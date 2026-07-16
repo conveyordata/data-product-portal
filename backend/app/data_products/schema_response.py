@@ -4,7 +4,7 @@ from warnings import deprecated
 
 from pydantic import Field
 
-from app.abstract_data_product.schema_response import InputPort
+from app.abstract_data_product.schema_response import AbstractDataProductInputPort
 from app.configuration.data_product_lifecycles.schema import DataProductLifeCycle
 from app.configuration.data_product_settings.schema import DataProductSettingValue
 from app.configuration.data_product_types.schema import DataProductType
@@ -50,7 +50,7 @@ class GetDataProductSettingsResponse(ORMModel):
 
 
 class GetDataProductInputPortsResponse(ORMModel):
-    input_ports: Sequence[InputPort]
+    input_ports: Sequence[AbstractDataProductInputPort]
 
 
 class GetDataProductRolledUpTagsResponse(ORMModel):

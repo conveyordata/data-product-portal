@@ -12,19 +12,21 @@ if TYPE_CHECKING:
     from ..models.output_port import OutputPort
 
 
-T = TypeVar("T", bound="AppUsersSchemaResponseInputPort")
+T = TypeVar("T", bound="UserInputPort")
 
 
 @_attrs_define
-class AppUsersSchemaResponseInputPort:
+class UserInputPort:
     """
     Attributes:
+        id (UUID):
         consuming_abstract_data_product_id (UUID):
         consuming_abstract_data_product (AbstractDataProductInfo):
         output_port_id (UUID):
         output_port (OutputPort):
     """
 
+    id: UUID
     consuming_abstract_data_product_id: UUID
     consuming_abstract_data_product: AbstractDataProductInfo
     output_port_id: UUID
@@ -32,6 +34,8 @@ class AppUsersSchemaResponseInputPort:
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
+        id = str(self.id)
+
         consuming_abstract_data_product_id = str(
             self.consuming_abstract_data_product_id
         )
@@ -46,6 +50,7 @@ class AppUsersSchemaResponseInputPort:
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
+                "id": id,
                 "consuming_abstract_data_product_id": consuming_abstract_data_product_id,
                 "consuming_abstract_data_product": consuming_abstract_data_product,
                 "output_port_id": output_port_id,
@@ -61,6 +66,8 @@ class AppUsersSchemaResponseInputPort:
         from ..models.output_port import OutputPort
 
         d = dict(src_dict)
+        id = UUID(d.pop("id"))
+
         consuming_abstract_data_product_id = UUID(
             d.pop("consuming_abstract_data_product_id")
         )
@@ -73,15 +80,16 @@ class AppUsersSchemaResponseInputPort:
 
         output_port = OutputPort.from_dict(d.pop("output_port"))
 
-        app_users_schema_response_input_port = cls(
+        user_input_port = cls(
+            id=id,
             consuming_abstract_data_product_id=consuming_abstract_data_product_id,
             consuming_abstract_data_product=consuming_abstract_data_product,
             output_port_id=output_port_id,
             output_port=output_port,
         )
 
-        app_users_schema_response_input_port.additional_properties = d
-        return app_users_schema_response_input_port
+        user_input_port.additional_properties = d
+        return user_input_port
 
     @property
     def additional_keys(self) -> list[str]:

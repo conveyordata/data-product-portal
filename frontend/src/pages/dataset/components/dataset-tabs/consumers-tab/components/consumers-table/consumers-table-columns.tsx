@@ -1,10 +1,13 @@
-import { Button, Popconfirm, type TableColumnsType } from 'antd';
+import { Badge, Button, Flex, Popconfirm, type TableColumnsType } from 'antd';
 import type { TFunction } from 'i18next';
 import EllipsisParagraph from '@/components/ellipsis-paragraph/ellipsis-paragraph.component.tsx';
+import { ExpiryDate, RenewalTag } from '@/components/input-port/access-status.tsx';
 import { ConsumerColumn } from '@/components/input-port/consumer-column.tsx';
-import type { OutputPortInputPort } from '@/store/api/services/generated/dataProductsOutputPortsInputPortsApi.ts';
-import { DecisionStatus } from '@/types/roles';
-import { getDecisionStatusLabel } from '@/utils/status.helper.ts';
+import {
+    InputPortStatus,
+    type OutputPortInputPort,
+} from '@/store/api/services/generated/dataProductsOutputPortsInputPortsApi.ts';
+import { getInputPortStatusBadgeStatus, getInputPortStatusLabel } from '@/utils/status.helper.ts';
 import { FilterSettings } from '@/utils/table-filter.helper';
 import { Sorter } from '@/utils/table-sorter.helper';
 
@@ -42,29 +45,53 @@ export const getConsumerColumns = ({
         {
             title: t('Name'),
             dataIndex: 'name',
-            render: (_, { consuming_abstract_data_product, consuming_abstract_data_product_id, status }) => {
+            width: '22%',
+            render: (_, { consuming_abstract_data_product, consuming_abstract_data_product_id }) => {
                 return (
                     <ConsumerColumn
-                        status={status}
                         consumingAbstractDataProductId={consuming_abstract_data_product_id}
                         consumingAbstractDataProduct={consuming_abstract_data_product}
                     />
                 );
             },
-            width: '25%',
-            ...new FilterSettings(dataProductLinks, (dpl) => getDecisionStatusLabel(t, dpl.status)),
             sorter: sorter.stringSorter((dpl) => dpl.consuming_abstract_data_product.name),
             defaultSortOrder: 'ascend',
         },
         {
+            title: t('Status'),
+            dataIndex: 'status',
+            width: '18%',
+            render: (_, { status, renewal_status, current_request }) => (
+                <Flex align={'center'} gap={'small'} wrap>
+                    <Badge status={getInputPortStatusBadgeStatus(status)} text={getInputPortStatusLabel(t, status)} />
+                    <RenewalTag
+                        status={status}
+                        renewalStatus={renewal_status}
+                        validUntil={current_request.valid_until}
+                    />
+                </Flex>
+            ),
+            ...new FilterSettings(dataProductLinks, (dpl) => getInputPortStatusLabel(t, dpl.status)),
+            sorter: sorter.stringSorter((dpl) => getInputPortStatusLabel(t, dpl.status)),
+        },
+        {
             title: t('Business justification'),
-            dataIndex: 'justification',
-            render: (_, { justification }) => <EllipsisParagraph text={justification} />,
+            dataIndex: ['current_request', 'justification'],
+            width: '30%',
+            render: (_, { current_request }) => <EllipsisParagraph text={current_request.justification} />,
+        },
+        {
+            title: t('Expiry date'),
+            dataIndex: ['current_request', 'valid_until'],
+            width: '12%',
+            render: (_, { status, current_request }) => (
+                <ExpiryDate status={status} validUntil={current_request.valid_until} />
+            ),
         },
         {
             title: t('Decision note'),
-            dataIndex: 'decision_note',
-            render: (_, { decision_note: decisionNote }) => <EllipsisParagraph text={decisionNote} />,
+            dataIndex: ['current_request', 'decision_note'],
+            render: (_, { current_request }) => <EllipsisParagraph text={current_request.decision_note} />,
         },
         {
             title: t('Actions'),
@@ -81,7 +108,7 @@ export const getConsumerColumns = ({
                     id,
                 },
             ) => {
-                if (status === DecisionStatus.Pending && (canApprove || canRevoke)) {
+                if (status === InputPortStatus.Pending && (canApprove || canRevoke)) {
                     return (
                         <Button type={'link'} onClick={() => setReviewingOutputPortInputPortId(id)}>
                             {t('Review Access Request')}
@@ -89,7 +116,7 @@ export const getConsumerColumns = ({
                     );
                 }
 
-                if (status === DecisionStatus.Approved) {
+                if (status === InputPortStatus.Approved) {
                     return (
                         <Button
                             type={'link'}
@@ -102,7 +129,7 @@ export const getConsumerColumns = ({
                     );
                 }
 
-                if (status === DecisionStatus.Denied) {
+                if (status === InputPortStatus.Denied) {
                     return (
                         <Popconfirm
                             title={t('Remove the access request')}
@@ -123,6 +150,7 @@ export const getConsumerColumns = ({
                             autoAdjustOverflow={true}
                         >
                             <Button
+                                type={'link'}
                                 danger
                                 onClick={() =>
                                     onRemoveDataProductDatasetLink(

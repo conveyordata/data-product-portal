@@ -76,13 +76,21 @@ function getRequestDetails(
             requesterEmail: action.requested_by.email,
             requestType: t('Output Port Access'),
             source: {
-                name: action.consuming_abstract_data_product.name,
+                name: action.input_port.consuming_abstract_data_product.name,
                 email: action.requested_by.email,
-                type: t(abstractDataProductTypeName(action.consuming_abstract_data_product.abstract_data_product_type)),
-                icon: <AbstractProductIcon type={action.consuming_abstract_data_product.abstract_data_product_type} />,
+                type: t(
+                    abstractDataProductTypeName(
+                        action.input_port.consuming_abstract_data_product.abstract_data_product_type,
+                    ),
+                ),
+                icon: (
+                    <AbstractProductIcon
+                        type={action.input_port.consuming_abstract_data_product.abstract_data_product_type}
+                    />
+                ),
             },
             target: {
-                name: action.output_port.name,
+                name: action.input_port.output_port.name,
                 type: t('Output Port'),
                 icon: <OutputPortOutlined />,
             },

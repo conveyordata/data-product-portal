@@ -27,6 +27,6 @@ class GetAbstractDataProductResponse(ORMModel):
     finalizers: list[str]
 
 
-class InputPort(InputPortBase):
+class AbstractDataProductInputPort(InputPortBase):
     output_port_id: UUID = Field(validation_alias="dataset_id")
     output_port: OutputPort = Field(validation_alias="dataset")

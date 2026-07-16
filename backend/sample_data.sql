@@ -1085,4 +1085,151 @@ begin
         ('weekly_feature_summary', 'top_platform',    'Top Platform',     'string',  'VARCHAR(20)',  false, false, false, false, null, null,'Platform with most usage: web/ios/android','["web"]',             8)
     ) AS p(schema_name, name, business_name, logical_type, physical_type, primary_key, "unique", required, partitioned, partition_key_position, primary_key_position, description, examples, position)
     ON o.output_port_id = feature_usage_metrics_weekly AND o.name = p.schema_name;
+
+
+    -- PRODUCER view: new John-owned output port on DEI Insights Dashboard
+    INSERT INTO public.datasets (id, namespace, data_product_id, "name", description, about, status, access_type, created_on, updated_on, deleted_at)
+    VALUES ('22222222-2222-4222-8222-222222222222', 'access_states_producer', dei_insights_dashboard, 'Access States (Producer)', 'Output port showcasing all access renewal states from the producer side', 'Output port showcasing all access renewal states from the producer side.', 'ACTIVE', 'RESTRICTED', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+    -- John owns the output port so he can approve/revoke consumer requests on it
+    INSERT INTO public.role_assignments_dataset (id, dataset_id, data_product_id, user_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at)
+    VALUES (gen_random_uuid(), '22222222-2222-4222-8222-222222222222', dei_insights_dashboard, john_id, dataset_owner_id, 'APPROVED', john_id, timezone('utc'::text, CURRENT_TIMESTAMP), john_id, timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+
+    -- Producer case 1 - Pending - consumer: Clinical trial performance
+    WITH link AS (
+        INSERT INTO public.input_ports (id, consuming_abstract_data_product_id, dataset_id, status, created_on, updated_on, deleted_at)
+        VALUES (gen_random_uuid(), '6e580d91-14ea-495e-a6d7-5db236a5c1d5', '22222222-2222-4222-8222-222222222222', 'PENDING', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL)
+        RETURNING id
+    )
+    INSERT INTO public.input_port_requests (id, input_port_id, decision, justification, decision_note, access_duration_type, requested_duration_days, requested_by_id, requested_on, decided_by_id, decided_on, valid_from, valid_until, created_on, updated_on)
+    SELECT gen_random_uuid(), link.id, 'PENDING', 'Producer 1: initial request pending', NULL, 'TIME_BOUND', 90, jane_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, NULL, NULL, timezone('utc'::text, CURRENT_TIMESTAMP), NULL FROM link;
+
+    -- Producer case 2 - Approved - consumer: Regulatory submission tracker
+    WITH link AS (
+        INSERT INTO public.input_ports (id, consuming_abstract_data_product_id, dataset_id, status, created_on, updated_on, deleted_at)
+        VALUES (gen_random_uuid(), 'fbcd7899-2763-4659-bd28-2a278910ef85', '22222222-2222-4222-8222-222222222222', 'APPROVED', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL)
+        RETURNING id
+    )
+    INSERT INTO public.input_port_requests (id, input_port_id, decision, justification, decision_note, access_duration_type, requested_duration_days, requested_by_id, requested_on, decided_by_id, decided_on, valid_from, valid_until, created_on, updated_on)
+    SELECT gen_random_uuid(), link.id, 'APPROVED', 'Producer 2: approved, active grant', NULL, 'TIME_BOUND', 90, jane_id, timezone('utc'::text, CURRENT_TIMESTAMP), john_id, timezone('utc'::text, CURRENT_TIMESTAMP), CURRENT_DATE, (CURRENT_DATE + INTERVAL '90 days')::date, timezone('utc'::text, CURRENT_TIMESTAMP), NULL FROM link;
+
+    -- Producer case 3 - Approved, renewal pending - consumer: Safety Signal Detection System
+    WITH link AS (
+        INSERT INTO public.input_ports (id, consuming_abstract_data_product_id, dataset_id, status, created_on, updated_on, deleted_at)
+        VALUES (gen_random_uuid(), '08039e5d-50a7-447a-b691-f5dc6b420dea', '22222222-2222-4222-8222-222222222222', 'APPROVED', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL)
+        RETURNING id
+    )
+    INSERT INTO public.input_port_requests (id, input_port_id, decision, justification, decision_note, access_duration_type, requested_duration_days, requested_by_id, requested_on, decided_by_id, decided_on, valid_from, valid_until, created_on, updated_on)
+    SELECT gen_random_uuid(), link.id, 'APPROVED', 'Producer 3: approved grant, renewal pending', NULL, 'TIME_BOUND', 90, jane_id, timezone('utc'::text, CURRENT_TIMESTAMP) - INTERVAL '1 hour', john_id, timezone('utc'::text, CURRENT_TIMESTAMP) - INTERVAL '1 hour', CURRENT_DATE, (CURRENT_DATE + INTERVAL '60 days')::date, timezone('utc'::text, CURRENT_TIMESTAMP) - INTERVAL '1 hour', NULL::timestamp FROM link
+    UNION ALL
+    SELECT gen_random_uuid(), link.id, 'PENDING', 'Producer 3: renewal request pending', NULL, 'TIME_BOUND', 90, jane_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, NULL, NULL, timezone('utc'::text, CURRENT_TIMESTAMP), NULL FROM link;
+
+    -- Producer case 4 - Approved, renewal denied - consumer: Biomarker discovery
+    WITH link AS (
+        INSERT INTO public.input_ports (id, consuming_abstract_data_product_id, dataset_id, status, created_on, updated_on, deleted_at)
+        VALUES (gen_random_uuid(), '81815c4c-f323-4cf1-b25b-f43f231f510f', '22222222-2222-4222-8222-222222222222', 'APPROVED', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL)
+        RETURNING id
+    )
+    INSERT INTO public.input_port_requests (id, input_port_id, decision, justification, decision_note, access_duration_type, requested_duration_days, requested_by_id, requested_on, decided_by_id, decided_on, valid_from, valid_until, created_on, updated_on)
+    SELECT gen_random_uuid(), link.id, 'APPROVED', 'Producer 4: approved grant, renewal denied', NULL, 'TIME_BOUND', 90, jane_id, timezone('utc'::text, CURRENT_TIMESTAMP) - INTERVAL '1 hour', john_id, timezone('utc'::text, CURRENT_TIMESTAMP) - INTERVAL '1 hour', CURRENT_DATE, (CURRENT_DATE + INTERVAL '60 days')::date, timezone('utc'::text, CURRENT_TIMESTAMP) - INTERVAL '1 hour', NULL::timestamp FROM link
+    UNION ALL
+    SELECT gen_random_uuid(), link.id, 'DENIED', 'Producer 4: renewal request denied', 'Renewal not approved at this time', 'TIME_BOUND', 90, jane_id, timezone('utc'::text, CURRENT_TIMESTAMP), john_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, timezone('utc'::text, CURRENT_TIMESTAMP), NULL FROM link;
+
+    -- Producer case 5 - Denied - consumer: Customer intelligence platform
+    WITH link AS (
+        INSERT INTO public.input_ports (id, consuming_abstract_data_product_id, dataset_id, status, created_on, updated_on, deleted_at)
+        VALUES (gen_random_uuid(), '22488fe0-c30a-4447-972e-3eb22a1bd266', '22222222-2222-4222-8222-222222222222', 'DENIED', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL)
+        RETURNING id
+    )
+    INSERT INTO public.input_port_requests (id, input_port_id, decision, justification, decision_note, access_duration_type, requested_duration_days, requested_by_id, requested_on, decided_by_id, decided_on, valid_from, valid_until, created_on, updated_on)
+    SELECT gen_random_uuid(), link.id, 'DENIED', 'Producer 5: initial request denied', 'Access not granted', 'TIME_BOUND', 90, jane_id, timezone('utc'::text, CURRENT_TIMESTAMP), john_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, timezone('utc'::text, CURRENT_TIMESTAMP), NULL FROM link;
+
+    -- Producer case 6 - Expired, renewal pending - consumer: Drug Supply Chain Optimization
+    WITH link AS (
+        INSERT INTO public.input_ports (id, consuming_abstract_data_product_id, dataset_id, status, created_on, updated_on, deleted_at)
+        VALUES (gen_random_uuid(), '625b65b6-13d9-4c8c-a669-865e36fc3dfc', '22222222-2222-4222-8222-222222222222', 'PENDING', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL)
+        RETURNING id
+    )
+    INSERT INTO public.input_port_requests (id, input_port_id, decision, justification, decision_note, access_duration_type, requested_duration_days, requested_by_id, requested_on, decided_by_id, decided_on, valid_from, valid_until, created_on, updated_on)
+    SELECT gen_random_uuid(), link.id, 'APPROVED', 'Producer 6: previous grant (now expired)', NULL, 'TIME_BOUND', 90, jane_id, timezone('utc'::text, CURRENT_TIMESTAMP) - INTERVAL '1 hour', john_id, timezone('utc'::text, CURRENT_TIMESTAMP) - INTERVAL '1 hour', (CURRENT_DATE - INTERVAL '90 days')::date, (CURRENT_DATE - INTERVAL '30 days')::date, timezone('utc'::text, CURRENT_TIMESTAMP) - INTERVAL '1 hour', NULL::timestamp FROM link
+    UNION ALL
+    SELECT gen_random_uuid(), link.id, 'PENDING', 'Producer 6: renewal request pending after expiry', NULL, 'TIME_BOUND', 90, jane_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, NULL, NULL, timezone('utc'::text, CURRENT_TIMESTAMP), NULL FROM link;
+
+    -- Producer case 7 - Expired, no renewal - consumer: Employee productivity
+    WITH link AS (
+        INSERT INTO public.input_ports (id, consuming_abstract_data_product_id, dataset_id, status, created_on, updated_on, deleted_at)
+        VALUES (gen_random_uuid(), '68b28e38-3faa-45ca-9d00-3830d0a7b108', '22222222-2222-4222-8222-222222222222', 'EXPIRED', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL)
+        RETURNING id
+    )
+    INSERT INTO public.input_port_requests (id, input_port_id, decision, justification, decision_note, access_duration_type, requested_duration_days, requested_by_id, requested_on, decided_by_id, decided_on, valid_from, valid_until, created_on, updated_on)
+    SELECT gen_random_uuid(), link.id, 'APPROVED', 'Producer 7: grant expired, no renewal requested', NULL, 'TIME_BOUND', 90, jane_id, timezone('utc'::text, CURRENT_TIMESTAMP), john_id, timezone('utc'::text, CURRENT_TIMESTAMP), (CURRENT_DATE - INTERVAL '90 days')::date, (CURRENT_DATE - INTERVAL '30 days')::date, timezone('utc'::text, CURRENT_TIMESTAMP), NULL FROM link;
+
+    -- CONSUMER view: DEI Insights Dashboard consumes 7 existing output ports (requested by John)
+    -- Consumer case 1 - Pending - output port: Revenue Dashboard Summary
+    WITH link AS (
+        INSERT INTO public.input_ports (id, consuming_abstract_data_product_id, dataset_id, status, created_on, updated_on, deleted_at)
+        VALUES (gen_random_uuid(), dei_insights_dashboard, 'b076bf53-463a-47bb-84a9-596d45b425d7', 'PENDING', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL)
+        RETURNING id
+    )
+    INSERT INTO public.input_port_requests (id, input_port_id, decision, justification, decision_note, access_duration_type, requested_duration_days, requested_by_id, requested_on, decided_by_id, decided_on, valid_from, valid_until, created_on, updated_on)
+    SELECT gen_random_uuid(), link.id, 'PENDING', 'Consumer 1: initial request pending', NULL, 'TIME_BOUND', 90, john_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, NULL, NULL, timezone('utc'::text, CURRENT_TIMESTAMP), NULL FROM link;
+
+    -- Consumer case 2 - Approved - output port: Revenue By Segment
+    WITH link AS (
+        INSERT INTO public.input_ports (id, consuming_abstract_data_product_id, dataset_id, status, created_on, updated_on, deleted_at)
+        VALUES (gen_random_uuid(), dei_insights_dashboard, '393cf08a-d05c-442a-8982-d7d2cced4ad2', 'APPROVED', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL)
+        RETURNING id
+    )
+    INSERT INTO public.input_port_requests (id, input_port_id, decision, justification, decision_note, access_duration_type, requested_duration_days, requested_by_id, requested_on, decided_by_id, decided_on, valid_from, valid_until, created_on, updated_on)
+    SELECT gen_random_uuid(), link.id, 'APPROVED', 'Consumer 2: approved, active grant', NULL, 'TIME_BOUND', 90, john_id, timezone('utc'::text, CURRENT_TIMESTAMP), jane_id, timezone('utc'::text, CURRENT_TIMESTAMP), CURRENT_DATE, (CURRENT_DATE + INTERVAL '90 days')::date, timezone('utc'::text, CURRENT_TIMESTAMP), NULL FROM link;
+
+    -- Consumer case 3 - Approved, renewal pending - output port: Expense Forecast
+    WITH link AS (
+        INSERT INTO public.input_ports (id, consuming_abstract_data_product_id, dataset_id, status, created_on, updated_on, deleted_at)
+        VALUES (gen_random_uuid(), dei_insights_dashboard, 'd4e7792b-fb93-4541-beb9-b3c2b2474c77', 'APPROVED', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL)
+        RETURNING id
+    )
+    INSERT INTO public.input_port_requests (id, input_port_id, decision, justification, decision_note, access_duration_type, requested_duration_days, requested_by_id, requested_on, decided_by_id, decided_on, valid_from, valid_until, created_on, updated_on)
+    SELECT gen_random_uuid(), link.id, 'APPROVED', 'Consumer 3: approved grant, renewal pending', NULL, 'TIME_BOUND', 90, john_id, timezone('utc'::text, CURRENT_TIMESTAMP) - INTERVAL '1 hour', jane_id, timezone('utc'::text, CURRENT_TIMESTAMP) - INTERVAL '1 hour', CURRENT_DATE, (CURRENT_DATE + INTERVAL '60 days')::date, timezone('utc'::text, CURRENT_TIMESTAMP) - INTERVAL '1 hour', NULL::timestamp FROM link
+    UNION ALL
+    SELECT gen_random_uuid(), link.id, 'PENDING', 'Consumer 3: renewal request pending', NULL, 'TIME_BOUND', 90, john_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, NULL, NULL, timezone('utc'::text, CURRENT_TIMESTAMP), NULL FROM link;
+
+    -- Consumer case 4 - Approved, renewal denied - output port: Feedback Insights Report
+    WITH link AS (
+        INSERT INTO public.input_ports (id, consuming_abstract_data_product_id, dataset_id, status, created_on, updated_on, deleted_at)
+        VALUES (gen_random_uuid(), dei_insights_dashboard, '9cfcdd85-8049-42fc-8984-6a6fc7bfeba9', 'APPROVED', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL)
+        RETURNING id
+    )
+    INSERT INTO public.input_port_requests (id, input_port_id, decision, justification, decision_note, access_duration_type, requested_duration_days, requested_by_id, requested_on, decided_by_id, decided_on, valid_from, valid_until, created_on, updated_on)
+    SELECT gen_random_uuid(), link.id, 'APPROVED', 'Consumer 4: approved grant, renewal denied', NULL, 'TIME_BOUND', 90, john_id, timezone('utc'::text, CURRENT_TIMESTAMP) - INTERVAL '1 hour', jane_id, timezone('utc'::text, CURRENT_TIMESTAMP) - INTERVAL '1 hour', CURRENT_DATE, (CURRENT_DATE + INTERVAL '60 days')::date, timezone('utc'::text, CURRENT_TIMESTAMP) - INTERVAL '1 hour', NULL::timestamp FROM link
+    UNION ALL
+    SELECT gen_random_uuid(), link.id, 'DENIED', 'Consumer 4: renewal request denied', 'Renewal not approved at this time', 'TIME_BOUND', 90, john_id, timezone('utc'::text, CURRENT_TIMESTAMP), jane_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, timezone('utc'::text, CURRENT_TIMESTAMP), NULL FROM link;
+
+    -- Consumer case 5 - Denied - output port: Release Engagement By Segment
+    WITH link AS (
+        INSERT INTO public.input_ports (id, consuming_abstract_data_product_id, dataset_id, status, created_on, updated_on, deleted_at)
+        VALUES (gen_random_uuid(), dei_insights_dashboard, 'e3dfeb4e-e7ee-4db2-84ce-7f4f36840c96', 'DENIED', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL)
+        RETURNING id
+    )
+    INSERT INTO public.input_port_requests (id, input_port_id, decision, justification, decision_note, access_duration_type, requested_duration_days, requested_by_id, requested_on, decided_by_id, decided_on, valid_from, valid_until, created_on, updated_on)
+    SELECT gen_random_uuid(), link.id, 'DENIED', 'Consumer 5: initial request denied', 'Access not granted', 'TIME_BOUND', 90, john_id, timezone('utc'::text, CURRENT_TIMESTAMP), jane_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, timezone('utc'::text, CURRENT_TIMESTAMP), NULL FROM link;
+
+    -- Consumer case 6 - Expired, renewal pending - output port: Release Impact Summary
+    WITH link AS (
+        INSERT INTO public.input_ports (id, consuming_abstract_data_product_id, dataset_id, status, created_on, updated_on, deleted_at)
+        VALUES (gen_random_uuid(), dei_insights_dashboard, '56acafd4-5bb8-45b1-81fa-acfab84ec3fc', 'PENDING', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL)
+        RETURNING id
+    )
+    INSERT INTO public.input_port_requests (id, input_port_id, decision, justification, decision_note, access_duration_type, requested_duration_days, requested_by_id, requested_on, decided_by_id, decided_on, valid_from, valid_until, created_on, updated_on)
+    SELECT gen_random_uuid(), link.id, 'APPROVED', 'Consumer 6: previous grant (now expired)', NULL, 'TIME_BOUND', 90, john_id, timezone('utc'::text, CURRENT_TIMESTAMP) - INTERVAL '1 hour', jane_id, timezone('utc'::text, CURRENT_TIMESTAMP) - INTERVAL '1 hour', (CURRENT_DATE - INTERVAL '90 days')::date, (CURRENT_DATE - INTERVAL '30 days')::date, timezone('utc'::text, CURRENT_TIMESTAMP) - INTERVAL '1 hour', NULL::timestamp FROM link
+    UNION ALL
+    SELECT gen_random_uuid(), link.id, 'PENDING', 'Consumer 6: renewal request pending after expiry', NULL, 'TIME_BOUND', 90, john_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, NULL, NULL, timezone('utc'::text, CURRENT_TIMESTAMP), NULL FROM link;
+
+    -- Consumer case 7 - Expired, no renewal - output port: Privacy Compliance Report
+    WITH link AS (
+        INSERT INTO public.input_ports (id, consuming_abstract_data_product_id, dataset_id, status, created_on, updated_on, deleted_at)
+        VALUES (gen_random_uuid(), dei_insights_dashboard, 'e94890c6-0da8-4a1e-b696-e53e5312f743', 'EXPIRED', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL)
+        RETURNING id
+    )
+    INSERT INTO public.input_port_requests (id, input_port_id, decision, justification, decision_note, access_duration_type, requested_duration_days, requested_by_id, requested_on, decided_by_id, decided_on, valid_from, valid_until, created_on, updated_on)
+    SELECT gen_random_uuid(), link.id, 'APPROVED', 'Consumer 7: grant expired, no renewal requested', NULL, 'TIME_BOUND', 90, john_id, timezone('utc'::text, CURRENT_TIMESTAMP), jane_id, timezone('utc'::text, CURRENT_TIMESTAMP), (CURRENT_DATE - INTERVAL '90 days')::date, (CURRENT_DATE - INTERVAL '30 days')::date, timezone('utc'::text, CURRENT_TIMESTAMP), NULL FROM link;
 end $$;

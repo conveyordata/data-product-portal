@@ -13,7 +13,7 @@ from pydantic.json_schema import SkipJsonSchema
 from sqlalchemy.orm import Session
 
 from app.abstract_data_product.schema_request import FinalizerRequest
-from app.abstract_data_product.schema_response import InputPort
+from app.abstract_data_product.schema_response import AbstractDataProductInputPort
 from app.authorization.role_assignments.data_product.auth import (
     DataProductAuthAssignment,
 )
@@ -575,7 +575,7 @@ def get_data_product_input_ports(
 ) -> GetDataProductInputPortsResponse:
     return GetDataProductInputPortsResponse(
         input_ports=[
-            InputPort.model_validate(input_port)
+            AbstractDataProductInputPort.model_validate(input_port)
             for input_port in DataProductService(db).get_input_ports(id)
         ]
     )

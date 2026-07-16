@@ -97,6 +97,76 @@ func (s *AbstractDataProductInfo) SetAbstractDataProductType(val AbstractDataPro
 	s.AbstractDataProductType = val
 }
 
+// Ref: #/components/schemas/AbstractDataProductInputPort
+type AbstractDataProductInputPort struct {
+	ID             uuid.UUID            `json:"id"`
+	Status         InputPortStatus      `json:"status"`
+	CurrentRequest InputPortRequestBase `json:"current_request"`
+	RenewalStatus  OptNilRenewalStatus  `json:"renewal_status"`
+	OutputPortID   uuid.UUID            `json:"output_port_id"`
+	OutputPort     OutputPort           `json:"output_port"`
+}
+
+// GetID returns the value of ID.
+func (s *AbstractDataProductInputPort) GetID() uuid.UUID {
+	return s.ID
+}
+
+// GetStatus returns the value of Status.
+func (s *AbstractDataProductInputPort) GetStatus() InputPortStatus {
+	return s.Status
+}
+
+// GetCurrentRequest returns the value of CurrentRequest.
+func (s *AbstractDataProductInputPort) GetCurrentRequest() InputPortRequestBase {
+	return s.CurrentRequest
+}
+
+// GetRenewalStatus returns the value of RenewalStatus.
+func (s *AbstractDataProductInputPort) GetRenewalStatus() OptNilRenewalStatus {
+	return s.RenewalStatus
+}
+
+// GetOutputPortID returns the value of OutputPortID.
+func (s *AbstractDataProductInputPort) GetOutputPortID() uuid.UUID {
+	return s.OutputPortID
+}
+
+// GetOutputPort returns the value of OutputPort.
+func (s *AbstractDataProductInputPort) GetOutputPort() OutputPort {
+	return s.OutputPort
+}
+
+// SetID sets the value of ID.
+func (s *AbstractDataProductInputPort) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+// SetStatus sets the value of Status.
+func (s *AbstractDataProductInputPort) SetStatus(val InputPortStatus) {
+	s.Status = val
+}
+
+// SetCurrentRequest sets the value of CurrentRequest.
+func (s *AbstractDataProductInputPort) SetCurrentRequest(val InputPortRequestBase) {
+	s.CurrentRequest = val
+}
+
+// SetRenewalStatus sets the value of RenewalStatus.
+func (s *AbstractDataProductInputPort) SetRenewalStatus(val OptNilRenewalStatus) {
+	s.RenewalStatus = val
+}
+
+// SetOutputPortID sets the value of OutputPortID.
+func (s *AbstractDataProductInputPort) SetOutputPortID(val uuid.UUID) {
+	s.OutputPortID = val
+}
+
+// SetOutputPort sets the value of OutputPort.
+func (s *AbstractDataProductInputPort) SetOutputPort(val OutputPort) {
+	s.OutputPort = val
+}
+
 // Ref: #/components/schemas/AbstractDataProductStatus
 type AbstractDataProductStatus string
 
@@ -423,76 +493,6 @@ func (*AddExplorationFinalizerOKApplicationJSON) addExplorationFinalizerRes() {}
 type AddOutputPortDataQualityRunNotFoundApplicationJSON jx.Raw
 
 func (*AddOutputPortDataQualityRunNotFoundApplicationJSON) addOutputPortDataQualityRunRes() {}
-
-// Ref: #/components/schemas/app__abstract_data_product__schema_response__InputPort
-type AppAbstractDataProductSchemaResponseInputPort struct {
-	ID             uuid.UUID            `json:"id"`
-	Status         DecisionStatus       `json:"status"`
-	CurrentRequest InputPortRequestBase `json:"current_request"`
-	RenewalStatus  OptNilRenewalStatus  `json:"renewal_status"`
-	OutputPortID   uuid.UUID            `json:"output_port_id"`
-	OutputPort     OutputPort           `json:"output_port"`
-}
-
-// GetID returns the value of ID.
-func (s *AppAbstractDataProductSchemaResponseInputPort) GetID() uuid.UUID {
-	return s.ID
-}
-
-// GetStatus returns the value of Status.
-func (s *AppAbstractDataProductSchemaResponseInputPort) GetStatus() DecisionStatus {
-	return s.Status
-}
-
-// GetCurrentRequest returns the value of CurrentRequest.
-func (s *AppAbstractDataProductSchemaResponseInputPort) GetCurrentRequest() InputPortRequestBase {
-	return s.CurrentRequest
-}
-
-// GetRenewalStatus returns the value of RenewalStatus.
-func (s *AppAbstractDataProductSchemaResponseInputPort) GetRenewalStatus() OptNilRenewalStatus {
-	return s.RenewalStatus
-}
-
-// GetOutputPortID returns the value of OutputPortID.
-func (s *AppAbstractDataProductSchemaResponseInputPort) GetOutputPortID() uuid.UUID {
-	return s.OutputPortID
-}
-
-// GetOutputPort returns the value of OutputPort.
-func (s *AppAbstractDataProductSchemaResponseInputPort) GetOutputPort() OutputPort {
-	return s.OutputPort
-}
-
-// SetID sets the value of ID.
-func (s *AppAbstractDataProductSchemaResponseInputPort) SetID(val uuid.UUID) {
-	s.ID = val
-}
-
-// SetStatus sets the value of Status.
-func (s *AppAbstractDataProductSchemaResponseInputPort) SetStatus(val DecisionStatus) {
-	s.Status = val
-}
-
-// SetCurrentRequest sets the value of CurrentRequest.
-func (s *AppAbstractDataProductSchemaResponseInputPort) SetCurrentRequest(val InputPortRequestBase) {
-	s.CurrentRequest = val
-}
-
-// SetRenewalStatus sets the value of RenewalStatus.
-func (s *AppAbstractDataProductSchemaResponseInputPort) SetRenewalStatus(val OptNilRenewalStatus) {
-	s.RenewalStatus = val
-}
-
-// SetOutputPortID sets the value of OutputPortID.
-func (s *AppAbstractDataProductSchemaResponseInputPort) SetOutputPortID(val uuid.UUID) {
-	s.OutputPortID = val
-}
-
-// SetOutputPort sets the value of OutputPort.
-func (s *AppAbstractDataProductSchemaResponseInputPort) SetOutputPort(val OutputPort) {
-	s.OutputPort = val
-}
 
 // Ref: #/components/schemas/ApproveLinkBetweenTechnicalAssetAndOutputPortRequest
 type ApproveLinkBetweenTechnicalAssetAndOutputPortRequest struct {
@@ -4372,16 +4372,16 @@ func (s *GetAllPlatformsResponse) SetPlatforms(val []Platform) {
 
 // Ref: #/components/schemas/GetDataProductInputPortsResponse
 type GetDataProductInputPortsResponse struct {
-	InputPorts []AppAbstractDataProductSchemaResponseInputPort `json:"input_ports"`
+	InputPorts []AbstractDataProductInputPort `json:"input_ports"`
 }
 
 // GetInputPorts returns the value of InputPorts.
-func (s *GetDataProductInputPortsResponse) GetInputPorts() []AppAbstractDataProductSchemaResponseInputPort {
+func (s *GetDataProductInputPortsResponse) GetInputPorts() []AbstractDataProductInputPort {
 	return s.InputPorts
 }
 
 // SetInputPorts sets the value of InputPorts.
-func (s *GetDataProductInputPortsResponse) SetInputPorts(val []AppAbstractDataProductSchemaResponseInputPort) {
+func (s *GetDataProductInputPortsResponse) SetInputPorts(val []AbstractDataProductInputPort) {
 	s.InputPorts = val
 }
 
@@ -5043,16 +5043,16 @@ func (s *GetEventHistoryResponseItem) SetTechnicalAsset(val OptNilTechnicalAsset
 
 // Ref: #/components/schemas/GetExplorationInputPortsResponse
 type GetExplorationInputPortsResponse struct {
-	InputPorts []AppAbstractDataProductSchemaResponseInputPort `json:"input_ports"`
+	InputPorts []AbstractDataProductInputPort `json:"input_ports"`
 }
 
 // GetInputPorts returns the value of InputPorts.
-func (s *GetExplorationInputPortsResponse) GetInputPorts() []AppAbstractDataProductSchemaResponseInputPort {
+func (s *GetExplorationInputPortsResponse) GetInputPorts() []AbstractDataProductInputPort {
 	return s.InputPorts
 }
 
 // SetInputPorts sets the value of InputPorts.
-func (s *GetExplorationInputPortsResponse) SetInputPorts(val []AppAbstractDataProductSchemaResponseInputPort) {
+func (s *GetExplorationInputPortsResponse) SetInputPorts(val []AbstractDataProductInputPort) {
 	s.InputPorts = val
 }
 
@@ -6352,6 +6352,7 @@ func (*IngestOutputPortContractNotFoundApplicationJSON) ingestOutputPortContract
 
 // Ref: #/components/schemas/InputPortRequestBase
 type InputPortRequestBase struct {
+	ID            uuid.UUID      `json:"id"`
 	Justification string         `json:"justification"`
 	DecisionNote  OptNilString   `json:"decision_note"`
 	ValidUntil    NilDateTime    `json:"valid_until"`
@@ -6360,6 +6361,11 @@ type InputPortRequestBase struct {
 	Decision      DecisionStatus `json:"decision"`
 	CreatedOn     time.Time      `json:"created_on"`
 	RequestedOn   time.Time      `json:"requested_on"`
+}
+
+// GetID returns the value of ID.
+func (s *InputPortRequestBase) GetID() uuid.UUID {
+	return s.ID
 }
 
 // GetJustification returns the value of Justification.
@@ -6402,6 +6408,11 @@ func (s *InputPortRequestBase) GetRequestedOn() time.Time {
 	return s.RequestedOn
 }
 
+// SetID sets the value of ID.
+func (s *InputPortRequestBase) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
 // SetJustification sets the value of Justification.
 func (s *InputPortRequestBase) SetJustification(val string) {
 	s.Justification = val
@@ -6440,6 +6451,62 @@ func (s *InputPortRequestBase) SetCreatedOn(val time.Time) {
 // SetRequestedOn sets the value of RequestedOn.
 func (s *InputPortRequestBase) SetRequestedOn(val time.Time) {
 	s.RequestedOn = val
+}
+
+// Ref: #/components/schemas/InputPortStatus
+type InputPortStatus string
+
+const (
+	InputPortStatusPending  InputPortStatus = "pending"
+	InputPortStatusApproved InputPortStatus = "approved"
+	InputPortStatusDenied   InputPortStatus = "denied"
+	InputPortStatusExpired  InputPortStatus = "expired"
+)
+
+// AllValues returns all InputPortStatus values.
+func (InputPortStatus) AllValues() []InputPortStatus {
+	return []InputPortStatus{
+		InputPortStatusPending,
+		InputPortStatusApproved,
+		InputPortStatusDenied,
+		InputPortStatusExpired,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s InputPortStatus) MarshalText() ([]byte, error) {
+	switch s {
+	case InputPortStatusPending:
+		return []byte(s), nil
+	case InputPortStatusApproved:
+		return []byte(s), nil
+	case InputPortStatusDenied:
+		return []byte(s), nil
+	case InputPortStatusExpired:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *InputPortStatus) UnmarshalText(data []byte) error {
+	switch InputPortStatus(data) {
+	case InputPortStatusPending:
+		*s = InputPortStatusPending
+		return nil
+	case InputPortStatusApproved:
+		*s = InputPortStatusApproved
+		return nil
+	case InputPortStatusDenied:
+		*s = InputPortStatusDenied
+		return nil
+	case InputPortStatusExpired:
+		*s = InputPortStatusExpired
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
 }
 
 // Ref: #/components/schemas/IsAdminResponse
@@ -9663,7 +9730,7 @@ func (s *OutputPortDataQualitySummaryResponseDimensions) init() OutputPortDataQu
 // Ref: #/components/schemas/OutputPortInputPort
 type OutputPortInputPort struct {
 	ID                             uuid.UUID               `json:"id"`
-	Status                         DecisionStatus          `json:"status"`
+	Status                         InputPortStatus         `json:"status"`
 	CurrentRequest                 InputPortRequestBase    `json:"current_request"`
 	RenewalStatus                  OptNilRenewalStatus     `json:"renewal_status"`
 	ConsumingAbstractDataProductID uuid.UUID               `json:"consuming_abstract_data_product_id"`
@@ -9676,7 +9743,7 @@ func (s *OutputPortInputPort) GetID() uuid.UUID {
 }
 
 // GetStatus returns the value of Status.
-func (s *OutputPortInputPort) GetStatus() DecisionStatus {
+func (s *OutputPortInputPort) GetStatus() InputPortStatus {
 	return s.Status
 }
 
@@ -9706,7 +9773,7 @@ func (s *OutputPortInputPort) SetID(val uuid.UUID) {
 }
 
 // SetStatus sets the value of Status.
-func (s *OutputPortInputPort) SetStatus(val DecisionStatus) {
+func (s *OutputPortInputPort) SetStatus(val InputPortStatus) {
 	s.Status = val
 }
 

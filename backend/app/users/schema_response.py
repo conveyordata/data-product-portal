@@ -59,7 +59,8 @@ class DataProductRoleAssignmentRequest(DataProductRoleAssignmentResponse):
     )
 
 
-class InputPort(ORMModel):
+class UserInputPort(ORMModel):
+    id: UUID
     consuming_abstract_data_product_id: UUID
     consuming_abstract_data_product: AbstractDataProductInfo
     output_port_id: UUID = Field(validation_alias="dataset_id")
@@ -68,7 +69,7 @@ class InputPort(ORMModel):
 
 class InputPortRequest(InputPortRequestBase):
     request_type: Literal[RequestTypes.InputPort] = RequestTypes.InputPort
-    input_port: InputPort
+    input_port: UserInputPort
 
 
 Request = Union[

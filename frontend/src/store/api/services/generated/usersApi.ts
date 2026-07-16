@@ -220,13 +220,15 @@ export type OutputPort = {
   data_product_id: string;
   tags: Tag[];
 };
-export type AppUsersSchemaResponseInputPort = {
+export type UserInputPort = {
+  id: string;
   consuming_abstract_data_product_id: string;
   consuming_abstract_data_product: AbstractDataProductInfo;
   output_port_id: string;
   output_port: OutputPort;
 };
 export type InputPortRequest = {
+  id: string;
   justification: string;
   decision_note?: string | null;
   valid_until: string | null;
@@ -236,7 +238,7 @@ export type InputPortRequest = {
   created_on: string;
   requested_on: string;
   request_type?: "InputPort";
-  input_port: AppUsersSchemaResponseInputPort;
+  input_port: UserInputPort;
 };
 export type TechnicalAssetStatus = "pending" | "active" | "archived";
 export type TechnicalMapping = "default" | "custom";

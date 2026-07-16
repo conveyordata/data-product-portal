@@ -3,6 +3,7 @@ from __future__ import annotations
 import datetime
 from collections.abc import Mapping
 from typing import TYPE_CHECKING, Any, TypeVar, cast
+from uuid import UUID
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
@@ -21,6 +22,7 @@ T = TypeVar("T", bound="InputPortRequestBase")
 class InputPortRequestBase:
     """
     Attributes:
+        id (UUID):
         justification (str):
         valid_until (datetime.datetime | None):
         requested_by (User):
@@ -31,6 +33,7 @@ class InputPortRequestBase:
         decided_by (None | Unset | User):
     """
 
+    id: UUID
     justification: str
     valid_until: datetime.datetime | None
     requested_by: User
@@ -43,6 +46,8 @@ class InputPortRequestBase:
 
     def to_dict(self) -> dict[str, Any]:
         from ..models.user import User
+
+        id = str(self.id)
 
         justification = self.justification
 
@@ -78,6 +83,7 @@ class InputPortRequestBase:
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
+                "id": id,
                 "justification": justification,
                 "valid_until": valid_until,
                 "requested_by": requested_by,
@@ -98,6 +104,8 @@ class InputPortRequestBase:
         from ..models.user import User
 
         d = dict(src_dict)
+        id = UUID(d.pop("id"))
+
         justification = d.pop("justification")
 
         def _parse_valid_until(data: object) -> datetime.datetime | None:
@@ -150,6 +158,7 @@ class InputPortRequestBase:
         decided_by = _parse_decided_by(d.pop("decided_by", UNSET))
 
         input_port_request_base = cls(
+            id=id,
             justification=justification,
             valid_until=valid_until,
             requested_by=requested_by,

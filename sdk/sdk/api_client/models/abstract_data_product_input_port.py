@@ -7,7 +7,7 @@ from uuid import UUID
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..models.decision_status import DecisionStatus
+from ..models.input_port_status import InputPortStatus
 from ..models.renewal_status import RenewalStatus
 from ..types import UNSET, Unset
 
@@ -16,15 +16,15 @@ if TYPE_CHECKING:
     from ..models.output_port import OutputPort
 
 
-T = TypeVar("T", bound="AppAbstractDataProductSchemaResponseInputPort")
+T = TypeVar("T", bound="AbstractDataProductInputPort")
 
 
 @_attrs_define
-class AppAbstractDataProductSchemaResponseInputPort:
+class AbstractDataProductInputPort:
     """
     Attributes:
         id (UUID):
-        status (DecisionStatus):
+        status (InputPortStatus):
         current_request (InputPortRequestBase):
         output_port_id (UUID):
         output_port (OutputPort):
@@ -32,7 +32,7 @@ class AppAbstractDataProductSchemaResponseInputPort:
     """
 
     id: UUID
-    status: DecisionStatus
+    status: InputPortStatus
     current_request: InputPortRequestBase
     output_port_id: UUID
     output_port: OutputPort
@@ -82,7 +82,7 @@ class AppAbstractDataProductSchemaResponseInputPort:
         d = dict(src_dict)
         id = UUID(d.pop("id"))
 
-        status = DecisionStatus(d.pop("status"))
+        status = InputPortStatus(d.pop("status"))
 
         current_request = InputPortRequestBase.from_dict(d.pop("current_request"))
 
@@ -107,7 +107,7 @@ class AppAbstractDataProductSchemaResponseInputPort:
 
         renewal_status = _parse_renewal_status(d.pop("renewal_status", UNSET))
 
-        app_abstract_data_product_schema_response_input_port = cls(
+        abstract_data_product_input_port = cls(
             id=id,
             status=status,
             current_request=current_request,
@@ -116,8 +116,8 @@ class AppAbstractDataProductSchemaResponseInputPort:
             renewal_status=renewal_status,
         )
 
-        app_abstract_data_product_schema_response_input_port.additional_properties = d
-        return app_abstract_data_product_schema_response_input_port
+        abstract_data_product_input_port.additional_properties = d
+        return abstract_data_product_input_port
 
     @property
     def additional_keys(self) -> list[str]:

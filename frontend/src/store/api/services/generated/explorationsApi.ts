@@ -194,6 +194,7 @@ export type GetExplorationResponse = {
   owner: User;
 };
 export type InputPortRequestBase = {
+  id: string;
   justification: string;
   decision_note?: string | null;
   valid_until: string | null;
@@ -217,16 +218,16 @@ export type OutputPort = {
   data_product_id: string;
   tags: Tag[];
 };
-export type AppAbstractDataProductSchemaResponseInputPort = {
+export type AbstractDataProductInputPort = {
   id: string;
-  status: DecisionStatus;
+  status: InputPortStatus;
   current_request: InputPortRequestBase;
   renewal_status?: RenewalStatus | null;
   output_port_id: string;
   output_port: OutputPort;
 };
 export type GetExplorationInputPortsResponse = {
-  input_ports: AppAbstractDataProductSchemaResponseInputPort[];
+  input_ports: AbstractDataProductInputPort[];
 };
 export type RequestInputPortsForExplorationResponse = {
   input_port_ids: string[];
@@ -239,6 +240,12 @@ export enum AbstractDataProductStatus {
   Active = "active",
   Archived = "archived",
   Deleting = "deleting",
+}
+export enum InputPortStatus {
+  Pending = "pending",
+  Approved = "approved",
+  Denied = "denied",
+  Expired = "expired",
 }
 export enum DecisionStatus {
   Approved = "approved",

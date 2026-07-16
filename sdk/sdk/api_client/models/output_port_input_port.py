@@ -7,7 +7,7 @@ from uuid import UUID
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..models.decision_status import DecisionStatus
+from ..models.input_port_status import InputPortStatus
 from ..models.renewal_status import RenewalStatus
 from ..types import UNSET, Unset
 
@@ -24,7 +24,7 @@ class OutputPortInputPort:
     """
     Attributes:
         id (UUID):
-        status (DecisionStatus):
+        status (InputPortStatus):
         current_request (InputPortRequestBase):
         consuming_abstract_data_product_id (UUID):
         consuming_abstract_data_product (AbstractDataProductInfo):
@@ -32,7 +32,7 @@ class OutputPortInputPort:
     """
 
     id: UUID
-    status: DecisionStatus
+    status: InputPortStatus
     current_request: InputPortRequestBase
     consuming_abstract_data_product_id: UUID
     consuming_abstract_data_product: AbstractDataProductInfo
@@ -84,7 +84,7 @@ class OutputPortInputPort:
         d = dict(src_dict)
         id = UUID(d.pop("id"))
 
-        status = DecisionStatus(d.pop("status"))
+        status = InputPortStatus(d.pop("status"))
 
         current_request = InputPortRequestBase.from_dict(d.pop("current_request"))
 

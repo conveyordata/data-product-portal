@@ -9,6 +9,7 @@ from typing import (
     TypeVar,
     cast,
 )
+from uuid import UUID
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
@@ -17,10 +18,8 @@ from ..models.decision_status import DecisionStatus
 from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
-    from ..models.app_users_schema_response_input_port import (
-        AppUsersSchemaResponseInputPort,
-    )
     from ..models.user import User
+    from ..models.user_input_port import UserInputPort
 
 
 T = TypeVar("T", bound="InputPortRequest")
@@ -30,25 +29,27 @@ T = TypeVar("T", bound="InputPortRequest")
 class InputPortRequest:
     """
     Attributes:
+        id (UUID):
         justification (str):
         valid_until (datetime.datetime | None):
         requested_by (User):
         decision (DecisionStatus):
         created_on (datetime.datetime):
         requested_on (datetime.datetime):
-        input_port (AppUsersSchemaResponseInputPort):
+        input_port (UserInputPort):
         decision_note (None | str | Unset):
         decided_by (None | Unset | User):
         request_type (Literal['InputPort'] | Unset):  Default: 'InputPort'.
     """
 
+    id: UUID
     justification: str
     valid_until: datetime.datetime | None
     requested_by: User
     decision: DecisionStatus
     created_on: datetime.datetime
     requested_on: datetime.datetime
-    input_port: AppUsersSchemaResponseInputPort
+    input_port: UserInputPort
     decision_note: None | str | Unset = UNSET
     decided_by: None | Unset | User = UNSET
     request_type: Literal["InputPort"] | Unset = "InputPort"
@@ -56,6 +57,8 @@ class InputPortRequest:
 
     def to_dict(self) -> dict[str, Any]:
         from ..models.user import User
+
+        id = str(self.id)
 
         justification = self.justification
 
@@ -95,6 +98,7 @@ class InputPortRequest:
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
+                "id": id,
                 "justification": justification,
                 "valid_until": valid_until,
                 "requested_by": requested_by,
@@ -115,12 +119,12 @@ class InputPortRequest:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.app_users_schema_response_input_port import (
-            AppUsersSchemaResponseInputPort,
-        )
         from ..models.user import User
+        from ..models.user_input_port import UserInputPort
 
         d = dict(src_dict)
+        id = UUID(d.pop("id"))
+
         justification = d.pop("justification")
 
         def _parse_valid_until(data: object) -> datetime.datetime | None:
@@ -146,7 +150,7 @@ class InputPortRequest:
 
         requested_on = datetime.datetime.fromisoformat(d.pop("requested_on"))
 
-        input_port = AppUsersSchemaResponseInputPort.from_dict(d.pop("input_port"))
+        input_port = UserInputPort.from_dict(d.pop("input_port"))
 
         def _parse_decision_note(data: object) -> None | str | Unset:
             if data is None:
@@ -181,6 +185,7 @@ class InputPortRequest:
             )
 
         input_port_request = cls(
+            id=id,
             justification=justification,
             valid_until=valid_until,
             requested_by=requested_by,

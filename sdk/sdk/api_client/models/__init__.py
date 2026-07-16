@@ -1,6 +1,7 @@
 """Contains all the data models used in inputs/outputs"""
 
 from .abstract_data_product_info import AbstractDataProductInfo
+from .abstract_data_product_input_port import AbstractDataProductInputPort
 from .abstract_data_product_status import AbstractDataProductStatus
 from .abstract_data_product_type import AbstractDataProductType
 from .access_duration import AccessDuration
@@ -8,10 +9,6 @@ from .access_duration_type import AccessDurationType
 from .access_duration_update import AccessDurationUpdate
 from .access_granularity import AccessGranularity
 from .access_response import AccessResponse
-from .app_abstract_data_product_schema_response_input_port import (
-    AppAbstractDataProductSchemaResponseInputPort,
-)
-from .app_users_schema_response_input_port import AppUsersSchemaResponseInputPort
 from .approve_link_between_technical_asset_and_output_port_request import (
     ApproveLinkBetweenTechnicalAssetAndOutputPortRequest,
 )
@@ -183,6 +180,7 @@ from .http_validation_error import HTTPValidationError
 from .input_port_event import InputPortEvent
 from .input_port_request import InputPortRequest
 from .input_port_request_base import InputPortRequestBase
+from .input_port_status import InputPortStatus
 from .is_admin_response import IsAdminResponse
 from .link_input_ports_to_data_product import LinkInputPortsToDataProduct
 from .link_input_ports_to_data_product_post import LinkInputPortsToDataProductPost
@@ -335,12 +333,14 @@ from .url_response import URLResponse
 from .user import User
 from .user_create import UserCreate
 from .user_create_response import UserCreateResponse
+from .user_input_port import UserInputPort
 from .users_get import UsersGet
 from .validation_error import ValidationError
 from .validation_error_context import ValidationErrorContext
 
 __all__ = (
     "AbstractDataProductInfo",
+    "AbstractDataProductInputPort",
     "AbstractDataProductStatus",
     "AbstractDataProductType",
     "AccessDuration",
@@ -348,10 +348,8 @@ __all__ = (
     "AccessDurationUpdate",
     "AccessGranularity",
     "AccessResponse",
-    "AppAbstractDataProductSchemaResponseInputPort",
     "ApproveLinkBetweenTechnicalAssetAndOutputPortRequest",
     "ApproveOutputPortAsInputPortRequest",
-    "AppUsersSchemaResponseInputPort",
     "AuthorizationAction",
     "AWSCredentials",
     "AWSEnvironmentPlatformConfiguration",
@@ -489,6 +487,7 @@ __all__ = (
     "InputPortEvent",
     "InputPortRequest",
     "InputPortRequestBase",
+    "InputPortStatus",
     "IsAdminResponse",
     "LinkInputPortsToDataProduct",
     "LinkInputPortsToDataProductPost",
@@ -607,6 +606,7 @@ __all__ = (
     "User",
     "UserCreate",
     "UserCreateResponse",
+    "UserInputPort",
     "UsersGet",
     "ValidationError",
     "ValidationErrorContext",

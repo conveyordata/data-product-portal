@@ -1,4 +1,3 @@
-import { Badge } from 'antd';
 import { useTranslation } from 'react-i18next';
 import explorationBorderIcon from '@/assets/icons/border-icons/exploration-border-icon.svg?react';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
@@ -9,16 +8,13 @@ import {
     AbstractDataProductType,
 } from '@/store/api/services/generated/dataProductsOutputPortsInputPortsApi.ts';
 import { createAbstractDataProductIdPath } from '@/types/navigation.ts';
-import type { DecisionStatus } from '@/types/roles';
 import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper.ts';
-import { getDecisionStatusBadgeStatus, getDecisionStatusLabel } from '@/utils/status.helper.ts';
 
 type Props = {
-    status: DecisionStatus;
     consumingAbstractDataProductId: string;
     consumingAbstractDataProduct: AbstractDataProductInfo;
 };
-export function ConsumerColumn({ consumingAbstractDataProduct, status, consumingAbstractDataProductId }: Props) {
+export function ConsumerColumn({ consumingAbstractDataProduct, consumingAbstractDataProductId }: Props) {
     const { t } = useTranslation();
     const popover = (() => {
         switch (consumingAbstractDataProduct.abstract_data_product_type) {
@@ -52,7 +48,6 @@ export function ConsumerColumn({ consumingAbstractDataProduct, status, consuming
             )}
             icon={<CustomSvgIconLoader iconComponent={icon} hasRoundBorder size={'default'} />}
             title={consumingAbstractDataProduct.name}
-            subtitle={<Badge status={getDecisionStatusBadgeStatus(status)} text={getDecisionStatusLabel(t, status)} />}
         />
     );
 }

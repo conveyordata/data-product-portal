@@ -81,6 +81,7 @@ export type User = {
   admin_expiry?: string | null;
 };
 export type InputPortRequestBase = {
+  id: string;
   justification: string;
   decision_note?: string | null;
   valid_until: string | null;
@@ -97,7 +98,7 @@ export type AbstractDataProductInfo = {
 };
 export type OutputPortInputPort = {
   id: string;
-  status: DecisionStatus;
+  status: InputPortStatus;
   current_request: InputPortRequestBase;
   renewal_status?: RenewalStatus | null;
   consuming_abstract_data_product_id: string;
@@ -127,6 +128,12 @@ export type DenyOutputPortAsInputPortRequest = {
 export type RemoveOutputPortAsInputPortRequest = {
   consuming_data_product_id: string;
 };
+export enum InputPortStatus {
+  Pending = "pending",
+  Approved = "approved",
+  Denied = "denied",
+  Expired = "expired",
+}
 export enum DecisionStatus {
   Approved = "approved",
   Pending = "pending",

@@ -289,6 +289,181 @@ func (s *AbstractDataProductInfo) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
+// Encode implements json.Marshaler.
+func (s *AbstractDataProductInputPort) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *AbstractDataProductInputPort) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("id")
+		json.EncodeUUID(e, s.ID)
+	}
+	{
+		e.FieldStart("status")
+		s.Status.Encode(e)
+	}
+	{
+		e.FieldStart("current_request")
+		s.CurrentRequest.Encode(e)
+	}
+	{
+		if s.RenewalStatus.Set {
+			e.FieldStart("renewal_status")
+			s.RenewalStatus.Encode(e)
+		}
+	}
+	{
+		e.FieldStart("output_port_id")
+		json.EncodeUUID(e, s.OutputPortID)
+	}
+	{
+		e.FieldStart("output_port")
+		s.OutputPort.Encode(e)
+	}
+}
+
+var jsonFieldsNameOfAbstractDataProductInputPort = [6]string{
+	0: "id",
+	1: "status",
+	2: "current_request",
+	3: "renewal_status",
+	4: "output_port_id",
+	5: "output_port",
+}
+
+// Decode decodes AbstractDataProductInputPort from json.
+func (s *AbstractDataProductInputPort) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode AbstractDataProductInputPort to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "id":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := json.DecodeUUID(d)
+				s.ID = v
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"id\"")
+			}
+		case "status":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				if err := s.Status.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"status\"")
+			}
+		case "current_request":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				if err := s.CurrentRequest.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"current_request\"")
+			}
+		case "renewal_status":
+			if err := func() error {
+				s.RenewalStatus.Reset()
+				if err := s.RenewalStatus.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"renewal_status\"")
+			}
+		case "output_port_id":
+			requiredBitSet[0] |= 1 << 4
+			if err := func() error {
+				v, err := json.DecodeUUID(d)
+				s.OutputPortID = v
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"output_port_id\"")
+			}
+		case "output_port":
+			requiredBitSet[0] |= 1 << 5
+			if err := func() error {
+				if err := s.OutputPort.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"output_port\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode AbstractDataProductInputPort")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00110111,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfAbstractDataProductInputPort) {
+					name = jsonFieldsNameOfAbstractDataProductInputPort[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *AbstractDataProductInputPort) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *AbstractDataProductInputPort) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode encodes AbstractDataProductStatus as json.
 func (s AbstractDataProductStatus) Encode(e *jx.Encoder) {
 	e.Str(string(s))
@@ -976,181 +1151,6 @@ func (s AddOutputPortDataQualityRunNotFoundApplicationJSON) MarshalJSON() ([]byt
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *AddOutputPortDataQualityRunNotFoundApplicationJSON) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode implements json.Marshaler.
-func (s *AppAbstractDataProductSchemaResponseInputPort) Encode(e *jx.Encoder) {
-	e.ObjStart()
-	s.encodeFields(e)
-	e.ObjEnd()
-}
-
-// encodeFields encodes fields.
-func (s *AppAbstractDataProductSchemaResponseInputPort) encodeFields(e *jx.Encoder) {
-	{
-		e.FieldStart("id")
-		json.EncodeUUID(e, s.ID)
-	}
-	{
-		e.FieldStart("status")
-		s.Status.Encode(e)
-	}
-	{
-		e.FieldStart("current_request")
-		s.CurrentRequest.Encode(e)
-	}
-	{
-		if s.RenewalStatus.Set {
-			e.FieldStart("renewal_status")
-			s.RenewalStatus.Encode(e)
-		}
-	}
-	{
-		e.FieldStart("output_port_id")
-		json.EncodeUUID(e, s.OutputPortID)
-	}
-	{
-		e.FieldStart("output_port")
-		s.OutputPort.Encode(e)
-	}
-}
-
-var jsonFieldsNameOfAppAbstractDataProductSchemaResponseInputPort = [6]string{
-	0: "id",
-	1: "status",
-	2: "current_request",
-	3: "renewal_status",
-	4: "output_port_id",
-	5: "output_port",
-}
-
-// Decode decodes AppAbstractDataProductSchemaResponseInputPort from json.
-func (s *AppAbstractDataProductSchemaResponseInputPort) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode AppAbstractDataProductSchemaResponseInputPort to nil")
-	}
-	var requiredBitSet [1]uint8
-
-	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		switch string(k) {
-		case "id":
-			requiredBitSet[0] |= 1 << 0
-			if err := func() error {
-				v, err := json.DecodeUUID(d)
-				s.ID = v
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"id\"")
-			}
-		case "status":
-			requiredBitSet[0] |= 1 << 1
-			if err := func() error {
-				if err := s.Status.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"status\"")
-			}
-		case "current_request":
-			requiredBitSet[0] |= 1 << 2
-			if err := func() error {
-				if err := s.CurrentRequest.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"current_request\"")
-			}
-		case "renewal_status":
-			if err := func() error {
-				s.RenewalStatus.Reset()
-				if err := s.RenewalStatus.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"renewal_status\"")
-			}
-		case "output_port_id":
-			requiredBitSet[0] |= 1 << 4
-			if err := func() error {
-				v, err := json.DecodeUUID(d)
-				s.OutputPortID = v
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"output_port_id\"")
-			}
-		case "output_port":
-			requiredBitSet[0] |= 1 << 5
-			if err := func() error {
-				if err := s.OutputPort.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"output_port\"")
-			}
-		default:
-			return d.Skip()
-		}
-		return nil
-	}); err != nil {
-		return errors.Wrap(err, "decode AppAbstractDataProductSchemaResponseInputPort")
-	}
-	// Validate required fields.
-	var failures []validate.FieldError
-	for i, mask := range [1]uint8{
-		0b00110111,
-	} {
-		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
-			// Mask only required fields and check equality to mask using XOR.
-			//
-			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
-			// Bits of fields which would be set are actually bits of missed fields.
-			missed := bits.OnesCount8(result)
-			for bitN := 0; bitN < missed; bitN++ {
-				bitIdx := bits.TrailingZeros8(result)
-				fieldIdx := i*8 + bitIdx
-				var name string
-				if fieldIdx < len(jsonFieldsNameOfAppAbstractDataProductSchemaResponseInputPort) {
-					name = jsonFieldsNameOfAppAbstractDataProductSchemaResponseInputPort[fieldIdx]
-				} else {
-					name = strconv.Itoa(fieldIdx)
-				}
-				failures = append(failures, validate.FieldError{
-					Name:  name,
-					Error: validate.ErrFieldRequired,
-				})
-				// Reset bit.
-				result &^= 1 << bitIdx
-			}
-		}
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s *AppAbstractDataProductSchemaResponseInputPort) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *AppAbstractDataProductSchemaResponseInputPort) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -12432,9 +12432,9 @@ func (s *GetDataProductInputPortsResponse) Decode(d *jx.Decoder) error {
 		case "input_ports":
 			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				s.InputPorts = make([]AppAbstractDataProductSchemaResponseInputPort, 0)
+				s.InputPorts = make([]AbstractDataProductInputPort, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
-					var elem AppAbstractDataProductSchemaResponseInputPort
+					var elem AbstractDataProductInputPort
 					if err := elem.Decode(d); err != nil {
 						return err
 					}
@@ -14406,9 +14406,9 @@ func (s *GetExplorationInputPortsResponse) Decode(d *jx.Decoder) error {
 		case "input_ports":
 			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				s.InputPorts = make([]AppAbstractDataProductSchemaResponseInputPort, 0)
+				s.InputPorts = make([]AbstractDataProductInputPort, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
-					var elem AppAbstractDataProductSchemaResponseInputPort
+					var elem AbstractDataProductInputPort
 					if err := elem.Decode(d); err != nil {
 						return err
 					}
@@ -17505,6 +17505,10 @@ func (s *InputPortRequestBase) Encode(e *jx.Encoder) {
 // encodeFields encodes fields.
 func (s *InputPortRequestBase) encodeFields(e *jx.Encoder) {
 	{
+		e.FieldStart("id")
+		json.EncodeUUID(e, s.ID)
+	}
+	{
 		e.FieldStart("justification")
 		e.Str(s.Justification)
 	}
@@ -17542,15 +17546,16 @@ func (s *InputPortRequestBase) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfInputPortRequestBase = [8]string{
-	0: "justification",
-	1: "decision_note",
-	2: "valid_until",
-	3: "requested_by",
-	4: "decided_by",
-	5: "decision",
-	6: "created_on",
-	7: "requested_on",
+var jsonFieldsNameOfInputPortRequestBase = [9]string{
+	0: "id",
+	1: "justification",
+	2: "decision_note",
+	3: "valid_until",
+	4: "requested_by",
+	5: "decided_by",
+	6: "decision",
+	7: "created_on",
+	8: "requested_on",
 }
 
 // Decode decodes InputPortRequestBase from json.
@@ -17558,12 +17563,24 @@ func (s *InputPortRequestBase) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode InputPortRequestBase to nil")
 	}
-	var requiredBitSet [1]uint8
+	var requiredBitSet [2]uint8
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
-		case "justification":
+		case "id":
 			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := json.DecodeUUID(d)
+				s.ID = v
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"id\"")
+			}
+		case "justification":
+			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
 				v, err := d.Str()
 				s.Justification = string(v)
@@ -17585,7 +17602,7 @@ func (s *InputPortRequestBase) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"decision_note\"")
 			}
 		case "valid_until":
-			requiredBitSet[0] |= 1 << 2
+			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
 				if err := s.ValidUntil.Decode(d, json.DecodeDateTime); err != nil {
 					return err
@@ -17595,7 +17612,7 @@ func (s *InputPortRequestBase) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"valid_until\"")
 			}
 		case "requested_by":
-			requiredBitSet[0] |= 1 << 3
+			requiredBitSet[0] |= 1 << 4
 			if err := func() error {
 				if err := s.RequestedBy.Decode(d); err != nil {
 					return err
@@ -17615,7 +17632,7 @@ func (s *InputPortRequestBase) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"decided_by\"")
 			}
 		case "decision":
-			requiredBitSet[0] |= 1 << 5
+			requiredBitSet[0] |= 1 << 6
 			if err := func() error {
 				if err := s.Decision.Decode(d); err != nil {
 					return err
@@ -17625,7 +17642,7 @@ func (s *InputPortRequestBase) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"decision\"")
 			}
 		case "created_on":
-			requiredBitSet[0] |= 1 << 6
+			requiredBitSet[0] |= 1 << 7
 			if err := func() error {
 				v, err := json.DecodeDateTime(d)
 				s.CreatedOn = v
@@ -17637,7 +17654,7 @@ func (s *InputPortRequestBase) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"created_on\"")
 			}
 		case "requested_on":
-			requiredBitSet[0] |= 1 << 7
+			requiredBitSet[1] |= 1 << 0
 			if err := func() error {
 				v, err := json.DecodeDateTime(d)
 				s.RequestedOn = v
@@ -17657,8 +17674,9 @@ func (s *InputPortRequestBase) Decode(d *jx.Decoder) error {
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
-	for i, mask := range [1]uint8{
-		0b11101101,
+	for i, mask := range [2]uint8{
+		0b11011011,
+		0b00000001,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -17700,6 +17718,50 @@ func (s *InputPortRequestBase) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *InputPortRequestBase) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes InputPortStatus as json.
+func (s InputPortStatus) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes InputPortStatus from json.
+func (s *InputPortStatus) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode InputPortStatus to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch InputPortStatus(v) {
+	case InputPortStatusPending:
+		*s = InputPortStatusPending
+	case InputPortStatusApproved:
+		*s = InputPortStatusApproved
+	case InputPortStatusDenied:
+		*s = InputPortStatusDenied
+	case InputPortStatusExpired:
+		*s = InputPortStatusExpired
+	default:
+		*s = InputPortStatus(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s InputPortStatus) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *InputPortStatus) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

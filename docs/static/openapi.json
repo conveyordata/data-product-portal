@@ -7811,6 +7811,48 @@
         ],
         "title": "AbstractDataProductInfo"
       },
+      "AbstractDataProductInputPort": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "status": {
+            "$ref": "#/components/schemas/InputPortStatus"
+          },
+          "current_request": {
+            "$ref": "#/components/schemas/InputPortRequestBase"
+          },
+          "renewal_status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RenewalStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "output_port_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Output Port Id"
+          },
+          "output_port": {
+            "$ref": "#/components/schemas/OutputPort"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "status",
+          "current_request",
+          "output_port_id",
+          "output_port"
+        ],
+        "title": "AbstractDataProductInputPort"
+      },
       "AbstractDataProductStatus": {
         "type": "string",
         "enum": [
@@ -10922,7 +10964,7 @@
         "properties": {
           "input_ports": {
             "items": {
-              "$ref": "#/components/schemas/app__abstract_data_product__schema_response__InputPort"
+              "$ref": "#/components/schemas/AbstractDataProductInputPort"
             },
             "type": "array",
             "title": "Input Ports"
@@ -11404,7 +11446,7 @@
         "properties": {
           "input_ports": {
             "items": {
-              "$ref": "#/components/schemas/app__abstract_data_product__schema_response__InputPort"
+              "$ref": "#/components/schemas/AbstractDataProductInputPort"
             },
             "type": "array",
             "title": "Input Ports"
@@ -12080,6 +12122,11 @@
       },
       "InputPortRequest": {
         "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
           "justification": {
             "type": "string",
             "title": "Justification"
@@ -12140,11 +12187,12 @@
             "default": "InputPort"
           },
           "input_port": {
-            "$ref": "#/components/schemas/app__users__schema_response__InputPort"
+            "$ref": "#/components/schemas/UserInputPort"
           }
         },
         "type": "object",
         "required": [
+          "id",
           "justification",
           "valid_until",
           "requested_by",
@@ -12157,6 +12205,11 @@
       },
       "InputPortRequestBase": {
         "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
           "justification": {
             "type": "string",
             "title": "Justification"
@@ -12213,6 +12266,7 @@
         },
         "type": "object",
         "required": [
+          "id",
           "justification",
           "valid_until",
           "requested_by",
@@ -12221,6 +12275,16 @@
           "requested_on"
         ],
         "title": "InputPortRequestBase"
+      },
+      "InputPortStatus": {
+        "type": "string",
+        "enum": [
+          "pending",
+          "approved",
+          "denied",
+          "expired"
+        ],
+        "title": "InputPortStatus"
       },
       "IsAdminResponse": {
         "properties": {
@@ -13003,7 +13067,7 @@
             "title": "Id"
           },
           "status": {
-            "$ref": "#/components/schemas/DecisionStatus"
+            "$ref": "#/components/schemas/InputPortStatus"
           },
           "current_request": {
             "$ref": "#/components/schemas/InputPortRequestBase"
@@ -15854,6 +15918,40 @@
         ],
         "title": "UserCreateResponse"
       },
+      "UserInputPort": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "consuming_abstract_data_product_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Consuming Abstract Data Product Id"
+          },
+          "consuming_abstract_data_product": {
+            "$ref": "#/components/schemas/AbstractDataProductInfo"
+          },
+          "output_port_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Output Port Id"
+          },
+          "output_port": {
+            "$ref": "#/components/schemas/OutputPort"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "consuming_abstract_data_product_id",
+          "consuming_abstract_data_product",
+          "output_port_id",
+          "output_port"
+        ],
+        "title": "UserInputPort"
+      },
       "UsersGet": {
         "properties": {
           "id": {
@@ -15961,76 +16059,6 @@
           "type"
         ],
         "title": "ValidationError"
-      },
-      "app__abstract_data_product__schema_response__InputPort": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "status": {
-            "$ref": "#/components/schemas/DecisionStatus"
-          },
-          "current_request": {
-            "$ref": "#/components/schemas/InputPortRequestBase"
-          },
-          "renewal_status": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/RenewalStatus"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "output_port_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Output Port Id"
-          },
-          "output_port": {
-            "$ref": "#/components/schemas/OutputPort"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "status",
-          "current_request",
-          "output_port_id",
-          "output_port"
-        ],
-        "title": "app__abstract_data_product__schema_response__InputPort"
-      },
-      "app__users__schema_response__InputPort": {
-        "properties": {
-          "consuming_abstract_data_product_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Consuming Abstract Data Product Id"
-          },
-          "consuming_abstract_data_product": {
-            "$ref": "#/components/schemas/AbstractDataProductInfo"
-          },
-          "output_port_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Output Port Id"
-          },
-          "output_port": {
-            "$ref": "#/components/schemas/OutputPort"
-          }
-        },
-        "type": "object",
-        "required": [
-          "consuming_abstract_data_product_id",
-          "consuming_abstract_data_product",
-          "output_port_id",
-          "output_port"
-        ],
-        "title": "app__users__schema_response__InputPort"
       }
     },
     "securitySchemes": {
