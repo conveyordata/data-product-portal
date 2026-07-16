@@ -14,7 +14,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.abstract_data_product.input_ports.enums import InputPortStatus
+from app.abstract_data_product.input_ports.enums import InputPortStatus, RenewalStatus
 from app.access_durations.enums import AccessDurationType
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.core.webhooks.events import InputPortEvent
@@ -67,9 +67,20 @@ class InputPort(
         lazy="raise",
     )
 
+    # This the current request
+    # When you have an initial output port request this will be the pending one
+    # When there is an active approved request it will be that
+    # No active approved request, and latest is declined it will be declined
+    # When the latest is approved but expired it will return that one
+    @property
+    def current_request(self) -> "InputPortRequest":
+        if active_grant := self.active_grant:
+            return active_grant
+        return self.latest_request
+
     @property
     def latest_request(self) -> "InputPortRequest":
-        return max(self.requests, key=lambda request: request.requested_on)
+        return max(self.requests, key=lambda request: request.created_on)
 
     @property
     def active_grant(self) -> Optional["InputPortRequest"]:
@@ -77,13 +88,28 @@ class InputPort(
         return next(
             (
                 request
-                for request in self.requests
+                for request in sorted(
+                    self.requests, key=lambda request: request.created_on, reverse=True
+                )
                 if request.decision == DecisionStatus.APPROVED
                 and (request.valid_from is None or request.valid_from <= today)
                 and (request.valid_until is None or request.valid_until >= today)
             ),
             None,
         )
+
+    @property
+    def renewal_status(self) -> Optional[RenewalStatus]:
+        if self.active_grant is None or self.active_grant.id != self.latest_request.id:
+            match self.latest_request.decision:
+                case DecisionStatus.APPROVED:
+                    # This case will never happen, the latest requests should equal active grant
+                    return None
+                case DecisionStatus.DENIED:
+                    return RenewalStatus.DENIED
+                case DecisionStatus.PENDING:
+                    return RenewalStatus.PENDING
+        return None
 
     @property
     def pending_request(self) -> Optional["InputPortRequest"]:
@@ -96,39 +122,44 @@ class InputPort(
             None,
         )
 
+    # TODO should this be a computed property
     def recompute_status(self) -> None:
         if self.active_grant is not None:
             self.status = InputPortStatus.APPROVED
-        elif self.pending_request is not None:
-            self.status = InputPortStatus.PENDING
         else:
-            self.status = InputPortStatus.DENIED
+            match self.latest_request.decision:
+                case DecisionStatus.PENDING:
+                    self.status = InputPortStatus.PENDING
+                case DecisionStatus.APPROVED:
+                    self.status = InputPortStatus.EXPIRED
+                case DecisionStatus.DENIED:
+                    self.status = InputPortStatus.DENIED
 
-    @property
-    def justification(self) -> str:
-        return self.latest_request.justification
+    # @property
+    # def justification(self) -> str:
+    #     return self.latest_request.justification
 
-    @property
-    def decision_note(self) -> Optional[str]:
-        return self.latest_request.decision_note
+    # @property
+    # def decision_note(self) -> Optional[str]:
+    #     return self.latest_request.decision_note
 
-    @property
-    def requested_on(self) -> datetime:
-        return self.latest_request.requested_on
+    # @property
+    # def requested_on(self) -> datetime:
+    #     return self.latest_request.requested_on
 
-    @property
-    def requested_by(self) -> "User":
-        return self.latest_request.requested_by
+    # @property
+    # def requested_by(self) -> "User":
+    #     return self.latest_request.requested_by
 
-    @property
-    def approved_by(self) -> Optional["User"]:
-        grant = self.active_grant
-        return grant.decided_by if grant is not None else None
-
-    @property
-    def denied_by(self) -> Optional["User"]:
-        request = self.latest_request
-        return request.decided_by if request.decision == DecisionStatus.DENIED else None
+    # @property
+    # def approved_by(self) -> Optional["User"]:
+    #     grant = self.active_grant
+    #     return grant.decided_by if grant is not None else None
+    #
+    # @property
+    # def denied_by(self) -> Optional["User"]:
+    #     request = self.latest_request
+    #     return request.decided_by if request.decision == DecisionStatus.DENIED else None
 
     def to_event(self) -> InputPortEvent:
         return InputPortEvent(

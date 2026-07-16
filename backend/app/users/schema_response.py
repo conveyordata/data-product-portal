@@ -2,8 +2,9 @@ from datetime import datetime
 from typing import Literal, Optional, Sequence, Union
 from uuid import UUID
 
-from pydantic import EmailStr
+from pydantic import EmailStr, Field
 
+from app.abstract_data_product.schema_response import AbstractDataProductInfo
 from app.authorization.role_assignments.data_product.schema import (
     DataProductRoleAssignmentResponse,
 )
@@ -13,7 +14,8 @@ from app.authorization.role_assignments.global_.schema import (
 from app.data_products.output_port_technical_assets_link.schema_response import (
     TechnicalAssetOutputPortAssociationsGet,
 )
-from app.data_products.output_ports.input_ports.schema_response import BaseInputPortGet
+from app.data_products.output_ports.input_ports.schema import InputPortRequestBase
+from app.data_products.output_ports.schema import OutputPort
 from app.shared.schema import ORMModel
 from app.users.enums import RequestTypes
 
@@ -57,8 +59,16 @@ class DataProductRoleAssignmentRequest(DataProductRoleAssignmentResponse):
     )
 
 
-class InputPortRequest(BaseInputPortGet):
+class InputPort(ORMModel):
+    consuming_abstract_data_product_id: UUID
+    consuming_abstract_data_product: AbstractDataProductInfo
+    output_port_id: UUID = Field(validation_alias="dataset_id")
+    output_port: OutputPort = Field(validation_alias="dataset")
+
+
+class InputPortRequest(InputPortRequestBase):
     request_type: Literal[RequestTypes.InputPort] = RequestTypes.InputPort
+    input_port: InputPort
 
 
 Request = Union[

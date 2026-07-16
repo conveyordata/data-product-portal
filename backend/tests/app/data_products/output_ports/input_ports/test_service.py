@@ -50,27 +50,24 @@ def _grant_and_pending_renewal(consumer, port):
 class TestInputPortService:
     def test_get_user_requests(self, session):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        dp = DataProductFactory()
-        ds = DatasetFactory(data_product=dp)
-        pending_recent = InputPortFactory(
-            consuming_abstract_data_product=dp,
-            dataset=ds,
-            request__requested_by=user,
-            status=DecisionStatus.PENDING,
+        now = datetime.now(timezone.utc)
+        pending_recent = InputPortRequestFactory(
+            requested_by=user,
+            requested_on=now - timedelta(days=1),
+            created_on=now - timedelta(days=1),
+            decision=DecisionStatus.PENDING,
         )
-        pending_old = InputPortFactory(
-            consuming_abstract_data_product=dp,
-            dataset=ds,
-            request__requested_by=user,
-            request__requested_on=datetime.now(timezone.utc) - timedelta(days=60),
-            status=DecisionStatus.PENDING,
+        pending_old = InputPortRequestFactory(
+            requested_by=user,
+            requested_on=now - timedelta(days=60),
+            created_on=now - timedelta(days=60),
+            decision=DecisionStatus.PENDING,
         )
-        approved_old = InputPortFactory(
-            consuming_abstract_data_product=dp,
-            dataset=ds,
-            request__requested_by=user,
-            request__requested_on=datetime.now(timezone.utc) - timedelta(days=60),
-            status=DecisionStatus.APPROVED,
+        approved_old = InputPortRequestFactory(
+            requested_by=user,
+            requested_on=now - timedelta(days=60),
+            created_on=now - timedelta(days=60),
+            decision=DecisionStatus.APPROVED,
         )
         requests_old_inactive_hidden = InputPortService(session).get_user_requests(
             user, True
@@ -78,10 +75,10 @@ class TestInputPortService:
         requests_all = InputPortService(session).get_user_requests(user, False)
         assert len(requests_old_inactive_hidden) == 2
         assert len(requests_all) == 3
-        requests_ids = [r.id for r in requests_old_inactive_hidden]
-        assert pending_recent.id in requests_ids
-        assert pending_old.id in requests_ids
-        assert approved_old.id not in requests_ids
+        requests_old_inactive_hidden_ids = [r.id for r in requests_old_inactive_hidden]
+        assert pending_recent.id in requests_old_inactive_hidden_ids
+        assert pending_old.id in requests_old_inactive_hidden_ids
+        assert approved_old.id not in requests_old_inactive_hidden_ids
 
 
 def _by_id(link):
@@ -89,7 +86,7 @@ def _by_id(link):
 
 
 class TestInputPortDecisions:
-    def test_approve__renewal_window_is_appended_after_current_grant(self):
+    def test_approve__renewal_window_starts_at_current_date(self):
         actor = UserFactory()
         consumer = DataProductFactory()
         port = DatasetFactory(
@@ -109,13 +106,9 @@ class TestInputPortDecisions:
         assert current_link.status == InputPortStatus.APPROVED
         assert requests[renewal.id].decision == DecisionStatus.APPROVED
         assert requests[grant.id].valid_until == date.today() + timedelta(days=10)
-        assert current_link.active_grant.id == grant.id
-        assert requests[renewal.id].valid_from == requests[grant.id].valid_until + (
-            timedelta(days=1)
-        )
-        assert requests[renewal.id].valid_until == requests[renewal.id].valid_from + (
-            timedelta(days=30)
-        )
+        assert current_link.active_grant.id == renewal.id
+        assert requests[renewal.id].valid_from == date.today()
+        assert requests[renewal.id].valid_until == date.today() + (timedelta(days=30))
 
     def test_deny__pending_renewal_keeps_the_active_grant(self):
         actor = UserFactory()

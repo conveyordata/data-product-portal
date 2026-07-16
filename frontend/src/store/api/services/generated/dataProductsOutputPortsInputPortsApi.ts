@@ -70,6 +70,26 @@ export type RemoveOutputPortAsInputPortApiArg = {
   outputPortId: string;
   removeOutputPortAsInputPortRequest: RemoveOutputPortAsInputPortRequest;
 };
+export type User = {
+  id: string;
+  email: string;
+  external_id: string;
+  first_name: string;
+  last_name: string;
+  has_seen_tour: boolean;
+  can_become_admin: boolean;
+  admin_expiry?: string | null;
+};
+export type InputPortRequestBase = {
+  justification: string;
+  decision_note?: string | null;
+  valid_until: string | null;
+  requested_by: User;
+  decided_by?: User | null;
+  decision: DecisionStatus;
+  created_on: string;
+  requested_on: string;
+};
 export type AbstractDataProductInfo = {
   name: string;
   namespace: string;
@@ -77,9 +97,9 @@ export type AbstractDataProductInfo = {
 };
 export type OutputPortInputPort = {
   id: string;
-  justification: string;
   status: DecisionStatus;
-  decision_note?: string | null;
+  current_request: InputPortRequestBase;
+  renewal_status?: RenewalStatus | null;
   consuming_abstract_data_product_id: string;
   consuming_abstract_data_product: AbstractDataProductInfo;
 };
@@ -109,6 +129,10 @@ export type RemoveOutputPortAsInputPortRequest = {
 };
 export enum DecisionStatus {
   Approved = "approved",
+  Pending = "pending",
+  Denied = "denied",
+}
+export enum RenewalStatus {
   Pending = "pending",
   Denied = "denied",
 }

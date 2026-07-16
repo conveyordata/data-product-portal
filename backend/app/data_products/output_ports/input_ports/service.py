@@ -81,7 +81,7 @@ class InputPortService:
         decided_by: Optional[UserModel] = None,
         decision_note: Optional[str] = None,
     ) -> None:
-        request.valid_from = now
+        request.valid_from = now.date()
         request.decided_on = now
         request.decided_by = decided_by
         request.decision_note = decision_note
@@ -185,12 +185,11 @@ class InputPortService:
         self.db.delete(current_link)
         return result
 
-    # Future refactor: query and return InputPortRequests instead of InputPorts
     def get_user_pending_actions(self, user: User) -> Sequence[InputPortRequest]:
         requested_associations = (
             self.db.scalars(
-                select(InputPortModel)
-                .join(InputPortRequestModel)
+                select(InputPortRequestModel)
+                .join(InputPortModel)
                 .where(InputPortRequestModel.decision == DecisionStatus.PENDING)
                 .where(
                     InputPortModel.dataset.has(
@@ -199,8 +198,7 @@ class InputPortService:
                         )
                     )
                 )
-                .options(selectinload(InputPortModel.requests))
-                .order_by(asc(InputPortRequestModel.requested_on))
+                .order_by(asc(InputPortRequestModel.created_on))
             )
             .unique()
             .all()
@@ -212,8 +210,8 @@ class InputPortService:
             for a in requested_associations
             if authorizer.has_access(
                 sub=str(user.id),
-                dom=str(a.dataset.data_product.domain),
-                obj=str(a.dataset_id),
+                dom=str(a.input_port.dataset.data_product.domain),
+                obj=str(a.input_port.dataset_id),
                 act=Action.OUTPUT_PORT__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
             )
         ]
@@ -223,10 +221,9 @@ class InputPortService:
         self, user: User, hide_old_inactive: bool
     ) -> Sequence[InputPortRequest]:
         query = (
-            select(InputPortModel)
-            .join(InputPortRequestModel)
+            select(InputPortRequestModel)
+            .join(InputPortModel)
             .where(InputPortRequestModel.requested_by_id == user.id)
-            .options(selectinload(InputPortModel.requests))
             .order_by(asc(InputPortRequestModel.requested_on))
         )
 
@@ -234,11 +231,9 @@ class InputPortService:
             thirty_days_ago = datetime.now(timezone.utc) - timedelta(days=30)
             query = query.where(
                 or_(
-                    InputPortModel.status == InputPortStatus.PENDING,
+                    InputPortRequestModel.decision == DecisionStatus.PENDING,
                     InputPortRequestModel.requested_on >= thirty_days_ago,
                 )
             )
 
-        requested_associations = self.db.scalars(query).unique().all()
-
-        return requested_associations
+        return self.db.scalars(query).unique().all()

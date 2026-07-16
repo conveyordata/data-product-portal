@@ -8,6 +8,10 @@ from .access_duration_type import AccessDurationType
 from .access_duration_update import AccessDurationUpdate
 from .access_granularity import AccessGranularity
 from .access_response import AccessResponse
+from .app_abstract_data_product_schema_response_input_port import (
+    AppAbstractDataProductSchemaResponseInputPort,
+)
+from .app_users_schema_response_input_port import AppUsersSchemaResponseInputPort
 from .approve_link_between_technical_asset_and_output_port_request import (
     ApproveLinkBetweenTechnicalAssetAndOutputPortRequest,
 )
@@ -176,9 +180,9 @@ from .global_role_assignment_response import GlobalRoleAssignmentResponse
 from .glue_technical_asset_configuration import GlueTechnicalAssetConfiguration
 from .graph import Graph
 from .http_validation_error import HTTPValidationError
-from .input_port import InputPort
 from .input_port_event import InputPortEvent
 from .input_port_request import InputPortRequest
+from .input_port_request_base import InputPortRequestBase
 from .is_admin_response import IsAdminResponse
 from .link_input_ports_to_data_product import LinkInputPortsToDataProduct
 from .link_input_ports_to_data_product_post import LinkInputPortsToDataProductPost
@@ -259,6 +263,7 @@ from .render_technical_asset_access_path_request import (
 from .render_technical_asset_access_path_response import (
     RenderTechnicalAssetAccessPathResponse,
 )
+from .renewal_status import RenewalStatus
 from .request_data_product_role_assignment import RequestDataProductRoleAssignment
 from .request_input_ports_for_data_product_request import (
     RequestInputPortsForDataProductRequest,
@@ -343,8 +348,10 @@ __all__ = (
     "AccessDurationUpdate",
     "AccessGranularity",
     "AccessResponse",
+    "AppAbstractDataProductSchemaResponseInputPort",
     "ApproveLinkBetweenTechnicalAssetAndOutputPortRequest",
     "ApproveOutputPortAsInputPortRequest",
+    "AppUsersSchemaResponseInputPort",
     "AuthorizationAction",
     "AWSCredentials",
     "AWSEnvironmentPlatformConfiguration",
@@ -479,9 +486,9 @@ __all__ = (
     "GlueTechnicalAssetConfiguration",
     "Graph",
     "HTTPValidationError",
-    "InputPort",
     "InputPortEvent",
     "InputPortRequest",
+    "InputPortRequestBase",
     "IsAdminResponse",
     "LinkInputPortsToDataProduct",
     "LinkInputPortsToDataProductPost",
@@ -540,6 +547,7 @@ __all__ = (
     "RemoveOutputPortAsInputPortRequest",
     "RenderTechnicalAssetAccessPathRequest",
     "RenderTechnicalAssetAccessPathResponse",
+    "RenewalStatus",
     "RequestDataProductRoleAssignment",
     "RequestInputPortsForDataProductRequest",
     "RequestInputPortsForDataProductResponse",

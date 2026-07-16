@@ -91,7 +91,7 @@ def approve_output_port_as_input_port(
     NotificationService(db).create_dataset_notifications(
         dataset_id=input_port.dataset_id,
         event_id=event_id,
-        extra_receiver_ids=[input_port.requested_by.id],
+        extra_receiver_ids=[input_port.current_request.requested_by_id],
     )
     RefreshInfrastructureLambda().trigger()
 
@@ -115,7 +115,7 @@ def deny_output_port_as_input_port(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    data_product_link = InputPortService(db).deny_output_port_as_input_port(
+    input_port = InputPortService(db).deny_output_port_as_input_port(
         data_product_id=data_product_id,
         output_port_id=output_port_id,
         consuming_data_product_id=body.consuming_data_product_id,
@@ -126,17 +126,17 @@ def deny_output_port_as_input_port(
     event_id = EventService(db).create_event(
         CreateEvent(
             name=EventType.DATA_PRODUCT_DATASET_LINK_DENIED,
-            subject_id=data_product_link.dataset_id,
+            subject_id=input_port.dataset_id,
             subject_type=EventReferenceEntity.DATASET,
-            target_id=data_product_link.consuming_abstract_data_product_id,
+            target_id=input_port.consuming_abstract_data_product_id,
             target_type=EventReferenceEntity.DATA_PRODUCT,
             actor_id=authenticated_user.id,
         ),
     )
     NotificationService(db).create_dataset_notifications(
-        dataset_id=data_product_link.dataset_id,
+        dataset_id=input_port.dataset_id,
         event_id=event_id,
-        extra_receiver_ids=[data_product_link.requested_by.id],
+        extra_receiver_ids=[input_port.latest_request.requested_by_id],
     )
 
 
@@ -159,7 +159,7 @@ def remove_output_port_as_input_port(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    data_product_link = InputPortService(db).remove_output_port_as_input_port(
+    input_port = InputPortService(db).remove_output_port_as_input_port(
         data_product_id=data_product_id,
         output_port_id=output_port_id,
         consuming_data_product_id=request.consuming_data_product_id,
@@ -167,17 +167,17 @@ def remove_output_port_as_input_port(
     event_id = EventService(db).create_event(
         CreateEvent(
             name=EventType.DATA_PRODUCT_DATASET_LINK_REMOVED,
-            subject_id=data_product_link.dataset_id,
+            subject_id=input_port.dataset_id,
             subject_type=EventReferenceEntity.DATASET,
-            target_id=data_product_link.consuming_abstract_data_product_id,
+            target_id=input_port.consuming_abstract_data_product_id,
             target_type=EventReferenceEntity.DATA_PRODUCT,
             actor_id=authenticated_user.id,
         ),
     )
-    if data_product_link.status == DecisionStatus.APPROVED:
+    if input_port.status == DecisionStatus.APPROVED:
         NotificationService(db).create_dataset_notifications(
-            dataset_id=data_product_link.dataset_id,
+            dataset_id=input_port.dataset_id,
             event_id=event_id,
-            extra_receiver_ids=[data_product_link.requested_by.id],
+            extra_receiver_ids=[input_port.latest_request.requested_by_id],
         )
     RefreshInfrastructureLambda().trigger()

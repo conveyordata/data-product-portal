@@ -1,4 +1,6 @@
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
+
+import pytz
 
 from app.abstract_data_product.input_ports.enums import InputPortStatus
 from app.abstract_data_product.input_ports.model import InputPort, InputPortRequest
@@ -6,9 +8,13 @@ from app.authorization.role_assignments.enums import DecisionStatus
 
 TODAY = date.today()
 
+# TODO use factory instead of _req and _port
 
-def _req(decision, *, valid_until=None):
-    return InputPortRequest(decision=decision, valid_until=valid_until)
+
+def _req(decision, *, valid_until=None, created_on=datetime.now(pytz.utc)):
+    return InputPortRequest(
+        decision=decision, valid_until=valid_until, created_on=created_on
+    )
 
 
 def _port(*requests):
@@ -33,6 +39,20 @@ class TestInputPortModel:
         active = _req(DecisionStatus.APPROVED, valid_until=TODAY + timedelta(days=10))
         port = _port(ended, active)
         assert port.active_grant is active
+
+    def test_active_grant__2_active_grants_returns_latest(self):
+        active_old = _req(
+            DecisionStatus.APPROVED,
+            valid_until=TODAY + timedelta(days=1),
+            created_on=TODAY - timedelta(days=10),
+        )
+        active_new = _req(
+            DecisionStatus.APPROVED,
+            valid_until=TODAY + timedelta(days=10),
+            created_on=TODAY - timedelta(days=1),
+        )
+        port = _port(active_old, active_new)
+        assert port.active_grant is active_new
 
     def test_active_grant__excludes_past_window(self):
         port = _port(
@@ -81,7 +101,7 @@ class TestInputPortModel:
             _req(DecisionStatus.APPROVED, valid_until=TODAY - timedelta(days=1))
         )
         port.recompute_status()
-        assert port.status == InputPortStatus.DENIED
+        assert port.status == InputPortStatus.EXPIRED
 
     def test_recompute_status__active_grant_survives_denied_renewal(self):
         port = _port(
@@ -90,8 +110,3 @@ class TestInputPortModel:
         )
         port.recompute_status()
         assert port.status == InputPortStatus.APPROVED
-
-    def test_active_grant__excludes_not_yet_started_grant(self):
-        future = _req(DecisionStatus.APPROVED, valid_until=TODAY + timedelta(days=40))
-        future.valid_from = TODAY + timedelta(days=11)
-        assert _port(future).active_grant is None

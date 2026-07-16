@@ -7,7 +7,9 @@ from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 if TYPE_CHECKING:
-    from ..models.input_port import InputPort
+    from ..models.app_abstract_data_product_schema_response_input_port import (
+        AppAbstractDataProductSchemaResponseInputPort,
+    )
 
 
 T = TypeVar("T", bound="GetDataProductInputPortsResponse")
@@ -17,10 +19,10 @@ T = TypeVar("T", bound="GetDataProductInputPortsResponse")
 class GetDataProductInputPortsResponse:
     """
     Attributes:
-        input_ports (list[InputPort]):
+        input_ports (list[AppAbstractDataProductSchemaResponseInputPort]):
     """
 
-    input_ports: list[InputPort]
+    input_ports: list[AppAbstractDataProductSchemaResponseInputPort]
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -41,13 +43,17 @@ class GetDataProductInputPortsResponse:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.input_port import InputPort
+        from ..models.app_abstract_data_product_schema_response_input_port import (
+            AppAbstractDataProductSchemaResponseInputPort,
+        )
 
         d = dict(src_dict)
         input_ports = []
         _input_ports = d.pop("input_ports")
         for input_ports_item_data in _input_ports:
-            input_ports_item = InputPort.from_dict(input_ports_item_data)
+            input_ports_item = AppAbstractDataProductSchemaResponseInputPort.from_dict(
+                input_ports_item_data
+            )
 
             input_ports.append(input_ports_item)
 

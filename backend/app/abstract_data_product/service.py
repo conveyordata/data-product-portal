@@ -156,7 +156,7 @@ class AbstractDataProductService:
             if existing is not None
             else InputPortModel(
                 dataset_id=output_port_id,
-                consuming_abstract_data_product_id=adp.id,
+                consuming_abstract_data_product=adp,
             )
         )
         request = InputPortRequestModel(
@@ -166,8 +166,10 @@ class AbstractDataProductService:
             access_duration_type=access_duration_type,
             requested_duration_days=requested_duration_days,
             input_port=input_port,
+            # created_on=datetime.now(tz=pytz.utc),
         )
         self.db.add(request)
+        self.db.flush()
         if output_port.access_type == OutputPortAccessType.UNRESTRICTED:
             InputPortService(self.db).approve_request(
                 request,
