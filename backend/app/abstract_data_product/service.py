@@ -3,10 +3,9 @@ from datetime import datetime
 from typing import Sequence
 
 import pytz
-from fastapi import BackgroundTasks, HTTPException
+from fastapi import BackgroundTasks, HTTPException, status
 from sqlalchemy import UUID, select
 from sqlalchemy.orm import Session, selectinload
-from starlette import status
 
 from app.abstract_data_product.input_ports.model import (
     InputPort as InputPortModel,

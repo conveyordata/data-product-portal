@@ -1,4 +1,5 @@
-from .. import test_session
+from tests import test_session
+
 from .access_duration import AccessDurationFactory
 from .data_product import DataProductFactory
 from .data_product import fake as data_product_fake
