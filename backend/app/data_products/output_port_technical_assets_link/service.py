@@ -15,8 +15,8 @@ from app.core.authz import Action, Authorization
 from app.data_products.output_port_technical_assets_link.model import (
     DataOutputDatasetAssociation as DataOutputDatasetAssociationModel,
 )
-from app.data_products.output_ports.model import Dataset
-from app.data_products.output_ports.model import Dataset as DatasetModel
+from app.data_products.output_ports.model import OutputPort
+from app.data_products.output_ports.model import OutputPort as OutputPortModel
 from app.users.schema import User
 from app.users.schema_response import (
     TechnicalAssetOutputPortRequest,
@@ -46,11 +46,11 @@ class TechnicalAssetOutputPortService:
                 DataOutputDatasetAssociationModel.dataset_id == output_port_id,
             )
             .join(
-                Dataset,
-                Dataset.id == DataOutputDatasetAssociationModel.dataset_id,
+                OutputPort,
+                OutputPort.id == DataOutputDatasetAssociationModel.dataset_id,
             )
             .where(
-                Dataset.data_product_id == data_product_id,
+                OutputPort.data_product_id == data_product_id,
             )
         )
         if not current_link:
@@ -157,7 +157,7 @@ class TechnicalAssetOutputPortService:
                 )
                 .where(
                     DataOutputDatasetAssociationModel.dataset.has(
-                        DatasetModel.assignments.any(
+                        OutputPortModel.assignments.any(
                             DatasetRoleAssignmentModel.user_id == user.id
                         )
                     )

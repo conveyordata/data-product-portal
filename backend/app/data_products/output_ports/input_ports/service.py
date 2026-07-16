@@ -21,8 +21,8 @@ from app.authorization.role_assignments.output_port.model import (
 )
 from app.core.authz import Action, Authorization
 from app.core.logging.posthog_analytics import get_posthog_client
-from app.data_products.output_ports.model import Dataset
-from app.data_products.output_ports.model import Dataset as DatasetModel
+from app.data_products.output_ports.model import OutputPort
+from app.data_products.output_ports.model import OutputPort as OutputPortModel
 from app.users.model import User as UserModel
 from app.users.schema import User
 from app.users.schema_response import (
@@ -58,11 +58,11 @@ class InputPortService:
                 InputPortModel.dataset_id == output_port_id,
             )
             .join(
-                Dataset,
-                Dataset.id == InputPortModel.dataset_id,
+                OutputPort,
+                OutputPort.id == InputPortModel.dataset_id,
             )
             .where(
-                Dataset.data_product_id == data_product_id,
+                OutputPort.data_product_id == data_product_id,
             )
             .options(selectinload(InputPortModel.requests)),
         )
@@ -215,7 +215,7 @@ class InputPortService:
                 .where(InputPortRequestModel.decision == DecisionStatus.PENDING)
                 .where(
                     InputPortModel.dataset.has(
-                        DatasetModel.assignments.any(
+                        OutputPortModel.assignments.any(
                             DatasetRoleAssignmentModel.user_id == user.id
                         )
                     )

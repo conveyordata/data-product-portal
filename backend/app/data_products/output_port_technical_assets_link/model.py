@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING, Sequence
 
 from sqlalchemy import UUID, Column, DateTime, Enum, ForeignKey, UniqueConstraint
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship, synonym
 
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.core.webhooks.events import OutputPortTechnicalAssetLinkEvent, V2Event
@@ -10,7 +10,7 @@ from app.database.event_mixin import EventTrackedMixin
 from app.settings import settings
 
 if TYPE_CHECKING:
-    from app.data_products.output_ports.model import Dataset
+    from app.data_products.output_ports.model import OutputPort
     from app.data_products.technical_assets.model import TechnicalAsset
     from app.users.model import User
 
@@ -44,11 +44,12 @@ class DataOutputDatasetAssociation(Base, BaseORM, EventTrackedMixin):
         order_by="TechnicalAsset.name",
         lazy="joined",
     )
-    dataset: Mapped["Dataset"] = relationship(
+    outputPort: Mapped["OutputPort"] = relationship(
         back_populates="data_output_links",
-        order_by="Dataset.name",
+        order_by="OutputPort.name",
         lazy="joined",
     )
+    dataset = synonym("outputPort")
     requested_by: Mapped["User"] = relationship(
         foreign_keys=[requested_by_id],
         back_populates="requested_dataoutputs",
@@ -89,7 +90,7 @@ class DataOutputDatasetAssociation(Base, BaseORM, EventTrackedMixin):
     def to_event(self) -> OutputPortTechnicalAssetLinkEvent:
         return OutputPortTechnicalAssetLinkEvent(
             id=self.id,
-            data_product_id=self.dataset.data_product_id
+            data_product_id=self.outputPort.data_product_id
             if self.data_output is None
             else self.data_output.owner_id,
             output_port_id=self.dataset_id,

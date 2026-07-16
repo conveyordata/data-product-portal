@@ -2,7 +2,7 @@ from typing import TYPE_CHECKING
 from uuid import uuid4
 
 from sqlalchemy import UUID, Column, DateTime, Enum, ForeignKey, UniqueConstraint
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship, synonym
 
 from app.core.webhooks.events import OutputPortRoleAssignmentEvent
 from app.database.database import Base
@@ -13,7 +13,7 @@ from ..enums import DecisionStatus
 
 if TYPE_CHECKING:
     from app.authorization.roles.model import Role
-    from app.data_products.output_ports.model import Dataset
+    from app.data_products.output_ports.model import OutputPort
     from app.users.model import User
 
 
@@ -25,7 +25,10 @@ class DatasetRoleAssignment(Base, BaseORM, EventTrackedMixin):
 
     id = Column(UUID, primary_key=True, default=uuid4)
     dataset_id: Mapped[UUID] = mapped_column("dataset_id", ForeignKey("datasets.id"))
-    dataset: Mapped["Dataset"] = relationship("Dataset", foreign_keys=[dataset_id])
+    outputPort: Mapped["OutputPort"] = relationship(
+        "OutputPort", foreign_keys=[dataset_id]
+    )
+    dataset = synonym("outputPort")
     data_product_id: Mapped[UUID] = mapped_column(ForeignKey("data_products.id"))
     user_id: Mapped[UUID] = mapped_column("user_id", ForeignKey("users.id"))
     user: Mapped["User"] = relationship("User", foreign_keys=[user_id])

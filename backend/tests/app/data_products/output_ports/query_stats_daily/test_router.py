@@ -9,8 +9,8 @@ from app.settings import settings
 from tests.factories import (
     DataProductFactory,
     DataProductRoleAssignmentFactory,
-    DatasetFactory,
     DatasetQueryStatsFactory,
+    OutputPortFactory,
     RoleFactory,
     UserFactory,
 )
@@ -39,7 +39,7 @@ class TestDatasetQueryStatsDailyRouter:
 
     def test_update_query_stats_daily_batch(self, client, session):
         """Test batch updating query stats."""
-        dataset = DatasetFactory()
+        dataset = OutputPortFactory()
 
         response = client.patch(
             f"{DATA_PRODUCT_ENDPOINT}/{dataset.data_product.id}/output_ports/{dataset.id}/query_stats",
@@ -54,7 +54,7 @@ class TestDatasetQueryStatsDailyRouter:
 
     def test_get_query_stats(self, client, session):
         """Test getting query stats for a dataset."""
-        dataset = DatasetFactory()
+        dataset = OutputPortFactory()
         consumer1 = DataProductFactory()
         consumer2 = DataProductFactory()
         today = date.today()
@@ -97,7 +97,7 @@ class TestDatasetQueryStatsDailyRouter:
             assert stat["query_count"] in [150, 250]
 
     def test_delete_query_stat(self, client, session):
-        dataset = DatasetFactory()
+        dataset = OutputPortFactory()
         consumer = DataProductFactory()
         today = date.today()
 
@@ -123,7 +123,7 @@ class TestDatasetQueryStatsDailyRouter:
         assert stats == []
 
     def test_get_query_stats_with_query_params(self, client, session):
-        dataset = DatasetFactory()
+        dataset = OutputPortFactory()
         consumer = DataProductFactory()
         base_date = date.today() - timedelta(days=7)
         start_of_week = base_date - timedelta(days=base_date.weekday())
@@ -178,7 +178,7 @@ class TestDatasetQueryStatsDailyRouter:
         """Regression test: Verify that deleting a data product via API cascade deletes query stats."""
 
         data_product = DataProductFactory()
-        dataset = DatasetFactory(data_product=data_product, tags=[])
+        dataset = OutputPortFactory(data_product=data_product, tags=[])
         consumer = DataProductFactory()
 
         DatasetQueryStatsFactory(

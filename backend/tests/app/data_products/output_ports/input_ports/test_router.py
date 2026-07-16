@@ -15,10 +15,10 @@ from app.settings import settings
 from tests.factories import (
     DataProductFactory,
     DataProductRoleAssignmentFactory,
-    DatasetFactory,
     DatasetRoleAssignmentFactory,
     ExplorationFactory,
     InputPortFactory,
+    OutputPortFactory,
     RoleFactory,
     UserFactory,
 )
@@ -42,7 +42,7 @@ class TestInputPortsRouter:
             role_id=role.id,
             data_product_id=data_product.id,
         )
-        ds = DatasetFactory()
+        ds = OutputPortFactory()
 
         response = self.request_input_ports_for_data_product(
             client, data_product.id, [ds.id]
@@ -64,7 +64,7 @@ class TestInputPortsRouter:
             role_id=role.id,
             data_product_id=data_product.id,
         )
-        ds = DatasetFactory()
+        ds = OutputPortFactory()
 
         response = self.request_input_ports_for_data_product_deprecated(
             client, data_product.id, [ds.id]
@@ -86,8 +86,8 @@ class TestInputPortsRouter:
             role_id=role.id,
             data_product_id=data_product.id,
         )
-        ds1 = DatasetFactory()
-        ds2 = DatasetFactory()
+        ds1 = OutputPortFactory()
+        ds2 = OutputPortFactory()
 
         response = self.request_input_ports_for_data_product(
             client, data_product.id, [ds1.id, ds2.id]
@@ -108,7 +108,7 @@ class TestInputPortsRouter:
             role_id=role.id,
             data_product_id=data_product.id,
         )
-        ds = DatasetFactory()
+        ds = OutputPortFactory()
 
         response = self.request_input_ports_for_data_product(
             client, data_product.id, [ds.id]
@@ -123,7 +123,7 @@ class TestInputPortsRouter:
         self, client
     ):
         data_product = DataProductFactory()
-        ds = DatasetFactory(access_type=OutputPortAccessType.PRIVATE)
+        ds = OutputPortFactory(access_type=OutputPortAccessType.PRIVATE)
 
         response = self.request_input_ports_for_data_product(
             client, data_product.id, [ds.id]
@@ -142,7 +142,7 @@ class TestInputPortsRouter:
             role_id=role.id,
             data_product_id=data_product.id,
         )
-        ds = DatasetFactory(access_type=OutputPortAccessType.PRIVATE)
+        ds = OutputPortFactory(access_type=OutputPortAccessType.PRIVATE)
         role = RoleFactory(scope=Scope.DATASET)
         DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
 
@@ -198,7 +198,7 @@ class TestInputPortsRouter:
     @pytest.mark.usefixtures("admin")
     def test_request_data_product_link_by_admin(self, client):
         data_product = DataProductFactory()
-        ds = DatasetFactory()
+        ds = OutputPortFactory()
 
         link = self.request_input_ports_for_data_product(
             client, data_product.id, [ds.id]
@@ -228,7 +228,7 @@ class TestInputPortsRouter:
 
     @pytest.mark.usefixtures("admin")
     def test_approve_data_product_link_by_admin(self, client):
-        ds = DatasetFactory()
+        ds = OutputPortFactory()
         link = InputPortFactory(dataset=ds, status=DecisionStatus.PENDING)
 
         response = self.approve_output_port_as_input_port(
@@ -240,7 +240,7 @@ class TestInputPortsRouter:
         assert response.status_code == 200
 
     def test_approved_link_no_role(self, client):
-        ds = DatasetFactory()
+        ds = OutputPortFactory()
         link = InputPortFactory(dataset=ds, status=DecisionStatus.PENDING)
 
         response = self.approve_output_port_as_input_port(
@@ -258,7 +258,7 @@ class TestInputPortsRouter:
     @staticmethod
     def create_link_with_status(status: DecisionStatus = DecisionStatus.PENDING):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        ds = DatasetFactory()
+        ds = OutputPortFactory()
         role = RoleFactory(
             scope=Scope.DATASET,
             permissions=[
@@ -304,7 +304,7 @@ class TestInputPortsRouter:
 
     @pytest.mark.usefixtures("admin")
     def test_deny_data_product_link_by_admin(self, client):
-        ds = DatasetFactory()
+        ds = OutputPortFactory()
         link = InputPortFactory(dataset=ds, status=DecisionStatus.PENDING)
 
         response = self.deny_output_port_as_input_port(
@@ -316,7 +316,7 @@ class TestInputPortsRouter:
         assert response.status_code == 200
 
     def test_deny_link_no_role(self, client):
-        ds = DatasetFactory()
+        ds = OutputPortFactory()
         link = InputPortFactory(dataset=ds, status=DecisionStatus.PENDING)
 
         response = self.deny_output_port_as_input_port(
@@ -343,7 +343,7 @@ class TestInputPortsRouter:
 
     @pytest.mark.usefixtures("admin")
     def test_remove_data_product_link_by_admin(self, client):
-        ds = DatasetFactory()
+        ds = OutputPortFactory()
         link = InputPortFactory(dataset=ds)
 
         response = self.remove_output_port_as_input_port(
@@ -371,7 +371,7 @@ class TestInputPortsRouter:
 
     def test_delete_dataset_with_product_link(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        ds = DatasetFactory()
+        ds = OutputPortFactory()
         role = RoleFactory(
             scope=Scope.DATASET, permissions=[Action.OUTPUT_PORT__DELETE]
         )
@@ -395,7 +395,7 @@ class TestInputPortsRouter:
 
     def test_history_event_created_on_remove_link(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        ds = DatasetFactory()
+        ds = OutputPortFactory()
         role = RoleFactory(
             scope=Scope.DATASET,
             permissions=[Action.OUTPUT_PORT__REVOKE_DATAPRODUCT_ACCESS],
@@ -418,7 +418,7 @@ class TestInputPortsRouter:
 
     def test_history_event_created_on_approval(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        ds = DatasetFactory()
+        ds = OutputPortFactory()
         role = RoleFactory(
             scope=Scope.DATASET,
             permissions=[Action.OUTPUT_PORT__APPROVE_DATAPRODUCT_ACCESS_REQUEST],
@@ -441,7 +441,7 @@ class TestInputPortsRouter:
 
     def test_history_event_created_on_denial(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        ds = DatasetFactory()
+        ds = OutputPortFactory()
         role = RoleFactory(
             scope=Scope.DATASET,
             permissions=[Action.OUTPUT_PORT__APPROVE_DATAPRODUCT_ACCESS_REQUEST],
@@ -463,7 +463,7 @@ class TestInputPortsRouter:
 
     def test_approve_output_port_as_input_port_for_exploration(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        ds = DatasetFactory()
+        ds = OutputPortFactory()
         role = RoleFactory(
             scope=Scope.DATASET,
             permissions=[
@@ -487,7 +487,7 @@ class TestInputPortsRouter:
 
     def test_deny_output_port_as_input_port_for_exploration(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        ds = DatasetFactory()
+        ds = OutputPortFactory()
         role = RoleFactory(
             scope=Scope.DATASET,
             permissions=[
@@ -511,7 +511,7 @@ class TestInputPortsRouter:
 
     def test_get_input_ports_for_output_port(self, client):
         # Create a dataset (output port) with a data product
-        ds = DatasetFactory()
+        ds = OutputPortFactory()
 
         # Create multiple data products that consume this dataset
         consuming_dp1 = DataProductFactory()
@@ -561,7 +561,7 @@ class TestInputPortsRouter:
             role_id=role.id,
             data_product_id=data_product.id,
         )
-        ds = DatasetFactory()
+        ds = OutputPortFactory()
         response = self.request_input_ports_for_data_product(
             client, data_product.id, [ds.id]
         )
@@ -684,7 +684,7 @@ class TestInputPortConsumptionTracking:
             role_id=role.id,
             data_product_id=data_product.id,
         )
-        ds = DatasetFactory(access_type=OutputPortAccessType.UNRESTRICTED)
+        ds = OutputPortFactory(access_type=OutputPortAccessType.UNRESTRICTED)
 
         mock_posthog = MagicMock()
         with patch(
@@ -717,7 +717,7 @@ class TestInputPortConsumptionTracking:
             role_id=role.id,
             data_product_id=data_product.id,
         )
-        ds = DatasetFactory(access_type=OutputPortAccessType.RESTRICTED)
+        ds = OutputPortFactory(access_type=OutputPortAccessType.RESTRICTED)
 
         mock_posthog = MagicMock()
         with patch(
@@ -734,7 +734,7 @@ class TestInputPortConsumptionTracking:
     def test_posthog_capture_called_on_manual_approval(self, client):
         """Manual approval of a pending link must fire a posthog event."""
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        ds = DatasetFactory(access_type=OutputPortAccessType.RESTRICTED)
+        ds = OutputPortFactory(access_type=OutputPortAccessType.RESTRICTED)
         role = RoleFactory(
             scope=Scope.DATASET,
             permissions=[
@@ -778,7 +778,7 @@ class TestInputPortConsumptionTracking:
             role_id=role.id,
             data_product_id=data_product.id,
         )
-        ds = DatasetFactory(access_type=OutputPortAccessType.UNRESTRICTED)
+        ds = OutputPortFactory(access_type=OutputPortAccessType.UNRESTRICTED)
 
         with patch(
             "app.abstract_data_product.service.get_posthog_client",

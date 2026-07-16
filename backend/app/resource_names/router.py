@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.configuration.data_product_settings.enums import DataProductSettingScope
 from app.data_products.model import DataProduct
-from app.data_products.output_ports.model import Dataset
+from app.data_products.output_ports.model import OutputPort
 from app.database.database import get_db_session
 from app.explorations.model import Exploration
 from app.resource_names.enums import ResourceNameModel
@@ -45,7 +45,7 @@ def validate_resource_name(
                 resource_name, db, scope=data_product_id
             )
         case ResourceNameModel.OUTPUT_PORT:
-            return ResourceNameService(model=Dataset).validate_resource_name(
+            return ResourceNameService(model=OutputPort).validate_resource_name(
                 resource_name, db
             )
         case ResourceNameModel.DATA_PRODUCT_SETTING:

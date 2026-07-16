@@ -1,9 +1,9 @@
 from tests.factories import (
     DataProductFactory,
-    DatasetFactory,
     DomainFactory,
     ExplorationFactory,
     InputPortFactory,
+    OutputPortFactory,
     TechnicalAssetFactory,
 )
 
@@ -15,7 +15,7 @@ class TestGraphRouter:
         domain = DomainFactory()
         data_product = DataProductFactory(domain=domain)
         exp = ExplorationFactory(domain=domain)
-        dataset = DatasetFactory(data_product=data_product)
+        dataset = OutputPortFactory(data_product=data_product)
         InputPortFactory(dataset=dataset, consuming_abstract_data_product=exp)
         TechnicalAssetFactory(owner=data_product)
         response = client.get(ENDPOINT)
@@ -30,7 +30,7 @@ class TestGraphRouter:
         domain = DomainFactory()
         data_product = DataProductFactory(domain=domain)
         exp = ExplorationFactory(domain=domain)
-        dataset = DatasetFactory(data_product=data_product)
+        dataset = OutputPortFactory(data_product=data_product)
         InputPortFactory(dataset=dataset, consuming_abstract_data_product=exp)
         TechnicalAssetFactory(owner=data_product)
         response = client.get(ENDPOINT, params={"output_port_nodes_enabled": "true"})
@@ -45,7 +45,7 @@ class TestGraphRouter:
         domain = DomainFactory()
         data_product = DataProductFactory(domain=domain)
         exp = ExplorationFactory(domain=domain)
-        dataset = DatasetFactory(data_product=data_product)
+        dataset = OutputPortFactory(data_product=data_product)
         InputPortFactory(dataset=dataset, consuming_abstract_data_product=exp)
         response = client.get(ENDPOINT, params={"exploration_nodes_enabled": "true"})
         assert response.status_code == 200, response.text
@@ -55,7 +55,7 @@ class TestGraphRouter:
         domain = DomainFactory()
         data_product = DataProductFactory(domain=domain)
         exp = ExplorationFactory(domain=domain)
-        dataset = DatasetFactory(data_product=data_product)
+        dataset = OutputPortFactory(data_product=data_product)
         InputPortFactory(dataset=dataset, consuming_abstract_data_product=exp)
         response = client.get(
             ENDPOINT,
@@ -69,7 +69,7 @@ class TestGraphRouter:
 
     def test_get_graph_data_single_consumer_show_output_ports(self, client):
         data_product_1 = DataProductFactory()
-        dataset = DatasetFactory(data_product=data_product_1)
+        dataset = OutputPortFactory(data_product=data_product_1)
         data_product_2 = DataProductFactory()
         InputPortFactory(
             consuming_abstract_data_product=data_product_2, dataset=dataset
@@ -81,7 +81,7 @@ class TestGraphRouter:
 
     def test_get_graph_data_single_consumer(self, client):
         data_product_1 = DataProductFactory()
-        dataset = DatasetFactory(data_product=data_product_1)
+        dataset = OutputPortFactory(data_product=data_product_1)
         data_product_2 = DataProductFactory()
         InputPortFactory(
             consuming_abstract_data_product=data_product_2, dataset=dataset
@@ -94,7 +94,7 @@ class TestGraphRouter:
     def test_data_products_only_arrow_points_producer_to_consumer(self, client):
         """Arrow should point from producer to consumer in Data Products only view."""
         producer = DataProductFactory()
-        dataset = DatasetFactory(data_product=producer)
+        dataset = OutputPortFactory(data_product=producer)
         consumer = DataProductFactory()
         InputPortFactory(consuming_abstract_data_product=consumer, dataset=dataset)
         response = client.get(ENDPOINT, params={"output_port_nodes_enabled": "false"})

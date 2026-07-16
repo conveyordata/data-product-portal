@@ -6,10 +6,10 @@ from app.authorization.roles.schema import Scope
 from app.core.authz import Action
 from app.settings import settings
 from tests.factories import (
-    DatasetFactory,
     DomainFactory,
     GlobalRoleAssignmentFactory,
     InputPortFactory,
+    OutputPortFactory,
     RoleFactory,
     UserFactory,
 )
@@ -89,7 +89,7 @@ class TestExplorationRouter:
                 "domain_id": str(d.id),
                 "description": faker.Faker().text(),
                 "input_ports": {
-                    "output_ports": [str(DatasetFactory().id)],
+                    "output_ports": [str(OutputPortFactory().id)],
                     "justification": "I am your king!",
                 },
             },
@@ -139,7 +139,7 @@ class TestExplorationRouter:
         response = client.post(
             f"{ROUTE}/{exploration.id}/input_ports",
             json={
-                "output_ports": [str(DatasetFactory().id)],
+                "output_ports": [str(OutputPortFactory().id)],
                 "justification": "I am your king!",
             },
         )
@@ -152,7 +152,7 @@ class TestExplorationRouter:
         response = client.post(
             f"{ROUTE}/{exploration.id}/input_ports",
             json={
-                "output_ports": [str(DatasetFactory().id)],
+                "output_ports": [str(OutputPortFactory().id)],
                 "justification": "I am your king!",
             },
         )
@@ -164,7 +164,7 @@ class TestExplorationRouter:
         response = client.post(
             f"{ROUTE}/{uuid.uuid4()}/input_ports",
             json={
-                "output_ports": [str(DatasetFactory().id)],
+                "output_ports": [str(OutputPortFactory().id)],
                 "justification": "I am your king!",
             },
         )
@@ -175,7 +175,7 @@ class TestExplorationRouter:
         response = client.post(
             f"{ROUTE}/{exploration.id}/input_ports",
             json={
-                "output_ports": [str(DatasetFactory().id)],
+                "output_ports": [str(OutputPortFactory().id)],
                 "justification": "I am your king!",
             },
         )

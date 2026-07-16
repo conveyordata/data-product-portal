@@ -7,7 +7,7 @@ from sqlalchemy import event as sql_event
 from sqlalchemy.orm import Session
 
 from app.data_products.model import DataProduct
-from app.data_products.output_ports.model import Dataset
+from app.data_products.output_ports.model import OutputPort
 from app.data_products.technical_assets.model import TechnicalAsset
 from app.events.enums import EventReferenceEntity
 from app.events.model import Event as EventModel
@@ -40,7 +40,7 @@ def _backup_user_name_on_delete(mapper, connection, target):
     )
 
 
-@sql_event.listens_for(Dataset, "before_delete")
+@sql_event.listens_for(OutputPort, "before_delete")
 def _backup_dataset_name_on_delete(mapper, connection, target):
     connection.execute(
         update(EventModel.__table__)

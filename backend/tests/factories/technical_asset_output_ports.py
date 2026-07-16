@@ -6,7 +6,7 @@ from app.data_products.output_port_technical_assets_link.model import (
 )
 from tests.factories.technical_asset import TechnicalAssetFactory
 
-from .dataset import DatasetFactory
+from .dataset import OutputPortFactory
 from .user import UserFactory
 
 
@@ -19,5 +19,5 @@ class TechnicalAssetOutputPortAssociationFactory(
     id = factory.Faker("uuid4")
     status = DecisionStatus.APPROVED
     data_output = factory.SubFactory(TechnicalAssetFactory)
-    dataset = factory.SubFactory(DatasetFactory)
+    dataset = factory.SubFactory(OutputPortFactory)
     requested_by = factory.SubFactory(UserFactory)

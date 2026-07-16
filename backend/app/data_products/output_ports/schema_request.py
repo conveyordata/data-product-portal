@@ -25,13 +25,13 @@ class CreateOutputPortRequest(DatasetUpdate):
     owners: Annotated[list[UUID], MinLen(1)]
 
 
-class DatasetAboutUpdate(ORMModel):
+class OutputPortAboutUpdate(ORMModel):
     about: str
 
 
-class DatasetStatusUpdate(ORMModel):
+class OutputPortStatusUpdate(ORMModel):
     status: OutputPortStatus
 
 
-class DatasetUsageUpdate(ORMModel):
+class OutputPortUsageUpdate(ORMModel):
     usage: str

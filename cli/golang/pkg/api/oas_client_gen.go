@@ -841,7 +841,7 @@ type Invoker interface {
 	// Update Output Port About.
 	//
 	// PUT /api/v2/data_products/{data_product_id}/output_ports/{id}/about
-	UpdateOutputPortAbout(ctx context.Context, request *DatasetAboutUpdate, params UpdateOutputPortAboutParams) (UpdateOutputPortAboutRes, error)
+	UpdateOutputPortAbout(ctx context.Context, request *OutputPortAboutUpdate, params UpdateOutputPortAboutParams) (UpdateOutputPortAboutRes, error)
 	// UpdateOutputPortQueryStats invokes update_output_port_query_stats operation.
 	//
 	// Update Output Port Query Stats.
@@ -853,7 +853,7 @@ type Invoker interface {
 	// Update Output Port Status.
 	//
 	// PUT /api/v2/data_products/{data_product_id}/output_ports/{id}/status
-	UpdateOutputPortStatus(ctx context.Context, request *DatasetStatusUpdate, params UpdateOutputPortStatusParams) (UpdateOutputPortStatusRes, error)
+	UpdateOutputPortStatus(ctx context.Context, request *OutputPortStatusUpdate, params UpdateOutputPortStatusParams) (UpdateOutputPortStatusRes, error)
 	// UpdateRole invokes update_role operation.
 	//
 	// Update Role.
@@ -9803,12 +9803,12 @@ func (c *Client) sendUpdateOutputPort(ctx context.Context, request *DatasetUpdat
 // Update Output Port About.
 //
 // PUT /api/v2/data_products/{data_product_id}/output_ports/{id}/about
-func (c *Client) UpdateOutputPortAbout(ctx context.Context, request *DatasetAboutUpdate, params UpdateOutputPortAboutParams) (UpdateOutputPortAboutRes, error) {
+func (c *Client) UpdateOutputPortAbout(ctx context.Context, request *OutputPortAboutUpdate, params UpdateOutputPortAboutParams) (UpdateOutputPortAboutRes, error) {
 	res, err := c.sendUpdateOutputPortAbout(ctx, request, params)
 	return res, err
 }
 
-func (c *Client) sendUpdateOutputPortAbout(ctx context.Context, request *DatasetAboutUpdate, params UpdateOutputPortAboutParams) (res UpdateOutputPortAboutRes, err error) {
+func (c *Client) sendUpdateOutputPortAbout(ctx context.Context, request *OutputPortAboutUpdate, params UpdateOutputPortAboutParams) (res UpdateOutputPortAboutRes, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [5]string
@@ -9971,12 +9971,12 @@ func (c *Client) sendUpdateOutputPortQueryStats(ctx context.Context, request *Up
 // Update Output Port Status.
 //
 // PUT /api/v2/data_products/{data_product_id}/output_ports/{id}/status
-func (c *Client) UpdateOutputPortStatus(ctx context.Context, request *DatasetStatusUpdate, params UpdateOutputPortStatusParams) (UpdateOutputPortStatusRes, error) {
+func (c *Client) UpdateOutputPortStatus(ctx context.Context, request *OutputPortStatusUpdate, params UpdateOutputPortStatusParams) (UpdateOutputPortStatusRes, error) {
 	res, err := c.sendUpdateOutputPortStatus(ctx, request, params)
 	return res, err
 }
 
-func (c *Client) sendUpdateOutputPortStatus(ctx context.Context, request *DatasetStatusUpdate, params UpdateOutputPortStatusParams) (res UpdateOutputPortStatusRes, err error) {
+func (c *Client) sendUpdateOutputPortStatus(ctx context.Context, request *OutputPortStatusUpdate, params UpdateOutputPortStatusParams) (res UpdateOutputPortStatusRes, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [5]string

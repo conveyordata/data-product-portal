@@ -6,7 +6,7 @@ from .data_product import fake as data_product_fake
 from .data_product_setting import DataProductSettingFactory
 from .data_product_setting_value import DataProductSettingValueFactory
 from .data_product_type import DataProductTypeFactory
-from .dataset import DatasetFactory
+from .dataset import OutputPortFactory
 from .dataset import fake as dataset_fake
 from .dataset_query_stats_daily import DatasetQueryStatsFactory
 from .domain import DomainFactory
@@ -57,7 +57,7 @@ factories = [
     InputPortFactory,
     InputPortRequestFactory,
     DataProductRoleAssignmentFactory,
-    DatasetFactory,
+    OutputPortFactory,
     DatasetQueryStatsFactory,
     DatasetRoleAssignmentFactory,
     DomainFactory,

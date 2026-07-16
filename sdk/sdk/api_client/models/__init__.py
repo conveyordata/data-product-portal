@@ -106,8 +106,6 @@ from .databricks_environment_platform_configuration_workspace_urls import (
 from .databricks_technical_asset_configuration import (
     DatabricksTechnicalAssetConfiguration,
 )
-from .dataset_about_update import DatasetAboutUpdate
-from .dataset_status_update import DatasetStatusUpdate
 from .dataset_update import DatasetUpdate
 from .decide_data_product_role_assignment import DecideDataProductRoleAssignment
 from .decide_global_role_assignment import DecideGlobalRoleAssignment
@@ -207,6 +205,7 @@ from .osi_semantic_model_technical_asset_configuration import (
     OSISemanticModelTechnicalAssetConfiguration,
 )
 from .output_port import OutputPort
+from .output_port_about_update import OutputPortAboutUpdate
 from .output_port_access_duration import OutputPortAccessDuration
 from .output_port_access_type import OutputPortAccessType
 from .output_port_curated_queries import OutputPortCuratedQueries
@@ -235,6 +234,7 @@ from .output_port_role_assignment_response import OutputPortRoleAssignmentRespon
 from .output_port_schema_response import OutputPortSchemaResponse
 from .output_port_setting_value import OutputPortSettingValue
 from .output_port_status import OutputPortStatus
+from .output_port_status_update import OutputPortStatusUpdate
 from .output_port_technical_asset_link_event import OutputPortTechnicalAssetLinkEvent
 from .owned_technical_asset import OwnedTechnicalAsset
 from .pending_action_response import PendingActionResponse
@@ -419,8 +419,6 @@ __all__ = (
     "DataProductUsageUpdate",
     "DataQualityStatus",
     "DataQualityTechnicalAsset",
-    "DatasetAboutUpdate",
-    "DatasetStatusUpdate",
     "DatasetUpdate",
     "DecideDataProductRoleAssignment",
     "DecideGlobalRoleAssignment",
@@ -500,6 +498,7 @@ __all__ = (
     "OIDCTokenResponse",
     "OSISemanticModelTechnicalAssetConfiguration",
     "OutputPort",
+    "OutputPortAboutUpdate",
     "OutputPortAccessDuration",
     "OutputPortAccessType",
     "OutputPortCuratedQueries",
@@ -522,6 +521,7 @@ __all__ = (
     "OutputPortSchemaResponse",
     "OutputPortSettingValue",
     "OutputPortStatus",
+    "OutputPortStatusUpdate",
     "OutputPortTechnicalAssetLinkEvent",
     "OwnedTechnicalAsset",
     "PendingActionResponse",

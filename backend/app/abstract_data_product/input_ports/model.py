@@ -12,7 +12,7 @@ from sqlalchemy import (
     Integer,
     Text,
 )
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship, synonym
 
 from app.abstract_data_product.input_ports.enums import InputPortStatus
 from app.access_durations.enums import AccessDurationType
@@ -24,7 +24,7 @@ from app.shared.model import BaseORM, utcnow
 
 if TYPE_CHECKING:
     from app.abstract_data_product.model import AbstractDataProduct
-    from app.data_products.output_ports.model import Dataset
+    from app.data_products.output_ports.model import OutputPort
     from app.users.model import User
 
 
@@ -46,12 +46,14 @@ class InputPort(
     )
     dataset_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("datasets.id"))
 
-    dataset: Mapped["Dataset"] = relationship(
-        "Dataset",
+    # Relationships
+    outputPort: Mapped["OutputPort"] = relationship(
+        "OutputPort",
         back_populates="data_product_links",
-        order_by="Dataset.name",
+        order_by="OutputPort.name",
         lazy="joined",
     )
+    dataset = synonym("outputPort")
     consuming_abstract_data_product: Mapped["AbstractDataProduct"] = relationship(
         "AbstractDataProduct",
         back_populates="input_ports",

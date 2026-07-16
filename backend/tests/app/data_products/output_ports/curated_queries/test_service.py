@@ -4,12 +4,12 @@ from app.data_products.output_ports.curated_queries.schema_request import (
 from app.data_products.output_ports.curated_queries.service import (
     DatasetCuratedQueryService,
 )
-from tests.factories import DatasetFactory
+from tests.factories import OutputPortFactory
 
 
 class TestCuratedQueriesService:
     def test_replace_curated_queries_orders_results(self, session):
-        dataset = DatasetFactory()
+        dataset = OutputPortFactory()
         service = DatasetCuratedQueryService(session)
 
         curated_queries = [
@@ -38,7 +38,7 @@ class TestCuratedQueriesService:
         ]
 
     def test_replace_curated_queries_clears_existing(self, session):
-        dataset = DatasetFactory()
+        dataset = OutputPortFactory()
         service = DatasetCuratedQueryService(session)
 
         service.replace_curated_queries(

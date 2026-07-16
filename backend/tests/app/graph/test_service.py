@@ -11,8 +11,8 @@ from app.graph.service import GraphService
 from tests import test_session
 from tests.factories import (
     DataProductFactory,
-    DatasetFactory,
     InputPortFactory,
+    OutputPortFactory,
 )
 
 
@@ -26,7 +26,7 @@ class TestGraphServiceEnumMatching:
         """
         # Create data products with different statuses
         producer = DataProductFactory()
-        dataset = DatasetFactory(data_product=producer)
+        dataset = OutputPortFactory(data_product=producer)
         consumer_approved = DataProductFactory()
 
         # Create links with different statuses
@@ -54,7 +54,7 @@ class TestGraphServiceEnumMatching:
         """
         # Create data products with different statuses
         producer = DataProductFactory()
-        dataset = DatasetFactory(data_product=producer)
+        dataset = OutputPortFactory(data_product=producer)
         consumer_pending = DataProductFactory()
 
         # Create links with different statuses
@@ -82,7 +82,7 @@ class TestGraphServiceEnumMatching:
         """
         # Create data products with different statuses
         producer = DataProductFactory()
-        dataset = DatasetFactory(data_product=producer)
+        dataset = OutputPortFactory(data_product=producer)
         consumer_denied = DataProductFactory()
 
         # Create links with different statuses

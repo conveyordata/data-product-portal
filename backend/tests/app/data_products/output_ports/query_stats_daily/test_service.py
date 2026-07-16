@@ -22,15 +22,15 @@ from app.data_products.output_ports.query_stats.service import (
 )
 from tests.factories import (
     DataProductFactory,
-    DatasetFactory,
     DatasetQueryStatsFactory,
+    OutputPortFactory,
 )
 
 
 @pytest.fixture
 def dataset_with_two_stats(session: Session):
     """Return dataset + consumers with two stats already persisted."""
-    dataset = DatasetFactory()
+    dataset = OutputPortFactory()
     consumer1 = DataProductFactory()
     consumer2 = DataProductFactory()
     today = date.today()
@@ -59,7 +59,7 @@ def dataset_with_two_stats(session: Session):
 @pytest.fixture
 def dataset_with_daily_history(session: Session):
     """Return dataset data for get_query_stats_daily tests."""
-    dataset = DatasetFactory()
+    dataset = OutputPortFactory()
     consumer1 = DataProductFactory()
     consumer2 = DataProductFactory()
     today = date.today()
@@ -82,7 +82,7 @@ def dataset_with_daily_history(session: Session):
         ]
     )
 
-    other_dataset = DatasetFactory()
+    other_dataset = OutputPortFactory()
     session.add(
         DatasetQueryStatsFactory(
             date=today,
@@ -109,7 +109,7 @@ class TestDatasetQueryStatsDailyService:
 
     def test_update_query_stats_daily_single_record(self, session: Session):
         """Test updating query stats with a single record."""
-        dataset = DatasetFactory()
+        dataset = OutputPortFactory()
         consumer = DataProductFactory()
         today = date.today()
 
@@ -206,7 +206,7 @@ class TestDatasetQueryStatsDailyService:
         assert stats_by_consumer[consumer2.id].date == yesterday
 
     def test_get_query_stats_daily_week_granularity(self, session: Session):
-        dataset = DatasetFactory()
+        dataset = OutputPortFactory()
         consumer = DataProductFactory()
 
         base_date = date.today() - timedelta(days=7)
@@ -262,7 +262,7 @@ class TestDatasetQueryStatsDailyService:
         assert actual_stats[0].consumer_data_product_id == consumer.id
 
     def test_get_query_stats_daily_day_range_filter(self, session: Session):
-        dataset = DatasetFactory()
+        dataset = OutputPortFactory()
         consumer = DataProductFactory()
 
         recent_date = date.today() - timedelta(days=10)
