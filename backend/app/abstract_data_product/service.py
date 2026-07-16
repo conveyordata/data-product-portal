@@ -7,8 +7,12 @@ from fastapi import BackgroundTasks, HTTPException, status
 from sqlalchemy import UUID, select
 from sqlalchemy.orm import Session, selectinload
 
+from app.abstract_data_product.input_ports.enums import InputPortStatus
 from app.abstract_data_product.input_ports.model import (
     InputPort as InputPortModel,
+)
+from app.abstract_data_product.input_ports.model import (
+    InputPortRequest as InputPortRequestModel,
 )
 from app.abstract_data_product.model import (
     AbstractDataProduct,
@@ -22,6 +26,7 @@ from app.core.authz import Action
 from app.core.logging.posthog_analytics import get_posthog_client
 from app.data_products import email
 from app.data_products.output_ports.enums import OutputPortAccessType
+from app.data_products.output_ports.input_ports.service import InputPortService
 from app.data_products.output_ports.model import Dataset as OutputPortModel
 from app.data_products.output_ports.model import ensure_output_port_exists
 from app.data_products.output_ports.service import OutputPortService
@@ -48,6 +53,7 @@ class AbstractDataProductService:
                 select(InputPortModel)
                 .options(
                     selectinload(InputPortModel.dataset),
+                    selectinload(InputPortModel.requests),
                 )
                 .filter(
                     InputPortModel.consuming_abstract_data_product_id == data_product_id
@@ -74,9 +80,7 @@ class AbstractDataProductService:
                 .selectinload(AbstractDataProduct.input_ports)
             ],
         )
-        # Block if the consumer is being deleted
         self._ensure_not_deleting(adp)
-        # Block if the output port's owning data product is being deleted
         self._ensure_not_deleting(output_port.data_product)
         if output_port.id in [
             link.dataset_id
@@ -99,13 +103,32 @@ class AbstractDataProductService:
                 detail="You do not have access to this private output port",
             )
 
-        approval_status = (
-            DecisionStatus.PENDING
+        input_port_approval_status = (
+            InputPortStatus.PENDING
             if output_port.access_type != OutputPortAccessType.UNRESTRICTED
-            else DecisionStatus.APPROVED
+            else InputPortStatus.APPROVED
         )
+        input_port = InputPortModel(
+            dataset_id=output_port_id,
+            status=input_port_approval_status,
+            consuming_abstract_data_product_id=adp.id,
+        )
+        request = InputPortRequestModel(
+            justification=justification,
+            requested_by=actor,
+            requested_on=datetime.now(tz=pytz.utc),
+            input_port=input_port,
+        )
+        if output_port.access_type == OutputPortAccessType.UNRESTRICTED:
+            InputPortService(self.db).approve_request(
+                request,
+                now=datetime.now(tz=pytz.utc),
+                decision_note="Auto approved for unrestricted output port",
+            )
+        else:
+            request.decision = DecisionStatus.PENDING
 
-        if approval_status == DecisionStatus.APPROVED and self.posthog:
+        if request.decision == DecisionStatus.APPROVED and self.posthog:
             self.posthog.capture(
                 distinct_id=actor.id,
                 event="Input Port Approved",
@@ -117,14 +140,6 @@ class AbstractDataProductService:
                 },
             )
 
-        input_port = InputPortModel(
-            dataset_id=output_port_id,
-            status=approval_status,
-            justification=justification,
-            requested_by=actor,
-            requested_on=datetime.now(tz=pytz.utc),
-            consuming_abstract_data_product_id=adp.id,
-        )
         adp.input_ports.append(input_port)
         return input_port
 
@@ -189,20 +204,20 @@ class AbstractDataProductService:
         background_tasks: BackgroundTasks,
         actor: User,
     ):
-        for dataset_link in input_ports:
-            if dataset_link.dataset.access_type != OutputPortAccessType.UNRESTRICTED:
+        for input_port in input_ports:
+            if input_port.dataset.access_type != OutputPortAccessType.UNRESTRICTED:
                 approvers = OutputPortRoleAssignmentService(
                     self.db
                 ).users_with_authz_action(
-                    dataset_link.dataset_id,
+                    input_port.dataset_id,
                     Action.OUTPUT_PORT__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
                 )
                 other_approvers = [a for a in approvers if a != actor]
                 if other_approvers:
                     background_tasks.add_task(
                         email.send_dataset_link_email(
-                            dataset_link.consuming_abstract_data_product,
-                            dataset_link.dataset,
+                            input_port.consuming_abstract_data_product,
+                            input_port.dataset,
                             requester=deepcopy(actor),
                             approvers=[
                                 deepcopy(approver) for approver in other_approvers

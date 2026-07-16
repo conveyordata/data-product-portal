@@ -26,7 +26,7 @@ class TestAbstractDataProductService:
         input_port = InputPortFactory(
             consuming_abstract_data_product=DataProductFactory(),
             dataset=output_port,
-            requested_by=actor,
+            request__requested_by=actor,
             status=DecisionStatus.PENDING,
         )
         approver_role = RoleFactory(
@@ -61,7 +61,7 @@ class TestAbstractDataProductService:
         input_port = InputPortFactory(
             consuming_abstract_data_product=DataProductFactory(),
             dataset=output_port,
-            requested_by=actor,
+            request__requested_by=actor,
             status=DecisionStatus.PENDING,
         )
         approver_role = RoleFactory(

@@ -17,6 +17,7 @@ from .event import EventFactory
 from .exploration import ExplorationFactory
 from .exploration import fake as exploration_fake
 from .input_port import InputPortFactory
+from .input_port_request import InputPortRequestFactory
 from .lifecycle import LifecycleFactory
 from .notification import NotificationFactory
 from .platform import PlatformFactory
@@ -54,6 +55,7 @@ factories = [
     DataProductSettingValueFactory,
     DataProductTypeFactory,
     InputPortFactory,
+    InputPortRequestFactory,
     DataProductRoleAssignmentFactory,
     DatasetFactory,
     DatasetQueryStatsFactory,

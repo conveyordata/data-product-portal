@@ -19,21 +19,21 @@ class TestInputPortService:
         pending_recent = InputPortFactory(
             consuming_abstract_data_product=dp,
             dataset=ds,
-            requested_by=user,
+            request__requested_by=user,
             status=DecisionStatus.PENDING,
         )
         pending_old = InputPortFactory(
             consuming_abstract_data_product=dp,
             dataset=ds,
-            requested_by=user,
-            requested_on=datetime.now(timezone.utc) - timedelta(days=60),
+            request__requested_by=user,
+            request__requested_on=datetime.now(timezone.utc) - timedelta(days=60),
             status=DecisionStatus.PENDING,
         )
         approved_old = InputPortFactory(
             consuming_abstract_data_product=dp,
             dataset=ds,
-            requested_by=user,
-            requested_on=datetime.now(timezone.utc) - timedelta(days=60),
+            request__requested_by=user,
+            request__requested_on=datetime.now(timezone.utc) - timedelta(days=60),
             status=DecisionStatus.APPROVED,
         )
         requests_old_inactive_hidden = InputPortService(session).get_user_requests(

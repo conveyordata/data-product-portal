@@ -15,7 +15,7 @@ from app.abstract_data_product.input_ports.model import (
     InputPort,
 )
 from app.abstract_data_product.input_ports.model import (
-    InputPort as DataProductDatasetAssociationModel,
+    InputPort as InputPortModel,
 )
 from app.abstract_data_product.type import AbstractDataProductType
 from app.access_durations.enums import AccessDurationType
@@ -68,9 +68,7 @@ from app.users.schema import User
 def get_dataset_load_options() -> Sequence[ExecutableOption]:
     return [
         selectinload(DatasetModel.data_product_links)
-        .selectinload(
-            DataProductDatasetAssociationModel.consuming_abstract_data_product
-        )
+        .selectinload(InputPortModel.consuming_abstract_data_product)
         .raiseload("*"),
         selectinload(DatasetModel.data_output_links)
         .selectinload(DataOutputDatasetAssociationModel.data_output)
@@ -603,8 +601,11 @@ class OutputPortService:
             .where(DatasetModel.data_product_id == data_product_id)
             .options(
                 selectinload(DatasetModel.data_product_links).selectinload(
-                    DataProductDatasetAssociationModel.consuming_abstract_data_product
-                )
+                    InputPortModel.consuming_abstract_data_product
+                ),
+                selectinload(DatasetModel.data_product_links).selectinload(
+                    InputPortModel.requests
+                ),
             )
         )
         if not dataset:
