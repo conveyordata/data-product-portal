@@ -50,7 +50,7 @@ export function ExplorationsTab() {
 
     return (
         <Flex vertical gap="small">
-            <Flex gap="middle" align="center">
+            <Flex gap="small" align="center">
                 <Input.Search
                     placeholder={t('Search Explorations by name')}
                     value={searchTerm ?? ''}

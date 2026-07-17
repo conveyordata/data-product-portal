@@ -136,7 +136,7 @@ export function OutputPortsTab() {
         <Flex vertical gap="small">
             {/* Search and Filters */}
             <Flex justify="space-between" align="center">
-                <Flex gap="middle" flex={1} align="center">
+                <Flex gap="small" flex={1} align="center">
                     <Input.Search
                         placeholder={t('Search Output Ports by name or Data Product')}
                         value={searchTerm ?? ''}
