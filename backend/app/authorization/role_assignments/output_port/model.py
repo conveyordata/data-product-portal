@@ -2,7 +2,7 @@ from typing import TYPE_CHECKING
 from uuid import uuid4
 
 from sqlalchemy import UUID, Column, DateTime, Enum, ForeignKey, UniqueConstraint
-from sqlalchemy.orm import Mapped, mapped_column, relationship, synonym
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.webhooks.events import OutputPortRoleAssignmentEvent
 from app.database.database import Base
@@ -24,11 +24,12 @@ class DatasetRoleAssignment(Base, BaseORM, EventTrackedMixin):
     )
 
     id = Column(UUID, primary_key=True, default=uuid4)
-    dataset_id: Mapped[UUID] = mapped_column("dataset_id", ForeignKey("datasets.id"))
-    outputPort: Mapped["OutputPort"] = relationship(
-        "OutputPort", foreign_keys=[dataset_id]
+    output_port_id: Mapped[UUID] = mapped_column(
+        "dataset_id", ForeignKey("datasets.id")
     )
-    dataset = synonym("outputPort")
+    output_port: Mapped["OutputPort"] = relationship(
+        "OutputPort", foreign_keys=[output_port_id]
+    )
     data_product_id: Mapped[UUID] = mapped_column(ForeignKey("data_products.id"))
     user_id: Mapped[UUID] = mapped_column("user_id", ForeignKey("users.id"))
     user: Mapped["User"] = relationship("User", foreign_keys=[user_id])
@@ -48,7 +49,7 @@ class DatasetRoleAssignment(Base, BaseORM, EventTrackedMixin):
     def to_event(self) -> OutputPortRoleAssignmentEvent:
         return OutputPortRoleAssignmentEvent(
             id=self.id,
-            output_port_id=self.dataset_id,
+            output_port_id=self.output_port_id,
             data_product_id=self.data_product_id,
             user_id=self.user_id,
         )

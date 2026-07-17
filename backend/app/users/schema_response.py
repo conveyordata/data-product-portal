@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Literal, Optional, Sequence, Union
 from uuid import UUID
 
-from pydantic import EmailStr, Field
+from pydantic import EmailStr
 
 from app.abstract_data_product.schema_response import AbstractDataProductInfo
 from app.authorization.role_assignments.data_product.schema import (
@@ -63,8 +63,8 @@ class UserInputPort(ORMModel):
     id: UUID
     consuming_abstract_data_product_id: UUID
     consuming_abstract_data_product: AbstractDataProductInfo
-    output_port_id: UUID = Field(validation_alias="dataset_id")
-    output_port: OutputPort = Field(validation_alias="dataset")
+    output_port_id: UUID
+    output_port: OutputPort
 
 
 class InputPortRequest(InputPortRequestBase):

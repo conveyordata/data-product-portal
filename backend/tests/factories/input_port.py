@@ -17,7 +17,7 @@ class InputPortFactory(factory.alchemy.SQLAlchemyModelFactory):
     id = factory.Faker("uuid4")
     status = InputPortStatus.APPROVED
     consuming_abstract_data_product = factory.SubFactory(DataProductFactory)
-    dataset = factory.SubFactory(OutputPortFactory)
+    output_port = factory.SubFactory(OutputPortFactory)
 
     @factory.post_generation
     def request(obj, create, extracted, **kwargs):

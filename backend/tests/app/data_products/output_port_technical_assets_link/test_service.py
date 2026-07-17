@@ -20,17 +20,17 @@ class TestDataOutputDatasetService:
         ds = OutputPortFactory(data_product=dp)
 
         pending_recent = TechnicalAssetOutputPortAssociationFactory(
-            dataset=ds, requested_by=user, status=DecisionStatus.PENDING
+            output_port=ds, requested_by=user, status=DecisionStatus.PENDING
         )
 
         pending_old = TechnicalAssetOutputPortAssociationFactory(
-            dataset=ds,
+            output_port=ds,
             requested_by=user,
             requested_on=datetime.now(timezone.utc) - timedelta(days=60),
             status=DecisionStatus.PENDING,
         )
         approved_old = TechnicalAssetOutputPortAssociationFactory(
-            dataset=ds,
+            output_port=ds,
             requested_by=user,
             requested_on=datetime.now(timezone.utc) - timedelta(days=60),
             status=DecisionStatus.APPROVED,

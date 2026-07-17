@@ -8,7 +8,7 @@ from .data_product_setting_value import DataProductSettingValueFactory
 from .data_product_type import DataProductTypeFactory
 from .dataset import OutputPortFactory
 from .dataset import fake as dataset_fake
-from .dataset_query_stats_daily import DatasetQueryStatsFactory
+from .dataset_query_stats_daily import OutputPortQueryStatsFactory
 from .domain import DomainFactory
 from .env_platform_config import EnvPlatformConfigFactory
 from .env_platform_service_config import EnvPlatformServiceConfigFactory
@@ -58,7 +58,7 @@ factories = [
     InputPortRequestFactory,
     DataProductRoleAssignmentFactory,
     OutputPortFactory,
-    DatasetQueryStatsFactory,
+    OutputPortQueryStatsFactory,
     DatasetRoleAssignmentFactory,
     DomainFactory,
     EnvPlatformConfigFactory,

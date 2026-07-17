@@ -17,6 +17,6 @@ class DatasetAuthAssignment(ResourceAuthAssignment):
         super().__init__(
             role_id=role_id,
             user_id=assignment.user_id,
-            resource_id=assignment.dataset_id,
+            resource_id=assignment.output_port_id,
             previous_role_id=previous_role_id,
         )

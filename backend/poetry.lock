@@ -286,18 +286,18 @@ test-tox-coverage = ["coverage (>=5.5)"]
 
 [[package]]
 name = "boto3"
-version = "1.43.49"
+version = "1.43.50"
 description = "The AWS SDK for Python"
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "boto3-1.43.49-py3-none-any.whl", hash = "sha256:2b31ab1a0eb1cee01d0363b8ee5e68b45dff2c8f99e7b53aca11c9f7b591a794"},
-    {file = "boto3-1.43.49.tar.gz", hash = "sha256:e58e0704805f720b94e40a56588eadd6da05d3693bde78b573116b11ae56710f"},
+    {file = "boto3-1.43.50-py3-none-any.whl", hash = "sha256:779eb5cfa8bd1d615f36051465f8182860219eef78b4ab8ca2c666bb56702325"},
+    {file = "boto3-1.43.50.tar.gz", hash = "sha256:a6865b9cd1d15511f6aad89cef964105acecff2160a3e29ae53c10d9821416af"},
 ]
 
 [package.dependencies]
-botocore = ">=1.43.49,<1.44.0"
+botocore = ">=1.43.50,<1.44.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.19.0,<0.20.0"
 
@@ -306,14 +306,14 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.43.49"
+version = "1.43.50"
 description = "Low-level, data-driven core of boto 3."
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "botocore-1.43.49-py3-none-any.whl", hash = "sha256:16b6838ac2fbbab85fb265c1f2e37906527aca07f461b1d293d3f8ab82f992dc"},
-    {file = "botocore-1.43.49.tar.gz", hash = "sha256:7de02863c95b8008b1400c92a1a00996f25ad38944c07f7b620949f8798d1fdf"},
+    {file = "botocore-1.43.50-py3-none-any.whl", hash = "sha256:4a57a1e0dd4a8be855c29183fc0e029c18e9ec84cd4ac172869f3e800f972528"},
+    {file = "botocore-1.43.50.tar.gz", hash = "sha256:7b07c423c44b1ab3815af103f11fa28ea317e28dda1335718a02ecde371a25e9"},
 ]
 
 [package.dependencies]
@@ -1055,14 +1055,14 @@ tzdata = ["tzdata"]
 
 [[package]]
 name = "fastapi"
-version = "0.139.0"
+version = "0.139.2"
 description = "FastAPI framework, high performance, easy to learn, fast to code, ready for production"
 optional = false
 python-versions = ">=3.10"
 groups = ["main", "test"]
 files = [
-    {file = "fastapi-0.139.0-py3-none-any.whl", hash = "sha256:cf15e1e9e667ddb0ad63811e60bd11390d1aac838ca4a7a23f421807b2308189"},
-    {file = "fastapi-0.139.0.tar.gz", hash = "sha256:99ab7b2d92223c76d6cf10757ab3f89d45b38267fc20b2a136cf02f6beac3145"},
+    {file = "fastapi-0.139.2-py3-none-any.whl", hash = "sha256:b9ad015a835173d59865e2f5d8296fbc2b317bf56a2ba1a5bfbdd03de2fd4b1c"},
+    {file = "fastapi-0.139.2.tar.gz", hash = "sha256:333145a6891e9b5b3cfceb69baf817e8240cde4d4588ae5a10bf56ffacb6255e"},
 ]
 
 [package.dependencies]
@@ -3081,14 +3081,14 @@ poetry-plugin = ["poetry (>=1.2.0,<3.0.0) ; python_version < \"4.0\""]
 
 [[package]]
 name = "posthog"
-version = "7.23.0"
+version = "7.25.0"
 description = "Integrate PostHog into any python application."
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "posthog-7.23.0-py3-none-any.whl", hash = "sha256:b3f9a7b0f4a234722fec1daefa63337dfafb6dce693804427c305e0f57856774"},
-    {file = "posthog-7.23.0.tar.gz", hash = "sha256:eb430e79e8317cee4b0603d4d106993058770f2cd6731da03913b82f4def2660"},
+    {file = "posthog-7.25.0-py3-none-any.whl", hash = "sha256:63b7879cd066f6a621327db449f831392e6a79226892417dc20701f037ad34d3"},
+    {file = "posthog-7.25.0.tar.gz", hash = "sha256:3a7aeab611ba48824e700314d5f81e00e0ff8a1c169a244c0fa18c6f7960f61f"},
 ]
 
 [package.dependencies]
@@ -4824,4 +4824,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "d808077441d5780c6e1f4d0fba31f3fc298320e65000452afcaf4d1b92472cd8"
+content-hash = "fc0a0e06b9ce9f10c4e88daf9738fa8d5c44fafa57935e40de018eecc1158df9"

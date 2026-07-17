@@ -24,7 +24,7 @@ from tests.factories import (
 def _grant_and_pending_renewal(consumer, port):
     link = InputPortFactory(
         consuming_abstract_data_product=consumer,
-        dataset=port,
+        output_port=port,
         status=DecisionStatus.APPROVED,
         request__access_duration_type=AccessDurationType.TIME_BOUND,
         request__requested_duration_days=30,
@@ -96,7 +96,7 @@ class TestInputPortDecisions:
         link, grant, renewal = _grant_and_pending_renewal(consumer, port)
 
         current_link = InputPortService(test_session).approve_output_port_as_input_port(
-            data_product_id=port.data_product_id,
+            data_product_id=port.data_product.id,
             output_port_id=port.id,
             consuming_data_product_id=consumer.id,
             actor=actor,
@@ -120,7 +120,7 @@ class TestInputPortDecisions:
         link, grant, renewal = _grant_and_pending_renewal(consumer, port)
 
         current_link = InputPortService(test_session).deny_output_port_as_input_port(
-            data_product_id=port.data_product_id,
+            data_product_id=port.data_product.id,
             output_port_id=port.id,
             consuming_data_product_id=consumer.id,
             actor=actor,
@@ -141,7 +141,7 @@ class TestInputPortDecisions:
         )
         link = InputPortFactory(
             consuming_abstract_data_product=consumer,
-            dataset=port,
+            output_port=port,
             status=DecisionStatus.APPROVED,
             request__access_duration_type=AccessDurationType.TIME_BOUND,
             request__requested_duration_days=30,
@@ -158,7 +158,7 @@ class TestInputPortDecisions:
         test_session.commit()
 
         current_link = InputPortService(test_session).approve_output_port_as_input_port(
-            data_product_id=port.data_product_id,
+            data_product_id=port.data_product.id,
             output_port_id=port.id,
             consuming_data_product_id=consumer.id,
             actor=actor,

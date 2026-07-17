@@ -57,7 +57,7 @@ class DataProductSettingService:
         elif scope == DataProductSettingScope.DATASET:
             setting = self.db.scalars(
                 select(DataProductSettingValueModel).filter_by(
-                    dataset_id=product_id, data_product_setting_id=setting_id
+                    output_port_id=product_id, data_product_setting_id=setting_id
                 )
             ).first()
         else:
@@ -74,7 +74,7 @@ class DataProductSettingService:
                 )
             elif scope == DataProductSettingScope.DATASET:
                 new_setting = DataProductSettingValueCreate(
-                    dataset_id=product_id,
+                    output_port_id=product_id,
                     data_product_setting_id=setting_id,
                     value=value,
                 )

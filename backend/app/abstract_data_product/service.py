@@ -54,7 +54,7 @@ class AbstractDataProductService:
             self.db.scalars(
                 select(InputPortModel)
                 .options(
-                    selectinload(InputPortModel.dataset),
+                    selectinload(InputPortModel.output_port),
                     selectinload(InputPortModel.requests),
                 )
                 .filter(
@@ -118,7 +118,7 @@ class AbstractDataProductService:
         self._ensure_not_deleting(adp)
         self._ensure_not_deleting(output_port.data_product)
         existing = next(
-            (link for link in adp.input_ports if link.dataset_id == output_port.id),
+            (link for link in adp.input_ports if link.output_port_id == output_port.id),
             None,
         )
         if existing is not None:
@@ -139,7 +139,7 @@ class AbstractDataProductService:
         if output_port.data_product_id == adp.id:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Cannot link own dataset to data product",
+                detail="Cannot link own output port to data product",
             )
 
         if not OutputPortService(self.db).is_visible_to_user(output_port, actor):
@@ -155,7 +155,7 @@ class AbstractDataProductService:
             existing
             if existing is not None
             else InputPortModel(
-                dataset_id=output_port_id,
+                output_port_id=output_port_id,
                 consuming_abstract_data_product=adp,
             )
         )
@@ -166,7 +166,6 @@ class AbstractDataProductService:
             access_duration_type=access_duration_type,
             requested_duration_days=requested_duration_days,
             input_port=input_port,
-            # created_on=datetime.now(tz=pytz.utc),
         )
         self.db.add(request)
         self.db.flush()
@@ -220,8 +219,8 @@ class AbstractDataProductService:
                 detail=f"Abstract data product {id} not found",
             )
         input_ports = [
-            self._add_single_input_port(adp, dataset_id, justification, actor=actor)
-            for dataset_id in output_port_ids
+            self._add_single_input_port(adp, output_port_id, justification, actor=actor)
+            for output_port_id in output_port_ids
         ]
         self.db.flush()
         return input_ports
@@ -240,16 +239,16 @@ class AbstractDataProductService:
         )
         input_port = next(
             (
-                dataset
-                for dataset in adp.input_ports
-                if dataset.dataset_id == output_port_id
+                input_port
+                for input_port in adp.input_ports
+                if input_port.output_port_id == output_port_id
             ),
             None,
         )
         if not input_port:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Data product dataset for data product {id} not found",
+                detail=f"Data product outputport for data product {id} not found",
             )
 
         self.db.delete(input_port)
@@ -262,11 +261,11 @@ class AbstractDataProductService:
         actor: User,
     ):
         for input_port in input_ports:
-            if input_port.dataset.access_type != OutputPortAccessType.UNRESTRICTED:
+            if input_port.output_port.access_type != OutputPortAccessType.UNRESTRICTED:
                 approvers = OutputPortRoleAssignmentService(
                     self.db
                 ).users_with_authz_action(
-                    input_port.dataset_id,
+                    input_port.output_port_id,
                     Action.OUTPUT_PORT__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
                 )
                 other_approvers = [a for a in approvers if a != actor]
@@ -274,7 +273,7 @@ class AbstractDataProductService:
                     background_tasks.add_task(
                         email.send_dataset_link_email(
                             input_port.consuming_abstract_data_product,
-                            input_port.dataset,
+                            input_port.output_port,
                             requester=deepcopy(actor),
                             approvers=[
                                 deepcopy(approver) for approver in other_approvers

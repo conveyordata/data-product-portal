@@ -48,7 +48,7 @@ class TestOutputPortSearchRouter:
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory.dataset_owner()
         DatasetRoleAssignmentFactory(
-            dataset=ds_1,
+            output_port=ds_1,
             user_id=user.id,
             role_id=role.id,
             decision=DecisionStatus.APPROVED,

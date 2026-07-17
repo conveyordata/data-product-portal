@@ -34,7 +34,7 @@ class TestDatasetRoleAssignmentsRouter:
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATASET)
         assignment: OutputPortRoleAssignment = DatasetRoleAssignmentFactory(
-            dataset_id=dataset.id, user_id=user.id, role_id=role.id
+            output_port_id=dataset.id, user_id=user.id, role_id=role.id
         )
         response = client.get(ENDPOINT)
 
@@ -73,7 +73,7 @@ class TestDatasetRoleAssignmentsRouter:
             permissions=permissions,
         )
         DatasetRoleAssignmentFactory(
-            user_id=me.id, role_id=authz_role.id, dataset_id=dataset.id
+            user_id=me.id, role_id=authz_role.id, output_port_id=dataset.id
         )
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATASET)
@@ -113,7 +113,7 @@ class TestDatasetRoleAssignmentsRouter:
             permissions=[Action.OUTPUT_PORT__CREATE_USER],
         )
         DatasetRoleAssignmentFactory(
-            user_id=me.id, role_id=authz_role.id, dataset_id=dataset.id
+            user_id=me.id, role_id=authz_role.id, output_port_id=dataset.id
         )
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATASET)
@@ -184,12 +184,12 @@ class TestDatasetRoleAssignmentsRouter:
             permissions=[Action.OUTPUT_PORT__DELETE_USER],
         )
         DatasetRoleAssignmentFactory(
-            user_id=me.id, role_id=authz_role.id, dataset_id=dataset.id
+            user_id=me.id, role_id=authz_role.id, output_port_id=dataset.id
         )
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATASET)
         assignment: OutputPortRoleAssignment = DatasetRoleAssignmentFactory(
-            dataset_id=dataset.id,
+            output_port_id=dataset.id,
             user_id=user.id,
             role_id=role.id,
             decision=DecisionStatus.APPROVED,
@@ -218,12 +218,12 @@ class TestDatasetRoleAssignmentsRouter:
             permissions=[Action.OUTPUT_PORT__APPROVE_USER_REQUEST],
         )
         DatasetRoleAssignmentFactory(
-            user_id=me.id, role_id=authz_role.id, dataset_id=dataset.id
+            user_id=me.id, role_id=authz_role.id, output_port_id=dataset.id
         )
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATASET)
         assignment: OutputPortRoleAssignment = DatasetRoleAssignmentFactory(
-            dataset_id=dataset.id,
+            output_port_id=dataset.id,
             user_id=user.id,
             role_id=role.id,
             decision=DecisionStatus.PENDING,
@@ -251,12 +251,12 @@ class TestDatasetRoleAssignmentsRouter:
             permissions=[Action.OUTPUT_PORT__APPROVE_USER_REQUEST],
         )
         DatasetRoleAssignmentFactory(
-            user_id=me.id, role_id=authz_role.id, dataset_id=dataset.id
+            user_id=me.id, role_id=authz_role.id, output_port_id=dataset.id
         )
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATASET)
         assignment: OutputPortRoleAssignment = DatasetRoleAssignmentFactory(
-            dataset_id=dataset.id,
+            output_port_id=dataset.id,
             user_id=user.id,
             role_id=role.id,
             decision=DecisionStatus.DENIED,
@@ -278,12 +278,12 @@ class TestDatasetRoleAssignmentsRouter:
             permissions=[Action.OUTPUT_PORT__APPROVE_USER_REQUEST],
         )
         DatasetRoleAssignmentFactory(
-            user_id=me.id, role_id=authz_role.id, dataset_id=dataset.id
+            user_id=me.id, role_id=authz_role.id, output_port_id=dataset.id
         )
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATASET)
         assignment: OutputPortRoleAssignment = DatasetRoleAssignmentFactory(
-            dataset_id=dataset.id,
+            output_port_id=dataset.id,
             user_id=user.id,
             role_id=role.id,
             decision=DecisionStatus.DENIED,
@@ -303,11 +303,11 @@ class TestDatasetRoleAssignmentsRouter:
             permissions=[Action.OUTPUT_PORT__APPROVE_USER_REQUEST],
         )
         DatasetRoleAssignmentFactory(
-            user_id=me.id, role_id=authz_role.id, dataset_id=dataset.id
+            user_id=me.id, role_id=authz_role.id, output_port_id=dataset.id
         )
         user: User = UserFactory()
         assignment: OutputPortRoleAssignment = DatasetRoleAssignmentFactory(
-            dataset_id=dataset.id,
+            output_port_id=dataset.id,
             user_id=user.id,
             role_id=None,
         )
@@ -328,14 +328,14 @@ class TestDatasetRoleAssignmentsRouter:
             permissions=[Action.OUTPUT_PORT__UPDATE_USER],
         )
         DatasetRoleAssignmentFactory(
-            user_id=me.id, role_id=authz_role.id, dataset_id=dataset.id
+            user_id=me.id, role_id=authz_role.id, output_port_id=dataset.id
         )
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATASET)
         new_role: Role = RoleFactory(scope=Scope.DATASET)
 
         assignment: OutputPortRoleAssignment = DatasetRoleAssignmentFactory(
-            dataset_id=dataset.id,
+            output_port_id=dataset.id,
             user_id=user.id,
             role_id=role.id,
         )
@@ -360,7 +360,7 @@ class TestDatasetRoleAssignmentsRouter:
             scope=Scope.DATASET, permissions=[Action.OUTPUT_PORT__DELETE]
         )
         DatasetRoleAssignmentFactory(
-            dataset_id=dataset.id,
+            output_port_id=dataset.id,
             user_id=user.id,
             role_id=role.id,
         )
@@ -386,18 +386,18 @@ class TestDatasetRoleAssignmentsRouter:
             permissions=[Action.OUTPUT_PORT__DELETE_USER],
         )
         DatasetRoleAssignmentFactory(
-            user_id=user.id, role_id=authz_role.id, dataset_id=dataset.id
+            user_id=user.id, role_id=authz_role.id, output_port_id=dataset.id
         )
 
         user_1, user_2 = UserFactory.create_batch(2)
         role = RoleFactory.dataset_owner()
         assignment_1 = DatasetRoleAssignmentFactory(
-            dataset_id=dataset.id,
+            output_port_id=dataset.id,
             user_id=user_1.id,
             role_id=role.id,
         )
         assignment_2 = DatasetRoleAssignmentFactory(
-            dataset_id=dataset.id,
+            output_port_id=dataset.id,
             user_id=user_2.id,
             role_id=role.id,
         )
@@ -446,12 +446,12 @@ class TestDatasetRoleAssignmentsRouter:
             permissions=[Action.OUTPUT_PORT__APPROVE_USER_REQUEST],
         )
         DatasetRoleAssignmentFactory(
-            user_id=me.id, role_id=authz_role.id, dataset_id=dataset.id
+            user_id=me.id, role_id=authz_role.id, output_port_id=dataset.id
         )
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATASET)
         assignment: OutputPortRoleAssignment = DatasetRoleAssignmentFactory(
-            dataset_id=dataset.id,
+            output_port_id=dataset.id,
             user_id=user.id,
             role_id=role.id,
             decision=DecisionStatus.PENDING,
@@ -477,14 +477,14 @@ class TestDatasetRoleAssignmentsRouter:
             permissions=[Action.OUTPUT_PORT__UPDATE_USER],
         )
         DatasetRoleAssignmentFactory(
-            user_id=me.id, role_id=authz_role.id, dataset_id=dataset.id
+            user_id=me.id, role_id=authz_role.id, output_port_id=dataset.id
         )
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATASET)
         new_role: Role = RoleFactory(scope=Scope.DATASET)
 
         assignment: OutputPortRoleAssignment = DatasetRoleAssignmentFactory(
-            dataset_id=dataset.id,
+            output_port_id=dataset.id,
             user_id=user.id,
             role_id=role.id,
             decision=DecisionStatus.APPROVED,
@@ -510,12 +510,12 @@ class TestDatasetRoleAssignmentsRouter:
             permissions=[Action.OUTPUT_PORT__DELETE_USER],
         )
         DatasetRoleAssignmentFactory(
-            user_id=me.id, role_id=authz_role.id, dataset_id=dataset.id
+            user_id=me.id, role_id=authz_role.id, output_port_id=dataset.id
         )
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATASET)
         assignment: OutputPortRoleAssignment = DatasetRoleAssignmentFactory(
-            dataset_id=dataset.id,
+            output_port_id=dataset.id,
             user_id=user.id,
             role_id=role.id,
             decision=DecisionStatus.APPROVED,

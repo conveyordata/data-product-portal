@@ -59,7 +59,7 @@ def delete_output_port_role_assignment(
     event_id = EventService(db).create_event(
         CreateEvent(
             name=EventType.DATASET_ROLE_ASSIGNMENT_REMOVED,
-            subject_id=assignment.dataset_id,
+            subject_id=assignment.output_port_id,
             subject_type=EventReferenceEntity.DATASET,
             target_id=assignment.user_id,
             target_type=EventReferenceEntity.USER,
@@ -67,7 +67,7 @@ def delete_output_port_role_assignment(
         ),
     )
     NotificationService(db).create_dataset_notifications(
-        dataset_id=assignment.dataset_id,
+        dataset_id=assignment.output_port_id,
         event_id=event_id,
         extra_receiver_ids=(
             [requester] if (requester := assignment.requested_by_id) is not None else []
@@ -75,7 +75,7 @@ def delete_output_port_role_assignment(
     )
     return DeleteOutputPortRoleAssignmentResponse(
         id=assignment.id,
-        output_port_id=assignment.dataset_id,
+        output_port_id=assignment.output_port_id,
     )
 
 
@@ -84,7 +84,7 @@ def convert_to_role_assignment(
 ) -> OutputPortRoleAssignmentResponse:
     return OutputPortRoleAssignmentResponse(
         id=assignment.id,
-        output_port=assignment.dataset,
+        output_port=assignment.output_port,
         user=assignment.user,
         role=assignment.role,
         decision=assignment.decision,
@@ -141,7 +141,7 @@ def request_output_port_role_assignment(
     EventService(db).create_event(
         CreateEvent(
             name=EventType.DATASET_ROLE_ASSIGNMENT_REQUESTED,
-            subject_id=assignment.dataset_id,
+            subject_id=assignment.output_port_id,
             subject_type=EventReferenceEntity.DATASET,
             target_id=assignment.user_id,
             target_type=EventReferenceEntity.USER,
@@ -179,7 +179,7 @@ def create_output_port_role_assignment(
     EventService(db).create_event(
         CreateEvent(
             name=EventType.DATASET_ROLE_ASSIGNMENT_CREATED,
-            subject_id=role_assignment.dataset_id,
+            subject_id=role_assignment.output_port_id,
             subject_type=EventReferenceEntity.DATASET,
             target_id=role_assignment.user_id,
             target_type=EventReferenceEntity.USER,
@@ -192,7 +192,7 @@ def create_output_port_role_assignment(
         is_admin := Authorization().has_admin_role(user_id=str(authenticated_user.id))
     ):
         approvers = service.users_with_authz_action(
-            dataset_id=role_assignment.dataset_id,
+            dataset_id=role_assignment.output_port_id,
             action=Action.OUTPUT_PORT__APPROVE_USER_REQUEST,
         )
 
@@ -254,7 +254,7 @@ def decide_output_port_role_assignment(
                 if assignment.decision == DecisionStatus.APPROVED
                 else EventType.DATASET_ROLE_ASSIGNMENT_DENIED
             ),
-            subject_id=assignment.dataset_id,
+            subject_id=assignment.output_port_id,
             subject_type=EventReferenceEntity.DATASET,
             target_id=assignment.user_id,
             target_type=EventReferenceEntity.USER,
@@ -262,7 +262,7 @@ def decide_output_port_role_assignment(
         ),
     )
     NotificationService(db).create_dataset_notifications(
-        dataset_id=assignment.dataset_id,
+        dataset_id=assignment.output_port_id,
         event_id=event_id,
         extra_receiver_ids=(
             [assignment.requested_by_id]
@@ -303,7 +303,7 @@ def modify_output_port_role_assignment(
     event_id = EventService(db).create_event(
         CreateEvent(
             name=EventType.DATASET_ROLE_ASSIGNMENT_UPDATED,
-            subject_id=assignment.dataset_id,
+            subject_id=assignment.output_port_id,
             subject_type=EventReferenceEntity.DATASET,
             target_id=assignment.user_id,
             target_type=EventReferenceEntity.USER,
@@ -311,7 +311,7 @@ def modify_output_port_role_assignment(
         ),
     )
     NotificationService(db).create_dataset_notifications(
-        dataset_id=assignment.dataset_id,
+        dataset_id=assignment.output_port_id,
         event_id=event_id,
         extra_receiver_ids=(
             [requester] if (requester := assignment.requested_by_id) is not None else []

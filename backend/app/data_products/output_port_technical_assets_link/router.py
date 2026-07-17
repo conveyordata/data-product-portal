@@ -68,7 +68,7 @@ def approve_output_port_technical_asset_link(
     event_id = EventService(db).create_event(
         CreateEvent(
             name=EventType.DATA_OUTPUT_DATASET_LINK_APPROVED,
-            subject_id=output_link.dataset_id,
+            subject_id=output_link.output_port_id,
             subject_type=EventReferenceEntity.DATASET,
             target_id=output_link.data_output_id,
             target_type=EventReferenceEntity.DATA_OUTPUT,
@@ -76,7 +76,7 @@ def approve_output_port_technical_asset_link(
         ),
     )
     NotificationService(db).create_dataset_notifications(
-        dataset_id=output_link.dataset_id,
+        dataset_id=output_link.output_port_id,
         event_id=event_id,
         extra_receiver_ids=[output_link.requested_by_id],
     )
@@ -112,7 +112,7 @@ def deny_output_port_technical_asset_link(
     event_id = EventService(db).create_event(
         CreateEvent(
             name=EventType.DATA_OUTPUT_DATASET_LINK_DENIED,
-            subject_id=output_link.dataset_id,
+            subject_id=output_link.output_port_id,
             subject_type=EventReferenceEntity.DATASET,
             target_id=output_link.data_output_id,
             target_type=EventReferenceEntity.DATA_OUTPUT,
@@ -120,7 +120,7 @@ def deny_output_port_technical_asset_link(
         ),
     )
     NotificationService(db).create_dataset_notifications(
-        dataset_id=output_link.dataset_id,
+        dataset_id=output_link.output_port_id,
         event_id=event_id,
         extra_receiver_ids=[output_link.requested_by_id],
     )
@@ -174,14 +174,14 @@ def link_output_port_to_technical_asset(
     RefreshInfrastructureLambda().trigger()
 
     approvers = RoleAssignmentService(db).users_with_authz_action(
-        dataset_link.dataset_id,
+        dataset_link.output_port_id,
         Action.OUTPUT_PORT__APPROVE_TECHNICAL_ASSET_LINK_REQUEST,
     )
     other_approvers = [a for a in approvers if a != authenticated_user]
     if other_approvers:
         background_tasks.add_task(
             email.send_link_dataset_email(
-                dataset_link.dataset,
+                dataset_link.output_port,
                 dataset_link.data_output,
                 requester=deepcopy(authenticated_user),
                 approvers=[deepcopy(approver) for approver in other_approvers],
@@ -220,7 +220,7 @@ def unlink_output_port_from_technical_asset(
     data_output = DataOutputService(db).unlink_dataset_from_data_output(
         data_product_id=data_product_id,
         id=link_request.technical_asset_id,
-        dataset_id=output_port_id,
+        output_port_id=output_port_id,
     )
 
     event_id = EventService(db).create_event(

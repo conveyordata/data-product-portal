@@ -108,7 +108,7 @@ class TestDataProductsRouter:
         input_ports_response = self.get_input_ports(
             client, created_data_product.json()["id"]
         )
-        assert input_ports_response.status_code == 200
+        assert input_ports_response.status_code == 200, input_ports_response.text
         assert len(input_ports_response.json()["input_ports"]) == 1
 
     def test_create_data_product_no_owners(
@@ -515,10 +515,10 @@ class TestDataProductsRouter:
         data_product = DataProductFactory()
         dataset = OutputPortFactory(data_product=data_product)
         ta = TechnicalAssetFactory(owner=data_product)
-        TechnicalAssetOutputPortAssociationFactory(data_output=ta, dataset=dataset)
+        TechnicalAssetOutputPortAssociationFactory(data_output=ta, output_port=dataset)
         downstream_dataset = OutputPortFactory()
         InputPortFactory(
-            dataset=dataset,
+            output_port=dataset,
             consuming_abstract_data_product=downstream_dataset.data_product,
         )
         response = client.get(f"{ENDPOINT}/{data_product.id}/graph")
@@ -529,10 +529,10 @@ class TestDataProductsRouter:
         data_product = DataProductFactory()
         dataset = OutputPortFactory(data_product=data_product)
         ta = TechnicalAssetFactory(owner=data_product)
-        TechnicalAssetOutputPortAssociationFactory(data_output=ta, dataset=dataset)
+        TechnicalAssetOutputPortAssociationFactory(data_output=ta, output_port=dataset)
         exp = ExplorationFactory()
         InputPortFactory(
-            dataset=dataset,
+            output_port=dataset,
             consuming_abstract_data_product=exp,
         )
         response = client.get(f"{ENDPOINT}/{data_product.id}/graph")

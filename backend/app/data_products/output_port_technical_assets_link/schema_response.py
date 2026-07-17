@@ -30,8 +30,8 @@ class DataOutput(TechnicalAssetBaseSchema):
 
 class BaseTechnicalAssetOutputPortAssociationGet(ORMModel):
     id: UUID
-    output_port_id: UUID = Field(validation_alias="dataset_id")
-    output_port: OutputPort = Field(validation_alias="dataset")
+    output_port_id: UUID = Field(validation_alias="output_port_id")
+    output_port: OutputPort = Field(validation_alias="output_port")
     technical_asset_id: UUID = Field(validation_alias="data_output_id")
     technical_asset: OwnedTechnicalAsset = Field(validation_alias="data_output")
     status: DecisionStatus

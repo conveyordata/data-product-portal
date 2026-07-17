@@ -129,7 +129,7 @@ class TestRequestInputPortsRenewal:
         port = self._restricted_time_bound_port()
         link = InputPortFactory(
             consuming_abstract_data_product=dp,
-            dataset=port,
+            output_port=port,
             status=DecisionStatus.APPROVED,
             request__access_duration_type=AccessDurationType.TIME_BOUND,
             request__requested_duration_days=30,
@@ -153,7 +153,7 @@ class TestRequestInputPortsRenewal:
         port = self._restricted_time_bound_port()
         link = InputPortFactory(
             consuming_abstract_data_product=dp,
-            dataset=port,
+            output_port=port,
             status=DecisionStatus.APPROVED,
             request__justification="original reason",
             request__access_duration_type=AccessDurationType.TIME_BOUND,
@@ -175,7 +175,7 @@ class TestRequestInputPortsRenewal:
         port = self._restricted_time_bound_port()
         link = InputPortFactory(
             consuming_abstract_data_product=dp,
-            dataset=port,
+            output_port=port,
             status=DecisionStatus.PENDING,
         )
 
@@ -192,7 +192,7 @@ class TestRequestInputPortsRenewal:
         port = OutputPortFactory(access_type=OutputPortAccessType.RESTRICTED)
         InputPortFactory(
             consuming_abstract_data_product=dp,
-            dataset=port,
+            output_port=port,
             status=DecisionStatus.APPROVED,
         )
 
@@ -208,7 +208,7 @@ class TestRequestInputPortsRenewal:
         port = self._restricted_time_bound_port()
         link = InputPortFactory(
             consuming_abstract_data_product=dp,
-            dataset=port,
+            output_port=port,
             status=DecisionStatus.DENIED,
         )
 

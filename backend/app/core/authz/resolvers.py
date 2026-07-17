@@ -91,7 +91,7 @@ class DatasetRoleAssignmentResolver(SubjectResolver):
                 .one_or_none()
             )
             if assignment:
-                return assignment.dataset_id
+                return assignment.output_port_id
         return cls.DEFAULT
 
 
@@ -186,7 +186,7 @@ class DataOutputDatasetAssociationResolver(DatasetResolver):
                 )
             )
             if data_output_dataset:
-                return data_output_dataset.dataset_id
+                return data_output_dataset.output_port_id
         return cls.DEFAULT
 
 
@@ -203,5 +203,5 @@ class DataProductDatasetAssociationResolver(DatasetResolver):
                 .one_or_none()
             )
             if data_product_dataset:
-                return data_product_dataset.dataset_id
+                return data_product_dataset.output_port_id
         return cls.DEFAULT

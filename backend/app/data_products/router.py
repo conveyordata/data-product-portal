@@ -507,7 +507,7 @@ def request_input_ports_for_data_product(
                 ),
                 subject_id=dataset_link.consuming_abstract_data_product_id,
                 subject_type=EventReferenceEntity.DATA_PRODUCT,
-                target_id=dataset_link.dataset_id,
+                target_id=dataset_link.output_port_id,
                 target_type=EventReferenceEntity.DATASET,
                 actor_id=authenticated_user.id,
             )
@@ -632,7 +632,7 @@ def unlink_input_port_from_data_product(
             ),
             subject_id=id,
             subject_type=EventReferenceEntity.DATA_PRODUCT,
-            target_id=data_product_dataset.dataset_id,
+            target_id=data_product_dataset.output_port_id,
             target_type=EventReferenceEntity.DATASET,
             actor_id=authenticated_user.id,
         ),

@@ -72,7 +72,7 @@ class NotificationService:
     ) -> None:
         assignments = self.db.scalars(
             select(DatasetRoleAssignment).where(
-                DatasetRoleAssignment.dataset_id == dataset_id,
+                DatasetRoleAssignment.output_port_id == dataset_id,
                 DatasetRoleAssignment.decision == DecisionStatus.APPROVED,
             )
         ).all()

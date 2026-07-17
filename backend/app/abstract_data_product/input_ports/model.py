@@ -12,7 +12,7 @@ from sqlalchemy import (
     Integer,
     Text,
 )
-from sqlalchemy.orm import Mapped, mapped_column, relationship, synonym
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.abstract_data_product.input_ports.enums import InputPortStatus, RenewalStatus
 from app.access_durations.enums import AccessDurationType
@@ -44,16 +44,17 @@ class InputPort(
     consuming_abstract_data_product_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("abstract_data_products.id")
     )
-    dataset_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("datasets.id"))
+    output_port_id: Mapped[uuid.UUID] = mapped_column(
+        "dataset_id", ForeignKey("datasets.id")
+    )
 
     # Relationships
-    outputPort: Mapped["OutputPort"] = relationship(
+    output_port: Mapped["OutputPort"] = relationship(
         "OutputPort",
         back_populates="data_product_links",
         order_by="OutputPort.name",
         lazy="joined",
     )
-    dataset = synonym("outputPort")
     consuming_abstract_data_product: Mapped["AbstractDataProduct"] = relationship(
         "AbstractDataProduct",
         back_populates="input_ports",
@@ -69,11 +70,6 @@ class InputPort(
         lazy="raise",
     )
 
-    # This the current request
-    # When you have an initial output port request this will be the pending one
-    # When there is an active approved request it will be that
-    # No active approved request, and latest is declined it will be declined
-    # When the latest is approved but expired it will return that one
     @property
     def current_request(self) -> "InputPortRequest":
         if active_grant := self.active_grant:
