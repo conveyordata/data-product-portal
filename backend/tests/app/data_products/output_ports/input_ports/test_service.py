@@ -18,20 +18,20 @@ class TestInputPortService:
         ds = OutputPortFactory(data_product=dp)
         pending_recent = InputPortFactory(
             consuming_abstract_data_product=dp,
-            dataset=ds,
+            output_port=ds,
             request__requested_by=user,
             status=DecisionStatus.PENDING,
         )
         pending_old = InputPortFactory(
             consuming_abstract_data_product=dp,
-            dataset=ds,
+            output_port=ds,
             request__requested_by=user,
             request__requested_on=datetime.now(timezone.utc) - timedelta(days=60),
             status=DecisionStatus.PENDING,
         )
         approved_old = InputPortFactory(
             consuming_abstract_data_product=dp,
-            dataset=ds,
+            output_port=ds,
             request__requested_by=user,
             request__requested_on=datetime.now(timezone.utc) - timedelta(days=60),
             status=DecisionStatus.APPROVED,

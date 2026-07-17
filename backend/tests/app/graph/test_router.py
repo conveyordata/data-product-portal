@@ -16,7 +16,7 @@ class TestGraphRouter:
         data_product = DataProductFactory(domain=domain)
         exp = ExplorationFactory(domain=domain)
         dataset = OutputPortFactory(data_product=data_product)
-        InputPortFactory(dataset=dataset, consuming_abstract_data_product=exp)
+        InputPortFactory(output_port=dataset, consuming_abstract_data_product=exp)
         TechnicalAssetFactory(owner=data_product)
         response = client.get(ENDPOINT)
         assert response.status_code == 200, response.text
@@ -31,7 +31,7 @@ class TestGraphRouter:
         data_product = DataProductFactory(domain=domain)
         exp = ExplorationFactory(domain=domain)
         dataset = OutputPortFactory(data_product=data_product)
-        InputPortFactory(dataset=dataset, consuming_abstract_data_product=exp)
+        InputPortFactory(output_port=dataset, consuming_abstract_data_product=exp)
         TechnicalAssetFactory(owner=data_product)
         response = client.get(ENDPOINT, params={"output_port_nodes_enabled": "true"})
         assert response.status_code == 200, response.text
@@ -46,7 +46,7 @@ class TestGraphRouter:
         data_product = DataProductFactory(domain=domain)
         exp = ExplorationFactory(domain=domain)
         dataset = OutputPortFactory(data_product=data_product)
-        InputPortFactory(dataset=dataset, consuming_abstract_data_product=exp)
+        InputPortFactory(output_port=dataset, consuming_abstract_data_product=exp)
         response = client.get(ENDPOINT, params={"exploration_nodes_enabled": "true"})
         assert response.status_code == 200, response.text
         assert len(response.json()["nodes"]) == 2
@@ -56,7 +56,7 @@ class TestGraphRouter:
         data_product = DataProductFactory(domain=domain)
         exp = ExplorationFactory(domain=domain)
         dataset = OutputPortFactory(data_product=data_product)
-        InputPortFactory(dataset=dataset, consuming_abstract_data_product=exp)
+        InputPortFactory(output_port=dataset, consuming_abstract_data_product=exp)
         response = client.get(
             ENDPOINT,
             params={
@@ -72,7 +72,7 @@ class TestGraphRouter:
         dataset = OutputPortFactory(data_product=data_product_1)
         data_product_2 = DataProductFactory()
         InputPortFactory(
-            consuming_abstract_data_product=data_product_2, dataset=dataset
+            consuming_abstract_data_product=data_product_2, output_port=dataset
         )
         response = client.get(ENDPOINT, params={"output_port_nodes_enabled": "true"})
         assert response.status_code == 200, response.text
@@ -84,7 +84,7 @@ class TestGraphRouter:
         dataset = OutputPortFactory(data_product=data_product_1)
         data_product_2 = DataProductFactory()
         InputPortFactory(
-            consuming_abstract_data_product=data_product_2, dataset=dataset
+            consuming_abstract_data_product=data_product_2, output_port=dataset
         )
         response = client.get(ENDPOINT)
         assert response.status_code == 200, response.text
@@ -96,7 +96,7 @@ class TestGraphRouter:
         producer = DataProductFactory()
         dataset = OutputPortFactory(data_product=producer)
         consumer = DataProductFactory()
-        InputPortFactory(consuming_abstract_data_product=consumer, dataset=dataset)
+        InputPortFactory(consuming_abstract_data_product=consumer, output_port=dataset)
         response = client.get(ENDPOINT, params={"output_port_nodes_enabled": "false"})
         assert response.status_code == 200, response.text
         edge = response.json()["edges"][0]

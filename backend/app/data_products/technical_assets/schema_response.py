@@ -80,7 +80,7 @@ class BaseTechnicalAssetGet(ORMModel):
 
 
 class OutputPortLink(TechnicalAssetOutputPortAssociation):
-    output_port: OutputPort = Field(validation_alias="dataset")
+    output_port: OutputPort
 
 
 class GetTechnicalAssetsResponseItem(BaseTechnicalAssetGet):

@@ -28,7 +28,7 @@ class TestAuth:
             user_id=str(user.id), role_id=str(role.id), resource_id=str(dataset.id)
         )
         DatasetRoleAssignmentFactory(
-            dataset_id=dataset.id,
+            output_port_id=dataset.id,
             user_id=user.id,
             role_id=role.id,
             decision=DecisionStatus.APPROVED,
@@ -46,7 +46,7 @@ class TestAuth:
             user_id=str(user.id), role_id=str(role.id), resource_id=str(dataset.id)
         )
         assignment: OutputPortRoleAssignment = DatasetRoleAssignmentFactory(
-            dataset_id=dataset.id,
+            output_port_id=dataset.id,
             user_id=user.id,
             role_id=role.id,
             decision=DecisionStatus.APPROVED,
@@ -67,7 +67,7 @@ class TestAuth:
         new_role: Role = RoleFactory(scope=Scope.DATASET)
 
         assignment: OutputPortRoleAssignment = DatasetRoleAssignmentFactory(
-            dataset_id=dataset.id,
+            output_port_id=dataset.id,
             user_id=user.id,
             role_id=role.id,
             decision=DecisionStatus.APPROVED,

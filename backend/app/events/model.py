@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 
 from sqlalchemy import Column, Enum, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, mapped_column, relationship, synonym
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.database import Base
 from app.shared.model import BaseORM
@@ -52,13 +52,12 @@ class Event(Base, BaseORM):
         ",and_(Event.target_id == foreign(User.id), "
         "Event.target_type == 'USER'))",
     )
-    outputPort: Mapped["OutputPort"] = relationship(
+    output_port: Mapped["OutputPort"] = relationship(
         primaryjoin="or_(and_(Event.subject_id == foreign(OutputPort.id),"
         " Event.subject_type == 'DATASET'),"
         "and_(Event.target_id == foreign(OutputPort.id),"
         " Event.target_type == 'DATASET'))",
     )
-    dataset = synonym("outputPort")
     data_output: Mapped["TechnicalAsset"] = relationship(
         primaryjoin="or_(and_(Event.subject_id == "
         "foreign(TechnicalAsset.id), Event.subject_type == 'DATA_OUTPUT'),"

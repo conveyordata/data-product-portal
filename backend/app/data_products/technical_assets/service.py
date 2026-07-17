@@ -68,7 +68,7 @@ class DataOutputService:
                 select(TechnicalAssetModel).options(
                     selectinload(TechnicalAssetModel.environment_configurations),
                     selectinload(TechnicalAssetModel.dataset_links)
-                    .selectinload(DataOutputDatasetAssociationModel.dataset)
+                    .selectinload(DataOutputDatasetAssociationModel.output_port)
                     .raiseload("*"),
                 )
             )
@@ -155,7 +155,7 @@ class DataOutputService:
     def update_search_for_associated_datasets(self, result: TechnicalAssetModel):
         dataset_service = OutputPortService(self.db)
         for dataset_link in result.dataset_links:
-            dataset_service.recalculate_search(dataset_link.dataset_id)
+            dataset_service.recalculate_search(dataset_link.output_port_id)
 
     def update_data_output_status(
         self,
@@ -176,12 +176,12 @@ class DataOutputService:
         self,
         data_product_id: UUID,
         id: UUID,
-        dataset_id: UUID,
+        output_port_id: UUID,
         *,
         actor: User,
     ) -> DataOutputDatasetAssociationModel:
         dataset = ensure_output_port_exists(
-            dataset_id,
+            output_port_id,
             self.db,
             data_product_id=data_product_id,
             options=[selectinload(OutputPortModel.data_product_links)],
@@ -194,39 +194,39 @@ class DataOutputService:
             )
 
         if dataset.id in [
-            link.dataset_id
+            link.output_port_id
             for link in data_output.dataset_links
             if link.status != DecisionStatus.DENIED
         ]:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Dataset {dataset_id} already exists in data product {id}",
+                detail=f"Dataset {output_port_id} already exists in data product {id}",
             )
 
         # Data output requests always need to be approved
         dataset_link = DataOutputDatasetAssociationModel(
-            dataset_id=dataset_id,
+            output_port_id=output_port_id,
             status=DecisionStatus.PENDING,
             requested_by=actor,
             requested_on=datetime.now(tz=pytz.utc),
         )
         data_output.dataset_links.append(dataset_link)
         self.db.flush()
-        OutputPortService(self.db).recalculate_search(dataset_id)
+        OutputPortService(self.db).recalculate_search(output_port_id)
         self.db.commit()
         return dataset_link
 
     def unlink_dataset_from_data_output(
-        self, data_product_id: UUID, id: UUID, dataset_id: UUID
+        self, data_product_id: UUID, id: UUID, output_port_id: UUID
     ) -> TechnicalAssetModel:
-        ensure_output_port_exists(dataset_id, self.db)
+        ensure_output_port_exists(output_port_id, self.db)
         data_output = self.get_data_output(data_product_id, id)
 
         data_output_dataset = next(
             (
                 dataset
                 for dataset in data_output.dataset_links
-                if dataset.dataset_id == dataset_id
+                if dataset.output_port_id == output_port_id
             ),
             None,
         )
@@ -238,7 +238,7 @@ class DataOutputService:
 
         data_output.dataset_links.remove(data_output_dataset)
         self.db.flush()
-        OutputPortService(self.db).recalculate_search(dataset_id)
+        OutputPortService(self.db).recalculate_search(output_port_id)
         self.db.commit()
         return data_output
 
@@ -281,7 +281,7 @@ class DataOutputService:
                 .options(
                     selectinload(TechnicalAssetModel.environment_configurations),
                     selectinload(TechnicalAssetModel.dataset_links)
-                    .selectinload(DataOutputDatasetAssociation.dataset)
+                    .selectinload(DataOutputDatasetAssociation.output_port)
                     .selectinload(OutputPortModel.tags)
                     .raiseload("*"),
                 )

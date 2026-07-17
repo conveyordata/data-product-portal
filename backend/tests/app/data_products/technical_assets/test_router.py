@@ -628,7 +628,7 @@ class TestTechnicalAssetsRouter:
             permissions=[Action.OUTPUT_PORT__APPROVE_TECHNICAL_ASSET_LINK_REQUEST],
         )
         DatasetRoleAssignmentFactory(
-            user_id=user.id, role_id=ds_role.id, dataset_id=dataset.id
+            user_id=user.id, role_id=ds_role.id, output_port_id=dataset.id
         )
         # Mock auto-approval scenario (same data product owner)
         response = client.post(
@@ -666,7 +666,7 @@ class TestTechnicalAssetsRouter:
         DatasetRoleAssignmentFactory(
             user_id=other_approver.id,
             role_id=approver_role.id,
-            dataset_id=dataset.id,
+            output_port_id=dataset.id,
         )
 
         # Mock manual approval scenario (different data product owner)

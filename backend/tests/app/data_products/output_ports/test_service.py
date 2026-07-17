@@ -32,7 +32,7 @@ class TestDatasetsService:
         role = RoleFactory.dataset_owner()
         ds = OutputPortFactory(access_type=OutputPortAccessType.PRIVATE)
         DatasetRoleAssignmentFactory(
-            role_id=role.id, dataset_id=ds.id, user_id=owner.id
+            role_id=role.id, output_port_id=ds.id, user_id=owner.id
         )
         ds = self.get_output_port(ds)
         assert OutputPortService(test_session).is_visible_to_user(ds, owner) is True
@@ -53,7 +53,7 @@ class TestDatasetsService:
         DataProductRoleAssignmentFactory(
             role_id=role.id, data_product_id=dp.id, user_id=user.id
         )
-        InputPortFactory(consuming_abstract_data_product=dp, dataset=ds)
+        InputPortFactory(consuming_abstract_data_product=dp, output_port=ds)
         ds = self.get_output_port(ds)
         assert OutputPortService(test_session).is_visible_to_user(ds, user) is True
 
@@ -64,7 +64,9 @@ class TestDatasetsService:
     def test_recalculate_search_with_technical_asset(self):
         ds = OutputPortFactory()
         data_output = TechnicalAssetFactory(owner=ds.data_product)
-        TechnicalAssetOutputPortAssociationFactory(data_output=data_output, dataset=ds)
+        TechnicalAssetOutputPortAssociationFactory(
+            data_output=data_output, output_port=ds
+        )
         OutputPortService(test_session).recalculate_search(ds.id)
 
     def test_recalculate_search_for_all_output_ports(self):
@@ -95,7 +97,9 @@ class TestDatasetsService:
             name="Owner Private Dataset", access_type=OutputPortAccessType.PRIVATE
         )
         DatasetRoleAssignmentFactory(
-            role_id=owner_role.id, dataset_id=owned_private_dataset.id, user_id=owner.id
+            role_id=owner_role.id,
+            output_port_id=owned_private_dataset.id,
+            user_id=owner.id,
         )
 
         # Recalculate search embeddings for all datasets
@@ -135,7 +139,7 @@ class TestDatasetsService:
             name="My Private Dataset", access_type=OutputPortAccessType.PRIVATE
         )
         DatasetRoleAssignmentFactory(
-            role_id=owner_role.id, dataset_id=private_dataset.id, user_id=owner.id
+            role_id=owner_role.id, output_port_id=private_dataset.id, user_id=owner.id
         )
 
         # Create a unrestricted dataset for comparison

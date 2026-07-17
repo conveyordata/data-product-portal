@@ -55,11 +55,11 @@ class InputPortService:
             .where(
                 InputPortModel.consuming_abstract_data_product_id
                 == consuming_data_product_id,
-                InputPortModel.dataset_id == output_port_id,
+                InputPortModel.output_port_id == output_port_id,
             )
             .join(
                 OutputPort,
-                OutputPort.id == InputPortModel.dataset_id,
+                OutputPort.id == InputPortModel.output_port_id,
             )
             .where(
                 OutputPort.data_product_id == data_product_id,
@@ -214,7 +214,7 @@ class InputPortService:
                 .join(InputPortRequestModel)
                 .where(InputPortRequestModel.decision == DecisionStatus.PENDING)
                 .where(
-                    InputPortModel.dataset.has(
+                    InputPortModel.output_port.has(
                         OutputPortModel.assignments.any(
                             DatasetRoleAssignmentModel.user_id == user.id
                         )
@@ -233,8 +233,8 @@ class InputPortService:
             for a in requested_associations
             if authorizer.has_access(
                 sub=str(user.id),
-                dom=str(a.dataset.data_product.domain),
-                obj=str(a.dataset_id),
+                dom=str(a.output_port.data_product.domain),
+                obj=str(a.output_port_id),
                 act=Action.OUTPUT_PORT__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
             )
         ]

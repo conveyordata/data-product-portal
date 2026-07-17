@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from pydantic import Field
+from pydantic import AliasChoices, Field
 
 from app.configuration.data_product_settings.enums import (
     DataProductSettingScope,
@@ -35,4 +35,6 @@ class DataProductSettingValue(BaseValue):
 
 
 class OutputPortSettingValue(BaseValue):
-    output_port_id: UUID = Field(validation_alias="dataset_id")
+    output_port_id: UUID = Field(
+        validation_alias=AliasChoices("output_port_id", "dataset_id")
+    )

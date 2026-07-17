@@ -24,7 +24,7 @@ class TestDatasetRoleAssignmentsService:
         user = UserFactory()
         role = RoleFactory(scope=Scope.DATASET, permissions=[action])
         DatasetRoleAssignmentFactory(
-            dataset_id=dataset.id, user_id=user.id, role_id=role.id
+            output_port_id=dataset.id, user_id=user.id, role_id=role.id
         )
 
         authorized_users = service.users_with_authz_action(

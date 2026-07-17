@@ -72,7 +72,7 @@ class OutputPortStatsService:
 
     def get_query_stats(
         self,
-        dataset_id: UUID,
+        output_port_id: UUID,
         granularity: QueryStatsGranularity = DEFAULT_GRANULARITY,
         day_range: int = DEFAULT_DAY_RANGE,
     ) -> OutputPortQueryStatsResponses:
@@ -84,7 +84,7 @@ class OutputPortStatsService:
             query = (
                 select(DatasetQueryStatsDaily)
                 .where(
-                    DatasetQueryStatsDaily.dataset_id == dataset_id,
+                    DatasetQueryStatsDaily.output_port_id == output_port_id,
                     DatasetQueryStatsDaily.date >= start_date,
                 )
                 .order_by(DatasetQueryStatsDaily.date.asc())
@@ -112,7 +112,7 @@ class OutputPortStatsService:
                     DataProduct.id == DatasetQueryStatsDaily.consumer_data_product_id,
                 )
                 .where(
-                    DatasetQueryStatsDaily.dataset_id == dataset_id,
+                    DatasetQueryStatsDaily.output_port_id == output_port_id,
                     DatasetQueryStatsDaily.date >= start_date,
                 )
                 .group_by(
@@ -173,7 +173,7 @@ class OutputPortStatsService:
         self.db.commit()
 
     def delete_query_stats(
-        self, dataset_id: UUID, delete_request: OutputPortQueryStatsDelete
+        self, output_port_id: UUID, delete_request: OutputPortQueryStatsDelete
     ) -> None:
         try:
             target_date = date.fromisoformat(delete_request.date)
@@ -181,7 +181,7 @@ class OutputPortStatsService:
             raise ValueError(f"Invalid date format: {delete_request.date}") from e
 
         stmt = delete(DatasetQueryStatsDaily).where(
-            DatasetQueryStatsDaily.dataset_id == dataset_id,
+            DatasetQueryStatsDaily.output_port_id == output_port_id,
             DatasetQueryStatsDaily.consumer_data_product_id
             == delete_request.consumer_data_product_id,
             DatasetQueryStatsDaily.date == target_date,

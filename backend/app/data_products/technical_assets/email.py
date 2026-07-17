@@ -4,14 +4,14 @@ from typing import Callable, Sequence
 import emailgen
 
 from app.core.email.send_mail import send_mail
-from app.data_products.output_ports.schema import Dataset
+from app.data_products.output_ports.schema import OutputPort
 from app.data_products.technical_assets.schema import TechnicalAsset
 from app.settings import settings
 from app.users.schema import User
 
 
 def send_link_dataset_email(
-    output_port: Dataset,
+    output_port: OutputPort,
     data_output: TechnicalAsset,
     *,
     requester: User,

@@ -48,7 +48,7 @@ def add_random_data(
 
             TechnicalAssetOutputPortAssociationFactory(
                 data_output=data_output,
-                dataset=dataset,
+                output_port=dataset,
             )
 
         # Add data products to the dataset
@@ -57,7 +57,7 @@ def add_random_data(
 
             InputPortFactory(
                 consuming_abstract_data_product=data_product,
-                dataset=dataset,
+                output_port=dataset,
             )
 
 

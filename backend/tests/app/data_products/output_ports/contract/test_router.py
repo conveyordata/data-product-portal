@@ -88,7 +88,7 @@ def _assign_update_role(session, dataset_id):
         permissions=[AuthorizationAction.OUTPUT_PORT__UPDATE_CONTRACT],
     )
     DatasetRoleAssignmentFactory(
-        user_id=user.id, role_id=role.id, dataset_id=dataset_id
+        user_id=user.id, role_id=role.id, output_port_id=dataset_id
     )
     return user
 
@@ -311,7 +311,7 @@ class TestContractRouter:
         DatasetRoleAssignmentFactory(
             user_id=user.id,
             role_id=role.id,
-            dataset_id=dataset.id,
+            output_port_id=dataset.id,
         )
 
         response = client.delete(

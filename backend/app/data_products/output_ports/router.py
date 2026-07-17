@@ -82,7 +82,7 @@ def _assign_owner_role_assignments(
         event_service.create_event(
             CreateEvent(
                 name=EventType.DATASET_ROLE_ASSIGNMENT_CREATED,
-                subject_id=assignment.dataset_id,
+                subject_id=assignment.output_port_id,
                 subject_type=EventReferenceEntity.DATASET,
                 target_id=assignment.user_id,
                 target_type=EventReferenceEntity.USER,

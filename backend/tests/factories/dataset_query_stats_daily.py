@@ -8,13 +8,17 @@ from .data_product import DataProductFactory
 from .dataset import OutputPortFactory
 
 
-class DatasetQueryStatsFactory(factory.alchemy.SQLAlchemyModelFactory):
+class OutputPortQueryStatsFactory(factory.alchemy.SQLAlchemyModelFactory):
     class Meta:
         model = DatasetQueryStatsDaily
 
     date = factory.Faker("date_object")
-    dataset_id = factory.LazyAttribute(
-        lambda o: OutputPortFactory().id if not hasattr(o, "dataset") else o.dataset.id
+    output_port_id = factory.LazyAttribute(
+        lambda o: (
+            OutputPortFactory().id
+            if not hasattr(o, "output_port")
+            else o.output_port.id
+        )
     )
     consumer_data_product_id = factory.LazyAttribute(
         lambda o: (

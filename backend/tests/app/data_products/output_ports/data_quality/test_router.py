@@ -31,7 +31,7 @@ def _assign_update_role(session, dataset):
         ],
     )
     DatasetRoleAssignmentFactory(
-        user_id=user.id, role_id=role.id, dataset_id=dataset.id
+        user_id=user.id, role_id=role.id, output_port_id=dataset.id
     )
     return user
 

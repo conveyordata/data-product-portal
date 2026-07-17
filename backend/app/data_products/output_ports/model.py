@@ -68,21 +68,21 @@ class OutputPort(Base, BaseORM, EventTrackedMixin):
 
     # Relationships
     assignments: Mapped[list["DatasetRoleAssignment"]] = relationship(
-        back_populates="outputPort",
+        back_populates="output_port",
         cascade="all, delete-orphan",
         order_by="DatasetRoleAssignment.decision, DatasetRoleAssignment.requested_on",
         lazy="raise",
     )
     data_product_links: Mapped[list["InputPort"]] = relationship(
         "InputPort",
-        back_populates="outputPort",
+        back_populates="output_port",
         order_by="InputPort.status.desc()",
         cascade="all, delete-orphan",
         lazy="raise",
     )
     data_output_links: Mapped[list["DataOutputDatasetAssociation"]] = relationship(
         "DataOutputDatasetAssociation",
-        back_populates="outputPort",
+        back_populates="output_port",
         order_by="DataOutputDatasetAssociation.status.desc()",
         cascade="all, delete-orphan",
         lazy="raise",
@@ -92,9 +92,9 @@ class OutputPort(Base, BaseORM, EventTrackedMixin):
     )
     data_product_settings: Mapped[list["DataProductSettingValue"]] = relationship(
         "DataProductSettingValue",
-        back_populates="outputPort",
+        back_populates="output_port",
         cascade="all, delete-orphan",
-        order_by="DataProductSettingValue.dataset_id",
+        order_by="DataProductSettingValue.output_port_id",
         lazy="raise",
     )
     lifecycle: Mapped["DataProductLifecycle"] = relationship(
@@ -122,7 +122,7 @@ class OutputPort(Base, BaseORM, EventTrackedMixin):
     abstract_data_product_count = deferred(
         column_property(
             select(func.count(InputPort.id))
-            .where(InputPort.dataset_id == id)
+            .where(InputPort.output_port_id == id)
             .where(InputPort.status == DecisionStatus.APPROVED)
             .correlate_except(InputPort)
             .scalar_subquery()
@@ -132,7 +132,7 @@ class OutputPort(Base, BaseORM, EventTrackedMixin):
     technical_assets_count = deferred(
         column_property(
             select(func.count(DataOutputDatasetAssociation.id))
-            .where(DataOutputDatasetAssociation.dataset_id == id)
+            .where(DataOutputDatasetAssociation.output_port_id == id)
             .correlate_except(DataOutputDatasetAssociation)
             .scalar_subquery()
         ),

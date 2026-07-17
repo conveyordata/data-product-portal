@@ -9,8 +9,8 @@ from app.settings import settings
 from tests.factories import (
     DataProductFactory,
     DataProductRoleAssignmentFactory,
-    DatasetQueryStatsFactory,
     OutputPortFactory,
+    OutputPortQueryStatsFactory,
     RoleFactory,
     UserFactory,
 )
@@ -60,15 +60,15 @@ class TestDatasetQueryStatsDailyRouter:
         today = date.today()
         yesterday = today - timedelta(days=1)
 
-        DatasetQueryStatsFactory(
+        OutputPortQueryStatsFactory(
             date=today,
-            dataset_id=dataset.id,
+            output_port_id=dataset.id,
             consumer_data_product_id=consumer1.id,
             query_count=150,
         )
-        DatasetQueryStatsFactory(
+        OutputPortQueryStatsFactory(
             date=yesterday,
-            dataset_id=dataset.id,
+            output_port_id=dataset.id,
             consumer_data_product_id=consumer2.id,
             query_count=250,
         )
@@ -101,9 +101,9 @@ class TestDatasetQueryStatsDailyRouter:
         consumer = DataProductFactory()
         today = date.today()
 
-        DatasetQueryStatsFactory(
+        OutputPortQueryStatsFactory(
             date=today,
-            dataset_id=dataset.id,
+            output_port_id=dataset.id,
             consumer_data_product_id=consumer.id,
             query_count=200,
         )
@@ -130,21 +130,21 @@ class TestDatasetQueryStatsDailyRouter:
         middle_of_week = start_of_week + timedelta(days=2)
         old_date = date.today() - timedelta(days=150)
 
-        DatasetQueryStatsFactory(
+        OutputPortQueryStatsFactory(
             date=start_of_week,
-            dataset_id=dataset.id,
+            output_port_id=dataset.id,
             consumer_data_product_id=consumer.id,
             query_count=50,
         )
-        DatasetQueryStatsFactory(
+        OutputPortQueryStatsFactory(
             date=middle_of_week,
-            dataset_id=dataset.id,
+            output_port_id=dataset.id,
             consumer_data_product_id=consumer.id,
             query_count=75,
         )
-        DatasetQueryStatsFactory(
+        OutputPortQueryStatsFactory(
             date=old_date,
-            dataset_id=dataset.id,
+            output_port_id=dataset.id,
             consumer_data_product_id=consumer.id,
             query_count=125,
         )
@@ -181,9 +181,9 @@ class TestDatasetQueryStatsDailyRouter:
         dataset = OutputPortFactory(data_product=data_product, tags=[])
         consumer = DataProductFactory()
 
-        DatasetQueryStatsFactory(
+        OutputPortQueryStatsFactory(
             date=date(2024, 1, 15),
-            dataset_id=dataset.id,
+            output_port_id=dataset.id,
             consumer_data_product_id=consumer.id,
             query_count=150,
         )
@@ -194,7 +194,9 @@ class TestDatasetQueryStatsDailyRouter:
 
         # Verify query stats exist before deletion
         stats_before = (
-            session.query(DatasetQueryStatsDaily).filter_by(dataset_id=dataset_id).all()
+            session.query(DatasetQueryStatsDaily)
+            .filter_by(output_port_id=dataset_id)
+            .all()
         )
         assert len(stats_before) == 1, "Should have 1 query stat before deletion"
 
@@ -217,7 +219,9 @@ class TestDatasetQueryStatsDailyRouter:
         # (This happens because deleting the data product cascades to delete the dataset,
         # and deleting the dataset cascades to delete the query stats)
         stats_after = (
-            session.query(DatasetQueryStatsDaily).filter_by(dataset_id=dataset_id).all()
+            session.query(DatasetQueryStatsDaily)
+            .filter_by(output_port_id=dataset_id)
+            .all()
         )
         assert len(stats_after) == 0, (
             "Query stats should be cascade deleted when data product (and its dataset) is deleted"
