@@ -4185,6 +4185,21 @@ func (s *EventEntityType) UnmarshalText(data []byte) error {
 	}
 }
 
+// Ref: #/components/schemas/ExpiringSoonThresholdResponse
+type ExpiringSoonThresholdResponse struct {
+	Days int `json:"days"`
+}
+
+// GetDays returns the value of Days.
+func (s *ExpiringSoonThresholdResponse) GetDays() int {
+	return s.Days
+}
+
+// SetDays sets the value of Days.
+func (s *ExpiringSoonThresholdResponse) SetDays(val int) {
+	s.Days = val
+}
+
 // Ref: #/components/schemas/Exploration
 type Exploration struct {
 	ID          uuid.UUID                 `json:"id"`

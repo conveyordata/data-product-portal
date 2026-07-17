@@ -7273,6 +7273,27 @@
         }
       }
     },
+    "/api/v2/access_durations/expiring_soon_threshold": {
+      "get": {
+        "tags": [
+          "Access Durations"
+        ],
+        "summary": "Get Expiring Soon Threshold",
+        "operationId": "get_expiring_soon_threshold",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExpiringSoonThresholdResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v2/access_durations/{abstract_data_product_type}/default": {
       "get": {
         "tags": [
@@ -10812,6 +10833,19 @@
           "user"
         ],
         "title": "EventEntityType"
+      },
+      "ExpiringSoonThresholdResponse": {
+        "properties": {
+          "days": {
+            "type": "integer",
+            "title": "Days"
+          }
+        },
+        "type": "object",
+        "required": [
+          "days"
+        ],
+        "title": "ExpiringSoonThresholdResponse"
       },
       "Exploration": {
         "properties": {

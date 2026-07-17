@@ -136,6 +136,7 @@ from .environment_get_item import EnvironmentGetItem
 from .environment_platform_config_get import EnvironmentPlatformConfigGet
 from .environments_get import EnvironmentsGet
 from .event_entity_type import EventEntityType
+from .expiring_soon_threshold_response import ExpiringSoonThresholdResponse
 from .exploration import Exploration
 from .exploration_event import ExplorationEvent
 from .field_dependency import FieldDependency
@@ -447,6 +448,7 @@ __all__ = (
     "EnvironmentPlatformConfigGet",
     "EnvironmentsGet",
     "EventEntityType",
+    "ExpiringSoonThresholdResponse",
     "Exploration",
     "ExplorationEvent",
     "FieldDependency",

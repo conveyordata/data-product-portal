@@ -17,6 +17,8 @@ from app.abstract_data_product.model import (
     AbstractDataProduct,
     ensure_abstract_data_product_exists,
 )
+from app.abstract_data_product.type import AbstractDataProductType
+from app.access_durations.enums import AccessDurationType
 from app.access_durations.model import AccessDuration
 from app.access_durations.service import AccessDurationService
 from app.authorization.role_assignments.enums import DecisionStatus
@@ -67,8 +69,9 @@ class AbstractDataProductService:
     def _resolve_access_duration(
         self, adp: AbstractDataProduct, output_port: OutputPortModel
     ) -> AccessDuration:
-        access_duration_type = output_port.get_access_duration_type(
-            adp.abstract_data_product_type
+        access_duration_type = self.get_access_duration_type(
+            output_port=output_port,
+            abstract_data_product_type=adp.abstract_data_product_type,
         )
         access_duration = AccessDurationService(self.db).get_access_duration(
             adp.abstract_data_product_type, access_duration_type
@@ -82,6 +85,25 @@ class AbstractDataProductService:
                 ),
             )
         return access_duration
+
+    def get_access_duration_type(
+        self,
+        output_port: OutputPortModel,
+        abstract_data_product_type: AbstractDataProductType,
+    ) -> AccessDurationType:
+        match abstract_data_product_type:
+            case AbstractDataProductType.DATA_PRODUCT:
+                return output_port.data_product_access_duration_type
+            case AbstractDataProductType.EXPLORATION:
+                return output_port.exploration_access_duration_type
+            case _:
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail=(
+                        "Unsupported abstract data product type: "
+                        f"{abstract_data_product_type}"
+                    ),
+                )
 
     def _add_single_input_port(
         self,

@@ -336,6 +336,12 @@ type Invoker interface {
 	//
 	// GET /api/v2/configuration/environments
 	GetEnvironments(ctx context.Context) (*EnvironmentsGet, error)
+	// GetExpiringSoonThreshold invokes get_expiring_soon_threshold operation.
+	//
+	// Get Expiring Soon Threshold.
+	//
+	// GET /api/v2/access_durations/expiring_soon_threshold
+	GetExpiringSoonThreshold(ctx context.Context) (*ExpiringSoonThresholdResponse, error)
 	// GetExploration invokes get_exploration operation.
 	//
 	// Get Exploration.
@@ -4034,6 +4040,49 @@ func (c *Client) sendGetEnvironments(ctx context.Context) (res *EnvironmentsGet,
 	}()
 
 	result, err := decodeGetEnvironmentsResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetExpiringSoonThreshold invokes get_expiring_soon_threshold operation.
+//
+// Get Expiring Soon Threshold.
+//
+// GET /api/v2/access_durations/expiring_soon_threshold
+func (c *Client) GetExpiringSoonThreshold(ctx context.Context) (*ExpiringSoonThresholdResponse, error) {
+	res, err := c.sendGetExpiringSoonThreshold(ctx)
+	return res, err
+}
+
+func (c *Client) sendGetExpiringSoonThreshold(ctx context.Context) (res *ExpiringSoonThresholdResponse, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/api/v2/access_durations/expiring_soon_threshold"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeGetExpiringSoonThresholdResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
