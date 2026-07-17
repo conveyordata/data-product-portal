@@ -7,7 +7,7 @@ import { DatasetPopoverTitle } from '@/components/datasets/dataset-popover-title
 import { OutputPortTitle } from '@/components/datasets/output-port-title/output-port-title.tsx';
 import EllipsisParagraph from '@/components/ellipsis-paragraph/ellipsis-paragraph.component.tsx';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
-import { ExpiryDate, RenewalTag } from '@/components/input-port/access-status.tsx';
+import { ExpiryDate, IsExpiringSoonTag, RenewalTag } from '@/components/input-port/access-status.tsx';
 import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-avatar.component.tsx';
 import {
     type AbstractDataProductInputPort as InputPort,
@@ -69,11 +69,8 @@ export const getDataProductDatasetsColumns = ({
             render: (_, { status, renewal_status, current_request }) => (
                 <Flex align={'center'} gap={'small'} wrap>
                     <Badge status={getInputPortStatusBadgeStatus(status)} text={getInputPortStatusLabel(t, status)} />
-                    <RenewalTag
-                        status={status}
-                        renewalStatus={renewal_status}
-                        validUntil={current_request.valid_until}
-                    />
+                    <RenewalTag renewalStatus={renewal_status} />
+                    <IsExpiringSoonTag status={status} validUntil={current_request.valid_until} />
                 </Flex>
             ),
             ...new FilterSettings(inputPorts, (input_port) => getInputPortStatusLabel(t, input_port.status)),

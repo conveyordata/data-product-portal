@@ -2,7 +2,7 @@ from datetime import date, datetime, timedelta
 
 import pytz
 
-from app.abstract_data_product.input_ports.enums import InputPortStatus
+from app.abstract_data_product.input_ports.enums import InputPortStatus, RenewalStatus
 from app.authorization.role_assignments.enums import DecisionStatus
 from tests.factories import InputPortFactory, InputPortRequestFactory
 
@@ -194,3 +194,96 @@ class TestInputPortModel:
         )
         port.recompute_status()
         assert port.status == InputPortStatus.APPROVED
+
+    def test_renewal_status__first_time_pending_is_not_a_renewal(self):
+        port = InputPortFactory.build(
+            request=False,
+            requests=[InputPortRequestFactory.build(decision=DecisionStatus.PENDING)],
+        )
+        assert port.renewal_status is None
+
+    def test_renewal_status__first_time_denied_is_not_a_renewal(self):
+        port = InputPortFactory.build(
+            request=False,
+            requests=[
+                InputPortRequestFactory.build(
+                    decision=DecisionStatus.DENIED, decided_by=None
+                )
+            ],
+        )
+        assert port.renewal_status is None
+
+    def test_renewal_status__active_grant_only_has_no_renewal(self):
+        port = InputPortFactory.build(
+            request=False,
+            requests=[
+                InputPortRequestFactory.build(
+                    decision=DecisionStatus.APPROVED, valid_until=None, decided_by=None
+                )
+            ],
+        )
+        assert port.renewal_status is None
+
+    def test_renewal_status__expired_grant_only_has_no_renewal(self):
+        port = InputPortFactory.build(
+            request=False,
+            requests=[
+                InputPortRequestFactory.build(
+                    decision=DecisionStatus.APPROVED,
+                    valid_until=TODAY - timedelta(days=1),
+                    decided_by=None,
+                )
+            ],
+        )
+        assert port.renewal_status is None
+
+    def test_renewal_status__pending_renewal_on_active_grant(self):
+        port = InputPortFactory.build(
+            request=False,
+            requests=[
+                InputPortRequestFactory.build(
+                    decision=DecisionStatus.APPROVED,
+                    valid_until=TODAY + timedelta(days=10),
+                    created_on=NOW - timedelta(days=1),
+                    decided_by=None,
+                ),
+                InputPortRequestFactory.build(
+                    decision=DecisionStatus.PENDING, created_on=NOW
+                ),
+            ],
+        )
+        assert port.renewal_status == RenewalStatus.PENDING
+
+    def test_renewal_status__denied_renewal_on_active_grant(self):
+        port = InputPortFactory.build(
+            request=False,
+            requests=[
+                InputPortRequestFactory.build(
+                    decision=DecisionStatus.APPROVED,
+                    valid_until=TODAY + timedelta(days=10),
+                    created_on=NOW - timedelta(days=1),
+                    decided_by=None,
+                ),
+                InputPortRequestFactory.build(
+                    decision=DecisionStatus.DENIED, created_on=NOW, decided_by=None
+                ),
+            ],
+        )
+        assert port.renewal_status == RenewalStatus.DENIED
+
+    def test_renewal_status__pending_renewal_after_expired_grant(self):
+        port = InputPortFactory.build(
+            request=False,
+            requests=[
+                InputPortRequestFactory.build(
+                    decision=DecisionStatus.APPROVED,
+                    valid_until=TODAY - timedelta(days=1),
+                    created_on=NOW - timedelta(days=10),
+                    decided_by=None,
+                ),
+                InputPortRequestFactory.build(
+                    decision=DecisionStatus.PENDING, created_on=NOW
+                ),
+            ],
+        )
+        assert port.renewal_status == RenewalStatus.PENDING

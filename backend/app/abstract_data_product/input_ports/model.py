@@ -99,6 +99,11 @@ class InputPort(
     @property
     def renewal_status(self) -> Optional[RenewalStatus]:
         if self.active_grant is None or self.active_grant.id != self.latest_request.id:
+            has_prior_grant = any(
+                request.decision == DecisionStatus.APPROVED for request in self.requests
+            )
+            if not has_prior_grant:
+                return None
             match self.latest_request.decision:
                 case DecisionStatus.APPROVED:
                     # This case will never happen, the latest requests should equal active grant

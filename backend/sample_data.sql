@@ -1163,7 +1163,7 @@ begin
     INSERT INTO public.input_port_requests (id, input_port_id, decision, justification, decision_note, access_duration_type, requested_duration_days, requested_by_id, requested_on, decided_by_id, decided_on, valid_from, valid_until, created_on, updated_on)
     SELECT gen_random_uuid(), link.id, 'APPROVED', 'Producer 7: grant expired, no renewal requested', NULL, 'TIME_BOUND', 90, jane_id, timezone('utc'::text, CURRENT_TIMESTAMP), john_id, timezone('utc'::text, CURRENT_TIMESTAMP), (CURRENT_DATE - INTERVAL '90 days')::date, (CURRENT_DATE - INTERVAL '30 days')::date, timezone('utc'::text, CURRENT_TIMESTAMP), NULL FROM link;
 
-    -- CONSUMER view: DEI Insights Dashboard consumes 7 existing output ports (requested by John)
+    -- CONSUMER view: DEI Insights Dashboard consumes 8 existing output ports (requested by John)
     -- Consumer case 1 - Pending - output port: Revenue Dashboard Summary
     WITH link AS (
         INSERT INTO public.input_ports (id, consuming_abstract_data_product_id, dataset_id, status, created_on, updated_on, deleted_at)
@@ -1232,4 +1232,13 @@ begin
     )
     INSERT INTO public.input_port_requests (id, input_port_id, decision, justification, decision_note, access_duration_type, requested_duration_days, requested_by_id, requested_on, decided_by_id, decided_on, valid_from, valid_until, created_on, updated_on)
     SELECT gen_random_uuid(), link.id, 'APPROVED', 'Consumer 7: grant expired, no renewal requested', NULL, 'TIME_BOUND', 90, john_id, timezone('utc'::text, CURRENT_TIMESTAMP), jane_id, timezone('utc'::text, CURRENT_TIMESTAMP), (CURRENT_DATE - INTERVAL '90 days')::date, (CURRENT_DATE - INTERVAL '30 days')::date, timezone('utc'::text, CURRENT_TIMESTAMP), NULL FROM link;
+
+    -- Consumer case 8 - Approved, expiring soon - output port: Regulatory Audit Report
+    WITH link AS (
+        INSERT INTO public.input_ports (id, consuming_abstract_data_product_id, dataset_id, status, created_on, updated_on, deleted_at)
+        VALUES (gen_random_uuid(), dei_insights_dashboard, 'f1659a4f-95d5-40bb-a7b5-121cf7e74ea8', 'APPROVED', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL)
+        RETURNING id
+    )
+    INSERT INTO public.input_port_requests (id, input_port_id, decision, justification, decision_note, access_duration_type, requested_duration_days, requested_by_id, requested_on, decided_by_id, decided_on, valid_from, valid_until, created_on, updated_on)
+    SELECT gen_random_uuid(), link.id, 'APPROVED', 'Consumer 8: approved, active grant expiring soon', NULL, 'TIME_BOUND', 90, john_id, timezone('utc'::text, CURRENT_TIMESTAMP), jane_id, timezone('utc'::text, CURRENT_TIMESTAMP), (CURRENT_DATE - INTERVAL '83 days')::date, (CURRENT_DATE + INTERVAL '7 days')::date, timezone('utc'::text, CURRENT_TIMESTAMP), NULL FROM link;
 end $$;

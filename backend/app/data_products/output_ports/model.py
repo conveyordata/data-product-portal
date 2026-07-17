@@ -17,6 +17,7 @@ from sqlalchemy.orm import (
 from app.abstract_data_product.input_ports.model import (
     InputPort,
 )
+from app.abstract_data_product.type import AbstractDataProductType
 from app.access_durations.enums import AccessDurationType
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.configuration.tags.model import Tag, tag_dataset_table
@@ -156,6 +157,23 @@ class OutputPort(Base, BaseORM, EventTrackedMixin):
         ),
         nullable=False,
     )
+
+    def get_access_duration_type(
+        self, abstract_data_product_type: AbstractDataProductType
+    ) -> AccessDurationType:
+        match abstract_data_product_type:
+            case AbstractDataProductType.DATA_PRODUCT:
+                return self.data_product_access_duration_type
+            case AbstractDataProductType.EXPLORATION:
+                return self.exploration_access_duration_type
+            case _:
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail=(
+                        "Unsupported abstract data product type: "
+                        f"{abstract_data_product_type}"
+                    ),
+                )
 
     def to_event(self) -> OutputPortEvent:
         return OutputPortEvent(

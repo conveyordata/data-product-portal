@@ -1,7 +1,7 @@
 import { Badge, Button, Flex, Popconfirm, type TableColumnsType } from 'antd';
 import type { TFunction } from 'i18next';
 import EllipsisParagraph from '@/components/ellipsis-paragraph/ellipsis-paragraph.component.tsx';
-import { ExpiryDate, RenewalTag } from '@/components/input-port/access-status.tsx';
+import { ExpiryDate, IsExpiringSoonTag, RenewalTag } from '@/components/input-port/access-status.tsx';
 import { ConsumerColumn } from '@/components/input-port/consumer-column.tsx';
 import {
     InputPortStatus,
@@ -64,11 +64,8 @@ export const getConsumerColumns = ({
             render: (_, { status, renewal_status, current_request }) => (
                 <Flex align={'center'} gap={'small'} wrap>
                     <Badge status={getInputPortStatusBadgeStatus(status)} text={getInputPortStatusLabel(t, status)} />
-                    <RenewalTag
-                        status={status}
-                        renewalStatus={renewal_status}
-                        validUntil={current_request.valid_until}
-                    />
+                    <RenewalTag renewalStatus={renewal_status} />
+                    <IsExpiringSoonTag status={status} validUntil={current_request.valid_until} />
                 </Flex>
             ),
             ...new FilterSettings(dataProductLinks, (dpl) => getInputPortStatusLabel(t, dpl.status)),

@@ -15,26 +15,31 @@ function isExpiringSoon(status: string, validUntil: string | null): boolean {
 }
 
 type RenewalTagProps = {
-    status: string;
     renewalStatus?: string | null;
-    validUntil: string | null;
 };
 
-export function RenewalTag({ status, renewalStatus, validUntil }: RenewalTagProps) {
+export function RenewalTag({ renewalStatus }: RenewalTagProps) {
     const { t } = useTranslation();
-    if (status === InputPortStatus.Pending) {
-        return null;
-    }
     if (renewalStatus === RenewalStatus.Pending) {
         return <Tag color={'blue'}>{t('Renewal pending')}</Tag>;
     }
-    if (renewalStatus === RenewalStatus.Denied && status !== InputPortStatus.Denied) {
+    if (renewalStatus === RenewalStatus.Denied) {
         return <Tag color={'red'}>{t('Renewal declined')}</Tag>;
     }
-    if (isExpiringSoon(status, validUntil)) {
-        return <Tag color={'gold'}>{t('Expiring soon')}</Tag>;
-    }
     return null;
+}
+
+type IsExpiringSoonTagProps = {
+    status: string;
+    validUntil: string | null;
+};
+
+export function IsExpiringSoonTag({ status, validUntil }: IsExpiringSoonTagProps) {
+    const { t } = useTranslation();
+    if (!isExpiringSoon(status, validUntil)) {
+        return null;
+    }
+    return <Tag color={'gold'}>{t('Expiring soon')}</Tag>;
 }
 
 type ExpiryDateProps = {

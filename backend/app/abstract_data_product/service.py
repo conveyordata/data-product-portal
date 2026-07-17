@@ -1,6 +1,6 @@
 from copy import deepcopy
 from datetime import datetime
-from typing import Optional, Sequence
+from typing import Sequence
 
 import pytz
 from fastapi import BackgroundTasks, HTTPException, status
@@ -17,8 +17,7 @@ from app.abstract_data_product.model import (
     AbstractDataProduct,
     ensure_abstract_data_product_exists,
 )
-from app.abstract_data_product.type import AbstractDataProductType
-from app.access_durations.enums import AccessDurationType
+from app.access_durations.model import AccessDuration
 from app.access_durations.service import AccessDurationService
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.role_assignments.output_port.service import (
@@ -67,36 +66,22 @@ class AbstractDataProductService:
 
     def _resolve_access_duration(
         self, adp: AbstractDataProduct, output_port: OutputPortModel
-    ) -> tuple[AccessDurationType, Optional[int]]:
-        match adp.abstract_data_product_type:
-            case AbstractDataProductType.DATA_PRODUCT:
-                access_duration_type = output_port.data_product_access_duration_type
-            case AbstractDataProductType.EXPLORATION:
-                access_duration_type = output_port.exploration_access_duration_type
-            case _:
-                raise HTTPException(
-                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    detail=(
-                        "Unsupported abstract data product type: "
-                        f"{adp.abstract_data_product_type}"
-                    ),
-                )
-
-        if access_duration_type == AccessDurationType.PERMANENT:
-            return access_duration_type, None
-
+    ) -> AccessDuration:
+        access_duration_type = output_port.get_access_duration_type(
+            adp.abstract_data_product_type
+        )
         access_duration = AccessDurationService(self.db).get_access_duration(
             adp.abstract_data_product_type, access_duration_type
         )
-        if access_duration is None or access_duration.days is None:
+        if access_duration is None:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=(
-                    "No time-bound access duration is configured for "
+                    "No access duration is configured for "
                     f"{adp.abstract_data_product_type.value} access to this output port"
                 ),
             )
-        return access_duration_type, access_duration.days
+        return access_duration
 
     def _add_single_input_port(
         self,
@@ -148,9 +133,7 @@ class AbstractDataProductService:
                 detail="You do not have access to this private output port",
             )
 
-        access_duration_type, requested_duration_days = self._resolve_access_duration(
-            adp, output_port
-        )
+        access_duration = self._resolve_access_duration(adp, output_port)
         input_port = (
             existing
             if existing is not None
@@ -163,8 +146,8 @@ class AbstractDataProductService:
             justification=justification,
             requested_by=actor,
             requested_on=datetime.now(tz=pytz.utc),
-            access_duration_type=access_duration_type,
-            requested_duration_days=requested_duration_days,
+            access_duration_type=access_duration.access_duration_type,
+            requested_duration_days=access_duration.days,
             input_port=input_port,
         )
         self.db.add(request)
