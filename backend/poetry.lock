@@ -3090,14 +3090,14 @@ poetry-plugin = ["poetry (>=1.2.0,<3.0.0) ; python_version < \"4.0\""]
 
 [[package]]
 name = "posthog"
-version = "7.25.0"
+version = "7.26.0"
 description = "Integrate PostHog into any python application."
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "posthog-7.25.0-py3-none-any.whl", hash = "sha256:63b7879cd066f6a621327db449f831392e6a79226892417dc20701f037ad34d3"},
-    {file = "posthog-7.25.0.tar.gz", hash = "sha256:3a7aeab611ba48824e700314d5f81e00e0ff8a1c169a244c0fa18c6f7960f61f"},
+    {file = "posthog-7.26.0-py3-none-any.whl", hash = "sha256:9a4bb3f62cd544b14d26d4d974aeb0937a75f60ad53cd2e520f56595eb57f851"},
+    {file = "posthog-7.26.0.tar.gz", hash = "sha256:9b31576acfabfa10f197ed23d3928f39178cd04d5b8c8193cad9780a315ffa55"},
 ]
 
 [package.dependencies]
@@ -3110,7 +3110,7 @@ typing-extensions = ">=4.2.0"
 dev = ["django-stubs", "griffe", "lxml", "mypy", "mypy-baseline", "packaging", "pre-commit", "pydantic (>=2.12.0)", "ruff", "setuptools", "tomli", "tomli_w", "twine", "types-requests", "types-setuptools", "wheel"]
 langchain = ["langchain (>=0.2.0)"]
 otel = ["opentelemetry-exporter-otlp-proto-http (>=1.20.0)", "opentelemetry-sdk (>=1.20.0)"]
-test = ["anthropic (>=0.72)", "claude-agent-sdk", "coverage", "django (>=5.2.15,<6.0)", "fastmcp (>=2.0)", "freezegun (==1.5.1)", "google-genai", "langchain-anthropic (>=1.0)", "langchain-community (>=0.4)", "langchain-core (>=1.0)", "langchain-openai (>=1.0)", "langgraph (>=1.0)", "langgraph-checkpoint (>=4.1.1)", "mcp (>=1.26.0)", "openai (>=2.0)", "opentelemetry-exporter-otlp-proto-http (>=1.20.0)", "opentelemetry-sdk (>=1.20.0)", "parameterized (>=0.8.1)", "pydantic (>=2.12.0)", "pytest", "pytest-asyncio", "pytest-bdd (>=8.1.0)", "pytest-timeout", "python-dateutil (>=2.9.0.post0)", "tiktoken (>=0.12.0)", "tzdata", "zstandard (>=0.23.0)"]
+test = ["anthropic (>=0.72)", "claude-agent-sdk", "coverage", "django (>=5.2.15,<6.0)", "fastmcp (>=2.0)", "freezegun (==1.5.1)", "google-genai", "langchain-anthropic (>=1.0)", "langchain-community (>=0.4)", "langchain-core (>=1.0)", "langchain-openai (>=1.0)", "langgraph (>=1.0)", "langgraph-checkpoint (>=4.1.1)", "mcp (>=1.28.1)", "openai (>=2.0)", "opentelemetry-exporter-otlp-proto-http (>=1.20.0)", "opentelemetry-sdk (>=1.20.0)", "parameterized (>=0.8.1)", "pydantic (>=2.12.0)", "pytest", "pytest-asyncio", "pytest-bdd (>=8.1.0)", "pytest-timeout", "python-dateutil (>=2.9.0.post0)", "tiktoken (>=0.12.0)", "tzdata", "zstandard (>=0.23.0)"]
 zstd = ["zstandard (>=0.23.0)"]
 
 [[package]]
@@ -4833,4 +4833,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "fc0a0e06b9ce9f10c4e88daf9738fa8d5c44fafa57935e40de018eecc1158df9"
+content-hash = "558714336339e546d8a611a2aa20f9e2043965444291798261d5b401a804115e"
