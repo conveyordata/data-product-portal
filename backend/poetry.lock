@@ -286,18 +286,18 @@ test-tox-coverage = ["coverage (>=5.5)"]
 
 [[package]]
 name = "boto3"
-version = "1.43.50"
+version = "1.43.51"
 description = "The AWS SDK for Python"
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "boto3-1.43.50-py3-none-any.whl", hash = "sha256:779eb5cfa8bd1d615f36051465f8182860219eef78b4ab8ca2c666bb56702325"},
-    {file = "boto3-1.43.50.tar.gz", hash = "sha256:a6865b9cd1d15511f6aad89cef964105acecff2160a3e29ae53c10d9821416af"},
+    {file = "boto3-1.43.51-py3-none-any.whl", hash = "sha256:a97057bb609fd38c80448db6a93db770786775dabd651401debf09816d4553d7"},
+    {file = "boto3-1.43.51.tar.gz", hash = "sha256:b5a416cc703db73b69b22bef563c89c1fb14a4b10a93628d3c7abc4dd1aaf979"},
 ]
 
 [package.dependencies]
-botocore = ">=1.43.50,<1.44.0"
+botocore = ">=1.43.51,<1.44.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.19.0,<0.20.0"
 
@@ -306,14 +306,14 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.43.50"
+version = "1.43.51"
 description = "Low-level, data-driven core of boto 3."
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "botocore-1.43.50-py3-none-any.whl", hash = "sha256:4a57a1e0dd4a8be855c29183fc0e029c18e9ec84cd4ac172869f3e800f972528"},
-    {file = "botocore-1.43.50.tar.gz", hash = "sha256:7b07c423c44b1ab3815af103f11fa28ea317e28dda1335718a02ecde371a25e9"},
+    {file = "botocore-1.43.51-py3-none-any.whl", hash = "sha256:7c2c538c932bddc95834e177ce6f91dcc388c6a7934b4f8d0db13caa30e3e543"},
+    {file = "botocore-1.43.51.tar.gz", hash = "sha256:e0e5e88585fdb01dcb6b533ac2dd3f18d5d45092a14ccbfd330e3576a4152128"},
 ]
 
 [package.dependencies]
@@ -322,7 +322,7 @@ python-dateutil = ">=2.1,<3.0.0"
 urllib3 = ">=1.25.4,<2.2.0 || >2.2.0,<3"
 
 [package.extras]
-crt = ["awscrt (==0.32.2)"]
+crt = ["awscrt (==0.36.0)"]
 
 [[package]]
 name = "cachetools"
@@ -4833,4 +4833,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "fc0a0e06b9ce9f10c4e88daf9738fa8d5c44fafa57935e40de018eecc1158df9"
+content-hash = "96ba5a9cb8bd802776e9d4ad26f293a329f8529ce746ae349862a658db7b3813"
