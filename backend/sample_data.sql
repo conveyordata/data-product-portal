@@ -341,7 +341,7 @@ begin
     INSERT INTO public.datasets (id, namespace, data_product_id, "name", description, about, status, access_type, created_on, updated_on, deleted_at) VALUES ('56acafd4-5bb8-45b1-81fa-acfab84ec3fc', 'release_impact_summary', release_impact_analysis, 'Release Impact Summary', 'Metrics on usage changes after new releases', 'Provides insight into feature release performance. Key objectives: - Measure adoption - Detect regressions - Inform next releases', 'ACTIVE', 'RESTRICTED', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id into release_impact_summary;
 
     -- DEI Insights
-    INSERT INTO public.abstract_data_products (id, status, finalizers, name, namespace, abstract_data_product_type, description, domain_id, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), 'active', '{}', 'DEI Insights Dashboard', 'dei-insights-dashboard', 'data_products', 'Monitors diversity, equity, and inclusion metrics across the organization.
+    INSERT INTO public.abstract_data_products (id, status, finalizers, name, namespace, abstract_data_product_type, description, domain_id, created_on, updated_on, deleted_at) VALUES ('33333333-3333-4333-8333-333333333333', 'active', '{}', 'DEI Insights Dashboard', 'dei-insights-dashboard', 'data_products', 'Monitors diversity, equity, and inclusion metrics across the organization.
     It ensures transparency and compliance with internal and external reporting standards.', customer_domain_id, '2025-10-28 18:16:50.70893', NULL, NULL) returning id into dei_insights_dashboard;
     INSERT INTO public.data_products (id, about, type_id, lifecycle_id, usage) VALUES (dei_insights_dashboard, NULL, '1b4a64b3-96fb-404c-a73c-294802dc9852', data_product_lifecycle_id, NULL);
 
