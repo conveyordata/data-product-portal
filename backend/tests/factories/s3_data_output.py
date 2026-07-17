@@ -1,6 +1,6 @@
 import factory
 
-from app.data_output_configuration.s3.model import S3TechnicalAssetConfiguration
+from app.technical_asset_configuration.s3.model import S3TechnicalAssetConfiguration
 
 
 class S3DataOutputFactory(factory.alchemy.SQLAlchemyModelFactory):

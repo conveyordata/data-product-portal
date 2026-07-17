@@ -18,7 +18,6 @@ from app.configuration.tags.router import router as tag
 from app.configuration.theme_settings.router import router as theme_settings
 from app.core.auth.auth import api_key_authenticated
 from app.core.config.env_var_parser import get_boolean_variable
-from app.data_output_configuration.router import router as plugin
 from app.data_products.output_port_technical_assets_link.router import (
     router as data_output_dataset,
 )
@@ -32,6 +31,7 @@ from app.explorations.router import router as exploration
 from app.graph.router import router as graph
 from app.resource_names.router import router as resource_name
 from app.search_output_ports.router import router as search_output_ports
+from app.technical_asset_configuration.router import router as plugin
 from app.users.notifications.router import router as notification
 from app.users.router import router as user
 
