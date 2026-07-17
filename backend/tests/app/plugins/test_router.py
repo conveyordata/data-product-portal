@@ -1,8 +1,8 @@
 from fastapi.testclient import TestClient
 
-from app.data_output_configuration.data_output_types import DataOutputTypes
-from app.data_output_configuration.s3.schema import S3TechnicalAssetConfiguration
-from app.data_output_configuration.schema_request import (
+from app.technical_asset_configuration.data_output_types import DataOutputTypes
+from app.technical_asset_configuration.s3.schema import S3TechnicalAssetConfiguration
+from app.technical_asset_configuration.schema_request import (
     RenderTechnicalAssetAccessPathRequest,
 )
 from tests.factories import PlatformFactory
