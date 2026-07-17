@@ -23,10 +23,5 @@ class InputPortRequestBase(ORMModel):
 class InputPortBase(ORMModel):
     id: UUID
     status: InputPortStatus
-    # This the current request
-    # When you have an initial output port request this will be the pending one
-    # When there is an active approved request it will be that
-    # No active approved request, and latest is declined it will be declined
-    # When the latest is approved but expired it will return that one
     current_request: InputPortRequestBase
     renewal_status: Optional[RenewalStatus] = None

@@ -28,7 +28,6 @@ class BaseDataProductGet(ORMModel):
     status: AbstractDataProductStatus
     finalizers: list[str]
 
-    # Nested schemas
     tags: list[Tag]
     usage: Optional[str]
     domain: Domain
@@ -37,7 +36,6 @@ class BaseDataProductGet(ORMModel):
 
 
 class TechnicalAssetLinks(BaseTechnicalAssetGet):
-    # Nested schemas
     output_port_links: list[BaseTechnicalAssetOutputPortAssociationGet]
 
 

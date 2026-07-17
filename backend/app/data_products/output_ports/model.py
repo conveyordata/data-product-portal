@@ -60,13 +60,11 @@ class OutputPort(Base, BaseORM, EventTrackedMixin):
     search_vector = Column(TSVECTOR)
     embeddings = deferred(Column(Vector(384)))
 
-    # Foreign keys
     lifecycle_id: Mapped[UUID] = mapped_column(
         ForeignKey("data_product_lifecycles.id", ondelete="SET NULL")
     )
     data_product_id: Mapped[UUID] = mapped_column(ForeignKey("data_products.id"))
 
-    # Relationships
     assignments: Mapped[list["DatasetRoleAssignment"]] = relationship(
         back_populates="output_port",
         cascade="all, delete-orphan",

@@ -36,11 +36,9 @@ class BaseTechnicalAssetGet(ORMModel):
     status: TechnicalAssetStatus
     technical_mapping: TechnicalMapping
 
-    # Nested schemas
     configuration: DataOutputConfiguration
     owner: DataProduct
 
-    # Excluded
     service: PlatformService = Field(exclude=True)
     environment_configurations: list[EnvironmentConfigsGetItem] = Field(exclude=True)
 
@@ -84,7 +82,6 @@ class OutputPortLink(TechnicalAssetOutputPortAssociation):
 
 
 class GetTechnicalAssetsResponseItem(BaseTechnicalAssetGet):
-    # Nested schemas
     output_port_links: list[OutputPortLink] = Field(validation_alias="dataset_links")
     tags: list[Tag]
 

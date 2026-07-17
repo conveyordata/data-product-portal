@@ -48,7 +48,7 @@ export function ExpiryDate({ status, validUntil }: ExpiryDateProps) {
         return null;
     }
     if (validUntil === null) {
-        return <Typography.Text type={'secondary'}>{t('Permanent Access')}</Typography.Text>;
+        return <Typography.Text type={'secondary'}>{t('Permanent access')}</Typography.Text>;
     }
     return <Typography.Text>{formatDateFromISOString(validUntil)}</Typography.Text>;
 }

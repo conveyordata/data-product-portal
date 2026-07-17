@@ -34,7 +34,6 @@ class DataQualityTechnicalAsset(Base):
         nullable=False,
     )
 
-    # Relationships
     data_quality_summary_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("output_port_data_quality_summaries.id", ondelete="CASCADE"),
@@ -69,7 +68,6 @@ class DataQualitySummary(Base):
     assets_with_issues: Mapped[int] = mapped_column(SmallInteger, default=0)
     dimensions = Column(JSONB, nullable=True)
 
-    # Relationships
     technical_assets: Mapped[list["DataQualityTechnicalAsset"]] = relationship(
         lazy="raise",
         cascade="all, delete-orphan",

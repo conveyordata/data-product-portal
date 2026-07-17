@@ -39,13 +39,11 @@ class DataProduct(
     about = Column(String)
     usage = Column(String, nullable=True)
 
-    # Foreign keys
     type_id: Mapped[UUID] = mapped_column(ForeignKey("data_product_types.id"))
     lifecycle_id: Mapped[UUID] = mapped_column(
         ForeignKey("data_product_lifecycles.id", ondelete="SET NULL")
     )
 
-    # Relationships
     type: Mapped[DataProductType] = relationship(
         back_populates="data_products", lazy="joined"
     )
