@@ -12,8 +12,8 @@ from app.data_products.output_ports.data_quality.service import (
 )
 from app.settings import settings
 from tests.factories import (
-    DatasetFactory,
     DatasetRoleAssignmentFactory,
+    OutputPortFactory,
     RoleFactory,
     UserFactory,
 )
@@ -38,7 +38,7 @@ def _assign_update_role(session, dataset):
 
 class TestDataQualityRouter:
     def test_post_data_quality(self, client, session):
-        dataset = DatasetFactory()
+        dataset = OutputPortFactory()
         _assign_update_role(session, dataset)
 
         payload = {
@@ -62,7 +62,7 @@ class TestDataQualityRouter:
         assert body["details_url"] == payload["details_url"]
 
     def test_post_data_quality_no_permissions(self, client):
-        dataset = DatasetFactory()
+        dataset = OutputPortFactory()
 
         payload = {
             "overall_status": "success",
@@ -81,7 +81,7 @@ class TestDataQualityRouter:
         assert post_response.status_code == 403
 
     def test_post_data_quality_with_dimensions(self, client, session):
-        dataset = DatasetFactory()
+        dataset = OutputPortFactory()
         _assign_update_role(session, dataset)
 
         payload = {
@@ -104,7 +104,7 @@ class TestDataQualityRouter:
         assert body["dimensions"]["completeness"] == "success"
 
     def test_get_latest_data_quality_result_no_results(self, client, session):
-        dataset = DatasetFactory()
+        dataset = OutputPortFactory()
         _assign_update_role(session, dataset)
 
         get_response = client.get(
@@ -115,7 +115,7 @@ class TestDataQualityRouter:
         assert "No data quality summary found for output port" in data["detail"]
 
     def test_delete_output_port_data_quality_summary(self, client, session):
-        dataset = DatasetFactory()
+        dataset = OutputPortFactory()
         _assign_update_role(session, dataset)
 
         service = OutputPortDataQualityService(session)
@@ -133,7 +133,7 @@ class TestDataQualityRouter:
         assert response.status_code == 200
 
     def test_get_latest_data_quality_result(self, client, session):
-        dataset = DatasetFactory()
+        dataset = OutputPortFactory()
         _assign_update_role(session, dataset)
 
         service = OutputPortDataQualityService(session)
@@ -172,7 +172,7 @@ class TestDataQualityRouter:
         assert data["dimensions"]["completeness"] == DataQualityStatus.SUCCESS
 
     def test_update_data_quality_summary(self, client, session):
-        dataset = DatasetFactory()
+        dataset = OutputPortFactory()
         _assign_update_role(session, dataset)
 
         service = OutputPortDataQualityService(session)

@@ -8,9 +8,9 @@ from app.data_products.output_ports.enums import OutputPortAccessType
 from tests import test_session
 from tests.factories import (
     DataProductFactory,
-    DatasetFactory,
     DatasetRoleAssignmentFactory,
     InputPortFactory,
+    OutputPortFactory,
     RoleFactory,
     UserFactory,
 )
@@ -22,7 +22,7 @@ class TestAbstractDataProductService:
         self, mock_send_email
     ):
         actor = UserFactory()
-        output_port = DatasetFactory(access_type=OutputPortAccessType.RESTRICTED)
+        output_port = OutputPortFactory(access_type=OutputPortAccessType.RESTRICTED)
         input_port = InputPortFactory(
             consuming_abstract_data_product=DataProductFactory(),
             dataset=output_port,
@@ -57,7 +57,7 @@ class TestAbstractDataProductService:
     ):
         actor = UserFactory()
         other_approver = UserFactory()
-        output_port = DatasetFactory(access_type=OutputPortAccessType.RESTRICTED)
+        output_port = OutputPortFactory(access_type=OutputPortAccessType.RESTRICTED)
         input_port = InputPortFactory(
             consuming_abstract_data_product=DataProductFactory(),
             dataset=output_port,

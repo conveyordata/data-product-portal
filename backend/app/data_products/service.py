@@ -33,7 +33,7 @@ from app.data_products.model import ensure_data_product_exists
 from app.data_products.output_port_technical_assets_link.model import (
     DataOutputDatasetAssociation,
 )
-from app.data_products.output_ports.model import Dataset as DatasetModel
+from app.data_products.output_ports.model import OutputPort as OutputPortModel
 from app.data_products.schema_request import (
     DataProductAboutUpdate,
     DataProductCreate,
@@ -78,8 +78,8 @@ class DataProductService(AbstractDataProductService):
 
         output_port_tags = self.db.scalars(
             select(TagModel)
-            .join(DatasetModel.tags)
-            .where(DatasetModel.data_product_id == data_product_id)
+            .join(OutputPortModel.tags)
+            .where(OutputPortModel.data_product_id == data_product_id)
         ).all()
         rolled_up_tags.update(output_port_tags)
 
@@ -300,7 +300,7 @@ class DataProductService(AbstractDataProductService):
                 .options(
                     joinedload(TechnicalAssetModel.dataset_links)
                     .selectinload(DataOutputDatasetAssociation.dataset)
-                    .selectinload(DatasetModel.data_product_links)
+                    .selectinload(OutputPortModel.data_product_links)
                 )
                 .filter_by(owner_id=id)
                 .execution_options(populate_existing=True)

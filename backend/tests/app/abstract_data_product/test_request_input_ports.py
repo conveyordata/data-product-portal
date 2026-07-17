@@ -16,9 +16,9 @@ from tests import test_session
 from tests.factories import (
     AccessDurationFactory,
     DataProductFactory,
-    DatasetFactory,
     ExplorationFactory,
     InputPortFactory,
+    OutputPortFactory,
     UserFactory,
 )
 
@@ -39,7 +39,7 @@ class TestRequestInputPortsDuration:
     def test_request_input_ports__time_bound_data_product_port_sets_window(self):
         actor = UserFactory()
         dp = DataProductFactory()
-        port = DatasetFactory(
+        port = OutputPortFactory(
             access_type=OutputPortAccessType.UNRESTRICTED,
             data_product_access_duration_type=AccessDurationType.TIME_BOUND,
         )
@@ -61,7 +61,7 @@ class TestRequestInputPortsDuration:
     def test_request_input_ports__permanent_port_has_no_window(self):
         actor = UserFactory()
         dp = DataProductFactory()
-        port = DatasetFactory(access_type=OutputPortAccessType.UNRESTRICTED)
+        port = OutputPortFactory(access_type=OutputPortAccessType.UNRESTRICTED)
 
         [ip] = AbstractDataProductService(test_session).request_input_ports(
             dp.id, [port.id], "need access", actor=actor
@@ -75,7 +75,7 @@ class TestRequestInputPortsDuration:
     def test_request_input_ports__exploration_uses_exploration_duration_type(self):
         actor = UserFactory()
         exploration = ExplorationFactory()
-        port = DatasetFactory(
+        port = OutputPortFactory(
             access_type=OutputPortAccessType.UNRESTRICTED,
             exploration_access_duration_type=AccessDurationType.TIME_BOUND,
         )
@@ -96,7 +96,7 @@ class TestRequestInputPortsDuration:
     def test_request_input_ports__time_bound_without_policy_row_errors(self):
         actor = UserFactory()
         dp = DataProductFactory()
-        port = DatasetFactory(
+        port = OutputPortFactory(
             access_type=OutputPortAccessType.UNRESTRICTED,
             data_product_access_duration_type=AccessDurationType.TIME_BOUND,
         )
@@ -110,7 +110,7 @@ class TestRequestInputPortsDuration:
 
 class TestRequestInputPortsRenewal:
     def _restricted_time_bound_port(self):
-        port = DatasetFactory(
+        port = OutputPortFactory(
             access_type=OutputPortAccessType.RESTRICTED,
             data_product_access_duration_type=AccessDurationType.TIME_BOUND,
         )
@@ -189,7 +189,7 @@ class TestRequestInputPortsRenewal:
     def test_request_input_ports__blocked_when_active_grant_is_permanent(self):
         actor = UserFactory()
         dp = DataProductFactory()
-        port = DatasetFactory(access_type=OutputPortAccessType.RESTRICTED)
+        port = OutputPortFactory(access_type=OutputPortAccessType.RESTRICTED)
         InputPortFactory(
             consuming_abstract_data_product=dp,
             dataset=port,

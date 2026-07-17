@@ -14,8 +14,8 @@ from app.data_products.output_ports.service import OutputPortService
 from app.db_tool import seed_cmd
 from app.settings import settings
 from tests.factories import (
-    DatasetFactory,
     DatasetRoleAssignmentFactory,
+    OutputPortFactory,
     RoleFactory,
     UserFactory,
 )
@@ -203,9 +203,9 @@ class TestOutputPortSearchRouter:
 
     @staticmethod
     def setup(session) -> tuple[Dataset, Dataset, Dataset]:
-        ds_1 = DatasetFactory(name="Customer Data")
-        ds_2 = DatasetFactory(name="Sales Data")
-        ds_3 = DatasetFactory(name="Internal Metrics")
+        ds_1 = OutputPortFactory(name="Customer Data")
+        ds_2 = OutputPortFactory(name="Sales Data")
+        ds_3 = OutputPortFactory(name="Internal Metrics")
         OutputPortService(db=session).recalculate_search_for_all_output_ports()
         return ds_1, ds_2, ds_3
 

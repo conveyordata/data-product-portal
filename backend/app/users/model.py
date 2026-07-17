@@ -24,7 +24,7 @@ if TYPE_CHECKING:
         DataOutputDatasetAssociation,
     )
     from app.data_products.output_ports.model import (
-        Dataset,
+        OutputPort,
     )
     from app.explorations.model import Exploration
     from app.users.notifications.model import Notification
@@ -92,7 +92,7 @@ class User(Base, BaseORM):
         #  - Complicates get_authenticated_user
         lazy="select",
     )
-    datasets: Mapped[list["Dataset"]] = association_proxy("dataset_roles", "dataset")
+    datasets: Mapped[list["OutputPort"]] = association_proxy("dataset_roles", "dataset")
 
     # Relationships - Data outputs
     requested_dataoutputs: Mapped[list["DataOutputDatasetAssociation"]] = relationship(

@@ -5,8 +5,8 @@ from app.abstract_data_product.service import AbstractDataProductService
 from app.data_products.status import AbstractDataProductStatus
 from tests.factories import (
     DataProductFactory,
-    DatasetFactory,
     ExplorationFactory,
+    OutputPortFactory,
     UserFactory,
 )
 
@@ -190,7 +190,7 @@ class TestEnsureNotDeleting:
         service = AbstractDataProductService(db=session)
         actor = UserFactory()
         consumer = DataProductFactory(status=AbstractDataProductStatus.DELETING.value)
-        output_port = DatasetFactory()
+        output_port = OutputPortFactory()
 
         with pytest.raises(HTTPException) as exc_info:
             service.request_input_ports(
@@ -209,7 +209,7 @@ class TestEnsureNotDeleting:
         actor = UserFactory()
         consumer = DataProductFactory(status=AbstractDataProductStatus.ACTIVE.value)
         provider = DataProductFactory(status=AbstractDataProductStatus.DELETING.value)
-        output_port = DatasetFactory(data_product=provider)
+        output_port = OutputPortFactory(data_product=provider)
 
         with pytest.raises(HTTPException) as exc_info:
             service.request_input_ports(

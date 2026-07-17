@@ -29,7 +29,7 @@ from app.core.logging.posthog_analytics import get_posthog_client
 from app.data_products import email
 from app.data_products.output_ports.enums import OutputPortAccessType
 from app.data_products.output_ports.input_ports.service import InputPortService
-from app.data_products.output_ports.model import Dataset as OutputPortModel
+from app.data_products.output_ports.model import OutputPort as OutputPortModel
 from app.data_products.output_ports.model import ensure_output_port_exists
 from app.data_products.output_ports.service import OutputPortService
 from app.data_products.status import AbstractDataProductStatus

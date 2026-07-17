@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 
 from sqlalchemy import Column, Enum, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship, synonym
 
 from app.database.database import Base
 from app.shared.model import BaseORM
@@ -13,7 +13,7 @@ from .enums import EventReferenceEntity
 
 if TYPE_CHECKING:
     from app.data_products.model import DataProduct
-    from app.data_products.output_ports.model import Dataset
+    from app.data_products.output_ports.model import OutputPort
     from app.data_products.technical_assets.model import TechnicalAsset
     from app.users.model import User
 
@@ -52,12 +52,13 @@ class Event(Base, BaseORM):
         ",and_(Event.target_id == foreign(User.id), "
         "Event.target_type == 'USER'))",
     )
-    dataset: Mapped["Dataset"] = relationship(
-        primaryjoin="or_(and_(Event.subject_id == foreign(Dataset.id),"
+    outputPort: Mapped["OutputPort"] = relationship(
+        primaryjoin="or_(and_(Event.subject_id == foreign(OutputPort.id),"
         " Event.subject_type == 'DATASET'),"
-        "and_(Event.target_id == foreign(Dataset.id),"
+        "and_(Event.target_id == foreign(OutputPort.id),"
         " Event.target_type == 'DATASET'))",
     )
+    dataset = synonym("outputPort")
     data_output: Mapped["TechnicalAsset"] = relationship(
         primaryjoin="or_(and_(Event.subject_id == "
         "foreign(TechnicalAsset.id), Event.subject_type == 'DATA_OUTPUT'),"

@@ -7,7 +7,7 @@ from app.access_durations.enums import AccessDurationType
 from app.access_durations.model import AccessDuration as AccessDurationModel
 from app.access_durations.schema_request import AccessDurationUpdate
 from app.access_durations.schema_response import AccessDuration
-from app.data_products.output_ports.model import Dataset as DatasetModel
+from app.data_products.output_ports.model import OutputPort as OutputPortModel
 
 
 class AccessDurationService:
@@ -115,9 +115,9 @@ class AccessDurationService:
         """Move output ports off an access duration type no longer offered."""
         match abstract_data_product_type:
             case AbstractDataProductType.DATA_PRODUCT:
-                column = DatasetModel.data_product_access_duration_type
+                column = OutputPortModel.data_product_access_duration_type
             case AbstractDataProductType.EXPLORATION:
-                column = DatasetModel.exploration_access_duration_type
+                column = OutputPortModel.exploration_access_duration_type
             case _:
                 raise HTTPException(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -125,7 +125,7 @@ class AccessDurationService:
                 )
 
         outdated_datasets = (
-            self.db.scalars(select(DatasetModel).where(column.notin_(allowed_types)))
+            self.db.scalars(select(OutputPortModel).where(column.notin_(allowed_types)))
             .unique()
             .all()
         )

@@ -5,7 +5,7 @@ from app.data_products.output_ports.query_stats.model import (
 )
 
 from .data_product import DataProductFactory
-from .dataset import DatasetFactory
+from .dataset import OutputPortFactory
 
 
 class DatasetQueryStatsFactory(factory.alchemy.SQLAlchemyModelFactory):
@@ -14,7 +14,7 @@ class DatasetQueryStatsFactory(factory.alchemy.SQLAlchemyModelFactory):
 
     date = factory.Faker("date_object")
     dataset_id = factory.LazyAttribute(
-        lambda o: DatasetFactory().id if not hasattr(o, "dataset") else o.dataset.id
+        lambda o: OutputPortFactory().id if not hasattr(o, "dataset") else o.dataset.id
     )
     consumer_data_product_id = factory.LazyAttribute(
         lambda o: (

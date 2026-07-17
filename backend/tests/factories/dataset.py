@@ -13,7 +13,7 @@ from .tags import TagFactory
 fake = Faker()
 
 
-class DatasetFactory(factory.alchemy.SQLAlchemyModelFactory):
+class OutputPortFactory(factory.alchemy.SQLAlchemyModelFactory):
     class Meta:
         model = Dataset
 

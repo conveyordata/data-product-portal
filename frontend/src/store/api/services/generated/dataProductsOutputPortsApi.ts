@@ -154,7 +154,7 @@ const injectedRtkApi = api.injectEndpoints({
       query: (queryArg) => ({
         url: `/api/v2/data_products/${queryArg.dataProductId}/output_ports/${queryArg.id}/about`,
         method: "PUT",
-        body: queryArg.datasetAboutUpdate,
+        body: queryArg.outputPortAboutUpdate,
       }),
     }),
     updateOutputPortStatus: build.mutation<
@@ -164,7 +164,7 @@ const injectedRtkApi = api.injectEndpoints({
       query: (queryArg) => ({
         url: `/api/v2/data_products/${queryArg.dataProductId}/output_ports/${queryArg.id}/status`,
         method: "PUT",
-        body: queryArg.datasetStatusUpdate,
+        body: queryArg.outputPortStatusUpdate,
       }),
     }),
     getOutputPortGraphData: build.query<
@@ -310,14 +310,14 @@ export type UpdateOutputPortAboutApiResponse =
 export type UpdateOutputPortAboutApiArg = {
   dataProductId: string;
   id: string;
-  datasetAboutUpdate: DatasetAboutUpdate;
+  outputPortAboutUpdate: OutputPortAboutUpdate;
 };
 export type UpdateOutputPortStatusApiResponse =
   /** status 200 Successful Response */ any;
 export type UpdateOutputPortStatusApiArg = {
   dataProductId: string;
   id: string;
-  datasetStatusUpdate: DatasetStatusUpdate;
+  outputPortStatusUpdate: OutputPortStatusUpdate;
 };
 export type GetOutputPortGraphDataApiResponse =
   /** status 200 Successful Response */ Graph;
@@ -720,10 +720,10 @@ export type GetEventHistoryResponseItem = {
 export type GetEventHistoryResponse = {
   events: GetEventHistoryResponseItem[];
 };
-export type DatasetAboutUpdate = {
+export type OutputPortAboutUpdate = {
   about: string;
 };
-export type DatasetStatusUpdate = {
+export type OutputPortStatusUpdate = {
   status: OutputPortStatus;
 };
 export type Edge = {

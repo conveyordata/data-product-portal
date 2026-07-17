@@ -3399,36 +3399,6 @@ func (s *DatabricksTechnicalAssetConfiguration) SetAccessGranularity(val AccessG
 	s.AccessGranularity = val
 }
 
-// Ref: #/components/schemas/DatasetAboutUpdate
-type DatasetAboutUpdate struct {
-	About string `json:"about"`
-}
-
-// GetAbout returns the value of About.
-func (s *DatasetAboutUpdate) GetAbout() string {
-	return s.About
-}
-
-// SetAbout sets the value of About.
-func (s *DatasetAboutUpdate) SetAbout(val string) {
-	s.About = val
-}
-
-// Ref: #/components/schemas/DatasetStatusUpdate
-type DatasetStatusUpdate struct {
-	Status OutputPortStatus `json:"status"`
-}
-
-// GetStatus returns the value of Status.
-func (s *DatasetStatusUpdate) GetStatus() OutputPortStatus {
-	return s.Status
-}
-
-// SetStatus sets the value of Status.
-func (s *DatasetStatusUpdate) SetStatus(val OutputPortStatus) {
-	s.Status = val
-}
-
 // Ref: #/components/schemas/DatasetUpdate
 type DatasetUpdate struct {
 	Name                          string               `json:"name"`
@@ -9306,6 +9276,21 @@ func (s *OutputPort) SetTags(val []Tag) {
 	s.Tags = val
 }
 
+// Ref: #/components/schemas/OutputPortAboutUpdate
+type OutputPortAboutUpdate struct {
+	About string `json:"about"`
+}
+
+// GetAbout returns the value of About.
+func (s *OutputPortAboutUpdate) GetAbout() string {
+	return s.About
+}
+
+// SetAbout sets the value of About.
+func (s *OutputPortAboutUpdate) SetAbout(val string) {
+	s.About = val
+}
+
 // Ref: #/components/schemas/OutputPortAccessDuration
 type OutputPortAccessDuration struct {
 	AccessDurationType AccessDurationType `json:"access_duration_type"`
@@ -10227,6 +10212,21 @@ func (s *OutputPortStatus) UnmarshalText(data []byte) error {
 	default:
 		return errors.Errorf("invalid value: %q", data)
 	}
+}
+
+// Ref: #/components/schemas/OutputPortStatusUpdate
+type OutputPortStatusUpdate struct {
+	Status OutputPortStatus `json:"status"`
+}
+
+// GetStatus returns the value of Status.
+func (s *OutputPortStatusUpdate) GetStatus() OutputPortStatus {
+	return s.Status
+}
+
+// SetStatus sets the value of Status.
+func (s *OutputPortStatusUpdate) SetStatus(val OutputPortStatus) {
+	s.Status = val
 }
 
 type OverwriteOutputPortDataQualitySummaryNotFoundApplicationJSON jx.Raw

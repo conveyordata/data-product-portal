@@ -21,7 +21,7 @@ from app.data_products.output_port_technical_assets_link.model import (
 from app.data_products.output_port_technical_assets_link.model import (
     DataOutputDatasetAssociation as DataOutputDatasetAssociationModel,
 )
-from app.data_products.output_ports.model import Dataset as DatasetModel
+from app.data_products.output_ports.model import OutputPort as OutputPortModel
 from app.data_products.output_ports.model import ensure_output_port_exists
 from app.data_products.output_ports.service import OutputPortService
 from app.data_products.service import DataProductService
@@ -184,7 +184,7 @@ class DataOutputService:
             dataset_id,
             self.db,
             data_product_id=data_product_id,
-            options=[selectinload(DatasetModel.data_product_links)],
+            options=[selectinload(OutputPortModel.data_product_links)],
         )
         data_output = self.get_data_output(data_product_id, id)
         if data_output.status != TechnicalAssetStatus.ACTIVE:
@@ -282,7 +282,7 @@ class DataOutputService:
                     selectinload(TechnicalAssetModel.environment_configurations),
                     selectinload(TechnicalAssetModel.dataset_links)
                     .selectinload(DataOutputDatasetAssociation.dataset)
-                    .selectinload(DatasetModel.tags)
+                    .selectinload(OutputPortModel.tags)
                     .raiseload("*"),
                 )
                 .filter(TechnicalAssetModel.owner_id == data_product_id)

@@ -23,7 +23,7 @@ if TYPE_CHECKING:
     from app.configuration.data_product_lifecycles.model import DataProductLifecycle
     from app.configuration.data_product_settings.model import DataProductSettingValue
     from app.data_products.output_ports.model import (
-        Dataset,
+        OutputPort,
     )
 
 
@@ -58,7 +58,7 @@ class DataProduct(
         order_by="DataProductRoleAssignment.decision, DataProductRoleAssignment.requested_on",
         lazy="raise",
     )
-    datasets: Mapped[list["Dataset"]] = relationship(
+    datasets: Mapped[list["OutputPort"]] = relationship(
         back_populates="data_product",
         cascade="all, delete-orphan",
         lazy="raise",

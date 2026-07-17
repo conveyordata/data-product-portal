@@ -46,7 +46,7 @@ export function AboutTab({ datasetId, dataProductId }: Props) {
                 await updateDatasetAbout({
                     id: datasetId,
                     dataProductId,
-                    datasetAboutUpdate: { about: content },
+                    outputPortAboutUpdate: { about: content },
                 }).unwrap();
                 dispatchMessage({ content: t('About section successfully updated'), type: 'success' });
             } catch (_error) {

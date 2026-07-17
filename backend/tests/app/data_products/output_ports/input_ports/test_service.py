@@ -14,9 +14,9 @@ from app.settings import settings
 from tests import test_session
 from tests.factories import (
     DataProductFactory,
-    DatasetFactory,
     InputPortFactory,
     InputPortRequestFactory,
+    OutputPortFactory,
     UserFactory,
 )
 
@@ -89,7 +89,7 @@ class TestInputPortDecisions:
     def test_approve__renewal_window_starts_at_current_date(self):
         actor = UserFactory()
         consumer = DataProductFactory()
-        port = DatasetFactory(
+        port = OutputPortFactory(
             access_type=OutputPortAccessType.RESTRICTED,
             data_product_access_duration_type=AccessDurationType.TIME_BOUND,
         )
@@ -113,7 +113,7 @@ class TestInputPortDecisions:
     def test_deny__pending_renewal_keeps_the_active_grant(self):
         actor = UserFactory()
         consumer = DataProductFactory()
-        port = DatasetFactory(
+        port = OutputPortFactory(
             access_type=OutputPortAccessType.RESTRICTED,
             data_product_access_duration_type=AccessDurationType.TIME_BOUND,
         )
@@ -135,7 +135,7 @@ class TestInputPortDecisions:
     def test_approve__renewal_after_expiry_starts_today(self):
         actor = UserFactory()
         consumer = DataProductFactory()
-        port = DatasetFactory(
+        port = OutputPortFactory(
             access_type=OutputPortAccessType.RESTRICTED,
             data_product_access_duration_type=AccessDurationType.TIME_BOUND,
         )

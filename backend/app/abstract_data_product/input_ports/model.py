@@ -12,7 +12,7 @@ from sqlalchemy import (
     Integer,
     Text,
 )
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship, synonym
 
 from app.abstract_data_product.input_ports.enums import InputPortStatus, RenewalStatus
 from app.access_durations.enums import AccessDurationType
@@ -24,7 +24,7 @@ from app.shared.model import BaseORM, utcnow
 
 if TYPE_CHECKING:
     from app.abstract_data_product.model import AbstractDataProduct
-    from app.data_products.output_ports.model import Dataset
+    from app.data_products.output_ports.model import OutputPort
     from app.users.model import User
 
 
@@ -46,12 +46,14 @@ class InputPort(
     )
     dataset_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("datasets.id"))
 
-    dataset: Mapped["Dataset"] = relationship(
-        "Dataset",
+    # Relationships
+    outputPort: Mapped["OutputPort"] = relationship(
+        "OutputPort",
         back_populates="data_product_links",
-        order_by="Dataset.name",
+        order_by="OutputPort.name",
         lazy="joined",
     )
+    dataset = synonym("outputPort")
     consuming_abstract_data_product: Mapped["AbstractDataProduct"] = relationship(
         "AbstractDataProduct",
         back_populates="input_ports",
@@ -122,7 +124,6 @@ class InputPort(
             None,
         )
 
-    # TODO should this be a computed property
     def recompute_status(self) -> None:
         if self.active_grant is not None:
             self.status = InputPortStatus.APPROVED
@@ -134,32 +135,6 @@ class InputPort(
                     self.status = InputPortStatus.EXPIRED
                 case DecisionStatus.DENIED:
                     self.status = InputPortStatus.DENIED
-
-    # @property
-    # def justification(self) -> str:
-    #     return self.latest_request.justification
-
-    # @property
-    # def decision_note(self) -> Optional[str]:
-    #     return self.latest_request.decision_note
-
-    # @property
-    # def requested_on(self) -> datetime:
-    #     return self.latest_request.requested_on
-
-    # @property
-    # def requested_by(self) -> "User":
-    #     return self.latest_request.requested_by
-
-    # @property
-    # def approved_by(self) -> Optional["User"]:
-    #     grant = self.active_grant
-    #     return grant.decided_by if grant is not None else None
-    #
-    # @property
-    # def denied_by(self) -> Optional["User"]:
-    #     request = self.latest_request
-    #     return request.decided_by if request.decision == DecisionStatus.DENIED else None
 
     def to_event(self) -> InputPortEvent:
         return InputPortEvent(

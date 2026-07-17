@@ -2,8 +2,8 @@ from app.authorization.roles.schema import Scope
 from app.core.authz.actions import AuthorizationAction
 from app.settings import settings
 from tests.factories import (
-    DatasetFactory,
     DatasetRoleAssignmentFactory,
+    OutputPortFactory,
     RoleFactory,
     UserFactory,
 )
@@ -95,7 +95,7 @@ def _assign_update_role(session, dataset_id):
 
 class TestContractRouter:
     def test_post_contract(self, client, session):
-        dataset = DatasetFactory()
+        dataset = OutputPortFactory()
         _assign_update_role(session, dataset.id)
 
         response = client.post(
@@ -148,7 +148,7 @@ class TestContractRouter:
         assert patient_id_prop["properties"] is None
 
     def test_post_contract_no_permissions(self, client):
-        dataset = DatasetFactory()
+        dataset = OutputPortFactory()
 
         response = client.post(
             f"{ENDPOINT}/{dataset.data_product.id}/output_ports/{dataset.id}/data_contract",
@@ -158,8 +158,8 @@ class TestContractRouter:
         assert response.status_code == 403
 
     def test_post_contract_output_port_not_found(self, client, session):
-        dataset = DatasetFactory()
-        other_dataset = DatasetFactory()
+        dataset = OutputPortFactory()
+        other_dataset = OutputPortFactory()
         _assign_update_role(session, other_dataset.id)
 
         response = client.post(
@@ -170,7 +170,7 @@ class TestContractRouter:
         assert response.status_code == 404
 
     def test_get_contract_none_existing(self, client):
-        dataset = DatasetFactory()
+        dataset = OutputPortFactory()
 
         response = client.get(
             f"{ENDPOINT}/{dataset.data_product.id}/output_ports/{dataset.id}/data_contract"
@@ -181,7 +181,7 @@ class TestContractRouter:
         assert len(data["schema_objects"]) == 0
 
     def test_get_contract_after_ingest(self, client, session):
-        dataset = DatasetFactory()
+        dataset = OutputPortFactory()
         _assign_update_role(session, dataset.id)
 
         client.post(
@@ -200,7 +200,7 @@ class TestContractRouter:
         assert body["schema_objects"][1]["name"] == "retention_metrics"
 
     def test_post_contract_replaces_existing(self, client, session):
-        dataset = DatasetFactory()
+        dataset = OutputPortFactory()
         _assign_update_role(session, dataset.id)
 
         client.post(
@@ -228,7 +228,7 @@ class TestContractRouter:
         assert body["schema_objects"][0]["name"] == "new_table"
 
     def test_post_contract_with_nested_properties(self, client, session):
-        dataset = DatasetFactory()
+        dataset = OutputPortFactory()
         _assign_update_role(session, dataset.id)
 
         payload = {
@@ -267,7 +267,7 @@ class TestContractRouter:
         assert nested_names == {"street", "city"}
 
     def test_post_contract_property_order_preserved(self, client, session):
-        dataset = DatasetFactory()
+        dataset = OutputPortFactory()
         _assign_update_role(session, dataset.id)
 
         response = client.post(
@@ -283,7 +283,7 @@ class TestContractRouter:
         assert props[1]["position"] == 1
 
     def test_post_contract_empty_schema(self, client, session):
-        dataset = DatasetFactory()
+        dataset = OutputPortFactory()
         _assign_update_role(session, dataset.id)
 
         response = client.post(
@@ -296,7 +296,7 @@ class TestContractRouter:
         assert len(data["schema_objects"]) == 0
 
     def test_delete_output_port_removes_schema(self, client, session):
-        dataset = DatasetFactory()
+        dataset = OutputPortFactory()
         user = _assign_update_role(session, dataset.id)
 
         client.post(
