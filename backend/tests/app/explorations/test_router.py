@@ -1,11 +1,17 @@
 import uuid
+from datetime import date, timedelta
 
 import faker
 
+from app.abstract_data_product.type import AbstractDataProductType
+from app.access_durations.enums import AccessDurationType
+from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.roles.schema import Scope
 from app.core.authz import Action
+from app.data_products.output_ports.enums import OutputPortAccessType
 from app.settings import settings
 from tests.factories import (
+    AccessDurationFactory,
     DomainFactory,
     GlobalRoleAssignmentFactory,
     InputPortFactory,
@@ -180,6 +186,48 @@ class TestExplorationRouter:
             },
         )
         assert response.status_code == 403, response.text
+
+    def test_renew_input_port_for_exploration(self, client):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        exploration = ExplorationFactory(owner=user)
+        ds = OutputPortFactory(
+            access_type=OutputPortAccessType.RESTRICTED,
+            exploration_access_duration_type=AccessDurationType.TIME_BOUND,
+        )
+        AccessDurationFactory(
+            abstract_data_product_type=AbstractDataProductType.EXPLORATION,
+            access_duration_type=AccessDurationType.TIME_BOUND,
+            days=15,
+        )
+        input_port = InputPortFactory(
+            consuming_abstract_data_product=exploration,
+            output_port=ds,
+            status=DecisionStatus.APPROVED,
+            request__access_duration_type=AccessDurationType.TIME_BOUND,
+            request__valid_until=date.today() + timedelta(days=10),
+        )
+
+        response = client.post(
+            f"{ROUTE}/{exploration.id}/input_ports/{ds.id}/renew",
+        )
+        assert response.status_code == 200, response.text
+        assert response.json()["input_port_id"] == str(input_port.id)
+
+    def test_renew_input_port_for_exploration__not_owner(self, client):
+        exploration = ExplorationFactory()
+        input_port = InputPortFactory(consuming_abstract_data_product=exploration)
+        response = client.post(
+            f"{ROUTE}/{exploration.id}/input_ports/{input_port.output_port.id}/renew",
+        )
+        assert response.status_code == 403, response.text
+
+    def test_renew_input_port_for_exploration__no_existing_link(self, client):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        exploration = ExplorationFactory(owner=user)
+        response = client.post(
+            f"{ROUTE}/{exploration.id}/input_ports/{OutputPortFactory().id}/renew",
+        )
+        assert response.status_code == 404, response.text
 
     def test_remove_input_port_from_exploration(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)

@@ -21,13 +21,17 @@ import { Sorter } from '@/utils/table-sorter.helper.ts';
 type Props = {
     t: TFunction;
     canRemoveAccess: boolean;
+    canRequestAccess: boolean;
     handleRemove: (outputPortId: string) => Promise<void>;
+    handleRenew: (outputPortId: string) => Promise<void>;
     inputPorts: InputPort[];
 };
 export const getDataProductDatasetsColumns = ({
     t,
     canRemoveAccess,
+    canRequestAccess,
     handleRemove,
+    handleRenew,
     inputPorts,
 }: Props): TableColumnsType<InputPort> => {
     const sorter = new Sorter<InputPort>();
@@ -70,7 +74,11 @@ export const getDataProductDatasetsColumns = ({
                 <Flex align={'center'} gap={'small'} wrap>
                     <Badge status={getInputPortStatusBadgeStatus(status)} text={getInputPortStatusLabel(t, status)} />
                     <RenewalTag renewalStatus={renewal_status} />
-                    <IsExpiringSoonTag status={status} validUntil={current_request.valid_until} />
+                    <IsExpiringSoonTag
+                        status={status}
+                        validUntil={current_request.valid_until}
+                        renewalStatus={renewal_status}
+                    />
                 </Flex>
             ),
             ...new FilterSettings(inputPorts, (input_port) => getInputPortStatusLabel(t, input_port.status)),
@@ -98,13 +106,17 @@ export const getDataProductDatasetsColumns = ({
         {
             title: t('Actions'),
             key: 'action',
-            render: (_, { output_port, status }) => {
+            render: (_, { output_port, status, current_request, renewal_status }) => {
                 return (
                     <InputPortActionButton
                         output_port={output_port}
                         canRemoveAccess={canRemoveAccess}
+                        canRequestAccess={canRequestAccess}
                         handleRemove={handleRemove}
+                        handleRenew={handleRenew}
                         status={status}
+                        validUntil={current_request.valid_until}
+                        renewalStatus={renewal_status}
                     />
                 );
             },

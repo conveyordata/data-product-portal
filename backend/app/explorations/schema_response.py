@@ -36,3 +36,7 @@ class GetExplorationInputPortsResponse(ORMModel):
 
 class RequestInputPortsForExplorationResponse(ORMModel):
     input_port_ids: list[UUID]
+
+
+class RenewInputPortForExplorationResponse(ORMModel):
+    input_port_id: UUID

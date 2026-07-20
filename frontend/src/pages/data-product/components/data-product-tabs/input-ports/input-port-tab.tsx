@@ -3,6 +3,7 @@ import { InputPortTab } from '@/components/abstract-data-products/input-port-tab
 import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
 import {
     useGetDataProductInputPortsQuery,
+    useRenewInputPortForDataProductMutation,
     useUnlinkInputPortFromDataProductMutation,
 } from '@/store/api/services/generated/dataProductsApi.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
@@ -37,6 +38,14 @@ export const DataProductInputPorts = ({ dataProductId }: Props) => {
         [removeDatasetFromDataProduct, dataProductId],
     );
 
+    const [renewInputPortForDataProduct] = useRenewInputPortForDataProductMutation();
+    const handleRenew = useCallback(
+        async (outputPortId: string) => {
+            await renewInputPortForDataProduct({ outputPortId, id: dataProductId }).unwrap();
+        },
+        [renewInputPortForDataProduct, dataProductId],
+    );
+
     return (
         <InputPortTab
             loadingInputPorts={loadingInputPorts}
@@ -44,6 +53,7 @@ export const DataProductInputPorts = ({ dataProductId }: Props) => {
             canRemoveAccess={canRevokeAccess?.allowed ?? false}
             inputPorts={inputPorts}
             handleRemove={handleRemove}
+            handleRenew={handleRenew}
         />
     );
 };

@@ -6299,6 +6299,8 @@ func (*HTTPValidationError) removeTechnicalAssetRes()                     {}
 func (*HTTPValidationError) removeUserNotificationRes()                   {}
 func (*HTTPValidationError) removeUserRes()                               {}
 func (*HTTPValidationError) renderTechnicalAssetAccessPathRes()           {}
+func (*HTTPValidationError) renewInputPortForDataProductRes()             {}
+func (*HTTPValidationError) renewInputPortForExplorationRes()             {}
 func (*HTTPValidationError) replaceOutputPortCuratedQueriesRes()          {}
 func (*HTTPValidationError) requestDataProductRoleAssignmentRes()         {}
 func (*HTTPValidationError) requestInputPortsForDataProductRes()          {}
@@ -11122,6 +11124,48 @@ func (s *RenderTechnicalAssetAccessPathResponse) SetTechnicalAssetAccessPath(val
 }
 
 func (*RenderTechnicalAssetAccessPathResponse) renderTechnicalAssetAccessPathRes() {}
+
+type RenewInputPortForDataProductBadRequestApplicationJSON jx.Raw
+
+func (*RenewInputPortForDataProductBadRequestApplicationJSON) renewInputPortForDataProductRes() {}
+
+type RenewInputPortForDataProductNotFoundApplicationJSON jx.Raw
+
+func (*RenewInputPortForDataProductNotFoundApplicationJSON) renewInputPortForDataProductRes() {}
+
+// Ref: #/components/schemas/RenewInputPortForDataProductResponse
+type RenewInputPortForDataProductResponse struct {
+	InputPortLink uuid.UUID `json:"input_port_link"`
+}
+
+// GetInputPortLink returns the value of InputPortLink.
+func (s *RenewInputPortForDataProductResponse) GetInputPortLink() uuid.UUID {
+	return s.InputPortLink
+}
+
+// SetInputPortLink sets the value of InputPortLink.
+func (s *RenewInputPortForDataProductResponse) SetInputPortLink(val uuid.UUID) {
+	s.InputPortLink = val
+}
+
+func (*RenewInputPortForDataProductResponse) renewInputPortForDataProductRes() {}
+
+// Ref: #/components/schemas/RenewInputPortForExplorationResponse
+type RenewInputPortForExplorationResponse struct {
+	InputPortID uuid.UUID `json:"input_port_id"`
+}
+
+// GetInputPortID returns the value of InputPortID.
+func (s *RenewInputPortForExplorationResponse) GetInputPortID() uuid.UUID {
+	return s.InputPortID
+}
+
+// SetInputPortID sets the value of InputPortID.
+func (s *RenewInputPortForExplorationResponse) SetInputPortID(val uuid.UUID) {
+	s.InputPortID = val
+}
+
+func (*RenewInputPortForExplorationResponse) renewInputPortForExplorationRes() {}
 
 // Ref: #/components/schemas/RenewalStatus
 type RenewalStatus string

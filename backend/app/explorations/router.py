@@ -23,6 +23,7 @@ from app.explorations.schema_response import (
     GetExplorationInputPortsResponse,
     GetExplorationResponse,
     GetExplorationsResponse,
+    RenewInputPortForExplorationResponse,
     RequestInputPortsForExplorationResponse,
 )
 from app.explorations.service import ExplorationService
@@ -129,6 +130,27 @@ def request_input_ports_for_exploration(
             )
         ]
     )
+
+
+@router.post("/{id}/input_ports/{output_port_id}/renew")
+def renew_input_port_for_exploration(
+    id: UUID,
+    output_port_id: UUID,
+    db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
+) -> RenewInputPortForExplorationResponse:
+    exp = ExplorationService(db).get_exploration(id, authenticated_user)
+    if exp.owner_id != authenticated_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You are not the owner of this exploration",
+        )
+
+    input_port = ExplorationService(db).renew_input_port(
+        id, output_port_id, actor=authenticated_user
+    )
+    RefreshInfrastructureLambda().trigger()
+    return RenewInputPortForExplorationResponse(input_port_id=input_port.id)
 
 
 @router.delete(

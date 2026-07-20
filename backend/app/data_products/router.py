@@ -50,6 +50,7 @@ from app.data_products.schema_response import (
     GetDataProductsResponse,
     GetDataProductsResponseItem,
     LinkInputPortsToDataProductPost,
+    RenewInputPortForDataProductResponse,
     RequestInputPortsForDataProductResponse,
     UpdateDataProductResponse,
 )
@@ -528,6 +529,49 @@ def request_input_ports_for_data_product(
     return RequestInputPortsForDataProductResponse(
         input_port_links=[dataset_link.id for dataset_link in input_ports]
     )
+
+
+@router.post(
+    "/{id}/input_ports/{output_port_id}/renew",
+    responses=_input_ports_responses,
+    dependencies=_input_ports_dependencies,
+)
+def renew_input_port_for_data_product(
+    id: UUID,
+    output_port_id: UUID,
+    background_tasks: BackgroundTasks,
+    authenticated_user: User = Depends(get_authenticated_user),
+    db: Session = Depends(get_db_session),
+) -> RenewInputPortForDataProductResponse:
+    input_port = DataProductService(db).renew_input_port(
+        id, output_port_id, actor=authenticated_user
+    )
+
+    event_id = EventService(db).create_event(
+        CreateEvent(
+            name=(
+                EventType.DATA_PRODUCT_DATASET_LINK_REQUESTED
+                if input_port.status == DecisionStatus.PENDING
+                else EventType.DATA_PRODUCT_DATASET_LINK_APPROVED
+            ),
+            subject_id=input_port.consuming_abstract_data_product_id,
+            subject_type=EventReferenceEntity.DATA_PRODUCT,
+            target_id=input_port.output_port_id,
+            target_type=EventReferenceEntity.DATASET,
+            actor_id=authenticated_user.id,
+        )
+    )
+    if input_port.status == DecisionStatus.APPROVED:
+        NotificationService(db).create_data_product_notifications(
+            data_product_id=input_port.consuming_abstract_data_product_id,
+            event_id=event_id,
+        )
+
+    DataProductService(db).send_input_port_requested_emails_to_output_port_owners(
+        [input_port], background_tasks, authenticated_user
+    )
+    RefreshInfrastructureLambda().trigger()
+    return RenewInputPortForDataProductResponse(input_port_link=input_port.id)
 
 
 @router.get("")

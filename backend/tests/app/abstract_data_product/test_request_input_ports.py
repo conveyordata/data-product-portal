@@ -107,8 +107,27 @@ class TestRequestInputPortsDuration:
             )
         assert exc.value.status_code == 500
 
+    @pytest.mark.parametrize(
+        "status",
+        [DecisionStatus.PENDING, DecisionStatus.APPROVED, DecisionStatus.DENIED],
+    )
+    def test_request_input_ports__fails_when_link_already_exists(self, status):
+        actor = UserFactory()
+        dp = DataProductFactory()
+        port = OutputPortFactory(access_type=OutputPortAccessType.RESTRICTED)
+        link = InputPortFactory(
+            consuming_abstract_data_product=dp,
+            output_port=port,
+            status=status,
+        )
 
-class TestRequestInputPortsRenewal:
+        with pytest.raises(HTTPException) as exc:
+            AbstractDataProductService(test_session).request_input_ports(
+                dp.id, [port.id], "again", actor=actor
+            )
+        assert exc.value.status_code == 400
+        assert len(_requests_for(link.id)) == 1
+
     def _restricted_time_bound_port(self):
         port = OutputPortFactory(
             access_type=OutputPortAccessType.RESTRICTED,
@@ -121,9 +140,7 @@ class TestRequestInputPortsRenewal:
         )
         return port
 
-    def test_request_input_ports__renewal_on_active_grant_creates_pending_request(
-        self,
-    ):
+    def test_renew_input_port__on_active_grant_creates_pending_request(self):
         actor = UserFactory()
         dp = DataProductFactory()
         port = self._restricted_time_bound_port()
@@ -136,8 +153,8 @@ class TestRequestInputPortsRenewal:
             request__valid_until=date.today() + timedelta(days=10),
         )
 
-        [ip] = AbstractDataProductService(test_session).request_input_ports(
-            dp.id, [port.id], "renew please", actor=actor
+        ip = AbstractDataProductService(test_session).renew_input_port(
+            dp.id, port.id, actor=actor
         )
 
         assert ip.id == link.id
@@ -147,7 +164,7 @@ class TestRequestInputPortsRenewal:
         test_session.refresh(link)
         assert link.status == InputPortStatus.APPROVED
 
-    def test_request_input_ports__renewal_reuses_previous_justification(self):
+    def test_renew_input_port__reuses_previous_justification(self):
         actor = UserFactory()
         dp = DataProductFactory()
         port = self._restricted_time_bound_port()
@@ -161,15 +178,15 @@ class TestRequestInputPortsRenewal:
             request__valid_until=date.today() + timedelta(days=10),
         )
 
-        AbstractDataProductService(test_session).request_input_ports(
-            dp.id, [port.id], "a different body justification", actor=actor
+        AbstractDataProductService(test_session).renew_input_port(
+            dp.id, port.id, actor=actor
         )
 
         reqs = _requests_for(link.id)
         renewal = next(r for r in reqs if r.decision == DecisionStatus.PENDING)
         assert renewal.justification == "original reason"
 
-    def test_request_input_ports__blocked_when_a_request_is_already_pending(self):
+    def test_renew_input_port__blocked_when_a_request_is_already_pending(self):
         actor = UserFactory()
         dp = DataProductFactory()
         port = self._restricted_time_bound_port()
@@ -180,13 +197,13 @@ class TestRequestInputPortsRenewal:
         )
 
         with pytest.raises(HTTPException) as exc:
-            AbstractDataProductService(test_session).request_input_ports(
-                dp.id, [port.id], "again", actor=actor
+            AbstractDataProductService(test_session).renew_input_port(
+                dp.id, port.id, actor=actor
             )
         assert exc.value.status_code == 400
         assert len(_requests_for(link.id)) == 1
 
-    def test_request_input_ports__blocked_when_active_grant_is_permanent(self):
+    def test_renew_input_port__blocked_when_active_grant_is_permanent(self):
         actor = UserFactory()
         dp = DataProductFactory()
         port = OutputPortFactory(access_type=OutputPortAccessType.RESTRICTED)
@@ -197,12 +214,12 @@ class TestRequestInputPortsRenewal:
         )
 
         with pytest.raises(HTTPException) as exc:
-            AbstractDataProductService(test_session).request_input_ports(
-                dp.id, [port.id], "renew", actor=actor
+            AbstractDataProductService(test_session).renew_input_port(
+                dp.id, port.id, actor=actor
             )
         assert exc.value.status_code == 400
 
-    def test_request_input_ports__re_request_allowed_on_denied_link(self):
+    def test_renew_input_port__allowed_on_denied_link(self):
         actor = UserFactory()
         dp = DataProductFactory()
         port = self._restricted_time_bound_port()
@@ -212,9 +229,20 @@ class TestRequestInputPortsRenewal:
             status=DecisionStatus.DENIED,
         )
 
-        [ip] = AbstractDataProductService(test_session).request_input_ports(
-            dp.id, [port.id], "retry", actor=actor
+        ip = AbstractDataProductService(test_session).renew_input_port(
+            dp.id, port.id, actor=actor
         )
 
         assert ip.id == link.id
         assert len(_requests_for(link.id)) == 2
+
+    def test_renew_input_port__404_when_no_existing_link(self):
+        actor = UserFactory()
+        dp = DataProductFactory()
+        port = OutputPortFactory(access_type=OutputPortAccessType.RESTRICTED)
+
+        with pytest.raises(HTTPException) as exc:
+            AbstractDataProductService(test_session).renew_input_port(
+                dp.id, port.id, actor=actor
+            )
+        assert exc.value.status_code == 404

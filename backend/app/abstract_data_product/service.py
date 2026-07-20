@@ -105,65 +105,16 @@ class AbstractDataProductService:
                     ),
                 )
 
-    def _add_single_input_port(
+    def _create_request(
         self,
         adp: AbstractDataProduct,
-        output_port_id: UUID,
+        output_port: OutputPortModel,
+        input_port: InputPortModel,
         justification: str,
         *,
         actor: User,
     ) -> InputPortModel:
-        output_port = ensure_output_port_exists(
-            output_port_id,
-            self.db,
-            options=[
-                selectinload(OutputPortModel.data_product_links)
-                .selectinload(InputPortModel.consuming_abstract_data_product)
-                .selectinload(AbstractDataProduct.input_ports)
-            ],
-        )
-        self._ensure_not_deleting(adp)
-        self._ensure_not_deleting(output_port.data_product)
-        existing = next(
-            (link for link in adp.input_ports if link.output_port_id == output_port.id),
-            None,
-        )
-        if existing is not None:
-            if existing.pending_request is not None:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="A request is already pending for this input port",
-                )
-            if (
-                existing.active_grant is not None
-                and existing.active_grant.valid_until is None
-            ):
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="This input port already has permanent access; there is nothing to renew",
-                )
-            justification = existing.latest_request.justification
-        if output_port.data_product_id == adp.id:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Cannot link own output port to data product",
-            )
-
-        if not OutputPortService(self.db).is_visible_to_user(output_port, actor):
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="You do not have access to this private output port",
-            )
-
         access_duration = self._resolve_access_duration(adp, output_port)
-        input_port = (
-            existing
-            if existing is not None
-            else InputPortModel(
-                output_port_id=output_port_id,
-                consuming_abstract_data_product=adp,
-            )
-        )
         request = InputPortRequestModel(
             justification=justification,
             requested_by=actor,
@@ -190,24 +141,110 @@ class AbstractDataProductService:
                 event="Input Port Approved",
                 properties={
                     "data_product_id": str(output_port.data_product_id),
-                    "output_port_id": str(output_port_id),
+                    "output_port_id": str(output_port.id),
                     "consuming_data_product_id": str(adp.id),
                     "type": str(adp.abstract_data_product_type.value),
                 },
             )
-
-        if existing is None:
-            adp.input_ports.append(input_port)
         return input_port
 
-    def request_input_ports(
+    def _add_single_input_port(
         self,
-        id: UUID,
-        output_port_ids: list[UUID],
+        adp: AbstractDataProduct,
+        output_port_id: UUID,
         justification: str,
         *,
         actor: User,
-    ) -> list[InputPortModel]:
+    ) -> InputPortModel:
+        output_port = ensure_output_port_exists(
+            output_port_id,
+            self.db,
+            options=[
+                selectinload(OutputPortModel.data_product_links)
+                .selectinload(InputPortModel.consuming_abstract_data_product)
+                .selectinload(AbstractDataProduct.input_ports)
+            ],
+        )
+        self._ensure_not_deleting(adp)
+        self._ensure_not_deleting(output_port.data_product)
+        if any(link.output_port_id == output_port.id for link in adp.input_ports):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Input port connection to Output Port ({output_port_id}) already exists in {adp.abstract_data_product_type} {adp.id}",
+            )
+        if output_port.data_product_id == adp.id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Cannot link own output port to data product",
+            )
+
+        if not OutputPortService(self.db).is_visible_to_user(output_port, actor):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have access to this private output port",
+            )
+
+        input_port = InputPortModel(
+            output_port_id=output_port_id,
+            consuming_abstract_data_product=adp,
+        )
+        self._create_request(adp, output_port, input_port, justification, actor=actor)
+        adp.input_ports.append(input_port)
+        return input_port
+
+    def _renew_single_input_port(
+        self,
+        adp: AbstractDataProduct,
+        output_port_id: UUID,
+        *,
+        actor: User,
+    ) -> InputPortModel:
+        output_port = ensure_output_port_exists(
+            output_port_id,
+            self.db,
+            options=[
+                selectinload(OutputPortModel.data_product_links)
+                .selectinload(InputPortModel.consuming_abstract_data_product)
+                .selectinload(AbstractDataProduct.input_ports)
+            ],
+        )
+        self._ensure_not_deleting(adp)
+        self._ensure_not_deleting(output_port.data_product)
+        existing = next(
+            (link for link in adp.input_ports if link.output_port_id == output_port.id),
+            None,
+        )
+        if existing is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Input port connection to Output Port ({output_port_id}) not found in {adp.abstract_data_product_type} {adp.id}",
+            )
+        if existing.pending_request is not None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="A request is already pending for this input port",
+            )
+        if (
+            existing.active_grant is not None
+            and existing.active_grant.valid_until is None
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="This input port already has permanent access; there is nothing to renew",
+            )
+
+        if not OutputPortService(self.db).is_visible_to_user(output_port, actor):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have access to this private output port",
+            )
+
+        justification = existing.latest_request.justification
+        return self._create_request(
+            adp, output_port, existing, justification, actor=actor
+        )
+
+    def _get_adp_with_input_ports(self, id: UUID) -> AbstractDataProduct:
         adp = self.db.get(
             AbstractDataProduct,
             id,
@@ -223,12 +260,35 @@ class AbstractDataProductService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Abstract data product {id} not found",
             )
+        return adp
+
+    def request_input_ports(
+        self,
+        id: UUID,
+        output_port_ids: list[UUID],
+        justification: str,
+        *,
+        actor: User,
+    ) -> list[InputPortModel]:
+        adp = self._get_adp_with_input_ports(id)
         input_ports = [
             self._add_single_input_port(adp, output_port_id, justification, actor=actor)
             for output_port_id in output_port_ids
         ]
         self.db.flush()
         return input_ports
+
+    def renew_input_port(
+        self,
+        id: UUID,
+        output_port_id: UUID,
+        *,
+        actor: User,
+    ) -> InputPortModel:
+        adp = self._get_adp_with_input_ports(id)
+        input_port = self._renew_single_input_port(adp, output_port_id, actor=actor)
+        self.db.flush()
+        return input_port
 
     def remove_input_port(
         self,

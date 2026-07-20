@@ -5,9 +5,9 @@ import { useGetExpiringSoonThresholdQuery } from '@/store/api/services/generated
 import { InputPortStatus, RenewalStatus } from '@/store/api/services/generated/dataProductsApi.ts';
 import { formatDateFromISOString } from '@/utils/date.helper.ts';
 
-const DEFAULT_EXPIRING_SOON_THRESHOLD_DAYS = 14;
+export const DEFAULT_EXPIRING_SOON_THRESHOLD_DAYS = 14;
 
-function isExpiringSoon(status: string, validUntil: string | null, thresholdDays: number): boolean {
+export function isExpiringSoon(status: string, validUntil: string | null, thresholdDays: number): boolean {
     if (status !== InputPortStatus.Approved || validUntil === null) {
         return false;
     }
@@ -33,13 +33,14 @@ export function RenewalTag({ renewalStatus }: RenewalTagProps) {
 type IsExpiringSoonTagProps = {
     status: string;
     validUntil: string | null;
+    renewalStatus?: string | null;
 };
 
-export function IsExpiringSoonTag({ status, validUntil }: IsExpiringSoonTagProps) {
+export function IsExpiringSoonTag({ status, validUntil, renewalStatus }: IsExpiringSoonTagProps) {
     const { t } = useTranslation();
     const { data } = useGetExpiringSoonThresholdQuery();
     const thresholdDays = data?.days ?? DEFAULT_EXPIRING_SOON_THRESHOLD_DAYS;
-    if (!isExpiringSoon(status, validUntil, thresholdDays)) {
+    if (renewalStatus === RenewalStatus.Pending || !isExpiringSoon(status, validUntil, thresholdDays)) {
         return null;
     }
     return <Tag color={'gold'}>{t('Expiring soon')}</Tag>;

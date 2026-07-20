@@ -1,3 +1,4 @@
+from datetime import date, timedelta
 from typing import Optional
 from unittest.mock import MagicMock, patch
 from uuid import UUID
@@ -7,12 +8,15 @@ from fastapi import status
 from fastapi.testclient import TestClient
 from httpx import Response
 
+from app.abstract_data_product.type import AbstractDataProductType
+from app.access_durations.enums import AccessDurationType
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.roles.schema import Scope
 from app.core.authz import Action
 from app.data_products.output_ports.enums import OutputPortAccessType
 from app.settings import settings
 from tests.factories import (
+    AccessDurationFactory,
     DataProductFactory,
     DataProductRoleAssignmentFactory,
     DatasetRoleAssignmentFactory,
@@ -116,6 +120,77 @@ class TestInputPortsRouter:
         assert response.status_code == 200
         response = self.request_input_ports_for_data_product(
             client, data_product.id, [ds.id]
+        )
+        assert response.status_code == 400
+
+    def test_renew_input_port_for_data_product(self, client):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__REQUEST_OUTPUT_PORT_ACCESS],
+        )
+        ds = OutputPortFactory(
+            access_type=OutputPortAccessType.RESTRICTED,
+            data_product_access_duration_type=AccessDurationType.TIME_BOUND,
+        )
+        AccessDurationFactory(
+            abstract_data_product_type=AbstractDataProductType.DATA_PRODUCT,
+            access_duration_type=AccessDurationType.TIME_BOUND,
+            days=30,
+        )
+        assoc = InputPortFactory(
+            output_port=ds,
+            status=DecisionStatus.APPROVED,
+            request__access_duration_type=AccessDurationType.TIME_BOUND,
+            request__valid_until=date.today() + timedelta(days=10),
+        )
+        DataProductRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+            data_product_id=assoc.consuming_abstract_data_product.id,
+        )
+
+        response = self.renew_input_port_for_data_product(
+            client, assoc.consuming_abstract_data_product.id, ds.id
+        )
+        assert response.status_code == 200, response.text
+
+    def test_renew_input_port_for_data_product__no_existing_link(self, client):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__REQUEST_OUTPUT_PORT_ACCESS],
+        )
+        data_product = DataProductFactory()
+        DataProductRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+            data_product_id=data_product.id,
+        )
+        ds = OutputPortFactory()
+
+        response = self.renew_input_port_for_data_product(
+            client, data_product.id, ds.id
+        )
+        assert response.status_code == 404
+
+    def test_renew_input_port_for_data_product__pending_request(self, client):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__REQUEST_OUTPUT_PORT_ACCESS],
+        )
+        assoc = InputPortFactory(status=DecisionStatus.PENDING)
+        DataProductRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+            data_product_id=assoc.consuming_abstract_data_product.id,
+        )
+
+        response = self.renew_input_port_for_data_product(
+            client,
+            assoc.consuming_abstract_data_product.id,
+            assoc.output_port.id,
         )
         assert response.status_code == 400
 
@@ -605,6 +680,16 @@ class TestInputPortsRouter:
                 ],
                 "justification": justification,
             },
+        )
+
+    @staticmethod
+    def renew_input_port_for_data_product(
+        client: TestClient,
+        data_product_id: UUID,
+        output_port_id: UUID,
+    ) -> Response:
+        return client.post(
+            f"{DATA_PRODUCTS_ENDPOINT}/{data_product_id}/input_ports/{output_port_id}/renew"
         )
 
     @staticmethod

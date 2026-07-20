@@ -147,6 +147,15 @@ const injectedRtkApi = api.injectEndpoints({
         url: `/api/v2/data_products/${queryArg}/input_ports`,
       }),
     }),
+    renewInputPortForDataProduct: build.mutation<
+      RenewInputPortForDataProductApiResponse,
+      RenewInputPortForDataProductApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/data_products/${queryArg.id}/input_ports/${queryArg.outputPortId}/renew`,
+        method: "POST",
+      }),
+    }),
     getDataProductEventHistory: build.query<
       GetDataProductEventHistoryApiResponse,
       GetDataProductEventHistoryApiArg
@@ -260,6 +269,12 @@ export type RequestInputPortsForDataProductApiArg = {
 export type GetDataProductInputPortsApiResponse =
   /** status 200 Successful Response */ GetDataProductInputPortsResponse;
 export type GetDataProductInputPortsApiArg = string;
+export type RenewInputPortForDataProductApiResponse =
+  /** status 200 Successful Response */ RenewInputPortForDataProductResponse;
+export type RenewInputPortForDataProductApiArg = {
+  id: string;
+  outputPortId: string;
+};
 export type GetDataProductEventHistoryApiResponse =
   /** status 200 Successful Response */ GetEventHistoryResponse;
 export type GetDataProductEventHistoryApiArg = string;
@@ -462,6 +477,9 @@ export type AbstractDataProductInputPort = {
 };
 export type GetDataProductInputPortsResponse = {
   input_ports: AbstractDataProductInputPort[];
+};
+export type RenewInputPortForDataProductResponse = {
+  input_port_link: string;
 };
 export type DataProduct = {
   id: string;
@@ -710,6 +728,7 @@ export const {
   useRequestInputPortsForDataProductMutation,
   useGetDataProductInputPortsQuery,
   useLazyGetDataProductInputPortsQuery,
+  useRenewInputPortForDataProductMutation,
   useGetDataProductEventHistoryQuery,
   useLazyGetDataProductEventHistoryQuery,
   useGetDataProductRolledUpTagsQuery,

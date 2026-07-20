@@ -11,6 +11,7 @@ type Props = {
     canRemoveAccess: boolean;
     loadingInputPorts: boolean;
     handleRemove: (outputPortId: string) => Promise<void>;
+    handleRenew: (outputPortId: string) => Promise<void>;
     inputPorts: InputPort[];
 };
 
@@ -29,6 +30,7 @@ export function InputPortTab({
     inputPorts,
     canRequestAccess,
     handleRemove,
+    handleRenew,
     canRemoveAccess,
 }: Props) {
     const { t } = useTranslation();
@@ -55,7 +57,9 @@ export function InputPortTab({
                 loadingInputPorts={loadingInputPorts}
                 inputPorts={filteredDatasets}
                 handleRemove={handleRemove}
+                handleRenew={handleRenew}
                 canRemoveAccess={canRemoveAccess}
+                canRequestAccess={canRequestAccess}
             />
         </Flex>
     );

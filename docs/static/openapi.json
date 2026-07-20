@@ -2315,6 +2315,79 @@
         }
       }
     },
+    "/api/v2/data_products/{id}/input_ports/{output_port_id}/renew": {
+      "post": {
+        "tags": [
+          "Data Products"
+        ],
+        "summary": "Renew Input Port For Data Product",
+        "operationId": "renew_input_port_for_data_product",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "output_port_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Output Port Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RenewInputPortForDataProductResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Output port not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Output port not found"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Data Product not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Data Product id not found"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v2/data_products/{id}/history": {
       "get": {
         "tags": [
@@ -7083,6 +7156,59 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/RequestInputPortsForExplorationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/explorations/{id}/input_ports/{output_port_id}/renew": {
+      "post": {
+        "tags": [
+          "Explorations"
+        ],
+        "summary": "Renew Input Port For Exploration",
+        "operationId": "renew_input_port_for_exploration",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "output_port_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Output Port Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RenewInputPortForExplorationResponse"
                 }
               }
             }
@@ -14021,6 +14147,34 @@
           "technical_asset_access_path"
         ],
         "title": "RenderTechnicalAssetAccessPathResponse"
+      },
+      "RenewInputPortForDataProductResponse": {
+        "properties": {
+          "input_port_link": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Input Port Link"
+          }
+        },
+        "type": "object",
+        "required": [
+          "input_port_link"
+        ],
+        "title": "RenewInputPortForDataProductResponse"
+      },
+      "RenewInputPortForExplorationResponse": {
+        "properties": {
+          "input_port_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Input Port Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "input_port_id"
+        ],
+        "title": "RenewInputPortForExplorationResponse"
       },
       "RenewalStatus": {
         "type": "string",
