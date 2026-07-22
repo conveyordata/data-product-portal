@@ -37,6 +37,9 @@ from app.database.database import SessionLocal
 from app.mcp.deps import get_db_session
 from app.mcp.plugin_registry import MCPPlugin
 from app.settings import settings
+from app.technical_asset_configuration.glue.model import (
+    GlueTechnicalAssetConfiguration as GlueTechnicalAssetConfigurationModel,
+)
 from app.technical_asset_configuration.glue.schema import (
     GlueTechnicalAssetConfiguration,
 )
@@ -175,26 +178,27 @@ class GlueMCPPlugin(MCPPlugin):
             )
 
             configuration: DataOutputConfiguration = data_output.configuration  # type: ignore[assignment]
-            if not isinstance(configuration, GlueTechnicalAssetConfiguration):
+            if not isinstance(configuration, GlueTechnicalAssetConfigurationModel):
                 return {
                     "error": f"Technical asset {technical_asset_id} is not a Glue asset"
                 }
 
+            config_schema = GlueTechnicalAssetConfiguration.model_validate(
+                configuration, from_attributes=True
+            )
             env_configs = [
                 EnvironmentConfigsGetItem.model_validate(e)
                 for e in data_output.environment_configurations
             ]
             for tech_info in compute_technical_info(
-                configuration, data_output.service, env_configs
+                config_schema, data_output.service, env_configs
             ):
                 if tech_info.environment.lower() == environment.lower():
                     if not tech_info.info:
                         return {
                             "error": f"No Glue info rendered for environment '{environment}'"
                         }
-                    return tech_info.info.split(".")[
-                        0
-                    ]  # database part before the table
+                    return tech_info.info.split(".")[0]
 
             return {
                 "error": f"Environment '{environment}' not found for this technical asset"
