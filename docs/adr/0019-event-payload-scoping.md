@@ -31,16 +31,14 @@ A worked example for an AWS S3-backed platform — covering every event in the c
 
 ## Decision Outcome
 
-**Chosen approach:** *Option 3 (dedicated per-event payload models) combined with Option 6 (cascade event emission on delete).*
+**Chosen approach:** *Option 1 (ID-only events + soft deletes).* and *Option 4: ID-only events + finalizers (Kubernetes-style)*
+
+They are honestly very similar and just have small differences, we will take the best of both approaches.
 
 Option 2 is rejected outright: it accidentally solves the delete problem but couples the event contract to internal API shapes and ships a lot of display metadata the provisioner never touches.
-
-Options 1 and 4 are kept on the table as evolution paths, not as the starting point:
-
-- **Option 1** dissolves the delete-cascade problem by leaving objects addressable after their delete event, but requires a cross-cutting `deleted_at` schema change and forces an SDK round-trip on every event — including hot paths like `link_approved` and `technical_asset.linked` where two-sided hydration is exactly what the provisioner needs.
-- **Option 4** is conceptually clean — Kubernetes uses the same pattern to give controllers a chance to clean up before an object is removed — but it inverts the operational model. Portal deletes become asynchronous and block on external systems: UI affordances like "delete this data product" no longer reflect an immediate state change, partial failures are easy (one provisioner stuck, the object stuck with it). Beyond the delete case, non-delete events would still need SDK round-trips. Moving from fire-and-forget events to two-phase-commit deletes is a significantly larger architectural shift than this problem warrants today.
-
+Option 3 has been rejected after trying implementation options, it doesn't handle certain edge cases nicely like missing events.
 Option 3 on its own leaves cascading deletes awkward: a `data_product.deleted` event would need to embed every output port, every technical asset, and every consumer link in a single fat payload. Option 6 fixes this: the portal emits a delete or unlink event for each cascaded child *before* the parent's transaction commits, so each event stays small and each child is handled by its own handler.
+Option 6 is currently not needed, since we will limit Option 1 by only implementing data product and exploration reconcilers. We might need it later.
 
 This combination gives provisioners a stable, right-sized contract that survives internal refactors, keeps deletes fire-and-forget, and keeps every delete handleable on its own event. **Options 1, 3, and 4 are not mutually exclusive**: if we discover that minimal payloads cannot carry what provisioners actually need in some flow, we can migrate to ID-only events with SDK hydration, or to finalizers, without invalidating the catalogue defined below. Option 5 lives entirely on the provisioner side — the portal does not assume provisioners track their own state, but we will document the pattern as a recommendation because every provisioner needs some equivalent in practice.
 
@@ -86,9 +84,14 @@ Today, events are emitted from the router layer. A future refactor will move eve
 
 ### Option 1: ID-only events + soft deletes
 
+We will implement event loops in the SDK that only implement data product and reconciler [see here](./reference/id-only-event-implementation.md).
+Output port events trigger the data product event loop for example.
+
 - **Good, because** payloads are minimal and provisioners fetch only what they need.
 - **Good, because** the delete problem dissolves: the object stays addressable via the SDK after the delete event.
-- **Bad, because** soft deletes require schema migrations across many tables and add `deleted_at` filtering throughout every query in the codebase.
+- **Good, because** Easy to recover from missing events, you can reboot the provisioner and fetch all resources and check if you missed an update.
+- **Good, because** We can integrate this rather simply with SQL alchemy to detect updates and trigger events for the ID
+- **Bad, because** soft deletes require schema migrations across many tables and filtering throughout every query in the codebase.
 - **Bad, because** provisioners still need SDK round-trips for every event, including on the hot paths (`link_approved`, `technical_asset.linked`) where two-sided hydration would otherwise be a single payload.
 - **Bad, because** cascading deletes still need a custom solution — a deleted data product's output ports, TAs, and consumer links must remain reachable too, multiplying the soft-delete surface area.
 
@@ -98,6 +101,8 @@ Today, events are emitted from the router layer. A future refactor will move eve
 - **Bad, because** API response shapes change for unrelated reasons (new display fields, schema reshaping for the frontend) and silently break provisioner consumers.
 - **Bad, because** payloads include display fields (`about`, `usage`, `tags`) that provisioners never use.
 - **Bad, because** delete events are still broken for cascade-deleted children (consumers of a TA, TAs of a deleted output port).
+- **Bad, because** when a delete fails it's impossible to retry it since you will lose all information
+- **Bad, because** when events are missed, we have no easy way to recover, unless we store them in the DB
 
 ### Option 3: Dedicated per-event payload models
 
@@ -106,14 +111,19 @@ Today, events are emitted from the router layer. A future refactor will move eve
 - **Good, because** branching state (link status APPROVED vs PENDING, TA status transitions) can be carried explicitly on the event.
 - **Good, because** combined with Option 6 it solves cascading deletes without forcing fat delete payloads.
 - **Neutral, because** requires upfront scoping of each event (see Appendix A) and a worked use case to validate the scope.
+- **Neutral, because** Bugfixes on the provisioner require you to reconcile all objects you manage, which is not automatically included but not that hard to do
 - **Bad, because** two model hierarchies (API responses + event payloads) must be maintained in parallel; care is needed to keep them from drifting back into coupling.
 - **Bad, because** payloads might still not include what a specific provisioner needs in every flow; SDK hydration remains the fallback for non-delete cases.
+- **Bad, because** when a delete fails it's impossible to retry it since you will lose all information
+- **Bad, because** when events are missed, we have no easy way to recover. For example when the provisioner is down for 2 hours it might have missed 100's, unless we store them in the DB
 
 ### Option 4: ID-only events + finalizers (Kubernetes-style)
 
 - **Good, because** the event contract stays tiny — only IDs travel on the wire.
 - **Good, because** the delete-cascade problem dissolves cleanly: deletes are explicitly blocked until every provisioner signs off, so nothing is gone before teardown finishes.
 - **Good, because** the pattern is well understood from Kubernetes; provisioners that already think in terms of controllers map onto it directly.
+- **Good, because** we can use the same ideas from Kubernetes to fix failures, when we restart a provisioner we trigger the event loop of every object we manage. Automatically fixing missed events
+- **Good, because** We can integrate this rather simply with SQL alchemy to detect updates and trigger events for the ID
 - **Bad, because** portal deletes become asynchronous and block on external systems, changing the UX contract of every delete affordance in the product.
 - **Bad, because** events still need SDK round-trips; the finalizer trick only addresses delete semantics.
 - **Bad, because** moving from fire-and-forget events to two-phase-commit deletes is a much larger architectural shift than this ADR is scoped to make.
