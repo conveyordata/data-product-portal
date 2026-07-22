@@ -30,7 +30,6 @@ from app.configuration.platforms.platform_services.model import PlatformService
 from app.core.auth.auth import get_authenticated_user
 from app.core.auth.jwt import JWTToken
 from app.core.logging import logger
-from app.data_output_configuration.glue.schema import GlueTechnicalAssetConfiguration
 from app.data_products.technical_assets.model import ensure_technical_asset_exists
 from app.data_products.technical_assets.schema_response import compute_technical_info
 from app.data_products.technical_assets.service import DataOutputService
@@ -38,9 +37,12 @@ from app.database.database import SessionLocal
 from app.mcp.deps import get_db_session
 from app.mcp.plugin_registry import MCPPlugin
 from app.settings import settings
+from app.technical_asset_configuration.glue.schema import (
+    GlueTechnicalAssetConfiguration,
+)
 
 if TYPE_CHECKING:
-    from app.data_output_configuration.schema_union import DataOutputConfiguration
+    from app.technical_asset_configuration.schema_union import DataOutputConfiguration
 
 
 def _fetch_aws_credentials(data_product_namespace: str, env: str) -> dict[str, str]:
