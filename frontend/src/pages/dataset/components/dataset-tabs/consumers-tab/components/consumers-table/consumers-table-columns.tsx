@@ -61,10 +61,15 @@ export const getConsumerColumns = ({
             title: t('Status'),
             dataIndex: 'status',
             width: '18%',
-            render: (_, { status, renewal_status }) => (
+            render: (_, { status, renewal_status, current_request }) => (
                 <Flex vertical align={'flex-start'} gap={'small'}>
                     <Badge status={getInputPortStatusBadgeStatus(status)} text={getInputPortStatusLabel(t, status)} />
                     <RenewalTag status={status} renewalStatus={renewal_status} />
+                    <IsExpiringSoonTag
+                        status={status}
+                        validUntil={current_request.valid_until}
+                        renewalStatus={renewal_status}
+                    />
                 </Flex>
             ),
             ...new FilterSettings(dataProductLinks, (dpl) => getInputPortStatusLabel(t, dpl.status)),
@@ -80,15 +85,8 @@ export const getConsumerColumns = ({
             title: t('Expiry date'),
             dataIndex: ['current_request', 'valid_until'],
             width: '12%',
-            render: (_, { status, renewal_status, current_request }) => (
-                <Flex vertical align={'flex-start'} gap={'small'}>
-                    <ExpiryDate status={status} validUntil={current_request.valid_until} />
-                    <IsExpiringSoonTag
-                        status={status}
-                        validUntil={current_request.valid_until}
-                        renewalStatus={renewal_status}
-                    />
-                </Flex>
+            render: (_, { status, current_request }) => (
+                <ExpiryDate status={status} validUntil={current_request.valid_until} />
             ),
         },
         {

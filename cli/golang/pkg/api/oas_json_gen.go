@@ -17426,7 +17426,7 @@ func (s *InputPortRequestBase) encodeFields(e *jx.Encoder) {
 	}
 	{
 		e.FieldStart("valid_until")
-		s.ValidUntil.Encode(e, json.EncodeDateTime)
+		s.ValidUntil.Encode(e, json.EncodeDate)
 	}
 	{
 		e.FieldStart("requested_by")
@@ -17510,7 +17510,7 @@ func (s *InputPortRequestBase) Decode(d *jx.Decoder) error {
 		case "valid_until":
 			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
-				if err := s.ValidUntil.Decode(d, json.DecodeDateTime); err != nil {
+				if err := s.ValidUntil.Decode(d, json.DecodeDate); err != nil {
 					return err
 				}
 				return nil
@@ -19016,6 +19016,52 @@ func (s NilDataQualityStatus) MarshalJSON() ([]byte, error) {
 func (s *NilDataQualityStatus) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
+}
+
+// Encode encodes time.Time as json.
+func (o NilDate) Encode(e *jx.Encoder, format func(*jx.Encoder, time.Time)) {
+	if o.Null {
+		e.Null()
+		return
+	}
+	format(e, o.Value)
+}
+
+// Decode decodes time.Time from json.
+func (o *NilDate) Decode(d *jx.Decoder, format func(*jx.Decoder) (time.Time, error)) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode NilDate to nil")
+	}
+	if d.Next() == jx.Null {
+		if err := d.Null(); err != nil {
+			return err
+		}
+
+		var v time.Time
+		o.Value = v
+		o.Null = true
+		return nil
+	}
+	o.Null = false
+	v, err := format(d)
+	if err != nil {
+		return err
+	}
+	o.Value = v
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s NilDate) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e, json.EncodeDate)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *NilDate) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d, json.DecodeDate)
 }
 
 // Encode encodes time.Time as json.

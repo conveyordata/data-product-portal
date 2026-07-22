@@ -1,5 +1,5 @@
 import { ClockCircleOutlined, CloseCircleOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
-import { Flex, Typography } from 'antd';
+import { Flex, Tag, Typography } from 'antd';
 import { differenceInCalendarDays, parseISO } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import { useGetExpiringSoonThresholdQuery } from '@/store/api/services/generated/accessDurationsApi.ts';
@@ -59,10 +59,9 @@ export function IsExpiringSoonTag({ status, validUntil, renewalStatus }: IsExpir
         return null;
     }
     return (
-        <Flex align={'center'} gap={'small'}>
-            <ExclamationCircleOutlined />
-            <Typography.Text type={'secondary'}>{t('Expiring soon')}</Typography.Text>
-        </Flex>
+        <Tag color={'gold'} icon={<ExclamationCircleOutlined />}>
+            {t('Expiring soon')}
+        </Tag>
     );
 }
 

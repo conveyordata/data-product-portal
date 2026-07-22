@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime
 from typing import Optional
 from uuid import UUID
 
@@ -12,7 +12,7 @@ class InputPortRequestBase(ORMModel):
     id: UUID
     justification: str
     decision_note: Optional[str] = None
-    valid_until: Optional[datetime]
+    valid_until: Optional[date]
     requested_by: User
     decided_by: Optional[User] = None
     decision: DecisionStatus

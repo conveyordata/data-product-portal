@@ -6342,7 +6342,7 @@ type InputPortRequestBase struct {
 	ID            uuid.UUID      `json:"id"`
 	Justification string         `json:"justification"`
 	DecisionNote  OptNilString   `json:"decision_note"`
-	ValidUntil    NilDateTime    `json:"valid_until"`
+	ValidUntil    NilDate        `json:"valid_until"`
 	RequestedBy   User           `json:"requested_by"`
 	DecidedBy     OptNilUser     `json:"decided_by"`
 	Decision      DecisionStatus `json:"decision"`
@@ -6366,7 +6366,7 @@ func (s *InputPortRequestBase) GetDecisionNote() OptNilString {
 }
 
 // GetValidUntil returns the value of ValidUntil.
-func (s *InputPortRequestBase) GetValidUntil() NilDateTime {
+func (s *InputPortRequestBase) GetValidUntil() NilDate {
 	return s.ValidUntil
 }
 
@@ -6411,7 +6411,7 @@ func (s *InputPortRequestBase) SetDecisionNote(val OptNilString) {
 }
 
 // SetValidUntil sets the value of ValidUntil.
-func (s *InputPortRequestBase) SetValidUntil(val NilDateTime) {
+func (s *InputPortRequestBase) SetValidUntil(val NilDate) {
 	s.ValidUntil = val
 }
 
@@ -6782,6 +6782,51 @@ func (o NilDataQualityStatus) Get() (v DataQualityStatus, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o NilDataQualityStatus) Or(d DataQualityStatus) DataQualityStatus {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewNilDate returns new NilDate with value set to v.
+func NewNilDate(v time.Time) NilDate {
+	return NilDate{
+		Value: v,
+	}
+}
+
+// NilDate is nullable time.Time.
+type NilDate struct {
+	Value time.Time
+	Null  bool
+}
+
+// SetTo sets value to v.
+func (o *NilDate) SetTo(v time.Time) {
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o NilDate) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *NilDate) SetToNull() {
+	o.Null = true
+	var v time.Time
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o NilDate) Get() (v time.Time, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o NilDate) Or(d time.Time) time.Time {
 	if v, ok := o.Get(); ok {
 		return v
 	}

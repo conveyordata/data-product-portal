@@ -24,7 +24,7 @@ class InputPortRequestBase:
     Attributes:
         id (UUID):
         justification (str):
-        valid_until (datetime.datetime | None):
+        valid_until (datetime.date | None):
         requested_by (User):
         decision (DecisionStatus):
         created_on (datetime.datetime):
@@ -35,7 +35,7 @@ class InputPortRequestBase:
 
     id: UUID
     justification: str
-    valid_until: datetime.datetime | None
+    valid_until: datetime.date | None
     requested_by: User
     decision: DecisionStatus
     created_on: datetime.datetime
@@ -52,7 +52,7 @@ class InputPortRequestBase:
         justification = self.justification
 
         valid_until: None | str
-        if isinstance(self.valid_until, datetime.datetime):
+        if isinstance(self.valid_until, datetime.date):
             valid_until = self.valid_until.isoformat()
         else:
             valid_until = self.valid_until
@@ -108,18 +108,18 @@ class InputPortRequestBase:
 
         justification = d.pop("justification")
 
-        def _parse_valid_until(data: object) -> datetime.datetime | None:
+        def _parse_valid_until(data: object) -> datetime.date | None:
             if data is None:
                 return data
             try:
                 if not isinstance(data, str):
                     raise TypeError()
-                valid_until_type_0 = datetime.datetime.fromisoformat(data)
+                valid_until_type_0 = datetime.date.fromisoformat(data)
 
                 return valid_until_type_0
             except (TypeError, ValueError, AttributeError, KeyError):
                 pass
-            return cast(datetime.datetime | None, data)
+            return cast(datetime.date | None, data)
 
         valid_until = _parse_valid_until(d.pop("valid_until"))
 
