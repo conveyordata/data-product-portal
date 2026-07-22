@@ -12,6 +12,7 @@ from fastapi.responses import Response
 from pydantic.json_schema import SkipJsonSchema
 from sqlalchemy.orm import Session
 
+from app.abstract_data_product.input_ports.enums import InputPortStatus
 from app.abstract_data_product.schema_request import FinalizerRequest
 from app.abstract_data_product.schema_response import AbstractDataProductInputPort
 from app.authorization.role_assignments.data_product.auth import (
@@ -551,7 +552,7 @@ def renew_input_port_for_data_product(
         CreateEvent(
             name=(
                 EventType.DATA_PRODUCT_DATASET_LINK_REQUESTED
-                if input_port.status == DecisionStatus.PENDING
+                if input_port.status == InputPortStatus.PENDING
                 else EventType.DATA_PRODUCT_DATASET_LINK_APPROVED
             ),
             subject_id=input_port.consuming_abstract_data_product_id,
@@ -561,7 +562,7 @@ def renew_input_port_for_data_product(
             actor_id=authenticated_user.id,
         )
     )
-    if input_port.status == DecisionStatus.APPROVED:
+    if input_port.status == InputPortStatus.APPROVED:
         NotificationService(db).create_data_product_notifications(
             data_product_id=input_port.consuming_abstract_data_product_id,
             event_id=event_id,

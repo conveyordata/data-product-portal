@@ -1,4 +1,5 @@
-import { Tag, Typography } from 'antd';
+import { ClockCircleOutlined, CloseCircleOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
+import { Flex, Typography } from 'antd';
 import { differenceInCalendarDays, parseISO } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import { useGetExpiringSoonThresholdQuery } from '@/store/api/services/generated/accessDurationsApi.ts';
@@ -16,16 +17,30 @@ export function isExpiringSoon(status: string, validUntil: string | null, thresh
 }
 
 type RenewalTagProps = {
+    status: string;
     renewalStatus?: string | null;
 };
 
-export function RenewalTag({ renewalStatus }: RenewalTagProps) {
+export function RenewalTag({ status, renewalStatus }: RenewalTagProps) {
     const { t } = useTranslation();
+    if (status === InputPortStatus.Pending) {
+        return null;
+    }
     if (renewalStatus === RenewalStatus.Pending) {
-        return <Tag color={'blue'}>{t('Renewal pending')}</Tag>;
+        return (
+            <Flex align={'center'} gap={'small'}>
+                <ClockCircleOutlined />
+                <Typography.Text type={'secondary'}>{t('Renewal pending')}</Typography.Text>
+            </Flex>
+        );
     }
     if (renewalStatus === RenewalStatus.Denied) {
-        return <Tag color={'red'}>{t('Renewal declined')}</Tag>;
+        return (
+            <Flex align={'center'} gap={'small'}>
+                <CloseCircleOutlined />
+                <Typography.Text type={'secondary'}>{t('Renewal declined')}</Typography.Text>
+            </Flex>
+        );
     }
     return null;
 }
@@ -43,7 +58,12 @@ export function IsExpiringSoonTag({ status, validUntil, renewalStatus }: IsExpir
     if (renewalStatus === RenewalStatus.Pending || !isExpiringSoon(status, validUntil, thresholdDays)) {
         return null;
     }
-    return <Tag color={'gold'}>{t('Expiring soon')}</Tag>;
+    return (
+        <Flex align={'center'} gap={'small'}>
+            <ExclamationCircleOutlined />
+            <Typography.Text type={'secondary'}>{t('Expiring soon')}</Typography.Text>
+        </Flex>
+    );
 }
 
 type ExpiryDateProps = {
