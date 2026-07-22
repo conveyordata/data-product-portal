@@ -1,17 +1,20 @@
-import { Badge, type TableColumnsType } from 'antd';
+import { Badge, Flex, type TableColumnsType } from 'antd';
 import type { TFunction } from 'i18next';
 
 import outputPortBorderIcon from '@/assets/icons/border-icons/output-port-border-icon.svg?react';
 import { InputPortActionButton } from '@/components/abstract-data-products/input-port-tab/components/input-port-table/input-port-action-botton.component.tsx';
-import Justification from '@/components/data-products/data-product-dataset-justification/justification.component.tsx';
 import { DatasetPopoverTitle } from '@/components/datasets/dataset-popover-title/dataset-popover-title.tsx';
 import { OutputPortTitle } from '@/components/datasets/output-port-title/output-port-title.tsx';
+import EllipsisParagraph from '@/components/ellipsis-paragraph/ellipsis-paragraph.component.tsx';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
+import { ExpiryDate, IsExpiringSoonTag, RenewalTag } from '@/components/input-port/access-status.tsx';
 import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-avatar.component.tsx';
-import type { InputPort } from '@/store/api/services/generated/dataProductsApi.ts';
+import {
+    type AbstractDataProductInputPort as InputPort,
+    InputPortStatus,
+} from '@/store/api/services/generated/dataProductsApi.ts';
 import { createMarketplaceOutputPortPath } from '@/types/navigation.ts';
-import { DecisionStatus } from '@/types/roles';
-import { getDecisionStatusBadgeStatus, getDecisionStatusLabel } from '@/utils/status.helper.ts';
+import { getInputPortStatusBadgeStatus, getInputPortStatusLabel } from '@/utils/status.helper.ts';
 import { FilterSettings } from '@/utils/table-filter.helper.ts';
 import { Sorter } from '@/utils/table-sorter.helper.ts';
 
@@ -37,8 +40,9 @@ export const getDataProductDatasetsColumns = ({
         {
             title: t('Name'),
             dataIndex: 'name',
+            width: '22%',
             render: (_, { output_port, status }) => {
-                const isDatasetRequestApproved = status === DecisionStatus.Approved;
+                const isDatasetRequestApproved = status === InputPortStatus.Approved;
                 const popoverTitle = (
                     <DatasetPopoverTitle
                         name={output_port.name}
@@ -52,24 +56,44 @@ export const getDataProductDatasetsColumns = ({
                         linkTo={createMarketplaceOutputPortPath(output_port.id, output_port.data_product_id)}
                         icon={<CustomSvgIconLoader iconComponent={outputPortBorderIcon} />}
                         title={<OutputPortTitle name={output_port.name} accessType={output_port.access_type} />}
-                        subtitle={
-                            <Badge
-                                status={getDecisionStatusBadgeStatus(status)}
-                                text={getDecisionStatusLabel(t, status)}
-                            />
-                        }
                     />
                 );
             },
-            width: '25%',
-            ...new FilterSettings(inputPorts, (input_port) => getDecisionStatusLabel(t, input_port.status)),
             sorter: sorter.stringSorter((input_port) => input_port.output_port.name),
             defaultSortOrder: 'ascend',
         },
         {
+            title: t('Status'),
+            dataIndex: 'status',
+            width: '18%',
+            render: (_, { status, renewal_status, current_request }) => (
+                <Flex align={'center'} gap={'small'} wrap>
+                    <Badge status={getInputPortStatusBadgeStatus(status)} text={getInputPortStatusLabel(t, status)} />
+                    <RenewalTag renewalStatus={renewal_status} />
+                    <IsExpiringSoonTag status={status} validUntil={current_request.valid_until} />
+                </Flex>
+            ),
+            ...new FilterSettings(inputPorts, (input_port) => getInputPortStatusLabel(t, input_port.status)),
+            sorter: sorter.stringSorter((input_port) => getInputPortStatusLabel(t, input_port.status)),
+        },
+        {
             title: t('Business justification'),
-            dataIndex: 'justification',
-            render: (_, { justification }) => <Justification justification={justification} />,
+            dataIndex: ['current_request', 'justification'],
+            width: '30%',
+            render: (_, { current_request }) => <EllipsisParagraph text={current_request.justification} />,
+        },
+        {
+            title: t('Expiry date'),
+            dataIndex: ['current_request', 'valid_until'],
+            width: '12%',
+            render: (_, { status, current_request }) => (
+                <ExpiryDate status={status} validUntil={current_request.valid_until} />
+            ),
+        },
+        {
+            title: t('Decision note'),
+            dataIndex: ['current_request', 'decision_note'],
+            render: (_, { current_request }) => <EllipsisParagraph text={current_request.decision_note} />,
         },
         {
             title: t('Actions'),

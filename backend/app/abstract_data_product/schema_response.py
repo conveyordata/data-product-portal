@@ -1,7 +1,5 @@
 from uuid import UUID
 
-from pydantic import Field
-
 from app.abstract_data_product.type import AbstractDataProductType
 from app.configuration.domains.schema import Domain
 from app.data_products.output_ports.input_ports.schema import InputPortBase
@@ -27,6 +25,6 @@ class GetAbstractDataProductResponse(ORMModel):
     finalizers: list[str]
 
 
-class InputPort(InputPortBase):
-    output_port_id: UUID = Field(validation_alias="dataset_id")
-    output_port: OutputPort = Field(validation_alias="dataset")
+class AbstractDataProductInputPort(InputPortBase):
+    output_port_id: UUID
+    output_port: OutputPort

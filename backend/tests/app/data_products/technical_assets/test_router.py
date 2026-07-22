@@ -15,7 +15,7 @@ from tests.app.data_products.output_port_technical_assets_link.test_router impor
 from tests.factories import (
     DataProductFactory,
     DataProductRoleAssignmentFactory,
-    DatasetFactory,
+    OutputPortFactory,
     PlatformServiceFactory,
     RoleFactory,
     TagFactory,
@@ -611,7 +611,7 @@ class TestTechnicalAssetsRouter:
         """Test that no email is sent when dataset link request is auto-approved"""
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
-        dataset = DatasetFactory(data_product=data_product)
+        dataset = OutputPortFactory(data_product=data_product)
         data_output = TechnicalAssetFactory(owner=data_product)
 
         # Create role that allows linking datasets
@@ -628,7 +628,7 @@ class TestTechnicalAssetsRouter:
             permissions=[Action.OUTPUT_PORT__APPROVE_TECHNICAL_ASSET_LINK_REQUEST],
         )
         DatasetRoleAssignmentFactory(
-            user_id=user.id, role_id=ds_role.id, dataset_id=dataset.id
+            user_id=user.id, role_id=ds_role.id, output_port_id=dataset.id
         )
         # Mock auto-approval scenario (same data product owner)
         response = client.post(
@@ -648,7 +648,7 @@ class TestTechnicalAssetsRouter:
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         other_approver = UserFactory()
         data_product = DataProductFactory()
-        dataset = DatasetFactory(data_product=data_product)  # Different owner
+        dataset = OutputPortFactory(data_product=data_product)  # Different owner
         data_output = TechnicalAssetFactory(owner=data_product)
 
         # Create role that allows linking datasets
@@ -666,7 +666,7 @@ class TestTechnicalAssetsRouter:
         DatasetRoleAssignmentFactory(
             user_id=other_approver.id,
             role_id=approver_role.id,
-            dataset_id=dataset.id,
+            output_port_id=dataset.id,
         )
 
         # Mock manual approval scenario (different data product owner)

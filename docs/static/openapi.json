@@ -1195,7 +1195,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/DatasetAboutUpdate"
+                "$ref": "#/components/schemas/OutputPortAboutUpdate"
               }
             }
           }
@@ -1266,7 +1266,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/DatasetStatusUpdate"
+                "$ref": "#/components/schemas/OutputPortStatusUpdate"
               }
             }
           }
@@ -3102,7 +3102,7 @@
         }
       }
     },
-    "/api/v2/data_products/{data_product_id}/output_ports/{output_port_id}/input_ports": {
+    "/api/v2/data_products/{data_product_id}/output_ports/{output_port_id}/input_ports/": {
       "get": {
         "tags": [
           "Data Products - Output ports - Input ports"
@@ -5174,6 +5174,51 @@
         }
       }
     },
+    "/api/v2/users/current/my_requests": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Get User Requests",
+        "operationId": "get_user_requests",
+        "parameters": [
+          {
+            "name": "hide_old_inactive",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Filter out inactive requests older than 30 days",
+              "default": true,
+              "title": "Hide Old Inactive"
+            },
+            "description": "Filter out inactive requests older than 30 days"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyRequestsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v2/users/current": {
       "get": {
         "tags": [
@@ -7228,6 +7273,27 @@
         }
       }
     },
+    "/api/v2/access_durations/expiring_soon_threshold": {
+      "get": {
+        "tags": [
+          "Access Durations"
+        ],
+        "summary": "Get Expiring Soon Threshold",
+        "operationId": "get_expiring_soon_threshold",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExpiringSoonThresholdResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v2/access_durations/{abstract_data_product_type}/default": {
       "get": {
         "tags": [
@@ -7766,6 +7832,48 @@
         ],
         "title": "AbstractDataProductInfo"
       },
+      "AbstractDataProductInputPort": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "status": {
+            "$ref": "#/components/schemas/InputPortStatus"
+          },
+          "current_request": {
+            "$ref": "#/components/schemas/InputPortRequestBase"
+          },
+          "renewal_status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RenewalStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "output_port_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Output Port Id"
+          },
+          "output_port": {
+            "$ref": "#/components/schemas/OutputPort"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "status",
+          "current_request",
+          "output_port_id",
+          "output_port"
+        ],
+        "title": "AbstractDataProductInputPort"
+      },
       "AbstractDataProductStatus": {
         "type": "string",
         "enum": [
@@ -7912,6 +8020,17 @@
             "type": "string",
             "format": "uuid",
             "title": "Consuming Data Product Id"
+          },
+          "decision_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decision Note"
           }
         },
         "type": "object",
@@ -9266,87 +9385,6 @@
         ],
         "title": "DataProductLifeCyclesGetItem"
       },
-      "DataProductOutputPortPendingAction": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "justification": {
-            "type": "string",
-            "title": "Justification"
-          },
-          "consuming_abstract_data_product_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Consuming Abstract Data Product Id"
-          },
-          "output_port_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Output Port Id"
-          },
-          "status": {
-            "$ref": "#/components/schemas/DecisionStatus"
-          },
-          "requested_on": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Requested On"
-          },
-          "output_port": {
-            "$ref": "#/components/schemas/OutputPort"
-          },
-          "consuming_abstract_data_product": {
-            "$ref": "#/components/schemas/AbstractDataProductInfo"
-          },
-          "requested_by": {
-            "$ref": "#/components/schemas/User"
-          },
-          "denied_by": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/User"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "approved_by": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/User"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "pending_action_type": {
-            "type": "string",
-            "const": "InputPort",
-            "title": "Pending Action Type",
-            "default": "InputPort"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "justification",
-          "consuming_abstract_data_product_id",
-          "output_port_id",
-          "status",
-          "requested_on",
-          "output_port",
-          "consuming_abstract_data_product",
-          "requested_by",
-          "denied_by",
-          "approved_by"
-        ],
-        "title": "DataProductOutputPortPendingAction"
-      },
       "DataProductRoleAssignmentEvent": {
         "properties": {
           "id": {
@@ -9374,7 +9412,7 @@
         "title": "DataProductRoleAssignmentEvent",
         "description": "Fired on insert, update, and delete of a data-product role assignment."
       },
-      "DataProductRoleAssignmentPendingAction": {
+      "DataProductRoleAssignmentRequest": {
         "properties": {
           "id": {
             "type": "string",
@@ -9444,10 +9482,10 @@
               }
             ]
           },
-          "pending_action_type": {
+          "request_type": {
             "type": "string",
             "const": "DataProductRoleAssignment",
-            "title": "Pending Action Type",
+            "title": "Request Type",
             "default": "DataProductRoleAssignment"
           }
         },
@@ -9463,7 +9501,7 @@
           "decided_on",
           "decided_by"
         ],
-        "title": "DataProductRoleAssignmentPendingAction"
+        "title": "DataProductRoleAssignmentRequest"
       },
       "DataProductRoleAssignmentResponse": {
         "properties": {
@@ -10178,31 +10216,6 @@
         ],
         "title": "DatabricksTechnicalAssetConfiguration"
       },
-      "DatasetAboutUpdate": {
-        "properties": {
-          "about": {
-            "type": "string",
-            "title": "About"
-          }
-        },
-        "type": "object",
-        "required": [
-          "about"
-        ],
-        "title": "DatasetAboutUpdate"
-      },
-      "DatasetStatusUpdate": {
-        "properties": {
-          "status": {
-            "$ref": "#/components/schemas/OutputPortStatus"
-          }
-        },
-        "type": "object",
-        "required": [
-          "status"
-        ],
-        "title": "DatasetStatusUpdate"
-      },
       "DatasetUpdate": {
         "properties": {
           "name": {
@@ -10389,11 +10402,16 @@
             "type": "string",
             "format": "uuid",
             "title": "Consuming Data Product Id"
+          },
+          "decision_note": {
+            "type": "string",
+            "title": "Decision Note"
           }
         },
         "type": "object",
         "required": [
-          "consuming_data_product_id"
+          "consuming_data_product_id",
+          "decision_note"
         ],
         "title": "DenyOutputPortAsInputPortRequest"
       },
@@ -10816,6 +10834,19 @@
         ],
         "title": "EventEntityType"
       },
+      "ExpiringSoonThresholdResponse": {
+        "properties": {
+          "days": {
+            "type": "integer",
+            "title": "Days"
+          }
+        },
+        "type": "object",
+        "required": [
+          "days"
+        ],
+        "title": "ExpiringSoonThresholdResponse"
+      },
       "Exploration": {
         "properties": {
           "id": {
@@ -10942,7 +10973,7 @@
         "properties": {
           "input_ports": {
             "items": {
-              "$ref": "#/components/schemas/InputPort"
+              "$ref": "#/components/schemas/AbstractDataProductInputPort"
             },
             "type": "array",
             "title": "Input Ports"
@@ -11424,7 +11455,7 @@
         "properties": {
           "input_ports": {
             "items": {
-              "$ref": "#/components/schemas/InputPort"
+              "$ref": "#/components/schemas/AbstractDataProductInputPort"
             },
             "type": "array",
             "title": "Input Ports"
@@ -12074,39 +12105,6 @@
         "type": "object",
         "title": "HTTPValidationError"
       },
-      "InputPort": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "justification": {
-            "type": "string",
-            "title": "Justification"
-          },
-          "status": {
-            "$ref": "#/components/schemas/DecisionStatus"
-          },
-          "output_port_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Output Port Id"
-          },
-          "output_port": {
-            "$ref": "#/components/schemas/OutputPort"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "justification",
-          "status",
-          "output_port_id",
-          "output_port"
-        ],
-        "title": "InputPort"
-      },
       "InputPortEvent": {
         "properties": {
           "id": {
@@ -12130,6 +12128,172 @@
           "consuming_abstract_data_product_type"
         ],
         "title": "InputPortEvent"
+      },
+      "InputPortRequest": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "justification": {
+            "type": "string",
+            "title": "Justification"
+          },
+          "decision_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decision Note"
+          },
+          "valid_until": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Valid Until"
+          },
+          "requested_by": {
+            "$ref": "#/components/schemas/User"
+          },
+          "decided_by": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/User"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "decision": {
+            "$ref": "#/components/schemas/DecisionStatus"
+          },
+          "created_on": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created On"
+          },
+          "requested_on": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Requested On"
+          },
+          "request_type": {
+            "type": "string",
+            "const": "InputPort",
+            "title": "Request Type",
+            "default": "InputPort"
+          },
+          "input_port": {
+            "$ref": "#/components/schemas/UserInputPort"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "justification",
+          "valid_until",
+          "requested_by",
+          "decision",
+          "created_on",
+          "requested_on",
+          "input_port"
+        ],
+        "title": "InputPortRequest"
+      },
+      "InputPortRequestBase": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "justification": {
+            "type": "string",
+            "title": "Justification"
+          },
+          "decision_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decision Note"
+          },
+          "valid_until": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Valid Until"
+          },
+          "requested_by": {
+            "$ref": "#/components/schemas/User"
+          },
+          "decided_by": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/User"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "decision": {
+            "$ref": "#/components/schemas/DecisionStatus"
+          },
+          "created_on": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created On"
+          },
+          "requested_on": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Requested On"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "justification",
+          "valid_until",
+          "requested_by",
+          "decision",
+          "created_on",
+          "requested_on"
+        ],
+        "title": "InputPortRequestBase"
+      },
+      "InputPortStatus": {
+        "type": "string",
+        "enum": [
+          "pending",
+          "approved",
+          "denied",
+          "expired"
+        ],
+        "title": "InputPortStatus"
       },
       "IsAdminResponse": {
         "properties": {
@@ -12319,6 +12483,32 @@
           "role_id"
         ],
         "title": "ModifyOutputPortRoleAssignment"
+      },
+      "MyRequestsResponse": {
+        "properties": {
+          "my_requests": {
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/InputPortRequest"
+                },
+                {
+                  "$ref": "#/components/schemas/TechnicalAssetOutputPortRequest"
+                },
+                {
+                  "$ref": "#/components/schemas/DataProductRoleAssignmentRequest"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "My Requests"
+          }
+        },
+        "type": "object",
+        "required": [
+          "my_requests"
+        ],
+        "title": "MyRequestsResponse"
       },
       "Node": {
         "properties": {
@@ -12573,6 +12763,19 @@
           "tags"
         ],
         "title": "OutputPort"
+      },
+      "OutputPortAboutUpdate": {
+        "properties": {
+          "about": {
+            "type": "string",
+            "title": "About"
+          }
+        },
+        "type": "object",
+        "required": [
+          "about"
+        ],
+        "title": "OutputPortAboutUpdate"
       },
       "OutputPortAccessDuration": {
         "properties": {
@@ -12885,12 +13088,21 @@
             "format": "uuid",
             "title": "Id"
           },
-          "justification": {
-            "type": "string",
-            "title": "Justification"
-          },
           "status": {
-            "$ref": "#/components/schemas/DecisionStatus"
+            "$ref": "#/components/schemas/InputPortStatus"
+          },
+          "current_request": {
+            "$ref": "#/components/schemas/InputPortRequestBase"
+          },
+          "renewal_status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RenewalStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "consuming_abstract_data_product_id": {
             "type": "string",
@@ -12904,8 +13116,8 @@
         "type": "object",
         "required": [
           "id",
-          "justification",
           "status",
+          "current_request",
           "consuming_abstract_data_product_id",
           "consuming_abstract_data_product"
         ],
@@ -13224,6 +13436,18 @@
         ],
         "title": "OutputPortStatus"
       },
+      "OutputPortStatusUpdate": {
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/OutputPortStatus"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "title": "OutputPortStatusUpdate"
+      },
       "OutputPortTechnicalAssetLinkEvent": {
         "properties": {
           "id": {
@@ -13364,13 +13588,13 @@
             "items": {
               "anyOf": [
                 {
-                  "$ref": "#/components/schemas/DataProductOutputPortPendingAction"
+                  "$ref": "#/components/schemas/InputPortRequest"
                 },
                 {
-                  "$ref": "#/components/schemas/TechnicalAssetOutputPortPendingAction"
+                  "$ref": "#/components/schemas/TechnicalAssetOutputPortRequest"
                 },
                 {
-                  "$ref": "#/components/schemas/DataProductRoleAssignmentPendingAction"
+                  "$ref": "#/components/schemas/DataProductRoleAssignmentRequest"
                 }
               ]
             },
@@ -13797,6 +14021,14 @@
           "technical_asset_access_path"
         ],
         "title": "RenderTechnicalAssetAccessPathResponse"
+      },
+      "RenewalStatus": {
+        "type": "string",
+        "enum": [
+          "pending",
+          "denied"
+        ],
+        "title": "RenewalStatus"
       },
       "RequestDataProductRoleAssignment": {
         "properties": {
@@ -14915,7 +15147,7 @@
         ],
         "title": "TechnicalAssetLink"
       },
-      "TechnicalAssetOutputPortPendingAction": {
+      "TechnicalAssetOutputPortRequest": {
         "properties": {
           "id": {
             "type": "string",
@@ -14993,10 +15225,10 @@
               }
             ]
           },
-          "pending_action_type": {
+          "request_type": {
             "type": "string",
             "const": "TechnicalAssetOutputPort",
-            "title": "Pending Action Type",
+            "title": "Request Type",
             "default": "TechnicalAssetOutputPort"
           }
         },
@@ -15015,7 +15247,7 @@
           "denied_by",
           "approved_by"
         ],
-        "title": "TechnicalAssetOutputPortPendingAction"
+        "title": "TechnicalAssetOutputPortRequest"
       },
       "TechnicalAssetStatus": {
         "type": "string",
@@ -15719,6 +15951,40 @@
           "id"
         ],
         "title": "UserCreateResponse"
+      },
+      "UserInputPort": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "consuming_abstract_data_product_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Consuming Abstract Data Product Id"
+          },
+          "consuming_abstract_data_product": {
+            "$ref": "#/components/schemas/AbstractDataProductInfo"
+          },
+          "output_port_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Output Port Id"
+          },
+          "output_port": {
+            "$ref": "#/components/schemas/OutputPort"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "consuming_abstract_data_product_id",
+          "consuming_abstract_data_product",
+          "output_port_id",
+          "output_port"
+        ],
+        "title": "UserInputPort"
       },
       "UsersGet": {
         "properties": {

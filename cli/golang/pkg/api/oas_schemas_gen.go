@@ -97,6 +97,76 @@ func (s *AbstractDataProductInfo) SetAbstractDataProductType(val AbstractDataPro
 	s.AbstractDataProductType = val
 }
 
+// Ref: #/components/schemas/AbstractDataProductInputPort
+type AbstractDataProductInputPort struct {
+	ID             uuid.UUID            `json:"id"`
+	Status         InputPortStatus      `json:"status"`
+	CurrentRequest InputPortRequestBase `json:"current_request"`
+	RenewalStatus  OptNilRenewalStatus  `json:"renewal_status"`
+	OutputPortID   uuid.UUID            `json:"output_port_id"`
+	OutputPort     OutputPort           `json:"output_port"`
+}
+
+// GetID returns the value of ID.
+func (s *AbstractDataProductInputPort) GetID() uuid.UUID {
+	return s.ID
+}
+
+// GetStatus returns the value of Status.
+func (s *AbstractDataProductInputPort) GetStatus() InputPortStatus {
+	return s.Status
+}
+
+// GetCurrentRequest returns the value of CurrentRequest.
+func (s *AbstractDataProductInputPort) GetCurrentRequest() InputPortRequestBase {
+	return s.CurrentRequest
+}
+
+// GetRenewalStatus returns the value of RenewalStatus.
+func (s *AbstractDataProductInputPort) GetRenewalStatus() OptNilRenewalStatus {
+	return s.RenewalStatus
+}
+
+// GetOutputPortID returns the value of OutputPortID.
+func (s *AbstractDataProductInputPort) GetOutputPortID() uuid.UUID {
+	return s.OutputPortID
+}
+
+// GetOutputPort returns the value of OutputPort.
+func (s *AbstractDataProductInputPort) GetOutputPort() OutputPort {
+	return s.OutputPort
+}
+
+// SetID sets the value of ID.
+func (s *AbstractDataProductInputPort) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+// SetStatus sets the value of Status.
+func (s *AbstractDataProductInputPort) SetStatus(val InputPortStatus) {
+	s.Status = val
+}
+
+// SetCurrentRequest sets the value of CurrentRequest.
+func (s *AbstractDataProductInputPort) SetCurrentRequest(val InputPortRequestBase) {
+	s.CurrentRequest = val
+}
+
+// SetRenewalStatus sets the value of RenewalStatus.
+func (s *AbstractDataProductInputPort) SetRenewalStatus(val OptNilRenewalStatus) {
+	s.RenewalStatus = val
+}
+
+// SetOutputPortID sets the value of OutputPortID.
+func (s *AbstractDataProductInputPort) SetOutputPortID(val uuid.UUID) {
+	s.OutputPortID = val
+}
+
+// SetOutputPort sets the value of OutputPort.
+func (s *AbstractDataProductInputPort) SetOutputPort(val OutputPort) {
+	s.OutputPort = val
+}
+
 // Ref: #/components/schemas/AbstractDataProductStatus
 type AbstractDataProductStatus string
 
@@ -445,7 +515,8 @@ func (*ApproveOutputPortAsInputPortOKApplicationJSON) approveOutputPortAsInputPo
 
 // Ref: #/components/schemas/ApproveOutputPortAsInputPortRequest
 type ApproveOutputPortAsInputPortRequest struct {
-	ConsumingDataProductID uuid.UUID `json:"consuming_data_product_id"`
+	ConsumingDataProductID uuid.UUID    `json:"consuming_data_product_id"`
+	DecisionNote           OptNilString `json:"decision_note"`
 }
 
 // GetConsumingDataProductID returns the value of ConsumingDataProductID.
@@ -453,9 +524,19 @@ func (s *ApproveOutputPortAsInputPortRequest) GetConsumingDataProductID() uuid.U
 	return s.ConsumingDataProductID
 }
 
+// GetDecisionNote returns the value of DecisionNote.
+func (s *ApproveOutputPortAsInputPortRequest) GetDecisionNote() OptNilString {
+	return s.DecisionNote
+}
+
 // SetConsumingDataProductID sets the value of ConsumingDataProductID.
 func (s *ApproveOutputPortAsInputPortRequest) SetConsumingDataProductID(val uuid.UUID) {
 	s.ConsumingDataProductID = val
+}
+
+// SetDecisionNote sets the value of DecisionNote.
+func (s *ApproveOutputPortAsInputPortRequest) SetDecisionNote(val OptNilString) {
+	s.DecisionNote = val
 }
 
 type ApproveOutputPortTechnicalAssetLinkOKApplicationJSON jx.Raw
@@ -3318,36 +3399,6 @@ func (s *DatabricksTechnicalAssetConfiguration) SetAccessGranularity(val AccessG
 	s.AccessGranularity = val
 }
 
-// Ref: #/components/schemas/DatasetAboutUpdate
-type DatasetAboutUpdate struct {
-	About string `json:"about"`
-}
-
-// GetAbout returns the value of About.
-func (s *DatasetAboutUpdate) GetAbout() string {
-	return s.About
-}
-
-// SetAbout sets the value of About.
-func (s *DatasetAboutUpdate) SetAbout(val string) {
-	s.About = val
-}
-
-// Ref: #/components/schemas/DatasetStatusUpdate
-type DatasetStatusUpdate struct {
-	Status OutputPortStatus `json:"status"`
-}
-
-// GetStatus returns the value of Status.
-func (s *DatasetStatusUpdate) GetStatus() OutputPortStatus {
-	return s.Status
-}
-
-// SetStatus sets the value of Status.
-func (s *DatasetStatusUpdate) SetStatus(val OutputPortStatus) {
-	s.Status = val
-}
-
 // Ref: #/components/schemas/DatasetUpdate
 type DatasetUpdate struct {
 	Name                          string               `json:"name"`
@@ -3644,6 +3695,7 @@ func (*DenyOutputPortAsInputPortOKApplicationJSON) denyOutputPortAsInputPortRes(
 // Ref: #/components/schemas/DenyOutputPortAsInputPortRequest
 type DenyOutputPortAsInputPortRequest struct {
 	ConsumingDataProductID uuid.UUID `json:"consuming_data_product_id"`
+	DecisionNote           string    `json:"decision_note"`
 }
 
 // GetConsumingDataProductID returns the value of ConsumingDataProductID.
@@ -3651,9 +3703,19 @@ func (s *DenyOutputPortAsInputPortRequest) GetConsumingDataProductID() uuid.UUID
 	return s.ConsumingDataProductID
 }
 
+// GetDecisionNote returns the value of DecisionNote.
+func (s *DenyOutputPortAsInputPortRequest) GetDecisionNote() string {
+	return s.DecisionNote
+}
+
 // SetConsumingDataProductID sets the value of ConsumingDataProductID.
 func (s *DenyOutputPortAsInputPortRequest) SetConsumingDataProductID(val uuid.UUID) {
 	s.ConsumingDataProductID = val
+}
+
+// SetDecisionNote sets the value of DecisionNote.
+func (s *DenyOutputPortAsInputPortRequest) SetDecisionNote(val string) {
+	s.DecisionNote = val
 }
 
 type DenyOutputPortTechnicalAssetLinkOKApplicationJSON jx.Raw
@@ -4123,6 +4185,21 @@ func (s *EventEntityType) UnmarshalText(data []byte) error {
 	}
 }
 
+// Ref: #/components/schemas/ExpiringSoonThresholdResponse
+type ExpiringSoonThresholdResponse struct {
+	Days int `json:"days"`
+}
+
+// GetDays returns the value of Days.
+func (s *ExpiringSoonThresholdResponse) GetDays() int {
+	return s.Days
+}
+
+// SetDays sets the value of Days.
+func (s *ExpiringSoonThresholdResponse) SetDays(val int) {
+	s.Days = val
+}
+
 // Ref: #/components/schemas/Exploration
 type Exploration struct {
 	ID          uuid.UUID                 `json:"id"`
@@ -4280,16 +4357,16 @@ func (s *GetAllPlatformsResponse) SetPlatforms(val []Platform) {
 
 // Ref: #/components/schemas/GetDataProductInputPortsResponse
 type GetDataProductInputPortsResponse struct {
-	InputPorts []InputPort `json:"input_ports"`
+	InputPorts []AbstractDataProductInputPort `json:"input_ports"`
 }
 
 // GetInputPorts returns the value of InputPorts.
-func (s *GetDataProductInputPortsResponse) GetInputPorts() []InputPort {
+func (s *GetDataProductInputPortsResponse) GetInputPorts() []AbstractDataProductInputPort {
 	return s.InputPorts
 }
 
 // SetInputPorts sets the value of InputPorts.
-func (s *GetDataProductInputPortsResponse) SetInputPorts(val []InputPort) {
+func (s *GetDataProductInputPortsResponse) SetInputPorts(val []AbstractDataProductInputPort) {
 	s.InputPorts = val
 }
 
@@ -4951,16 +5028,16 @@ func (s *GetEventHistoryResponseItem) SetTechnicalAsset(val OptNilTechnicalAsset
 
 // Ref: #/components/schemas/GetExplorationInputPortsResponse
 type GetExplorationInputPortsResponse struct {
-	InputPorts []InputPort `json:"input_ports"`
+	InputPorts []AbstractDataProductInputPort `json:"input_ports"`
 }
 
 // GetInputPorts returns the value of InputPorts.
-func (s *GetExplorationInputPortsResponse) GetInputPorts() []InputPort {
+func (s *GetExplorationInputPortsResponse) GetInputPorts() []AbstractDataProductInputPort {
 	return s.InputPorts
 }
 
 // SetInputPorts sets the value of InputPorts.
-func (s *GetExplorationInputPortsResponse) SetInputPorts(val []InputPort) {
+func (s *GetExplorationInputPortsResponse) SetInputPorts(val []AbstractDataProductInputPort) {
 	s.InputPorts = val
 }
 
@@ -6258,63 +6335,163 @@ type IngestOutputPortContractNotFoundApplicationJSON jx.Raw
 
 func (*IngestOutputPortContractNotFoundApplicationJSON) ingestOutputPortContractRes() {}
 
-// Ref: #/components/schemas/InputPort
-type InputPort struct {
+// Ref: #/components/schemas/InputPortRequestBase
+type InputPortRequestBase struct {
 	ID            uuid.UUID      `json:"id"`
 	Justification string         `json:"justification"`
-	Status        DecisionStatus `json:"status"`
-	OutputPortID  uuid.UUID      `json:"output_port_id"`
-	OutputPort    OutputPort     `json:"output_port"`
+	DecisionNote  OptNilString   `json:"decision_note"`
+	ValidUntil    NilDateTime    `json:"valid_until"`
+	RequestedBy   User           `json:"requested_by"`
+	DecidedBy     OptNilUser     `json:"decided_by"`
+	Decision      DecisionStatus `json:"decision"`
+	CreatedOn     time.Time      `json:"created_on"`
+	RequestedOn   time.Time      `json:"requested_on"`
 }
 
 // GetID returns the value of ID.
-func (s *InputPort) GetID() uuid.UUID {
+func (s *InputPortRequestBase) GetID() uuid.UUID {
 	return s.ID
 }
 
 // GetJustification returns the value of Justification.
-func (s *InputPort) GetJustification() string {
+func (s *InputPortRequestBase) GetJustification() string {
 	return s.Justification
 }
 
-// GetStatus returns the value of Status.
-func (s *InputPort) GetStatus() DecisionStatus {
-	return s.Status
+// GetDecisionNote returns the value of DecisionNote.
+func (s *InputPortRequestBase) GetDecisionNote() OptNilString {
+	return s.DecisionNote
 }
 
-// GetOutputPortID returns the value of OutputPortID.
-func (s *InputPort) GetOutputPortID() uuid.UUID {
-	return s.OutputPortID
+// GetValidUntil returns the value of ValidUntil.
+func (s *InputPortRequestBase) GetValidUntil() NilDateTime {
+	return s.ValidUntil
 }
 
-// GetOutputPort returns the value of OutputPort.
-func (s *InputPort) GetOutputPort() OutputPort {
-	return s.OutputPort
+// GetRequestedBy returns the value of RequestedBy.
+func (s *InputPortRequestBase) GetRequestedBy() User {
+	return s.RequestedBy
+}
+
+// GetDecidedBy returns the value of DecidedBy.
+func (s *InputPortRequestBase) GetDecidedBy() OptNilUser {
+	return s.DecidedBy
+}
+
+// GetDecision returns the value of Decision.
+func (s *InputPortRequestBase) GetDecision() DecisionStatus {
+	return s.Decision
+}
+
+// GetCreatedOn returns the value of CreatedOn.
+func (s *InputPortRequestBase) GetCreatedOn() time.Time {
+	return s.CreatedOn
+}
+
+// GetRequestedOn returns the value of RequestedOn.
+func (s *InputPortRequestBase) GetRequestedOn() time.Time {
+	return s.RequestedOn
 }
 
 // SetID sets the value of ID.
-func (s *InputPort) SetID(val uuid.UUID) {
+func (s *InputPortRequestBase) SetID(val uuid.UUID) {
 	s.ID = val
 }
 
 // SetJustification sets the value of Justification.
-func (s *InputPort) SetJustification(val string) {
+func (s *InputPortRequestBase) SetJustification(val string) {
 	s.Justification = val
 }
 
-// SetStatus sets the value of Status.
-func (s *InputPort) SetStatus(val DecisionStatus) {
-	s.Status = val
+// SetDecisionNote sets the value of DecisionNote.
+func (s *InputPortRequestBase) SetDecisionNote(val OptNilString) {
+	s.DecisionNote = val
 }
 
-// SetOutputPortID sets the value of OutputPortID.
-func (s *InputPort) SetOutputPortID(val uuid.UUID) {
-	s.OutputPortID = val
+// SetValidUntil sets the value of ValidUntil.
+func (s *InputPortRequestBase) SetValidUntil(val NilDateTime) {
+	s.ValidUntil = val
 }
 
-// SetOutputPort sets the value of OutputPort.
-func (s *InputPort) SetOutputPort(val OutputPort) {
-	s.OutputPort = val
+// SetRequestedBy sets the value of RequestedBy.
+func (s *InputPortRequestBase) SetRequestedBy(val User) {
+	s.RequestedBy = val
+}
+
+// SetDecidedBy sets the value of DecidedBy.
+func (s *InputPortRequestBase) SetDecidedBy(val OptNilUser) {
+	s.DecidedBy = val
+}
+
+// SetDecision sets the value of Decision.
+func (s *InputPortRequestBase) SetDecision(val DecisionStatus) {
+	s.Decision = val
+}
+
+// SetCreatedOn sets the value of CreatedOn.
+func (s *InputPortRequestBase) SetCreatedOn(val time.Time) {
+	s.CreatedOn = val
+}
+
+// SetRequestedOn sets the value of RequestedOn.
+func (s *InputPortRequestBase) SetRequestedOn(val time.Time) {
+	s.RequestedOn = val
+}
+
+// Ref: #/components/schemas/InputPortStatus
+type InputPortStatus string
+
+const (
+	InputPortStatusPending  InputPortStatus = "pending"
+	InputPortStatusApproved InputPortStatus = "approved"
+	InputPortStatusDenied   InputPortStatus = "denied"
+	InputPortStatusExpired  InputPortStatus = "expired"
+)
+
+// AllValues returns all InputPortStatus values.
+func (InputPortStatus) AllValues() []InputPortStatus {
+	return []InputPortStatus{
+		InputPortStatusPending,
+		InputPortStatusApproved,
+		InputPortStatusDenied,
+		InputPortStatusExpired,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s InputPortStatus) MarshalText() ([]byte, error) {
+	switch s {
+	case InputPortStatusPending:
+		return []byte(s), nil
+	case InputPortStatusApproved:
+		return []byte(s), nil
+	case InputPortStatusDenied:
+		return []byte(s), nil
+	case InputPortStatusExpired:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *InputPortStatus) UnmarshalText(data []byte) error {
+	switch InputPortStatus(data) {
+	case InputPortStatusPending:
+		*s = InputPortStatusPending
+		return nil
+	case InputPortStatusApproved:
+		*s = InputPortStatusApproved
+		return nil
+	case InputPortStatusDenied:
+		*s = InputPortStatusDenied
+		return nil
+	case InputPortStatusExpired:
+		*s = InputPortStatusExpired
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
 }
 
 // Ref: #/components/schemas/IsAdminResponse
@@ -7932,6 +8109,74 @@ func (o OptNilPlatformTile) Or(d PlatformTile) PlatformTile {
 	return d
 }
 
+// NewOptNilRenewalStatus returns new OptNilRenewalStatus with value set to v.
+func NewOptNilRenewalStatus(v RenewalStatus) OptNilRenewalStatus {
+	return OptNilRenewalStatus{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptNilRenewalStatus is optional nullable RenewalStatus.
+type OptNilRenewalStatus struct {
+	Value RenewalStatus
+	Set   bool
+	Null  bool
+}
+
+// IsSet returns true if OptNilRenewalStatus was set.
+func (o OptNilRenewalStatus) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptNilRenewalStatus) Reset() {
+	var v RenewalStatus
+	o.Value = v
+	o.Set = false
+	o.Null = false
+}
+
+// SetTo sets value to v.
+func (o *OptNilRenewalStatus) SetTo(v RenewalStatus) {
+	o.Set = true
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o OptNilRenewalStatus) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *OptNilRenewalStatus) SetToNull() {
+	o.Set = true
+	o.Null = true
+	var v RenewalStatus
+	o.Value = v
+}
+
+// IsEmpty returns true if the field was omitted from the payload (not Set and not Null).
+func (o OptNilRenewalStatus) IsEmpty() bool {
+	return !o.Set && !o.Null
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptNilRenewalStatus) Get() (v RenewalStatus, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptNilRenewalStatus) Or(d RenewalStatus) RenewalStatus {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptNilRequestInputPortsForDataProductRequest returns new OptNilRequestInputPortsForDataProductRequest with value set to v.
 func NewOptNilRequestInputPortsForDataProductRequest(v RequestInputPortsForDataProductRequest) OptNilRequestInputPortsForDataProductRequest {
 	return OptNilRequestInputPortsForDataProductRequest{
@@ -9046,6 +9291,21 @@ func (s *OutputPort) SetTags(val []Tag) {
 	s.Tags = val
 }
 
+// Ref: #/components/schemas/OutputPortAboutUpdate
+type OutputPortAboutUpdate struct {
+	About string `json:"about"`
+}
+
+// GetAbout returns the value of About.
+func (s *OutputPortAboutUpdate) GetAbout() string {
+	return s.About
+}
+
+// SetAbout sets the value of About.
+func (s *OutputPortAboutUpdate) SetAbout(val string) {
+	s.About = val
+}
+
 // Ref: #/components/schemas/OutputPortAccessDuration
 type OutputPortAccessDuration struct {
 	AccessDurationType AccessDurationType `json:"access_duration_type"`
@@ -9470,8 +9730,9 @@ func (s *OutputPortDataQualitySummaryResponseDimensions) init() OutputPortDataQu
 // Ref: #/components/schemas/OutputPortInputPort
 type OutputPortInputPort struct {
 	ID                             uuid.UUID               `json:"id"`
-	Justification                  string                  `json:"justification"`
-	Status                         DecisionStatus          `json:"status"`
+	Status                         InputPortStatus         `json:"status"`
+	CurrentRequest                 InputPortRequestBase    `json:"current_request"`
+	RenewalStatus                  OptNilRenewalStatus     `json:"renewal_status"`
 	ConsumingAbstractDataProductID uuid.UUID               `json:"consuming_abstract_data_product_id"`
 	ConsumingAbstractDataProduct   AbstractDataProductInfo `json:"consuming_abstract_data_product"`
 }
@@ -9481,14 +9742,19 @@ func (s *OutputPortInputPort) GetID() uuid.UUID {
 	return s.ID
 }
 
-// GetJustification returns the value of Justification.
-func (s *OutputPortInputPort) GetJustification() string {
-	return s.Justification
+// GetStatus returns the value of Status.
+func (s *OutputPortInputPort) GetStatus() InputPortStatus {
+	return s.Status
 }
 
-// GetStatus returns the value of Status.
-func (s *OutputPortInputPort) GetStatus() DecisionStatus {
-	return s.Status
+// GetCurrentRequest returns the value of CurrentRequest.
+func (s *OutputPortInputPort) GetCurrentRequest() InputPortRequestBase {
+	return s.CurrentRequest
+}
+
+// GetRenewalStatus returns the value of RenewalStatus.
+func (s *OutputPortInputPort) GetRenewalStatus() OptNilRenewalStatus {
+	return s.RenewalStatus
 }
 
 // GetConsumingAbstractDataProductID returns the value of ConsumingAbstractDataProductID.
@@ -9506,14 +9772,19 @@ func (s *OutputPortInputPort) SetID(val uuid.UUID) {
 	s.ID = val
 }
 
-// SetJustification sets the value of Justification.
-func (s *OutputPortInputPort) SetJustification(val string) {
-	s.Justification = val
+// SetStatus sets the value of Status.
+func (s *OutputPortInputPort) SetStatus(val InputPortStatus) {
+	s.Status = val
 }
 
-// SetStatus sets the value of Status.
-func (s *OutputPortInputPort) SetStatus(val DecisionStatus) {
-	s.Status = val
+// SetCurrentRequest sets the value of CurrentRequest.
+func (s *OutputPortInputPort) SetCurrentRequest(val InputPortRequestBase) {
+	s.CurrentRequest = val
+}
+
+// SetRenewalStatus sets the value of RenewalStatus.
+func (s *OutputPortInputPort) SetRenewalStatus(val OptNilRenewalStatus) {
+	s.RenewalStatus = val
 }
 
 // SetConsumingAbstractDataProductID sets the value of ConsumingAbstractDataProductID.
@@ -9956,6 +10227,21 @@ func (s *OutputPortStatus) UnmarshalText(data []byte) error {
 	default:
 		return errors.Errorf("invalid value: %q", data)
 	}
+}
+
+// Ref: #/components/schemas/OutputPortStatusUpdate
+type OutputPortStatusUpdate struct {
+	Status OutputPortStatus `json:"status"`
+}
+
+// GetStatus returns the value of Status.
+func (s *OutputPortStatusUpdate) GetStatus() OutputPortStatus {
+	return s.Status
+}
+
+// SetStatus sets the value of Status.
+func (s *OutputPortStatusUpdate) SetStatus(val OutputPortStatus) {
+	s.Status = val
 }
 
 type OverwriteOutputPortDataQualitySummaryNotFoundApplicationJSON jx.Raw
@@ -10836,6 +11122,48 @@ func (s *RenderTechnicalAssetAccessPathResponse) SetTechnicalAssetAccessPath(val
 }
 
 func (*RenderTechnicalAssetAccessPathResponse) renderTechnicalAssetAccessPathRes() {}
+
+// Ref: #/components/schemas/RenewalStatus
+type RenewalStatus string
+
+const (
+	RenewalStatusPending RenewalStatus = "pending"
+	RenewalStatusDenied  RenewalStatus = "denied"
+)
+
+// AllValues returns all RenewalStatus values.
+func (RenewalStatus) AllValues() []RenewalStatus {
+	return []RenewalStatus{
+		RenewalStatusPending,
+		RenewalStatusDenied,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s RenewalStatus) MarshalText() ([]byte, error) {
+	switch s {
+	case RenewalStatusPending:
+		return []byte(s), nil
+	case RenewalStatusDenied:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *RenewalStatus) UnmarshalText(data []byte) error {
+	switch RenewalStatus(data) {
+	case RenewalStatusPending:
+		*s = RenewalStatusPending
+		return nil
+	case RenewalStatusDenied:
+		*s = RenewalStatusDenied
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
 
 type ReplaceOutputPortCuratedQueriesNotFoundApplicationJSON jx.Raw
 

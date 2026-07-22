@@ -1,10 +1,10 @@
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from typing import Sequence
 from uuid import UUID
 
 import pytz
 from fastapi import HTTPException, status
-from sqlalchemy import asc, select
+from sqlalchemy import asc, or_, select
 from sqlalchemy.orm import Session
 
 from app.authorization.role_assignments.enums import DecisionStatus
@@ -15,13 +15,15 @@ from app.core.authz import Action, Authorization
 from app.data_products.output_port_technical_assets_link.model import (
     DataOutputDatasetAssociation as DataOutputDatasetAssociationModel,
 )
-from app.data_products.output_ports.model import Dataset
-from app.data_products.output_ports.model import Dataset as DatasetModel
-from app.pending_actions.schema import DataOutputDatasetPendingAction
+from app.data_products.output_ports.model import OutputPort
+from app.data_products.output_ports.model import OutputPort as OutputPortModel
 from app.users.schema import User
+from app.users.schema_response import (
+    TechnicalAssetOutputPortRequest,
+)
 
 
-class DataOutputDatasetService:
+class TechnicalAssetOutputPortService:
     def __init__(self, db: Session):
         self.db = db
 
@@ -41,14 +43,14 @@ class DataOutputDatasetService:
             select(DataOutputDatasetAssociationModel)
             .where(
                 DataOutputDatasetAssociationModel.data_output_id == technical_asset_id,
-                DataOutputDatasetAssociationModel.dataset_id == output_port_id,
+                DataOutputDatasetAssociationModel.output_port_id == output_port_id,
             )
             .join(
-                Dataset,
-                Dataset.id == DataOutputDatasetAssociationModel.dataset_id,
+                OutputPort,
+                OutputPort.id == DataOutputDatasetAssociationModel.output_port_id,
             )
             .where(
-                Dataset.data_product_id == data_product_id,
+                OutputPort.data_product_id == data_product_id,
             )
         )
         if not current_link:
@@ -119,9 +121,34 @@ class DataOutputDatasetService:
         self.db.commit()
         return current_link
 
+    def get_user_requests(self, user: User, hide_old_inactive: bool):
+        query = (
+            select(DataOutputDatasetAssociationModel)
+            .where(
+                DataOutputDatasetAssociationModel.requested_by_id == user.id,
+            )
+            .order_by(asc(DataOutputDatasetAssociationModel.requested_on))
+        )
+
+        if hide_old_inactive:
+            thirty_days_ago = datetime.now(timezone.utc) - timedelta(days=30)
+            query = query.where(
+                or_(
+                    DataOutputDatasetAssociationModel.status == DecisionStatus.PENDING,
+                    DataOutputDatasetAssociationModel.requested_on >= thirty_days_ago,
+                )
+            )
+
+        requested_associations = self.db.scalars(query).unique().all()
+
+        return [
+            TechnicalAssetOutputPortRequest.model_validate(a)
+            for a in requested_associations
+        ]
+
     def get_user_pending_actions(
         self, user: User
-    ) -> Sequence[DataOutputDatasetPendingAction]:
+    ) -> Sequence[TechnicalAssetOutputPortRequest]:
         requested_associations = (
             self.db.scalars(
                 select(DataOutputDatasetAssociationModel)
@@ -129,8 +156,8 @@ class DataOutputDatasetService:
                     DataOutputDatasetAssociationModel.status == DecisionStatus.PENDING,
                 )
                 .where(
-                    DataOutputDatasetAssociationModel.dataset.has(
-                        DatasetModel.assignments.any(
+                    DataOutputDatasetAssociationModel.output_port.has(
+                        OutputPortModel.assignments.any(
                             DatasetRoleAssignmentModel.user_id == user.id
                         )
                     )
@@ -143,12 +170,12 @@ class DataOutputDatasetService:
 
         authorizer = Authorization()
         return [
-            DataOutputDatasetPendingAction.model_validate(a)
+            TechnicalAssetOutputPortRequest.model_validate(a)
             for a in requested_associations
             if authorizer.has_access(
                 sub=str(user.id),
-                dom=str(a.dataset.data_product.domain),
-                obj=str(a.dataset_id),
+                dom=str(a.output_port.data_product.domain),
+                obj=str(a.output_port_id),
                 act=Action.OUTPUT_PORT__APPROVE_TECHNICAL_ASSET_LINK_REQUEST,
             )
         ]

@@ -22,30 +22,30 @@ from app.data_products.output_ports.query_stats.service import (
 )
 from tests.factories import (
     DataProductFactory,
-    DatasetFactory,
-    DatasetQueryStatsFactory,
+    OutputPortFactory,
+    OutputPortQueryStatsFactory,
 )
 
 
 @pytest.fixture
 def dataset_with_two_stats(session: Session):
     """Return dataset + consumers with two stats already persisted."""
-    dataset = DatasetFactory()
+    dataset = OutputPortFactory()
     consumer1 = DataProductFactory()
     consumer2 = DataProductFactory()
     today = date.today()
 
     session.add_all(
         [
-            DatasetQueryStatsFactory(
+            OutputPortQueryStatsFactory(
                 date=today,
-                dataset_id=dataset.id,
+                output_port_id=dataset.id,
                 consumer_data_product_id=consumer1.id,
                 query_count=50,
             ),
-            DatasetQueryStatsFactory(
+            OutputPortQueryStatsFactory(
                 date=today,
-                dataset_id=dataset.id,
+                output_port_id=dataset.id,
                 consumer_data_product_id=consumer2.id,
                 query_count=75,
             ),
@@ -59,7 +59,7 @@ def dataset_with_two_stats(session: Session):
 @pytest.fixture
 def dataset_with_daily_history(session: Session):
     """Return dataset data for get_query_stats_daily tests."""
-    dataset = DatasetFactory()
+    dataset = OutputPortFactory()
     consumer1 = DataProductFactory()
     consumer2 = DataProductFactory()
     today = date.today()
@@ -67,26 +67,26 @@ def dataset_with_daily_history(session: Session):
 
     session.add_all(
         [
-            DatasetQueryStatsFactory(
+            OutputPortQueryStatsFactory(
                 date=today,
-                dataset_id=dataset.id,
+                output_port_id=dataset.id,
                 consumer_data_product_id=consumer1.id,
                 query_count=100,
             ),
-            DatasetQueryStatsFactory(
+            OutputPortQueryStatsFactory(
                 date=yesterday,
-                dataset_id=dataset.id,
+                output_port_id=dataset.id,
                 consumer_data_product_id=consumer2.id,
                 query_count=200,
             ),
         ]
     )
 
-    other_dataset = DatasetFactory()
+    other_dataset = OutputPortFactory()
     session.add(
-        DatasetQueryStatsFactory(
+        OutputPortQueryStatsFactory(
             date=today,
-            dataset_id=other_dataset.id,
+            output_port_id=other_dataset.id,
             consumer_data_product_id=consumer1.id,
             query_count=999,
         )
@@ -98,18 +98,20 @@ def dataset_with_daily_history(session: Session):
 
 class TestDatasetQueryStatsDailyService:
     @staticmethod
-    def _fetch_stats(session, dataset_id, consumer_id, target_date, *, multiple=False):
+    def _fetch_stats(
+        session, output_port_id, consumer_id, target_date, *, multiple=False
+    ):
         """Return DatasetQueryStatsDaily rows for a dataset/consumer/date combo."""
         query = session.query(DatasetQueryStatsDaily).filter_by(
             date=target_date,
-            dataset_id=dataset_id,
+            output_port_id=output_port_id,
             consumer_data_product_id=consumer_id,
         )
         return query.all() if multiple else query.first()
 
     def test_update_query_stats_daily_single_record(self, session: Session):
         """Test updating query stats with a single record."""
-        dataset = DatasetFactory()
+        output_port = OutputPortFactory()
         consumer = DataProductFactory()
         today = date.today()
 
@@ -122,13 +124,13 @@ class TestDatasetQueryStatsDailyService:
         ]
 
         service = OutputPortStatsService(session)
-        service.update_query_stats(dataset.id, updates)
+        service.update_query_stats(output_port.id, updates)
 
-        stats = self._fetch_stats(session, dataset.id, consumer.id, today)
+        stats = self._fetch_stats(session, output_port.id, consumer.id, today)
 
         assert stats is not None
         assert stats.query_count == 100
-        assert stats.dataset_id == dataset.id
+        assert stats.output_port_id == output_port.id
         assert stats.consumer_data_product_id == consumer.id
 
     def test_update_query_stats_daily_with_overlapping_updates(
@@ -206,22 +208,22 @@ class TestDatasetQueryStatsDailyService:
         assert stats_by_consumer[consumer2.id].date == yesterday
 
     def test_get_query_stats_daily_week_granularity(self, session: Session):
-        dataset = DatasetFactory()
+        dataset = OutputPortFactory()
         consumer = DataProductFactory()
 
         base_date = date.today() - timedelta(days=7)
         start_of_week = base_date - timedelta(days=base_date.weekday())
         middle_of_week = start_of_week + timedelta(days=2)
 
-        DatasetQueryStatsFactory(
+        OutputPortQueryStatsFactory(
             date=start_of_week,
-            dataset_id=dataset.id,
+            output_port_id=dataset.id,
             consumer_data_product_id=consumer.id,
             query_count=120,
         )
-        DatasetQueryStatsFactory(
+        OutputPortQueryStatsFactory(
             date=middle_of_week,
-            dataset_id=dataset.id,
+            output_port_id=dataset.id,
             consumer_data_product_id=consumer.id,
             query_count=180,
         )
@@ -262,21 +264,21 @@ class TestDatasetQueryStatsDailyService:
         assert actual_stats[0].consumer_data_product_id == consumer.id
 
     def test_get_query_stats_daily_day_range_filter(self, session: Session):
-        dataset = DatasetFactory()
+        dataset = OutputPortFactory()
         consumer = DataProductFactory()
 
         recent_date = date.today() - timedelta(days=10)
         old_date = date.today() - timedelta(days=120)
 
-        DatasetQueryStatsFactory(
+        OutputPortQueryStatsFactory(
             date=recent_date,
-            dataset_id=dataset.id,
+            output_port_id=dataset.id,
             consumer_data_product_id=consumer.id,
             query_count=50,
         )
-        DatasetQueryStatsFactory(
+        OutputPortQueryStatsFactory(
             date=old_date,
-            dataset_id=dataset.id,
+            output_port_id=dataset.id,
             consumer_data_product_id=consumer.id,
             query_count=75,
         )

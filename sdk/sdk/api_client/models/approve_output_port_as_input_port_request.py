@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import Any, TypeVar
+from typing import Any, TypeVar, cast
 from uuid import UUID
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
+
+from ..types import UNSET, Unset
 
 T = TypeVar("T", bound="ApproveOutputPortAsInputPortRequest")
 
@@ -15,13 +17,21 @@ class ApproveOutputPortAsInputPortRequest:
     """
     Attributes:
         consuming_data_product_id (UUID):
+        decision_note (None | str | Unset):
     """
 
     consuming_data_product_id: UUID
+    decision_note: None | str | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         consuming_data_product_id = str(self.consuming_data_product_id)
+
+        decision_note: None | str | Unset
+        if isinstance(self.decision_note, Unset):
+            decision_note = UNSET
+        else:
+            decision_note = self.decision_note
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
@@ -30,6 +40,8 @@ class ApproveOutputPortAsInputPortRequest:
                 "consuming_data_product_id": consuming_data_product_id,
             }
         )
+        if decision_note is not UNSET:
+            field_dict["decision_note"] = decision_note
 
         return field_dict
 
@@ -38,8 +50,18 @@ class ApproveOutputPortAsInputPortRequest:
         d = dict(src_dict)
         consuming_data_product_id = UUID(d.pop("consuming_data_product_id"))
 
+        def _parse_decision_note(data: object) -> None | str | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(None | str | Unset, data)
+
+        decision_note = _parse_decision_note(d.pop("decision_note", UNSET))
+
         approve_output_port_as_input_port_request = cls(
             consuming_data_product_id=consuming_data_product_id,
+            decision_note=decision_note,
         )
 
         approve_output_port_as_input_port_request.additional_properties = d

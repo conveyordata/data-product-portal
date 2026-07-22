@@ -15,19 +15,24 @@ class DenyOutputPortAsInputPortRequest:
     """
     Attributes:
         consuming_data_product_id (UUID):
+        decision_note (str):
     """
 
     consuming_data_product_id: UUID
+    decision_note: str
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         consuming_data_product_id = str(self.consuming_data_product_id)
+
+        decision_note = self.decision_note
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
                 "consuming_data_product_id": consuming_data_product_id,
+                "decision_note": decision_note,
             }
         )
 
@@ -38,8 +43,11 @@ class DenyOutputPortAsInputPortRequest:
         d = dict(src_dict)
         consuming_data_product_id = UUID(d.pop("consuming_data_product_id"))
 
+        decision_note = d.pop("decision_note")
+
         deny_output_port_as_input_port_request = cls(
             consuming_data_product_id=consuming_data_product_id,
+            decision_note=decision_note,
         )
 
         deny_output_port_as_input_port_request.additional_properties = d

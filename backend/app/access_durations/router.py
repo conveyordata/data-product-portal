@@ -5,6 +5,7 @@ from app.abstract_data_product.type import AbstractDataProductType
 from app.access_durations.schema_request import AccessDurationUpdate
 from app.access_durations.schema_response import (
     AccessDuration,
+    ExpiringSoonThresholdResponse,
     TimeBoundAccessEnabledResponse,
 )
 from app.access_durations.service import AccessDurationService
@@ -19,6 +20,11 @@ router = APIRouter(tags=["Access Durations"], prefix="/v2/access_durations")
 @router.get("/enabled", response_model=TimeBoundAccessEnabledResponse)
 def is_time_bound_access_enabled():
     return TimeBoundAccessEnabledResponse(enabled=settings.TIME_BOUND_ACCESS_ENABLED)
+
+
+@router.get("/expiring_soon_threshold", response_model=ExpiringSoonThresholdResponse)
+def get_expiring_soon_threshold():
+    return ExpiringSoonThresholdResponse(days=settings.EXPIRING_SOON_THRESHOLD_DAYS)
 
 
 @router.get("/{abstract_data_product_type}/default", response_model=AccessDuration)

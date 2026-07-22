@@ -1,8 +1,8 @@
 from fastapi.testclient import TestClient
 
-from app.data_output_configuration.data_output_types import DataOutputTypes
-from app.data_output_configuration.s3.schema import S3TechnicalAssetConfiguration
-from app.data_output_configuration.schema_request import (
+from app.technical_asset_configuration.data_output_types import DataOutputTypes
+from app.technical_asset_configuration.s3.schema import S3TechnicalAssetConfiguration
+from app.technical_asset_configuration.schema_request import (
     RenderTechnicalAssetAccessPathRequest,
 )
 from tests.factories import PlatformFactory
@@ -18,11 +18,9 @@ class TestPluginEndpoints:
     ):
         """Test GET /v2/plugins returns empty list when no service configs exist"""
         response = client.get(ENDPOINT)
-
         assert response.status_code == 200
         data = response.json()
 
-        # Verify response structure
         assert "plugins" in data
         assert isinstance(data["plugins"], list)
         assert len(data["plugins"]) == 3
@@ -30,19 +28,18 @@ class TestPluginEndpoints:
     def test_list_plugins_returns_all_available_plugins(self, client: TestClient):
         """Test GET /v2/plugins returns list of all available plugins"""
         aws = PlatformFactory(name="AWS")
-        s3 = PlatformServiceFactory(name="S3")
-        PlatformServiceConfigFactory(service=s3, platform=aws)
+        PlatformServiceConfigFactory(
+            service=PlatformServiceFactory(name="S3", platform=aws)
+        )
         response = client.get(ENDPOINT)
 
         assert response.status_code == 200
         data = response.json()
 
-        # Verify response structure
         assert "plugins" in data
         assert isinstance(data["plugins"], list)
         assert len(data["plugins"]) > 0
 
-        # Verify each plugin has required fields
         for plugin in data["plugins"]:
             assert "plugin" in plugin
             assert "platform" in plugin
@@ -56,54 +53,55 @@ class TestPluginEndpoints:
     def test_list_plugins_includes_expected_platforms(self, client: TestClient):
         """Test that all expected plugins are in the list"""
         aws = PlatformFactory(name="AWS")
-        s3 = PlatformServiceFactory(name="S3")
-        glue = PlatformServiceFactory(name="Glue")
-        PlatformServiceConfigFactory(service=s3, platform=aws)
-        PlatformServiceConfigFactory(service=glue, platform=aws)
+        PlatformServiceConfigFactory(
+            service=PlatformServiceFactory(name="S3", platform=aws)
+        )
+        PlatformServiceConfigFactory(
+            service=PlatformServiceFactory(name="Glue", platform=aws)
+        )
         response = client.get(ENDPOINT)
 
         assert response.status_code == 200
         data = response.json()
 
         plugin_names = {p["plugin"] for p in data["plugins"]}
-
-        # Verify all expected plugins are present
         expected_plugins = {
             "S3TechnicalAssetConfiguration",
             "GlueTechnicalAssetConfiguration",
         }
         assert expected_plugins.issubset(plugin_names)
-        # not configured = true
         assert (
             next(p for p in data["plugins"] if p["plugin"] == "ConveyorPlugin").get(
                 "show_in_form", True
             )
-            is False
+            is False  # not configured = true
         )
 
     def test_list_plugins_includes_all_platforms(self, client: TestClient):
         """Test that all expected plugins are in the list"""
         aws = PlatformFactory(name="AWS")
         dwh = PlatformFactory(name="DWH")
-        s3 = PlatformServiceFactory(name="S3")
-        glue = PlatformServiceFactory(name="Glue")
-        redshift = PlatformServiceFactory(name="Redshift")
-        snowflake = PlatformServiceFactory(name="Snowflake")
-        databricks = PlatformServiceFactory(name="Databricks")
-        PlatformServiceConfigFactory(service=s3, platform=aws)
-        PlatformServiceConfigFactory(service=glue, platform=aws)
-        PlatformServiceConfigFactory(service=redshift, platform=aws)
-        PlatformServiceConfigFactory(service=snowflake, platform=dwh)
-        PlatformServiceConfigFactory(service=databricks, platform=dwh)
+        PlatformServiceConfigFactory(
+            service=PlatformServiceFactory(name="S3", platform=aws)
+        )
+        PlatformServiceConfigFactory(
+            service=PlatformServiceFactory(name="Glue", platform=aws)
+        )
+        PlatformServiceConfigFactory(
+            service=PlatformServiceFactory(name="Redshift", platform=aws)
+        )
+        PlatformServiceConfigFactory(
+            service=PlatformServiceFactory(name="Snowflake", platform=dwh)
+        )
+        PlatformServiceConfigFactory(
+            service=PlatformServiceFactory(name="Databricks", platform=dwh)
+        )
 
         response = client.get(ENDPOINT)
-
         assert response.status_code == 200
         data = response.json()
 
         plugin_names = {p["plugin"] for p in data["plugins"]}
-
-        # Verify all expected plugins are present
         expected_plugins = {
             "S3TechnicalAssetConfiguration",
             "GlueTechnicalAssetConfiguration",
@@ -113,14 +111,14 @@ class TestPluginEndpoints:
     def test_get_plugin_form_by_name_returns_correct_plugin(self, client: TestClient):
         """Test GET /v2/plugins/{plugin_name}/form returns specific plugin"""
         aws = PlatformFactory(name="AWS")
-        s3 = PlatformServiceFactory(name="S3")
-        PlatformServiceConfigFactory(service=s3, platform=aws)
+        PlatformServiceConfigFactory(
+            service=PlatformServiceFactory(name="S3", platform=aws)
+        )
         response = client.get(f"{ENDPOINT}/S3TechnicalAssetConfiguration/form")
 
         assert response.status_code == 200
         data = response.json()
 
-        # Verify it's the correct plugin
         assert data["plugin"] == "S3TechnicalAssetConfiguration"
         assert data["platform"] == "s3"
         assert data["display_name"] == "S3"
@@ -131,27 +129,25 @@ class TestPluginEndpoints:
     def test_get_plugin_form_includes_all_fields(self, client: TestClient):
         """Test that plugin form includes all expected fields"""
         aws = PlatformFactory(name="AWS")
-        glue = PlatformServiceFactory(name="Glue")
-        PlatformServiceConfigFactory(service=glue, platform=aws)
+        PlatformServiceConfigFactory(
+            service=PlatformServiceFactory(name="Glue", platform=aws)
+        )
+
         response = client.get(f"{ENDPOINT}/GlueTechnicalAssetConfiguration/form")
-
         assert response.status_code == 200
-        data = response.json()
 
+        data = response.json()
         assert data["plugin"] == "GlueTechnicalAssetConfiguration"
 
-        # Get field names
         field_names = {field["name"] for field in data["ui_metadata"]}
-
-        # Verify expected fields are present
         expected_fields = {"database", "database_suffix", "access_granularity", "table"}
         assert expected_fields.issubset(field_names)
 
     def test_get_plugin_form_with_invalid_name_returns_404(self, client: TestClient):
         """Test GET /v2/plugins/{plugin_name}/form with invalid name returns 404"""
         response = client.get(f"{ENDPOINT}/NonExistentPlugin/form")
-
         assert response.status_code == 404
+
         data = response.json()
         assert "detail" in data
         assert "NonExistentPlugin" in data["detail"]
@@ -159,15 +155,14 @@ class TestPluginEndpoints:
 
     def test_get_plugin_form_for_each_available_plugin(self, client: TestClient):
         """Test that each plugin from list can be retrieved individually"""
-        # Get all plugins
-        aws = PlatformFactory(name="AWS")
-        s3 = PlatformServiceFactory(name="S3")
-        PlatformServiceConfigFactory(service=s3, platform=aws)
+        s3 = PlatformServiceFactory(name="S3", platform=PlatformFactory(name="AWS"))
+        PlatformServiceConfigFactory(service=s3)
+
         list_response = client.get(ENDPOINT)
         assert list_response.status_code == 200
-        plugins = list_response.json()["plugins"]
 
         # Test each plugin can be retrieved
+        plugins = list_response.json()["plugins"]
         for plugin in plugins:
             plugin_name = plugin["plugin"]
             form_response = client.get(f"{ENDPOINT}/{plugin_name}/form")
@@ -181,20 +176,20 @@ class TestPluginEndpoints:
     def test_plugin_form_has_field_dependencies(self, client: TestClient):
         """Test that plugin forms with dependencies include them correctly"""
         aws = PlatformFactory(name="AWS")
-        glue = PlatformServiceFactory(name="Glue")
-        PlatformServiceConfigFactory(service=glue, platform=aws)
-        response = client.get(f"{ENDPOINT}/GlueTechnicalAssetConfiguration/form")
+        PlatformServiceConfigFactory(
+            service=PlatformServiceFactory(name="Glue", platform=aws)
+        )
 
+        response = client.get(f"{ENDPOINT}/GlueTechnicalAssetConfiguration/form")
         assert response.status_code == 200
-        data = response.json()
 
         # Find the table field which depends on access_granularity
+        data = response.json()
         table_field = next(
             (f for f in data["ui_metadata"] if f["name"] == "table"), None
         )
         assert table_field is not None
 
-        # Verify dependency structure
         assert "depends_on" in table_field
         if table_field["depends_on"] is not None:
             assert "field_name" in table_field["depends_on"][0]
@@ -207,21 +202,21 @@ class TestPlatformTilesEndpoint:
 
     def test_get_platform_tiles_returns_correct_structure(self, client: TestClient):
         """Test GET /v2/technical_assets/platform-tiles returns correct structure"""
-        # Create platform services for testing
         aws = PlatformFactory(name="AWS")
-        s3 = PlatformServiceFactory(name="S3")
-        glue = PlatformServiceFactory(name="Glue")
-        redshift = PlatformServiceFactory(name="Redshift")
-        PlatformServiceConfigFactory(service=s3, platform=aws)
-        PlatformServiceConfigFactory(service=glue, platform=aws)
-        PlatformServiceConfigFactory(service=redshift, platform=aws)
+        PlatformServiceConfigFactory(
+            service=PlatformServiceFactory(name="S3", platform=aws)
+        )
+        PlatformServiceConfigFactory(
+            service=PlatformServiceFactory(name="Glue", platform=aws)
+        )
+        PlatformServiceConfigFactory(
+            service=PlatformServiceFactory(name="Redshift", platform=aws)
+        )
 
         response = client.get(f"{ENDPOINT}/platform-tiles")
-
         assert response.status_code == 200
-        data = response.json()
 
-        # Verify response structure
+        data = response.json()
         assert "platform_tiles" in data
         assert isinstance(data["platform_tiles"], list)
 
@@ -229,14 +224,14 @@ class TestPlatformTilesEndpoint:
         """Test that only configured platforms are included in tiles"""
         # Create some platform services
         aws = PlatformFactory(name="AWS")
-        s3_service = PlatformServiceFactory(name="S3")
-        PlatformServiceConfigFactory(service=s3_service, platform=aws)
+        PlatformServiceConfigFactory(
+            service=PlatformServiceFactory(name="S3", platform=aws)
+        )
 
         response = client.get(f"{ENDPOINT}/platform-tiles")
-
         assert response.status_code == 200
-        data = response.json()
 
+        data = response.json()
         tiles = data["platform_tiles"]
         assert len(tiles) > 0
 
@@ -253,15 +248,13 @@ class TestPlatformTilesEndpoint:
         """Test that platform tiles are organized in parent-child hierarchy"""
         # Create AWS services
         response = client.get(f"{ENDPOINT}/platform-tiles")
-
         assert response.status_code == 200
-        data = response.json()
 
+        data = response.json()
         tiles = data["platform_tiles"]
 
         # Find AWS parent tile
         aws_tile = next((t for t in tiles if t["value"] == "aws"), None)
-
         if aws_tile:
             # AWS should have children
             assert "children" in aws_tile
@@ -277,15 +270,13 @@ class TestPlatformTilesEndpoint:
         """Test that tiles have has_environments flag for parent platforms"""
         # Create AWS services
         response = client.get(f"{ENDPOINT}/platform-tiles")
-
         assert response.status_code == 200
-        data = response.json()
 
+        data = response.json()
         tiles = data["platform_tiles"]
 
         # Find AWS tile
         aws_tile = next((t for t in tiles if t["value"] == "aws"), None)
-
         if aws_tile:
             assert "has_environments" in aws_tile
             # AWS has multiple children, so should have environments

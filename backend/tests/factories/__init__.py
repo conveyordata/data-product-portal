@@ -1,14 +1,14 @@
-from .. import test_session
+from tests import test_session
+
 from .access_duration import AccessDurationFactory
-from .data_outputs_datasets import DataOutputDatasetAssociationFactory
 from .data_product import DataProductFactory
 from .data_product import fake as data_product_fake
 from .data_product_setting import DataProductSettingFactory
 from .data_product_setting_value import DataProductSettingValueFactory
 from .data_product_type import DataProductTypeFactory
-from .dataset import DatasetFactory
+from .dataset import OutputPortFactory
 from .dataset import fake as dataset_fake
-from .dataset_query_stats_daily import DatasetQueryStatsFactory
+from .dataset_query_stats_daily import OutputPortQueryStatsFactory
 from .domain import DomainFactory
 from .env_platform_config import EnvPlatformConfigFactory
 from .env_platform_service_config import EnvPlatformServiceConfigFactory
@@ -17,6 +17,7 @@ from .event import EventFactory
 from .exploration import ExplorationFactory
 from .exploration import fake as exploration_fake
 from .input_port import InputPortFactory
+from .input_port_request import InputPortRequestFactory
 from .lifecycle import LifecycleFactory
 from .notification import NotificationFactory
 from .platform import PlatformFactory
@@ -29,6 +30,7 @@ from .role_assignment_global import GlobalRoleAssignmentFactory
 from .s3_data_output import S3DataOutputFactory
 from .tags import TagFactory
 from .technical_asset import TechnicalAssetFactory
+from .technical_asset_output_ports import TechnicalAssetOutputPortAssociationFactory
 from .theme_settings import ThemeSettingsFactory
 from .user import UserFactory
 
@@ -47,15 +49,16 @@ def reset_unique_fakers() -> None:
 
 factories = [
     AccessDurationFactory,
-    DataOutputDatasetAssociationFactory,
+    TechnicalAssetOutputPortAssociationFactory,
     DataProductFactory,
     DataProductSettingFactory,
     DataProductSettingValueFactory,
     DataProductTypeFactory,
     InputPortFactory,
+    InputPortRequestFactory,
     DataProductRoleAssignmentFactory,
-    DatasetFactory,
-    DatasetQueryStatsFactory,
+    OutputPortFactory,
+    OutputPortQueryStatsFactory,
     DatasetRoleAssignmentFactory,
     DomainFactory,
     EnvPlatformConfigFactory,

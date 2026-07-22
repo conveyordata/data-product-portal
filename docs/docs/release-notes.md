@@ -6,6 +6,11 @@ sidebar_position: 200
 
 ## Unreleased
 
+### features
+
+- **[Input port]**: Input ports now contain a decision note, which can be used by the reviewer of an access request to show why they denied or approved access
+- **[Product studio]**: A My Requests page has been added to Product Studio, which shows all access requests you have made and their status. This allows you to track your access requests in one place.
+
 ## 0.6.1
 
 ### features

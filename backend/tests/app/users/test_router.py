@@ -8,15 +8,15 @@ from tests.app.data_products.output_port_technical_assets_link.test_router impor
     DATA_OUTPUTS_DATASETS_ENDPOINT,
 )
 from tests.factories import (
-    DataOutputDatasetAssociationFactory,
     DataProductFactory,
     DataProductRoleAssignmentFactory,
-    DatasetFactory,
     DatasetRoleAssignmentFactory,
     GlobalRoleAssignmentFactory,
     InputPortFactory,
+    OutputPortFactory,
     RoleFactory,
     TechnicalAssetFactory,
+    TechnicalAssetOutputPortAssociationFactory,
     UserFactory,
 )
 
@@ -213,8 +213,8 @@ class TestUsersRouter:
                 assert user_data["can_become_admin"] is True
 
     def test_get_pending_actions_no_action(self, client):
-        ds = DatasetFactory()
-        DataOutputDatasetAssociationFactory(dataset=ds)
+        ds = OutputPortFactory()
+        TechnicalAssetOutputPortAssociationFactory(output_port=ds)
         response = client.get("/api/v2/users/current/pending_actions")
         assert response.json() == {"pending_actions": []}
 
@@ -228,7 +228,7 @@ class TestUsersRouter:
             ],
         )
         DatasetRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id, dataset_id=input_port.dataset.id
+            user_id=user.id, role_id=role.id, output_port_id=input_port.output_port.id
         )
 
         response = client.get("/api/v2/users/current/pending_actions")
@@ -249,14 +249,16 @@ class TestUsersRouter:
             user_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
 
-        ds = DatasetFactory(data_product=data_product)
+        ds = OutputPortFactory(data_product=data_product)
         role = RoleFactory(
             scope=Scope.DATASET,
             permissions=[
                 AuthorizationAction.OUTPUT_PORT__APPROVE_TECHNICAL_ASSET_LINK_REQUEST
             ],
         )
-        DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
+        DatasetRoleAssignmentFactory(
+            user_id=user.id, role_id=role.id, output_port_id=ds.id
+        )
 
         response = client.post(
             f"{DATA_OUTPUTS_DATASETS_ENDPOINT.format(data_product.id, ds.id)}/add",
@@ -274,3 +276,10 @@ class TestUsersRouter:
         response = client.get("/api/v2/users/current")
         assert response.status_code == 200, response.text
         assert response.json()["id"] == str(user.id)
+
+    def test_get_current_user_my_requests(self, client):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        InputPortFactory(request__requested_by=user)
+        response = client.get("/api/v2/users/current/my_requests")
+        assert response.status_code == 200, response.text
+        assert len(response.json()["my_requests"]) == 1

@@ -39,6 +39,17 @@ const injectedRtkApi = api.injectEndpoints({
     >({
       query: () => ({ url: `/api/v2/users/current/pending_actions` }),
     }),
+    getUserRequests: build.query<
+      GetUserRequestsApiResponse,
+      GetUserRequestsApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/users/current/my_requests`,
+        params: {
+          hide_old_inactive: queryArg,
+        },
+      }),
+    }),
     getCurrentUser: build.query<
       GetCurrentUserApiResponse,
       GetCurrentUserApiArg
@@ -66,6 +77,10 @@ export type MarkTourAsSeenApiArg = void;
 export type GetUserPendingActionsApiResponse =
   /** status 200 Successful Response */ PendingActionResponse;
 export type GetUserPendingActionsApiArg = void;
+export type GetUserRequestsApiResponse =
+  /** status 200 Successful Response */ MyRequestsResponse;
+export type GetUserRequestsApiArg =
+  /** Filter out inactive requests older than 30 days */ boolean | undefined;
 export type GetCurrentUserApiResponse =
   /** status 200 Successful Response */ User;
 export type GetCurrentUserApiArg = void;
@@ -176,6 +191,15 @@ export type CanBecomeAdminUpdate = {
   user_id: string;
   can_become_admin: boolean;
 };
+export type AbstractDataProductType =
+  | "unknown"
+  | "data_products"
+  | "explorations";
+export type AbstractDataProductInfo = {
+  name: string;
+  namespace: string;
+  abstract_data_product_type: AbstractDataProductType;
+};
 export type OutputPortStatus = "pending" | "active" | "archived";
 export type OutputPortAccessType =
   | "public"
@@ -196,28 +220,25 @@ export type OutputPort = {
   data_product_id: string;
   tags: Tag[];
 };
-export type AbstractDataProductType =
-  | "unknown"
-  | "data_products"
-  | "explorations";
-export type AbstractDataProductInfo = {
-  name: string;
-  namespace: string;
-  abstract_data_product_type: AbstractDataProductType;
+export type UserInputPort = {
+  id: string;
+  consuming_abstract_data_product_id: string;
+  consuming_abstract_data_product: AbstractDataProductInfo;
+  output_port_id: string;
+  output_port: OutputPort;
 };
-export type DataProductOutputPortPendingAction = {
+export type InputPortRequest = {
   id: string;
   justification: string;
-  consuming_abstract_data_product_id: string;
-  output_port_id: string;
-  status: DecisionStatus;
-  requested_on: string;
-  output_port: OutputPort;
-  consuming_abstract_data_product: AbstractDataProductInfo;
+  decision_note?: string | null;
+  valid_until: string | null;
   requested_by: User;
-  denied_by: User | null;
-  approved_by: User | null;
-  pending_action_type?: "InputPort";
+  decided_by?: User | null;
+  decision: DecisionStatus;
+  created_on: string;
+  requested_on: string;
+  request_type?: "InputPort";
+  input_port: UserInputPort;
 };
 export type TechnicalAssetStatus = "pending" | "active" | "archived";
 export type TechnicalMapping = "default" | "custom";
@@ -350,7 +371,7 @@ export type OwnedTechnicalAsset = {
       } & SnowflakeTechnicalAssetConfiguration);
   owner: DataProduct;
 };
-export type TechnicalAssetOutputPortPendingAction = {
+export type TechnicalAssetOutputPortRequest = {
   id: string;
   output_port_id: string;
   output_port: OutputPort;
@@ -363,9 +384,9 @@ export type TechnicalAssetOutputPortPendingAction = {
   requested_by: User;
   denied_by: User | null;
   approved_by: User | null;
-  pending_action_type?: "TechnicalAssetOutputPort";
+  request_type?: "TechnicalAssetOutputPort";
 };
-export type DataProductRoleAssignmentPendingAction = {
+export type DataProductRoleAssignmentRequest = {
   id: string;
   data_product: DataProduct;
   user: User;
@@ -375,13 +396,20 @@ export type DataProductRoleAssignmentPendingAction = {
   requested_by: User | null;
   decided_on: string | null;
   decided_by: User | null;
-  pending_action_type?: "DataProductRoleAssignment";
+  request_type?: "DataProductRoleAssignment";
 };
 export type PendingActionResponse = {
   pending_actions: (
-    | DataProductOutputPortPendingAction
-    | TechnicalAssetOutputPortPendingAction
-    | DataProductRoleAssignmentPendingAction
+    | InputPortRequest
+    | TechnicalAssetOutputPortRequest
+    | DataProductRoleAssignmentRequest
+  )[];
+};
+export type MyRequestsResponse = {
+  my_requests: (
+    | InputPortRequest
+    | TechnicalAssetOutputPortRequest
+    | DataProductRoleAssignmentRequest
   )[];
 };
 export const {
@@ -393,6 +421,8 @@ export const {
   useMarkTourAsSeenMutation,
   useGetUserPendingActionsQuery,
   useLazyGetUserPendingActionsQuery,
+  useGetUserRequestsQuery,
+  useLazyGetUserRequestsQuery,
   useGetCurrentUserQuery,
   useLazyGetCurrentUserQuery,
 } = injectedRtkApi;

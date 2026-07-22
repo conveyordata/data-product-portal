@@ -2,10 +2,9 @@ import copy
 from typing import Optional, Sequence
 from uuid import UUID
 
-from fastapi import HTTPException
+from fastapi import HTTPException, status
 from sqlalchemy import asc, select
 from sqlalchemy.orm import Session, joinedload
-from starlette import status
 
 from app.abstract_data_product.service import AbstractDataProductService
 from app.core.namespace.validation import NamespaceValidator

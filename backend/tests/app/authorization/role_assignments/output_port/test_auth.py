@@ -5,8 +5,8 @@ from app.authorization.role_assignments.output_port.auth import DatasetAuthAssig
 from app.authorization.roles.schema import Role, Scope
 from app.core.authz import Authorization
 from tests.factories import (
-    DatasetFactory,
     DatasetRoleAssignmentFactory,
+    OutputPortFactory,
     RoleFactory,
     UserFactory,
 )
@@ -21,14 +21,14 @@ if TYPE_CHECKING:
 
 class TestAuth:
     def test_add(self, authorizer: Authorization):
-        dataset: Dataset = DatasetFactory()
+        dataset: Dataset = OutputPortFactory()
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATASET)
         assert not authorizer.has_resource_role(
             user_id=str(user.id), role_id=str(role.id), resource_id=str(dataset.id)
         )
         DatasetRoleAssignmentFactory(
-            dataset_id=dataset.id,
+            output_port_id=dataset.id,
             user_id=user.id,
             role_id=role.id,
             decision=DecisionStatus.APPROVED,
@@ -39,14 +39,14 @@ class TestAuth:
         )
 
     def test_remove(self, authorizer: Authorization):
-        dataset: Dataset = DatasetFactory()
+        dataset: Dataset = OutputPortFactory()
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATASET)
         assert not authorizer.has_resource_role(
             user_id=str(user.id), role_id=str(role.id), resource_id=str(dataset.id)
         )
         assignment: OutputPortRoleAssignment = DatasetRoleAssignmentFactory(
-            dataset_id=dataset.id,
+            output_port_id=dataset.id,
             user_id=user.id,
             role_id=role.id,
             decision=DecisionStatus.APPROVED,
@@ -61,13 +61,13 @@ class TestAuth:
         )
 
     def test_swap(self, authorizer: Authorization):
-        dataset: Dataset = DatasetFactory()
+        dataset: Dataset = OutputPortFactory()
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATASET)
         new_role: Role = RoleFactory(scope=Scope.DATASET)
 
         assignment: OutputPortRoleAssignment = DatasetRoleAssignmentFactory(
-            dataset_id=dataset.id,
+            output_port_id=dataset.id,
             user_id=user.id,
             role_id=role.id,
             decision=DecisionStatus.APPROVED,

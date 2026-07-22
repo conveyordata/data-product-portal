@@ -8,9 +8,9 @@ from app.data_products.output_ports.enums import OutputPortAccessType
 from tests import test_session
 from tests.factories import (
     DataProductFactory,
-    DatasetFactory,
     DatasetRoleAssignmentFactory,
     InputPortFactory,
+    OutputPortFactory,
     RoleFactory,
     UserFactory,
 )
@@ -22,11 +22,11 @@ class TestAbstractDataProductService:
         self, mock_send_email
     ):
         actor = UserFactory()
-        output_port = DatasetFactory(access_type=OutputPortAccessType.RESTRICTED)
+        output_port = OutputPortFactory(access_type=OutputPortAccessType.RESTRICTED)
         input_port = InputPortFactory(
             consuming_abstract_data_product=DataProductFactory(),
-            dataset=output_port,
-            requested_by=actor,
+            output_port=output_port,
+            request__requested_by=actor,
             status=DecisionStatus.PENDING,
         )
         approver_role = RoleFactory(
@@ -34,7 +34,7 @@ class TestAbstractDataProductService:
             permissions=[Action.OUTPUT_PORT__APPROVE_DATAPRODUCT_ACCESS_REQUEST],
         )
         DatasetRoleAssignmentFactory(
-            dataset=output_port,
+            output_port=output_port,
             role_id=approver_role.id,
             user_id=actor.id,
         )
@@ -57,11 +57,11 @@ class TestAbstractDataProductService:
     ):
         actor = UserFactory()
         other_approver = UserFactory()
-        output_port = DatasetFactory(access_type=OutputPortAccessType.RESTRICTED)
+        output_port = OutputPortFactory(access_type=OutputPortAccessType.RESTRICTED)
         input_port = InputPortFactory(
             consuming_abstract_data_product=DataProductFactory(),
-            dataset=output_port,
-            requested_by=actor,
+            output_port=output_port,
+            request__requested_by=actor,
             status=DecisionStatus.PENDING,
         )
         approver_role = RoleFactory(
@@ -70,7 +70,7 @@ class TestAbstractDataProductService:
         )
         for user in [actor, other_approver]:
             DatasetRoleAssignmentFactory(
-                dataset=output_port,
+                output_port=output_port,
                 role_id=approver_role.id,
                 user_id=user.id,
             )

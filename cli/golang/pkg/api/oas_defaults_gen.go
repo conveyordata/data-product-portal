@@ -2,6 +2,10 @@
 
 package api
 
+import (
+	"github.com/google/uuid"
+)
+
 // setDefaults set default value of fields.
 func (s *AzureBlobTechnicalAssetConfiguration) setDefaults() {
 	{
@@ -11,6 +15,22 @@ func (s *AzureBlobTechnicalAssetConfiguration) setDefaults() {
 	{
 		val := string("")
 		s.Path.SetTo(val)
+	}
+}
+
+// setDefaults set default value of fields.
+func (s *BitolContractRequest) setDefaults() {
+	{
+		var defaultVal0 []SchemaObjectRequest
+		s.Schema = defaultVal0
+	}
+}
+
+// setDefaults set default value of fields.
+func (s *DataProductCreate) setDefaults() {
+	{
+		var defaultVal0 []uuid.UUID
+		s.TagIds = defaultVal0
 	}
 }
 
@@ -59,6 +79,14 @@ func (s *DataProductSettingsGetItem) setDefaults() {
 	{
 		val := int(100)
 		s.Order.SetTo(val)
+	}
+}
+
+// setDefaults set default value of fields.
+func (s *DataProductUpdate) setDefaults() {
+	{
+		var defaultVal0 []uuid.UUID
+		s.TagIds = defaultVal0
 	}
 }
 
@@ -139,6 +167,14 @@ func (s *OSISemanticModelTechnicalAssetConfiguration) setDefaults() {
 }
 
 // setDefaults set default value of fields.
+func (s *OutputPortSchemaResponse) setDefaults() {
+	{
+		var defaultVal0 []SchemaObjectResponse
+		s.SchemaObjects = defaultVal0
+	}
+}
+
+// setDefaults set default value of fields.
 func (s *PlatformTile) setDefaults() {
 	{
 		val := bool(true)
@@ -147,6 +183,10 @@ func (s *PlatformTile) setDefaults() {
 	{
 		val := bool(true)
 		s.HasConfig.SetTo(val)
+	}
+	{
+		var defaultVal0 []PlatformTile
+		s.Children = defaultVal0
 	}
 	{
 		val := bool(true)
@@ -199,6 +239,22 @@ func (s *S3TechnicalAssetConfiguration) setDefaults() {
 }
 
 // setDefaults set default value of fields.
+func (s *SchemaObjectRequest) setDefaults() {
+	{
+		var defaultVal0 []SchemaPropertyRequest
+		s.Properties = defaultVal0
+	}
+}
+
+// setDefaults set default value of fields.
+func (s *SchemaObjectResponse) setDefaults() {
+	{
+		var defaultVal0 []SchemaPropertyResponse
+		s.Properties = defaultVal0
+	}
+}
+
+// setDefaults set default value of fields.
 func (s *SchemaPropertyRequest) setDefaults() {
 	{
 		val := bool(false)
@@ -215,6 +271,10 @@ func (s *SchemaPropertyRequest) setDefaults() {
 	{
 		val := bool(false)
 		s.Partitioned.SetTo(val)
+	}
+	{
+		var defaultVal0 []SchemaPropertyRequest
+		s.Properties = defaultVal0
 	}
 }
 

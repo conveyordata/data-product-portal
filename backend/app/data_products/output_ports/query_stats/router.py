@@ -32,7 +32,7 @@ def get_output_port_query_stats(
 ) -> OutputPortQueryStatsResponses:
     ds = ensure_output_port_exists(id, db, data_product_id=data_product_id)
     return OutputPortStatsService(db).get_query_stats(
-        dataset_id=ds.id, granularity=granularity, day_range=day_range
+        output_port_id=ds.id, granularity=granularity, day_range=day_range
     )
 
 
@@ -58,5 +58,5 @@ def delete_output_port_query_stat(
 ) -> None:
     ds = ensure_output_port_exists(id, db, data_product_id=data_product_id)
     OutputPortStatsService(db).delete_query_stats(
-        dataset_id=ds.id, delete_request=input_data
+        output_port_id=ds.id, delete_request=input_data
     )

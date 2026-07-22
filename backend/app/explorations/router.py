@@ -1,14 +1,13 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, status
 from fastapi.responses import Response
 from pydantic.json_schema import SkipJsonSchema
 from sqlalchemy.orm import Session
-from starlette import status
 
 from app.abstract_data_product.schema_request import FinalizerRequest
-from app.abstract_data_product.schema_response import InputPort
+from app.abstract_data_product.schema_response import AbstractDataProductInputPort
 from app.core.auth.auth import get_authenticated_user
 from app.core.authz import Action, Authorization
 from app.core.authz.resolvers import EmptyResolver
@@ -96,7 +95,7 @@ def get_exploration_input_ports(
 ):
     return GetExplorationInputPortsResponse(
         input_ports=[
-            InputPort.model_validate(ip)
+            AbstractDataProductInputPort.model_validate(ip)
             for ip in ExplorationService(db).get_input_ports(id)
         ]
     )

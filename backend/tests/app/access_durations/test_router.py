@@ -5,7 +5,7 @@ from app.abstract_data_product.type import AbstractDataProductType
 from app.access_durations.enums import AccessDurationType
 from app.access_durations.schema_request import AccessDurationUpdate
 from tests import test_session
-from tests.factories import AccessDurationFactory, DatasetFactory
+from tests.factories import AccessDurationFactory, OutputPortFactory
 
 ENDPOINT = "/api/v2/access_durations"
 
@@ -239,6 +239,13 @@ class TestAccessDurationsRouter:
         assert "enabled" in data
         assert isinstance(data["enabled"], bool)
 
+    def test_get_expiring_soon_threshold_endpoint(self, client):
+        response = client.get(f"{ENDPOINT}/expiring_soon_threshold")
+        assert response.status_code == 200
+        data = response.json()
+        assert "days" in data
+        assert isinstance(data["days"], int)
+
     @pytest.mark.usefixtures("admin")
     def test_update_cascades_dropped_type_to_data_product_output_ports(self, client):
         AccessDurationFactory(
@@ -247,7 +254,7 @@ class TestAccessDurationsRouter:
             days=30,
             is_default=True,
         )
-        ds = DatasetFactory(
+        ds = OutputPortFactory(
             data_product_access_duration_type=AccessDurationType.TIME_BOUND,
             exploration_access_duration_type=AccessDurationType.PERMANENT,
         )
@@ -266,7 +273,7 @@ class TestAccessDurationsRouter:
             access_duration_type=AccessDurationType.PERMANENT,
             is_default=True,
         )
-        ds = DatasetFactory(
+        ds = OutputPortFactory(
             data_product_access_duration_type=AccessDurationType.PERMANENT,
             exploration_access_duration_type=AccessDurationType.PERMANENT,
         )
@@ -291,7 +298,7 @@ class TestAccessDurationsRouter:
             days=30,
             is_default=True,
         )
-        ds = DatasetFactory(
+        ds = OutputPortFactory(
             data_product_access_duration_type=AccessDurationType.PERMANENT,
             exploration_access_duration_type=AccessDurationType.TIME_BOUND,
         )

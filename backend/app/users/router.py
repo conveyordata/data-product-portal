@@ -1,17 +1,20 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.core.auth.auth import authorize_user, get_authenticated_user
 from app.core.authz import Action, Authorization
 from app.core.authz.resolvers import EmptyResolver
 from app.database.database import get_db_session
-from app.pending_actions.schema_response import PendingActionResponse
-from app.pending_actions.service import PendingActionsService
 from app.users.schema import User
 from app.users.schema_request import CanBecomeAdminUpdate, UserCreate
-from app.users.schema_response import GetUsersResponse, UserCreateResponse
+from app.users.schema_response import (
+    GetUsersResponse,
+    MyRequestsResponse,
+    PendingActionResponse,
+    UserCreateResponse,
+)
 from app.users.service import UserService
 
 router = APIRouter(tags=["Users"], prefix="/v2/users")
@@ -86,7 +89,18 @@ def get_user_pending_actions(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> PendingActionResponse:
-    return PendingActionsService(db).get_user_pending_actions(authenticated_user)
+    return UserService(db).get_user_pending_actions(authenticated_user)
+
+
+@router.get("/current/my_requests")
+def get_user_requests(
+    db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
+    hide_old_inactive: bool = Query(
+        default=True, description="Filter out inactive requests older than 30 days"
+    ),
+) -> MyRequestsResponse:
+    return UserService(db).get_user_requests(authenticated_user, hide_old_inactive)
 
 
 @router.get("/current")

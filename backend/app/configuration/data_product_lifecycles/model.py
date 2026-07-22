@@ -10,7 +10,7 @@ from app.shared.model import BaseORM
 
 if TYPE_CHECKING:
     from app.data_products.model import DataProduct
-    from app.data_products.output_ports.model import Dataset
+    from app.data_products.output_ports.model import OutputPort
 
 
 class DataProductLifecycle(Base, BaseORM):
@@ -26,6 +26,6 @@ class DataProductLifecycle(Base, BaseORM):
     data_products: Mapped[list["DataProduct"]] = relationship(
         lazy="raise", back_populates="lifecycle", cascade="all, delete-orphan"
     )
-    datasets: Mapped[list["Dataset"]] = relationship(
+    datasets: Mapped[list["OutputPort"]] = relationship(
         lazy="raise", back_populates="lifecycle", cascade="all, delete-orphan"
     )

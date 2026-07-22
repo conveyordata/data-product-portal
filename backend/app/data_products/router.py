@@ -6,14 +6,14 @@ from fastapi import (
     BackgroundTasks,
     Depends,
     Query,
+    status,
 )
 from fastapi.responses import Response
 from pydantic.json_schema import SkipJsonSchema
 from sqlalchemy.orm import Session
-from starlette import status
 
 from app.abstract_data_product.schema_request import FinalizerRequest
-from app.abstract_data_product.schema_response import InputPort
+from app.abstract_data_product.schema_response import AbstractDataProductInputPort
 from app.authorization.role_assignments.data_product.auth import (
     DataProductAuthAssignment,
 )
@@ -507,7 +507,7 @@ def request_input_ports_for_data_product(
                 ),
                 subject_id=dataset_link.consuming_abstract_data_product_id,
                 subject_type=EventReferenceEntity.DATA_PRODUCT,
-                target_id=dataset_link.dataset_id,
+                target_id=dataset_link.output_port_id,
                 target_type=EventReferenceEntity.DATASET,
                 actor_id=authenticated_user.id,
             )
@@ -575,7 +575,7 @@ def get_data_product_input_ports(
 ) -> GetDataProductInputPortsResponse:
     return GetDataProductInputPortsResponse(
         input_ports=[
-            InputPort.model_validate(input_port)
+            AbstractDataProductInputPort.model_validate(input_port)
             for input_port in DataProductService(db).get_input_ports(id)
         ]
     )
@@ -632,7 +632,7 @@ def unlink_input_port_from_data_product(
             ),
             subject_id=id,
             subject_type=EventReferenceEntity.DATA_PRODUCT,
-            target_id=data_product_dataset.dataset_id,
+            target_id=data_product_dataset.output_port_id,
             target_type=EventReferenceEntity.DATASET,
             actor_id=authenticated_user.id,
         ),

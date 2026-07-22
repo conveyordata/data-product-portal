@@ -5,10 +5,12 @@ from sqlalchemy import select
 from app.configuration.platforms.platform_services.model import PlatformService
 from tests import test_session
 from tests.factories.data_output import DataOutputFactory
-from tests.factories.data_outputs_datasets import DataOutputDatasetAssociationFactory
+from tests.factories.data_outputs_datasets import (
+    TechnicalAssetOutputPortAssociationFactory,
+)
 from tests.factories.data_product import DataProductFactory
 from tests.factories.data_products_datasets import InputPortFactory
-from tests.factories.dataset import DatasetFactory
+from tests.factories.dataset import OutputPortFactory
 
 
 def add_random_data(
@@ -38,15 +40,15 @@ def add_random_data(
 
     # Create datasets and associate them with random data products and data outputs
     for _ in range(nr_of_datasets):
-        dataset = DatasetFactory()
+        dataset = OutputPortFactory()
 
         # Add data outputs to the dataset
         for _ in range(random.randint(0, 3)):
             data_output = random.choice(data_outputs)
 
-            DataOutputDatasetAssociationFactory(
+            TechnicalAssetOutputPortAssociationFactory(
                 data_output=data_output,
-                dataset=dataset,
+                output_port=dataset,
             )
 
         # Add data products to the dataset
@@ -55,7 +57,7 @@ def add_random_data(
 
             InputPortFactory(
                 consuming_abstract_data_product=data_product,
-                dataset=dataset,
+                output_port=dataset,
             )
 
 

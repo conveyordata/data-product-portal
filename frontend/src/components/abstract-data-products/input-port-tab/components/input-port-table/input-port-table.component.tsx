@@ -2,9 +2,9 @@ import { Table, type TableColumnsType, type TableProps } from 'antd';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { TABLE_SUBSECTION_PAGINATION } from '@/constants/table.constants.ts';
+import { DEFAULT_TABLE_PAGINATION } from '@/constants/table.constants.ts';
 import { useTablePagination } from '@/hooks/use-table-pagination.tsx';
-import type { InputPort } from '@/store/api/services/generated/dataProductsApi.ts';
+import type { AbstractDataProductInputPort as InputPort } from '@/store/api/services/generated/dataProductsApi.ts';
 import styles from './input-port-table.module.scss';
 import { getDataProductDatasetsColumns } from './input-port-table-columns.tsx';
 
@@ -18,7 +18,7 @@ export function InputPortTable({ canRemoveAccess, handleRemove, inputPorts, load
     const { t } = useTranslation();
 
     const { pagination, handlePaginationChange } = useTablePagination(inputPorts, {
-        initialPagination: TABLE_SUBSECTION_PAGINATION,
+        initialPagination: DEFAULT_TABLE_PAGINATION,
     });
 
     const onChange: TableProps<InputPort>['onChange'] = (pagination) => {

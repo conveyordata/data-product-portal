@@ -4,20 +4,20 @@ from typing import Callable, Sequence
 import emailgen
 
 from app.core.email.send_mail import send_mail
-from app.data_products.output_ports.schema import Dataset
+from app.data_products.output_ports.schema import OutputPort
 from app.data_products.technical_assets.schema import TechnicalAsset
 from app.settings import settings
 from app.users.schema import User
 
 
 def send_link_dataset_email(
-    dataset: Dataset,
+    output_port: OutputPort,
     data_output: TechnicalAsset,
     *,
     requester: User,
     approvers: Sequence[User],
 ) -> Callable[[None], None]:
-    url = settings.HOST.strip("/") + "/datasets/" + str(dataset.id) + "#data-output"
+    url = settings.HOST.strip("/") + "/datasets/" + str(output_port.id) + "#data-output"
     action = emailgen.Table(
         ["Data Product", "Request", "Dataset", "Owned By", "Requested By"]
     )
@@ -25,7 +25,7 @@ def send_link_dataset_email(
         [
             data_output.owner.name,
             "Wants to provide data to ",
-            dataset.name,
+            output_port.name,
             ", ".join(
                 [
                     f"{approver.first_name} {approver.last_name}"
@@ -42,5 +42,5 @@ def send_link_dataset_email(
         action=action,
         url=url,
         subject=f"Action Required: {data_output.owner.name}"
-        f" wants to provide data to {dataset.name}",
+        f" wants to provide data to {output_port.name}",
     )

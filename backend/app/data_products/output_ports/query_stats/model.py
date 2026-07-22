@@ -11,8 +11,11 @@ from app.database.database import Base
 class DatasetQueryStatsDaily(Base):
     __tablename__ = "dataset_query_stats_daily"
     date: Mapped[DateType] = mapped_column(primary_key=True)
-    dataset_id: Mapped[UUID] = mapped_column(
-        ForeignKey("datasets.id", ondelete="CASCADE"), primary_key=True, index=True
+    output_port_id: Mapped[UUID] = mapped_column(
+        "dataset_id",
+        ForeignKey("datasets.id", ondelete="CASCADE"),
+        primary_key=True,
+        index=True,
     )
     consumer_data_product_id: Mapped[UUID] = mapped_column(
         ForeignKey("data_products.id"), primary_key=True, index=True

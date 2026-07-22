@@ -42,7 +42,7 @@ if TYPE_CHECKING:
     from app.data_products.model import DataProduct
 
 
-class Dataset(Base, BaseORM, EventTrackedMixin):
+class OutputPort(Base, BaseORM, EventTrackedMixin):
     __tablename__ = "datasets"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
@@ -60,29 +60,27 @@ class Dataset(Base, BaseORM, EventTrackedMixin):
     search_vector = Column(TSVECTOR)
     embeddings = deferred(Column(Vector(384)))
 
-    # Foreign keys
     lifecycle_id: Mapped[UUID] = mapped_column(
         ForeignKey("data_product_lifecycles.id", ondelete="SET NULL")
     )
     data_product_id: Mapped[UUID] = mapped_column(ForeignKey("data_products.id"))
 
-    # Relationships
     assignments: Mapped[list["DatasetRoleAssignment"]] = relationship(
-        back_populates="dataset",
+        back_populates="output_port",
         cascade="all, delete-orphan",
         order_by="DatasetRoleAssignment.decision, DatasetRoleAssignment.requested_on",
         lazy="raise",
     )
     data_product_links: Mapped[list["InputPort"]] = relationship(
         "InputPort",
-        back_populates="dataset",
+        back_populates="output_port",
         order_by="InputPort.status.desc()",
         cascade="all, delete-orphan",
         lazy="raise",
     )
     data_output_links: Mapped[list["DataOutputDatasetAssociation"]] = relationship(
         "DataOutputDatasetAssociation",
-        back_populates="dataset",
+        back_populates="output_port",
         order_by="DataOutputDatasetAssociation.status.desc()",
         cascade="all, delete-orphan",
         lazy="raise",
@@ -92,9 +90,9 @@ class Dataset(Base, BaseORM, EventTrackedMixin):
     )
     data_product_settings: Mapped[list["DataProductSettingValue"]] = relationship(
         "DataProductSettingValue",
-        back_populates="dataset",
+        back_populates="output_port",
         cascade="all, delete-orphan",
-        order_by="DataProductSettingValue.dataset_id",
+        order_by="DataProductSettingValue.output_port_id",
         lazy="raise",
     )
     lifecycle: Mapped["DataProductLifecycle"] = relationship(
@@ -122,7 +120,7 @@ class Dataset(Base, BaseORM, EventTrackedMixin):
     abstract_data_product_count = deferred(
         column_property(
             select(func.count(InputPort.id))
-            .where(InputPort.dataset_id == id)
+            .where(InputPort.output_port_id == id)
             .where(InputPort.status == DecisionStatus.APPROVED)
             .correlate_except(InputPort)
             .scalar_subquery()
@@ -132,7 +130,7 @@ class Dataset(Base, BaseORM, EventTrackedMixin):
     technical_assets_count = deferred(
         column_property(
             select(func.count(DataOutputDatasetAssociation.id))
-            .where(DataOutputDatasetAssociation.dataset_id == id)
+            .where(DataOutputDatasetAssociation.output_port_id == id)
             .correlate_except(DataOutputDatasetAssociation)
             .scalar_subquery()
         ),
@@ -166,16 +164,19 @@ class Dataset(Base, BaseORM, EventTrackedMixin):
         )
 
 
+Dataset = OutputPort
+
+
 def ensure_output_port_exists(
     dataset_id: UUID,
     db: Session,
     data_product_id: Optional[UUID] = None,
     **kwargs,
-) -> Dataset:
-    dataset: Dataset = ensure_exists(dataset_id, db, Dataset, **kwargs)
-    if data_product_id is not None and dataset.data_product_id != data_product_id:
+) -> OutputPort:
+    output_port: OutputPort = ensure_exists(dataset_id, db, OutputPort, **kwargs)
+    if data_product_id is not None and output_port.data_product_id != data_product_id:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Required item {dataset_id} does not exist",
         )
-    return dataset
+    return output_port

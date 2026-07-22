@@ -65,6 +65,36 @@ export function getDecisionStatusBadgeStatus(status: DecisionStatus): BadgeProps
     }
 }
 
+export function getInputPortStatusLabel(t: TFunction, status: string): string {
+    switch (status) {
+        case 'pending':
+            return t('Requested');
+        case 'approved':
+            return t('Available');
+        case 'denied':
+            return t('Rejected');
+        case 'expired':
+            return t('Expired');
+        default:
+            return t('Unknown');
+    }
+}
+
+export function getInputPortStatusBadgeStatus(status: string): BadgeProps['status'] {
+    switch (status) {
+        case 'pending':
+            return 'processing';
+        case 'approved':
+            return 'success';
+        case 'denied':
+            return 'error';
+        case 'expired':
+            return 'warning';
+        default:
+            return 'default';
+    }
+}
+
 export function getRoleAssignmentBadgeStatus(status: DecisionStatus): BadgeProps['status'] {
     switch (status) {
         case DecisionStatus.Approved:

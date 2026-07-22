@@ -33,9 +33,9 @@ from app.data_products.output_ports.query_stats.router import (
 )
 from app.data_products.output_ports.schema_request import (
     CreateOutputPortRequest,
-    DatasetAboutUpdate,
-    DatasetStatusUpdate,
     DatasetUpdate,
+    OutputPortAboutUpdate,
+    OutputPortStatusUpdate,
 )
 from app.data_products.output_ports.schema_response import (
     CreateOutputPortResponse,
@@ -82,7 +82,7 @@ def _assign_owner_role_assignments(
         event_service.create_event(
             CreateEvent(
                 name=EventType.DATASET_ROLE_ASSIGNMENT_CREATED,
-                subject_id=assignment.dataset_id,
+                subject_id=assignment.output_port_id,
                 subject_type=EventReferenceEntity.DATASET,
                 target_id=assignment.user_id,
                 target_type=EventReferenceEntity.USER,
@@ -117,7 +117,7 @@ def get_output_port(
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
 ):
-    return OutputPortService(db).get_visible_dataset(id, user, data_product_id)
+    return OutputPortService(db).get_visible_output_port(id, user, data_product_id)
 
 
 @router.get(f"{route}/{{id}}/history")
@@ -244,15 +244,15 @@ def remove_output_port(
 def update_output_port(
     data_product_id: UUID,
     id: UUID,
-    dataset: DatasetUpdate,
+    update: DatasetUpdate,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> UpdateOutputPortResponse:
     # Temporarily convert public to unrestricted.
-    if dataset.access_type == OutputPortAccessType.PUBLIC:
-        dataset.access_type = OutputPortAccessType.UNRESTRICTED
+    if update.access_type == OutputPortAccessType.PUBLIC:
+        update.access_type = OutputPortAccessType.UNRESTRICTED
 
-    response = OutputPortService(db).update_dataset(id, data_product_id, dataset)
+    response = OutputPortService(db).update_dataset(id, data_product_id, update)
 
     EventService(db).create_event(
         CreateEvent(
@@ -287,11 +287,11 @@ def update_output_port(
 def update_output_port_about(
     data_product_id: UUID,
     id: UUID,
-    dataset: DatasetAboutUpdate,
+    output_port: OutputPortAboutUpdate,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    OutputPortService(db).update_dataset_about(id, data_product_id, dataset)
+    OutputPortService(db).update_output_port_about(id, data_product_id, output_port)
 
     EventService(db).create_event(
         CreateEvent(
@@ -322,11 +322,11 @@ def update_output_port_about(
 def update_output_port_status(
     data_product_id: UUID,
     id: UUID,
-    dataset: DatasetStatusUpdate,
+    output_port: OutputPortStatusUpdate,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    OutputPortService(db).update_dataset_status(id, data_product_id, dataset)
+    OutputPortService(db).update_dataset_status(id, data_product_id, output_port)
 
     EventService(db).create_event(
         CreateEvent(

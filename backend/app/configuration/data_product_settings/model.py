@@ -14,7 +14,7 @@ from app.shared.model import BaseORM
 
 if TYPE_CHECKING:
     from app.data_products.model import DataProduct
-    from app.data_products.output_ports.model import Dataset
+    from app.data_products.output_ports.model import OutputPort
 
 
 class DataProductSettingValue(Base, BaseORM):
@@ -30,7 +30,9 @@ class DataProductSettingValue(Base, BaseORM):
     data_product_id: Mapped[UUID] = mapped_column(
         ForeignKey("data_products.id"), nullable=True
     )
-    dataset_id: Mapped[UUID] = mapped_column(ForeignKey("datasets.id"), nullable=True)
+    output_port_id: Mapped[UUID] = mapped_column(
+        "dataset_id", ForeignKey("datasets.id"), nullable=True
+    )
 
     # Relationships
     data_product_setting: Mapped["DataProductSetting"] = relationship(
@@ -43,9 +45,9 @@ class DataProductSettingValue(Base, BaseORM):
         order_by="DataProduct.name",
         lazy="raise",
     )
-    dataset: Mapped["Dataset"] = relationship(
+    output_port: Mapped["OutputPort"] = relationship(
         back_populates="data_product_settings",
-        order_by="Dataset.name",
+        order_by="OutputPort.name",
         lazy="raise",
     )
 

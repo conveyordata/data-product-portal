@@ -1,10 +1,10 @@
 import copy
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from typing import Optional, Sequence
 from uuid import UUID
 
 from fastapi import HTTPException, status
-from sqlalchemy import asc, func, select
+from sqlalchemy import asc, func, or_, select
 from sqlalchemy.orm import Session
 
 from app.authorization.role_assignments.data_product.model import (
@@ -21,9 +21,11 @@ from app.core.authz import Action
 from app.data_products.model import ensure_data_product_exists
 from app.data_products.status import AbstractDataProductStatus
 from app.database.database import ensure_exists
-from app.pending_actions.schema import DataProductRoleAssignmentPendingActionOld
 from app.users.model import User as UserModel
 from app.users.schema import User
+from app.users.schema_response import (
+    DataProductRoleAssignmentRequest,
+)
 
 
 class RoleAssignmentService:
@@ -152,12 +154,37 @@ class RoleAssignmentService:
         )
         return self.db.scalar(query)
 
+    def get_user_requests(
+        self,
+        user: User,
+        hide_old_inactive: bool,
+    ) -> Sequence[DataProductRoleAssignmentRequest]:
+        query = (
+            select(DataProductRoleAssignmentModel)
+            .filter(
+                DataProductRoleAssignmentModel.user_id == user.id,
+            )
+            .order_by(asc(DataProductRoleAssignmentModel.requested_on))
+        )
+        if hide_old_inactive:
+            thirty_days_ago = datetime.now(timezone.utc) - timedelta(days=30)
+            query = query.where(
+                or_(
+                    DataProductRoleAssignmentModel.decision == DecisionStatus.PENDING,
+                    DataProductRoleAssignmentModel.requested_on >= thirty_days_ago,
+                )
+            )
+        actions = self.db.scalars(query).unique().all()
+        return [
+            DataProductRoleAssignmentRequest.model_validate(action)
+            for action in actions
+        ]
+
     def get_pending_data_product_role_assignments(
         self, user: User
-    ) -> Sequence[DataProductRoleAssignmentPendingActionOld]:
+    ) -> Sequence[DataProductRoleAssignmentRequest]:
         data_product_ids = (
             select(DataProductRoleAssignmentModel.data_product_id)
-            .join(DataProductRoleAssignmentModel.role)
             .where(
                 DataProductRoleAssignmentModel.user_id == user.id,
                 DataProductRoleAssignmentModel.decision == DecisionStatus.APPROVED,
@@ -182,7 +209,10 @@ class RoleAssignmentService:
             .unique()
             .all()
         )
-        return actions
+        return [
+            DataProductRoleAssignmentRequest.model_validate(action)
+            for action in actions
+        ]
 
     def users_with_authz_action(
         self, data_product_id: UUID, action: Action

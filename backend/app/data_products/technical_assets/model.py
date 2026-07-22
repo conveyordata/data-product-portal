@@ -16,11 +16,11 @@ from app.database.event_mixin import EventTrackedMixin
 if TYPE_CHECKING:
     from app.configuration.platforms.model import Platform
     from app.configuration.platforms.platform_services.model import PlatformService
-    from app.data_output_configuration.base_model import TechnicalAssetConfiguration
     from app.data_products.model import DataProduct
     from app.data_products.output_port_technical_assets_link.model import (
         DataOutputDatasetAssociation,
     )
+    from app.technical_asset_configuration.base_model import TechnicalAssetConfiguration
 
 from app.configuration.tags.model import Tag, tag_data_output_table
 from app.database.database import Base, ensure_exists
@@ -37,13 +37,11 @@ class TechnicalAsset(Base, BaseORM, EventTrackedMixin):
     status: TechnicalAssetStatus = Column(Enum(TechnicalAssetStatus))
     technical_mapping = Column(String)
 
-    # Foreign keys
     platform_id: Mapped[UUID] = Column(ForeignKey("platforms.id"))
     service_id: Mapped[UUID] = Column(ForeignKey("platform_services.id"))
     owner_id: Mapped[UUID] = Column(ForeignKey("data_products.id"))
     configuration_id: Mapped[UUID] = Column(ForeignKey("data_output_configurations.id"))
 
-    # Relationships
     platform: Mapped["Platform"] = relationship(lazy="joined")
     service: Mapped["PlatformService"] = relationship(lazy="joined")
     owner: Mapped["DataProduct"] = relationship(

@@ -1,13 +1,27 @@
+from itertools import chain
 from typing import Final, Sequence
 from uuid import UUID
 
 from sqlalchemy import asc, select
 from sqlalchemy.orm import Session
 
+from app.authorization.role_assignments.data_product.service import (
+    RoleAssignmentService,
+)
+from app.data_products.output_port_technical_assets_link.service import (
+    TechnicalAssetOutputPortService,
+)
+from app.data_products.output_ports.input_ports.service import InputPortService
+from app.users.model import User, ensure_user_exists
 from app.users.model import User as UserModel
-from app.users.model import ensure_user_exists
 from app.users.schema_request import CanBecomeAdminUpdate, UserCreate
-from app.users.schema_response import UserCreateResponse, UsersGet
+from app.users.schema_response import (
+    MyRequestsResponse,
+    PendingActionResponse,
+    Request,
+    UserCreateResponse,
+    UsersGet,
+)
 
 SYSTEM_ACCOUNT: Final[str] = "systemaccount@noreply.com"
 
@@ -56,3 +70,46 @@ class UserService:
         user = ensure_user_exists(request.user_id, self.db)
         user.can_become_admin = request.can_become_admin
         self.db.commit()
+
+    def get_user_pending_actions(self, user: User) -> PendingActionResponse:
+        input_port_actions = InputPortService(self.db).get_user_pending_actions(user)
+
+        data_output_dataset_actions = TechnicalAssetOutputPortService(
+            self.db
+        ).get_user_pending_actions(user)
+        data_product_role_assignment_actions = RoleAssignmentService(
+            self.db
+        ).get_pending_data_product_role_assignments(user)
+        return PendingActionResponse(
+            pending_actions=sorted(
+                chain[Request](
+                    input_port_actions,
+                    data_output_dataset_actions,
+                    data_product_role_assignment_actions,
+                ),
+                key=lambda action: (action.requested_on is None, action.requested_on),
+            )
+        )
+
+    def get_user_requests(
+        self, user: User, hide_old_inactive: bool
+    ) -> MyRequestsResponse:
+        input_port_requests = InputPortService(self.db).get_user_requests(
+            user, hide_old_inactive
+        )
+        technical_asset_output_port_requests = TechnicalAssetOutputPortService(
+            self.db
+        ).get_user_requests(user, hide_old_inactive)
+        data_product_role_requests = RoleAssignmentService(self.db).get_user_requests(
+            user, hide_old_inactive
+        )
+        return MyRequestsResponse(
+            my_requests=sorted(
+                chain[Request](
+                    input_port_requests,
+                    technical_asset_output_port_requests,
+                    data_product_role_requests,
+                ),
+                key=lambda action: (action.requested_on is None, action.requested_on),
+            )
+        )

@@ -9,8 +9,8 @@ from app.settings import settings
 from tests.factories import (
     DataProductFactory,
     DataProductRoleAssignmentFactory,
-    DatasetFactory,
-    DatasetQueryStatsFactory,
+    OutputPortFactory,
+    OutputPortQueryStatsFactory,
     RoleFactory,
     UserFactory,
 )
@@ -39,7 +39,7 @@ class TestDatasetQueryStatsDailyRouter:
 
     def test_update_query_stats_daily_batch(self, client, session):
         """Test batch updating query stats."""
-        dataset = DatasetFactory()
+        dataset = OutputPortFactory()
 
         response = client.patch(
             f"{DATA_PRODUCT_ENDPOINT}/{dataset.data_product.id}/output_ports/{dataset.id}/query_stats",
@@ -54,21 +54,21 @@ class TestDatasetQueryStatsDailyRouter:
 
     def test_get_query_stats(self, client, session):
         """Test getting query stats for a dataset."""
-        dataset = DatasetFactory()
+        dataset = OutputPortFactory()
         consumer1 = DataProductFactory()
         consumer2 = DataProductFactory()
         today = date.today()
         yesterday = today - timedelta(days=1)
 
-        DatasetQueryStatsFactory(
+        OutputPortQueryStatsFactory(
             date=today,
-            dataset_id=dataset.id,
+            output_port_id=dataset.id,
             consumer_data_product_id=consumer1.id,
             query_count=150,
         )
-        DatasetQueryStatsFactory(
+        OutputPortQueryStatsFactory(
             date=yesterday,
-            dataset_id=dataset.id,
+            output_port_id=dataset.id,
             consumer_data_product_id=consumer2.id,
             query_count=250,
         )
@@ -97,13 +97,13 @@ class TestDatasetQueryStatsDailyRouter:
             assert stat["query_count"] in [150, 250]
 
     def test_delete_query_stat(self, client, session):
-        dataset = DatasetFactory()
+        dataset = OutputPortFactory()
         consumer = DataProductFactory()
         today = date.today()
 
-        DatasetQueryStatsFactory(
+        OutputPortQueryStatsFactory(
             date=today,
-            dataset_id=dataset.id,
+            output_port_id=dataset.id,
             consumer_data_product_id=consumer.id,
             query_count=200,
         )
@@ -123,28 +123,28 @@ class TestDatasetQueryStatsDailyRouter:
         assert stats == []
 
     def test_get_query_stats_with_query_params(self, client, session):
-        dataset = DatasetFactory()
+        dataset = OutputPortFactory()
         consumer = DataProductFactory()
         base_date = date.today() - timedelta(days=7)
         start_of_week = base_date - timedelta(days=base_date.weekday())
         middle_of_week = start_of_week + timedelta(days=2)
         old_date = date.today() - timedelta(days=150)
 
-        DatasetQueryStatsFactory(
+        OutputPortQueryStatsFactory(
             date=start_of_week,
-            dataset_id=dataset.id,
+            output_port_id=dataset.id,
             consumer_data_product_id=consumer.id,
             query_count=50,
         )
-        DatasetQueryStatsFactory(
+        OutputPortQueryStatsFactory(
             date=middle_of_week,
-            dataset_id=dataset.id,
+            output_port_id=dataset.id,
             consumer_data_product_id=consumer.id,
             query_count=75,
         )
-        DatasetQueryStatsFactory(
+        OutputPortQueryStatsFactory(
             date=old_date,
-            dataset_id=dataset.id,
+            output_port_id=dataset.id,
             consumer_data_product_id=consumer.id,
             query_count=125,
         )
@@ -178,12 +178,12 @@ class TestDatasetQueryStatsDailyRouter:
         """Regression test: Verify that deleting a data product via API cascade deletes query stats."""
 
         data_product = DataProductFactory()
-        dataset = DatasetFactory(data_product=data_product, tags=[])
+        dataset = OutputPortFactory(data_product=data_product, tags=[])
         consumer = DataProductFactory()
 
-        DatasetQueryStatsFactory(
+        OutputPortQueryStatsFactory(
             date=date(2024, 1, 15),
-            dataset_id=dataset.id,
+            output_port_id=dataset.id,
             consumer_data_product_id=consumer.id,
             query_count=150,
         )
@@ -194,7 +194,9 @@ class TestDatasetQueryStatsDailyRouter:
 
         # Verify query stats exist before deletion
         stats_before = (
-            session.query(DatasetQueryStatsDaily).filter_by(dataset_id=dataset_id).all()
+            session.query(DatasetQueryStatsDaily)
+            .filter_by(output_port_id=dataset_id)
+            .all()
         )
         assert len(stats_before) == 1, "Should have 1 query stat before deletion"
 
@@ -217,7 +219,9 @@ class TestDatasetQueryStatsDailyRouter:
         # (This happens because deleting the data product cascades to delete the dataset,
         # and deleting the dataset cascades to delete the query stats)
         stats_after = (
-            session.query(DatasetQueryStatsDaily).filter_by(dataset_id=dataset_id).all()
+            session.query(DatasetQueryStatsDaily)
+            .filter_by(output_port_id=dataset_id)
+            .all()
         )
         assert len(stats_after) == 0, (
             "Query stats should be cascade deleted when data product (and its dataset) is deleted"

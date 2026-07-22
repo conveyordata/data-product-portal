@@ -8,8 +8,8 @@ from app.data_products.output_ports.curated_queries.service import (
 )
 from app.settings import settings
 from tests.factories import (
-    DatasetFactory,
     DatasetRoleAssignmentFactory,
+    OutputPortFactory,
     RoleFactory,
     UserFactory,
 )
@@ -27,7 +27,7 @@ def _assign_update_role(session, dataset):
         ],
     )
     DatasetRoleAssignmentFactory(
-        user_id=user.id, role_id=role.id, dataset_id=dataset.id
+        user_id=user.id, role_id=role.id, output_port_id=dataset.id
     )
     return user
 
@@ -51,7 +51,7 @@ class TestCuratedQueriesRouter:
         }
 
     def test_curated_queries_put(self, client, session):
-        dataset = DatasetFactory()
+        dataset = OutputPortFactory()
         _assign_update_role(session, dataset)
 
         put_response = client.put(
@@ -65,7 +65,7 @@ class TestCuratedQueriesRouter:
         assert body["output_port_curated_queries"][1]["title"] == "New deviations"
 
     def test_delete_output_port_curated_query(self, client, session):
-        dataset = DatasetFactory()
+        dataset = OutputPortFactory()
         _assign_update_role(session, dataset)
 
         service = DatasetCuratedQueryService(session)
@@ -86,7 +86,7 @@ class TestCuratedQueriesRouter:
         assert response.status_code == 200
 
     def test_curated_queries_get(self, client, session):
-        dataset = DatasetFactory()
+        dataset = OutputPortFactory()
         _assign_update_role(session, dataset)
 
         service = DatasetCuratedQueryService(session)

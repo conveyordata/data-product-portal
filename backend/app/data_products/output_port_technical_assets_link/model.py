@@ -10,7 +10,7 @@ from app.database.event_mixin import EventTrackedMixin
 from app.settings import settings
 
 if TYPE_CHECKING:
-    from app.data_products.output_ports.model import Dataset
+    from app.data_products.output_ports.model import OutputPort
     from app.data_products.technical_assets.model import TechnicalAsset
     from app.users.model import User
 
@@ -31,22 +31,22 @@ class DataOutputDatasetAssociation(Base, BaseORM, EventTrackedMixin):
     approved_on = Column(DateTime(timezone=False))
     denied_on = Column(DateTime(timezone=False))
 
-    # Foreign keys
     data_output_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("data_outputs.id"))
-    dataset_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("datasets.id"))
+    output_port_id: Mapped[uuid.UUID] = mapped_column(
+        "dataset_id", ForeignKey("datasets.id")
+    )
     requested_by_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"))
     approved_by_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"))
     denied_by_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"))
 
-    # Relationships
     data_output: Mapped["TechnicalAsset"] = relationship(
         back_populates="dataset_links",
         order_by="TechnicalAsset.name",
         lazy="joined",
     )
-    dataset: Mapped["Dataset"] = relationship(
+    output_port: Mapped["OutputPort"] = relationship(
         back_populates="data_output_links",
-        order_by="Dataset.name",
+        order_by="OutputPort.name",
         lazy="joined",
     )
     requested_by: Mapped["User"] = relationship(
@@ -80,7 +80,7 @@ class DataOutputDatasetAssociation(Base, BaseORM, EventTrackedMixin):
                 return []
             input_ports = (
                 db.query(InputPort)
-                .filter(InputPort.dataset_id == self.dataset_id)
+                .filter(InputPort.output_port_id == self.output_port_id)
                 .all()
             )
             return [ip.to_event() for ip in input_ports]
@@ -89,9 +89,9 @@ class DataOutputDatasetAssociation(Base, BaseORM, EventTrackedMixin):
     def to_event(self) -> OutputPortTechnicalAssetLinkEvent:
         return OutputPortTechnicalAssetLinkEvent(
             id=self.id,
-            data_product_id=self.dataset.data_product_id
+            data_product_id=self.output_port.data_product_id
             if self.data_output is None
             else self.data_output.owner_id,
-            output_port_id=self.dataset_id,
+            output_port_id=self.output_port_id,
             technical_asset_id=self.data_output_id,
         )
