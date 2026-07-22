@@ -14,6 +14,7 @@ authors = ["Stijn Janssens <stijn.janssens@dataminded.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
+data-product-portal-sdk = { path = "../sdk" }
 python = "^3.13"
 python-dotenv = "^1.2.2"
 fastapi = "0.139.2"

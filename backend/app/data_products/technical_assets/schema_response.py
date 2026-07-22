@@ -25,6 +25,27 @@ class TechnicalInfo(ORMModel):
     info: Optional[str]
 
 
+def compute_technical_info(
+    configuration: DataOutputConfiguration,
+    service: PlatformService,
+    environment_configurations: list[EnvironmentConfigsGetItem],
+) -> list[TechnicalInfo]:
+    result = []
+    for env_config in environment_configurations:
+        plugin_config = configuration.get_configuration(env_config.config)
+        context = plugin_config.model_dump() if plugin_config else {}
+        context["environment"] = env_config.environment.acronym
+        info = configuration.render_template(service.technical_info_template, **context)
+        result.append(
+            TechnicalInfo(
+                environment_id=env_config.environment.id,
+                environment=env_config.environment.name,
+                info=info,
+            )
+        )
+    return result
+
+
 class BaseTechnicalAssetGet(ORMModel):
     id: UUID
     name: str
@@ -56,25 +77,9 @@ class BaseTechnicalAssetGet(ORMModel):
 
     @computed_field
     def technical_info(self) -> list[TechnicalInfo]:
-        technical_info_list = []
-        for environment_configuration in self.environment_configurations:
-            configuration = self.configuration.get_configuration(
-                environment_configuration.config
-            )
-            context = configuration.model_dump() if configuration else {}
-            context["environment"] = environment_configuration.environment.acronym
-
-            info = self.configuration.render_template(
-                self.service.technical_info_template, **context
-            )
-            technical_info_list.append(
-                TechnicalInfo(
-                    environment_id=environment_configuration.environment.id,
-                    environment=environment_configuration.environment.name,
-                    info=info,
-                )
-            )
-        return technical_info_list
+        return compute_technical_info(
+            self.configuration, self.service, self.environment_configurations
+        )
 
 
 class OutputPortLink(TechnicalAssetOutputPortAssociation):

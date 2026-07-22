@@ -889,17 +889,17 @@ yaml = ["pyyaml (>=6.0.1)"]
 
 [[package]]
 name = "data-product-portal-sdk"
-version = "0.6.0"
+version = "0.6.1"
 description = "SDK for Data Product Portal"
 optional = false
 python-versions = "^3.13"
-groups = ["test"]
+groups = ["main", "test"]
 files = []
-develop = true
+develop = false
 
 [package.dependencies]
 attrs = ">=22.2.0"
-fastapi = ">=0.137.1"
+fastapi = ">=0.136.3"
 httpx = ">=0.23.0,<0.29.0"
 python-dateutil = ">=2.8.0"
 
@@ -4829,4 +4829,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "6edde5960afc2b5c0b9f9e1f7664d42173dc5072242a0d8ca72d282788737a76"
+content-hash = "15398820d7ee84e7e18362d02817a567ae74705d5b6ae92fd61167c0d5d55ca6"

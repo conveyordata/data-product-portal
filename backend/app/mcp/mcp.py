@@ -1,23 +1,30 @@
-from contextlib import asynccontextmanager
-from typing import Any, Optional, Sequence
+"""Data Product Portal MCP server.
+
+Structure:
+  mcp.py               — this file: portal discovery tools, AWS credentials tool, resources
+  deps.py              — shared infrastructure (DB session, auth)
+  plugin_registry.py   — MCPPlugin abstract base class
+  loader.py            — plugin discovery and registration
+
+  data_output_configuration/<name>/mcp_tools.py
+                       — per-plugin tool registrations (e.g. Glue/Athena)
+"""
+
+from typing import Any, Dict, Optional, Sequence
 from uuid import UUID
 
-import jwt as pyjwt
 from fastmcp import FastMCP
 from fastmcp.dependencies import Depends
-from fastmcp.server.auth.oidc_proxy import OIDCProxy
-from fastmcp.server.dependencies import get_access_token
-from sqlalchemy import select as sa_select
-from sqlalchemy.orm import Session, configure_mappers
+from sqlalchemy.orm import Session
 
 from app.authorization.role_assignments.data_product.schema import (
-    DataProductRoleAssignmentResponse as DataProductRoleAssignmentResponse,
+    DataProductRoleAssignmentResponse,
 )
 from app.authorization.role_assignments.data_product.service import (
     RoleAssignmentService as DataProductRoleAssignmentService,
 )
 from app.authorization.role_assignments.global_.schema import (
-    GlobalRoleAssignmentResponse as GlobalRoleAssignmentResponse,
+    GlobalRoleAssignmentResponse,
 )
 from app.authorization.role_assignments.global_.service import (
     RoleAssignmentService as GlobalRoleAssignmentService,
@@ -30,8 +37,8 @@ from app.authorization.role_assignments.output_port.service import (
 )
 from app.configuration.domains.schema_response import GetDomainResponse, GetDomainsItem
 from app.configuration.domains.service import DomainService
-from app.core.auth.auth import get_authenticated_user
-from app.core.auth.jwt import get_oidc
+from app.configuration.environments.schema_response import EnvironmentGetItem
+from app.configuration.environments.service import EnvironmentService
 from app.core.logging import logger
 from app.data_products.output_ports.schema_response import (
     GetOutputPortResponse,
@@ -48,166 +55,87 @@ from app.data_products.technical_assets.schema_response import (
     GetTechnicalAssetsResponseItem,
 )
 from app.data_products.technical_assets.service import DataOutputService
-from app.database.database import SessionLocal
+from app.mcp.deps import (
+    get_auth_provider,
+    get_db_session,
+    get_mcp_authenticated_user,
+    initialize_models,
+)
+from app.mcp.loader import get_plugin_instructions, load_plugins
 from app.search_output_ports.schema_response import SearchOutputPortsResponseItem
-from app.settings import settings
 from app.users.model import User as UserModel
 
-
-@asynccontextmanager
-async def get_db_session():
-    db = SessionLocal()
-    try:
-        yield db
-        db.commit()
-    except Exception:
-        db.rollback()
-        raise
-    finally:
-        db.close()
-
-
-def initialize_models():
-    """Initialize all SQLAlchemy models and resolve relationships"""
-    try:
-        configure_mappers()
-    except Exception as e:
-        logger.warn(f"Warning during model initialization: {e}")
-
+# ---------------------------------------------------------------------------
+# Bootstrap
+# ---------------------------------------------------------------------------
 
 initialize_models()
 
 
-class PortalOIDCProxy(OIDCProxy):
-    async def _extract_upstream_claims(
-        self, idp_tokens: dict[str, Any]
-    ) -> dict[str, Any] | None:
-        for key in ("id_token", "access_token"):
-            raw = idp_tokens.get(key, "")
-            if not raw:
-                continue
-            try:
-                claims = pyjwt.decode(raw, options={"verify_signature": False})
-                extracted = {
-                    k: claims[k]
-                    for k in ("sub", "email", "name", "family_name")
-                    if k in claims
-                }
-                if extracted.get("sub"):
-                    logger.debug(
-                        f"[MCP] Extracted upstream claims from {key}: "
-                        f"sub={extracted.get('sub')!r}, email={extracted.get('email')!r}"
-                    )
-                    return extracted
-            except Exception as exc:
-                logger.error(f"[MCP] Could not decode {key} as JWT: {exc}")
-        logger.warning(
-            "[MCP] _extract_upstream_claims: no usable token found in IDP response"
-        )
-        return None
+# ---------------------------------------------------------------------------
+# Instructions
+# ---------------------------------------------------------------------------
 
+_BASE_INSTRUCTIONS = """
+Portal for discovering and exploring data products and output ports.
 
-def get_auth_provider() -> Optional[PortalOIDCProxy]:
-    if settings.OIDC_ENABLED:
-        oidc = get_oidc()
-        return PortalOIDCProxy(
-            config_url=f"{oidc.authority}/.well-known/openid-configuration",
-            client_id=oidc.client_id,
-            client_secret=oidc.client_secret,
-            base_url=f"{settings.HOST.rstrip('/')}/mcp",
-            require_authorization_consent="external",
-            allowed_client_redirect_uris=settings.MCP_AUTH_REDIRECT_URIS,
-        )
-    logger.debug("[MCP] OIDC disabled — MCP server will run without authentication")
-    return None
+CORE CONCEPTS:
+- Output ports (datasets) = published, queryable datasets
+- Data products = containers grouping related output ports and infrastructure
+- Technical assets = underlying infrastructure (e.g. Glue databases)
+- Environments = deployment stages (prod, staging, dev)
 
+═══════════════════════════════════════════════════════════════════════
+TWO DISTINCT MODES OF OPERATION
+═══════════════════════════════════════════════════════════════════════
+
+MODE 1: DISCOVERY (Metadata Only — Fast, No Credentials Required)
+──────────────────────────────────────────────────────────────────────
+Tools for Discovery (no credentials needed):
+- search_output_ports(query)      — find datasets
+- search_data_products(query)     — find data products
+- get_output_port_details(id)     — metadata about a dataset
+- get_data_product_details(id)    — details about a data product
+- get_data_product_analytics(id)  — what output ports a data product has
+- get_marketplace_overview()      — high-level statistics
+- get_environments()              — available environments
+
+MODE 2: DATA QUERIES (Actual Data — Requires Credentials)
+──────────────────────────────────────────────────────────────────────
+DATA QUERY FLOW — Steps 1–3 (common to all plugins)
+
+Step 1: DISCOVER THE DATA
+  search_output_ports("user's query")
+
+Step 2: GET METADATA & CONSUMING DATA PRODUCTS 🔑
+  get_output_port_details(output_port_id)
+  → data_product_links contains consuming data products — these are typically
+    your access path to query the data
+  → Also use get_consuming_products(output_port_id, data_product_id)
+
+Step 3: DETERMINE ENVIRONMENT
+  Call get_environments() if the user didn't specify one.
+
+Steps 4+ are provided by the active data-access plugin (e.g. Glue/Athena).
+
+═══════════════════════════════════════════════════════════════════════
+GENERAL RULES
+═══════════════════════════════════════════════════════════════════════
+✓ Route to Discovery mode for metadata questions (no credentials needed)
+✓ ALWAYS extract data_product_links from output port details
+✓ TRY CONSUMING DATA PRODUCTS FIRST — most common access pattern
+✗ Don't request credentials for pure metadata questions
+"""
 
 mcp = FastMCP(
     name="DataProductPortalMCP",
-    instructions="""
-    Portal for discovering and exploring data products and output ports.
-
-    Recommended discovery flow:
-    1. get_marketplace_overview: understand what's available and get domain IDs
-    2. search_output_ports: find specific output ports (preferred for most searches)
-       Use search_data_products only when the user explicitly asks to find a data product.
-    3. get_*_details: drill into a specific result by UUID
-
-    Output ports (datasets) are the primary way data is shared in the portal.
-    Data products are containers owned by teams that group related output ports and technical assets.
-    """,
+    instructions=_BASE_INSTRUCTIONS + get_plugin_instructions(),
     auth=get_auth_provider(),
 )
 
 # ==============================================================================
-# CORE DISCOVERY & SEARCH TOOLS
+# SEARCH & DISCOVERY
 # ==============================================================================
-
-
-def get_mcp_authenticated_user(db: Session = Depends(get_db_session)) -> UserModel:
-    """Get the authenticated portal user from the current MCP request context.
-
-    When OIDC is enabled the FastMCP access token (issued by PortalOIDCProxy)
-    carries upstream identity claims extracted from the upstream OIDC id_token.
-    These claims are used for a direct DB lookup — no extra userinfo round-trip.
-
-    When OIDC is disabled the default portal user is returned.
-
-    The DB session is injected as a dependency so all ORM attribute reads
-    happen inside an active session, avoiding DetachedInstanceError.
-    """
-
-    if not settings.OIDC_ENABLED:
-        from app.core.auth.auth import generate_default_jwt_token
-
-        logger.debug("[MCP] OIDC disabled — resolving default user")
-        return get_authenticated_user(token=generate_default_jwt_token(), db=db)
-
-    access_token = get_access_token()
-    if access_token is None:
-        logger.warning("[MCP] get_mcp_authenticated_user: no access token in context")
-        raise ValueError("No access token found in MCP context")
-
-    logger.debug(
-        f"[MCP] Access token present: client_id={access_token.client_id!r}, "
-        f"scopes={access_token.scopes!r}, has_claims={bool(access_token.claims)}"
-    )
-
-    # OIDCProxy embeds upstream identity under claims["upstream_claims"]
-    upstream_claims = (
-        access_token.claims.get("upstream_claims") if access_token.claims else None
-    )
-    if not upstream_claims:
-        raise ValueError("No upstream_claims found in access token")
-
-    sub = upstream_claims.get("sub")
-    if not sub:
-        raise ValueError(f"upstream_claims missing 'sub' claim: {upstream_claims!r}")
-    logger.debug(f"[MCP] Resolving user from upstream_claims: sub={sub!r}")
-
-    user_model = db.scalar(sa_select(UserModel).where(UserModel.external_id == sub))
-    if not user_model:
-        logger.error(f"[MCP] Authenticated user not found in DB: sub={sub!r}")
-        raise ValueError(f"Authenticated user not found: sub={sub!r}")
-
-    logger.debug(f"[MCP] Resolved user from upstream_claims: sub={sub!r}")
-    return user_model
-
-
-@mcp.tool
-async def get_current_user(
-    user: UserModel = Depends(get_mcp_authenticated_user),
-) -> dict[str, Any]:
-    """Get the profile of the currently authenticated user (id, name, email).
-    Use this to resolve 'me' or 'my' in user requests before querying roles or owned resources.
-    Requires authentication."""
-    return {
-        "id": user.id,
-        "external_id": user.external_id,
-        "first_name": user.first_name,
-        "email": user.email,
-        "last_name": user.last_name,
-    }
 
 
 @mcp.tool(
@@ -216,7 +144,6 @@ Search across data products, output ports, technical assets, and domains in a si
 Use this only when the user hasn't specified what type of entity they're looking for.
 For output ports specifically, always prefer search_output_ports — it uses semantic search and returns richer metadata.
 To get the data product details for output ports, you can use the get_data_product_details function with the data_product_id.
-
 Args:
     query: Search query string
     entity_types: Filter to specific types. Valid values: 'data_products', 'output_ports',
@@ -354,37 +281,76 @@ def search_data_products(
     limit: int = 20,
     db: Session = Depends(get_db_session),
 ) -> dict[str, Any]:
-    # Get all data products and filter manually
-    all_data_products = DataProductService(db).get_data_products()
-    filtered_data_products = []
+    def _execute(db: Session) -> dict[str, Any]:
+        all_data_products = DataProductService(db).get_data_products()
+        filtered_data_products = []
 
-    for dp in all_data_products:
-        # Apply filters manually
-        if (
-            query
-            and query.lower() not in dp.name.lower()
-            and (not dp.description or query.lower() not in dp.description.lower())
-        ):
-            continue
-        if domain_id and str(dp.domain_id) != domain_id:
-            continue
-        if status and dp.status != status:
-            continue
+        for dp in all_data_products:
+            if (
+                query
+                and query.lower() not in dp.name.lower()
+                and (not dp.description or query.lower() not in dp.description.lower())
+            ):
+                continue
+            if domain_id and str(dp.domain_id) != domain_id:
+                continue
+            if status and dp.status != status:
+                continue
 
-        filtered_data_products.append(GetDataProductsResponseItem.model_validate(dp))
-        if len(filtered_data_products) >= limit:
-            break
+            filtered_data_products.append(
+                GetDataProductsResponseItem.model_validate(dp)
+            )
+            if len(filtered_data_products) >= limit:
+                break
+        return {
+            "data_products": [
+                GetDataProductsResponseItem.model_validate(dp).model_dump()
+                for dp in filtered_data_products
+            ],
+            "count": len(filtered_data_products),
+            "filters_applied": {
+                "query": query,
+                "domain_id": domain_id,
+                "status": status,
+            },
+        }
+
+    return _execute(db)
+
+
+# Get input port for output ports to figure out consumers
+@mcp.tool
+def get_consuming_products(
+    output_port_id: str,
+    data_product_id: str,
+    db: Session = Depends(get_db_session),
+    user: UserModel = Depends(get_mcp_authenticated_user),
+) -> Dict[str, Any]:
+    """Get consuming data products for a specific output port.
+
+    Essential for understanding who has access to the data and how users
+    typically access it.
+
+    Args:
+        output_port_id: UUID of the output port (dataset) to check.
+        data_product_id: UUID of the owning data product of the output port.
+    Returns:
+        List of consuming data products with their namespaces and descriptions.
+    """
+    consuming_products = OutputPortService(db).get_consuming_data_products(
+        UUID(output_port_id), UUID(data_product_id)
+    )
     return {
-        "data_products": [
-            GetDataProductsResponseItem.model_validate(dp).model_dump()
-            for dp in filtered_data_products
+        "output_port_id": output_port_id,
+        "consuming_data_products": [
+            {
+                "id": str(ip.consuming_abstract_data_product.id),
+                "name": ip.consuming_abstract_data_product.name,
+                "namespace": ip.consuming_abstract_data_product.namespace,
+                "description": ip.consuming_abstract_data_product.description,
+            }
+            for ip in consuming_products
         ],
-        "count": len(filtered_data_products),
-        "filters_applied": {
-            "query": query,
-            "domain_id": domain_id,
-            "status": status,
-        },
     }
 
 
@@ -395,6 +361,9 @@ def search_data_products(
 
     An output port is a published, consumable dataset exposed by a data product.
     Returns the name, description, access type, owner, and parent data product for each result.
+
+    NEXT STEP: After finding relevant output ports, use get_output_port_details() to get the full details
+    including data_product_links (consuming data products) which are essential for querying the data.
 
     Args:
         query: Natural language or keyword search. Leave empty to list all accessible output ports.
@@ -454,8 +423,20 @@ def get_data_product_details(
     the data product it belongs to, and owner contact information.
     Use after search_output_ports to get complete information about a specific dataset.
 
+    CRITICAL FOR DATA QUERIES: This returns data_product_links[], which contains the consuming
+    data products that have access to this output port. These are typically YOUR access path to
+    query the data. Extract the namespace from each data_product_links[].data_product.namespace
+    and try those FIRST when getting credentials.
+
+    Also returns data_output_links[] with technical_asset configuration including the database name.
+
     Args:
         output_port_id: UUID obtained from search_output_ports or universal_search.
+
+    Returns:
+        - data_product_links: List of consuming data products (YOUR access path!)
+        - data_output_links: Technical assets with database configuration
+        - namespace: Owner data product namespace (try as fallback only)
     """
 )
 def get_output_port_details(
@@ -507,6 +488,31 @@ def get_domain_details(
     )
 
     return GetDomainResponse.model_validate(domain).model_dump()
+
+
+@mcp.tool
+def get_environments(
+    db: Session = Depends(get_db_session),
+) -> Dict[str, Any]:
+    """Get the list of available environments (e.g. prod, staging, dev).
+
+    The default environment is marked with is_default=True.
+
+    Returns:
+        List of environments with IDs, names, acronyms, and default status.
+    """
+    environments = EnvironmentService(db).get_environments()
+    serialized = [
+        EnvironmentGetItem.model_validate(e).model_dump() for e in environments
+    ]
+    default = next((e for e in environments if e.is_default), None)
+    return {
+        "environments": serialized,
+        "count": len(serialized),
+        "default_environment": EnvironmentGetItem.model_validate(default).model_dump()
+        if default
+        else None,
+    }
 
 
 # ==============================================================================
@@ -925,3 +931,20 @@ def get_resource_roles(
             "total_users": len(users_with_roles),
         },
     }
+
+
+# ==============================================================================
+# PLUGIN TOOLS (registered last, after all core tools)
+# ==============================================================================
+
+load_plugins(mcp)
+
+logger.info(
+    "[MCP] Server ready. Active plugins: "
+    + str(
+        [
+            type(p).__name__
+            for p in __import__("app.mcp.loader", fromlist=["PLUGINS"]).PLUGINS
+        ]
+    )
+)
