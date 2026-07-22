@@ -3,7 +3,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.authorization.role_assignments.enums import DecisionStatus
+from app.abstract_data_product.input_ports.enums import InputPortStatus
 from app.core.auth.auth import get_authenticated_user
 from app.core.authz import (
     Action,
@@ -174,7 +174,7 @@ def remove_output_port_as_input_port(
             actor_id=authenticated_user.id,
         ),
     )
-    if input_port.status == DecisionStatus.APPROVED:
+    if input_port.status == InputPortStatus.APPROVED:
         NotificationService(db).create_dataset_notifications(
             dataset_id=input_port.output_port_id,
             event_id=event_id,

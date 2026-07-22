@@ -2,7 +2,7 @@ import { Badge, Flex, type TableColumnsType } from 'antd';
 import type { TFunction } from 'i18next';
 
 import outputPortBorderIcon from '@/assets/icons/border-icons/output-port-border-icon.svg?react';
-import { InputPortActionButton } from '@/components/abstract-data-products/input-port-tab/components/input-port-table/input-port-action-botton.component.tsx';
+import { InputPortActionButton } from '@/components/abstract-data-products/input-port-tab/components/input-port-table/input-port-action-button.component.tsx';
 import { DatasetPopoverTitle } from '@/components/datasets/dataset-popover-title/dataset-popover-title.tsx';
 import { OutputPortTitle } from '@/components/datasets/output-port-title/output-port-title.tsx';
 import EllipsisParagraph from '@/components/ellipsis-paragraph/ellipsis-paragraph.component.tsx';
@@ -21,13 +21,17 @@ import { Sorter } from '@/utils/table-sorter.helper.ts';
 type Props = {
     t: TFunction;
     canRemoveAccess: boolean;
+    canRequestAccess: boolean;
     handleRemove: (outputPortId: string) => Promise<void>;
+    handleRenew: (outputPortId: string) => Promise<void>;
     inputPorts: InputPort[];
 };
 export const getDataProductDatasetsColumns = ({
     t,
     canRemoveAccess,
+    canRequestAccess,
     handleRemove,
+    handleRenew,
     inputPorts,
 }: Props): TableColumnsType<InputPort> => {
     const sorter = new Sorter<InputPort>();
@@ -67,10 +71,14 @@ export const getDataProductDatasetsColumns = ({
             dataIndex: 'status',
             width: '18%',
             render: (_, { status, renewal_status, current_request }) => (
-                <Flex align={'center'} gap={'small'} wrap>
+                <Flex vertical align={'flex-start'} gap={'small'}>
                     <Badge status={getInputPortStatusBadgeStatus(status)} text={getInputPortStatusLabel(t, status)} />
-                    <RenewalTag renewalStatus={renewal_status} />
-                    <IsExpiringSoonTag status={status} validUntil={current_request.valid_until} />
+                    <RenewalTag status={status} renewalStatus={renewal_status} />
+                    <IsExpiringSoonTag
+                        status={status}
+                        validUntil={current_request.valid_until}
+                        renewalStatus={renewal_status}
+                    />
                 </Flex>
             ),
             ...new FilterSettings(inputPorts, (input_port) => getInputPortStatusLabel(t, input_port.status)),
@@ -98,13 +106,17 @@ export const getDataProductDatasetsColumns = ({
         {
             title: t('Actions'),
             key: 'action',
-            render: (_, { output_port, status }) => {
+            render: (_, { output_port, status, current_request, renewal_status }) => {
                 return (
                     <InputPortActionButton
                         output_port={output_port}
                         canRemoveAccess={canRemoveAccess}
+                        canRequestAccess={canRequestAccess}
                         handleRemove={handleRemove}
+                        handleRenew={handleRenew}
                         status={status}
+                        validUntil={current_request.valid_until}
+                        renewalStatus={renewal_status}
                     />
                 );
             },

@@ -62,10 +62,14 @@ export const getConsumerColumns = ({
             dataIndex: 'status',
             width: '18%',
             render: (_, { status, renewal_status, current_request }) => (
-                <Flex align={'center'} gap={'small'} wrap>
+                <Flex vertical align={'flex-start'} gap={'small'}>
                     <Badge status={getInputPortStatusBadgeStatus(status)} text={getInputPortStatusLabel(t, status)} />
-                    <RenewalTag renewalStatus={renewal_status} />
-                    <IsExpiringSoonTag status={status} validUntil={current_request.valid_until} />
+                    <RenewalTag status={status} renewalStatus={renewal_status} />
+                    <IsExpiringSoonTag
+                        status={status}
+                        validUntil={current_request.valid_until}
+                        renewalStatus={renewal_status}
+                    />
                 </Flex>
             ),
             ...new FilterSettings(dataProductLinks, (dpl) => getInputPortStatusLabel(t, dpl.status)),

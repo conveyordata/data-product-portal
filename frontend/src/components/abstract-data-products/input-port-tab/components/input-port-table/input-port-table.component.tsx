@@ -10,11 +10,20 @@ import { getDataProductDatasetsColumns } from './input-port-table-columns.tsx';
 
 type Props = {
     canRemoveAccess: boolean;
+    canRequestAccess: boolean;
     handleRemove: (outputPortId: string) => Promise<void>;
+    handleRenew: (outputPortId: string) => Promise<void>;
     inputPorts: InputPort[];
     loadingInputPorts: boolean;
 };
-export function InputPortTable({ canRemoveAccess, handleRemove, inputPorts, loadingInputPorts }: Props) {
+export function InputPortTable({
+    canRemoveAccess,
+    canRequestAccess,
+    handleRemove,
+    handleRenew,
+    inputPorts,
+    loadingInputPorts,
+}: Props) {
     const { t } = useTranslation();
 
     const { pagination, handlePaginationChange } = useTablePagination(inputPorts, {
@@ -29,10 +38,12 @@ export function InputPortTable({ canRemoveAccess, handleRemove, inputPorts, load
         return getDataProductDatasetsColumns({
             t,
             canRemoveAccess: canRemoveAccess,
+            canRequestAccess: canRequestAccess,
             handleRemove,
+            handleRenew,
             inputPorts: inputPorts,
         });
-    }, [t, inputPorts, canRemoveAccess, handleRemove]);
+    }, [t, inputPorts, canRemoveAccess, canRequestAccess, handleRemove, handleRenew]);
 
     return (
         <Table<InputPort>

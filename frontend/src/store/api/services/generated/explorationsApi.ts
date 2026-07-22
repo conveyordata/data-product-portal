@@ -55,6 +55,15 @@ const injectedRtkApi = api.injectEndpoints({
         body: queryArg.requestInputPortsForExplorationRequest,
       }),
     }),
+    renewInputPortForExploration: build.mutation<
+      RenewInputPortForExplorationApiResponse,
+      RenewInputPortForExplorationApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/explorations/${queryArg.id}/input_ports/${queryArg.outputPortId}/renew`,
+        method: "POST",
+      }),
+    }),
     removeInputPortFromExploration: build.mutation<
       RemoveInputPortFromExplorationApiResponse,
       RemoveInputPortFromExplorationApiArg
@@ -107,6 +116,12 @@ export type RequestInputPortsForExplorationApiResponse =
 export type RequestInputPortsForExplorationApiArg = {
   id: string;
   requestInputPortsForExplorationRequest: RequestInputPortsForExplorationRequest;
+};
+export type RenewInputPortForExplorationApiResponse =
+  /** status 200 Successful Response */ RenewInputPortForExplorationResponse;
+export type RenewInputPortForExplorationApiArg = {
+  id: string;
+  outputPortId: string;
 };
 export type RemoveInputPortFromExplorationApiResponse =
   /** status 200 Successful Response */ any;
@@ -232,6 +247,9 @@ export type GetExplorationInputPortsResponse = {
 export type RequestInputPortsForExplorationResponse = {
   input_port_ids: string[];
 };
+export type RenewInputPortForExplorationResponse = {
+  input_port_id: string;
+};
 export type FinalizerRequest = {
   finalizer: string;
 };
@@ -277,6 +295,7 @@ export const {
   useGetExplorationInputPortsQuery,
   useLazyGetExplorationInputPortsQuery,
   useRequestInputPortsForExplorationMutation,
+  useRenewInputPortForExplorationMutation,
   useRemoveInputPortFromExplorationMutation,
   useAddExplorationFinalizerMutation,
   useRemoveExplorationFinalizerMutation,

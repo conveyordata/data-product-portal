@@ -262,6 +262,12 @@ from .render_technical_asset_access_path_request import (
 from .render_technical_asset_access_path_response import (
     RenderTechnicalAssetAccessPathResponse,
 )
+from .renew_input_port_for_data_product_response import (
+    RenewInputPortForDataProductResponse,
+)
+from .renew_input_port_for_exploration_response import (
+    RenewInputPortForExplorationResponse,
+)
 from .renewal_status import RenewalStatus
 from .request_data_product_role_assignment import RequestDataProductRoleAssignment
 from .request_input_ports_for_data_product_request import (
@@ -549,6 +555,8 @@ __all__ = (
     "RenderTechnicalAssetAccessPathRequest",
     "RenderTechnicalAssetAccessPathResponse",
     "RenewalStatus",
+    "RenewInputPortForDataProductResponse",
+    "RenewInputPortForExplorationResponse",
     "RequestDataProductRoleAssignment",
     "RequestInputPortsForDataProductRequest",
     "RequestInputPortsForDataProductResponse",

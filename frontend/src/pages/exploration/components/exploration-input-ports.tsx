@@ -6,6 +6,7 @@ import {
     useGetExplorationInputPortsQuery,
     useGetExplorationQuery,
     useRemoveInputPortFromExplorationMutation,
+    useRenewInputPortForExplorationMutation,
 } from '@/store/api/services/generated/explorationsApi.ts';
 
 type Props = {
@@ -25,6 +26,14 @@ export const ExplorationInputPorts = ({ explorationId }: Props) => {
         [removeInputPortFromExploration, explorationId],
     );
 
+    const [renewInputPortForExploration] = useRenewInputPortForExplorationMutation();
+    const handleRenew = useCallback(
+        async (outputPortId: string) => {
+            await renewInputPortForExploration({ outputPortId, id: explorationId }).unwrap();
+        },
+        [renewInputPortForExploration, explorationId],
+    );
+
     const isOwner: boolean =
         exploration !== undefined &&
         exploration?.owner !== undefined &&
@@ -38,6 +47,7 @@ export const ExplorationInputPorts = ({ explorationId }: Props) => {
             canRemoveAccess={isOwner}
             inputPorts={inputPorts}
             handleRemove={handleRemove}
+            handleRenew={handleRenew}
         />
     );
 };

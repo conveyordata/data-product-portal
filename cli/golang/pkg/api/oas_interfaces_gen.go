@@ -365,6 +365,14 @@ type RenderTechnicalAssetAccessPathRes interface {
 	renderTechnicalAssetAccessPathRes()
 }
 
+type RenewInputPortForDataProductRes interface {
+	renewInputPortForDataProductRes()
+}
+
+type RenewInputPortForExplorationRes interface {
+	renewInputPortForExplorationRes()
+}
+
 type ReplaceOutputPortCuratedQueriesRes interface {
 	replaceOutputPortCuratedQueriesRes()
 }

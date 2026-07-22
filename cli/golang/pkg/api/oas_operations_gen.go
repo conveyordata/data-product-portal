@@ -118,6 +118,8 @@ const (
 	RemoveUserOperation                               OperationName = "RemoveUser"
 	RemoveUserNotificationOperation                   OperationName = "RemoveUserNotification"
 	RenderTechnicalAssetAccessPathOperation           OperationName = "RenderTechnicalAssetAccessPath"
+	RenewInputPortForDataProductOperation             OperationName = "RenewInputPortForDataProduct"
+	RenewInputPortForExplorationOperation             OperationName = "RenewInputPortForExploration"
 	ReplaceOutputPortCuratedQueriesOperation          OperationName = "ReplaceOutputPortCuratedQueries"
 	RequestDataProductRoleAssignmentOperation         OperationName = "RequestDataProductRoleAssignment"
 	RequestInputPortsForDataProductOperation          OperationName = "RequestInputPortsForDataProduct"

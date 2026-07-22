@@ -698,6 +698,18 @@ type Invoker interface {
 	//
 	// POST /api/v2/plugins/render_technical_asset_access_path
 	RenderTechnicalAssetAccessPath(ctx context.Context, request *RenderTechnicalAssetAccessPathRequest) (RenderTechnicalAssetAccessPathRes, error)
+	// RenewInputPortForDataProduct invokes renew_input_port_for_data_product operation.
+	//
+	// Renew Input Port For Data Product.
+	//
+	// POST /api/v2/data_products/{id}/input_ports/{output_port_id}/renew
+	RenewInputPortForDataProduct(ctx context.Context, params RenewInputPortForDataProductParams) (RenewInputPortForDataProductRes, error)
+	// RenewInputPortForExploration invokes renew_input_port_for_exploration operation.
+	//
+	// Renew Input Port For Exploration.
+	//
+	// POST /api/v2/explorations/{id}/input_ports/{output_port_id}/renew
+	RenewInputPortForExploration(ctx context.Context, params RenewInputPortForExplorationParams) (RenewInputPortForExplorationRes, error)
 	// ReplaceOutputPortCuratedQueries invokes replace_output_port_curated_queries operation.
 	//
 	// Replace Output Port Curated Queries.
@@ -8206,6 +8218,168 @@ func (c *Client) sendRenderTechnicalAssetAccessPath(ctx context.Context, request
 	}()
 
 	result, err := decodeRenderTechnicalAssetAccessPathResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// RenewInputPortForDataProduct invokes renew_input_port_for_data_product operation.
+//
+// Renew Input Port For Data Product.
+//
+// POST /api/v2/data_products/{id}/input_ports/{output_port_id}/renew
+func (c *Client) RenewInputPortForDataProduct(ctx context.Context, params RenewInputPortForDataProductParams) (RenewInputPortForDataProductRes, error) {
+	res, err := c.sendRenewInputPortForDataProduct(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendRenewInputPortForDataProduct(ctx context.Context, params RenewInputPortForDataProductParams) (res RenewInputPortForDataProductRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/api/v2/data_products/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/input_ports/"
+	{
+		// Encode "output_port_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "output_port_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.OutputPortID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/renew"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeRenewInputPortForDataProductResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// RenewInputPortForExploration invokes renew_input_port_for_exploration operation.
+//
+// Renew Input Port For Exploration.
+//
+// POST /api/v2/explorations/{id}/input_ports/{output_port_id}/renew
+func (c *Client) RenewInputPortForExploration(ctx context.Context, params RenewInputPortForExplorationParams) (RenewInputPortForExplorationRes, error) {
+	res, err := c.sendRenewInputPortForExploration(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendRenewInputPortForExploration(ctx context.Context, params RenewInputPortForExplorationParams) (res RenewInputPortForExplorationRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/api/v2/explorations/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/input_ports/"
+	{
+		// Encode "output_port_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "output_port_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.OutputPortID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/renew"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeRenewInputPortForExplorationResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

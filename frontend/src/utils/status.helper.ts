@@ -83,13 +83,13 @@ export function getInputPortStatusLabel(t: TFunction, status: string): string {
 export function getInputPortStatusBadgeStatus(status: string): BadgeProps['status'] {
     switch (status) {
         case 'pending':
-            return 'processing';
+            return 'default';
         case 'approved':
             return 'success';
         case 'denied':
             return 'error';
         case 'expired':
-            return 'warning';
+            return 'error';
         default:
             return 'default';
     }

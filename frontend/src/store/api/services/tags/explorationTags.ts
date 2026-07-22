@@ -35,4 +35,12 @@ export const explorationTags = {
     getExplorationInputPorts: {
         providesTags: (_, __, id) => [{ type: TagTypes.ExplorationInputPorts, id }],
     },
+    renewInputPortForExploration: {
+        invalidatesTags: (_, __, arg) => [
+            { type: TagTypes.OutputPort, id: arg.outputPortId },
+            { type: TagTypes.History, id: arg.outputPortId },
+            { type: TagTypes.ExplorationInputPorts, id: arg.id },
+            { type: TagTypes.MyRequests },
+        ],
+    },
 } satisfies EndpointDefinitions;

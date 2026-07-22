@@ -444,6 +444,18 @@ type RemoveUserNotificationParams struct {
 	ID uuid.UUID
 }
 
+// RenewInputPortForDataProductParams is parameters of renew_input_port_for_data_product operation.
+type RenewInputPortForDataProductParams struct {
+	ID           uuid.UUID
+	OutputPortID uuid.UUID
+}
+
+// RenewInputPortForExplorationParams is parameters of renew_input_port_for_exploration operation.
+type RenewInputPortForExplorationParams struct {
+	ID           uuid.UUID
+	OutputPortID uuid.UUID
+}
+
 // ReplaceOutputPortCuratedQueriesParams is parameters of replace_output_port_curated_queries operation.
 type ReplaceOutputPortCuratedQueriesParams struct {
 	DataProductID uuid.UUID
