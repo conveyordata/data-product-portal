@@ -1,7 +1,7 @@
 """Plugin loader: auto-discovers and registers all MCP plugin tools.
 
 To add a new plugin:
-1. Create `app/data_output_configuration/<name>/mcp_tools.py`.
+1. Create `app/technical_asset_configuration/<name>/mcp_tools.py`.
 2. Implement `MCPPlugin` in that module.
 3. That's it — no changes needed here.
 """
@@ -16,14 +16,14 @@ from app.mcp.plugin_registry import MCPPlugin
 
 
 def _import_plugin_modules() -> None:
-    """Import every mcp_tools.py found under data_output_configuration/.
+    """Import every mcp_tools.py found under technical_asset_configuration/.
 
     Importing a module that defines an MCPPlugin subclass registers that
     subclass via Python's normal class machinery, so MCPPlugin.__subclasses__()
     will include it afterwards.
     """
-    base_path = Path(__file__).parent.parent / "data_output_configuration"
-    base_package = "app.data_output_configuration"
+    base_path = Path(__file__).parent.parent / "technical_asset_configuration"
+    base_package = "app.technical_asset_configuration"
 
     for directory in sorted(base_path.iterdir()):
         module_file = directory / "mcp_tools.py"

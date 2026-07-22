@@ -13,7 +13,7 @@ from fastmcp import FastMCP
 class MCPPlugin(ABC):
     """Base class for data output configuration plugins that expose MCP tools.
 
-    Implement this in `app/data_output_configuration/<plugin>/mcp_tools.py`.
+    Implement this in `app/technical_asset_configuration/<plugin>/mcp_tools.py`.
     Register the implementation in `app/mcp/loader.py`.
     """
 
