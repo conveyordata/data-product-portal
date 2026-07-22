@@ -1,6 +1,7 @@
 import asyncio
 import re
 import time
+import urllib.parse
 from collections.abc import Awaitable, Callable
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -89,7 +90,9 @@ async def lifespan(_: FastAPI):
 
 
 mcp.add_middleware(LoggingMiddleware())
-mcp_app = mcp.http_app("/")
+_mcp_host = settings.MCP_BASE_URL or settings.HOST
+_mcp_allowed_hosts = [urllib.parse.urlparse(_mcp_host).hostname] if _mcp_host else []
+mcp_app = mcp.http_app("/", allowed_hosts=_mcp_allowed_hosts or None)
 
 
 def route_as_operation_id(route: APIRoute) -> str:
