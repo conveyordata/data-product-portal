@@ -13,6 +13,7 @@ from pydantic.json_schema import SkipJsonSchema
 from sqlalchemy.orm import Session
 
 from app.abstract_data_product.input_ports.enums import InputPortStatus
+from app.abstract_data_product.input_ports.model import InputPort
 from app.abstract_data_product.schema_request import FinalizerRequest
 from app.abstract_data_product.schema_response import AbstractDataProductInputPort
 from app.authorization.role_assignments.data_product.auth import (
@@ -480,6 +481,42 @@ def link_input_ports_to_data_product(
     )
 
 
+def _notify_input_port_links(
+    db: Session,
+    input_ports: list[InputPort],
+    background_tasks: BackgroundTasks,
+    authenticated_user: User,
+) -> None:
+    event_ids = EventService(db).create_events(
+        [
+            CreateEvent(
+                name=(
+                    EventType.DATA_PRODUCT_DATASET_LINK_REQUESTED
+                    if input_port.status == InputPortStatus.PENDING
+                    else EventType.DATA_PRODUCT_DATASET_LINK_APPROVED
+                ),
+                subject_id=input_port.consuming_abstract_data_product_id,
+                subject_type=EventReferenceEntity.DATA_PRODUCT,
+                target_id=input_port.output_port_id,
+                target_type=EventReferenceEntity.DATASET,
+                actor_id=authenticated_user.id,
+            )
+            for input_port in input_ports
+        ]
+    )
+    for input_port, event_id in zip(input_ports, event_ids):
+        if input_port.status == InputPortStatus.APPROVED:
+            NotificationService(db).create_data_product_notifications(
+                data_product_id=input_port.consuming_abstract_data_product_id,
+                event_id=event_id,
+            )
+
+    DataProductService(db).send_input_port_requested_emails_to_output_port_owners(
+        input_ports, background_tasks, authenticated_user
+    )
+    RefreshInfrastructureLambda().trigger()
+
+
 @router.post(
     "/{id}/input_ports",
     responses=_input_ports_responses,
@@ -499,34 +536,8 @@ def request_input_ports_for_data_product(
         actor=authenticated_user,
     )
 
-    event_ids = EventService(db).create_events(
-        [
-            CreateEvent(
-                name=(
-                    EventType.DATA_PRODUCT_DATASET_LINK_REQUESTED
-                    if dataset_link.status == DecisionStatus.PENDING
-                    else EventType.DATA_PRODUCT_DATASET_LINK_APPROVED
-                ),
-                subject_id=dataset_link.consuming_abstract_data_product_id,
-                subject_type=EventReferenceEntity.DATA_PRODUCT,
-                target_id=dataset_link.output_port_id,
-                target_type=EventReferenceEntity.DATASET,
-                actor_id=authenticated_user.id,
-            )
-            for dataset_link in input_ports
-        ]
-    )
-    for dataset_link, event_id in zip(input_ports, event_ids):
-        if dataset_link.status == DecisionStatus.APPROVED:
-            NotificationService(db).create_data_product_notifications(
-                data_product_id=dataset_link.consuming_abstract_data_product_id,
-                event_id=event_id,
-            )
+    _notify_input_port_links(db, input_ports, background_tasks, authenticated_user)
 
-    DataProductService(db).send_input_port_requested_emails_to_output_port_owners(
-        input_ports, background_tasks, authenticated_user
-    )
-    RefreshInfrastructureLambda().trigger()
     return RequestInputPortsForDataProductResponse(
         input_port_links=[dataset_link.id for dataset_link in input_ports]
     )
@@ -548,30 +559,8 @@ def renew_input_port_for_data_product(
         id, output_port_id, actor=authenticated_user
     )
 
-    event_id = EventService(db).create_event(
-        CreateEvent(
-            name=(
-                EventType.DATA_PRODUCT_DATASET_LINK_REQUESTED
-                if input_port.status == InputPortStatus.PENDING
-                else EventType.DATA_PRODUCT_DATASET_LINK_APPROVED
-            ),
-            subject_id=input_port.consuming_abstract_data_product_id,
-            subject_type=EventReferenceEntity.DATA_PRODUCT,
-            target_id=input_port.output_port_id,
-            target_type=EventReferenceEntity.DATASET,
-            actor_id=authenticated_user.id,
-        )
-    )
-    if input_port.status == InputPortStatus.APPROVED:
-        NotificationService(db).create_data_product_notifications(
-            data_product_id=input_port.consuming_abstract_data_product_id,
-            event_id=event_id,
-        )
+    _notify_input_port_links(db, [input_port], background_tasks, authenticated_user)
 
-    DataProductService(db).send_input_port_requested_emails_to_output_port_owners(
-        [input_port], background_tasks, authenticated_user
-    )
-    RefreshInfrastructureLambda().trigger()
     return RenewInputPortForDataProductResponse(input_port_link=input_port.id)
 
 
