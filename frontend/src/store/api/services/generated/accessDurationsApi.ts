@@ -7,6 +7,14 @@ const injectedRtkApi = api.injectEndpoints({
     >({
       query: () => ({ url: `/api/v2/access_durations/enabled` }),
     }),
+    getExpiringSoonThreshold: build.query<
+      GetExpiringSoonThresholdApiResponse,
+      GetExpiringSoonThresholdApiArg
+    >({
+      query: () => ({
+        url: `/api/v2/access_durations/expiring_soon_threshold`,
+      }),
+    }),
     getDefaultAccessDuration: build.query<
       GetDefaultAccessDurationApiResponse,
       GetDefaultAccessDurationApiArg
@@ -38,6 +46,9 @@ export { injectedRtkApi as api };
 export type IsTimeBoundAccessEnabledApiResponse =
   /** status 200 Successful Response */ TimeBoundAccessEnabledResponse;
 export type IsTimeBoundAccessEnabledApiArg = void;
+export type GetExpiringSoonThresholdApiResponse =
+  /** status 200 Successful Response */ ExpiringSoonThresholdResponse;
+export type GetExpiringSoonThresholdApiArg = void;
 export type GetDefaultAccessDurationApiResponse =
   /** status 200 Successful Response */ AccessDuration;
 export type GetDefaultAccessDurationApiArg = AbstractDataProductType;
@@ -52,6 +63,9 @@ export type UpdateAccessDurationApiArg = {
 };
 export type TimeBoundAccessEnabledResponse = {
   enabled: boolean;
+};
+export type ExpiringSoonThresholdResponse = {
+  days: number;
 };
 export type AccessDuration = {
   id: string;
@@ -88,6 +102,8 @@ export enum AccessDurationType {
 export const {
   useIsTimeBoundAccessEnabledQuery,
   useLazyIsTimeBoundAccessEnabledQuery,
+  useGetExpiringSoonThresholdQuery,
+  useLazyGetExpiringSoonThresholdQuery,
   useGetDefaultAccessDurationQuery,
   useLazyGetDefaultAccessDurationQuery,
   useGetAllAccessDurationsQuery,

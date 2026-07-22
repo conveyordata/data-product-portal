@@ -239,6 +239,13 @@ class TestAccessDurationsRouter:
         assert "enabled" in data
         assert isinstance(data["enabled"], bool)
 
+    def test_get_expiring_soon_threshold_endpoint(self, client):
+        response = client.get(f"{ENDPOINT}/expiring_soon_threshold")
+        assert response.status_code == 200
+        data = response.json()
+        assert "days" in data
+        assert isinstance(data["days"], int)
+
     @pytest.mark.usefixtures("admin")
     def test_update_cascades_dropped_type_to_data_product_output_ports(self, client):
         AccessDurationFactory(

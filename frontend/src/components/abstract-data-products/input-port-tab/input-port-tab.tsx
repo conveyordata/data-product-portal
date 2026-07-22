@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { InputPortTable } from '@/components/abstract-data-products/input-port-tab/components/input-port-table/input-port-table.component.tsx';
-import type { InputPort } from '@/store/api/services/generated/dataProductsApi.ts';
+import type { AbstractDataProductInputPort as InputPort } from '@/store/api/services/generated/dataProductsApi.ts';
 import { ApplicationPaths } from '@/types/navigation.ts';
 
 type Props = {

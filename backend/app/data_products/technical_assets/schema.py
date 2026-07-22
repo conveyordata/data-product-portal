@@ -17,5 +17,4 @@ class TechnicalAsset(ORMModel):
     platform_id: UUID
     service_id: UUID
 
-    # Nested schemas
     configuration: DataOutputConfiguration

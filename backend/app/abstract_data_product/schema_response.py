@@ -25,6 +25,6 @@ class GetAbstractDataProductResponse(ORMModel):
     finalizers: list[str]
 
 
-class InputPort(InputPortBase):
+class AbstractDataProductInputPort(InputPortBase):
     output_port_id: UUID
     output_port: OutputPort

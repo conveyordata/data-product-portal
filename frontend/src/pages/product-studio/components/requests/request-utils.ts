@@ -21,7 +21,7 @@ export interface TableRow {
 export function getRequestDescription(action: Request): string {
     switch (action.request_type) {
         case RequestType_InputPort:
-            return `${action.consuming_abstract_data_product.name} requests read access to ${action.output_port.name}`;
+            return `${action.input_port.consuming_abstract_data_product.name} requests read access to ${action.input_port.output_port.name}`;
         case RequestType_TechnicalAssetOutputPort:
             return `${action.technical_asset.name} requests to be included in ${action.output_port.name}`;
         case RequestType_DataProductRoleAssignment: {
@@ -46,11 +46,11 @@ export function transformToTableRow(action: Request): TableRow {
             return {
                 ...baseRow,
                 requestedBy: action.requested_by,
-                decidedBy: action.approved_by ?? action.denied_by,
+                decidedBy: action.decided_by ?? null,
                 description: getRequestDescription(action),
                 date: action.requested_on,
-                decision: action.status,
-                decisionNote: action.decision_note,
+                decision: action.decision,
+                decisionNote: action.decision_note ?? null,
             };
         case RequestType_TechnicalAssetOutputPort:
             return {

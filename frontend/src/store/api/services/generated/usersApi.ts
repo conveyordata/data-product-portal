@@ -191,6 +191,15 @@ export type CanBecomeAdminUpdate = {
   user_id: string;
   can_become_admin: boolean;
 };
+export type AbstractDataProductType =
+  | "unknown"
+  | "data_products"
+  | "explorations";
+export type AbstractDataProductInfo = {
+  name: string;
+  namespace: string;
+  abstract_data_product_type: AbstractDataProductType;
+};
 export type OutputPortStatus = "pending" | "active" | "archived";
 export type OutputPortAccessType =
   | "public"
@@ -211,29 +220,25 @@ export type OutputPort = {
   data_product_id: string;
   tags: Tag[];
 };
-export type AbstractDataProductType =
-  | "unknown"
-  | "data_products"
-  | "explorations";
-export type AbstractDataProductInfo = {
-  name: string;
-  namespace: string;
-  abstract_data_product_type: AbstractDataProductType;
+export type UserInputPort = {
+  id: string;
+  consuming_abstract_data_product_id: string;
+  consuming_abstract_data_product: AbstractDataProductInfo;
+  output_port_id: string;
+  output_port: OutputPort;
 };
 export type InputPortRequest = {
   id: string;
   justification: string;
-  consuming_abstract_data_product_id: string;
-  output_port_id: string;
-  decision_note: string | null;
-  status: DecisionStatus;
-  requested_on: string;
-  output_port: OutputPort;
-  consuming_abstract_data_product: AbstractDataProductInfo;
+  decision_note?: string | null;
+  valid_until: string | null;
   requested_by: User;
-  denied_by: User | null;
-  approved_by: User | null;
+  decided_by?: User | null;
+  decision: DecisionStatus;
+  created_on: string;
+  requested_on: string;
   request_type?: "InputPort";
+  input_port: UserInputPort;
 };
 export type TechnicalAssetStatus = "pending" | "active" | "archived";
 export type TechnicalMapping = "default" | "custom";

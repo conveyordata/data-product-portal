@@ -81,7 +81,7 @@ class InputPortService:
         decided_by: Optional[UserModel] = None,
         decision_note: Optional[str] = None,
     ) -> None:
-        request.valid_from = now
+        request.valid_from = now.date()
         request.decided_on = now
         request.decided_by = decided_by
         request.decision_note = decision_note
@@ -113,17 +113,8 @@ class InputPortService:
         current_link = self.get_link(
             data_product_id, output_port_id, consuming_data_product_id
         )
-        if current_link.status != DecisionStatus.PENDING:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Approval request already decided",
-            )
-
-        pending_request = current_link.latest_request
-        if (
-            pending_request is None
-            or pending_request.decision != DecisionStatus.PENDING
-        ):
+        pending_request = current_link.pending_request
+        if pending_request is None:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="There is no pending request",
@@ -134,6 +125,7 @@ class InputPortService:
             decided_by=actor,
             decision_note=decision_note,
         )
+        current_link.recompute_status()
 
         consuming_data_product = current_link.consuming_abstract_data_product
 
@@ -165,31 +157,18 @@ class InputPortService:
         current_link = self.get_link(
             data_product_id, output_port_id, consuming_data_product_id
         )
-        if current_link.status not in (DecisionStatus.PENDING, DecisionStatus.APPROVED):
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Approval request already decided",
-            )
-
-        pending_request: Optional[InputPortRequestModel] = self.db.scalar(
-            select(InputPortRequestModel).where(
-                InputPortRequestModel.decision.in_(
-                    [DecisionStatus.PENDING, DecisionStatus.APPROVED]
-                ),
-                InputPortRequestModel.input_port_id == current_link.id,
-            )
-        )
-        if pending_request is None:
+        target = current_link.pending_request or current_link.active_grant
+        if target is None:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="There is no pending or approved request to deny",
             )
 
-        current_link.status = InputPortStatus.DENIED
-        pending_request.decided_by = actor
-        pending_request.decided_on = datetime.now(timezone.utc)
-        pending_request.decision_note = decision_note
-        pending_request.decision = DecisionStatus.DENIED
+        target.decided_by = actor
+        target.decided_on = datetime.now(timezone.utc)
+        target.decision_note = decision_note
+        target.decision = DecisionStatus.DENIED
+        current_link.recompute_status()
         return current_link
 
     def remove_output_port_as_input_port(
@@ -206,12 +185,11 @@ class InputPortService:
         self.db.delete(current_link)
         return result
 
-    # Future refactor: query and return InputPortRequests instead of InputPorts
     def get_user_pending_actions(self, user: User) -> Sequence[InputPortRequest]:
         requested_associations = (
             self.db.scalars(
-                select(InputPortModel)
-                .join(InputPortRequestModel)
+                select(InputPortRequestModel)
+                .join(InputPortModel)
                 .where(InputPortRequestModel.decision == DecisionStatus.PENDING)
                 .where(
                     InputPortModel.output_port.has(
@@ -220,8 +198,7 @@ class InputPortService:
                         )
                     )
                 )
-                .options(selectinload(InputPortModel.requests))
-                .order_by(asc(InputPortRequestModel.requested_on))
+                .order_by(asc(InputPortRequestModel.created_on))
             )
             .unique()
             .all()
@@ -233,8 +210,8 @@ class InputPortService:
             for a in requested_associations
             if authorizer.has_access(
                 sub=str(user.id),
-                dom=str(a.output_port.data_product.domain),
-                obj=str(a.output_port_id),
+                dom=str(a.input_port.output_port.data_product.domain),
+                obj=str(a.input_port.output_port_id),
                 act=Action.OUTPUT_PORT__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
             )
         ]
@@ -244,10 +221,9 @@ class InputPortService:
         self, user: User, hide_old_inactive: bool
     ) -> Sequence[InputPortRequest]:
         query = (
-            select(InputPortModel)
-            .join(InputPortRequestModel)
+            select(InputPortRequestModel)
+            .join(InputPortModel)
             .where(InputPortRequestModel.requested_by_id == user.id)
-            .options(selectinload(InputPortModel.requests))
             .order_by(asc(InputPortRequestModel.requested_on))
         )
 
@@ -255,11 +231,9 @@ class InputPortService:
             thirty_days_ago = datetime.now(timezone.utc) - timedelta(days=30)
             query = query.where(
                 or_(
-                    InputPortModel.status == InputPortStatus.PENDING,
+                    InputPortRequestModel.decision == DecisionStatus.PENDING,
                     InputPortRequestModel.requested_on >= thirty_days_ago,
                 )
             )
 
-        requested_associations = self.db.scalars(query).unique().all()
-
-        return requested_associations
+        return self.db.scalars(query).unique().all()

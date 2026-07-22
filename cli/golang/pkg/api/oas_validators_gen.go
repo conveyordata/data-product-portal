@@ -32,6 +32,69 @@ func (s *AbstractDataProductInfo) Validate() error {
 	return nil
 }
 
+func (s *AbstractDataProductInputPort) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.Status.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "status",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if err := s.CurrentRequest.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "current_request",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if value, ok := s.RenewalStatus.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "renewal_status",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if err := s.OutputPort.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "output_port",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
 func (s AbstractDataProductStatus) Validate() error {
 	switch s {
 	case "pending":
@@ -2953,31 +3016,49 @@ func (s *HTTPValidationError) Validate() error {
 	return nil
 }
 
-func (s *InputPort) Validate() error {
+func (s *InputPortRequestBase) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer
 	}
 
 	var failures []validate.FieldError
 	if err := func() error {
-		if err := s.Status.Validate(); err != nil {
+		if err := s.RequestedBy.Validate(); err != nil {
 			return err
 		}
 		return nil
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
-			Name:  "status",
+			Name:  "requested_by",
 			Error: err,
 		})
 	}
 	if err := func() error {
-		if err := s.OutputPort.Validate(); err != nil {
+		if value, ok := s.DecidedBy.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "decided_by",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if err := s.Decision.Validate(); err != nil {
 			return err
 		}
 		return nil
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
-			Name:  "output_port",
+			Name:  "decision",
 			Error: err,
 		})
 	}
@@ -2985,6 +3066,21 @@ func (s *InputPort) Validate() error {
 		return &validate.Error{Fields: failures}
 	}
 	return nil
+}
+
+func (s InputPortStatus) Validate() error {
+	switch s {
+	case "pending":
+		return nil
+	case "approved":
+		return nil
+	case "denied":
+		return nil
+	case "expired":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
 }
 
 func (s *LinkInputPortsToDataProduct) Validate() error {
@@ -3482,6 +3578,35 @@ func (s *OutputPortInputPort) Validate() error {
 		})
 	}
 	if err := func() error {
+		if err := s.CurrentRequest.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "current_request",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if value, ok := s.RenewalStatus.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "renewal_status",
+			Error: err,
+		})
+	}
+	if err := func() error {
 		if err := s.ConsumingAbstractDataProduct.Validate(); err != nil {
 			return err
 		}
@@ -3968,6 +4093,17 @@ func (s RenderTechnicalAssetAccessPathRequestConfiguration) Validate() error {
 		return nil // no validation needed
 	default:
 		return errors.Errorf("invalid type %q", s.Type)
+	}
+}
+
+func (s RenewalStatus) Validate() error {
+	switch s {
+	case "pending":
+		return nil
+	case "denied":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
 	}
 }
 

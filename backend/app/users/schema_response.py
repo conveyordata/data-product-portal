@@ -4,6 +4,7 @@ from uuid import UUID
 
 from pydantic import EmailStr
 
+from app.abstract_data_product.schema_response import AbstractDataProductInfo
 from app.authorization.role_assignments.data_product.schema import (
     DataProductRoleAssignmentResponse,
 )
@@ -13,7 +14,8 @@ from app.authorization.role_assignments.global_.schema import (
 from app.data_products.output_port_technical_assets_link.schema_response import (
     TechnicalAssetOutputPortAssociationsGet,
 )
-from app.data_products.output_ports.input_ports.schema_response import BaseInputPortGet
+from app.data_products.output_ports.input_ports.schema import InputPortRequestBase
+from app.data_products.output_ports.schema import OutputPort
 from app.shared.schema import ORMModel
 from app.users.enums import RequestTypes
 
@@ -57,8 +59,17 @@ class DataProductRoleAssignmentRequest(DataProductRoleAssignmentResponse):
     )
 
 
-class InputPortRequest(BaseInputPortGet):
+class UserInputPort(ORMModel):
+    id: UUID
+    consuming_abstract_data_product_id: UUID
+    consuming_abstract_data_product: AbstractDataProductInfo
+    output_port_id: UUID
+    output_port: OutputPort
+
+
+class InputPortRequest(InputPortRequestBase):
     request_type: Literal[RequestTypes.InputPort] = RequestTypes.InputPort
+    input_port: UserInputPort
 
 
 Request = Union[

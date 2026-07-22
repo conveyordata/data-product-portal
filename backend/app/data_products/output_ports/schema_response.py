@@ -48,7 +48,6 @@ class BaseOutputPortGet(ORMModel):
     exploration_access_duration_type: AccessDurationType
     data_product_id: UUID
 
-    # Nested schemas
     tags: list[Tag]
     domain: Domain
     lifecycle: Optional[DataProductLifeCycle]

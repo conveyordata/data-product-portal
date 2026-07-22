@@ -21,7 +21,6 @@ class OwnedTechnicalAsset(TechnicalAssetBaseSchema):
 
 @deprecated("Use OwnedTechnicalAsset instead")
 class DataOutput(TechnicalAssetBaseSchema):
-    # Nested schemas
     owner: DataProduct
 
     def convert(self) -> OwnedTechnicalAsset:
@@ -39,7 +38,6 @@ class BaseTechnicalAssetOutputPortAssociationGet(ORMModel):
     denied_on: Optional[datetime]
     approved_on: Optional[datetime]
 
-    # Nested schemas
     requested_by: User
     denied_by: Optional[User]
     approved_by: Optional[User]

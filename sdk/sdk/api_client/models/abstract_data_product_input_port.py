@@ -12,30 +12,30 @@ from ..models.renewal_status import RenewalStatus
 from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
-    from ..models.abstract_data_product_info import AbstractDataProductInfo
     from ..models.input_port_request_base import InputPortRequestBase
+    from ..models.output_port import OutputPort
 
 
-T = TypeVar("T", bound="OutputPortInputPort")
+T = TypeVar("T", bound="AbstractDataProductInputPort")
 
 
 @_attrs_define
-class OutputPortInputPort:
+class AbstractDataProductInputPort:
     """
     Attributes:
         id (UUID):
         status (InputPortStatus):
         current_request (InputPortRequestBase):
-        consuming_abstract_data_product_id (UUID):
-        consuming_abstract_data_product (AbstractDataProductInfo):
+        output_port_id (UUID):
+        output_port (OutputPort):
         renewal_status (None | RenewalStatus | Unset):
     """
 
     id: UUID
     status: InputPortStatus
     current_request: InputPortRequestBase
-    consuming_abstract_data_product_id: UUID
-    consuming_abstract_data_product: AbstractDataProductInfo
+    output_port_id: UUID
+    output_port: OutputPort
     renewal_status: None | RenewalStatus | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
@@ -46,11 +46,9 @@ class OutputPortInputPort:
 
         current_request = self.current_request.to_dict()
 
-        consuming_abstract_data_product_id = str(
-            self.consuming_abstract_data_product_id
-        )
+        output_port_id = str(self.output_port_id)
 
-        consuming_abstract_data_product = self.consuming_abstract_data_product.to_dict()
+        output_port = self.output_port.to_dict()
 
         renewal_status: None | str | Unset
         if isinstance(self.renewal_status, Unset):
@@ -67,8 +65,8 @@ class OutputPortInputPort:
                 "id": id,
                 "status": status,
                 "current_request": current_request,
-                "consuming_abstract_data_product_id": consuming_abstract_data_product_id,
-                "consuming_abstract_data_product": consuming_abstract_data_product,
+                "output_port_id": output_port_id,
+                "output_port": output_port,
             }
         )
         if renewal_status is not UNSET:
@@ -78,8 +76,8 @@ class OutputPortInputPort:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.abstract_data_product_info import AbstractDataProductInfo
         from ..models.input_port_request_base import InputPortRequestBase
+        from ..models.output_port import OutputPort
 
         d = dict(src_dict)
         id = UUID(d.pop("id"))
@@ -88,13 +86,9 @@ class OutputPortInputPort:
 
         current_request = InputPortRequestBase.from_dict(d.pop("current_request"))
 
-        consuming_abstract_data_product_id = UUID(
-            d.pop("consuming_abstract_data_product_id")
-        )
+        output_port_id = UUID(d.pop("output_port_id"))
 
-        consuming_abstract_data_product = AbstractDataProductInfo.from_dict(
-            d.pop("consuming_abstract_data_product")
-        )
+        output_port = OutputPort.from_dict(d.pop("output_port"))
 
         def _parse_renewal_status(data: object) -> None | RenewalStatus | Unset:
             if data is None:
@@ -113,17 +107,17 @@ class OutputPortInputPort:
 
         renewal_status = _parse_renewal_status(d.pop("renewal_status", UNSET))
 
-        output_port_input_port = cls(
+        abstract_data_product_input_port = cls(
             id=id,
             status=status,
             current_request=current_request,
-            consuming_abstract_data_product_id=consuming_abstract_data_product_id,
-            consuming_abstract_data_product=consuming_abstract_data_product,
+            output_port_id=output_port_id,
+            output_port=output_port,
             renewal_status=renewal_status,
         )
 
-        output_port_input_port.additional_properties = d
-        return output_port_input_port
+        abstract_data_product_input_port.additional_properties = d
+        return abstract_data_product_input_port
 
     @property
     def additional_keys(self) -> list[str]:

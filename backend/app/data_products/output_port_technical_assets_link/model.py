@@ -31,7 +31,6 @@ class DataOutputDatasetAssociation(Base, BaseORM, EventTrackedMixin):
     approved_on = Column(DateTime(timezone=False))
     denied_on = Column(DateTime(timezone=False))
 
-    # Foreign keys
     data_output_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("data_outputs.id"))
     output_port_id: Mapped[uuid.UUID] = mapped_column(
         "dataset_id", ForeignKey("datasets.id")
@@ -40,7 +39,6 @@ class DataOutputDatasetAssociation(Base, BaseORM, EventTrackedMixin):
     approved_by_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"))
     denied_by_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"))
 
-    # Relationships
     data_output: Mapped["TechnicalAsset"] = relationship(
         back_populates="dataset_links",
         order_by="TechnicalAsset.name",

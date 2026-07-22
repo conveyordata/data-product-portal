@@ -3,7 +3,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { acceptRequest, rejectRequest } from '@/components/pending-access-requests-modal/request-handlers.ts';
 import { ReviewRequestModal } from '@/components/pending-access-requests-modal/review-request-modal.tsx';
-import { TABLE_SUBSECTION_PAGINATION } from '@/constants/table.constants.ts';
+import { DEFAULT_TABLE_PAGINATION } from '@/constants/table.constants.ts';
 import { useTablePagination } from '@/hooks/use-table-pagination.tsx';
 import { RevokeAccessModal } from '@/pages/dataset/components/dataset-tabs/consumers-tab/components/consumers-table/revoke-access-modal.tsx';
 import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
@@ -38,7 +38,9 @@ export function ConsumersTable({ outputPortId, dataProductId, dataProducts, isLo
     const { data: { pending_actions } = {} } = useGetUserPendingActionsQuery();
     const handlers = usePendingActionHandlers();
 
-    const reviewingPendingAction = pending_actions?.find((action) => action.id === reviewingOutputPortInputPortId);
+    const reviewingPendingAction = pending_actions?.find(
+        (action) => 'input_port' in action && action.input_port.id === reviewingOutputPortInputPortId,
+    );
 
     const { isApprovingDataProductLink, isRejectingDataProductLink: isRejectingDataProductLinkFromHandler } =
         usePendingActionHandlers();
@@ -61,7 +63,7 @@ export function ConsumersTable({ outputPortId, dataProductId, dataProducts, isLo
     const canRevoke = revoke_access?.allowed || false;
 
     const { pagination, handlePaginationChange } = useTablePagination(dataProducts, {
-        initialPagination: TABLE_SUBSECTION_PAGINATION,
+        initialPagination: DEFAULT_TABLE_PAGINATION,
     });
 
     const onChange: TableProps<OutputPortInputPort>['onChange'] = (pagination) => {

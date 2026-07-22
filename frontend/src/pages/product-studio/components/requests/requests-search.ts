@@ -16,10 +16,11 @@ export function filterBySearch(requests: Request[], searchTerm: string): Request
             action.request_type === RequestType_InputPort ||
             action.request_type === RequestType_TechnicalAssetOutputPort
         ) {
+            const outputPort = 'input_port' in action ? action.input_port.output_port : action.output_port;
             return (
-                action.output_port.name.toLowerCase().includes(lowerSearch) ||
-                ('consuming_abstract_data_product' in action &&
-                    action.consuming_abstract_data_product.name.toLowerCase().includes(lowerSearch)) ||
+                outputPort.name.toLowerCase().includes(lowerSearch) ||
+                ('input_port' in action &&
+                    action.input_port.consuming_abstract_data_product.name.toLowerCase().includes(lowerSearch)) ||
                 ('technical_asset' in action && action.technical_asset.name.toLowerCase().includes(lowerSearch)) ||
                 action.requested_by.first_name.toLowerCase().includes(lowerSearch) ||
                 action.requested_by.last_name.toLowerCase().includes(lowerSearch) ||

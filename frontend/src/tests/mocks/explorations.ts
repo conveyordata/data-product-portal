@@ -5,7 +5,8 @@ import {
     type Exploration,
     type GetExplorationInputPortsResponse,
     type GetExplorationsResponse,
-    type InputPort,
+    type AbstractDataProductInputPort as InputPort,
+    InputPortStatus,
     OutputPortAccessType,
     OutputPortStatus,
 } from '@/store/api/services/generated/explorationsApi.ts';
@@ -43,9 +44,25 @@ export const mockExplorationsHttp = (explorations: Exploration[] = mockExplorati
 const mockInputPorts: InputPort[] = [
     {
         id: 'id-1',
-        justification: 'I am your king!',
-        status: DecisionStatus.Approved,
+        status: InputPortStatus.Approved,
         output_port_id: 'op-1',
+        current_request: {
+            id: 'request-1',
+            justification: 'I am your king!',
+            valid_until: null,
+            decision: DecisionStatus.Approved,
+            created_on: '2024-03-15T10:00:00Z',
+            requested_on: '2024-03-15T10:00:00Z',
+            requested_by: {
+                id: 'user-1',
+                email: 'alice@example.com',
+                external_id: 'ext-1',
+                first_name: 'Alice',
+                last_name: 'Smith',
+                has_seen_tour: true,
+                can_become_admin: false,
+            },
+        },
         output_port: {
             id: 'op-1',
             name: 'Output port numero uno',

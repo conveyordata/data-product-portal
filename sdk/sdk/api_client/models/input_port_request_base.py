@@ -2,13 +2,7 @@ from __future__ import annotations
 
 import datetime
 from collections.abc import Mapping
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Literal,
-    TypeVar,
-    cast,
-)
+from typing import TYPE_CHECKING, Any, TypeVar, cast
 from uuid import UUID
 
 from attrs import define as _attrs_define
@@ -19,14 +13,13 @@ from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
     from ..models.user import User
-    from ..models.user_input_port import UserInputPort
 
 
-T = TypeVar("T", bound="InputPortRequest")
+T = TypeVar("T", bound="InputPortRequestBase")
 
 
 @_attrs_define
-class InputPortRequest:
+class InputPortRequestBase:
     """
     Attributes:
         id (UUID):
@@ -36,10 +29,8 @@ class InputPortRequest:
         decision (DecisionStatus):
         created_on (datetime.datetime):
         requested_on (datetime.datetime):
-        input_port (UserInputPort):
         decision_note (None | str | Unset):
         decided_by (None | Unset | User):
-        request_type (Literal['InputPort'] | Unset):  Default: 'InputPort'.
     """
 
     id: UUID
@@ -49,10 +40,8 @@ class InputPortRequest:
     decision: DecisionStatus
     created_on: datetime.datetime
     requested_on: datetime.datetime
-    input_port: UserInputPort
     decision_note: None | str | Unset = UNSET
     decided_by: None | Unset | User = UNSET
-    request_type: Literal["InputPort"] | Unset = "InputPort"
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -76,8 +65,6 @@ class InputPortRequest:
 
         requested_on = self.requested_on.isoformat()
 
-        input_port = self.input_port.to_dict()
-
         decision_note: None | str | Unset
         if isinstance(self.decision_note, Unset):
             decision_note = UNSET
@@ -92,8 +79,6 @@ class InputPortRequest:
         else:
             decided_by = self.decided_by
 
-        request_type = self.request_type
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
@@ -105,22 +90,18 @@ class InputPortRequest:
                 "decision": decision,
                 "created_on": created_on,
                 "requested_on": requested_on,
-                "input_port": input_port,
             }
         )
         if decision_note is not UNSET:
             field_dict["decision_note"] = decision_note
         if decided_by is not UNSET:
             field_dict["decided_by"] = decided_by
-        if request_type is not UNSET:
-            field_dict["request_type"] = request_type
 
         return field_dict
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.user import User
-        from ..models.user_input_port import UserInputPort
 
         d = dict(src_dict)
         id = UUID(d.pop("id"))
@@ -150,8 +131,6 @@ class InputPortRequest:
 
         requested_on = datetime.datetime.fromisoformat(d.pop("requested_on"))
 
-        input_port = UserInputPort.from_dict(d.pop("input_port"))
-
         def _parse_decision_note(data: object) -> None | str | Unset:
             if data is None:
                 return data
@@ -178,13 +157,7 @@ class InputPortRequest:
 
         decided_by = _parse_decided_by(d.pop("decided_by", UNSET))
 
-        request_type = cast(Literal["InputPort"] | Unset, d.pop("request_type", UNSET))
-        if request_type != "InputPort" and not isinstance(request_type, Unset):
-            raise ValueError(
-                f"request_type must match const 'InputPort', got '{request_type}'"
-            )
-
-        input_port_request = cls(
+        input_port_request_base = cls(
             id=id,
             justification=justification,
             valid_until=valid_until,
@@ -192,14 +165,12 @@ class InputPortRequest:
             decision=decision,
             created_on=created_on,
             requested_on=requested_on,
-            input_port=input_port,
             decision_note=decision_note,
             decided_by=decided_by,
-            request_type=request_type,
         )
 
-        input_port_request.additional_properties = d
-        return input_port_request
+        input_port_request_base.additional_properties = d
+        return input_port_request_base
 
     @property
     def additional_keys(self) -> list[str]:

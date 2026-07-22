@@ -8,7 +8,8 @@ import {
     type GetDataProductRolledUpTagsResponse,
     type GetDataProductsResponse,
     type GetDataProductsResponseItem,
-    type InputPort,
+    type AbstractDataProductInputPort as InputPort,
+    InputPortStatus,
     OutputPortAccessType,
     OutputPortStatus,
 } from '@/store/api/services/generated/dataProductsApi';
@@ -81,9 +82,25 @@ export const mockDataProductHttp = (
 const mockInputPorts: InputPort[] = [
     {
         id: 'id-1',
-        justification: 'I need access!',
         output_port_id: 'op-1',
-        status: DecisionStatus.Approved,
+        status: InputPortStatus.Approved,
+        current_request: {
+            id: 'request-1',
+            justification: 'I need access!',
+            valid_until: null,
+            decision: DecisionStatus.Approved,
+            created_on: '2024-03-15T10:00:00Z',
+            requested_on: '2024-03-15T10:00:00Z',
+            requested_by: {
+                id: 'user-1',
+                email: 'alice@example.com',
+                external_id: 'ext-1',
+                first_name: 'Alice',
+                last_name: 'Smith',
+                has_seen_tour: true,
+                can_become_admin: false,
+            },
+        },
         output_port: {
             id: 'op-1',
             name: 'op-1',

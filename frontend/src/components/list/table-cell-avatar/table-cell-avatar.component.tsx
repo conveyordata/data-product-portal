@@ -6,7 +6,7 @@ import styles from './table-cell-avatar.module.scss';
 
 type Props = {
     title: ReactNode | string;
-    subtitle: ReactNode | string;
+    subtitle?: ReactNode | string;
     icon: ReactNode;
     popover?: PopoverProps;
     linkTo?: string;

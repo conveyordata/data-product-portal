@@ -421,6 +421,27 @@ export type LinkInputPortsToDataProduct = {
 export type RequestInputPortsForDataProductResponse = {
   input_port_links: string[];
 };
+export type User = {
+  id: string;
+  email: string;
+  external_id: string;
+  first_name: string;
+  last_name: string;
+  has_seen_tour: boolean;
+  can_become_admin: boolean;
+  admin_expiry?: string | null;
+};
+export type InputPortRequestBase = {
+  id: string;
+  justification: string;
+  decision_note?: string | null;
+  valid_until: string | null;
+  requested_by: User;
+  decided_by?: User | null;
+  decision: DecisionStatus;
+  created_on: string;
+  requested_on: string;
+};
 export type OutputPort = {
   id: string;
   name: string;
@@ -431,26 +452,16 @@ export type OutputPort = {
   data_product_id: string;
   tags: Tag[];
 };
-export type InputPort = {
+export type AbstractDataProductInputPort = {
   id: string;
-  justification: string;
-  status: DecisionStatus;
-  decision_note?: string | null;
+  status: InputPortStatus;
+  current_request: InputPortRequestBase;
+  renewal_status?: RenewalStatus | null;
   output_port_id: string;
   output_port: OutputPort;
 };
 export type GetDataProductInputPortsResponse = {
-  input_ports: InputPort[];
-};
-export type User = {
-  id: string;
-  email: string;
-  external_id: string;
-  first_name: string;
-  last_name: string;
-  has_seen_tour: boolean;
-  can_become_admin: boolean;
-  admin_expiry?: string | null;
+  input_ports: AbstractDataProductInputPort[];
 };
 export type DataProduct = {
   id: string;
@@ -625,8 +636,18 @@ export enum NodeType {
   TechnicalAssetNode = "technicalAssetNode",
   OutputPortNode = "outputPortNode",
 }
+export enum InputPortStatus {
+  Pending = "pending",
+  Approved = "approved",
+  Denied = "denied",
+  Expired = "expired",
+}
 export enum DecisionStatus {
   Approved = "approved",
+  Pending = "pending",
+  Denied = "denied",
+}
+export enum RenewalStatus {
   Pending = "pending",
   Denied = "denied",
 }

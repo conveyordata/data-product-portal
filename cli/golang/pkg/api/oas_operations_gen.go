@@ -58,6 +58,7 @@ const (
 	GetDomainsOperation                               OperationName = "GetDomains"
 	GetEnvironmentOperation                           OperationName = "GetEnvironment"
 	GetEnvironmentsOperation                          OperationName = "GetEnvironments"
+	GetExpiringSoonThresholdOperation                 OperationName = "GetExpiringSoonThreshold"
 	GetExplorationOperation                           OperationName = "GetExploration"
 	GetExplorationInputPortsOperation                 OperationName = "GetExplorationInputPorts"
 	GetExplorationsOperation                          OperationName = "GetExplorations"

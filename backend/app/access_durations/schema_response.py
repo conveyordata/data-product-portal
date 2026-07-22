@@ -15,3 +15,7 @@ class AccessDuration(ORMModel):
 
 class TimeBoundAccessEnabledResponse(ORMModel):
     enabled: bool
+
+
+class ExpiringSoonThresholdResponse(ORMModel):
+    days: int
