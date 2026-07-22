@@ -313,7 +313,7 @@ class AbstractDataProductService:
         if not input_port:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Data product outputport for data product {id} not found",
+                detail=f"Input port connection to Output Port ({output_port_id}) not found in {adp.abstract_data_product_type} {id}",
             )
 
         self.db.delete(input_port)
