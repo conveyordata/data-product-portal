@@ -15,21 +15,17 @@ from sdk.api_client.api.authentication import (
     get_aws_credentials as sdk_get_aws_credentials,
 )
 from sdk.api_client.client import AuthenticatedClient
-from sqlalchemy import select as sa_select
 from sqlalchemy.orm import Session
 
-from app.configuration.environments.platform_service_configurations.model import (
-    EnvironmentPlatformServiceConfiguration as EnvPlatformServiceConfigurationModel,
-)
 from app.configuration.environments.platform_service_configurations.schema_response import (
     EnvironmentConfigsGetItem,
 )
+from app.configuration.environments.platform_service_configurations.schemas import (
+    AWSS3Config,
+)
 from app.configuration.environments.service import EnvironmentService
-from app.configuration.platforms.model import Platform
-from app.configuration.platforms.platform_services.model import PlatformService
 from app.core.auth.auth import get_authenticated_user
 from app.core.auth.jwt import JWTToken
-from app.core.logging import logger
 from app.data_products.technical_assets.model import ensure_technical_asset_exists
 from app.data_products.technical_assets.schema_response import compute_technical_info
 from app.data_products.technical_assets.service import DataOutputService
@@ -103,12 +99,12 @@ class GlueMCPPlugin(MCPPlugin):
     Try consuming data product namespaces first, then the owner namespace.
     Use the same namespace for ALL subsequent calls.
 
-    Step 5: GET DATABASE NAME
-    ──────────────────────────
+    Step 5: GET DATABASE + BUCKET
+    ────────────────────────────────
     get_glue_database(environment, technical_asset_id)
-    → Returns the fully-qualified Athena database name for the environment
-      (e.g. 'datalake_prod_my-product__sales').
-    → Use this name directly in SQL queries — no prefix computation needed.
+    → Returns {'database': '...', 'bucket': '...'}
+    → Use database directly in SQL queries — no prefix computation needed.
+    → Pass bucket to query_athena (optional — workgroup default used if absent).
 
     Step 6: LIST TABLES
     ────────────────────
@@ -116,7 +112,7 @@ class GlueMCPPlugin(MCPPlugin):
 
     Step 7: EXECUTE QUERY
     ──────────────────────
-    query_athena(data_product_namespace, env, query, bucket)
+    query_athena(data_product_namespace, env, query, bucket=None)
     → Use the database name from get_glue_database directly in the SQL:
       SELECT * FROM "datalake_prod_my-product__sales"."users"
     → Always quote names that contain hyphens.
@@ -158,18 +154,15 @@ class GlueMCPPlugin(MCPPlugin):
             environment: str,
             technical_asset_id: str,
             db: Session = Depends(get_db_session),
-        ) -> str | Dict[str, str]:
-            """Get the fully-qualified Athena/Glue database name for a technical asset.
-
-            Reads database_name directly from the environment-specific AWSGlueConfig
-            stored on the platform service configuration — no prefix computation needed.
+        ) -> Dict[str, str]:
+            """Get the Athena database name and S3 results bucket for a technical asset.
 
             Args:
                 environment: The environment name (e.g. 'prod', 'dev').
                 technical_asset_id: UUID of the Glue technical asset.
             Returns:
-                The fully-qualified database name (e.g. 'datalake_prod_mydb__sales'),
-                ready to use in SQL queries.
+                {'database': '<fully-qualified db name>', 'bucket': '<s3 bucket name>'}
+                or {'error': '...'} on failure.
             """
             asset_uuid = UUID(technical_asset_id)
             do = ensure_technical_asset_exists(asset_uuid, db=db)
@@ -190,79 +183,39 @@ class GlueMCPPlugin(MCPPlugin):
                 EnvironmentConfigsGetItem.model_validate(e)
                 for e in data_output.environment_configurations
             ]
-            for tech_info in compute_technical_info(
-                config_schema, data_output.service, env_configs
-            ):
-                if tech_info.environment.lower() == environment.lower():
-                    if not tech_info.info:
-                        return {
-                            "error": f"No Glue info rendered for environment '{environment}'"
-                        }
-                    return tech_info.info.split(".")[0]
+            for env_config in env_configs:
+                if env_config.environment.name.lower() != environment.lower():
+                    continue
+                glue_config = config_schema.get_configuration(env_config.config)
+                if glue_config is None:
+                    return {
+                        "error": f"No Glue config found for environment '{environment}'"
+                    }
+                tech_infos = compute_technical_info(
+                    config_schema, data_output.service, [env_config]
+                )
+                if not tech_infos or not tech_infos[0].info:
+                    return {
+                        "error": f"No Glue info rendered for environment '{environment}'"
+                    }
+                database = tech_infos[0].info.split(".")[0]
+                s3_config = next(
+                    (
+                        c
+                        for c in env_config.config
+                        if isinstance(c, AWSS3Config)
+                        and c.identifier == glue_config.bucket_identifier
+                    ),
+                    None,
+                )
+                return {
+                    "database": database,
+                    "bucket": s3_config.bucket_name if s3_config else "",
+                }
 
             return {
                 "error": f"Environment '{environment}' not found for this technical asset"
             }
-
-        @mcp.tool
-        def get_bucket(environment_id: str) -> Dict[str, Any]:
-            """Get the S3 bucket configured for Athena query results in a given environment.
-
-            Args:
-                environment_id: UUID of the environment.
-            Returns:
-                {'athena_results_bucket': '<bucket_name>'} or {'error': '...'}.
-            """
-            db = SessionLocal()
-            try:
-                stmt = (
-                    sa_select(
-                        EnvPlatformServiceConfigurationModel, Platform, PlatformService
-                    )
-                    .join(
-                        Platform,
-                        EnvPlatformServiceConfigurationModel.platform_id == Platform.id,
-                    )
-                    .join(
-                        PlatformService,
-                        EnvPlatformServiceConfigurationModel.service_id
-                        == PlatformService.id,
-                    )
-                    .where(
-                        EnvPlatformServiceConfigurationModel.environment_id
-                        == UUID(environment_id)
-                    )
-                )
-                results = db.execute(stmt).all()
-                for config_model, platform, service in results:
-                    if platform.name.lower() == "aws" and service.name.lower() == "s3":
-                        config_data = EnvironmentConfigsGetItem.model_validate(
-                            config_model
-                        )
-                        s3_config = None
-                        if config_data.config:
-                            s3_config = next(
-                                (
-                                    c
-                                    for c in config_data.config
-                                    if hasattr(c, "is_default") and c.is_default
-                                ),
-                                config_data.config[0],
-                            )
-                        if not s3_config or not hasattr(s3_config, "bucket_name"):
-                            return {
-                                "error": f"No S3 bucket configured for environment '{environment_id}'."
-                            }
-                        return {"athena_results_bucket": s3_config.bucket_name}
-
-                return {
-                    "error": f"AWS S3 configuration not found for environment '{environment_id}'."
-                }
-            except Exception as e:
-                logger.error(f"Error getting bucket: {e}", exc_info=True)
-                return {"error": f"Failed to get bucket: {e}"}
-            finally:
-                db.close()
 
         @mcp.tool
         def list_glue_tables(
@@ -344,12 +297,13 @@ class GlueMCPPlugin(MCPPlugin):
             data_product_namespace: str,
             env: str,
             query: str,
-            bucket: str,
+            bucket: str = "",
         ) -> Dict[str, Any]:
             """Run an Athena query using temporary credentials for a data product and environment.
 
-            Use get_bucket for the `bucket` argument.
             Use the database name returned by get_glue_database directly in the SQL.
+            Pass the bucket from get_glue_database if available; omit to use the
+            workgroup's configured default output location.
 
             CRITICAL: Use the SAME data_product_namespace that worked in get_aws_credentials().
 
@@ -363,13 +317,10 @@ class GlueMCPPlugin(MCPPlugin):
                 data_product_namespace: The namespace with access (consuming data product).
                 env: The environment.
                 query: SQL query to execute.
-                bucket: S3 results bucket — use get_bucket.
+                bucket: S3 bucket for results (from get_glue_database). Optional.
             Returns:
                 {'query_execution_id': '...', ...} or {'error': '...'}.
             """
-            if not bucket:
-                return {"error": "bucket is required. Use get_bucket."}
-
             creds = _fetch_aws_credentials(data_product_namespace, env)
             if "error" in creds:
                 return creds
@@ -385,22 +336,26 @@ class GlueMCPPlugin(MCPPlugin):
                 workgroup = (
                     f"{settings.AWS_ATHENA_PREFIX}-{data_product_namespace}-{env}"
                 )
-                response = client.start_query_execution(
-                    QueryString=query,
-                    WorkGroup=workgroup,
-                    ResultConfiguration={
-                        "OutputLocation": f"s3://{bucket}/athena/{data_product_namespace}"
-                    },
-                )
-                return {
+                kwargs: Dict[str, Any] = {
+                    "QueryString": query,
+                    "WorkGroup": workgroup,
+                }
+                if bucket:
+                    kwargs["ResultConfiguration"] = {
+                        "OutputLocation": f"s3://{bucket}/athena-results"
+                    }
+                response = client.start_query_execution(**kwargs)
+                result = {
                     "query_execution_id": response["QueryExecutionId"],
                     "data_product_namespace": data_product_namespace,
                     "environment": env,
                     "workgroup": workgroup,
-                    "output_location": f"s3://{bucket}/athena/{data_product_namespace}",
                     "query": query,
                     "status": "Query submitted. Use get_athena_query_results to poll for results.",
                 }
+                if bucket:
+                    result["output_location"] = f"s3://{bucket}/athena-results"
+                return result
             except client.exceptions.InvalidRequestException as e:
                 return {"error": f"Invalid Athena query: {e}", "query": query}
             except Exception as e:
