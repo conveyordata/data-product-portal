@@ -78,7 +78,7 @@
         "@types/react": "^19.2.17",
         "@types/react-dom": "^19.2.3",
         "@types/react-syntax-highlighter": "^15.5.13",
-        "@vitejs/plugin-react": "^6.0.3",
+        "@vitejs/plugin-react": "^6.0.4",
         "axios-mock-adapter": "^2.1.0",
         "esbuild": "^0.28.1",
         "i18next-cli": "^1.66.2",
