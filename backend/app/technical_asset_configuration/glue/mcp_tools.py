@@ -186,11 +186,6 @@ class GlueMCPPlugin(MCPPlugin):
             for env_config in env_configs:
                 if env_config.environment.name.lower() != environment.lower():
                     continue
-                glue_config = config_schema.get_configuration(env_config.config)
-                if glue_config is None:
-                    return {
-                        "error": f"No Glue config found for environment '{environment}'"
-                    }
                 tech_infos = compute_technical_info(
                     config_schema, data_output.service, [env_config]
                 )
@@ -199,19 +194,26 @@ class GlueMCPPlugin(MCPPlugin):
                         "error": f"No Glue info rendered for environment '{environment}'"
                     }
                 database = tech_infos[0].info.split(".")[0]
-                s3_config = next(
-                    (
-                        c
-                        for c in env_config.config
-                        if isinstance(c, AWSS3Config)
-                        and c.identifier == glue_config.bucket_identifier
-                    ),
-                    None,
-                )
-                return {
-                    "database": database,
-                    "bucket": s3_config.bucket_name if s3_config else "",
-                }
+                glue_config = config_schema.get_configuration(env_config.config)
+                if glue_config is None:
+                    return {
+                        "database": database,
+                        "bucket": "",
+                    }
+                else:
+                    s3_config = next(
+                        (
+                            c
+                            for c in env_config.config
+                            if isinstance(c, AWSS3Config)
+                            and c.identifier == glue_config.bucket_identifier
+                        ),
+                        None,
+                    )
+                    return {
+                        "database": database,
+                        "bucket": s3_config.bucket_name if s3_config else "",
+                    }
 
             return {
                 "error": f"Environment '{environment}' not found for this technical asset"
