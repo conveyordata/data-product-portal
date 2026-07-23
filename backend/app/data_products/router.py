@@ -494,7 +494,7 @@ def _notify_input_port_links(
             CreateEvent(
                 name=(
                     EventType.DATA_PRODUCT_DATASET_LINK_REQUESTED
-                    if input_port.status == InputPortStatus.PENDING
+                    if input_port.pending_request is not None
                     else EventType.DATA_PRODUCT_DATASET_LINK_APPROVED
                 ),
                 subject_id=input_port.consuming_abstract_data_product_id,
@@ -507,7 +507,7 @@ def _notify_input_port_links(
         ]
     )
     for input_port, event_id in zip(input_ports, event_ids):
-        if input_port.status == InputPortStatus.APPROVED:
+        if input_port.pending_request is None:
             NotificationService(db).create_data_product_notifications(
                 data_product_id=input_port.consuming_abstract_data_product_id,
                 event_id=event_id,
@@ -725,11 +725,7 @@ def remove_input_port_for_data_product(
 
     event_id = EventService(db).create_event(
         CreateEvent(
-            name=(
-                EventType.DATA_PRODUCT_DATASET_LINK_REMOVED
-                if input_port.status != InputPortStatus.APPROVED
-                else EventType.DATA_PRODUCT_DATASET_LINK_DENIED
-            ),
+            name=EventType.DATA_PRODUCT_DATASET_LINK_REMOVED,
             subject_id=id,
             subject_type=EventReferenceEntity.DATA_PRODUCT,
             target_id=input_port.output_port_id,

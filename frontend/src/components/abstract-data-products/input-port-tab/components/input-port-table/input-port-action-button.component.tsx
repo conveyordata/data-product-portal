@@ -54,6 +54,10 @@ export function InputPortActionButton({
                 });
             } catch (error) {
                 console.error('Failed to cancel Output port link request', error);
+                dispatchMessage({
+                    content: t('Failed to cancel the request to link Output Port {{name}}', { name }),
+                    type: 'error',
+                });
             } finally {
                 setLoading(false);
             }
@@ -72,6 +76,10 @@ export function InputPortActionButton({
                 });
             } catch (error) {
                 console.error('Failed to revoke access to Output port', error);
+                dispatchMessage({
+                    content: t('Failed to revoke access to Output Port {{name}}', { name }),
+                    type: 'error',
+                });
             } finally {
                 setLoading(false);
             }
@@ -89,6 +97,10 @@ export function InputPortActionButton({
             });
         } catch (error) {
             console.error('Failed to request renewal for Output port', error);
+            dispatchMessage({
+                content: t('Failed to request renewal for Output Port {{name}}', { name: output_port.name }),
+                type: 'error',
+            });
         } finally {
             setRenewing(false);
         }

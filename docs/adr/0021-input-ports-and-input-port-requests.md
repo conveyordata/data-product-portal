@@ -179,7 +179,8 @@ All paths stay on `/api/v2`; changes are additive.
 
 * `GET /data_products/{id}/input_ports` and `GET /explorations/{id}/input_ports` — list a consumer's input ports. Response adds `is_expiring_soon` and the effective end date (`valid_until`); the link `status` now includes `EXPIRED`; grant fields come from the active request.
 * `GET /input_ports/{id}/requests` — list all requests for a given input port (the audit/history view).
-* `POST /data_products/{id}/input_ports` and `POST /explorations/{id}/input_ports` — request access; also the single entry point for renewal. If a link already exists for that (consumer, output port), it adds a new request instead of failing as "already exists" or mutating the old grant; on a renewal the previous justification is reused. Blocked if a request is already PENDING on the link, or if the current active grant is permanent (`valid_until = NULL`) — permanent access never lapses, so there is nothing to renew, unless it is first revoked (see Ending access).
+* `POST /data_products/{id}/input_ports` and `POST /explorations/{id}/input_ports` — request access for a link that doesn't exist yet; fails with "already exists" if one does.
+* `POST /data_products/{id}/input_ports/{output_port_id}/renew` (and exploration equivalent) — the entry point for renewal on an existing link; adds a new request without mutating the old grant, reusing the previous justification. Blocked if a request is already PENDING on the link, or if the current active grant is permanent (`valid_until = NULL`) — permanent access never lapses, so there is nothing to renew, unless it is first revoked (see Ending access).
 * `POST /data_products/{id}/input_ports/{output_port_id}/cancel` (and exploration equivalent) — withdraw a still-pending request.
 * `POST /data_products/{id}/input_ports/{output_port_id}/revoke` (and exploration equivalent) — give up an active grant.
 

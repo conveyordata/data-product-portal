@@ -155,6 +155,49 @@ class TestInputPortsRouter:
         )
         assert response.status_code == 200, response.text
 
+    def test_renew_input_port_for_data_product__while_grant_still_active_emits_requested(
+        self, client
+    ):
+        # The link's own status stays APPROVED (the old grant is still valid), but
+        # the renewal itself is a new PENDING request on a restricted port, so this
+        # must emit REQUESTED, not APPROVED - it hasn't been decided yet.
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__REQUEST_OUTPUT_PORT_ACCESS],
+        )
+        ds = OutputPortFactory(
+            access_type=OutputPortAccessType.RESTRICTED,
+            data_product_access_duration_type=AccessDurationType.TIME_BOUND,
+        )
+        AccessDurationFactory(
+            abstract_data_product_type=AbstractDataProductType.DATA_PRODUCT,
+            access_duration_type=AccessDurationType.TIME_BOUND,
+            days=30,
+        )
+        assoc = InputPortFactory(
+            output_port=ds,
+            status=DecisionStatus.APPROVED,
+            request__access_duration_type=AccessDurationType.TIME_BOUND,
+            request__valid_until=date.today() + timedelta(days=10),
+        )
+        DataProductRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+            data_product_id=assoc.consuming_abstract_data_product.id,
+        )
+
+        response = self.renew_input_port_for_data_product(
+            client, assoc.consuming_abstract_data_product.id, ds.id
+        )
+        assert response.status_code == 200, response.text
+
+        history = self.get_data_product_history(
+            client, assoc.consuming_abstract_data_product.id
+        ).json()
+        assert len(history["events"]) == 1
+        assert history["events"][0]["name"] == "data_product_dataset_link_requested"
+
     def test_renew_input_port_for_data_product__no_existing_link(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
