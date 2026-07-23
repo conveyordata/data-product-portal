@@ -1,5 +1,5 @@
 import type { User } from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
-import type { DecisionStatus } from '@/store/api/services/generated/usersApi.ts';
+import type { DecisionStatus, InputPortRequestDecision } from '@/store/api/services/generated/usersApi.ts';
 import type { Request } from '@/types/request-types/request-types.tsx';
 import {
     RequestType_DataProductRoleAssignment,
@@ -14,7 +14,7 @@ export interface TableRow {
     requestedBy: User | null;
     decidedBy: User | null;
     date: string;
-    decision: DecisionStatus;
+    decision: DecisionStatus | InputPortRequestDecision;
     decisionNote: string | null;
 }
 

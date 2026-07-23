@@ -17,15 +17,11 @@ export function isExpiringSoon(status: string, validUntil: string | null, thresh
 }
 
 type RenewalTagProps = {
-    status: string;
     renewalStatus?: string | null;
 };
 
-export function RenewalTag({ status, renewalStatus }: RenewalTagProps) {
+export function RenewalTag({ renewalStatus }: RenewalTagProps) {
     const { t } = useTranslation();
-    if (status === InputPortStatus.Pending) {
-        return null;
-    }
     if (renewalStatus === RenewalStatus.Pending) {
         return (
             <Flex align={'center'} gap={'small'}>
@@ -72,7 +68,12 @@ type ExpiryDateProps = {
 
 export function ExpiryDate({ status, validUntil }: ExpiryDateProps) {
     const { t } = useTranslation();
-    if (status === InputPortStatus.Pending || status === InputPortStatus.Denied) {
+    if (
+        status === InputPortStatus.Pending ||
+        status === InputPortStatus.Denied ||
+        status === InputPortStatus.Revoked ||
+        status === InputPortStatus.Cancelled
+    ) {
         return null;
     }
     if (validUntil === null) {

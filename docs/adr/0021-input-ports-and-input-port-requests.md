@@ -31,15 +31,16 @@ This mirrors how identity-governance systems (e.g. Entra PIM, Google Cloud IAM) 
 
 **Chosen option: Option 2 — split into `input_ports` and `input_port_requests`.**
 
-The link keeps identity plus a `status` that expresses the current access state (`PENDING / APPROVED / DENIED / EXPIRED`). Every request or renewal is a new row in `input_port_requests`, whose own `status` is `PENDING / APPROVED / DENIED` (no `EXPIRED`), so history is preserved and denials/renewals are auditable.
+The link keeps identity plus a `status` that expresses the current access state (`PENDING / APPROVED / DENIED / EXPIRED / REVOKED / CANCELLED`). Every request or renewal is a new row in `input_port_requests`; approving, denying, revoking and cancelling all decide or annotate an existing row rather than mutating a grant in place, so history is preserved and every transition is auditable. A request's own `decision` is `PENDING / APPROVED / DENIED / CANCELLED`; an `APPROVED` request additionally carries `revoked_at` / `revoked_by_id` once access is revoked.
 
 The background task is retained but simplified: a **daily** job (also run on application startup) flips a lapsed grant's link to `EXPIRED` and emits the access-ended event to the provisioner. `is_renewing` and the in-place renewal mutation are removed. `is_expiring_soon` is computed in the backend for the UI.
 
 ### Confirmation
 
 * A new `input_port_requests` table exists; `input_ports` keeps only identity and the access-state `status`.
-* Requesting access, renewing, approving, denying and revoking create or decide request rows, not mutate a grant in place.
-* The link `status` keeps `EXPIRED`; the request `status` does not.
+* Requesting access, renewing, approving, denying, revoking and cancelling create, decide or annotate request rows, not mutate a grant in place.
+* The link `status` additionally carries `REVOKED` and `CANCELLED`; the request `decision` gets its own `CANCELLED` value but never `EXPIRED` or `REVOKED` — those are link-only, and revocation is instead tracked by `revoked_at` / `revoked_by_id` on an `APPROVED` request.
+* The UI has no delete action for an input port or a request; revoke and cancel are the only ways to end access there, and both preserve the link and its full request history. A backend-only hard-delete route stays on each side as a two-way door (see Revoking and cancelling).
 * The background task is retained (daily + on startup) to set `EXPIRED` and emit the access-ended event, with a delivery-guarantee marker. `is_renewing` is removed.
 * A migration backfills one request per existing link and moves the request columns off the link.
 * A `GET /input_ports/{id}/requests` endpoint lists a link's request history.
@@ -76,7 +77,7 @@ Keep:
 | `id` | PK |
 | `dataset_id` → datasets | the output port |
 | `consuming_abstract_data_product_id` → abstract_data_products | the consuming data product / exploration |
-| `status` | `PENDING / APPROVED / DENIED / EXPIRED` — the current access state (see Link status). Reused from today; the daily job maintains `EXPIRED`. |
+| `status` | `PENDING / APPROVED / DENIED / EXPIRED / REVOKED / CANCELLED` — the current access state (see Link status). Reused from today; the daily job maintains `EXPIRED`, and `recompute_status` maintains `REVOKED` / `CANCELLED` after a revoke or cancel. |
 | `created_by` | the consumer-side owner to notify for renewals |
 | `created_on`, `updated_on` | audit |
 
@@ -104,18 +105,19 @@ Remove (moved to `input_port_requests`, or dropped):
 
 ### `input_port_requests` — the new table (one row per request)
 
-Requests reference the link one-directionally via `input_port_id`; the link holds no request list. Deleting a link cascades its requests (see Deletion).
+Requests reference the link one-directionally via `input_port_id`; the link holds no request list. The UI never deletes a request or its link — see Ending access.
 
 | Column | Meaning |
 | --- | --- |
 | `id` | PK |
 | `input_port_id` → input_ports | the link this request belongs to |
-| `status` | `PENDING / APPROVED / DENIED` |
+| `decision` | `PENDING / APPROVED / DENIED / CANCELLED` — its own `InputPortRequestDecision` enum, kept separate from the shared `DecisionStatus` used by other approval flows |
 | `justification` | the consumer's reason for this request; on a renewal the previous request's justification is reused |
 | `access_duration_type` | `PERMANENT` or `TIME_BOUND` — stored on the request (also derivable from `valid_until` / `requested_duration_days`, but kept for clarity) |
 | `requested_duration_days` (nullable) | requested window length; NULL = permanent |
 | `requested_on`, `requested_by_id` → users | when / who requested |
-| `decided_on` (nullable), `decided_by_id` (nullable) → users | when / who approved or denied (which one is told by `status`) |
+| `decided_on` (nullable), `decided_by_id` (nullable) → users | when / who approved, denied or cancelled (which one is told by `decision`) |
+| `revoked_at` (nullable), `revoked_by_id` (nullable) → users | when / who revoked an approved grant; only ever set on a request whose `decision` is `APPROVED` |
 | `valid_from` (nullable, date) | start of the granted window (set at approval) |
 | `valid_until` (nullable, date) | last day of the granted window, **inclusive**; NULL = permanent |
 | `created_on`, `updated_on` | audit |
@@ -128,16 +130,31 @@ Constraint: at most one PENDING request per link (partial unique index). A new r
 
 ### Link status
 
-The link `status` uses a four-value enum (`PENDING / APPROVED / DENIED / EXPIRED`); the request `decision` uses the three-value `DecisionStatus`. `status` is a stored column, but it is written in only one place: a `recompute_status` method that derives it from the request rows and runs after every request change (the daily job runs the same logic for the `EXPIRED` transition). It uses two accessors on the link — the active grant (the single approved request whose window covers today) and the pending request — and resolves the current access state in this order:
+The link `status` uses a six-value enum (`PENDING / APPROVED / DENIED / EXPIRED / REVOKED / CANCELLED`); the request `decision` uses its own four-value `InputPortRequestDecision` (`PENDING / APPROVED / DENIED / CANCELLED`). `status` is a stored column, but it is written in only one place: a `recompute_status` method that derives it from the request rows and runs after every request change (the daily job runs the same logic for the `EXPIRED` transition).
 
-1. **APPROVED** — there is an active grant: an approved request whose window includes today (`valid_from ≤ today ≤ valid_until`, with `NULL` meaning open-ended). The consumer has access. A pending or denied renewal does not change this.
-2. **PENDING** — there is no active grant and there is a pending request (a first request, or a renewal after the grant lapsed).
-3. **EXPIRED** — there is no active grant and no pending request, but a prior grant was approved and its window has passed. Set by the daily job.
-4. **DENIED** — the latest decided request was denied, and no pending request.
+A pending request never eclipses a real prior outcome on its own, a renewal submitted after a grant expired, was revoked, or was denied keeps showing that prior outcome (with `renewal_status`/the UI's "Renewal pending" tag signalling that something is in flight), rather than collapsing the link back to `PENDING`. `PENDING` is reserved for when there's genuinely nothing else to show: a first-ever request, or a fresh request after a denial that was never actually approved — in both cases nothing else on the link signals that a decision is awaited, so `status` has to. Concretely, `recompute_status` resolves the state in this order, using the active grant (the single approved request whose window covers today and which has not been revoked), the pending request (the request whose `decision` is still `PENDING`), and whether the link was *ever* approved (any request, ever, with `decision = APPROVED`):
 
-So an active grant with a pending renewal reads `APPROVED`; once that grant lapses while the renewal is still pending it reads `PENDING`.
+1. **APPROVED** — there is an active grant. The consumer has access. A pending, denied or cancelled renewal does not change this.
+2. **PENDING** — there is a pending request, and the link was never approved before (a first-ever request, or a fresh request after a plain denial). Nothing else would indicate this request is awaiting a decision, so `status` must.
+3. Otherwise (no active grant, and either no pending request, or a pending request sitting on top of a link that *was* approved at some point — a real renewal, where `renewal_status` already signals it's in flight) — skip past any cancelled or pending request and take the most recent request that ever received a real decision (`APPROVED` or `DENIED`):
+   - **CANCELLED** — no such request exists at all; every request ever made on this link was cancelled before a decision.
+   - **REVOKED** — that request was `APPROVED` with `revoked_at` set.
+   - **EXPIRED** — that request was `APPROVED` with `revoked_at` unset (the window simply passed). Set by the daily job.
+   - **DENIED** — that request was `DENIED`.
 
-When a renewal is approved while a grant is still active, its window starts the day after the current grant's `valid_until`, so at most one grant covers any given day and no existing grant is modified. If the previous grant has already lapsed, the new window starts today.
+`current_request` (the request whose `justification` / `valid_until` / `decision_note` the UI shows) mirrors this exact resolution, so the fields displayed always belong to whichever request `status` was actually derived from, a cancelled or pending renewal never becomes "current" over the grant it was renewing.
+
+When a renewal is approved while a grant is still active, its window starts the day after the current grant's `valid_until`, so at most one grant covers any given day and no existing grant is modified. If the previous grant has already lapsed or been revoked, the new window starts today.
+
+### Revoking and cancelling
+
+The UI only ever offers revoke and cancel — never a delete. Ending access this way never deletes anything: the link and its full request history stay.
+
+* **Revoke** ends an active grant. Either the producer (the output port owner, pulling a consumer's access) or the consumer (giving up their own access) can revoke it. It sets `revoked_at` / `revoked_by_id` on the active grant's request; the request's `decision` stays `APPROVED` — it really was approved, and revocation is a separate, later fact layered on top, the same way `decided_on` / `decided_by` already work. No reason is stored; a confirmation dialog is the only safeguard against an accidental click.
+* **Cancel** withdraws a request that is still `PENDING`, before anyone decided it. Only the consumer who made the request can cancel it. It sets the request's `decision` to `CANCELLED` and its `decided_by` / `decided_on` — the same columns `approve` and `deny` already use, since a cancelled request was never decided by the producer but did reach a final state of its own. Because a cancelled request's `decision` is no longer `PENDING`, the "one pending request per link" constraint does not block a fresh request afterward.
+* **Deny** only ever acts on a `PENDING` request; it cannot act on an active grant — ending an active grant is revoke's job.
+
+Both backend routers additionally keep a hard-delete route alive — `POST .../input_ports/remove` on the producer side, `DELETE .../input_ports/{output_port_id}` on the consumer side — deleting the link and cascading its requests, exactly as before this feature existed. Neither is wired to any frontend button. They stay as a two-way door: if fully removing an input port (not just ending its access) ever turns out to be genuinely needed, the capability already exists rather than having to be rebuilt; if it never is, the only cost was keeping an unused route around.
 
 ### Expiry background task
 
@@ -162,25 +179,25 @@ All paths stay on `/api/v2`; changes are additive.
 
 * `GET /data_products/{id}/input_ports` and `GET /explorations/{id}/input_ports` — list a consumer's input ports. Response adds `is_expiring_soon` and the effective end date (`valid_until`); the link `status` now includes `EXPIRED`; grant fields come from the active request.
 * `GET /input_ports/{id}/requests` — list all requests for a given input port (the audit/history view).
-* `POST /data_products/{id}/input_ports` and `POST /explorations/{id}/input_ports` — request access; also the single entry point for renewal. If a link already exists for that (consumer, output port), it adds a new request instead of failing as "already exists" or mutating the old grant; on a renewal the previous justification is reused. Blocked if a request is already PENDING on the link, or if the current active grant is permanent (`valid_until = NULL`) — permanent access never lapses, so there is nothing to renew. Changing permanent access to time-bound is not possible in place today; the input port must be deleted and recreated (see Deletion).
-* `DELETE /data_products/{id}/input_ports/{output_port_id}` (and exploration equivalent) — unlink.
+* `POST /data_products/{id}/input_ports` and `POST /explorations/{id}/input_ports` — request access; also the single entry point for renewal. If a link already exists for that (consumer, output port), it adds a new request instead of failing as "already exists" or mutating the old grant; on a renewal the previous justification is reused. Blocked if a request is already PENDING on the link, or if the current active grant is permanent (`valid_until = NULL`) — permanent access never lapses, so there is nothing to renew, unless it is first revoked (see Ending access).
+* `POST /data_products/{id}/input_ports/{output_port_id}/cancel` (and exploration equivalent) — withdraw a still-pending request.
+* `POST /data_products/{id}/input_ports/{output_port_id}/revoke` (and exploration equivalent) — give up an active grant.
 
 **Producer side** (an output port owner managing consumers):
 
 * `GET /data_products/{dp}/output_ports/{op}/input_ports` — list the consumers of an output port; same additive response changes.
-* `POST .../input_ports/approve` and `POST .../input_ports/deny` — decide the link's single PENDING request; sets the request `status` and `decided_by/on`, and on approve sets `valid_from/valid_until` from the requested duration.
+* `POST .../input_ports/approve` — decide the link's single PENDING request; sets `decided_by/on`, and sets `valid_from/valid_until` from the requested duration.
+* `POST .../input_ports/deny` — decide the link's single PENDING request; sets `decided_by/on`. Only ever acts on a PENDING request, never on an active grant.
 * `POST .../input_ports/renew` — producer-initiated extension; adds a new APPROVED request (`decided_by` = the producer) rather than overwriting the current grant's dates.
-* `POST .../input_ports/remove` — revoke; deletes the link.
+* `POST .../input_ports/revoke` — end an active grant; the link and its request history stay.
 
 **Approver queue:**
 
 * `GET /users/current/pending_actions` — includes pending input-port requests. The item sources its who/when/duration fields from the request and adds `decided_by`; `approved_by` / `denied_by` are kept as deprecated aliases (from `decided_by`) for one release.
 
-### Deletion
+### Ending access
 
-Deleting an input port stays, and it cascades its requests.
-
-Because permanent access cannot be re-scoped in place, changing a permanent grant to time-bound today means deleting the input port and recreating it (which loses the audit trail). A `CANCELLED` state / cancel action was considered — ending a grant while keeping the link and its request history, and re-scoping permanent access without delete-and-recreate — but it is out of scope for this story (see Open Questions).
+The UI never deletes an input port or a request. Revoke and cancel (see Revoking and cancelling) are the only ways to end access or withdraw a request there, and both keep the link and its full request history — a backend-only hard-delete route stays on each side as a two-way door, not wired to any button. Changing a permanent grant to time-bound (or back) in place is not possible; it is revoked first, freeing the link up for a fresh request or renewal.
 
 ### Edge cases and outcomes
 
@@ -198,16 +215,14 @@ Because permanent access cannot be re-scoped in place, changing a permanent gran
 | 10 | Permanent grant | `valid_until=NULL` → APPROVED, no expiry, no extend |
 | 11 | Producer extend | Producer adds a new approved request (`decided_by` = producer) |
 | 12 | Second request while one pending | Blocked (one pending per link) → 400; DB partial-unique-index backstop |
-| 12b | New request while the current grant is permanent | Blocked → 400; permanent access has nothing to renew. To re-scope it to time-bound, delete the input port and recreate it |
-| 13 | Remove / unlink | Delete the link, cascading its requests |
+| 12b | New request while the current grant is permanent | Blocked → 400; permanent access has nothing to renew. To re-scope it to time-bound, revoke it first, then request or renew |
+| 13 | Consumer gives up an active grant | Consumer revokes → request `decision` stays APPROVED, `revoked_at` / `revoked_by_id` set → link REVOKED |
+| 13b | Producer pulls a consumer's active grant | Producer revokes → same as above; either side can end an active grant |
+| 13c | Consumer withdraws a pending request | Consumer cancels → request `decision` → CANCELLED, `decided_by/on` set → link CANCELLED; a new request can be made immediately |
 | 14 | Grant lapses while renewal still pending | Daily job emits the access-ended event (infra revoked); link `status` is PENDING until re-approval |
 
 ### Backward compatibility
 
-The released contract is the committed OpenAPI spec, and pre-commit regenerates and gate-checks it together with the frontend client, the published Python SDK and the Go CLI. Fields that exist only on the unreleased feature branch (`is_renewing`, `renewed_on`, `renewed_by`, `expired_on`, `total_range_start/end`) are dropped freely. `approved_by` / `denied_by` are released via the pending-actions endpoint, so they are kept as deprecated aliases derived from `decided_by` for one release, then removed with a breaking-changes note. Endpoint paths are unchanged and additive (plus the new `GET /input_ports/{id}/requests`).
+The released contract is the committed OpenAPI spec, and pre-commit regenerates and gate-checks it together with the frontend client, the published Python SDK and the Go CLI. Fields that exist only on the unreleased feature branch (`is_renewing`, `renewed_on`, `renewed_by`, `expired_on`, `total_range_start/end`) are dropped freely. `approved_by` / `denied_by` are released via the pending-actions endpoint, so they are kept as deprecated aliases derived from `decided_by` for one release, then removed with a breaking-changes note. Endpoint paths are unchanged and additive (plus the new `GET /input_ports/{id}/requests`, `.../cancel` and `.../revoke`); the producer-side `.../input_ports/remove` and the consumer-side `DELETE .../input_ports/{output_port_id}` stay too, just no longer referenced by any frontend button (see Revoking and cancelling).
 
-The link `status` keeps `EXPIRED`. Released clients validate the status enum against `approved/pending/denied`, so surfacing `EXPIRED` on the link needs a release-notes entry (or a dedicated link-status enum) rather than a silent enum change.
-
-## Open Questions
-
-* **Cancellation instead of delete?** Replacing hard delete with cancellation would preserve the full audit trail; deferred to a later iteration.
+The link `status` keeps `EXPIRED`, and now also `REVOKED` and `CANCELLED`. Released clients validate the status enum against `approved/pending/denied`, so surfacing any of these needs a release-notes entry (or a dedicated link-status enum) rather than a silent enum change.

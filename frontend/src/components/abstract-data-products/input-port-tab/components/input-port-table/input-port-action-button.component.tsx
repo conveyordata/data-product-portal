@@ -1,4 +1,4 @@
-import { DeleteOutlined, ReloadOutlined, StopOutlined } from '@ant-design/icons';
+import { CloseCircleOutlined, ReloadOutlined, StopOutlined } from '@ant-design/icons';
 import { Button, Flex, Popconfirm } from 'antd';
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -11,7 +11,8 @@ type Props = {
     output_port: OutputPort;
     canRemoveAccess: boolean;
     canRequestAccess: boolean;
-    handleRemove: (outputPortId: string) => Promise<void>;
+    handleCancel: (outputPortId: string) => Promise<void>;
+    handleRevoke: (outputPortId: string) => Promise<void>;
     handleRenew: (outputPortId: string) => Promise<void>;
     status: InputPortStatus;
     validUntil: string | null;
@@ -21,7 +22,8 @@ export function InputPortActionButton({
     output_port,
     canRemoveAccess,
     canRequestAccess,
-    handleRemove,
+    handleCancel,
+    handleRevoke,
     handleRenew,
     status,
     validUntil,
@@ -35,27 +37,46 @@ export function InputPortActionButton({
 
     const canRenew =
         renewalStatus !== RenewalStatus.Pending &&
-        (status === InputPortStatus.Expired || isExpiringSoon(status, validUntil, thresholdDays));
+        (status === InputPortStatus.Expired ||
+            status === InputPortStatus.Denied ||
+            status === InputPortStatus.Revoked ||
+            status === InputPortStatus.Cancelled ||
+            isExpiringSoon(status, validUntil, thresholdDays));
 
-    const handleRemoveDatasetFromDataProduct = useCallback(
-        async (datasetId: string, name: string) => {
+    const handleCancelRequest = useCallback(
+        async (outputPortId: string, name: string) => {
             try {
                 setLoading(true);
-                await handleRemove(datasetId);
+                await handleCancel(outputPortId);
                 dispatchMessage({
-                    content:
-                        status === InputPortStatus.Pending
-                            ? t('Request to link Output Port {{name}} has been cancelled', { name })
-                            : t('Output Port {{name}} has been removed', { name }),
+                    content: t('Request to link Output Port {{name}} has been cancelled', { name }),
                     type: 'success',
                 });
             } catch (error) {
-                status === InputPortStatus.Pending
-                    ? console.error('Failed to cancel Output port link request', error)
-                    : console.error('Failed to remove Output port', error);
+                console.error('Failed to cancel Output port link request', error);
+            } finally {
+                setLoading(false);
             }
         },
-        [handleRemove, t, status],
+        [handleCancel, t],
+    );
+
+    const handleRevokeAccess = useCallback(
+        async (outputPortId: string, name: string) => {
+            try {
+                setLoading(true);
+                await handleRevoke(outputPortId);
+                dispatchMessage({
+                    content: t('Access to Output Port {{name}} has been revoked', { name }),
+                    type: 'success',
+                });
+            } catch (error) {
+                console.error('Failed to revoke access to Output port', error);
+            } finally {
+                setLoading(false);
+            }
+        },
+        [handleRevoke, t],
     );
 
     const handleRenewClick = useCallback(async () => {
@@ -83,36 +104,45 @@ export function InputPortActionButton({
                     type={'link'}
                     onClick={handleRenewClick}
                 >
-                    {t('Renew')}
+                    {t('Renew Access')}
                 </Button>
             )}
-            <Popconfirm
-                title={status === InputPortStatus.Pending ? t('Cancel Request') : t('Unlink Output Port')}
-                description={
-                    status === InputPortStatus.Pending
-                        ? t('Are you sure you want to cancel the request to link {{name}}?', {
-                              name: output_port.name,
-                          })
-                        : t('Are you sure you want to remove {{name}}?', {
-                              name: output_port.name,
-                          })
-                }
-                onConfirm={() => handleRemoveDatasetFromDataProduct(output_port.id, output_port.name)}
-                placement={'leftTop'}
-                okText={t('Confirm')}
-                cancelText={t('Cancel')}
-                okButtonProps={{ loading }}
-                autoAdjustOverflow={true}
-            >
-                <Button
-                    icon={status === InputPortStatus.Pending ? <StopOutlined /> : <DeleteOutlined />}
-                    loading={loading}
-                    disabled={!canRemoveAccess}
-                    type={'link'}
+            {(status === InputPortStatus.Pending || renewalStatus === RenewalStatus.Pending) && (
+                <Popconfirm
+                    title={t('Cancel Request')}
+                    description={t('Are you sure you want to cancel the request to link {{name}}?', {
+                        name: output_port.name,
+                    })}
+                    onConfirm={() => handleCancelRequest(output_port.id, output_port.name)}
+                    placement={'leftTop'}
+                    okText={t('Confirm')}
+                    cancelText={t('Cancel')}
+                    okButtonProps={{ loading }}
+                    autoAdjustOverflow={true}
                 >
-                    {status === InputPortStatus.Pending ? t('Cancel') : t('Remove')}
-                </Button>
-            </Popconfirm>
+                    <Button icon={<StopOutlined />} loading={loading} disabled={!canRemoveAccess} type={'link'}>
+                        {t('Cancel Request')}
+                    </Button>
+                </Popconfirm>
+            )}
+            {status === InputPortStatus.Approved && (
+                <Popconfirm
+                    title={t('Revoke Access')}
+                    description={t('Are you sure you want to revoke access for {{name}}?', {
+                        name: output_port.name,
+                    })}
+                    onConfirm={() => handleRevokeAccess(output_port.id, output_port.name)}
+                    placement={'leftTop'}
+                    okText={t('Confirm')}
+                    cancelText={t('Cancel')}
+                    okButtonProps={{ loading }}
+                    autoAdjustOverflow={true}
+                >
+                    <Button icon={<CloseCircleOutlined />} loading={loading} disabled={!canRemoveAccess} type={'link'}>
+                        {t('Revoke Access')}
+                    </Button>
+                </Popconfirm>
+            )}
         </Flex>
     );
 }

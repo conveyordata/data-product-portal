@@ -244,7 +244,7 @@ class TestInputPortsRouter:
             data_product_id=assoc.consuming_abstract_data_product.id,
         )
 
-        response = self.request_data_product_input_port_unlink(
+        response = self.revoke_input_port_for_data_product(
             client, assoc.consuming_abstract_data_product.id, assoc.output_port.id
         )
         assert response.status_code == 200
@@ -265,12 +265,85 @@ class TestInputPortsRouter:
             data_product_id=assoc.consuming_abstract_data_product.id,
         )
 
-        response = self.request_data_product_input_port_unlink(
+        response = self.revoke_input_port_for_data_product(
             client,
             assoc.consuming_abstract_data_product.id,
             assoc.output_port.id,
         )
         assert response.status_code == 200
+
+    def test_cancel_input_port_for_data_product(self, client):
+        assoc = InputPortFactory(status=DecisionStatus.PENDING)
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[
+                Action.DATA_PRODUCT__REQUEST_OUTPUT_PORT_ACCESS,
+                Action.DATA_PRODUCT__REVOKE_OUTPUT_PORT_ACCESS,
+            ],
+        )
+        DataProductRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+            data_product_id=assoc.consuming_abstract_data_product.id,
+        )
+
+        response = client.post(
+            f"{DATA_PRODUCTS_ENDPOINT}/{assoc.consuming_abstract_data_product.id}"
+            f"/input_ports/{assoc.output_port.id}/cancel"
+        )
+        assert response.status_code == 200
+
+    def test_cancel_input_port_for_data_product_blocked_when_approved(self, client):
+        assoc = InputPortFactory(status=DecisionStatus.APPROVED)
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[
+                Action.DATA_PRODUCT__REQUEST_OUTPUT_PORT_ACCESS,
+                Action.DATA_PRODUCT__REVOKE_OUTPUT_PORT_ACCESS,
+            ],
+        )
+        DataProductRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+            data_product_id=assoc.consuming_abstract_data_product.id,
+        )
+
+        response = client.post(
+            f"{DATA_PRODUCTS_ENDPOINT}/{assoc.consuming_abstract_data_product.id}"
+            f"/input_ports/{assoc.output_port.id}/cancel"
+        )
+        assert response.status_code == 400
+
+    def test_remove_input_port_for_data_product_hard_deletes_regardless_of_status(
+        self, client
+    ):
+        assoc = InputPortFactory(status=DecisionStatus.APPROVED)
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[
+                Action.DATA_PRODUCT__REQUEST_OUTPUT_PORT_ACCESS,
+                Action.DATA_PRODUCT__REVOKE_OUTPUT_PORT_ACCESS,
+            ],
+        )
+        DataProductRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+            data_product_id=assoc.consuming_abstract_data_product.id,
+        )
+
+        response = client.delete(
+            f"{DATA_PRODUCTS_ENDPOINT}/{assoc.consuming_abstract_data_product.id}"
+            f"/input_ports/{assoc.output_port.id}"
+        )
+        assert response.status_code == 200
+
+        get_response = client.get(
+            f"{DATA_PRODUCTS_ENDPOINT}/{assoc.consuming_abstract_data_product.id}/input_ports"
+        )
+        assert get_response.json()["input_ports"] == []
 
     @pytest.mark.usefixtures("admin")
     def test_request_data_product_link_by_admin(self, client):
@@ -361,7 +434,7 @@ class TestInputPortsRouter:
         )
         assert response.status_code == 200, response.text
 
-    def test_deny_output_port_as_input_port_revoke_approved(self, client):
+    def test_deny_output_port_as_input_port_blocked_when_approved(self, client):
         link = self.create_link_with_status(DecisionStatus.APPROVED)
         response = self.deny_output_port_as_input_port(
             client,
@@ -369,7 +442,7 @@ class TestInputPortsRouter:
             link.output_port.id,
             link.consuming_abstract_data_product.id,
         )
-        assert response.status_code == 200, response.text
+        assert response.status_code == 400, response.text
 
     def test_deny_output_port_as_input_port_reasoning_required(self, client):
         link = self.create_link_with_status()
@@ -410,22 +483,68 @@ class TestInputPortsRouter:
             == "You don't have permission to perform this action"
         )
 
-    def test_remove_output_port_as_input_port(self, client):
-        link = self.create_link_with_status()
-        response = self.remove_output_port_as_input_port(
+    def test_revoke_output_port_as_input_port(self, client):
+        link = self.create_link_with_status(DecisionStatus.APPROVED)
+        response = self.revoke_output_port_as_input_port(
             client,
             link.output_port.data_product.id,
             link.output_port.id,
             link.consuming_abstract_data_product.id,
         )
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
+
+    def test_revoke_output_port_as_input_port_blocked_when_no_active_grant(
+        self, client
+    ):
+        link = self.create_link_with_status(DecisionStatus.PENDING)
+        response = self.revoke_output_port_as_input_port(
+            client,
+            link.output_port.data_product.id,
+            link.output_port.id,
+            link.consuming_abstract_data_product.id,
+        )
+        assert response.status_code == 400, response.text
+
+    def test_remove_output_port_as_input_port_hard_deletes_regardless_of_status(
+        self, client
+    ):
+        link = self.create_link_with_status(DecisionStatus.APPROVED)
+        consuming_data_product_id = link.consuming_abstract_data_product.id
+        response = self.remove_output_port_as_input_port(
+            client,
+            link.output_port.data_product.id,
+            link.output_port.id,
+            consuming_data_product_id,
+        )
+        assert response.status_code == 200, response.text
+
+        history = self.get_data_product_history(
+            client, consuming_data_product_id
+        ).json()
+        assert len(history) == 1
+
+    def test_revoke_link_no_role(self, client):
+        ds = OutputPortFactory()
+        link = InputPortFactory(output_port=ds, status=DecisionStatus.APPROVED)
+
+        response = self.revoke_output_port_as_input_port(
+            client,
+            link.output_port.data_product.id,
+            link.output_port.id,
+            link.consuming_abstract_data_product.id,
+        )
+        assert response.status_code == 403
+        assert (
+            response.json()["detail"]
+            == "You don't have permission to perform this action"
+        )
 
     @pytest.mark.usefixtures("admin")
-    def test_remove_data_product_link_by_admin(self, client):
+    def test_revoke_data_product_link_by_admin(self, client):
         ds = OutputPortFactory()
-        link = InputPortFactory(output_port=ds)
+        link = InputPortFactory(output_port=ds, status=DecisionStatus.APPROVED)
 
-        response = self.remove_output_port_as_input_port(
+        response = self.revoke_output_port_as_input_port(
             client,
             link.output_port.data_product.id,
             link.output_port.id,
@@ -472,7 +591,7 @@ class TestInputPortsRouter:
         )
         assert len(response.json()["input_ports"]) == 0
 
-    def test_history_event_created_on_remove_link(self, client):
+    def test_history_event_created_on_revoke_link(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         ds = OutputPortFactory()
         role = RoleFactory(
@@ -484,7 +603,7 @@ class TestInputPortsRouter:
         )
         link = InputPortFactory(output_port=ds)
 
-        response = self.remove_output_port_as_input_port(
+        response = self.revoke_output_port_as_input_port(
             client,
             link.output_port.data_product.id,
             link.output_port.id,
@@ -635,7 +754,7 @@ class TestInputPortsRouter:
         assert str(consuming_dp1.id) in consuming_dp_ids
         assert str(consuming_dp2.id) in consuming_dp_ids
 
-    def test_history_event_created_on_unlink_request(self, client):
+    def test_history_event_created_on_revoke_request(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
@@ -657,7 +776,7 @@ class TestInputPortsRouter:
 
         assert response.status_code == 200
 
-        response = self.request_data_product_input_port_unlink(
+        response = self.revoke_input_port_for_data_product(
             client, data_product.id, ds.id
         )
         assert response.status_code == 200
@@ -742,6 +861,15 @@ class TestInputPortsRouter:
         )
 
     @staticmethod
+    def revoke_output_port_as_input_port(
+        client: TestClient, data_product_id, output_port_id, consuming_data_product_id
+    ) -> Response:
+        return client.post(
+            f"{DATA_PRODUCTS_DATASETS_ENDPOINT.format(data_product_id, output_port_id)}/revoke",
+            json={"consuming_data_product_id": f"{consuming_data_product_id}"},
+        )
+
+    @staticmethod
     def remove_output_port_as_input_port(
         client: TestClient, data_product_id, output_port_id, consuming_data_product_id
     ) -> Response:
@@ -751,11 +879,11 @@ class TestInputPortsRouter:
         )
 
     @staticmethod
-    def request_data_product_input_port_unlink(
-        client: TestClient, data_product_id, dataset_id
+    def revoke_input_port_for_data_product(
+        client: TestClient, data_product_id, output_port_id
     ) -> Response:
-        return client.delete(
-            f"{DATA_PRODUCTS_ENDPOINT}/{data_product_id}/input_ports/{dataset_id}"
+        return client.post(
+            f"{DATA_PRODUCTS_ENDPOINT}/{data_product_id}/input_ports/{output_port_id}/revoke"
         )
 
     @staticmethod

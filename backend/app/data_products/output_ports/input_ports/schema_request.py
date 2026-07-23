@@ -30,5 +30,9 @@ class DenyOutputPortAsInputPortRequest(ORMModel):
     decision_note: str
 
 
+class RevokeOutputPortAsInputPortRequest(ORMModel):
+    consuming_data_product_id: UUID
+
+
 class RemoveOutputPortAsInputPortRequest(ORMModel):
     consuming_data_product_id: UUID

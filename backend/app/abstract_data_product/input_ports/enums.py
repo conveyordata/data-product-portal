@@ -13,3 +13,13 @@ class InputPortStatus(StrEnum):
     APPROVED = "approved"
     DENIED = "denied"
     EXPIRED = "expired"
+    REVOKED = "revoked"
+    CANCELLED = "cancelled"
+
+
+@verify(UNIQUE)
+class InputPortRequestDecision(StrEnum):
+    PENDING = "pending"
+    APPROVED = "approved"
+    DENIED = "denied"
+    CANCELLED = "cancelled"
