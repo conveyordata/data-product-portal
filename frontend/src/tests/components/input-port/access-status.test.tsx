@@ -64,15 +64,13 @@ describe('RenewalTag', () => {
 describe('ExpiryDate', () => {
     const validUntil = '2026-06-21T00:00:00Z';
 
-    it.each([
-        InputPortStatus.Pending,
-        InputPortStatus.Denied,
-        InputPortStatus.Revoked,
-        InputPortStatus.Cancelled,
-    ])('shows nothing for %s status even if validUntil is set', (status) => {
-        const { container } = renderWithProviders(<ExpiryDate status={status} validUntil={validUntil} />);
-        expect(container).toBeEmptyDOMElement();
-    });
+    it.each([InputPortStatus.Pending, InputPortStatus.Denied, InputPortStatus.Revoked, InputPortStatus.Cancelled])(
+        'shows nothing for %s status even if validUntil is set',
+        (status) => {
+            const { container } = renderWithProviders(<ExpiryDate status={status} validUntil={validUntil} />);
+            expect(container).toBeEmptyDOMElement();
+        },
+    );
 
     it('shows "Permanent access" for Approved with no validUntil', () => {
         renderWithProviders(<ExpiryDate status={InputPortStatus.Approved} validUntil={null} />);
