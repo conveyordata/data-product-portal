@@ -43,4 +43,18 @@ export const explorationTags = {
             { type: TagTypes.MyRequests },
         ],
     },
+    revokeInputPortForExploration: {
+        invalidatesTags: (_, __, arg) => [
+            { type: TagTypes.OutputPort, id: arg.outputPortId },
+            { type: TagTypes.History, id: arg.outputPortId },
+            { type: TagTypes.ExplorationInputPorts, id: arg.id },
+        ],
+    },
+    cancelInputPortForExploration: {
+        invalidatesTags: (_, __, arg) => [
+            { type: TagTypes.OutputPort, id: arg.outputPortId },
+            { type: TagTypes.History, id: arg.outputPortId },
+            { type: TagTypes.ExplorationInputPorts, id: arg.id },
+        ],
+    },
 } satisfies EndpointDefinitions;

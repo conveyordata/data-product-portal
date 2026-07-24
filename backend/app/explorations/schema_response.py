@@ -40,3 +40,11 @@ class RequestInputPortsForExplorationResponse(ORMModel):
 
 class RenewInputPortForExplorationResponse(ORMModel):
     input_port_id: UUID
+
+
+class RevokeInputPortForExplorationResponse(ORMModel):
+    input_port_id: UUID
+
+
+class CancelInputPortForExplorationResponse(ORMModel):
+    input_port_id: UUID

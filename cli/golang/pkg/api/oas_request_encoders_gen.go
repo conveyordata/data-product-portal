@@ -542,6 +542,20 @@ func encodeRequestOutputPortRoleAssignmentRequest(
 	return nil
 }
 
+func encodeRevokeOutputPortAsInputPortRequest(
+	req *RevokeOutputPortAsInputPortRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
 func encodeSetCanBecomeAdminRequest(
 	req *CanBecomeAdminUpdate,
 	r *http.Request,

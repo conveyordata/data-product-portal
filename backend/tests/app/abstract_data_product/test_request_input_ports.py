@@ -5,7 +5,10 @@ import pytz
 from fastapi import HTTPException
 from sqlalchemy import select
 
-from app.abstract_data_product.input_ports.enums import InputPortStatus
+from app.abstract_data_product.input_ports.enums import (
+    InputPortRequestDecision,
+    InputPortStatus,
+)
 from app.abstract_data_product.input_ports.model import InputPortRequest
 from app.abstract_data_product.service import AbstractDataProductService
 from app.abstract_data_product.type import AbstractDataProductType
@@ -160,7 +163,7 @@ class TestRequestInputPortsDuration:
         assert ip.id == link.id
         reqs = _requests_for(link.id)
         assert len(reqs) == 2
-        assert sum(r.decision == DecisionStatus.PENDING for r in reqs) == 1
+        assert sum(r.decision == InputPortRequestDecision.PENDING for r in reqs) == 1
         test_session.refresh(link)
         assert link.status == InputPortStatus.APPROVED
 
@@ -183,7 +186,9 @@ class TestRequestInputPortsDuration:
         )
 
         reqs = _requests_for(link.id)
-        renewal = next(r for r in reqs if r.decision == DecisionStatus.PENDING)
+        renewal = next(
+            r for r in reqs if r.decision == InputPortRequestDecision.PENDING
+        )
         assert renewal.justification == "original reason"
 
     def test_renew_input_port__blocked_when_a_request_is_already_pending(self):
@@ -243,6 +248,134 @@ class TestRequestInputPortsDuration:
 
         with pytest.raises(HTTPException) as exc:
             AbstractDataProductService(test_session).renew_input_port(
+                dp.id, port.id, actor=actor
+            )
+        assert exc.value.status_code == 404
+
+    def test_revoke_input_port__revokes_the_active_grant(self):
+        actor = UserFactory()
+        dp = DataProductFactory()
+        port = self._restricted_time_bound_port()
+        link = InputPortFactory(
+            consuming_abstract_data_product=dp,
+            output_port=port,
+            status=DecisionStatus.APPROVED,
+            request__access_duration_type=AccessDurationType.TIME_BOUND,
+            request__requested_duration_days=30,
+            request__valid_until=date.today() + timedelta(days=10),
+        )
+        grant = _request_for(link)
+
+        ip = AbstractDataProductService(test_session).revoke_input_port(
+            dp.id, port.id, actor=actor
+        )
+
+        assert ip.id == link.id
+        test_session.refresh(link)
+        test_session.refresh(grant)
+        assert link.status == InputPortStatus.REVOKED
+        assert grant.revoked_at is not None
+        assert grant.revoked_by_id == actor.id
+        assert grant.decision == InputPortRequestDecision.APPROVED
+
+    def test_revoke_input_port__raises_when_no_active_grant(self):
+        actor = UserFactory()
+        dp = DataProductFactory()
+        port = OutputPortFactory(access_type=OutputPortAccessType.RESTRICTED)
+        InputPortFactory(
+            consuming_abstract_data_product=dp,
+            output_port=port,
+            status=DecisionStatus.PENDING,
+        )
+
+        with pytest.raises(HTTPException) as exc:
+            AbstractDataProductService(test_session).revoke_input_port(
+                dp.id, port.id, actor=actor
+            )
+        assert exc.value.status_code == 400
+
+    def test_revoke_input_port__404_when_no_existing_link(self):
+        actor = UserFactory()
+        dp = DataProductFactory()
+        port = OutputPortFactory(access_type=OutputPortAccessType.RESTRICTED)
+
+        with pytest.raises(HTTPException) as exc:
+            AbstractDataProductService(test_session).revoke_input_port(
+                dp.id, port.id, actor=actor
+            )
+        assert exc.value.status_code == 404
+
+    def test_cancel_input_port__cancels_the_pending_request(self):
+        actor = UserFactory()
+        dp = DataProductFactory()
+        port = OutputPortFactory(access_type=OutputPortAccessType.RESTRICTED)
+        link = InputPortFactory(
+            consuming_abstract_data_product=dp,
+            output_port=port,
+            status=DecisionStatus.PENDING,
+        )
+        pending = _request_for(link)
+
+        ip = AbstractDataProductService(test_session).cancel_input_port_request(
+            dp.id, port.id, actor=actor
+        )
+
+        assert ip.id == link.id
+        test_session.refresh(link)
+        test_session.refresh(pending)
+        assert link.status == InputPortStatus.CANCELLED
+        assert pending.decision == InputPortRequestDecision.CANCELLED
+        assert pending.decided_by_id == actor.id
+        assert pending.decided_on is not None
+        assert pending.revoked_at is None
+
+    def test_cancel_input_port__allows_a_new_request_afterwards(self):
+        actor = UserFactory()
+        dp = DataProductFactory()
+        port = OutputPortFactory(access_type=OutputPortAccessType.RESTRICTED)
+        link = InputPortFactory(
+            consuming_abstract_data_product=dp,
+            output_port=port,
+            status=DecisionStatus.PENDING,
+        )
+
+        AbstractDataProductService(test_session).cancel_input_port_request(
+            dp.id, port.id, actor=actor
+        )
+
+        # A cancelled request frees up the "one pending request per link" slot
+        AbstractDataProductService(test_session).renew_input_port(
+            dp.id, port.id, actor=actor
+        )
+
+        reqs = _requests_for(link.id)
+        assert len(reqs) == 2
+        assert sum(r.decision == InputPortRequestDecision.PENDING for r in reqs) == 1
+        assert sum(r.decision == InputPortRequestDecision.CANCELLED for r in reqs) == 1
+
+    def test_cancel_input_port__raises_when_no_pending_request(self):
+        actor = UserFactory()
+        dp = DataProductFactory()
+        port = OutputPortFactory(access_type=OutputPortAccessType.RESTRICTED)
+        InputPortFactory(
+            consuming_abstract_data_product=dp,
+            output_port=port,
+            status=DecisionStatus.APPROVED,
+        )
+
+        with pytest.raises(HTTPException) as exc:
+            AbstractDataProductService(test_session).cancel_input_port_request(
+                dp.id, port.id, actor=actor
+            )
+        assert exc.value.status_code == 400
+
+    def test_cancel_input_port__404_when_no_existing_link(self):
+        actor = UserFactory()
+        dp = DataProductFactory()
+        port = OutputPortFactory(access_type=OutputPortAccessType.RESTRICTED)
+
+        with pytest.raises(HTTPException) as exc:
+            AbstractDataProductService(test_session).cancel_input_port_request(
                 dp.id, port.id, actor=actor
             )
         assert exc.value.status_code == 404

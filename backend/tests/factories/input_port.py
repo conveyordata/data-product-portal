@@ -1,13 +1,18 @@
+from datetime import datetime, timezone
+
 import factory
 
-from app.abstract_data_product.input_ports.enums import InputPortStatus
+from app.abstract_data_product.input_ports.enums import (
+    InputPortRequestDecision,
+    InputPortStatus,
+)
 from app.abstract_data_product.input_ports.model import (
     InputPort,
 )
-from app.authorization.role_assignments.enums import DecisionStatus
 
 from .data_product import DataProductFactory
 from .dataset import OutputPortFactory
+from .user import UserFactory
 
 
 class InputPortFactory(factory.alchemy.SQLAlchemyModelFactory):
@@ -31,10 +36,14 @@ class InputPortFactory(factory.alchemy.SQLAlchemyModelFactory):
             return
         from .input_port_request import InputPortRequestFactory
 
-        decision = (
-            DecisionStatus.APPROVED
-            if obj.status == InputPortStatus.EXPIRED
-            else DecisionStatus(obj.status.value)
-        )
+        if obj.status == InputPortStatus.CANCELLED:
+            decision = InputPortRequestDecision.CANCELLED
+        elif obj.status in (InputPortStatus.EXPIRED, InputPortStatus.REVOKED):
+            decision = InputPortRequestDecision.APPROVED
+        else:
+            decision = InputPortRequestDecision(obj.status.value)
         kwargs.setdefault("decision", decision)
+        if obj.status == InputPortStatus.REVOKED:
+            kwargs.setdefault("revoked_at", datetime.now(timezone.utc))
+            kwargs.setdefault("revoked_by", UserFactory())
         InputPortRequestFactory(input_port=obj, **kwargs)

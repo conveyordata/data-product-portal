@@ -59,6 +59,18 @@ type Invoker interface {
 	//
 	// POST /api/v2/authz/role_assignments/global/become_admin
 	BecomeAdmin(ctx context.Context, request *BecomeAdmin) (BecomeAdminRes, error)
+	// CancelInputPortForDataProduct invokes cancel_input_port_for_data_product operation.
+	//
+	// Cancel Input Port For Data Product.
+	//
+	// POST /api/v2/data_products/{id}/input_ports/{output_port_id}/cancel
+	CancelInputPortForDataProduct(ctx context.Context, params CancelInputPortForDataProductParams) (CancelInputPortForDataProductRes, error)
+	// CancelInputPortForExploration invokes cancel_input_port_for_exploration operation.
+	//
+	// Cancel Input Port For Exploration.
+	//
+	// POST /api/v2/explorations/{id}/input_ports/{output_port_id}/cancel
+	CancelInputPortForExploration(ctx context.Context, params CancelInputPortForExplorationParams) (CancelInputPortForExplorationRes, error)
 	// CheckAccess invokes check_access operation.
 	//
 	// Allows the requesting user to check whether an access check will fail or succeed. Useful to
@@ -644,12 +656,18 @@ type Invoker interface {
 	//
 	// DELETE /api/v2/explorations/{id}/finalizers/{finalizer}
 	RemoveExplorationFinalizer(ctx context.Context, params RemoveExplorationFinalizerParams) (RemoveExplorationFinalizerRes, error)
-	// RemoveInputPortFromExploration invokes remove_input_port_from_exploration operation.
+	// RemoveInputPortForDataProduct invokes remove_input_port_for_data_product operation.
 	//
-	// Remove Input Port From Exploration.
+	// Remove Input Port For Data Product.
+	//
+	// DELETE /api/v2/data_products/{id}/input_ports/{output_port_id}
+	RemoveInputPortForDataProduct(ctx context.Context, params RemoveInputPortForDataProductParams) (RemoveInputPortForDataProductRes, error)
+	// RemoveInputPortForExploration invokes remove_input_port_for_exploration operation.
+	//
+	// Remove Input Port For Exploration.
 	//
 	// DELETE /api/v2/explorations/{id}/input_ports/{output_port_id}
-	RemoveInputPortFromExploration(ctx context.Context, params RemoveInputPortFromExplorationParams) (RemoveInputPortFromExplorationRes, error)
+	RemoveInputPortForExploration(ctx context.Context, params RemoveInputPortForExplorationParams) (RemoveInputPortForExplorationRes, error)
 	// RemoveOutputPort invokes remove_output_port operation.
 	//
 	// Remove Output Port.
@@ -752,6 +770,24 @@ type Invoker interface {
 	//
 	// POST /api/v2/authz/role_assignments/global/revoke_admin
 	RevokeAdmin(ctx context.Context) (jx.Raw, error)
+	// RevokeInputPortForDataProduct invokes revoke_input_port_for_data_product operation.
+	//
+	// Revoke Input Port For Data Product.
+	//
+	// POST /api/v2/data_products/{id}/input_ports/{output_port_id}/revoke
+	RevokeInputPortForDataProduct(ctx context.Context, params RevokeInputPortForDataProductParams) (RevokeInputPortForDataProductRes, error)
+	// RevokeInputPortForExploration invokes revoke_input_port_for_exploration operation.
+	//
+	// Revoke Input Port For Exploration.
+	//
+	// POST /api/v2/explorations/{id}/input_ports/{output_port_id}/revoke
+	RevokeInputPortForExploration(ctx context.Context, params RevokeInputPortForExplorationParams) (RevokeInputPortForExplorationRes, error)
+	// RevokeOutputPortAsInputPort invokes revoke_output_port_as_input_port operation.
+	//
+	// Revoke Output Port As Input Port.
+	//
+	// POST /api/v2/data_products/{data_product_id}/output_ports/{output_port_id}/input_ports/revoke
+	RevokeOutputPortAsInputPort(ctx context.Context, request *RevokeOutputPortAsInputPortRequest, params RevokeOutputPortAsInputPortParams) (RevokeOutputPortAsInputPortRes, error)
 	// SanitizeResourceName invokes sanitize_resource_name operation.
 	//
 	// Sanitize Resource Name.
@@ -782,12 +818,6 @@ type Invoker interface {
 	//
 	// POST /api/v2/data_products/{data_product_id}/output_ports/{id}/settings/{setting_id}
 	SetValueForOutputPort(ctx context.Context, params SetValueForOutputPortParams) (SetValueForOutputPortRes, error)
-	// UnlinkInputPortFromDataProduct invokes unlink_input_port_from_data_product operation.
-	//
-	// Unlink Input Port From Data Product.
-	//
-	// DELETE /api/v2/data_products/{id}/input_ports/{output_port_id}
-	UnlinkInputPortFromDataProduct(ctx context.Context, params UnlinkInputPortFromDataProductParams) (UnlinkInputPortFromDataProductRes, error)
 	// UnlinkOutputPortFromTechnicalAsset invokes unlink_output_port_from_technical_asset operation.
 	//
 	// Unlink Output Port From Technical Asset.
@@ -1372,6 +1402,168 @@ func (c *Client) sendBecomeAdmin(ctx context.Context, request *BecomeAdmin) (res
 	}()
 
 	result, err := decodeBecomeAdminResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// CancelInputPortForDataProduct invokes cancel_input_port_for_data_product operation.
+//
+// Cancel Input Port For Data Product.
+//
+// POST /api/v2/data_products/{id}/input_ports/{output_port_id}/cancel
+func (c *Client) CancelInputPortForDataProduct(ctx context.Context, params CancelInputPortForDataProductParams) (CancelInputPortForDataProductRes, error) {
+	res, err := c.sendCancelInputPortForDataProduct(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendCancelInputPortForDataProduct(ctx context.Context, params CancelInputPortForDataProductParams) (res CancelInputPortForDataProductRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/api/v2/data_products/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/input_ports/"
+	{
+		// Encode "output_port_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "output_port_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.OutputPortID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/cancel"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeCancelInputPortForDataProductResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// CancelInputPortForExploration invokes cancel_input_port_for_exploration operation.
+//
+// Cancel Input Port For Exploration.
+//
+// POST /api/v2/explorations/{id}/input_ports/{output_port_id}/cancel
+func (c *Client) CancelInputPortForExploration(ctx context.Context, params CancelInputPortForExplorationParams) (CancelInputPortForExplorationRes, error) {
+	res, err := c.sendCancelInputPortForExploration(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendCancelInputPortForExploration(ctx context.Context, params CancelInputPortForExplorationParams) (res CancelInputPortForExplorationRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/api/v2/explorations/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/input_ports/"
+	{
+		// Encode "output_port_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "output_port_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.OutputPortID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/cancel"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeCancelInputPortForExplorationResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -7611,17 +7803,97 @@ func (c *Client) sendRemoveExplorationFinalizer(ctx context.Context, params Remo
 	return result, nil
 }
 
-// RemoveInputPortFromExploration invokes remove_input_port_from_exploration operation.
+// RemoveInputPortForDataProduct invokes remove_input_port_for_data_product operation.
 //
-// Remove Input Port From Exploration.
+// Remove Input Port For Data Product.
 //
-// DELETE /api/v2/explorations/{id}/input_ports/{output_port_id}
-func (c *Client) RemoveInputPortFromExploration(ctx context.Context, params RemoveInputPortFromExplorationParams) (RemoveInputPortFromExplorationRes, error) {
-	res, err := c.sendRemoveInputPortFromExploration(ctx, params)
+// DELETE /api/v2/data_products/{id}/input_ports/{output_port_id}
+func (c *Client) RemoveInputPortForDataProduct(ctx context.Context, params RemoveInputPortForDataProductParams) (RemoveInputPortForDataProductRes, error) {
+	res, err := c.sendRemoveInputPortForDataProduct(ctx, params)
 	return res, err
 }
 
-func (c *Client) sendRemoveInputPortFromExploration(ctx context.Context, params RemoveInputPortFromExplorationParams) (res RemoveInputPortFromExplorationRes, err error) {
+func (c *Client) sendRemoveInputPortForDataProduct(ctx context.Context, params RemoveInputPortForDataProductParams) (res RemoveInputPortForDataProductRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [4]string
+	pathParts[0] = "/api/v2/data_products/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/input_ports/"
+	{
+		// Encode "output_port_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "output_port_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.OutputPortID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "DELETE", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeRemoveInputPortForDataProductResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// RemoveInputPortForExploration invokes remove_input_port_for_exploration operation.
+//
+// Remove Input Port For Exploration.
+//
+// DELETE /api/v2/explorations/{id}/input_ports/{output_port_id}
+func (c *Client) RemoveInputPortForExploration(ctx context.Context, params RemoveInputPortForExplorationParams) (RemoveInputPortForExplorationRes, error) {
+	res, err := c.sendRemoveInputPortForExploration(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendRemoveInputPortForExploration(ctx context.Context, params RemoveInputPortForExplorationParams) (res RemoveInputPortForExplorationRes, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [4]string
@@ -7683,7 +7955,7 @@ func (c *Client) sendRemoveInputPortFromExploration(ctx context.Context, params 
 		_ = body.Close()
 	}()
 
-	result, err := decodeRemoveInputPortFromExplorationResponse(resp)
+	result, err := decodeRemoveInputPortForExplorationResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -8779,6 +9051,252 @@ func (c *Client) sendRevokeAdmin(ctx context.Context) (res jx.Raw, err error) {
 	return result, nil
 }
 
+// RevokeInputPortForDataProduct invokes revoke_input_port_for_data_product operation.
+//
+// Revoke Input Port For Data Product.
+//
+// POST /api/v2/data_products/{id}/input_ports/{output_port_id}/revoke
+func (c *Client) RevokeInputPortForDataProduct(ctx context.Context, params RevokeInputPortForDataProductParams) (RevokeInputPortForDataProductRes, error) {
+	res, err := c.sendRevokeInputPortForDataProduct(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendRevokeInputPortForDataProduct(ctx context.Context, params RevokeInputPortForDataProductParams) (res RevokeInputPortForDataProductRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/api/v2/data_products/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/input_ports/"
+	{
+		// Encode "output_port_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "output_port_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.OutputPortID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/revoke"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeRevokeInputPortForDataProductResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// RevokeInputPortForExploration invokes revoke_input_port_for_exploration operation.
+//
+// Revoke Input Port For Exploration.
+//
+// POST /api/v2/explorations/{id}/input_ports/{output_port_id}/revoke
+func (c *Client) RevokeInputPortForExploration(ctx context.Context, params RevokeInputPortForExplorationParams) (RevokeInputPortForExplorationRes, error) {
+	res, err := c.sendRevokeInputPortForExploration(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendRevokeInputPortForExploration(ctx context.Context, params RevokeInputPortForExplorationParams) (res RevokeInputPortForExplorationRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/api/v2/explorations/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/input_ports/"
+	{
+		// Encode "output_port_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "output_port_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.OutputPortID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/revoke"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeRevokeInputPortForExplorationResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// RevokeOutputPortAsInputPort invokes revoke_output_port_as_input_port operation.
+//
+// Revoke Output Port As Input Port.
+//
+// POST /api/v2/data_products/{data_product_id}/output_ports/{output_port_id}/input_ports/revoke
+func (c *Client) RevokeOutputPortAsInputPort(ctx context.Context, request *RevokeOutputPortAsInputPortRequest, params RevokeOutputPortAsInputPortParams) (RevokeOutputPortAsInputPortRes, error) {
+	res, err := c.sendRevokeOutputPortAsInputPort(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendRevokeOutputPortAsInputPort(ctx context.Context, request *RevokeOutputPortAsInputPortRequest, params RevokeOutputPortAsInputPortParams) (res RevokeOutputPortAsInputPortRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/api/v2/data_products/"
+	{
+		// Encode "data_product_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "data_product_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.DataProductID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/output_ports/"
+	{
+		// Encode "output_port_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "output_port_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.OutputPortID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/input_ports/revoke"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeRevokeOutputPortAsInputPortRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeRevokeOutputPortAsInputPortResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // SanitizeResourceName invokes sanitize_resource_name operation.
 //
 // Sanitize Resource Name.
@@ -9188,86 +9706,6 @@ func (c *Client) sendSetValueForOutputPort(ctx context.Context, params SetValueF
 	}()
 
 	result, err := decodeSetValueForOutputPortResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
-// UnlinkInputPortFromDataProduct invokes unlink_input_port_from_data_product operation.
-//
-// Unlink Input Port From Data Product.
-//
-// DELETE /api/v2/data_products/{id}/input_ports/{output_port_id}
-func (c *Client) UnlinkInputPortFromDataProduct(ctx context.Context, params UnlinkInputPortFromDataProductParams) (UnlinkInputPortFromDataProductRes, error) {
-	res, err := c.sendUnlinkInputPortFromDataProduct(ctx, params)
-	return res, err
-}
-
-func (c *Client) sendUnlinkInputPortFromDataProduct(ctx context.Context, params UnlinkInputPortFromDataProductParams) (res UnlinkInputPortFromDataProductRes, err error) {
-
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [4]string
-	pathParts[0] = "/api/v2/data_products/"
-	{
-		// Encode "id" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "id",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			return e.EncodeValue(conv.UUIDToString(params.ID))
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		encoded, err := e.Result()
-		if err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		pathParts[1] = encoded
-	}
-	pathParts[2] = "/input_ports/"
-	{
-		// Encode "output_port_id" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "output_port_id",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			return e.EncodeValue(conv.UUIDToString(params.OutputPortID))
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		encoded, err := e.Result()
-		if err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		pathParts[3] = encoded
-	}
-	uri.AddPathParts(u, pathParts[:]...)
-
-	r, err := ht.NewRequest(ctx, "DELETE", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	body := resp.Body
-	defer func() {
-		// Drain the body to EOF before closing, so the underlying
-		// connection can be reused by the Transport regardless of the
-		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
-		_, _ = io.Copy(io.Discard, body)
-		_ = body.Close()
-	}()
-
-	result, err := decodeUnlinkInputPortFromDataProductResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
