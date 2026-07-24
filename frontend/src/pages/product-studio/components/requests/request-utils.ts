@@ -1,11 +1,11 @@
 import type { User } from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
-import type { DecisionStatus, InputPortRequestDecision } from '@/store/api/services/generated/usersApi.ts';
 import type { Request } from '@/types/request-types/request-types.tsx';
 import {
     RequestType_DataProductRoleAssignment,
     RequestType_InputPort,
     RequestType_TechnicalAssetOutputPort,
 } from '@/types/request-types/request-types.tsx';
+import type { DecisionStatus, InputPortRequestDecision } from '@/types/roles';
 
 export interface TableRow {
     key: string;
