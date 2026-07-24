@@ -21,6 +21,10 @@ what is the justification for accessing this data, for what period of time, who 
 
 Input Ports allow tracking the consumers of a certain **[Output Port](./output-ports)**.
 By listing all the consuming Input Ports, an Output Port owner can easily track the usage of their assets.
-The owner of the data always stays in control, and can revoke access by unlinking an Input Port connected to their Output Port.
+The owner of the data always stays in control, and can **revoke** a consumer's access at any time.
+
+Access can be granted **permanently** or **time-bound** (valid for a limited number of days), depending on the portal's [Access Duration Policy](./output-ports#access-duration-policy) for the consuming type and what the requester asked for.
+A time-bound grant goes through a lifecycle: requested, then approved or denied, and — once approved — either renewed before it lapses, revoked, or left to expire.
+Every request, renewal, approval, denial and revocation is kept as history on the Input Port, so nothing is silently overwritten.
 
 ---
