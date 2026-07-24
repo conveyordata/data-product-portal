@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Optional
 
 from sqlalchemy import (
     UUID,
+    Boolean,
     Column,
     Date,
     DateTime,
@@ -43,6 +44,7 @@ class InputPort(
         Enum(InputPortStatus, native_enum=False),
         default=InputPortStatus.PENDING,
     )
+    expiry_event_sent: Mapped[bool] = mapped_column(Boolean, default=False)
 
     consuming_abstract_data_product_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("abstract_data_products.id")

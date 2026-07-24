@@ -238,6 +238,7 @@ class TestInputPortDecisions:
             request__valid_from=date.today() - timedelta(days=40),
             request__valid_until=date.today() - timedelta(days=5),
         )
+        link.expiry_event_sent = True
         renewal = InputPortRequestFactory(
             input_port=link,
             decision=InputPortRequestDecision.PENDING,
@@ -257,3 +258,4 @@ class TestInputPortDecisions:
         requests = _by_id(current_link)
         assert requests[renewal.id].valid_from == date.today()
         assert requests[renewal.id].valid_until == date.today() + timedelta(days=30)
+        assert current_link.expiry_event_sent is False
