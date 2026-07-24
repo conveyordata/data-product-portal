@@ -2,9 +2,10 @@ import { useCallback } from 'react';
 import { InputPortTab } from '@/components/abstract-data-products/input-port-tab/input-port-tab.tsx';
 import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
 import {
+    useCancelInputPortForDataProductMutation,
     useGetDataProductInputPortsQuery,
     useRenewInputPortForDataProductMutation,
-    useUnlinkInputPortFromDataProductMutation,
+    useRevokeInputPortForDataProductMutation,
 } from '@/store/api/services/generated/dataProductsApi.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 
@@ -30,12 +31,20 @@ export const DataProductInputPorts = ({ dataProductId }: Props) => {
         { skip: !dataProductId },
     );
 
-    const [removeDatasetFromDataProduct] = useUnlinkInputPortFromDataProductMutation();
-    const handleRemove = useCallback(
+    const [cancelInputPortForDataProduct] = useCancelInputPortForDataProductMutation();
+    const handleCancel = useCallback(
         async (outputPortId: string) => {
-            await removeDatasetFromDataProduct({ outputPortId, id: dataProductId }).unwrap();
+            await cancelInputPortForDataProduct({ outputPortId, id: dataProductId }).unwrap();
         },
-        [removeDatasetFromDataProduct, dataProductId],
+        [cancelInputPortForDataProduct, dataProductId],
+    );
+
+    const [revokeInputPortForDataProduct] = useRevokeInputPortForDataProductMutation();
+    const handleRevoke = useCallback(
+        async (outputPortId: string) => {
+            await revokeInputPortForDataProduct({ outputPortId, id: dataProductId }).unwrap();
+        },
+        [revokeInputPortForDataProduct, dataProductId],
     );
 
     const [renewInputPortForDataProduct] = useRenewInputPortForDataProductMutation();
@@ -52,7 +61,8 @@ export const DataProductInputPorts = ({ dataProductId }: Props) => {
             canRequestAccess={canRequestAccess?.allowed ?? false}
             canRemoveAccess={canRevokeAccess?.allowed ?? false}
             inputPorts={inputPorts}
-            handleRemove={handleRemove}
+            handleCancel={handleCancel}
+            handleRevoke={handleRevoke}
             handleRenew={handleRenew}
         />
     );

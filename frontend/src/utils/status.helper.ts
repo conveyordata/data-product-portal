@@ -2,6 +2,7 @@ import type { BadgeProps } from 'antd';
 import type { TFunction } from 'i18next';
 import { AbstractDataProductStatus, TechnicalAssetStatus } from '@/store/api/services/generated/dataProductsApi.ts';
 import { OutputPortStatus } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
+import type { InputPortRequestDecision } from '@/store/api/services/generated/usersApi.ts';
 import { DecisionStatus } from '@/types/roles';
 
 export function getStatusLabel(
@@ -39,7 +40,14 @@ export function getBadgeStatus(
     }
 }
 
-export function getDecisionStatusLabel(t: TFunction, status: DecisionStatus): string {
+export function getDecisionStatusLabel(
+    t: TFunction,
+    status: DecisionStatus | InputPortRequestDecision,
+    revokedAt?: string | null,
+): string {
+    if (status === DecisionStatus.Approved && revokedAt) {
+        return t('Revoked');
+    }
     switch (status) {
         case DecisionStatus.Pending:
             return t('Requested');
@@ -47,12 +55,20 @@ export function getDecisionStatusLabel(t: TFunction, status: DecisionStatus): st
             return t('Available');
         case DecisionStatus.Denied:
             return t('Rejected');
+        case 'cancelled':
+            return t('Cancelled');
         default:
             return t('Unknown');
     }
 }
 
-export function getDecisionStatusBadgeStatus(status: DecisionStatus): BadgeProps['status'] {
+export function getDecisionStatusBadgeStatus(
+    status: DecisionStatus | InputPortRequestDecision,
+    revokedAt?: string | null,
+): BadgeProps['status'] {
+    if (status === DecisionStatus.Approved && revokedAt) {
+        return 'error';
+    }
     switch (status) {
         case DecisionStatus.Pending:
             return 'processing';
@@ -60,6 +76,8 @@ export function getDecisionStatusBadgeStatus(status: DecisionStatus): BadgeProps
             return 'success';
         case DecisionStatus.Denied:
             return 'error';
+        case 'cancelled':
+            return 'default';
         default:
             return 'default';
     }
@@ -75,6 +93,10 @@ export function getInputPortStatusLabel(t: TFunction, status: string): string {
             return t('Rejected');
         case 'expired':
             return t('Expired');
+        case 'revoked':
+            return t('Revoked');
+        case 'cancelled':
+            return t('Cancelled');
         default:
             return t('Unknown');
     }
@@ -90,6 +112,10 @@ export function getInputPortStatusBadgeStatus(status: string): BadgeProps['statu
             return 'error';
         case 'expired':
             return 'error';
+        case 'revoked':
+            return 'error';
+        case 'cancelled':
+            return 'default';
         default:
             return 'default';
     }

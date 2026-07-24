@@ -746,6 +746,48 @@ func (s *CanBecomeAdminUpdate) SetCanBecomeAdmin(val bool) {
 	s.CanBecomeAdmin = val
 }
 
+type CancelInputPortForDataProductBadRequestApplicationJSON jx.Raw
+
+func (*CancelInputPortForDataProductBadRequestApplicationJSON) cancelInputPortForDataProductRes() {}
+
+type CancelInputPortForDataProductNotFoundApplicationJSON jx.Raw
+
+func (*CancelInputPortForDataProductNotFoundApplicationJSON) cancelInputPortForDataProductRes() {}
+
+// Ref: #/components/schemas/CancelInputPortForDataProductResponse
+type CancelInputPortForDataProductResponse struct {
+	InputPortLink uuid.UUID `json:"input_port_link"`
+}
+
+// GetInputPortLink returns the value of InputPortLink.
+func (s *CancelInputPortForDataProductResponse) GetInputPortLink() uuid.UUID {
+	return s.InputPortLink
+}
+
+// SetInputPortLink sets the value of InputPortLink.
+func (s *CancelInputPortForDataProductResponse) SetInputPortLink(val uuid.UUID) {
+	s.InputPortLink = val
+}
+
+func (*CancelInputPortForDataProductResponse) cancelInputPortForDataProductRes() {}
+
+// Ref: #/components/schemas/CancelInputPortForExplorationResponse
+type CancelInputPortForExplorationResponse struct {
+	InputPortID uuid.UUID `json:"input_port_id"`
+}
+
+// GetInputPortID returns the value of InputPortID.
+func (s *CancelInputPortForExplorationResponse) GetInputPortID() uuid.UUID {
+	return s.InputPortID
+}
+
+// SetInputPortID sets the value of InputPortID.
+func (s *CancelInputPortForExplorationResponse) SetInputPortID(val uuid.UUID) {
+	s.InputPortID = val
+}
+
+func (*CancelInputPortForExplorationResponse) cancelInputPortForExplorationRes() {}
+
 // Ref: #/components/schemas/CreateDataProductLifeCycleResponse
 type CreateDataProductLifeCycleResponse struct {
 	ID uuid.UUID `json:"id"`
@@ -6214,6 +6256,8 @@ func (*HTTPValidationError) addOutputPortDataQualityRunRes()              {}
 func (*HTTPValidationError) approveOutputPortAsInputPortRes()             {}
 func (*HTTPValidationError) approveOutputPortTechnicalAssetLinkRes()      {}
 func (*HTTPValidationError) becomeAdminRes()                              {}
+func (*HTTPValidationError) cancelInputPortForDataProductRes()            {}
+func (*HTTPValidationError) cancelInputPortForExplorationRes()            {}
 func (*HTTPValidationError) checkAccessRes()                              {}
 func (*HTTPValidationError) createDataProductLifecycleRes()               {}
 func (*HTTPValidationError) createDataProductRes()                        {}
@@ -6290,7 +6334,8 @@ func (*HTTPValidationError) removeDataProductTypeRes()                    {}
 func (*HTTPValidationError) removeDomainRes()                             {}
 func (*HTTPValidationError) removeExplorationFinalizerRes()               {}
 func (*HTTPValidationError) removeExplorationRes()                        {}
-func (*HTTPValidationError) removeInputPortFromExplorationRes()           {}
+func (*HTTPValidationError) removeInputPortForDataProductRes()            {}
+func (*HTTPValidationError) removeInputPortForExplorationRes()            {}
 func (*HTTPValidationError) removeOutputPortAsInputPortRes()              {}
 func (*HTTPValidationError) removeOutputPortRes()                         {}
 func (*HTTPValidationError) removeRoleRes()                               {}
@@ -6306,12 +6351,14 @@ func (*HTTPValidationError) requestDataProductRoleAssignmentRes()         {}
 func (*HTTPValidationError) requestInputPortsForDataProductRes()          {}
 func (*HTTPValidationError) requestInputPortsForExplorationRes()          {}
 func (*HTTPValidationError) requestOutputPortRoleAssignmentRes()          {}
+func (*HTTPValidationError) revokeInputPortForDataProductRes()            {}
+func (*HTTPValidationError) revokeInputPortForExplorationRes()            {}
+func (*HTTPValidationError) revokeOutputPortAsInputPortRes()              {}
 func (*HTTPValidationError) sanitizeResourceNameRes()                     {}
 func (*HTTPValidationError) searchOutputPortsRes()                        {}
 func (*HTTPValidationError) setCanBecomeAdminRes()                        {}
 func (*HTTPValidationError) setValueForDataProductRes()                   {}
 func (*HTTPValidationError) setValueForOutputPortRes()                    {}
-func (*HTTPValidationError) unlinkInputPortFromDataProductRes()           {}
 func (*HTTPValidationError) unlinkOutputPortFromTechnicalAssetRes()       {}
 func (*HTTPValidationError) updateAccessDurationRes()                     {}
 func (*HTTPValidationError) updateDataProductAboutRes()                   {}
@@ -6339,15 +6386,17 @@ func (*IngestOutputPortContractNotFoundApplicationJSON) ingestOutputPortContract
 
 // Ref: #/components/schemas/InputPortRequestBase
 type InputPortRequestBase struct {
-	ID            uuid.UUID      `json:"id"`
-	Justification string         `json:"justification"`
-	DecisionNote  OptNilString   `json:"decision_note"`
-	ValidUntil    NilDate        `json:"valid_until"`
-	RequestedBy   User           `json:"requested_by"`
-	DecidedBy     OptNilUser     `json:"decided_by"`
-	Decision      DecisionStatus `json:"decision"`
-	CreatedOn     time.Time      `json:"created_on"`
-	RequestedOn   time.Time      `json:"requested_on"`
+	ID            uuid.UUID                `json:"id"`
+	Justification string                   `json:"justification"`
+	DecisionNote  OptNilString             `json:"decision_note"`
+	ValidUntil    NilDate                  `json:"valid_until"`
+	RequestedBy   User                     `json:"requested_by"`
+	DecidedBy     OptNilUser               `json:"decided_by"`
+	Decision      InputPortRequestDecision `json:"decision"`
+	RevokedAt     OptNilDateTime           `json:"revoked_at"`
+	RevokedBy     OptNilUser               `json:"revoked_by"`
+	CreatedOn     time.Time                `json:"created_on"`
+	RequestedOn   time.Time                `json:"requested_on"`
 }
 
 // GetID returns the value of ID.
@@ -6381,8 +6430,18 @@ func (s *InputPortRequestBase) GetDecidedBy() OptNilUser {
 }
 
 // GetDecision returns the value of Decision.
-func (s *InputPortRequestBase) GetDecision() DecisionStatus {
+func (s *InputPortRequestBase) GetDecision() InputPortRequestDecision {
 	return s.Decision
+}
+
+// GetRevokedAt returns the value of RevokedAt.
+func (s *InputPortRequestBase) GetRevokedAt() OptNilDateTime {
+	return s.RevokedAt
+}
+
+// GetRevokedBy returns the value of RevokedBy.
+func (s *InputPortRequestBase) GetRevokedBy() OptNilUser {
+	return s.RevokedBy
 }
 
 // GetCreatedOn returns the value of CreatedOn.
@@ -6426,8 +6485,18 @@ func (s *InputPortRequestBase) SetDecidedBy(val OptNilUser) {
 }
 
 // SetDecision sets the value of Decision.
-func (s *InputPortRequestBase) SetDecision(val DecisionStatus) {
+func (s *InputPortRequestBase) SetDecision(val InputPortRequestDecision) {
 	s.Decision = val
+}
+
+// SetRevokedAt sets the value of RevokedAt.
+func (s *InputPortRequestBase) SetRevokedAt(val OptNilDateTime) {
+	s.RevokedAt = val
+}
+
+// SetRevokedBy sets the value of RevokedBy.
+func (s *InputPortRequestBase) SetRevokedBy(val OptNilUser) {
+	s.RevokedBy = val
 }
 
 // SetCreatedOn sets the value of CreatedOn.
@@ -6440,14 +6509,72 @@ func (s *InputPortRequestBase) SetRequestedOn(val time.Time) {
 	s.RequestedOn = val
 }
 
+// Ref: #/components/schemas/InputPortRequestDecision
+type InputPortRequestDecision string
+
+const (
+	InputPortRequestDecisionPending   InputPortRequestDecision = "pending"
+	InputPortRequestDecisionApproved  InputPortRequestDecision = "approved"
+	InputPortRequestDecisionDenied    InputPortRequestDecision = "denied"
+	InputPortRequestDecisionCancelled InputPortRequestDecision = "cancelled"
+)
+
+// AllValues returns all InputPortRequestDecision values.
+func (InputPortRequestDecision) AllValues() []InputPortRequestDecision {
+	return []InputPortRequestDecision{
+		InputPortRequestDecisionPending,
+		InputPortRequestDecisionApproved,
+		InputPortRequestDecisionDenied,
+		InputPortRequestDecisionCancelled,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s InputPortRequestDecision) MarshalText() ([]byte, error) {
+	switch s {
+	case InputPortRequestDecisionPending:
+		return []byte(s), nil
+	case InputPortRequestDecisionApproved:
+		return []byte(s), nil
+	case InputPortRequestDecisionDenied:
+		return []byte(s), nil
+	case InputPortRequestDecisionCancelled:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *InputPortRequestDecision) UnmarshalText(data []byte) error {
+	switch InputPortRequestDecision(data) {
+	case InputPortRequestDecisionPending:
+		*s = InputPortRequestDecisionPending
+		return nil
+	case InputPortRequestDecisionApproved:
+		*s = InputPortRequestDecisionApproved
+		return nil
+	case InputPortRequestDecisionDenied:
+		*s = InputPortRequestDecisionDenied
+		return nil
+	case InputPortRequestDecisionCancelled:
+		*s = InputPortRequestDecisionCancelled
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
 // Ref: #/components/schemas/InputPortStatus
 type InputPortStatus string
 
 const (
-	InputPortStatusPending  InputPortStatus = "pending"
-	InputPortStatusApproved InputPortStatus = "approved"
-	InputPortStatusDenied   InputPortStatus = "denied"
-	InputPortStatusExpired  InputPortStatus = "expired"
+	InputPortStatusPending   InputPortStatus = "pending"
+	InputPortStatusApproved  InputPortStatus = "approved"
+	InputPortStatusDenied    InputPortStatus = "denied"
+	InputPortStatusExpired   InputPortStatus = "expired"
+	InputPortStatusRevoked   InputPortStatus = "revoked"
+	InputPortStatusCancelled InputPortStatus = "cancelled"
 )
 
 // AllValues returns all InputPortStatus values.
@@ -6457,6 +6584,8 @@ func (InputPortStatus) AllValues() []InputPortStatus {
 		InputPortStatusApproved,
 		InputPortStatusDenied,
 		InputPortStatusExpired,
+		InputPortStatusRevoked,
+		InputPortStatusCancelled,
 	}
 }
 
@@ -6470,6 +6599,10 @@ func (s InputPortStatus) MarshalText() ([]byte, error) {
 	case InputPortStatusDenied:
 		return []byte(s), nil
 	case InputPortStatusExpired:
+		return []byte(s), nil
+	case InputPortStatusRevoked:
+		return []byte(s), nil
+	case InputPortStatusCancelled:
 		return []byte(s), nil
 	default:
 		return nil, errors.Errorf("invalid value: %q", s)
@@ -6490,6 +6623,12 @@ func (s *InputPortStatus) UnmarshalText(data []byte) error {
 		return nil
 	case InputPortStatusExpired:
 		*s = InputPortStatusExpired
+		return nil
+	case InputPortStatusRevoked:
+		*s = InputPortStatusRevoked
+		return nil
+	case InputPortStatusCancelled:
+		*s = InputPortStatusCancelled
 		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)
@@ -10816,9 +10955,21 @@ type RemoveExplorationOKApplicationJSON jx.Raw
 
 func (*RemoveExplorationOKApplicationJSON) removeExplorationRes() {}
 
-type RemoveInputPortFromExplorationOKApplicationJSON jx.Raw
+type RemoveInputPortForDataProductBadRequestApplicationJSON jx.Raw
 
-func (*RemoveInputPortFromExplorationOKApplicationJSON) removeInputPortFromExplorationRes() {}
+func (*RemoveInputPortForDataProductBadRequestApplicationJSON) removeInputPortForDataProductRes() {}
+
+type RemoveInputPortForDataProductNotFoundApplicationJSON jx.Raw
+
+func (*RemoveInputPortForDataProductNotFoundApplicationJSON) removeInputPortForDataProductRes() {}
+
+type RemoveInputPortForDataProductOKApplicationJSON jx.Raw
+
+func (*RemoveInputPortForDataProductOKApplicationJSON) removeInputPortForDataProductRes() {}
+
+type RemoveInputPortForExplorationOKApplicationJSON jx.Raw
+
+func (*RemoveInputPortForExplorationOKApplicationJSON) removeInputPortForExplorationRes() {}
 
 type RemoveOutputPortAsInputPortOKApplicationJSON jx.Raw
 
@@ -11600,6 +11751,67 @@ func (s *ResourceNameValidityType) UnmarshalText(data []byte) error {
 	default:
 		return errors.Errorf("invalid value: %q", data)
 	}
+}
+
+type RevokeInputPortForDataProductBadRequestApplicationJSON jx.Raw
+
+func (*RevokeInputPortForDataProductBadRequestApplicationJSON) revokeInputPortForDataProductRes() {}
+
+type RevokeInputPortForDataProductNotFoundApplicationJSON jx.Raw
+
+func (*RevokeInputPortForDataProductNotFoundApplicationJSON) revokeInputPortForDataProductRes() {}
+
+// Ref: #/components/schemas/RevokeInputPortForDataProductResponse
+type RevokeInputPortForDataProductResponse struct {
+	InputPortLink uuid.UUID `json:"input_port_link"`
+}
+
+// GetInputPortLink returns the value of InputPortLink.
+func (s *RevokeInputPortForDataProductResponse) GetInputPortLink() uuid.UUID {
+	return s.InputPortLink
+}
+
+// SetInputPortLink sets the value of InputPortLink.
+func (s *RevokeInputPortForDataProductResponse) SetInputPortLink(val uuid.UUID) {
+	s.InputPortLink = val
+}
+
+func (*RevokeInputPortForDataProductResponse) revokeInputPortForDataProductRes() {}
+
+// Ref: #/components/schemas/RevokeInputPortForExplorationResponse
+type RevokeInputPortForExplorationResponse struct {
+	InputPortID uuid.UUID `json:"input_port_id"`
+}
+
+// GetInputPortID returns the value of InputPortID.
+func (s *RevokeInputPortForExplorationResponse) GetInputPortID() uuid.UUID {
+	return s.InputPortID
+}
+
+// SetInputPortID sets the value of InputPortID.
+func (s *RevokeInputPortForExplorationResponse) SetInputPortID(val uuid.UUID) {
+	s.InputPortID = val
+}
+
+func (*RevokeInputPortForExplorationResponse) revokeInputPortForExplorationRes() {}
+
+type RevokeOutputPortAsInputPortOKApplicationJSON jx.Raw
+
+func (*RevokeOutputPortAsInputPortOKApplicationJSON) revokeOutputPortAsInputPortRes() {}
+
+// Ref: #/components/schemas/RevokeOutputPortAsInputPortRequest
+type RevokeOutputPortAsInputPortRequest struct {
+	ConsumingDataProductID uuid.UUID `json:"consuming_data_product_id"`
+}
+
+// GetConsumingDataProductID returns the value of ConsumingDataProductID.
+func (s *RevokeOutputPortAsInputPortRequest) GetConsumingDataProductID() uuid.UUID {
+	return s.ConsumingDataProductID
+}
+
+// SetConsumingDataProductID sets the value of ConsumingDataProductID.
+func (s *RevokeOutputPortAsInputPortRequest) SetConsumingDataProductID(val uuid.UUID) {
+	s.ConsumingDataProductID = val
 }
 
 // Ref: #/components/schemas/Role
@@ -13803,18 +14015,6 @@ func (s *UnLinkTechnicalAssetToOutputPortRequest) GetTechnicalAssetID() uuid.UUI
 func (s *UnLinkTechnicalAssetToOutputPortRequest) SetTechnicalAssetID(val uuid.UUID) {
 	s.TechnicalAssetID = val
 }
-
-type UnlinkInputPortFromDataProductBadRequestApplicationJSON jx.Raw
-
-func (*UnlinkInputPortFromDataProductBadRequestApplicationJSON) unlinkInputPortFromDataProductRes() {}
-
-type UnlinkInputPortFromDataProductNotFoundApplicationJSON jx.Raw
-
-func (*UnlinkInputPortFromDataProductNotFoundApplicationJSON) unlinkInputPortFromDataProductRes() {}
-
-type UnlinkInputPortFromDataProductOKApplicationJSON jx.Raw
-
-func (*UnlinkInputPortFromDataProductOKApplicationJSON) unlinkInputPortFromDataProductRes() {}
 
 type UnlinkOutputPortFromTechnicalAssetNotFoundApplicationJSON jx.Raw
 

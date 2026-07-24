@@ -191,6 +191,11 @@ export type CanBecomeAdminUpdate = {
   user_id: string;
   can_become_admin: boolean;
 };
+export type InputPortRequestDecision =
+  | "pending"
+  | "approved"
+  | "denied"
+  | "cancelled";
 export type AbstractDataProductType =
   | "unknown"
   | "data_products"
@@ -234,7 +239,9 @@ export type InputPortRequest = {
   valid_until: string | null;
   requested_by: User;
   decided_by?: User | null;
-  decision: DecisionStatus;
+  decision: InputPortRequestDecision;
+  revoked_at?: string | null;
+  revoked_by?: User | null;
   created_on: string;
   requested_on: string;
   request_type?: "InputPort";

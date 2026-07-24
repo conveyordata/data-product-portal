@@ -7,7 +7,9 @@ from fastapi import HTTPException, status
 from sqlalchemy import asc, or_, select
 from sqlalchemy.orm import Session, selectinload
 
-from app.abstract_data_product.input_ports.enums import InputPortStatus
+from app.abstract_data_product.input_ports.enums import (
+    InputPortRequestDecision,
+)
 from app.abstract_data_product.input_ports.model import (
     InputPort as InputPortModel,
 )
@@ -15,7 +17,6 @@ from app.abstract_data_product.input_ports.model import (
     InputPortRequest as InputPortRequestModel,
 )
 from app.access_durations.enums import AccessDurationType
-from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.role_assignments.output_port.model import (
     DatasetRoleAssignment as DatasetRoleAssignmentModel,
 )
@@ -85,8 +86,8 @@ class InputPortService:
         request.decided_on = now
         request.decided_by = decided_by
         request.decision_note = decision_note
-        request.decision = DecisionStatus.APPROVED
-        request.input_port.status = InputPortStatus.APPROVED
+        request.decision = InputPortRequestDecision.APPROVED
+        request.input_port.expiry_event_sent = False
 
         match request.access_duration_type:
             case AccessDurationType.PERMANENT:
@@ -157,17 +158,40 @@ class InputPortService:
         current_link = self.get_link(
             data_product_id, output_port_id, consuming_data_product_id
         )
-        target = current_link.pending_request or current_link.active_grant
+        target = current_link.pending_request
         if target is None:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="There is no pending or approved request to deny",
+                detail="There is no pending request to deny",
             )
 
         target.decided_by = actor
         target.decided_on = datetime.now(timezone.utc)
         target.decision_note = decision_note
-        target.decision = DecisionStatus.DENIED
+        target.decision = InputPortRequestDecision.DENIED
+        current_link.recompute_status()
+        return current_link
+
+    def revoke_output_port_as_input_port(
+        self,
+        *,
+        data_product_id: UUID,
+        output_port_id: UUID,
+        consuming_data_product_id: UUID,
+        actor: User,
+    ) -> InputPortModel:
+        current_link = self.get_link(
+            data_product_id, output_port_id, consuming_data_product_id
+        )
+        target = current_link.active_grant
+        if target is None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="There is no active access to revoke",
+            )
+
+        target.revoked_by = actor
+        target.revoked_at = datetime.now(timezone.utc)
         current_link.recompute_status()
         return current_link
 
@@ -190,7 +214,9 @@ class InputPortService:
             self.db.scalars(
                 select(InputPortRequestModel)
                 .join(InputPortModel)
-                .where(InputPortRequestModel.decision == DecisionStatus.PENDING)
+                .where(
+                    InputPortRequestModel.decision == InputPortRequestDecision.PENDING
+                )
                 .where(
                     InputPortModel.output_port.has(
                         OutputPortModel.assignments.any(
@@ -231,7 +257,7 @@ class InputPortService:
             thirty_days_ago = datetime.now(timezone.utc) - timedelta(days=30)
             query = query.where(
                 or_(
-                    InputPortRequestModel.decision == DecisionStatus.PENDING,
+                    InputPortRequestModel.decision == InputPortRequestDecision.PENDING,
                     InputPortRequestModel.requested_on >= thirty_days_ago,
                 )
             )
