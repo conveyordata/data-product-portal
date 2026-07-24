@@ -16,6 +16,7 @@ export interface TableRow {
     date: string;
     decision: DecisionStatus | InputPortRequestDecision;
     decisionNote: string | null;
+    revokedAt: string | null;
 }
 
 export function getRequestDescription(action: Request): string {
@@ -51,6 +52,7 @@ export function transformToTableRow(action: Request): TableRow {
                 date: action.requested_on,
                 decision: action.decision,
                 decisionNote: action.decision_note ?? null,
+                revokedAt: action.revoked_at ?? null,
             };
         case RequestType_TechnicalAssetOutputPort:
             return {
@@ -61,6 +63,7 @@ export function transformToTableRow(action: Request): TableRow {
                 date: action.requested_on,
                 decision: action.status,
                 decisionNote: null,
+                revokedAt: null,
             };
         case RequestType_DataProductRoleAssignment:
             return {
@@ -71,6 +74,7 @@ export function transformToTableRow(action: Request): TableRow {
                 date: action.requested_on || '',
                 decision: action.decision,
                 decisionNote: null,
+                revokedAt: null,
             };
         default:
             throw new Error('Unknown request type');

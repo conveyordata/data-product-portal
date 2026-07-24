@@ -40,7 +40,14 @@ export function getBadgeStatus(
     }
 }
 
-export function getDecisionStatusLabel(t: TFunction, status: DecisionStatus | InputPortRequestDecision): string {
+export function getDecisionStatusLabel(
+    t: TFunction,
+    status: DecisionStatus | InputPortRequestDecision,
+    revokedAt?: string | null,
+): string {
+    if (status === DecisionStatus.Approved && revokedAt) {
+        return t('Revoked');
+    }
     switch (status) {
         case DecisionStatus.Pending:
             return t('Requested');
@@ -55,7 +62,13 @@ export function getDecisionStatusLabel(t: TFunction, status: DecisionStatus | In
     }
 }
 
-export function getDecisionStatusBadgeStatus(status: DecisionStatus | InputPortRequestDecision): BadgeProps['status'] {
+export function getDecisionStatusBadgeStatus(
+    status: DecisionStatus | InputPortRequestDecision,
+    revokedAt?: string | null,
+): BadgeProps['status'] {
+    if (status === DecisionStatus.Approved && revokedAt) {
+        return 'error';
+    }
     switch (status) {
         case DecisionStatus.Pending:
             return 'processing';

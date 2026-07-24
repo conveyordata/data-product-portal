@@ -9,7 +9,6 @@ from sqlalchemy.orm import Session, selectinload
 
 from app.abstract_data_product.input_ports.enums import (
     InputPortRequestDecision,
-    InputPortStatus,
 )
 from app.abstract_data_product.input_ports.model import (
     InputPort as InputPortModel,
@@ -88,7 +87,6 @@ class InputPortService:
         request.decided_by = decided_by
         request.decision_note = decision_note
         request.decision = InputPortRequestDecision.APPROVED
-        request.input_port.status = InputPortStatus.APPROVED
 
         match request.access_duration_type:
             case AccessDurationType.PERMANENT:
