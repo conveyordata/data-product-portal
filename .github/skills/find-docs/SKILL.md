@@ -1,0 +1,1 @@
+../../../.claude/skills/find-docs/SKILL.md
