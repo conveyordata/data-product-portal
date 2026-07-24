@@ -24,6 +24,14 @@ An Output Port might contain:
 - Access to Output Ports must be **requested and approved**.
 - Approvals go through the owner of the Output Port.
 - Once access is granted, the Output Port gets registered as an Input Port of the consuming Data Product.
+- Access can be **permanent** or **time-bound**; a time-bound grant expires automatically after a set number of days unless the consumer renews it.
+- The Output Port owner can **revoke** a consumer's access at any time, even before it expires.
+
+### Access Duration Policy
+
+Portal admins configure the default access duration per consumer type (Data Products vs. Explorations) under **Settings → Access Duration Settings**: whether access defaults to permanent or time-bound, the default number of days, and whether requesters are allowed to ask for the alternative duration type instead.
+
+The "expiring soon" warning shown to consumers before a time-bound grant lapses defaults to 14 days out, and can be changed via the `EXPIRING_SOON_THRESHOLD_DAYS` environment variable.
 
 ## Quality Control
 

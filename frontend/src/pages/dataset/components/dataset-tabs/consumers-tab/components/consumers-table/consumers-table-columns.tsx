@@ -1,3 +1,4 @@
+import { CloseCircleOutlined, EyeOutlined } from '@ant-design/icons';
 import { Badge, Button, Flex, Popconfirm, type TableColumnsType } from 'antd';
 import type { TFunction } from 'i18next';
 import EllipsisParagraph from '@/components/ellipsis-paragraph/ellipsis-paragraph.component.tsx';
@@ -6,6 +7,7 @@ import { ConsumerColumn } from '@/components/input-port/consumer-column.tsx';
 import {
     InputPortStatus,
     type OutputPortInputPort,
+    RenewalStatus,
 } from '@/store/api/services/generated/dataProductsOutputPortsInputPortsApi.ts';
 import { getInputPortStatusBadgeStatus, getInputPortStatusLabel } from '@/utils/status.helper.ts';
 import { FilterSettings } from '@/utils/table-filter.helper';
@@ -13,26 +15,22 @@ import { Sorter } from '@/utils/table-sorter.helper';
 
 type Props = {
     t: TFunction;
-    dataProductId: string;
     outputPortId: string;
     dataProductLinks: OutputPortInputPort[];
-    onRemoveDataProductDatasetLink: (data_productId: string, name: string, consumingDataProductId: string) => void;
+    onRevokeDataProductDatasetLink: (name: string, consumingDataProductId: string) => void;
     isLoading?: boolean;
     canApprove?: boolean;
     canRevoke?: boolean;
     setReviewingOutputPortInputPortId: (id: string) => void;
-    setRejectingOutputPortInputPortId: (id: string) => void;
 };
 
 export const getConsumerColumns = ({
     t,
-    dataProductId,
     dataProductLinks,
-    onRemoveDataProductDatasetLink,
+    onRevokeDataProductDatasetLink,
     canApprove,
     canRevoke,
     setReviewingOutputPortInputPortId,
-    setRejectingOutputPortInputPortId,
     isLoading,
 }: Props): TableColumnsType<OutputPortInputPort> => {
     const sorter = new Sorter<OutputPortInputPort>();
@@ -64,7 +62,7 @@ export const getConsumerColumns = ({
             render: (_, { status, renewal_status, current_request }) => (
                 <Flex vertical align={'flex-start'} gap={'small'}>
                     <Badge status={getInputPortStatusBadgeStatus(status)} text={getInputPortStatusLabel(t, status)} />
-                    <RenewalTag status={status} renewalStatus={renewal_status} />
+                    <RenewalTag renewalStatus={renewal_status} />
                     <IsExpiringSoonTag
                         status={status}
                         validUntil={current_request.valid_until}
@@ -106,66 +104,56 @@ export const getConsumerColumns = ({
                     consuming_abstract_data_product: consuming_data_product,
                     consuming_abstract_data_product_id: consuming_data_product_id,
                     status,
+                    renewal_status,
                     id,
                 },
             ) => {
-                if (status === InputPortStatus.Pending && (canApprove || canRevoke)) {
-                    return (
-                        <Button type={'link'} onClick={() => setReviewingOutputPortInputPortId(id)}>
-                            {t('Review Access Request')}
-                        </Button>
-                    );
-                }
+                const showReview =
+                    (status === InputPortStatus.Pending || renewal_status === RenewalStatus.Pending) &&
+                    (canApprove || canRevoke);
+                const showRevoke = status === InputPortStatus.Approved;
 
-                if (status === InputPortStatus.Approved) {
-                    return (
-                        <Button
-                            type={'link'}
-                            loading={isLoading}
-                            disabled={isLoading || !canRevoke}
-                            onClick={() => setRejectingOutputPortInputPortId(id)}
-                        >
-                            {t('Revoke Access')}
-                        </Button>
-                    );
-                }
-
-                if (status === InputPortStatus.Denied) {
-                    return (
-                        <Popconfirm
-                            title={t('Remove the access request')}
-                            description={t('Are you sure you want to remove the access request of {{name}}?', {
-                                name: consuming_data_product.name,
-                            })}
-                            onConfirm={() =>
-                                onRemoveDataProductDatasetLink(
-                                    dataProductId,
-                                    consuming_data_product.name,
-                                    consuming_data_product_id,
-                                )
-                            }
-                            placement={'leftTop'}
-                            okText={t('Confirm')}
-                            cancelText={t('Cancel')}
-                            okButtonProps={{ loading: isLoading }}
-                            autoAdjustOverflow={true}
-                        >
+                return (
+                    <Flex gap={'small'} wrap>
+                        {showReview && (
                             <Button
+                                icon={<EyeOutlined />}
                                 type={'link'}
-                                danger
-                                onClick={() =>
-                                    onRemoveDataProductDatasetLink(
-                                        dataProductId,
+                                onClick={() => setReviewingOutputPortInputPortId(id)}
+                            >
+                                {t('Review Access Request')}
+                            </Button>
+                        )}
+                        {showRevoke && (
+                            <Popconfirm
+                                title={t('Revoke Access')}
+                                description={t('Are you sure you want to revoke access for {{name}}?', {
+                                    name: consuming_data_product.name,
+                                })}
+                                onConfirm={() =>
+                                    onRevokeDataProductDatasetLink(
                                         consuming_data_product.name,
                                         consuming_data_product_id,
                                     )
                                 }
+                                placement={'leftTop'}
+                                okText={t('Confirm')}
+                                cancelText={t('Cancel')}
+                                okButtonProps={{ loading: isLoading }}
+                                autoAdjustOverflow={true}
                             >
-                                {t('Remove')}
-                            </Button>
-                        </Popconfirm>
-                    );
-                }
+                                <Button
+                                    icon={<CloseCircleOutlined />}
+                                    type={'link'}
+                                    loading={isLoading}
+                                    disabled={isLoading || !canRevoke}
+                                >
+                                    {t('Revoke Access')}
+                                </Button>
+                            </Popconfirm>
+                        )}
+                    </Flex>
+                );
             },
         },
     ];

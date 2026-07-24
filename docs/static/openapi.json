@@ -2388,6 +2388,79 @@
         }
       }
     },
+    "/api/v2/data_products/{id}/input_ports/{output_port_id}/revoke": {
+      "post": {
+        "tags": [
+          "Data Products"
+        ],
+        "summary": "Revoke Input Port For Data Product",
+        "operationId": "revoke_input_port_for_data_product",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "output_port_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Output Port Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RevokeInputPortForDataProductResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Output port not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Output port not found"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Data Product not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Data Product id not found"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v2/data_products/{id}/history": {
       "get": {
         "tags": [
@@ -2474,13 +2547,86 @@
         }
       }
     },
+    "/api/v2/data_products/{id}/input_ports/{output_port_id}/cancel": {
+      "post": {
+        "tags": [
+          "Data Products"
+        ],
+        "summary": "Cancel Input Port For Data Product",
+        "operationId": "cancel_input_port_for_data_product",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "output_port_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Output Port Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CancelInputPortForDataProductResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Output port not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Output port not found"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Data Product not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Data Product id not found"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v2/data_products/{id}/input_ports/{output_port_id}": {
       "delete": {
         "tags": [
           "Data Products"
         ],
-        "summary": "Unlink Input Port From Data Product",
-        "operationId": "unlink_input_port_from_data_product",
+        "summary": "Remove Input Port For Data Product",
+        "operationId": "remove_input_port_for_data_product",
         "parameters": [
           {
             "name": "id",
@@ -3324,6 +3470,67 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/DenyOutputPortAsInputPortRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/data_products/{data_product_id}/output_ports/{output_port_id}/input_ports/revoke": {
+      "post": {
+        "tags": [
+          "Data Products - Output ports - Input ports"
+        ],
+        "summary": "Revoke Output Port As Input Port",
+        "operationId": "revoke_output_port_as_input_port",
+        "parameters": [
+          {
+            "name": "data_product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Data Product Id"
+            }
+          },
+          {
+            "name": "output_port_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Output Port Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RevokeOutputPortAsInputPortRequest"
               }
             }
           }
@@ -7226,13 +7433,119 @@
         }
       }
     },
+    "/api/v2/explorations/{id}/input_ports/{output_port_id}/revoke": {
+      "post": {
+        "tags": [
+          "Explorations"
+        ],
+        "summary": "Revoke Input Port For Exploration",
+        "operationId": "revoke_input_port_for_exploration",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "output_port_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Output Port Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RevokeInputPortForExplorationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/explorations/{id}/input_ports/{output_port_id}/cancel": {
+      "post": {
+        "tags": [
+          "Explorations"
+        ],
+        "summary": "Cancel Input Port For Exploration",
+        "operationId": "cancel_input_port_for_exploration",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "output_port_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Output Port Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CancelInputPortForExplorationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v2/explorations/{id}/input_ports/{output_port_id}": {
       "delete": {
         "tags": [
           "Explorations"
         ],
-        "summary": "Remove Input Port From Exploration",
-        "operationId": "remove_input_port_from_exploration",
+        "summary": "Remove Input Port For Exploration",
+        "operationId": "remove_input_port_for_exploration",
         "parameters": [
           {
             "name": "id",
@@ -8328,6 +8641,34 @@
           "can_become_admin"
         ],
         "title": "CanBecomeAdminUpdate"
+      },
+      "CancelInputPortForDataProductResponse": {
+        "properties": {
+          "input_port_link": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Input Port Link"
+          }
+        },
+        "type": "object",
+        "required": [
+          "input_port_link"
+        ],
+        "title": "CancelInputPortForDataProductResponse"
+      },
+      "CancelInputPortForExplorationResponse": {
+        "properties": {
+          "input_port_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Input Port Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "input_port_id"
+        ],
+        "title": "CancelInputPortForExplorationResponse"
       },
       "CloudEvent_DataProductEvent": {
         "properties": {
@@ -12303,7 +12644,29 @@
             ]
           },
           "decision": {
-            "$ref": "#/components/schemas/DecisionStatus"
+            "$ref": "#/components/schemas/InputPortRequestDecision"
+          },
+          "revoked_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Revoked At"
+          },
+          "revoked_by": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/User"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "created_on": {
             "type": "string",
@@ -12386,7 +12749,29 @@
             ]
           },
           "decision": {
-            "$ref": "#/components/schemas/DecisionStatus"
+            "$ref": "#/components/schemas/InputPortRequestDecision"
+          },
+          "revoked_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Revoked At"
+          },
+          "revoked_by": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/User"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "created_on": {
             "type": "string",
@@ -12411,13 +12796,25 @@
         ],
         "title": "InputPortRequestBase"
       },
+      "InputPortRequestDecision": {
+        "type": "string",
+        "enum": [
+          "pending",
+          "approved",
+          "denied",
+          "cancelled"
+        ],
+        "title": "InputPortRequestDecision"
+      },
       "InputPortStatus": {
         "type": "string",
         "enum": [
           "pending",
           "approved",
           "denied",
-          "expired"
+          "expired",
+          "revoked",
+          "cancelled"
         ],
         "title": "InputPortStatus"
       },
@@ -14373,6 +14770,48 @@
           "DUPLICATE"
         ],
         "title": "ResourceNameValidityType"
+      },
+      "RevokeInputPortForDataProductResponse": {
+        "properties": {
+          "input_port_link": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Input Port Link"
+          }
+        },
+        "type": "object",
+        "required": [
+          "input_port_link"
+        ],
+        "title": "RevokeInputPortForDataProductResponse"
+      },
+      "RevokeInputPortForExplorationResponse": {
+        "properties": {
+          "input_port_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Input Port Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "input_port_id"
+        ],
+        "title": "RevokeInputPortForExplorationResponse"
+      },
+      "RevokeOutputPortAsInputPortRequest": {
+        "properties": {
+          "consuming_data_product_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Consuming Data Product Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "consuming_data_product_id"
+        ],
+        "title": "RevokeOutputPortAsInputPortRequest"
       },
       "Role": {
         "properties": {

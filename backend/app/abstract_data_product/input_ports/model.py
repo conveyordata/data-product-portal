@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Optional
 
 from sqlalchemy import (
     UUID,
+    Boolean,
     Column,
     Date,
     DateTime,
@@ -14,9 +15,12 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.abstract_data_product.input_ports.enums import InputPortStatus, RenewalStatus
+from app.abstract_data_product.input_ports.enums import (
+    InputPortRequestDecision,
+    InputPortStatus,
+    RenewalStatus,
+)
 from app.access_durations.enums import AccessDurationType
-from app.authorization.role_assignments.enums import DecisionStatus
 from app.core.webhooks.events import InputPortEvent
 from app.database.database import Base
 from app.database.event_mixin import EventTrackedMixin
@@ -40,6 +44,7 @@ class InputPort(
         Enum(InputPortStatus, native_enum=False),
         default=InputPortStatus.PENDING,
     )
+    expiry_event_sent: Mapped[bool] = mapped_column(Boolean, default=False)
 
     consuming_abstract_data_product_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("abstract_data_products.id")
@@ -74,11 +79,36 @@ class InputPort(
     def current_request(self) -> "InputPortRequest":
         if active_grant := self.active_grant:
             return active_grant
+        if self.pending_request is not None and not self._has_real_grant:
+            return self.pending_request
+        if last_settled := self._last_settled_request:
+            return last_settled
         return self.latest_request
 
     @property
     def latest_request(self) -> "InputPortRequest":
         return max(self.requests, key=lambda request: request.created_on)
+
+    @property
+    def _has_real_grant(self) -> bool:
+        return any(
+            request.decision == InputPortRequestDecision.APPROVED
+            for request in self.requests
+        )
+
+    @property
+    def _last_settled_request(self) -> Optional["InputPortRequest"]:
+        return next(
+            (
+                request
+                for request in sorted(
+                    self.requests, key=lambda request: request.created_on, reverse=True
+                )
+                if request.decision
+                in (InputPortRequestDecision.APPROVED, InputPortRequestDecision.DENIED)
+            ),
+            None,
+        )
 
     @property
     def active_grant(self) -> Optional["InputPortRequest"]:
@@ -89,7 +119,8 @@ class InputPort(
                 for request in sorted(
                     self.requests, key=lambda request: request.created_on, reverse=True
                 )
-                if request.decision == DecisionStatus.APPROVED
+                if request.decision == InputPortRequestDecision.APPROVED
+                and request.revoked_at is None
                 and (request.valid_from is None or request.valid_from <= today)
                 and (request.valid_until is None or request.valid_until >= today)
             ),
@@ -99,19 +130,17 @@ class InputPort(
     @property
     def renewal_status(self) -> Optional[RenewalStatus]:
         if self.active_grant is None or self.active_grant.id != self.latest_request.id:
-            has_prior_grant = any(
-                request.decision == DecisionStatus.APPROVED for request in self.requests
-            )
-            if not has_prior_grant:
+            if not self._has_real_grant:
                 return None
             match self.latest_request.decision:
-                case DecisionStatus.APPROVED:
-                    # This case will never happen, the latest requests should equal active grant
+                case InputPortRequestDecision.APPROVED:
                     return None
-                case DecisionStatus.DENIED:
+                case InputPortRequestDecision.DENIED:
                     return RenewalStatus.DENIED
-                case DecisionStatus.PENDING:
+                case InputPortRequestDecision.PENDING:
                     return RenewalStatus.PENDING
+                case InputPortRequestDecision.CANCELLED:
+                    return None
         return None
 
     @property
@@ -120,7 +149,7 @@ class InputPort(
             (
                 request
                 for request in self.requests
-                if request.decision == DecisionStatus.PENDING
+                if request.decision == InputPortRequestDecision.PENDING
             ),
             None,
         )
@@ -128,14 +157,23 @@ class InputPort(
     def recompute_status(self) -> None:
         if self.active_grant is not None:
             self.status = InputPortStatus.APPROVED
-        else:
-            match self.latest_request.decision:
-                case DecisionStatus.PENDING:
-                    self.status = InputPortStatus.PENDING
-                case DecisionStatus.APPROVED:
-                    self.status = InputPortStatus.EXPIRED
-                case DecisionStatus.DENIED:
-                    self.status = InputPortStatus.DENIED
+            return
+        if self.pending_request is not None and not self._has_real_grant:
+            self.status = InputPortStatus.PENDING
+            return
+        last_settled = self._last_settled_request
+        if last_settled is None:
+            self.status = InputPortStatus.CANCELLED
+            return
+        match last_settled.decision:
+            case InputPortRequestDecision.APPROVED:
+                self.status = (
+                    InputPortStatus.REVOKED
+                    if last_settled.revoked_at is not None
+                    else InputPortStatus.EXPIRED
+                )
+            case InputPortRequestDecision.DENIED:
+                self.status = InputPortStatus.DENIED
 
     def to_event(self) -> InputPortEvent:
         return InputPortEvent(
@@ -152,9 +190,9 @@ class InputPortRequest(
     __tablename__ = "input_port_requests"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    decision: Mapped[DecisionStatus] = mapped_column(
-        Enum(DecisionStatus, native_enum=False),
-        default=DecisionStatus.PENDING,
+    decision: Mapped[InputPortRequestDecision] = mapped_column(
+        Enum(InputPortRequestDecision, native_enum=False),
+        default=InputPortRequestDecision.PENDING,
     )
     justification: Mapped[str] = mapped_column(Text)
     decision_note: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
@@ -169,6 +207,9 @@ class InputPortRequest(
     decided_on: Mapped[Optional[datetime]] = mapped_column(
         DateTime(timezone=False), nullable=True
     )
+    revoked_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=False), nullable=True
+    )
     valid_from: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
     valid_until: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
 
@@ -177,6 +218,9 @@ class InputPortRequest(
     )
     requested_by_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"))
     decided_by_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        ForeignKey("users.id"), nullable=True
+    )
+    revoked_by_id: Mapped[Optional[uuid.UUID]] = mapped_column(
         ForeignKey("users.id"), nullable=True
     )
 
@@ -192,5 +236,10 @@ class InputPortRequest(
     decided_by: Mapped[Optional["User"]] = relationship(
         "User",
         foreign_keys=[decided_by_id],
+        lazy="joined",
+    )
+    revoked_by: Mapped[Optional["User"]] = relationship(
+        "User",
+        foreign_keys=[revoked_by_id],
         lazy="joined",
     )

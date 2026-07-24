@@ -29,6 +29,16 @@ const injectedRtkApi = api.injectEndpoints({
         body: queryArg.denyOutputPortAsInputPortRequest,
       }),
     }),
+    revokeOutputPortAsInputPort: build.mutation<
+      RevokeOutputPortAsInputPortApiResponse,
+      RevokeOutputPortAsInputPortApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/data_products/${queryArg.dataProductId}/output_ports/${queryArg.outputPortId}/input_ports/revoke`,
+        method: "POST",
+        body: queryArg.revokeOutputPortAsInputPortRequest,
+      }),
+    }),
     removeOutputPortAsInputPort: build.mutation<
       RemoveOutputPortAsInputPortApiResponse,
       RemoveOutputPortAsInputPortApiArg
@@ -63,6 +73,13 @@ export type DenyOutputPortAsInputPortApiArg = {
   outputPortId: string;
   denyOutputPortAsInputPortRequest: DenyOutputPortAsInputPortRequest;
 };
+export type RevokeOutputPortAsInputPortApiResponse =
+  /** status 200 Successful Response */ any;
+export type RevokeOutputPortAsInputPortApiArg = {
+  dataProductId: string;
+  outputPortId: string;
+  revokeOutputPortAsInputPortRequest: RevokeOutputPortAsInputPortRequest;
+};
 export type RemoveOutputPortAsInputPortApiResponse =
   /** status 200 Successful Response */ any;
 export type RemoveOutputPortAsInputPortApiArg = {
@@ -87,7 +104,9 @@ export type InputPortRequestBase = {
   valid_until: string | null;
   requested_by: User;
   decided_by?: User | null;
-  decision: DecisionStatus;
+  decision: InputPortRequestDecision;
+  revoked_at?: string | null;
+  revoked_by?: User | null;
   created_on: string;
   requested_on: string;
 };
@@ -125,6 +144,9 @@ export type DenyOutputPortAsInputPortRequest = {
   consuming_data_product_id: string;
   decision_note: string;
 };
+export type RevokeOutputPortAsInputPortRequest = {
+  consuming_data_product_id: string;
+};
 export type RemoveOutputPortAsInputPortRequest = {
   consuming_data_product_id: string;
 };
@@ -133,11 +155,14 @@ export enum InputPortStatus {
   Approved = "approved",
   Denied = "denied",
   Expired = "expired",
+  Revoked = "revoked",
+  Cancelled = "cancelled",
 }
-export enum DecisionStatus {
-  Approved = "approved",
+export enum InputPortRequestDecision {
   Pending = "pending",
+  Approved = "approved",
   Denied = "denied",
+  Cancelled = "cancelled",
 }
 export enum RenewalStatus {
   Pending = "pending",
@@ -153,5 +178,6 @@ export const {
   useLazyGetInputPortsForOutputPortQuery,
   useApproveOutputPortAsInputPortMutation,
   useDenyOutputPortAsInputPortMutation,
+  useRevokeOutputPortAsInputPortMutation,
   useRemoveOutputPortAsInputPortMutation,
 } = injectedRtkApi;

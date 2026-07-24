@@ -22,7 +22,8 @@ type Props = {
     t: TFunction;
     canRemoveAccess: boolean;
     canRequestAccess: boolean;
-    handleRemove: (outputPortId: string) => Promise<void>;
+    handleCancel: (outputPortId: string) => Promise<void>;
+    handleRevoke: (outputPortId: string) => Promise<void>;
     handleRenew: (outputPortId: string) => Promise<void>;
     inputPorts: InputPort[];
 };
@@ -30,7 +31,8 @@ export const getDataProductDatasetsColumns = ({
     t,
     canRemoveAccess,
     canRequestAccess,
-    handleRemove,
+    handleCancel,
+    handleRevoke,
     handleRenew,
     inputPorts,
 }: Props): TableColumnsType<InputPort> => {
@@ -73,7 +75,7 @@ export const getDataProductDatasetsColumns = ({
             render: (_, { status, renewal_status, current_request }) => (
                 <Flex vertical align={'flex-start'} gap={'small'}>
                     <Badge status={getInputPortStatusBadgeStatus(status)} text={getInputPortStatusLabel(t, status)} />
-                    <RenewalTag status={status} renewalStatus={renewal_status} />
+                    <RenewalTag renewalStatus={renewal_status} />
                     <IsExpiringSoonTag
                         status={status}
                         validUntil={current_request.valid_until}
@@ -112,7 +114,8 @@ export const getDataProductDatasetsColumns = ({
                         output_port={output_port}
                         canRemoveAccess={canRemoveAccess}
                         canRequestAccess={canRequestAccess}
-                        handleRemove={handleRemove}
+                        handleCancel={handleCancel}
+                        handleRevoke={handleRevoke}
                         handleRenew={handleRenew}
                         status={status}
                         validUntil={current_request.valid_until}

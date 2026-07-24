@@ -117,6 +117,16 @@ For more information about input ports, take a look at the concept page describi
 
 ![Linking an Output port to an Input port](./img/linking-output-input-port.png)
 
+## Managing access over time
+
+Once an Input Port is approved, access may be **permanent** or **time-bound**, depending on the Output Port owner's [Access Duration Policy](../concepts/output-ports.md#access-duration-policy).
+
+- **Expiring soon**: When a time-bound grant is nearing its end, the Input Port shows an **Expiring soon** tag and a **Renew Access** button. Renewing submits a fresh request without losing the history of the current grant.
+- **Cancel Request**: Withdraws a request you made that is still pending a decision.
+- **Revoke Access**: Ends an active grant immediately. Either you (the consumer) or the Output Port owner can revoke access at any time.
+
+If a time-bound grant lapses without being renewed, access ends automatically and you'll need to request or renew it to continue consuming the data.
+
 ## Conclusion
 
 Congratulations :tada:! you succeeded in creating your first Data Product and made it discoverable and consumable through:

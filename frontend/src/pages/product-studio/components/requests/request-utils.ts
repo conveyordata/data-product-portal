@@ -1,5 +1,5 @@
 import type { User } from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
-import type { DecisionStatus } from '@/store/api/services/generated/usersApi.ts';
+import type { DecisionStatus, InputPortRequestDecision } from '@/store/api/services/generated/usersApi.ts';
 import type { Request } from '@/types/request-types/request-types.tsx';
 import {
     RequestType_DataProductRoleAssignment,
@@ -14,8 +14,9 @@ export interface TableRow {
     requestedBy: User | null;
     decidedBy: User | null;
     date: string;
-    decision: DecisionStatus;
+    decision: DecisionStatus | InputPortRequestDecision;
     decisionNote: string | null;
+    revokedAt: string | null;
 }
 
 export function getRequestDescription(action: Request): string {
@@ -51,6 +52,7 @@ export function transformToTableRow(action: Request): TableRow {
                 date: action.requested_on,
                 decision: action.decision,
                 decisionNote: action.decision_note ?? null,
+                revokedAt: action.revoked_at ?? null,
             };
         case RequestType_TechnicalAssetOutputPort:
             return {
@@ -61,6 +63,7 @@ export function transformToTableRow(action: Request): TableRow {
                 date: action.requested_on,
                 decision: action.status,
                 decisionNote: null,
+                revokedAt: null,
             };
         case RequestType_DataProductRoleAssignment:
             return {
@@ -71,6 +74,7 @@ export function transformToTableRow(action: Request): TableRow {
                 date: action.requested_on || '',
                 decision: action.decision,
                 decisionNote: null,
+                revokedAt: null,
             };
         default:
             throw new Error('Unknown request type');

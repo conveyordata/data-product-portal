@@ -8,7 +8,7 @@ from uuid import UUID
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..models.decision_status import DecisionStatus
+from ..models.input_port_request_decision import InputPortRequestDecision
 from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
@@ -26,22 +26,26 @@ class InputPortRequestBase:
         justification (str):
         valid_until (datetime.date | None):
         requested_by (User):
-        decision (DecisionStatus):
+        decision (InputPortRequestDecision):
         created_on (datetime.datetime):
         requested_on (datetime.datetime):
         decision_note (None | str | Unset):
         decided_by (None | Unset | User):
+        revoked_at (datetime.datetime | None | Unset):
+        revoked_by (None | Unset | User):
     """
 
     id: UUID
     justification: str
     valid_until: datetime.date | None
     requested_by: User
-    decision: DecisionStatus
+    decision: InputPortRequestDecision
     created_on: datetime.datetime
     requested_on: datetime.datetime
     decision_note: None | str | Unset = UNSET
     decided_by: None | Unset | User = UNSET
+    revoked_at: datetime.datetime | None | Unset = UNSET
+    revoked_by: None | Unset | User = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -79,6 +83,22 @@ class InputPortRequestBase:
         else:
             decided_by = self.decided_by
 
+        revoked_at: None | str | Unset
+        if isinstance(self.revoked_at, Unset):
+            revoked_at = UNSET
+        elif isinstance(self.revoked_at, datetime.datetime):
+            revoked_at = self.revoked_at.isoformat()
+        else:
+            revoked_at = self.revoked_at
+
+        revoked_by: dict[str, Any] | None | Unset
+        if isinstance(self.revoked_by, Unset):
+            revoked_by = UNSET
+        elif isinstance(self.revoked_by, User):
+            revoked_by = self.revoked_by.to_dict()
+        else:
+            revoked_by = self.revoked_by
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
@@ -96,6 +116,10 @@ class InputPortRequestBase:
             field_dict["decision_note"] = decision_note
         if decided_by is not UNSET:
             field_dict["decided_by"] = decided_by
+        if revoked_at is not UNSET:
+            field_dict["revoked_at"] = revoked_at
+        if revoked_by is not UNSET:
+            field_dict["revoked_by"] = revoked_by
 
         return field_dict
 
@@ -125,7 +149,7 @@ class InputPortRequestBase:
 
         requested_by = User.from_dict(d.pop("requested_by"))
 
-        decision = DecisionStatus(d.pop("decision"))
+        decision = InputPortRequestDecision(d.pop("decision"))
 
         created_on = datetime.datetime.fromisoformat(d.pop("created_on"))
 
@@ -157,6 +181,40 @@ class InputPortRequestBase:
 
         decided_by = _parse_decided_by(d.pop("decided_by", UNSET))
 
+        def _parse_revoked_at(data: object) -> datetime.datetime | None | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, str):
+                    raise TypeError()
+                revoked_at_type_0 = datetime.datetime.fromisoformat(data)
+
+                return revoked_at_type_0
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            return cast(datetime.datetime | None | Unset, data)
+
+        revoked_at = _parse_revoked_at(d.pop("revoked_at", UNSET))
+
+        def _parse_revoked_by(data: object) -> None | Unset | User:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, dict):
+                    raise TypeError()
+                revoked_by_type_0 = User.from_dict(data)
+
+                return revoked_by_type_0
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            return cast(None | Unset | User, data)
+
+        revoked_by = _parse_revoked_by(d.pop("revoked_by", UNSET))
+
         input_port_request_base = cls(
             id=id,
             justification=justification,
@@ -167,6 +225,8 @@ class InputPortRequestBase:
             requested_on=requested_on,
             decision_note=decision_note,
             decided_by=decided_by,
+            revoked_at=revoked_at,
+            revoked_by=revoked_by,
         )
 
         input_port_request_base.additional_properties = d

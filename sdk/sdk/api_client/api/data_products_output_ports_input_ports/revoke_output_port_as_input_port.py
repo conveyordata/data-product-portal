@@ -8,22 +8,33 @@ import httpx
 from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.http_validation_error import HTTPValidationError
+from ...models.revoke_output_port_as_input_port_request import (
+    RevokeOutputPortAsInputPortRequest,
+)
 from ...types import Response
 
 
 def _get_kwargs(
-    id: UUID,
+    data_product_id: UUID,
     output_port_id: UUID,
+    *,
+    body: RevokeOutputPortAsInputPortRequest,
 ) -> dict[str, Any]:
+    headers: dict[str, Any] = {}
 
     _kwargs: dict[str, Any] = {
-        "method": "delete",
-        "url": "/api/v2/explorations/{id}/input_ports/{output_port_id}".format(
-            id=quote(str(id), safe=""),
+        "method": "post",
+        "url": "/api/v2/data_products/{data_product_id}/output_ports/{output_port_id}/input_ports/revoke".format(
+            data_product_id=quote(str(data_product_id), safe=""),
             output_port_id=quote(str(output_port_id), safe=""),
         ),
     }
 
+    _kwargs["json"] = body.to_dict()
+
+    headers["Content-Type"] = "application/json"
+
+    _kwargs["headers"] = headers
     return _kwargs
 
 
@@ -57,16 +68,18 @@ def _build_response(
 
 
 def sync_detailed(
-    id: UUID,
+    data_product_id: UUID,
     output_port_id: UUID,
     *,
     client: AuthenticatedClient | Client,
+    body: RevokeOutputPortAsInputPortRequest,
 ) -> Response[Any | HTTPValidationError]:
-    """Remove Input Port From Exploration
+    """Revoke Output Port As Input Port
 
     Args:
-        id (UUID):
+        data_product_id (UUID):
         output_port_id (UUID):
+        body (RevokeOutputPortAsInputPortRequest):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -77,8 +90,9 @@ def sync_detailed(
     """
 
     kwargs = _get_kwargs(
-        id=id,
+        data_product_id=data_product_id,
         output_port_id=output_port_id,
+        body=body,
     )
 
     response = client.get_httpx_client().request(
@@ -89,16 +103,18 @@ def sync_detailed(
 
 
 def sync(
-    id: UUID,
+    data_product_id: UUID,
     output_port_id: UUID,
     *,
     client: AuthenticatedClient | Client,
+    body: RevokeOutputPortAsInputPortRequest,
 ) -> Any | HTTPValidationError | None:
-    """Remove Input Port From Exploration
+    """Revoke Output Port As Input Port
 
     Args:
-        id (UUID):
+        data_product_id (UUID):
         output_port_id (UUID):
+        body (RevokeOutputPortAsInputPortRequest):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -109,23 +125,26 @@ def sync(
     """
 
     return sync_detailed(
-        id=id,
+        data_product_id=data_product_id,
         output_port_id=output_port_id,
         client=client,
+        body=body,
     ).parsed
 
 
 async def asyncio_detailed(
-    id: UUID,
+    data_product_id: UUID,
     output_port_id: UUID,
     *,
     client: AuthenticatedClient | Client,
+    body: RevokeOutputPortAsInputPortRequest,
 ) -> Response[Any | HTTPValidationError]:
-    """Remove Input Port From Exploration
+    """Revoke Output Port As Input Port
 
     Args:
-        id (UUID):
+        data_product_id (UUID):
         output_port_id (UUID):
+        body (RevokeOutputPortAsInputPortRequest):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -136,8 +155,9 @@ async def asyncio_detailed(
     """
 
     kwargs = _get_kwargs(
-        id=id,
+        data_product_id=data_product_id,
         output_port_id=output_port_id,
+        body=body,
     )
 
     response = await client.get_async_httpx_client().request(**kwargs)
@@ -146,16 +166,18 @@ async def asyncio_detailed(
 
 
 async def asyncio(
-    id: UUID,
+    data_product_id: UUID,
     output_port_id: UUID,
     *,
     client: AuthenticatedClient | Client,
+    body: RevokeOutputPortAsInputPortRequest,
 ) -> Any | HTTPValidationError | None:
-    """Remove Input Port From Exploration
+    """Revoke Output Port As Input Port
 
     Args:
-        id (UUID):
+        data_product_id (UUID):
         output_port_id (UUID):
+        body (RevokeOutputPortAsInputPortRequest):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -167,8 +189,9 @@ async def asyncio(
 
     return (
         await asyncio_detailed(
-            id=id,
+            data_product_id=data_product_id,
             output_port_id=output_port_id,
             client=client,
+            body=body,
         )
     ).parsed

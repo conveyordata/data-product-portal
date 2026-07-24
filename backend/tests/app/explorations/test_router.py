@@ -229,18 +229,69 @@ class TestExplorationRouter:
         )
         assert response.status_code == 404, response.text
 
-    def test_remove_input_port_from_exploration(self, client):
+    def test_revoke_input_port_for_exploration(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         exploration = ExplorationFactory(owner=user)
         input_port = InputPortFactory(consuming_abstract_data_product=exploration)
+        response = client.post(
+            f"{ROUTE}/{exploration.id}/input_ports/{input_port.output_port.id}/revoke",
+        )
+        assert response.status_code == 200, response.text
+
+    def test_revoke_input_port_for_exploration__not_owner(self, client):
+        exploration = ExplorationFactory()
+        input_port = InputPortFactory(consuming_abstract_data_product=exploration)
+        response = client.post(
+            f"{ROUTE}/{exploration.id}/input_ports/{input_port.output_port.id}/revoke",
+        )
+        assert response.status_code == 403, response.text
+
+    def test_cancel_input_port_for_exploration(self, client):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        exploration = ExplorationFactory(owner=user)
+        input_port = InputPortFactory(
+            consuming_abstract_data_product=exploration,
+            status=DecisionStatus.PENDING,
+        )
+        response = client.post(
+            f"{ROUTE}/{exploration.id}/input_ports/{input_port.output_port.id}/cancel",
+        )
+        assert response.status_code == 200, response.text
+
+    def test_cancel_input_port_for_exploration__not_owner(self, client):
+        exploration = ExplorationFactory()
+        input_port = InputPortFactory(
+            consuming_abstract_data_product=exploration,
+            status=DecisionStatus.PENDING,
+        )
+        response = client.post(
+            f"{ROUTE}/{exploration.id}/input_ports/{input_port.output_port.id}/cancel",
+        )
+        assert response.status_code == 403, response.text
+
+    def test_remove_input_port_for_exploration_hard_deletes_regardless_of_status(
+        self, client
+    ):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        exploration = ExplorationFactory(owner=user)
+        input_port = InputPortFactory(
+            consuming_abstract_data_product=exploration,
+            status=DecisionStatus.APPROVED,
+        )
         response = client.delete(
             f"{ROUTE}/{exploration.id}/input_ports/{input_port.output_port.id}",
         )
         assert response.status_code == 200, response.text
 
-    def test_remove_input_port_from_exploration_not_owner(self, client):
+        get_response = client.get(f"{ROUTE}/{exploration.id}/input_ports")
+        assert get_response.json()["input_ports"] == []
+
+    def test_remove_input_port_for_exploration__not_owner(self, client):
         exploration = ExplorationFactory()
-        input_port = InputPortFactory(consuming_abstract_data_product=exploration)
+        input_port = InputPortFactory(
+            consuming_abstract_data_product=exploration,
+            status=DecisionStatus.APPROVED,
+        )
         response = client.delete(
             f"{ROUTE}/{exploration.id}/input_ports/{input_port.output_port.id}",
         )

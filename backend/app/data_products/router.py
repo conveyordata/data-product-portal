@@ -44,6 +44,7 @@ from app.data_products.schema_request import (
     RequestInputPortsForDataProductRequest,
 )
 from app.data_products.schema_response import (
+    CancelInputPortForDataProductResponse,
     CreateDataProductResponse,
     GetDataProductInputPortsResponse,
     GetDataProductResponse,
@@ -54,6 +55,7 @@ from app.data_products.schema_response import (
     LinkInputPortsToDataProductPost,
     RenewInputPortForDataProductResponse,
     RequestInputPortsForDataProductResponse,
+    RevokeInputPortForDataProductResponse,
     UpdateDataProductResponse,
 )
 from app.data_products.service import DataProductService
@@ -492,7 +494,7 @@ def _notify_input_port_links(
             CreateEvent(
                 name=(
                     EventType.DATA_PRODUCT_DATASET_LINK_REQUESTED
-                    if input_port.status == InputPortStatus.PENDING
+                    if input_port.pending_request is not None
                     else EventType.DATA_PRODUCT_DATASET_LINK_APPROVED
                 ),
                 subject_id=input_port.consuming_abstract_data_product_id,
@@ -505,7 +507,7 @@ def _notify_input_port_links(
         ]
     )
     for input_port, event_id in zip(input_ports, event_ids):
-        if input_port.status == InputPortStatus.APPROVED:
+        if input_port.pending_request is None:
             NotificationService(db).create_data_product_notifications(
                 data_product_id=input_port.consuming_abstract_data_product_id,
                 event_id=event_id,
@@ -562,6 +564,46 @@ def renew_input_port_for_data_product(
     _notify_input_port_links(db, [input_port], background_tasks, authenticated_user)
 
     return RenewInputPortForDataProductResponse(input_port_link=input_port.id)
+
+
+@router.post(
+    "/{id}/input_ports/{output_port_id}/revoke",
+    responses=_input_ports_responses,
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                Action.DATA_PRODUCT__REVOKE_OUTPUT_PORT_ACCESS,
+                DataProductResolver,
+            )
+        ),
+    ],
+)
+def revoke_input_port_for_data_product(
+    id: UUID,
+    output_port_id: UUID,
+    authenticated_user: User = Depends(get_authenticated_user),
+    db: Session = Depends(get_db_session),
+) -> RevokeInputPortForDataProductResponse:
+    input_port = DataProductService(db).revoke_input_port(
+        id, output_port_id, actor=authenticated_user
+    )
+
+    event_id = EventService(db).create_event(
+        CreateEvent(
+            name=EventType.DATA_PRODUCT_DATASET_LINK_REVOKED,
+            subject_id=id,
+            subject_type=EventReferenceEntity.DATA_PRODUCT,
+            target_id=input_port.output_port_id,
+            target_type=EventReferenceEntity.DATASET,
+            actor_id=authenticated_user.id,
+        ),
+    )
+    NotificationService(db).create_data_product_notifications(
+        data_product_id=id, event_id=event_id
+    )
+    RefreshInfrastructureLambda().trigger()
+
+    return RevokeInputPortForDataProductResponse(input_port_link=input_port.id)
 
 
 @router.get("")
@@ -624,22 +666,9 @@ def get_data_product_rolled_up_tags(
     )
 
 
-@router.delete(
-    "/{id}/input_ports/{output_port_id}",
-    responses={
-        400: {
-            "description": "Output port not found",
-            "content": {
-                "application/json": {"example": {"detail": "Output port not found"}}
-            },
-        },
-        404: {
-            "description": "Data Product not found",
-            "content": {
-                "application/json": {"example": {"detail": "Data Product id not found"}}
-            },
-        },
-    },
+@router.post(
+    "/{id}/input_ports/{output_port_id}/cancel",
+    responses=_input_ports_responses,
     dependencies=[
         Depends(
             Authorization.enforce(
@@ -649,29 +678,62 @@ def get_data_product_rolled_up_tags(
         ),
     ],
 )
-def unlink_input_port_from_data_product(
+def cancel_input_port_for_data_product(
+    id: UUID,
+    output_port_id: UUID,
+    authenticated_user: User = Depends(get_authenticated_user),
+    db: Session = Depends(get_db_session),
+) -> CancelInputPortForDataProductResponse:
+    input_port = DataProductService(db).cancel_input_port_request(
+        id, output_port_id, actor=authenticated_user
+    )
+
+    EventService(db).create_event(
+        CreateEvent(
+            name=EventType.DATA_PRODUCT_DATASET_LINK_CANCELLED,
+            subject_id=id,
+            subject_type=EventReferenceEntity.DATA_PRODUCT,
+            target_id=input_port.output_port_id,
+            target_type=EventReferenceEntity.DATASET,
+            actor_id=authenticated_user.id,
+        ),
+    )
+    RefreshInfrastructureLambda().trigger()
+
+    return CancelInputPortForDataProductResponse(input_port_link=input_port.id)
+
+
+@router.delete(
+    "/{id}/input_ports/{output_port_id}",
+    responses=_input_ports_responses,
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                Action.DATA_PRODUCT__REVOKE_OUTPUT_PORT_ACCESS,
+                DataProductResolver,
+            )
+        ),
+    ],
+)
+def remove_input_port_for_data_product(
     id: UUID,
     output_port_id: UUID,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    data_product_dataset = DataProductService(db).remove_input_port(id, output_port_id)
+    input_port = DataProductService(db).remove_input_port(id, output_port_id)
 
     event_id = EventService(db).create_event(
         CreateEvent(
-            name=(
-                EventType.DATA_PRODUCT_DATASET_LINK_REMOVED
-                if data_product_dataset.status != DecisionStatus.APPROVED
-                else EventType.DATA_PRODUCT_DATASET_LINK_DENIED
-            ),
+            name=EventType.DATA_PRODUCT_DATASET_LINK_REMOVED,
             subject_id=id,
             subject_type=EventReferenceEntity.DATA_PRODUCT,
-            target_id=data_product_dataset.output_port_id,
+            target_id=input_port.output_port_id,
             target_type=EventReferenceEntity.DATASET,
             actor_id=authenticated_user.id,
         ),
     )
-    if data_product_dataset.status == DecisionStatus.APPROVED:
+    if input_port.status == InputPortStatus.APPROVED:
         NotificationService(db).create_data_product_notifications(
             data_product_id=id, event_id=event_id
         )
