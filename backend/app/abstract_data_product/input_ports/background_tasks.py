@@ -10,7 +10,7 @@ from app.core.logging import logger
 from app.core.webhooks.v2 import call_v2_webhook
 from app.database.database import SessionLocal
 
-CHECK_INTERVAL_SECONDS = 24*60*60
+CHECK_INTERVAL_SECONDS = 24 * 60 * 60
 
 
 async def expire_input_ports(db: Session) -> None:
