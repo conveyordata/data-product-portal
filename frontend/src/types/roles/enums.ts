@@ -3,6 +3,7 @@ import type {
     Prototype as ApiPrototype,
     Scope as ApiScope,
 } from '@/store/api/services/generated/authorizationRolesApi.ts';
+import type { InputPortRequestDecision as ApiInputPortRequestDecision } from '@/store/api/services/generated/usersApi.ts';
 
 export const Prototype = {
     CUSTOM: 0 as ApiPrototype,
@@ -28,3 +29,12 @@ export const DecisionStatus = {
 } as const;
 
 export type DecisionStatus = (typeof DecisionStatus)[keyof typeof DecisionStatus];
+
+export const InputPortRequestDecision = {
+    Pending: 'pending' as ApiInputPortRequestDecision,
+    Approved: 'approved' as ApiInputPortRequestDecision,
+    Denied: 'denied' as ApiInputPortRequestDecision,
+    Cancelled: 'cancelled' as ApiInputPortRequestDecision,
+} as const;
+
+export type InputPortRequestDecision = (typeof InputPortRequestDecision)[keyof typeof InputPortRequestDecision];
