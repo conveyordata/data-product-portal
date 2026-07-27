@@ -156,6 +156,15 @@ const injectedRtkApi = api.injectEndpoints({
         method: "POST",
       }),
     }),
+    revokeInputPortForDataProduct: build.mutation<
+      RevokeInputPortForDataProductApiResponse,
+      RevokeInputPortForDataProductApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/data_products/${queryArg.id}/input_ports/${queryArg.outputPortId}/revoke`,
+        method: "POST",
+      }),
+    }),
     getDataProductEventHistory: build.query<
       GetDataProductEventHistoryApiResponse,
       GetDataProductEventHistoryApiArg
@@ -172,9 +181,18 @@ const injectedRtkApi = api.injectEndpoints({
         url: `/api/v2/data_products/${queryArg}/rolled_up_tags`,
       }),
     }),
-    unlinkInputPortFromDataProduct: build.mutation<
-      UnlinkInputPortFromDataProductApiResponse,
-      UnlinkInputPortFromDataProductApiArg
+    cancelInputPortForDataProduct: build.mutation<
+      CancelInputPortForDataProductApiResponse,
+      CancelInputPortForDataProductApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/data_products/${queryArg.id}/input_ports/${queryArg.outputPortId}/cancel`,
+        method: "POST",
+      }),
+    }),
+    removeInputPortForDataProduct: build.mutation<
+      RemoveInputPortForDataProductApiResponse,
+      RemoveInputPortForDataProductApiArg
     >({
       query: (queryArg) => ({
         url: `/api/v2/data_products/${queryArg.id}/input_ports/${queryArg.outputPortId}`,
@@ -275,15 +293,27 @@ export type RenewInputPortForDataProductApiArg = {
   id: string;
   outputPortId: string;
 };
+export type RevokeInputPortForDataProductApiResponse =
+  /** status 200 Successful Response */ RevokeInputPortForDataProductResponse;
+export type RevokeInputPortForDataProductApiArg = {
+  id: string;
+  outputPortId: string;
+};
 export type GetDataProductEventHistoryApiResponse =
   /** status 200 Successful Response */ GetEventHistoryResponse;
 export type GetDataProductEventHistoryApiArg = string;
 export type GetDataProductRolledUpTagsApiResponse =
   /** status 200 Successful Response */ GetDataProductRolledUpTagsResponse;
 export type GetDataProductRolledUpTagsApiArg = string;
-export type UnlinkInputPortFromDataProductApiResponse =
+export type CancelInputPortForDataProductApiResponse =
+  /** status 200 Successful Response */ CancelInputPortForDataProductResponse;
+export type CancelInputPortForDataProductApiArg = {
+  id: string;
+  outputPortId: string;
+};
+export type RemoveInputPortForDataProductApiResponse =
   /** status 200 Successful Response */ any;
-export type UnlinkInputPortFromDataProductApiArg = {
+export type RemoveInputPortForDataProductApiArg = {
   id: string;
   outputPortId: string;
 };
@@ -453,7 +483,9 @@ export type InputPortRequestBase = {
   valid_until: string | null;
   requested_by: User;
   decided_by?: User | null;
-  decision: DecisionStatus;
+  decision: InputPortRequestDecision;
+  revoked_at?: string | null;
+  revoked_by?: User | null;
   created_on: string;
   requested_on: string;
 };
@@ -479,6 +511,9 @@ export type GetDataProductInputPortsResponse = {
   input_ports: AbstractDataProductInputPort[];
 };
 export type RenewInputPortForDataProductResponse = {
+  input_port_link: string;
+};
+export type RevokeInputPortForDataProductResponse = {
   input_port_link: string;
 };
 export type DataProduct = {
@@ -612,6 +647,9 @@ export type GetEventHistoryResponse = {
 export type GetDataProductRolledUpTagsResponse = {
   rolled_up_tags: Tag[];
 };
+export type CancelInputPortForDataProductResponse = {
+  input_port_link: string;
+};
 export type DataProductSetting = {
   id: string;
   category: string;
@@ -659,11 +697,14 @@ export enum InputPortStatus {
   Approved = "approved",
   Denied = "denied",
   Expired = "expired",
+  Revoked = "revoked",
+  Cancelled = "cancelled",
 }
-export enum DecisionStatus {
-  Approved = "approved",
+export enum InputPortRequestDecision {
   Pending = "pending",
+  Approved = "approved",
   Denied = "denied",
+  Cancelled = "cancelled",
 }
 export enum RenewalStatus {
   Pending = "pending",
@@ -729,11 +770,13 @@ export const {
   useGetDataProductInputPortsQuery,
   useLazyGetDataProductInputPortsQuery,
   useRenewInputPortForDataProductMutation,
+  useRevokeInputPortForDataProductMutation,
   useGetDataProductEventHistoryQuery,
   useLazyGetDataProductEventHistoryQuery,
   useGetDataProductRolledUpTagsQuery,
   useLazyGetDataProductRolledUpTagsQuery,
-  useUnlinkInputPortFromDataProductMutation,
+  useCancelInputPortForDataProductMutation,
+  useRemoveInputPortForDataProductMutation,
   useGetDataProductSettingsQuery,
   useLazyGetDataProductSettingsQuery,
 } = injectedRtkApi;

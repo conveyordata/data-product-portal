@@ -19,12 +19,14 @@ from app.explorations.schema_request import (
     RequestInputPortsForExplorationRequest,
 )
 from app.explorations.schema_response import (
+    CancelInputPortForExplorationResponse,
     CreateExplorationResponse,
     GetExplorationInputPortsResponse,
     GetExplorationResponse,
     GetExplorationsResponse,
     RenewInputPortForExplorationResponse,
     RequestInputPortsForExplorationResponse,
+    RevokeInputPortForExplorationResponse,
 )
 from app.explorations.service import ExplorationService
 from app.users.model import User
@@ -153,10 +155,52 @@ def renew_input_port_for_exploration(
     return RenewInputPortForExplorationResponse(input_port_id=input_port.id)
 
 
+@router.post("/{id}/input_ports/{output_port_id}/revoke")
+def revoke_input_port_for_exploration(
+    id: UUID,
+    output_port_id: UUID,
+    db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
+) -> RevokeInputPortForExplorationResponse:
+    exp = ExplorationService(db).get_exploration(id, authenticated_user)
+    if exp.owner_id != authenticated_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You are not the owner of this exploration",
+        )
+
+    input_port = ExplorationService(db).revoke_input_port(
+        id, output_port_id, actor=authenticated_user
+    )
+    RefreshInfrastructureLambda().trigger()
+    return RevokeInputPortForExplorationResponse(input_port_id=input_port.id)
+
+
+@router.post("/{id}/input_ports/{output_port_id}/cancel")
+def cancel_input_port_for_exploration(
+    id: UUID,
+    output_port_id: UUID,
+    db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
+) -> CancelInputPortForExplorationResponse:
+    exploration_service = ExplorationService(db)
+    exp = exploration_service.get_exploration(id, authenticated_user)
+    if exp.owner_id != authenticated_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You are not the owner of this exploration",
+        )
+    input_port = exploration_service.cancel_input_port_request(
+        id, output_port_id, actor=authenticated_user
+    )
+    RefreshInfrastructureLambda().trigger()
+    return CancelInputPortForExplorationResponse(input_port_id=input_port.id)
+
+
 @router.delete(
     "/{id}/input_ports/{output_port_id}",
 )
-def remove_input_port_from_exploration(
+def remove_input_port_for_exploration(
     id: UUID,
     output_port_id: UUID,
     db: Session = Depends(get_db_session),

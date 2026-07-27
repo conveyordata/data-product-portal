@@ -82,7 +82,16 @@ export const dataProductTags = {
             { type: TagTypes.MyRequests },
         ],
     },
-    unlinkInputPortFromDataProduct: {
+    revokeInputPortForDataProduct: {
+        invalidatesTags: (_, __, arg) => [
+            { type: TagTypes.DataProduct, id: arg.id },
+            { type: TagTypes.OutputPort, id: arg.outputPortId },
+            { type: TagTypes.History, id: arg.outputPortId },
+            { type: TagTypes.History, id: arg.id },
+            { type: TagTypes.DataProductInputPorts, id: arg.id },
+        ],
+    },
+    cancelInputPortForDataProduct: {
         invalidatesTags: (_, __, arg) => [
             { type: TagTypes.DataProduct, id: arg.id },
             { type: TagTypes.OutputPort, id: arg.outputPortId },

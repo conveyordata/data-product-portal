@@ -15,6 +15,7 @@ from app.data_products.output_ports.input_ports.schema_request import (
     ApproveOutputPortAsInputPortRequest,
     DenyOutputPortAsInputPortRequest,
     RemoveOutputPortAsInputPortRequest,
+    RevokeOutputPortAsInputPortRequest,
 )
 from app.data_products.output_ports.input_ports.schema_response import (
     GetInputPortsForOutputPortResponse,
@@ -141,6 +142,50 @@ def deny_output_port_as_input_port(
 
 
 @router.post(
+    "/revoke",
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                Action.OUTPUT_PORT__REVOKE_DATAPRODUCT_ACCESS,
+                DatasetResolver,
+                object_id="output_port_id",
+            )
+        ),
+    ],
+)
+def revoke_output_port_as_input_port(
+    data_product_id: UUID,
+    output_port_id: UUID,
+    body: RevokeOutputPortAsInputPortRequest,
+    db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
+) -> None:
+    input_port = InputPortService(db).revoke_output_port_as_input_port(
+        data_product_id=data_product_id,
+        output_port_id=output_port_id,
+        consuming_data_product_id=body.consuming_data_product_id,
+        actor=authenticated_user,
+    )
+
+    event_id = EventService(db).create_event(
+        CreateEvent(
+            name=EventType.DATA_PRODUCT_DATASET_LINK_REVOKED,
+            subject_id=input_port.output_port_id,
+            subject_type=EventReferenceEntity.DATASET,
+            target_id=input_port.consuming_abstract_data_product_id,
+            target_type=EventReferenceEntity.DATA_PRODUCT,
+            actor_id=authenticated_user.id,
+        ),
+    )
+    NotificationService(db).create_dataset_notifications(
+        dataset_id=input_port.output_port_id,
+        event_id=event_id,
+        extra_receiver_ids=[input_port.latest_request.requested_by_id],
+    )
+    RefreshInfrastructureLambda().trigger()
+
+
+@router.post(
     "/remove",
     dependencies=[
         Depends(
@@ -155,14 +200,14 @@ def deny_output_port_as_input_port(
 def remove_output_port_as_input_port(
     data_product_id: UUID,
     output_port_id: UUID,
-    request: RemoveOutputPortAsInputPortRequest,
+    body: RemoveOutputPortAsInputPortRequest,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
     input_port = InputPortService(db).remove_output_port_as_input_port(
         data_product_id=data_product_id,
         output_port_id=output_port_id,
-        consuming_data_product_id=request.consuming_data_product_id,
+        consuming_data_product_id=body.consuming_data_product_id,
     )
     event_id = EventService(db).create_event(
         CreateEvent(

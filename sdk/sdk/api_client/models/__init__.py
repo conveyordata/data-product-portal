@@ -31,6 +31,12 @@ from .azure_environment_platform_configuration import (
 from .become_admin import BecomeAdmin
 from .bitol_contract_request import BitolContractRequest
 from .can_become_admin_update import CanBecomeAdminUpdate
+from .cancel_input_port_for_data_product_response import (
+    CancelInputPortForDataProductResponse,
+)
+from .cancel_input_port_for_exploration_response import (
+    CancelInputPortForExplorationResponse,
+)
 from .cloud_event_data_product_event import CloudEventDataProductEvent
 from .cloud_event_data_product_role_assignment_event import (
     CloudEventDataProductRoleAssignmentEvent,
@@ -179,6 +185,7 @@ from .http_validation_error import HTTPValidationError
 from .input_port_event import InputPortEvent
 from .input_port_request import InputPortRequest
 from .input_port_request_base import InputPortRequestBase
+from .input_port_request_decision import InputPortRequestDecision
 from .input_port_status import InputPortStatus
 from .is_admin_response import IsAdminResponse
 from .link_input_ports_to_data_product import LinkInputPortsToDataProduct
@@ -288,6 +295,13 @@ from .resource_name_model import ResourceNameModel
 from .resource_name_suggestion import ResourceNameSuggestion
 from .resource_name_validation import ResourceNameValidation
 from .resource_name_validity_type import ResourceNameValidityType
+from .revoke_input_port_for_data_product_response import (
+    RevokeInputPortForDataProductResponse,
+)
+from .revoke_input_port_for_exploration_response import (
+    RevokeInputPortForExplorationResponse,
+)
+from .revoke_output_port_as_input_port_request import RevokeOutputPortAsInputPortRequest
 from .role import Role
 from .s3_technical_asset_configuration import S3TechnicalAssetConfiguration
 from .schema_object_request import SchemaObjectRequest
@@ -369,6 +383,8 @@ __all__ = (
     "BecomeAdmin",
     "BitolContractRequest",
     "CanBecomeAdminUpdate",
+    "CancelInputPortForDataProductResponse",
+    "CancelInputPortForExplorationResponse",
     "CloudEventDataProductEvent",
     "CloudEventDataProductRoleAssignmentEvent",
     "CloudEventExplorationEvent",
@@ -493,6 +509,7 @@ __all__ = (
     "InputPortEvent",
     "InputPortRequest",
     "InputPortRequestBase",
+    "InputPortRequestDecision",
     "InputPortStatus",
     "IsAdminResponse",
     "LinkInputPortsToDataProduct",
@@ -568,6 +585,9 @@ __all__ = (
     "ResourceNameSuggestion",
     "ResourceNameValidation",
     "ResourceNameValidityType",
+    "RevokeInputPortForDataProductResponse",
+    "RevokeInputPortForExplorationResponse",
+    "RevokeOutputPortAsInputPortRequest",
     "Role",
     "S3TechnicalAssetConfiguration",
     "SchemaObjectRequest",

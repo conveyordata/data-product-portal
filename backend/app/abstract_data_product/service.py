@@ -7,6 +7,7 @@ from fastapi import BackgroundTasks, HTTPException, status
 from sqlalchemy import UUID, select
 from sqlalchemy.orm import Session, selectinload
 
+from app.abstract_data_product.input_ports.enums import InputPortRequestDecision
 from app.abstract_data_product.input_ports.model import (
     InputPort as InputPortModel,
 )
@@ -21,7 +22,6 @@ from app.abstract_data_product.type import AbstractDataProductType
 from app.access_durations.enums import AccessDurationType
 from app.access_durations.model import AccessDuration
 from app.access_durations.service import AccessDurationService
-from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.role_assignments.output_port.service import (
     RoleAssignmentService as OutputPortRoleAssignmentService,
 )
@@ -132,10 +132,10 @@ class AbstractDataProductService:
                 decision_note="Auto approved for unrestricted output port",
             )
         else:
-            request.decision = DecisionStatus.PENDING
+            request.decision = InputPortRequestDecision.PENDING
         input_port.recompute_status()
 
-        if request.decision == DecisionStatus.APPROVED and self.posthog:
+        if request.decision == InputPortRequestDecision.APPROVED and self.posthog:
             self.posthog.capture(
                 distinct_id=actor.id,
                 event="Input Port Approved",
@@ -290,16 +290,16 @@ class AbstractDataProductService:
         self.db.flush()
         return input_port
 
-    def remove_input_port(
-        self,
-        id: UUID,
-        output_port_id: UUID,
-    ) -> InputPortModel:
+    def _get_input_port(self, id: UUID, output_port_id: UUID) -> InputPortModel:
         ensure_output_port_exists(output_port_id, self.db)
         adp = ensure_abstract_data_product_exists(
             id,
             self.db,
-            options=[selectinload(AbstractDataProduct.input_ports)],
+            options=[
+                selectinload(AbstractDataProduct.input_ports).selectinload(
+                    InputPortModel.requests
+                )
+            ],
             populate_existing=True,
         )
         input_port = next(
@@ -315,7 +315,57 @@ class AbstractDataProductService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Input port connection to Output Port ({output_port_id}) not found in {adp.abstract_data_product_type} {id}",
             )
+        return input_port
 
+    def revoke_input_port(
+        self,
+        id: UUID,
+        output_port_id: UUID,
+        *,
+        actor: User,
+    ) -> InputPortModel:
+        input_port = self._get_input_port(id, output_port_id)
+        target = input_port.active_grant
+        if target is None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="There is no active access to revoke",
+            )
+
+        target.revoked_by = actor
+        target.revoked_at = datetime.now(tz=pytz.utc)
+        input_port.recompute_status()
+        self.db.flush()
+        return input_port
+
+    def cancel_input_port_request(
+        self,
+        id: UUID,
+        output_port_id: UUID,
+        *,
+        actor: User,
+    ) -> InputPortModel:
+        input_port = self._get_input_port(id, output_port_id)
+        target = input_port.pending_request
+        if target is None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="There is no pending request to cancel",
+            )
+
+        target.decided_by = actor
+        target.decided_on = datetime.now(tz=pytz.utc)
+        target.decision = InputPortRequestDecision.CANCELLED
+        input_port.recompute_status()
+        self.db.flush()
+        return input_port
+
+    def remove_input_port(
+        self,
+        id: UUID,
+        output_port_id: UUID,
+    ) -> InputPortModel:
+        input_port = self._get_input_port(id, output_port_id)
         self.db.delete(input_port)
         return input_port
 

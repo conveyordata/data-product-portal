@@ -262,6 +262,26 @@ export function getEventTypeDisplayName(
                     components={{ element }}
                 />
             );
+        case EventType.DATA_PRODUCT_DATASET_LINK_REVOKED:
+            return (
+                <Trans
+                    t={t}
+                    i18nKey="EventDataProductDatasetLinkRevoked"
+                    defaults="Revoked consuming link with the <element>{{entity}}</element> {{entity_type}}"
+                    values={{ entity, entity_type }}
+                    components={{ element }}
+                />
+            );
+        case EventType.DATA_PRODUCT_DATASET_LINK_CANCELLED:
+            return (
+                <Trans
+                    t={t}
+                    i18nKey="EventDataProductDatasetLinkCancelled"
+                    defaults="Cancelled request to link with the <element>{{entity}}</element> {{entity_type}}"
+                    values={{ entity, entity_type }}
+                    components={{ element }}
+                />
+            );
 
         case EventType.DATASET_ROLE_ASSIGNMENT_CREATED:
             return (
@@ -410,6 +430,18 @@ export function getNotificationDisplayName(
                     components={{ subject, target }}
                 />
             );
+        case EventType.DATA_PRODUCT_DATASET_LINK_REVOKED:
+            return (
+                <Trans
+                    t={t}
+                    i18nKey="NotificationDataProductLinkRevoked"
+                    defaults="<subject>{{subject_entity}}</subject> {{subject_entity_type}} access has been revoked for the <target>{{target_entity}}</target> {{target_entity_type}}"
+                    values={{ subject_entity, subject_entity_type, target_entity, target_entity_type }}
+                    components={{ subject, target }}
+                />
+            );
+        case EventType.DATA_PRODUCT_DATASET_LINK_CANCELLED:
+            return;
 
         case EventType.DATA_PRODUCT_CREATED:
         case EventType.DATASET_CREATED:
@@ -563,6 +595,10 @@ function getEventTypeDisplayTranslation(
             return t('EventDataProductDatasetLinkDenied', { entity, entity_type });
         case EventType.DATA_PRODUCT_DATASET_LINK_REMOVED:
             return t('EventDataProductDatasetLinkRemoved', { entity, entity_type });
+        case EventType.DATA_PRODUCT_DATASET_LINK_REVOKED:
+            return t('EventDataProductDatasetLinkRevoked', { entity, entity_type });
+        case EventType.DATA_PRODUCT_DATASET_LINK_CANCELLED:
+            return t('EventDataProductDatasetLinkCancelled', { entity, entity_type });
 
         case EventType.DATASET_ROLE_ASSIGNMENT_CREATED:
             return t('EventDatasetRoleAssignmentCreated', { entity });

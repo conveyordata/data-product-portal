@@ -11,7 +11,8 @@ import { getDataProductDatasetsColumns } from './input-port-table-columns.tsx';
 type Props = {
     canRemoveAccess: boolean;
     canRequestAccess: boolean;
-    handleRemove: (outputPortId: string) => Promise<void>;
+    handleCancel: (outputPortId: string) => Promise<void>;
+    handleRevoke: (outputPortId: string) => Promise<void>;
     handleRenew: (outputPortId: string) => Promise<void>;
     inputPorts: InputPort[];
     loadingInputPorts: boolean;
@@ -19,7 +20,8 @@ type Props = {
 export function InputPortTable({
     canRemoveAccess,
     canRequestAccess,
-    handleRemove,
+    handleCancel,
+    handleRevoke,
     handleRenew,
     inputPorts,
     loadingInputPorts,
@@ -39,11 +41,12 @@ export function InputPortTable({
             t,
             canRemoveAccess: canRemoveAccess,
             canRequestAccess: canRequestAccess,
-            handleRemove,
+            handleCancel,
+            handleRevoke,
             handleRenew,
             inputPorts: inputPorts,
         });
-    }, [t, inputPorts, canRemoveAccess, canRequestAccess, handleRemove, handleRenew]);
+    }, [t, inputPorts, canRemoveAccess, canRequestAccess, handleCancel, handleRevoke, handleRenew]);
 
     return (
         <Table<InputPort>

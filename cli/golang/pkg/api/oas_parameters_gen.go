@@ -34,6 +34,18 @@ type ApproveOutputPortTechnicalAssetLinkParams struct {
 	OutputPortID  uuid.UUID
 }
 
+// CancelInputPortForDataProductParams is parameters of cancel_input_port_for_data_product operation.
+type CancelInputPortForDataProductParams struct {
+	ID           uuid.UUID
+	OutputPortID uuid.UUID
+}
+
+// CancelInputPortForExplorationParams is parameters of cancel_input_port_for_exploration operation.
+type CancelInputPortForExplorationParams struct {
+	ID           uuid.UUID
+	OutputPortID uuid.UUID
+}
+
 // CheckAccessParams is parameters of check_access operation.
 type CheckAccessParams struct {
 	Action   AuthorizationAction
@@ -400,8 +412,14 @@ type RemoveExplorationFinalizerParams struct {
 	Finalizer string
 }
 
-// RemoveInputPortFromExplorationParams is parameters of remove_input_port_from_exploration operation.
-type RemoveInputPortFromExplorationParams struct {
+// RemoveInputPortForDataProductParams is parameters of remove_input_port_for_data_product operation.
+type RemoveInputPortForDataProductParams struct {
+	ID           uuid.UUID
+	OutputPortID uuid.UUID
+}
+
+// RemoveInputPortForExplorationParams is parameters of remove_input_port_for_exploration operation.
+type RemoveInputPortForExplorationParams struct {
 	ID           uuid.UUID
 	OutputPortID uuid.UUID
 }
@@ -472,6 +490,24 @@ type RequestInputPortsForExplorationParams struct {
 	ID uuid.UUID
 }
 
+// RevokeInputPortForDataProductParams is parameters of revoke_input_port_for_data_product operation.
+type RevokeInputPortForDataProductParams struct {
+	ID           uuid.UUID
+	OutputPortID uuid.UUID
+}
+
+// RevokeInputPortForExplorationParams is parameters of revoke_input_port_for_exploration operation.
+type RevokeInputPortForExplorationParams struct {
+	ID           uuid.UUID
+	OutputPortID uuid.UUID
+}
+
+// RevokeOutputPortAsInputPortParams is parameters of revoke_output_port_as_input_port operation.
+type RevokeOutputPortAsInputPortParams struct {
+	DataProductID uuid.UUID
+	OutputPortID  uuid.UUID
+}
+
 // SanitizeResourceNameParams is parameters of sanitize_resource_name operation.
 type SanitizeResourceNameParams struct {
 	Name string
@@ -497,12 +533,6 @@ type SetValueForOutputPortParams struct {
 	ID            uuid.UUID
 	SettingID     uuid.UUID
 	Value         string
-}
-
-// UnlinkInputPortFromDataProductParams is parameters of unlink_input_port_from_data_product operation.
-type UnlinkInputPortFromDataProductParams struct {
-	ID           uuid.UUID
-	OutputPortID uuid.UUID
 }
 
 // UnlinkOutputPortFromTechnicalAssetParams is parameters of unlink_output_port_from_technical_asset operation.
