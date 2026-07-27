@@ -87,6 +87,7 @@ class InputPortService:
         request.decided_by = decided_by
         request.decision_note = decision_note
         request.decision = InputPortRequestDecision.APPROVED
+        request.input_port.expiry_event_sent = False
 
         match request.access_duration_type:
             case AccessDurationType.PERMANENT:
