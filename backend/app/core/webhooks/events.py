@@ -57,6 +57,12 @@ class InputPortEvent(V2Event):
         return "input_port.event"
 
 
+class InputPortExpiredEvent(InputPortEvent):
+    @classmethod
+    def event_type(cls) -> str:
+        return "input_port.expired"
+
+
 class DataProductRoleAssignmentEvent(V2Event):
     """Fired on insert, update, and delete of a data-product role assignment."""
 

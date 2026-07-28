@@ -1,6 +1,6 @@
 import uuid
 from datetime import date, datetime
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Optional, Sequence
 
 from sqlalchemy import (
     UUID,
@@ -11,6 +11,7 @@ from sqlalchemy import (
     ForeignKey,
     Integer,
     Text,
+    inspect,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -20,7 +21,7 @@ from app.abstract_data_product.input_ports.enums import (
     RenewalStatus,
 )
 from app.access_durations.enums import AccessDurationType
-from app.core.webhooks.events import InputPortEvent
+from app.core.webhooks.events import InputPortEvent, InputPortExpiredEvent, V2Event
 from app.database.database import Base
 from app.database.event_mixin import EventTrackedMixin
 from app.shared.model import BaseORM, utcnow
@@ -183,6 +184,12 @@ class InputPort(
             consuming_abstract_data_product_id=self.consuming_abstract_data_product_id,
             consuming_abstract_data_product_type=self.consuming_abstract_data_product.abstract_data_product_type,
         )
+
+    def generate_extra_events(self, connection) -> Sequence[V2Event]:
+        history = inspect(self).attrs.status.history
+        if history.has_changes() and self.status == InputPortStatus.EXPIRED:
+            return [InputPortExpiredEvent(**self.to_event().model_dump())]
+        return []
 
 
 class InputPortRequest(

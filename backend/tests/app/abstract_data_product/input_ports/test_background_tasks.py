@@ -33,9 +33,9 @@ class TestExpireInputPorts:
         assert link.status == InputPortStatus.EXPIRED
         mock_emit.assert_awaited_once()
         (events,) = mock_emit.call_args.args
-        assert len(events) == 1
-        assert events[0].event_type() == "input_port.event"
-        assert events[0].id == link.id
+        event_types = {event.event_type() for event in events}
+        assert event_types == {"input_port.event", "input_port.expired"}
+        assert all(event.id == link.id for event in events)
 
     def test_expire_input_ports__active_grant_is_untouched(self):
         link = InputPortFactory(
