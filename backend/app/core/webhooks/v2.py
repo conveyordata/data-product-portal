@@ -1,12 +1,21 @@
 import uuid
 from datetime import datetime, timezone
+from typing import Sequence
 
 import httpx
 
 from app.core.logging import logger
+from app.core.webhooks.events import V2Event
 from app.settings import settings
 
 _MISSING = object()
+
+
+async def emit_all_events(events: Sequence[V2Event]) -> None:
+    # Good for keeping sequential order, bad for speed, maybe also good for not DoSing the receiver.
+    # To be checked if we ever run into issues with this.
+    for event in events:
+        await call_v2_webhook(type(event).event_type(), event.model_dump(mode="json"))
 
 
 async def call_v2_webhook(event_type: str, data: dict) -> bool:
