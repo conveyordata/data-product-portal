@@ -1,11 +1,11 @@
 import { HttpResponse, http } from 'msw';
 import {
     AbstractDataProductStatus,
-    DecisionStatus,
     type Exploration,
     type GetExplorationInputPortsResponse,
     type GetExplorationsResponse,
     type AbstractDataProductInputPort as InputPort,
+    InputPortRequestDecision,
     InputPortStatus,
     OutputPortAccessType,
     OutputPortStatus,
@@ -50,7 +50,7 @@ const mockInputPorts: InputPort[] = [
             id: 'request-1',
             justification: 'I am your king!',
             valid_until: null,
-            decision: DecisionStatus.Approved,
+            decision: InputPortRequestDecision.Approved,
             created_on: '2024-03-15T10:00:00Z',
             requested_on: '2024-03-15T10:00:00Z',
             requested_by: {

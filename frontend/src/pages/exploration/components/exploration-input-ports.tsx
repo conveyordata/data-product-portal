@@ -3,9 +3,11 @@ import { useSelector } from 'react-redux';
 import { InputPortTab } from '@/components/abstract-data-products/input-port-tab/input-port-tab.tsx';
 import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
 import {
+    useCancelInputPortForExplorationMutation,
     useGetExplorationInputPortsQuery,
     useGetExplorationQuery,
-    useRemoveInputPortFromExplorationMutation,
+    useRenewInputPortForExplorationMutation,
+    useRevokeInputPortForExplorationMutation,
 } from '@/store/api/services/generated/explorationsApi.ts';
 
 type Props = {
@@ -17,12 +19,28 @@ export const ExplorationInputPorts = ({ explorationId }: Props) => {
     const currentUser = useSelector(selectCurrentUser);
     const { data: exploration } = useGetExplorationQuery(explorationId);
 
-    const [removeInputPortFromExploration] = useRemoveInputPortFromExplorationMutation();
-    const handleRemove = useCallback(
+    const [cancelInputPortForExploration] = useCancelInputPortForExplorationMutation();
+    const handleCancel = useCallback(
         async (outputPortId: string) => {
-            await removeInputPortFromExploration({ outputPortId, id: explorationId }).unwrap();
+            await cancelInputPortForExploration({ outputPortId, id: explorationId }).unwrap();
         },
-        [removeInputPortFromExploration, explorationId],
+        [cancelInputPortForExploration, explorationId],
+    );
+
+    const [revokeInputPortForExploration] = useRevokeInputPortForExplorationMutation();
+    const handleRevoke = useCallback(
+        async (outputPortId: string) => {
+            await revokeInputPortForExploration({ outputPortId, id: explorationId }).unwrap();
+        },
+        [revokeInputPortForExploration, explorationId],
+    );
+
+    const [renewInputPortForExploration] = useRenewInputPortForExplorationMutation();
+    const handleRenew = useCallback(
+        async (outputPortId: string) => {
+            await renewInputPortForExploration({ outputPortId, id: explorationId }).unwrap();
+        },
+        [renewInputPortForExploration, explorationId],
     );
 
     const isOwner: boolean =
@@ -37,7 +55,9 @@ export const ExplorationInputPorts = ({ explorationId }: Props) => {
             canRequestAccess={isOwner}
             canRemoveAccess={isOwner}
             inputPorts={inputPorts}
-            handleRemove={handleRemove}
+            handleCancel={handleCancel}
+            handleRevoke={handleRevoke}
+            handleRenew={handleRenew}
         />
     );
 };

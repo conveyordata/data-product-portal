@@ -5,7 +5,6 @@ import { useTranslation } from 'react-i18next';
 import EllipsisParagraph from '@/components/ellipsis-paragraph/ellipsis-paragraph.component.tsx';
 import { UserAvatarWithEmail } from '@/components/user-avatar/user-avatar-with-email.component.tsx';
 import type { TableRow } from '@/pages/product-studio/components/requests/request-utils.ts';
-import type { DecisionStatus } from '@/store/api/services/generated/usersApi.ts';
 import { formatDate } from '@/utils/date.helper.ts';
 import { getDecisionStatusBadgeStatus, getDecisionStatusLabel } from '@/utils/status.helper.ts';
 
@@ -22,8 +21,11 @@ export function useTableColumns(): ColumnsType<TableRow> {
                 title: t('Decision'),
                 dataIndex: 'decision',
                 key: 'decision',
-                render: (decision: DecisionStatus) => (
-                    <Badge status={getDecisionStatusBadgeStatus(decision)} text={getDecisionStatusLabel(t, decision)} />
+                render: (_, { decision, revokedAt }: TableRow) => (
+                    <Badge
+                        status={getDecisionStatusBadgeStatus(decision, revokedAt)}
+                        text={getDecisionStatusLabel(t, decision, revokedAt)}
+                    />
                 ),
             },
             {

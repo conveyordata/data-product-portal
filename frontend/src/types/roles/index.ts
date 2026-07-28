@@ -8,4 +8,4 @@ export type DataProductRoleAssignment = DataProductRoleAssignmentResponse;
 export type GlobalRoleAssignment = GlobalRoleAssignmentResponse;
 export type OutputPortRoleAssignment = OutputPortRoleAssignmentResponse;
 
-export { DecisionStatus, Prototype, Scope } from './enums.ts';
+export { DecisionStatus, InputPortRequestDecision, Prototype, Scope } from './enums.ts';

@@ -74,6 +74,18 @@ class RequestInputPortsForDataProductResponse(ORMModel):
     input_port_links: list[UUID]
 
 
+class RenewInputPortForDataProductResponse(ORMModel):
+    input_port_link: UUID
+
+
+class RevokeInputPortForDataProductResponse(ORMModel):
+    input_port_link: UUID
+
+
+class CancelInputPortForDataProductResponse(ORMModel):
+    input_port_link: UUID
+
+
 class GetDataProductsResponse(ORMModel):
     data_products: Sequence[GetDataProductsResponseItem]
 

@@ -5,8 +5,8 @@ from sqlalchemy import Enum as SAEnum
 from sqlalchemy.dialects.postgresql import ARRAY, UUID
 from sqlalchemy.orm import Mapped, Session, deferred, mapped_column, relationship
 
+from app.abstract_data_product.input_ports.enums import InputPortStatus
 from app.abstract_data_product.type import AbstractDataProductType
-from app.authorization.role_assignments.enums import DecisionStatus
 from app.configuration.domains.model import Domain
 from app.data_products.output_ports.model import (
     InputPort,
@@ -63,7 +63,7 @@ class AbstractDataProduct(Base, BaseORM):
     input_port_count = deferred(
         select(func.count(InputPort.id))
         .where(InputPort.consuming_abstract_data_product_id == id)
-        .where(InputPort.status == DecisionStatus.APPROVED)
+        .where(InputPort.status == InputPortStatus.APPROVED)
         .correlate_except(InputPort)
         .scalar_subquery(),
         raiseload=True,

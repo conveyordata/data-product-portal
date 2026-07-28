@@ -1,13 +1,14 @@
-import { Tag, Typography } from 'antd';
+import { ClockCircleOutlined, CloseCircleOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
+import { Flex, Tag, Typography } from 'antd';
 import { differenceInCalendarDays, parseISO } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import { useGetExpiringSoonThresholdQuery } from '@/store/api/services/generated/accessDurationsApi.ts';
 import { InputPortStatus, RenewalStatus } from '@/store/api/services/generated/dataProductsApi.ts';
 import { formatDateFromISOString } from '@/utils/date.helper.ts';
 
-const DEFAULT_EXPIRING_SOON_THRESHOLD_DAYS = 14;
+export const DEFAULT_EXPIRING_SOON_THRESHOLD_DAYS = 14;
 
-function isExpiringSoon(status: string, validUntil: string | null, thresholdDays: number): boolean {
+export function isExpiringSoon(status: string, validUntil: string | null, thresholdDays: number): boolean {
     if (status !== InputPortStatus.Approved || validUntil === null) {
         return false;
     }
@@ -22,10 +23,20 @@ type RenewalTagProps = {
 export function RenewalTag({ renewalStatus }: RenewalTagProps) {
     const { t } = useTranslation();
     if (renewalStatus === RenewalStatus.Pending) {
-        return <Tag color={'blue'}>{t('Renewal pending')}</Tag>;
+        return (
+            <Flex align={'center'} gap={'small'}>
+                <ClockCircleOutlined />
+                <Typography.Text type={'secondary'}>{t('Renewal pending')}</Typography.Text>
+            </Flex>
+        );
     }
     if (renewalStatus === RenewalStatus.Denied) {
-        return <Tag color={'red'}>{t('Renewal declined')}</Tag>;
+        return (
+            <Flex align={'center'} gap={'small'}>
+                <CloseCircleOutlined />
+                <Typography.Text type={'secondary'}>{t('Renewal declined')}</Typography.Text>
+            </Flex>
+        );
     }
     return null;
 }
@@ -33,16 +44,21 @@ export function RenewalTag({ renewalStatus }: RenewalTagProps) {
 type IsExpiringSoonTagProps = {
     status: string;
     validUntil: string | null;
+    renewalStatus?: string | null;
 };
 
-export function IsExpiringSoonTag({ status, validUntil }: IsExpiringSoonTagProps) {
+export function IsExpiringSoonTag({ status, validUntil, renewalStatus }: IsExpiringSoonTagProps) {
     const { t } = useTranslation();
     const { data } = useGetExpiringSoonThresholdQuery();
     const thresholdDays = data?.days ?? DEFAULT_EXPIRING_SOON_THRESHOLD_DAYS;
-    if (!isExpiringSoon(status, validUntil, thresholdDays)) {
+    if (renewalStatus === RenewalStatus.Pending || !isExpiringSoon(status, validUntil, thresholdDays)) {
         return null;
     }
-    return <Tag color={'gold'}>{t('Expiring soon')}</Tag>;
+    return (
+        <Tag color={'gold'} icon={<ExclamationCircleOutlined />}>
+            {t('Expiring soon')}
+        </Tag>
+    );
 }
 
 type ExpiryDateProps = {
@@ -52,7 +68,12 @@ type ExpiryDateProps = {
 
 export function ExpiryDate({ status, validUntil }: ExpiryDateProps) {
     const { t } = useTranslation();
-    if (status === InputPortStatus.Pending || status === InputPortStatus.Denied) {
+    if (
+        status === InputPortStatus.Pending ||
+        status === InputPortStatus.Denied ||
+        status === InputPortStatus.Revoked ||
+        status === InputPortStatus.Cancelled
+    ) {
         return null;
     }
     if (validUntil === null) {

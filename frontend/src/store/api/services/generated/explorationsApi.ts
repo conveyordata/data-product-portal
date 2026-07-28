@@ -55,9 +55,36 @@ const injectedRtkApi = api.injectEndpoints({
         body: queryArg.requestInputPortsForExplorationRequest,
       }),
     }),
-    removeInputPortFromExploration: build.mutation<
-      RemoveInputPortFromExplorationApiResponse,
-      RemoveInputPortFromExplorationApiArg
+    renewInputPortForExploration: build.mutation<
+      RenewInputPortForExplorationApiResponse,
+      RenewInputPortForExplorationApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/explorations/${queryArg.id}/input_ports/${queryArg.outputPortId}/renew`,
+        method: "POST",
+      }),
+    }),
+    revokeInputPortForExploration: build.mutation<
+      RevokeInputPortForExplorationApiResponse,
+      RevokeInputPortForExplorationApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/explorations/${queryArg.id}/input_ports/${queryArg.outputPortId}/revoke`,
+        method: "POST",
+      }),
+    }),
+    cancelInputPortForExploration: build.mutation<
+      CancelInputPortForExplorationApiResponse,
+      CancelInputPortForExplorationApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/explorations/${queryArg.id}/input_ports/${queryArg.outputPortId}/cancel`,
+        method: "POST",
+      }),
+    }),
+    removeInputPortForExploration: build.mutation<
+      RemoveInputPortForExplorationApiResponse,
+      RemoveInputPortForExplorationApiArg
     >({
       query: (queryArg) => ({
         url: `/api/v2/explorations/${queryArg.id}/input_ports/${queryArg.outputPortId}`,
@@ -108,9 +135,27 @@ export type RequestInputPortsForExplorationApiArg = {
   id: string;
   requestInputPortsForExplorationRequest: RequestInputPortsForExplorationRequest;
 };
-export type RemoveInputPortFromExplorationApiResponse =
+export type RenewInputPortForExplorationApiResponse =
+  /** status 200 Successful Response */ RenewInputPortForExplorationResponse;
+export type RenewInputPortForExplorationApiArg = {
+  id: string;
+  outputPortId: string;
+};
+export type RevokeInputPortForExplorationApiResponse =
+  /** status 200 Successful Response */ RevokeInputPortForExplorationResponse;
+export type RevokeInputPortForExplorationApiArg = {
+  id: string;
+  outputPortId: string;
+};
+export type CancelInputPortForExplorationApiResponse =
+  /** status 200 Successful Response */ CancelInputPortForExplorationResponse;
+export type CancelInputPortForExplorationApiArg = {
+  id: string;
+  outputPortId: string;
+};
+export type RemoveInputPortForExplorationApiResponse =
   /** status 200 Successful Response */ any;
-export type RemoveInputPortFromExplorationApiArg = {
+export type RemoveInputPortForExplorationApiArg = {
   id: string;
   outputPortId: string;
 };
@@ -200,7 +245,9 @@ export type InputPortRequestBase = {
   valid_until: string | null;
   requested_by: User;
   decided_by?: User | null;
-  decision: DecisionStatus;
+  decision: InputPortRequestDecision;
+  revoked_at?: string | null;
+  revoked_by?: User | null;
   created_on: string;
   requested_on: string;
 };
@@ -232,6 +279,15 @@ export type GetExplorationInputPortsResponse = {
 export type RequestInputPortsForExplorationResponse = {
   input_port_ids: string[];
 };
+export type RenewInputPortForExplorationResponse = {
+  input_port_id: string;
+};
+export type RevokeInputPortForExplorationResponse = {
+  input_port_id: string;
+};
+export type CancelInputPortForExplorationResponse = {
+  input_port_id: string;
+};
 export type FinalizerRequest = {
   finalizer: string;
 };
@@ -246,11 +302,14 @@ export enum InputPortStatus {
   Approved = "approved",
   Denied = "denied",
   Expired = "expired",
+  Revoked = "revoked",
+  Cancelled = "cancelled",
 }
-export enum DecisionStatus {
-  Approved = "approved",
+export enum InputPortRequestDecision {
   Pending = "pending",
+  Approved = "approved",
   Denied = "denied",
+  Cancelled = "cancelled",
 }
 export enum RenewalStatus {
   Pending = "pending",
@@ -277,7 +336,10 @@ export const {
   useGetExplorationInputPortsQuery,
   useLazyGetExplorationInputPortsQuery,
   useRequestInputPortsForExplorationMutation,
-  useRemoveInputPortFromExplorationMutation,
+  useRenewInputPortForExplorationMutation,
+  useRevokeInputPortForExplorationMutation,
+  useCancelInputPortForExplorationMutation,
+  useRemoveInputPortForExplorationMutation,
   useAddExplorationFinalizerMutation,
   useRemoveExplorationFinalizerMutation,
 } = injectedRtkApi;

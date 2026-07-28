@@ -81,14 +81,14 @@ export const dataProductsOutputPortsInputPortsTags = {
             },
         ) => invalidateOutputPortAsInputPort(dataProductId, outputPortId, consumingDataProductId),
     },
-    removeOutputPortAsInputPort: {
+    revokeOutputPortAsInputPort: {
         invalidatesTags: (
             _,
             __,
             {
                 dataProductId,
                 outputPortId,
-                removeOutputPortAsInputPortRequest: { consuming_data_product_id: consumingDataProductId },
+                revokeOutputPortAsInputPortRequest: { consuming_data_product_id: consumingDataProductId },
             },
         ) => invalidateOutputPortAsInputPort(dataProductId, outputPortId, consumingDataProductId),
     },

@@ -25,6 +25,14 @@ type BecomeAdminRes interface {
 	becomeAdminRes()
 }
 
+type CancelInputPortForDataProductRes interface {
+	cancelInputPortForDataProductRes()
+}
+
+type CancelInputPortForExplorationRes interface {
+	cancelInputPortForExplorationRes()
+}
+
 type CheckAccessRes interface {
 	checkAccessRes()
 }
@@ -329,8 +337,12 @@ type RemoveExplorationRes interface {
 	removeExplorationRes()
 }
 
-type RemoveInputPortFromExplorationRes interface {
-	removeInputPortFromExplorationRes()
+type RemoveInputPortForDataProductRes interface {
+	removeInputPortForDataProductRes()
+}
+
+type RemoveInputPortForExplorationRes interface {
+	removeInputPortForExplorationRes()
 }
 
 type RemoveOutputPortAsInputPortRes interface {
@@ -365,6 +377,14 @@ type RenderTechnicalAssetAccessPathRes interface {
 	renderTechnicalAssetAccessPathRes()
 }
 
+type RenewInputPortForDataProductRes interface {
+	renewInputPortForDataProductRes()
+}
+
+type RenewInputPortForExplorationRes interface {
+	renewInputPortForExplorationRes()
+}
+
 type ReplaceOutputPortCuratedQueriesRes interface {
 	replaceOutputPortCuratedQueriesRes()
 }
@@ -385,6 +405,18 @@ type RequestOutputPortRoleAssignmentRes interface {
 	requestOutputPortRoleAssignmentRes()
 }
 
+type RevokeInputPortForDataProductRes interface {
+	revokeInputPortForDataProductRes()
+}
+
+type RevokeInputPortForExplorationRes interface {
+	revokeInputPortForExplorationRes()
+}
+
+type RevokeOutputPortAsInputPortRes interface {
+	revokeOutputPortAsInputPortRes()
+}
+
 type SanitizeResourceNameRes interface {
 	sanitizeResourceNameRes()
 }
@@ -403,10 +435,6 @@ type SetValueForDataProductRes interface {
 
 type SetValueForOutputPortRes interface {
 	setValueForOutputPortRes()
-}
-
-type UnlinkInputPortFromDataProductRes interface {
-	unlinkInputPortFromDataProductRes()
 }
 
 type UnlinkOutputPortFromTechnicalAssetRes interface {
