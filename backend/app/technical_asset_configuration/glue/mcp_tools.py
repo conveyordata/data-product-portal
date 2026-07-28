@@ -26,13 +26,10 @@ from app.configuration.environments.platform_service_configurations.schemas impo
     AWSS3Config,
 )
 from app.configuration.environments.service import EnvironmentService
-from app.core.auth.auth import get_authenticated_user
-from app.core.auth.jwt import JWTToken
 from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.technical_assets.model import ensure_technical_asset_exists
 from app.data_products.technical_assets.schema_response import compute_technical_info
 from app.data_products.technical_assets.service import DataOutputService
-from app.database.database import SessionLocal
 from app.mcp.deps import get_db_session
 from app.settings import settings
 from app.technical_asset_configuration.glue.model import (
@@ -46,43 +43,44 @@ if TYPE_CHECKING:
     from app.technical_asset_configuration.schema_union import DataOutputConfiguration
 
 
-def _fetch_aws_credentials(data_product_namespace: str, env: str) -> dict[str, str]:
+def get_mcp_access_token() -> AccessToken:
+    """Dependency: return the FastMCP access token for the current request."""
+    return get_access_token()
+
+
+def _fetch_aws_credentials(
+    data_product_namespace: str,
+    env: str,
+    db: Session,
+    access_token: AccessToken,
+) -> dict[str, str]:
     """Fetch temporary AWS credentials via the portal SDK.
 
-    Validates that the current MCP user has access to the given data product.
+    Pure helper — callers must supply the db session and access token.
     Returns AccessKeyId / SecretAccessKey / SessionToken on success,
     or {'error': '...'} on failure.
     """
-    db = SessionLocal()
-    try:
-        access_token: AccessToken = get_access_token()
-        get_authenticated_user(
-            token=JWTToken(sub="", token=f"Bearer {access_token.token}"),
-            db=db,
-        )
-        envs = EnvironmentService(db).get_environments()
-        if env not in [e.name for e in envs]:
-            return {
-                "error": (
-                    f"Environment '{env}' not found. "
-                    f"Available environments: {[e.name for e in envs]}"
-                )
-            }
-        client = AuthenticatedClient(base_url=settings.HOST, token=access_token.token)
-        result = sdk_get_aws_credentials.sync(
-            client=client, data_product_name=data_product_namespace, environment=env
-        )
-        if not result:
-            return {
-                "error": "You don't have access to this data product or it doesn't exist."
-            }
+    envs = EnvironmentService(db).get_environments()
+    if env not in [e.name for e in envs]:
         return {
-            "AccessKeyId": result.access_key_id,
-            "SecretAccessKey": result.secret_access_key,
-            "SessionToken": result.session_token,
+            "error": (
+                f"Environment '{env}' not found. "
+                f"Available environments: {[e.name for e in envs]}"
+            )
         }
-    finally:
-        db.close()
+    client = AuthenticatedClient(base_url=settings.HOST, token=access_token.token)
+    result = sdk_get_aws_credentials.sync(
+        client=client, data_product_name=data_product_namespace, environment=env
+    )
+    if not result:
+        return {
+            "error": "You don't have access to this data product or it doesn't exist."
+        }
+    return {
+        "AccessKeyId": result.access_key_id,
+        "SecretAccessKey": result.secret_access_key,
+        "SessionToken": result.session_token,
+    }
 
 
 MCP_INSTRUCTIONS = """
@@ -125,7 +123,12 @@ MCP_INSTRUCTIONS = """
 
 def register_tools(mcp: FastMCP) -> None:
     @mcp.tool
-    def get_aws_credentials(data_product_namespace: str, env: str) -> Dict[str, str]:
+    def get_aws_credentials(
+        data_product_namespace: str,
+        env: str,
+        db: Session = Depends(get_db_session),
+        access_token: AccessToken = Depends(get_mcp_access_token),
+    ) -> Dict[str, str]:
         """Get temporary AWS credentials for a specific data product and environment.
 
         Validates that the authenticated user has access to the data product.
@@ -143,7 +146,7 @@ def register_tools(mcp: FastMCP) -> None:
         Returns:
             AccessKeyId / SecretAccessKey / SessionToken, or {'error': '...'}.
         """
-        return _fetch_aws_credentials(data_product_namespace, env)
+        return _fetch_aws_credentials(data_product_namespace, env, db, access_token)
 
     @mcp.tool
     def get_glue_database(
@@ -239,7 +242,11 @@ def register_tools(mcp: FastMCP) -> None:
 
     @mcp.tool
     def list_glue_tables(
-        data_product_namespace: str, env: str, database_name: str
+        data_product_namespace: str,
+        env: str,
+        database_name: str,
+        db: Session = Depends(get_db_session),
+        access_token: AccessToken = Depends(get_mcp_access_token),
     ) -> Dict[str, Any]:
         """List all tables in a Glue database for a data product and environment.
 
@@ -254,7 +261,7 @@ def register_tools(mcp: FastMCP) -> None:
         Returns:
             List of table names, or error if access denied / database not found.
         """
-        creds = _fetch_aws_credentials(data_product_namespace, env)
+        creds = _fetch_aws_credentials(data_product_namespace, env, db, access_token)
         if "error" in creds:
             return creds
 
@@ -319,6 +326,8 @@ def register_tools(mcp: FastMCP) -> None:
         query: str,
         bucket: str = "",
         workgroup: str = "",
+        db: Session = Depends(get_db_session),
+        access_token: AccessToken = Depends(get_mcp_access_token),
     ) -> Dict[str, Any]:
         """Run an Athena query using temporary credentials for a data product and environment.
 
@@ -342,7 +351,7 @@ def register_tools(mcp: FastMCP) -> None:
         Returns:
             {'query_execution_id': '...', ...} or {'error': '...'}.
         """
-        creds = _fetch_aws_credentials(data_product_namespace, env)
+        creds = _fetch_aws_credentials(data_product_namespace, env, db, access_token)
         if "error" in creds:
             return creds
 
@@ -386,6 +395,8 @@ def register_tools(mcp: FastMCP) -> None:
         data_product_namespace: str,
         env: str,
         max_results: int = 100,
+        db: Session = Depends(get_db_session),
+        access_token: AccessToken = Depends(get_mcp_access_token),
     ) -> Dict[str, Any]:
         """Get the status and results of a previously submitted Athena query.
 
@@ -397,7 +408,7 @@ def register_tools(mcp: FastMCP) -> None:
         Returns:
             Status and result rows, or error information.
         """
-        creds = _fetch_aws_credentials(data_product_namespace, env)
+        creds = _fetch_aws_credentials(data_product_namespace, env, db, access_token)
         if "error" in creds:
             return creds
 
