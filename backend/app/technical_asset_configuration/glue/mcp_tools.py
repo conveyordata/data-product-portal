@@ -22,6 +22,7 @@ from app.configuration.environments.platform_service_configurations.schema_respo
     EnvironmentConfigsGetItem,
 )
 from app.configuration.environments.platform_service_configurations.schemas import (
+    AWSGlueConfig,
     AWSS3Config,
 )
 from app.configuration.environments.service import EnvironmentService
@@ -195,8 +196,16 @@ def register_tools(mcp: FastMCP) -> None:
                 }
             database = tech_infos[0].info.split(".")[0]
             glue_config = config_schema.get_configuration(env_config.config)
+
+            # athena_workgroup_template is a service-level setting — the same value
+            # appears on every entry. Fall back to the first available Glue config
+            # if there is no entry whose identifier matches the technical asset's
+            # database field (e.g. demo / sample data scenarios).
+            any_glue_config = glue_config or next(
+                (c for c in env_config.config if isinstance(c, AWSGlueConfig)), None
+            )
             workgroup_template = (
-                glue_config.athena_workgroup_template if glue_config else ""
+                any_glue_config.athena_workgroup_template if any_glue_config else ""
             )
             workgroup = (
                 config_schema.render_template(
@@ -208,17 +217,12 @@ def register_tools(mcp: FastMCP) -> None:
                 if workgroup_template
                 else ""
             )
-            if glue_config is None:
-                return {
-                    "database": database,
-                    "bucket": "",
-                    "workgroup": workgroup,
-                }
             s3_config = next(
                 (
                     c
                     for c in env_config.config
                     if isinstance(c, AWSS3Config)
+                    and glue_config
                     and c.identifier == glue_config.bucket_identifier
                 ),
                 None,
