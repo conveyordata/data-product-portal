@@ -74,7 +74,12 @@ class PortalOIDCProxy(OIDCProxy):
 
 def get_auth_provider() -> Optional[PortalOIDCProxy]:
     if settings.OIDC_ENABLED:
+        from key_value.aio.stores.postgresql import PostgreSQLStore
+
+        from app.database.database import get_url
+
         oidc = get_oidc()
+        client_storage = PostgreSQLStore(url=get_url())
         return PortalOIDCProxy(
             config_url=f"{oidc.authority}/.well-known/openid-configuration",
             client_id=oidc.client_id,
@@ -82,6 +87,7 @@ def get_auth_provider() -> Optional[PortalOIDCProxy]:
             base_url=f"{(settings.MCP_BASE_URL or settings.HOST).rstrip('/')}/mcp",
             require_authorization_consent="external",
             allowed_client_redirect_uris=settings.MCP_AUTH_REDIRECT_URIS,
+            client_storage=client_storage,
         )
     logger.debug("[MCP] OIDC disabled — MCP server will run without authentication")
     return None
