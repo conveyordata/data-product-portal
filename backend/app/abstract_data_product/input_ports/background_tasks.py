@@ -15,7 +15,6 @@ CHECK_INTERVAL_SECONDS = 24 * 60 * 60
 
 async def expire_input_ports(db: Session) -> None:
     token = open_event_context()
-    events = []
     try:
         candidates = (
             db.execute(
@@ -30,14 +29,13 @@ async def expire_input_ports(db: Session) -> None:
         for input_port in candidates:
             input_port.recompute_status()
             if input_port.status == InputPortStatus.EXPIRED:
-                events.append(input_port.to_event())
                 logger.info(
                     f"[InputPort Expiry] Expired input port {input_port.id} "
                     f"for consuming data product {input_port.consuming_abstract_data_product_id}"
                 )
         db.commit()
+        events = pop_events()
     finally:
-        pop_events()
         close_event_context(token)
     await emit_all_events(events)
 
