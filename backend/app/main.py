@@ -92,7 +92,11 @@ async def lifespan(_: FastAPI):
 mcp.add_middleware(LoggingMiddleware())
 _mcp_host = settings.MCP_BASE_URL or settings.HOST
 _mcp_allowed_hosts = [urllib.parse.urlparse(_mcp_host).hostname] if _mcp_host else []
-mcp_app = mcp.http_app("/", allowed_hosts=_mcp_allowed_hosts or None)
+mcp_app = mcp.http_app(
+    "/",
+    allowed_hosts=_mcp_allowed_hosts or None,
+    stateless_http=settings.MCP_STATELESS_HTTP,
+)
 
 
 def route_as_operation_id(route: APIRoute) -> str:
