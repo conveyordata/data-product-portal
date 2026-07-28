@@ -3,14 +3,13 @@
 Structure:
   mcp.py               — this file: portal discovery tools, AWS credentials tool, resources
   deps.py              — shared infrastructure (DB session, auth)
-  plugin_registry.py   — MCPPlugin abstract base class
-  loader.py            — plugin discovery and registration
+  loader.py            — discovers and registers tools from all AssetProviderPlugin subclasses
 
   data_output_configuration/<name>/mcp_tools.py
                        — per-plugin tool registrations (e.g. Glue/Athena)
 """
 
-from typing import Any, Dict, Optional, Sequence
+from typing import Any, Dict, Optional, Sequence, get_args
 from uuid import UUID
 
 from fastmcp import FastMCP
@@ -63,6 +62,7 @@ from app.mcp.deps import (
 )
 from app.mcp.loader import get_plugin_instructions, load_plugins
 from app.search_output_ports.schema_response import SearchOutputPortsResponseItem
+from app.technical_asset_configuration.schema_union import DataOutputs
 from app.users.model import User as UserModel
 
 # ---------------------------------------------------------------------------
@@ -939,12 +939,8 @@ def get_resource_roles(
 
 load_plugins(mcp)
 
+
 logger.info(
     "[MCP] Server ready. Active plugins: "
-    + str(
-        [
-            type(p).__name__
-            for p in __import__("app.mcp.loader", fromlist=["PLUGINS"]).PLUGINS
-        ]
-    )
+    + str([cls.__name__ for cls in get_args(DataOutputs) if cls.mcp_instructions])
 )

@@ -7766,6 +7766,11 @@
           "s3_path": {
             "type": "string",
             "title": "S3 Path"
+          },
+          "athena_workgroup_template": {
+            "type": "string",
+            "title": "Athena Workgroup Template",
+            "default": ""
           }
         },
         "type": "object",
