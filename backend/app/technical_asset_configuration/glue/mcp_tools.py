@@ -90,10 +90,16 @@ MCP_INSTRUCTIONS = """
 
     Step 5: GET DATABASE + BUCKET + WORKGROUP
     ────────────────────────────────────────────
-    get_glue_database(environment, technical_asset_id)
+    get_glue_database(environment, technical_asset_id, data_product_namespace)
     → Returns {'database': '...', 'bucket': '...', 'workgroup': '...'}
+    → Resolves database name from owner's technical asset (always correct)
+    → Resolves workgroup for the CONSUMING data product (data_product_namespace param)
     → Use database directly in SQL queries — no prefix computation needed.
     → Pass bucket and workgroup to query_athena (both optional).
+
+    CRITICAL: Pass data_product_namespace (consuming product) to get the correct workgroup!
+    The workgroup template is rendered for the consumer's namespace, allowing them to
+    query using their own IAM role and workgroup permissions.
 
     Step 6: LIST TABLES
     ────────────────────
@@ -157,13 +163,17 @@ def register_tools(mcp: FastMCP) -> None:
     def get_glue_database(
         environment: str,
         technical_asset_id: str,
+        data_product_namespace: str = "",
         db: Session = Depends(get_db_session),
     ) -> Dict[str, str]:
         """Get the Athena database name and S3 results bucket for a technical asset.
 
         Args:
             environment: The environment name (e.g. 'prod', 'dev').
-            technical_asset_id: UUID of the Glue technical asset.
+            technical_asset_id: UUID of the Glue technical asset (owner's asset).
+            data_product_namespace: (Optional) Consuming data product namespace for workgroup resolution.
+                If provided, the workgroup is rendered for the consumer's namespace, allowing them to
+                query using their own IAM role and workgroup. If empty, defaults to the owner's namespace.
         Returns:
             {'database': '<fully-qualified db name>', 'bucket': '<s3 bucket name>', 'workgroup': '<workgroup name>'}
             or {'error': '...'} on failure.
@@ -183,7 +193,10 @@ def register_tools(mcp: FastMCP) -> None:
                 DataProductModel.id == data_output.owner_id
             )
         )
-        data_product_namespace = data_product.namespace if data_product else ""
+        owner_namespace = data_product.namespace if data_product else ""
+
+        # Use consuming data product namespace for workgroup if provided, otherwise use owner's
+        workgroup_namespace = data_product_namespace or owner_namespace
 
         config_schema = GlueTechnicalAssetConfiguration.model_validate(
             configuration, from_attributes=True
@@ -218,7 +231,7 @@ def register_tools(mcp: FastMCP) -> None:
             workgroup = (
                 config_schema.render_template(
                     workgroup_template,
-                    data_product_namespace=data_product_namespace,
+                    data_product_namespace=workgroup_namespace,
                     environment=environment,
                     environment_acronym=env_config.environment.acronym,
                 )
