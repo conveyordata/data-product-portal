@@ -3023,6 +3023,17 @@ func (s *InputPortRequestBase) Validate() error {
 
 	var failures []validate.FieldError
 	if err := func() error {
+		if err := s.AccessDurationType.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "access_duration_type",
+			Error: err,
+		})
+	}
+	if err := func() error {
 		if err := s.RequestedBy.Validate(); err != nil {
 			return err
 		}

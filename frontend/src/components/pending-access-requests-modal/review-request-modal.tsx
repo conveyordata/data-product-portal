@@ -1,6 +1,7 @@
 import {
     CalendarOutlined,
     CheckOutlined,
+    ClockCircleOutlined,
     CloseOutlined,
     FileTextOutlined,
     InfoCircleOutlined,
@@ -15,6 +16,7 @@ import {
     OutputPortOutlined,
     TechnicalAssetOutlined,
 } from '@/components/icons';
+import { AccessDurationType } from '@/store/api/services/generated/accessDurationsApi.ts';
 import type { AbstractDataProductType } from '@/store/api/services/generated/usersApi.ts';
 import {
     type Request,
@@ -53,6 +55,9 @@ type RequestDetails = {
     hasJustification: boolean;
     requestedOn: string;
     title: string;
+    accessDurationDays?: number | null;
+    isPermanent?: boolean;
+    renewalStatus?: string | null;
 };
 
 const abstractDataProductTypeName = (type: AbstractDataProductType) => {
@@ -99,6 +104,9 @@ function getRequestDetails(
             hasJustification: true,
             requestedOn: action.requested_on,
             title: t('Review Output Port Access Request'),
+            accessDurationDays: action.requested_duration_days,
+            isPermanent: action.access_duration_type === AccessDurationType.Permanent,
+            renewalStatus: action.input_port.renewal_status,
         };
     }
 
@@ -189,7 +197,12 @@ export function ReviewRequestModal({ action, open, onClose, onAccept, onReject }
 
     return (
         <Modal
-            title={details.title}
+            title={
+                <Flex align="center" gap="small">
+                    <span>{details.title}</span>
+                    {details.renewalStatus === 'pending' && <span style={{ color: '#faad14' }}>{t('Renewal')}</span>}
+                </Flex>
+            }
             open={open}
             onCancel={onClose}
             width={800}
@@ -279,6 +292,52 @@ export function ReviewRequestModal({ action, open, onClose, onAccept, onReject }
                                             <Typography.Text strong>{t('Business Justification')}</Typography.Text>
                                         </Flex>
                                         <Typography.Text>{details.justification}</Typography.Text>
+                                    </Flex>
+                                    <Divider style={{ margin: 0 }} />
+                                </>
+                            )}
+                            {(details.isPermanent === true ||
+                                (details.isPermanent === false && details.accessDurationDays != null)) && (
+                                <>
+                                    <Flex justify="space-between" gap="large">
+                                        <Flex align="center" gap="middle">
+                                            <Avatar
+                                                icon={<ClockCircleOutlined />}
+                                                style={{ color: '#1890ff', backgroundColor: '#e6f7ff' }}
+                                            />
+                                            <Flex vertical>
+                                                <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                                                    {t('Requested Duration')}
+                                                </Typography.Text>
+                                                <Typography.Text strong>
+                                                    {details.isPermanent
+                                                        ? t('Permanent')
+                                                        : `${details.accessDurationDays} ${t('days')}`}
+                                                </Typography.Text>
+                                            </Flex>
+                                        </Flex>
+
+                                        {!details.isPermanent && details.accessDurationDays != null && (
+                                            <Flex align="center" gap="middle">
+                                                <Avatar
+                                                    icon={<CalendarOutlined />}
+                                                    style={{ color: '#1890ff', backgroundColor: '#e6f7ff' }}
+                                                />
+                                                <Flex vertical>
+                                                    <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                                                        {t('Calculated End Date')}
+                                                    </Typography.Text>
+                                                    <Typography.Text strong>
+                                                        {formatDate(
+                                                            new Date(
+                                                                Date.now() +
+                                                                    details.accessDurationDays * 24 * 60 * 60 * 1000,
+                                                            ),
+                                                        )}
+                                                    </Typography.Text>
+                                                </Flex>
+                                            </Flex>
+                                        )}
                                     </Flex>
                                     <Divider style={{ margin: 0 }} />
                                 </>

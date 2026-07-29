@@ -6386,17 +6386,19 @@ func (*IngestOutputPortContractNotFoundApplicationJSON) ingestOutputPortContract
 
 // Ref: #/components/schemas/InputPortRequestBase
 type InputPortRequestBase struct {
-	ID            uuid.UUID                `json:"id"`
-	Justification string                   `json:"justification"`
-	DecisionNote  OptNilString             `json:"decision_note"`
-	ValidUntil    NilDate                  `json:"valid_until"`
-	RequestedBy   User                     `json:"requested_by"`
-	DecidedBy     OptNilUser               `json:"decided_by"`
-	Decision      InputPortRequestDecision `json:"decision"`
-	RevokedAt     OptNilDateTime           `json:"revoked_at"`
-	RevokedBy     OptNilUser               `json:"revoked_by"`
-	CreatedOn     time.Time                `json:"created_on"`
-	RequestedOn   time.Time                `json:"requested_on"`
+	ID                    uuid.UUID                `json:"id"`
+	Justification         string                   `json:"justification"`
+	DecisionNote          OptNilString             `json:"decision_note"`
+	ValidUntil            NilDate                  `json:"valid_until"`
+	AccessDurationType    AccessDurationType       `json:"access_duration_type"`
+	RequestedDurationDays OptNilInt                `json:"requested_duration_days"`
+	RequestedBy           User                     `json:"requested_by"`
+	DecidedBy             OptNilUser               `json:"decided_by"`
+	Decision              InputPortRequestDecision `json:"decision"`
+	RevokedAt             OptNilDateTime           `json:"revoked_at"`
+	RevokedBy             OptNilUser               `json:"revoked_by"`
+	CreatedOn             time.Time                `json:"created_on"`
+	RequestedOn           time.Time                `json:"requested_on"`
 }
 
 // GetID returns the value of ID.
@@ -6417,6 +6419,16 @@ func (s *InputPortRequestBase) GetDecisionNote() OptNilString {
 // GetValidUntil returns the value of ValidUntil.
 func (s *InputPortRequestBase) GetValidUntil() NilDate {
 	return s.ValidUntil
+}
+
+// GetAccessDurationType returns the value of AccessDurationType.
+func (s *InputPortRequestBase) GetAccessDurationType() AccessDurationType {
+	return s.AccessDurationType
+}
+
+// GetRequestedDurationDays returns the value of RequestedDurationDays.
+func (s *InputPortRequestBase) GetRequestedDurationDays() OptNilInt {
+	return s.RequestedDurationDays
 }
 
 // GetRequestedBy returns the value of RequestedBy.
@@ -6472,6 +6484,16 @@ func (s *InputPortRequestBase) SetDecisionNote(val OptNilString) {
 // SetValidUntil sets the value of ValidUntil.
 func (s *InputPortRequestBase) SetValidUntil(val NilDate) {
 	s.ValidUntil = val
+}
+
+// SetAccessDurationType sets the value of AccessDurationType.
+func (s *InputPortRequestBase) SetAccessDurationType(val AccessDurationType) {
+	s.AccessDurationType = val
+}
+
+// SetRequestedDurationDays sets the value of RequestedDurationDays.
+func (s *InputPortRequestBase) SetRequestedDurationDays(val OptNilInt) {
+	s.RequestedDurationDays = val
 }
 
 // SetRequestedBy sets the value of RequestedBy.

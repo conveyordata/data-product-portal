@@ -17705,6 +17705,16 @@ func (s *InputPortRequestBase) encodeFields(e *jx.Encoder) {
 		s.ValidUntil.Encode(e, json.EncodeDate)
 	}
 	{
+		e.FieldStart("access_duration_type")
+		s.AccessDurationType.Encode(e)
+	}
+	{
+		if s.RequestedDurationDays.Set {
+			e.FieldStart("requested_duration_days")
+			s.RequestedDurationDays.Encode(e)
+		}
+	}
+	{
 		e.FieldStart("requested_by")
 		s.RequestedBy.Encode(e)
 	}
@@ -17740,18 +17750,20 @@ func (s *InputPortRequestBase) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfInputPortRequestBase = [11]string{
+var jsonFieldsNameOfInputPortRequestBase = [13]string{
 	0:  "id",
 	1:  "justification",
 	2:  "decision_note",
 	3:  "valid_until",
-	4:  "requested_by",
-	5:  "decided_by",
-	6:  "decision",
-	7:  "revoked_at",
-	8:  "revoked_by",
-	9:  "created_on",
-	10: "requested_on",
+	4:  "access_duration_type",
+	5:  "requested_duration_days",
+	6:  "requested_by",
+	7:  "decided_by",
+	8:  "decision",
+	9:  "revoked_at",
+	10: "revoked_by",
+	11: "created_on",
+	12: "requested_on",
 }
 
 // Decode decodes InputPortRequestBase from json.
@@ -17807,8 +17819,28 @@ func (s *InputPortRequestBase) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"valid_until\"")
 			}
-		case "requested_by":
+		case "access_duration_type":
 			requiredBitSet[0] |= 1 << 4
+			if err := func() error {
+				if err := s.AccessDurationType.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"access_duration_type\"")
+			}
+		case "requested_duration_days":
+			if err := func() error {
+				s.RequestedDurationDays.Reset()
+				if err := s.RequestedDurationDays.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"requested_duration_days\"")
+			}
+		case "requested_by":
+			requiredBitSet[0] |= 1 << 6
 			if err := func() error {
 				if err := s.RequestedBy.Decode(d); err != nil {
 					return err
@@ -17828,7 +17860,7 @@ func (s *InputPortRequestBase) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"decided_by\"")
 			}
 		case "decision":
-			requiredBitSet[0] |= 1 << 6
+			requiredBitSet[1] |= 1 << 0
 			if err := func() error {
 				if err := s.Decision.Decode(d); err != nil {
 					return err
@@ -17858,7 +17890,7 @@ func (s *InputPortRequestBase) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"revoked_by\"")
 			}
 		case "created_on":
-			requiredBitSet[1] |= 1 << 1
+			requiredBitSet[1] |= 1 << 3
 			if err := func() error {
 				v, err := json.DecodeDateTime(d)
 				s.CreatedOn = v
@@ -17870,7 +17902,7 @@ func (s *InputPortRequestBase) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"created_on\"")
 			}
 		case "requested_on":
-			requiredBitSet[1] |= 1 << 2
+			requiredBitSet[1] |= 1 << 4
 			if err := func() error {
 				v, err := json.DecodeDateTime(d)
 				s.RequestedOn = v
@@ -17892,7 +17924,7 @@ func (s *InputPortRequestBase) Decode(d *jx.Decoder) error {
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
 		0b01011011,
-		0b00000110,
+		0b00011001,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

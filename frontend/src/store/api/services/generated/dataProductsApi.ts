@@ -481,6 +481,8 @@ export type InputPortRequestBase = {
   justification: string;
   decision_note?: string | null;
   valid_until: string | null;
+  access_duration_type: AccessDurationType;
+  requested_duration_days?: number | null;
   requested_by: User;
   decided_by?: User | null;
   decision: InputPortRequestDecision;
@@ -699,6 +701,10 @@ export enum InputPortStatus {
   Expired = "expired",
   Revoked = "revoked",
   Cancelled = "cancelled",
+}
+export enum AccessDurationType {
+  Permanent = "permanent",
+  TimeBound = "time_bound",
 }
 export enum InputPortRequestDecision {
   Pending = "pending",

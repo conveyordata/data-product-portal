@@ -223,6 +223,11 @@ class InputPortService:
                         )
                     )
                 )
+                .options(
+                    selectinload(InputPortRequestModel.input_port).selectinload(
+                        InputPortModel.requests
+                    )
+                )
                 .order_by(asc(InputPortRequestModel.created_on))
             )
             .unique()
@@ -249,6 +254,11 @@ class InputPortService:
             select(InputPortRequestModel)
             .join(InputPortModel)
             .where(InputPortRequestModel.requested_by_id == user.id)
+            .options(
+                selectinload(InputPortRequestModel.input_port).selectinload(
+                    InputPortModel.requests
+                )
+            )
             .order_by(asc(InputPortRequestModel.requested_on))
         )
 

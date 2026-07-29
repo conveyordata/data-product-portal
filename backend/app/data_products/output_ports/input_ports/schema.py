@@ -7,6 +7,7 @@ from app.abstract_data_product.input_ports.enums import (
     InputPortStatus,
     RenewalStatus,
 )
+from app.access_durations.enums import AccessDurationType
 from app.shared.schema import ORMModel
 from app.users.schema import User
 
@@ -16,6 +17,8 @@ class InputPortRequestBase(ORMModel):
     justification: str
     decision_note: Optional[str] = None
     valid_until: Optional[date]
+    access_duration_type: AccessDurationType
+    requested_duration_days: Optional[int] = None
     requested_by: User
     decided_by: Optional[User] = None
     decision: InputPortRequestDecision

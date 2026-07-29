@@ -12630,6 +12630,20 @@
             ],
             "title": "Valid Until"
           },
+          "access_duration_type": {
+            "$ref": "#/components/schemas/AccessDurationType"
+          },
+          "requested_duration_days": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requested Duration Days"
+          },
           "requested_by": {
             "$ref": "#/components/schemas/User"
           },
@@ -12693,6 +12707,7 @@
           "id",
           "justification",
           "valid_until",
+          "access_duration_type",
           "requested_by",
           "decision",
           "created_on",
@@ -12734,6 +12749,20 @@
               }
             ],
             "title": "Valid Until"
+          },
+          "access_duration_type": {
+            "$ref": "#/components/schemas/AccessDurationType"
+          },
+          "requested_duration_days": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requested Duration Days"
           },
           "requested_by": {
             "$ref": "#/components/schemas/User"
@@ -12789,6 +12818,7 @@
           "id",
           "justification",
           "valid_until",
+          "access_duration_type",
           "requested_by",
           "decision",
           "created_on",
@@ -16567,6 +16597,16 @@
           },
           "output_port": {
             "$ref": "#/components/schemas/OutputPort"
+          },
+          "renewal_status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RenewalStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",

@@ -8,6 +8,8 @@ const mockInputPortAction: InputPortRequest = {
     id: 'action-1',
     justification: 'We need this data for our quarterly reports.',
     valid_until: null,
+    access_duration_type: 'permanent',
+    requested_duration_days: null,
     decision: 'pending',
     created_on: '2024-03-15T10:00:00Z',
     requested_on: '2024-03-15T10:00:00Z',

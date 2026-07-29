@@ -4,6 +4,7 @@ from uuid import UUID
 
 from pydantic import EmailStr
 
+from app.abstract_data_product.input_ports.enums import RenewalStatus
 from app.abstract_data_product.schema_response import AbstractDataProductInfo
 from app.authorization.role_assignments.data_product.schema import (
     DataProductRoleAssignmentResponse,
@@ -65,6 +66,7 @@ class UserInputPort(ORMModel):
     consuming_abstract_data_product: AbstractDataProductInfo
     output_port_id: UUID
     output_port: OutputPort
+    renewal_status: Optional[RenewalStatus] = None
 
 
 class InputPortRequest(InputPortRequestBase):
