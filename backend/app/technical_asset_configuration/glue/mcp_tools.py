@@ -20,6 +20,7 @@ from app.configuration.environments.platform_service_configurations.schema_respo
 from app.configuration.environments.platform_service_configurations.schemas import (
     AWSGlueConfig,
 )
+from app.configuration.environments.service import EnvironmentService
 from app.core.auth.credentials import AWSCredentials
 from app.core.auth.service import AuthService
 from app.data_products.model import DataProduct as DataProductModel
@@ -65,6 +66,12 @@ def _fetch_aws_credentials(
         raise ToolError(str(e)) from e
 
     try:
+        envs = EnvironmentService(db).get_environments()
+        if env not in [e.name for e in envs]:
+            raise ToolError(
+                f"Environment '{env}' not found. "
+                f"Available environments: {[e.name for e in envs]}"
+            )
         creds = AuthService().get_aws_credentials(
             data_product_name=data_product_namespace,
             environment=env,
