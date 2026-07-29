@@ -343,6 +343,13 @@ def register_tools(mcp: FastMCP) -> None:
             aws_session_token=creds.SessionToken,
         )
         try:
+            client = boto3.client(
+                "athena",
+                region_name=settings.AWS_DEFAULT_REGION,
+                aws_access_key_id=creds.AccessKeyId,
+                aws_secret_access_key=creds.SecretAccessKey,
+                aws_session_token=creds.SessionToken,
+            )
             kwargs: Dict[str, Any] = {"QueryString": query}
             if workgroup:
                 kwargs["WorkGroup"] = workgroup
