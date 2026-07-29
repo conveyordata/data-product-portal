@@ -1,20 +1,3 @@
-"""Data Product Portal MCP server.
-
-Structure:
-  mcp.py               — this file: server initialization and plugin loader
-  deps.py              — shared infrastructure (DB session, auth)
-  loader.py            — discovers and registers tools from all AssetProviderPlugin subclasses
-
-  search.py            — discovery and search tools
-  details.py           — detail retrieval tools for entities
-  config.py            — marketplace overview, environments, analytics
-  resources.py         — resource endpoints
-  permissions.py       — role assignments and user permissions
-
-  data_output_configuration/<name>/mcp_tools.py
-                       — per-plugin tool registrations (e.g. Glue/Athena)
-"""
-
 from typing import get_args
 
 from fastmcp import FastMCP

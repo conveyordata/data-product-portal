@@ -10,6 +10,7 @@ from uuid import UUID
 import boto3
 from fastmcp import FastMCP
 from fastmcp.dependencies import Depends
+from fastmcp.exceptions import ToolError
 from sqlalchemy import select as sa_select
 from sqlalchemy.orm import Session
 
@@ -18,7 +19,6 @@ from app.configuration.environments.platform_service_configurations.schema_respo
 )
 from app.configuration.environments.platform_service_configurations.schemas import (
     AWSGlueConfig,
-    AWSS3Config,
 )
 from app.core.auth.credentials import AWSCredentials
 from app.core.auth.service import AuthService
@@ -49,14 +49,12 @@ def _fetch_aws_credentials(
     env: str,
     authorized_user: User,
     db: Session,
-) -> AWSCredentials | dict[str, str]:
+) -> AWSCredentials:
     """Fetch temporary AWS credentials for the authenticated user.
 
     Validates READ_INTEGRATIONS authorization via Casbin, then assumes the IAM
-    role to get temporary credentials. Returns AWSCredentials on success,
-    or {'error': '...'} on failure.
+    role to get temporary credentials. Raises ToolError on failure.
     """
-
     try:
         authorize_data_product_read_integrations(
             data_product_namespace=data_product_namespace,
@@ -64,17 +62,21 @@ def _fetch_aws_credentials(
             db=db,
         )
     except (ValueError, PermissionError) as e:
-        return {"error": str(e)}
+        raise ToolError(str(e)) from e
 
     try:
-        return AuthService().get_aws_credentials(
+        creds = AuthService().get_aws_credentials(
             data_product_name=data_product_namespace,
             environment=env,
             authorized_user=authorized_user,
             db=db,
         )
     except Exception as e:
-        return {"error": str(e)}
+        raise ToolError(str(e)) from e
+
+    if not isinstance(creds, AWSCredentials):
+        raise ToolError("Invalid credentials format")
+    return creds
 
 
 MCP_INSTRUCTIONS = """
@@ -146,17 +148,11 @@ def register_tools(mcp: FastMCP) -> None:
         Returns:
             AccessKeyId / SecretAccessKey / SessionToken, or {'error': '...'}.
         """
-        result = _fetch_aws_credentials(
-            data_product_namespace, env, authorized_user, db
-        )
-        if isinstance(result, dict) and "error" in result:
-            return result
-        if not isinstance(result, AWSCredentials):
-            return {"error": "Invalid credentials format"}
+        creds = _fetch_aws_credentials(data_product_namespace, env, authorized_user, db)
         return {
-            "AccessKeyId": result.AccessKeyId,
-            "SecretAccessKey": result.SecretAccessKey,
-            "SessionToken": result.SessionToken,
+            "AccessKeyId": creds.AccessKeyId,
+            "SecretAccessKey": creds.SecretAccessKey,
+            "SessionToken": creds.SessionToken,
         }
 
     @mcp.tool
@@ -238,19 +234,8 @@ def register_tools(mcp: FastMCP) -> None:
                 if workgroup_template
                 else ""
             )
-            s3_config = next(
-                (
-                    c
-                    for c in env_config.config
-                    if isinstance(c, AWSS3Config)
-                    and glue_config
-                    and c.identifier == glue_config.bucket_identifier
-                ),
-                None,
-            )
             return {
                 "database": database,
-                "bucket": s3_config.bucket_name if s3_config else "",
                 "workgroup": workgroup,
             }
 
@@ -280,42 +265,28 @@ def register_tools(mcp: FastMCP) -> None:
             List of table names, or error if access denied / database not found.
         """
         creds = _fetch_aws_credentials(data_product_namespace, env, authorized_user, db)
-        if isinstance(creds, dict) and "error" in creds:
-            return creds
-        if not isinstance(creds, AWSCredentials):
-            return {"error": "Invalid credentials format"}
-
+        client = boto3.client(
+            "glue",
+            region_name=settings.AWS_DEFAULT_REGION,
+            aws_access_key_id=creds.AccessKeyId,
+            aws_secret_access_key=creds.SecretAccessKey,
+            aws_session_token=creds.SessionToken,
+        )
         try:
-            client = boto3.client(
-                "glue",
-                region_name=settings.AWS_DEFAULT_REGION,
-                aws_access_key_id=creds.AccessKeyId,
-                aws_secret_access_key=creds.SecretAccessKey,
-                aws_session_token=creds.SessionToken,
-            )
-            tables: list[dict] = []
-            next_token = None
-            while True:
-                params: dict[str, Any] = {"DatabaseName": database_name}
-                if next_token:
-                    params["NextToken"] = next_token
-                response = client.get_tables(**params)
-                tables.extend(
-                    {
-                        "name": t["Name"],
-                        "database": database_name,
-                        "full_name": f"{database_name}.{t['Name']}",
-                        "description": t.get("Description", ""),
-                        "table_type": t.get("TableType", ""),
-                        "created_at": str(t.get("CreateTime", "")),
-                        "updated_at": str(t.get("UpdateTime", "")),
-                    }
-                    for t in response.get("TableList", [])
-                )
-                next_token = response.get("NextToken")
-                if not next_token:
-                    break
-
+            paginator = client.get_paginator("get_tables")
+            tables: list[dict] = [
+                {
+                    "name": t["Name"],
+                    "database": database_name,
+                    "full_name": f"{database_name}.{t['Name']}",
+                    "description": t.get("Description", ""),
+                    "table_type": t.get("TableType", ""),
+                    "created_at": str(t.get("CreateTime", "")),
+                    "updated_at": str(t.get("UpdateTime", "")),
+                }
+                for page in paginator.paginate(DatabaseName=database_name)
+                for t in page.get("TableList", [])
+            ]
             return {
                 "database": database_name,
                 "data_product_namespace": data_product_namespace,
@@ -325,19 +296,11 @@ def register_tools(mcp: FastMCP) -> None:
                 "table_names": [t["name"] for t in tables],
             }
         except client.exceptions.EntityNotFoundException:
-            return {
-                "error": f"Database '{database_name}' not found in Glue catalog",
-                "database": database_name,
-                "data_product_namespace": data_product_namespace,
-                "environment": env,
-            }
+            raise ToolError(
+                f"Database '{database_name}' not found in Glue catalog"
+            ) from None
         except Exception as e:
-            return {
-                "error": f"Failed to list Glue tables: {e}",
-                "database": database_name,
-                "data_product_namespace": data_product_namespace,
-                "environment": env,
-            }
+            raise ToolError(f"Failed to list Glue tables: {e}") from e
 
     @mcp.tool
     def query_athena(
@@ -372,23 +335,17 @@ def register_tools(mcp: FastMCP) -> None:
             {'query_execution_id': '...', ...} or {'error': '...'}.
         """
         creds = _fetch_aws_credentials(data_product_namespace, env, authorized_user, db)
-        if isinstance(creds, dict) and "error" in creds:
-            return creds
-        if not isinstance(creds, AWSCredentials):
-            return {"error": "Invalid credentials format"}
-
+        client = boto3.client(
+            "athena",
+            region_name=settings.AWS_DEFAULT_REGION,
+            aws_access_key_id=creds.AccessKeyId,
+            aws_secret_access_key=creds.SecretAccessKey,
+            aws_session_token=creds.SessionToken,
+        )
         try:
-            client = boto3.client(
-                "athena",
-                region_name=settings.AWS_DEFAULT_REGION,
-                aws_access_key_id=creds.AccessKeyId,
-                aws_secret_access_key=creds.SecretAccessKey,
-                aws_session_token=creds.SessionToken,
-            )
-            resolved_workgroup = workgroup
             kwargs: Dict[str, Any] = {"QueryString": query}
-            if resolved_workgroup:
-                kwargs["WorkGroup"] = resolved_workgroup
+            if workgroup:
+                kwargs["WorkGroup"] = workgroup
             if bucket:
                 kwargs["ResultConfiguration"] = {
                     "OutputLocation": f"s3://{bucket}/athena-results"
@@ -401,15 +358,15 @@ def register_tools(mcp: FastMCP) -> None:
                 "query": query,
                 "status": "Query submitted. Use get_athena_query_results to poll for results.",
             }
-            if resolved_workgroup:
-                result["workgroup"] = resolved_workgroup
+            if workgroup:
+                result["workgroup"] = workgroup
             if bucket:
                 result["output_location"] = f"s3://{bucket}/athena-results"
             return result
         except client.exceptions.InvalidRequestException as e:
-            return {"error": f"Invalid Athena query: {e}", "query": query}
+            raise ToolError(f"Invalid Athena query: {e}") from e
         except Exception as e:
-            return {"error": f"Failed to execute Athena query: {e}", "query": query}
+            raise ToolError(f"Failed to execute Athena query: {e}") from e
 
     @mcp.tool
     def get_athena_query_results(
@@ -431,19 +388,14 @@ def register_tools(mcp: FastMCP) -> None:
             Status and result rows, or error information.
         """
         creds = _fetch_aws_credentials(data_product_namespace, env, authorized_user, db)
-        if isinstance(creds, dict) and "error" in creds:
-            return creds
-        if not isinstance(creds, AWSCredentials):
-            return {"error": "Invalid credentials format"}
-
+        client = boto3.client(
+            "athena",
+            region_name=settings.AWS_DEFAULT_REGION,
+            aws_access_key_id=creds.AccessKeyId,
+            aws_secret_access_key=creds.SecretAccessKey,
+            aws_session_token=creds.SessionToken,
+        )
         try:
-            client = boto3.client(
-                "athena",
-                region_name=settings.AWS_DEFAULT_REGION,
-                aws_access_key_id=creds.AccessKeyId,
-                aws_secret_access_key=creds.SecretAccessKey,
-                aws_session_token=creds.SessionToken,
-            )
             execution = client.get_query_execution(QueryExecutionId=query_execution_id)
             exec_status = execution["QueryExecution"]["Status"]["State"]
             stats = execution["QueryExecution"]["Statistics"]
@@ -456,10 +408,11 @@ def register_tools(mcp: FastMCP) -> None:
             }
 
             if exec_status == "FAILED":
-                result["error"] = execution["QueryExecution"]["Status"].get(
-                    "StateChangeReason", "Query failed"
+                raise ToolError(
+                    execution["QueryExecution"]["Status"].get(
+                        "StateChangeReason", "Query failed"
+                    )
                 )
-                return result
 
             if exec_status in ("QUEUED", "RUNNING"):
                 result["message"] = (
@@ -497,8 +450,7 @@ def register_tools(mcp: FastMCP) -> None:
             result["message"] = f"Unexpected query status: {exec_status}"
             return result
 
+        except ToolError:
+            raise
         except Exception as e:
-            return {
-                "error": f"Failed to get query results: {e}",
-                "query_execution_id": query_execution_id,
-            }
+            raise ToolError(f"Failed to get query results: {e}") from e
