@@ -26,7 +26,11 @@ from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.technical_assets.model import ensure_technical_asset_exists
 from app.data_products.technical_assets.schema_response import compute_technical_info
 from app.data_products.technical_assets.service import DataOutputService
-from app.mcp.deps import get_db_session, get_mcp_authenticated_user
+from app.mcp.deps import (
+    authorize_data_product_read_integrations,
+    get_db_session,
+    get_mcp_authenticated_user,
+)
 from app.settings import settings
 from app.technical_asset_configuration.glue.model import (
     GlueTechnicalAssetConfiguration as GlueTechnicalAssetConfigurationModel,
@@ -52,7 +56,6 @@ def _fetch_aws_credentials(
     role to get temporary credentials. Returns AWSCredentials on success,
     or {'error': '...'} on failure.
     """
-    from app.mcp.deps import authorize_data_product_read_integrations
 
     try:
         authorize_data_product_read_integrations(
