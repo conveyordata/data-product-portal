@@ -50,7 +50,7 @@ class TestExplorationEventEmission:
         assert event_type == "exploration.event"
         assert "id" in payload
 
-    @patch("app.main.call_v2_webhook", new_callable=AsyncMock)
+    @patch("app.core.webhooks.v2.call_v2_webhook", new_callable=AsyncMock)
     def test_no_event_emitted_when_webhook_not_configured(self, mock_webhook, client):
         d = DomainFactory()
         _authorized_user()
