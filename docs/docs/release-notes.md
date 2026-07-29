@@ -6,6 +6,8 @@ sidebar_position: 200
 
 ## Unreleased
 
+## 0.7.0
+
 ### features
 
 - **[Input port]**: Input ports now contain a decision note, which can be used by the reviewer of an access request to show why they denied or approved access
