@@ -385,10 +385,9 @@ def register_tools(mcp: FastMCP) -> None:
                 aws_secret_access_key=creds.SecretAccessKey,
                 aws_session_token=creds.SessionToken,
             )
-            resolved_workgroup = workgroup
             kwargs: Dict[str, Any] = {"QueryString": query}
-            if resolved_workgroup:
-                kwargs["WorkGroup"] = resolved_workgroup
+            if workgroup:
+                kwargs["WorkGroup"] = workgroup
             if bucket:
                 kwargs["ResultConfiguration"] = {
                     "OutputLocation": f"s3://{bucket}/athena-results"
@@ -401,8 +400,8 @@ def register_tools(mcp: FastMCP) -> None:
                 "query": query,
                 "status": "Query submitted. Use get_athena_query_results to poll for results.",
             }
-            if resolved_workgroup:
-                result["workgroup"] = resolved_workgroup
+            if workgroup:
+                result["workgroup"] = workgroup
             if bucket:
                 result["output_location"] = f"s3://{bucket}/athena-results"
             return result
