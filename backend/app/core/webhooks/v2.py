@@ -18,9 +18,9 @@ async def emit_all_events(events: Sequence[V2Event]) -> None:
         await call_v2_webhook(type(event).event_type(), event.model_dump(mode="json"))
 
 
-async def call_v2_webhook(event_type: str, data: dict) -> bool:
+async def call_v2_webhook(event_type: str, data: dict) -> None:
     if not (url := settings.WEBHOOK_V2_URL):
-        return False
+        return
     body = {
         "specversion": "1.0",
         "id": str(uuid.uuid4()),
@@ -33,7 +33,5 @@ async def call_v2_webhook(event_type: str, data: dict) -> bool:
         async with httpx.AsyncClient() as client:
             resp = await client.post(url, json=body, timeout=5.0)
             resp.raise_for_status()
-        return True
     except Exception as e:
         logger.warning("v2 webhook failed: %s", e)
-        return False

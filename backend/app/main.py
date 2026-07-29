@@ -16,7 +16,6 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.abstract_data_product.background_tasks import check_stuck_deletions
 from app.abstract_data_product.input_ports.background_tasks import (
-    expire_input_ports,
     expire_input_ports_task,
 )
 from app.authorization.service import AuthorizationService
@@ -79,9 +78,6 @@ async def lifespan(_: FastAPI):
         if settings.AUTHORIZER_STARTUP_SYNC:
             AuthorizationService(db).reload_enforcer()
         db.commit()
-
-    with database.SessionLocal() as db:
-        await expire_input_ports(db)
 
     backend_analytics(API_VERSION)
     admin_task = asyncio.create_task(check_expired_admins())
