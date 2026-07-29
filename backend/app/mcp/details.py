@@ -21,8 +21,50 @@ from app.mcp.deps import get_db_session, get_mcp_authenticated_user
 from app.users.model import User as UserModel
 
 
+def get_data_product_details(
+    data_product_id: str,
+    db: Session = Depends(get_db_session),
+) -> dict[str, Any]:
+    data_product = DataProductService(db).get_data_product(
+        id=UUID(data_product_id),
+    )
+    return GetDataProductResponse.model_validate(data_product).model_dump()
+
+
+def get_output_port_details(
+    output_port_id: str,
+    db: Session = Depends(get_db_session),
+    user: UserModel = Depends(get_mcp_authenticated_user),
+) -> dict[str, Any]:
+    dataset = OutputPortService(db).get_visible_output_port(
+        id=UUID(output_port_id), user=user
+    )
+    return GetOutputPortResponse.model_validate(dataset).model_dump()
+
+
+def get_technical_asset_details(
+    technical_asset_id: str,
+    db: Session = Depends(get_db_session),
+) -> dict[str, Any]:
+    do = ensure_technical_asset_exists(UUID(technical_asset_id), db=db)
+    data_output = DataOutputService(db).get_data_output(
+        do.owner_id,
+        id=UUID(technical_asset_id),
+    )
+    return GetTechnicalAssetsResponseItem.model_validate(data_output).model_dump()
+
+
+def get_domain_details(
+    domain_id: str, db: Session = Depends(get_db_session)
+) -> dict[str, Any]:
+    domain = DomainService(db).get_domain(
+        id=UUID(domain_id),
+    )
+    return GetDomainResponse.model_validate(domain).model_dump()
+
+
 def register_detail_tools(mcp) -> None:
-    @mcp.tool(
+    mcp.tool(
         description="""
     Get full details of a single data product by its UUID, including its description,
     domain, lifecycle status, owners, output ports, and technical assets.
@@ -31,17 +73,9 @@ def register_detail_tools(mcp) -> None:
     Args:
         data_product_id: UUID obtained from search_data_products or universal_search.
     """
-    )
-    def get_data_product_details(
-        data_product_id: str,
-        db: Session = Depends(get_db_session),
-    ) -> dict[str, Any]:
-        data_product = DataProductService(db).get_data_product(
-            id=UUID(data_product_id),
-        )
-        return GetDataProductResponse.model_validate(data_product).model_dump()
+    )(get_data_product_details)
 
-    @mcp.tool(
+    mcp.tool(
         description="""
     Get full details of a single output port by its UUID, including schema, access type,
     the data product it belongs to, and owner contact information.
@@ -62,18 +96,9 @@ def register_detail_tools(mcp) -> None:
         - data_output_links: Technical assets with database configuration
         - namespace: Owner data product namespace (try as fallback only)
     """
-    )
-    def get_output_port_details(
-        output_port_id: str,
-        db: Session = Depends(get_db_session),
-        user: UserModel = Depends(get_mcp_authenticated_user),
-    ) -> dict[str, Any]:
-        dataset = OutputPortService(db).get_visible_output_port(
-            id=UUID(output_port_id), user=user
-        )
-        return GetOutputPortResponse.model_validate(dataset).model_dump()
+    )(get_output_port_details)
 
-    @mcp.tool(
+    mcp.tool(
         description="""
     Get full details of a specific technical asset (data output) by its UUID,
     including its type, configuration, and the data product it belongs to.
@@ -81,19 +106,9 @@ def register_detail_tools(mcp) -> None:
     Args:
         technical_asset_id: UUID obtained from universal_search or get_data_product_analytics.
     """
-    )
-    def get_technical_asset_details(
-        technical_asset_id: str,
-        db: Session = Depends(get_db_session),
-    ) -> dict[str, Any]:
-        do = ensure_technical_asset_exists(UUID(technical_asset_id), db=db)
-        data_output = DataOutputService(db).get_data_output(
-            do.owner_id,
-            id=UUID(technical_asset_id),
-        )
-        return GetTechnicalAssetsResponseItem.model_validate(data_output).model_dump()
+    )(get_technical_asset_details)
 
-    @mcp.tool(
+    mcp.tool(
         description="""
     Get details of a specific domain by its UUID, including its name and description.
     Use get_marketplace_overview first to discover available domain IDs.
@@ -101,11 +116,4 @@ def register_detail_tools(mcp) -> None:
     Args:
         domain_id: UUID obtained from get_marketplace_overview or search results.
     """
-    )
-    def get_domain_details(
-        domain_id: str, db: Session = Depends(get_db_session)
-    ) -> dict[str, Any]:
-        domain = DomainService(db).get_domain(
-            id=UUID(domain_id),
-        )
-        return GetDomainResponse.model_validate(domain).model_dump()
+    )(get_domain_details)
