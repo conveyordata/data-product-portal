@@ -893,9 +893,9 @@ version = "0.6.1"
 description = "SDK for Data Product Portal"
 optional = false
 python-versions = "^3.13"
-groups = ["main", "test"]
+groups = ["test"]
 files = []
-develop = false
+develop = true
 
 [package.dependencies]
 attrs = ">=22.2.0"
@@ -4829,4 +4829,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "6986359b2687addf478bfa8438801ea974b8ebac6241f4f35765d2d8ada19346"
+content-hash = "dd7b294b939d1a821aab0aa5bf6ad0a36dc313374270e3ccac61bbe239754937"

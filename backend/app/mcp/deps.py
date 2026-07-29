@@ -16,7 +16,9 @@ from sqlalchemy.orm import Session, configure_mappers
 
 from app.core.auth.auth import get_authenticated_user
 from app.core.auth.jwt import get_oidc
+from app.core.authz import Action, Authorization
 from app.core.logging import logger
+from app.data_products.model import DataProduct as DataProductModel
 from app.database.database import SessionLocal
 from app.settings import settings
 from app.users.model import User as UserModel
@@ -136,3 +138,34 @@ def get_mcp_authenticated_user(db: Session = Depends(get_db_session)) -> UserMod
 
     logger.debug(f"[MCP] Resolved user from upstream_claims: sub={sub!r}")
     return user_model
+
+
+def authorize_data_product_read_integrations(
+    data_product_namespace: str,
+    authorized_user=Depends(get_mcp_authenticated_user),
+    db: Session = Depends(get_db_session),
+) -> None:
+    """Verify authenticated user has READ_INTEGRATIONS access to the data product.
+
+    Raises an error if not authorized.
+    """
+    data_product = db.scalar(
+        sa_select(DataProductModel).where(
+            DataProductModel.namespace == data_product_namespace
+        )
+    )
+    if not data_product:
+        raise ValueError(f"Data product '{data_product_namespace}' not found")
+
+    domain_id = data_product.domain_id
+    dom = str(domain_id) if domain_id else "*"
+    obj = str(data_product.id)
+    sub = str(authorized_user.id)
+
+    if not Authorization().has_access(
+        sub=sub, dom=dom, obj=obj, act=Action.DATA_PRODUCT__READ_INTEGRATIONS
+    ):
+        raise PermissionError(
+            f"User {authorized_user.id} does not have permission to read integrations "
+            f"for data product {data_product_namespace}"
+        )

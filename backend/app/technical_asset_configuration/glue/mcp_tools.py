@@ -10,11 +10,6 @@ from uuid import UUID
 import boto3
 from fastmcp import FastMCP
 from fastmcp.dependencies import Depends
-from fastmcp.server.dependencies import AccessToken, get_access_token
-from sdk.api_client.api.authentication import (
-    get_aws_credentials as sdk_get_aws_credentials,
-)
-from sdk.api_client.client import AuthenticatedClient
 from sqlalchemy import select as sa_select
 from sqlalchemy.orm import Session
 
@@ -25,12 +20,13 @@ from app.configuration.environments.platform_service_configurations.schemas impo
     AWSGlueConfig,
     AWSS3Config,
 )
-from app.configuration.environments.service import EnvironmentService
+from app.core.auth.credentials import AWSCredentials
+from app.core.auth.service import AuthService
 from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.technical_assets.model import ensure_technical_asset_exists
 from app.data_products.technical_assets.schema_response import compute_technical_info
 from app.data_products.technical_assets.service import DataOutputService
-from app.mcp.deps import get_db_session
+from app.mcp.deps import get_db_session, get_mcp_authenticated_user
 from app.settings import settings
 from app.technical_asset_configuration.glue.model import (
     GlueTechnicalAssetConfiguration as GlueTechnicalAssetConfigurationModel,
@@ -38,49 +34,44 @@ from app.technical_asset_configuration.glue.model import (
 from app.technical_asset_configuration.glue.schema import (
     GlueTechnicalAssetConfiguration,
 )
+from app.users.schema import User
 
 if TYPE_CHECKING:
     from app.technical_asset_configuration.schema_union import DataOutputConfiguration
 
 
-def get_mcp_access_token() -> AccessToken:
-    """Dependency: return the FastMCP access token for the current request."""
-    return get_access_token()
-
-
 def _fetch_aws_credentials(
     data_product_namespace: str,
     env: str,
+    authorized_user: User,
     db: Session,
-    access_token: AccessToken,
-) -> dict[str, str]:
-    """Fetch temporary AWS credentials via the portal SDK.
+) -> AWSCredentials | dict[str, str]:
+    """Fetch temporary AWS credentials for the authenticated user.
 
-    Pure helper — callers must supply the db session and access token.
-    Returns AccessKeyId / SecretAccessKey / SessionToken on success,
+    Validates READ_INTEGRATIONS authorization via Casbin, then assumes the IAM
+    role to get temporary credentials. Returns AWSCredentials on success,
     or {'error': '...'} on failure.
     """
-    envs = EnvironmentService(db).get_environments()
-    if env not in [e.name for e in envs]:
-        return {
-            "error": (
-                f"Environment '{env}' not found. "
-                f"Available environments: {[e.name for e in envs]}"
-            )
-        }
-    client = AuthenticatedClient(base_url=settings.HOST, token=access_token.token)
-    result = sdk_get_aws_credentials.sync(
-        client=client, data_product_name=data_product_namespace, environment=env
-    )
-    if not result:
-        return {
-            "error": "You don't have access to this data product or it doesn't exist."
-        }
-    return {
-        "AccessKeyId": result.access_key_id,
-        "SecretAccessKey": result.secret_access_key,
-        "SessionToken": result.session_token,
-    }
+    from app.mcp.deps import authorize_data_product_read_integrations
+
+    try:
+        authorize_data_product_read_integrations(
+            data_product_namespace=data_product_namespace,
+            authorized_user=authorized_user,
+            db=db,
+        )
+    except (ValueError, PermissionError) as e:
+        return {"error": str(e)}
+
+    try:
+        return AuthService().get_aws_credentials(
+            data_product_name=data_product_namespace,
+            environment=env,
+            authorized_user=authorized_user,
+            db=db,
+        )
+    except Exception as e:
+        return {"error": str(e)}
 
 
 MCP_INSTRUCTIONS = """
@@ -126,8 +117,8 @@ def register_tools(mcp: FastMCP) -> None:
     def get_aws_credentials(
         data_product_namespace: str,
         env: str,
+        authorized_user: User = Depends(get_mcp_authenticated_user),
         db: Session = Depends(get_db_session),
-        access_token: AccessToken = Depends(get_mcp_access_token),
     ) -> Dict[str, str]:
         """Get temporary AWS credentials for a specific data product and environment.
 
@@ -146,7 +137,18 @@ def register_tools(mcp: FastMCP) -> None:
         Returns:
             AccessKeyId / SecretAccessKey / SessionToken, or {'error': '...'}.
         """
-        return _fetch_aws_credentials(data_product_namespace, env, db, access_token)
+        result = _fetch_aws_credentials(
+            data_product_namespace, env, authorized_user, db
+        )
+        if isinstance(result, dict) and "error" in result:
+            return result
+        if not isinstance(result, AWSCredentials):
+            return {"error": "Invalid credentials format"}
+        return {
+            "AccessKeyId": result.AccessKeyId,
+            "SecretAccessKey": result.SecretAccessKey,
+            "SessionToken": result.SessionToken,
+        }
 
     @mcp.tool
     def get_glue_database(
@@ -245,8 +247,8 @@ def register_tools(mcp: FastMCP) -> None:
         data_product_namespace: str,
         env: str,
         database_name: str,
+        authorized_user: User = Depends(get_mcp_authenticated_user),
         db: Session = Depends(get_db_session),
-        access_token: AccessToken = Depends(get_mcp_access_token),
     ) -> Dict[str, Any]:
         """List all tables in a Glue database for a data product and environment.
 
@@ -261,17 +263,19 @@ def register_tools(mcp: FastMCP) -> None:
         Returns:
             List of table names, or error if access denied / database not found.
         """
-        creds = _fetch_aws_credentials(data_product_namespace, env, db, access_token)
-        if "error" in creds:
+        creds = _fetch_aws_credentials(data_product_namespace, env, authorized_user, db)
+        if isinstance(creds, dict) and "error" in creds:
             return creds
+        if not isinstance(creds, AWSCredentials):
+            return {"error": "Invalid credentials format"}
 
         try:
             client = boto3.client(
                 "glue",
                 region_name=settings.AWS_DEFAULT_REGION,
-                aws_access_key_id=creds["AccessKeyId"],
-                aws_secret_access_key=creds["SecretAccessKey"],
-                aws_session_token=creds["SessionToken"],
+                aws_access_key_id=creds.AccessKeyId,
+                aws_secret_access_key=creds.SecretAccessKey,
+                aws_session_token=creds.SessionToken,
             )
             tables: list[dict] = []
             next_token = None
@@ -326,8 +330,8 @@ def register_tools(mcp: FastMCP) -> None:
         query: str,
         bucket: str = "",
         workgroup: str = "",
+        authorized_user: User = Depends(get_mcp_authenticated_user),
         db: Session = Depends(get_db_session),
-        access_token: AccessToken = Depends(get_mcp_access_token),
     ) -> Dict[str, Any]:
         """Run an Athena query using temporary credentials for a data product and environment.
 
@@ -351,17 +355,19 @@ def register_tools(mcp: FastMCP) -> None:
         Returns:
             {'query_execution_id': '...', ...} or {'error': '...'}.
         """
-        creds = _fetch_aws_credentials(data_product_namespace, env, db, access_token)
-        if "error" in creds:
+        creds = _fetch_aws_credentials(data_product_namespace, env, authorized_user, db)
+        if isinstance(creds, dict) and "error" in creds:
             return creds
+        if not isinstance(creds, AWSCredentials):
+            return {"error": "Invalid credentials format"}
 
         try:
             client = boto3.client(
                 "athena",
                 region_name=settings.AWS_DEFAULT_REGION,
-                aws_access_key_id=creds["AccessKeyId"],
-                aws_secret_access_key=creds["SecretAccessKey"],
-                aws_session_token=creds["SessionToken"],
+                aws_access_key_id=creds.AccessKeyId,
+                aws_secret_access_key=creds.SecretAccessKey,
+                aws_session_token=creds.SessionToken,
             )
             resolved_workgroup = workgroup
             kwargs: Dict[str, Any] = {"QueryString": query}
@@ -395,8 +401,8 @@ def register_tools(mcp: FastMCP) -> None:
         data_product_namespace: str,
         env: str,
         max_results: int = 100,
+        authorized_user: User = Depends(get_mcp_authenticated_user),
         db: Session = Depends(get_db_session),
-        access_token: AccessToken = Depends(get_mcp_access_token),
     ) -> Dict[str, Any]:
         """Get the status and results of a previously submitted Athena query.
 
@@ -408,17 +414,19 @@ def register_tools(mcp: FastMCP) -> None:
         Returns:
             Status and result rows, or error information.
         """
-        creds = _fetch_aws_credentials(data_product_namespace, env, db, access_token)
-        if "error" in creds:
+        creds = _fetch_aws_credentials(data_product_namespace, env, authorized_user, db)
+        if isinstance(creds, dict) and "error" in creds:
             return creds
+        if not isinstance(creds, AWSCredentials):
+            return {"error": "Invalid credentials format"}
 
         try:
             client = boto3.client(
                 "athena",
                 region_name=settings.AWS_DEFAULT_REGION,
-                aws_access_key_id=creds["AccessKeyId"],
-                aws_secret_access_key=creds["SecretAccessKey"],
-                aws_session_token=creds["SessionToken"],
+                aws_access_key_id=creds.AccessKeyId,
+                aws_secret_access_key=creds.SecretAccessKey,
+                aws_session_token=creds.SessionToken,
             )
             execution = client.get_query_execution(QueryExecutionId=query_execution_id)
             exec_status = execution["QueryExecution"]["Status"]["State"]
