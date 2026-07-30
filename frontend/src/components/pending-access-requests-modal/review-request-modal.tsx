@@ -288,7 +288,7 @@ export function ReviewRequestModal({ action, open, onClose, onAccept, onReject }
                         <InfoCircleOutlined /> {t('Request Details')}
                     </Typography.Title>
                     <Card size="small" variant="outlined">
-                        <Flex vertical gap="middle">
+                        <Flex vertical gap="small">
                             {details.hasJustification && (
                                 <>
                                     <Flex vertical gap="small">
@@ -324,11 +324,7 @@ export function ReviewRequestModal({ action, open, onClose, onAccept, onReject }
 
                                         {!details.isPermanent && details.accessDurationDays != null && (
                                             <Flex align="center" gap="middle">
-                                                <Avatar
-                                                    icon={<CalendarOutlined />}
-                                                    style={{ color: '#1890ff', backgroundColor: '#e6f7ff' }}
-                                                />
-                                                <Flex vertical>
+                                                <Flex vertical style={{ textAlign: 'right' }}>
                                                     <Typography.Text type="secondary" style={{ fontSize: 12 }}>
                                                         {t('Calculated End Date')}
                                                     </Typography.Text>
@@ -336,6 +332,10 @@ export function ReviewRequestModal({ action, open, onClose, onAccept, onReject }
                                                         {formatDate(addDays(new Date(), details.accessDurationDays))}
                                                     </Typography.Text>
                                                 </Flex>
+                                                <Avatar
+                                                    icon={<CalendarOutlined />}
+                                                    style={{ color: '#1890ff', backgroundColor: '#e6f7ff' }}
+                                                />
                                             </Flex>
                                         )}
                                     </Flex>
@@ -360,16 +360,16 @@ export function ReviewRequestModal({ action, open, onClose, onAccept, onReject }
                                 </Flex>
 
                                 <Flex align="center" gap="middle">
-                                    <Avatar
-                                        icon={<CalendarOutlined />}
-                                        style={{ color: '#1890ff', backgroundColor: '#e6f7ff' }}
-                                    />
-                                    <Flex vertical>
+                                    <Flex vertical style={{ textAlign: 'right' }}>
                                         <Typography.Text type="secondary" style={{ fontSize: 12 }}>
                                             {t('Requested On')}
                                         </Typography.Text>
                                         <Typography.Text strong>{formatDate(details.requestedOn)}</Typography.Text>
                                     </Flex>
+                                    <Avatar
+                                        icon={<CalendarOutlined />}
+                                        style={{ color: '#1890ff', backgroundColor: '#e6f7ff' }}
+                                    />
                                 </Flex>
                             </Flex>
                         </Flex>
