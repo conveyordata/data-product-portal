@@ -446,7 +446,7 @@ class TestDataProductsRouter:
         response = client.post(
             f"{ENDPOINT}/{data_product.id}/settings/{setting.id}?value=false"
         )
-        assert response.status_code == 400, response.text
+        assert response.status_code == 404, response.text
 
     def test_set_value_for_data_product_not_owner(self, client):
         data_product = DataProductFactory()
