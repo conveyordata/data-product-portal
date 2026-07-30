@@ -30,7 +30,9 @@ class Settings(BaseSettings):
     OIDC_REDIRECT_URI: Optional[str] = None
     OIDC_AUDIENCE: Optional[str] = None
 
+    MCP_BASE_URL: Optional[str] = None
     MCP_AUTH_REDIRECT_URIS: list[str] = []
+    MCP_STATELESS_HTTP: bool = True
 
     # Default username when oidc is disabled
     DEFAULT_USERNAME: str = "john.doe@pharma.com"
@@ -40,7 +42,6 @@ class Settings(BaseSettings):
     CONVEYOR_SECRET: Optional[str] = None
 
     # Infrastructure
-    INFRASTRUCTURE_LAMBDA_ARN: Optional[str] = None
     WEBHOOK_URL: Optional[str] = None
     ENVIRONMENT_CONTEXT: Optional[str] = None
     WEBHOOK_SECRET: Optional[str] = None

@@ -1,12 +1,11 @@
 from app.data_products.output_ports.service import OutputPortService
-from app.mcp.mcp import (
+from app.mcp.details import (
     get_data_product_details,
     get_domain_details,
     get_output_port_details,
     get_technical_asset_details,
-    search_data_products,
-    search_output_ports,
 )
+from app.mcp.search import search_data_products, search_output_ports
 from tests.factories import (
     DataProductFactory,
     DomainFactory,

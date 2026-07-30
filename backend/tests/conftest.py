@@ -163,7 +163,7 @@ def webhook_v2_input_port_events_from_technical_asset_output_port_link(
 @pytest.fixture
 def mock_webhook() -> Iterator[AsyncMock]:
     with (
-        patch("app.main.call_v2_webhook", new_callable=AsyncMock) as mock,
+        patch("app.core.webhooks.v2.call_v2_webhook", new_callable=AsyncMock) as mock,
         webhook_v2_config(),
     ):
         yield mock

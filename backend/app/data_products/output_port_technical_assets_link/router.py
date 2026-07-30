@@ -11,7 +11,6 @@ from app.core.authz.resolvers import (
     DataProductResolver,
     DatasetResolver,
 )
-from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
 from app.data_products.output_port_technical_assets_link.schema_request import (
     ApproveLinkBetweenTechnicalAssetAndOutputPortRequest,
     DenyLinkBetweenTechnicalAssetAndOutputPortRequest,
@@ -80,7 +79,6 @@ def approve_output_port_technical_asset_link(
         event_id=event_id,
         extra_receiver_ids=[output_link.requested_by_id],
     )
-    RefreshInfrastructureLambda().trigger()
 
 
 @router.post(
@@ -171,7 +169,6 @@ def link_output_port_to_technical_asset(
             actor_id=authenticated_user.id,
         ),
     )
-    RefreshInfrastructureLambda().trigger()
 
     approvers = RoleAssignmentService(db).users_with_authz_action(
         dataset_link.output_port_id,
@@ -236,4 +233,3 @@ def unlink_output_port_from_technical_asset(
     NotificationService(db).create_data_product_notifications(
         data_product_id=data_output.owner_id, event_id=event_id
     )
-    RefreshInfrastructureLambda().trigger()

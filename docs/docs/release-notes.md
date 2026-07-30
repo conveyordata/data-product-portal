@@ -8,16 +8,25 @@ sidebar_position: 200
 
 ## 0.7.0
 
+### breaking changes
+
+- **[Infrastructure Lambda]**: With the introduction of the new provisioner and reconciler the infrastructure lambda is no longer supported. The `INFRASTRUCTURE_LAMBDA_ARN` setting is no longer used and no lambda will be triggered on certain calls.
+
 ### features
 
 - **[Input port]**: Input ports now contain a decision note, which can be used by the reviewer of an access request to show why they denied or approved access
 - **[Product studio]**: A My Requests page has been added to Product Studio, which shows all access requests you have made and their status. This allows you to track your access requests in one place.
 - **[General]**: [Timebound access](./concepts/input-ports.md) has been added to the product studio for both data products and explorations.
 
+### bugfixes
+
+- **[Temporary Admin]**: Fixed a bug where temporary admin rights were expired directly after it was set due to timezone differences in the backend.
+
 ## 0.6.1
 
 ### features
 
+- **[MCP]**: Extended the MCP server with tools to fetch AWS credentials and use those credentials to query Glue and Athena. This allows the MCP server to fully execute "Talk to your data" requests if configured correctly.
 - **[SDK]**: Added support for [Infra provisioners](./developer-guide/provisioner) to the SDK. This allows for a robust way to provision infra based on changes in Portal.
 - **[UI]**: Allow deletion of an Exploration you own
 

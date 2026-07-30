@@ -113,6 +113,7 @@ class AssetProviderPlugin(ORMModel, ABC):
 
     name: ClassVar[str]
     version: ClassVar[str] = "1.0"
+    mcp_instructions: ClassVar[str] = ""
     configuration_type: DataOutputTypes
 
     # Platform metadata - should be overridden in subclasses
@@ -181,3 +182,7 @@ class AssetProviderPlugin(ORMModel, ABC):
         """Get the logo filename for this plugin"""
         platform_meta = cls.get_platform_metadata()
         return platform_meta.icon_name
+
+    @classmethod
+    def register_mcp_tools(cls, mcp: Any) -> None:
+        """Register MCP tools for this plugin. Override in subclasses that support MCP querying."""

@@ -153,3 +153,13 @@ class GlueTechnicalAssetConfiguration(AssetProviderPlugin):
     @classmethod
     def get_parent_platform(cls) -> Optional[str]:
         return "aws"
+
+    @classmethod
+    def register_mcp_tools(cls, mcp: object) -> None:
+        from app.technical_asset_configuration.glue.mcp_tools import (
+            MCP_INSTRUCTIONS,
+            register_tools,
+        )
+
+        cls.mcp_instructions = MCP_INSTRUCTIONS
+        register_tools(mcp)  # type: ignore[arg-type]

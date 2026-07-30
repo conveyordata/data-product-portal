@@ -1,6 +1,7 @@
 import asyncio
 import re
 import time
+import urllib.parse
 from collections.abc import Awaitable, Callable
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -15,6 +16,9 @@ from fastmcp.utilities.lifespan import combine_lifespans
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.abstract_data_product.background_tasks import check_stuck_deletions
+from app.abstract_data_product.input_ports.background_tasks import (
+    expire_input_ports_task,
+)
 from app.authorization.service import AuthorizationService
 from app.core.auth.device_flows.background_tasks import cleanup_device_flow_table_task
 from app.core.auth.jwt import get_oidc
@@ -25,7 +29,7 @@ from app.core.errors.error_handling import add_exception_handlers
 from app.core.logging import logger
 from app.core.logging.posthog_analytics import report_consumption_metrics_task
 from app.core.logging.scarf_analytics import backend_analytics
-from app.core.webhooks.v2 import call_v2_webhook
+from app.core.webhooks.v2 import emit_all_events
 from app.core.webhooks.webhook import call_webhook, register_webhooks
 from app.database import database
 from app.mcp.mcp import mcp
@@ -81,15 +85,23 @@ async def lifespan(_: FastAPI):
     device_flow_cleanup_task = asyncio.create_task(cleanup_device_flow_table_task())
     consumption_metrics_task = asyncio.create_task(report_consumption_metrics_task())
     stuck_deletion_task = asyncio.create_task(check_stuck_deletions())
+    input_port_expiry_task = asyncio.create_task(expire_input_ports_task())
     yield
     admin_task.cancel()
     device_flow_cleanup_task.cancel()
     consumption_metrics_task.cancel()
     stuck_deletion_task.cancel()
+    input_port_expiry_task.cancel()
 
 
 mcp.add_middleware(LoggingMiddleware())
-mcp_app = mcp.http_app("/")
+_mcp_host = settings.MCP_BASE_URL or settings.HOST
+_mcp_allowed_hosts = [urllib.parse.urlparse(_mcp_host).hostname] if _mcp_host else []
+mcp_app = mcp.http_app(
+    "/",
+    allowed_hosts=_mcp_allowed_hosts or None,
+    stateless_http=settings.MCP_STATELESS_HTTP,
+)
 
 
 def route_as_operation_id(route: APIRoute) -> str:
@@ -196,16 +208,8 @@ async def dispatch_queued_events(request: Request, call_next):
         events = pop_events()
         close_event_context(token)
     if response.status_code < 400 and settings.WEBHOOK_V2_URL and events:
-        asyncio.create_task(_emit_all_events(events))
+        asyncio.create_task(emit_all_events(events))
     return response
-
-
-async def _emit_all_events(events: list) -> None:
-    # This is a sequential loop.
-    # Good for keeping sequential order, bad for speed, maybe also good for not DoSing the receiver.
-    # To be checked if we ever run into issues with this.
-    for event in events:
-        await call_v2_webhook(type(event).event_type(), event.model_dump(mode="json"))
 
 
 class VersionResponse(ORMModel):

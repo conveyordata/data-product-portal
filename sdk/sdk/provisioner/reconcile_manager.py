@@ -12,6 +12,7 @@ from sdk.api_client.models import (
     AbstractDataProductType,
     DataProductEvent,
     DataProductRoleAssignmentEvent,
+    DataProductSettingValueEvent,
     ExplorationEvent,
     InputPortEvent,
     OutputPortEvent,
@@ -269,5 +270,10 @@ class ReconcileEventHandler(AbstractEventHandler):
 
     async def on_output_port_technical_asset_link_event(
         self, data: OutputPortTechnicalAssetLinkEvent
+    ):
+        await self._enqueue(ResourceType.DATA_PRODUCT, data.data_product_id)
+
+    async def on_data_product_setting_value_event(
+        self, data: DataProductSettingValueEvent
     ):
         await self._enqueue(ResourceType.DATA_PRODUCT, data.data_product_id)

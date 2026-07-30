@@ -11,7 +11,6 @@ from app.abstract_data_product.schema_response import AbstractDataProductInputPo
 from app.core.auth.auth import get_authenticated_user
 from app.core.authz import Action, Authorization
 from app.core.authz.resolvers import EmptyResolver
-from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
 from app.database.database import get_db_session
 from app.explorations.schema_request import (
     CreateExplorationRequest,
@@ -78,7 +77,6 @@ def create_exploration(
             background_tasks,
             authenticated_user,
         )
-        RefreshInfrastructureLambda().trigger()
     return created_exploration
 
 
@@ -120,7 +118,6 @@ def request_input_ports_for_exploration(
             detail="You are not the owner of this exploration",
         )
 
-    RefreshInfrastructureLambda().trigger()
     return RequestInputPortsForExplorationResponse(
         input_port_ids=[
             ip.id
@@ -151,7 +148,6 @@ def renew_input_port_for_exploration(
     input_port = ExplorationService(db).renew_input_port(
         id, output_port_id, actor=authenticated_user
     )
-    RefreshInfrastructureLambda().trigger()
     return RenewInputPortForExplorationResponse(input_port_id=input_port.id)
 
 
@@ -172,7 +168,6 @@ def revoke_input_port_for_exploration(
     input_port = ExplorationService(db).revoke_input_port(
         id, output_port_id, actor=authenticated_user
     )
-    RefreshInfrastructureLambda().trigger()
     return RevokeInputPortForExplorationResponse(input_port_id=input_port.id)
 
 
@@ -193,7 +188,6 @@ def cancel_input_port_for_exploration(
     input_port = exploration_service.cancel_input_port_request(
         id, output_port_id, actor=authenticated_user
     )
-    RefreshInfrastructureLambda().trigger()
     return CancelInputPortForExplorationResponse(input_port_id=input_port.id)
 
 
@@ -214,7 +208,6 @@ def remove_input_port_for_exploration(
             detail="You are not the owner of this exploration",
         )
     exploration_service.remove_input_port(id, output_port_id)
-    RefreshInfrastructureLambda().trigger()
 
 
 @router.delete(
