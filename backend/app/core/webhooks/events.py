@@ -109,3 +109,12 @@ class OutputPortTechnicalAssetLinkEvent(V2Event):
     @classmethod
     def event_type(cls) -> str:
         return "output_port_technical_asset_link.event"
+
+
+class DataProductSettingValueEvent(V2Event):
+    id: UUID
+    data_product_id: UUID
+
+    @classmethod
+    def event_type(cls) -> str:
+        return "data_product_setting_value.event"

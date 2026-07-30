@@ -41,6 +41,9 @@ from .cloud_event_data_product_event import CloudEventDataProductEvent
 from .cloud_event_data_product_role_assignment_event import (
     CloudEventDataProductRoleAssignmentEvent,
 )
+from .cloud_event_data_product_setting_value_event import (
+    CloudEventDataProductSettingValueEvent,
+)
 from .cloud_event_exploration_event import CloudEventExplorationEvent
 from .cloud_event_input_port_event import CloudEventInputPortEvent
 from .cloud_event_output_port_event import CloudEventOutputPortEvent
@@ -90,6 +93,7 @@ from .data_product_setting_scope import DataProductSettingScope
 from .data_product_setting_type import DataProductSettingType
 from .data_product_setting_update import DataProductSettingUpdate
 from .data_product_setting_value import DataProductSettingValue
+from .data_product_setting_value_event import DataProductSettingValueEvent
 from .data_product_settings_get import DataProductSettingsGet
 from .data_product_settings_get_item import DataProductSettingsGetItem
 from .data_product_status_update import DataProductStatusUpdate
@@ -387,6 +391,7 @@ __all__ = (
     "CancelInputPortForExplorationResponse",
     "CloudEventDataProductEvent",
     "CloudEventDataProductRoleAssignmentEvent",
+    "CloudEventDataProductSettingValueEvent",
     "CloudEventExplorationEvent",
     "CloudEventInputPortEvent",
     "CloudEventOutputPortEvent",
@@ -436,6 +441,7 @@ __all__ = (
     "DataProductSettingType",
     "DataProductSettingUpdate",
     "DataProductSettingValue",
+    "DataProductSettingValueEvent",
     "DataProductStatusUpdate",
     "DataProductType",
     "DataProductTypeCreate",

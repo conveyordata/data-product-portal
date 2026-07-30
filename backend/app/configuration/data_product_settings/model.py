@@ -9,7 +9,9 @@ from app.configuration.data_product_settings.enums import (
     DataProductSettingScope,
     DataProductSettingType,
 )
+from app.core.webhooks.events import DataProductSettingValueEvent
 from app.database.database import Base
+from app.database.event_mixin import EventTrackedMixin
 from app.shared.model import BaseORM
 
 if TYPE_CHECKING:
@@ -17,7 +19,7 @@ if TYPE_CHECKING:
     from app.data_products.output_ports.model import OutputPort
 
 
-class DataProductSettingValue(Base, BaseORM):
+class DataProductSettingValue(Base, BaseORM, EventTrackedMixin):
     __tablename__ = "data_products_settings_values"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
@@ -50,6 +52,15 @@ class DataProductSettingValue(Base, BaseORM):
         order_by="OutputPort.name",
         lazy="raise",
     )
+
+    def to_event(self) -> DataProductSettingValueEvent:
+        event_id = self.data_product_id
+        if not self.data_product_id:
+            event_id = self.output_port.data_product_id
+        return DataProductSettingValueEvent(
+            id=self.id,
+            data_product_id=event_id,
+        )
 
 
 class DataProductSetting(Base, BaseORM):
