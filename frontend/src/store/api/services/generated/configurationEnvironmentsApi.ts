@@ -119,6 +119,7 @@ export type AwsGlueConfig = {
   database_name: string;
   bucket_identifier: string;
   s3_path: string;
+  athena_workgroup_template?: string;
 };
 export type DatabricksConfig = {
   identifier: string;

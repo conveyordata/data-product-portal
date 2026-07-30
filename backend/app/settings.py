@@ -30,7 +30,9 @@ class Settings(BaseSettings):
     OIDC_REDIRECT_URI: Optional[str] = None
     OIDC_AUDIENCE: Optional[str] = None
 
+    MCP_BASE_URL: Optional[str] = None
     MCP_AUTH_REDIRECT_URIS: list[str] = []
+    MCP_STATELESS_HTTP: bool = True
 
     # Default username when oidc is disabled
     DEFAULT_USERNAME: str = "john.doe@pharma.com"

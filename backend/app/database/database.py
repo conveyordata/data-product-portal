@@ -1,6 +1,7 @@
 import time
 from contextlib import contextmanager
 from typing import Any, Type, TypeVar
+from urllib.parse import quote_plus
 from uuid import UUID
 
 from fastapi import HTTPException, status
@@ -28,9 +29,11 @@ def ensure_exists(
 
 
 def get_url(async_: bool = False) -> str:
+    user = quote_plus(settings.POSTGRES_USER)
+    password = quote_plus(settings.POSTGRES_PASSWORD)
     return (
-        f"postgresql{'+asyncpg' if async_ else ''}://{settings.POSTGRES_USER}:"
-        f"{settings.POSTGRES_PASSWORD}@{settings.POSTGRES_SERVER}:"
+        f"postgresql{'+asyncpg' if async_ else ''}://{user}:"
+        f"{password}@{settings.POSTGRES_SERVER}:"
         f"{settings.POSTGRES_PORT}/{settings.POSTGRES_DB}"
     )
 

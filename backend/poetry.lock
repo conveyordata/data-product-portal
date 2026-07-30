@@ -889,7 +889,7 @@ yaml = ["pyyaml (>=6.0.1)"]
 
 [[package]]
 name = "data-product-portal-sdk"
-version = "0.6.0"
+version = "0.6.1"
 description = "SDK for Data Product Portal"
 optional = false
 python-versions = "^3.13"
