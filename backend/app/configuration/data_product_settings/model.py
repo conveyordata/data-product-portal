@@ -55,8 +55,10 @@ class DataProductSettingValue(Base, BaseORM, EventTrackedMixin):
 
     def to_event(self) -> DataProductSettingValueEvent:
         event_id = self.data_product_id
-        if not self.data_product_id:
-            event_id = self.output_port.data_product_id
+        if not event_id:
+            raise ValueError(
+                "Missing data_product_id for data product setting value event"
+            )
         return DataProductSettingValueEvent(
             id=self.id,
             data_product_id=event_id,
