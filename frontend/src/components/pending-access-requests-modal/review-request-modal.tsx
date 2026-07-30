@@ -8,6 +8,7 @@ import {
     UserOutlined,
 } from '@ant-design/icons';
 import { Avatar, Button, Card, Col, Divider, Flex, Form, Input, Modal, Row, Space, Typography, theme } from 'antd';
+import { addDays } from 'date-fns';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -332,12 +333,7 @@ export function ReviewRequestModal({ action, open, onClose, onAccept, onReject }
                                                         {t('Calculated End Date')}
                                                     </Typography.Text>
                                                     <Typography.Text strong>
-                                                        {formatDate(
-                                                            new Date(
-                                                                Date.now() +
-                                                                    details.accessDurationDays * 24 * 60 * 60 * 1000,
-                                                            ),
-                                                        )}
+                                                        {formatDate(addDays(new Date(), details.accessDurationDays))}
                                                     </Typography.Text>
                                                 </Flex>
                                             </Flex>
