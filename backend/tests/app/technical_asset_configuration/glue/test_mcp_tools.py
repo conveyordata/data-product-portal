@@ -2,7 +2,6 @@ import asyncio as _asyncio
 from unittest.mock import MagicMock, patch
 
 import pytest
-from fastmcp.exceptions import ToolError
 
 from app.core.auth.credentials import AWSCredentials
 from app.technical_asset_configuration.glue.mcp_tools import _fetch_aws_credentials
@@ -33,7 +32,7 @@ class TestFetchAwsCredentials:
                 "app.technical_asset_configuration.glue.mcp_tools.authorize_data_product_read_integrations",
                 side_effect=PermissionError("no access"),
             ),
-            pytest.raises(ToolError, match="no access"),
+            pytest.raises(PermissionError, match="no access"),
         ):
             _fetch_aws_credentials("my-product", "prod", user, session)
 
@@ -43,7 +42,7 @@ class TestFetchAwsCredentials:
                 "app.technical_asset_configuration.glue.mcp_tools.authorize_data_product_read_integrations",
                 side_effect=ValueError("unknown namespace"),
             ),
-            pytest.raises(ToolError, match="unknown namespace"),
+            pytest.raises(ValueError, match="unknown namespace"),
         ):
             _fetch_aws_credentials("unknown", "prod", user, session)
 
@@ -62,7 +61,7 @@ class TestFetchAwsCredentials:
                 "app.technical_asset_configuration.glue.mcp_tools.AuthService.get_aws_credentials",
                 side_effect=Exception("STS error"),
             ),
-            pytest.raises(ToolError, match="STS error"),
+            pytest.raises(Exception, match="STS error"),
         ):
             _fetch_aws_credentials("my-product", "prod", user, session)
 
@@ -121,18 +120,13 @@ class TestListGlueTables:
         assert "customers" in result["table_names"]
 
     def test_raises_tool_error_for_missing_database(self, session, user, mock_creds):
+        class EntityNotFoundException(Exception):
+            pass
+
         mock_client = MagicMock()
         mock_paginator = MagicMock()
-        mock_paginator.paginate.side_effect = (
-            mock_client.exceptions.EntityNotFoundException()
-        )
+        mock_paginator.paginate.side_effect = EntityNotFoundException("missing_db")
         mock_client.get_paginator.return_value = mock_paginator
-        mock_client.exceptions.EntityNotFoundException = type(
-            "EntityNotFoundException", (Exception,), {}
-        )
-        mock_paginator.paginate.side_effect = (
-            mock_client.exceptions.EntityNotFoundException()
-        )
 
         with (
             patch(
@@ -140,7 +134,7 @@ class TestListGlueTables:
                 return_value=mock_creds,
             ),
             patch("boto3.client", return_value=mock_client),
-            pytest.raises(ToolError, match="not found in Glue catalog"),
+            pytest.raises(EntityNotFoundException, match="missing_db"),
         ):
             _call_list_glue_tables(
                 data_product_namespace="my-product",
@@ -199,12 +193,12 @@ class TestQueryAthena:
         assert result["workgroup"] == "my-workgroup"
 
     def test_raises_tool_error_on_invalid_query(self, session, user, mock_creds):
+        class InvalidRequestException(Exception):
+            pass
+
         mock_client = MagicMock()
-        mock_client.exceptions.InvalidRequestException = type(
-            "InvalidRequestException", (Exception,), {}
-        )
-        mock_client.start_query_execution.side_effect = (
-            mock_client.exceptions.InvalidRequestException("bad SQL")
+        mock_client.start_query_execution.side_effect = InvalidRequestException(
+            "bad SQL"
         )
 
         with (
@@ -213,7 +207,7 @@ class TestQueryAthena:
                 return_value=mock_creds,
             ),
             patch("boto3.client", return_value=mock_client),
-            pytest.raises(ToolError, match="Invalid Athena query"),
+            pytest.raises(InvalidRequestException, match="bad SQL"),
         ):
             _call_query_athena(
                 data_product_namespace="my-product",
@@ -273,7 +267,7 @@ class TestGetAthenaQueryResults:
                 return_value=mock_creds,
             ),
             patch("boto3.client", return_value=mock_client),
-            pytest.raises(ToolError, match="Syntax error in SQL"),
+            pytest.raises(RuntimeError, match="Syntax error in SQL"),
         ):
             _call_get_athena_query_results(
                 query_execution_id="qry-123",
