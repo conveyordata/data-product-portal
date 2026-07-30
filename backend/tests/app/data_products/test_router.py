@@ -33,7 +33,7 @@ from tests.factories import (
 )
 from tests.factories.data_product_setting_value import DataProductSettingValueFactory
 from tests.factories.platform_service import PlatformServiceFactory
-from tests.webhook_util import assert_event_in_queue
+from tests.webhook_util import assert_event_in_queue, assert_event_not_in_queue
 
 ENDPOINT = "/api/v2/data_products"
 
@@ -448,13 +448,14 @@ class TestDataProductsRouter:
         )
         assert response.status_code == 404, response.text
 
-    def test_set_value_for_data_product_not_owner(self, client):
+    def test_set_value_for_data_product_not_owner(self, client, mock_webhook):
         data_product = DataProductFactory()
         setting = DataProductSettingFactory()
         response = client.post(f"{ENDPOINT}/{data_product.id}/settings/{setting.id}")
+        assert_event_not_in_queue("data_product_setting_value.event", mock_webhook)
         assert response.status_code == 403
 
-    def test_dataset_set_custom_setting_not_owner(self, client):
+    def test_data_product_set_custom_setting(self, client, mock_webhook):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
         role = RoleFactory(
@@ -472,6 +473,8 @@ class TestDataProductsRouter:
         )
         assert response.status_code == 200
         response = client.get(f"{ENDPOINT}/{data_product.id}/settings")
+
+        assert_event_in_queue("data_product_setting_value.event", mock_webhook)
         assert response.json()["data_product_settings"][0]["value"] == "false"
 
     def test_get_data_product_settings(self, client):
