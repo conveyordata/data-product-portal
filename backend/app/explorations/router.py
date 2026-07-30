@@ -77,7 +77,7 @@ def create_exploration(
             background_tasks,
             authenticated_user,
         )
-        return created_exploration
+    return created_exploration
 
 
 @router.get("/{id}", response_model=GetExplorationResponse)
@@ -118,17 +118,17 @@ def request_input_ports_for_exploration(
             detail="You are not the owner of this exploration",
         )
 
-        return RequestInputPortsForExplorationResponse(
-            input_port_ids=[
-                ip.id
-                for ip in ExplorationService(db).request_input_ports(
-                    id,
-                    request.output_ports,
-                    request.justification,
-                    actor=authenticated_user,
-                )
-            ]
-        )
+    return RequestInputPortsForExplorationResponse(
+        input_port_ids=[
+            ip.id
+            for ip in ExplorationService(db).request_input_ports(
+                id,
+                request.output_ports,
+                request.justification,
+                actor=authenticated_user,
+            )
+        ]
+    )
 
 
 @router.post("/{id}/input_ports/{output_port_id}/renew")
