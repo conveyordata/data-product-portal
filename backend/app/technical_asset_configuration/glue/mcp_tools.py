@@ -10,7 +10,6 @@ from uuid import UUID
 import boto3
 from fastmcp import FastMCP
 from fastmcp.dependencies import Depends
-from fastmcp.exceptions import ToolError
 from sqlalchemy import select as sa_select
 from sqlalchemy.orm import Session
 
@@ -54,35 +53,29 @@ def _fetch_aws_credentials(
     """Fetch temporary AWS credentials for the authenticated user.
 
     Validates READ_INTEGRATIONS authorization via Casbin, then assumes the IAM
-    role to get temporary credentials. Raises ToolError on failure.
+    role to get temporary credentials.
     """
-    try:
-        authorize_data_product_read_integrations(
-            data_product_namespace=data_product_namespace,
-            authorized_user=authorized_user,
-            db=db,
-        )
-    except (ValueError, PermissionError) as e:
-        raise ToolError(str(e)) from e
+    authorize_data_product_read_integrations(
+        data_product_namespace=data_product_namespace,
+        authorized_user=authorized_user,
+        db=db,
+    )
 
-    try:
-        envs = EnvironmentService(db).get_environments()
-        if env not in [e.name for e in envs]:
-            raise ToolError(
-                f"Environment '{env}' not found. "
-                f"Available environments: {[e.name for e in envs]}"
-            )
-        creds = AuthService().get_aws_credentials(
-            data_product_name=data_product_namespace,
-            environment=env,
-            authorized_user=authorized_user,
-            db=db,
+    envs = EnvironmentService(db).get_environments()
+    if env not in [e.name for e in envs]:
+        raise ValueError(
+            f"Environment '{env}' not found. "
+            f"Available environments: {[e.name for e in envs]}"
         )
-    except Exception as e:
-        raise ToolError(str(e)) from e
+    creds = AuthService().get_aws_credentials(
+        data_product_name=data_product_namespace,
+        environment=env,
+        authorized_user=authorized_user,
+        db=db,
+    )
 
     if not isinstance(creds, AWSCredentials):
-        raise ToolError("Invalid credentials format")
+        raise TypeError("Invalid credentials format")
     return creds
 
 
@@ -279,35 +272,28 @@ def register_tools(mcp: FastMCP) -> None:
             aws_secret_access_key=creds.SecretAccessKey,
             aws_session_token=creds.SessionToken,
         )
-        try:
-            paginator = client.get_paginator("get_tables")
-            tables: list[dict] = [
-                {
-                    "name": t["Name"],
-                    "database": database_name,
-                    "full_name": f"{database_name}.{t['Name']}",
-                    "description": t.get("Description", ""),
-                    "table_type": t.get("TableType", ""),
-                    "created_at": str(t.get("CreateTime", "")),
-                    "updated_at": str(t.get("UpdateTime", "")),
-                }
-                for page in paginator.paginate(DatabaseName=database_name)
-                for t in page.get("TableList", [])
-            ]
-            return {
+        paginator = client.get_paginator("get_tables")
+        tables: list[dict] = [
+            {
+                "name": t["Name"],
                 "database": database_name,
-                "data_product_namespace": data_product_namespace,
-                "environment": env,
-                "tables": tables,
-                "table_count": len(tables),
-                "table_names": [t["name"] for t in tables],
+                "full_name": f"{database_name}.{t['Name']}",
+                "description": t.get("Description", ""),
+                "table_type": t.get("TableType", ""),
+                "created_at": str(t.get("CreateTime", "")),
+                "updated_at": str(t.get("UpdateTime", "")),
             }
-        except client.exceptions.EntityNotFoundException:
-            raise ToolError(
-                f"Database '{database_name}' not found in Glue catalog"
-            ) from None
-        except Exception as e:
-            raise ToolError(f"Failed to list Glue tables: {e}") from e
+            for page in paginator.paginate(DatabaseName=database_name)
+            for t in page.get("TableList", [])
+        ]
+        return {
+            "database": database_name,
+            "data_product_namespace": data_product_namespace,
+            "environment": env,
+            "tables": tables,
+            "table_count": len(tables),
+            "table_names": [t["name"] for t in tables],
+        }
 
     @mcp.tool
     def query_athena(
@@ -349,38 +335,26 @@ def register_tools(mcp: FastMCP) -> None:
             aws_secret_access_key=creds.SecretAccessKey,
             aws_session_token=creds.SessionToken,
         )
-        try:
-            client = boto3.client(
-                "athena",
-                region_name=settings.AWS_DEFAULT_REGION,
-                aws_access_key_id=creds.AccessKeyId,
-                aws_secret_access_key=creds.SecretAccessKey,
-                aws_session_token=creds.SessionToken,
-            )
-            kwargs: Dict[str, Any] = {"QueryString": query}
-            if workgroup:
-                kwargs["WorkGroup"] = workgroup
-            if bucket:
-                kwargs["ResultConfiguration"] = {
-                    "OutputLocation": f"s3://{bucket}/athena-results"
-                }
-            response = client.start_query_execution(**kwargs)
-            result = {
-                "query_execution_id": response["QueryExecutionId"],
-                "data_product_namespace": data_product_namespace,
-                "environment": env,
-                "query": query,
-                "status": "Query submitted. Use get_athena_query_results to poll for results.",
+        kwargs: Dict[str, Any] = {"QueryString": query}
+        if workgroup:
+            kwargs["WorkGroup"] = workgroup
+        if bucket:
+            kwargs["ResultConfiguration"] = {
+                "OutputLocation": f"s3://{bucket}/athena-results"
             }
-            if workgroup:
-                result["workgroup"] = workgroup
-            if bucket:
-                result["output_location"] = f"s3://{bucket}/athena-results"
-            return result
-        except client.exceptions.InvalidRequestException as e:
-            raise ToolError(f"Invalid Athena query: {e}") from e
-        except Exception as e:
-            raise ToolError(f"Failed to execute Athena query: {e}") from e
+        response = client.start_query_execution(**kwargs)
+        result = {
+            "query_execution_id": response["QueryExecutionId"],
+            "data_product_namespace": data_product_namespace,
+            "environment": env,
+            "query": query,
+            "status": "Query submitted. Use get_athena_query_results to poll for results.",
+        }
+        if workgroup:
+            result["workgroup"] = workgroup
+        if bucket:
+            result["output_location"] = f"s3://{bucket}/athena-results"
+        return result
 
     @mcp.tool
     def get_athena_query_results(
@@ -409,62 +383,54 @@ def register_tools(mcp: FastMCP) -> None:
             aws_secret_access_key=creds.SecretAccessKey,
             aws_session_token=creds.SessionToken,
         )
-        try:
-            execution = client.get_query_execution(QueryExecutionId=query_execution_id)
-            exec_status = execution["QueryExecution"]["Status"]["State"]
-            stats = execution["QueryExecution"]["Statistics"]
+        execution = client.get_query_execution(QueryExecutionId=query_execution_id)
+        exec_status = execution["QueryExecution"]["Status"]["State"]
+        stats = execution["QueryExecution"]["Statistics"]
 
-            result: Dict[str, Any] = {
-                "query_execution_id": query_execution_id,
-                "status": exec_status,
-                "data_scanned_bytes": stats.get("DataScannedInBytes", 0),
-                "execution_time_ms": stats.get("EngineExecutionTimeInMillis", 0),
-            }
+        result: Dict[str, Any] = {
+            "query_execution_id": query_execution_id,
+            "status": exec_status,
+            "data_scanned_bytes": stats.get("DataScannedInBytes", 0),
+            "execution_time_ms": stats.get("EngineExecutionTimeInMillis", 0),
+        }
 
-            if exec_status == "FAILED":
-                raise ToolError(
-                    execution["QueryExecution"]["Status"].get(
-                        "StateChangeReason", "Query failed"
-                    )
+        if exec_status == "FAILED":
+            raise RuntimeError(
+                execution["QueryExecution"]["Status"].get(
+                    "StateChangeReason", "Query failed"
                 )
+            )
 
-            if exec_status in ("QUEUED", "RUNNING"):
-                result["message"] = (
-                    f"Query is {exec_status.lower()}. Retry in a moment."
-                )
-                return result
-
-            if exec_status == "SUCCEEDED":
-                rows_response = client.get_query_results(
-                    QueryExecutionId=query_execution_id, MaxResults=max_results
-                )
-                rows = rows_response["ResultSet"]["Rows"]
-                if not rows:
-                    result.update({"rows": [], "row_count": 0})
-                    return result
-
-                headers = [col.get("VarCharValue", "") for col in rows[0]["Data"]]
-                data_rows = [
-                    {
-                        headers[i]: col.get("VarCharValue")
-                        for i, col in enumerate(row["Data"])
-                    }
-                    for row in rows[1:]
-                ]
-                result.update(
-                    {
-                        "columns": headers,
-                        "rows": data_rows,
-                        "row_count": len(data_rows),
-                        "truncated": len(data_rows) >= max_results,
-                    }
-                )
-                return result
-
-            result["message"] = f"Unexpected query status: {exec_status}"
+        if exec_status in ("QUEUED", "RUNNING"):
+            result["message"] = f"Query is {exec_status.lower()}. Retry in a moment."
             return result
 
-        except ToolError:
-            raise
-        except Exception as e:
-            raise ToolError(f"Failed to get query results: {e}") from e
+        if exec_status == "SUCCEEDED":
+            rows_response = client.get_query_results(
+                QueryExecutionId=query_execution_id, MaxResults=max_results
+            )
+            rows = rows_response["ResultSet"]["Rows"]
+            if not rows:
+                result.update({"rows": [], "row_count": 0})
+                return result
+
+            headers = [col.get("VarCharValue", "") for col in rows[0]["Data"]]
+            data_rows = [
+                {
+                    headers[i]: col.get("VarCharValue")
+                    for i, col in enumerate(row["Data"])
+                }
+                for row in rows[1:]
+            ]
+            result.update(
+                {
+                    "columns": headers,
+                    "rows": data_rows,
+                    "row_count": len(data_rows),
+                    "truncated": len(data_rows) >= max_results,
+                }
+            )
+            return result
+
+        result["message"] = f"Unexpected query status: {exec_status}"
+        return result
