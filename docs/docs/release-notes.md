@@ -6,6 +6,9 @@ sidebar_position: 200
 
 ## Unreleased
 
+### breaking changes
+- **[Infrastructure Lambda]**: With the introduction of the new provisioner and reconciler the infrastructure lambda is no longer supported. The `INFRASTRUCTURE_LAMBDA_ARN` setting is no longer used and no lambda will be triggered on certain calls.
+
 ### features
 
 - **[Input port]**: Input ports now contain a decision note, which can be used by the reviewer of an access request to show why they denied or approved access

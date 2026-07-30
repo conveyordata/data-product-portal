@@ -42,7 +42,6 @@ class Settings(BaseSettings):
     CONVEYOR_SECRET: Optional[str] = None
 
     # Infrastructure
-    INFRASTRUCTURE_LAMBDA_ARN: Optional[str] = None
     WEBHOOK_URL: Optional[str] = None
     ENVIRONMENT_CONTEXT: Optional[str] = None
     WEBHOOK_SECRET: Optional[str] = None

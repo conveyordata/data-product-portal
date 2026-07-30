@@ -16,7 +16,6 @@ from app.configuration.data_product_settings.service import DataProductSettingSe
 from app.core.auth.auth import get_authenticated_user
 from app.core.authz import Action, Authorization, DatasetResolver
 from app.core.authz.resolvers import EmptyResolver
-from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
 from app.data_products.output_ports.contract.router import (
     router as contract_router,
 )
@@ -179,7 +178,6 @@ def create_output_port(
     NotificationService(db).create_dataset_notifications(
         dataset_id=output_port.id, event_id=event_id
     )
-    RefreshInfrastructureLambda().trigger()
     return CreateOutputPortResponse(id=output_port.id)
 
 
@@ -220,7 +218,6 @@ def remove_output_port(
     NotificationService(db).create_dataset_notifications(
         dataset_id=dataset.id, event_id=event_id
     )
-    RefreshInfrastructureLambda().trigger()
 
 
 @router.put(
@@ -262,7 +259,6 @@ def update_output_port(
             actor_id=authenticated_user.id,
         )
     )
-    RefreshInfrastructureLambda().trigger()
     return UpdateOutputPortResponse(id=response)
 
 
@@ -374,7 +370,6 @@ def set_value_for_output_port(
             actor_id=authenticated_user.id,
         )
     )
-    RefreshInfrastructureLambda().trigger()
 
 
 @router.get(

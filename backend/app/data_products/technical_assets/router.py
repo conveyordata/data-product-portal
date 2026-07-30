@@ -10,7 +10,6 @@ from app.core.authz import (
     DataOutputResolver,
     DataProductResolver,
 )
-from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
 from app.data_products.technical_assets.model import ensure_technical_asset_exists
 from app.data_products.technical_assets.schema_request import (
     CreateTechnicalAssetRequest,
@@ -122,7 +121,6 @@ def remove_technical_asset(
     NotificationService(db).create_data_product_notifications(
         data_product_id=data_output.owner_id, event_id=event_id
     )
-    RefreshInfrastructureLambda().trigger()
 
 
 @router.put(
@@ -162,7 +160,6 @@ def update_technical_asset(
             actor_id=authenticated_user.id,
         )
     )
-    RefreshInfrastructureLambda().trigger()
     return result
 
 
@@ -259,5 +256,4 @@ def create_technical_asset(
     NotificationService(db).create_data_product_notifications(
         data_product_id=technical_asset.owner_id, event_id=event_id
     )
-    RefreshInfrastructureLambda().trigger()
     return CreateTechnicalAssetResponse(id=technical_asset.id)
