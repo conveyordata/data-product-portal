@@ -246,7 +246,6 @@ class InputPortService:
             )
         ]
 
-    # Future refactor: query and return InputPortRequests instead of InputPorts
     def get_user_requests(
         self, user: User, hide_old_inactive: bool
     ) -> Sequence[InputPortRequest]:

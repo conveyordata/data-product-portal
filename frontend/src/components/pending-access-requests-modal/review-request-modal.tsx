@@ -7,7 +7,7 @@ import {
     InfoCircleOutlined,
     UserOutlined,
 } from '@ant-design/icons';
-import { Avatar, Button, Card, Col, Divider, Flex, Form, Input, Modal, Row, Space, Typography } from 'antd';
+import { Avatar, Button, Card, Col, Divider, Flex, Form, Input, Modal, Row, Space, Typography, theme } from 'antd';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -17,6 +17,7 @@ import {
     TechnicalAssetOutlined,
 } from '@/components/icons';
 import { AccessDurationType } from '@/store/api/services/generated/accessDurationsApi.ts';
+import { RenewalStatus } from '@/store/api/services/generated/dataProductsOutputPortsInputPortsApi.ts';
 import type { AbstractDataProductType } from '@/store/api/services/generated/usersApi.ts';
 import {
     type Request,
@@ -164,6 +165,7 @@ function getRequestDetails(
 
 export function ReviewRequestModal({ action, open, onClose, onAccept, onReject }: Props) {
     const { t } = useTranslation();
+    const { token } = theme.useToken();
     const [form] = Form.useForm<{ decisionNote: string }>();
     const [isAccepting, setIsAccepting] = useState(false);
 
@@ -200,7 +202,9 @@ export function ReviewRequestModal({ action, open, onClose, onAccept, onReject }
             title={
                 <Flex align="center" gap="small">
                     <span>{details.title}</span>
-                    {details.renewalStatus === 'pending' && <span style={{ color: '#faad14' }}>{t('Renewal')}</span>}
+                    {details.renewalStatus === RenewalStatus.Pending && (
+                        <span style={{ color: token.colorWarning }}>{t('Renewal')}</span>
+                    )}
                 </Flex>
             }
             open={open}
