@@ -26,6 +26,7 @@ from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLamb
 from app.core.namespace.validation import (
     DataProductSettingNamespaceValidator,
 )
+from app.data_products.output_ports.model import ensure_output_port_exists
 from app.resource_names.service import ResourceNameValidityType
 
 
@@ -48,6 +49,7 @@ class DataProductSettingService:
         value: str,
     ) -> None:
         scope = self.db.get(DataProductSettingModel, setting_id).scope
+        output_port_data_product_id = None
         if scope == DataProductSettingScope.DATAPRODUCT:
             setting = self.db.scalars(
                 select(DataProductSettingValueModel).filter_by(
@@ -55,6 +57,8 @@ class DataProductSettingService:
                 )
             ).first()
         elif scope == DataProductSettingScope.DATASET:
+            output_port = ensure_output_port_exists(product_id, self.db)
+            output_port_data_product_id = output_port.data_product_id
             setting = self.db.scalars(
                 select(DataProductSettingValueModel).filter_by(
                     output_port_id=product_id, data_product_setting_id=setting_id
@@ -65,6 +69,12 @@ class DataProductSettingService:
 
         if setting:
             setting.value = value
+            if (
+                scope == DataProductSettingScope.DATASET
+                and setting.data_product_id is None
+                and output_port_data_product_id is not None
+            ):
+                setting.data_product_id = output_port_data_product_id
         else:
             if scope == DataProductSettingScope.DATAPRODUCT:
                 new_setting = DataProductSettingValueCreate(
@@ -74,6 +84,7 @@ class DataProductSettingService:
                 )
             elif scope == DataProductSettingScope.DATASET:
                 new_setting = DataProductSettingValueCreate(
+                    data_product_id=output_port_data_product_id,
                     output_port_id=product_id,
                     data_product_setting_id=setting_id,
                     value=value,

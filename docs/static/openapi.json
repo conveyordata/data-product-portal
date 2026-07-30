@@ -8087,6 +8087,9 @@
                   },
                   {
                     "$ref": "#/components/schemas/CloudEvent_OutputPortTechnicalAssetLinkEvent"
+                  },
+                  {
+                    "$ref": "#/components/schemas/CloudEvent_DataProductSettingValueEvent"
                   }
                 ],
                 "title": "Body",
@@ -8100,7 +8103,8 @@
                     "output_port_role_assignment.event": "#/components/schemas/CloudEvent_OutputPortRoleAssignmentEvent",
                     "technical_asset.event": "#/components/schemas/CloudEvent_TechnicalAssetEvent",
                     "output_port.event": "#/components/schemas/CloudEvent_OutputPortEvent",
-                    "output_port_technical_asset_link.event": "#/components/schemas/CloudEvent_OutputPortTechnicalAssetLinkEvent"
+                    "output_port_technical_asset_link.event": "#/components/schemas/CloudEvent_OutputPortTechnicalAssetLinkEvent",
+                    "data_product_setting_value.event": "#/components/schemas/CloudEvent_DataProductSettingValueEvent"
                   }
                 }
               }
@@ -8762,6 +8766,50 @@
           "data"
         ],
         "title": "CloudEvent_DataProductRoleAssignmentEvent"
+      },
+      "CloudEvent_DataProductSettingValueEvent": {
+        "properties": {
+          "specversion": {
+            "type": "string",
+            "title": "Specversion",
+            "description": "The CloudEvents specification version.",
+            "default": "1.0"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "A unique UUID identifier for this specific event instance."
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "description": "Identifies the context in which an event happened.",
+            "default": "data-product-portal"
+          },
+          "type": {
+            "type": "string",
+            "const": "data_product_setting_value.event",
+            "title": "Type",
+            "description": "The unique type string belonging to this event.",
+            "default": "data_product_setting_value.event"
+          },
+          "time": {
+            "type": "string",
+            "title": "Time",
+            "description": "Timestamp of when the event occurred in ISO 8601 UTC format."
+          },
+          "data": {
+            "$ref": "#/components/schemas/DataProductSettingValueEvent",
+            "description": "The specific data payload corresponding to this event type."
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "time",
+          "data"
+        ],
+        "title": "CloudEvent_DataProductSettingValueEvent"
       },
       "CloudEvent_ExplorationEvent": {
         "properties": {
@@ -10255,6 +10303,26 @@
           "data_product_id"
         ],
         "title": "DataProductSettingValue"
+      },
+      "DataProductSettingValueEvent": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "data_product_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Data Product Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "data_product_id"
+        ],
+        "title": "DataProductSettingValueEvent"
       },
       "DataProductSettingsGet": {
         "properties": {
