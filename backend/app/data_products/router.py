@@ -32,7 +32,6 @@ from app.configuration.data_product_settings.service import DataProductSettingSe
 from app.core.auth.auth import get_authenticated_user
 from app.core.authz import Action, Authorization, DataProductResolver
 from app.core.authz.resolvers import EmptyResolver
-from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
 from app.data_products.output_ports.service import OutputPortService
 from app.data_products.schema_request import (
     DataProductAboutUpdate,
@@ -129,7 +128,6 @@ def create_data_product(
         event_id=event_id,
         extra_receiver_ids=owners,
     )
-    RefreshInfrastructureLambda().trigger()
     if data_product.input_ports is not None:
         request_input_ports_for_data_product(
             created_id,
@@ -294,7 +292,6 @@ def update_data_product(
             actor_id=authenticated_user.id,
         )
     )
-    RefreshInfrastructureLambda().trigger()
     OutputPortService(db).recalculate_search_for_output_ports_of_product(id)
     return result
 
@@ -429,7 +426,6 @@ def set_value_for_data_product(
             actor_id=authenticated_user.id,
         )
     )
-    RefreshInfrastructureLambda().trigger()
 
 
 _input_ports_responses = {
@@ -516,7 +512,6 @@ def _notify_input_port_links(
     DataProductService(db).send_input_port_requested_emails_to_output_port_owners(
         input_ports, background_tasks, authenticated_user
     )
-    RefreshInfrastructureLambda().trigger()
 
 
 @router.post(
@@ -601,7 +596,6 @@ def revoke_input_port_for_data_product(
     NotificationService(db).create_data_product_notifications(
         data_product_id=id, event_id=event_id
     )
-    RefreshInfrastructureLambda().trigger()
 
     return RevokeInputPortForDataProductResponse(input_port_link=input_port.id)
 
@@ -698,7 +692,6 @@ def cancel_input_port_for_data_product(
             actor_id=authenticated_user.id,
         ),
     )
-    RefreshInfrastructureLambda().trigger()
 
     return CancelInputPortForDataProductResponse(input_port_link=input_port.id)
 
@@ -737,7 +730,6 @@ def remove_input_port_for_data_product(
         NotificationService(db).create_data_product_notifications(
             data_product_id=id, event_id=event_id
         )
-    RefreshInfrastructureLambda().trigger()
 
 
 @router.get("/{id}/settings")

@@ -22,7 +22,6 @@ from app.configuration.data_product_settings.schema_response import (
     DataProductSettingsGetItem,
     UpdateDataProductSettingResponse,
 )
-from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
 from app.core.namespace.validation import (
     DataProductSettingNamespaceValidator,
 )
@@ -93,7 +92,6 @@ class DataProductSettingService:
                 DataProductSettingValueModel(**new_setting.parse_pydantic_schema())
             )
         self.db.commit()
-        RefreshInfrastructureLambda().trigger()
 
     def create_data_product_setting(
         self, setting: DataProductSettingCreate

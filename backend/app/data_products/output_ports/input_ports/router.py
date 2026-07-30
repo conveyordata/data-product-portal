@@ -10,7 +10,6 @@ from app.core.authz import (
     Authorization,
     DatasetResolver,
 )
-from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
 from app.data_products.output_ports.input_ports.schema_request import (
     ApproveOutputPortAsInputPortRequest,
     DenyOutputPortAsInputPortRequest,
@@ -94,7 +93,6 @@ def approve_output_port_as_input_port(
         event_id=event_id,
         extra_receiver_ids=[input_port.current_request.requested_by_id],
     )
-    RefreshInfrastructureLambda().trigger()
 
 
 @router.post(
@@ -182,7 +180,6 @@ def revoke_output_port_as_input_port(
         event_id=event_id,
         extra_receiver_ids=[input_port.latest_request.requested_by_id],
     )
-    RefreshInfrastructureLambda().trigger()
 
 
 @router.post(
@@ -225,4 +222,3 @@ def remove_output_port_as_input_port(
             event_id=event_id,
             extra_receiver_ids=[input_port.latest_request.requested_by_id],
         )
-    RefreshInfrastructureLambda().trigger()
