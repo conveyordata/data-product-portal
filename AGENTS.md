@@ -9,8 +9,8 @@ It consists of a 3-tier web architecture.
 
 ## Tech Stack and Directory Structure
 
-*   `backend/`: Backend written with FastAPI, SQLAlchemy, Alembic, Casbin (RBAC), pgvector (embeddings), Pydantic v2, FastMCP. Tooling used includes Poetry, Ruff, mypy, pytest. See [backend/AGENTS.md](backend/AGENTS.md).
-*   `frontend/`: React 19, TypeScript, Vite, Redux Toolkit + RTK Query, Ant Design, Biome (linting/formatting), i18next (localization), Vitest (testing). See [frontend/AGENTS.md](frontend/AGENTS.md).
+*   `backend/`:See [backend/AGENTS.md](backend/AGENTS.md).
+*   `frontend/`: See [frontend/AGENTS.md](frontend/AGENTS.md).
 *   `cli/go`: Cli in Go
 *   `demo/`: Demo setups.
 *   `docs/`: Docusaurus documentation and Architecture Decision Records (ADRs in `docs/adr/`).
@@ -22,8 +22,8 @@ It consists of a 3-tier web architecture.
 
 *   **Task Runner**: `Taskfile.yml` is primarily for release automation.
 *   **Pre-commit**: Run `pre-commit` rather than invoking Ruff, mypy, or Biome directly — it also regenerates the OpenAPI client/SDK. Code must pass pre-commit hooks (Ruff, mypy, Biome, gitleaks, OpenAPI spec check).
-*   **Documentation**: When adding major features or making architectural changes, consider if a new ADR (`docs/adr/`) is needed. Don't duplicate documentation — reference an existing doc instead of repeating its content.
-*   **Documentation**: When developing is done with the user ONCE that the documentation is complete and consistent.
+*   **ADRs**: When adding major features or making architectural changes, consider if a new ADR (`docs/adr/`) is needed validate with user. Don't duplicate documentation — reference an existing doc instead of repeating its content.
+*   **User DOCS**: When development is done, discuss ONCE with the user that the documentation (`docs/docs/`)including AGENTS.md files is complete and consistent.
 
 ## General Rules for Agents
 
@@ -32,8 +32,5 @@ It consists of a 3-tier web architecture.
 *   **Validation**: Always verify your changes.
 *   **No Dead Code**: Before a commit, check for unused code, redundant returns, and dead statements — never leave them in.
 *   **Failing Tests**: Fix and rerun failing tests one at a time; only rerun the full suite once everything passes.
-*   **File Formatting**: Always leave a trailing empty line at the end of a file.
 *   **Writing style**: Don't over use bold or italic use in markdowns, only use it to be consistent
-*   **Boyscout Rule**: When touching code and you see legacy concepts, inefficient code, dead code or bugs, fix it. Only if the refactor is small enough,
-otherwise suggest making a separate issue from it in github with the changes that an agent can pick up later.
 *   **One Concern per PR**: If you can't summarize the diff in one sentence, stop and propose splitting the work into separate branches/PRs before continuing. If the user persists in keeping the work don't mention this again.
