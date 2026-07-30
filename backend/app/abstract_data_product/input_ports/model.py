@@ -152,26 +152,30 @@ class InputPort(
             None,
         )
 
+    def _set_status(self, status: InputPortStatus) -> None:
+        if self.status != status:
+            self.status = status
+
     def recompute_status(self) -> None:
         if self.active_grant is not None:
-            self.status = InputPortStatus.APPROVED
+            self._set_status(InputPortStatus.APPROVED)
             return
         if self.pending_request is not None and not self._has_real_grant:
-            self.status = InputPortStatus.PENDING
+            self._set_status(InputPortStatus.PENDING)
             return
         last_settled = self._last_settled_request
         if last_settled is None:
-            self.status = InputPortStatus.CANCELLED
+            self._set_status(InputPortStatus.CANCELLED)
             return
         match last_settled.decision:
             case InputPortRequestDecision.APPROVED:
-                self.status = (
+                self._set_status(
                     InputPortStatus.REVOKED
                     if last_settled.revoked_at is not None
                     else InputPortStatus.EXPIRED
                 )
             case InputPortRequestDecision.DENIED:
-                self.status = InputPortStatus.DENIED
+                self._set_status(InputPortStatus.DENIED)
 
     def to_event(self) -> InputPortEvent:
         return InputPortEvent(

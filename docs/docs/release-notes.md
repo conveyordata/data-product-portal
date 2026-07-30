@@ -12,6 +12,9 @@ sidebar_position: 200
 - **[Product studio]**: A My Requests page has been added to Product Studio, which shows all access requests you have made and their status. This allows you to track your access requests in one place.
 - **[General]**: [Timebound access](./concepts/input-ports.md) has been added to the product studio for both data products and explorations.
 
+### bugfixes
+- **[Temporary Admin]**: Fixed a bug where temporary admin rights were expired directly after it was set due to timezone differences in the backend.
+
 ## 0.6.1
 
 ### features

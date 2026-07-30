@@ -116,7 +116,7 @@ class TestSDKWebhookIntegration:
             await spy.dispatch_routing(nested_request)
 
         mock_call = AsyncMock(side_effect=intercept_webhook_delivery)
-        patch("app.main.call_v2_webhook", new=mock_call).start()
+        patch("app.core.webhooks.v2.call_v2_webhook", new=mock_call).start()
         d = DomainFactory()
         payload = {
             "name": str(uuid.uuid4()),
