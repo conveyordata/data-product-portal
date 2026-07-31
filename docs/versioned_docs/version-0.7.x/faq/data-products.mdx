@@ -1,0 +1,68 @@
+---
+sidebar_position: 1
+title: Data Products
+description: Data Products answered
+---
+
+import TOCInline from '@theme/TOCInline';
+
+# Data Products
+
+### Table of Contents
+
+<TOCInline toc={toc} maxHeadingLevel={2}/>
+
+## What is the difference between a Data Product and an Output Port?
+
+Think of the difference as "The Why" versus "The How".
+
+#### The Data Product (The "Why"):
+
+This represents the logical scope, value, and ownership.
+A Data Product exists because there is a specific business use case (e.g., a Customer Recommendation Engine)
+that requires its own lifecycle, unique logic, and a dedicated owner who understands that specific domain.
+It is the "container" that holds the value.
+
+#### The Output Port (The "How"):
+
+This represents the consumption contract.
+It is the mechanism users use to access the value inside the product.
+A single Data Product can have multiple output ports to meet consumers where they are.
+Adding a port does not change the underlying business logic;
+it simply makes the data easier to consume (e.g., offering the same data via SQL for analysts and via API for applications).
+
+## When should I create a new Data Product instead of adding an Output Port?
+
+If you are unsure whether to expand an existing product or build a new one, use this rule of thumb:
+
+#### Add an Output Port if:
+
+- **The logic is identical**: You are serving the exact same data but simply need a different "wrapper" or format.
+
+- **The ownership is the same:** The current product owner is still responsible for the data quality.
+
+- *Example:* You have a customer table, and a new user needs that exact same data as a real-time stream or a flattened view for a specific BI tool.
+
+#### Create a new Data Product if:
+
+- **The logic changes:** You are performing complex feature engineering, aggregating data, or joining it with data from other domains to create new insights.
+
+- **The ownership changes:** The transformation requires knowledge or management that sits with a different team.
+
+- *Example:* You need to take the customer table and join it with third-party market data to predict churn risk. Because this involves new logic and joins irrelevant to the original customer data owner, this deserves to be its own Consumer-Aligned Data Product.
+
+## What is a "Source-Aligned" vs. "Consumer-Aligned" Data Product?
+
+This distinction is about where the data comes from versus how it is used.
+
+#### Source-Aligned:
+
+These products represent the facts of the business as they happen.
+They are usually close to the operational systems (e.g., "Orders," "Website Clicks," "Invoices").
+They are general-purpose and used by many different teams.
+
+#### Consumer-Aligned:
+
+These products are built to answer specific business questions.
+They often combine data from multiple Source-Aligned products to create new value
+(e.g., "Customer 360", "Quarterly Sales Forecast", "Fraud Detection").
