@@ -8,6 +8,7 @@ from uuid import UUID
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
+from ..models.access_duration_type import AccessDurationType
 from ..models.input_port_request_decision import InputPortRequestDecision
 from ..types import UNSET, Unset
 
@@ -25,11 +26,14 @@ class InputPortRequestBase:
         id (UUID):
         justification (str):
         valid_until (datetime.date | None):
+        access_duration_type (AccessDurationType):
         requested_by (User):
         decision (InputPortRequestDecision):
         created_on (datetime.datetime):
         requested_on (datetime.datetime):
         decision_note (None | str | Unset):
+        valid_from (datetime.date | None | Unset):
+        requested_duration_days (int | None | Unset):
         decided_by (None | Unset | User):
         revoked_at (datetime.datetime | None | Unset):
         revoked_by (None | Unset | User):
@@ -38,11 +42,14 @@ class InputPortRequestBase:
     id: UUID
     justification: str
     valid_until: datetime.date | None
+    access_duration_type: AccessDurationType
     requested_by: User
     decision: InputPortRequestDecision
     created_on: datetime.datetime
     requested_on: datetime.datetime
     decision_note: None | str | Unset = UNSET
+    valid_from: datetime.date | None | Unset = UNSET
+    requested_duration_days: int | None | Unset = UNSET
     decided_by: None | Unset | User = UNSET
     revoked_at: datetime.datetime | None | Unset = UNSET
     revoked_by: None | Unset | User = UNSET
@@ -61,6 +68,8 @@ class InputPortRequestBase:
         else:
             valid_until = self.valid_until
 
+        access_duration_type = self.access_duration_type.value
+
         requested_by = self.requested_by.to_dict()
 
         decision = self.decision.value
@@ -74,6 +83,20 @@ class InputPortRequestBase:
             decision_note = UNSET
         else:
             decision_note = self.decision_note
+
+        valid_from: None | str | Unset
+        if isinstance(self.valid_from, Unset):
+            valid_from = UNSET
+        elif isinstance(self.valid_from, datetime.date):
+            valid_from = self.valid_from.isoformat()
+        else:
+            valid_from = self.valid_from
+
+        requested_duration_days: int | None | Unset
+        if isinstance(self.requested_duration_days, Unset):
+            requested_duration_days = UNSET
+        else:
+            requested_duration_days = self.requested_duration_days
 
         decided_by: dict[str, Any] | None | Unset
         if isinstance(self.decided_by, Unset):
@@ -106,6 +129,7 @@ class InputPortRequestBase:
                 "id": id,
                 "justification": justification,
                 "valid_until": valid_until,
+                "access_duration_type": access_duration_type,
                 "requested_by": requested_by,
                 "decision": decision,
                 "created_on": created_on,
@@ -114,6 +138,10 @@ class InputPortRequestBase:
         )
         if decision_note is not UNSET:
             field_dict["decision_note"] = decision_note
+        if valid_from is not UNSET:
+            field_dict["valid_from"] = valid_from
+        if requested_duration_days is not UNSET:
+            field_dict["requested_duration_days"] = requested_duration_days
         if decided_by is not UNSET:
             field_dict["decided_by"] = decided_by
         if revoked_at is not UNSET:
@@ -147,6 +175,8 @@ class InputPortRequestBase:
 
         valid_until = _parse_valid_until(d.pop("valid_until"))
 
+        access_duration_type = AccessDurationType(d.pop("access_duration_type"))
+
         requested_by = User.from_dict(d.pop("requested_by"))
 
         decision = InputPortRequestDecision(d.pop("decision"))
@@ -163,6 +193,34 @@ class InputPortRequestBase:
             return cast(None | str | Unset, data)
 
         decision_note = _parse_decision_note(d.pop("decision_note", UNSET))
+
+        def _parse_valid_from(data: object) -> datetime.date | None | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, str):
+                    raise TypeError()
+                valid_from_type_0 = datetime.date.fromisoformat(data)
+
+                return valid_from_type_0
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            return cast(datetime.date | None | Unset, data)
+
+        valid_from = _parse_valid_from(d.pop("valid_from", UNSET))
+
+        def _parse_requested_duration_days(data: object) -> int | None | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(int | None | Unset, data)
+
+        requested_duration_days = _parse_requested_duration_days(
+            d.pop("requested_duration_days", UNSET)
+        )
 
         def _parse_decided_by(data: object) -> None | Unset | User:
             if data is None:
@@ -219,11 +277,14 @@ class InputPortRequestBase:
             id=id,
             justification=justification,
             valid_until=valid_until,
+            access_duration_type=access_duration_type,
             requested_by=requested_by,
             decision=decision,
             created_on=created_on,
             requested_on=requested_on,
             decision_note=decision_note,
+            valid_from=valid_from,
+            requested_duration_days=requested_duration_days,
             decided_by=decided_by,
             revoked_at=revoked_at,
             revoked_by=revoked_by,

@@ -17701,8 +17701,24 @@ func (s *InputPortRequestBase) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
+		if s.ValidFrom.Set {
+			e.FieldStart("valid_from")
+			s.ValidFrom.Encode(e, json.EncodeDate)
+		}
+	}
+	{
 		e.FieldStart("valid_until")
 		s.ValidUntil.Encode(e, json.EncodeDate)
+	}
+	{
+		e.FieldStart("access_duration_type")
+		s.AccessDurationType.Encode(e)
+	}
+	{
+		if s.RequestedDurationDays.Set {
+			e.FieldStart("requested_duration_days")
+			s.RequestedDurationDays.Encode(e)
+		}
 	}
 	{
 		e.FieldStart("requested_by")
@@ -17740,18 +17756,21 @@ func (s *InputPortRequestBase) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfInputPortRequestBase = [11]string{
+var jsonFieldsNameOfInputPortRequestBase = [14]string{
 	0:  "id",
 	1:  "justification",
 	2:  "decision_note",
-	3:  "valid_until",
-	4:  "requested_by",
-	5:  "decided_by",
-	6:  "decision",
-	7:  "revoked_at",
-	8:  "revoked_by",
-	9:  "created_on",
-	10: "requested_on",
+	3:  "valid_from",
+	4:  "valid_until",
+	5:  "access_duration_type",
+	6:  "requested_duration_days",
+	7:  "requested_by",
+	8:  "decided_by",
+	9:  "decision",
+	10: "revoked_at",
+	11: "revoked_by",
+	12: "created_on",
+	13: "requested_on",
 }
 
 // Decode decodes InputPortRequestBase from json.
@@ -17797,8 +17816,18 @@ func (s *InputPortRequestBase) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"decision_note\"")
 			}
+		case "valid_from":
+			if err := func() error {
+				s.ValidFrom.Reset()
+				if err := s.ValidFrom.Decode(d, json.DecodeDate); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"valid_from\"")
+			}
 		case "valid_until":
-			requiredBitSet[0] |= 1 << 3
+			requiredBitSet[0] |= 1 << 4
 			if err := func() error {
 				if err := s.ValidUntil.Decode(d, json.DecodeDate); err != nil {
 					return err
@@ -17807,8 +17836,28 @@ func (s *InputPortRequestBase) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"valid_until\"")
 			}
+		case "access_duration_type":
+			requiredBitSet[0] |= 1 << 5
+			if err := func() error {
+				if err := s.AccessDurationType.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"access_duration_type\"")
+			}
+		case "requested_duration_days":
+			if err := func() error {
+				s.RequestedDurationDays.Reset()
+				if err := s.RequestedDurationDays.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"requested_duration_days\"")
+			}
 		case "requested_by":
-			requiredBitSet[0] |= 1 << 4
+			requiredBitSet[0] |= 1 << 7
 			if err := func() error {
 				if err := s.RequestedBy.Decode(d); err != nil {
 					return err
@@ -17828,7 +17877,7 @@ func (s *InputPortRequestBase) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"decided_by\"")
 			}
 		case "decision":
-			requiredBitSet[0] |= 1 << 6
+			requiredBitSet[1] |= 1 << 1
 			if err := func() error {
 				if err := s.Decision.Decode(d); err != nil {
 					return err
@@ -17858,7 +17907,7 @@ func (s *InputPortRequestBase) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"revoked_by\"")
 			}
 		case "created_on":
-			requiredBitSet[1] |= 1 << 1
+			requiredBitSet[1] |= 1 << 4
 			if err := func() error {
 				v, err := json.DecodeDateTime(d)
 				s.CreatedOn = v
@@ -17870,7 +17919,7 @@ func (s *InputPortRequestBase) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"created_on\"")
 			}
 		case "requested_on":
-			requiredBitSet[1] |= 1 << 2
+			requiredBitSet[1] |= 1 << 5
 			if err := func() error {
 				v, err := json.DecodeDateTime(d)
 				s.RequestedOn = v
@@ -17891,8 +17940,8 @@ func (s *InputPortRequestBase) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
-		0b01011011,
-		0b00000110,
+		0b10110011,
+		0b00110010,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -20314,6 +20363,57 @@ func (s OptNilDataProduct) MarshalJSON() ([]byte, error) {
 func (s *OptNilDataProduct) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
+}
+
+// Encode encodes time.Time as json.
+func (o OptNilDate) Encode(e *jx.Encoder, format func(*jx.Encoder, time.Time)) {
+	if !o.Set {
+		return
+	}
+	if o.Null {
+		e.Null()
+		return
+	}
+	format(e, o.Value)
+}
+
+// Decode decodes time.Time from json.
+func (o *OptNilDate) Decode(d *jx.Decoder, format func(*jx.Decoder) (time.Time, error)) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptNilDate to nil")
+	}
+	if d.Next() == jx.Null {
+		if err := d.Null(); err != nil {
+			return err
+		}
+
+		var v time.Time
+		o.Value = v
+		o.Set = true
+		o.Null = true
+		return nil
+	}
+	o.Set = true
+	o.Null = false
+	v, err := format(d)
+	if err != nil {
+		return err
+	}
+	o.Value = v
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptNilDate) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e, json.EncodeDate)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptNilDate) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d, json.DecodeDate)
 }
 
 // Encode encodes time.Time as json.

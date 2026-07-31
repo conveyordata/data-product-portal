@@ -1,12 +1,15 @@
 import {
     CalendarOutlined,
     CheckOutlined,
+    ClockCircleOutlined,
     CloseOutlined,
     FileTextOutlined,
+    HistoryOutlined,
     InfoCircleOutlined,
     UserOutlined,
 } from '@ant-design/icons';
-import { Avatar, Button, Card, Col, Divider, Flex, Form, Input, Modal, Row, Space, Typography } from 'antd';
+import { Avatar, Button, Card, Col, Divider, Flex, Form, Input, Modal, Row, Space, Typography, theme } from 'antd';
+import { addDays } from 'date-fns';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -15,6 +18,8 @@ import {
     OutputPortOutlined,
     TechnicalAssetOutlined,
 } from '@/components/icons';
+import { AccessDurationType } from '@/store/api/services/generated/accessDurationsApi.ts';
+import { RenewalStatus } from '@/store/api/services/generated/dataProductsOutputPortsInputPortsApi.ts';
 import type { AbstractDataProductType } from '@/store/api/services/generated/usersApi.ts';
 import {
     type Request,
@@ -53,7 +58,34 @@ type RequestDetails = {
     hasJustification: boolean;
     requestedOn: string;
     title: string;
+    accessDurationDays?: number | null;
+    isPermanent?: boolean;
+    renewalStatus?: string | null;
+    currentAccessPeriod?: {
+        label: string;
+        wasRevoked: boolean;
+    } | null;
 };
+
+function formatAccessPeriodLabel(
+    t: (key: string) => string,
+    current: {
+        valid_from?: string | null;
+        valid_until: string | null;
+        access_duration_type: 'permanent' | 'time_bound';
+    },
+): string {
+    if (current.access_duration_type === 'permanent') {
+        return t('Permanent');
+    }
+    if (current.valid_from && current.valid_until) {
+        return `${formatDate(current.valid_from)} - ${formatDate(current.valid_until)}`;
+    }
+    if (current.valid_until) {
+        return `${t('Until')} ${formatDate(current.valid_until)}`;
+    }
+    return t('Unknown');
+}
 
 const abstractDataProductTypeName = (type: AbstractDataProductType) => {
     switch (type) {
@@ -99,6 +131,16 @@ function getRequestDetails(
             hasJustification: true,
             requestedOn: action.requested_on,
             title: t('Review Output Port Access Request'),
+            accessDurationDays: action.requested_duration_days,
+            isPermanent: action.access_duration_type === AccessDurationType.Permanent,
+            renewalStatus: action.input_port.renewal_status,
+            currentAccessPeriod:
+                action.input_port.current_request.id !== action.id
+                    ? {
+                          label: formatAccessPeriodLabel(t, action.input_port.current_request),
+                          wasRevoked: action.input_port.current_request.revoked_at != null,
+                      }
+                    : null,
         };
     }
 
@@ -156,6 +198,7 @@ function getRequestDetails(
 
 export function ReviewRequestModal({ action, open, onClose, onAccept, onReject }: Props) {
     const { t } = useTranslation();
+    const { token } = theme.useToken();
     const [form] = Form.useForm<{ decisionNote: string }>();
     const [isAccepting, setIsAccepting] = useState(false);
 
@@ -189,7 +232,14 @@ export function ReviewRequestModal({ action, open, onClose, onAccept, onReject }
 
     return (
         <Modal
-            title={details.title}
+            title={
+                <Flex align="center" gap="small">
+                    <span>{details.title}</span>
+                    {details.renewalStatus === RenewalStatus.Pending && (
+                        <span style={{ color: token.colorWarning }}>{t('Renewal')}</span>
+                    )}
+                </Flex>
+            }
             open={open}
             onCancel={onClose}
             width={800}
@@ -270,7 +320,7 @@ export function ReviewRequestModal({ action, open, onClose, onAccept, onReject }
                         <InfoCircleOutlined /> {t('Request Details')}
                     </Typography.Title>
                     <Card size="small" variant="outlined">
-                        <Flex vertical gap="middle">
+                        <Flex vertical gap="small">
                             {details.hasJustification && (
                                 <>
                                     <Flex vertical gap="small">
@@ -279,6 +329,67 @@ export function ReviewRequestModal({ action, open, onClose, onAccept, onReject }
                                             <Typography.Text strong>{t('Business Justification')}</Typography.Text>
                                         </Flex>
                                         <Typography.Text>{details.justification}</Typography.Text>
+                                    </Flex>
+                                    <Divider style={{ margin: 0 }} />
+                                </>
+                            )}
+                            {details.currentAccessPeriod && (
+                                <>
+                                    <Flex align="center" gap="middle">
+                                        <Avatar
+                                            icon={<HistoryOutlined />}
+                                            style={{ color: '#1890ff', backgroundColor: '#e6f7ff' }}
+                                        />
+                                        <Flex vertical>
+                                            <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                                                {t('Previous Request')}
+                                            </Typography.Text>
+                                            <Typography.Text strong>
+                                                {details.currentAccessPeriod.label}
+                                                {details.currentAccessPeriod.wasRevoked && ` (${t('Revoked')})`}
+                                            </Typography.Text>
+                                        </Flex>
+                                    </Flex>
+                                    <Divider style={{ margin: 0 }} />
+                                </>
+                            )}
+                            {(details.isPermanent === true ||
+                                (details.isPermanent === false && details.accessDurationDays != null)) && (
+                                <>
+                                    <Flex justify="space-between" gap="large">
+                                        <Flex align="center" gap="middle">
+                                            <Avatar
+                                                icon={<ClockCircleOutlined />}
+                                                style={{ color: '#1890ff', backgroundColor: '#e6f7ff' }}
+                                            />
+                                            <Flex vertical>
+                                                <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                                                    {t('Requested Duration')}
+                                                </Typography.Text>
+                                                <Typography.Text strong>
+                                                    {details.isPermanent
+                                                        ? t('Permanent')
+                                                        : `${details.accessDurationDays} ${t('days')}`}
+                                                </Typography.Text>
+                                            </Flex>
+                                        </Flex>
+
+                                        {!details.isPermanent && details.accessDurationDays != null && (
+                                            <Flex align="center" gap="middle">
+                                                <Flex vertical style={{ textAlign: 'right' }}>
+                                                    <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                                                        {t('Calculated End Date')}
+                                                    </Typography.Text>
+                                                    <Typography.Text strong>
+                                                        {formatDate(addDays(new Date(), details.accessDurationDays))}
+                                                    </Typography.Text>
+                                                </Flex>
+                                                <Avatar
+                                                    icon={<CalendarOutlined />}
+                                                    style={{ color: '#1890ff', backgroundColor: '#e6f7ff' }}
+                                                />
+                                            </Flex>
+                                        )}
                                     </Flex>
                                     <Divider style={{ margin: 0 }} />
                                 </>
@@ -301,16 +412,16 @@ export function ReviewRequestModal({ action, open, onClose, onAccept, onReject }
                                 </Flex>
 
                                 <Flex align="center" gap="middle">
-                                    <Avatar
-                                        icon={<CalendarOutlined />}
-                                        style={{ color: '#1890ff', backgroundColor: '#e6f7ff' }}
-                                    />
-                                    <Flex vertical>
+                                    <Flex vertical style={{ textAlign: 'right' }}>
                                         <Typography.Text type="secondary" style={{ fontSize: 12 }}>
                                             {t('Requested On')}
                                         </Typography.Text>
                                         <Typography.Text strong>{formatDate(details.requestedOn)}</Typography.Text>
                                     </Flex>
+                                    <Avatar
+                                        icon={<CalendarOutlined />}
+                                        style={{ color: '#1890ff', backgroundColor: '#e6f7ff' }}
+                                    />
                                 </Flex>
                             </Flex>
                         </Flex>

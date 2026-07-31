@@ -191,6 +191,7 @@ export type CanBecomeAdminUpdate = {
   user_id: string;
   can_become_admin: boolean;
 };
+export type AccessDurationType = "permanent" | "time_bound";
 export type InputPortRequestDecision =
   | "pending"
   | "approved"
@@ -225,18 +226,40 @@ export type OutputPort = {
   data_product_id: string;
   tags: Tag[];
 };
+export type RenewalStatus = "pending" | "denied";
+export type InputPortRequestBase = {
+  id: string;
+  justification: string;
+  decision_note?: string | null;
+  valid_from?: string | null;
+  valid_until: string | null;
+  access_duration_type: AccessDurationType;
+  requested_duration_days?: number | null;
+  requested_by: User;
+  decided_by?: User | null;
+  decision: InputPortRequestDecision;
+  revoked_at?: string | null;
+  revoked_by?: User | null;
+  created_on: string;
+  requested_on: string;
+};
 export type UserInputPort = {
   id: string;
   consuming_abstract_data_product_id: string;
   consuming_abstract_data_product: AbstractDataProductInfo;
   output_port_id: string;
   output_port: OutputPort;
+  renewal_status?: RenewalStatus | null;
+  current_request: InputPortRequestBase;
 };
 export type InputPortRequest = {
   id: string;
   justification: string;
   decision_note?: string | null;
+  valid_from?: string | null;
   valid_until: string | null;
+  access_duration_type: AccessDurationType;
+  requested_duration_days?: number | null;
   requested_by: User;
   decided_by?: User | null;
   decision: InputPortRequestDecision;

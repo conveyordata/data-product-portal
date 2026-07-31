@@ -1,14 +1,18 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Any, TypeVar
+from typing import TYPE_CHECKING, Any, TypeVar, cast
 from uuid import UUID
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
+from ..models.renewal_status import RenewalStatus
+from ..types import UNSET, Unset
+
 if TYPE_CHECKING:
     from ..models.abstract_data_product_info import AbstractDataProductInfo
+    from ..models.input_port_request_base import InputPortRequestBase
     from ..models.output_port import OutputPort
 
 
@@ -24,6 +28,8 @@ class UserInputPort:
         consuming_abstract_data_product (AbstractDataProductInfo):
         output_port_id (UUID):
         output_port (OutputPort):
+        current_request (InputPortRequestBase):
+        renewal_status (None | RenewalStatus | Unset):
     """
 
     id: UUID
@@ -31,6 +37,8 @@ class UserInputPort:
     consuming_abstract_data_product: AbstractDataProductInfo
     output_port_id: UUID
     output_port: OutputPort
+    current_request: InputPortRequestBase
+    renewal_status: None | RenewalStatus | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -46,6 +54,16 @@ class UserInputPort:
 
         output_port = self.output_port.to_dict()
 
+        current_request = self.current_request.to_dict()
+
+        renewal_status: None | str | Unset
+        if isinstance(self.renewal_status, Unset):
+            renewal_status = UNSET
+        elif isinstance(self.renewal_status, RenewalStatus):
+            renewal_status = self.renewal_status.value
+        else:
+            renewal_status = self.renewal_status
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
@@ -55,14 +73,18 @@ class UserInputPort:
                 "consuming_abstract_data_product": consuming_abstract_data_product,
                 "output_port_id": output_port_id,
                 "output_port": output_port,
+                "current_request": current_request,
             }
         )
+        if renewal_status is not UNSET:
+            field_dict["renewal_status"] = renewal_status
 
         return field_dict
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.abstract_data_product_info import AbstractDataProductInfo
+        from ..models.input_port_request_base import InputPortRequestBase
         from ..models.output_port import OutputPort
 
         d = dict(src_dict)
@@ -80,12 +102,33 @@ class UserInputPort:
 
         output_port = OutputPort.from_dict(d.pop("output_port"))
 
+        current_request = InputPortRequestBase.from_dict(d.pop("current_request"))
+
+        def _parse_renewal_status(data: object) -> None | RenewalStatus | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, str):
+                    raise TypeError()
+                renewal_status_type_0 = RenewalStatus(data)
+
+                return renewal_status_type_0
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            return cast(None | RenewalStatus | Unset, data)
+
+        renewal_status = _parse_renewal_status(d.pop("renewal_status", UNSET))
+
         user_input_port = cls(
             id=id,
             consuming_abstract_data_product_id=consuming_abstract_data_product_id,
             consuming_abstract_data_product=consuming_abstract_data_product,
             output_port_id=output_port_id,
             output_port=output_port,
+            current_request=current_request,
+            renewal_status=renewal_status,
         )
 
         user_input_port.additional_properties = d

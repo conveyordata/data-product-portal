@@ -1,6 +1,7 @@
 import { HttpResponse, http } from 'msw';
 import {
     AbstractDataProductStatus,
+    AccessDurationType,
     type DataProduct,
     DataProductIconKey,
     type GetDataProductInputPortsResponse,
@@ -88,6 +89,7 @@ const mockInputPorts: InputPort[] = [
             id: 'request-1',
             justification: 'I need access!',
             valid_until: null,
+            access_duration_type: AccessDurationType.Permanent,
             decision: InputPortRequestDecision.Approved,
             created_on: '2024-03-15T10:00:00Z',
             requested_on: '2024-03-15T10:00:00Z',

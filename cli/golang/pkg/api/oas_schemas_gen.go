@@ -6386,17 +6386,20 @@ func (*IngestOutputPortContractNotFoundApplicationJSON) ingestOutputPortContract
 
 // Ref: #/components/schemas/InputPortRequestBase
 type InputPortRequestBase struct {
-	ID            uuid.UUID                `json:"id"`
-	Justification string                   `json:"justification"`
-	DecisionNote  OptNilString             `json:"decision_note"`
-	ValidUntil    NilDate                  `json:"valid_until"`
-	RequestedBy   User                     `json:"requested_by"`
-	DecidedBy     OptNilUser               `json:"decided_by"`
-	Decision      InputPortRequestDecision `json:"decision"`
-	RevokedAt     OptNilDateTime           `json:"revoked_at"`
-	RevokedBy     OptNilUser               `json:"revoked_by"`
-	CreatedOn     time.Time                `json:"created_on"`
-	RequestedOn   time.Time                `json:"requested_on"`
+	ID                    uuid.UUID                `json:"id"`
+	Justification         string                   `json:"justification"`
+	DecisionNote          OptNilString             `json:"decision_note"`
+	ValidFrom             OptNilDate               `json:"valid_from"`
+	ValidUntil            NilDate                  `json:"valid_until"`
+	AccessDurationType    AccessDurationType       `json:"access_duration_type"`
+	RequestedDurationDays OptNilInt                `json:"requested_duration_days"`
+	RequestedBy           User                     `json:"requested_by"`
+	DecidedBy             OptNilUser               `json:"decided_by"`
+	Decision              InputPortRequestDecision `json:"decision"`
+	RevokedAt             OptNilDateTime           `json:"revoked_at"`
+	RevokedBy             OptNilUser               `json:"revoked_by"`
+	CreatedOn             time.Time                `json:"created_on"`
+	RequestedOn           time.Time                `json:"requested_on"`
 }
 
 // GetID returns the value of ID.
@@ -6414,9 +6417,24 @@ func (s *InputPortRequestBase) GetDecisionNote() OptNilString {
 	return s.DecisionNote
 }
 
+// GetValidFrom returns the value of ValidFrom.
+func (s *InputPortRequestBase) GetValidFrom() OptNilDate {
+	return s.ValidFrom
+}
+
 // GetValidUntil returns the value of ValidUntil.
 func (s *InputPortRequestBase) GetValidUntil() NilDate {
 	return s.ValidUntil
+}
+
+// GetAccessDurationType returns the value of AccessDurationType.
+func (s *InputPortRequestBase) GetAccessDurationType() AccessDurationType {
+	return s.AccessDurationType
+}
+
+// GetRequestedDurationDays returns the value of RequestedDurationDays.
+func (s *InputPortRequestBase) GetRequestedDurationDays() OptNilInt {
+	return s.RequestedDurationDays
 }
 
 // GetRequestedBy returns the value of RequestedBy.
@@ -6469,9 +6487,24 @@ func (s *InputPortRequestBase) SetDecisionNote(val OptNilString) {
 	s.DecisionNote = val
 }
 
+// SetValidFrom sets the value of ValidFrom.
+func (s *InputPortRequestBase) SetValidFrom(val OptNilDate) {
+	s.ValidFrom = val
+}
+
 // SetValidUntil sets the value of ValidUntil.
 func (s *InputPortRequestBase) SetValidUntil(val NilDate) {
 	s.ValidUntil = val
+}
+
+// SetAccessDurationType sets the value of AccessDurationType.
+func (s *InputPortRequestBase) SetAccessDurationType(val AccessDurationType) {
+	s.AccessDurationType = val
+}
+
+// SetRequestedDurationDays sets the value of RequestedDurationDays.
+func (s *InputPortRequestBase) SetRequestedDurationDays(val OptNilInt) {
+	s.RequestedDurationDays = val
 }
 
 // SetRequestedBy sets the value of RequestedBy.
@@ -7745,6 +7778,74 @@ func (o OptNilDataProduct) Get() (v DataProduct, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptNilDataProduct) Or(d DataProduct) DataProduct {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptNilDate returns new OptNilDate with value set to v.
+func NewOptNilDate(v time.Time) OptNilDate {
+	return OptNilDate{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptNilDate is optional nullable time.Time.
+type OptNilDate struct {
+	Value time.Time
+	Set   bool
+	Null  bool
+}
+
+// IsSet returns true if OptNilDate was set.
+func (o OptNilDate) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptNilDate) Reset() {
+	var v time.Time
+	o.Value = v
+	o.Set = false
+	o.Null = false
+}
+
+// SetTo sets value to v.
+func (o *OptNilDate) SetTo(v time.Time) {
+	o.Set = true
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o OptNilDate) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *OptNilDate) SetToNull() {
+	o.Set = true
+	o.Null = true
+	var v time.Time
+	o.Value = v
+}
+
+// IsEmpty returns true if the field was omitted from the payload (not Set and not Null).
+func (o OptNilDate) IsEmpty() bool {
+	return !o.Set && !o.Null
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptNilDate) Get() (v time.Time, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptNilDate) Or(d time.Time) time.Time {
 	if v, ok := o.Get(); ok {
 		return v
 	}

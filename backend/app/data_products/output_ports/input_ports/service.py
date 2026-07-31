@@ -223,6 +223,11 @@ class InputPortService:
                         )
                     )
                 )
+                .options(
+                    selectinload(InputPortRequestModel.input_port).selectinload(
+                        InputPortModel.requests
+                    )
+                )
                 .order_by(asc(InputPortRequestModel.created_on))
             )
             .unique()
@@ -241,7 +246,6 @@ class InputPortService:
             )
         ]
 
-    # Future refactor: query and return InputPortRequests instead of InputPorts
     def get_user_requests(
         self, user: User, hide_old_inactive: bool
     ) -> Sequence[InputPortRequest]:
@@ -249,6 +253,11 @@ class InputPortService:
             select(InputPortRequestModel)
             .join(InputPortModel)
             .where(InputPortRequestModel.requested_by_id == user.id)
+            .options(
+                selectinload(InputPortRequestModel.input_port).selectinload(
+                    InputPortModel.requests
+                )
+            )
             .order_by(asc(InputPortRequestModel.requested_on))
         )
 

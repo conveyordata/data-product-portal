@@ -55,7 +55,7 @@ function visibleButtons(): Buttons {
     return {
         renew: screen.queryByText('Renew Access') !== null,
         cancel: screen.queryByText('Cancel Request') !== null,
-        revoke: screen.queryByText('Revoke Access') !== null,
+        revoke: screen.queryByText('Cancel Access') !== null,
     };
 }
 

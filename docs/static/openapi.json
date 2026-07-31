@@ -12691,6 +12691,18 @@
             ],
             "title": "Decision Note"
           },
+          "valid_from": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Valid From"
+          },
           "valid_until": {
             "anyOf": [
               {
@@ -12702,6 +12714,20 @@
               }
             ],
             "title": "Valid Until"
+          },
+          "access_duration_type": {
+            "$ref": "#/components/schemas/AccessDurationType"
+          },
+          "requested_duration_days": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requested Duration Days"
           },
           "requested_by": {
             "$ref": "#/components/schemas/User"
@@ -12766,6 +12792,7 @@
           "id",
           "justification",
           "valid_until",
+          "access_duration_type",
           "requested_by",
           "decision",
           "created_on",
@@ -12796,6 +12823,18 @@
             ],
             "title": "Decision Note"
           },
+          "valid_from": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Valid From"
+          },
           "valid_until": {
             "anyOf": [
               {
@@ -12807,6 +12846,20 @@
               }
             ],
             "title": "Valid Until"
+          },
+          "access_duration_type": {
+            "$ref": "#/components/schemas/AccessDurationType"
+          },
+          "requested_duration_days": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requested Duration Days"
           },
           "requested_by": {
             "$ref": "#/components/schemas/User"
@@ -12862,6 +12915,7 @@
           "id",
           "justification",
           "valid_until",
+          "access_duration_type",
           "requested_by",
           "decision",
           "created_on",
@@ -16640,6 +16694,19 @@
           },
           "output_port": {
             "$ref": "#/components/schemas/OutputPort"
+          },
+          "renewal_status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RenewalStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "current_request": {
+            "$ref": "#/components/schemas/InputPortRequestBase"
           }
         },
         "type": "object",
@@ -16648,7 +16715,8 @@
           "consuming_abstract_data_product_id",
           "consuming_abstract_data_product",
           "output_port_id",
-          "output_port"
+          "output_port",
+          "current_request"
         ],
         "title": "UserInputPort"
       },
