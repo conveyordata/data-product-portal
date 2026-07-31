@@ -480,6 +480,7 @@ export type InputPortRequestBase = {
   id: string;
   justification: string;
   decision_note?: string | null;
+  valid_from?: string | null;
   valid_until: string | null;
   access_duration_type: AccessDurationType;
   requested_duration_days?: number | null;

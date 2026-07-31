@@ -12618,6 +12618,18 @@
             ],
             "title": "Decision Note"
           },
+          "valid_from": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Valid From"
+          },
           "valid_until": {
             "anyOf": [
               {
@@ -12737,6 +12749,18 @@
               }
             ],
             "title": "Decision Note"
+          },
+          "valid_from": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Valid From"
           },
           "valid_until": {
             "anyOf": [
@@ -16607,6 +16631,9 @@
                 "type": "null"
               }
             ]
+          },
+          "current_request": {
+            "$ref": "#/components/schemas/InputPortRequestBase"
           }
         },
         "type": "object",
@@ -16615,7 +16642,8 @@
           "consuming_abstract_data_product_id",
           "consuming_abstract_data_product",
           "output_port_id",
-          "output_port"
+          "output_port",
+          "current_request"
         ],
         "title": "UserInputPort"
       },

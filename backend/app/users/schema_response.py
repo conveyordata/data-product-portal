@@ -67,6 +67,7 @@ class UserInputPort(ORMModel):
     output_port_id: UUID
     output_port: OutputPort
     renewal_status: Optional[RenewalStatus] = None
+    current_request: InputPortRequestBase
 
 
 class InputPortRequest(InputPortRequestBase):

@@ -12,6 +12,7 @@ from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
     from ..models.abstract_data_product_info import AbstractDataProductInfo
+    from ..models.input_port_request_base import InputPortRequestBase
     from ..models.output_port import OutputPort
 
 
@@ -27,6 +28,7 @@ class UserInputPort:
         consuming_abstract_data_product (AbstractDataProductInfo):
         output_port_id (UUID):
         output_port (OutputPort):
+        current_request (InputPortRequestBase):
         renewal_status (None | RenewalStatus | Unset):
     """
 
@@ -35,6 +37,7 @@ class UserInputPort:
     consuming_abstract_data_product: AbstractDataProductInfo
     output_port_id: UUID
     output_port: OutputPort
+    current_request: InputPortRequestBase
     renewal_status: None | RenewalStatus | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
@@ -50,6 +53,8 @@ class UserInputPort:
         output_port_id = str(self.output_port_id)
 
         output_port = self.output_port.to_dict()
+
+        current_request = self.current_request.to_dict()
 
         renewal_status: None | str | Unset
         if isinstance(self.renewal_status, Unset):
@@ -68,6 +73,7 @@ class UserInputPort:
                 "consuming_abstract_data_product": consuming_abstract_data_product,
                 "output_port_id": output_port_id,
                 "output_port": output_port,
+                "current_request": current_request,
             }
         )
         if renewal_status is not UNSET:
@@ -78,6 +84,7 @@ class UserInputPort:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.abstract_data_product_info import AbstractDataProductInfo
+        from ..models.input_port_request_base import InputPortRequestBase
         from ..models.output_port import OutputPort
 
         d = dict(src_dict)
@@ -94,6 +101,8 @@ class UserInputPort:
         output_port_id = UUID(d.pop("output_port_id"))
 
         output_port = OutputPort.from_dict(d.pop("output_port"))
+
+        current_request = InputPortRequestBase.from_dict(d.pop("current_request"))
 
         def _parse_renewal_status(data: object) -> None | RenewalStatus | Unset:
             if data is None:
@@ -118,6 +127,7 @@ class UserInputPort:
             consuming_abstract_data_product=consuming_abstract_data_product,
             output_port_id=output_port_id,
             output_port=output_port,
+            current_request=current_request,
             renewal_status=renewal_status,
         )
 

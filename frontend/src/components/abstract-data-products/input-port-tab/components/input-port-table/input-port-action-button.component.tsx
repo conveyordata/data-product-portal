@@ -70,12 +70,12 @@ export function InputPortActionButton({
                 setLoading(true);
                 await handleRevoke(outputPortId);
                 dispatchMessage({
-                    content: t('Access to Output Port {{name}} has been revoked', { name }),
+                    content: t('Access to Output Port {{name}} has been cancelled', { name }),
                     type: 'success',
                 });
             } catch {
                 dispatchMessage({
-                    content: t('Failed to revoke access to Output Port {{name}}', { name }),
+                    content: t('Failed to cancel access to Output Port {{name}}', { name }),
                     type: 'error',
                 });
             } finally {
@@ -136,8 +136,8 @@ export function InputPortActionButton({
             )}
             {status === InputPortStatus.Approved && (
                 <Popconfirm
-                    title={t('Revoke Access')}
-                    description={t('Are you sure you want to revoke access for {{name}}?', {
+                    title={t('Cancel Access')}
+                    description={t('Are you sure you want to cancel access to {{name}}?', {
                         name: output_port.name,
                     })}
                     onConfirm={() => handleRevokeAccess(output_port.id, output_port.name)}
@@ -148,7 +148,7 @@ export function InputPortActionButton({
                     autoAdjustOverflow={true}
                 >
                     <Button icon={<CloseCircleOutlined />} loading={loading} disabled={!canRemoveAccess} type={'link'}>
-                        {t('Revoke Access')}
+                        {t('Cancel Access')}
                     </Button>
                 </Popconfirm>
             )}

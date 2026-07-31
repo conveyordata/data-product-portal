@@ -4,6 +4,7 @@ import {
     ClockCircleOutlined,
     CloseOutlined,
     FileTextOutlined,
+    HistoryOutlined,
     InfoCircleOutlined,
     UserOutlined,
 } from '@ant-design/icons';
@@ -60,7 +61,31 @@ type RequestDetails = {
     accessDurationDays?: number | null;
     isPermanent?: boolean;
     renewalStatus?: string | null;
+    currentAccessPeriod?: {
+        label: string;
+        wasRevoked: boolean;
+    } | null;
 };
+
+function formatAccessPeriodLabel(
+    t: (key: string) => string,
+    current: {
+        valid_from?: string | null;
+        valid_until: string | null;
+        access_duration_type: 'permanent' | 'time_bound';
+    },
+): string {
+    if (current.access_duration_type === 'permanent') {
+        return t('Permanent');
+    }
+    if (current.valid_from && current.valid_until) {
+        return `${formatDate(current.valid_from)} - ${formatDate(current.valid_until)}`;
+    }
+    if (current.valid_until) {
+        return `${t('Until')} ${formatDate(current.valid_until)}`;
+    }
+    return t('Unknown');
+}
 
 const abstractDataProductTypeName = (type: AbstractDataProductType) => {
     switch (type) {
@@ -109,6 +134,13 @@ function getRequestDetails(
             accessDurationDays: action.requested_duration_days,
             isPermanent: action.access_duration_type === AccessDurationType.Permanent,
             renewalStatus: action.input_port.renewal_status,
+            currentAccessPeriod:
+                action.input_port.current_request.id !== action.id
+                    ? {
+                          label: formatAccessPeriodLabel(t, action.input_port.current_request),
+                          wasRevoked: action.input_port.current_request.revoked_at != null,
+                      }
+                    : null,
         };
     }
 
@@ -297,6 +329,26 @@ export function ReviewRequestModal({ action, open, onClose, onAccept, onReject }
                                             <Typography.Text strong>{t('Business Justification')}</Typography.Text>
                                         </Flex>
                                         <Typography.Text>{details.justification}</Typography.Text>
+                                    </Flex>
+                                    <Divider style={{ margin: 0 }} />
+                                </>
+                            )}
+                            {details.currentAccessPeriod && (
+                                <>
+                                    <Flex align="center" gap="middle">
+                                        <Avatar
+                                            icon={<HistoryOutlined />}
+                                            style={{ color: '#1890ff', backgroundColor: '#e6f7ff' }}
+                                        />
+                                        <Flex vertical>
+                                            <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                                                {t('Previous Request')}
+                                            </Typography.Text>
+                                            <Typography.Text strong>
+                                                {details.currentAccessPeriod.label}
+                                                {details.currentAccessPeriod.wasRevoked && ` (${t('Revoked')})`}
+                                            </Typography.Text>
+                                        </Flex>
                                     </Flex>
                                     <Divider style={{ margin: 0 }} />
                                 </>

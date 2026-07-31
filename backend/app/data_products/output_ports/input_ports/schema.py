@@ -16,6 +16,7 @@ class InputPortRequestBase(ORMModel):
     id: UUID
     justification: str
     decision_note: Optional[str] = None
+    valid_from: Optional[date] = None
     valid_until: Optional[date]
     access_duration_type: AccessDurationType
     requested_duration_days: Optional[int] = None

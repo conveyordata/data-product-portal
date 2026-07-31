@@ -40,6 +40,7 @@ class InputPortRequest:
         requested_on (datetime.datetime):
         input_port (UserInputPort):
         decision_note (None | str | Unset):
+        valid_from (datetime.date | None | Unset):
         requested_duration_days (int | None | Unset):
         decided_by (None | Unset | User):
         revoked_at (datetime.datetime | None | Unset):
@@ -57,6 +58,7 @@ class InputPortRequest:
     requested_on: datetime.datetime
     input_port: UserInputPort
     decision_note: None | str | Unset = UNSET
+    valid_from: datetime.date | None | Unset = UNSET
     requested_duration_days: int | None | Unset = UNSET
     decided_by: None | Unset | User = UNSET
     revoked_at: datetime.datetime | None | Unset = UNSET
@@ -94,6 +96,14 @@ class InputPortRequest:
             decision_note = UNSET
         else:
             decision_note = self.decision_note
+
+        valid_from: None | str | Unset
+        if isinstance(self.valid_from, Unset):
+            valid_from = UNSET
+        elif isinstance(self.valid_from, datetime.date):
+            valid_from = self.valid_from.isoformat()
+        else:
+            valid_from = self.valid_from
 
         requested_duration_days: int | None | Unset
         if isinstance(self.requested_duration_days, Unset):
@@ -144,6 +154,8 @@ class InputPortRequest:
         )
         if decision_note is not UNSET:
             field_dict["decision_note"] = decision_note
+        if valid_from is not UNSET:
+            field_dict["valid_from"] = valid_from
         if requested_duration_days is not UNSET:
             field_dict["requested_duration_days"] = requested_duration_days
         if decided_by is not UNSET:
@@ -202,6 +214,23 @@ class InputPortRequest:
             return cast(None | str | Unset, data)
 
         decision_note = _parse_decision_note(d.pop("decision_note", UNSET))
+
+        def _parse_valid_from(data: object) -> datetime.date | None | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, str):
+                    raise TypeError()
+                valid_from_type_0 = datetime.date.fromisoformat(data)
+
+                return valid_from_type_0
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            return cast(datetime.date | None | Unset, data)
+
+        valid_from = _parse_valid_from(d.pop("valid_from", UNSET))
 
         def _parse_requested_duration_days(data: object) -> int | None | Unset:
             if data is None:
@@ -282,6 +311,7 @@ class InputPortRequest:
             requested_on=requested_on,
             input_port=input_port,
             decision_note=decision_note,
+            valid_from=valid_from,
             requested_duration_days=requested_duration_days,
             decided_by=decided_by,
             revoked_at=revoked_at,
