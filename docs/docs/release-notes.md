@@ -6,7 +6,10 @@ sidebar_position: 200
 
 ## Unreleased
 
+## 0.7.0
+
 ### breaking changes
+
 - **[Infrastructure Lambda]**: With the introduction of the new provisioner and reconciler the infrastructure lambda is no longer supported. The `INFRASTRUCTURE_LAMBDA_ARN` setting is no longer used and no lambda will be triggered on certain calls.
 
 ### features
@@ -16,6 +19,7 @@ sidebar_position: 200
 - **[General]**: [Timebound access](./concepts/input-ports.md) has been added to the product studio for both data products and explorations.
 
 ### bugfixes
+
 - **[Temporary Admin]**: Fixed a bug where temporary admin rights were expired directly after it was set due to timezone differences in the backend.
 
 ## 0.6.1
