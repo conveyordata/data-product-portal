@@ -78,7 +78,7 @@
         "@types/react": "^19.2.17",
         "@types/react-dom": "^19.2.3",
         "@types/react-syntax-highlighter": "^15.5.13",
-        "@vitejs/plugin-react": "^6.0.4",
+        "@vitejs/plugin-react": "^6.0.5",
         "axios-mock-adapter": "^2.1.0",
         "esbuild": "^0.28.1",
         "i18next-cli": "^1.67.3",
@@ -88,7 +88,7 @@
         "rollup-plugin-visualizer": "^7.0.1",
         "sass": "^1.102.0",
         "typescript": "^7.0.2",
-        "vite": "^8.1.5",
+        "vite": "^8.2.0",
         "vite-plugin-svgr": "^5.2.0",
         "vitest": "^4.1.10"
     },
