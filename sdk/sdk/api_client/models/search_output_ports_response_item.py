@@ -8,7 +8,6 @@ from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..models.access_duration_type import AccessDurationType
-from ..models.data_quality_status import DataQualityStatus
 from ..models.output_port_access_type import OutputPortAccessType
 from ..models.output_port_status import OutputPortStatus
 
@@ -41,7 +40,6 @@ class SearchOutputPortsResponseItem:
         abstract_data_product_count (int):
         technical_assets_count (int):
         data_product_name (str):
-        quality_status (DataQualityStatus | None):
     """
 
     id: UUID
@@ -60,7 +58,6 @@ class SearchOutputPortsResponseItem:
     abstract_data_product_count: int
     technical_assets_count: int
     data_product_name: str
-    quality_status: DataQualityStatus | None
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -106,12 +103,6 @@ class SearchOutputPortsResponseItem:
 
         data_product_name = self.data_product_name
 
-        quality_status: None | str
-        if isinstance(self.quality_status, DataQualityStatus):
-            quality_status = self.quality_status.value
-        else:
-            quality_status = self.quality_status
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
@@ -132,7 +123,6 @@ class SearchOutputPortsResponseItem:
                 "abstract_data_product_count": abstract_data_product_count,
                 "technical_assets_count": technical_assets_count,
                 "data_product_name": data_product_name,
-                "quality_status": quality_status,
             }
         )
 
@@ -204,21 +194,6 @@ class SearchOutputPortsResponseItem:
 
         data_product_name = d.pop("data_product_name")
 
-        def _parse_quality_status(data: object) -> DataQualityStatus | None:
-            if data is None:
-                return data
-            try:
-                if not isinstance(data, str):
-                    raise TypeError()
-                quality_status_type_0 = DataQualityStatus(data)
-
-                return quality_status_type_0
-            except (TypeError, ValueError, AttributeError, KeyError):
-                pass
-            return cast(DataQualityStatus | None, data)
-
-        quality_status = _parse_quality_status(d.pop("quality_status"))
-
         search_output_ports_response_item = cls(
             id=id,
             namespace=namespace,
@@ -236,7 +211,6 @@ class SearchOutputPortsResponseItem:
             abstract_data_product_count=abstract_data_product_count,
             technical_assets_count=technical_assets_count,
             data_product_name=data_product_name,
-            quality_status=quality_status,
         )
 
         search_output_ports_response_item.additional_properties = d

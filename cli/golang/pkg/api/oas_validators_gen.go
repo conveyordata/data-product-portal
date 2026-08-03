@@ -1614,6 +1614,29 @@ func (s *Exploration) Validate() error {
 	return nil
 }
 
+func (s *GetAccessModes) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if s.AccessModes == nil {
+			return errors.New("nil is invalid value")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "access_modes",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
 func (s *GetAllPlatformServiceConfigurationsResponse) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer
@@ -2431,6 +2454,17 @@ func (s *GetOutputPortResponse) Validate() error {
 		})
 	}
 	if err := func() error {
+		if s.AccessModes == nil {
+			return errors.New("nil is invalid value")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "access_modes",
+			Error: err,
+		})
+	}
+	if err := func() error {
 		if s.RolledUpTags == nil {
 			return errors.New("nil is invalid value")
 		}
@@ -2642,6 +2676,17 @@ func (s *GetTechnicalAssetsResponseItem) Validate() error {
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
 			Name:  "technical_mapping",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if s.AccessModes == nil {
+			return errors.New("nil is invalid value")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "access_modes",
 			Error: err,
 		})
 	}
@@ -4673,24 +4718,6 @@ func (s *SearchOutputPortsResponseItem) Validate() error {
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
 			Name:  "tags",
-			Error: err,
-		})
-	}
-	if err := func() error {
-		if value, ok := s.QualityStatus.Get(); ok {
-			if err := func() error {
-				if err := value.Validate(); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return err
-			}
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "quality_status",
 			Error: err,
 		})
 	}

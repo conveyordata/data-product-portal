@@ -10,7 +10,7 @@ from app.settings import settings
 from app.users.schema import User
 
 
-def send_link_dataset_email(
+def send_link_output_port_email(
     output_port: OutputPort,
     data_output: TechnicalAsset,
     *,

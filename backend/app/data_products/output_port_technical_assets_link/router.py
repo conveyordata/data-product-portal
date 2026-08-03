@@ -32,15 +32,14 @@ from app.events.service import EventService
 from app.users.notifications.service import NotificationService
 from app.users.schema import User
 
-router = APIRouter(tags=["Data Products - Technical assets"])
-
-route = (
-    "/v2/data_products/{data_product_id}/output_ports/{output_port_id}/technical_assets"
+router = APIRouter(
+    tags=["Data Products - Technical assets"],
+    prefix="/v2/data_products/{data_product_id}/output_ports/{output_port_id}/technical_assets",
 )
 
 
 @router.post(
-    f"{route}/approve_link_request",
+    "/approve_link_request",
     dependencies=[
         Depends(
             Authorization.enforce(
@@ -82,7 +81,7 @@ def approve_output_port_technical_asset_link(
 
 
 @router.post(
-    f"{route}/deny_link_request",
+    "/deny_link_request",
     dependencies=[
         Depends(
             Authorization.enforce(
@@ -125,7 +124,7 @@ def deny_output_port_technical_asset_link(
 
 
 @router.post(
-    f"{route}/add",
+    "/add",
     responses={
         404: {
             "description": "Data Product not found",
@@ -177,7 +176,7 @@ def link_output_port_to_technical_asset(
     other_approvers = [a for a in approvers if a != authenticated_user]
     if other_approvers:
         background_tasks.add_task(
-            email.send_link_dataset_email(
+            email.send_link_output_port_email(
                 dataset_link.output_port,
                 dataset_link.data_output,
                 requester=deepcopy(authenticated_user),
@@ -188,7 +187,7 @@ def link_output_port_to_technical_asset(
 
 
 @router.delete(
-    f"{route}/remove",
+    "/remove",
     responses={
         404: {
             "description": "Data Product not found",

@@ -94,6 +94,20 @@ func encodeBecomeAdminRequest(
 	return nil
 }
 
+func encodeCreateAccessModeRequest(
+	req *AccessModeCreate,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
 func encodeCreateDataProductRequest(
 	req *DataProductCreate,
 	r *http.Request,
@@ -586,6 +600,20 @@ func encodeUnlinkOutputPortFromTechnicalAssetRequest(
 
 func encodeUpdateAccessDurationRequest(
 	req *AccessDurationUpdate,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeUpdateAccessModeRequest(
+	req *AccessModeUpdate,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"

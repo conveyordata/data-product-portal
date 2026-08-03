@@ -56,7 +56,7 @@ def register_resources(mcp) -> None:
         db: Session = Depends(get_db_session),
         user: UserModel = Depends(get_mcp_authenticated_user),
     ) -> str:
-        output_port = OutputPortService(db).get_visible_output_port(
+        output_port = OutputPortService(db).get_output_port(
             id=UUID(output_port_id), user=user
         )
 

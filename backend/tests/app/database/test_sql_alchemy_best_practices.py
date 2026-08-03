@@ -8,7 +8,7 @@ models = [mapper.class_ for mapper in Base.registry.mappers]
 # The purpose of this list is to ensure we don't have to fix everything all at once
 # We can ignore our tech debt for now and improve it later, but we won't make it worse
 ignore_list = {
-    "TechnicalAsset": ["tags"],
+    "TechnicalAsset": ["tags", "access_modes"],
     "Platform": ["services"],
     "User": ["data_product_roles", "dataset_roles"],
     "OutputPort": ["tags"],

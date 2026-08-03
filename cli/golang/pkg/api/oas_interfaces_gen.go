@@ -37,6 +37,10 @@ type CheckAccessRes interface {
 	checkAccessRes()
 }
 
+type CreateAccessModeRes interface {
+	createAccessModeRes()
+}
+
 type CreateDataProductLifecycleRes interface {
 	createDataProductLifecycleRes()
 }
@@ -443,6 +447,10 @@ type UnlinkOutputPortFromTechnicalAssetRes interface {
 
 type UpdateAccessDurationRes interface {
 	updateAccessDurationRes()
+}
+
+type UpdateAccessModeRes interface {
+	updateAccessModeRes()
 }
 
 type UpdateDataProductAboutRes interface {

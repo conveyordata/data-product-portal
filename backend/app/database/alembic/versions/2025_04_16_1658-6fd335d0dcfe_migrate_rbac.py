@@ -16,11 +16,7 @@ from alembic import op
 from sqlalchemy.dialects.postgresql import UUID as PGUUID
 from sqlalchemy.orm import Session
 
-from app.authorization.role_assignments.data_product.model import (
-    DataProductRoleAssignment,
-)
 from app.authorization.role_assignments.enums import DecisionStatus
-from app.authorization.role_assignments.global_.model import GlobalRoleAssignment
 from app.authorization.roles import ADMIN_UUID
 from app.authorization.roles.schema import Prototype, Scope
 from app.core.authz import Action
@@ -138,17 +134,25 @@ class RoleMigrationService:
                 else member_role_id
             )
             decision, decided_by_id, decided_on = self.map_decision(membership)
-            self.db.add(
-                DataProductRoleAssignment(
-                    data_product_id=membership.data_product_id,
-                    user_id=membership.user_id,
-                    role_id=role_id,
-                    requested_on=membership.requested_on,
-                    requested_by_id=membership.requested_by_id,
-                    decision=decision,
-                    decided_on=decided_on,
-                    decided_by_id=decided_by_id,
-                )
+            self.db.execute(
+                sa.sql.text(
+                    """
+                    INSERT INTO role_assignments_data_product
+                        (id, data_product_id, user_id, role_id, decision, requested_on, requested_by_id, decided_on, decided_by_id)
+                    VALUES
+                        (gen_random_uuid(), :data_product_id, :user_id, :role_id, :decision, :requested_on, :requested_by_id, :decided_on, :decided_by_id)
+                    """
+                ),
+                {
+                    "data_product_id": membership.data_product_id,
+                    "user_id": membership.user_id,
+                    "role_id": role_id,
+                    "decision": decision.name,
+                    "requested_on": membership.requested_on,
+                    "requested_by_id": membership.requested_by_id,
+                    "decided_on": decided_on,
+                    "decided_by_id": decided_by_id,
+                },
             )
         self.db.commit()
 
@@ -199,7 +203,7 @@ class RoleMigrationService:
                         "dataset_id": dataset.id,
                         "user_id": owner.id,
                         "role_id": owner_role_id,
-                        "decision": DecisionStatus.APPROVED.value,
+                        "decision": DecisionStatus.APPROVED.name,
                         "requested_on": dataset.updated_on,
                         "decided_on": dataset.updated_on,
                     },
@@ -219,14 +223,22 @@ class RoleMigrationService:
 
         for user in users:
             if user.is_admin:
-                self.db.add(
-                    GlobalRoleAssignment(
-                        user_id=user.id,
-                        role_id=admin_role_id,
-                        decision=DecisionStatus.APPROVED,
-                        requested_on=user.updated_on,
-                        decided_on=user.updated_on,
-                    )
+                self.db.execute(
+                    sa.sql.text(
+                        """
+                        INSERT INTO role_assignments_global
+                            (id, user_id, role_id, decision, requested_on, decided_on)
+                        VALUES
+                            (gen_random_uuid(), :user_id, :role_id, :decision, :requested_on, :decided_on)
+                        """
+                    ),
+                    {
+                        "user_id": user.id,
+                        "role_id": admin_role_id,
+                        "decision": DecisionStatus.APPROVED.name,
+                        "requested_on": user.updated_on,
+                        "decided_on": user.updated_on,
+                    },
                 )
         self.db.commit()
 

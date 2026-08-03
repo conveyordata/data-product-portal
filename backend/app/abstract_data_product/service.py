@@ -1,10 +1,11 @@
 from copy import deepcopy
 from datetime import datetime
-from typing import Sequence
+from typing import Optional, Sequence
+from uuid import UUID
 
 import pytz
 from fastapi import BackgroundTasks, HTTPException, status
-from sqlalchemy import UUID, select
+from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
 from app.abstract_data_product.input_ports.enums import InputPortRequestDecision
@@ -111,6 +112,7 @@ class AbstractDataProductService:
         output_port: OutputPortModel,
         input_port: InputPortModel,
         justification: str,
+        access_mode_id: Optional[UUID] = None,
         *,
         actor: User,
     ) -> InputPortModel:
@@ -122,6 +124,7 @@ class AbstractDataProductService:
             access_duration_type=access_duration.access_duration_type,
             requested_duration_days=access_duration.days,
             input_port=input_port,
+            access_mode_id=access_mode_id,
         )
         self.db.add(request)
         self.db.flush()
@@ -153,6 +156,7 @@ class AbstractDataProductService:
         adp: AbstractDataProduct,
         output_port_id: UUID,
         justification: str,
+        access_mode_id: Optional[UUID] = None,
         *,
         actor: User,
     ) -> InputPortModel:
@@ -162,8 +166,10 @@ class AbstractDataProductService:
             options=[
                 selectinload(OutputPortModel.data_product_links)
                 .selectinload(InputPortModel.consuming_abstract_data_product)
-                .selectinload(AbstractDataProduct.input_ports)
+                .selectinload(AbstractDataProduct.input_ports),
+                selectinload(OutputPortModel.data_output_links),
             ],
+            populate_existing=True,
         )
         self._ensure_not_deleting(adp)
         self._ensure_not_deleting(output_port.data_product)
@@ -183,12 +189,31 @@ class AbstractDataProductService:
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="You do not have access to this private output port",
             )
+        if output_port.access_modes and not access_mode_id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Can not request access to this output port without specifying an access mode",
+            )
+        if access_mode_id and access_mode_id not in [
+            op.id for op in output_port.access_modes
+        ]:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="The specified access mode does not exist",
+            )
 
         input_port = InputPortModel(
             output_port_id=output_port_id,
             consuming_abstract_data_product=adp,
         )
-        self._create_request(adp, output_port, input_port, justification, actor=actor)
+        self._create_request(
+            adp,
+            output_port,
+            input_port,
+            justification,
+            access_mode_id=access_mode_id,
+            actor=actor,
+        )
         adp.input_ports.append(input_port)
         return input_port
 
@@ -240,8 +265,14 @@ class AbstractDataProductService:
             )
 
         justification = existing.latest_request.justification
+        access_mode_id = existing.latest_request.access_mode_id
         return self._create_request(
-            adp, output_port, existing, justification, actor=actor
+            adp,
+            output_port,
+            existing,
+            justification,
+            actor=actor,
+            access_mode_id=access_mode_id,
         )
 
     def _get_adp_with_input_ports(self, id: UUID) -> AbstractDataProduct:
@@ -267,12 +298,19 @@ class AbstractDataProductService:
         id: UUID,
         output_port_ids: list[UUID],
         justification: str,
+        access_mode_id: Optional[UUID] = None,
         *,
         actor: User,
     ) -> list[InputPortModel]:
         adp = self._get_adp_with_input_ports(id)
         input_ports = [
-            self._add_single_input_port(adp, output_port_id, justification, actor=actor)
+            self._add_single_input_port(
+                adp,
+                output_port_id,
+                justification,
+                access_mode_id=access_mode_id,
+                actor=actor,
+            )
             for output_port_id in output_port_ids
         ]
         self.db.flush()

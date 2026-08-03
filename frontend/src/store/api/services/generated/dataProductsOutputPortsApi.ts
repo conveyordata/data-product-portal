@@ -518,6 +518,11 @@ export type DataProductLifeCycle = {
   color: string;
   is_default: boolean;
 };
+export type AccessMode = {
+  id: string;
+  name: string;
+  description: string;
+};
 export type DataProductSetting = {
   id: string;
   category: string;
@@ -658,6 +663,7 @@ export type GetOutputPortResponse = {
   domain: Domain;
   lifecycle: DataProductLifeCycle | null;
   about: string | null;
+  access_modes: AccessMode[];
   rolled_up_tags: Tag[];
   data_product_settings: OutputPortSettingValue[];
   technical_asset_links: TechnicalAssetLink[];

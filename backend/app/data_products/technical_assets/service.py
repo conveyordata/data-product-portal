@@ -9,6 +9,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
 from app.authorization.role_assignments.enums import DecisionStatus
+from app.configuration.access_modes.model import AccessMode as AccessModeModel
 from app.configuration.tags.model import Tag as TagModel
 from app.configuration.tags.model import ensure_tag_exists
 from app.core.namespace.validation import (
@@ -56,6 +57,17 @@ class DataOutputService:
             tags.append(tag)
         return tags
 
+    def _get_access_modes(self, access_mode_ids: list[UUID]) -> list[AccessModeModel]:
+        access_modes = self.db.scalars(
+            select(AccessModeModel).where(AccessModeModel.id.in_(access_mode_ids))
+        ).all()
+        if len(access_mode_ids) != len(access_modes):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid access modes provided",
+            )
+        return access_modes
+
     @staticmethod
     def get_status_for(technical_mapping: TechnicalMapping):
         if technical_mapping == TechnicalMapping.Default:
@@ -76,8 +88,10 @@ class DataOutputService:
             .all()
         )
 
-    def get_data_output(self, data_product_id: UUID, id: UUID) -> TechnicalAssetModel:
-        data_output = self.db.scalar(
+    def get_technical_asset(
+        self, data_product_id: UUID, id: UUID
+    ) -> TechnicalAssetModel:
+        technical_asset = self.db.scalar(
             (
                 select(TechnicalAssetModel)
                 .where(TechnicalAssetModel.id == id)
@@ -87,19 +101,19 @@ class DataOutputService:
                 selectinload(TechnicalAssetModel.environment_configurations),
             )
         )
-        if not data_output:
+        if not technical_asset:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Technical asset not found",
             )
-        return data_output
+        return technical_asset
 
-    def create_data_output(
-        self, id: UUID, data_output: CreateTechnicalAssetRequest
+    def create_technical_asset(
+        self, id: UUID, technical_asset: CreateTechnicalAssetRequest
     ) -> TechnicalAssetModel:
         if (
             validity := self.namespace_validator.validate_namespace(
-                data_output.namespace, self.db, id
+                technical_asset.namespace, self.db, id
             ).validity
         ) != ResourceNameValidityType.VALID:
             raise HTTPException(
@@ -107,18 +121,22 @@ class DataOutputService:
                 detail=f"Invalid namespace: {validity.value}",
             )
 
-        if data_output.technical_mapping == TechnicalMapping.Default:
+        if technical_asset.technical_mapping == TechnicalMapping.Default:
             data_product = self.db.get(DataProductModel, id)
-            data_output.configuration.validate_configuration(data_product, self.db)
+            technical_asset.configuration.validate_configuration(data_product, self.db)
 
-        data_output_schema = data_output.parse_pydantic_schema()
+        data_output_schema = technical_asset.parse_pydantic_schema()
         tags = self._get_tags(data_output_schema.pop("tag_ids", []))
+        access_modes = self._get_access_modes(
+            data_output_schema.pop("access_mode_ids", [])
+        )
         data_output_schema.pop("sourceAligned")  # Remove deprecated field
 
-        technical_asset_status = self.get_status_for(data_output.technical_mapping)  # type: ignore[arg-type]
+        technical_asset_status = self.get_status_for(technical_asset.technical_mapping)  # type: ignore[arg-type]
         model = TechnicalAssetModel(
             **data_output_schema,
             tags=tags,
+            access_modes=access_modes,
             owner_id=id,
             status=technical_asset_status,
         )
@@ -142,7 +160,7 @@ class DataOutputService:
     def get_data_output_with_links(
         self, data_product_id: UUID, id: UUID
     ) -> TechnicalAssetModel:
-        data_output: TechnicalAssetModel | None = self.get_data_output(
+        data_output: TechnicalAssetModel | None = self.get_technical_asset(
             data_product_id, id
         )
         if not data_output:
@@ -180,47 +198,60 @@ class DataOutputService:
         *,
         actor: User,
     ) -> DataOutputDatasetAssociationModel:
-        dataset = ensure_output_port_exists(
+        output_port = ensure_output_port_exists(
             output_port_id,
             self.db,
             data_product_id=data_product_id,
-            options=[selectinload(OutputPortModel.data_product_links)],
+            options=[
+                selectinload(OutputPortModel.data_product_links),
+                selectinload(OutputPortModel.data_output_links).selectinload(
+                    DataOutputDatasetAssociationModel.data_output
+                ),
+            ],
         )
-        data_output = self.get_data_output(data_product_id, id)
-        if data_output.status != TechnicalAssetStatus.ACTIVE:
+        technical_asset = self.get_technical_asset(data_product_id, id)
+        if technical_asset.status != TechnicalAssetStatus.ACTIVE:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Cannot link technical asset that is not active",
             )
 
-        if dataset.id in [
+        if output_port.id in [
             link.output_port_id
-            for link in data_output.dataset_links
+            for link in technical_asset.dataset_links
             if link.status != DecisionStatus.DENIED
         ]:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Dataset {output_port_id} already exists in data product {id}",
+                detail=f"Technical Asset {id} already exists in output port {output_port_id}",
+            )
+        if (
+            technical_asset.access_modes
+            and output_port.access_modes
+            and set(output_port.access_modes) != set(technical_asset.access_modes)
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Access modes of technical asset {id} are incompatible with access modes of technical assets already part of output port {output_port_id}",
             )
 
         # Data output requests always need to be approved
-        dataset_link = DataOutputDatasetAssociationModel(
+        output_port_link = DataOutputDatasetAssociationModel(
             output_port_id=output_port_id,
             status=DecisionStatus.PENDING,
             requested_by=actor,
             requested_on=datetime.now(tz=pytz.utc),
         )
-        data_output.dataset_links.append(dataset_link)
+        technical_asset.dataset_links.append(output_port_link)
         self.db.flush()
         OutputPortService(self.db).recalculate_search(output_port_id)
-        self.db.commit()
-        return dataset_link
+        return output_port_link
 
     def unlink_dataset_from_data_output(
         self, data_product_id: UUID, id: UUID, output_port_id: UUID
     ) -> TechnicalAssetModel:
         ensure_output_port_exists(output_port_id, self.db)
-        data_output = self.get_data_output(data_product_id, id)
+        data_output = self.get_technical_asset(data_product_id, id)
 
         data_output_dataset = next(
             (
@@ -272,7 +303,7 @@ class DataOutputService:
 
         return graph
 
-    def get_data_outputs_for_data_product(
+    def get_technical_assets_for_data_product(
         self, data_product_id: UUID
     ) -> Sequence[TechnicalAssetModel]:
         return (

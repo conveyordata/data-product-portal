@@ -13,6 +13,7 @@ from tests.app.data_products.output_port_technical_assets_link.test_router impor
     DATA_OUTPUTS_DATASETS_ENDPOINT,
 )
 from tests.factories import (
+    AccessModeFactory,
     DataProductFactory,
     DataProductRoleAssignmentFactory,
     OutputPortFactory,
@@ -81,7 +82,7 @@ def data_output_payload_not_owner():
 class TestTechnicalAssetsRouter:
     invalid_id = "00000000-0000-0000-0000-000000000000"
 
-    def test_create_data_output_source_aligned(
+    def test_create_technical_asset_source_aligned(
         self, data_output_payload, client: TestClient
     ):
         role = RoleFactory(
@@ -94,8 +95,39 @@ class TestTechnicalAssetsRouter:
             data_product_id=data_output_payload["owner_id"],
         )
         created_data_output = self.create_technical_asset(client, data_output_payload)
-        assert created_data_output.status_code == 200
+        assert created_data_output.status_code == 200, created_data_output.text
         assert "id" in created_data_output.json()
+
+    def test_create_technical_asset_with_access_modes(
+        self, data_output_payload, client
+    ):
+        access_mode = AccessModeFactory()
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__CREATE_TECHNICAL_ASSET],
+        )
+        DataProductRoleAssignmentFactory(
+            user_id=data_output_payload["user_id"],
+            role_id=role.id,
+            data_product_id=data_output_payload["owner_id"],
+        )
+        data_output_payload["access_mode_ids"] = [
+            str(access_mode.id),
+        ]
+
+        created_technical_asset = self.create_technical_asset(
+            client, data_output_payload
+        )
+        assert created_technical_asset.status_code == 200
+
+        technical_asset = self.get_technical_asset(
+            client,
+            data_output_payload["owner_id"],
+            created_technical_asset.json()["id"],
+        )
+        assert technical_asset.status_code == 200, technical_asset.text
+        assert len(technical_asset.json()["access_modes"]) == 1
+        assert technical_asset.json()["access_modes"][0]["name"] == access_mode.name
 
     def test_create_technical_assert_generates_webhook_v2_event(
         self,
@@ -103,10 +135,10 @@ class TestTechnicalAssetsRouter:
         client: TestClient,
         mock_webhook,
     ):
-        self.test_create_data_output_source_aligned(data_output_payload, client)
+        self.test_create_technical_asset_source_aligned(data_output_payload, client)
         assert_event_in_queue("technical_asset.event", mock_webhook)
 
-    def test_create_data_output_product_aligned(
+    def test_create_technical_asset_product_aligned(
         self, data_output_payload, client: TestClient
     ):
         role = RoleFactory(
@@ -170,7 +202,7 @@ class TestTechnicalAssetsRouter:
             == "custom"
         )
 
-    def test_create_data_output_not_product_owner(
+    def test_create_technical_asset_not_product_owner(
         self, data_output_payload_not_owner, client: TestClient
     ):
         created_data_output = self.create_technical_asset(
@@ -397,7 +429,7 @@ class TestTechnicalAssetsRouter:
         assert response.status_code == 200
         assert body["validity"] == "VALID"
 
-    def test_create_data_output_duplicate_namespace(
+    def test_create_technical_asset_duplicate_namespace(
         self, data_output_payload, client: TestClient
     ):
         role = RoleFactory(
@@ -421,7 +453,7 @@ class TestTechnicalAssetsRouter:
         response = self.create_technical_asset(client, create_payload)
         assert response.status_code == 400
 
-    def test_create_data_output_invalid_characters_namespace(
+    def test_create_technical_asset_invalid_characters_namespace(
         self, data_output_payload, client: TestClient
     ):
         role = RoleFactory(
@@ -439,7 +471,7 @@ class TestTechnicalAssetsRouter:
         response = self.create_technical_asset(client, create_payload)
         assert response.status_code == 400
 
-    def test_create_data_output_invalid_length_namespace(
+    def test_create_technical_asset_invalid_length_namespace(
         self, data_output_payload, client: TestClient
     ):
         role = RoleFactory(
@@ -604,7 +636,7 @@ class TestTechnicalAssetsRouter:
             == data_output_name
         )
 
-    @patch("app.data_products.technical_assets.email.send_link_dataset_email")
+    @patch("app.data_products.technical_assets.email.send_link_output_port_email")
     def test_dataset_link_auto_approval_no_email_sent(
         self, mock_send_email, client: TestClient
     ):
@@ -640,7 +672,7 @@ class TestTechnicalAssetsRouter:
         # Verify no email was sent for auto-approved request
         mock_send_email.assert_not_called()
 
-    @patch("app.data_products.technical_assets.email.send_link_dataset_email")
+    @patch("app.data_products.technical_assets.email.send_link_output_port_email")
     def test_dataset_link_manual_approval_email_sent(
         self, mock_send_email, client: TestClient
     ):

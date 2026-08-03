@@ -465,6 +465,87 @@ func (s *AccessGranularity) UnmarshalText(data []byte) error {
 	}
 }
 
+// Ref: #/components/schemas/AccessMode
+type AccessMode struct {
+	ID          uuid.UUID `json:"id"`
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
+}
+
+// GetID returns the value of ID.
+func (s *AccessMode) GetID() uuid.UUID {
+	return s.ID
+}
+
+// GetName returns the value of Name.
+func (s *AccessMode) GetName() string {
+	return s.Name
+}
+
+// GetDescription returns the value of Description.
+func (s *AccessMode) GetDescription() string {
+	return s.Description
+}
+
+// SetID sets the value of ID.
+func (s *AccessMode) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+// SetName sets the value of Name.
+func (s *AccessMode) SetName(val string) {
+	s.Name = val
+}
+
+// SetDescription sets the value of Description.
+func (s *AccessMode) SetDescription(val string) {
+	s.Description = val
+}
+
+func (*AccessMode) createAccessModeRes() {}
+func (*AccessMode) updateAccessModeRes() {}
+
+// Ref: #/components/schemas/AccessModeCreate
+type AccessModeCreate struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+}
+
+// GetName returns the value of Name.
+func (s *AccessModeCreate) GetName() string {
+	return s.Name
+}
+
+// GetDescription returns the value of Description.
+func (s *AccessModeCreate) GetDescription() string {
+	return s.Description
+}
+
+// SetName sets the value of Name.
+func (s *AccessModeCreate) SetName(val string) {
+	s.Name = val
+}
+
+// SetDescription sets the value of Description.
+func (s *AccessModeCreate) SetDescription(val string) {
+	s.Description = val
+}
+
+// Ref: #/components/schemas/AccessModeUpdate
+type AccessModeUpdate struct {
+	Description string `json:"description"`
+}
+
+// GetDescription returns the value of Description.
+func (s *AccessModeUpdate) GetDescription() string {
+	return s.Description
+}
+
+// SetDescription sets the value of Description.
+func (s *AccessModeUpdate) SetDescription(val string) {
+	s.Description = val
+}
+
 // Ref: #/components/schemas/AccessResponse
 type AccessResponse struct {
 	Allowed bool `json:"allowed"`
@@ -1314,6 +1395,7 @@ type CreateTechnicalAssetRequest struct {
 	// Deprecated: schema marks this property as deprecated.
 	SourceAligned    OptNilBool             `json:"sourceAligned"`
 	TechnicalMapping OptNilTechnicalMapping `json:"technical_mapping"`
+	AccessModeIds    []uuid.UUID            `json:"access_mode_ids"`
 	TagIds           []uuid.UUID            `json:"tag_ids"`
 }
 
@@ -1355,6 +1437,11 @@ func (s *CreateTechnicalAssetRequest) GetSourceAligned() OptNilBool {
 // GetTechnicalMapping returns the value of TechnicalMapping.
 func (s *CreateTechnicalAssetRequest) GetTechnicalMapping() OptNilTechnicalMapping {
 	return s.TechnicalMapping
+}
+
+// GetAccessModeIds returns the value of AccessModeIds.
+func (s *CreateTechnicalAssetRequest) GetAccessModeIds() []uuid.UUID {
+	return s.AccessModeIds
 }
 
 // GetTagIds returns the value of TagIds.
@@ -1400,6 +1487,11 @@ func (s *CreateTechnicalAssetRequest) SetSourceAligned(val OptNilBool) {
 // SetTechnicalMapping sets the value of TechnicalMapping.
 func (s *CreateTechnicalAssetRequest) SetTechnicalMapping(val OptNilTechnicalMapping) {
 	s.TechnicalMapping = val
+}
+
+// SetAccessModeIds sets the value of AccessModeIds.
+func (s *CreateTechnicalAssetRequest) SetAccessModeIds(val []uuid.UUID) {
+	s.AccessModeIds = val
 }
 
 // SetTagIds sets the value of TagIds.
@@ -4367,6 +4459,21 @@ func (s *FinalizerRequest) SetFinalizer(val string) {
 	s.Finalizer = val
 }
 
+// Ref: #/components/schemas/GetAccessModes
+type GetAccessModes struct {
+	AccessModes []AccessMode `json:"access_modes"`
+}
+
+// GetAccessModes returns the value of AccessModes.
+func (s *GetAccessModes) GetAccessModes() []AccessMode {
+	return s.AccessModes
+}
+
+// SetAccessModes sets the value of AccessModes.
+func (s *GetAccessModes) SetAccessModes(val []AccessMode) {
+	s.AccessModes = val
+}
+
 // Ref: #/components/schemas/GetAllPlatformServiceConfigurationsResponse
 type GetAllPlatformServiceConfigurationsResponse struct {
 	PlatformServiceConfigurations []PlatformServiceConfiguration `json:"platform_service_configurations"`
@@ -5268,6 +5375,7 @@ type GetOutputPortResponse struct {
 	Domain                        Domain                   `json:"domain"`
 	Lifecycle                     NilDataProductLifeCycle  `json:"lifecycle"`
 	About                         NilString                `json:"about"`
+	AccessModes                   []AccessMode             `json:"access_modes"`
 	RolledUpTags                  []Tag                    `json:"rolled_up_tags"`
 	DataProductSettings           []OutputPortSettingValue `json:"data_product_settings"`
 	TechnicalAssetLinks           []TechnicalAssetLink     `json:"technical_asset_links"`
@@ -5341,6 +5449,11 @@ func (s *GetOutputPortResponse) GetLifecycle() NilDataProductLifeCycle {
 // GetAbout returns the value of About.
 func (s *GetOutputPortResponse) GetAbout() NilString {
 	return s.About
+}
+
+// GetAccessModes returns the value of AccessModes.
+func (s *GetOutputPortResponse) GetAccessModes() []AccessMode {
+	return s.AccessModes
 }
 
 // GetRolledUpTags returns the value of RolledUpTags.
@@ -5426,6 +5539,11 @@ func (s *GetOutputPortResponse) SetLifecycle(val NilDataProductLifeCycle) {
 // SetAbout sets the value of About.
 func (s *GetOutputPortResponse) SetAbout(val NilString) {
 	s.About = val
+}
+
+// SetAccessModes sets the value of AccessModes.
+func (s *GetOutputPortResponse) SetAccessModes(val []AccessMode) {
+	s.AccessModes = val
 }
 
 // SetRolledUpTags sets the value of RolledUpTags.
@@ -5515,6 +5633,7 @@ type GetTechnicalAssetsResponseItem struct {
 	ServiceID        uuid.UUID                                   `json:"service_id"`
 	Status           TechnicalAssetStatus                        `json:"status"`
 	TechnicalMapping TechnicalMapping                            `json:"technical_mapping"`
+	AccessModes      []AccessMode                                `json:"access_modes"`
 	Configuration    GetTechnicalAssetsResponseItemConfiguration `json:"configuration"`
 	Owner            DataProduct                                 `json:"owner"`
 	OutputPortLinks  []OutputPortLink                            `json:"output_port_links"`
@@ -5568,6 +5687,11 @@ func (s *GetTechnicalAssetsResponseItem) GetStatus() TechnicalAssetStatus {
 // GetTechnicalMapping returns the value of TechnicalMapping.
 func (s *GetTechnicalAssetsResponseItem) GetTechnicalMapping() TechnicalMapping {
 	return s.TechnicalMapping
+}
+
+// GetAccessModes returns the value of AccessModes.
+func (s *GetTechnicalAssetsResponseItem) GetAccessModes() []AccessMode {
+	return s.AccessModes
 }
 
 // GetConfiguration returns the value of Configuration.
@@ -5648,6 +5772,11 @@ func (s *GetTechnicalAssetsResponseItem) SetStatus(val TechnicalAssetStatus) {
 // SetTechnicalMapping sets the value of TechnicalMapping.
 func (s *GetTechnicalAssetsResponseItem) SetTechnicalMapping(val TechnicalMapping) {
 	s.TechnicalMapping = val
+}
+
+// SetAccessModes sets the value of AccessModes.
+func (s *GetTechnicalAssetsResponseItem) SetAccessModes(val []AccessMode) {
+	s.AccessModes = val
 }
 
 // SetConfiguration sets the value of Configuration.
@@ -6259,6 +6388,7 @@ func (*HTTPValidationError) becomeAdminRes()                              {}
 func (*HTTPValidationError) cancelInputPortForDataProductRes()            {}
 func (*HTTPValidationError) cancelInputPortForExplorationRes()            {}
 func (*HTTPValidationError) checkAccessRes()                              {}
+func (*HTTPValidationError) createAccessModeRes()                         {}
 func (*HTTPValidationError) createDataProductLifecycleRes()               {}
 func (*HTTPValidationError) createDataProductRes()                        {}
 func (*HTTPValidationError) createDataProductRoleAssignmentRes()          {}
@@ -6361,6 +6491,7 @@ func (*HTTPValidationError) setValueForDataProductRes()                   {}
 func (*HTTPValidationError) setValueForOutputPortRes()                    {}
 func (*HTTPValidationError) unlinkOutputPortFromTechnicalAssetRes()       {}
 func (*HTTPValidationError) updateAccessDurationRes()                     {}
+func (*HTTPValidationError) updateAccessModeRes()                         {}
 func (*HTTPValidationError) updateDataProductAboutRes()                   {}
 func (*HTTPValidationError) updateDataProductLifecycleRes()               {}
 func (*HTTPValidationError) updateDataProductRes()                        {}
@@ -6909,51 +7040,6 @@ func (o NilDataProductLifeCycle) Get() (v DataProductLifeCycle, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o NilDataProductLifeCycle) Or(d DataProductLifeCycle) DataProductLifeCycle {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
-// NewNilDataQualityStatus returns new NilDataQualityStatus with value set to v.
-func NewNilDataQualityStatus(v DataQualityStatus) NilDataQualityStatus {
-	return NilDataQualityStatus{
-		Value: v,
-	}
-}
-
-// NilDataQualityStatus is nullable DataQualityStatus.
-type NilDataQualityStatus struct {
-	Value DataQualityStatus
-	Null  bool
-}
-
-// SetTo sets value to v.
-func (o *NilDataQualityStatus) SetTo(v DataQualityStatus) {
-	o.Null = false
-	o.Value = v
-}
-
-// IsNull returns true if value is Null.
-func (o NilDataQualityStatus) IsNull() bool { return o.Null }
-
-// SetToNull sets value to null.
-func (o *NilDataQualityStatus) SetToNull() {
-	o.Null = true
-	var v DataQualityStatus
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o NilDataQualityStatus) Get() (v DataQualityStatus, ok bool) {
-	if o.Null {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o NilDataQualityStatus) Or(d DataQualityStatus) DataQualityStatus {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -12605,7 +12691,6 @@ type SearchOutputPortsResponseItem struct {
 	AbstractDataProductCount      int                     `json:"abstract_data_product_count"`
 	TechnicalAssetsCount          int                     `json:"technical_assets_count"`
 	DataProductName               string                  `json:"data_product_name"`
-	QualityStatus                 NilDataQualityStatus    `json:"quality_status"`
 }
 
 // GetID returns the value of ID.
@@ -12688,11 +12773,6 @@ func (s *SearchOutputPortsResponseItem) GetDataProductName() string {
 	return s.DataProductName
 }
 
-// GetQualityStatus returns the value of QualityStatus.
-func (s *SearchOutputPortsResponseItem) GetQualityStatus() NilDataQualityStatus {
-	return s.QualityStatus
-}
-
 // SetID sets the value of ID.
 func (s *SearchOutputPortsResponseItem) SetID(val uuid.UUID) {
 	s.ID = val
@@ -12771,11 +12851,6 @@ func (s *SearchOutputPortsResponseItem) SetTechnicalAssetsCount(val int) {
 // SetDataProductName sets the value of DataProductName.
 func (s *SearchOutputPortsResponseItem) SetDataProductName(val string) {
 	s.DataProductName = val
-}
-
-// SetQualityStatus sets the value of QualityStatus.
-func (s *SearchOutputPortsResponseItem) SetQualityStatus(val NilDataQualityStatus) {
-	s.QualityStatus = val
 }
 
 // Option for select UI elements.

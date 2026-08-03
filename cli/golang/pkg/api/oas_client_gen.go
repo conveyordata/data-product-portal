@@ -78,6 +78,12 @@ type Invoker interface {
 	//
 	// GET /api/v2/authz/access/{action}
 	CheckAccess(ctx context.Context, params CheckAccessParams) (CheckAccessRes, error)
+	// CreateAccessMode invokes create_access_mode operation.
+	//
+	// Create Access Mode.
+	//
+	// POST /api/v2/configuration/access_modes
+	CreateAccessMode(ctx context.Context, request *AccessModeCreate) (CreateAccessModeRes, error)
 	// CreateDataProduct invokes create_data_product operation.
 	//
 	// Create Data Product.
@@ -148,7 +154,7 @@ type Invoker interface {
 	//
 	// Create Technical Asset.
 	//
-	// POST /api/v2/data_products/{data_product_id}/technical_assets
+	// POST /api/v2/data_products/{data_product_id}/technical_assets/
 	CreateTechnicalAsset(ctx context.Context, request *CreateTechnicalAssetRequest, params CreateTechnicalAssetParams) (CreateTechnicalAssetRes, error)
 	// CreateUser invokes create_user operation.
 	//
@@ -216,6 +222,12 @@ type Invoker interface {
 	//
 	// GET /api/v2/authn/aws_credentials
 	GetAWSCredentials(ctx context.Context, params GetAWSCredentialsParams) (GetAWSCredentialsRes, error)
+	// GetAccessModes invokes get_access_modes operation.
+	//
+	// Get Access Modes.
+	//
+	// GET /api/v2/configuration/access_modes
+	GetAccessModes(ctx context.Context) (*GetAccessModes, error)
 	// GetAllAccessDurations invokes get_all_access_durations operation.
 	//
 	// Get All Access Durations.
@@ -280,7 +292,7 @@ type Invoker interface {
 	//
 	// Get Data Product Technical Assets.
 	//
-	// GET /api/v2/data_products/{data_product_id}/technical_assets
+	// GET /api/v2/data_products/{data_product_id}/technical_assets/
 	GetDataProductTechnicalAssets(ctx context.Context, params GetDataProductTechnicalAssetsParams) (GetDataProductTechnicalAssetsRes, error)
 	// GetDataProductType invokes get_data_product_type operation.
 	//
@@ -830,6 +842,12 @@ type Invoker interface {
 	//
 	// PUT /api/v2/access_durations/{abstract_data_product_type}
 	UpdateAccessDuration(ctx context.Context, request *AccessDurationUpdate, params UpdateAccessDurationParams) (UpdateAccessDurationRes, error)
+	// UpdateAccessMode invokes update_access_mode operation.
+	//
+	// Update Access Mode.
+	//
+	// PUT /api/v2/configuration/access_modes/{id}
+	UpdateAccessMode(ctx context.Context, request *AccessModeUpdate, params UpdateAccessModeParams) (UpdateAccessModeRes, error)
 	// UpdateDataProduct invokes update_data_product operation.
 	//
 	// Update Data Product.
@@ -1670,6 +1688,52 @@ func (c *Client) sendCheckAccess(ctx context.Context, params CheckAccessParams) 
 	return result, nil
 }
 
+// CreateAccessMode invokes create_access_mode operation.
+//
+// Create Access Mode.
+//
+// POST /api/v2/configuration/access_modes
+func (c *Client) CreateAccessMode(ctx context.Context, request *AccessModeCreate) (CreateAccessModeRes, error) {
+	res, err := c.sendCreateAccessMode(ctx, request)
+	return res, err
+}
+
+func (c *Client) sendCreateAccessMode(ctx context.Context, request *AccessModeCreate) (res CreateAccessModeRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/api/v2/configuration/access_modes"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeCreateAccessModeRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeCreateAccessModeResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // CreateDataProduct invokes create_data_product operation.
 //
 // Create Data Product.
@@ -2199,7 +2263,7 @@ func (c *Client) sendCreateTag(ctx context.Context, request *TagCreate) (res Cre
 //
 // Create Technical Asset.
 //
-// POST /api/v2/data_products/{data_product_id}/technical_assets
+// POST /api/v2/data_products/{data_product_id}/technical_assets/
 func (c *Client) CreateTechnicalAsset(ctx context.Context, request *CreateTechnicalAssetRequest, params CreateTechnicalAssetParams) (CreateTechnicalAssetRes, error) {
 	res, err := c.sendCreateTechnicalAsset(ctx, request, params)
 	return res, err
@@ -2228,7 +2292,7 @@ func (c *Client) sendCreateTechnicalAsset(ctx context.Context, request *CreateTe
 		}
 		pathParts[1] = encoded
 	}
-	pathParts[2] = "/technical_assets"
+	pathParts[2] = "/technical_assets/"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	r, err := ht.NewRequest(ctx, "POST", u)
@@ -3010,6 +3074,49 @@ func (c *Client) sendGetAWSCredentials(ctx context.Context, params GetAWSCredent
 	return result, nil
 }
 
+// GetAccessModes invokes get_access_modes operation.
+//
+// Get Access Modes.
+//
+// GET /api/v2/configuration/access_modes
+func (c *Client) GetAccessModes(ctx context.Context) (*GetAccessModes, error) {
+	res, err := c.sendGetAccessModes(ctx)
+	return res, err
+}
+
+func (c *Client) sendGetAccessModes(ctx context.Context) (res *GetAccessModes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/api/v2/configuration/access_modes"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeGetAccessModesResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // GetAllAccessDurations invokes get_all_access_durations operation.
 //
 // Get All Access Durations.
@@ -3557,7 +3664,7 @@ func (c *Client) sendGetDataProductSettings(ctx context.Context, params GetDataP
 //
 // Get Data Product Technical Assets.
 //
-// GET /api/v2/data_products/{data_product_id}/technical_assets
+// GET /api/v2/data_products/{data_product_id}/technical_assets/
 func (c *Client) GetDataProductTechnicalAssets(ctx context.Context, params GetDataProductTechnicalAssetsParams) (GetDataProductTechnicalAssetsRes, error) {
 	res, err := c.sendGetDataProductTechnicalAssets(ctx, params)
 	return res, err
@@ -3586,7 +3693,7 @@ func (c *Client) sendGetDataProductTechnicalAssets(ctx context.Context, params G
 		}
 		pathParts[1] = encoded
 	}
-	pathParts[2] = "/technical_assets"
+	pathParts[2] = "/technical_assets/"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	r, err := ht.NewRequest(ctx, "GET", u)
@@ -9854,6 +9961,70 @@ func (c *Client) sendUpdateAccessDuration(ctx context.Context, request *AccessDu
 	}()
 
 	result, err := decodeUpdateAccessDurationResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// UpdateAccessMode invokes update_access_mode operation.
+//
+// Update Access Mode.
+//
+// PUT /api/v2/configuration/access_modes/{id}
+func (c *Client) UpdateAccessMode(ctx context.Context, request *AccessModeUpdate, params UpdateAccessModeParams) (UpdateAccessModeRes, error) {
+	res, err := c.sendUpdateAccessMode(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendUpdateAccessMode(ctx context.Context, request *AccessModeUpdate, params UpdateAccessModeParams) (res UpdateAccessModeRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [2]string
+	pathParts[0] = "/api/v2/configuration/access_modes/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "PUT", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeUpdateAccessModeRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeUpdateAccessModeResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

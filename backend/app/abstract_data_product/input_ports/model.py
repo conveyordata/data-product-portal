@@ -27,6 +27,7 @@ from app.shared.model import BaseORM, utcnow
 
 if TYPE_CHECKING:
     from app.abstract_data_product.model import AbstractDataProduct
+    from app.configuration.access_modes.model import AccessMode
     from app.data_products.output_ports.model import OutputPort
     from app.users.model import User
 
@@ -198,6 +199,9 @@ class InputPortRequest(
     )
     justification: Mapped[str] = mapped_column(Text)
     decision_note: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    access_mode_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        ForeignKey("access_modes.id"), nullable=True
+    )
     access_duration_type: Mapped[AccessDurationType] = mapped_column(
         Enum(AccessDurationType, native_enum=False),
         default=AccessDurationType.PERMANENT,
@@ -243,5 +247,10 @@ class InputPortRequest(
     revoked_by: Mapped[Optional["User"]] = relationship(
         "User",
         foreign_keys=[revoked_by_id],
+        lazy="joined",
+    )
+    access_mode: Mapped[Optional["AccessMode"]] = relationship(
+        "AccessMode",
+        foreign_keys=[access_mode_id],
         lazy="joined",
     )

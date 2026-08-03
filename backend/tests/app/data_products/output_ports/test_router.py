@@ -203,7 +203,7 @@ class TestOutputPortRouter:
         )
         assert created_dataset.status_code == 400
 
-    def test_get_datasets(self, client):
+    def test_get_output_ports(self, client):
         ds = OutputPortFactory()
         response = client.get(ENDPOINT.format(ds.data_product.id))
         assert response.status_code == 200
@@ -378,30 +378,10 @@ class TestOutputPortRouter:
         response = self.get_output_port(client, ds.id, ds.data_product.id)
         assert response.status_code == 404
 
-    def test_get_dataset_with_invalid_dataset_id(self, client):
+    def test_get_output_port_with_invalid_id(self, client):
         dp = DataProductFactory()
         dataset = self.get_output_port(client, dp.id, self.invalid_id)
         assert dataset.status_code == 404
-
-    def test_get_dataset(
-        self,
-        client,
-    ):
-        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        role = RoleFactory(
-            scope=Scope.DATASET, permissions=[AuthorizationAction.OUTPUT_PORT__DELETE]
-        )
-        data_product = DataProductFactory()
-        data_output = TechnicalAssetFactory(owner=data_product)
-        ds = OutputPortFactory(data_product=data_product)
-        TechnicalAssetOutputPortAssociationFactory(
-            output_port=ds, data_output=data_output
-        )
-        DatasetRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id, output_port_id=ds.id
-        )
-        dataset = self.get_output_port(client, ds.id, data_product.id)
-        assert dataset.status_code == 200
 
     def test_get_output_port(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)

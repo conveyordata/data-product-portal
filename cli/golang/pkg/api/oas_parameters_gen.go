@@ -546,6 +546,11 @@ type UpdateAccessDurationParams struct {
 	AbstractDataProductType AbstractDataProductType
 }
 
+// UpdateAccessModeParams is parameters of update_access_mode operation.
+type UpdateAccessModeParams struct {
+	ID uuid.UUID
+}
+
 // UpdateDataProductParams is parameters of update_data_product operation.
 type UpdateDataProductParams struct {
 	ID uuid.UUID

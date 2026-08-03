@@ -11,6 +11,7 @@ from ..models.technical_asset_status import TechnicalAssetStatus
 from ..models.technical_mapping import TechnicalMapping
 
 if TYPE_CHECKING:
+    from ..models.access_mode import AccessMode
     from ..models.azure_blob_technical_asset_configuration import (
         AzureBlobTechnicalAssetConfiguration,
     )
@@ -55,6 +56,7 @@ class GetTechnicalAssetsResponseItem:
         service_id (UUID):
         status (TechnicalAssetStatus):
         technical_mapping (TechnicalMapping):
+        access_modes (list[AccessMode]):
         configuration (AzureBlobTechnicalAssetConfiguration | DatabricksTechnicalAssetConfiguration |
             GlueTechnicalAssetConfiguration | OSISemanticModelTechnicalAssetConfiguration |
             PostgreSQLTechnicalAssetConfiguration | RedshiftTechnicalAssetConfiguration | S3TechnicalAssetConfiguration |
@@ -77,6 +79,7 @@ class GetTechnicalAssetsResponseItem:
     service_id: UUID
     status: TechnicalAssetStatus
     technical_mapping: TechnicalMapping
+    access_modes: list[AccessMode]
     configuration: (
         AzureBlobTechnicalAssetConfiguration
         | DatabricksTechnicalAssetConfiguration
@@ -136,6 +139,11 @@ class GetTechnicalAssetsResponseItem:
 
         technical_mapping = self.technical_mapping.value
 
+        access_modes = []
+        for access_modes_item_data in self.access_modes:
+            access_modes_item = access_modes_item_data.to_dict()
+            access_modes.append(access_modes_item)
+
         configuration: dict[str, Any]
         if isinstance(self.configuration, S3TechnicalAssetConfiguration):
             configuration = self.configuration.to_dict()
@@ -190,6 +198,7 @@ class GetTechnicalAssetsResponseItem:
                 "service_id": service_id,
                 "status": status,
                 "technical_mapping": technical_mapping,
+                "access_modes": access_modes,
                 "configuration": configuration,
                 "owner": owner,
                 "output_port_links": output_port_links,
@@ -204,6 +213,7 @@ class GetTechnicalAssetsResponseItem:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        from ..models.access_mode import AccessMode
         from ..models.azure_blob_technical_asset_configuration import (
             AzureBlobTechnicalAssetConfiguration,
         )
@@ -251,6 +261,13 @@ class GetTechnicalAssetsResponseItem:
         status = TechnicalAssetStatus(d.pop("status"))
 
         technical_mapping = TechnicalMapping(d.pop("technical_mapping"))
+
+        access_modes = []
+        _access_modes = d.pop("access_modes")
+        for access_modes_item_data in _access_modes:
+            access_modes_item = AccessMode.from_dict(access_modes_item_data)
+
+            access_modes.append(access_modes_item)
 
         def _parse_configuration(
             data: object,
@@ -377,6 +394,7 @@ class GetTechnicalAssetsResponseItem:
             service_id=service_id,
             status=status,
             technical_mapping=technical_mapping,
+            access_modes=access_modes,
             configuration=configuration,
             owner=owner,
             output_port_links=output_port_links,
