@@ -30,6 +30,7 @@ from .role_assignment_global import GlobalRoleAssignmentFactory
 from .s3_data_output import S3DataOutputFactory
 from .tags import TagFactory
 from .technical_asset import TechnicalAssetFactory
+from .technical_asset_access_mode import TechnicalAssetAccessModeFactory
 from .technical_asset_output_ports import TechnicalAssetOutputPortAssociationFactory
 from .theme_settings import ThemeSettingsFactory
 from .user import UserFactory
@@ -78,6 +79,7 @@ factories = [
     ThemeSettingsFactory,
     NotificationFactory,
     ExplorationFactory,
+    TechnicalAssetAccessModeFactory,
 ]
 
 for factory_model in factories:

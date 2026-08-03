@@ -3884,7 +3884,7 @@
         }
       }
     },
-    "/api/v2/data_products/{data_product_id}/technical_assets": {
+    "/api/v2/data_products/{data_product_id}/technical_assets/": {
       "get": {
         "tags": [
           "Data Products - Technical assets"
@@ -9533,6 +9533,14 @@
               }
             ]
           },
+          "access_modes": {
+            "items": {
+              "$ref": "#/components/schemas/TechnicalAssetAccessMode"
+            },
+            "type": "array",
+            "title": "Access Modes",
+            "default": []
+          },
           "tag_ids": {
             "items": {
               "type": "string",
@@ -12188,6 +12196,13 @@
             ],
             "title": "About"
           },
+          "access_modes": {
+            "items": {
+              "$ref": "#/components/schemas/TechnicalAssetAccessMode"
+            },
+            "type": "array",
+            "title": "Access Modes"
+          },
           "rolled_up_tags": {
             "items": {
               "$ref": "#/components/schemas/Tag"
@@ -12227,6 +12242,7 @@
           "domain",
           "lifecycle",
           "about",
+          "access_modes",
           "rolled_up_tags",
           "data_product_settings",
           "technical_asset_links"
@@ -12321,6 +12337,13 @@
           "technical_mapping": {
             "$ref": "#/components/schemas/TechnicalMapping"
           },
+          "access_modes": {
+            "items": {
+              "$ref": "#/components/schemas/TechnicalAssetAccessMode"
+            },
+            "type": "array",
+            "title": "Access Modes"
+          },
           "configuration": {
             "oneOf": [
               {
@@ -12408,6 +12431,7 @@
           "service_id",
           "status",
           "technical_mapping",
+          "access_modes",
           "configuration",
           "owner",
           "output_port_links",
@@ -15509,16 +15533,6 @@
           "data_product_name": {
             "type": "string",
             "title": "Data Product Name"
-          },
-          "quality_status": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/DataQualityStatus"
-              },
-              {
-                "type": "null"
-              }
-            ]
           }
         },
         "type": "object",
@@ -15538,8 +15552,7 @@
           "lifecycle",
           "abstract_data_product_count",
           "technical_assets_count",
-          "data_product_name",
-          "quality_status"
+          "data_product_name"
         ],
         "title": "SearchOutputPortsResponseItem"
       },
@@ -15812,6 +15825,24 @@
           "configuration"
         ],
         "title": "TechnicalAsset"
+      },
+      "TechnicalAssetAccessMode": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "description"
+        ],
+        "title": "TechnicalAssetAccessMode"
       },
       "TechnicalAssetEvent": {
         "properties": {

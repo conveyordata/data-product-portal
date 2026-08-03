@@ -27,6 +27,16 @@ from app.database.database import Base, ensure_exists
 from app.shared.model import BaseORM
 
 
+class TechnicalAssetAccessMode(Base, BaseORM):
+    __tablename__ = "technical_asset_access_modes"
+
+    technical_asset_id = Column(
+        UUID(as_uuid=True), ForeignKey("data_outputs.id"), primary_key=True
+    )
+    name = Column(String, primary_key=True)
+    description = Column(String, nullable=True)
+
+
 class TechnicalAsset(Base, BaseORM, EventTrackedMixin):
     __tablename__ = "data_outputs"
 
@@ -57,7 +67,7 @@ class TechnicalAsset(Base, BaseORM, EventTrackedMixin):
         lazy="raise",
     )
     tags: Mapped[list[Tag]] = relationship(
-        secondary=tag_data_output_table, back_populates="data_outputs", lazy="joined"
+        secondary=tag_data_output_table, back_populates="data_outputs", lazy="selectin"
     )
 
     environment_configurations: Mapped[
@@ -69,6 +79,12 @@ class TechnicalAsset(Base, BaseORM, EventTrackedMixin):
         ),
         lazy="raise",
         viewonly=True,
+    )
+    access_modes: Mapped[list["TechnicalAssetAccessMode"]] = relationship(
+        "TechnicalAssetAccessMode",
+        foreign_keys="TechnicalAssetAccessMode.technical_asset_id",
+        order_by="TechnicalAssetAccessMode.name",
+        lazy="selectin",
     )
 
     def to_event(self) -> TechnicalAssetEvent:

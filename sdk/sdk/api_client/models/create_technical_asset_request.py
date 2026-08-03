@@ -33,6 +33,7 @@ if TYPE_CHECKING:
     from ..models.snowflake_technical_asset_configuration import (
         SnowflakeTechnicalAssetConfiguration,
     )
+    from ..models.technical_asset_access_mode import TechnicalAssetAccessMode
 
 
 T = TypeVar("T", bound="CreateTechnicalAssetRequest")
@@ -55,6 +56,7 @@ class CreateTechnicalAssetRequest:
         source_aligned (bool | None | Unset): DEPRECATED: Use 'technical_mapping' instead. This field will be removed in
             a future version.
         technical_mapping (None | TechnicalMapping | Unset):
+        access_modes (list[TechnicalAssetAccessMode] | Unset):
     """
 
     name: str
@@ -75,6 +77,7 @@ class CreateTechnicalAssetRequest:
     tag_ids: list[UUID]
     source_aligned: bool | None | Unset = UNSET
     technical_mapping: None | TechnicalMapping | Unset = UNSET
+    access_modes: list[TechnicalAssetAccessMode] | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -149,6 +152,13 @@ class CreateTechnicalAssetRequest:
         else:
             technical_mapping = self.technical_mapping
 
+        access_modes: list[dict[str, Any]] | Unset = UNSET
+        if not isinstance(self.access_modes, Unset):
+            access_modes = []
+            for access_modes_item_data in self.access_modes:
+                access_modes_item = access_modes_item_data.to_dict()
+                access_modes.append(access_modes_item)
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
@@ -166,6 +176,8 @@ class CreateTechnicalAssetRequest:
             field_dict["sourceAligned"] = source_aligned
         if technical_mapping is not UNSET:
             field_dict["technical_mapping"] = technical_mapping
+        if access_modes is not UNSET:
+            field_dict["access_modes"] = access_modes
 
         return field_dict
 
@@ -195,6 +207,7 @@ class CreateTechnicalAssetRequest:
         from ..models.snowflake_technical_asset_configuration import (
             SnowflakeTechnicalAssetConfiguration,
         )
+        from ..models.technical_asset_access_mode import TechnicalAssetAccessMode
 
         d = dict(src_dict)
         name = d.pop("name")
@@ -326,6 +339,17 @@ class CreateTechnicalAssetRequest:
 
         technical_mapping = _parse_technical_mapping(d.pop("technical_mapping", UNSET))
 
+        _access_modes = d.pop("access_modes", UNSET)
+        access_modes: list[TechnicalAssetAccessMode] | Unset = UNSET
+        if _access_modes is not UNSET:
+            access_modes = []
+            for access_modes_item_data in _access_modes:
+                access_modes_item = TechnicalAssetAccessMode.from_dict(
+                    access_modes_item_data
+                )
+
+                access_modes.append(access_modes_item)
+
         create_technical_asset_request = cls(
             name=name,
             description=description,
@@ -336,6 +360,7 @@ class CreateTechnicalAssetRequest:
             tag_ids=tag_ids,
             source_aligned=source_aligned,
             technical_mapping=technical_mapping,
+            access_modes=access_modes,
         )
 
         create_technical_asset_request.additional_properties = d

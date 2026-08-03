@@ -46,7 +46,7 @@ const injectedRtkApi = api.injectEndpoints({
       GetDataProductTechnicalAssetsApiArg
     >({
       query: (queryArg) => ({
-        url: `/api/v2/data_products/${queryArg}/technical_assets`,
+        url: `/api/v2/data_products/${queryArg}/technical_assets/`,
       }),
     }),
     createTechnicalAsset: build.mutation<
@@ -54,7 +54,7 @@ const injectedRtkApi = api.injectEndpoints({
       CreateTechnicalAssetApiArg
     >({
       query: (queryArg) => ({
-        url: `/api/v2/data_products/${queryArg.dataProductId}/technical_assets`,
+        url: `/api/v2/data_products/${queryArg.dataProductId}/technical_assets/`,
         method: "POST",
         body: queryArg.createTechnicalAssetRequest,
       }),
@@ -220,6 +220,10 @@ export type LinkTechnicalAssetToOutputPortRequest = {
 export type UnLinkTechnicalAssetToOutputPortRequest = {
   technical_asset_id: string;
 };
+export type TechnicalAssetAccessMode = {
+  name: string;
+  description: string;
+};
 export type AzureBlobTechnicalAssetConfiguration = {
   configuration_type: "AzureBlobTechnicalAssetConfiguration";
   domain?: string;
@@ -334,6 +338,7 @@ export type GetTechnicalAssetsResponseItem = {
   service_id: string;
   status: TechnicalAssetStatus;
   technical_mapping: TechnicalMapping;
+  access_modes: TechnicalAssetAccessMode[];
   configuration:
     | ({
         configuration_type: "AzureBlobTechnicalAssetConfiguration";
@@ -407,6 +412,7 @@ export type CreateTechnicalAssetRequest = {
   /** DEPRECATED: Use 'technical_mapping' instead. This field will be removed in a future version. */
   sourceAligned?: boolean | null;
   technical_mapping?: TechnicalMapping | null;
+  access_modes?: TechnicalAssetAccessMode[];
   tag_ids: string[];
 };
 export type UpdateTechnicalAssetResponse = {

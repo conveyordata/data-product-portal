@@ -148,7 +148,7 @@ type Invoker interface {
 	//
 	// Create Technical Asset.
 	//
-	// POST /api/v2/data_products/{data_product_id}/technical_assets
+	// POST /api/v2/data_products/{data_product_id}/technical_assets/
 	CreateTechnicalAsset(ctx context.Context, request *CreateTechnicalAssetRequest, params CreateTechnicalAssetParams) (CreateTechnicalAssetRes, error)
 	// CreateUser invokes create_user operation.
 	//
@@ -280,7 +280,7 @@ type Invoker interface {
 	//
 	// Get Data Product Technical Assets.
 	//
-	// GET /api/v2/data_products/{data_product_id}/technical_assets
+	// GET /api/v2/data_products/{data_product_id}/technical_assets/
 	GetDataProductTechnicalAssets(ctx context.Context, params GetDataProductTechnicalAssetsParams) (GetDataProductTechnicalAssetsRes, error)
 	// GetDataProductType invokes get_data_product_type operation.
 	//
@@ -2199,7 +2199,7 @@ func (c *Client) sendCreateTag(ctx context.Context, request *TagCreate) (res Cre
 //
 // Create Technical Asset.
 //
-// POST /api/v2/data_products/{data_product_id}/technical_assets
+// POST /api/v2/data_products/{data_product_id}/technical_assets/
 func (c *Client) CreateTechnicalAsset(ctx context.Context, request *CreateTechnicalAssetRequest, params CreateTechnicalAssetParams) (CreateTechnicalAssetRes, error) {
 	res, err := c.sendCreateTechnicalAsset(ctx, request, params)
 	return res, err
@@ -2228,7 +2228,7 @@ func (c *Client) sendCreateTechnicalAsset(ctx context.Context, request *CreateTe
 		}
 		pathParts[1] = encoded
 	}
-	pathParts[2] = "/technical_assets"
+	pathParts[2] = "/technical_assets/"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	r, err := ht.NewRequest(ctx, "POST", u)
@@ -3557,7 +3557,7 @@ func (c *Client) sendGetDataProductSettings(ctx context.Context, params GetDataP
 //
 // Get Data Product Technical Assets.
 //
-// GET /api/v2/data_products/{data_product_id}/technical_assets
+// GET /api/v2/data_products/{data_product_id}/technical_assets/
 func (c *Client) GetDataProductTechnicalAssets(ctx context.Context, params GetDataProductTechnicalAssetsParams) (GetDataProductTechnicalAssetsRes, error) {
 	res, err := c.sendGetDataProductTechnicalAssets(ctx, params)
 	return res, err
@@ -3586,7 +3586,7 @@ func (c *Client) sendGetDataProductTechnicalAssets(ctx context.Context, params G
 		}
 		pathParts[1] = encoded
 	}
-	pathParts[2] = "/technical_assets"
+	pathParts[2] = "/technical_assets/"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	r, err := ht.NewRequest(ctx, "GET", u)

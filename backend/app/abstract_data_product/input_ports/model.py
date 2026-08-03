@@ -28,6 +28,7 @@ from app.shared.model import BaseORM, utcnow
 if TYPE_CHECKING:
     from app.abstract_data_product.model import AbstractDataProduct
     from app.data_products.output_ports.model import OutputPort
+    from app.data_products.technical_assets.model import TechnicalAssetAccessMode
     from app.users.model import User
 
 
@@ -198,6 +199,7 @@ class InputPortRequest(
     )
     justification: Mapped[str] = mapped_column(Text)
     decision_note: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    access_mode_name: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     access_duration_type: Mapped[AccessDurationType] = mapped_column(
         Enum(AccessDurationType, native_enum=False),
         default=AccessDurationType.PERMANENT,
@@ -245,3 +247,21 @@ class InputPortRequest(
         foreign_keys=[revoked_by_id],
         lazy="joined",
     )
+
+    @property
+    def access_mode(self) -> Optional["TechnicalAssetAccessMode"]:
+        if not self.access_mode_name:
+            return None
+        am = next(
+            (
+                am
+                for am in self.input_port.output_port.access_modes
+                if am.name == self.access_mode_name
+            ),
+            None,
+        )
+        if am is None:
+            raise ValueError(
+                f"Access mode '{self.access_mode_name}' not found for input port '{self.input_port.id}'"
+            )
+        return am

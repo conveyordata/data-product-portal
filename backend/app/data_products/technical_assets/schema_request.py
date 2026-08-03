@@ -4,6 +4,7 @@ from warnings import deprecated, warn
 from pydantic import Field, model_validator
 
 from app.data_products.technical_assets.enums import TechnicalMapping
+from app.data_products.technical_assets.schema import TechnicalAssetAccessMode
 from app.data_products.technical_assets.status import TechnicalAssetStatus
 from app.shared.schema import ORMModel
 from app.technical_asset_configuration.schema_union import DataOutputConfiguration
@@ -25,6 +26,7 @@ class CreateTechnicalAssetRequest(ORMModel):
     technical_mapping: TechnicalMapping | None = Field(
         default=None,
     )
+    access_modes: list[TechnicalAssetAccessMode] = Field(default=[])
     tag_ids: list[UUID]
 
     @model_validator(mode="after")

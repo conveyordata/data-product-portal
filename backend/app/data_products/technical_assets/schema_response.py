@@ -14,6 +14,7 @@ from app.data_products.output_port_technical_assets_link.schema import (
 from app.data_products.output_ports.schema import OutputPort
 from app.data_products.schema import DataProduct
 from app.data_products.technical_assets.enums import TechnicalMapping
+from app.data_products.technical_assets.schema import TechnicalAssetAccessMode
 from app.data_products.technical_assets.status import TechnicalAssetStatus
 from app.shared.schema import ORMModel
 from app.technical_asset_configuration.schema_union import DataOutputConfiguration
@@ -46,7 +47,11 @@ def compute_technical_info(
     return result
 
 
-class BaseTechnicalAssetGet(ORMModel):
+class OutputPortLink(TechnicalAssetOutputPortAssociation):
+    output_port: OutputPort
+
+
+class GetTechnicalAssetsResponseItem(ORMModel):
     id: UUID
     name: str
     description: str
@@ -56,6 +61,7 @@ class BaseTechnicalAssetGet(ORMModel):
     service_id: UUID
     status: TechnicalAssetStatus
     technical_mapping: TechnicalMapping
+    access_modes: list[TechnicalAssetAccessMode]
 
     configuration: DataOutputConfiguration
     owner: DataProduct
@@ -81,12 +87,6 @@ class BaseTechnicalAssetGet(ORMModel):
             self.configuration, self.service, self.environment_configurations
         )
 
-
-class OutputPortLink(TechnicalAssetOutputPortAssociation):
-    output_port: OutputPort
-
-
-class GetTechnicalAssetsResponseItem(BaseTechnicalAssetGet):
     output_port_links: list[OutputPortLink] = Field(validation_alias="dataset_links")
     tags: list[Tag]
 

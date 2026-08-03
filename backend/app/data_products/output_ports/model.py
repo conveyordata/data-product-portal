@@ -40,6 +40,7 @@ if TYPE_CHECKING:
     from app.configuration.data_product_lifecycles.model import DataProductLifecycle
     from app.configuration.data_product_settings.model import DataProductSettingValue
     from app.data_products.model import DataProduct
+    from app.data_products.technical_assets.model import TechnicalAssetAccessMode
 
 
 class OutputPort(Base, BaseORM, EventTrackedMixin):
@@ -86,7 +87,7 @@ class OutputPort(Base, BaseORM, EventTrackedMixin):
         lazy="raise",
     )
     tags: Mapped[list[Tag]] = relationship(
-        secondary=tag_dataset_table, back_populates="datasets", lazy="joined"
+        secondary=tag_dataset_table, back_populates="datasets", lazy="selectin"
     )
     data_product_settings: Mapped[list["DataProductSettingValue"]] = relationship(
         "DataProductSettingValue",
@@ -116,6 +117,12 @@ class OutputPort(Base, BaseORM, EventTrackedMixin):
     @property
     def data_product_name(self) -> str:
         return self.data_product.name
+
+    @property
+    def access_modes(self) -> list["TechnicalAssetAccessMode"]:
+        if not self.data_output_links:
+            return []
+        return self.data_output_links[0].data_output.access_modes
 
     abstract_data_product_count = deferred(
         column_property(

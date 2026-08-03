@@ -22,6 +22,9 @@ from tests.factories import (
     ExplorationFactory,
     InputPortFactory,
     OutputPortFactory,
+    TechnicalAssetAccessModeFactory,
+    TechnicalAssetFactory,
+    TechnicalAssetOutputPortAssociationFactory,
     UserFactory,
 )
 
@@ -39,7 +42,9 @@ def _request_for(input_port):
 
 
 class TestRequestInputPortsDuration:
-    def test_request_input_ports__time_bound_data_product_port_sets_window(self):
+    def test_request_input_ports__time_bound_data_product_port_sets_window(
+        self, session
+    ):
         actor = UserFactory()
         dp = DataProductFactory()
         port = OutputPortFactory(
@@ -130,6 +135,72 @@ class TestRequestInputPortsDuration:
             )
         assert exc.value.status_code == 400
         assert len(_requests_for(link.id)) == 1
+
+    def test_request_input_ports__access_mode(self):
+        actor = UserFactory()
+        dp = DataProductFactory()
+        port = OutputPortFactory(
+            access_type=OutputPortAccessType.UNRESTRICTED,
+        )
+        TechnicalAssetOutputPortAssociationFactory(
+            data_output=TechnicalAssetFactory(
+                access_modes=[TechnicalAssetAccessModeFactory(name="a name")]
+            ),
+            output_port=port,
+        )
+
+        [ip] = AbstractDataProductService(test_session).request_input_ports(
+            dp.id,
+            [port.id],
+            "need access",
+            actor=actor,
+            access_mode_name="a name",
+        )
+        assert ip.latest_request.access_mode_name == "a name"
+
+    def test_request_input_ports__access_mode_required(self):
+        actor = UserFactory()
+        dp = DataProductFactory()
+        port = OutputPortFactory(
+            access_type=OutputPortAccessType.UNRESTRICTED,
+        )
+        TechnicalAssetOutputPortAssociationFactory(
+            data_output=TechnicalAssetFactory(
+                access_modes=[TechnicalAssetAccessModeFactory(name="a name")]
+            ),
+            output_port=port,
+        )
+
+        with pytest.raises(HTTPException) as exc:
+            AbstractDataProductService(test_session).request_input_ports(
+                dp.id, [port.id], "need access", actor=actor
+            )
+
+        assert exc.value.status_code == 400
+
+    def test_request_input_ports__access_mode_does_not_exist(self):
+        actor = UserFactory()
+        dp = DataProductFactory()
+        port = OutputPortFactory(
+            access_type=OutputPortAccessType.UNRESTRICTED,
+        )
+        TechnicalAssetOutputPortAssociationFactory(
+            data_output=TechnicalAssetFactory(
+                access_modes=[TechnicalAssetAccessModeFactory(name="a name")]
+            ),
+            output_port=port,
+        )
+
+        with pytest.raises(HTTPException) as exc:
+            AbstractDataProductService(test_session).request_input_ports(
+                dp.id,
+                [port.id],
+                "need access",
+                actor=actor,
+                access_mode_name="bla",
+            )
+
+        assert exc.value.status_code == 400
 
     def _restricted_time_bound_port(self):
         port = OutputPortFactory(
@@ -251,6 +322,38 @@ class TestRequestInputPortsDuration:
                 dp.id, port.id, actor=actor
             )
         assert exc.value.status_code == 404
+
+    def test_renew_input_port__access_mode(self):
+        actor = UserFactory()
+        dp = DataProductFactory()
+        port = OutputPortFactory(
+            access_type=OutputPortAccessType.UNRESTRICTED,
+        )
+        TechnicalAssetOutputPortAssociationFactory(
+            data_output=TechnicalAssetFactory(
+                access_modes=[TechnicalAssetAccessModeFactory(name="a mode")]
+            ),
+            output_port=port,
+        )
+        link = InputPortFactory(
+            consuming_abstract_data_product=dp,
+            output_port=port,
+            status=DecisionStatus.APPROVED,
+            request__access_duration_type=AccessDurationType.TIME_BOUND,
+            request__requested_duration_days=30,
+            request__valid_until=date.today() + timedelta(days=10),
+            request__access_mode_name="a mode",
+        )
+
+        ip = AbstractDataProductService(test_session).renew_input_port(
+            dp.id, port.id, actor=actor
+        )
+
+        assert ip.id == link.id
+        reqs = _requests_for(link.id)
+        assert len(reqs) == 2
+        for req in reqs:
+            assert req.access_mode_name == "a mode"
 
     def test_revoke_input_port__revokes_the_active_grant(self):
         actor = UserFactory()

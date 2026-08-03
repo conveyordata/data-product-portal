@@ -94,49 +94,11 @@ class OutputPortService:
                 detail=f"Data product '{dp.name}' is pending deletion and cannot be modified",
             )
 
-    def get_dataset(
-        self, id: UUID, data_product_id: Optional[UUID] = None
-    ) -> OutputPortModel:
-        """DB fetch with all required eager loads, lifecycle defaulting, and tag roll-up.
-
-        Does not enforce any visibility policy — callers decide whether to gate on user.
-        """
-        query = select(OutputPortModel).where(OutputPortModel.id == id)
-
-        if data_product_id is not None:
-            query = query.where(OutputPortModel.data_product_id == data_product_id)
-
-        output_port = self.db.scalar(
-            query.options(
-                selectinload(OutputPortModel.data_output_links),
-                selectinload(OutputPortModel.data_product_settings),
-            )
-        )
-
-        if not output_port:
-            raise self.not_found_exception(id)
-
-        rolled_up_tags = set()
-        for output_link in output_port.data_output_links:
-            rolled_up_tags.update(output_link.data_output.tags)
-
-        output_port.rolled_up_tags = rolled_up_tags
-
-        if not output_port.lifecycle:
-            default_lifecycle = self.db.scalar(
-                select(DataProductLifeCycleModel).where(
-                    DataProductLifeCycleModel.is_default
-                )
-            )
-            output_port.lifecycle = default_lifecycle
-        output_port.domain = output_port.data_product.domain
-        return output_port
-
     def get_access_durations(
         self, id: UUID, user: UserModel, data_product_id: Optional[UUID] = None
     ) -> GetOutputPortAccessDurationsResponse:
 
-        dataset = self.get_visible_output_port(id, user, data_product_id)
+        dataset = self.get_output_port(id, user, data_product_id)
 
         time_bound_days: dict[AbstractDataProductType, int] = {
             row.abstract_data_product_type: row.days
@@ -175,23 +137,44 @@ class OutputPortService:
             else time_bound_days.get(product_type, -1),
         )
 
-    def get_visible_output_port(
+    def get_output_port(
         self, id: UUID, user: UserModel, data_product_id: Optional[UUID] = None
     ) -> OutputPortModel:
-        """Fetch a dataset, raising 403 if the user cannot see it as a consumer.
+        query = select(OutputPortModel).where(OutputPortModel.id == id)
 
-        Use this for endpoints where dataset visibility must be enforced.
+        if data_product_id is not None:
+            query = query.where(OutputPortModel.data_product_id == data_product_id)
 
-        For system/internal callers already authorised at the endpoint level, use
-        get_dataset() instead.
-        """
-        dataset = self.get_dataset(id, data_product_id)
-        if not self.is_visible_to_user(dataset, user):
+        output_port = self.db.scalar(
+            query.options(
+                selectinload(OutputPortModel.data_output_links),
+                selectinload(OutputPortModel.data_product_settings),
+            )
+        )
+
+        if not output_port:
+            raise self.not_found_exception(id)
+
+        rolled_up_tags = set()
+        for output_link in output_port.data_output_links:
+            rolled_up_tags.update(output_link.data_output.tags)
+
+        output_port.rolled_up_tags = rolled_up_tags
+
+        if not output_port.lifecycle:
+            default_lifecycle = self.db.scalar(
+                select(DataProductLifeCycleModel).where(
+                    DataProductLifeCycleModel.is_default
+                )
+            )
+            output_port.lifecycle = default_lifecycle
+        output_port.domain = output_port.data_product.domain
+        if not self.is_visible_to_user(output_port, user):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="You do not have access to this private dataset",
             )
-        return dataset
+        return output_port
 
     def search_output_ports(
         self,

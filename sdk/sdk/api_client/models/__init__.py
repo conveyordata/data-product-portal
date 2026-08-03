@@ -326,6 +326,7 @@ from .tag_update import TagUpdate
 from .tags_get import TagsGet
 from .tags_get_item import TagsGetItem
 from .technical_asset import TechnicalAsset
+from .technical_asset_access_mode import TechnicalAssetAccessMode
 from .technical_asset_event import TechnicalAssetEvent
 from .technical_asset_link import TechnicalAssetLink
 from .technical_asset_output_port_request import TechnicalAssetOutputPortRequest
@@ -612,6 +613,7 @@ __all__ = (
     "TagsGetItem",
     "TagUpdate",
     "TechnicalAsset",
+    "TechnicalAssetAccessMode",
     "TechnicalAssetEvent",
     "TechnicalAssetLink",
     "TechnicalAssetOutputPortRequest",

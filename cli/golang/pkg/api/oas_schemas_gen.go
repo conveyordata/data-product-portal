@@ -1312,9 +1312,10 @@ type CreateTechnicalAssetRequest struct {
 	// DEPRECATED: Use 'technical_mapping' instead. This field will be removed in a future version.
 	//
 	// Deprecated: schema marks this property as deprecated.
-	SourceAligned    OptNilBool             `json:"sourceAligned"`
-	TechnicalMapping OptNilTechnicalMapping `json:"technical_mapping"`
-	TagIds           []uuid.UUID            `json:"tag_ids"`
+	SourceAligned    OptNilBool                 `json:"sourceAligned"`
+	TechnicalMapping OptNilTechnicalMapping     `json:"technical_mapping"`
+	AccessModes      []TechnicalAssetAccessMode `json:"access_modes"`
+	TagIds           []uuid.UUID                `json:"tag_ids"`
 }
 
 // GetName returns the value of Name.
@@ -1355,6 +1356,11 @@ func (s *CreateTechnicalAssetRequest) GetSourceAligned() OptNilBool {
 // GetTechnicalMapping returns the value of TechnicalMapping.
 func (s *CreateTechnicalAssetRequest) GetTechnicalMapping() OptNilTechnicalMapping {
 	return s.TechnicalMapping
+}
+
+// GetAccessModes returns the value of AccessModes.
+func (s *CreateTechnicalAssetRequest) GetAccessModes() []TechnicalAssetAccessMode {
+	return s.AccessModes
 }
 
 // GetTagIds returns the value of TagIds.
@@ -1400,6 +1406,11 @@ func (s *CreateTechnicalAssetRequest) SetSourceAligned(val OptNilBool) {
 // SetTechnicalMapping sets the value of TechnicalMapping.
 func (s *CreateTechnicalAssetRequest) SetTechnicalMapping(val OptNilTechnicalMapping) {
 	s.TechnicalMapping = val
+}
+
+// SetAccessModes sets the value of AccessModes.
+func (s *CreateTechnicalAssetRequest) SetAccessModes(val []TechnicalAssetAccessMode) {
+	s.AccessModes = val
 }
 
 // SetTagIds sets the value of TagIds.
@@ -5254,23 +5265,24 @@ func (*GetOutputPortAccessDurationsResponse) getOutputPortAccessDurationsRes() {
 
 // Ref: #/components/schemas/GetOutputPortResponse
 type GetOutputPortResponse struct {
-	ID                            uuid.UUID                `json:"id"`
-	Namespace                     string                   `json:"namespace"`
-	Name                          string                   `json:"name"`
-	Description                   string                   `json:"description"`
-	Status                        OutputPortStatus         `json:"status"`
-	Usage                         NilString                `json:"usage"`
-	AccessType                    OutputPortAccessType     `json:"access_type"`
-	DataProductAccessDurationType AccessDurationType       `json:"data_product_access_duration_type"`
-	ExplorationAccessDurationType AccessDurationType       `json:"exploration_access_duration_type"`
-	DataProductID                 uuid.UUID                `json:"data_product_id"`
-	Tags                          []Tag                    `json:"tags"`
-	Domain                        Domain                   `json:"domain"`
-	Lifecycle                     NilDataProductLifeCycle  `json:"lifecycle"`
-	About                         NilString                `json:"about"`
-	RolledUpTags                  []Tag                    `json:"rolled_up_tags"`
-	DataProductSettings           []OutputPortSettingValue `json:"data_product_settings"`
-	TechnicalAssetLinks           []TechnicalAssetLink     `json:"technical_asset_links"`
+	ID                            uuid.UUID                  `json:"id"`
+	Namespace                     string                     `json:"namespace"`
+	Name                          string                     `json:"name"`
+	Description                   string                     `json:"description"`
+	Status                        OutputPortStatus           `json:"status"`
+	Usage                         NilString                  `json:"usage"`
+	AccessType                    OutputPortAccessType       `json:"access_type"`
+	DataProductAccessDurationType AccessDurationType         `json:"data_product_access_duration_type"`
+	ExplorationAccessDurationType AccessDurationType         `json:"exploration_access_duration_type"`
+	DataProductID                 uuid.UUID                  `json:"data_product_id"`
+	Tags                          []Tag                      `json:"tags"`
+	Domain                        Domain                     `json:"domain"`
+	Lifecycle                     NilDataProductLifeCycle    `json:"lifecycle"`
+	About                         NilString                  `json:"about"`
+	AccessModes                   []TechnicalAssetAccessMode `json:"access_modes"`
+	RolledUpTags                  []Tag                      `json:"rolled_up_tags"`
+	DataProductSettings           []OutputPortSettingValue   `json:"data_product_settings"`
+	TechnicalAssetLinks           []TechnicalAssetLink       `json:"technical_asset_links"`
 }
 
 // GetID returns the value of ID.
@@ -5341,6 +5353,11 @@ func (s *GetOutputPortResponse) GetLifecycle() NilDataProductLifeCycle {
 // GetAbout returns the value of About.
 func (s *GetOutputPortResponse) GetAbout() NilString {
 	return s.About
+}
+
+// GetAccessModes returns the value of AccessModes.
+func (s *GetOutputPortResponse) GetAccessModes() []TechnicalAssetAccessMode {
+	return s.AccessModes
 }
 
 // GetRolledUpTags returns the value of RolledUpTags.
@@ -5426,6 +5443,11 @@ func (s *GetOutputPortResponse) SetLifecycle(val NilDataProductLifeCycle) {
 // SetAbout sets the value of About.
 func (s *GetOutputPortResponse) SetAbout(val NilString) {
 	s.About = val
+}
+
+// SetAccessModes sets the value of AccessModes.
+func (s *GetOutputPortResponse) SetAccessModes(val []TechnicalAssetAccessMode) {
+	s.AccessModes = val
 }
 
 // SetRolledUpTags sets the value of RolledUpTags.
@@ -5515,6 +5537,7 @@ type GetTechnicalAssetsResponseItem struct {
 	ServiceID        uuid.UUID                                   `json:"service_id"`
 	Status           TechnicalAssetStatus                        `json:"status"`
 	TechnicalMapping TechnicalMapping                            `json:"technical_mapping"`
+	AccessModes      []TechnicalAssetAccessMode                  `json:"access_modes"`
 	Configuration    GetTechnicalAssetsResponseItemConfiguration `json:"configuration"`
 	Owner            DataProduct                                 `json:"owner"`
 	OutputPortLinks  []OutputPortLink                            `json:"output_port_links"`
@@ -5568,6 +5591,11 @@ func (s *GetTechnicalAssetsResponseItem) GetStatus() TechnicalAssetStatus {
 // GetTechnicalMapping returns the value of TechnicalMapping.
 func (s *GetTechnicalAssetsResponseItem) GetTechnicalMapping() TechnicalMapping {
 	return s.TechnicalMapping
+}
+
+// GetAccessModes returns the value of AccessModes.
+func (s *GetTechnicalAssetsResponseItem) GetAccessModes() []TechnicalAssetAccessMode {
+	return s.AccessModes
 }
 
 // GetConfiguration returns the value of Configuration.
@@ -5648,6 +5676,11 @@ func (s *GetTechnicalAssetsResponseItem) SetStatus(val TechnicalAssetStatus) {
 // SetTechnicalMapping sets the value of TechnicalMapping.
 func (s *GetTechnicalAssetsResponseItem) SetTechnicalMapping(val TechnicalMapping) {
 	s.TechnicalMapping = val
+}
+
+// SetAccessModes sets the value of AccessModes.
+func (s *GetTechnicalAssetsResponseItem) SetAccessModes(val []TechnicalAssetAccessMode) {
+	s.AccessModes = val
 }
 
 // SetConfiguration sets the value of Configuration.
@@ -6909,51 +6942,6 @@ func (o NilDataProductLifeCycle) Get() (v DataProductLifeCycle, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o NilDataProductLifeCycle) Or(d DataProductLifeCycle) DataProductLifeCycle {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
-// NewNilDataQualityStatus returns new NilDataQualityStatus with value set to v.
-func NewNilDataQualityStatus(v DataQualityStatus) NilDataQualityStatus {
-	return NilDataQualityStatus{
-		Value: v,
-	}
-}
-
-// NilDataQualityStatus is nullable DataQualityStatus.
-type NilDataQualityStatus struct {
-	Value DataQualityStatus
-	Null  bool
-}
-
-// SetTo sets value to v.
-func (o *NilDataQualityStatus) SetTo(v DataQualityStatus) {
-	o.Null = false
-	o.Value = v
-}
-
-// IsNull returns true if value is Null.
-func (o NilDataQualityStatus) IsNull() bool { return o.Null }
-
-// SetToNull sets value to null.
-func (o *NilDataQualityStatus) SetToNull() {
-	o.Null = true
-	var v DataQualityStatus
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o NilDataQualityStatus) Get() (v DataQualityStatus, ok bool) {
-	if o.Null {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o NilDataQualityStatus) Or(d DataQualityStatus) DataQualityStatus {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -12605,7 +12593,6 @@ type SearchOutputPortsResponseItem struct {
 	AbstractDataProductCount      int                     `json:"abstract_data_product_count"`
 	TechnicalAssetsCount          int                     `json:"technical_assets_count"`
 	DataProductName               string                  `json:"data_product_name"`
-	QualityStatus                 NilDataQualityStatus    `json:"quality_status"`
 }
 
 // GetID returns the value of ID.
@@ -12688,11 +12675,6 @@ func (s *SearchOutputPortsResponseItem) GetDataProductName() string {
 	return s.DataProductName
 }
 
-// GetQualityStatus returns the value of QualityStatus.
-func (s *SearchOutputPortsResponseItem) GetQualityStatus() NilDataQualityStatus {
-	return s.QualityStatus
-}
-
 // SetID sets the value of ID.
 func (s *SearchOutputPortsResponseItem) SetID(val uuid.UUID) {
 	s.ID = val
@@ -12771,11 +12753,6 @@ func (s *SearchOutputPortsResponseItem) SetTechnicalAssetsCount(val int) {
 // SetDataProductName sets the value of DataProductName.
 func (s *SearchOutputPortsResponseItem) SetDataProductName(val string) {
 	s.DataProductName = val
-}
-
-// SetQualityStatus sets the value of QualityStatus.
-func (s *SearchOutputPortsResponseItem) SetQualityStatus(val NilDataQualityStatus) {
-	s.QualityStatus = val
 }
 
 // Option for select UI elements.
@@ -13183,6 +13160,32 @@ func (s *TechnicalAsset) SetServiceID(val uuid.UUID) {
 // SetConfiguration sets the value of Configuration.
 func (s *TechnicalAsset) SetConfiguration(val TechnicalAssetConfiguration) {
 	s.Configuration = val
+}
+
+// Ref: #/components/schemas/TechnicalAssetAccessMode
+type TechnicalAssetAccessMode struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+}
+
+// GetName returns the value of Name.
+func (s *TechnicalAssetAccessMode) GetName() string {
+	return s.Name
+}
+
+// GetDescription returns the value of Description.
+func (s *TechnicalAssetAccessMode) GetDescription() string {
+	return s.Description
+}
+
+// SetName sets the value of Name.
+func (s *TechnicalAssetAccessMode) SetName(val string) {
+	s.Name = val
+}
+
+// SetDescription sets the value of Description.
+func (s *TechnicalAssetAccessMode) SetDescription(val string) {
+	s.Description = val
 }
 
 // TechnicalAssetConfiguration represents sum type.

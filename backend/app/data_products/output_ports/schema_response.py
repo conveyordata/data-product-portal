@@ -13,11 +13,13 @@ from app.configuration.tags.schema import Tag
 from app.data_products.output_port_technical_assets_link.schema import (
     TechnicalAssetOutputPortAssociation,
 )
-from app.data_products.output_ports.data_quality.enums import DataQualityStatus
 from app.data_products.output_ports.enums import OutputPortAccessType
 from app.data_products.output_ports.schema import OutputPort
 from app.data_products.output_ports.status import OutputPortStatus
-from app.data_products.technical_assets.schema import TechnicalAsset
+from app.data_products.technical_assets.schema import (
+    TechnicalAsset,
+    TechnicalAssetAccessMode,
+)
 from app.shared.schema import ORMModel
 
 
@@ -55,19 +57,13 @@ class BaseOutputPortGet(ORMModel):
 
 class GetOutputPortResponse(BaseOutputPortGet):
     about: Optional[str]
+    access_modes: list[TechnicalAssetAccessMode]
 
     rolled_up_tags: set[Tag]
     data_product_settings: list[OutputPortSettingValue]
     technical_asset_links: list[TechnicalAssetLink] = Field(
         validation_alias="data_output_links"
     )
-
-
-class OutputPortsGet(BaseOutputPortGet):
-    abstract_data_product_count: int
-    technical_assets_count: int
-    data_product_name: str
-    quality_status: Optional[DataQualityStatus]
 
 
 class GetDataProductOutputPortsResponse(ORMModel):

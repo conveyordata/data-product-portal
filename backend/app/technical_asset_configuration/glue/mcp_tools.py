@@ -176,7 +176,9 @@ def register_tools(mcp: FastMCP) -> None:
         """
         asset_uuid = UUID(technical_asset_id)
         do = ensure_technical_asset_exists(asset_uuid, db=db)
-        data_output = DataOutputService(db).get_data_output(do.owner_id, id=asset_uuid)
+        data_output = DataOutputService(db).get_technical_asset(
+            do.owner_id, id=asset_uuid
+        )
 
         configuration: DataOutputConfiguration = data_output.configuration  # type: ignore[assignment]
         if not isinstance(configuration, GlueTechnicalAssetConfigurationModel):

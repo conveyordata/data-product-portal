@@ -22,7 +22,7 @@ def _get_kwargs(
 
     _kwargs: dict[str, Any] = {
         "method": "post",
-        "url": "/api/v2/data_products/{data_product_id}/technical_assets".format(
+        "url": "/api/v2/data_products/{data_product_id}/technical_assets/".format(
             data_product_id=quote(str(data_product_id), safe=""),
         ),
     }

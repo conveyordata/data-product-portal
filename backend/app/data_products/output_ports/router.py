@@ -116,7 +116,7 @@ def get_output_port(
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
 ):
-    return OutputPortService(db).get_visible_output_port(id, user, data_product_id)
+    return OutputPortService(db).get_output_port(id, user, data_product_id)
 
 
 @router.get(f"{route}/{{id}}/history")
