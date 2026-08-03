@@ -14,7 +14,7 @@ type Props = {
     dataProductId: string;
     status: DecisionStatus;
 };
-export function DatasetActionButton({ outputPort, technicalAssetId, dataProductId, status }: Props) {
+export function OutputPortActionButton({ outputPort, technicalAssetId, dataProductId, status }: Props) {
     const { t } = useTranslation();
 
     const { data: access } = useCheckAccessQuery(

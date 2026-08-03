@@ -10,7 +10,7 @@ import { useCheckAccessQuery } from '@/store/api/services/generated/authorizatio
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import type { CustomDropdownItemProps } from '@/types/shared';
 
-import styles from './data-output-actions.module.scss';
+import styles from './technical-asset-actions.module.scss';
 
 // TODO: These catalog platforms should come from the backend plugin system
 // They are currently hardcoded because catalog integration platforms are not yet
@@ -28,7 +28,7 @@ type Props = {
     dataProductId: string | undefined;
     dataOutputId: string;
 };
-export function DataOutputActions({ dataProductId, dataOutputId }: Props) {
+export function TechnicalAssetActions({ dataProductId, dataOutputId }: Props) {
     const { t } = useTranslation();
     const dataPlatforms = useMemo(() => getDataPlatforms(t), [t]);
 

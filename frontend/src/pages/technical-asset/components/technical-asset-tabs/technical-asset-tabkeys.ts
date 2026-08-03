@@ -1,5 +1,5 @@
 export enum TabKeys {
-    Datasets = 'datasets',
+    OutputPorts = 'outputPorts',
     Technologies = 'technologies',
     Explorer = 'explorer',
     History = 'history',

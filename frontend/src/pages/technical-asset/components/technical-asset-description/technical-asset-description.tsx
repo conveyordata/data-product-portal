@@ -3,9 +3,9 @@ import { useTranslation } from 'react-i18next';
 import type { TechnicalAssetStatus } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
 import { useGetPluginsQuery } from '@/store/api/services/generated/pluginsApi';
 import type { TagModel } from '@/types/tag';
-import { getDataOutputType } from '@/utils/data-output-type.helper';
 import { getBadgeStatus, getStatusLabel } from '@/utils/status.helper.ts';
-import styles from './data-output-description.module.scss';
+import { getTechnicalAssetType } from '@/utils/technical-asset-type.helper.ts';
+import styles from './technical-asset-description.module.scss';
 
 type Props = {
     status: TechnicalAssetStatus;
@@ -15,7 +15,7 @@ type Props = {
     namespace: string;
 };
 
-export function DataOutputDescription({ status, type, description, tags, namespace }: Props) {
+export function TechnicalAssetDescription({ status, type, description, tags, namespace }: Props) {
     const { t } = useTranslation();
     const { data: { plugins } = {} } = useGetPluginsQuery();
 
@@ -36,7 +36,7 @@ export function DataOutputDescription({ status, type, description, tags, namespa
                 </Flex>
                 <Flex className={styles.statusBadge}>
                     <Typography.Text strong>{t('Type')}</Typography.Text>
-                    <Typography.Text>{getDataOutputType(type, plugins, t)}</Typography.Text>
+                    <Typography.Text>{getTechnicalAssetType(type, plugins, t)}</Typography.Text>
                 </Flex>
             </Space>
             <Space size={'small'}>

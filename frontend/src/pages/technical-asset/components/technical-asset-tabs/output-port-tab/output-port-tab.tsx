@@ -6,7 +6,7 @@ import {
     type OutputPortLink,
     useGetTechnicalAssetQuery,
 } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
-import { DatasetTable } from './components/dataset-table/dataset-table.component.tsx';
+import { DatasetTable } from './components/output-port-table/output-port-table.component.tsx';
 
 function filterDatasets(outputPortLinks: OutputPortLink[], searchTerm: string) {
     return (
@@ -22,7 +22,7 @@ type Props = {
     technicalAssetId: string;
     dataProductId: string;
 };
-export function DatasetTab({ technicalAssetId, dataProductId }: Props) {
+export function OutputPortTab({ technicalAssetId, dataProductId }: Props) {
     const { t } = useTranslation();
 
     const { data: technicalAsset } = useGetTechnicalAssetQuery({ id: technicalAssetId, dataProductId });

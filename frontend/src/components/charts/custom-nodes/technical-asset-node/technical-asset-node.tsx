@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 
 import { BaseNode } from '@/components/charts/custom-nodes/base-node/base-node.tsx';
 import type { UiElementMetadataResponse } from '@/store/api/services/generated/pluginsApi';
-import { getDataOutputIcon } from '@/utils/data-output-type.helper';
+import { getTechnicalAssetIcon } from '@/utils/technical-asset-type.helper.ts';
 
 type DataOutputNodeProps = Node<{
     id: string;
@@ -43,7 +43,7 @@ export function TechnicalAssetNode({
                 isMainNode,
                 name,
                 id,
-                icon: getDataOutputIcon(icon_key, plugins),
+                icon: getTechnicalAssetIcon(icon_key, plugins),
                 borderType: 'square',
                 nodeToolbarActions,
                 targetHandlePosition,

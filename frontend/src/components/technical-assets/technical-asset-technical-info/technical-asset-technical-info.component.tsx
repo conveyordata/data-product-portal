@@ -6,15 +6,15 @@ import {
     useGetTechnicalAssetQuery,
 } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
 import { useGetPluginsQuery } from '@/store/api/services/generated/pluginsApi';
-import { getTechnicalInformationColumns } from './data-output-table-columns';
-import styles from './data-output-technical-info.module.scss';
+import { getTechnicalInformationColumns } from './technical-asset-table-columns.tsx';
+import styles from './technical-asset-technical-info.module.scss';
 
 type Props = {
     technicalAssetId: string;
     dataProductId: string;
 };
 
-export function DataOutputTechnicalInfo({ technicalAssetId, dataProductId }: Props) {
+export function TechnicalAssetTechnicalInfo({ technicalAssetId, dataProductId }: Props) {
     const { t } = useTranslation();
     const { data: technicalASset, isLoading } = useGetTechnicalAssetQuery({ id: technicalAssetId, dataProductId });
     const { data: { plugins: uiMetadataGroups } = {}, isLoading: isLoadingMetadata } = useGetPluginsQuery();

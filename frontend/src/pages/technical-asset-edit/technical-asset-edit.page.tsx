@@ -3,13 +3,13 @@ import { Flex, Space, Typography } from 'antd';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router';
-import { DataOutputForm } from '@/components/data-outputs/data-output-form/data-output-form.component';
 import { useBreadcrumbs } from '@/components/layout/navbar/breadcrumbs/breadcrumb.context.tsx';
+import { TechnicalAssetForm } from '@/pages/technical-asset-edit/technical-asset-form/technical-asset-form.component';
 import { useGetTechnicalAssetQuery } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
 import { ApplicationPaths, createDataOutputIdPath, createDataProductIdPath } from '@/types/navigation.ts';
-import styles from './data-output-edit.module.scss';
+import styles from './technical-asset-edit.module.scss';
 
-export function DataOutputEdit() {
+export function TechnicalAssetEdit() {
     const { dataOutputId, dataProductId } = useParams();
     const { t } = useTranslation();
     const { data: dataOutput, isError } = useGetTechnicalAssetQuery(
@@ -48,7 +48,7 @@ export function DataOutputEdit() {
                 {dataOutput?.name}
             </Typography.Title>
             <Space orientation="vertical" size="large" className={styles.container}>
-                <DataOutputForm dataOutputId={dataOutputId} dataProductId={dataProductId} mode="edit" />
+                <TechnicalAssetForm dataOutputId={dataOutputId} dataProductId={dataProductId} mode="edit" />
             </Space>
         </Flex>
     );

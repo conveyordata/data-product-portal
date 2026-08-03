@@ -3,7 +3,7 @@ import { Flex, Radio, Typography } from 'antd';
 
 import type { CustomDropdownItemProps } from '@/types/shared';
 
-import styles from './data-output-platform-tile.module.scss';
+import styles from './technical-asset-platform-tile.module.scss';
 
 type Props<T extends string> = {
     dataPlatform: CustomDropdownItemProps<T>;
@@ -13,7 +13,7 @@ type Props<T extends string> = {
     value?: string;
 };
 
-export function DataOutputPlatformTile<T extends string>({
+export function TechnicalAssetPlatformTile<T extends string>({
     dataPlatform,
     isDisabled,
     isSelected,

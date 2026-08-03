@@ -8,8 +8,8 @@ import {
     type OutputPortLink,
     useGetTechnicalAssetQuery,
 } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
-import styles from './dataset-table.module.scss';
-import { getDataOutputDatasetsColumns } from './dataset-table-columns.tsx';
+import styles from './output-port-table.module.scss';
+import { getDataOutputDatasetsColumns } from './output-port-table-columns.tsx';
 
 type Props = {
     dataProductId: string;

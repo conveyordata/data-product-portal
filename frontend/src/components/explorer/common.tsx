@@ -4,10 +4,9 @@ import '@xyflow/react/dist/base.css';
 import { Button } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
-
-import { TabKeys as DataOutputTabKeys } from '@/pages/data-output/components/data-output-tabs/data-output-tabkeys';
 import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
 import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabkeys';
+import { TabKeys as TechnicalAssetTabKeys } from '@/pages/technical-asset/components/technical-asset-tabs/technical-asset-tabkeys';
 import {
     createDataOutputIdPath,
     createDataProductIdPath,
@@ -47,7 +46,7 @@ function LinkToDatasetNode({ id, product_id }: { id: string; product_id: string 
 function LinkToDataOutputNode({ id, product_id }: { id: string; product_id: string }) {
     const { t } = useTranslation();
     return (
-        <Link to={createDataOutputIdPath(id, product_id, DataOutputTabKeys.Explorer)} className={styles.link}>
+        <Link to={createDataOutputIdPath(id, product_id, TechnicalAssetTabKeys.Explorer)} className={styles.link}>
             <Button type="default">{t('View Technical Asset')}</Button>
         </Link>
     );

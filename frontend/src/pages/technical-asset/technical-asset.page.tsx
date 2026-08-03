@@ -9,21 +9,21 @@ import { UserAccessOverview } from '@/components/data-access/user-access-overvie
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component';
 import { useBreadcrumbs } from '@/components/layout/navbar/breadcrumbs/breadcrumb.context.tsx';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
-import { DataOutputDescription } from '@/pages/data-output/components/data-output-description/data-output-description.tsx';
+import { TechnicalAssetDescription } from '@/pages/technical-asset/components/technical-asset-description/technical-asset-description.tsx';
 import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
 import { useGetDataProductQuery } from '@/store/api/services/generated/dataProductsApi.ts';
 import { useGetTechnicalAssetQuery } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
 import { useGetPluginsQuery } from '@/store/api/services/generated/pluginsApi';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { ApplicationPaths, createDataProductIdPath, DynamicPathParams } from '@/types/navigation.ts';
-import { getDataOutputIcon } from '@/utils/data-output-type.helper';
 import { useGetDataProductOwners } from '@/utils/data-product-user-role.helper';
 import { getDynamicRoutePath } from '@/utils/routes.helper.ts';
-import { DataOutputActions } from './components/data-output-actions/data-output-actions.component';
-import { DataOutputTabs } from './components/data-output-tabs/data-output-tabs';
-import styles from './data-output.module.scss';
+import { getTechnicalAssetIcon } from '@/utils/technical-asset-type.helper.ts';
+import { TechnicalAssetActions } from './components/technical-asset-actions/technical-asset-actions.component.tsx';
+import { TechnicalAssetTabs } from './components/technical-asset-tabs/technical-asset-tabs.tsx';
+import styles from './technical-asset.module.scss';
 
-export function DataOutput() {
+export function TechnicalAsset() {
     const { t } = useTranslation();
     const navigate = useNavigate();
     const { dataOutputId = '', dataProductId = '' } = useParams();
@@ -52,7 +52,7 @@ export function DataOutput() {
     }, [setBreadcrumbs, dataProduct, dataOutput, dataProductId, t]);
 
     const dataOutputTypeIcon = useMemo(() => {
-        return getDataOutputIcon(dataOutput?.configuration.configuration_type, plugins);
+        return getTechnicalAssetIcon(dataOutput?.configuration.configuration_type, plugins);
     }, [dataOutput?.configuration.configuration_type, plugins]);
 
     const dataOutputOwners = useGetDataProductOwners(dataProduct?.id);
@@ -106,7 +106,7 @@ export function DataOutput() {
                 <Flex className={styles.mainContent}>
                     {/* Data Product description */}
                     <Flex vertical className={styles.overview}>
-                        <DataOutputDescription
+                        <TechnicalAssetDescription
                             status={dataOutput.status}
                             namespace={dataOutput.namespace}
                             type={dataOutput.configuration.configuration_type}
@@ -114,7 +114,7 @@ export function DataOutput() {
                             tags={dataOutput.tags}
                         />
                         {/*  Tabs  */}
-                        <DataOutputTabs
+                        <TechnicalAssetTabs
                             technicalAssetId={dataOutput.id}
                             dataProductId={dataProductId}
                             isLoading={isLoading}
@@ -124,7 +124,7 @@ export function DataOutput() {
             </Flex>
             {/* Sidebar */}
             <Flex vertical className={styles.sidebar}>
-                <DataOutputActions dataProductId={dataProductId} dataOutputId={dataOutputId} />
+                <TechnicalAssetActions dataProductId={dataProductId} dataOutputId={dataOutputId} />
                 {/*  Data Product owners overview */}
                 <UserAccessOverview users={dataOutputOwners} title={t('Technical Asset Owners')} />
             </Flex>

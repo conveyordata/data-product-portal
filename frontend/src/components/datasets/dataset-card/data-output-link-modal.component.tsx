@@ -13,7 +13,7 @@ import {
 } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
 import { useGetPluginsQuery } from '@/store/api/services/generated/pluginsApi';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
-import { getDataOutputIcon } from '@/utils/data-output-type.helper';
+import { getTechnicalAssetIcon } from '@/utils/technical-asset-type.helper.ts';
 
 type Props = {
     onClose: () => void;
@@ -176,7 +176,7 @@ export function DataOutputLinkModal({ onClose, dataProductId, datasetId, dataset
                                 onChange={() => handleOutputToggle(output.id)}
                             />
                             <CustomSvgIconLoader
-                                iconComponent={getDataOutputIcon(output.configuration.configuration_type, plugins)}
+                                iconComponent={getTechnicalAssetIcon(output.configuration.configuration_type, plugins)}
                             />
                             <Flex vertical style={{ flex: 1 }}>
                                 <Typography.Text strong>{output.result_string}</Typography.Text>
