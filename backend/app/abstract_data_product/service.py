@@ -50,6 +50,8 @@ class AbstractDataProductService:
                 detail=f"{adp.abstract_data_product_type.value} '{adp.name}' is pending deletion and cannot be modified",
             )
 
+    import uuid
+
     def get_input_ports(self, data_product_id: UUID) -> Sequence[InputPortModel]:
         ensure_abstract_data_product_exists(data_product_id, self.db)
         return (
