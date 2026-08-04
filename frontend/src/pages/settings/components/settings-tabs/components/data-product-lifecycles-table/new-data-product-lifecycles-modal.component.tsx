@@ -1,8 +1,7 @@
-import { Button, Checkbox, ColorPicker, Form, Input, InputNumber } from 'antd';
+import { Button, Checkbox, ColorPicker, Form, Input, InputNumber, Modal } from 'antd';
 import type { TFunction } from 'i18next';
 import type React from 'react';
 
-import { FormModal } from '@/components/modal/form-modal/form-modal.component';
 import {
     useCreateDataProductLifecycleMutation,
     useUpdateDataProductLifecycleMutation,
@@ -70,13 +69,9 @@ export const CreateLifecycleModal: React.FC<CreateLifecycleModalProps> = ({ isOp
     };
 
     return (
-        <FormModal
-            isOpen={isOpen}
+        <Modal
+            open={isOpen}
             title={variableText.title}
-            onClose={() => {
-                form.resetFields();
-                onClose();
-            }}
             onCancel={() => {
                 form.resetFields();
                 onClose();
@@ -95,6 +90,7 @@ export const CreateLifecycleModal: React.FC<CreateLifecycleModalProps> = ({ isOp
                     {t('Cancel')}
                 </Button>,
             ]}
+            centered
         >
             <Form
                 form={form}
@@ -140,6 +136,6 @@ export const CreateLifecycleModal: React.FC<CreateLifecycleModalProps> = ({ isOp
                     <Checkbox disabled />
                 </Form.Item>
             </Form>
-        </FormModal>
+        </Modal>
     );
 };

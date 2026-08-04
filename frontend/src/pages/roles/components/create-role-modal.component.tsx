@@ -1,7 +1,6 @@
-import { Button, Form, Input } from 'antd';
+import { Button, Form, Input, Modal } from 'antd';
 import { useTranslation } from 'react-i18next';
 
-import { FormModal } from '@/components/modal/form-modal/form-modal.component';
 import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants';
 import { type Scope, useCreateRoleMutation } from '@/store/api/services/generated/authorizationRolesApi.ts';
 import styles from './create-role-modal.module.scss';
@@ -47,7 +46,7 @@ export function CreateRoleModal({ scope, title, isOpen, onClose }: Props) {
     ];
 
     return (
-        <FormModal title={title} isOpen={isOpen} onClose={onClose} footer={footer}>
+        <Modal title={title} open={isOpen} onCancel={onClose} footer={footer} centered>
             <Form form={form} labelCol={FORM_GRID_WRAPPER_COLS} layout="vertical">
                 <Form.Item
                     name={'name'}
@@ -82,6 +81,6 @@ export function CreateRoleModal({ scope, title, isOpen, onClose }: Props) {
                     <Input.TextArea rows={3} count={{ show: true, max: MAX_DESCRIPTION_INPUT_LENGTH }} />
                 </Form.Item>
             </Form>
-        </FormModal>
+        </Modal>
     );
 }

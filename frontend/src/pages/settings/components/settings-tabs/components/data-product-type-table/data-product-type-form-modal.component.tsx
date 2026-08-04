@@ -1,7 +1,6 @@
 import Icon from '@ant-design/icons';
-import { Button, Form, Input, Select } from 'antd';
+import { Button, Form, Input, Modal, Select } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { FormModal } from '@/components/modal/form-modal/form-modal.component';
 import {
     DataProductIconKey,
     type DataProductTypeCreate,
@@ -73,13 +72,9 @@ export function CreateDataProductTypeModal({ isOpen, onClose, mode, initial }: P
     };
 
     return (
-        <FormModal
-            isOpen={isOpen}
+        <Modal
+            open={isOpen}
             title={variableText.title}
-            onClose={() => {
-                form.resetFields();
-                onClose();
-            }}
             onCancel={() => {
                 form.resetFields();
                 onClose();
@@ -98,6 +93,7 @@ export function CreateDataProductTypeModal({ isOpen, onClose, mode, initial }: P
                     {t('Cancel')}
                 </Button>,
             ]}
+            centered
         >
             <Form form={form} layout="vertical" onFinish={handleFinish} initialValues={initial}>
                 <Form.Item
@@ -132,6 +128,6 @@ export function CreateDataProductTypeModal({ isOpen, onClose, mode, initial }: P
                     </Select>
                 </Form.Item>
             </Form>
-        </FormModal>
+        </Modal>
     );
 }

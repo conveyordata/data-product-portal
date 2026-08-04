@@ -1,6 +1,5 @@
-import { Button, Form, Input, Select } from 'antd';
+import { Button, Form, Input, Modal, Select } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { FormModal } from '@/components/modal/form-modal/form-modal.component';
 import {
     type GetDomainsItem,
     useGetDomainsQuery,
@@ -41,13 +40,9 @@ export function CreateDomainMigrateModal({ isOpen, onClose, migrateFrom }: Props
     };
 
     return (
-        <FormModal
-            isOpen={isOpen}
+        <Modal
+            open={isOpen}
             title={t('Delete Domain')}
-            onClose={() => {
-                form.resetFields();
-                onClose();
-            }}
             onCancel={() => {
                 form.resetFields();
                 onClose();
@@ -67,6 +62,7 @@ export function CreateDomainMigrateModal({ isOpen, onClose, migrateFrom }: Props
                     {t('Cancel')}
                 </Button>,
             ]}
+            centered
         >
             <Form form={form} layout="vertical" onFinish={handleFinish} initialValues={migrateFrom}>
                 <Form.Item name="name" label={t('Name')}>
@@ -89,6 +85,6 @@ export function CreateDomainMigrateModal({ isOpen, onClose, migrateFrom }: Props
                     </Select>
                 </Form.Item>
             </Form>
-        </FormModal>
+        </Modal>
     );
 }

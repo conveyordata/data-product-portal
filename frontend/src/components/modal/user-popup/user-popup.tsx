@@ -1,8 +1,7 @@
-import { Input, List, Select, Typography } from 'antd';
+import { Input, List, Modal, Select, Typography } from 'antd';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { FormModal } from '@/components/modal/form-modal/form-modal.component.tsx';
 import type { Role } from '@/store/api/services/generated/authorizationRolesApi.ts';
 import { type UsersGet, useGetUsersQuery } from '@/store/api/services/generated/usersApi.ts';
 import styles from './user-popup.module.scss';
@@ -40,7 +39,13 @@ export function UserPopup({ onClose, isOpen, roles, item, isLoading, userIdsToHi
     }, [userIdsToHide, users, searchTerm]);
 
     return (
-        <FormModal title={t('Add User')} onClose={onClose} isOpen={isOpen} footer={(_, { CancelBtn }) => <CancelBtn />}>
+        <Modal
+            title={t('Add User')}
+            onCancel={onClose}
+            open={isOpen}
+            footer={(_, { CancelBtn }) => <CancelBtn />}
+            centered
+        >
             <Input.Search
                 placeholder={t('Search users by email or name')}
                 allowClear
@@ -83,6 +88,6 @@ export function UserPopup({ onClose, isOpen, roles, item, isLoading, userIdsToHi
                     }}
                 />
             </div>
-        </FormModal>
+        </Modal>
     );
 }
