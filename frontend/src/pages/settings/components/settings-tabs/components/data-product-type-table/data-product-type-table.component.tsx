@@ -57,7 +57,7 @@ export function DataProductTypeTable() {
     const columns = getDataProductTypeTableColumns({ t, handleRemove, handleEdit });
 
     return (
-        <Flex vertical gap={'large'}>
+        <Flex vertical gap="large">
             <Flex justify={'space-between'} align={'center'} gap={'small'}>
                 <Typography.Title level={3}>{t('Types')}</Typography.Title>
                 <Button className={styles.formButton} type={'primary'} onClick={handleAdd}>

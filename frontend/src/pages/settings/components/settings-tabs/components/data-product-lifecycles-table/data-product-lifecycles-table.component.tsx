@@ -54,7 +54,7 @@ export function DataProductLifecyclesTable() {
     );
 
     return (
-        <Flex vertical gap={'large'}>
+        <Flex vertical gap="large">
             <Flex justify={'space-between'} align={'center'}>
                 <Typography.Title level={3}>{t('Lifecycles')}</Typography.Title>
                 <Button className={styles.formButton} type={'primary'} onClick={handleAdd}>
