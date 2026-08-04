@@ -1,6 +1,5 @@
-import { Button, Form, Input } from 'antd';
+import { Button, Form, Input, Modal } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { FormModal } from '@/components/modal/form-modal/form-modal.component';
 import {
     type DomainCreate,
     type GetDomainsItem,
@@ -67,13 +66,9 @@ export function CreateDomainModal({ isOpen, onClose, mode, initial }: Props) {
     };
 
     return (
-        <FormModal
-            isOpen={isOpen}
+        <Modal
+            open={isOpen}
             title={variableText.title}
-            onClose={() => {
-                form.resetFields();
-                onClose();
-            }}
             onCancel={() => {
                 form.resetFields();
                 onClose();
@@ -92,6 +87,7 @@ export function CreateDomainModal({ isOpen, onClose, mode, initial }: Props) {
                     {t('Cancel')}
                 </Button>,
             ]}
+            centered
         >
             <Form form={form} layout="vertical" onFinish={handleFinish} initialValues={initial}>
                 <Form.Item
@@ -110,6 +106,6 @@ export function CreateDomainModal({ isOpen, onClose, mode, initial }: Props) {
                     <Input />
                 </Form.Item>
             </Form>
-        </FormModal>
+        </Modal>
     );
 }

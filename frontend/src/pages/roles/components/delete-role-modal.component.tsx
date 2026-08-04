@@ -1,8 +1,7 @@
-import { Alert, Badge, Button, List, Skeleton, Space, Typography, theme } from 'antd';
+import { Alert, Badge, Button, List, Modal, Skeleton, Space, Typography, theme } from 'antd';
 import { useMemo } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
-import { FormModal } from '@/components/modal/form-modal/form-modal.component';
 import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
 import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabkeys';
 import {
@@ -184,7 +183,7 @@ export function DeleteRoleModal({ role, isOpen, onClose }: Props) {
     ];
 
     return (
-        <FormModal title={title} isOpen={isOpen} onClose={onClose} footer={footer}>
+        <Modal title={title} open={isOpen} onCancel={onClose} footer={footer} centered>
             {isLoading ? (
                 <Skeleton active />
             ) : assignments?.length === 0 ? (
@@ -223,6 +222,6 @@ export function DeleteRoleModal({ role, isOpen, onClose }: Props) {
                     {additionalInfo}
                 </Space>
             )}
-        </FormModal>
+        </Modal>
     );
 }

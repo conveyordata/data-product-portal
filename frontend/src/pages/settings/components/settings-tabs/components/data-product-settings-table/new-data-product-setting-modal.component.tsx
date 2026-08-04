@@ -1,9 +1,8 @@
-import { Button, Checkbox, Form, Input, InputNumber, Select } from 'antd';
+import { Button, Checkbox, Form, Input, InputNumber, Modal, Select } from 'antd';
 import type { TFunction } from 'i18next';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDebouncedCallback } from 'use-debounce';
-import { FormModal } from '@/components/modal/form-modal/form-modal.component';
 import { ResourceNameFormItem } from '@/components/resource-name/resource-name-form-item.tsx';
 import {
     type DataProductSettingCreate,
@@ -230,13 +229,9 @@ export function CreateSettingModal({ isOpen, onClose, scope, mode, initial }: Pr
     );
 
     return (
-        <FormModal
-            isOpen={isOpen}
+        <Modal
+            open={isOpen}
             title={variableText.title}
-            onClose={() => {
-                form.resetFields();
-                onClose();
-            }}
             onCancel={() => {
                 form.resetFields();
                 onClose();
@@ -255,6 +250,7 @@ export function CreateSettingModal({ isOpen, onClose, scope, mode, initial }: Pr
                     {t('Cancel')}
                 </Button>,
             ]}
+            centered
         >
             <Form form={form} layout="vertical" onFinish={handleFinish} initialValues={initialValues}>
                 <Form.Item
@@ -322,6 +318,6 @@ export function CreateSettingModal({ isOpen, onClose, scope, mode, initial }: Pr
                     <InputNumber className={styles.numberInput} min={0} precision={0} />
                 </Form.Item>
             </Form>
-        </FormModal>
+        </Modal>
     );
 }
