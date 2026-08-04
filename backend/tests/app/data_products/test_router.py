@@ -371,13 +371,12 @@ class TestDataProductsRouter:
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
         role = RoleFactory(
-            scope=Scope.DATA_PRODUCT,
-            permissions=[Action.DATA_PRODUCT__DELETE],
+            scope=Scope.GLOBAL,
+            permissions=[Action.GLOBAL__MANAGE_FINALIZERS],
         )
-        DataProductRoleAssignmentFactory(
+        GlobalRoleAssignmentFactory(
             user_id=user.id,
             role_id=role.id,
-            data_product_id=data_product.id,
         )
         response = client.post(
             f"{ENDPOINT}/{data_product.id}/finalizers",
