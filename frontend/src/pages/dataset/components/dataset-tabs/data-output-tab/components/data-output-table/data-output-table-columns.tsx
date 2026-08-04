@@ -11,8 +11,8 @@ import type {
 import type { UiElementMetadataResponse } from '@/store/api/services/generated/pluginsApi';
 import { createDataOutputIdPath } from '@/types/navigation.ts';
 import { DecisionStatus } from '@/types/roles';
-import { getDataOutputIcon } from '@/utils/data-output-type.helper';
 import { getDecisionStatusBadgeStatus, getDecisionStatusLabel } from '@/utils/status.helper';
+import { getTechnicalAssetIcon } from '@/utils/technical-asset-type.helper.ts';
 import styles from './data-output-table.module.scss';
 
 type Props = {
@@ -53,7 +53,7 @@ export const getDatasetDataProductsColumns = ({
                         linkTo={createDataOutputIdPath(technical_asset.id, technical_asset.owner_id)}
                         icon={
                             <CustomSvgIconLoader
-                                iconComponent={getDataOutputIcon(
+                                iconComponent={getTechnicalAssetIcon(
                                     technical_asset.configuration.configuration_type,
                                     plugins,
                                 )}

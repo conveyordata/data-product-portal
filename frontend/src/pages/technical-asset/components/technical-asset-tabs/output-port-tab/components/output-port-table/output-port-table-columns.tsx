@@ -6,12 +6,12 @@ import { DatasetPopoverTitle } from '@/components/datasets/dataset-popover-title
 import { OutputPortTitle } from '@/components/datasets/output-port-title/output-port-title.tsx';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
 import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-avatar.component.tsx';
-import { DatasetActionButton } from '@/pages/data-output/components/data-output-tabs/dataset-tab/components/dataset-table/dataset-action-button.component.tsx';
+import { OutputPortActionButton } from '@/pages/technical-asset/components/technical-asset-tabs/output-port-tab/components/output-port-table/output-port-action-button.component.tsx';
 import type { OutputPortLink } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
 import { createMarketplaceOutputPortPath } from '@/types/navigation.ts';
 import { DecisionStatus } from '@/types/roles';
 import { getDecisionStatusBadgeStatus, getDecisionStatusLabel } from '@/utils/status.helper.ts';
-import styles from './dataset-table.module.scss';
+import styles from './output-port-table.module.scss';
 
 type Props = {
     t: TFunction;
@@ -59,7 +59,7 @@ export const getDataOutputDatasetsColumns = ({ t, dataProductId }: Props): Table
             key: 'action',
             render: (_, { output_port, output_port_id, status }) => {
                 return (
-                    <DatasetActionButton
+                    <OutputPortActionButton
                         outputPort={output_port}
                         technicalAssetId={output_port_id}
                         dataProductId={dataProductId}

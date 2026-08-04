@@ -8,11 +8,11 @@ import { Explorer } from '@/components/explorer/explorer.tsx';
 import { HistoryTab } from '@/components/history/history-tab';
 import { OutputPortOutlined } from '@/components/icons';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
-import { TabKeys } from '@/pages/data-output/components/data-output-tabs/data-output-tabkeys.ts';
-import { DatasetTab } from '@/pages/data-output/components/data-output-tabs/dataset-tab/dataset-tab.tsx';
+import { OutputPortTab } from '@/pages/technical-asset/components/technical-asset-tabs/output-port-tab/output-port-tab.tsx';
+import { TabKeys } from '@/pages/technical-asset/components/technical-asset-tabs/technical-asset-tabkeys.ts';
 import { useGetTechnicalAssetEventHistoryQuery } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
 import { EventReferenceEntity } from '@/types/events/event-reference-entity';
-import styles from './data-output-tabs.module.scss';
+import styles from './technical-asset-tabs.module.scss';
 import { TechnologiesTab } from './technologies-tab/technologies-tab';
 
 type Props = {
@@ -28,12 +28,12 @@ type Tab = {
     children: ReactNode;
 };
 
-export function DataOutputTabs({ technicalAssetId, dataProductId, isLoading }: Props) {
+export function TechnicalAssetTabs({ technicalAssetId, dataProductId, isLoading }: Props) {
     const { t } = useTranslation();
 
     const location = useLocation();
     const navigate = useNavigate();
-    const [activeTab, setActiveTab] = useState(location.hash.slice(1) || TabKeys.Datasets);
+    const [activeTab, setActiveTab] = useState(location.hash.slice(1) || TabKeys.OutputPorts);
     const { data: { events: dataOutputHistoryData = [] } = {}, isLoading: isFetchingDataOutputHistory } =
         useGetTechnicalAssetEventHistoryQuery({ id: technicalAssetId, dataProductId }, { skip: !technicalAssetId });
 
@@ -52,9 +52,9 @@ export function DataOutputTabs({ technicalAssetId, dataProductId, isLoading }: P
         return [
             {
                 label: t('Output Ports'),
-                key: TabKeys.Datasets,
+                key: TabKeys.OutputPorts,
                 icon: <OutputPortOutlined />,
-                children: <DatasetTab dataProductId={dataProductId} technicalAssetId={technicalAssetId} />,
+                children: <OutputPortTab dataProductId={dataProductId} technicalAssetId={technicalAssetId} />,
             },
             {
                 label: t('Explorer'),

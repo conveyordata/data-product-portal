@@ -20,9 +20,9 @@ import { PeoplePage } from '@/pages/people/people-table.component.tsx';
 import { ProductStudio } from '@/pages/product-studio/product-studio.page.tsx';
 import { ApplicationPaths } from '@/types/navigation';
 import ProtectedRoute from './components/layout/protected/protected.layout.tsx';
-import { DataOutput } from './pages/data-output/data-output.page.tsx';
-import { DataOutputEdit } from './pages/data-output-edit/data-output-edit.page.tsx';
 import { Settings } from './pages/settings/settings.page.tsx';
+import { TechnicalAsset } from './pages/technical-asset/technical-asset.page.tsx';
+import { TechnicalAssetEdit } from './pages/technical-asset-edit/technical-asset-edit.page.tsx';
 
 function DataProductsRedirect() {
     const params = useParams();
@@ -70,11 +70,11 @@ const router = createBrowserRouter([
                             },
                             {
                                 path: ApplicationPaths.DataOutput,
-                                element: <DataOutput />,
+                                element: <TechnicalAsset />,
                             },
                             {
                                 path: ApplicationPaths.DataOutputEdit,
-                                element: <DataOutputEdit />,
+                                element: <TechnicalAssetEdit />,
                             },
                             {
                                 path: ApplicationPaths.DataProductNew,

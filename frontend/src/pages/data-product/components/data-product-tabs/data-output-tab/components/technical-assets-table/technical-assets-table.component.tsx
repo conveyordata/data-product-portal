@@ -1,7 +1,7 @@
 import { Button, Flex, Input, Typography } from 'antd';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { TechnicalAssetCard } from '@/components/data-outputs/technical-asset-card/data-output-card.component.tsx';
+import { TechnicalAssetCard } from '@/components/technical-assets/technical-asset-card/technical-asset-card.component.tsx';
 import { useModal } from '@/hooks/use-modal.tsx';
 import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
 import { useGetDataProductQuery } from '@/store/api/services/generated/dataProductsApi.ts';

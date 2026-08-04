@@ -1,7 +1,7 @@
-import { TabKeys as DataOutputTabKeys } from '@/pages/data-output/components/data-output-tabs/data-output-tabkeys';
 import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
 import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabkeys';
 import { ExplorationTabKeys } from '@/pages/exploration/exploration-tab-keys.ts';
+import { TabKeys as TechnicalAssetTabKeys } from '@/pages/technical-asset/components/technical-asset-tabs/technical-asset-tabkeys';
 import { AbstractDataProductType } from '@/store/api/services/generated/dataProductsOutputPortsInputPortsApi.ts';
 
 export enum ApplicationPaths {
@@ -55,7 +55,7 @@ export function createAbstractDataProductIdPath(id: string, type: AbstractDataPr
 export function createDataOutputIdPath(
     dataOutputId: string,
     dataProductId: string,
-    tabKey: DataOutputTabKeys = DataOutputTabKeys.Datasets,
+    tabKey: TechnicalAssetTabKeys = TechnicalAssetTabKeys.OutputPorts,
 ) {
     return `${ApplicationPaths.DataOutput.replace(':dataProductId', encodeURIComponent(dataProductId)).replace(
         ':dataOutputId',

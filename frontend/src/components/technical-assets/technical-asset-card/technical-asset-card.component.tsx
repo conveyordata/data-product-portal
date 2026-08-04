@@ -15,9 +15,9 @@ import { useGetPluginsQuery } from '@/store/api/services/generated/pluginsApi';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import { createDataOutputIdPath } from '@/types/navigation';
-import { getDataOutputIcon } from '@/utils/data-output-type.helper';
 import { getDecisionStatusBadgeStatus } from '@/utils/status.helper';
-import styles from './data-output-card.module.scss';
+import { getTechnicalAssetIcon } from '@/utils/technical-asset-type.helper.ts';
+import styles from './technical-asset-card.module.scss';
 
 type Props = {
     technicalAsset: GetTechnicalAssetsResponseItem;
@@ -148,7 +148,7 @@ export function TechnicalAssetCard({ technicalAsset, dataProductId, onDragStart,
                     <Flex justify="space-between" align="flex-start">
                         <Flex gap="medium" align="center">
                             <CustomSvgIconLoader
-                                iconComponent={getDataOutputIcon(
+                                iconComponent={getTechnicalAssetIcon(
                                     technicalAsset.configuration.configuration_type,
                                     plugins,
                                 )}

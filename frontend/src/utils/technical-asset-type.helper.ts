@@ -3,7 +3,7 @@ import type { TFunction } from 'i18next';
 import type { UiElementMetadataResponse } from '@/store/api/services/generated/pluginsApi';
 import { getIcon } from './icon-loader';
 
-export function getDataOutputIcon(configuration_type: string | undefined, plugins?: UiElementMetadataResponse[]) {
+export function getTechnicalAssetIcon(configuration_type: string | undefined, plugins?: UiElementMetadataResponse[]) {
     if (!configuration_type || !plugins) {
         return undefined;
     }
@@ -18,7 +18,7 @@ export function getDataOutputIcon(configuration_type: string | undefined, plugin
     return getIcon(borderIcon);
 }
 
-export function getDataOutputType(
+export function getTechnicalAssetType(
     configuration_type: string | undefined,
     plugins: UiElementMetadataResponse[] | undefined,
     t: TFunction,

@@ -3,9 +3,8 @@ import TextArea from 'antd/es/input/TextArea';
 import { type RefObject, useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDebouncedCallback } from 'use-debounce';
-
-import { DataOutputPlatformTile } from '@/components/data-outputs/data-output-platform-tile/data-output-platform-tile.component';
 import { ResourceNameFormItem } from '@/components/resource-name/resource-name-form-item.tsx';
+import { TechnicalAssetPlatformTile } from '@/components/technical-assets/technical-asset-platform-tile/technical-asset-platform-tile.component';
 import { MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants';
 import { useGetAllPlatformServiceConfigurationsQuery } from '@/store/api/services/generated/configurationPlatformsApi.ts';
 import { useGetTagsQuery } from '@/store/api/services/generated/configurationTagsApi.ts';
@@ -312,7 +311,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                 <Radio.Group>
                     <Space wrap className={styles.radioButtonContainer}>
                         {dataPlatforms.map((dataPlatform) => (
-                            <DataOutputPlatformTile<string>
+                            <TechnicalAssetPlatformTile<string>
                                 key={dataPlatform.value}
                                 dataPlatform={dataPlatform}
                                 isDisabled={isLoading}
@@ -333,7 +332,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                 <Radio.Group>
                     <Space wrap className={styles.radioButtonContainer}>
                         {selectedDataPlatform?.children?.map((dataPlatform) => (
-                            <DataOutputPlatformTile<string>
+                            <TechnicalAssetPlatformTile<string>
                                 key={dataPlatform.value}
                                 dataPlatform={dataPlatform}
                                 isDisabled={isLoading}
