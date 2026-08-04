@@ -36,9 +36,7 @@ def get_output_port_details(
     db: Session = Depends(get_db_session),
     user: UserModel = Depends(get_mcp_authenticated_user),
 ) -> dict[str, Any]:
-    dataset = OutputPortService(db).get_visible_output_port(
-        id=UUID(output_port_id), user=user
-    )
+    dataset = OutputPortService(db).get_output_port(id=UUID(output_port_id), user=user)
     return GetOutputPortResponse.model_validate(dataset).model_dump()
 
 
@@ -47,7 +45,7 @@ def get_technical_asset_details(
     db: Session = Depends(get_db_session),
 ) -> dict[str, Any]:
     do = ensure_technical_asset_exists(UUID(technical_asset_id), db=db)
-    data_output = DataOutputService(db).get_data_output(
+    data_output = DataOutputService(db).get_technical_asset(
         do.owner_id,
         id=UUID(technical_asset_id),
     )

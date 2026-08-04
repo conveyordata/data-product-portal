@@ -3,6 +3,7 @@ from uuid import UUID
 
 from pydantic import Field, computed_field
 
+from app.configuration.access_modes.schema_response import AccessMode
 from app.configuration.environments.platform_service_configurations.schema_response import (
     EnvironmentConfigsGetItem,
 )
@@ -46,7 +47,11 @@ def compute_technical_info(
     return result
 
 
-class BaseTechnicalAssetGet(ORMModel):
+class OutputPortLink(TechnicalAssetOutputPortAssociation):
+    output_port: OutputPort
+
+
+class GetTechnicalAssetsResponseItem(ORMModel):
     id: UUID
     name: str
     description: str
@@ -56,6 +61,7 @@ class BaseTechnicalAssetGet(ORMModel):
     service_id: UUID
     status: TechnicalAssetStatus
     technical_mapping: TechnicalMapping
+    access_modes: list[AccessMode]
 
     configuration: DataOutputConfiguration
     owner: DataProduct
@@ -81,12 +87,6 @@ class BaseTechnicalAssetGet(ORMModel):
             self.configuration, self.service, self.environment_configurations
         )
 
-
-class OutputPortLink(TechnicalAssetOutputPortAssociation):
-    output_port: OutputPort
-
-
-class GetTechnicalAssetsResponseItem(BaseTechnicalAssetGet):
     output_port_links: list[OutputPortLink] = Field(validation_alias="dataset_links")
     tags: list[Tag]
 

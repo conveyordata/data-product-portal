@@ -27,6 +27,14 @@ func (s *BitolContractRequest) setDefaults() {
 }
 
 // setDefaults set default value of fields.
+func (s *CreateTechnicalAssetRequest) setDefaults() {
+	{
+		var defaultVal0 []uuid.UUID
+		s.AccessModeIds = defaultVal0
+	}
+}
+
+// setDefaults set default value of fields.
 func (s *DataProductCreate) setDefaults() {
 	{
 		var defaultVal0 []uuid.UUID

@@ -4,6 +4,9 @@ from app.access_durations.router import router as access_duration
 from app.authorization.role_assignments.router import router as role_assignment
 from app.authorization.roles.router import router as role
 from app.authorization.router import router as authorization
+from app.configuration.access_modes.router import (
+    router as access_modes,
+)
 from app.configuration.data_product_lifecycles.router import (
     router as data_product_lifecycle,
 )
@@ -48,6 +51,7 @@ router.include_router(data_product)
 router.include_router(data_product_type)
 router.include_router(data_product_lifecycle)
 router.include_router(data_product_setting)
+router.include_router(access_modes)
 router.include_router(data_product_dataset)
 router.include_router(data_output_dataset)
 router.include_router(data_outputs)

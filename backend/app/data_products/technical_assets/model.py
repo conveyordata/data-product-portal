@@ -14,6 +14,7 @@ from app.data_products.technical_assets.status import TechnicalAssetStatus
 from app.database.event_mixin import EventTrackedMixin
 
 if TYPE_CHECKING:
+    from app.configuration.access_modes.model import AccessMode
     from app.configuration.platforms.model import Platform
     from app.configuration.platforms.platform_services.model import PlatformService
     from app.data_products.model import DataProduct
@@ -25,6 +26,18 @@ if TYPE_CHECKING:
 from app.configuration.tags.model import Tag, tag_data_output_table
 from app.database.database import Base, ensure_exists
 from app.shared.model import BaseORM
+
+
+class TechnicalAssetAccessMode(Base, BaseORM):
+    __tablename__ = "technical_asset_access_modes"
+
+    technical_asset_id = Column(
+        UUID(as_uuid=True), ForeignKey("data_outputs.id"), primary_key=True
+    )
+    access_mode_id = Column(
+        UUID(as_uuid=True), ForeignKey("access_modes.id"), primary_key=True
+    )
+    access_mode: Mapped["AccessMode"] = relationship(lazy="joined")
 
 
 class TechnicalAsset(Base, BaseORM, EventTrackedMixin):
@@ -57,7 +70,7 @@ class TechnicalAsset(Base, BaseORM, EventTrackedMixin):
         lazy="raise",
     )
     tags: Mapped[list[Tag]] = relationship(
-        secondary=tag_data_output_table, back_populates="data_outputs", lazy="joined"
+        secondary=tag_data_output_table, back_populates="data_outputs", lazy="selectin"
     )
 
     environment_configurations: Mapped[
@@ -69,6 +82,12 @@ class TechnicalAsset(Base, BaseORM, EventTrackedMixin):
         ),
         lazy="raise",
         viewonly=True,
+    )
+    access_modes: Mapped[list["AccessMode"]] = relationship(
+        "AccessMode",
+        secondary="technical_asset_access_modes",
+        order_by="AccessMode.name",
+        lazy="selectin",
     )
 
     def to_event(self) -> TechnicalAssetEvent:

@@ -35,35 +35,36 @@ from app.graph.graph import Graph
 from app.users.notifications.service import NotificationService
 from app.users.schema import User
 
-route = "/v2/data_products/{data_product_id}/technical_assets"
+router = APIRouter(
+    tags=["Data Products - Technical assets"],
+    prefix="/v2/data_products/{data_product_id}/technical_assets",
+)
 
-router = APIRouter(tags=["Data Products - Technical assets"])
 
-
-@router.get(route)
+@router.get("/")
 def get_data_product_technical_assets(
     data_product_id: UUID, db: Session = Depends(get_db_session)
 ) -> GetTechnicalAssetsResponse:
     return GetTechnicalAssetsResponse(
         technical_assets=[
             GetTechnicalAssetsResponseItem.model_validate(do)
-            for do in DataOutputService(db).get_data_outputs_for_data_product(
+            for do in DataOutputService(db).get_technical_assets_for_data_product(
                 data_product_id
             )
         ]
     )
 
 
-@router.get(f"{route}/{{id}}")
+@router.get("/{id}")
 def get_technical_asset(
     data_product_id: UUID, id: UUID, db: Session = Depends(get_db_session)
 ) -> GetTechnicalAssetsResponseItem:
     return GetTechnicalAssetsResponseItem.model_validate(
-        DataOutputService(db).get_data_output(data_product_id, id)
+        DataOutputService(db).get_technical_asset(data_product_id, id)
     )
 
 
-@router.get(f"{route}/{{id}}/history")
+@router.get("/{id}/history")
 def get_technical_asset_event_history(
     data_product_id: UUID, id: UUID, db: Session = Depends(get_db_session)
 ) -> GetEventHistoryResponse:
@@ -79,7 +80,7 @@ def get_technical_asset_event_history(
 
 
 @router.delete(
-    f"{route}/{{id}}",
+    "/{id}",
     responses={
         404: {
             "description": "Technical asset not found",
@@ -124,7 +125,7 @@ def remove_technical_asset(
 
 
 @router.put(
-    f"{route}/{{id}}",
+    "/{id}",
     responses={
         404: {
             "description": "Technical asset not found",
@@ -164,7 +165,7 @@ def update_technical_asset(
 
 
 @router.put(
-    f"{route}/{{id}}/status",
+    "/{id}/status",
     responses={
         404: {
             "description": "Data Output not found",
@@ -202,7 +203,7 @@ def update_technical_asset_status(
     )
 
 
-@router.get(f"{route}/{{id}}/graph")
+@router.get("/{id}/graph")
 def get_technical_asset_graph_data(
     data_product_id: UUID,
     id: UUID,
@@ -213,7 +214,7 @@ def get_technical_asset_graph_data(
 
 
 @router.post(
-    route,
+    "/",
     responses={
         200: {
             "description": "Technical asset successfully created",
@@ -240,7 +241,7 @@ def create_technical_asset(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> CreateTechnicalAssetResponse:
-    technical_asset = DataOutputService(db).create_data_output(
+    technical_asset = DataOutputService(db).create_technical_asset(
         data_product_id, technical_asset
     )
     event_id = EventService(db).create_event(

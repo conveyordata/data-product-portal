@@ -934,6 +934,345 @@ func (s *AccessGranularity) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
+func (s *AccessMode) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *AccessMode) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("id")
+		json.EncodeUUID(e, s.ID)
+	}
+	{
+		e.FieldStart("name")
+		e.Str(s.Name)
+	}
+	{
+		e.FieldStart("description")
+		e.Str(s.Description)
+	}
+}
+
+var jsonFieldsNameOfAccessMode = [3]string{
+	0: "id",
+	1: "name",
+	2: "description",
+}
+
+// Decode decodes AccessMode from json.
+func (s *AccessMode) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode AccessMode to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "id":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := json.DecodeUUID(d)
+				s.ID = v
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"id\"")
+			}
+		case "name":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Str()
+				s.Name = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"name\"")
+			}
+		case "description":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				v, err := d.Str()
+				s.Description = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"description\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode AccessMode")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000111,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfAccessMode) {
+					name = jsonFieldsNameOfAccessMode[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *AccessMode) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *AccessMode) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *AccessModeCreate) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *AccessModeCreate) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("name")
+		e.Str(s.Name)
+	}
+	{
+		e.FieldStart("description")
+		e.Str(s.Description)
+	}
+}
+
+var jsonFieldsNameOfAccessModeCreate = [2]string{
+	0: "name",
+	1: "description",
+}
+
+// Decode decodes AccessModeCreate from json.
+func (s *AccessModeCreate) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode AccessModeCreate to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "name":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Str()
+				s.Name = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"name\"")
+			}
+		case "description":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Str()
+				s.Description = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"description\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode AccessModeCreate")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000011,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfAccessModeCreate) {
+					name = jsonFieldsNameOfAccessModeCreate[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *AccessModeCreate) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *AccessModeCreate) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *AccessModeUpdate) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *AccessModeUpdate) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("description")
+		e.Str(s.Description)
+	}
+}
+
+var jsonFieldsNameOfAccessModeUpdate = [1]string{
+	0: "description",
+}
+
+// Decode decodes AccessModeUpdate from json.
+func (s *AccessModeUpdate) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode AccessModeUpdate to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "description":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Str()
+				s.Description = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"description\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode AccessModeUpdate")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000001,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfAccessModeUpdate) {
+					name = jsonFieldsNameOfAccessModeUpdate[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *AccessModeUpdate) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *AccessModeUpdate) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
 func (s *AccessResponse) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
@@ -4169,6 +4508,16 @@ func (s *CreateTechnicalAssetRequest) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
+		if s.AccessModeIds != nil {
+			e.FieldStart("access_mode_ids")
+			e.ArrStart()
+			for _, elem := range s.AccessModeIds {
+				json.EncodeUUID(e, elem)
+			}
+			e.ArrEnd()
+		}
+	}
+	{
 		e.FieldStart("tag_ids")
 		e.ArrStart()
 		for _, elem := range s.TagIds {
@@ -4178,7 +4527,7 @@ func (s *CreateTechnicalAssetRequest) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfCreateTechnicalAssetRequest = [9]string{
+var jsonFieldsNameOfCreateTechnicalAssetRequest = [10]string{
 	0: "name",
 	1: "description",
 	2: "namespace",
@@ -4187,7 +4536,8 @@ var jsonFieldsNameOfCreateTechnicalAssetRequest = [9]string{
 	5: "configuration",
 	6: "sourceAligned",
 	7: "technical_mapping",
-	8: "tag_ids",
+	8: "access_mode_ids",
+	9: "tag_ids",
 }
 
 // Decode decodes CreateTechnicalAssetRequest from json.
@@ -4196,6 +4546,7 @@ func (s *CreateTechnicalAssetRequest) Decode(d *jx.Decoder) error {
 		return errors.New("invalid: unable to decode CreateTechnicalAssetRequest to nil")
 	}
 	var requiredBitSet [2]uint8
+	s.setDefaults()
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
@@ -4289,8 +4640,27 @@ func (s *CreateTechnicalAssetRequest) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"technical_mapping\"")
 			}
+		case "access_mode_ids":
+			if err := func() error {
+				s.AccessModeIds = make([]uuid.UUID, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem uuid.UUID
+					v, err := json.DecodeUUID(d)
+					elem = v
+					if err != nil {
+						return err
+					}
+					s.AccessModeIds = append(s.AccessModeIds, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"access_mode_ids\"")
+			}
 		case "tag_ids":
-			requiredBitSet[1] |= 1 << 0
+			requiredBitSet[1] |= 1 << 1
 			if err := func() error {
 				s.TagIds = make([]uuid.UUID, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
@@ -4320,7 +4690,7 @@ func (s *CreateTechnicalAssetRequest) Decode(d *jx.Decoder) error {
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
 		0b00111111,
-		0b00000001,
+		0b00000010,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -12368,6 +12738,112 @@ func (s *FinalizerRequest) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
+func (s *GetAccessModes) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *GetAccessModes) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("access_modes")
+		e.ArrStart()
+		for _, elem := range s.AccessModes {
+			elem.Encode(e)
+		}
+		e.ArrEnd()
+	}
+}
+
+var jsonFieldsNameOfGetAccessModes = [1]string{
+	0: "access_modes",
+}
+
+// Decode decodes GetAccessModes from json.
+func (s *GetAccessModes) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode GetAccessModes to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "access_modes":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				s.AccessModes = make([]AccessMode, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem AccessMode
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.AccessModes = append(s.AccessModes, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"access_modes\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode GetAccessModes")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000001,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfGetAccessModes) {
+					name = jsonFieldsNameOfGetAccessModes[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *GetAccessModes) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *GetAccessModes) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
 func (s *GetAllPlatformServiceConfigurationsResponse) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
@@ -15288,6 +15764,14 @@ func (s *GetOutputPortResponse) encodeFields(e *jx.Encoder) {
 		s.About.Encode(e)
 	}
 	{
+		e.FieldStart("access_modes")
+		e.ArrStart()
+		for _, elem := range s.AccessModes {
+			elem.Encode(e)
+		}
+		e.ArrEnd()
+	}
+	{
 		e.FieldStart("rolled_up_tags")
 		e.ArrStart()
 		for _, elem := range s.RolledUpTags {
@@ -15313,7 +15797,7 @@ func (s *GetOutputPortResponse) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfGetOutputPortResponse = [17]string{
+var jsonFieldsNameOfGetOutputPortResponse = [18]string{
 	0:  "id",
 	1:  "namespace",
 	2:  "name",
@@ -15328,9 +15812,10 @@ var jsonFieldsNameOfGetOutputPortResponse = [17]string{
 	11: "domain",
 	12: "lifecycle",
 	13: "about",
-	14: "rolled_up_tags",
-	15: "data_product_settings",
-	16: "technical_asset_links",
+	14: "access_modes",
+	15: "rolled_up_tags",
+	16: "data_product_settings",
+	17: "technical_asset_links",
 }
 
 // Decode decodes GetOutputPortResponse from json.
@@ -15500,8 +15985,26 @@ func (s *GetOutputPortResponse) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"about\"")
 			}
-		case "rolled_up_tags":
+		case "access_modes":
 			requiredBitSet[1] |= 1 << 6
+			if err := func() error {
+				s.AccessModes = make([]AccessMode, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem AccessMode
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.AccessModes = append(s.AccessModes, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"access_modes\"")
+			}
+		case "rolled_up_tags":
+			requiredBitSet[1] |= 1 << 7
 			if err := func() error {
 				s.RolledUpTags = make([]Tag, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
@@ -15519,7 +16022,7 @@ func (s *GetOutputPortResponse) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"rolled_up_tags\"")
 			}
 		case "data_product_settings":
-			requiredBitSet[1] |= 1 << 7
+			requiredBitSet[2] |= 1 << 0
 			if err := func() error {
 				s.DataProductSettings = make([]OutputPortSettingValue, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
@@ -15537,7 +16040,7 @@ func (s *GetOutputPortResponse) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"data_product_settings\"")
 			}
 		case "technical_asset_links":
-			requiredBitSet[2] |= 1 << 0
+			requiredBitSet[2] |= 1 << 1
 			if err := func() error {
 				s.TechnicalAssetLinks = make([]TechnicalAssetLink, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
@@ -15566,7 +16069,7 @@ func (s *GetOutputPortResponse) Decode(d *jx.Decoder) error {
 	for i, mask := range [3]uint8{
 		0b11111111,
 		0b11111111,
-		0b00000001,
+		0b00000011,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -16060,6 +16563,14 @@ func (s *GetTechnicalAssetsResponseItem) encodeFields(e *jx.Encoder) {
 		s.TechnicalMapping.Encode(e)
 	}
 	{
+		e.FieldStart("access_modes")
+		e.ArrStart()
+		for _, elem := range s.AccessModes {
+			elem.Encode(e)
+		}
+		e.ArrEnd()
+	}
+	{
 		e.FieldStart("configuration")
 		s.Configuration.Encode(e)
 	}
@@ -16101,7 +16612,7 @@ func (s *GetTechnicalAssetsResponseItem) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfGetTechnicalAssetsResponseItem = [16]string{
+var jsonFieldsNameOfGetTechnicalAssetsResponseItem = [17]string{
 	0:  "id",
 	1:  "name",
 	2:  "description",
@@ -16111,13 +16622,14 @@ var jsonFieldsNameOfGetTechnicalAssetsResponseItem = [16]string{
 	6:  "service_id",
 	7:  "status",
 	8:  "technical_mapping",
-	9:  "configuration",
-	10: "owner",
-	11: "output_port_links",
-	12: "tags",
-	13: "sourceAligned",
-	14: "result_string",
-	15: "technical_info",
+	9:  "access_modes",
+	10: "configuration",
+	11: "owner",
+	12: "output_port_links",
+	13: "tags",
+	14: "sourceAligned",
+	15: "result_string",
+	16: "technical_info",
 }
 
 // Decode decodes GetTechnicalAssetsResponseItem from json.
@@ -16125,7 +16637,7 @@ func (s *GetTechnicalAssetsResponseItem) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode GetTechnicalAssetsResponseItem to nil")
 	}
-	var requiredBitSet [2]uint8
+	var requiredBitSet [3]uint8
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
@@ -16233,8 +16745,26 @@ func (s *GetTechnicalAssetsResponseItem) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"technical_mapping\"")
 			}
-		case "configuration":
+		case "access_modes":
 			requiredBitSet[1] |= 1 << 1
+			if err := func() error {
+				s.AccessModes = make([]AccessMode, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem AccessMode
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.AccessModes = append(s.AccessModes, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"access_modes\"")
+			}
+		case "configuration":
+			requiredBitSet[1] |= 1 << 2
 			if err := func() error {
 				if err := s.Configuration.Decode(d); err != nil {
 					return err
@@ -16244,7 +16774,7 @@ func (s *GetTechnicalAssetsResponseItem) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"configuration\"")
 			}
 		case "owner":
-			requiredBitSet[1] |= 1 << 2
+			requiredBitSet[1] |= 1 << 3
 			if err := func() error {
 				if err := s.Owner.Decode(d); err != nil {
 					return err
@@ -16254,7 +16784,7 @@ func (s *GetTechnicalAssetsResponseItem) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"owner\"")
 			}
 		case "output_port_links":
-			requiredBitSet[1] |= 1 << 3
+			requiredBitSet[1] |= 1 << 4
 			if err := func() error {
 				s.OutputPortLinks = make([]OutputPortLink, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
@@ -16272,7 +16802,7 @@ func (s *GetTechnicalAssetsResponseItem) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"output_port_links\"")
 			}
 		case "tags":
-			requiredBitSet[1] |= 1 << 4
+			requiredBitSet[1] |= 1 << 5
 			if err := func() error {
 				s.Tags = make([]Tag, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
@@ -16290,7 +16820,7 @@ func (s *GetTechnicalAssetsResponseItem) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"tags\"")
 			}
 		case "sourceAligned":
-			requiredBitSet[1] |= 1 << 5
+			requiredBitSet[1] |= 1 << 6
 			if err := func() error {
 				v, err := d.Bool()
 				s.SourceAligned = bool(v)
@@ -16302,7 +16832,7 @@ func (s *GetTechnicalAssetsResponseItem) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"sourceAligned\"")
 			}
 		case "result_string":
-			requiredBitSet[1] |= 1 << 6
+			requiredBitSet[1] |= 1 << 7
 			if err := func() error {
 				v, err := d.Str()
 				s.ResultString = string(v)
@@ -16314,7 +16844,7 @@ func (s *GetTechnicalAssetsResponseItem) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"result_string\"")
 			}
 		case "technical_info":
-			requiredBitSet[1] |= 1 << 7
+			requiredBitSet[2] |= 1 << 0
 			if err := func() error {
 				s.TechnicalInfo = make([]TechnicalInfo, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
@@ -16340,9 +16870,10 @@ func (s *GetTechnicalAssetsResponseItem) Decode(d *jx.Decoder) error {
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
-	for i, mask := range [2]uint8{
+	for i, mask := range [3]uint8{
 		0b11111111,
 		0b11111111,
+		0b00000001,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -19377,50 +19908,6 @@ func (s NilDataProductLifeCycle) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *NilDataProductLifeCycle) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode encodes DataQualityStatus as json.
-func (o NilDataQualityStatus) Encode(e *jx.Encoder) {
-	if o.Null {
-		e.Null()
-		return
-	}
-	e.Str(string(o.Value))
-}
-
-// Decode decodes DataQualityStatus from json.
-func (o *NilDataQualityStatus) Decode(d *jx.Decoder) error {
-	if o == nil {
-		return errors.New("invalid: unable to decode NilDataQualityStatus to nil")
-	}
-	if d.Next() == jx.Null {
-		if err := d.Null(); err != nil {
-			return err
-		}
-
-		var v DataQualityStatus
-		o.Value = v
-		o.Null = true
-		return nil
-	}
-	o.Null = false
-	if err := o.Value.Decode(d); err != nil {
-		return err
-	}
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s NilDataQualityStatus) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *NilDataQualityStatus) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -31176,13 +31663,9 @@ func (s *SearchOutputPortsResponseItem) encodeFields(e *jx.Encoder) {
 		e.FieldStart("data_product_name")
 		e.Str(s.DataProductName)
 	}
-	{
-		e.FieldStart("quality_status")
-		s.QualityStatus.Encode(e)
-	}
 }
 
-var jsonFieldsNameOfSearchOutputPortsResponseItem = [17]string{
+var jsonFieldsNameOfSearchOutputPortsResponseItem = [16]string{
 	0:  "id",
 	1:  "namespace",
 	2:  "name",
@@ -31199,7 +31682,6 @@ var jsonFieldsNameOfSearchOutputPortsResponseItem = [17]string{
 	13: "abstract_data_product_count",
 	14: "technical_assets_count",
 	15: "data_product_name",
-	16: "quality_status",
 }
 
 // Decode decodes SearchOutputPortsResponseItem from json.
@@ -31207,7 +31689,7 @@ func (s *SearchOutputPortsResponseItem) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode SearchOutputPortsResponseItem to nil")
 	}
-	var requiredBitSet [3]uint8
+	var requiredBitSet [2]uint8
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
@@ -31395,16 +31877,6 @@ func (s *SearchOutputPortsResponseItem) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"data_product_name\"")
 			}
-		case "quality_status":
-			requiredBitSet[2] |= 1 << 0
-			if err := func() error {
-				if err := s.QualityStatus.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"quality_status\"")
-			}
 		default:
 			return d.Skip()
 		}
@@ -31414,10 +31886,9 @@ func (s *SearchOutputPortsResponseItem) Decode(d *jx.Decoder) error {
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
-	for i, mask := range [3]uint8{
+	for i, mask := range [2]uint8{
 		0b11111111,
 		0b11111111,
-		0b00000001,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

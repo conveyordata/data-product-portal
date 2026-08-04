@@ -25,6 +25,7 @@ class CreateTechnicalAssetRequest(ORMModel):
     technical_mapping: TechnicalMapping | None = Field(
         default=None,
     )
+    access_mode_ids: list[UUID] = Field(default=[])
     tag_ids: list[UUID]
 
     @model_validator(mode="after")

@@ -1,7 +1,6 @@
 from datetime import datetime
 from typing import Optional
 from uuid import UUID
-from warnings import deprecated
 
 from pydantic import Field
 
@@ -19,15 +18,7 @@ class OwnedTechnicalAsset(TechnicalAssetBaseSchema):
     owner: DataProduct
 
 
-@deprecated("Use OwnedTechnicalAsset instead")
-class DataOutput(TechnicalAssetBaseSchema):
-    owner: DataProduct
-
-    def convert(self) -> OwnedTechnicalAsset:
-        return OwnedTechnicalAsset(**self.model_dump())
-
-
-class BaseTechnicalAssetOutputPortAssociationGet(ORMModel):
+class TechnicalAssetOutputPortAssociationsGet(ORMModel):
     id: UUID
     output_port_id: UUID = Field(validation_alias="output_port_id")
     output_port: OutputPort = Field(validation_alias="output_port")
@@ -41,12 +32,6 @@ class BaseTechnicalAssetOutputPortAssociationGet(ORMModel):
     requested_by: User
     denied_by: Optional[User]
     approved_by: Optional[User]
-
-
-class TechnicalAssetOutputPortAssociationsGet(
-    BaseTechnicalAssetOutputPortAssociationGet
-):
-    pass
 
 
 class LinkTechnicalAssetsToOutputPortResponse(ORMModel):

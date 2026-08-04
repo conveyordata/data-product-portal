@@ -12,6 +12,7 @@ from ..models.output_port_access_type import OutputPortAccessType
 from ..models.output_port_status import OutputPortStatus
 
 if TYPE_CHECKING:
+    from ..models.access_mode import AccessMode
     from ..models.data_product_life_cycle import DataProductLifeCycle
     from ..models.domain import Domain
     from ..models.output_port_setting_value import OutputPortSettingValue
@@ -40,6 +41,7 @@ class GetOutputPortResponse:
         domain (Domain):
         lifecycle (DataProductLifeCycle | None):
         about (None | str):
+        access_modes (list[AccessMode]):
         rolled_up_tags (list[Tag]):
         data_product_settings (list[OutputPortSettingValue]):
         technical_asset_links (list[TechnicalAssetLink]):
@@ -59,6 +61,7 @@ class GetOutputPortResponse:
     domain: Domain
     lifecycle: DataProductLifeCycle | None
     about: None | str
+    access_modes: list[AccessMode]
     rolled_up_tags: list[Tag]
     data_product_settings: list[OutputPortSettingValue]
     technical_asset_links: list[TechnicalAssetLink]
@@ -104,6 +107,11 @@ class GetOutputPortResponse:
         about: None | str
         about = self.about
 
+        access_modes = []
+        for access_modes_item_data in self.access_modes:
+            access_modes_item = access_modes_item_data.to_dict()
+            access_modes.append(access_modes_item)
+
         rolled_up_tags = []
         for rolled_up_tags_item_data in self.rolled_up_tags:
             rolled_up_tags_item = rolled_up_tags_item_data.to_dict()
@@ -137,6 +145,7 @@ class GetOutputPortResponse:
                 "domain": domain,
                 "lifecycle": lifecycle,
                 "about": about,
+                "access_modes": access_modes,
                 "rolled_up_tags": rolled_up_tags,
                 "data_product_settings": data_product_settings,
                 "technical_asset_links": technical_asset_links,
@@ -147,6 +156,7 @@ class GetOutputPortResponse:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        from ..models.access_mode import AccessMode
         from ..models.data_product_life_cycle import DataProductLifeCycle
         from ..models.domain import Domain
         from ..models.output_port_setting_value import OutputPortSettingValue
@@ -214,6 +224,13 @@ class GetOutputPortResponse:
 
         about = _parse_about(d.pop("about"))
 
+        access_modes = []
+        _access_modes = d.pop("access_modes")
+        for access_modes_item_data in _access_modes:
+            access_modes_item = AccessMode.from_dict(access_modes_item_data)
+
+            access_modes.append(access_modes_item)
+
         rolled_up_tags = []
         _rolled_up_tags = d.pop("rolled_up_tags")
         for rolled_up_tags_item_data in _rolled_up_tags:
@@ -254,6 +271,7 @@ class GetOutputPortResponse:
             domain=domain,
             lifecycle=lifecycle,
             about=about,
+            access_modes=access_modes,
             rolled_up_tags=rolled_up_tags,
             data_product_settings=data_product_settings,
             technical_asset_links=technical_asset_links,

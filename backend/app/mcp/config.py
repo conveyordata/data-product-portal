@@ -10,7 +10,7 @@ from app.configuration.domains.schema_response import GetDomainsItem
 from app.configuration.domains.service import DomainService
 from app.configuration.environments.schema_response import EnvironmentGetItem
 from app.configuration.environments.service import EnvironmentService
-from app.data_products.output_ports.schema_response import OutputPortsGet
+from app.data_products.output_ports.schema import OutputPort
 from app.data_products.output_ports.service import OutputPortService
 from app.data_products.schema_response import (
     GetDataProductResponse,
@@ -141,8 +141,7 @@ def register_config_tools(mcp) -> None:
                 "output_ports_count": len(output_ports),
                 "technical_assets_count": len(related_technical_assets),
                 "output_ports": [
-                    OutputPortsGet.model_validate(ds).model_dump()
-                    for ds in output_ports
+                    OutputPort.model_validate(ds).model_dump() for ds in output_ports
                 ],
                 "technical_assets": [
                     GetTechnicalAssetsResponseItem.model_validate(do).model_dump()

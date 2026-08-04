@@ -3321,6 +3321,119 @@
         }
       }
     },
+    "/api/v2/configuration/access_modes": {
+      "get": {
+        "tags": [
+          "Configuration - Access Modes"
+        ],
+        "summary": "Get Access Modes",
+        "operationId": "get_access_modes",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAccessModes"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Configuration - Access Modes"
+        ],
+        "summary": "Create Access Mode",
+        "operationId": "create_access_mode",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccessModeCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessMode"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/configuration/access_modes/{id}": {
+      "put": {
+        "tags": [
+          "Configuration - Access Modes"
+        ],
+        "summary": "Update Access Mode",
+        "operationId": "update_access_mode",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccessModeUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessMode"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v2/data_products/{data_product_id}/output_ports/{output_port_id}/input_ports/": {
       "get": {
         "tags": [
@@ -3884,7 +3997,7 @@
         }
       }
     },
-    "/api/v2/data_products/{data_product_id}/technical_assets": {
+    "/api/v2/data_products/{data_product_id}/technical_assets/": {
       "get": {
         "tags": [
           "Data Products - Technical assets"
@@ -8435,6 +8548,61 @@
         ],
         "title": "AccessGranularity"
       },
+      "AccessMode": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "description"
+        ],
+        "title": "AccessMode"
+      },
+      "AccessModeCreate": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "description"
+        ],
+        "title": "AccessModeCreate"
+      },
+      "AccessModeUpdate": {
+        "properties": {
+          "description": {
+            "type": "string",
+            "title": "Description"
+          }
+        },
+        "type": "object",
+        "required": [
+          "description"
+        ],
+        "title": "AccessModeUpdate"
+      },
       "AccessResponse": {
         "properties": {
           "allowed": {
@@ -9532,6 +9700,15 @@
                 "type": "null"
               }
             ]
+          },
+          "access_mode_ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Access Mode Ids",
+            "default": []
           },
           "tag_ids": {
             "items": {
@@ -11477,6 +11654,22 @@
         ],
         "title": "FinalizerRequest"
       },
+      "GetAccessModes": {
+        "properties": {
+          "access_modes": {
+            "items": {
+              "$ref": "#/components/schemas/AccessMode"
+            },
+            "type": "array",
+            "title": "Access Modes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "access_modes"
+        ],
+        "title": "GetAccessModes"
+      },
       "GetAllPlatformServiceConfigurationsResponse": {
         "properties": {
           "platform_service_configurations": {
@@ -12188,6 +12381,13 @@
             ],
             "title": "About"
           },
+          "access_modes": {
+            "items": {
+              "$ref": "#/components/schemas/AccessMode"
+            },
+            "type": "array",
+            "title": "Access Modes"
+          },
           "rolled_up_tags": {
             "items": {
               "$ref": "#/components/schemas/Tag"
@@ -12227,6 +12427,7 @@
           "domain",
           "lifecycle",
           "about",
+          "access_modes",
           "rolled_up_tags",
           "data_product_settings",
           "technical_asset_links"
@@ -12321,6 +12522,13 @@
           "technical_mapping": {
             "$ref": "#/components/schemas/TechnicalMapping"
           },
+          "access_modes": {
+            "items": {
+              "$ref": "#/components/schemas/AccessMode"
+            },
+            "type": "array",
+            "title": "Access Modes"
+          },
           "configuration": {
             "oneOf": [
               {
@@ -12408,6 +12616,7 @@
           "service_id",
           "status",
           "technical_mapping",
+          "access_modes",
           "configuration",
           "owner",
           "output_port_links",
@@ -15509,16 +15718,6 @@
           "data_product_name": {
             "type": "string",
             "title": "Data Product Name"
-          },
-          "quality_status": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/DataQualityStatus"
-              },
-              {
-                "type": "null"
-              }
-            ]
           }
         },
         "type": "object",
@@ -15538,8 +15737,7 @@
           "lifecycle",
           "abstract_data_product_count",
           "technical_assets_count",
-          "data_product_name",
-          "quality_status"
+          "data_product_name"
         ],
         "title": "SearchOutputPortsResponseItem"
       },

@@ -8,6 +8,9 @@ from .access_duration import AccessDuration
 from .access_duration_type import AccessDurationType
 from .access_duration_update import AccessDurationUpdate
 from .access_granularity import AccessGranularity
+from .access_mode import AccessMode
+from .access_mode_create import AccessModeCreate
+from .access_mode_update import AccessModeUpdate
 from .access_response import AccessResponse
 from .approve_link_between_technical_asset_and_output_port_request import (
     ApproveLinkBetweenTechnicalAssetAndOutputPortRequest,
@@ -151,6 +154,7 @@ from .exploration import Exploration
 from .exploration_event import ExplorationEvent
 from .field_dependency import FieldDependency
 from .finalizer_request import FinalizerRequest
+from .get_access_modes import GetAccessModes
 from .get_all_platform_service_configurations_response import (
     GetAllPlatformServiceConfigurationsResponse,
 )
@@ -372,6 +376,9 @@ __all__ = (
     "AccessDurationType",
     "AccessDurationUpdate",
     "AccessGranularity",
+    "AccessMode",
+    "AccessModeCreate",
+    "AccessModeUpdate",
     "AccessResponse",
     "ApproveLinkBetweenTechnicalAssetAndOutputPortRequest",
     "ApproveOutputPortAsInputPortRequest",
@@ -481,6 +488,7 @@ __all__ = (
     "ExplorationEvent",
     "FieldDependency",
     "FinalizerRequest",
+    "GetAccessModes",
     "GetAllPlatformServiceConfigurationsResponse",
     "GetAllPlatformsResponse",
     "GetDataProductInputPortsResponse",

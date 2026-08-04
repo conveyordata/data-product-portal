@@ -10,13 +10,7 @@ from app.configuration.data_product_settings.schema import DataProductSettingVal
 from app.configuration.data_product_types.schema import DataProductType
 from app.configuration.domains.schema import Domain
 from app.configuration.tags.schema import Tag
-from app.data_products.output_port_technical_assets_link.schema_response import (
-    BaseTechnicalAssetOutputPortAssociationGet,
-)
 from app.data_products.status import AbstractDataProductStatus
-from app.data_products.technical_assets.schema_response import (
-    BaseTechnicalAssetGet,
-)
 from app.shared.schema import ORMModel
 
 
@@ -33,10 +27,6 @@ class BaseDataProductGet(ORMModel):
     domain: Domain
     type: DataProductType
     lifecycle: Optional[DataProductLifeCycle]
-
-
-class TechnicalAssetLinks(BaseTechnicalAssetGet):
-    output_port_links: list[BaseTechnicalAssetOutputPortAssociationGet]
 
 
 class GetDataProductResponse(BaseDataProductGet):
