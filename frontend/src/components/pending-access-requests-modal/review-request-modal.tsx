@@ -18,7 +18,7 @@ import {
     OutputPortOutlined,
     TechnicalAssetOutlined,
 } from '@/components/icons';
-import { AccessDurationType } from '@/store/api/services/generated/accessDurationsApi.ts';
+import { AccessDurationType } from '@/store/api/services/generated/configurationAccessDurationsApi.ts';
 import { RenewalStatus } from '@/store/api/services/generated/dataProductsOutputPortsInputPortsApi.ts';
 import type { AbstractDataProductType } from '@/store/api/services/generated/usersApi.ts';
 import {

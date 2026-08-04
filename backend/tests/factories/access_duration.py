@@ -1,8 +1,8 @@
 import factory
 
 from app.abstract_data_product.type import AbstractDataProductType
-from app.access_durations.enums import AccessDurationType
-from app.access_durations.model import AccessDuration
+from app.configuration.access_durations.enums import AccessDurationType
+from app.configuration.access_durations.model import AccessDuration
 
 
 class AccessDurationFactory(factory.alchemy.SQLAlchemyModelFactory):

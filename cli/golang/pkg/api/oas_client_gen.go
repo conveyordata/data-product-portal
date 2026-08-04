@@ -232,7 +232,7 @@ type Invoker interface {
 	//
 	// Get All Access Durations.
 	//
-	// GET /api/v2/access_durations
+	// GET /api/v2/configuration/access_durations
 	GetAllAccessDurations(ctx context.Context) ([]AccessDuration, error)
 	// GetAllPlatformServiceConfigurations invokes get_all_platform_service_configurations operation.
 	//
@@ -328,7 +328,7 @@ type Invoker interface {
 	//
 	// Get Default Access Duration.
 	//
-	// GET /api/v2/access_durations/{abstract_data_product_type}/default
+	// GET /api/v2/configuration/access_durations/{abstract_data_product_type}/default
 	GetDefaultAccessDuration(ctx context.Context, params GetDefaultAccessDurationParams) (GetDefaultAccessDurationRes, error)
 	// GetDeviceToken invokes get_device_token operation.
 	//
@@ -364,7 +364,7 @@ type Invoker interface {
 	//
 	// Get Expiring Soon Threshold.
 	//
-	// GET /api/v2/access_durations/expiring_soon_threshold
+	// GET /api/v2/configuration/access_durations/expiring_soon_threshold
 	GetExpiringSoonThreshold(ctx context.Context) (*ExpiringSoonThresholdResponse, error)
 	// GetExploration invokes get_exploration operation.
 	//
@@ -544,7 +544,7 @@ type Invoker interface {
 	//
 	// Is Time Bound Access Enabled.
 	//
-	// GET /api/v2/access_durations/enabled
+	// GET /api/v2/configuration/access_durations/enabled
 	IsTimeBoundAccessEnabled(ctx context.Context) (*TimeBoundAccessEnabledResponse, error)
 	// LinkInputPortsToDataProduct invokes link_input_ports_to_data_product operation.
 	//
@@ -840,7 +840,7 @@ type Invoker interface {
 	//
 	// Update Access Duration.
 	//
-	// PUT /api/v2/access_durations/{abstract_data_product_type}
+	// PUT /api/v2/configuration/access_durations/{abstract_data_product_type}
 	UpdateAccessDuration(ctx context.Context, request *AccessDurationUpdate, params UpdateAccessDurationParams) (UpdateAccessDurationRes, error)
 	// UpdateAccessMode invokes update_access_mode operation.
 	//
@@ -3121,7 +3121,7 @@ func (c *Client) sendGetAccessModes(ctx context.Context) (res *GetAccessModes, e
 //
 // Get All Access Durations.
 //
-// GET /api/v2/access_durations
+// GET /api/v2/configuration/access_durations
 func (c *Client) GetAllAccessDurations(ctx context.Context) ([]AccessDuration, error) {
 	res, err := c.sendGetAllAccessDurations(ctx)
 	return res, err
@@ -3131,7 +3131,7 @@ func (c *Client) sendGetAllAccessDurations(ctx context.Context) (res []AccessDur
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/api/v2/access_durations"
+	pathParts[0] = "/api/v2/configuration/access_durations"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	r, err := ht.NewRequest(ctx, "GET", u)
@@ -3979,7 +3979,7 @@ func (c *Client) sendGetDataProductsTypes(ctx context.Context) (res *DataProduct
 //
 // Get Default Access Duration.
 //
-// GET /api/v2/access_durations/{abstract_data_product_type}/default
+// GET /api/v2/configuration/access_durations/{abstract_data_product_type}/default
 func (c *Client) GetDefaultAccessDuration(ctx context.Context, params GetDefaultAccessDurationParams) (GetDefaultAccessDurationRes, error) {
 	res, err := c.sendGetDefaultAccessDuration(ctx, params)
 	return res, err
@@ -3989,7 +3989,7 @@ func (c *Client) sendGetDefaultAccessDuration(ctx context.Context, params GetDef
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [3]string
-	pathParts[0] = "/api/v2/access_durations/"
+	pathParts[0] = "/api/v2/configuration/access_durations/"
 	{
 		// Encode "abstract_data_product_type" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -4362,7 +4362,7 @@ func (c *Client) sendGetEnvironments(ctx context.Context) (res *EnvironmentsGet,
 //
 // Get Expiring Soon Threshold.
 //
-// GET /api/v2/access_durations/expiring_soon_threshold
+// GET /api/v2/configuration/access_durations/expiring_soon_threshold
 func (c *Client) GetExpiringSoonThreshold(ctx context.Context) (*ExpiringSoonThresholdResponse, error) {
 	res, err := c.sendGetExpiringSoonThreshold(ctx)
 	return res, err
@@ -4372,7 +4372,7 @@ func (c *Client) sendGetExpiringSoonThreshold(ctx context.Context) (res *Expirin
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/api/v2/access_durations/expiring_soon_threshold"
+	pathParts[0] = "/api/v2/configuration/access_durations/expiring_soon_threshold"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	r, err := ht.NewRequest(ctx, "GET", u)
@@ -6410,7 +6410,7 @@ func (c *Client) sendIsAdmin(ctx context.Context) (res *IsAdminResponse, err err
 //
 // Is Time Bound Access Enabled.
 //
-// GET /api/v2/access_durations/enabled
+// GET /api/v2/configuration/access_durations/enabled
 func (c *Client) IsTimeBoundAccessEnabled(ctx context.Context) (*TimeBoundAccessEnabledResponse, error) {
 	res, err := c.sendIsTimeBoundAccessEnabled(ctx)
 	return res, err
@@ -6420,7 +6420,7 @@ func (c *Client) sendIsTimeBoundAccessEnabled(ctx context.Context) (res *TimeBou
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
-	pathParts[0] = "/api/v2/access_durations/enabled"
+	pathParts[0] = "/api/v2/configuration/access_durations/enabled"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	r, err := ht.NewRequest(ctx, "GET", u)
@@ -9908,7 +9908,7 @@ func (c *Client) sendUnlinkOutputPortFromTechnicalAsset(ctx context.Context, req
 //
 // Update Access Duration.
 //
-// PUT /api/v2/access_durations/{abstract_data_product_type}
+// PUT /api/v2/configuration/access_durations/{abstract_data_product_type}
 func (c *Client) UpdateAccessDuration(ctx context.Context, request *AccessDurationUpdate, params UpdateAccessDurationParams) (UpdateAccessDurationRes, error) {
 	res, err := c.sendUpdateAccessDuration(ctx, request, params)
 	return res, err
@@ -9918,7 +9918,7 @@ func (c *Client) sendUpdateAccessDuration(ctx context.Context, request *AccessDu
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [2]string
-	pathParts[0] = "/api/v2/access_durations/"
+	pathParts[0] = "/api/v2/configuration/access_durations/"
 	{
 		// Encode "abstract_data_product_type" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{

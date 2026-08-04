@@ -4,7 +4,7 @@ from app.abstract_data_product.input_ports.enums import InputPortRequestDecision
 from app.abstract_data_product.input_ports.model import (
     InputPortRequest,
 )
-from app.access_durations.enums import AccessDurationType
+from app.configuration.access_durations.enums import AccessDurationType
 
 from .input_port import InputPortFactory
 from .user import UserFactory

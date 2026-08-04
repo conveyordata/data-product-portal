@@ -17,8 +17,8 @@ from sqlalchemy.orm import (
 from app.abstract_data_product.input_ports.model import (
     InputPort,
 )
-from app.access_durations.enums import AccessDurationType
 from app.authorization.role_assignments.enums import DecisionStatus
+from app.configuration.access_durations.enums import AccessDurationType
 from app.configuration.tags.model import Tag, tag_dataset_table
 from app.core.webhooks.events import OutputPortEvent
 from app.data_products.output_port_technical_assets_link.model import (

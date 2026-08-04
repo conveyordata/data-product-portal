@@ -3,10 +3,12 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.abstract_data_product.type import AbstractDataProductType
-from app.access_durations.enums import AccessDurationType
-from app.access_durations.model import AccessDuration as AccessDurationModel
-from app.access_durations.schema_request import AccessDurationUpdate
-from app.access_durations.schema_response import AccessDuration
+from app.configuration.access_durations.enums import AccessDurationType
+from app.configuration.access_durations.model import (
+    AccessDuration as AccessDurationModel,
+)
+from app.configuration.access_durations.schema_request import AccessDurationUpdate
+from app.configuration.access_durations.schema_response import AccessDuration
 from app.data_products.output_ports.model import OutputPort as OutputPortModel
 
 

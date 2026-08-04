@@ -2,7 +2,7 @@ import factory
 from faker import Faker
 
 from app.abstract_data_product.type import AbstractDataProductType
-from app.access_durations.enums import AccessDurationType
+from app.configuration.access_durations.enums import AccessDurationType
 from app.data_products.output_ports.enums import OutputPortAccessType
 from app.data_products.output_ports.model import Dataset
 from app.data_products.output_ports.status import OutputPortStatus

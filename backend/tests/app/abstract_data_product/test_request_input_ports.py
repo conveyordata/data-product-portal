@@ -13,8 +13,8 @@ from app.abstract_data_product.input_ports.enums import (
 from app.abstract_data_product.input_ports.model import InputPortRequest
 from app.abstract_data_product.service import AbstractDataProductService
 from app.abstract_data_product.type import AbstractDataProductType
-from app.access_durations.enums import AccessDurationType
 from app.authorization.role_assignments.enums import DecisionStatus
+from app.configuration.access_durations.enums import AccessDurationType
 from app.data_products.output_ports.enums import OutputPortAccessType
 from tests import test_session
 from tests.factories import (

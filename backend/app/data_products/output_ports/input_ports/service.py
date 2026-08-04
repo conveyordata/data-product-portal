@@ -16,10 +16,10 @@ from app.abstract_data_product.input_ports.model import (
 from app.abstract_data_product.input_ports.model import (
     InputPortRequest as InputPortRequestModel,
 )
-from app.access_durations.enums import AccessDurationType
 from app.authorization.role_assignments.output_port.model import (
     DatasetRoleAssignment as DatasetRoleAssignmentModel,
 )
+from app.configuration.access_durations.enums import AccessDurationType
 from app.core.authz import Action, Authorization
 from app.core.logging.posthog_analytics import get_posthog_client
 from app.data_products.output_ports.model import OutputPort

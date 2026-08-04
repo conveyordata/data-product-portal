@@ -2,7 +2,6 @@ import type { ConfigFile } from '@rtk-query/codegen-openapi';
 
 const services = [
     { name: 'empty', file: 'empty' },
-    { name: 'Access Durations', file: 'accessDurations' },
     { name: 'Authorization', file: 'authorization' },
     { name: 'Authorization - Role assignments', file: 'authorizationRoleAssignments' },
     { name: 'Authorization - Roles', file: 'authorizationRoles' },
@@ -16,6 +15,7 @@ const services = [
     { name: 'Configuration - Platforms', file: 'configurationPlatforms' },
     { name: 'Configuration - Theme settings', file: 'configurationThemeSettings' },
     { name: 'Configuration - Tags', file: 'configurationTags' },
+    { name: 'Configuration - Access Durations', file: 'configurationAccessDurations' },
     { name: 'Plugins', file: 'plugins' },
     { name: 'Data Products', file: 'dataProducts' },
     { name: 'Data Products - Technical assets', file: 'dataProductsTechnicalAssets' },

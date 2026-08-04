@@ -5,7 +5,7 @@ import httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
-from ...models.access_duration import AccessDuration
+from ...models.time_bound_access_enabled_response import TimeBoundAccessEnabledResponse
 from ...types import Response
 
 
@@ -13,7 +13,7 @@ def _get_kwargs() -> dict[str, Any]:
 
     _kwargs: dict[str, Any] = {
         "method": "get",
-        "url": "/api/v2/access_durations",
+        "url": "/api/v2/configuration/access_durations/enabled",
     }
 
     return _kwargs
@@ -21,14 +21,9 @@ def _get_kwargs() -> dict[str, Any]:
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> list[AccessDuration] | None:
+) -> TimeBoundAccessEnabledResponse | None:
     if response.status_code == 200:
-        response_200 = []
-        _response_200 = response.json()
-        for response_200_item_data in _response_200:
-            response_200_item = AccessDuration.from_dict(response_200_item_data)
-
-            response_200.append(response_200_item)
+        response_200 = TimeBoundAccessEnabledResponse.from_dict(response.json())
 
         return response_200
 
@@ -40,7 +35,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[list[AccessDuration]]:
+) -> Response[TimeBoundAccessEnabledResponse]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -52,15 +47,15 @@ def _build_response(
 def sync_detailed(
     *,
     client: AuthenticatedClient | Client,
-) -> Response[list[AccessDuration]]:
-    """Get All Access Durations
+) -> Response[TimeBoundAccessEnabledResponse]:
+    """Is Time Bound Access Enabled
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[list[AccessDuration]]
+        Response[TimeBoundAccessEnabledResponse]
     """
 
     kwargs = _get_kwargs()
@@ -75,15 +70,15 @@ def sync_detailed(
 def sync(
     *,
     client: AuthenticatedClient | Client,
-) -> list[AccessDuration] | None:
-    """Get All Access Durations
+) -> TimeBoundAccessEnabledResponse | None:
+    """Is Time Bound Access Enabled
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        list[AccessDuration]
+        TimeBoundAccessEnabledResponse
     """
 
     return sync_detailed(
@@ -94,15 +89,15 @@ def sync(
 async def asyncio_detailed(
     *,
     client: AuthenticatedClient | Client,
-) -> Response[list[AccessDuration]]:
-    """Get All Access Durations
+) -> Response[TimeBoundAccessEnabledResponse]:
+    """Is Time Bound Access Enabled
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[list[AccessDuration]]
+        Response[TimeBoundAccessEnabledResponse]
     """
 
     kwargs = _get_kwargs()
@@ -115,15 +110,15 @@ async def asyncio_detailed(
 async def asyncio(
     *,
     client: AuthenticatedClient | Client,
-) -> list[AccessDuration] | None:
-    """Get All Access Durations
+) -> TimeBoundAccessEnabledResponse | None:
+    """Is Time Bound Access Enabled
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        list[AccessDuration]
+        TimeBoundAccessEnabledResponse
     """
 
     return (

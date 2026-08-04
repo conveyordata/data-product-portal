@@ -1,6 +1,6 @@
 from pydantic import BaseModel, model_validator
 
-from app.access_durations.enums import AccessDurationType
+from app.configuration.access_durations.enums import AccessDurationType
 
 
 class AccessDurationUpdate(BaseModel):

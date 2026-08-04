@@ -7804,10 +7804,10 @@
         }
       }
     },
-    "/api/v2/access_durations/enabled": {
+    "/api/v2/configuration/access_durations/enabled": {
       "get": {
         "tags": [
-          "Access Durations"
+          "Configuration - Access Durations"
         ],
         "summary": "Is Time Bound Access Enabled",
         "operationId": "is_time_bound_access_enabled",
@@ -7825,10 +7825,10 @@
         }
       }
     },
-    "/api/v2/access_durations/expiring_soon_threshold": {
+    "/api/v2/configuration/access_durations/expiring_soon_threshold": {
       "get": {
         "tags": [
-          "Access Durations"
+          "Configuration - Access Durations"
         ],
         "summary": "Get Expiring Soon Threshold",
         "operationId": "get_expiring_soon_threshold",
@@ -7846,10 +7846,10 @@
         }
       }
     },
-    "/api/v2/access_durations/{abstract_data_product_type}/default": {
+    "/api/v2/configuration/access_durations/{abstract_data_product_type}/default": {
       "get": {
         "tags": [
-          "Access Durations"
+          "Configuration - Access Durations"
         ],
         "summary": "Get Default Access Duration",
         "operationId": "get_default_access_duration",
@@ -7887,10 +7887,10 @@
         }
       }
     },
-    "/api/v2/access_durations": {
+    "/api/v2/configuration/access_durations": {
       "get": {
         "tags": [
-          "Access Durations"
+          "Configuration - Access Durations"
         ],
         "summary": "Get All Access Durations",
         "operationId": "get_all_access_durations",
@@ -7912,10 +7912,10 @@
         }
       }
     },
-    "/api/v2/access_durations/{abstract_data_product_type}": {
+    "/api/v2/configuration/access_durations/{abstract_data_product_type}": {
       "put": {
         "tags": [
-          "Access Durations"
+          "Configuration - Access Durations"
         ],
         "summary": "Update Access Duration",
         "operationId": "update_access_duration",

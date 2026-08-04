@@ -3,7 +3,7 @@ from uuid import UUID
 
 from pydantic import Field
 
-from app.access_durations.enums import AccessDurationType
+from app.configuration.access_durations.enums import AccessDurationType
 from app.configuration.access_modes.schema_response import AccessMode
 from app.configuration.data_product_lifecycles.schema import DataProductLifeCycle
 from app.configuration.data_product_settings.schema import (
