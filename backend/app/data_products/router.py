@@ -227,9 +227,7 @@ def _do_delete_data_product(
 @router.post(
     "/{id}/finalizers",
     dependencies=[
-        Depends(
-            Authorization.enforce(Action.DATA_PRODUCT__DELETE, DataProductResolver)
-        ),
+        Depends(Authorization.enforce(Action.GLOBAL__MANAGE_FINALIZERS, EmptyResolver)),
     ],
 )
 def add_data_product_finalizer(
@@ -243,9 +241,7 @@ def add_data_product_finalizer(
 @router.delete(
     "/{id}/finalizers/{finalizer}",
     dependencies=[
-        Depends(
-            Authorization.enforce(Action.DATA_PRODUCT__DELETE, DataProductResolver)
-        ),
+        Depends(Authorization.enforce(Action.GLOBAL__MANAGE_FINALIZERS, EmptyResolver)),
     ],
 )
 def remove_data_product_finalizer(

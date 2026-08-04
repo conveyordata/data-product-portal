@@ -6,6 +6,10 @@ sidebar_position: 200
 
 ## Unreleased
 
+### bugfixes
+
+- **[Provisioner]**: Access to the finalizer endpoint of exploration and data product is now only possible as an admin. The provisioner should always run with admin credentials.
+
 ## 0.7.0
 
 ### breaking changes

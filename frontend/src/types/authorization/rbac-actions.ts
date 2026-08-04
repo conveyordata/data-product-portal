@@ -8,6 +8,7 @@ export enum AuthorizationAction {
     GLOBAL__CREATE_USER = 106,
     GLOBAL__DELETE_USER = 107,
     GLOBAL__CREATE_EXPLORATION = 108,
+    GLOBAL__MANAGE_FINALIZERS = 109,
 
     // Data Product actions
     DATA_PRODUCT__UPDATE_PROPERTIES = 301,
