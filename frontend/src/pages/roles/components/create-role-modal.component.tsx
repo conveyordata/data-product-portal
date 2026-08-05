@@ -49,7 +49,7 @@ export function CreateRoleModal({ scope, title, isOpen, onClose }: Props) {
         <Modal title={title} open={isOpen} onCancel={onClose} footer={footer} centered>
             <Form form={form} labelCol={FORM_GRID_WRAPPER_COLS} layout="vertical">
                 <Form.Item
-                    name={'name'}
+                    name="name"
                     label={t('Name')}
                     tooltip={t('The name of your role')}
                     rules={[
@@ -62,7 +62,7 @@ export function CreateRoleModal({ scope, title, isOpen, onClose }: Props) {
                     <Input />
                 </Form.Item>
                 <Form.Item
-                    name={'description'}
+                    name="description"
                     label={t('Description')}
                     tooltip={t('A description for your role')}
                     rules={[

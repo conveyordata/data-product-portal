@@ -139,8 +139,8 @@ export function OutputPortMarketplaceCard({ dataset }: Props) {
                 >
                     <Button
                         key="add to cart"
-                        type={'text'}
-                        size={'middle'}
+                        type="text"
+                        size="middle"
                         onClick={(e) => {
                             e.preventDefault();
                             toggleCart(dataset.id);
@@ -149,20 +149,20 @@ export function OutputPortMarketplaceCard({ dataset }: Props) {
                         {cartDatasetIds.includes(dataset.id) ? (
                             <>
                                 <CustomSvgIconLoader
-                                    size={'x-small'}
+                                    size="x-small"
                                     iconComponent={ShoppingCartOutlined}
-                                    color={'success'}
+                                    color="success"
                                 />
-                                <CustomSvgIconLoader size={'x-small'} iconComponent={CheckOutlined} color={'success'} />
+                                <CustomSvgIconLoader size="x-small" iconComponent={CheckOutlined} color="success" />
                             </>
                         ) : (
                             <>
                                 <CustomSvgIconLoader
-                                    size={'x-small'}
+                                    size="x-small"
                                     iconComponent={ShoppingCartOutlined}
-                                    color={'primary'}
+                                    color="primary"
                                 />
-                                <CustomSvgIconLoader size={'x-small'} iconComponent={PlusOutlined} color={'primary'} />
+                                <CustomSvgIconLoader size="x-small" iconComponent={PlusOutlined} color="primary" />
                             </>
                         )}
                     </Button>
@@ -180,7 +180,7 @@ export function OutputPortMarketplaceCard({ dataset }: Props) {
                 </Typography.Paragraph>
                 <Space size={2} style={{ height: '22px' }}>
                     {dataset.tags?.map((tag) => (
-                        <Tag color={'success'} key={tag.value}>
+                        <Tag color="success" key={tag.value}>
                             {tag.value}
                         </Tag>
                     ))}
@@ -188,7 +188,7 @@ export function OutputPortMarketplaceCard({ dataset }: Props) {
 
                 <Descriptions
                     layout="vertical"
-                    size={'small'}
+                    size="small"
                     colon={false}
                     column={2}
                     items={createCardDetails(dataset)}

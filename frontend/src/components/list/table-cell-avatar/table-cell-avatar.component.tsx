@@ -40,7 +40,7 @@ export const TableCellAvatar = ({ title, subtitle, icon, popover, linkTo }: Prop
 
     if (popover) {
         component = (
-            <PopoverComponent placement={'topLeft'} classNames={{ root: styles.popoverContent }} {...popover}>
+            <PopoverComponent placement="topLeft" classNames={{ root: styles.popoverContent }} {...popover}>
                 {component}
             </PopoverComponent>
         );

@@ -84,13 +84,13 @@ export function OutputPortActionButton({ outputPort, technicalAssetId, dataProdu
             title={popupTitle}
             description={popupDescription}
             onConfirm={() => onConfirm(outputPort.id, outputPort.name)}
-            placement={'leftTop'}
+            placement="leftTop"
             okText={t('Confirm')}
             cancelText={t('Cancel')}
             okButtonProps={{ loading: isLoading }}
             autoAdjustOverflow={true}
         >
-            <Button loading={isLoading} disabled={!canRevoke} type={'link'}>
+            <Button loading={isLoading} disabled={!canRevoke} type="link">
                 {buttonText}
             </Button>
         </Popconfirm>

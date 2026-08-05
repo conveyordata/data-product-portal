@@ -24,7 +24,7 @@ export const OutputPortAccessIcon = ({ accessType, hasPopover = false }: Props) 
             case OutputPortAccessType.Unrestricted:
                 return null;
             case OutputPortAccessType.Restricted:
-                return <CustomSvgIconLoader iconComponent={shieldHalfIcon} size="x-small" color={'dark'} />;
+                return <CustomSvgIconLoader iconComponent={shieldHalfIcon} size="x-small" color="dark" />;
             case OutputPortAccessType.Private:
                 return <EyeInvisibleOutlined className={clsx(styles.defaultIcon, styles.dark, styles.xSmall)} />;
             default:
@@ -33,7 +33,7 @@ export const OutputPortAccessIcon = ({ accessType, hasPopover = false }: Props) 
     }, [accessType]);
 
     return hasPopover ? (
-        <Popover content={t('{{Type}} access', { Type: getDatasetAccessTypeLabel(t, accessType) })} placement={'top'}>
+        <Popover content={t('{{Type}} access', { Type: getDatasetAccessTypeLabel(t, accessType) })} placement="top">
             {icon}
         </Popover>
     ) : (

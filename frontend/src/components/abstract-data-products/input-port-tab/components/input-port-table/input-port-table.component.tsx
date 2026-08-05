@@ -69,7 +69,7 @@ export function InputPortTable({
                 className: styles.pagination,
             }}
             rowClassName={styles.tableRow}
-            size={'small'}
+            size="small"
         />
     );
 }

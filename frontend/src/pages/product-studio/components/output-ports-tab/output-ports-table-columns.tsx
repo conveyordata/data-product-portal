@@ -32,7 +32,7 @@ export const getOutputPortTableColumns = ({
             width: iconColumnWidth,
             render: (status) => {
                 return (
-                    <Popover content={getStatusLabel(t, status)} placement={'top'}>
+                    <Popover content={getStatusLabel(t, status)} placement="top">
                         <TableCellItem icon={<Badge status={getBadgeStatus(status)} />} />
                     </Popover>
                 );

@@ -57,7 +57,7 @@ export const getDatasetDataProductsColumns = ({
                                     technical_asset.configuration.configuration_type,
                                     plugins,
                                 )}
-                                size={'default'}
+                                size="default"
                             />
                         }
                         title={technical_asset.name}
@@ -95,13 +95,13 @@ export const getDatasetDataProductsColumns = ({
                                         },
                                     })
                                 }
-                                placement={'leftTop'}
+                                placement="leftTop"
                                 okText={t('Confirm')}
                                 cancelText={t('Cancel')}
                                 okButtonProps={{ loading: isLoading }}
                                 autoAdjustOverflow={true}
                             >
-                                <Button loading={isLoading} disabled={isLoading || !canAccept} type={'link'}>
+                                <Button loading={isLoading} disabled={isLoading || !canAccept} type="link">
                                     {t('Accept')}
                                 </Button>
                             </Popconfirm>
@@ -119,13 +119,13 @@ export const getDatasetDataProductsColumns = ({
                                         },
                                     })
                                 }
-                                placement={'leftTop'}
+                                placement="leftTop"
                                 okText={t('Confirm')}
                                 cancelText={t('Cancel')}
                                 okButtonProps={{ loading: isLoading }}
                                 autoAdjustOverflow={true}
                             >
-                                <Button loading={isLoading} disabled={isLoading || !canAccept} type={'link'}>
+                                <Button loading={isLoading} disabled={isLoading || !canAccept} type="link">
                                     {t('Reject')}
                                 </Button>
                             </Popconfirm>
@@ -148,13 +148,13 @@ export const getDatasetDataProductsColumns = ({
                                     },
                                 })
                             }
-                            placement={'leftTop'}
+                            placement="leftTop"
                             okText={t('Confirm')}
                             cancelText={t('Cancel')}
                             okButtonProps={{ loading: isLoading }}
                             autoAdjustOverflow={true}
                         >
-                            <Button loading={isLoading} disabled={isLoading || !canRevoke} type={'link'}>
+                            <Button loading={isLoading} disabled={isLoading || !canRevoke} type="link">
                                 {t('Revoke Access')}
                             </Button>
                         </Popconfirm>
@@ -164,7 +164,7 @@ export const getDatasetDataProductsColumns = ({
                 if (status === DecisionStatus.Denied) {
                     return (
                         <Button
-                            type={'link'}
+                            type="link"
                             onClick={() => onRemoveDataOutputDatasetLink(technical_asset_id, technical_asset.name)}
                         >
                             {t('Remove')}

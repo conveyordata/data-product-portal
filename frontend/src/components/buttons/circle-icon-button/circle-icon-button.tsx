@@ -17,7 +17,7 @@ interface CircleIconButtonProps {
 export const CircleIconButton = ({ tooltip, tooltipOptions, buttonProps, icon, onClick }: CircleIconButtonProps) => {
     const { token } = useToken();
     const button = (
-        <Button shape={'circle'} className={styles.circleIconButton} icon={icon} onClick={onClick} {...buttonProps} />
+        <Button shape="circle" className={styles.circleIconButton} icon={icon} onClick={onClick} {...buttonProps} />
     );
 
     return tooltip ? (

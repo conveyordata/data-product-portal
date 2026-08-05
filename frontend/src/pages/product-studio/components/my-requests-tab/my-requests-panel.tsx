@@ -27,7 +27,7 @@ export function MyRequestsTab() {
 
     return (
         <Flex vertical gap="small">
-            <Flex gap={'small'} align="center">
+            <Flex gap="small" align="center">
                 <Input.Search
                     placeholder={t('Search requests...')}
                     value={searchTerm}

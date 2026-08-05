@@ -94,7 +94,7 @@ export function DataProductsTab() {
             to={ApplicationPaths.DataProductNew}
             onClick={() => posthog.capture(PosthogEvents.CREATE_DATA_PRODUCT_STARTED)}
         >
-            <Button type={'primary'} disabled={!canCreateDataProduct}>
+            <Button type="primary" disabled={!canCreateDataProduct}>
                 {t('Create Data Product')}
             </Button>
         </Link>
@@ -118,7 +118,7 @@ export function DataProductsTab() {
                     </Radio.Group>
                     {!showAllProducts && (
                         <RoleFilter
-                            mode={'data_products'}
+                            mode="data_products"
                             selectedRoles={selectedRoles}
                             onRoleChange={handleRoleChange}
                         />
@@ -147,7 +147,7 @@ export function DataProductsTab() {
                 rowKey={(record) => record.id}
                 loading={isFetching}
                 rowHoverable
-                size={'small'}
+                size="small"
                 locale={{
                     emptyText: (
                         <Empty

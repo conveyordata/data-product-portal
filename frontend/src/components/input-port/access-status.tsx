@@ -24,17 +24,17 @@ export function RenewalTag({ renewalStatus }: RenewalTagProps) {
     const { t } = useTranslation();
     if (renewalStatus === RenewalStatus.Pending) {
         return (
-            <Flex align={'center'} gap={'small'}>
+            <Flex align="center" gap="small">
                 <ClockCircleOutlined />
-                <Typography.Text type={'secondary'}>{t('Renewal pending')}</Typography.Text>
+                <Typography.Text type="secondary">{t('Renewal pending')}</Typography.Text>
             </Flex>
         );
     }
     if (renewalStatus === RenewalStatus.Denied) {
         return (
-            <Flex align={'center'} gap={'small'}>
+            <Flex align="center" gap="small">
                 <CloseCircleOutlined />
-                <Typography.Text type={'secondary'}>{t('Renewal declined')}</Typography.Text>
+                <Typography.Text type="secondary">{t('Renewal declined')}</Typography.Text>
             </Flex>
         );
     }
@@ -55,7 +55,7 @@ export function IsExpiringSoonTag({ status, validUntil, renewalStatus }: IsExpir
         return null;
     }
     return (
-        <Tag color={'gold'} icon={<ExclamationCircleOutlined />}>
+        <Tag color="gold" icon={<ExclamationCircleOutlined />}>
             {t('Expiring soon')}
         </Tag>
     );
@@ -77,7 +77,7 @@ export function ExpiryDate({ status, validUntil }: ExpiryDateProps) {
         return null;
     }
     if (validUntil === null) {
-        return <Typography.Text type={'secondary'}>{t('Permanent access')}</Typography.Text>;
+        return <Typography.Text type="secondary">{t('Permanent access')}</Typography.Text>;
     }
     return <Typography.Text>{formatDateFromISOString(validUntil)}</Typography.Text>;
 }

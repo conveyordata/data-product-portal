@@ -232,7 +232,7 @@ export function DataProductSettings({ id, scope, dataProductId }: Props) {
         ));
     }, [updatedSettings, t]);
     const isLoading = isFetching || isFetchingDP || isFetchingDS;
-    if (!isLoading && updatedSettings.length === 0) return <Empty description={'No settings to show'} />;
+    if (!isLoading && updatedSettings.length === 0) return <Empty description="No settings to show" />;
 
     return (
         <Flex vertical>
@@ -243,9 +243,9 @@ export function DataProductSettings({ id, scope, dataProductId }: Props) {
                 layout="horizontal"
                 onFinish={onSubmit}
                 onFinishFailed={onSubmitFailed}
-                autoComplete={'off'}
+                autoComplete="off"
                 labelWrap
-                labelAlign={'left'}
+                labelAlign="left"
                 disabled={isLoading || !canUpdateProductSettings || !canUpdateOutputPortSetting}
                 className={styles.form}
                 onValuesChange={(_, allValues) => {

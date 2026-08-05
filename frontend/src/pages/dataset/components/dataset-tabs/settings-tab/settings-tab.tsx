@@ -6,5 +6,5 @@ type Props = {
 };
 
 export function SettingsTab({ datasetId, dataProductId }: Props) {
-    return <DataProductSettings id={datasetId} scope={'dataset'} dataProductId={dataProductId} />;
+    return <DataProductSettings id={datasetId} scope="dataset" dataProductId={dataProductId} />;
 }

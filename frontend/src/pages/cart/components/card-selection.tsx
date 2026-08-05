@@ -18,7 +18,7 @@ type Props<T> = {
 
 export const CardSelection = <T,>({ options, setSelectedChoice, selectedChoice }: Props<T>) => {
     return (
-        <Flex gap={'middle'}>
+        <Flex gap="middle">
             {options.map((option) => (
                 <Card
                     key={option.value as string}

@@ -46,7 +46,7 @@ export function ConsumerColumn({ consumingAbstractDataProduct, consumingAbstract
                 consumingAbstractDataProductId,
                 consumingAbstractDataProduct.abstract_data_product_type,
             )}
-            icon={<CustomSvgIconLoader iconComponent={icon} hasRoundBorder size={'default'} />}
+            icon={<CustomSvgIconLoader iconComponent={icon} hasRoundBorder size="default" />}
             title={consumingAbstractDataProduct.name}
         />
     );

@@ -38,7 +38,7 @@ export const getDataProductTableColumns = ({
             width: iconColumnWidth,
             render: (status: AbstractDataProductStatus) => {
                 return (
-                    <Popover content={getStatusLabel(t, status)} placement={'top'}>
+                    <Popover content={getStatusLabel(t, status)} placement="top">
                         <TableCellItem icon={<Badge status={getBadgeStatus(status)} />} />
                     </Popover>
                 );

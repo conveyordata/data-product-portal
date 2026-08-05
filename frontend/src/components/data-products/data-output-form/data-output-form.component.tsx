@@ -243,12 +243,12 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
             onFinish={onSubmit}
             onFinishFailed={onSubmitFailed}
             onValuesChange={onValuesChange}
-            autoComplete={'off'}
+            autoComplete="off"
             labelWrap
             disabled={isLoading}
         >
             <Form.Item<TechnicalAssetsCreateForm>
-                name={'name'}
+                name="name"
                 label={t('Name')}
                 tooltip={t('The name of your Technical Asset')}
                 rules={[
@@ -270,7 +270,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                 validateResourceName={validateNamespaceCallback}
             />
             <Form.Item<TechnicalAssetsCreateForm>
-                name={'description'}
+                name="description"
                 label={t('Description')}
                 tooltip={t('A description for your Technical Asset')}
                 rules={[
@@ -288,27 +288,27 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
             >
                 <TextArea rows={3} count={{ show: true, max: MAX_DESCRIPTION_INPUT_LENGTH }} />
             </Form.Item>
-            <Form.Item<TechnicalAssetsCreateForm> name={'tag_ids'} label={t('Tags')} initialValue={[]}>
+            <Form.Item<TechnicalAssetsCreateForm> name="tag_ids" label={t('Tags')} initialValue={[]}>
                 <Select
                     tokenSeparators={[',']}
                     placeholder={t('Select Technical Asset tags')}
-                    mode={'multiple'}
+                    mode="multiple"
                     options={tagSelectOptions}
                     showSearch={{ filterOption: selectFilterOptionByLabel }}
                 />
             </Form.Item>
             <Form.Item<TechnicalAssetsCreateForm>
-                name={'technical_mapping'}
+                name="technical_mapping"
                 label={t('Technical Mapping')}
                 required
                 tooltip={t(
                     'Default mapping applies the platform’s standards to your asset. Choose Custom if your asset exists outside these standards and requires explicit configuration, which may be subject to manual approval before activation.',
                 )}
-                initialValue={'default'}
+                initialValue="default"
             >
                 <Select allowClear={false} options={options} />
             </Form.Item>
-            <Form.Item name={'platform_id'}>
+            <Form.Item name="platform_id">
                 <Radio.Group>
                     <Space wrap className={styles.radioButtonContainer}>
                         {dataPlatforms.map((dataPlatform) => (
@@ -329,7 +329,7 @@ export function DataOutputForm({ mode, formRef, dataProductId, modalCallbackOnSu
                     </Space>
                 </Radio.Group>
             </Form.Item>
-            <Form.Item name={'service_id'} hidden={selectedDataPlatform?.children?.length === 0}>
+            <Form.Item name="service_id" hidden={selectedDataPlatform?.children?.length === 0}>
                 <Radio.Group>
                     <Space wrap className={styles.radioButtonContainer}>
                         {selectedDataPlatform?.children?.map((dataPlatform) => (

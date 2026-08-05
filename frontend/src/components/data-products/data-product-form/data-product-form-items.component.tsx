@@ -120,7 +120,7 @@ export const DataProductFormItems = <T extends DataProductCreate>({
     return (
         <>
             <Form.Item<DataProductCreate>
-                name={'name'}
+                name="name"
                 label={t('Name')}
                 tooltip={t('The name of your Data Product')}
                 rules={[
@@ -143,7 +143,7 @@ export const DataProductFormItems = <T extends DataProductCreate>({
                 validateResourceName={resourceNameValidationCallback}
             />
             <Form.Item<DataProductCreate>
-                name={'owners'}
+                name="owners"
                 label={t('Owners')}
                 tooltip={t('The owners of the Data Product')}
                 rules={[
@@ -155,7 +155,7 @@ export const DataProductFormItems = <T extends DataProductCreate>({
             >
                 <Select
                     loading={isFetchingUsers}
-                    mode={'multiple'}
+                    mode="multiple"
                     options={userSelectOptions}
                     showSearch={{ filterOption: selectFilterOptionByLabelAndValue }}
                     disabled={mode !== 'create'}
@@ -163,7 +163,7 @@ export const DataProductFormItems = <T extends DataProductCreate>({
                 />
             </Form.Item>
             <Form.Item<DataProductCreate>
-                name={'type_id'}
+                name="type_id"
                 label={t('Type')}
                 rules={[
                     {
@@ -180,7 +180,7 @@ export const DataProductFormItems = <T extends DataProductCreate>({
                 />
             </Form.Item>
             <Form.Item<DataProductCreate>
-                name={'lifecycle_id'}
+                name="lifecycle_id"
                 label={t('Status')}
                 rules={[
                     {
@@ -200,7 +200,7 @@ export const DataProductFormItems = <T extends DataProductCreate>({
                 />
             </Form.Item>
             <Form.Item<DataProductCreate>
-                name={'domain_id'}
+                name="domain_id"
                 label={t('Domain')}
                 tooltip={t('The domain to which this Data Product belongs')}
                 rules={[
@@ -217,17 +217,17 @@ export const DataProductFormItems = <T extends DataProductCreate>({
                     allowClear
                 />
             </Form.Item>
-            <Form.Item<DataProductCreate> name={'tag_ids'} label={t('Tags')}>
+            <Form.Item<DataProductCreate> name="tag_ids" label={t('Tags')}>
                 <Select
                     tokenSeparators={[',']}
                     placeholder={t('Select Data Product tags')}
-                    mode={'multiple'}
+                    mode="multiple"
                     options={tagSelectOptions}
                     showSearch={{ filterOption: selectFilterOptionByLabel }}
                 />
             </Form.Item>
             <Form.Item<DataProductCreate>
-                name={'description'}
+                name="description"
                 label={t('Description')}
                 tooltip={t('A description for your Data Product')}
                 rules={[

@@ -80,19 +80,19 @@ export const NewDataProductForm = ({ cartOutputPorts }: Props) => {
         <Form<NewDataProductCartFormData>
             form={form}
             onFinish={onFinish}
-            layout={'vertical'}
-            autoComplete={'off'}
+            layout="vertical"
+            autoComplete="off"
             onValuesChange={onValuesChange}
             initialValues={initialValues}
         >
-            <DataProductFormItems form={form} mode={'create'} setAreFormItemsLoading={setAreFormItemsLoading} />
+            <DataProductFormItems form={form} mode="create" setAreFormItemsLoading={setAreFormItemsLoading} />
             <JustificationFormItem />
             <Form.Item>
                 <Flex justify="end">
                     <Button
                         className={styles.formButton}
                         type="primary"
-                        htmlType={'submit'}
+                        htmlType="submit"
                         loading={submitting}
                         disabled={areFormItemsLoading}
                     >

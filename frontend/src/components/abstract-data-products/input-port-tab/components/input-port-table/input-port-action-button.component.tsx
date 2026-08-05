@@ -104,13 +104,13 @@ export function InputPortActionButton({
     }, [handleRenew, output_port.id, output_port.name, t]);
 
     return (
-        <Flex gap={'small'} wrap>
+        <Flex gap="small" wrap>
             {canRenew && (
                 <Button
                     icon={<ReloadOutlined />}
                     loading={renewing}
                     disabled={!canRequestAccess}
-                    type={'link'}
+                    type="link"
                     onClick={handleRenewClick}
                 >
                     {t('Renew Access')}
@@ -123,13 +123,13 @@ export function InputPortActionButton({
                         name: output_port.name,
                     })}
                     onConfirm={() => handleCancelRequest(output_port.id, output_port.name)}
-                    placement={'leftTop'}
+                    placement="leftTop"
                     okText={t('Confirm')}
                     cancelText={t('Cancel')}
                     okButtonProps={{ loading }}
                     autoAdjustOverflow={true}
                 >
-                    <Button icon={<StopOutlined />} loading={loading} disabled={!canRemoveAccess} type={'link'}>
+                    <Button icon={<StopOutlined />} loading={loading} disabled={!canRemoveAccess} type="link">
                         {t('Cancel Request')}
                     </Button>
                 </Popconfirm>
@@ -141,13 +141,13 @@ export function InputPortActionButton({
                         name: output_port.name,
                     })}
                     onConfirm={() => handleRevokeAccess(output_port.id, output_port.name)}
-                    placement={'leftTop'}
+                    placement="leftTop"
                     okText={t('Confirm')}
                     cancelText={t('Cancel')}
                     okButtonProps={{ loading }}
                     autoAdjustOverflow={true}
                 >
-                    <Button icon={<CloseCircleOutlined />} loading={loading} disabled={!canRemoveAccess} type={'link'}>
+                    <Button icon={<CloseCircleOutlined />} loading={loading} disabled={!canRemoveAccess} type="link">
                         {t('Cancel Access')}
                     </Button>
                 </Popconfirm>

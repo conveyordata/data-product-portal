@@ -143,12 +143,12 @@ export function TechnicalAssetForm({ mode, dataProductId, dataOutputId }: Props)
             layout="vertical"
             onFinish={onSubmit}
             onFinishFailed={onSubmitFailed}
-            autoComplete={'off'}
+            autoComplete="off"
             disabled={isLoading || !canEdit}
             initialValues={initialValues}
         >
             <Form.Item<TechnicalAssetsCreateForm>
-                name={'name'}
+                name="name"
                 label={t('Name')}
                 tooltip={t('The name of your Technical Asset')}
                 rules={[
@@ -168,7 +168,7 @@ export function TechnicalAssetForm({ mode, dataProductId, dataOutputId }: Props)
                 canEditResourceName={false}
             />
             <Form.Item<TechnicalAssetsCreateForm>
-                name={'description'}
+                name="description"
                 label={t('Description')}
                 tooltip={t('A description for your Technical Asset')}
                 rules={[
@@ -186,10 +186,10 @@ export function TechnicalAssetForm({ mode, dataProductId, dataOutputId }: Props)
             >
                 <Input.TextArea rows={3} count={{ show: true, max: MAX_DESCRIPTION_INPUT_LENGTH }} />
             </Form.Item>
-            <Form.Item<TechnicalAssetsCreateForm> name={'tag_ids'} label={t('Tags')}>
+            <Form.Item<TechnicalAssetsCreateForm> name="tag_ids" label={t('Tags')}>
                 <Select
                     placeholder={t('Select Technical Asset tags')}
-                    mode={'multiple'}
+                    mode="multiple"
                     tokenSeparators={[',']}
                     options={tagSelectOptions}
                     showSearch={{ filterOption: selectFilterOptionByLabel }}
@@ -200,7 +200,7 @@ export function TechnicalAssetForm({ mode, dataProductId, dataOutputId }: Props)
                     <Button
                         className={styles.formButton}
                         type="primary"
-                        htmlType={'submit'}
+                        htmlType="submit"
                         loading={isUpdating}
                         disabled={isLoading || !canEdit}
                     >

@@ -27,11 +27,11 @@ export function ConfigurationSubForm({ form, configurationType, resultLabel, res
 
     return (
         <div>
-            <ConfigurationFormItem name={'configuration_type'} hidden required>
+            <ConfigurationFormItem name="configuration_type" hidden required>
                 <Input />
             </ConfigurationFormItem>
             {children}
-            <Form.Item name={'result'} label={resultLabel} tooltip={resultTooltip}>
+            <Form.Item name="result" label={resultLabel} tooltip={resultTooltip}>
                 <Input disabled />
             </Form.Item>
         </div>

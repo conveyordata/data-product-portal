@@ -3,6 +3,6 @@ import { renderWithProviders } from '@/tests/test-utils.tsx';
 
 describe('TeamTab', () => {
     it('should filter out the users', async () => {
-        renderWithProviders(<TeamTab dataProductId={'bla'} />);
+        renderWithProviders(<TeamTab dataProductId="bla" />);
     });
 });

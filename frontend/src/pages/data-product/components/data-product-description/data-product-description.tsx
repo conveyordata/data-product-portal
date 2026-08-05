@@ -16,26 +16,26 @@ export function DataProductDescription({ lifecycle, type, description, domain, t
     const { t } = useTranslation();
 
     return (
-        <Flex vertical gap={'middle'}>
-            <Space size={'large'}>
-                <Flex gap={'small'}>
+        <Flex vertical gap="middle">
+            <Space size="large">
+                <Flex gap="small">
                     <Typography.Text strong>{t('Status')}</Typography.Text>
                     <Tag color={lifecycle?.color ?? 'default'}>{lifecycle?.name ?? t('Unknown')}</Tag>
                 </Flex>
-                <Flex gap={'small'}>
+                <Flex gap="small">
                     <Typography.Text strong>{t('Namespace')}</Typography.Text>
                     <Typography.Text>{namespace}</Typography.Text>
                 </Flex>
-                <Flex gap={'small'}>
+                <Flex gap="small">
                     <Typography.Text strong>{t('Domain')}</Typography.Text>
                     <Typography.Text>{domain}</Typography.Text>
                 </Flex>
-                <Flex gap={'small'}>
+                <Flex gap="small">
                     <Typography.Text strong>{t('Type')}</Typography.Text>
                     <Typography.Text>{type}</Typography.Text>
                 </Flex>
             </Space>
-            <Space size={'small'}>
+            <Space size="small">
                 {tags.map((tag) => (
                     <Tag color={tag.rolled_up ? 'red' : 'success'} key={tag.id}>
                         {tag.value}

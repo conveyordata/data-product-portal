@@ -157,7 +157,7 @@ export function TeamTable({ datasetId, datasetUsers, dataProductId }: Props) {
                     className: styles.pagination,
                 }}
                 rowClassName={styles.tableRow}
-                size={'small'}
+                size="small"
             />
         </Flex>
     );

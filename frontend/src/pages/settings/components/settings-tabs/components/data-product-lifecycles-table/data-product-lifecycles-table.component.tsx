@@ -55,9 +55,9 @@ export function DataProductLifecyclesTable() {
 
     return (
         <Flex vertical gap="large">
-            <Flex justify={'space-between'} align={'center'}>
+            <Flex justify="space-between" align="center">
                 <Typography.Title level={3}>{t('Lifecycles')}</Typography.Title>
-                <Button className={styles.formButton} type={'primary'} onClick={handleAdd}>
+                <Button className={styles.formButton} type="primary" onClick={handleAdd}>
                     {t('Add Lifecycle')}
                 </Button>
             </Flex>
@@ -67,7 +67,7 @@ export function DataProductLifecyclesTable() {
                 rowKey={(record) => record.id}
                 loading={isFetching}
                 rowHoverable
-                size={'small'}
+                size="small"
             />
             {isVisible && (mode === 'create' || initial) && (
                 <CreateLifecycleModal onClose={handleClose} t={t} isOpen={isVisible} mode={mode} initial={initial} />

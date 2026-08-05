@@ -11,10 +11,10 @@ export const CartButton = () => {
     const { t } = useTranslation();
     const cartDatasetIds = useSelector(selectCartDatasetIds);
     return (
-        <Popover placement={'bottom'} content={t('Go to checkout')} color={'white'} trigger={'hover'}>
+        <Popover placement="bottom" content={t('Go to checkout')} color="white" trigger="hover">
             <Badge count={cartDatasetIds?.length}>
                 <Link to={ApplicationPaths.MarketplaceCart}>
-                    <Button shape={'circle'} className={styles.iconButton} icon={<ShoppingCartOutlined />} />
+                    <Button shape="circle" className={styles.iconButton} icon={<ShoppingCartOutlined />} />
                 </Link>
             </Badge>
         </Popover>

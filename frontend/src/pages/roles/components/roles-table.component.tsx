@@ -157,7 +157,7 @@ export function RolesTable({ scope }: RolesTableProps) {
                 );
             }
 
-            return <Flex justify={'center'}>{checkbox}</Flex>;
+            return <Flex justify="center">{checkbox}</Flex>;
         }
     };
 
@@ -172,16 +172,16 @@ export function RolesTable({ scope }: RolesTableProps) {
 
         return {
             title: (
-                <Space align={'center'} size={0}>
+                <Space align="center" size={0}>
                     <QuestionTooltip title={description}>
                         <Text>{title}</Text>
                     </QuestionTooltip>
                     <Popover
-                        placement={'bottom'}
+                        placement="bottom"
                         align={{ offset: alignToQuestionTooltip }}
                         content={<RoleDetailsMenu role={role} />}
                     >
-                        <Button icon={<MoreOutlined />} type={'text'} style={overlapPadding} />
+                        <Button icon={<MoreOutlined />} type="text" style={overlapPadding} />
                     </Popover>
                 </Space>
             ),
@@ -213,7 +213,7 @@ export function RolesTable({ scope }: RolesTableProps) {
                 loading={isFetching || isLoading}
                 dataSource={permissions}
                 pagination={false}
-                rowKey={'id'}
+                rowKey="id"
                 scroll={{ x: 'max-content' }}
             />
         </Flex>

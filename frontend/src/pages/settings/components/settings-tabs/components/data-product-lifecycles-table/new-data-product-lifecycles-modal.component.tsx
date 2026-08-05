@@ -98,7 +98,7 @@ export const CreateLifecycleModal: React.FC<CreateLifecycleModalProps> = ({ isOp
                 onFinish={handleFinish}
                 initialValues={initial || { is_default: false }}
             >
-                <Form.Item name={'id'} hidden />
+                <Form.Item name="id" hidden />
                 <Form.Item
                     name="name"
                     label={t('Name')}

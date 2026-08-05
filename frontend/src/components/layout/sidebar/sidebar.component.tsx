@@ -92,7 +92,7 @@ export const Sidebar = () => {
         },
         {
             label: (
-                <a href={'https://docs.dataproductportal.com/docs/intro'} target="_blank" rel="noopener noreferrer">
+                <a href="https://docs.dataproductportal.com/docs/intro" target="_blank" rel="noopener noreferrer">
                     {t('Documentation')}
                 </a>
             ),

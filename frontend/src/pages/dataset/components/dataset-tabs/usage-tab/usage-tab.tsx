@@ -75,7 +75,7 @@ export function UsageTab({ outputPortId, dataProductId }: Props) {
     return (
         <Row gutter={[32, 32]}>
             <Col span={24}>
-                <Flex justify={'center'}>
+                <Flex justify="center">
                     <Radio.Group
                         optionType="button"
                         value={dayRange}

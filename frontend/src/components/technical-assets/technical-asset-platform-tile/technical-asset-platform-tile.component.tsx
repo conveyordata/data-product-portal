@@ -23,7 +23,7 @@ export function TechnicalAssetPlatformTile<T extends string>({
     const isDisabledDropdown = isDisabled || dataPlatform.disabled;
 
     return (
-        <Flex vertical className={styles.radioButtonContainer} gap={'small'}>
+        <Flex vertical className={styles.radioButtonContainer} gap="small">
             <Radio.Button
                 rootClassName={styles.radioButton}
                 disabled={isDisabledDropdown}

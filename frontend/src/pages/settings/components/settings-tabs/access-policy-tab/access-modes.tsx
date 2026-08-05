@@ -23,10 +23,10 @@ export default function AccessModes() {
 
     return (
         <>
-            <Flex vertical gap={'small'}>
-                <Flex justify={'space-between'} align={'center'}>
+            <Flex vertical gap="small">
+                <Flex justify="space-between" align="center">
                     <Typography.Title level={3}>{t('Access Modes')}</Typography.Title>
-                    <Button type={'primary'} onClick={() => setOpenModal(true)}>
+                    <Button type="primary" onClick={() => setOpenModal(true)}>
                         {t('Add access mode')}
                     </Button>
                 </Flex>
@@ -61,7 +61,7 @@ export default function AccessModes() {
                         render: (record: AccessMode) => {
                             return (
                                 <Button
-                                    type={'link'}
+                                    type="link"
                                     onClick={() => {
                                         handleEdit(record);
                                     }}
@@ -74,7 +74,7 @@ export default function AccessModes() {
                 ]}
                 rowKey={(record) => record.id}
                 loading={isFetching}
-                size={'small'}
+                size="small"
             />
             {openModal && <AccessModesModal onClose={cancelModal} editAccessMode={editAccessMode} />}
         </>

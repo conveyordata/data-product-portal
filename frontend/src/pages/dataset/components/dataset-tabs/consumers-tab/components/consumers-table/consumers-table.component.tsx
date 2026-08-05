@@ -136,7 +136,7 @@ export function ConsumersTable({ outputPortId, dataProductId, dataProducts, isLo
                         }),
                     className: styles.pagination,
                 }}
-                size={'small'}
+                size="small"
             />
             {
                 <ReviewRequestModal

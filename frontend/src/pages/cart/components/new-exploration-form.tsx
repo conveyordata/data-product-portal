@@ -144,13 +144,13 @@ export const NewExplorationForm = ({ cartOutputPorts }: Props) => {
         <Form<CreateExplorationRequestForm>
             form={form}
             onFinish={onFinish}
-            layout={'vertical'}
+            layout="vertical"
             onValuesChange={onValuesChange}
-            autoComplete={'off'}
+            autoComplete="off"
             initialValues={initialValues}
         >
             <Form.Item<DataProductCreate>
-                name={'name'}
+                name="name"
                 label={t('Name')}
                 tooltip={t('The name of your Exploration')}
                 rules={[
@@ -163,7 +163,7 @@ export const NewExplorationForm = ({ cartOutputPorts }: Props) => {
                 <Input />
             </Form.Item>
             <Form.Item<CreateExplorationRequestForm>
-                name={'domain_id'}
+                name="domain_id"
                 label={t('Domain')}
                 rules={[
                     {
@@ -185,7 +185,7 @@ export const NewExplorationForm = ({ cartOutputPorts }: Props) => {
                     <Button
                         className={styles.formButton}
                         type="primary"
-                        htmlType={'submit'}
+                        htmlType="submit"
                         loading={isCreatingExploration}
                         disabled={
                             isFetchingDomains ||

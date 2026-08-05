@@ -103,7 +103,7 @@ export function Notifications() {
 
         if (excessLength > 0) {
             slicedItems.push(
-                <Flex key={'show-more-indicator'} className={styles.notificationItem}>
+                <Flex key="show-more-indicator" className={styles.notificationItem}>
                     <Button
                         className={styles.closeButton}
                         type="link"
@@ -160,7 +160,7 @@ export function Notifications() {
                     trigger="hover"
                     placement="bottom"
                 >
-                    <Button shape={'circle'} className={styles.iconButton} icon={<BellOutlined />} />
+                    <Button shape="circle" className={styles.iconButton} icon={<BellOutlined />} />
                 </Popover>
             </Badge>
         </Flex>

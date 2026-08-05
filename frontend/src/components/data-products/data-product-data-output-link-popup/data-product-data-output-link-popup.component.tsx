@@ -25,7 +25,7 @@ export function DataProductDataOutputLinkPopup({ onClose, isOpen, title, formRef
                     <Button
                         className={styles.formButton}
                         type="primary"
-                        htmlType={'submit'}
+                        htmlType="submit"
                         onClick={() => formRef.current?.submit()}
                     >
                         {t('Create')}

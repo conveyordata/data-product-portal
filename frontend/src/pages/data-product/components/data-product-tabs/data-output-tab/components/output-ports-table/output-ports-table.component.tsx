@@ -81,7 +81,7 @@ export function OutputPortsTable({ dataProductId, draggedDataOutputId }: Props) 
                 />
             ))}
             {filteredDatasets.length === 0 && (
-                <Flex justify={'center'}>
+                <Flex justify="center">
                     <Typography.Text type="secondary">
                         {searchTerm ? t('No Output Ports found matching your search') : t('No Output Ports found')}
                     </Typography.Text>

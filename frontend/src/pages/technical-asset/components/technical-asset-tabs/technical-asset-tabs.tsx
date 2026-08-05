@@ -60,7 +60,7 @@ export function TechnicalAssetTabs({ technicalAssetId, dataProductId, isLoading 
                 label: t('Explorer'),
                 key: TabKeys.Explorer,
                 icon: <CompassOutlined />,
-                children: <Explorer id={technicalAssetId} type={'dataoutput'} dataProductId={dataProductId} />,
+                children: <Explorer id={technicalAssetId} type="dataoutput" dataProductId={dataProductId} />,
             },
             {
                 label: t('Technical information'),
@@ -101,7 +101,7 @@ export function TechnicalAssetTabs({ technicalAssetId, dataProductId, isLoading 
                     className: styles.tabPane,
                 };
             })}
-            size={'middle'}
+            size="middle"
             rootClassName={styles.tabContainer}
             onChange={onTabChange}
         />

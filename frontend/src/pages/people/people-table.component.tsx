@@ -178,8 +178,8 @@ export function PeoplePage() {
                     loading={isFetching}
                     rowHoverable
                     rowClassName={styles.row}
-                    size={'small'}
-                    data-testid={'people-table'}
+                    size="small"
+                    data-testid="people-table"
                 />
             </Col>
         </Row>
