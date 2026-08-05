@@ -10,7 +10,7 @@ import {
     useGetAllAccessDurationsQuery,
     useUpdateAccessDurationMutation,
 } from '@/store/api/services/generated/configurationAccessDurationsApi';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
+import { dispatchMessage } from '@/utils/feedback.ts';
 
 type ConsumerPolicy = {
     key: AbstractDataProductType;

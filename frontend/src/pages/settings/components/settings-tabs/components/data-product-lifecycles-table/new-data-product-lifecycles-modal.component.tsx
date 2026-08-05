@@ -7,7 +7,7 @@ import {
     useUpdateDataProductLifecycleMutation,
 } from '@/store/api/services/generated/configurationDataProductLifecyclesApi.ts';
 import type { DataProductLifeCycle } from '@/store/api/services/generated/dataProductsApi.ts';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
+import { dispatchMessage } from '@/utils/feedback.ts';
 import styles from './data-product-lifecycles-table.module.scss';
 
 interface CreateLifecycleModalProps {

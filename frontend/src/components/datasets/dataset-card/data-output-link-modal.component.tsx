@@ -12,7 +12,7 @@ import {
     useLinkOutputPortToTechnicalAssetMutation,
 } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
 import { useGetPluginsQuery } from '@/store/api/services/generated/pluginsApi';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
+import { dispatchMessage } from '@/utils/feedback.ts';
 import { getTechnicalAssetIcon } from '@/utils/technical-asset-type.helper.ts';
 
 type Props = {

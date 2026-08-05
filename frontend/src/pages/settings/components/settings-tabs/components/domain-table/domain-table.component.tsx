@@ -8,7 +8,7 @@ import {
     useGetDomainsQuery,
     useRemoveDomainMutation,
 } from '@/store/api/services/generated/configurationDomainsApi.ts';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import { dispatchMessage } from '@/utils/feedback.ts';
 import { CreateDomainModal } from './domain-form-modal.component';
 import { CreateDomainMigrateModal } from './domain-migrate-modal.component';
 import styles from './domain-table.module.scss';

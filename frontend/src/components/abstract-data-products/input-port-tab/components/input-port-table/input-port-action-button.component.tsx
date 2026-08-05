@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { DEFAULT_EXPIRING_SOON_THRESHOLD_DAYS, isExpiringSoon } from '@/components/input-port/access-status.tsx';
 import { useGetExpiringSoonThresholdQuery } from '@/store/api/services/generated/configurationAccessDurationsApi.ts';
 import { InputPortStatus, type OutputPort, RenewalStatus } from '@/store/api/services/generated/dataProductsApi.ts';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import { dispatchMessage } from '@/utils/feedback.ts';
 
 type Props = {
     output_port: OutputPort;

@@ -14,8 +14,8 @@ import {
     useGetExplorationQuery,
     useRemoveExplorationMutation,
 } from '@/store/api/services/generated/explorationsApi.ts';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { ApplicationPaths, createExplorationIdPath } from '@/types/navigation.ts';
+import { dispatchMessage } from '@/utils/feedback.ts';
 
 type Props = {
     explorationId?: string;

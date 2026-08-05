@@ -6,7 +6,7 @@ import {
     useMigrateDataProductTypeMutation,
     useRemoveDataProductTypeMutation,
 } from '@/store/api/services/generated/configurationDataProductTypesApi.ts';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
+import { dispatchMessage } from '@/utils/feedback.ts';
 
 const { Option } = Select;
 

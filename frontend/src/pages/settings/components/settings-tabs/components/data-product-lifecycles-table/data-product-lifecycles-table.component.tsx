@@ -8,7 +8,7 @@ import {
     useGetDataProductsLifecyclesQuery,
     useRemoveDataProductLifecycleMutation,
 } from '@/store/api/services/generated/configurationDataProductLifecyclesApi.ts';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import { dispatchMessage } from '@/utils/feedback.ts';
 import styles from './data-product-lifecycles-table.module.scss';
 import { getDataProductTableColumns } from './data-product-lifecycles-table-columns.tsx';
 import { CreateLifecycleModal } from './new-data-product-lifecycles-modal.component.tsx';

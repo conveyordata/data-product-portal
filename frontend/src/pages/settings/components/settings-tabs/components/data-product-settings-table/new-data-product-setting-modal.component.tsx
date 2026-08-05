@@ -20,7 +20,7 @@ import {
     useLazyValidateResourceNameQuery,
     useResourceNameConstraintsQuery,
 } from '@/store/api/services/generated/resourceNamesApi.ts';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
+import { dispatchMessage } from '@/utils/feedback.ts';
 import styles from './data-product-settings-table.module.scss';
 
 const { Option } = Select;

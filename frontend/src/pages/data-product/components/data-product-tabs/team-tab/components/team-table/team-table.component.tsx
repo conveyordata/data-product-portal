@@ -13,8 +13,8 @@ import {
 } from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
 import type { Role } from '@/store/api/services/generated/authorizationRolesApi.ts';
 import { useGetDataProductQuery } from '@/store/api/services/generated/dataProductsApi.ts';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
+import { dispatchMessage } from '@/utils/feedback.ts';
 import { usePendingActionHandlers } from '@/utils/pending-request.helper';
 import styles from './team-table.module.scss';
 

@@ -9,7 +9,7 @@ import {
     useGetDataProductsSettingsQuery,
     useRemoveDataProductSettingMutation,
 } from '@/store/api/services/generated/configurationDataProductSettingsApi.ts';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import { dispatchMessage } from '@/utils/feedback.ts';
 import styles from './data-product-settings-table.module.scss';
 import { getDataProductSettingsTableColumns } from './data-product-settings-table-columns.tsx';
 import { CreateSettingModal } from './new-data-product-setting-modal.component.tsx';

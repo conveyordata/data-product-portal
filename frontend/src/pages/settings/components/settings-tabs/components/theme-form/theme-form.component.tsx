@@ -7,7 +7,7 @@ import {
     useGetThemeSettingsQuery,
     useUpdateThemeSettingsMutation,
 } from '@/store/api/services/generated/configurationThemeSettingsApi.ts';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import { dispatchMessage } from '@/utils/feedback.ts';
 import styles from './theme-form.module.scss';
 
 export function ThemeSettingsForm() {

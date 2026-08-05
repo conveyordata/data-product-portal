@@ -12,8 +12,8 @@ import {
 } from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
 import type { Role } from '@/store/api/services/generated/authorizationRolesApi.ts';
 import { useGetOutputPortQuery } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
+import { dispatchMessage } from '@/utils/feedback.ts';
 import { usePendingActionHandlers } from '@/utils/pending-request.helper';
 import styles from './team-table.module.scss';
 import { getDatasetTeamColumns } from './team-table-columns';

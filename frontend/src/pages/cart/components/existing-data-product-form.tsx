@@ -18,8 +18,8 @@ import {
 } from '@/store/api/services/generated/dataProductsApi.ts';
 import type { SearchOutputPortsResponseItem } from '@/store/api/services/generated/outputPortsSearchApi.ts';
 import { clearCart } from '@/store/features/cart/cart-slice.ts';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { createDataProductIdPath } from '@/types/navigation.ts';
+import { dispatchMessage } from '@/utils/feedback.ts';
 
 type CartFormData = {
     dataProductId?: string;

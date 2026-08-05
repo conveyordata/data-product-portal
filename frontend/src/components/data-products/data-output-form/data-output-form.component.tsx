@@ -24,9 +24,9 @@ import {
     useLazyValidateResourceNameQuery,
     useResourceNameConstraintsQuery,
 } from '@/store/api/services/generated/resourceNamesApi.ts';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import type { CustomDropdownItemProps } from '@/types/shared';
 import type { TechnicalAssetsCreateForm } from '@/types/technical-asset';
+import { dispatchMessage } from '@/utils/feedback.ts';
 import { selectFilterOptionByLabel } from '@/utils/form.helper';
 import { getIcon } from '@/utils/icon-loader';
 import { DataOutputConfigurationForm } from './data-output-configuration-form.component';

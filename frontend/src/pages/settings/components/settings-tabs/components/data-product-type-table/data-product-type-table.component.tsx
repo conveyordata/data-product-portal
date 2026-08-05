@@ -8,7 +8,7 @@ import {
     useGetDataProductsTypesQuery,
     useRemoveDataProductTypeMutation,
 } from '@/store/api/services/generated/configurationDataProductTypesApi.ts';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import { dispatchMessage } from '@/utils/feedback.ts';
 import { CreateDataProductTypeModal } from './data-product-type-form-modal.component';
 import { CreateDataProductTypeMigrateModal } from './data-product-type-migrate-modal.component';
 import styles from './data-product-type-table.module.scss';

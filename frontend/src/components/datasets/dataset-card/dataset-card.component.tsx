@@ -15,9 +15,9 @@ import {
     useLinkOutputPortToTechnicalAssetMutation,
     useUnlinkOutputPortFromTechnicalAssetMutation,
 } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import { createMarketplaceOutputPortPath } from '@/types/navigation';
+import { dispatchMessage } from '@/utils/feedback.ts';
 import { getBadgeStatus, getDecisionStatusBadgeStatus, getStatusLabel } from '@/utils/status.helper';
 import { DataOutputLinkModal } from './data-output-link-modal.component';
 import styles from './dataset-card.module.scss';

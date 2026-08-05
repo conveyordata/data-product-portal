@@ -52,7 +52,6 @@ import {
     useResourceNameConstraintsQuery,
 } from '@/store/api/services/generated/resourceNamesApi.ts';
 import { useGetUsersQuery } from '@/store/api/services/generated/usersApi.ts';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import {
     ApplicationPaths,
@@ -64,6 +63,7 @@ import {
 import { getDatasetAccessTypeLabel } from '@/utils/access-type.helper.ts';
 import { useGetDataProductOwnerIds } from '@/utils/data-product-user-role.helper';
 import { useGetDatasetOwnerIds } from '@/utils/dataset-user-role.helper.ts';
+import { dispatchMessage } from '@/utils/feedback.ts';
 import { selectFilterOptionByLabel, selectFilterOptionByLabelAndValue } from '@/utils/form.helper.ts';
 import styles from './dataset-form.module.scss';
 

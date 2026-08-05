@@ -13,10 +13,10 @@ import {
     useUpdateTechnicalAssetMutation,
 } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
 import { useResourceNameConstraintsQuery } from '@/store/api/services/generated/resourceNamesApi.ts';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import { createDataOutputIdPath, createDataProductIdPath } from '@/types/navigation.ts';
 import type { TechnicalAssetsCreateForm } from '@/types/technical-asset';
+import { dispatchMessage } from '@/utils/feedback.ts';
 import { selectFilterOptionByLabel } from '@/utils/form.helper.ts';
 import styles from './technical-asset-form.module.scss';
 

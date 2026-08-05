@@ -4,9 +4,9 @@ import { useTranslation } from 'react-i18next';
 import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
 import { useUnlinkOutputPortFromTechnicalAssetMutation } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
 import type { OutputPort } from '@/store/api/services/generated/usersApi.ts';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { DecisionStatus } from '@/types/roles';
+import { dispatchMessage } from '@/utils/feedback.ts';
 
 type Props = {
     outputPort: OutputPort;
