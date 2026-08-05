@@ -15,6 +15,7 @@ const services = [
     { name: 'Configuration - Platforms', file: 'configurationPlatforms' },
     { name: 'Configuration - Theme settings', file: 'configurationThemeSettings' },
     { name: 'Configuration - Tags', file: 'configurationTags' },
+    { name: 'Configuration - Access Modes', file: 'configurationAccessModes' },
     { name: 'Configuration - Access Durations', file: 'configurationAccessDurations' },
     { name: 'Plugins', file: 'plugins' },
     { name: 'Data Products', file: 'dataProducts' },

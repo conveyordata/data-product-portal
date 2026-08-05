@@ -1,10 +1,11 @@
 import { Form, Input, Select } from 'antd';
-import TextArea from 'antd/es/input/TextArea';
 import { useTranslation } from 'react-i18next';
 import { MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
 import { useGetDomainsQuery } from '@/store/api/services/generated/configurationDomainsApi.ts';
 import type { Exploration } from '@/store/api/services/generated/explorationsApi.ts';
 import { selectFilterOptionByLabelAndValue } from '@/utils/form.helper.ts';
+
+const { TextArea } = Input;
 
 export const ExplorationFormItems = () => {
     const { t } = useTranslation();

@@ -37,6 +37,7 @@ export enum TagTypes {
     PendingAction = 'PendingAction',
     MyRequests = 'MyRequests',
     AccessDuration = 'AccessDuration',
+    AccessMode = 'AccessMode',
 }
 
 export const STATIC_TAG_ID = {

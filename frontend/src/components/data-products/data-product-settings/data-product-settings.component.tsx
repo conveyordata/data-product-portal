@@ -1,5 +1,4 @@
-import { Empty, Flex, Form, type FormProps, Select, Switch, Typography } from 'antd';
-import TextArea from 'antd/es/input/TextArea';
+import { Empty, Flex, Form, type FormProps, Input, Select, Switch, Typography } from 'antd';
 import { type ReactElement, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -22,6 +21,8 @@ import {
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import styles from './data-product-settings.module.scss';
+
+const { TextArea } = Input;
 
 type Timeout = ReturnType<typeof setTimeout>; // Defines the type for timeouts
 type Props = {

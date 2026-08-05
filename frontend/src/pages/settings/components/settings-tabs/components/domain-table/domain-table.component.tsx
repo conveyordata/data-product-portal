@@ -57,7 +57,7 @@ export function DomainTable() {
     const columns = getDomainTableColumns({ t, handleRemove, handleEdit });
 
     return (
-        <Flex vertical gap={'large'}>
+        <Flex vertical gap="large">
             <Flex justify={'space-between'} align={'center'}>
                 <Typography.Title level={3}>{t('Domains')}</Typography.Title>
                 <Button className={styles.formButton} type={'primary'} onClick={handleAdd}>

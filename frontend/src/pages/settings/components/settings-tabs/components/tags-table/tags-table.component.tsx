@@ -36,7 +36,7 @@ export function TagsTable() {
     const columns = getTagsTableColumns({ t, onRemoveTag, handleEdit });
 
     return (
-        <Flex vertical gap={'large'}>
+        <Flex vertical gap="large">
             <Flex justify={'space-between'} align={'center'}>
                 <Typography.Title level={3}>{t('Tags')}</Typography.Title>
                 <Space>

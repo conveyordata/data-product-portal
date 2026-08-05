@@ -1,6 +1,7 @@
 import { api } from '@/store/api/services/generated/completeServiceApi.ts';
 import { STATIC_TAG_ID, TagTypes } from '@/store/api/services/tag-types.ts';
 import { configurationAccessDurationsTags } from '@/store/api/services/tags/configurationAccessDurationsTags.ts';
+import { configurationAccessModesTags } from '@/store/api/services/tags/configurationAccessModesTags.ts';
 import { dataProductsOutputPortsInputPortsTags } from '@/store/api/services/tags/dataProductsOutputPortsInputPortsTags.ts';
 import { dataProductOutputPortTags } from '@/store/api/services/tags/dataProductsOutputPortsTags.ts';
 import { dataProductTechnicalAssetsTags } from '@/store/api/services/tags/dataProductsTechicalAssetsTags.ts';
@@ -300,5 +301,6 @@ api.enhanceEndpoints({
         ...dataProductsOutputPortsInputPortsTags,
         ...explorationTags,
         ...configurationAccessDurationsTags,
+        ...configurationAccessModesTags,
     },
 });

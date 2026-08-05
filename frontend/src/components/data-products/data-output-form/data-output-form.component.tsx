@@ -1,5 +1,4 @@
 import { Form, type FormInstance, type FormProps, Input, Radio, Select, Space } from 'antd';
-import TextArea from 'antd/es/input/TextArea';
 import { type RefObject, useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDebouncedCallback } from 'use-debounce';
@@ -32,6 +31,8 @@ import { selectFilterOptionByLabel } from '@/utils/form.helper';
 import { getIcon } from '@/utils/icon-loader';
 import { DataOutputConfigurationForm } from './data-output-configuration-form.component';
 import styles from './data-output-form.module.scss';
+
+const { TextArea } = Input;
 
 type Props = {
     mode: 'create';

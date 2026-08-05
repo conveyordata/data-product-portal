@@ -1,6 +1,5 @@
 import { Form, Input, Select, Skeleton } from 'antd';
 import type { FormInstance } from 'antd/es/form/hooks/useForm';
-import TextArea from 'antd/es/input/TextArea';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -22,6 +21,8 @@ import {
 import { useGetUsersQuery } from '@/store/api/services/generated/usersApi.ts';
 import { useGetDataProductOwnerIds } from '@/utils/data-product-user-role.helper.ts';
 import { selectFilterOptionByLabel, selectFilterOptionByLabelAndValue } from '@/utils/form.helper.ts';
+
+const { TextArea } = Input;
 
 type Props<T extends DataProductCreate> = {
     form: FormInstance<T>;

@@ -3,24 +3,21 @@ import { Tabs } from 'antd';
 import { type ReactNode, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import chipIcon from '@/assets/icons/data-product-types/chip-icon.svg?react';
-import { DataProductOutlined, OutputPortOutlined, TechnicalAssetOutlined } from '@/components/icons';
+import { DataProductOutlined, OutputPortOutlined } from '@/components/icons';
 import { useTabParam } from '@/hooks/use-tab-param.tsx';
 import { useIsTimeBoundAccessEnabledQuery } from '@/store/api/services/generated/configurationAccessDurationsApi';
 import { AccessPolicyTab } from './access-policy-tab/access-policy-tab.component';
-import { DataOutputTab } from './data-output-tab/data-output-tab.component';
 import { DataProductTab } from './data-product-tab/data-product-tab.component';
 import { DatasetTab } from './dataset-tab/dataset-tab.component';
 import { GeneralTab } from './general-tab/general-tab.component';
 import { MetadataTab } from './metadata-tab/metadata-tab.component';
 import { PlatformTab } from './platform-tab/platform-tab.component';
 import { RolesTab } from './roles-tab/roles-tab.component';
-import styles from './settings-tabs.module.scss';
 
 enum TabKeys {
     General = 'general',
     DataProduct = 'data-product',
     Dataset = 'dataset',
-    DataOutput = 'data-output',
     Platform = 'platform',
     Roles = 'roles',
     Metadata = 'metadata',
@@ -59,13 +56,6 @@ export function SettingsTabs() {
                 key: TabKeys.Dataset,
                 children: <DatasetTab />,
                 icon: <OutputPortOutlined />,
-            },
-            {
-                label: t('Technical Asset'),
-                key: TabKeys.DataOutput,
-                children: <DataOutputTab />,
-                icon: <TechnicalAssetOutlined />,
-                hidden: true,
             },
             {
                 label: t('Metadata'),
@@ -108,11 +98,9 @@ export function SettingsTabs() {
                         key,
                         children,
                         icon,
-                        className: styles.tabPane,
                     };
                 })}
             size={'middle'}
-            rootClassName={styles.tabContainer}
         />
     );
 }

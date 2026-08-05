@@ -1,7 +1,8 @@
-import { Form } from 'antd';
-import TextArea from 'antd/es/input/TextArea';
+import { Form, Input } from 'antd';
 import { t } from 'i18next';
 import type { ChangeEventHandler, ReactNode } from 'react';
+
+const { TextArea } = Input;
 
 type Props = {
     extra?: ReactNode;
