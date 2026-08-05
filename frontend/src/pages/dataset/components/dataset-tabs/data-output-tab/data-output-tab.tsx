@@ -31,7 +31,7 @@ export function DataOutputTab({ datasetId, dataProductId }: Props) {
     }, [dataset?.technical_asset_links, searchTerm]);
 
     return (
-        <Flex vertical gap={'middle'}>
+        <Flex vertical gap="middle">
             <Input.Search
                 placeholder={t('Search Technical Assets by name')}
                 allowClear

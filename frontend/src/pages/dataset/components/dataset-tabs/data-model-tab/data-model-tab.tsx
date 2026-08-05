@@ -123,7 +123,7 @@ export function DataModelTab({ datasetId, dataProductId }: Props) {
                         action={
                             <Button
                                 icon={<BookOutlined />}
-                                href={'https://docs.dataproductportal.com/docs/developer-guide/schema-information'}
+                                href="https://docs.dataproductportal.com/docs/developer-guide/schema-information"
                                 target="_blank"
                                 rel="noopener noreferrer"
                             >

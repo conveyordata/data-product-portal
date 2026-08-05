@@ -130,7 +130,7 @@ function ExplorationsCart() {
     return (
         <Row gutter={16}>
             <Col span={16}>
-                <Flex vertical gap={'middle'}>
+                <Flex vertical gap="middle">
                     <CardSelection
                         selectedChoice={dataProductTypeChoice}
                         setSelectedChoice={setDataProductTypeChoice}

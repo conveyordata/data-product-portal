@@ -39,7 +39,7 @@ export function TechnicalAssetTechnicalInfo({ technicalAssetId, dataProductId }:
             rowKey={(info) => info.environment_id}
             pagination={false}
             rowClassName={styles.tableRow}
-            size={'small'}
+            size="small"
         />
     );
 }

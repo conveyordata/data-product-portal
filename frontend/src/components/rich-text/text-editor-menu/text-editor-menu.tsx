@@ -134,28 +134,28 @@ export const TextEditorMenu = ({ editor, isDisabled }: Props) => {
     return (
         <div className={styles.menuBar}>
             <Flex className={styles.actionsContainer}>
-                <Popover content={t('Undo')} trigger={'hover'}>
+                <Popover content={t('Undo')} trigger="hover">
                     <Button
                         className={getClassName('undo')}
                         onClick={undo}
                         disabled={!canUndo || isDisabled}
-                        type={'text'}
+                        type="text"
                     >
                         <UndoOutlined />
                     </Button>
                 </Popover>
-                <Popover content={t('Redo')} trigger={'hover'}>
+                <Popover content={t('Redo')} trigger="hover">
                     <Button
                         className={getClassName('redo')}
                         onClick={redo}
                         disabled={!canRedo || isDisabled}
-                        type={'text'}
+                        type="text"
                     >
                         <RedoOutlined />
                     </Button>
                 </Popover>
-                <Divider type={'vertical'} />
-                <Popover content={t('Turn into')} trigger={'hover'}>
+                <Divider type="vertical" />
+                <Popover content={t('Turn into')} trigger="hover">
                     <div>
                         <Select
                             options={[
@@ -164,7 +164,7 @@ export const TextEditorMenu = ({ editor, isDisabled }: Props) => {
                                     options: TextTypeMenuOptions.map((option) => ({ ...option, key: option.value })),
                                 },
                             ]}
-                            defaultValue={'paragraph'}
+                            defaultValue="paragraph"
                             className={styles.textTypeDropdown}
                             title={t('Turn into')}
                             value={getActiveTextType()}
@@ -173,70 +173,60 @@ export const TextEditorMenu = ({ editor, isDisabled }: Props) => {
                         />
                     </div>
                 </Popover>
-                <Divider type={'vertical'} />
-                <Popover content={t('Bold')} trigger={'hover'}>
-                    <Button className={getClassName('bold')} onClick={toggleBold} disabled={isDisabled} type={'text'}>
+                <Divider type="vertical" />
+                <Popover content={t('Bold')} trigger="hover">
+                    <Button className={getClassName('bold')} onClick={toggleBold} disabled={isDisabled} type="text">
                         <BoldOutlined />
                     </Button>
                 </Popover>
-                <Popover content={t('Underline')} trigger={'hover'}>
+                <Popover content={t('Underline')} trigger="hover">
                     <Button
                         className={getClassName('underline')}
                         onClick={toggleUnderline}
                         disabled={isDisabled}
-                        type={'text'}
+                        type="text"
                     >
                         <UnderlineOutlined />
                     </Button>
                 </Popover>
-                <Popover content={t('Italic')} trigger={'hover'}>
-                    <Button
-                        className={getClassName('italic')}
-                        onClick={toggleItalic}
-                        disabled={isDisabled}
-                        type={'text'}
-                    >
+                <Popover content={t('Italic')} trigger="hover">
+                    <Button className={getClassName('italic')} onClick={toggleItalic} disabled={isDisabled} type="text">
                         <ItalicOutlined />
                     </Button>
                 </Popover>
-                <Popover content={t('Strike')} trigger={'hover'}>
-                    <Button
-                        className={getClassName('strike')}
-                        onClick={toggleStrike}
-                        disabled={isDisabled}
-                        type={'text'}
-                    >
+                <Popover content={t('Strike')} trigger="hover">
+                    <Button className={getClassName('strike')} onClick={toggleStrike} disabled={isDisabled} type="text">
                         <StrikethroughOutlined />
                     </Button>
                 </Popover>
-                <Divider type={'vertical'} />
-                <Popover content={t('Bulleted list')} trigger={'hover'}>
+                <Divider type="vertical" />
+                <Popover content={t('Bulleted list')} trigger="hover">
                     <Button
                         onClick={() => toggleBulletList()}
                         className={getClassName('bulletList')}
                         disabled={isDisabled}
-                        type={'text'}
+                        type="text"
                     >
                         <UnorderedListOutlined />
                     </Button>
                 </Popover>
-                <Popover content={t('Numbered list')} trigger={'hover'}>
+                <Popover content={t('Numbered list')} trigger="hover">
                     <Button
                         onClick={() => toggleOrderedList()}
                         className={getClassName('orderedList')}
                         disabled={isDisabled}
-                        type={'text'}
+                        type="text"
                     >
                         <OrderedListOutlined />
                     </Button>
                 </Popover>
-                <Divider type={'vertical'} />
-                <Popover content={t('Code block')} trigger={'hover'}>
+                <Divider type="vertical" />
+                <Popover content={t('Code block')} trigger="hover">
                     <Button
                         className={getClassName('codeBlock')}
                         onClick={toggleCode}
                         disabled={isDisabled}
-                        type={'text'}
+                        type="text"
                     >
                         <CodeOutlined />
                     </Button>

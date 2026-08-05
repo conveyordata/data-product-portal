@@ -88,7 +88,7 @@ export function ExplorationsTab() {
                 rowKey={(record) => record.id}
                 loading={isFetching}
                 rowHoverable
-                size={'small'}
+                size="small"
                 locale={{
                     emptyText: (
                         <Empty

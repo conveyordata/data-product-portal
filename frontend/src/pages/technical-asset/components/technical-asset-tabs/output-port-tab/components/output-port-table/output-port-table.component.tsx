@@ -62,7 +62,7 @@ export function DatasetTable({ dataProductId, dataOutputId, datasets }: Props) {
                     className: styles.pagination,
                 }}
                 rowClassName={styles.tableRow}
-                size={'small'}
+                size="small"
             />
         </Flex>
     );

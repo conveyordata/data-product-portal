@@ -42,15 +42,15 @@ export function InputPortTab({
     }, [inputPorts, searchTerm]);
 
     return (
-        <Flex vertical gap={'middle'}>
-            <Flex gap={'small'}>
+        <Flex vertical gap="middle">
+            <Flex gap="small">
                 <Input.Search
                     placeholder={t('Filter by name')}
                     allowClear
                     onChange={(e) => setSearchTerm(e.target.value)}
                 />
                 <Link to={ApplicationPaths.Marketplace}>
-                    <Button disabled={!canRequestAccess} type={'primary'}>
+                    <Button disabled={!canRequestAccess} type="primary">
                         {t('Shop for new data')}
                     </Button>
                 </Link>

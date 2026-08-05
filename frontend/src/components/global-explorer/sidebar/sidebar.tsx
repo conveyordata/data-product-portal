@@ -117,7 +117,7 @@ export function Sidebar({ nodes, sidebarFilters, onFilterChange, nodeId, nodeCli
     );
 
     return (
-        <Flex className={styles.sidebarContainer} vertical gap={'small'}>
+        <Flex className={styles.sidebarContainer} vertical gap="small">
             <Tooltip title={t('Group all nodes in their own domain')}>
                 <Flex align="center" gap="small">
                     <Switch

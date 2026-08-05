@@ -73,7 +73,7 @@ export const getDataProductDatasetsColumns = ({
             dataIndex: 'status',
             width: '18%',
             render: (_, { status, renewal_status, current_request }) => (
-                <Flex vertical align={'flex-start'} gap={'small'}>
+                <Flex vertical align="flex-start" gap="small">
                     <Badge status={getInputPortStatusBadgeStatus(status)} text={getInputPortStatusLabel(t, status)} />
                     <RenewalTag renewalStatus={renewal_status} />
                     <IsExpiringSoonTag

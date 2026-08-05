@@ -66,7 +66,7 @@ export function ModifyRoleModal({ role, isOpen, onClose }: Props) {
                 initialValues={{ name: role.name, description: role.description }}
             >
                 <Form.Item
-                    name={'name'}
+                    name="name"
                     label={t('Name')}
                     tooltip={t('The name of your role')}
                     rules={[
@@ -79,7 +79,7 @@ export function ModifyRoleModal({ role, isOpen, onClose }: Props) {
                     <Input />
                 </Form.Item>
                 <Form.Item
-                    name={'description'}
+                    name="description"
                     label={t('Description')}
                     tooltip={t('A description for your role')}
                     rules={[

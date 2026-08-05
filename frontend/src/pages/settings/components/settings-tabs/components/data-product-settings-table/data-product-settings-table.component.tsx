@@ -69,9 +69,9 @@ export function DataProductSettingsTable({ scope }: Props) {
 
     return (
         <Flex vertical gap="large">
-            <Flex justify={'space-between'} align={'center'}>
+            <Flex justify="space-between" align="center">
                 <Typography.Title level={3}>{t('Custom Settings')}</Typography.Title>
-                <Button className={styles.formButton} type={'primary'} onClick={handleAdd}>
+                <Button className={styles.formButton} type="primary" onClick={handleAdd}>
                     {t('Add custom setting')}
                 </Button>
             </Flex>
@@ -81,7 +81,7 @@ export function DataProductSettingsTable({ scope }: Props) {
                 rowKey={(record) => record.id}
                 loading={isFetching}
                 rowHoverable
-                size={'small'}
+                size="small"
             />
             {isVisible && (mode === 'create' || initial) && (
                 <CreateSettingModal scope={scope} onClose={onClose} isOpen={isVisible} mode={mode} initial={initial} />

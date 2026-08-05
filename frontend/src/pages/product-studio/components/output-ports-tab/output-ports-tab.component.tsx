@@ -126,7 +126,7 @@ export function OutputPortsTab() {
             to={ApplicationPaths.DataProductNew}
             onClick={() => posthog.capture(PosthogEvents.CREATE_DATA_PRODUCT_STARTED)}
         >
-            <Button type={'primary'} disabled={!canCreateDataProduct}>
+            <Button type="primary" disabled={!canCreateDataProduct}>
                 {t('Create a Data Product first')}
             </Button>
         </Link>
@@ -149,7 +149,7 @@ export function OutputPortsTab() {
                         <Radio.Button value={true}>{t('All Output Ports')}</Radio.Button>
                     </Radio.Group>
                     {!showAllPorts && (
-                        <RoleFilter mode={'datasets'} selectedRoles={selectedRoles} onRoleChange={handleRoleChange} />
+                        <RoleFilter mode="datasets" selectedRoles={selectedRoles} onRoleChange={handleRoleChange} />
                     )}
                 </Flex>
             </Flex>
@@ -177,7 +177,7 @@ export function OutputPortsTab() {
                 loading={isFetching}
                 rowHoverable
                 rowClassName={styles.row}
-                size={'small'}
+                size="small"
                 locale={{
                     emptyText: (
                         <Empty

@@ -82,13 +82,13 @@ export function ThemeSettingsForm() {
                 layout="vertical"
                 onFinish={onSubmit}
                 onFinishFailed={onSubmitFailed}
-                autoComplete={'off'}
+                autoComplete="off"
                 labelWrap
                 disabled={isLoading || !canEditForm}
                 initialValues={data}
             >
                 <Form.Item
-                    name={'portal_name'}
+                    name="portal_name"
                     label={t('Portal Name')}
                     tooltip={t('The name of the Data Product Portal')}
                     rules={[

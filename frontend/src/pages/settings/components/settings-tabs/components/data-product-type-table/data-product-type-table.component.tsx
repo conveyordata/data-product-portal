@@ -58,9 +58,9 @@ export function DataProductTypeTable() {
 
     return (
         <Flex vertical gap="large">
-            <Flex justify={'space-between'} align={'center'} gap={'small'}>
+            <Flex justify="space-between" align="center" gap="small">
                 <Typography.Title level={3}>{t('Types')}</Typography.Title>
-                <Button className={styles.formButton} type={'primary'} onClick={handleAdd}>
+                <Button className={styles.formButton} type="primary" onClick={handleAdd}>
                     {t('Add Type')}
                 </Button>
             </Flex>
@@ -70,7 +70,7 @@ export function DataProductTypeTable() {
                 rowKey={(record) => record.id}
                 loading={isFetching}
                 rowHoverable
-                size={'small'}
+                size="small"
             />
             {isVisible && (mode === 'create' || initial) && (
                 <CreateDataProductTypeModal onClose={handleClose} isOpen={isVisible} mode={mode} initial={initial} />

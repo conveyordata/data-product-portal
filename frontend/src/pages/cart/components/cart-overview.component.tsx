@@ -39,7 +39,7 @@ function CartOverviewItem({ outputPort }: CartOverviewItemProps) {
                 {remainingCount > 0 && (
                     <Tooltip
                         title={
-                            <Space orientation="vertical" size={'small'}>
+                            <Space orientation="vertical" size="small">
                                 {dataProductOwners.slice(maxVisible).map((owner) => (
                                     <span key={owner.id}>{owner.email}</span>
                                 ))}
@@ -55,13 +55,13 @@ function CartOverviewItem({ outputPort }: CartOverviewItemProps) {
     return (
         <Descriptions
             column={1}
-            size={'small'}
+            size="small"
             items={[
                 {
                     key: 'data product',
                     label: <Typography.Text strong>{t('Data Product')}</Typography.Text>,
                     children: (
-                        <Link to={createDataProductIdPath(outputPort.data_product_id)} target={'_blank'}>
+                        <Link to={createDataProductIdPath(outputPort.data_product_id)} target="_blank">
                             <Typography.Text>{outputPort.data_product_name}</Typography.Text>
                         </Link>
                     ),
@@ -149,17 +149,17 @@ export const CartOverview = ({
                             styles: { header: { alignItems: 'center' } },
                             children: <CartOverviewItem outputPort={outputPort} />,
                             extra: (
-                                <Space size={'small'} align={'center'}>
+                                <Space size="small" align="center">
                                     <CartOverviewWarning
                                         outputPort={outputPort}
                                         overlapping={overlappingOutputPortIds?.includes(outputPort.id)}
                                         selectedDataProductId={selectedDataProductId}
                                     />
                                     <Button
-                                        type={'text'}
+                                        type="text"
                                         icon={<DeleteOutlined />}
                                         danger
-                                        size={'small'}
+                                        size="small"
                                         onClick={(e) => {
                                             e.stopPropagation();
                                             removeFromCart(outputPort.id);

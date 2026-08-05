@@ -259,7 +259,7 @@ export function DatasetCard({ datasetId, dataProductId, draggedDataOutputId }: P
                     />
                     {dataset.technical_asset_links && dataset.technical_asset_links.length > 0 && (
                         <Collapse
-                            size={'small'}
+                            size="small"
                             items={[
                                 {
                                     key: 0,

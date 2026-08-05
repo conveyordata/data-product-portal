@@ -124,8 +124,8 @@ function AccessDurationSection({
     ];
 
     return (
-        <Flex vertical gap={'small'}>
-            <Flex vertical gap={'small'}>
+        <Flex vertical gap="small">
+            <Flex vertical gap="small">
                 <Radio.Group
                     value={selected}
                     options={options}
@@ -139,7 +139,7 @@ function AccessDurationSection({
                         type="info"
                         showIcon={false}
                         title={
-                            <Flex vertical gap={'small'}>
+                            <Flex vertical gap="small">
                                 <Typography.Text strong>{t('{{days}} days', { days: timeBoundDays })}</Typography.Text>
                                 <Typography.Text type="secondary">
                                     {t('Admin-configured duration policy.')}
@@ -198,7 +198,7 @@ function AccessDurationInfo({ mode }: { mode: 'create' | 'edit' }) {
                         type="warning"
                         showIcon
                         title={
-                            <Flex vertical gap={'small'}>
+                            <Flex vertical gap="small">
                                 <Typography.Text>
                                     {t(
                                         'Only future approved access requests will be affected by changes to the access duration policy.',
@@ -503,12 +503,12 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
             layout="vertical"
             onFinish={onFinish}
             onFinishFailed={onFinishFailed}
-            autoComplete={'off'}
+            autoComplete="off"
             disabled={isLoading || !canSubmit}
             initialValues={initialValues}
         >
             <Form.Item<CreateOutputPortRequest>
-                name={'name'}
+                name="name"
                 label={t('Name')}
                 tooltip={t('The name of your Output Port')}
                 rules={[
@@ -532,7 +532,7 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
             />
             {mode === 'create' && (
                 <Form.Item<CreateOutputPortRequest>
-                    name={'owners'}
+                    name="owners"
                     label={t('Owners')}
                     tooltip={t('The owners of the Output Port')}
                     rules={[
@@ -544,7 +544,7 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
                 >
                     <Select
                         loading={isFetchingUsers}
-                        mode={'multiple'}
+                        mode="multiple"
                         options={userSelectOptions}
                         showSearch={{ filterOption: selectFilterOptionByLabelAndValue }}
                         tokenSeparators={[',']}
@@ -553,7 +553,7 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
                 </Form.Item>
             )}
             <Form.Item<CreateOutputPortRequest>
-                name={'lifecycle_id'}
+                name="lifecycle_id"
                 label={t('Status')}
                 rules={[
                     {
@@ -573,7 +573,7 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
                 />
             </Form.Item>
             <Form.Item<CreateOutputPortRequest>
-                name={'access_type'}
+                name="access_type"
                 label={t('Access Type')}
                 tooltip={t('The access type of the Output Port')}
                 rules={[
@@ -586,17 +586,17 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
                 <Radio.Group options={accessTypeOptions} />
             </Form.Item>
             <AccessDurationInfo mode={mode} />
-            <Form.Item<CreateOutputPortRequest> name={'tag_ids'} label={t('Tags')}>
+            <Form.Item<CreateOutputPortRequest> name="tag_ids" label={t('Tags')}>
                 <Select
                     tokenSeparators={[',']}
                     placeholder={t('Select Output Port tags')}
-                    mode={'multiple'}
+                    mode="multiple"
                     options={tagSelectOptions}
                     showSearch={{ filterOption: selectFilterOptionByLabel }}
                 />
             </Form.Item>
             <Form.Item<CreateOutputPortRequest>
-                name={'description'}
+                name="description"
                 label={t('Description')}
                 tooltip={t('A description for the Output Port')}
                 rules={[
@@ -650,7 +650,7 @@ export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, d
                                 <Button
                                     className={styles.formButton}
                                     type="primary"
-                                    htmlType={'submit'}
+                                    htmlType="submit"
                                     loading={isCreating || isUpdating}
                                     disabled={isLoading || !canSubmit}
                                 >

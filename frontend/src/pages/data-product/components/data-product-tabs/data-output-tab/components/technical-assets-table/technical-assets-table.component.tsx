@@ -87,7 +87,7 @@ export function TechnicalAssetsTable({ dataProductId, onDragStart, onDragEnd }: 
             ))}
 
             {filteredDataOutputs.length === 0 && (
-                <Flex justify={'center'}>
+                <Flex justify="center">
                     <Typography.Text type="secondary">
                         {searchTerm
                             ? t('No Technical Assets found matching your search')

@@ -105,13 +105,13 @@ export function Marketplace() {
                 {isFetching ? (
                     <LoadingSpinner spinProps={{ style: { height: '200px' } }} />
                 ) : paginatedOutputPorts?.length > 0 ? (
-                    <Flex wrap="wrap" gap={'small'}>
+                    <Flex wrap="wrap" gap="small">
                         {paginatedOutputPorts.map((outputPort) => (
                             <OutputPortMarketplaceCard key={outputPort.id} dataset={outputPort} />
                         ))}
                     </Flex>
                 ) : (
-                    <Flex justify={'center'}>
+                    <Flex justify="center">
                         <Empty description={t('No results match you search')} />
                     </Flex>
                 )}
@@ -119,7 +119,7 @@ export function Marketplace() {
                 {!isFetching && outputPorts.length > pageSize && (
                     <Flex
                         key="pagination-container"
-                        justify={'flex-end'}
+                        justify="flex-end"
                         style={{
                             marginTop: 12,
                         }}

@@ -68,7 +68,7 @@ export function ResourceNameFormItem({
         <Form.Item label={t('Namespace')} tooltip={tooltip} required>
             <Space.Compact orientation="horizontal" className={styles.resourceNameFormField}>
                 <Form.Item
-                    name={'namespace'}
+                    name="namespace"
                     noStyle
                     hasFeedback
                     validateFirst

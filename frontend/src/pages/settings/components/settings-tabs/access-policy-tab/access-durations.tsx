@@ -92,7 +92,7 @@ export default function AccessDurations() {
             key: 'consumer_type',
             width: 200,
             render: (_, record) => (
-                <Flex align="center" gap={'small'}>
+                <Flex align="center" gap="small">
                     <AbstractProductIcon type={record.key} />
                     <Typography.Text strong>{t(PRODUCT_TYPE_LABELS[record.key] ?? record.key)}</Typography.Text>
                 </Flex>
@@ -100,7 +100,7 @@ export default function AccessDurations() {
         },
         {
             title: (
-                <Flex align="center" gap={'small'}>
+                <Flex align="center" gap="small">
                     {t('Default duration')}
                     <Tooltip title={t('The default access duration assigned when a request is approved.')}>
                         <InfoCircleOutlined style={{ color: 'var(--ant-color-text-secondary)', cursor: 'help' }} />
@@ -110,7 +110,7 @@ export default function AccessDurations() {
             key: 'duration',
             width: 320,
             render: (_, record) => (
-                <Flex align="center" gap={'small'}>
+                <Flex align="center" gap="small">
                     <Select
                         value={record.durationType}
                         onChange={(val: AccessDurationType) =>
@@ -137,7 +137,7 @@ export default function AccessDurations() {
         },
         {
             title: (
-                <Flex align="center" gap={'small'}>
+                <Flex align="center" gap="small">
                     {t('Alternative allowed')}
                     <Tooltip
                         title={t(
@@ -155,7 +155,7 @@ export default function AccessDurations() {
                 const label = isTimeBound ? t('Permanent allowed') : t('Time-bound allowed');
 
                 return (
-                    <Flex align="center" gap={'small'}>
+                    <Flex align="center" gap="small">
                         <Checkbox
                             checked={record.alternativeAllowed}
                             onChange={(e) => {
@@ -182,7 +182,7 @@ export default function AccessDurations() {
     ];
 
     return (
-        <Flex vertical gap={'small'}>
+        <Flex vertical gap="small">
             <Typography.Title level={3}>{t('Access Durations')}</Typography.Title>
             <Typography.Text type="secondary">
                 {t('Configure default access durations for Input Ports.')}
@@ -193,7 +193,7 @@ export default function AccessDurations() {
                 rowKey="key"
                 pagination={false}
                 tableLayout="fixed"
-                size={'small'}
+                size="small"
             />
             <div>
                 <Button type="primary" onClick={handleSave}>

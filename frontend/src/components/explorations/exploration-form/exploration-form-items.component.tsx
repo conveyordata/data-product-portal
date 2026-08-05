@@ -15,7 +15,7 @@ export const ExplorationFormItems = () => {
     return (
         <>
             <Form.Item<Exploration>
-                name={'name'}
+                name="name"
                 label={t('Name')}
                 tooltip={t('The name of your Exploration')}
                 rules={[
@@ -28,7 +28,7 @@ export const ExplorationFormItems = () => {
                 <Input />
             </Form.Item>
             <Form.Item<Exploration>
-                name={'namespace'}
+                name="namespace"
                 label={t('Namespace')}
                 tooltip={t('The namespace of your Exploration')}
                 rules={[
@@ -41,7 +41,7 @@ export const ExplorationFormItems = () => {
                 <Input />
             </Form.Item>
             <Form.Item<Exploration>
-                name={'domain'}
+                name="domain"
                 label={t('Domain')}
                 tooltip={t('The domain to which this Exploration belongs')}
                 rules={[
@@ -59,7 +59,7 @@ export const ExplorationFormItems = () => {
                 />
             </Form.Item>
             <Form.Item<Exploration>
-                name={'description'}
+                name="description"
                 label={t('Description')}
                 tooltip={t('A description for your Exploration')}
                 rules={[

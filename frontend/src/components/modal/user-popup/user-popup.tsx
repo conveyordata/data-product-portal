@@ -54,7 +54,7 @@ export function UserPopup({ onClose, isOpen, roles, item, isLoading, userIdsToHi
             <div className={styles.userList}>
                 <List
                     loading={isLoading || isFetchingUsers}
-                    size={'large'}
+                    size="large"
                     locale={{ emptyText: t('No users found') }}
                     rowKey={(user) => user.id}
                     dataSource={filteredUsers}

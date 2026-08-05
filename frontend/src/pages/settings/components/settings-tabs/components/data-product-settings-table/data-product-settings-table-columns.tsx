@@ -131,7 +131,7 @@ export const getDataProductSettingsTableColumns = ({
             render: (record) => {
                 return (
                     <Flex>
-                        <Button type={'link'} onClick={handleEdit(record)}>
+                        <Button type="link" onClick={handleEdit(record)}>
                             {t('Edit')}
                         </Button>
                         <Popconfirm
@@ -140,13 +140,13 @@ export const getDataProductSettingsTableColumns = ({
                                 'Are you sure you want to delete the Data Product setting? This will remove the setting from all the Data Products',
                             )}
                             onConfirm={() => handleRemove(record)}
-                            placement={'leftTop'}
+                            placement="leftTop"
                             okText={t('Confirm')}
                             cancelText={t('Cancel')}
                             okButtonProps={{ loading: isLoading }}
                             autoAdjustOverflow={true}
                         >
-                            <Button loading={isLoading} disabled={isLoading || isDisabled} type={'link'}>
+                            <Button loading={isLoading} disabled={isLoading || isDisabled} type="link">
                                 {t('Remove')}
                             </Button>
                         </Popconfirm>

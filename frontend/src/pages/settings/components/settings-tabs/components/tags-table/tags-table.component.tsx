@@ -37,10 +37,10 @@ export function TagsTable() {
 
     return (
         <Flex vertical gap="large">
-            <Flex justify={'space-between'} align={'center'}>
+            <Flex justify="space-between" align="center">
                 <Typography.Title level={3}>{t('Tags')}</Typography.Title>
                 <Space>
-                    <Button className={styles.formButton} type={'primary'} onClick={handleAdd}>
+                    <Button className={styles.formButton} type="primary" onClick={handleAdd}>
                         {t('Add Tag')}
                     </Button>
                 </Space>
@@ -51,7 +51,7 @@ export function TagsTable() {
                 rowKey={(record) => record.id}
                 loading={isFetching || isRemoving}
                 rowHoverable
-                size={'small'}
+                size="small"
             />
             {isVisible && (mode === 'create' || initial) && (
                 <CreateTagsModal isOpen={isVisible} onClose={handleClose} mode={mode} initial={initial} />

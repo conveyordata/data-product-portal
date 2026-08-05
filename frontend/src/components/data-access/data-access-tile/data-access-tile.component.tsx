@@ -51,7 +51,7 @@ export function AccessDataTile<T extends string>({
         <Flex vertical className={styles.radioButtonContainer}>
             <div>
                 <Dropdown
-                    placement={'bottom'}
+                    placement="bottom"
                     menu={{
                         items,
                     }}
@@ -69,7 +69,7 @@ export function AccessDataTile<T extends string>({
                         >
                             <Flex vertical className={styles.iconWrapper}>
                                 {isLoading ? (
-                                    <Spin size={'small'}>
+                                    <Spin size="small">
                                         <Icon component={dataPlatform.icon} className={styles.icon} />
                                     </Spin>
                                 ) : (

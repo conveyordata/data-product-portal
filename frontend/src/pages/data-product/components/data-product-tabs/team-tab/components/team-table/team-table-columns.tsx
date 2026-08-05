@@ -112,13 +112,13 @@ export const getDataProductUsersTableColumns = ({
                                     name: user.first_name,
                                 })}
                                 onConfirm={() => onAcceptAccessRequest(id)}
-                                placement={'leftTop'}
+                                placement="leftTop"
                                 okText={t('Confirm')}
                                 cancelText={t('Cancel')}
                                 okButtonProps={{ loading: isLoading }}
                                 autoAdjustOverflow={true}
                             >
-                                <Button loading={isLoading} disabled={isLoading || !canApprove} type={'link'}>
+                                <Button loading={isLoading} disabled={isLoading || !canApprove} type="link">
                                     {t('Accept')}
                                 </Button>
                             </Popconfirm>
@@ -128,13 +128,13 @@ export const getDataProductUsersTableColumns = ({
                                     name: user.first_name,
                                 })}
                                 onConfirm={() => onRejectAccessRequest(id)}
-                                placement={'leftTop'}
+                                placement="leftTop"
                                 okText={t('Confirm')}
                                 cancelText={t('Cancel')}
                                 okButtonProps={{ loading: isLoading }}
                                 autoAdjustOverflow={true}
                             >
-                                <Button loading={isLoading} disabled={isLoading || !canApprove} type={'link'}>
+                                <Button loading={isLoading} disabled={isLoading || !canApprove} type="link">
                                     {t('Reject')}
                                 </Button>
                             </Popconfirm>
@@ -146,13 +146,13 @@ export const getDataProductUsersTableColumns = ({
                                 name: user.first_name,
                             })}
                             onConfirm={() => onRemoveUserAccess(id)}
-                            placement={'leftTop'}
+                            placement="leftTop"
                             okText={t('Confirm')}
                             cancelText={t('Cancel')}
                             okButtonProps={{ loading: isRemovingUser }}
                             autoAdjustOverflow={true}
                         >
-                            <Button loading={isRemovingUser} disabled={isRemovingUser || !canRemove} type={'link'}>
+                            <Button loading={isRemovingUser} disabled={isRemovingUser || !canRemove} type="link">
                                 {t('Remove')}
                             </Button>
                         </Popconfirm>

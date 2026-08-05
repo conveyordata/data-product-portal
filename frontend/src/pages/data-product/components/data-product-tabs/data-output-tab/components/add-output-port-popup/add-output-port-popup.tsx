@@ -18,7 +18,7 @@ export function AddOutputPortPopup({ onClose, isOpen, dataProductId }: Props) {
 
     return (
         <DataProductDataOutputLinkPopup onClose={onClose} isOpen={isOpen} title={t('Add Output Port')} formRef={ref}>
-            <DatasetForm formRef={ref} modalCallbackOnSubmit={onClose} mode={'create'} dataProductId={dataProductId} />
+            <DatasetForm formRef={ref} modalCallbackOnSubmit={onClose} mode="create" dataProductId={dataProductId} />
         </DataProductDataOutputLinkPopup>
     );
 }

@@ -66,7 +66,7 @@ export function HistoryTab({ id, type, history = [], isFetching }: Props) {
     ) as ColumnsType<GetEventHistoryResponseItem>;
 
     return (
-        <Flex vertical gap={'middle'}>
+        <Flex vertical gap="middle">
             <Input.Search
                 placeholder={t('Search event history')}
                 allowClear
@@ -77,7 +77,7 @@ export function HistoryTab({ id, type, history = [], isFetching }: Props) {
                 dataSource={filteredHistory}
                 columns={columns}
                 onChange={onChange}
-                size={'small'}
+                size="small"
                 pagination={{
                     ...pagination,
                     size: 'small',

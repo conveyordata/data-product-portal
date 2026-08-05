@@ -121,7 +121,7 @@ export const ExistingExplorationForm = ({ cartOutputPorts, setSelectedExploratio
         });
     };
     return (
-        <Form<CartFormData> layout={'vertical'} form={form} onFinish={onFinish} onValuesChange={onValuesChange}>
+        <Form<CartFormData> layout="vertical" form={form} onFinish={onFinish} onValuesChange={onValuesChange}>
             <Form.Item<CartFormData>
                 name="explorationId"
                 label={t('Exploration')}

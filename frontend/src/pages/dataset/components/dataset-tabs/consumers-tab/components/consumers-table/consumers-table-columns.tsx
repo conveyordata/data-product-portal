@@ -60,7 +60,7 @@ export const getConsumerColumns = ({
             dataIndex: 'status',
             width: '18%',
             render: (_, { status, renewal_status, current_request }) => (
-                <Flex vertical align={'flex-start'} gap={'small'}>
+                <Flex vertical align="flex-start" gap="small">
                     <Badge status={getInputPortStatusBadgeStatus(status)} text={getInputPortStatusLabel(t, status)} />
                     <RenewalTag renewalStatus={renewal_status} />
                     <IsExpiringSoonTag
@@ -114,11 +114,11 @@ export const getConsumerColumns = ({
                 const showRevoke = status === InputPortStatus.Approved;
 
                 return (
-                    <Flex gap={'small'} wrap>
+                    <Flex gap="small" wrap>
                         {showReview && (
                             <Button
                                 icon={<EyeOutlined />}
-                                type={'link'}
+                                type="link"
                                 onClick={() => setReviewingOutputPortInputPortId(id)}
                             >
                                 {t('Review Access Request')}
@@ -136,7 +136,7 @@ export const getConsumerColumns = ({
                                         consuming_data_product_id,
                                     )
                                 }
-                                placement={'leftTop'}
+                                placement="leftTop"
                                 okText={t('Confirm')}
                                 cancelText={t('Cancel')}
                                 okButtonProps={{ loading: isLoading }}
@@ -144,7 +144,7 @@ export const getConsumerColumns = ({
                             >
                                 <Button
                                     icon={<CloseCircleOutlined />}
-                                    type={'link'}
+                                    type="link"
                                     loading={isLoading}
                                     disabled={isLoading || !canRevoke}
                                 >

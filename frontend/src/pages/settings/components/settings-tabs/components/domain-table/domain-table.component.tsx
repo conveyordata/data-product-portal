@@ -58,9 +58,9 @@ export function DomainTable() {
 
     return (
         <Flex vertical gap="large">
-            <Flex justify={'space-between'} align={'center'}>
+            <Flex justify="space-between" align="center">
                 <Typography.Title level={3}>{t('Domains')}</Typography.Title>
-                <Button className={styles.formButton} type={'primary'} onClick={handleAdd}>
+                <Button className={styles.formButton} type="primary" onClick={handleAdd}>
                     {t('Add Domain')}
                 </Button>
             </Flex>
@@ -71,7 +71,7 @@ export function DomainTable() {
                 loading={isFetching}
                 rowHoverable
                 rowClassName={() => 'editable-row'}
-                size={'small'}
+                size="small"
             />
             {isVisible && (mode === 'create' || initial) && (
                 <CreateDomainModal isOpen={isVisible} onClose={handleClose} mode={mode} initial={initial} />

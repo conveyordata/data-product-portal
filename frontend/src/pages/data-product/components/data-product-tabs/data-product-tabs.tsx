@@ -98,7 +98,7 @@ export function DataProductTabs({ dataProductId }: Props) {
                 label: t('Explorer'),
                 key: TabKeys.Explorer,
                 icon: <CompassOutlined />,
-                children: <Explorer id={dataProductId} type={'dataproduct'} />,
+                children: <Explorer id={dataProductId} type="dataproduct" />,
             },
             {
                 label: <Typography.Text ref={teamRef}>{t('Team')}</Typography.Text>,
@@ -217,7 +217,7 @@ export function DataProductTabs({ dataProductId }: Props) {
                         className: styles.tabPane,
                     };
                 })}
-                size={'middle'}
+                size="middle"
                 className={styles.container}
             />
             <Tour

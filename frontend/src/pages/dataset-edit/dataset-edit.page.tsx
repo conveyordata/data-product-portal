@@ -72,7 +72,7 @@ export function DatasetEdit() {
     return (
         <>
             <Typography.Title level={3}>{data?.name}</Typography.Title>
-            <DatasetForm mode={'edit'} datasetId={datasetId} dataProductId={dataProductId} />
+            <DatasetForm mode="edit" datasetId={datasetId} dataProductId={dataProductId} />
         </>
     );
 }

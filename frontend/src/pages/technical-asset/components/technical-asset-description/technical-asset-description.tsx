@@ -39,7 +39,7 @@ export function TechnicalAssetDescription({ status, type, description, tags, nam
                     <Typography.Text>{getTechnicalAssetType(type, plugins, t)}</Typography.Text>
                 </Flex>
             </Space>
-            <Space size={'small'}>
+            <Space size="small">
                 {tags.map((tag) => (
                     <Tag color="success" key={tag.id}>
                         {tag.value}

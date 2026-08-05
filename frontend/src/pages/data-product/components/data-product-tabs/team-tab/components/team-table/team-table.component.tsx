@@ -166,7 +166,7 @@ export function TeamTable({ dataProductId, dataProductUsers }: Props) {
                     className: styles.pagination,
                 }}
                 rowClassName={styles.tableRow}
-                size={'small'}
+                size="small"
             />
         </Flex>
     );

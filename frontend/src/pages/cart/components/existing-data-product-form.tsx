@@ -122,7 +122,7 @@ export const ExistingDataProductForm = ({ cartOutputPorts, setSelectedDataProduc
         description: dp.description,
     }));
     return (
-        <Form<CartFormData> layout={'vertical'} form={form} onFinish={onFinish} onValuesChange={onValuesChange}>
+        <Form<CartFormData> layout="vertical" form={form} onFinish={onFinish} onValuesChange={onValuesChange}>
             <Form.Item<CartFormData>
                 name="dataProductId"
                 label={t('Data Product')}

@@ -39,19 +39,19 @@ export const getDomainTableColumns = ({ t, handleRemove, handleEdit }: Props): T
             render: (record) => {
                 return (
                     <Flex>
-                        <Button type={'link'} onClick={handleEdit(record)}>
+                        <Button type="link" onClick={handleEdit(record)}>
                             {t('Edit')}
                         </Button>
                         <Popconfirm
                             title={t('Remove')}
                             description={t('Are you sure you want to delete the Domain?')}
                             onConfirm={() => handleRemove(record)}
-                            placement={'leftTop'}
+                            placement="leftTop"
                             okText={t('Confirm')}
                             cancelText={t('Cancel')}
                             autoAdjustOverflow={true}
                         >
-                            <Button type={'link'}>{t('Remove')}</Button>
+                            <Button type="link">{t('Remove')}</Button>
                         </Popconfirm>
                     </Flex>
                 );

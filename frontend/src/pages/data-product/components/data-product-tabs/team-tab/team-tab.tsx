@@ -82,14 +82,14 @@ export function TeamTab({ dataProductId }: Props) {
 
     return (
         <>
-            <Flex vertical gap={'middle'}>
-                <Flex gap={'small'}>
+            <Flex vertical gap="middle">
+                <Flex gap="small">
                     <Input.Search
                         placeholder={t('Search users by email or name')}
                         allowClear
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
-                    <Button type={'primary'} className={styles.formButton} onClick={handleOpen} disabled={!canAddUser}>
+                    <Button type="primary" className={styles.formButton} onClick={handleOpen} disabled={!canAddUser}>
                         {t('Add User')}
                     </Button>
                 </Flex>

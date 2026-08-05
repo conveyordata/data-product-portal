@@ -185,7 +185,7 @@ export function TechnicalAssetCard({ technicalAsset, dataProductId, onDragStart,
 
                     {technicalAsset.output_port_links && technicalAsset.output_port_links.length > 0 && (
                         <Collapse
-                            size={'small'}
+                            size="small"
                             items={[
                                 {
                                     key: '1',

@@ -126,7 +126,7 @@ export function DataOutputTable({ dataProductId, datasetId, dataOutputs, isLoadi
                     className: styles.pagination,
                 }}
                 rowClassName={styles.tableRow}
-                size={'small'}
+                size="small"
             />
         </Flex>
     );

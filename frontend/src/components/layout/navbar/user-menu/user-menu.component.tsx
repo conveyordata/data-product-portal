@@ -106,14 +106,14 @@ export function UserMenu() {
     ];
 
     return (
-        <Flex gap={'middle'} align={'center'}>
+        <Flex gap="middle" align="center">
             <Notifications />
             <CartButton />
             <DownloadCLIButton />
-            <Flex align={'center'} gap={'small'}>
+            <Flex align="center" gap="small">
                 <Dropdown
                     menu={{ items }}
-                    placement={'bottomRight'}
+                    placement="bottomRight"
                     arrow={{ pointAtCenter: true }}
                     mouseLeaveDelay={0.3}
                 >

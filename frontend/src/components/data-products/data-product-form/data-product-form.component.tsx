@@ -269,7 +269,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                                 <Button
                                     className={styles.formButton}
                                     type="primary"
-                                    htmlType={'submit'}
+                                    htmlType="submit"
                                     loading={isCreating || isUpdating}
                                     disabled={isLoading || !canSubmit}
                                 >
