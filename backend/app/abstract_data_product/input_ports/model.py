@@ -19,7 +19,7 @@ from app.abstract_data_product.input_ports.enums import (
     InputPortStatus,
     RenewalStatus,
 )
-from app.access_durations.enums import AccessDurationType
+from app.configuration.access_durations.enums import AccessDurationType
 from app.core.webhooks.events import InputPortEvent
 from app.database.database import Base
 from app.database.event_mixin import EventTrackedMixin

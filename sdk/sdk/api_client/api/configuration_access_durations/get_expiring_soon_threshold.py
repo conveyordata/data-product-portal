@@ -13,7 +13,7 @@ def _get_kwargs() -> dict[str, Any]:
 
     _kwargs: dict[str, Any] = {
         "method": "get",
-        "url": "/api/v2/access_durations/expiring_soon_threshold",
+        "url": "/api/v2/configuration/access_durations/expiring_soon_threshold",
     }
 
     return _kwargs

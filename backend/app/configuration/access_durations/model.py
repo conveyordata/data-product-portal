@@ -6,7 +6,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.abstract_data_product.type import AbstractDataProductType
-from app.access_durations.enums import AccessDurationType
+from app.configuration.access_durations.enums import AccessDurationType
 from app.database.database import Base
 from app.shared.model import BaseORM
 

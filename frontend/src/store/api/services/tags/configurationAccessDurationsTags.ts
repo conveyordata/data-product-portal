@@ -3,7 +3,7 @@ import { STATIC_TAG_ID, TagTypes } from '@/store/api/services/tag-types.ts';
 
 type EndpointDefinitions = Parameters<typeof api.enhanceEndpoints>[0]['endpoints'];
 
-export const accessDurationsTags = {
+export const configurationAccessDurationsTags = {
     getAllAccessDurations: {
         providesTags: [{ type: TagTypes.AccessDuration, id: STATIC_TAG_ID.LIST }],
     },

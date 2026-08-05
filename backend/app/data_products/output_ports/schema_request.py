@@ -3,7 +3,7 @@ from uuid import UUID
 
 from annotated_types import MinLen
 
-from app.access_durations.enums import AccessDurationType
+from app.configuration.access_durations.enums import AccessDurationType
 from app.data_products.output_ports.enums import OutputPortAccessType
 from app.data_products.output_ports.status import OutputPortStatus
 from app.shared.schema import ORMModel

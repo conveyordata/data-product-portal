@@ -4,8 +4,8 @@ from uuid import uuid4
 import pytest
 
 from app.abstract_data_product.type import AbstractDataProductType
-from app.access_durations.enums import AccessDurationType
 from app.authorization.roles.schema import Scope
+from app.configuration.access_durations.enums import AccessDurationType
 from app.core.authz.actions import AuthorizationAction
 from app.data_products.output_ports.enums import OutputPortAccessType
 from app.data_products.output_ports.model import Dataset

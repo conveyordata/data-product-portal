@@ -2,19 +2,22 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.abstract_data_product.type import AbstractDataProductType
-from app.access_durations.schema_request import AccessDurationUpdate
-from app.access_durations.schema_response import (
+from app.configuration.access_durations.schema_request import AccessDurationUpdate
+from app.configuration.access_durations.schema_response import (
     AccessDuration,
     ExpiringSoonThresholdResponse,
     TimeBoundAccessEnabledResponse,
 )
-from app.access_durations.service import AccessDurationService
+from app.configuration.access_durations.service import AccessDurationService
 from app.core.authz import Action, Authorization
 from app.core.authz.resolvers import EmptyResolver
 from app.database.database import get_db_session
 from app.settings import settings
 
-router = APIRouter(tags=["Access Durations"], prefix="/v2/access_durations")
+router = APIRouter(
+    tags=["Configuration - Access Durations"],
+    prefix="/v2/configuration/access_durations",
+)
 
 
 @router.get("/enabled", response_model=TimeBoundAccessEnabledResponse)

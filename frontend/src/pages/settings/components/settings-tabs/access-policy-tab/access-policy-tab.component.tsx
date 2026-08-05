@@ -9,7 +9,7 @@ import {
     AccessDurationType,
     useGetAllAccessDurationsQuery,
     useUpdateAccessDurationMutation,
-} from '@/store/api/services/generated/accessDurationsApi';
+} from '@/store/api/services/generated/configurationAccessDurationsApi';
 import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 
 type ConsumerPolicy = {

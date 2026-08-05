@@ -1,18 +1,18 @@
-import { api } from "@/store/api/services/baseApi";
+import { api } from "@/store/api/services/generated/configurationTagsApi";
 const injectedRtkApi = api.injectEndpoints({
   endpoints: (build) => ({
     isTimeBoundAccessEnabled: build.query<
       IsTimeBoundAccessEnabledApiResponse,
       IsTimeBoundAccessEnabledApiArg
     >({
-      query: () => ({ url: `/api/v2/access_durations/enabled` }),
+      query: () => ({ url: `/api/v2/configuration/access_durations/enabled` }),
     }),
     getExpiringSoonThreshold: build.query<
       GetExpiringSoonThresholdApiResponse,
       GetExpiringSoonThresholdApiArg
     >({
       query: () => ({
-        url: `/api/v2/access_durations/expiring_soon_threshold`,
+        url: `/api/v2/configuration/access_durations/expiring_soon_threshold`,
       }),
     }),
     getDefaultAccessDuration: build.query<
@@ -20,21 +20,21 @@ const injectedRtkApi = api.injectEndpoints({
       GetDefaultAccessDurationApiArg
     >({
       query: (queryArg) => ({
-        url: `/api/v2/access_durations/${queryArg}/default`,
+        url: `/api/v2/configuration/access_durations/${queryArg}/default`,
       }),
     }),
     getAllAccessDurations: build.query<
       GetAllAccessDurationsApiResponse,
       GetAllAccessDurationsApiArg
     >({
-      query: () => ({ url: `/api/v2/access_durations` }),
+      query: () => ({ url: `/api/v2/configuration/access_durations` }),
     }),
     updateAccessDuration: build.mutation<
       UpdateAccessDurationApiResponse,
       UpdateAccessDurationApiArg
     >({
       query: (queryArg) => ({
-        url: `/api/v2/access_durations/${queryArg.abstractDataProductType}`,
+        url: `/api/v2/configuration/access_durations/${queryArg.abstractDataProductType}`,
         method: "PUT",
         body: queryArg.accessDurationUpdate,
       }),

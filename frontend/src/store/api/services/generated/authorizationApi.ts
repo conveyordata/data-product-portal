@@ -1,4 +1,4 @@
-import { api } from "@/store/api/services/generated/accessDurationsApi";
+import { api } from "@/store/api/services/baseApi";
 const injectedRtkApi = api.injectEndpoints({
   endpoints: (build) => ({
     checkAccess: build.query<CheckAccessApiResponse, CheckAccessApiArg>({

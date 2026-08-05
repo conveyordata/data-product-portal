@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Security
 
-from app.access_durations.router import router as access_duration
 from app.authorization.role_assignments.router import router as role_assignment
 from app.authorization.roles.router import router as role
 from app.authorization.router import router as authorization
+from app.configuration.access_durations.router import router as access_duration
 from app.configuration.access_modes.router import (
     router as access_modes,
 )

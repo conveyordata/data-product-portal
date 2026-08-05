@@ -2,7 +2,7 @@ import { ClockCircleOutlined, CloseCircleOutlined, ExclamationCircleOutlined } f
 import { Flex, Tag, Typography } from 'antd';
 import { differenceInCalendarDays, parseISO } from 'date-fns';
 import { useTranslation } from 'react-i18next';
-import { useGetExpiringSoonThresholdQuery } from '@/store/api/services/generated/accessDurationsApi.ts';
+import { useGetExpiringSoonThresholdQuery } from '@/store/api/services/generated/configurationAccessDurationsApi.ts';
 import { InputPortStatus, RenewalStatus } from '@/store/api/services/generated/dataProductsApi.ts';
 import { formatDateFromISOString } from '@/utils/date.helper.ts';
 

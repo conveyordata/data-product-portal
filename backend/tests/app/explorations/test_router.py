@@ -4,9 +4,9 @@ from datetime import date, timedelta
 import faker
 
 from app.abstract_data_product.type import AbstractDataProductType
-from app.access_durations.enums import AccessDurationType
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.roles.schema import Scope
+from app.configuration.access_durations.enums import AccessDurationType
 from app.core.authz import Action
 from app.data_products.output_ports.enums import OutputPortAccessType
 from app.settings import settings

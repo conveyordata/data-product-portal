@@ -18,11 +18,13 @@ from app.abstract_data_product.input_ports.model import (
     InputPort as InputPortModel,
 )
 from app.abstract_data_product.type import AbstractDataProductType
-from app.access_durations.enums import AccessDurationType
-from app.access_durations.model import AccessDuration as AccessDurationModel
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.role_assignments.output_port.service import (
     RoleAssignmentService as DatasetRoleAssignmentService,
+)
+from app.configuration.access_durations.enums import AccessDurationType
+from app.configuration.access_durations.model import (
+    AccessDuration as AccessDurationModel,
 )
 from app.configuration.data_product_lifecycles.model import (
     DataProductLifecycle as DataProductLifeCycleModel,

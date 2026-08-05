@@ -20,12 +20,12 @@ from app.abstract_data_product.model import (
     ensure_abstract_data_product_exists,
 )
 from app.abstract_data_product.type import AbstractDataProductType
-from app.access_durations.enums import AccessDurationType
-from app.access_durations.model import AccessDuration
-from app.access_durations.service import AccessDurationService
 from app.authorization.role_assignments.output_port.service import (
     RoleAssignmentService as OutputPortRoleAssignmentService,
 )
+from app.configuration.access_durations.enums import AccessDurationType
+from app.configuration.access_durations.model import AccessDuration
+from app.configuration.access_durations.service import AccessDurationService
 from app.core.authz import Action
 from app.core.logging.posthog_analytics import get_posthog_client
 from app.data_products import email

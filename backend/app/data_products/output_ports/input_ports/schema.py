@@ -7,7 +7,7 @@ from app.abstract_data_product.input_ports.enums import (
     InputPortStatus,
     RenewalStatus,
 )
-from app.access_durations.enums import AccessDurationType
+from app.configuration.access_durations.enums import AccessDurationType
 from app.shared.schema import ORMModel
 from app.users.schema import User
 

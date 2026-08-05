@@ -11,8 +11,8 @@ from app.abstract_data_product.input_ports.enums import (
 from app.abstract_data_product.input_ports.model import (
     InputPortRequest as InputPortRequestModel,
 )
-from app.access_durations.enums import AccessDurationType
 from app.authorization.role_assignments.enums import DecisionStatus
+from app.configuration.access_durations.enums import AccessDurationType
 from app.data_products.output_ports.enums import OutputPortAccessType
 from app.data_products.output_ports.input_ports.service import InputPortService
 from app.settings import settings

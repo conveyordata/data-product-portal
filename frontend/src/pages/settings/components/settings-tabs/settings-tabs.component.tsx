@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import chipIcon from '@/assets/icons/data-product-types/chip-icon.svg?react';
 import { DataProductOutlined, OutputPortOutlined, TechnicalAssetOutlined } from '@/components/icons';
 import { useTabParam } from '@/hooks/use-tab-param.tsx';
-import { useIsTimeBoundAccessEnabledQuery } from '@/store/api/services/generated/accessDurationsApi';
+import { useIsTimeBoundAccessEnabledQuery } from '@/store/api/services/generated/configurationAccessDurationsApi';
 import { AccessPolicyTab } from './access-policy-tab/access-policy-tab.component';
 import { DataOutputTab } from './data-output-tab/data-output-tab.component';
 import { DataProductTab } from './data-product-tab/data-product-tab.component';
