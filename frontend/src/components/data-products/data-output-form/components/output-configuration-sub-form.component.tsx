@@ -2,7 +2,7 @@ import { Form, type FormInstance, Input } from 'antd';
 import type React from 'react';
 import { useEffect } from 'react';
 
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
+import { dispatchMessage } from '@/utils/feedback.ts';
 
 import { configurationFieldName } from './configuration-field-name';
 import { ConfigurationFormItem } from './output-configuration-form-item';

@@ -15,10 +15,10 @@ import {
     useGetPlatformTilesQuery,
     useLazyGetPluginUrlQuery,
 } from '@/store/api/services/generated/pluginsApi.ts';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { DecisionStatus } from '@/types/roles';
 import type { CustomDropdownItemProps } from '@/types/shared';
+import { dispatchMessage } from '@/utils/feedback.ts';
 import { getIcon } from '@/utils/icon-loader';
 import styles from './data-product-actions.module.scss';
 

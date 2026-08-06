@@ -9,8 +9,8 @@ import {
     useGetOutputPortQuery,
     useUpdateOutputPortAboutMutation,
 } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
+import { dispatchMessage } from '@/utils/feedback.ts';
 
 type Props = {
     datasetId: string;

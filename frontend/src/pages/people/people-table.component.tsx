@@ -18,9 +18,9 @@ import {
     useGetUsersQuery,
     useSetCanBecomeAdminMutation,
 } from '@/store/api/services/generated/usersApi.ts';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { type GlobalRoleAssignment, Prototype, Scope } from '@/types/roles';
+import { dispatchMessage } from '@/utils/feedback.ts';
 import { searchMatchesUser } from '@/utils/search.ts';
 import styles from './people-table.module.scss';
 import { getPeopleTableColumns } from './people-table-columns';

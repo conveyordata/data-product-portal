@@ -11,8 +11,8 @@ import {
     useRevokeOutputPortAsInputPortMutation,
 } from '@/store/api/services/generated/dataProductsOutputPortsInputPortsApi.ts';
 import { useGetUserPendingActionsQuery } from '@/store/api/services/generated/usersApi.ts';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
+import { dispatchMessage } from '@/utils/feedback.ts';
 import { usePendingActionHandlers } from '@/utils/pending-request.helper.ts';
 import styles from './consumers-table.module.scss';
 import { getConsumerColumns } from './consumers-table-columns.tsx';

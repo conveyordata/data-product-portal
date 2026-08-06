@@ -8,8 +8,8 @@ import {
     useCreateDataProductTypeMutation,
     useUpdateDataProductTypeMutation,
 } from '@/store/api/services/generated/configurationDataProductTypesApi.ts';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper';
+import { dispatchMessage } from '@/utils/feedback.ts';
 import styles from './data-product-type-table.module.scss';
 
 const { Option } = Select;

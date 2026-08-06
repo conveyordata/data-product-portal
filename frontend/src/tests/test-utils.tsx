@@ -6,13 +6,13 @@ import type { ReactElement, ReactNode } from 'react';
 import { I18nextProvider } from 'react-i18next';
 import { Provider } from 'react-redux';
 import { MemoryRouter, type MemoryRouterProps } from 'react-router';
+import { FeedbackBridge } from '@/components/feedback/feedback-bridge.component.tsx';
 import { BreadcrumbProvider } from '@/components/layout/navbar/breadcrumbs/breadcrumb.context.tsx';
 import authSlice, { setCredentials } from '@/store/api/services/auth-slice.ts';
 import { api as generatedApiSlice } from '@/store/api/services/generated/completeServiceApi.ts';
 import type { User } from '@/store/api/services/generated/usersApi.ts';
 import { baseApiSlice } from '@/store/features/api/base-api-slice.ts';
 import cartSlice, { addDatasetToCart } from '@/store/features/cart/cart-slice.ts';
-import feedbackSlice from '@/store/features/feedback/feedback-slice.ts';
 import wizardSlice from '@/store/features/wizard/wizard-slice.ts';
 import i18n from './i18n';
 
@@ -25,7 +25,6 @@ function createTestStore() {
         reducer: {
             auth: authSlice,
             cart: cartSlice,
-            feedback: feedbackSlice,
             wizard: wizardSlice,
             [baseApiSlice.reducerPath]: baseApiSlice.reducer,
             [generatedApiSlice.reducerPath]: generatedApiSlice.reducer,
@@ -60,6 +59,7 @@ export function renderWithProviders(ui: ReactElement, options?: RenderWithProvid
         return (
             <Provider store={store}>
                 <I18nextProvider i18n={i18n}>
+                    <FeedbackBridge />
                     <BreadcrumbProvider>
                         <NuqsTestingAdapter hasMemory={true}>
                             {routerProps ? <MemoryRouter {...routerProps}>{children}</MemoryRouter> : children}

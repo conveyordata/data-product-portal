@@ -8,8 +8,8 @@ import {
     useRemoveAllUserNotificationsMutation,
     useRemoveUserNotificationMutation,
 } from '@/store/api/services/generated/usersNotificationsApi.ts';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import { formatDateToNowFromUTCString } from '@/utils/date.helper';
+import { dispatchMessage } from '@/utils/feedback.ts';
 import { NotificationDescription } from './notification-description';
 import styles from './notifications.module.scss';
 

@@ -16,8 +16,8 @@ import {
     useApproveOutputPortTechnicalAssetLinkMutation,
     useDenyOutputPortTechnicalAssetLinkMutation,
 } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import { DecisionStatus } from '@/types/roles';
+import { dispatchMessage } from '@/utils/feedback.ts';
 
 export interface DataProductRoleRequest {
     assignment_id: string;

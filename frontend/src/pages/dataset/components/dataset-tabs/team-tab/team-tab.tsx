@@ -15,9 +15,9 @@ import {
 import { useGetRolesQuery } from '@/store/api/services/generated/authorizationRolesApi.ts';
 import { useGetOutputPortQuery } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
 import type { UsersGet } from '@/store/api/services/generated/usersApi.ts';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { Scope } from '@/types/roles';
+import { dispatchMessage } from '@/utils/feedback.ts';
 import { searchMatchesUser } from '@/utils/search.ts';
 import { TeamTable } from './components/team-table/team-table.component.tsx';
 import styles from './team-tab.module.scss';

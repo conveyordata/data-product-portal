@@ -1,11 +1,11 @@
-import type { BaseQueryApi, BaseQueryFn } from '@reduxjs/toolkit/query';
+import type { BaseQueryFn } from '@reduxjs/toolkit/query';
 import type { AxiosError, AxiosRequestConfig } from 'axios';
 import axios, { type AxiosResponse } from 'axios';
 import { User } from 'oidc-client-ts';
 
 import { AppConfig } from '@/config/app-config.ts';
-import { type NotificationState, showNotification } from '@/store/features/feedback/feedback-slice.ts';
 import type { ApiError } from '@/types/api-result.ts';
+import { dispatchNotification, type NotificationOptions } from '@/utils/feedback.ts';
 
 interface CustomAxiosError extends AxiosError {
     response?: AxiosResponse<ApiError>;
@@ -25,25 +25,23 @@ function getUser() {
     return User.fromStorageString(oidcStorage);
 }
 
-const defaultErrorMessage: NotificationState = {
-    message: 'Something went wrong',
+const defaultErrorMessage: NotificationOptions = {
+    title: 'Something went wrong',
     description: 'Please try again later',
     type: 'error',
 };
 
-function showErrorMessageToast(err: AxiosResponse<ApiError>, api: BaseQueryApi) {
-    const { correlation_id: correlationId = defaultErrorMessage.message, detail = defaultErrorMessage.description } =
+function showErrorMessageToast(err: AxiosResponse<ApiError>) {
+    const { correlation_id: correlationId = defaultErrorMessage.title, detail = defaultErrorMessage.description } =
         err.data;
 
-    const message = typeof detail === 'string' ? detail : defaultErrorMessage.message;
+    const title = typeof detail === 'string' ? detail : defaultErrorMessage.title;
 
-    api.dispatch(
-        showNotification({
-            message,
-            description: correlationId,
-            type: 'error',
-        }),
-    );
+    dispatchNotification({
+        title,
+        description: correlationId,
+        type: 'error',
+    });
 }
 
 function shouldShowErrorToast(status: number, url: string) {
@@ -70,7 +68,7 @@ export const axiosBaseQuery =
         unknown,
         unknown
     > =>
-    async ({ url, method, data, body, params, headers }, api) => {
+    async ({ url, method, data, body, params, headers }) => {
         try {
             const user = getUser();
             const result = await axios({
@@ -89,10 +87,10 @@ export const axiosBaseQuery =
 
             if (err.response) {
                 if (shouldShowErrorToast(err.response.status, url)) {
-                    showErrorMessageToast(err.response, api);
+                    showErrorMessageToast(err.response);
                 }
             } else {
-                api.dispatch(showNotification(defaultErrorMessage));
+                dispatchNotification(defaultErrorMessage);
             }
 
             return { error: { correlation_id: 'NA', detail: defaultErrorMessage.description } };

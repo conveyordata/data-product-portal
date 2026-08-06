@@ -23,8 +23,8 @@ import {
     useLazyValidateResourceNameQuery,
 } from '@/store/api/services/generated/resourceNamesApi.ts';
 import { clearCart } from '@/store/features/cart/cart-slice.ts';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { createExplorationIdPath } from '@/types/navigation.ts';
+import { dispatchMessage } from '@/utils/feedback.ts';
 import { selectFilterOptionByLabelAndValue } from '@/utils/form.helper.ts';
 
 type Props = {
