@@ -62,7 +62,11 @@ export const dataProductOutputPortTags = {
     deleteOutputPortQueryStat: {},
     updateOutputPortQueryStats: {},
     getOutputPortCuratedQueries: {},
-    getLatestDataQualitySummaryForOutputPort: {},
+    getLatestDataQualitySummaryForOutputPort: {
+        extraOptions: {
+            suppressErrorToast: true,
+        },
+    },
     addOutputPortDataQualityRun: {},
     overwriteOutputPortDataQualitySummary: {},
     createOutputPort: {

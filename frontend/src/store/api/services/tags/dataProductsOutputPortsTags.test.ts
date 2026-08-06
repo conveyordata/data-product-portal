@@ -23,4 +23,10 @@ describe('dataProductOutputPortTags invalidation', () => {
 
         expect(tags).toContainEqual({ type: TagTypes.OutputPort, id: 'op1' });
     });
+
+    it('suppresses the toast for latest data quality summary requests', () => {
+        expect(dataProductOutputPortTags.getLatestDataQualitySummaryForOutputPort.extraOptions).toEqual({
+            suppressErrorToast: true,
+        });
+    });
 });

@@ -1,15 +1,15 @@
 import type { BaseQueryFn } from '@reduxjs/toolkit/query';
-import type { AxiosError, AxiosRequestConfig } from 'axios';
-import axios, { type AxiosResponse } from 'axios';
+import type { AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios from 'axios';
 import { User } from 'oidc-client-ts';
 
 import { AppConfig } from '@/config/app-config.ts';
 import type { ApiError } from '@/store/common/api-result.ts';
 import { dispatchNotification, type NotificationOptions } from '@/utils/feedback.ts';
 
-interface CustomAxiosError extends AxiosError {
-    response?: AxiosResponse<ApiError>;
-}
+type AxiosBaseQueryExtraOptions = {
+    suppressErrorToast?: boolean;
+};
 
 function getUser() {
     const skipAuth = !AppConfig.isOidcEnabled();
@@ -31,11 +31,6 @@ const defaultErrorMessage: NotificationOptions = {
     type: 'error',
 };
 
-const suppressedErrorToastEndpoints = new Set([
-    'linkOutputPortToTechnicalAsset',
-    'getLatestDataQualitySummaryForOutputPort',
-]);
-
 function showErrorMessageToast(err: AxiosResponse<ApiError>) {
     const { correlation_id: correlationId = defaultErrorMessage.title, detail = defaultErrorMessage.description } =
         err.data;
@@ -47,10 +42,6 @@ function showErrorMessageToast(err: AxiosResponse<ApiError>) {
         description: correlationId,
         type: 'error',
     });
-}
-
-function shouldShowErrorToast(endpoint: string) {
-    return !suppressedErrorToastEndpoints.has(endpoint);
 }
 
 export const axiosBaseQuery =
@@ -66,9 +57,10 @@ export const axiosBaseQuery =
             headers?: { [key: string]: string | number };
         },
         unknown,
-        unknown
+        unknown,
+        AxiosBaseQueryExtraOptions
     > =>
-    async ({ url, method, data, body, params, headers }, api) => {
+    async ({ url, method, data, body, params, headers }, api, extraOptions) => {
         try {
             const user = getUser();
             const result = await axios({
@@ -76,6 +68,7 @@ export const axiosBaseQuery =
                 method,
                 data: data ?? body,
                 params,
+                signal: api.signal,
                 headers: {
                     ...headers,
                     ...(user?.access_token && { Authorization: `${user.token_type} ${user.access_token}` }),
@@ -83,19 +76,15 @@ export const axiosBaseQuery =
             });
             return { data: result.data };
         } catch (axiosError: unknown) {
-            const err = axiosError as CustomAxiosError;
-
-            if (err.response) {
-                if (shouldShowErrorToast(api.endpoint)) {
-                    showErrorMessageToast(err.response);
+            if (axios.isAxiosError<ApiError>(axiosError) && axiosError.response) {
+                if (!extraOptions.suppressErrorToast) {
+                    showErrorMessageToast(axiosError.response);
                 }
-            } else {
-                dispatchNotification(defaultErrorMessage);
+
+                return { error: axiosError.response.data };
             }
 
-            if (err.response?.data) {
-                return { error: err.response.data };
-            }
+            dispatchNotification(defaultErrorMessage);
 
             return { error: { correlation_id: 'NA', detail: defaultErrorMessage.description } };
         }
