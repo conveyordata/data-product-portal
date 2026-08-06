@@ -12,7 +12,6 @@ import '@/store/api/services/apiTags.ts';
 import authSlice, { setCredentials } from '@/store/api/services/auth-slice.ts';
 import { api as generatedApiSlice } from '@/store/api/services/generated/completeServiceApi.ts';
 import type { User } from '@/store/api/services/generated/usersApi.ts';
-import { baseApiSlice } from '@/store/features/api/base-api-slice.ts';
 import cartSlice, { addOutputPortToCart } from '@/store/features/cart/cart-slice.ts';
 import wizardSlice from '@/store/features/wizard/wizard-slice.ts';
 import i18n from './i18n';
@@ -27,11 +26,9 @@ function createTestStore() {
             auth: authSlice,
             cart: cartSlice,
             wizard: wizardSlice,
-            [baseApiSlice.reducerPath]: baseApiSlice.reducer,
             [generatedApiSlice.reducerPath]: generatedApiSlice.reducer,
         },
-        middleware: (getDefaultMiddleware) =>
-            getDefaultMiddleware().concat(baseApiSlice.middleware, generatedApiSlice.middleware),
+        middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(generatedApiSlice.middleware),
     });
     setupListeners(store.dispatch);
     return store;
