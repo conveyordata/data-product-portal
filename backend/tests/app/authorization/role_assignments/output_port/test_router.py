@@ -104,7 +104,7 @@ class TestDatasetRoleAssignmentsRouter:
         "app.authorization.role_assignments.output_port.router.DatasetAuthAssignment"
     )
     def test_create_assignment_generates_webhook_v2_event(
-        self, mock_auth, client, mock_webhook
+        self, mock_auth, client, capture_events
     ):
         dataset: Dataset = OutputPortFactory()
         me = UserFactory(external_id=settings.DEFAULT_USERNAME)
@@ -127,7 +127,7 @@ class TestDatasetRoleAssignmentsRouter:
             },
         )
         assert response.status_code == 200
-        assert_event_in_queue("output_port_role_assignment.event", mock_webhook)
+        assert_event_in_queue("output_port_role_assignment.event", capture_events)
 
     def test_request_assignment(self, client: TestClient):
         dataset: Dataset = OutputPortFactory()
@@ -155,9 +155,11 @@ class TestDatasetRoleAssignmentsRouter:
         assert data["user"]["id"] == str(user.id)
         assert data["role"]["id"] == str(role.id)
 
-    def test_request_assignment_generates_webhook_v2_event(self, client, mock_webhook):
+    def test_request_assignment_generates_webhook_v2_event(
+        self, client, capture_events
+    ):
         self.test_request_assignment(client)
-        assert_event_in_queue("output_port_role_assignment.event", mock_webhook)
+        assert_event_in_queue("output_port_role_assignment.event", capture_events)
 
     def test_request_assignment_no_right(self, client: TestClient):
         dataset: Dataset = OutputPortFactory()
@@ -206,9 +208,9 @@ class TestDatasetRoleAssignmentsRouter:
         assert response.status_code == 200
         assert len(response.json()["role_assignments"]) == 1
 
-    def test_delete_assignment_generates_webhook_v2_event(self, client, mock_webhook):
+    def test_delete_assignment_generates_webhook_v2_event(self, client, capture_events):
         self.test_delete_assignment(client)
-        assert_event_in_queue("output_port_role_assignment.event", mock_webhook)
+        assert_event_in_queue("output_port_role_assignment.event", capture_events)
 
     def test_decide_assignment(self, client: TestClient):
         dataset: Dataset = OutputPortFactory()
@@ -239,9 +241,9 @@ class TestDatasetRoleAssignmentsRouter:
         assert data["id"] == str(assignment.id)
         assert data["decision"] == DecisionStatus.APPROVED
 
-    def test_decide_assignment_generates_webhook_v2_event(self, client, mock_webhook):
+    def test_decide_assignment_generates_webhook_v2_event(self, client, capture_events):
         self.test_decide_assignment(client)
-        assert_event_in_queue("output_port_role_assignment.event", mock_webhook)
+        assert_event_in_queue("output_port_role_assignment.event", capture_events)
 
     def test_decide_assignment_already_decided(self, client: TestClient):
         dataset: Dataset = OutputPortFactory()
@@ -348,10 +350,10 @@ class TestDatasetRoleAssignmentsRouter:
         assert data["role"]["id"] == str(new_role.id)
 
     def test_modify_assigned_role_generates_webhook_v2_event(
-        self, client, mock_webhook
+        self, client, capture_events
     ):
         self.test_modify_assigned_role(client)
-        assert_event_in_queue("output_port_role_assignment.event", mock_webhook)
+        assert_event_in_queue("output_port_role_assignment.event", capture_events)
 
     def test_delete_dataset_with_role_assignment(self, client: TestClient):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)

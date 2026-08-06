@@ -133,10 +133,10 @@ class TestTechnicalAssetsRouter:
         self,
         data_output_payload,
         client: TestClient,
-        mock_webhook,
+        capture_events,
     ):
         self.test_create_technical_asset_source_aligned(data_output_payload, client)
-        assert_event_in_queue("technical_asset.event", mock_webhook)
+        assert_event_in_queue("technical_asset.event", capture_events)
 
     def test_create_technical_asset_product_aligned(
         self, data_output_payload, client: TestClient

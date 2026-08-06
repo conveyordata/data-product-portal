@@ -1,14 +1,13 @@
 import asyncio
 import re
 import urllib.parse
-from collections.abc import Awaitable, Callable, Coroutine
+from collections.abc import Coroutine
 from contextlib import asynccontextmanager, suppress
 from pathlib import Path
 from typing import Any
 
 from asgi_correlation_id import CorrelationIdMiddleware
-from fastapi import FastAPI, Request, Response
-from fastapi.concurrency import iterate_in_threadpool
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 from fastapi.routing import APIRoute
@@ -33,7 +32,7 @@ from app.core.webhooks.middleware import (
     start_event_dispatcher,
     stop_event_dispatcher,
 )
-from app.core.webhooks.webhook import call_webhook, register_webhooks
+from app.core.webhooks.webhook import register_webhooks
 from app.database import database
 from app.mcp.mcp import mcp
 from app.mcp.middleware import LoggingMiddleware
@@ -191,38 +190,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
-@app.middleware("http")
-async def send_response_to_webhook(
-    request: Request, call_next: Callable[[Request], Awaitable[Response]]
-) -> Response:
-    response = await call_next(request)
-    # Gets are not logged
-    if (
-        settings.WEBHOOK_URL
-        and request.method in ["POST", "PUT", "DELETE"]
-        and not (
-            request.url.path.startswith("/api/auth/")
-            or request.url.path.startswith("/api/v2/authn/")
-        )
-    ):
-        body = ""
-        if request.method == "POST":
-            response_body = [chunk async for chunk in response.body_iterator]
-            response.body_iterator = iterate_in_threadpool(iter(response_body))
-            body = (b"".join(response_body)).decode()
-        _create_supervised_task(
-            call_webhook(
-                content=body,
-                method=request.method,
-                url=request.url.path,
-                query=request.url.query,
-                status_code=response.status_code,
-            ),
-            name="call_webhook",
-        )
-    return response
 
 
 class VersionResponse(ORMModel):

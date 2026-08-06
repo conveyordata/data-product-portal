@@ -86,12 +86,12 @@ class TestDataProductsRouter:
         payload,
         client,
         user_with_create_data_product_rights,
-        mock_webhook,
+        capture_events,
     ):
         self.test_create_data_product(
             payload, client, user_with_create_data_product_rights
         )
-        assert_event_in_queue("data_product.event", mock_webhook)
+        assert_event_in_queue("data_product.event", capture_events)
 
     def test_create_data_product_with_input_ports(
         self, payload, client, user_with_create_data_product_rights
@@ -447,14 +447,14 @@ class TestDataProductsRouter:
         )
         assert response.status_code == 404, response.text
 
-    def test_set_value_for_data_product_not_owner(self, client, mock_webhook):
+    def test_set_value_for_data_product_not_owner(self, client, capture_events):
         data_product = DataProductFactory()
         setting = DataProductSettingFactory()
         response = client.post(f"{ENDPOINT}/{data_product.id}/settings/{setting.id}")
-        assert_event_not_in_queue("data_product_setting_value.event", mock_webhook)
+        assert_event_not_in_queue("data_product_setting_value.event", capture_events)
         assert response.status_code == 403
 
-    def test_data_product_set_custom_setting(self, client, mock_webhook):
+    def test_data_product_set_custom_setting(self, client, capture_events):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
         role = RoleFactory(
@@ -473,7 +473,7 @@ class TestDataProductsRouter:
         assert response.status_code == 200
         response = client.get(f"{ENDPOINT}/{data_product.id}/settings")
 
-        assert_event_in_queue("data_product_setting_value.event", mock_webhook)
+        assert_event_in_queue("data_product_setting_value.event", capture_events)
         assert response.json()["data_product_settings"][0]["value"] == "false"
 
     def test_get_data_product_settings(self, client):

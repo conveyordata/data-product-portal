@@ -152,7 +152,7 @@ class TestExplorationRouter:
         assert response.status_code == 200, response.text
         assert len(response.json()["input_port_ids"]) == 1
 
-    def test_request_input_ports_for_exploration_event(self, mock_webhook, client):
+    def test_request_input_ports_for_exploration_event(self, capture_events, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         exploration = ExplorationFactory(owner=user)
         response = client.post(
@@ -164,7 +164,7 @@ class TestExplorationRouter:
         )
         assert response.status_code == 200, response.text
         assert len(response.json()["input_port_ids"]) == 1
-        assert_event_in_queue("input_port.event", mock_webhook)
+        assert_event_in_queue("input_port.event", capture_events)
 
     def test_request_input_ports_for_exploration_does_not_exist(self, client):
         response = client.post(

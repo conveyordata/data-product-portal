@@ -1,52 +1,9 @@
-import hashlib
-import hmac
-import json
 from typing import Annotated, Literal, Union
 
-import httpx
 from fastapi import FastAPI
 from pydantic import Field, create_model
 
-from app.core.logging import logger
 from app.core.webhooks.events import V2Event
-from app.settings import settings
-
-
-async def call_webhook(
-    content: str, method: str, url: str, query: str, status_code: int
-) -> None:
-    webhook_url = settings.WEBHOOK_URL
-    logger.warning("Using deprecated webhook v1, please switch to v2")
-    try:
-        async with httpx.AsyncClient() as client:
-            message = {
-                "method": method,
-                "url": url,
-                "query": query,
-                "response": content,
-                "status_code": status_code,
-            }
-            logger.info("Webhook triggered with content: %s", message)
-
-            headers = {}
-            if settings.WEBHOOK_SECRET:
-                headers = {
-                    "Sign": hmac.new(
-                        bytes(settings.WEBHOOK_SECRET, encoding="utf-8"),
-                        bytes(json.dumps(message), encoding="utf-8"),
-                        digestmod=hashlib.sha512,
-                    ).hexdigest()
-                }
-
-            resp = await client.post(webhook_url, json=message, headers=headers)
-            if resp.status_code != 200:
-                logger.warning(f"Response received {webhook_url}")
-                logger.warning(
-                    f"Failed to send notification to {webhook_url} \n response: {resp.text} \n Message sent: {message} \n Headers: {headers}"
-                )
-
-    except Exception as e:
-        logger.warning(f"Failed to send notification to {webhook_url}", e)
 
 
 def register_webhooks(app: FastAPI) -> None:

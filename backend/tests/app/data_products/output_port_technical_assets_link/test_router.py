@@ -52,14 +52,14 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         assert response.status_code == 200
 
     def test_request_technical_asset_link_generates_webhook_v2_event(
-        self, client, mock_webhook
+        self, client, capture_events
     ):
         self.test_request_technical_asset_link(client)
-        assert_event_in_queue("output_port_technical_asset_link.event", mock_webhook)
+        assert_event_in_queue("output_port_technical_asset_link.event", capture_events)
 
     @pytest.mark.parametrize("enabled", [True, False])
     def test_request_technical_asset_link_with_consumers_and_event_sending_active_generates_webhook_v2_event(
-        self, client, mock_webhook, enabled: bool
+        self, client, capture_events, enabled: bool
     ):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
@@ -82,11 +82,11 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
                 client, data_product.id, technical_asset.id, ds.id
             )
         assert response.status_code == 200
-        assert_event_in_queue("output_port_technical_asset_link.event", mock_webhook)
+        assert_event_in_queue("output_port_technical_asset_link.event", capture_events)
         if enabled:
-            assert_event_in_queue("input_port.event", mock_webhook)
+            assert_event_in_queue("input_port.event", capture_events)
         else:
-            assert_event_not_in_queue("input_port.event", mock_webhook)
+            assert_event_not_in_queue("input_port.event", capture_events)
 
     def test_request_technical_asset_link_incompatible_access_modes(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
