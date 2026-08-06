@@ -5,7 +5,6 @@ import { setupListeners } from '@reduxjs/toolkit/query';
 import { useDispatch } from 'react-redux';
 import authSlice from '@/store/api/services/auth-slice.ts';
 import { api as generatedApiSlice } from '@/store/api/services/generated/completeServiceApi.ts';
-import { baseApiSlice } from '@/store/features/api/base-api-slice.ts';
 import cartSlice from '@/store/features/cart/cart-slice.ts';
 import wizardSlice from '@/store/features/wizard/wizard-slice.ts';
 import { isDevMode } from '@/utils/env-mode.helper.ts';
@@ -15,18 +14,14 @@ const store = configureStore({
         auth: authSlice,
         cart: cartSlice,
         wizard: wizardSlice,
-        [baseApiSlice.reducerPath]: baseApiSlice.reducer,
         [generatedApiSlice.reducerPath]: generatedApiSlice.reducer,
     },
-    middleware: (getDefaultMiddleware) =>
-        getDefaultMiddleware().concat(baseApiSlice.middleware).concat(generatedApiSlice.middleware),
+    middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(generatedApiSlice.middleware),
     devTools: isDevMode,
 });
 
-export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
 export const useAppDispatch = () => useDispatch<AppDispatch>();
-export const useAppSelector = (selector: (state: RootState) => unknown) => selector(store.getState());
 
 setupListeners(store.dispatch);
 
