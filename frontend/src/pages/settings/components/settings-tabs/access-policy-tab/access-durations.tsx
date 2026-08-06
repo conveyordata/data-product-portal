@@ -1,6 +1,6 @@
 import { InfoCircleOutlined } from '@ant-design/icons';
 import { Button, Checkbox, Flex, InputNumber, Select, Table, type TableColumnsType, Tooltip, Typography } from 'antd';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AbstractProductIcon } from '@/components/icons/index.tsx';
 import {
@@ -51,15 +51,28 @@ function toPolicies(durations: AccessDuration[]): ConsumerPolicy[] {
         .sort((a, b) => a.key.localeCompare(b.key));
 }
 
+function getPoliciesSignature(policies: ConsumerPolicy[]) {
+    return JSON.stringify(policies);
+}
+
 export default function AccessDurations() {
     const { t } = useTranslation();
     const { data: accessDurations } = useGetAllAccessDurationsQuery();
     const [policies, setPolicies] = useState<ConsumerPolicy[]>([]);
-    const [updateAccessDuration] = useUpdateAccessDurationMutation();
+    const [updateAccessDuration, { isLoading: isUpdating }] = useUpdateAccessDurationMutation();
 
     useEffect(() => {
-        if (accessDurations) setPolicies(toPolicies(accessDurations));
+        if (accessDurations) {
+            setPolicies(toPolicies(accessDurations));
+        }
     }, [accessDurations]);
+
+    const policiesSignature = useMemo(() => getPoliciesSignature(policies), [policies]);
+    const savedPoliciesSignature = useMemo(
+        () => getPoliciesSignature(accessDurations ? toPolicies(accessDurations) : []),
+        [accessDurations],
+    );
+    const hasChanges = policiesSignature !== savedPoliciesSignature;
 
     const updatePolicy = (key: AbstractDataProductType, patch: Partial<ConsumerPolicy>) => {
         setPolicies((prev) => prev.map((p) => (p.key === key ? { ...p, ...patch } : p)));
@@ -196,7 +209,7 @@ export default function AccessDurations() {
                 size="small"
             />
             <div>
-                <Button type="primary" onClick={handleSave}>
+                <Button type="primary" onClick={handleSave} disabled={!hasChanges || isUpdating}>
                     {t('Save')}
                 </Button>
             </div>
