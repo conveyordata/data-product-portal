@@ -23,7 +23,7 @@ type Props = {
     existingLinks: TechnicalAssetLink[];
 };
 
-export function DataOutputLinkModal({ onClose, dataProductId, datasetId, datasetName, existingLinks }: Props) {
+export function TechnicalAssetLinkModal({ onClose, dataProductId, datasetId, datasetName, existingLinks }: Props) {
     const { t } = useTranslation();
     const [selectedOutputs, setSelectedOutputs] = useState<Set<string>>(new Set());
 

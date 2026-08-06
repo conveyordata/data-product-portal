@@ -4,12 +4,12 @@ import type { TFunction } from 'i18next';
 import outputPortBorderIcon from '@/assets/icons/border-icons/output-port-border-icon.svg?react';
 import { InputPortActionButton } from '@/components/abstract-data-products/input-port-tab/components/input-port-table/input-port-action-button.component.tsx';
 import AccessMode from '@/components/access-modes/access-mode.component.tsx';
-import { DatasetPopoverTitle } from '@/components/datasets/dataset-popover-title/dataset-popover-title.tsx';
-import { OutputPortTitle } from '@/components/datasets/output-port-title/output-port-title.tsx';
 import EllipsisParagraph from '@/components/ellipsis-paragraph/ellipsis-paragraph.component.tsx';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
 import { ExpiryDate, IsExpiringSoonTag, RenewalTag } from '@/components/input-port/access-status.tsx';
 import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-avatar.component.tsx';
+import { OutputPortPopoverTitle } from '@/components/output-ports/output-port-popover-title/output-port-popover-title.tsx';
+import { OutputPortTitle } from '@/components/output-ports/output-port-title/output-port-title.tsx';
 import {
     type AbstractDataProductInputPort as InputPort,
     InputPortStatus,
@@ -51,7 +51,7 @@ export const getDataProductDatasetsColumns = ({
             render: (_, { output_port, status }) => {
                 const isDatasetRequestApproved = status === InputPortStatus.Approved;
                 const popoverTitle = (
-                    <DatasetPopoverTitle
+                    <OutputPortPopoverTitle
                         name={output_port.name}
                         accessType={output_port.access_type}
                         isApproved={isDatasetRequestApproved}

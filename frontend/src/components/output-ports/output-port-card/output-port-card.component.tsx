@@ -20,25 +20,32 @@ import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import { createMarketplaceOutputPortPath } from '@/types/navigation';
 import { dispatchMessage } from '@/utils/feedback.ts';
 import { getBadgeStatus, getDecisionStatusBadgeStatus, getStatusLabel } from '@/utils/status.helper';
-import { DataOutputLinkModal } from './data-output-link-modal.component';
-import styles from './dataset-card.module.scss';
+import { IncompatibleAccessModesModal } from './incompatible-access-modes-modal.component';
+import styles from './output-port-card.module.scss';
+import { TechnicalAssetLinkModal } from './technical-asset-link-modal.component.tsx';
 
 type Props = {
-    datasetId: string;
+    outputPortId: string;
     dataProductId: string;
     draggedDataOutputId?: string | null;
 };
 
-export function DatasetCard({ datasetId, dataProductId, draggedDataOutputId }: Props) {
+export function OutputPortCard({ outputPortId, dataProductId, draggedDataOutputId }: Props) {
     const { t } = useTranslation();
     const [dragOver, setDragOver] = useState(false);
     const [invalidDrop, setInvalidDrop] = useState(false);
     const { isVisible, handleOpen, handleClose } = useModal();
     const [isRemoved, setIsRemoved] = useState(false);
+    const [incompatibleAccessModesTechnicalAssetId, setIncompatibleAccessModesTechnicalAssetId] = useState<
+        string | null
+    >(null);
 
-    const { data: dataset, isLoading } = useGetOutputPortQuery({ id: datasetId, dataProductId }, { skip: isRemoved });
+    const { data: dataset, isLoading } = useGetOutputPortQuery(
+        { id: outputPortId, dataProductId },
+        { skip: isRemoved },
+    );
     const { data: deleteAccess } = useCheckAccessQuery({
-        resource: datasetId,
+        resource: outputPortId,
         action: AuthorizationAction.OUTPUT_PORT__DELETE,
     });
     const { data: linkAccess } = useCheckAccessQuery({
@@ -59,7 +66,7 @@ export function DatasetCard({ datasetId, dataProductId, draggedDataOutputId }: P
         setIsRemoved(true);
         if (!dataset) return;
         try {
-            await removeDataset({ id: datasetId, dataProductId }).unwrap();
+            await removeDataset({ id: outputPortId, dataProductId }).unwrap();
             dispatchMessage({
                 content: t('Output Port {{name}} has been successfully removed', { name: dataset.name }),
                 type: 'success',
@@ -70,14 +77,14 @@ export function DatasetCard({ datasetId, dataProductId, draggedDataOutputId }: P
                 type: 'error',
             });
         }
-    }, [removeDataset, dataset, t, dataProductId, datasetId]);
+    }, [removeDataset, dataset, t, dataProductId, outputPortId]);
 
     const handleRemoveDataOutputLink = useCallback(
         async (dataOutputId: string) => {
             if (!dataset) return;
             try {
                 await unlinkOutputPortFromTechnicalAsset({
-                    outputPortId: datasetId,
+                    outputPortId: outputPortId,
                     dataProductId,
                     unLinkTechnicalAssetToOutputPortRequest: { technical_asset_id: dataOutputId },
                 }).unwrap();
@@ -92,7 +99,7 @@ export function DatasetCard({ datasetId, dataProductId, draggedDataOutputId }: P
                 });
             }
         },
-        [unlinkOutputPortFromTechnicalAsset, dataset, t, dataProductId, datasetId],
+        [unlinkOutputPortFromTechnicalAsset, dataset, t, dataProductId, outputPortId],
     );
 
     const handleDragOver = (event: DragEvent) => {
@@ -124,9 +131,9 @@ export function DatasetCard({ datasetId, dataProductId, draggedDataOutputId }: P
     const handleDrop = async (event: React.DragEvent) => {
         event.preventDefault();
         setDragOver(false);
+        const dragData = JSON.parse(event.dataTransfer.getData('text/plain'));
 
         try {
-            const dragData = JSON.parse(event.dataTransfer.getData('text/plain'));
             if (dragData.type === 'data-output' && dataset) {
                 // Check if already linked
                 const isAlreadyLinked = dataset.technical_asset_links?.some(
@@ -144,7 +151,7 @@ export function DatasetCard({ datasetId, dataProductId, draggedDataOutputId }: P
                 }
 
                 await linkOutputPortToTechnicalAsset({
-                    outputPortId: dataset.id,
+                    outputPortId,
                     dataProductId,
                     linkTechnicalAssetToOutputPortRequest: {
                         technical_asset_id: dragData.id,
@@ -157,7 +164,7 @@ export function DatasetCard({ datasetId, dataProductId, draggedDataOutputId }: P
                 // TODO make this dependable on access rights
                 await approveLink({
                     dataProductId,
-                    outputPortId: datasetId,
+                    outputPortId,
                     approveLinkBetweenTechnicalAssetAndOutputPortRequest: {
                         technical_asset_id: dragData.id,
                     },
@@ -165,10 +172,7 @@ export function DatasetCard({ datasetId, dataProductId, draggedDataOutputId }: P
             }
         } catch (error) {
             if (isIncompatibleAccessModesError(error)) {
-                dispatchMessage({
-                    content: t('Technical Asset access modes are incompatible with Output Port access modes'),
-                    type: 'error',
-                });
+                setIncompatibleAccessModesTechnicalAssetId(dragData.id);
                 return;
             }
 
@@ -315,12 +319,20 @@ export function DatasetCard({ datasetId, dataProductId, draggedDataOutputId }: P
             </Card>
 
             {isVisible && (
-                <DataOutputLinkModal
+                <TechnicalAssetLinkModal
                     onClose={handleClose}
-                    datasetId={datasetId}
+                    datasetId={outputPortId}
                     dataProductId={dataProductId}
                     datasetName={dataset.name}
                     existingLinks={dataset.technical_asset_links || []}
+                />
+            )}
+            {incompatibleAccessModesTechnicalAssetId && (
+                <IncompatibleAccessModesModal
+                    onClose={() => setIncompatibleAccessModesTechnicalAssetId(null)}
+                    dataProductId={dataProductId}
+                    outputPortId={outputPortId}
+                    technicalAssetId={incompatibleAccessModesTechnicalAssetId}
                 />
             )}
         </>

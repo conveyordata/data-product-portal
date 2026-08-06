@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { OutputPortAccessType } from '@/store/api/services/generated/dataProductsApi.ts';
 import { getDatasetAccessTypeLabel } from '@/utils/access-type.helper';
 import { OutputPortAccessIcon } from '../output-port-access-icon/output-port-access-icon.tsx';
-import styles from './dataset-title.module.scss';
+import styles from './output-port-title.module.scss';
 
 type Props = {
     name: string;

@@ -12,7 +12,7 @@ type Props = {
     isApproved?: boolean;
 };
 
-export function DatasetPopoverTitle({ name, accessType, titleProps, isApproved }: Props) {
+export function OutputPortPopoverTitle({ name, accessType, titleProps, isApproved }: Props) {
     const { t } = useTranslation();
     const subtitle = isApproved ? t('Access granted') : t('Permission required');
 

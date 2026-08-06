@@ -3,8 +3,8 @@ import { Typography } from 'antd';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate, useParams } from 'react-router';
-import { DatasetForm } from '@/components/datasets/dataset-form/dataset-form.component';
 import { useBreadcrumbs } from '@/components/layout/navbar/breadcrumbs/breadcrumb.context.tsx';
+import { OutputPortForm } from '@/components/output-ports/output-port-form/output-port-form.component';
 import { useGetDataProductQuery } from '@/store/api/services/generated/dataProductsApi.ts';
 import { useGetOutputPortQuery } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
 import {
@@ -72,7 +72,7 @@ export function OutputPortEdit() {
     return (
         <>
             <Typography.Title level={3}>{data?.name}</Typography.Title>
-            <DatasetForm mode="edit" datasetId={datasetId} dataProductId={dataProductId} />
+            <OutputPortForm mode="edit" datasetId={datasetId} dataProductId={dataProductId} />
         </>
     );
 }
