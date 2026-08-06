@@ -23,11 +23,14 @@ export const explorationTags = {
     requestInputPortsForExploration: {
         invalidatesTags: (_, __, arg) => [
             { type: TagTypes.DataProduct, id: arg.id },
-            ...arg.requestInputPortsForExplorationRequest.output_ports.map((id) => ({
+            ...arg.requestInputPortsForExplorationRequest.output_ports.map((op) => ({
                 type: TagTypes.OutputPort,
-                id,
+                id: op.output_port_id,
             })),
-            ...arg.requestInputPortsForExplorationRequest.output_ports.map((id) => ({ type: TagTypes.History, id })),
+            ...arg.requestInputPortsForExplorationRequest.output_ports.map((op) => ({
+                type: TagTypes.History,
+                id: op.output_port_id,
+            })),
             { type: TagTypes.ExplorationInputPorts, id: arg.id },
             { type: TagTypes.MyRequests },
         ],

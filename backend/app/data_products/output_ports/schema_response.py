@@ -53,11 +53,11 @@ class BaseOutputPortGet(ORMModel):
     tags: list[Tag]
     domain: Domain
     lifecycle: Optional[DataProductLifeCycle]
+    access_modes: list[AccessMode]
 
 
 class GetOutputPortResponse(BaseOutputPortGet):
     about: Optional[str]
-    access_modes: list[AccessMode]
 
     rolled_up_tags: set[Tag]
     data_product_settings: list[OutputPortSettingValue]

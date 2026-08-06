@@ -308,11 +308,6 @@ type IngestOutputPortContractParams struct {
 	ID            uuid.UUID
 }
 
-// LinkInputPortsToDataProductParams is parameters of link_input_ports_to_data_product operation.
-type LinkInputPortsToDataProductParams struct {
-	ID uuid.UUID
-}
-
 // LinkOutputPortToTechnicalAssetParams is parameters of link_output_port_to_technical_asset operation.
 type LinkOutputPortToTechnicalAssetParams struct {
 	DataProductID uuid.UUID

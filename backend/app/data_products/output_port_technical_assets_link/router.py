@@ -11,6 +11,7 @@ from app.core.authz.resolvers import (
     DataProductResolver,
     DatasetResolver,
 )
+from app.core.errors.router_responses import process_errors_as_route_responses
 from app.data_products.output_port_technical_assets_link.schema_request import (
     ApproveLinkBetweenTechnicalAssetAndOutputPortRequest,
     DenyLinkBetweenTechnicalAssetAndOutputPortRequest,
@@ -24,7 +25,12 @@ from app.data_products.output_port_technical_assets_link.service import (
     TechnicalAssetOutputPortService,
 )
 from app.data_products.technical_assets import email
-from app.data_products.technical_assets.service import DataOutputService
+from app.data_products.technical_assets.service import (
+    TECHNICAL_ASSET_ACCESS_MODES_INCOMPATIBLE_ERROR,
+    TECHNICAL_ASSET_ALREADY_LINKED_ERROR,
+    TECHNICAL_ASSET_NOT_ACTIVE_ERROR,
+    DataOutputService,
+)
 from app.database.database import get_db_session
 from app.events.enums import EventReferenceEntity, EventType
 from app.events.schema import CreateEvent
@@ -40,6 +46,13 @@ router = APIRouter(
 
 @router.post(
     "/approve_link_request",
+    responses=process_errors_as_route_responses(
+        [
+            TECHNICAL_ASSET_NOT_ACTIVE_ERROR,
+            TECHNICAL_ASSET_ALREADY_LINKED_ERROR,
+            TECHNICAL_ASSET_ACCESS_MODES_INCOMPATIBLE_ERROR,
+        ]
+    ),
     dependencies=[
         Depends(
             Authorization.enforce(

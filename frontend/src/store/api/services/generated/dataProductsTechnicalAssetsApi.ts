@@ -316,6 +316,7 @@ export type OutputPort = {
   access_type: OutputPortAccessType;
   data_product_id: string;
   tags: Tag[];
+  access_modes: AccessMode[];
 };
 export type OutputPortLink = {
   id: string;

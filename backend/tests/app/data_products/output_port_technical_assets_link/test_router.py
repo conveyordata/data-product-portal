@@ -115,7 +115,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         response = self.request_technical_asset_output_port_link(
             client, data_product.id, technical_asset.id, ds.id
         )
-        assert response.status_code == 400, response.text
+        assert response.status_code == 409, response.text
         assert "incompatible" in response.text, response.text
 
     @patch(

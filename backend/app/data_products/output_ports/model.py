@@ -10,6 +10,7 @@ from sqlalchemy.orm import (
     Session,
     column_property,
     deferred,
+    foreign,
     mapped_column,
     relationship,
 )
@@ -19,6 +20,7 @@ from app.abstract_data_product.input_ports.model import (
 )
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.configuration.access_durations.enums import AccessDurationType
+from app.configuration.access_modes.model import AccessMode
 from app.configuration.tags.model import Tag, tag_dataset_table
 from app.core.webhooks.events import OutputPortEvent
 from app.data_products.output_port_technical_assets_link.model import (
@@ -29,6 +31,7 @@ from app.data_products.output_ports.data_quality.model import (  # noqa: TCH001
 )
 from app.data_products.output_ports.enums import OutputPortAccessType
 from app.data_products.output_ports.status import OutputPortStatus
+from app.data_products.technical_assets.model import TechnicalAssetAccessMode
 from app.database.database import Base, ensure_exists
 from app.database.event_mixin import EventTrackedMixin
 from app.shared.model import BaseORM
@@ -37,10 +40,24 @@ if TYPE_CHECKING:
     from app.authorization.role_assignments.output_port.model import (
         DatasetRoleAssignment,
     )
-    from app.configuration.access_modes.model import AccessMode
     from app.configuration.data_product_lifecycles.model import DataProductLifecycle
     from app.configuration.data_product_settings.model import DataProductSettingValue
     from app.data_products.model import DataProduct
+
+
+output_port_access_modes = (
+    select(
+        DataOutputDatasetAssociation.output_port_id.label("output_port_id"),
+        TechnicalAssetAccessMode.access_mode_id.label("access_mode_id"),
+    )
+    .join(
+        TechnicalAssetAccessMode,
+        DataOutputDatasetAssociation.data_output_id
+        == TechnicalAssetAccessMode.technical_asset_id,
+    )
+    .distinct()
+    .subquery()
+)
 
 
 class OutputPort(Base, BaseORM, EventTrackedMixin):
@@ -118,11 +135,16 @@ class OutputPort(Base, BaseORM, EventTrackedMixin):
     def data_product_name(self) -> str:
         return self.data_product.name
 
-    @property
-    def access_modes(self) -> list["AccessMode"]:
-        if not self.data_output_links:
-            return []
-        return self.data_output_links[0].data_output.access_modes
+    access_modes: Mapped[list["AccessMode"]] = relationship(
+        AccessMode,
+        secondary=output_port_access_modes,
+        primaryjoin=id == foreign(output_port_access_modes.c.output_port_id),
+        secondaryjoin=AccessMode.id
+        == foreign(output_port_access_modes.c.access_mode_id),
+        order_by="AccessMode.name",
+        viewonly=True,
+        lazy="selectin",
+    )
 
     abstract_data_product_count = deferred(
         column_property(

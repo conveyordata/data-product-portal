@@ -197,6 +197,11 @@ export type InputPortRequestDecision =
   | "approved"
   | "denied"
   | "cancelled";
+export type AccessMode = {
+  id: string;
+  name: string;
+  description: string;
+};
 export type AbstractDataProductType =
   | "unknown"
   | "data_products"
@@ -225,6 +230,7 @@ export type OutputPort = {
   access_type: OutputPortAccessType;
   data_product_id: string;
   tags: Tag[];
+  access_modes: AccessMode[];
 };
 export type RenewalStatus = "pending" | "denied";
 export type InputPortRequestBase = {
@@ -242,6 +248,7 @@ export type InputPortRequestBase = {
   revoked_by?: User | null;
   created_on: string;
   requested_on: string;
+  access_mode?: AccessMode | null;
 };
 export type UserInputPort = {
   id: string;
@@ -267,6 +274,7 @@ export type InputPortRequest = {
   revoked_by?: User | null;
   created_on: string;
   requested_on: string;
+  access_mode?: AccessMode | null;
   request_type?: "InputPort";
   input_port: UserInputPort;
 };

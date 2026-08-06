@@ -16,8 +16,7 @@ import {
     useGetDataProductsQuery,
     useRequestInputPortsForDataProductMutation,
 } from '@/store/api/services/generated/dataProductsApi.ts';
-import type { SearchOutputPortsResponseItem } from '@/store/api/services/generated/outputPortsSearchApi.ts';
-import { clearCart } from '@/store/features/cart/cart-slice.ts';
+import { clearCart, selectCartOutputPorts } from '@/store/features/cart/cart-slice.ts';
 import { createDataProductIdPath } from '@/types/navigation.ts';
 import { dispatchMessage } from '@/utils/feedback.ts';
 
@@ -27,11 +26,11 @@ type CartFormData = {
 };
 
 type Props = {
-    cartOutputPorts?: SearchOutputPortsResponseItem[];
     setSelectedDataProductId: (id?: string) => void;
 };
 
-export const ExistingDataProductForm = ({ cartOutputPorts, setSelectedDataProductId }: Props) => {
+export const ExistingDataProductForm = ({ setSelectedDataProductId }: Props) => {
+    const cartOutputPorts = useSelector(selectCartOutputPorts);
     const dispatch = useAppDispatch();
     const posthog = usePostHog();
     const navigate = useNavigate();
@@ -106,7 +105,10 @@ export const ExistingDataProductForm = ({ cartOutputPorts, setSelectedDataProduc
         requestInputPortsForDataProduct({
             id: values.dataProductId,
             requestInputPortsForDataProductRequest: {
-                output_ports: cartOutputPorts?.map((dataset) => dataset.id),
+                output_ports: cartOutputPorts.map((cartOutputPort) => ({
+                    output_port_id: cartOutputPort.outputPortId,
+                    access_mode_id: cartOutputPort.accessModeId,
+                })),
                 justification: values.justification,
             },
         });

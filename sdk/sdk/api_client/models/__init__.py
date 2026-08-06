@@ -196,8 +196,6 @@ from .input_port_request_base import InputPortRequestBase
 from .input_port_request_decision import InputPortRequestDecision
 from .input_port_status import InputPortStatus
 from .is_admin_response import IsAdminResponse
-from .link_input_ports_to_data_product import LinkInputPortsToDataProduct
-from .link_input_ports_to_data_product_post import LinkInputPortsToDataProductPost
 from .link_technical_asset_to_output_port_request import (
     LinkTechnicalAssetToOutputPortRequest,
 )
@@ -285,6 +283,9 @@ from .renew_input_port_for_exploration_response import (
 )
 from .renewal_status import RenewalStatus
 from .request_data_product_role_assignment import RequestDataProductRoleAssignment
+from .request_input_ports_for_abstract_data_product_request_item import (
+    RequestInputPortsForAbstractDataProductRequestItem,
+)
 from .request_input_ports_for_data_product_request import (
     RequestInputPortsForDataProductRequest,
 )
@@ -526,8 +527,6 @@ __all__ = (
     "InputPortRequestDecision",
     "InputPortStatus",
     "IsAdminResponse",
-    "LinkInputPortsToDataProduct",
-    "LinkInputPortsToDataProductPost",
     "LinkTechnicalAssetsToOutputPortResponse",
     "LinkTechnicalAssetToOutputPortRequest",
     "ListDataProductRoleAssignmentsResponse",
@@ -589,6 +588,7 @@ __all__ = (
     "RenewInputPortForDataProductResponse",
     "RenewInputPortForExplorationResponse",
     "RequestDataProductRoleAssignment",
+    "RequestInputPortsForAbstractDataProductRequestItem",
     "RequestInputPortsForDataProductRequest",
     "RequestInputPortsForDataProductResponse",
     "RequestInputPortsForExplorationRequest",

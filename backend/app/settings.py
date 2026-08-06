@@ -88,6 +88,7 @@ class Settings(BaseSettings):
         "ConveyorPlugin",
         "GlueTechnicalAssetConfiguration",
         "S3TechnicalAssetConfiguration",
+        "DatabricksTechnicalAssetConfiguration",
     ]
 
     AWS_SESSION_DURATION: int = 900

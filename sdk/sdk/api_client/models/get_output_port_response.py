@@ -40,8 +40,8 @@ class GetOutputPortResponse:
         tags (list[Tag]):
         domain (Domain):
         lifecycle (DataProductLifeCycle | None):
-        about (None | str):
         access_modes (list[AccessMode]):
+        about (None | str):
         rolled_up_tags (list[Tag]):
         data_product_settings (list[OutputPortSettingValue]):
         technical_asset_links (list[TechnicalAssetLink]):
@@ -60,8 +60,8 @@ class GetOutputPortResponse:
     tags: list[Tag]
     domain: Domain
     lifecycle: DataProductLifeCycle | None
-    about: None | str
     access_modes: list[AccessMode]
+    about: None | str
     rolled_up_tags: list[Tag]
     data_product_settings: list[OutputPortSettingValue]
     technical_asset_links: list[TechnicalAssetLink]
@@ -104,13 +104,13 @@ class GetOutputPortResponse:
         else:
             lifecycle = self.lifecycle
 
-        about: None | str
-        about = self.about
-
         access_modes = []
         for access_modes_item_data in self.access_modes:
             access_modes_item = access_modes_item_data.to_dict()
             access_modes.append(access_modes_item)
+
+        about: None | str
+        about = self.about
 
         rolled_up_tags = []
         for rolled_up_tags_item_data in self.rolled_up_tags:
@@ -144,8 +144,8 @@ class GetOutputPortResponse:
                 "tags": tags,
                 "domain": domain,
                 "lifecycle": lifecycle,
-                "about": about,
                 "access_modes": access_modes,
+                "about": about,
                 "rolled_up_tags": rolled_up_tags,
                 "data_product_settings": data_product_settings,
                 "technical_asset_links": technical_asset_links,
@@ -217,19 +217,19 @@ class GetOutputPortResponse:
 
         lifecycle = _parse_lifecycle(d.pop("lifecycle"))
 
-        def _parse_about(data: object) -> None | str:
-            if data is None:
-                return data
-            return cast(None | str, data)
-
-        about = _parse_about(d.pop("about"))
-
         access_modes = []
         _access_modes = d.pop("access_modes")
         for access_modes_item_data in _access_modes:
             access_modes_item = AccessMode.from_dict(access_modes_item_data)
 
             access_modes.append(access_modes_item)
+
+        def _parse_about(data: object) -> None | str:
+            if data is None:
+                return data
+            return cast(None | str, data)
+
+        about = _parse_about(d.pop("about"))
 
         rolled_up_tags = []
         _rolled_up_tags = d.pop("rolled_up_tags")
@@ -270,8 +270,8 @@ class GetOutputPortResponse:
             tags=tags,
             domain=domain,
             lifecycle=lifecycle,
-            about=about,
             access_modes=access_modes,
+            about=about,
             rolled_up_tags=rolled_up_tags,
             data_product_settings=data_product_settings,
             technical_asset_links=technical_asset_links,

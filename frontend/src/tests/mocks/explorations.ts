@@ -74,6 +74,7 @@ const mockInputPorts: InputPort[] = [
             access_type: OutputPortAccessType.Public,
             data_product_id: 'dp-1',
             tags: [],
+            access_modes: [],
         },
     },
 ];

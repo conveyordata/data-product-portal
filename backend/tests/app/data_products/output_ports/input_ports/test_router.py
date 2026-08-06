@@ -51,29 +51,7 @@ class TestInputPortsRouter:
         response = self.request_input_ports_for_data_product(
             client, data_product.id, [ds.id]
         )
-        assert response.status_code == 200
-        history_response = self.get_data_product_history(client, data_product.id)
-        assert history_response.status_code == 200, history_response.text
-        assert len(history_response.json()) == 1
-
-    def test_request_input_ports_for_data_product_deprecated(self, client):
-        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        role = RoleFactory(
-            scope=Scope.DATA_PRODUCT,
-            permissions=[Action.DATA_PRODUCT__REQUEST_OUTPUT_PORT_ACCESS],
-        )
-        data_product = DataProductFactory()
-        DataProductRoleAssignmentFactory(
-            user_id=user.id,
-            role_id=role.id,
-            data_product_id=data_product.id,
-        )
-        ds = OutputPortFactory()
-
-        response = self.request_input_ports_for_data_product_deprecated(
-            client, data_product.id, [ds.id]
-        )
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
         history_response = self.get_data_product_history(client, data_product.id)
         assert history_response.status_code == 200, history_response.text
         assert len(history_response.json()) == 1
@@ -838,7 +816,8 @@ class TestInputPortsRouter:
             f"{DATA_PRODUCTS_ENDPOINT}/{data_product_id}/input_ports",
             json={
                 "output_ports": [
-                    str(output_port_id) for output_port_id in output_port_ids
+                    {"output_port_id": str(output_port_id)}
+                    for output_port_id in output_port_ids
                 ],
                 "justification": justification,
             },
@@ -1072,7 +1051,9 @@ class TestInputPortConsumptionTracking:
         return client.post(
             f"{DATA_PRODUCTS_ENDPOINT}/{data_product_id}/input_ports",
             json={
-                "output_ports": [str(oid) for oid in output_port_ids],
+                "output_ports": [
+                    {"output_port_id": str(oid)} for oid in output_port_ids
+                ],
                 "justification": justification,
             },
         )

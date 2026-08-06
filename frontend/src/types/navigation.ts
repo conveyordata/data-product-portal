@@ -1,6 +1,6 @@
 import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
-import { TabKeys as DatasetTabKeys } from '@/pages/dataset/components/dataset-tabs/dataset-tabkeys';
 import { ExplorationTabKeys } from '@/pages/exploration/exploration-tab-keys.ts';
+import { TabKeys as DatasetTabKeys } from '@/pages/output-port/components/dataset-tabs/dataset-tabkeys';
 import { TabKeys as TechnicalAssetTabKeys } from '@/pages/technical-asset/components/technical-asset-tabs/technical-asset-tabkeys';
 import { AbstractDataProductType } from '@/store/api/services/generated/dataProductsOutputPortsInputPortsApi.ts';
 

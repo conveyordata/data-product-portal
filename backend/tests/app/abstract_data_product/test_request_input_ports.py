@@ -11,6 +11,9 @@ from app.abstract_data_product.input_ports.enums import (
     InputPortStatus,
 )
 from app.abstract_data_product.input_ports.model import InputPortRequest
+from app.abstract_data_product.schema_request import (
+    RequestInputPortsForAbstractDataProductRequestItem,
+)
 from app.abstract_data_product.service import AbstractDataProductService
 from app.abstract_data_product.type import AbstractDataProductType
 from app.authorization.role_assignments.enums import DecisionStatus
@@ -59,7 +62,14 @@ class TestRequestInputPortsDuration:
         )
 
         [ip] = AbstractDataProductService(test_session).request_input_ports(
-            dp.id, [port.id], "need access", actor=actor
+            dp.id,
+            [
+                RequestInputPortsForAbstractDataProductRequestItem(
+                    output_port_id=port.id
+                )
+            ],
+            "need access",
+            actor=actor,
         )
 
         req = _request_for(ip)
@@ -73,7 +83,14 @@ class TestRequestInputPortsDuration:
         port = OutputPortFactory(access_type=OutputPortAccessType.UNRESTRICTED)
 
         [ip] = AbstractDataProductService(test_session).request_input_ports(
-            dp.id, [port.id], "need access", actor=actor
+            dp.id,
+            [
+                RequestInputPortsForAbstractDataProductRequestItem(
+                    output_port_id=port.id
+                )
+            ],
+            "need access",
+            actor=actor,
         )
 
         req = _request_for(ip)
@@ -95,7 +112,14 @@ class TestRequestInputPortsDuration:
         )
 
         [ip] = AbstractDataProductService(test_session).request_input_ports(
-            exploration.id, [port.id], "need access", actor=actor
+            exploration.id,
+            [
+                RequestInputPortsForAbstractDataProductRequestItem(
+                    output_port_id=port.id
+                )
+            ],
+            "need access",
+            actor=actor,
         )
 
         req = _request_for(ip)
@@ -112,7 +136,14 @@ class TestRequestInputPortsDuration:
 
         with pytest.raises(HTTPException) as exc:
             AbstractDataProductService(test_session).request_input_ports(
-                dp.id, [port.id], "need access", actor=actor
+                dp.id,
+                [
+                    RequestInputPortsForAbstractDataProductRequestItem(
+                        output_port_id=port.id
+                    )
+                ],
+                "need access",
+                actor=actor,
             )
         assert exc.value.status_code == 500
 
@@ -132,7 +163,14 @@ class TestRequestInputPortsDuration:
 
         with pytest.raises(HTTPException) as exc:
             AbstractDataProductService(test_session).request_input_ports(
-                dp.id, [port.id], "again", actor=actor
+                dp.id,
+                [
+                    RequestInputPortsForAbstractDataProductRequestItem(
+                        output_port_id=port.id
+                    )
+                ],
+                "again",
+                actor=actor,
             )
         assert exc.value.status_code == 400
         assert len(_requests_for(link.id)) == 1
@@ -151,10 +189,13 @@ class TestRequestInputPortsDuration:
 
         [ip] = AbstractDataProductService(test_session).request_input_ports(
             dp.id,
-            [port.id],
+            [
+                RequestInputPortsForAbstractDataProductRequestItem(
+                    output_port_id=port.id, access_mode_id=access_mode.id
+                )
+            ],
             "need access",
             actor=actor,
-            access_mode_id=access_mode.id,
         )
         assert ip.latest_request.access_mode_id == access_mode.id
 
@@ -173,7 +214,14 @@ class TestRequestInputPortsDuration:
 
         with pytest.raises(HTTPException) as exc:
             AbstractDataProductService(test_session).request_input_ports(
-                dp.id, [port.id], "need access", actor=actor
+                dp.id,
+                [
+                    RequestInputPortsForAbstractDataProductRequestItem(
+                        output_port_id=port.id
+                    )
+                ],
+                "need access",
+                actor=actor,
             )
 
         assert exc.value.status_code == 400
@@ -194,13 +242,48 @@ class TestRequestInputPortsDuration:
         with pytest.raises(HTTPException) as exc:
             AbstractDataProductService(test_session).request_input_ports(
                 dp.id,
-                [port.id],
+                [
+                    RequestInputPortsForAbstractDataProductRequestItem(
+                        output_port_id=port.id, access_mode_id=uuid.uuid4()
+                    )
+                ],
                 "need access",
                 actor=actor,
-                access_mode_id=uuid.uuid4(),
             )
 
         assert exc.value.status_code == 400
+
+    def test_request_input_ports__access_mode_from_any_linked_technical_asset(self):
+        actor = UserFactory()
+        dp = DataProductFactory()
+        port = OutputPortFactory(
+            access_type=OutputPortAccessType.UNRESTRICTED,
+        )
+        denied_mode = AccessModeFactory(name="denied mode")
+        approved_mode = AccessModeFactory(name="approved mode")
+        TechnicalAssetOutputPortAssociationFactory(
+            data_output=TechnicalAssetFactory(access_modes=[denied_mode]),
+            output_port=port,
+            status=DecisionStatus.DENIED,
+        )
+        TechnicalAssetOutputPortAssociationFactory(
+            data_output=TechnicalAssetFactory(access_modes=[approved_mode]),
+            output_port=port,
+            status=DecisionStatus.APPROVED,
+        )
+
+        [ip] = AbstractDataProductService(test_session).request_input_ports(
+            dp.id,
+            [
+                RequestInputPortsForAbstractDataProductRequestItem(
+                    output_port_id=port.id, access_mode_id=approved_mode.id
+                )
+            ],
+            "need access",
+            actor=actor,
+        )
+
+        assert ip.latest_request.access_mode_id == approved_mode.id
 
     def _restricted_time_bound_port(self):
         port = OutputPortFactory(

@@ -11,31 +11,41 @@ export enum ExistingOrNew {
     new = 'new',
 }
 
+export type CartOutputPort = {
+    outputPortId: string;
+    accessModeId?: string;
+};
+
 export type CartState = {
-    DatasetIds: string[];
+    outputPortIds: CartOutputPort[];
     dataProductTypeChoice: DataProductChoiceOptions | null;
     existingOrNewChoice: ExistingOrNew | null;
 };
 
-const DATASET_IDS_KEY = 'CartDatasetIds';
+const OUTPUT_PORT_IDS_KEY = 'CartOutputPortIds';
 const EXPLORATION_CHOICES_KEY = 'CartExplorationChoices';
 
-const saveDatasetIds = (datasetIds: string[]): void => {
-    localStorage.setItem(DATASET_IDS_KEY, JSON.stringify(datasetIds));
+const saveOutputPortIds = (outputPorts: CartOutputPort[]): void => {
+    localStorage.setItem(OUTPUT_PORT_IDS_KEY, JSON.stringify(outputPorts));
 };
 
-const loadDatasetIds = (): string[] => {
+const loadOutputPortIds = (): CartOutputPort[] => {
     try {
-        const stored = localStorage.getItem(DATASET_IDS_KEY);
-        return stored ? JSON.parse(stored) : [];
+        const stored = localStorage.getItem(OUTPUT_PORT_IDS_KEY);
+        if (!stored) {
+            return [];
+        }
+
+        const parsed: unknown = JSON.parse(stored);
+        return Array.isArray(parsed) ? (parsed as CartOutputPort[]) : [];
     } catch (error) {
-        console.error('Failed to load dataset IDs from localStorage:', error);
+        console.error('Failed to load output port IDs from localStorage:', error);
         return [];
     }
 };
 
-const clearDatasetIds = (): void => {
-    localStorage.removeItem(DATASET_IDS_KEY);
+const clearOutputPortIds = (): void => {
+    localStorage.removeItem(OUTPUT_PORT_IDS_KEY);
 };
 
 const saveExplorationChoices = (dataProductTypeChoice: string | null, existingOrNewChoice: string | null): void => {
@@ -61,41 +71,63 @@ const { dataProductTypeChoice: initialDataProductTypeChoice, existingOrNewChoice
 const cartSlice = createSlice({
     name: 'cart',
     initialState: {
-        DatasetIds: loadDatasetIds(),
+        outputPortIds: loadOutputPortIds(),
         dataProductTypeChoice: initialDataProductTypeChoice,
         existingOrNewChoice: initialExistingOrNewChoice,
     } as CartState,
     reducers: {
-        addDatasetToCart: (
+        addOutputPortToCart: (
             state,
             {
-                payload: { datasetId },
+                payload: { outputPortId, accessModeId },
             }: PayloadAction<{
-                datasetId: string;
+                outputPortId: string;
+                accessModeId?: string;
             }>,
         ) => {
-            if (state.DatasetIds.includes(datasetId)) {
-                console.error('We tried to add a dataset id that is already in the cart');
+            if (state.outputPortIds.some((item) => item.outputPortId === outputPortId)) {
+                console.error('We tried to add an output port that is already in the cart');
                 return;
             }
-            state.DatasetIds = [...state.DatasetIds, datasetId];
-            saveDatasetIds(state.DatasetIds);
+
+            state.outputPortIds = [...state.outputPortIds, { outputPortId, accessModeId }];
+            saveOutputPortIds(state.outputPortIds);
         },
-        removeDatasetFromCart: (
+        removeOutputPortFromCart: (
             state,
             {
-                payload: { datasetId },
+                payload: { outputPortId },
             }: PayloadAction<{
-                datasetId: string;
+                outputPortId: string;
             }>,
         ) => {
-            state.DatasetIds = state.DatasetIds.filter((id) => id !== datasetId);
-            saveDatasetIds(state.DatasetIds);
+            state.outputPortIds = state.outputPortIds.filter((item) => item.outputPortId !== outputPortId);
+            saveOutputPortIds(state.outputPortIds);
+        },
+        selectAccessModeForOutputPortInCart: (
+            state,
+            {
+                payload: { outputPortId, accessModeId },
+            }: PayloadAction<{
+                outputPortId: string;
+                accessModeId: string;
+            }>,
+        ) => {
+            const outputPortExists = state.outputPortIds.some((item) => item.outputPortId === outputPortId);
+            if (!outputPortExists) {
+                console.error('We tried to select an access mode for an output port that is not in the cart');
+                return;
+            }
+
+            state.outputPortIds = state.outputPortIds.map((item) =>
+                item.outputPortId === outputPortId ? { ...item, accessModeId } : item,
+            );
+            saveOutputPortIds(state.outputPortIds);
         },
         clearCart: (state) => {
-            clearDatasetIds();
+            clearOutputPortIds();
             clearExplorationChoicesStorage();
-            state.DatasetIds = [];
+            state.outputPortIds = [];
             state.dataProductTypeChoice = null;
             state.existingOrNewChoice = null;
         },
@@ -114,15 +146,26 @@ const cartSlice = createSlice({
         },
     },
     selectors: {
-        selectCartDatasetIds: (state) => state.DatasetIds,
+        selectCartOutputPortIds: (state) => state.outputPortIds.map((item) => item.outputPortId),
+        selectCartOutputPorts: (state) => state.outputPortIds,
         selectCartDataProductTypeChoice: (state) => state.dataProductTypeChoice,
         selectCartExistingOrNewChoice: (state) => state.existingOrNewChoice,
     },
 });
 
-export const { addDatasetToCart, removeDatasetFromCart, clearCart, setCartExplorationChoices } = cartSlice.actions;
+export const {
+    addOutputPortToCart,
+    removeOutputPortFromCart,
+    selectAccessModeForOutputPortInCart,
+    clearCart,
+    setCartExplorationChoices,
+} = cartSlice.actions;
 
 export default cartSlice.reducer;
 
-export const { selectCartDatasetIds, selectCartDataProductTypeChoice, selectCartExistingOrNewChoice } =
-    cartSlice.selectors;
+export const {
+    selectCartOutputPortIds,
+    selectCartOutputPorts,
+    selectCartDataProductTypeChoice,
+    selectCartExistingOrNewChoice,
+} = cartSlice.selectors;

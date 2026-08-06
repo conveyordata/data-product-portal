@@ -15,6 +15,7 @@ import {
     useLinkOutputPortToTechnicalAssetMutation,
     useUnlinkOutputPortFromTechnicalAssetMutation,
 } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
+import { isIncompatibleAccessModesError } from '@/store/common/errors.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import { createMarketplaceOutputPortPath } from '@/types/navigation';
 import { dispatchMessage } from '@/utils/feedback.ts';
@@ -50,8 +51,8 @@ export function DatasetCard({ datasetId, dataProductId, draggedDataOutputId }: P
     });
 
     const [removeDataset, { isLoading: isRemoving }] = useRemoveOutputPortMutation();
-    const [unlinkDataset] = useUnlinkOutputPortFromTechnicalAssetMutation();
-    const [linkDataset] = useLinkOutputPortToTechnicalAssetMutation();
+    const [unlinkOutputPortFromTechnicalAsset] = useUnlinkOutputPortFromTechnicalAssetMutation();
+    const [linkOutputPortToTechnicalAsset] = useLinkOutputPortToTechnicalAssetMutation();
     const [approveLink] = useApproveOutputPortTechnicalAssetLinkMutation();
 
     const handleRemoveDataset = useCallback(async () => {
@@ -75,7 +76,7 @@ export function DatasetCard({ datasetId, dataProductId, draggedDataOutputId }: P
         async (dataOutputId: string) => {
             if (!dataset) return;
             try {
-                await unlinkDataset({
+                await unlinkOutputPortFromTechnicalAsset({
                     outputPortId: datasetId,
                     dataProductId,
                     unLinkTechnicalAssetToOutputPortRequest: { technical_asset_id: dataOutputId },
@@ -91,7 +92,7 @@ export function DatasetCard({ datasetId, dataProductId, draggedDataOutputId }: P
                 });
             }
         },
-        [unlinkDataset, dataset, t, dataProductId, datasetId],
+        [unlinkOutputPortFromTechnicalAsset, dataset, t, dataProductId, datasetId],
     );
 
     const handleDragOver = (event: DragEvent) => {
@@ -142,7 +143,7 @@ export function DatasetCard({ datasetId, dataProductId, draggedDataOutputId }: P
                     return;
                 }
 
-                await linkDataset({
+                await linkOutputPortToTechnicalAsset({
                     outputPortId: dataset.id,
                     dataProductId,
                     linkTechnicalAssetToOutputPortRequest: {
@@ -162,7 +163,15 @@ export function DatasetCard({ datasetId, dataProductId, draggedDataOutputId }: P
                     },
                 }).unwrap();
             }
-        } catch (_error) {
+        } catch (error) {
+            if (isIncompatibleAccessModesError(error)) {
+                dispatchMessage({
+                    content: t('Technical Asset access modes are incompatible with Output Port access modes'),
+                    type: 'error',
+                });
+                return;
+            }
+
             dispatchMessage({
                 content: t('Failed to link Technical Asset to Output Port'),
                 type: 'error',

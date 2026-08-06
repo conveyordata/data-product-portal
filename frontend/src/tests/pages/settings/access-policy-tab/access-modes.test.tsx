@@ -9,7 +9,7 @@ describe('AccessModes', () => {
         renderWithProviders(<AccessModes />);
 
         await waitFor(() => {
-            expect(screen.getByText('Access Modes')).toBeInTheDocument();
+            expect(screen.getByText('Access modes')).toBeInTheDocument();
             expect(screen.getByText('Read Only')).toBeInTheDocument();
             expect(screen.getByText('Read Write')).toBeInTheDocument();
             expect(screen.getByText('Read-only access to data')).toBeInTheDocument();

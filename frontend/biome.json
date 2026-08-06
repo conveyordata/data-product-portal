@@ -82,7 +82,8 @@
                     "options": {
                         "paths": {
                             "@/components/explorer/internal-explorer": "Use Explorer from @/components/explorer/ixplorer instead.",
-                            "@/components/global-explorer/internal-explorer": "Use FullExplorer from @/components/global-explorer/full-explorer instead."
+                            "@/components/global-explorer/internal-explorer": "Use FullExplorer from @/components/global-explorer/full-explorer instead.",
+                            "antd/es/form/Form": "Use Form.useForm from antd instead."
                         }
                     }
                 },

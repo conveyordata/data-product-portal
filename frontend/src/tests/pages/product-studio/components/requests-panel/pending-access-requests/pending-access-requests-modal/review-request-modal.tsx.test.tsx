@@ -26,6 +26,7 @@ const mockInputPortAction: InputPortRequest = {
             access_type: 'restricted',
             data_product_id: 'dp-1',
             tags: [],
+            access_modes: [],
         },
         consuming_abstract_data_product: {
             name: 'Marketing Analytics',

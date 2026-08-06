@@ -478,6 +478,11 @@ export type Tag = {
   id: string;
   value: string;
 };
+export type AccessMode = {
+  id: string;
+  name: string;
+  description: string;
+};
 export type OutputPort = {
   id: string;
   name: string;
@@ -487,6 +492,7 @@ export type OutputPort = {
   access_type: OutputPortAccessType;
   data_product_id: string;
   tags: Tag[];
+  access_modes: AccessMode[];
 };
 export type GetDataProductOutputPortsResponse = {
   output_ports: OutputPort[];
@@ -517,11 +523,6 @@ export type DataProductLifeCycle = {
   value: number;
   color: string;
   is_default: boolean;
-};
-export type AccessMode = {
-  id: string;
-  name: string;
-  description: string;
 };
 export type DataProductSetting = {
   id: string;
@@ -662,8 +663,8 @@ export type GetOutputPortResponse = {
   tags: Tag[];
   domain: Domain;
   lifecycle: DataProductLifeCycle | null;
-  about: string | null;
   access_modes: AccessMode[];
+  about: string | null;
   rolled_up_tags: Tag[];
   data_product_settings: OutputPortSettingValue[];
   technical_asset_links: TechnicalAssetLink[];

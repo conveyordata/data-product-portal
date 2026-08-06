@@ -13,6 +13,7 @@ from ..models.input_port_request_decision import InputPortRequestDecision
 from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
+    from ..models.access_mode import AccessMode
     from ..models.user import User
 
 
@@ -37,6 +38,7 @@ class InputPortRequestBase:
         decided_by (None | Unset | User):
         revoked_at (datetime.datetime | None | Unset):
         revoked_by (None | Unset | User):
+        access_mode (AccessMode | None | Unset):
     """
 
     id: UUID
@@ -53,9 +55,11 @@ class InputPortRequestBase:
     decided_by: None | Unset | User = UNSET
     revoked_at: datetime.datetime | None | Unset = UNSET
     revoked_by: None | Unset | User = UNSET
+    access_mode: AccessMode | None | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
+        from ..models.access_mode import AccessMode
         from ..models.user import User
 
         id = str(self.id)
@@ -122,6 +126,14 @@ class InputPortRequestBase:
         else:
             revoked_by = self.revoked_by
 
+        access_mode: dict[str, Any] | None | Unset
+        if isinstance(self.access_mode, Unset):
+            access_mode = UNSET
+        elif isinstance(self.access_mode, AccessMode):
+            access_mode = self.access_mode.to_dict()
+        else:
+            access_mode = self.access_mode
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
@@ -148,11 +160,14 @@ class InputPortRequestBase:
             field_dict["revoked_at"] = revoked_at
         if revoked_by is not UNSET:
             field_dict["revoked_by"] = revoked_by
+        if access_mode is not UNSET:
+            field_dict["access_mode"] = access_mode
 
         return field_dict
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        from ..models.access_mode import AccessMode
         from ..models.user import User
 
         d = dict(src_dict)
@@ -273,6 +288,23 @@ class InputPortRequestBase:
 
         revoked_by = _parse_revoked_by(d.pop("revoked_by", UNSET))
 
+        def _parse_access_mode(data: object) -> AccessMode | None | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, dict):
+                    raise TypeError()
+                access_mode_type_0 = AccessMode.from_dict(data)
+
+                return access_mode_type_0
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            return cast(AccessMode | None | Unset, data)
+
+        access_mode = _parse_access_mode(d.pop("access_mode", UNSET))
+
         input_port_request_base = cls(
             id=id,
             justification=justification,
@@ -288,6 +320,7 @@ class InputPortRequestBase:
             decided_by=decided_by,
             revoked_at=revoked_at,
             revoked_by=revoked_by,
+            access_mode=access_mode,
         )
 
         input_port_request_base.additional_properties = d

@@ -16,6 +16,7 @@ from app.settings import settings
 from tests import test_session
 from tests.factories import (
     AccessDurationFactory,
+    AccessModeFactory,
     DataProductFactory,
     DataProductRoleAssignmentFactory,
     DataProductSettingFactory,
@@ -399,6 +400,35 @@ class TestOutputPortRouter:
         )
         dataset = self.get_output_port(client, ds.id, ds.data_product.id)
         assert dataset.status_code == 200
+
+    def test_get_output_port__deduplicates_access_modes(self, client):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        role = RoleFactory(
+            scope=Scope.DATASET, permissions=[AuthorizationAction.OUTPUT_PORT__DELETE]
+        )
+        data_product = DataProductFactory()
+        shared_access_mode = AccessModeFactory(name="shared")
+        ds = OutputPortFactory(data_product=data_product)
+        TechnicalAssetOutputPortAssociationFactory(
+            output_port=ds,
+            data_output=TechnicalAssetFactory(
+                owner=data_product, access_modes=[shared_access_mode]
+            ),
+        )
+        TechnicalAssetOutputPortAssociationFactory(
+            output_port=ds,
+            data_output=TechnicalAssetFactory(
+                owner=data_product, access_modes=[shared_access_mode]
+            ),
+        )
+        DatasetRoleAssignmentFactory(
+            user_id=user.id, role_id=role.id, output_port_id=ds.id
+        )
+
+        dataset = self.get_output_port(client, ds.id, ds.data_product.id)
+        assert dataset.status_code == 200
+        assert len(dataset.json()["access_modes"]) == 1
+        assert dataset.json()["access_modes"][0]["id"] == str(shared_access_mode.id)
 
     def test_update_dataset_with_invalid_dataset_id(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)

@@ -7,7 +7,6 @@ import { useCheckAccessQuery } from '@/store/api/services/generated/authorizatio
 import { useGetTagsQuery } from '@/store/api/services/generated/configurationTagsApi.ts';
 import { useGetDataProductQuery } from '@/store/api/services/generated/dataProductsApi.ts';
 import {
-    type DataOutputUpdate,
     useGetTechnicalAssetQuery,
     useRemoveTechnicalAssetMutation,
     useUpdateTechnicalAssetMutation,
@@ -89,16 +88,14 @@ export function TechnicalAssetForm({ mode, dataProductId, dataOutputId }: Props)
                     return;
                 }
 
-                // TODO Figure out what fields are updatable and which are not
-                const request: DataOutputUpdate = {
-                    name: values.name,
-                    description: values.description,
-                    tag_ids: values.tag_ids ?? [],
-                };
                 const response = await updateDataOutput({
                     id: dataOutputId,
                     dataProductId: currentDataOutput.owner_id,
-                    dataOutputUpdate: request,
+                    dataOutputUpdate: {
+                        name: values.name,
+                        description: values.description,
+                        tag_ids: values.tag_ids ?? [],
+                    },
                 }).unwrap();
                 dispatchMessage({ content: t('Technical Asset updated successfully'), type: 'success' });
 

@@ -96,9 +96,8 @@ class TestDataProductsRouter:
     def test_create_data_product_with_input_ports(
         self, payload, client, user_with_create_data_product_rights
     ):
-        ds = OutputPortFactory()
         payload["input_ports"] = {
-            "output_ports": [str(ds.id)],
+            "output_ports": [{"output_port_id": str(OutputPortFactory().id)}],
             "justification": "I am your king",
         }
         created_data_product = self.create_data_product(client, payload)

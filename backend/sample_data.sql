@@ -16,6 +16,11 @@ declare
     machine_learning_type_id uuid;
     analytics_type_id uuid;
 
+    -- ACCESS MODES
+    access_mode_read uuid;
+    access_mode_write uuid;
+    access_mode_admin uuid;
+
     -- USERS
     alice_id uuid;
     bob_id uuid;
@@ -50,6 +55,8 @@ declare
     feature_usage_metrics uuid;
     profitability_analysis uuid;
     dei_insights_dashboard uuid;
+    access_modes_example uuid;
+    access_modes_consumer uuid;
 
     -- DATASETS
     production_planning_insights_forecast uuid;
@@ -65,6 +72,7 @@ declare
     feature_usage_metrics_weekly uuid;
     release_version_prop_id uuid;
     dei_insights_dashboard_ds uuid;
+    dei_access_modes_example_output_port uuid;
 
     -- PLATFORMS
     returned_platform_id uuid;
@@ -86,6 +94,9 @@ declare
     glue_configuration_id uuid;
     databricks_configuration_id uuid;
     customer_segmentation_weekly_technical_asset_id uuid;
+    access_mode_linked_technical_asset_id uuid;
+    access_mode_unlinked_technical_asset_id uuid;
+    access_mode_unlinked_admin_technical_asset_id uuid;
 
     product_owner_id uuid;
     product_member_id uuid;
@@ -114,6 +125,11 @@ begin
     INSERT INTO public.tags (id, value, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), 'Sensitive', '2025-10-28 16:32:27.884892', NULL, NULL) returning id into tag_sensitive_id;
     INSERT INTO public.tags (id, value, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), 'Public', '2025-10-28 16:32:27.884892', NULL, NULL) returning id into tag_public_id;
 
+
+    -- INSERT ACCESS MODES
+    INSERT INTO public.access_modes (id, "name", description) VALUES (gen_random_uuid(), 'read', 'Read access, gives users the ability to view data') returning id into access_mode_read;
+    INSERT INTO public.access_modes (id, "name", description) VALUES (gen_random_uuid(), 'write', 'Write access, gives users the ability to modify data') returning id into access_mode_write;
+    INSERT INTO public.access_modes (id, "name", description) VALUES (gen_random_uuid(), 'admin', 'Admin access, gives users full control over data and settings') returning id into access_mode_admin;
 
     -- PLATFORMS: the default configuration is added in migrations already.
     SELECT id FROM public.platforms WHERE name = 'AWS' INTO STRICT returned_platform_id;
@@ -341,7 +357,8 @@ begin
     INSERT INTO public.datasets (id, namespace, data_product_id, "name", description, about, status, access_type, created_on, updated_on, deleted_at) VALUES ('56acafd4-5bb8-45b1-81fa-acfab84ec3fc', 'release_impact_summary', release_impact_analysis, 'Release Impact Summary', 'Metrics on usage changes after new releases', 'Provides insight into feature release performance. Key objectives: - Measure adoption - Detect regressions - Inform next releases', 'ACTIVE', 'RESTRICTED', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id into release_impact_summary;
 
     -- DEI Insights
-    INSERT INTO public.abstract_data_products (id, status, finalizers, name, namespace, abstract_data_product_type, description, domain_id, created_on, updated_on, deleted_at) VALUES ('33333333-3333-4333-8333-333333333333', 'active', '{}', 'DEI Insights Dashboard', 'dei-insights-dashboard', 'data_products', 'Monitors diversity, equity, and inclusion metrics across the organization.
+    INSERT INTO public.abstract_data_products (id, status, finalizers, name, namespace, abstract_data_product_type, description, domain_id, created_on, updated_on, deleted_at)
+    VALUES ('33333333-3333-4333-8333-333333333333', 'active', '{}', 'DEI Insights Dashboard', 'dei-insights-dashboard', 'data_products', 'Monitors diversity, equity, and inclusion metrics across the organization.
     It ensures transparency and compliance with internal and external reporting standards.', customer_domain_id, '2025-10-28 18:16:50.70893', NULL, NULL) returning id into dei_insights_dashboard;
     INSERT INTO public.data_products (id, about, type_id, lifecycle_id, usage) VALUES (dei_insights_dashboard, NULL, '1b4a64b3-96fb-404c-a73c-294802dc9852', data_product_lifecycle_id, NULL);
 
@@ -355,6 +372,65 @@ begin
     INSERT INTO public.role_assignments_data_product (id, data_product_id, user_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at)
     VALUES (gen_random_uuid(), dei_insights_dashboard, john_id, product_owner_id, 'APPROVED', john_id, '2025-10-28 18:16:50.723993', john_id, '2025-10-28 18:16:50.72973', '2025-10-28 18:16:50.720213', '2025-10-28 18:16:50.728845', NULL);
 
+    -- Access modes example
+    INSERT INTO public.abstract_data_products (id, status, finalizers, name, namespace, abstract_data_product_type, description, domain_id, created_on, updated_on, deleted_at)
+    VALUES (gen_random_uuid(), 'active', '{}', 'Access modes example', 'access_modes_example', 'data_products', 'Producer data product for access mode examples.', customer_domain_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id into access_modes_example;
+    INSERT INTO public.data_products (id, about, type_id, lifecycle_id, usage)
+    VALUES (access_modes_example, NULL, '1b4a64b3-96fb-404c-a73c-294802dc9852', data_product_lifecycle_id, NULL);
+    INSERT INTO public.role_assignments_data_product (id, data_product_id, user_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at)
+    VALUES (gen_random_uuid(), access_modes_example, john_id, product_owner_id, 'APPROVED', john_id, timezone('utc'::text, CURRENT_TIMESTAMP), john_id, timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+
+    INSERT INTO public.datasets (id, namespace, data_product_id, "name", description, about, status, access_type, created_on, updated_on, deleted_at)
+    VALUES (gen_random_uuid(), 'access-mode-representative-dataset', access_modes_example, 'Access mode example', 'Quarterly representation metrics by function and level', 'Output port for access mode examples.', 'ACTIVE', 'RESTRICTED', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id into dei_access_modes_example_output_port;
+
+    INSERT INTO public.data_output_configurations (id, configuration_type) VALUES ('3e5b2eb0-2d78-4ef4-b73b-57df8d85be11', 'GlueTechnicalAssetConfiguration');
+    INSERT INTO public.glue_technical_asset_configurations (id, bucket_identifier, "database", database_suffix, "table", database_path, table_path, access_granularity, created_on, updated_on, deleted_at)
+    VALUES ('3e5b2eb0-2d78-4ef4-b73b-57df8d85be11', '', 'access-modes-example-linked', '', '*', 'access-modes-example-linked', '*', 'table', '2025-10-28 18:17:04.80167', NULL, NULL);
+    INSERT INTO public.data_outputs (id, namespace, name, description, status, platform_id, service_id, owner_id, configuration, configuration_id, created_on, updated_on, deleted_at, "technical_mapping")
+    VALUES (gen_random_uuid(), 'access-mode-two-modes-linked-output', 'Access mode - 2 modes (linked output)', 'Detailed representation metrics table with row-level breakdowns.', 'ACTIVE', returned_platform_id, glue_service_id, access_modes_example, NULL, '3e5b2eb0-2d78-4ef4-b73b-57df8d85be11', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, 'default') returning id into access_mode_linked_technical_asset_id;
+    INSERT INTO public.technical_asset_access_modes (technical_asset_id, access_mode_id)
+    VALUES
+        (access_mode_linked_technical_asset_id, access_mode_read),
+        (access_mode_linked_technical_asset_id, access_mode_write);
+    INSERT INTO public.data_outputs_datasets (id, data_output_id, dataset_id, status, requested_by_id, requested_on, approved_by_id, approved_on, denied_by_id, denied_on, created_on, updated_on, deleted_at)
+    VALUES (gen_random_uuid(), access_mode_linked_technical_asset_id, dei_access_modes_example_output_port, 'APPROVED', john_id, timezone('utc'::text, CURRENT_TIMESTAMP), john_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+
+    INSERT INTO public.data_output_configurations (id, configuration_type) VALUES ('6c8d4df0-a65a-4967-a40e-f0fffbf90231', 'GlueTechnicalAssetConfiguration');
+    INSERT INTO public.glue_technical_asset_configurations (id, bucket_identifier, "database", database_suffix, "table", database_path, table_path, access_granularity, created_on, updated_on, deleted_at)
+    VALUES ('6c8d4df0-a65a-4967-a40e-f0fffbf90231', '', 'access-modes-example-unlinked', '', '*', 'access-modes-example-unlinked', '*', 'table', '2025-10-28 18:17:20.241114', NULL, NULL);
+    INSERT INTO public.data_outputs (id, namespace, name, description, status, platform_id, service_id, owner_id, configuration, configuration_id, created_on, updated_on, deleted_at, "technical_mapping")
+    VALUES (gen_random_uuid(), 'access-mode-two-modes-unlinked-output', 'Access mode - 2 modes (unlinked output)', 'Draft technical asset for DEI policy access analysis, not linked to an output port yet.', 'ACTIVE', returned_platform_id, glue_service_id, access_modes_example, NULL, '6c8d4df0-a65a-4967-a40e-f0fffbf90231', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, 'default') returning id into access_mode_unlinked_technical_asset_id;
+    INSERT INTO public.technical_asset_access_modes (technical_asset_id, access_mode_id)
+    VALUES
+        (access_mode_unlinked_technical_asset_id, access_mode_read),
+        (access_mode_unlinked_technical_asset_id, access_mode_write);
+
+    INSERT INTO public.data_output_configurations (id, configuration_type) VALUES ('9e4d6227-7f74-467f-a6cd-6b1f0e9f6f3a', 'GlueTechnicalAssetConfiguration');
+    INSERT INTO public.glue_technical_asset_configurations (id, bucket_identifier, "database", database_suffix, "table", database_path, table_path, access_granularity, created_on, updated_on, deleted_at)
+    VALUES ('9e4d6227-7f74-467f-a6cd-6b1f0e9f6f3a', '', 'access-modes-example-admin', '', '*', 'access-modes-example-admin', '*', 'table', '2025-10-28 18:17:35.241114', NULL, NULL);
+    INSERT INTO public.data_outputs (id, namespace, name, description, status, platform_id, service_id, owner_id, configuration, configuration_id, created_on, updated_on, deleted_at, "technical_mapping")
+    VALUES (gen_random_uuid(), 'access-mode-three-modes-output', 'Access mode - 3 modes', 'Unlinked DEI technical asset example including admin access mode.', 'ACTIVE', returned_platform_id, glue_service_id, access_modes_example, NULL, '9e4d6227-7f74-467f-a6cd-6b1f0e9f6f3a', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, 'default') returning id into access_mode_unlinked_admin_technical_asset_id;
+    INSERT INTO public.technical_asset_access_modes (technical_asset_id, access_mode_id)
+    VALUES
+        (access_mode_unlinked_admin_technical_asset_id, access_mode_read),
+        (access_mode_unlinked_admin_technical_asset_id, access_mode_write),
+        (access_mode_unlinked_admin_technical_asset_id, access_mode_admin);
+
+    -- Access modes consumer
+    INSERT INTO public.abstract_data_products (id, status, finalizers, name, namespace, abstract_data_product_type, description, domain_id, created_on, updated_on, deleted_at)
+    VALUES (gen_random_uuid(), 'active', '{}', 'Access modes consumer', 'access_modes_consumer', 'data_products', 'Consumer data product for access mode examples.', customer_domain_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id into access_modes_consumer;
+    INSERT INTO public.data_products (id, about, type_id, lifecycle_id, usage)
+    VALUES (access_modes_consumer, NULL, '1b4a64b3-96fb-404c-a73c-294802dc9852', data_product_lifecycle_id, NULL);
+    INSERT INTO public.role_assignments_data_product (id, data_product_id, user_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at)
+    VALUES (gen_random_uuid(), access_modes_consumer, john_id, product_owner_id, 'APPROVED', john_id, timezone('utc'::text, CURRENT_TIMESTAMP), john_id, timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+
+    WITH link AS (
+        INSERT INTO public.input_ports (id, consuming_abstract_data_product_id, dataset_id, status, created_on, updated_on, deleted_at)
+        VALUES (gen_random_uuid(), access_modes_consumer, dei_access_modes_example_output_port, 'APPROVED', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL)
+        RETURNING id
+    )
+    INSERT INTO public.input_port_requests (id, input_port_id, decision, justification, decision_note, access_duration_type, requested_duration_days, requested_by_id, requested_on, decided_by_id, decided_on, valid_from, valid_until, access_mode_id, created_on, updated_on)
+    SELECT gen_random_uuid(), link.id, 'APPROVED', 'Consumer access for access mode examples.', NULL, 'PERMANENT', NULL, john_id, timezone('utc'::text, CURRENT_TIMESTAMP), jane_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, access_mode_read, timezone('utc'::text, CURRENT_TIMESTAMP), NULL FROM link;
 
 
     -- Data privacy compliance

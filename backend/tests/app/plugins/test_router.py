@@ -23,7 +23,7 @@ class TestPluginEndpoints:
 
         assert "plugins" in data
         assert isinstance(data["plugins"], list)
-        assert len(data["plugins"]) == 3
+        assert len(data["plugins"]) == 4
 
     def test_list_plugins_returns_all_available_plugins(self, client: TestClient):
         """Test GET /v2/plugins returns list of all available plugins"""

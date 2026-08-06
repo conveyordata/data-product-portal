@@ -11,6 +11,7 @@ from ..models.output_port_access_type import OutputPortAccessType
 from ..models.output_port_status import OutputPortStatus
 
 if TYPE_CHECKING:
+    from ..models.access_mode import AccessMode
     from ..models.tag import Tag
 
 
@@ -29,6 +30,7 @@ class OutputPort:
         access_type (OutputPortAccessType):
         data_product_id (UUID):
         tags (list[Tag]):
+        access_modes (list[AccessMode]):
     """
 
     id: UUID
@@ -39,6 +41,7 @@ class OutputPort:
     access_type: OutputPortAccessType
     data_product_id: UUID
     tags: list[Tag]
+    access_modes: list[AccessMode]
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -61,6 +64,11 @@ class OutputPort:
             tags_item = tags_item_data.to_dict()
             tags.append(tags_item)
 
+        access_modes = []
+        for access_modes_item_data in self.access_modes:
+            access_modes_item = access_modes_item_data.to_dict()
+            access_modes.append(access_modes_item)
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
@@ -73,6 +81,7 @@ class OutputPort:
                 "access_type": access_type,
                 "data_product_id": data_product_id,
                 "tags": tags,
+                "access_modes": access_modes,
             }
         )
 
@@ -80,6 +89,7 @@ class OutputPort:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        from ..models.access_mode import AccessMode
         from ..models.tag import Tag
 
         d = dict(src_dict)
@@ -104,6 +114,13 @@ class OutputPort:
 
             tags.append(tags_item)
 
+        access_modes = []
+        _access_modes = d.pop("access_modes")
+        for access_modes_item_data in _access_modes:
+            access_modes_item = AccessMode.from_dict(access_modes_item_data)
+
+            access_modes.append(access_modes_item)
+
         output_port = cls(
             id=id,
             name=name,
@@ -113,6 +130,7 @@ class OutputPort:
             access_type=access_type,
             data_product_id=data_product_id,
             tags=tags,
+            access_modes=access_modes,
         )
 
         output_port.additional_properties = d

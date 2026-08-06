@@ -6,10 +6,10 @@ import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router';
 import ExplorationBorderIcon from '@/assets/icons/border-icons/exploration-border-icon.svg?react';
+import { CardSelection } from '@/components/card-selection/card-selection.tsx';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
 import { useBreadcrumbs } from '@/components/layout/navbar/breadcrumbs/breadcrumb.context.tsx';
 import { PosthogEvents } from '@/constants/posthog.constants.ts';
-import { CardSelection } from '@/pages/cart/components/card-selection.tsx';
 import { CartOverview } from '@/pages/cart/components/cart-overview.component.tsx';
 import { ExistingDataProductForm } from '@/pages/cart/components/existing-data-product-form.tsx';
 import { ExistingExplorationForm } from '@/pages/cart/components/existing-exploration-form.tsx';
@@ -20,9 +20,10 @@ import { useSearchOutputPortsQuery } from '@/store/api/services/generated/output
 import {
     DataProductChoiceOptions,
     ExistingOrNew,
+    removeOutputPortFromCart,
     selectCartDataProductTypeChoice,
-    selectCartDatasetIds,
     selectCartExistingOrNewChoice,
+    selectCartOutputPortIds,
     setCartExplorationChoices,
 } from '@/store/features/cart/cart-slice.ts';
 import { ApplicationPaths } from '@/types/navigation.ts';
@@ -71,48 +72,57 @@ function ExplorationsCart() {
         ]);
     }, [setBreadcrumbs, t]);
 
-    const { data: { output_ports: outputPorts = [] } = {}, isFetching: fetchingOutputPorts } =
-        useSearchOutputPortsQuery({ limit: 1000 });
-    const cartDatasetIds = useSelector(selectCartDatasetIds);
+    const {
+        data: { output_ports: outputPorts = [] } = {},
+        isFetching: fetchingOutputPorts,
+        isSuccess,
+    } = useSearchOutputPortsQuery({ limit: 1000 });
+    const cartOutputPortIds = useSelector(selectCartOutputPortIds);
+
+    useEffect(() => {
+        if (!isSuccess || cartOutputPortIds.length === 0) {
+            return;
+        }
+
+        const availableOutputPortIds = new Set(outputPorts.map((outputPort) => outputPort.id));
+        const staleCartOutputPortIds = cartOutputPortIds.filter(
+            (outputPortId) => !availableOutputPortIds.has(outputPortId),
+        );
+
+        staleCartOutputPortIds.forEach((outputPortId) => {
+            dispatch(removeOutputPortFromCart({ outputPortId }));
+        });
+    }, [cartOutputPortIds, dispatch, isSuccess, outputPorts]);
+
     const cartOutputPorts = useMemo(() => {
-        if (cartDatasetIds.length === 0) {
+        if (cartOutputPortIds.length === 0) {
             return [];
         }
-        return outputPorts?.filter((dataset) => cartDatasetIds.includes(dataset.id));
-    }, [outputPorts, cartDatasetIds]);
+        return outputPorts?.filter((outputPort) => cartOutputPortIds.includes(outputPort.id));
+    }, [outputPorts, cartOutputPortIds]);
     const form = useMemo(() => {
         if (!dataProductTypeChoice || !existingOrNewChoice) {
             return null;
         }
         if (dataProductTypeChoice === DataProductChoiceOptions.data_product) {
             if (existingOrNewChoice === ExistingOrNew.existing) {
-                return (
-                    <ExistingDataProductForm
-                        cartOutputPorts={cartOutputPorts}
-                        setSelectedDataProductId={setSelectedDataProductId}
-                    />
-                );
+                return <ExistingDataProductForm setSelectedDataProductId={setSelectedDataProductId} />;
             }
             if (existingOrNewChoice === ExistingOrNew.new) {
-                return <NewDataProductForm cartOutputPorts={cartOutputPorts} />;
+                return <NewDataProductForm />;
             }
         }
         if (dataProductTypeChoice === DataProductChoiceOptions.exploration) {
             if (existingOrNewChoice === ExistingOrNew.new) {
-                return <NewExplorationForm cartOutputPorts={cartOutputPorts} />;
+                return <NewExplorationForm />;
             }
             if (existingOrNewChoice === ExistingOrNew.existing) {
-                return (
-                    <ExistingExplorationForm
-                        cartOutputPorts={cartOutputPorts}
-                        setSelectedExplorationId={setSelectedExplorationId}
-                    />
-                );
+                return <ExistingExplorationForm setSelectedExplorationId={setSelectedExplorationId} />;
             }
         }
         return null;
-    }, [dataProductTypeChoice, existingOrNewChoice, cartOutputPorts]);
-    if (cartDatasetIds?.length === 0) {
+    }, [dataProductTypeChoice, existingOrNewChoice]);
+    if (cartOutputPortIds?.length === 0) {
         return (
             <Empty
                 description={
@@ -132,8 +142,8 @@ function ExplorationsCart() {
             <Col span={16}>
                 <Flex vertical gap="middle">
                     <CardSelection
-                        selectedChoice={dataProductTypeChoice}
-                        setSelectedChoice={setDataProductTypeChoice}
+                        value={dataProductTypeChoice}
+                        onChange={setDataProductTypeChoice}
                         options={[
                             {
                                 title: t('I want to explore this data'),
@@ -161,8 +171,8 @@ function ExplorationsCart() {
                     />
                     {dataProductTypeChoice && (
                         <CardSelection
-                            selectedChoice={existingOrNewChoice}
-                            setSelectedChoice={setExistingOrNewChoice}
+                            value={existingOrNewChoice}
+                            onChange={setExistingOrNewChoice}
                             options={[
                                 {
                                     title: t('Create a new {{dataProductChoice}}', {

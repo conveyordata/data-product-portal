@@ -39,7 +39,6 @@ from app.data_products.schema_request import (
     DataProductStatusUpdate,
     DataProductUpdate,
     DataProductUsageUpdate,
-    LinkInputPortsToDataProduct,
     RequestInputPortsForDataProductRequest,
 )
 from app.data_products.schema_response import (
@@ -51,7 +50,6 @@ from app.data_products.schema_response import (
     GetDataProductSettingsResponse,
     GetDataProductsResponse,
     GetDataProductsResponseItem,
-    LinkInputPortsToDataProductPost,
     RenewInputPortForDataProductResponse,
     RequestInputPortsForDataProductResponse,
     RevokeInputPortForDataProductResponse,
@@ -450,33 +448,6 @@ _input_ports_dependencies = [
         )
     ),
 ]
-
-
-@router.post(
-    "/{id}/link_input_ports",
-    responses=_input_ports_responses,
-    dependencies=_input_ports_dependencies,
-    deprecated=True,
-)
-def link_input_ports_to_data_product(
-    id: UUID,
-    link_input_ports: LinkInputPortsToDataProduct,
-    background_tasks: BackgroundTasks,
-    authenticated_user: User = Depends(get_authenticated_user),
-    db: Session = Depends(get_db_session),
-) -> LinkInputPortsToDataProductPost:
-    return LinkInputPortsToDataProductPost(
-        input_port_links=request_input_ports_for_data_product(
-            id,
-            RequestInputPortsForDataProductRequest(
-                output_ports=link_input_ports.input_ports,
-                justification=link_input_ports.justification,
-            ),
-            background_tasks,
-            authenticated_user=authenticated_user,
-            db=db,
-        ).input_port_links
-    )
 
 
 def _notify_input_port_links(

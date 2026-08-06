@@ -112,8 +112,8 @@ export function TechnicalAsset() {
                             type={dataOutput.configuration.configuration_type}
                             description={dataOutput.description}
                             tags={dataOutput.tags}
+                            accessModes={dataOutput.access_modes}
                         />
-                        {/*  Tabs  */}
                         <TechnicalAssetTabs
                             technicalAssetId={dataOutput.id}
                             dataProductId={dataProductId}

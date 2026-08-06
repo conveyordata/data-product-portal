@@ -18,6 +18,7 @@ const outputPort: OutputPort = {
     access_type: OutputPortAccessType.Restricted,
     data_product_id: 'dp-1',
     tags: [],
+    access_modes: [],
 };
 
 function isoInDays(days: number): string {

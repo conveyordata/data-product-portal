@@ -1,6 +1,5 @@
 import { usePostHog } from '@posthog/react';
 import { Button, Flex, Form, type FormProps } from 'antd';
-import { useForm } from 'antd/es/form/Form';
 import { t } from 'i18next';
 import { useCallback, useState } from 'react';
 import { useSelector } from 'react-redux';
@@ -17,23 +16,20 @@ import {
     type DataProductCreate,
     useCreateDataProductMutation,
 } from '@/store/api/services/generated/dataProductsApi.ts';
-import type { SearchOutputPortsResponseItem } from '@/store/api/services/generated/outputPortsSearchApi.ts';
-import { clearCart } from '@/store/features/cart/cart-slice.ts';
+import { clearCart, selectCartOutputPorts } from '@/store/features/cart/cart-slice.ts';
 import { createDataProductIdPath } from '@/types/navigation.ts';
 import { dispatchMessage } from '@/utils/feedback.ts';
 
 type NewDataProductCartFormData = DataProductCreate & {
     justification: string;
 };
-type Props = {
-    cartOutputPorts?: SearchOutputPortsResponseItem[];
-};
 
-export const NewDataProductForm = ({ cartOutputPorts }: Props) => {
+export const NewDataProductForm = () => {
+    const cartOutputPorts = useSelector(selectCartOutputPorts);
     const dispatch = useAppDispatch();
     const posthog = usePostHog();
     const navigate = useNavigate();
-    const [form] = useForm<NewDataProductCartFormData>();
+    const [form] = Form.useForm<NewDataProductCartFormData>();
     const [areFormItemsLoading, setAreFormItemsLoading] = useState(true);
     const currentUser = useSelector(selectCurrentUser);
 
@@ -55,7 +51,10 @@ export const NewDataProductForm = ({ cartOutputPorts }: Props) => {
                     ...request,
                     input_ports: {
                         justification,
-                        output_ports: cartOutputPorts?.map((dataset) => dataset.id),
+                        output_ports: cartOutputPorts?.map((dataset) => ({
+                            output_port_id: dataset.outputPortId,
+                            access_mode_id: dataset.accessModeId,
+                        })),
                     },
                 }).unwrap();
                 dispatch(clearCart());

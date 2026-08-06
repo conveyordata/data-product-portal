@@ -8,6 +8,7 @@ from app.abstract_data_product.input_ports.enums import (
     RenewalStatus,
 )
 from app.configuration.access_durations.enums import AccessDurationType
+from app.configuration.access_modes.schema_response import AccessMode
 from app.shared.schema import ORMModel
 from app.users.schema import User
 
@@ -27,6 +28,7 @@ class InputPortRequestBase(ORMModel):
     revoked_by: Optional[User] = None
     created_on: datetime
     requested_on: datetime
+    access_mode: Optional[AccessMode] = None
 
 
 class InputPortBase(ORMModel):

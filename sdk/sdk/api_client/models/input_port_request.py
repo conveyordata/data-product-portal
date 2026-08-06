@@ -19,6 +19,7 @@ from ..models.input_port_request_decision import InputPortRequestDecision
 from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
+    from ..models.access_mode import AccessMode
     from ..models.user import User
     from ..models.user_input_port import UserInputPort
 
@@ -45,6 +46,7 @@ class InputPortRequest:
         decided_by (None | Unset | User):
         revoked_at (datetime.datetime | None | Unset):
         revoked_by (None | Unset | User):
+        access_mode (AccessMode | None | Unset):
         request_type (Literal['InputPort'] | Unset):  Default: 'InputPort'.
     """
 
@@ -63,10 +65,12 @@ class InputPortRequest:
     decided_by: None | Unset | User = UNSET
     revoked_at: datetime.datetime | None | Unset = UNSET
     revoked_by: None | Unset | User = UNSET
+    access_mode: AccessMode | None | Unset = UNSET
     request_type: Literal["InputPort"] | Unset = "InputPort"
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
+        from ..models.access_mode import AccessMode
         from ..models.user import User
 
         id = str(self.id)
@@ -135,6 +139,14 @@ class InputPortRequest:
         else:
             revoked_by = self.revoked_by
 
+        access_mode: dict[str, Any] | None | Unset
+        if isinstance(self.access_mode, Unset):
+            access_mode = UNSET
+        elif isinstance(self.access_mode, AccessMode):
+            access_mode = self.access_mode.to_dict()
+        else:
+            access_mode = self.access_mode
+
         request_type = self.request_type
 
         field_dict: dict[str, Any] = {}
@@ -164,6 +176,8 @@ class InputPortRequest:
             field_dict["revoked_at"] = revoked_at
         if revoked_by is not UNSET:
             field_dict["revoked_by"] = revoked_by
+        if access_mode is not UNSET:
+            field_dict["access_mode"] = access_mode
         if request_type is not UNSET:
             field_dict["request_type"] = request_type
 
@@ -171,6 +185,7 @@ class InputPortRequest:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        from ..models.access_mode import AccessMode
         from ..models.user import User
         from ..models.user_input_port import UserInputPort
 
@@ -294,6 +309,23 @@ class InputPortRequest:
 
         revoked_by = _parse_revoked_by(d.pop("revoked_by", UNSET))
 
+        def _parse_access_mode(data: object) -> AccessMode | None | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, dict):
+                    raise TypeError()
+                access_mode_type_0 = AccessMode.from_dict(data)
+
+                return access_mode_type_0
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            return cast(AccessMode | None | Unset, data)
+
+        access_mode = _parse_access_mode(d.pop("access_mode", UNSET))
+
         request_type = cast(Literal["InputPort"] | Unset, d.pop("request_type", UNSET))
         if request_type != "InputPort" and not isinstance(request_type, Unset):
             raise ValueError(
@@ -316,6 +348,7 @@ class InputPortRequest:
             decided_by=decided_by,
             revoked_at=revoked_at,
             revoked_by=revoked_by,
+            access_mode=access_mode,
             request_type=request_type,
         )
 

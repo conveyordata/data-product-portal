@@ -1,11 +1,16 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import Any, TypeVar
-from uuid import UUID
+from typing import TYPE_CHECKING, Any, TypeVar
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
+
+if TYPE_CHECKING:
+    from ..models.request_input_ports_for_abstract_data_product_request_item import (
+        RequestInputPortsForAbstractDataProductRequestItem,
+    )
+
 
 T = TypeVar("T", bound="RequestInputPortsForExplorationRequest")
 
@@ -14,18 +19,18 @@ T = TypeVar("T", bound="RequestInputPortsForExplorationRequest")
 class RequestInputPortsForExplorationRequest:
     """
     Attributes:
-        output_ports (list[UUID]):
+        output_ports (list[RequestInputPortsForAbstractDataProductRequestItem]):
         justification (str):
     """
 
-    output_ports: list[UUID]
+    output_ports: list[RequestInputPortsForAbstractDataProductRequestItem]
     justification: str
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         output_ports = []
         for output_ports_item_data in self.output_ports:
-            output_ports_item = str(output_ports_item_data)
+            output_ports_item = output_ports_item_data.to_dict()
             output_ports.append(output_ports_item)
 
         justification = self.justification
@@ -43,11 +48,19 @@ class RequestInputPortsForExplorationRequest:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        from ..models.request_input_ports_for_abstract_data_product_request_item import (
+            RequestInputPortsForAbstractDataProductRequestItem,
+        )
+
         d = dict(src_dict)
         output_ports = []
         _output_ports = d.pop("output_ports")
         for output_ports_item_data in _output_ports:
-            output_ports_item = UUID(output_ports_item_data)
+            output_ports_item = (
+                RequestInputPortsForAbstractDataProductRequestItem.from_dict(
+                    output_ports_item_data
+                )
+            )
 
             output_ports.append(output_ports_item)
 
