@@ -1,9 +1,10 @@
 import asyncio
 import re
 import urllib.parse
-from collections.abc import Awaitable, Callable
-from contextlib import asynccontextmanager
+from collections.abc import Awaitable, Callable, Coroutine
+from contextlib import asynccontextmanager, suppress
 from pathlib import Path
+from typing import Any
 
 from asgi_correlation_id import CorrelationIdMiddleware
 from fastapi import FastAPI, Request, Response
@@ -60,6 +61,33 @@ oidc_kwargs = (
 )
 
 
+def _log_background_task_result(task: asyncio.Task[None]) -> None:
+    if task.cancelled():
+        return
+    if exc := task.exception():
+        logger.exception(
+            "Background task '%s' failed",
+            task.get_name(),
+            exc_info=exc,
+        )
+
+
+def _create_supervised_task(
+    coro: Coroutine[Any, Any, None], *, name: str
+) -> asyncio.Task[None]:
+    task: asyncio.Task[None] = asyncio.create_task(coro, name=name)
+    task.add_done_callback(_log_background_task_result)
+    return task
+
+
+async def _cancel_tasks(tasks: list[asyncio.Task[None]]) -> None:
+    for task in tasks:
+        task.cancel()
+    for task in tasks:
+        with suppress(asyncio.CancelledError):
+            await task
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     with database.SessionLocal() as db:
@@ -68,18 +96,25 @@ async def lifespan(app: FastAPI):
         db.commit()
 
     backend_analytics(API_VERSION)
-    admin_task = asyncio.create_task(check_expired_admins())
-    device_flow_cleanup_task = asyncio.create_task(cleanup_device_flow_table_task())
-    consumption_metrics_task = asyncio.create_task(report_consumption_metrics_task())
-    stuck_deletion_task = asyncio.create_task(check_stuck_deletions())
-    input_port_expiry_task = asyncio.create_task(expire_input_ports_task())
+    background_tasks = [
+        _create_supervised_task(check_expired_admins(), name="check_expired_admins"),
+        _create_supervised_task(
+            cleanup_device_flow_table_task(),
+            name="cleanup_device_flow_table_task",
+        ),
+        _create_supervised_task(
+            report_consumption_metrics_task(),
+            name="report_consumption_metrics_task",
+        ),
+        _create_supervised_task(check_stuck_deletions(), name="check_stuck_deletions"),
+        _create_supervised_task(
+            expire_input_ports_task(),
+            name="expire_input_ports_task",
+        ),
+    ]
     start_event_dispatcher(app)
     yield
-    admin_task.cancel()
-    device_flow_cleanup_task.cancel()
-    consumption_metrics_task.cancel()
-    stuck_deletion_task.cancel()
-    input_port_expiry_task.cancel()
+    await _cancel_tasks(background_tasks)
     await stop_event_dispatcher(app)
 
 
@@ -177,14 +212,15 @@ async def send_response_to_webhook(
             response_body = [chunk async for chunk in response.body_iterator]
             response.body_iterator = iterate_in_threadpool(iter(response_body))
             body = (b"".join(response_body)).decode()
-        asyncio.create_task(
+        _create_supervised_task(
             call_webhook(
                 content=body,
                 method=request.method,
                 url=request.url.path,
                 query=request.url.query,
                 status_code=response.status_code,
-            )
+            ),
+            name="call_webhook",
         )
     return response
 
