@@ -44,6 +44,21 @@ from app.graph.graph import Graph
 from app.resource_names.service import ResourceNameValidityType
 from app.users.schema import User
 
+TECHNICAL_ASSET_ACCESS_MODES_INCOMPATIBLE_ERROR = HTTPException(
+    status_code=status.HTTP_409_CONFLICT,
+    detail="Access modes of technical asset are incompatible with access modes of output port",
+)
+
+TECHNICAL_ASSET_ALREADY_LINKED_ERROR = HTTPException(
+    status_code=status.HTTP_400_BAD_REQUEST,
+    detail="Technical Asset already exists in output port",
+)
+
+TECHNICAL_ASSET_NOT_ACTIVE_ERROR = HTTPException(
+    status_code=status.HTTP_400_BAD_REQUEST,
+    detail="Cannot link technical asset that is not active",
+)
+
 
 class DataOutputService:
     def __init__(self, db: Session):
@@ -204,36 +219,24 @@ class DataOutputService:
             data_product_id=data_product_id,
             options=[
                 selectinload(OutputPortModel.data_product_links),
-                selectinload(OutputPortModel.data_output_links).selectinload(
-                    DataOutputDatasetAssociationModel.data_output
-                ),
             ],
         )
         technical_asset = self.get_technical_asset(data_product_id, id)
         if technical_asset.status != TechnicalAssetStatus.ACTIVE:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Cannot link technical asset that is not active",
-            )
+            raise TECHNICAL_ASSET_NOT_ACTIVE_ERROR
 
         if output_port.id in [
             link.output_port_id
             for link in technical_asset.dataset_links
             if link.status != DecisionStatus.DENIED
         ]:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Technical Asset {id} already exists in output port {output_port_id}",
-            )
+            raise TECHNICAL_ASSET_ALREADY_LINKED_ERROR
         if (
             technical_asset.access_modes
             and output_port.access_modes
             and set(output_port.access_modes) != set(technical_asset.access_modes)
         ):
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Access modes of technical asset {id} are incompatible with access modes of technical assets already part of output port {output_port_id}",
-            )
+            raise TECHNICAL_ASSET_ACCESS_MODES_INCOMPATIBLE_ERROR
 
         # Data output requests always need to be approved
         output_port_link = DataOutputDatasetAssociationModel(

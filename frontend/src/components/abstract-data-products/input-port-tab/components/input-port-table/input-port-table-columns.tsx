@@ -3,6 +3,7 @@ import type { TFunction } from 'i18next';
 
 import outputPortBorderIcon from '@/assets/icons/border-icons/output-port-border-icon.svg?react';
 import { InputPortActionButton } from '@/components/abstract-data-products/input-port-tab/components/input-port-table/input-port-action-button.component.tsx';
+import AccessMode from '@/components/access-modes/access-mode.component.tsx';
 import { DatasetPopoverTitle } from '@/components/datasets/dataset-popover-title/dataset-popover-title.tsx';
 import { OutputPortTitle } from '@/components/datasets/output-port-title/output-port-title.tsx';
 import EllipsisParagraph from '@/components/ellipsis-paragraph/ellipsis-paragraph.component.tsx';
@@ -89,8 +90,14 @@ export const getDataProductDatasetsColumns = ({
         {
             title: t('Business justification'),
             dataIndex: ['current_request', 'justification'],
-            width: '30%',
+            width: '25%',
             render: (_, { current_request }) => <EllipsisParagraph text={current_request.justification} />,
+        },
+        {
+            title: t('Access mode'),
+            dataIndex: ['current_request', 'access_mode'],
+            width: '10%',
+            render: (_, { current_request }) => <AccessMode accessMode={current_request.access_mode} />,
         },
         {
             title: t('Expiry date'),

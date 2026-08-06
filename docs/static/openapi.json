@@ -2127,80 +2127,6 @@
         }
       }
     },
-    "/api/v2/data_products/{id}/link_input_ports": {
-      "post": {
-        "tags": [
-          "Data Products"
-        ],
-        "summary": "Link Input Ports To Data Product",
-        "operationId": "link_input_ports_to_data_product",
-        "deprecated": true,
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Id"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/LinkInputPortsToDataProduct"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/LinkInputPortsToDataProductPost"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Output port not found",
-            "content": {
-              "application/json": {
-                "example": {
-                  "detail": "Output port not found"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Data Product not found",
-            "content": {
-              "application/json": {
-                "example": {
-                  "detail": "Data Product id not found"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/v2/data_products/{id}/input_ports": {
       "post": {
         "tags": [
@@ -3776,6 +3702,35 @@
             "content": {
               "application/json": {
                 "schema": {}
+              }
+            }
+          },
+          "400": {
+            "description": "Possible errors",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "cannot_link_technical_asset_that_is_not_active": {
+                    "value": {
+                      "detail": "Cannot link technical asset that is not active"
+                    }
+                  },
+                  "technical_asset_already_exists_in_output_port": {
+                    "value": {
+                      "detail": "Technical Asset already exists in output port"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Access modes of technical asset are incompatible with access modes of output port",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Access modes of technical asset are incompatible with access modes of output port"
+                }
               }
             }
           },
@@ -12370,6 +12325,13 @@
               }
             ]
           },
+          "access_modes": {
+            "items": {
+              "$ref": "#/components/schemas/AccessMode"
+            },
+            "type": "array",
+            "title": "Access Modes"
+          },
           "about": {
             "anyOf": [
               {
@@ -12380,13 +12342,6 @@
               }
             ],
             "title": "About"
-          },
-          "access_modes": {
-            "items": {
-              "$ref": "#/components/schemas/AccessMode"
-            },
-            "type": "array",
-            "title": "Access Modes"
           },
           "rolled_up_tags": {
             "items": {
@@ -12426,8 +12381,8 @@
           "tags",
           "domain",
           "lifecycle",
-          "about",
           "access_modes",
+          "about",
           "rolled_up_tags",
           "data_product_settings",
           "technical_asset_links"
@@ -12986,6 +12941,16 @@
             "format": "date-time",
             "title": "Requested On"
           },
+          "access_mode": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AccessMode"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "request_type": {
             "type": "string",
             "const": "InputPort",
@@ -13117,6 +13082,16 @@
             "type": "string",
             "format": "date-time",
             "title": "Requested On"
+          },
+          "access_mode": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AccessMode"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",
@@ -13177,45 +13152,6 @@
           "is_admin"
         ],
         "title": "IsAdminResponse"
-      },
-      "LinkInputPortsToDataProduct": {
-        "properties": {
-          "input_ports": {
-            "items": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "type": "array",
-            "title": "Input Ports"
-          },
-          "justification": {
-            "type": "string",
-            "title": "Justification"
-          }
-        },
-        "type": "object",
-        "required": [
-          "input_ports",
-          "justification"
-        ],
-        "title": "LinkInputPortsToDataProduct"
-      },
-      "LinkInputPortsToDataProductPost": {
-        "properties": {
-          "input_port_links": {
-            "items": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "type": "array",
-            "title": "Input Port Links"
-          }
-        },
-        "type": "object",
-        "required": [
-          "input_port_links"
-        ],
-        "title": "LinkInputPortsToDataProductPost"
       },
       "LinkTechnicalAssetToOutputPortRequest": {
         "properties": {
@@ -13608,6 +13544,13 @@
             },
             "type": "array",
             "title": "Tags"
+          },
+          "access_modes": {
+            "items": {
+              "$ref": "#/components/schemas/AccessMode"
+            },
+            "type": "array",
+            "title": "Access Modes"
           }
         },
         "type": "object",
@@ -13619,7 +13562,8 @@
           "status",
           "access_type",
           "data_product_id",
-          "tags"
+          "tags",
+          "access_modes"
         ],
         "title": "OutputPort"
       },
@@ -14943,12 +14887,37 @@
         ],
         "title": "RequestDataProductRoleAssignment"
       },
+      "RequestInputPortsForAbstractDataProductRequestItem": {
+        "properties": {
+          "output_port_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Output Port Id"
+          },
+          "access_mode_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Access Mode Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "output_port_id"
+        ],
+        "title": "RequestInputPortsForAbstractDataProductRequestItem"
+      },
       "RequestInputPortsForDataProductRequest": {
         "properties": {
           "output_ports": {
             "items": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/components/schemas/RequestInputPortsForAbstractDataProductRequestItem"
             },
             "type": "array",
             "title": "Output Ports"
@@ -14986,8 +14955,7 @@
         "properties": {
           "output_ports": {
             "items": {
-              "type": "string",
-              "format": "uuid"
+              "$ref": "#/components/schemas/RequestInputPortsForAbstractDataProductRequestItem"
             },
             "type": "array",
             "title": "Output Ports"
@@ -15707,6 +15675,13 @@
               }
             ]
           },
+          "access_modes": {
+            "items": {
+              "$ref": "#/components/schemas/AccessMode"
+            },
+            "type": "array",
+            "title": "Access Modes"
+          },
           "abstract_data_product_count": {
             "type": "integer",
             "title": "Abstract Data Product Count"
@@ -15735,6 +15710,7 @@
           "tags",
           "domain",
           "lifecycle",
+          "access_modes",
           "abstract_data_product_count",
           "technical_assets_count",
           "data_product_name"

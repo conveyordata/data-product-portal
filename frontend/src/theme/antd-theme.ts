@@ -35,12 +35,6 @@ const blueThemeConfig: ThemeConfig = {
     },
     token: {
         fontFamily: 'SF Pro Text, sans-serif',
-        fontSize: 14,
-        fontSizeHeading1: 38,
-        fontSizeHeading2: 30,
-        fontSizeHeading3: 24,
-        fontSizeHeading4: 20,
-        fontSizeHeading5: 16,
         fontWeightStrong: 600,
         // -------- Brand Colors ---------
         // Primary
@@ -76,18 +70,6 @@ const blueThemeConfig: ThemeConfig = {
         colorWarningText: token.gold6,
         colorWarningTextHover: token.gold5,
         colorWarningTextActive: token.gold7,
-        // Error
-        colorError: '#FF4D4F',
-        colorErrorBg: '#FFF2F0',
-        colorErrorBgHover: '#FFF1F0',
-        colorErrorBorder: '#FFCCC7',
-        colorErrorBorderHover: '#FFA39E',
-        colorErrorHover: '#FF7875',
-        colorErrorActive: '#D9363E',
-        colorErrorText: '#FF4D4F',
-        colorErrorTextHover: '#FF7875',
-        colorErrorTextActive: '#D9363E',
-        colorErrorOutline: '#FF2696',
         // Info
         colorInfo: token.colorPrimary,
         colorInfoBg: token.colorPrimaryBg,
@@ -139,26 +121,10 @@ const datamindedThemeConfig: ThemeConfig = {
     },
     token: {
         fontFamily: 'DM Sans, sans-serif',
-        fontSize: 14,
-        fontSizeHeading1: 38,
-        fontSizeHeading2: 30,
-        fontSizeHeading3: 24,
-        fontSizeHeading4: 20,
-        fontSizeHeading5: 16,
         fontWeightStrong: 600,
         // -------- Brand Colors ---------
         // Primary
         colorPrimary: '#543EDC',
-        colorPrimaryBg: '#543EDC',
-        colorPrimaryBgHover: '#543EDC',
-        colorPrimaryBorder: '#543EDC',
-        colorPrimaryBorderHover: '#543EDC',
-        colorPrimaryHover: '#543EDC',
-        colorPrimaryActive: '#543EDC',
-        colorPrimaryText: '#543EDC',
-        colorPrimaryTextHover: '#543EDC',
-        colorPrimaryTextActive: '#543EDC',
-        colorLink: '#543EDC',
         // Success
         colorSuccess: token.green6,
         colorSuccessBg: token.green1,
@@ -181,18 +147,6 @@ const datamindedThemeConfig: ThemeConfig = {
         colorWarningText: token.gold6,
         colorWarningTextHover: token.gold5,
         colorWarningTextActive: token.gold7,
-        // Error
-        colorError: '#FF4D4F',
-        colorErrorBg: '#FFF2F0',
-        colorErrorBgHover: '#FFF1F0',
-        colorErrorBorder: '#FFCCC7',
-        colorErrorBorderHover: '#FFA39E',
-        colorErrorHover: '#FF7875',
-        colorErrorActive: '#D9363E',
-        colorErrorText: '#FF4D4F',
-        colorErrorTextHover: '#FF7875',
-        colorErrorTextActive: '#D9363E',
-        colorErrorOutline: '#FF2696',
         // Info
         colorInfo: '#5B21B6',
         colorInfoBg: '#F5F3FF',
@@ -269,12 +223,6 @@ const greenThemeConfig: ThemeConfig = {
         colorPrimaryBg: '#107072',
         // -------- Font ---------
         fontFamily: 'Neue Haas Grotesk Display Pro, sans-serif',
-        fontSize: 16,
-        fontSizeHeading1: 38,
-        fontSizeHeading2: 32,
-        fontSizeHeading3: 24,
-        fontSizeHeading4: 20,
-        fontSizeHeading5: 16,
         fontWeightStrong: 600,
         // -------- Border ---------
         borderRadiusXS: 4,

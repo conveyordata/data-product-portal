@@ -119,16 +119,6 @@ const injectedRtkApi = api.injectEndpoints({
         },
       }),
     }),
-    linkInputPortsToDataProduct: build.mutation<
-      LinkInputPortsToDataProductApiResponse,
-      LinkInputPortsToDataProductApiArg
-    >({
-      query: (queryArg) => ({
-        url: `/api/v2/data_products/${queryArg.id}/link_input_ports`,
-        method: "POST",
-        body: queryArg.linkInputPortsToDataProduct,
-      }),
-    }),
     requestInputPortsForDataProduct: build.mutation<
       RequestInputPortsForDataProductApiResponse,
       RequestInputPortsForDataProductApiArg
@@ -272,12 +262,6 @@ export type SetValueForDataProductApiArg = {
   settingId: string;
   value: string;
 };
-export type LinkInputPortsToDataProductApiResponse =
-  /** status 200 Successful Response */ LinkInputPortsToDataProductPost;
-export type LinkInputPortsToDataProductApiArg = {
-  id: string;
-  linkInputPortsToDataProduct: LinkInputPortsToDataProduct;
-};
 export type RequestInputPortsForDataProductApiResponse =
   /** status 200 Successful Response */ RequestInputPortsForDataProductResponse;
 export type RequestInputPortsForDataProductApiArg = {
@@ -333,8 +317,12 @@ export type ValidationError = {
 export type HttpValidationError = {
   detail?: ValidationError[];
 };
+export type RequestInputPortsForAbstractDataProductRequestItem = {
+  output_port_id: string;
+  access_mode_id?: string | null;
+};
 export type RequestInputPortsForDataProductRequest = {
-  output_ports: string[];
+  output_ports: RequestInputPortsForAbstractDataProductRequestItem[];
   justification: string;
 };
 export type DataProductCreate = {
@@ -456,13 +444,6 @@ export type Graph = {
   edges: Edge[];
   nodes: Node[];
 };
-export type LinkInputPortsToDataProductPost = {
-  input_port_links: string[];
-};
-export type LinkInputPortsToDataProduct = {
-  input_ports: string[];
-  justification: string;
-};
 export type RequestInputPortsForDataProductResponse = {
   input_port_links: string[];
 };
@@ -475,6 +456,11 @@ export type User = {
   has_seen_tour: boolean;
   can_become_admin: boolean;
   admin_expiry?: string | null;
+};
+export type AccessMode = {
+  id: string;
+  name: string;
+  description: string;
 };
 export type InputPortRequestBase = {
   id: string;
@@ -491,6 +477,7 @@ export type InputPortRequestBase = {
   revoked_by?: User | null;
   created_on: string;
   requested_on: string;
+  access_mode?: AccessMode | null;
 };
 export type OutputPort = {
   id: string;
@@ -501,6 +488,7 @@ export type OutputPort = {
   access_type: OutputPortAccessType;
   data_product_id: string;
   tags: Tag[];
+  access_modes: AccessMode[];
 };
 export type AbstractDataProductInputPort = {
   id: string;
@@ -772,7 +760,6 @@ export const {
   useGetDataProductGraphDataQuery,
   useLazyGetDataProductGraphDataQuery,
   useSetValueForDataProductMutation,
-  useLinkInputPortsToDataProductMutation,
   useRequestInputPortsForDataProductMutation,
   useGetDataProductInputPortsQuery,
   useLazyGetDataProductInputPortsQuery,

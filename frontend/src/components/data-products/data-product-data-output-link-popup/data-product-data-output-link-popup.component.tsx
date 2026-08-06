@@ -12,7 +12,7 @@ type Props = {
     formRef: RefObject<FormInstance | null>;
 };
 
-export function DataProductDataOutputLinkPopup({ onClose, isOpen, title, formRef, children }: Props) {
+export function DataProductLinkPopup({ onClose, isOpen, title, formRef, children }: Props) {
     const { t } = useTranslation();
 
     return (
@@ -20,6 +20,7 @@ export function DataProductDataOutputLinkPopup({ onClose, isOpen, title, formRef
             title={title}
             onCancel={onClose}
             open={isOpen}
+            width={800}
             footer={() => (
                 <Space>
                     <Button

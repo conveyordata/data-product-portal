@@ -12,7 +12,7 @@ import authSlice, { setCredentials } from '@/store/api/services/auth-slice.ts';
 import { api as generatedApiSlice } from '@/store/api/services/generated/completeServiceApi.ts';
 import type { User } from '@/store/api/services/generated/usersApi.ts';
 import { baseApiSlice } from '@/store/features/api/base-api-slice.ts';
-import cartSlice, { addDatasetToCart } from '@/store/features/cart/cart-slice.ts';
+import cartSlice, { addOutputPortToCart } from '@/store/features/cart/cart-slice.ts';
 import wizardSlice from '@/store/features/wizard/wizard-slice.ts';
 import i18n from './i18n';
 
@@ -51,7 +51,7 @@ export function renderWithProviders(ui: ReactElement, options?: RenderWithProvid
     }
     if (preloadedState?.cart?.DatasetIds) {
         for (const datasetId of preloadedState.cart.DatasetIds) {
-            store.dispatch(addDatasetToCart({ datasetId }));
+            store.dispatch(addOutputPortToCart({ outputPortId: datasetId }));
         }
     }
 

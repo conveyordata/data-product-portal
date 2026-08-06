@@ -620,6 +620,16 @@ func (s *ApproveOutputPortAsInputPortRequest) SetDecisionNote(val OptNilString) 
 	s.DecisionNote = val
 }
 
+type ApproveOutputPortTechnicalAssetLinkBadRequestApplicationJSON jx.Raw
+
+func (*ApproveOutputPortTechnicalAssetLinkBadRequestApplicationJSON) approveOutputPortTechnicalAssetLinkRes() {
+}
+
+type ApproveOutputPortTechnicalAssetLinkConflictApplicationJSON jx.Raw
+
+func (*ApproveOutputPortTechnicalAssetLinkConflictApplicationJSON) approveOutputPortTechnicalAssetLinkRes() {
+}
+
 type ApproveOutputPortTechnicalAssetLinkOKApplicationJSON jx.Raw
 
 func (*ApproveOutputPortTechnicalAssetLinkOKApplicationJSON) approveOutputPortTechnicalAssetLinkRes() {
@@ -5374,8 +5384,8 @@ type GetOutputPortResponse struct {
 	Tags                          []Tag                    `json:"tags"`
 	Domain                        Domain                   `json:"domain"`
 	Lifecycle                     NilDataProductLifeCycle  `json:"lifecycle"`
-	About                         NilString                `json:"about"`
 	AccessModes                   []AccessMode             `json:"access_modes"`
+	About                         NilString                `json:"about"`
 	RolledUpTags                  []Tag                    `json:"rolled_up_tags"`
 	DataProductSettings           []OutputPortSettingValue `json:"data_product_settings"`
 	TechnicalAssetLinks           []TechnicalAssetLink     `json:"technical_asset_links"`
@@ -5446,14 +5456,14 @@ func (s *GetOutputPortResponse) GetLifecycle() NilDataProductLifeCycle {
 	return s.Lifecycle
 }
 
-// GetAbout returns the value of About.
-func (s *GetOutputPortResponse) GetAbout() NilString {
-	return s.About
-}
-
 // GetAccessModes returns the value of AccessModes.
 func (s *GetOutputPortResponse) GetAccessModes() []AccessMode {
 	return s.AccessModes
+}
+
+// GetAbout returns the value of About.
+func (s *GetOutputPortResponse) GetAbout() NilString {
+	return s.About
 }
 
 // GetRolledUpTags returns the value of RolledUpTags.
@@ -5536,14 +5546,14 @@ func (s *GetOutputPortResponse) SetLifecycle(val NilDataProductLifeCycle) {
 	s.Lifecycle = val
 }
 
-// SetAbout sets the value of About.
-func (s *GetOutputPortResponse) SetAbout(val NilString) {
-	s.About = val
-}
-
 // SetAccessModes sets the value of AccessModes.
 func (s *GetOutputPortResponse) SetAccessModes(val []AccessMode) {
 	s.AccessModes = val
+}
+
+// SetAbout sets the value of About.
+func (s *GetOutputPortResponse) SetAbout(val NilString) {
+	s.About = val
 }
 
 // SetRolledUpTags sets the value of RolledUpTags.
@@ -6446,7 +6456,6 @@ func (*HTTPValidationError) getSinglePlatformServiceConfigurationRes()    {}
 func (*HTTPValidationError) getTechnicalAssetEventHistoryRes()            {}
 func (*HTTPValidationError) getTechnicalAssetRes()                        {}
 func (*HTTPValidationError) ingestOutputPortContractRes()                 {}
-func (*HTTPValidationError) linkInputPortsToDataProductRes()              {}
 func (*HTTPValidationError) linkOutputPortToTechnicalAssetRes()           {}
 func (*HTTPValidationError) listDataProductRoleAssignmentsRes()           {}
 func (*HTTPValidationError) listGlobalRoleAssignmentsRes()                {}
@@ -6531,6 +6540,7 @@ type InputPortRequestBase struct {
 	RevokedBy             OptNilUser               `json:"revoked_by"`
 	CreatedOn             time.Time                `json:"created_on"`
 	RequestedOn           time.Time                `json:"requested_on"`
+	AccessMode            OptNilAccessMode         `json:"access_mode"`
 }
 
 // GetID returns the value of ID.
@@ -6603,6 +6613,11 @@ func (s *InputPortRequestBase) GetRequestedOn() time.Time {
 	return s.RequestedOn
 }
 
+// GetAccessMode returns the value of AccessMode.
+func (s *InputPortRequestBase) GetAccessMode() OptNilAccessMode {
+	return s.AccessMode
+}
+
 // SetID sets the value of ID.
 func (s *InputPortRequestBase) SetID(val uuid.UUID) {
 	s.ID = val
@@ -6671,6 +6686,11 @@ func (s *InputPortRequestBase) SetCreatedOn(val time.Time) {
 // SetRequestedOn sets the value of RequestedOn.
 func (s *InputPortRequestBase) SetRequestedOn(val time.Time) {
 	s.RequestedOn = val
+}
+
+// SetAccessMode sets the value of AccessMode.
+func (s *InputPortRequestBase) SetAccessMode(val OptNilAccessMode) {
+	s.AccessMode = val
 }
 
 // Ref: #/components/schemas/InputPortRequestDecision
@@ -6824,57 +6844,6 @@ func (s *IsAdminResponse) SetIsAdmin(val bool) {
 func (s *IsAdminResponse) SetTime(val OptNilString) {
 	s.Time = val
 }
-
-// Ref: #/components/schemas/LinkInputPortsToDataProduct
-type LinkInputPortsToDataProduct struct {
-	InputPorts    []uuid.UUID `json:"input_ports"`
-	Justification string      `json:"justification"`
-}
-
-// GetInputPorts returns the value of InputPorts.
-func (s *LinkInputPortsToDataProduct) GetInputPorts() []uuid.UUID {
-	return s.InputPorts
-}
-
-// GetJustification returns the value of Justification.
-func (s *LinkInputPortsToDataProduct) GetJustification() string {
-	return s.Justification
-}
-
-// SetInputPorts sets the value of InputPorts.
-func (s *LinkInputPortsToDataProduct) SetInputPorts(val []uuid.UUID) {
-	s.InputPorts = val
-}
-
-// SetJustification sets the value of Justification.
-func (s *LinkInputPortsToDataProduct) SetJustification(val string) {
-	s.Justification = val
-}
-
-type LinkInputPortsToDataProductBadRequestApplicationJSON jx.Raw
-
-func (*LinkInputPortsToDataProductBadRequestApplicationJSON) linkInputPortsToDataProductRes() {}
-
-type LinkInputPortsToDataProductNotFoundApplicationJSON jx.Raw
-
-func (*LinkInputPortsToDataProductNotFoundApplicationJSON) linkInputPortsToDataProductRes() {}
-
-// Ref: #/components/schemas/LinkInputPortsToDataProductPost
-type LinkInputPortsToDataProductPost struct {
-	InputPortLinks []uuid.UUID `json:"input_port_links"`
-}
-
-// GetInputPortLinks returns the value of InputPortLinks.
-func (s *LinkInputPortsToDataProductPost) GetInputPortLinks() []uuid.UUID {
-	return s.InputPortLinks
-}
-
-// SetInputPortLinks sets the value of InputPortLinks.
-func (s *LinkInputPortsToDataProductPost) SetInputPortLinks(val []uuid.UUID) {
-	s.InputPortLinks = val
-}
-
-func (*LinkInputPortsToDataProductPost) linkInputPortsToDataProductRes() {}
 
 type LinkOutputPortToTechnicalAssetNotFoundApplicationJSON jx.Raw
 
@@ -7592,6 +7561,74 @@ func (o OptInt) Get() (v int, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptInt) Or(d int) int {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptNilAccessMode returns new OptNilAccessMode with value set to v.
+func NewOptNilAccessMode(v AccessMode) OptNilAccessMode {
+	return OptNilAccessMode{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptNilAccessMode is optional nullable AccessMode.
+type OptNilAccessMode struct {
+	Value AccessMode
+	Set   bool
+	Null  bool
+}
+
+// IsSet returns true if OptNilAccessMode was set.
+func (o OptNilAccessMode) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptNilAccessMode) Reset() {
+	var v AccessMode
+	o.Value = v
+	o.Set = false
+	o.Null = false
+}
+
+// SetTo sets value to v.
+func (o *OptNilAccessMode) SetTo(v AccessMode) {
+	o.Set = true
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o OptNilAccessMode) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *OptNilAccessMode) SetToNull() {
+	o.Set = true
+	o.Null = true
+	var v AccessMode
+	o.Value = v
+}
+
+// IsEmpty returns true if the field was omitted from the payload (not Set and not Null).
+func (o OptNilAccessMode) IsEmpty() bool {
+	return !o.Set && !o.Null
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptNilAccessMode) Get() (v AccessMode, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptNilAccessMode) Or(d AccessMode) AccessMode {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -9582,6 +9619,7 @@ type OutputPort struct {
 	AccessType    OutputPortAccessType `json:"access_type"`
 	DataProductID uuid.UUID            `json:"data_product_id"`
 	Tags          []Tag                `json:"tags"`
+	AccessModes   []AccessMode         `json:"access_modes"`
 }
 
 // GetID returns the value of ID.
@@ -9624,6 +9662,11 @@ func (s *OutputPort) GetTags() []Tag {
 	return s.Tags
 }
 
+// GetAccessModes returns the value of AccessModes.
+func (s *OutputPort) GetAccessModes() []AccessMode {
+	return s.AccessModes
+}
+
 // SetID sets the value of ID.
 func (s *OutputPort) SetID(val uuid.UUID) {
 	s.ID = val
@@ -9662,6 +9705,11 @@ func (s *OutputPort) SetDataProductID(val uuid.UUID) {
 // SetTags sets the value of Tags.
 func (s *OutputPort) SetTags(val []Tag) {
 	s.Tags = val
+}
+
+// SetAccessModes sets the value of AccessModes.
+func (s *OutputPort) SetAccessModes(val []AccessMode) {
+	s.AccessModes = val
 }
 
 // Ref: #/components/schemas/OutputPortAboutUpdate
@@ -11633,6 +11681,32 @@ func (s *RequestDataProductRoleAssignment) SetDataProductID(val uuid.UUID) {
 	s.DataProductID = val
 }
 
+// Ref: #/components/schemas/RequestInputPortsForAbstractDataProductRequestItem
+type RequestInputPortsForAbstractDataProductRequestItem struct {
+	OutputPortID uuid.UUID  `json:"output_port_id"`
+	AccessModeID OptNilUUID `json:"access_mode_id"`
+}
+
+// GetOutputPortID returns the value of OutputPortID.
+func (s *RequestInputPortsForAbstractDataProductRequestItem) GetOutputPortID() uuid.UUID {
+	return s.OutputPortID
+}
+
+// GetAccessModeID returns the value of AccessModeID.
+func (s *RequestInputPortsForAbstractDataProductRequestItem) GetAccessModeID() OptNilUUID {
+	return s.AccessModeID
+}
+
+// SetOutputPortID sets the value of OutputPortID.
+func (s *RequestInputPortsForAbstractDataProductRequestItem) SetOutputPortID(val uuid.UUID) {
+	s.OutputPortID = val
+}
+
+// SetAccessModeID sets the value of AccessModeID.
+func (s *RequestInputPortsForAbstractDataProductRequestItem) SetAccessModeID(val OptNilUUID) {
+	s.AccessModeID = val
+}
+
 type RequestInputPortsForDataProductBadRequestApplicationJSON jx.Raw
 
 func (*RequestInputPortsForDataProductBadRequestApplicationJSON) requestInputPortsForDataProductRes() {
@@ -11644,12 +11718,12 @@ func (*RequestInputPortsForDataProductNotFoundApplicationJSON) requestInputPorts
 
 // Ref: #/components/schemas/RequestInputPortsForDataProductRequest
 type RequestInputPortsForDataProductRequest struct {
-	OutputPorts   []uuid.UUID `json:"output_ports"`
-	Justification string      `json:"justification"`
+	OutputPorts   []RequestInputPortsForAbstractDataProductRequestItem `json:"output_ports"`
+	Justification string                                               `json:"justification"`
 }
 
 // GetOutputPorts returns the value of OutputPorts.
-func (s *RequestInputPortsForDataProductRequest) GetOutputPorts() []uuid.UUID {
+func (s *RequestInputPortsForDataProductRequest) GetOutputPorts() []RequestInputPortsForAbstractDataProductRequestItem {
 	return s.OutputPorts
 }
 
@@ -11659,7 +11733,7 @@ func (s *RequestInputPortsForDataProductRequest) GetJustification() string {
 }
 
 // SetOutputPorts sets the value of OutputPorts.
-func (s *RequestInputPortsForDataProductRequest) SetOutputPorts(val []uuid.UUID) {
+func (s *RequestInputPortsForDataProductRequest) SetOutputPorts(val []RequestInputPortsForAbstractDataProductRequestItem) {
 	s.OutputPorts = val
 }
 
@@ -11687,12 +11761,12 @@ func (*RequestInputPortsForDataProductResponse) requestInputPortsForDataProductR
 
 // Ref: #/components/schemas/RequestInputPortsForExplorationRequest
 type RequestInputPortsForExplorationRequest struct {
-	OutputPorts   []uuid.UUID `json:"output_ports"`
-	Justification string      `json:"justification"`
+	OutputPorts   []RequestInputPortsForAbstractDataProductRequestItem `json:"output_ports"`
+	Justification string                                               `json:"justification"`
 }
 
 // GetOutputPorts returns the value of OutputPorts.
-func (s *RequestInputPortsForExplorationRequest) GetOutputPorts() []uuid.UUID {
+func (s *RequestInputPortsForExplorationRequest) GetOutputPorts() []RequestInputPortsForAbstractDataProductRequestItem {
 	return s.OutputPorts
 }
 
@@ -11702,7 +11776,7 @@ func (s *RequestInputPortsForExplorationRequest) GetJustification() string {
 }
 
 // SetOutputPorts sets the value of OutputPorts.
-func (s *RequestInputPortsForExplorationRequest) SetOutputPorts(val []uuid.UUID) {
+func (s *RequestInputPortsForExplorationRequest) SetOutputPorts(val []RequestInputPortsForAbstractDataProductRequestItem) {
 	s.OutputPorts = val
 }
 
@@ -12688,6 +12762,7 @@ type SearchOutputPortsResponseItem struct {
 	Tags                          []Tag                   `json:"tags"`
 	Domain                        Domain                  `json:"domain"`
 	Lifecycle                     NilDataProductLifeCycle `json:"lifecycle"`
+	AccessModes                   []AccessMode            `json:"access_modes"`
 	AbstractDataProductCount      int                     `json:"abstract_data_product_count"`
 	TechnicalAssetsCount          int                     `json:"technical_assets_count"`
 	DataProductName               string                  `json:"data_product_name"`
@@ -12756,6 +12831,11 @@ func (s *SearchOutputPortsResponseItem) GetDomain() Domain {
 // GetLifecycle returns the value of Lifecycle.
 func (s *SearchOutputPortsResponseItem) GetLifecycle() NilDataProductLifeCycle {
 	return s.Lifecycle
+}
+
+// GetAccessModes returns the value of AccessModes.
+func (s *SearchOutputPortsResponseItem) GetAccessModes() []AccessMode {
+	return s.AccessModes
 }
 
 // GetAbstractDataProductCount returns the value of AbstractDataProductCount.
@@ -12836,6 +12916,11 @@ func (s *SearchOutputPortsResponseItem) SetDomain(val Domain) {
 // SetLifecycle sets the value of Lifecycle.
 func (s *SearchOutputPortsResponseItem) SetLifecycle(val NilDataProductLifeCycle) {
 	s.Lifecycle = val
+}
+
+// SetAccessModes sets the value of AccessModes.
+func (s *SearchOutputPortsResponseItem) SetAccessModes(val []AccessMode) {
+	s.AccessModes = val
 }
 
 // SetAbstractDataProductCount sets the value of AbstractDataProductCount.

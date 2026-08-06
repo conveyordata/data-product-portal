@@ -546,14 +546,6 @@ type Invoker interface {
 	//
 	// GET /api/v2/configuration/access_durations/enabled
 	IsTimeBoundAccessEnabled(ctx context.Context) (*TimeBoundAccessEnabledResponse, error)
-	// LinkInputPortsToDataProduct invokes link_input_ports_to_data_product operation.
-	//
-	// Link Input Ports To Data Product.
-	//
-	// Deprecated: schema marks this operation as deprecated.
-	//
-	// POST /api/v2/data_products/{id}/link_input_ports
-	LinkInputPortsToDataProduct(ctx context.Context, request *LinkInputPortsToDataProduct, params LinkInputPortsToDataProductParams) (LinkInputPortsToDataProductRes, error)
 	// LinkOutputPortToTechnicalAsset invokes link_output_port_to_technical_asset operation.
 	//
 	// Link Output Port To Technical Asset.
@@ -6442,73 +6434,6 @@ func (c *Client) sendIsTimeBoundAccessEnabled(ctx context.Context) (res *TimeBou
 	}()
 
 	result, err := decodeIsTimeBoundAccessEnabledResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
-// LinkInputPortsToDataProduct invokes link_input_ports_to_data_product operation.
-//
-// Link Input Ports To Data Product.
-//
-// Deprecated: schema marks this operation as deprecated.
-//
-// POST /api/v2/data_products/{id}/link_input_ports
-func (c *Client) LinkInputPortsToDataProduct(ctx context.Context, request *LinkInputPortsToDataProduct, params LinkInputPortsToDataProductParams) (LinkInputPortsToDataProductRes, error) {
-	res, err := c.sendLinkInputPortsToDataProduct(ctx, request, params)
-	return res, err
-}
-
-func (c *Client) sendLinkInputPortsToDataProduct(ctx context.Context, request *LinkInputPortsToDataProduct, params LinkInputPortsToDataProductParams) (res LinkInputPortsToDataProductRes, err error) {
-
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [3]string
-	pathParts[0] = "/api/v2/data_products/"
-	{
-		// Encode "id" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "id",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			return e.EncodeValue(conv.UUIDToString(params.ID))
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		encoded, err := e.Result()
-		if err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		pathParts[1] = encoded
-	}
-	pathParts[2] = "/link_input_ports"
-	uri.AddPathParts(u, pathParts[:]...)
-
-	r, err := ht.NewRequest(ctx, "POST", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-	if err := encodeLinkInputPortsToDataProductRequest(request, r); err != nil {
-		return res, errors.Wrap(err, "encode request")
-	}
-
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	body := resp.Body
-	defer func() {
-		// Drain the body to EOF before closing, so the underlying
-		// connection can be reused by the Transport regardless of the
-		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
-		_, _ = io.Copy(io.Discard, body)
-		_ = body.Close()
-	}()
-
-	result, err := decodeLinkInputPortsToDataProductResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

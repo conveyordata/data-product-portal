@@ -1,6 +1,5 @@
 import { usePostHog } from '@posthog/react';
 import { Button, Flex, Form, type FormProps, Input, Select } from 'antd';
-import { useForm } from 'antd/es/form/Form';
 import { t } from 'i18next';
 import { useCallback, useEffect } from 'react';
 import { useSelector } from 'react-redux';
@@ -15,21 +14,16 @@ import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
 import { useGetDomainsQuery } from '@/store/api/services/generated/configurationDomainsApi.ts';
 import type { DataProductCreate } from '@/store/api/services/generated/dataProductsApi.ts';
 import { useCreateExplorationMutation } from '@/store/api/services/generated/explorationsApi.ts';
-import type { SearchOutputPortsResponseItem } from '@/store/api/services/generated/outputPortsSearchApi.ts';
 import {
     ResourceNameModel,
     ResourceNameValidityType,
     useLazySanitizeResourceNameQuery,
     useLazyValidateResourceNameQuery,
 } from '@/store/api/services/generated/resourceNamesApi.ts';
-import { clearCart } from '@/store/features/cart/cart-slice.ts';
+import { clearCart, selectCartOutputPorts } from '@/store/features/cart/cart-slice.ts';
 import { createExplorationIdPath } from '@/types/navigation.ts';
 import { dispatchMessage } from '@/utils/feedback.ts';
 import { selectFilterOptionByLabelAndValue } from '@/utils/form.helper.ts';
-
-type Props = {
-    cartOutputPorts?: SearchOutputPortsResponseItem[];
-};
 
 type CreateExplorationRequestForm = {
     name: string;
@@ -37,11 +31,12 @@ type CreateExplorationRequestForm = {
     justification: string;
 };
 
-export const NewExplorationForm = ({ cartOutputPorts }: Props) => {
+export const NewExplorationForm = () => {
+    const cartOutputPorts = useSelector(selectCartOutputPorts);
     const dispatch = useAppDispatch();
     const posthog = usePostHog();
     const navigate = useNavigate();
-    const [form] = useForm<CreateExplorationRequestForm>();
+    const [form] = Form.useForm<CreateExplorationRequestForm>();
     const { data: { domains = [] } = {}, isFetching: isFetchingDomains } = useGetDomainsQuery();
     const currentUser = useSelector(selectCurrentUser);
 
@@ -79,7 +74,10 @@ export const NewExplorationForm = ({ cartOutputPorts }: Props) => {
                     description: justification,
                     namespace: sanitizedResourceName.resource_name,
                     input_ports: {
-                        output_ports: cartOutputPorts?.map((dataset) => dataset.id),
+                        output_ports: cartOutputPorts?.map((dataset) => ({
+                            output_port_id: dataset.outputPortId,
+                            access_mode_id: dataset.accessModeId,
+                        })),
                         justification,
                     },
                     ...request,

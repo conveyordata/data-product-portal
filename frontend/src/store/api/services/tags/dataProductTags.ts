@@ -14,11 +14,11 @@ export const dataProductTags = {
     createDataProduct: {
         invalidatesTags: (_, __, arg) => [
             { type: TagTypes.DataProduct, id: STATIC_TAG_ID.LIST },
-            ...(arg.input_ports?.output_ports?.map((id) => ({
+            ...(arg.input_ports?.output_ports?.map((op) => ({
                 type: TagTypes.OutputPort,
-                id,
+                id: op.output_port_id,
             })) ?? []),
-            ...(arg.input_ports?.output_ports?.map((id) => ({ type: TagTypes.History, id })) ?? []),
+            ...(arg.input_ports?.output_ports?.map((op) => ({ type: TagTypes.History, id: op.output_port_id })) ?? []),
             { type: TagTypes.MyRequests },
         ],
     },
@@ -72,11 +72,14 @@ export const dataProductTags = {
     requestInputPortsForDataProduct: {
         invalidatesTags: (_, __, arg) => [
             { type: TagTypes.DataProduct, id: arg.id },
-            ...arg.requestInputPortsForDataProductRequest.output_ports.map((id) => ({
+            ...arg.requestInputPortsForDataProductRequest.output_ports.map((op) => ({
                 type: TagTypes.OutputPort,
-                id,
+                id: op.output_port_id,
             })),
-            ...arg.requestInputPortsForDataProductRequest.output_ports.map((id) => ({ type: TagTypes.History, id })),
+            ...arg.requestInputPortsForDataProductRequest.output_ports.map((op) => ({
+                type: TagTypes.History,
+                id: op.output_port_id,
+            })),
             { type: TagTypes.History, id: arg.id },
             { type: TagTypes.DataProductInputPorts, id: arg.id },
             { type: TagTypes.MyRequests },

@@ -207,8 +207,12 @@ export type CreateExplorationResponse = {
   status: AbstractDataProductStatus;
   finalizers: string[];
 };
+export type RequestInputPortsForAbstractDataProductRequestItem = {
+  output_port_id: string;
+  access_mode_id?: string | null;
+};
 export type RequestInputPortsForExplorationRequest = {
-  output_ports: string[];
+  output_ports: RequestInputPortsForAbstractDataProductRequestItem[];
   justification: string;
 };
 export type CreateExplorationRequestWithInputPorts = {
@@ -238,6 +242,11 @@ export type GetExplorationResponse = {
   finalizers: string[];
   owner: User;
 };
+export type AccessMode = {
+  id: string;
+  name: string;
+  description: string;
+};
 export type InputPortRequestBase = {
   id: string;
   justification: string;
@@ -253,6 +262,7 @@ export type InputPortRequestBase = {
   revoked_by?: User | null;
   created_on: string;
   requested_on: string;
+  access_mode?: AccessMode | null;
 };
 export type Tag = {
   id: string;
@@ -267,6 +277,7 @@ export type OutputPort = {
   access_type: OutputPortAccessType;
   data_product_id: string;
   tags: Tag[];
+  access_modes: AccessMode[];
 };
 export type AbstractDataProductInputPort = {
   id: string;

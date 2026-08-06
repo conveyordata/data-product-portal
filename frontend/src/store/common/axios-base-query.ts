@@ -4,7 +4,7 @@ import axios, { type AxiosResponse } from 'axios';
 import { User } from 'oidc-client-ts';
 
 import { AppConfig } from '@/config/app-config.ts';
-import type { ApiError } from '@/types/api-result.ts';
+import type { ApiError } from '@/store/common/api-result.ts';
 import { dispatchNotification, type NotificationOptions } from '@/utils/feedback.ts';
 
 interface CustomAxiosError extends AxiosError {
@@ -31,6 +31,11 @@ const defaultErrorMessage: NotificationOptions = {
     type: 'error',
 };
 
+const suppressedErrorToastEndpoints = new Set([
+    'linkOutputPortToTechnicalAsset',
+    'getLatestDataQualitySummaryForOutputPort',
+]);
+
 function showErrorMessageToast(err: AxiosResponse<ApiError>) {
     const { correlation_id: correlationId = defaultErrorMessage.title, detail = defaultErrorMessage.description } =
         err.data;
@@ -44,13 +49,8 @@ function showErrorMessageToast(err: AxiosResponse<ApiError>) {
     });
 }
 
-function shouldShowErrorToast(status: number, url: string) {
-    if (status === 404) {
-        if (url.includes('data_quality_summary')) {
-            return false;
-        }
-    }
-    return true;
+function shouldShowErrorToast(endpoint: string) {
+    return !suppressedErrorToastEndpoints.has(endpoint);
 }
 
 export const axiosBaseQuery =
@@ -68,7 +68,7 @@ export const axiosBaseQuery =
         unknown,
         unknown
     > =>
-    async ({ url, method, data, body, params, headers }) => {
+    async ({ url, method, data, body, params, headers }, api) => {
         try {
             const user = getUser();
             const result = await axios({
@@ -86,11 +86,15 @@ export const axiosBaseQuery =
             const err = axiosError as CustomAxiosError;
 
             if (err.response) {
-                if (shouldShowErrorToast(err.response.status, url)) {
+                if (shouldShowErrorToast(api.endpoint)) {
                     showErrorMessageToast(err.response);
                 }
             } else {
                 dispatchNotification(defaultErrorMessage);
+            }
+
+            if (err.response?.data) {
+                return { error: err.response.data };
             }
 
             return { error: { correlation_id: 'NA', detail: defaultErrorMessage.description } };

@@ -269,10 +269,6 @@ type IngestOutputPortContractRes interface {
 	ingestOutputPortContractRes()
 }
 
-type LinkInputPortsToDataProductRes interface {
-	linkInputPortsToDataProductRes()
-}
-
 type LinkOutputPortToTechnicalAssetRes interface {
 	linkOutputPortToTechnicalAssetRes()
 }

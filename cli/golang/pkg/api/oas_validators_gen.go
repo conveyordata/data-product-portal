@@ -3176,52 +3176,6 @@ func (s InputPortStatus) Validate() error {
 	}
 }
 
-func (s *LinkInputPortsToDataProduct) Validate() error {
-	if s == nil {
-		return validate.ErrNilPointer
-	}
-
-	var failures []validate.FieldError
-	if err := func() error {
-		if s.InputPorts == nil {
-			return errors.New("nil is invalid value")
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "input_ports",
-			Error: err,
-		})
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-	return nil
-}
-
-func (s *LinkInputPortsToDataProductPost) Validate() error {
-	if s == nil {
-		return validate.ErrNilPointer
-	}
-
-	var failures []validate.FieldError
-	if err := func() error {
-		if s.InputPortLinks == nil {
-			return errors.New("nil is invalid value")
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "input_port_links",
-			Error: err,
-		})
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-	return nil
-}
-
 func (s *ListDataProductRoleAssignmentsResponse) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer
@@ -3378,6 +3332,17 @@ func (s *OutputPort) Validate() error {
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
 			Name:  "tags",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if s.AccessModes == nil {
+			return errors.New("nil is invalid value")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "access_modes",
 			Error: err,
 		})
 	}
@@ -4718,6 +4683,17 @@ func (s *SearchOutputPortsResponseItem) Validate() error {
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
 			Name:  "tags",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if s.AccessModes == nil {
+			return errors.New("nil is invalid value")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "access_modes",
 			Error: err,
 		})
 	}

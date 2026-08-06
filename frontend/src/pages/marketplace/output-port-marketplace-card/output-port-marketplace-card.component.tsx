@@ -11,32 +11,46 @@ import {
     UnorderedListOutlined,
 } from '@ant-design/icons';
 import { Button, Card, Descriptions, type DescriptionsProps, Space, Tag, Tooltip, Typography } from 'antd';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
+import SelectAccessModeModal from '@/pages/marketplace/output-port-marketplace-card/select-access-mode-modal.component.tsx';
 import { useAppDispatch } from '@/store';
 import type { SearchOutputPortsResponseItem } from '@/store/api/services/generated/outputPortsSearchApi.ts';
-import { addDatasetToCart, removeDatasetFromCart, selectCartDatasetIds } from '@/store/features/cart/cart-slice.ts';
+import {
+    addOutputPortToCart,
+    removeOutputPortFromCart,
+    selectCartOutputPortIds,
+} from '@/store/features/cart/cart-slice.ts';
 import { createDataProductIdPath, createMarketplaceOutputPortPath } from '@/types/navigation.ts';
 import { OutputPortCardTooltip } from './output-port-card-tooltip.component';
 import styles from './output-port-marketplace-card.module.scss';
 
 type Props = {
-    dataset: SearchOutputPortsResponseItem;
+    outputPort: SearchOutputPortsResponseItem;
 };
 
-export function OutputPortMarketplaceCard({ dataset }: Props) {
+export function OutputPortMarketplaceCard({ outputPort }: Props) {
     const { t } = useTranslation();
     const dispatch = useAppDispatch();
-    const cartDatasetIds = useSelector(selectCartDatasetIds);
+    const cartOutputPortIds = useSelector(selectCartOutputPortIds);
 
-    const toggleCart = (datasetId: string) => {
-        if (cartDatasetIds.includes(datasetId)) {
-            dispatch(removeDatasetFromCart({ datasetId }));
+    const [selectAccessModesOutputPort, setSelectAccessModesOutputPort] = useState<
+        SearchOutputPortsResponseItem | undefined
+    >(undefined);
+
+    const toggleCart = (outputPort: SearchOutputPortsResponseItem) => {
+        if (cartOutputPortIds.includes(outputPort.id)) {
+            dispatch(removeOutputPortFromCart({ outputPortId: outputPort.id }));
         } else {
-            dispatch(addDatasetToCart({ datasetId }));
+            if (outputPort.access_modes?.length > 0) {
+                setSelectAccessModesOutputPort(outputPort);
+            } else {
+                dispatch(addOutputPortToCart({ outputPortId: outputPort.id }));
+            }
         }
     };
 
@@ -121,79 +135,94 @@ export function OutputPortMarketplaceCard({ dataset }: Props) {
         return items;
     }
 
-    if (!dataset) return <LoadingSpinner />;
+    if (!outputPort) return <LoadingSpinner />;
     return (
-        <Card
-            key={dataset.id}
-            styles={{ body: { padding: 12 } }}
-            className={styles.marketplaceCardContainer}
-            actions={[
-                <Tooltip key="details" title={t('View details')}>
-                    <Link to={createMarketplaceOutputPortPath(dataset.id, dataset.data_product_id)}>
-                        <Button type="text" icon={<UnorderedListOutlined />} />
-                    </Link>
-                </Tooltip>,
-                <Tooltip
-                    key="details"
-                    title={cartDatasetIds.includes(dataset.id) ? t('Remove from cart') : t('Add to cart')}
-                >
-                    <Button
-                        key="add to cart"
-                        type="text"
-                        size="middle"
-                        onClick={(e) => {
-                            e.preventDefault();
-                            toggleCart(dataset.id);
-                        }}
+        <>
+            <Card
+                key={outputPort.id}
+                styles={{ body: { padding: 12 } }}
+                className={styles.marketplaceCardContainer}
+                actions={[
+                    <Tooltip key="details" title={t('View details')}>
+                        <Link to={createMarketplaceOutputPortPath(outputPort.id, outputPort.data_product_id)}>
+                            <Button type="text" icon={<UnorderedListOutlined />} />
+                        </Link>
+                    </Tooltip>,
+                    <Tooltip
+                        key="details"
+                        title={cartOutputPortIds.includes(outputPort.id) ? t('Remove from cart') : t('Add to cart')}
                     >
-                        {cartDatasetIds.includes(dataset.id) ? (
-                            <>
-                                <CustomSvgIconLoader
-                                    size="x-small"
-                                    iconComponent={ShoppingCartOutlined}
-                                    color="success"
-                                />
-                                <CustomSvgIconLoader size="x-small" iconComponent={CheckOutlined} color="success" />
-                            </>
-                        ) : (
-                            <>
-                                <CustomSvgIconLoader
-                                    size="x-small"
-                                    iconComponent={ShoppingCartOutlined}
-                                    color="primary"
-                                />
-                                <CustomSvgIconLoader size="x-small" iconComponent={PlusOutlined} color="primary" />
-                            </>
-                        )}
-                    </Button>
-                </Tooltip>,
-            ]}
-        >
-            <Space orientation="vertical" size="small" style={{ width: '100%' }}>
-                <Link to={createMarketplaceOutputPortPath(dataset.id, dataset.data_product_id)}>
-                    <Typography.Title level={5} style={{ marginBottom: 0 }}>
-                        {dataset.name}
-                    </Typography.Title>
-                </Link>
-                <Typography.Paragraph ellipsis={{ rows: 2, tooltip: true }} style={{ height: '44px', marginBottom: 0 }}>
-                    {dataset.description || 'No description available.'}
-                </Typography.Paragraph>
-                <Space size={2} style={{ height: '22px' }}>
-                    {dataset.tags?.map((tag) => (
-                        <Tag color="success" key={tag.value}>
-                            {tag.value}
-                        </Tag>
-                    ))}
-                </Space>
+                        <Button
+                            key="add to cart"
+                            type="text"
+                            size="middle"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                toggleCart(outputPort);
+                            }}
+                        >
+                            {cartOutputPortIds.includes(outputPort.id) ? (
+                                <>
+                                    <CustomSvgIconLoader
+                                        size="x-small"
+                                        iconComponent={ShoppingCartOutlined}
+                                        color="success"
+                                    />
+                                    <CustomSvgIconLoader size="x-small" iconComponent={CheckOutlined} color="success" />
+                                </>
+                            ) : (
+                                <>
+                                    <CustomSvgIconLoader
+                                        size="x-small"
+                                        iconComponent={ShoppingCartOutlined}
+                                        color="primary"
+                                    />
+                                    <CustomSvgIconLoader size="x-small" iconComponent={PlusOutlined} color="primary" />
+                                </>
+                            )}
+                        </Button>
+                    </Tooltip>,
+                ]}
+            >
+                <Space orientation="vertical" size="small" style={{ width: '100%' }}>
+                    <Link to={createMarketplaceOutputPortPath(outputPort.id, outputPort.data_product_id)}>
+                        <Typography.Title level={5} style={{ marginBottom: 0 }}>
+                            {outputPort.name}
+                        </Typography.Title>
+                    </Link>
+                    <Typography.Paragraph
+                        ellipsis={{ rows: 2, tooltip: true }}
+                        style={{ height: '44px', marginBottom: 0 }}
+                    >
+                        {outputPort.description || 'No description available.'}
+                    </Typography.Paragraph>
+                    <Space size={2} style={{ height: '22px' }}>
+                        {outputPort.tags?.map((tag) => (
+                            <Tag color="success" key={tag.value}>
+                                {tag.value}
+                            </Tag>
+                        ))}
+                    </Space>
 
-                <Descriptions
-                    layout="vertical"
-                    size="small"
-                    colon={false}
-                    column={2}
-                    items={createCardDetails(dataset)}
+                    <Descriptions
+                        layout="vertical"
+                        size="small"
+                        colon={false}
+                        column={2}
+                        items={createCardDetails(outputPort)}
+                    />
+                </Space>
+            </Card>
+            {selectAccessModesOutputPort !== undefined && (
+                <SelectAccessModeModal
+                    outputPort={selectAccessModesOutputPort}
+                    onClose={() => setSelectAccessModesOutputPort(undefined)}
+                    selectAccessMode={(accessMode) => {
+                        dispatch(addOutputPortToCart({ outputPortId: outputPort.id, accessModeId: accessMode.id }));
+                        setSelectAccessModesOutputPort(undefined);
+                    }}
                 />
-            </Space>
-        </Card>
+            )}
+        </>
     );
 }

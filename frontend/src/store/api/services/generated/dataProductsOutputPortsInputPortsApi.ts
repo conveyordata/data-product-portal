@@ -97,6 +97,11 @@ export type User = {
   can_become_admin: boolean;
   admin_expiry?: string | null;
 };
+export type AccessMode = {
+  id: string;
+  name: string;
+  description: string;
+};
 export type InputPortRequestBase = {
   id: string;
   justification: string;
@@ -112,6 +117,7 @@ export type InputPortRequestBase = {
   revoked_by?: User | null;
   created_on: string;
   requested_on: string;
+  access_mode?: AccessMode | null;
 };
 export type AbstractDataProductInfo = {
   name: string;

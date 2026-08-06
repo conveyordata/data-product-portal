@@ -459,6 +459,11 @@ export type Tag = {
   id: string;
   value: string;
 };
+export type AccessMode = {
+  id: string;
+  name: string;
+  description: string;
+};
 export type OutputPort = {
   id: string;
   name: string;
@@ -468,6 +473,7 @@ export type OutputPort = {
   access_type: OutputPortAccessType;
   data_product_id: string;
   tags: Tag[];
+  access_modes: AccessMode[];
 };
 export type OutputPortRoleAssignmentResponse = {
   id: string;

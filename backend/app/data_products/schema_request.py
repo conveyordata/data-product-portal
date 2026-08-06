@@ -5,6 +5,9 @@ from warnings import deprecated
 from annotated_types import MinLen
 from pydantic import field_validator
 
+from app.abstract_data_product.schema_request import (
+    RequestInputPortsForAbstractDataProductRequestItem,
+)
 from app.data_products.status import AbstractDataProductStatus
 from app.shared.schema import ORMModel
 
@@ -21,7 +24,7 @@ class DataProductUpdate(ORMModel):
 
 
 class RequestInputPortsForDataProductRequest(ORMModel):
-    output_ports: list[UUID]
+    output_ports: list[RequestInputPortsForAbstractDataProductRequestItem]
     justification: str
 
 

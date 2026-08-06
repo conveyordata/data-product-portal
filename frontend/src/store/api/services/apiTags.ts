@@ -302,5 +302,6 @@ api.enhanceEndpoints({
         ...explorationTags,
         ...configurationAccessDurationsTags,
         ...configurationAccessModesTags,
+        ...configurationAccessModesTags,
     },
 });

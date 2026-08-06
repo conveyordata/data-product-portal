@@ -107,7 +107,7 @@ export function Marketplace() {
                 ) : paginatedOutputPorts?.length > 0 ? (
                     <Flex wrap="wrap" gap="small">
                         {paginatedOutputPorts.map((outputPort) => (
-                            <OutputPortMarketplaceCard key={outputPort.id} dataset={outputPort} />
+                            <OutputPortMarketplaceCard key={outputPort.id} outputPort={outputPort} />
                         ))}
                     </Flex>
                 ) : (

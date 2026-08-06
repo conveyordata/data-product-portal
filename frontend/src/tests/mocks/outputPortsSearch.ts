@@ -27,6 +27,7 @@ export const mockOutputPorts: SearchOutputPortsResponseItem[] = [
         abstract_data_product_count: 1,
         technical_assets_count: 1,
         data_product_name: 'dp-1',
+        access_modes: [],
         data_product_access_duration_type: AccessDurationType.Permanent,
         exploration_access_duration_type: AccessDurationType.Permanent,
     },

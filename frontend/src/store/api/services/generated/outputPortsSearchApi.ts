@@ -41,6 +41,11 @@ export type DataProductLifeCycle = {
   color: string;
   is_default: boolean;
 };
+export type AccessMode = {
+  id: string;
+  name: string;
+  description: string;
+};
 export type SearchOutputPortsResponseItem = {
   id: string;
   namespace: string;
@@ -55,6 +60,7 @@ export type SearchOutputPortsResponseItem = {
   tags: Tag[];
   domain: Domain;
   lifecycle: DataProductLifeCycle | null;
+  access_modes: AccessMode[];
   abstract_data_product_count: number;
   technical_assets_count: number;
   data_product_name: string;

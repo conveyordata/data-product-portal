@@ -19,6 +19,9 @@ from app.abstract_data_product.model import (
     AbstractDataProduct,
     ensure_abstract_data_product_exists,
 )
+from app.abstract_data_product.schema_request import (
+    RequestInputPortsForAbstractDataProductRequestItem,
+)
 from app.abstract_data_product.type import AbstractDataProductType
 from app.authorization.role_assignments.output_port.service import (
     RoleAssignmentService as OutputPortRoleAssignmentService,
@@ -167,7 +170,6 @@ class AbstractDataProductService:
                 selectinload(OutputPortModel.data_product_links)
                 .selectinload(InputPortModel.consuming_abstract_data_product)
                 .selectinload(AbstractDataProduct.input_ports),
-                selectinload(OutputPortModel.data_output_links),
             ],
             populate_existing=True,
         )
@@ -296,9 +298,10 @@ class AbstractDataProductService:
     def request_input_ports(
         self,
         id: UUID,
-        output_port_ids: list[UUID],
+        output_ports_requested: list[
+            RequestInputPortsForAbstractDataProductRequestItem
+        ],
         justification: str,
-        access_mode_id: Optional[UUID] = None,
         *,
         actor: User,
     ) -> list[InputPortModel]:
@@ -306,12 +309,12 @@ class AbstractDataProductService:
         input_ports = [
             self._add_single_input_port(
                 adp,
-                output_port_id,
+                requested.output_port_id,
                 justification,
-                access_mode_id=access_mode_id,
+                access_mode_id=requested.access_mode_id,
                 actor=actor,
             )
-            for output_port_id in output_port_ids
+            for requested in output_ports_requested
         ]
         self.db.flush()
         return input_ports

@@ -7,11 +7,11 @@ from alembic.config import Config
 
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.data_products.output_ports.model import Dataset
-from app.data_products.output_ports.schema_response import (
-    GetDataProductOutputPortsResponse,
-)
 from app.data_products.output_ports.service import OutputPortService
 from app.db_tool import seed_cmd
+from app.search_output_ports.schema_response import (
+    SearchOutputPortsResponse,
+)
 from app.settings import settings
 from tests.factories import (
     DatasetRoleAssignmentFactory,
@@ -34,7 +34,7 @@ class TestOutputPortSearchRouter:
 
         response = client.get("/api/v2/search/output_ports", params={"query": "Data"})
         assert response.status_code == 200, response.text
-        output = GetDataProductOutputPortsResponse.model_validate(response.json())
+        output = SearchOutputPortsResponse.model_validate(response.json())
         assert len(output.output_ports) >= 2
         returned_ops = {port.name for port in output.output_ports}
         expected_ops = {ds_1.name, ds_2.name}
@@ -58,7 +58,7 @@ class TestOutputPortSearchRouter:
             "/api/v2/search/output_ports", params={"current_user_assigned": True}
         )
         assert response.status_code == 200, response.text
-        output = GetDataProductOutputPortsResponse.model_validate(response.json())
+        output = SearchOutputPortsResponse.model_validate(response.json())
         assert len(output.output_ports) == 1
 
     def test_search_output_ports_no_query(self, session, client):
@@ -66,7 +66,7 @@ class TestOutputPortSearchRouter:
 
         response = client.get("/api/v2/search/output_ports")
         assert response.status_code == 200, response.text
-        output = GetDataProductOutputPortsResponse.model_validate(response.json())
+        output = SearchOutputPortsResponse.model_validate(response.json())
         assert len(output.output_ports) == len(output_ports)
 
     def test_benchmark_output_ports(self, session, client):
@@ -184,7 +184,7 @@ class TestOutputPortSearchRouter:
             f"Output Port search took longer than {latency_bound * 1000} ms"
         )
 
-        output = GetDataProductOutputPortsResponse.model_validate(response.json())
+        output = SearchOutputPortsResponse.model_validate(response.json())
         assert len(output.output_ports) <= limit, "Query limit exceeded"
 
         positives = {port.name for port in output.output_ports}

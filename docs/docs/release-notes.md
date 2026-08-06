@@ -9,6 +9,16 @@ sidebar_position: 200
 ### breaking changes
 
 - **[API]**: Access durations configuration switched URL path from /v2/access_durations to /v2/configuration/access_durations. Please update your API calls accordingly.
+- **[API]**: Remove deprecated /v2/data_products/{id}/link_input_ports
+- **[API]**: Modified the body of the following routes to enable selection of access modes:
+  - Create data product: `/v2/data_products`
+  - Request input ports for data product: `/v2/data_products/{id}/input_ports`
+  - Create exploration: `/v2/explorations`
+  - Request input ports for exploration: `/v2/explorations/{id}/input_ports`
+
+### features
+
+- **[General]**: Added support for access modes on Technical Assets, Output Ports and Input Ports
 
 ## 0.7.0
 

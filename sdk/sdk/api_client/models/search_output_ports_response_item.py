@@ -12,6 +12,7 @@ from ..models.output_port_access_type import OutputPortAccessType
 from ..models.output_port_status import OutputPortStatus
 
 if TYPE_CHECKING:
+    from ..models.access_mode import AccessMode
     from ..models.data_product_life_cycle import DataProductLifeCycle
     from ..models.domain import Domain
     from ..models.tag import Tag
@@ -37,6 +38,7 @@ class SearchOutputPortsResponseItem:
         tags (list[Tag]):
         domain (Domain):
         lifecycle (DataProductLifeCycle | None):
+        access_modes (list[AccessMode]):
         abstract_data_product_count (int):
         technical_assets_count (int):
         data_product_name (str):
@@ -55,6 +57,7 @@ class SearchOutputPortsResponseItem:
     tags: list[Tag]
     domain: Domain
     lifecycle: DataProductLifeCycle | None
+    access_modes: list[AccessMode]
     abstract_data_product_count: int
     technical_assets_count: int
     data_product_name: str
@@ -97,6 +100,11 @@ class SearchOutputPortsResponseItem:
         else:
             lifecycle = self.lifecycle
 
+        access_modes = []
+        for access_modes_item_data in self.access_modes:
+            access_modes_item = access_modes_item_data.to_dict()
+            access_modes.append(access_modes_item)
+
         abstract_data_product_count = self.abstract_data_product_count
 
         technical_assets_count = self.technical_assets_count
@@ -120,6 +128,7 @@ class SearchOutputPortsResponseItem:
                 "tags": tags,
                 "domain": domain,
                 "lifecycle": lifecycle,
+                "access_modes": access_modes,
                 "abstract_data_product_count": abstract_data_product_count,
                 "technical_assets_count": technical_assets_count,
                 "data_product_name": data_product_name,
@@ -130,6 +139,7 @@ class SearchOutputPortsResponseItem:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        from ..models.access_mode import AccessMode
         from ..models.data_product_life_cycle import DataProductLifeCycle
         from ..models.domain import Domain
         from ..models.tag import Tag
@@ -188,6 +198,13 @@ class SearchOutputPortsResponseItem:
 
         lifecycle = _parse_lifecycle(d.pop("lifecycle"))
 
+        access_modes = []
+        _access_modes = d.pop("access_modes")
+        for access_modes_item_data in _access_modes:
+            access_modes_item = AccessMode.from_dict(access_modes_item_data)
+
+            access_modes.append(access_modes_item)
+
         abstract_data_product_count = d.pop("abstract_data_product_count")
 
         technical_assets_count = d.pop("technical_assets_count")
@@ -208,6 +225,7 @@ class SearchOutputPortsResponseItem:
             tags=tags,
             domain=domain,
             lifecycle=lifecycle,
+            access_modes=access_modes,
             abstract_data_product_count=abstract_data_product_count,
             technical_assets_count=technical_assets_count,
             data_product_name=data_product_name,

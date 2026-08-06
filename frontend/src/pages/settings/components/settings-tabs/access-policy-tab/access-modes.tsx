@@ -25,7 +25,7 @@ export default function AccessModes() {
         <>
             <Flex vertical gap="small">
                 <Flex justify="space-between" align="center">
-                    <Typography.Title level={3}>{t('Access Modes')}</Typography.Title>
+                    <Typography.Title level={3}>{t('Access modes')}</Typography.Title>
                     <Button type="primary" onClick={() => setOpenModal(true)}>
                         {t('Add access mode')}
                     </Button>
@@ -46,6 +46,7 @@ export default function AccessModes() {
                         title: t('Name'),
                         dataIndex: 'name',
                         render: (name: string) => <TableCellItem text={name} tooltip={{ content: name }} />,
+                        width: '25%',
                     },
                     {
                         title: t('Description'),

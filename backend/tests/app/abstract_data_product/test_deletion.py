@@ -1,6 +1,9 @@
 import pytest
 from fastapi import HTTPException
 
+from app.abstract_data_product.schema_request import (
+    RequestInputPortsForAbstractDataProductRequestItem,
+)
 from app.abstract_data_product.service import AbstractDataProductService
 from app.data_products.status import AbstractDataProductStatus
 from tests.factories import (
@@ -195,7 +198,11 @@ class TestEnsureNotDeleting:
         with pytest.raises(HTTPException) as exc_info:
             service.request_input_ports(
                 id=consumer.id,
-                output_port_ids=[output_port.id],
+                output_ports_requested=[
+                    RequestInputPortsForAbstractDataProductRequestItem(
+                        output_port_id=output_port.id
+                    )
+                ],
                 justification="test",
                 actor=actor,
             )
@@ -214,7 +221,11 @@ class TestEnsureNotDeleting:
         with pytest.raises(HTTPException) as exc_info:
             service.request_input_ports(
                 id=consumer.id,
-                output_port_ids=[output_port.id],
+                output_ports_requested=[
+                    RequestInputPortsForAbstractDataProductRequestItem(
+                        output_port_id=output_port.id
+                    )
+                ],
                 justification="test",
                 actor=actor,
             )
