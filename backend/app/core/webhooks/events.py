@@ -23,7 +23,7 @@ class V2Event(BaseModel):
         if "event_type" not in cls.__dict__:
             raise TypeError(f"{cls.__name__} must define an event_type() classmethod")
         if cls.event_type() in cls.events:
-            raise Exception("Duplicated event type detected")
+            raise Exception(f"Duplicated event type detected, {cls.event_type()}")
         cls.events.append(cls.event_type())
 
     @classmethod

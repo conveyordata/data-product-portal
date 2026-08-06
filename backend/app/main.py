@@ -24,12 +24,15 @@ from app.core.auth.device_flows.background_tasks import cleanup_device_flow_tabl
 from app.core.auth.jwt import get_oidc
 from app.core.auth.router import router as auth
 from app.core.authz.background_tasks import check_expired_admins
-from app.core.context import close_event_context, open_event_context, pop_events
 from app.core.errors.error_handling import add_exception_handlers
 from app.core.logging import logger
 from app.core.logging.posthog_analytics import report_consumption_metrics_task
 from app.core.logging.scarf_analytics import backend_analytics
-from app.core.webhooks.v2 import emit_all_events
+from app.core.webhooks.middleware import (
+    DispatchQueuedEventsMiddleware,
+    start_event_dispatcher,
+    stop_event_dispatcher,
+)
 from app.core.webhooks.webhook import call_webhook, register_webhooks
 from app.database import database
 from app.mcp.mcp import mcp
@@ -74,7 +77,7 @@ async def log_middleware(request: Request, call_next):
 
 
 @asynccontextmanager
-async def lifespan(_: FastAPI):
+async def lifespan(app: FastAPI):
     with database.SessionLocal() as db:
         if settings.AUTHORIZER_STARTUP_SYNC:
             AuthorizationService(db).reload_enforcer()
@@ -86,12 +89,14 @@ async def lifespan(_: FastAPI):
     consumption_metrics_task = asyncio.create_task(report_consumption_metrics_task())
     stuck_deletion_task = asyncio.create_task(check_stuck_deletions())
     input_port_expiry_task = asyncio.create_task(expire_input_ports_task())
+    start_event_dispatcher(app)
     yield
     admin_task.cancel()
     device_flow_cleanup_task.cancel()
     consumption_metrics_task.cancel()
     stuck_deletion_task.cancel()
     input_port_expiry_task.cancel()
+    await stop_event_dispatcher(app)
 
 
 mcp.add_middleware(LoggingMiddleware())
@@ -152,6 +157,7 @@ add_exception_handlers(app)
 register_webhooks(app)
 
 app.add_middleware(BaseHTTPMiddleware, dispatch=log_middleware)
+app.add_middleware(DispatchQueuedEventsMiddleware, fastapi_app=app)
 app.add_middleware(
     CorrelationIdMiddleware,
     header_name="X-Request-ID",
@@ -196,19 +202,6 @@ async def send_response_to_webhook(
                 status_code=response.status_code,
             )
         )
-    return response
-
-
-@app.middleware("http")
-async def dispatch_queued_events(request: Request, call_next):
-    token = open_event_context()
-    try:
-        response = await call_next(request)
-    finally:
-        events = pop_events()
-        close_event_context(token)
-    if response.status_code < 400 and settings.WEBHOOK_V2_URL and events:
-        asyncio.create_task(emit_all_events(events))
     return response
 
 
