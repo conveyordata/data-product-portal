@@ -8,6 +8,7 @@ import { Provider } from 'react-redux';
 import { MemoryRouter, type MemoryRouterProps } from 'react-router';
 import { FeedbackBridge } from '@/components/feedback/feedback-bridge.component.tsx';
 import { BreadcrumbProvider } from '@/components/layout/navbar/breadcrumbs/breadcrumb.context.tsx';
+import '@/store/api/services/apiTags.ts';
 import authSlice, { setCredentials } from '@/store/api/services/auth-slice.ts';
 import { api as generatedApiSlice } from '@/store/api/services/generated/completeServiceApi.ts';
 import type { User } from '@/store/api/services/generated/usersApi.ts';
