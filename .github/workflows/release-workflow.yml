@@ -75,7 +75,7 @@ jobs:
           VERSION: ${{ needs.prep-version.outputs.version }}
         run: |
           helm package helm
-          helm push data-product-portal-$VERSION.tgz oci://public.ecr.aws/conveyordata
+          helm push data-product-portal-$VERSION.tgz oci://public.ecr.aws/conveyordata/helm
 
   portal-docker:
     runs-on: ubuntu-latest
