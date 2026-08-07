@@ -90,7 +90,7 @@ jobs:
           VERSION: ${{ needs.prep-version.outputs.version }}
         run: |
           helm package helm --version 0.0.0-$VERSION
-          helm push data-product-portal-0.0.0-$VERSION.tgz oci://public.ecr.aws/conveyordata
+          helm push data-product-portal-0.0.0-$VERSION.tgz oci://public.ecr.aws/conveyordata/helm
 
   deploy-on-portal-dev:
     name: Deploy to portal dev
