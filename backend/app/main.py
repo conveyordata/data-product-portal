@@ -1,6 +1,5 @@
 import asyncio
 import re
-import time
 import urllib.parse
 from collections.abc import Awaitable, Callable
 from contextlib import asynccontextmanager
@@ -13,7 +12,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 from fastapi.routing import APIRoute
 from fastmcp.utilities.lifespan import combine_lifespans
-from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.abstract_data_product.background_tasks import check_stuck_deletions
 from app.abstract_data_product.input_ports.background_tasks import (
@@ -26,6 +24,7 @@ from app.core.auth.router import router as auth
 from app.core.authz.background_tasks import check_expired_admins
 from app.core.errors.error_handling import add_exception_handlers
 from app.core.logging import logger
+from app.core.logging.middleware import RequestLoggingMiddleware
 from app.core.logging.posthog_analytics import report_consumption_metrics_task
 from app.core.logging.scarf_analytics import backend_analytics
 from app.core.webhooks.middleware import (
@@ -59,21 +58,6 @@ oidc_kwargs = (
     if settings.OIDC_ENABLED
     else {}
 )
-
-
-async def log_middleware(request: Request, call_next):
-    start = time.time()
-    response: Response = await call_next(request)
-    process_time = time.time() - start
-    log_dict = {
-        "url": request.url.path,
-        "method": request.method,
-        "status": response.status_code,
-        "process_time": process_time,
-    }
-    if request.url.path != "/":  # ignore health checks on root path
-        logger.info(log_dict)
-    return response
 
 
 @asynccontextmanager
@@ -156,7 +140,7 @@ app.include_router(auth, prefix="/api")
 add_exception_handlers(app)
 register_webhooks(app)
 
-app.add_middleware(BaseHTTPMiddleware, dispatch=log_middleware)
+app.add_middleware(RequestLoggingMiddleware)
 app.add_middleware(DispatchQueuedEventsMiddleware, fastapi_app=app)
 app.add_middleware(
     CorrelationIdMiddleware,
