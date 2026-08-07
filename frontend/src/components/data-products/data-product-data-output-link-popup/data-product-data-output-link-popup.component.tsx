@@ -37,6 +37,7 @@ export function DataProductLinkPopup({ onClose, isOpen, title, formRef, children
                 </Space>
             )}
             centered
+            styles={{ body: { maxHeight: '80vh', overflowY: 'auto' } }}
         >
             {children}
         </Modal>
