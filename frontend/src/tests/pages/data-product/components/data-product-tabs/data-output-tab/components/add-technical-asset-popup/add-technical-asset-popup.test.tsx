@@ -46,7 +46,8 @@ describe('TechnicalAssetPopup', async () => {
         const descriptionInput = screen.getByLabelText(/description/i);
         await user.type(descriptionInput, 'My new technical asset is the best one ever');
     };
-    it('should be able to fill in the whole form with single access mode', async () => {
+
+    it('should be able to fill in the whole form', async () => {
         defaultMocks();
         mockCreateTechnicalAsset(mockDataProducts[0].id);
 
@@ -63,8 +64,6 @@ describe('TechnicalAssetPopup', async () => {
 
         await fillInNameAndDescription(user);
         await fillInS3(user);
-
-        await user.click(screen.getByText('Single access mode'));
 
         const createButton = screen.getByRole('button', { name: /Create/i });
         await user.click(createButton);
@@ -99,25 +98,6 @@ describe('TechnicalAssetPopup', async () => {
         await user.click(createButton);
 
         await waitFor(() => expect(mockCloseFunction).toHaveBeenCalled());
-    }, 15000);
-
-    it('should fail when not specifying single or multiple access mode', async () => {
-        defaultMocks();
-
-        const user = userEvent.setup({ delay: null, pointerEventsCheck: 0 });
-        renderWithProviders(
-            <AddTechnicalAssetPopup onClose={vi.fn()} isOpen dataProductId={mockDataProducts[0].id} debounce={0} />,
-        );
-
-        await waitFor(() => expect(screen.getByLabelText(/name/i)).not.toBeDisabled());
-
-        await fillInNameAndDescription(user);
-        await fillInS3(user);
-
-        const createButton = screen.getByRole('button', { name: /Create/i });
-        await user.click(createButton);
-
-        await waitFor(() => expect(screen.getByText(/Please select an access mode/i)).toBeInTheDocument());
     }, 15000);
 
     it('should fail when specifying multiple access mode but no mode is selected from the table', async () => {

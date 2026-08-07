@@ -33,7 +33,6 @@ import { selectFilterOptionByLabel } from '@/utils/form.helper';
 import { getIcon } from '@/utils/icon-loader';
 import { AccessModeSelector } from './access-mode-selector.component';
 import { TechnicalAssetConfigurationForm } from './technical-asset-configuration-form.component';
-import styles from './technical-asset-form.module.scss';
 
 const { TextArea } = Input;
 
@@ -309,7 +308,7 @@ export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallback
 
             <Form.Item name="platform_id">
                 <Radio.Group>
-                    <Space wrap className={styles.radioButtonContainer}>
+                    <Space wrap>
                         {dataPlatforms.map((dataPlatform) => (
                             <TechnicalAssetPlatformTile<string>
                                 key={dataPlatform.value}
@@ -330,7 +329,7 @@ export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallback
             </Form.Item>
             <Form.Item name="service_id" hidden={selectedDataPlatform?.children?.length === 0}>
                 <Radio.Group>
-                    <Space wrap className={styles.radioButtonContainer}>
+                    <Space wrap>
                         {selectedDataPlatform?.children?.map((dataPlatform) => (
                             <TechnicalAssetPlatformTile<string>
                                 key={dataPlatform.value}
@@ -373,6 +372,7 @@ export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallback
                         <Form.Item<TechnicalAssetsCreateForm>
                             name="access_mode_type"
                             label={t('Access mode')}
+                            initialValue="single"
                             rules={[{ required: true, message: t('Please select an access mode') }]}
                         >
                             <CardSelection<AccessModeType>
