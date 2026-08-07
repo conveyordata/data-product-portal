@@ -2,10 +2,10 @@ import { Badge, type TableColumnsType } from 'antd';
 import type { TFunction } from 'i18next';
 
 import outputPortBorderIcon from '@/assets/icons/border-icons/output-port-border-icon.svg?react';
-import { DatasetPopoverTitle } from '@/components/datasets/dataset-popover-title/dataset-popover-title';
-import { OutputPortTitle } from '@/components/datasets/output-port-title/output-port-title.tsx';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
 import { TableCellAvatar } from '@/components/list/table-cell-avatar/table-cell-avatar.component.tsx';
+import { OutputPortPopoverTitle } from '@/components/output-ports/output-port-popover-title/output-port-popover-title.tsx';
+import { OutputPortTitle } from '@/components/output-ports/output-port-title/output-port-title.tsx';
 import { OutputPortActionButton } from '@/pages/technical-asset/components/technical-asset-tabs/output-port-tab/components/output-port-table/output-port-action-button.component.tsx';
 import type { OutputPortLink } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
 import { createMarketplaceOutputPortPath } from '@/types/navigation.ts';
@@ -30,7 +30,7 @@ export const getDataOutputDatasetsColumns = ({ t, dataProductId }: Props): Table
             render: (_, { output_port, status }) => {
                 const isDatasetRequestApproved = status === DecisionStatus.Approved;
                 const popoverTitle = (
-                    <DatasetPopoverTitle
+                    <OutputPortPopoverTitle
                         name={output_port.name}
                         accessType={output_port.access_type}
                         isApproved={isDatasetRequestApproved}

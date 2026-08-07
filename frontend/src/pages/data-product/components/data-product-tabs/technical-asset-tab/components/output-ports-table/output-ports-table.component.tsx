@@ -1,7 +1,7 @@
 import { Button, Flex, Input, Typography } from 'antd';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { DatasetCard } from '@/components/datasets/dataset-card/dataset-card.component';
+import { OutputPortCard } from '@/components/output-ports/output-port-card/output-port-card.component.tsx';
 import { useModal } from '@/hooks/use-modal';
 import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
 import { useGetDataProductQuery } from '@/store/api/services/generated/dataProductsApi.ts';
@@ -73,10 +73,10 @@ export function OutputPortsTable({ dataProductId, draggedDataOutputId }: Props) 
                 />
             </Flex>
             {filteredDatasets.map((dataset) => (
-                <DatasetCard
+                <OutputPortCard
                     key={dataset.id}
                     dataProductId={dataProductId}
-                    datasetId={dataset.id}
+                    outputPortId={dataset.id}
                     draggedDataOutputId={draggedDataOutputId}
                 />
             ))}

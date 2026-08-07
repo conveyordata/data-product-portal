@@ -65,7 +65,7 @@ import { useGetDataProductOwnerIds } from '@/utils/data-product-user-role.helper
 import { useGetDatasetOwnerIds } from '@/utils/dataset-user-role.helper.ts';
 import { dispatchMessage } from '@/utils/feedback.ts';
 import { selectFilterOptionByLabel, selectFilterOptionByLabelAndValue } from '@/utils/form.helper.ts';
-import styles from './dataset-form.module.scss';
+import styles from './output-port-form.module.scss';
 
 const PRODUCT_TYPE_LABELS: Record<string, string> = {
     [AbstractDataProductType.DataProducts]: 'Data Products',
@@ -277,7 +277,14 @@ const getAccessTypeOptions = (t: TFunction) => {
     ];
 };
 
-export function DatasetForm({ mode, modalCallbackOnSubmit, formRef, datasetId, dataProductId, dataOutputId }: Props) {
+export function OutputPortForm({
+    mode,
+    modalCallbackOnSubmit,
+    formRef,
+    datasetId,
+    dataProductId,
+    dataOutputId,
+}: Props) {
     const { t } = useTranslation();
     const navigate = useNavigate();
 
