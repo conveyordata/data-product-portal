@@ -19,9 +19,7 @@ smtp:
   no_login: false
 from_mail_address: ""
 email_button_color: ""
-webhook:
-  url: ""
-  secret: ""
+webhook_v2_url: ""
 cloudwatch_enabled: false
 api_key:
   enabled: false

@@ -42,9 +42,7 @@ class Settings(BaseSettings):
     CONVEYOR_SECRET: Optional[str] = None
 
     # Infrastructure
-    WEBHOOK_URL: Optional[str] = None
     ENVIRONMENT_CONTEXT: Optional[str] = None
-    WEBHOOK_SECRET: Optional[str] = None
     WEBHOOK_V2_URL: Optional[str] = None
     # This setting enables extra events to be triggered when a Technical Asset is added or removed from an Output Port
     # This can be used when migrating infra, or when roles are not properly supported by your infrastructure

@@ -1,16 +1,17 @@
-from unittest.mock import AsyncMock
-
 import pytest
 
+from tests.conftest import CapturedEventsMock
 
-def assert_event_in_queue(expected_event_type: str, mock_webhook: AsyncMock) -> None:
+
+def assert_event_in_queue(
+    expected_event_type: str, mock_webhook: CapturedEventsMock
+) -> None:
     event_types_found = set()
-    if not mock_webhook.await_args_list:
+    if not mock_webhook.captured_events:
         assert pytest.fail("No events found in queue")
-    for args_items in mock_webhook.await_args_list:
-        event_type, payload = args_items.args
-        event_types_found.add(event_type)
-        if event_type == expected_event_type:
+    for event in mock_webhook.captured_events:
+        event_types_found.add(event.event_type())
+        if event.event_type() == expected_event_type:
             return
     pytest.fail(
         f"Event {expected_event_type} not found in queue, found types: {event_types_found}"
@@ -18,13 +19,12 @@ def assert_event_in_queue(expected_event_type: str, mock_webhook: AsyncMock) -> 
 
 
 def assert_event_not_in_queue(
-    expected_event_type: str, mock_webhook: AsyncMock
+    expected_event_type: str, mock_webhook: CapturedEventsMock
 ) -> None:
     event_types_found = set()
-    for args_items in mock_webhook.await_args_list:
-        event_type, payload = args_items.args
-        event_types_found.add(event_type)
-        if event_type == expected_event_type:
+    for event in mock_webhook.captured_events:
+        event_types_found.add(event.event_type())
+        if event.event_type() == expected_event_type:
             pytest.fail(
                 f"Event {expected_event_type} found in queue, found types: {event_types_found}"
             )

@@ -898,10 +898,10 @@ class TestOutputPortRouter:
         assert events[0].deleted_subject_identifier == dataset_name
 
     def test_create_generates_webhook_v2_event(
-        self, mock_webhook, dataset_payload, client
+        self, capture_events, dataset_payload, client
     ):
         self.test_create_dataset(dataset_payload, client)
-        assert_event_in_queue("output_port.event", mock_webhook)
+        assert_event_in_queue("output_port.event", capture_events)
 
     @staticmethod
     def create_output_port(client, data_product_id, output_port_payload):

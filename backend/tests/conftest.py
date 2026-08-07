@@ -2,7 +2,7 @@
 from collections.abc import Iterator
 from contextlib import contextmanager
 from typing import Any, Generator
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 from fastapi.testclient import TestClient
@@ -12,6 +12,8 @@ from starlette.routing import _DefaultLifespan
 from app.authorization.service import AuthorizationService
 from app.core.auth.device_flows.service import verify_auth_header
 from app.core.authz.authorization import Authorization
+from app.core.context import _pending_events
+from app.core.webhooks.events import V2Event
 from app.data_products.output_ports.enums import OutputPortAccessType
 from app.database.database import Base, get_db_session
 from app.main import app
@@ -160,10 +162,33 @@ def webhook_v2_input_port_events_from_technical_asset_output_port_link(
         settings.WEBHOOK_V2_TECHNICAL_ASSET_OUTPUT_PORT_LINKS_TRIGGER_INPUT_PORT_EVENTS = original
 
 
+class CapturedEventsMock:
+    def __init__(self) -> None:
+        self.captured_events: list[V2Event] = []
+
+    def record(self, event: V2Event) -> None:
+        self.captured_events.append(event)
+
+
 @pytest.fixture
-def mock_webhook() -> Iterator[AsyncMock]:
+def capture_events() -> Iterator["CapturedEventsMock"]:
+    mock = CapturedEventsMock()
+
+    def _queue_event(event: V2Event) -> None:
+        if _pending_events.get() is None or not settings.WEBHOOK_V2_URL:
+            return
+        mock.record(event)
+
+    def _queue_events(events: list[V2Event]) -> None:
+        if _pending_events.get() is None or not settings.WEBHOOK_V2_URL:
+            return
+        for event in events:
+            mock.record(event)
+
     with (
-        patch("app.core.webhooks.v2.call_v2_webhook", new_callable=AsyncMock) as mock,
+        patch("app.core.context.queue_event", side_effect=_queue_event),
+        patch("app.core.context.queue_events", side_effect=_queue_events),
+        patch("app.database.event_mixin.queue_events", side_effect=_queue_events),
         webhook_v2_config(),
     ):
         yield mock

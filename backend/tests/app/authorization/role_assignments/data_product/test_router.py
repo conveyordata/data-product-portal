@@ -100,7 +100,7 @@ class TestDataProductRoleAssignmentsRouter:
         "app.authorization.role_assignments.data_product.router.DataProductAuthAssignment"
     )
     def test_create_assignment_generates_webhook_v2_event(
-        self, mock_auth, client, mock_webhook
+        self, mock_auth, client, capture_events
     ):
         data_product: DataProduct = DataProductFactory()
         me = UserFactory(external_id=settings.DEFAULT_USERNAME)
@@ -123,7 +123,7 @@ class TestDataProductRoleAssignmentsRouter:
             },
         )
         assert response.status_code == 200
-        assert_event_in_queue("data_product_role_assignment.event", mock_webhook)
+        assert_event_in_queue("data_product_role_assignment.event", capture_events)
 
     def test_request_assignment(self, client: TestClient):
         data_product: DataProduct = DataProductFactory()
@@ -151,9 +151,11 @@ class TestDataProductRoleAssignmentsRouter:
         assert data["user"]["id"] == str(user.id)
         assert data["role"]["id"] == str(role.id)
 
-    def test_request_assignment_generates_webhook_v2_event(self, client, mock_webhook):
+    def test_request_assignment_generates_webhook_v2_event(
+        self, client, capture_events
+    ):
         self.test_request_assignment(client)
-        assert_event_in_queue("data_product_role_assignment.event", mock_webhook)
+        assert_event_in_queue("data_product_role_assignment.event", capture_events)
 
     @patch(
         "app.authorization.role_assignments.data_product.router.email.send_role_assignment_request_email"
@@ -280,9 +282,9 @@ class TestDataProductRoleAssignmentsRouter:
         assert response.status_code == 200
         assert len(response.json()["role_assignments"]) == 1
 
-    def test_delete_assignment_generates_webhook_v2_event(self, client, mock_webhook):
+    def test_delete_assignment_generates_webhook_v2_event(self, client, capture_events):
         self.test_delete_assignment(client)
-        assert_event_in_queue("data_product_role_assignment.event", mock_webhook)
+        assert_event_in_queue("data_product_role_assignment.event", capture_events)
 
     def test_delete_last_owner_assignment(self, client: TestClient):
         data_product: DataProduct = DataProductFactory()
@@ -339,9 +341,9 @@ class TestDataProductRoleAssignmentsRouter:
         assert data["id"] == str(assignment.id)
         assert data["decision"] == DecisionStatus.APPROVED
 
-    def test_decide_assignment_generates_webhook_v2_event(self, client, mock_webhook):
+    def test_decide_assignment_generates_webhook_v2_event(self, client, capture_events):
         self.test_decide_assignment(client)
-        assert_event_in_queue("data_product_role_assignment.event", mock_webhook)
+        assert_event_in_queue("data_product_role_assignment.event", capture_events)
 
     def test_decide_assignment_already_decided(self, client: TestClient):
         data_product: DataProduct = DataProductFactory()

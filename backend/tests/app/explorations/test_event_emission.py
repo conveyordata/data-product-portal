@@ -38,20 +38,18 @@ def _authorized_user():
 
 
 class TestExplorationEventEmission:
-    def test_create_exploration_emits_created_event(self, mock_webhook, client):
+    def test_create_exploration_emits_created_event(self, capture_events, client):
         d = DomainFactory()
         _authorized_user()
 
         response = client.post(ROUTE, json=_create_payload(str(d.id)))
 
         assert response.status_code == 200
-        mock_webhook.assert_awaited_once()
-        event_type, payload = mock_webhook.call_args.args
-        assert event_type == "exploration.event"
-        assert "id" in payload
+        assert len(capture_events.captured_events) == 1
+        assert capture_events.captured_events[0].event_type() == "exploration.event"
 
     @patch("app.core.webhooks.v2.call_v2_webhook", new_callable=AsyncMock)
-    def test_no_event_emitted_when_webhook_not_configured(self, mock_webhook, client):
+    def test_no_event_emitted_when_webhook_not_configured(self, capture_events, client):
         d = DomainFactory()
         _authorized_user()
 
@@ -59,9 +57,9 @@ class TestExplorationEventEmission:
             response = client.post(ROUTE, json=_create_payload(str(d.id)))
 
         assert response.status_code == 200
-        mock_webhook.assert_not_awaited()
+        assert len(capture_events.captured_events) == 0
 
-    def test_no_event_emitted_on_failed_request(self, mock_webhook, client):
+    def test_no_event_emitted_on_failed_request(self, capture_events, client):
         """A 4xx response must not emit any event."""
         d = DomainFactory()
         # no authorized user → 403
@@ -69,4 +67,4 @@ class TestExplorationEventEmission:
         response = client.post(ROUTE, json=_create_payload(str(d.id)))
 
         assert response.status_code >= 400
-        mock_webhook.assert_not_awaited()
+        assert len(capture_events.captured_events) == 0

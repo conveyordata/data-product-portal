@@ -13,7 +13,7 @@ It consists of a 3-tier web architecture.
 *   `frontend/`: See [frontend/AGENTS.md](frontend/AGENTS.md).
 *   `cli/go`: Cli in Go
 *   `demo/`: Demo setups.
-*   `docs/`: Docusaurus documentation and Architecture Decision Records (ADRs in `docs/adr/`).
+*   `docs/`: Docusaurus documentation and Architecture Decision Records (ADRs in `docs/adr/`). Do not edit versioned docs
 *   `integrations/`: Platform-specific integration logic (Terraform, BitOL, data quality).
 *   `helm/`: Kubernetes deployment charts.
 *   `scripts/`: Build and utility scripts.
@@ -23,7 +23,7 @@ It consists of a 3-tier web architecture.
 *   **Task Runner**: `Taskfile.yml` is primarily for release automation.
 *   **Pre-commit**: Run `pre-commit` rather than invoking Ruff, mypy, or Biome directly — it also regenerates the OpenAPI client/SDK. Code must pass pre-commit hooks (Ruff, mypy, Biome, gitleaks, OpenAPI spec check).
 *   **ADRs**: When adding major features or making architectural changes, consider if a new ADR (`docs/adr/`) is needed validate with user. Don't duplicate documentation — reference an existing doc instead of repeating its content.
-*   **User DOCS**: When development is done, discuss ONCE with the user that the documentation (`docs/docs/`)including AGENTS.md files is complete and consistent.
+*   **User DOCS**: When development is done, discuss ONCE with the user that the documentation (`docs/docs/`) including AGENTS.md files is complete and consistent.
 
 ## General Rules for Agents
 

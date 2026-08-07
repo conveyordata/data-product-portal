@@ -281,7 +281,7 @@ PORTAL_BASE_URL="http://localhost:5050" \
 Then configure the portal's webhook URL to point at your running provisioner:
 
 ```
-http://localhost:8000/webhook
+export WEBHOOK_V2_URL=http://localhost:8000/webhook
 ```
 
 ---

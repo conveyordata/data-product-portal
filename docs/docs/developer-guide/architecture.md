@@ -85,40 +85,15 @@ A **PostgreSQL** database that stores all portal state: data products, datasets,
 
 ### Provisioner
 
-The provisioner is an external HTTP service that receives webhook events from the backend and translates portal state changes into actual infrastructure changes on the target data platform (Snowflake, Databricks, AWS, etc.).
+The provisioner is an external HTTP service that receives webhook events from the backend and translates portal state
+changes into actual infrastructure changes on the target data platform (Snowflake, Databricks, AWS, etc.).
 
-The provisioner is **intentionally decoupled** from the backend — the backend only emits events, the provisioner acts on them. This means the provisioner is always a **custom-built service** tailored to your organisation's platform setup. A provisioner SDK to simplify building provisioners is currently in development.
+The provisioner is **intentionally decoupled** from the backend — the backend only emits events, the provisioner acts
+on them. This means the provisioner is always a **custom-built service** tailored to your organisation's platform setup.
+A provisioner SDK is available.
 
 A reference implementation is available in [`demo/basic/provisioner/`](https://github.com/conveyordata/data-product-portal/tree/main/demo/basic/provisioner).
-
-## Webhook Configuration
-
-Configure the following environment variables on the **backend** to enable the webhook:
-
-| Variable | Required | Description |
-|---|---|---|
-| `WEBHOOK_URL` | Yes | URL of your provisioner's webhook endpoint (e.g. `http://provisioner:6060`) |
-| `WEBHOOK_SECRET` | No | Shared secret used to sign requests (HMAC-SHA512, sent in the `Sign` header) |
-
-### Webhook Payload
-
-Every event is a `POST` request to `WEBHOOK_URL` with a JSON body mirroring the original API call that triggered it:
-
-```json
-{
-  "method": "POST",
-  "url": "/api/v2/data_products",
-  "query": "",
-  "response": "{\"id\": \"97a3bf4c-12b9-4f03-aff5-8917aef0b0e7\"}",
-  "status_code": 200
-}
-```
-
-The provisioner can use the `method` + `url` combination to route the event to the right handler, and call back into the portal's REST API using the IDs in `response` to fetch full resource details.
-
-### Request Signing
-
-When `WEBHOOK_SECRET` is set, the backend adds a `Sign` header to every webhook request containing the HMAC-SHA512 signature of the JSON body. Verify this header in your provisioner to ensure requests are authentic.
+And a developer guide is available in [`How to use the provisioner`](./provisioner.md).
 
 ## Communication Flow
 
