@@ -6,9 +6,12 @@ import pytest
 from fastapi.testclient import TestClient
 from httpx import Response
 
+from app.authorization.roles.model import Role
 from app.authorization.roles.schema import Scope
 from app.core.authz import Action
+from app.data_products.model import DataProduct
 from app.settings import settings
+from tests import test_session
 from tests.app.data_products.output_port_technical_assets_link.test_router import (
     DATA_OUTPUTS_DATASETS_ENDPOINT,
 )
@@ -30,7 +33,7 @@ ENDPOINT = "/api/v2/data_products/{}/technical_assets"
 
 
 @pytest.fixture
-def data_output_payload():
+def technical_asset_payload():
     user = UserFactory(external_id=settings.DEFAULT_USERNAME)
     data_product = DataProductFactory()
     service = PlatformServiceFactory()
@@ -56,101 +59,97 @@ def data_output_payload():
 
 
 @pytest.fixture
-def data_output_payload_not_owner():
-    data_product = DataProductFactory()
-    service = PlatformServiceFactory()
-    tag = TagFactory()
-
-    return {
-        "name": "Data Output Name",
-        "description": "Updated Data Output Description",
-        "namespace": "namespace",
-        "technical_mapping": "custom",
-        "configuration": {
-            "bucket": "test",
-            "path": "test",
-            "configuration_type": "S3TechnicalAssetConfiguration",
-        },
-        "owner_id": str(data_product.id),
-        "platform_id": str(service.platform.id),
-        "service_id": str(service.id),
-        "status": "pending",
-        "tag_ids": [str(tag.id)],
-    }
+def data_product_role_assignment(technical_asset_payload) -> Role:
+    role = RoleFactory(
+        scope=Scope.DATA_PRODUCT,
+        permissions=[Action.DATA_PRODUCT__CREATE_TECHNICAL_ASSET],
+    )
+    DataProductRoleAssignmentFactory(
+        user_id=technical_asset_payload["user_id"],
+        role_id=role.id,
+        data_product_id=technical_asset_payload["owner_id"],
+    )
+    return role
 
 
 class TestTechnicalAssetsRouter:
     invalid_id = "00000000-0000-0000-0000-000000000000"
 
-    def test_create_technical_asset_source_aligned(
-        self, data_output_payload, client: TestClient
+    def test_create_technical_asset(
+        self, technical_asset_payload, data_product_role_assignment, client: TestClient
     ):
-        role = RoleFactory(
-            scope=Scope.DATA_PRODUCT,
-            permissions=[Action.DATA_PRODUCT__CREATE_TECHNICAL_ASSET],
+        created_data_output = self.create_technical_asset(
+            client, technical_asset_payload
         )
-        DataProductRoleAssignmentFactory(
-            user_id=data_output_payload["user_id"],
-            role_id=role.id,
-            data_product_id=data_output_payload["owner_id"],
-        )
-        created_data_output = self.create_technical_asset(client, data_output_payload)
         assert created_data_output.status_code == 200, created_data_output.text
         assert "id" in created_data_output.json()
 
-    def test_create_technical_asset_with_access_modes(
-        self, data_output_payload, client
+    def test_create_technical_asset__with_access_modes(
+        self, technical_asset_payload, data_product_role_assignment, client
     ):
-        access_mode = AccessModeFactory()
-        role = RoleFactory(
-            scope=Scope.DATA_PRODUCT,
-            permissions=[Action.DATA_PRODUCT__CREATE_TECHNICAL_ASSET],
+        access_mode = AccessModeFactory(
+            technical_asset_types=[
+                technical_asset_payload["configuration"]["configuration_type"]
+            ]
         )
-        DataProductRoleAssignmentFactory(
-            user_id=data_output_payload["user_id"],
-            role_id=role.id,
-            data_product_id=data_output_payload["owner_id"],
-        )
-        data_output_payload["access_mode_ids"] = [
+        technical_asset_payload["access_mode_ids"] = [
             str(access_mode.id),
         ]
 
         created_technical_asset = self.create_technical_asset(
-            client, data_output_payload
+            client, technical_asset_payload
         )
         assert created_technical_asset.status_code == 200
 
         technical_asset = self.get_technical_asset(
             client,
-            data_output_payload["owner_id"],
+            technical_asset_payload["owner_id"],
             created_technical_asset.json()["id"],
         )
         assert technical_asset.status_code == 200, technical_asset.text
         assert len(technical_asset.json()["access_modes"]) == 1
         assert technical_asset.json()["access_modes"][0]["name"] == access_mode.name
 
-    def test_create_technical_assert_generates_webhook_v2_event(
+    def test_create_technical_asset__incorrect_access_modes(
+        self, technical_asset_payload, data_product_role_assignment, client
+    ):
+        access_mode = AccessModeFactory()
+        technical_asset_payload["access_mode_ids"] = [
+            str(access_mode.id),
+        ]
+
+        created_technical_asset = self.create_technical_asset(
+            client, technical_asset_payload
+        )
+        assert created_technical_asset.status_code == 400
+
+    def test_create_technical_asset__access_mode_doest_not_exist(
+        self, technical_asset_payload, data_product_role_assignment, client
+    ):
+        technical_asset_payload["access_mode_ids"] = [
+            str(uuid.uuid4()),
+        ]
+        created_technical_asset = self.create_technical_asset(
+            client, technical_asset_payload
+        )
+        assert created_technical_asset.status_code == 400
+
+    def test_create_technical_asset_generates_webhook_v2_event(
         self,
-        data_output_payload,
+        technical_asset_payload,
+        data_product_role_assignment,
         client: TestClient,
         capture_events,
     ):
-        self.test_create_technical_asset_source_aligned(data_output_payload, client)
+        self.test_create_technical_asset(
+            technical_asset_payload, data_product_role_assignment, client
+        )
         assert_event_in_queue("technical_asset.event", capture_events)
 
     def test_create_technical_asset_product_aligned(
-        self, data_output_payload, client: TestClient
+        self, technical_asset_payload, data_product_role_assignment, client: TestClient
     ):
-        role = RoleFactory(
-            scope=Scope.DATA_PRODUCT,
-            permissions=[Action.DATA_PRODUCT__CREATE_TECHNICAL_ASSET],
-        )
-        DataProductRoleAssignmentFactory(
-            user_id=data_output_payload["user_id"],
-            role_id=role.id,
-            data_product_id=data_output_payload["owner_id"],
-        )
-        payload = deepcopy(data_output_payload)
+        payload = deepcopy(technical_asset_payload)
         payload["technical_mapping"] = "default"
 
         created_data_output = self.create_technical_asset(client, payload)
@@ -158,35 +157,19 @@ class TestTechnicalAssetsRouter:
         assert "id" in created_data_output.json()
 
     def test_create_technical_asset_product_aligned_new(
-        self, data_output_payload, client: TestClient
+        self, technical_asset_payload, data_product_role_assignment, client: TestClient
     ):
-        role = RoleFactory(
-            scope=Scope.DATA_PRODUCT,
-            permissions=[Action.DATA_PRODUCT__CREATE_TECHNICAL_ASSET],
-        )
-        DataProductRoleAssignmentFactory(
-            user_id=data_output_payload["user_id"],
-            role_id=role.id,
-            data_product_id=data_output_payload["owner_id"],
-        )
-        payload = deepcopy(data_output_payload)
+        payload = deepcopy(technical_asset_payload)
         payload["technical_mapping"] = "default"
 
         created_data_output = self.create_technical_asset(client, payload)
         assert created_data_output.status_code == 200
         assert "id" in created_data_output.json()
 
-    def test_deprecated_source_aligned(self, data_output_payload, client: TestClient):
-        role = RoleFactory(
-            scope=Scope.DATA_PRODUCT,
-            permissions=[Action.DATA_PRODUCT__CREATE_TECHNICAL_ASSET],
-        )
-        DataProductRoleAssignmentFactory(
-            user_id=data_output_payload["user_id"],
-            role_id=role.id,
-            data_product_id=data_output_payload["owner_id"],
-        )
-        payload = deepcopy(data_output_payload)
+    def test_deprecated_source_aligned(
+        self, technical_asset_payload, data_product_role_assignment, client: TestClient
+    ):
+        payload = deepcopy(technical_asset_payload)
         payload.pop("technical_mapping")
         payload["sourceAligned"] = True
 
@@ -196,17 +179,18 @@ class TestTechnicalAssetsRouter:
         assert (
             self.get_technical_asset(
                 client,
-                data_output_payload["owner_id"],
+                technical_asset_payload["owner_id"],
                 created_data_output.json().get("id"),
             ).json()["technical_mapping"]
             == "custom"
         )
 
     def test_create_technical_asset_not_product_owner(
-        self, data_output_payload_not_owner, client: TestClient
+        self, technical_asset_payload, client: TestClient
     ):
+        technical_asset_payload.pop("user_id")
         created_data_output = self.create_technical_asset(
-            client, data_output_payload_not_owner
+            client, technical_asset_payload
         )
         assert created_data_output.status_code == 403
 
@@ -430,105 +414,63 @@ class TestTechnicalAssetsRouter:
         assert body["validity"] == "VALID"
 
     def test_create_technical_asset_duplicate_namespace(
-        self, data_output_payload, client: TestClient
+        self, technical_asset_payload, data_product_role_assignment, client: TestClient
     ):
-        role = RoleFactory(
-            scope=Scope.DATA_PRODUCT,
-            permissions=[Action.DATA_PRODUCT__CREATE_TECHNICAL_ASSET],
-        )
-        owner = DataProductFactory()
-        DataProductRoleAssignmentFactory(
-            user_id=data_output_payload["user_id"],
-            role_id=role.id,
-            data_product_id=owner.id,
+        data_product = test_session.get(
+            DataProduct, str(technical_asset_payload["owner_id"])
         )
         TechnicalAssetFactory(
-            namespace=data_output_payload["namespace"],
-            owner=owner,
+            namespace=technical_asset_payload["namespace"], owner=data_product
         )
-
-        create_payload = deepcopy(data_output_payload)
-        create_payload["owner_id"] = str(owner.id)
-
-        response = self.create_technical_asset(client, create_payload)
+        response = self.create_technical_asset(client, technical_asset_payload)
         assert response.status_code == 400
 
     def test_create_technical_asset_invalid_characters_namespace(
-        self, data_output_payload, client: TestClient
+        self, technical_asset_payload, data_product_role_assignment, client: TestClient
     ):
-        role = RoleFactory(
-            scope=Scope.DATA_PRODUCT,
-            permissions=[Action.DATA_PRODUCT__CREATE_TECHNICAL_ASSET],
-        )
-        DataProductRoleAssignmentFactory(
-            user_id=data_output_payload["user_id"],
-            role_id=role.id,
-            data_product_id=data_output_payload["owner_id"],
-        )
-        create_payload = deepcopy(data_output_payload)
+        create_payload = deepcopy(technical_asset_payload)
         create_payload["namespace"] = "!"
 
         response = self.create_technical_asset(client, create_payload)
         assert response.status_code == 400
 
     def test_create_technical_asset_invalid_length_namespace(
-        self, data_output_payload, client: TestClient
+        self, technical_asset_payload, data_product_role_assignment, client: TestClient
     ):
-        role = RoleFactory(
-            scope=Scope.DATA_PRODUCT,
-            permissions=[Action.DATA_PRODUCT__CREATE_TECHNICAL_ASSET],
-        )
-        DataProductRoleAssignmentFactory(
-            user_id=data_output_payload["user_id"],
-            role_id=role.id,
-            data_product_id=data_output_payload["owner_id"],
-        )
-        create_payload = deepcopy(data_output_payload)
+        create_payload = deepcopy(technical_asset_payload)
         create_payload["namespace"] = "a" * 256
 
         response = self.create_technical_asset(client, create_payload)
         assert response.status_code == 400
 
     def test_history_event_created_on_data_output_creation(
-        self, data_output_payload, client
+        self, technical_asset_payload, data_product_role_assignment, client
     ):
-        role = RoleFactory(
-            scope=Scope.DATA_PRODUCT,
-            permissions=[Action.DATA_PRODUCT__CREATE_TECHNICAL_ASSET],
+        created_data_output = self.create_technical_asset(
+            client, technical_asset_payload
         )
-        DataProductRoleAssignmentFactory(
-            user_id=data_output_payload["user_id"],
-            role_id=role.id,
-            data_product_id=data_output_payload["owner_id"],
-        )
-        created_data_output = self.create_technical_asset(client, data_output_payload)
         assert created_data_output.status_code == 200
         assert "id" in created_data_output.json()
 
         history = self.get_technical_asset_history(
             client,
-            data_output_payload["owner_id"],
+            technical_asset_payload["owner_id"],
             created_data_output.json().get("id"),
         ).json()
         assert len(history["events"]) == 1
 
-    def test_get_technical_asset_history(self, data_output_payload, client):
-        role = RoleFactory(
-            scope=Scope.DATA_PRODUCT,
-            permissions=[Action.DATA_PRODUCT__CREATE_TECHNICAL_ASSET],
+    def test_get_technical_asset_history(
+        self, technical_asset_payload, data_product_role_assignment, client
+    ):
+        created_data_output = self.create_technical_asset(
+            client, technical_asset_payload
         )
-        DataProductRoleAssignmentFactory(
-            user_id=data_output_payload["user_id"],
-            role_id=role.id,
-            data_product_id=data_output_payload["owner_id"],
-        )
-        created_data_output = self.create_technical_asset(client, data_output_payload)
         assert created_data_output.status_code == 200
         assert "id" in created_data_output.json()
 
         history = self.get_technical_asset_history(
             client,
-            data_output_payload["owner_id"],
+            technical_asset_payload["owner_id"],
             created_data_output.json().get("id"),
         )
         assert history.status_code == 200, history.text

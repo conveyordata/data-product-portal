@@ -10,7 +10,7 @@ from app.data_products.output_ports.schema_response import GetOutputPortResponse
 from app.data_products.output_ports.service import OutputPortService
 from app.data_products.schema_response import GetDataProductResponse
 from app.data_products.service import DataProductService
-from app.data_products.technical_assets.service import DataOutputService
+from app.data_products.technical_assets.service import TechnicalAssetService
 from app.mcp.deps import get_db_session, get_mcp_authenticated_user
 from app.users.model import User as UserModel
 
@@ -94,7 +94,7 @@ def register_resources(mcp) -> None:
         all_output_ports = OutputPortService(db).search_output_ports(
             query=None, limit=1000, user=user, current_user_assigned=False
         )
-        all_technical_assets = DataOutputService(db).get_data_outputs()
+        all_technical_assets = TechnicalAssetService(db).get_data_outputs()
         all_domains = DomainService(db).get_domains()
 
         stats = {

@@ -87,6 +87,7 @@ class Settings(BaseSettings):
         "GlueTechnicalAssetConfiguration",
         "S3TechnicalAssetConfiguration",
         "DatabricksTechnicalAssetConfiguration",
+        "RedshiftTechnicalAssetConfiguration",
     ]
 
     AWS_SESSION_DURATION: int = 900

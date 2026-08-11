@@ -1,6 +1,7 @@
 from typing import Sequence
 from uuid import UUID
 
+from fastapi import Depends
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -10,10 +11,11 @@ from app.configuration.platform_service_configurations.model import (
 from app.configuration.platform_service_configurations.schema import (
     PlatformServiceConfiguration,
 )
+from app.database.database import get_db_session
 
 
 class PlatformServiceConfigurationService:
-    def __init__(self, db: Session):
+    def __init__(self, db: Session = Depends(get_db_session)):
         self.db = db
 
     def get_platform_service_configuration(

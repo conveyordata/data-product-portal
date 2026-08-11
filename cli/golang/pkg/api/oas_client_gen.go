@@ -227,7 +227,7 @@ type Invoker interface {
 	// Get Access Modes.
 	//
 	// GET /api/v2/configuration/access_modes
-	GetAccessModes(ctx context.Context) (*GetAccessModes, error)
+	GetAccessModes(ctx context.Context) (GetAccessModesRes, error)
 	// GetAllAccessDurations invokes get_all_access_durations operation.
 	//
 	// Get All Access Durations.
@@ -3071,12 +3071,12 @@ func (c *Client) sendGetAWSCredentials(ctx context.Context, params GetAWSCredent
 // Get Access Modes.
 //
 // GET /api/v2/configuration/access_modes
-func (c *Client) GetAccessModes(ctx context.Context) (*GetAccessModes, error) {
+func (c *Client) GetAccessModes(ctx context.Context) (GetAccessModesRes, error) {
 	res, err := c.sendGetAccessModes(ctx)
 	return res, err
 }
 
-func (c *Client) sendGetAccessModes(ctx context.Context) (res *GetAccessModes, err error) {
+func (c *Client) sendGetAccessModes(ctx context.Context) (res GetAccessModesRes, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string

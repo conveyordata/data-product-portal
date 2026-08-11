@@ -3264,6 +3264,26 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Cannot remove the specified technical asset types because they are in use by technical assets or input port requests.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Cannot remove the specified technical asset types because they are in use by technical assets or input port requests."
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Access mode not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Access mode not found"
+                }
+              }
+            }
           }
         }
       },
@@ -8536,12 +8556,20 @@
           "description": {
             "type": "string",
             "title": "Description"
+          },
+          "technical_asset_types": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Technical Asset Types"
           }
         },
         "type": "object",
         "required": [
           "name",
-          "description"
+          "description",
+          "technical_asset_types"
         ],
         "title": "AccessModeCreate"
       },
@@ -8550,13 +8578,53 @@
           "description": {
             "type": "string",
             "title": "Description"
+          },
+          "technical_asset_types": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Technical Asset Types"
           }
         },
         "type": "object",
         "required": [
-          "description"
+          "description",
+          "technical_asset_types"
         ],
         "title": "AccessModeUpdate"
+      },
+      "AccessModeWithType": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "technical_asset_types": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Technical Asset Types"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "description",
+          "technical_asset_types"
+        ],
+        "title": "AccessModeWithType"
       },
       "AccessResponse": {
         "properties": {
@@ -11613,7 +11681,7 @@
         "properties": {
           "access_modes": {
             "items": {
-              "$ref": "#/components/schemas/AccessMode"
+              "$ref": "#/components/schemas/AccessModeWithType"
             },
             "type": "array",
             "title": "Access Modes"

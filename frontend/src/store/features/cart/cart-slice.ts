@@ -1,5 +1,4 @@
-import type { PayloadAction } from '@reduxjs/toolkit';
-import { createSlice } from '@reduxjs/toolkit';
+import { createSelector, createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
 export enum DataProductChoiceOptions {
     exploration = 'EXPLORATION',
@@ -146,7 +145,6 @@ const cartSlice = createSlice({
         },
     },
     selectors: {
-        selectCartOutputPortIds: (state) => state.outputPortIds.map((item) => item.outputPortId),
         selectCartOutputPorts: (state) => state.outputPortIds,
         selectCartDataProductTypeChoice: (state) => state.dataProductTypeChoice,
         selectCartExistingOrNewChoice: (state) => state.existingOrNewChoice,
@@ -163,9 +161,9 @@ export const {
 
 export default cartSlice.reducer;
 
-export const {
-    selectCartOutputPortIds,
-    selectCartOutputPorts,
-    selectCartDataProductTypeChoice,
-    selectCartExistingOrNewChoice,
-} = cartSlice.selectors;
+export const { selectCartOutputPorts, selectCartDataProductTypeChoice, selectCartExistingOrNewChoice } =
+    cartSlice.selectors;
+
+export const selectCartOutputPortIds = createSelector([selectCartOutputPorts], (outputPorts) =>
+    outputPorts.map((item) => item.outputPortId),
+);

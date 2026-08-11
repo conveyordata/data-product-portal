@@ -1,11 +1,12 @@
 from typing import TYPE_CHECKING, Optional, Sequence
 from uuid import UUID
 
-from fastapi import HTTPException, status
+from fastapi import Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.configuration.platforms.platform_services.model import PlatformService
+from app.database.database import get_db_session
 from app.technical_asset_configuration.schema_request import (
     RenderTechnicalAssetAccessPathRequest,
 )
@@ -13,9 +14,6 @@ from app.technical_asset_configuration.schema_request import (
 if TYPE_CHECKING:
     from app.users.schema import User
 
-from app.configuration.platform_service_configurations.schema import (
-    PlatformServiceConfiguration,
-)
 from app.settings import settings
 from app.technical_asset_configuration.base_schema import (
     AssetProviderPlugin,
@@ -27,7 +25,7 @@ from app.technical_asset_configuration.schema_response import (
 
 
 class PluginService:
-    def __init__(self, db: Session):
+    def __init__(self, db: Session = Depends(get_db_session)):
         self.db = db
 
     def get_all_technical_assets_ui_metadata(
@@ -97,9 +95,7 @@ class PluginService:
                 has_environments=platform_meta.has_environments,
             )
 
-    def get_platform_tiles(
-        self, configs: Sequence[PlatformServiceConfiguration]
-    ) -> Sequence[PlatformTile]:
+    def get_platform_tiles(self) -> Sequence[PlatformTile]:
         """Build the complete platform tile structure for the UI"""
         all_metadata = self.get_all_technical_assets_ui_metadata()
         # Filter to only configured platforms
@@ -109,7 +105,6 @@ class PluginService:
         self,
         plugin_name: str,
         id: UUID,
-        db: Session,
         actor: "User",
         environment: Optional[str] = None,
     ) -> str:
@@ -138,7 +133,7 @@ class PluginService:
                 detail=f"Plugin '{plugin_name}' not found",
             )
         try:
-            return plugin_class.get_url(id, db, actor, environment)
+            return plugin_class.get_url(id, self.db, actor, environment)
         except NotImplementedError:
             raise HTTPException(
                 status_code=status.HTTP_501_NOT_IMPLEMENTED,

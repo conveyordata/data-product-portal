@@ -4,7 +4,7 @@ from typing import Sequence
 from uuid import UUID
 
 import pytz
-from fastapi import HTTPException, status
+from fastapi import Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
@@ -40,6 +40,7 @@ from app.data_products.technical_assets.schema_response import (
     UpdateTechnicalAssetResponse,
 )
 from app.data_products.technical_assets.status import TechnicalAssetStatus
+from app.database.database import get_db_session
 from app.graph.graph import Graph
 from app.resource_names.service import ResourceNameValidityType
 from app.users.schema import User
@@ -60,8 +61,8 @@ TECHNICAL_ASSET_NOT_ACTIVE_ERROR = HTTPException(
 )
 
 
-class DataOutputService:
-    def __init__(self, db: Session):
+class TechnicalAssetService:
+    def __init__(self, db: Session = Depends(get_db_session)):
         self.db = db
         self.namespace_validator = TechnicalAssetNamespaceValidator()
 
@@ -72,7 +73,9 @@ class DataOutputService:
             tags.append(tag)
         return tags
 
-    def _get_access_modes(self, access_mode_ids: list[UUID]) -> list[AccessModeModel]:
+    def _get_access_modes(
+        self, access_mode_ids: list[UUID], technical_asset_type
+    ) -> list[AccessModeModel]:
         access_modes = self.db.scalars(
             select(AccessModeModel).where(AccessModeModel.id.in_(access_mode_ids))
         ).all()
@@ -81,6 +84,12 @@ class DataOutputService:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Invalid access modes provided",
             )
+        for access_mode in access_modes:
+            if technical_asset_type not in access_mode.technical_asset_types:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Access mode {access_mode.name} is not compatible with technical asset type {technical_asset_type}",
+                )
         return access_modes
 
     @staticmethod
@@ -124,11 +133,11 @@ class DataOutputService:
         return technical_asset
 
     def create_technical_asset(
-        self, id: UUID, technical_asset: CreateTechnicalAssetRequest
+        self, data_product_id: UUID, technical_asset: CreateTechnicalAssetRequest
     ) -> TechnicalAssetModel:
         if (
             validity := self.namespace_validator.validate_namespace(
-                technical_asset.namespace, self.db, id
+                technical_asset.namespace, self.db, data_product_id
             ).validity
         ) != ResourceNameValidityType.VALID:
             raise HTTPException(
@@ -137,22 +146,23 @@ class DataOutputService:
             )
 
         if technical_asset.technical_mapping == TechnicalMapping.Default:
-            data_product = self.db.get(DataProductModel, id)
+            data_product = self.db.get(DataProductModel, data_product_id)
             technical_asset.configuration.validate_configuration(data_product, self.db)
 
-        data_output_schema = technical_asset.parse_pydantic_schema()
-        tags = self._get_tags(data_output_schema.pop("tag_ids", []))
+        technical_asset_schema = technical_asset.parse_pydantic_schema()
+        tags = self._get_tags(technical_asset_schema.pop("tag_ids", []))
         access_modes = self._get_access_modes(
-            data_output_schema.pop("access_mode_ids", [])
+            technical_asset_schema.pop("access_mode_ids", []),
+            technical_asset.configuration.name,
         )
-        data_output_schema.pop("sourceAligned")  # Remove deprecated field
+        technical_asset_schema.pop("sourceAligned")  # Remove deprecated field
 
         technical_asset_status = self.get_status_for(technical_asset.technical_mapping)  # type: ignore[arg-type]
         model = TechnicalAssetModel(
-            **data_output_schema,
+            **technical_asset_schema,
             tags=tags,
             access_modes=access_modes,
-            owner_id=id,
+            owner_id=data_product_id,
             status=technical_asset_status,
         )
         self.db.add(model)

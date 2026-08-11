@@ -507,8 +507,9 @@ func (*AccessMode) updateAccessModeRes() {}
 
 // Ref: #/components/schemas/AccessModeCreate
 type AccessModeCreate struct {
-	Name        string `json:"name"`
-	Description string `json:"description"`
+	Name                string   `json:"name"`
+	Description         string   `json:"description"`
+	TechnicalAssetTypes []string `json:"technical_asset_types"`
 }
 
 // GetName returns the value of Name.
@@ -521,6 +522,11 @@ func (s *AccessModeCreate) GetDescription() string {
 	return s.Description
 }
 
+// GetTechnicalAssetTypes returns the value of TechnicalAssetTypes.
+func (s *AccessModeCreate) GetTechnicalAssetTypes() []string {
+	return s.TechnicalAssetTypes
+}
+
 // SetName sets the value of Name.
 func (s *AccessModeCreate) SetName(val string) {
 	s.Name = val
@@ -531,9 +537,15 @@ func (s *AccessModeCreate) SetDescription(val string) {
 	s.Description = val
 }
 
+// SetTechnicalAssetTypes sets the value of TechnicalAssetTypes.
+func (s *AccessModeCreate) SetTechnicalAssetTypes(val []string) {
+	s.TechnicalAssetTypes = val
+}
+
 // Ref: #/components/schemas/AccessModeUpdate
 type AccessModeUpdate struct {
-	Description string `json:"description"`
+	Description         string   `json:"description"`
+	TechnicalAssetTypes []string `json:"technical_asset_types"`
 }
 
 // GetDescription returns the value of Description.
@@ -541,9 +553,67 @@ func (s *AccessModeUpdate) GetDescription() string {
 	return s.Description
 }
 
+// GetTechnicalAssetTypes returns the value of TechnicalAssetTypes.
+func (s *AccessModeUpdate) GetTechnicalAssetTypes() []string {
+	return s.TechnicalAssetTypes
+}
+
 // SetDescription sets the value of Description.
 func (s *AccessModeUpdate) SetDescription(val string) {
 	s.Description = val
+}
+
+// SetTechnicalAssetTypes sets the value of TechnicalAssetTypes.
+func (s *AccessModeUpdate) SetTechnicalAssetTypes(val []string) {
+	s.TechnicalAssetTypes = val
+}
+
+// Ref: #/components/schemas/AccessModeWithType
+type AccessModeWithType struct {
+	ID                  uuid.UUID `json:"id"`
+	Name                string    `json:"name"`
+	Description         string    `json:"description"`
+	TechnicalAssetTypes []string  `json:"technical_asset_types"`
+}
+
+// GetID returns the value of ID.
+func (s *AccessModeWithType) GetID() uuid.UUID {
+	return s.ID
+}
+
+// GetName returns the value of Name.
+func (s *AccessModeWithType) GetName() string {
+	return s.Name
+}
+
+// GetDescription returns the value of Description.
+func (s *AccessModeWithType) GetDescription() string {
+	return s.Description
+}
+
+// GetTechnicalAssetTypes returns the value of TechnicalAssetTypes.
+func (s *AccessModeWithType) GetTechnicalAssetTypes() []string {
+	return s.TechnicalAssetTypes
+}
+
+// SetID sets the value of ID.
+func (s *AccessModeWithType) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+// SetName sets the value of Name.
+func (s *AccessModeWithType) SetName(val string) {
+	s.Name = val
+}
+
+// SetDescription sets the value of Description.
+func (s *AccessModeWithType) SetDescription(val string) {
+	s.Description = val
+}
+
+// SetTechnicalAssetTypes sets the value of TechnicalAssetTypes.
+func (s *AccessModeWithType) SetTechnicalAssetTypes(val []string) {
+	s.TechnicalAssetTypes = val
 }
 
 // Ref: #/components/schemas/AccessResponse
@@ -4471,18 +4541,28 @@ func (s *FinalizerRequest) SetFinalizer(val string) {
 
 // Ref: #/components/schemas/GetAccessModes
 type GetAccessModes struct {
-	AccessModes []AccessMode `json:"access_modes"`
+	AccessModes []AccessModeWithType `json:"access_modes"`
 }
 
 // GetAccessModes returns the value of AccessModes.
-func (s *GetAccessModes) GetAccessModes() []AccessMode {
+func (s *GetAccessModes) GetAccessModes() []AccessModeWithType {
 	return s.AccessModes
 }
 
 // SetAccessModes sets the value of AccessModes.
-func (s *GetAccessModes) SetAccessModes(val []AccessMode) {
+func (s *GetAccessModes) SetAccessModes(val []AccessModeWithType) {
 	s.AccessModes = val
 }
+
+func (*GetAccessModes) getAccessModesRes() {}
+
+type GetAccessModesBadRequestApplicationJSON jx.Raw
+
+func (*GetAccessModesBadRequestApplicationJSON) getAccessModesRes() {}
+
+type GetAccessModesNotFoundApplicationJSON jx.Raw
+
+func (*GetAccessModesNotFoundApplicationJSON) getAccessModesRes() {}
 
 // Ref: #/components/schemas/GetAllPlatformServiceConfigurationsResponse
 type GetAllPlatformServiceConfigurationsResponse struct {

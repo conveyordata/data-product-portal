@@ -13,7 +13,7 @@ from app.data_products.service import DataProductService
 from app.data_products.technical_assets.schema_response import (
     GetTechnicalAssetsResponseItem,
 )
-from app.data_products.technical_assets.service import DataOutputService
+from app.data_products.technical_assets.service import TechnicalAssetService
 from app.mcp.deps import get_db_session, get_mcp_authenticated_user
 from app.search_output_ports.schema_response import SearchOutputPortsResponseItem
 from app.users.model import User as UserModel
@@ -80,7 +80,7 @@ def universal_search(
         total_count += len(filtered_output_ports)
 
     if "technical_assets" in search_types:
-        all_data_outputs = DataOutputService(db).get_data_outputs()
+        all_data_outputs = TechnicalAssetService(db).get_data_outputs()
         filtered_data_outputs = []
         for do in all_data_outputs:
             if query.lower() in do.name.lower() or (

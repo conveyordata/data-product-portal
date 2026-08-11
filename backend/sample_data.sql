@@ -129,11 +129,11 @@ INSERT INTO public.tags (id, value, created_on, updated_on, deleted_at) VALUES (
 INSERT INTO public.tags (id, value, created_on, updated_on, deleted_at) VALUES ('{{ tag_public_id }}'::uuid, 'Public', '2025-10-28 16:32:27.884892', NULL, NULL);
 
 -- INSERT ACCESS MODES
-INSERT INTO public.access_modes (id, name, description) VALUES ('{{ access_mode_read }}'::uuid, 'read', 'Read access, gives users the ability to view data');
+INSERT INTO public.access_modes (id, name, technical_asset_types, description) VALUES ('{{ access_mode_read }}'::uuid, 'read', ARRAY['RedshiftTechnicalAssetConfiguration'], 'Read access, gives users the ability to view data');
 
-INSERT INTO public.access_modes (id, name, description) VALUES ('{{ access_mode_write }}'::uuid, 'write', 'Write access, gives users the ability to modify data');
+INSERT INTO public.access_modes (id, name, technical_asset_types, description) VALUES ('{{ access_mode_write }}'::uuid, 'write', ARRAY['RedshiftTechnicalAssetConfiguration'], 'Write access, gives users the ability to modify data');
 
-INSERT INTO public.access_modes (id, name, description) VALUES ('{{ access_mode_admin }}'::uuid, 'admin', 'Admin access, gives users full control over data and settings');
+INSERT INTO public.access_modes (id, name, technical_asset_types, description) VALUES ('{{ access_mode_admin }}'::uuid, 'admin', ARRAY['RedshiftTechnicalAssetConfiguration'], 'Admin access, gives users full control over data and settings');
 
 -- ...existing platform configuration code...
 INSERT INTO public.platforms (id, name) VALUES ('{{ snowflake_id }}'::uuid, 'Snowflake');
@@ -173,6 +173,11 @@ INSERT INTO public.platform_service_configs (id, platform_id, service_id, config
         ) AND ps.name = 'S3'
 ), '["datalake","ingress","egress"]', timezone('utc'::text, current_timestamp
 ), NULL, NULL);
+
+INSERT INTO public.platform_service_configs (id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES ('1c9f5a2b-7e3d-4c6b-8f4a-2d5e9c1b3a4d', (
+    SELECT p.id FROM public.platforms AS p
+    WHERE p.name = 'AWS'
+), '{{ redshift_service_id }}', '[]', timezone('utc'::text, current_timestamp), NULL, NULL);
 
 INSERT INTO public.platform_service_configs (id, platform_id, service_id, config, created_on, updated_on, deleted_at) VALUES ('fa026b3a-7a17-4c32-b279-995af021f6c2', (
     SELECT p.id FROM public.platforms AS p
@@ -266,7 +271,8 @@ INSERT INTO public.env_platform_service_configs (id, environment_id, platform_id
 ), '[{"identifier":"datalake","bucket_name":"{{ DATALAKE_BUCKET_NAME_DEV }}","bucket_arn":"{{ DATALAKE_BUCKET_ARN_DEV }}","kms_key_arn":"{{ DATALAKE_BUCKET_KMS_ARN_DEV }}","is_default":true},{"identifier":"ingress","bucket_name":"{{ INGRESS_BUCKET_NAME_DEV }}","bucket_arn":"{{ INGRESS_BUCKET_ARN_DEV }}","kms_key_arn":"{{ INGRESS_BUCKET_KMS_ARN_DEV }}","is_default":false},{"identifier":"egress","bucket_name":"{{ EGRESS_BUCKET_NAME_DEV }}","bucket_arn":"{{ EGRESS_BUCKET_ARN_DEV }}","kms_key_arn":"{{ EGRESS_BUCKET_KMS_ARN_DEV }}","is_default":false}]', timezone('utc'::text, current_timestamp
 ), NULL, NULL);
 
-INSERT INTO public.env_platform_service_configs (id, environment_id, platform_id, service_id, config, created_on, updated_on, deleted_at) VALUES ('9c1d025c-f342-4665-8461-ba8b9f4035ff', '{{ returned_environment_id_prd }}'::uuid, (
+INSERT INTO public.env_platform_service_configs (id, environment_id, platform_id, service_id, config, created_on, updated_on, deleted_at)
+VALUES ('9c1d025c-f342-4665-8461-ba8b9f4035ff', '{{ returned_environment_id_prd }}'::uuid, (
     SELECT p.id FROM public.platforms AS p
     WHERE p.name = 'AWS'), (
     SELECT ps.id FROM public.platform_services AS ps
@@ -278,7 +284,8 @@ INSERT INTO public.env_platform_service_configs (id, environment_id, platform_id
 ), '[{"identifier":"datalake","bucket_name":"{{ DATALAKE_BUCKET_NAME_PRD }}","bucket_arn":"{{ DATALAKE_BUCKET_ARN_PRD }}","kms_key_arn":"{{ DATALAKE_BUCKET_KMS_ARN_PRD }}","is_default":true},{"identifier":"ingress","bucket_name":"{{ INGRESS_BUCKET_NAME_PRD }}","bucket_arn":"{{ INGRESS_BUCKET_ARN_PRD }}","kms_key_arn":"{{ INGRESS_BUCKET_KMS_ARN_PRD }}","is_default":false},{"identifier":"egress","bucket_name":"{{ EGRESS_BUCKET_NAME_PRD }}","bucket_arn":"{{ EGRESS_BUCKET_ARN_PRD }}","kms_key_arn":"{{ EGRESS_BUCKET_KMS_ARN_PRD }}","is_default":false}]', timezone('utc'::text, current_timestamp
 ), NULL, NULL);
 
-INSERT INTO public.env_platform_service_configs (id, environment_id, platform_id, service_id, config, created_on, updated_on, deleted_at) VALUES ('6afd025c-f342-5286-8461-ba8b9f4039dc', '{{ azure_environment_id_prd }}'::uuid, (
+INSERT INTO public.env_platform_service_configs (id, environment_id, platform_id, service_id, config, created_on, updated_on, deleted_at)
+VALUES ('6afd025c-f342-5286-8461-ba8b9f4039dc', '{{ azure_environment_id_prd }}'::uuid, (
     SELECT p.id FROM public.platforms AS p
     WHERE p.name = 'Azure'), (
     SELECT ps.id FROM public.platform_services AS ps
@@ -290,7 +297,8 @@ INSERT INTO public.env_platform_service_configs (id, environment_id, platform_id
 ), '[{"identifier":"azure_prd","storage_account_names": { "default": "defaultartifactsprd"}}]', timezone('utc'::text, current_timestamp
 ), NULL, NULL);
 
-INSERT INTO public.env_platform_service_configs (id, environment_id, platform_id, service_id, config, created_on, updated_on, deleted_at) VALUES ('8dc4b677-5ae8-7823-91a6-e15196b2e562', '{{ azure_environment_id_dev }}'::uuid, (
+INSERT INTO public.env_platform_service_configs (id, environment_id, platform_id, service_id, config, created_on, updated_on, deleted_at)
+VALUES ('8dc4b677-5ae8-7823-91a6-e15196b2e562', '{{ azure_environment_id_dev }}'::uuid, (
     SELECT p.id FROM public.platforms AS p
     WHERE p.name = 'Azure'), (
     SELECT ps.id FROM public.platform_services AS ps
@@ -302,7 +310,8 @@ INSERT INTO public.env_platform_service_configs (id, environment_id, platform_id
 ), '[{"identifier":"azure_dev","storage_account_names": {"default": "defaultartifactsdev"}}]', timezone('utc'::text, current_timestamp
 ), NULL, NULL);
 
-INSERT INTO public.env_platform_service_configs (id, environment_id, platform_id, service_id, config, created_on, updated_on, deleted_at) VALUES ('1c52b0e5-961f-412a-995e-0c1efae19f41', '{{ returned_environment_id_dev }}'::uuid, (
+INSERT INTO public.env_platform_service_configs (id, environment_id, platform_id, service_id, config, created_on, updated_on, deleted_at)
+VALUES ('1c52b0e5-961f-412a-995e-0c1efae19f41', '{{ returned_environment_id_dev }}'::uuid, (
     SELECT p.id FROM public.platforms AS p
     WHERE p.name = 'AWS'), (
     SELECT ps.id FROM public.platform_services AS ps
@@ -314,7 +323,8 @@ INSERT INTO public.env_platform_service_configs (id, environment_id, platform_id
 ), '[{"identifier":"clean_test","database_name":"clean_test_dev","bucket_identifier":"datalake","s3_path":"clean/test"},{"identifier":"master_test","database_name":"master_test_dev","bucket_identifier":"datalake","s3_path":"master/test"}]', timezone('utc'::text, current_timestamp
 ), NULL, NULL);
 
-INSERT INTO public.env_platform_service_configs (id, environment_id, platform_id, service_id, config, created_on, updated_on, deleted_at) VALUES ('ba42ca59-ab5d-498e-8cd0-cdd680f80bb0', '{{ returned_environment_id_prd }}'::uuid, (
+INSERT INTO public.env_platform_service_configs (id, environment_id, platform_id, service_id, config, created_on, updated_on, deleted_at)
+VALUES ('ba42ca59-ab5d-498e-8cd0-cdd680f80bb0', '{{ returned_environment_id_prd }}'::uuid, (
     SELECT p.id FROM public.platforms AS p
     WHERE p.name = 'AWS'), (
     SELECT ps.id FROM public.platform_services AS ps
@@ -325,6 +335,18 @@ INSERT INTO public.env_platform_service_configs (id, environment_id, platform_id
         ) AND ps.name = 'Glue'
 ), '[{"identifier":"clean_test","database_name":"clean_test_prd","bucket_identifier":"datalake","s3_path":"clean/test"},{"identifier":"master_test","database_name":"master_test_prd","bucket_identifier":"datalake","s3_path":"master/test"}]', timezone('utc'::text, current_timestamp
 ), NULL, NULL);
+
+INSERT INTO public.env_platform_service_configs (id, environment_id, platform_id, service_id, "config", created_on, updated_on, deleted_at)
+VALUES ('2d63c1f6-a72b-4f9a-8b5e-1e2c3d4f5a6b', '{{ returned_environment_id_dev }}'::uuid, (
+    SELECT p.id FROM public.platforms AS p
+    WHERE p.name = 'AWS'
+), '{{ redshift_service_id }}', '[{"identifier":"dev","database_name":"database-dev","bucket_identifier":"datalake","s3_path":"redshift/dev"}]', timezone('utc'::text, current_timestamp), NULL, NULL);
+
+INSERT INTO public.env_platform_service_configs (id, environment_id, platform_id, service_id, "config", created_on, updated_on, deleted_at)
+VALUES ('3e74d2d7-b83c-5f0b-9c6f-2f3d4e5f6b7c', '{{ returned_environment_id_prd }}'::uuid, (
+    SELECT p.id FROM public.platforms AS p
+    WHERE p.name = 'AWS'
+), '{{ redshift_service_id }}', '[{"identifier":"prd","database_name":"database-prd","bucket_identifier":"datalake","s3_path":"redshift/prd"}]', timezone('utc'::text, current_timestamp), NULL, NULL);
 
 -- DOMAINS
 INSERT INTO public.domains (id, name, description, created_on, updated_on, deleted_at) VALUES ('{{ customer_domain_id }}'::uuid, 'Customer Insights', 'Contains data products that provide information about customer behavior, demographics and satisfaction.', timezone('utc'::text, current_timestamp), NULL, NULL);
@@ -702,8 +724,9 @@ INSERT INTO public.datasets (id, namespace, data_product_id, name, description, 
 
 INSERT INTO public.data_output_configurations (id, configuration_type) VALUES ('3e5b2eb0-2d78-4ef4-b73b-57df8d85be11', 'GlueTechnicalAssetConfiguration');
 
-INSERT INTO public.glue_technical_asset_configurations (id, bucket_identifier, database, database_suffix, "table", database_path, table_path, access_granularity, created_on, updated_on, deleted_at)
-VALUES ('3e5b2eb0-2d78-4ef4-b73b-57df8d85be11', '', 'access-modes-example-linked', '', '*', 'access-modes-example-linked', '*', 'table', '2025-10-28 18:17:04.80167', NULL, NULL);
+
+INSERT INTO public.redshift_technical_asset_configurations (id, bucket_identifier, "database", schema, "table", database_path, table_path, access_granularity, created_on, updated_on, deleted_at)
+VALUES ('3e5b2eb0-2d78-4ef4-b73b-57df8d85be11', '', 'access-modes-example-linked', '*', '*', 'access-modes-example-linked', '*', 'table', '2025-10-28 18:17:04.80167', NULL, NULL);
 
 INSERT INTO public.data_outputs (id, namespace, name, description, status, platform_id, service_id, owner_id, configuration, configuration_id, created_on, updated_on, deleted_at, technical_mapping) VALUES ('{{ access_mode_linked_technical_asset_id }}'::uuid, 'access-mode-two-modes-linked-output', 'Access mode - 2 modes (linked output)', 'Detailed representation metrics table with row-level breakdowns.', 'ACTIVE', (
     SELECT p.id FROM public.platforms AS p
@@ -727,8 +750,8 @@ VALUES (gen_random_uuid(), '{{ access_mode_linked_technical_asset_id }}'::uuid, 
 
 INSERT INTO public.data_output_configurations (id, configuration_type) VALUES ('6c8d4df0-a65a-4967-a40e-f0fffbf90231', 'GlueTechnicalAssetConfiguration');
 
-INSERT INTO public.glue_technical_asset_configurations (id, bucket_identifier, database, database_suffix, "table", database_path, table_path, access_granularity, created_on, updated_on, deleted_at)
-VALUES ('6c8d4df0-a65a-4967-a40e-f0fffbf90231', '', 'access-modes-example-unlinked', '', '*', 'access-modes-example-unlinked', '*', 'table', '2025-10-28 18:17:20.241114', NULL, NULL);
+INSERT INTO public.redshift_technical_asset_configurations (id, bucket_identifier, "database", schema, "table", database_path, table_path, access_granularity, created_on, updated_on, deleted_at)
+VALUES ('6c8d4df0-a65a-4967-a40e-f0fffbf90231', '', 'access-modes-example-unlinked', '*', '*', 'access-modes-example-unlinked', '*', 'table', '2025-10-28 18:17:20.241114', NULL, NULL);
 
 INSERT INTO public.data_outputs (id, namespace, name, description, status, platform_id, service_id, owner_id, configuration, configuration_id, created_on, updated_on, deleted_at, technical_mapping) VALUES ('{{ access_mode_unlinked_technical_asset_id }}'::uuid, 'access-mode-two-modes-unlinked-output', 'Access mode - 2 modes (unlinked output)', 'Draft technical asset for DEI policy access analysis, not linked to an output port yet.', 'ACTIVE', (
     SELECT p.id FROM public.platforms AS p
@@ -749,8 +772,8 @@ VALUES
 
 INSERT INTO public.data_output_configurations (id, configuration_type) VALUES ('9e4d6227-7f74-467f-a6cd-6b1f0e9f6f3a', 'GlueTechnicalAssetConfiguration');
 
-INSERT INTO public.glue_technical_asset_configurations (id, bucket_identifier, database, database_suffix, "table", database_path, table_path, access_granularity, created_on, updated_on, deleted_at)
-VALUES ('9e4d6227-7f74-467f-a6cd-6b1f0e9f6f3a', '', 'access-modes-example-admin', '', '*', 'access-modes-example-admin', '*', 'table', '2025-10-28 18:17:35.241114', NULL, NULL);
+INSERT INTO public.redshift_technical_asset_configurations (id, bucket_identifier, "database", schema, "table", database_path, table_path, access_granularity, created_on, updated_on, deleted_at)
+VALUES ('9e4d6227-7f74-467f-a6cd-6b1f0e9f6f3a', '', 'access-modes-example-admin', '*', '*', 'access-modes-example-admin', '*', 'table', '2025-10-28 18:17:35.241114', NULL, NULL);
 
 INSERT INTO public.data_outputs (id, namespace, name, description, status, platform_id, service_id, owner_id, configuration, configuration_id, created_on, updated_on, deleted_at, technical_mapping) VALUES ('{{ access_mode_unlinked_admin_technical_asset_id }}'::uuid, 'access-mode-three-modes-output', 'Access mode - 3 modes', 'Unlinked DEI technical asset example including admin access mode.', 'ACTIVE', (
     SELECT p.id FROM public.platforms AS p

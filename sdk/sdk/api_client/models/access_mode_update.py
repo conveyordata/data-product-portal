@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import Any, TypeVar
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
@@ -14,19 +14,24 @@ class AccessModeUpdate:
     """
     Attributes:
         description (str):
+        technical_asset_types (list[str]):
     """
 
     description: str
+    technical_asset_types: list[str]
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         description = self.description
+
+        technical_asset_types = self.technical_asset_types
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
                 "description": description,
+                "technical_asset_types": technical_asset_types,
             }
         )
 
@@ -37,8 +42,11 @@ class AccessModeUpdate:
         d = dict(src_dict)
         description = d.pop("description")
 
+        technical_asset_types = cast(list[str], d.pop("technical_asset_types"))
+
         access_mode_update = cls(
             description=description,
+            technical_asset_types=technical_asset_types,
         )
 
         access_mode_update.additional_properties = d

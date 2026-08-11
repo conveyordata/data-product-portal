@@ -11,6 +11,7 @@ from .access_granularity import AccessGranularity
 from .access_mode import AccessMode
 from .access_mode_create import AccessModeCreate
 from .access_mode_update import AccessModeUpdate
+from .access_mode_with_type import AccessModeWithType
 from .access_response import AccessResponse
 from .approve_link_between_technical_asset_and_output_port_request import (
     ApproveLinkBetweenTechnicalAssetAndOutputPortRequest,
@@ -380,6 +381,7 @@ __all__ = (
     "AccessMode",
     "AccessModeCreate",
     "AccessModeUpdate",
+    "AccessModeWithType",
     "AccessResponse",
     "ApproveLinkBetweenTechnicalAssetAndOutputPortRequest",
     "ApproveOutputPortAsInputPortRequest",
