@@ -1,0 +1,35 @@
+[sqlfluff]
+dialect = postgres
+large_file_skip_byte_limit = 0
+#Disable long lines for now
+exclude_rules = LT05
+
+[sqlfluff:templater:jinja]
+apply_dbt_builtins = true
+
+[sqlfluff:templater:jinja:context]
+AWS_ACCOUNT_ID = "123456789012"
+AWS_ROLE_WITH_CONTEXT_TEMPLATE_DEV = "arn:aws:iam::123456789012:role/dev-role"
+AWS_ROLE_WITH_CONTEXT_TEMPLATE_PRD = "arn:aws:iam::123456789012:role/prd-role"
+AWS_REGION = "eu-west-1"
+AZURE_TENANT_ID = "00000000-0000-0000-0000-000000000000"
+AZURE_REGION = "westeurope"
+AZURE_SUBSCRIPTION_ID = "00000000-0000-0000-0000-000000000000"
+DATALAKE_BUCKET_NAME_DEV = "datalake-dev"
+DATALAKE_BUCKET_ARN_DEV = "arn:aws:s3:::datalake-dev"
+DATALAKE_BUCKET_KMS_ARN_DEV = "arn:aws:kms:eu-west-1:123456789012:key/00000000-0000-0000-0000-000000000000"
+DATALAKE_BUCKET_NAME_PRD = "datalake-prd"
+DATALAKE_BUCKET_ARN_PRD = "arn:aws:s3:::datalake-prd"
+DATALAKE_BUCKET_KMS_ARN_PRD = "arn:aws:kms:eu-west-1:123456789012:key/00000000-0000-0000-0000-000000000000"
+INGRESS_BUCKET_NAME_DEV = "ingress-dev"
+INGRESS_BUCKET_ARN_DEV = "arn:aws:s3:::ingress-dev"
+INGRESS_BUCKET_KMS_ARN_DEV = "arn:aws:kms:eu-west-1:123456789012:key/00000000-0000-0000-0000-000000000000"
+INGRESS_BUCKET_NAME_PRD = "ingress-prd"
+INGRESS_BUCKET_ARN_PRD = "arn:aws:s3:::ingress-prd"
+INGRESS_BUCKET_KMS_ARN_PRD = "arn:aws:kms:eu-west-1:123456789012:key/00000000-0000-0000-0000-000000000000"
+EGRESS_BUCKET_NAME_DEV = "egress-dev"
+EGRESS_BUCKET_ARN_DEV = "arn:aws:s3:::egress-dev"
+EGRESS_BUCKET_KMS_ARN_DEV = "arn:aws:kms:eu-west-1:123456789012:key/00000000-0000-0000-0000-000000000000"
+EGRESS_BUCKET_NAME_PRD = "egress-prd"
+EGRESS_BUCKET_ARN_PRD = "arn:aws:s3:::egress-prd"
+EGRESS_BUCKET_KMS_ARN_PRD = "arn:aws:kms:eu-west-1:123456789012:key/00000000-0000-0000-0000-000000000000"
