@@ -44,7 +44,7 @@
         "@tiptap/react": "^3.29.2",
         "@tiptap/starter-kit": "^3.29.2",
         "@xyflow/react": "^12.11.2",
-        "antd": "^6.5.3",
+        "antd": "^6.5.4",
         "axios": "^1.19.0",
         "clsx": "^2.1.1",
         "date-fns": "^4.4.0",
