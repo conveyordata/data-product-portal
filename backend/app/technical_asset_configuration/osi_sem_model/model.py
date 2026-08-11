@@ -3,6 +3,8 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from app.technical_asset_configuration.base_model import BaseTechnicalAssetConfiguration
 
+NAME = "OSISemanticModelTechnicalAssetConfiguration"
+
 
 class OSISemanticModelTechnicalAssetConfiguration(BaseTechnicalAssetConfiguration):
     __tablename__ = "osi_semantic_model_technical_asset_configurations"
@@ -11,5 +13,5 @@ class OSISemanticModelTechnicalAssetConfiguration(BaseTechnicalAssetConfiguratio
     location: Mapped[str] = mapped_column(String, nullable=True)
 
     __mapper_args__ = {
-        "polymorphic_identity": "OSISemanticModelTechnicalAssetConfiguration",
+        "polymorphic_identity": NAME,
     }

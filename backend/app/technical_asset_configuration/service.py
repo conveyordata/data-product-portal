@@ -37,7 +37,7 @@ class PluginService:
         configured_metadata = [
             name
             for name in data_output_configurations
-            if name.__name__ in configured_plugins
+            if name.name in configured_plugins
         ]
         return [
             metadata_response

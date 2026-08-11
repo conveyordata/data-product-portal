@@ -20,12 +20,15 @@ from app.technical_asset_configuration.base_schema import (
 from app.technical_asset_configuration.data_output_types import DataOutputTypes
 from app.technical_asset_configuration.enums import AccessGranularity, UIElementType
 from app.technical_asset_configuration.postgresql.model import (
+    NAME,
+)
+from app.technical_asset_configuration.postgresql.model import (
     PostgreSQLTechnicalAssetConfiguration as PostgreSQLTechnicalAssetConfigurationModel,
 )
 
 
 class PostgreSQLTechnicalAssetConfiguration(AssetProviderPlugin):
-    name: ClassVar[str] = "PostgreSQLTechnicalAssetConfiguration"
+    name: ClassVar[str] = NAME
     version: ClassVar[str] = "1.0"
 
     database: str

@@ -20,12 +20,15 @@ from app.technical_asset_configuration.base_schema import (
 from app.technical_asset_configuration.data_output_types import DataOutputTypes
 from app.technical_asset_configuration.enums import AccessGranularity, UIElementType
 from app.technical_asset_configuration.redshift.model import (
+    NAME,
+)
+from app.technical_asset_configuration.redshift.model import (
     RedshiftTechnicalAssetConfiguration as RedshiftTechnicalAssetConfigurationModel,
 )
 
 
 class RedshiftTechnicalAssetConfiguration(AssetProviderPlugin):
-    name: ClassVar[str] = "RedshiftTechnicalAssetConfiguration"
+    name: ClassVar[str] = NAME
     version: ClassVar[str] = "1.0"
 
     database: str

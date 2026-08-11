@@ -11,6 +11,9 @@ from app.configuration.environments.platform_service_configurations.schemas impo
 from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.schema import DataProduct
 from app.technical_asset_configuration.azure_blob.model import (
+    NAME,
+)
+from app.technical_asset_configuration.azure_blob.model import (
     AzureBlobTechnicalAssetConfiguration as AzureBlobTechnicalAssetConfigurationModel,
 )
 from app.technical_asset_configuration.base_schema import (
@@ -27,7 +30,7 @@ logger = logging.getLogger(__name__)
 
 
 class AzureBlobTechnicalAssetConfiguration(AssetProviderPlugin):
-    name: ClassVar[str] = "AzureBlobTechnicalAssetConfiguration"
+    name: ClassVar[str] = NAME
     version: ClassVar[str] = "1.0"
 
     domain: str = ""

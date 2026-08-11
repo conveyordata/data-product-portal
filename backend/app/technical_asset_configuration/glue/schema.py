@@ -23,13 +23,16 @@ from app.technical_asset_configuration.base_schema import (
 from app.technical_asset_configuration.data_output_types import DataOutputTypes
 from app.technical_asset_configuration.enums import AccessGranularity, UIElementType
 from app.technical_asset_configuration.glue.model import (
+    NAME,
+)
+from app.technical_asset_configuration.glue.model import (
     GlueTechnicalAssetConfiguration as GlueTechnicalAssetConfigurationModel,
 )
 from app.users.schema import User
 
 
 class GlueTechnicalAssetConfiguration(AssetProviderPlugin):
-    name: ClassVar[str] = "GlueTechnicalAssetConfiguration"
+    name: ClassVar[str] = NAME
     version: ClassVar[str] = "1.0"
 
     database: str
