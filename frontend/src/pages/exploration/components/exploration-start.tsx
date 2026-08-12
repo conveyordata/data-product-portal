@@ -40,7 +40,9 @@ export const ExplorationStart = () => {
 
     const guidanceItems = [
         t("This is a private sandbox, your queries aren't visible in the Marketplace."),
-        t('Need to share results? You need to create a new Data Product based on your Exploration later.'),
+        t(
+            "This Exploration is private and can't be shared. To share your results, you'll need to build a Data Product.",
+        ),
     ];
 
     return (
