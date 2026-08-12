@@ -1,10 +1,6 @@
 import { useCallback } from 'react';
 import { useSearchParams } from 'react-router';
 
-export type Props = {
-    defaultValue: string;
-    acceptedValues?: string[];
-};
 export function useTabParam(defaultValue: string, acceptedValues?: string[], capturePosthog?: (value: string) => void) {
     const [searchParams, setSearchParams] = useSearchParams();
 

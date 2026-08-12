@@ -11,12 +11,12 @@ export enum ExistingOrNew {
     new = 'new',
 }
 
-export type CartOutputPort = {
+type CartOutputPort = {
     outputPortId: string;
     accessModeId?: string;
 };
 
-export type CartState = {
+type CartState = {
     outputPortIds: CartOutputPort[];
     dataProductTypeChoice: DataProductChoiceOptions | null;
     existingOrNewChoice: ExistingOrNew | null;
