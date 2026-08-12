@@ -20,6 +20,7 @@ sidebar_position: 200
 ### features
 
 - **[General]**: Added support for access modes on Technical Assets, Output Ports and Input Ports
+- **[General]**: Made improvements to application shut down, shut down now wait for all backgrounds tacks to finish and ensure all v2 webhook events are sent before the application is shut down.
 
 ## 0.7.0
 
