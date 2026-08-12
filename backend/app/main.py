@@ -22,6 +22,7 @@ from app.core.auth.device_flows.background_tasks import cleanup_device_flow_tabl
 from app.core.auth.jwt import get_oidc
 from app.core.auth.router import router as auth
 from app.core.authz.background_tasks import check_expired_admins
+from app.core.embed.model import warm_text_embedding_model
 from app.core.errors.error_handling import add_exception_handlers
 from app.core.logging import logger
 from app.core.logging.middleware import RequestLoggingMiddleware
@@ -93,6 +94,8 @@ async def lifespan(app: FastAPI):
         if settings.AUTHORIZER_STARTUP_SYNC:
             AuthorizationService(db).reload_enforcer()
         db.commit()
+
+    warm_text_embedding_model()
 
     backend_analytics(API_VERSION)
     background_tasks = [

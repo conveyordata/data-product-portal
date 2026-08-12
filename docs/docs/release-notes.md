@@ -21,6 +21,8 @@ sidebar_position: 200
 
 - **[General]**: Added support for access modes on Technical Assets, Output Ports and Input Ports
 - **[General]**: Made improvements to application shut down, shut down now wait for all backgrounds tacks to finish and ensure all v2 webhook events are sent before the application is shut down.
+- **[General]**: Performance improvements for all output port endpoints, since we now cache the Embedding models used in output port search
+- **[General]**: We now allow changing DB pool settings, this allows you to tweak this for your specific environment. We set the default to a pool of 20 and a max overflow of 20, which should be sufficient for most installations.
 
 ## 0.7.0
 

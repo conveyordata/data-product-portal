@@ -131,12 +131,22 @@ python -m app.db_tool migrate
 To run the integration tests, execute the following commands:
 
 ```sh
-poetry install --with test
+poetry install --all-groups
 docker compose up -d postgresql
 poetry run pytest -v
 ```
 
 It will install test dependencies, boot up the test database and run the tests.
+
+### Load testing (Locust)
+
+Run a baseline headless test against local backend (10 users, spawn 5/s, 1m):
+
+```sh
+poetry run poe loadtest --headless -H http://localhost:5050 -u 10 -r 5 -t 1m
+```
+
+For more info see `backend/loadtest/locustfile.py`
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->

@@ -38,7 +38,16 @@ def get_url(async_: bool = False) -> str:
     )
 
 
-engine = create_engine(get_url(), connect_args={})
+engine = create_engine(
+    get_url(),
+    connect_args={"connect_timeout": settings.DB_CONNECT_TIMEOUT_SECONDS},
+    pool_size=settings.DB_POOL_SIZE,
+    max_overflow=settings.DB_MAX_OVERFLOW,
+    pool_timeout=settings.DB_POOL_TIMEOUT_SECONDS,
+    pool_recycle=settings.DB_POOL_RECYCLE_SECONDS,
+    pool_pre_ping=settings.DB_POOL_PRE_PING,
+    pool_use_lifo=True,
+)
 if settings.OPENTELEMETRY_TRACES_ENABLED:
     from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
 

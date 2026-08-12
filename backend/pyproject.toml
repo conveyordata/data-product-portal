@@ -78,6 +78,7 @@ types-cachetools = "*"
 types-requests = "*"
 types-pytz = "*"
 types-PyYAML = "*"
+locust = "^2.37.14"
 
 [tool.poe.tasks]
 test = "pytest -v tests/"
@@ -89,6 +90,7 @@ coverage = "pytest --cov-report term-missing --cov-report html --cov=app tests/"
 up = "docker compose up -d postgresql"
 down = "docker compose down postgresql"
 poetry-reqs = "uv pip compile requirements-poetry.in -o requirements-poetry.txt --generate-hashes --upgrade"
+loadtest = "locust -f loadtest/locustfile.py"
 
 [tool.mypy]
 ignore_missing_imports = true
