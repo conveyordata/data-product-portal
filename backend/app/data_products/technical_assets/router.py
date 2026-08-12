@@ -22,7 +22,7 @@ from app.data_products.technical_assets.schema_response import (
     GetTechnicalAssetsResponseItem,
     UpdateTechnicalAssetResponse,
 )
-from app.data_products.technical_assets.service import DataOutputService
+from app.data_products.technical_assets.service import TechnicalAssetService
 from app.database.database import get_db_session
 from app.events.enums import EventReferenceEntity, EventType
 from app.events.schema import CreateEvent
@@ -48,7 +48,7 @@ def get_data_product_technical_assets(
     return GetTechnicalAssetsResponse(
         technical_assets=[
             GetTechnicalAssetsResponseItem.model_validate(do)
-            for do in DataOutputService(db).get_technical_assets_for_data_product(
+            for do in TechnicalAssetService(db).get_technical_assets_for_data_product(
                 data_product_id
             )
         ]
@@ -60,7 +60,7 @@ def get_technical_asset(
     data_product_id: UUID, id: UUID, db: Session = Depends(get_db_session)
 ) -> GetTechnicalAssetsResponseItem:
     return GetTechnicalAssetsResponseItem.model_validate(
-        DataOutputService(db).get_technical_asset(data_product_id, id)
+        TechnicalAssetService(db).get_technical_asset(data_product_id, id)
     )
 
 
@@ -106,7 +106,7 @@ def remove_technical_asset(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    data_output = DataOutputService(db).remove_data_output(data_product_id, id)
+    data_output = TechnicalAssetService(db).remove_data_output(data_product_id, id)
     event_id = EventService(db).create_event(
         CreateEvent(
             name=EventType.DATA_OUTPUT_REMOVED,
@@ -152,7 +152,9 @@ def update_technical_asset(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> UpdateTechnicalAssetResponse:
-    result = DataOutputService(db).update_data_output(data_product_id, id, data_output)
+    result = TechnicalAssetService(db).update_data_output(
+        data_product_id, id, data_output
+    )
     EventService(db).create_event(
         CreateEvent(
             name=EventType.DATA_OUTPUT_UPDATED,
@@ -190,7 +192,7 @@ def update_technical_asset_status(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    DataOutputService(db).update_data_output_status(
+    TechnicalAssetService(db).update_data_output_status(
         data_product_id, id, data_output, actor=authenticated_user
     )
     EventService(db).create_event(
@@ -210,7 +212,7 @@ def get_technical_asset_graph_data(
     db: Session = Depends(get_db_session),
     level: int = 3,
 ) -> Graph:
-    return DataOutputService(db).get_graph_data(data_product_id, id, level)
+    return TechnicalAssetService(db).get_graph_data(data_product_id, id, level)
 
 
 @router.post(
@@ -241,7 +243,7 @@ def create_technical_asset(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> CreateTechnicalAssetResponse:
-    technical_asset = DataOutputService(db).create_technical_asset(
+    technical_asset = TechnicalAssetService(db).create_technical_asset(
         data_product_id, technical_asset
     )
     event_id = EventService(db).create_event(

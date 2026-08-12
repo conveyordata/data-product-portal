@@ -133,6 +133,10 @@ type GetAWSCredentialsRes interface {
 	getAWSCredentialsRes()
 }
 
+type GetAccessModesRes interface {
+	getAccessModesRes()
+}
+
 type GetDataProductEventHistoryRes interface {
 	getDataProductEventHistoryRes()
 }

@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from typing import Any
+from typing import Any, cast
 
 import httpx
 
@@ -21,11 +21,19 @@ def _get_kwargs() -> dict[str, Any]:
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> GetAccessModes | None:
+) -> Any | GetAccessModes | None:
     if response.status_code == 200:
         response_200 = GetAccessModes.from_dict(response.json())
 
         return response_200
+
+    if response.status_code == 400:
+        response_400 = cast(Any, None)
+        return response_400
+
+    if response.status_code == 404:
+        response_404 = cast(Any, None)
+        return response_404
 
     if client.raise_on_unexpected_status:
         raise errors.UnexpectedStatus(response.status_code, response.content)
@@ -35,7 +43,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[GetAccessModes]:
+) -> Response[Any | GetAccessModes]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -47,7 +55,7 @@ def _build_response(
 def sync_detailed(
     *,
     client: AuthenticatedClient | Client,
-) -> Response[GetAccessModes]:
+) -> Response[Any | GetAccessModes]:
     """Get Access Modes
 
     Raises:
@@ -55,7 +63,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[GetAccessModes]
+        Response[Any | GetAccessModes]
     """
 
     kwargs = _get_kwargs()
@@ -70,7 +78,7 @@ def sync_detailed(
 def sync(
     *,
     client: AuthenticatedClient | Client,
-) -> GetAccessModes | None:
+) -> Any | GetAccessModes | None:
     """Get Access Modes
 
     Raises:
@@ -78,7 +86,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        GetAccessModes
+        Any | GetAccessModes
     """
 
     return sync_detailed(
@@ -89,7 +97,7 @@ def sync(
 async def asyncio_detailed(
     *,
     client: AuthenticatedClient | Client,
-) -> Response[GetAccessModes]:
+) -> Response[Any | GetAccessModes]:
     """Get Access Modes
 
     Raises:
@@ -97,7 +105,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[GetAccessModes]
+        Response[Any | GetAccessModes]
     """
 
     kwargs = _get_kwargs()
@@ -110,7 +118,7 @@ async def asyncio_detailed(
 async def asyncio(
     *,
     client: AuthenticatedClient | Client,
-) -> GetAccessModes | None:
+) -> Any | GetAccessModes | None:
     """Get Access Modes
 
     Raises:
@@ -118,7 +126,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        GetAccessModes
+        Any | GetAccessModes
     """
 
     return (

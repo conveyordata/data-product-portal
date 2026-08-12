@@ -25,7 +25,7 @@ from app.core.auth.service import AuthService
 from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.technical_assets.model import ensure_technical_asset_exists
 from app.data_products.technical_assets.schema_response import compute_technical_info
-from app.data_products.technical_assets.service import DataOutputService
+from app.data_products.technical_assets.service import TechnicalAssetService
 from app.mcp.deps import (
     authorize_data_product_read_integrations,
     get_db_session,
@@ -176,7 +176,7 @@ def register_tools(mcp: FastMCP) -> None:
         """
         asset_uuid = UUID(technical_asset_id)
         do = ensure_technical_asset_exists(asset_uuid, db=db)
-        data_output = DataOutputService(db).get_technical_asset(
+        data_output = TechnicalAssetService(db).get_technical_asset(
             do.owner_id, id=asset_uuid
         )
 

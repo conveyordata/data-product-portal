@@ -100,8 +100,16 @@ describe('TechnicalAssetPopup', async () => {
         await waitFor(() => expect(mockCloseFunction).toHaveBeenCalled());
     }, 15000);
 
-    it('should fail when specifying multiple access mode but no mode is selected from the table', async () => {
+    it('should not show access mode choice when no access mode matches the selected technical asset type', async () => {
         defaultMocks();
+        mockAccessModesHttp([
+            {
+                id: '1',
+                name: 'Read Only',
+                description: 'Read-only access to data',
+                technical_asset_types: ['SnowflakeTechnicalAssetConfiguration'],
+            },
+        ]);
 
         const user = userEvent.setup({ delay: null, pointerEventsCheck: 0 });
         renderWithProviders(
@@ -112,12 +120,9 @@ describe('TechnicalAssetPopup', async () => {
 
         await fillInS3(user);
 
-        await user.click(screen.getByText('Configure access modes'));
-        await waitFor(() => expect(screen.getByText('Read Only')).toBeInTheDocument());
-
-        const createButton = screen.getByRole('button', { name: /Create/i });
-        await user.click(createButton);
-
-        await waitFor(() => expect(screen.getByText(/Please select at least one access mode/i)).toBeInTheDocument());
+        await waitFor(() => {
+            expect(screen.queryByText('Single access mode')).not.toBeInTheDocument();
+            expect(screen.queryByText('Configure access modes')).not.toBeInTheDocument();
+        });
     }, 15000);
 });

@@ -20,7 +20,7 @@ from app.data_products.service import DataProductService
 from app.data_products.technical_assets.schema_response import (
     GetTechnicalAssetsResponseItem,
 )
-from app.data_products.technical_assets.service import DataOutputService
+from app.data_products.technical_assets.service import TechnicalAssetService
 from app.mcp.deps import get_db_session, get_mcp_authenticated_user
 from app.search_output_ports.schema_response import SearchOutputPortsResponseItem
 from app.users.model import User as UserModel
@@ -69,7 +69,7 @@ def register_config_tools(mcp) -> None:
         all_output_ports = OutputPortService(db).search_output_ports(
             query=None, limit=1000, user=user, current_user_assigned=False
         )
-        all_technical_assets = DataOutputService(db).get_data_outputs()
+        all_technical_assets = TechnicalAssetService(db).get_data_outputs()
         all_domains = DomainService(db).get_domains()
 
         popular_data_products = all_data_products[:5]
@@ -125,7 +125,7 @@ def register_config_tools(mcp) -> None:
             user=user, data_product_id=UUID(data_product_id)
         )
 
-        technical_assets = DataOutputService(db).get_data_outputs()
+        technical_assets = TechnicalAssetService(db).get_data_outputs()
         related_technical_assets = [
             do
             for do in technical_assets

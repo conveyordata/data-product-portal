@@ -29,7 +29,7 @@ from app.data_products.technical_assets.service import (
     TECHNICAL_ASSET_ACCESS_MODES_INCOMPATIBLE_ERROR,
     TECHNICAL_ASSET_ALREADY_LINKED_ERROR,
     TECHNICAL_ASSET_NOT_ACTIVE_ERROR,
-    DataOutputService,
+    TechnicalAssetService,
 )
 from app.database.database import get_db_session
 from app.events.enums import EventReferenceEntity, EventType
@@ -164,7 +164,7 @@ def link_output_port_to_technical_asset(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> LinkTechnicalAssetsToOutputPortResponse:
-    dataset_link = DataOutputService(db).link_dataset_to_data_output(
+    dataset_link = TechnicalAssetService(db).link_dataset_to_data_output(
         data_product_id,
         link_request.technical_asset_id,
         output_port_id,
@@ -226,7 +226,7 @@ def unlink_output_port_from_technical_asset(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    data_output = DataOutputService(db).unlink_dataset_from_data_output(
+    data_output = TechnicalAssetService(db).unlink_dataset_from_data_output(
         data_product_id=data_product_id,
         id=link_request.technical_asset_id,
         output_port_id=output_port_id,

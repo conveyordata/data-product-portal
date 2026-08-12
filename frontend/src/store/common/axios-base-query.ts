@@ -1,11 +1,11 @@
 import type { BaseQueryFn } from '@reduxjs/toolkit/query';
-import type { AxiosRequestConfig, AxiosResponse } from 'axios';
+import type { AxiosRequestConfig } from 'axios';
 import axios from 'axios';
 import { User } from 'oidc-client-ts';
 
 import { AppConfig } from '@/config/app-config.ts';
 import type { ApiError } from '@/store/common/api-result.ts';
-import { dispatchNotification, type NotificationOptions } from '@/utils/feedback.ts';
+import { defaultErrorMessage, showGenericErrorMessage } from '@/store/common/errors.ts';
 
 type AxiosBaseQueryExtraOptions = {
     suppressErrorToast?: boolean;
@@ -23,25 +23,6 @@ function getUser() {
     }
 
     return User.fromStorageString(oidcStorage);
-}
-
-const defaultErrorMessage: NotificationOptions = {
-    title: 'Something went wrong',
-    description: 'Please try again later',
-    type: 'error',
-};
-
-function showErrorMessageToast(err: AxiosResponse<ApiError>) {
-    const { correlation_id: correlationId = defaultErrorMessage.title, detail = defaultErrorMessage.description } =
-        err.data;
-
-    const title = typeof detail === 'string' ? detail : defaultErrorMessage.title;
-
-    dispatchNotification({
-        title,
-        description: correlationId,
-        type: 'error',
-    });
 }
 
 export const axiosBaseQuery =
@@ -76,16 +57,12 @@ export const axiosBaseQuery =
             });
             return { data: result.data };
         } catch (axiosError: unknown) {
+            if (!extraOptions.suppressErrorToast) {
+                showGenericErrorMessage(axiosError);
+            }
             if (axios.isAxiosError<ApiError>(axiosError) && axiosError.response) {
-                if (!extraOptions.suppressErrorToast) {
-                    showErrorMessageToast(axiosError.response);
-                }
-
                 return { error: axiosError.response.data };
             }
-
-            dispatchNotification(defaultErrorMessage);
-
             return { error: { correlation_id: 'NA', detail: defaultErrorMessage.description } };
         }
     };

@@ -6,10 +6,19 @@ from app.configuration.access_modes.schema_request import (
     AccessModeCreate,
     AccessModeUpdate,
 )
-from app.configuration.access_modes.schema_response import AccessMode, GetAccessModes
-from app.configuration.access_modes.service import AccessModeService
+from app.configuration.access_modes.schema_response import (
+    AccessMode,
+    AccessModeWithType,
+    GetAccessModes,
+)
+from app.configuration.access_modes.service import (
+    ACCESS_MODE_NOT_FOUND_ERROR,
+    CAN_NOT_REMOVE_TECHNICAL_ASSET_TYPES_ERROR,
+    AccessModeService,
+)
 from app.core.authz import Action, Authorization
 from app.core.authz.resolvers import EmptyResolver
+from app.core.errors.router_responses import process_errors_as_route_responses
 
 router = APIRouter(
     tags=["Configuration - Access Modes"],
@@ -50,13 +59,21 @@ def update_access_mode(
     return AccessMode.model_validate(access_mode_service.update_access_mode(id, update))
 
 
-@router.get("")
+@router.get(
+    "",
+    responses=process_errors_as_route_responses(
+        [
+            CAN_NOT_REMOVE_TECHNICAL_ASSET_TYPES_ERROR,
+            ACCESS_MODE_NOT_FOUND_ERROR,
+        ]
+    ),
+)
 def get_access_modes(
     access_mode_service: AccessModeService = Depends(AccessModeService),
 ) -> GetAccessModes:
     return GetAccessModes(
         access_modes=[
-            AccessMode.model_validate(am)
+            AccessModeWithType.model_validate(am)
             for am in access_mode_service.get_access_modes()
         ],
     )

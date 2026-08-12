@@ -43,13 +43,19 @@ export type UpdateAccessModeApiArg = {
   id: string;
   accessModeUpdate: AccessModeUpdate;
 };
+export type AccessModeWithType = {
+  id: string;
+  name: string;
+  description: string;
+  technical_asset_types: string[];
+};
+export type GetAccessModes = {
+  access_modes: AccessModeWithType[];
+};
 export type AccessMode = {
   id: string;
   name: string;
   description: string;
-};
-export type GetAccessModes = {
-  access_modes: AccessMode[];
 };
 export type ValidationError = {
   loc: (string | number)[];
@@ -64,9 +70,11 @@ export type HttpValidationError = {
 export type AccessModeCreate = {
   name: string;
   description: string;
+  technical_asset_types: string[];
 };
 export type AccessModeUpdate = {
   description: string;
+  technical_asset_types: string[];
 };
 export const {
   useGetAccessModesQuery,

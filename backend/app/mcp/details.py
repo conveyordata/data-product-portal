@@ -16,7 +16,7 @@ from app.data_products.technical_assets.model import ensure_technical_asset_exis
 from app.data_products.technical_assets.schema_response import (
     GetTechnicalAssetsResponseItem,
 )
-from app.data_products.technical_assets.service import DataOutputService
+from app.data_products.technical_assets.service import TechnicalAssetService
 from app.mcp.deps import get_db_session, get_mcp_authenticated_user
 from app.users.model import User as UserModel
 
@@ -45,7 +45,7 @@ def get_technical_asset_details(
     db: Session = Depends(get_db_session),
 ) -> dict[str, Any]:
     do = ensure_technical_asset_exists(UUID(technical_asset_id), db=db)
-    data_output = DataOutputService(db).get_technical_asset(
+    data_output = TechnicalAssetService(db).get_technical_asset(
         do.owner_id,
         id=UUID(technical_asset_id),
     )

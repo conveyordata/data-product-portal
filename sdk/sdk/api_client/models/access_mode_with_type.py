@@ -2,28 +2,33 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from typing import Any, TypeVar, cast
+from uuid import UUID
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-T = TypeVar("T", bound="AccessModeCreate")
+T = TypeVar("T", bound="AccessModeWithType")
 
 
 @_attrs_define
-class AccessModeCreate:
+class AccessModeWithType:
     """
     Attributes:
+        id (UUID):
         name (str):
         description (str):
         technical_asset_types (list[str]):
     """
 
+    id: UUID
     name: str
     description: str
     technical_asset_types: list[str]
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
+        id = str(self.id)
+
         name = self.name
 
         description = self.description
@@ -34,6 +39,7 @@ class AccessModeCreate:
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
+                "id": id,
                 "name": name,
                 "description": description,
                 "technical_asset_types": technical_asset_types,
@@ -45,20 +51,23 @@ class AccessModeCreate:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
+        id = UUID(d.pop("id"))
+
         name = d.pop("name")
 
         description = d.pop("description")
 
         technical_asset_types = cast(list[str], d.pop("technical_asset_types"))
 
-        access_mode_create = cls(
+        access_mode_with_type = cls(
+            id=id,
             name=name,
             description=description,
             technical_asset_types=technical_asset_types,
         )
 
-        access_mode_create.additional_properties = d
-        return access_mode_create
+        access_mode_with_type.additional_properties = d
+        return access_mode_with_type
 
     @property
     def additional_keys(self) -> list[str]:

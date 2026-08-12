@@ -72,6 +72,19 @@ export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallback
         undefined,
     );
 
+    const pluginMetadata = useMemo(() => {
+        if (!uiMetadataGroups || !selectedConfiguration) {
+            return undefined;
+        }
+        return uiMetadataGroups.find((meta) => meta.platform === selectedConfiguration.value.toLowerCase());
+    }, [uiMetadataGroups, selectedConfiguration]);
+    const accessModesForSelectedPlugin = useMemo(() => {
+        if (!pluginMetadata || !accessModes) {
+            return [];
+        }
+        return accessModes.filter((mode) => mode.technical_asset_types.includes(pluginMetadata.plugin));
+    }, [pluginMetadata, accessModes]);
+
     const [form] = Form.useForm();
     const technical_mapping = Form.useWatch('technical_mapping', form);
     const dataOutputNameValue = Form.useWatch('name', form);
@@ -343,32 +356,18 @@ export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallback
                     </Space>
                 </Radio.Group>
             </Form.Item>
-            {(() => {
-                if (!currentDataProduct || !selectedConfiguration || !uiMetadataGroups) {
-                    return null;
-                }
-
-                // Find the metadata for the selected platform
-                const pluginMetadata = uiMetadataGroups.find(
-                    (meta) => meta.platform === selectedConfiguration.value.toLowerCase(),
-                );
-
-                if (!pluginMetadata) {
-                    return null;
-                }
-
-                return (
-                    <>
-                        <TechnicalAssetConfigurationForm
-                            form={form}
-                            uiMetadataGroups={pluginMetadata.ui_metadata}
-                            namespace={currentDataProduct.namespace}
-                            technical_mapping={technical_mapping}
-                            configurationType={pluginMetadata.plugin}
-                            resultLabel={pluginMetadata.result_label ?? ''}
-                            resultTooltip={pluginMetadata.result_tooltip ?? ''}
-                        />
-
+            {currentDataProduct && pluginMetadata && (
+                <>
+                    <TechnicalAssetConfigurationForm
+                        form={form}
+                        uiMetadataGroups={pluginMetadata.ui_metadata}
+                        namespace={currentDataProduct.namespace}
+                        technical_mapping={technical_mapping}
+                        configurationType={pluginMetadata.plugin}
+                        resultLabel={pluginMetadata.result_label ?? ''}
+                        resultTooltip={pluginMetadata.result_tooltip ?? ''}
+                    />
+                    {accessModesForSelectedPlugin.length > 0 && (
                         <Form.Item<TechnicalAssetsCreateForm>
                             name="access_mode_type"
                             label={t('Access mode')}
@@ -395,34 +394,31 @@ export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallback
                                 ]}
                             />
                         </Form.Item>
-
-                        <Form.Item
-                            name="access_mode_ids"
-                            label={t('Access modes')}
-                            initialValue={[]}
-                            hidden={accessMode !== 'multiple'}
-                            dependencies={['access_mode_type']}
-                            rules={[
-                                {
-                                    validator: async (_, value) => {
-                                        if (accessMode === 'multiple' && (!value || value.length === 0)) {
-                                            return Promise.reject(
-                                                new Error(t('Please select at least one access mode')),
-                                            );
-                                        }
-                                    },
+                    )}
+                    <Form.Item
+                        name="access_mode_ids"
+                        label={t('Access modes')}
+                        initialValue={[]}
+                        hidden={accessMode !== 'multiple'}
+                        dependencies={['access_mode_type']}
+                        rules={[
+                            {
+                                validator: async (_, value) => {
+                                    if (accessMode === 'multiple' && (!value || value.length === 0)) {
+                                        return Promise.reject(new Error(t('Please select at least one access mode')));
+                                    }
                                 },
-                            ]}
-                        >
-                            <AccessModeSelector
-                                accessModes={accessModes}
-                                loading={isFetchingAccessModes}
-                                selectionMode="multiple"
-                            />
-                        </Form.Item>
-                    </>
-                );
-            })()}
+                            },
+                        ]}
+                    >
+                        <AccessModeSelector
+                            accessModes={accessModesForSelectedPlugin}
+                            loading={isFetchingAccessModes}
+                            selectionMode="multiple"
+                        />
+                    </Form.Item>
+                </>
+            )}
         </Form>
     );
 }

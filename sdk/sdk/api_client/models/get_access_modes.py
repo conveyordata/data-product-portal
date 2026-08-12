@@ -7,7 +7,7 @@ from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 if TYPE_CHECKING:
-    from ..models.access_mode import AccessMode
+    from ..models.access_mode_with_type import AccessModeWithType
 
 
 T = TypeVar("T", bound="GetAccessModes")
@@ -17,10 +17,10 @@ T = TypeVar("T", bound="GetAccessModes")
 class GetAccessModes:
     """
     Attributes:
-        access_modes (list[AccessMode]):
+        access_modes (list[AccessModeWithType]):
     """
 
-    access_modes: list[AccessMode]
+    access_modes: list[AccessModeWithType]
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -41,13 +41,13 @@ class GetAccessModes:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.access_mode import AccessMode
+        from ..models.access_mode_with_type import AccessModeWithType
 
         d = dict(src_dict)
         access_modes = []
         _access_modes = d.pop("access_modes")
         for access_modes_item_data in _access_modes:
-            access_modes_item = AccessMode.from_dict(access_modes_item_data)
+            access_modes_item = AccessModeWithType.from_dict(access_modes_item_data)
 
             access_modes.append(access_modes_item)
 

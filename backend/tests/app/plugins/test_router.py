@@ -13,20 +13,7 @@ ENDPOINT = "/api/v2/plugins"
 
 
 class TestPluginEndpoints:
-    def test_list_plugins_returns_no_results_when_no_service_config(
-        self, client: TestClient
-    ):
-        """Test GET /v2/plugins returns empty list when no service configs exist"""
-        response = client.get(ENDPOINT)
-        assert response.status_code == 200
-        data = response.json()
-
-        assert "plugins" in data
-        assert isinstance(data["plugins"], list)
-        assert len(data["plugins"]) == 4
-
-    def test_list_plugins_returns_all_available_plugins(self, client: TestClient):
-        """Test GET /v2/plugins returns list of all available plugins"""
+    def test_list_plugins(self, client: TestClient):
         aws = PlatformFactory(name="AWS")
         PlatformServiceConfigFactory(
             service=PlatformServiceFactory(name="S3", platform=aws)
@@ -38,7 +25,7 @@ class TestPluginEndpoints:
 
         assert "plugins" in data
         assert isinstance(data["plugins"], list)
-        assert len(data["plugins"]) > 0
+        assert len(data["plugins"]) == 5
 
         for plugin in data["plugins"]:
             assert "plugin" in plugin
