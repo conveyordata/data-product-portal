@@ -107,6 +107,13 @@ repos:
       types: [text]
       files: ^docs/static/openapi.json$
       pass_filenames: false
+    - id: validate-api-errors
+      name: Validate API error constants against OpenAPI
+      entry: bash -c "cd frontend && npm run validate-api-errors"
+      language: system
+      types: [text]
+      files: ^(frontend/src/store/common/api-errors\.ts|docs/static/openapi\.json)$
+      pass_filenames: false
     - id: local-fe-check
       name: fe check
       entry: bash -c "cd frontend && npm run biome:fix"

@@ -23,7 +23,8 @@
         "lint-translations": "npx i18next-cli lint",
         "copy-config": "cp config.local.js public/config.js",
         "dep-viz": "npm run build && npx open-cli dependencies.html",
-        "generate-api": "rm -rf src/store/api/services/generated/* && npx @rtk-query/codegen-openapi src/store/api/openapi-config.ts && node scripts/add-ts-nocheck.js",
+        "generate-api": "rm -rf src/store/api/services/generated/* && npx @rtk-query/codegen-openapi src/store/api/openapi-config.ts && node scripts/add-ts-nocheck.js && node scripts/validate-api-errors.js",
+        "validate-api-errors": "node scripts/validate-api-errors.js",
         "knip": "knip"
     },
     "dependencies": {

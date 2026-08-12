@@ -14,7 +14,7 @@ import {
     TechnicalAssetStatus,
     TechnicalMapping,
 } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
-import { INCOMPATIBLE_ACCESS_MODES_ERROR_DETAIL } from '@/store/common/errors.ts';
+import { INCOMPATIBLE_ACCESS_MODES_ERROR_DETAIL } from '@/store/common/api-errors.ts';
 import { server } from '@/tests/mocks/server.ts';
 import { fireEvent, renderWithProviders, screen, waitFor, within } from '@/tests/test-utils.tsx';
 

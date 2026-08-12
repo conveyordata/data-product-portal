@@ -74,14 +74,6 @@ router = APIRouter(tags=["Data Products"], prefix="/v2/data_products")
 @router.post(
     "",
     responses={
-        200: {
-            "description": "Data Product successfully created",
-            "content": {
-                "application/json": {
-                    "example": {"id": "random id of the new data_product"}
-                }
-            },
-        },
         404: {
             "description": "Owner not found",
             "content": {
