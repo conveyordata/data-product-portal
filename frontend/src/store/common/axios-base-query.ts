@@ -57,7 +57,7 @@ export const axiosBaseQuery =
             });
             return { data: result.data };
         } catch (axiosError: unknown) {
-            if (!extraOptions.suppressErrorToast) {
+            if (!extraOptions?.suppressErrorToast) {
                 showGenericErrorMessage(axiosError);
             }
             if (axios.isAxiosError<ApiError>(axiosError) && axiosError.response) {

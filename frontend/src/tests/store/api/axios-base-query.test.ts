@@ -51,6 +51,19 @@ describe('axiosBaseQuery', () => {
         );
     });
 
+    it('shows the error toast when extraOptions is undefined', async () => {
+        const query = axiosBaseQuery({ baseUrl: 'https://example.test' });
+        const api = createBaseQueryApi();
+        const error = new Error('boom');
+
+        vi.mocked(axios).mockRejectedValueOnce(error);
+        vi.mocked(axios.isAxiosError).mockReturnValue(false);
+
+        await query({ url: '/resource' }, api, undefined as never);
+
+        expect(dispatchNotification).toHaveBeenCalled();
+    });
+
     it('falls back cleanly for non-Axios errors', async () => {
         const query = axiosBaseQuery({ baseUrl: 'https://example.test' });
         const api = createBaseQueryApi();
