@@ -13,7 +13,7 @@ from app.users.schema import User
 
 
 class ConveyorPlugin(AssetProviderPlugin):
-    name: ClassVar[str] = "ConveyorPlatform"
+    name: ClassVar[str] = "ConveyorPlugin"
     version: ClassVar[str] = "1.0"
 
     _platform_metadata = PlatformMetadata(

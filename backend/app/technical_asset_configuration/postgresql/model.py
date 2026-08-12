@@ -3,6 +3,8 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from app.technical_asset_configuration.base_model import BaseTechnicalAssetConfiguration
 
+NAME = "PostgreSQLTechnicalAssetConfiguration"
+
 
 class PostgreSQLTechnicalAssetConfiguration(BaseTechnicalAssetConfiguration):
     __tablename__ = "postgresql_technical_asset_configurations"
@@ -13,5 +15,5 @@ class PostgreSQLTechnicalAssetConfiguration(BaseTechnicalAssetConfiguration):
     access_granularity: Mapped[str] = mapped_column(String, nullable=True)
 
     __mapper_args__ = {
-        "polymorphic_identity": "PostgreSQLTechnicalAssetConfiguration",
+        "polymorphic_identity": NAME,
     }
