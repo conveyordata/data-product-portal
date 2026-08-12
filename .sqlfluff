@@ -2,7 +2,8 @@
 dialect = postgres
 large_file_skip_byte_limit = 0
 #Disable long lines for now
-exclude_rules = LT05
+#Also disable CV06 as it takes a long time to run 12s out of 30s at time of benchmarking
+exclude_rules = LT05, CV06
 
 [sqlfluff:templater:jinja]
 apply_dbt_builtins = true
