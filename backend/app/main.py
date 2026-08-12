@@ -25,7 +25,7 @@ from app.core.authz.background_tasks import check_expired_admins
 from app.core.errors.error_handling import add_exception_handlers
 from app.core.logging import logger
 from app.core.logging.middleware import RequestLoggingMiddleware
-from app.core.logging.posthog_analytics import report_consumption_metrics_task
+from app.core.logging.posthog_analytics import report_daily_metrics
 from app.core.logging.scarf_analytics import backend_analytics
 from app.core.webhooks.middleware import (
     DispatchQueuedEventsMiddleware,
@@ -102,8 +102,8 @@ async def lifespan(app: FastAPI):
             name="cleanup_device_flow_table_task",
         ),
         _create_supervised_task(
-            report_consumption_metrics_task(),
-            name="report_consumption_metrics_task",
+            report_daily_metrics(),
+            name="report_north_star_metrics",
         ),
         _create_supervised_task(check_stuck_deletions(), name="check_stuck_deletions"),
         _create_supervised_task(
