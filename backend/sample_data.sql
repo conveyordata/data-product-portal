@@ -722,7 +722,8 @@ VALUES (gen_random_uuid(), '{{ access_modes_example }}'::uuid, '{{ john_id }}'::
 
 INSERT INTO public.datasets (id, namespace, data_product_id, name, description, about, status, access_type, created_on, updated_on, deleted_at) VALUES ('{{ dei_access_modes_example_output_port }}'::uuid, 'access-mode-representative-dataset', '{{ access_modes_example }}'::uuid, 'Access mode example', 'Quarterly representation metrics by function and level', 'Output port for access mode examples.', 'ACTIVE', 'RESTRICTED', timezone('utc'::text, current_timestamp), NULL, NULL);
 
-INSERT INTO public.data_output_configurations (id, configuration_type) VALUES ('3e5b2eb0-2d78-4ef4-b73b-57df8d85be11', 'GlueTechnicalAssetConfiguration');
+INSERT INTO public.data_output_configurations (id, configuration_type)
+VALUES ('3e5b2eb0-2d78-4ef4-b73b-57df8d85be11', 'RedshiftTechnicalAssetConfiguration');
 
 
 INSERT INTO public.redshift_technical_asset_configurations (id, bucket_identifier, "database", schema, "table", database_path, table_path, access_granularity, created_on, updated_on, deleted_at)
@@ -736,7 +737,7 @@ INSERT INTO public.data_outputs (id, namespace, name, description, status, platf
         ps.platform_id = (
             SELECT p.id FROM public.platforms AS p
             WHERE p.name = 'AWS'
-        ) AND ps.name = 'Glue'
+        ) AND ps.name = 'Redshift'
 ), '{{ access_modes_example }}'::uuid, NULL, '3e5b2eb0-2d78-4ef4-b73b-57df8d85be11', timezone('utc'::text, current_timestamp
 ), NULL, NULL, 'default');
 
@@ -748,7 +749,8 @@ VALUES
 INSERT INTO public.data_outputs_datasets (id, data_output_id, dataset_id, status, requested_by_id, requested_on, approved_by_id, approved_on, denied_by_id, denied_on, created_on, updated_on, deleted_at)
 VALUES (gen_random_uuid(), '{{ access_mode_linked_technical_asset_id }}'::uuid, '{{ dei_access_modes_example_output_port }}'::uuid, 'APPROVED', '{{ john_id }}'::uuid, timezone('utc'::text, current_timestamp), '{{ john_id }}'::uuid, timezone('utc'::text, current_timestamp), NULL, NULL, timezone('utc'::text, current_timestamp), NULL, NULL);
 
-INSERT INTO public.data_output_configurations (id, configuration_type) VALUES ('6c8d4df0-a65a-4967-a40e-f0fffbf90231', 'GlueTechnicalAssetConfiguration');
+INSERT INTO public.data_output_configurations (id, configuration_type)
+VALUES ('6c8d4df0-a65a-4967-a40e-f0fffbf90231', 'RedshiftTechnicalAssetConfiguration');
 
 INSERT INTO public.redshift_technical_asset_configurations (id, bucket_identifier, "database", schema, "table", database_path, table_path, access_granularity, created_on, updated_on, deleted_at)
 VALUES ('6c8d4df0-a65a-4967-a40e-f0fffbf90231', '', 'access-modes-example-unlinked', '*', '*', 'access-modes-example-unlinked', '*', 'table', '2025-10-28 18:17:20.241114', NULL, NULL);
@@ -761,7 +763,7 @@ INSERT INTO public.data_outputs (id, namespace, name, description, status, platf
         ps.platform_id = (
             SELECT p.id FROM public.platforms AS p
             WHERE p.name = 'AWS'
-        ) AND ps.name = 'Glue'
+        ) AND ps.name = 'Redshift'
 ), '{{ access_modes_example }}'::uuid, NULL, '6c8d4df0-a65a-4967-a40e-f0fffbf90231', timezone('utc'::text, current_timestamp
 ), NULL, NULL, 'default');
 
@@ -770,7 +772,8 @@ VALUES
 ('{{ access_mode_unlinked_technical_asset_id }}'::uuid, '{{ access_mode_read }}'::uuid),
 ('{{ access_mode_unlinked_technical_asset_id }}'::uuid, '{{ access_mode_write }}'::uuid);
 
-INSERT INTO public.data_output_configurations (id, configuration_type) VALUES ('9e4d6227-7f74-467f-a6cd-6b1f0e9f6f3a', 'GlueTechnicalAssetConfiguration');
+INSERT INTO public.data_output_configurations (id, configuration_type)
+VALUES ('9e4d6227-7f74-467f-a6cd-6b1f0e9f6f3a', 'RedshiftTechnicalAssetConfiguration');
 
 INSERT INTO public.redshift_technical_asset_configurations (id, bucket_identifier, "database", schema, "table", database_path, table_path, access_granularity, created_on, updated_on, deleted_at)
 VALUES ('9e4d6227-7f74-467f-a6cd-6b1f0e9f6f3a', '', 'access-modes-example-admin', '*', '*', 'access-modes-example-admin', '*', 'table', '2025-10-28 18:17:35.241114', NULL, NULL);
@@ -783,7 +786,7 @@ INSERT INTO public.data_outputs (id, namespace, name, description, status, platf
         ps.platform_id = (
             SELECT p.id FROM public.platforms AS p
             WHERE p.name = 'AWS'
-        ) AND ps.name = 'Glue'
+        ) AND ps.name = 'Redshift'
 ), '{{ access_modes_example }}'::uuid, NULL, '9e4d6227-7f74-467f-a6cd-6b1f0e9f6f3a', timezone('utc'::text, current_timestamp
 ), NULL, NULL, 'default');
 
