@@ -93,22 +93,20 @@ function AccessDurationSection({
     const { t } = useTranslation();
     const selected = value ?? AccessDurationType.Permanent;
 
-    const hasTimeBound = accessDurations.some((r) => r.access_duration_type === AccessDurationType.TimeBound);
+    const timeBoundEnabled = accessDurations.some((r) => r.access_duration_type === AccessDurationType.TimeBound);
     const hasPermanent = accessDurations.some((r) => r.access_duration_type === AccessDurationType.Permanent);
-    const canToggle = hasTimeBound && hasPermanent;
     const timeBoundDays = accessDurations.find((r) => r.access_duration_type === AccessDurationType.TimeBound)?.days;
+    const daysLabel = timeBoundDays ? t('{{days}} days', { days: timeBoundDays }) : '';
 
     const options = [
         {
-            label: !hasTimeBound ? (
-                <Tooltip title={t('Not allowed by admin')}>
-                    <span>{t('Time Bound')}</span>
+            label: (
+                <Tooltip title={timeBoundEnabled ? null : t('Not allowed by Admin.')}>
+                    {t('Time Bound')} {daysLabel}
                 </Tooltip>
-            ) : (
-                t('Time Bound')
             ),
             value: AccessDurationType.TimeBound,
-            disabled: !hasTimeBound,
+            disabled: !timeBoundEnabled,
         },
         {
             label: !hasPermanent ? (
@@ -124,35 +122,13 @@ function AccessDurationSection({
     ];
 
     return (
-        <Flex vertical gap="small">
-            <Flex vertical gap="small">
-                <Radio.Group
-                    value={selected}
-                    options={options}
-                    optionType="button"
-                    disabled={!canToggle}
-                    onChange={(e) => onChange?.(e.target.value)}
-                    key={`${abstractDataProductType}-access-duration`}
-                />
-                {selected === AccessDurationType.TimeBound && timeBoundDays != null && (
-                    <Alert
-                        type="info"
-                        showIcon={false}
-                        title={
-                            <Flex vertical gap="small">
-                                <Typography.Text strong>{t('{{days}} days', { days: timeBoundDays })}</Typography.Text>
-                                <Typography.Text type="secondary">
-                                    {t('Admin-configured duration policy.')}
-                                </Typography.Text>
-                                <Typography.Text type="secondary">
-                                    {t('Access expires after configured duration.')}
-                                </Typography.Text>
-                            </Flex>
-                        }
-                    />
-                )}
-            </Flex>
-        </Flex>
+        <Radio.Group
+            value={selected}
+            options={options}
+            optionType="button"
+            onChange={(e) => onChange?.(e.target.value)}
+            key={`${abstractDataProductType}-access-duration`}
+        />
     );
 }
 
@@ -192,6 +168,23 @@ function AccessDurationInfo({ mode }: { mode: 'create' | 'edit' }) {
 
     return (
         <>
+            {sections.map(({ abstractDataProductType, accessDurations, initialValue }) => (
+                <Form.Item
+                    key={abstractDataProductType}
+                    name={FIELD_NAMES[abstractDataProductType as keyof typeof FIELD_NAMES]}
+                    initialValue={initialValue}
+                    required
+                    label={t('{{type}} Access Duration', { type: PRODUCT_TYPE_LABELS[abstractDataProductType] })}
+                    tooltip={t(
+                        'Access duration policy configured by the administrator. This applies when someone requests access to this Output Port.',
+                    )}
+                >
+                    <AccessDurationSection
+                        abstractDataProductType={abstractDataProductType}
+                        accessDurations={accessDurations}
+                    />
+                </Form.Item>
+            ))}
             {mode === 'edit' && (
                 <Form.Item>
                     <Alert
@@ -214,23 +207,6 @@ function AccessDurationInfo({ mode }: { mode: 'create' | 'edit' }) {
                     />
                 </Form.Item>
             )}
-            {sections.map(({ abstractDataProductType, accessDurations, initialValue }) => (
-                <Form.Item
-                    key={abstractDataProductType}
-                    name={FIELD_NAMES[abstractDataProductType as keyof typeof FIELD_NAMES]}
-                    initialValue={initialValue}
-                    required
-                    label={t('{{type}} Access Duration', { type: PRODUCT_TYPE_LABELS[abstractDataProductType] })}
-                    tooltip={t(
-                        'Access duration policy configured by the administrator. This applies when someone requests access to this Output Port.',
-                    )}
-                >
-                    <AccessDurationSection
-                        abstractDataProductType={abstractDataProductType}
-                        accessDurations={accessDurations}
-                    />
-                </Form.Item>
-            ))}
         </>
     );
 }
