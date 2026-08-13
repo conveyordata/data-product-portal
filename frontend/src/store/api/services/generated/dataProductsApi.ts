@@ -202,7 +202,7 @@ const injectedRtkApi = api.injectEndpoints({
 });
 export { injectedRtkApi as api };
 export type CreateDataProductApiResponse =
-  /** status 200 Data Product successfully created */ CreateDataProductResponse;
+  /** status 200 Successful Response */ CreateDataProductResponse;
 export type CreateDataProductApiArg = DataProductCreate;
 export type GetDataProductsApiResponse =
   /** status 200 Successful Response */ GetDataProductsResponse;

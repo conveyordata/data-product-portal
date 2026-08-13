@@ -15,7 +15,7 @@ import {
     useLinkOutputPortToTechnicalAssetMutation,
     useUnlinkOutputPortFromTechnicalAssetMutation,
 } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
-import { isIncompatibleAccessModesError } from '@/store/common/errors.ts';
+import { isIncompatibleAccessModesError } from '@/store/common/api-errors.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import { createMarketplaceOutputPortPath } from '@/types/navigation';
 import { dispatchMessage } from '@/utils/feedback.ts';

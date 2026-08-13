@@ -1,9 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import {
-    getApiErrorDetail,
-    INCOMPATIBLE_ACCESS_MODES_ERROR_DETAIL,
-    isIncompatibleAccessModesError,
-} from '@/store/common/errors.ts';
+import { INCOMPATIBLE_ACCESS_MODES_ERROR_DETAIL, isIncompatibleAccessModesError } from '@/store/common/api-errors.ts';
+import { getApiErrorDetail } from '@/store/common/errors.ts';
 
 describe('getApiErrorDetail', () => {
     it('returns undefined for non-object errors', () => {

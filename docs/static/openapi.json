@@ -1508,14 +1508,11 @@
         },
         "responses": {
           "200": {
-            "description": "Data Product successfully created",
+            "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CreateDataProductResponse"
-                },
-                "example": {
-                  "id": "random id of the new data_product"
                 }
               }
             }

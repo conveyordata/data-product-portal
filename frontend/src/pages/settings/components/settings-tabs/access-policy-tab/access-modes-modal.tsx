@@ -7,7 +7,8 @@ import {
 } from '@/store/api/services/generated/configurationAccessModesApi.ts';
 import type { AccessMode } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
 import { useGetPluginsQuery } from '@/store/api/services/generated/pluginsApi.ts';
-import { isCanNotRemoveTechnicalAssetTypesError, showGenericErrorMessage } from '@/store/common/errors.ts';
+import { isCanNotRemoveTechnicalAssetTypesError } from '@/store/common/api-errors.ts';
+import { showGenericErrorMessage } from '@/store/common/errors.ts';
 
 const { TextArea } = Input;
 
