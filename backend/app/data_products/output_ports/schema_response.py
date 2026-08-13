@@ -1,7 +1,7 @@
 from typing import Optional, Sequence
 from uuid import UUID
 
-from pydantic import Field
+from pydantic import AliasPath, ConfigDict, Field
 
 from app.configuration.access_durations.enums import AccessDurationType
 from app.configuration.access_modes.schema_response import AccessMode
@@ -39,6 +39,10 @@ class GetOutputPortAccessDurationsResponse(ORMModel):
 
 
 class BaseOutputPortGet(ORMModel):
+    model_config = ConfigDict(
+        from_attributes=True, validate_by_name=True, validate_by_alias=True
+    )
+
     id: UUID
     namespace: str
     name: str
@@ -51,7 +55,7 @@ class BaseOutputPortGet(ORMModel):
     data_product_id: UUID
 
     tags: list[Tag]
-    domain: Domain
+    domain: Domain = Field(validation_alias=AliasPath("data_product", "domain"))
     lifecycle: Optional[DataProductLifeCycle]
     access_modes: list[AccessMode]
 

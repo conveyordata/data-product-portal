@@ -1,9 +1,9 @@
 import copy
+from itertools import islice
 from typing import Iterable, Optional, Sequence
 from uuid import UUID
 
 from fastapi import HTTPException, status
-from fastembed import TextEmbedding
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session, joinedload, raiseload, selectinload, undefer
 from sqlalchemy.sql.base import ExecutableOption
@@ -32,7 +32,7 @@ from app.configuration.data_product_lifecycles.model import (
 from app.configuration.tags.model import Tag as TagModel
 from app.configuration.tags.model import ensure_tag_exists
 from app.core.authz import Authorization
-from app.core.embed.model import EMBEDDING_MODEL
+from app.core.embed.model import get_text_embedding_model
 from app.core.namespace.validation import (
     NamespaceValidator,
 )
@@ -86,7 +86,7 @@ class OutputPortService:
     def __init__(self, db: Session):
         self.db = db
         self.namespace_validator = NamespaceValidator(OutputPortModel)
-        self.embedding_model = TextEmbedding(EMBEDDING_MODEL)
+        self.embedding_model = get_text_embedding_model()
 
     def _ensure_data_product_not_deleting(self, data_product_id: UUID) -> None:
         dp = ensure_data_product_exists(data_product_id, self.db)
@@ -170,7 +170,6 @@ class OutputPortService:
                 )
             )
             output_port.lifecycle = default_lifecycle
-        output_port.domain = output_port.data_product.domain
         if not self.is_visible_to_user(output_port, user):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
@@ -222,16 +221,9 @@ class OutputPortService:
         )
         results = self.db.scalars(stmt).unique().all()
 
-        visible_candidates: list[OutputPortModel] = []
-        for dataset in results:
-            if self.is_visible_to_user(dataset, user):
-                dataset.domain = dataset.data_product.domain
-                visible_candidates.append(dataset)
-
-                if len(visible_candidates) >= limit:
-                    return visible_candidates
-
-        return visible_candidates
+        return list(
+            islice((d for d in results if self.is_visible_to_user(d, user)), limit)
+        )
 
     @staticmethod
     def recalculate_embeddings_load_options():
@@ -569,13 +561,11 @@ class OutputPortService:
             query = query.filter(OutputPortModel.data_product_id == data_product_id)
 
         results = self.db.scalars(query).unique().all()
-        visible_candidates: list[OutputPortModel] = []
-        for dataset in results:
-            if self.is_visible_to_user(dataset, user):
-                dataset.domain = dataset.data_product.domain
-                visible_candidates.append(dataset)
-
-        return visible_candidates
+        return [
+            output_port
+            for output_port in results
+            if self.is_visible_to_user(output_port, user)
+        ]
 
     def get_consuming_data_products(
         self, output_port_id: UUID, data_product_id: UUID
