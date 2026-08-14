@@ -403,7 +403,7 @@ INSERT INTO public.data_outputs (id, namespace, name, description, status, platf
             SELECT p.id FROM public.platforms AS p
             WHERE p.name = 'AWS'
         ) AND ps.name = 'Glue'
-), '{{ customer_segmentation_id }}'::uuid, NULL, '12346cc6-f58d-4217-88d3-6443b01d5d0f', '2025-10-28 16:34:02.355842', NULL, NULL, 'default');
+), '{{ customer_segmentation_id }}'::uuid, NULL, 'e08b4635-809b-452e-bcb3-e4dac788ce86', '2025-10-28 16:34:02.355842', NULL, NULL, 'default');
 
 INSERT INTO public.tags_data_outputs (data_output_id, tag_id, created_on, updated_on) VALUES ('{{ customer_segmentation_weekly_technical_asset_id }}'::uuid, '{{ tag_pii_id }}'::uuid, '2025-10-28 17:56:57.829806', NULL);
 
@@ -1668,6 +1668,10 @@ INSERT INTO public.data_outputs (id, namespace, name, description, status, platf
 INSERT INTO public.data_output_configurations (id, configuration_type) VALUES ('12346cc6-f58d-4217-88d3-6443b01d5d0f', 'GlueTechnicalAssetConfiguration');
 
 INSERT INTO public.glue_technical_asset_configurations (id, bucket_identifier, database, database_suffix, "table", database_path, table_path, access_granularity, created_on, updated_on, deleted_at) VALUES ('12346cc6-f58d-4217-88d3-6443b01d5d0f', '', 'biomarker-discovery', '', 'omics_prod', 'biomarker-discovery', 'omics_prod', 'table', '2025-10-28 16:34:02.355842', NULL, NULL);
+
+INSERT INTO public.data_output_configurations (id, configuration_type) VALUES ('e08b4635-809b-452e-bcb3-e4dac788ce86', 'GlueTechnicalAssetConfiguration');
+
+INSERT INTO public.glue_technical_asset_configurations (id, bucket_identifier, database, database_suffix, "table", database_path, table_path, access_granularity, created_on, updated_on, deleted_at) VALUES ('e08b4635-809b-452e-bcb3-e4dac788ce86', '', 'customer-segmentation', '', 'customer_segments_weekly', 'customer-segmentation', 'customer_segments_weekly', 'table', '2025-10-28 16:34:02.355842', NULL, NULL);
 
 INSERT INTO public.data_output_configurations (id, configuration_type) VALUES ('db8e84e9-e942-4ebb-ac78-ee0fa600db5d', 'DatabricksTechnicalAssetConfiguration');
 
