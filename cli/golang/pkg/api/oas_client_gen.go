@@ -180,6 +180,12 @@ type Invoker interface {
 	//
 	// POST /api/v2/authz/role_assignments/output_port/{id}/decide
 	DecideOutputPortRoleAssignment(ctx context.Context, request *DecideOutputPortRoleAssignment, params DecideOutputPortRoleAssignmentParams) (DecideOutputPortRoleAssignmentRes, error)
+	// DeleteAccessMode invokes delete_access_mode operation.
+	//
+	// Delete Access Mode.
+	//
+	// DELETE /api/v2/configuration/access_modes/{id}
+	DeleteAccessMode(ctx context.Context, params DeleteAccessModeParams) (DeleteAccessModeRes, error)
 	// DeleteDataProductRoleAssignment invokes delete_data_product_role_assignment operation.
 	//
 	// Delete Data Product Role Assignment.
@@ -2550,6 +2556,67 @@ func (c *Client) sendDecideOutputPortRoleAssignment(ctx context.Context, request
 	}()
 
 	result, err := decodeDecideOutputPortRoleAssignmentResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// DeleteAccessMode invokes delete_access_mode operation.
+//
+// Delete Access Mode.
+//
+// DELETE /api/v2/configuration/access_modes/{id}
+func (c *Client) DeleteAccessMode(ctx context.Context, params DeleteAccessModeParams) (DeleteAccessModeRes, error) {
+	res, err := c.sendDeleteAccessMode(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendDeleteAccessMode(ctx context.Context, params DeleteAccessModeParams) (res DeleteAccessModeRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [2]string
+	pathParts[0] = "/api/v2/configuration/access_modes/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "DELETE", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeDeleteAccessModeResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

@@ -3810,6 +3810,14 @@ func (s *DecisionStatus) UnmarshalText(data []byte) error {
 	}
 }
 
+type DeleteAccessModeBadRequestApplicationJSON jx.Raw
+
+func (*DeleteAccessModeBadRequestApplicationJSON) deleteAccessModeRes() {}
+
+type DeleteAccessModeOKApplicationJSON jx.Raw
+
+func (*DeleteAccessModeOKApplicationJSON) deleteAccessModeRes() {}
+
 // Ref: #/components/schemas/DeleteDataProductRoleAssignmentResponse
 type DeleteDataProductRoleAssignmentResponse struct {
 	ID            uuid.UUID `json:"id"`
@@ -6495,6 +6503,7 @@ func (*HTTPValidationError) createUserRes()                               {}
 func (*HTTPValidationError) decideDataProductRoleAssignmentRes()          {}
 func (*HTTPValidationError) decideGlobalRoleAssignmentRes()               {}
 func (*HTTPValidationError) decideOutputPortRoleAssignmentRes()           {}
+func (*HTTPValidationError) deleteAccessModeRes()                         {}
 func (*HTTPValidationError) deleteDataProductRoleAssignmentRes()          {}
 func (*HTTPValidationError) deleteGlobalRoleAssignmentRes()               {}
 func (*HTTPValidationError) deleteOutputPortQueryStatRes()                {}

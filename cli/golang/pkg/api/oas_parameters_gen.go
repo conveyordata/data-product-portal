@@ -78,6 +78,11 @@ type DecideOutputPortRoleAssignmentParams struct {
 	ID uuid.UUID
 }
 
+// DeleteAccessModeParams is parameters of delete_access_mode operation.
+type DeleteAccessModeParams struct {
+	ID uuid.UUID
+}
+
 // DeleteDataProductRoleAssignmentParams is parameters of delete_data_product_role_assignment operation.
 type DeleteDataProductRoleAssignmentParams struct {
 	ID uuid.UUID

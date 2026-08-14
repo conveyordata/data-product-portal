@@ -27,6 +27,15 @@ const injectedRtkApi = api.injectEndpoints({
         body: queryArg.accessModeUpdate,
       }),
     }),
+    deleteAccessMode: build.mutation<
+      DeleteAccessModeApiResponse,
+      DeleteAccessModeApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/configuration/access_modes/${queryArg}`,
+        method: "DELETE",
+      }),
+    }),
   }),
   overrideExisting: false,
 });
@@ -43,6 +52,9 @@ export type UpdateAccessModeApiArg = {
   id: string;
   accessModeUpdate: AccessModeUpdate;
 };
+export type DeleteAccessModeApiResponse =
+  /** status 200 Successful Response */ any;
+export type DeleteAccessModeApiArg = string;
 export type AccessModeWithType = {
   id: string;
   name: string;
@@ -81,4 +93,5 @@ export const {
   useLazyGetAccessModesQuery,
   useCreateAccessModeMutation,
   useUpdateAccessModeMutation,
+  useDeleteAccessModeMutation,
 } = injectedRtkApi;

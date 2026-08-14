@@ -32,6 +32,7 @@ const (
 	DecideDataProductRoleAssignmentOperation          OperationName = "DecideDataProductRoleAssignment"
 	DecideGlobalRoleAssignmentOperation               OperationName = "DecideGlobalRoleAssignment"
 	DecideOutputPortRoleAssignmentOperation           OperationName = "DecideOutputPortRoleAssignment"
+	DeleteAccessModeOperation                         OperationName = "DeleteAccessMode"
 	DeleteDataProductRoleAssignmentOperation          OperationName = "DeleteDataProductRoleAssignment"
 	DeleteGlobalRoleAssignmentOperation               OperationName = "DeleteGlobalRoleAssignment"
 	DeleteOutputPortQueryStatOperation                OperationName = "DeleteOutputPortQueryStat"
