@@ -96,6 +96,9 @@ class Settings(BaseSettings):
         "RedshiftTechnicalAssetConfiguration",
     ]
 
+    CODER_BASE_URL: str = ""
+    CODER_GITHUB_ORG: str = ""
+
     AWS_SESSION_DURATION: int = 900
 
     # Frontend hosting

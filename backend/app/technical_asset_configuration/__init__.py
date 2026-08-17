@@ -1,5 +1,6 @@
 from .agno.schema import AgnoPlugin
 from .azure_blob.schema import AzureBlobTechnicalAssetConfiguration
+from .coder.schema import CoderPlugin
 from .conveyor.schema import ConveyorPlugin
 from .databricks.schema import DatabricksTechnicalAssetConfiguration
 from .glue.schema import GlueTechnicalAssetConfiguration
@@ -11,6 +12,7 @@ from .snowflake.schema import SnowflakeTechnicalAssetConfiguration
 
 __all__ = [
     "AgnoPlugin",
+    "CoderPlugin",
     "ConveyorPlugin",
     "DatabricksTechnicalAssetConfiguration",
     "GlueTechnicalAssetConfiguration",
