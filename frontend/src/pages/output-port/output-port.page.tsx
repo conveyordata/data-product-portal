@@ -17,7 +17,10 @@ import { DatasetQuality } from '@/pages/output-port/components/dataset-quality/d
 import { DatasetTabs } from '@/pages/output-port/components/dataset-tabs/dataset-tabs';
 import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
 import { useGetDataProductQuery } from '@/store/api/services/generated/dataProductsApi.ts';
-import { useGetOutputPortQuery } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
+import {
+    useGetOutputPortAccessDurationsQuery,
+    useGetOutputPortQuery,
+} from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { ApplicationPaths, createDataProductIdPath, DynamicPathParams } from '@/types/navigation';
 import { getDatasetAccessTypeLabel } from '@/utils/access-type.helper';
@@ -36,6 +39,10 @@ export function OutputPort() {
     const { data: data_product, isLoading: isLoadingDataProduct } = useGetDataProductQuery(dataProductId, {
         skip: !dataProductId,
     });
+    const { data: accessDurations } = useGetOutputPortAccessDurationsQuery(
+        { dataProductId, id: datasetId },
+        { skip: !dataProductId || !datasetId },
+    );
     const { data: edit_access } = useCheckAccessQuery(
         {
             resource: datasetId,
@@ -117,6 +124,7 @@ export function OutputPort() {
                         namespace={outputPort.namespace}
                         accessType={getDatasetAccessTypeLabel(t, outputPort.access_type)}
                         accessModes={outputPort.access_modes}
+                        accessDurations={accessDurations}
                         tags={[
                             ...outputPort.tags,
                             ...outputPort.rolled_up_tags.map((tag) => ({ rolled_up: true, ...tag })),

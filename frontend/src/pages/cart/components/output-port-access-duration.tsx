@@ -1,5 +1,4 @@
-import { ClockCircleOutlined } from '@ant-design/icons';
-import { Tag } from 'antd';
+import { Flex, Typography } from 'antd';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
@@ -23,7 +22,7 @@ export function OutputPortAccessDuration({ outputPort, dataProductTypeChoice }: 
     });
     const { t } = useTranslation();
 
-    const { label, isPermanent } = useMemo(() => {
+    const { label } = useMemo(() => {
         if (!accessDurations) {
             return { label: '', isPermanent: true };
         }
@@ -36,7 +35,7 @@ export function OutputPortAccessDuration({ outputPort, dataProductTypeChoice }: 
         return {
             label: isPermanent
                 ? t('Permanent access')
-                : t('{{count}} days · expires {{expiryDate}}', {
+                : t('Timebound access ({{count}} days)', {
                       count: abstractTypeAccessDuration.days,
                       expiryDate: formatDate(expiryDate),
                   }),
@@ -49,8 +48,8 @@ export function OutputPortAccessDuration({ outputPort, dataProductTypeChoice }: 
     }
 
     return (
-        <Tag icon={<ClockCircleOutlined />} color={isPermanent ? 'green' : 'orange'} style={{ width: 'fit-content' }}>
-            {label}
-        </Tag>
+        <Flex align="center" gap="small">
+            <Typography.Text type="secondary">{label}</Typography.Text>
+        </Flex>
     );
 }
