@@ -1,67 +1,86 @@
 import { Flex } from 'antd';
-import type { TFunction } from 'i18next';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import collibraLogo from '@/assets/icons/collibra-logo.svg?react';
-import datahubLogo from '@/assets/icons/datahub-logo.svg?react';
 import { DataAccessTileGrid } from '@/components/data-access/data-access-tile-grid/data-access-tile-grid.tsx';
 import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
+import {
+    type PlatformTile,
+    useGetPlatformTilesQuery,
+    useLazyGetPluginUrlQuery,
+} from '@/store/api/services/generated/pluginsApi.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import type { CustomDropdownItemProps } from '@/types/shared';
+import { dispatchMessage } from '@/utils/feedback.ts';
+import { getIcon } from '@/utils/icon-loader';
 
 import styles from './dataset-actions.module.scss';
 
-// TODO: These catalog platforms should come from the backend plugin system
-// They are currently hardcoded because catalog integration platforms are not yet
-// part of the backend platform_tiles endpoint
-const getDataPlatforms = (t: TFunction): CustomDropdownItemProps<string>[] => [
-    {
-        label: t('Collibra'),
-        value: 'collibra',
-        icon: collibraLogo,
-    },
-    { label: t('Datahub'), value: 'datahub', icon: datahubLogo, disabled: true },
-];
-
 type Props = {
     datasetId: string;
+    dataProductId: string;
 };
-export function DatasetActions({ datasetId }: Props) {
+export function DatasetActions({ datasetId: _datasetId, dataProductId }: Props) {
     const { t } = useTranslation();
-    const dataPlatforms = useMemo(() => getDataPlatforms(t), [t]);
 
-    async function handleAccessToData(environment: string, dataPlatform: string) {
-        // Todo - implement endpoints to allow for dataset data access
-        // All tiles are currently disabled
-        console.log(dataPlatform, environment, datasetId);
-    }
+    const { data: { platform_tiles: platformTilesData } = {}, isLoading: isLoadingPlatforms } =
+        useGetPlatformTilesQuery();
+    const [getPluginUrl, { isLoading }] = useLazyGetPluginUrlQuery();
 
-    // const { data: request_access } = useCheckAccessQuery(
-    //     {
-    //         action: AuthorizationAction.GLOBAL__REQUEST_OUTPUT_PORT_ACCESS,
-    //     },
-    // );
+    const dataPlatforms = useMemo(() => {
+        if (!platformTilesData) {
+            return [];
+        }
+
+        const transformTile = (tile: PlatformTile): CustomDropdownItemProps<string> => ({
+            label: t(tile.label),
+            value: tile.value,
+            icon: getIcon(tile.icon_name),
+            hasEnvironments: tile.has_environments,
+            hasConfig: tile.has_config,
+            children: tile.children?.map(transformTile) || [],
+        });
+
+        return platformTilesData.map(transformTile);
+    }, [platformTilesData, t]);
+
     const { data: read_integrations } = useCheckAccessQuery(
         {
-            resource: datasetId,
-            action: AuthorizationAction.OUTPUT_PORT__READ_INTEGRATIONS,
+            resource: dataProductId,
+            action: AuthorizationAction.DATA_PRODUCT__READ_INTEGRATIONS,
         },
         {
-            skip: !datasetId,
+            skip: !dataProductId,
         },
     );
-
-    // const canRequestAccess = request_access?.allowed ?? false;
     const canReadIntegrations = read_integrations?.allowed ?? false;
+
+    async function openPlatform(environment: string, dataPlatform: string) {
+        try {
+            const url = await getPluginUrl({ id: dataProductId, pluginName: dataPlatform, environment }).unwrap();
+            if (url) {
+                window.open(url.url, '_blank');
+            } else {
+                dispatchMessage({ content: t('Failed to get platform url'), type: 'error' });
+            }
+        } catch (_error) {
+            dispatchMessage({ content: t('Failed to get platform url'), type: 'error' });
+        }
+    }
+
+    async function handleTileClick(dataPlatform: string) {
+        await openPlatform('', dataPlatform);
+    }
 
     return (
         <Flex vertical className={styles.actionsContainer}>
             <DataAccessTileGrid
                 canAccessData={canReadIntegrations}
                 dataPlatforms={dataPlatforms}
-                onDataPlatformClick={handleAccessToData}
-                isDisabled
+                onDataPlatformClick={openPlatform}
+                onTileClick={handleTileClick}
+                isDisabled={isLoading || !canReadIntegrations}
+                isLoading={isLoading || isLoadingPlatforms}
             />
         </Flex>
     );
