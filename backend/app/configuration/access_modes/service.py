@@ -24,6 +24,10 @@ CAN_NOT_REMOVE_TECHNICAL_ASSET_TYPES_ERROR = HTTPException(
     status_code=status.HTTP_400_BAD_REQUEST,
     detail="Cannot remove the specified technical asset types because they are in use by technical assets or input port requests.",
 )
+CAN_NOT_REMOVE_ACCESS_MODE_IN_USE_ERROR = HTTPException(
+    status_code=status.HTTP_400_BAD_REQUEST,
+    detail="Cannot remove the specified access mode because it is in use by technical assets or input port requests.",
+)
 
 
 class AccessModeService:
@@ -93,3 +97,29 @@ class AccessModeService:
 
     def get_access_modes(self) -> list[type[AccessMode]]:
         return self.db.query(AccessMode).all()
+
+    def delete_access_mode(self, id: UUID) -> None:
+        access_mode = self.db.get(AccessMode, id)
+        if not access_mode:
+            raise ACCESS_MODE_NOT_FOUND_ERROR
+        technical_asset_count = self.db.scalar(
+            select(count(TechnicalAsset.id))
+            .select_from(TechnicalAsset)
+            .join(TechnicalAsset.configuration)
+            .filter(
+                TechnicalAsset.access_modes.any(AccessMode.id == id),
+            )
+        )
+        input_port_requests_count = self.db.scalar(
+            select(count(InputPortRequest.id))
+            .select_from(InputPortRequest)
+            .filter(
+                InputPortRequest.access_mode_id == id,
+            )
+        )
+
+        if technical_asset_count > 0 or input_port_requests_count > 0:
+            raise CAN_NOT_REMOVE_ACCESS_MODE_IN_USE_ERROR
+
+        self.db.delete(access_mode)
+        self.db.flush()

@@ -13,6 +13,7 @@ from app.configuration.access_modes.schema_response import (
 )
 from app.configuration.access_modes.service import (
     ACCESS_MODE_NOT_FOUND_ERROR,
+    CAN_NOT_REMOVE_ACCESS_MODE_IN_USE_ERROR,
     CAN_NOT_REMOVE_TECHNICAL_ASSET_TYPES_ERROR,
     AccessModeService,
 )
@@ -77,3 +78,23 @@ def get_access_modes(
             for am in access_mode_service.get_access_modes()
         ],
     )
+
+
+@router.delete(
+    "/{id}",
+    responses=process_errors_as_route_responses(
+        [
+            CAN_NOT_REMOVE_ACCESS_MODE_IN_USE_ERROR,
+        ]
+    ),
+    dependencies=[
+        Depends(
+            Authorization.enforce(Action.GLOBAL__UPDATE_CONFIGURATION, EmptyResolver)
+        ),
+    ],
+)
+def delete_access_mode(
+    id: UUID,
+    access_mode_service: AccessModeService = Depends(AccessModeService),
+) -> None:
+    access_mode_service.delete_access_mode(id)

@@ -138,6 +138,26 @@ class TestAccessModesRouter:
         assert response.status_code == 200, response.text
         assert len(response.json()["access_modes"]) == 1
 
+    @pytest.mark.usefixtures("admin")
+    def test_delete_access_mode__success(self, client):
+        access_mode = AccessModeFactory()
+        response = self.delete_access_mode(client, access_mode.id)
+        assert response.status_code == 200
+
+    @pytest.mark.usefixtures("admin")
+    def test_delete_access_mode__linked_to_input_port_request(self, client):
+        access_mode = AccessModeFactory()
+        InputPortRequestFactory(access_mode=access_mode)
+        response = self.delete_access_mode(client, access_mode.id)
+        assert response.status_code == 400, response.json()
+
+    @pytest.mark.usefixtures("admin")
+    def test_delete_access_mode__linked_to_technical_asset(self, client):
+        access_mode = AccessModeFactory()
+        TechnicalAssetFactory(access_modes=[access_mode])
+        response = self.delete_access_mode(client, access_mode.id)
+        assert response.status_code == 400, response.json()
+
     @staticmethod
     def create_access_mode(client, payload):
         return client.post(ENDPOINT, json=payload)
@@ -149,3 +169,7 @@ class TestAccessModesRouter:
     @staticmethod
     def get_access_modes(client):
         return client.get(ENDPOINT)
+
+    @staticmethod
+    def delete_access_mode(client, access_mode_id):
+        return client.delete(f"{ENDPOINT}/{access_mode_id}")

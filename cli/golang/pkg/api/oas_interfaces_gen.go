@@ -105,6 +105,10 @@ type DecideOutputPortRoleAssignmentRes interface {
 	decideOutputPortRoleAssignmentRes()
 }
 
+type DeleteAccessModeRes interface {
+	deleteAccessModeRes()
+}
+
 type DeleteDataProductRoleAssignmentRes interface {
 	deleteDataProductRoleAssignmentRes()
 }

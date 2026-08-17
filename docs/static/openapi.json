@@ -3375,6 +3375,55 @@
             }
           }
         }
+      },
+      "delete": {
+        "tags": [
+          "Configuration - Access Modes"
+        ],
+        "summary": "Delete Access Mode",
+        "operationId": "delete_access_mode",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "400": {
+            "description": "Cannot remove the specified access mode because it is in use by technical assets or input port requests.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Cannot remove the specified access mode because it is in use by technical assets or input port requests."
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/v2/data_products/{data_product_id}/output_ports/{output_port_id}/input_ports/": {
