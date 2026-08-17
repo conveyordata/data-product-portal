@@ -124,7 +124,7 @@ export function TechnicalAsset() {
             </Flex>
             {/* Sidebar */}
             <Flex vertical className={styles.sidebar}>
-                <TechnicalAssetActions dataProductId={dataProductId} dataOutputId={dataOutputId} />
+                <TechnicalAssetActions dataProductId={dataProductId} />
                 {/*  Data Product owners overview */}
                 <UserAccessOverview users={dataOutputOwners} title={t('Technical Asset Owners')} />
             </Flex>
