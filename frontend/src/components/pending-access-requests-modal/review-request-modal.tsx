@@ -218,7 +218,6 @@ function getRequestDetails(
 export function ReviewRequestModal({ action, open, onClose, onAccept, onReject, readOnly = false }: Props) {
     const { t } = useTranslation();
     const { token } = theme.useToken();
-    const tileBodyStyle = { display: 'flex', flexDirection: 'column' as const, gap: token.sizeXS };
     const tileLabelStyle = { fontSize: token.fontSizeSM, textTransform: 'uppercase' as const };
     const [form] = Form.useForm<{ decisionNote: string }>();
     const [isAccepting, setIsAccepting] = useState(false);
@@ -351,42 +350,48 @@ export function ReviewRequestModal({ action, open, onClose, onAccept, onReject, 
             >
                 <Flex vertical gap="middle">
                     <Flex gap="small" align="stretch">
-                        <Card size="small" variant="outlined" style={{ flex: 3 }} styles={{ body: tileBodyStyle }}>
-                            <Typography.Text type="secondary" style={tileLabelStyle}>
-                                {t('Requesting Consumer')}
-                            </Typography.Text>
-                            <Flex align="center" gap="small">
-                                <Avatar
-                                    icon={details.source.icon}
-                                    style={{ color: token.colorPrimary, backgroundColor: token.colorPrimaryBg }}
-                                />
-                                <Typography.Text strong>{details.source.name}</Typography.Text>
+                        <Card size="small" variant="outlined" style={{ flex: 3 }}>
+                            <Flex vertical gap="small">
+                                <Typography.Text type="secondary" style={tileLabelStyle}>
+                                    {t('Requesting Consumer')}
+                                </Typography.Text>
+                                <Flex align="center" gap="small">
+                                    <Avatar
+                                        icon={details.source.icon}
+                                        style={{ color: token.colorPrimary, backgroundColor: token.colorPrimaryBg }}
+                                    />
+                                    <Typography.Text strong>{details.source.name}</Typography.Text>
+                                </Flex>
                             </Flex>
                         </Card>
-                        <Card size="small" variant="outlined" style={{ flex: 2 }} styles={{ body: tileBodyStyle }}>
-                            <Typography.Text type="secondary" style={tileLabelStyle}>
-                                {details.requestType === t('Role Assignment')
-                                    ? t('Requests Role')
-                                    : t('Requests Access')}
-                            </Typography.Text>
-                            <Typography.Text strong>{details.accessType}</Typography.Text>
+                        <Card size="small" variant="outlined" style={{ flex: 2 }}>
+                            <Flex vertical gap="small">
+                                <Typography.Text type="secondary" style={tileLabelStyle}>
+                                    {details.requestType === t('Role Assignment')
+                                        ? t('Requests Role')
+                                        : t('Requests Access')}
+                                </Typography.Text>
+                                <Typography.Text strong>{details.accessType}</Typography.Text>
+                            </Flex>
                         </Card>
-                        <Card size="small" variant="outlined" style={{ flex: 3 }} styles={{ body: tileBodyStyle }}>
-                            <Typography.Text type="secondary" style={tileLabelStyle}>
-                                {t('Requested Resource')}
-                            </Typography.Text>
-                            <Flex align="center" gap="small">
-                                <Avatar
-                                    icon={details.target.icon}
-                                    style={{ color: token.colorPrimary, backgroundColor: token.colorPrimaryBg }}
-                                />
-                                <Flex vertical>
-                                    <Typography.Text strong>{details.target.name}</Typography.Text>
-                                    {details.target.type && (
-                                        <Typography.Text type="secondary" style={{ fontSize: token.fontSizeSM }}>
-                                            {details.target.type}
-                                        </Typography.Text>
-                                    )}
+                        <Card size="small" variant="outlined" style={{ flex: 3 }}>
+                            <Flex vertical gap="small">
+                                <Typography.Text type="secondary" style={tileLabelStyle}>
+                                    {t('Requested Resource')}
+                                </Typography.Text>
+                                <Flex align="center" gap="small">
+                                    <Avatar
+                                        icon={details.target.icon}
+                                        style={{ color: token.colorPrimary, backgroundColor: token.colorPrimaryBg }}
+                                    />
+                                    <Flex vertical>
+                                        <Typography.Text strong>{details.target.name}</Typography.Text>
+                                        {details.target.type && (
+                                            <Typography.Text type="secondary" style={{ fontSize: token.fontSizeSM }}>
+                                                {details.target.type}
+                                            </Typography.Text>
+                                        )}
+                                    </Flex>
                                 </Flex>
                             </Flex>
                         </Card>

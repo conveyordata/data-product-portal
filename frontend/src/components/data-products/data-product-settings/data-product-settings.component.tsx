@@ -216,7 +216,7 @@ export function DataProductSettings({ id, scope, dataProductId }: Props) {
         // Render grouped settings
         return Object.entries(groupedSettings).map(([divider, settings]) => (
             <Flex key={divider} vertical>
-                <Typography.Title>{divider}</Typography.Title>
+                <Typography.Text type="secondary">{divider}</Typography.Text>
                 {settings.map((setting) => (
                     <Flex key={setting.id} vertical>
                         {/* Hidden Input for ID */}

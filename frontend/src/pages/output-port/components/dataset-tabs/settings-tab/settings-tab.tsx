@@ -1,16 +1,30 @@
-import { Card, Descriptions, type DescriptionsProps, Flex, Typography, theme } from 'antd';
+import { QuestionCircleOutlined } from '@ant-design/icons';
+import { Card, Descriptions, type DescriptionsProps, Flex, Radio, Tooltip, Typography, theme } from 'antd';
 import type { TFunction } from 'i18next';
 import { useTranslation } from 'react-i18next';
 import AccessModeTag from '@/components/access-modes/access-mode.component.tsx';
 import { DataProductSettings } from '@/components/data-products/data-product-settings/data-product-settings.component';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
 import {
+    AccessDurationSection,
+    getAccessTypeOptions,
+} from '@/components/output-ports/output-port-form/output-port-form.component.tsx';
+import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
+import {
+    AbstractDataProductType,
+    useGetAllAccessDurationsQuery,
+} from '@/store/api/services/generated/configurationAccessDurationsApi.ts';
+import {
     AccessDurationType,
+    type DatasetUpdate,
     type OutputPortAccessDuration,
     useGetOutputPortAccessDurationsQuery,
     useGetOutputPortQuery,
+    useUpdateOutputPortMutation,
 } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
+import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { getDatasetAccessTypeLabel } from '@/utils/access-type.helper';
+import { dispatchMessage } from '@/utils/feedback.ts';
 
 type Props = {
     datasetId: string;
@@ -26,7 +40,7 @@ function formatAccessDuration(duration: OutputPortAccessDuration, t: TFunction):
 export function SettingsTab({ datasetId, dataProductId }: Props) {
     const { t } = useTranslation();
     const { token } = theme.useToken();
-    const { data: outputPort, isFetching } = useGetOutputPortQuery(
+    const { data: outputPort, isLoading } = useGetOutputPortQuery(
         { id: datasetId, dataProductId },
         { skip: !datasetId || !dataProductId },
     );
@@ -34,8 +48,15 @@ export function SettingsTab({ datasetId, dataProductId }: Props) {
         { dataProductId, id: datasetId },
         { skip: !datasetId || !dataProductId },
     );
+    const { data: edit_access } = useCheckAccessQuery(
+        { resource: datasetId, action: AuthorizationAction.OUTPUT_PORT__UPDATE_PROPERTIES },
+        { skip: !datasetId },
+    );
+    const canEditAccess = edit_access?.allowed || false;
+    const { data: allDurations = [] } = useGetAllAccessDurationsQuery();
+    const [updateOutputPort] = useUpdateOutputPortMutation();
 
-    if (isFetching) {
+    if (isLoading) {
         return <LoadingSpinner />;
     }
 
@@ -43,11 +64,64 @@ export function SettingsTab({ datasetId, dataProductId }: Props) {
         return null;
     }
 
+    async function saveAccessField(
+        partial: Partial<
+            Pick<
+                DatasetUpdate,
+                'access_type' | 'data_product_access_duration_type' | 'exploration_access_duration_type'
+            >
+        >,
+    ) {
+        if (!outputPort) return;
+        try {
+            await updateOutputPort({
+                id: datasetId,
+                dataProductId,
+                datasetUpdate: {
+                    name: outputPort.name,
+                    namespace: outputPort.namespace,
+                    description: outputPort.description,
+                    tag_ids: outputPort.tags.map((tag) => tag.id),
+                    lifecycle_id: outputPort.lifecycle?.id ?? null,
+                    access_type: outputPort.access_type,
+                    data_product_access_duration_type: outputPort.data_product_access_duration_type,
+                    exploration_access_duration_type: outputPort.exploration_access_duration_type,
+                    ...partial,
+                },
+            }).unwrap();
+            dispatchMessage({ content: t('Output Port updated successfully'), type: 'success' });
+        } catch {
+            dispatchMessage({ content: t('Could not update Output Port'), type: 'error' });
+        }
+    }
+
+    const durationsFor = (abstractDataProductType: AbstractDataProductType) =>
+        allDurations.filter((d) => d.abstract_data_product_type === abstractDataProductType);
+
+    const labelWithTooltip = (label: string, tooltip: string) => (
+        <Flex align="center" gap="small">
+            <span>{label}</span>
+            <Tooltip title={tooltip}>
+                <QuestionCircleOutlined style={{ color: token.colorTextTertiary }} />
+            </Tooltip>
+        </Flex>
+    );
+
     const items: DescriptionsProps['items'] = [
         {
             key: 'access-type',
-            label: t('Access Type'),
-            children: getDatasetAccessTypeLabel(t, outputPort.access_type),
+            label: labelWithTooltip(t('Access Type'), t('The access type of the Output Port')),
+            children: canEditAccess ? (
+                <Radio.Group
+                    size="small"
+                    optionType="button"
+                    value={outputPort.access_type}
+                    options={getAccessTypeOptions(t)}
+                    onChange={(e) => saveAccessField({ access_type: e.target.value })}
+                />
+            ) : (
+                getDatasetAccessTypeLabel(t, outputPort.access_type)
+            ),
         },
         {
             key: 'access-modes',
@@ -67,8 +141,36 @@ export function SettingsTab({ datasetId, dataProductId }: Props) {
             ? [
                   {
                       key: 'timebound-access',
-                      label: t('Access Duration'),
-                      children: (
+                      label: labelWithTooltip(
+                          t('Access Duration'),
+                          t(
+                              'Access duration policy configured by the administrator. This applies when someone requests access to this Output Port.',
+                          ),
+                      ),
+                      children: canEditAccess ? (
+                          <Flex vertical gap="small">
+                              <Flex vertical gap="small">
+                                  <Typography.Text type="secondary">{t('Data Products')}</Typography.Text>
+                                  <AccessDurationSection
+                                      abstractDataProductType={AbstractDataProductType.DataProducts}
+                                      accessDurations={durationsFor(AbstractDataProductType.DataProducts)}
+                                      value={outputPort.data_product_access_duration_type}
+                                      onChange={(value) =>
+                                          saveAccessField({ data_product_access_duration_type: value })
+                                      }
+                                  />
+                              </Flex>
+                              <Flex vertical gap="small">
+                                  <Typography.Text type="secondary">{t('Explorations')}</Typography.Text>
+                                  <AccessDurationSection
+                                      abstractDataProductType={AbstractDataProductType.Explorations}
+                                      accessDurations={durationsFor(AbstractDataProductType.Explorations)}
+                                      value={outputPort.exploration_access_duration_type}
+                                      onChange={(value) => saveAccessField({ exploration_access_duration_type: value })}
+                                  />
+                              </Flex>
+                          </Flex>
+                      ) : (
                           <Flex vertical gap="small">
                               <Typography.Text>
                                   {t('Data Products')}:{' '}
@@ -86,8 +188,8 @@ export function SettingsTab({ datasetId, dataProductId }: Props) {
     ];
 
     return (
-        <Flex gap="medium" align="stretch">
-            <Card title={t('Access')} size="small" style={{ flex: 1 }}>
+        <Flex vertical gap="middle">
+            <Card title={t('Access Settings')} size="small">
                 <Descriptions
                     column={1}
                     layout="vertical"
@@ -96,7 +198,7 @@ export function SettingsTab({ datasetId, dataProductId }: Props) {
                     styles={{ label: { color: token.colorTextSecondary } }}
                 />
             </Card>
-            <Card title={t('Custom Settings')} size="small" style={{ flex: 2 }}>
+            <Card title={t('Custom Settings')} size="small">
                 <DataProductSettings id={datasetId} scope="dataset" dataProductId={dataProductId} />
             </Card>
         </Flex>

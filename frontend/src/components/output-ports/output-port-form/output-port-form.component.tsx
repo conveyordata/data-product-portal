@@ -79,7 +79,7 @@ const FIELD_NAMES: Partial<
     [AbstractDataProductType.Explorations]: 'exploration_access_duration_type',
 };
 
-function AccessDurationSection({
+export function AccessDurationSection({
     abstractDataProductType,
     accessDurations,
     value,
@@ -224,7 +224,7 @@ const { TextArea } = Input;
 
 const DEBOUNCE = 500;
 
-const getAccessTypeOptions = (t: TFunction) => {
+export const getAccessTypeOptions = (t: TFunction) => {
     return [
         {
             label: (
