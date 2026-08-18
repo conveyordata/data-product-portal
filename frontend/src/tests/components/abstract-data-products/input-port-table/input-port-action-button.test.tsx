@@ -88,7 +88,7 @@ describe('InputPortActionButton', () => {
             InputPortStatus.Approved,
             RenewalStatus.Denied,
             FAR_FUTURE,
-            { renew: false, cancel: false, revoke: true },
+            { renew: true, cancel: false, revoke: true },
         ],
         [
             'Pending, first-ever request',

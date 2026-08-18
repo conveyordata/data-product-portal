@@ -1,7 +1,6 @@
 import {
     Alert,
     Button,
-    type CheckboxOptionType,
     Col,
     Flex,
     Form,
@@ -18,7 +17,7 @@ import {
     Typography,
 } from 'antd';
 import type { TFunction } from 'i18next';
-import { type Ref, useCallback, useEffect, useMemo, useState } from 'react';
+import { type ReactNode, type Ref, useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 import { useDebouncedCallback } from 'use-debounce';
@@ -79,6 +78,20 @@ const FIELD_NAMES: Partial<
     [AbstractDataProductType.Explorations]: 'exploration_access_duration_type',
 };
 
+function EqualWidthLabel({ visible, others }: { visible: ReactNode; others: ReactNode[] }) {
+    return (
+        <span style={{ display: 'grid', justifyItems: 'center' }}>
+            {others.map((label, index) => (
+                // biome-ignore lint/suspicious/noArrayIndexKey: static, order never changes
+                <span key={index} style={{ gridArea: '1 / 1', visibility: 'hidden' }} aria-hidden="true">
+                    {label}
+                </span>
+            ))}
+            <span style={{ gridArea: '1 / 1' }}>{visible}</span>
+        </span>
+    );
+}
+
 export function AccessDurationSection({
     abstractDataProductType,
     accessDurations,
@@ -98,11 +111,20 @@ export function AccessDurationSection({
     const timeBoundDays = accessDurations.find((r) => r.access_duration_type === AccessDurationType.TimeBound)?.days;
     const daysLabel = timeBoundDays ? t('{{days}} days', { days: timeBoundDays }) : '';
 
+    const timeBoundLabel = (
+        <>
+            {t('Time Bound')} {daysLabel}
+        </>
+    );
+    const permanentLabel = t('Permanent');
+
+    const durationLabels = [timeBoundLabel, permanentLabel];
+
     const options = [
         {
             label: (
                 <Tooltip title={timeBoundEnabled ? null : t('Not allowed by Admin.')}>
-                    {t('Time Bound')} {daysLabel}
+                    <EqualWidthLabel visible={timeBoundLabel} others={durationLabels} />
                 </Tooltip>
             ),
             value: AccessDurationType.TimeBound,
@@ -111,10 +133,10 @@ export function AccessDurationSection({
         {
             label: !hasPermanent ? (
                 <Tooltip title={t('Not allowed by admin')}>
-                    <span>{t('Permanent')}</span>
+                    <EqualWidthLabel visible={permanentLabel} others={durationLabels} />
                 </Tooltip>
             ) : (
-                t('Permanent')
+                <EqualWidthLabel visible={permanentLabel} others={durationLabels} />
             ),
             value: AccessDurationType.Permanent,
             disabled: !hasPermanent,
@@ -126,6 +148,7 @@ export function AccessDurationSection({
             value={selected}
             options={options}
             optionType="button"
+            block
             onChange={(e) => onChange?.(e.target.value)}
             key={`${abstractDataProductType}-access-duration`}
         />
@@ -225,11 +248,17 @@ const { TextArea } = Input;
 const DEBOUNCE = 500;
 
 export const getAccessTypeOptions = (t: TFunction) => {
+    const labels = [
+        getDatasetAccessTypeLabel(t, OutputPortAccessType.Restricted),
+        getDatasetAccessTypeLabel(t, OutputPortAccessType.Unrestricted),
+        getDatasetAccessTypeLabel(t, OutputPortAccessType.Private),
+    ];
+
     return [
         {
             label: (
                 <Tooltip title={t('Restricted Output Ports are visible to everyone but require permission to use')}>
-                    {getDatasetAccessTypeLabel(t, OutputPortAccessType.Restricted)}
+                    <EqualWidthLabel visible={labels[0]} others={labels} />
                 </Tooltip>
             ),
             value: OutputPortAccessType.Restricted,
@@ -237,7 +266,7 @@ export const getAccessTypeOptions = (t: TFunction) => {
         {
             label: (
                 <Tooltip title={t('Unrestricted Output Ports are visible and accessible to use by anyone')}>
-                    {getDatasetAccessTypeLabel(t, OutputPortAccessType.Unrestricted)}
+                    <EqualWidthLabel visible={labels[1]} others={labels} />
                 </Tooltip>
             ),
             value: OutputPortAccessType.Unrestricted,
@@ -245,13 +274,32 @@ export const getAccessTypeOptions = (t: TFunction) => {
         {
             label: (
                 <Tooltip title={t('Private Output Ports are only visible to owners and users with access')}>
-                    {getDatasetAccessTypeLabel(t, OutputPortAccessType.Private)}
+                    <EqualWidthLabel visible={labels[2]} others={labels} />
                 </Tooltip>
             ),
             value: OutputPortAccessType.Private,
         },
     ];
 };
+
+export function AccessTypeSection({
+    value,
+    onChange,
+}: {
+    value?: OutputPortAccessType;
+    onChange?: (value: OutputPortAccessType) => void;
+}) {
+    const { t } = useTranslation();
+    return (
+        <Radio.Group
+            value={value}
+            options={getAccessTypeOptions(t)}
+            optionType="button"
+            block
+            onChange={(e) => onChange?.(e.target.value)}
+        />
+    );
+}
 
 export function OutputPortForm({
     mode,
@@ -318,8 +366,6 @@ export function OutputPortForm({
         isFetchingDataProduct ||
         isFetchingInitialValues ||
         isFetchingTags;
-
-    const accessTypeOptions: CheckboxOptionType<OutputPortAccessType>[] = useMemo(() => getAccessTypeOptions(t), [t]);
 
     const userSelectOptions = users.map((owner) => ({
         label: `${owner.first_name} ${owner.last_name} (${owner.email})`,
@@ -566,7 +612,7 @@ export function OutputPortForm({
                     },
                 ]}
             >
-                <Radio.Group options={accessTypeOptions} />
+                <AccessTypeSection />
             </Form.Item>
             <AccessDurationInfo mode={mode} />
             <Form.Item<CreateOutputPortRequest> name="tag_ids" label={t('Tags')}>

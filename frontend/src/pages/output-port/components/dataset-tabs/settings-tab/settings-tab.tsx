@@ -1,5 +1,5 @@
 import { QuestionCircleOutlined } from '@ant-design/icons';
-import { Card, Descriptions, type DescriptionsProps, Flex, Radio, Tooltip, Typography, theme } from 'antd';
+import { Card, Descriptions, type DescriptionsProps, Flex, Tooltip, Typography, theme } from 'antd';
 import type { TFunction } from 'i18next';
 import { useTranslation } from 'react-i18next';
 import AccessModeTag from '@/components/access-modes/access-mode.component.tsx';
@@ -7,7 +7,7 @@ import { DataProductSettings } from '@/components/data-products/data-product-set
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
 import {
     AccessDurationSection,
-    getAccessTypeOptions,
+    AccessTypeSection,
 } from '@/components/output-ports/output-port-form/output-port-form.component.tsx';
 import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
 import {
@@ -109,18 +109,65 @@ export function SettingsTab({ datasetId, dataProductId }: Props) {
 
     const items: DescriptionsProps['items'] = [
         {
-            key: 'access-type',
-            label: labelWithTooltip(t('Access Type'), t('The access type of the Output Port')),
-            children: canEditAccess ? (
-                <Radio.Group
-                    size="small"
-                    optionType="button"
-                    value={outputPort.access_type}
-                    options={getAccessTypeOptions(t)}
-                    onChange={(e) => saveAccessField({ access_type: e.target.value })}
-                />
-            ) : (
-                getDatasetAccessTypeLabel(t, outputPort.access_type)
+            key: 'access-settings',
+            children: (
+                <Flex vertical gap="middle">
+                    <Flex vertical gap="small">
+                        {labelWithTooltip(t('Access Type'), t('The access type of the Output Port'))}
+                        {canEditAccess ? (
+                            <AccessTypeSection
+                                value={outputPort.access_type}
+                                onChange={(value) => saveAccessField({ access_type: value })}
+                            />
+                        ) : (
+                            getDatasetAccessTypeLabel(t, outputPort.access_type)
+                        )}
+                    </Flex>
+                    {accessDurations && (
+                        <Flex vertical gap="small">
+                            {labelWithTooltip(
+                                t('Access Duration'),
+                                t(
+                                    'Access duration policy configured by the administrator. This applies when someone requests access to this Output Port.',
+                                ),
+                            )}
+                            <Flex vertical gap="small">
+                                <Typography.Text type="secondary">{t('Data Products')}</Typography.Text>
+                                {canEditAccess ? (
+                                    <AccessDurationSection
+                                        abstractDataProductType={AbstractDataProductType.DataProducts}
+                                        accessDurations={durationsFor(AbstractDataProductType.DataProducts)}
+                                        value={outputPort.data_product_access_duration_type}
+                                        onChange={(value) =>
+                                            saveAccessField({ data_product_access_duration_type: value })
+                                        }
+                                    />
+                                ) : (
+                                    <Typography.Text>
+                                        {formatAccessDuration(accessDurations.data_product_access_duration, t)}
+                                    </Typography.Text>
+                                )}
+                            </Flex>
+                            <Flex vertical gap="small">
+                                <Typography.Text type="secondary">{t('Explorations')}</Typography.Text>
+                                {canEditAccess ? (
+                                    <AccessDurationSection
+                                        abstractDataProductType={AbstractDataProductType.Explorations}
+                                        accessDurations={durationsFor(AbstractDataProductType.Explorations)}
+                                        value={outputPort.exploration_access_duration_type}
+                                        onChange={(value) =>
+                                            saveAccessField({ exploration_access_duration_type: value })
+                                        }
+                                    />
+                                ) : (
+                                    <Typography.Text>
+                                        {formatAccessDuration(accessDurations.exploration_access_duration, t)}
+                                    </Typography.Text>
+                                )}
+                            </Flex>
+                        </Flex>
+                    )}
+                </Flex>
             ),
         },
         {
@@ -137,54 +184,6 @@ export function SettingsTab({ datasetId, dataProductId }: Props) {
                     </Flex>
                 ),
         },
-        ...(accessDurations
-            ? [
-                  {
-                      key: 'timebound-access',
-                      label: labelWithTooltip(
-                          t('Access Duration'),
-                          t(
-                              'Access duration policy configured by the administrator. This applies when someone requests access to this Output Port.',
-                          ),
-                      ),
-                      children: canEditAccess ? (
-                          <Flex vertical gap="small">
-                              <Flex vertical gap="small">
-                                  <Typography.Text type="secondary">{t('Data Products')}</Typography.Text>
-                                  <AccessDurationSection
-                                      abstractDataProductType={AbstractDataProductType.DataProducts}
-                                      accessDurations={durationsFor(AbstractDataProductType.DataProducts)}
-                                      value={outputPort.data_product_access_duration_type}
-                                      onChange={(value) =>
-                                          saveAccessField({ data_product_access_duration_type: value })
-                                      }
-                                  />
-                              </Flex>
-                              <Flex vertical gap="small">
-                                  <Typography.Text type="secondary">{t('Explorations')}</Typography.Text>
-                                  <AccessDurationSection
-                                      abstractDataProductType={AbstractDataProductType.Explorations}
-                                      accessDurations={durationsFor(AbstractDataProductType.Explorations)}
-                                      value={outputPort.exploration_access_duration_type}
-                                      onChange={(value) => saveAccessField({ exploration_access_duration_type: value })}
-                                  />
-                              </Flex>
-                          </Flex>
-                      ) : (
-                          <Flex vertical gap="small">
-                              <Typography.Text>
-                                  {t('Data Products')}:{' '}
-                                  {formatAccessDuration(accessDurations.data_product_access_duration, t)}
-                              </Typography.Text>
-                              <Typography.Text>
-                                  {t('Explorations')}:{' '}
-                                  {formatAccessDuration(accessDurations.exploration_access_duration, t)}
-                              </Typography.Text>
-                          </Flex>
-                      ),
-                  },
-              ]
-            : []),
     ];
 
     return (
