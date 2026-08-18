@@ -1,7 +1,8 @@
 import { InfoCircleOutlined } from '@ant-design/icons';
-import { Button, Checkbox, Flex, InputNumber, Select, Table, type TableColumnsType, Tooltip, Typography } from 'antd';
+import { Checkbox, Flex, InputNumber, Select, Table, type TableColumnsType, Tooltip, Typography } from 'antd';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useDebouncedCallback } from 'use-debounce';
 import { AbstractProductIcon } from '@/components/icons/index.tsx';
 import {
     AbstractDataProductType,
@@ -55,11 +56,13 @@ function getPoliciesSignature(policies: ConsumerPolicy[]) {
     return JSON.stringify(policies);
 }
 
+const AUTO_SAVE_DELAY = 3000; // 3 seconds
+
 export default function AccessDurations() {
     const { t } = useTranslation();
     const { data: accessDurations } = useGetAllAccessDurationsQuery();
     const [policies, setPolicies] = useState<ConsumerPolicy[]>([]);
-    const [updateAccessDuration, { isLoading: isUpdating }] = useUpdateAccessDurationMutation();
+    const [updateAccessDuration] = useUpdateAccessDurationMutation();
 
     useEffect(() => {
         if (accessDurations) {
@@ -78,7 +81,11 @@ export default function AccessDurations() {
         setPolicies((prev) => prev.map((p) => (p.key === key ? { ...p, ...patch } : p)));
     };
 
-    const handleSave = async () => {
+    const handleSave = useDebouncedCallback(async () => {
+        if (!hasChanges) {
+            return;
+        }
+
         try {
             await Promise.all(
                 policies.map((policy) =>
@@ -93,11 +100,19 @@ export default function AccessDurations() {
                     }).unwrap(),
                 ),
             );
-            dispatchMessage({ content: t('Access duration settings saved successfully'), type: 'success' });
         } catch (_e) {
-            dispatchMessage({ content: t('Failed to save access duration settings'), type: 'error' });
+            dispatchMessage({ content: t('Failed to edit access duration settings'), type: 'error' });
         }
-    };
+    }, AUTO_SAVE_DELAY);
+
+    useEffect(() => {
+        if (!hasChanges) {
+            return;
+        }
+
+        handleSave();
+        return () => handleSave.cancel();
+    }, [hasChanges, handleSave]);
 
     const columns: TableColumnsType<ConsumerPolicy> = [
         {
@@ -208,11 +223,6 @@ export default function AccessDurations() {
                 tableLayout="fixed"
                 size="small"
             />
-            <div>
-                <Button type="primary" onClick={handleSave} disabled={!hasChanges || isUpdating}>
-                    {t('Save')}
-                </Button>
-            </div>
         </Flex>
     );
 }
