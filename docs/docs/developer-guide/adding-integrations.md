@@ -70,7 +70,7 @@ Technical asset configurations use a **plugin system** based on SQLAlchemy's Cla
 - Has a Pydantic schema with UI metadata (for form generation).
 - Registers itself in a union type so the API can serialize/deserialize it.
 
-These live in `app/data_output_configuration/<service_name>/`.
+These live in `app/technical_asset_configuration/<service_name>/`.
 
 ## Step-by-Step: Adding a New Integration
 
@@ -116,12 +116,12 @@ Export it in the `schemas/__init__.py` and add it to the `ConfigType` union in `
 
 Create a new table for your service-specific columns using Class Table Inheritance.
 
-**File:** `app/data_output_configuration/azure_blob/model.py`
+**File:** `app/technical_asset_configuration/azure_blob/model.py`
 
 ```python
 from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column
-from app.data_output_configuration.base_model import BaseTechnicalAssetConfiguration
+from app.technical_asset_configuration.base_model import BaseTechnicalAssetConfiguration
 
 class AzureBlobTechnicalAssetConfiguration(BaseTechnicalAssetConfiguration):
     __tablename__ = "azure_blob_technical_asset_configurations"
