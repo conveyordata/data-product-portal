@@ -2425,7 +2425,7 @@ INNER JOIN (
 
 -- PRODUCER view: new John-owned output port on DEI Insights Dashboard
 INSERT INTO public.datasets (id, namespace, data_product_id, name, description, about, status, access_type, created_on, updated_on, deleted_at)
-VALUES ('22222222-2222-4222-8222-222222222222', 'cafeteria_menu_rotation', '{{ dei_insights_dashboard }}'::uuid, 'Timebound access example', 'Example dataset showing time-limited access to an output port', 'Output port showcasing all access renewal states from the producer side.', 'ACTIVE', 'RESTRICTED', timezone('utc'::text, current_timestamp), NULL, NULL);
+VALUES ('22222222-2222-4222-8222-222222222222', 'timebound_access_duration', '{{ dei_insights_dashboard }}'::uuid, 'Timebound access example', 'Example dataset showing time-limited access to an output port', 'Output port showcasing all access renewal states from the producer side.', 'ACTIVE', 'RESTRICTED', timezone('utc'::text, current_timestamp), NULL, NULL);
 
 -- John owns the output port so he can approve/revoke consumer requests on it
 INSERT INTO public.role_assignments_dataset (id, dataset_id, data_product_id, user_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at)
