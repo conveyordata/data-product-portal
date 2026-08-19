@@ -331,3 +331,30 @@ class TestCoderPluginEndToEnd:
             "https://ide.test.dp.uhasselt.be/templates/vscode/workspace"
             "?param.git_repo=https://github.com/UH-RDP/test-my-first-db"
         )
+
+
+class TestGitHubPluginEndToEnd:
+    def test_github_tile_and_url_via_existing_endpoints(self, client, monkeypatch):
+        monkeypatch.setattr(settings, "ENABLED_PLUGINS", ["GitHubPlugin"])
+        monkeypatch.setattr(settings, "GITHUB_ORG", "UH-RDP")
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        data_product = DataProductFactory(namespace="test-my-first-db")
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__READ_INTEGRATIONS],
+        )
+        DataProductRoleAssignmentFactory(
+            user_id=user.id, role_id=role.id, data_product_id=data_product.id
+        )
+
+        tiles_response = client.get(f"{ENDPOINT}/platform-tiles")
+        assert tiles_response.status_code == 200
+        assert any(
+            t["value"] == "github" for t in tiles_response.json()["platform_tiles"]
+        )
+
+        url_response = client.get(f"{ENDPOINT}/github/url?id={data_product.id}")
+        assert url_response.status_code == 200
+        assert url_response.json()["url"] == (
+            "https://github.com/UH-RDP/test-my-first-db"
+        )

@@ -3,6 +3,7 @@ from .azure_blob.schema import AzureBlobTechnicalAssetConfiguration
 from .coder.schema import CoderPlugin
 from .conveyor.schema import ConveyorPlugin
 from .databricks.schema import DatabricksTechnicalAssetConfiguration
+from .github.schema import GitHubPlugin
 from .glue.schema import GlueTechnicalAssetConfiguration
 from .osi_sem_model.schema import OSISemanticModelTechnicalAssetConfiguration
 from .postgresql.schema import PostgreSQLTechnicalAssetConfiguration
@@ -15,6 +16,7 @@ __all__ = [
     "CoderPlugin",
     "ConveyorPlugin",
     "DatabricksTechnicalAssetConfiguration",
+    "GitHubPlugin",
     "GlueTechnicalAssetConfiguration",
     "OSISemanticModelTechnicalAssetConfiguration",
     "PostgreSQLTechnicalAssetConfiguration",
