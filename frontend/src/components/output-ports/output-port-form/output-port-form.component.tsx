@@ -17,7 +17,7 @@ import {
     Typography,
 } from 'antd';
 import type { TFunction } from 'i18next';
-import { type ReactNode, type Ref, useCallback, useEffect, useState } from 'react';
+import { forwardRef, type HTMLAttributes, type ReactNode, type Ref, useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 import { useDebouncedCallback } from 'use-debounce';
@@ -78,19 +78,20 @@ const FIELD_NAMES: Partial<
     [AbstractDataProductType.Explorations]: 'exploration_access_duration_type',
 };
 
-function EqualWidthLabel({ visible, others }: { visible: ReactNode; others: ReactNode[] }) {
-    return (
-        <span style={{ display: 'grid', justifyItems: 'center' }}>
-            {others.map((label, index) => (
-                // biome-ignore lint/suspicious/noArrayIndexKey: static, order never changes
-                <span key={index} style={{ gridArea: '1 / 1', visibility: 'hidden' }} aria-hidden="true">
-                    {label}
-                </span>
-            ))}
-            <span style={{ gridArea: '1 / 1' }}>{visible}</span>
-        </span>
-    );
-}
+const EqualWidthLabel = forwardRef<
+    HTMLSpanElement,
+    HTMLAttributes<HTMLSpanElement> & { visible: ReactNode; others: ReactNode[] }
+>(({ visible, others, style, ...rest }, ref) => (
+    <span ref={ref} {...rest} style={{ ...style, display: 'grid', justifyItems: 'center' }}>
+        {others.map((label, index) => (
+            // biome-ignore lint/suspicious/noArrayIndexKey: static, order never changes
+            <span key={index} style={{ gridArea: '1 / 1', visibility: 'hidden' }} aria-hidden="true">
+                {label}
+            </span>
+        ))}
+        <span style={{ gridArea: '1 / 1' }}>{visible}</span>
+    </span>
+));
 
 export function AccessDurationSection({
     abstractDataProductType,
