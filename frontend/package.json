@@ -49,7 +49,7 @@
         "axios": "^1.19.0",
         "clsx": "^2.1.1",
         "date-fns": "^4.4.0",
-        "dayjs": "^1.11.22",
+        "dayjs": "^1.11.23",
         "elkjs": "^0.12.0",
         "esbuild-runner": "^2.2.2",
         "framer-motion": "^13.1.0",
