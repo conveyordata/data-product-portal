@@ -1,6 +1,7 @@
 import { QuestionCircleOutlined } from '@ant-design/icons';
-import { Card, Descriptions, type DescriptionsProps, Flex, Tooltip, Typography, theme } from 'antd';
+import { Card, Col, Descriptions, type DescriptionsProps, Flex, Row, Tooltip, Typography, theme } from 'antd';
 import type { TFunction } from 'i18next';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import AccessModeTag from '@/components/access-modes/access-mode.component.tsx';
 import { DataProductSettings } from '@/components/data-products/data-product-settings/data-product-settings.component';
@@ -9,6 +10,7 @@ import {
     AccessDurationSection,
     AccessTypeSection,
 } from '@/components/output-ports/output-port-form/output-port-form.component.tsx';
+import { FORM_GRID_WRAPPER_COLS } from '@/constants/form.constants.ts';
 import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
 import {
     AbstractDataProductType,
@@ -56,6 +58,20 @@ export function SettingsTab({ datasetId, dataProductId }: Props) {
     const { data: allDurations = [] } = useGetAllAccessDurationsQuery();
     const [updateOutputPort] = useUpdateOutputPortMutation();
 
+    const [accessType, setAccessType] = useState(outputPort?.access_type);
+    const [dataProductDuration, setDataProductDuration] = useState(outputPort?.data_product_access_duration_type);
+    const [explorationDuration, setExplorationDuration] = useState(outputPort?.exploration_access_duration_type);
+
+    useEffect(() => setAccessType(outputPort?.access_type), [outputPort?.access_type]);
+    useEffect(
+        () => setDataProductDuration(outputPort?.data_product_access_duration_type),
+        [outputPort?.data_product_access_duration_type],
+    );
+    useEffect(
+        () => setExplorationDuration(outputPort?.exploration_access_duration_type),
+        [outputPort?.exploration_access_duration_type],
+    );
+
     if (isLoading) {
         return <LoadingSpinner />;
     }
@@ -71,6 +87,7 @@ export function SettingsTab({ datasetId, dataProductId }: Props) {
                 'access_type' | 'data_product_access_duration_type' | 'exploration_access_duration_type'
             >
         >,
+        revert: () => void,
     ) {
         if (!outputPort) return;
         try {
@@ -91,6 +108,7 @@ export function SettingsTab({ datasetId, dataProductId }: Props) {
             }).unwrap();
             dispatchMessage({ content: t('Output Port updated successfully'), type: 'success' });
         } catch {
+            revert();
             dispatchMessage({ content: t('Could not update Output Port'), type: 'error' });
         }
     }
@@ -107,69 +125,78 @@ export function SettingsTab({ datasetId, dataProductId }: Props) {
         </Flex>
     );
 
+    const durationTooltip = t(
+        'Access duration policy configured by the administrator. This applies when someone requests access to this Output Port.',
+    );
+
     const items: DescriptionsProps['items'] = [
         {
-            key: 'access-settings',
-            children: (
-                <Flex vertical gap="middle">
-                    <Flex vertical gap="small">
-                        {labelWithTooltip(t('Access Type'), t('The access type of the Output Port'))}
-                        {canEditAccess ? (
-                            <AccessTypeSection
-                                value={outputPort.access_type}
-                                onChange={(value) => saveAccessField({ access_type: value })}
-                            />
-                        ) : (
-                            getDatasetAccessTypeLabel(t, outputPort.access_type)
-                        )}
-                    </Flex>
-                    {accessDurations && (
-                        <Flex vertical gap="small">
-                            {labelWithTooltip(
-                                t('Access Duration'),
-                                t(
-                                    'Access duration policy configured by the administrator. This applies when someone requests access to this Output Port.',
-                                ),
-                            )}
-                            <Flex vertical gap="small">
-                                <Typography.Text type="secondary">{t('Data Products')}</Typography.Text>
-                                {canEditAccess ? (
-                                    <AccessDurationSection
-                                        abstractDataProductType={AbstractDataProductType.DataProducts}
-                                        accessDurations={durationsFor(AbstractDataProductType.DataProducts)}
-                                        value={outputPort.data_product_access_duration_type}
-                                        onChange={(value) =>
-                                            saveAccessField({ data_product_access_duration_type: value })
-                                        }
-                                    />
-                                ) : (
-                                    <Typography.Text>
-                                        {formatAccessDuration(accessDurations.data_product_access_duration, t)}
-                                    </Typography.Text>
-                                )}
-                            </Flex>
-                            <Flex vertical gap="small">
-                                <Typography.Text type="secondary">{t('Explorations')}</Typography.Text>
-                                {canEditAccess ? (
-                                    <AccessDurationSection
-                                        abstractDataProductType={AbstractDataProductType.Explorations}
-                                        accessDurations={durationsFor(AbstractDataProductType.Explorations)}
-                                        value={outputPort.exploration_access_duration_type}
-                                        onChange={(value) =>
-                                            saveAccessField({ exploration_access_duration_type: value })
-                                        }
-                                    />
-                                ) : (
-                                    <Typography.Text>
-                                        {formatAccessDuration(accessDurations.exploration_access_duration, t)}
-                                    </Typography.Text>
-                                )}
-                            </Flex>
-                        </Flex>
-                    )}
-                </Flex>
+            key: 'access-type',
+            label: labelWithTooltip(t('Access Type'), t('The access type of the Output Port')),
+            span: 2,
+            children: canEditAccess ? (
+                <AccessTypeSection
+                    value={accessType}
+                    onChange={(value) => {
+                        const previous = accessType;
+                        setAccessType(value);
+                        saveAccessField({ access_type: value }, () => setAccessType(previous));
+                    }}
+                />
+            ) : (
+                getDatasetAccessTypeLabel(t, outputPort.access_type)
             ),
         },
+        ...(accessDurations
+            ? [
+                  {
+                      key: 'access-duration-data-products',
+                      label: labelWithTooltip(t('Data Products Access Duration'), durationTooltip),
+                      span: 2,
+                      children: canEditAccess ? (
+                          <AccessDurationSection
+                              abstractDataProductType={AbstractDataProductType.DataProducts}
+                              accessDurations={durationsFor(AbstractDataProductType.DataProducts)}
+                              value={dataProductDuration}
+                              onChange={(value) => {
+                                  const previous = dataProductDuration;
+                                  setDataProductDuration(value);
+                                  saveAccessField({ data_product_access_duration_type: value }, () =>
+                                      setDataProductDuration(previous),
+                                  );
+                              }}
+                          />
+                      ) : (
+                          <Typography.Text>
+                              {formatAccessDuration(accessDurations.data_product_access_duration, t)}
+                          </Typography.Text>
+                      ),
+                  },
+                  {
+                      key: 'access-duration-explorations',
+                      label: labelWithTooltip(t('Explorations Access Duration'), durationTooltip),
+                      span: 2,
+                      children: canEditAccess ? (
+                          <AccessDurationSection
+                              abstractDataProductType={AbstractDataProductType.Explorations}
+                              accessDurations={durationsFor(AbstractDataProductType.Explorations)}
+                              value={explorationDuration}
+                              onChange={(value) => {
+                                  const previous = explorationDuration;
+                                  setExplorationDuration(value);
+                                  saveAccessField({ exploration_access_duration_type: value }, () =>
+                                      setExplorationDuration(previous),
+                                  );
+                              }}
+                          />
+                      ) : (
+                          <Typography.Text>
+                              {formatAccessDuration(accessDurations.exploration_access_duration, t)}
+                          </Typography.Text>
+                      ),
+                  },
+              ]
+            : []),
         {
             key: 'access-modes',
             label: t('Access modes'),
@@ -188,15 +215,19 @@ export function SettingsTab({ datasetId, dataProductId }: Props) {
 
     return (
         <Flex vertical gap="middle">
-            <Card title={t('Access Settings')} size="small">
-                <Descriptions
-                    column={1}
-                    layout="vertical"
-                    size="small"
-                    items={items}
-                    styles={{ label: { color: token.colorTextSecondary } }}
-                />
-            </Card>
+            <Row>
+                <Col {...FORM_GRID_WRAPPER_COLS}>
+                    <Card title={t('Access Settings')} size="small">
+                        <Descriptions
+                            column={2}
+                            size="small"
+                            items={items}
+                            bordered
+                            styles={{ label: { color: token.colorTextSecondary } }}
+                        />
+                    </Card>
+                </Col>
+            </Row>
             <Card title={t('Custom Settings')} size="small">
                 <DataProductSettings id={datasetId} scope="dataset" dataProductId={dataProductId} />
             </Card>

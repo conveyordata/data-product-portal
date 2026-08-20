@@ -8,7 +8,6 @@ import {
 } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
 import type { SearchOutputPortsResponseItem } from '@/store/api/services/generated/outputPortsSearchApi.ts';
 import { DataProductChoiceOptions } from '@/store/features/cart/cart-slice.ts';
-import { formatDate } from '@/utils/date.helper.ts';
 
 type Props = {
     outputPort: SearchOutputPortsResponseItem;
@@ -30,14 +29,12 @@ export function OutputPortAccessDuration({ outputPort, dataProductTypeChoice }: 
             dataProductTypeChoice === DataProductChoiceOptions.data_product
                 ? accessDurations?.data_product_access_duration
                 : accessDurations?.exploration_access_duration;
-        const expiryDate = new Date(Date.now() + abstractTypeAccessDuration.days * 24 * 60 * 60 * 1000);
         const isPermanent = abstractTypeAccessDuration.access_duration_type === AccessDurationType.Permanent;
         return {
             label: isPermanent
                 ? t('Permanent access')
                 : t('Timebound access ({{count}} days)', {
                       count: abstractTypeAccessDuration.days,
-                      expiryDate: formatDate(expiryDate),
                   }),
             isPermanent,
         };

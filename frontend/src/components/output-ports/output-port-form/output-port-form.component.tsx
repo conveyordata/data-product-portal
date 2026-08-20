@@ -17,7 +17,7 @@ import {
     Typography,
 } from 'antd';
 import type { TFunction } from 'i18next';
-import { forwardRef, type HTMLAttributes, type ReactNode, type Ref, useCallback, useEffect, useState } from 'react';
+import { type Ref, useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 import { useDebouncedCallback } from 'use-debounce';
@@ -78,31 +78,18 @@ const FIELD_NAMES: Partial<
     [AbstractDataProductType.Explorations]: 'exploration_access_duration_type',
 };
 
-const EqualWidthLabel = forwardRef<
-    HTMLSpanElement,
-    HTMLAttributes<HTMLSpanElement> & { visible: ReactNode; others: ReactNode[] }
->(({ visible, others, style, ...rest }, ref) => (
-    <span ref={ref} {...rest} style={{ ...style, display: 'grid', justifyItems: 'center' }}>
-        {others.map((label, index) => (
-            // biome-ignore lint/suspicious/noArrayIndexKey: static, order never changes
-            <span key={index} style={{ gridArea: '1 / 1', visibility: 'hidden' }} aria-hidden="true">
-                {label}
-            </span>
-        ))}
-        <span style={{ gridArea: '1 / 1' }}>{visible}</span>
-    </span>
-));
-
 export function AccessDurationSection({
     abstractDataProductType,
     accessDurations,
     value,
     onChange,
+    block = true,
 }: {
     abstractDataProductType: AbstractDataProductType;
     accessDurations: AccessDuration[];
     value?: AccessDurationType;
     onChange?: (value: AccessDurationType) => void;
+    block?: boolean;
 }) {
     const { t } = useTranslation();
     const selected = value ?? AccessDurationType.Permanent;
@@ -112,32 +99,24 @@ export function AccessDurationSection({
     const timeBoundDays = accessDurations.find((r) => r.access_duration_type === AccessDurationType.TimeBound)?.days;
     const daysLabel = timeBoundDays ? t('{{days}} days', { days: timeBoundDays }) : '';
 
-    const timeBoundLabel = (
-        <>
-            {t('Time Bound')} {daysLabel}
-        </>
-    );
+    const timeBoundLabel = `${t('Time Bound')} ${daysLabel}`;
     const permanentLabel = t('Permanent');
-
-    const durationLabels = [timeBoundLabel, permanentLabel];
 
     const options = [
         {
             label: (
                 <Tooltip title={timeBoundEnabled ? null : t('Not allowed by Admin.')}>
-                    <EqualWidthLabel visible={timeBoundLabel} others={durationLabels} />
+                    <span>{timeBoundLabel}</span>
                 </Tooltip>
             ),
             value: AccessDurationType.TimeBound,
             disabled: !timeBoundEnabled,
         },
         {
-            label: !hasPermanent ? (
-                <Tooltip title={t('Not allowed by admin')}>
-                    <EqualWidthLabel visible={permanentLabel} others={durationLabels} />
+            label: (
+                <Tooltip title={hasPermanent ? null : t('Not allowed by admin')}>
+                    <span>{permanentLabel}</span>
                 </Tooltip>
-            ) : (
-                <EqualWidthLabel visible={permanentLabel} others={durationLabels} />
             ),
             value: AccessDurationType.Permanent,
             disabled: !hasPermanent,
@@ -149,7 +128,7 @@ export function AccessDurationSection({
             value={selected}
             options={options}
             optionType="button"
-            block
+            block={block}
             onChange={(e) => onChange?.(e.target.value)}
             key={`${abstractDataProductType}-access-duration`}
         />
@@ -259,7 +238,7 @@ export const getAccessTypeOptions = (t: TFunction) => {
         {
             label: (
                 <Tooltip title={t('Restricted Output Ports are visible to everyone but require permission to use')}>
-                    <EqualWidthLabel visible={labels[0]} others={labels} />
+                    <span>{labels[0]}</span>
                 </Tooltip>
             ),
             value: OutputPortAccessType.Restricted,
@@ -267,7 +246,7 @@ export const getAccessTypeOptions = (t: TFunction) => {
         {
             label: (
                 <Tooltip title={t('Unrestricted Output Ports are visible and accessible to use by anyone')}>
-                    <EqualWidthLabel visible={labels[1]} others={labels} />
+                    <span>{labels[1]}</span>
                 </Tooltip>
             ),
             value: OutputPortAccessType.Unrestricted,
@@ -275,7 +254,7 @@ export const getAccessTypeOptions = (t: TFunction) => {
         {
             label: (
                 <Tooltip title={t('Private Output Ports are only visible to owners and users with access')}>
-                    <EqualWidthLabel visible={labels[2]} others={labels} />
+                    <span>{labels[2]}</span>
                 </Tooltip>
             ),
             value: OutputPortAccessType.Private,
@@ -286,9 +265,11 @@ export const getAccessTypeOptions = (t: TFunction) => {
 export function AccessTypeSection({
     value,
     onChange,
+    block = true,
 }: {
     value?: OutputPortAccessType;
     onChange?: (value: OutputPortAccessType) => void;
+    block?: boolean;
 }) {
     const { t } = useTranslation();
     return (
@@ -296,7 +277,7 @@ export function AccessTypeSection({
             value={value}
             options={getAccessTypeOptions(t)}
             optionType="button"
-            block
+            block={block}
             onChange={(e) => onChange?.(e.target.value)}
         />
     );

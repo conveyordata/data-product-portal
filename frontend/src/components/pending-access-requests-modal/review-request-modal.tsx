@@ -13,7 +13,7 @@ import {
     Typography,
     theme,
 } from 'antd';
-import { addDays } from 'date-fns';
+import { addDays, isPast } from 'date-fns';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -47,7 +47,6 @@ type Props = {
 type RequestDetails = {
     requesterName: string;
     requesterEmail: string;
-    requestType: string;
     source: {
         name: string;
         email: string;
@@ -99,7 +98,7 @@ function getPreviousRequestStatus(period: { wasRevoked: boolean; validUntil: str
     if (period.wasRevoked) {
         return InputPortStatus.Revoked;
     }
-    if (period.validUntil && new Date(period.validUntil) < new Date()) {
+    if (period.validUntil && isPast(new Date(period.validUntil))) {
         return InputPortStatus.Expired;
     }
     return InputPortStatus.Approved;
@@ -124,7 +123,6 @@ function getRequestDetails(
         return {
             requesterName: `${action.requested_by.first_name} ${action.requested_by.last_name}`,
             requesterEmail: action.requested_by.email,
-            requestType: t('Output Port Access'),
             source: {
                 name: action.input_port.consuming_abstract_data_product.name,
                 email: action.requested_by.email,
@@ -167,7 +165,6 @@ function getRequestDetails(
         return {
             requesterName: `${action.requested_by.first_name} ${action.requested_by.last_name}`,
             requesterEmail: action.requested_by.email,
-            requestType: t('Technical Asset Inclusion'),
             source: {
                 name: action.technical_asset.name,
                 email: action.requested_by.email,
@@ -192,7 +189,6 @@ function getRequestDetails(
         return {
             requesterName: `${action.requested_by?.first_name} ${action.requested_by?.last_name}`,
             requesterEmail: action.requested_by?.email || '',
-            requestType: t('Role Assignment'),
             source: {
                 name: `${action.user.first_name} ${action.user.last_name}`,
                 email: action.user.email,
@@ -367,9 +363,9 @@ export function ReviewRequestModal({ action, open, onClose, onAccept, onReject, 
                         <Card size="small" variant="outlined" style={{ flex: 2 }}>
                             <Flex vertical gap="small">
                                 <Typography.Text type="secondary" style={tileLabelStyle}>
-                                    {details.requestType === t('Role Assignment')
+                                    {action.request_type === RequestType_DataProductRoleAssignment
                                         ? t('Requests Role')
-                                        : t('Requests Access')}
+                                        : t('Access Mode')}
                                 </Typography.Text>
                                 <Typography.Text strong>{details.accessType}</Typography.Text>
                             </Flex>
