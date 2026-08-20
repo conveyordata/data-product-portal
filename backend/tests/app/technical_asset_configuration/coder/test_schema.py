@@ -16,13 +16,13 @@ class TestCoderPlugin:
     def test_get_url_builds_workspace_link_from_data_product_namespace(
         self, mock_settings, session
     ):
-        mock_settings.CODER_BASE_URL = "https://ide.test.dp.uhasselt.be"
-        mock_settings.CODER_GITHUB_ORG = "UH-RDP"
+        mock_settings.CODER_BASE_URL = "https://ide.example.com"
+        mock_settings.CODER_GITHUB_ORG = "example-org"
         data_product = DataProductFactory(namespace="test-my-first-db")
 
         url = CoderPlugin.get_url(data_product.id, session, actor=None)
 
         assert url == (
-            "https://ide.test.dp.uhasselt.be/templates/vscode/workspace"
-            "?param.git_repo=https://github.com/UH-RDP/test-my-first-db"
+            "https://ide.example.com/templates/vscode/workspace"
+            "?param.git_repo=https://github.com/example-org/test-my-first-db"
         )
