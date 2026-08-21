@@ -1,7 +1,6 @@
 import {
     Alert,
     Button,
-    type CheckboxOptionType,
     Col,
     Flex,
     Form,
@@ -18,7 +17,7 @@ import {
     Typography,
 } from 'antd';
 import type { TFunction } from 'i18next';
-import { type Ref, useCallback, useEffect, useMemo, useState } from 'react';
+import { type Ref, useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 import { useDebouncedCallback } from 'use-debounce';
@@ -79,16 +78,18 @@ const FIELD_NAMES: Partial<
     [AbstractDataProductType.Explorations]: 'exploration_access_duration_type',
 };
 
-function AccessDurationSection({
+export function AccessDurationSection({
     abstractDataProductType,
     accessDurations,
     value,
     onChange,
+    block = true,
 }: {
     abstractDataProductType: AbstractDataProductType;
     accessDurations: AccessDuration[];
     value?: AccessDurationType;
     onChange?: (value: AccessDurationType) => void;
+    block?: boolean;
 }) {
     const { t } = useTranslation();
     const selected = value ?? AccessDurationType.Permanent;
@@ -98,23 +99,24 @@ function AccessDurationSection({
     const timeBoundDays = accessDurations.find((r) => r.access_duration_type === AccessDurationType.TimeBound)?.days;
     const daysLabel = timeBoundDays ? t('{{days}} days', { days: timeBoundDays }) : '';
 
+    const timeBoundLabel = `${t('Time Bound')} ${daysLabel}`;
+    const permanentLabel = t('Permanent');
+
     const options = [
         {
             label: (
                 <Tooltip title={timeBoundEnabled ? null : t('Not allowed by Admin.')}>
-                    {t('Time Bound')} {daysLabel}
+                    <span>{timeBoundLabel}</span>
                 </Tooltip>
             ),
             value: AccessDurationType.TimeBound,
             disabled: !timeBoundEnabled,
         },
         {
-            label: !hasPermanent ? (
-                <Tooltip title={t('Not allowed by admin')}>
-                    <span>{t('Permanent')}</span>
+            label: (
+                <Tooltip title={hasPermanent ? null : t('Not allowed by admin')}>
+                    <span>{permanentLabel}</span>
                 </Tooltip>
-            ) : (
-                t('Permanent')
             ),
             value: AccessDurationType.Permanent,
             disabled: !hasPermanent,
@@ -126,6 +128,7 @@ function AccessDurationSection({
             value={selected}
             options={options}
             optionType="button"
+            block={block}
             onChange={(e) => onChange?.(e.target.value)}
             key={`${abstractDataProductType}-access-duration`}
         />
@@ -224,12 +227,18 @@ const { TextArea } = Input;
 
 const DEBOUNCE = 500;
 
-const getAccessTypeOptions = (t: TFunction) => {
+export const getAccessTypeOptions = (t: TFunction) => {
+    const labels = [
+        getDatasetAccessTypeLabel(t, OutputPortAccessType.Restricted),
+        getDatasetAccessTypeLabel(t, OutputPortAccessType.Unrestricted),
+        getDatasetAccessTypeLabel(t, OutputPortAccessType.Private),
+    ];
+
     return [
         {
             label: (
                 <Tooltip title={t('Restricted Output Ports are visible to everyone but require permission to use')}>
-                    {getDatasetAccessTypeLabel(t, OutputPortAccessType.Restricted)}
+                    <span>{labels[0]}</span>
                 </Tooltip>
             ),
             value: OutputPortAccessType.Restricted,
@@ -237,7 +246,7 @@ const getAccessTypeOptions = (t: TFunction) => {
         {
             label: (
                 <Tooltip title={t('Unrestricted Output Ports are visible and accessible to use by anyone')}>
-                    {getDatasetAccessTypeLabel(t, OutputPortAccessType.Unrestricted)}
+                    <span>{labels[1]}</span>
                 </Tooltip>
             ),
             value: OutputPortAccessType.Unrestricted,
@@ -245,13 +254,34 @@ const getAccessTypeOptions = (t: TFunction) => {
         {
             label: (
                 <Tooltip title={t('Private Output Ports are only visible to owners and users with access')}>
-                    {getDatasetAccessTypeLabel(t, OutputPortAccessType.Private)}
+                    <span>{labels[2]}</span>
                 </Tooltip>
             ),
             value: OutputPortAccessType.Private,
         },
     ];
 };
+
+export function AccessTypeSection({
+    value,
+    onChange,
+    block = true,
+}: {
+    value?: OutputPortAccessType;
+    onChange?: (value: OutputPortAccessType) => void;
+    block?: boolean;
+}) {
+    const { t } = useTranslation();
+    return (
+        <Radio.Group
+            value={value}
+            options={getAccessTypeOptions(t)}
+            optionType="button"
+            block={block}
+            onChange={(e) => onChange?.(e.target.value)}
+        />
+    );
+}
 
 export function OutputPortForm({
     mode,
@@ -318,8 +348,6 @@ export function OutputPortForm({
         isFetchingDataProduct ||
         isFetchingInitialValues ||
         isFetchingTags;
-
-    const accessTypeOptions: CheckboxOptionType<OutputPortAccessType>[] = useMemo(() => getAccessTypeOptions(t), [t]);
 
     const userSelectOptions = users.map((owner) => ({
         label: `${owner.first_name} ${owner.last_name} (${owner.email})`,
@@ -566,7 +594,7 @@ export function OutputPortForm({
                     },
                 ]}
             >
-                <Radio.Group options={accessTypeOptions} />
+                <AccessTypeSection />
             </Form.Item>
             <AccessDurationInfo mode={mode} />
             <Form.Item<CreateOutputPortRequest> name="tag_ids" label={t('Tags')}>
