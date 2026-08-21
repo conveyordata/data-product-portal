@@ -1,7 +1,9 @@
 from .agno.schema import AgnoPlugin
 from .azure_blob.schema import AzureBlobTechnicalAssetConfiguration
+from .coder.schema import CoderPlugin
 from .conveyor.schema import ConveyorPlugin
 from .databricks.schema import DatabricksTechnicalAssetConfiguration
+from .github.schema import GitHubPlugin
 from .glue.schema import GlueTechnicalAssetConfiguration
 from .osi_sem_model.schema import OSISemanticModelTechnicalAssetConfiguration
 from .postgresql.schema import PostgreSQLTechnicalAssetConfiguration
@@ -11,8 +13,10 @@ from .snowflake.schema import SnowflakeTechnicalAssetConfiguration
 
 __all__ = [
     "AgnoPlugin",
+    "CoderPlugin",
     "ConveyorPlugin",
     "DatabricksTechnicalAssetConfiguration",
+    "GitHubPlugin",
     "GlueTechnicalAssetConfiguration",
     "OSISemanticModelTechnicalAssetConfiguration",
     "PostgreSQLTechnicalAssetConfiguration",
