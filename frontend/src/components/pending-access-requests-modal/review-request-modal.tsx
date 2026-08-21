@@ -4,6 +4,7 @@ import {
     Badge,
     Button,
     Card,
+    Collapse,
     Descriptions,
     type DescriptionsProps,
     Flex,
@@ -260,6 +261,42 @@ export function ReviewRequestModal({ action, open, onClose, onAccept, onReject, 
         ? getPreviousRequestStatus(details.currentAccessPeriod)
         : null;
 
+    const previousDetails = previousRequestAction ? getRequestDetails(previousRequestAction, t) : undefined;
+
+    const previousDetailItems: DescriptionsProps['items'] = previousDetails
+        ? [
+              {
+                  key: 'requested-on',
+                  label: t('Requested On'),
+                  children: formatDate(previousDetails.requestedOn),
+              },
+              {
+                  key: 'requested-by',
+                  label: t('Requested By'),
+                  children: (
+                      <Flex align="baseline" gap="small" wrap>
+                          <Typography.Text>{previousDetails.requesterName}</Typography.Text>
+                          <Typography.Text type="secondary" style={{ fontSize: token.fontSizeSM }}>
+                              {previousDetails.requesterEmail}
+                          </Typography.Text>
+                      </Flex>
+                  ),
+              },
+              ...(previousDetails.isPermanent === true ||
+              (previousDetails.isPermanent === false && previousDetails.accessDurationDays != null)
+                  ? [
+                        {
+                            key: 'requested-duration',
+                            label: t('Requested Duration'),
+                            children: previousDetails.isPermanent
+                                ? t('Permanent')
+                                : `${previousDetails.accessDurationDays} ${t('days')}`,
+                        },
+                    ]
+                  : []),
+          ]
+        : [];
+
     const detailItems: DescriptionsProps['items'] = [
         ...(details.hasJustification
             ? [
@@ -396,7 +433,7 @@ export function ReviewRequestModal({ action, open, onClose, onAccept, onReject, 
                     <Card size="small" variant="outlined" title={t('Request Details')}>
                         <Descriptions
                             column={2}
-                            layout="vertical"
+                            //layout="vertical"
                             size="small"
                             items={detailItems}
                             styles={{ label: { color: token.colorTextSecondary } }}
@@ -404,25 +441,62 @@ export function ReviewRequestModal({ action, open, onClose, onAccept, onReject, 
                     </Card>
 
                     {details.currentAccessPeriod && (
-                        <Card
-                            size="small"
-                            variant="outlined"
-                            title={
-                                <Flex align="center" justify="space-between">
-                                    <span>{t('Previous Request')}</span>
-                                    {previousRequestStatus && (
-                                        <Badge
-                                            status={getInputPortStatusBadgeStatus(previousRequestStatus)}
-                                            text={getInputPortStatusLabel(t, previousRequestStatus)}
-                                        />
-                                    )}
-                                </Flex>
-                            }
-                            hoverable={!!previousRequestAction}
-                            onClick={previousRequestAction ? () => setShowPreviousRequest(true) : undefined}
-                        >
-                            <Typography.Text>{details.currentAccessPeriod.label}</Typography.Text>
-                        </Card>
+                        <>
+                            {/* Modal-based previous request
+                            <Card
+                                size="small"
+                                variant="outlined"
+                                title={
+                                    <Flex align="center" justify="space-between">
+                                        <span>{t('Previous Request')}</span>
+                                        {previousRequestStatus && (
+                                            <Badge
+                                                status={getInputPortStatusBadgeStatus(previousRequestStatus)}
+                                                text={getInputPortStatusLabel(t, previousRequestStatus)}
+                                            />
+                                        )}
+                                    </Flex>
+                                }
+                                hoverable={!!previousRequestAction}
+                                onClick={previousRequestAction ? () => setShowPreviousRequest(true) : undefined}
+                            >
+                                <Typography.Text>{details.currentAccessPeriod.label}</Typography.Text>
+                            </Card>
+                            */}
+                            <Collapse
+                                size="small"
+                                items={[
+                                    {
+                                        key: 'previous-request',
+                                        label: t('Previous Request'),
+                                        extra: (
+                                            <Flex align="center" gap="small">
+                                                <Typography.Text
+                                                    type="secondary"
+                                                    style={{ fontSize: token.fontSizeSM }}
+                                                >
+                                                    {details.currentAccessPeriod.label}
+                                                </Typography.Text>
+                                                {previousRequestStatus && (
+                                                    <Badge
+                                                        status={getInputPortStatusBadgeStatus(previousRequestStatus)}
+                                                        text={getInputPortStatusLabel(t, previousRequestStatus)}
+                                                    />
+                                                )}
+                                            </Flex>
+                                        ),
+                                        children: (
+                                            <Descriptions
+                                                column={2}
+                                                size="small"
+                                                items={previousDetailItems}
+                                                styles={{ label: { color: token.colorTextSecondary } }}
+                                            />
+                                        ),
+                                    },
+                                ]}
+                            />
+                        </>
                     )}
 
                     {!readOnly && action.request_type === RequestType_InputPort && (

@@ -1,5 +1,8 @@
 import { QuestionCircleOutlined } from '@ant-design/icons';
-import { Card, Col, Descriptions, type DescriptionsProps, Flex, Row, Tooltip, Typography, theme } from 'antd';
+import { Card, Descriptions, type DescriptionsProps, Divider, Flex, Form, Tooltip, Typography, theme } from 'antd';
+
+const { Title } = Typography;
+
 import type { TFunction } from 'i18next';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -215,22 +218,97 @@ export function SettingsTab({ datasetId, dataProductId }: Props) {
 
     return (
         <Flex vertical gap="middle">
-            <Row>
-                <Col {...FORM_GRID_WRAPPER_COLS}>
-                    <Card title={t('Access Settings')} size="small">
-                        <Descriptions
-                            column={2}
-                            size="small"
-                            items={items}
-                            bordered
-                            styles={{ label: { color: token.colorTextSecondary } }}
+            <Title level={5} style={{ margin: 0 }}>
+                {t('Access Settings')}
+            </Title>
+            <Divider style={{ margin: 0 }} />
+            {/* Descriptions implementation
+            <Descriptions
+                column={2}
+                size="small"
+                items={items}
+                bordered
+                styles={{ label: { color: token.colorTextSecondary } }}
+            />
+            */}
+            <Form wrapperCol={FORM_GRID_WRAPPER_COLS}>
+                <Form.Item label={labelWithTooltip(t('Access Type'), t('The access type of the Output Port'))}>
+                    {canEditAccess ? (
+                        <AccessTypeSection
+                            value={accessType}
+                            onChange={(value) => {
+                                const previous = accessType;
+                                setAccessType(value);
+                                saveAccessField({ access_type: value }, () => setAccessType(previous));
+                            }}
                         />
-                    </Card>
-                </Col>
-            </Row>
-            <Card title={t('Custom Settings')} size="small">
-                <DataProductSettings id={datasetId} scope="dataset" dataProductId={dataProductId} />
-            </Card>
+                    ) : (
+                        getDatasetAccessTypeLabel(t, outputPort.access_type)
+                    )}
+                </Form.Item>
+                {accessDurations && (
+                    <>
+                        <Form.Item label={labelWithTooltip(t('Data Products Access Duration'), durationTooltip)}>
+                            {canEditAccess ? (
+                                <AccessDurationSection
+                                    abstractDataProductType={AbstractDataProductType.DataProducts}
+                                    accessDurations={durationsFor(AbstractDataProductType.DataProducts)}
+                                    value={dataProductDuration}
+                                    onChange={(value) => {
+                                        const previous = dataProductDuration;
+                                        setDataProductDuration(value);
+                                        saveAccessField({ data_product_access_duration_type: value }, () =>
+                                            setDataProductDuration(previous),
+                                        );
+                                    }}
+                                />
+                            ) : (
+                                <Typography.Text>
+                                    {formatAccessDuration(accessDurations.data_product_access_duration, t)}
+                                </Typography.Text>
+                            )}
+                        </Form.Item>
+                        <Form.Item label={labelWithTooltip(t('Explorations Access Duration'), durationTooltip)}>
+                            {canEditAccess ? (
+                                <AccessDurationSection
+                                    abstractDataProductType={AbstractDataProductType.Explorations}
+                                    accessDurations={durationsFor(AbstractDataProductType.Explorations)}
+                                    value={explorationDuration}
+                                    onChange={(value) => {
+                                        const previous = explorationDuration;
+                                        setExplorationDuration(value);
+                                        saveAccessField({ exploration_access_duration_type: value }, () =>
+                                            setExplorationDuration(previous),
+                                        );
+                                    }}
+                                />
+                            ) : (
+                                <Typography.Text>
+                                    {formatAccessDuration(accessDurations.exploration_access_duration, t)}
+                                </Typography.Text>
+                            )}
+                        </Form.Item>
+                    </>
+                )}
+                <Form.Item label={t('Access modes')}>
+                    {outputPort.access_modes.length === 0 ? (
+                        t('None')
+                    ) : (
+                        <Flex gap="small" wrap>
+                            {outputPort.access_modes.map((accessMode) => (
+                                <AccessModeTag key={accessMode.id} accessMode={accessMode} />
+                            ))}
+                        </Flex>
+                    )}
+                </Form.Item>
+            </Form>
+            <Title level={5} style={{ margin: 0 }}>
+                {t('Custom Settings')}
+            </Title>
+            <Divider style={{ margin: 0 }} />
+            {/*<Card title={t('Custom Settings')} size="small">*/}
+            <DataProductSettings id={datasetId} scope="dataset" dataProductId={dataProductId} />
+            {/*</Card>*/}
         </Flex>
     );
 }
