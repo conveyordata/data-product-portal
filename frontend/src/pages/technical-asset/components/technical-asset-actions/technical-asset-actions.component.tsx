@@ -1,10 +1,5 @@
 import { Flex } from 'antd';
-import type { TFunction } from 'i18next';
-import { useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
 
-import collibraLogo from '@/assets/icons/collibra-logo.svg?react';
-import datahubLogo from '@/assets/icons/datahub-logo.svg?react';
 import { DataAccessTileGrid } from '@/components/data-access/data-access-tile-grid/data-access-tile-grid.tsx';
 import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
@@ -12,26 +7,17 @@ import type { CustomDropdownItemProps } from '@/types/shared';
 
 import styles from './technical-asset-actions.module.scss';
 
-// TODO: These catalog platforms should come from the backend plugin system
-// They are currently hardcoded because catalog integration platforms are not yet
-// part of the backend platform_tiles endpoint
-const getDataPlatforms = (t: TFunction): CustomDropdownItemProps<string>[] => [
-    {
-        label: t('Collibra'),
-        value: 'collibra',
-        icon: collibraLogo,
-    },
-    { label: t('Datahub'), value: 'datahub', icon: datahubLogo, disabled: true },
-];
+// TODO: Catalog platforms for technical assets (e.g. Collibra/Datahub) are not yet exposed
+// through the backend plugin system. That system currently mixes data-product-scoped
+// and output-port-scoped plugins into a single list (e.g. Coder/GitHub vs RustFS) -
+// to be investigated as part of the wider plugin rework.
+const dataPlatforms: CustomDropdownItemProps<string>[] = [];
 
 type Props = {
     dataProductId: string | undefined;
     dataOutputId: string;
 };
 export function TechnicalAssetActions({ dataProductId, dataOutputId }: Props) {
-    const { t } = useTranslation();
-    const dataPlatforms = useMemo(() => getDataPlatforms(t), [t]);
-
     async function handleAccessToData(environment: string, dataPlatform: string) {
         // Todo - implement endpoints to allow for dataset data access
         // All tiles are currently disabled

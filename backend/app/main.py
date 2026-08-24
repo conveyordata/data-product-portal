@@ -90,10 +90,10 @@ async def _cancel_tasks(tasks: list[asyncio.Task[None]]) -> None:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    with database.SessionLocal() as db:
-        if settings.AUTHORIZER_STARTUP_SYNC:
+    if settings.AUTHORIZER_STARTUP_SYNC:
+        with database.SessionLocal() as db:
             AuthorizationService(db).reload_enforcer()
-        db.commit()
+            db.commit()
 
     warm_text_embedding_model()
 

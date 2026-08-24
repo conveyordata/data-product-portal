@@ -313,6 +313,7 @@ from .revoke_input_port_for_exploration_response import (
 )
 from .revoke_output_port_as_input_port_request import RevokeOutputPortAsInputPortRequest
 from .role import Role
+from .rust_fs_technical_asset_configuration import RustFSTechnicalAssetConfiguration
 from .s3_technical_asset_configuration import S3TechnicalAssetConfiguration
 from .schema_object_request import SchemaObjectRequest
 from .schema_object_response import SchemaObjectResponse
@@ -605,6 +606,7 @@ __all__ = (
     "RevokeInputPortForExplorationResponse",
     "RevokeOutputPortAsInputPortRequest",
     "Role",
+    "RustFSTechnicalAssetConfiguration",
     "S3TechnicalAssetConfiguration",
     "SchemaObjectRequest",
     "SchemaObjectResponse",

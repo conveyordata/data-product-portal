@@ -29,6 +29,9 @@ if TYPE_CHECKING:
     from ..models.redshift_technical_asset_configuration import (
         RedshiftTechnicalAssetConfiguration,
     )
+    from ..models.rust_fs_technical_asset_configuration import (
+        RustFSTechnicalAssetConfiguration,
+    )
     from ..models.s3_technical_asset_configuration import S3TechnicalAssetConfiguration
     from ..models.snowflake_technical_asset_configuration import (
         SnowflakeTechnicalAssetConfiguration,
@@ -49,8 +52,8 @@ class CreateTechnicalAssetRequest:
         service_id (UUID):
         configuration (AzureBlobTechnicalAssetConfiguration | DatabricksTechnicalAssetConfiguration |
             GlueTechnicalAssetConfiguration | OSISemanticModelTechnicalAssetConfiguration |
-            PostgreSQLTechnicalAssetConfiguration | RedshiftTechnicalAssetConfiguration | S3TechnicalAssetConfiguration |
-            SnowflakeTechnicalAssetConfiguration):
+            PostgreSQLTechnicalAssetConfiguration | RedshiftTechnicalAssetConfiguration | RustFSTechnicalAssetConfiguration
+            | S3TechnicalAssetConfiguration | SnowflakeTechnicalAssetConfiguration):
         tag_ids (list[UUID]):
         source_aligned (bool | None | Unset): DEPRECATED: Use 'technical_mapping' instead. This field will be removed in
             a future version.
@@ -70,6 +73,7 @@ class CreateTechnicalAssetRequest:
         | OSISemanticModelTechnicalAssetConfiguration
         | PostgreSQLTechnicalAssetConfiguration
         | RedshiftTechnicalAssetConfiguration
+        | RustFSTechnicalAssetConfiguration
         | S3TechnicalAssetConfiguration
         | SnowflakeTechnicalAssetConfiguration
     )
@@ -95,6 +99,9 @@ class CreateTechnicalAssetRequest:
         from ..models.redshift_technical_asset_configuration import (
             RedshiftTechnicalAssetConfiguration,
         )
+        from ..models.rust_fs_technical_asset_configuration import (
+            RustFSTechnicalAssetConfiguration,
+        )
         from ..models.s3_technical_asset_configuration import (
             S3TechnicalAssetConfiguration,
         )
@@ -114,6 +121,8 @@ class CreateTechnicalAssetRequest:
 
         configuration: dict[str, Any]
         if isinstance(self.configuration, S3TechnicalAssetConfiguration):
+            configuration = self.configuration.to_dict()
+        elif isinstance(self.configuration, RustFSTechnicalAssetConfiguration):
             configuration = self.configuration.to_dict()
         elif isinstance(self.configuration, GlueTechnicalAssetConfiguration):
             configuration = self.configuration.to_dict()
@@ -200,6 +209,9 @@ class CreateTechnicalAssetRequest:
         from ..models.redshift_technical_asset_configuration import (
             RedshiftTechnicalAssetConfiguration,
         )
+        from ..models.rust_fs_technical_asset_configuration import (
+            RustFSTechnicalAssetConfiguration,
+        )
         from ..models.s3_technical_asset_configuration import (
             S3TechnicalAssetConfiguration,
         )
@@ -227,6 +239,7 @@ class CreateTechnicalAssetRequest:
             | OSISemanticModelTechnicalAssetConfiguration
             | PostgreSQLTechnicalAssetConfiguration
             | RedshiftTechnicalAssetConfiguration
+            | RustFSTechnicalAssetConfiguration
             | S3TechnicalAssetConfiguration
             | SnowflakeTechnicalAssetConfiguration
         ):
@@ -241,7 +254,7 @@ class CreateTechnicalAssetRequest:
             try:
                 if not isinstance(data, dict):
                     raise TypeError()
-                configuration_type_1 = GlueTechnicalAssetConfiguration.from_dict(data)
+                configuration_type_1 = RustFSTechnicalAssetConfiguration.from_dict(data)
 
                 return configuration_type_1
             except (TypeError, ValueError, AttributeError, KeyError):
@@ -249,9 +262,7 @@ class CreateTechnicalAssetRequest:
             try:
                 if not isinstance(data, dict):
                     raise TypeError()
-                configuration_type_2 = DatabricksTechnicalAssetConfiguration.from_dict(
-                    data
-                )
+                configuration_type_2 = GlueTechnicalAssetConfiguration.from_dict(data)
 
                 return configuration_type_2
             except (TypeError, ValueError, AttributeError, KeyError):
@@ -259,7 +270,7 @@ class CreateTechnicalAssetRequest:
             try:
                 if not isinstance(data, dict):
                     raise TypeError()
-                configuration_type_3 = SnowflakeTechnicalAssetConfiguration.from_dict(
+                configuration_type_3 = DatabricksTechnicalAssetConfiguration.from_dict(
                     data
                 )
 
@@ -269,7 +280,7 @@ class CreateTechnicalAssetRequest:
             try:
                 if not isinstance(data, dict):
                     raise TypeError()
-                configuration_type_4 = RedshiftTechnicalAssetConfiguration.from_dict(
+                configuration_type_4 = SnowflakeTechnicalAssetConfiguration.from_dict(
                     data
                 )
 
@@ -279,7 +290,7 @@ class CreateTechnicalAssetRequest:
             try:
                 if not isinstance(data, dict):
                     raise TypeError()
-                configuration_type_5 = PostgreSQLTechnicalAssetConfiguration.from_dict(
+                configuration_type_5 = RedshiftTechnicalAssetConfiguration.from_dict(
                     data
                 )
 
@@ -289,18 +300,28 @@ class CreateTechnicalAssetRequest:
             try:
                 if not isinstance(data, dict):
                     raise TypeError()
-                configuration_type_6 = (
-                    OSISemanticModelTechnicalAssetConfiguration.from_dict(data)
+                configuration_type_6 = PostgreSQLTechnicalAssetConfiguration.from_dict(
+                    data
                 )
 
                 return configuration_type_6
             except (TypeError, ValueError, AttributeError, KeyError):
                 pass
+            try:
+                if not isinstance(data, dict):
+                    raise TypeError()
+                configuration_type_7 = (
+                    OSISemanticModelTechnicalAssetConfiguration.from_dict(data)
+                )
+
+                return configuration_type_7
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
             if not isinstance(data, dict):
                 raise TypeError()
-            configuration_type_7 = AzureBlobTechnicalAssetConfiguration.from_dict(data)
+            configuration_type_8 = AzureBlobTechnicalAssetConfiguration.from_dict(data)
 
-            return configuration_type_7
+            return configuration_type_8
 
         configuration = _parse_configuration(d.pop("configuration"))
 

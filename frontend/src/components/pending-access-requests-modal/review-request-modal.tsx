@@ -15,8 +15,9 @@ import {
     theme,
 } from 'antd';
 import { addDays, isPast } from 'date-fns';
-import { useState } from 'react';
+import { type ReactNode, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import AccessMode from '@/components/access-modes/access-mode.component.tsx';
 import EllipsisParagraph from '@/components/ellipsis-paragraph/ellipsis-paragraph.component';
 import {
     AbstractProductIcon,
@@ -27,7 +28,7 @@ import {
 import { AccessDurationType } from '@/store/api/services/generated/configurationAccessDurationsApi.ts';
 import { InputPortStatus } from '@/store/api/services/generated/dataProductsApi.ts';
 import { RenewalStatus } from '@/store/api/services/generated/dataProductsOutputPortsInputPortsApi.ts';
-import type { AbstractDataProductType } from '@/store/api/services/generated/usersApi.ts';
+import type { AbstractDataProductType, InputPortRequest } from '@/store/api/services/generated/usersApi.ts';
 import {
     type Request,
     RequestType_DataProductRoleAssignment,
@@ -61,7 +62,7 @@ type RequestDetails = {
         type: string;
         icon: React.ReactNode;
     };
-    accessType: string;
+    accessType: string | ReactNode;
     justification: string;
     hasJustification: boolean;
     requestedOn: string;
@@ -117,11 +118,14 @@ const abstractDataProductTypeName = (type: AbstractDataProductType) => {
     }
 };
 
+const isInputPortRequest = (action: Request): action is InputPortRequest =>
+    action.request_type === RequestType_InputPort;
+
 function getRequestDetails(
     action: Request,
     t: (key: string, params?: Record<string, string>) => string,
 ): RequestDetails | undefined {
-    if (action.request_type === RequestType_InputPort) {
+    if (isInputPortRequest(action)) {
         return {
             requesterName: `${action.requested_by.first_name} ${action.requested_by.last_name}`,
             requesterEmail: action.requested_by.email,
@@ -144,7 +148,14 @@ function getRequestDetails(
                 type: t('Output Port'),
                 icon: <OutputPortOutlined />,
             },
-            accessType: t('READ ONLY'),
+            accessType: action.access_mode ? (
+                <AccessMode
+                    accessMode={action.access_mode}
+                    tagProps={{ style: { fontSize: 16, fontWeight: 700, paddingInline: 10, paddingBlock: 2 } }}
+                />
+            ) : (
+                t('READ ONLY')
+            ),
             justification: action.justification || t('No justification provided'),
             hasJustification: true,
             requestedOn: action.requested_on,
@@ -236,7 +247,7 @@ export function ReviewRequestModal({ action, open, onClose, onAccept, onReject, 
 
     const handleReject = () => {
         const { decisionNote } = form.getFieldsValue();
-        if (action.request_type === RequestType_InputPort && !decisionNote?.trim()) {
+        if (isInputPortRequest(action) && !decisionNote?.trim()) {
             form.setFields([{ name: 'decisionNote', errors: [t('A decision note is required when declining')] }]);
             return;
         }

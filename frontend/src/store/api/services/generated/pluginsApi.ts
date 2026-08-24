@@ -188,6 +188,12 @@ export type RedshiftTechnicalAssetConfiguration = {
   table_path?: string;
   access_granularity: AccessGranularity;
 };
+export type RustFsTechnicalAssetConfiguration = {
+  configuration_type: "RustFSTechnicalAssetConfiguration";
+  bucket: string;
+  suffix?: string;
+  path: string;
+};
 export type S3TechnicalAssetConfiguration = {
   configuration_type: "S3TechnicalAssetConfiguration";
   bucket: string;
@@ -226,6 +232,9 @@ export type RenderTechnicalAssetAccessPathRequest = {
     | ({
         configuration_type: "RedshiftTechnicalAssetConfiguration";
       } & RedshiftTechnicalAssetConfiguration)
+    | ({
+        configuration_type: "RustFSTechnicalAssetConfiguration";
+      } & RustFsTechnicalAssetConfiguration)
     | ({
         configuration_type: "S3TechnicalAssetConfiguration";
       } & S3TechnicalAssetConfiguration)
