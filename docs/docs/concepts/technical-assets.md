@@ -32,7 +32,7 @@ Output Ports should follow the advice that data that belongs together should als
 When creating a Technical Asset, you can choose between two provisioning strategies:
 
 ### Default Mapping
-This is the **recommended option for most users**. Default mapping uses the platform's standard provisioning conventions,automatically generating technical identifiers (paths, table names, schemas, etc.) based on your Data Product's namespace and configuration.
+This is the **recommended option for most users**. Default mapping uses the platform's standard provisioning conventions, automatically generating technical identifiers (paths, table names, schemas, etc.) based on your Data Product's namespace and configuration.
 
 **Benefits:**
 - Follows organizational naming conventions
