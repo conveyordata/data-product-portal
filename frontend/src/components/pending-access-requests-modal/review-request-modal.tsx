@@ -10,8 +10,9 @@ import {
 } from '@ant-design/icons';
 import { Avatar, Button, Card, Col, Divider, Flex, Form, Input, Modal, Row, Space, Typography, theme } from 'antd';
 import { addDays } from 'date-fns';
-import { useState } from 'react';
+import { type ReactNode, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import AccessMode from '@/components/access-modes/access-mode.component.tsx';
 import {
     AbstractProductIcon,
     DataProductOutlined,
@@ -20,7 +21,7 @@ import {
 } from '@/components/icons';
 import { AccessDurationType } from '@/store/api/services/generated/configurationAccessDurationsApi.ts';
 import { RenewalStatus } from '@/store/api/services/generated/dataProductsOutputPortsInputPortsApi.ts';
-import type { AbstractDataProductType } from '@/store/api/services/generated/usersApi.ts';
+import type { AbstractDataProductType, InputPortRequest } from '@/store/api/services/generated/usersApi.ts';
 import {
     type Request,
     RequestType_DataProductRoleAssignment,
@@ -53,7 +54,7 @@ type RequestDetails = {
         type: string;
         icon: React.ReactNode;
     };
-    accessType: string;
+    accessType: string | ReactNode;
     justification: string;
     hasJustification: boolean;
     requestedOn: string;
@@ -98,11 +99,14 @@ const abstractDataProductTypeName = (type: AbstractDataProductType) => {
     }
 };
 
+const isInputPortRequest = (action: Request): action is InputPortRequest =>
+    action.request_type === RequestType_InputPort;
+
 function getRequestDetails(
     action: Request,
     t: (key: string, params?: Record<string, string>) => string,
 ): RequestDetails | undefined {
-    if (action.request_type === RequestType_InputPort) {
+    if (isInputPortRequest(action)) {
         return {
             requesterName: `${action.requested_by.first_name} ${action.requested_by.last_name}`,
             requesterEmail: action.requested_by.email,
@@ -126,7 +130,14 @@ function getRequestDetails(
                 type: t('Output Port'),
                 icon: <OutputPortOutlined />,
             },
-            accessType: t('READ ONLY'),
+            accessType: action.access_mode ? (
+                <AccessMode
+                    accessMode={action.access_mode}
+                    tagProps={{ style: { fontSize: 16, fontWeight: 700, paddingInline: 10, paddingBlock: 2 } }}
+                />
+            ) : (
+                t('READ ONLY')
+            ),
             justification: action.justification || t('No justification provided'),
             hasJustification: true,
             requestedOn: action.requested_on,
@@ -217,7 +228,7 @@ export function ReviewRequestModal({ action, open, onClose, onAccept, onReject }
 
     const handleReject = () => {
         const { decisionNote } = form.getFieldsValue();
-        if (action.request_type === RequestType_InputPort && !decisionNote?.trim()) {
+        if (isInputPortRequest(action) && !decisionNote?.trim()) {
             form.setFields([{ name: 'decisionNote', errors: [t('A decision note is required when declining')] }]);
             return;
         }
@@ -257,8 +268,8 @@ export function ReviewRequestModal({ action, open, onClose, onAccept, onReject }
             {/* 3-Tile Access Visualization using Antd Row/Col */}
             <Row gutter={[16, 16]}>
                 {/* Requesting Consumer Tile */}
-                <Col span={9}>
-                    <Card size="small" variant="outlined">
+                <Col span={9} style={{ display: 'flex' }}>
+                    <Card size="small" variant="outlined" style={{ flex: 1 }}>
                         <Typography.Text strong style={{ fontSize: 12 }}>
                             {t('Requesting Consumer')}
                         </Typography.Text>
@@ -280,20 +291,30 @@ export function ReviewRequestModal({ action, open, onClose, onAccept, onReject }
                 </Col>
                 {/* Requests Role/Access Tile (smaller) */}
                 <Col span={6} style={{ display: 'flex' }}>
-                    <Card size="small" variant="outlined" style={{ flex: 1 }}>
+                    <Card
+                        size="small"
+                        variant="outlined"
+                        style={{ flex: 1 }}
+                        styles={{ body: { display: 'flex', flexDirection: 'column', height: '100%' } }}
+                    >
                         <Typography.Text strong style={{ fontSize: 12 }}>
                             {details.requestType === t('Role Assignment') ? t('Requests Role') : t('Requests Access')}
                         </Typography.Text>
-                        <Flex align="center" justify="center">
-                            <Typography.Text strong style={{ fontSize: 16 }}>
-                                {details.accessType}
-                            </Typography.Text>
+
+                        <Flex align="center" justify="center" style={{ flex: 1 }}>
+                            {typeof details.accessType === 'string' ? (
+                                <Typography.Text strong style={{ fontSize: 16 }}>
+                                    {details.accessType}
+                                </Typography.Text>
+                            ) : (
+                                details.accessType
+                            )}
                         </Flex>
                     </Card>
                 </Col>
                 {/* Requested Resource Tile */}
-                <Col span={9}>
-                    <Card size="small" variant="outlined">
+                <Col span={9} style={{ display: 'flex' }}>
+                    <Card size="small" variant="outlined" style={{ flex: 1 }}>
                         <Typography.Text strong style={{ fontSize: 12 }}>
                             {t('Requested Resource')}
                         </Typography.Text>
@@ -427,7 +448,7 @@ export function ReviewRequestModal({ action, open, onClose, onAccept, onReject }
                         </Flex>
                     </Card>
                 </Col>
-                {action.request_type === RequestType_InputPort && (
+                {isInputPortRequest(action) && (
                     <Col span={24}>
                         <Form form={form} layout="vertical">
                             <Form.Item
