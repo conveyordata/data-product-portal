@@ -14,7 +14,6 @@ from sqlalchemy.dialects import postgresql
 
 from app.shared.model import utcnow
 
-# revision identifiers, used by Alembic.
 revision: str = "e4b81c7d2f90"
 down_revision: Union[str, None] = "44b3eff9ab38"
 branch_labels: Union[str, Sequence[str], None] = None

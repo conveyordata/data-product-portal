@@ -18,15 +18,12 @@ T = TypeVar("T", bound="RustFSTechnicalAssetConfiguration")
 
 @_attrs_define
 class RustFSTechnicalAssetConfiguration:
-    """RustFS is S3-compatible, so this mirrors the S3 plugin's bucket/suffix/path
-    configuration. It is a platform of its own rather than a child of AWS because it
-    is self-hosted: there is no AWS account, and no AWS console to federate into.
-
-        Attributes:
-            configuration_type (Literal['RustFSTechnicalAssetConfiguration']):
-            bucket (str):
-            path (str):
-            suffix (str | Unset):  Default: ''.
+    """
+    Attributes:
+        configuration_type (Literal['RustFSTechnicalAssetConfiguration']):
+        bucket (str):
+        path (str):
+        suffix (str | Unset):  Default: ''.
     """
 
     configuration_type: Literal["RustFSTechnicalAssetConfiguration"]

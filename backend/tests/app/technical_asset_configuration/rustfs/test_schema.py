@@ -11,7 +11,6 @@ class TestRustFSPlugin:
         meta = RustFSTechnicalAssetConfiguration.get_platform_metadata()
         assert meta.display_name == "RustFS"
         assert meta.platform_key == "rustfs"
-        # Self-hosted: not nested under AWS, and no per-environment console to pick.
         assert meta.parent_platform is None
         assert meta.has_environments is False
 

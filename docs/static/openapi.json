@@ -15314,8 +15314,7 @@
           "bucket",
           "path"
         ],
-        "title": "RustFSTechnicalAssetConfiguration",
-        "description": "RustFS is S3-compatible, so this mirrors the S3 plugin's bucket/suffix/path\nconfiguration. It is a platform of its own rather than a child of AWS because it\nis self-hosted: there is no AWS account, and no AWS console to federate into."
+        "title": "RustFSTechnicalAssetConfiguration"
       },
       "S3TechnicalAssetConfiguration": {
         "properties": {

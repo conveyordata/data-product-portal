@@ -12321,9 +12321,6 @@ func (s *Role) SetPrototype(val Prototype) {
 func (*Role) createRoleRes() {}
 func (*Role) updateRoleRes() {}
 
-// RustFS is S3-compatible, so this mirrors the S3 plugin's bucket/suffix/path configuration. It is a
-// platform of its own rather than a child of AWS because it is self-hosted: there is no AWS account,
-// and no AWS console to federate into.
 // Ref: #/components/schemas/RustFSTechnicalAssetConfiguration
 type RustFSTechnicalAssetConfiguration struct {
 	ConfigurationType string    `json:"configuration_type"`
