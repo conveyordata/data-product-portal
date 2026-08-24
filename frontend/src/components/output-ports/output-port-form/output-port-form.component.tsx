@@ -228,38 +228,29 @@ const { TextArea } = Input;
 const DEBOUNCE = 500;
 
 export const getAccessTypeOptions = (t: TFunction) => {
-    const labels = [
-        getDatasetAccessTypeLabel(t, OutputPortAccessType.Restricted),
-        getDatasetAccessTypeLabel(t, OutputPortAccessType.Unrestricted),
-        getDatasetAccessTypeLabel(t, OutputPortAccessType.Private),
+    const options = [
+        {
+            value: OutputPortAccessType.Restricted,
+            tooltip: t('Restricted Output Ports are visible to everyone but require permission to use'),
+        },
+        {
+            value: OutputPortAccessType.Unrestricted,
+            tooltip: t('Unrestricted Output Ports are visible and accessible to use by anyone'),
+        },
+        {
+            value: OutputPortAccessType.Private,
+            tooltip: t('Private Output Ports are only visible to owners and users with access'),
+        },
     ];
 
-    return [
-        {
-            label: (
-                <Tooltip title={t('Restricted Output Ports are visible to everyone but require permission to use')}>
-                    <span>{labels[0]}</span>
-                </Tooltip>
-            ),
-            value: OutputPortAccessType.Restricted,
-        },
-        {
-            label: (
-                <Tooltip title={t('Unrestricted Output Ports are visible and accessible to use by anyone')}>
-                    <span>{labels[1]}</span>
-                </Tooltip>
-            ),
-            value: OutputPortAccessType.Unrestricted,
-        },
-        {
-            label: (
-                <Tooltip title={t('Private Output Ports are only visible to owners and users with access')}>
-                    <span>{labels[2]}</span>
-                </Tooltip>
-            ),
-            value: OutputPortAccessType.Private,
-        },
-    ];
+    return options.map(({ value, tooltip }) => ({
+        label: (
+            <Tooltip title={tooltip}>
+                <span>{getDatasetAccessTypeLabel(t, value)}</span>
+            </Tooltip>
+        ),
+        value,
+    }));
 };
 
 export function AccessTypeSection({
