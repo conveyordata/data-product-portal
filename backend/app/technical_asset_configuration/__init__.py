@@ -8,6 +8,7 @@ from .glue.schema import GlueTechnicalAssetConfiguration
 from .osi_sem_model.schema import OSISemanticModelTechnicalAssetConfiguration
 from .postgresql.schema import PostgreSQLTechnicalAssetConfiguration
 from .redshift.schema import RedshiftTechnicalAssetConfiguration
+from .rustfs.schema import RustFSTechnicalAssetConfiguration
 from .s3.schema import S3TechnicalAssetConfiguration
 from .snowflake.schema import SnowflakeTechnicalAssetConfiguration
 
@@ -21,6 +22,7 @@ __all__ = [
     "OSISemanticModelTechnicalAssetConfiguration",
     "PostgreSQLTechnicalAssetConfiguration",
     "RedshiftTechnicalAssetConfiguration",
+    "RustFSTechnicalAssetConfiguration",
     "SnowflakeTechnicalAssetConfiguration",
     "S3TechnicalAssetConfiguration",
     "AzureBlobTechnicalAssetConfiguration",

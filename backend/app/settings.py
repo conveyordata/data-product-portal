@@ -101,6 +101,11 @@ class Settings(BaseSettings):
 
     GITHUB_ORG: str = ""
 
+    RUSTFS_CONSOLE_URL: str = ""
+    # Prepended to the namespace to form the bucket name, when a deployment names its
+    # data product buckets with a common prefix.
+    RUSTFS_BUCKET_PREFIX: str = ""
+
     AWS_SESSION_DURATION: int = 900
 
     # Frontend hosting

@@ -637,6 +637,8 @@ func (s CreateTechnicalAssetRequestConfiguration) Validate() error {
 	switch s.Type {
 	case S3TechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration:
 		return nil // no validation needed
+	case RustFSTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration:
+		return nil // no validation needed
 	case GlueTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration:
 		if err := s.GlueTechnicalAssetConfiguration.Validate(); err != nil {
 			return err
@@ -2858,6 +2860,8 @@ func (s GetTechnicalAssetsResponseItemConfiguration) Validate() error {
 	switch s.Type {
 	case S3TechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration:
 		return nil // no validation needed
+	case RustFSTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration:
+		return nil // no validation needed
 	case GlueTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration:
 		if err := s.GlueTechnicalAssetConfiguration.Validate(); err != nil {
 			return err
@@ -4206,6 +4210,8 @@ func (s RenderTechnicalAssetAccessPathRequestConfiguration) Validate() error {
 	switch s.Type {
 	case S3TechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration:
 		return nil // no validation needed
+	case RustFSTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration:
+		return nil // no validation needed
 	case GlueTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration:
 		if err := s.GlueTechnicalAssetConfiguration.Validate(); err != nil {
 			return err
@@ -4883,6 +4889,8 @@ func (s *TechnicalAsset) Validate() error {
 func (s TechnicalAssetConfiguration) Validate() error {
 	switch s.Type {
 	case S3TechnicalAssetConfigurationTechnicalAssetConfiguration:
+		return nil // no validation needed
+	case RustFSTechnicalAssetConfigurationTechnicalAssetConfiguration:
 		return nil // no validation needed
 	case GlueTechnicalAssetConfigurationTechnicalAssetConfiguration:
 		if err := s.GlueTechnicalAssetConfiguration.Validate(); err != nil {
