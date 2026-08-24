@@ -24,6 +24,10 @@ from app.technical_asset_configuration.rustfs.model import (
 from app.users.schema import User
 
 
+# Nearly identical to S3TechnicalAssetConfiguration (bucket/suffix/path fields,
+# get_ui_metadata, render_template) since RustFS is S3-API-compatible. Not worth
+# extracting a shared base (e.g. ObjectStorageTechnicalAssetConfiguration) for just
+# two plugins with diverging get_url/metadata - revisit if a third one shows up.
 class RustFSTechnicalAssetConfiguration(AssetProviderPlugin):
     name: ClassVar[str] = NAME
     version: ClassVar[str] = "1.0"
