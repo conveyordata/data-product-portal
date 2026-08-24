@@ -11,6 +11,7 @@
 {% set access_mode_unlinked_admin_technical_asset_id = "d3b62b7c-1b72-4dc8-a20e-eab964763c0b" %}
 {% set access_mode_unlinked_technical_asset_id = "939455a4-8bf0-4127-b414-100e6df9faa9" %}
 {% set access_modes_consumer = "98688e99-24e8-425d-8ca8-7134257028fd" %}
+{% set access_modes_consumer_pending = "f39ab873-24f9-4745-bab4-25cedb0b6dfa" %}
 {% set access_modes_example = "da9e4ef1-48d5-4f3d-9094-100d3abc64b5" %}
 {% set dei_access_modes_example_output_port = "64369c22-9e41-4bfa-953a-87ddf484cd52" %}
 
@@ -720,7 +721,20 @@ VALUES (gen_random_uuid(), '{{ access_modes_example }}'::uuid, '{{ john_id }}'::
 ), timezone('utc'::text, current_timestamp
 ), NULL, NULL);
 
-INSERT INTO public.datasets (id, namespace, data_product_id, name, description, about, status, access_type, created_on, updated_on, deleted_at) VALUES ('{{ dei_access_modes_example_output_port }}'::uuid, 'access-mode-representative-dataset', '{{ access_modes_example }}'::uuid, 'Access mode example', 'Quarterly representation metrics by function and level', 'Output port for access mode examples.', 'ACTIVE', 'RESTRICTED', timezone('utc'::text, current_timestamp), NULL, NULL);
+INSERT INTO public.datasets (id, namespace, data_product_id, name, description, about, status, access_type, created_on, updated_on, deleted_at)
+VALUES ('{{ dei_access_modes_example_output_port }}'::uuid, 'access-mode-representative-dataset', '{{ access_modes_example }}'::uuid, 'Access mode example', 'Quarterly representation metrics by function and level', 'Output port for access mode examples.', 'ACTIVE', 'RESTRICTED', timezone('utc'::text, current_timestamp), NULL, NULL);
+
+INSERT INTO public.role_assignments_dataset (
+    id, dataset_id, data_product_id, user_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at) VALUES (
+    gen_random_uuid(),
+    '{{ dei_access_modes_example_output_port }}'::uuid, (
+        SELECT data_product_id FROM public.datasets
+        WHERE id = '{{ dei_access_modes_example_output_port }}'::uuid), '{{ john_id }}'::uuid, (
+        SELECT r.id FROM public.roles AS r
+        WHERE r.scope = 'dataset' AND r.prototype = 2
+    ), 'APPROVED', '{{ john_id }}'::uuid, '2025-10-28 16:32:57.902449', '{{ john_id }}'::uuid, '2025-10-28 16:32:57.910346', '2025-10-28 16:32:57.89898', '2025-10-28 16:32:57.908607', NULL
+);
+
 
 INSERT INTO public.data_output_configurations (id, configuration_type)
 VALUES ('3e5b2eb0-2d78-4ef4-b73b-57df8d85be11', 'RedshiftTechnicalAssetConfiguration');
@@ -830,6 +844,38 @@ SELECT
     timezone('utc'::text, current_timestamp),
     '{{ jane_id }}'::uuid,
     timezone('utc'::text, current_timestamp),
+    NULL,
+    NULL,
+    '{{ access_mode_read }}'::uuid,
+    timezone('utc'::text, current_timestamp),
+    NULL
+FROM link;
+
+-- Access modes consumer (pending request)
+INSERT INTO public.abstract_data_products (id, status, finalizers, name, namespace, abstract_data_product_type, description, domain_id, created_on, updated_on, deleted_at) VALUES ('{{ access_modes_consumer_pending }}'::uuid, 'active', '{}', 'Access modes consumer pending', 'access_modes_consumer_pending', 'data_products', 'Consumer data product for access mode examples with a pending request.', '{{ customer_domain_id }}'::uuid, timezone('utc'::text, current_timestamp), NULL, NULL);
+
+INSERT INTO public.data_products (id, about, type_id, lifecycle_id, usage)
+VALUES ('{{ access_modes_consumer_pending }}'::uuid, NULL, '1b4a64b3-96fb-404c-a73c-294802dc9852', '{{ data_product_lifecycle_id }}'::uuid, NULL);
+
+WITH link AS (
+    INSERT INTO public.input_ports (id, consuming_abstract_data_product_id, dataset_id, status, created_on, updated_on, deleted_at)
+    VALUES (gen_random_uuid(), '{{ access_modes_consumer_pending }}'::uuid, '{{ dei_access_modes_example_output_port }}'::uuid, 'PENDING', timezone('utc'::text, current_timestamp), NULL, NULL)
+    RETURNING id
+)
+
+INSERT INTO public.input_port_requests (id, input_port_id, decision, justification, decision_note, access_duration_type, requested_duration_days, requested_by_id, requested_on, decided_by_id, decided_on, valid_from, valid_until, access_mode_id, created_on, updated_on)
+SELECT
+    gen_random_uuid(),
+    link.id,
+    'PENDING',
+    'Consumer access for access mode examples.',
+    NULL,
+    'PERMANENT',
+    NULL,
+    '{{ jane_id }}'::uuid,
+    timezone('utc'::text, current_timestamp),
+    NULL,
+    NULL,
     NULL,
     NULL,
     '{{ access_mode_read }}'::uuid,
