@@ -86,7 +86,7 @@
         "knip": "^6.32.2",
         "msw": "^2.15.0",
         "rollup-plugin-visualizer": "^7.1.1",
-        "sass": "^1.102.0",
+        "sass": "^1.103.1",
         "typescript": "^7.0.2",
         "vite": "^8.2.1",
         "vite-plugin-svgr": "^5.2.0",
