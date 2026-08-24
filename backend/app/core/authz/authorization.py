@@ -18,6 +18,7 @@ from app.utils.singleton import Singleton
 
 from .actions import AuthorizationAction
 from .resolvers import SubjectResolver
+from .watcher import notify_policy_update
 
 ID: TypeAlias = Union[str, UUID]
 
@@ -79,11 +80,16 @@ class Authorization(metaclass=Singleton):
             enforcer: Enforcer = self._enforcer
             return enforcer.enforce(sub, dom, obj, str(act))
 
+    def reload_policy(self) -> None:
+        self._enforcer.load_policy()
+        self._cache.clear()
+
     def _after_update(self) -> None:
         """The cache should be purged when the casbin database is altered,
         otherwise we risk returning stale results.
         """
         self._cache.clear()
+        notify_policy_update()
 
     def sync_role_permissions(
         self, *, role_id: ID, actions: Sequence[AuthorizationAction]
