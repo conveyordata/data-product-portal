@@ -1,8 +1,22 @@
-import { Empty, Flex, Form, type FormProps, Input, Select, Switch, Typography } from 'antd';
+import { QuestionCircleOutlined } from '@ant-design/icons';
+import {
+    Descriptions,
+    type DescriptionsProps,
+    Empty,
+    Flex,
+    Form,
+    type FormProps,
+    Input,
+    Select,
+    Switch,
+    Tooltip,
+    Typography,
+    theme,
+} from 'antd';
 import { type ReactElement, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants';
+import { DESCRIPTIONS_LABEL_WIDTH, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants';
 import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
 import {
     type DataProductSettingsGetItem,
@@ -20,7 +34,6 @@ import {
 } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { dispatchMessage } from '@/utils/feedback.ts';
-import styles from './data-product-settings.module.scss';
 
 const { TextArea } = Input;
 
@@ -37,6 +50,7 @@ interface DataProductSettingValueForm {
 
 export function DataProductSettings({ id, scope, dataProductId }: Props) {
     const { t } = useTranslation();
+    const { token } = theme.useToken();
     const { data: { data_product_settings: dataProductSettings = [] } = {}, isFetching: isFetchingDP } =
         useGetDataProductSettingsQuery(id || '', {
             skip: scope !== 'dataproduct',
@@ -157,27 +171,13 @@ export function DataProductSettings({ id, scope, dataProductId }: Props) {
     }, [form, updatedSettings]);
 
     const formContent = useMemo(() => {
-        // Group settings by divider
-        const groupedSettings = updatedSettings.reduce(
-            (groups, setting) => {
-                const category = setting.category; // Use 'Default' for settings without a divider
-                if (!groups[category]) {
-                    groups[category] = [];
-                }
-                groups[category].push(setting);
-                return groups;
-            },
-            {} as Record<string, typeof updatedSettings>,
-        );
-
-        const renderSetting = (setting: DataProductSettingsGetItem): ReactElement | null => {
+        const renderControl = (setting: DataProductSettingsGetItem): ReactElement | null => {
             switch (setting.type) {
                 case 'checkbox':
                     return (
                         <Form.Item<DataProductSettingValueForm>
                             name={`value_${setting.id}`}
-                            label={setting.name}
-                            tooltip={setting.tooltip}
+                            style={{ margin: 0 }}
                             rules={[
                                 {
                                     required: true,
@@ -190,21 +190,13 @@ export function DataProductSettings({ id, scope, dataProductId }: Props) {
                     );
                 case 'tags':
                     return (
-                        <Form.Item<DataProductSettingValueForm>
-                            name={`value_${setting.id}`}
-                            label={setting.name}
-                            tooltip={setting.tooltip}
-                        >
+                        <Form.Item<DataProductSettingValueForm> name={`value_${setting.id}`} style={{ margin: 0 }}>
                             <Select allowClear={false} defaultActiveFirstOption mode="tags" />
                         </Form.Item>
                     );
                 case 'input':
                     return (
-                        <Form.Item<DataProductSettingValueForm>
-                            name={`value_${setting.id}`}
-                            label={setting.name}
-                            tooltip={setting.tooltip}
-                        >
+                        <Form.Item<DataProductSettingValueForm> name={`value_${setting.id}`}>
                             <TextArea rows={3} count={{ show: true, max: MAX_DESCRIPTION_INPUT_LENGTH }} />
                         </Form.Item>
                     );
@@ -213,54 +205,67 @@ export function DataProductSettings({ id, scope, dataProductId }: Props) {
             }
         };
 
-        // Render grouped settings
-        return Object.entries(groupedSettings).map(([divider, settings]) => (
-            <Flex key={divider} vertical>
-                <Typography.Text type="secondary">{divider}</Typography.Text>
-                {settings.map((setting) => (
-                    <Flex key={setting.id} vertical>
-                        {/* Hidden Input for ID */}
-                        <Form.Item<DataProductSettingValueForm>
-                            name={`data_product_settings_id_${setting.id}`}
-                            initialValue={setting.id}
-                            hidden
-                        />
-                        {renderSetting(setting)}
+        const items: DescriptionsProps['items'] = updatedSettings.map((setting) => ({
+            key: setting.id,
+            label: (
+                <Flex vertical gap={0}>
+                    <Flex align="center" gap="small">
+                        <span>{setting.name}</span>
+                        {setting.tooltip ? (
+                            <Tooltip title={setting.tooltip}>
+                                <QuestionCircleOutlined style={{ color: token.colorTextTertiary }} />
+                            </Tooltip>
+                        ) : null}
                     </Flex>
-                ))}
-            </Flex>
-        ));
-    }, [updatedSettings, t]);
+                    <Typography.Text type="secondary" style={{ fontSize: token.fontSizeSM }}>
+                        {t('Category')}: {setting.category}
+                    </Typography.Text>
+                </Flex>
+            ),
+            children: (
+                <>
+                    <Form.Item<DataProductSettingValueForm>
+                        name={`data_product_settings_id_${setting.id}`}
+                        initialValue={setting.id}
+                        hidden
+                    />
+                    {renderControl(setting)}
+                </>
+            ),
+        }));
+
+        return (
+            <Descriptions
+                column={1}
+                size="small"
+                bordered
+                items={items}
+                styles={{ label: { color: token.colorTextSecondary, width: DESCRIPTIONS_LABEL_WIDTH } }}
+            />
+        );
+    }, [updatedSettings, t, token]);
     const isLoading = isFetching || isFetchingDP || isFetchingDS;
     if (!isLoading && updatedSettings.length === 0) return <Empty description="No settings to show" />;
 
     return (
-        <Flex vertical>
-            <Form
-                form={form}
-                labelCol={FORM_GRID_WRAPPER_COLS}
-                wrapperCol={FORM_GRID_WRAPPER_COLS}
-                layout="horizontal"
-                onFinish={onSubmit}
-                onFinishFailed={onSubmitFailed}
-                autoComplete="off"
-                labelWrap
-                labelAlign="left"
-                disabled={isLoading || !canUpdateProductSettings || !canUpdateOutputPortSetting}
-                className={styles.form}
-                onValuesChange={(_, allValues) => {
-                    // Trigger form submission after 0.5 seconds of unchanged input values
-                    if (timeoutRef.current) {
-                        clearTimeout(timeoutRef.current);
-                    }
+        <Form
+            form={form}
+            onFinish={onSubmit}
+            onFinishFailed={onSubmitFailed}
+            autoComplete="off"
+            disabled={isLoading || !canUpdateProductSettings || !canUpdateOutputPortSetting}
+            onValuesChange={(_, allValues) => {
+                // Trigger form submission after 0.5 seconds of unchanged input values
+                if (timeoutRef.current) {
+                    clearTimeout(timeoutRef.current);
+                }
 
-                    timeoutRef.current = setTimeout(() => {
-                        onSubmit(allValues); // Trigger the onSubmit function
-                    }, 500);
-                }}
-            >
-                {formContent}
-            </Form>
-        </Flex>
+                timeoutRef.current = setTimeout(() => {
+                    onSubmit(allValues); // Trigger the onSubmit function
+                }, 500);
+            }}
+        >
+            {formContent}
+        </Form>
     );
 }

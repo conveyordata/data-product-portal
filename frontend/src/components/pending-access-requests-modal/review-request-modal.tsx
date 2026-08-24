@@ -17,6 +17,7 @@ import {
 import { addDays, isPast } from 'date-fns';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import EllipsisParagraph from '@/components/ellipsis-paragraph/ellipsis-paragraph.component';
 import {
     AbstractProductIcon,
     DataProductOutlined,
@@ -304,7 +305,7 @@ export function ReviewRequestModal({ action, open, onClose, onAccept, onReject, 
                       key: 'justification',
                       label: t('Business Justification'),
                       span: 2,
-                      children: details.justification,
+                      children: <EllipsisParagraph text={details.justification} />,
                   },
               ]
             : []),
@@ -441,62 +442,36 @@ export function ReviewRequestModal({ action, open, onClose, onAccept, onReject, 
                     </Card>
 
                     {details.currentAccessPeriod && (
-                        <>
-                            {/* Modal-based previous request
-                            <Card
-                                size="small"
-                                variant="outlined"
-                                title={
-                                    <Flex align="center" justify="space-between">
-                                        <span>{t('Previous Request')}</span>
-                                        {previousRequestStatus && (
-                                            <Badge
-                                                status={getInputPortStatusBadgeStatus(previousRequestStatus)}
-                                                text={getInputPortStatusLabel(t, previousRequestStatus)}
-                                            />
-                                        )}
-                                    </Flex>
-                                }
-                                hoverable={!!previousRequestAction}
-                                onClick={previousRequestAction ? () => setShowPreviousRequest(true) : undefined}
-                            >
-                                <Typography.Text>{details.currentAccessPeriod.label}</Typography.Text>
-                            </Card>
-                            */}
-                            <Collapse
-                                size="small"
-                                items={[
-                                    {
-                                        key: 'previous-request',
-                                        label: t('Previous Request'),
-                                        extra: (
-                                            <Flex align="center" gap="small">
-                                                <Typography.Text
-                                                    type="secondary"
-                                                    style={{ fontSize: token.fontSizeSM }}
-                                                >
-                                                    {details.currentAccessPeriod.label}
-                                                </Typography.Text>
-                                                {previousRequestStatus && (
-                                                    <Badge
-                                                        status={getInputPortStatusBadgeStatus(previousRequestStatus)}
-                                                        text={getInputPortStatusLabel(t, previousRequestStatus)}
-                                                    />
-                                                )}
-                                            </Flex>
-                                        ),
-                                        children: (
-                                            <Descriptions
-                                                column={2}
-                                                size="small"
-                                                items={previousDetailItems}
-                                                styles={{ label: { color: token.colorTextSecondary } }}
-                                            />
-                                        ),
-                                    },
-                                ]}
-                            />
-                        </>
+                        <Collapse
+                            size="small"
+                            items={[
+                                {
+                                    key: 'previous-request',
+                                    label: t('Previous Request'),
+                                    extra: (
+                                        <Flex gap="small">
+                                            <Typography.Text type="secondary">
+                                                {details.currentAccessPeriod.label}
+                                            </Typography.Text>
+                                            {previousRequestStatus && (
+                                                <Badge
+                                                    status={getInputPortStatusBadgeStatus(previousRequestStatus)}
+                                                    text={getInputPortStatusLabel(t, previousRequestStatus)}
+                                                />
+                                            )}
+                                        </Flex>
+                                    ),
+                                    children: (
+                                        <Descriptions
+                                            column={2}
+                                            size="small"
+                                            items={previousDetailItems}
+                                            styles={{ label: { color: token.colorTextSecondary } }}
+                                        />
+                                    ),
+                                },
+                            ]}
+                        />
                     )}
 
                     {!readOnly && action.request_type === RequestType_InputPort && (
