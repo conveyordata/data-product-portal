@@ -41,6 +41,7 @@ export function InputPortActionButton({
             status === InputPortStatus.Denied ||
             status === InputPortStatus.Revoked ||
             status === InputPortStatus.Cancelled ||
+            renewalStatus === RenewalStatus.Denied ||
             isExpiringSoon(status, validUntil, thresholdDays));
 
     const handleCancelRequest = useCallback(

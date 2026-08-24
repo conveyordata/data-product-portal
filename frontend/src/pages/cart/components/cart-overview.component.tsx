@@ -193,7 +193,7 @@ export const CartOverview = ({
                     items={cartOutputPorts?.map((outputPort) => {
                         return {
                             label: (
-                                <Flex vertical gap="small">
+                                <Flex vertical gap="small" align="flex-start">
                                     <Typography.Text>{outputPort.name}</Typography.Text>
                                     {dataProductTypeChoice && (
                                         <OutputPortAccessDuration

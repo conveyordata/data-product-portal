@@ -1,18 +1,24 @@
+import { CheckOutlined, CloseOutlined, UserOutlined } from '@ant-design/icons';
 import {
-    CalendarOutlined,
-    CheckOutlined,
-    ClockCircleOutlined,
-    CloseOutlined,
-    FileTextOutlined,
-    HistoryOutlined,
-    InfoCircleOutlined,
-    UserOutlined,
-} from '@ant-design/icons';
-import { Avatar, Button, Card, Col, Divider, Flex, Form, Input, Modal, Row, Space, Typography, theme } from 'antd';
-import { addDays } from 'date-fns';
+    Avatar,
+    Badge,
+    Button,
+    Card,
+    Collapse,
+    Descriptions,
+    type DescriptionsProps,
+    Flex,
+    Form,
+    Input,
+    Modal,
+    Typography,
+    theme,
+} from 'antd';
+import { addDays, isPast } from 'date-fns';
 import { type ReactNode, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import AccessMode from '@/components/access-modes/access-mode.component.tsx';
+import EllipsisParagraph from '@/components/ellipsis-paragraph/ellipsis-paragraph.component';
 import {
     AbstractProductIcon,
     DataProductOutlined,
@@ -20,6 +26,7 @@ import {
     TechnicalAssetOutlined,
 } from '@/components/icons';
 import { AccessDurationType } from '@/store/api/services/generated/configurationAccessDurationsApi.ts';
+import { InputPortStatus } from '@/store/api/services/generated/dataProductsApi.ts';
 import { RenewalStatus } from '@/store/api/services/generated/dataProductsOutputPortsInputPortsApi.ts';
 import type { AbstractDataProductType, InputPortRequest } from '@/store/api/services/generated/usersApi.ts';
 import {
@@ -29,19 +36,20 @@ import {
     RequestType_TechnicalAssetOutputPort,
 } from '@/types/request-types/request-types.tsx';
 import { formatDate } from '@/utils/date.helper.ts';
+import { getInputPortStatusBadgeStatus, getInputPortStatusLabel } from '@/utils/status.helper.ts';
 
 type Props = {
     action?: Request | null;
     open: boolean;
     onClose: () => void;
-    onAccept: (action: Request, decisionNote?: string) => void;
-    onReject: (action: Request, decisionNote?: string) => void;
+    onAccept?: (action: Request, decisionNote?: string) => void;
+    onReject?: (action: Request, decisionNote?: string) => void;
+    readOnly?: boolean;
 };
 
 type RequestDetails = {
     requesterName: string;
     requesterEmail: string;
-    requestType: string;
     source: {
         name: string;
         email: string;
@@ -65,6 +73,7 @@ type RequestDetails = {
     currentAccessPeriod?: {
         label: string;
         wasRevoked: boolean;
+        validUntil: string | null;
     } | null;
 };
 
@@ -86,6 +95,16 @@ function formatAccessPeriodLabel(
         return `${t('Until')} ${formatDate(current.valid_until)}`;
     }
     return t('Unknown');
+}
+
+function getPreviousRequestStatus(period: { wasRevoked: boolean; validUntil: string | null }): InputPortStatus {
+    if (period.wasRevoked) {
+        return InputPortStatus.Revoked;
+    }
+    if (period.validUntil && isPast(new Date(period.validUntil))) {
+        return InputPortStatus.Expired;
+    }
+    return InputPortStatus.Approved;
 }
 
 const abstractDataProductTypeName = (type: AbstractDataProductType) => {
@@ -110,7 +129,6 @@ function getRequestDetails(
         return {
             requesterName: `${action.requested_by.first_name} ${action.requested_by.last_name}`,
             requesterEmail: action.requested_by.email,
-            requestType: t('Output Port Access'),
             source: {
                 name: action.input_port.consuming_abstract_data_product.name,
                 email: action.requested_by.email,
@@ -150,6 +168,7 @@ function getRequestDetails(
                     ? {
                           label: formatAccessPeriodLabel(t, action.input_port.current_request),
                           wasRevoked: action.input_port.current_request.revoked_at != null,
+                          validUntil: action.input_port.current_request.valid_until,
                       }
                     : null,
         };
@@ -159,7 +178,6 @@ function getRequestDetails(
         return {
             requesterName: `${action.requested_by.first_name} ${action.requested_by.last_name}`,
             requesterEmail: action.requested_by.email,
-            requestType: t('Technical Asset Inclusion'),
             source: {
                 name: action.technical_asset.name,
                 email: action.requested_by.email,
@@ -184,7 +202,6 @@ function getRequestDetails(
         return {
             requesterName: `${action.requested_by?.first_name} ${action.requested_by?.last_name}`,
             requesterEmail: action.requested_by?.email || '',
-            requestType: t('Role Assignment'),
             source: {
                 name: `${action.user.first_name} ${action.user.last_name}`,
                 email: action.user.email,
@@ -207,11 +224,13 @@ function getRequestDetails(
     return undefined;
 }
 
-export function ReviewRequestModal({ action, open, onClose, onAccept, onReject }: Props) {
+export function ReviewRequestModal({ action, open, onClose, onAccept, onReject, readOnly = false }: Props) {
     const { t } = useTranslation();
     const { token } = theme.useToken();
+    const tileLabelStyle = { fontSize: token.fontSizeSM, textTransform: 'uppercase' as const };
     const [form] = Form.useForm<{ decisionNote: string }>();
     const [isAccepting, setIsAccepting] = useState(false);
+    const [showPreviousRequest, setShowPreviousRequest] = useState(false);
 
     if (!action) {
         return null;
@@ -221,7 +240,7 @@ export function ReviewRequestModal({ action, open, onClose, onAccept, onReject }
 
     const handleAccept = () => {
         const { decisionNote } = form.getFieldsValue();
-        onAccept(action, decisionNote);
+        onAccept?.(action, decisionNote);
         onClose();
         form.resetFields();
     };
@@ -233,7 +252,7 @@ export function ReviewRequestModal({ action, open, onClose, onAccept, onReject }
             return;
         }
         setIsAccepting(true);
-        onReject(action, decisionNote);
+        onReject?.(action, decisionNote);
         onClose();
         form.resetFields();
         setIsAccepting(false);
@@ -241,215 +260,232 @@ export function ReviewRequestModal({ action, open, onClose, onAccept, onReject }
 
     if (!details) return null;
 
-    return (
-        <Modal
-            title={
-                <Flex align="center" gap="small">
-                    <span>{details.title}</span>
-                    {details.renewalStatus === RenewalStatus.Pending && (
-                        <span style={{ color: token.colorWarning }}>{t('Renewal')}</span>
-                    )}
+    const previousRequestAction: Request | null =
+        action.request_type === RequestType_InputPort && details.currentAccessPeriod
+            ? {
+                  ...action.input_port.current_request,
+                  request_type: RequestType_InputPort,
+                  input_port: { ...action.input_port, renewal_status: null },
+              }
+            : null;
+
+    const previousRequestStatus = details.currentAccessPeriod
+        ? getPreviousRequestStatus(details.currentAccessPeriod)
+        : null;
+
+    const previousDetails = previousRequestAction ? getRequestDetails(previousRequestAction, t) : undefined;
+
+    const previousDetailItems: DescriptionsProps['items'] = previousDetails
+        ? [
+              {
+                  key: 'requested-on',
+                  label: t('Requested On'),
+                  children: formatDate(previousDetails.requestedOn),
+              },
+              {
+                  key: 'requested-by',
+                  label: t('Requested By'),
+                  children: (
+                      <Flex align="baseline" gap="small" wrap>
+                          <Typography.Text>{previousDetails.requesterName}</Typography.Text>
+                          <Typography.Text type="secondary" style={{ fontSize: token.fontSizeSM }}>
+                              {previousDetails.requesterEmail}
+                          </Typography.Text>
+                      </Flex>
+                  ),
+              },
+              ...(previousDetails.isPermanent === true ||
+              (previousDetails.isPermanent === false && previousDetails.accessDurationDays != null)
+                  ? [
+                        {
+                            key: 'requested-duration',
+                            label: t('Requested Duration'),
+                            children: previousDetails.isPermanent
+                                ? t('Permanent')
+                                : `${previousDetails.accessDurationDays} ${t('days')}`,
+                        },
+                    ]
+                  : []),
+          ]
+        : [];
+
+    const detailItems: DescriptionsProps['items'] = [
+        ...(details.hasJustification
+            ? [
+                  {
+                      key: 'justification',
+                      label: t('Business Justification'),
+                      span: 2,
+                      children: <EllipsisParagraph text={details.justification} />,
+                  },
+              ]
+            : []),
+        {
+            key: 'requested-on',
+            label: t('Requested On'),
+            children: formatDate(details.requestedOn),
+        },
+        {
+            key: 'requested-by',
+            label: t('Requested By'),
+            children: (
+                <Flex align="baseline" gap="small" wrap>
+                    <Typography.Text>{details.requesterName}</Typography.Text>
+                    <Typography.Text type="secondary" style={{ fontSize: token.fontSizeSM }}>
+                        {details.requesterEmail}
+                    </Typography.Text>
                 </Flex>
-            }
-            open={open}
-            onCancel={onClose}
-            width={800}
-            footer={
-                <Space>
-                    <Button danger icon={<CloseOutlined />} loading={isAccepting} onClick={handleReject}>
-                        {t('Decline')}
-                    </Button>
-                    <Button type="primary" icon={<CheckOutlined />} onClick={handleAccept}>
-                        {t('Accept')}
-                    </Button>
-                </Space>
-            }
-        >
-            {/* 3-Tile Access Visualization using Antd Row/Col */}
-            <Row gutter={[16, 16]}>
-                {/* Requesting Consumer Tile */}
-                <Col span={9} style={{ display: 'flex' }}>
-                    <Card size="small" variant="outlined" style={{ flex: 1 }}>
-                        <Typography.Text strong style={{ fontSize: 12 }}>
-                            {t('Requesting Consumer')}
-                        </Typography.Text>
-                        <Flex align="center" gap="middle">
-                            <Avatar
-                                icon={details.source.icon}
-                                style={{ color: '#1890ff', backgroundColor: '#e6f7ff' }}
-                            />
-                            <Flex vertical>
-                                <Typography.Text strong>{details.source.name}</Typography.Text>
-                                {details.source.email && (
-                                    <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                                        {details.source.email}
-                                    </Typography.Text>
-                                )}
-                            </Flex>
-                        </Flex>
-                    </Card>
-                </Col>
-                {/* Requests Role/Access Tile (smaller) */}
-                <Col span={6} style={{ display: 'flex' }}>
-                    <Card
-                        size="small"
-                        variant="outlined"
-                        style={{ flex: 1 }}
-                        styles={{ body: { display: 'flex', flexDirection: 'column', height: '100%' } }}
-                    >
-                        <Typography.Text strong style={{ fontSize: 12 }}>
-                            {details.requestType === t('Role Assignment') ? t('Requests Role') : t('Requests Access')}
-                        </Typography.Text>
+            ),
+        },
+        ...(details.isPermanent === true || (details.isPermanent === false && details.accessDurationDays != null)
+            ? [
+                  {
+                      key: 'requested-duration',
+                      label: t('Requested Duration'),
+                      children: details.isPermanent ? t('Permanent') : `${details.accessDurationDays} ${t('days')}`,
+                  },
+                  ...(!details.isPermanent && details.accessDurationDays != null
+                      ? [
+                            {
+                                key: 'calculated-end-date',
+                                label: t('Calculated End Date'),
+                                children: formatDate(addDays(new Date(), details.accessDurationDays)),
+                            },
+                        ]
+                      : []),
+              ]
+            : []),
+    ];
 
-                        <Flex align="center" justify="center" style={{ flex: 1 }}>
-                            {typeof details.accessType === 'string' ? (
-                                <Typography.Text strong style={{ fontSize: 16 }}>
-                                    {details.accessType}
+    return (
+        <>
+            <Modal
+                title={
+                    <Flex vertical>
+                        {details.renewalStatus === RenewalStatus.Pending && (
+                            <Typography.Text
+                                strong
+                                style={{
+                                    color: token.colorPrimary,
+                                    fontSize: token.fontSizeSM,
+                                    textTransform: 'uppercase',
+                                }}
+                            >
+                                {t('Renewal')}
+                            </Typography.Text>
+                        )}
+                        <span>{readOnly ? t('Previous Request') : details.title}</span>
+                    </Flex>
+                }
+                open={open}
+                onCancel={onClose}
+                width={800}
+                footer={
+                    readOnly ? null : (
+                        <Flex gap="small" justify="flex-end">
+                            <Button danger icon={<CloseOutlined />} loading={isAccepting} onClick={handleReject}>
+                                {t('Decline')}
+                            </Button>
+                            <Button type="primary" icon={<CheckOutlined />} onClick={handleAccept}>
+                                {t('Accept')}
+                            </Button>
+                        </Flex>
+                    )
+                }
+            >
+                <Flex vertical gap="middle">
+                    <Flex gap="small" align="stretch">
+                        <Card size="small" variant="outlined" style={{ flex: 3 }}>
+                            <Flex vertical gap="small">
+                                <Typography.Text type="secondary" style={tileLabelStyle}>
+                                    {t('Requesting Consumer')}
                                 </Typography.Text>
-                            ) : (
-                                details.accessType
-                            )}
-                        </Flex>
-                    </Card>
-                </Col>
-                {/* Requested Resource Tile */}
-                <Col span={9} style={{ display: 'flex' }}>
-                    <Card size="small" variant="outlined" style={{ flex: 1 }}>
-                        <Typography.Text strong style={{ fontSize: 12 }}>
-                            {t('Requested Resource')}
-                        </Typography.Text>
-                        <Flex align="center" gap="middle">
-                            <Avatar
-                                icon={details.target.icon}
-                                style={{ color: '#1890ff', backgroundColor: '#e6f7ff' }}
-                            />
-                            <Flex vertical>
-                                <Typography.Text strong>{details.target.name}</Typography.Text>
-                                {details.target.type && (
-                                    <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                                        {details.target.type}
-                                    </Typography.Text>
-                                )}
-                            </Flex>
-                        </Flex>
-                    </Card>
-                </Col>
-
-                {/* Request Details */}
-                <Col span={24}>
-                    <Typography.Title level={5}>
-                        <InfoCircleOutlined /> {t('Request Details')}
-                    </Typography.Title>
-                    <Card size="small" variant="outlined">
-                        <Flex vertical gap="small">
-                            {details.hasJustification && (
-                                <>
-                                    <Flex vertical gap="small">
-                                        <Flex gap="small">
-                                            <FileTextOutlined />
-                                            <Typography.Text strong>{t('Business Justification')}</Typography.Text>
-                                        </Flex>
-                                        <Typography.Text>{details.justification}</Typography.Text>
-                                    </Flex>
-                                    <Divider style={{ margin: 0 }} />
-                                </>
-                            )}
-                            {details.currentAccessPeriod && (
-                                <>
-                                    <Flex align="center" gap="middle">
-                                        <Avatar
-                                            icon={<HistoryOutlined />}
-                                            style={{ color: '#1890ff', backgroundColor: '#e6f7ff' }}
-                                        />
-                                        <Flex vertical>
-                                            <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                                                {t('Previous Request')}
-                                            </Typography.Text>
-                                            <Typography.Text strong>
-                                                {details.currentAccessPeriod.label}
-                                                {details.currentAccessPeriod.wasRevoked && ` (${t('Revoked')})`}
-                                            </Typography.Text>
-                                        </Flex>
-                                    </Flex>
-                                    <Divider style={{ margin: 0 }} />
-                                </>
-                            )}
-                            {(details.isPermanent === true ||
-                                (details.isPermanent === false && details.accessDurationDays != null)) && (
-                                <>
-                                    <Flex justify="space-between" gap="large">
-                                        <Flex align="center" gap="middle">
-                                            <Avatar
-                                                icon={<ClockCircleOutlined />}
-                                                style={{ color: '#1890ff', backgroundColor: '#e6f7ff' }}
-                                            />
-                                            <Flex vertical>
-                                                <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                                                    {t('Requested Duration')}
-                                                </Typography.Text>
-                                                <Typography.Text strong>
-                                                    {details.isPermanent
-                                                        ? t('Permanent')
-                                                        : `${details.accessDurationDays} ${t('days')}`}
-                                                </Typography.Text>
-                                            </Flex>
-                                        </Flex>
-
-                                        {!details.isPermanent && details.accessDurationDays != null && (
-                                            <Flex align="center" gap="middle">
-                                                <Flex vertical style={{ textAlign: 'right' }}>
-                                                    <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                                                        {t('Calculated End Date')}
-                                                    </Typography.Text>
-                                                    <Typography.Text strong>
-                                                        {formatDate(addDays(new Date(), details.accessDurationDays))}
-                                                    </Typography.Text>
-                                                </Flex>
-                                                <Avatar
-                                                    icon={<CalendarOutlined />}
-                                                    style={{ color: '#1890ff', backgroundColor: '#e6f7ff' }}
-                                                />
-                                            </Flex>
-                                        )}
-                                    </Flex>
-                                    <Divider style={{ margin: 0 }} />
-                                </>
-                            )}
-                            <Flex justify="space-between" gap="large">
-                                <Flex align="center" gap="middle">
+                                <Flex align="center" gap="small">
                                     <Avatar
-                                        icon={<UserOutlined />}
-                                        style={{ color: '#1890ff', backgroundColor: '#e6f7ff' }}
+                                        icon={details.source.icon}
+                                        style={{ color: token.colorPrimary, backgroundColor: token.colorPrimaryBg }}
+                                    />
+                                    <Typography.Text strong>{details.source.name}</Typography.Text>
+                                </Flex>
+                            </Flex>
+                        </Card>
+                        <Card size="small" variant="outlined" style={{ flex: 2 }}>
+                            <Flex vertical gap="small">
+                                <Typography.Text type="secondary" style={tileLabelStyle}>
+                                    {action.request_type === RequestType_DataProductRoleAssignment
+                                        ? t('Requests Role')
+                                        : t('Access Mode')}
+                                </Typography.Text>
+                                <Typography.Text strong>{details.accessType}</Typography.Text>
+                            </Flex>
+                        </Card>
+                        <Card size="small" variant="outlined" style={{ flex: 3 }}>
+                            <Flex vertical gap="small">
+                                <Typography.Text type="secondary" style={tileLabelStyle}>
+                                    {t('Requested Resource')}
+                                </Typography.Text>
+                                <Flex align="center" gap="small">
+                                    <Avatar
+                                        icon={details.target.icon}
+                                        style={{ color: token.colorPrimary, backgroundColor: token.colorPrimaryBg }}
                                     />
                                     <Flex vertical>
-                                        <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                                            {t('Requested By')}
-                                        </Typography.Text>
-                                        <Typography.Text strong>{details.requesterName}</Typography.Text>
-                                        <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                                            {details.requesterEmail}
-                                        </Typography.Text>
+                                        <Typography.Text strong>{details.target.name}</Typography.Text>
+                                        {details.target.type && (
+                                            <Typography.Text type="secondary" style={{ fontSize: token.fontSizeSM }}>
+                                                {details.target.type}
+                                            </Typography.Text>
+                                        )}
                                     </Flex>
-                                </Flex>
-
-                                <Flex align="center" gap="middle">
-                                    <Flex vertical style={{ textAlign: 'right' }}>
-                                        <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                                            {t('Requested On')}
-                                        </Typography.Text>
-                                        <Typography.Text strong>{formatDate(details.requestedOn)}</Typography.Text>
-                                    </Flex>
-                                    <Avatar
-                                        icon={<CalendarOutlined />}
-                                        style={{ color: '#1890ff', backgroundColor: '#e6f7ff' }}
-                                    />
                                 </Flex>
                             </Flex>
-                        </Flex>
+                        </Card>
+                    </Flex>
+
+                    <Card size="small" variant="outlined" title={t('Request Details')}>
+                        <Descriptions
+                            column={2}
+                            //layout="vertical"
+                            size="small"
+                            items={detailItems}
+                            styles={{ label: { color: token.colorTextSecondary } }}
+                        />
                     </Card>
-                </Col>
-                {isInputPortRequest(action) && (
-                    <Col span={24}>
+
+                    {details.currentAccessPeriod && (
+                        <Collapse
+                            size="small"
+                            items={[
+                                {
+                                    key: 'previous-request',
+                                    label: t('Previous Request'),
+                                    extra: (
+                                        <Flex gap="small">
+                                            <Typography.Text type="secondary">
+                                                {details.currentAccessPeriod.label}
+                                            </Typography.Text>
+                                            {previousRequestStatus && (
+                                                <Badge
+                                                    status={getInputPortStatusBadgeStatus(previousRequestStatus)}
+                                                    text={getInputPortStatusLabel(t, previousRequestStatus)}
+                                                />
+                                            )}
+                                        </Flex>
+                                    ),
+                                    children: (
+                                        <Descriptions
+                                            column={2}
+                                            size="small"
+                                            items={previousDetailItems}
+                                            styles={{ label: { color: token.colorTextSecondary } }}
+                                        />
+                                    ),
+                                },
+                            ]}
+                        />
+                    )}
+
+                    {!readOnly && action.request_type === RequestType_InputPort && (
                         <Form form={form} layout="vertical">
                             <Form.Item
                                 name="decisionNote"
@@ -462,9 +498,17 @@ export function ReviewRequestModal({ action, open, onClose, onAccept, onReject }
                                 />
                             </Form.Item>
                         </Form>
-                    </Col>
-                )}
-            </Row>
-        </Modal>
+                    )}
+                </Flex>
+            </Modal>
+            {previousRequestAction && (
+                <ReviewRequestModal
+                    action={previousRequestAction}
+                    open={showPreviousRequest}
+                    onClose={() => setShowPreviousRequest(false)}
+                    readOnly
+                />
+            )}
+        </>
     );
 }

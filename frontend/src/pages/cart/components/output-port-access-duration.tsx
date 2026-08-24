@@ -1,5 +1,4 @@
-import { ClockCircleOutlined } from '@ant-design/icons';
-import { Tag } from 'antd';
+import { Flex, Typography } from 'antd';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
@@ -9,7 +8,6 @@ import {
 } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
 import type { SearchOutputPortsResponseItem } from '@/store/api/services/generated/outputPortsSearchApi.ts';
 import { DataProductChoiceOptions } from '@/store/features/cart/cart-slice.ts';
-import { formatDate } from '@/utils/date.helper.ts';
 
 type Props = {
     outputPort: SearchOutputPortsResponseItem;
@@ -23,7 +21,7 @@ export function OutputPortAccessDuration({ outputPort, dataProductTypeChoice }: 
     });
     const { t } = useTranslation();
 
-    const { label, isPermanent } = useMemo(() => {
+    const { label } = useMemo(() => {
         if (!accessDurations) {
             return { label: '', isPermanent: true };
         }
@@ -31,14 +29,12 @@ export function OutputPortAccessDuration({ outputPort, dataProductTypeChoice }: 
             dataProductTypeChoice === DataProductChoiceOptions.data_product
                 ? accessDurations?.data_product_access_duration
                 : accessDurations?.exploration_access_duration;
-        const expiryDate = new Date(Date.now() + abstractTypeAccessDuration.days * 24 * 60 * 60 * 1000);
         const isPermanent = abstractTypeAccessDuration.access_duration_type === AccessDurationType.Permanent;
         return {
             label: isPermanent
                 ? t('Permanent access')
-                : t('{{count}} days · expires {{expiryDate}}', {
+                : t('Timebound access ({{count}} days)', {
                       count: abstractTypeAccessDuration.days,
-                      expiryDate: formatDate(expiryDate),
                   }),
             isPermanent,
         };
@@ -49,8 +45,8 @@ export function OutputPortAccessDuration({ outputPort, dataProductTypeChoice }: 
     }
 
     return (
-        <Tag icon={<ClockCircleOutlined />} color={isPermanent ? 'green' : 'orange'} style={{ width: 'fit-content' }}>
-            {label}
-        </Tag>
+        <Flex align="center" gap="small">
+            <Typography.Text type="secondary">{label}</Typography.Text>
+        </Flex>
     );
 }
