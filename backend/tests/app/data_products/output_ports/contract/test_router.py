@@ -1,3 +1,6 @@
+import yaml
+from fastapi.encoders import jsonable_encoder
+
 from app.authorization.roles.schema import Scope
 from app.core.authz.actions import AuthorizationAction
 from app.settings import settings
@@ -10,75 +13,73 @@ from tests.factories import (
 
 ENDPOINT = "/api/v2/data_products"
 
-DEFAULT_PAYLOAD = {
-    "apiVersion": "v3.1.0",
-    "kind": "DataContract",
-    "id": "clinical-trial-dashboard-contract",
-    "schema": [
-        {
-            "name": "trial_master",
-            "logicalType": "object",
-            "physicalType": "table",
-            "physicalName": "clinical-trial-dashboard.trial_master",
-            "description": "Main table of clinical trial performance metrics",
-            "properties": [
-                {
-                    "name": "trial_id",
-                    "businessName": "Trial Identifier",
-                    "logicalType": "string",
-                    "physicalType": "varchar",
-                    "required": True,
-                    "primaryKey": True,
-                    "primaryKeyPosition": 1,
-                    "description": "Unique identifier for the clinical trial",
-                    "examples": ["CT-12345", "AX-45678"],
-                },
-                {
-                    "name": "enrollment_count",
-                    "businessName": "Enrollment Count",
-                    "logicalType": "number",
-                    "physicalType": "integer",
-                    "description": "Number of enrolled patients",
-                },
-            ],
-        },
-        {
-            "name": "retention_metrics",
-            "logicalType": "object",
-            "physicalType": "table",
-            "physicalName": "clinical-trial-dashboard.retention_metrics",
-            "description": "Retention metrics per patient per site",
-            "properties": [
-                {
-                    "name": "trial_id",
-                    "logicalType": "string",
-                    "physicalType": "varchar",
-                    "partitioned": True,
-                    "partitionKeyPosition": 1,
-                    "description": "Unique identifier for the clinical trial",
-                    "examples": ["CT-12345", "AX-45678"],
-                },
-                {
-                    "name": "patient_id",
-                    "businessName": "Patient Identifier",
-                    "logicalType": "string",
-                    "physicalType": "varchar",
-                    "partitioned": True,
-                    "partitionKeyPosition": 2,
-                    "description": "Unique identifier for the patient",
-                    "examples": ["M-12345", "F-45678"],
-                },
-                {
-                    "name": "visits_count",
-                    "businessName": "Yearly visits",
-                    "logicalType": "number",
-                    "physicalType": "integer",
-                    "description": "Number of yearly visits by the patient",
-                },
-            ],
-        },
-    ],
-}
+DEFAULT_YAML_PAYLOAD = """
+apiVersion: v3.1.0
+kind: DataContract
+id: clinical-trial-dashboard-contract
+schema:
+  - name: trial_master
+    logicalType: object
+    physicalType: table
+    physicalName: clinical-trial-dashboard.trial_master
+    description: Main table of clinical trial performance metrics
+    properties:
+      - name: trial_id
+        businessName: Trial Identifier
+        logicalType: string
+        physicalType: varchar
+        required: true
+        primaryKey: true
+        primaryKeyPosition: 1
+        description: Unique identifier for the clinical trial
+        examples:
+          - CT-12345
+          - AX-45678
+      - name: enrollment_count
+        businessName: Enrollment Count
+        logicalType: number
+        physicalType: integer
+        description: Number of enrolled patients
+      - name: snapshot_date
+        businessName: Snapshot Date
+        logicalType: timestamp
+        physicalType: timestamp
+        description: Snapshot date of performance metrics
+        examples:
+          - 2026-08-24
+  - name: retention_metrics
+    logicalType: object
+    physicalType: table
+    physicalName: clinical-trial-dashboard.retention_metrics
+    description: Retention metrics per patient per site
+    properties:
+      - name: trial_id
+        logicalType: string
+        physicalType: varchar
+        partitioned: true
+        partitionKeyPosition: 1
+        description: Unique identifier for the clinical trial
+        examples:
+          - CT-12345
+          - AX-45678
+      - name: patient_id
+        businessName: Patient Identifier
+        logicalType: string
+        physicalType: varchar
+        partitioned: true
+        partitionKeyPosition: 2
+        description: Unique identifier for the patient
+        examples:
+          - M-12345
+          - F-45678
+      - name: visits_count
+        businessName: Yearly visits
+        logicalType: number
+        physicalType: integer
+        description: Number of yearly visits by the patient
+"""
+
+DEFAULT_PAYLOAD = jsonable_encoder(yaml.safe_load(DEFAULT_YAML_PAYLOAD))
 
 
 def _assign_update_role(session, dataset_id):
@@ -113,7 +114,7 @@ class TestContractRouter:
         assert trial_master["physical_type"] == "table"
         assert trial_master["physical_name"] == "clinical-trial-dashboard.trial_master"
         assert trial_master["position"] == 0
-        assert len(trial_master["properties"]) == 2
+        assert len(trial_master["properties"]) == 3
 
         trial_id_prop = trial_master["properties"][0]
         assert trial_id_prop["name"] == "trial_id"
@@ -125,6 +126,13 @@ class TestContractRouter:
         assert trial_id_prop["examples"] == ["CT-12345", "AX-45678"]
         assert trial_id_prop["position"] == 0
         assert trial_id_prop["properties"] is None
+
+        snapshot_date_prop = trial_master["properties"][2]
+        assert snapshot_date_prop["name"] == "snapshot_date"
+        assert snapshot_date_prop["logical_type"] == "timestamp"
+        assert snapshot_date_prop["physical_type"] == "timestamp"
+        assert snapshot_date_prop["examples"] == ["2026-08-24"]
+        assert snapshot_date_prop["position"] == 2
 
         retention_metrics = body["schema_objects"][1]
         assert retention_metrics["name"] == "retention_metrics"
@@ -281,6 +289,93 @@ class TestContractRouter:
         assert props[0]["position"] == 0
         assert props[1]["name"] == "enrollment_count"
         assert props[1]["position"] == 1
+        assert props[2]["name"] == "snapshot_date"
+        assert props[2]["position"] == 2
+
+    def test_post_contract_yaml_upload(self, client, session):
+        dataset = OutputPortFactory()
+        _assign_update_role(session, dataset.id)
+
+        response = client.post(
+            f"{ENDPOINT}/{dataset.data_product.id}/output_ports/{dataset.id}/data_contract/upload",
+            files={"file": ("contract.yaml", DEFAULT_YAML_PAYLOAD, "application/yaml")},
+        )
+
+        assert response.status_code == 200
+        body = response.json()
+        assert body["output_port_id"] == str(dataset.id)
+        assert len(body["schema_objects"]) == 2
+        assert body["schema_objects"][0]["name"] == "trial_master"
+        assert body["schema_objects"][1]["name"] == "retention_metrics"
+        assert body["schema_objects"][0]["properties"][2]["examples"] == ["2026-08-24"]
+
+    def test_post_contract_yaml_upload_invalid_yaml(self, client, session):
+        dataset = OutputPortFactory()
+        _assign_update_role(session, dataset.id)
+
+        response = client.post(
+            f"{ENDPOINT}/{dataset.data_product.id}/output_ports/{dataset.id}/data_contract/upload",
+            files={"file": ("contract.yaml", "schema: [", "application/yaml")},
+        )
+
+        assert response.status_code == 422
+        assert response.json()["detail"] == "Invalid YAML payload"
+
+    def test_post_contract_yaml_upload_non_mapping_root(self, client, session):
+        dataset = OutputPortFactory()
+        _assign_update_role(session, dataset.id)
+
+        response = client.post(
+            f"{ENDPOINT}/{dataset.data_product.id}/output_ports/{dataset.id}/data_contract/upload",
+            files={
+                "file": (
+                    "contract.yaml",
+                    "- name: not-a-contract\n- name: still-not-a-contract\n",
+                    "application/yaml",
+                )
+            },
+        )
+
+        assert response.status_code == 422
+        assert response.json()["detail"] == "YAML payload must be a mapping/object"
+
+    def test_post_contract_yaml_upload_invalid_contract(self, client, session):
+        dataset = OutputPortFactory()
+        _assign_update_role(session, dataset.id)
+
+        response = client.post(
+            f"{ENDPOINT}/{dataset.data_product.id}/output_ports/{dataset.id}/data_contract/upload",
+            files={
+                "file": ("contract.yaml", "schema: invalid", "application/yaml"),
+            },
+        )
+
+        assert response.status_code == 422
+        errors = response.json()["detail"]
+        assert isinstance(errors, list)
+        assert errors[0]["loc"] == ["schema"]
+
+    def test_post_contract_yaml_upload_no_permissions(self, client):
+        dataset = OutputPortFactory()
+
+        response = client.post(
+            f"{ENDPOINT}/{dataset.data_product.id}/output_ports/{dataset.id}/data_contract/upload",
+            files={"file": ("contract.yaml", DEFAULT_YAML_PAYLOAD, "application/yaml")},
+        )
+
+        assert response.status_code == 403
+
+    def test_post_contract_yaml_upload_output_port_not_found(self, client, session):
+        dataset = OutputPortFactory()
+        other_dataset = OutputPortFactory()
+        _assign_update_role(session, other_dataset.id)
+
+        response = client.post(
+            f"{ENDPOINT}/{dataset.data_product.id}/output_ports/{other_dataset.id}/data_contract/upload",
+            files={"file": ("contract.yaml", DEFAULT_YAML_PAYLOAD, "application/yaml")},
+        )
+
+        assert response.status_code == 404
 
     def test_post_contract_empty_schema(self, client, session):
         dataset = OutputPortFactory()

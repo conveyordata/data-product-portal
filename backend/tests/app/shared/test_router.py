@@ -4,6 +4,7 @@ from fastapi.dependencies.models import Dependant
 from fastapi.routing import APIRoute
 
 from app.main import app
+from app.open_api_export import custom_openapi
 
 
 def test_endpoints_return_object_or_none():
@@ -175,6 +176,21 @@ def test_openapi_no_duplicate_operation_ids():
                 operation_ids.add(operation_id)
 
     assert not duplicates, f"Duplicate operationIds found in OpenAPI spec: {duplicates}"
+
+
+def test_openapi_file_upload_uses_binary_schema():
+    path = (
+        "/api/v2/data_products/{data_product_id}/output_ports/{id}/data_contract/upload"
+    )
+    schema = custom_openapi(app)["paths"][path]["post"]["requestBody"]["content"][
+        "multipart/form-data"
+    ]["schema"]["properties"]["file"]
+
+    assert schema == {
+        "type": "string",
+        "format": "binary",
+        "title": "File",
+    }
 
 
 def test_routes_not_v2_are_deprecated():

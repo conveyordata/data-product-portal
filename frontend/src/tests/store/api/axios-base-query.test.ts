@@ -103,4 +103,34 @@ describe('axiosBaseQuery', () => {
         });
         expect(dispatchNotification).not.toHaveBeenCalled();
     });
+
+    it('passes FormData bodies through unchanged', async () => {
+        const query = axiosBaseQuery({ baseUrl: 'https://example.test' });
+        const api = createBaseQueryApi();
+        const formData = new FormData();
+        const file = new Blob(['schema: []'], { type: 'application/yaml' });
+        formData.append('file', file);
+        vi.mocked(axios).mockResolvedValueOnce({ data: { ok: true } });
+
+        await query({ url: '/upload', method: 'POST', body: formData }, api, {});
+
+        expect(axios).toHaveBeenCalledWith(
+            expect.objectContaining({
+                data: expect.any(FormData),
+            }),
+        );
+
+        const call = vi.mocked(axios).mock.calls[0];
+        expect(call).toBeDefined();
+        if (!call) {
+            throw new Error('Expected axios to be called');
+        }
+
+        const request = call[0] as unknown as { data: FormData };
+        expect(request.data).toBeInstanceOf(FormData);
+
+        const uploadedFile = request.data.get('file');
+        expect(uploadedFile).toBeInstanceOf(File);
+        expect(await (uploadedFile as File).text()).toBe('schema: []');
+    });
 });

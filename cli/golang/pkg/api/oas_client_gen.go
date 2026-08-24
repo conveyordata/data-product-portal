@@ -436,7 +436,7 @@ type Invoker interface {
 	//
 	// Get Output Port Schema.
 	//
-	// GET /api/v2/data_products/{data_product_id}/output_ports/{id}/data_contract
+	// GET /api/v2/data_products/{data_product_id}/output_ports/{id}/data_contract/
 	GetOutputPortSchema(ctx context.Context, params GetOutputPortSchemaParams) (GetOutputPortSchemaRes, error)
 	// GetOutputPortsEventHistory invokes get_output_ports_event_history operation.
 	//
@@ -538,8 +538,14 @@ type Invoker interface {
 	//
 	// Ingest Output Port Contract.
 	//
-	// POST /api/v2/data_products/{data_product_id}/output_ports/{id}/data_contract
+	// POST /api/v2/data_products/{data_product_id}/output_ports/{id}/data_contract/
 	IngestOutputPortContract(ctx context.Context, request *BitolContractRequest, params IngestOutputPortContractParams) (IngestOutputPortContractRes, error)
+	// IngestOutputPortContractYaml invokes ingest_output_port_contract_yaml operation.
+	//
+	// Ingest Output Port Contract Yaml.
+	//
+	// POST /api/v2/data_products/{data_product_id}/output_ports/{id}/data_contract/upload
+	IngestOutputPortContractYaml(ctx context.Context, request *IngestOutputPortContractYamlReq, params IngestOutputPortContractYamlParams) (IngestOutputPortContractYamlRes, error)
 	// IsAdmin invokes is_admin operation.
 	//
 	// Is Admin.
@@ -5296,7 +5302,7 @@ func (c *Client) sendGetOutputPortQueryStats(ctx context.Context, params GetOutp
 //
 // Get Output Port Schema.
 //
-// GET /api/v2/data_products/{data_product_id}/output_ports/{id}/data_contract
+// GET /api/v2/data_products/{data_product_id}/output_ports/{id}/data_contract/
 func (c *Client) GetOutputPortSchema(ctx context.Context, params GetOutputPortSchemaParams) (GetOutputPortSchemaRes, error) {
 	res, err := c.sendGetOutputPortSchema(ctx, params)
 	return res, err
@@ -5344,7 +5350,7 @@ func (c *Client) sendGetOutputPortSchema(ctx context.Context, params GetOutputPo
 		}
 		pathParts[3] = encoded
 	}
-	pathParts[4] = "/data_contract"
+	pathParts[4] = "/data_contract/"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	r, err := ht.NewRequest(ctx, "GET", u)
@@ -6342,7 +6348,7 @@ func (c *Client) sendGetVersion(ctx context.Context) (res jx.Raw, err error) {
 //
 // Ingest Output Port Contract.
 //
-// POST /api/v2/data_products/{data_product_id}/output_ports/{id}/data_contract
+// POST /api/v2/data_products/{data_product_id}/output_ports/{id}/data_contract/
 func (c *Client) IngestOutputPortContract(ctx context.Context, request *BitolContractRequest, params IngestOutputPortContractParams) (IngestOutputPortContractRes, error) {
 	res, err := c.sendIngestOutputPortContract(ctx, request, params)
 	return res, err
@@ -6390,7 +6396,7 @@ func (c *Client) sendIngestOutputPortContract(ctx context.Context, request *Bito
 		}
 		pathParts[3] = encoded
 	}
-	pathParts[4] = "/data_contract"
+	pathParts[4] = "/data_contract/"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	r, err := ht.NewRequest(ctx, "POST", u)
@@ -6415,6 +6421,90 @@ func (c *Client) sendIngestOutputPortContract(ctx context.Context, request *Bito
 	}()
 
 	result, err := decodeIngestOutputPortContractResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// IngestOutputPortContractYaml invokes ingest_output_port_contract_yaml operation.
+//
+// Ingest Output Port Contract Yaml.
+//
+// POST /api/v2/data_products/{data_product_id}/output_ports/{id}/data_contract/upload
+func (c *Client) IngestOutputPortContractYaml(ctx context.Context, request *IngestOutputPortContractYamlReq, params IngestOutputPortContractYamlParams) (IngestOutputPortContractYamlRes, error) {
+	res, err := c.sendIngestOutputPortContractYaml(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendIngestOutputPortContractYaml(ctx context.Context, request *IngestOutputPortContractYamlReq, params IngestOutputPortContractYamlParams) (res IngestOutputPortContractYamlRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/api/v2/data_products/"
+	{
+		// Encode "data_product_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "data_product_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.DataProductID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/output_ports/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/data_contract/upload"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeIngestOutputPortContractYamlRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeIngestOutputPortContractYamlResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
