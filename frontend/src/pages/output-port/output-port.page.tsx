@@ -127,7 +127,7 @@ export function OutputPort() {
             </Flex>
             {/* Sidebar */}
             <Flex vertical className={styles.sidebar}>
-                <DatasetActions datasetId={datasetId} dataProductId={dataProductId} />
+                <DatasetActions datasetId={datasetId} />
                 <DatasetQuality dataProductId={outputPort?.data_product_id} datasetId={datasetId} />
                 <UserAccessOverview users={datasetOwners} title={t('Output Port Owners')} />
             </Flex>
