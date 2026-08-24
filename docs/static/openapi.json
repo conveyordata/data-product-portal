@@ -9711,6 +9711,9 @@
                 "$ref": "#/components/schemas/S3TechnicalAssetConfiguration"
               },
               {
+                "$ref": "#/components/schemas/RustFSTechnicalAssetConfiguration"
+              },
+              {
                 "$ref": "#/components/schemas/GlueTechnicalAssetConfiguration"
               },
               {
@@ -9742,6 +9745,7 @@
                 "OSISemanticModelTechnicalAssetConfiguration": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration",
                 "PostgreSQLTechnicalAssetConfiguration": "#/components/schemas/PostgreSQLTechnicalAssetConfiguration",
                 "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
+                "RustFSTechnicalAssetConfiguration": "#/components/schemas/RustFSTechnicalAssetConfiguration",
                 "S3TechnicalAssetConfiguration": "#/components/schemas/S3TechnicalAssetConfiguration",
                 "SnowflakeTechnicalAssetConfiguration": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
               }
@@ -12604,6 +12608,9 @@
                 "$ref": "#/components/schemas/S3TechnicalAssetConfiguration"
               },
               {
+                "$ref": "#/components/schemas/RustFSTechnicalAssetConfiguration"
+              },
+              {
                 "$ref": "#/components/schemas/GlueTechnicalAssetConfiguration"
               },
               {
@@ -12635,6 +12642,7 @@
                 "OSISemanticModelTechnicalAssetConfiguration": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration",
                 "PostgreSQLTechnicalAssetConfiguration": "#/components/schemas/PostgreSQLTechnicalAssetConfiguration",
                 "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
+                "RustFSTechnicalAssetConfiguration": "#/components/schemas/RustFSTechnicalAssetConfiguration",
                 "S3TechnicalAssetConfiguration": "#/components/schemas/S3TechnicalAssetConfiguration",
                 "SnowflakeTechnicalAssetConfiguration": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
               }
@@ -14443,6 +14451,9 @@
                 "$ref": "#/components/schemas/S3TechnicalAssetConfiguration"
               },
               {
+                "$ref": "#/components/schemas/RustFSTechnicalAssetConfiguration"
+              },
+              {
                 "$ref": "#/components/schemas/GlueTechnicalAssetConfiguration"
               },
               {
@@ -14474,6 +14485,7 @@
                 "OSISemanticModelTechnicalAssetConfiguration": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration",
                 "PostgreSQLTechnicalAssetConfiguration": "#/components/schemas/PostgreSQLTechnicalAssetConfiguration",
                 "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
+                "RustFSTechnicalAssetConfiguration": "#/components/schemas/RustFSTechnicalAssetConfiguration",
                 "S3TechnicalAssetConfiguration": "#/components/schemas/S3TechnicalAssetConfiguration",
                 "SnowflakeTechnicalAssetConfiguration": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
               }
@@ -14881,6 +14893,9 @@
                 "$ref": "#/components/schemas/S3TechnicalAssetConfiguration"
               },
               {
+                "$ref": "#/components/schemas/RustFSTechnicalAssetConfiguration"
+              },
+              {
                 "$ref": "#/components/schemas/GlueTechnicalAssetConfiguration"
               },
               {
@@ -14912,6 +14927,7 @@
                 "OSISemanticModelTechnicalAssetConfiguration": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration",
                 "PostgreSQLTechnicalAssetConfiguration": "#/components/schemas/PostgreSQLTechnicalAssetConfiguration",
                 "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
+                "RustFSTechnicalAssetConfiguration": "#/components/schemas/RustFSTechnicalAssetConfiguration",
                 "S3TechnicalAssetConfiguration": "#/components/schemas/S3TechnicalAssetConfiguration",
                 "SnowflakeTechnicalAssetConfiguration": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
               }
@@ -15270,6 +15286,35 @@
           "prototype"
         ],
         "title": "Role"
+      },
+      "RustFSTechnicalAssetConfiguration": {
+        "properties": {
+          "configuration_type": {
+            "type": "string",
+            "const": "RustFSTechnicalAssetConfiguration",
+            "title": "Configuration Type"
+          },
+          "bucket": {
+            "type": "string",
+            "title": "Bucket"
+          },
+          "suffix": {
+            "type": "string",
+            "title": "Suffix",
+            "default": ""
+          },
+          "path": {
+            "type": "string",
+            "title": "Path"
+          }
+        },
+        "type": "object",
+        "required": [
+          "configuration_type",
+          "bucket",
+          "path"
+        ],
+        "title": "RustFSTechnicalAssetConfiguration"
       },
       "S3TechnicalAssetConfiguration": {
         "properties": {
@@ -16049,6 +16094,9 @@
                 "$ref": "#/components/schemas/S3TechnicalAssetConfiguration"
               },
               {
+                "$ref": "#/components/schemas/RustFSTechnicalAssetConfiguration"
+              },
+              {
                 "$ref": "#/components/schemas/GlueTechnicalAssetConfiguration"
               },
               {
@@ -16080,6 +16128,7 @@
                 "OSISemanticModelTechnicalAssetConfiguration": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration",
                 "PostgreSQLTechnicalAssetConfiguration": "#/components/schemas/PostgreSQLTechnicalAssetConfiguration",
                 "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
+                "RustFSTechnicalAssetConfiguration": "#/components/schemas/RustFSTechnicalAssetConfiguration",
                 "S3TechnicalAssetConfiguration": "#/components/schemas/S3TechnicalAssetConfiguration",
                 "SnowflakeTechnicalAssetConfiguration": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
               }

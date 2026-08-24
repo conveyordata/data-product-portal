@@ -1,0 +1,18 @@
+from sqlalchemy import String
+from sqlalchemy.orm import Mapped, mapped_column
+
+from app.technical_asset_configuration.base_model import BaseTechnicalAssetConfiguration
+
+NAME = "RustFSTechnicalAssetConfiguration"
+
+
+class RustFSTechnicalAssetConfiguration(BaseTechnicalAssetConfiguration):
+    __tablename__ = "rustfs_technical_asset_configurations"
+
+    bucket: Mapped[str] = mapped_column(String, nullable=True)
+    suffix: Mapped[str] = mapped_column(String, nullable=True)
+    path: Mapped[str] = mapped_column(String, nullable=True)
+
+    __mapper_args__ = {
+        "polymorphic_identity": NAME,
+    }
