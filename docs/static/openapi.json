@@ -12945,13 +12945,19 @@
           },
           "consuming_abstract_data_product_type": {
             "$ref": "#/components/schemas/AbstractDataProductType"
+          },
+          "producing_data_product_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Producing Data Product Id"
           }
         },
         "type": "object",
         "required": [
           "id",
           "consuming_abstract_data_product_id",
-          "consuming_abstract_data_product_type"
+          "consuming_abstract_data_product_type",
+          "producing_data_product_id"
         ],
         "title": "InputPortEvent"
       },

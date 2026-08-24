@@ -183,6 +183,7 @@ class InputPort(
             id=self.id,
             consuming_abstract_data_product_id=self.consuming_abstract_data_product_id,
             consuming_abstract_data_product_type=self.consuming_abstract_data_product.abstract_data_product_type,
+            producing_data_product_id=self.output_port.data_product_id,
         )
 
 

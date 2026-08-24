@@ -206,6 +206,18 @@ class ReconcileManager:
         await self._queue.add_after(key, delay)
 
 
+class InputPortReconcilerTarget(Enum):
+    """
+    Determines which data product is reconciled when an input port event is received.
+    When you specify `InputPortReconcilerTarget.PRODUCER`, the reconciler will be triggered for the data product that
+    produces the input port. When you specify `InputPortReconcilerTarget.CONSUMER`, the reconciler will be triggered
+    for the data product or exploration that consumes the input port.
+    """
+
+    PRODUCER = "producer"
+    CONSUMER = "consumer"
+
+
 class ReconcileEventHandler(AbstractEventHandler):
     """Webhook handler that enqueues a reconcile for each supported portal event.
 
@@ -217,8 +229,13 @@ class ReconcileEventHandler(AbstractEventHandler):
     registered reconciler are acknowledged as "ignored".
     """
 
-    def __init__(self, manager: ReconcileManager) -> None:
+    def __init__(
+        self,
+        manager: ReconcileManager,
+        input_port_reconcile_target: InputPortReconcilerTarget = InputPortReconcilerTarget.CONSUMER,
+    ) -> None:
         self._manager = manager
+        self._input_port_reconcile_target = input_port_reconcile_target
 
     @property
     def manager(self) -> ReconcileManager:
@@ -237,15 +254,23 @@ class ReconcileEventHandler(AbstractEventHandler):
         await self._enqueue(ResourceType.EXPLORATION, data.id)
 
     async def on_input_port_event(self, data: InputPortEvent):
-        match data.consuming_abstract_data_product_type:
-            case AbstractDataProductType.EXPLORATIONS:
+        match self._input_port_reconcile_target:
+            case InputPortReconcilerTarget.PRODUCER:
                 return await self._enqueue(
-                    ResourceType.EXPLORATION, data.consuming_abstract_data_product_id
+                    ResourceType.DATA_PRODUCT, data.producing_data_product_id
                 )
-            case AbstractDataProductType.DATA_PRODUCTS:
-                return await self._enqueue(
-                    ResourceType.DATA_PRODUCT, data.consuming_abstract_data_product_id
-                )
+            case InputPortReconcilerTarget.CONSUMER:
+                match data.consuming_abstract_data_product_type:
+                    case AbstractDataProductType.EXPLORATIONS:
+                        return await self._enqueue(
+                            ResourceType.EXPLORATION,
+                            data.consuming_abstract_data_product_id,
+                        )
+                    case AbstractDataProductType.DATA_PRODUCTS:
+                        return await self._enqueue(
+                            ResourceType.DATA_PRODUCT,
+                            data.consuming_abstract_data_product_id,
+                        )
         return None
 
     async def on_data_product_role_assignment_event(
