@@ -138,7 +138,7 @@
     "Are you sure you want to remove {{name}} from the Technical Asset?": "Are you sure you want to remove {{name}} from the $t(Technical Asset)?",
     "Are you sure you want to revoke access for {{name}}?": "Are you sure you want to revoke access for {{name}}?",
     "Are you sure you want to revoke access from Technical Asset {{name}}?": "Are you sure you want to revoke access from $t(Technical Asset) {{name}}?",
-    "As an owner you can upload a scheme": "As an owner you can upload a scheme",
+    "As an owner you can upload a schema": "As an owner you can upload a schema",
     "Ask a business question to find the relevant data": "Ask a business question to find the relevant data",
     "Ask the owners to publish data quality information": "Ask the owners to publish data quality information",
     "Assign one access level to all users who connect to this asset.": "Assign one access level to all users who connect to this asset.",
