@@ -39,11 +39,11 @@ beforeAll(() => {
 });
 
 beforeAll(() => server.listen({ onUnhandledRequest: 'warn' }));
-afterEach(() => {
-    // Clear any pending timers created by UI libraries (for example useDelayState from
-    // @rc-component/util). Those delayed callbacks can fire after jsdom teardown and attempt
+afterEach(async () => {
+    // Ensure all pending timers created by UI libraries (for example useDelayState from
+    // @rc-component/util) are ran. Those delayed callbacks can fire after jsdom teardown and attempt
     // to access window, which would otherwise throw ReferenceError: window is not defined.
-    vi.clearAllTimers();
+    await vi.runAllTimersAsync();
     server.resetHandlers();
     cleanup();
 });
