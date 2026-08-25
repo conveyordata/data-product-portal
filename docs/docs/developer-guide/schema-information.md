@@ -67,9 +67,10 @@ Obtain or create the Bitol ODCS data contract that describes your output port.
 A complete example contract is available [here](https://github.com/conveyordata/data-product-portal/blob/main/integrations/bitol/data-contract-example.yml)
 
 Portal accepts the full ODCS document, so you can post the contract as-is; only its `schema` section is used.
+You can upload a file via the front or use our API or SDK to upload the contract programmatically.
+
 Each ingestion replaces the previously stored schema for that output port, so posting an updated contract keeps the displayed schema in sync with your data.
 
 ### API endpoint
 
-- [`POST /api/v2/data_products/{data_product_id}/output_ports/{output_port_id}/data_contract`](/docs/api/#tag/Output-Ports-Contract/operation/ingest_output_port_contract)
-- [`GET /api/v2/data_products/{data_product_id}/output_ports/{output_port_id}/data_contract`](/docs/api/#tag/Output-Ports-Contract/operation/get_output_port_schema)
+The API endpoints can be found in [our API docs](/docs/api#tag/Data-Products-Output-Ports-Contract)

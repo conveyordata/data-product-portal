@@ -92,6 +92,7 @@ const (
 	GetUsersOperation                                 OperationName = "GetUsers"
 	GetVersionOperation                               OperationName = "GetVersion"
 	IngestOutputPortContractOperation                 OperationName = "IngestOutputPortContract"
+	IngestOutputPortContractYamlOperation             OperationName = "IngestOutputPortContractYaml"
 	IsAdminOperation                                  OperationName = "IsAdmin"
 	IsTimeBoundAccessEnabledOperation                 OperationName = "IsTimeBoundAccessEnabled"
 	LinkOutputPortToTechnicalAssetOperation           OperationName = "LinkOutputPortToTechnicalAsset"

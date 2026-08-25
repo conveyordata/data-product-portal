@@ -8,6 +8,7 @@ import (
 	"github.com/go-faster/errors"
 	"github.com/go-faster/jx"
 	"github.com/google/uuid"
+	ht "github.com/ogen-go/ogen/http"
 )
 
 // Ref: #/components/schemas/AWSCredentials
@@ -6601,6 +6602,7 @@ func (*HTTPValidationError) getSinglePlatformServiceConfigurationRes()    {}
 func (*HTTPValidationError) getTechnicalAssetEventHistoryRes()            {}
 func (*HTTPValidationError) getTechnicalAssetRes()                        {}
 func (*HTTPValidationError) ingestOutputPortContractRes()                 {}
+func (*HTTPValidationError) ingestOutputPortContractYamlRes()             {}
 func (*HTTPValidationError) linkOutputPortToTechnicalAssetRes()           {}
 func (*HTTPValidationError) listDataProductRoleAssignmentsRes()           {}
 func (*HTTPValidationError) listGlobalRoleAssignmentsRes()                {}
@@ -6668,6 +6670,24 @@ func (*HTTPValidationError) validateResourceNameRes()                     {}
 type IngestOutputPortContractNotFoundApplicationJSON jx.Raw
 
 func (*IngestOutputPortContractNotFoundApplicationJSON) ingestOutputPortContractRes() {}
+
+type IngestOutputPortContractYamlNotFoundApplicationJSON jx.Raw
+
+func (*IngestOutputPortContractYamlNotFoundApplicationJSON) ingestOutputPortContractYamlRes() {}
+
+type IngestOutputPortContractYamlReq struct {
+	File ht.MultipartFile `json:"file"`
+}
+
+// GetFile returns the value of File.
+func (s *IngestOutputPortContractYamlReq) GetFile() ht.MultipartFile {
+	return s.File
+}
+
+// SetFile sets the value of File.
+func (s *IngestOutputPortContractYamlReq) SetFile(val ht.MultipartFile) {
+	s.File = val
+}
 
 // Ref: #/components/schemas/InputPortRequestBase
 type InputPortRequestBase struct {
@@ -10684,8 +10704,9 @@ func (s *OutputPortSchemaResponse) SetSchemaObjects(val []SchemaObjectResponse) 
 	s.SchemaObjects = val
 }
 
-func (*OutputPortSchemaResponse) getOutputPortSchemaRes()      {}
-func (*OutputPortSchemaResponse) ingestOutputPortContractRes() {}
+func (*OutputPortSchemaResponse) getOutputPortSchemaRes()          {}
+func (*OutputPortSchemaResponse) ingestOutputPortContractRes()     {}
+func (*OutputPortSchemaResponse) ingestOutputPortContractYamlRes() {}
 
 // Ref: #/components/schemas/OutputPortSettingValue
 type OutputPortSettingValue struct {

@@ -83,6 +83,16 @@ def custom_openapi(app: FastAPI):
 
     final_schema = json.loads(schema_json)
 
+    fix_file_upload_methods(
+        final_schema,
+        [
+            (
+                "/api/v2/data_products/{data_product_id}/output_ports/{id}/data_contract/upload",
+                "Body_ingest_output_port_contract_yaml",
+            )
+        ],
+    )
+
     # 5. Reset internal titles to match their clean schema keys and remove readOnly tags
     schemas = final_schema.get("components", {}).get("schemas", {})
     for schema_name, schema in schemas.items():
@@ -95,6 +105,47 @@ def custom_openapi(app: FastAPI):
 
     app.openapi_schema = final_schema
     return app.openapi_schema
+
+
+def fix_file_upload_methods(
+    openapi_schema: dict, upload_paths: list[tuple[str, str]]
+) -> None:
+    """
+    This method changed the typing of requests that accept a file upload, this is needed because we expose an open api
+    3.1 spec, however RTK does not generate the correct types for file uploads in 3.1, so we need to change the typing
+    to be compatible with 3.0.
+    :param openapi_schema:
+    :param upload_paths:
+    :return:
+    """
+    schemas = openapi_schema.get("components", {}).get("schemas", {})
+
+    for upload_path, schema_name in upload_paths:
+        upload_schema = (
+            openapi_schema.get("paths", {})
+            .get(upload_path, {})
+            .get("post", {})
+            .get("requestBody", {})
+            .get("content", {})
+            .get("multipart/form-data", {})
+            .get("schema")
+        )
+        if isinstance(upload_schema, dict):
+            upload_schema.clear()
+            upload_schema.update(
+                {
+                    "type": "object",
+                    "required": ["file"],
+                    "properties": {
+                        "file": {
+                            "type": "string",
+                            "format": "binary",
+                            "title": "File",
+                        }
+                    },
+                }
+            )
+        schemas.pop(schema_name, None)
 
 
 if __name__ == "__main__":

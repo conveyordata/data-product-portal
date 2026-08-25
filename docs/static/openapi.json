@@ -685,7 +685,7 @@
         }
       }
     },
-    "/api/v2/data_products/{data_product_id}/output_ports/{id}/data_contract": {
+    "/api/v2/data_products/{data_product_id}/output_ports/{id}/data_contract/": {
       "get": {
         "tags": [
           "Data Products - Output ports",
@@ -783,6 +783,90 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/BitolContractRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OutputPortSchemaResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Output Port not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Output Port ID not found"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/data_products/{data_product_id}/output_ports/{id}/data_contract/upload": {
+      "post": {
+        "tags": [
+          "Data Products - Output ports",
+          "Data Products - Output Ports - Contract"
+        ],
+        "summary": "Ingest Output Port Contract Yaml",
+        "operationId": "ingest_output_port_contract_yaml",
+        "parameters": [
+          {
+            "name": "data_product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Data Product Id"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "file"
+                ],
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary",
+                    "title": "File"
+                  }
+                }
               }
             }
           }

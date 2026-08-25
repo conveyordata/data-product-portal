@@ -191,6 +191,7 @@ from .global_role_assignment_response import GlobalRoleAssignmentResponse
 from .glue_technical_asset_configuration import GlueTechnicalAssetConfiguration
 from .graph import Graph
 from .http_validation_error import HTTPValidationError
+from .ingest_output_port_contract_yaml_body import IngestOutputPortContractYamlBody
 from .input_port_event import InputPortEvent
 from .input_port_request import InputPortRequest
 from .input_port_request_base import InputPortRequestBase
@@ -524,6 +525,7 @@ __all__ = (
     "GlueTechnicalAssetConfiguration",
     "Graph",
     "HTTPValidationError",
+    "IngestOutputPortContractYamlBody",
     "InputPortEvent",
     "InputPortRequest",
     "InputPortRequestBase",

@@ -18731,6 +18731,48 @@ func (s *IngestOutputPortContractNotFoundApplicationJSON) UnmarshalJSON(data []b
 	return s.Decode(d)
 }
 
+// Encode encodes IngestOutputPortContractYamlNotFoundApplicationJSON as json.
+func (s IngestOutputPortContractYamlNotFoundApplicationJSON) Encode(e *jx.Encoder) {
+	unwrapped := jx.Raw(s)
+
+	if len(unwrapped) != 0 {
+		e.Raw(unwrapped)
+	}
+}
+
+// Decode decodes IngestOutputPortContractYamlNotFoundApplicationJSON from json.
+func (s *IngestOutputPortContractYamlNotFoundApplicationJSON) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode IngestOutputPortContractYamlNotFoundApplicationJSON to nil")
+	}
+	var unwrapped jx.Raw
+	if err := func() error {
+		v, err := d.RawAppend(nil)
+		unwrapped = jx.Raw(v)
+		if err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = IngestOutputPortContractYamlNotFoundApplicationJSON(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s IngestOutputPortContractYamlNotFoundApplicationJSON) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *IngestOutputPortContractYamlNotFoundApplicationJSON) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode implements json.Marshaler.
 func (s *InputPortRequestBase) Encode(e *jx.Encoder) {
 	e.ObjStart()

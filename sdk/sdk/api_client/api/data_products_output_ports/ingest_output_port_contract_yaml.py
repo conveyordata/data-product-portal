@@ -8,6 +8,9 @@ import httpx
 from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.http_validation_error import HTTPValidationError
+from ...models.ingest_output_port_contract_yaml_body import (
+    IngestOutputPortContractYamlBody,
+)
 from ...models.output_port_schema_response import OutputPortSchemaResponse
 from ...types import Response
 
@@ -15,16 +18,24 @@ from ...types import Response
 def _get_kwargs(
     data_product_id: UUID,
     id: UUID,
+    *,
+    body: IngestOutputPortContractYamlBody,
 ) -> dict[str, Any]:
+    headers: dict[str, Any] = {}
 
     _kwargs: dict[str, Any] = {
-        "method": "get",
-        "url": "/api/v2/data_products/{data_product_id}/output_ports/{id}/data_contract/".format(
+        "method": "post",
+        "url": "/api/v2/data_products/{data_product_id}/output_ports/{id}/data_contract/upload".format(
             data_product_id=quote(str(data_product_id), safe=""),
             id=quote(str(id), safe=""),
         ),
     }
 
+    _kwargs["files"] = body.to_multipart()
+
+    headers["Content-Type"] = "multipart/form-data; boundary=+++"
+
+    _kwargs["headers"] = headers
     return _kwargs
 
 
@@ -67,12 +78,14 @@ def sync_detailed(
     id: UUID,
     *,
     client: AuthenticatedClient | Client,
+    body: IngestOutputPortContractYamlBody,
 ) -> Response[Any | HTTPValidationError | OutputPortSchemaResponse]:
-    """Get Output Port Schema
+    """Ingest Output Port Contract Yaml
 
     Args:
         data_product_id (UUID):
         id (UUID):
+        body (IngestOutputPortContractYamlBody):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -85,6 +98,7 @@ def sync_detailed(
     kwargs = _get_kwargs(
         data_product_id=data_product_id,
         id=id,
+        body=body,
     )
 
     response = client.get_httpx_client().request(
@@ -99,12 +113,14 @@ def sync(
     id: UUID,
     *,
     client: AuthenticatedClient | Client,
+    body: IngestOutputPortContractYamlBody,
 ) -> Any | HTTPValidationError | OutputPortSchemaResponse | None:
-    """Get Output Port Schema
+    """Ingest Output Port Contract Yaml
 
     Args:
         data_product_id (UUID):
         id (UUID):
+        body (IngestOutputPortContractYamlBody):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -118,6 +134,7 @@ def sync(
         data_product_id=data_product_id,
         id=id,
         client=client,
+        body=body,
     ).parsed
 
 
@@ -126,12 +143,14 @@ async def asyncio_detailed(
     id: UUID,
     *,
     client: AuthenticatedClient | Client,
+    body: IngestOutputPortContractYamlBody,
 ) -> Response[Any | HTTPValidationError | OutputPortSchemaResponse]:
-    """Get Output Port Schema
+    """Ingest Output Port Contract Yaml
 
     Args:
         data_product_id (UUID):
         id (UUID):
+        body (IngestOutputPortContractYamlBody):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -144,6 +163,7 @@ async def asyncio_detailed(
     kwargs = _get_kwargs(
         data_product_id=data_product_id,
         id=id,
+        body=body,
     )
 
     response = await client.get_async_httpx_client().request(**kwargs)
@@ -156,12 +176,14 @@ async def asyncio(
     id: UUID,
     *,
     client: AuthenticatedClient | Client,
+    body: IngestOutputPortContractYamlBody,
 ) -> Any | HTTPValidationError | OutputPortSchemaResponse | None:
-    """Get Output Port Schema
+    """Ingest Output Port Contract Yaml
 
     Args:
         data_product_id (UUID):
         id (UUID):
+        body (IngestOutputPortContractYamlBody):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -176,5 +198,6 @@ async def asyncio(
             data_product_id=data_product_id,
             id=id,
             client=client,
+            body=body,
         )
     ).parsed
