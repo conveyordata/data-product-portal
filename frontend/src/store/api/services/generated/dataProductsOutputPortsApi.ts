@@ -84,7 +84,7 @@ const injectedRtkApi = api.injectEndpoints({
       GetOutputPortSchemaApiArg
     >({
       query: (queryArg) => ({
-        url: `/api/v2/data_products/${queryArg.dataProductId}/output_ports/${queryArg.id}/data_contract`,
+        url: `/api/v2/data_products/${queryArg.dataProductId}/output_ports/${queryArg.id}/data_contract/`,
       }),
     }),
     ingestOutputPortContract: build.mutation<
@@ -92,9 +92,19 @@ const injectedRtkApi = api.injectEndpoints({
       IngestOutputPortContractApiArg
     >({
       query: (queryArg) => ({
-        url: `/api/v2/data_products/${queryArg.dataProductId}/output_ports/${queryArg.id}/data_contract`,
+        url: `/api/v2/data_products/${queryArg.dataProductId}/output_ports/${queryArg.id}/data_contract/`,
         method: "POST",
         body: queryArg.bitolContractRequest,
+      }),
+    }),
+    ingestOutputPortContractYaml: build.mutation<
+      IngestOutputPortContractYamlApiResponse,
+      IngestOutputPortContractYamlApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/data_products/${queryArg.dataProductId}/output_ports/${queryArg.id}/data_contract/upload`,
+        method: "POST",
+        body: queryArg.body,
       }),
     }),
     getDataProductOutputPorts: build.query<
@@ -270,6 +280,15 @@ export type IngestOutputPortContractApiArg = {
   dataProductId: string;
   id: string;
   bitolContractRequest: BitolContractRequest;
+};
+export type IngestOutputPortContractYamlApiResponse =
+  /** status 200 Successful Response */ OutputPortSchemaResponse;
+export type IngestOutputPortContractYamlApiArg = {
+  dataProductId: string;
+  id: string;
+  body: {
+    file: Blob;
+  };
 };
 export type GetDataProductOutputPortsApiResponse =
   /** status 200 Successful Response */ GetDataProductOutputPortsResponse;
@@ -590,6 +609,12 @@ export type RedshiftTechnicalAssetConfiguration = {
   table_path?: string;
   access_granularity: AccessGranularity;
 };
+export type RustFsTechnicalAssetConfiguration = {
+  configuration_type: "RustFSTechnicalAssetConfiguration";
+  bucket: string;
+  suffix?: string;
+  path: string;
+};
 export type S3TechnicalAssetConfiguration = {
   configuration_type: "S3TechnicalAssetConfiguration";
   bucket: string;
@@ -635,6 +660,9 @@ export type TechnicalAsset = {
     | ({
         configuration_type: "RedshiftTechnicalAssetConfiguration";
       } & RedshiftTechnicalAssetConfiguration)
+    | ({
+        configuration_type: "RustFSTechnicalAssetConfiguration";
+      } & RustFsTechnicalAssetConfiguration)
     | ({
         configuration_type: "S3TechnicalAssetConfiguration";
       } & S3TechnicalAssetConfiguration)
@@ -865,6 +893,7 @@ export const {
   useGetOutputPortSchemaQuery,
   useLazyGetOutputPortSchemaQuery,
   useIngestOutputPortContractMutation,
+  useIngestOutputPortContractYamlMutation,
   useGetDataProductOutputPortsQuery,
   useLazyGetDataProductOutputPortsQuery,
   useCreateOutputPortMutation,

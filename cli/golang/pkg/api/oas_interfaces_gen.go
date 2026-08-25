@@ -277,6 +277,10 @@ type IngestOutputPortContractRes interface {
 	ingestOutputPortContractRes()
 }
 
+type IngestOutputPortContractYamlRes interface {
+	ingestOutputPortContractYamlRes()
+}
+
 type LinkOutputPortToTechnicalAssetRes interface {
 	linkOutputPortToTechnicalAssetRes()
 }

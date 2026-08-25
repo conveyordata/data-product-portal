@@ -239,6 +239,14 @@ func (s *RedshiftTechnicalAssetConfiguration) setDefaults() {
 }
 
 // setDefaults set default value of fields.
+func (s *RustFSTechnicalAssetConfiguration) setDefaults() {
+	{
+		val := string("")
+		s.Suffix.SetTo(val)
+	}
+}
+
+// setDefaults set default value of fields.
 func (s *S3TechnicalAssetConfiguration) setDefaults() {
 	{
 		val := string("")

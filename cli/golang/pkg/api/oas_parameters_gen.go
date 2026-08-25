@@ -313,6 +313,12 @@ type IngestOutputPortContractParams struct {
 	ID            uuid.UUID
 }
 
+// IngestOutputPortContractYamlParams is parameters of ingest_output_port_contract_yaml operation.
+type IngestOutputPortContractYamlParams struct {
+	DataProductID uuid.UUID
+	ID            uuid.UUID
+}
+
 // LinkOutputPortToTechnicalAssetParams is parameters of link_output_port_to_technical_asset operation.
 type LinkOutputPortToTechnicalAssetParams struct {
 	DataProductID uuid.UUID

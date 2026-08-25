@@ -5066,6 +5066,26 @@ func (s CreateTechnicalAssetRequestConfiguration) encodeFields(e *jx.Encoder) {
 				e.Str(s.Path)
 			}
 		}
+	case RustFSTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration:
+		e.FieldStart("configuration_type")
+		e.Str("RustFSTechnicalAssetConfiguration")
+		{
+			s := s.RustFSTechnicalAssetConfiguration
+			{
+				e.FieldStart("bucket")
+				e.Str(s.Bucket)
+			}
+			{
+				if s.Suffix.Set {
+					e.FieldStart("suffix")
+					s.Suffix.Encode(e)
+				}
+			}
+			{
+				e.FieldStart("path")
+				e.Str(s.Path)
+			}
+		}
 	case GlueTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration:
 		e.FieldStart("configuration_type")
 		e.Str("GlueTechnicalAssetConfiguration")
@@ -5337,6 +5357,9 @@ func (s *CreateTechnicalAssetRequestConfiguration) Decode(d *jx.Decoder) error {
 				case "S3TechnicalAssetConfiguration":
 					s.Type = S3TechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration
 					found = true
+				case "RustFSTechnicalAssetConfiguration":
+					s.Type = RustFSTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration
+					found = true
 				case "GlueTechnicalAssetConfiguration":
 					s.Type = GlueTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration
 					found = true
@@ -5374,6 +5397,10 @@ func (s *CreateTechnicalAssetRequestConfiguration) Decode(d *jx.Decoder) error {
 	switch s.Type {
 	case S3TechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration:
 		if err := s.S3TechnicalAssetConfiguration.Decode(d); err != nil {
+			return err
+		}
+	case RustFSTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration:
+		if err := s.RustFSTechnicalAssetConfiguration.Decode(d); err != nil {
 			return err
 		}
 	case GlueTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration:
@@ -17417,6 +17444,26 @@ func (s GetTechnicalAssetsResponseItemConfiguration) encodeFields(e *jx.Encoder)
 				e.Str(s.Path)
 			}
 		}
+	case RustFSTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration:
+		e.FieldStart("configuration_type")
+		e.Str("RustFSTechnicalAssetConfiguration")
+		{
+			s := s.RustFSTechnicalAssetConfiguration
+			{
+				e.FieldStart("bucket")
+				e.Str(s.Bucket)
+			}
+			{
+				if s.Suffix.Set {
+					e.FieldStart("suffix")
+					s.Suffix.Encode(e)
+				}
+			}
+			{
+				e.FieldStart("path")
+				e.Str(s.Path)
+			}
+		}
 	case GlueTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration:
 		e.FieldStart("configuration_type")
 		e.Str("GlueTechnicalAssetConfiguration")
@@ -17688,6 +17735,9 @@ func (s *GetTechnicalAssetsResponseItemConfiguration) Decode(d *jx.Decoder) erro
 				case "S3TechnicalAssetConfiguration":
 					s.Type = S3TechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration
 					found = true
+				case "RustFSTechnicalAssetConfiguration":
+					s.Type = RustFSTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration
+					found = true
 				case "GlueTechnicalAssetConfiguration":
 					s.Type = GlueTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration
 					found = true
@@ -17725,6 +17775,10 @@ func (s *GetTechnicalAssetsResponseItemConfiguration) Decode(d *jx.Decoder) erro
 	switch s.Type {
 	case S3TechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration:
 		if err := s.S3TechnicalAssetConfiguration.Decode(d); err != nil {
+			return err
+		}
+	case RustFSTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration:
+		if err := s.RustFSTechnicalAssetConfiguration.Decode(d); err != nil {
 			return err
 		}
 	case GlueTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration:
@@ -18673,6 +18727,48 @@ func (s IngestOutputPortContractNotFoundApplicationJSON) MarshalJSON() ([]byte, 
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *IngestOutputPortContractNotFoundApplicationJSON) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes IngestOutputPortContractYamlNotFoundApplicationJSON as json.
+func (s IngestOutputPortContractYamlNotFoundApplicationJSON) Encode(e *jx.Encoder) {
+	unwrapped := jx.Raw(s)
+
+	if len(unwrapped) != 0 {
+		e.Raw(unwrapped)
+	}
+}
+
+// Decode decodes IngestOutputPortContractYamlNotFoundApplicationJSON from json.
+func (s *IngestOutputPortContractYamlNotFoundApplicationJSON) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode IngestOutputPortContractYamlNotFoundApplicationJSON to nil")
+	}
+	var unwrapped jx.Raw
+	if err := func() error {
+		v, err := d.RawAppend(nil)
+		unwrapped = jx.Raw(v)
+		if err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = IngestOutputPortContractYamlNotFoundApplicationJSON(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s IngestOutputPortContractYamlNotFoundApplicationJSON) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *IngestOutputPortContractYamlNotFoundApplicationJSON) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -27913,6 +28009,26 @@ func (s RenderTechnicalAssetAccessPathRequestConfiguration) encodeFields(e *jx.E
 				e.Str(s.Path)
 			}
 		}
+	case RustFSTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration:
+		e.FieldStart("configuration_type")
+		e.Str("RustFSTechnicalAssetConfiguration")
+		{
+			s := s.RustFSTechnicalAssetConfiguration
+			{
+				e.FieldStart("bucket")
+				e.Str(s.Bucket)
+			}
+			{
+				if s.Suffix.Set {
+					e.FieldStart("suffix")
+					s.Suffix.Encode(e)
+				}
+			}
+			{
+				e.FieldStart("path")
+				e.Str(s.Path)
+			}
+		}
 	case GlueTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration:
 		e.FieldStart("configuration_type")
 		e.Str("GlueTechnicalAssetConfiguration")
@@ -28184,6 +28300,9 @@ func (s *RenderTechnicalAssetAccessPathRequestConfiguration) Decode(d *jx.Decode
 				case "S3TechnicalAssetConfiguration":
 					s.Type = S3TechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration
 					found = true
+				case "RustFSTechnicalAssetConfiguration":
+					s.Type = RustFSTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration
+					found = true
 				case "GlueTechnicalAssetConfiguration":
 					s.Type = GlueTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration
 					found = true
@@ -28221,6 +28340,10 @@ func (s *RenderTechnicalAssetAccessPathRequestConfiguration) Decode(d *jx.Decode
 	switch s.Type {
 	case S3TechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration:
 		if err := s.S3TechnicalAssetConfiguration.Decode(d); err != nil {
+			return err
+		}
+	case RustFSTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration:
+		if err := s.RustFSTechnicalAssetConfiguration.Decode(d); err != nil {
 			return err
 		}
 	case GlueTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration:
@@ -30570,6 +30693,154 @@ func (s *Role) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *Role) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *RustFSTechnicalAssetConfiguration) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *RustFSTechnicalAssetConfiguration) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("configuration_type")
+		e.Str("RustFSTechnicalAssetConfiguration")
+	}
+	{
+		e.FieldStart("bucket")
+		e.Str(s.Bucket)
+	}
+	{
+		if s.Suffix.Set {
+			e.FieldStart("suffix")
+			s.Suffix.Encode(e)
+		}
+	}
+	{
+		e.FieldStart("path")
+		e.Str(s.Path)
+	}
+}
+
+var jsonFieldsNameOfRustFSTechnicalAssetConfiguration = [4]string{
+	0: "configuration_type",
+	1: "bucket",
+	2: "suffix",
+	3: "path",
+}
+
+// Decode decodes RustFSTechnicalAssetConfiguration from json.
+func (s *RustFSTechnicalAssetConfiguration) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode RustFSTechnicalAssetConfiguration to nil")
+	}
+	var requiredBitSet [1]uint8
+	s.setDefaults()
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "configuration_type":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Str()
+				s.ConfigurationType = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"configuration_type\"")
+			}
+		case "bucket":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Str()
+				s.Bucket = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"bucket\"")
+			}
+		case "suffix":
+			if err := func() error {
+				s.Suffix.Reset()
+				if err := s.Suffix.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"suffix\"")
+			}
+		case "path":
+			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				v, err := d.Str()
+				s.Path = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"path\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode RustFSTechnicalAssetConfiguration")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00001011,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfRustFSTechnicalAssetConfiguration) {
+					name = jsonFieldsNameOfRustFSTechnicalAssetConfiguration[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *RustFSTechnicalAssetConfiguration) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *RustFSTechnicalAssetConfiguration) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -33615,6 +33886,26 @@ func (s TechnicalAssetConfiguration) encodeFields(e *jx.Encoder) {
 				e.Str(s.Path)
 			}
 		}
+	case RustFSTechnicalAssetConfigurationTechnicalAssetConfiguration:
+		e.FieldStart("configuration_type")
+		e.Str("RustFSTechnicalAssetConfiguration")
+		{
+			s := s.RustFSTechnicalAssetConfiguration
+			{
+				e.FieldStart("bucket")
+				e.Str(s.Bucket)
+			}
+			{
+				if s.Suffix.Set {
+					e.FieldStart("suffix")
+					s.Suffix.Encode(e)
+				}
+			}
+			{
+				e.FieldStart("path")
+				e.Str(s.Path)
+			}
+		}
 	case GlueTechnicalAssetConfigurationTechnicalAssetConfiguration:
 		e.FieldStart("configuration_type")
 		e.Str("GlueTechnicalAssetConfiguration")
@@ -33886,6 +34177,9 @@ func (s *TechnicalAssetConfiguration) Decode(d *jx.Decoder) error {
 				case "S3TechnicalAssetConfiguration":
 					s.Type = S3TechnicalAssetConfigurationTechnicalAssetConfiguration
 					found = true
+				case "RustFSTechnicalAssetConfiguration":
+					s.Type = RustFSTechnicalAssetConfigurationTechnicalAssetConfiguration
+					found = true
 				case "GlueTechnicalAssetConfiguration":
 					s.Type = GlueTechnicalAssetConfigurationTechnicalAssetConfiguration
 					found = true
@@ -33923,6 +34217,10 @@ func (s *TechnicalAssetConfiguration) Decode(d *jx.Decoder) error {
 	switch s.Type {
 	case S3TechnicalAssetConfigurationTechnicalAssetConfiguration:
 		if err := s.S3TechnicalAssetConfiguration.Decode(d); err != nil {
+			return err
+		}
+	case RustFSTechnicalAssetConfigurationTechnicalAssetConfiguration:
+		if err := s.RustFSTechnicalAssetConfiguration.Decode(d); err != nil {
 			return err
 		}
 	case GlueTechnicalAssetConfigurationTechnicalAssetConfiguration:

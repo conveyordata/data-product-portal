@@ -8,6 +8,7 @@ import (
 	"github.com/go-faster/errors"
 	"github.com/go-faster/jx"
 	"github.com/google/uuid"
+	ht "github.com/ogen-go/ogen/http"
 )
 
 // Ref: #/components/schemas/AWSCredentials
@@ -1584,6 +1585,7 @@ type CreateTechnicalAssetRequestConfiguration struct {
 	// Type selects the active sum variant, switch on this field.
 	Type                                        CreateTechnicalAssetRequestConfigurationType
 	S3TechnicalAssetConfiguration               S3TechnicalAssetConfiguration
+	RustFSTechnicalAssetConfiguration           RustFSTechnicalAssetConfiguration
 	GlueTechnicalAssetConfiguration             GlueTechnicalAssetConfiguration
 	DatabricksTechnicalAssetConfiguration       DatabricksTechnicalAssetConfiguration
 	SnowflakeTechnicalAssetConfiguration        SnowflakeTechnicalAssetConfiguration
@@ -1599,6 +1601,7 @@ type CreateTechnicalAssetRequestConfigurationType string
 // Possible values for CreateTechnicalAssetRequestConfigurationType.
 const (
 	S3TechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration               CreateTechnicalAssetRequestConfigurationType = "S3TechnicalAssetConfiguration"
+	RustFSTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration           CreateTechnicalAssetRequestConfigurationType = "RustFSTechnicalAssetConfiguration"
 	GlueTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration             CreateTechnicalAssetRequestConfigurationType = "GlueTechnicalAssetConfiguration"
 	DatabricksTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration       CreateTechnicalAssetRequestConfigurationType = "DatabricksTechnicalAssetConfiguration"
 	SnowflakeTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration        CreateTechnicalAssetRequestConfigurationType = "SnowflakeTechnicalAssetConfiguration"
@@ -1611,6 +1614,11 @@ const (
 // IsS3TechnicalAssetConfiguration reports whether CreateTechnicalAssetRequestConfiguration is S3TechnicalAssetConfiguration.
 func (s CreateTechnicalAssetRequestConfiguration) IsS3TechnicalAssetConfiguration() bool {
 	return s.Type == S3TechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration
+}
+
+// IsRustFSTechnicalAssetConfiguration reports whether CreateTechnicalAssetRequestConfiguration is RustFSTechnicalAssetConfiguration.
+func (s CreateTechnicalAssetRequestConfiguration) IsRustFSTechnicalAssetConfiguration() bool {
+	return s.Type == RustFSTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration
 }
 
 // IsGlueTechnicalAssetConfiguration reports whether CreateTechnicalAssetRequestConfiguration is GlueTechnicalAssetConfiguration.
@@ -1666,6 +1674,27 @@ func (s CreateTechnicalAssetRequestConfiguration) GetS3TechnicalAssetConfigurati
 func NewS3TechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration(v S3TechnicalAssetConfiguration) CreateTechnicalAssetRequestConfiguration {
 	var s CreateTechnicalAssetRequestConfiguration
 	s.SetS3TechnicalAssetConfiguration(v)
+	return s
+}
+
+// SetRustFSTechnicalAssetConfiguration sets CreateTechnicalAssetRequestConfiguration to RustFSTechnicalAssetConfiguration.
+func (s *CreateTechnicalAssetRequestConfiguration) SetRustFSTechnicalAssetConfiguration(v RustFSTechnicalAssetConfiguration) {
+	s.Type = RustFSTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration
+	s.RustFSTechnicalAssetConfiguration = v
+}
+
+// GetRustFSTechnicalAssetConfiguration returns RustFSTechnicalAssetConfiguration and true boolean if CreateTechnicalAssetRequestConfiguration is RustFSTechnicalAssetConfiguration.
+func (s CreateTechnicalAssetRequestConfiguration) GetRustFSTechnicalAssetConfiguration() (v RustFSTechnicalAssetConfiguration, ok bool) {
+	if !s.IsRustFSTechnicalAssetConfiguration() {
+		return v, false
+	}
+	return s.RustFSTechnicalAssetConfiguration, true
+}
+
+// NewRustFSTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration returns new CreateTechnicalAssetRequestConfiguration from RustFSTechnicalAssetConfiguration.
+func NewRustFSTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration(v RustFSTechnicalAssetConfiguration) CreateTechnicalAssetRequestConfiguration {
+	var s CreateTechnicalAssetRequestConfiguration
+	s.SetRustFSTechnicalAssetConfiguration(v)
 	return s
 }
 
@@ -5919,6 +5948,7 @@ type GetTechnicalAssetsResponseItemConfiguration struct {
 	// Type selects the active sum variant, switch on this field.
 	Type                                        GetTechnicalAssetsResponseItemConfigurationType
 	S3TechnicalAssetConfiguration               S3TechnicalAssetConfiguration
+	RustFSTechnicalAssetConfiguration           RustFSTechnicalAssetConfiguration
 	GlueTechnicalAssetConfiguration             GlueTechnicalAssetConfiguration
 	DatabricksTechnicalAssetConfiguration       DatabricksTechnicalAssetConfiguration
 	SnowflakeTechnicalAssetConfiguration        SnowflakeTechnicalAssetConfiguration
@@ -5934,6 +5964,7 @@ type GetTechnicalAssetsResponseItemConfigurationType string
 // Possible values for GetTechnicalAssetsResponseItemConfigurationType.
 const (
 	S3TechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration               GetTechnicalAssetsResponseItemConfigurationType = "S3TechnicalAssetConfiguration"
+	RustFSTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration           GetTechnicalAssetsResponseItemConfigurationType = "RustFSTechnicalAssetConfiguration"
 	GlueTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration             GetTechnicalAssetsResponseItemConfigurationType = "GlueTechnicalAssetConfiguration"
 	DatabricksTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration       GetTechnicalAssetsResponseItemConfigurationType = "DatabricksTechnicalAssetConfiguration"
 	SnowflakeTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration        GetTechnicalAssetsResponseItemConfigurationType = "SnowflakeTechnicalAssetConfiguration"
@@ -5946,6 +5977,11 @@ const (
 // IsS3TechnicalAssetConfiguration reports whether GetTechnicalAssetsResponseItemConfiguration is S3TechnicalAssetConfiguration.
 func (s GetTechnicalAssetsResponseItemConfiguration) IsS3TechnicalAssetConfiguration() bool {
 	return s.Type == S3TechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration
+}
+
+// IsRustFSTechnicalAssetConfiguration reports whether GetTechnicalAssetsResponseItemConfiguration is RustFSTechnicalAssetConfiguration.
+func (s GetTechnicalAssetsResponseItemConfiguration) IsRustFSTechnicalAssetConfiguration() bool {
+	return s.Type == RustFSTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration
 }
 
 // IsGlueTechnicalAssetConfiguration reports whether GetTechnicalAssetsResponseItemConfiguration is GlueTechnicalAssetConfiguration.
@@ -6001,6 +6037,27 @@ func (s GetTechnicalAssetsResponseItemConfiguration) GetS3TechnicalAssetConfigur
 func NewS3TechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration(v S3TechnicalAssetConfiguration) GetTechnicalAssetsResponseItemConfiguration {
 	var s GetTechnicalAssetsResponseItemConfiguration
 	s.SetS3TechnicalAssetConfiguration(v)
+	return s
+}
+
+// SetRustFSTechnicalAssetConfiguration sets GetTechnicalAssetsResponseItemConfiguration to RustFSTechnicalAssetConfiguration.
+func (s *GetTechnicalAssetsResponseItemConfiguration) SetRustFSTechnicalAssetConfiguration(v RustFSTechnicalAssetConfiguration) {
+	s.Type = RustFSTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration
+	s.RustFSTechnicalAssetConfiguration = v
+}
+
+// GetRustFSTechnicalAssetConfiguration returns RustFSTechnicalAssetConfiguration and true boolean if GetTechnicalAssetsResponseItemConfiguration is RustFSTechnicalAssetConfiguration.
+func (s GetTechnicalAssetsResponseItemConfiguration) GetRustFSTechnicalAssetConfiguration() (v RustFSTechnicalAssetConfiguration, ok bool) {
+	if !s.IsRustFSTechnicalAssetConfiguration() {
+		return v, false
+	}
+	return s.RustFSTechnicalAssetConfiguration, true
+}
+
+// NewRustFSTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration returns new GetTechnicalAssetsResponseItemConfiguration from RustFSTechnicalAssetConfiguration.
+func NewRustFSTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration(v RustFSTechnicalAssetConfiguration) GetTechnicalAssetsResponseItemConfiguration {
+	var s GetTechnicalAssetsResponseItemConfiguration
+	s.SetRustFSTechnicalAssetConfiguration(v)
 	return s
 }
 
@@ -6545,6 +6602,7 @@ func (*HTTPValidationError) getSinglePlatformServiceConfigurationRes()    {}
 func (*HTTPValidationError) getTechnicalAssetEventHistoryRes()            {}
 func (*HTTPValidationError) getTechnicalAssetRes()                        {}
 func (*HTTPValidationError) ingestOutputPortContractRes()                 {}
+func (*HTTPValidationError) ingestOutputPortContractYamlRes()             {}
 func (*HTTPValidationError) linkOutputPortToTechnicalAssetRes()           {}
 func (*HTTPValidationError) listDataProductRoleAssignmentsRes()           {}
 func (*HTTPValidationError) listGlobalRoleAssignmentsRes()                {}
@@ -6612,6 +6670,24 @@ func (*HTTPValidationError) validateResourceNameRes()                     {}
 type IngestOutputPortContractNotFoundApplicationJSON jx.Raw
 
 func (*IngestOutputPortContractNotFoundApplicationJSON) ingestOutputPortContractRes() {}
+
+type IngestOutputPortContractYamlNotFoundApplicationJSON jx.Raw
+
+func (*IngestOutputPortContractYamlNotFoundApplicationJSON) ingestOutputPortContractYamlRes() {}
+
+type IngestOutputPortContractYamlReq struct {
+	File ht.MultipartFile `json:"file"`
+}
+
+// GetFile returns the value of File.
+func (s *IngestOutputPortContractYamlReq) GetFile() ht.MultipartFile {
+	return s.File
+}
+
+// SetFile sets the value of File.
+func (s *IngestOutputPortContractYamlReq) SetFile(val ht.MultipartFile) {
+	s.File = val
+}
 
 // Ref: #/components/schemas/InputPortRequestBase
 type InputPortRequestBase struct {
@@ -10628,8 +10704,9 @@ func (s *OutputPortSchemaResponse) SetSchemaObjects(val []SchemaObjectResponse) 
 	s.SchemaObjects = val
 }
 
-func (*OutputPortSchemaResponse) getOutputPortSchemaRes()      {}
-func (*OutputPortSchemaResponse) ingestOutputPortContractRes() {}
+func (*OutputPortSchemaResponse) getOutputPortSchemaRes()          {}
+func (*OutputPortSchemaResponse) ingestOutputPortContractRes()     {}
+func (*OutputPortSchemaResponse) ingestOutputPortContractYamlRes() {}
 
 // Ref: #/components/schemas/OutputPortSettingValue
 type OutputPortSettingValue struct {
@@ -11396,6 +11473,7 @@ type RenderTechnicalAssetAccessPathRequestConfiguration struct {
 	// Type selects the active sum variant, switch on this field.
 	Type                                        RenderTechnicalAssetAccessPathRequestConfigurationType
 	S3TechnicalAssetConfiguration               S3TechnicalAssetConfiguration
+	RustFSTechnicalAssetConfiguration           RustFSTechnicalAssetConfiguration
 	GlueTechnicalAssetConfiguration             GlueTechnicalAssetConfiguration
 	DatabricksTechnicalAssetConfiguration       DatabricksTechnicalAssetConfiguration
 	SnowflakeTechnicalAssetConfiguration        SnowflakeTechnicalAssetConfiguration
@@ -11411,6 +11489,7 @@ type RenderTechnicalAssetAccessPathRequestConfigurationType string
 // Possible values for RenderTechnicalAssetAccessPathRequestConfigurationType.
 const (
 	S3TechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration               RenderTechnicalAssetAccessPathRequestConfigurationType = "S3TechnicalAssetConfiguration"
+	RustFSTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration           RenderTechnicalAssetAccessPathRequestConfigurationType = "RustFSTechnicalAssetConfiguration"
 	GlueTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration             RenderTechnicalAssetAccessPathRequestConfigurationType = "GlueTechnicalAssetConfiguration"
 	DatabricksTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration       RenderTechnicalAssetAccessPathRequestConfigurationType = "DatabricksTechnicalAssetConfiguration"
 	SnowflakeTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration        RenderTechnicalAssetAccessPathRequestConfigurationType = "SnowflakeTechnicalAssetConfiguration"
@@ -11423,6 +11502,11 @@ const (
 // IsS3TechnicalAssetConfiguration reports whether RenderTechnicalAssetAccessPathRequestConfiguration is S3TechnicalAssetConfiguration.
 func (s RenderTechnicalAssetAccessPathRequestConfiguration) IsS3TechnicalAssetConfiguration() bool {
 	return s.Type == S3TechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration
+}
+
+// IsRustFSTechnicalAssetConfiguration reports whether RenderTechnicalAssetAccessPathRequestConfiguration is RustFSTechnicalAssetConfiguration.
+func (s RenderTechnicalAssetAccessPathRequestConfiguration) IsRustFSTechnicalAssetConfiguration() bool {
+	return s.Type == RustFSTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration
 }
 
 // IsGlueTechnicalAssetConfiguration reports whether RenderTechnicalAssetAccessPathRequestConfiguration is GlueTechnicalAssetConfiguration.
@@ -11478,6 +11562,27 @@ func (s RenderTechnicalAssetAccessPathRequestConfiguration) GetS3TechnicalAssetC
 func NewS3TechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration(v S3TechnicalAssetConfiguration) RenderTechnicalAssetAccessPathRequestConfiguration {
 	var s RenderTechnicalAssetAccessPathRequestConfiguration
 	s.SetS3TechnicalAssetConfiguration(v)
+	return s
+}
+
+// SetRustFSTechnicalAssetConfiguration sets RenderTechnicalAssetAccessPathRequestConfiguration to RustFSTechnicalAssetConfiguration.
+func (s *RenderTechnicalAssetAccessPathRequestConfiguration) SetRustFSTechnicalAssetConfiguration(v RustFSTechnicalAssetConfiguration) {
+	s.Type = RustFSTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration
+	s.RustFSTechnicalAssetConfiguration = v
+}
+
+// GetRustFSTechnicalAssetConfiguration returns RustFSTechnicalAssetConfiguration and true boolean if RenderTechnicalAssetAccessPathRequestConfiguration is RustFSTechnicalAssetConfiguration.
+func (s RenderTechnicalAssetAccessPathRequestConfiguration) GetRustFSTechnicalAssetConfiguration() (v RustFSTechnicalAssetConfiguration, ok bool) {
+	if !s.IsRustFSTechnicalAssetConfiguration() {
+		return v, false
+	}
+	return s.RustFSTechnicalAssetConfiguration, true
+}
+
+// NewRustFSTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration returns new RenderTechnicalAssetAccessPathRequestConfiguration from RustFSTechnicalAssetConfiguration.
+func NewRustFSTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration(v RustFSTechnicalAssetConfiguration) RenderTechnicalAssetAccessPathRequestConfiguration {
+	var s RenderTechnicalAssetAccessPathRequestConfiguration
+	s.SetRustFSTechnicalAssetConfiguration(v)
 	return s
 }
 
@@ -12236,6 +12341,54 @@ func (s *Role) SetPrototype(val Prototype) {
 
 func (*Role) createRoleRes() {}
 func (*Role) updateRoleRes() {}
+
+// Ref: #/components/schemas/RustFSTechnicalAssetConfiguration
+type RustFSTechnicalAssetConfiguration struct {
+	ConfigurationType string    `json:"configuration_type"`
+	Bucket            string    `json:"bucket"`
+	Suffix            OptString `json:"suffix"`
+	Path              string    `json:"path"`
+}
+
+// GetConfigurationType returns the value of ConfigurationType.
+func (s *RustFSTechnicalAssetConfiguration) GetConfigurationType() string {
+	return s.ConfigurationType
+}
+
+// GetBucket returns the value of Bucket.
+func (s *RustFSTechnicalAssetConfiguration) GetBucket() string {
+	return s.Bucket
+}
+
+// GetSuffix returns the value of Suffix.
+func (s *RustFSTechnicalAssetConfiguration) GetSuffix() OptString {
+	return s.Suffix
+}
+
+// GetPath returns the value of Path.
+func (s *RustFSTechnicalAssetConfiguration) GetPath() string {
+	return s.Path
+}
+
+// SetConfigurationType sets the value of ConfigurationType.
+func (s *RustFSTechnicalAssetConfiguration) SetConfigurationType(val string) {
+	s.ConfigurationType = val
+}
+
+// SetBucket sets the value of Bucket.
+func (s *RustFSTechnicalAssetConfiguration) SetBucket(val string) {
+	s.Bucket = val
+}
+
+// SetSuffix sets the value of Suffix.
+func (s *RustFSTechnicalAssetConfiguration) SetSuffix(val OptString) {
+	s.Suffix = val
+}
+
+// SetPath sets the value of Path.
+func (s *RustFSTechnicalAssetConfiguration) SetPath(val string) {
+	s.Path = val
+}
 
 // Ref: #/components/schemas/S3TechnicalAssetConfiguration
 type S3TechnicalAssetConfiguration struct {
@@ -13439,6 +13592,7 @@ type TechnicalAssetConfiguration struct {
 	// Type selects the active sum variant, switch on this field.
 	Type                                        TechnicalAssetConfigurationType
 	S3TechnicalAssetConfiguration               S3TechnicalAssetConfiguration
+	RustFSTechnicalAssetConfiguration           RustFSTechnicalAssetConfiguration
 	GlueTechnicalAssetConfiguration             GlueTechnicalAssetConfiguration
 	DatabricksTechnicalAssetConfiguration       DatabricksTechnicalAssetConfiguration
 	SnowflakeTechnicalAssetConfiguration        SnowflakeTechnicalAssetConfiguration
@@ -13454,6 +13608,7 @@ type TechnicalAssetConfigurationType string
 // Possible values for TechnicalAssetConfigurationType.
 const (
 	S3TechnicalAssetConfigurationTechnicalAssetConfiguration               TechnicalAssetConfigurationType = "S3TechnicalAssetConfiguration"
+	RustFSTechnicalAssetConfigurationTechnicalAssetConfiguration           TechnicalAssetConfigurationType = "RustFSTechnicalAssetConfiguration"
 	GlueTechnicalAssetConfigurationTechnicalAssetConfiguration             TechnicalAssetConfigurationType = "GlueTechnicalAssetConfiguration"
 	DatabricksTechnicalAssetConfigurationTechnicalAssetConfiguration       TechnicalAssetConfigurationType = "DatabricksTechnicalAssetConfiguration"
 	SnowflakeTechnicalAssetConfigurationTechnicalAssetConfiguration        TechnicalAssetConfigurationType = "SnowflakeTechnicalAssetConfiguration"
@@ -13466,6 +13621,11 @@ const (
 // IsS3TechnicalAssetConfiguration reports whether TechnicalAssetConfiguration is S3TechnicalAssetConfiguration.
 func (s TechnicalAssetConfiguration) IsS3TechnicalAssetConfiguration() bool {
 	return s.Type == S3TechnicalAssetConfigurationTechnicalAssetConfiguration
+}
+
+// IsRustFSTechnicalAssetConfiguration reports whether TechnicalAssetConfiguration is RustFSTechnicalAssetConfiguration.
+func (s TechnicalAssetConfiguration) IsRustFSTechnicalAssetConfiguration() bool {
+	return s.Type == RustFSTechnicalAssetConfigurationTechnicalAssetConfiguration
 }
 
 // IsGlueTechnicalAssetConfiguration reports whether TechnicalAssetConfiguration is GlueTechnicalAssetConfiguration.
@@ -13521,6 +13681,27 @@ func (s TechnicalAssetConfiguration) GetS3TechnicalAssetConfiguration() (v S3Tec
 func NewS3TechnicalAssetConfigurationTechnicalAssetConfiguration(v S3TechnicalAssetConfiguration) TechnicalAssetConfiguration {
 	var s TechnicalAssetConfiguration
 	s.SetS3TechnicalAssetConfiguration(v)
+	return s
+}
+
+// SetRustFSTechnicalAssetConfiguration sets TechnicalAssetConfiguration to RustFSTechnicalAssetConfiguration.
+func (s *TechnicalAssetConfiguration) SetRustFSTechnicalAssetConfiguration(v RustFSTechnicalAssetConfiguration) {
+	s.Type = RustFSTechnicalAssetConfigurationTechnicalAssetConfiguration
+	s.RustFSTechnicalAssetConfiguration = v
+}
+
+// GetRustFSTechnicalAssetConfiguration returns RustFSTechnicalAssetConfiguration and true boolean if TechnicalAssetConfiguration is RustFSTechnicalAssetConfiguration.
+func (s TechnicalAssetConfiguration) GetRustFSTechnicalAssetConfiguration() (v RustFSTechnicalAssetConfiguration, ok bool) {
+	if !s.IsRustFSTechnicalAssetConfiguration() {
+		return v, false
+	}
+	return s.RustFSTechnicalAssetConfiguration, true
+}
+
+// NewRustFSTechnicalAssetConfigurationTechnicalAssetConfiguration returns new TechnicalAssetConfiguration from RustFSTechnicalAssetConfiguration.
+func NewRustFSTechnicalAssetConfigurationTechnicalAssetConfiguration(v RustFSTechnicalAssetConfiguration) TechnicalAssetConfiguration {
+	var s TechnicalAssetConfiguration
+	s.SetRustFSTechnicalAssetConfiguration(v)
 	return s
 }
 

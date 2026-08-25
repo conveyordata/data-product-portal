@@ -51,6 +51,7 @@ class InputPortEvent(V2Event):
     id: UUID
     consuming_abstract_data_product_id: UUID
     consuming_abstract_data_product_type: AbstractDataProductType
+    producing_data_product_id: UUID
 
     @classmethod
     def event_type(cls) -> str:

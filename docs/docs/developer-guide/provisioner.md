@@ -77,7 +77,12 @@ of how many workers you run.
 A FastAPI-ready webhook handler. Pass it a `ReconcileManager` and call
 `handler.dispatch_routing(request)` from your `/webhook` endpoint. It parses the
 incoming CloudEvent, maps it to the right `ResourceType`, and enqueues a reconcile.
-Events for resource types that have no registered reconciler are silently acknowledged.
+Events for resource types that have no registered reconciler are silently acknowledged. Key
+constructor parameters:
+
+| Parameter                     | Default                              | Description                                                                               |
+|-------------------------------|--------------------------------------|-------------------------------------------------------------------------------------------|
+| `input_port_reconcile_target` | `InputPortReconcilerTarget.CONSUMER` | Determines whether the reconciler should target the producer or consumer of an input port |
 
 ### `ResourceType`
 
@@ -323,8 +328,11 @@ We generally recommend the following pattern:
 - **Input Port removed / rejected** — revoke the role assignment from the consumer's
   principal.
 
+Depending on how your reconciler works either `input_port_reconcile_target` can be set to `InputPortReconcilerTarget.CONSUMER`
+(default) or `InputPortReconcilerTarget.PRODUCER`. The default is usually the right choice, but if your provisioner
+needs to manage the connection via the producer instead of the consumer's, you can set it to `PRODUCER`.
 
-### When a technical assets is added or removed from an output port, I want every consumer to be reconciled.
+### When a technical asset is added or removed from an output port, I want every consumer to be reconciled.
 
 We generally recommend against this pattern, see the recommended pattern in the [FAQ above](#how-should-i-handle-input-port-and-technical-asset-changes).
 However sometimes it's necessary, or you need it during a migration. In this case you can add the following setting to your Portal installation:

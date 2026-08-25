@@ -21,6 +21,9 @@ from app.technical_asset_configuration.postgresql.schema import (
 from app.technical_asset_configuration.redshift.schema import (
     RedshiftTechnicalAssetConfiguration,
 )
+from app.technical_asset_configuration.rustfs.schema import (
+    RustFSTechnicalAssetConfiguration,
+)
 from app.technical_asset_configuration.s3.schema import S3TechnicalAssetConfiguration
 from app.technical_asset_configuration.snowflake.schema import (
     SnowflakeTechnicalAssetConfiguration,
@@ -28,6 +31,7 @@ from app.technical_asset_configuration.snowflake.schema import (
 
 DataOutputs = Union[
     S3TechnicalAssetConfiguration,
+    RustFSTechnicalAssetConfiguration,
     GlueTechnicalAssetConfiguration,
     DatabricksTechnicalAssetConfiguration,
     SnowflakeTechnicalAssetConfiguration,
@@ -39,6 +43,7 @@ DataOutputs = Union[
 
 DataOutputMap = {
     DataOutputTypes.S3TechnicalAssetConfiguration: S3TechnicalAssetConfiguration,
+    DataOutputTypes.RustFSTechnicalAssetConfiguration: RustFSTechnicalAssetConfiguration,
     DataOutputTypes.GlueTechnicalAssetConfiguration: GlueTechnicalAssetConfiguration,
     DataOutputTypes.DatabricksTechnicalAssetConfiguration: DatabricksTechnicalAssetConfiguration,
     DataOutputTypes.SnowflakeTechnicalAssetConfiguration: SnowflakeTechnicalAssetConfiguration,

@@ -191,6 +191,7 @@ from .global_role_assignment_response import GlobalRoleAssignmentResponse
 from .glue_technical_asset_configuration import GlueTechnicalAssetConfiguration
 from .graph import Graph
 from .http_validation_error import HTTPValidationError
+from .ingest_output_port_contract_yaml_body import IngestOutputPortContractYamlBody
 from .input_port_event import InputPortEvent
 from .input_port_request import InputPortRequest
 from .input_port_request_base import InputPortRequestBase
@@ -313,6 +314,7 @@ from .revoke_input_port_for_exploration_response import (
 )
 from .revoke_output_port_as_input_port_request import RevokeOutputPortAsInputPortRequest
 from .role import Role
+from .rust_fs_technical_asset_configuration import RustFSTechnicalAssetConfiguration
 from .s3_technical_asset_configuration import S3TechnicalAssetConfiguration
 from .schema_object_request import SchemaObjectRequest
 from .schema_object_response import SchemaObjectResponse
@@ -523,6 +525,7 @@ __all__ = (
     "GlueTechnicalAssetConfiguration",
     "Graph",
     "HTTPValidationError",
+    "IngestOutputPortContractYamlBody",
     "InputPortEvent",
     "InputPortRequest",
     "InputPortRequestBase",
@@ -605,6 +608,7 @@ __all__ = (
     "RevokeInputPortForExplorationResponse",
     "RevokeOutputPortAsInputPortRequest",
     "Role",
+    "RustFSTechnicalAssetConfiguration",
     "S3TechnicalAssetConfiguration",
     "SchemaObjectRequest",
     "SchemaObjectResponse",

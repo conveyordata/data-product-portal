@@ -30,6 +30,10 @@ export function DataAccessTileGrid({
     const { data: { environments = [] } = {}, isLoading: isLoadingEnvironments } = useGetEnvironmentsQuery();
     const [accessDataForm] = Form.useForm<AccessDataForm>();
 
+    if (dataPlatforms.length === 0) {
+        return null;
+    }
+
     function getEnvironment(platform: CustomDropdownItemProps<string>) {
         if (!platform.hasEnvironments) {
             return [];

@@ -4,11 +4,33 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 
 from app.main import app as f_app
+from app.open_api_export import custom_openapi
 
 
 def test_export_openapi() -> None:
     collisions = find_model_name_collisions(f_app)
     assert len(collisions) == 0, collision_message(collisions)
+
+
+def test_export_openapi_uses_binary_file_schema() -> None:
+    path = (
+        "/api/v2/data_products/{data_product_id}/output_ports/{id}/data_contract/upload"
+    )
+    schema = custom_openapi(f_app)["paths"][path]["post"]["requestBody"]["content"][
+        "multipart/form-data"
+    ]["schema"]
+
+    assert schema == {
+        "type": "object",
+        "required": ["file"],
+        "properties": {
+            "file": {
+                "type": "string",
+                "format": "binary",
+                "title": "File",
+            }
+        },
+    }
 
 
 def find_model_name_collisions(app: FastAPI) -> dict[str, list[Type]]:
