@@ -178,7 +178,7 @@ export function DataModelTab({ datasetId, dataProductId }: Props) {
                             type="info"
                             icon={<SafetyOutlined />}
                             showIcon
-                            title={t('As an owner you can upload a scheme')}
+                            title={t('As an owner you can upload a schema')}
                             description={
                                 <Space direction="vertical" size="small">
                                     <a
