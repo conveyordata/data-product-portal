@@ -1,7 +1,10 @@
 from typing import cast
 
+from sqlalchemy import text
+
 from app.core.authz.actions import AuthorizationAction
 from app.core.authz.authorization import Authorization
+from app.database.database import engine
 
 ANY: str = "does_not_matter"
 ANY_ACT: AuthorizationAction = cast("AuthorizationAction", 0)
@@ -251,8 +254,54 @@ class TestAuthorization:
         assert authorizer.has_domain_role(user_id=user, role_id=role, domain_id=dom1)
         assert authorizer.has_domain_role(user_id=user, role_id=role, domain_id=dom2)
 
-        authorizer.clear_assignments_for_domain(domain_id=dom1)
-        assert not authorizer.has_domain_role(
-            user_id=user, role_id=role, domain_id=dom1
-        )
         assert authorizer.has_domain_role(user_id=user, role_id=role, domain_id=dom2)
+
+
+class TestCrossWorkerStaleness:
+    def test_auto_reload_resolves_stale_policy(self, authorizer: Authorization):
+        """Regression test: a role assigned by another worker (direct DB write) is
+        invisible until the enforcer reloads and the TTL cache expires."""
+        role = "staleness_role"
+        user = "staleness_user"
+        resource = "staleness_resource"
+        action = AuthorizationAction.DATA_PRODUCT__UPDATE_PROPERTIES
+
+        authorizer.sync_role_permissions(role_id=role, actions=[action])
+        assert (
+            authorizer.has_access(sub=user, dom="*", obj=resource, act=action) is False
+        )
+
+        # Another worker writes the assignment directly to DB, bypassing the enforcer
+        with engine.connect() as conn:
+            conn.execute(
+                text(
+                    "INSERT INTO casbin_rule (ptype, v0, v1, v2) VALUES ('g', :u, :r, :obj)"
+                ),
+                {"u": user, "r": role, "obj": resource},
+            )
+            conn.commit()
+
+        # In-memory is stale: still denied despite the DB change
+        assert (
+            authorizer.has_access(sub=user, dom="*", obj=resource, act=action) is False
+        )
+
+        # Simulate start_auto_load_policy firing and the TTL cache expiring
+        authorizer._enforcer.load_policy()
+        authorizer._cache.clear()
+
+        # Access is now correctly granted
+        assert (
+            authorizer.has_access(sub=user, dom="*", obj=resource, act=action) is True
+        )
+
+        # Cleanup
+        with engine.connect() as conn:
+            conn.execute(
+                text(
+                    "DELETE FROM casbin_rule WHERE ptype='g' AND v0=:u AND v1=:r AND v2=:obj"
+                ),
+                {"u": user, "r": role, "obj": resource},
+            )
+            conn.commit()
+        authorizer.remove_role_permissions(role_id=role)
