@@ -3,8 +3,8 @@ from typing import Awaitable, Callable, Sequence, TypeAlias, Union
 from uuid import UUID
 
 import casbin_sqlalchemy_adapter as sqlalchemy_adapter
-from cachetools import Cache, LRUCache, cachedmethod
-from casbin import Enforcer
+from cachetools import Cache, TTLCache, cachedmethod
+from casbin import SyncedEnforcer
 from fastapi import Depends, HTTPException, Request, status
 from opentelemetry import trace
 from sqlalchemy.orm import Session
@@ -26,21 +26,26 @@ tracer = trace.get_tracer(__name__)
 
 class Authorization(metaclass=Singleton):
     def __init__(self) -> None:
-        self._enforcer: Enforcer = self._initialize()
-        self._cache: Cache = LRUCache(maxsize=settings.AUTHORIZER_CACHE_SIZE)
+        self._enforcer: SyncedEnforcer = self._initialize()
+        self._cache: Cache = TTLCache(
+            maxsize=settings.AUTHORIZER_CACHE_SIZE,
+            ttl=settings.AUTHORIZER_AUTOLOAD_INTERVAL,
+        )
 
     @classmethod
-    def _initialize(cls) -> Enforcer:
+    def _initialize(cls) -> SyncedEnforcer:
         model_location = Path(__file__).parent / "rbac_model.conf"
         enforcer = cls._construct_enforcer(str(model_location))
         enforcer.load_policy()
         return enforcer
 
     @staticmethod
-    def _construct_enforcer(model: str) -> Enforcer:
+    def _construct_enforcer(model: str) -> SyncedEnforcer:
         """Initializes the casbin table in the DB and constructs the enforcer."""
         adapter = sqlalchemy_adapter.Adapter(database.get_url())
-        return Enforcer(model, adapter)
+        enforcer = SyncedEnforcer(model, adapter)
+        enforcer.start_auto_load_policy(settings.AUTHORIZER_AUTOLOAD_INTERVAL)
+        return enforcer
 
     @classmethod
     def deregister(cls):
@@ -76,7 +81,7 @@ class Authorization(metaclass=Singleton):
         self, *, sub: str, dom: str, obj: str, act: AuthorizationAction
     ) -> bool:
         with tracer.start_as_current_span("has_access"):
-            enforcer: Enforcer = self._enforcer
+            enforcer: SyncedEnforcer = self._enforcer
             return enforcer.enforce(sub, dom, obj, str(act))
 
     def _after_update(self) -> None:
@@ -89,7 +94,7 @@ class Authorization(metaclass=Singleton):
         self, *, role_id: ID, actions: Sequence[AuthorizationAction]
     ) -> bool:
         """Creates or updates the permissions for the chosen role."""
-        enforcer: Enforcer = self._enforcer
+        enforcer: SyncedEnforcer = self._enforcer
         enforcer.remove_filtered_policy(0, role_id)
 
         policies = [(str(role_id), str(action)) for action in actions]
@@ -112,7 +117,7 @@ class Authorization(metaclass=Singleton):
     ) -> bool:
         """Creates an entry in the casbin table,
         assigning the user a role for the chosen resource."""
-        enforcer: Enforcer = self._enforcer
+        enforcer: SyncedEnforcer = self._enforcer
         updated = enforcer.add_named_grouping_policy(
             "g", str(user_id), str(role_id), str(resource_id)
         )
@@ -124,7 +129,7 @@ class Authorization(metaclass=Singleton):
     ) -> bool:
         """Deletes the entry in the casbin table,
         revoking the role for the chosen resource and user."""
-        enforcer: Enforcer = self._enforcer
+        enforcer: SyncedEnforcer = self._enforcer
         updated = enforcer.remove_named_grouping_policy(
             "g", str(user_id), str(role_id), str(resource_id)
         )
@@ -133,7 +138,7 @@ class Authorization(metaclass=Singleton):
 
     def has_resource_role(self, *, user_id: ID, role_id: ID, resource_id: ID) -> bool:
         """Determines whether this resource role is assigned to the chosen user."""
-        enforcer: Enforcer = self._enforcer
+        enforcer: SyncedEnforcer = self._enforcer
         return enforcer.has_named_grouping_policy(
             "g", str(user_id), str(role_id), str(resource_id)
         )
@@ -141,7 +146,7 @@ class Authorization(metaclass=Singleton):
     def assign_domain_role(self, *, user_id: ID, role_id: ID, domain_id: ID) -> bool:
         """Creates an entry in the casbin table,
         assigning the user a role for the chosen domain."""
-        enforcer: Enforcer = self._enforcer
+        enforcer: SyncedEnforcer = self._enforcer
         updated = enforcer.add_named_grouping_policy(
             "g2", str(user_id), str(role_id), str(domain_id)
         )
@@ -151,7 +156,7 @@ class Authorization(metaclass=Singleton):
     def revoke_domain_role(self, *, user_id: ID, role_id: ID, domain_id: ID) -> bool:
         """Deletes the entry in the casbin table,
         revoking the role for the chosen domain and user."""
-        enforcer: Enforcer = self._enforcer
+        enforcer: SyncedEnforcer = self._enforcer
         updated = enforcer.remove_named_grouping_policy(
             "g2", str(user_id), str(role_id), str(domain_id)
         )
@@ -160,7 +165,7 @@ class Authorization(metaclass=Singleton):
 
     def has_domain_role(self, *, user_id: ID, role_id: ID, domain_id: ID) -> bool:
         """Determines whether this domain role is assigned to chosen user."""
-        enforcer: Enforcer = self._enforcer
+        enforcer: SyncedEnforcer = self._enforcer
         return enforcer.has_named_grouping_policy(
             "g2", str(user_id), str(role_id), str(domain_id)
         )
@@ -168,7 +173,7 @@ class Authorization(metaclass=Singleton):
     def assign_global_role(self, *, user_id: ID, role_id: ID) -> bool:
         """Creates an entry in the casbin table,
         assigning the user the chosen global role."""
-        enforcer: Enforcer = self._enforcer
+        enforcer: SyncedEnforcer = self._enforcer
         updated = enforcer.add_named_grouping_policy("g3", str(user_id), str(role_id))
         self._after_update()
         return updated
@@ -176,7 +181,7 @@ class Authorization(metaclass=Singleton):
     def revoke_global_role(self, *, user_id: ID, role_id: ID) -> bool:
         """Deletes the entry in the casbin table,
         revoking the chosen global role for the user."""
-        enforcer: Enforcer = self._enforcer
+        enforcer: SyncedEnforcer = self._enforcer
         updated = enforcer.remove_named_grouping_policy(
             "g3", str(user_id), str(role_id)
         )
@@ -185,7 +190,7 @@ class Authorization(metaclass=Singleton):
 
     def has_global_role(self, *, user_id: ID, role_id: ID) -> bool:
         """Determines whether this global role is assigned to the chosen user."""
-        enforcer: Enforcer = self._enforcer
+        enforcer: SyncedEnforcer = self._enforcer
         return enforcer.has_named_grouping_policy("g3", str(user_id), str(role_id))
 
     def assign_admin_role(self, *, user_id: ID) -> bool:
@@ -206,7 +211,7 @@ class Authorization(metaclass=Singleton):
         """
         value = str(user_id)
 
-        enforcer: Enforcer = self._enforcer
+        enforcer: SyncedEnforcer = self._enforcer
         resource_updates = enforcer.remove_filtered_named_grouping_policy("g", 0, value)
         domain_updates = enforcer.remove_filtered_named_grouping_policy("g2", 0, value)
         global_updates = enforcer.remove_filtered_named_grouping_policy("g3", 0, value)
@@ -217,7 +222,7 @@ class Authorization(metaclass=Singleton):
         """Removes all assignments of a resource role inside the casbin table.
         Should be called when a resource role is removed.
         """
-        enforcer: Enforcer = self._enforcer
+        enforcer: SyncedEnforcer = self._enforcer
         updates = enforcer.remove_filtered_named_grouping_policy("g", 1, str(role_id))
         self._after_update()
         return bool(updates)
@@ -226,7 +231,7 @@ class Authorization(metaclass=Singleton):
         """Removes all assignments of a domain role inside the casbin table.
         Should be called when a domain role is removed.
         """
-        enforcer: Enforcer = self._enforcer
+        enforcer: SyncedEnforcer = self._enforcer
         updates = enforcer.remove_filtered_named_grouping_policy("g2", 1, str(role_id))
         self._after_update()
         return bool(updates)
@@ -235,7 +240,7 @@ class Authorization(metaclass=Singleton):
         """Removes all assignments of a global role inside the casbin table.
         Should be called when a global role is removed.
         """
-        enforcer: Enforcer = self._enforcer
+        enforcer: SyncedEnforcer = self._enforcer
         updates = enforcer.remove_filtered_named_grouping_policy("g3", 1, str(role_id))
         self._after_update()
         return bool(updates)
@@ -244,7 +249,7 @@ class Authorization(metaclass=Singleton):
         """Removes all assignments to a resource inside the casbin table.
         Should be called when a resource is removed.
         """
-        enforcer: Enforcer = self._enforcer
+        enforcer: SyncedEnforcer = self._enforcer
         updates = enforcer.remove_filtered_named_grouping_policy(
             "g", 2, str(resource_id)
         )
@@ -255,7 +260,7 @@ class Authorization(metaclass=Singleton):
         """Removes all assignments to a domain inside the casbin table.
         Should be called when a domain is removed.
         """
-        enforcer: Enforcer = self._enforcer
+        enforcer: SyncedEnforcer = self._enforcer
         updates = enforcer.remove_filtered_named_grouping_policy(
             "g2", 2, str(domain_id)
         )
