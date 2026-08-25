@@ -1,6 +1,6 @@
 import '@testing-library/jest-dom/vitest';
 import { cleanup } from '@testing-library/react';
-import { afterAll, afterEach, beforeAll } from 'vitest';
+import { afterAll, afterEach, beforeAll, vi } from 'vitest';
 import { server } from './mocks/server';
 
 (globalThis as Record<string, unknown>).config = {
@@ -40,6 +40,10 @@ beforeAll(() => {
 
 beforeAll(() => server.listen({ onUnhandledRequest: 'warn' }));
 afterEach(() => {
+    // Clear any pending timers created by UI libraries (for example useDelayState from
+    // @rc-component/util). Those delayed callbacks can fire after jsdom teardown and attempt
+    // to access window, which would otherwise throw ReferenceError: window is not defined.
+    vi.clearAllTimers();
     server.resetHandlers();
     cleanup();
 });
