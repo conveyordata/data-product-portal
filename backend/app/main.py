@@ -23,7 +23,6 @@ from app.core.auth.jwt import get_oidc
 from app.core.auth.router import router as auth
 from app.core.authz.authorization import Authorization
 from app.core.authz.background_tasks import check_expired_admins
-from app.core.authz.watcher import listen_for_policy_changes
 from app.core.embed.model import warm_text_embedding_model
 from app.core.errors.error_handling import add_exception_handlers
 from app.core.logging import logger
@@ -103,7 +102,7 @@ async def lifespan(app: FastAPI):
     background_tasks = [
         _create_supervised_task(check_expired_admins(), name="check_expired_admins"),
         _create_supervised_task(
-            listen_for_policy_changes(Authorization().reload_policy),
+            Authorization().watcher.start(),
             name="casbin_policy_watcher",
         ),
         _create_supervised_task(

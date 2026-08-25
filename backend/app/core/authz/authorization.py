@@ -18,7 +18,7 @@ from app.utils.singleton import Singleton
 
 from .actions import AuthorizationAction
 from .resolvers import SubjectResolver
-from .watcher import notify_policy_update
+from .watcher import PostgresqlAsyncWatcher
 
 ID: TypeAlias = Union[str, UUID]
 
@@ -29,6 +29,8 @@ class Authorization(metaclass=Singleton):
     def __init__(self) -> None:
         self._enforcer: Enforcer = self._initialize()
         self._cache: Cache = LRUCache(maxsize=settings.AUTHORIZER_CACHE_SIZE)
+        self.watcher: PostgresqlAsyncWatcher = PostgresqlAsyncWatcher()
+        self.watcher.set_update_callback(self.reload_policy)
 
     @classmethod
     def _initialize(cls) -> Enforcer:
@@ -89,7 +91,7 @@ class Authorization(metaclass=Singleton):
         otherwise we risk returning stale results.
         """
         self._cache.clear()
-        notify_policy_update()
+        self.watcher.update()
 
     def sync_role_permissions(
         self, *, role_id: ID, actions: Sequence[AuthorizationAction]

@@ -6,15 +6,11 @@ from sqlalchemy import text
 
 from app.core.authz.actions import AuthorizationAction
 from app.core.authz.authorization import Authorization
-from app.core.authz.watcher import (
-    CHANNEL,
-    listen_for_policy_changes,
-    notify_policy_update,
-)
+from app.core.authz.watcher import CHANNEL, PostgresqlAsyncWatcher
 from app.database.database import engine
 
 
-class TestNotifyPolicyUpdate:
+class TestPostgresqlAsyncWatcherUpdate:
     def test_executes_notify_and_commits(self):
         mock_conn = MagicMock()
         mock_ctx = MagicMock(
@@ -24,7 +20,7 @@ class TestNotifyPolicyUpdate:
 
         with patch("app.core.authz.watcher.engine") as mock_engine:
             mock_engine.connect.return_value = mock_ctx
-            notify_policy_update()
+            PostgresqlAsyncWatcher().update()
 
         mock_conn.execute.assert_called_once()
         sql = str(mock_conn.execute.call_args[0][0])
@@ -35,13 +31,13 @@ class TestNotifyPolicyUpdate:
     def test_swallows_exceptions(self):
         with patch("app.core.authz.watcher.engine") as mock_engine:
             mock_engine.connect.side_effect = RuntimeError("db down")
-            notify_policy_update()  # must not raise
+            PostgresqlAsyncWatcher().update()  # must not raise
 
 
-class TestListenForPolicyChanges:
-    def _run_task(self, coro):
+class TestPostgresqlAsyncWatcherStart:
+    def _run_task(self, watcher: PostgresqlAsyncWatcher):
         async def runner():
-            task = asyncio.create_task(coro)
+            task = asyncio.create_task(watcher.start())
             await asyncio.sleep(0)
             task.cancel()
             with suppress(asyncio.CancelledError):
@@ -52,27 +48,33 @@ class TestListenForPolicyChanges:
 
     def test_adds_listener_on_correct_channel(self):
         mock_conn = AsyncMock()
+        watcher = PostgresqlAsyncWatcher()
+        watcher.set_update_callback(MagicMock())
 
         with patch("app.core.authz.watcher.asyncpg.connect", return_value=mock_conn):
-            self._run_task(listen_for_policy_changes(MagicMock()))
+            self._run_task(watcher)
 
         mock_conn.add_listener.assert_called_once()
         assert mock_conn.add_listener.call_args[0][0] == CHANNEL
 
     def test_closes_connection_on_cancel(self):
         mock_conn = AsyncMock()
+        watcher = PostgresqlAsyncWatcher()
+        watcher.set_update_callback(MagicMock())
 
         with patch("app.core.authz.watcher.asyncpg.connect", return_value=mock_conn):
-            self._run_task(listen_for_policy_changes(MagicMock()))
+            self._run_task(watcher)
 
         mock_conn.close.assert_called_once()
 
     def test_reconnects_after_connection_error(self):
         mock_connect = AsyncMock(side_effect=OSError("connection refused"))
+        watcher = PostgresqlAsyncWatcher()
+        watcher.set_update_callback(MagicMock())
 
         async def runner():
-            task = asyncio.create_task(listen_for_policy_changes(MagicMock()))
-            await asyncio.sleep(0)  # let task attempt connect, fail, and enter sleep(5)
+            task = asyncio.create_task(watcher.start())
+            await asyncio.sleep(0)
             task.cancel()
             with suppress(asyncio.CancelledError):
                 await task
@@ -84,10 +86,12 @@ class TestListenForPolicyChanges:
         mock_connect.assert_called_once()
         assert task.cancelled()
 
-    def test_on_change_called_when_notification_received(self):
-        on_change = MagicMock()
+    def test_callback_called_when_notification_received(self):
+        callback = MagicMock()
         captured_cb = []
         mock_conn = AsyncMock()
+        watcher = PostgresqlAsyncWatcher()
+        watcher.set_update_callback(callback)
 
         async def capture_listener(channel, cb):
             captured_cb.append(cb)
@@ -95,8 +99,8 @@ class TestListenForPolicyChanges:
         mock_conn.add_listener.side_effect = capture_listener
 
         async def runner():
-            task = asyncio.create_task(listen_for_policy_changes(on_change))
-            await asyncio.sleep(0)  # let task reach add_listener
+            task = asyncio.create_task(watcher.start())
+            await asyncio.sleep(0)
             assert captured_cb, "listener callback was not registered"
             await captured_cb[0](mock_conn, 0, CHANNEL, "")
             task.cancel()
@@ -105,7 +109,25 @@ class TestListenForPolicyChanges:
 
         with patch("app.core.authz.watcher.asyncpg.connect", return_value=mock_conn):
             asyncio.run(runner())
-        on_change.assert_called_once()
+        assert callback.call_count >= 2  # once at connect, once via notification
+
+    def test_reloads_immediately_after_connecting(self):
+        callback = MagicMock()
+        mock_conn = AsyncMock()
+        watcher = PostgresqlAsyncWatcher()
+        watcher.set_update_callback(callback)
+
+        with patch("app.core.authz.watcher.asyncpg.connect", return_value=mock_conn):
+            self._run_task(watcher)
+
+        callback.assert_called_once()
+
+    def test_no_callback_does_not_raise(self):
+        mock_conn = AsyncMock()
+        watcher = PostgresqlAsyncWatcher()  # no callback set
+
+        with patch("app.core.authz.watcher.asyncpg.connect", return_value=mock_conn):
+            self._run_task(watcher)
 
 
 class TestAuthorizationReloadPolicy:
@@ -165,7 +187,7 @@ class TestAuthorizationReloadPolicy:
         assert len(authorizer._cache) == 0
 
     def test_after_update_calls_notify(self, authorizer: Authorization):
-        with patch("app.core.authz.authorization.notify_policy_update") as mock_notify:
+        with patch.object(authorizer.watcher, "update") as mock_update:
             authorizer._after_update()
 
-        mock_notify.assert_called_once()
+        mock_update.assert_called_once()
