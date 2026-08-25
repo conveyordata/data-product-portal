@@ -3589,14 +3589,14 @@ poetry-plugin = ["poetry (>=1.2.0,<3.0.0) ; python_version < \"4.0\""]
 
 [[package]]
 name = "posthog"
-version = "7.39.1"
+version = "7.42.0"
 description = "Integrate PostHog into any python application."
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "posthog-7.39.1-py3-none-any.whl", hash = "sha256:e76e82fe571314a0a9bc11d039fd1a1a8d210cd0f737899d41b31f61b73bf08c"},
-    {file = "posthog-7.39.1.tar.gz", hash = "sha256:0d184596e35057457fc1094883646fd23de2d6338db8b9c3ea770643fb55d8a2"},
+    {file = "posthog-7.42.0-py3-none-any.whl", hash = "sha256:6429c9a4145572a8f54ab00330bbfe987340025d3a464212505be814b2b0950d"},
+    {file = "posthog-7.42.0.tar.gz", hash = "sha256:c7e9297446208d413c3071348f101f4c05e32fba4228ac0a85e9d0014c2a274e"},
 ]
 
 [package.dependencies]
@@ -5652,4 +5652,4 @@ testing = ["coverage[toml]", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "bff6f2f617981979d8fc498dfa9088e1a861a2d4fd3ac796c5b7439cf20ccf82"
+content-hash = "52be11ccd4f3443e621301a1881dc19f8052de042c94fd59a5f1e75eccfcaaa6"
