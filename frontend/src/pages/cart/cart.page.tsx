@@ -34,20 +34,26 @@ function ExplorationsCart() {
     const dispatch = useAppDispatch();
     const dataProductTypeChoice = useSelector(selectCartDataProductTypeChoice);
     const existingOrNewChoice = useSelector(selectCartExistingOrNewChoice);
+    const clearSelectedIds = useCallback(() => {
+        setSelectedDataProductId(undefined);
+        setSelectedExplorationId(undefined);
+    }, []);
 
     const setDataProductTypeChoice = useCallback(
         (choice: DataProductChoiceOptions | null) => {
+            clearSelectedIds();
             posthog.capture(PosthogEvents.CART_DATA_PRODUCT_OR_EXPLORATION_CHOICE, { choice });
             dispatch(setCartExplorationChoices({ dataProductTypeChoice: choice, existingOrNewChoice: null }));
         },
-        [dispatch],
+        [clearSelectedIds, dispatch],
     );
     const setExistingOrNewChoice = useCallback(
         (choice: ExistingOrNew | null) => {
+            clearSelectedIds();
             posthog.capture(PosthogEvents.CART_EXISTING_OR_NEW_CHOICE, { choice });
             dispatch(setCartExplorationChoices({ dataProductTypeChoice, existingOrNewChoice: choice }));
         },
-        [dispatch, dataProductTypeChoice],
+        [clearSelectedIds, dispatch, dataProductTypeChoice],
     );
     const [selectedDataProductId, setSelectedDataProductId] = useState<string | undefined>(undefined);
     const [selectedExplorationId, setSelectedExplorationId] = useState<string | undefined>(undefined);

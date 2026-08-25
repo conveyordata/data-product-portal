@@ -25,6 +25,11 @@ afterEach(() => {
     localStorage.clear();
 });
 
+const createNewExploration = async () => {
+    const existingChoice = await screen.findByText('Create a new Exploration');
+    await userEvent.click(existingChoice);
+};
+
 describe('Cart', () => {
     const selectDataProducts = async () => {
         const dataProductChoice = await screen.findByText('I want to build Data Products');
@@ -223,11 +228,6 @@ describe('Cart', () => {
     }, 20000);
 
     describe('Cart should support creating a new exploration', () => {
-        const createNewExploration = async () => {
-            const existingChoice = await screen.findByText('Create a new Exploration');
-            await userEvent.click(existingChoice);
-        };
-
         it('Should succeed when filling in the form completely', async () => {
             allowAllAuth();
 
@@ -388,6 +388,44 @@ describe('Cart', () => {
                 expect(
                     screen.getByText(/Output Ports in the cart, for which the selected Exploration already has access/),
                 ).toBeTruthy();
+            });
+        });
+
+        it('should clear stale overlap warnings when switching from existing to new exploration', async () => {
+            allowAllAuth();
+
+            const cartOutputPortId = 'op-1';
+
+            mockOutputPortsSearch();
+            mockExplorationsHttp();
+            mockExplorationInputPorts(mockExplorations[0].id);
+
+            renderWithProviders(<Cart />, {
+                routerProps: { initialEntries: ['/cart'] },
+                preloadedState: { cart: { DatasetIds: [cartOutputPortId] } },
+                currentUser: mockUsers[0],
+            });
+
+            await selectExplorations();
+            await selectExistingExplorations();
+
+            const selectExploration1 = await screen.findByText(mockExplorations[0].name);
+            await userEvent.click(selectExploration1);
+
+            await waitFor(() => {
+                expect(
+                    screen.getByText(/Output Ports in the cart, for which the selected Exploration already has access/),
+                ).toBeTruthy();
+            });
+
+            await createNewExploration();
+
+            await waitFor(() => {
+                expect(
+                    screen.queryByText(
+                        /Output Ports in the cart, for which the selected Exploration already has access/,
+                    ),
+                ).toBeNull();
             });
         });
     });
