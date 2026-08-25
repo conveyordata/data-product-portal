@@ -58,7 +58,7 @@ export function OutputPortEdit() {
                     path: ApplicationPaths.Marketplace,
                 },
                 { title: <>{data_product?.name}</>, path: createDataProductIdPath(dataProductId) },
-                { title: <>{outputPort?.name}</>, path: createMarketplaceOutputPortPath(dataProductId, datasetId) },
+                { title: <>{outputPort?.name}</>, path: createMarketplaceOutputPortPath(datasetId, dataProductId) },
                 { title: <>{t('Edit')}</> },
             ]);
         }
