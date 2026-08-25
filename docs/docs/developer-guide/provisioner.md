@@ -357,3 +357,15 @@ Yes. Use the same pattern as in the example provisioner:
 - Otherwise, add the finalizer as needed and run `tofu apply` / `terraform apply` to provision the resource.
 
 You can pass variables to OpenTofu/Terraform using the resource data you get from the SDK.
+
+### I need to provision on external requests or triggers, not just portal events. How can I do that?
+
+You can do this by calling `enqueue` on the reconcile manager with the resource id you want to reconcile. For example:
+
+```python
+manager.enqueue(ResourceType.DATA_PRODUCT, resource_id)
+```
+
+The trigger for this enqueue depends on your use case, you could for example have a separate FastAPI endpoint that
+receives the external request and calls `enqueue` with the resource id you want to reconcile.
+Or you can respond to a message on a message queue, or a cron job, or any other trigger you want.
