@@ -21,6 +21,7 @@ from app.authorization.service import AuthorizationService
 from app.core.auth.device_flows.background_tasks import cleanup_device_flow_table_task
 from app.core.auth.jwt import get_oidc
 from app.core.auth.router import router as auth
+from app.core.authz.authorization import Authorization
 from app.core.authz.background_tasks import check_expired_admins
 from app.core.embed.model import warm_text_embedding_model
 from app.core.errors.error_handling import add_exception_handlers
@@ -100,6 +101,10 @@ async def lifespan(app: FastAPI):
     backend_analytics(API_VERSION)
     background_tasks = [
         _create_supervised_task(check_expired_admins(), name="check_expired_admins"),
+        _create_supervised_task(
+            Authorization().watcher.start(),
+            name="casbin_policy_watcher",
+        ),
         _create_supervised_task(
             cleanup_device_flow_table_task(),
             name="cleanup_device_flow_table_task",
