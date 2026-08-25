@@ -205,6 +205,7 @@ class AbstractDataProductService:
             )
 
         input_port = InputPortModel(
+            output_port=output_port,
             output_port_id=output_port_id,
             consuming_abstract_data_product=adp,
         )

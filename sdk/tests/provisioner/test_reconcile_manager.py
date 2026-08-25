@@ -6,11 +6,13 @@ from typing import Any
 from fastapi import Request
 from fastapi.datastructures import Headers
 
+from sdk.api_client.models import AbstractDataProductType
 from sdk.provisioner.reconcile_manager import (
     ReconcileEventHandler,
     ReconcileManager,
     Reconciler,
     ResourceType,
+    InputPortReconcilerTarget,
 )
 from sdk.provisioner.reconcile_queue import (
     RateLimiter,
@@ -313,6 +315,28 @@ def _envelope(event_type: str, resource_id: uuid.UUID) -> dict[str, Any]:
     }
 
 
+def _envelope_input_port(
+    event_type: str,
+    producing_data_product_id: uuid.UUID = uuid.uuid4(),
+    consuming_abstract_data_product_id: uuid.UUID = uuid.uuid4(),
+) -> dict[str, Any]:
+    return {
+        "specversion": "1.0",
+        "id": str(uuid.uuid4()),
+        "source": "data-product-portal",
+        "type": event_type,
+        "time": "2026-06-17T00:00:00Z",
+        "data": {
+            "id": str(uuid.uuid4()),
+            "producing_data_product_id": str(producing_data_product_id),
+            "consuming_abstract_data_product_id": str(
+                consuming_abstract_data_product_id
+            ),
+            "consuming_abstract_data_product_type": AbstractDataProductType.DATA_PRODUCTS.value,
+        },
+    }
+
+
 async def test_event_handler_enqueues_exploration():
     reconciler = RecordingReconciler()
     manager = _manager(reconciler, default_delay=0.0, num_workers=1)
@@ -340,6 +364,54 @@ async def test_event_handler_enqueues_data_product():
 
     await handler.dispatch_routing(
         _build_request(_envelope("data_product.event", data_product_id))
+    )
+
+    await _drain(reconciler, expected=1)
+    await manager.stop()
+    assert reconciler.calls == [data_product_id]
+
+
+async def test_event_handler_enqueues_input_port_target_producer():
+    reconciler = RecordingReconciler()
+    manager = ReconcileManager(
+        {ResourceType.DATA_PRODUCT: reconciler}, default_delay=0.0, num_workers=1
+    )
+    manager.start()
+    handler = ReconcileEventHandler(
+        manager, input_port_reconcile_target=InputPortReconcilerTarget.PRODUCER
+    )
+    data_product_id = uuid.uuid4()
+
+    await handler.dispatch_routing(
+        _build_request(
+            _envelope_input_port(
+                "input_port.event", producing_data_product_id=data_product_id
+            )
+        )
+    )
+
+    await _drain(reconciler, expected=1)
+    await manager.stop()
+    assert reconciler.calls == [data_product_id]
+
+
+async def test_event_handler_enqueues_input_port_target_consumer():
+    reconciler = RecordingReconciler()
+    manager = ReconcileManager(
+        {ResourceType.DATA_PRODUCT: reconciler}, default_delay=0.0, num_workers=1
+    )
+    manager.start()
+    handler = ReconcileEventHandler(
+        manager, input_port_reconcile_target=InputPortReconcilerTarget.CONSUMER
+    )
+    data_product_id = uuid.uuid4()
+
+    await handler.dispatch_routing(
+        _build_request(
+            _envelope_input_port(
+                "input_port.event", consuming_abstract_data_product_id=data_product_id
+            )
+        )
     )
 
     await _drain(reconciler, expected=1)
