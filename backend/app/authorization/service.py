@@ -25,7 +25,7 @@ from app.core.authz import Authorization
 from app.core.logging import logger
 
 if TYPE_CHECKING:
-    from casbin import Enforcer
+    from casbin import SyncedEnforcer
 
 
 class AuthorizationService:
@@ -69,8 +69,8 @@ class AuthorizationService:
         This means the casbin table will be out of sync with the role assignments.
         """
         authorizer = Authorization()
-        enforcer: Enforcer = authorizer._enforcer
-        adapter: Adapter = enforcer.adapter
+        enforcer: SyncedEnforcer = authorizer._enforcer
+        adapter: Adapter = enforcer._e.adapter
 
         enforcer.clear_policy()
         with adapter._session_scope() as session:

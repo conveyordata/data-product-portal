@@ -349,6 +349,18 @@ urllib3 = ">=1.25.4,<2.2.0 || >2.2.0,<3"
 crt = ["awscrt (==0.36.0)"]
 
 [[package]]
+name = "bracex"
+version = "3.0.1"
+description = "Bash style brace expander."
+optional = false
+python-versions = ">=3.10"
+groups = ["main"]
+files = [
+    {file = "bracex-3.0.1-py3-none-any.whl", hash = "sha256:6523ad83aeb5098a4ee597cff0f964442ff74e460bd3fafaffab6a013ff2288c"},
+    {file = "bracex-3.0.1.tar.gz", hash = "sha256:4e38e32392e4a4780fe15d644bfc7c8514057cfc3861e060b11814ce829c25e4"},
+]
+
+[[package]]
 name = "brotli"
 version = "1.2.0"
 description = "Python bindings for the Brotli compression library"
@@ -3864,6 +3876,22 @@ files = [
 ]
 
 [[package]]
+name = "pycasbin"
+version = "2.8.0"
+description = "An authorization library that supports access control models like ACL, RBAC, ABAC in Python"
+optional = false
+python-versions = ">=3.8"
+groups = ["main"]
+files = [
+    {file = "pycasbin-2.8.0-py3-none-any.whl", hash = "sha256:1a9e370de553c677c4dff75a5d6f3b0eb354b73b20d7df77ff4ee61a71267a3a"},
+    {file = "pycasbin-2.8.0.tar.gz", hash = "sha256:2615c8940d58caf03c9206246d9499209fd520448c682d2f2ca101c41d9b0aee"},
+]
+
+[package.dependencies]
+simpleeval = ">=1.0.3"
+wcmatch = ">=10.1"
+
+[[package]]
 name = "pycparser"
 version = "3.0"
 description = "C parser in Python"
@@ -5350,6 +5378,21 @@ files = [
 anyio = ">=3.0.0"
 
 [[package]]
+name = "wcmatch"
+version = "11.0.1"
+description = "Wildcard/glob file name matcher."
+optional = false
+python-versions = ">=3.10"
+groups = ["main"]
+files = [
+    {file = "wcmatch-11.0.1-py3-none-any.whl", hash = "sha256:fd149ecddb9f0a88ea780017d6dde17c994e494e7f7303d4e3c9d6251f978f4b"},
+    {file = "wcmatch-11.0.1.tar.gz", hash = "sha256:1ea2b4fa678b8ca268253798d5963935df39132d47c3e241c0a0732224005e7d"},
+]
+
+[package.dependencies]
+bracex = ">=3.0"
+
+[[package]]
 name = "websocket-client"
 version = "1.9.0"
 description = "WebSocket client for Python with low level API options"
@@ -5652,4 +5695,4 @@ testing = ["coverage[toml]", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "52be11ccd4f3443e621301a1881dc19f8052de042c94fd59a5f1e75eccfcaaa6"
+content-hash = "c87d2ac6d4076f8a7bf6c3195c9b6b813b97a0b4139a70ccbb632a307882ba4b"
