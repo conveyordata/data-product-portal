@@ -45,6 +45,36 @@ class TestAuthorization:
         authorizer.revoke_resource_role(user_id=user, role_id=role, resource_id=obj)
         assert authorizer.has_access(sub=user, dom=ANY, obj=obj, act=allowed) is False
 
+    def test_wildcard_resource_role(self, authorizer: Authorization):
+        role = "public_reader"
+        obj = "test_resource"
+        allowed = AuthorizationAction.HIDDEN_DATA_PRODUCT__READ
+        denied = AuthorizationAction.DATA_PRODUCT__UPDATE_SETTINGS
+
+        authorizer.sync_role_permissions(role_id=role, actions=[allowed])
+        authorizer.assign_resource_role(user_id="*", role_id=role, resource_id=obj)
+
+        assert (
+            authorizer.has_access(sub="user_1", dom=ANY, obj=obj, act=allowed) is True
+        )
+        assert (
+            authorizer.has_access(sub="user_2", dom=ANY, obj=obj, act=allowed) is True
+        )
+        assert (
+            authorizer.has_access(sub="user_1", dom=ANY, obj=obj, act=denied) is False
+        )
+        assert (
+            authorizer.has_access(
+                sub="user_1", dom=ANY, obj="other_resource", act=allowed
+            )
+            is False
+        )
+
+        authorizer.revoke_resource_role(user_id="*", role_id=role, resource_id=obj)
+        assert (
+            authorizer.has_access(sub="user_1", dom=ANY, obj=obj, act=allowed) is False
+        )
+
     def test_domain_role(self, authorizer: Authorization):
         role = "test_role"
         user = "test_user"
@@ -66,19 +96,20 @@ class TestAuthorization:
         authorizer.revoke_domain_role(user_id=user, role_id=role, domain_id=dom)
         assert authorizer.has_access(sub=user, dom=dom, obj=ANY, act=allowed) is False
 
-    def test_global_role(self, authorizer: Authorization):
+    def test_global_role(self, authorizer: Authorization, everyone_role_permissions):
         user = "test_user"
         role = "test_role"
         act = AuthorizationAction.GLOBAL__REQUEST_OUTPUT_PORT_ACCESS
 
-        authorizer.sync_role_permissions(role_id=role, actions=[act])
-        assert authorizer.has_access(sub=user, dom=ANY, obj=ANY, act=act) is False
+        with everyone_role_permissions(permissions=[]):
+            authorizer.sync_role_permissions(role_id=role, actions=[act])
+            assert authorizer.has_access(sub=user, dom=ANY, obj=ANY, act=act) is False
 
-        authorizer.assign_global_role(user_id=user, role_id=role)
-        assert authorizer.has_access(sub=user, dom=ANY, obj=ANY, act=act) is True
+            authorizer.assign_global_role(user_id=user, role_id=role)
+            assert authorizer.has_access(sub=user, dom=ANY, obj=ANY, act=act) is True
 
-        authorizer.revoke_global_role(user_id=user, role_id=role)
-        assert authorizer.has_access(sub=user, dom=ANY, obj=ANY, act=act) is False
+            authorizer.revoke_global_role(user_id=user, role_id=role)
+            assert authorizer.has_access(sub=user, dom=ANY, obj=ANY, act=act) is False
 
     def test_admin_role(self, authorizer: Authorization):
         user = "test_user"

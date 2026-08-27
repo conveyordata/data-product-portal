@@ -193,6 +193,82 @@ def test_openapi_file_upload_uses_binary_schema():
     }
 
 
+def _iter_app_routes():
+    def walk(node):
+        if isinstance(node, APIRoute):
+            yield node
+            return
+
+        if type(node).__name__ == "_IncludedRouter":
+            for candidate in node.effective_candidates():
+                yield from walk(candidate)
+            return
+
+        if hasattr(node, "path") and hasattr(node, "dependencies"):
+            yield node
+
+    for route in app.routes:
+        yield from walk(route)
+
+
+def _route_has_authorization_enforce(route) -> bool:
+    dependencies = list(getattr(route, "dependencies", []) or [])
+    dependencies.extend(getattr(route.dependant, "dependencies", []) or [])
+
+    for dependency in dependencies:
+        call = getattr(dependency, "call", None)
+        if call is None:
+            continue
+
+        qualname = getattr(call, "__qualname__", "")
+        module = getattr(call, "__module__", "")
+        name = getattr(call, "__name__", "")
+
+        if (
+            "Authorization.enforce" in qualname
+            or "Authorization.enforce" in repr(call)
+            or qualname.startswith("Authorization.enforce.<locals>.inner")
+            or (name == "inner" and qualname.startswith("Authorization.enforce."))
+            or (
+                module.startswith("app.")
+                and qualname.startswith("Authorization.enforce.")
+            )
+        ):
+            return True
+
+    return False
+
+
+def test_every_protected_v2_route_has_authorization_enforce_dependency():
+    excluded_paths = {
+        # Everyone is allowed to read the list of data products, so no authorization is needed.
+        # We filter out hidden data products in the service layer
+        "/api/v2/data_products",
+    }
+    missing = []
+
+    for route in _iter_app_routes():
+        if not getattr(route, "path", "").startswith("/api/v2/"):
+            continue
+        # For now we only check data products paths, and exclude output port paths
+        if not route.path.startswith("/api/v2/data_products"):
+            continue
+        if route.path.startswith(
+            "/api/v2/data_products/{data_product_id}/output_ports"
+        ):
+            continue
+        if route.path in excluded_paths:
+            continue
+
+        if not _route_has_authorization_enforce(route):
+            missing.append(f"{route.path} [{route.name}]")
+
+    assert not missing, (
+        "The following API routes do not declare an Authorization.enforce dependency:\n"
+        + "\n".join(missing)
+    )
+
+
 def test_routes_not_v2_are_deprecated():
     """
     Ensures that all routes not starting with /api/v2/ are marked as deprecated.

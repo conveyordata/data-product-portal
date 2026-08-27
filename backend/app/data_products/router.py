@@ -383,7 +383,14 @@ def update_data_product_usage(
     )
 
 
-@router.get("/{id}/graph")
+@router.get(
+    "/{id}/graph",
+    dependencies=[
+        Depends(
+            Authorization.enforce(Action.HIDDEN_DATA_PRODUCT__READ, DataProductResolver)
+        )
+    ],
+)
 def get_data_product_graph_data(
     id: UUID, db: Session = Depends(get_db_session), level: int = 3
 ) -> Graph:
@@ -580,7 +587,14 @@ def get_data_products(
     )
 
 
-@router.get("/{id}/history")
+@router.get(
+    "/{id}/history",
+    dependencies=[
+        Depends(
+            Authorization.enforce(Action.HIDDEN_DATA_PRODUCT__READ, DataProductResolver)
+        )
+    ],
+)
 def get_data_product_event_history(
     id: UUID, db: Session = Depends(get_db_session)
 ) -> GetEventHistoryResponse:
@@ -594,14 +608,28 @@ def get_data_product_event_history(
     )
 
 
-@router.get("/{id}")
+@router.get(
+    "/{id}",
+    dependencies=[
+        Depends(
+            Authorization.enforce(Action.HIDDEN_DATA_PRODUCT__READ, DataProductResolver)
+        )
+    ],
+)
 def get_data_product(
     id: UUID, db: Session = Depends(get_db_session)
 ) -> GetDataProductResponse:
     return DataProductService(db).get_data_product(id)
 
 
-@router.get("/{id}/input_ports")
+@router.get(
+    "/{id}/input_ports",
+    dependencies=[
+        Depends(
+            Authorization.enforce(Action.HIDDEN_DATA_PRODUCT__READ, DataProductResolver)
+        )
+    ],
+)
 def get_data_product_input_ports(
     id: UUID,
     db: Session = Depends(get_db_session),
@@ -614,7 +642,14 @@ def get_data_product_input_ports(
     )
 
 
-@router.get("/{id}/rolled_up_tags")
+@router.get(
+    "/{id}/rolled_up_tags",
+    dependencies=[
+        Depends(
+            Authorization.enforce(Action.HIDDEN_DATA_PRODUCT__READ, DataProductResolver)
+        )
+    ],
+)
 def get_data_product_rolled_up_tags(
     id: UUID, db: Session = Depends(get_db_session)
 ) -> GetDataProductRolledUpTagsResponse:
@@ -695,7 +730,14 @@ def remove_input_port_for_data_product(
         )
 
 
-@router.get("/{id}/settings")
+@router.get(
+    "/{id}/settings",
+    dependencies=[
+        Depends(
+            Authorization.enforce(Action.HIDDEN_DATA_PRODUCT__READ, DataProductResolver)
+        )
+    ],
+)
 def get_data_product_settings(
     id: UUID, db: Session = Depends(get_db_session)
 ) -> GetDataProductSettingsResponse:

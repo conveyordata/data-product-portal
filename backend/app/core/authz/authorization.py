@@ -153,6 +153,22 @@ class Authorization(metaclass=Singleton):
         self._after_update()
         return updated
 
+    def pause_enforcer_for_reload(self) -> None:
+        """This stops autoloading and auto policy saving of the enforcer.
+        IT ALSO CLEARS ALL POLICIES FROM CASBIN.
+        To be used when you want to recreate the casbin table.
+        By pausing these it goes faster and avoids race conditions."""
+        self._enforcer.stop_auto_load_policy()
+        self._enforcer.enable_auto_save(False)
+        self._enforcer.clear_policy()
+
+    def start_enforcer_after_reload(self) -> None:
+        """This resumes autoloading and auto policy saving of the enforcer. It also flushes the current policy to the database.
+        To be used when you want to recreate the casbin table, to be used after pause_enforcer_for_reload."""
+        self._enforcer.save_policy()
+        self._enforcer.start_auto_load_policy(settings.AUTHORIZER_AUTOLOAD_INTERVAL)
+        self._enforcer.enable_auto_save(True)
+
     def revoke_domain_role(self, *, user_id: ID, role_id: ID, domain_id: ID) -> bool:
         """Deletes the entry in the casbin table,
         revoking the role for the chosen domain and user."""

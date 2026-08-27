@@ -236,21 +236,24 @@ class TestDataProductRoleAssignmentsRouter:
         assert {approver.id for approver in approvers} == {other_approver.id}
         assert requester.id not in {approver.id for approver in approvers}
 
-    def test_request_assignment_no_right(self, client: TestClient):
+    def test_request_assignment_no_right(
+        self, client: TestClient, everyone_role_permissions
+    ):
         data_product: DataProduct = DataProductFactory()
         UserFactory(external_id=settings.DEFAULT_USERNAME)
 
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
 
-        response = client.post(
-            f"{ENDPOINT}/request",
-            json={
-                "user_id": str(user.id),
-                "role_id": str(role.id),
-                "data_product_id": str(data_product.id),
-            },
-        )
+        with everyone_role_permissions(permissions=[]):
+            response = client.post(
+                f"{ENDPOINT}/request",
+                json={
+                    "user_id": str(user.id),
+                    "role_id": str(role.id),
+                    "data_product_id": str(data_product.id),
+                },
+            )
         assert response.status_code == 403
 
     def test_delete_assignment(self, client: TestClient):

@@ -7,8 +7,8 @@ from app.core.auth.auth import get_authenticated_user
 from app.core.authz import (
     Action,
     Authorization,
-    DataOutputResolver,
     DataProductResolver,
+    TechnicalAssetResolver,
 )
 from app.data_products.technical_assets.model import ensure_technical_asset_exists
 from app.data_products.technical_assets.schema_request import (
@@ -41,7 +41,18 @@ router = APIRouter(
 )
 
 
-@router.get("/")
+@router.get(
+    "/",
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                Action.HIDDEN_DATA_PRODUCT__READ,
+                DataProductResolver,
+                object_id="data_product_id",
+            )
+        )
+    ],
+)
 def get_data_product_technical_assets(
     data_product_id: UUID, db: Session = Depends(get_db_session)
 ) -> GetTechnicalAssetsResponse:
@@ -55,7 +66,18 @@ def get_data_product_technical_assets(
     )
 
 
-@router.get("/{id}")
+@router.get(
+    "/{id}",
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                Action.HIDDEN_DATA_PRODUCT__READ,
+                DataProductResolver,
+                object_id="data_product_id",
+            )
+        )
+    ],
+)
 def get_technical_asset(
     data_product_id: UUID, id: UUID, db: Session = Depends(get_db_session)
 ) -> GetTechnicalAssetsResponseItem:
@@ -64,7 +86,18 @@ def get_technical_asset(
     )
 
 
-@router.get("/{id}/history")
+@router.get(
+    "/{id}/history",
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                Action.HIDDEN_DATA_PRODUCT__READ,
+                DataProductResolver,
+                object_id="data_product_id",
+            )
+        )
+    ],
+)
 def get_technical_asset_event_history(
     data_product_id: UUID, id: UUID, db: Session = Depends(get_db_session)
 ) -> GetEventHistoryResponse:
@@ -95,7 +128,7 @@ def get_technical_asset_event_history(
         Depends(
             Authorization.enforce(
                 Action.DATA_PRODUCT__DELETE_TECHNICAL_ASSET,
-                DataOutputResolver,
+                TechnicalAssetResolver,
             )
         ),
     ],
@@ -140,7 +173,7 @@ def remove_technical_asset(
         Depends(
             Authorization.enforce(
                 Action.DATA_PRODUCT__UPDATE_TECHNICAL_ASSET,
-                DataOutputResolver,
+                TechnicalAssetResolver,
             )
         ),
     ],
@@ -180,7 +213,7 @@ def update_technical_asset(
         Depends(
             Authorization.enforce(
                 Action.DATA_PRODUCT__UPDATE_TECHNICAL_ASSET,
-                DataOutputResolver,
+                TechnicalAssetResolver,
             )
         ),
     ],
@@ -205,7 +238,18 @@ def update_technical_asset_status(
     )
 
 
-@router.get("/{id}/graph")
+@router.get(
+    "/{id}/graph",
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                Action.HIDDEN_DATA_PRODUCT__READ,
+                DataProductResolver,
+                object_id="data_product_id",
+            )
+        )
+    ],
+)
 def get_technical_asset_graph_data(
     data_product_id: UUID,
     id: UUID,

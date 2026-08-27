@@ -20,9 +20,7 @@ class RoleFactory(factory.alchemy.SQLAlchemyModelFactory):
 
     id = factory.Faker("uuid4")
     name = factory.Sequence(lambda _: faker.unique.name())
-    scope = factory.Faker(
-        "random_element", elements=("global", "data_product", "dataset")
-    )
+    scope = factory.Faker("random_element", elements=("global", "dataset"))
     description = factory.Faker("text")
     permissions = factory.Faker(
         "random_elements", elements=list(map(int, AuthorizationAction)), unique=True

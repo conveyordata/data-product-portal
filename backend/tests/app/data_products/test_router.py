@@ -9,6 +9,7 @@ from fastapi.testclient import TestClient
 
 from app.authorization.roles.schema import Scope
 from app.core.authz import Action
+from app.data_products.model import DataProductVisibility
 from app.resource_names.service import ResourceNameValidityType
 from app.settings import settings
 from tests.factories import (
@@ -169,6 +170,26 @@ class TestDataProductsRouter:
         assert response.status_code == 200
         assert response.json()["id"] == str(data_product.id)
 
+    def test_get_data_product_hidden_not_assigned(self, client):
+        data_product = DataProductFactory(visibility=DataProductVisibility.HIDDEN)
+
+        response = self.get_data_product(client, data_product.id)
+        assert response.status_code == 403
+
+    def test_get_data_product_hidden(self, client):
+        data_product = DataProductFactory(visibility=DataProductVisibility.HIDDEN)
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__READ_INTEGRATIONS],
+        )
+        DataProductRoleAssignmentFactory(
+            data_product_id=data_product.id, role_id=role.id, user_id=user.id
+        )
+
+        response = self.get_data_product(client, data_product.id)
+        assert response.status_code == 200, response.text
+
     def test_get_conveyor_ide_url(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         cvr = PlatformFactory(name="Conveyor")
@@ -315,23 +336,14 @@ class TestDataProductsRouter:
         )
         assert response.status_code == 403
 
+    @pytest.mark.usefixtures("admin")
     def test_remove_finalizer_triggers_deletion(self, client):
         """Removing the last finalizer from a DELETING product deletes it."""
         from app.data_products.status import AbstractDataProductStatus
 
-        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory(
             finalizers=["last-one"],
             status=AbstractDataProductStatus.DELETING.value,
-        )
-        role = RoleFactory(
-            scope=Scope.DATA_PRODUCT,
-            permissions=[Action.DATA_PRODUCT__DELETE],
-        )
-        DataProductRoleAssignmentFactory(
-            user_id=user.id,
-            role_id=role.id,
-            data_product_id=data_product.id,
         )
         response = client.delete(
             f"{ENDPOINT}/{data_product.id}/finalizers/last-one",
@@ -339,23 +351,14 @@ class TestDataProductsRouter:
         assert response.status_code == 200
         assert self.get_data_product(client, data_product.id).status_code == 404
 
+    @pytest.mark.usefixtures("admin")
     def test_remove_finalizer_not_last_does_not_delete(self, client):
         """Removing a finalizer when others remain leaves the product in DELETING."""
         from app.data_products.status import AbstractDataProductStatus
 
-        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory(
             finalizers=["a", "b"],
             status=AbstractDataProductStatus.DELETING.value,
-        )
-        role = RoleFactory(
-            scope=Scope.DATA_PRODUCT,
-            permissions=[Action.DATA_PRODUCT__DELETE],
-        )
-        DataProductRoleAssignmentFactory(
-            user_id=user.id,
-            role_id=role.id,
-            data_product_id=data_product.id,
         )
         response = client.delete(
             f"{ENDPOINT}/{data_product.id}/finalizers/a",
@@ -410,6 +413,7 @@ class TestDataProductsRouter:
             data_product_id=data_product.id,
         )
         response = self.get_data_product(client, data_product.id)
+        assert response.status_code == 200
         assert response.json()["status"] == "pending"
         _ = self.update_data_product_usage(
             client, {"usage": "new usage"}, data_product.id
@@ -417,7 +421,13 @@ class TestDataProductsRouter:
         response = self.get_data_product(client, data_product.id)
         assert response.json()["usage"] == "new usage"
 
-    def test_get_data_product_by_id_with_invalid_id(self, client):
+    @pytest.mark.usefixtures("admin")
+    def test_get_data_product_by_id_with_invalid_id_admin(self, client):
+        data_product = self.get_data_product(client, self.invalid_id)
+        assert data_product.status_code == 404
+
+    @pytest.mark.usefixtures("admin")
+    def test_get_data_product_by_id_with_invalid_id_regular_user(self, client):
         data_product = self.get_data_product(client, self.invalid_id)
         assert data_product.status_code == 404
 
@@ -496,6 +506,7 @@ class TestDataProductsRouter:
     def test_get_data_product_graph_data(self, client):
         data_product = DataProductFactory()
         response = client.get(f"{ENDPOINT}/{data_product.id}/graph")
+        assert response.status_code == 200, response.text
         assert response.json()["edges"] == []
         for node in response.json()["nodes"]:
             assert node == {
@@ -750,48 +761,29 @@ class TestDataProductsRouter:
         history = self.get_data_product_history(client, data_product.id).json()
         assert len(history["events"]) == 1
 
+    @pytest.mark.usefixtures("admin")
     def test_history_event_created_on_data_product_deletion(self, client):
-        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
-        role = RoleFactory(
-            scope=Scope.DATA_PRODUCT,
-            permissions=[Action.DATA_PRODUCT__DELETE],
-        )
-        DataProductRoleAssignmentFactory(
-            user_id=user.id,
-            role_id=role.id,
-            data_product_id=data_product.id,
-        )
         response = self.delete_data_product(client, data_product.id)
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
 
-        history = self.get_data_product_history(client, data_product.id).json()
-        assert len(history["events"]) == 1
+        history = self.get_data_product_history(client, data_product.id)
+        assert history.status_code == 200, history.text
+        assert len(history.json()["events"]) == 1
 
+    @pytest.mark.usefixtures("admin")
     def test_retain_deleted_data_product_name_in_history(self, client: TestClient):
-        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
-        role = RoleFactory(
-            scope=Scope.DATA_PRODUCT,
-            permissions=[Action.DATA_PRODUCT__DELETE],
-        )
-        DataProductRoleAssignmentFactory(
-            user_id=user.id,
-            role_id=role.id,
-            data_product_id=data_product.id,
-        )
-
-        data_product_id = data_product.id
-        data_product_name = data_product.name
 
         response = self.delete_data_product(client, data_product.id)
         assert response.status_code == 200
 
-        response = self.get_data_product_history(client, data_product_id)
+        response = self.get_data_product_history(client, data_product.id)
+        assert response.status_code == 200, response.text
         assert len(response.json()["events"]) == 1
         assert (
             response.json()["events"][0]["deleted_subject_identifier"]
-            == data_product_name
+            == data_product.name
         )
 
     def test_get_output_ports(self, client: TestClient):

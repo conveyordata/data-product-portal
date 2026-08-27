@@ -6,11 +6,15 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy.orm import Session, scoped_session
+from sqlalchemy import select
+from sqlalchemy.orm import Session
 from starlette.routing import _DefaultLifespan
 
+from app.authorization.roles.model import Role
+from app.authorization.roles.schema import Prototype, Scope
 from app.authorization.service import AuthorizationService
 from app.core.auth.device_flows.service import verify_auth_header
+from app.core.authz import Action
 from app.core.authz.authorization import Authorization
 from app.core.context import _pending_events
 from app.core.webhooks.events import V2Event
@@ -80,6 +84,42 @@ def client() -> Generator[TestClient, None, None]:
 
 
 @pytest.fixture
+def everyone_role_permissions(session: Session):
+    def everyone_role() -> Role:
+        role = session.scalar(
+            select(Role)
+            .where(Role.prototype == Prototype.EVERYONE)
+            .where(Role.scope == Scope.GLOBAL)
+        )
+        assert role is not None, "Failed to find the global 'everyone' role"
+        return role
+
+    @contextmanager
+    def _change_permissions(*, permissions: list[Action] | None = None):
+        role = everyone_role()
+        if permissions is None:
+            raise Exception("Permissions must be provided")
+
+        original_permissions = list(role.permissions or [])
+        next_permissions = [int(action) for action in permissions]
+
+        role.permissions = next_permissions
+        session.commit()
+        Authorization().sync_everyone_role_permissions(actions=permissions)
+
+        try:
+            yield
+        finally:
+            role = everyone_role()
+            assert role is not None, "Failed to find the global 'everyone' role"
+            role.permissions = original_permissions
+            session.commit()
+            Authorization().sync_everyone_role_permissions(actions=original_permissions)
+
+    return _change_permissions
+
+
+@pytest.fixture
 def default_data_product_payload() -> dict[str, Any]:
     data_product_type = DataProductTypeFactory()
     user = UserFactory()
@@ -111,15 +151,17 @@ def default_dataset_payload() -> dict[str, Any]:
 
 
 @pytest.fixture(autouse=True)
-def clear_db(session: scoped_session[Session]) -> None:
+def clear_db(session: Session) -> None:
     """Clear database after each test."""
     for table in reversed(Base.metadata.sorted_tables):
+        if table.name == "casbin_rule":
+            continue
         if table.name == "roles":
             session.execute(table.delete().where(table.c.prototype == 0))
         else:
             session.execute(table.delete())
+    AuthorizationService(session).reload_enforcer()
     session.commit()
-    AuthorizationService._clear_casbin_table()
     reset_unique_fakers()
 
 

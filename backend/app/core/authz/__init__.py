@@ -2,17 +2,17 @@ from .actions import AuthorizationAction as Action
 from .authorization import Authorization
 from .resolvers import (
     DataOutputDatasetAssociationResolver,
-    DataOutputResolver,
     DataProductDatasetAssociationResolver,
     DataProductResolver,
     DatasetResolver,
+    TechnicalAssetResolver,
 )
 
 __all__ = (
     "Action",
     "Authorization",
     "DataOutputDatasetAssociationResolver",
-    "DataOutputResolver",
+    "TechnicalAssetResolver",
     "DataProductDatasetAssociationResolver",
     "DataProductResolver",
     "DatasetResolver",

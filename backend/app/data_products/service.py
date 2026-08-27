@@ -16,6 +16,7 @@ from app.abstract_data_product.input_ports.model import (
 from app.abstract_data_product.service import AbstractDataProductService
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.roles.schema import Prototype
+from app.authorization.service import DATA_PRODUCT_READER_ROLE
 from app.configuration.data_product_lifecycles.model import (
     DataProductLifecycle as DataProductLifeCycleModel,
 )
@@ -23,13 +24,14 @@ from app.configuration.data_product_settings.model import DataProductSettingValu
 from app.configuration.tags.model import Tag as TagModel
 from app.configuration.tags.model import ensure_tag_exists
 from app.configuration.tags.schema import Tag
+from app.core.authz import Authorization
 from app.core.aws.get_url import _get_data_product_role_arn
 from app.core.namespace.validation import (
     NamespaceValidator,
     TechnicalAssetNamespaceValidator,
 )
 from app.data_products.model import DataProduct as DataProductModel
-from app.data_products.model import ensure_data_product_exists
+from app.data_products.model import DataProductVisibility, ensure_data_product_exists
 from app.data_products.output_port_technical_assets_link.model import (
     DataOutputDatasetAssociation,
 )
@@ -61,6 +63,23 @@ class DataProductService(AbstractDataProductService):
         super().__init__(db)
         self.namespace_validator = NamespaceValidator(DataProductModel)
         self.technical_asset_namespace_validator = TechnicalAssetNamespaceValidator()
+
+    @staticmethod
+    def _sync_public_reader_grouping(
+        data_product_id: UUID, visibility: DataProductVisibility
+    ) -> None:
+        if visibility == DataProductVisibility.DISCOVERABLE:
+            Authorization().assign_resource_role(
+                user_id="*",
+                role_id=DATA_PRODUCT_READER_ROLE,
+                resource_id=str(data_product_id),
+            )
+        else:
+            Authorization().revoke_resource_role(
+                user_id="*",
+                role_id=DATA_PRODUCT_READER_ROLE,
+                resource_id=str(data_product_id),
+            )
 
     def get_data_product_settings(
         self, data_product_id: UUID
@@ -183,6 +202,8 @@ class DataProductService(AbstractDataProductService):
         model = DataProductModel(**data_product_schema, tags=tags)
         self.db.add(model)
         self.db.commit()
+        self._sync_public_reader_grouping(model.id, model.visibility)
+        self.db.commit()
         return model
 
     def remove_data_product(self, id: UUID) -> DataProductModel:
@@ -223,14 +244,23 @@ class DataProductService(AbstractDataProductService):
                 detail=f"Invalid namespace: {validity.value}",
             )
 
+        visibility_change = None
         for k, v in update_data_product.items():
             if k == "tag_ids":
                 new_tags = self._get_tags(v)
                 current_data_product.tags = new_tags
+            elif k == "visibility":
+                visibility_change = current_data_product.visibility
+                setattr(current_data_product, k, v)
             else:
                 setattr(current_data_product, k, v) if v else None
 
         self.db.commit()
+        if visibility_change is not None:
+            self._sync_public_reader_grouping(
+                current_data_product.id, current_data_product.visibility
+            )
+            self.db.commit()
         return UpdateDataProductResponse(id=current_data_product.id)
 
     def update_data_product_about(
@@ -421,3 +451,12 @@ class DataProductService(AbstractDataProductService):
                 )
 
         return Graph(nodes=set(nodes), edges=set(edges))
+
+    def sync_discoverable_data_products(self):
+        visible_data_product_ids = self.db.scalars(
+            select(DataProductModel.id).where(
+                DataProductModel.visibility == DataProductVisibility.DISCOVERABLE
+            )
+        ).all()
+        for id in visible_data_product_ids:
+            self._sync_public_reader_grouping(id, DataProductVisibility.DISCOVERABLE)
