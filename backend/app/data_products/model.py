@@ -1,6 +1,8 @@
+import enum
 from typing import TYPE_CHECKING
 
 from sqlalchemy import Column, ForeignKey, String, func, select
+from sqlalchemy import Enum as SAEnum
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, Session, column_property, mapped_column, relationship
 
@@ -27,6 +29,11 @@ if TYPE_CHECKING:
     )
 
 
+class DataProductVisibility(enum.Enum):
+    HIDDEN = "hidden"
+    DISCOVERABLE = "discoverable"
+
+
 class DataProduct(
     AbstractDataProduct,
     EventTrackedMixin,
@@ -38,6 +45,16 @@ class DataProduct(
     )
     about = Column(String)
     usage = Column(String, nullable=True)
+    visibility = mapped_column(
+        SAEnum(
+            DataProductVisibility,
+            values_callable=lambda enum: [e.value for e in enum],
+            native_enum=False,
+            validate_strings=True,
+        ),
+        nullable=False,
+        default=DataProductVisibility.DISCOVERABLE,
+    )
 
     type_id: Mapped[UUID] = mapped_column(ForeignKey("data_product_types.id"))
     lifecycle_id: Mapped[UUID] = mapped_column(

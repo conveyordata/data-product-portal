@@ -7,8 +7,8 @@ from app.core.authz import Action
 class TestAction:
     def test_authorization_actions_equivalence(self):
         """
-        Test to ensure that the AuthorizationAction enum in the TypeScript file
-        matches the AuthorizationAction class in the Python file.
+        Test to ensure that the public AuthorizationAction enum in the TypeScript
+        file matches the Python enum, while hidden 9xx actions stay backend-only.
         """
         # Path to the TypeScript file
 
@@ -31,12 +31,20 @@ class TestAction:
                 value = value.strip().rstrip(",")
                 ts_enum[key] = int(value)
 
-        # Extract the Python enum as a dictionary
-        py_enum = {action.name: action.value for action in Action}
+        # Extract the Python enum as a dictionary, excluding backend-only 9xx actions
+        py_enum = {
+            action.name: action.value
+            for action in Action
+            if not 900 <= action.value < 1000
+        }
 
         # Compare the two dictionaries
         assert ts_enum == py_enum, (
             "Mismatch between TypeScript and"
             f"Python enums:\nTS: {json.dumps(ts_enum, indent=2)}\n"
             f"PY: {json.dumps(py_enum, indent=2)}"
+        )
+        assert all(not 900 <= value < 1000 for value in ts_enum.values()), (
+            "Frontend RBAC actions should not include backend-only 9xx actions:\n"
+            f"TS: {json.dumps(ts_enum, indent=2)}"
         )

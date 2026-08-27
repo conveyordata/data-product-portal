@@ -1,7 +1,5 @@
-from typing import TYPE_CHECKING
-
-from casbin_sqlalchemy_adapter import Adapter, CasbinRule
-from sqlalchemy import delete, func, select
+from casbin_sqlalchemy_adapter import CasbinRule
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.authorization.role_assignments.data_product.auth import (
@@ -22,10 +20,10 @@ from app.authorization.role_assignments.output_port.service import (
 from app.authorization.roles.auth import AuthRole
 from app.authorization.roles.service import RoleService
 from app.core.authz import Authorization
+from app.core.authz.actions import AuthorizationAction
 from app.core.logging import logger
 
-if TYPE_CHECKING:
-    from casbin import SyncedEnforcer
+DATA_PRODUCT_READER_ROLE = "/role/data-product-reader"
 
 
 class AuthorizationService:
@@ -34,8 +32,7 @@ class AuthorizationService:
         self.authorizer = Authorization()
 
     def reload_enforcer(self) -> None:
-        removed = self._clear_casbin_table()
-        logger.info(f"Removed {removed} rows from the casbin table")
+        self.authorizer.pause_enforcer_for_reload()
 
         changed_roles, total_roles = self._sync_roles()
         logger.info(f"Synced {changed_roles}/{total_roles} roles to the casbin table")
@@ -58,25 +55,15 @@ class AuthorizationService:
             " global assignments to the casbin table"
         )
 
+        self._sync_data_product_reader_role()
+        logger.info("Synced data product reader role permissions")
+
+        self.authorizer.start_enforcer_after_reload()
+
         logger.info(
             "Authorization reload done - the casbin table"
             f" now contains {self._casbin_row_count(self.db)} rows"
         )
-
-    @classmethod
-    def _clear_casbin_table(cls) -> int:
-        """Clears the database table used by casbin. Use with caution!
-        This means the casbin table will be out of sync with the role assignments.
-        """
-        authorizer = Authorization()
-        enforcer: SyncedEnforcer = authorizer._enforcer
-        adapter: Adapter = enforcer._e.adapter
-
-        enforcer.clear_policy()
-        with adapter._session_scope() as session:
-            count = cls._casbin_row_count(session)
-            session.execute(delete(CasbinRule))
-        return count
 
     @staticmethod
     def _casbin_row_count(session: Session) -> int:
@@ -127,3 +114,12 @@ class AuthorizationService:
             if GlobalAuthAssignment(assignment).add():
                 changes += 1
         return changes, len(global_assignments)
+
+    def _sync_data_product_reader_role(self):
+        from app.data_products.service import DataProductService
+
+        self.authorizer.sync_role_permissions(
+            role_id=DATA_PRODUCT_READER_ROLE,
+            actions=[AuthorizationAction.HIDDEN_DATA_PRODUCT__READ],
+        )
+        DataProductService(self.db).sync_discoverable_data_products()

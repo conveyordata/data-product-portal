@@ -3,6 +3,7 @@ from fastapi.testclient import TestClient
 
 from app.authorization.roles import ADMIN_UUID
 from app.authorization.roles.schema import Role, Scope
+from app.core.authz.actions import AuthorizationAction
 from tests.factories import RoleFactory
 
 ENDPOINT = "/api/v2/authz/roles"
@@ -43,6 +44,31 @@ class TestRolesRouter:
         assert data["permissions"] == self.test_role["permissions"]
 
     @pytest.mark.usefixtures("admin")
+    def test_create_data_product_role_adds_read_permission(self, client: TestClient):
+        response = client.post(
+            ENDPOINT,
+            json={
+                "name": "data product role",
+                "scope": Scope.DATA_PRODUCT,
+                "description": "data product role description",
+                "permissions": [
+                    int(AuthorizationAction.DATA_PRODUCT__UPDATE_PROPERTIES)
+                ],
+            },
+        )
+        assert response.status_code == 200, response.text
+
+        data = response.json()
+        assert data["scope"] == Scope.DATA_PRODUCT
+        assert AuthorizationAction.HIDDEN_DATA_PRODUCT__READ in data["permissions"]
+        assert data["permissions"] == sorted(
+            [
+                int(AuthorizationAction.HIDDEN_DATA_PRODUCT__READ),
+                int(AuthorizationAction.DATA_PRODUCT__UPDATE_PROPERTIES),
+            ]
+        )
+
+    @pytest.mark.usefixtures("admin")
     def test_update_role_old(self, client: TestClient):
         role: Role = RoleFactory()
         response = client.put(
@@ -53,6 +79,37 @@ class TestRolesRouter:
             },
         )
         assert response.status_code == 200, response.text
+
+    @pytest.mark.usefixtures("admin")
+    def test_update_data_product_role_adds_read_permission(self, client: TestClient):
+        role: Role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[int(AuthorizationAction.DATA_PRODUCT__UPDATE_PROPERTIES)],
+        )
+        response = client.put(
+            f"{ENDPOINT}/{role.id}",
+            json={
+                "permissions": [
+                    int(AuthorizationAction.DATA_PRODUCT__UPDATE_PROPERTIES),
+                    int(AuthorizationAction.DATA_PRODUCT__UPDATE_SETTINGS),
+                ],
+                "description": "updated_description",
+            },
+        )
+        assert response.status_code == 200, response.text
+
+        data = response.json()
+        assert data["id"] == str(role.id)
+        assert data["scope"] == role.scope
+        assert data["description"] == "updated_description"
+        assert AuthorizationAction.HIDDEN_DATA_PRODUCT__READ in data["permissions"]
+        assert data["permissions"] == sorted(
+            [
+                int(AuthorizationAction.HIDDEN_DATA_PRODUCT__READ),
+                int(AuthorizationAction.DATA_PRODUCT__UPDATE_PROPERTIES),
+                int(AuthorizationAction.DATA_PRODUCT__UPDATE_SETTINGS),
+            ]
+        )
 
     @pytest.mark.usefixtures("admin")
     def test_update_role(self, client: TestClient):

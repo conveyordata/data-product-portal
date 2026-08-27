@@ -161,21 +161,24 @@ class TestDatasetRoleAssignmentsRouter:
         self.test_request_assignment(client)
         assert_event_in_queue("output_port_role_assignment.event", capture_events)
 
-    def test_request_assignment_no_right(self, client: TestClient):
+    def test_request_assignment_no_right(
+        self, client: TestClient, everyone_role_permissions
+    ):
         dataset: Dataset = OutputPortFactory()
         UserFactory(external_id=settings.DEFAULT_USERNAME)
 
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATASET)
 
-        response = client.post(
-            f"{ENDPOINT}/request",
-            json={
-                "output_port_id": str(dataset.id),
-                "user_id": str(user.id),
-                "role_id": str(role.id),
-            },
-        )
+        with everyone_role_permissions(permissions=[]):
+            response = client.post(
+                f"{ENDPOINT}/request",
+                json={
+                    "output_port_id": str(dataset.id),
+                    "user_id": str(user.id),
+                    "role_id": str(role.id),
+                },
+            )
         assert response.status_code == 403
 
     def test_delete_assignment(self, client: TestClient):

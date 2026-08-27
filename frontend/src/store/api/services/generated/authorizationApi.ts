@@ -78,7 +78,8 @@ export type AuthorizationAction =
   | 412
   | 413
   | 414
-  | 415;
+  | 415
+  | 901;
 export type IsAdminResponse = {
   is_admin: boolean;
   time?: string | null;

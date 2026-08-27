@@ -23,8 +23,8 @@ from app.core.auth.auth import get_authenticated_user
 from app.core.authz import Action, Authorization
 from app.core.authz.resolvers import (
     DatasetResolver,
-    DatasetRoleAssignmentResolver,
     EmptyResolver,
+    OutputPortRoleAssignmentResolver,
 )
 from app.database.database import get_db_session
 from app.events.enums import EventReferenceEntity, EventType
@@ -42,7 +42,7 @@ router = APIRouter(prefix="/v2/authz/role_assignments/output_port")
         Depends(
             Authorization.enforce(
                 Action.OUTPUT_PORT__DELETE_USER,
-                resolver=DatasetRoleAssignmentResolver,
+                resolver=OutputPortRoleAssignmentResolver,
             )
         )
     ],
@@ -216,7 +216,7 @@ def create_output_port_role_assignment(
         Depends(
             Authorization.enforce(
                 Action.OUTPUT_PORT__APPROVE_USER_REQUEST,
-                resolver=DatasetRoleAssignmentResolver,
+                resolver=OutputPortRoleAssignmentResolver,
             )
         )
     ],
@@ -280,7 +280,7 @@ def decide_output_port_role_assignment(
         Depends(
             Authorization.enforce(
                 Action.OUTPUT_PORT__UPDATE_USER,
-                resolver=DatasetRoleAssignmentResolver,
+                resolver=OutputPortRoleAssignmentResolver,
             )
         )
     ],

@@ -2,11 +2,13 @@ from casbin_sqlalchemy_adapter import CasbinRule
 
 from app.authorization.service import AuthorizationService
 from app.core.authz import Authorization
+from app.data_products.model import DataProductVisibility
 from app.database.database import get_db_session
+from tests.factories import DataProductFactory
 
 
 class TestAuthorizationService:
-    def test_clear_casbin_table(self, authorizer: Authorization):
+    def test_reload_enforcer(self, authorizer: Authorization):
         db = next(get_db_session())
 
         existing = len(db.query(CasbinRule).all())
@@ -19,6 +21,26 @@ class TestAuthorizationService:
         assert len(db.query(CasbinRule).all()) == 5 + existing, "roles not recorded"
 
         service = AuthorizationService(db)
-        service._clear_casbin_table()
+        service.reload_enforcer()
 
-        assert len(db.query(CasbinRule).all()) == 0, "database not cleared"
+        assert len(db.query(CasbinRule).all()) == existing, (
+            "Syncing did not remove the roles"
+        )
+
+    def test_reload_enforcer_ensure_discoverable_data_products_sync(
+        self, authorizer: Authorization
+    ):
+        db = next(get_db_session())
+
+        existing = len(db.query(CasbinRule).all())
+
+        for i in range(5):
+            DataProductFactory(visibility=DataProductVisibility.DISCOVERABLE)
+            DataProductFactory(visibility=DataProductVisibility.HIDDEN)
+
+        assert len(db.query(CasbinRule).all()) == 5 + existing, "roles not recorded"
+
+        service = AuthorizationService(db)
+        service.reload_enforcer()
+
+        assert len(db.query(CasbinRule).all()) == 5 + existing, "database not cleared"

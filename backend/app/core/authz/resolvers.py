@@ -37,7 +37,7 @@ class SubjectResolver(ABC):
         cls, request: Request, key: str, db: Session = Depends(get_db_session)
     ):
         if (result := request.query_params.get(key)) is not None:
-            return cast("str", result)
+            return result
         if (result := request.path_params.get(key)) is not None:
             return cast("str", result)
         json_body = await request.json()
@@ -74,7 +74,7 @@ class ExplorationResolver(SubjectResolver):
     model: Model = Exploration
 
 
-class DatasetRoleAssignmentResolver(SubjectResolver):
+class OutputPortRoleAssignmentResolver(SubjectResolver):
     model: Model = DataProduct
 
     @classmethod
@@ -154,7 +154,7 @@ class DataProductNameResolver(SubjectResolver):
         return cls.DEFAULT
 
 
-class DataOutputResolver(SubjectResolver):
+class TechnicalAssetResolver(SubjectResolver):
     model: Model = DataProduct
 
     @classmethod
@@ -163,13 +163,13 @@ class DataOutputResolver(SubjectResolver):
     ):
         obj = await DataProductResolver.resolve(request, key, db)
         if obj != cls.DEFAULT:
-            data_output = (
+            technical_asset = (
                 db.scalars(select(TechnicalAsset).where(TechnicalAsset.id == obj))
                 .unique()
                 .one_or_none()
             )
-            if data_output:
-                return data_output.owner_id
+            if technical_asset:
+                return technical_asset.owner_id
         return cls.DEFAULT
 
 

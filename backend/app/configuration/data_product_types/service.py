@@ -92,7 +92,6 @@ class DataProductTypeService:
             )
 
         self.db.delete(data_product_type)
-        self.db.commit()
 
     def migrate_data_product_type(self, from_id: UUID, to_id: UUID) -> None:
         data_product_type = ensure_data_product_type_exists(
@@ -104,5 +103,3 @@ class DataProductTypeService:
 
         for data_product in data_product_type.data_products:
             data_product.type_id = new_data_product_type.id
-
-        self.db.commit()

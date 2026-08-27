@@ -62,7 +62,7 @@ class TestDataProductTypesRouter:
         assert response.status_code == 400
 
     @pytest.mark.usefixtures("admin")
-    def test_migrate_data_product_types(self, client):
+    def test_migrate_data_product_types(self, client, session):
         data_product_type = DataProductTypeFactory()
         new_data_product_type = DataProductTypeFactory()
         data_product = DataProductFactory(type=data_product_type)
@@ -70,6 +70,7 @@ class TestDataProductTypesRouter:
             client, data_product_type.id, new_data_product_type.id
         )
         assert response.status_code == 200
+        session.refresh(data_product)
         assert data_product.type.id == new_data_product_type.id
 
     def test_create_data_product_type_admin_only(
