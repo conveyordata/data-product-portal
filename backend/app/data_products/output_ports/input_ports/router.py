@@ -18,10 +18,8 @@ from app.data_products.output_ports.input_ports.schema_request import (
 )
 from app.data_products.output_ports.input_ports.schema_response import (
     GetInputPortsForOutputPortResponse,
-    OutputPortInputPort,
 )
 from app.data_products.output_ports.input_ports.service import InputPortService
-from app.data_products.output_ports.service import OutputPortService
 from app.database.database import get_db_session
 from app.events.enums import EventReferenceEntity, EventType
 from app.events.schema import CreateEvent
@@ -40,14 +38,14 @@ def get_input_ports_for_output_port(
     data_product_id: UUID,
     output_port_id: UUID,
     db: Session = Depends(get_db_session),
+    authenticated_user: User = Depends(get_authenticated_user),
 ) -> GetInputPortsForOutputPortResponse:
     return GetInputPortsForOutputPortResponse(
-        input_ports=[
-            OutputPortInputPort.model_validate(x)
-            for x in OutputPortService(db).get_consuming_data_products(
-                output_port_id, data_product_id
-            )
-        ]
+        input_ports=InputPortService(db).get_consuming_data_products(
+            authenticated_user,
+            output_port_id,
+            data_product_id,
+        )
     )
 
 

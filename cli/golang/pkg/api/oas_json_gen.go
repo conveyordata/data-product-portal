@@ -182,12 +182,17 @@ func (s *AbstractDataProductInfo) encodeFields(e *jx.Encoder) {
 		e.FieldStart("abstract_data_product_type")
 		s.AbstractDataProductType.Encode(e)
 	}
+	{
+		e.FieldStart("is_redacted")
+		e.Bool(s.IsRedacted)
+	}
 }
 
-var jsonFieldsNameOfAbstractDataProductInfo = [3]string{
+var jsonFieldsNameOfAbstractDataProductInfo = [4]string{
 	0: "name",
 	1: "namespace",
 	2: "abstract_data_product_type",
+	3: "is_redacted",
 }
 
 // Decode decodes AbstractDataProductInfo from json.
@@ -233,6 +238,18 @@ func (s *AbstractDataProductInfo) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"abstract_data_product_type\"")
 			}
+		case "is_redacted":
+			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				v, err := d.Bool()
+				s.IsRedacted = bool(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"is_redacted\"")
+			}
 		default:
 			return d.Skip()
 		}
@@ -243,7 +260,7 @@ func (s *AbstractDataProductInfo) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00000111,
+		0b00001111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

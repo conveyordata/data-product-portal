@@ -2,7 +2,9 @@ import pytest
 
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.roles.schema import Scope
+from app.core.authz import REDACTION_VALUE
 from app.core.authz.actions import AuthorizationAction
+from app.data_products.model import DataProductVisibility
 from app.settings import settings
 from tests.app.data_products.output_port_technical_assets_link.test_router import (
     DATA_OUTPUTS_DATASETS_ENDPOINT,
@@ -234,6 +236,46 @@ class TestUsersRouter:
         response = client.get("/api/v2/users/current/pending_actions")
         assert response.status_code == 200, response.text
         assert len(response.json()["pending_actions"]) == 1
+        assert not response.json()["pending_actions"][0]["input_port"][
+            "consuming_abstract_data_product"
+        ]["is_redacted"]
+        assert (
+            response.json()["pending_actions"][0]["input_port"][
+                "consuming_abstract_data_product"
+            ]["name"]
+            != REDACTION_VALUE
+        )
+
+    def test_get_pending_actions_input_port_redacted(self, client):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        input_port = InputPortFactory(
+            status=DecisionStatus.PENDING,
+            consuming_abstract_data_product=DataProductFactory(
+                visibility=DataProductVisibility.HIDDEN
+            ),
+        )
+        role = RoleFactory(
+            scope=Scope.DATASET,
+            permissions=[
+                AuthorizationAction.OUTPUT_PORT__APPROVE_DATAPRODUCT_ACCESS_REQUEST
+            ],
+        )
+        DatasetRoleAssignmentFactory(
+            user_id=user.id, role_id=role.id, output_port_id=input_port.output_port.id
+        )
+
+        response = client.get("/api/v2/users/current/pending_actions")
+        assert response.status_code == 200, response.text
+        assert len(response.json()["pending_actions"]) == 1
+        assert response.json()["pending_actions"][0]["input_port"][
+            "consuming_abstract_data_product"
+        ]["is_redacted"]
+        assert (
+            response.json()["pending_actions"][0]["input_port"][
+                "consuming_abstract_data_product"
+            ]["name"]
+            == REDACTION_VALUE
+        )
 
     def test_get_pending_actions(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
@@ -283,3 +325,21 @@ class TestUsersRouter:
         response = client.get("/api/v2/users/current/my_requests")
         assert response.status_code == 200, response.text
         assert len(response.json()["my_requests"]) == 1
+
+    def test_get_current_user_my_requests_redacted(self, client):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        InputPortFactory(
+            request__requested_by=user,
+            consuming_abstract_data_product=DataProductFactory(
+                visibility=DataProductVisibility.HIDDEN
+            ),
+        )
+        response = client.get("/api/v2/users/current/my_requests")
+        assert response.status_code == 200, response.text
+        assert len(response.json()["my_requests"]) == 1
+        assert (
+            response.json()["my_requests"][0]["input_port"][
+                "consuming_abstract_data_product"
+            ]["name"]
+            == REDACTION_VALUE
+        )

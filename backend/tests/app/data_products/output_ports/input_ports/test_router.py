@@ -12,7 +12,8 @@ from app.abstract_data_product.type import AbstractDataProductType
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.roles.schema import Scope
 from app.configuration.access_durations.enums import AccessDurationType
-from app.core.authz import Action
+from app.core.authz import REDACTION_VALUE, Action
+from app.data_products.model import DataProductVisibility
 from app.data_products.output_ports.enums import OutputPortAccessType
 from app.settings import settings
 from tests.factories import (
@@ -738,6 +739,13 @@ class TestInputPortsRouter:
         )
         assert response.status_code == 200, response.text
 
+    @staticmethod
+    def ensure_not_redacted(input_port):
+        assert input_port["consuming_abstract_data_product"]["is_redacted"] is False
+        assert (
+            input_port["consuming_abstract_data_product"]["name"] is not REDACTION_VALUE
+        )
+
     def test_get_input_ports_for_output_port(self, client):
         # Create a dataset (output port) with a data product
         ds = OutputPortFactory()
@@ -774,6 +782,36 @@ class TestInputPortsRouter:
         }
         assert str(consuming_dp1.id) in consuming_dp_ids
         assert str(consuming_dp2.id) in consuming_dp_ids
+        self.ensure_not_redacted(data["input_ports"][0])
+        self.ensure_not_redacted(data["input_ports"][1])
+
+    def test_get_input_ports_for_output_port_redacted_when_hidden(self, client):
+        ds = OutputPortFactory()
+        InputPortFactory(
+            output_port=ds,
+            consuming_abstract_data_product=DataProductFactory(
+                visibility=DataProductVisibility.HIDDEN
+            ),
+            status=DecisionStatus.APPROVED,
+        )
+
+        # Get the input ports for the output port
+        response = client.get(
+            DATA_PRODUCTS_DATASETS_ENDPOINT.format(ds.data_product.id, ds.id)
+        )
+
+        assert response.status_code == 200, response.text
+        data = response.json()
+        assert "input_ports" in data
+        assert len(data["input_ports"]) == 1
+        assert (
+            data["input_ports"][0]["consuming_abstract_data_product"]["is_redacted"]
+            is True
+        )
+        assert (
+            data["input_ports"][0]["consuming_abstract_data_product"]["name"]
+            == REDACTION_VALUE
+        )
 
     def test_history_event_created_on_revoke_request(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)

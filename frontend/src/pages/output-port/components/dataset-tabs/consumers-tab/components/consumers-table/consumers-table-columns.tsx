@@ -45,9 +45,10 @@ export const getConsumerColumns = ({
             title: t('Name'),
             dataIndex: 'name',
             width: '22%',
-            render: (_, { consuming_abstract_data_product, consuming_abstract_data_product_id }) => {
+            render: (_, { consuming_abstract_data_product, consuming_abstract_data_product_id, current_request }) => {
                 return (
                     <ConsumerColumn
+                        requestedBy={current_request.requested_by}
                         consumingAbstractDataProductId={consuming_abstract_data_product_id}
                         consumingAbstractDataProduct={consuming_abstract_data_product}
                     />

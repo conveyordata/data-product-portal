@@ -211,6 +211,7 @@ export type AbstractDataProductInfo = {
   name: string;
   namespace: string;
   abstract_data_product_type: AbstractDataProductType;
+  is_redacted: boolean;
 };
 export type OutputPortStatus = "pending" | "active" | "archived";
 export type OutputPortAccessType =

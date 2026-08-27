@@ -16,14 +16,24 @@ from app.abstract_data_product.input_ports.model import (
 from app.abstract_data_product.input_ports.model import (
     InputPortRequest as InputPortRequestModel,
 )
+from app.abstract_data_product.model import AbstractDataProduct
 from app.authorization.role_assignments.output_port.model import (
     DatasetRoleAssignment as DatasetRoleAssignmentModel,
 )
 from app.configuration.access_durations.enums import AccessDurationType
 from app.core.authz import Action, Authorization
+from app.core.authz.actions import AuthorizationAction
 from app.core.logging.posthog_analytics import get_posthog_client
+from app.data_products.model import DataProduct as DataProductModel
+from app.data_products.model import DataProductVisibility
+from app.data_products.output_ports.input_ports.schema_response import (
+    OutputPortInputPort,
+)
 from app.data_products.output_ports.model import OutputPort
 from app.data_products.output_ports.model import OutputPort as OutputPortModel
+from app.data_products.output_ports.schema_response import (
+    output_port_not_found_exception,
+)
 from app.users.model import User as UserModel
 from app.users.schema import User
 from app.users.schema_response import (
@@ -208,6 +218,63 @@ class InputPortService:
         self.db.delete(current_link)
         return result
 
+    @staticmethod
+    def calculate_redaction_of_consumer(
+        current_user: User, consuming_data_product: AbstractDataProduct
+    ) -> bool:
+        return (
+            isinstance(consuming_data_product, DataProductModel)
+            and consuming_data_product.visibility == DataProductVisibility.HIDDEN
+            and not Authorization().has_access(
+                sub=str(current_user.id),
+                obj=consuming_data_product.id,
+                dom="",
+                act=AuthorizationAction.HIDDEN_DATA_PRODUCT__READ,
+            )
+        )
+
+    def get_consuming_data_products(
+        self, current_user: User, output_port_id: UUID, data_product_id: UUID
+    ) -> Sequence[OutputPortInputPort]:
+
+        output_port = self.db.scalar(
+            select(OutputPortModel)
+            .where(OutputPortModel.id == output_port_id)
+            .where(OutputPortModel.data_product_id == data_product_id)
+            .options(
+                selectinload(OutputPortModel.data_product_links).selectinload(
+                    InputPortModel.consuming_abstract_data_product
+                ),
+                selectinload(OutputPortModel.data_product_links).selectinload(
+                    InputPortModel.requests
+                ),
+            )
+        )
+        if not output_port:
+            raise output_port_not_found_exception(output_port_id)
+
+        result = []
+        for link in output_port.data_product_links:
+            item = OutputPortInputPort.model_validate(link)
+            item.consuming_abstract_data_product.set_redacted(
+                self.calculate_redaction_of_consumer(
+                    current_user, link.consuming_abstract_data_product
+                )
+            )
+            result.append(item)
+        return result
+
+    def compute_redaction(
+        self, user: User, request: InputPortRequestModel
+    ) -> InputPortRequest:
+        result = InputPortRequest.model_validate(request)
+        result.input_port.consuming_abstract_data_product.set_redacted(
+            self.calculate_redaction_of_consumer(
+                user, request.input_port.consuming_abstract_data_product
+            )
+        )
+        return result
+
     def get_user_pending_actions(self, user: User) -> Sequence[InputPortRequest]:
         requested_associations = (
             self.db.scalars(
@@ -236,11 +303,11 @@ class InputPortService:
 
         authorizer = Authorization()
         return [
-            InputPortRequest.model_validate(a)
+            self.compute_redaction(user, a)
             for a in requested_associations
             if authorizer.has_access(
                 sub=str(user.id),
-                dom=str(a.input_port.output_port.data_product.domain),
+                dom=str(a.input_port.output_port.data_product.domain.id),
                 obj=str(a.input_port.output_port_id),
                 act=Action.OUTPUT_PORT__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
             )
@@ -270,4 +337,6 @@ class InputPortService:
                 )
             )
 
-        return self.db.scalars(query).unique().all()
+        requests = self.db.scalars(query).unique().all()
+
+        return [self.compute_redaction(user, request) for request in requests]

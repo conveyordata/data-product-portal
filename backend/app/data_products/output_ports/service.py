@@ -12,9 +12,6 @@ from app.abstract_data_product.graph_utils import (
     get_graph_data_from_abstract_data_product,
 )
 from app.abstract_data_product.input_ports.model import (
-    InputPort,
-)
-from app.abstract_data_product.input_ports.model import (
     InputPort as InputPortModel,
 )
 from app.abstract_data_product.type import AbstractDataProductType
@@ -36,7 +33,9 @@ from app.core.embed.model import get_text_embedding_model
 from app.core.namespace.validation import (
     NamespaceValidator,
 )
-from app.data_products.model import ensure_data_product_exists
+from app.data_products.model import (
+    ensure_data_product_exists,
+)
 from app.data_products.output_port_technical_assets_link.model import (
     DataOutputDatasetAssociation as DataOutputDatasetAssociationModel,
 )
@@ -54,6 +53,7 @@ from app.data_products.output_ports.schema_request import (
 from app.data_products.output_ports.schema_response import (
     GetOutputPortAccessDurationsResponse,
     OutputPortAccessDuration,
+    output_port_not_found_exception,
 )
 from app.data_products.status import AbstractDataProductStatus
 from app.data_products.technical_assets.model import (
@@ -155,7 +155,7 @@ class OutputPortService:
         )
 
         if not output_port:
-            raise self.not_found_exception(id)
+            raise output_port_not_found_exception(id)
 
         rolled_up_tags = set()
         for output_link in output_port.data_output_links:
@@ -337,7 +337,7 @@ class OutputPortService:
             id, self.db, data_product_id=data_product_id
         )
         if not dataset:
-            raise self.not_found_exception(id)
+            raise output_port_not_found_exception(id)
 
         result = copy.deepcopy(dataset)
         self.db.delete(dataset)
@@ -426,7 +426,7 @@ class OutputPortService:
             )
         )
         if not output_port:
-            raise self.not_found_exception(id)
+            raise output_port_not_found_exception(id)
         nodes = [
             Node(
                 id=id,
@@ -566,29 +566,3 @@ class OutputPortService:
             for output_port in results
             if self.is_visible_to_user(output_port, user)
         ]
-
-    def get_consuming_data_products(
-        self, output_port_id: UUID, data_product_id: UUID
-    ) -> Sequence[InputPort]:
-        output_port = self.db.scalar(
-            select(OutputPortModel)
-            .where(OutputPortModel.id == output_port_id)
-            .where(OutputPortModel.data_product_id == data_product_id)
-            .options(
-                selectinload(OutputPortModel.data_product_links).selectinload(
-                    InputPortModel.consuming_abstract_data_product
-                ),
-                selectinload(OutputPortModel.data_product_links).selectinload(
-                    InputPortModel.requests
-                ),
-            )
-        )
-        if not output_port:
-            raise self.not_found_exception(output_port_id)
-        return output_port.data_product_links
-
-    def not_found_exception(self, output_port_id: UUID) -> HTTPException:
-        return HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Output port {output_port_id} not found",
-        )
