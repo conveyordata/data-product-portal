@@ -78,7 +78,7 @@ types-cachetools = "*"
 types-requests = "*"
 types-pytz = "*"
 types-PyYAML = "*"
-locust = "^2.37.14"
+locust = "^2.46.4"
 
 [tool.poe.tasks]
 test = "pytest -v tests/"
