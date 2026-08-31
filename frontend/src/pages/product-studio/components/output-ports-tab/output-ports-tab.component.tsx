@@ -2,7 +2,7 @@ import { DeploymentUnitOutlined } from '@ant-design/icons';
 import { usePostHog } from '@posthog/react';
 import { Button, Empty, Flex, Input, Radio, type RadioChangeEvent, Table } from 'antd';
 import Paragraph from 'antd/es/typography/Paragraph';
-import { parseAsBoolean, parseAsString, useQueryState } from 'nuqs';
+import { parseAsString, parseAsStringEnum, useQueryState } from 'nuqs';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -12,6 +12,7 @@ import { PosthogEvents } from '@/constants/posthog.constants';
 import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
 import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
 import { useListOutputPortRoleAssignmentsQuery } from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
+import { AssignmentFilter } from '@/store/api/services/generated/dataProductsApi.ts';
 import {
     type SearchOutputPortsResponseItem,
     useSearchOutputPortsQuery,
@@ -49,7 +50,10 @@ export function OutputPortsTab() {
     const currentUser = useSelector(selectCurrentUser);
 
     const [searchTerm, setSearchTerm] = useQueryState('op-search', parseAsString.withDefault(''));
-    const [showAllPorts, setShowAllPorts] = useQueryState('op-showAll', parseAsBoolean.withDefault(false));
+    const [assignmentFilter, setAssignmentFilter] = useQueryState(
+        'op-assignmentFilter',
+        parseAsStringEnum<AssignmentFilter>(Object.values(AssignmentFilter)).withDefault(AssignmentFilter.OnlyAssigned),
+    );
     const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
     const [selectedPortIds, setSelectedPortIds] = useState<string[]>([]);
     const [isInitialized, setIsInitialized] = useState(false);
@@ -83,7 +87,7 @@ export function OutputPortsTab() {
     }, [userDatasetRoles, isInitialized]);
 
     const { data: { output_ports: outputPorts = [] } = {}, isFetching } = useSearchOutputPortsQuery({
-        currentUserAssigned: !showAllPorts,
+        assignmentFilter,
         limit: 1000,
     });
 
@@ -116,7 +120,7 @@ export function OutputPortsTab() {
     };
 
     const handleShowAllChange = (e: RadioChangeEvent) => {
-        setShowAllPorts(e.target.value || null);
+        setAssignmentFilter(e.target.value);
         // Reset role filter when switching between views
         setSelectedPortIds([]);
         setSelectedRoles([]);
@@ -144,11 +148,11 @@ export function OutputPortsTab() {
                         allowClear
                         style={{ maxWidth: 400 }}
                     />
-                    <Radio.Group value={showAllPorts} onChange={handleShowAllChange} optionType="button">
-                        <Radio.Button value={false}>{t('My Output Ports')}</Radio.Button>
-                        <Radio.Button value={true}>{t('All Output Ports')}</Radio.Button>
+                    <Radio.Group value={assignmentFilter} onChange={handleShowAllChange} optionType="button">
+                        <Radio.Button value={AssignmentFilter.OnlyAssigned}>{t('My Output Ports')}</Radio.Button>
+                        <Radio.Button value={AssignmentFilter.All}>{t('All Output Ports')}</Radio.Button>
                     </Radio.Group>
-                    {!showAllPorts && (
+                    {assignmentFilter === AssignmentFilter.OnlyAssigned && (
                         <RoleFilter mode="datasets" selectedRoles={selectedRoles} onRoleChange={handleRoleChange} />
                     )}
                 </Flex>

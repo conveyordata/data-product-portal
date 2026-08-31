@@ -271,6 +271,17 @@ func (s *AccessModeWithType) Validate() error {
 	return nil
 }
 
+func (s AssignmentFilter) Validate() error {
+	switch s {
+	case "all":
+		return nil
+	case "only_assigned":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
 func (s AuthorizationAction) Validate() error {
 	switch s {
 	case 101:

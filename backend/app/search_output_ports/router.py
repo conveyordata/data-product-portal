@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, Query
 from pydantic.json_schema import SkipJsonSchema
 from sqlalchemy.orm import Session
 
+from app.authorization.role_assignments.enums import AssignmentFilter
 from app.core.auth.auth import get_authenticated_user
 from app.data_products.output_ports.service import OutputPortService
 from app.database.database import get_db_session
@@ -20,7 +21,7 @@ router = APIRouter(tags=["Search Output ports"])
 def search_output_ports(
     query: Annotated[str | SkipJsonSchema[None], Query(min_length=3)] = None,
     limit: Annotated[int, Query(ge=1, le=1000)] = 100,
-    current_user_assigned: bool = False,
+    assignment_filter: AssignmentFilter = AssignmentFilter.ALL,
     db: Session = Depends(get_db_session),
     user: User = Depends(get_authenticated_user),
 ) -> SearchOutputPortsResponse:
@@ -31,7 +32,7 @@ def search_output_ports(
                 query=query,
                 limit=limit,
                 user=user,
-                current_user_assigned=current_user_assigned,
+                assignment_filter=assignment_filter,
             )
         ]
     )

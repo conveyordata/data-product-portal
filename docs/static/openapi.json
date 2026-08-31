@@ -126,13 +126,12 @@
             }
           },
           {
-            "name": "current_user_assigned",
+            "name": "assignment_filter",
             "in": "query",
             "required": false,
             "schema": {
-              "type": "boolean",
-              "default": false,
-              "title": "Current User Assigned"
+              "$ref": "#/components/schemas/AssignmentFilter",
+              "default": "all"
             }
           }
         ],
@@ -1631,13 +1630,12 @@
         "operationId": "get_data_products",
         "parameters": [
           {
-            "name": "filter_to_user_with_assigment",
+            "name": "assignment_filter",
             "in": "query",
             "required": false,
             "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Filter To User With Assigment"
+              "$ref": "#/components/schemas/AssignmentFilter",
+              "default": "all"
             }
           }
         ],
@@ -8812,6 +8810,14 @@
           "consuming_data_product_id"
         ],
         "title": "ApproveOutputPortAsInputPortRequest"
+      },
+      "AssignmentFilter": {
+        "type": "string",
+        "enum": [
+          "all",
+          "only_assigned"
+        ],
+        "title": "AssignmentFilter"
       },
       "AuthorizationAction": {
         "type": "integer",

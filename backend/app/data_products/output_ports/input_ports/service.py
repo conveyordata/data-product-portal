@@ -22,10 +22,8 @@ from app.authorization.role_assignments.output_port.model import (
 )
 from app.configuration.access_durations.enums import AccessDurationType
 from app.core.authz import Action, Authorization
-from app.core.authz.actions import AuthorizationAction
 from app.core.logging.posthog_analytics import get_posthog_client
 from app.data_products.model import DataProduct as DataProductModel
-from app.data_products.model import DataProductVisibility
 from app.data_products.output_ports.input_ports.schema_response import (
     OutputPortInputPort,
 )
@@ -222,15 +220,10 @@ class InputPortService:
     def calculate_redaction_of_consumer(
         current_user: User, consuming_data_product: AbstractDataProduct
     ) -> bool:
-        return (
-            isinstance(consuming_data_product, DataProductModel)
-            and consuming_data_product.visibility == DataProductVisibility.HIDDEN
-            and not Authorization().has_access(
-                sub=str(current_user.id),
-                obj=consuming_data_product.id,
-                dom="",
-                act=AuthorizationAction.HIDDEN_DATA_PRODUCT__READ,
-            )
+        if not isinstance(consuming_data_product, DataProductModel):
+            return False
+        return not Authorization().has_read_access_to_data_product(
+            current_user, consuming_data_product
         )
 
     def get_consuming_data_products(

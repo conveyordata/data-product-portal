@@ -1,6 +1,6 @@
 import copy
 from itertools import islice
-from typing import Iterable, Optional, Sequence
+from typing import Iterable, Optional, Sequence, assert_never
 from uuid import UUID
 
 from fastapi import HTTPException, status
@@ -15,7 +15,7 @@ from app.abstract_data_product.input_ports.model import (
     InputPort as InputPortModel,
 )
 from app.abstract_data_product.type import AbstractDataProductType
-from app.authorization.role_assignments.enums import DecisionStatus
+from app.authorization.role_assignments.enums import AssignmentFilter, DecisionStatus
 from app.authorization.role_assignments.output_port.service import (
     RoleAssignmentService as DatasetRoleAssignmentService,
 )
@@ -182,7 +182,7 @@ class OutputPortService:
         query: Optional[str],
         limit: int,
         user: UserModel,
-        current_user_assigned: bool,
+        assignment_filter: AssignmentFilter,
     ) -> Sequence[OutputPortModel]:
         """An attempt was made to use the elbow method to determine a cut-off for returned results.
         The results of this method were quite poor, hence the search currently works as a sorting operation only,
@@ -213,8 +213,13 @@ class OutputPortService:
             # We currently apply a limit times 2, the reason is that without a limit the query is really slow, however we might miss results because of that
             .limit(limit * 2)
         )
-        if current_user_assigned:
-            stmt = stmt.where(OutputPortModel.assignments.any(user_id=user.id))
+        match assignment_filter:
+            case AssignmentFilter.ALL:
+                pass
+            case AssignmentFilter.ONLY_ASSIGNED:
+                stmt = stmt.where(OutputPortModel.assignments.any(user_id=user.id))
+            case _:
+                assert_never(assignment_filter)
         stmt = stmt.options(
             undefer(OutputPortModel.abstract_data_product_count),
             undefer(OutputPortModel.technical_assets_count),

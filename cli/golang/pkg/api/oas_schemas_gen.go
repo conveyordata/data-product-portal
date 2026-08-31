@@ -717,6 +717,48 @@ type ApproveOutputPortTechnicalAssetLinkOKApplicationJSON jx.Raw
 func (*ApproveOutputPortTechnicalAssetLinkOKApplicationJSON) approveOutputPortTechnicalAssetLinkRes() {
 }
 
+// Ref: #/components/schemas/AssignmentFilter
+type AssignmentFilter string
+
+const (
+	AssignmentFilterAll          AssignmentFilter = "all"
+	AssignmentFilterOnlyAssigned AssignmentFilter = "only_assigned"
+)
+
+// AllValues returns all AssignmentFilter values.
+func (AssignmentFilter) AllValues() []AssignmentFilter {
+	return []AssignmentFilter{
+		AssignmentFilterAll,
+		AssignmentFilterOnlyAssigned,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s AssignmentFilter) MarshalText() ([]byte, error) {
+	switch s {
+	case AssignmentFilterAll:
+		return []byte(s), nil
+	case AssignmentFilterOnlyAssigned:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *AssignmentFilter) UnmarshalText(data []byte) error {
+	switch AssignmentFilter(data) {
+	case AssignmentFilterAll:
+		*s = AssignmentFilterAll
+		return nil
+	case AssignmentFilterOnlyAssigned:
+		*s = AssignmentFilterOnlyAssigned
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
 // The integer values for the authorization actions are stored directly in the DB. This means you can
 // change the name of the actions, but not their integer values. The values for the actions are spaced
 // on purpose, to make it easier to extend. This has no technical benefit, but it makes it easier to
@@ -7605,6 +7647,52 @@ func (s *OSISemanticModelTechnicalAssetConfiguration) SetModelName(val OptString
 // SetLocation sets the value of Location.
 func (s *OSISemanticModelTechnicalAssetConfiguration) SetLocation(val OptString) {
 	s.Location = val
+}
+
+// NewOptAssignmentFilter returns new OptAssignmentFilter with value set to v.
+func NewOptAssignmentFilter(v AssignmentFilter) OptAssignmentFilter {
+	return OptAssignmentFilter{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptAssignmentFilter is optional AssignmentFilter.
+type OptAssignmentFilter struct {
+	Value AssignmentFilter
+	Set   bool
+}
+
+// IsSet returns true if OptAssignmentFilter was set.
+func (o OptAssignmentFilter) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptAssignmentFilter) Reset() {
+	var v AssignmentFilter
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptAssignmentFilter) SetTo(v AssignmentFilter) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptAssignmentFilter) Get() (v AssignmentFilter, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptAssignmentFilter) Or(d AssignmentFilter) AssignmentFilter {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
 }
 
 // NewOptBool returns new OptBool with value set to v.

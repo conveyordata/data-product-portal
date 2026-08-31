@@ -5,6 +5,7 @@ from uuid import UUID
 from fastmcp.dependencies import Depends
 from sqlalchemy.orm import Session
 
+from app.authorization.role_assignments.enums import AssignmentFilter
 from app.configuration.domains.service import DomainService
 from app.data_products.output_ports.schema_response import GetOutputPortResponse
 from app.data_products.output_ports.service import OutputPortService
@@ -90,9 +91,14 @@ def register_resources(mcp) -> None:
         db: Session = Depends(get_db_session),
         user: UserModel = Depends(get_mcp_authenticated_user),
     ) -> str:
-        all_data_products = DataProductService(db).get_data_products()
+        all_data_products = DataProductService(db).get_data_products(
+            current_user=user, assignment_filter=AssignmentFilter.ALL
+        )
         all_output_ports = OutputPortService(db).search_output_ports(
-            query=None, limit=1000, user=user, current_user_assigned=False
+            query=None,
+            limit=1000,
+            user=user,
+            assignment_filter=AssignmentFilter.ALL,
         )
         all_technical_assets = TechnicalAssetService(db).get_data_outputs()
         all_domains = DomainService(db).get_domains()

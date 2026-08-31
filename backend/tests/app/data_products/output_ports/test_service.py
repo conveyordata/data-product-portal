@@ -1,5 +1,6 @@
 from sqlalchemy.orm import selectinload
 
+from app.authorization.role_assignments.enums import AssignmentFilter
 from app.authorization.roles.schema import Scope
 from app.data_products.output_ports.enums import OutputPortAccessType
 from app.data_products.output_ports.model import OutputPort
@@ -109,7 +110,10 @@ class TestDatasetsService:
 
         # Search as the regular user
         search_results = OutputPortService(test_session).search_output_ports(
-            query=None, limit=100, user=regular_user, current_user_assigned=False
+            query=None,
+            limit=100,
+            user=regular_user,
+            assignment_filter=AssignmentFilter.ALL,
         )
 
         # Extract dataset IDs from results
@@ -153,7 +157,10 @@ class TestDatasetsService:
 
         # Search as the owner
         search_results = OutputPortService(test_session).search_output_ports(
-            query=None, limit=100, user=owner, current_user_assigned=False
+            query=None,
+            limit=100,
+            user=owner,
+            assignment_filter=AssignmentFilter.ALL,
         )
 
         # Extract dataset IDs from results

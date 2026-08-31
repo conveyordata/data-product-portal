@@ -19,6 +19,7 @@ from .approve_link_between_technical_asset_and_output_port_request import (
 from .approve_output_port_as_input_port_request import (
     ApproveOutputPortAsInputPortRequest,
 )
+from .assignment_filter import AssignmentFilter
 from .authorization_action import AuthorizationAction
 from .aws_credentials import AWSCredentials
 from .aws_environment_platform_configuration import AWSEnvironmentPlatformConfiguration
@@ -387,6 +388,7 @@ __all__ = (
     "AccessResponse",
     "ApproveLinkBetweenTechnicalAssetAndOutputPortRequest",
     "ApproveOutputPortAsInputPortRequest",
+    "AssignmentFilter",
     "AuthorizationAction",
     "AWSCredentials",
     "AWSEnvironmentPlatformConfiguration",

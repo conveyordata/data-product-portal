@@ -5,7 +5,7 @@ from app.mcp.details import (
     get_output_port_details,
     get_technical_asset_details,
 )
-from app.mcp.search import search_data_products, search_output_ports
+from app.mcp.search import search_data_products, search_output_ports, universal_search
 from tests.factories import (
     DataProductFactory,
     DomainFactory,
@@ -143,3 +143,11 @@ def test_search_data_products_matches_description(session):
 
     assert result["count"] == 1
     assert result["data_products"][0]["id"] == dp.id
+
+
+def test_universal_search(session):
+    dp = DataProductFactory(name="IrrelevantName", description="unique_needle_xyz")
+    result = universal_search(query="", db=session)
+    assert result["total_count"] == 2
+    assert dp.id == result["results"]["data_products"][0]["id"]
+    assert dp.domain.id == result["results"]["domains"][0]["id"]

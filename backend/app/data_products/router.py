@@ -1,15 +1,13 @@
-from typing import Annotated, Sequence
+from typing import Sequence
 from uuid import UUID
 
 from fastapi import (
     APIRouter,
     BackgroundTasks,
     Depends,
-    Query,
     status,
 )
 from fastapi.responses import Response
-from pydantic.json_schema import SkipJsonSchema
 from sqlalchemy.orm import Session
 
 from app.abstract_data_product.input_ports.enums import InputPortStatus
@@ -25,7 +23,7 @@ from app.authorization.role_assignments.data_product.schema import (
 from app.authorization.role_assignments.data_product.service import (
     RoleAssignmentService,
 )
-from app.authorization.role_assignments.enums import DecisionStatus
+from app.authorization.role_assignments.enums import AssignmentFilter, DecisionStatus
 from app.authorization.roles.schema import Prototype, Scope
 from app.authorization.roles.service import RoleService
 from app.configuration.data_product_settings.service import DataProductSettingService
@@ -573,15 +571,15 @@ def revoke_input_port_for_data_product(
 @router.get("")
 def get_data_products(
     db: Session = Depends(get_db_session),
-    filter_to_user_with_assigment: Annotated[
-        UUID | SkipJsonSchema[None], Query()
-    ] = None,
+    assignment_filter: AssignmentFilter = AssignmentFilter.ALL,
+    current_user: User = Depends(get_authenticated_user),
 ) -> GetDataProductsResponse:
     return GetDataProductsResponse(
         data_products=[
             GetDataProductsResponseItem.model_validate(dp)
             for dp in DataProductService(db).get_data_products(
-                filter_to_user_with_assigment
+                assignment_filter=assignment_filter,
+                current_user=current_user,
             )
         ]
     )

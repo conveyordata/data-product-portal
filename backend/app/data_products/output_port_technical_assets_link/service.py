@@ -174,7 +174,7 @@ class TechnicalAssetOutputPortService:
             for a in requested_associations
             if authorizer.has_access(
                 sub=str(user.id),
-                dom=str(a.output_port.data_product.domain),
+                dom=str(a.output_port.data_product.domain.id),
                 obj=str(a.output_port_id),
                 act=Action.OUTPUT_PORT__APPROVE_TECHNICAL_ASSET_LINK_REQUEST,
             )

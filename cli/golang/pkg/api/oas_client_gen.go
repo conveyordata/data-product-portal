@@ -3867,16 +3867,16 @@ func (c *Client) sendGetDataProducts(ctx context.Context, params GetDataProducts
 
 	q := uri.NewQueryEncoder()
 	{
-		// Encode "filter_to_user_with_assigment" parameter.
+		// Encode "assignment_filter" parameter.
 		cfg := uri.QueryParameterEncodingConfig{
-			Name:    "filter_to_user_with_assigment",
+			Name:    "assignment_filter",
 			Style:   uri.QueryStyleForm,
 			Explode: true,
 		}
 
 		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
-			if val, ok := params.FilterToUserWithAssigment.Get(); ok {
-				return e.EncodeValue(conv.UUIDToString(val))
+			if val, ok := params.AssignmentFilter.Get(); ok {
+				return e.EncodeValue(conv.StringToString(string(val)))
 			}
 			return nil
 		}); err != nil {
@@ -9599,16 +9599,16 @@ func (c *Client) sendSearchOutputPorts(ctx context.Context, params SearchOutputP
 		}
 	}
 	{
-		// Encode "current_user_assigned" parameter.
+		// Encode "assignment_filter" parameter.
 		cfg := uri.QueryParameterEncodingConfig{
-			Name:    "current_user_assigned",
+			Name:    "assignment_filter",
 			Style:   uri.QueryStyleForm,
 			Explode: true,
 		}
 
 		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
-			if val, ok := params.CurrentUserAssigned.Get(); ok {
-				return e.EncodeValue(conv.BoolToString(val))
+			if val, ok := params.AssignmentFilter.Get(); ok {
+				return e.EncodeValue(conv.StringToString(string(val)))
 			}
 			return nil
 		}); err != nil {
