@@ -75,6 +75,9 @@
 {% set feature_usage_metrics_weekly = "f3a95935-5a3e-4427-be75-a01a40a53f55" %}
 {% set financial_risk_assessment = "1953822b-1198-4de0-9784-1633db208a78" %}
 {% set fraud_detection = "3438b81d-7834-4f0c-bb94-c9b4449d7ce6" %}
+{% set hidden_data_product_example = "f4de6505-4e9c-4ed2-9d0c-8c2d9ad83071" %}
+{% set hidden_data_product_example_consumed = "5ed029af-5507-4d33-a531-a53d10488e5d" %}
+{% set hidden_data_product_example_consumed_output_port = "d6f5af8a-5c8b-4b73-8774-2cae9e977341" %}
 {% set inventory_management = "65254a60-6f97-4b6c-812c-84dcf7c316e3" %}
 {% set inventory_management_output_port = "aa84c8a8-9ca3-47be-9389-c75458e326a2" %}
 {% set margin_trends_by_product = "bdfdcad2-2071-4581-b6b9-94fe5bca55f7" %}
@@ -847,6 +850,80 @@ SELECT
     NULL,
     NULL,
     '{{ access_mode_read }}'::uuid,
+    timezone('utc'::text, current_timestamp),
+    NULL
+FROM link;
+
+-- Hidden data product example
+INSERT INTO public.abstract_data_products (id, status, finalizers, name, namespace, abstract_data_product_type, description, domain_id, created_on, updated_on, deleted_at)
+VALUES ('{{ hidden_data_product_example }}'::uuid, 'active', '{}', 'Hidden data product example', 'hidden_data_product_example', 'data_products', 'Hidden data product used as consumer in sample data.', '{{ customer_domain_id }}'::uuid, timezone('utc'::text, current_timestamp), NULL, NULL);
+
+INSERT INTO public.data_products (id, about, type_id, lifecycle_id, usage, visibility)
+VALUES ('{{ hidden_data_product_example }}'::uuid, NULL, '{{ reporting_type_id }}'::uuid, '{{ data_product_lifecycle_id }}'::uuid, NULL, 'hidden');
+
+INSERT INTO public.role_assignments_data_product (id, data_product_id, user_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at)
+VALUES (gen_random_uuid(), '{{ hidden_data_product_example }}'::uuid, '{{ jane_id }}'::uuid, (
+    SELECT r.id FROM public.roles AS r
+    WHERE r.scope = 'data_product' AND r.prototype = 2
+), 'APPROVED', '{{ jane_id }}'::uuid, timezone('utc'::text, current_timestamp), '{{ jane_id }}'::uuid, timezone('utc'::text, current_timestamp), timezone('utc'::text, current_timestamp), NULL, NULL);
+
+-- Hidden data product example consumed
+INSERT INTO public.abstract_data_products (id, status, finalizers, name, namespace, abstract_data_product_type, description, domain_id, created_on, updated_on, deleted_at)
+VALUES ('{{ hidden_data_product_example_consumed }}'::uuid, 'active', '{}', 'Discoverable Data product', 'hidden_data_product_example_consumed', 'data_products', 'Data product exposing a single output port consumed by the hidden data product example.', '{{ customer_domain_id }}'::uuid, timezone('utc'::text, current_timestamp), NULL, NULL);
+
+INSERT INTO public.data_products (id, about, type_id, lifecycle_id, usage)
+VALUES ('{{ hidden_data_product_example_consumed }}'::uuid, NULL, '{{ reporting_type_id }}'::uuid, '{{ data_product_lifecycle_id }}'::uuid, NULL);
+
+INSERT INTO public.role_assignments_data_product (id, data_product_id, user_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at)
+VALUES (gen_random_uuid(), '{{ hidden_data_product_example_consumed }}'::uuid, '{{ john_id }}'::uuid, (
+    SELECT r.id FROM public.roles AS r
+    WHERE r.scope = 'data_product' AND r.prototype = 2
+), 'APPROVED', '{{ john_id }}'::uuid, timezone('utc'::text, current_timestamp), '{{ john_id }}'::uuid, timezone('utc'::text, current_timestamp), timezone('utc'::text, current_timestamp), NULL, NULL);
+
+INSERT INTO public.datasets (id, namespace, data_product_id, name, description, about, status, access_type, created_on, updated_on, lifecycle_id, deleted_at)
+VALUES ('{{ hidden_data_product_example_consumed_output_port }}'::uuid, 'hidden_data_product_example_consumed_output_port', '{{ hidden_data_product_example_consumed }}'::uuid, 'Hidden data product example consumed output port', 'Single output port for the hidden data product sample.', 'Single output port consumed from a hidden data product through a pending request.', 'ACTIVE', 'RESTRICTED', timezone('utc'::text, current_timestamp), NULL, '{{ data_product_lifecycle_id }}'::uuid, NULL);
+
+INSERT INTO public.role_assignments_dataset (
+    id, dataset_id, data_product_id, user_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at
+) VALUES (
+    gen_random_uuid(),
+    '{{ hidden_data_product_example_consumed_output_port }}'::uuid,
+    '{{ hidden_data_product_example_consumed }}'::uuid,
+    '{{ john_id }}'::uuid,
+    (
+        SELECT r.id FROM public.roles AS r
+        WHERE r.scope = 'dataset' AND r.prototype = 2
+    ),
+    'APPROVED',
+    '{{ john_id }}'::uuid,
+    timezone('utc'::text, current_timestamp),
+    '{{ john_id }}'::uuid,
+    timezone('utc'::text, current_timestamp),
+    timezone('utc'::text, current_timestamp),
+    NULL,
+    NULL
+);
+
+WITH link AS (
+    INSERT INTO public.input_ports (id, consuming_abstract_data_product_id, dataset_id, status, created_on, updated_on, deleted_at)
+    VALUES (gen_random_uuid(), '{{ hidden_data_product_example }}'::uuid, '{{ hidden_data_product_example_consumed_output_port }}'::uuid, 'PENDING', timezone('utc'::text, current_timestamp), NULL, NULL)
+    RETURNING id
+)
+INSERT INTO public.input_port_requests (id, input_port_id, decision, justification, decision_note, access_duration_type, requested_duration_days, requested_by_id, requested_on, decided_by_id, decided_on, valid_from, valid_until, created_on, updated_on)
+SELECT
+    gen_random_uuid(),
+    link.id,
+    'PENDING',
+    'Requesting access from hidden data product example.',
+    NULL,
+    'PERMANENT',
+    NULL,
+    '{{ jane_id }}'::uuid,
+    timezone('utc'::text, current_timestamp),
+    NULL,
+    NULL,
+    NULL,
+    NULL,
     timezone('utc'::text, current_timestamp),
     NULL
 FROM link;

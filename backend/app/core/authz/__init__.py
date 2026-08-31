@@ -8,6 +8,8 @@ from .resolvers import (
     TechnicalAssetResolver,
 )
 
+REDACTION_VALUE = "Redacted"
+
 __all__ = (
     "Action",
     "Authorization",

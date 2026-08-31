@@ -11,13 +11,16 @@ import {
     Form,
     Input,
     Modal,
+    Tooltip,
     Typography,
     theme,
 } from 'antd';
+import type { GlobalToken } from 'antd/es/theme/interface';
 import { addDays, isPast } from 'date-fns';
 import { type ReactNode, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import AccessMode from '@/components/access-modes/access-mode.component.tsx';
+import BlurredText from '@/components/blurred/blurred-text';
 import EllipsisParagraph from '@/components/ellipsis-paragraph/ellipsis-paragraph.component';
 import {
     AbstractProductIcon,
@@ -51,7 +54,7 @@ type RequestDetails = {
     requesterName: string;
     requesterEmail: string;
     source: {
-        name: string;
+        name: string | ReactNode;
         email: string;
         type: string;
         icon: React.ReactNode;
@@ -118,19 +121,41 @@ const abstractDataProductTypeName = (type: AbstractDataProductType) => {
     }
 };
 
+const hiddenDataProductName = (
+    name: string,
+    t: (key: string, params?: Record<string, string>) => string,
+    token: GlobalToken,
+): ReactNode => (
+    <Tooltip
+        title={t(
+            'This is a hidden Data Product, validate this requests based on its business justification. You can always contact the requester for details.',
+        )}
+    >
+        <Flex vertical>
+            <BlurredText strong>{name}</BlurredText>
+            <Typography.Text type="secondary" style={{ fontSize: token.fontSizeSM }}>
+                {t('This is a hidden Data Product')}
+            </Typography.Text>
+        </Flex>
+    </Tooltip>
+);
+
 const isInputPortRequest = (action: Request): action is InputPortRequest =>
     action.request_type === RequestType_InputPort;
 
 function getRequestDetails(
     action: Request,
     t: (key: string, params?: Record<string, string>) => string,
+    token: GlobalToken,
 ): RequestDetails | undefined {
     if (isInputPortRequest(action)) {
         return {
             requesterName: `${action.requested_by.first_name} ${action.requested_by.last_name}`,
             requesterEmail: action.requested_by.email,
             source: {
-                name: action.input_port.consuming_abstract_data_product.name,
+                name: action.input_port.consuming_abstract_data_product.is_redacted
+                    ? hiddenDataProductName(action.input_port.consuming_abstract_data_product.name, t, token)
+                    : action.input_port.consuming_abstract_data_product.name,
                 email: action.requested_by.email,
                 type: t(
                     abstractDataProductTypeName(
@@ -236,7 +261,7 @@ export function ReviewRequestModal({ action, open, onClose, onAccept, onReject, 
         return null;
     }
 
-    const details = getRequestDetails(action, t);
+    const details = getRequestDetails(action, t, token);
 
     const handleAccept = () => {
         const { decisionNote } = form.getFieldsValue();
@@ -273,7 +298,7 @@ export function ReviewRequestModal({ action, open, onClose, onAccept, onReject, 
         ? getPreviousRequestStatus(details.currentAccessPeriod)
         : null;
 
-    const previousDetails = previousRequestAction ? getRequestDetails(previousRequestAction, t) : undefined;
+    const previousDetails = previousRequestAction ? getRequestDetails(previousRequestAction, t, token) : undefined;
 
     const previousDetailItems: DescriptionsProps['items'] = previousDetails
         ? [
@@ -405,7 +430,13 @@ export function ReviewRequestModal({ action, open, onClose, onAccept, onReject, 
                                         icon={details.source.icon}
                                         style={{ color: token.colorPrimary, backgroundColor: token.colorPrimaryBg }}
                                     />
-                                    <Typography.Text strong>{details.source.name}</Typography.Text>
+                                    <Flex vertical>
+                                        {typeof details.source.name === 'string' ? (
+                                            <Typography.Text strong>{details.source.name}</Typography.Text>
+                                        ) : (
+                                            details.source.name
+                                        )}
+                                    </Flex>
                                 </Flex>
                             </Flex>
                         </Card>

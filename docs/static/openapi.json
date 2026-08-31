@@ -8488,13 +8488,18 @@
           },
           "abstract_data_product_type": {
             "$ref": "#/components/schemas/AbstractDataProductType"
+          },
+          "is_redacted": {
+            "type": "boolean",
+            "title": "Is Redacted"
           }
         },
         "type": "object",
         "required": [
           "name",
           "namespace",
-          "abstract_data_product_type"
+          "abstract_data_product_type",
+          "is_redacted"
         ],
         "title": "AbstractDataProductInfo"
       },

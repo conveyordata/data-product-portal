@@ -1,6 +1,7 @@
 from typing import Optional, Sequence
 from uuid import UUID
 
+from fastapi import HTTPException, status
 from pydantic import AliasPath, ConfigDict, Field
 
 from app.configuration.access_durations.enums import AccessDurationType
@@ -80,3 +81,10 @@ class CreateOutputPortResponse(ORMModel):
 
 class UpdateOutputPortResponse(ORMModel):
     id: UUID
+
+
+def output_port_not_found_exception(output_port_id: UUID) -> HTTPException:
+    return HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail=f"Output port {output_port_id} not found",
+    )

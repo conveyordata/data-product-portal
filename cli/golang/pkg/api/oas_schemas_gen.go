@@ -66,6 +66,7 @@ type AbstractDataProductInfo struct {
 	Name                    string                  `json:"name"`
 	Namespace               string                  `json:"namespace"`
 	AbstractDataProductType AbstractDataProductType `json:"abstract_data_product_type"`
+	IsRedacted              bool                    `json:"is_redacted"`
 }
 
 // GetName returns the value of Name.
@@ -83,6 +84,11 @@ func (s *AbstractDataProductInfo) GetAbstractDataProductType() AbstractDataProdu
 	return s.AbstractDataProductType
 }
 
+// GetIsRedacted returns the value of IsRedacted.
+func (s *AbstractDataProductInfo) GetIsRedacted() bool {
+	return s.IsRedacted
+}
+
 // SetName sets the value of Name.
 func (s *AbstractDataProductInfo) SetName(val string) {
 	s.Name = val
@@ -96,6 +102,11 @@ func (s *AbstractDataProductInfo) SetNamespace(val string) {
 // SetAbstractDataProductType sets the value of AbstractDataProductType.
 func (s *AbstractDataProductInfo) SetAbstractDataProductType(val AbstractDataProductType) {
 	s.AbstractDataProductType = val
+}
+
+// SetIsRedacted sets the value of IsRedacted.
+func (s *AbstractDataProductInfo) SetIsRedacted(val bool) {
+	s.IsRedacted = val
 }
 
 // Ref: #/components/schemas/AbstractDataProductInputPort

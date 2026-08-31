@@ -32,6 +32,7 @@ const mockInputPortAction: InputPortRequest = {
             name: 'Marketing Analytics',
             namespace: 'marketing',
             abstract_data_product_type: 'data_products',
+            is_redacted: false,
         },
         current_request: {
             id: 'action-1',

@@ -7,6 +7,7 @@ from fastmcp.dependencies import Depends
 from sqlalchemy.orm import Session
 
 from app.configuration.domains.service import DomainService
+from app.data_products.output_ports.input_ports.service import InputPortService
 from app.data_products.output_ports.service import OutputPortService
 from app.data_products.schema_response import GetDataProductsResponseItem
 from app.data_products.service import DataProductService
@@ -177,17 +178,16 @@ def get_consuming_products(
     Returns:
         List of consuming data products with their namespaces and descriptions.
     """
-    consuming_products = OutputPortService(db).get_consuming_data_products(
-        UUID(output_port_id), UUID(data_product_id)
+    consuming_products = InputPortService(db).get_consuming_data_products(
+        user, UUID(output_port_id), UUID(data_product_id)
     )
     return {
         "output_port_id": output_port_id,
         "consuming_data_products": [
             {
-                "id": str(ip.consuming_abstract_data_product.id),
+                "id": str(ip.consuming_abstract_data_product_id),
                 "name": ip.consuming_abstract_data_product.name,
                 "namespace": ip.consuming_abstract_data_product.namespace,
-                "description": ip.consuming_abstract_data_product.description,
             }
             for ip in consuming_products
         ],
