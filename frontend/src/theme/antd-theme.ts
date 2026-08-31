@@ -22,9 +22,10 @@ const datamindedThemeConfig: ThemeConfig = {
         colorPrimary: '#543EDC',
         // Info
         colorInfo: '#5B21B6',
-
+        // colorBgLayout: '#f5f5f5',
+        // colorBgContainer: '#ffffff',
+        // colorBgElevated: '#ffffff',
     },
 };
-
 
 export { datamindedThemeConfig };

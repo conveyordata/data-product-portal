@@ -1,5 +1,5 @@
 import { InboxOutlined, ProductOutlined } from '@ant-design/icons';
-import { Badge, Space, Tabs, Typography, theme } from 'antd';
+import { Badge, Card, Space, Tabs, Typography, theme } from 'antd';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DataProductOutlined, ExplorationOutlined, OutputPortOutlined } from '@/components/icons';
@@ -82,7 +82,9 @@ export function ProductStudio() {
                     'Manage your Data Products, Explorations and Output Ports. View, edit, and monitor all your data assets in one place.',
                 )}
             </Typography.Paragraph>
-            <Tabs activeKey={activeTab} items={tabs} onChange={onTabChange} />
+            <Card>
+                <Tabs activeKey={activeTab} items={tabs} onChange={onTabChange} />
+            </Card>
         </div>
     );
 }

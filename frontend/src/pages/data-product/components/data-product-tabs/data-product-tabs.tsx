@@ -1,7 +1,6 @@
 import { CompassOutlined, HistoryOutlined, InfoCircleOutlined, SettingOutlined, TeamOutlined } from '@ant-design/icons';
 import { usePostHog } from '@posthog/react';
-import type { TourProps } from 'antd';
-import { Tabs, Tour, Typography } from 'antd';
+import { Card, Tabs, Tour, type TourProps, Typography } from 'antd';
 import { type ReactNode, type RefObject, useEffect, useMemo, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -203,7 +202,7 @@ export function DataProductTabs({ dataProductId }: Props) {
     }, [t]);
 
     return (
-        <>
+        <Card>
             <Tabs
                 activeKey={activeTab}
                 onChange={onTabChange}
@@ -255,6 +254,6 @@ export function DataProductTabs({ dataProductId }: Props) {
                     posthog.capture(PosthogEvents.DATA_PRODUCT_TOUR_FINISHED);
                 }}
             />
-        </>
+        </Card>
     );
 }

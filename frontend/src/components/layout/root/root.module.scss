@@ -16,8 +16,8 @@
 .children-wrapper {
     height: 100%;
     overflow-x: auto;
-    padding: globals.$container-padding-large;
-    background: globals.$background-color-container;
+    padding: globals.$container-padding;
+    background: globals.$color-bg-layout;
     border-radius: globals.$border-radius-lg;
 
     &.layout-content-home {
