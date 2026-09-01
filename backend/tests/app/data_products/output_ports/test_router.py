@@ -7,6 +7,7 @@ from app.abstract_data_product.type import AbstractDataProductType
 from app.authorization.roles.schema import Scope
 from app.configuration.access_durations.enums import AccessDurationType
 from app.core.authz.actions import AuthorizationAction
+from app.data_products.model import DataProductVisibility
 from app.data_products.output_ports.enums import OutputPortAccessType
 from app.data_products.output_ports.model import Dataset
 from app.events.enums import EventReferenceEntity
@@ -21,7 +22,6 @@ from tests.factories import (
     DataProductRoleAssignmentFactory,
     DataProductSettingFactory,
     DatasetRoleAssignmentFactory,
-    DomainFactory,
     ExplorationFactory,
     GlobalRoleAssignmentFactory,
     InputPortFactory,
@@ -37,21 +37,17 @@ ENDPOINT = "/api/v2/data_products/{}/output_ports"
 
 
 @pytest.fixture
-def dataset_payload():
+def output_port_payload():
     user = UserFactory()
-    domain = DomainFactory()
-    data_product = DataProductFactory()
     return {
-        "name": "Test Dataset",
+        "name": "Test Output Port",
         "description": "Test Description",
-        "namespace": "test-dataset",
+        "namespace": f"test-output-port-{uuid4()}",
         "tag_ids": [],
         "owners": [
             str(user.id),
         ],
         "access_type": OutputPortAccessType.RESTRICTED.value,
-        "domain_id": str(domain.id),
-        "data_product_id": str(data_product.id),
         "exploration_access_duration_type": AccessDurationType.TIME_BOUND.value,
         "data_product_access_duration_type": AccessDurationType.TIME_BOUND.value,
     }
@@ -73,7 +69,7 @@ def output_port_event_payload():
 class TestOutputPortRouter:
     invalid_id = "00000000-0000-0000-0000-000000000000"
 
-    def test_create_dataset(self, dataset_payload, client):
+    def test_create_dataset(self, output_port_payload, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.GLOBAL,
@@ -83,13 +79,14 @@ class TestOutputPortRouter:
             user_id=user.id,
             role_id=role.id,
         )
+        data_product = DataProductFactory()
         created_dataset = self.create_output_port(
-            client, dataset_payload["data_product_id"], dataset_payload
+            client, data_product.id, output_port_payload
         )
         assert created_dataset.status_code == 200, created_dataset.text
         assert "id" in created_dataset.json()
 
-    def test_create_output_port(self, session, dataset_payload, client):
+    def test_create_output_port(self, session, output_port_payload, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.GLOBAL,
@@ -99,15 +96,15 @@ class TestOutputPortRouter:
             user_id=user.id,
             role_id=role.id,
         )
-        data_product_id = dataset_payload.pop("data_product_id")
+        data_product_id = DataProductFactory().id
         created_dataset = self.create_output_port(
-            client, data_product_id, dataset_payload
+            client, data_product_id, output_port_payload
         )
         assert created_dataset.status_code == 200
         assert "id" in created_dataset.json()
 
     def test_create_output_port_type_public(
-        self, session, dataset_payload, client
+        self, session, output_port_payload, client
     ) -> None:
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
@@ -118,10 +115,10 @@ class TestOutputPortRouter:
             user_id=user.id,
             role_id=role.id,
         )
-        data_product_id = dataset_payload.pop("data_product_id")
-        dataset_payload["access_type"] = OutputPortAccessType.PUBLIC.value
+        data_product_id = DataProductFactory().id
+        output_port_payload["access_type"] = "public"
         created_dataset = self.create_output_port(
-            client, data_product_id, dataset_payload
+            client, data_product_id, output_port_payload
         )
         assert created_dataset.status_code == 200
         assert "id" in created_dataset.json()
@@ -130,7 +127,9 @@ class TestOutputPortRouter:
         )
         assert output_port.access_type == OutputPortAccessType.UNRESTRICTED.value
 
-    def test_create_dataset_no_owners(self, session, dataset_payload, client):
+    def test_create_output_port__hidden_data_product_only_allows_private_output_port(
+        self, session, output_port_payload, client
+    ) -> None:
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.GLOBAL,
@@ -140,14 +139,46 @@ class TestOutputPortRouter:
             user_id=user.id,
             role_id=role.id,
         )
-        create_payload = deepcopy(dataset_payload)
+        data_product_id = DataProductFactory(visibility=DataProductVisibility.HIDDEN).id
+
+        output_port_payload["access_type"] = OutputPortAccessType.UNRESTRICTED.value
+        created_dataset = self.create_output_port(
+            client, data_product_id, output_port_payload
+        )
+        assert created_dataset.status_code == 400
+
+        output_port_payload["access_type"] = OutputPortAccessType.RESTRICTED.value
+        created_dataset = self.create_output_port(
+            client, data_product_id, output_port_payload
+        )
+        assert created_dataset.status_code == 400
+
+        output_port_payload["access_type"] = OutputPortAccessType.PRIVATE.value
+        created_dataset = self.create_output_port(
+            client, data_product_id, output_port_payload
+        )
+        assert created_dataset.status_code == 200
+
+    def test_create_dataset_no_owners(self, session, output_port_payload, client):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        role = RoleFactory(
+            scope=Scope.GLOBAL,
+            permissions=[AuthorizationAction.GLOBAL__CREATE_OUTPUT_PORT],
+        )
+        GlobalRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+        )
+        create_payload = deepcopy(output_port_payload)
         create_payload["owners"] = []
         created_dataset = self.create_output_port(
-            client, create_payload["data_product_id"], create_payload
+            client, DataProductFactory().id, create_payload
         )
         assert created_dataset.status_code == 422
 
-    def test_create_dataset_duplicate_namespace(self, session, dataset_payload, client):
+    def test_create_dataset_duplicate_namespace(
+        self, session, output_port_payload, client
+    ):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.GLOBAL,
@@ -157,15 +188,15 @@ class TestOutputPortRouter:
             user_id=user.id,
             role_id=role.id,
         )
-        OutputPortFactory(namespace=dataset_payload["namespace"])
+        OutputPortFactory(namespace=output_port_payload["namespace"])
 
         created_dataset = self.create_output_port(
-            client, dataset_payload["data_product_id"], dataset_payload
+            client, DataProductFactory().id, output_port_payload
         )
         assert created_dataset.status_code == 400
 
     def test_create_dataset_invalid_characters_namespace(
-        self, session, dataset_payload, client
+        self, session, output_port_payload, client
     ):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
@@ -176,16 +207,16 @@ class TestOutputPortRouter:
             user_id=user.id,
             role_id=role.id,
         )
-        create_payload = deepcopy(dataset_payload)
+        create_payload = deepcopy(output_port_payload)
         create_payload["namespace"] = "!"
 
         created_dataset = self.create_output_port(
-            client, create_payload["data_product_id"], create_payload
+            client, DataProductFactory().id, create_payload
         )
         assert created_dataset.status_code == 400
 
     def test_create_dataset_invalid_length_namespace(
-        self, session, dataset_payload, client
+        self, session, output_port_payload, client
     ):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
@@ -196,11 +227,11 @@ class TestOutputPortRouter:
             user_id=user.id,
             role_id=role.id,
         )
-        create_payload = deepcopy(dataset_payload)
+        create_payload = deepcopy(output_port_payload)
         create_payload["namespace"] = "a" * 256
 
         created_dataset = self.create_output_port(
-            client, create_payload["data_product_id"], create_payload
+            client, DataProductFactory().id, create_payload
         )
         assert created_dataset.status_code == 400
 
@@ -257,34 +288,6 @@ class TestOutputPortRouter:
         output_port: Dataset = session.query(Dataset).filter_by(id=dataset_id).first()
         assert output_port.access_type == OutputPortAccessType.UNRESTRICTED.value
 
-    def test_update_dataset(self, client):
-        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        role = RoleFactory(
-            scope=Scope.DATASET,
-            permissions=[AuthorizationAction.OUTPUT_PORT__UPDATE_PROPERTIES],
-        )
-        ds = OutputPortFactory()
-        DatasetRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id, output_port_id=ds.id
-        )
-
-        update_payload = {
-            "name": "new_name",
-            "namespace": "new_namespace",
-            "description": "new_description",
-            "tag_ids": [],
-            "access_type": "restricted",
-            "data_product_access_duration_type": AccessDurationType.TIME_BOUND.value,
-            "exploration_access_duration_type": AccessDurationType.TIME_BOUND.value,
-        }
-
-        updated_dataset = self.update_output_port(
-            client, ds.data_product.id, ds.id, update_payload
-        )
-
-        assert updated_dataset.status_code == 200
-        assert updated_dataset.json()["id"] == str(ds.id)
-
     def test_update_output_port(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
@@ -313,23 +316,57 @@ class TestOutputPortRouter:
         assert updated_dataset.status_code == 200
         assert updated_dataset.json()["id"] == str(ds.id)
 
-    def test_update_dataset_about_no_role(self, client):
-        ds = OutputPortFactory()
-        response = self.update_output_port_about(client, ds.data_product.id, ds.id)
-        assert response.status_code == 403
-
-    def test_update_dataset_about(self, client):
+    def test_update_output_port__hidden_data_product_only_allows_private(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.DATASET,
             permissions=[AuthorizationAction.OUTPUT_PORT__UPDATE_PROPERTIES],
         )
-        ds = OutputPortFactory()
+        dp = DataProductFactory(visibility=DataProductVisibility.HIDDEN)
+        ds = OutputPortFactory(
+            data_product=dp, access_type=OutputPortAccessType.PRIVATE
+        )
         DatasetRoleAssignmentFactory(
             user_id=user.id, role_id=role.id, output_port_id=ds.id
         )
+
+        update_payload = {
+            "name": "new_name",
+            "namespace": "new_namespace",
+            "description": "new_description",
+            "tag_ids": [],
+            "data_product_access_duration_type": AccessDurationType.TIME_BOUND.value,
+            "exploration_access_duration_type": AccessDurationType.TIME_BOUND.value,
+        }
+
+        updated_dataset = self.update_output_port(
+            client,
+            ds.data_product.id,
+            ds.id,
+            {**update_payload, "access_type": OutputPortAccessType.UNRESTRICTED.value},
+        )
+        assert updated_dataset.status_code == 400
+
+        updated_dataset = self.update_output_port(
+            client,
+            ds.data_product.id,
+            ds.id,
+            {**update_payload, "access_type": OutputPortAccessType.RESTRICTED.value},
+        )
+        assert updated_dataset.status_code == 400
+
+        updated_dataset = self.update_output_port(
+            client,
+            ds.data_product.id,
+            ds.id,
+            {**update_payload, "access_type": OutputPortAccessType.PRIVATE.value},
+        )
+        assert updated_dataset.status_code == 200
+
+    def test_update_output_port_about_no_role(self, client):
+        ds = OutputPortFactory()
         response = self.update_output_port_about(client, ds.data_product.id, ds.id)
-        assert response.status_code == 200
+        assert response.status_code == 403
 
     def test_update_output_port_about(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
@@ -348,21 +385,6 @@ class TestOutputPortRouter:
         ds = OutputPortFactory()
         response = self.delete_output_port(client, ds.data_product.id, ds.id)
         assert response.status_code == 403
-
-    def test_remove_dataset(self, client):
-        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        role = RoleFactory(
-            scope=Scope.DATASET, permissions=[AuthorizationAction.OUTPUT_PORT__DELETE]
-        )
-        ds = OutputPortFactory()
-        DatasetRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id, output_port_id=ds.id
-        )
-        response = self.delete_output_port(client, ds.data_product.id, ds.id)
-        assert response.status_code == 200
-
-        response = self.get_output_port(client, ds.id, ds.data_product.id)
-        assert response.status_code == 404
 
     def test_remove_output_port(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
@@ -745,7 +767,7 @@ class TestOutputPortRouter:
 
         assert response.status_code == 400
 
-    def test_history_event_created_on_create_dataset(self, dataset_payload, client):
+    def test_history_event_created_on_create_dataset(self, output_port_payload, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.GLOBAL,
@@ -755,8 +777,9 @@ class TestOutputPortRouter:
             user_id=user.id,
             role_id=role.id,
         )
+        data_product = DataProductFactory()
         created_dataset = self.create_output_port(
-            client, dataset_payload["data_product_id"], dataset_payload
+            client, data_product.id, output_port_payload
         )
         assert created_dataset.status_code == 200
         assert "id" in created_dataset.json()
@@ -764,11 +787,11 @@ class TestOutputPortRouter:
         history = self.get_output_port_history(
             client,
             created_dataset.json().get("id"),
-            dataset_payload.get("data_product_id"),
+            data_product.id,
         )
         assert len(history.json()["events"]) == 2
 
-    def test_get_output_port_history(self, dataset_payload, client):
+    def test_get_output_port_history(self, output_port_payload, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.GLOBAL,
@@ -778,8 +801,9 @@ class TestOutputPortRouter:
             user_id=user.id,
             role_id=role.id,
         )
+        data_product = DataProductFactory()
         created_dataset = self.create_output_port(
-            client, dataset_payload["data_product_id"], dataset_payload
+            client, data_product.id, output_port_payload
         )
         assert created_dataset.status_code == 200
         assert "id" in created_dataset.json()
@@ -787,7 +811,7 @@ class TestOutputPortRouter:
         history = self.get_output_port_history(
             client,
             created_dataset.json().get("id"),
-            dataset_payload.get("data_product_id"),
+            data_product.id,
         )
         assert history.status_code == 200
         assert len(history.json()["events"]) == 2
@@ -898,9 +922,9 @@ class TestOutputPortRouter:
         assert events[0].deleted_subject_identifier == dataset_name
 
     def test_create_generates_webhook_v2_event(
-        self, capture_events, dataset_payload, client
+        self, capture_events, output_port_payload, client
     ):
-        self.test_create_dataset(dataset_payload, client)
+        self.test_create_dataset(output_port_payload, client)
         assert_event_in_queue("output_port.event", capture_events)
 
     @staticmethod

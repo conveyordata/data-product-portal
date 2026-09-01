@@ -22865,8 +22865,6 @@ func (s *OutputPortAccessType) Decode(d *jx.Decoder) error {
 	}
 	// Try to use constant string.
 	switch OutputPortAccessType(v) {
-	case OutputPortAccessTypePublic:
-		*s = OutputPortAccessTypePublic
 	case OutputPortAccessTypeRestricted:
 		*s = OutputPortAccessTypeRestricted
 	case OutputPortAccessTypePrivate:
