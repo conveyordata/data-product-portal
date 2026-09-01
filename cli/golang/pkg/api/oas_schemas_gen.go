@@ -4208,8 +4208,9 @@ func (s *Domain) SetDescription(val string) {
 
 // Ref: #/components/schemas/DomainCreate
 type DomainCreate struct {
-	Name        string `json:"name"`
-	Description string `json:"description"`
+	Name           string      `json:"name"`
+	Description    string      `json:"description"`
+	EnvironmentIds []uuid.UUID `json:"environment_ids"`
 }
 
 // GetName returns the value of Name.
@@ -4222,6 +4223,11 @@ func (s *DomainCreate) GetDescription() string {
 	return s.Description
 }
 
+// GetEnvironmentIds returns the value of EnvironmentIds.
+func (s *DomainCreate) GetEnvironmentIds() []uuid.UUID {
+	return s.EnvironmentIds
+}
+
 // SetName sets the value of Name.
 func (s *DomainCreate) SetName(val string) {
 	s.Name = val
@@ -4232,10 +4238,16 @@ func (s *DomainCreate) SetDescription(val string) {
 	s.Description = val
 }
 
+// SetEnvironmentIds sets the value of EnvironmentIds.
+func (s *DomainCreate) SetEnvironmentIds(val []uuid.UUID) {
+	s.EnvironmentIds = val
+}
+
 // Ref: #/components/schemas/DomainUpdate
 type DomainUpdate struct {
-	Name        string `json:"name"`
-	Description string `json:"description"`
+	Name           string      `json:"name"`
+	Description    string      `json:"description"`
+	EnvironmentIds []uuid.UUID `json:"environment_ids"`
 }
 
 // GetName returns the value of Name.
@@ -4248,6 +4260,11 @@ func (s *DomainUpdate) GetDescription() string {
 	return s.Description
 }
 
+// GetEnvironmentIds returns the value of EnvironmentIds.
+func (s *DomainUpdate) GetEnvironmentIds() []uuid.UUID {
+	return s.EnvironmentIds
+}
+
 // SetName sets the value of Name.
 func (s *DomainUpdate) SetName(val string) {
 	s.Name = val
@@ -4258,6 +4275,11 @@ func (s *DomainUpdate) SetDescription(val string) {
 	s.Description = val
 }
 
+// SetEnvironmentIds sets the value of EnvironmentIds.
+func (s *DomainUpdate) SetEnvironmentIds(val []uuid.UUID) {
+	s.EnvironmentIds = val
+}
+
 // Ref: #/components/schemas/Environment
 type Environment struct {
 	ID        uuid.UUID `json:"id"`
@@ -4265,6 +4287,7 @@ type Environment struct {
 	Acronym   string    `json:"acronym"`
 	Context   string    `json:"context"`
 	IsDefault OptBool   `json:"is_default"`
+	IsGlobal  OptBool   `json:"is_global"`
 }
 
 // GetID returns the value of ID.
@@ -4292,6 +4315,11 @@ func (s *Environment) GetIsDefault() OptBool {
 	return s.IsDefault
 }
 
+// GetIsGlobal returns the value of IsGlobal.
+func (s *Environment) GetIsGlobal() OptBool {
+	return s.IsGlobal
+}
+
 // SetID sets the value of ID.
 func (s *Environment) SetID(val uuid.UUID) {
 	s.ID = val
@@ -4317,6 +4345,11 @@ func (s *Environment) SetIsDefault(val OptBool) {
 	s.IsDefault = val
 }
 
+// SetIsGlobal sets the value of IsGlobal.
+func (s *Environment) SetIsGlobal(val OptBool) {
+	s.IsGlobal = val
+}
+
 func (*Environment) getEnvironmentRes() {}
 
 // Ref: #/components/schemas/EnvironmentGetItem
@@ -4326,6 +4359,7 @@ type EnvironmentGetItem struct {
 	Acronym   string    `json:"acronym"`
 	Context   string    `json:"context"`
 	IsDefault OptBool   `json:"is_default"`
+	IsGlobal  OptBool   `json:"is_global"`
 }
 
 // GetID returns the value of ID.
@@ -4353,6 +4387,11 @@ func (s *EnvironmentGetItem) GetIsDefault() OptBool {
 	return s.IsDefault
 }
 
+// GetIsGlobal returns the value of IsGlobal.
+func (s *EnvironmentGetItem) GetIsGlobal() OptBool {
+	return s.IsGlobal
+}
+
 // SetID sets the value of ID.
 func (s *EnvironmentGetItem) SetID(val uuid.UUID) {
 	s.ID = val
@@ -4376,6 +4415,11 @@ func (s *EnvironmentGetItem) SetContext(val string) {
 // SetIsDefault sets the value of IsDefault.
 func (s *EnvironmentGetItem) SetIsDefault(val OptBool) {
 	s.IsDefault = val
+}
+
+// SetIsGlobal sets the value of IsGlobal.
+func (s *EnvironmentGetItem) SetIsGlobal(val OptBool) {
+	s.IsGlobal = val
 }
 
 // Ref: #/components/schemas/EnvironmentsGet
@@ -5027,9 +5071,10 @@ func (s *GetDataProductsResponseItem) SetTechnicalAssetCount(val int) {
 
 // Ref: #/components/schemas/GetDomainResponse
 type GetDomainResponse struct {
-	ID          uuid.UUID `json:"id"`
-	Name        string    `json:"name"`
-	Description string    `json:"description"`
+	ID           uuid.UUID            `json:"id"`
+	Name         string               `json:"name"`
+	Description  string               `json:"description"`
+	Environments []EnvironmentGetItem `json:"environments"`
 }
 
 // GetID returns the value of ID.
@@ -5047,6 +5092,11 @@ func (s *GetDomainResponse) GetDescription() string {
 	return s.Description
 }
 
+// GetEnvironments returns the value of Environments.
+func (s *GetDomainResponse) GetEnvironments() []EnvironmentGetItem {
+	return s.Environments
+}
+
 // SetID sets the value of ID.
 func (s *GetDomainResponse) SetID(val uuid.UUID) {
 	s.ID = val
@@ -5062,14 +5112,20 @@ func (s *GetDomainResponse) SetDescription(val string) {
 	s.Description = val
 }
 
+// SetEnvironments sets the value of Environments.
+func (s *GetDomainResponse) SetEnvironments(val []EnvironmentGetItem) {
+	s.Environments = val
+}
+
 func (*GetDomainResponse) getDomainRes() {}
 
 // Ref: #/components/schemas/GetDomainsItem
 type GetDomainsItem struct {
-	ID                       uuid.UUID `json:"id"`
-	Name                     string    `json:"name"`
-	Description              string    `json:"description"`
-	AbstractDataProductCount int       `json:"abstract_data_product_count"`
+	ID                       uuid.UUID            `json:"id"`
+	Name                     string               `json:"name"`
+	Description              string               `json:"description"`
+	Environments             []EnvironmentGetItem `json:"environments"`
+	AbstractDataProductCount int                  `json:"abstract_data_product_count"`
 }
 
 // GetID returns the value of ID.
@@ -5085,6 +5141,11 @@ func (s *GetDomainsItem) GetName() string {
 // GetDescription returns the value of Description.
 func (s *GetDomainsItem) GetDescription() string {
 	return s.Description
+}
+
+// GetEnvironments returns the value of Environments.
+func (s *GetDomainsItem) GetEnvironments() []EnvironmentGetItem {
+	return s.Environments
 }
 
 // GetAbstractDataProductCount returns the value of AbstractDataProductCount.
@@ -5105,6 +5166,11 @@ func (s *GetDomainsItem) SetName(val string) {
 // SetDescription sets the value of Description.
 func (s *GetDomainsItem) SetDescription(val string) {
 	s.Description = val
+}
+
+// SetEnvironments sets the value of Environments.
+func (s *GetDomainsItem) SetEnvironments(val []EnvironmentGetItem) {
+	s.Environments = val
 }
 
 // SetAbstractDataProductCount sets the value of AbstractDataProductCount.

@@ -1,15 +1,36 @@
 import uuid
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Column, String, func, literal_column, select, text
+from sqlalchemy import (
+    Column,
+    DateTime,
+    ForeignKey,
+    String,
+    Table,
+    func,
+    literal_column,
+    select,
+    text,
+)
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, Session, deferred, relationship
 
 from app.database.database import Base, ensure_exists
-from app.shared.model import BaseORM
+from app.shared.model import BaseORM, utcnow
 
 if TYPE_CHECKING:
     from app.abstract_data_product.model import AbstractDataProduct
+    from app.configuration.environments.model import Environment
+
+
+domain_environment_table = Table(
+    "domain_environments",
+    Base.metadata,
+    Column("domain_id", ForeignKey("domains.id")),
+    Column("environment_id", ForeignKey("environments.id")),
+    Column("created_on", DateTime(timezone=False), server_default=utcnow()),
+    Column("updated_on", DateTime(timezone=False), onupdate=utcnow()),
+)
 
 
 class Domain(Base, BaseORM):
@@ -21,6 +42,9 @@ class Domain(Base, BaseORM):
 
     abstract_data_products: Mapped[list["AbstractDataProduct"]] = relationship(
         "AbstractDataProduct", lazy="raise"
+    )
+    environments: Mapped[list["Environment"]] = relationship(
+        secondary=domain_environment_table, lazy="raise"
     )
 
     abstract_data_product_count = deferred(

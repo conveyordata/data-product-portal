@@ -96,6 +96,7 @@ export type Environment = {
   acronym: string;
   context: string;
   is_default?: boolean;
+  is_global?: boolean;
 };
 export type ValidationError = {
   loc: (string | number)[];
@@ -206,6 +207,7 @@ export type EnvironmentGetItem = {
   acronym: string;
   context: string;
   is_default?: boolean;
+  is_global?: boolean;
 };
 export type EnvironmentsGet = {
   environments: EnvironmentGetItem[];
