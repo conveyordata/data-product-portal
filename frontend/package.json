@@ -32,7 +32,7 @@
         "@ant-design/icons": "^6.3.2",
         "@dagrejs/dagre": "^2.0.4",
         "@fontsource/inter": "^5.3.0",
-        "@posthog/react": "^1.10.4",
+        "@posthog/react": "^1.10.5",
         "@reduxjs/toolkit": "^2.12.0",
         "@tiptap/extension-heading": "^3.30.3",
         "@tiptap/extension-table": "^3.30.3",
