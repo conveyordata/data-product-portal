@@ -2,7 +2,7 @@ import { ToolOutlined } from '@ant-design/icons';
 import { usePostHog } from '@posthog/react';
 import { Button, Empty, Flex, Input, Radio, type RadioChangeEvent, Table } from 'antd';
 import Paragraph from 'antd/es/typography/Paragraph';
-import { parseAsBoolean, parseAsString, useQueryState } from 'nuqs';
+import { parseAsString, parseAsStringEnum, useQueryState } from 'nuqs';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -13,6 +13,7 @@ import { getDataProductTableColumns } from '@/pages/product-studio/components/da
 import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
 import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
 import {
+    AssignmentFilter,
     type GetDataProductsResponseItem,
     useGetDataProductsQuery,
 } from '@/store/api/services/generated/dataProductsApi.ts';
@@ -44,14 +45,16 @@ export function DataProductsTab() {
     const currentUser = useSelector(selectCurrentUser);
 
     const [searchTerm, setSearchTerm] = useQueryState('dp-search', parseAsString.withDefault(''));
-    const [showAllProducts, setShowAllProducts] = useQueryState('dp-showAll', parseAsBoolean.withDefault(false));
+    const [assignmentFilter, setAssignmentFilter] = useQueryState(
+        'dp-assignmentFilter',
+        parseAsStringEnum<AssignmentFilter>(Object.values(AssignmentFilter)).withDefault(AssignmentFilter.OnlyAssigned),
+    );
     const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
     const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
 
-    const { data: { data_products: dataProducts = [] } = {}, isFetching } = useGetDataProductsQuery(
-        showAllProducts ? undefined : (currentUser?.id ?? ''),
-        { skip: !currentUser },
-    );
+    const { data: { data_products: dataProducts = [] } = {}, isFetching } = useGetDataProductsQuery(assignmentFilter, {
+        skip: !currentUser,
+    });
 
     const { data: access } = useCheckAccessQuery({ action: AuthorizationAction.GLOBAL__CREATE_DATAPRODUCT });
     const canCreateDataProduct = access?.allowed ?? false;
@@ -84,7 +87,7 @@ export function DataProductsTab() {
     };
 
     const handleShowAllChange = (e: RadioChangeEvent) => {
-        setShowAllProducts(e.target.value || null);
+        setAssignmentFilter(e.target.value);
         // Reset role filter when switching between views
         setSelectedProductIds([]);
         setSelectedRoles([]);
@@ -112,11 +115,11 @@ export function DataProductsTab() {
                         allowClear
                         style={{ maxWidth: 400 }}
                     />
-                    <Radio.Group value={showAllProducts} onChange={handleShowAllChange} optionType="button">
-                        <Radio.Button value={false}>{t('My Data Products')}</Radio.Button>
-                        <Radio.Button value={true}>{t('All Data Products')}</Radio.Button>
+                    <Radio.Group value={assignmentFilter} onChange={handleShowAllChange} optionType="button">
+                        <Radio.Button value={AssignmentFilter.OnlyAssigned}>{t('My Data Products')}</Radio.Button>
+                        <Radio.Button value={AssignmentFilter.All}>{t('All Data Products')}</Radio.Button>
                     </Radio.Group>
-                    {!showAllProducts && (
+                    {assignmentFilter === AssignmentFilter.OnlyAssigned && (
                         <RoleFilter
                             mode="data_products"
                             selectedRoles={selectedRoles}

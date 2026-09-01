@@ -16,6 +16,7 @@ from app.settings import settings
 from app.users.schema import User
 from app.utils.singleton import Singleton
 
+from ...data_products.model import DataProduct, DataProductVisibility
 from .actions import AuthorizationAction
 from .resolvers import SubjectResolver
 
@@ -282,3 +283,21 @@ class Authorization(metaclass=Singleton):
         )
         self._after_update()
         return bool(updates)
+
+    def has_read_access_to_data_product(
+        self, current_user: User, data_product: DataProduct
+    ) -> bool:
+        # The check for visibility is a performance optimisation to avoid unnecessary
+        # has_access checks for discoverable data products.
+        match data_product.visibility:
+            case DataProductVisibility.DISCOVERABLE:
+                return True
+            case DataProductVisibility.HIDDEN:
+                return self.has_access(
+                    sub=str(current_user.id),
+                    obj=data_product.id,
+                    dom=data_product.domain_id,
+                    act=AuthorizationAction.HIDDEN_DATA_PRODUCT__READ,
+                )
+            case _:
+                raise ValueError("Unknown data product visibility type")

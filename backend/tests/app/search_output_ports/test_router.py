@@ -5,7 +5,7 @@ from typing import Final
 from alembic import command
 from alembic.config import Config
 
-from app.authorization.role_assignments.enums import DecisionStatus
+from app.authorization.role_assignments.enums import AssignmentFilter, DecisionStatus
 from app.data_products.output_ports.model import Dataset
 from app.data_products.output_ports.service import OutputPortService
 from app.db_tool import seed_cmd
@@ -55,7 +55,8 @@ class TestOutputPortSearchRouter:
         )
 
         response = client.get(
-            "/api/v2/search/output_ports", params={"current_user_assigned": True}
+            "/api/v2/search/output_ports",
+            params={"assignment_filter": AssignmentFilter.ONLY_ASSIGNED.value},
         )
         assert response.status_code == 200, response.text
         output = SearchOutputPortsResponse.model_validate(response.json())

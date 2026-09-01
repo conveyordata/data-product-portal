@@ -10,7 +10,7 @@ const injectedRtkApi = api.injectEndpoints({
         params: {
           query: queryArg.query,
           limit: queryArg.limit,
-          current_user_assigned: queryArg.currentUserAssigned,
+          assignment_filter: queryArg.assignmentFilter,
         },
       }),
     }),
@@ -23,7 +23,7 @@ export type SearchOutputPortsApiResponse =
 export type SearchOutputPortsApiArg = {
   query?: string;
   limit?: number;
-  currentUserAssigned?: boolean;
+  assignmentFilter?: AssignmentFilter;
 };
 export type Tag = {
   id: string;
@@ -92,6 +92,10 @@ export enum OutputPortAccessType {
 export enum AccessDurationType {
   Permanent = "permanent",
   TimeBound = "time_bound",
+}
+export enum AssignmentFilter {
+  All = "all",
+  OnlyAssigned = "only_assigned",
 }
 export const { useSearchOutputPortsQuery, useLazySearchOutputPortsQuery } =
   injectedRtkApi;

@@ -7,6 +7,7 @@ from uuid import UUID
 import pytest
 from fastapi.testclient import TestClient
 
+from app.authorization.role_assignments.enums import AssignmentFilter
 from app.authorization.roles.schema import Scope
 from app.core.authz import Action
 from app.data_products.model import DataProductVisibility
@@ -160,8 +161,63 @@ class TestDataProductsRouter:
         response = client.get(ENDPOINT)
         assert response.status_code == 200, response.text
         data = response.json()
-        assert len(data) == 1
+        assert len(data["data_products"]) == 1
         assert data["data_products"][0]["id"] == str(data_product.id)
+
+    def test_get_data_products_assignment_filter_only_assigned(self, client):
+        data_product = DataProductFactory()
+        data_product_not_assigned = DataProductFactory()
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[],
+        )
+        DataProductRoleAssignmentFactory(
+            data_product_id=data_product.id,
+            role_id=role.id,
+            user_id=user.id,
+        )
+        response = client.get(
+            ENDPOINT, params={"assignment_filter": AssignmentFilter.ONLY_ASSIGNED.value}
+        )
+        assert response.status_code == 200, response.text
+        data = response.json()
+        assert len(data["data_products"]) == 1
+        assert data["data_products"][0]["id"] == str(data_product.id)
+        assert data["data_products"][0]["id"] != str(data_product_not_assigned.id), (
+            "Not assigned data product should be filtered"
+        )
+
+    def test_get_data_products_filters_out_hidden(self, client):
+        data_product_discoverable = DataProductFactory()
+        data_product_hidden_no_access = DataProductFactory(
+            visibility=DataProductVisibility.HIDDEN
+        )
+        data_product_hidden_access = DataProductFactory(
+            visibility=DataProductVisibility.HIDDEN
+        )
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[],
+        )
+        DataProductRoleAssignmentFactory(
+            data_product_id=data_product_hidden_access.id,
+            role_id=role.id,
+            user_id=user.id,
+        )
+        response = client.get(
+            ENDPOINT, params={"assignment_filter": AssignmentFilter.ALL.value}
+        )
+        assert response.status_code == 200, response.text
+        data = response.json()
+        returned_ids = {dp["id"] for dp in data["data_products"]}
+        assert data_product_hidden_no_access not in returned_ids
+        assert str(data_product_discoverable.id) in returned_ids, (
+            "Discoverable data product should be returned"
+        )
+        assert str(data_product_hidden_access.id) in returned_ids
+        assert len(returned_ids) == 2
 
     def test_get_data_product(self, client):
         data_product = DataProductFactory()

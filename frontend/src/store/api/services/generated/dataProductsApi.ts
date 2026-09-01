@@ -18,7 +18,7 @@ const injectedRtkApi = api.injectEndpoints({
       query: (queryArg) => ({
         url: `/api/v2/data_products`,
         params: {
-          filter_to_user_with_assigment: queryArg,
+          assignment_filter: queryArg,
         },
       }),
     }),
@@ -206,7 +206,7 @@ export type CreateDataProductApiResponse =
 export type CreateDataProductApiArg = DataProductCreate;
 export type GetDataProductsApiResponse =
   /** status 200 Successful Response */ GetDataProductsResponse;
-export type GetDataProductsApiArg = string | undefined;
+export type GetDataProductsApiArg = AssignmentFilter | undefined;
 export type RemoveDataProductApiResponse =
   /** status 200 Data Product deleted */ any;
 export type RemoveDataProductApiArg = string;
@@ -685,6 +685,10 @@ export enum DataProductIconKey {
   MachineLearning = "machine_learning",
   Analytics = "analytics",
   Default = "default",
+}
+export enum AssignmentFilter {
+  All = "all",
+  OnlyAssigned = "only_assigned",
 }
 export enum NodeType {
   DataProductNode = "dataProductNode",

@@ -6,6 +6,7 @@ from uuid import UUID
 from fastmcp.dependencies import Depends
 from sqlalchemy.orm import Session
 
+from app.authorization.role_assignments.enums import AssignmentFilter
 from app.configuration.domains.service import DomainService
 from app.data_products.output_ports.input_ports.service import InputPortService
 from app.data_products.output_ports.service import OutputPortService
@@ -41,7 +42,10 @@ def universal_search(
     ]
     query_results = {}
     if "data_products" in search_types:
-        all_data_products = DataProductService(db).get_data_products()
+        all_data_products = DataProductService(db).get_data_products(
+            current_user=user,
+            assignment_filter=AssignmentFilter.ALL,
+        )
         filtered_data_products = []
         for dp in all_data_products:
             if query.lower() in dp.name.lower() or (
@@ -62,7 +66,10 @@ def universal_search(
 
     if "output_ports" in search_types:
         all_output_ports = OutputPortService(db).search_output_ports(
-            query=None, limit=1000, user=user, current_user_assigned=False
+            query=None,
+            limit=1000,
+            user=user,
+            assignment_filter=AssignmentFilter.ALL,
         )
         filtered_output_ports = []
         for ds in all_output_ports:
@@ -128,8 +135,12 @@ def search_data_products(
     status: Optional[str] = None,
     limit: int = 20,
     db: Session = Depends(get_db_session),
+    user: UserModel = Depends(get_mcp_authenticated_user),
 ) -> dict[str, Any]:
-    all_data_products = DataProductService(db).get_data_products()
+    all_data_products = DataProductService(db).get_data_products(
+        current_user=user,
+        assignment_filter=AssignmentFilter.ALL,
+    )
     filtered_data_products = []
 
     for dp in all_data_products:
@@ -201,7 +212,10 @@ def search_output_ports(
     user: UserModel = Depends(get_mcp_authenticated_user),
 ) -> dict[str, Any]:
     all_output_ports = OutputPortService(db).search_output_ports(
-        query=query, user=user, limit=limit, current_user_assigned=False
+        query=query,
+        user=user,
+        limit=limit,
+        assignment_filter=AssignmentFilter.ALL,
     )
     return {
         "output_ports": [

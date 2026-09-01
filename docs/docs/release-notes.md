@@ -15,6 +15,7 @@ sidebar_position: 200
   - Request input ports for data product: `/v2/data_products/{id}/input_ports`
   - Create exploration: `/v2/explorations`
   - Request input ports for exploration: `/v2/explorations/{id}/input_ports`
+- **[API]**: Changed the way to filter data product and output ports to only show those the current user is assigned to. The new filter is called `assignmentFilter` and can be set to either `only_assigned` or `all`. This makes both consistent
 - **[Webhook v1]**: Removed webhook v1 support, use the [provisioner SDK](./developer-guide/provisioner.md) to handle webhook events instead.
 
 ### features
