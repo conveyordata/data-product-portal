@@ -530,6 +530,12 @@ function determinePermissionsForScope(scope: Scope, roles: Role[], t: TFunction)
                     name: 'Insert data quality results',
                     description: t('Allows inserting data quality results for an Output Port'),
                 },
+                {
+                    type: 'Instance',
+                    id: AuthorizationAction.OUTPUT_PORT__UPDATE_QUERY_STATS,
+                    name: 'Insert query statistics',
+                    description: t('Allows inserting query statistics for an Output Port'),
+                },
             ];
             break;
     }

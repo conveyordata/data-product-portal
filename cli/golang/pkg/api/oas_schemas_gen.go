@@ -805,7 +805,9 @@ const (
 	AuthorizationAction413 AuthorizationAction = 413
 	AuthorizationAction414 AuthorizationAction = 414
 	AuthorizationAction415 AuthorizationAction = 415
+	AuthorizationAction416 AuthorizationAction = 416
 	AuthorizationAction901 AuthorizationAction = 901
+	AuthorizationAction902 AuthorizationAction = 902
 )
 
 // AllValues returns all AuthorizationAction values.
@@ -849,7 +851,9 @@ func (AuthorizationAction) AllValues() []AuthorizationAction {
 		AuthorizationAction413,
 		AuthorizationAction414,
 		AuthorizationAction415,
+		AuthorizationAction416,
 		AuthorizationAction901,
+		AuthorizationAction902,
 	}
 }
 
@@ -3695,109 +3699,6 @@ func (s *DatabricksTechnicalAssetConfiguration) SetTablePath(val OptString) {
 // SetAccessGranularity sets the value of AccessGranularity.
 func (s *DatabricksTechnicalAssetConfiguration) SetAccessGranularity(val AccessGranularity) {
 	s.AccessGranularity = val
-}
-
-// Ref: #/components/schemas/DatasetUpdate
-type DatasetUpdate struct {
-	Name                          string               `json:"name"`
-	Namespace                     string               `json:"namespace"`
-	Description                   string               `json:"description"`
-	AccessType                    OutputPortAccessType `json:"access_type"`
-	DataProductAccessDurationType AccessDurationType   `json:"data_product_access_duration_type"`
-	ExplorationAccessDurationType AccessDurationType   `json:"exploration_access_duration_type"`
-	About                         OptNilString         `json:"about"`
-	LifecycleID                   OptNilUUID           `json:"lifecycle_id"`
-	TagIds                        []uuid.UUID          `json:"tag_ids"`
-}
-
-// GetName returns the value of Name.
-func (s *DatasetUpdate) GetName() string {
-	return s.Name
-}
-
-// GetNamespace returns the value of Namespace.
-func (s *DatasetUpdate) GetNamespace() string {
-	return s.Namespace
-}
-
-// GetDescription returns the value of Description.
-func (s *DatasetUpdate) GetDescription() string {
-	return s.Description
-}
-
-// GetAccessType returns the value of AccessType.
-func (s *DatasetUpdate) GetAccessType() OutputPortAccessType {
-	return s.AccessType
-}
-
-// GetDataProductAccessDurationType returns the value of DataProductAccessDurationType.
-func (s *DatasetUpdate) GetDataProductAccessDurationType() AccessDurationType {
-	return s.DataProductAccessDurationType
-}
-
-// GetExplorationAccessDurationType returns the value of ExplorationAccessDurationType.
-func (s *DatasetUpdate) GetExplorationAccessDurationType() AccessDurationType {
-	return s.ExplorationAccessDurationType
-}
-
-// GetAbout returns the value of About.
-func (s *DatasetUpdate) GetAbout() OptNilString {
-	return s.About
-}
-
-// GetLifecycleID returns the value of LifecycleID.
-func (s *DatasetUpdate) GetLifecycleID() OptNilUUID {
-	return s.LifecycleID
-}
-
-// GetTagIds returns the value of TagIds.
-func (s *DatasetUpdate) GetTagIds() []uuid.UUID {
-	return s.TagIds
-}
-
-// SetName sets the value of Name.
-func (s *DatasetUpdate) SetName(val string) {
-	s.Name = val
-}
-
-// SetNamespace sets the value of Namespace.
-func (s *DatasetUpdate) SetNamespace(val string) {
-	s.Namespace = val
-}
-
-// SetDescription sets the value of Description.
-func (s *DatasetUpdate) SetDescription(val string) {
-	s.Description = val
-}
-
-// SetAccessType sets the value of AccessType.
-func (s *DatasetUpdate) SetAccessType(val OutputPortAccessType) {
-	s.AccessType = val
-}
-
-// SetDataProductAccessDurationType sets the value of DataProductAccessDurationType.
-func (s *DatasetUpdate) SetDataProductAccessDurationType(val AccessDurationType) {
-	s.DataProductAccessDurationType = val
-}
-
-// SetExplorationAccessDurationType sets the value of ExplorationAccessDurationType.
-func (s *DatasetUpdate) SetExplorationAccessDurationType(val AccessDurationType) {
-	s.ExplorationAccessDurationType = val
-}
-
-// SetAbout sets the value of About.
-func (s *DatasetUpdate) SetAbout(val OptNilString) {
-	s.About = val
-}
-
-// SetLifecycleID sets the value of LifecycleID.
-func (s *DatasetUpdate) SetLifecycleID(val OptNilUUID) {
-	s.LifecycleID = val
-}
-
-// SetTagIds sets the value of TagIds.
-func (s *DatasetUpdate) SetTagIds(val []uuid.UUID) {
-	s.TagIds = val
 }
 
 // Ref: #/components/schemas/DecideDataProductRoleAssignment
@@ -10923,6 +10824,109 @@ func (s *OutputPortStatusUpdate) GetStatus() OutputPortStatus {
 // SetStatus sets the value of Status.
 func (s *OutputPortStatusUpdate) SetStatus(val OutputPortStatus) {
 	s.Status = val
+}
+
+// Ref: #/components/schemas/OutputPortUpdate
+type OutputPortUpdate struct {
+	Name                          string               `json:"name"`
+	Namespace                     string               `json:"namespace"`
+	Description                   string               `json:"description"`
+	AccessType                    OutputPortAccessType `json:"access_type"`
+	DataProductAccessDurationType AccessDurationType   `json:"data_product_access_duration_type"`
+	ExplorationAccessDurationType AccessDurationType   `json:"exploration_access_duration_type"`
+	About                         OptNilString         `json:"about"`
+	LifecycleID                   OptNilUUID           `json:"lifecycle_id"`
+	TagIds                        []uuid.UUID          `json:"tag_ids"`
+}
+
+// GetName returns the value of Name.
+func (s *OutputPortUpdate) GetName() string {
+	return s.Name
+}
+
+// GetNamespace returns the value of Namespace.
+func (s *OutputPortUpdate) GetNamespace() string {
+	return s.Namespace
+}
+
+// GetDescription returns the value of Description.
+func (s *OutputPortUpdate) GetDescription() string {
+	return s.Description
+}
+
+// GetAccessType returns the value of AccessType.
+func (s *OutputPortUpdate) GetAccessType() OutputPortAccessType {
+	return s.AccessType
+}
+
+// GetDataProductAccessDurationType returns the value of DataProductAccessDurationType.
+func (s *OutputPortUpdate) GetDataProductAccessDurationType() AccessDurationType {
+	return s.DataProductAccessDurationType
+}
+
+// GetExplorationAccessDurationType returns the value of ExplorationAccessDurationType.
+func (s *OutputPortUpdate) GetExplorationAccessDurationType() AccessDurationType {
+	return s.ExplorationAccessDurationType
+}
+
+// GetAbout returns the value of About.
+func (s *OutputPortUpdate) GetAbout() OptNilString {
+	return s.About
+}
+
+// GetLifecycleID returns the value of LifecycleID.
+func (s *OutputPortUpdate) GetLifecycleID() OptNilUUID {
+	return s.LifecycleID
+}
+
+// GetTagIds returns the value of TagIds.
+func (s *OutputPortUpdate) GetTagIds() []uuid.UUID {
+	return s.TagIds
+}
+
+// SetName sets the value of Name.
+func (s *OutputPortUpdate) SetName(val string) {
+	s.Name = val
+}
+
+// SetNamespace sets the value of Namespace.
+func (s *OutputPortUpdate) SetNamespace(val string) {
+	s.Namespace = val
+}
+
+// SetDescription sets the value of Description.
+func (s *OutputPortUpdate) SetDescription(val string) {
+	s.Description = val
+}
+
+// SetAccessType sets the value of AccessType.
+func (s *OutputPortUpdate) SetAccessType(val OutputPortAccessType) {
+	s.AccessType = val
+}
+
+// SetDataProductAccessDurationType sets the value of DataProductAccessDurationType.
+func (s *OutputPortUpdate) SetDataProductAccessDurationType(val AccessDurationType) {
+	s.DataProductAccessDurationType = val
+}
+
+// SetExplorationAccessDurationType sets the value of ExplorationAccessDurationType.
+func (s *OutputPortUpdate) SetExplorationAccessDurationType(val AccessDurationType) {
+	s.ExplorationAccessDurationType = val
+}
+
+// SetAbout sets the value of About.
+func (s *OutputPortUpdate) SetAbout(val OptNilString) {
+	s.About = val
+}
+
+// SetLifecycleID sets the value of LifecycleID.
+func (s *OutputPortUpdate) SetLifecycleID(val OptNilUUID) {
+	s.LifecycleID = val
+}
+
+// SetTagIds sets the value of TagIds.
+func (s *OutputPortUpdate) SetTagIds(val []uuid.UUID) {
+	s.TagIds = val
 }
 
 type OverwriteOutputPortDataQualitySummaryNotFoundApplicationJSON jx.Raw

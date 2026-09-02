@@ -10211,245 +10211,6 @@ func (s *DatabricksTechnicalAssetConfiguration) UnmarshalJSON(data []byte) error
 }
 
 // Encode implements json.Marshaler.
-func (s *DatasetUpdate) Encode(e *jx.Encoder) {
-	e.ObjStart()
-	s.encodeFields(e)
-	e.ObjEnd()
-}
-
-// encodeFields encodes fields.
-func (s *DatasetUpdate) encodeFields(e *jx.Encoder) {
-	{
-		e.FieldStart("name")
-		e.Str(s.Name)
-	}
-	{
-		e.FieldStart("namespace")
-		e.Str(s.Namespace)
-	}
-	{
-		e.FieldStart("description")
-		e.Str(s.Description)
-	}
-	{
-		e.FieldStart("access_type")
-		s.AccessType.Encode(e)
-	}
-	{
-		e.FieldStart("data_product_access_duration_type")
-		s.DataProductAccessDurationType.Encode(e)
-	}
-	{
-		e.FieldStart("exploration_access_duration_type")
-		s.ExplorationAccessDurationType.Encode(e)
-	}
-	{
-		if s.About.Set {
-			e.FieldStart("about")
-			s.About.Encode(e)
-		}
-	}
-	{
-		if s.LifecycleID.Set {
-			e.FieldStart("lifecycle_id")
-			s.LifecycleID.Encode(e)
-		}
-	}
-	{
-		e.FieldStart("tag_ids")
-		e.ArrStart()
-		for _, elem := range s.TagIds {
-			json.EncodeUUID(e, elem)
-		}
-		e.ArrEnd()
-	}
-}
-
-var jsonFieldsNameOfDatasetUpdate = [9]string{
-	0: "name",
-	1: "namespace",
-	2: "description",
-	3: "access_type",
-	4: "data_product_access_duration_type",
-	5: "exploration_access_duration_type",
-	6: "about",
-	7: "lifecycle_id",
-	8: "tag_ids",
-}
-
-// Decode decodes DatasetUpdate from json.
-func (s *DatasetUpdate) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode DatasetUpdate to nil")
-	}
-	var requiredBitSet [2]uint8
-
-	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		switch string(k) {
-		case "name":
-			requiredBitSet[0] |= 1 << 0
-			if err := func() error {
-				v, err := d.Str()
-				s.Name = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"name\"")
-			}
-		case "namespace":
-			requiredBitSet[0] |= 1 << 1
-			if err := func() error {
-				v, err := d.Str()
-				s.Namespace = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"namespace\"")
-			}
-		case "description":
-			requiredBitSet[0] |= 1 << 2
-			if err := func() error {
-				v, err := d.Str()
-				s.Description = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"description\"")
-			}
-		case "access_type":
-			requiredBitSet[0] |= 1 << 3
-			if err := func() error {
-				if err := s.AccessType.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"access_type\"")
-			}
-		case "data_product_access_duration_type":
-			requiredBitSet[0] |= 1 << 4
-			if err := func() error {
-				if err := s.DataProductAccessDurationType.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"data_product_access_duration_type\"")
-			}
-		case "exploration_access_duration_type":
-			requiredBitSet[0] |= 1 << 5
-			if err := func() error {
-				if err := s.ExplorationAccessDurationType.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"exploration_access_duration_type\"")
-			}
-		case "about":
-			if err := func() error {
-				s.About.Reset()
-				if err := s.About.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"about\"")
-			}
-		case "lifecycle_id":
-			if err := func() error {
-				s.LifecycleID.Reset()
-				if err := s.LifecycleID.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"lifecycle_id\"")
-			}
-		case "tag_ids":
-			requiredBitSet[1] |= 1 << 0
-			if err := func() error {
-				s.TagIds = make([]uuid.UUID, 0)
-				if err := d.Arr(func(d *jx.Decoder) error {
-					var elem uuid.UUID
-					v, err := json.DecodeUUID(d)
-					elem = v
-					if err != nil {
-						return err
-					}
-					s.TagIds = append(s.TagIds, elem)
-					return nil
-				}); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"tag_ids\"")
-			}
-		default:
-			return d.Skip()
-		}
-		return nil
-	}); err != nil {
-		return errors.Wrap(err, "decode DatasetUpdate")
-	}
-	// Validate required fields.
-	var failures []validate.FieldError
-	for i, mask := range [2]uint8{
-		0b00111111,
-		0b00000001,
-	} {
-		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
-			// Mask only required fields and check equality to mask using XOR.
-			//
-			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
-			// Bits of fields which would be set are actually bits of missed fields.
-			missed := bits.OnesCount8(result)
-			for bitN := 0; bitN < missed; bitN++ {
-				bitIdx := bits.TrailingZeros8(result)
-				fieldIdx := i*8 + bitIdx
-				var name string
-				if fieldIdx < len(jsonFieldsNameOfDatasetUpdate) {
-					name = jsonFieldsNameOfDatasetUpdate[fieldIdx]
-				} else {
-					name = strconv.Itoa(fieldIdx)
-				}
-				failures = append(failures, validate.FieldError{
-					Name:  name,
-					Error: validate.ErrFieldRequired,
-				})
-				// Reset bit.
-				result &^= 1 << bitIdx
-			}
-		}
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s *DatasetUpdate) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *DatasetUpdate) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode implements json.Marshaler.
 func (s *DecideDataProductRoleAssignment) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
@@ -25414,6 +25175,245 @@ func (s *OutputPortStatusUpdate) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *OutputPortStatusUpdate) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *OutputPortUpdate) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *OutputPortUpdate) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("name")
+		e.Str(s.Name)
+	}
+	{
+		e.FieldStart("namespace")
+		e.Str(s.Namespace)
+	}
+	{
+		e.FieldStart("description")
+		e.Str(s.Description)
+	}
+	{
+		e.FieldStart("access_type")
+		s.AccessType.Encode(e)
+	}
+	{
+		e.FieldStart("data_product_access_duration_type")
+		s.DataProductAccessDurationType.Encode(e)
+	}
+	{
+		e.FieldStart("exploration_access_duration_type")
+		s.ExplorationAccessDurationType.Encode(e)
+	}
+	{
+		if s.About.Set {
+			e.FieldStart("about")
+			s.About.Encode(e)
+		}
+	}
+	{
+		if s.LifecycleID.Set {
+			e.FieldStart("lifecycle_id")
+			s.LifecycleID.Encode(e)
+		}
+	}
+	{
+		e.FieldStart("tag_ids")
+		e.ArrStart()
+		for _, elem := range s.TagIds {
+			json.EncodeUUID(e, elem)
+		}
+		e.ArrEnd()
+	}
+}
+
+var jsonFieldsNameOfOutputPortUpdate = [9]string{
+	0: "name",
+	1: "namespace",
+	2: "description",
+	3: "access_type",
+	4: "data_product_access_duration_type",
+	5: "exploration_access_duration_type",
+	6: "about",
+	7: "lifecycle_id",
+	8: "tag_ids",
+}
+
+// Decode decodes OutputPortUpdate from json.
+func (s *OutputPortUpdate) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode OutputPortUpdate to nil")
+	}
+	var requiredBitSet [2]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "name":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Str()
+				s.Name = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"name\"")
+			}
+		case "namespace":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Str()
+				s.Namespace = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"namespace\"")
+			}
+		case "description":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				v, err := d.Str()
+				s.Description = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"description\"")
+			}
+		case "access_type":
+			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				if err := s.AccessType.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"access_type\"")
+			}
+		case "data_product_access_duration_type":
+			requiredBitSet[0] |= 1 << 4
+			if err := func() error {
+				if err := s.DataProductAccessDurationType.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"data_product_access_duration_type\"")
+			}
+		case "exploration_access_duration_type":
+			requiredBitSet[0] |= 1 << 5
+			if err := func() error {
+				if err := s.ExplorationAccessDurationType.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"exploration_access_duration_type\"")
+			}
+		case "about":
+			if err := func() error {
+				s.About.Reset()
+				if err := s.About.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"about\"")
+			}
+		case "lifecycle_id":
+			if err := func() error {
+				s.LifecycleID.Reset()
+				if err := s.LifecycleID.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"lifecycle_id\"")
+			}
+		case "tag_ids":
+			requiredBitSet[1] |= 1 << 0
+			if err := func() error {
+				s.TagIds = make([]uuid.UUID, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem uuid.UUID
+					v, err := json.DecodeUUID(d)
+					elem = v
+					if err != nil {
+						return err
+					}
+					s.TagIds = append(s.TagIds, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"tag_ids\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode OutputPortUpdate")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [2]uint8{
+		0b00111111,
+		0b00000001,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfOutputPortUpdate) {
+					name = jsonFieldsNameOfOutputPortUpdate[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *OutputPortUpdate) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OutputPortUpdate) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

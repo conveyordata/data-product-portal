@@ -8,7 +8,7 @@ from app.core.auth.auth import get_authenticated_user
 from app.core.authz import (
     Action,
     Authorization,
-    DatasetResolver,
+    OutputPortResolver,
 )
 from app.data_products.output_ports.input_ports.schema_request import (
     ApproveOutputPortAsInputPortRequest,
@@ -33,7 +33,18 @@ router = APIRouter(
 )
 
 
-@router.get("/")
+@router.get(
+    "/",
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                Action.HIDDEN__OUTPUT_PORT__READ,
+                OutputPortResolver,
+                object_id="output_port_id",
+            )
+        )
+    ],
+)
 def get_input_ports_for_output_port(
     data_product_id: UUID,
     output_port_id: UUID,
@@ -55,7 +66,7 @@ def get_input_ports_for_output_port(
         Depends(
             Authorization.enforce(
                 Action.OUTPUT_PORT__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
-                DatasetResolver,
+                OutputPortResolver,
                 object_id="output_port_id",
             )
         ),
@@ -99,7 +110,7 @@ def approve_output_port_as_input_port(
         Depends(
             Authorization.enforce(
                 Action.OUTPUT_PORT__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
-                DatasetResolver,
+                OutputPortResolver,
                 object_id="output_port_id",
             )
         ),
@@ -143,7 +154,7 @@ def deny_output_port_as_input_port(
         Depends(
             Authorization.enforce(
                 Action.OUTPUT_PORT__REVOKE_DATAPRODUCT_ACCESS,
-                DatasetResolver,
+                OutputPortResolver,
                 object_id="output_port_id",
             )
         ),
@@ -186,7 +197,7 @@ def revoke_output_port_as_input_port(
         Depends(
             Authorization.enforce(
                 Action.OUTPUT_PORT__REVOKE_DATAPRODUCT_ACCESS,
-                DatasetResolver,
+                OutputPortResolver,
                 object_id="output_port_id",
             )
         ),

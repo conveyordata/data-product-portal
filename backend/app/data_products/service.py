@@ -68,18 +68,21 @@ class DataProductService(AbstractDataProductService):
     def _sync_public_reader_grouping(
         data_product_id: UUID, visibility: DataProductVisibility
     ) -> None:
-        if visibility == DataProductVisibility.DISCOVERABLE:
-            Authorization().assign_resource_role(
-                user_id="*",
-                role_id=DATA_PRODUCT_READER_ROLE,
-                resource_id=str(data_product_id),
-            )
-        else:
-            Authorization().revoke_resource_role(
-                user_id="*",
-                role_id=DATA_PRODUCT_READER_ROLE,
-                resource_id=str(data_product_id),
-            )
+        match visibility:
+            case DataProductVisibility.DISCOVERABLE:
+                Authorization().assign_resource_role(
+                    user_id="*",
+                    role_id=DATA_PRODUCT_READER_ROLE,
+                    resource_id=str(data_product_id),
+                )
+            case DataProductVisibility.HIDDEN:
+                Authorization().revoke_resource_role(
+                    user_id="*",
+                    role_id=DATA_PRODUCT_READER_ROLE,
+                    resource_id=str(data_product_id),
+                )
+            case _:
+                assert_never(visibility)
 
     def get_data_product_settings(
         self, data_product_id: UUID
@@ -208,9 +211,8 @@ class DataProductService(AbstractDataProductService):
         _ = data_product_schema.pop("owners", [])
         model = DataProductModel(**data_product_schema, tags=tags)
         self.db.add(model)
-        self.db.commit()
+        self.db.flush()
         self._sync_public_reader_grouping(model.id, model.visibility)
-        self.db.commit()
         return model
 
     def remove_data_product(self, id: UUID) -> DataProductModel:
@@ -262,12 +264,11 @@ class DataProductService(AbstractDataProductService):
             else:
                 setattr(current_data_product, k, v) if v else None
 
-        self.db.commit()
         if visibility_change is not None:
             self._sync_public_reader_grouping(
                 current_data_product.id, current_data_product.visibility
             )
-            self.db.commit()
+        self.db.flush()
         return UpdateDataProductResponse(id=current_data_product.id)
 
     def update_data_product_about(

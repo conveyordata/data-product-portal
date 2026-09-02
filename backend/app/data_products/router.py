@@ -385,7 +385,9 @@ def update_data_product_usage(
     "/{id}/graph",
     dependencies=[
         Depends(
-            Authorization.enforce(Action.HIDDEN_DATA_PRODUCT__READ, DataProductResolver)
+            Authorization.enforce(
+                Action.HIDDEN__DATA_PRODUCT__READ, DataProductResolver
+            )
         )
     ],
 )
@@ -589,7 +591,9 @@ def get_data_products(
     "/{id}/history",
     dependencies=[
         Depends(
-            Authorization.enforce(Action.HIDDEN_DATA_PRODUCT__READ, DataProductResolver)
+            Authorization.enforce(
+                Action.HIDDEN__DATA_PRODUCT__READ, DataProductResolver
+            )
         )
     ],
 )
@@ -610,7 +614,9 @@ def get_data_product_event_history(
     "/{id}",
     dependencies=[
         Depends(
-            Authorization.enforce(Action.HIDDEN_DATA_PRODUCT__READ, DataProductResolver)
+            Authorization.enforce(
+                Action.HIDDEN__DATA_PRODUCT__READ, DataProductResolver
+            )
         )
     ],
 )
@@ -624,7 +630,9 @@ def get_data_product(
     "/{id}/input_ports",
     dependencies=[
         Depends(
-            Authorization.enforce(Action.HIDDEN_DATA_PRODUCT__READ, DataProductResolver)
+            Authorization.enforce(
+                Action.HIDDEN__DATA_PRODUCT__READ, DataProductResolver
+            )
         )
     ],
 )
@@ -644,7 +652,9 @@ def get_data_product_input_ports(
     "/{id}/rolled_up_tags",
     dependencies=[
         Depends(
-            Authorization.enforce(Action.HIDDEN_DATA_PRODUCT__READ, DataProductResolver)
+            Authorization.enforce(
+                Action.HIDDEN__DATA_PRODUCT__READ, DataProductResolver
+            )
         )
     ],
 )
@@ -732,7 +742,9 @@ def remove_input_port_for_data_product(
     "/{id}/settings",
     dependencies=[
         Depends(
-            Authorization.enforce(Action.HIDDEN_DATA_PRODUCT__READ, DataProductResolver)
+            Authorization.enforce(
+                Action.HIDDEN__DATA_PRODUCT__READ, DataProductResolver
+            )
         )
     ],
 )

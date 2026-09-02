@@ -24,6 +24,7 @@ from app.core.authz.actions import AuthorizationAction
 from app.core.logging import logger
 
 DATA_PRODUCT_READER_ROLE = "/role/data-product-reader"
+OUTPUT_PORT_READER_ROLE = "/role/output-port-reader"
 
 
 class AuthorizationService:
@@ -55,8 +56,11 @@ class AuthorizationService:
             " global assignments to the casbin table"
         )
 
-        self._sync_data_product_reader_role()
-        logger.info("Synced data product reader role permissions")
+        self._sync_data_products_reader_role()
+        logger.info("Synced data products reader role permissions")
+
+        self._sync_output_ports_reader_role()
+        logger.info("Synced output ports reader role permissions")
 
         self.authorizer.start_enforcer_after_reload()
 
@@ -115,11 +119,20 @@ class AuthorizationService:
                 changes += 1
         return changes, len(global_assignments)
 
-    def _sync_data_product_reader_role(self):
+    def _sync_data_products_reader_role(self):
         from app.data_products.service import DataProductService
 
         self.authorizer.sync_role_permissions(
             role_id=DATA_PRODUCT_READER_ROLE,
-            actions=[AuthorizationAction.HIDDEN_DATA_PRODUCT__READ],
+            actions=[AuthorizationAction.HIDDEN__DATA_PRODUCT__READ],
         )
         DataProductService(self.db).sync_discoverable_data_products()
+
+    def _sync_output_ports_reader_role(self):
+        from app.data_products.output_ports.service import OutputPortService
+
+        self.authorizer.sync_role_permissions(
+            role_id=OUTPUT_PORT_READER_ROLE,
+            actions=[AuthorizationAction.HIDDEN__OUTPUT_PORT__READ],
+        )
+        OutputPortService(self.db).sync_read_rights_output_ports()

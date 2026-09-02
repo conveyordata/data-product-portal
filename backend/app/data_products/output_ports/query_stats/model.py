@@ -8,7 +8,7 @@ from app.data_products.model import DataProduct
 from app.database.database import Base
 
 
-class DatasetQueryStatsDaily(Base):
+class OutputPortQueryStatsDaily(Base):
     __tablename__ = "dataset_query_stats_daily"
     date: Mapped[DateType] = mapped_column(primary_key=True)
     output_port_id: Mapped[UUID] = mapped_column(

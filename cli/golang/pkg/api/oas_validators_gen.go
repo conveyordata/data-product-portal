@@ -360,7 +360,11 @@ func (s AuthorizationAction) Validate() error {
 		return nil
 	case 415:
 		return nil
+	case 416:
+		return nil
 	case 901:
+		return nil
+	case 902:
 		return nil
 	default:
 		return errors.Errorf("invalid value: %v", s)
@@ -1441,62 +1445,6 @@ func (s *DatabricksTechnicalAssetConfiguration) Validate() error {
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
 			Name:  "access_granularity",
-			Error: err,
-		})
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-	return nil
-}
-
-func (s *DatasetUpdate) Validate() error {
-	if s == nil {
-		return validate.ErrNilPointer
-	}
-
-	var failures []validate.FieldError
-	if err := func() error {
-		if err := s.AccessType.Validate(); err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "access_type",
-			Error: err,
-		})
-	}
-	if err := func() error {
-		if err := s.DataProductAccessDurationType.Validate(); err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "data_product_access_duration_type",
-			Error: err,
-		})
-	}
-	if err := func() error {
-		if err := s.ExplorationAccessDurationType.Validate(); err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "exploration_access_duration_type",
-			Error: err,
-		})
-	}
-	if err := func() error {
-		if s.TagIds == nil {
-			return errors.New("nil is invalid value")
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "tag_ids",
 			Error: err,
 		})
 	}
@@ -4025,6 +3973,62 @@ func (s *OutputPortStatusUpdate) Validate() error {
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
 			Name:  "status",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *OutputPortUpdate) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.AccessType.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "access_type",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if err := s.DataProductAccessDurationType.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "data_product_access_duration_type",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if err := s.ExplorationAccessDurationType.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "exploration_access_duration_type",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if s.TagIds == nil {
+			return errors.New("nil is invalid value")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "tag_ids",
 			Error: err,
 		})
 	}

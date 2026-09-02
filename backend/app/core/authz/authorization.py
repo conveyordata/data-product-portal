@@ -11,6 +11,8 @@ from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
 from app.data_products.model import DataProduct, DataProductVisibility
+from app.data_products.output_ports.enums import OutputPortAccessType
+from app.data_products.output_ports.model import OutputPort
 from app.database import database
 from app.database.deps import get_db_session
 from app.settings import settings
@@ -287,7 +289,7 @@ class Authorization(metaclass=Singleton):
     def has_read_access_to_data_product(
         self, current_user: User, data_product: DataProduct
     ) -> bool:
-        # The check for visibility is a performance optimisation to avoid unnecessary
+        # The check for visibility is a performance optimization to avoid unnecessary
         # has_access checks for discoverable data products.
         match data_product.visibility:
             case DataProductVisibility.DISCOVERABLE:
@@ -297,7 +299,25 @@ class Authorization(metaclass=Singleton):
                     sub=str(current_user.id),
                     obj=data_product.id,
                     dom=data_product.domain_id,
-                    act=AuthorizationAction.HIDDEN_DATA_PRODUCT__READ,
+                    act=AuthorizationAction.HIDDEN__DATA_PRODUCT__READ,
                 )
             case _:
                 assert_never(data_product.visibility)
+
+    def has_read_access_to_output_port(
+        self, current_user: User, output_port: OutputPort
+    ) -> bool:
+        # The check for visibility is a performance optimization to avoid unnecessary
+        # has_access checks for discoverable output ports.
+        match output_port.access_type:
+            case OutputPortAccessType.RESTRICTED | OutputPortAccessType.UNRESTRICTED:
+                return True
+            case OutputPortAccessType.PRIVATE:
+                return self.has_access(
+                    sub=str(current_user.id),
+                    obj=output_port.id,
+                    dom=output_port.data_product.domain_id,
+                    act=AuthorizationAction.HIDDEN__OUTPUT_PORT__READ,
+                )
+            case _:
+                assert_never(output_port.access_type)

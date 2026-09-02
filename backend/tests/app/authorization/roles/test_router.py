@@ -14,7 +14,7 @@ class TestRolesRouter:
         "name": "test",
         "scope": "dataset",
         "description": "test description",
-        "permissions": [101],
+        "permissions": [AuthorizationAction.OUTPUT_PORT__UPDATE_PROPERTIES],
     }
 
     def test_get_roles(self, client: TestClient):
@@ -41,7 +41,10 @@ class TestRolesRouter:
         assert data["name"] == self.test_role["name"]
         assert data["scope"] == self.test_role["scope"]
         assert data["description"] == self.test_role["description"]
-        assert data["permissions"] == self.test_role["permissions"]
+        assert len(data["permissions"]) == 2
+        assert AuthorizationAction.HIDDEN__OUTPUT_PORT__READ in data["permissions"]
+        for permission in self.test_role["permissions"]:
+            assert permission in data["permissions"]
 
     @pytest.mark.usefixtures("admin")
     def test_create_data_product_role_adds_read_permission(self, client: TestClient):
@@ -60,10 +63,10 @@ class TestRolesRouter:
 
         data = response.json()
         assert data["scope"] == Scope.DATA_PRODUCT
-        assert AuthorizationAction.HIDDEN_DATA_PRODUCT__READ in data["permissions"]
+        assert AuthorizationAction.HIDDEN__DATA_PRODUCT__READ in data["permissions"]
         assert data["permissions"] == sorted(
             [
-                int(AuthorizationAction.HIDDEN_DATA_PRODUCT__READ),
+                int(AuthorizationAction.HIDDEN__DATA_PRODUCT__READ),
                 int(AuthorizationAction.DATA_PRODUCT__UPDATE_PROPERTIES),
             ]
         )
@@ -102,10 +105,10 @@ class TestRolesRouter:
         assert data["id"] == str(role.id)
         assert data["scope"] == role.scope
         assert data["description"] == "updated_description"
-        assert AuthorizationAction.HIDDEN_DATA_PRODUCT__READ in data["permissions"]
+        assert AuthorizationAction.HIDDEN__DATA_PRODUCT__READ in data["permissions"]
         assert data["permissions"] == sorted(
             [
-                int(AuthorizationAction.HIDDEN_DATA_PRODUCT__READ),
+                int(AuthorizationAction.HIDDEN__DATA_PRODUCT__READ),
                 int(AuthorizationAction.DATA_PRODUCT__UPDATE_PROPERTIES),
                 int(AuthorizationAction.DATA_PRODUCT__UPDATE_SETTINGS),
             ]
@@ -113,7 +116,7 @@ class TestRolesRouter:
 
     @pytest.mark.usefixtures("admin")
     def test_update_role(self, client: TestClient):
-        role: Role = RoleFactory()
+        role: Role = RoleFactory(scope=Scope.GLOBAL)
         response = client.put(
             f"{ENDPOINT}/{role.id}",
             json={

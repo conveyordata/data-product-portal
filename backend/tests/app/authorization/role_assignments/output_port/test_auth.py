@@ -15,13 +15,13 @@ if TYPE_CHECKING:
     from app.authorization.role_assignments.output_port.schema import (
         OutputPortRoleAssignment,
     )
-    from app.data_products.output_ports.model import Dataset
+    from app.data_products.output_ports.model import OutputPort
     from app.users.schema import User
 
 
 class TestAuth:
     def test_add(self, authorizer: Authorization):
-        dataset: Dataset = OutputPortFactory()
+        dataset: OutputPort = OutputPortFactory()
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATASET)
         assert not authorizer.has_resource_role(
@@ -39,7 +39,7 @@ class TestAuth:
         )
 
     def test_remove(self, authorizer: Authorization):
-        dataset: Dataset = OutputPortFactory()
+        dataset: OutputPort = OutputPortFactory()
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATASET)
         assert not authorizer.has_resource_role(
@@ -61,7 +61,7 @@ class TestAuth:
         )
 
     def test_swap(self, authorizer: Authorization):
-        dataset: Dataset = OutputPortFactory()
+        dataset: OutputPort = OutputPortFactory()
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATASET)
         new_role: Role = RoleFactory(scope=Scope.DATASET)
