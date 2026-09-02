@@ -135,14 +135,12 @@ class TestEnvironmentsRouter:
         assert response.json()["is_global"] is False
 
     @pytest.mark.usefixtures("admin")
-    def test_update_environment_is_global__blocks_removing_last_global(self, client):
+    def test_update_environment_is_global__allows_removing_last_global(self, client):
         env_obj = EnvironmentFactory()
 
         response = self.update_environment_is_global(client, env_obj.id, False)
-        assert response.status_code == 400
-        assert (
-            response.json()["detail"] == "At least one environment must remain global"
-        )
+        assert response.status_code == 200
+        assert response.json()["is_global"] is False
 
     def test_update_environment_is_global_forbidden(self, client):
         env_obj = EnvironmentFactory()

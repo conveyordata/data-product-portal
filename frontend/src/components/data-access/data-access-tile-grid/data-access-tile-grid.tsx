@@ -62,9 +62,7 @@ export function DataAccessTileGrid({
                             key={dataPlatform.value}
                             dataPlatform={dataPlatform}
                             environments={getEnvironment(dataPlatform) ?? []}
-                            isDisabled={
-                                isDisabled || isLoading || isLoadingEnvironments || isLoadingDomain || !canAccessData
-                            }
+                            isDisabled={isDisabled || !canAccessData}
                             isLoading={isLoading || isLoadingEnvironments || isLoadingDomain}
                             onMenuItemClick={onDataPlatformClick}
                             onTileClick={

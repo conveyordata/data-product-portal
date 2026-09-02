@@ -29,19 +29,6 @@ class EnvironmentService:
                 detail="Environment not found",
             )
 
-        if environment.is_global and not is_global:
-            other_global_exists = self.db.scalar(
-                select(EnvironmentModel).filter(
-                    EnvironmentModel.id != environment_id,
-                    EnvironmentModel.is_global.is_(True),
-                )
-            )
-            if not other_global_exists:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="At least one environment must remain global",
-                )
-
         environment.is_global = is_global
         self.db.commit()
         return environment
