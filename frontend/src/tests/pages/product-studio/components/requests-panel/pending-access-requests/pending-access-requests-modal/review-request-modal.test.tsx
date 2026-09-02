@@ -75,7 +75,7 @@ function renderModal(props: Partial<Parameters<typeof ReviewRequestModal>[0]> = 
         onAccept: vi.fn(),
         onReject: vi.fn(),
     };
-    return renderWithProviders(<ReviewRequestModal {...defaults} {...props} />);
+    return renderWithProviders(<ReviewRequestModal {...defaults} {...props} />, { routerProps: {} });
 }
 
 describe('ReviewRequestModal — InputPort', () => {
