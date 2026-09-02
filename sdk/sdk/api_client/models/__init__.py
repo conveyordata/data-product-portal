@@ -122,7 +122,6 @@ from .databricks_environment_platform_configuration_workspace_urls import (
 from .databricks_technical_asset_configuration import (
     DatabricksTechnicalAssetConfiguration,
 )
-from .dataset_update import DatasetUpdate
 from .decide_data_product_role_assignment import DecideDataProductRoleAssignment
 from .decide_global_role_assignment import DecideGlobalRoleAssignment
 from .decide_output_port_role_assignment import DecideOutputPortRoleAssignment
@@ -255,6 +254,7 @@ from .output_port_setting_value import OutputPortSettingValue
 from .output_port_status import OutputPortStatus
 from .output_port_status_update import OutputPortStatusUpdate
 from .output_port_technical_asset_link_event import OutputPortTechnicalAssetLinkEvent
+from .output_port_update import OutputPortUpdate
 from .owned_technical_asset import OwnedTechnicalAsset
 from .pending_action_response import PendingActionResponse
 from .platform import Platform
@@ -467,7 +467,6 @@ __all__ = (
     "DataProductUsageUpdate",
     "DataQualityStatus",
     "DataQualityTechnicalAsset",
-    "DatasetUpdate",
     "DecideDataProductRoleAssignment",
     "DecideGlobalRoleAssignment",
     "DecideOutputPortRoleAssignment",
@@ -574,6 +573,7 @@ __all__ = (
     "OutputPortStatus",
     "OutputPortStatusUpdate",
     "OutputPortTechnicalAssetLinkEvent",
+    "OutputPortUpdate",
     "OwnedTechnicalAsset",
     "PendingActionResponse",
     "Platform",

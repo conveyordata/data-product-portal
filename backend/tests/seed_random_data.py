@@ -4,13 +4,13 @@ from sqlalchemy import select
 
 from app.configuration.platforms.platform_services.model import PlatformService
 from tests import test_session
-from tests.factories.data_output import DataOutputFactory
-from tests.factories.data_outputs_datasets import (
+from tests.factories import (
+    DataProductFactory,
+    InputPortFactory,
+    OutputPortFactory,
+    TechnicalAssetFactory,
     TechnicalAssetOutputPortAssociationFactory,
 )
-from tests.factories.data_product import DataProductFactory
-from tests.factories.data_products_datasets import InputPortFactory
-from tests.factories.dataset import OutputPortFactory
 
 
 def add_random_data(
@@ -33,7 +33,7 @@ def add_random_data(
         data_product = DataProductFactory()
 
         for _ in range(random.randint(0, 3)):
-            data_output = DataOutputFactory(owner=data_product, service=service)
+            data_output = TechnicalAssetFactory(owner=data_product, service=service)
             data_outputs.append(data_output)
 
         data_products.append(data_product)

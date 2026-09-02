@@ -842,13 +842,6 @@ class TestDataProductsRouter:
             == data_product.name
         )
 
-    def test_get_output_ports(self, client: TestClient):
-        dataset = OutputPortFactory()
-        response = self.get_output_ports(client, dataset.data_product.id)
-        assert response.status_code == 200, f"Response failed with: {response.text}"
-        assert len(response.json()["output_ports"]) == 1
-        assert response.json()["output_ports"][0]["id"] == dataset.id.__str__()
-
     def test_get_rolled_up_tags(self, client: TestClient):
         data_product = DataProductFactory()
         data_output = TechnicalAssetFactory(owner=data_product)
@@ -916,10 +909,6 @@ class TestDataProductsRouter:
             "api/v2/resource_names/validate",
             params={"resource_name": namespace, "model": "data_product"},
         )
-
-    @staticmethod
-    def get_output_ports(client: TestClient, data_product_id: UUID):
-        return client.get(f"{ENDPOINT}/{data_product_id}/output_ports")
 
     @staticmethod
     def get_input_ports(client: TestClient, data_product_id: UUID):

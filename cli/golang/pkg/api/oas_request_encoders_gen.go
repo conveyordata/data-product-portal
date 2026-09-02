@@ -750,7 +750,7 @@ func encodeUpdateDomainRequest(
 }
 
 func encodeUpdateOutputPortRequest(
-	req *DatasetUpdate,
+	req *OutputPortUpdate,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"

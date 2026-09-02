@@ -58,7 +58,7 @@ class TestCuratedQueriesRouter:
             f"{ENDPOINT}/{dataset.data_product.id}/output_ports/{dataset.id}/curated_queries",
             json=self.curate_queries_payload(),
         )
-        assert put_response.status_code == 200
+        assert put_response.status_code == 200, put_response.text
         body = put_response.json()
         assert len(body["output_port_curated_queries"]) == 2
         assert body["output_port_curated_queries"][0]["title"] == "Top enrolling sites"

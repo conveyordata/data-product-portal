@@ -684,7 +684,7 @@
         }
       }
     },
-    "/api/v2/data_products/{data_product_id}/output_ports/{id}/data_contract/": {
+    "/api/v2/data_products/{data_product_id}/output_ports/{id}/data_contract": {
       "get": {
         "tags": [
           "Data Products - Output ports",
@@ -1152,7 +1152,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/DatasetUpdate"
+                "$ref": "#/components/schemas/OutputPortUpdate"
               }
             }
           }
@@ -8860,7 +8860,9 @@
           413,
           414,
           415,
-          901
+          416,
+          901,
+          902
         ],
         "title": "AuthorizationAction",
         "description": "The integer values for the authorization actions are stored directly in the DB.\nThis means you can change the name of the actions, but not their integer values.\nThe values for the actions are spaced on purpose, to make it easier to extend.\nThis has no technical benefit, but it makes it easier to read for developers."
@@ -11101,73 +11103,6 @@
           "access_granularity"
         ],
         "title": "DatabricksTechnicalAssetConfiguration"
-      },
-      "DatasetUpdate": {
-        "properties": {
-          "name": {
-            "type": "string",
-            "title": "Name"
-          },
-          "namespace": {
-            "type": "string",
-            "title": "Namespace"
-          },
-          "description": {
-            "type": "string",
-            "title": "Description"
-          },
-          "access_type": {
-            "$ref": "#/components/schemas/OutputPortAccessType"
-          },
-          "data_product_access_duration_type": {
-            "$ref": "#/components/schemas/AccessDurationType"
-          },
-          "exploration_access_duration_type": {
-            "$ref": "#/components/schemas/AccessDurationType"
-          },
-          "about": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "About"
-          },
-          "lifecycle_id": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Lifecycle Id"
-          },
-          "tag_ids": {
-            "items": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "type": "array",
-            "title": "Tag Ids"
-          }
-        },
-        "type": "object",
-        "required": [
-          "name",
-          "namespace",
-          "description",
-          "access_type",
-          "data_product_access_duration_type",
-          "exploration_access_duration_type",
-          "tag_ids"
-        ],
-        "title": "DatasetUpdate"
       },
       "DecideDataProductRoleAssignment": {
         "properties": {
@@ -14505,6 +14440,73 @@
           "technical_asset_id"
         ],
         "title": "OutputPortTechnicalAssetLinkEvent"
+      },
+      "OutputPortUpdate": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "namespace": {
+            "type": "string",
+            "title": "Namespace"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "access_type": {
+            "$ref": "#/components/schemas/OutputPortAccessType"
+          },
+          "data_product_access_duration_type": {
+            "$ref": "#/components/schemas/AccessDurationType"
+          },
+          "exploration_access_duration_type": {
+            "$ref": "#/components/schemas/AccessDurationType"
+          },
+          "about": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "About"
+          },
+          "lifecycle_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lifecycle Id"
+          },
+          "tag_ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Tag Ids"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "namespace",
+          "description",
+          "access_type",
+          "data_product_access_duration_type",
+          "exploration_access_duration_type",
+          "tag_ids"
+        ],
+        "title": "OutputPortUpdate"
       },
       "OwnedTechnicalAsset": {
         "properties": {
