@@ -7,9 +7,6 @@ from .data_product import fake as data_product_fake
 from .data_product_setting import DataProductSettingFactory
 from .data_product_setting_value import DataProductSettingValueFactory
 from .data_product_type import DataProductTypeFactory
-from .dataset import OutputPortFactory
-from .dataset import fake as dataset_fake
-from .dataset_query_stats_daily import OutputPortQueryStatsFactory
 from .device_flow import DeviceFlowFactory
 from .domain import DomainFactory
 from .env_platform_config import EnvPlatformConfigFactory
@@ -22,6 +19,9 @@ from .input_port import InputPortFactory
 from .input_port_request import InputPortRequestFactory
 from .lifecycle import LifecycleFactory
 from .notification import NotificationFactory
+from .output_port import OutputPortFactory
+from .output_port import fake as dataset_fake
+from .output_port_query_stats_daily import OutputPortQueryStatsFactory
 from .platform import PlatformFactory
 from .platform_service import PlatformServiceFactory
 from .platform_service_config import PlatformServiceConfigFactory

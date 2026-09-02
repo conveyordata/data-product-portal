@@ -38,12 +38,33 @@ class Role(Base, BaseORM):
         This permission is required to ensure people have access to hidden data products.
         """
 
-        if (
-            self.scope == Scope.DATA_PRODUCT
-            and int(AuthorizationAction.HIDDEN_DATA_PRODUCT__READ) not in permissions
-        ):
-            permissions = [
-                *permissions,
-                int(AuthorizationAction.HIDDEN_DATA_PRODUCT__READ),
-            ]
+        match self.scope:
+            case Scope.DATA_PRODUCT:
+                if (
+                    int(AuthorizationAction.HIDDEN__DATA_PRODUCT__READ)
+                    not in permissions
+                ):
+                    permissions = [
+                        *permissions,
+                        int(AuthorizationAction.HIDDEN__DATA_PRODUCT__READ),
+                    ]
+                if (
+                    int(AuthorizationAction.HIDDEN__OUTPUT_PORT__READ)
+                    not in permissions
+                ):
+                    permissions = [
+                        *permissions,
+                        int(AuthorizationAction.HIDDEN__OUTPUT_PORT__READ),
+                    ]
+            case Scope.DATASET:
+                if (
+                    int(AuthorizationAction.HIDDEN__OUTPUT_PORT__READ)
+                    not in permissions
+                ):
+                    permissions = [
+                        *permissions,
+                        int(AuthorizationAction.HIDDEN__OUTPUT_PORT__READ),
+                    ]
+            case _:
+                pass
         return sorted(set(permissions))

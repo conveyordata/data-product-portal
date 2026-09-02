@@ -119,11 +119,11 @@ class OutputPortRoleAssignmentResolver(SubjectResolver):
 
     @classmethod
     async def _resolve_domain(cls, db: Session, id_: str) -> str:
-        return await DatasetResolver._resolve_domain(db, id_)
+        return await OutputPortResolver._resolve_domain(db, id_)
 
     @classmethod
     async def _resolve_parent(cls, db: Session, id_: str) -> str:
-        return await DatasetResolver._resolve_parent(db, id_)
+        return await OutputPortResolver._resolve_parent(db, id_)
 
 
 class DataProductRoleAssignmentResolver(SubjectResolver):
@@ -149,7 +149,7 @@ class DataProductRoleAssignmentResolver(SubjectResolver):
         return cls.DEFAULT
 
 
-class DatasetResolver(SubjectResolver):
+class OutputPortResolver(SubjectResolver):
     model: Model = OutputPort
 
     @classmethod
@@ -213,24 +213,24 @@ class TechnicalAssetResolver(SubjectResolver):
         return cls.DEFAULT
 
 
-class DataOutputDatasetAssociationResolver(DatasetResolver):
+class TechnicalAssetOutputPortAssociationResolver(OutputPortResolver):
     @classmethod
     async def _resolve(
         cls, request: Request, key: str, db: Session = Depends(get_db_session)
     ):
         obj = await SubjectResolver._resolve(request, key, db)
         if obj != cls.DEFAULT:
-            data_output_dataset = db.scalar(
+            technical_asset_output_port = db.scalar(
                 select(DataOutputDatasetAssociation).where(
                     DataOutputDatasetAssociation.id == obj
                 )
             )
-            if data_output_dataset:
-                return data_output_dataset.output_port_id
+            if technical_asset_output_port:
+                return technical_asset_output_port.output_port_id
         return cls.DEFAULT
 
 
-class DataProductDatasetAssociationResolver(DatasetResolver):
+class DataProductOutputPortAssociationResolver(OutputPortResolver):
     @classmethod
     async def _resolve(
         cls, request: Request, key: str, db: Session = Depends(get_db_session)

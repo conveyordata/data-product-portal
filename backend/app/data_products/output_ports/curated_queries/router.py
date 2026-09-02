@@ -3,7 +3,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.core.authz import Action, Authorization, DatasetResolver
+from app.core.authz import Action, Authorization, OutputPortResolver
 from app.data_products.output_ports.curated_queries.schema_request import (
     OutputPortCuratedQueriesUpdate,
 )
@@ -16,11 +16,17 @@ from app.data_products.output_ports.curated_queries.service import (
 from app.data_products.output_ports.model import ensure_output_port_exists
 from app.database.deps import get_db_session
 
-router = APIRouter()
-route = "/v2/data_products/{data_product_id}/output_ports/{id}/curated_queries"
+router = APIRouter(prefix="/{id}/curated_queries")
 
 
-@router.get(route)
+@router.get(
+    "",
+    dependencies=[
+        Depends(
+            Authorization.enforce(Action.HIDDEN__OUTPUT_PORT__READ, OutputPortResolver)
+        )
+    ],
+)
 def get_output_port_curated_queries(
     data_product_id: UUID,
     id: UUID,
@@ -31,7 +37,7 @@ def get_output_port_curated_queries(
 
 
 @router.put(
-    route,
+    "",
     responses={
         404: {
             "description": "Dataset not found",
@@ -43,7 +49,7 @@ def get_output_port_curated_queries(
     dependencies=[
         Depends(
             Authorization.enforce(
-                Action.OUTPUT_PORT__UPDATE_PROPERTIES, DatasetResolver
+                Action.OUTPUT_PORT__UPDATE_PROPERTIES, OutputPortResolver
             )
         ),
     ],
