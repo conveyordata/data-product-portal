@@ -6,7 +6,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import select
+from sqlalchemy import select, text
 from sqlalchemy.orm import Session
 from starlette.routing import _DefaultLifespan
 
@@ -153,13 +153,15 @@ def default_dataset_payload() -> dict[str, Any]:
 @pytest.fixture(autouse=True)
 def clear_db(session: Session) -> None:
     """Clear database after each test."""
-    for table in reversed(Base.metadata.sorted_tables):
-        if table.name == "casbin_rule":
-            continue
-        if table.name == "roles":
-            session.execute(table.delete().where(table.c.prototype == 0))
-        else:
-            session.execute(table.delete())
+    truncate_tables = [
+        table
+        for table in Base.metadata.tables
+        if table not in {"casbin_rule", "roles", "alembic_version"}
+    ]
+    session.execute(text(f"TRUNCATE TABLE {', '.join(truncate_tables)}"))
+    roles_table = Base.metadata.tables.get("roles")
+    if roles_table is not None:
+        session.execute(roles_table.delete().where(roles_table.c.prototype == 0))
     AuthorizationService(session).reload_enforcer()
     session.commit()
     reset_unique_fakers()
