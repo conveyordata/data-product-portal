@@ -9,6 +9,16 @@ const injectedRtkApi = api.injectEndpoints({
         url: `/api/v2/configuration/environments/${queryArg}`,
       }),
     }),
+    updateEnvironmentIsGlobal: build.mutation<
+      UpdateEnvironmentIsGlobalApiResponse,
+      UpdateEnvironmentIsGlobalApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/configuration/environments/${queryArg.id}`,
+        method: "PATCH",
+        body: queryArg.environmentUpdateGlobal,
+      }),
+    }),
     getEnvironmentConfigsById: build.query<
       GetEnvironmentConfigsByIdApiResponse,
       GetEnvironmentConfigsByIdApiArg
@@ -62,6 +72,12 @@ export { injectedRtkApi as api };
 export type GetEnvironmentApiResponse =
   /** status 200 Successful Response */ Environment;
 export type GetEnvironmentApiArg = string;
+export type UpdateEnvironmentIsGlobalApiResponse =
+  /** status 200 Successful Response */ Environment;
+export type UpdateEnvironmentIsGlobalApiArg = {
+  id: string;
+  environmentUpdateGlobal: EnvironmentUpdateGlobal;
+};
 export type GetEnvironmentConfigsByIdApiResponse =
   /** status 200 Successful Response */ EnvironmentConfigsGetItem;
 export type GetEnvironmentConfigsByIdApiArg = string;
@@ -107,6 +123,9 @@ export type ValidationError = {
 };
 export type HttpValidationError = {
   detail?: ValidationError[];
+};
+export type EnvironmentUpdateGlobal = {
+  is_global: boolean;
 };
 export type Awss3Config = {
   identifier: string;
@@ -218,6 +237,7 @@ export type EnvironmentConfigsGet = {
 export const {
   useGetEnvironmentQuery,
   useLazyGetEnvironmentQuery,
+  useUpdateEnvironmentIsGlobalMutation,
   useGetEnvironmentConfigsByIdQuery,
   useLazyGetEnvironmentConfigsByIdQuery,
   useGetEnvironmentPlatformServiceConfigQuery,

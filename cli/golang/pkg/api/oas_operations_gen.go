@@ -152,6 +152,7 @@ const (
 	UpdateDataProductTypeOperation                    OperationName = "UpdateDataProductType"
 	UpdateDataProductUsageOperation                   OperationName = "UpdateDataProductUsage"
 	UpdateDomainOperation                             OperationName = "UpdateDomain"
+	UpdateEnvironmentIsGlobalOperation                OperationName = "UpdateEnvironmentIsGlobal"
 	UpdateOutputPortOperation                         OperationName = "UpdateOutputPort"
 	UpdateOutputPortAboutOperation                    OperationName = "UpdateOutputPortAbout"
 	UpdateOutputPortQueryStatsOperation               OperationName = "UpdateOutputPortQueryStats"

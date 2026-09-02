@@ -4350,7 +4350,8 @@ func (s *Environment) SetIsGlobal(val OptBool) {
 	s.IsGlobal = val
 }
 
-func (*Environment) getEnvironmentRes() {}
+func (*Environment) getEnvironmentRes()            {}
+func (*Environment) updateEnvironmentIsGlobalRes() {}
 
 // Ref: #/components/schemas/EnvironmentGetItem
 type EnvironmentGetItem struct {
@@ -4419,6 +4420,21 @@ func (s *EnvironmentGetItem) SetIsDefault(val OptBool) {
 
 // SetIsGlobal sets the value of IsGlobal.
 func (s *EnvironmentGetItem) SetIsGlobal(val OptBool) {
+	s.IsGlobal = val
+}
+
+// Ref: #/components/schemas/EnvironmentUpdateGlobal
+type EnvironmentUpdateGlobal struct {
+	IsGlobal bool `json:"is_global"`
+}
+
+// GetIsGlobal returns the value of IsGlobal.
+func (s *EnvironmentUpdateGlobal) GetIsGlobal() bool {
+	return s.IsGlobal
+}
+
+// SetIsGlobal sets the value of IsGlobal.
+func (s *EnvironmentUpdateGlobal) SetIsGlobal(val bool) {
 	s.IsGlobal = val
 }
 
@@ -6735,6 +6751,7 @@ func (*HTTPValidationError) updateDataProductStatusRes()                  {}
 func (*HTTPValidationError) updateDataProductTypeRes()                    {}
 func (*HTTPValidationError) updateDataProductUsageRes()                   {}
 func (*HTTPValidationError) updateDomainRes()                             {}
+func (*HTTPValidationError) updateEnvironmentIsGlobalRes()                {}
 func (*HTTPValidationError) updateOutputPortAboutRes()                    {}
 func (*HTTPValidationError) updateOutputPortQueryStatsRes()               {}
 func (*HTTPValidationError) updateOutputPortRes()                         {}

@@ -4857,6 +4857,57 @@
             }
           }
         }
+      },
+      "patch": {
+        "tags": [
+          "Configuration - Environments"
+        ],
+        "summary": "Update Environment Is Global",
+        "operationId": "update_environment_is_global",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EnvironmentUpdateGlobal"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Environment"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/v2/configuration/environments/configs/{config_id}": {
@@ -11715,6 +11766,19 @@
           "platform"
         ],
         "title": "EnvironmentPlatformConfigGet"
+      },
+      "EnvironmentUpdateGlobal": {
+        "properties": {
+          "is_global": {
+            "type": "boolean",
+            "title": "Is Global"
+          }
+        },
+        "type": "object",
+        "required": [
+          "is_global"
+        ],
+        "title": "EnvironmentUpdateGlobal"
       },
       "EnvironmentsGet": {
         "properties": {
