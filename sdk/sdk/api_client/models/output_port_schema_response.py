@@ -11,6 +11,7 @@ from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
     from ..models.schema_object_response import SchemaObjectResponse
+    from ..models.schema_relationship_response import SchemaRelationshipResponse
 
 
 T = TypeVar("T", bound="OutputPortSchemaResponse")
@@ -22,10 +23,12 @@ class OutputPortSchemaResponse:
     Attributes:
         output_port_id (UUID):
         schema_objects (list[SchemaObjectResponse] | Unset):
+        relationships (list[SchemaRelationshipResponse] | Unset):
     """
 
     output_port_id: UUID
     schema_objects: list[SchemaObjectResponse] | Unset = UNSET
+    relationships: list[SchemaRelationshipResponse] | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -38,6 +41,13 @@ class OutputPortSchemaResponse:
                 schema_objects_item = schema_objects_item_data.to_dict()
                 schema_objects.append(schema_objects_item)
 
+        relationships: list[dict[str, Any]] | Unset = UNSET
+        if not isinstance(self.relationships, Unset):
+            relationships = []
+            for relationships_item_data in self.relationships:
+                relationships_item = relationships_item_data.to_dict()
+                relationships.append(relationships_item)
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
@@ -47,12 +57,15 @@ class OutputPortSchemaResponse:
         )
         if schema_objects is not UNSET:
             field_dict["schema_objects"] = schema_objects
+        if relationships is not UNSET:
+            field_dict["relationships"] = relationships
 
         return field_dict
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.schema_object_response import SchemaObjectResponse
+        from ..models.schema_relationship_response import SchemaRelationshipResponse
 
         d = dict(src_dict)
         output_port_id = UUID(d.pop("output_port_id"))
@@ -68,9 +81,21 @@ class OutputPortSchemaResponse:
 
                 schema_objects.append(schema_objects_item)
 
+        _relationships = d.pop("relationships", UNSET)
+        relationships: list[SchemaRelationshipResponse] | Unset = UNSET
+        if _relationships is not UNSET:
+            relationships = []
+            for relationships_item_data in _relationships:
+                relationships_item = SchemaRelationshipResponse.from_dict(
+                    relationships_item_data
+                )
+
+                relationships.append(relationships_item)
+
         output_port_schema_response = cls(
             output_port_id=output_port_id,
             schema_objects=schema_objects,
+            relationships=relationships,
         )
 
         output_port_schema_response.additional_properties = d

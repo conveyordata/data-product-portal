@@ -10781,8 +10781,9 @@ func (*OutputPortRoleAssignmentResponse) requestOutputPortRoleAssignmentRes() {}
 
 // Ref: #/components/schemas/OutputPortSchemaResponse
 type OutputPortSchemaResponse struct {
-	OutputPortID  uuid.UUID              `json:"output_port_id"`
-	SchemaObjects []SchemaObjectResponse `json:"schema_objects"`
+	OutputPortID  uuid.UUID                    `json:"output_port_id"`
+	SchemaObjects []SchemaObjectResponse       `json:"schema_objects"`
+	Relationships []SchemaRelationshipResponse `json:"relationships"`
 }
 
 // GetOutputPortID returns the value of OutputPortID.
@@ -10795,6 +10796,11 @@ func (s *OutputPortSchemaResponse) GetSchemaObjects() []SchemaObjectResponse {
 	return s.SchemaObjects
 }
 
+// GetRelationships returns the value of Relationships.
+func (s *OutputPortSchemaResponse) GetRelationships() []SchemaRelationshipResponse {
+	return s.Relationships
+}
+
 // SetOutputPortID sets the value of OutputPortID.
 func (s *OutputPortSchemaResponse) SetOutputPortID(val uuid.UUID) {
 	s.OutputPortID = val
@@ -10803,6 +10809,11 @@ func (s *OutputPortSchemaResponse) SetOutputPortID(val uuid.UUID) {
 // SetSchemaObjects sets the value of SchemaObjects.
 func (s *OutputPortSchemaResponse) SetSchemaObjects(val []SchemaObjectResponse) {
 	s.SchemaObjects = val
+}
+
+// SetRelationships sets the value of Relationships.
+func (s *OutputPortSchemaResponse) SetRelationships(val []SchemaRelationshipResponse) {
+	s.Relationships = val
 }
 
 func (*OutputPortSchemaResponse) getOutputPortSchemaRes()          {}
@@ -12703,19 +12714,20 @@ func (s *SchemaObjectResponse) SetProperties(val []SchemaPropertyResponse) {
 
 // Ref: #/components/schemas/SchemaPropertyRequest
 type SchemaPropertyRequest struct {
-	Name                 string                  `json:"name"`
-	BusinessName         OptNilString            `json:"businessName"`
-	LogicalType          OptNilString            `json:"logicalType"`
-	PhysicalType         OptNilString            `json:"physicalType"`
-	Description          OptNilString            `json:"description"`
-	Examples             OptNilAnyArray          `json:"examples"`
-	PrimaryKey           OptBool                 `json:"primaryKey"`
-	PrimaryKeyPosition   OptNilInt               `json:"primaryKeyPosition"`
-	Unique               OptBool                 `json:"unique"`
-	Required             OptBool                 `json:"required"`
-	Partitioned          OptBool                 `json:"partitioned"`
-	PartitionKeyPosition OptNilInt               `json:"partitionKeyPosition"`
-	Properties           []SchemaPropertyRequest `json:"properties"`
+	Name                 string                      `json:"name"`
+	BusinessName         OptNilString                `json:"businessName"`
+	LogicalType          OptNilString                `json:"logicalType"`
+	PhysicalType         OptNilString                `json:"physicalType"`
+	Description          OptNilString                `json:"description"`
+	Examples             OptNilAnyArray              `json:"examples"`
+	PrimaryKey           OptBool                     `json:"primaryKey"`
+	PrimaryKeyPosition   OptNilInt                   `json:"primaryKeyPosition"`
+	Unique               OptBool                     `json:"unique"`
+	Required             OptBool                     `json:"required"`
+	Partitioned          OptBool                     `json:"partitioned"`
+	PartitionKeyPosition OptNilInt                   `json:"partitionKeyPosition"`
+	Relationships        []SchemaRelationshipRequest `json:"relationships"`
+	Properties           []SchemaPropertyRequest     `json:"properties"`
 }
 
 // GetName returns the value of Name.
@@ -12776,6 +12788,11 @@ func (s *SchemaPropertyRequest) GetPartitioned() OptBool {
 // GetPartitionKeyPosition returns the value of PartitionKeyPosition.
 func (s *SchemaPropertyRequest) GetPartitionKeyPosition() OptNilInt {
 	return s.PartitionKeyPosition
+}
+
+// GetRelationships returns the value of Relationships.
+func (s *SchemaPropertyRequest) GetRelationships() []SchemaRelationshipRequest {
+	return s.Relationships
 }
 
 // GetProperties returns the value of Properties.
@@ -12841,6 +12858,11 @@ func (s *SchemaPropertyRequest) SetPartitioned(val OptBool) {
 // SetPartitionKeyPosition sets the value of PartitionKeyPosition.
 func (s *SchemaPropertyRequest) SetPartitionKeyPosition(val OptNilInt) {
 	s.PartitionKeyPosition = val
+}
+
+// SetRelationships sets the value of Relationships.
+func (s *SchemaPropertyRequest) SetRelationships(val []SchemaRelationshipRequest) {
+	s.Relationships = val
 }
 
 // SetProperties sets the value of Properties.
@@ -13015,6 +13037,102 @@ func (s *SchemaPropertyResponse) SetPosition(val int) {
 // SetProperties sets the value of Properties.
 func (s *SchemaPropertyResponse) SetProperties(val OptNilSchemaPropertyResponseArray) {
 	s.Properties = val
+}
+
+// Ref: #/components/schemas/SchemaRelationshipRequest
+type SchemaRelationshipRequest struct {
+	Type OptString `json:"type"`
+	To   string    `json:"to"`
+}
+
+// GetType returns the value of Type.
+func (s *SchemaRelationshipRequest) GetType() OptString {
+	return s.Type
+}
+
+// GetTo returns the value of To.
+func (s *SchemaRelationshipRequest) GetTo() string {
+	return s.To
+}
+
+// SetType sets the value of Type.
+func (s *SchemaRelationshipRequest) SetType(val OptString) {
+	s.Type = val
+}
+
+// SetTo sets the value of To.
+func (s *SchemaRelationshipRequest) SetTo(val string) {
+	s.To = val
+}
+
+// Ref: #/components/schemas/SchemaRelationshipResponse
+type SchemaRelationshipResponse struct {
+	ID               uuid.UUID `json:"id"`
+	Type             string    `json:"type"`
+	SourceObjectID   uuid.UUID `json:"source_object_id"`
+	SourcePropertyID uuid.UUID `json:"source_property_id"`
+	TargetObjectID   uuid.UUID `json:"target_object_id"`
+	TargetPropertyID uuid.UUID `json:"target_property_id"`
+}
+
+// GetID returns the value of ID.
+func (s *SchemaRelationshipResponse) GetID() uuid.UUID {
+	return s.ID
+}
+
+// GetType returns the value of Type.
+func (s *SchemaRelationshipResponse) GetType() string {
+	return s.Type
+}
+
+// GetSourceObjectID returns the value of SourceObjectID.
+func (s *SchemaRelationshipResponse) GetSourceObjectID() uuid.UUID {
+	return s.SourceObjectID
+}
+
+// GetSourcePropertyID returns the value of SourcePropertyID.
+func (s *SchemaRelationshipResponse) GetSourcePropertyID() uuid.UUID {
+	return s.SourcePropertyID
+}
+
+// GetTargetObjectID returns the value of TargetObjectID.
+func (s *SchemaRelationshipResponse) GetTargetObjectID() uuid.UUID {
+	return s.TargetObjectID
+}
+
+// GetTargetPropertyID returns the value of TargetPropertyID.
+func (s *SchemaRelationshipResponse) GetTargetPropertyID() uuid.UUID {
+	return s.TargetPropertyID
+}
+
+// SetID sets the value of ID.
+func (s *SchemaRelationshipResponse) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+// SetType sets the value of Type.
+func (s *SchemaRelationshipResponse) SetType(val string) {
+	s.Type = val
+}
+
+// SetSourceObjectID sets the value of SourceObjectID.
+func (s *SchemaRelationshipResponse) SetSourceObjectID(val uuid.UUID) {
+	s.SourceObjectID = val
+}
+
+// SetSourcePropertyID sets the value of SourcePropertyID.
+func (s *SchemaRelationshipResponse) SetSourcePropertyID(val uuid.UUID) {
+	s.SourcePropertyID = val
+}
+
+// SetTargetObjectID sets the value of TargetObjectID.
+func (s *SchemaRelationshipResponse) SetTargetObjectID(val uuid.UUID) {
+	s.TargetObjectID = val
+}
+
+// SetTargetPropertyID sets the value of TargetPropertyID.
+func (s *SchemaRelationshipResponse) SetTargetPropertyID(val uuid.UUID) {
+	s.TargetPropertyID = val
 }
 
 // Ref: #/components/schemas/Scope

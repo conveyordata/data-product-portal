@@ -321,6 +321,8 @@ from .schema_object_request import SchemaObjectRequest
 from .schema_object_response import SchemaObjectResponse
 from .schema_property_request import SchemaPropertyRequest
 from .schema_property_response import SchemaPropertyResponse
+from .schema_relationship_request import SchemaRelationshipRequest
+from .schema_relationship_response import SchemaRelationshipResponse
 from .scope import Scope
 from .search_output_ports_response import SearchOutputPortsResponse
 from .search_output_ports_response_item import SearchOutputPortsResponseItem
@@ -616,6 +618,8 @@ __all__ = (
     "SchemaObjectResponse",
     "SchemaPropertyRequest",
     "SchemaPropertyResponse",
+    "SchemaRelationshipRequest",
+    "SchemaRelationshipResponse",
     "Scope",
     "SearchOutputPortsResponse",
     "SearchOutputPortsResponseItem",

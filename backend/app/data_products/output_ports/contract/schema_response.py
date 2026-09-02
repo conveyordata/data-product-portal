@@ -36,6 +36,16 @@ class SchemaObjectResponse(ORMModel):
     properties: list[SchemaPropertyResponse] = []
 
 
+class SchemaRelationshipResponse(ORMModel):
+    id: UUID
+    type: str
+    source_object_id: UUID
+    source_property_id: UUID
+    target_object_id: UUID
+    target_property_id: UUID
+
+
 class OutputPortSchemaResponse(ORMModel):
     output_port_id: UUID
     schema_objects: list[SchemaObjectResponse] = []
+    relationships: list[SchemaRelationshipResponse] = []

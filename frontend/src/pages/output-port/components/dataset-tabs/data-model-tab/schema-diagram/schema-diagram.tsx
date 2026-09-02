@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 import type {
     SchemaObjectResponse,
     SchemaPropertyResponse,
+    SchemaRelationshipResponse,
 } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
 import { inferRelationships } from './infer-relationships.ts';
 import { SCHEMA_OBJECT_NODE_TYPE, SchemaObjectNode, type SchemaObjectNodeData } from './schema-object-node.tsx';
@@ -104,16 +105,29 @@ type EdgePopoverState = {
 
 type Props = {
     schemaObjects: SchemaObjectResponse[];
+    declaredRelationships?: SchemaRelationshipResponse[];
     onSelectObject?: (id: string) => void;
 };
 
-export function SchemaDiagram({ schemaObjects, onSelectObject }: Props) {
+export function SchemaDiagram({ schemaObjects, declaredRelationships, onSelectObject }: Props) {
     const { t } = useTranslation();
     const [nodes, setNodes] = useState<Node<SchemaObjectNodeData>[]>([]);
     const [edgePopover, setEdgePopover] = useState<EdgePopoverState | null>(null);
     const [highlightedPropertyIds, setHighlightedPropertyIds] = useState<Set<string>>(new Set());
 
-    const relationships = useMemo(() => inferRelationships(schemaObjects), [schemaObjects]);
+    // Prefer relationships the producer declared in the contract; fall back to the name-matching heuristic.
+    const relationships = useMemo(() => {
+        if (declaredRelationships && declaredRelationships.length > 0) {
+            return declaredRelationships.map((relationship) => ({
+                id: relationship.id,
+                sourceObjectId: relationship.source_object_id,
+                sourcePropertyId: relationship.source_property_id,
+                targetObjectId: relationship.target_object_id,
+                targetPropertyId: relationship.target_property_id,
+            }));
+        }
+        return inferRelationships(schemaObjects);
+    }, [schemaObjects, declaredRelationships]);
 
     const objectById = useMemo(() => new Map(schemaObjects.map((object) => [object.id, object])), [schemaObjects]);
 

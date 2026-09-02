@@ -463,9 +463,22 @@ export type SchemaObjectResponse = {
   position: number;
   properties?: SchemaPropertyResponse[];
 };
+export type SchemaRelationshipResponse = {
+  id: string;
+  type: string;
+  source_object_id: string;
+  source_property_id: string;
+  target_object_id: string;
+  target_property_id: string;
+};
 export type OutputPortSchemaResponse = {
   output_port_id: string;
   schema_objects?: SchemaObjectResponse[];
+  relationships?: SchemaRelationshipResponse[];
+};
+export type SchemaRelationshipRequest = {
+  type?: string;
+  to: string;
 };
 export type SchemaPropertyRequest = {
   name: string;
@@ -480,6 +493,7 @@ export type SchemaPropertyRequest = {
   required?: boolean;
   partitioned?: boolean;
   partitionKeyPosition?: number | null;
+  relationships?: SchemaRelationshipRequest[];
   properties?: SchemaPropertyRequest[];
 };
 export type SchemaObjectRequest = {

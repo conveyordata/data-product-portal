@@ -274,6 +274,112 @@ class TestContractRouter:
         nested_names = {p["name"] for p in address["properties"]}
         assert nested_names == {"street", "city"}
 
+    def test_post_contract_with_relationships(self, client, session):
+        dataset = OutputPortFactory()
+        _assign_update_role(session, dataset.id)
+
+        payload = {
+            "schema": [
+                {
+                    "name": "customers",
+                    "properties": [
+                        {"name": "customer_id", "primaryKey": True},
+                    ],
+                },
+                {
+                    "name": "orders",
+                    "properties": [
+                        {
+                            "name": "customer_id",
+                            "relationships": [{"to": "customers.customer_id"}],
+                        },
+                    ],
+                },
+            ]
+        }
+
+        response = client.post(
+            f"{ENDPOINT}/{dataset.data_product.id}/output_ports/{dataset.id}/data_contract",
+            json=payload,
+        )
+
+        assert response.status_code == 200
+        body = response.json()
+        relationships = body["relationships"]
+        assert len(relationships) == 1
+        assert relationships[0]["type"] == "foreignKey"
+
+        customers = next(o for o in body["schema_objects"] if o["name"] == "customers")
+        orders = next(o for o in body["schema_objects"] if o["name"] == "orders")
+        assert relationships[0]["source_object_id"] == orders["id"]
+        assert relationships[0]["source_property_id"] == orders["properties"][0]["id"]
+        assert relationships[0]["target_object_id"] == customers["id"]
+        assert (
+            relationships[0]["target_property_id"] == customers["properties"][0]["id"]
+        )
+
+    def test_post_contract_relationship_unresolvable_reference_is_skipped(
+        self, client, session
+    ):
+        dataset = OutputPortFactory()
+        _assign_update_role(session, dataset.id)
+
+        payload = {
+            "schema": [
+                {
+                    "name": "orders",
+                    "properties": [
+                        {
+                            "name": "customer_id",
+                            "relationships": [{"to": "customers.customer_id"}],
+                        },
+                    ],
+                },
+            ]
+        }
+
+        response = client.post(
+            f"{ENDPOINT}/{dataset.data_product.id}/output_ports/{dataset.id}/data_contract",
+            json=payload,
+        )
+
+        assert response.status_code == 200
+        assert response.json()["relationships"] == []
+
+    def test_post_contract_replaces_existing_relationships(self, client, session):
+        dataset = OutputPortFactory()
+        _assign_update_role(session, dataset.id)
+
+        payload = {
+            "schema": [
+                {
+                    "name": "customers",
+                    "properties": [{"name": "customer_id", "primaryKey": True}],
+                },
+                {
+                    "name": "orders",
+                    "properties": [
+                        {
+                            "name": "customer_id",
+                            "relationships": [{"to": "customers.customer_id"}],
+                        },
+                    ],
+                },
+            ]
+        }
+        client.post(
+            f"{ENDPOINT}/{dataset.data_product.id}/output_ports/{dataset.id}/data_contract",
+            json=payload,
+        )
+
+        response = client.post(
+            f"{ENDPOINT}/{dataset.data_product.id}/output_ports/{dataset.id}/data_contract",
+            json=DEFAULT_PAYLOAD,
+        )
+
+        assert response.status_code == 200
+        assert response.json()["relationships"] == []
+
     def test_post_contract_property_order_preserved(self, client, session):
         dataset = OutputPortFactory()
         _assign_update_role(session, dataset.id)

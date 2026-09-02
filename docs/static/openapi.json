@@ -14411,6 +14411,14 @@
             "type": "array",
             "title": "Schema Objects",
             "default": []
+          },
+          "relationships": {
+            "items": {
+              "$ref": "#/components/schemas/SchemaRelationshipResponse"
+            },
+            "type": "array",
+            "title": "Relationships",
+            "default": []
           }
         },
         "type": "object",
@@ -15692,6 +15700,14 @@
             ],
             "title": "Partitionkeyposition"
           },
+          "relationships": {
+            "items": {
+              "$ref": "#/components/schemas/SchemaRelationshipRequest"
+            },
+            "type": "array",
+            "title": "Relationships",
+            "default": []
+          },
           "properties": {
             "items": {
               "$ref": "#/components/schemas/SchemaPropertyRequest"
@@ -15842,6 +15858,67 @@
           "position"
         ],
         "title": "SchemaPropertyResponse"
+      },
+      "SchemaRelationshipRequest": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "title": "Type",
+            "default": "foreignKey"
+          },
+          "to": {
+            "type": "string",
+            "title": "To"
+          }
+        },
+        "type": "object",
+        "required": [
+          "to"
+        ],
+        "title": "SchemaRelationshipRequest"
+      },
+      "SchemaRelationshipResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "type": {
+            "type": "string",
+            "title": "Type"
+          },
+          "source_object_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Source Object Id"
+          },
+          "source_property_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Source Property Id"
+          },
+          "target_object_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Target Object Id"
+          },
+          "target_property_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Target Property Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "type",
+          "source_object_id",
+          "source_property_id",
+          "target_object_id",
+          "target_property_id"
+        ],
+        "title": "SchemaRelationshipResponse"
       },
       "Scope": {
         "type": "string",

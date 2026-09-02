@@ -4,6 +4,12 @@ from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel, Field, field_validator
 
 
+# https://github.com/bitol-io/tsc/blob/main/rfcs/approved/odcs-v3.1.0/0013-relationships-between-properties.md
+class SchemaRelationshipRequest(BaseModel):
+    type: str = "foreignKey"
+    to: str
+
+
 # Took relevant properties from: https://github.com/bitol-io/open-data-contract-standard/blob/main/docs/schema.md
 class SchemaPropertyRequest(BaseModel):
     name: str
@@ -18,6 +24,7 @@ class SchemaPropertyRequest(BaseModel):
     required: bool = False
     partitioned: bool = False
     partition_key_position: Optional[int] = Field(None, alias="partitionKeyPosition")
+    relationships: list[SchemaRelationshipRequest] = []
     properties: list["SchemaPropertyRequest"] = []
 
     model_config = {"populate_by_name": True}

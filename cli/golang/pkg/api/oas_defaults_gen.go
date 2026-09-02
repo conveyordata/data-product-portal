@@ -180,6 +180,10 @@ func (s *OutputPortSchemaResponse) setDefaults() {
 		var defaultVal0 []SchemaObjectResponse
 		s.SchemaObjects = defaultVal0
 	}
+	{
+		var defaultVal0 []SchemaRelationshipResponse
+		s.Relationships = defaultVal0
+	}
 }
 
 // setDefaults set default value of fields.
@@ -289,6 +293,10 @@ func (s *SchemaPropertyRequest) setDefaults() {
 		s.Partitioned.SetTo(val)
 	}
 	{
+		var defaultVal0 []SchemaRelationshipRequest
+		s.Relationships = defaultVal0
+	}
+	{
 		var defaultVal0 []SchemaPropertyRequest
 		s.Properties = defaultVal0
 	}
@@ -311,6 +319,14 @@ func (s *SchemaPropertyResponse) setDefaults() {
 	{
 		val := bool(false)
 		s.Partitioned.SetTo(val)
+	}
+}
+
+// setDefaults set default value of fields.
+func (s *SchemaRelationshipRequest) setDefaults() {
+	{
+		val := string("foreignKey")
+		s.Type.SetTo(val)
 	}
 }
 

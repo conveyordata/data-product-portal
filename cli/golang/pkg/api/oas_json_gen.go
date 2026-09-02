@@ -25020,11 +25020,22 @@ func (s *OutputPortSchemaResponse) encodeFields(e *jx.Encoder) {
 			e.ArrEnd()
 		}
 	}
+	{
+		if s.Relationships != nil {
+			e.FieldStart("relationships")
+			e.ArrStart()
+			for _, elem := range s.Relationships {
+				elem.Encode(e)
+			}
+			e.ArrEnd()
+		}
+	}
 }
 
-var jsonFieldsNameOfOutputPortSchemaResponse = [2]string{
+var jsonFieldsNameOfOutputPortSchemaResponse = [3]string{
 	0: "output_port_id",
 	1: "schema_objects",
+	2: "relationships",
 }
 
 // Decode decodes OutputPortSchemaResponse from json.
@@ -25065,6 +25076,23 @@ func (s *OutputPortSchemaResponse) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"schema_objects\"")
+			}
+		case "relationships":
+			if err := func() error {
+				s.Relationships = make([]SchemaRelationshipResponse, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem SchemaRelationshipResponse
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.Relationships = append(s.Relationships, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"relationships\"")
 			}
 		default:
 			return d.Skip()
@@ -31510,6 +31538,16 @@ func (s *SchemaPropertyRequest) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
+		if s.Relationships != nil {
+			e.FieldStart("relationships")
+			e.ArrStart()
+			for _, elem := range s.Relationships {
+				elem.Encode(e)
+			}
+			e.ArrEnd()
+		}
+	}
+	{
 		if s.Properties != nil {
 			e.FieldStart("properties")
 			e.ArrStart()
@@ -31521,7 +31559,7 @@ func (s *SchemaPropertyRequest) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfSchemaPropertyRequest = [13]string{
+var jsonFieldsNameOfSchemaPropertyRequest = [14]string{
 	0:  "name",
 	1:  "businessName",
 	2:  "logicalType",
@@ -31534,7 +31572,8 @@ var jsonFieldsNameOfSchemaPropertyRequest = [13]string{
 	9:  "required",
 	10: "partitioned",
 	11: "partitionKeyPosition",
-	12: "properties",
+	12: "relationships",
+	13: "properties",
 }
 
 // Decode decodes SchemaPropertyRequest from json.
@@ -31668,6 +31707,23 @@ func (s *SchemaPropertyRequest) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"partitionKeyPosition\"")
+			}
+		case "relationships":
+			if err := func() error {
+				s.Relationships = make([]SchemaRelationshipRequest, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem SchemaRelationshipRequest
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.Relationships = append(s.Relationships, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"relationships\"")
 			}
 		case "properties":
 			if err := func() error {
@@ -32075,6 +32131,301 @@ func (s *SchemaPropertyResponse) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *SchemaPropertyResponse) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *SchemaRelationshipRequest) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *SchemaRelationshipRequest) encodeFields(e *jx.Encoder) {
+	{
+		if s.Type.Set {
+			e.FieldStart("type")
+			s.Type.Encode(e)
+		}
+	}
+	{
+		e.FieldStart("to")
+		e.Str(s.To)
+	}
+}
+
+var jsonFieldsNameOfSchemaRelationshipRequest = [2]string{
+	0: "type",
+	1: "to",
+}
+
+// Decode decodes SchemaRelationshipRequest from json.
+func (s *SchemaRelationshipRequest) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode SchemaRelationshipRequest to nil")
+	}
+	var requiredBitSet [1]uint8
+	s.setDefaults()
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "type":
+			if err := func() error {
+				s.Type.Reset()
+				if err := s.Type.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"type\"")
+			}
+		case "to":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Str()
+				s.To = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"to\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode SchemaRelationshipRequest")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000010,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfSchemaRelationshipRequest) {
+					name = jsonFieldsNameOfSchemaRelationshipRequest[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *SchemaRelationshipRequest) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *SchemaRelationshipRequest) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *SchemaRelationshipResponse) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *SchemaRelationshipResponse) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("id")
+		json.EncodeUUID(e, s.ID)
+	}
+	{
+		e.FieldStart("type")
+		e.Str(s.Type)
+	}
+	{
+		e.FieldStart("source_object_id")
+		json.EncodeUUID(e, s.SourceObjectID)
+	}
+	{
+		e.FieldStart("source_property_id")
+		json.EncodeUUID(e, s.SourcePropertyID)
+	}
+	{
+		e.FieldStart("target_object_id")
+		json.EncodeUUID(e, s.TargetObjectID)
+	}
+	{
+		e.FieldStart("target_property_id")
+		json.EncodeUUID(e, s.TargetPropertyID)
+	}
+}
+
+var jsonFieldsNameOfSchemaRelationshipResponse = [6]string{
+	0: "id",
+	1: "type",
+	2: "source_object_id",
+	3: "source_property_id",
+	4: "target_object_id",
+	5: "target_property_id",
+}
+
+// Decode decodes SchemaRelationshipResponse from json.
+func (s *SchemaRelationshipResponse) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode SchemaRelationshipResponse to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "id":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := json.DecodeUUID(d)
+				s.ID = v
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"id\"")
+			}
+		case "type":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Str()
+				s.Type = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"type\"")
+			}
+		case "source_object_id":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				v, err := json.DecodeUUID(d)
+				s.SourceObjectID = v
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"source_object_id\"")
+			}
+		case "source_property_id":
+			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				v, err := json.DecodeUUID(d)
+				s.SourcePropertyID = v
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"source_property_id\"")
+			}
+		case "target_object_id":
+			requiredBitSet[0] |= 1 << 4
+			if err := func() error {
+				v, err := json.DecodeUUID(d)
+				s.TargetObjectID = v
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"target_object_id\"")
+			}
+		case "target_property_id":
+			requiredBitSet[0] |= 1 << 5
+			if err := func() error {
+				v, err := json.DecodeUUID(d)
+				s.TargetPropertyID = v
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"target_property_id\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode SchemaRelationshipResponse")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00111111,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfSchemaRelationshipResponse) {
+					name = jsonFieldsNameOfSchemaRelationshipResponse[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *SchemaRelationshipResponse) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *SchemaRelationshipResponse) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

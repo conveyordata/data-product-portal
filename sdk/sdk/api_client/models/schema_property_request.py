@@ -1,12 +1,16 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import Any, TypeVar, cast
+from typing import TYPE_CHECKING, Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..types import UNSET, Unset
+
+if TYPE_CHECKING:
+    from ..models.schema_relationship_request import SchemaRelationshipRequest
+
 
 T = TypeVar("T", bound="SchemaPropertyRequest")
 
@@ -27,6 +31,7 @@ class SchemaPropertyRequest:
         required (bool | Unset):  Default: False.
         partitioned (bool | Unset):  Default: False.
         partition_key_position (int | None | Unset):
+        relationships (list[SchemaRelationshipRequest] | Unset):
         properties (list[SchemaPropertyRequest] | Unset):
     """
 
@@ -42,6 +47,7 @@ class SchemaPropertyRequest:
     required: bool | Unset = False
     partitioned: bool | Unset = False
     partition_key_position: int | None | Unset = UNSET
+    relationships: list[SchemaRelationshipRequest] | Unset = UNSET
     properties: list[SchemaPropertyRequest] | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
@@ -101,6 +107,13 @@ class SchemaPropertyRequest:
         else:
             partition_key_position = self.partition_key_position
 
+        relationships: list[dict[str, Any]] | Unset = UNSET
+        if not isinstance(self.relationships, Unset):
+            relationships = []
+            for relationships_item_data in self.relationships:
+                relationships_item = relationships_item_data.to_dict()
+                relationships.append(relationships_item)
+
         properties: list[dict[str, Any]] | Unset = UNSET
         if not isinstance(self.properties, Unset):
             properties = []
@@ -137,6 +150,8 @@ class SchemaPropertyRequest:
             field_dict["partitioned"] = partitioned
         if partition_key_position is not UNSET:
             field_dict["partitionKeyPosition"] = partition_key_position
+        if relationships is not UNSET:
+            field_dict["relationships"] = relationships
         if properties is not UNSET:
             field_dict["properties"] = properties
 
@@ -144,6 +159,8 @@ class SchemaPropertyRequest:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        from ..models.schema_relationship_request import SchemaRelationshipRequest
+
         d = dict(src_dict)
         name = d.pop("name")
 
@@ -230,6 +247,17 @@ class SchemaPropertyRequest:
             d.pop("partitionKeyPosition", UNSET)
         )
 
+        _relationships = d.pop("relationships", UNSET)
+        relationships: list[SchemaRelationshipRequest] | Unset = UNSET
+        if _relationships is not UNSET:
+            relationships = []
+            for relationships_item_data in _relationships:
+                relationships_item = SchemaRelationshipRequest.from_dict(
+                    relationships_item_data
+                )
+
+                relationships.append(relationships_item)
+
         _properties = d.pop("properties", UNSET)
         properties: list[SchemaPropertyRequest] | Unset = UNSET
         if _properties is not UNSET:
@@ -252,6 +280,7 @@ class SchemaPropertyRequest:
             required=required,
             partitioned=partitioned,
             partition_key_position=partition_key_position,
+            relationships=relationships,
             properties=properties,
         )
 

@@ -60,3 +60,22 @@ class OutputPortSchemaProperty(Base):
     description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     examples: Mapped[Optional[list]] = mapped_column(JSONB, nullable=True)
     position: Mapped[int] = mapped_column(SmallInteger, nullable=False, default=0)
+
+
+class OutputPortSchemaRelationship(Base):
+    __tablename__ = "output_port_schema_relationships"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    source_property_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("output_port_schema_properties.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    target_property_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("output_port_schema_properties.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    type: Mapped[str] = mapped_column(Text, nullable=False, default="foreignKey")

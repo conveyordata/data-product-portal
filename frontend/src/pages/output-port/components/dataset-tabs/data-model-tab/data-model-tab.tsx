@@ -144,6 +144,7 @@ export function DataModelTab({ datasetId, dataProductId }: Props) {
             {uploadButton && <Flex justify="end">{uploadButton}</Flex>}
             <SchemaDiagram
                 schemaObjects={schemaObjects}
+                declaredRelationships={data?.relationships}
                 onSelectObject={(key) => posthog.capture(PosthogEvents.OUTPUT_PORT_DATA_MODEL_TABLE, { tab: key })}
             />
         </Flex>

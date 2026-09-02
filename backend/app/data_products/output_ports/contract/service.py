@@ -8,15 +8,18 @@ from sqlalchemy.orm import Session
 from app.data_products.output_ports.contract.model import (
     OutputPortSchemaObject,
     OutputPortSchemaProperty,
+    OutputPortSchemaRelationship,
 )
 from app.data_products.output_ports.contract.schema_request import (
     BitolContractRequest,
     SchemaPropertyRequest,
+    SchemaRelationshipRequest,
 )
 from app.data_products.output_ports.contract.schema_response import (
     OutputPortSchemaResponse,
     SchemaObjectResponse,
     SchemaPropertyResponse,
+    SchemaRelationshipResponse,
 )
 
 
@@ -33,6 +36,10 @@ class OutputPortContractService:
             )
         )
 
+        # Relationships can only reference top-level properties, by "<object_name>.<property_name>".
+        property_id_by_key: dict[tuple[str, str], UUID] = {}
+        pending_relationships: list[tuple[UUID, SchemaRelationshipRequest]] = []
+
         for position, obj_req in enumerate(contract.schema_objects):
             obj_id = uuid.uuid4()
             self.db.add(
@@ -47,8 +54,33 @@ class OutputPortContractService:
                     position=position,
                 )
             )
-            for prop in self._flatten_properties(obj_req.properties, obj_id, None):
-                self.db.add(prop)
+            for prop_position, prop_req in enumerate(obj_req.properties):
+                prop_id = uuid.uuid4()
+                self.db.add(
+                    self._build_property(prop_req, obj_id, None, prop_id, prop_position)
+                )
+                property_id_by_key[(obj_req.name, prop_req.name)] = prop_id
+                pending_relationships.extend(
+                    (prop_id, relationship) for relationship in prop_req.relationships
+                )
+                for prop in self._flatten_properties(
+                    prop_req.properties, obj_id, prop_id
+                ):
+                    self.db.add(prop)
+
+        for source_property_id, relationship in pending_relationships:
+            schema_name, _, property_name = relationship.to.partition(".")
+            target_property_id = property_id_by_key.get((schema_name, property_name))
+            if target_property_id is None:
+                continue
+            self.db.add(
+                OutputPortSchemaRelationship(
+                    id=uuid.uuid4(),
+                    source_property_id=source_property_id,
+                    target_property_id=target_property_id,
+                    type=relationship.type,
+                )
+            )
 
         self.db.commit()
         return self.get_schema(output_port_id)
@@ -81,6 +113,13 @@ class OutputPortContractService:
         for p in all_properties:
             props_by_schema_object[p.schema_object_id][p.parent_property_id].append(p)
 
+        property_by_id = {p.id: p for p in all_properties}
+        relationships = (
+            self.db.query(OutputPortSchemaRelationship)
+            .filter(OutputPortSchemaRelationship.source_property_id.in_(property_by_id))
+            .all()
+        )
+
         return OutputPortSchemaResponse(
             output_port_id=output_port_id,
             schema_objects=[
@@ -97,6 +136,21 @@ class OutputPortContractService:
                     ),
                 )
                 for obj in schema_objects
+            ],
+            relationships=[
+                SchemaRelationshipResponse(
+                    id=r.id,
+                    type=r.type,
+                    source_object_id=property_by_id[
+                        r.source_property_id
+                    ].schema_object_id,
+                    source_property_id=r.source_property_id,
+                    target_object_id=property_by_id[
+                        r.target_property_id
+                    ].schema_object_id,
+                    target_property_id=r.target_property_id,
+                )
+                for r in relationships
             ],
         )
 
@@ -132,6 +186,33 @@ class OutputPortContractService:
         return schema_properties
 
     @staticmethod
+    def _build_property(
+        prop: SchemaPropertyRequest,
+        schema_object_id: UUID,
+        parent_id: UUID | None,
+        prop_id: UUID,
+        position: int,
+    ) -> OutputPortSchemaProperty:
+        return OutputPortSchemaProperty(
+            id=prop_id,
+            schema_object_id=schema_object_id,
+            parent_property_id=parent_id,
+            name=prop.name,
+            business_name=prop.business_name,
+            logical_type=prop.logical_type,
+            physical_type=prop.physical_type,
+            description=prop.description,
+            examples=prop.examples,
+            position=position,
+            partitioned=prop.partitioned,
+            partition_key_position=prop.partition_key_position,
+            primary_key=prop.primary_key,
+            primary_key_position=prop.primary_key_position,
+            unique=prop.unique,
+            required=prop.required,
+        )
+
+    @staticmethod
     def _flatten_properties(
         properties: list[SchemaPropertyRequest],
         schema_object_id: UUID,
@@ -142,23 +223,8 @@ class OutputPortContractService:
         for i, prop in enumerate(properties):
             prop_id = uuid.uuid4()
             result.append(
-                OutputPortSchemaProperty(
-                    id=prop_id,
-                    schema_object_id=schema_object_id,
-                    parent_property_id=parent_id,
-                    name=prop.name,
-                    business_name=prop.business_name,
-                    logical_type=prop.logical_type,
-                    physical_type=prop.physical_type,
-                    description=prop.description,
-                    examples=prop.examples,
-                    position=start_position + i,
-                    partitioned=prop.partitioned,
-                    partition_key_position=prop.partition_key_position,
-                    primary_key=prop.primary_key,
-                    primary_key_position=prop.primary_key_position,
-                    unique=prop.unique,
-                    required=prop.required,
+                OutputPortContractService._build_property(
+                    prop, schema_object_id, parent_id, prop_id, start_position + i
                 )
             )
             if prop.properties:

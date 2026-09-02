@@ -911,6 +911,7 @@ WITH link AS (
     VALUES (gen_random_uuid(), '{{ hidden_data_product_example }}'::uuid, '{{ hidden_data_product_example_consumed_output_port }}'::uuid, 'PENDING', timezone('utc'::text, current_timestamp), NULL, NULL)
     RETURNING id
 )
+
 INSERT INTO public.input_port_requests (id, input_port_id, decision, justification, decision_note, access_duration_type, requested_duration_days, requested_by_id, requested_on, decided_by_id, decided_on, valid_from, valid_until, created_on, updated_on)
 SELECT
     gen_random_uuid(),
@@ -2626,6 +2627,32 @@ INNER JOIN (
     ('payments', 'payment_method', 'Payment Method', 'string', 'VARCHAR(20)', FALSE, FALSE, FALSE, FALSE, NULL, NULL, 'Payment method used', '["CREDIT_CARD"]', 5)
 ) AS p (schema_name, name, business_name, logical_type, physical_type, primary_key, "unique", required, partitioned, partition_key_position, primary_key_position, description, examples, position)
     ON o.output_port_id = '{{ demo_schema_visualisation_output_port }}'::uuid AND o.name = p.schema_name;
+
+INSERT INTO public.output_port_schema_relationships (id, source_property_id, target_property_id, type)
+SELECT
+    gen_random_uuid() AS id,
+    src_prop.id AS source_property_id,
+    tgt_prop.id AS target_property_id,
+    'foreignKey' AS "type"
+FROM (
+    VALUES
+    ('orders', 'customer_id', 'customers', 'customer_id'),
+    ('order_items', 'order_id', 'orders', 'order_id'),
+    ('order_items', 'product_id', 'products', 'product_id'),
+    ('payments', 'order_id', 'orders', 'order_id')
+) AS rel (source_object_name, source_property_name, target_object_name, target_property_name)
+INNER JOIN public.output_port_schema_objects AS src_obj
+    ON
+        src_obj.output_port_id = '{{ demo_schema_visualisation_output_port }}'::uuid
+        AND rel.source_object_name = src_obj.name
+INNER JOIN public.output_port_schema_properties AS src_prop
+    ON src_obj.id = src_prop.schema_object_id AND rel.source_property_name = src_prop.name
+INNER JOIN public.output_port_schema_objects AS tgt_obj
+    ON
+        tgt_obj.output_port_id = '{{ demo_schema_visualisation_output_port }}'::uuid
+        AND rel.target_object_name = tgt_obj.name
+INNER JOIN public.output_port_schema_properties AS tgt_prop
+    ON tgt_obj.id = tgt_prop.schema_object_id AND rel.target_property_name = tgt_prop.name;
 
 -- PRODUCER view: new John-owned output port on DEI Insights Dashboard
 INSERT INTO public.datasets (id, namespace, data_product_id, name, description, about, status, access_type, created_on, updated_on, lifecycle_id, deleted_at)
