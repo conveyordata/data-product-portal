@@ -69,6 +69,8 @@
 {% set data_privacy_compliance = "4aa9fdef-3c19-442c-8b09-813d51850e8c" %}
 {% set dei_insights_dashboard = "33333333-3333-4333-8333-333333333333" %}
 {% set dei_insights_dashboard_ds = "a0ade5a9-2d3d-455c-a110-074a8386e803" %}
+{% set demo_schema_visualisation = "fbf18345-23cc-4df1-8191-0b6bd83d8e9f" %}
+{% set demo_schema_visualisation_output_port = "b91b6b5a-705c-454c-a7f1-b07c927f68f8" %}
 {% set expense_forecasting = "a3a132f9-067f-42dc-8b16-6ea439014fb2" %}
 {% set feature_usage_metrics = "e1874884-52a7-4a70-92c3-85e5d1ee304c" %}
 {% set feature_usage_metrics_daily = "b8f56c2f-da55-4be5-9625-ba2a4e4a42c2" %}
@@ -2545,6 +2547,85 @@ INNER JOIN (
     ('weekly_feature_summary', 'top_platform', 'Top Platform', 'string', 'VARCHAR(20)', FALSE, FALSE, FALSE, FALSE, NULL, NULL, 'Platform with most usage: web/ios/android', '["web"]', 8)
 ) AS p (schema_name, name, business_name, logical_type, physical_type, primary_key, "unique", required, partitioned, partition_key_position, primary_key_position, description, examples, position)
     ON o.output_port_id = '{{ feature_usage_metrics_weekly }}'::uuid AND o.name = p.schema_name;
+
+-- Schema visualisation demo: dummy e-commerce schema with plenty of FK relationships
+-- (customers -> orders -> order_items <- products, orders -> payments) for prototyping the ER diagram.
+INSERT INTO public.abstract_data_products (id, status, finalizers, name, namespace, abstract_data_product_type, description, domain_id, created_on, updated_on, deleted_at)
+VALUES ('{{ demo_schema_visualisation }}'::uuid, 'active', '{}', 'Schema Visualisation Demo', 'schema_visualisation_demo', 'data_products', 'Demo data product with a richly related dummy schema, used to prototype the output port ER diagram.', '{{ customer_domain_id }}'::uuid, timezone('utc'::text, current_timestamp), NULL, NULL);
+
+INSERT INTO public.data_products (id, about, type_id, lifecycle_id, usage)
+VALUES ('{{ demo_schema_visualisation }}'::uuid, NULL, '{{ analytics_type_id }}'::uuid, '{{ data_product_lifecycle_id }}'::uuid, NULL);
+
+INSERT INTO public.role_assignments_data_product (id, data_product_id, user_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at)
+VALUES (gen_random_uuid(), '{{ demo_schema_visualisation }}'::uuid, '{{ john_id }}'::uuid, (
+    SELECT r.id FROM public.roles AS r
+    WHERE r.scope = 'data_product' AND r.prototype = 2
+), 'APPROVED', '{{ john_id }}'::uuid, timezone('utc'::text, current_timestamp), '{{ john_id }}'::uuid, timezone('utc'::text, current_timestamp), timezone('utc'::text, current_timestamp), NULL, NULL);
+
+INSERT INTO public.datasets (id, namespace, data_product_id, name, description, about, status, access_type, created_on, updated_on, lifecycle_id, deleted_at)
+VALUES ('{{ demo_schema_visualisation_output_port }}'::uuid, 'demo_schema_visualisation', '{{ demo_schema_visualisation }}'::uuid, 'Demo Schema Visualisation', 'Dummy e-commerce schema (customers, products, orders, order_items, payments) with foreign keys', 'Dummy dataset created to exercise table-relationship visualisation. Not real data.', 'ACTIVE', 'RESTRICTED', timezone('utc'::text, current_timestamp), NULL, '{{ data_product_lifecycle_id }}'::uuid, NULL);
+
+INSERT INTO public.role_assignments_dataset (id, dataset_id, data_product_id, user_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at)
+VALUES (gen_random_uuid(), '{{ demo_schema_visualisation_output_port }}'::uuid, '{{ demo_schema_visualisation }}'::uuid, '{{ john_id }}'::uuid, (
+    SELECT r.id FROM public.roles AS r
+    WHERE r.scope = 'dataset' AND r.prototype = 2
+), 'APPROVED', '{{ john_id }}'::uuid, timezone('utc'::text, current_timestamp), '{{ john_id }}'::uuid, timezone('utc'::text, current_timestamp), timezone('utc'::text, current_timestamp), NULL, NULL);
+
+INSERT INTO public.output_port_schema_objects (id, output_port_id, name, physical_name, logical_type, physical_type, description, position)
+VALUES
+(gen_random_uuid(), '{{ demo_schema_visualisation_output_port }}'::uuid, 'customers', 'customers', 'table', 'table', 'Registered customers', 1),
+(gen_random_uuid(), '{{ demo_schema_visualisation_output_port }}'::uuid, 'products', 'products', 'table', 'table', 'Sellable product catalog', 2),
+(gen_random_uuid(), '{{ demo_schema_visualisation_output_port }}'::uuid, 'orders', 'orders', 'table', 'table', 'Customer orders', 3),
+(gen_random_uuid(), '{{ demo_schema_visualisation_output_port }}'::uuid, 'order_items', 'order_items', 'table', 'table', 'Line items per order, linking orders to products', 4),
+(gen_random_uuid(), '{{ demo_schema_visualisation_output_port }}'::uuid, 'payments', 'payments', 'table', 'table', 'Payments captured against orders', 5);
+
+INSERT INTO public.output_port_schema_properties (id, schema_object_id, name, business_name, logical_type, physical_type, primary_key, "unique", required, partitioned, partition_key_position, primary_key_position, description, examples, position)
+SELECT
+    gen_random_uuid(),
+    o.id,
+    p.name,
+    p.business_name,
+    p.logical_type,
+    p.physical_type,
+    p.primary_key,
+    p."unique",
+    p.required,
+    p.partitioned,
+    p.partition_key_position,
+    p.primary_key_position,
+    p.description,
+    p.examples::jsonb,
+    p.position
+FROM public.output_port_schema_objects AS o
+INNER JOIN (
+    VALUES
+    ('customers', 'customer_id', 'Customer ID', 'string', 'VARCHAR(36)', TRUE, TRUE, TRUE, FALSE, NULL, 1, 'Unique customer identifier', '["cust-1001"]', 1),
+    ('customers', 'full_name', 'Full Name', 'string', 'VARCHAR(120)', FALSE, FALSE, TRUE, FALSE, NULL, NULL, 'Customer full name', '["Amara Okafor"]', 2),
+    ('customers', 'email', 'Email', 'string', 'VARCHAR(255)', FALSE, TRUE, TRUE, FALSE, NULL, NULL, 'Customer email address', '["amara.okafor@example.com"]', 3),
+    ('customers', 'signup_date', 'Signup Date', 'date', 'DATE', FALSE, FALSE, TRUE, FALSE, NULL, NULL, 'Date the customer registered', '["2023-11-02"]', 4),
+    ('customers', 'country', 'Country', 'string', 'VARCHAR(2)', FALSE, FALSE, FALSE, FALSE, NULL, NULL, 'ISO country code', '["BE"]', 5),
+    ('products', 'product_id', 'Product ID', 'string', 'VARCHAR(36)', TRUE, TRUE, TRUE, FALSE, NULL, 1, 'Unique product identifier', '["prod-2001"]', 1),
+    ('products', 'product_name', 'Product Name', 'string', 'VARCHAR(150)', FALSE, FALSE, TRUE, FALSE, NULL, NULL, 'Product display name', '["Wireless Mouse"]', 2),
+    ('products', 'category', 'Category', 'string', 'VARCHAR(50)', FALSE, FALSE, TRUE, FALSE, NULL, NULL, 'Product category', '["Electronics"]', 3),
+    ('products', 'unit_price', 'Unit Price', 'decimal', 'DECIMAL(10,2)', FALSE, FALSE, TRUE, FALSE, NULL, NULL, 'List price per unit', '[29.99]', 4),
+    ('products', 'is_active', 'Is Active', 'boolean', 'BOOLEAN', FALSE, FALSE, FALSE, FALSE, NULL, NULL, 'Whether the product is still sold', '[true]', 5),
+    ('orders', 'order_id', 'Order ID', 'string', 'VARCHAR(36)', TRUE, TRUE, TRUE, FALSE, NULL, 1, 'Unique order identifier', '["ord-3001"]', 1),
+    ('orders', 'customer_id', 'Customer ID', 'string', 'VARCHAR(36)', FALSE, FALSE, TRUE, FALSE, NULL, NULL, 'Customer who placed the order (references customers.customer_id)', '["cust-1001"]', 2),
+    ('orders', 'order_date', 'Order Date', 'date', 'DATE', FALSE, FALSE, TRUE, TRUE, 1, NULL, 'Date the order was placed', '["2024-02-10"]', 3),
+    ('orders', 'status', 'Status', 'string', 'VARCHAR(20)', FALSE, FALSE, TRUE, FALSE, NULL, NULL, 'Order status', '["SHIPPED"]', 4),
+    ('orders', 'shipping_country', 'Shipping Country', 'string', 'VARCHAR(2)', FALSE, FALSE, FALSE, FALSE, NULL, NULL, 'Destination country code', '["BE"]', 5),
+    ('order_items', 'order_item_id', 'Order Item ID', 'string', 'VARCHAR(36)', TRUE, TRUE, TRUE, FALSE, NULL, 1, 'Unique order line identifier', '["item-4001"]', 1),
+    ('order_items', 'order_id', 'Order ID', 'string', 'VARCHAR(36)', FALSE, FALSE, TRUE, FALSE, NULL, NULL, 'Parent order (references orders.order_id)', '["ord-3001"]', 2),
+    ('order_items', 'product_id', 'Product ID', 'string', 'VARCHAR(36)', FALSE, FALSE, TRUE, FALSE, NULL, NULL, 'Ordered product (references products.product_id)', '["prod-2001"]', 3),
+    ('order_items', 'quantity', 'Quantity', 'integer', 'INT', FALSE, FALSE, TRUE, FALSE, NULL, NULL, 'Units ordered', '[2]', 4),
+    ('order_items', 'unit_price', 'Unit Price', 'decimal', 'DECIMAL(10,2)', FALSE, FALSE, TRUE, FALSE, NULL, NULL, 'Price per unit at order time', '[27.99]', 5),
+    ('payments', 'payment_id', 'Payment ID', 'string', 'VARCHAR(36)', TRUE, TRUE, TRUE, FALSE, NULL, 1, 'Unique payment identifier', '["pay-5001"]', 1),
+    ('payments', 'order_id', 'Order ID', 'string', 'VARCHAR(36)', FALSE, FALSE, TRUE, FALSE, NULL, NULL, 'Order being paid for (references orders.order_id)', '["ord-3001"]', 2),
+    ('payments', 'payment_date', 'Payment Date', 'date', 'DATE', FALSE, FALSE, TRUE, TRUE, 1, NULL, 'Date payment was captured', '["2024-02-11"]', 3),
+    ('payments', 'amount', 'Amount', 'decimal', 'DECIMAL(12,2)', FALSE, FALSE, TRUE, FALSE, NULL, NULL, 'Amount captured', '[55.98]', 4),
+    ('payments', 'payment_method', 'Payment Method', 'string', 'VARCHAR(20)', FALSE, FALSE, FALSE, FALSE, NULL, NULL, 'Payment method used', '["CREDIT_CARD"]', 5)
+) AS p (schema_name, name, business_name, logical_type, physical_type, primary_key, "unique", required, partitioned, partition_key_position, primary_key_position, description, examples, position)
+    ON o.output_port_id = '{{ demo_schema_visualisation_output_port }}'::uuid AND o.name = p.schema_name;
 
 -- PRODUCER view: new John-owned output port on DEI Insights Dashboard
 INSERT INTO public.datasets (id, namespace, data_product_id, name, description, about, status, access_type, created_on, updated_on, lifecycle_id, deleted_at)
