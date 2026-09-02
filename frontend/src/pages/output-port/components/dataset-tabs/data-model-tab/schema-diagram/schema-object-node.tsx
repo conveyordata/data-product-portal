@@ -14,12 +14,13 @@ export type SchemaObjectNodeData = {
     physicalType?: string | null;
     properties: SchemaPropertyResponse[];
     fkPropertyIds: Set<string>;
+    highlightedPropertyIds: Set<string>;
 };
 
 type SchemaObjectNodeType = Node<SchemaObjectNodeData>;
 
 export function SchemaObjectNode({ data, selected }: NodeProps<SchemaObjectNodeType>) {
-    const { name, physicalType, properties, fkPropertyIds } = data;
+    const { name, physicalType, properties, fkPropertyIds, highlightedPropertyIds } = data;
 
     return (
         <Card
@@ -34,7 +35,14 @@ export function SchemaObjectNode({ data, selected }: NodeProps<SchemaObjectNodeT
                 pagination={false}
                 dataSource={properties}
                 rowKey="id"
-                onRow={() => ({ style: { position: 'relative' } })}
+                onRow={(property) => ({
+                    style: {
+                        position: 'relative',
+                        backgroundColor: highlightedPropertyIds.has(property.id)
+                            ? 'var(--ant-color-primary-bg)'
+                            : undefined,
+                    },
+                })}
                 columns={[
                     {
                         key: 'name',

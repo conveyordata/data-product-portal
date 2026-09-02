@@ -111,6 +111,7 @@ export function SchemaDiagram({ schemaObjects, onSelectObject }: Props) {
     const { t } = useTranslation();
     const [nodes, setNodes] = useState<Node<SchemaObjectNodeData>[]>([]);
     const [edgePopover, setEdgePopover] = useState<EdgePopoverState | null>(null);
+    const [highlightedPropertyIds, setHighlightedPropertyIds] = useState<Set<string>>(new Set());
 
     const relationships = useMemo(() => inferRelationships(schemaObjects), [schemaObjects]);
 
@@ -157,6 +158,7 @@ export function SchemaDiagram({ schemaObjects, onSelectObject }: Props) {
                         physicalType: schemaObject.physical_type,
                         properties: schemaObject.properties ?? [],
                         fkPropertyIds: fkPropertyIdsByObject.get(schemaObject.id) ?? new Set<string>(),
+                        highlightedPropertyIds: new Set<string>(),
                     },
                 };
             });
@@ -172,6 +174,11 @@ export function SchemaDiagram({ schemaObjects, onSelectObject }: Props) {
             }
         },
         [onSelectObject],
+    );
+
+    const renderedNodes = useMemo(
+        () => nodes.map((node) => ({ ...node, data: { ...node.data, highlightedPropertyIds } })),
+        [nodes, highlightedPropertyIds],
     );
 
     const selectObjectFromTab = (id: string) => {
@@ -206,6 +213,7 @@ export function SchemaDiagram({ schemaObjects, onSelectObject }: Props) {
                 targetLabel: `${targetObject?.name}.${targetProperty?.name}`,
                 cardinality: sourceProperty?.unique ? t('One-to-one') : t('Many-to-one'),
             });
+            setHighlightedPropertyIds(new Set([relationship.sourcePropertyId, relationship.targetPropertyId]));
         },
         [relationships, objectById, propertyById, t],
     );
@@ -247,13 +255,19 @@ export function SchemaDiagram({ schemaObjects, onSelectObject }: Props) {
             <Splitter.Panel defaultSize="55%" min="30%" collapsible>
                 <ReactFlowProvider>
                     <ReactFlow
-                        nodes={nodes}
+                        nodes={renderedNodes}
                         edges={edges}
                         nodeTypes={nodeTypes}
                         onNodesChange={onNodesChange}
                         onEdgeClick={onEdgeClick}
-                        onPaneClick={() => setEdgePopover(null)}
-                        onMoveStart={() => setEdgePopover(null)}
+                        onPaneClick={() => {
+                            setEdgePopover(null);
+                            setHighlightedPropertyIds(new Set());
+                        }}
+                        onMoveStart={() => {
+                            setEdgePopover(null);
+                            setHighlightedPropertyIds(new Set());
+                        }}
                         fitView
                         minZoom={0.1}
                         maxZoom={2}
