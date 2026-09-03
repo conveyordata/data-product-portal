@@ -238,19 +238,19 @@ files = [
 
 [[package]]
 name = "authlib"
-version = "1.7.2"
+version = "1.8.0"
 description = "The ultimate Python library in building OAuth and OpenID Connect servers and clients."
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "authlib-1.7.2-py2.py3-none-any.whl", hash = "sha256:3e1faedc9d87e7d56a164eca3ccb6ace0d61b94abe83e92242f8dc8bba9b4a9f"},
-    {file = "authlib-1.7.2.tar.gz", hash = "sha256:2cea25fefcd4e7173bdf1372c0afc265c8034b23a8cd5dcb6a9164b826c64231"},
+    {file = "authlib-1.8.0-py2.py3-none-any.whl", hash = "sha256:88aebbd9af6757e14e912d5dc007ae1dc1f3e27e3b2152ce7c552ee2c3b3c121"},
+    {file = "authlib-1.8.0.tar.gz", hash = "sha256:f3ecd5f1da737262fb53bf1a4d95c4ea1ad9dd509316587a255c99ab1838a4f0"},
 ]
 
 [package.dependencies]
-cryptography = "*"
-joserfc = ">=1.6.0"
+cryptography = ">=45.0.1"
+joserfc = ">=1.6.1"
 
 [[package]]
 name = "backoff"
@@ -5695,4 +5695,4 @@ testing = ["coverage[toml]", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "3ddfccc7677fcbe7df8184d92e79ac0f6a37d7d6b85d58a25798d9b8c7676dcd"
+content-hash = "0d1618eede88439dbb8b5429637915036df2570fc101455b0e7a3ae84f3dddb0"
