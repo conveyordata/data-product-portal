@@ -100,7 +100,7 @@ class TestOutputPortRouter:
         assert created_dataset.status_code == 200, created_dataset.text
         assert "id" in created_dataset.json()
 
-    def test_create_dataset__unconfigured_access_duration_type(
+    def test_create_output_port__unconfigured_access_duration_type(
         self, output_port_payload, client
     ):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
@@ -116,11 +116,11 @@ class TestOutputPortRouter:
         output_port_payload["exploration_access_duration_type"] = (
             AccessDurationType.PERMANENT.value
         )
-        created_dataset = self.create_output_port(
+        created_output_port = self.create_output_port(
             client, data_product.id, output_port_payload
         )
-        assert created_dataset.status_code == 400
-        assert "not a currently configured" in created_dataset.text
+        assert created_output_port.status_code == 400
+        assert "not a currently configured" in created_output_port.text
 
     def test_create_output_port(self, session, output_port_payload, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
@@ -375,12 +375,12 @@ class TestOutputPortRouter:
             "exploration_access_duration_type": AccessDurationType.TIME_BOUND.value,
         }
 
-        updated_dataset = self.update_output_port(
+        updated_output_port = self.update_output_port(
             client, ds.data_product.id, ds.id, update_payload
         )
 
-        assert updated_dataset.status_code == 400
-        assert "not a currently configured" in updated_dataset.text
+        assert updated_output_port.status_code == 400
+        assert "not a currently configured" in updated_output_port.text
 
     def test_update_output_port__hidden_data_product_only_allows_private(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)

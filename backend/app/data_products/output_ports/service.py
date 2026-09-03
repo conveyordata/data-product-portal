@@ -402,20 +402,20 @@ class OutputPortService:
         return result
 
     def update_output_port(
-        self, id: UUID, data_product_id: UUID, dataset: DatasetUpdate
+        self, id: UUID, data_product_id: UUID, output_port_update: DatasetUpdate
     ) -> UUID:
         dp = self._ensure_data_product_not_deleting(data_product_id)
-        self.ensure_access_type_matches_visibility(dp, dataset.access_type)
-        current_dataset = ensure_output_port_exists(
+        self.ensure_access_type_matches_visibility(dp, output_port_update.access_type)
+        current_output_port = ensure_output_port_exists(
             id, self.db, data_product_id=data_product_id
         )
-        updated_dataset = dataset.model_dump(exclude_unset=True)
+        updated_output_port = output_port_update.model_dump(exclude_unset=True)
 
         if (
-            current_dataset.namespace != dataset.namespace
+            current_output_port.namespace != output_port_update.namespace
             and (
                 validity := self.namespace_validator.validate_namespace(
-                    dataset.namespace, self.db
+                    output_port_update.namespace, self.db
                 ).validity
             )
             != ResourceNameValidityType.VALID
@@ -425,19 +425,19 @@ class OutputPortService:
                 detail=f"Invalid namespace: {validity.value}",
             )
         self._ensure_access_durations_are_configured(
-            dataset.data_product_access_duration_type,
-            dataset.exploration_access_duration_type,
+            output_port_update.data_product_access_duration_type,
+            output_port_update.exploration_access_duration_type,
         )
 
-        for k, v in updated_dataset.items():
+        for k, v in updated_output_port.items():
             if k == "tag_ids":
                 new_tags = self._fetch_tags(v)
-                current_dataset.tags = new_tags
+                current_output_port.tags = new_tags
             else:
-                setattr(current_dataset, k, v) if v else None
+                setattr(current_output_port, k, v) if v else None
         self.db.flush()
         self.recalculate_search(id)
-        return current_dataset.id
+        return current_output_port.id
 
     def update_output_port_about(
         self,
