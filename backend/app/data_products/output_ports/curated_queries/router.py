@@ -14,7 +14,7 @@ from app.data_products.output_ports.curated_queries.service import (
     DatasetCuratedQueryService,
 )
 from app.data_products.output_ports.model import ensure_output_port_exists
-from app.database.database import get_db_session
+from app.database.deps import get_db_session
 
 router = APIRouter()
 route = "/v2/data_products/{data_product_id}/output_ports/{id}/curated_queries"

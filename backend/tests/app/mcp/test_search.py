@@ -1,3 +1,6 @@
+from app.authorization.roles.schema import Scope
+from app.core.authz.actions import AuthorizationAction
+from app.data_products.model import DataProductVisibility
 from app.data_products.output_ports.service import OutputPortService
 from app.mcp.details import (
     get_data_product_details,
@@ -6,12 +9,17 @@ from app.mcp.details import (
     get_technical_asset_details,
 )
 from app.mcp.search import search_data_products, search_output_ports, universal_search
+from app.settings import settings
 from tests.factories import (
     DataProductFactory,
+    DataProductRoleAssignmentFactory,
     DomainFactory,
     OutputPortFactory,
+    RoleFactory,
     TechnicalAssetFactory,
+    UserFactory,
 )
+from tests.session_util import as_user
 
 
 def test_search_output_ports(session):
@@ -40,25 +48,33 @@ def test_search_output_ports_no_query(session):
 
 def test_get_data_product_details(session):
     dp = DataProductFactory()
-    result = get_data_product_details(data_product_id=str(dp.id), db=session)
+    user = UserFactory()
+    with as_user(session, user.id):
+        result = get_data_product_details(data_product_id=str(dp.id), db=session)
     assert result["id"] == dp.id
 
 
 def test_get_output_port_details(session):
     ds = OutputPortFactory()
-    result = get_output_port_details(output_port_id=str(ds.id), db=session)
+    user = UserFactory()
+    with as_user(session, user.id):
+        result = get_output_port_details(output_port_id=str(ds.id), db=session)
     assert result["id"] == ds.id
 
 
 def test_get_technical_asset_details(session):
     ta = TechnicalAssetFactory()
-    result = get_technical_asset_details(technical_asset_id=str(ta.id), db=session)
+    user = UserFactory()
+    with as_user(session, user.id):
+        result = get_technical_asset_details(technical_asset_id=str(ta.id), db=session)
     assert result["id"] == ta.id
 
 
 def test_get_domain_details(session):
     domain = DomainFactory()
-    result = get_domain_details(domain_id=str(domain.id), db=session)
+    user = UserFactory()
+    with as_user(session, user.id):
+        result = get_domain_details(domain_id=str(domain.id), db=session)
     assert result["id"] == domain.id
 
 
@@ -66,7 +82,9 @@ def test_search_data_products(session):
     dp1 = DataProductFactory(name="Alpha Product", description="alpha description")
     dp2 = DataProductFactory(name="Beta Product", description="beta description")
 
-    result = search_data_products(query="Alpha", db=session)
+    user = UserFactory()
+    with as_user(session, user.id):
+        result = search_data_products(query="Alpha", db=session)
 
     assert "data_products" in result
     assert result["count"] == 1
@@ -79,7 +97,9 @@ def test_search_data_products_no_query(session):
     DataProductFactory()
     DataProductFactory()
 
-    result = search_data_products(query=None, db=session)
+    user = UserFactory()
+    with as_user(session, user.id):
+        result = search_data_products(query=None, db=session)
 
     assert "data_products" in result
     assert result["count"] >= 2
@@ -90,7 +110,9 @@ def test_search_data_products_by_domain(session):
     dp_in_domain = DataProductFactory(domain=domain)
     DataProductFactory()  # different domain
 
-    result = search_data_products(domain_id=str(domain.id), db=session)
+    user = UserFactory()
+    with as_user(session, user.id):
+        result = search_data_products(domain_id=str(domain.id), db=session)
 
     assert "data_products" in result
     returned_ids = {dp["id"] for dp in result["data_products"]}
@@ -104,9 +126,11 @@ def test_search_data_products_by_status(session):
     active_dp = DataProductFactory(status=AbstractDataProductStatus.ACTIVE.value)
     DataProductFactory(status=AbstractDataProductStatus.PENDING.value)
 
-    result = search_data_products(
-        status=AbstractDataProductStatus.ACTIVE.value, db=session
-    )
+    user = UserFactory()
+    with as_user(session, user.id):
+        result = search_data_products(
+            status=AbstractDataProductStatus.ACTIVE.value, db=session
+        )
 
     assert "data_products" in result
     returned_ids = {dp["id"] for dp in result["data_products"]}
@@ -119,27 +143,49 @@ def test_search_data_products_limit(session):
     for _ in range(5):
         DataProductFactory()
 
-    result = search_data_products(query=None, limit=2, db=session)
+    user = UserFactory()
+    with as_user(session, user.id):
+        result = search_data_products(query=None, limit=2, db=session)
 
     assert result["count"] <= 2
     assert len(result["data_products"]) <= 2
 
 
 def test_search_data_products_filters_applied(session):
-    result = search_data_products(
-        query="test", domain_id=None, status="active", db=session
-    )
+    user = UserFactory()
+    with as_user(session, user.id):
+        result = search_data_products(
+            query="test", domain_id=None, status="active", db=session
+        )
 
     assert result["filters_applied"]["query"] == "test"
     assert result["filters_applied"]["domain_id"] is None
     assert result["filters_applied"]["status"] == "active"
 
 
+def test_search_data_products__filters_out_hidden(session):
+    user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+    dp1 = DataProductFactory(visibility=DataProductVisibility.HIDDEN)
+    DataProductFactory(visibility=DataProductVisibility.HIDDEN)
+    role = RoleFactory(
+        scope=Scope.DATA_PRODUCT,
+        permissions=[AuthorizationAction.DATA_PRODUCT__REQUEST_OUTPUT_PORT_ACCESS],
+    )
+    DataProductRoleAssignmentFactory(data_product=dp1, user=user, role=role)
+    with as_user(session, user.id):
+        result = search_data_products(db=session)
+
+    assert len(result["data_products"]) == 1
+    assert result["data_products"][0]["id"] == dp1.id
+
+
 def test_search_data_products_matches_description(session):
     dp = DataProductFactory(name="IrrelevantName", description="unique_needle_xyz")
     DataProductFactory(name="OtherProduct", description="something else")
 
-    result = search_data_products(query="unique_needle_xyz", db=session)
+    user = UserFactory()
+    with as_user(session, user.id):
+        result = search_data_products(query="unique_needle_xyz", db=session)
 
     assert result["count"] == 1
     assert result["data_products"][0]["id"] == dp.id
@@ -147,7 +193,10 @@ def test_search_data_products_matches_description(session):
 
 def test_universal_search(session):
     dp = DataProductFactory(name="IrrelevantName", description="unique_needle_xyz")
-    result = universal_search(query="", db=session)
+
+    user = UserFactory()
+    with as_user(session, user.id):
+        result = universal_search(query="", db=session)
     assert result["total_count"] == 2
     assert dp.id == result["results"]["data_products"][0]["id"]
     assert dp.domain.id == result["results"]["domains"][0]["id"]

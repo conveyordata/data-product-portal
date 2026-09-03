@@ -16,7 +16,7 @@ from app.data_products.technical_assets.schema_response import (
     GetTechnicalAssetsResponseItem,
 )
 from app.data_products.technical_assets.service import TechnicalAssetService
-from app.mcp.deps import get_db_session, get_mcp_authenticated_user
+from app.mcp.deps import get_mcp_authenticated_user, get_user_db_session
 from app.search_output_ports.schema_response import SearchOutputPortsResponseItem
 from app.users.model import User as UserModel
 
@@ -25,7 +25,7 @@ def universal_search(
     query: str,
     entity_types: Sequence[str] = (),
     limit: int = 10,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_user_db_session),
     user: UserModel = Depends(get_mcp_authenticated_user),
 ) -> dict[str, Any]:
     results: dict[str, Any] = {
@@ -134,7 +134,7 @@ def search_data_products(
     domain_id: Optional[str] = None,
     status: Optional[str] = None,
     limit: int = 20,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_user_db_session),
     user: UserModel = Depends(get_mcp_authenticated_user),
 ) -> dict[str, Any]:
     all_data_products = DataProductService(db).get_data_products(
@@ -175,7 +175,7 @@ def search_data_products(
 def get_consuming_products(
     output_port_id: str,
     data_product_id: str,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_user_db_session),
     user: UserModel = Depends(get_mcp_authenticated_user),
 ) -> dict[str, Any]:
     """Get consuming data products for a specific output port.
@@ -208,7 +208,7 @@ def get_consuming_products(
 def search_output_ports(
     query: Optional[str] = None,
     limit: int = 20,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_user_db_session),
     user: UserModel = Depends(get_mcp_authenticated_user),
 ) -> dict[str, Any]:
     all_output_ports = OutputPortService(db).search_output_ports(

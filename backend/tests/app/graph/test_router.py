@@ -1,10 +1,17 @@
+from app.authorization.roles.schema import Scope
+from app.core.authz.actions import AuthorizationAction
+from app.data_products.model import DataProductVisibility
+from app.settings import settings
 from tests.factories import (
     DataProductFactory,
+    DataProductRoleAssignmentFactory,
     DomainFactory,
     ExplorationFactory,
     InputPortFactory,
     OutputPortFactory,
+    RoleFactory,
     TechnicalAssetFactory,
+    UserFactory,
 )
 
 ENDPOINT = "/api/v2/graph"
@@ -25,6 +32,24 @@ class TestGraphRouter:
         for node in response.json()["nodes"]:
             assert node["data"]["domain_id"] == str(domain.id)
             assert node["data"]["domain"] == domain.name
+
+    def test_get_graph_data__filters_hidden_data_product(self, client):
+        data_product = DataProductFactory(visibility=DataProductVisibility.HIDDEN)
+        DataProductFactory(visibility=DataProductVisibility.HIDDEN)
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[AuthorizationAction.DATA_PRODUCT__READ_INTEGRATIONS],
+        )
+        DataProductRoleAssignmentFactory(
+            data_product_id=data_product.id,
+            user_id=user.id,
+            role_id=role.id,
+        )
+        response = client.get(ENDPOINT)
+        assert response.status_code == 200, response.text
+        assert len(response.json()["edges"]) == 0
+        assert len(response.json()["nodes"]) == 1
 
     def test_get_graph_data_include_output_ports(self, client):
         domain = DomainFactory()

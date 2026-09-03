@@ -4,7 +4,6 @@ Kept in a separate module so both core portal tools and plugin tools can import
 these utilities without creating circular dependencies.
 """
 
-from contextlib import asynccontextmanager
 from typing import Any, Optional
 
 import jwt as pyjwt
@@ -19,22 +18,10 @@ from app.core.auth.jwt import get_oidc
 from app.core.authz import Action, Authorization
 from app.core.logging import logger
 from app.data_products.model import DataProduct as DataProductModel
-from app.database.database import SessionLocal
+from app.database.database import db_session
 from app.settings import settings
+from app.users.model import User
 from app.users.model import User as UserModel
-
-
-@asynccontextmanager
-async def get_db_session():
-    db = SessionLocal()
-    try:
-        yield db
-        db.commit()
-    except Exception:
-        db.rollback()
-        raise
-    finally:
-        db.close()
 
 
 def initialize_models() -> None:
@@ -95,7 +82,7 @@ def get_auth_provider() -> Optional[PortalOIDCProxy]:
     return None
 
 
-def get_mcp_authenticated_user(db: Session = Depends(get_db_session)) -> UserModel:
+def get_mcp_authenticated_user(db: Session = Depends(db_session)) -> UserModel:
     """Get the authenticated portal user from the current MCP request context.
 
     When OIDC is enabled the FastMCP access token carries upstream identity claims
@@ -140,10 +127,19 @@ def get_mcp_authenticated_user(db: Session = Depends(get_db_session)) -> UserMod
     return user_model
 
 
+def get_user_db_session(user: User = Depends(get_mcp_authenticated_user)):
+    with db_session() as db:
+        db.info["current_user_id"] = user.id
+        try:
+            yield db
+        finally:
+            db.info.pop("current_user_id", None)
+
+
 def authorize_data_product_read_integrations(
     data_product_namespace: str,
     authorized_user=Depends(get_mcp_authenticated_user),
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_user_db_session),
 ) -> None:
     """Verify authenticated user has READ_INTEGRATIONS access to the data product.
 

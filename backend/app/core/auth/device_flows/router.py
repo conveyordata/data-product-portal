@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.core.auth.device_flows.schema import DeviceFlow, OIDCTokenResponse
 from app.core.auth.device_flows.service import DeviceFlowService, verify_auth_header
-from app.database.database import get_db_session
+from app.database.deps import get_db_session
 
 router = APIRouter(prefix="/device")
 

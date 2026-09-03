@@ -23,7 +23,7 @@ from app.configuration.environments.schema_response import (
 from app.configuration.environments.service import EnvironmentService
 from app.core.authz import Action, Authorization
 from app.core.authz.resolvers import EmptyResolver
-from app.database.database import get_db_session
+from app.database.deps import get_db_session
 
 router = APIRouter(
     tags=["Configuration - Environments"], prefix="/v2/configuration/environments"

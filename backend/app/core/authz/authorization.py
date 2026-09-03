@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session
 from app.core.auth.auth import get_authenticated_user
 from app.data_products.model import DataProduct, DataProductVisibility
 from app.database import database
-from app.database.database import get_db_session
+from app.database.deps import get_db_session
 from app.settings import settings
 from app.users.schema import User
 from app.utils.singleton import Singleton

@@ -6,7 +6,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import select, text
+from sqlalchemy import select, text  # noqa: TID251
 from sqlalchemy.orm import Session
 from starlette.routing import _DefaultLifespan
 
@@ -19,7 +19,7 @@ from app.core.authz.authorization import Authorization
 from app.core.context import _pending_events
 from app.core.webhooks.events import V2Event
 from app.data_products.output_ports.enums import OutputPortAccessType
-from app.database.database import Base, get_db_session
+from app.database.database import Base, get_system_db_session
 from app.main import app
 from app.settings import settings
 from tests.factories import reset_unique_fakers
@@ -40,7 +40,7 @@ def setup_and_teardown_database():
     return
 
 
-def override_get_db():
+def override_unauthenticated_get_db():
     test_db = None
     try:
         test_db = TestingSessionLocal()
@@ -51,7 +51,7 @@ def override_get_db():
             test_db.close()
 
 
-session = pytest.fixture(override_get_db)
+session = pytest.fixture(override_unauthenticated_get_db)
 
 from app.core.auth import jwt  # noqa: E402
 
@@ -75,7 +75,7 @@ def client() -> Generator[TestClient, None, None]:
     # Disable lifespan for testing
     app.router.lifespan_context = _DefaultLifespan(app.router)
 
-    app.dependency_overrides[get_db_session] = override_get_db
+    app.dependency_overrides[get_system_db_session] = override_unauthenticated_get_db
     app.dependency_overrides[verify_auth_header] = lambda: "test"
 
     with TestClient(app) as test_client:

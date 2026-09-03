@@ -164,15 +164,11 @@ class DataProductService(AbstractDataProductService):
 
         dps = self.db.scalars(query).unique().all()
 
-        auth = Authorization()
-        filtered = []
         for dp in dps:
-            if auth.has_read_access_to_data_product(current_user, dp):
-                if not dp.lifecycle:
-                    dp.lifecycle = default_lifecycle
-                filtered.append(dp)
+            if not dp.lifecycle:
+                dp.lifecycle = default_lifecycle
 
-        return filtered
+        return dps
 
     def get_owners(self, id: UUID) -> Sequence[User]:
         data_product = ensure_data_product_exists(
@@ -467,7 +463,8 @@ class DataProductService(AbstractDataProductService):
         visible_data_product_ids = self.db.scalars(
             select(DataProductModel.id).where(
                 DataProductModel.visibility == DataProductVisibility.DISCOVERABLE
-            )
+            ),
+            execution_options={"skip_data_product_visibility_filter": True},
         ).all()
         for id in visible_data_product_ids:
             self._sync_public_reader_grouping(id, DataProductVisibility.DISCOVERABLE)

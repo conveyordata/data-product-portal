@@ -54,7 +54,7 @@ from app.data_products.schema_response import (
     UpdateDataProductResponse,
 )
 from app.data_products.service import DataProductService
-from app.database.database import get_db_session
+from app.database.deps import get_db_session
 from app.events.enums import EventReferenceEntity, EventType
 from app.events.schema import CreateEvent
 from app.events.schema_response import (

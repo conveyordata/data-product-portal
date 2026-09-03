@@ -125,9 +125,15 @@ select = [
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["S101", "S105", "S311"]
+"tests/__init__.py" = ["TID251"]
+"tests/factories/**" = ["TID251"]
+"tests/seed_random_data.py" = ["TID251"]
+"app/database/alembic/versions/*.py" = ["TID251"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["app"]
 
 [tool.ruff.lint.flake8-tidy-imports.banned-api]
 "starlette.status".msg = "Use `from fastapi import status` instead."
+"tests.test_session".msg = "Use the `session` fixture instead of importing test_session directly."
+"sqlalchemy.text".msg = "Do not import `text` from SQLAlchemy; use SQLAlchemy expressions/ORM APIs instead. This is a security issue, since raw sqls bypass hidden data product and private output port visibility"

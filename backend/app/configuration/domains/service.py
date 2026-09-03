@@ -2,9 +2,10 @@ from typing import Sequence
 from uuid import UUID
 
 from fastapi import HTTPException, status
-from sqlalchemy import select
-from sqlalchemy.orm import Session, selectinload, undefer
+from sqlalchemy import func, select
+from sqlalchemy.orm import Session, selectinload
 
+from app.abstract_data_product.model import AbstractDataProduct
 from app.configuration.domains.model import Domain as DomainModel
 from app.configuration.domains.model import ensure_domain_exists
 from app.configuration.domains.schema_request import DomainCreate, DomainUpdate
@@ -21,26 +22,33 @@ class DomainService:
         self.db = db
 
     def get_domains(self) -> Sequence[GetDomainsItem]:
-        return (
-            self.db.scalars(
-                select(DomainModel)
-                .options(
-                    undefer(DomainModel.abstract_data_product_count),
+        counts = dict(
+            self.db.execute(
+                select(
+                    DomainModel.id,
+                    func.count(AbstractDataProduct.id),
                 )
-                .order_by(DomainModel.name)
-            )
-            .unique()
-            .all()
+                .outerjoin(
+                    AbstractDataProduct,
+                    AbstractDataProduct.domain_id == DomainModel.id,
+                )
+                .group_by(DomainModel.id)
+            ).all()
         )
 
+        domains = self.db.scalars(select(DomainModel).order_by(DomainModel.name)).all()
+        return [
+            GetDomainsItem(
+                id=domain.id,
+                name=domain.name,
+                description=domain.description,
+                abstract_data_product_count=counts.get(domain.id, 0),
+            )
+            for domain in domains
+        ]
+
     def get_domain(self, id: UUID) -> GetDomainResponse:
-        domain = self.db.get(
-            DomainModel,
-            id,
-            options=[
-                undefer(DomainModel.abstract_data_product_count),
-            ],
-        )
+        domain = self.db.get(DomainModel, id)
 
         if not domain:
             raise HTTPException(

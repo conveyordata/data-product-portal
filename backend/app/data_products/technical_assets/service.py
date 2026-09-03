@@ -40,7 +40,7 @@ from app.data_products.technical_assets.schema_response import (
     UpdateTechnicalAssetResponse,
 )
 from app.data_products.technical_assets.status import TechnicalAssetStatus
-from app.database.database import get_db_session
+from app.database.deps import get_db_session
 from app.graph.graph import Graph
 from app.resource_names.service import ResourceNameValidityType
 from app.users.schema import User

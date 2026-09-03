@@ -11,7 +11,6 @@ from app.authorization.roles.schema import Scope
 from app.core.authz import Action
 from app.data_products.model import DataProduct
 from app.settings import settings
-from tests import test_session
 from tests.app.data_products.output_port_technical_assets_link.test_router import (
     DATA_OUTPUTS_DATASETS_ENDPOINT,
 )
@@ -414,10 +413,16 @@ class TestTechnicalAssetsRouter:
         assert body["validity"] == "VALID"
 
     def test_create_technical_asset_duplicate_namespace(
-        self, technical_asset_payload, data_product_role_assignment, client: TestClient
+        self,
+        technical_asset_payload,
+        data_product_role_assignment,
+        client: TestClient,
+        session,
     ):
-        data_product = test_session.get(
-            DataProduct, str(technical_asset_payload["owner_id"])
+        data_product = session.get(
+            DataProduct,
+            str(technical_asset_payload["owner_id"]),
+            execution_options={"skip_data_product_visibility_filter": True},
         )
         TechnicalAssetFactory(
             namespace=technical_asset_payload["namespace"], owner=data_product

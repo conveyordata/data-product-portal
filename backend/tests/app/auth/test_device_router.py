@@ -4,8 +4,7 @@ from urllib.parse import parse_qs, urlparse
 
 from freezegun import freeze_time
 
-from app.core.auth.device_flows.model import DeviceFlow
-from app.database.database import get_db_session
+from tests.factories import DeviceFlowFactory
 
 ENDPOINT = "/api/v2/authn/device"
 
@@ -74,13 +73,9 @@ class TestAuthDeviceRouter:
         assert response.status_code == 307, response.text
         assert response.headers["location"] == "/"
 
-    def test_get_callback(self, client):
-        db_session = next(get_db_session())
-        mock_device = DeviceFlow(
+    def test_get_callback(self, client, session):
+        DeviceFlowFactory(
             authz_state="test",
         )
-        db_session.add(mock_device)
-        db_session.commit()
-
         response = client.get(f"{ENDPOINT}/callback?code=test&state=test")
         assert response.status_code == 200
