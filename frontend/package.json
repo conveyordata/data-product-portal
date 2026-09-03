@@ -83,7 +83,7 @@
         "esbuild": "^0.28.2",
         "i18next-cli": "^1.71.3",
         "jsdom": "^30.0.1",
-        "knip": "^6.33.0",
+        "knip": "^6.34.0",
         "msw": "^2.15.0",
         "rollup-plugin-visualizer": "^7.1.1",
         "sass": "^1.103.1",
