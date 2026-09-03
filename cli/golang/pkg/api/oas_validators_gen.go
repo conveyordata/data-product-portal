@@ -3480,8 +3480,6 @@ func (s *OutputPortAccessDuration) Validate() error {
 
 func (s OutputPortAccessType) Validate() error {
 	switch s {
-	case "public":
-		return nil
 	case "restricted":
 		return nil
 	case "private":

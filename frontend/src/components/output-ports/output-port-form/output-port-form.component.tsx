@@ -487,7 +487,7 @@ export function OutputPortForm({
         name: currentDataset?.name,
         namespace: currentDataset?.namespace,
         description: currentDataset?.description,
-        access_type: mode === 'create' ? OutputPortAccessType.Public : currentDataset?.access_type,
+        access_type: mode === 'create' ? OutputPortAccessType.Unrestricted : currentDataset?.access_type,
         lifecycle_id: currentDataset?.lifecycle?.id,
         tag_ids: currentDataset?.tags.map((tag) => tag.id),
         owners: ownerIds,

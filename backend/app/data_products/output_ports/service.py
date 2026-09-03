@@ -34,6 +34,10 @@ from app.core.namespace.validation import (
     NamespaceValidator,
 )
 from app.data_products.model import (
+    DataProduct as DataProductModel,
+)
+from app.data_products.model import (
+    DataProductVisibility,
     ensure_data_product_exists,
 )
 from app.data_products.output_port_technical_assets_link.model import (
@@ -88,13 +92,16 @@ class OutputPortService:
         self.namespace_validator = NamespaceValidator(OutputPortModel)
         self.embedding_model = get_text_embedding_model()
 
-    def _ensure_data_product_not_deleting(self, data_product_id: UUID) -> None:
+    def _ensure_data_product_not_deleting(
+        self, data_product_id: UUID
+    ) -> DataProductModel:
         dp = ensure_data_product_exists(data_product_id, self.db)
         if dp.status == AbstractDataProductStatus.DELETING:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
                 detail=f"Data product '{dp.name}' is pending deletion and cannot be modified",
             )
+        return dp
 
     def get_access_durations(
         self, id: UUID, user: UserModel, data_product_id: Optional[UUID] = None
@@ -304,54 +311,73 @@ class OutputPortService:
 
         return tags
 
+    @staticmethod
+    def ensure_access_type_matches_visibility(
+        dp: DataProductModel, access_type: OutputPortAccessType
+    ) -> None:
+        match dp.visibility:
+            case DataProductVisibility.HIDDEN:
+                if access_type != OutputPortAccessType.PRIVATE:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail="Hidden data products can only have private output ports",
+                    )
+            case DataProductVisibility.DISCOVERABLE:
+                pass
+            case _:
+                assert_never(dp.visibility)
+
     def create_output_port(
-        self, data_product_id: UUID, dataset: CreateOutputPortRequest
+        self, data_product_id: UUID, create_output_port_request: CreateOutputPortRequest
     ) -> OutputPortModel:
-        self._ensure_data_product_not_deleting(data_product_id)
+        dp = self._ensure_data_product_not_deleting(data_product_id)
+        self.ensure_access_type_matches_visibility(
+            dp, create_output_port_request.access_type
+        )
         if (
             validity := self.namespace_validator.validate_namespace(
-                dataset.namespace, self.db
+                create_output_port_request.namespace, self.db
             ).validity
         ) != ResourceNameValidityType.VALID:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Invalid namespace: {validity.value}",
+                detail=f"Invalid namespace: {validity}",
             )
 
-        dataset_schema = dataset.parse_pydantic_schema()
-        dataset_schema["data_product_id"] = data_product_id
-        tags = self._fetch_tags(dataset_schema.pop("tag_ids", []))
-        _ = dataset_schema.pop("owners", [])
-        if dataset_schema.get("lifecycle_id") is None:
-            dataset_schema["lifecycle_id"] = self.db.scalar(
+        output_port_schema = create_output_port_request.parse_pydantic_schema()
+        output_port_schema["data_product_id"] = data_product_id
+        tags = self._fetch_tags(output_port_schema.pop("tag_ids", []))
+        _ = output_port_schema.pop("owners", [])
+        if output_port_schema.get("lifecycle_id") is None:
+            output_port_schema["lifecycle_id"] = self.db.scalar(
                 select(DataProductLifeCycleModel.id).where(
                     DataProductLifeCycleModel.is_default
                 )
             )
-        model = OutputPortModel(**dataset_schema, tags=tags)
+        model = OutputPortModel(**output_port_schema, tags=tags)
 
         self.db.add(model)
         self.db.flush()
         self.recalculate_search(model.id)
         return model
 
-    def remove_dataset(self, id: UUID, data_product_id: UUID) -> OutputPortModel:
+    def remove_output_port(self, id: UUID, data_product_id: UUID) -> OutputPortModel:
         self._ensure_data_product_not_deleting(data_product_id)
-        dataset = ensure_output_port_exists(
+        output_port = ensure_output_port_exists(
             id, self.db, data_product_id=data_product_id
         )
-        if not dataset:
+        if not output_port:
             raise output_port_not_found_exception(id)
 
-        result = copy.deepcopy(dataset)
-        self.db.delete(dataset)
-        self.db.commit()
+        result = copy.deepcopy(output_port)
+        self.db.delete(output_port)
         return result
 
-    def update_dataset(
+    def update_output_port(
         self, id: UUID, data_product_id: UUID, dataset: DatasetUpdate
     ) -> UUID:
-        self._ensure_data_product_not_deleting(data_product_id)
+        dp = self._ensure_data_product_not_deleting(data_product_id)
+        self.ensure_access_type_matches_visibility(dp, dataset.access_type)
         current_dataset = ensure_output_port_exists(
             id, self.db, data_product_id=data_product_id
         )
@@ -379,7 +405,6 @@ class OutputPortService:
                 setattr(current_dataset, k, v) if v else None
         self.db.flush()
         self.recalculate_search(id)
-        self.db.commit()
         return current_dataset.id
 
     def update_output_port_about(

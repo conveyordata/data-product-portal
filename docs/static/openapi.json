@@ -13824,7 +13824,6 @@
       "OutputPortAccessType": {
         "type": "string",
         "enum": [
-          "public",
           "restricted",
           "private",
           "unrestricted"
