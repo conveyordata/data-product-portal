@@ -141,7 +141,7 @@ class TestOutputPortRouter:
             role_id=role.id,
         )
         default_lifecycle = LifecycleFactory(is_default=True)
-        data_product_id = output_port_payload.pop("data_product_id")
+        data_product_id = DataProductFactory().id
         created_output_port = self.create_output_port(
             client, data_product_id, output_port_payload
         )
