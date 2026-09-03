@@ -3,6 +3,7 @@ from datetime import datetime
 import pytest
 from sqlalchemy import select
 
+from app.abstract_data_product.model import AbstractDataProduct
 from app.authorization.roles.schema import Scope
 from app.core.auth.auth import SYSTEM_ACCOUNT_BOT_EXTERNAL_ID
 from app.core.authz.actions import AuthorizationAction
@@ -73,6 +74,32 @@ def test_hidden_data_product_not_visible_without_approved_user_assignment(sessio
         visible = session.get(DataProduct, data_product.id)
 
     assert visible is None
+
+
+def test_hidden_data_product_not_visible_when_queried_as_abstract_data_product(session):
+    data_product = DataProductFactory(visibility=DataProductVisibility.HIDDEN)
+    user = UserFactory()
+
+    with as_user(session, user.id):
+        visible = session.get(AbstractDataProduct, data_product.id)
+
+    assert visible is None
+
+
+def test_hidden_data_product_id_not_visible_when_queried_as_abstract_data_product(
+    session,
+):
+    data_product = DataProductFactory(visibility=DataProductVisibility.HIDDEN)
+    user = UserFactory()
+
+    with as_user(session, user.id):
+        visible_id = session.scalar(
+            select(AbstractDataProduct.id).where(
+                AbstractDataProduct.id == data_product.id
+            )
+        )
+
+    assert visible_id is None
 
 
 def test_hidden_data_product_visible_for_system_account(session):
