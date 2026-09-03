@@ -17,8 +17,9 @@ import {
 } from 'antd';
 import type { GlobalToken } from 'antd/es/theme/interface';
 import { addDays, isPast } from 'date-fns';
-import { type ReactNode, useState } from 'react';
+import { type CSSProperties, type ReactNode, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router';
 import AccessMode from '@/components/access-modes/access-mode.component.tsx';
 import BlurredText from '@/components/blurred/blurred-text';
 import EllipsisParagraph from '@/components/ellipsis-paragraph/ellipsis-paragraph.component';
@@ -32,6 +33,12 @@ import { AccessDurationType } from '@/store/api/services/generated/configuration
 import { InputPortStatus } from '@/store/api/services/generated/dataProductsApi.ts';
 import { RenewalStatus } from '@/store/api/services/generated/dataProductsOutputPortsInputPortsApi.ts';
 import type { AbstractDataProductType, InputPortRequest } from '@/store/api/services/generated/usersApi.ts';
+import {
+    createDataOutputIdPath,
+    createDataProductIdPath,
+    createExplorationIdPath,
+    createOutputPortPath,
+} from '@/types/navigation.ts';
 import {
     type Request,
     RequestType_DataProductRoleAssignment,
@@ -59,11 +66,13 @@ type RequestDetails = {
         type: string;
         icon: React.ReactNode;
         badge?: string;
+        linkTo?: string;
     };
     target: {
         name: string;
         type: string;
         icon: React.ReactNode;
+        linkTo?: string;
     };
     accessType: string | ReactNode;
     justification: string;
@@ -140,6 +149,20 @@ const hiddenDataProductName = (
     </Tooltip>
 );
 
+function LinkableCard({ linkTo, style, children }: { linkTo?: string; style?: CSSProperties; children: ReactNode }) {
+    const card = (
+        <Card size="small" variant="outlined" hoverable={Boolean(linkTo)} style={style}>
+            {children}
+        </Card>
+    );
+    if (!linkTo) return card;
+    return (
+        <Link to={linkTo} target="_blank" rel="noopener noreferrer" style={{ color: 'inherit' }}>
+            {card}
+        </Link>
+    );
+}
+
 const isInputPortRequest = (action: Request): action is InputPortRequest =>
     action.request_type === RequestType_InputPort;
 
@@ -167,11 +190,20 @@ function getRequestDetails(
                         type={action.input_port.consuming_abstract_data_product.abstract_data_product_type}
                     />
                 ),
+                linkTo: action.input_port.consuming_abstract_data_product.is_redacted
+                    ? undefined
+                    : action.input_port.consuming_abstract_data_product.abstract_data_product_type === 'explorations'
+                      ? createExplorationIdPath(action.input_port.consuming_abstract_data_product_id)
+                      : createDataProductIdPath(action.input_port.consuming_abstract_data_product_id),
             },
             target: {
                 name: action.input_port.output_port.name,
                 type: t('Output Port'),
                 icon: <OutputPortOutlined />,
+                linkTo: createOutputPortPath(
+                    action.input_port.output_port.data_product_id,
+                    action.input_port.output_port_id,
+                ),
             },
             accessType: action.access_mode ? (
                 <AccessMode
@@ -208,11 +240,13 @@ function getRequestDetails(
                 email: action.requested_by.email,
                 type: t('Technical Asset'),
                 icon: <TechnicalAssetOutlined />,
+                linkTo: createDataOutputIdPath(action.technical_asset_id, action.technical_asset.owner_id),
             },
             target: {
                 name: action.output_port.name,
                 type: t('Output Port'),
                 icon: <OutputPortOutlined />,
+                linkTo: createOutputPortPath(action.output_port.data_product_id, action.output_port_id),
             },
             accessType: t('INCLUDE'),
             justification: '',
@@ -237,6 +271,7 @@ function getRequestDetails(
                 name: action.data_product.name,
                 type: t('Data Product'),
                 icon: <DataProductOutlined />,
+                linkTo: createDataProductIdPath(action.data_product.id),
             },
             accessType: roleName,
             justification: '',
@@ -284,6 +319,9 @@ export function ReviewRequestModal({ action, open, onClose, onAccept, onReject, 
     };
 
     if (!details) return null;
+
+    const sourceLinkTo = details.source.linkTo;
+    const targetLinkTo = details.target.linkTo;
 
     const previousRequestAction: Request | null =
         action.request_type === RequestType_InputPort && details.currentAccessPeriod
@@ -420,7 +458,7 @@ export function ReviewRequestModal({ action, open, onClose, onAccept, onReject, 
             >
                 <Flex vertical gap="middle">
                     <Flex gap="small" align="stretch">
-                        <Card size="small" variant="outlined" style={{ flex: 3 }}>
+                        <LinkableCard linkTo={sourceLinkTo} style={{ flex: 3 }}>
                             <Flex vertical gap="small">
                                 <Typography.Text type="secondary" style={tileLabelStyle}>
                                     {t('Requesting Consumer')}
@@ -439,7 +477,7 @@ export function ReviewRequestModal({ action, open, onClose, onAccept, onReject, 
                                     </Flex>
                                 </Flex>
                             </Flex>
-                        </Card>
+                        </LinkableCard>
                         <Card size="small" variant="outlined" style={{ flex: 2 }}>
                             <Flex vertical gap="small">
                                 <Typography.Text type="secondary" style={tileLabelStyle}>
@@ -450,7 +488,7 @@ export function ReviewRequestModal({ action, open, onClose, onAccept, onReject, 
                                 <Typography.Text strong>{details.accessType}</Typography.Text>
                             </Flex>
                         </Card>
-                        <Card size="small" variant="outlined" style={{ flex: 3 }}>
+                        <LinkableCard linkTo={targetLinkTo} style={{ flex: 3 }}>
                             <Flex vertical gap="small">
                                 <Typography.Text type="secondary" style={tileLabelStyle}>
                                     {t('Requested Resource')}
@@ -470,7 +508,7 @@ export function ReviewRequestModal({ action, open, onClose, onAccept, onReject, 
                                     </Flex>
                                 </Flex>
                             </Flex>
-                        </Card>
+                        </LinkableCard>
                     </Flex>
 
                     <Card size="small" variant="outlined" title={t('Request Details')}>
