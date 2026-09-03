@@ -17,9 +17,9 @@ import {
 } from 'antd';
 import type { GlobalToken } from 'antd/es/theme/interface';
 import { addDays, isPast } from 'date-fns';
-import { type ReactNode, useState } from 'react';
+import { type CSSProperties, type ReactNode, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router';
+import { Link } from 'react-router';
 import AccessMode from '@/components/access-modes/access-mode.component.tsx';
 import BlurredText from '@/components/blurred/blurred-text';
 import EllipsisParagraph from '@/components/ellipsis-paragraph/ellipsis-paragraph.component';
@@ -149,6 +149,20 @@ const hiddenDataProductName = (
     </Tooltip>
 );
 
+function LinkableCard({ linkTo, style, children }: { linkTo?: string; style?: CSSProperties; children: ReactNode }) {
+    const card = (
+        <Card size="small" variant="outlined" hoverable={Boolean(linkTo)} style={style}>
+            {children}
+        </Card>
+    );
+    if (!linkTo) return card;
+    return (
+        <Link to={linkTo} target="_blank" rel="noopener noreferrer" style={{ color: 'inherit' }}>
+            {card}
+        </Link>
+    );
+}
+
 const isInputPortRequest = (action: Request): action is InputPortRequest =>
     action.request_type === RequestType_InputPort;
 
@@ -272,7 +286,6 @@ function getRequestDetails(
 
 export function ReviewRequestModal({ action, open, onClose, onAccept, onReject, readOnly = false }: Props) {
     const { t } = useTranslation();
-    const navigate = useNavigate();
     const { token } = theme.useToken();
     const tileLabelStyle = { fontSize: token.fontSizeSM, textTransform: 'uppercase' as const };
     const [form] = Form.useForm<{ decisionNote: string }>();
@@ -445,13 +458,7 @@ export function ReviewRequestModal({ action, open, onClose, onAccept, onReject, 
             >
                 <Flex vertical gap="middle">
                     <Flex gap="small" align="stretch">
-                        <Card
-                            size="small"
-                            variant="outlined"
-                            hoverable={Boolean(sourceLinkTo)}
-                            style={{ flex: 3, cursor: sourceLinkTo ? 'pointer' : 'default' }}
-                            onClick={sourceLinkTo ? () => navigate(sourceLinkTo) : undefined}
-                        >
+                        <LinkableCard linkTo={sourceLinkTo} style={{ flex: 3 }}>
                             <Flex vertical gap="small">
                                 <Typography.Text type="secondary" style={tileLabelStyle}>
                                     {t('Requesting Consumer')}
@@ -470,7 +477,7 @@ export function ReviewRequestModal({ action, open, onClose, onAccept, onReject, 
                                     </Flex>
                                 </Flex>
                             </Flex>
-                        </Card>
+                        </LinkableCard>
                         <Card size="small" variant="outlined" style={{ flex: 2 }}>
                             <Flex vertical gap="small">
                                 <Typography.Text type="secondary" style={tileLabelStyle}>
@@ -481,13 +488,7 @@ export function ReviewRequestModal({ action, open, onClose, onAccept, onReject, 
                                 <Typography.Text strong>{details.accessType}</Typography.Text>
                             </Flex>
                         </Card>
-                        <Card
-                            size="small"
-                            variant="outlined"
-                            hoverable={Boolean(targetLinkTo)}
-                            style={{ flex: 3, cursor: targetLinkTo ? 'pointer' : 'default' }}
-                            onClick={targetLinkTo ? () => navigate(targetLinkTo) : undefined}
-                        >
+                        <LinkableCard linkTo={targetLinkTo} style={{ flex: 3 }}>
                             <Flex vertical gap="small">
                                 <Typography.Text type="secondary" style={tileLabelStyle}>
                                     {t('Requested Resource')}
@@ -507,7 +508,7 @@ export function ReviewRequestModal({ action, open, onClose, onAccept, onReject, 
                                     </Flex>
                                 </Flex>
                             </Flex>
-                        </Card>
+                        </LinkableCard>
                     </Flex>
 
                     <Card size="small" variant="outlined" title={t('Request Details')}>
