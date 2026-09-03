@@ -27,7 +27,9 @@ class DataProductLifeCycleService:
             select(DataProductLifeCycleModel).order_by(DataProductLifeCycleModel.name)
         ).all()
 
-    def _ensure_single_default(self, default_lifecycle_id: Optional[UUID] = None) -> None:
+    def _ensure_single_default(
+        self, default_lifecycle_id: Optional[UUID] = None
+    ) -> None:
         stmt = update(DataProductLifeCycleModel).where(
             DataProductLifeCycleModel.is_default
         )
@@ -42,7 +44,7 @@ class DataProductLifeCycleService:
             **data_product_lifecycle.parse_pydantic_schema()
         )
         if data_product_lifecycle.is_default:
-            self._unset_other_defaults()
+            self._ensure_single_default()
         self.db.add(data_product_lifecycle)
         self.db.commit()
         return CreateDataProductLifeCycleResponse(id=data_product_lifecycle.id)
@@ -52,7 +54,7 @@ class DataProductLifeCycleService:
     ) -> UpdateDataProductLifeCycleResponse:
         lifecycle = self.db.get(DataProductLifeCycleModel, id)
         if data_product_lifecycle.is_default:
-            self._unset_other_defaults(exclude_id=id)
+            self._ensure_single_default(default_lifecycle_id=id)
         lifecycle.color = data_product_lifecycle.color
         lifecycle.is_default = data_product_lifecycle.is_default
         lifecycle.name = data_product_lifecycle.name
