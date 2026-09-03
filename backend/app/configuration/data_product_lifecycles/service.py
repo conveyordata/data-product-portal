@@ -27,12 +27,12 @@ class DataProductLifeCycleService:
             select(DataProductLifeCycleModel).order_by(DataProductLifeCycleModel.name)
         ).all()
 
-    def _unset_other_defaults(self, exclude_id: Optional[UUID] = None) -> None:
+    def _ensure_single_default(self, default_lifecycle_id: Optional[UUID] = None) -> None:
         stmt = update(DataProductLifeCycleModel).where(
             DataProductLifeCycleModel.is_default
         )
-        if exclude_id is not None:
-            stmt = stmt.where(DataProductLifeCycleModel.id != exclude_id)
+        if default_lifecycle_id is not None:
+            stmt = stmt.where(DataProductLifeCycleModel.id != default_lifecycle_id)
         self.db.execute(stmt.values(is_default=False))
 
     def create_data_product_lifecycle(
