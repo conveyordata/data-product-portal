@@ -1,7 +1,7 @@
-from typing import Sequence
+from typing import Optional, Sequence
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
 from app.configuration.data_product_lifecycles.model import (
@@ -27,12 +27,22 @@ class DataProductLifeCycleService:
             select(DataProductLifeCycleModel).order_by(DataProductLifeCycleModel.name)
         ).all()
 
+    def _unset_other_defaults(self, exclude_id: Optional[UUID] = None) -> None:
+        stmt = update(DataProductLifeCycleModel).where(
+            DataProductLifeCycleModel.is_default
+        )
+        if exclude_id is not None:
+            stmt = stmt.where(DataProductLifeCycleModel.id != exclude_id)
+        self.db.execute(stmt.values(is_default=False))
+
     def create_data_product_lifecycle(
         self, data_product_lifecycle: DataProductLifeCycleCreate
     ) -> CreateDataProductLifeCycleResponse:
         data_product_lifecycle = DataProductLifeCycleModel(
             **data_product_lifecycle.parse_pydantic_schema()
         )
+        if data_product_lifecycle.is_default:
+            self._unset_other_defaults()
         self.db.add(data_product_lifecycle)
         self.db.commit()
         return CreateDataProductLifeCycleResponse(id=data_product_lifecycle.id)
@@ -41,6 +51,8 @@ class DataProductLifeCycleService:
         self, id: UUID, data_product_lifecycle: DataProductLifeCycleUpdate
     ) -> UpdateDataProductLifeCycleResponse:
         lifecycle = self.db.get(DataProductLifeCycleModel, id)
+        if data_product_lifecycle.is_default:
+            self._unset_other_defaults(exclude_id=id)
         lifecycle.color = data_product_lifecycle.color
         lifecycle.is_default = data_product_lifecycle.is_default
         lifecycle.name = data_product_lifecycle.name

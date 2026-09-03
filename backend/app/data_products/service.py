@@ -17,9 +17,6 @@ from app.abstract_data_product.service import AbstractDataProductService
 from app.authorization.role_assignments.enums import AssignmentFilter, DecisionStatus
 from app.authorization.roles.schema import Prototype
 from app.authorization.service import DATA_PRODUCT_READER_ROLE
-from app.configuration.data_product_lifecycles.model import (
-    DataProductLifecycle as DataProductLifeCycleModel,
-)
 from app.configuration.data_product_settings.model import DataProductSettingValue
 from app.configuration.tags.model import Tag as TagModel
 from app.configuration.tags.model import ensure_tag_exists
@@ -119,18 +116,11 @@ class DataProductService(AbstractDataProductService):
             .where(DataProductModel.id == id)
             .options(selectinload(DataProductModel.tags))
         )
-        default_lifecycle = self.db.scalar(
-            select(DataProductLifeCycleModel).filter(
-                DataProductLifeCycleModel.is_default
-            )
-        )
         if not data_product:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Data Product not found"
             )
 
-        if not data_product.lifecycle:
-            data_product.lifecycle = default_lifecycle
         return data_product
 
     def get_data_products(
@@ -139,11 +129,6 @@ class DataProductService(AbstractDataProductService):
         current_user: User,
         assignment_filter: AssignmentFilter,
     ) -> Sequence[DataProductModel]:
-        default_lifecycle = self.db.scalar(
-            select(DataProductLifeCycleModel).filter(
-                DataProductLifeCycleModel.is_default
-            )
-        )
         query = select(DataProductModel).options(
             selectinload(DataProductModel.tags).raiseload("*"),
             undefer(DataProductModel.input_port_count),
@@ -165,14 +150,9 @@ class DataProductService(AbstractDataProductService):
         dps = self.db.scalars(query).unique().all()
 
         auth = Authorization()
-        filtered = []
-        for dp in dps:
-            if auth.has_read_access_to_data_product(current_user, dp):
-                if not dp.lifecycle:
-                    dp.lifecycle = default_lifecycle
-                filtered.append(dp)
-
-        return filtered
+        return [
+            dp for dp in dps if auth.has_read_access_to_data_product(current_user, dp)
+        ]
 
     def get_owners(self, id: UUID) -> Sequence[User]:
         data_product = ensure_data_product_exists(

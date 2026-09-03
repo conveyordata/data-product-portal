@@ -163,13 +163,6 @@ class OutputPortService:
 
         output_port.rolled_up_tags = rolled_up_tags
 
-        if not output_port.lifecycle:
-            default_lifecycle = self.db.scalar(
-                select(DataProductLifeCycleModel).where(
-                    DataProductLifeCycleModel.is_default
-                )
-            )
-            output_port.lifecycle = default_lifecycle
         if not self.is_visible_to_user(output_port, user):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
@@ -329,6 +322,12 @@ class OutputPortService:
         dataset_schema["data_product_id"] = data_product_id
         tags = self._fetch_tags(dataset_schema.pop("tag_ids", []))
         _ = dataset_schema.pop("owners", [])
+        if dataset_schema.get("lifecycle_id") is None:
+            dataset_schema["lifecycle_id"] = self.db.scalar(
+                select(DataProductLifeCycleModel.id).where(
+                    DataProductLifeCycleModel.is_default
+                )
+            )
         model = OutputPortModel(**dataset_schema, tags=tags)
 
         self.db.add(model)

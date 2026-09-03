@@ -31,6 +31,47 @@ class TestDataProductLifecyclesRouter:
         assert response.json()["id"] == str(data_product_lifecycle.id)
 
     @pytest.mark.usefixtures("admin")
+    def test_create_data_product_lifecycle__unsets_previous_default(self, client):
+        previous_default = LifecycleFactory(is_default=True)
+        response = self.create_data_product_lifecycle(
+            client,
+            {"name": "new", "value": 2, "color": "blue", "is_default": True},
+        )
+        assert response.status_code == 200
+        new_id = response.json()["id"]
+
+        lifecycles = {
+            item["id"]: item["is_default"]
+            for item in self.get_data_product_lifecycles(client).json()[
+                "data_product_life_cycles"
+            ]
+        }
+        assert lifecycles[new_id] is True
+        assert lifecycles[str(previous_default.id)] is False
+
+    @pytest.mark.usefixtures("admin")
+    def test_update_data_product_lifecycle__unsets_previous_default(self, client):
+        previous_default = LifecycleFactory(is_default=True)
+        other = LifecycleFactory(is_default=False)
+        update_payload = {
+            "name": other.name,
+            "value": other.value,
+            "color": other.color,
+            "is_default": True,
+        }
+        response = self.update_data_product_lifecycle(client, update_payload, other.id)
+        assert response.status_code == 200
+
+        lifecycles = {
+            item["id"]: item["is_default"]
+            for item in self.get_data_product_lifecycles(client).json()[
+                "data_product_life_cycles"
+            ]
+        }
+        assert lifecycles[str(other.id)] is True
+        assert lifecycles[str(previous_default.id)] is False
+
+    @pytest.mark.usefixtures("admin")
     def test_remove_data_product_lifecycle(self, client):
         data_product_lifecycle = LifecycleFactory()
         response = self.remove_data_product_lifecycle(client, data_product_lifecycle.id)
