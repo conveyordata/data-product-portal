@@ -25,7 +25,6 @@ from app.data_products.output_ports.curated_queries.router import (
 from app.data_products.output_ports.data_quality.router import (
     router as data_quality_router,
 )
-from app.data_products.output_ports.enums import OutputPortAccessType
 from app.data_products.output_ports.model import ensure_output_port_exists
 from app.data_products.output_ports.query_stats.router import (
     router as query_stats_router,
@@ -156,10 +155,6 @@ def create_output_port(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> CreateOutputPortResponse:
-    # Temporarily convert public to unrestricted.
-    if output_port_request.access_type == OutputPortAccessType.PUBLIC:
-        output_port_request.access_type = OutputPortAccessType.UNRESTRICTED
-
     output_port = OutputPortService(db).create_output_port(
         data_product_id, output_port_request
     )
@@ -201,7 +196,7 @@ def remove_output_port(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    dataset = OutputPortService(db).remove_dataset(id, data_product_id)
+    dataset = OutputPortService(db).remove_output_port(id, data_product_id)
     Authorization().clear_assignments_for_resource(resource_id=str(id))
 
     event_id = EventService(db).create_event(
@@ -245,11 +240,7 @@ def update_output_port(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> UpdateOutputPortResponse:
-    # Temporarily convert public to unrestricted.
-    if update.access_type == OutputPortAccessType.PUBLIC:
-        update.access_type = OutputPortAccessType.UNRESTRICTED
-
-    response = OutputPortService(db).update_dataset(id, data_product_id, update)
+    response = OutputPortService(db).update_output_port(id, data_product_id, update)
 
     EventService(db).create_event(
         CreateEvent(

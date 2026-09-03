@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Awaitable, Callable, Sequence, TypeAlias, Union
+from typing import Awaitable, Callable, Sequence, TypeAlias, Union, assert_never
 from uuid import UUID
 
 import casbin_sqlalchemy_adapter as sqlalchemy_adapter
@@ -300,4 +300,4 @@ class Authorization(metaclass=Singleton):
                     act=AuthorizationAction.HIDDEN_DATA_PRODUCT__READ,
                 )
             case _:
-                raise ValueError("Unknown data product visibility type")
+                assert_never(data_product.visibility)

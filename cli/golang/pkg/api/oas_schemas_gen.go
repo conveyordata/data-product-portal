@@ -10023,7 +10023,6 @@ func (s *OutputPortAccessDuration) SetDays(val int) {
 type OutputPortAccessType string
 
 const (
-	OutputPortAccessTypePublic       OutputPortAccessType = "public"
 	OutputPortAccessTypeRestricted   OutputPortAccessType = "restricted"
 	OutputPortAccessTypePrivate      OutputPortAccessType = "private"
 	OutputPortAccessTypeUnrestricted OutputPortAccessType = "unrestricted"
@@ -10032,7 +10031,6 @@ const (
 // AllValues returns all OutputPortAccessType values.
 func (OutputPortAccessType) AllValues() []OutputPortAccessType {
 	return []OutputPortAccessType{
-		OutputPortAccessTypePublic,
 		OutputPortAccessTypeRestricted,
 		OutputPortAccessTypePrivate,
 		OutputPortAccessTypeUnrestricted,
@@ -10042,8 +10040,6 @@ func (OutputPortAccessType) AllValues() []OutputPortAccessType {
 // MarshalText implements encoding.TextMarshaler.
 func (s OutputPortAccessType) MarshalText() ([]byte, error) {
 	switch s {
-	case OutputPortAccessTypePublic:
-		return []byte(s), nil
 	case OutputPortAccessTypeRestricted:
 		return []byte(s), nil
 	case OutputPortAccessTypePrivate:
@@ -10058,9 +10054,6 @@ func (s OutputPortAccessType) MarshalText() ([]byte, error) {
 // UnmarshalText implements encoding.TextUnmarshaler.
 func (s *OutputPortAccessType) UnmarshalText(data []byte) error {
 	switch OutputPortAccessType(data) {
-	case OutputPortAccessTypePublic:
-		*s = OutputPortAccessTypePublic
-		return nil
 	case OutputPortAccessTypeRestricted:
 		*s = OutputPortAccessTypeRestricted
 		return nil
