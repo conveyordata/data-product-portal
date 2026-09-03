@@ -14,12 +14,7 @@ machine users can be members of groups.
 Explorations currently use a user-specific ownership model and can therefore only be owned and operated by users. Extending Explorations to support the common
 Identity model requires a separate refactoring and is outside the scope of this decision.
 
-Users, groups and group memberships need to be synchronized from an external identity provider. SCIM provides a standard interface for this synchronization, but
-the current provider does not expose machine users through SCIM. Portal therefore also needs an API for creating and updating machine users and their
-memberships.
-
-Portal’s API must expose users, groups, group memberships, machine users and Data Product role assignments. This extends Portal’s API capabilities without
-introducing provider-specific concepts into its contracts.
+Portal needs also a way to introduce these identities from an external identity provider and a way to expose them through the API.
 
 ## Decision Drivers
 
