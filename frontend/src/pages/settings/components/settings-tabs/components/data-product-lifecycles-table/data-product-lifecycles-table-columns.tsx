@@ -1,4 +1,4 @@
-import { Button, ColorPicker, Flex, Popconfirm, type TableColumnsType } from 'antd';
+import { Button, Checkbox, ColorPicker, Flex, Popconfirm, type TableColumnsType } from 'antd';
 import type { TFunction } from 'i18next';
 
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
@@ -60,7 +60,7 @@ export const getDataProductTableColumns = ({
             ellipsis: {
                 showTitle: false,
             },
-            render: (is_default: boolean) => <TableCellItem text={is_default ? 'Yes' : 'No'} />,
+            render: (is_default: boolean) => <Checkbox checked={is_default} disabled />,
             sorter: sorter.stringSorter((dp) => dp.is_default.toString()),
         },
         {
