@@ -117,6 +117,7 @@ select = [
     "T20", #flake-8 print
     "TC", #flake8-type-checking
     "TID251", #flake8-tidy-imports banned-api
+    "TID252", #flake8-tidy-imports relative-imports
     "FURB",
     "PERF",
     "FLY",

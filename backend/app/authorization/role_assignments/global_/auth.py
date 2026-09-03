@@ -2,10 +2,10 @@ from dataclasses import dataclass
 from typing import Optional
 from uuid import UUID
 
+from app.authorization.role_assignments.auth import AuthAssignment
 from app.authorization.roles import ADMIN_UUID
 from app.core.authz.authorization import Authorization
 
-from ..auth import AuthAssignment
 from .schema import GlobalRoleAssignment
 
 

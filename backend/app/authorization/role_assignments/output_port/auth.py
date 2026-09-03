@@ -1,7 +1,8 @@
 from typing import Optional
 from uuid import UUID
 
-from ..auth import ResourceAuthAssignment
+from app.authorization.role_assignments.auth import ResourceAuthAssignment
+
 from .schema import OutputPortRoleAssignment
 
 

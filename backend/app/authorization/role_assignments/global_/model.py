@@ -4,10 +4,9 @@ from uuid import uuid4
 from sqlalchemy import UUID, Column, DateTime, Enum, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from app.authorization.role_assignments.enums import DecisionStatus
 from app.database.database import Base
 from app.shared.model import BaseORM, utcnow
-
-from ..enums import DecisionStatus
 
 if TYPE_CHECKING:
     from app.authorization.roles.model import Role
