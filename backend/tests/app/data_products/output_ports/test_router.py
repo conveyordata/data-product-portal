@@ -45,6 +45,7 @@ def _seed_time_bound_access_durations() -> None:
             abstract_data_product_type=adp_type,
             access_duration_type=AccessDurationType.TIME_BOUND,
             days=30,
+            is_default=False,
         )
 
 

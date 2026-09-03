@@ -27,26 +27,20 @@ def upgrade() -> None:
     op.execute(
         """
         UPDATE datasets
-        SET exploration_access_duration_type = ad.access_duration_type
-        FROM access_durations ad
-        WHERE ad.abstract_data_product_type = 'explorations'
-          AND ad.is_default
-          AND datasets.exploration_access_duration_type NOT IN (
-              SELECT access_duration_type FROM access_durations
-              WHERE abstract_data_product_type = 'explorations'
-          )
+        SET exploration_access_duration_type = (
+            SELECT access_duration_type FROM access_durations
+            WHERE abstract_data_product_type = 'explorations' AND is_default
+            ORDER BY id
+            LIMIT 1
+        )
+        WHERE exploration_access_duration_type NOT IN (
+            SELECT access_duration_type FROM access_durations
+            WHERE abstract_data_product_type = 'explorations'
+        )
         """
-    )
-    op.alter_column(
-        "datasets",
-        "exploration_access_duration_type",
-        server_default="time_bound",
     )
 
 
 def downgrade() -> None:
-    op.alter_column(
-        "datasets",
-        "exploration_access_duration_type",
-        server_default="permanent",
-    )
+    # Data backfill; not reversible.
+    pass
