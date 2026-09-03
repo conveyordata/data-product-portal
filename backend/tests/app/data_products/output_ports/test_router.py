@@ -36,9 +36,22 @@ from tests.webhook_util import assert_event_in_queue
 ENDPOINT = "/api/v2/data_products/{}/output_ports"
 
 
+def _seed_time_bound_access_durations() -> None:
+    for adp_type in (
+        AbstractDataProductType.DATA_PRODUCT,
+        AbstractDataProductType.EXPLORATION,
+    ):
+        AccessDurationFactory(
+            abstract_data_product_type=adp_type,
+            access_duration_type=AccessDurationType.TIME_BOUND,
+            days=30,
+        )
+
+
 @pytest.fixture
 def output_port_payload():
     user = UserFactory()
+    _seed_time_bound_access_durations()
     return {
         "name": "Test Output Port",
         "description": "Test Description",
@@ -85,6 +98,28 @@ class TestOutputPortRouter:
         )
         assert created_dataset.status_code == 200, created_dataset.text
         assert "id" in created_dataset.json()
+
+    def test_create_dataset__unconfigured_access_duration_type(
+        self, output_port_payload, client
+    ):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        role = RoleFactory(
+            scope=Scope.GLOBAL,
+            permissions=[AuthorizationAction.GLOBAL__CREATE_OUTPUT_PORT],
+        )
+        GlobalRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+        )
+        data_product = DataProductFactory()
+        output_port_payload["exploration_access_duration_type"] = (
+            AccessDurationType.PERMANENT.value
+        )
+        created_dataset = self.create_output_port(
+            client, data_product.id, output_port_payload
+        )
+        assert created_dataset.status_code == 400
+        assert "not a currently configured" in created_dataset.text
 
     def test_create_output_port(self, session, output_port_payload, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
@@ -269,6 +304,7 @@ class TestOutputPortRouter:
         DatasetRoleAssignmentFactory(
             user_id=user.id, role_id=role.id, output_port_id=ds.id
         )
+        _seed_time_bound_access_durations()
         update_payload = {
             "name": "new_name",
             "namespace": "new_namespace",
@@ -298,6 +334,7 @@ class TestOutputPortRouter:
         DatasetRoleAssignmentFactory(
             user_id=user.id, role_id=role.id, output_port_id=ds.id
         )
+        _seed_time_bound_access_durations()
 
         update_payload = {
             "name": "new_name",
@@ -316,6 +353,34 @@ class TestOutputPortRouter:
         assert updated_dataset.status_code == 200
         assert updated_dataset.json()["id"] == str(ds.id)
 
+    def test_update_output_port__unconfigured_access_duration_type(self, client):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        role = RoleFactory(
+            scope=Scope.DATASET,
+            permissions=[AuthorizationAction.OUTPUT_PORT__UPDATE_PROPERTIES],
+        )
+        ds = OutputPortFactory()
+        DatasetRoleAssignmentFactory(
+            user_id=user.id, role_id=role.id, output_port_id=ds.id
+        )
+
+        update_payload = {
+            "name": "new_name",
+            "namespace": "new_namespace",
+            "description": "new_description",
+            "tag_ids": [],
+            "access_type": "restricted",
+            "data_product_access_duration_type": AccessDurationType.PERMANENT.value,
+            "exploration_access_duration_type": AccessDurationType.TIME_BOUND.value,
+        }
+
+        updated_dataset = self.update_output_port(
+            client, ds.data_product.id, ds.id, update_payload
+        )
+
+        assert updated_dataset.status_code == 400
+        assert "not a currently configured" in updated_dataset.text
+
     def test_update_output_port__hidden_data_product_only_allows_private(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
@@ -329,6 +394,7 @@ class TestOutputPortRouter:
         DatasetRoleAssignmentFactory(
             user_id=user.id, role_id=role.id, output_port_id=ds.id
         )
+        _seed_time_bound_access_durations()
 
         update_payload = {
             "name": "new_name",
@@ -826,6 +892,7 @@ class TestOutputPortRouter:
         DatasetRoleAssignmentFactory(
             user_id=user.id, role_id=role.id, output_port_id=ds.id
         )
+        _seed_time_bound_access_durations()
 
         update_payload = {
             "name": "new_name",
