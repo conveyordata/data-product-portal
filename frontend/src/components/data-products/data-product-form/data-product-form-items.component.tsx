@@ -181,11 +181,11 @@ export const DataProductFormItems = <T extends DataProductCreate>({
             </Form.Item>
             <Form.Item<DataProductCreate>
                 name="lifecycle_id"
-                label={t('Status')}
+                label={t('Lifecycle Status')}
                 rules={[
                     {
                         required: true,
-                        message: t('Please select the status of the Data Product'),
+                        message: t('Please select the lifecycle status of the Data Product'),
                     },
                 ]}
             >

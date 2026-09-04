@@ -226,6 +226,32 @@ class TestDataProductsRouter:
         assert response.status_code == 200
         assert response.json()["id"] == str(data_product.id)
 
+    def test_get_data_product__does_not_persist_default_lifecycle(
+        self, session, client
+    ):
+        LifecycleFactory(is_default=True)
+        data_product = DataProductFactory(lifecycle=None)
+
+        response = self.get_data_product(client, data_product.id)
+        assert response.status_code == 200
+        assert response.json()["lifecycle"] is None
+
+        session.expire_all()
+        assert session.get(type(data_product), data_product.id).lifecycle_id is None
+
+    def test_get_data_products__does_not_persist_default_lifecycle(
+        self, session, client
+    ):
+        LifecycleFactory(is_default=True)
+        data_product = DataProductFactory(lifecycle=None)
+
+        response = client.get(ENDPOINT)
+        assert response.status_code == 200
+        assert response.json()["data_products"][0]["lifecycle"] is None
+
+        session.expire_all()
+        assert session.get(type(data_product), data_product.id).lifecycle_id is None
+
     def test_get_data_product_hidden_not_assigned(self, client):
         data_product = DataProductFactory(visibility=DataProductVisibility.HIDDEN)
 

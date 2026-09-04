@@ -60,7 +60,7 @@ export const getDataProductTableColumns = ({
             ellipsis: {
                 showTitle: false,
             },
-            render: (is_default: boolean) => <Checkbox checked={is_default} />,
+            render: (is_default: boolean) => <Checkbox checked={is_default} disabled />,
             sorter: sorter.stringSorter((dp) => dp.is_default.toString()),
         },
         {

@@ -25,6 +25,7 @@ from tests.factories import (
     ExplorationFactory,
     GlobalRoleAssignmentFactory,
     InputPortFactory,
+    LifecycleFactory,
     OutputPortFactory,
     RoleFactory,
     TechnicalAssetFactory,
@@ -126,6 +127,31 @@ class TestOutputPortRouter:
             session.query(Dataset).filter_by(id=created_dataset.json()["id"]).first()
         )
         assert output_port.access_type == OutputPortAccessType.UNRESTRICTED.value
+
+    def test_create_output_port__assigns_default_lifecycle_when_missing(
+        self, session, output_port_payload, client
+    ):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        role = RoleFactory(
+            scope=Scope.GLOBAL,
+            permissions=[AuthorizationAction.GLOBAL__CREATE_OUTPUT_PORT],
+        )
+        GlobalRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+        )
+        default_lifecycle = LifecycleFactory(is_default=True)
+        data_product_id = DataProductFactory().id
+        created_output_port = self.create_output_port(
+            client, data_product_id, output_port_payload
+        )
+        assert created_output_port.status_code == 200
+        output_port: Dataset = (
+            session.query(Dataset)
+            .filter_by(id=created_output_port.json()["id"])
+            .first()
+        )
+        assert output_port.lifecycle_id == default_lifecycle.id
 
     def test_create_output_port__hidden_data_product_only_allows_private_output_port(
         self, session, output_port_payload, client
@@ -422,6 +448,25 @@ class TestOutputPortRouter:
         )
         dataset = self.get_output_port(client, ds.id, ds.data_product.id)
         assert dataset.status_code == 200
+
+    def test_get_output_port__does_not_persist_default_lifecycle(self, session, client):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        role = RoleFactory(
+            scope=Scope.DATASET, permissions=[AuthorizationAction.OUTPUT_PORT__DELETE]
+        )
+        data_product = DataProductFactory()
+        LifecycleFactory(is_default=True)
+        op = OutputPortFactory(data_product=data_product)
+        DatasetRoleAssignmentFactory(
+            user_id=user.id, role_id=role.id, output_port_id=op.id
+        )
+
+        response = self.get_output_port(client, op.id, op.data_product.id)
+        assert response.status_code == 200
+        assert response.json()["lifecycle"] is None
+
+        session.expire_all()
+        assert session.get(type(op), op.id).lifecycle_id is None
 
     def test_get_output_port__deduplicates_access_modes(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)

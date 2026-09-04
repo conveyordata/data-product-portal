@@ -130,10 +130,14 @@ export const CreateLifecycleModal: React.FC<CreateLifecycleModalProps> = ({ isOp
                     name="is_default"
                     label={t('Is Default')}
                     valuePropName="checked"
-                    tooltip={t('You can only have one default lifecycle')}
+                    tooltip={
+                        initial?.is_default
+                            ? t('To remove this default, make another lifecycle the default instead')
+                            : t('Setting this as default will unset the current default lifecycle')
+                    }
                     rules={[{ required: true, message: t('You can only have one default lifecycle') }]}
                 >
-                    <Checkbox disabled />
+                    <Checkbox disabled={initial?.is_default} />
                 </Form.Item>
             </Form>
         </Modal>
