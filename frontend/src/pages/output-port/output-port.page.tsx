@@ -6,21 +6,21 @@ import { useLocation, useNavigate, useParams } from 'react-router';
 
 import outputPortBorderIcon from '@/assets/icons/border-icons/output-port-border-icon.svg?react';
 import { CircleIconButton } from '@/components/buttons/circle-icon-button/circle-icon-button';
-import { UserAccessOverview } from '@/components/data-access/user-access-overview/user-access-overview.component';
+//import { UserAccessOverview } from '@/components/data-access/user-access-overview/user-access-overview.component';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component';
 import { useBreadcrumbs } from '@/components/layout/navbar/breadcrumbs/breadcrumb.context.tsx';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
 import { OutputPortAccessIcon } from '@/components/output-ports/output-port-access-icon/output-port-access-icon.tsx';
-import { DatasetActions } from '@/pages/output-port/components/dataset-actions/dataset-actions.component';
+//import { DatasetActions } from '@/pages/output-port/components/dataset-actions/dataset-actions.component';
 import { OutputPortDescription } from '@/pages/output-port/components/dataset-description/output-port-description.tsx';
-import { DatasetQuality } from '@/pages/output-port/components/dataset-quality/dataset-quality.component.tsx';
+//import { DatasetQuality } from '@/pages/output-port/components/dataset-quality/dataset-quality.component.tsx';
 import { DatasetTabs } from '@/pages/output-port/components/dataset-tabs/dataset-tabs';
 import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
 import { useGetDataProductQuery } from '@/store/api/services/generated/dataProductsApi.ts';
 import { useGetOutputPortQuery } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { ApplicationPaths, createDataProductIdPath, DynamicPathParams } from '@/types/navigation';
-import { useGetDatasetOwners } from '@/utils/dataset-user-role.helper';
+//import { useGetDatasetOwners } from '@/utils/dataset-user-role.helper';
 import styles from './output-port.module.scss';
 
 export function OutputPort() {
@@ -75,7 +75,7 @@ export function OutputPort() {
         }
     }, [setBreadcrumbs, data_product, outputPort, dataProductId, pathname, t]);
 
-    const datasetOwners = useGetDatasetOwners(outputPort?.id);
+    //const datasetOwners = useGetDatasetOwners(outputPort?.id);
 
     function navigateToDatasetEditPage() {
         navigate(
@@ -123,11 +123,11 @@ export function OutputPort() {
                 </Flex>
             </Flex>
             {/* Sidebar */}
-            <Flex vertical className={styles.sidebar}>
-                <DatasetActions datasetId={datasetId} />
-                <DatasetQuality dataProductId={outputPort?.data_product_id} datasetId={datasetId} />
-                <UserAccessOverview users={datasetOwners} title={t('Output Port Owners')} />
-            </Flex>
+            {/*<Flex vertical className={styles.sidebar}>*/}
+            {/*    <DatasetActions datasetId={datasetId} />*/}
+            {/*    <DatasetQuality dataProductId={outputPort?.data_product_id} datasetId={datasetId} />*/}
+            {/*    <UserAccessOverview users={datasetOwners} title={t('Output Port Owners')} />*/}
+            {/*</Flex>*/}
         </Flex>
     );
 }

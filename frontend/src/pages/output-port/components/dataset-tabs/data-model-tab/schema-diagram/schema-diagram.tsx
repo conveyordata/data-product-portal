@@ -1,5 +1,6 @@
 import '@xyflow/react/dist/style.css';
 
+import Dagre from '@dagrejs/dagre';
 import type { Edge, Node, NodeChange } from '@xyflow/react';
 import { applyNodeChanges, Background, Controls, ReactFlow, ReactFlowProvider } from '@xyflow/react';
 import { Flex, Popover, Space, Splitter, Table, Tabs, Tag, Typography } from 'antd';
@@ -13,18 +14,53 @@ import type {
     SchemaRelationshipResponse,
 } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
 import { inferRelationships } from './infer-relationships.ts';
-import { SCHEMA_OBJECT_NODE_TYPE, SchemaObjectNode, type SchemaObjectNodeData } from './schema-object-node.tsx';
+import {
+    EMPTY_PROPERTY_IDS,
+    PropertyClickContext,
+    PropertyHoverContext,
+    SCHEMA_OBJECT_NODE_TYPE,
+    SCHEMA_OBJECT_NODE_WIDTH,
+    SCHEMA_OBJECT_ROW_HEIGHT,
+    SchemaObjectNode,
+    type SchemaObjectNodeData,
+} from './schema-object-node.tsx';
 
 const { Text } = Typography;
 
 const nodeTypes = { [SCHEMA_OBJECT_NODE_TYPE]: SchemaObjectNode };
 
-const NODE_WIDTH = 260;
-const ROW_HEIGHT = 28;
 const HEADER_HEIGHT = 37;
-const COLUMN_GAP = 80;
-const ROW_GAP = 60;
-const COLUMNS = 3;
+const NODE_SEP = 60;
+const RANK_SEP = 80;
+
+function layoutSchemaObjects(
+    schemaObjects: SchemaObjectResponse[],
+    relationships: { sourceObjectId: string; targetObjectId: string }[],
+): Map<string, { x: number; y: number }> {
+    const graph = new Dagre.graphlib.Graph();
+    graph.setDefaultEdgeLabel(() => ({}));
+    graph.setGraph({ rankdir: 'LR', nodesep: NODE_SEP, ranksep: RANK_SEP });
+
+    for (const schemaObject of schemaObjects) {
+        const height = HEADER_HEIGHT + (schemaObject.properties?.length ?? 0) * SCHEMA_OBJECT_ROW_HEIGHT;
+        graph.setNode(schemaObject.id, { width: SCHEMA_OBJECT_NODE_WIDTH, height });
+    }
+    for (const relationship of relationships) {
+        if (relationship.sourceObjectId !== relationship.targetObjectId) {
+            graph.setEdge(relationship.sourceObjectId, relationship.targetObjectId);
+        }
+    }
+    Dagre.layout(graph);
+
+    const positions = new Map<string, { x: number; y: number }>();
+    for (const schemaObject of schemaObjects) {
+        const node = graph.node(schemaObject.id);
+        if (node) {
+            positions.set(schemaObject.id, { x: node.x - SCHEMA_OBJECT_NODE_WIDTH / 2, y: node.y - node.height / 2 });
+        }
+    }
+    return positions;
+}
 
 function getPropertyColumns(t: TFunction) {
     return [
@@ -113,7 +149,10 @@ export function SchemaDiagram({ schemaObjects, declaredRelationships, onSelectOb
     const { t } = useTranslation();
     const [nodes, setNodes] = useState<Node<SchemaObjectNodeData>[]>([]);
     const [edgePopover, setEdgePopover] = useState<EdgePopoverState | null>(null);
-    const [highlightedPropertyIds, setHighlightedPropertyIds] = useState<Set<string>>(new Set());
+    // Set by clicking a column or an edge; persists until something else is clicked or the pane is cleared.
+    const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null);
+    // Set by hovering a column; takes priority over the click selection as a live preview.
+    const [hoveredPropertyId, setHoveredPropertyId] = useState<string | null>(null);
 
     // Prefer relationships the producer declared in the contract; fall back to the name-matching heuristic.
     const relationships = useMemo(() => {
@@ -151,33 +190,68 @@ export function SchemaDiagram({ schemaObjects, declaredRelationships, onSelectOb
         return map;
     }, [relationships]);
 
+    // Hovering previews a column's relationship(s); it wins over a held click selection while active.
+    const activePropertyId = hoveredPropertyId ?? selectedPropertyId;
+
+    const highlightedPropertyIds = useMemo(() => {
+        if (!activePropertyId) return EMPTY_PROPERTY_IDS;
+        const ids = new Set<string>([activePropertyId]);
+        for (const relationship of relationships) {
+            if (relationship.sourcePropertyId === activePropertyId) ids.add(relationship.targetPropertyId);
+            if (relationship.targetPropertyId === activePropertyId) ids.add(relationship.sourcePropertyId);
+        }
+        return ids;
+    }, [activePropertyId, relationships]);
+
+    // Patch only the node(s) whose highlight actually changed, so hovering/clicking never re-renders every card.
+    useEffect(() => {
+        setNodes((currentNodes) =>
+            currentNodes.map((node) => {
+                const isHighlighted = node.data.properties.some((property) => highlightedPropertyIds.has(property.id));
+                const wasHighlighted = node.data.highlightedPropertyIds.size > 0;
+                if (!isHighlighted && !wasHighlighted) return node;
+                return {
+                    ...node,
+                    data: {
+                        ...node.data,
+                        highlightedPropertyIds: isHighlighted ? highlightedPropertyIds : EMPTY_PROPERTY_IDS,
+                    },
+                };
+            }),
+        );
+    }, [highlightedPropertyIds]);
+
+    const onPropertyHover = useCallback((propertyId: string | null) => setHoveredPropertyId(propertyId), []);
+
+    // Clicking a column pins its highlight; clicking it again unpins it.
+    const onPropertyClick = useCallback((propertyId: string) => {
+        setSelectedPropertyId((current) => (current === propertyId ? null : propertyId));
+    }, []);
+
     // Preserve dragged position / selection across schema refetches instead of resetting the layout.
+    // Only re-run the dagre layout when the set of objects actually changes, not on every refetch.
     useEffect(() => {
         setNodes((previousNodes) => {
             const previousPositions = new Map(previousNodes.map((node) => [node.id, node.position]));
             const previousSelection = new Map(previousNodes.map((node) => [node.id, node.selected ?? false]));
-            const columnY = new Array(COLUMNS).fill(0);
-            return schemaObjects.map((schemaObject, index) => {
-                const column = index % COLUMNS;
-                const height = HEADER_HEIGHT + (schemaObject.properties?.length ?? 0) * ROW_HEIGHT;
-                const fallbackPosition = { x: column * (NODE_WIDTH + COLUMN_GAP), y: columnY[column] };
-                columnY[column] += height + ROW_GAP;
-                return {
-                    id: schemaObject.id,
-                    type: SCHEMA_OBJECT_NODE_TYPE,
-                    position: previousPositions.get(schemaObject.id) ?? fallbackPosition,
-                    selected: previousSelection.get(schemaObject.id) ?? index === 0,
-                    data: {
-                        name: schemaObject.name,
-                        physicalType: schemaObject.physical_type,
-                        properties: schemaObject.properties ?? [],
-                        fkPropertyIds: fkPropertyIdsByObject.get(schemaObject.id) ?? new Set<string>(),
-                        highlightedPropertyIds: new Set<string>(),
-                    },
-                };
-            });
+            const hasNewObjects = schemaObjects.some((object) => !previousPositions.has(object.id));
+            const layoutPositions = hasNewObjects ? layoutSchemaObjects(schemaObjects, relationships) : null;
+            return schemaObjects.map((schemaObject, index) => ({
+                id: schemaObject.id,
+                type: SCHEMA_OBJECT_NODE_TYPE,
+                position: previousPositions.get(schemaObject.id) ??
+                    layoutPositions?.get(schemaObject.id) ?? { x: 0, y: 0 },
+                selected: previousSelection.get(schemaObject.id) ?? index === 0,
+                data: {
+                    name: schemaObject.name,
+                    physicalType: schemaObject.physical_type,
+                    properties: schemaObject.properties ?? [],
+                    fkPropertyIds: fkPropertyIdsByObject.get(schemaObject.id) ?? new Set<string>(),
+                    highlightedPropertyIds: EMPTY_PROPERTY_IDS,
+                },
+            }));
         });
-    }, [schemaObjects, fkPropertyIdsByObject]);
+    }, [schemaObjects, relationships, fkPropertyIdsByObject]);
 
     const onNodesChange = useCallback(
         (changes: NodeChange<Node<SchemaObjectNodeData>>[]) => {
@@ -190,10 +264,15 @@ export function SchemaDiagram({ schemaObjects, declaredRelationships, onSelectOb
         [onSelectObject],
     );
 
-    const renderedNodes = useMemo(
-        () => nodes.map((node) => ({ ...node, data: { ...node.data, highlightedPropertyIds } })),
-        [nodes, highlightedPropertyIds],
-    );
+    // The popover is pinned to fixed screen coordinates, so it goes stale as soon as the canvas pans/zooms.
+    // The highlight itself has no such issue and should survive scrolling, so only close the popover here.
+    const closePopover = useCallback(() => setEdgePopover(null), []);
+
+    // Bail out when there's nothing to clear so clicking empty space doesn't re-render every node.
+    const clearHighlight = useCallback(() => {
+        setEdgePopover(null);
+        setSelectedPropertyId((current) => (current === null ? current : null));
+    }, []);
 
     const selectObjectFromTab = (id: string) => {
         setNodes((currentNodes) => currentNodes.map((node) => ({ ...node, selected: node.id === id })));
@@ -202,14 +281,22 @@ export function SchemaDiagram({ schemaObjects, declaredRelationships, onSelectOb
 
     const edges: Edge[] = useMemo(
         () =>
-            relationships.map((relationship) => ({
-                id: relationship.id,
-                source: relationship.sourceObjectId,
-                sourceHandle: `${relationship.sourcePropertyId}-source`,
-                target: relationship.targetObjectId,
-                targetHandle: `${relationship.targetPropertyId}-target`,
-            })),
-        [relationships],
+            relationships.map((relationship) => {
+                const isActive =
+                    activePropertyId != null &&
+                    (relationship.sourcePropertyId === activePropertyId ||
+                        relationship.targetPropertyId === activePropertyId);
+                return {
+                    id: relationship.id,
+                    source: relationship.sourceObjectId,
+                    sourceHandle: `${relationship.sourcePropertyId}-source`,
+                    target: relationship.targetObjectId,
+                    targetHandle: `${relationship.targetPropertyId}-target`,
+                    style: isActive ? { stroke: 'var(--ant-color-primary)', strokeWidth: 2 } : undefined,
+                    zIndex: isActive ? 1 : 0,
+                };
+            }),
+        [relationships, activePropertyId],
     );
 
     const onEdgeClick = useCallback(
@@ -227,7 +314,7 @@ export function SchemaDiagram({ schemaObjects, declaredRelationships, onSelectOb
                 targetLabel: `${targetObject?.name}.${targetProperty?.name}`,
                 cardinality: sourceProperty?.unique ? t('One-to-one') : t('Many-to-one'),
             });
-            setHighlightedPropertyIds(new Set([relationship.sourcePropertyId, relationship.targetPropertyId]));
+            setSelectedPropertyId(relationship.sourcePropertyId);
         },
         [relationships, objectById, propertyById, t],
     );
@@ -268,53 +355,51 @@ export function SchemaDiagram({ schemaObjects, declaredRelationships, onSelectOb
         <Splitter style={{ height: 640 }}>
             <Splitter.Panel defaultSize="55%" min="30%" collapsible>
                 <ReactFlowProvider>
-                    <ReactFlow
-                        nodes={renderedNodes}
-                        edges={edges}
-                        nodeTypes={nodeTypes}
-                        onNodesChange={onNodesChange}
-                        onEdgeClick={onEdgeClick}
-                        onPaneClick={() => {
-                            setEdgePopover(null);
-                            setHighlightedPropertyIds(new Set());
-                        }}
-                        onMoveStart={() => {
-                            setEdgePopover(null);
-                            setHighlightedPropertyIds(new Set());
-                        }}
-                        fitView
-                        minZoom={0.1}
-                        maxZoom={2}
-                        proOptions={{ hideAttribution: true }}
-                        nodesConnectable={false}
-                    >
-                        <Background />
-                        <Controls position="top-right" showInteractive={false} />
-                    </ReactFlow>
-                    {edgePopover && (
-                        <Popover
-                            open
-                            onOpenChange={(open) => !open && setEdgePopover(null)}
-                            content={
-                                <Space orientation="vertical" size={0}>
-                                    <Text strong>
-                                        {edgePopover.sourceLabel} → {edgePopover.targetLabel}
-                                    </Text>
-                                    <Text type="secondary">{edgePopover.cardinality}</Text>
-                                </Space>
-                            }
-                        >
-                            <div
-                                style={{
-                                    position: 'fixed',
-                                    left: edgePopover.x,
-                                    top: edgePopover.y,
-                                    width: 0,
-                                    height: 0,
-                                }}
-                            />
-                        </Popover>
-                    )}
+                    <PropertyHoverContext.Provider value={onPropertyHover}>
+                        <PropertyClickContext.Provider value={onPropertyClick}>
+                            <ReactFlow
+                                nodes={nodes}
+                                edges={edges}
+                                nodeTypes={nodeTypes}
+                                onNodesChange={onNodesChange}
+                                onEdgeClick={onEdgeClick}
+                                onPaneClick={clearHighlight}
+                                onMoveStart={closePopover}
+                                fitView
+                                minZoom={0.1}
+                                maxZoom={2}
+                                proOptions={{ hideAttribution: true }}
+                                nodesConnectable={false}
+                            >
+                                <Background />
+                                <Controls position="top-right" showInteractive={false} />
+                            </ReactFlow>
+                            {edgePopover && (
+                                <Popover
+                                    open
+                                    onOpenChange={(open) => !open && setEdgePopover(null)}
+                                    content={
+                                        <Space orientation="vertical" size={0}>
+                                            <Text strong>
+                                                {edgePopover.sourceLabel} → {edgePopover.targetLabel}
+                                            </Text>
+                                            <Text type="secondary">{edgePopover.cardinality}</Text>
+                                        </Space>
+                                    }
+                                >
+                                    <div
+                                        style={{
+                                            position: 'fixed',
+                                            left: edgePopover.x,
+                                            top: edgePopover.y,
+                                            width: 0,
+                                            height: 0,
+                                        }}
+                                    />
+                                </Popover>
+                            )}
+                        </PropertyClickContext.Provider>
+                    </PropertyHoverContext.Provider>
                 </ReactFlowProvider>
             </Splitter.Panel>
             <Splitter.Panel defaultSize="45%" min="30%" collapsible>
