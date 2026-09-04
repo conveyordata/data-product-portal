@@ -23,7 +23,6 @@ Portal needs also a way to introduce these identities from an external identity 
 * Grant users permissions and Data Product visibility inherited from their groups.
 * Use a standard protocol for synchronizing users, groups and memberships.
 * Support machine users even when they are not available through SCIM.
-* Keep Portal as the only component with direct write access to its database.
 * Provide provider-agnostic APIs for identities, memberships and Data Product role assignments.
 * Preserve existing user-linked workflow and audit relationships.
 * Avoid nested-group resolution, as the supported identity provider supplies flat memberships.
@@ -37,24 +36,20 @@ Portal needs also a way to introduce these identities from an external identity 
 
 For synchronization:
 
-* **Option A: Custom Portal synchronization API** — receive every identity type and membership through Portal-specific API operations.
-* **Option B: SCIM interface with a Machine User API** — receive users, groups and memberships through SCIM and receive machine users through a Portal-specific
+* **Option A: Extend Portal API** — receive every identity type and membership through Portal-specific API operations.
+* **Option B: Extend Portal API + SCIM interface** — receive users, groups and memberships through SCIM and receive machine users through a Portal-specific
   API.
 
 ## Decision Outcome
 
-**Chosen options:** *Option 1: Common Identity with separate subtype tables* and *Option B: SCIM interface with a Machine User API*.
+**Chosen options:** *Option 1: Common Identity with separate subtype tables* and *Option B: Extend Portal API + SCIM interface*.
 
 A common Identity provides one target for Global and Data Product role assignments while keeping the attributes and behaviour of users, groups and machine users
 separated. Only users can authenticate, request or approve changes and act inside Portal, while every identity type can receive roles and both users and machine
 users can belong to groups.
 
-Portal will implement a SCIM interface for users, groups and group memberships. Machine users and their memberships will be created and updated through
-authenticated and idempotent Portal API operations until they can be synchronized through SCIM. Both entry points will use the same internal identity services
-and persistence model.
-
-Explorations remain owned and operated by individual users. Their ownership and authorization model is not migrated to the common Identity model as part of this
-decision.
+Portal will implement a SCIM interface for users, groups and group memberships. Machine users and their memberships will be created and updated through Portal 
+API operations until they can be synchronized through SCIM. Both entry points will use the same internal identity services and persistence model.
 
 ### Confirmation
 
@@ -66,7 +61,7 @@ decision.
 * Explorations continue to use their existing user-specific ownership model.
 * SCIM endpoints support the user, group and membership operations required by the identity provider.
 * The Portal API supports creating and updating machine users and their group memberships.
-* Read endpoints expose users, groups, machine users and group memberships.
+* CRUD endpoints expose users, groups, machine users and group memberships.
 * Data Product role-assignment responses include the assigned identity and its type.
 * The generated SDK includes the new Portal API operations.
 
@@ -78,10 +73,10 @@ decision.
 * **Good, because** type-specific attributes and relationships remain in separate tables.
 * **Good, because** users remain separated from identities that cannot authenticate.
 * **Good, because** group membership can reference both users and machine users.
+* **Good, because** Casbin group inheritance can be used to enforce access control policies.
 * **Neutral, because** reading a complete identity requires joining its common and type-specific tables.
 * **Bad, because** parent and subtype rows must be managed in the same transaction.
 * **Bad, because** Portal must validate that every Identity has exactly one subtype matching its type.
-* **Bad, because** it introduces more tables and relationships than a single-table model.
 
 ### Option 2: Single Identities table
 
@@ -92,22 +87,18 @@ decision.
 * **Bad, because** user-only relationships and constraints become harder to enforce.
 * **Bad, because** existing Portal code assumes a dedicated User model for authentication, notifications and workflows.
 
-### Option A: Custom Portal synchronization API
+### Option A: Extend Portal API
 
 * **Good, because** every identity type follows the same synchronization contract.
 * **Good, because** Portal keeps control over validation and database writes.
-* **Bad, because** it requires designing and maintaining a custom synchronization protocol.
+* **Bad, because** it requires designing and maintaining an external custom synchronization protocol.
 * **Bad, because** identity providers require a custom integration instead of using their existing SCIM support.
 
-### Option B: SCIM interface with a Machine User API
+### Option B: Extend Portal API + SCIM interface
 
 * **Good, because** SCIM provides a standard interface for users, groups and memberships.
 * **Good, because** the identity provider pushes changes without Portal scheduling provider queries.
-* **Good, because** the custom API remains limited to identities not available through SCIM.
-* **Good, because** Portal remains the only component with direct database access.
-* **Neutral, because** SCIM and the Machine User API are separate entry points into the same identity model.
 * **Bad, because** two synchronization mechanisms must coexist while machine users are not available through SCIM.
-* **Bad, because** Portal must prevent duplicates between SCIM, the Machine User API and login-time user creation.
 
 ## Design Details
 
@@ -116,7 +107,45 @@ decision.
 The common table holds the Portal identity and its type. Users, groups and machine users use the Identity ID as their primary key and as a foreign key to
 `identities.id`.
 
-![model.png](0023-external-identities-group-based-auth-model.png)
+```mermaid
+erDiagram
+    identities {
+        string id PK
+        string type "USER | GROUP | SP"
+    }
+
+    group_membership {
+        string group_id PK, FK
+        string member_id PK, FK
+    }
+
+    users {
+        string id PK, FK
+        string email
+        string external_id
+        string first_name
+        string second_name
+    }
+
+    service_principals {
+        string id PK, FK
+        string display_name
+        string external_id
+    }
+
+    groups {
+        string id PK, FK
+        string display_name
+        string external_id
+    }
+
+    identities ||--o| users : "1:0..1"
+    identities ||--o| service_principals : "1:0..1"
+    identities ||--o| groups : "1:0..1"
+    identities ||--o{ group_membership : "member_id"
+    groups ||--o{ group_membership : "group_id"
+
+```
 
 `group_memberships` uses `(group_id, member_identity_id)` as its composite primary key. Portal accepts users and machine users as members and rejects groups as
 members. This matches the flat memberships supplied by the supported identity provider and avoids introducing recursive group resolution.
@@ -140,26 +169,6 @@ Existing Global and Data Product role assignments must be migrated by creating a
 references with the corresponding `identity_id`.
 
 Explorations remain associated with users through their existing ownership model. Their relationships are not migrated to `identities.id` by this decision.
-
-### Effective authorization and visibility
-
-For an authenticated user, Portal resolves the user identity and the groups of which the user is a direct member:
-
-```text
-effective identities = user identity + group identities
-```
-
-Global and Data Product authorization succeeds when the user identity or any of those group identities has the required approved role assignment. Groups and
-machine users do not authenticate and are therefore never resolved as Portal actors.
-
-The same effective identities must be used for Data Product visibility. A group assignment to a Data Product makes that Data Product and the resources governed
-by the assigned role visible to the users belonging to the group.
-
-Machine users can receive Global and Data Product assignments, but they cannot exercise those permissions inside Portal because they cannot authenticate. Their
-assignments remain available through the common persistence and API models.
-
-Changes to group membership and role assignments must invalidate affected authorization decisions. This must work across backend instances and cannot depend
-only on clearing an in-process cache.
 
 ### Exploration scope boundary
 
@@ -192,21 +201,18 @@ a duplicate.
 
 ### Portal API
 
-Portal adds authenticated and idempotent operations for creating and updating machine users and their group memberships. Stable external identifiers are used so
-the operations can be safely retried.
-
-Portal also exposes paginated read operations for:
+Portal adds authenticated and idempotent CRUD operations for: 
 
 * Users.
 * Groups and their members.
 * Machine users.
 * Data Product role assignments.
 
-The existing `GET /v2/users` operation can be extended where needed instead of adding another user-list endpoint. New operations for groups, memberships and
+The existing `GET /v2/users` operation will be extended where needed as it is already implemented. New operations for groups, memberships and
 machine users follow the same `/v2` API conventions.
 
 Data Product role-assignment responses embed the assigned identity and its type. For example, when Group A is Developer of a Data Product, the response contains
-Group A rather than expanding it into its members:
+Group A rather than the corresponding Identity A:
 
 ```json
 {
@@ -228,21 +234,3 @@ Group A rather than expanding it into its members:
 Embedding the identity avoids an additional lookup while preserving the original assignment.
 
 Global role assignments are not added to the external read API because they only affect authorization inside Portal.
-
-## Consequences
-
-Portal gains a common Identity model where users, groups and machine users can receive Global and Data Product roles without losing the separation between
-interactive users and non-interactive identities. This requires migrating existing Global and Data Product assignments and updating the corresponding models,
-schemas, events and authorization services.
-
-Group membership becomes part of Portal’s authorization state. A user can receive access directly or through any of their flat groups, and Data Product
-visibility must follow the same rule to avoid differences between what the user can access and what Portal shows.
-
-Explorations remain limited to users through their existing ownership model. Allowing other identity types to own or receive access to Explorations will require
-a separate refactoring and architectural decision.
-
-Users, groups and memberships are primarily managed through SCIM, while machine users temporarily use Portal-specific API operations. Both paths share the same
-internal identity services and must reconcile with login-time user creation to avoid duplicated records.
-
-Portal’s read API exposes the original assigned identity and its type without expanding group membership. This keeps the API generic while allowing clients to
-combine identities, memberships and Data Product role assignments for their own use cases.
