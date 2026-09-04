@@ -264,7 +264,9 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         response = self.request_technical_asset_output_port_link(
             client, data_product.id, technical_asset.id, ds.id
         )
-        assert response.status_code == 200
+        assert response.status_code == 200, (
+            "Since the user is part of the data product, they should be able to request a link to a private output port"
+        )
 
     def test_request_technical_asset_remove(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)

@@ -19,8 +19,7 @@ from tests.session_util import as_user
 class TestDatasetsService:
     def test_recalculate_search(self, session):
         ds = OutputPortFactory()
-        with as_user(session, UserFactory().id):
-            OutputPortService(session).recalculate_search(ds.id)
+        OutputPortService(session).recalculate_search(ds.id)
 
     def test_recalculate_search_with_technical_asset(self, session):
         ds = OutputPortFactory()
@@ -28,8 +27,7 @@ class TestDatasetsService:
         TechnicalAssetOutputPortAssociationFactory(
             data_output=data_output, output_port=ds
         )
-        with as_user(session, UserFactory().id):
-            OutputPortService(session).recalculate_search(ds.id)
+        OutputPortService(session).recalculate_search(ds.id)
 
     def test_recalculate_search_for_all_output_ports(self, session):
         for i in range(51):  # Ensure we load 2 batches
@@ -65,18 +63,18 @@ class TestDatasetsService:
         )
 
         # Recalculate search embeddings for all datasets
-        with as_user(session, UserFactory().id):
-            OutputPortService(session).recalculate_search(unrestricted_dataset.id)
-            OutputPortService(session).recalculate_search(private_dataset.id)
-            OutputPortService(session).recalculate_search(owned_private_dataset.id)
+        OutputPortService(session).recalculate_search(unrestricted_dataset.id)
+        OutputPortService(session).recalculate_search(private_dataset.id)
+        OutputPortService(session).recalculate_search(owned_private_dataset.id)
 
         # Search as the regular user
-        search_results = OutputPortService(session).search_output_ports(
-            query=None,
-            limit=100,
-            user=regular_user,
-            assignment_filter=AssignmentFilter.ALL,
-        )
+        with as_user(session, regular_user.id):
+            search_results = OutputPortService(session).search_output_ports(
+                query=None,
+                limit=100,
+                user=regular_user,
+                assignment_filter=AssignmentFilter.ALL,
+            )
 
         # Extract dataset IDs from results
         result_ids = [ds.id for ds in search_results]
@@ -112,19 +110,18 @@ class TestDatasetsService:
         unrestricted_dataset = OutputPortFactory(
             name="Unrestricted Dataset", access_type=OutputPortAccessType.UNRESTRICTED
         )
-
         # Recalculate search embeddings
-        with as_user(session, owner.id):
-            OutputPortService(session).recalculate_search(private_dataset.id)
-            OutputPortService(session).recalculate_search(unrestricted_dataset.id)
+        OutputPortService(session).recalculate_search(private_dataset.id)
+        OutputPortService(session).recalculate_search(unrestricted_dataset.id)
 
-        # Search as the owner
-        search_results = OutputPortService(session).search_output_ports(
-            query=None,
-            limit=100,
-            user=owner,
-            assignment_filter=AssignmentFilter.ALL,
-        )
+        with as_user(session, owner.id):
+            # Search as the owner
+            search_results = OutputPortService(session).search_output_ports(
+                query=None,
+                limit=100,
+                user=owner,
+                assignment_filter=AssignmentFilter.ALL,
+            )
 
         # Extract dataset IDs from results
         result_ids = [ds.id for ds in search_results]

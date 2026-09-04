@@ -76,6 +76,26 @@ class TestRequestInputPortsDuration:
         assert req.requested_duration_days == 30
         assert req.valid_until == datetime.now(pytz.utc).date() + timedelta(days=30)
 
+    def test_request_input_ports__private_output_port_no_access(self, session):
+        actor = UserFactory()
+        dp = DataProductFactory()
+        port = OutputPortFactory(
+            access_type=OutputPortAccessType.PRIVATE,
+        )
+        with pytest.raises(HTTPException) as exc_info:
+            AbstractDataProductService(session).request_input_ports(
+                dp.id,
+                [
+                    RequestInputPortsForAbstractDataProductRequestItem(
+                        output_port_id=port.id
+                    )
+                ],
+                "need access",
+                actor=actor,
+            )
+
+        assert exc_info.value.status_code == 404
+
     def test_request_input_ports__permanent_port_has_no_window(self, session):
         actor = UserFactory()
         dp = DataProductFactory()
