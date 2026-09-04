@@ -23,6 +23,7 @@ from app.configuration.access_durations.enums import AccessDurationType
 from app.configuration.access_durations.model import (
     AccessDuration as AccessDurationModel,
 )
+from app.configuration.access_durations.service import AccessDurationService
 from app.configuration.data_product_lifecycles.model import (
     DataProductLifecycle as DataProductLifeCycleModel,
 )
@@ -91,6 +92,28 @@ class OutputPortService:
         self.db = db
         self.namespace_validator = NamespaceValidator(OutputPortModel)
         self.embedding_model = get_text_embedding_model()
+
+    def _ensure_access_durations_are_configured(
+        self,
+        data_product_access_duration_type: AccessDurationType,
+        exploration_access_duration_type: AccessDurationType,
+    ) -> None:
+        access_duration_service = AccessDurationService(self.db)
+        for adp_type, duration_type in (
+            (AbstractDataProductType.DATA_PRODUCT, data_product_access_duration_type),
+            (AbstractDataProductType.EXPLORATION, exploration_access_duration_type),
+        ):
+            if (
+                access_duration_service.get_access_duration(adp_type, duration_type)
+                is None
+            ):
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=(
+                        f"{duration_type.value} is not a currently configured "
+                        f"access duration for {adp_type.value}"
+                    ),
+                )
 
     def _ensure_data_product_not_deleting(
         self, data_product_id: UUID
@@ -350,6 +373,10 @@ class OutputPortService:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Invalid namespace: {validity}",
             )
+        self._ensure_access_durations_are_configured(
+            create_output_port_request.data_product_access_duration_type,
+            create_output_port_request.exploration_access_duration_type,
+        )
 
         output_port_schema = create_output_port_request.parse_pydantic_schema()
         output_port_schema["data_product_id"] = data_product_id
@@ -375,20 +402,20 @@ class OutputPortService:
         return result
 
     def update_output_port(
-        self, id: UUID, data_product_id: UUID, dataset: DatasetUpdate
+        self, id: UUID, data_product_id: UUID, output_port_update: DatasetUpdate
     ) -> UUID:
         dp = self._ensure_data_product_not_deleting(data_product_id)
-        self.ensure_access_type_matches_visibility(dp, dataset.access_type)
-        current_dataset = ensure_output_port_exists(
+        self.ensure_access_type_matches_visibility(dp, output_port_update.access_type)
+        current_output_port = ensure_output_port_exists(
             id, self.db, data_product_id=data_product_id
         )
-        updated_dataset = dataset.model_dump(exclude_unset=True)
+        updated_output_port = output_port_update.model_dump(exclude_unset=True)
 
         if (
-            current_dataset.namespace != dataset.namespace
+            current_output_port.namespace != output_port_update.namespace
             and (
                 validity := self.namespace_validator.validate_namespace(
-                    dataset.namespace, self.db
+                    output_port_update.namespace, self.db
                 ).validity
             )
             != ResourceNameValidityType.VALID
@@ -397,16 +424,20 @@ class OutputPortService:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Invalid namespace: {validity.value}",
             )
+        self._ensure_access_durations_are_configured(
+            output_port_update.data_product_access_duration_type,
+            output_port_update.exploration_access_duration_type,
+        )
 
-        for k, v in updated_dataset.items():
+        for k, v in updated_output_port.items():
             if k == "tag_ids":
                 new_tags = self._fetch_tags(v)
-                current_dataset.tags = new_tags
+                current_output_port.tags = new_tags
             else:
-                setattr(current_dataset, k, v) if v else None
+                setattr(current_output_port, k, v) if v else None
         self.db.flush()
         self.recalculate_search(id)
-        return current_dataset.id
+        return current_output_port.id
 
     def update_output_port_about(
         self,

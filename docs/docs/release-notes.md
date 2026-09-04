@@ -26,6 +26,10 @@ sidebar_position: 200
 - **[General]**: We now allow changing DB pool settings, this allows you to tweak this for your specific environment. We set the default to a pool of 20 and a max overflow of 20, which should be sufficient for most installations.
 - **[Data model]**: Allow uploading the data model of an output port through the UI
 
+### bugfixes
+
+- **[Explorations]**: Fixed a bug where requesting an output port as an exploration input port could fail with a 500 error due to a misconfigured access duration.
+
 ## 0.7.0
 
 ### breaking changes
