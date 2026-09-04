@@ -414,6 +414,23 @@ class TestOutputPortRouter:
         response = self.get_output_port(client, ds.id, ds.data_product.id)
         assert response.status_code == 404
 
+    def test_remove_output_port_with_data_product_role(self, client):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[AuthorizationAction.OUTPUT_PORT__DELETE],
+        )
+        ds = OutputPortFactory()
+        DataProductRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+            data_product_id=ds.data_product.id,
+        )
+
+        response = self.delete_output_port(client, ds.data_product.id, ds.id)
+
+        assert response.status_code == 200
+
     def test_get_output_port_with_invalid_id(self, client):
         dp = DataProductFactory()
         dataset = self.get_output_port(client, dp.id, self.invalid_id)

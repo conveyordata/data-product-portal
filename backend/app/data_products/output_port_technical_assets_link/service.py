@@ -7,11 +7,15 @@ from fastapi import HTTPException, status
 from sqlalchemy import asc, or_, select
 from sqlalchemy.orm import Session
 
+from app.authorization.role_assignments.data_product.model import (
+    DataProductRoleAssignment as DataProductRoleAssignmentModel,
+)
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.role_assignments.output_port.model import (
     DatasetRoleAssignment as DatasetRoleAssignmentModel,
 )
 from app.core.authz import Action, Authorization
+from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.output_port_technical_assets_link.model import (
     DataOutputDatasetAssociation as DataOutputDatasetAssociationModel,
 )
@@ -156,10 +160,19 @@ class TechnicalAssetOutputPortService:
                     DataOutputDatasetAssociationModel.status == DecisionStatus.PENDING,
                 )
                 .where(
-                    DataOutputDatasetAssociationModel.output_port.has(
-                        OutputPortModel.assignments.any(
-                            DatasetRoleAssignmentModel.user_id == user.id
-                        )
+                    or_(
+                        DataOutputDatasetAssociationModel.output_port.has(
+                            OutputPortModel.assignments.any(
+                                DatasetRoleAssignmentModel.user_id == user.id
+                            )
+                        ),
+                        DataOutputDatasetAssociationModel.output_port.has(
+                            OutputPortModel.data_product.has(
+                                DataProductModel.assignments.any(
+                                    DataProductRoleAssignmentModel.user_id == user.id
+                                )
+                            )
+                        ),
                     )
                 )
                 .order_by(asc(DataOutputDatasetAssociationModel.requested_on))
@@ -176,6 +189,7 @@ class TechnicalAssetOutputPortService:
                 sub=str(user.id),
                 dom=str(a.output_port.data_product.domain.id),
                 obj=str(a.output_port_id),
+                parent=str(a.output_port.data_product_id),
                 act=Action.OUTPUT_PORT__APPROVE_TECHNICAL_ASSET_LINK_REQUEST,
             )
         ]

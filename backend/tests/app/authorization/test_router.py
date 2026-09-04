@@ -5,7 +5,13 @@ from fastapi.testclient import TestClient
 from app.authorization.schema_response import AccessResponse
 from app.core.authz import Action, Authorization
 from app.settings import settings
-from tests.factories import UserFactory
+from tests.factories import (
+    DataProductFactory,
+    DataProductRoleAssignmentFactory,
+    OutputPortFactory,
+    RoleFactory,
+    UserFactory,
+)
 
 ENDPOINT = "/api/v2/authz"
 
@@ -40,6 +46,23 @@ class TestAuthorizationRouter:
 
         access = AccessResponse(**response.json())
         assert access.allowed is True
+
+    def test_check_access_authorized_by_data_product_role(
+        self, client: TestClient, authorizer: Authorization
+    ):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        data_product = DataProductFactory()
+        output_port = OutputPortFactory(data_product=data_product)
+        action = Action.OUTPUT_PORT__UPDATE_PROPERTIES
+        role = RoleFactory(permissions=[action])
+        DataProductRoleAssignmentFactory(
+            role_id=role.id, user_id=user.id, data_product_id=data_product.id
+        )
+
+        response = client.get(f"{ENDPOINT}/access/{action}?resource={output_port.id}")
+
+        assert response.status_code == 200
+        assert AccessResponse(**response.json()).allowed is True
 
     def test_is_admin(self, client: TestClient):
         response = client.get(f"{ENDPOINT}/admin")

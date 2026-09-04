@@ -86,6 +86,7 @@
     "Allows modifying properties such as labels and the description of a Data Product": "Allows modifying properties such as labels and the description of a Data Product",
     "Allows modifying properties such as labels and the description of an Output Port": "Allows modifying properties such as labels and the description of an Output Port",
     "Allows modifying the configuration options of this installation": "Allows modifying the configuration options of this installation",
+    "Allows modifying the data contract of an Output Port": "Allows modifying the data contract of an Output Port",
     "Allows modifying the details of a Technical Asset of this Data Product": "Allows modifying the details of a Technical Asset of this Data Product",
     "Allows removing a Technical Asset from this Data Product and unlinking it from a Dataset": "Allows removing a Technical Asset from this Data Product and unlinking it from a Dataset",
     "Allows removing a user as member from this Data Product": "Allows removing a user as member from this Data Product",

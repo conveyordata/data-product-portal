@@ -61,3 +61,9 @@ Hidden data products are supported through a read only role, that is added with 
 This read action will be added by default to add data product roles, and is hidden for users.
 But this action will give you rights to any data product you have access to.
 And visible data products will use the g("*", public_reader_role_id, product_id) wildcard to allow access to all users.
+
+
+## Parent access
+
+We support a parent model, where a data product role for example can give access to all output ports under it.
+In the request the parent must be passed for output ports. This can ensure the data product role can give rights.
