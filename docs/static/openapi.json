@@ -11417,7 +11417,8 @@
           },
           "verification_uri_complete": {
             "type": "string",
-            "title": "Verification Uri Complete"
+            "title": "Verification Uri Complete",
+            "default": ""
           }
         },
         "type": "object",
@@ -11431,8 +11432,7 @@
           "status",
           "authz_code",
           "authz_state",
-          "authz_verif",
-          "verification_uri_complete"
+          "authz_verif"
         ],
         "title": "DeviceFlow"
       },

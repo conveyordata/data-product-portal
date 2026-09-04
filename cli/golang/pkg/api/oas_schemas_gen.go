@@ -4040,7 +4040,7 @@ type DeviceFlow struct {
 	AuthzCode               NilString        `json:"authz_code"`
 	AuthzState              NilString        `json:"authz_state"`
 	AuthzVerif              NilString        `json:"authz_verif"`
-	VerificationURIComplete string           `json:"verification_uri_complete"`
+	VerificationURIComplete OptString        `json:"verification_uri_complete"`
 }
 
 // GetDeviceCode returns the value of DeviceCode.
@@ -4094,7 +4094,7 @@ func (s *DeviceFlow) GetAuthzVerif() NilString {
 }
 
 // GetVerificationURIComplete returns the value of VerificationURIComplete.
-func (s *DeviceFlow) GetVerificationURIComplete() string {
+func (s *DeviceFlow) GetVerificationURIComplete() OptString {
 	return s.VerificationURIComplete
 }
 
@@ -4149,7 +4149,7 @@ func (s *DeviceFlow) SetAuthzVerif(val NilString) {
 }
 
 // SetVerificationURIComplete sets the value of VerificationURIComplete.
-func (s *DeviceFlow) SetVerificationURIComplete(val string) {
+func (s *DeviceFlow) SetVerificationURIComplete(val OptString) {
 	s.VerificationURIComplete = val
 }
 

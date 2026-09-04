@@ -44,7 +44,7 @@ class OutputPortFactory(factory.alchemy.SQLAlchemyModelFactory):
         else:
             # If called without arguments, create a default tag
             self.tags.append(TagFactory())
-        test_session.commit()
+        test_session.flush()
 
     @factory.post_generation
     def access_durations(self, create, extracted, **kwargs):
@@ -67,4 +67,4 @@ class OutputPortFactory(factory.alchemy.SQLAlchemyModelFactory):
                     access_duration_type=AccessDurationType.PERMANENT,
                     days=None,
                 )
-        test_session.commit()
+        test_session.flush()

@@ -76,7 +76,10 @@ func Login(ctx context.Context) (*token.Token, error) {
 	case *api.HTTPValidationError:
 		return nil, errortranslation.TranslateHttpError(r)
 	case *api.DeviceFlow:
-		loginUrl := r.VerificationURIComplete
+		loginUrl, ok := r.VerificationURIComplete.Get()
+		if !ok {
+			return nil, errors.New("verification URI complete not found in response")
+		}
 
 		if err := browser.OpenURL(loginUrl); err != nil {
 			fmt.Println("Could not open the browser automatically, please go to this url: ", loginUrl)

@@ -8,6 +8,7 @@ from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..models.device_flow_status import DeviceFlowStatus
+from ..types import UNSET, Unset
 
 T = TypeVar("T", bound="DeviceFlow")
 
@@ -26,7 +27,7 @@ class DeviceFlow:
         authz_code (None | str):
         authz_state (None | str):
         authz_verif (None | str):
-        verification_uri_complete (str):
+        verification_uri_complete (str | Unset):  Default: ''.
     """
 
     device_code: UUID
@@ -39,7 +40,7 @@ class DeviceFlow:
     authz_code: None | str
     authz_state: None | str
     authz_verif: None | str
-    verification_uri_complete: str
+    verification_uri_complete: str | Unset = ""
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -82,9 +83,10 @@ class DeviceFlow:
                 "authz_code": authz_code,
                 "authz_state": authz_state,
                 "authz_verif": authz_verif,
-                "verification_uri_complete": verification_uri_complete,
             }
         )
+        if verification_uri_complete is not UNSET:
+            field_dict["verification_uri_complete"] = verification_uri_complete
 
         return field_dict
 
@@ -126,7 +128,7 @@ class DeviceFlow:
 
         authz_verif = _parse_authz_verif(d.pop("authz_verif"))
 
-        verification_uri_complete = d.pop("verification_uri_complete")
+        verification_uri_complete = d.pop("verification_uri_complete", UNSET)
 
         device_flow = cls(
             device_code=device_code,
