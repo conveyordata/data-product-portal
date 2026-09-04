@@ -1,4 +1,5 @@
 from abc import ABC
+from dataclasses import dataclass
 from typing import Type, TypeAlias, Union, cast
 
 from fastapi import Depends, Request
@@ -24,8 +25,15 @@ from app.database.deps import get_db_session
 from app.explorations.model import Exploration
 
 Model: TypeAlias = Union[
-    Type[DataProduct], Type[OutputPort], Type[TechnicalAsset], None
+    Type[DataProduct], Type[OutputPort], Type[TechnicalAsset], Type[Exploration], None
 ]
+
+
+@dataclass(frozen=True)
+class AuthorizationContext:
+    object_id: str
+    parent_id: str
+    domain_id: str
 
 
 class SubjectResolver(ABC):
@@ -33,7 +41,7 @@ class SubjectResolver(ABC):
     model: Model = None
 
     @classmethod
-    async def resolve(
+    async def _resolve(
         cls, request: Request, key: str, db: Session = Depends(get_db_session)
     ):
         if (result := request.query_params.get(key)) is not None:
@@ -47,7 +55,7 @@ class SubjectResolver(ABC):
         return cls.DEFAULT
 
     @classmethod
-    async def resolve_domain(
+    async def _resolve_domain(
         cls,
         db: Session,
         id_: str,
@@ -57,10 +65,25 @@ class SubjectResolver(ABC):
         domain = db.scalar(select(cls.model.domain_id).where(cls.model.id == id_))
         return cls.DEFAULT if domain is None else str(domain)
 
+    @classmethod
+    async def _resolve_parent(cls, db: Session, id_: str) -> str:
+        return cls.DEFAULT
+
+    @classmethod
+    async def resolve_context(
+        cls, request: Request, key: str, db: Session = Depends(get_db_session)
+    ) -> AuthorizationContext:
+        object_id = str(await cls._resolve(request, key, db))
+        return AuthorizationContext(
+            object_id=object_id,
+            parent_id=await cls._resolve_parent(db, object_id),
+            domain_id=await cls._resolve_domain(db, object_id),
+        )
+
 
 class EmptyResolver(SubjectResolver):
     @classmethod
-    async def resolve(
+    async def _resolve(
         cls, request: Request, key: str, db: Session = Depends(get_db_session)
     ):
         return cls.DEFAULT
@@ -75,13 +98,13 @@ class ExplorationResolver(SubjectResolver):
 
 
 class OutputPortRoleAssignmentResolver(SubjectResolver):
-    model: Model = DataProduct
+    model: Model = OutputPort
 
     @classmethod
-    async def resolve(
+    async def _resolve(
         cls, request: Request, key: str, db: Session = Depends(get_db_session)
     ):
-        obj = await DataProductResolver.resolve(request, key, db)
+        obj = await super()._resolve(request, key, db)
         if obj != cls.DEFAULT:
             assignment = (
                 db.scalars(
@@ -94,15 +117,23 @@ class OutputPortRoleAssignmentResolver(SubjectResolver):
                 return assignment.output_port_id
         return cls.DEFAULT
 
+    @classmethod
+    async def _resolve_domain(cls, db: Session, id_: str) -> str:
+        return await DatasetResolver._resolve_domain(db, id_)
+
+    @classmethod
+    async def _resolve_parent(cls, db: Session, id_: str) -> str:
+        return await DatasetResolver._resolve_parent(db, id_)
+
 
 class DataProductRoleAssignmentResolver(SubjectResolver):
     model: Model = DataProduct
 
     @classmethod
-    async def resolve(
+    async def _resolve(
         cls, request: Request, key: str, db: Session = Depends(get_db_session)
     ):
-        obj = await DataProductResolver.resolve(request, key, db)
+        obj = await super()._resolve(request, key, db)
         if obj != cls.DEFAULT:
             assignment = (
                 db.scalars(
@@ -122,7 +153,7 @@ class DatasetResolver(SubjectResolver):
     model: Model = OutputPort
 
     @classmethod
-    async def resolve_domain(
+    async def _resolve_domain(
         cls,
         db: Session,
         id_: str,
@@ -134,15 +165,24 @@ class DatasetResolver(SubjectResolver):
         )
         return cls.DEFAULT if domain is None else str(domain)
 
+    @classmethod
+    async def _resolve_parent(cls, db: Session, id_: str) -> str:
+        if id_ == cls.DEFAULT:
+            return cls.DEFAULT
+        data_product_id = db.scalar(
+            select(OutputPort.data_product_id).where(OutputPort.id == id_)
+        )
+        return cls.DEFAULT if data_product_id is None else str(data_product_id)
+
 
 class DataProductNameResolver(SubjectResolver):
     model: Model = DataProduct
 
     @classmethod
-    async def resolve(
+    async def _resolve(
         cls, request: Request, key: str, db: Session = Depends(get_db_session)
     ):
-        obj = await DataProductResolver.resolve(request, key, db)
+        obj = await DataProductResolver._resolve(request, key, db)
         if obj != cls.DEFAULT:
             data_product = (
                 db.scalars(select(DataProduct).where(DataProduct.namespace == obj))
@@ -158,10 +198,10 @@ class TechnicalAssetResolver(SubjectResolver):
     model: Model = DataProduct
 
     @classmethod
-    async def resolve(
+    async def _resolve(
         cls, request: Request, key: str, db: Session = Depends(get_db_session)
     ):
-        obj = await DataProductResolver.resolve(request, key, db)
+        obj = await DataProductResolver._resolve(request, key, db)
         if obj != cls.DEFAULT:
             technical_asset = (
                 db.scalars(select(TechnicalAsset).where(TechnicalAsset.id == obj))
@@ -175,10 +215,10 @@ class TechnicalAssetResolver(SubjectResolver):
 
 class DataOutputDatasetAssociationResolver(DatasetResolver):
     @classmethod
-    async def resolve(
+    async def _resolve(
         cls, request: Request, key: str, db: Session = Depends(get_db_session)
     ):
-        obj = await SubjectResolver.resolve(request, key, db)
+        obj = await SubjectResolver._resolve(request, key, db)
         if obj != cls.DEFAULT:
             data_output_dataset = db.scalar(
                 select(DataOutputDatasetAssociation).where(
@@ -192,10 +232,10 @@ class DataOutputDatasetAssociationResolver(DatasetResolver):
 
 class DataProductDatasetAssociationResolver(DatasetResolver):
     @classmethod
-    async def resolve(
+    async def _resolve(
         cls, request: Request, key: str, db: Session = Depends(get_db_session)
     ):
-        obj = await DataProductResolver.resolve(request, key, db)
+        obj = await DataProductResolver._resolve(request, key, db)
         if obj != cls.DEFAULT:
             data_product_dataset = (
                 db.scalars(select(InputPort).where(InputPort.id == obj))

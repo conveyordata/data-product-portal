@@ -96,6 +96,33 @@ class TestAuthorization:
         authorizer.revoke_domain_role(user_id=user, role_id=role, domain_id=dom)
         assert authorizer.has_access(sub=user, dom=dom, obj=ANY, act=allowed) is False
 
+    def test_data_product_role_applies_to_output_port(self, authorizer: Authorization):
+        role = "data_product_role"
+        user = "test_user"
+        data_product = "data_product"
+        output_port = "output_port"
+        action = AuthorizationAction.OUTPUT_PORT__UPDATE_PROPERTIES
+
+        authorizer.sync_role_permissions(role_id=role, actions=[action])
+        authorizer.assign_resource_role(
+            user_id=user, role_id=role, resource_id=data_product
+        )
+
+        assert authorizer.has_access(
+            sub=user,
+            dom=ANY,
+            obj=output_port,
+            parent=data_product,
+            act=action,
+        )
+        assert not authorizer.has_access(
+            sub=user,
+            dom=ANY,
+            obj=output_port,
+            parent="other_data_product",
+            act=action,
+        )
+
     def test_global_role(self, authorizer: Authorization, everyone_role_permissions):
         user = "test_user"
         role = "test_role"
