@@ -85,7 +85,18 @@ def _visibility_filter_for_user(user_id: uuid.UUID):
     )
 
 
-def _statement_references_data_product(statement):
+def _visibility_filter_for_abstract_data_product(cls, user_id: uuid.UUID):
+    return or_(
+        cls.abstract_data_product_type != AbstractDataProductType.DATA_PRODUCT,
+        select(DataProduct.id)
+        .where(DataProduct.id == cls.id)
+        .where(_visibility_filter_for_user(user_id))
+        .correlate_except(DataProduct.__table__)
+        .exists(),
+    )
+
+
+def _statement_references_model(statement, model):
     try:
         selected_columns = list(statement.selected_columns)
     except Exception:
@@ -96,7 +107,7 @@ def _statement_references_data_product(statement):
 
     for selected in selected_columns:
         for node in iterate(selected, {}):
-            if getattr(node, "table", None) is DataProduct.__table__:
+            if getattr(node, "table", None) is model.__table__:
                 return True
 
     return False
@@ -211,14 +222,29 @@ def enforce_hidden_data_product_filter(execute_state):
     user_id = execute_state.session.info.get("current_user_id")
 
     # ORM entity loads use loader criteria. Scalar queries that directly select
-    # DataProduct columns (for example select(DataProduct.id)) do not carry an
-    # ORM entity description, but they still need the same visibility guard.
-    is_data_product_query = any(
+    # model columns (for example select(DataProduct.id)) do not carry an ORM
+    # entity description, but they still need the same visibility guard.
+    is_data_product_entity_query = any(
         desc.get("entity") is DataProduct
         for desc in execute_state.statement.column_descriptions
-    ) or _statement_references_data_product(execute_state.statement)
+    )
+    is_abstract_data_product_entity_query = any(
+        desc.get("entity") is AbstractDataProduct
+        for desc in execute_state.statement.column_descriptions
+    )
+    references_data_product = _statement_references_model(
+        execute_state.statement, DataProduct
+    )
+    references_abstract_data_product = _statement_references_model(
+        execute_state.statement, AbstractDataProduct
+    )
 
-    if not is_data_product_query:
+    if not (
+        is_data_product_entity_query
+        or is_abstract_data_product_entity_query
+        or references_data_product
+        or references_abstract_data_product
+    ):
         return
 
     if user_id is None:
@@ -226,10 +252,7 @@ def enforce_hidden_data_product_filter(execute_state):
             "User id must be set when skip_data_product_visibility_filter is False or not set"
         )
 
-    if any(
-        desc.get("entity") is DataProduct
-        for desc in execute_state.statement.column_descriptions
-    ):
+    if is_data_product_entity_query:
         execute_state.statement = execute_state.statement.options(
             with_loader_criteria(
                 DataProduct,
@@ -237,8 +260,20 @@ def enforce_hidden_data_product_filter(execute_state):
                 include_aliases=True,
             )
         )
-        return
+    elif references_data_product:
+        execute_state.statement = execute_state.statement.where(
+            _visibility_filter_for_user(user_id)
+        )
 
-    execute_state.statement = execute_state.statement.where(
-        _visibility_filter_for_user(user_id)
-    )
+    if is_abstract_data_product_entity_query:
+        execute_state.statement = execute_state.statement.options(
+            with_loader_criteria(
+                AbstractDataProduct,
+                lambda cls: _visibility_filter_for_abstract_data_product(cls, user_id),
+                include_aliases=True,
+            )
+        )
+    elif references_abstract_data_product:
+        execute_state.statement = execute_state.statement.where(
+            _visibility_filter_for_abstract_data_product(AbstractDataProduct, user_id)
+        )

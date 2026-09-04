@@ -241,7 +241,8 @@ class InputPortService:
                 selectinload(OutputPortModel.data_product_links).selectinload(
                     InputPortModel.requests
                 ),
-            )
+            ),
+            execution_options={"skip_data_product_visibility_filter": True},
         )
         if not output_port:
             raise output_port_not_found_exception(output_port_id)
