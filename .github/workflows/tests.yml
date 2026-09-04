@@ -113,7 +113,7 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
           node-version-file: frontend/package.json
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --prefer-offline --no-audit --progress=false
         working-directory: frontend
       - name: Run tests
         run: npm run test:run
@@ -183,6 +183,6 @@ jobs:
         node-version-file: 'frontend/package.json'
     - name: Install npm dependencies
       working-directory: frontend
-      run: npm ci --legacy-peer-deps
+      run: npm ci --legacy-peer-deps --prefer-offline --no-audit --progress=false
     - name: Run pre-commit
       uses: pre-commit/action@2c7b3805fd2a0fd8c1884dcaebf91fc102a13ecd # v3.0.1
