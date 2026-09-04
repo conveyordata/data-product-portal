@@ -8,6 +8,7 @@ import {
     useGetDomainsQuery,
     useRemoveDomainMutation,
 } from '@/store/api/services/generated/configurationDomainsApi.ts';
+import { useGetEnvironmentsQuery } from '@/store/api/services/generated/configurationEnvironmentsApi.ts';
 import { dispatchMessage } from '@/utils/feedback.ts';
 import { CreateDomainModal } from './domain-form-modal.component';
 import { CreateDomainMigrateModal } from './domain-migrate-modal.component';
@@ -17,6 +18,7 @@ import { getDomainTableColumns } from './domain-table-columns';
 export function DomainTable() {
     const { t } = useTranslation();
     const { data: { domains = [] } = {}, isFetching } = useGetDomainsQuery();
+    const { data: { environments: availableEnvironments = [] } = {} } = useGetEnvironmentsQuery();
     const { isVisible, handleOpen, handleClose } = useModal();
     const {
         isVisible: migrateModalVisible,
@@ -54,7 +56,7 @@ export function DomainTable() {
         }
     };
 
-    const columns = getDomainTableColumns({ t, handleRemove, handleEdit });
+    const columns = getDomainTableColumns({ t, handleRemove, handleEdit, availableEnvironments });
 
     return (
         <Flex vertical gap="large">

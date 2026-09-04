@@ -123,10 +123,30 @@ func (s *DatabricksTechnicalAssetConfiguration) setDefaults() {
 }
 
 // setDefaults set default value of fields.
+func (s *DomainCreate) setDefaults() {
+	{
+		var defaultVal0 []uuid.UUID
+		s.EnvironmentIds = defaultVal0
+	}
+}
+
+// setDefaults set default value of fields.
+func (s *DomainUpdate) setDefaults() {
+	{
+		var defaultVal0 []uuid.UUID
+		s.EnvironmentIds = defaultVal0
+	}
+}
+
+// setDefaults set default value of fields.
 func (s *Environment) setDefaults() {
 	{
 		val := bool(false)
 		s.IsDefault.SetTo(val)
+	}
+	{
+		val := bool(true)
+		s.IsGlobal.SetTo(val)
 	}
 }
 
@@ -135,6 +155,10 @@ func (s *EnvironmentGetItem) setDefaults() {
 	{
 		val := bool(false)
 		s.IsDefault.SetTo(val)
+	}
+	{
+		val := bool(true)
+		s.IsGlobal.SetTo(val)
 	}
 }
 

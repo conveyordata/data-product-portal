@@ -28,6 +28,7 @@
 {% set operations_and_logistics_domain_id = "bd09093e-14ff-41c1-b74d-7c2ce9821d1c" %}
 {% set product_development_domain_id = "623e6fbf-3a06-434e-995c-b0336e71806e" %}
 {% set risk_and_compliance_domain_id = "bec196cb-81df-4cfc-959f-b142c312861e" %}
+{% set demo_domain_environments_id = "10c0a1d9-448f-48f7-a8df-d79ab3f9a76b" %}
 
 -- Data product types and roles
 {% set analytics_type_id = "3c289333-2d55-4aed-8bd5-85015a1567fe" %}
@@ -63,6 +64,7 @@
 {% set customer_churn_prediction = "0a883317-d6c0-44e1-93b2-ba531fa9eeab" %}
 {% set customer_feedback_analysis = "66563731-1be2-493c-b692-aef4cc29e493" %}
 {% set customer_lifetime_value = "9a78d3cc-0c0d-4d0b-a314-aeb99c8cecf3" %}
+{% set demo_domain_environments_dp_id = "54ed1144-5a02-46d1-96b4-5432a8e0919e" %}
 {% set customer_segmentation_id = "138d83af-7a12-4037-85e7-fab3383593f2" %}
 {% set customer_segmentation_weekly_output_port_id = "811cd818-3b0d-437a-96bd-f29cbb3449d2" %}
 {% set customer_segmentation_weekly_technical_asset_id = "5125ae37-5c20-4ad3-9774-54d7cd480bd5" %}
@@ -365,6 +367,12 @@ INSERT INTO public.domains (id, name, description, created_on, updated_on, delet
 
 INSERT INTO public.domains (id, name, description, created_on, updated_on, deleted_at) VALUES ('{{ commercial_and_customer_relationship_mgt_domain_id }}'::uuid, 'Commercial and Customer Relationship Management', 'Commercial and CRM', '2025-10-28 16:30:41.743083', NULL, NULL);
 
+INSERT INTO public.domains (id, name, description, created_on, updated_on, deleted_at) VALUES ('{{ demo_domain_environments_id }}'::uuid, 'Demo Domain Environments', 'Demo domain used to showcase a custom (non-global) environment list, scoped to development only.', timezone('utc'::text, current_timestamp), NULL, NULL);
+
+-- DOMAIN ENVIRONMENTS
+-- Demo Domain Environments uses a custom list containing only "development", instead of the global list.
+INSERT INTO public.domain_environments (domain_id, environment_id, created_on, updated_on) VALUES ('{{ demo_domain_environments_id }}'::uuid, '{{ returned_environment_id_dev }}'::uuid, timezone('utc'::text, current_timestamp), NULL);
+
 -- DATA PRODUCT TYPES
 -- ...existing data product types code...
 
@@ -394,6 +402,21 @@ INSERT INTO public.abstract_data_products (id, status, finalizers, name, namespa
 INSERT INTO public.data_products (id, about, type_id, lifecycle_id, usage) VALUES ('{{ customer_segmentation_id }}'::uuid, '<h2>Customer Segmentation</h2><p></p><p>This data product aims to provide a centralized view of customer segments across demographics and behavior.</p><p></p><p><strong>Key objectives include:</strong></p><ul><li>Enable targeted marketing and product strategies</li><li>Identify high-value customer groups</li><li>Support personalized engagement campaigns</li></ul>', '3c289333-2d55-4aed-8bd5-85015a1567fe', NULL, NULL);
 
 INSERT INTO public.tags_data_products (data_product_id, tag_id) VALUES ('{{ customer_segmentation_id }}'::uuid, '{{ tag_sensitive_id }}'::uuid);
+
+-- Demo Domain Environments data product
+INSERT INTO public.abstract_data_products (id, status, finalizers, name, namespace, abstract_data_product_type, description, domain_id, created_on, updated_on, deleted_at) VALUES ('{{ demo_domain_environments_dp_id }}'::uuid, 'active', '{}', 'Demo Domain Environments', 'demo_domain_environments', 'data_products', 'Demo data product used to showcase a domain with a custom (non-global) environment list.', '{{ demo_domain_environments_id }}'::uuid, timezone('utc'::text, current_timestamp), NULL, NULL);
+
+INSERT INTO public.data_products (id, about, type_id, lifecycle_id, usage)
+VALUES ('{{ demo_domain_environments_dp_id }}'::uuid, '<h3>Value Proposition</h3><p>Demonstrates a domain configured with a custom environment list (development only) instead of the global environment list.</p>', '{{ analytics_type_id }}'::uuid, '{{ data_product_lifecycle_id }}'::uuid, NULL);
+
+INSERT INTO public.role_assignments_data_product (id, data_product_id, user_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at)
+VALUES (gen_random_uuid(), '{{ demo_domain_environments_dp_id }}'::uuid, '{{ john_id }}'::uuid, (
+    SELECT r.id FROM public.roles AS r
+    WHERE r.scope = 'data_product' AND r.prototype = 2
+), 'APPROVED', '{{ john_id }}'::uuid, timezone('utc'::text, current_timestamp
+), '{{ john_id }}'::uuid, timezone('utc'::text, current_timestamp
+), timezone('utc'::text, current_timestamp
+), NULL, NULL);
 
 -- Customer segementation id -- Customer segments weekly
 INSERT INTO public.datasets (id, namespace, data_product_id, name, description, about, status, access_type, created_on, updated_on, lifecycle_id, deleted_at) VALUES ('{{ customer_segmentation_weekly_output_port_id }}'::uuid, 'customer_segments_weekly', '{{ customer_segmentation_id }}'::uuid, 'Customer Segments Weekly', 'Weekly segmentation of customers by demographics and purchase behavior', 'Provides the latest segmentation of customers to guide marketing and targeting. Key objectives: - Identify high-value segments - Support campaign personalization - Update targeting weekly', 'ACTIVE', 'RESTRICTED', timezone('utc'::text, current_timestamp), NULL, '{{ data_product_lifecycle_id }}'::uuid, NULL);

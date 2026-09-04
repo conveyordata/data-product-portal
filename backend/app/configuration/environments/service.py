@@ -1,6 +1,7 @@
 from typing import Sequence
 from uuid import UUID
 
+from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -17,3 +18,17 @@ class EnvironmentService:
 
     def get_environment(self, environment_id: UUID) -> Environment:
         return self.db.scalar(select(EnvironmentModel).filter_by(id=environment_id))
+
+    def update_is_global(self, environment_id: UUID, is_global: bool) -> Environment:
+        environment = self.db.scalar(
+            select(EnvironmentModel).filter_by(id=environment_id)
+        )
+        if not environment:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Environment not found",
+            )
+
+        environment.is_global = is_global
+        self.db.commit()
+        return environment

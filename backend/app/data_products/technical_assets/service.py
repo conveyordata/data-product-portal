@@ -6,10 +6,12 @@ from uuid import UUID
 import pytz
 from fastapi import Depends, HTTPException, status
 from sqlalchemy import select
-from sqlalchemy.orm import Session, selectinload
+from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.configuration.access_modes.model import AccessMode as AccessModeModel
+from app.configuration.domains.model import Domain as DomainModel
+from app.configuration.environments.model import Environment as EnvironmentModel
 from app.configuration.tags.model import Tag as TagModel
 from app.configuration.tags.model import ensure_tag_exists
 from app.core.namespace.validation import (
@@ -98,11 +100,36 @@ class TechnicalAssetService:
             return TechnicalAssetStatus.ACTIVE
         return TechnicalAssetStatus.PENDING
 
+    def _filter_environment_configurations_by_domain(
+        self, technical_assets: Sequence[TechnicalAssetModel]
+    ) -> None:
+        global_environment_ids = {
+            environment.id
+            for environment in self.db.scalars(
+                select(EnvironmentModel).where(EnvironmentModel.is_global.is_(True))
+            ).all()
+        }
+        for technical_asset in technical_assets:
+            domain_environments = technical_asset.owner.domain.environments
+            allowed_environment_ids = (
+                {environment.id for environment in domain_environments}
+                if domain_environments
+                else global_environment_ids
+            )
+            technical_asset.environment_configurations = [
+                config
+                for config in technical_asset.environment_configurations
+                if config.environment_id in allowed_environment_ids
+            ]
+
     def get_data_outputs(self) -> Sequence[TechnicalAssetModel]:
-        return (
+        technical_assets = (
             self.db.scalars(
                 select(TechnicalAssetModel).options(
                     selectinload(TechnicalAssetModel.environment_configurations),
+                    joinedload(TechnicalAssetModel.owner)
+                    .joinedload(DataProductModel.domain)
+                    .selectinload(DomainModel.environments),
                     selectinload(TechnicalAssetModel.dataset_links)
                     .selectinload(DataOutputDatasetAssociationModel.output_port)
                     .raiseload("*"),
@@ -111,6 +138,8 @@ class TechnicalAssetService:
             .unique()
             .all()
         )
+        self._filter_environment_configurations_by_domain(technical_assets)
+        return technical_assets
 
     def get_technical_asset(
         self, data_product_id: UUID, id: UUID
@@ -123,6 +152,9 @@ class TechnicalAssetService:
             ).options(
                 selectinload(TechnicalAssetModel.dataset_links),
                 selectinload(TechnicalAssetModel.environment_configurations),
+                joinedload(TechnicalAssetModel.owner)
+                .joinedload(DataProductModel.domain)
+                .selectinload(DomainModel.environments),
             )
         )
         if not technical_asset:
@@ -130,6 +162,7 @@ class TechnicalAssetService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Technical asset not found",
             )
+        self._filter_environment_configurations_by_domain([technical_asset])
         return technical_asset
 
     def create_technical_asset(
@@ -319,11 +352,14 @@ class TechnicalAssetService:
     def get_technical_assets_for_data_product(
         self, data_product_id: UUID
     ) -> Sequence[TechnicalAssetModel]:
-        return (
+        technical_assets = (
             self.db.scalars(
                 select(TechnicalAssetModel)
                 .options(
                     selectinload(TechnicalAssetModel.environment_configurations),
+                    joinedload(TechnicalAssetModel.owner)
+                    .joinedload(DataProductModel.domain)
+                    .selectinload(DomainModel.environments),
                     selectinload(TechnicalAssetModel.dataset_links)
                     .selectinload(DataOutputDatasetAssociation.output_port)
                     .selectinload(OutputPortModel.tags)
@@ -334,3 +370,5 @@ class TechnicalAssetService:
             .unique()
             .all()
         )
+        self._filter_environment_configurations_by_domain(technical_assets)
+        return technical_assets

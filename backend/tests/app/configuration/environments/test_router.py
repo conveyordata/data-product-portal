@@ -125,6 +125,35 @@ class TestEnvironmentsRouter:
         assert "platform" in data["environment_configs"][0]
         assert "config" in data["environment_configs"][0]
 
+    @pytest.mark.usefixtures("admin")
+    def test_update_environment_is_global__toggles_flag(self, client):
+        EnvironmentFactory()
+        env_obj = EnvironmentFactory(name="production")
+
+        response = self.update_environment_is_global(client, env_obj.id, False)
+        assert response.status_code == 200
+        assert response.json()["is_global"] is False
+
+    @pytest.mark.usefixtures("admin")
+    def test_update_environment_is_global__allows_removing_last_global(self, client):
+        env_obj = EnvironmentFactory()
+
+        response = self.update_environment_is_global(client, env_obj.id, False)
+        assert response.status_code == 200
+        assert response.json()["is_global"] is False
+
+    def test_update_environment_is_global_forbidden(self, client):
+        env_obj = EnvironmentFactory()
+
+        response = self.update_environment_is_global(client, env_obj.id, False)
+        assert response.status_code == 403
+
     @staticmethod
     def get_environment_by_id(client, environment_id):
         return client.get(f"{ENDPOINT}/{environment_id}")
+
+    @staticmethod
+    def update_environment_is_global(client, environment_id, is_global):
+        return client.patch(
+            f"{ENDPOINT}/{environment_id}", json={"is_global": is_global}
+        )

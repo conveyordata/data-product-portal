@@ -1,11 +1,15 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import Any, TypeVar
+from typing import TYPE_CHECKING, Any, TypeVar
 from uuid import UUID
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
+
+if TYPE_CHECKING:
+    from ..models.environment_get_item import EnvironmentGetItem
+
 
 T = TypeVar("T", bound="GetDomainsItem")
 
@@ -17,12 +21,14 @@ class GetDomainsItem:
         id (UUID):
         name (str):
         description (str):
+        environments (list[EnvironmentGetItem]):
         abstract_data_product_count (int):
     """
 
     id: UUID
     name: str
     description: str
+    environments: list[EnvironmentGetItem]
     abstract_data_product_count: int
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
@@ -33,6 +39,11 @@ class GetDomainsItem:
 
         description = self.description
 
+        environments = []
+        for environments_item_data in self.environments:
+            environments_item = environments_item_data.to_dict()
+            environments.append(environments_item)
+
         abstract_data_product_count = self.abstract_data_product_count
 
         field_dict: dict[str, Any] = {}
@@ -42,6 +53,7 @@ class GetDomainsItem:
                 "id": id,
                 "name": name,
                 "description": description,
+                "environments": environments,
                 "abstract_data_product_count": abstract_data_product_count,
             }
         )
@@ -50,6 +62,8 @@ class GetDomainsItem:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
+        from ..models.environment_get_item import EnvironmentGetItem
+
         d = dict(src_dict)
         id = UUID(d.pop("id"))
 
@@ -57,12 +71,20 @@ class GetDomainsItem:
 
         description = d.pop("description")
 
+        environments = []
+        _environments = d.pop("environments")
+        for environments_item_data in _environments:
+            environments_item = EnvironmentGetItem.from_dict(environments_item_data)
+
+            environments.append(environments_item)
+
         abstract_data_product_count = d.pop("abstract_data_product_count")
 
         get_domains_item = cls(
             id=id,
             name=name,
             description=description,
+            environments=environments,
             abstract_data_product_count=abstract_data_product_count,
         )
 
