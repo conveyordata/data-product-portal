@@ -2,7 +2,6 @@ import pytest
 
 from app.abstract_data_product.type import AbstractDataProductType
 from app.configuration.access_durations.enums import AccessDurationType
-from tests import test_session
 from tests.factories import AccessDurationFactory, OutputPortFactory
 
 ENDPOINT = "/api/v2/configuration/access_durations"
@@ -176,7 +175,11 @@ class TestAccessDurationsRouter:
         assert isinstance(data["days"], int)
 
     @pytest.mark.usefixtures("admin")
-    def test_update_cascades_dropped_type_to_data_product_output_ports(self, client):
+    def test_update_cascades_dropped_type_to_data_product_output_ports(
+        self,
+        client,
+        session,
+    ):
         AccessDurationFactory(
             abstract_data_product_type=AbstractDataProductType.DATA_PRODUCT,
             access_duration_type=AccessDurationType.TIME_BOUND,
@@ -191,12 +194,16 @@ class TestAccessDurationsRouter:
         response = client.put(f"{ENDPOINT}/data_products", json=PERMANENT_PAYLOAD)
 
         assert response.status_code == 200
-        test_session.refresh(ds)
+        session.refresh(ds)
         assert ds.data_product_access_duration_type == AccessDurationType.PERMANENT
         assert ds.exploration_access_duration_type == AccessDurationType.PERMANENT
 
     @pytest.mark.usefixtures("admin")
-    def test_update_leaves_output_ports_on_still_allowed_type(self, client):
+    def test_update_leaves_output_ports_on_still_allowed_type(
+        self,
+        client,
+        session,
+    ):
         AccessDurationFactory(
             abstract_data_product_type=AbstractDataProductType.DATA_PRODUCT,
             access_duration_type=AccessDurationType.PERMANENT,
@@ -216,11 +223,15 @@ class TestAccessDurationsRouter:
         response = client.put(f"{ENDPOINT}/data_products", json=payload)
 
         assert response.status_code == 200
-        test_session.refresh(ds)
+        session.refresh(ds)
         assert ds.data_product_access_duration_type == AccessDurationType.PERMANENT
 
     @pytest.mark.usefixtures("admin")
-    def test_update_only_cascades_matching_abstract_type(self, client):
+    def test_update_only_cascades_matching_abstract_type(
+        self,
+        client,
+        session,
+    ):
         AccessDurationFactory(
             abstract_data_product_type=AbstractDataProductType.DATA_PRODUCT,
             access_duration_type=AccessDurationType.TIME_BOUND,
@@ -235,6 +246,6 @@ class TestAccessDurationsRouter:
         response = client.put(f"{ENDPOINT}/data_products", json=PERMANENT_PAYLOAD)
 
         assert response.status_code == 200
-        test_session.refresh(ds)
+        session.refresh(ds)
         assert ds.data_product_access_duration_type == AccessDurationType.PERMANENT
         assert ds.exploration_access_duration_type == AccessDurationType.TIME_BOUND

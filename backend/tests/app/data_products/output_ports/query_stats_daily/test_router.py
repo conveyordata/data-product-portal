@@ -14,6 +14,7 @@ from tests.factories import (
     RoleFactory,
     UserFactory,
 )
+from tests.session_util import as_user
 
 DATA_PRODUCT_ENDPOINT = "/api/v2/data_products"
 
@@ -49,8 +50,10 @@ class TestDatasetQueryStatsDailyRouter:
         assert response.status_code == 200, response.text
 
         # Verify the records were created
-        stats = session.query(DatasetQueryStatsDaily).all()
-        assert len(stats) >= 2
+
+        with as_user(session, UserFactory().id):
+            stats = session.query(DatasetQueryStatsDaily).all()
+            assert len(stats) >= 2
 
     def test_get_query_stats(self, client, session):
         """Test getting query stats for a dataset."""
@@ -119,8 +122,9 @@ class TestDatasetQueryStatsDailyRouter:
         )
 
         assert response.status_code == 200
-        stats = session.query(DatasetQueryStatsDaily).all()
-        assert stats == []
+        with as_user(session, UserFactory().id):
+            stats = session.query(DatasetQueryStatsDaily).all()
+            assert stats == []
 
     def test_get_query_stats_with_query_params(self, client, session):
         dataset = OutputPortFactory()
@@ -193,12 +197,14 @@ class TestDatasetQueryStatsDailyRouter:
         dataset_id = dataset.id
 
         # Verify query stats exist before deletion
-        stats_before = (
-            session.query(DatasetQueryStatsDaily)
-            .filter_by(output_port_id=dataset_id)
-            .all()
-        )
-        assert len(stats_before) == 1, "Should have 1 query stat before deletion"
+
+        with as_user(session, UserFactory().id):
+            stats_before = (
+                session.query(DatasetQueryStatsDaily)
+                .filter_by(output_port_id=dataset_id)
+                .all()
+            )
+            assert len(stats_before) == 1, "Should have 1 query stat before deletion"
 
         # Set up authorization to allow data product deletion
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
@@ -209,7 +215,6 @@ class TestDatasetQueryStatsDailyRouter:
         DataProductRoleAssignmentFactory(
             user_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
-        session.commit()
 
         # Delete the data product via API
         response = client.delete(f"{DATA_PRODUCT_ENDPOINT}/{data_product.id}")
@@ -218,11 +223,12 @@ class TestDatasetQueryStatsDailyRouter:
         # Verify that query stats are cascade deleted by the database
         # (This happens because deleting the data product cascades to delete the dataset,
         # and deleting the dataset cascades to delete the query stats)
-        stats_after = (
-            session.query(DatasetQueryStatsDaily)
-            .filter_by(output_port_id=dataset_id)
-            .all()
-        )
-        assert len(stats_after) == 0, (
-            "Query stats should be cascade deleted when data product (and its dataset) is deleted"
-        )
+        with as_user(session, UserFactory().id):
+            stats_after = (
+                session.query(DatasetQueryStatsDaily)
+                .filter_by(output_port_id=dataset_id)
+                .all()
+            )
+            assert len(stats_after) == 0, (
+                "Query stats should be cascade deleted when data product (and its dataset) is deleted"
+            )

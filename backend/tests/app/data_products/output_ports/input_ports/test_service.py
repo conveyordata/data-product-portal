@@ -16,7 +16,6 @@ from app.configuration.access_durations.enums import AccessDurationType
 from app.data_products.output_ports.enums import OutputPortAccessType
 from app.data_products.output_ports.input_ports.service import InputPortService
 from app.settings import settings
-from tests import test_session
 from tests.factories import (
     DataProductFactory,
     InputPortFactory,
@@ -26,7 +25,7 @@ from tests.factories import (
 )
 
 
-def _grant_and_pending_renewal(consumer, port):
+def _grant_and_pending_renewal(consumer, port, session):
     link = InputPortFactory(
         consuming_abstract_data_product=consumer,
         output_port=port,
@@ -36,7 +35,7 @@ def _grant_and_pending_renewal(consumer, port):
         request__valid_from=date.today() - timedelta(days=5),
         request__valid_until=date.today() + timedelta(days=10),
     )
-    grant = test_session.scalars(
+    grant = session.scalars(
         select(InputPortRequestModel).where(
             InputPortRequestModel.input_port_id == link.id
         )
@@ -48,7 +47,7 @@ def _grant_and_pending_renewal(consumer, port):
         requested_duration_days=30,
         decided_by=None,
     )
-    test_session.commit()
+    session.commit()
     return link, grant, renewal
 
 
@@ -91,16 +90,16 @@ def _by_id(link):
 
 
 class TestInputPortDecisions:
-    def test_approve__renewal_window_starts_at_current_date(self):
+    def test_approve__renewal_window_starts_at_current_date(self, session):
         actor = UserFactory()
         consumer = DataProductFactory()
         port = OutputPortFactory(
             access_type=OutputPortAccessType.RESTRICTED,
             data_product_access_duration_type=AccessDurationType.TIME_BOUND,
         )
-        link, grant, renewal = _grant_and_pending_renewal(consumer, port)
+        link, grant, renewal = _grant_and_pending_renewal(consumer, port, session)
 
-        current_link = InputPortService(test_session).approve_output_port_as_input_port(
+        current_link = InputPortService(session).approve_output_port_as_input_port(
             data_product_id=port.data_product.id,
             output_port_id=port.id,
             consuming_data_product_id=consumer.id,
@@ -115,16 +114,16 @@ class TestInputPortDecisions:
         assert requests[renewal.id].valid_from == date.today()
         assert requests[renewal.id].valid_until == date.today() + (timedelta(days=30))
 
-    def test_deny__pending_renewal_keeps_the_active_grant(self):
+    def test_deny__pending_renewal_keeps_the_active_grant(self, session):
         actor = UserFactory()
         consumer = DataProductFactory()
         port = OutputPortFactory(
             access_type=OutputPortAccessType.RESTRICTED,
             data_product_access_duration_type=AccessDurationType.TIME_BOUND,
         )
-        link, grant, renewal = _grant_and_pending_renewal(consumer, port)
+        link, grant, renewal = _grant_and_pending_renewal(consumer, port, session)
 
-        current_link = InputPortService(test_session).deny_output_port_as_input_port(
+        current_link = InputPortService(session).deny_output_port_as_input_port(
             data_product_id=port.data_product.id,
             output_port_id=port.id,
             consuming_data_product_id=consumer.id,
@@ -137,7 +136,7 @@ class TestInputPortDecisions:
         assert requests[grant.id].valid_until == date.today() + timedelta(days=10)
         assert current_link.status == InputPortStatus.APPROVED
 
-    def test_deny__raises_when_only_an_active_grant_exists(self):
+    def test_deny__raises_when_only_an_active_grant_exists(self, session):
         actor = UserFactory()
         consumer = DataProductFactory()
         port = OutputPortFactory(
@@ -153,10 +152,9 @@ class TestInputPortDecisions:
             request__valid_from=date.today() - timedelta(days=5),
             request__valid_until=date.today() + timedelta(days=10),
         )
-        test_session.commit()
 
         with pytest.raises(HTTPException) as exc:
-            InputPortService(test_session).deny_output_port_as_input_port(
+            InputPortService(session).deny_output_port_as_input_port(
                 data_product_id=port.data_product.id,
                 output_port_id=port.id,
                 consuming_data_product_id=consumer.id,
@@ -165,7 +163,7 @@ class TestInputPortDecisions:
             )
         assert exc.value.status_code == 400
 
-    def test_revoke__revokes_the_active_grant(self):
+    def test_revoke__revokes_the_active_grant(self, session):
         actor = UserFactory()
         consumer = DataProductFactory()
         port = OutputPortFactory(
@@ -181,20 +179,19 @@ class TestInputPortDecisions:
             request__valid_from=date.today() - timedelta(days=5),
             request__valid_until=date.today() + timedelta(days=10),
         )
-        grant = test_session.scalars(
+        grant = session.scalars(
             select(InputPortRequestModel).where(
                 InputPortRequestModel.input_port_id == link.id
             )
         ).one()
-        test_session.commit()
 
-        current_link = InputPortService(test_session).revoke_output_port_as_input_port(
+        current_link = InputPortService(session).revoke_output_port_as_input_port(
             data_product_id=port.data_product.id,
             output_port_id=port.id,
             consuming_data_product_id=consumer.id,
             actor=actor,
         )
-        test_session.flush()
+        session.flush()
 
         requests = _by_id(current_link)
         assert current_link.status == InputPortStatus.REVOKED
@@ -202,7 +199,7 @@ class TestInputPortDecisions:
         assert requests[grant.id].revoked_by_id == actor.id
         assert requests[grant.id].decision == InputPortRequestDecision.APPROVED
 
-    def test_revoke__raises_when_no_active_grant(self):
+    def test_revoke__raises_when_no_active_grant(self, session):
         actor = UserFactory()
         consumer = DataProductFactory()
         port = OutputPortFactory(access_type=OutputPortAccessType.RESTRICTED)
@@ -211,10 +208,10 @@ class TestInputPortDecisions:
             output_port=port,
             status=DecisionStatus.PENDING,
         )
-        test_session.commit()
+        session.flush()
 
         with pytest.raises(HTTPException) as exc:
-            InputPortService(test_session).revoke_output_port_as_input_port(
+            InputPortService(session).revoke_output_port_as_input_port(
                 data_product_id=port.data_product.id,
                 output_port_id=port.id,
                 consuming_data_product_id=consumer.id,
@@ -222,7 +219,7 @@ class TestInputPortDecisions:
             )
         assert exc.value.status_code == 400
 
-    def test_approve__renewal_after_expiry_starts_today(self):
+    def test_approve__renewal_after_expiry_starts_today(self, session):
         actor = UserFactory()
         consumer = DataProductFactory()
         port = OutputPortFactory(
@@ -245,9 +242,9 @@ class TestInputPortDecisions:
             requested_duration_days=30,
             decided_by=None,
         )
-        test_session.commit()
+        session.flush()
 
-        current_link = InputPortService(test_session).approve_output_port_as_input_port(
+        current_link = InputPortService(session).approve_output_port_as_input_port(
             data_product_id=port.data_product.id,
             output_port_id=port.id,
             consuming_data_product_id=consumer.id,

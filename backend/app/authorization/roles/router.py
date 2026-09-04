@@ -14,7 +14,7 @@ from app.authorization.roles.schema import (
 from app.authorization.roles.service import RoleService
 from app.core.authz import Action, Authorization
 from app.core.authz.resolvers import EmptyResolver
-from app.database.database import get_db_session
+from app.database.deps import get_db_session
 
 router = APIRouter(tags=["Authorization - Roles"], prefix="/v2/authz/roles")
 

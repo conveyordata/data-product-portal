@@ -14,7 +14,6 @@ from app.events.enums import EventReferenceEntity
 from app.events.service import EventService
 from app.resource_names.service import ResourceNameValidityType
 from app.settings import settings
-from tests import test_session
 from tests.factories import (
     AccessDurationFactory,
     AccessModeFactory,
@@ -128,7 +127,7 @@ class TestOutputPortRouter:
         assert output_port.access_type == OutputPortAccessType.UNRESTRICTED.value
 
     def test_create_output_port__hidden_data_product_only_allows_private_output_port(
-        self, session, output_port_payload, client
+        self, output_port_payload, client
     ) -> None:
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
@@ -140,24 +139,31 @@ class TestOutputPortRouter:
             role_id=role.id,
         )
         data_product_id = DataProductFactory(visibility=DataProductVisibility.HIDDEN).id
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[AuthorizationAction.DATA_PRODUCT__CREATE_USER],
+        )
+        DataProductRoleAssignmentFactory(
+            data_product_id=data_product_id, user_id=user.id, role_id=role.id
+        )
 
         output_port_payload["access_type"] = OutputPortAccessType.UNRESTRICTED.value
-        created_dataset = self.create_output_port(
+        created_output_port = self.create_output_port(
             client, data_product_id, output_port_payload
         )
-        assert created_dataset.status_code == 400
+        assert created_output_port.status_code == 400, created_output_port.text
 
         output_port_payload["access_type"] = OutputPortAccessType.RESTRICTED.value
-        created_dataset = self.create_output_port(
+        created_output_port = self.create_output_port(
             client, data_product_id, output_port_payload
         )
-        assert created_dataset.status_code == 400
+        assert created_output_port.status_code == 400, created_output_port.text
 
         output_port_payload["access_type"] = OutputPortAccessType.PRIVATE.value
-        created_dataset = self.create_output_port(
+        created_output_port = self.create_output_port(
             client, data_product_id, output_port_payload
         )
-        assert created_dataset.status_code == 200
+        assert created_output_port.status_code == 200
 
     def test_create_dataset_no_owners(self, session, output_port_payload, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
@@ -328,6 +334,13 @@ class TestOutputPortRouter:
         )
         DatasetRoleAssignmentFactory(
             user_id=user.id, role_id=role.id, output_port_id=ds.id
+        )
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[AuthorizationAction.DATA_PRODUCT__CREATE_USER],
+        )
+        DataProductRoleAssignmentFactory(
+            data_product_id=dp.id, user_id=user.id, role_id=role.id
         )
 
         update_payload = {
@@ -879,7 +892,7 @@ class TestOutputPortRouter:
         history = self.get_output_port_history(client, ds.id, ds.data_product.id)
         assert len(history.json()["events"]) == 1
 
-    def test_history_event_created_on_removing_dataset(self, client):
+    def test_history_event_created_on_removing_dataset(self, client, session):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.DATASET, permissions=[AuthorizationAction.OUTPUT_PORT__DELETE]
@@ -894,13 +907,13 @@ class TestOutputPortRouter:
         history = self.get_output_port_history(client, ds.id, ds.data_product.id)
         assert history.status_code == 404
 
-        events = EventService(db=test_session).get_history(
+        events = EventService(db=session).get_history(
             ds.data_product_id, EventReferenceEntity.DATA_PRODUCT
         )
         assert len(events) == 1
         assert events[0].deleted_subject_identifier == ds.name
 
-    def test_retain_deleted_dataset_name_in_history(self, client):
+    def test_retain_deleted_dataset_name_in_history(self, client, session):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.DATASET, permissions=[AuthorizationAction.OUTPUT_PORT__DELETE]
@@ -915,7 +928,7 @@ class TestOutputPortRouter:
         response = self.delete_output_port(client, ds.data_product_id, ds.id)
         assert response.status_code == 200
 
-        events = EventService(db=test_session).get_history(
+        events = EventService(db=session).get_history(
             dataset_id, EventReferenceEntity.DATASET
         )
         assert len(events) == 1

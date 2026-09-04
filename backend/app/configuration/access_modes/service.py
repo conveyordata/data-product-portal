@@ -12,7 +12,7 @@ from app.configuration.access_modes.schema_request import (
     AccessModeUpdate,
 )
 from app.data_products.technical_assets.model import TechnicalAsset
-from app.database.database import get_db_session
+from app.database.deps import get_db_session
 from app.technical_asset_configuration.base_model import TechnicalAssetConfiguration
 from app.technical_asset_configuration.service import PluginService
 

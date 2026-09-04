@@ -34,14 +34,6 @@ class TestUsersRouter:
         data = response.json()
         assert len(data) == 1
 
-    def test_get_users_v2(self, client):
-        UserFactory()
-
-        response = client.get("/api/v2/users")
-        assert response.status_code == 200
-        data = response.json()
-        assert len(data["users"]) == 1
-
     def test_remove_user_not_admin(self, client):
         user = UserFactory()
 

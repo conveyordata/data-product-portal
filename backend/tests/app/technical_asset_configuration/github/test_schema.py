@@ -1,7 +1,8 @@
 from unittest.mock import patch
 
 from app.technical_asset_configuration.github.schema import GitHubPlugin
-from tests.factories import DataProductFactory
+from tests.factories import DataProductFactory, UserFactory
+from tests.session_util import as_user
 
 
 class TestGitHubPlugin:
@@ -18,7 +19,8 @@ class TestGitHubPlugin:
     ):
         mock_settings.GITHUB_ORG = "UH-RDP"
         data_product = DataProductFactory(namespace="test-my-first-db")
-
-        url = GitHubPlugin.get_url(data_product.id, session, actor=None)
+        user = UserFactory()
+        with as_user(session, user.id):
+            url = GitHubPlugin.get_url(data_product.id, session, actor=user)
 
         assert url == "https://github.com/UH-RDP/test-my-first-db"

@@ -1,9 +1,9 @@
 import uuid
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Column, String, func, literal_column, select, text
+from sqlalchemy import Column, String
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, Session, deferred, relationship
+from sqlalchemy.orm import Mapped, Session, relationship
 
 from app.database.database import Base, ensure_exists
 from app.shared.model import BaseORM
@@ -21,13 +21,6 @@ class Domain(Base, BaseORM):
 
     abstract_data_products: Mapped[list["AbstractDataProduct"]] = relationship(
         "AbstractDataProduct", lazy="raise"
-    )
-
-    abstract_data_product_count = deferred(
-        select(func.count(literal_column("id")))
-        .select_from(text("abstract_data_products"))
-        .scalar_subquery(),
-        raiseload=True,
     )
 
 

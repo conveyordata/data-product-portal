@@ -20,7 +20,7 @@ from app.data_products.output_port_technical_assets_link.model import (
 )
 from app.data_products.output_ports.model import OutputPort
 from app.data_products.technical_assets.model import TechnicalAsset
-from app.database.database import get_db_session
+from app.database.deps import get_db_session
 from app.explorations.model import Exploration
 
 Model: TypeAlias = Union[

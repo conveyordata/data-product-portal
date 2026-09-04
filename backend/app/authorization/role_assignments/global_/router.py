@@ -23,7 +23,7 @@ from app.authorization.roles import ADMIN_UUID
 from app.core.auth.auth import get_authenticated_user
 from app.core.authz import Action, Authorization
 from app.core.authz.resolvers import EmptyResolver
-from app.database.database import get_db_session
+from app.database.deps import get_db_session
 from app.users.model import ensure_user_exists
 from app.users.schema import User
 

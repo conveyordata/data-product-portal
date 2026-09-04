@@ -11,7 +11,7 @@ from app.abstract_data_product.schema_response import AbstractDataProductInputPo
 from app.core.auth.auth import get_authenticated_user
 from app.core.authz import Action, Authorization
 from app.core.authz.resolvers import EmptyResolver
-from app.database.database import get_db_session
+from app.database.deps import get_db_session
 from app.explorations.schema_request import (
     CreateExplorationRequest,
     CreateExplorationRequestWithInputPorts,

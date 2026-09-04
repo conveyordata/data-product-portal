@@ -38,10 +38,12 @@ dependency checks, the service itself will have to do filtering and redaction ba
 
 * **Option 1: Application-layer visibility dependency** Application-side dependency on product routes that checks `visibility` and approved assignments directly
 * **Option 2: Casbin resource-role visibility** Reuse approved data-product assignments for hidden products and add a wildcard public role for discoverable products
+* **Option 3: ORM based visibility** Via the ORM we can ensure that only visibilit data products are returned in calls
 
 ## Decision Outcome
 
-**Chosen option:** *Option 2: Casbin resource-role visibility*. We will keep visibility enforcement inside Casbin and reuse the existing data-product assignment flow for the restricted-user path.
+**Chosen option:** *Option 2: Casbin resource-role visibility* and **Option 3: ORM based visibility**. We will keep visibility
+enforcement inside Casbin and reuse the existing data-product assignment flow for the restricted-user path.
 
 The model is:
 
@@ -51,6 +53,8 @@ The model is:
 
 The data product `visibility` field remains the source of truth, while Casbin remains the enforcement engine.
 The application keeps Casbin and the database in sync when a product is created, when visibility changes, and when assignments are approved, denied, or revoked.
+
+The reason for adding ORM based visibility is to reduce the change of mistakes.
 
 ### Confirmation
 
@@ -87,6 +91,12 @@ This will be reflected in the application as follows:
 * **Bad, because** the application must keep Casbin state synchronized with product visibility and assignment changes. If someone changes the DB directly, we will run into issues. But this is never recommended anyway, so this is not a big issue.
 * **Bad, because** it introduces policy synchronization and thus requires careful handling when a product changes from hidden to discoverable or vice versa.
 * **Bad, because** the matcher must support wildcard public groupings without breaking the existing RBAC semantics.
+
+### Option 3: ORM based visibility
+
+* **Good, because** you make it hard to abuse
+* **Neutral, because** raw queries skip it, but we can reduce raw queries
+* **Bad, because** it is hidden
 
 ## Implementation Notes
 

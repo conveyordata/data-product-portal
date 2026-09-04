@@ -300,6 +300,7 @@ class OutputPortService:
                     select(OutputPortModel)
                     .where(OutputPortModel.id.in_(batch_ids))
                     .options(*self.recalculate_embeddings_load_options())
+                    .execution_options(skip_data_product_visibility_filter=True)
                 )
                 .unique()
                 .all()

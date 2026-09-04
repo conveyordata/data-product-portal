@@ -11,7 +11,7 @@ from app.configuration.platform_service_configurations.model import (
 from app.configuration.platform_service_configurations.schema import (
     PlatformServiceConfiguration,
 )
-from app.database.database import get_db_session
+from app.database.deps import get_db_session
 
 
 class PlatformServiceConfigurationService:

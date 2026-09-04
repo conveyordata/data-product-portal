@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.database.database import get_db_session
+from app.database.deps import get_db_session
 from app.graph.graph import Graph
 from app.graph.service import GraphService
 

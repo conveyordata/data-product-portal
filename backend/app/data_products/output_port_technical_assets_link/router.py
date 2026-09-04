@@ -31,7 +31,7 @@ from app.data_products.technical_assets.service import (
     TECHNICAL_ASSET_NOT_ACTIVE_ERROR,
     TechnicalAssetService,
 )
-from app.database.database import get_db_session
+from app.database.deps import get_db_session
 from app.events.enums import EventReferenceEntity, EventType
 from app.events.schema import CreateEvent
 from app.events.service import EventService

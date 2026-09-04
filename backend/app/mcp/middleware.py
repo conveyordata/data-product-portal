@@ -7,7 +7,7 @@ from fastmcp.server.middleware import Middleware, MiddlewareContext
 from app.core.auth.auth import get_authenticated_user
 from app.core.auth.jwt import JWTToken
 from app.core.logging.posthog_analytics import get_posthog_client
-from app.database.database import get_db_session
+from app.database.deps import get_db_session
 
 
 class LoggingMiddleware(Middleware):
@@ -50,7 +50,7 @@ class LoggingMiddleware(Middleware):
             access_token: AccessToken = get_access_token()
             jwt_token = JWTToken(sub="", token=f"Bearer {access_token.token}")
 
-            db_session = next(get_db_session())
+            db_session = get_db_session()
             user = get_authenticated_user(token=jwt_token, db=db_session)
             return str(user.id)
 

@@ -1,6 +1,6 @@
 from typing import cast
 
-from sqlalchemy import text
+from sqlalchemy import text  # noqa: TID251
 
 from app.core.authz.actions import AuthorizationAction
 from app.core.authz.authorization import Authorization

@@ -38,7 +38,7 @@ from app.core.authz.resolvers import (
     DataProductRoleAssignmentResolver,
     EmptyResolver,
 )
-from app.database.database import get_db_session
+from app.database.deps import get_db_session
 from app.events.enums import EventReferenceEntity, EventType
 from app.events.schema import CreateEvent
 from app.events.service import EventService
