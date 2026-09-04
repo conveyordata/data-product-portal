@@ -46,7 +46,7 @@ router = APIRouter(
     dependencies=[
         Depends(
             Authorization.enforce(
-                Action.HIDDEN_DATA_PRODUCT__READ,
+                Action.HIDDEN__DATA_PRODUCT__READ,
                 DataProductResolver,
                 object_id="data_product_id",
             )
@@ -71,7 +71,7 @@ def get_data_product_technical_assets(
     dependencies=[
         Depends(
             Authorization.enforce(
-                Action.HIDDEN_DATA_PRODUCT__READ,
+                Action.HIDDEN__DATA_PRODUCT__READ,
                 DataProductResolver,
                 object_id="data_product_id",
             )
@@ -91,7 +91,7 @@ def get_technical_asset(
     dependencies=[
         Depends(
             Authorization.enforce(
-                Action.HIDDEN_DATA_PRODUCT__READ,
+                Action.HIDDEN__DATA_PRODUCT__READ,
                 DataProductResolver,
                 object_id="data_product_id",
             )
@@ -243,7 +243,7 @@ def update_technical_asset_status(
     dependencies=[
         Depends(
             Authorization.enforce(
-                Action.HIDDEN_DATA_PRODUCT__READ,
+                Action.HIDDEN__DATA_PRODUCT__READ,
                 DataProductResolver,
                 object_id="data_product_id",
             )

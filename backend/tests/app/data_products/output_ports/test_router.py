@@ -9,7 +9,7 @@ from app.configuration.access_durations.enums import AccessDurationType
 from app.core.authz.actions import AuthorizationAction
 from app.data_products.model import DataProductVisibility
 from app.data_products.output_ports.enums import OutputPortAccessType
-from app.data_products.output_ports.model import Dataset
+from app.data_products.output_ports.model import OutputPort
 from app.events.enums import EventReferenceEntity
 from app.events.service import EventService
 from app.resource_names.service import ResourceNameValidityType
@@ -121,8 +121,8 @@ class TestOutputPortRouter:
         )
         assert created_dataset.status_code == 200
         assert "id" in created_dataset.json()
-        output_port: Dataset = (
-            session.query(Dataset).filter_by(id=created_dataset.json()["id"]).first()
+        output_port: OutputPort = (
+            session.query(OutputPort).filter_by(id=created_dataset.json()["id"]).first()
         )
         assert output_port.access_type == OutputPortAccessType.UNRESTRICTED.value
 
@@ -249,6 +249,22 @@ class TestOutputPortRouter:
         assert len(data) == 1
         assert data[0]["id"] == str(ds.id)
 
+    def test_get_output_ports__filters_private(self, client):
+        unrestricted_output_port = OutputPortFactory(
+            access_type=OutputPortAccessType.UNRESTRICTED
+        )
+        private_output_port = OutputPortFactory(
+            access_type=OutputPortAccessType.PRIVATE,
+            data_product=unrestricted_output_port.data_product,
+        )
+        response = client.get(ENDPOINT.format(unrestricted_output_port.data_product.id))
+        assert response.status_code == 200, f"Response failed with: {response.text}"
+        assert len(response.json()["output_ports"]) == 1
+        assert response.json()["output_ports"][0]["id"] == str(
+            unrestricted_output_port.id
+        )
+        assert response.json()["output_ports"][0]["id"] != str(private_output_port.id)
+
     def test_update_dataset_no_role(self, client):
         ds = OutputPortFactory()
         update_payload = {
@@ -291,7 +307,9 @@ class TestOutputPortRouter:
 
         assert updated_dataset.status_code == 200
         dataset_id = updated_dataset.json()["id"]
-        output_port: Dataset = session.query(Dataset).filter_by(id=dataset_id).first()
+        output_port: OutputPort = (
+            session.query(OutputPort).filter_by(id=dataset_id).first()
+        )
         assert output_port.access_type == OutputPortAccessType.UNRESTRICTED.value
 
     def test_update_output_port(self, client):
@@ -394,7 +412,7 @@ class TestOutputPortRouter:
         response = self.update_output_port_about(client, ds.data_product.id, ds.id)
         assert response.status_code == 200
 
-    def test_remove_dataset_not_owner(self, client):
+    def test_remove_output_port_not_owner(self, client):
         ds = OutputPortFactory()
         response = self.delete_output_port(client, ds.data_product.id, ds.id)
         assert response.status_code == 403
@@ -412,7 +430,7 @@ class TestOutputPortRouter:
         assert response.status_code == 200
 
         response = self.get_output_port(client, ds.id, ds.data_product.id)
-        assert response.status_code == 404
+        assert response.status_code == 403
 
     def test_remove_output_port_with_data_product_role(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
@@ -434,7 +452,7 @@ class TestOutputPortRouter:
     def test_get_output_port_with_invalid_id(self, client):
         dp = DataProductFactory()
         dataset = self.get_output_port(client, dp.id, self.invalid_id)
-        assert dataset.status_code == 404
+        assert dataset.status_code == 403
 
     def test_get_output_port(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
@@ -566,6 +584,7 @@ class TestOutputPortRouter:
         dp = DataProductFactory()
         ds = OutputPortFactory(data_product=dp)
         response = client.get(f"{ENDPOINT.format(dp.id)}/{ds.id}/graph")
+        assert response.status_code == 200, response.text
         assert response.json()["edges"] == [
             {
                 "id": f"{str(dp.id)}-{str(ds.id)}-2",
@@ -687,31 +706,20 @@ class TestOutputPortRouter:
         response = self.get_output_port(client, ds.id, ds.data_product.id)
         assert response.status_code == 200
 
-    def test_get_private_dataset_by_member_of_consuming_data_product(self, client):
-        ds = OutputPortFactory(access_type=OutputPortAccessType.PRIVATE)
-        dp = DataProductFactory()
-        InputPortFactory(consuming_abstract_data_product=dp, output_port=ds)
-        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        role = RoleFactory(scope=Scope.DATA_PRODUCT)
-        DataProductRoleAssignmentFactory(
-            data_product_id=dp.id, user_id=user.id, role_id=role.id
-        )
-
-        response = self.get_output_port(client, ds.id, ds.data_product.id)
-        assert response.status_code == 200, response.text
-
     def test_get_private_datasets_not_allowed(self, client):
         ds = OutputPortFactory(access_type=OutputPortAccessType.PRIVATE)
         response = client.get(ENDPOINT.format(ds.data_product.id))
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
         assert len(response.json()["output_ports"]) == 0
 
     def test_get_private_datasets_by_owner(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory.data_product_owner()
         ds = OutputPortFactory(access_type=OutputPortAccessType.PRIVATE)
-        DatasetRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id, output_port_id=ds.id
+        DataProductRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+            data_product_id=ds.data_product.id,
         )
         response = client.get(ENDPOINT.format(ds.data_product.id))
         assert response.status_code == 200
@@ -721,20 +729,6 @@ class TestOutputPortRouter:
     def test_get_private_datasets_by_admin(self, client):
         ds = OutputPortFactory(access_type=OutputPortAccessType.PRIVATE)
         response = client.get(ENDPOINT.format(ds.data_product.id))
-        assert response.status_code == 200
-        assert len(response.json()["output_ports"]) == 1
-
-    def test_get_private_datasets_by_member_of_consuming_data_product(self, client):
-        ds = OutputPortFactory(access_type=OutputPortAccessType.PRIVATE)
-        dp = DataProductFactory()
-        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        role = RoleFactory(scope=Scope.DATA_PRODUCT)
-        DataProductRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id, data_product_id=dp.id
-        )
-        InputPortFactory(consuming_abstract_data_product=dp, output_port=ds)
-
-        response = client.get(ENDPOINT.format(ds.data_product_id))
         assert response.status_code == 200
         assert len(response.json()["output_ports"]) == 1
 
@@ -909,15 +903,9 @@ class TestOutputPortRouter:
         history = self.get_output_port_history(client, ds.id, ds.data_product.id)
         assert len(history.json()["events"]) == 1
 
+    @pytest.mark.usefixtures("admin")
     def test_history_event_created_on_removing_dataset(self, client, session):
-        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        role = RoleFactory(
-            scope=Scope.DATASET, permissions=[AuthorizationAction.OUTPUT_PORT__DELETE]
-        )
         ds = OutputPortFactory()
-        DatasetRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id, output_port_id=ds.id
-        )
         response = self.delete_output_port(client, ds.data_product_id, ds.id)
         assert response.status_code == 200
 
@@ -1070,13 +1058,13 @@ class TestOutputPortRouter:
 
         assert response.status_code == 403
 
-    def test_unknown_output_port_returns_404(self, client):
+    def test_unknown_output_port_returns_403(self, client):
         UserFactory(external_id=settings.DEFAULT_USERNAME)
         dp = DataProductFactory()
 
         response = self.get_access_durations(client, dp.id, uuid4())
 
-        assert response.status_code == 404
+        assert response.status_code == 403
 
     def test_wrong_data_product_id_returns_404(self, client):
         UserFactory(external_id=settings.DEFAULT_USERNAME)

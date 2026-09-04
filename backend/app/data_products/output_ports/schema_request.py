@@ -9,7 +9,7 @@ from app.data_products.output_ports.status import OutputPortStatus
 from app.shared.schema import ORMModel
 
 
-class DatasetUpdate(ORMModel):
+class OutputPortUpdate(ORMModel):
     name: str
     namespace: str
     description: str
@@ -21,7 +21,7 @@ class DatasetUpdate(ORMModel):
     tag_ids: list[UUID]
 
 
-class CreateOutputPortRequest(DatasetUpdate):
+class CreateOutputPortRequest(OutputPortUpdate):
     owners: Annotated[list[UUID], MinLen(1)]
 
 

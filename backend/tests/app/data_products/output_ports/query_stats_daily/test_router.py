@@ -3,12 +3,13 @@ from datetime import date, timedelta
 from app.authorization.roles.schema import Scope
 from app.core.authz.actions import AuthorizationAction
 from app.data_products.output_ports.query_stats.model import (
-    DatasetQueryStatsDaily,
+    OutputPortQueryStatsDaily,
 )
 from app.settings import settings
 from tests.factories import (
     DataProductFactory,
     DataProductRoleAssignmentFactory,
+    DatasetRoleAssignmentFactory,
     OutputPortFactory,
     OutputPortQueryStatsFactory,
     RoleFactory,
@@ -17,6 +18,20 @@ from tests.factories import (
 from tests.session_util import as_user
 
 DATA_PRODUCT_ENDPOINT = "/api/v2/data_products"
+
+
+def _assign_update_role(output_port):
+    user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+    role = RoleFactory(
+        scope=Scope.DATASET,
+        permissions=[
+            AuthorizationAction.OUTPUT_PORT__UPDATE_QUERY_STATS,
+        ],
+    )
+    DatasetRoleAssignmentFactory(
+        user_id=user.id, role_id=role.id, output_port_id=output_port.id
+    )
+    return user
 
 
 class TestDatasetQueryStatsDailyRouter:
@@ -40,10 +55,11 @@ class TestDatasetQueryStatsDailyRouter:
 
     def test_update_query_stats_daily_batch(self, client, session):
         """Test batch updating query stats."""
-        dataset = OutputPortFactory()
+        output_port = OutputPortFactory()
+        _assign_update_role(output_port)
 
         response = client.patch(
-            f"{DATA_PRODUCT_ENDPOINT}/{dataset.data_product.id}/output_ports/{dataset.id}/query_stats",
+            f"{DATA_PRODUCT_ENDPOINT}/{output_port.data_product.id}/output_ports/{output_port.id}/query_stats",
             json={"output_port_query_stats_updates": self.update_query_stats_payload()},
         )
 
@@ -52,7 +68,7 @@ class TestDatasetQueryStatsDailyRouter:
         # Verify the records were created
 
         with as_user(session, UserFactory().id):
-            stats = session.query(DatasetQueryStatsDaily).all()
+            stats = session.query(OutputPortQueryStatsDaily).all()
             assert len(stats) >= 2
 
     def test_get_query_stats(self, client, session):
@@ -100,13 +116,14 @@ class TestDatasetQueryStatsDailyRouter:
             assert stat["query_count"] in [150, 250]
 
     def test_delete_query_stat(self, client, session):
-        dataset = OutputPortFactory()
+        output_port = OutputPortFactory()
+        _assign_update_role(output_port)
         consumer = DataProductFactory()
         today = date.today()
 
         OutputPortQueryStatsFactory(
             date=today,
-            output_port_id=dataset.id,
+            output_port_id=output_port.id,
             consumer_data_product_id=consumer.id,
             query_count=200,
         )
@@ -114,7 +131,7 @@ class TestDatasetQueryStatsDailyRouter:
 
         response = client.request(
             "DELETE",
-            f"{DATA_PRODUCT_ENDPOINT}/{dataset.data_product.id}/output_ports/{dataset.id}/query_stats",
+            f"{DATA_PRODUCT_ENDPOINT}/{output_port.data_product.id}/output_ports/{output_port.id}/query_stats",
             json={
                 "date": today.isoformat(),
                 "consumer_data_product_id": str(consumer.id),
@@ -123,7 +140,7 @@ class TestDatasetQueryStatsDailyRouter:
 
         assert response.status_code == 200
         with as_user(session, UserFactory().id):
-            stats = session.query(DatasetQueryStatsDaily).all()
+            stats = session.query(OutputPortQueryStatsDaily).all()
             assert stats == []
 
     def test_get_query_stats_with_query_params(self, client, session):
@@ -200,7 +217,7 @@ class TestDatasetQueryStatsDailyRouter:
 
         with as_user(session, UserFactory().id):
             stats_before = (
-                session.query(DatasetQueryStatsDaily)
+                session.query(OutputPortQueryStatsDaily)
                 .filter_by(output_port_id=dataset_id)
                 .all()
             )
@@ -225,7 +242,7 @@ class TestDatasetQueryStatsDailyRouter:
         # and deleting the dataset cascades to delete the query stats)
         with as_user(session, UserFactory().id):
             stats_after = (
-                session.query(DatasetQueryStatsDaily)
+                session.query(OutputPortQueryStatsDaily)
                 .filter_by(output_port_id=dataset_id)
                 .all()
             )

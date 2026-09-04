@@ -7,8 +7,12 @@ from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.roles.schema import Role, Scope
 from app.core.authz.actions import AuthorizationAction
 from app.settings import settings
-from tests.factories import GlobalRoleAssignmentFactory, RoleFactory, UserFactory
-from tests.factories.dataset import OutputPortFactory
+from tests.factories import (
+    GlobalRoleAssignmentFactory,
+    OutputPortFactory,
+    RoleFactory,
+    UserFactory,
+)
 
 if TYPE_CHECKING:
     from app.authorization.role_assignments.global_.schema import GlobalRoleAssignment

@@ -11,11 +11,11 @@ from ..models.access_duration_type import AccessDurationType
 from ..models.output_port_access_type import OutputPortAccessType
 from ..types import UNSET, Unset
 
-T = TypeVar("T", bound="DatasetUpdate")
+T = TypeVar("T", bound="OutputPortUpdate")
 
 
 @_attrs_define
-class DatasetUpdate:
+class OutputPortUpdate:
     """
     Attributes:
         name (str):
@@ -144,7 +144,7 @@ class DatasetUpdate:
 
         lifecycle_id = _parse_lifecycle_id(d.pop("lifecycle_id", UNSET))
 
-        dataset_update = cls(
+        output_port_update = cls(
             name=name,
             namespace=namespace,
             description=description,
@@ -156,8 +156,8 @@ class DatasetUpdate:
             lifecycle_id=lifecycle_id,
         )
 
-        dataset_update.additional_properties = d
-        return dataset_update
+        output_port_update.additional_properties = d
+        return output_port_update
 
     @property
     def additional_keys(self) -> list[str]:

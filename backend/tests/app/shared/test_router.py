@@ -250,12 +250,8 @@ def test_every_protected_v2_route_has_authorization_enforce_dependency():
     for route in _iter_app_routes():
         if not getattr(route, "path", "").startswith("/api/v2/"):
             continue
-        # For now we only check data products paths, and exclude output port paths
+        # We only check data products paths
         if not route.path.startswith("/api/v2/data_products"):
-            continue
-        if route.path.startswith(
-            "/api/v2/data_products/{data_product_id}/output_ports"
-        ):
             continue
         if route.path in excluded_paths:
             continue

@@ -11,7 +11,7 @@ from app.abstract_data_product.input_ports.model import (
 )
 
 from .data_product import DataProductFactory
-from .dataset import OutputPortFactory
+from .output_port import OutputPortFactory
 from .user import UserFactory
 
 

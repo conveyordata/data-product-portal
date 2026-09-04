@@ -5,7 +5,7 @@ import pytest
 from sqlalchemy.orm import Session
 
 from app.data_products.output_ports.query_stats.model import (
-    DatasetQueryStatsDaily,
+    OutputPortQueryStatsDaily,
 )
 from app.data_products.output_ports.query_stats.schema_request import (
     OutputPortQueryStatsDelete,
@@ -101,7 +101,7 @@ class TestOutputPortQueryStatsDailyService:
         """Return DatasetQueryStatsDaily rows for a dataset/consumer/date combo."""
 
         with as_user(session, UserFactory().id):
-            query = session.query(DatasetQueryStatsDaily).filter_by(
+            query = session.query(OutputPortQueryStatsDaily).filter_by(
                 date=target_date,
                 output_port_id=output_port_id,
                 consumer_data_product_id=consumer_id,

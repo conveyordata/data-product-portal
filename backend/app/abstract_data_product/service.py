@@ -29,14 +29,13 @@ from app.authorization.role_assignments.output_port.service import (
 from app.configuration.access_durations.enums import AccessDurationType
 from app.configuration.access_durations.model import AccessDuration
 from app.configuration.access_durations.service import AccessDurationService
-from app.core.authz import Action
+from app.core.authz import Action, Authorization
 from app.core.logging.posthog_analytics import get_posthog_client
 from app.data_products import email
 from app.data_products.output_ports.enums import OutputPortAccessType
 from app.data_products.output_ports.input_ports.service import InputPortService
 from app.data_products.output_ports.model import OutputPort as OutputPortModel
 from app.data_products.output_ports.model import ensure_output_port_exists
-from app.data_products.output_ports.service import OutputPortService
 from app.data_products.status import AbstractDataProductStatus
 from app.users.model import User
 
@@ -186,7 +185,9 @@ class AbstractDataProductService:
                 detail="Cannot link own output port to data product",
             )
 
-        if not OutputPortService(self.db).is_visible_to_user(output_port, actor):
+        if not Authorization().has_read_access_to_output_port(
+            current_user=actor, output_port=output_port
+        ):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="You do not have access to this private output port",
@@ -261,7 +262,9 @@ class AbstractDataProductService:
                 detail="This input port already has permanent access; there is nothing to renew",
             )
 
-        if not OutputPortService(self.db).is_visible_to_user(output_port, actor):
+        if not Authorization().has_read_access_to_output_port(
+            current_user=actor, output_port=output_port
+        ):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="You do not have access to this private output port",

@@ -83,6 +83,7 @@
     "Allows changing the status of a Data Product": "Allows changing the status of a Data Product",
     "Allows changing the status of a Output Port": "Allows changing the status of a Output Port",
     "Allows inserting data quality results for an Output Port": "Allows inserting data quality results for an Output Port",
+    "Allows inserting query statistics for an Output Port": "Allows inserting query statistics for an Output Port",
     "Allows modifying properties such as labels and the description of a Data Product": "Allows modifying properties such as labels and the description of a Data Product",
     "Allows modifying properties such as labels and the description of an Output Port": "Allows modifying properties such as labels and the description of an Output Port",
     "Allows modifying the configuration options of this installation": "Allows modifying the configuration options of this installation",

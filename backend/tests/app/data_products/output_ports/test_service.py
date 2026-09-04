@@ -1,17 +1,12 @@
 from sqlalchemy.orm import selectinload
 
 from app.authorization.role_assignments.enums import AssignmentFilter
-from app.authorization.roles.schema import Scope
 from app.data_products.output_ports.enums import OutputPortAccessType
 from app.data_products.output_ports.model import OutputPort
 from app.data_products.output_ports.service import OutputPortService
 from app.settings import settings
 from tests.factories import (
-    DataProductFactory,
-    DataProductRoleAssignmentFactory,
     DatasetRoleAssignmentFactory,
-    GlobalRoleAssignmentFactory,
-    InputPortFactory,
     OutputPortFactory,
     RoleFactory,
     TechnicalAssetFactory,
@@ -22,42 +17,6 @@ from tests.session_util import as_user
 
 
 class TestDatasetsService:
-    def test_private_dataset_not_visible(self, session):
-        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        ds = OutputPortFactory(access_type=OutputPortAccessType.PRIVATE)
-        ds = self.get_output_port(ds, session)
-        assert OutputPortService(session).is_visible_to_user(ds, user) is False
-
-    def test_get_private_dataset_by_owner(self, session):
-        owner = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        role = RoleFactory.dataset_owner()
-        ds = OutputPortFactory(access_type=OutputPortAccessType.PRIVATE)
-        DatasetRoleAssignmentFactory(
-            role_id=role.id, output_port_id=ds.id, user_id=owner.id
-        )
-        ds = self.get_output_port(ds, session)
-        assert OutputPortService(session).is_visible_to_user(ds, owner) is True
-
-    def test_get_private_dataset_by_admin(self, session):
-        admin = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        role = RoleFactory.admin()
-        GlobalRoleAssignmentFactory(role_id=role.id, user_id=admin.id)
-        ds = OutputPortFactory(access_type=OutputPortAccessType.PRIVATE)
-        ds = self.get_output_port(ds, session)
-        assert OutputPortService(session).is_visible_to_user(ds, admin) is True
-
-    def test_get_private_dataset_by_member_of_consuming_data_product(self, session):
-        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        ds = OutputPortFactory(access_type=OutputPortAccessType.PRIVATE)
-        dp = DataProductFactory()
-        role = RoleFactory(scope=Scope.DATA_PRODUCT)
-        DataProductRoleAssignmentFactory(
-            role_id=role.id, data_product_id=dp.id, user_id=user.id
-        )
-        InputPortFactory(consuming_abstract_data_product=dp, output_port=ds)
-        ds = self.get_output_port(ds, session)
-        assert OutputPortService(session).is_visible_to_user(ds, user) is True
-
     def test_recalculate_search(self, session):
         ds = OutputPortFactory()
         with as_user(session, UserFactory().id):

@@ -104,7 +104,7 @@ class TestContractRouter:
             json=DEFAULT_PAYLOAD,
         )
 
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
         body = response.json()
         assert body["output_port_id"] == str(dataset.id)
         assert len(body["schema_objects"]) == 2

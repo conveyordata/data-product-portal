@@ -536,6 +536,12 @@ function determinePermissionsForScope(scope: Scope, roles: Role[], t: TFunction)
                     name: 'Manage data contract',
                     description: t('Allows modifying the data contract of an Output Port'),
                 },
+                {
+                    type: 'Instance',
+                    id: AuthorizationAction.OUTPUT_PORT__UPDATE_QUERY_STATS,
+                    name: 'Insert query statistics',
+                    description: t('Allows inserting query statistics for an Output Port'),
+                },
             ];
             break;
     }
