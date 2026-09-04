@@ -23,7 +23,6 @@ Portal needs also a way to introduce these identities from an external identity 
 * Grant users permissions and Data Product visibility inherited from their groups.
 * Use a standard protocol for synchronizing users, groups and memberships.
 * Support machine users even when they are not available through SCIM.
-* Keep Portal as the only component with direct write access to its database.
 * Provide provider-agnostic APIs for identities, memberships and Data Product role assignments.
 * Preserve existing user-linked workflow and audit relationships.
 * Avoid nested-group resolution, as the supported identity provider supplies flat memberships.
