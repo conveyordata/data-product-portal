@@ -13,7 +13,6 @@ from sqlalchemy.orm import (
     relationship,
     with_loader_criteria,
 )
-from sqlalchemy.sql.visitors import iterate
 
 from app.abstract_data_product.model import AbstractDataProduct
 from app.abstract_data_product.type import AbstractDataProductType
@@ -23,7 +22,11 @@ from app.authorization.role_assignments.data_product.model import (
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.configuration.data_product_types.model import DataProductType
 from app.configuration.tags.model import Tag, tag_data_product_table
-from app.core.auth.auth import SYSTEM_ACCOUNT_BOT_EXTERNAL_ID
+from app.core.authz.db_utils import (
+    is_system_account,
+    is_user_admin,
+    statement_references_model,
+)
 from app.core.webhooks.events import (
     DataProductEvent,
 )
@@ -54,34 +57,12 @@ def _has_user_access_to_hidden_data_product(cls, user_id: uuid.UUID):
     )
 
 
-def _is_user_admin(user_id: uuid.UUID):
-    from app.users.model import User
-
-    return (
-        select(User.id)
-        .where(User.id == user_id)
-        .where(User.admin_expiry > func.now())
-        .exists()
-    )
-
-
-def _is_system_account(user_id: uuid.UUID):
-    from app.users.model import User
-
-    return (
-        select(User.id)
-        .where(User.id == user_id)
-        .where(User.external_id == SYSTEM_ACCOUNT_BOT_EXTERNAL_ID)
-        .exists()
-    )
-
-
 def _visibility_filter_for_user(user_id: uuid.UUID):
     return or_(
         DataProduct.visibility != DataProductVisibility.HIDDEN,
         _has_user_access_to_hidden_data_product(DataProduct, user_id),
-        _is_user_admin(user_id),
-        _is_system_account(user_id),
+        is_user_admin(user_id),
+        is_system_account(user_id),
     )
 
 
@@ -94,23 +75,6 @@ def _visibility_filter_for_abstract_data_product(cls, user_id: uuid.UUID):
         .correlate_except(DataProduct.__table__)
         .exists(),
     )
-
-
-def _statement_references_model(statement, model):
-    try:
-        selected_columns = list(statement.selected_columns)
-    except Exception:
-        selected_columns = []
-
-    if not selected_columns:
-        return False
-
-    for selected in selected_columns:
-        for node in iterate(selected, {}):
-            if getattr(node, "table", None) is model.__table__:
-                return True
-
-    return False
 
 
 class DataProduct(
@@ -232,10 +196,10 @@ def enforce_hidden_data_product_filter(execute_state):
         desc.get("entity") is AbstractDataProduct
         for desc in execute_state.statement.column_descriptions
     )
-    references_data_product = _statement_references_model(
+    references_data_product = statement_references_model(
         execute_state.statement, DataProduct
     )
-    references_abstract_data_product = _statement_references_model(
+    references_abstract_data_product = statement_references_model(
         execute_state.statement, AbstractDataProduct
     )
 

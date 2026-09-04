@@ -1,6 +1,7 @@
 # ruff: noqa: S311, S105
 from collections.abc import Iterator
 from contextlib import contextmanager
+from datetime import datetime, timedelta
 from typing import Any, Generator
 from unittest.mock import MagicMock, patch
 
@@ -36,6 +37,7 @@ from .factories.user import UserFactory
 def setup_and_teardown_database():
     from app.db_tool import init  # noqa: E402
 
+    settings.AUTHORIZER_AUTOLOAD_ENABLED = False
     init(force=True, seed_path=None)
     return
 
@@ -170,7 +172,10 @@ def clear_db(session: Session) -> None:
 @pytest.fixture
 def admin() -> UserFactory:
     role = RoleFactory.admin()
-    user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+    user = UserFactory(
+        external_id=settings.DEFAULT_USERNAME,
+        admin_expiry=datetime.now() + timedelta(days=1),
+    )
     GlobalRoleAssignmentFactory(user_id=user.id, role_id=role.id)
     return user
 

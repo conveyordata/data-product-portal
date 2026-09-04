@@ -47,7 +47,8 @@ class Authorization(metaclass=Singleton):
         """Initializes the casbin table in the DB and constructs the enforcer."""
         adapter = sqlalchemy_adapter.Adapter(database.get_url())
         enforcer = SyncedEnforcer(model, adapter)
-        enforcer.start_auto_load_policy(settings.AUTHORIZER_AUTOLOAD_INTERVAL)
+        if settings.AUTHORIZER_AUTOLOAD_ENABLED:
+            enforcer.start_auto_load_policy(settings.AUTHORIZER_AUTOLOAD_INTERVAL)
         return enforcer
 
     @classmethod
@@ -169,7 +170,8 @@ class Authorization(metaclass=Singleton):
         """This resumes autoloading and auto policy saving of the enforcer. It also flushes the current policy to the database.
         To be used when you want to recreate the casbin table, to be used after pause_enforcer_for_reload."""
         self._enforcer.save_policy()
-        self._enforcer.start_auto_load_policy(settings.AUTHORIZER_AUTOLOAD_INTERVAL)
+        if settings.AUTHORIZER_AUTOLOAD_ENABLED:
+            self._enforcer.start_auto_load_policy(settings.AUTHORIZER_AUTOLOAD_INTERVAL)
         self._enforcer.enable_auto_save(True)
 
     def revoke_domain_role(self, *, user_id: ID, role_id: ID, domain_id: ID) -> bool:

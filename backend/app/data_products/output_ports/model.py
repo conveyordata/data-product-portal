@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING, Optional
 
 from fastapi import HTTPException, status
 from pgvector.sqlalchemy import Vector
-from sqlalchemy import Column, Enum, ForeignKey, String, func, select
+from sqlalchemy import Column, Enum, ForeignKey, String, event, func, or_, select
 from sqlalchemy.dialects.postgresql import TSVECTOR, UUID
 from sqlalchemy.orm import (
     Mapped,
@@ -13,15 +13,24 @@ from sqlalchemy.orm import (
     foreign,
     mapped_column,
     relationship,
+    with_loader_criteria,
 )
 
 from app.abstract_data_product.input_ports.model import (
     InputPort,
 )
 from app.authorization.role_assignments.enums import DecisionStatus
+from app.authorization.role_assignments.output_port.model import (
+    DatasetRoleAssignment,
+)
 from app.configuration.access_durations.enums import AccessDurationType
 from app.configuration.access_modes.model import AccessMode
 from app.configuration.tags.model import Tag, tag_dataset_table
+from app.core.authz.db_utils import (
+    is_system_account,
+    is_user_admin,
+    statement_references_model,
+)
 from app.core.webhooks.events import OutputPortEvent
 from app.data_products.output_port_technical_assets_link.model import (
     DataOutputDatasetAssociation,
@@ -37,12 +46,30 @@ from app.database.event_mixin import EventTrackedMixin
 from app.shared.model import BaseORM
 
 if TYPE_CHECKING:
-    from app.authorization.role_assignments.output_port.model import (
-        DatasetRoleAssignment,
-    )
     from app.configuration.data_product_lifecycles.model import DataProductLifecycle
     from app.configuration.data_product_settings.model import DataProductSettingValue
-    from app.data_products.model import DataProduct
+    from app.data_products.model import (
+        DataProduct,
+    )
+
+
+def _has_user_access_to_private_output_port(cls, user_id: uuid.UUID):
+    return (
+        select(DatasetRoleAssignment.id)
+        .where(DatasetRoleAssignment.output_port_id == cls.id)
+        .where(DatasetRoleAssignment.user_id == user_id)
+        .where(DatasetRoleAssignment.decision == DecisionStatus.APPROVED)
+        .exists()
+    )
+
+
+def _access_type_filter_for_user(user_id: uuid.UUID):
+    return or_(
+        OutputPort.access_type != OutputPortAccessType.PRIVATE,
+        _has_user_access_to_private_output_port(OutputPort, user_id),
+        is_user_admin(user_id),
+        is_system_account(user_id),
+    )
 
 
 output_port_access_modes = (
@@ -206,3 +233,46 @@ def ensure_output_port_exists(
             detail=f"Required item {dataset_id} does not exist",
         )
     return output_port
+
+
+@event.listens_for(Session, "do_orm_execute")
+def enforce_private_output_port_filter(execute_state):
+    if not execute_state.is_select:
+        return
+
+    if execute_state.is_column_load:
+        return
+
+    if execute_state.execution_options.get("skip_output_port_access_type_filter"):
+        return
+
+    user_id = execute_state.session.info.get("current_user_id")
+
+    is_output_port_entity_query = any(
+        desc.get("entity") is OutputPort
+        for desc in execute_state.statement.column_descriptions
+    )
+    references_output_port = statement_references_model(
+        execute_state.statement, OutputPort
+    )
+
+    if not (is_output_port_entity_query or references_output_port):
+        return
+
+    if user_id is None:
+        raise Exception(
+            "User id must be set when skip_output_port_access_type_filter is False or not set"
+        )
+
+    if is_output_port_entity_query:
+        execute_state.statement = execute_state.statement.options(
+            with_loader_criteria(
+                OutputPort,
+                lambda cls: _access_type_filter_for_user(user_id),
+                include_aliases=True,
+            )
+        )
+    elif references_output_port:
+        execute_state.statement = execute_state.statement.where(
+            _access_type_filter_for_user(user_id)
+        )

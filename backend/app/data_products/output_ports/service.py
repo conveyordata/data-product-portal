@@ -1,5 +1,4 @@
 import copy
-from itertools import islice
 from typing import Iterable, Optional, Sequence, assert_never
 from uuid import UUID
 
@@ -207,12 +206,7 @@ class OutputPortService:
                 .desc()
             )
 
-        stmt = (
-            select(OutputPortModel)
-            .order_by(ordered_by)
-            # We currently apply a limit times 2, the reason is that without a limit the query is really slow, however we might miss results because of that
-            .limit(limit * 2)
-        )
+        stmt = select(OutputPortModel).order_by(ordered_by).limit(limit)
         match assignment_filter:
             case AssignmentFilter.ALL:
                 pass
@@ -226,18 +220,7 @@ class OutputPortService:
         )
         results = self.db.scalars(stmt).unique().all()
 
-        return list(
-            islice(
-                (
-                    d
-                    for d in results
-                    if Authorization().has_read_access_to_output_port(
-                        current_user=user, output_port=d
-                    )
-                ),
-                limit,
-            )
-        )
+        return results
 
     @staticmethod
     def recalculate_embeddings_load_options():
@@ -257,6 +240,11 @@ class OutputPortService:
                 select(OutputPortModel)
                 .where(OutputPortModel.data_product_id == data_product_id)
                 .options(*self.recalculate_embeddings_load_options()),
+                execution_options={
+                    # Recalculation will never be done by users, so we can safely skip the filters here
+                    "skip_data_product_visibility_filter": True,
+                    "skip_output_port_access_type_filter": True,
+                },
             )
             .unique()
             .all()
@@ -267,7 +255,12 @@ class OutputPortService:
         dataset = self.db.scalar(
             select(OutputPortModel)
             .where(OutputPortModel.id == dataset_id)
-            .options(*self.recalculate_embeddings_load_options())
+            .options(*self.recalculate_embeddings_load_options()),
+            execution_options={
+                # Recalculation will never be done by users, so we can safely skip the filters here
+                "skip_data_product_visibility_filter": True,
+                "skip_output_port_access_type_filter": True,
+            },
         )
         self._recalculate_embeddings_and_search_vector([dataset])
 
@@ -291,8 +284,11 @@ class OutputPortService:
         )
 
     def recalculate_search_for_all_output_ports(self, batch_size: int = 50) -> None:
-        dataset_ids = self.db.scalars(select(OutputPortModel.id)).all()
-
+        dataset_ids = self.db.scalars(
+            select(OutputPortModel.id).execution_options(
+                skip_output_port_access_type_filter=True
+            )
+        ).all()
         # Process in batches to reduce load
         for i in range(0, len(dataset_ids), batch_size):
             batch_ids = dataset_ids[i : i + batch_size]
@@ -302,7 +298,10 @@ class OutputPortService:
                     select(OutputPortModel)
                     .where(OutputPortModel.id.in_(batch_ids))
                     .options(*self.recalculate_embeddings_load_options())
-                    .execution_options(skip_data_product_visibility_filter=True)
+                    .execution_options(
+                        skip_data_product_visibility_filter=True,
+                        skip_output_port_access_type_filter=True,
+                    ),
                 )
                 .unique()
                 .all()
@@ -609,7 +608,8 @@ class OutputPortService:
                 OutputPortModel.access_type.in_(
                     [OutputPortAccessType.UNRESTRICTED, OutputPortAccessType.RESTRICTED]
                 )
-            )
+            ),
+            execution_options={"skip_output_port_access_type_filter": True},
         ).all()
         if not visible_output_ports:
             return
