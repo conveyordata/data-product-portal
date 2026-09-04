@@ -24,7 +24,7 @@ class TechnicalAssetFactory(factory.alchemy.SQLAlchemyModelFactory):
     @factory.post_generation
     def platform_id(self, create, extracted, **kwargs):
         self.platform_id = self.service.platform_id
-        test_session.commit()
+        # test_session.flush()
 
     owner = factory.SubFactory(DataProductFactory)
 
@@ -44,4 +44,5 @@ class TechnicalAssetFactory(factory.alchemy.SQLAlchemyModelFactory):
         else:
             # If called without arguments, create a default tag
             self.tags.append(TagFactory())
-        test_session.commit()
+        # This is broken somehow without an explicit commit
+        test_session.commit()  # noqa: allow-commit

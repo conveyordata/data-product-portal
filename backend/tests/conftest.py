@@ -45,7 +45,7 @@ def override_unauthenticated_get_db():
     try:
         test_db = TestingSessionLocal()
         yield test_db
-        test_db.commit()
+        test_db.commit()  # noqa: allow-commit
     finally:
         if test_db:
             test_db.close()
@@ -104,7 +104,6 @@ def everyone_role_permissions(session: Session):
         next_permissions = [int(action) for action in permissions]
 
         role.permissions = next_permissions
-        session.commit()
         Authorization().sync_everyone_role_permissions(actions=permissions)
 
         try:
@@ -113,7 +112,6 @@ def everyone_role_permissions(session: Session):
             role = everyone_role()
             assert role is not None, "Failed to find the global 'everyone' role"
             role.permissions = original_permissions
-            session.commit()
             Authorization().sync_everyone_role_permissions(actions=original_permissions)
 
     return _change_permissions
@@ -163,7 +161,9 @@ def clear_db(session: Session) -> None:
     if roles_table is not None:
         session.execute(roles_table.delete().where(roles_table.c.prototype == 0))
     AuthorizationService(session).reload_enforcer()
-    session.commit()
+    # TODO fix by using factory for device token test
+    # Device token test is broken without this
+    session.commit()  # noqa: allow-commit
     reset_unique_fakers()
 
 

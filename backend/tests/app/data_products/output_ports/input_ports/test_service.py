@@ -47,7 +47,6 @@ def _grant_and_pending_renewal(consumer, port, session):
         requested_duration_days=30,
         decided_by=None,
     )
-    session.commit()
     return link, grant, renewal
 
 

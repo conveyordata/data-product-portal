@@ -75,7 +75,6 @@ class TestDatasetQueryStatsDailyRouter:
             consumer_data_product_id=consumer2.id,
             query_count=250,
         )
-        session.commit()
 
         # Use day granularity with small day_range to avoid excessive bucket filling
         response = client.get(
@@ -110,7 +109,6 @@ class TestDatasetQueryStatsDailyRouter:
             consumer_data_product_id=consumer.id,
             query_count=200,
         )
-        session.commit()
 
         response = client.request(
             "DELETE",
@@ -152,7 +150,6 @@ class TestDatasetQueryStatsDailyRouter:
             consumer_data_product_id=consumer.id,
             query_count=125,
         )
-        session.commit()
 
         response = client.get(
             f"{DATA_PRODUCT_ENDPOINT}/{dataset.data_product.id}/output_ports/{dataset.id}/query_stats",
@@ -191,7 +188,6 @@ class TestDatasetQueryStatsDailyRouter:
             consumer_data_product_id=consumer.id,
             query_count=150,
         )
-        session.commit()
 
         # Store dataset_id before deletion (dataset object will be deleted)
         dataset_id = dataset.id

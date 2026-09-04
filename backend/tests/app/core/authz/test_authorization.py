@@ -337,7 +337,7 @@ class TestCrossWorkerStaleness:
                 ),
                 {"u": user, "r": role, "obj": resource},
             )
-            conn.commit()
+            conn.commit()  # noqa: allow-commit
 
         # In-memory is stale: still denied despite the DB change
         assert (
@@ -361,5 +361,4 @@ class TestCrossWorkerStaleness:
                 ),
                 {"u": user, "r": role, "obj": resource},
             )
-            conn.commit()
         authorizer.remove_role_permissions(role_id=role)

@@ -49,4 +49,3 @@ class DatasetRoleAssignmentFactory(factory.alchemy.SQLAlchemyModelFactory):
                 user_id=str(self.user_id),
                 resource_id=str(self.output_port_id),
             )
-            test_session.commit()
