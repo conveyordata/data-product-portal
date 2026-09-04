@@ -72,7 +72,6 @@ API operations until they can be synchronized through SCIM. Both entry points wi
 * **Good, because** it provides one consistent target for Global and Data Product role assignments.
 * **Good, because** type-specific attributes and relationships remain in separate tables.
 * **Good, because** users remain separated from identities that cannot authenticate.
-* **Good, because** group membership can reference both users and machine users.
 * **Good, because** Casbin group inheritance can be used to enforce access control policies.
 * **Neutral, because** reading a complete identity requires joining its common and type-specific tables.
 * **Bad, because** parent and subtype rows must be managed in the same transaction.
