@@ -33,7 +33,6 @@ class RoleFactory(factory.alchemy.SQLAlchemyModelFactory):
             authorizer.sync_role_permissions(
                 role_id=str(self.id), actions=self.permissions
             )
-        test_session.commit()
 
     @classmethod
     def admin(cls):

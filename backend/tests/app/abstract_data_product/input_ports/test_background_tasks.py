@@ -25,7 +25,6 @@ class TestExpireInputPorts:
             request__valid_until=TODAY - timedelta(days=1),
             request__decided_by=None,
         )
-        session.commit()
 
         with _mock_emit() as mock_emit:
             asyncio.run(expire_input_ports(session))
@@ -44,7 +43,6 @@ class TestExpireInputPorts:
             request__valid_until=TODAY + timedelta(days=10),
             request__decided_by=None,
         )
-        session.commit()
 
         with _mock_emit() as mock_emit:
             asyncio.run(expire_input_ports(session))
@@ -59,7 +57,6 @@ class TestExpireInputPorts:
             request__valid_until=TODAY - timedelta(days=1),
             request__decided_by=None,
         )
-        session.commit()
 
         with _mock_emit() as mock_emit:
             asyncio.run(expire_input_ports(session))
@@ -70,7 +67,6 @@ class TestExpireInputPorts:
 
     def test_expire_input_ports__pending_only_link_is_ignored(self, session):
         link = InputPortFactory(status=InputPortStatus.PENDING)
-        session.commit()
 
         with _mock_emit() as mock_emit:
             asyncio.run(expire_input_ports(session))
