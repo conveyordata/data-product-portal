@@ -25,7 +25,8 @@
         "dep-viz": "npm run build && npx open-cli dependencies.html",
         "generate-api": "rm -rf src/store/api/services/generated/* && npx @rtk-query/codegen-openapi src/store/api/openapi-config.ts && node scripts/add-ts-nocheck.js && node scripts/validate-api-errors.js",
         "validate-api-errors": "node scripts/validate-api-errors.js",
-        "knip": "knip"
+        "knip": "knip",
+        "postinstall": "patch-package"
     },
     "dependencies": {
         "@ant-design/charts": "^2.6.7",
@@ -85,6 +86,7 @@
         "jsdom": "^30.0.1",
         "knip": "^6.34.0",
         "msw": "^2.15.0",
+        "patch-package": "^8.0.1",
         "rollup-plugin-visualizer": "^7.1.1",
         "sass": "^1.103.1",
         "typescript": "^7.0.2",
