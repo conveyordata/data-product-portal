@@ -5,14 +5,14 @@ from jinja2 import Template
 
 from app.authorization.service import AuthorizationService
 from app.data_products.output_ports.service import OutputPortService
-from app.database.database import get_db_session
+from app.database.database import get_system_db_session
 
 if TYPE_CHECKING:
     from sqlalchemy.orm import Session
 
 
 def seed_db(path: str, **template_vars):
-    db: Session = next(get_db_session())
+    db: Session = next(get_system_db_session())
 
     # Read the file content
     with open(path, "r") as file:

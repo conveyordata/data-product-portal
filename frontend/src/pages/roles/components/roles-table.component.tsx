@@ -530,8 +530,27 @@ function determinePermissionsForScope(scope: Scope, roles: Role[], t: TFunction)
                     name: 'Insert data quality results',
                     description: t('Allows inserting data quality results for an Output Port'),
                 },
+                {
+                    type: 'Instance',
+                    id: AuthorizationAction.OUTPUT_PORT__UPDATE_CONTRACT,
+                    name: 'Manage data contract',
+                    description: t('Allows modifying the data contract of an Output Port'),
+                },
             ];
             break;
+    }
+
+    if (scope === Scope.DATA_PRODUCT) {
+        permissions.push(
+            {
+                type: 'Group',
+                id: 'Manage Output Ports',
+                name: 'Manage Output Ports',
+            },
+            ...determinePermissionsForScope(Scope.DATASET, roles, t).filter(
+                (permission): permission is PermissionInstance => permission.type === 'Instance',
+            ),
+        );
     }
 
     const determineAccess = (permission: AuthorizationAction) => {

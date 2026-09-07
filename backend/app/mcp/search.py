@@ -6,6 +6,7 @@ from uuid import UUID
 from fastmcp.dependencies import Depends
 from sqlalchemy.orm import Session
 
+from app.authorization.role_assignments.enums import AssignmentFilter
 from app.configuration.domains.service import DomainService
 from app.data_products.output_ports.input_ports.service import InputPortService
 from app.data_products.output_ports.service import OutputPortService
@@ -15,7 +16,7 @@ from app.data_products.technical_assets.schema_response import (
     GetTechnicalAssetsResponseItem,
 )
 from app.data_products.technical_assets.service import TechnicalAssetService
-from app.mcp.deps import get_db_session, get_mcp_authenticated_user
+from app.mcp.deps import get_mcp_authenticated_user, get_user_db_session
 from app.search_output_ports.schema_response import SearchOutputPortsResponseItem
 from app.users.model import User as UserModel
 
@@ -24,7 +25,7 @@ def universal_search(
     query: str,
     entity_types: Sequence[str] = (),
     limit: int = 10,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_user_db_session),
     user: UserModel = Depends(get_mcp_authenticated_user),
 ) -> dict[str, Any]:
     results: dict[str, Any] = {
@@ -41,7 +42,10 @@ def universal_search(
     ]
     query_results = {}
     if "data_products" in search_types:
-        all_data_products = DataProductService(db).get_data_products()
+        all_data_products = DataProductService(db).get_data_products(
+            current_user=user,
+            assignment_filter=AssignmentFilter.ALL,
+        )
         filtered_data_products = []
         for dp in all_data_products:
             if query.lower() in dp.name.lower() or (
@@ -62,7 +66,10 @@ def universal_search(
 
     if "output_ports" in search_types:
         all_output_ports = OutputPortService(db).search_output_ports(
-            query=None, limit=1000, user=user, current_user_assigned=False
+            query=None,
+            limit=1000,
+            user=user,
+            assignment_filter=AssignmentFilter.ALL,
         )
         filtered_output_ports = []
         for ds in all_output_ports:
@@ -127,9 +134,13 @@ def search_data_products(
     domain_id: Optional[str] = None,
     status: Optional[str] = None,
     limit: int = 20,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_user_db_session),
+    user: UserModel = Depends(get_mcp_authenticated_user),
 ) -> dict[str, Any]:
-    all_data_products = DataProductService(db).get_data_products()
+    all_data_products = DataProductService(db).get_data_products(
+        current_user=user,
+        assignment_filter=AssignmentFilter.ALL,
+    )
     filtered_data_products = []
 
     for dp in all_data_products:
@@ -164,7 +175,7 @@ def search_data_products(
 def get_consuming_products(
     output_port_id: str,
     data_product_id: str,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_user_db_session),
     user: UserModel = Depends(get_mcp_authenticated_user),
 ) -> dict[str, Any]:
     """Get consuming data products for a specific output port.
@@ -197,11 +208,14 @@ def get_consuming_products(
 def search_output_ports(
     query: Optional[str] = None,
     limit: int = 20,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_user_db_session),
     user: UserModel = Depends(get_mcp_authenticated_user),
 ) -> dict[str, Any]:
     all_output_ports = OutputPortService(db).search_output_ports(
-        query=query, user=user, limit=limit, current_user_assigned=False
+        query=query,
+        user=user,
+        limit=limit,
+        assignment_filter=AssignmentFilter.ALL,
     )
     return {
         "output_ports": [

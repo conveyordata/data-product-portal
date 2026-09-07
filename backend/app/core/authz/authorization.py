@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Awaitable, Callable, Sequence, TypeAlias, Union
+from typing import Awaitable, Callable, Sequence, TypeAlias, Union, assert_never
 from uuid import UUID
 
 import casbin_sqlalchemy_adapter as sqlalchemy_adapter
@@ -10,8 +10,9 @@ from opentelemetry import trace
 from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
+from app.data_products.model import DataProduct, DataProductVisibility
 from app.database import database
-from app.database.database import get_db_session
+from app.database.deps import get_db_session
 from app.settings import settings
 from app.users.schema import User
 from app.utils.singleton import Singleton
@@ -65,10 +66,15 @@ class Authorization(metaclass=Singleton):
             user: User = Depends(get_authenticated_user),
             db: Session = Depends(get_db_session),
         ) -> None:
-            obj = await resolver.resolve(request, object_id, db)
-            dom = await resolver.resolve_domain(db, obj)
+            context = await resolver.resolve_context(request, object_id, db)
 
-            if not cls().has_access(sub=str(user.id), dom=dom, obj=obj, act=action):
+            if not cls().has_access(
+                sub=str(user.id),
+                dom=context.domain_id,
+                obj=context.object_id,
+                parent=context.parent_id,
+                act=action,
+            ):
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
                     detail="You don't have permission to perform this action",
@@ -78,11 +84,17 @@ class Authorization(metaclass=Singleton):
 
     @cachedmethod(lambda self: self._cache)
     def has_access(
-        self, *, sub: str, dom: str, obj: str, act: AuthorizationAction
+        self,
+        *,
+        sub: str,
+        dom: str,
+        obj: str,
+        act: AuthorizationAction,
+        parent: str = "*",
     ) -> bool:
         with tracer.start_as_current_span("has_access"):
             enforcer: SyncedEnforcer = self._enforcer
-            return enforcer.enforce(sub, dom, obj, str(act))
+            return enforcer.enforce(sub, dom, obj, parent, str(act))
 
     def _after_update(self) -> None:
         """The cache should be purged when the casbin database is altered,
@@ -282,3 +294,21 @@ class Authorization(metaclass=Singleton):
         )
         self._after_update()
         return bool(updates)
+
+    def has_read_access_to_data_product(
+        self, current_user: User, data_product: DataProduct
+    ) -> bool:
+        # The check for visibility is a performance optimisation to avoid unnecessary
+        # has_access checks for discoverable data products.
+        match data_product.visibility:
+            case DataProductVisibility.DISCOVERABLE:
+                return True
+            case DataProductVisibility.HIDDEN:
+                return self.has_access(
+                    sub=str(current_user.id),
+                    obj=data_product.id,
+                    dom=data_product.domain_id,
+                    act=AuthorizationAction.HIDDEN_DATA_PRODUCT__READ,
+                )
+            case _:
+                assert_never(data_product.visibility)

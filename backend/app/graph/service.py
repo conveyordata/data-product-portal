@@ -1,11 +1,17 @@
 from typing import List
 
-from sqlalchemy import bindparam, text
-from sqlalchemy.orm import Session
+from sqlalchemy import select
+from sqlalchemy.orm import Session, aliased, with_polymorphic
 
+from app.abstract_data_product.input_ports.model import InputPort
+from app.abstract_data_product.model import AbstractDataProduct
 from app.abstract_data_product.type import AbstractDataProductType
 from app.authorization.role_assignments.enums import DecisionStatus
+from app.configuration.data_product_types.model import DataProductType
+from app.configuration.domains.model import Domain
 from app.core.logging import logger
+from app.data_products.model import DataProduct
+from app.data_products.output_ports.model import OutputPort
 from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
@@ -21,23 +27,20 @@ class GraphService:
         exploration_nodes_enabled: bool = False,
         output_port_nodes_enabled: bool = False,
     ) -> Graph:
+        adp = with_polymorphic(DataProduct, [])
         data_products = (
             self.db.execute(
-                text(
-                    """
-                    SELECT
-                        data_products.id as id,
-                        adp.name as name,
-                        adp.description as description,
-                        data_product_types.icon_key as icon_key,
-                        domains.name as domain_name,
-                        domains.id as domain_id
-                    FROM data_products
-                    LEFT JOIN abstract_data_products as adp on data_products.id = adp.id
-                    LEFT JOIN data_product_types on data_products.type_id = data_product_types.id
-                    LEFT JOIN domains on adp.domain_id = domains.id
-                    """
+                select(
+                    adp.id.label("id"),
+                    adp.name.label("name"),
+                    adp.description.label("description"),
+                    DataProductType.icon_key.label("icon_key"),
+                    Domain.name.label("domain_name"),
+                    Domain.id.label("domain_id"),
                 )
+                .select_from(adp)
+                .join(DataProductType, adp.type_id == DataProductType.id, isouter=True)
+                .join(Domain, adp.domain_id == Domain.id, isouter=True)
             )
             .mappings()
             .all()
@@ -62,17 +65,19 @@ class GraphService:
         if exploration_nodes_enabled:
             exploration_nodes = (
                 self.db.execute(
-                    text(
-                        """
-                        SELECT explorations.id            as id,
-                               adp.name                    as name,
-                               adp.description             as description,
-                               domains.name                as domain_name,
-                               domains.id                  as domain_id
-                        FROM explorations
-                        LEFT JOIN abstract_data_products as adp on explorations.id = adp.id
-                        LEFT JOIN domains on adp.domain_id = domains.id
-                        """
+                    select(
+                        AbstractDataProduct.id.label("id"),
+                        AbstractDataProduct.name.label("name"),
+                        AbstractDataProduct.description.label("description"),
+                        Domain.name.label("domain_name"),
+                        Domain.id.label("domain_id"),
+                    )
+                    .where(
+                        AbstractDataProduct.abstract_data_product_type
+                        == AbstractDataProductType.EXPLORATION
+                    )
+                    .join(
+                        Domain, AbstractDataProduct.domain_id == Domain.id, isouter=True
                     )
                 )
                 .mappings()
@@ -104,20 +109,21 @@ class GraphService:
         if output_port_nodes_enabled:
             datasets = (
                 self.db.execute(
-                    text(
-                        """
-                SELECT datasets.id            as id,
-                       datasets.name          as name,
-                       datasets.data_product_id   as data_product_id,
-                       datasets.description   as description,
-                       domains.name                as domain_name,
-                       domains.id                  as domain_id
-                FROM datasets
-                LEFT JOIN data_products on data_products.id = datasets.data_product_id
-                LEFT JOIN abstract_data_products as adp on data_products.id = adp.id
-                LEFT JOIN domains on adp.domain_id = domains.id
-                """
+                    select(
+                        OutputPort.id.label("id"),
+                        OutputPort.name.label("name"),
+                        OutputPort.data_product_id.label("data_product_id"),
+                        OutputPort.description.label("description"),
+                        Domain.name.label("domain_name"),
+                        Domain.id.label("domain_id"),
                     )
+                    .select_from(OutputPort)
+                    .join(
+                        DataProduct,
+                        OutputPort.data_product_id == DataProduct.id,
+                        isouter=True,
+                    )
+                    .join(Domain, DataProduct.domain_id == Domain.id, isouter=True)
                 )
                 .mappings()
                 .all()
@@ -152,19 +158,27 @@ class GraphService:
                     for dataset in datasets
                 ]
             )
+            consumer_abstract = aliased(AbstractDataProduct)
             abstract_data_product_links = (
                 self.db.execute(
-                    text(
-                        """
-                SELECT input_ports.consuming_abstract_data_product_id as consumer_id,
-                       input_ports.dataset_id as dataset_id,
-                       input_ports.status          as status
-                FROM input_ports
-                JOIN abstract_data_products on abstract_data_products.id = input_ports.consuming_abstract_data_product_id
-                WHERE abstract_data_products.abstract_data_product_type in :data_product_types
-                """
-                    ).bindparams(bindparam("data_product_types", expanding=True)),
-                    {"data_product_types": data_product_types},
+                    select(
+                        InputPort.consuming_abstract_data_product_id.label(
+                            "consumer_id"
+                        ),
+                        InputPort.output_port_id.label("dataset_id"),
+                        InputPort.status.label("status"),
+                    )
+                    .select_from(InputPort)
+                    .join(
+                        consumer_abstract,
+                        consumer_abstract.id
+                        == InputPort.consuming_abstract_data_product_id,
+                    )
+                    .where(
+                        consumer_abstract.abstract_data_product_type.in_(
+                            data_product_types
+                        )
+                    )
                 )
                 .mappings()
                 .all()
@@ -175,28 +189,34 @@ class GraphService:
                         id=f"{link['dataset_id']}-{link['consumer_id']}",
                         source=link["dataset_id"],
                         target=link["consumer_id"],
-                        animated=link["status"] == DecisionStatus.APPROVED.name,
+                        animated=link["status"] == DecisionStatus.APPROVED.value,
                     )
                     for link in abstract_data_product_links
                 ]
             )
         else:
+            consumer_abstract = aliased(AbstractDataProduct)
             abstract_data_product_links = (
                 self.db.execute(
-                    text(
-                        """
-                        SELECT data_products.id          as producer_id,
-                               abstract_data_products.id as consumer_id,
-                               input_ports.status        as status
-                        FROM data_products
-                                 JOIN datasets ON data_products.id = datasets.data_product_id
-                                 JOIN input_ports ON datasets.id = input_ports.dataset_id
-                                 JOIN abstract_data_products
-                                      ON abstract_data_products.id = input_ports.consuming_abstract_data_product_id
-                        WHERE abstract_data_products.abstract_data_product_type IN :data_product_types
-                        """
-                    ).bindparams(bindparam("data_product_types", expanding=True)),
-                    {"data_product_types": data_product_types},
+                    select(
+                        OutputPort.data_product_id.label("producer_id"),
+                        InputPort.consuming_abstract_data_product_id.label(
+                            "consumer_id"
+                        ),
+                        InputPort.status.label("status"),
+                    )
+                    .select_from(OutputPort)
+                    .join(InputPort, InputPort.output_port_id == OutputPort.id)
+                    .join(
+                        consumer_abstract,
+                        consumer_abstract.id
+                        == InputPort.consuming_abstract_data_product_id,
+                    )
+                    .where(
+                        consumer_abstract.abstract_data_product_type.in_(
+                            data_product_types
+                        )
+                    )
                 )
                 .mappings()
                 .all()

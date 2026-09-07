@@ -13,6 +13,7 @@ import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/d
 import { useAppDispatch } from '@/store';
 import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
 import {
+    AssignmentFilter,
     useGetDataProductsQuery,
     useRequestInputPortsForDataProductMutation,
 } from '@/store/api/services/generated/dataProductsApi.ts';
@@ -115,7 +116,7 @@ export const ExistingDataProductForm = ({ setSelectedDataProductId }: Props) => 
     };
     const currentUser = useSelector(selectCurrentUser);
     const { data: { data_products: userDataProducts = [] } = {}, isFetching: isFetchingUserDataProducts } =
-        useGetDataProductsQuery(currentUser?.id, {
+        useGetDataProductsQuery(AssignmentFilter.OnlyAssigned, {
             skip: currentUser === null || !currentUser?.id,
         });
     const options = userDataProducts.map((dp) => ({

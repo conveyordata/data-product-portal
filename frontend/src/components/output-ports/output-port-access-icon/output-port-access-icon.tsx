@@ -19,8 +19,6 @@ export const OutputPortAccessIcon = ({ accessType, hasPopover = false }: Props) 
 
     const icon = useMemo(() => {
         switch (accessType) {
-            case OutputPortAccessType.Public:
-                return null;
             case OutputPortAccessType.Unrestricted:
                 return null;
             case OutputPortAccessType.Restricted:

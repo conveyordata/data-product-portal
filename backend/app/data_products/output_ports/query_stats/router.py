@@ -16,7 +16,7 @@ from app.data_products.output_ports.query_stats.service import (
     OutputPortStatsService,
     QueryStatsGranularity,
 )
-from app.database.database import get_db_session
+from app.database.deps import get_db_session
 
 router = APIRouter()
 route = "/v2/data_products/{data_product_id}/output_ports/{id}/query_stats"

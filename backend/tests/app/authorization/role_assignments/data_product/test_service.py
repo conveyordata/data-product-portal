@@ -12,6 +12,7 @@ from tests.factories import (
     RoleFactory,
     UserFactory,
 )
+from tests.session_util import as_user
 
 
 class TestDataProductRoleAssignmentsService:
@@ -68,13 +69,14 @@ class TestDataProductRoleAssignmentsService:
             data_product_id=DataProductFactory().id,
             role_id=role.id,
         )
-        requests_old_inactive_hidden = RoleAssignmentService(session).get_user_requests(
-            user, True
-        )
-        requests_all = RoleAssignmentService(session).get_user_requests(user, False)
-        assert len(requests_old_inactive_hidden) == 2
-        assert len(requests_all) == 3
-        requests_ids = [r.id for r in requests_old_inactive_hidden]
-        assert pending_recent.id in requests_ids
-        assert pending_old.id in requests_ids
-        assert approved_old.id not in requests_ids
+        with as_user(session, user.id):
+            requests_old_inactive_hidden = RoleAssignmentService(
+                session
+            ).get_user_requests(user, True)
+            requests_all = RoleAssignmentService(session).get_user_requests(user, False)
+            assert len(requests_old_inactive_hidden) == 2
+            assert len(requests_all) == 3
+            requests_ids = [r.id for r in requests_old_inactive_hidden]
+            assert pending_recent.id in requests_ids
+            assert pending_old.id in requests_ids
+            assert approved_old.id not in requests_ids

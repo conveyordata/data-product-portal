@@ -10,6 +10,7 @@ from .data_product_type import DataProductTypeFactory
 from .dataset import OutputPortFactory
 from .dataset import fake as dataset_fake
 from .dataset_query_stats_daily import OutputPortQueryStatsFactory
+from .device_flow import DeviceFlowFactory
 from .domain import DomainFactory
 from .env_platform_config import EnvPlatformConfigFactory
 from .env_platform_service_config import EnvPlatformServiceConfigFactory
@@ -82,6 +83,7 @@ factories = [
     NotificationFactory,
     ExplorationFactory,
     TechnicalAssetAccessModeFactory,
+    DeviceFlowFactory,
 ]
 
 for factory_model in factories:

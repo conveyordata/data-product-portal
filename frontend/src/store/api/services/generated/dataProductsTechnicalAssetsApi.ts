@@ -575,7 +575,6 @@ export enum OutputPortStatus {
   Archived = "archived",
 }
 export enum OutputPortAccessType {
-  Public = "public",
   Restricted = "restricted",
   Private = "private",
   Unrestricted = "unrestricted",

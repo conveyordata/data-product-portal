@@ -1,5 +1,5 @@
 import copy
-from typing import Optional, Sequence
+from typing import Sequence, assert_never
 from uuid import UUID
 from warnings import deprecated
 
@@ -14,7 +14,7 @@ from app.abstract_data_product.input_ports.model import (
     InputPort as InputPortModel,
 )
 from app.abstract_data_product.service import AbstractDataProductService
-from app.authorization.role_assignments.enums import DecisionStatus
+from app.authorization.role_assignments.enums import AssignmentFilter, DecisionStatus
 from app.authorization.roles.schema import Prototype
 from app.authorization.service import DATA_PRODUCT_READER_ROLE
 from app.configuration.data_product_lifecycles.model import (
@@ -135,7 +135,9 @@ class DataProductService(AbstractDataProductService):
 
     def get_data_products(
         self,
-        filter_to_user_with_assigment: Optional[UUID] = None,
+        *,
+        current_user: User,
+        assignment_filter: AssignmentFilter,
     ) -> Sequence[DataProductModel]:
         default_lifecycle = self.db.scalar(
             select(DataProductLifeCycleModel).filter(
@@ -146,13 +148,18 @@ class DataProductService(AbstractDataProductService):
             selectinload(DataProductModel.tags).raiseload("*"),
             undefer(DataProductModel.input_port_count),
         )
-        if filter_to_user_with_assigment:
-            query = query.filter(
-                DataProductModel.assignments.any(
-                    user_id=filter_to_user_with_assigment,
-                    decision=DecisionStatus.APPROVED,
+        match assignment_filter:
+            case AssignmentFilter.ALL:
+                pass
+            case AssignmentFilter.ONLY_ASSIGNED:
+                query = query.filter(
+                    DataProductModel.assignments.any(
+                        user_id=current_user.id,
+                        decision=DecisionStatus.APPROVED,
+                    )
                 )
-            )
+            case _:
+                assert_never(assignment_filter)
         query = query.order_by(asc(DataProductModel.name))
 
         dps = self.db.scalars(query).unique().all()
@@ -456,7 +463,8 @@ class DataProductService(AbstractDataProductService):
         visible_data_product_ids = self.db.scalars(
             select(DataProductModel.id).where(
                 DataProductModel.visibility == DataProductVisibility.DISCOVERABLE
-            )
+            ),
+            execution_options={"skip_data_product_visibility_filter": True},
         ).all()
         for id in visible_data_product_ids:
             self._sync_public_reader_grouping(id, DataProductVisibility.DISCOVERABLE)

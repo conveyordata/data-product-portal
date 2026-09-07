@@ -28,8 +28,8 @@ from app.data_products.technical_assets.schema_response import compute_technical
 from app.data_products.technical_assets.service import TechnicalAssetService
 from app.mcp.deps import (
     authorize_data_product_read_integrations,
-    get_db_session,
     get_mcp_authenticated_user,
+    get_user_db_session,
 )
 from app.settings import settings
 from app.technical_asset_configuration.glue.model import (
@@ -129,7 +129,7 @@ def register_tools(mcp: FastMCP) -> None:
         data_product_namespace: str,
         env: str,
         authorized_user: User = Depends(get_mcp_authenticated_user),
-        db: Session = Depends(get_db_session),
+        db: Session = Depends(get_user_db_session),
     ) -> Dict[str, str]:
         """Get temporary AWS credentials for a specific data product and environment.
 
@@ -160,7 +160,7 @@ def register_tools(mcp: FastMCP) -> None:
         environment: str,
         technical_asset_id: str,
         data_product_namespace: str = "",
-        db: Session = Depends(get_db_session),
+        db: Session = Depends(get_user_db_session),
     ) -> Dict[str, str]:
         """Get the Athena database name and S3 results bucket for a technical asset.
 
@@ -251,7 +251,7 @@ def register_tools(mcp: FastMCP) -> None:
         env: str,
         database_name: str,
         authorized_user: User = Depends(get_mcp_authenticated_user),
-        db: Session = Depends(get_db_session),
+        db: Session = Depends(get_user_db_session),
     ) -> Dict[str, Any]:
         """List all tables in a Glue database for a data product and environment.
 
@@ -305,7 +305,7 @@ def register_tools(mcp: FastMCP) -> None:
         bucket: str = "",
         workgroup: str = "",
         authorized_user: User = Depends(get_mcp_authenticated_user),
-        db: Session = Depends(get_db_session),
+        db: Session = Depends(get_user_db_session),
     ) -> Dict[str, Any]:
         """Run an Athena query using temporary credentials for a data product and environment.
 
@@ -365,7 +365,7 @@ def register_tools(mcp: FastMCP) -> None:
         env: str,
         max_results: int = 100,
         authorized_user: User = Depends(get_mcp_authenticated_user),
-        db: Session = Depends(get_db_session),
+        db: Session = Depends(get_user_db_session),
     ) -> Dict[str, Any]:
         """Get the status and results of a previously submitted Athena query.
 

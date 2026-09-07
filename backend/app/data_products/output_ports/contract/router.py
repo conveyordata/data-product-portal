@@ -12,7 +12,7 @@ from app.data_products.output_ports.contract.schema_response import (
 )
 from app.data_products.output_ports.contract.service import OutputPortContractService
 from app.data_products.output_ports.model import ensure_output_port_exists
-from app.database.database import get_db_session
+from app.database.deps import get_db_session
 
 router = APIRouter(
     tags=["Data Products - Output Ports - Contract"],

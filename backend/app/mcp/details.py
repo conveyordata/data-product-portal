@@ -17,13 +17,13 @@ from app.data_products.technical_assets.schema_response import (
     GetTechnicalAssetsResponseItem,
 )
 from app.data_products.technical_assets.service import TechnicalAssetService
-from app.mcp.deps import get_db_session, get_mcp_authenticated_user
+from app.mcp.deps import get_mcp_authenticated_user, get_user_db_session
 from app.users.model import User as UserModel
 
 
 def get_data_product_details(
     data_product_id: str,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_user_db_session),
 ) -> dict[str, Any]:
     data_product = DataProductService(db).get_data_product(
         id=UUID(data_product_id),
@@ -33,7 +33,7 @@ def get_data_product_details(
 
 def get_output_port_details(
     output_port_id: str,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_user_db_session),
     user: UserModel = Depends(get_mcp_authenticated_user),
 ) -> dict[str, Any]:
     dataset = OutputPortService(db).get_output_port(id=UUID(output_port_id), user=user)
@@ -42,7 +42,7 @@ def get_output_port_details(
 
 def get_technical_asset_details(
     technical_asset_id: str,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_user_db_session),
 ) -> dict[str, Any]:
     do = ensure_technical_asset_exists(UUID(technical_asset_id), db=db)
     data_output = TechnicalAssetService(db).get_technical_asset(
@@ -53,7 +53,7 @@ def get_technical_asset_details(
 
 
 def get_domain_details(
-    domain_id: str, db: Session = Depends(get_db_session)
+    domain_id: str, db: Session = Depends(get_user_db_session)
 ) -> dict[str, Any]:
     domain = DomainService(db).get_domain(
         id=UUID(domain_id),

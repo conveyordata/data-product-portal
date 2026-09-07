@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.configuration.platforms.model import Platform as PlatformModel
 from app.configuration.platforms.schema_response import Platform
-from app.database.database import get_db_session
+from app.database.deps import get_db_session
 
 
 class PlatformService:

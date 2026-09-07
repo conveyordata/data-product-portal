@@ -1,0 +1,26 @@
+diff --git a/node_modules/@rc-component/util/es/hooks/useDelayState.js b/node_modules/@rc-component/util/es/hooks/useDelayState.js
+index 219d954..d99c881 100644
+--- a/node_modules/@rc-component/util/es/hooks/useDelayState.js
++++ b/node_modules/@rc-component/util/es/hooks/useDelayState.js
+@@ -19,6 +19,8 @@ export default function useDelayState(defaultValue) {
+       delayRef.current = null;
+     }
+   });
++  // patch-package: clear the pending timeout/raf on unmount, see https://github.com/react-component/util/issues/805
++  React.useEffect(() => cancelPending, []);
+   const setDelayValue = useEvent((nextValue, immediatelyOrDelay) => {
+     const delayConfig = immediatelyOrDelay || {
+       frame: 1
+diff --git a/node_modules/@rc-component/util/lib/hooks/useDelayState.js b/node_modules/@rc-component/util/lib/hooks/useDelayState.js
+index e59989e..4c98ea0 100644
+--- a/node_modules/@rc-component/util/lib/hooks/useDelayState.js
++++ b/node_modules/@rc-component/util/lib/hooks/useDelayState.js
+@@ -28,6 +28,8 @@ function useDelayState(defaultValue) {
+       delayRef.current = null;
+     }
+   });
++  // patch-package: clear the pending timeout/raf on unmount, see https://github.com/react-component/util/issues/805
++  React.useEffect(() => cancelPending, []);
+   const setDelayValue = (0, _useEvent.default)((nextValue, immediatelyOrDelay) => {
+     const delayConfig = immediatelyOrDelay || {
+       frame: 1

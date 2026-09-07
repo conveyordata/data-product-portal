@@ -164,7 +164,7 @@ type GetDataProductTypeParams struct {
 
 // GetDataProductsParams is parameters of get_data_products operation.
 type GetDataProductsParams struct {
-	FilterToUserWithAssigment OptUUID `json:",omitempty,omitzero"`
+	AssignmentFilter OptAssignmentFilter `json:",omitempty,omitzero"`
 }
 
 // GetDefaultAccessDurationParams is parameters of get_default_access_duration operation.
@@ -521,9 +521,9 @@ type SanitizeResourceNameParams struct {
 
 // SearchOutputPortsParams is parameters of search_output_ports operation.
 type SearchOutputPortsParams struct {
-	Query               OptString `json:",omitempty,omitzero"`
-	Limit               OptInt    `json:",omitempty,omitzero"`
-	CurrentUserAssigned OptBool   `json:",omitempty,omitzero"`
+	Query            OptString           `json:",omitempty,omitzero"`
+	Limit            OptInt              `json:",omitempty,omitzero"`
+	AssignmentFilter OptAssignmentFilter `json:",omitempty,omitzero"`
 }
 
 // SetValueForDataProductParams is parameters of set_value_for_data_product operation.

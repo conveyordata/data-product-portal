@@ -5,6 +5,7 @@ import httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
+from ...models.assignment_filter import AssignmentFilter
 from ...models.http_validation_error import HTTPValidationError
 from ...models.search_output_ports_response import SearchOutputPortsResponse
 from ...types import UNSET, Response, Unset
@@ -14,7 +15,7 @@ def _get_kwargs(
     *,
     query: str | Unset = UNSET,
     limit: int | Unset = 100,
-    current_user_assigned: bool | Unset = False,
+    assignment_filter: AssignmentFilter | Unset = UNSET,
 ) -> dict[str, Any]:
 
     params: dict[str, Any] = {}
@@ -23,7 +24,11 @@ def _get_kwargs(
 
     params["limit"] = limit
 
-    params["current_user_assigned"] = current_user_assigned
+    json_assignment_filter: str | Unset = UNSET
+    if not isinstance(assignment_filter, Unset):
+        json_assignment_filter = assignment_filter.value
+
+    params["assignment_filter"] = json_assignment_filter
 
     params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
 
@@ -71,14 +76,14 @@ def sync_detailed(
     client: AuthenticatedClient | Client,
     query: str | Unset = UNSET,
     limit: int | Unset = 100,
-    current_user_assigned: bool | Unset = False,
+    assignment_filter: AssignmentFilter | Unset = UNSET,
 ) -> Response[HTTPValidationError | SearchOutputPortsResponse]:
     """Search Output Ports
 
     Args:
         query (str | Unset):
         limit (int | Unset):  Default: 100.
-        current_user_assigned (bool | Unset):  Default: False.
+        assignment_filter (AssignmentFilter | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -91,7 +96,7 @@ def sync_detailed(
     kwargs = _get_kwargs(
         query=query,
         limit=limit,
-        current_user_assigned=current_user_assigned,
+        assignment_filter=assignment_filter,
     )
 
     response = client.get_httpx_client().request(
@@ -106,14 +111,14 @@ def sync(
     client: AuthenticatedClient | Client,
     query: str | Unset = UNSET,
     limit: int | Unset = 100,
-    current_user_assigned: bool | Unset = False,
+    assignment_filter: AssignmentFilter | Unset = UNSET,
 ) -> HTTPValidationError | SearchOutputPortsResponse | None:
     """Search Output Ports
 
     Args:
         query (str | Unset):
         limit (int | Unset):  Default: 100.
-        current_user_assigned (bool | Unset):  Default: False.
+        assignment_filter (AssignmentFilter | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -127,7 +132,7 @@ def sync(
         client=client,
         query=query,
         limit=limit,
-        current_user_assigned=current_user_assigned,
+        assignment_filter=assignment_filter,
     ).parsed
 
 
@@ -136,14 +141,14 @@ async def asyncio_detailed(
     client: AuthenticatedClient | Client,
     query: str | Unset = UNSET,
     limit: int | Unset = 100,
-    current_user_assigned: bool | Unset = False,
+    assignment_filter: AssignmentFilter | Unset = UNSET,
 ) -> Response[HTTPValidationError | SearchOutputPortsResponse]:
     """Search Output Ports
 
     Args:
         query (str | Unset):
         limit (int | Unset):  Default: 100.
-        current_user_assigned (bool | Unset):  Default: False.
+        assignment_filter (AssignmentFilter | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -156,7 +161,7 @@ async def asyncio_detailed(
     kwargs = _get_kwargs(
         query=query,
         limit=limit,
-        current_user_assigned=current_user_assigned,
+        assignment_filter=assignment_filter,
     )
 
     response = await client.get_async_httpx_client().request(**kwargs)
@@ -169,14 +174,14 @@ async def asyncio(
     client: AuthenticatedClient | Client,
     query: str | Unset = UNSET,
     limit: int | Unset = 100,
-    current_user_assigned: bool | Unset = False,
+    assignment_filter: AssignmentFilter | Unset = UNSET,
 ) -> HTTPValidationError | SearchOutputPortsResponse | None:
     """Search Output Ports
 
     Args:
         query (str | Unset):
         limit (int | Unset):  Default: 100.
-        current_user_assigned (bool | Unset):  Default: False.
+        assignment_filter (AssignmentFilter | Unset):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -191,6 +196,6 @@ async def asyncio(
             client=client,
             query=query,
             limit=limit,
-            current_user_assigned=current_user_assigned,
+            assignment_filter=assignment_filter,
         )
     ).parsed

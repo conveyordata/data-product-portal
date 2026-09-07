@@ -451,11 +451,7 @@ export type DeleteOutputPortRoleAssignmentResponse = {
   output_port_id: string;
 };
 export type OutputPortStatus = "pending" | "active" | "archived";
-export type OutputPortAccessType =
-  | "public"
-  | "restricted"
-  | "private"
-  | "unrestricted";
+export type OutputPortAccessType = "restricted" | "private" | "unrestricted";
 export type Tag = {
   id: string;
   value: string;

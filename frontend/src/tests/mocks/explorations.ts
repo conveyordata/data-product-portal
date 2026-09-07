@@ -71,7 +71,7 @@ const mockInputPorts: InputPort[] = [
             namespace: 'op_numero_uno',
             description: 'I am the first output port',
             status: OutputPortStatus.Pending,
-            access_type: OutputPortAccessType.Public,
+            access_type: OutputPortAccessType.Unrestricted,
             data_product_id: 'dp-1',
             tags: [],
             access_modes: [],

@@ -8,11 +8,13 @@ from sqlalchemy.orm import Session
 from app.core.auth.api_key import secured_api_key
 from app.core.auth.jwt import JWTToken, JWTTokenValid, PyJWTError
 from app.core.auth.oidc import OIDCIdentity
-from app.database.database import get_db_session
+from app.database.database import get_system_db_session
 from app.settings import settings
 from app.users.model import User as UserModel
 from app.users.schema import User
 from app.users.schema_request import UserCreate
+
+SYSTEM_ACCOUNT_BOT_EXTERNAL_ID = "systemaccount_bot"
 
 
 def update_db_user(oidc_user: OIDCIdentity, token: JWTToken, db: Session) -> User:
@@ -56,7 +58,8 @@ if settings.OIDC_ENABLED:
         return JWTToken(sub=jwt.valid_jwt_token.get("sub"), token=token)
 
     def authorize_user(
-        token: JWTToken = Depends(secured_call), db: Session = Depends(get_db_session)
+        token: JWTToken = Depends(secured_call),
+        db: Session = Depends(get_system_db_session),
     ) -> User:
         response = httpx.post(
             url=oidc.userinfo_endpoint, headers={"Authorization": token.token}
@@ -74,11 +77,11 @@ if settings.OIDC_ENABLED:
         if not api_key:
             return secured_call(jwt_token)
         else:
-            return JWTToken(sub="systemaccount_bot", token="")
+            return JWTToken(sub=SYSTEM_ACCOUNT_BOT_EXTERNAL_ID, token="")
 
     def get_authenticated_user(
         token: JWTToken = Depends(api_key_authenticated),
-        db: Session = Depends(get_db_session),
+        db: Session = Depends(get_system_db_session),
     ) -> User:
         result = db.scalars(
             select(UserModel).where(UserModel.external_id == token.sub)
@@ -106,7 +109,7 @@ else:
 
     def authorize_user(
         token: JWTToken = Depends(secured_call),
-        db: Session = Depends(get_db_session),
+        db: Session = Depends(get_system_db_session),
     ) -> User:
         default_username = settings.DEFAULT_USERNAME
         if "@" not in default_username:
@@ -121,7 +124,8 @@ else:
         return update_db_user(oidc_user, token, db)
 
     def get_authenticated_user(
-        token: JWTToken = Depends(secured_call), db: Session = Depends(get_db_session)
+        token: JWTToken = Depends(secured_call),
+        db: Session = Depends(get_system_db_session),
     ) -> User:
         user: Optional[User] = db.scalars(
             select(UserModel).where(UserModel.external_id == token.sub)

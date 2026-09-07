@@ -7,13 +7,9 @@ from sqlalchemy import (
     ForeignKey,
     String,
     Table,
-    func,
-    literal_column,
-    select,
-    text,
 )
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, Session, deferred, relationship
+from sqlalchemy.orm import Mapped, Session, relationship
 
 from app.database.database import Base, ensure_exists
 from app.shared.model import BaseORM, utcnow
@@ -45,13 +41,6 @@ class Domain(Base, BaseORM):
     )
     environments: Mapped[list["Environment"]] = relationship(
         secondary=domain_environment_table, lazy="raise"
-    )
-
-    abstract_data_product_count = deferred(
-        select(func.count(literal_column("id")))
-        .select_from(text("abstract_data_products"))
-        .scalar_subquery(),
-        raiseload=True,
     )
 
 

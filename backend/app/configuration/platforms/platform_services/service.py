@@ -9,7 +9,7 @@ from app.configuration.platforms.platform_services.model import (
     PlatformService as PlatformServiceModel,
 )
 from app.configuration.platforms.platform_services.schema import PlatformService
-from app.database.database import get_db_session
+from app.database.deps import get_db_session
 
 
 class PlatformServiceService:

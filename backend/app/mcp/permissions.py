@@ -24,7 +24,7 @@ from app.authorization.role_assignments.output_port.schema import (
 from app.authorization.role_assignments.output_port.service import (
     RoleAssignmentService as DatasetRoleAssignmentService,
 )
-from app.mcp.deps import get_db_session, get_mcp_authenticated_user
+from app.mcp.deps import get_mcp_authenticated_user, get_user_db_session
 from app.users.model import User as UserModel
 
 
@@ -47,7 +47,7 @@ def register_permission_tools(mcp) -> None:
         user_id: Optional[str] = None,
         scope_type: Optional[str] = None,
         limit: int = 50,
-        db: Session = Depends(get_db_session),
+        db: Session = Depends(get_user_db_session),
         current_user: UserModel = Depends(get_mcp_authenticated_user),
     ) -> dict[str, Any]:
 
@@ -127,7 +127,7 @@ def register_permission_tools(mcp) -> None:
         resource_type: str,
         resource_id: str,
         limit: int = 50,
-        db: Session = Depends(get_db_session),
+        db: Session = Depends(get_user_db_session),
     ) -> dict[str, Any]:
         """
         List all users and their roles on a specific data product or output port.
