@@ -149,6 +149,7 @@ from .environment_configs_get import EnvironmentConfigsGet
 from .environment_configs_get_item import EnvironmentConfigsGetItem
 from .environment_get_item import EnvironmentGetItem
 from .environment_platform_config_get import EnvironmentPlatformConfigGet
+from .environment_update_global import EnvironmentUpdateGlobal
 from .environments_get import EnvironmentsGet
 from .event_entity_type import EventEntityType
 from .expiring_soon_threshold_response import ExpiringSoonThresholdResponse
@@ -489,6 +490,7 @@ __all__ = (
     "EnvironmentGetItem",
     "EnvironmentPlatformConfigGet",
     "EnvironmentsGet",
+    "EnvironmentUpdateGlobal",
     "EventEntityType",
     "ExpiringSoonThresholdResponse",
     "Exploration",

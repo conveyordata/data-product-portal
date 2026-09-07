@@ -4855,6 +4855,57 @@
             }
           }
         }
+      },
+      "patch": {
+        "tags": [
+          "Configuration - Environments"
+        ],
+        "summary": "Update Environment Is Global",
+        "operationId": "update_environment_is_global",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EnvironmentUpdateGlobal"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Environment"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/v2/configuration/environments/configs/{config_id}": {
@@ -11428,6 +11479,15 @@
           "description": {
             "type": "string",
             "title": "Description"
+          },
+          "environment_ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Environment Ids",
+            "default": []
           }
         },
         "type": "object",
@@ -11446,6 +11506,15 @@
           "description": {
             "type": "string",
             "title": "Description"
+          },
+          "environment_ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Environment Ids",
+            "default": []
           }
         },
         "type": "object",
@@ -11540,6 +11609,11 @@
             "type": "boolean",
             "title": "Is Default",
             "default": false
+          },
+          "is_global": {
+            "type": "boolean",
+            "title": "Is Global",
+            "default": true
           }
         },
         "type": "object",
@@ -11646,6 +11720,11 @@
             "type": "boolean",
             "title": "Is Default",
             "default": false
+          },
+          "is_global": {
+            "type": "boolean",
+            "title": "Is Global",
+            "default": true
           }
         },
         "type": "object",
@@ -11693,6 +11772,19 @@
           "platform"
         ],
         "title": "EnvironmentPlatformConfigGet"
+      },
+      "EnvironmentUpdateGlobal": {
+        "properties": {
+          "is_global": {
+            "type": "boolean",
+            "title": "Is Global"
+          }
+        },
+        "type": "object",
+        "required": [
+          "is_global"
+        ],
+        "title": "EnvironmentUpdateGlobal"
       },
       "EnvironmentsGet": {
         "properties": {
@@ -12153,13 +12245,21 @@
           "description": {
             "type": "string",
             "title": "Description"
+          },
+          "environments": {
+            "items": {
+              "$ref": "#/components/schemas/EnvironmentGetItem"
+            },
+            "type": "array",
+            "title": "Environments"
           }
         },
         "type": "object",
         "required": [
           "id",
           "name",
-          "description"
+          "description",
+          "environments"
         ],
         "title": "GetDomainResponse"
       },
@@ -12178,6 +12278,13 @@
             "type": "string",
             "title": "Description"
           },
+          "environments": {
+            "items": {
+              "$ref": "#/components/schemas/EnvironmentGetItem"
+            },
+            "type": "array",
+            "title": "Environments"
+          },
           "abstract_data_product_count": {
             "type": "integer",
             "title": "Abstract Data Product Count"
@@ -12188,6 +12295,7 @@
           "id",
           "name",
           "description",
+          "environments",
           "abstract_data_product_count"
         ],
         "title": "GetDomainsItem"

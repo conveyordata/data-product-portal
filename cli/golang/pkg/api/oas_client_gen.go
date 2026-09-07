@@ -900,6 +900,12 @@ type Invoker interface {
 	//
 	// PUT /api/v2/configuration/domains/{id}
 	UpdateDomain(ctx context.Context, request *DomainUpdate, params UpdateDomainParams) (UpdateDomainRes, error)
+	// UpdateEnvironmentIsGlobal invokes update_environment_is_global operation.
+	//
+	// Update Environment Is Global.
+	//
+	// PATCH /api/v2/configuration/environments/{id}
+	UpdateEnvironmentIsGlobal(ctx context.Context, request *EnvironmentUpdateGlobal, params UpdateEnvironmentIsGlobalParams) (UpdateEnvironmentIsGlobalRes, error)
 	// UpdateOutputPort invokes update_output_port operation.
 	//
 	// Update Output Port.
@@ -10622,6 +10628,70 @@ func (c *Client) sendUpdateDomain(ctx context.Context, request *DomainUpdate, pa
 	}()
 
 	result, err := decodeUpdateDomainResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// UpdateEnvironmentIsGlobal invokes update_environment_is_global operation.
+//
+// Update Environment Is Global.
+//
+// PATCH /api/v2/configuration/environments/{id}
+func (c *Client) UpdateEnvironmentIsGlobal(ctx context.Context, request *EnvironmentUpdateGlobal, params UpdateEnvironmentIsGlobalParams) (UpdateEnvironmentIsGlobalRes, error) {
+	res, err := c.sendUpdateEnvironmentIsGlobal(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendUpdateEnvironmentIsGlobal(ctx context.Context, request *EnvironmentUpdateGlobal, params UpdateEnvironmentIsGlobalParams) (res UpdateEnvironmentIsGlobalRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [2]string
+	pathParts[0] = "/api/v2/configuration/environments/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "PATCH", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeUpdateEnvironmentIsGlobalRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeUpdateEnvironmentIsGlobalResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

@@ -142,6 +142,7 @@ export function DataProductActions({ dataProductId }: Props) {
                 <DataAccessTileGrid
                     canAccessData={canReadIntegrations}
                     dataPlatforms={dataPlatforms}
+                    domainId={dataProduct.domain.id}
                     onDataPlatformClick={handleAccessToData}
                     onTileClick={handleTileClick}
                     isDisabled={isLoading || !canReadIntegrations}

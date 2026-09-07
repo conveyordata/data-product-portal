@@ -65,10 +65,19 @@ export type MigrateDomainApiArg = {
   fromId: string;
   toId: string;
 };
+export type EnvironmentGetItem = {
+  id: string;
+  name: string;
+  acronym: string;
+  context: string;
+  is_default?: boolean;
+  is_global?: boolean;
+};
 export type GetDomainsItem = {
   id: string;
   name: string;
   description: string;
+  environments: EnvironmentGetItem[];
   abstract_data_product_count: number;
 };
 export type GetDomainsResponse = {
@@ -90,6 +99,7 @@ export type HttpValidationError = {
 export type DomainCreate = {
   name: string;
   description: string;
+  environment_ids?: string[];
 };
 export type UpdateDomainResponse = {
   id: string;
@@ -97,11 +107,13 @@ export type UpdateDomainResponse = {
 export type DomainUpdate = {
   name: string;
   description: string;
+  environment_ids?: string[];
 };
 export type GetDomainResponse = {
   id: string;
   name: string;
   description: string;
+  environments: EnvironmentGetItem[];
 };
 export const {
   useGetDomainsQuery,

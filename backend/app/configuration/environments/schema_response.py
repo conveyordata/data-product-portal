@@ -10,6 +10,7 @@ class Environment(ORMModel):
     acronym: str
     context: str
     is_default: bool = False
+    is_global: bool = True
 
 
 class EnvironmentGetItem(Environment):
