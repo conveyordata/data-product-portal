@@ -6,6 +6,8 @@ sidebar_position: 200
 
 ## Unreleased
 
+## 0.7.1
+
 ### breaking changes
 
 - **[API]**: Access durations configuration switched URL path from /v2/access_durations to /v2/configuration/access_durations. Please update your API calls accordingly.
