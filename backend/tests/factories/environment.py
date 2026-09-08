@@ -1,6 +1,9 @@
 import factory
+from faker import Faker
 
 from app.configuration.environments.model import Environment
+
+fake = Faker()
 
 
 class EnvironmentFactory(factory.alchemy.SQLAlchemyModelFactory):
@@ -9,6 +12,6 @@ class EnvironmentFactory(factory.alchemy.SQLAlchemyModelFactory):
 
     id = factory.Faker("uuid4")
     name = "dev"
-    acronym = factory.Faker("word")
+    acronym = factory.Sequence(lambda _: fake.unique.word())
     context = "environment_context{{}}"
     is_default = False

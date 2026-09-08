@@ -15,9 +15,9 @@ from .domain import DomainFactory
 from .env_platform_config import EnvPlatformConfigFactory
 from .env_platform_service_config import EnvPlatformServiceConfigFactory
 from .environment import EnvironmentFactory
+from .environment import fake as environment_fake
 from .event import EventFactory
 from .exploration import ExplorationFactory
-from .exploration import fake as exploration_fake
 from .input_port import InputPortFactory
 from .input_port_request import InputPortRequestFactory
 from .lifecycle import LifecycleFactory
@@ -36,8 +36,9 @@ from .technical_asset_access_mode import TechnicalAssetAccessModeFactory
 from .technical_asset_output_ports import TechnicalAssetOutputPortAssociationFactory
 from .theme_settings import ThemeSettingsFactory
 from .user import UserFactory
+from .user import fake as user_fake
 
-_fakes_with_unique = [data_product_fake, dataset_fake, exploration_fake]
+_fakes_with_unique = [data_product_fake, dataset_fake, environment_fake, user_fake]
 
 
 def reset_unique_fakers() -> None:
