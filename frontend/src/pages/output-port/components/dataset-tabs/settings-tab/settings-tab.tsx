@@ -21,8 +21,8 @@ import {
 } from '@/store/api/services/generated/configurationAccessDurationsApi.ts';
 import {
     AccessDurationType,
-    type DatasetUpdate,
     type OutputPortAccessDuration,
+    type OutputPortUpdate,
     useGetOutputPortAccessDurationsQuery,
     useGetOutputPortQuery,
     useUpdateOutputPortMutation,
@@ -86,7 +86,7 @@ export function SettingsTab({ datasetId, dataProductId }: Props) {
     async function saveAccessField(
         partial: Partial<
             Pick<
-                DatasetUpdate,
+                OutputPortUpdate,
                 'access_type' | 'data_product_access_duration_type' | 'exploration_access_duration_type'
             >
         >,
@@ -97,7 +97,7 @@ export function SettingsTab({ datasetId, dataProductId }: Props) {
             await updateOutputPort({
                 id: datasetId,
                 dataProductId,
-                datasetUpdate: {
+                outputPortUpdate: {
                     name: outputPort.name,
                     namespace: outputPort.namespace,
                     description: outputPort.description,

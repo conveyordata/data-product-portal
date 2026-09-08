@@ -5,7 +5,7 @@ import factory
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.role_assignments.output_port.model import DatasetRoleAssignment
 from app.core.authz.authorization import Authorization
-from app.data_products.output_ports.model import Dataset
+from app.data_products.output_ports.model import OutputPort
 from tests import test_session
 
 
@@ -31,7 +31,7 @@ class DatasetRoleAssignmentFactory(factory.alchemy.SQLAlchemyModelFactory):
             if o.output_port is not None
             else (
                 _ds.data_product_id
-                if (_ds := test_session.get(Dataset, o.output_port_id)) is not None
+                if (_ds := test_session.get(OutputPort, o.output_port_id)) is not None
                 else uuid.uuid4()
             )
         )

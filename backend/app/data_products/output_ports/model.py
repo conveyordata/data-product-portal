@@ -193,9 +193,6 @@ class OutputPort(Base, BaseORM, EventTrackedMixin):
         )
 
 
-Dataset = OutputPort
-
-
 def ensure_output_port_exists(
     dataset_id: UUID,
     db: Session,

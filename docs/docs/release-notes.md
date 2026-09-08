@@ -28,6 +28,10 @@ sidebar_position: 200
 - **[Data Product Roles]**: Data product roles can now also give rights to all output ports under a data product, instead of only the data product itself. By default a Data Product owner, can do all actions on all Output Ports under that Data Product.
 - **[General]**: Introduced settings that allow domains to specify their own set of enabled environments or use the global default.
 
+### bugfixes
+
+- **[Provisioner]**: Access to the finalizer endpoint of exploration and data product is now only possible as an admin. The provisioner should always run with admin credentials.
+
 ## 0.7.0
 
 ### breaking changes

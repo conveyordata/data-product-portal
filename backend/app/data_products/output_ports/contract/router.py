@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from pydantic import ValidationError
 from sqlalchemy.orm import Session
 
-from app.core.authz import Action, Authorization, DatasetResolver
+from app.core.authz import Action, Authorization, OutputPortResolver
 from app.data_products.output_ports.contract.schema_request import BitolContractRequest
 from app.data_products.output_ports.contract.schema_response import (
     OutputPortSchemaResponse,
@@ -16,12 +16,12 @@ from app.database.deps import get_db_session
 
 router = APIRouter(
     tags=["Data Products - Output Ports - Contract"],
-    prefix="/v2/data_products/{data_product_id}/output_ports/{id}/data_contract",
+    prefix="/{id}/data_contract",
 )
 
 
 @router.get(
-    "/",
+    "",
     responses={
         404: {
             "description": "Output Port not found",
@@ -30,6 +30,11 @@ router = APIRouter(
             },
         }
     },
+    dependencies=[
+        Depends(
+            Authorization.enforce(Action.HIDDEN__OUTPUT_PORT__READ, OutputPortResolver)
+        )
+    ],
 )
 def get_output_port_schema(
     data_product_id: UUID,
@@ -41,7 +46,7 @@ def get_output_port_schema(
 
 
 @router.post(
-    "/",
+    "",
     responses={
         404: {
             "description": "Output Port not found",
@@ -52,7 +57,9 @@ def get_output_port_schema(
     },
     dependencies=[
         Depends(
-            Authorization.enforce(Action.OUTPUT_PORT__UPDATE_CONTRACT, DatasetResolver)
+            Authorization.enforce(
+                Action.OUTPUT_PORT__UPDATE_CONTRACT, OutputPortResolver
+            )
         ),
     ],
 )
@@ -78,7 +85,9 @@ def ingest_output_port_contract(
     },
     dependencies=[
         Depends(
-            Authorization.enforce(Action.OUTPUT_PORT__UPDATE_CONTRACT, DatasetResolver)
+            Authorization.enforce(
+                Action.OUTPUT_PORT__UPDATE_CONTRACT, OutputPortResolver
+            )
         ),
     ],
 )
