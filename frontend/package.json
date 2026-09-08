@@ -88,7 +88,7 @@
         "msw": "^2.15.0",
         "patch-package": "^8.0.1",
         "rollup-plugin-visualizer": "^7.1.1",
-        "sass": "^1.103.1",
+        "sass": "^1.104.0",
         "typescript": "^7.0.2",
         "vite": "^8.2.2",
         "vite-plugin-svgr": "^5.2.0",
