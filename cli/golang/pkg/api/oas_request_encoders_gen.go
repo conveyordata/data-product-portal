@@ -749,8 +749,22 @@ func encodeUpdateDomainRequest(
 	return nil
 }
 
+func encodeUpdateEnvironmentIsGlobalRequest(
+	req *EnvironmentUpdateGlobal,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
 func encodeUpdateOutputPortRequest(
-	req *DatasetUpdate,
+	req *OutputPortUpdate,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"

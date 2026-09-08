@@ -137,7 +137,7 @@ def upgrade() -> None:
         sa.Column(
             "access_type",
             sa.Enum(OutputPortAccessType),
-            default=OutputPortAccessType.PUBLIC,
+            default="public",
         ),
         sa.Column("business_area_id", UUID, sa.ForeignKey("business_areas.id")),
         sa.Column("created_on", sa.DateTime(timezone=False), server_default=utcnow()),

@@ -2,20 +2,20 @@ from botocore.client import BaseClient
 from botocore.exceptions import NoRegionError, TokenRetrievalError
 from fastapi import HTTPException, status
 
-from app.core.aws.refreshable_session import RefreshableBotoSession
+from app.core.aws.refreshable_session import get_refreshable_session
 from app.core.logging import logger
 from app.settings import settings
 
 disabled_aws = False
 if not settings.DISABLED_AWS:
     try:
-        session = RefreshableBotoSession().refreshable_session()
+        session = get_refreshable_session()
         clients = {
             "s3": session.client("s3"),
             "sts": session.client("sts"),
             "lambda": session.client("lambda"),
         }
-    except (AttributeError, NoRegionError, TokenRetrievalError):
+    except (AttributeError, NoRegionError, TokenRetrievalError, RuntimeError):
         logger.warning(
             "Could not instantiate AWS session. All AWS functionality will be disabled"
         )

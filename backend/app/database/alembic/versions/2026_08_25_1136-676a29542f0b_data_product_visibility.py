@@ -11,9 +11,6 @@ from typing import Sequence, Union
 import sqlalchemy as sa
 from alembic import op
 
-from app.authorization.roles.schema import Scope
-from app.core.authz.actions import AuthorizationAction
-
 # revision identifiers, used by Alembic.
 revision: str = "676a29542f0b"
 down_revision: Union[str, None] = "e4b81c7d2f90"
@@ -41,8 +38,8 @@ def upgrade() -> None:
               AND NOT (:read_action = ANY(COALESCE(permissions, ARRAY[]::int[])))
             """
         ).bindparams(
-            read_action=int(AuthorizationAction.HIDDEN_DATA_PRODUCT__READ),
-            scope=Scope.DATA_PRODUCT,
+            read_action=int(901),  # HIDDEN__DATA_PRODUCT__READ
+            scope="data_product",  # Scope.DATA_PRODUCT
         )
     )
 
@@ -56,8 +53,8 @@ def downgrade() -> None:
             WHERE scope = :scope
             """
         ).bindparams(
-            read_action=int(AuthorizationAction.HIDDEN_DATA_PRODUCT__READ),
-            scope=Scope.DATA_PRODUCT,
+            read_action=int(901),  # HIDDEN__DATA_PRODUCT__READ
+            scope="data_product",  # Scope.DATA_PRODUCT
         )
     )
     op.drop_column("data_products", "visibility")

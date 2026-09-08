@@ -22,11 +22,11 @@ from app.authorization.role_assignments.output_port.service import RoleAssignmen
 from app.core.auth.auth import get_authenticated_user
 from app.core.authz import Action, Authorization
 from app.core.authz.resolvers import (
-    DatasetResolver,
     EmptyResolver,
+    OutputPortResolver,
     OutputPortRoleAssignmentResolver,
 )
-from app.database.database import get_db_session
+from app.database.deps import get_db_session
 from app.events.enums import EventReferenceEntity, EventType
 from app.events.schema import CreateEvent
 from app.events.service import EventService
@@ -157,7 +157,7 @@ def request_output_port_role_assignment(
         Depends(
             Authorization.enforce(
                 Action.OUTPUT_PORT__CREATE_USER,
-                resolver=DatasetResolver,
+                resolver=OutputPortResolver,
                 object_id="output_port_id",
             )
         )

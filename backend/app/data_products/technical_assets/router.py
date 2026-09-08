@@ -23,7 +23,7 @@ from app.data_products.technical_assets.schema_response import (
     UpdateTechnicalAssetResponse,
 )
 from app.data_products.technical_assets.service import TechnicalAssetService
-from app.database.database import get_db_session
+from app.database.deps import get_db_session
 from app.events.enums import EventReferenceEntity, EventType
 from app.events.schema import CreateEvent
 from app.events.schema_response import (
@@ -46,7 +46,7 @@ router = APIRouter(
     dependencies=[
         Depends(
             Authorization.enforce(
-                Action.HIDDEN_DATA_PRODUCT__READ,
+                Action.HIDDEN__DATA_PRODUCT__READ,
                 DataProductResolver,
                 object_id="data_product_id",
             )
@@ -71,7 +71,7 @@ def get_data_product_technical_assets(
     dependencies=[
         Depends(
             Authorization.enforce(
-                Action.HIDDEN_DATA_PRODUCT__READ,
+                Action.HIDDEN__DATA_PRODUCT__READ,
                 DataProductResolver,
                 object_id="data_product_id",
             )
@@ -91,7 +91,7 @@ def get_technical_asset(
     dependencies=[
         Depends(
             Authorization.enforce(
-                Action.HIDDEN_DATA_PRODUCT__READ,
+                Action.HIDDEN__DATA_PRODUCT__READ,
                 DataProductResolver,
                 object_id="data_product_id",
             )
@@ -243,7 +243,7 @@ def update_technical_asset_status(
     dependencies=[
         Depends(
             Authorization.enforce(
-                Action.HIDDEN_DATA_PRODUCT__READ,
+                Action.HIDDEN__DATA_PRODUCT__READ,
                 DataProductResolver,
                 object_id="data_product_id",
             )

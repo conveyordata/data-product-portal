@@ -9,7 +9,7 @@ from app.core.auth.auth import get_authenticated_user
 from app.core.authz import Action, Authorization
 from app.core.authz.resolvers import (
     DataProductResolver,
-    DatasetResolver,
+    OutputPortResolver,
 )
 from app.core.errors.router_responses import process_errors_as_route_responses
 from app.data_products.output_port_technical_assets_link.schema_request import (
@@ -31,7 +31,7 @@ from app.data_products.technical_assets.service import (
     TECHNICAL_ASSET_NOT_ACTIVE_ERROR,
     TechnicalAssetService,
 )
-from app.database.database import get_db_session
+from app.database.deps import get_db_session
 from app.events.enums import EventReferenceEntity, EventType
 from app.events.schema import CreateEvent
 from app.events.service import EventService
@@ -57,7 +57,7 @@ router = APIRouter(
         Depends(
             Authorization.enforce(
                 Action.OUTPUT_PORT__APPROVE_TECHNICAL_ASSET_LINK_REQUEST,
-                DatasetResolver,
+                OutputPortResolver,
                 object_id="output_port_id",
             )
         ),
@@ -99,7 +99,7 @@ def approve_output_port_technical_asset_link(
         Depends(
             Authorization.enforce(
                 Action.OUTPUT_PORT__APPROVE_TECHNICAL_ASSET_LINK_REQUEST,
-                DatasetResolver,
+                OutputPortResolver,
                 object_id="output_port_id",
             )
         ),

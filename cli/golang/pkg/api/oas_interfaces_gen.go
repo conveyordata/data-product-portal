@@ -493,6 +493,10 @@ type UpdateDomainRes interface {
 	updateDomainRes()
 }
 
+type UpdateEnvironmentIsGlobalRes interface {
+	updateEnvironmentIsGlobalRes()
+}
+
 type UpdateOutputPortAboutRes interface {
 	updateOutputPortAboutRes()
 }

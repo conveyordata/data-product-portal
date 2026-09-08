@@ -11,7 +11,6 @@ from app.authorization.roles.schema import Scope
 from app.core.authz import Action
 from app.data_products.model import DataProduct
 from app.settings import settings
-from tests import test_session
 from tests.app.data_products.output_port_technical_assets_link.test_router import (
     DATA_OUTPUTS_DATASETS_ENDPOINT,
 )
@@ -19,6 +18,10 @@ from tests.factories import (
     AccessModeFactory,
     DataProductFactory,
     DataProductRoleAssignmentFactory,
+    DatasetRoleAssignmentFactory,
+    DomainFactory,
+    EnvironmentFactory,
+    EnvPlatformServiceConfigFactory,
     OutputPortFactory,
     PlatformServiceFactory,
     RoleFactory,
@@ -26,7 +29,6 @@ from tests.factories import (
     TechnicalAssetFactory,
     UserFactory,
 )
-from tests.factories.role_assignment_dataset import DatasetRoleAssignmentFactory
 from tests.webhook_util import assert_event_in_queue
 
 ENDPOINT = "/api/v2/data_products/{}/technical_assets"
@@ -210,6 +212,118 @@ class TestTechnicalAssetsRouter:
         )
         assert response.status_code == 200
         assert response.json()["id"] == str(data_output.id)
+
+    def test_get_technical_asset__environment_info_uses_global_list_by_default(
+        self, client: TestClient
+    ):
+        dev_env = EnvironmentFactory(name="dev", acronym="dev")
+        prd_env = EnvironmentFactory(name="prd", acronym="prd")
+        data_output = TechnicalAssetFactory()
+        EnvPlatformServiceConfigFactory(
+            platform=data_output.platform,
+            service=data_output.service,
+            environment=dev_env,
+        )
+        EnvPlatformServiceConfigFactory(
+            platform=data_output.platform,
+            service=data_output.service,
+            environment=prd_env,
+        )
+
+        response = self.get_technical_asset(
+            client, data_output.owner.id, data_output.id
+        )
+        assert response.status_code == 200
+        environment_ids = {
+            info["environment_id"] for info in response.json()["technical_info"]
+        }
+        assert environment_ids == {str(dev_env.id), str(prd_env.id)}
+
+    def test_get_technical_asset__environment_info_excludes_non_global_environments(
+        self, client: TestClient
+    ):
+        dev_env = EnvironmentFactory(name="dev", acronym="dev", is_global=True)
+        sandbox_env = EnvironmentFactory(
+            name="sandbox", acronym="sandbox", is_global=False
+        )
+        data_output = TechnicalAssetFactory()
+        EnvPlatformServiceConfigFactory(
+            platform=data_output.platform,
+            service=data_output.service,
+            environment=dev_env,
+        )
+        EnvPlatformServiceConfigFactory(
+            platform=data_output.platform,
+            service=data_output.service,
+            environment=sandbox_env,
+        )
+
+        response = self.get_technical_asset(
+            client, data_output.owner.id, data_output.id
+        )
+        assert response.status_code == 200
+        environment_ids = {
+            info["environment_id"] for info in response.json()["technical_info"]
+        }
+        assert environment_ids == {str(dev_env.id)}
+
+    def test_get_technical_asset__environment_info_filtered_by_domain_custom_list(
+        self, client: TestClient
+    ):
+        dev_env = EnvironmentFactory(name="dev", acronym="dev")
+        prd_env = EnvironmentFactory(name="prd", acronym="prd")
+        domain = DomainFactory(environments=[dev_env])
+        data_product = DataProductFactory(domain=domain)
+        data_output = TechnicalAssetFactory(owner=data_product)
+        EnvPlatformServiceConfigFactory(
+            platform=data_output.platform,
+            service=data_output.service,
+            environment=dev_env,
+        )
+        EnvPlatformServiceConfigFactory(
+            platform=data_output.platform,
+            service=data_output.service,
+            environment=prd_env,
+        )
+
+        response = self.get_technical_asset(
+            client, data_output.owner.id, data_output.id
+        )
+        assert response.status_code == 200
+        environment_ids = {
+            info["environment_id"] for info in response.json()["technical_info"]
+        }
+        assert environment_ids == {str(dev_env.id)}
+
+    def test_get_technical_asset__domain_custom_list_can_include_non_global_environment(
+        self, client: TestClient
+    ):
+        sandbox_env = EnvironmentFactory(
+            name="sandbox", acronym="sandbox", is_global=False
+        )
+        prd_env = EnvironmentFactory(name="prd", acronym="prd", is_global=True)
+        domain = DomainFactory(environments=[sandbox_env])
+        data_product = DataProductFactory(domain=domain)
+        data_output = TechnicalAssetFactory(owner=data_product)
+        EnvPlatformServiceConfigFactory(
+            platform=data_output.platform,
+            service=data_output.service,
+            environment=sandbox_env,
+        )
+        EnvPlatformServiceConfigFactory(
+            platform=data_output.platform,
+            service=data_output.service,
+            environment=prd_env,
+        )
+
+        response = self.get_technical_asset(
+            client, data_output.owner.id, data_output.id
+        )
+        assert response.status_code == 200
+        environment_ids = {
+            info["environment_id"] for info in response.json()["technical_info"]
+        }
+        assert environment_ids == {str(sandbox_env.id)}
 
     def test_get_data_output_by_id_not_found(self, client: TestClient):
         data_output = TechnicalAssetFactory()
@@ -414,10 +528,16 @@ class TestTechnicalAssetsRouter:
         assert body["validity"] == "VALID"
 
     def test_create_technical_asset_duplicate_namespace(
-        self, technical_asset_payload, data_product_role_assignment, client: TestClient
+        self,
+        technical_asset_payload,
+        data_product_role_assignment,
+        client: TestClient,
+        session,
     ):
-        data_product = test_session.get(
-            DataProduct, str(technical_asset_payload["owner_id"])
+        data_product = session.get(
+            DataProduct,
+            str(technical_asset_payload["owner_id"]),
+            execution_options={"skip_data_product_visibility_filter": True},
         )
         TechnicalAssetFactory(
             namespace=technical_asset_payload["namespace"], owner=data_product

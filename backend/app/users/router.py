@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from app.core.auth.auth import authorize_user, get_authenticated_user
 from app.core.authz import Action, Authorization
 from app.core.authz.resolvers import EmptyResolver
-from app.database.database import get_db_session
+from app.database.deps import get_db_session
 from app.users.schema import User
 from app.users.schema_request import CanBecomeAdminUpdate, UserCreate
 from app.users.schema_response import (

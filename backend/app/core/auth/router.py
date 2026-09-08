@@ -7,7 +7,7 @@ from app.core.auth.device_flows.router import router as device
 from app.core.auth.service import AuthService
 from app.core.authz import Action, Authorization
 from app.core.authz.resolvers import DataProductNameResolver
-from app.database.database import get_db_session
+from app.database.deps import get_db_session
 from app.users.schema import User
 
 router = APIRouter(tags=["Authentication"], prefix="/v2/authn")

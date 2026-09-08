@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from app.configuration.data_product_settings.enums import DataProductSettingScope
 from app.data_products.model import DataProduct
 from app.data_products.output_ports.model import OutputPort
-from app.database.database import get_db_session
+from app.database.deps import get_db_session
 from app.explorations.model import Exploration
 from app.resource_names.enums import ResourceNameModel
 from app.resource_names.service import (

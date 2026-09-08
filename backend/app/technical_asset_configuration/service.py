@@ -6,7 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.configuration.platforms.platform_services.model import PlatformService
-from app.database.database import get_db_session
+from app.database.deps import get_db_session
 from app.technical_asset_configuration.schema_request import (
     RenderTechnicalAssetAccessPathRequest,
 )

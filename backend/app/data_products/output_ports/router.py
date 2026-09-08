@@ -14,8 +14,8 @@ from app.authorization.roles.schema import Prototype, Scope
 from app.authorization.roles.service import RoleService
 from app.configuration.data_product_settings.service import DataProductSettingService
 from app.core.auth.auth import get_authenticated_user
-from app.core.authz import Action, Authorization, DatasetResolver
-from app.core.authz.resolvers import EmptyResolver
+from app.core.authz import Action, Authorization, OutputPortResolver
+from app.core.authz.resolvers import DataProductResolver, EmptyResolver
 from app.data_products.output_ports.contract.router import (
     router as contract_router,
 )
@@ -25,16 +25,15 @@ from app.data_products.output_ports.curated_queries.router import (
 from app.data_products.output_ports.data_quality.router import (
     router as data_quality_router,
 )
-from app.data_products.output_ports.enums import OutputPortAccessType
 from app.data_products.output_ports.model import ensure_output_port_exists
 from app.data_products.output_ports.query_stats.router import (
     router as query_stats_router,
 )
 from app.data_products.output_ports.schema_request import (
     CreateOutputPortRequest,
-    DatasetUpdate,
     OutputPortAboutUpdate,
     OutputPortStatusUpdate,
+    OutputPortUpdate,
 )
 from app.data_products.output_ports.schema_response import (
     CreateOutputPortResponse,
@@ -44,7 +43,7 @@ from app.data_products.output_ports.schema_response import (
     UpdateOutputPortResponse,
 )
 from app.data_products.output_ports.service import OutputPortService
-from app.database.database import get_db_session
+from app.database.deps import get_db_session
 from app.events.enums import EventReferenceEntity, EventType
 from app.events.schema import CreateEvent
 from app.events.schema_response import (
@@ -90,15 +89,28 @@ def _assign_owner_role_assignments(
         )
 
 
-router = APIRouter(tags=["Data Products - Output ports"])
-route = "/v2/data_products/{data_product_id}/output_ports"
+router = APIRouter(
+    tags=["Data Products - Output ports"],
+    prefix="/v2/data_products/{data_product_id}/output_ports",
+)
 router.include_router(query_stats_router)
 router.include_router(curated_queries_router)
 router.include_router(data_quality_router)
 router.include_router(contract_router)
 
 
-@router.get(route)
+@router.get(
+    "",
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                Action.HIDDEN__DATA_PRODUCT__READ,
+                DataProductResolver,
+                object_id="data_product_id",
+            )
+        )
+    ],
+)
 def get_data_product_output_ports(
     data_product_id: UUID,
     db: Session = Depends(get_db_session),
@@ -109,7 +121,15 @@ def get_data_product_output_ports(
     )
 
 
-@router.get(f"{route}/{{id}}", response_model=GetOutputPortResponse)
+@router.get(
+    "/{id}",
+    response_model=GetOutputPortResponse,
+    dependencies=[
+        Depends(
+            Authorization.enforce(Action.HIDDEN__OUTPUT_PORT__READ, OutputPortResolver)
+        )
+    ],
+)
 def get_output_port(
     data_product_id: UUID,
     id: UUID,
@@ -119,7 +139,14 @@ def get_output_port(
     return OutputPortService(db).get_output_port(id, user, data_product_id)
 
 
-@router.get(f"{route}/{{id}}/history")
+@router.get(
+    "/{id}/history",
+    dependencies=[
+        Depends(
+            Authorization.enforce(Action.HIDDEN__OUTPUT_PORT__READ, OutputPortResolver)
+        )
+    ],
+)
 def get_output_ports_event_history(
     data_product_id: UUID, id: UUID, db: Session = Depends(get_db_session)
 ) -> GetEventHistoryResponse:
@@ -133,7 +160,7 @@ def get_output_ports_event_history(
 
 
 @router.post(
-    route,
+    "",
     responses={
         404: {
             "description": "Owner not found",
@@ -156,10 +183,6 @@ def create_output_port(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> CreateOutputPortResponse:
-    # Temporarily convert public to unrestricted.
-    if output_port_request.access_type == OutputPortAccessType.PUBLIC:
-        output_port_request.access_type = OutputPortAccessType.UNRESTRICTED
-
     output_port = OutputPortService(db).create_output_port(
         data_product_id, output_port_request
     )
@@ -182,7 +205,7 @@ def create_output_port(
 
 
 @router.delete(
-    f"{route}/{{id}}",
+    "/{id}",
     responses={
         404: {
             "description": "Dataset not found",
@@ -192,7 +215,7 @@ def create_output_port(
         }
     },
     dependencies=[
-        Depends(Authorization.enforce(Action.OUTPUT_PORT__DELETE, DatasetResolver)),
+        Depends(Authorization.enforce(Action.OUTPUT_PORT__DELETE, OutputPortResolver)),
     ],
 )
 def remove_output_port(
@@ -201,7 +224,7 @@ def remove_output_port(
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    dataset = OutputPortService(db).remove_dataset(id, data_product_id)
+    dataset = OutputPortService(db).remove_output_port(id, data_product_id)
     Authorization().clear_assignments_for_resource(resource_id=str(id))
 
     event_id = EventService(db).create_event(
@@ -221,7 +244,7 @@ def remove_output_port(
 
 
 @router.put(
-    f"{route}/{{id}}",
+    "/{id}",
     responses={
         404: {
             "description": "Output port not found",
@@ -233,7 +256,7 @@ def remove_output_port(
     dependencies=[
         Depends(
             Authorization.enforce(
-                Action.OUTPUT_PORT__UPDATE_PROPERTIES, DatasetResolver
+                Action.OUTPUT_PORT__UPDATE_PROPERTIES, OutputPortResolver
             )
         ),
     ],
@@ -241,15 +264,11 @@ def remove_output_port(
 def update_output_port(
     data_product_id: UUID,
     id: UUID,
-    update: DatasetUpdate,
+    update: OutputPortUpdate,
     db: Session = Depends(get_db_session),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> UpdateOutputPortResponse:
-    # Temporarily convert public to unrestricted.
-    if update.access_type == OutputPortAccessType.PUBLIC:
-        update.access_type = OutputPortAccessType.UNRESTRICTED
-
-    response = OutputPortService(db).update_dataset(id, data_product_id, update)
+    response = OutputPortService(db).update_output_port(id, data_product_id, update)
 
     EventService(db).create_event(
         CreateEvent(
@@ -263,7 +282,7 @@ def update_output_port(
 
 
 @router.put(
-    f"{route}/{{id}}/about",
+    "/{id}/about",
     responses={
         404: {
             "description": "Output port not found",
@@ -275,7 +294,7 @@ def update_output_port(
     dependencies=[
         Depends(
             Authorization.enforce(
-                Action.OUTPUT_PORT__UPDATE_PROPERTIES, DatasetResolver
+                Action.OUTPUT_PORT__UPDATE_PROPERTIES, OutputPortResolver
             )
         ),
     ],
@@ -300,7 +319,7 @@ def update_output_port_about(
 
 
 @router.put(
-    f"{route}/{{id}}/status",
+    "/{id}/status",
     responses={
         404: {
             "description": "Output port not found",
@@ -311,7 +330,7 @@ def update_output_port_about(
     },
     dependencies=[
         Depends(
-            Authorization.enforce(Action.OUTPUT_PORT__UPDATE_STATUS, DatasetResolver)
+            Authorization.enforce(Action.OUTPUT_PORT__UPDATE_STATUS, OutputPortResolver)
         ),
     ],
 )
@@ -334,7 +353,14 @@ def update_output_port_status(
     )
 
 
-@router.get(f"{route}/{{id}}/graph")
+@router.get(
+    "/{id}/graph",
+    dependencies=[
+        Depends(
+            Authorization.enforce(Action.HIDDEN__OUTPUT_PORT__READ, OutputPortResolver)
+        )
+    ],
+)
 def get_output_port_graph_data(
     data_product_id: UUID,
     id: UUID,
@@ -345,10 +371,12 @@ def get_output_port_graph_data(
 
 
 @router.post(
-    f"{route}/{{id}}/settings/{{setting_id}}",
+    "/{id}/settings/{setting_id}",
     dependencies=[
         Depends(
-            Authorization.enforce(Action.OUTPUT_PORT__UPDATE_SETTINGS, DatasetResolver)
+            Authorization.enforce(
+                Action.OUTPUT_PORT__UPDATE_SETTINGS, OutputPortResolver
+            )
         ),
     ],
 )
@@ -373,8 +401,13 @@ def set_value_for_output_port(
 
 
 @router.get(
-    f"{route}/{{id}}/access_durations",
+    "/{id}/access_durations",
     response_model=GetOutputPortAccessDurationsResponse,
+    dependencies=[
+        Depends(
+            Authorization.enforce(Action.HIDDEN__OUTPUT_PORT__READ, OutputPortResolver)
+        )
+    ],
 )
 def get_output_port_access_durations(
     data_product_id: UUID,

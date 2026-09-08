@@ -5,13 +5,14 @@ from uuid import UUID
 from fastmcp.dependencies import Depends
 from sqlalchemy.orm import Session
 
+from app.authorization.role_assignments.enums import AssignmentFilter
 from app.configuration.domains.service import DomainService
 from app.data_products.output_ports.schema_response import GetOutputPortResponse
 from app.data_products.output_ports.service import OutputPortService
 from app.data_products.schema_response import GetDataProductResponse
 from app.data_products.service import DataProductService
 from app.data_products.technical_assets.service import TechnicalAssetService
-from app.mcp.deps import get_db_session, get_mcp_authenticated_user
+from app.mcp.deps import get_mcp_authenticated_user, get_user_db_session
 from app.users.model import User as UserModel
 
 
@@ -21,7 +22,7 @@ def register_resources(mcp) -> None:
         description="""Get data product as a resource.""",
     )
     def get_data_product_resource(
-        data_product_id: str, db: Session = Depends(get_db_session)
+        data_product_id: str, db: Session = Depends(get_user_db_session)
     ) -> str:
         data_product = DataProductService(db).get_data_product(
             id=UUID(data_product_id),
@@ -53,7 +54,7 @@ def register_resources(mcp) -> None:
     )
     def get_output_port_resource(
         output_port_id: str,
-        db: Session = Depends(get_db_session),
+        db: Session = Depends(get_user_db_session),
         user: UserModel = Depends(get_mcp_authenticated_user),
     ) -> str:
         output_port = OutputPortService(db).get_output_port(
@@ -87,12 +88,17 @@ def register_resources(mcp) -> None:
         description="""Get marketplace overview as a resource.""",
     )
     def get_marketplace_resource(
-        db: Session = Depends(get_db_session),
+        db: Session = Depends(get_user_db_session),
         user: UserModel = Depends(get_mcp_authenticated_user),
     ) -> str:
-        all_data_products = DataProductService(db).get_data_products()
+        all_data_products = DataProductService(db).get_data_products(
+            current_user=user, assignment_filter=AssignmentFilter.ALL
+        )
         all_output_ports = OutputPortService(db).search_output_ports(
-            query=None, limit=1000, user=user, current_user_assigned=False
+            query=None,
+            limit=1000,
+            user=user,
+            assignment_filter=AssignmentFilter.ALL,
         )
         all_technical_assets = TechnicalAssetService(db).get_data_outputs()
         all_domains = DomainService(db).get_domains()

@@ -37,7 +37,7 @@ import { useGetTagsQuery } from '@/store/api/services/generated/configurationTag
 import { OutputPortAccessType, useGetDataProductQuery } from '@/store/api/services/generated/dataProductsApi.ts';
 import {
     type CreateOutputPortRequest,
-    type DatasetUpdate,
+    type OutputPortUpdate,
     useCreateOutputPortMutation,
     useGetOutputPortQuery,
     useRemoveOutputPortMutation,
@@ -390,7 +390,7 @@ export function OutputPortForm({
                     return;
                 }
 
-                const request: DatasetUpdate = {
+                const request: OutputPortUpdate = {
                     name: values.name,
                     namespace: values.namespace,
                     description: values.description,
@@ -402,7 +402,7 @@ export function OutputPortForm({
                 };
 
                 const response = await updateDataset({
-                    datasetUpdate: request,
+                    outputPortUpdate: request,
                     id: datasetId,
                     dataProductId: currentDataset.data_product_id,
                 }).unwrap();
@@ -487,7 +487,7 @@ export function OutputPortForm({
         name: currentDataset?.name,
         namespace: currentDataset?.namespace,
         description: currentDataset?.description,
-        access_type: mode === 'create' ? OutputPortAccessType.Public : currentDataset?.access_type,
+        access_type: mode === 'create' ? OutputPortAccessType.Unrestricted : currentDataset?.access_type,
         lifecycle_id: currentDataset?.lifecycle?.id,
         tag_ids: currentDataset?.tags.map((tag) => tag.id),
         owners: ownerIds,

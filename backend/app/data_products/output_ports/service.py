@@ -1,6 +1,6 @@
 import copy
 from itertools import islice
-from typing import Iterable, Optional, Sequence
+from typing import Iterable, Optional, Sequence, assert_never
 from uuid import UUID
 
 from fastapi import HTTPException, status
@@ -15,10 +15,8 @@ from app.abstract_data_product.input_ports.model import (
     InputPort as InputPortModel,
 )
 from app.abstract_data_product.type import AbstractDataProductType
-from app.authorization.role_assignments.enums import DecisionStatus
-from app.authorization.role_assignments.output_port.service import (
-    RoleAssignmentService as DatasetRoleAssignmentService,
-)
+from app.authorization.role_assignments.enums import AssignmentFilter, DecisionStatus
+from app.authorization.service import OUTPUT_PORT_READER_ROLE
 from app.configuration.access_durations.enums import AccessDurationType
 from app.configuration.access_durations.model import (
     AccessDuration as AccessDurationModel,
@@ -34,6 +32,10 @@ from app.core.namespace.validation import (
     NamespaceValidator,
 )
 from app.data_products.model import (
+    DataProduct as DataProductModel,
+)
+from app.data_products.model import (
+    DataProductVisibility,
     ensure_data_product_exists,
 )
 from app.data_products.output_port_technical_assets_link.model import (
@@ -45,9 +47,9 @@ from app.data_products.output_ports.model import ensure_output_port_exists
 from app.data_products.output_ports.schema import DatasetEmbedModel, OutputPort
 from app.data_products.output_ports.schema_request import (
     CreateOutputPortRequest,
-    DatasetUpdate,
     OutputPortAboutUpdate,
     OutputPortStatusUpdate,
+    OutputPortUpdate,
     OutputPortUsageUpdate,
 )
 from app.data_products.output_ports.schema_response import (
@@ -88,13 +90,16 @@ class OutputPortService:
         self.namespace_validator = NamespaceValidator(OutputPortModel)
         self.embedding_model = get_text_embedding_model()
 
-    def _ensure_data_product_not_deleting(self, data_product_id: UUID) -> None:
+    def _ensure_data_product_not_deleting(
+        self, data_product_id: UUID
+    ) -> DataProductModel:
         dp = ensure_data_product_exists(data_product_id, self.db)
         if dp.status == AbstractDataProductStatus.DELETING:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
                 detail=f"Data product '{dp.name}' is pending deletion and cannot be modified",
             )
+        return dp
 
     def get_access_durations(
         self, id: UUID, user: UserModel, data_product_id: Optional[UUID] = None
@@ -170,11 +175,6 @@ class OutputPortService:
                 )
             )
             output_port.lifecycle = default_lifecycle
-        if not self.is_visible_to_user(output_port, user):
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="You do not have access to this private dataset",
-            )
         return output_port
 
     def search_output_ports(
@@ -182,7 +182,7 @@ class OutputPortService:
         query: Optional[str],
         limit: int,
         user: UserModel,
-        current_user_assigned: bool,
+        assignment_filter: AssignmentFilter,
     ) -> Sequence[OutputPortModel]:
         """An attempt was made to use the elbow method to determine a cut-off for returned results.
         The results of this method were quite poor, hence the search currently works as a sorting operation only,
@@ -213,8 +213,13 @@ class OutputPortService:
             # We currently apply a limit times 2, the reason is that without a limit the query is really slow, however we might miss results because of that
             .limit(limit * 2)
         )
-        if current_user_assigned:
-            stmt = stmt.where(OutputPortModel.assignments.any(user_id=user.id))
+        match assignment_filter:
+            case AssignmentFilter.ALL:
+                pass
+            case AssignmentFilter.ONLY_ASSIGNED:
+                stmt = stmt.where(OutputPortModel.assignments.any(user_id=user.id))
+            case _:
+                assert_never(assignment_filter)
         stmt = stmt.options(
             undefer(OutputPortModel.abstract_data_product_count),
             undefer(OutputPortModel.technical_assets_count),
@@ -222,7 +227,16 @@ class OutputPortService:
         results = self.db.scalars(stmt).unique().all()
 
         return list(
-            islice((d for d in results if self.is_visible_to_user(d, user)), limit)
+            islice(
+                (
+                    d
+                    for d in results
+                    if Authorization().has_read_access_to_output_port(
+                        current_user=user, output_port=d
+                    )
+                ),
+                limit,
+            )
         )
 
     @staticmethod
@@ -288,6 +302,7 @@ class OutputPortService:
                     select(OutputPortModel)
                     .where(OutputPortModel.id.in_(batch_ids))
                     .options(*self.recalculate_embeddings_load_options())
+                    .execution_options(skip_data_product_visibility_filter=True)
                 )
                 .unique()
                 .all()
@@ -306,58 +321,78 @@ class OutputPortService:
 
         return tags
 
+    @staticmethod
+    def ensure_access_type_matches_visibility(
+        dp: DataProductModel, access_type: OutputPortAccessType
+    ) -> None:
+        match dp.visibility:
+            case DataProductVisibility.HIDDEN:
+                if access_type != OutputPortAccessType.PRIVATE:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail="Hidden data products can only have private output ports",
+                    )
+            case DataProductVisibility.DISCOVERABLE:
+                pass
+            case _:
+                assert_never(dp.visibility)
+
     def create_output_port(
-        self, data_product_id: UUID, dataset: CreateOutputPortRequest
+        self, data_product_id: UUID, create_output_port_request: CreateOutputPortRequest
     ) -> OutputPortModel:
-        self._ensure_data_product_not_deleting(data_product_id)
+        dp = self._ensure_data_product_not_deleting(data_product_id)
+        self.ensure_access_type_matches_visibility(
+            dp, create_output_port_request.access_type
+        )
         if (
             validity := self.namespace_validator.validate_namespace(
-                dataset.namespace, self.db
+                create_output_port_request.namespace, self.db
             ).validity
         ) != ResourceNameValidityType.VALID:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Invalid namespace: {validity.value}",
+                detail=f"Invalid namespace: {validity}",
             )
 
-        dataset_schema = dataset.parse_pydantic_schema()
-        dataset_schema["data_product_id"] = data_product_id
-        tags = self._fetch_tags(dataset_schema.pop("tag_ids", []))
-        _ = dataset_schema.pop("owners", [])
-        model = OutputPortModel(**dataset_schema, tags=tags)
+        output_port_schema = create_output_port_request.parse_pydantic_schema()
+        output_port_schema["data_product_id"] = data_product_id
+        tags = self._fetch_tags(output_port_schema.pop("tag_ids", []))
+        _ = output_port_schema.pop("owners", [])
+        model = OutputPortModel(**output_port_schema, tags=tags)
 
         self.db.add(model)
         self.db.flush()
+        self._sync_public_reader_grouping(model.id, model.access_type)
         self.recalculate_search(model.id)
         return model
 
-    def remove_dataset(self, id: UUID, data_product_id: UUID) -> OutputPortModel:
+    def remove_output_port(self, id: UUID, data_product_id: UUID) -> OutputPortModel:
         self._ensure_data_product_not_deleting(data_product_id)
-        dataset = ensure_output_port_exists(
+        output_port = ensure_output_port_exists(
             id, self.db, data_product_id=data_product_id
         )
-        if not dataset:
+        if not output_port:
             raise output_port_not_found_exception(id)
 
-        result = copy.deepcopy(dataset)
-        self.db.delete(dataset)
-        self.db.commit()
+        result = copy.deepcopy(output_port)
+        self.db.delete(output_port)
         return result
 
-    def update_dataset(
-        self, id: UUID, data_product_id: UUID, dataset: DatasetUpdate
+    def update_output_port(
+        self, id: UUID, data_product_id: UUID, output_port_update: OutputPortUpdate
     ) -> UUID:
-        self._ensure_data_product_not_deleting(data_product_id)
-        current_dataset = ensure_output_port_exists(
+        dp = self._ensure_data_product_not_deleting(data_product_id)
+        self.ensure_access_type_matches_visibility(dp, output_port_update.access_type)
+        current_output_port = ensure_output_port_exists(
             id, self.db, data_product_id=data_product_id
         )
-        updated_dataset = dataset.model_dump(exclude_unset=True)
+        updated_dataset = output_port_update.model_dump(exclude_unset=True)
 
         if (
-            current_dataset.namespace != dataset.namespace
+            current_output_port.namespace != output_port_update.namespace
             and (
                 validity := self.namespace_validator.validate_namespace(
-                    dataset.namespace, self.db
+                    output_port_update.namespace, self.db
                 ).validity
             )
             != ResourceNameValidityType.VALID
@@ -367,16 +402,24 @@ class OutputPortService:
                 detail=f"Invalid namespace: {validity.value}",
             )
 
+        access_type_change = None
         for k, v in updated_dataset.items():
             if k == "tag_ids":
                 new_tags = self._fetch_tags(v)
-                current_dataset.tags = new_tags
+                current_output_port.tags = new_tags
+            elif k == "access_type":
+                access_type_change = current_output_port.access_type
+                setattr(current_output_port, k, v)
             else:
-                setattr(current_dataset, k, v) if v else None
+                setattr(current_output_port, k, v) if v else None
         self.db.flush()
+        if access_type_change is not None:
+            self._sync_public_reader_grouping(
+                current_output_port.id, current_output_port.access_type
+            )
         self.recalculate_search(id)
-        self.db.commit()
-        return current_dataset.id
+
+        return current_output_port.id
 
     def update_output_port_about(
         self,
@@ -523,35 +566,6 @@ class OutputPortService:
 
         return Graph(nodes=set(nodes), edges=set(edges))
 
-    def is_visible_to_user(self, output_port: OutputPortModel, user: UserModel) -> bool:
-        if (
-            output_port.access_type != OutputPortAccessType.PRIVATE
-            or Authorization().has_admin_role(user_id=str(user.id))
-            or DatasetRoleAssignmentService(self.db).has_assignment(
-                dataset_id=output_port.id, user=user
-            )
-        ):
-            return True
-        output_port = self.db.scalar(
-            select(OutputPortModel)
-            .where(OutputPortModel.id == output_port.id)
-            .options(selectinload(OutputPortModel.data_product_links))
-        )
-
-        consuming_data_products = {
-            link.consuming_abstract_data_product
-            for link in output_port.data_product_links
-            if link.status == DecisionStatus.APPROVED
-        }
-
-        user_data_products = {
-            assignment.data_product
-            for assignment in user.data_product_roles
-            if assignment.decision == DecisionStatus.APPROVED
-        }
-
-        return bool(consuming_data_products & user_data_products)
-
     def get_output_ports(
         self, data_product_id: Optional[UUID], user: User
     ) -> Sequence[OutputPort]:
@@ -564,5 +578,40 @@ class OutputPortService:
         return [
             output_port
             for output_port in results
-            if self.is_visible_to_user(output_port, user)
+            if Authorization().has_read_access_to_output_port(
+                current_user=user, output_port=output_port
+            )
         ]
+
+    @staticmethod
+    def _sync_public_reader_grouping(
+        output_port_id: UUID, access_type: OutputPortAccessType
+    ):
+        match access_type:
+            case OutputPortAccessType.UNRESTRICTED | OutputPortAccessType.RESTRICTED:
+                Authorization().assign_resource_role(
+                    user_id="*",
+                    role_id=OUTPUT_PORT_READER_ROLE,
+                    resource_id=str(output_port_id),
+                )
+            case OutputPortAccessType.PRIVATE:
+                Authorization().revoke_resource_role(
+                    user_id="*",
+                    role_id=OUTPUT_PORT_READER_ROLE,
+                    resource_id=str(output_port_id),
+                )
+            case _:
+                assert_never(access_type)
+
+    def sync_read_rights_output_ports(self):
+        visible_output_ports = self.db.execute(
+            select(OutputPortModel.id, OutputPortModel.access_type).where(
+                OutputPortModel.access_type.in_(
+                    [OutputPortAccessType.UNRESTRICTED, OutputPortAccessType.RESTRICTED]
+                )
+            )
+        ).all()
+        if not visible_output_ports:
+            return
+        for id, access_type in visible_output_ports:
+            self._sync_public_reader_grouping(id, access_type)

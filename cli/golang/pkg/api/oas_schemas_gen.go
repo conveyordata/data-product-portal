@@ -717,6 +717,48 @@ type ApproveOutputPortTechnicalAssetLinkOKApplicationJSON jx.Raw
 func (*ApproveOutputPortTechnicalAssetLinkOKApplicationJSON) approveOutputPortTechnicalAssetLinkRes() {
 }
 
+// Ref: #/components/schemas/AssignmentFilter
+type AssignmentFilter string
+
+const (
+	AssignmentFilterAll          AssignmentFilter = "all"
+	AssignmentFilterOnlyAssigned AssignmentFilter = "only_assigned"
+)
+
+// AllValues returns all AssignmentFilter values.
+func (AssignmentFilter) AllValues() []AssignmentFilter {
+	return []AssignmentFilter{
+		AssignmentFilterAll,
+		AssignmentFilterOnlyAssigned,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s AssignmentFilter) MarshalText() ([]byte, error) {
+	switch s {
+	case AssignmentFilterAll:
+		return []byte(s), nil
+	case AssignmentFilterOnlyAssigned:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *AssignmentFilter) UnmarshalText(data []byte) error {
+	switch AssignmentFilter(data) {
+	case AssignmentFilterAll:
+		*s = AssignmentFilterAll
+		return nil
+	case AssignmentFilterOnlyAssigned:
+		*s = AssignmentFilterOnlyAssigned
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
 // The integer values for the authorization actions are stored directly in the DB. This means you can
 // change the name of the actions, but not their integer values. The values for the actions are spaced
 // on purpose, to make it easier to extend. This has no technical benefit, but it makes it easier to
@@ -733,6 +775,7 @@ const (
 	AuthorizationAction106 AuthorizationAction = 106
 	AuthorizationAction107 AuthorizationAction = 107
 	AuthorizationAction108 AuthorizationAction = 108
+	AuthorizationAction109 AuthorizationAction = 109
 	AuthorizationAction301 AuthorizationAction = 301
 	AuthorizationAction302 AuthorizationAction = 302
 	AuthorizationAction303 AuthorizationAction = 303
@@ -763,7 +806,9 @@ const (
 	AuthorizationAction413 AuthorizationAction = 413
 	AuthorizationAction414 AuthorizationAction = 414
 	AuthorizationAction415 AuthorizationAction = 415
+	AuthorizationAction416 AuthorizationAction = 416
 	AuthorizationAction901 AuthorizationAction = 901
+	AuthorizationAction902 AuthorizationAction = 902
 )
 
 // AllValues returns all AuthorizationAction values.
@@ -777,6 +822,7 @@ func (AuthorizationAction) AllValues() []AuthorizationAction {
 		AuthorizationAction106,
 		AuthorizationAction107,
 		AuthorizationAction108,
+		AuthorizationAction109,
 		AuthorizationAction301,
 		AuthorizationAction302,
 		AuthorizationAction303,
@@ -807,7 +853,9 @@ func (AuthorizationAction) AllValues() []AuthorizationAction {
 		AuthorizationAction413,
 		AuthorizationAction414,
 		AuthorizationAction415,
+		AuthorizationAction416,
 		AuthorizationAction901,
+		AuthorizationAction902,
 	}
 }
 
@@ -3655,109 +3703,6 @@ func (s *DatabricksTechnicalAssetConfiguration) SetAccessGranularity(val AccessG
 	s.AccessGranularity = val
 }
 
-// Ref: #/components/schemas/DatasetUpdate
-type DatasetUpdate struct {
-	Name                          string               `json:"name"`
-	Namespace                     string               `json:"namespace"`
-	Description                   string               `json:"description"`
-	AccessType                    OutputPortAccessType `json:"access_type"`
-	DataProductAccessDurationType AccessDurationType   `json:"data_product_access_duration_type"`
-	ExplorationAccessDurationType AccessDurationType   `json:"exploration_access_duration_type"`
-	About                         OptNilString         `json:"about"`
-	LifecycleID                   OptNilUUID           `json:"lifecycle_id"`
-	TagIds                        []uuid.UUID          `json:"tag_ids"`
-}
-
-// GetName returns the value of Name.
-func (s *DatasetUpdate) GetName() string {
-	return s.Name
-}
-
-// GetNamespace returns the value of Namespace.
-func (s *DatasetUpdate) GetNamespace() string {
-	return s.Namespace
-}
-
-// GetDescription returns the value of Description.
-func (s *DatasetUpdate) GetDescription() string {
-	return s.Description
-}
-
-// GetAccessType returns the value of AccessType.
-func (s *DatasetUpdate) GetAccessType() OutputPortAccessType {
-	return s.AccessType
-}
-
-// GetDataProductAccessDurationType returns the value of DataProductAccessDurationType.
-func (s *DatasetUpdate) GetDataProductAccessDurationType() AccessDurationType {
-	return s.DataProductAccessDurationType
-}
-
-// GetExplorationAccessDurationType returns the value of ExplorationAccessDurationType.
-func (s *DatasetUpdate) GetExplorationAccessDurationType() AccessDurationType {
-	return s.ExplorationAccessDurationType
-}
-
-// GetAbout returns the value of About.
-func (s *DatasetUpdate) GetAbout() OptNilString {
-	return s.About
-}
-
-// GetLifecycleID returns the value of LifecycleID.
-func (s *DatasetUpdate) GetLifecycleID() OptNilUUID {
-	return s.LifecycleID
-}
-
-// GetTagIds returns the value of TagIds.
-func (s *DatasetUpdate) GetTagIds() []uuid.UUID {
-	return s.TagIds
-}
-
-// SetName sets the value of Name.
-func (s *DatasetUpdate) SetName(val string) {
-	s.Name = val
-}
-
-// SetNamespace sets the value of Namespace.
-func (s *DatasetUpdate) SetNamespace(val string) {
-	s.Namespace = val
-}
-
-// SetDescription sets the value of Description.
-func (s *DatasetUpdate) SetDescription(val string) {
-	s.Description = val
-}
-
-// SetAccessType sets the value of AccessType.
-func (s *DatasetUpdate) SetAccessType(val OutputPortAccessType) {
-	s.AccessType = val
-}
-
-// SetDataProductAccessDurationType sets the value of DataProductAccessDurationType.
-func (s *DatasetUpdate) SetDataProductAccessDurationType(val AccessDurationType) {
-	s.DataProductAccessDurationType = val
-}
-
-// SetExplorationAccessDurationType sets the value of ExplorationAccessDurationType.
-func (s *DatasetUpdate) SetExplorationAccessDurationType(val AccessDurationType) {
-	s.ExplorationAccessDurationType = val
-}
-
-// SetAbout sets the value of About.
-func (s *DatasetUpdate) SetAbout(val OptNilString) {
-	s.About = val
-}
-
-// SetLifecycleID sets the value of LifecycleID.
-func (s *DatasetUpdate) SetLifecycleID(val OptNilUUID) {
-	s.LifecycleID = val
-}
-
-// SetTagIds sets the value of TagIds.
-func (s *DatasetUpdate) SetTagIds(val []uuid.UUID) {
-	s.TagIds = val
-}
-
 // Ref: #/components/schemas/DecideDataProductRoleAssignment
 type DecideDataProductRoleAssignment struct {
 	Decision DecisionStatus `json:"decision"`
@@ -3998,7 +3943,7 @@ type DeviceFlow struct {
 	AuthzCode               NilString        `json:"authz_code"`
 	AuthzState              NilString        `json:"authz_state"`
 	AuthzVerif              NilString        `json:"authz_verif"`
-	VerificationURIComplete string           `json:"verification_uri_complete"`
+	VerificationURIComplete OptString        `json:"verification_uri_complete"`
 }
 
 // GetDeviceCode returns the value of DeviceCode.
@@ -4052,7 +3997,7 @@ func (s *DeviceFlow) GetAuthzVerif() NilString {
 }
 
 // GetVerificationURIComplete returns the value of VerificationURIComplete.
-func (s *DeviceFlow) GetVerificationURIComplete() string {
+func (s *DeviceFlow) GetVerificationURIComplete() OptString {
 	return s.VerificationURIComplete
 }
 
@@ -4107,7 +4052,7 @@ func (s *DeviceFlow) SetAuthzVerif(val NilString) {
 }
 
 // SetVerificationURIComplete sets the value of VerificationURIComplete.
-func (s *DeviceFlow) SetVerificationURIComplete(val string) {
+func (s *DeviceFlow) SetVerificationURIComplete(val OptString) {
 	s.VerificationURIComplete = val
 }
 
@@ -4208,8 +4153,9 @@ func (s *Domain) SetDescription(val string) {
 
 // Ref: #/components/schemas/DomainCreate
 type DomainCreate struct {
-	Name        string `json:"name"`
-	Description string `json:"description"`
+	Name           string      `json:"name"`
+	Description    string      `json:"description"`
+	EnvironmentIds []uuid.UUID `json:"environment_ids"`
 }
 
 // GetName returns the value of Name.
@@ -4222,6 +4168,11 @@ func (s *DomainCreate) GetDescription() string {
 	return s.Description
 }
 
+// GetEnvironmentIds returns the value of EnvironmentIds.
+func (s *DomainCreate) GetEnvironmentIds() []uuid.UUID {
+	return s.EnvironmentIds
+}
+
 // SetName sets the value of Name.
 func (s *DomainCreate) SetName(val string) {
 	s.Name = val
@@ -4232,10 +4183,16 @@ func (s *DomainCreate) SetDescription(val string) {
 	s.Description = val
 }
 
+// SetEnvironmentIds sets the value of EnvironmentIds.
+func (s *DomainCreate) SetEnvironmentIds(val []uuid.UUID) {
+	s.EnvironmentIds = val
+}
+
 // Ref: #/components/schemas/DomainUpdate
 type DomainUpdate struct {
-	Name        string `json:"name"`
-	Description string `json:"description"`
+	Name           string      `json:"name"`
+	Description    string      `json:"description"`
+	EnvironmentIds []uuid.UUID `json:"environment_ids"`
 }
 
 // GetName returns the value of Name.
@@ -4248,6 +4205,11 @@ func (s *DomainUpdate) GetDescription() string {
 	return s.Description
 }
 
+// GetEnvironmentIds returns the value of EnvironmentIds.
+func (s *DomainUpdate) GetEnvironmentIds() []uuid.UUID {
+	return s.EnvironmentIds
+}
+
 // SetName sets the value of Name.
 func (s *DomainUpdate) SetName(val string) {
 	s.Name = val
@@ -4258,6 +4220,11 @@ func (s *DomainUpdate) SetDescription(val string) {
 	s.Description = val
 }
 
+// SetEnvironmentIds sets the value of EnvironmentIds.
+func (s *DomainUpdate) SetEnvironmentIds(val []uuid.UUID) {
+	s.EnvironmentIds = val
+}
+
 // Ref: #/components/schemas/Environment
 type Environment struct {
 	ID        uuid.UUID `json:"id"`
@@ -4265,6 +4232,7 @@ type Environment struct {
 	Acronym   string    `json:"acronym"`
 	Context   string    `json:"context"`
 	IsDefault OptBool   `json:"is_default"`
+	IsGlobal  OptBool   `json:"is_global"`
 }
 
 // GetID returns the value of ID.
@@ -4292,6 +4260,11 @@ func (s *Environment) GetIsDefault() OptBool {
 	return s.IsDefault
 }
 
+// GetIsGlobal returns the value of IsGlobal.
+func (s *Environment) GetIsGlobal() OptBool {
+	return s.IsGlobal
+}
+
 // SetID sets the value of ID.
 func (s *Environment) SetID(val uuid.UUID) {
 	s.ID = val
@@ -4317,7 +4290,13 @@ func (s *Environment) SetIsDefault(val OptBool) {
 	s.IsDefault = val
 }
 
-func (*Environment) getEnvironmentRes() {}
+// SetIsGlobal sets the value of IsGlobal.
+func (s *Environment) SetIsGlobal(val OptBool) {
+	s.IsGlobal = val
+}
+
+func (*Environment) getEnvironmentRes()            {}
+func (*Environment) updateEnvironmentIsGlobalRes() {}
 
 // Ref: #/components/schemas/EnvironmentGetItem
 type EnvironmentGetItem struct {
@@ -4326,6 +4305,7 @@ type EnvironmentGetItem struct {
 	Acronym   string    `json:"acronym"`
 	Context   string    `json:"context"`
 	IsDefault OptBool   `json:"is_default"`
+	IsGlobal  OptBool   `json:"is_global"`
 }
 
 // GetID returns the value of ID.
@@ -4353,6 +4333,11 @@ func (s *EnvironmentGetItem) GetIsDefault() OptBool {
 	return s.IsDefault
 }
 
+// GetIsGlobal returns the value of IsGlobal.
+func (s *EnvironmentGetItem) GetIsGlobal() OptBool {
+	return s.IsGlobal
+}
+
 // SetID sets the value of ID.
 func (s *EnvironmentGetItem) SetID(val uuid.UUID) {
 	s.ID = val
@@ -4376,6 +4361,26 @@ func (s *EnvironmentGetItem) SetContext(val string) {
 // SetIsDefault sets the value of IsDefault.
 func (s *EnvironmentGetItem) SetIsDefault(val OptBool) {
 	s.IsDefault = val
+}
+
+// SetIsGlobal sets the value of IsGlobal.
+func (s *EnvironmentGetItem) SetIsGlobal(val OptBool) {
+	s.IsGlobal = val
+}
+
+// Ref: #/components/schemas/EnvironmentUpdateGlobal
+type EnvironmentUpdateGlobal struct {
+	IsGlobal bool `json:"is_global"`
+}
+
+// GetIsGlobal returns the value of IsGlobal.
+func (s *EnvironmentUpdateGlobal) GetIsGlobal() bool {
+	return s.IsGlobal
+}
+
+// SetIsGlobal sets the value of IsGlobal.
+func (s *EnvironmentUpdateGlobal) SetIsGlobal(val bool) {
+	s.IsGlobal = val
 }
 
 // Ref: #/components/schemas/EnvironmentsGet
@@ -5027,9 +5032,10 @@ func (s *GetDataProductsResponseItem) SetTechnicalAssetCount(val int) {
 
 // Ref: #/components/schemas/GetDomainResponse
 type GetDomainResponse struct {
-	ID          uuid.UUID `json:"id"`
-	Name        string    `json:"name"`
-	Description string    `json:"description"`
+	ID           uuid.UUID            `json:"id"`
+	Name         string               `json:"name"`
+	Description  string               `json:"description"`
+	Environments []EnvironmentGetItem `json:"environments"`
 }
 
 // GetID returns the value of ID.
@@ -5047,6 +5053,11 @@ func (s *GetDomainResponse) GetDescription() string {
 	return s.Description
 }
 
+// GetEnvironments returns the value of Environments.
+func (s *GetDomainResponse) GetEnvironments() []EnvironmentGetItem {
+	return s.Environments
+}
+
 // SetID sets the value of ID.
 func (s *GetDomainResponse) SetID(val uuid.UUID) {
 	s.ID = val
@@ -5062,14 +5073,20 @@ func (s *GetDomainResponse) SetDescription(val string) {
 	s.Description = val
 }
 
+// SetEnvironments sets the value of Environments.
+func (s *GetDomainResponse) SetEnvironments(val []EnvironmentGetItem) {
+	s.Environments = val
+}
+
 func (*GetDomainResponse) getDomainRes() {}
 
 // Ref: #/components/schemas/GetDomainsItem
 type GetDomainsItem struct {
-	ID                       uuid.UUID `json:"id"`
-	Name                     string    `json:"name"`
-	Description              string    `json:"description"`
-	AbstractDataProductCount int       `json:"abstract_data_product_count"`
+	ID                       uuid.UUID            `json:"id"`
+	Name                     string               `json:"name"`
+	Description              string               `json:"description"`
+	Environments             []EnvironmentGetItem `json:"environments"`
+	AbstractDataProductCount int                  `json:"abstract_data_product_count"`
 }
 
 // GetID returns the value of ID.
@@ -5085,6 +5102,11 @@ func (s *GetDomainsItem) GetName() string {
 // GetDescription returns the value of Description.
 func (s *GetDomainsItem) GetDescription() string {
 	return s.Description
+}
+
+// GetEnvironments returns the value of Environments.
+func (s *GetDomainsItem) GetEnvironments() []EnvironmentGetItem {
+	return s.Environments
 }
 
 // GetAbstractDataProductCount returns the value of AbstractDataProductCount.
@@ -5105,6 +5127,11 @@ func (s *GetDomainsItem) SetName(val string) {
 // SetDescription sets the value of Description.
 func (s *GetDomainsItem) SetDescription(val string) {
 	s.Description = val
+}
+
+// SetEnvironments sets the value of Environments.
+func (s *GetDomainsItem) SetEnvironments(val []EnvironmentGetItem) {
+	s.Environments = val
 }
 
 // SetAbstractDataProductCount sets the value of AbstractDataProductCount.
@@ -6669,6 +6696,7 @@ func (*HTTPValidationError) updateDataProductStatusRes()                  {}
 func (*HTTPValidationError) updateDataProductTypeRes()                    {}
 func (*HTTPValidationError) updateDataProductUsageRes()                   {}
 func (*HTTPValidationError) updateDomainRes()                             {}
+func (*HTTPValidationError) updateEnvironmentIsGlobalRes()                {}
 func (*HTTPValidationError) updateOutputPortAboutRes()                    {}
 func (*HTTPValidationError) updateOutputPortQueryStatsRes()               {}
 func (*HTTPValidationError) updateOutputPortRes()                         {}
@@ -7605,6 +7633,52 @@ func (s *OSISemanticModelTechnicalAssetConfiguration) SetModelName(val OptString
 // SetLocation sets the value of Location.
 func (s *OSISemanticModelTechnicalAssetConfiguration) SetLocation(val OptString) {
 	s.Location = val
+}
+
+// NewOptAssignmentFilter returns new OptAssignmentFilter with value set to v.
+func NewOptAssignmentFilter(v AssignmentFilter) OptAssignmentFilter {
+	return OptAssignmentFilter{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptAssignmentFilter is optional AssignmentFilter.
+type OptAssignmentFilter struct {
+	Value AssignmentFilter
+	Set   bool
+}
+
+// IsSet returns true if OptAssignmentFilter was set.
+func (o OptAssignmentFilter) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptAssignmentFilter) Reset() {
+	var v AssignmentFilter
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptAssignmentFilter) SetTo(v AssignmentFilter) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptAssignmentFilter) Get() (v AssignmentFilter, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptAssignmentFilter) Or(d AssignmentFilter) AssignmentFilter {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
 }
 
 // NewOptBool returns new OptBool with value set to v.
@@ -9935,7 +10009,6 @@ func (s *OutputPortAccessDuration) SetDays(val int) {
 type OutputPortAccessType string
 
 const (
-	OutputPortAccessTypePublic       OutputPortAccessType = "public"
 	OutputPortAccessTypeRestricted   OutputPortAccessType = "restricted"
 	OutputPortAccessTypePrivate      OutputPortAccessType = "private"
 	OutputPortAccessTypeUnrestricted OutputPortAccessType = "unrestricted"
@@ -9944,7 +10017,6 @@ const (
 // AllValues returns all OutputPortAccessType values.
 func (OutputPortAccessType) AllValues() []OutputPortAccessType {
 	return []OutputPortAccessType{
-		OutputPortAccessTypePublic,
 		OutputPortAccessTypeRestricted,
 		OutputPortAccessTypePrivate,
 		OutputPortAccessTypeUnrestricted,
@@ -9954,8 +10026,6 @@ func (OutputPortAccessType) AllValues() []OutputPortAccessType {
 // MarshalText implements encoding.TextMarshaler.
 func (s OutputPortAccessType) MarshalText() ([]byte, error) {
 	switch s {
-	case OutputPortAccessTypePublic:
-		return []byte(s), nil
 	case OutputPortAccessTypeRestricted:
 		return []byte(s), nil
 	case OutputPortAccessTypePrivate:
@@ -9970,9 +10040,6 @@ func (s OutputPortAccessType) MarshalText() ([]byte, error) {
 // UnmarshalText implements encoding.TextUnmarshaler.
 func (s *OutputPortAccessType) UnmarshalText(data []byte) error {
 	switch OutputPortAccessType(data) {
-	case OutputPortAccessTypePublic:
-		*s = OutputPortAccessTypePublic
-		return nil
 	case OutputPortAccessTypeRestricted:
 		*s = OutputPortAccessTypeRestricted
 		return nil
@@ -10842,6 +10909,109 @@ func (s *OutputPortStatusUpdate) GetStatus() OutputPortStatus {
 // SetStatus sets the value of Status.
 func (s *OutputPortStatusUpdate) SetStatus(val OutputPortStatus) {
 	s.Status = val
+}
+
+// Ref: #/components/schemas/OutputPortUpdate
+type OutputPortUpdate struct {
+	Name                          string               `json:"name"`
+	Namespace                     string               `json:"namespace"`
+	Description                   string               `json:"description"`
+	AccessType                    OutputPortAccessType `json:"access_type"`
+	DataProductAccessDurationType AccessDurationType   `json:"data_product_access_duration_type"`
+	ExplorationAccessDurationType AccessDurationType   `json:"exploration_access_duration_type"`
+	About                         OptNilString         `json:"about"`
+	LifecycleID                   OptNilUUID           `json:"lifecycle_id"`
+	TagIds                        []uuid.UUID          `json:"tag_ids"`
+}
+
+// GetName returns the value of Name.
+func (s *OutputPortUpdate) GetName() string {
+	return s.Name
+}
+
+// GetNamespace returns the value of Namespace.
+func (s *OutputPortUpdate) GetNamespace() string {
+	return s.Namespace
+}
+
+// GetDescription returns the value of Description.
+func (s *OutputPortUpdate) GetDescription() string {
+	return s.Description
+}
+
+// GetAccessType returns the value of AccessType.
+func (s *OutputPortUpdate) GetAccessType() OutputPortAccessType {
+	return s.AccessType
+}
+
+// GetDataProductAccessDurationType returns the value of DataProductAccessDurationType.
+func (s *OutputPortUpdate) GetDataProductAccessDurationType() AccessDurationType {
+	return s.DataProductAccessDurationType
+}
+
+// GetExplorationAccessDurationType returns the value of ExplorationAccessDurationType.
+func (s *OutputPortUpdate) GetExplorationAccessDurationType() AccessDurationType {
+	return s.ExplorationAccessDurationType
+}
+
+// GetAbout returns the value of About.
+func (s *OutputPortUpdate) GetAbout() OptNilString {
+	return s.About
+}
+
+// GetLifecycleID returns the value of LifecycleID.
+func (s *OutputPortUpdate) GetLifecycleID() OptNilUUID {
+	return s.LifecycleID
+}
+
+// GetTagIds returns the value of TagIds.
+func (s *OutputPortUpdate) GetTagIds() []uuid.UUID {
+	return s.TagIds
+}
+
+// SetName sets the value of Name.
+func (s *OutputPortUpdate) SetName(val string) {
+	s.Name = val
+}
+
+// SetNamespace sets the value of Namespace.
+func (s *OutputPortUpdate) SetNamespace(val string) {
+	s.Namespace = val
+}
+
+// SetDescription sets the value of Description.
+func (s *OutputPortUpdate) SetDescription(val string) {
+	s.Description = val
+}
+
+// SetAccessType sets the value of AccessType.
+func (s *OutputPortUpdate) SetAccessType(val OutputPortAccessType) {
+	s.AccessType = val
+}
+
+// SetDataProductAccessDurationType sets the value of DataProductAccessDurationType.
+func (s *OutputPortUpdate) SetDataProductAccessDurationType(val AccessDurationType) {
+	s.DataProductAccessDurationType = val
+}
+
+// SetExplorationAccessDurationType sets the value of ExplorationAccessDurationType.
+func (s *OutputPortUpdate) SetExplorationAccessDurationType(val AccessDurationType) {
+	s.ExplorationAccessDurationType = val
+}
+
+// SetAbout sets the value of About.
+func (s *OutputPortUpdate) SetAbout(val OptNilString) {
+	s.About = val
+}
+
+// SetLifecycleID sets the value of LifecycleID.
+func (s *OutputPortUpdate) SetLifecycleID(val OptNilUUID) {
+	s.LifecycleID = val
+}
+
+// SetTagIds sets the value of TagIds.
+func (s *OutputPortUpdate) SetTagIds(val []uuid.UUID) {
+	s.TagIds = val
 }
 
 type OverwriteOutputPortDataQualitySummaryNotFoundApplicationJSON jx.Raw

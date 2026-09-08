@@ -18,6 +18,7 @@ class AuthorizationAction(IntEnum):
     GLOBAL__CREATE_USER = 106
     GLOBAL__DELETE_USER = 107
     GLOBAL__CREATE_EXPLORATION = 108
+    GLOBAL__MANAGE_FINALIZERS = 109
 
     DATA_PRODUCT__UPDATE_PROPERTIES = 301
     DATA_PRODUCT__UPDATE_SETTINGS = 302
@@ -50,8 +51,10 @@ class AuthorizationAction(IntEnum):
     OUTPUT_PORT__READ_INTEGRATIONS = 413
     OUTPUT_PORT__UPDATE_DATA_QUALITY = 414
     OUTPUT_PORT__UPDATE_CONTRACT = 415
+    OUTPUT_PORT__UPDATE_QUERY_STATS = 416
 
     # The hidden section contains actions that can't be modified by Portal admins. They are used to ensure hidden
-    # Data Products are not accessible by default to any user, and can only be accessed by users with the right permissions.
-    # Discoverable Data Products ensure that everyone has this permission on their Data Product without any role.
-    HIDDEN_DATA_PRODUCT__READ = 901
+    # Data Products or private Output Ports are not accessible by default to any user, and can only be accessed by users with the right permissions.
+    # Discoverable Data Products or public, restricted Output Ports ensure that everyone has this permission on their Data Product without any role.
+    HIDDEN__DATA_PRODUCT__READ = 901
+    HIDDEN__OUTPUT_PORT__READ = 902

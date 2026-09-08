@@ -1,6 +1,13 @@
+from uuid import uuid4
+
 import pytest
 
-from tests.factories import DataProductFactory, DomainFactory, ExplorationFactory
+from tests.factories import (
+    DataProductFactory,
+    DomainFactory,
+    EnvironmentFactory,
+    ExplorationFactory,
+)
 
 ENDPOINT = "/api/v2/configuration/domains"
 
@@ -31,6 +38,29 @@ class TestDomainsRouter:
         response = self.get_domain(client, domain.id)
         assert response.status_code == 200
         assert response.json()["id"] == str(domain.id)
+        assert response.json()["environments"] == []
+
+    @pytest.mark.usefixtures("admin")
+    def test_create_domain__with_environments(self, client):
+        environment = EnvironmentFactory()
+        payload = {
+            "name": "Test Domain",
+            "description": "Test Description",
+            "environment_ids": [str(environment.id)],
+        }
+        response = self.create_domain(client, payload)
+        assert response.status_code == 200, response.text
+
+        domain_response = self.get_domain(client, response.json()["id"])
+        assert [env["id"] for env in domain_response.json()["environments"]] == [
+            str(environment.id)
+        ]
+
+    @pytest.mark.usefixtures("admin")
+    def test_create_domain__invalid_environment_id(self, client, domain_payload):
+        domain_payload["environment_ids"] = [str(uuid4())]
+        response = self.create_domain(client, domain_payload)
+        assert response.status_code == 400
 
     @pytest.mark.usefixtures("admin")
     def test_update_domain(self, client):
@@ -39,6 +69,38 @@ class TestDomainsRouter:
         response = self.update_domain(client, update_payload, domain.id)
         assert response.status_code == 200
         assert response.json()["id"] == str(domain.id)
+
+    @pytest.mark.usefixtures("admin")
+    def test_update_domain__sets_custom_environments(self, client):
+        environment = EnvironmentFactory()
+        domain = DomainFactory()
+        update_payload = {
+            "name": "update",
+            "description": "update",
+            "environment_ids": [str(environment.id)],
+        }
+        response = self.update_domain(client, update_payload, domain.id)
+        assert response.status_code == 200
+
+        domain_response = self.get_domain(client, domain.id)
+        assert [env["id"] for env in domain_response.json()["environments"]] == [
+            str(environment.id)
+        ]
+
+    @pytest.mark.usefixtures("admin")
+    def test_update_domain__clearing_environments_reverts_to_global(self, client):
+        environment = EnvironmentFactory()
+        domain = DomainFactory(environments=[environment])
+        update_payload = {
+            "name": "update",
+            "description": "update",
+            "environment_ids": [],
+        }
+        response = self.update_domain(client, update_payload, domain.id)
+        assert response.status_code == 200
+
+        domain_response = self.get_domain(client, domain.id)
+        assert domain_response.json()["environments"] == []
 
     @pytest.mark.usefixtures("admin")
     def test_remove_domain(self, client):

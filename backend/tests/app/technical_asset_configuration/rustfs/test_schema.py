@@ -3,7 +3,8 @@ from unittest.mock import patch
 from app.technical_asset_configuration.rustfs.schema import (
     RustFSTechnicalAssetConfiguration,
 )
-from tests.factories import DataProductFactory
+from tests.factories import DataProductFactory, UserFactory
+from tests.session_util import as_user
 
 
 class TestRustFSPlugin:
@@ -20,9 +21,11 @@ class TestRustFSPlugin:
         mock_settings.RUSTFS_BUCKET_PREFIX = "dp-"
         data_product = DataProductFactory(namespace="test-my-first-db")
 
-        url = RustFSTechnicalAssetConfiguration.get_url(
-            data_product.id, session, actor=None
-        )
+        user = UserFactory()
+        with as_user(session, user.id):
+            url = RustFSTechnicalAssetConfiguration.get_url(
+                data_product.id, session, actor=user
+            )
 
         assert url == (
             "https://rustfs.example.com/rustfs/console/browser/?bucket=dp-test-my-first-db"

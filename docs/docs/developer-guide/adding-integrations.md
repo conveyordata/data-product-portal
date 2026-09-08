@@ -29,6 +29,8 @@ An **Environment** represents a deployment stage (e.g., dev, staging, production
 
 Environments are defined in `app/configuration/environments/`.
 
+Each environment has an `is_global` flag. A **Domain** either inherits the full list of global environments (the default, when it hasn't customized its own list) or is pinned to a specific subset via its own `environments` list. Toggling `is_global` on an environment changes what every domain without a custom list sees, so it's managed from the Metadata settings tab rather than being freely editable per environment.
+
 ### How Defaults Work
 
 When defining an environment, the platform team configures two types of defaults:

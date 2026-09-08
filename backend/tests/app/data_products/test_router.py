@@ -7,6 +7,7 @@ from uuid import UUID
 import pytest
 from fastapi.testclient import TestClient
 
+from app.authorization.role_assignments.enums import AssignmentFilter
 from app.authorization.roles.schema import Scope
 from app.core.authz import Action
 from app.data_products.model import DataProductVisibility
@@ -160,8 +161,63 @@ class TestDataProductsRouter:
         response = client.get(ENDPOINT)
         assert response.status_code == 200, response.text
         data = response.json()
-        assert len(data) == 1
+        assert len(data["data_products"]) == 1
         assert data["data_products"][0]["id"] == str(data_product.id)
+
+    def test_get_data_products_assignment_filter_only_assigned(self, client):
+        data_product = DataProductFactory()
+        data_product_not_assigned = DataProductFactory()
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[],
+        )
+        DataProductRoleAssignmentFactory(
+            data_product_id=data_product.id,
+            role_id=role.id,
+            user_id=user.id,
+        )
+        response = client.get(
+            ENDPOINT, params={"assignment_filter": AssignmentFilter.ONLY_ASSIGNED.value}
+        )
+        assert response.status_code == 200, response.text
+        data = response.json()
+        assert len(data["data_products"]) == 1
+        assert data["data_products"][0]["id"] == str(data_product.id)
+        assert data["data_products"][0]["id"] != str(data_product_not_assigned.id), (
+            "Not assigned data product should be filtered"
+        )
+
+    def test_get_data_products_filters_out_hidden(self, client):
+        data_product_discoverable = DataProductFactory()
+        data_product_hidden_no_access = DataProductFactory(
+            visibility=DataProductVisibility.HIDDEN
+        )
+        data_product_hidden_access = DataProductFactory(
+            visibility=DataProductVisibility.HIDDEN
+        )
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[],
+        )
+        DataProductRoleAssignmentFactory(
+            data_product_id=data_product_hidden_access.id,
+            role_id=role.id,
+            user_id=user.id,
+        )
+        response = client.get(
+            ENDPOINT, params={"assignment_filter": AssignmentFilter.ALL.value}
+        )
+        assert response.status_code == 200, response.text
+        data = response.json()
+        returned_ids = {dp["id"] for dp in data["data_products"]}
+        assert data_product_hidden_no_access not in returned_ids
+        assert str(data_product_discoverable.id) in returned_ids, (
+            "Discoverable data product should be returned"
+        )
+        assert str(data_product_hidden_access.id) in returned_ids
+        assert len(returned_ids) == 2
 
     def test_get_data_product(self, client):
         data_product = DataProductFactory()
@@ -315,13 +371,12 @@ class TestDataProductsRouter:
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
         role = RoleFactory(
-            scope=Scope.DATA_PRODUCT,
-            permissions=[Action.DATA_PRODUCT__DELETE],
+            scope=Scope.GLOBAL,
+            permissions=[Action.GLOBAL__MANAGE_FINALIZERS],
         )
-        DataProductRoleAssignmentFactory(
+        GlobalRoleAssignmentFactory(
             user_id=user.id,
             role_id=role.id,
-            data_product_id=data_product.id,
         )
         response = client.post(
             f"{ENDPOINT}/{data_product.id}/finalizers",
@@ -786,13 +841,6 @@ class TestDataProductsRouter:
             == data_product.name
         )
 
-    def test_get_output_ports(self, client: TestClient):
-        dataset = OutputPortFactory()
-        response = self.get_output_ports(client, dataset.data_product.id)
-        assert response.status_code == 200, f"Response failed with: {response.text}"
-        assert len(response.json()["output_ports"]) == 1
-        assert response.json()["output_ports"][0]["id"] == dataset.id.__str__()
-
     def test_get_rolled_up_tags(self, client: TestClient):
         data_product = DataProductFactory()
         data_output = TechnicalAssetFactory(owner=data_product)
@@ -860,10 +908,6 @@ class TestDataProductsRouter:
             "api/v2/resource_names/validate",
             params={"resource_name": namespace, "model": "data_product"},
         )
-
-    @staticmethod
-    def get_output_ports(client: TestClient, data_product_id: UUID):
-        return client.get(f"{ENDPOINT}/{data_product_id}/output_ports")
 
     @staticmethod
     def get_input_ports(client: TestClient, data_product_id: UUID):

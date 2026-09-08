@@ -73,16 +73,19 @@ class DeviceFlowService:
             last_checked=utc_now(),
         )
         db.add(device_flow)
-        db.commit()
+        db.flush()
 
         base_url = request.url_for("device_flow_user_code")
         verification_uri = f"{base_url}?code={device_flow.user_code}"
 
         # Extract all ORM fields and add verification_uri_complete
 
-        return DeviceFlow(
-            **{k: v for k, v in device_flow.__dict__.items() if not k.startswith("_")},
-            verification_uri_complete=verification_uri,
+        device_flow_response = DeviceFlow.model_validate(
+            device_flow,
+            from_attributes=True,
+        )
+        return device_flow_response.model_copy(
+            update={"verification_uri_complete": verification_uri}
         )
 
     def fetch_jwt_tokens(

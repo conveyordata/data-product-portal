@@ -1,6 +1,6 @@
 from typing import cast
 
-from sqlalchemy import text
+from sqlalchemy import text  # noqa: TID251
 
 from app.core.authz.actions import AuthorizationAction
 from app.core.authz.authorization import Authorization
@@ -48,7 +48,7 @@ class TestAuthorization:
     def test_wildcard_resource_role(self, authorizer: Authorization):
         role = "public_reader"
         obj = "test_resource"
-        allowed = AuthorizationAction.HIDDEN_DATA_PRODUCT__READ
+        allowed = AuthorizationAction.HIDDEN__DATA_PRODUCT__READ
         denied = AuthorizationAction.DATA_PRODUCT__UPDATE_SETTINGS
 
         authorizer.sync_role_permissions(role_id=role, actions=[allowed])
@@ -95,6 +95,33 @@ class TestAuthorization:
         # Clear role assignment again
         authorizer.revoke_domain_role(user_id=user, role_id=role, domain_id=dom)
         assert authorizer.has_access(sub=user, dom=dom, obj=ANY, act=allowed) is False
+
+    def test_data_product_role_applies_to_output_port(self, authorizer: Authorization):
+        role = "data_product_role"
+        user = "test_user"
+        data_product = "data_product"
+        output_port = "output_port"
+        action = AuthorizationAction.OUTPUT_PORT__UPDATE_PROPERTIES
+
+        authorizer.sync_role_permissions(role_id=role, actions=[action])
+        authorizer.assign_resource_role(
+            user_id=user, role_id=role, resource_id=data_product
+        )
+
+        assert authorizer.has_access(
+            sub=user,
+            dom=ANY,
+            obj=output_port,
+            parent=data_product,
+            act=action,
+        )
+        assert not authorizer.has_access(
+            sub=user,
+            dom=ANY,
+            obj=output_port,
+            parent="other_data_product",
+            act=action,
+        )
 
     def test_global_role(self, authorizer: Authorization, everyone_role_permissions):
         user = "test_user"
@@ -310,7 +337,7 @@ class TestCrossWorkerStaleness:
                 ),
                 {"u": user, "r": role, "obj": resource},
             )
-            conn.commit()
+            conn.commit()  # noqa: allow-commit
 
         # In-memory is stale: still denied despite the DB change
         assert (
@@ -334,5 +361,4 @@ class TestCrossWorkerStaleness:
                 ),
                 {"u": user, "r": role, "obj": resource},
             )
-            conn.commit()
         authorizer.remove_role_permissions(role_id=role)

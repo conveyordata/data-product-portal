@@ -15,7 +15,7 @@ from app.configuration.data_product_settings.schema_response import (
 from app.configuration.data_product_settings.service import DataProductSettingService
 from app.core.authz import Action, Authorization
 from app.core.authz.resolvers import EmptyResolver
-from app.database.database import get_db_session
+from app.database.deps import get_db_session
 
 router = APIRouter(
     tags=["Configuration - Data Product settings"],

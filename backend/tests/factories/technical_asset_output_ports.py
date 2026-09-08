@@ -6,7 +6,7 @@ from app.data_products.output_port_technical_assets_link.model import (
 )
 from tests.factories.technical_asset import TechnicalAssetFactory
 
-from .dataset import OutputPortFactory
+from .output_port import OutputPortFactory
 from .user import UserFactory
 
 

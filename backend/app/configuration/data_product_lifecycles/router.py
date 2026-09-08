@@ -17,7 +17,7 @@ from app.configuration.data_product_lifecycles.service import (
 )
 from app.core.authz import Action, Authorization
 from app.core.authz.resolvers import EmptyResolver
-from app.database.database import get_db_session
+from app.database.deps import get_db_session
 
 router = APIRouter(
     tags=["Configuration - Data Product lifecycles"],

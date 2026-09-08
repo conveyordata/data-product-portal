@@ -21,6 +21,7 @@ class EnvironmentGetItem:
         acronym (str):
         context (str):
         is_default (bool | Unset):  Default: False.
+        is_global (bool | Unset):  Default: True.
     """
 
     id: UUID
@@ -28,6 +29,7 @@ class EnvironmentGetItem:
     acronym: str
     context: str
     is_default: bool | Unset = False
+    is_global: bool | Unset = True
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -41,6 +43,8 @@ class EnvironmentGetItem:
 
         is_default = self.is_default
 
+        is_global = self.is_global
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
@@ -53,6 +57,8 @@ class EnvironmentGetItem:
         )
         if is_default is not UNSET:
             field_dict["is_default"] = is_default
+        if is_global is not UNSET:
+            field_dict["is_global"] = is_global
 
         return field_dict
 
@@ -69,12 +75,15 @@ class EnvironmentGetItem:
 
         is_default = d.pop("is_default", UNSET)
 
+        is_global = d.pop("is_global", UNSET)
+
         environment_get_item = cls(
             id=id,
             name=name,
             acronym=acronym,
             context=context,
             is_default=is_default,
+            is_global=is_global,
         )
 
         environment_get_item.additional_properties = d

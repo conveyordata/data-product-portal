@@ -45,7 +45,8 @@ def consumption_metrics() -> dict[str, Any]:
                 == AbstractDataProduct.id,
             )
             .where(InputPortModel.status == DecisionStatus.APPROVED)
-            .group_by(AbstractDataProduct.abstract_data_product_type)
+            .group_by(AbstractDataProduct.abstract_data_product_type),
+            execution_options={"skip_data_product_visibility_filter": True},
         ).all()
 
     counts_by_type = {adp_type.value: count for adp_type, count in rows}
@@ -68,7 +69,8 @@ def provisioning_metrics() -> dict[str, Any]:
                 func.count(AbstractDataProduct.id).filter(
                     func.cardinality(AbstractDataProduct.finalizers) > 0
                 ),
-            ).group_by(AbstractDataProduct.abstract_data_product_type)
+            ).group_by(AbstractDataProduct.abstract_data_product_type),
+            execution_options={"skip_data_product_visibility_filter": True},
         ).all()
 
     counts_by_type = {

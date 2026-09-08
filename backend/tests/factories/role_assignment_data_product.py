@@ -5,7 +5,6 @@ from app.authorization.role_assignments.data_product.model import (
 )
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.core.authz.authorization import Authorization
-from tests import test_session
 from tests.factories import RoleFactory
 
 
@@ -28,4 +27,3 @@ class DataProductRoleAssignmentFactory(factory.alchemy.SQLAlchemyModelFactory):
                 user_id=str(self.user_id),
                 resource_id=str(self.data_product_id),
             )
-            test_session.commit()

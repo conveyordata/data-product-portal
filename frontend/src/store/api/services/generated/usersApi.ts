@@ -114,6 +114,7 @@ export type AuthorizationAction =
   | 106
   | 107
   | 108
+  | 109
   | 301
   | 302
   | 303
@@ -144,7 +145,9 @@ export type AuthorizationAction =
   | 413
   | 414
   | 415
-  | 901;
+  | 416
+  | 901
+  | 902;
 export type Prototype = 0 | 1 | 2 | 3;
 export type Role = {
   name: string;
@@ -214,11 +217,7 @@ export type AbstractDataProductInfo = {
   is_redacted: boolean;
 };
 export type OutputPortStatus = "pending" | "active" | "archived";
-export type OutputPortAccessType =
-  | "public"
-  | "restricted"
-  | "private"
-  | "unrestricted";
+export type OutputPortAccessType = "restricted" | "private" | "unrestricted";
 export type Tag = {
   id: string;
   value: string;

@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 
 from app.data_products.model import DataProduct
 from app.data_products.output_ports.query_stats.model import (
-    DatasetQueryStatsDaily,
+    OutputPortQueryStatsDaily,
 )
 from app.data_products.output_ports.query_stats.schema_request import (
     OutputPortQueryStatsDelete,
@@ -82,12 +82,12 @@ class OutputPortStatsService:
         if granularity == QueryStatsGranularity.DAY:
             # No aggregation needed, fetch raw data
             query = (
-                select(DatasetQueryStatsDaily)
+                select(OutputPortQueryStatsDaily)
                 .where(
-                    DatasetQueryStatsDaily.output_port_id == output_port_id,
-                    DatasetQueryStatsDaily.date >= start_date,
+                    OutputPortQueryStatsDaily.output_port_id == output_port_id,
+                    OutputPortQueryStatsDaily.date >= start_date,
                 )
-                .order_by(DatasetQueryStatsDaily.date.asc())
+                .order_by(OutputPortQueryStatsDaily.date.asc())
             )
             stats = self.db.execute(query).scalars().all()
             response_stats = [
@@ -99,31 +99,34 @@ class OutputPortStatsService:
 
             # Build aggregated query with database-level aggregation
             # Cast date_trunc result to date for cleaner handling
-            truncated_date = func.date_trunc(trunc_unit, DatasetQueryStatsDaily.date)
+            truncated_date = func.date_trunc(trunc_unit, OutputPortQueryStatsDaily.date)
             aggregated_query = (
                 select(
                     func.cast(truncated_date, Date).label("date"),
-                    DatasetQueryStatsDaily.consumer_data_product_id,
-                    func.sum(DatasetQueryStatsDaily.query_count).label("query_count"),
+                    OutputPortQueryStatsDaily.consumer_data_product_id,
+                    func.sum(OutputPortQueryStatsDaily.query_count).label(
+                        "query_count"
+                    ),
                     DataProduct.name.label("consumer_data_product_name"),
                 )
                 .join(
                     DataProduct,
-                    DataProduct.id == DatasetQueryStatsDaily.consumer_data_product_id,
+                    DataProduct.id
+                    == OutputPortQueryStatsDaily.consumer_data_product_id,
                 )
                 .where(
-                    DatasetQueryStatsDaily.output_port_id == output_port_id,
-                    DatasetQueryStatsDaily.date >= start_date,
+                    OutputPortQueryStatsDaily.output_port_id == output_port_id,
+                    OutputPortQueryStatsDaily.date >= start_date,
                 )
                 .group_by(
                     truncated_date,
-                    DatasetQueryStatsDaily.consumer_data_product_id,
+                    OutputPortQueryStatsDaily.consumer_data_product_id,
                     DataProduct.name,
                 )
                 .order_by(
                     truncated_date.asc(),
                     DataProduct.name.asc(),
-                    DatasetQueryStatsDaily.consumer_data_product_id.asc(),
+                    OutputPortQueryStatsDaily.consumer_data_product_id.asc(),
                 )
             )
 
@@ -164,7 +167,7 @@ class OutputPortStatsService:
         if not values:
             return
 
-        stmt = insert(DatasetQueryStatsDaily).values(values)
+        stmt = insert(OutputPortQueryStatsDaily).values(values)
         stmt = stmt.on_conflict_do_update(
             index_elements=["date", "dataset_id", "consumer_data_product_id"],
             set_={"query_count": stmt.excluded.query_count},
@@ -180,11 +183,11 @@ class OutputPortStatsService:
         except ValueError as e:
             raise ValueError(f"Invalid date format: {delete_request.date}") from e
 
-        stmt = delete(DatasetQueryStatsDaily).where(
-            DatasetQueryStatsDaily.output_port_id == output_port_id,
-            DatasetQueryStatsDaily.consumer_data_product_id
+        stmt = delete(OutputPortQueryStatsDaily).where(
+            OutputPortQueryStatsDaily.output_port_id == output_port_id,
+            OutputPortQueryStatsDaily.consumer_data_product_id
             == delete_request.consumer_data_product_id,
-            DatasetQueryStatsDaily.date == target_date,
+            OutputPortQueryStatsDaily.date == target_date,
         )
         self.db.execute(stmt)
         self.db.commit()
