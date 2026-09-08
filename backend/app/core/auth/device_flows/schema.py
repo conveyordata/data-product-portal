@@ -23,7 +23,7 @@ class DeviceFlow(ORMModel):
     authz_code: Optional[str]
     authz_state: Optional[str]
     authz_verif: Optional[str]
-    verification_uri_complete: str
+    verification_uri_complete: str = ""
 
 
 class OIDCTokenResponse(ORMModel):

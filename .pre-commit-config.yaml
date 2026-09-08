@@ -122,3 +122,9 @@ repos:
       files: "\\.(jsx?|tsx?|c(js|ts)|m(js|ts)|d\\.(ts|cts|mts)|jsonc?|css|svelte|vue|astro|graphql|gql)$"
       exclude: ^docs/
       pass_filenames: false
+    - id: no-commit-in-tests
+      name: Prevent .commit() calls in backend tests
+      entry: '\.commit\((?![^\n]*#\s*noqa:\s*allow-commit)'
+      language: pygrep
+      types: [python]
+      files: ^backend/tests/

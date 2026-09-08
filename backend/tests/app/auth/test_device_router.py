@@ -17,7 +17,7 @@ class TestAuthDeviceRouter:
 
     def test_get_device_token(self, client):
         response = client.post(f"{ENDPOINT}/device_token?client_id=test")
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
         assert response.json()["oidc_redirect_uri"] == "http://test-redirect-uri"
         assert response.json()["status"] == "authorization_pending"
 

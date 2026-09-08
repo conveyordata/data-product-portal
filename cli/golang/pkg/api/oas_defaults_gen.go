@@ -123,6 +123,14 @@ func (s *DatabricksTechnicalAssetConfiguration) setDefaults() {
 }
 
 // setDefaults set default value of fields.
+func (s *DeviceFlow) setDefaults() {
+	{
+		val := string("")
+		s.VerificationURIComplete.SetTo(val)
+	}
+}
+
+// setDefaults set default value of fields.
 func (s *DomainCreate) setDefaults() {
 	{
 		var defaultVal0 []uuid.UUID

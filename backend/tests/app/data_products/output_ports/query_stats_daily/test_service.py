@@ -88,7 +88,6 @@ def dataset_with_daily_history(session: Session):
             query_count=999,
         )
     )
-    session.commit()
 
     return dataset, today, yesterday, consumer1, consumer2
 

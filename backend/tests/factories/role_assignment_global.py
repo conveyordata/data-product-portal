@@ -4,7 +4,6 @@ from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.role_assignments.global_.model import GlobalRoleAssignment
 from app.authorization.roles import ADMIN_UUID
 from app.core.authz.authorization import Authorization
-from tests import test_session
 
 
 class GlobalRoleAssignmentFactory(factory.alchemy.SQLAlchemyModelFactory):
@@ -26,4 +25,3 @@ class GlobalRoleAssignmentFactory(factory.alchemy.SQLAlchemyModelFactory):
                 authorizer.assign_global_role(
                     role_id=str(self.role_id), user_id=str(self.user_id)
                 )
-            test_session.commit()
