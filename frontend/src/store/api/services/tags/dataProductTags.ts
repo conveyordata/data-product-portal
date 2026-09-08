@@ -80,9 +80,14 @@ export const dataProductTags = {
                 type: TagTypes.History,
                 id: op.output_port_id,
             })),
+            ...arg.requestInputPortsForDataProductRequest.output_ports.map((op) => ({
+                type: TagTypes.OutputPortInputPorts,
+                outputPortId: op.output_port_id,
+            })),
             { type: TagTypes.History, id: arg.id },
             { type: TagTypes.DataProductInputPorts, id: arg.id },
             { type: TagTypes.MyRequests },
+            { type: TagTypes.PendingAction, id: STATIC_TAG_ID.LIST },
         ],
     },
     revokeInputPortForDataProduct: {
@@ -92,6 +97,7 @@ export const dataProductTags = {
             { type: TagTypes.History, id: arg.outputPortId },
             { type: TagTypes.History, id: arg.id },
             { type: TagTypes.DataProductInputPorts, id: arg.id },
+            { type: TagTypes.OutputPortInputPorts, outputPortId: arg.outputPortId },
         ],
     },
     cancelInputPortForDataProduct: {
@@ -101,6 +107,8 @@ export const dataProductTags = {
             { type: TagTypes.History, id: arg.outputPortId },
             { type: TagTypes.History, id: arg.id },
             { type: TagTypes.DataProductInputPorts, id: arg.id },
+            { type: TagTypes.PendingAction, id: STATIC_TAG_ID.LIST },
+            { type: TagTypes.OutputPortInputPorts, outputPortId: arg.outputPortId },
         ],
     },
     renewInputPortForDataProduct: {
@@ -111,6 +119,8 @@ export const dataProductTags = {
             { type: TagTypes.History, id: arg.id },
             { type: TagTypes.DataProductInputPorts, id: arg.id },
             { type: TagTypes.MyRequests },
+            { type: TagTypes.PendingAction, id: STATIC_TAG_ID.LIST },
+            { type: TagTypes.OutputPortInputPorts, outputPortId: arg.outputPortId },
         ],
     },
     getDataProductInputPorts: {
