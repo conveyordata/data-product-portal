@@ -1,4 +1,4 @@
-poetry==2.4.2
+poetry==2.4.3
 
 # Transitive dependency, but not automatically generated
 SecretStorage>=3.3.3
