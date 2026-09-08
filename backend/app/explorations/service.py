@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session, joinedload
 
 from app.abstract_data_product.service import AbstractDataProductService
 from app.core.namespace.validation import NamespaceValidator
-from app.database.database import get_db_session
+from app.database.deps import get_db_session
 from app.resource_names.service import ResourceNameService, ResourceNameValidityType
 from app.users.model import User
 
