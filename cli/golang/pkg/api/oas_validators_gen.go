@@ -300,6 +300,8 @@ func (s AuthorizationAction) Validate() error {
 		return nil
 	case 108:
 		return nil
+	case 109:
+		return nil
 	case 301:
 		return nil
 	case 302:
