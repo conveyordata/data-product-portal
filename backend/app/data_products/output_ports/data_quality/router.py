@@ -4,7 +4,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.core.authz import Action, Authorization, DatasetResolver
+from app.core.authz import Action, Authorization, OutputPortResolver
 from app.data_products.output_ports.data_quality.enums import DataQualityStatus
 from app.data_products.output_ports.data_quality.model import (
     DataQualitySummary,
@@ -25,8 +25,10 @@ from app.data_products.output_ports.data_quality.service import (
 from app.data_products.output_ports.model import ensure_output_port_exists
 from app.database.deps import get_db_session
 
-router = APIRouter(tags=["Data Products - Output Ports - Data Quality"])
-route = "/v2/data_products/{data_product_id}/output_ports/{id}/data_quality_summary"
+router = APIRouter(
+    tags=["Data Products - Output Ports - Data Quality"],
+    prefix="/{id}/data_quality_summary",
+)
 
 
 def convert_dimensions_to_api(
@@ -46,7 +48,14 @@ def convert_technical_assets_to_api(
     ]
 
 
-@router.get(route)
+@router.get(
+    "",
+    dependencies=[
+        Depends(
+            Authorization.enforce(Action.HIDDEN__OUTPUT_PORT__READ, OutputPortResolver)
+        )
+    ],
+)
 def get_latest_data_quality_summary_for_output_port(
     data_product_id: UUID,
     id: UUID,
@@ -73,7 +82,7 @@ def convert(
 
 
 @router.post(
-    route,
+    "",
     responses={
         404: {
             "description": "Output Port not found",
@@ -85,7 +94,7 @@ def convert(
     dependencies=[
         Depends(
             Authorization.enforce(
-                Action.OUTPUT_PORT__UPDATE_DATA_QUALITY, DatasetResolver
+                Action.OUTPUT_PORT__UPDATE_DATA_QUALITY, OutputPortResolver
             )
         ),
     ],
@@ -104,7 +113,7 @@ def add_output_port_data_quality_run(
 
 
 @router.put(
-    route + "/{summary_id}",
+    "/{summary_id}",
     responses={
         404: {
             "description": "Output Port or Summary not found",
@@ -114,7 +123,7 @@ def add_output_port_data_quality_run(
     dependencies=[
         Depends(
             Authorization.enforce(
-                Action.OUTPUT_PORT__UPDATE_DATA_QUALITY, DatasetResolver
+                Action.OUTPUT_PORT__UPDATE_DATA_QUALITY, OutputPortResolver
             )
         ),
     ],

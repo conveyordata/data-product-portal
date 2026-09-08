@@ -18,6 +18,7 @@ from tests.factories import (
     AccessModeFactory,
     DataProductFactory,
     DataProductRoleAssignmentFactory,
+    DatasetRoleAssignmentFactory,
     DomainFactory,
     EnvironmentFactory,
     EnvPlatformServiceConfigFactory,
@@ -28,7 +29,6 @@ from tests.factories import (
     TechnicalAssetFactory,
     UserFactory,
 )
-from tests.factories.role_assignment_dataset import DatasetRoleAssignmentFactory
 from tests.webhook_util import assert_event_in_queue
 
 ENDPOINT = "/api/v2/data_products/{}/technical_assets"

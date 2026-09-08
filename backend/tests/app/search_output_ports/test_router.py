@@ -6,7 +6,7 @@ from alembic import command
 from alembic.config import Config
 
 from app.authorization.role_assignments.enums import AssignmentFilter, DecisionStatus
-from app.data_products.output_ports.model import Dataset
+from app.data_products.output_ports.model import OutputPort
 from app.data_products.output_ports.service import OutputPortService
 from app.db_tool import seed_cmd
 from app.search_output_ports.schema_response import (
@@ -203,7 +203,7 @@ class TestOutputPortSearchRouter:
         return precision_at_k, recall_at_k
 
     @staticmethod
-    def setup(session) -> tuple[Dataset, Dataset, Dataset]:
+    def setup(session) -> tuple[OutputPort, OutputPort, OutputPort]:
         ds_1 = OutputPortFactory(name="Customer Data")
         ds_2 = OutputPortFactory(name="Sales Data")
         ds_3 = OutputPortFactory(name="Internal Metrics")
