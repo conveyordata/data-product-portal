@@ -48,7 +48,7 @@ A common Identity provides one target for Global and Data Product role assignmen
 separated. Only users can authenticate, request or approve changes and act inside Portal, while every identity type can receive roles and both users and machine
 users can belong to groups.
 
-Portal will implement a SCIM interface for users, groups and group memberships. Machine users and their memberships will be created and updated through Portal 
+Portal will implement a SCIM interface for users, groups and group memberships. Machine users and their memberships will be created and updated through Portal
 API operations until they can be synchronized through SCIM. Both entry points will use the same internal identity services and persistence model.
 
 ### Confirmation
@@ -200,7 +200,7 @@ a duplicate.
 
 ### Portal API
 
-Portal adds authenticated and idempotent CRUD operations for: 
+Portal adds authenticated and idempotent CRUD operations for:
 
 * Users.
 * Groups and their members.
