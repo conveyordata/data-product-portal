@@ -1,12 +1,12 @@
 import factory
-from faker import Faker
 
 from app.explorations.model import Exploration
 
+from .data_product import (
+    fake,  # shared: namespace is unique across abstract_data_products
+)
 from .domain import DomainFactory
 from .user import UserFactory
-
-fake = Faker()
 
 
 class ExplorationFactory(factory.alchemy.SQLAlchemyModelFactory):
