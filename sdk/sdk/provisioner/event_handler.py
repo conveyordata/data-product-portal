@@ -7,6 +7,7 @@ from fastapi import HTTPException, Request
 from sdk.api_client.models import (
     CloudEventDataProductEvent,
     CloudEventDataProductRoleAssignmentEvent,
+    CloudEventDataProductSettingValueEvent,
     CloudEventExplorationEvent,
     CloudEventInputPortEvent,
     CloudEventOutputPortEvent,
@@ -15,6 +16,7 @@ from sdk.api_client.models import (
     CloudEventTechnicalAssetEvent,
     DataProductEvent,
     DataProductRoleAssignmentEvent,
+    DataProductSettingValueEvent,
     ExplorationEvent,
     InputPortEvent,
     OutputPortEvent,
@@ -44,7 +46,10 @@ class AbstractEventHandler(ABC):
             )
 
         parsed_event: Any
-        if event_type == "output_port.event":
+        if event_type == "data_product_setting_value.event":
+            parsed_event = CloudEventDataProductSettingValueEvent.from_dict(payload)
+            return await self.on_data_product_setting_value_event(parsed_event.data)
+        elif event_type == "output_port.event":
             parsed_event = CloudEventOutputPortEvent.from_dict(payload)
             return await self.on_output_port_event(parsed_event.data)
         elif event_type == "data_product.event":
@@ -78,6 +83,13 @@ class AbstractEventHandler(ABC):
                 "status": "ignored",
                 "reason": f"No handler implemented for '{event_type}'",
             }
+
+    @abstractmethod
+    async def on_data_product_setting_value_event(
+        self, data: DataProductSettingValueEvent
+    ) -> Any:
+        """Handler for the parsed payload of 'data_product_setting_value.event'"""
+        pass
 
     @abstractmethod
     async def on_output_port_event(self, data: OutputPortEvent) -> Any:
@@ -131,6 +143,11 @@ class EmptyEventHandler(AbstractEventHandler):
     An empty implementation of AbstractEventHandler for testing purposes.
     Inherit from this in your tests to avoid implementing every single abstract method.
     """
+
+    async def on_data_product_setting_value_event(
+        self, data: DataProductSettingValueEvent
+    ) -> Any:
+        pass
 
     async def on_output_port_event(self, data: OutputPortEvent) -> Any:
         pass
