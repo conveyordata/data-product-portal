@@ -45,7 +45,7 @@ ignore_errors = true
 
 [tool.ruff]
 exclude = [
-    "sdk/event_handler.py"
+    "sdk/provisioner/event_handler.py"
 ]
 
 [build-system]
