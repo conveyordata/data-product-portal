@@ -197,6 +197,11 @@ class AssetPlugin:
 
 `fields` and `environment_fields` are the same kind of thing described earlier under "Where is the basic metadata of the plugin stored" and "Where per-environment infrastructure details are stored" — a plain description of what's needed, not a database table. `is_shareable` is the one hook this decision adds specifically so the "unshareable asset types" request has somewhere to attach later, without needing a migration or a change to this interface when it's actually built.
 
+Two hard rules, confirmed necessary by an actual spike, not just theory:
+
+* **Every stored row carries its own plugin key as a real column**, next to the flexible value, not buried inside it. Reading a row back means looking up that key first and validating against exactly that plugin's own declared shape — never trying several plugins' shapes in turn to see which one happens to fit. This is what makes "which plugin does this row belong to" a lookup, not a guess.
+* **Every declared shape must reject fields it doesn't recognize.** Without this, a row that actually belongs to one plugin can silently pass validation against a *different* plugin's shape, if that plugin's fields happen to be a subset — quietly dropping data instead of raising an error. A spike proved this is a real, reachable mistake, not a hypothetical one: it's the same bug the external consultant ADR found already living in production between two of today's real plugins. This isn't optional or left to a plugin author's discipline — it's a hard requirement on every declared shape.
+
 
 Note: A plain clickable link (no environment configuration, no technical asset semantics, nothing to validate) could technically be shoehorned into this system as a plugin with an almost-empty class, just a name, an icon, and a URL template, nothing else. However it is quite heavy to use.
 
