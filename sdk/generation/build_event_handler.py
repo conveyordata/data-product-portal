@@ -18,8 +18,9 @@ def generate_event_handler_base():
     type_pattern = re.compile(r'type_:\s*Literal\["([^"]+)"]')
     data_pattern = re.compile(r"data:\s*([A-Z]\w+)")
 
-    # Scan every Python file in the models directory
-    for file_path in models_dir.glob("*.py"):
+    # Scan every Python file in the models directory (sorted for deterministic,
+    # cross-platform output — directory iteration order is filesystem-dependent)
+    for file_path in sorted(models_dir.glob("*.py")):
         content = file_path.read_text()
 
         class_match = class_pattern.search(content)
