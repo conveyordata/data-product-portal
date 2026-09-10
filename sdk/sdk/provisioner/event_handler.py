@@ -7,6 +7,7 @@ from fastapi import HTTPException, Request
 from sdk.api_client.models import (
     CloudEventDataProductEvent,
     CloudEventDataProductRoleAssignmentEvent,
+    CloudEventDataProductSettingValueEvent,
     CloudEventExplorationEvent,
     CloudEventInputPortEvent,
     CloudEventOutputPortEvent,
@@ -15,6 +16,7 @@ from sdk.api_client.models import (
     CloudEventTechnicalAssetEvent,
     DataProductEvent,
     DataProductRoleAssignmentEvent,
+    DataProductSettingValueEvent,
     ExplorationEvent,
     InputPortEvent,
     OutputPortEvent,
@@ -39,50 +41,39 @@ class AbstractEventHandler(ABC):
 
         event_type = payload.get("type")
         if not event_type:
-            raise HTTPException(
-                status_code=400, detail="Missing 'type' field in payload"
-            )
+            raise HTTPException(status_code=400, detail="Missing 'type' field in payload")
 
         parsed_event: Any
-        if event_type == "output_port.event":
-            parsed_event = CloudEventOutputPortEvent.from_dict(payload)
-            return await self.on_output_port_event(parsed_event.data)
-        elif event_type == "data_product.event":
+        if event_type == "data_product.event":
             parsed_event = CloudEventDataProductEvent.from_dict(payload)
             return await self.on_data_product_event(parsed_event.data)
-        elif event_type == "output_port_role_assignment.event":
-            parsed_event = CloudEventOutputPortRoleAssignmentEvent.from_dict(payload)
-            return await self.on_output_port_role_assignment_event(parsed_event.data)
-        elif event_type == "technical_asset.event":
-            parsed_event = CloudEventTechnicalAssetEvent.from_dict(payload)
-            return await self.on_technical_asset_event(parsed_event.data)
         elif event_type == "data_product_role_assignment.event":
             parsed_event = CloudEventDataProductRoleAssignmentEvent.from_dict(payload)
             return await self.on_data_product_role_assignment_event(parsed_event.data)
-        elif event_type == "output_port_technical_asset_link.event":
-            parsed_event = CloudEventOutputPortTechnicalAssetLinkEvent.from_dict(
-                payload
-            )
-            return await self.on_output_port_technical_asset_link_event(
-                parsed_event.data
-            )
+        elif event_type == "data_product_setting_value.event":
+            parsed_event = CloudEventDataProductSettingValueEvent.from_dict(payload)
+            return await self.on_data_product_setting_value_event(parsed_event.data)
         elif event_type == "exploration.event":
             parsed_event = CloudEventExplorationEvent.from_dict(payload)
             return await self.on_exploration_event(parsed_event.data)
         elif event_type == "input_port.event":
             parsed_event = CloudEventInputPortEvent.from_dict(payload)
             return await self.on_input_port_event(parsed_event.data)
+        elif event_type == "output_port.event":
+            parsed_event = CloudEventOutputPortEvent.from_dict(payload)
+            return await self.on_output_port_event(parsed_event.data)
+        elif event_type == "output_port_role_assignment.event":
+            parsed_event = CloudEventOutputPortRoleAssignmentEvent.from_dict(payload)
+            return await self.on_output_port_role_assignment_event(parsed_event.data)
+        elif event_type == "output_port_technical_asset_link.event":
+            parsed_event = CloudEventOutputPortTechnicalAssetLinkEvent.from_dict(payload)
+            return await self.on_output_port_technical_asset_link_event(parsed_event.data)
+        elif event_type == "technical_asset.event":
+            parsed_event = CloudEventTechnicalAssetEvent.from_dict(payload)
+            return await self.on_technical_asset_event(parsed_event.data)
         else:
             # Standard practice is to accept unhandled hooks with a 202/success to avoid webhook retries
-            return {
-                "status": "ignored",
-                "reason": f"No handler implemented for '{event_type}'",
-            }
-
-    @abstractmethod
-    async def on_output_port_event(self, data: OutputPortEvent) -> Any:
-        """Handler for the parsed payload of 'output_port.event'"""
-        pass
+            return {"status": "ignored", "reason": f"No handler implemented for '{event_type}'"}
 
     @abstractmethod
     async def on_data_product_event(self, data: DataProductEvent) -> Any:
@@ -90,29 +81,13 @@ class AbstractEventHandler(ABC):
         pass
 
     @abstractmethod
-    async def on_output_port_role_assignment_event(
-        self, data: OutputPortRoleAssignmentEvent
-    ) -> Any:
-        """Handler for the parsed payload of 'output_port_role_assignment.event'"""
-        pass
-
-    @abstractmethod
-    async def on_technical_asset_event(self, data: TechnicalAssetEvent) -> Any:
-        """Handler for the parsed payload of 'technical_asset.event'"""
-        pass
-
-    @abstractmethod
-    async def on_data_product_role_assignment_event(
-        self, data: DataProductRoleAssignmentEvent
-    ) -> Any:
+    async def on_data_product_role_assignment_event(self, data: DataProductRoleAssignmentEvent) -> Any:
         """Handler for the parsed payload of 'data_product_role_assignment.event'"""
         pass
 
     @abstractmethod
-    async def on_output_port_technical_asset_link_event(
-        self, data: OutputPortTechnicalAssetLinkEvent
-    ) -> Any:
-        """Handler for the parsed payload of 'output_port_technical_asset_link.event'"""
+    async def on_data_product_setting_value_event(self, data: DataProductSettingValueEvent) -> Any:
+        """Handler for the parsed payload of 'data_product_setting_value.event'"""
         pass
 
     @abstractmethod
@@ -125,6 +100,26 @@ class AbstractEventHandler(ABC):
         """Handler for the parsed payload of 'input_port.event'"""
         pass
 
+    @abstractmethod
+    async def on_output_port_event(self, data: OutputPortEvent) -> Any:
+        """Handler for the parsed payload of 'output_port.event'"""
+        pass
+
+    @abstractmethod
+    async def on_output_port_role_assignment_event(self, data: OutputPortRoleAssignmentEvent) -> Any:
+        """Handler for the parsed payload of 'output_port_role_assignment.event'"""
+        pass
+
+    @abstractmethod
+    async def on_output_port_technical_asset_link_event(self, data: OutputPortTechnicalAssetLinkEvent) -> Any:
+        """Handler for the parsed payload of 'output_port_technical_asset_link.event'"""
+        pass
+
+    @abstractmethod
+    async def on_technical_asset_event(self, data: TechnicalAssetEvent) -> Any:
+        """Handler for the parsed payload of 'technical_asset.event'"""
+        pass
+
 
 class EmptyEventHandler(AbstractEventHandler):
     """
@@ -132,32 +127,29 @@ class EmptyEventHandler(AbstractEventHandler):
     Inherit from this in your tests to avoid implementing every single abstract method.
     """
 
-    async def on_output_port_event(self, data: OutputPortEvent) -> Any:
-        pass
-
     async def on_data_product_event(self, data: DataProductEvent) -> Any:
         pass
 
-    async def on_output_port_role_assignment_event(
-        self, data: OutputPortRoleAssignmentEvent
-    ) -> Any:
+    async def on_data_product_role_assignment_event(self, data: DataProductRoleAssignmentEvent) -> Any:
         pass
 
-    async def on_technical_asset_event(self, data: TechnicalAssetEvent) -> Any:
-        pass
-
-    async def on_data_product_role_assignment_event(
-        self, data: DataProductRoleAssignmentEvent
-    ) -> Any:
-        pass
-
-    async def on_output_port_technical_asset_link_event(
-        self, data: OutputPortTechnicalAssetLinkEvent
-    ) -> Any:
+    async def on_data_product_setting_value_event(self, data: DataProductSettingValueEvent) -> Any:
         pass
 
     async def on_exploration_event(self, data: ExplorationEvent) -> Any:
         pass
 
     async def on_input_port_event(self, data: InputPortEvent) -> Any:
+        pass
+
+    async def on_output_port_event(self, data: OutputPortEvent) -> Any:
+        pass
+
+    async def on_output_port_role_assignment_event(self, data: OutputPortRoleAssignmentEvent) -> Any:
+        pass
+
+    async def on_output_port_technical_asset_link_event(self, data: OutputPortTechnicalAssetLinkEvent) -> Any:
+        pass
+
+    async def on_technical_asset_event(self, data: TechnicalAssetEvent) -> Any:
         pass
