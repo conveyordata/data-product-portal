@@ -30,6 +30,7 @@ from tests.factories import (
     TechnicalAssetOutputPortAssociationFactory,
     UserFactory,
 )
+from tests.session_util import as_user
 from tests.webhook_util import assert_event_in_queue
 
 ENDPOINT = "/api/v2/data_products/{}/output_ports"
@@ -121,9 +122,12 @@ class TestOutputPortRouter:
         )
         assert created_dataset.status_code == 200
         assert "id" in created_dataset.json()
-        output_port: OutputPort = (
-            session.query(OutputPort).filter_by(id=created_dataset.json()["id"]).first()
-        )
+        with as_user(session, user.id):
+            output_port: OutputPort = (
+                session.query(OutputPort)
+                .filter_by(id=created_dataset.json()["id"])
+                .first()
+            )
         assert output_port.access_type == OutputPortAccessType.UNRESTRICTED.value
 
     def test_create_output_port__hidden_data_product_only_allows_private_output_port(
@@ -307,9 +311,10 @@ class TestOutputPortRouter:
 
         assert updated_dataset.status_code == 200
         dataset_id = updated_dataset.json()["id"]
-        output_port: OutputPort = (
-            session.query(OutputPort).filter_by(id=dataset_id).first()
-        )
+        with as_user(session, user.id):
+            output_port: OutputPort = (
+                session.query(OutputPort).filter_by(id=dataset_id).first()
+            )
         assert output_port.access_type == OutputPortAccessType.UNRESTRICTED.value
 
     def test_update_output_port(self, client):

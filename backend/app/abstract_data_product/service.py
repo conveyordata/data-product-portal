@@ -29,7 +29,7 @@ from app.authorization.role_assignments.output_port.service import (
 from app.configuration.access_durations.enums import AccessDurationType
 from app.configuration.access_durations.model import AccessDuration
 from app.configuration.access_durations.service import AccessDurationService
-from app.core.authz import Action, Authorization
+from app.core.authz import Action
 from app.core.logging.posthog_analytics import get_posthog_client
 from app.data_products import email
 from app.data_products.output_ports.enums import OutputPortAccessType
@@ -185,13 +185,6 @@ class AbstractDataProductService:
                 detail="Cannot link own output port to data product",
             )
 
-        if not Authorization().has_read_access_to_output_port(
-            current_user=actor, output_port=output_port
-        ):
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="You do not have access to this private output port",
-            )
         if output_port.access_modes and not access_mode_id:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -260,14 +253,6 @@ class AbstractDataProductService:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="This input port already has permanent access; there is nothing to renew",
-            )
-
-        if not Authorization().has_read_access_to_output_port(
-            current_user=actor, output_port=output_port
-        ):
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="You do not have access to this private output port",
             )
 
         justification = existing.latest_request.justification
