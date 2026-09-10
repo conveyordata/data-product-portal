@@ -19,10 +19,10 @@ from app.core.namespace.validation import (
 )
 from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.output_port_technical_assets_link.model import (
-    DataOutputDatasetAssociation,
+    TechnicalAssetOutputPortAssociation,
 )
 from app.data_products.output_port_technical_assets_link.model import (
-    DataOutputDatasetAssociation as DataOutputDatasetAssociationModel,
+    TechnicalAssetOutputPortAssociation as TechnicalAssetOutputPortAssociationModel,
 )
 from app.data_products.output_ports.model import OutputPort as OutputPortModel
 from app.data_products.output_ports.model import ensure_output_port_exists
@@ -130,8 +130,8 @@ class TechnicalAssetService:
                     joinedload(TechnicalAssetModel.owner)
                     .joinedload(DataProductModel.domain)
                     .selectinload(DomainModel.environments),
-                    selectinload(TechnicalAssetModel.dataset_links)
-                    .selectinload(DataOutputDatasetAssociationModel.output_port)
+                    selectinload(TechnicalAssetModel.output_port_links)
+                    .selectinload(TechnicalAssetOutputPortAssociationModel.output_port)
                     .raiseload("*"),
                 )
             )
@@ -150,7 +150,7 @@ class TechnicalAssetService:
                 .where(TechnicalAssetModel.id == id)
                 .where(TechnicalAssetModel.owner_id == data_product_id)
             ).options(
-                selectinload(TechnicalAssetModel.dataset_links),
+                selectinload(TechnicalAssetModel.output_port_links),
                 selectinload(TechnicalAssetModel.environment_configurations),
                 joinedload(TechnicalAssetModel.owner)
                 .joinedload(DataProductModel.domain)
@@ -230,7 +230,7 @@ class TechnicalAssetService:
 
     def update_search_for_associated_datasets(self, result: TechnicalAssetModel):
         dataset_service = OutputPortService(self.db)
-        for dataset_link in result.dataset_links:
+        for dataset_link in result.output_port_links:
             dataset_service.recalculate_search(dataset_link.output_port_id)
 
     def update_data_output_status(
@@ -255,7 +255,7 @@ class TechnicalAssetService:
         output_port_id: UUID,
         *,
         actor: User,
-    ) -> DataOutputDatasetAssociationModel:
+    ) -> TechnicalAssetOutputPortAssociationModel:
         output_port = ensure_output_port_exists(
             output_port_id,
             self.db,
@@ -270,7 +270,7 @@ class TechnicalAssetService:
 
         if output_port.id in [
             link.output_port_id
-            for link in technical_asset.dataset_links
+            for link in technical_asset.output_port_links
             if link.status != DecisionStatus.DENIED
         ]:
             raise TECHNICAL_ASSET_ALREADY_LINKED_ERROR
@@ -282,13 +282,13 @@ class TechnicalAssetService:
             raise TECHNICAL_ASSET_ACCESS_MODES_INCOMPATIBLE_ERROR
 
         # Data output requests always need to be approved
-        output_port_link = DataOutputDatasetAssociationModel(
+        output_port_link = TechnicalAssetOutputPortAssociationModel(
             output_port_id=output_port_id,
             status=DecisionStatus.PENDING,
             requested_by=actor,
             requested_on=datetime.now(tz=pytz.utc),
         )
-        technical_asset.dataset_links.append(output_port_link)
+        technical_asset.output_port_links.append(output_port_link)
         self.db.flush()
         OutputPortService(self.db).recalculate_search(output_port_id)
         return output_port_link
@@ -302,7 +302,7 @@ class TechnicalAssetService:
         data_output_dataset = next(
             (
                 dataset
-                for dataset in data_output.dataset_links
+                for dataset in data_output.output_port_links
                 if dataset.output_port_id == output_port_id
             ),
             None,
@@ -313,7 +313,7 @@ class TechnicalAssetService:
                 detail=f"Data product dataset for data output {id} not found",
             )
 
-        data_output.dataset_links.remove(data_output_dataset)
+        data_output.output_port_links.remove(data_output_dataset)
         self.db.flush()
         OutputPortService(self.db).recalculate_search(output_port_id)
         self.db.commit()
@@ -360,8 +360,8 @@ class TechnicalAssetService:
                     joinedload(TechnicalAssetModel.owner)
                     .joinedload(DataProductModel.domain)
                     .selectinload(DomainModel.environments),
-                    selectinload(TechnicalAssetModel.dataset_links)
-                    .selectinload(DataOutputDatasetAssociation.output_port)
+                    selectinload(TechnicalAssetModel.output_port_links)
+                    .selectinload(TechnicalAssetOutputPortAssociation.output_port)
                     .selectinload(OutputPortModel.tags)
                     .raiseload("*"),
                 )

@@ -33,7 +33,7 @@ from app.core.namespace.validation import (
 from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.model import DataProductVisibility, ensure_data_product_exists
 from app.data_products.output_port_technical_assets_link.model import (
-    DataOutputDatasetAssociation,
+    TechnicalAssetOutputPortAssociation,
 )
 from app.data_products.output_ports.model import OutputPort as OutputPortModel
 from app.data_products.schema_request import (
@@ -336,8 +336,8 @@ class DataProductService(AbstractDataProductService):
             self.db.scalars(
                 select(TechnicalAssetModel)
                 .options(
-                    joinedload(TechnicalAssetModel.dataset_links)
-                    .selectinload(DataOutputDatasetAssociation.output_port)
+                    joinedload(TechnicalAssetModel.output_port_links)
+                    .selectinload(TechnicalAssetOutputPortAssociation.output_port)
                     .selectinload(OutputPortModel.data_product_links)
                 )
                 .filter_by(owner_id=id)
@@ -390,7 +390,7 @@ class DataProductService(AbstractDataProductService):
                 )
             )
             if level >= 2:
-                for downstream_datasets in data_output.dataset_links:
+                for downstream_datasets in data_output.output_port_links:
                     nodes.append(
                         Node(
                             id=f"{downstream_datasets.output_port_id}_2",

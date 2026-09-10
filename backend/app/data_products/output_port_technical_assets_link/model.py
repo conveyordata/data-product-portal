@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING, Sequence
 
-from sqlalchemy import UUID, Column, DateTime, Enum, ForeignKey, UniqueConstraint
+from sqlalchemy import UUID, Column, DateTime, Enum, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.authorization.role_assignments.enums import DecisionStatus
@@ -19,7 +19,7 @@ import uuid
 from app.shared.model import BaseORM, utcnow
 
 
-class DataOutputDatasetAssociation(Base, BaseORM, EventTrackedMixin):
+class TechnicalAssetOutputPortAssociation(Base, BaseORM, EventTrackedMixin):
     __tablename__ = "data_outputs_datasets"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
@@ -31,7 +31,9 @@ class DataOutputDatasetAssociation(Base, BaseORM, EventTrackedMixin):
     approved_on = Column(DateTime(timezone=False))
     denied_on = Column(DateTime(timezone=False))
 
-    data_output_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("data_outputs.id"))
+    technical_asset_id: Mapped[uuid.UUID] = mapped_column(
+        "data_output_id", ForeignKey("data_outputs.id")
+    )
     output_port_id: Mapped[uuid.UUID] = mapped_column(
         "dataset_id", ForeignKey("datasets.id")
     )
@@ -39,13 +41,13 @@ class DataOutputDatasetAssociation(Base, BaseORM, EventTrackedMixin):
     approved_by_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"))
     denied_by_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"))
 
-    data_output: Mapped["TechnicalAsset"] = relationship(
-        back_populates="dataset_links",
+    technical_asset: Mapped["TechnicalAsset"] = relationship(
+        back_populates="output_port_links",
         order_by="TechnicalAsset.name",
         lazy="joined",
     )
     output_port: Mapped["OutputPort"] = relationship(
-        back_populates="data_output_links",
+        back_populates="technical_asset_links",
         order_by="OutputPort.name",
         lazy="joined",
     )
@@ -61,12 +63,6 @@ class DataOutputDatasetAssociation(Base, BaseORM, EventTrackedMixin):
     )
     denied_by: Mapped["User"] = relationship(
         foreign_keys=[denied_by_id], back_populates="denied_dataoutputs", lazy="joined"
-    )
-
-    __table_args__ = (
-        UniqueConstraint(
-            "data_output_id", "dataset_id", name="unique_data_output_dataset"
-        ),
     )
 
     def generate_extra_events(self, connection) -> Sequence[V2Event]:
@@ -90,8 +86,8 @@ class DataOutputDatasetAssociation(Base, BaseORM, EventTrackedMixin):
         return OutputPortTechnicalAssetLinkEvent(
             id=self.id,
             data_product_id=self.output_port.data_product_id
-            if self.data_output is None
-            else self.data_output.owner_id,
+            if self.technical_asset is None
+            else self.technical_asset.owner_id,
             output_port_id=self.output_port_id,
-            technical_asset_id=self.data_output_id,
+            technical_asset_id=self.technical_asset_id,
         )

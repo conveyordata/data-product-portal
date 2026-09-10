@@ -465,10 +465,10 @@ class TestOutputPortRouter:
             scope=Scope.DATASET, permissions=[AuthorizationAction.OUTPUT_PORT__DELETE]
         )
         data_product = DataProductFactory()
-        data_output = TechnicalAssetFactory(owner=data_product)
+        technical_asset = TechnicalAssetFactory(owner=data_product)
         ds = OutputPortFactory(data_product=data_product)
         TechnicalAssetOutputPortAssociationFactory(
-            output_port=ds, data_output=data_output
+            output_port=ds, technical_asset=technical_asset
         )
         DatasetRoleAssignmentFactory(
             user_id=user.id, role_id=role.id, output_port_id=ds.id
@@ -486,13 +486,13 @@ class TestOutputPortRouter:
         ds = OutputPortFactory(data_product=data_product)
         TechnicalAssetOutputPortAssociationFactory(
             output_port=ds,
-            data_output=TechnicalAssetFactory(
+            technical_asset=TechnicalAssetFactory(
                 owner=data_product, access_modes=[shared_access_mode]
             ),
         )
         TechnicalAssetOutputPortAssociationFactory(
             output_port=ds,
-            data_output=TechnicalAssetFactory(
+            technical_asset=TechnicalAssetFactory(
                 owner=data_product, access_modes=[shared_access_mode]
             ),
         )

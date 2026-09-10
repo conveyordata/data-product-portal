@@ -38,7 +38,7 @@ from app.data_products.model import (
     ensure_data_product_exists,
 )
 from app.data_products.output_port_technical_assets_link.model import (
-    DataOutputDatasetAssociation as DataOutputDatasetAssociationModel,
+    TechnicalAssetOutputPortAssociation as TechnicalAssetOutputPortAssociationModel,
 )
 from app.data_products.output_ports.enums import OutputPortAccessType
 from app.data_products.output_ports.model import OutputPort as OutputPortModel
@@ -73,8 +73,8 @@ def get_dataset_load_options() -> Sequence[ExecutableOption]:
         selectinload(OutputPortModel.data_product_links)
         .selectinload(InputPortModel.consuming_abstract_data_product)
         .raiseload("*"),
-        selectinload(OutputPortModel.data_output_links)
-        .selectinload(DataOutputDatasetAssociationModel.data_output)
+        selectinload(OutputPortModel.technical_asset_links)
+        .selectinload(TechnicalAssetOutputPortAssociationModel.technical_asset)
         .options(
             joinedload(TechnicalAssetModel.configuration),
             joinedload(TechnicalAssetModel.owner),
@@ -153,7 +153,7 @@ class OutputPortService:
 
         output_port = self.db.scalar(
             query.options(
-                selectinload(OutputPortModel.data_output_links),
+                selectinload(OutputPortModel.technical_asset_links),
                 selectinload(OutputPortModel.data_product_settings),
             )
         )
@@ -162,8 +162,8 @@ class OutputPortService:
             raise output_port_not_found_exception(id)
 
         rolled_up_tags = set()
-        for output_link in output_port.data_output_links:
-            rolled_up_tags.update(output_link.data_output.tags)
+        for output_link in output_port.technical_asset_links:
+            rolled_up_tags.update(output_link.technical_asset.tags)
 
         output_port.rolled_up_tags = rolled_up_tags
 
@@ -226,8 +226,8 @@ class OutputPortService:
     def recalculate_embeddings_load_options():
         return [
             selectinload(OutputPortModel.data_product),
-            selectinload(OutputPortModel.data_output_links).selectinload(
-                DataOutputDatasetAssociationModel.data_output
+            selectinload(OutputPortModel.technical_asset_links).selectinload(
+                TechnicalAssetOutputPortAssociationModel.technical_asset
             ),
         ]
 
@@ -464,7 +464,7 @@ class OutputPortService:
             .where(OutputPortModel.data_product_id == data_product_id)
             .options(
                 selectinload(OutputPortModel.data_product_links),
-                selectinload(OutputPortModel.data_output_links),
+                selectinload(OutputPortModel.technical_asset_links),
             )
         )
         if not output_port:
@@ -498,8 +498,8 @@ class OutputPortService:
                 )
             )
 
-        for data_output_link in output_port.data_output_links:
-            data_output = data_output_link.data_output
+        for data_output_link in output_port.technical_asset_links:
+            data_output = data_output_link.technical_asset
             nodes.append(
                 Node(
                     id=data_output.id,
@@ -542,7 +542,7 @@ class OutputPortService:
                 )
 
         # if no data outputs are linked yet, still show the owner data product
-        if level >= 2 and not output_port.data_output_links:
+        if level >= 2 and not output_port.technical_asset_links:
             nodes.append(
                 Node(
                     id=f"{output_port.data_product.id}_2",

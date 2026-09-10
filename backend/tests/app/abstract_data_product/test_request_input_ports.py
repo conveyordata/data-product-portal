@@ -204,7 +204,7 @@ class TestRequestInputPortsDuration:
         )
         access_mode = AccessModeFactory(name="a name")
         TechnicalAssetOutputPortAssociationFactory(
-            data_output=TechnicalAssetFactory(access_modes=[access_mode]),
+            technical_asset=TechnicalAssetFactory(access_modes=[access_mode]),
             output_port=port,
         )
 
@@ -227,7 +227,7 @@ class TestRequestInputPortsDuration:
             access_type=OutputPortAccessType.UNRESTRICTED,
         )
         TechnicalAssetOutputPortAssociationFactory(
-            data_output=TechnicalAssetFactory(
+            technical_asset=TechnicalAssetFactory(
                 access_modes=[AccessModeFactory(name="a name")]
             ),
             output_port=port,
@@ -254,7 +254,7 @@ class TestRequestInputPortsDuration:
             access_type=OutputPortAccessType.UNRESTRICTED,
         )
         TechnicalAssetOutputPortAssociationFactory(
-            data_output=TechnicalAssetFactory(
+            technical_asset=TechnicalAssetFactory(
                 access_modes=[AccessModeFactory(name="a name")]
             ),
             output_port=port,
@@ -285,12 +285,12 @@ class TestRequestInputPortsDuration:
         denied_mode = AccessModeFactory(name="denied mode")
         approved_mode = AccessModeFactory(name="approved mode")
         TechnicalAssetOutputPortAssociationFactory(
-            data_output=TechnicalAssetFactory(access_modes=[denied_mode]),
+            technical_asset=TechnicalAssetFactory(access_modes=[denied_mode]),
             output_port=port,
             status=DecisionStatus.DENIED,
         )
         TechnicalAssetOutputPortAssociationFactory(
-            data_output=TechnicalAssetFactory(access_modes=[approved_mode]),
+            technical_asset=TechnicalAssetFactory(access_modes=[approved_mode]),
             output_port=port,
             status=DecisionStatus.APPROVED,
         )
@@ -437,7 +437,7 @@ class TestRequestInputPortsDuration:
         )
         access_mode = AccessModeFactory(name="a mode")
         TechnicalAssetOutputPortAssociationFactory(
-            data_output=TechnicalAssetFactory(access_modes=[access_mode]),
+            technical_asset=TechnicalAssetFactory(access_modes=[access_mode]),
             output_port=port,
         )
         link = InputPortFactory(

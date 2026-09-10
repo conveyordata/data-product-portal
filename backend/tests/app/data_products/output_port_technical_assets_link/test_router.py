@@ -106,7 +106,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         ds = OutputPortFactory(data_product=data_product)
 
         TechnicalAssetOutputPortAssociationFactory(
-            data_output=TechnicalAssetFactory(
+            technical_asset=TechnicalAssetFactory(
                 access_modes=[AccessModeFactory(name="a name")]
             ),
             output_port=ds,
@@ -347,7 +347,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
             output_port=ds, status=DecisionStatus.PENDING
         )
         response = self.approve_link_between_technical_asset_and_output_port(
-            client, ds.data_product.id, link.data_output.id, link.output_port.id
+            client, ds.data_product.id, link.technical_asset.id, link.output_port.id
         )
         assert response.status_code == 200, response.text
 
@@ -366,7 +366,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
             output_port=ds, status=DecisionStatus.PENDING
         )
         response = self.approve_link_between_technical_asset_and_output_port(
-            client, ds.data_product.id, link.data_output.id, link.output_port.id
+            client, ds.data_product.id, link.technical_asset.id, link.output_port.id
         )
         assert response.status_code == 200, response.text
 
@@ -378,7 +378,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         )
 
         response = self.approve_link_between_technical_asset_and_output_port(
-            client, ds.data_product.id, link.data_output.id, link.output_port.id
+            client, ds.data_product.id, link.technical_asset.id, link.output_port.id
         )
         assert response.status_code == 200
 
@@ -389,7 +389,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         )
 
         response = self.approve_link_between_technical_asset_and_output_port(
-            client, ds.data_product.id, link.data_output.id, link.output_port.id
+            client, ds.data_product.id, link.technical_asset.id, link.output_port.id
         )
         assert response.status_code == 403
         assert (
@@ -411,7 +411,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
             output_port=ds, status=DecisionStatus.PENDING
         )
         response = self.deny_link_between_technical_asset_and_output_port(
-            client, ds.data_product.id, link.data_output.id, link.output_port.id
+            client, ds.data_product.id, link.technical_asset.id, link.output_port.id
         )
         assert response.status_code == 200
 
@@ -430,7 +430,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
             output_port=ds, status=DecisionStatus.PENDING
         )
         response = self.deny_link_between_technical_asset_and_output_port(
-            client, ds.data_product.id, link.data_output.id, link.output_port.id
+            client, ds.data_product.id, link.technical_asset.id, link.output_port.id
         )
         assert response.status_code == 200
 
@@ -442,7 +442,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         )
 
         response = self.deny_link_between_technical_asset_and_output_port(
-            client, ds.data_product.id, link.data_output.id, link.output_port.id
+            client, ds.data_product.id, link.technical_asset.id, link.output_port.id
         )
         assert response.status_code == 200
 
@@ -453,7 +453,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         )
 
         response = self.deny_link_between_technical_asset_and_output_port(
-            client, ds.data_product.id, link.data_output.id, link.output_port.id
+            client, ds.data_product.id, link.technical_asset.id, link.output_port.id
         )
         assert response.status_code == 403
         assert (
@@ -473,7 +473,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         )
         technical_asset = TechnicalAssetFactory(owner=ds.data_product)
         TechnicalAssetOutputPortAssociationFactory(
-            output_port=ds, data_output=technical_asset
+            output_port=ds, technical_asset=technical_asset
         )
 
         response = self.request_technical_asset_output_port_unlink(
@@ -486,7 +486,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         ds = OutputPortFactory()
         technical_asset = TechnicalAssetFactory(owner=ds.data_product)
         TechnicalAssetOutputPortAssociationFactory(
-            output_port=ds, data_output=technical_asset
+            output_port=ds, technical_asset=technical_asset
         )
 
         response = self.request_technical_asset_output_port_unlink(
@@ -513,7 +513,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         )
         link = TechnicalAssetOutputPortAssociationFactory(output_port=ds)
         response = client.get(
-            f"/api/v2/data_products/{link.data_output.owner.id}/technical_assets"
+            f"/api/v2/data_products/{link.technical_asset.owner.id}/technical_assets"
         )
         assert response.status_code == 200, response.text
         assert response.json()["technical_assets"][0]["output_port_links"][0][
@@ -524,7 +524,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         )
         assert response.status_code == 200
         response = client.get(
-            f"/api/v2/data_products/{link.data_output.owner.id}/technical_assets"
+            f"/api/v2/data_products/{link.technical_asset.owner.id}/technical_assets"
         )
         assert len(response.json()["technical_assets"][0]["output_port_links"]) == 0
 
@@ -564,10 +564,10 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         )
         technical_asset = TechnicalAssetFactory(owner=ds.data_product)
         link = TechnicalAssetOutputPortAssociationFactory(
-            output_port=ds, data_output=technical_asset
+            output_port=ds, technical_asset=technical_asset
         )
-        owner_id = link.data_output.owner.id
-        output_id = link.data_output.id
+        owner_id = link.technical_asset.owner.id
+        output_id = link.technical_asset.id
 
         response = self.request_technical_asset_output_port_unlink(
             client, ds.data_product.id, technical_asset.id, ds.id
@@ -592,12 +592,12 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
             output_port=ds, status=DecisionStatus.PENDING
         )
         response = self.approve_link_between_technical_asset_and_output_port(
-            client, ds.data_product.id, link.data_output.id, ds.id
+            client, ds.data_product.id, link.technical_asset.id, ds.id
         )
         assert response.status_code == 200
 
         history = self.get_technical_asset_history(
-            client, link.data_output.owner.id, link.data_output.id
+            client, link.technical_asset.owner.id, link.technical_asset.id
         ).json()
         assert len(history["events"]) == 1
 
@@ -615,12 +615,12 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
             output_port=ds, status=DecisionStatus.PENDING
         )
         response = self.deny_link_between_technical_asset_and_output_port(
-            client, ds.data_product.id, link.data_output.id, ds.id
+            client, ds.data_product.id, link.technical_asset.id, ds.id
         )
         assert response.status_code == 200
 
         history = self.get_technical_asset_history(
-            client, link.data_output.owner.id, link.data_output.id
+            client, link.technical_asset.owner.id, link.technical_asset.id
         ).json()
         assert len(history["events"]) == 1
 

@@ -23,9 +23,9 @@ class TestDatasetsService:
 
     def test_recalculate_search_with_technical_asset(self, session):
         ds = OutputPortFactory()
-        data_output = TechnicalAssetFactory(owner=ds.data_product)
+        technical_asset = TechnicalAssetFactory(owner=ds.data_product)
         TechnicalAssetOutputPortAssociationFactory(
-            data_output=data_output, output_port=ds
+            technical_asset=technical_asset, output_port=ds
         )
         OutputPortService(session).recalculate_search(ds.id)
 

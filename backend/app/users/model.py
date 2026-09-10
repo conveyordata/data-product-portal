@@ -21,7 +21,7 @@ if TYPE_CHECKING:
     )
     from app.data_products.model import DataProduct
     from app.data_products.output_port_technical_assets_link.model import (
-        DataOutputDatasetAssociation,
+        TechnicalAssetOutputPortAssociation,
     )
     from app.data_products.output_ports.model import (
         OutputPort,
@@ -95,20 +95,26 @@ class User(Base, BaseORM):
     datasets: Mapped[list["OutputPort"]] = association_proxy("dataset_roles", "dataset")
 
     # Relationships - Data outputs
-    requested_dataoutputs: Mapped[list["DataOutputDatasetAssociation"]] = relationship(
-        foreign_keys="DataOutputDatasetAssociation.requested_by_id",
-        back_populates="requested_by",
-        lazy="raise",
+    requested_dataoutputs: Mapped[list["TechnicalAssetOutputPortAssociation"]] = (
+        relationship(
+            foreign_keys="TechnicalAssetOutputPortAssociation.requested_by_id",
+            back_populates="requested_by",
+            lazy="raise",
+        )
     )
-    denied_dataoutputs: Mapped[list["DataOutputDatasetAssociation"]] = relationship(
-        foreign_keys="DataOutputDatasetAssociation.denied_by_id",
-        back_populates="denied_by",
-        lazy="raise",
+    denied_dataoutputs: Mapped[list["TechnicalAssetOutputPortAssociation"]] = (
+        relationship(
+            foreign_keys="TechnicalAssetOutputPortAssociation.denied_by_id",
+            back_populates="denied_by",
+            lazy="raise",
+        )
     )
-    approved_dataoutputs: Mapped[list["DataOutputDatasetAssociation"]] = relationship(
-        foreign_keys="DataOutputDatasetAssociation.approved_by_id",
-        back_populates="approved_by",
-        lazy="raise",
+    approved_dataoutputs: Mapped[list["TechnicalAssetOutputPortAssociation"]] = (
+        relationship(
+            foreign_keys="TechnicalAssetOutputPortAssociation.approved_by_id",
+            back_populates="approved_by",
+            lazy="raise",
+        )
     )
 
     def __eq__(self, other: object) -> bool:

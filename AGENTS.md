@@ -21,7 +21,7 @@ It consists of a 3-tier web architecture.
 ## Workflow & Automation
 
 *   **Task Runner**: `Taskfile.yml` is primarily for release automation.
-*   **Pre-commit**: Run `pre-commit` rather than invoking Ruff, mypy, or Biome directly — it also regenerates the OpenAPI client/SDK. Code must pass pre-commit hooks (Ruff, mypy, Biome, gitleaks, OpenAPI spec check).
+*   **Pre-commit**: Run `pre-commit run` after adding unstaged files rather than invoking Ruff, mypy, or Biome directly — it also regenerates the OpenAPI client/SDK. Code must pass pre-commit hooks (Ruff, mypy, Biome, gitleaks, OpenAPI spec check).
 *   **ADRs**: When adding major features or making architectural changes, consider if a new ADR (`docs/adr/`) is needed validate with user. Don't duplicate documentation — reference an existing doc instead of repeating its content.
 *   **User DOCS**: When development is done, discuss ONCE with the user that the documentation (`docs/docs/`) including AGENTS.md files is complete and consistent.
 

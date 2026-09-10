@@ -49,7 +49,7 @@ class Tag(Base, BaseORM):
     value = Column(String)
 
     # Relationships
-    datasets: Mapped[list["OutputPort"]] = relationship(
+    output_ports: Mapped[list["OutputPort"]] = relationship(
         secondary=tag_dataset_table, lazy="raise", back_populates="tags"
     )
     data_products: Mapped[list["DataProduct"]] = relationship(
