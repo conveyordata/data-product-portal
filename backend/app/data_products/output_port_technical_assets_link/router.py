@@ -81,7 +81,7 @@ def approve_output_port_technical_asset_link(
             name=EventType.DATA_OUTPUT_DATASET_LINK_APPROVED,
             subject_id=output_link.output_port_id,
             subject_type=EventReferenceEntity.DATASET,
-            target_id=output_link.data_output_id,
+            target_id=output_link.technical_asset_id,
             target_type=EventReferenceEntity.DATA_OUTPUT,
             actor_id=authenticated_user.id,
         ),
@@ -124,7 +124,7 @@ def deny_output_port_technical_asset_link(
             name=EventType.DATA_OUTPUT_DATASET_LINK_DENIED,
             subject_id=output_link.output_port_id,
             subject_type=EventReferenceEntity.DATASET,
-            target_id=output_link.data_output_id,
+            target_id=output_link.technical_asset_id,
             target_type=EventReferenceEntity.DATA_OUTPUT,
             actor_id=authenticated_user.id,
         ),
@@ -191,7 +191,7 @@ def link_output_port_to_technical_asset(
         background_tasks.add_task(
             email.send_link_output_port_email(
                 dataset_link.output_port,
-                dataset_link.data_output,
+                dataset_link.technical_asset,
                 requester=deepcopy(authenticated_user),
                 approvers=[deepcopy(approver) for approver in other_approvers],
             )

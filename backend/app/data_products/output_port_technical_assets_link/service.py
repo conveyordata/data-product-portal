@@ -17,7 +17,7 @@ from app.authorization.role_assignments.output_port.model import (
 from app.core.authz import Action, Authorization
 from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.output_port_technical_assets_link.model import (
-    DataOutputDatasetAssociation as DataOutputDatasetAssociationModel,
+    TechnicalAssetOutputPortAssociation as TechnicalAssetOutputPortAssociationModel,
 )
 from app.data_products.output_ports.model import OutputPort
 from app.data_products.output_ports.model import OutputPort as OutputPortModel
@@ -31,8 +31,8 @@ class TechnicalAssetOutputPortService:
     def __init__(self, db: Session):
         self.db = db
 
-    def get_link_by_id(self, id: UUID) -> DataOutputDatasetAssociationModel:
-        current_link = self.db.get(DataOutputDatasetAssociationModel, id)
+    def get_link_by_id(self, id: UUID) -> TechnicalAssetOutputPortAssociationModel:
+        current_link = self.db.get(TechnicalAssetOutputPortAssociationModel, id)
         if not current_link:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -42,16 +42,19 @@ class TechnicalAssetOutputPortService:
 
     def get_link(
         self, *, data_product_id: UUID, technical_asset_id: UUID, output_port_id: UUID
-    ) -> DataOutputDatasetAssociationModel:
+    ) -> TechnicalAssetOutputPortAssociationModel:
         current_link = self.db.scalar(
-            select(DataOutputDatasetAssociationModel)
+            select(TechnicalAssetOutputPortAssociationModel)
             .where(
-                DataOutputDatasetAssociationModel.data_output_id == technical_asset_id,
-                DataOutputDatasetAssociationModel.output_port_id == output_port_id,
+                TechnicalAssetOutputPortAssociationModel.technical_asset_id
+                == technical_asset_id,
+                TechnicalAssetOutputPortAssociationModel.output_port_id
+                == output_port_id,
             )
             .join(
                 OutputPort,
-                OutputPort.id == DataOutputDatasetAssociationModel.output_port_id,
+                OutputPort.id
+                == TechnicalAssetOutputPortAssociationModel.output_port_id,
             )
             .where(
                 OutputPort.data_product_id == data_product_id,
@@ -71,7 +74,7 @@ class TechnicalAssetOutputPortService:
         technical_asset_id: UUID,
         output_port_id: UUID,
         actor: User,
-    ) -> DataOutputDatasetAssociationModel:
+    ) -> TechnicalAssetOutputPortAssociationModel:
         current_link = self.get_link(
             data_product_id=data_product_id,
             technical_asset_id=technical_asset_id,
@@ -96,7 +99,7 @@ class TechnicalAssetOutputPortService:
         technical_asset_id: UUID,
         output_port_id: UUID,
         actor: User,
-    ) -> DataOutputDatasetAssociationModel:
+    ) -> TechnicalAssetOutputPortAssociationModel:
         current_link = self.get_link(
             data_product_id=data_product_id,
             technical_asset_id=technical_asset_id,
@@ -115,7 +118,7 @@ class TechnicalAssetOutputPortService:
         output_port_id: UUID,
         *,
         actor: User,
-    ) -> DataOutputDatasetAssociationModel:
+    ) -> TechnicalAssetOutputPortAssociationModel:
         current_link = self.get_link(
             data_product_id=data_product_id,
             technical_asset_id=technical_asset_id,
@@ -127,19 +130,21 @@ class TechnicalAssetOutputPortService:
 
     def get_user_requests(self, user: User, hide_old_inactive: bool):
         query = (
-            select(DataOutputDatasetAssociationModel)
+            select(TechnicalAssetOutputPortAssociationModel)
             .where(
-                DataOutputDatasetAssociationModel.requested_by_id == user.id,
+                TechnicalAssetOutputPortAssociationModel.requested_by_id == user.id,
             )
-            .order_by(asc(DataOutputDatasetAssociationModel.requested_on))
+            .order_by(asc(TechnicalAssetOutputPortAssociationModel.requested_on))
         )
 
         if hide_old_inactive:
             thirty_days_ago = datetime.now(timezone.utc) - timedelta(days=30)
             query = query.where(
                 or_(
-                    DataOutputDatasetAssociationModel.status == DecisionStatus.PENDING,
-                    DataOutputDatasetAssociationModel.requested_on >= thirty_days_ago,
+                    TechnicalAssetOutputPortAssociationModel.status
+                    == DecisionStatus.PENDING,
+                    TechnicalAssetOutputPortAssociationModel.requested_on
+                    >= thirty_days_ago,
                 )
             )
 
@@ -155,18 +160,19 @@ class TechnicalAssetOutputPortService:
     ) -> Sequence[TechnicalAssetOutputPortRequest]:
         requested_associations = (
             self.db.scalars(
-                select(DataOutputDatasetAssociationModel)
+                select(TechnicalAssetOutputPortAssociationModel)
                 .where(
-                    DataOutputDatasetAssociationModel.status == DecisionStatus.PENDING,
+                    TechnicalAssetOutputPortAssociationModel.status
+                    == DecisionStatus.PENDING,
                 )
                 .where(
                     or_(
-                        DataOutputDatasetAssociationModel.output_port.has(
+                        TechnicalAssetOutputPortAssociationModel.output_port.has(
                             OutputPortModel.assignments.any(
                                 DatasetRoleAssignmentModel.user_id == user.id
                             )
                         ),
-                        DataOutputDatasetAssociationModel.output_port.has(
+                        TechnicalAssetOutputPortAssociationModel.output_port.has(
                             OutputPortModel.data_product.has(
                                 DataProductModel.assignments.any(
                                     DataProductRoleAssignmentModel.user_id == user.id
@@ -175,7 +181,7 @@ class TechnicalAssetOutputPortService:
                         ),
                     )
                 )
-                .order_by(asc(DataOutputDatasetAssociationModel.requested_on))
+                .order_by(asc(TechnicalAssetOutputPortAssociationModel.requested_on))
             )
             .unique()
             .all()

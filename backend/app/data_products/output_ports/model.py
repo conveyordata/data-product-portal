@@ -36,7 +36,7 @@ from app.core.authz.db_utils import (
 )
 from app.core.webhooks.events import OutputPortEvent
 from app.data_products.output_port_technical_assets_link.model import (
-    DataOutputDatasetAssociation,
+    TechnicalAssetOutputPortAssociation,
 )
 from app.data_products.output_ports.data_quality.model import (  # noqa: TCH001
     DataQualitySummary,
@@ -88,12 +88,12 @@ def _access_type_filter_for_user(user_id: uuid.UUID):
 
 output_port_access_modes = (
     select(
-        DataOutputDatasetAssociation.output_port_id.label("output_port_id"),
+        TechnicalAssetOutputPortAssociation.output_port_id.label("output_port_id"),
         TechnicalAssetAccessMode.access_mode_id.label("access_mode_id"),
     )
     .join(
         TechnicalAssetAccessMode,
-        DataOutputDatasetAssociation.data_output_id
+        TechnicalAssetOutputPortAssociation.technical_asset_id
         == TechnicalAssetAccessMode.technical_asset_id,
     )
     .distinct()
@@ -137,15 +137,17 @@ class OutputPort(Base, BaseORM, EventTrackedMixin):
         cascade="all, delete-orphan",
         lazy="raise",
     )
-    data_output_links: Mapped[list["DataOutputDatasetAssociation"]] = relationship(
-        "DataOutputDatasetAssociation",
-        back_populates="output_port",
-        order_by="DataOutputDatasetAssociation.status.desc()",
-        cascade="all, delete-orphan",
-        lazy="raise",
+    technical_asset_links: Mapped[list["TechnicalAssetOutputPortAssociation"]] = (
+        relationship(
+            "TechnicalAssetOutputPortAssociation",
+            back_populates="output_port",
+            order_by="TechnicalAssetOutputPortAssociation.status.desc()",
+            cascade="all, delete-orphan",
+            lazy="raise",
+        )
     )
     tags: Mapped[list[Tag]] = relationship(
-        secondary=tag_dataset_table, back_populates="datasets", lazy="selectin"
+        secondary=tag_dataset_table, back_populates="output_ports", lazy="selectin"
     )
     data_product_settings: Mapped[list["DataProductSettingValue"]] = relationship(
         "DataProductSettingValue",
@@ -199,9 +201,9 @@ class OutputPort(Base, BaseORM, EventTrackedMixin):
     )
     technical_assets_count = deferred(
         column_property(
-            select(func.count(DataOutputDatasetAssociation.id))
-            .where(DataOutputDatasetAssociation.output_port_id == id)
-            .correlate_except(DataOutputDatasetAssociation)
+            select(func.count(TechnicalAssetOutputPortAssociation.id))
+            .where(TechnicalAssetOutputPortAssociation.output_port_id == id)
+            .correlate_except(TechnicalAssetOutputPortAssociation)
             .scalar_subquery()
         ),
         raiseload=True,

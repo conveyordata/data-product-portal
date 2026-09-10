@@ -17,7 +17,7 @@ from app.authorization.role_assignments.output_port.model import (
 )
 from app.data_products.model import DataProduct
 from app.data_products.output_port_technical_assets_link.model import (
-    DataOutputDatasetAssociation,
+    TechnicalAssetOutputPortAssociation,
 )
 from app.data_products.output_ports.model import OutputPort
 from app.data_products.technical_assets.model import TechnicalAsset
@@ -221,8 +221,8 @@ class TechnicalAssetOutputPortAssociationResolver(OutputPortResolver):
         obj = await SubjectResolver._resolve(request, key, db)
         if obj != cls.DEFAULT:
             technical_asset_output_port = db.scalar(
-                select(DataOutputDatasetAssociation).where(
-                    DataOutputDatasetAssociation.id == obj
+                select(TechnicalAssetOutputPortAssociation).where(
+                    TechnicalAssetOutputPortAssociation.id == obj
                 )
             )
             if technical_asset_output_port:

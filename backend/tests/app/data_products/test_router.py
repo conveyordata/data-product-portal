@@ -581,12 +581,14 @@ class TestDataProductsRouter:
 
     def test_get_data_product_graph_data_level3(self, client):
         data_product = DataProductFactory()
-        dataset = OutputPortFactory(data_product=data_product)
+        output_port = OutputPortFactory(data_product=data_product)
         ta = TechnicalAssetFactory(owner=data_product)
-        TechnicalAssetOutputPortAssociationFactory(data_output=ta, output_port=dataset)
+        TechnicalAssetOutputPortAssociationFactory(
+            technical_asset=ta, output_port=output_port
+        )
         downstream_dataset = OutputPortFactory()
         InputPortFactory(
-            output_port=dataset,
+            output_port=output_port,
             consuming_abstract_data_product=downstream_dataset.data_product,
         )
         response = client.get(f"{ENDPOINT}/{data_product.id}/graph")
@@ -595,12 +597,14 @@ class TestDataProductsRouter:
 
     def test_get_data_product_graph_data_exploration_included(self, client):
         data_product = DataProductFactory()
-        dataset = OutputPortFactory(data_product=data_product)
+        output_port = OutputPortFactory(data_product=data_product)
         ta = TechnicalAssetFactory(owner=data_product)
-        TechnicalAssetOutputPortAssociationFactory(data_output=ta, output_port=dataset)
+        TechnicalAssetOutputPortAssociationFactory(
+            technical_asset=ta, output_port=output_port
+        )
         exp = ExplorationFactory()
         InputPortFactory(
-            output_port=dataset,
+            output_port=output_port,
             consuming_abstract_data_product=exp,
         )
         response = client.get(f"{ENDPOINT}/{data_product.id}/graph")

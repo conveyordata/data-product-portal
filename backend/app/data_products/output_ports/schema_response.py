@@ -25,7 +25,7 @@ from app.shared.schema import ORMModel
 
 
 class TechnicalAssetLink(TechnicalAssetOutputPortAssociation):
-    technical_asset: TechnicalAsset = Field(validation_alias="data_output")
+    technical_asset: TechnicalAsset
 
 
 class OutputPortAccessDuration(ORMModel):
@@ -66,9 +66,7 @@ class GetOutputPortResponse(BaseOutputPortGet):
 
     rolled_up_tags: set[Tag]
     data_product_settings: list[OutputPortSettingValue]
-    technical_asset_links: list[TechnicalAssetLink] = Field(
-        validation_alias="data_output_links"
-    )
+    technical_asset_links: list[TechnicalAssetLink]
 
 
 class GetDataProductOutputPortsResponse(ORMModel):
