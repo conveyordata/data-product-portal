@@ -6,10 +6,12 @@ sidebar_position: 200
 
 ## Unreleased
 
+## 0.7.1
+
 ### breaking changes
 
 - **[API]**: Access durations configuration switched URL path from /v2/access_durations to /v2/configuration/access_durations. Please update your API calls accordingly.
-- **[API]**: Remove deprecated /v2/data_products/{id}/link_input_ports
+- **[API]**: Remove deprecated `/v2/data_products/{id}/link_input_ports`
 - **[API]**: Modified the body of the following routes to enable selection of access modes:
   - Create data product: `/v2/data_products`
   - Request input ports for data product: `/v2/data_products/{id}/input_ports`
@@ -25,6 +27,12 @@ sidebar_position: 200
 - **[General]**: Performance improvements for all output port endpoints, since we now cache the Embedding models used in output port search
 - **[General]**: We now allow changing DB pool settings, this allows you to tweak this for your specific environment. We set the default to a pool of 20 and a max overflow of 20, which should be sufficient for most installations.
 - **[Data model]**: Allow uploading the data model of an output port through the UI
+- **[Data Product Roles]**: Data product roles can now also give rights to all output ports under a data product, instead of only the data product itself. By default a Data Product owner, can do all actions on all Output Ports under that Data Product.
+- **[General]**: Introduced settings that allow domains to specify their own set of enabled environments or use the global default.
+
+### bugfixes
+
+- **[Provisioner]**: Access to the finalizer endpoint of exploration and data product is now only possible as an admin. The provisioner should always run with admin credentials.
 
 ### bugfixes
 

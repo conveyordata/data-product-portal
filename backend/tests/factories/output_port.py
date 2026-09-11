@@ -4,7 +4,8 @@ from faker import Faker
 from app.abstract_data_product.type import AbstractDataProductType
 from app.configuration.access_durations.enums import AccessDurationType
 from app.data_products.output_ports.enums import OutputPortAccessType
-from app.data_products.output_ports.model import Dataset
+from app.data_products.output_ports.model import OutputPort
+from app.data_products.output_ports.service import OutputPortService
 from app.data_products.output_ports.status import OutputPortStatus
 from tests import test_session
 
@@ -17,7 +18,7 @@ fake = Faker()
 
 class OutputPortFactory(factory.alchemy.SQLAlchemyModelFactory):
     class Meta:
-        model = Dataset
+        model = OutputPort
 
     id = factory.Faker("uuid4")
     namespace = factory.Sequence(lambda _: fake.unique.word())
@@ -44,7 +45,7 @@ class OutputPortFactory(factory.alchemy.SQLAlchemyModelFactory):
         else:
             # If called without arguments, create a default tag
             self.tags.append(TagFactory())
-        test_session.commit()
+        test_session.flush()
 
     @factory.post_generation
     def access_durations(self, create, extracted, **kwargs):
@@ -67,4 +68,11 @@ class OutputPortFactory(factory.alchemy.SQLAlchemyModelFactory):
                     access_duration_type=AccessDurationType.PERMANENT,
                     days=None,
                 )
-        test_session.commit()
+        test_session.flush()
+
+    @factory.post_generation
+    def sync_public_reader_grouping(self, create, extracted, **kwargs):
+        if not create:
+            return
+
+        OutputPortService._sync_public_reader_grouping(self.id, self.access_type)

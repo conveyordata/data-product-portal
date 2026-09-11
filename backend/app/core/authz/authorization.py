@@ -10,13 +10,13 @@ from opentelemetry import trace
 from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
+from app.data_products.model import DataProduct, DataProductVisibility
 from app.database import database
-from app.database.database import get_db_session
+from app.database.deps import get_db_session
 from app.settings import settings
 from app.users.schema import User
 from app.utils.singleton import Singleton
 
-from ...data_products.model import DataProduct, DataProductVisibility
 from .actions import AuthorizationAction
 from .resolvers import SubjectResolver
 
@@ -45,7 +45,8 @@ class Authorization(metaclass=Singleton):
         """Initializes the casbin table in the DB and constructs the enforcer."""
         adapter = sqlalchemy_adapter.Adapter(database.get_url())
         enforcer = SyncedEnforcer(model, adapter)
-        enforcer.start_auto_load_policy(settings.AUTHORIZER_AUTOLOAD_INTERVAL)
+        if settings.AUTHORIZER_AUTOLOAD_ENABLED:
+            enforcer.start_auto_load_policy(settings.AUTHORIZER_AUTOLOAD_INTERVAL)
         return enforcer
 
     @classmethod
@@ -66,10 +67,15 @@ class Authorization(metaclass=Singleton):
             user: User = Depends(get_authenticated_user),
             db: Session = Depends(get_db_session),
         ) -> None:
-            obj = await resolver.resolve(request, object_id, db)
-            dom = await resolver.resolve_domain(db, obj)
+            context = await resolver.resolve_context(request, object_id, db)
 
-            if not cls().has_access(sub=str(user.id), dom=dom, obj=obj, act=action):
+            if not cls().has_access(
+                sub=str(user.id),
+                dom=context.domain_id,
+                obj=context.object_id,
+                parent=context.parent_id,
+                act=action,
+            ):
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
                     detail="You don't have permission to perform this action",
@@ -79,11 +85,17 @@ class Authorization(metaclass=Singleton):
 
     @cachedmethod(lambda self: self._cache)
     def has_access(
-        self, *, sub: str, dom: str, obj: str, act: AuthorizationAction
+        self,
+        *,
+        sub: str,
+        dom: str,
+        obj: str,
+        act: AuthorizationAction,
+        parent: str = "*",
     ) -> bool:
         with tracer.start_as_current_span("has_access"):
             enforcer: SyncedEnforcer = self._enforcer
-            return enforcer.enforce(sub, dom, obj, str(act))
+            return enforcer.enforce(sub, dom, obj, parent, str(act))
 
     def _after_update(self) -> None:
         """The cache should be purged when the casbin database is altered,
@@ -167,7 +179,8 @@ class Authorization(metaclass=Singleton):
         """This resumes autoloading and auto policy saving of the enforcer. It also flushes the current policy to the database.
         To be used when you want to recreate the casbin table, to be used after pause_enforcer_for_reload."""
         self._enforcer.save_policy()
-        self._enforcer.start_auto_load_policy(settings.AUTHORIZER_AUTOLOAD_INTERVAL)
+        if settings.AUTHORIZER_AUTOLOAD_ENABLED:
+            self._enforcer.start_auto_load_policy(settings.AUTHORIZER_AUTOLOAD_INTERVAL)
         self._enforcer.enable_auto_save(True)
 
     def revoke_domain_role(self, *, user_id: ID, role_id: ID, domain_id: ID) -> bool:
@@ -287,7 +300,7 @@ class Authorization(metaclass=Singleton):
     def has_read_access_to_data_product(
         self, current_user: User, data_product: DataProduct
     ) -> bool:
-        # The check for visibility is a performance optimisation to avoid unnecessary
+        # The check for visibility is a performance optimization to avoid unnecessary
         # has_access checks for discoverable data products.
         match data_product.visibility:
             case DataProductVisibility.DISCOVERABLE:
@@ -295,9 +308,9 @@ class Authorization(metaclass=Singleton):
             case DataProductVisibility.HIDDEN:
                 return self.has_access(
                     sub=str(current_user.id),
-                    obj=data_product.id,
-                    dom=data_product.domain_id,
-                    act=AuthorizationAction.HIDDEN_DATA_PRODUCT__READ,
+                    obj=str(data_product.id),
+                    dom=str(data_product.domain_id),
+                    act=AuthorizationAction.HIDDEN__DATA_PRODUCT__READ,
                 )
             case _:
                 assert_never(data_product.visibility)

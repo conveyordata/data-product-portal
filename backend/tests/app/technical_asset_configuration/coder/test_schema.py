@@ -1,7 +1,8 @@
 from unittest.mock import patch
 
 from app.technical_asset_configuration.coder.schema import CoderPlugin
-from tests.factories import DataProductFactory
+from tests.factories import DataProductFactory, UserFactory
+from tests.session_util import as_user
 
 
 class TestCoderPlugin:
@@ -19,8 +20,9 @@ class TestCoderPlugin:
         mock_settings.CODER_BASE_URL = "https://ide.example.com"
         mock_settings.CODER_GITHUB_ORG = "example-org"
         data_product = DataProductFactory(namespace="test-my-first-db")
-
-        url = CoderPlugin.get_url(data_product.id, session, actor=None)
+        user = UserFactory()
+        with as_user(session, user.id):
+            url = CoderPlugin.get_url(data_product.id, session, actor=user)
 
         assert url == (
             "https://ide.example.com/templates/vscode/workspace"

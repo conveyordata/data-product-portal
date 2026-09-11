@@ -3,7 +3,7 @@
   "info": {
     "title": "Data product portal",
     "summary": "Backend API implementation for Data product portal",
-    "version": "0.7.0"
+    "version": "0.7.1"
   },
   "paths": {
     "/api/v2/authz/access/{action}": {
@@ -684,7 +684,7 @@
         }
       }
     },
-    "/api/v2/data_products/{data_product_id}/output_ports/{id}/data_contract/": {
+    "/api/v2/data_products/{data_product_id}/output_ports/{id}/data_contract": {
       "get": {
         "tags": [
           "Data Products - Output ports",
@@ -1152,7 +1152,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/DatasetUpdate"
+                "$ref": "#/components/schemas/OutputPortUpdate"
               }
             }
           }
@@ -4833,6 +4833,57 @@
             }
           }
         ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Environment"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Configuration - Environments"
+        ],
+        "summary": "Update Environment Is Global",
+        "operationId": "update_environment_is_global",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EnvironmentUpdateGlobal"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -8830,6 +8881,7 @@
           106,
           107,
           108,
+          109,
           301,
           302,
           303,
@@ -8860,7 +8912,9 @@
           413,
           414,
           415,
-          901
+          416,
+          901,
+          902
         ],
         "title": "AuthorizationAction",
         "description": "The integer values for the authorization actions are stored directly in the DB.\nThis means you can change the name of the actions, but not their integer values.\nThe values for the actions are spaced on purpose, to make it easier to extend.\nThis has no technical benefit, but it makes it easier to read for developers."
@@ -11102,73 +11156,6 @@
         ],
         "title": "DatabricksTechnicalAssetConfiguration"
       },
-      "DatasetUpdate": {
-        "properties": {
-          "name": {
-            "type": "string",
-            "title": "Name"
-          },
-          "namespace": {
-            "type": "string",
-            "title": "Namespace"
-          },
-          "description": {
-            "type": "string",
-            "title": "Description"
-          },
-          "access_type": {
-            "$ref": "#/components/schemas/OutputPortAccessType"
-          },
-          "data_product_access_duration_type": {
-            "$ref": "#/components/schemas/AccessDurationType"
-          },
-          "exploration_access_duration_type": {
-            "$ref": "#/components/schemas/AccessDurationType"
-          },
-          "about": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "About"
-          },
-          "lifecycle_id": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Lifecycle Id"
-          },
-          "tag_ids": {
-            "items": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "type": "array",
-            "title": "Tag Ids"
-          }
-        },
-        "type": "object",
-        "required": [
-          "name",
-          "namespace",
-          "description",
-          "access_type",
-          "data_product_access_duration_type",
-          "exploration_access_duration_type",
-          "tag_ids"
-        ],
-        "title": "DatasetUpdate"
-      },
       "DecideDataProductRoleAssignment": {
         "properties": {
           "decision": {
@@ -11366,7 +11353,8 @@
           },
           "verification_uri_complete": {
             "type": "string",
-            "title": "Verification Uri Complete"
+            "title": "Verification Uri Complete",
+            "default": ""
           }
         },
         "type": "object",
@@ -11380,8 +11368,7 @@
           "status",
           "authz_code",
           "authz_state",
-          "authz_verif",
-          "verification_uri_complete"
+          "authz_verif"
         ],
         "title": "DeviceFlow"
       },
@@ -11428,6 +11415,15 @@
           "description": {
             "type": "string",
             "title": "Description"
+          },
+          "environment_ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Environment Ids",
+            "default": []
           }
         },
         "type": "object",
@@ -11446,6 +11442,15 @@
           "description": {
             "type": "string",
             "title": "Description"
+          },
+          "environment_ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Environment Ids",
+            "default": []
           }
         },
         "type": "object",
@@ -11540,6 +11545,11 @@
             "type": "boolean",
             "title": "Is Default",
             "default": false
+          },
+          "is_global": {
+            "type": "boolean",
+            "title": "Is Global",
+            "default": true
           }
         },
         "type": "object",
@@ -11646,6 +11656,11 @@
             "type": "boolean",
             "title": "Is Default",
             "default": false
+          },
+          "is_global": {
+            "type": "boolean",
+            "title": "Is Global",
+            "default": true
           }
         },
         "type": "object",
@@ -11693,6 +11708,19 @@
           "platform"
         ],
         "title": "EnvironmentPlatformConfigGet"
+      },
+      "EnvironmentUpdateGlobal": {
+        "properties": {
+          "is_global": {
+            "type": "boolean",
+            "title": "Is Global"
+          }
+        },
+        "type": "object",
+        "required": [
+          "is_global"
+        ],
+        "title": "EnvironmentUpdateGlobal"
       },
       "EnvironmentsGet": {
         "properties": {
@@ -12153,13 +12181,21 @@
           "description": {
             "type": "string",
             "title": "Description"
+          },
+          "environments": {
+            "items": {
+              "$ref": "#/components/schemas/EnvironmentGetItem"
+            },
+            "type": "array",
+            "title": "Environments"
           }
         },
         "type": "object",
         "required": [
           "id",
           "name",
-          "description"
+          "description",
+          "environments"
         ],
         "title": "GetDomainResponse"
       },
@@ -12178,6 +12214,13 @@
             "type": "string",
             "title": "Description"
           },
+          "environments": {
+            "items": {
+              "$ref": "#/components/schemas/EnvironmentGetItem"
+            },
+            "type": "array",
+            "title": "Environments"
+          },
           "abstract_data_product_count": {
             "type": "integer",
             "title": "Abstract Data Product Count"
@@ -12188,6 +12231,7 @@
           "id",
           "name",
           "description",
+          "environments",
           "abstract_data_product_count"
         ],
         "title": "GetDomainsItem"
@@ -14505,6 +14549,73 @@
           "technical_asset_id"
         ],
         "title": "OutputPortTechnicalAssetLinkEvent"
+      },
+      "OutputPortUpdate": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "namespace": {
+            "type": "string",
+            "title": "Namespace"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "access_type": {
+            "$ref": "#/components/schemas/OutputPortAccessType"
+          },
+          "data_product_access_duration_type": {
+            "$ref": "#/components/schemas/AccessDurationType"
+          },
+          "exploration_access_duration_type": {
+            "$ref": "#/components/schemas/AccessDurationType"
+          },
+          "about": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "About"
+          },
+          "lifecycle_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lifecycle Id"
+          },
+          "tag_ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Tag Ids"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "namespace",
+          "description",
+          "access_type",
+          "data_product_access_duration_type",
+          "exploration_access_duration_type",
+          "tag_ids"
+        ],
+        "title": "OutputPortUpdate"
       },
       "OwnedTechnicalAsset": {
         "properties": {

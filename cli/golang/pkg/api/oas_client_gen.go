@@ -436,7 +436,7 @@ type Invoker interface {
 	//
 	// Get Output Port Schema.
 	//
-	// GET /api/v2/data_products/{data_product_id}/output_ports/{id}/data_contract/
+	// GET /api/v2/data_products/{data_product_id}/output_ports/{id}/data_contract
 	GetOutputPortSchema(ctx context.Context, params GetOutputPortSchemaParams) (GetOutputPortSchemaRes, error)
 	// GetOutputPortsEventHistory invokes get_output_ports_event_history operation.
 	//
@@ -538,7 +538,7 @@ type Invoker interface {
 	//
 	// Ingest Output Port Contract.
 	//
-	// POST /api/v2/data_products/{data_product_id}/output_ports/{id}/data_contract/
+	// POST /api/v2/data_products/{data_product_id}/output_ports/{id}/data_contract
 	IngestOutputPortContract(ctx context.Context, request *BitolContractRequest, params IngestOutputPortContractParams) (IngestOutputPortContractRes, error)
 	// IngestOutputPortContractYaml invokes ingest_output_port_contract_yaml operation.
 	//
@@ -900,12 +900,18 @@ type Invoker interface {
 	//
 	// PUT /api/v2/configuration/domains/{id}
 	UpdateDomain(ctx context.Context, request *DomainUpdate, params UpdateDomainParams) (UpdateDomainRes, error)
+	// UpdateEnvironmentIsGlobal invokes update_environment_is_global operation.
+	//
+	// Update Environment Is Global.
+	//
+	// PATCH /api/v2/configuration/environments/{id}
+	UpdateEnvironmentIsGlobal(ctx context.Context, request *EnvironmentUpdateGlobal, params UpdateEnvironmentIsGlobalParams) (UpdateEnvironmentIsGlobalRes, error)
 	// UpdateOutputPort invokes update_output_port operation.
 	//
 	// Update Output Port.
 	//
 	// PUT /api/v2/data_products/{data_product_id}/output_ports/{id}
-	UpdateOutputPort(ctx context.Context, request *DatasetUpdate, params UpdateOutputPortParams) (UpdateOutputPortRes, error)
+	UpdateOutputPort(ctx context.Context, request *OutputPortUpdate, params UpdateOutputPortParams) (UpdateOutputPortRes, error)
 	// UpdateOutputPortAbout invokes update_output_port_about operation.
 	//
 	// Update Output Port About.
@@ -5302,7 +5308,7 @@ func (c *Client) sendGetOutputPortQueryStats(ctx context.Context, params GetOutp
 //
 // Get Output Port Schema.
 //
-// GET /api/v2/data_products/{data_product_id}/output_ports/{id}/data_contract/
+// GET /api/v2/data_products/{data_product_id}/output_ports/{id}/data_contract
 func (c *Client) GetOutputPortSchema(ctx context.Context, params GetOutputPortSchemaParams) (GetOutputPortSchemaRes, error) {
 	res, err := c.sendGetOutputPortSchema(ctx, params)
 	return res, err
@@ -5350,7 +5356,7 @@ func (c *Client) sendGetOutputPortSchema(ctx context.Context, params GetOutputPo
 		}
 		pathParts[3] = encoded
 	}
-	pathParts[4] = "/data_contract/"
+	pathParts[4] = "/data_contract"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	r, err := ht.NewRequest(ctx, "GET", u)
@@ -6348,7 +6354,7 @@ func (c *Client) sendGetVersion(ctx context.Context) (res jx.Raw, err error) {
 //
 // Ingest Output Port Contract.
 //
-// POST /api/v2/data_products/{data_product_id}/output_ports/{id}/data_contract/
+// POST /api/v2/data_products/{data_product_id}/output_ports/{id}/data_contract
 func (c *Client) IngestOutputPortContract(ctx context.Context, request *BitolContractRequest, params IngestOutputPortContractParams) (IngestOutputPortContractRes, error) {
 	res, err := c.sendIngestOutputPortContract(ctx, request, params)
 	return res, err
@@ -6396,7 +6402,7 @@ func (c *Client) sendIngestOutputPortContract(ctx context.Context, request *Bito
 		}
 		pathParts[3] = encoded
 	}
-	pathParts[4] = "/data_contract/"
+	pathParts[4] = "/data_contract"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	r, err := ht.NewRequest(ctx, "POST", u)
@@ -10629,17 +10635,81 @@ func (c *Client) sendUpdateDomain(ctx context.Context, request *DomainUpdate, pa
 	return result, nil
 }
 
+// UpdateEnvironmentIsGlobal invokes update_environment_is_global operation.
+//
+// Update Environment Is Global.
+//
+// PATCH /api/v2/configuration/environments/{id}
+func (c *Client) UpdateEnvironmentIsGlobal(ctx context.Context, request *EnvironmentUpdateGlobal, params UpdateEnvironmentIsGlobalParams) (UpdateEnvironmentIsGlobalRes, error) {
+	res, err := c.sendUpdateEnvironmentIsGlobal(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendUpdateEnvironmentIsGlobal(ctx context.Context, request *EnvironmentUpdateGlobal, params UpdateEnvironmentIsGlobalParams) (res UpdateEnvironmentIsGlobalRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [2]string
+	pathParts[0] = "/api/v2/configuration/environments/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "PATCH", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeUpdateEnvironmentIsGlobalRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeUpdateEnvironmentIsGlobalResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // UpdateOutputPort invokes update_output_port operation.
 //
 // Update Output Port.
 //
 // PUT /api/v2/data_products/{data_product_id}/output_ports/{id}
-func (c *Client) UpdateOutputPort(ctx context.Context, request *DatasetUpdate, params UpdateOutputPortParams) (UpdateOutputPortRes, error) {
+func (c *Client) UpdateOutputPort(ctx context.Context, request *OutputPortUpdate, params UpdateOutputPortParams) (UpdateOutputPortRes, error) {
 	res, err := c.sendUpdateOutputPort(ctx, request, params)
 	return res, err
 }
 
-func (c *Client) sendUpdateOutputPort(ctx context.Context, request *DatasetUpdate, params UpdateOutputPortParams) (res UpdateOutputPortRes, err error) {
+func (c *Client) sendUpdateOutputPort(ctx context.Context, request *OutputPortUpdate, params UpdateOutputPortParams) (res UpdateOutputPortRes, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [4]string

@@ -22,7 +22,7 @@ from app.data_products.technical_assets.schema_response import (
     GetTechnicalAssetsResponseItem,
 )
 from app.data_products.technical_assets.service import TechnicalAssetService
-from app.mcp.deps import get_db_session, get_mcp_authenticated_user
+from app.mcp.deps import get_mcp_authenticated_user, get_user_db_session
 from app.search_output_ports.schema_response import SearchOutputPortsResponseItem
 from app.users.model import User as UserModel
 
@@ -30,7 +30,7 @@ from app.users.model import User as UserModel
 def register_config_tools(mcp) -> None:
     @mcp.tool
     def get_environments(
-        db: Session = Depends(get_db_session),
+        db: Session = Depends(get_user_db_session),
     ) -> Dict[str, Any]:
         """Get the list of available environments (e.g. prod, staging, dev).
 
@@ -63,7 +63,7 @@ def register_config_tools(mcp) -> None:
     """
     )
     def get_marketplace_overview(
-        db: Session = Depends(get_db_session),
+        db: Session = Depends(get_user_db_session),
         user: UserModel = Depends(get_mcp_authenticated_user),
     ) -> dict[str, Any]:
         all_data_products = DataProductService(db).get_data_products(
@@ -117,7 +117,7 @@ def register_config_tools(mcp) -> None:
     )
     def get_data_product_analytics(
         data_product_id: str,
-        db: Session = Depends(get_db_session),
+        db: Session = Depends(get_user_db_session),
         user: UserModel = Depends(get_mcp_authenticated_user),
     ) -> dict[str, Any]:
         data_product = DataProductService(db).get_data_product(

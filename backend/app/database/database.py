@@ -1,6 +1,6 @@
 import time
 from contextlib import contextmanager
-from typing import Any, Type, TypeVar
+from typing import Any, Generator, Type, TypeVar
 from urllib.parse import quote_plus
 from uuid import UUID
 
@@ -100,7 +100,14 @@ SessionLocal = sessionmaker(
 Base = declarative_base()
 
 
-def get_db_session():
+@contextmanager
+def db_session() -> Generator[Session]:
+    """
+    Should not be used directly, use get_db_session instead or get_system_db_session.
+    This is a context manager that will commit or rollback the session depending on whether an exception was raised.
+    :return:
+    """
+
     db = SessionLocal()
     try:
         yield db
@@ -112,4 +119,11 @@ def get_db_session():
         db.close()
 
 
-get_db_context = contextmanager(get_db_session)
+def get_system_db_session() -> Generator[Session]:
+    """
+    This session should only be used with caution! Without this the data product visilibity filter will fail.
+    So only use it when no user is available. For example in migrations or when running background tasks that are not user specific.
+    :return:
+    """
+    with db_session() as db:
+        yield db

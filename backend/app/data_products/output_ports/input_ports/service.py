@@ -17,6 +17,9 @@ from app.abstract_data_product.input_ports.model import (
     InputPortRequest as InputPortRequestModel,
 )
 from app.abstract_data_product.model import AbstractDataProduct
+from app.authorization.role_assignments.data_product.model import (
+    DataProductRoleAssignment as DataProductRoleAssignmentModel,
+)
 from app.authorization.role_assignments.output_port.model import (
     DatasetRoleAssignment as DatasetRoleAssignmentModel,
 )
@@ -241,7 +244,8 @@ class InputPortService:
                 selectinload(OutputPortModel.data_product_links).selectinload(
                     InputPortModel.requests
                 ),
-            )
+            ),
+            execution_options={"skip_data_product_visibility_filter": True},
         )
         if not output_port:
             raise output_port_not_found_exception(output_port_id)
@@ -277,10 +281,19 @@ class InputPortService:
                     InputPortRequestModel.decision == InputPortRequestDecision.PENDING
                 )
                 .where(
-                    InputPortModel.output_port.has(
-                        OutputPortModel.assignments.any(
-                            DatasetRoleAssignmentModel.user_id == user.id
-                        )
+                    or_(
+                        InputPortModel.output_port.has(
+                            OutputPortModel.assignments.any(
+                                DatasetRoleAssignmentModel.user_id == user.id
+                            )
+                        ),
+                        InputPortModel.output_port.has(
+                            OutputPortModel.data_product.has(
+                                DataProductModel.assignments.any(
+                                    DataProductRoleAssignmentModel.user_id == user.id
+                                )
+                            )
+                        ),
                     )
                 )
                 .options(
@@ -302,6 +315,7 @@ class InputPortService:
                 sub=str(user.id),
                 dom=str(a.input_port.output_port.data_product.domain.id),
                 obj=str(a.input_port.output_port_id),
+                parent=str(a.input_port.output_port.data_product_id),
                 act=Action.OUTPUT_PORT__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
             )
         ]

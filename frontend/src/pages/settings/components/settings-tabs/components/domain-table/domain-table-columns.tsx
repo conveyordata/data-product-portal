@@ -1,18 +1,25 @@
-import { Button, Flex, Popconfirm, type TableColumnsType } from 'antd';
+import { Button, Flex, Popconfirm, type TableColumnsType, Tooltip } from 'antd';
 import type { TFunction } from 'i18next';
 
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
-import type { GetDomainsItem } from '@/store/api/services/generated/configurationDomainsApi.ts';
+import type { EnvironmentGetItem, GetDomainsItem } from '@/store/api/services/generated/configurationDomainsApi.ts';
 import { Sorter } from '@/utils/table-sorter.helper';
 
 type Props = {
     t: TFunction;
     handleRemove: (domain: GetDomainsItem) => void;
     handleEdit: (domain: GetDomainsItem) => () => void;
+    availableEnvironments: EnvironmentGetItem[];
 };
 
-export const getDomainTableColumns = ({ t, handleRemove, handleEdit }: Props): TableColumnsType<GetDomainsItem> => {
+export const getDomainTableColumns = ({
+    t,
+    handleRemove,
+    handleEdit,
+    availableEnvironments,
+}: Props): TableColumnsType<GetDomainsItem> => {
     const sorter = new Sorter<GetDomainsItem>();
+    const globalEnvironments = availableEnvironments.filter((environment) => environment.is_global !== false);
     return [
         {
             title: t('Id'),
@@ -31,6 +38,20 @@ export const getDomainTableColumns = ({ t, handleRemove, handleEdit }: Props): T
             dataIndex: 'description',
             render: (description: string) => <TableCellItem text={description} tooltip={{ content: description }} />,
             sorter: sorter.stringSorter((domain) => domain.description),
+        },
+        {
+            title: t('Environments'),
+            dataIndex: 'environments',
+            render: (environments: GetDomainsItem['environments']) => {
+                const effectiveEnvironments = environments.length ? environments : globalEnvironments;
+                const names = effectiveEnvironments.map((environment) => environment.name);
+                const visibleText = names.length > 2 ? `${names.slice(0, 2).join(', ')}, ...` : names.join(', ');
+                return (
+                    <Tooltip title={names.join(', ')}>
+                        <span>{visibleText}</span>
+                    </Tooltip>
+                );
+            },
         },
         {
             title: t('Actions'),

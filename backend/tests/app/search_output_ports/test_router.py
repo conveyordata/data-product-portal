@@ -6,7 +6,7 @@ from alembic import command
 from alembic.config import Config
 
 from app.authorization.role_assignments.enums import AssignmentFilter, DecisionStatus
-from app.data_products.output_ports.model import Dataset
+from app.data_products.output_ports.model import OutputPort
 from app.data_products.output_ports.service import OutputPortService
 from app.db_tool import seed_cmd
 from app.search_output_ports.schema_response import (
@@ -19,6 +19,7 @@ from tests.factories import (
     RoleFactory,
     UserFactory,
 )
+from tests.session_util import as_user
 
 EMBEDDING_LATENCY_BOUND: Final[float] = float(
     os.getenv("TEST_EMBEDDING_LATENCY_BOUND", 1.100)
@@ -132,10 +133,11 @@ class TestOutputPortSearchRouter:
         ]
 
         user = UserFactory()
-        valid_output_ports = {
-            port.name
-            for port in OutputPortService(session).get_output_ports(None, user)
-        }
+        with as_user(session, UserFactory().id):
+            valid_output_ports = {
+                port.name
+                for port in OutputPortService(session).get_output_ports(None, user)
+            }
         for config in configuration:
             for value in config["expected"]:
                 assert value in valid_output_ports, (
@@ -203,7 +205,7 @@ class TestOutputPortSearchRouter:
         return precision_at_k, recall_at_k
 
     @staticmethod
-    def setup(session) -> tuple[Dataset, Dataset, Dataset]:
+    def setup(session) -> tuple[OutputPort, OutputPort, OutputPort]:
         ds_1 = OutputPortFactory(name="Customer Data")
         ds_2 = OutputPortFactory(name="Sales Data")
         ds_3 = OutputPortFactory(name="Internal Metrics")

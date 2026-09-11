@@ -16,6 +16,7 @@ from app.configuration.environments.platform_service_configurations.schema_respo
 from app.configuration.environments.platform_service_configurations.service import (
     EnvironmentPlatformServiceConfigurationService,
 )
+from app.configuration.environments.schema_request import EnvironmentUpdateGlobal
 from app.configuration.environments.schema_response import (
     Environment,
     EnvironmentsGet,
@@ -23,7 +24,7 @@ from app.configuration.environments.schema_response import (
 from app.configuration.environments.service import EnvironmentService
 from app.core.authz import Action, Authorization
 from app.core.authz.resolvers import EmptyResolver
-from app.database.database import get_db_session
+from app.database.deps import get_db_session
 
 router = APIRouter(
     tags=["Configuration - Environments"], prefix="/v2/configuration/environments"
@@ -92,6 +93,22 @@ def get_environment_platform_config(
 @router.get("")
 def get_environments(db: Session = Depends(get_db_session)) -> EnvironmentsGet:
     return EnvironmentsGet(environments=EnvironmentService(db).get_environments())
+
+
+@router.patch(
+    "/{id}",
+    dependencies=[
+        Depends(
+            Authorization.enforce(Action.GLOBAL__UPDATE_CONFIGURATION, EmptyResolver)
+        ),
+    ],
+)
+def update_environment_is_global(
+    id: UUID,
+    environment_update: EnvironmentUpdateGlobal,
+    db: Session = Depends(get_db_session),
+) -> Environment:
+    return EnvironmentService(db).update_is_global(id, environment_update.is_global)
 
 
 @router.get("/{id}/configs")

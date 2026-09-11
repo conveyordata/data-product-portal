@@ -371,13 +371,12 @@ class TestDataProductsRouter:
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
         role = RoleFactory(
-            scope=Scope.DATA_PRODUCT,
-            permissions=[Action.DATA_PRODUCT__DELETE],
+            scope=Scope.GLOBAL,
+            permissions=[Action.GLOBAL__MANAGE_FINALIZERS],
         )
-        DataProductRoleAssignmentFactory(
+        GlobalRoleAssignmentFactory(
             user_id=user.id,
             role_id=role.id,
-            data_product_id=data_product.id,
         )
         response = client.post(
             f"{ENDPOINT}/{data_product.id}/finalizers",
@@ -582,12 +581,14 @@ class TestDataProductsRouter:
 
     def test_get_data_product_graph_data_level3(self, client):
         data_product = DataProductFactory()
-        dataset = OutputPortFactory(data_product=data_product)
+        output_port = OutputPortFactory(data_product=data_product)
         ta = TechnicalAssetFactory(owner=data_product)
-        TechnicalAssetOutputPortAssociationFactory(data_output=ta, output_port=dataset)
+        TechnicalAssetOutputPortAssociationFactory(
+            technical_asset=ta, output_port=output_port
+        )
         downstream_dataset = OutputPortFactory()
         InputPortFactory(
-            output_port=dataset,
+            output_port=output_port,
             consuming_abstract_data_product=downstream_dataset.data_product,
         )
         response = client.get(f"{ENDPOINT}/{data_product.id}/graph")
@@ -596,12 +597,14 @@ class TestDataProductsRouter:
 
     def test_get_data_product_graph_data_exploration_included(self, client):
         data_product = DataProductFactory()
-        dataset = OutputPortFactory(data_product=data_product)
+        output_port = OutputPortFactory(data_product=data_product)
         ta = TechnicalAssetFactory(owner=data_product)
-        TechnicalAssetOutputPortAssociationFactory(data_output=ta, output_port=dataset)
+        TechnicalAssetOutputPortAssociationFactory(
+            technical_asset=ta, output_port=output_port
+        )
         exp = ExplorationFactory()
         InputPortFactory(
-            output_port=dataset,
+            output_port=output_port,
             consuming_abstract_data_product=exp,
         )
         response = client.get(f"{ENDPOINT}/{data_product.id}/graph")
@@ -842,13 +845,6 @@ class TestDataProductsRouter:
             == data_product.name
         )
 
-    def test_get_output_ports(self, client: TestClient):
-        dataset = OutputPortFactory()
-        response = self.get_output_ports(client, dataset.data_product.id)
-        assert response.status_code == 200, f"Response failed with: {response.text}"
-        assert len(response.json()["output_ports"]) == 1
-        assert response.json()["output_ports"][0]["id"] == dataset.id.__str__()
-
     def test_get_rolled_up_tags(self, client: TestClient):
         data_product = DataProductFactory()
         data_output = TechnicalAssetFactory(owner=data_product)
@@ -916,10 +912,6 @@ class TestDataProductsRouter:
             "api/v2/resource_names/validate",
             params={"resource_name": namespace, "model": "data_product"},
         )
-
-    @staticmethod
-    def get_output_ports(client: TestClient, data_product_id: UUID):
-        return client.get(f"{ENDPOINT}/{data_product_id}/output_ports")
 
     @staticmethod
     def get_input_ports(client: TestClient, data_product_id: UUID):

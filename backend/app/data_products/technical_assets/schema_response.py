@@ -87,7 +87,7 @@ class GetTechnicalAssetsResponseItem(ORMModel):
             self.configuration, self.service, self.environment_configurations
         )
 
-    output_port_links: list[OutputPortLink] = Field(validation_alias="dataset_links")
+    output_port_links: list[OutputPortLink]
     tags: list[Tag]
 
 

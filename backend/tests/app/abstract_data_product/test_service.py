@@ -5,7 +5,6 @@ from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.roles.schema import Scope
 from app.core.authz import Action
 from app.data_products.output_ports.enums import OutputPortAccessType
-from tests import test_session
 from tests.factories import (
     DataProductFactory,
     DatasetRoleAssignmentFactory,
@@ -19,7 +18,9 @@ from tests.factories import (
 class TestAbstractDataProductService:
     @patch("app.abstract_data_product.service.email.send_dataset_link_email")
     def test_input_port_request_email_not_sent_when_requester_is_only_approver(
-        self, mock_send_email
+        self,
+        mock_send_email,
+        session,
     ):
         actor = UserFactory()
         output_port = OutputPortFactory(access_type=OutputPortAccessType.RESTRICTED)
@@ -41,7 +42,7 @@ class TestAbstractDataProductService:
         background_tasks = MagicMock()
 
         AbstractDataProductService(
-            test_session
+            session
         ).send_input_port_requested_emails_to_output_port_owners(
             [input_port],
             background_tasks,
@@ -53,7 +54,9 @@ class TestAbstractDataProductService:
 
     @patch("app.abstract_data_product.service.email.send_dataset_link_email")
     def test_input_port_request_email_excludes_requester_from_approvers(
-        self, mock_send_email
+        self,
+        mock_send_email,
+        session,
     ):
         actor = UserFactory()
         other_approver = UserFactory()
@@ -77,7 +80,7 @@ class TestAbstractDataProductService:
         background_tasks = MagicMock()
 
         AbstractDataProductService(
-            test_session
+            session
         ).send_input_port_requested_emails_to_output_port_owners(
             [input_port],
             background_tasks,

@@ -54,7 +54,7 @@ from app.data_products.schema_response import (
     UpdateDataProductResponse,
 )
 from app.data_products.service import DataProductService
-from app.database.database import get_db_session
+from app.database.deps import get_db_session
 from app.events.enums import EventReferenceEntity, EventType
 from app.events.schema import CreateEvent
 from app.events.schema_response import (
@@ -215,9 +215,7 @@ def _do_delete_data_product(
 @router.post(
     "/{id}/finalizers",
     dependencies=[
-        Depends(
-            Authorization.enforce(Action.DATA_PRODUCT__DELETE, DataProductResolver)
-        ),
+        Depends(Authorization.enforce(Action.GLOBAL__MANAGE_FINALIZERS, EmptyResolver)),
     ],
 )
 def add_data_product_finalizer(
@@ -231,9 +229,7 @@ def add_data_product_finalizer(
 @router.delete(
     "/{id}/finalizers/{finalizer}",
     dependencies=[
-        Depends(
-            Authorization.enforce(Action.DATA_PRODUCT__DELETE, DataProductResolver)
-        ),
+        Depends(Authorization.enforce(Action.GLOBAL__MANAGE_FINALIZERS, EmptyResolver)),
     ],
 )
 def remove_data_product_finalizer(
@@ -385,7 +381,9 @@ def update_data_product_usage(
     "/{id}/graph",
     dependencies=[
         Depends(
-            Authorization.enforce(Action.HIDDEN_DATA_PRODUCT__READ, DataProductResolver)
+            Authorization.enforce(
+                Action.HIDDEN__DATA_PRODUCT__READ, DataProductResolver
+            )
         )
     ],
 )
@@ -589,7 +587,9 @@ def get_data_products(
     "/{id}/history",
     dependencies=[
         Depends(
-            Authorization.enforce(Action.HIDDEN_DATA_PRODUCT__READ, DataProductResolver)
+            Authorization.enforce(
+                Action.HIDDEN__DATA_PRODUCT__READ, DataProductResolver
+            )
         )
     ],
 )
@@ -610,7 +610,9 @@ def get_data_product_event_history(
     "/{id}",
     dependencies=[
         Depends(
-            Authorization.enforce(Action.HIDDEN_DATA_PRODUCT__READ, DataProductResolver)
+            Authorization.enforce(
+                Action.HIDDEN__DATA_PRODUCT__READ, DataProductResolver
+            )
         )
     ],
 )
@@ -624,7 +626,9 @@ def get_data_product(
     "/{id}/input_ports",
     dependencies=[
         Depends(
-            Authorization.enforce(Action.HIDDEN_DATA_PRODUCT__READ, DataProductResolver)
+            Authorization.enforce(
+                Action.HIDDEN__DATA_PRODUCT__READ, DataProductResolver
+            )
         )
     ],
 )
@@ -644,7 +648,9 @@ def get_data_product_input_ports(
     "/{id}/rolled_up_tags",
     dependencies=[
         Depends(
-            Authorization.enforce(Action.HIDDEN_DATA_PRODUCT__READ, DataProductResolver)
+            Authorization.enforce(
+                Action.HIDDEN__DATA_PRODUCT__READ, DataProductResolver
+            )
         )
     ],
 )
@@ -732,7 +738,9 @@ def remove_input_port_for_data_product(
     "/{id}/settings",
     dependencies=[
         Depends(
-            Authorization.enforce(Action.HIDDEN_DATA_PRODUCT__READ, DataProductResolver)
+            Authorization.enforce(
+                Action.HIDDEN__DATA_PRODUCT__READ, DataProductResolver
+            )
         )
     ],
 )

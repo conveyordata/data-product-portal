@@ -21,7 +21,7 @@ from tests.factories import (
 ENDPOINT = "/api/v2/data_products"
 
 
-def _assign_update_role(session, dataset):
+def _assign_update_role(output_port):
     user = UserFactory(external_id=settings.DEFAULT_USERNAME)
     role = RoleFactory(
         scope=Scope.DATASET,
@@ -31,7 +31,7 @@ def _assign_update_role(session, dataset):
         ],
     )
     DatasetRoleAssignmentFactory(
-        user_id=user.id, role_id=role.id, output_port_id=dataset.id
+        user_id=user.id, role_id=role.id, output_port_id=output_port.id
     )
     return user
 
@@ -39,7 +39,7 @@ def _assign_update_role(session, dataset):
 class TestDataQualityRouter:
     def test_post_data_quality(self, client, session):
         dataset = OutputPortFactory()
-        _assign_update_role(session, dataset)
+        _assign_update_role(dataset)
 
         payload = {
             "overall_status": "success",
@@ -82,7 +82,7 @@ class TestDataQualityRouter:
 
     def test_post_data_quality_with_dimensions(self, client, session):
         dataset = OutputPortFactory()
-        _assign_update_role(session, dataset)
+        _assign_update_role(dataset)
 
         payload = {
             "overall_status": "success",
@@ -105,7 +105,7 @@ class TestDataQualityRouter:
 
     def test_get_latest_data_quality_result_no_results(self, client, session):
         dataset = OutputPortFactory()
-        _assign_update_role(session, dataset)
+        _assign_update_role(dataset)
 
         get_response = client.get(
             f"{ENDPOINT}/{dataset.data_product.id}/output_ports/{dataset.id}/data_quality_summary"
@@ -116,7 +116,7 @@ class TestDataQualityRouter:
 
     def test_delete_output_port_data_quality_summary(self, client, session):
         dataset = OutputPortFactory()
-        _assign_update_role(session, dataset)
+        _assign_update_role(dataset)
 
         service = OutputPortDataQualityService(session)
         service.save_data_quality_summary(
@@ -134,7 +134,7 @@ class TestDataQualityRouter:
 
     def test_get_latest_data_quality_result(self, client, session):
         dataset = OutputPortFactory()
-        _assign_update_role(session, dataset)
+        _assign_update_role(dataset)
 
         service = OutputPortDataQualityService(session)
         service.save_data_quality_summary(
@@ -173,7 +173,7 @@ class TestDataQualityRouter:
 
     def test_update_data_quality_summary(self, client, session):
         dataset = OutputPortFactory()
-        _assign_update_role(session, dataset)
+        _assign_update_role(dataset)
 
         service = OutputPortDataQualityService(session)
         saved_result = service.save_data_quality_summary(

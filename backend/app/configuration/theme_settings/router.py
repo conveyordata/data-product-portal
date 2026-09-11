@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.core.authz import Action, Authorization
 from app.core.authz.resolvers import EmptyResolver
-from app.database.database import get_db_session
+from app.database.deps import get_db_session
 
 from .schema_response import ThemeSettings
 from .service import ThemeSettingsService

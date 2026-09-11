@@ -84,7 +84,7 @@ const injectedRtkApi = api.injectEndpoints({
       GetOutputPortSchemaApiArg
     >({
       query: (queryArg) => ({
-        url: `/api/v2/data_products/${queryArg.dataProductId}/output_ports/${queryArg.id}/data_contract/`,
+        url: `/api/v2/data_products/${queryArg.dataProductId}/output_ports/${queryArg.id}/data_contract`,
       }),
     }),
     ingestOutputPortContract: build.mutation<
@@ -92,7 +92,7 @@ const injectedRtkApi = api.injectEndpoints({
       IngestOutputPortContractApiArg
     >({
       query: (queryArg) => ({
-        url: `/api/v2/data_products/${queryArg.dataProductId}/output_ports/${queryArg.id}/data_contract/`,
+        url: `/api/v2/data_products/${queryArg.dataProductId}/output_ports/${queryArg.id}/data_contract`,
         method: "POST",
         body: queryArg.bitolContractRequest,
       }),
@@ -146,7 +146,7 @@ const injectedRtkApi = api.injectEndpoints({
       query: (queryArg) => ({
         url: `/api/v2/data_products/${queryArg.dataProductId}/output_ports/${queryArg.id}`,
         method: "PUT",
-        body: queryArg.datasetUpdate,
+        body: queryArg.outputPortUpdate,
       }),
     }),
     getOutputPortsEventHistory: build.query<
@@ -316,7 +316,7 @@ export type UpdateOutputPortApiResponse =
 export type UpdateOutputPortApiArg = {
   dataProductId: string;
   id: string;
-  datasetUpdate: DatasetUpdate;
+  outputPortUpdate: OutputPortUpdate;
 };
 export type GetOutputPortsEventHistoryApiResponse =
   /** status 200 Successful Response */ GetEventHistoryResponse;
@@ -700,7 +700,7 @@ export type GetOutputPortResponse = {
 export type UpdateOutputPortResponse = {
   id: string;
 };
-export type DatasetUpdate = {
+export type OutputPortUpdate = {
   name: string;
   namespace: string;
   description: string;

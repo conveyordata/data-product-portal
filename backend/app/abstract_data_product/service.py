@@ -36,7 +36,6 @@ from app.data_products.output_ports.enums import OutputPortAccessType
 from app.data_products.output_ports.input_ports.service import InputPortService
 from app.data_products.output_ports.model import OutputPort as OutputPortModel
 from app.data_products.output_ports.model import ensure_output_port_exists
-from app.data_products.output_ports.service import OutputPortService
 from app.data_products.status import AbstractDataProductStatus
 from app.users.model import User
 
@@ -186,11 +185,6 @@ class AbstractDataProductService:
                 detail="Cannot link own output port to data product",
             )
 
-        if not OutputPortService(self.db).is_visible_to_user(output_port, actor):
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="You do not have access to this private output port",
-            )
         if output_port.access_modes and not access_mode_id:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -259,12 +253,6 @@ class AbstractDataProductService:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="This input port already has permanent access; there is nothing to renew",
-            )
-
-        if not OutputPortService(self.db).is_visible_to_user(output_port, actor):
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="You do not have access to this private output port",
             )
 
         justification = existing.latest_request.justification

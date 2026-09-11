@@ -7,7 +7,7 @@ left on that default has no matching access_durations row, so requesting
 it as an exploration input port always fails with a 500 (GH #4091).
 
 Revision ID: c2a4e91f7b3d
-Revises: 676a29542f0b
+Revises: ad035abcf21d
 Create Date: 2026-09-03 12:00:00.000000
 
 """
@@ -18,7 +18,7 @@ from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "c2a4e91f7b3d"
-down_revision: Union[str, None] = "676a29542f0b"
+down_revision: Union[str, None] = "ad035abcf21d"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

@@ -33,7 +33,7 @@ from app.core.namespace.validation import (
 from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.model import DataProductVisibility, ensure_data_product_exists
 from app.data_products.output_port_technical_assets_link.model import (
-    DataOutputDatasetAssociation,
+    TechnicalAssetOutputPortAssociation,
 )
 from app.data_products.output_ports.model import OutputPort as OutputPortModel
 from app.data_products.schema_request import (
@@ -68,18 +68,21 @@ class DataProductService(AbstractDataProductService):
     def _sync_public_reader_grouping(
         data_product_id: UUID, visibility: DataProductVisibility
     ) -> None:
-        if visibility == DataProductVisibility.DISCOVERABLE:
-            Authorization().assign_resource_role(
-                user_id="*",
-                role_id=DATA_PRODUCT_READER_ROLE,
-                resource_id=str(data_product_id),
-            )
-        else:
-            Authorization().revoke_resource_role(
-                user_id="*",
-                role_id=DATA_PRODUCT_READER_ROLE,
-                resource_id=str(data_product_id),
-            )
+        match visibility:
+            case DataProductVisibility.DISCOVERABLE:
+                Authorization().assign_resource_role(
+                    user_id="*",
+                    role_id=DATA_PRODUCT_READER_ROLE,
+                    resource_id=str(data_product_id),
+                )
+            case DataProductVisibility.HIDDEN:
+                Authorization().revoke_resource_role(
+                    user_id="*",
+                    role_id=DATA_PRODUCT_READER_ROLE,
+                    resource_id=str(data_product_id),
+                )
+            case _:
+                assert_never(visibility)
 
     def get_data_product_settings(
         self, data_product_id: UUID
@@ -164,15 +167,11 @@ class DataProductService(AbstractDataProductService):
 
         dps = self.db.scalars(query).unique().all()
 
-        auth = Authorization()
-        filtered = []
         for dp in dps:
-            if auth.has_read_access_to_data_product(current_user, dp):
-                if not dp.lifecycle:
-                    dp.lifecycle = default_lifecycle
-                filtered.append(dp)
+            if not dp.lifecycle:
+                dp.lifecycle = default_lifecycle
 
-        return filtered
+        return dps
 
     def get_owners(self, id: UUID) -> Sequence[User]:
         data_product = ensure_data_product_exists(
@@ -212,9 +211,8 @@ class DataProductService(AbstractDataProductService):
         _ = data_product_schema.pop("owners", [])
         model = DataProductModel(**data_product_schema, tags=tags)
         self.db.add(model)
-        self.db.commit()
+        self.db.flush()
         self._sync_public_reader_grouping(model.id, model.visibility)
-        self.db.commit()
         return model
 
     def remove_data_product(self, id: UUID) -> DataProductModel:
@@ -266,12 +264,11 @@ class DataProductService(AbstractDataProductService):
             else:
                 setattr(current_data_product, k, v) if v else None
 
-        self.db.commit()
         if visibility_change is not None:
             self._sync_public_reader_grouping(
                 current_data_product.id, current_data_product.visibility
             )
-            self.db.commit()
+        self.db.flush()
         return UpdateDataProductResponse(id=current_data_product.id)
 
     def update_data_product_about(
@@ -339,8 +336,8 @@ class DataProductService(AbstractDataProductService):
             self.db.scalars(
                 select(TechnicalAssetModel)
                 .options(
-                    joinedload(TechnicalAssetModel.dataset_links)
-                    .selectinload(DataOutputDatasetAssociation.output_port)
+                    joinedload(TechnicalAssetModel.output_port_links)
+                    .selectinload(TechnicalAssetOutputPortAssociation.output_port)
                     .selectinload(OutputPortModel.data_product_links)
                 )
                 .filter_by(owner_id=id)
@@ -393,7 +390,7 @@ class DataProductService(AbstractDataProductService):
                 )
             )
             if level >= 2:
-                for downstream_datasets in data_output.dataset_links:
+                for downstream_datasets in data_output.output_port_links:
                     nodes.append(
                         Node(
                             id=f"{downstream_datasets.output_port_id}_2",
@@ -467,7 +464,8 @@ class DataProductService(AbstractDataProductService):
         visible_data_product_ids = self.db.scalars(
             select(DataProductModel.id).where(
                 DataProductModel.visibility == DataProductVisibility.DISCOVERABLE
-            )
+            ),
+            execution_options={"skip_data_product_visibility_filter": True},
         ).all()
         for id in visible_data_product_ids:
             self._sync_public_reader_grouping(id, DataProductVisibility.DISCOVERABLE)

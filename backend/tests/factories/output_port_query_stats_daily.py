@@ -1,16 +1,16 @@
 import factory
 
 from app.data_products.output_ports.query_stats.model import (
-    DatasetQueryStatsDaily,
+    OutputPortQueryStatsDaily,
 )
 
 from .data_product import DataProductFactory
-from .dataset import OutputPortFactory
+from .output_port import OutputPortFactory
 
 
 class OutputPortQueryStatsFactory(factory.alchemy.SQLAlchemyModelFactory):
     class Meta:
-        model = DatasetQueryStatsDaily
+        model = OutputPortQueryStatsDaily
 
     date = factory.Faker("date_object")
     output_port_id = factory.LazyAttribute(

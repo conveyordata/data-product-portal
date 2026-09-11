@@ -597,6 +597,11 @@ type UpdateDomainParams struct {
 	ID uuid.UUID
 }
 
+// UpdateEnvironmentIsGlobalParams is parameters of update_environment_is_global operation.
+type UpdateEnvironmentIsGlobalParams struct {
+	ID uuid.UUID
+}
+
 // UpdateOutputPortParams is parameters of update_output_port operation.
 type UpdateOutputPortParams struct {
 	DataProductID uuid.UUID

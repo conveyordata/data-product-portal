@@ -41,7 +41,7 @@ class Settings(BaseSettings):
     MCP_STATELESS_HTTP: bool = True
 
     # Default username when oidc is disabled
-    DEFAULT_USERNAME: str = "john.doe@pharma.com"
+    DEFAULT_USERNAME: str = "john.scientist@pharma.com"
 
     # Conveyor
     CONVEYOR_API_KEY: Optional[str] = None
@@ -68,6 +68,7 @@ class Settings(BaseSettings):
     # Authorizer
     AUTHORIZER_CACHE_SIZE: int = 128
     AUTHORIZER_STARTUP_SYNC: bool = True
+    AUTHORIZER_AUTOLOAD_ENABLED: bool = True
     AUTHORIZER_AUTOLOAD_INTERVAL: int = 30  # seconds
 
     # Namespace validation

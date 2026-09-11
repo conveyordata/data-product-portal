@@ -16,6 +16,9 @@ pushd sdk
     --meta none \
     --overwrite
 
+  # Regenerate the provisioner event handler from the generated CloudEvent models
+  poetry run python generation/build_event_handler.py
+
   #Ensure the generated files are added to git context
   git add ./sdk
 

@@ -1,12 +1,13 @@
 # ruff: noqa: S311, S105
 from collections.abc import Iterator
 from contextlib import contextmanager
+from datetime import datetime, timedelta
 from typing import Any, Generator
 from unittest.mock import MagicMock, patch
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import select, text
+from sqlalchemy import select, text  # noqa: TID251
 from sqlalchemy.orm import Session
 from starlette.routing import _DefaultLifespan
 
@@ -19,7 +20,7 @@ from app.core.authz.authorization import Authorization
 from app.core.context import _pending_events
 from app.core.webhooks.events import V2Event
 from app.data_products.output_ports.enums import OutputPortAccessType
-from app.database.database import Base, get_db_session
+from app.database.database import Base, get_system_db_session
 from app.main import app
 from app.settings import settings
 from tests.factories import reset_unique_fakers
@@ -36,22 +37,23 @@ from .factories.user import UserFactory
 def setup_and_teardown_database():
     from app.db_tool import init  # noqa: E402
 
+    settings.AUTHORIZER_AUTOLOAD_ENABLED = False
     init(force=True, seed_path=None)
     return
 
 
-def override_get_db():
+def override_unauthenticated_get_db():
     test_db = None
     try:
         test_db = TestingSessionLocal()
         yield test_db
-        test_db.commit()
+        test_db.commit()  # noqa: allow-commit
     finally:
         if test_db:
             test_db.close()
 
 
-session = pytest.fixture(override_get_db)
+session = pytest.fixture(override_unauthenticated_get_db)
 
 from app.core.auth import jwt  # noqa: E402
 
@@ -75,7 +77,7 @@ def client() -> Generator[TestClient, None, None]:
     # Disable lifespan for testing
     app.router.lifespan_context = _DefaultLifespan(app.router)
 
-    app.dependency_overrides[get_db_session] = override_get_db
+    app.dependency_overrides[get_system_db_session] = override_unauthenticated_get_db
     app.dependency_overrides[verify_auth_header] = lambda: "test"
 
     with TestClient(app) as test_client:
@@ -104,7 +106,6 @@ def everyone_role_permissions(session: Session):
         next_permissions = [int(action) for action in permissions]
 
         role.permissions = next_permissions
-        session.commit()
         Authorization().sync_everyone_role_permissions(actions=permissions)
 
         try:
@@ -113,7 +114,6 @@ def everyone_role_permissions(session: Session):
             role = everyone_role()
             assert role is not None, "Failed to find the global 'everyone' role"
             role.permissions = original_permissions
-            session.commit()
             Authorization().sync_everyone_role_permissions(actions=original_permissions)
 
     return _change_permissions
@@ -163,14 +163,17 @@ def clear_db(session: Session) -> None:
     if roles_table is not None:
         session.execute(roles_table.delete().where(roles_table.c.prototype == 0))
     AuthorizationService(session).reload_enforcer()
-    session.commit()
+    session.commit()  # noqa: allow-commit
     reset_unique_fakers()
 
 
 @pytest.fixture
 def admin() -> UserFactory:
     role = RoleFactory.admin()
-    user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+    user = UserFactory(
+        external_id=settings.DEFAULT_USERNAME,
+        admin_expiry=datetime.now() + timedelta(days=1),
+    )
     GlobalRoleAssignmentFactory(user_id=user.id, role_id=role.id)
     return user
 

@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from app.authorization.role_assignments.enums import AssignmentFilter
 from app.core.auth.auth import get_authenticated_user
 from app.data_products.output_ports.service import OutputPortService
-from app.database.database import get_db_session
+from app.database.deps import get_db_session
 from app.search_output_ports.schema_response import (
     SearchOutputPortsResponse,
     SearchOutputPortsResponseItem,
