@@ -1,9 +1,10 @@
 import uuid
 
-from sqlalchemy import func, select
+from sqlalchemy import select
 from sqlalchemy.sql.visitors import iterate
 
 from app.core.auth.auth import SYSTEM_ACCOUNT_BOT_EXTERNAL_ID
+from app.shared.model import utcnow
 
 
 def is_user_admin(user_id: uuid.UUID):
@@ -12,7 +13,7 @@ def is_user_admin(user_id: uuid.UUID):
     return (
         select(User.id)
         .where(User.id == user_id)
-        .where(User.admin_expiry > func.now())
+        .where(User.admin_expiry > utcnow())
         .exists()
     )
 

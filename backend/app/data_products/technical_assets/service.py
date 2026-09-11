@@ -291,6 +291,7 @@ class TechnicalAssetService:
         technical_asset.output_port_links.append(output_port_link)
         self.db.flush()
         OutputPortService(self.db).recalculate_search(output_port_id)
+        self.db.commit()
         return output_port_link
 
     def unlink_dataset_from_data_output(

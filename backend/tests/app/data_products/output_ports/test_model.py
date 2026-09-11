@@ -1,7 +1,7 @@
 from datetime import datetime
 
 import pytest
-from sqlalchemy import select
+from sqlalchemy import select, text  # noqa: TID251
 
 from app.authorization.roles.schema import Scope
 from app.core.auth.auth import SYSTEM_ACCOUNT_BOT_EXTERNAL_ID
@@ -37,6 +37,26 @@ def test_private_output_port_visible_for_currently_activated_admin(session):
 
     with as_user(session, admin.id):
         visible = session.get(OutputPort, output_port_id)
+
+    assert visible.id == output_port_id
+
+
+def test_private_output_port_visible_for_admin_under_non_utc_session_timezone(session):
+    """Regression test: is_user_admin() must compare admin_expiry against an explicit
+    UTC timestamp (utcnow()), not func.now(), which is affected by the Postgres
+    session's TimeZone setting and could wrongly treat an active admin as expired.
+    """
+    output_port = OutputPortFactory(access_type=OutputPortAccessType.PRIVATE)
+    admin = UserFactory(admin_expiry=datetime(2099, 1, 1))
+    output_port_id = output_port.id
+    session.expunge(output_port)
+
+    session.execute(text("SET TIME ZONE 'Pacific/Kiritimati'"))  # UTC+14
+    try:
+        with as_user(session, admin.id):
+            visible = session.get(OutputPort, output_port_id)
+    finally:
+        session.execute(text("SET TIME ZONE 'UTC'"))
 
     assert visible.id == output_port_id
 
