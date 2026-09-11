@@ -34,6 +34,10 @@ sidebar_position: 200
 
 - **[Provisioner]**: Access to the finalizer endpoint of exploration and data product is now only possible as an admin. The provisioner should always run with admin credentials.
 
+### bugfixes
+
+- **[Explorations]**: Fixed a bug where requesting an output port as an exploration input port could fail with a 500 error due to a misconfigured access duration.
+
 ## 0.7.0
 
 ### breaking changes
