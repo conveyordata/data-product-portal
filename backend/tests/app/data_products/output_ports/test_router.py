@@ -37,7 +37,21 @@ ENDPOINT = "/api/v2/data_products/{}/output_ports"
 
 
 @pytest.fixture
-def output_port_payload():
+def seed_time_bound_access_durations() -> None:
+    for adp_type in (
+        AbstractDataProductType.DATA_PRODUCT,
+        AbstractDataProductType.EXPLORATION,
+    ):
+        AccessDurationFactory(
+            abstract_data_product_type=adp_type,
+            access_duration_type=AccessDurationType.TIME_BOUND,
+            days=30,
+            is_default=False,
+        )
+
+
+@pytest.fixture
+def output_port_payload(seed_time_bound_access_durations):
     user = UserFactory()
     return {
         "name": "Test Output Port",
@@ -85,6 +99,28 @@ class TestOutputPortRouter:
         )
         assert created_dataset.status_code == 200, created_dataset.text
         assert "id" in created_dataset.json()
+
+    def test_create_output_port__unconfigured_access_duration_type(
+        self, output_port_payload, client
+    ):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        role = RoleFactory(
+            scope=Scope.GLOBAL,
+            permissions=[AuthorizationAction.GLOBAL__CREATE_OUTPUT_PORT],
+        )
+        GlobalRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=role.id,
+        )
+        data_product = DataProductFactory()
+        output_port_payload["exploration_access_duration_type"] = (
+            AccessDurationType.PERMANENT.value
+        )
+        created_output_port = self.create_output_port(
+            client, data_product.id, output_port_payload
+        )
+        assert created_output_port.status_code == 400
+        assert "not a currently configured" in created_output_port.text
 
     def test_create_output_port(self, session, output_port_payload, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
@@ -285,7 +321,9 @@ class TestOutputPortRouter:
 
         assert updated_dataset.status_code == 403
 
-    def test_update_dataset_type_public_renamed(self, session, client) -> None:
+    def test_update_dataset_type_public_renamed(
+        self, session, client, seed_time_bound_access_durations
+    ) -> None:
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.DATASET,
@@ -317,7 +355,7 @@ class TestOutputPortRouter:
             )
         assert output_port.access_type == OutputPortAccessType.UNRESTRICTED.value
 
-    def test_update_output_port(self, client):
+    def test_update_output_port(self, client, seed_time_bound_access_durations):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.DATASET,
@@ -345,7 +383,37 @@ class TestOutputPortRouter:
         assert updated_dataset.status_code == 200
         assert updated_dataset.json()["id"] == str(ds.id)
 
-    def test_update_output_port__hidden_data_product_only_allows_private(self, client):
+    def test_update_output_port__unconfigured_access_duration_type(self, client):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        role = RoleFactory(
+            scope=Scope.DATASET,
+            permissions=[AuthorizationAction.OUTPUT_PORT__UPDATE_PROPERTIES],
+        )
+        ds = OutputPortFactory()
+        DatasetRoleAssignmentFactory(
+            user_id=user.id, role_id=role.id, output_port_id=ds.id
+        )
+
+        update_payload = {
+            "name": "new_name",
+            "namespace": "new_namespace",
+            "description": "new_description",
+            "tag_ids": [],
+            "access_type": "restricted",
+            "data_product_access_duration_type": AccessDurationType.PERMANENT.value,
+            "exploration_access_duration_type": AccessDurationType.TIME_BOUND.value,
+        }
+
+        updated_output_port = self.update_output_port(
+            client, ds.data_product.id, ds.id, update_payload
+        )
+
+        assert updated_output_port.status_code == 400
+        assert "not a currently configured" in updated_output_port.text
+
+    def test_update_output_port__hidden_data_product_only_allows_private(
+        self, client, seed_time_bound_access_durations
+    ):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.DATASET,
@@ -845,7 +913,9 @@ class TestOutputPortRouter:
         assert history.status_code == 200
         assert len(history.json()["events"]) == 2
 
-    def test_history_event_created_on_update_dataset(self, client):
+    def test_history_event_created_on_update_dataset(
+        self, client, seed_time_bound_access_durations
+    ):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.DATASET,
