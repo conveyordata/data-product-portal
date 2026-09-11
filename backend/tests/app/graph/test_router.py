@@ -53,6 +53,27 @@ class TestGraphRouter:
         assert len(response.json()["edges"]) == 0
         assert len(response.json()["nodes"]) == 1
 
+    def test_get_graph_data__filters_edges_to_hidden_data_product(self, client):
+        """Regression test: an edge must not reference a data product that got
+        filtered out of the nodes, since that produces a dangling edge the
+        frontend graph can't render.
+        """
+        producer = DataProductFactory()
+        output_port = OutputPortFactory(data_product=producer)
+        hidden_consumer = DataProductFactory(visibility=DataProductVisibility.HIDDEN)
+        InputPortFactory(
+            output_port=output_port, consuming_abstract_data_product=hidden_consumer
+        )
+
+        response = client.get(ENDPOINT)
+        assert response.status_code == 200, response.text
+
+        node_ids = {node["id"] for node in response.json()["nodes"]}
+        assert str(hidden_consumer.id) not in node_ids
+        for edge in response.json()["edges"]:
+            assert edge["source"] in node_ids
+            assert edge["target"] in node_ids
+
     def test_get_graph_data__filters_private_output_ports(self, client):
         output_port = OutputPortFactory(access_type=OutputPortAccessType.PRIVATE)
         OutputPortFactory(access_type=OutputPortAccessType.PRIVATE)
