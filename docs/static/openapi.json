@@ -7376,6 +7376,67 @@
         }
       }
     },
+    "/api/v2/plugins/dynamic/": {
+      "get": {
+        "tags": [
+          "Dynamic Plugins"
+        ],
+        "summary": "List Plugins",
+        "operationId": "list_plugins",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PluginListResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/plugins/dynamic/{key}/icon": {
+      "get": {
+        "tags": [
+          "Dynamic Plugins"
+        ],
+        "summary": "Get Plugin Icon",
+        "operationId": "get_plugin_icon",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v2/explorations": {
       "get": {
         "tags": [
@@ -9846,60 +9907,104 @@
             "title": "Namespace"
           },
           "platform_id": {
-            "type": "string",
-            "format": "uuid",
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Platform Id"
           },
           "service_id": {
-            "type": "string",
-            "format": "uuid",
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Service Id"
           },
           "configuration": {
-            "oneOf": [
+            "anyOf": [
               {
-                "$ref": "#/components/schemas/S3TechnicalAssetConfiguration"
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/S3TechnicalAssetConfiguration"
+                  },
+                  {
+                    "$ref": "#/components/schemas/RustFSTechnicalAssetConfiguration"
+                  },
+                  {
+                    "$ref": "#/components/schemas/GlueTechnicalAssetConfiguration"
+                  },
+                  {
+                    "$ref": "#/components/schemas/DatabricksTechnicalAssetConfiguration"
+                  },
+                  {
+                    "$ref": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
+                  },
+                  {
+                    "$ref": "#/components/schemas/RedshiftTechnicalAssetConfiguration"
+                  },
+                  {
+                    "$ref": "#/components/schemas/PostgreSQLTechnicalAssetConfiguration"
+                  },
+                  {
+                    "$ref": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration"
+                  },
+                  {
+                    "$ref": "#/components/schemas/AzureBlobTechnicalAssetConfiguration"
+                  }
+                ],
+                "discriminator": {
+                  "propertyName": "configuration_type",
+                  "mapping": {
+                    "AzureBlobTechnicalAssetConfiguration": "#/components/schemas/AzureBlobTechnicalAssetConfiguration",
+                    "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
+                    "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
+                    "OSISemanticModelTechnicalAssetConfiguration": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration",
+                    "PostgreSQLTechnicalAssetConfiguration": "#/components/schemas/PostgreSQLTechnicalAssetConfiguration",
+                    "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
+                    "RustFSTechnicalAssetConfiguration": "#/components/schemas/RustFSTechnicalAssetConfiguration",
+                    "S3TechnicalAssetConfiguration": "#/components/schemas/S3TechnicalAssetConfiguration",
+                    "SnowflakeTechnicalAssetConfiguration": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
+                  }
+                }
               },
               {
-                "$ref": "#/components/schemas/RustFSTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/GlueTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/DatabricksTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/RedshiftTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/PostgreSQLTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/AzureBlobTechnicalAssetConfiguration"
+                "type": "null"
               }
             ],
-            "title": "Configuration",
-            "discriminator": {
-              "propertyName": "configuration_type",
-              "mapping": {
-                "AzureBlobTechnicalAssetConfiguration": "#/components/schemas/AzureBlobTechnicalAssetConfiguration",
-                "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
-                "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
-                "OSISemanticModelTechnicalAssetConfiguration": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration",
-                "PostgreSQLTechnicalAssetConfiguration": "#/components/schemas/PostgreSQLTechnicalAssetConfiguration",
-                "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
-                "RustFSTechnicalAssetConfiguration": "#/components/schemas/RustFSTechnicalAssetConfiguration",
-                "S3TechnicalAssetConfiguration": "#/components/schemas/S3TechnicalAssetConfiguration",
-                "SnowflakeTechnicalAssetConfiguration": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
+            "title": "Configuration"
+          },
+          "plugin_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
               }
-            }
+            ],
+            "title": "Plugin Key"
+          },
+          "values": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Values"
           },
           "sourceAligned": {
             "anyOf": [
@@ -9947,9 +10052,6 @@
           "name",
           "description",
           "namespace",
-          "platform_id",
-          "service_id",
-          "configuration",
           "tag_ids"
         ],
         "title": "CreateTechnicalAssetRequest"
@@ -12720,13 +12822,27 @@
             "title": "Owner Id"
           },
           "platform_id": {
-            "type": "string",
-            "format": "uuid",
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Platform Id"
           },
           "service_id": {
-            "type": "string",
-            "format": "uuid",
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Service Id"
           },
           "status": {
@@ -12743,50 +12859,80 @@
             "title": "Access Modes"
           },
           "configuration": {
-            "oneOf": [
+            "anyOf": [
               {
-                "$ref": "#/components/schemas/S3TechnicalAssetConfiguration"
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/S3TechnicalAssetConfiguration"
+                  },
+                  {
+                    "$ref": "#/components/schemas/RustFSTechnicalAssetConfiguration"
+                  },
+                  {
+                    "$ref": "#/components/schemas/GlueTechnicalAssetConfiguration"
+                  },
+                  {
+                    "$ref": "#/components/schemas/DatabricksTechnicalAssetConfiguration"
+                  },
+                  {
+                    "$ref": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
+                  },
+                  {
+                    "$ref": "#/components/schemas/RedshiftTechnicalAssetConfiguration"
+                  },
+                  {
+                    "$ref": "#/components/schemas/PostgreSQLTechnicalAssetConfiguration"
+                  },
+                  {
+                    "$ref": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration"
+                  },
+                  {
+                    "$ref": "#/components/schemas/AzureBlobTechnicalAssetConfiguration"
+                  }
+                ],
+                "discriminator": {
+                  "propertyName": "configuration_type",
+                  "mapping": {
+                    "AzureBlobTechnicalAssetConfiguration": "#/components/schemas/AzureBlobTechnicalAssetConfiguration",
+                    "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
+                    "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
+                    "OSISemanticModelTechnicalAssetConfiguration": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration",
+                    "PostgreSQLTechnicalAssetConfiguration": "#/components/schemas/PostgreSQLTechnicalAssetConfiguration",
+                    "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
+                    "RustFSTechnicalAssetConfiguration": "#/components/schemas/RustFSTechnicalAssetConfiguration",
+                    "S3TechnicalAssetConfiguration": "#/components/schemas/S3TechnicalAssetConfiguration",
+                    "SnowflakeTechnicalAssetConfiguration": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
+                  }
+                }
               },
               {
-                "$ref": "#/components/schemas/RustFSTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/GlueTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/DatabricksTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/RedshiftTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/PostgreSQLTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/AzureBlobTechnicalAssetConfiguration"
+                "type": "null"
               }
             ],
-            "title": "Configuration",
-            "discriminator": {
-              "propertyName": "configuration_type",
-              "mapping": {
-                "AzureBlobTechnicalAssetConfiguration": "#/components/schemas/AzureBlobTechnicalAssetConfiguration",
-                "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
-                "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
-                "OSISemanticModelTechnicalAssetConfiguration": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration",
-                "PostgreSQLTechnicalAssetConfiguration": "#/components/schemas/PostgreSQLTechnicalAssetConfiguration",
-                "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
-                "RustFSTechnicalAssetConfiguration": "#/components/schemas/RustFSTechnicalAssetConfiguration",
-                "S3TechnicalAssetConfiguration": "#/components/schemas/S3TechnicalAssetConfiguration",
-                "SnowflakeTechnicalAssetConfiguration": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
+            "title": "Configuration"
+          },
+          "plugin_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
               }
-            }
+            ],
+            "title": "Plugin Key"
+          },
+          "values": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Values"
           },
           "owner": {
             "$ref": "#/components/schemas/DataProduct"
@@ -12829,12 +12975,9 @@
           "description",
           "namespace",
           "owner_id",
-          "platform_id",
-          "service_id",
           "status",
           "technical_mapping",
           "access_modes",
-          "configuration",
           "owner",
           "output_port_links",
           "tags",
@@ -14648,60 +14791,92 @@
             "title": "Owner Id"
           },
           "platform_id": {
-            "type": "string",
-            "format": "uuid",
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Platform Id"
           },
           "service_id": {
-            "type": "string",
-            "format": "uuid",
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Service Id"
           },
           "configuration": {
-            "oneOf": [
+            "anyOf": [
               {
-                "$ref": "#/components/schemas/S3TechnicalAssetConfiguration"
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/S3TechnicalAssetConfiguration"
+                  },
+                  {
+                    "$ref": "#/components/schemas/RustFSTechnicalAssetConfiguration"
+                  },
+                  {
+                    "$ref": "#/components/schemas/GlueTechnicalAssetConfiguration"
+                  },
+                  {
+                    "$ref": "#/components/schemas/DatabricksTechnicalAssetConfiguration"
+                  },
+                  {
+                    "$ref": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
+                  },
+                  {
+                    "$ref": "#/components/schemas/RedshiftTechnicalAssetConfiguration"
+                  },
+                  {
+                    "$ref": "#/components/schemas/PostgreSQLTechnicalAssetConfiguration"
+                  },
+                  {
+                    "$ref": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration"
+                  },
+                  {
+                    "$ref": "#/components/schemas/AzureBlobTechnicalAssetConfiguration"
+                  }
+                ],
+                "discriminator": {
+                  "propertyName": "configuration_type",
+                  "mapping": {
+                    "AzureBlobTechnicalAssetConfiguration": "#/components/schemas/AzureBlobTechnicalAssetConfiguration",
+                    "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
+                    "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
+                    "OSISemanticModelTechnicalAssetConfiguration": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration",
+                    "PostgreSQLTechnicalAssetConfiguration": "#/components/schemas/PostgreSQLTechnicalAssetConfiguration",
+                    "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
+                    "RustFSTechnicalAssetConfiguration": "#/components/schemas/RustFSTechnicalAssetConfiguration",
+                    "S3TechnicalAssetConfiguration": "#/components/schemas/S3TechnicalAssetConfiguration",
+                    "SnowflakeTechnicalAssetConfiguration": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
+                  }
+                }
               },
               {
-                "$ref": "#/components/schemas/RustFSTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/GlueTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/DatabricksTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/RedshiftTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/PostgreSQLTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/AzureBlobTechnicalAssetConfiguration"
+                "type": "null"
               }
             ],
-            "title": "Configuration",
-            "discriminator": {
-              "propertyName": "configuration_type",
-              "mapping": {
-                "AzureBlobTechnicalAssetConfiguration": "#/components/schemas/AzureBlobTechnicalAssetConfiguration",
-                "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
-                "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
-                "OSISemanticModelTechnicalAssetConfiguration": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration",
-                "PostgreSQLTechnicalAssetConfiguration": "#/components/schemas/PostgreSQLTechnicalAssetConfiguration",
-                "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
-                "RustFSTechnicalAssetConfiguration": "#/components/schemas/RustFSTechnicalAssetConfiguration",
-                "S3TechnicalAssetConfiguration": "#/components/schemas/S3TechnicalAssetConfiguration",
-                "SnowflakeTechnicalAssetConfiguration": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
+            "title": "Configuration"
+          },
+          "plugin_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
               }
-            }
+            ],
+            "title": "Plugin Key"
           },
           "owner": {
             "$ref": "#/components/schemas/DataProduct"
@@ -14716,9 +14891,6 @@
           "status",
           "technical_mapping",
           "owner_id",
-          "platform_id",
-          "service_id",
-          "configuration",
           "owner"
         ],
         "title": "OwnedTechnicalAsset"
@@ -14895,6 +15067,22 @@
         "title": "PlatformTileResponse",
         "description": "Response model for platform tiles"
       },
+      "PluginListResponse": {
+        "properties": {
+          "plugins": {
+            "items": {
+              "$ref": "#/components/schemas/PluginSummary"
+            },
+            "type": "array",
+            "title": "Plugins"
+          }
+        },
+        "type": "object",
+        "required": [
+          "plugins"
+        ],
+        "title": "PluginListResponse"
+      },
       "PluginResponse": {
         "properties": {
           "plugins": {
@@ -14911,6 +15099,33 @@
         ],
         "title": "PluginResponse",
         "description": "Response model for listing available plugins"
+      },
+      "PluginSummary": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "display_name": {
+            "type": "string",
+            "title": "Display Name"
+          },
+          "fields": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Fields"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key",
+          "display_name",
+          "fields"
+        ],
+        "title": "PluginSummary"
       },
       "PostgreSQLConfig": {
         "properties": {
@@ -15090,68 +15305,107 @@
       "RenderTechnicalAssetAccessPathRequest": {
         "properties": {
           "platform_id": {
-            "type": "string",
-            "format": "uuid",
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Platform Id"
           },
           "service_id": {
-            "type": "string",
-            "format": "uuid",
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Service Id"
           },
           "configuration": {
-            "oneOf": [
+            "anyOf": [
               {
-                "$ref": "#/components/schemas/S3TechnicalAssetConfiguration"
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/S3TechnicalAssetConfiguration"
+                  },
+                  {
+                    "$ref": "#/components/schemas/RustFSTechnicalAssetConfiguration"
+                  },
+                  {
+                    "$ref": "#/components/schemas/GlueTechnicalAssetConfiguration"
+                  },
+                  {
+                    "$ref": "#/components/schemas/DatabricksTechnicalAssetConfiguration"
+                  },
+                  {
+                    "$ref": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
+                  },
+                  {
+                    "$ref": "#/components/schemas/RedshiftTechnicalAssetConfiguration"
+                  },
+                  {
+                    "$ref": "#/components/schemas/PostgreSQLTechnicalAssetConfiguration"
+                  },
+                  {
+                    "$ref": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration"
+                  },
+                  {
+                    "$ref": "#/components/schemas/AzureBlobTechnicalAssetConfiguration"
+                  }
+                ],
+                "discriminator": {
+                  "propertyName": "configuration_type",
+                  "mapping": {
+                    "AzureBlobTechnicalAssetConfiguration": "#/components/schemas/AzureBlobTechnicalAssetConfiguration",
+                    "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
+                    "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
+                    "OSISemanticModelTechnicalAssetConfiguration": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration",
+                    "PostgreSQLTechnicalAssetConfiguration": "#/components/schemas/PostgreSQLTechnicalAssetConfiguration",
+                    "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
+                    "RustFSTechnicalAssetConfiguration": "#/components/schemas/RustFSTechnicalAssetConfiguration",
+                    "S3TechnicalAssetConfiguration": "#/components/schemas/S3TechnicalAssetConfiguration",
+                    "SnowflakeTechnicalAssetConfiguration": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
+                  }
+                }
               },
               {
-                "$ref": "#/components/schemas/RustFSTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/GlueTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/DatabricksTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/RedshiftTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/PostgreSQLTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/AzureBlobTechnicalAssetConfiguration"
+                "type": "null"
               }
             ],
-            "title": "Configuration",
-            "discriminator": {
-              "propertyName": "configuration_type",
-              "mapping": {
-                "AzureBlobTechnicalAssetConfiguration": "#/components/schemas/AzureBlobTechnicalAssetConfiguration",
-                "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
-                "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
-                "OSISemanticModelTechnicalAssetConfiguration": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration",
-                "PostgreSQLTechnicalAssetConfiguration": "#/components/schemas/PostgreSQLTechnicalAssetConfiguration",
-                "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
-                "RustFSTechnicalAssetConfiguration": "#/components/schemas/RustFSTechnicalAssetConfiguration",
-                "S3TechnicalAssetConfiguration": "#/components/schemas/S3TechnicalAssetConfiguration",
-                "SnowflakeTechnicalAssetConfiguration": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
+            "title": "Configuration"
+          },
+          "plugin_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
               }
-            }
+            ],
+            "title": "Plugin Key"
+          },
+          "values": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Values"
           }
         },
         "type": "object",
-        "required": [
-          "platform_id",
-          "service_id",
-          "configuration"
-        ],
         "title": "RenderTechnicalAssetAccessPathRequest"
       },
       "RenderTechnicalAssetAccessPathResponse": {
@@ -16291,60 +16545,92 @@
             "title": "Owner Id"
           },
           "platform_id": {
-            "type": "string",
-            "format": "uuid",
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Platform Id"
           },
           "service_id": {
-            "type": "string",
-            "format": "uuid",
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Service Id"
           },
           "configuration": {
-            "oneOf": [
+            "anyOf": [
               {
-                "$ref": "#/components/schemas/S3TechnicalAssetConfiguration"
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/S3TechnicalAssetConfiguration"
+                  },
+                  {
+                    "$ref": "#/components/schemas/RustFSTechnicalAssetConfiguration"
+                  },
+                  {
+                    "$ref": "#/components/schemas/GlueTechnicalAssetConfiguration"
+                  },
+                  {
+                    "$ref": "#/components/schemas/DatabricksTechnicalAssetConfiguration"
+                  },
+                  {
+                    "$ref": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
+                  },
+                  {
+                    "$ref": "#/components/schemas/RedshiftTechnicalAssetConfiguration"
+                  },
+                  {
+                    "$ref": "#/components/schemas/PostgreSQLTechnicalAssetConfiguration"
+                  },
+                  {
+                    "$ref": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration"
+                  },
+                  {
+                    "$ref": "#/components/schemas/AzureBlobTechnicalAssetConfiguration"
+                  }
+                ],
+                "discriminator": {
+                  "propertyName": "configuration_type",
+                  "mapping": {
+                    "AzureBlobTechnicalAssetConfiguration": "#/components/schemas/AzureBlobTechnicalAssetConfiguration",
+                    "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
+                    "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
+                    "OSISemanticModelTechnicalAssetConfiguration": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration",
+                    "PostgreSQLTechnicalAssetConfiguration": "#/components/schemas/PostgreSQLTechnicalAssetConfiguration",
+                    "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
+                    "RustFSTechnicalAssetConfiguration": "#/components/schemas/RustFSTechnicalAssetConfiguration",
+                    "S3TechnicalAssetConfiguration": "#/components/schemas/S3TechnicalAssetConfiguration",
+                    "SnowflakeTechnicalAssetConfiguration": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
+                  }
+                }
               },
               {
-                "$ref": "#/components/schemas/RustFSTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/GlueTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/DatabricksTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/RedshiftTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/PostgreSQLTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/AzureBlobTechnicalAssetConfiguration"
+                "type": "null"
               }
             ],
-            "title": "Configuration",
-            "discriminator": {
-              "propertyName": "configuration_type",
-              "mapping": {
-                "AzureBlobTechnicalAssetConfiguration": "#/components/schemas/AzureBlobTechnicalAssetConfiguration",
-                "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
-                "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
-                "OSISemanticModelTechnicalAssetConfiguration": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration",
-                "PostgreSQLTechnicalAssetConfiguration": "#/components/schemas/PostgreSQLTechnicalAssetConfiguration",
-                "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
-                "RustFSTechnicalAssetConfiguration": "#/components/schemas/RustFSTechnicalAssetConfiguration",
-                "S3TechnicalAssetConfiguration": "#/components/schemas/S3TechnicalAssetConfiguration",
-                "SnowflakeTechnicalAssetConfiguration": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
+            "title": "Configuration"
+          },
+          "plugin_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
               }
-            }
+            ],
+            "title": "Plugin Key"
           }
         },
         "type": "object",
@@ -16355,10 +16641,7 @@
           "description",
           "status",
           "technical_mapping",
-          "owner_id",
-          "platform_id",
-          "service_id",
-          "configuration"
+          "owner_id"
         ],
         "title": "TechnicalAsset"
       },
@@ -16807,6 +17090,11 @@
           "detailed_name": {
             "type": "string",
             "title": "Detailed Name"
+          },
+          "is_dynamic_plugin": {
+            "type": "boolean",
+            "title": "Is Dynamic Plugin",
+            "default": false
           }
         },
         "type": "object",
@@ -16908,6 +17196,17 @@
               }
             ],
             "title": "Initial Value"
+          },
+          "pattern": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pattern"
           }
         },
         "type": "object",

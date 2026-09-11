@@ -54,7 +54,7 @@ export const getDatasetDataProductsColumns = ({
                         icon={
                             <CustomSvgIconLoader
                                 iconComponent={getTechnicalAssetIcon(
-                                    technical_asset.configuration.configuration_type,
+                                    technical_asset.configuration?.configuration_type,
                                     plugins,
                                 )}
                                 size="default"

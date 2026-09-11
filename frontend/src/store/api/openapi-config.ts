@@ -18,6 +18,7 @@ const services = [
     { name: 'Configuration - Access Modes', file: 'configurationAccessModes' },
     { name: 'Configuration - Access Durations', file: 'configurationAccessDurations' },
     { name: 'Plugins', file: 'plugins' },
+    { name: 'Dynamic Plugins', file: 'pluginsDynamic' },
     { name: 'Data Products', file: 'dataProducts' },
     { name: 'Data Products - Technical assets', file: 'dataProductsTechnicalAssets' },
     { name: 'Data Products - Output ports', file: 'dataProductsOutputPorts' },

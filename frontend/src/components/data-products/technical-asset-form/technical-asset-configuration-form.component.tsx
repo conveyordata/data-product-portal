@@ -99,6 +99,12 @@ export function TechnicalAssetConfigurationForm({
                 message: t('Please provide {{ label }}', { label: label.toLowerCase() }),
             });
         }
+        if (type === 'string' && string?.pattern && !isHidden) {
+            rules.push({
+                pattern: new RegExp(string.pattern),
+                message: t('{{ label }} has an invalid format', { label }),
+            });
+        }
 
         // Determine if field should be disabled
         const isDisabled = disabled || (use_namespace_when_not_source_aligned && technical_mapping === 'default');

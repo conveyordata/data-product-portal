@@ -20,6 +20,7 @@ import {
     useGetPluginsQuery,
     useRenderTechnicalAssetAccessPathMutation,
 } from '@/store/api/services/generated/pluginsApi';
+import { useListPluginsQuery } from '@/store/api/services/generated/pluginsDynamicApi';
 import {
     ResourceNameModel,
     useLazySanitizeResourceNameQuery,
@@ -78,6 +79,14 @@ export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallback
         }
         return uiMetadataGroups.find((meta) => meta.platform === selectedConfiguration.value.toLowerCase());
     }, [uiMetadataGroups, selectedConfiguration]);
+    // Checked directly against the submitted `configuration_type`, not derived
+    // component state - a dynamically loaded plugin (ADR-0024) submits
+    // `plugin_key`/`values` instead of `platform_id`/`service_id`/`configuration`.
+    const { data: { plugins: dynamicPlugins } = {} } = useListPluginsQuery();
+    const dynamicPluginKeys = useMemo(
+        () => new Set(dynamicPlugins?.map((plugin) => plugin.key) ?? []),
+        [dynamicPlugins],
+    );
     const accessModesForSelectedPlugin = useMemo(() => {
         if (!pluginMetadata || !accessModes) {
             return [];
@@ -152,7 +161,26 @@ export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallback
 
     const onSubmit: FormProps<CreateTechnicalAssetRequest>['onFinish'] = async (values) => {
         try {
-            await createTechnicalAsset({ dataProductId, createTechnicalAssetRequest: values }).unwrap();
+            // A dynamically loaded plugin (ADR-0024) submits `plugin_key`/`values`
+            // instead of `platform_id`/`service_id`/`configuration` - the form
+            // itself doesn't know which shape it's filling in, only the metadata
+            // that described its fields does.
+            const configurationType = values.configuration?.configuration_type;
+            const createTechnicalAssetRequest =
+                configurationType && dynamicPluginKeys.has(configurationType)
+                    ? (() => {
+                          const { configuration_type, ...pluginValues } = values.configuration ?? {};
+                          return {
+                              ...values,
+                              platform_id: undefined,
+                              service_id: undefined,
+                              configuration: undefined,
+                              plugin_key: configuration_type,
+                              values: pluginValues,
+                          };
+                      })()
+                    : values;
+            await createTechnicalAsset({ dataProductId, createTechnicalAssetRequest }).unwrap();
             dispatchMessage({ content: t('Technical Asset created successfully'), type: 'success' });
             modalCallbackOnSubmit();
             form.resetFields();
@@ -224,15 +252,21 @@ export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallback
     );
 
     const setResultString = useDebouncedCallback((values: CreateTechnicalAssetRequest) => {
+        const configurationType = values.configuration?.configuration_type;
+        if (configurationType && dynamicPluginKeys.has(configurationType)) {
+            const { configuration_type, ...pluginValues } = values.configuration ?? {};
+            form.validateFields(['configuration'], { validateOnly: true, recursive: true })
+                .then(() => fetchResultString({ plugin_key: configuration_type, values: pluginValues }).unwrap())
+                .then((result) => form.setFieldValue('result', result.technical_asset_access_path))
+                .catch(() => form.setFieldValue('result', undefined));
+            return;
+        }
+        if (!values.platform_id || !values.service_id || !values.configuration) {
+            return;
+        }
+        const { platform_id, service_id, configuration } = values;
         form.validateFields(['configuration'], { validateOnly: true, recursive: true })
-            .then(() => {
-                const request = {
-                    platform_id: values.platform_id,
-                    service_id: values.service_id,
-                    configuration: values.configuration,
-                };
-                return fetchResultString(request).unwrap();
-            })
+            .then(() => fetchResultString({ platform_id, service_id, configuration }).unwrap())
             .then((result) => form.setFieldValue('result', result.technical_asset_access_path))
             .catch(() => form.setFieldValue('result', undefined));
     }, debounce);

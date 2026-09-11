@@ -237,9 +237,9 @@ INSERT INTO public.environments (id, name, context, acronym, is_default, created
 
 INSERT INTO public.environments (id, name, context, acronym, is_default, created_on, updated_on, deleted_at) VALUES ('{{ returned_environment_id_prd }}'::uuid, 'production', 'arn:aws:iam::{{ AWS_ACCOUNT_ID }}:role/{{ AWS_ROLE_WITH_CONTEXT_TEMPLATE_PRD }}', 'prd', FALSE, timezone('utc'::text, current_timestamp), NULL, NULL);
 
-INSERT INTO public.environments (id, name, context, acronym, is_default, created_on, updated_on, deleted_at) VALUES ('{{ azure_environment_id_dev }}'::uuid, 'azure_development', '', 'azure_dev', TRUE, timezone('utc'::text, current_timestamp), NULL, NULL);
+INSERT INTO public.environments (id, name, context, acronym, is_default, created_on, updated_on, deleted_at) VALUES ('{{ azure_environment_id_dev }}'::uuid, 'azure_development', 'https://{{ "{{}}" }}-dev.blob.core.windows.net/', 'azure_dev', TRUE, timezone('utc'::text, current_timestamp), NULL, NULL);
 
-INSERT INTO public.environments (id, name, context, acronym, is_default, created_on, updated_on, deleted_at) VALUES ('{{ azure_environment_id_prd }}'::uuid, 'azure_production', '', 'azure_prd', FALSE, timezone('utc'::text, current_timestamp), NULL, NULL);
+INSERT INTO public.environments (id, name, context, acronym, is_default, created_on, updated_on, deleted_at) VALUES ('{{ azure_environment_id_prd }}'::uuid, 'azure_production', 'https://{{ "{{}}" }}-prd.blob.core.windows.net/', 'azure_prd', FALSE, timezone('utc'::text, current_timestamp), NULL, NULL);
 
 INSERT INTO public.env_platform_configs (id, environment_id, platform_id, config, created_on, updated_on, deleted_at) VALUES ('daa8e3e8-1485-4eb2-8b4b-575e8d10a570', '{{ returned_environment_id_dev }}'::uuid, (
     SELECT p.id FROM public.platforms AS p

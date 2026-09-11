@@ -278,6 +278,11 @@ type GetPluginFormParams struct {
 	PluginName string
 }
 
+// GetPluginIconParams is parameters of get_plugin_icon operation.
+type GetPluginIconParams struct {
+	Key string
+}
+
 // GetPluginURLParams is parameters of get_plugin_url operation.
 type GetPluginURLParams struct {
 	PluginName  string

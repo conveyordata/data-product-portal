@@ -57,6 +57,9 @@ class UIElementSelect(ORMModel):
 
 class UIElementString(ORMModel):
     initial_value: Optional[str] = None
+    pattern: Optional[str] = (
+        None  # Regex the value must match, checked client- and server-side
+    )
 
 
 class UIElementMetadata(ORMModel):

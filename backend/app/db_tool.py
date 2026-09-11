@@ -12,7 +12,9 @@ from app.core.helpers.local import add_additional_env_vars
 
 add_additional_env_vars()
 
-from app.database.database import get_url  # noqa: E402
+from app.database.database import engine, get_url  # noqa: E402
+from app.plugins.loader import discover_plugins  # noqa: E402
+from app.plugins.migrations import reconcile_all  # noqa: E402
 from app.seed import seed_db  # noqa: E402
 
 app = typer.Typer(help="Database migration toolkit for the Data product portal.")
@@ -42,6 +44,17 @@ def migrate():
             os.path.join(os.path.dirname(os.path.abspath("__file__")), "alembic.ini")
         )
         command.upgrade(cfg, "heads")
+        print("Core migration finished successfully")
+
+        print("[bold blue]Reconciling plugin migrations :electric_plug:[/bold blue]")
+        plugins = discover_plugins()
+        if not plugins:
+            print("No plugins registered")
+        else:
+            results = reconcile_all(plugins, engine)
+            for plugin_key, outcome in results.items():
+                print(f"  {plugin_key}: {outcome}")
+
         print("Migration finished successfully")
     except Exception as e:
         print("Something went wrong when migrating", e)

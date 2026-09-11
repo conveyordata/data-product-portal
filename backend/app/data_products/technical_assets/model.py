@@ -50,10 +50,17 @@ class TechnicalAsset(Base, BaseORM, EventTrackedMixin):
     status: TechnicalAssetStatus = Column(Enum(TechnicalAssetStatus))
     technical_mapping = Column(String)
 
-    platform_id: Mapped[UUID] = Column(ForeignKey("platforms.id"))
-    service_id: Mapped[UUID] = Column(ForeignKey("platform_services.id"))
+    platform_id: Mapped[Optional[UUID]] = Column(ForeignKey("platforms.id"))
+    service_id: Mapped[Optional[UUID]] = Column(ForeignKey("platform_services.id"))
     owner_id: Mapped[UUID] = Column(ForeignKey("data_products.id"))
-    configuration_id: Mapped[UUID] = Column(ForeignKey("data_output_configurations.id"))
+    configuration_id: Mapped[Optional[UUID]] = Column(
+        ForeignKey("data_output_configurations.id")
+    )
+    # Set for a technical asset backed by a dynamically loaded plugin
+    # (ADR-0024) instead of the core `data_output_configurations` hierarchy.
+    # When set, this row's `id` is also the primary key of the plugin's own
+    # table - see app/plugins/.
+    plugin_key: Mapped[Optional[str]] = Column(String, nullable=True)
 
     platform: Mapped["Platform"] = relationship(lazy="joined")
     service: Mapped["PlatformService"] = relationship(lazy="joined")

@@ -33,6 +33,7 @@ class UIElementMetadataResponse:
         parent_platform (None | str | Unset):
         platform_tile (None | PlatformTile | Unset):
         show_in_form (bool | Unset):  Default: True.
+        is_dynamic_plugin (bool | Unset):  Default: False.
     """
 
     ui_metadata: list[UIElementMetadata]
@@ -48,6 +49,7 @@ class UIElementMetadataResponse:
     parent_platform: None | str | Unset = UNSET
     platform_tile: None | PlatformTile | Unset = UNSET
     show_in_form: bool | Unset = True
+    is_dynamic_plugin: bool | Unset = False
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -92,6 +94,8 @@ class UIElementMetadataResponse:
 
         show_in_form = self.show_in_form
 
+        is_dynamic_plugin = self.is_dynamic_plugin
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
@@ -117,6 +121,8 @@ class UIElementMetadataResponse:
             field_dict["platform_tile"] = platform_tile
         if show_in_form is not UNSET:
             field_dict["show_in_form"] = show_in_form
+        if is_dynamic_plugin is not UNSET:
+            field_dict["is_dynamic_plugin"] = is_dynamic_plugin
 
         return field_dict
 
@@ -179,6 +185,8 @@ class UIElementMetadataResponse:
 
         show_in_form = d.pop("show_in_form", UNSET)
 
+        is_dynamic_plugin = d.pop("is_dynamic_plugin", UNSET)
+
         ui_element_metadata_response = cls(
             ui_metadata=ui_metadata,
             plugin=plugin,
@@ -193,6 +201,7 @@ class UIElementMetadataResponse:
             parent_platform=parent_platform,
             platform_tile=platform_tile,
             show_in_form=show_in_form,
+            is_dynamic_plugin=is_dynamic_plugin,
         )
 
         ui_element_metadata_response.additional_properties = d

@@ -468,6 +468,12 @@ type Invoker interface {
 	//
 	// GET /api/v2/plugins/{plugin_name}/form
 	GetPluginForm(ctx context.Context, params GetPluginFormParams) (GetPluginFormRes, error)
+	// GetPluginIcon invokes get_plugin_icon operation.
+	//
+	// Get Plugin Icon.
+	//
+	// GET /api/v2/plugins/dynamic/{key}/icon
+	GetPluginIcon(ctx context.Context, params GetPluginIconParams) (GetPluginIconRes, error)
 	// GetPluginURL invokes get_plugin_url operation.
 	//
 	// Get the URL for the access tile of a specific plugin.
@@ -582,6 +588,12 @@ type Invoker interface {
 	//
 	// GET /api/v2/authz/role_assignments/output_port
 	ListOutputPortRoleAssignments(ctx context.Context, params ListOutputPortRoleAssignmentsParams) (ListOutputPortRoleAssignmentsRes, error)
+	// ListPlugins invokes list_plugins operation.
+	//
+	// List Plugins.
+	//
+	// GET /api/v2/plugins/dynamic/
+	ListPlugins(ctx context.Context) (*PluginListResponse, error)
 	// MarkTourAsSeen invokes mark_tour_as_seen operation.
 	//
 	// Mark Tour As Seen.
@@ -5713,6 +5725,68 @@ func (c *Client) sendGetPluginForm(ctx context.Context, params GetPluginFormPara
 	return result, nil
 }
 
+// GetPluginIcon invokes get_plugin_icon operation.
+//
+// Get Plugin Icon.
+//
+// GET /api/v2/plugins/dynamic/{key}/icon
+func (c *Client) GetPluginIcon(ctx context.Context, params GetPluginIconParams) (GetPluginIconRes, error) {
+	res, err := c.sendGetPluginIcon(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendGetPluginIcon(ctx context.Context, params GetPluginIconParams) (res GetPluginIconRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/api/v2/plugins/dynamic/"
+	{
+		// Encode "key" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "key",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Key))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/icon"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeGetPluginIconResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // GetPluginURL invokes get_plugin_url operation.
 //
 // Get the URL for the access tile of a specific plugin.
@@ -6989,6 +7063,49 @@ func (c *Client) sendListOutputPortRoleAssignments(ctx context.Context, params L
 	}()
 
 	result, err := decodeListOutputPortRoleAssignmentsResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// ListPlugins invokes list_plugins operation.
+//
+// List Plugins.
+//
+// GET /api/v2/plugins/dynamic/
+func (c *Client) ListPlugins(ctx context.Context) (*PluginListResponse, error) {
+	res, err := c.sendListPlugins(ctx)
+	return res, err
+}
+
+func (c *Client) sendListPlugins(ctx context.Context) (res *PluginListResponse, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/api/v2/plugins/dynamic/"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeListPluginsResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

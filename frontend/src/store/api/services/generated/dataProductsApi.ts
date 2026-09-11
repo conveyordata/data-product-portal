@@ -1,4 +1,4 @@
-import { api } from "@/store/api/services/generated/pluginsApi";
+import { api } from "@/store/api/services/generated/pluginsDynamicApi";
 const injectedRtkApi = api.injectEndpoints({
   endpoints: (build) => ({
     createDataProduct: build.mutation<
@@ -593,36 +593,40 @@ export type TechnicalAsset = {
   status: TechnicalAssetStatus;
   technical_mapping: TechnicalMapping;
   owner_id: string;
-  platform_id: string;
-  service_id: string;
-  configuration:
-    | ({
-        configuration_type: "AzureBlobTechnicalAssetConfiguration";
-      } & AzureBlobTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "DatabricksTechnicalAssetConfiguration";
-      } & DatabricksTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "GlueTechnicalAssetConfiguration";
-      } & GlueTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "OSISemanticModelTechnicalAssetConfiguration";
-      } & OsiSemanticModelTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "PostgreSQLTechnicalAssetConfiguration";
-      } & PostgreSqlTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "RedshiftTechnicalAssetConfiguration";
-      } & RedshiftTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "RustFSTechnicalAssetConfiguration";
-      } & RustFsTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "S3TechnicalAssetConfiguration";
-      } & S3TechnicalAssetConfiguration)
-    | ({
-        configuration_type: "SnowflakeTechnicalAssetConfiguration";
-      } & SnowflakeTechnicalAssetConfiguration);
+  platform_id?: string | null;
+  service_id?: string | null;
+  configuration?:
+    | (
+        | ({
+            configuration_type: "AzureBlobTechnicalAssetConfiguration";
+          } & AzureBlobTechnicalAssetConfiguration)
+        | ({
+            configuration_type: "DatabricksTechnicalAssetConfiguration";
+          } & DatabricksTechnicalAssetConfiguration)
+        | ({
+            configuration_type: "GlueTechnicalAssetConfiguration";
+          } & GlueTechnicalAssetConfiguration)
+        | ({
+            configuration_type: "OSISemanticModelTechnicalAssetConfiguration";
+          } & OsiSemanticModelTechnicalAssetConfiguration)
+        | ({
+            configuration_type: "PostgreSQLTechnicalAssetConfiguration";
+          } & PostgreSqlTechnicalAssetConfiguration)
+        | ({
+            configuration_type: "RedshiftTechnicalAssetConfiguration";
+          } & RedshiftTechnicalAssetConfiguration)
+        | ({
+            configuration_type: "RustFSTechnicalAssetConfiguration";
+          } & RustFsTechnicalAssetConfiguration)
+        | ({
+            configuration_type: "S3TechnicalAssetConfiguration";
+          } & S3TechnicalAssetConfiguration)
+        | ({
+            configuration_type: "SnowflakeTechnicalAssetConfiguration";
+          } & SnowflakeTechnicalAssetConfiguration)
+      )
+    | null;
+  plugin_key?: string | null;
 };
 export type GetEventHistoryResponseItem = {
   id: string;

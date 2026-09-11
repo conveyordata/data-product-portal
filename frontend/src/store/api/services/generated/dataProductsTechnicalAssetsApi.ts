@@ -342,39 +342,46 @@ export type GetTechnicalAssetsResponseItem = {
   description: string;
   namespace: string;
   owner_id: string;
-  platform_id: string;
-  service_id: string;
+  platform_id?: string | null;
+  service_id?: string | null;
   status: TechnicalAssetStatus;
   technical_mapping: TechnicalMapping;
   access_modes: AccessMode[];
-  configuration:
-    | ({
-        configuration_type: "AzureBlobTechnicalAssetConfiguration";
-      } & AzureBlobTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "DatabricksTechnicalAssetConfiguration";
-      } & DatabricksTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "GlueTechnicalAssetConfiguration";
-      } & GlueTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "OSISemanticModelTechnicalAssetConfiguration";
-      } & OsiSemanticModelTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "PostgreSQLTechnicalAssetConfiguration";
-      } & PostgreSqlTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "RedshiftTechnicalAssetConfiguration";
-      } & RedshiftTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "RustFSTechnicalAssetConfiguration";
-      } & RustFsTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "S3TechnicalAssetConfiguration";
-      } & S3TechnicalAssetConfiguration)
-    | ({
-        configuration_type: "SnowflakeTechnicalAssetConfiguration";
-      } & SnowflakeTechnicalAssetConfiguration);
+  configuration?:
+    | (
+        | ({
+            configuration_type: "AzureBlobTechnicalAssetConfiguration";
+          } & AzureBlobTechnicalAssetConfiguration)
+        | ({
+            configuration_type: "DatabricksTechnicalAssetConfiguration";
+          } & DatabricksTechnicalAssetConfiguration)
+        | ({
+            configuration_type: "GlueTechnicalAssetConfiguration";
+          } & GlueTechnicalAssetConfiguration)
+        | ({
+            configuration_type: "OSISemanticModelTechnicalAssetConfiguration";
+          } & OsiSemanticModelTechnicalAssetConfiguration)
+        | ({
+            configuration_type: "PostgreSQLTechnicalAssetConfiguration";
+          } & PostgreSqlTechnicalAssetConfiguration)
+        | ({
+            configuration_type: "RedshiftTechnicalAssetConfiguration";
+          } & RedshiftTechnicalAssetConfiguration)
+        | ({
+            configuration_type: "RustFSTechnicalAssetConfiguration";
+          } & RustFsTechnicalAssetConfiguration)
+        | ({
+            configuration_type: "S3TechnicalAssetConfiguration";
+          } & S3TechnicalAssetConfiguration)
+        | ({
+            configuration_type: "SnowflakeTechnicalAssetConfiguration";
+          } & SnowflakeTechnicalAssetConfiguration)
+      )
+    | null;
+  plugin_key?: string | null;
+  values?: {
+    [key: string]: any;
+  } | null;
   owner: DataProduct;
   output_port_links: OutputPortLink[];
   tags: Tag[];
@@ -393,36 +400,43 @@ export type CreateTechnicalAssetRequest = {
   name: string;
   description: string;
   namespace: string;
-  platform_id: string;
-  service_id: string;
-  configuration:
-    | ({
-        configuration_type: "AzureBlobTechnicalAssetConfiguration";
-      } & AzureBlobTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "DatabricksTechnicalAssetConfiguration";
-      } & DatabricksTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "GlueTechnicalAssetConfiguration";
-      } & GlueTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "OSISemanticModelTechnicalAssetConfiguration";
-      } & OsiSemanticModelTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "PostgreSQLTechnicalAssetConfiguration";
-      } & PostgreSqlTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "RedshiftTechnicalAssetConfiguration";
-      } & RedshiftTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "RustFSTechnicalAssetConfiguration";
-      } & RustFsTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "S3TechnicalAssetConfiguration";
-      } & S3TechnicalAssetConfiguration)
-    | ({
-        configuration_type: "SnowflakeTechnicalAssetConfiguration";
-      } & SnowflakeTechnicalAssetConfiguration);
+  platform_id?: string | null;
+  service_id?: string | null;
+  configuration?:
+    | (
+        | ({
+            configuration_type: "AzureBlobTechnicalAssetConfiguration";
+          } & AzureBlobTechnicalAssetConfiguration)
+        | ({
+            configuration_type: "DatabricksTechnicalAssetConfiguration";
+          } & DatabricksTechnicalAssetConfiguration)
+        | ({
+            configuration_type: "GlueTechnicalAssetConfiguration";
+          } & GlueTechnicalAssetConfiguration)
+        | ({
+            configuration_type: "OSISemanticModelTechnicalAssetConfiguration";
+          } & OsiSemanticModelTechnicalAssetConfiguration)
+        | ({
+            configuration_type: "PostgreSQLTechnicalAssetConfiguration";
+          } & PostgreSqlTechnicalAssetConfiguration)
+        | ({
+            configuration_type: "RedshiftTechnicalAssetConfiguration";
+          } & RedshiftTechnicalAssetConfiguration)
+        | ({
+            configuration_type: "RustFSTechnicalAssetConfiguration";
+          } & RustFsTechnicalAssetConfiguration)
+        | ({
+            configuration_type: "S3TechnicalAssetConfiguration";
+          } & S3TechnicalAssetConfiguration)
+        | ({
+            configuration_type: "SnowflakeTechnicalAssetConfiguration";
+          } & SnowflakeTechnicalAssetConfiguration)
+      )
+    | null;
+  plugin_key?: string | null;
+  values?: {
+    [key: string]: any;
+  } | null;
   /** DEPRECATED: Use 'technical_mapping' instead. This field will be removed in a future version. */
   sourceAligned?: boolean | null;
   technical_mapping?: TechnicalMapping | null;
@@ -455,36 +469,40 @@ export type TechnicalAsset = {
   status: TechnicalAssetStatus;
   technical_mapping: TechnicalMapping;
   owner_id: string;
-  platform_id: string;
-  service_id: string;
-  configuration:
-    | ({
-        configuration_type: "AzureBlobTechnicalAssetConfiguration";
-      } & AzureBlobTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "DatabricksTechnicalAssetConfiguration";
-      } & DatabricksTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "GlueTechnicalAssetConfiguration";
-      } & GlueTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "OSISemanticModelTechnicalAssetConfiguration";
-      } & OsiSemanticModelTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "PostgreSQLTechnicalAssetConfiguration";
-      } & PostgreSqlTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "RedshiftTechnicalAssetConfiguration";
-      } & RedshiftTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "RustFSTechnicalAssetConfiguration";
-      } & RustFsTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "S3TechnicalAssetConfiguration";
-      } & S3TechnicalAssetConfiguration)
-    | ({
-        configuration_type: "SnowflakeTechnicalAssetConfiguration";
-      } & SnowflakeTechnicalAssetConfiguration);
+  platform_id?: string | null;
+  service_id?: string | null;
+  configuration?:
+    | (
+        | ({
+            configuration_type: "AzureBlobTechnicalAssetConfiguration";
+          } & AzureBlobTechnicalAssetConfiguration)
+        | ({
+            configuration_type: "DatabricksTechnicalAssetConfiguration";
+          } & DatabricksTechnicalAssetConfiguration)
+        | ({
+            configuration_type: "GlueTechnicalAssetConfiguration";
+          } & GlueTechnicalAssetConfiguration)
+        | ({
+            configuration_type: "OSISemanticModelTechnicalAssetConfiguration";
+          } & OsiSemanticModelTechnicalAssetConfiguration)
+        | ({
+            configuration_type: "PostgreSQLTechnicalAssetConfiguration";
+          } & PostgreSqlTechnicalAssetConfiguration)
+        | ({
+            configuration_type: "RedshiftTechnicalAssetConfiguration";
+          } & RedshiftTechnicalAssetConfiguration)
+        | ({
+            configuration_type: "RustFSTechnicalAssetConfiguration";
+          } & RustFsTechnicalAssetConfiguration)
+        | ({
+            configuration_type: "S3TechnicalAssetConfiguration";
+          } & S3TechnicalAssetConfiguration)
+        | ({
+            configuration_type: "SnowflakeTechnicalAssetConfiguration";
+          } & SnowflakeTechnicalAssetConfiguration)
+      )
+    | null;
+  plugin_key?: string | null;
 };
 export type GetEventHistoryResponseItem = {
   id: string;

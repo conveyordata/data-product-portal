@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Any, TypeVar
+from typing import TYPE_CHECKING, Any, TypeVar, cast
 from uuid import UUID
 
 from attrs import define as _attrs_define
@@ -9,6 +9,7 @@ from attrs import field as _attrs_field
 
 from ..models.technical_asset_status import TechnicalAssetStatus
 from ..models.technical_mapping import TechnicalMapping
+from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
     from ..models.access_mode import AccessMode
@@ -18,6 +19,9 @@ if TYPE_CHECKING:
     from ..models.data_product import DataProduct
     from ..models.databricks_technical_asset_configuration import (
         DatabricksTechnicalAssetConfiguration,
+    )
+    from ..models.get_technical_assets_response_item_values_type_0 import (
+        GetTechnicalAssetsResponseItemValuesType0,
     )
     from ..models.glue_technical_asset_configuration import (
         GlueTechnicalAssetConfiguration,
@@ -55,15 +59,9 @@ class GetTechnicalAssetsResponseItem:
         description (str):
         namespace (str):
         owner_id (UUID):
-        platform_id (UUID):
-        service_id (UUID):
         status (TechnicalAssetStatus):
         technical_mapping (TechnicalMapping):
         access_modes (list[AccessMode]):
-        configuration (AzureBlobTechnicalAssetConfiguration | DatabricksTechnicalAssetConfiguration |
-            GlueTechnicalAssetConfiguration | OSISemanticModelTechnicalAssetConfiguration |
-            PostgreSQLTechnicalAssetConfiguration | RedshiftTechnicalAssetConfiguration | RustFSTechnicalAssetConfiguration
-            | S3TechnicalAssetConfiguration | SnowflakeTechnicalAssetConfiguration):
         owner (DataProduct):
         output_port_links (list[OutputPortLink]):
         tags (list[Tag]):
@@ -71,6 +69,14 @@ class GetTechnicalAssetsResponseItem:
             version.
         result_string (str):
         technical_info (list[TechnicalInfo]):
+        platform_id (None | Unset | UUID):
+        service_id (None | Unset | UUID):
+        configuration (AzureBlobTechnicalAssetConfiguration | DatabricksTechnicalAssetConfiguration |
+            GlueTechnicalAssetConfiguration | None | OSISemanticModelTechnicalAssetConfiguration |
+            PostgreSQLTechnicalAssetConfiguration | RedshiftTechnicalAssetConfiguration | RustFSTechnicalAssetConfiguration
+            | S3TechnicalAssetConfiguration | SnowflakeTechnicalAssetConfiguration | Unset):
+        plugin_key (None | str | Unset):
+        values (GetTechnicalAssetsResponseItemValuesType0 | None | Unset):
     """
 
     id: UUID
@@ -78,33 +84,43 @@ class GetTechnicalAssetsResponseItem:
     description: str
     namespace: str
     owner_id: UUID
-    platform_id: UUID
-    service_id: UUID
     status: TechnicalAssetStatus
     technical_mapping: TechnicalMapping
     access_modes: list[AccessMode]
-    configuration: (
-        AzureBlobTechnicalAssetConfiguration
-        | DatabricksTechnicalAssetConfiguration
-        | GlueTechnicalAssetConfiguration
-        | OSISemanticModelTechnicalAssetConfiguration
-        | PostgreSQLTechnicalAssetConfiguration
-        | RedshiftTechnicalAssetConfiguration
-        | RustFSTechnicalAssetConfiguration
-        | S3TechnicalAssetConfiguration
-        | SnowflakeTechnicalAssetConfiguration
-    )
     owner: DataProduct
     output_port_links: list[OutputPortLink]
     tags: list[Tag]
     source_aligned: bool
     result_string: str
     technical_info: list[TechnicalInfo]
+    platform_id: None | Unset | UUID = UNSET
+    service_id: None | Unset | UUID = UNSET
+    configuration: (
+        AzureBlobTechnicalAssetConfiguration
+        | DatabricksTechnicalAssetConfiguration
+        | GlueTechnicalAssetConfiguration
+        | None
+        | OSISemanticModelTechnicalAssetConfiguration
+        | PostgreSQLTechnicalAssetConfiguration
+        | RedshiftTechnicalAssetConfiguration
+        | RustFSTechnicalAssetConfiguration
+        | S3TechnicalAssetConfiguration
+        | SnowflakeTechnicalAssetConfiguration
+        | Unset
+    ) = UNSET
+    plugin_key: None | str | Unset = UNSET
+    values: GetTechnicalAssetsResponseItemValuesType0 | None | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
+        from ..models.azure_blob_technical_asset_configuration import (
+            AzureBlobTechnicalAssetConfiguration,
+        )
         from ..models.databricks_technical_asset_configuration import (
             DatabricksTechnicalAssetConfiguration,
+        )
+        from ..models.get_technical_assets_response_item_values_type_0 import (
+            GetTechnicalAssetsResponseItemValuesType0,
         )
         from ..models.glue_technical_asset_configuration import (
             GlueTechnicalAssetConfiguration,
@@ -138,10 +154,6 @@ class GetTechnicalAssetsResponseItem:
 
         owner_id = str(self.owner_id)
 
-        platform_id = str(self.platform_id)
-
-        service_id = str(self.service_id)
-
         status = self.status.value
 
         technical_mapping = self.technical_mapping.value
@@ -150,28 +162,6 @@ class GetTechnicalAssetsResponseItem:
         for access_modes_item_data in self.access_modes:
             access_modes_item = access_modes_item_data.to_dict()
             access_modes.append(access_modes_item)
-
-        configuration: dict[str, Any]
-        if isinstance(self.configuration, S3TechnicalAssetConfiguration):
-            configuration = self.configuration.to_dict()
-        elif isinstance(self.configuration, RustFSTechnicalAssetConfiguration):
-            configuration = self.configuration.to_dict()
-        elif isinstance(self.configuration, GlueTechnicalAssetConfiguration):
-            configuration = self.configuration.to_dict()
-        elif isinstance(self.configuration, DatabricksTechnicalAssetConfiguration):
-            configuration = self.configuration.to_dict()
-        elif isinstance(self.configuration, SnowflakeTechnicalAssetConfiguration):
-            configuration = self.configuration.to_dict()
-        elif isinstance(self.configuration, RedshiftTechnicalAssetConfiguration):
-            configuration = self.configuration.to_dict()
-        elif isinstance(self.configuration, PostgreSQLTechnicalAssetConfiguration):
-            configuration = self.configuration.to_dict()
-        elif isinstance(
-            self.configuration, OSISemanticModelTechnicalAssetConfiguration
-        ):
-            configuration = self.configuration.to_dict()
-        else:
-            configuration = self.configuration.to_dict()
 
         owner = self.owner.to_dict()
 
@@ -194,6 +184,62 @@ class GetTechnicalAssetsResponseItem:
             technical_info_item = technical_info_item_data.to_dict()
             technical_info.append(technical_info_item)
 
+        platform_id: None | str | Unset
+        if isinstance(self.platform_id, Unset):
+            platform_id = UNSET
+        elif isinstance(self.platform_id, UUID):
+            platform_id = str(self.platform_id)
+        else:
+            platform_id = self.platform_id
+
+        service_id: None | str | Unset
+        if isinstance(self.service_id, Unset):
+            service_id = UNSET
+        elif isinstance(self.service_id, UUID):
+            service_id = str(self.service_id)
+        else:
+            service_id = self.service_id
+
+        configuration: dict[str, Any] | None | Unset
+        if isinstance(self.configuration, Unset):
+            configuration = UNSET
+        elif isinstance(self.configuration, S3TechnicalAssetConfiguration):
+            configuration = self.configuration.to_dict()
+        elif isinstance(self.configuration, RustFSTechnicalAssetConfiguration):
+            configuration = self.configuration.to_dict()
+        elif isinstance(self.configuration, GlueTechnicalAssetConfiguration):
+            configuration = self.configuration.to_dict()
+        elif isinstance(self.configuration, DatabricksTechnicalAssetConfiguration):
+            configuration = self.configuration.to_dict()
+        elif isinstance(self.configuration, SnowflakeTechnicalAssetConfiguration):
+            configuration = self.configuration.to_dict()
+        elif isinstance(self.configuration, RedshiftTechnicalAssetConfiguration):
+            configuration = self.configuration.to_dict()
+        elif isinstance(self.configuration, PostgreSQLTechnicalAssetConfiguration):
+            configuration = self.configuration.to_dict()
+        elif isinstance(
+            self.configuration, OSISemanticModelTechnicalAssetConfiguration
+        ):
+            configuration = self.configuration.to_dict()
+        elif isinstance(self.configuration, AzureBlobTechnicalAssetConfiguration):
+            configuration = self.configuration.to_dict()
+        else:
+            configuration = self.configuration
+
+        plugin_key: None | str | Unset
+        if isinstance(self.plugin_key, Unset):
+            plugin_key = UNSET
+        else:
+            plugin_key = self.plugin_key
+
+        values: dict[str, Any] | None | Unset
+        if isinstance(self.values, Unset):
+            values = UNSET
+        elif isinstance(self.values, GetTechnicalAssetsResponseItemValuesType0):
+            values = self.values.to_dict()
+        else:
+            values = self.values
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
@@ -203,12 +249,9 @@ class GetTechnicalAssetsResponseItem:
                 "description": description,
                 "namespace": namespace,
                 "owner_id": owner_id,
-                "platform_id": platform_id,
-                "service_id": service_id,
                 "status": status,
                 "technical_mapping": technical_mapping,
                 "access_modes": access_modes,
-                "configuration": configuration,
                 "owner": owner,
                 "output_port_links": output_port_links,
                 "tags": tags,
@@ -217,6 +260,16 @@ class GetTechnicalAssetsResponseItem:
                 "technical_info": technical_info,
             }
         )
+        if platform_id is not UNSET:
+            field_dict["platform_id"] = platform_id
+        if service_id is not UNSET:
+            field_dict["service_id"] = service_id
+        if configuration is not UNSET:
+            field_dict["configuration"] = configuration
+        if plugin_key is not UNSET:
+            field_dict["plugin_key"] = plugin_key
+        if values is not UNSET:
+            field_dict["values"] = values
 
         return field_dict
 
@@ -229,6 +282,9 @@ class GetTechnicalAssetsResponseItem:
         from ..models.data_product import DataProduct
         from ..models.databricks_technical_asset_configuration import (
             DatabricksTechnicalAssetConfiguration,
+        )
+        from ..models.get_technical_assets_response_item_values_type_0 import (
+            GetTechnicalAssetsResponseItemValuesType0,
         )
         from ..models.glue_technical_asset_configuration import (
             GlueTechnicalAssetConfiguration,
@@ -266,10 +322,6 @@ class GetTechnicalAssetsResponseItem:
 
         owner_id = UUID(d.pop("owner_id"))
 
-        platform_id = UUID(d.pop("platform_id"))
-
-        service_id = UUID(d.pop("service_id"))
-
         status = TechnicalAssetStatus(d.pop("status"))
 
         technical_mapping = TechnicalMapping(d.pop("technical_mapping"))
@@ -280,101 +332,6 @@ class GetTechnicalAssetsResponseItem:
             access_modes_item = AccessMode.from_dict(access_modes_item_data)
 
             access_modes.append(access_modes_item)
-
-        def _parse_configuration(
-            data: object,
-        ) -> (
-            AzureBlobTechnicalAssetConfiguration
-            | DatabricksTechnicalAssetConfiguration
-            | GlueTechnicalAssetConfiguration
-            | OSISemanticModelTechnicalAssetConfiguration
-            | PostgreSQLTechnicalAssetConfiguration
-            | RedshiftTechnicalAssetConfiguration
-            | RustFSTechnicalAssetConfiguration
-            | S3TechnicalAssetConfiguration
-            | SnowflakeTechnicalAssetConfiguration
-        ):
-            try:
-                if not isinstance(data, dict):
-                    raise TypeError()
-                configuration_type_0 = S3TechnicalAssetConfiguration.from_dict(data)
-
-                return configuration_type_0
-            except (TypeError, ValueError, AttributeError, KeyError):
-                pass
-            try:
-                if not isinstance(data, dict):
-                    raise TypeError()
-                configuration_type_1 = RustFSTechnicalAssetConfiguration.from_dict(data)
-
-                return configuration_type_1
-            except (TypeError, ValueError, AttributeError, KeyError):
-                pass
-            try:
-                if not isinstance(data, dict):
-                    raise TypeError()
-                configuration_type_2 = GlueTechnicalAssetConfiguration.from_dict(data)
-
-                return configuration_type_2
-            except (TypeError, ValueError, AttributeError, KeyError):
-                pass
-            try:
-                if not isinstance(data, dict):
-                    raise TypeError()
-                configuration_type_3 = DatabricksTechnicalAssetConfiguration.from_dict(
-                    data
-                )
-
-                return configuration_type_3
-            except (TypeError, ValueError, AttributeError, KeyError):
-                pass
-            try:
-                if not isinstance(data, dict):
-                    raise TypeError()
-                configuration_type_4 = SnowflakeTechnicalAssetConfiguration.from_dict(
-                    data
-                )
-
-                return configuration_type_4
-            except (TypeError, ValueError, AttributeError, KeyError):
-                pass
-            try:
-                if not isinstance(data, dict):
-                    raise TypeError()
-                configuration_type_5 = RedshiftTechnicalAssetConfiguration.from_dict(
-                    data
-                )
-
-                return configuration_type_5
-            except (TypeError, ValueError, AttributeError, KeyError):
-                pass
-            try:
-                if not isinstance(data, dict):
-                    raise TypeError()
-                configuration_type_6 = PostgreSQLTechnicalAssetConfiguration.from_dict(
-                    data
-                )
-
-                return configuration_type_6
-            except (TypeError, ValueError, AttributeError, KeyError):
-                pass
-            try:
-                if not isinstance(data, dict):
-                    raise TypeError()
-                configuration_type_7 = (
-                    OSISemanticModelTechnicalAssetConfiguration.from_dict(data)
-                )
-
-                return configuration_type_7
-            except (TypeError, ValueError, AttributeError, KeyError):
-                pass
-            if not isinstance(data, dict):
-                raise TypeError()
-            configuration_type_8 = AzureBlobTechnicalAssetConfiguration.from_dict(data)
-
-            return configuration_type_8
-
-        configuration = _parse_configuration(d.pop("configuration"))
 
         owner = DataProduct.from_dict(d.pop("owner"))
 
@@ -405,24 +362,216 @@ class GetTechnicalAssetsResponseItem:
 
             technical_info.append(technical_info_item)
 
+        def _parse_platform_id(data: object) -> None | Unset | UUID:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, str):
+                    raise TypeError()
+                platform_id_type_0 = UUID(data)
+
+                return platform_id_type_0
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            return cast(None | Unset | UUID, data)
+
+        platform_id = _parse_platform_id(d.pop("platform_id", UNSET))
+
+        def _parse_service_id(data: object) -> None | Unset | UUID:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, str):
+                    raise TypeError()
+                service_id_type_0 = UUID(data)
+
+                return service_id_type_0
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            return cast(None | Unset | UUID, data)
+
+        service_id = _parse_service_id(d.pop("service_id", UNSET))
+
+        def _parse_configuration(
+            data: object,
+        ) -> (
+            AzureBlobTechnicalAssetConfiguration
+            | DatabricksTechnicalAssetConfiguration
+            | GlueTechnicalAssetConfiguration
+            | None
+            | OSISemanticModelTechnicalAssetConfiguration
+            | PostgreSQLTechnicalAssetConfiguration
+            | RedshiftTechnicalAssetConfiguration
+            | RustFSTechnicalAssetConfiguration
+            | S3TechnicalAssetConfiguration
+            | SnowflakeTechnicalAssetConfiguration
+            | Unset
+        ):
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, dict):
+                    raise TypeError()
+                configuration_type_0_type_0 = S3TechnicalAssetConfiguration.from_dict(
+                    data
+                )
+
+                return configuration_type_0_type_0
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            try:
+                if not isinstance(data, dict):
+                    raise TypeError()
+                configuration_type_0_type_1 = (
+                    RustFSTechnicalAssetConfiguration.from_dict(data)
+                )
+
+                return configuration_type_0_type_1
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            try:
+                if not isinstance(data, dict):
+                    raise TypeError()
+                configuration_type_0_type_2 = GlueTechnicalAssetConfiguration.from_dict(
+                    data
+                )
+
+                return configuration_type_0_type_2
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            try:
+                if not isinstance(data, dict):
+                    raise TypeError()
+                configuration_type_0_type_3 = (
+                    DatabricksTechnicalAssetConfiguration.from_dict(data)
+                )
+
+                return configuration_type_0_type_3
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            try:
+                if not isinstance(data, dict):
+                    raise TypeError()
+                configuration_type_0_type_4 = (
+                    SnowflakeTechnicalAssetConfiguration.from_dict(data)
+                )
+
+                return configuration_type_0_type_4
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            try:
+                if not isinstance(data, dict):
+                    raise TypeError()
+                configuration_type_0_type_5 = (
+                    RedshiftTechnicalAssetConfiguration.from_dict(data)
+                )
+
+                return configuration_type_0_type_5
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            try:
+                if not isinstance(data, dict):
+                    raise TypeError()
+                configuration_type_0_type_6 = (
+                    PostgreSQLTechnicalAssetConfiguration.from_dict(data)
+                )
+
+                return configuration_type_0_type_6
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            try:
+                if not isinstance(data, dict):
+                    raise TypeError()
+                configuration_type_0_type_7 = (
+                    OSISemanticModelTechnicalAssetConfiguration.from_dict(data)
+                )
+
+                return configuration_type_0_type_7
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            try:
+                if not isinstance(data, dict):
+                    raise TypeError()
+                configuration_type_0_type_8 = (
+                    AzureBlobTechnicalAssetConfiguration.from_dict(data)
+                )
+
+                return configuration_type_0_type_8
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            return cast(
+                AzureBlobTechnicalAssetConfiguration
+                | DatabricksTechnicalAssetConfiguration
+                | GlueTechnicalAssetConfiguration
+                | None
+                | OSISemanticModelTechnicalAssetConfiguration
+                | PostgreSQLTechnicalAssetConfiguration
+                | RedshiftTechnicalAssetConfiguration
+                | RustFSTechnicalAssetConfiguration
+                | S3TechnicalAssetConfiguration
+                | SnowflakeTechnicalAssetConfiguration
+                | Unset,
+                data,
+            )
+
+        configuration = _parse_configuration(d.pop("configuration", UNSET))
+
+        def _parse_plugin_key(data: object) -> None | str | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(None | str | Unset, data)
+
+        plugin_key = _parse_plugin_key(d.pop("plugin_key", UNSET))
+
+        def _parse_values(
+            data: object,
+        ) -> GetTechnicalAssetsResponseItemValuesType0 | None | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, dict):
+                    raise TypeError()
+                values_type_0 = GetTechnicalAssetsResponseItemValuesType0.from_dict(
+                    data
+                )
+
+                return values_type_0
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            return cast(GetTechnicalAssetsResponseItemValuesType0 | None | Unset, data)
+
+        values = _parse_values(d.pop("values", UNSET))
+
         get_technical_assets_response_item = cls(
             id=id,
             name=name,
             description=description,
             namespace=namespace,
             owner_id=owner_id,
-            platform_id=platform_id,
-            service_id=service_id,
             status=status,
             technical_mapping=technical_mapping,
             access_modes=access_modes,
-            configuration=configuration,
             owner=owner,
             output_port_links=output_port_links,
             tags=tags,
             source_aligned=source_aligned,
             result_string=result_string,
             technical_info=technical_info,
+            platform_id=platform_id,
+            service_id=service_id,
+            configuration=configuration,
+            plugin_key=plugin_key,
+            values=values,
         )
 
         get_technical_assets_response_item.additional_properties = d

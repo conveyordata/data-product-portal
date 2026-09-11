@@ -176,7 +176,7 @@ export function TechnicalAssetLinkModal({ onClose, dataProductId, datasetId, dat
                                 onChange={() => handleOutputToggle(output.id)}
                             />
                             <CustomSvgIconLoader
-                                iconComponent={getTechnicalAssetIcon(output.configuration.configuration_type, plugins)}
+                                iconComponent={getTechnicalAssetIcon(output.configuration?.configuration_type, plugins)}
                             />
                             <Flex vertical style={{ flex: 1 }}>
                                 <Typography.Text strong>{output.result_string}</Typography.Text>

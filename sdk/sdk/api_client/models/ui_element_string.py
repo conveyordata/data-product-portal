@@ -16,9 +16,11 @@ class UIElementString:
     """
     Attributes:
         initial_value (None | str | Unset):
+        pattern (None | str | Unset):
     """
 
     initial_value: None | str | Unset = UNSET
+    pattern: None | str | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -28,11 +30,19 @@ class UIElementString:
         else:
             initial_value = self.initial_value
 
+        pattern: None | str | Unset
+        if isinstance(self.pattern, Unset):
+            pattern = UNSET
+        else:
+            pattern = self.pattern
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update({})
         if initial_value is not UNSET:
             field_dict["initial_value"] = initial_value
+        if pattern is not UNSET:
+            field_dict["pattern"] = pattern
 
         return field_dict
 
@@ -49,8 +59,18 @@ class UIElementString:
 
         initial_value = _parse_initial_value(d.pop("initial_value", UNSET))
 
+        def _parse_pattern(data: object) -> None | str | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(None | str | Unset, data)
+
+        pattern = _parse_pattern(d.pop("pattern", UNSET))
+
         ui_element_string = cls(
             initial_value=initial_value,
+            pattern=pattern,
         )
 
         ui_element_string.additional_properties = d

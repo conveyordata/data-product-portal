@@ -81,6 +81,7 @@ export type UiElementSelect = {
 };
 export type UiElementString = {
   initial_value?: string | null;
+  pattern?: string | null;
 };
 export type UiElementRadio = {
   max_count?: number | null;
@@ -120,6 +121,7 @@ export type UiElementMetadataResponse = {
   platform_tile?: PlatformTile | null;
   show_in_form?: boolean;
   detailed_name: string;
+  is_dynamic_plugin?: boolean;
 };
 export type PluginResponse = {
   plugins: UiElementMetadataResponse[];
@@ -211,36 +213,43 @@ export type SnowflakeTechnicalAssetConfiguration = {
   access_granularity: AccessGranularity;
 };
 export type RenderTechnicalAssetAccessPathRequest = {
-  platform_id: string;
-  service_id: string;
-  configuration:
-    | ({
-        configuration_type: "AzureBlobTechnicalAssetConfiguration";
-      } & AzureBlobTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "DatabricksTechnicalAssetConfiguration";
-      } & DatabricksTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "GlueTechnicalAssetConfiguration";
-      } & GlueTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "OSISemanticModelTechnicalAssetConfiguration";
-      } & OsiSemanticModelTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "PostgreSQLTechnicalAssetConfiguration";
-      } & PostgreSqlTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "RedshiftTechnicalAssetConfiguration";
-      } & RedshiftTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "RustFSTechnicalAssetConfiguration";
-      } & RustFsTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "S3TechnicalAssetConfiguration";
-      } & S3TechnicalAssetConfiguration)
-    | ({
-        configuration_type: "SnowflakeTechnicalAssetConfiguration";
-      } & SnowflakeTechnicalAssetConfiguration);
+  platform_id?: string | null;
+  service_id?: string | null;
+  configuration?:
+    | (
+        | ({
+            configuration_type: "AzureBlobTechnicalAssetConfiguration";
+          } & AzureBlobTechnicalAssetConfiguration)
+        | ({
+            configuration_type: "DatabricksTechnicalAssetConfiguration";
+          } & DatabricksTechnicalAssetConfiguration)
+        | ({
+            configuration_type: "GlueTechnicalAssetConfiguration";
+          } & GlueTechnicalAssetConfiguration)
+        | ({
+            configuration_type: "OSISemanticModelTechnicalAssetConfiguration";
+          } & OsiSemanticModelTechnicalAssetConfiguration)
+        | ({
+            configuration_type: "PostgreSQLTechnicalAssetConfiguration";
+          } & PostgreSqlTechnicalAssetConfiguration)
+        | ({
+            configuration_type: "RedshiftTechnicalAssetConfiguration";
+          } & RedshiftTechnicalAssetConfiguration)
+        | ({
+            configuration_type: "RustFSTechnicalAssetConfiguration";
+          } & RustFsTechnicalAssetConfiguration)
+        | ({
+            configuration_type: "S3TechnicalAssetConfiguration";
+          } & S3TechnicalAssetConfiguration)
+        | ({
+            configuration_type: "SnowflakeTechnicalAssetConfiguration";
+          } & SnowflakeTechnicalAssetConfiguration)
+      )
+    | null;
+  plugin_key?: string | null;
+  values?: {
+    [key: string]: any;
+  } | null;
 };
 export enum UIElementType {
   String = "string",

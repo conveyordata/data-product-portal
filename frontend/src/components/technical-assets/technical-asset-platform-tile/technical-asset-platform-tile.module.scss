@@ -21,9 +21,11 @@ $icon-size: calc(#{$tile-size} / 2);
 }
 
 .icon {
-    svg {
+    svg,
+    img {
         height: $icon-size;
         width: $icon-size;
+        object-fit: contain;
     }
 }
 

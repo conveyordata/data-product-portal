@@ -149,7 +149,7 @@ export function TechnicalAssetCard({ technicalAsset, dataProductId, onDragStart,
                         <Flex gap="medium" align="center">
                             <CustomSvgIconLoader
                                 iconComponent={getTechnicalAssetIcon(
-                                    technicalAsset.configuration.configuration_type,
+                                    technicalAsset.configuration?.configuration_type,
                                     plugins,
                                 )}
                             />

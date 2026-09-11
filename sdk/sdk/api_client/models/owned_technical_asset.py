@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Any, TypeVar
+from typing import TYPE_CHECKING, Any, TypeVar, cast
 from uuid import UUID
 
 from attrs import define as _attrs_define
@@ -9,6 +9,7 @@ from attrs import field as _attrs_field
 
 from ..models.technical_asset_status import TechnicalAssetStatus
 from ..models.technical_mapping import TechnicalMapping
+from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
     from ..models.azure_blob_technical_asset_configuration import (
@@ -53,13 +54,14 @@ class OwnedTechnicalAsset:
         status (TechnicalAssetStatus):
         technical_mapping (TechnicalMapping):
         owner_id (UUID):
-        platform_id (UUID):
-        service_id (UUID):
-        configuration (AzureBlobTechnicalAssetConfiguration | DatabricksTechnicalAssetConfiguration |
-            GlueTechnicalAssetConfiguration | OSISemanticModelTechnicalAssetConfiguration |
-            PostgreSQLTechnicalAssetConfiguration | RedshiftTechnicalAssetConfiguration | RustFSTechnicalAssetConfiguration
-            | S3TechnicalAssetConfiguration | SnowflakeTechnicalAssetConfiguration):
         owner (DataProduct):
+        platform_id (None | Unset | UUID):
+        service_id (None | Unset | UUID):
+        configuration (AzureBlobTechnicalAssetConfiguration | DatabricksTechnicalAssetConfiguration |
+            GlueTechnicalAssetConfiguration | None | OSISemanticModelTechnicalAssetConfiguration |
+            PostgreSQLTechnicalAssetConfiguration | RedshiftTechnicalAssetConfiguration | RustFSTechnicalAssetConfiguration
+            | S3TechnicalAssetConfiguration | SnowflakeTechnicalAssetConfiguration | Unset):
+        plugin_key (None | str | Unset):
     """
 
     id: UUID
@@ -69,23 +71,29 @@ class OwnedTechnicalAsset:
     status: TechnicalAssetStatus
     technical_mapping: TechnicalMapping
     owner_id: UUID
-    platform_id: UUID
-    service_id: UUID
+    owner: DataProduct
+    platform_id: None | Unset | UUID = UNSET
+    service_id: None | Unset | UUID = UNSET
     configuration: (
         AzureBlobTechnicalAssetConfiguration
         | DatabricksTechnicalAssetConfiguration
         | GlueTechnicalAssetConfiguration
+        | None
         | OSISemanticModelTechnicalAssetConfiguration
         | PostgreSQLTechnicalAssetConfiguration
         | RedshiftTechnicalAssetConfiguration
         | RustFSTechnicalAssetConfiguration
         | S3TechnicalAssetConfiguration
         | SnowflakeTechnicalAssetConfiguration
-    )
-    owner: DataProduct
+        | Unset
+    ) = UNSET
+    plugin_key: None | str | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
+        from ..models.azure_blob_technical_asset_configuration import (
+            AzureBlobTechnicalAssetConfiguration,
+        )
         from ..models.databricks_technical_asset_configuration import (
             DatabricksTechnicalAssetConfiguration,
         )
@@ -125,12 +133,28 @@ class OwnedTechnicalAsset:
 
         owner_id = str(self.owner_id)
 
-        platform_id = str(self.platform_id)
+        owner = self.owner.to_dict()
 
-        service_id = str(self.service_id)
+        platform_id: None | str | Unset
+        if isinstance(self.platform_id, Unset):
+            platform_id = UNSET
+        elif isinstance(self.platform_id, UUID):
+            platform_id = str(self.platform_id)
+        else:
+            platform_id = self.platform_id
 
-        configuration: dict[str, Any]
-        if isinstance(self.configuration, S3TechnicalAssetConfiguration):
+        service_id: None | str | Unset
+        if isinstance(self.service_id, Unset):
+            service_id = UNSET
+        elif isinstance(self.service_id, UUID):
+            service_id = str(self.service_id)
+        else:
+            service_id = self.service_id
+
+        configuration: dict[str, Any] | None | Unset
+        if isinstance(self.configuration, Unset):
+            configuration = UNSET
+        elif isinstance(self.configuration, S3TechnicalAssetConfiguration):
             configuration = self.configuration.to_dict()
         elif isinstance(self.configuration, RustFSTechnicalAssetConfiguration):
             configuration = self.configuration.to_dict()
@@ -148,10 +172,16 @@ class OwnedTechnicalAsset:
             self.configuration, OSISemanticModelTechnicalAssetConfiguration
         ):
             configuration = self.configuration.to_dict()
-        else:
+        elif isinstance(self.configuration, AzureBlobTechnicalAssetConfiguration):
             configuration = self.configuration.to_dict()
+        else:
+            configuration = self.configuration
 
-        owner = self.owner.to_dict()
+        plugin_key: None | str | Unset
+        if isinstance(self.plugin_key, Unset):
+            plugin_key = UNSET
+        else:
+            plugin_key = self.plugin_key
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
@@ -164,12 +194,17 @@ class OwnedTechnicalAsset:
                 "status": status,
                 "technical_mapping": technical_mapping,
                 "owner_id": owner_id,
-                "platform_id": platform_id,
-                "service_id": service_id,
-                "configuration": configuration,
                 "owner": owner,
             }
         )
+        if platform_id is not UNSET:
+            field_dict["platform_id"] = platform_id
+        if service_id is not UNSET:
+            field_dict["service_id"] = service_id
+        if configuration is not UNSET:
+            field_dict["configuration"] = configuration
+        if plugin_key is not UNSET:
+            field_dict["plugin_key"] = plugin_key
 
         return field_dict
 
@@ -219,9 +254,41 @@ class OwnedTechnicalAsset:
 
         owner_id = UUID(d.pop("owner_id"))
 
-        platform_id = UUID(d.pop("platform_id"))
+        owner = DataProduct.from_dict(d.pop("owner"))
 
-        service_id = UUID(d.pop("service_id"))
+        def _parse_platform_id(data: object) -> None | Unset | UUID:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, str):
+                    raise TypeError()
+                platform_id_type_0 = UUID(data)
+
+                return platform_id_type_0
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            return cast(None | Unset | UUID, data)
+
+        platform_id = _parse_platform_id(d.pop("platform_id", UNSET))
+
+        def _parse_service_id(data: object) -> None | Unset | UUID:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, str):
+                    raise TypeError()
+                service_id_type_0 = UUID(data)
+
+                return service_id_type_0
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            return cast(None | Unset | UUID, data)
+
+        service_id = _parse_service_id(d.pop("service_id", UNSET))
 
         def _parse_configuration(
             data: object,
@@ -229,96 +296,134 @@ class OwnedTechnicalAsset:
             AzureBlobTechnicalAssetConfiguration
             | DatabricksTechnicalAssetConfiguration
             | GlueTechnicalAssetConfiguration
+            | None
             | OSISemanticModelTechnicalAssetConfiguration
             | PostgreSQLTechnicalAssetConfiguration
             | RedshiftTechnicalAssetConfiguration
             | RustFSTechnicalAssetConfiguration
             | S3TechnicalAssetConfiguration
             | SnowflakeTechnicalAssetConfiguration
+            | Unset
         ):
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
             try:
                 if not isinstance(data, dict):
                     raise TypeError()
-                configuration_type_0 = S3TechnicalAssetConfiguration.from_dict(data)
-
-                return configuration_type_0
-            except (TypeError, ValueError, AttributeError, KeyError):
-                pass
-            try:
-                if not isinstance(data, dict):
-                    raise TypeError()
-                configuration_type_1 = RustFSTechnicalAssetConfiguration.from_dict(data)
-
-                return configuration_type_1
-            except (TypeError, ValueError, AttributeError, KeyError):
-                pass
-            try:
-                if not isinstance(data, dict):
-                    raise TypeError()
-                configuration_type_2 = GlueTechnicalAssetConfiguration.from_dict(data)
-
-                return configuration_type_2
-            except (TypeError, ValueError, AttributeError, KeyError):
-                pass
-            try:
-                if not isinstance(data, dict):
-                    raise TypeError()
-                configuration_type_3 = DatabricksTechnicalAssetConfiguration.from_dict(
+                configuration_type_0_type_0 = S3TechnicalAssetConfiguration.from_dict(
                     data
                 )
 
-                return configuration_type_3
+                return configuration_type_0_type_0
             except (TypeError, ValueError, AttributeError, KeyError):
                 pass
             try:
                 if not isinstance(data, dict):
                     raise TypeError()
-                configuration_type_4 = SnowflakeTechnicalAssetConfiguration.from_dict(
+                configuration_type_0_type_1 = (
+                    RustFSTechnicalAssetConfiguration.from_dict(data)
+                )
+
+                return configuration_type_0_type_1
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            try:
+                if not isinstance(data, dict):
+                    raise TypeError()
+                configuration_type_0_type_2 = GlueTechnicalAssetConfiguration.from_dict(
                     data
                 )
 
-                return configuration_type_4
+                return configuration_type_0_type_2
             except (TypeError, ValueError, AttributeError, KeyError):
                 pass
             try:
                 if not isinstance(data, dict):
                     raise TypeError()
-                configuration_type_5 = RedshiftTechnicalAssetConfiguration.from_dict(
-                    data
+                configuration_type_0_type_3 = (
+                    DatabricksTechnicalAssetConfiguration.from_dict(data)
                 )
 
-                return configuration_type_5
+                return configuration_type_0_type_3
             except (TypeError, ValueError, AttributeError, KeyError):
                 pass
             try:
                 if not isinstance(data, dict):
                     raise TypeError()
-                configuration_type_6 = PostgreSQLTechnicalAssetConfiguration.from_dict(
-                    data
+                configuration_type_0_type_4 = (
+                    SnowflakeTechnicalAssetConfiguration.from_dict(data)
                 )
 
-                return configuration_type_6
+                return configuration_type_0_type_4
             except (TypeError, ValueError, AttributeError, KeyError):
                 pass
             try:
                 if not isinstance(data, dict):
                     raise TypeError()
-                configuration_type_7 = (
+                configuration_type_0_type_5 = (
+                    RedshiftTechnicalAssetConfiguration.from_dict(data)
+                )
+
+                return configuration_type_0_type_5
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            try:
+                if not isinstance(data, dict):
+                    raise TypeError()
+                configuration_type_0_type_6 = (
+                    PostgreSQLTechnicalAssetConfiguration.from_dict(data)
+                )
+
+                return configuration_type_0_type_6
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            try:
+                if not isinstance(data, dict):
+                    raise TypeError()
+                configuration_type_0_type_7 = (
                     OSISemanticModelTechnicalAssetConfiguration.from_dict(data)
                 )
 
-                return configuration_type_7
+                return configuration_type_0_type_7
             except (TypeError, ValueError, AttributeError, KeyError):
                 pass
-            if not isinstance(data, dict):
-                raise TypeError()
-            configuration_type_8 = AzureBlobTechnicalAssetConfiguration.from_dict(data)
+            try:
+                if not isinstance(data, dict):
+                    raise TypeError()
+                configuration_type_0_type_8 = (
+                    AzureBlobTechnicalAssetConfiguration.from_dict(data)
+                )
 
-            return configuration_type_8
+                return configuration_type_0_type_8
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            return cast(
+                AzureBlobTechnicalAssetConfiguration
+                | DatabricksTechnicalAssetConfiguration
+                | GlueTechnicalAssetConfiguration
+                | None
+                | OSISemanticModelTechnicalAssetConfiguration
+                | PostgreSQLTechnicalAssetConfiguration
+                | RedshiftTechnicalAssetConfiguration
+                | RustFSTechnicalAssetConfiguration
+                | S3TechnicalAssetConfiguration
+                | SnowflakeTechnicalAssetConfiguration
+                | Unset,
+                data,
+            )
 
-        configuration = _parse_configuration(d.pop("configuration"))
+        configuration = _parse_configuration(d.pop("configuration", UNSET))
 
-        owner = DataProduct.from_dict(d.pop("owner"))
+        def _parse_plugin_key(data: object) -> None | str | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(None | str | Unset, data)
+
+        plugin_key = _parse_plugin_key(d.pop("plugin_key", UNSET))
 
         owned_technical_asset = cls(
             id=id,
@@ -328,10 +433,11 @@ class OwnedTechnicalAsset:
             status=status,
             technical_mapping=technical_mapping,
             owner_id=owner_id,
+            owner=owner,
             platform_id=platform_id,
             service_id=service_id,
             configuration=configuration,
-            owner=owner,
+            plugin_key=plugin_key,
         )
 
         owned_technical_asset.additional_properties = d

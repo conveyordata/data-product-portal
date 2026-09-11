@@ -30,6 +30,9 @@ class UIElementMetadataResponse(ORMModel):
     platform_tile: Optional[PlatformTile] = None  # Complete tile structure
     show_in_form: bool = True  # Whether to show this platform in the configuration form, can be set to False for platforms that are only meant to be shown as tiles without detailed configuration options
     detailed_name: str
+    # True for a dynamically loaded plugin (ADR-0024) - the frontend submits
+    # `plugin_key`/`values` for these instead of `platform_id`/`service_id`/`configuration`.
+    is_dynamic_plugin: bool = False
 
 
 class PluginResponse(ORMModel):

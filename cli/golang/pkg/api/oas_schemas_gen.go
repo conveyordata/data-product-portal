@@ -1526,12 +1526,14 @@ func (*CreateTagResponse) createTagRes() {}
 
 // Ref: #/components/schemas/CreateTechnicalAssetRequest
 type CreateTechnicalAssetRequest struct {
-	Name          string                                   `json:"name"`
-	Description   string                                   `json:"description"`
-	Namespace     string                                   `json:"namespace"`
-	PlatformID    uuid.UUID                                `json:"platform_id"`
-	ServiceID     uuid.UUID                                `json:"service_id"`
-	Configuration CreateTechnicalAssetRequestConfiguration `json:"configuration"`
+	Name          string                                         `json:"name"`
+	Description   string                                         `json:"description"`
+	Namespace     string                                         `json:"namespace"`
+	PlatformID    OptNilUUID                                     `json:"platform_id"`
+	ServiceID     OptNilUUID                                     `json:"service_id"`
+	Configuration OptNilCreateTechnicalAssetRequestConfiguration `json:"configuration"`
+	PluginKey     OptNilString                                   `json:"plugin_key"`
+	Values        OptNilCreateTechnicalAssetRequestValues        `json:"values"`
 	// DEPRECATED: Use 'technical_mapping' instead. This field will be removed in a future version.
 	//
 	// Deprecated: schema marks this property as deprecated.
@@ -1557,18 +1559,28 @@ func (s *CreateTechnicalAssetRequest) GetNamespace() string {
 }
 
 // GetPlatformID returns the value of PlatformID.
-func (s *CreateTechnicalAssetRequest) GetPlatformID() uuid.UUID {
+func (s *CreateTechnicalAssetRequest) GetPlatformID() OptNilUUID {
 	return s.PlatformID
 }
 
 // GetServiceID returns the value of ServiceID.
-func (s *CreateTechnicalAssetRequest) GetServiceID() uuid.UUID {
+func (s *CreateTechnicalAssetRequest) GetServiceID() OptNilUUID {
 	return s.ServiceID
 }
 
 // GetConfiguration returns the value of Configuration.
-func (s *CreateTechnicalAssetRequest) GetConfiguration() CreateTechnicalAssetRequestConfiguration {
+func (s *CreateTechnicalAssetRequest) GetConfiguration() OptNilCreateTechnicalAssetRequestConfiguration {
 	return s.Configuration
+}
+
+// GetPluginKey returns the value of PluginKey.
+func (s *CreateTechnicalAssetRequest) GetPluginKey() OptNilString {
+	return s.PluginKey
+}
+
+// GetValues returns the value of Values.
+func (s *CreateTechnicalAssetRequest) GetValues() OptNilCreateTechnicalAssetRequestValues {
+	return s.Values
 }
 
 // GetSourceAligned returns the value of SourceAligned.
@@ -1607,18 +1619,28 @@ func (s *CreateTechnicalAssetRequest) SetNamespace(val string) {
 }
 
 // SetPlatformID sets the value of PlatformID.
-func (s *CreateTechnicalAssetRequest) SetPlatformID(val uuid.UUID) {
+func (s *CreateTechnicalAssetRequest) SetPlatformID(val OptNilUUID) {
 	s.PlatformID = val
 }
 
 // SetServiceID sets the value of ServiceID.
-func (s *CreateTechnicalAssetRequest) SetServiceID(val uuid.UUID) {
+func (s *CreateTechnicalAssetRequest) SetServiceID(val OptNilUUID) {
 	s.ServiceID = val
 }
 
 // SetConfiguration sets the value of Configuration.
-func (s *CreateTechnicalAssetRequest) SetConfiguration(val CreateTechnicalAssetRequestConfiguration) {
+func (s *CreateTechnicalAssetRequest) SetConfiguration(val OptNilCreateTechnicalAssetRequestConfiguration) {
 	s.Configuration = val
+}
+
+// SetPluginKey sets the value of PluginKey.
+func (s *CreateTechnicalAssetRequest) SetPluginKey(val OptNilString) {
+	s.PluginKey = val
+}
+
+// SetValues sets the value of Values.
+func (s *CreateTechnicalAssetRequest) SetValues(val OptNilCreateTechnicalAssetRequestValues) {
+	s.Values = val
 }
 
 // SetSourceAligned sets the value of SourceAligned.
@@ -1904,6 +1926,17 @@ func NewAzureBlobTechnicalAssetConfigurationCreateTechnicalAssetRequestConfigura
 	var s CreateTechnicalAssetRequestConfiguration
 	s.SetAzureBlobTechnicalAssetConfiguration(v)
 	return s
+}
+
+type CreateTechnicalAssetRequestValues map[string]jx.Raw
+
+func (s *CreateTechnicalAssetRequestValues) init() CreateTechnicalAssetRequestValues {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
 }
 
 // Ref: #/components/schemas/CreateTechnicalAssetResponse
@@ -5755,6 +5788,10 @@ func (s *GetPlatformServicesResponse) SetPlatformServices(val []PlatformService)
 
 func (*GetPlatformServicesResponse) getPlatformServicesRes() {}
 
+type GetPluginIconOKApplicationJSON jx.Raw
+
+func (*GetPluginIconOKApplicationJSON) getPluginIconRes() {}
+
 // Ref: #/components/schemas/GetRolesResponse
 type GetRolesResponse struct {
 	Roles []Role `json:"roles"`
@@ -5791,20 +5828,22 @@ func (*GetTechnicalAssetsResponse) getDataProductTechnicalAssetsRes() {}
 
 // Ref: #/components/schemas/GetTechnicalAssetsResponseItem
 type GetTechnicalAssetsResponseItem struct {
-	ID               uuid.UUID                                   `json:"id"`
-	Name             string                                      `json:"name"`
-	Description      string                                      `json:"description"`
-	Namespace        string                                      `json:"namespace"`
-	OwnerID          uuid.UUID                                   `json:"owner_id"`
-	PlatformID       uuid.UUID                                   `json:"platform_id"`
-	ServiceID        uuid.UUID                                   `json:"service_id"`
-	Status           TechnicalAssetStatus                        `json:"status"`
-	TechnicalMapping TechnicalMapping                            `json:"technical_mapping"`
-	AccessModes      []AccessMode                                `json:"access_modes"`
-	Configuration    GetTechnicalAssetsResponseItemConfiguration `json:"configuration"`
-	Owner            DataProduct                                 `json:"owner"`
-	OutputPortLinks  []OutputPortLink                            `json:"output_port_links"`
-	Tags             []Tag                                       `json:"tags"`
+	ID               uuid.UUID                                         `json:"id"`
+	Name             string                                            `json:"name"`
+	Description      string                                            `json:"description"`
+	Namespace        string                                            `json:"namespace"`
+	OwnerID          uuid.UUID                                         `json:"owner_id"`
+	PlatformID       OptNilUUID                                        `json:"platform_id"`
+	ServiceID        OptNilUUID                                        `json:"service_id"`
+	Status           TechnicalAssetStatus                              `json:"status"`
+	TechnicalMapping TechnicalMapping                                  `json:"technical_mapping"`
+	AccessModes      []AccessMode                                      `json:"access_modes"`
+	Configuration    OptNilGetTechnicalAssetsResponseItemConfiguration `json:"configuration"`
+	PluginKey        OptNilString                                      `json:"plugin_key"`
+	Values           OptNilGetTechnicalAssetsResponseItemValues        `json:"values"`
+	Owner            DataProduct                                       `json:"owner"`
+	OutputPortLinks  []OutputPortLink                                  `json:"output_port_links"`
+	Tags             []Tag                                             `json:"tags"`
 	// DEPRECATED: Use 'technical_mapping' instead. This field will be removed in a future version.
 	SourceAligned bool            `json:"sourceAligned"`
 	ResultString  string          `json:"result_string"`
@@ -5837,12 +5876,12 @@ func (s *GetTechnicalAssetsResponseItem) GetOwnerID() uuid.UUID {
 }
 
 // GetPlatformID returns the value of PlatformID.
-func (s *GetTechnicalAssetsResponseItem) GetPlatformID() uuid.UUID {
+func (s *GetTechnicalAssetsResponseItem) GetPlatformID() OptNilUUID {
 	return s.PlatformID
 }
 
 // GetServiceID returns the value of ServiceID.
-func (s *GetTechnicalAssetsResponseItem) GetServiceID() uuid.UUID {
+func (s *GetTechnicalAssetsResponseItem) GetServiceID() OptNilUUID {
 	return s.ServiceID
 }
 
@@ -5862,8 +5901,18 @@ func (s *GetTechnicalAssetsResponseItem) GetAccessModes() []AccessMode {
 }
 
 // GetConfiguration returns the value of Configuration.
-func (s *GetTechnicalAssetsResponseItem) GetConfiguration() GetTechnicalAssetsResponseItemConfiguration {
+func (s *GetTechnicalAssetsResponseItem) GetConfiguration() OptNilGetTechnicalAssetsResponseItemConfiguration {
 	return s.Configuration
+}
+
+// GetPluginKey returns the value of PluginKey.
+func (s *GetTechnicalAssetsResponseItem) GetPluginKey() OptNilString {
+	return s.PluginKey
+}
+
+// GetValues returns the value of Values.
+func (s *GetTechnicalAssetsResponseItem) GetValues() OptNilGetTechnicalAssetsResponseItemValues {
+	return s.Values
 }
 
 // GetOwner returns the value of Owner.
@@ -5922,12 +5971,12 @@ func (s *GetTechnicalAssetsResponseItem) SetOwnerID(val uuid.UUID) {
 }
 
 // SetPlatformID sets the value of PlatformID.
-func (s *GetTechnicalAssetsResponseItem) SetPlatformID(val uuid.UUID) {
+func (s *GetTechnicalAssetsResponseItem) SetPlatformID(val OptNilUUID) {
 	s.PlatformID = val
 }
 
 // SetServiceID sets the value of ServiceID.
-func (s *GetTechnicalAssetsResponseItem) SetServiceID(val uuid.UUID) {
+func (s *GetTechnicalAssetsResponseItem) SetServiceID(val OptNilUUID) {
 	s.ServiceID = val
 }
 
@@ -5947,8 +5996,18 @@ func (s *GetTechnicalAssetsResponseItem) SetAccessModes(val []AccessMode) {
 }
 
 // SetConfiguration sets the value of Configuration.
-func (s *GetTechnicalAssetsResponseItem) SetConfiguration(val GetTechnicalAssetsResponseItemConfiguration) {
+func (s *GetTechnicalAssetsResponseItem) SetConfiguration(val OptNilGetTechnicalAssetsResponseItemConfiguration) {
 	s.Configuration = val
+}
+
+// SetPluginKey sets the value of PluginKey.
+func (s *GetTechnicalAssetsResponseItem) SetPluginKey(val OptNilString) {
+	s.PluginKey = val
+}
+
+// SetValues sets the value of Values.
+func (s *GetTechnicalAssetsResponseItem) SetValues(val OptNilGetTechnicalAssetsResponseItemValues) {
+	s.Values = val
 }
 
 // SetOwner sets the value of Owner.
@@ -6246,6 +6305,17 @@ func NewAzureBlobTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfig
 	var s GetTechnicalAssetsResponseItemConfiguration
 	s.SetAzureBlobTechnicalAssetConfiguration(v)
 	return s
+}
+
+type GetTechnicalAssetsResponseItemValues map[string]jx.Raw
+
+func (s *GetTechnicalAssetsResponseItemValues) init() GetTechnicalAssetsResponseItemValues {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
 }
 
 // Ref: #/components/schemas/GetUserNotificationsResponse
@@ -6636,6 +6706,7 @@ func (*HTTPValidationError) getOutputPortsEventHistoryRes()               {}
 func (*HTTPValidationError) getPlatformServiceConfigRes()                 {}
 func (*HTTPValidationError) getPlatformServicesRes()                      {}
 func (*HTTPValidationError) getPluginFormRes()                            {}
+func (*HTTPValidationError) getPluginIconRes()                            {}
 func (*HTTPValidationError) getPluginURLRes()                             {}
 func (*HTTPValidationError) getRolesRes()                                 {}
 func (*HTTPValidationError) getSinglePlatformServiceConfigurationRes()    {}
@@ -8091,6 +8162,142 @@ func (o OptNilBool) Or(d bool) bool {
 	return d
 }
 
+// NewOptNilCreateTechnicalAssetRequestConfiguration returns new OptNilCreateTechnicalAssetRequestConfiguration with value set to v.
+func NewOptNilCreateTechnicalAssetRequestConfiguration(v CreateTechnicalAssetRequestConfiguration) OptNilCreateTechnicalAssetRequestConfiguration {
+	return OptNilCreateTechnicalAssetRequestConfiguration{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptNilCreateTechnicalAssetRequestConfiguration is optional nullable CreateTechnicalAssetRequestConfiguration.
+type OptNilCreateTechnicalAssetRequestConfiguration struct {
+	Value CreateTechnicalAssetRequestConfiguration
+	Set   bool
+	Null  bool
+}
+
+// IsSet returns true if OptNilCreateTechnicalAssetRequestConfiguration was set.
+func (o OptNilCreateTechnicalAssetRequestConfiguration) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptNilCreateTechnicalAssetRequestConfiguration) Reset() {
+	var v CreateTechnicalAssetRequestConfiguration
+	o.Value = v
+	o.Set = false
+	o.Null = false
+}
+
+// SetTo sets value to v.
+func (o *OptNilCreateTechnicalAssetRequestConfiguration) SetTo(v CreateTechnicalAssetRequestConfiguration) {
+	o.Set = true
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o OptNilCreateTechnicalAssetRequestConfiguration) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *OptNilCreateTechnicalAssetRequestConfiguration) SetToNull() {
+	o.Set = true
+	o.Null = true
+	var v CreateTechnicalAssetRequestConfiguration
+	o.Value = v
+}
+
+// IsEmpty returns true if the field was omitted from the payload (not Set and not Null).
+func (o OptNilCreateTechnicalAssetRequestConfiguration) IsEmpty() bool {
+	return !o.Set && !o.Null
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptNilCreateTechnicalAssetRequestConfiguration) Get() (v CreateTechnicalAssetRequestConfiguration, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptNilCreateTechnicalAssetRequestConfiguration) Or(d CreateTechnicalAssetRequestConfiguration) CreateTechnicalAssetRequestConfiguration {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptNilCreateTechnicalAssetRequestValues returns new OptNilCreateTechnicalAssetRequestValues with value set to v.
+func NewOptNilCreateTechnicalAssetRequestValues(v CreateTechnicalAssetRequestValues) OptNilCreateTechnicalAssetRequestValues {
+	return OptNilCreateTechnicalAssetRequestValues{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptNilCreateTechnicalAssetRequestValues is optional nullable CreateTechnicalAssetRequestValues.
+type OptNilCreateTechnicalAssetRequestValues struct {
+	Value CreateTechnicalAssetRequestValues
+	Set   bool
+	Null  bool
+}
+
+// IsSet returns true if OptNilCreateTechnicalAssetRequestValues was set.
+func (o OptNilCreateTechnicalAssetRequestValues) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptNilCreateTechnicalAssetRequestValues) Reset() {
+	var v CreateTechnicalAssetRequestValues
+	o.Value = v
+	o.Set = false
+	o.Null = false
+}
+
+// SetTo sets value to v.
+func (o *OptNilCreateTechnicalAssetRequestValues) SetTo(v CreateTechnicalAssetRequestValues) {
+	o.Set = true
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o OptNilCreateTechnicalAssetRequestValues) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *OptNilCreateTechnicalAssetRequestValues) SetToNull() {
+	o.Set = true
+	o.Null = true
+	var v CreateTechnicalAssetRequestValues
+	o.Value = v
+}
+
+// IsEmpty returns true if the field was omitted from the payload (not Set and not Null).
+func (o OptNilCreateTechnicalAssetRequestValues) IsEmpty() bool {
+	return !o.Set && !o.Null
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptNilCreateTechnicalAssetRequestValues) Get() (v CreateTechnicalAssetRequestValues, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptNilCreateTechnicalAssetRequestValues) Or(d CreateTechnicalAssetRequestValues) CreateTechnicalAssetRequestValues {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptNilDataProduct returns new OptNilDataProduct with value set to v.
 func NewOptNilDataProduct(v DataProduct) OptNilDataProduct {
 	return OptNilDataProduct{
@@ -8431,6 +8638,142 @@ func (o OptNilFieldDependencyArray) Or(d []FieldDependency) []FieldDependency {
 	return d
 }
 
+// NewOptNilGetTechnicalAssetsResponseItemConfiguration returns new OptNilGetTechnicalAssetsResponseItemConfiguration with value set to v.
+func NewOptNilGetTechnicalAssetsResponseItemConfiguration(v GetTechnicalAssetsResponseItemConfiguration) OptNilGetTechnicalAssetsResponseItemConfiguration {
+	return OptNilGetTechnicalAssetsResponseItemConfiguration{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptNilGetTechnicalAssetsResponseItemConfiguration is optional nullable GetTechnicalAssetsResponseItemConfiguration.
+type OptNilGetTechnicalAssetsResponseItemConfiguration struct {
+	Value GetTechnicalAssetsResponseItemConfiguration
+	Set   bool
+	Null  bool
+}
+
+// IsSet returns true if OptNilGetTechnicalAssetsResponseItemConfiguration was set.
+func (o OptNilGetTechnicalAssetsResponseItemConfiguration) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptNilGetTechnicalAssetsResponseItemConfiguration) Reset() {
+	var v GetTechnicalAssetsResponseItemConfiguration
+	o.Value = v
+	o.Set = false
+	o.Null = false
+}
+
+// SetTo sets value to v.
+func (o *OptNilGetTechnicalAssetsResponseItemConfiguration) SetTo(v GetTechnicalAssetsResponseItemConfiguration) {
+	o.Set = true
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o OptNilGetTechnicalAssetsResponseItemConfiguration) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *OptNilGetTechnicalAssetsResponseItemConfiguration) SetToNull() {
+	o.Set = true
+	o.Null = true
+	var v GetTechnicalAssetsResponseItemConfiguration
+	o.Value = v
+}
+
+// IsEmpty returns true if the field was omitted from the payload (not Set and not Null).
+func (o OptNilGetTechnicalAssetsResponseItemConfiguration) IsEmpty() bool {
+	return !o.Set && !o.Null
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptNilGetTechnicalAssetsResponseItemConfiguration) Get() (v GetTechnicalAssetsResponseItemConfiguration, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptNilGetTechnicalAssetsResponseItemConfiguration) Or(d GetTechnicalAssetsResponseItemConfiguration) GetTechnicalAssetsResponseItemConfiguration {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptNilGetTechnicalAssetsResponseItemValues returns new OptNilGetTechnicalAssetsResponseItemValues with value set to v.
+func NewOptNilGetTechnicalAssetsResponseItemValues(v GetTechnicalAssetsResponseItemValues) OptNilGetTechnicalAssetsResponseItemValues {
+	return OptNilGetTechnicalAssetsResponseItemValues{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptNilGetTechnicalAssetsResponseItemValues is optional nullable GetTechnicalAssetsResponseItemValues.
+type OptNilGetTechnicalAssetsResponseItemValues struct {
+	Value GetTechnicalAssetsResponseItemValues
+	Set   bool
+	Null  bool
+}
+
+// IsSet returns true if OptNilGetTechnicalAssetsResponseItemValues was set.
+func (o OptNilGetTechnicalAssetsResponseItemValues) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptNilGetTechnicalAssetsResponseItemValues) Reset() {
+	var v GetTechnicalAssetsResponseItemValues
+	o.Value = v
+	o.Set = false
+	o.Null = false
+}
+
+// SetTo sets value to v.
+func (o *OptNilGetTechnicalAssetsResponseItemValues) SetTo(v GetTechnicalAssetsResponseItemValues) {
+	o.Set = true
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o OptNilGetTechnicalAssetsResponseItemValues) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *OptNilGetTechnicalAssetsResponseItemValues) SetToNull() {
+	o.Set = true
+	o.Null = true
+	var v GetTechnicalAssetsResponseItemValues
+	o.Value = v
+}
+
+// IsEmpty returns true if the field was omitted from the payload (not Set and not Null).
+func (o OptNilGetTechnicalAssetsResponseItemValues) IsEmpty() bool {
+	return !o.Set && !o.Null
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptNilGetTechnicalAssetsResponseItemValues) Get() (v GetTechnicalAssetsResponseItemValues, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptNilGetTechnicalAssetsResponseItemValues) Or(d GetTechnicalAssetsResponseItemValues) GetTechnicalAssetsResponseItemValues {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptNilInt returns new OptNilInt with value set to v.
 func NewOptNilInt(v int) OptNilInt {
 	return OptNilInt{
@@ -8765,6 +9108,142 @@ func (o OptNilPlatformTile) Get() (v PlatformTile, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptNilPlatformTile) Or(d PlatformTile) PlatformTile {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptNilRenderTechnicalAssetAccessPathRequestConfiguration returns new OptNilRenderTechnicalAssetAccessPathRequestConfiguration with value set to v.
+func NewOptNilRenderTechnicalAssetAccessPathRequestConfiguration(v RenderTechnicalAssetAccessPathRequestConfiguration) OptNilRenderTechnicalAssetAccessPathRequestConfiguration {
+	return OptNilRenderTechnicalAssetAccessPathRequestConfiguration{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptNilRenderTechnicalAssetAccessPathRequestConfiguration is optional nullable RenderTechnicalAssetAccessPathRequestConfiguration.
+type OptNilRenderTechnicalAssetAccessPathRequestConfiguration struct {
+	Value RenderTechnicalAssetAccessPathRequestConfiguration
+	Set   bool
+	Null  bool
+}
+
+// IsSet returns true if OptNilRenderTechnicalAssetAccessPathRequestConfiguration was set.
+func (o OptNilRenderTechnicalAssetAccessPathRequestConfiguration) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptNilRenderTechnicalAssetAccessPathRequestConfiguration) Reset() {
+	var v RenderTechnicalAssetAccessPathRequestConfiguration
+	o.Value = v
+	o.Set = false
+	o.Null = false
+}
+
+// SetTo sets value to v.
+func (o *OptNilRenderTechnicalAssetAccessPathRequestConfiguration) SetTo(v RenderTechnicalAssetAccessPathRequestConfiguration) {
+	o.Set = true
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o OptNilRenderTechnicalAssetAccessPathRequestConfiguration) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *OptNilRenderTechnicalAssetAccessPathRequestConfiguration) SetToNull() {
+	o.Set = true
+	o.Null = true
+	var v RenderTechnicalAssetAccessPathRequestConfiguration
+	o.Value = v
+}
+
+// IsEmpty returns true if the field was omitted from the payload (not Set and not Null).
+func (o OptNilRenderTechnicalAssetAccessPathRequestConfiguration) IsEmpty() bool {
+	return !o.Set && !o.Null
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptNilRenderTechnicalAssetAccessPathRequestConfiguration) Get() (v RenderTechnicalAssetAccessPathRequestConfiguration, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptNilRenderTechnicalAssetAccessPathRequestConfiguration) Or(d RenderTechnicalAssetAccessPathRequestConfiguration) RenderTechnicalAssetAccessPathRequestConfiguration {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptNilRenderTechnicalAssetAccessPathRequestValues returns new OptNilRenderTechnicalAssetAccessPathRequestValues with value set to v.
+func NewOptNilRenderTechnicalAssetAccessPathRequestValues(v RenderTechnicalAssetAccessPathRequestValues) OptNilRenderTechnicalAssetAccessPathRequestValues {
+	return OptNilRenderTechnicalAssetAccessPathRequestValues{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptNilRenderTechnicalAssetAccessPathRequestValues is optional nullable RenderTechnicalAssetAccessPathRequestValues.
+type OptNilRenderTechnicalAssetAccessPathRequestValues struct {
+	Value RenderTechnicalAssetAccessPathRequestValues
+	Set   bool
+	Null  bool
+}
+
+// IsSet returns true if OptNilRenderTechnicalAssetAccessPathRequestValues was set.
+func (o OptNilRenderTechnicalAssetAccessPathRequestValues) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptNilRenderTechnicalAssetAccessPathRequestValues) Reset() {
+	var v RenderTechnicalAssetAccessPathRequestValues
+	o.Value = v
+	o.Set = false
+	o.Null = false
+}
+
+// SetTo sets value to v.
+func (o *OptNilRenderTechnicalAssetAccessPathRequestValues) SetTo(v RenderTechnicalAssetAccessPathRequestValues) {
+	o.Set = true
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o OptNilRenderTechnicalAssetAccessPathRequestValues) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *OptNilRenderTechnicalAssetAccessPathRequestValues) SetToNull() {
+	o.Set = true
+	o.Null = true
+	var v RenderTechnicalAssetAccessPathRequestValues
+	o.Value = v
+}
+
+// IsEmpty returns true if the field was omitted from the payload (not Set and not Null).
+func (o OptNilRenderTechnicalAssetAccessPathRequestValues) IsEmpty() bool {
+	return !o.Set && !o.Null
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptNilRenderTechnicalAssetAccessPathRequestValues) Get() (v RenderTechnicalAssetAccessPathRequestValues, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptNilRenderTechnicalAssetAccessPathRequestValues) Or(d RenderTechnicalAssetAccessPathRequestValues) RenderTechnicalAssetAccessPathRequestValues {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -9241,6 +9720,74 @@ func (o OptNilTechnicalAsset) Get() (v TechnicalAsset, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptNilTechnicalAsset) Or(d TechnicalAsset) TechnicalAsset {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptNilTechnicalAssetConfiguration returns new OptNilTechnicalAssetConfiguration with value set to v.
+func NewOptNilTechnicalAssetConfiguration(v TechnicalAssetConfiguration) OptNilTechnicalAssetConfiguration {
+	return OptNilTechnicalAssetConfiguration{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptNilTechnicalAssetConfiguration is optional nullable TechnicalAssetConfiguration.
+type OptNilTechnicalAssetConfiguration struct {
+	Value TechnicalAssetConfiguration
+	Set   bool
+	Null  bool
+}
+
+// IsSet returns true if OptNilTechnicalAssetConfiguration was set.
+func (o OptNilTechnicalAssetConfiguration) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptNilTechnicalAssetConfiguration) Reset() {
+	var v TechnicalAssetConfiguration
+	o.Value = v
+	o.Set = false
+	o.Null = false
+}
+
+// SetTo sets value to v.
+func (o *OptNilTechnicalAssetConfiguration) SetTo(v TechnicalAssetConfiguration) {
+	o.Set = true
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o OptNilTechnicalAssetConfiguration) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *OptNilTechnicalAssetConfiguration) SetToNull() {
+	o.Set = true
+	o.Null = true
+	var v TechnicalAssetConfiguration
+	o.Value = v
+}
+
+// IsEmpty returns true if the field was omitted from the payload (not Set and not Null).
+func (o OptNilTechnicalAssetConfiguration) IsEmpty() bool {
+	return !o.Set && !o.Null
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptNilTechnicalAssetConfiguration) Get() (v TechnicalAssetConfiguration, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptNilTechnicalAssetConfiguration) Or(d TechnicalAssetConfiguration) TechnicalAssetConfiguration {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -11253,6 +11800,21 @@ func (s *PlatformTileResponse) SetPlatformTiles(val []PlatformTile) {
 	s.PlatformTiles = val
 }
 
+// Ref: #/components/schemas/PluginListResponse
+type PluginListResponse struct {
+	Plugins []PluginSummary `json:"plugins"`
+}
+
+// GetPlugins returns the value of Plugins.
+func (s *PluginListResponse) GetPlugins() []PluginSummary {
+	return s.Plugins
+}
+
+// SetPlugins sets the value of Plugins.
+func (s *PluginListResponse) SetPlugins(val []PluginSummary) {
+	s.Plugins = val
+}
+
 // Response model for listing available plugins.
 // Ref: #/components/schemas/PluginResponse
 type PluginResponse struct {
@@ -11267,6 +11829,54 @@ func (s *PluginResponse) GetPlugins() []UIElementMetadataResponse {
 // SetPlugins sets the value of Plugins.
 func (s *PluginResponse) SetPlugins(val []UIElementMetadataResponse) {
 	s.Plugins = val
+}
+
+// Ref: #/components/schemas/PluginSummary
+type PluginSummary struct {
+	Key         string                    `json:"key"`
+	DisplayName string                    `json:"display_name"`
+	Fields      []PluginSummaryFieldsItem `json:"fields"`
+}
+
+// GetKey returns the value of Key.
+func (s *PluginSummary) GetKey() string {
+	return s.Key
+}
+
+// GetDisplayName returns the value of DisplayName.
+func (s *PluginSummary) GetDisplayName() string {
+	return s.DisplayName
+}
+
+// GetFields returns the value of Fields.
+func (s *PluginSummary) GetFields() []PluginSummaryFieldsItem {
+	return s.Fields
+}
+
+// SetKey sets the value of Key.
+func (s *PluginSummary) SetKey(val string) {
+	s.Key = val
+}
+
+// SetDisplayName sets the value of DisplayName.
+func (s *PluginSummary) SetDisplayName(val string) {
+	s.DisplayName = val
+}
+
+// SetFields sets the value of Fields.
+func (s *PluginSummary) SetFields(val []PluginSummaryFieldsItem) {
+	s.Fields = val
+}
+
+type PluginSummaryFieldsItem map[string]jx.Raw
+
+func (s *PluginSummaryFieldsItem) init() PluginSummaryFieldsItem {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
 }
 
 // Ref: #/components/schemas/PostgreSQLTechnicalAssetConfiguration
@@ -11616,39 +12226,61 @@ func (*RemoveUserOKApplicationJSON) removeUserRes() {}
 
 // Ref: #/components/schemas/RenderTechnicalAssetAccessPathRequest
 type RenderTechnicalAssetAccessPathRequest struct {
-	PlatformID    uuid.UUID                                          `json:"platform_id"`
-	ServiceID     uuid.UUID                                          `json:"service_id"`
-	Configuration RenderTechnicalAssetAccessPathRequestConfiguration `json:"configuration"`
+	PlatformID    OptNilUUID                                               `json:"platform_id"`
+	ServiceID     OptNilUUID                                               `json:"service_id"`
+	Configuration OptNilRenderTechnicalAssetAccessPathRequestConfiguration `json:"configuration"`
+	PluginKey     OptNilString                                             `json:"plugin_key"`
+	Values        OptNilRenderTechnicalAssetAccessPathRequestValues        `json:"values"`
 }
 
 // GetPlatformID returns the value of PlatformID.
-func (s *RenderTechnicalAssetAccessPathRequest) GetPlatformID() uuid.UUID {
+func (s *RenderTechnicalAssetAccessPathRequest) GetPlatformID() OptNilUUID {
 	return s.PlatformID
 }
 
 // GetServiceID returns the value of ServiceID.
-func (s *RenderTechnicalAssetAccessPathRequest) GetServiceID() uuid.UUID {
+func (s *RenderTechnicalAssetAccessPathRequest) GetServiceID() OptNilUUID {
 	return s.ServiceID
 }
 
 // GetConfiguration returns the value of Configuration.
-func (s *RenderTechnicalAssetAccessPathRequest) GetConfiguration() RenderTechnicalAssetAccessPathRequestConfiguration {
+func (s *RenderTechnicalAssetAccessPathRequest) GetConfiguration() OptNilRenderTechnicalAssetAccessPathRequestConfiguration {
 	return s.Configuration
 }
 
+// GetPluginKey returns the value of PluginKey.
+func (s *RenderTechnicalAssetAccessPathRequest) GetPluginKey() OptNilString {
+	return s.PluginKey
+}
+
+// GetValues returns the value of Values.
+func (s *RenderTechnicalAssetAccessPathRequest) GetValues() OptNilRenderTechnicalAssetAccessPathRequestValues {
+	return s.Values
+}
+
 // SetPlatformID sets the value of PlatformID.
-func (s *RenderTechnicalAssetAccessPathRequest) SetPlatformID(val uuid.UUID) {
+func (s *RenderTechnicalAssetAccessPathRequest) SetPlatformID(val OptNilUUID) {
 	s.PlatformID = val
 }
 
 // SetServiceID sets the value of ServiceID.
-func (s *RenderTechnicalAssetAccessPathRequest) SetServiceID(val uuid.UUID) {
+func (s *RenderTechnicalAssetAccessPathRequest) SetServiceID(val OptNilUUID) {
 	s.ServiceID = val
 }
 
 // SetConfiguration sets the value of Configuration.
-func (s *RenderTechnicalAssetAccessPathRequest) SetConfiguration(val RenderTechnicalAssetAccessPathRequestConfiguration) {
+func (s *RenderTechnicalAssetAccessPathRequest) SetConfiguration(val OptNilRenderTechnicalAssetAccessPathRequestConfiguration) {
 	s.Configuration = val
+}
+
+// SetPluginKey sets the value of PluginKey.
+func (s *RenderTechnicalAssetAccessPathRequest) SetPluginKey(val OptNilString) {
+	s.PluginKey = val
+}
+
+// SetValues sets the value of Values.
+func (s *RenderTechnicalAssetAccessPathRequest) SetValues(val OptNilRenderTechnicalAssetAccessPathRequestValues) {
+	s.Values = val
 }
 
 // RenderTechnicalAssetAccessPathRequestConfiguration represents sum type.
@@ -11914,6 +12546,17 @@ func NewAzureBlobTechnicalAssetConfigurationRenderTechnicalAssetAccessPathReques
 	var s RenderTechnicalAssetAccessPathRequestConfiguration
 	s.SetAzureBlobTechnicalAssetConfiguration(v)
 	return s
+}
+
+type RenderTechnicalAssetAccessPathRequestValues map[string]jx.Raw
+
+func (s *RenderTechnicalAssetAccessPathRequestValues) init() RenderTechnicalAssetAccessPathRequestValues {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
 }
 
 // Ref: #/components/schemas/RenderTechnicalAssetAccessPathResponse
@@ -13658,16 +14301,17 @@ func (s *TagsGetItem) SetValue(val string) {
 
 // Ref: #/components/schemas/TechnicalAsset
 type TechnicalAsset struct {
-	ID               uuid.UUID                   `json:"id"`
-	Name             string                      `json:"name"`
-	Namespace        string                      `json:"namespace"`
-	Description      string                      `json:"description"`
-	Status           TechnicalAssetStatus        `json:"status"`
-	TechnicalMapping TechnicalMapping            `json:"technical_mapping"`
-	OwnerID          uuid.UUID                   `json:"owner_id"`
-	PlatformID       uuid.UUID                   `json:"platform_id"`
-	ServiceID        uuid.UUID                   `json:"service_id"`
-	Configuration    TechnicalAssetConfiguration `json:"configuration"`
+	ID               uuid.UUID                         `json:"id"`
+	Name             string                            `json:"name"`
+	Namespace        string                            `json:"namespace"`
+	Description      string                            `json:"description"`
+	Status           TechnicalAssetStatus              `json:"status"`
+	TechnicalMapping TechnicalMapping                  `json:"technical_mapping"`
+	OwnerID          uuid.UUID                         `json:"owner_id"`
+	PlatformID       OptNilUUID                        `json:"platform_id"`
+	ServiceID        OptNilUUID                        `json:"service_id"`
+	Configuration    OptNilTechnicalAssetConfiguration `json:"configuration"`
+	PluginKey        OptNilString                      `json:"plugin_key"`
 }
 
 // GetID returns the value of ID.
@@ -13706,18 +14350,23 @@ func (s *TechnicalAsset) GetOwnerID() uuid.UUID {
 }
 
 // GetPlatformID returns the value of PlatformID.
-func (s *TechnicalAsset) GetPlatformID() uuid.UUID {
+func (s *TechnicalAsset) GetPlatformID() OptNilUUID {
 	return s.PlatformID
 }
 
 // GetServiceID returns the value of ServiceID.
-func (s *TechnicalAsset) GetServiceID() uuid.UUID {
+func (s *TechnicalAsset) GetServiceID() OptNilUUID {
 	return s.ServiceID
 }
 
 // GetConfiguration returns the value of Configuration.
-func (s *TechnicalAsset) GetConfiguration() TechnicalAssetConfiguration {
+func (s *TechnicalAsset) GetConfiguration() OptNilTechnicalAssetConfiguration {
 	return s.Configuration
+}
+
+// GetPluginKey returns the value of PluginKey.
+func (s *TechnicalAsset) GetPluginKey() OptNilString {
+	return s.PluginKey
 }
 
 // SetID sets the value of ID.
@@ -13756,18 +14405,23 @@ func (s *TechnicalAsset) SetOwnerID(val uuid.UUID) {
 }
 
 // SetPlatformID sets the value of PlatformID.
-func (s *TechnicalAsset) SetPlatformID(val uuid.UUID) {
+func (s *TechnicalAsset) SetPlatformID(val OptNilUUID) {
 	s.PlatformID = val
 }
 
 // SetServiceID sets the value of ServiceID.
-func (s *TechnicalAsset) SetServiceID(val uuid.UUID) {
+func (s *TechnicalAsset) SetServiceID(val OptNilUUID) {
 	s.ServiceID = val
 }
 
 // SetConfiguration sets the value of Configuration.
-func (s *TechnicalAsset) SetConfiguration(val TechnicalAssetConfiguration) {
+func (s *TechnicalAsset) SetConfiguration(val OptNilTechnicalAssetConfiguration) {
 	s.Configuration = val
+}
+
+// SetPluginKey sets the value of PluginKey.
+func (s *TechnicalAsset) SetPluginKey(val OptNilString) {
+	s.PluginKey = val
 }
 
 // TechnicalAssetConfiguration represents sum type.
@@ -14429,6 +15083,7 @@ type UIElementMetadataResponse struct {
 	PlatformTile    OptNilPlatformTile  `json:"platform_tile"`
 	ShowInForm      OptBool             `json:"show_in_form"`
 	DetailedName    string              `json:"detailed_name"`
+	IsDynamicPlugin OptBool             `json:"is_dynamic_plugin"`
 }
 
 // GetNotConfigured returns the value of NotConfigured.
@@ -14496,6 +15151,11 @@ func (s *UIElementMetadataResponse) GetDetailedName() string {
 	return s.DetailedName
 }
 
+// GetIsDynamicPlugin returns the value of IsDynamicPlugin.
+func (s *UIElementMetadataResponse) GetIsDynamicPlugin() OptBool {
+	return s.IsDynamicPlugin
+}
+
 // SetNotConfigured sets the value of NotConfigured.
 func (s *UIElementMetadataResponse) SetNotConfigured(val OptBool) {
 	s.NotConfigured = val
@@ -14559,6 +15219,11 @@ func (s *UIElementMetadataResponse) SetShowInForm(val OptBool) {
 // SetDetailedName sets the value of DetailedName.
 func (s *UIElementMetadataResponse) SetDetailedName(val string) {
 	s.DetailedName = val
+}
+
+// SetIsDynamicPlugin sets the value of IsDynamicPlugin.
+func (s *UIElementMetadataResponse) SetIsDynamicPlugin(val OptBool) {
+	s.IsDynamicPlugin = val
 }
 
 func (*UIElementMetadataResponse) getPluginFormRes() {}
@@ -14629,6 +15294,7 @@ func (s *UIElementSelect) SetOptions(val OptNilSelectOptionArray) {
 // Ref: #/components/schemas/UIElementString
 type UIElementString struct {
 	InitialValue OptNilString `json:"initial_value"`
+	Pattern      OptNilString `json:"pattern"`
 }
 
 // GetInitialValue returns the value of InitialValue.
@@ -14636,9 +15302,19 @@ func (s *UIElementString) GetInitialValue() OptNilString {
 	return s.InitialValue
 }
 
+// GetPattern returns the value of Pattern.
+func (s *UIElementString) GetPattern() OptNilString {
+	return s.Pattern
+}
+
 // SetInitialValue sets the value of InitialValue.
 func (s *UIElementString) SetInitialValue(val OptNilString) {
 	s.InitialValue = val
+}
+
+// SetPattern sets the value of Pattern.
+func (s *UIElementString) SetPattern(val OptNilString) {
+	s.Pattern = val
 }
 
 // Ref: #/components/schemas/UIElementType

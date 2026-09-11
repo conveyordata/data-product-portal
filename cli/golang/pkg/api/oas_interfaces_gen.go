@@ -253,6 +253,10 @@ type GetPluginFormRes interface {
 	getPluginFormRes()
 }
 
+type GetPluginIconRes interface {
+	getPluginIconRes()
+}
+
 type GetPluginURLRes interface {
 	getPluginURLRes()
 }

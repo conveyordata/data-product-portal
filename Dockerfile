@@ -43,6 +43,11 @@ RUN pip install -r requirements-poetry.txt --require-hashes
 COPY backend/poetry.lock backend/pyproject.toml backend/alembic.ini backend/sample_data.sql /
 RUN poetry install --no-root
 
+# Spike: install a third-party technical asset plugin, the same way a customer
+# would install one into their own image - see docs/adr/0024-dynamic-plugin-system.md
+COPY plugins/example-azure-blob /plugins/example-azure-blob
+RUN pip install /plugins/example-azure-blob
+
 # ---------------------------------------------------------------------------
 # Stage 3 – final runtime image
 # ---------------------------------------------------------------------------

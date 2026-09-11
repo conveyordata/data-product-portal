@@ -2,6 +2,7 @@
     " tab.": " tab.",
     "... {{count}} more items_one": "... {{count}} more item",
     "... {{count}} more items_other": "... {{count}} more items",
+    "{{ label }} has an invalid format": "{{ label }} has an invalid format",
     "{{count}} available Technical Assets_one": "{{count}} available $t(Technical Asset)",
     "{{count}} available Technical Assets_other": "{{count}} available $t(Technical Assets)",
     "{{count}} consumers_one": "{{count}} consumer",

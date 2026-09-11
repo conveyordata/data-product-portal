@@ -1,12 +1,20 @@
-from typing import TYPE_CHECKING, Optional, Sequence
+from typing import TYPE_CHECKING, Any, Optional, Sequence
 from uuid import UUID
 
 from fastapi import Depends, HTTPException, status
+from sdk.plugins.base import TechnicalAssetPlugin
+from sdk.plugins.context import PluginContext
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.configuration.environments.model import Environment as EnvironmentModel
 from app.configuration.platforms.platform_services.model import PlatformService
+from app.core.logging import logger
+from app.data_products.model import DataProduct as DataProductModel
+from app.data_products.technical_assets.model import TechnicalAsset
 from app.database.deps import get_db_session
+from app.plugins.loader import discover_plugins
+from app.plugins.runtime import call_plugin
 from app.technical_asset_configuration.schema_request import (
     RenderTechnicalAssetAccessPathRequest,
 )
@@ -17,7 +25,10 @@ if TYPE_CHECKING:
 from app.settings import settings
 from app.technical_asset_configuration.base_schema import (
     AssetProviderPlugin,
+    UIElementMetadata,
+    UIElementString,
 )
+from app.technical_asset_configuration.enums import UIElementType
 from app.technical_asset_configuration.schema_response import (
     PlatformTile,
     UIElementMetadataResponse,
@@ -39,11 +50,62 @@ class PluginService:
             for name in data_output_configurations
             if name.name in configured_plugins
         ]
-        return [
+        built_in = [
             metadata_response
             for plugin in configured_metadata
             if (metadata_response := self._build_metadata_response(plugin)) is not None
         ]
+        dynamic = [
+            self._build_dynamic_plugin_metadata_response(plugin_cls)
+            for plugin_cls in discover_plugins()
+        ]
+        return built_in + dynamic
+
+    def _build_dynamic_plugin_metadata_response(
+        self, plugin_cls: type[TechnicalAssetPlugin]
+    ) -> UIElementMetadataResponse:
+        """Adapt a dynamically loaded plugin's minimal field vocabulary
+        (ADR-0024) into the same UI metadata shape the existing,
+        metadata-driven create-technical-asset form already renders.
+
+        Only "string" fields are supported for now - see the ADR, "The
+        plugin's field vocabulary, and who owns turning it into a form".
+        """
+        ui_metadata = []
+        for field in plugin_cls.fields:
+            field_type = field.get("type", "string")
+            if field_type != "string":
+                logger.warning(
+                    f"Plugin '{plugin_cls.key}' field '{field.get('name')}' has "
+                    f"unsupported type '{field_type}' - skipping. Only 'string' "
+                    "fields are rendered by the portal today."
+                )
+                continue
+            ui_metadata.append(
+                UIElementMetadata(
+                    name=field["name"],
+                    label=field.get("label", field["name"]),
+                    type=UIElementType.String,
+                    required=field.get("required", False),
+                    tooltip=field.get("tooltip"),
+                    string=UIElementString(pattern=field.get("pattern")),
+                )
+            )
+        return UIElementMetadataResponse(
+            ui_metadata=ui_metadata,
+            plugin=plugin_cls.key,
+            platform=plugin_cls.key,
+            display_name=plugin_cls.display_name,
+            # Not a bundled frontend asset - fetched from the portal at
+            # render time. See icon-loader.ts's "dynamic:" prefix handling.
+            icon_name=f"dynamic:{plugin_cls.key}",
+            has_environments=plugin_cls.has_environments,
+            result_label="Resulting value",
+            result_tooltip="The value you can access through this technical asset",
+            detailed_name=plugin_cls.display_name,
+            show_in_form=True,
+            is_dynamic_plugin=True,
+        )
 
     def get_technical_asset_ui_metadata_by_name(
         self, plugin_name: str
@@ -108,6 +170,14 @@ class PluginService:
         actor: "User",
         environment: Optional[str] = None,
     ) -> str:
+        dynamic_plugin_cls = next(
+            (p for p in discover_plugins() if p.key == plugin_name), None
+        )
+        if dynamic_plugin_cls:
+            return self._get_dynamic_plugin_url(
+                dynamic_plugin_cls, id, actor, environment
+            )
+
         data_output_configurations = AssetProviderPlugin.__subclasses__()
         plugin_class = next(
             (
@@ -139,6 +209,80 @@ class PluginService:
                 status_code=status.HTTP_501_NOT_IMPLEMENTED,
                 detail=f"Plugin '{plugin_name}' does not implement URL retrieval",
             )
+
+    def _get_dynamic_plugin_url(
+        self,
+        plugin_cls: type[TechnicalAssetPlugin],
+        id: UUID,
+        actor: "User",
+        environment: Optional[str] = None,
+    ) -> str:
+        # `id` is a technical asset id when called from a technical asset's
+        # own card, but the data-product-level "access data" grid
+        # (DataProductActions.tsx) calls this same endpoint with the data
+        # product's own id instead - built-in types tolerate this today by
+        # mostly ignoring `id` (e.g. Azure Blob's own get_url() always
+        # returns a static URL). Match that: degrade to empty values/context
+        # rather than 404 when `id` doesn't resolve to a technical asset.
+        technical_asset = self.db.get(TechnicalAsset, id)
+        values: dict[str, Any] = {}
+        if technical_asset:
+            plugin_row = self.db.get(plugin_cls.model, id)
+            if plugin_row:
+                values = {
+                    column.name: getattr(plugin_row, column.name)
+                    for column in plugin_row.__table__.columns
+                    if column.name != "id"
+                }
+            data_product_id = technical_asset.owner_id
+            context = PluginContext(
+                technical_asset_id=id,
+                technical_asset_name=technical_asset.name,
+                data_product_id=data_product_id,
+                actor=actor,
+            )
+        else:
+            data_product_id = id
+            context = PluginContext(data_product_id=id, actor=actor)
+
+        if plugin_cls.has_environments:
+            if not environment:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Environment is required to get the URL for the '{plugin_cls.key}' plugin",
+                )
+            # Reuses the portal's own `Environment` table and the same
+            # `{{}}` -> namespace substitution built-in types already do
+            # (see `app.core.aws.get_url._get_data_product_role_arn`) -
+            # deliberate, per ADR-0024's own decision driver to build on
+            # top of the existing platform/environment data model rather
+            # than invent a plugin-specific one.
+            env = self.db.scalar(
+                select(EnvironmentModel).where(EnvironmentModel.name == environment)
+            )
+            if not env:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"Environment '{environment}' not found",
+                )
+            data_product = self.db.get(DataProductModel, data_product_id)
+            namespace = data_product.namespace if data_product else None
+            context.environment = environment
+            context.environment_context = (
+                env.context.replace("{{}}", namespace)
+                if env.context and namespace
+                else env.context
+            )
+            context.namespace = namespace
+
+        result = call_plugin(
+            plugin_cls.key, "get_url", plugin_cls.get_url, values, context
+        )
+        if not result.ok:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail=result.error
+            )
+        return result.value
 
     def _build_tile_hierarchy(
         self, metadata_list: Sequence[UIElementMetadataResponse]
@@ -187,6 +331,16 @@ class PluginService:
     def render_technical_asset_access_path(
         self, request: RenderTechnicalAssetAccessPathRequest
     ) -> str:
+        if request.plugin_key:
+            return self._render_dynamic_plugin_access_path(
+                request.plugin_key, request.values or {}
+            )
+
+        if request.configuration is None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="configuration is required",
+            )
         template = self.db.scalar(
             select(PlatformService.result_string_template).where(
                 PlatformService.id == request.service_id,
@@ -201,3 +355,25 @@ class PluginService:
             )
 
         return request.configuration.render_template(template)
+
+    def _render_dynamic_plugin_access_path(
+        self, plugin_key: str, values: dict[str, Any]
+    ) -> str:
+        plugin_cls = next((p for p in discover_plugins() if p.key == plugin_key), None)
+        if not plugin_cls:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"No plugin registered for key '{plugin_key}'",
+            )
+        result = call_plugin(
+            plugin_cls.key,
+            "render_result",
+            plugin_cls.render_result,
+            values,
+            PluginContext(),
+        )
+        if not result.ok:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail=result.error
+            )
+        return result.value

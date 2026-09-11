@@ -56,12 +56,13 @@ router = APIRouter(
 def get_data_product_technical_assets(
     data_product_id: UUID, db: Session = Depends(get_db_session)
 ) -> GetTechnicalAssetsResponse:
+    service = TechnicalAssetService(db)
     return GetTechnicalAssetsResponse(
         technical_assets=[
-            GetTechnicalAssetsResponseItem.model_validate(do)
-            for do in TechnicalAssetService(db).get_technical_assets_for_data_product(
-                data_product_id
+            service.hydrate_plugin_values(
+                GetTechnicalAssetsResponseItem.model_validate(do)
             )
+            for do in service.get_technical_assets_for_data_product(data_product_id)
         ]
     )
 
@@ -81,8 +82,11 @@ def get_data_product_technical_assets(
 def get_technical_asset(
     data_product_id: UUID, id: UUID, db: Session = Depends(get_db_session)
 ) -> GetTechnicalAssetsResponseItem:
-    return GetTechnicalAssetsResponseItem.model_validate(
-        TechnicalAssetService(db).get_technical_asset(data_product_id, id)
+    service = TechnicalAssetService(db)
+    return service.hydrate_plugin_values(
+        GetTechnicalAssetsResponseItem.model_validate(
+            service.get_technical_asset(data_product_id, id)
+        )
     )
 
 

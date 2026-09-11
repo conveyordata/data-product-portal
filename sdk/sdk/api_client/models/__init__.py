@@ -76,6 +76,9 @@ from .create_output_port_role_assignment import CreateOutputPortRoleAssignment
 from .create_role import CreateRole
 from .create_tag_response import CreateTagResponse
 from .create_technical_asset_request import CreateTechnicalAssetRequest
+from .create_technical_asset_request_values_type_0 import (
+    CreateTechnicalAssetRequestValuesType0,
+)
 from .create_technical_asset_response import CreateTechnicalAssetResponse
 from .data_output_status_update import DataOutputStatusUpdate
 from .data_output_update import DataOutputUpdate
@@ -185,6 +188,9 @@ from .get_platform_services_response import GetPlatformServicesResponse
 from .get_roles_response import GetRolesResponse
 from .get_technical_assets_response import GetTechnicalAssetsResponse
 from .get_technical_assets_response_item import GetTechnicalAssetsResponseItem
+from .get_technical_assets_response_item_values_type_0 import (
+    GetTechnicalAssetsResponseItemValuesType0,
+)
 from .get_user_notifications_response import GetUserNotificationsResponse
 from .get_user_notifications_response_item import GetUserNotificationsResponseItem
 from .get_users_response import GetUsersResponse
@@ -263,7 +269,10 @@ from .platform_service import PlatformService
 from .platform_service_configuration import PlatformServiceConfiguration
 from .platform_tile import PlatformTile
 from .platform_tile_response import PlatformTileResponse
+from .plugin_list_response import PluginListResponse
 from .plugin_response import PluginResponse
+from .plugin_summary import PluginSummary
+from .plugin_summary_fields_item import PluginSummaryFieldsItem
 from .postgre_sql_config import PostgreSQLConfig
 from .postgre_sql_technical_asset_configuration import (
     PostgreSQLTechnicalAssetConfiguration,
@@ -275,6 +284,9 @@ from .redshift_technical_asset_configuration import RedshiftTechnicalAssetConfig
 from .remove_output_port_as_input_port_request import RemoveOutputPortAsInputPortRequest
 from .render_technical_asset_access_path_request import (
     RenderTechnicalAssetAccessPathRequest,
+)
+from .render_technical_asset_access_path_request_values_type_0 import (
+    RenderTechnicalAssetAccessPathRequestValuesType0,
 )
 from .render_technical_asset_access_path_response import (
     RenderTechnicalAssetAccessPathResponse,
@@ -428,6 +440,7 @@ __all__ = (
     "CreateRole",
     "CreateTagResponse",
     "CreateTechnicalAssetRequest",
+    "CreateTechnicalAssetRequestValuesType0",
     "CreateTechnicalAssetResponse",
     "DatabricksConfig",
     "DatabricksEnvironmentPlatformConfiguration",
@@ -521,6 +534,7 @@ __all__ = (
     "GetRolesResponse",
     "GetTechnicalAssetsResponse",
     "GetTechnicalAssetsResponseItem",
+    "GetTechnicalAssetsResponseItemValuesType0",
     "GetUserNotificationsResponse",
     "GetUserNotificationsResponseItem",
     "GetUsersResponse",
@@ -583,7 +597,10 @@ __all__ = (
     "PlatformServiceConfiguration",
     "PlatformTile",
     "PlatformTileResponse",
+    "PluginListResponse",
     "PluginResponse",
+    "PluginSummary",
+    "PluginSummaryFieldsItem",
     "PostgreSQLConfig",
     "PostgreSQLTechnicalAssetConfiguration",
     "Prototype",
@@ -592,6 +609,7 @@ __all__ = (
     "RedshiftTechnicalAssetConfiguration",
     "RemoveOutputPortAsInputPortRequest",
     "RenderTechnicalAssetAccessPathRequest",
+    "RenderTechnicalAssetAccessPathRequestValuesType0",
     "RenderTechnicalAssetAccessPathResponse",
     "RenewalStatus",
     "RenewInputPortForDataProductResponse",

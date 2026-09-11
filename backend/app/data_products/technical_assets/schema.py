@@ -1,3 +1,4 @@
+from typing import Optional
 from uuid import UUID
 
 from app.data_products.technical_assets.enums import TechnicalMapping
@@ -14,7 +15,10 @@ class TechnicalAsset(ORMModel):
     status: TechnicalAssetStatus
     technical_mapping: TechnicalMapping
     owner_id: UUID
-    platform_id: UUID
-    service_id: UUID
-
-    configuration: DataOutputConfiguration
+    # Exactly one of `configuration` (a built-in type) or `plugin_key` (a
+    # dynamically loaded plugin, ADR-0024) is set - see
+    # app/data_products/technical_assets/schema_response.py for the same shape.
+    platform_id: Optional[UUID] = None
+    service_id: Optional[UUID] = None
+    configuration: Optional[DataOutputConfiguration] = None
+    plugin_key: Optional[str] = None

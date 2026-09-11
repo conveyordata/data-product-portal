@@ -55,6 +55,7 @@ opentelemetry-instrumentation-fastapi = "^0.64b0"
 opentelemetry-instrumentation-sqlalchemy = "^0.64b0"
 opentelemetry-distro = "^0.64b0"
 pycasbin = "^2.8.0"
+data-product-portal-sdk = { path = "../sdk", develop = true }
 
 [tool.poetry.group.test]
 optional = true
@@ -66,7 +67,6 @@ pytest-cov = "^7.1.0"
 pytest-dotenv= "^0.5.2"
 factory-boy = "^3.3.3"
 freezegun = "^1.5.5"
-data-product-portal-sdk = { path = "../sdk", develop = true }
 
 [tool.poetry.group.dev]
 optional = true
@@ -129,6 +129,7 @@ select = [
 "tests/factories/**" = ["TID251"]
 "tests/seed_random_data.py" = ["TID251"]
 "app/database/alembic/versions/*.py" = ["TID251"]
+"app/plugins/demo.py" = ["S101"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["app"]

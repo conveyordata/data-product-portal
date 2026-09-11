@@ -136,13 +136,28 @@ The question is where that richness is allowed to come from. Part of it - concre
 - Requires real, additional backend and frontend work to support authoring and validating that richer shape generically, for a plugin nobody has written yet.
 - Requires every plugin author to understand frontend-shaped concepts (form field types, conditional visibility) and, for anything DB-backed like `select` options, to depend on the portal's ORM and exact table shapes - directly against the "as light as reasonably possible" decision driver: a plugin already depends on the SDK for its base class, but the portal's own ORM and database are a different, heavier kind of dependency this decision explicitly avoids. Not pursued for a first version.
 
-## Decision Outcome
-- Where the plugin's code runs: an installable Python package.
+### Whether a plugin's access URL can vary by environment
+
+The existing "Access data" tile shows an environment picker (dev/production/...) before resolving a technical asset's access URL, for any type whose metadata declares `has_environments`. Built-in types (e.g. S3) resolve that per-environment: the chosen environment's own `Environment.context` (a template string, with `{{}}` substituted for the data product's namespace) decides what `get_url` actually returns - for S3 that's an IAM role ARN used to assume a role and build a federated console URL.
+
+#### Option 1: No environment concept for a dynamic plugin
+- `has_environments` stays hardcoded `false` for every dynamic plugin; the "Access data" tile never shows an environment picker for one, and `get_url` never receives an environment.
+- Simplest, and matches "a plugin never depends on the portal's own database" as closely as possible.
+- A plugin genuinely can't distinguish "give me the URL for staging" from "give me the URL for production" - not a viable option for any plugin whose real-world resource actually differs by environment (most integrations this system targets do).
+
+#### Option 2: Reuse the portal's existing `Environment` table
+- A plugin opts in with `has_environments: ClassVar[bool] = True`. The portal resolves the chosen environment's `Environment` row and its `context` template exactly the way it already does for a built-in type, substitutes the data product's namespace into it the same way, and hands the plugin the result (plus the raw environment name and namespace) via `PluginContext` - not a raw database session or ORM object, so the plugin package itself still never depends on the portal's ORM.
+- Reuses the actual, existing data - the same `environments` table and the same `{{}}` -> namespace substitution built-in types already rely on - rather than inventing a plugin-specific parallel concept, per this ADR's own decision driver to build on top of the existing platform/environment data model rather than avoid it.
+- Zero new tables, zero new migrations - `Environment` already exists and is already managed by admins the same way for every type, built-in or dynamic.
+- The *portal's own service layer* now depends on `Environment` on a dynamic plugin's behalf - a plugin can no longer be reasoned about as touching nothing but its own table; it can trigger a lookup against core, non-plugin-owned data. Deliberately accepted: the alternative (no environment support at all) fails a driver more directly than this fails "as light as possible."
+
+
 - Loading the python packages inside portal core: Option 1 - automatic discovery via Python entry points.
 - How the portal recognizes a plugin's shape: Option 2 - an ABC (`TechnicalAssetPlugin`), living in the SDK's `sdk.plugins` package, that a plugin class inherits from.
 - Where and how is the configuration of the plugin stored: Option 2 - a dedicated table per plugin, migrated by the plugin's own Alembic revisions.
 - How the API describes a plugin's configuration: Option 1, with the published contract describing configuration generically for every type, served through the existing technical-asset endpoints rather than a dedicated plugin-only API.
 - The plugin's field vocabulary, and who owns turning it into a form: Option 1 - a minimal, string-only vocabulary (`name`, `label`, `required`, an optional regex `pattern`), adapted by the portal into the existing `UIElementMetadataResponse` shape.
+- Whether a plugin's access URL can vary by environment: Option 2 - a plugin can opt in to the portal's existing `Environment` table and its `{{}}` -> namespace substitution, the same mechanism built-in types already use.
 
 ### Confirmation
 
@@ -158,6 +173,7 @@ This decision is reflected in the application by:
 * Running a customer's own plugin code safely is that customer's own responsibility; the portal does not add sandboxing, code review, or resource limits as part of this decision.
 * Calls into a plugin's code are wrapped by the portal at the call boundary: an uncaught exception is caught, logged with its stack trace, and surfaced as a clean error, so one broken plugin can't take down the request it's handling.
 * Alongside its own `values`, a plugin's methods are passed a context object carrying whatever's generic across every technical asset type (its own id/name, its output port, its data product, its domain).
+* A plugin that declares `has_environments = True` gets a real environment picker on its "Access data" tile, the same as a built-in type. The portal resolves the chosen environment against the existing `Environment` table, substitutes the data product's namespace into its `context` field the same way a built-in type's environment resolution already does, and passes the result to the plugin's `get_url` via `PluginContext` (`environment`, `environment_context`, `namespace`) - plain strings, not a database session, so the plugin package itself still depends only on the SDK. Calling without an environment (when required) or naming one that doesn't exist fails the same way a built-in type's own environment resolution already does (400 / 404), not a silent fallback.
 * If a plugin's own validation is backed by a dynamically-built model (e.g. Pydantic) for nicer error messages, that model stays internal to `validate` - it never becomes part of the generated OpenAPI schema, SDK, or CLI types.
 
 ## Pros and Cons of the Options
@@ -196,6 +212,15 @@ This decision is reflected in the application by:
 - **Good, because** a plugin author writes plain data - no frontend knowledge, no portal-database access - and gets a working, validated form field for free.
 - **Good, because** the portal-owned adapter means zero new frontend code is needed to add a plugin; it appears as a tile in the existing form automatically.
 - **Bad, because** a plugin that genuinely needs a boolean, a dropdown, a conditional field, or a DB-driven option list can't have one yet - real, separate work to add later.
+
+### Whether a plugin's access URL can vary by environment - Option 1: no environment concept
+- **Good, because** a plugin stays fully isolated from the portal's own database - nothing to resolve, nothing to get wrong.
+- **Bad, because** a plugin whose real-world resource genuinely differs by environment (most of them) simply can't express that - not a viable option long-term.
+
+### Whether a plugin's access URL can vary by environment - Option 2: reuse the existing `Environment` table
+- **Good, because** it reuses real, already-admin-managed data instead of inventing a plugin-specific parallel concept.
+- **Good, because** the plugin itself still only ever sees plain strings via `PluginContext` - the database lookup and namespace substitution stay in the portal's service layer, not leaked into the plugin's own dependencies.
+- **Bad, because** the portal's service layer now touches core, non-plugin-owned data on a dynamic plugin's behalf - a plugin can no longer be reasoned about as touching only its own table.
 
 ### The plugin's field vocabulary, and who owns turning it into a form - Option 2: full `UIElementMetadata` parity
 - **Good, because** a plugin could offer the same richness the built-in types have - booleans, dropdowns, conditional fields, DB-driven option lists - nothing permanently out of reach.

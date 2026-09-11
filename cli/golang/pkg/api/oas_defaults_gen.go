@@ -388,6 +388,10 @@ func (s *UIElementMetadataResponse) setDefaults() {
 		val := bool(true)
 		s.ShowInForm.SetTo(val)
 	}
+	{
+		val := bool(false)
+		s.IsDynamicPlugin.SetTo(val)
+	}
 }
 
 // setDefaults set default value of fields.

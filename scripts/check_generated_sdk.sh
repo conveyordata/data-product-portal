@@ -16,9 +16,6 @@ pushd sdk
     --meta none \
     --overwrite
 
-  #Ensure the generated files are added to git context
-  git add ./sdk
-
   if [[ -n "${CI}" ]]; then
     if [[ -z "$(git status --porcelain .)" ]];
     then

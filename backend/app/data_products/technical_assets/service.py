@@ -1,10 +1,11 @@
 import copy
 from datetime import datetime
 from typing import Sequence
-from uuid import UUID
+from uuid import UUID, uuid4
 
 import pytz
 from fastapi import Depends, HTTPException, status
+from sdk.plugins.context import PluginContext
 from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload, selectinload
 
@@ -39,11 +40,14 @@ from app.data_products.technical_assets.schema_request import (
     DataOutputUpdate,
 )
 from app.data_products.technical_assets.schema_response import (
+    GetTechnicalAssetsResponseItem,
     UpdateTechnicalAssetResponse,
 )
 from app.data_products.technical_assets.status import TechnicalAssetStatus
 from app.database.deps import get_db_session
 from app.graph.graph import Graph
+from app.plugins.loader import discover_plugins
+from app.plugins.runtime import call_plugin
 from app.resource_names.service import ResourceNameValidityType
 from app.users.schema import User
 
@@ -178,11 +182,27 @@ class TechnicalAssetService:
                 detail=f"Invalid namespace: {validity.value}",
             )
 
+        if technical_asset.plugin_key:
+            return self._create_plugin_backed_technical_asset(
+                data_product_id, technical_asset
+            )
+
+        # A request for a built-in type always has `configuration` set - it's
+        # only Optional on the request schema to also allow a plugin-backed one.
+        # `validate_configuration_shape` (schema_request.py) already enforces this.
+        if technical_asset.configuration is None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="configuration is required",
+            )
+
         if technical_asset.technical_mapping == TechnicalMapping.Default:
             data_product = self.db.get(DataProductModel, data_product_id)
             technical_asset.configuration.validate_configuration(data_product, self.db)
 
         technical_asset_schema = technical_asset.parse_pydantic_schema()
+        technical_asset_schema.pop("plugin_key", None)
+        technical_asset_schema.pop("values", None)
         tags = self._get_tags(technical_asset_schema.pop("tag_ids", []))
         access_modes = self._get_access_modes(
             technical_asset_schema.pop("access_mode_ids", []),
@@ -201,6 +221,87 @@ class TechnicalAssetService:
         self.db.add(model)
         self.db.commit()
         return model
+
+    def _create_plugin_backed_technical_asset(
+        self, data_product_id: UUID, technical_asset: CreateTechnicalAssetRequest
+    ) -> TechnicalAssetModel:
+        """Create a technical asset backed by a dynamically loaded plugin (ADR-0024)."""
+        plugin_cls = next(
+            (p for p in discover_plugins() if p.key == technical_asset.plugin_key), None
+        )
+        if not plugin_cls:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"No plugin registered for key '{technical_asset.plugin_key}'",
+            )
+
+        asset_id = uuid4()
+        values = technical_asset.values or {}
+        context = PluginContext(
+            technical_asset_id=asset_id,
+            technical_asset_name=technical_asset.name,
+            data_product_id=data_product_id,
+        )
+        validation = call_plugin(
+            plugin_cls.key, "validate", plugin_cls.validate, values, context
+        )
+        if not validation.ok:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail=validation.error
+            )
+
+        tags = self._get_tags(technical_asset.tag_ids)
+        access_modes = self._get_access_modes(
+            technical_asset.access_mode_ids, plugin_cls.key
+        )
+        technical_asset_status = self.get_status_for(technical_asset.technical_mapping)  # type: ignore[arg-type]
+
+        model = TechnicalAssetModel(
+            id=asset_id,
+            namespace=technical_asset.namespace,
+            name=technical_asset.name,
+            description=technical_asset.description,
+            status=technical_asset_status,
+            technical_mapping=technical_asset.technical_mapping.value,  # type: ignore[union-attr]
+            owner_id=data_product_id,
+            plugin_key=plugin_cls.key,
+            tags=tags,
+            access_modes=access_modes,
+        )
+        # The plugin's own row shares its primary key with the TechnicalAsset
+        # it belongs to - no physical FK, since it lives in a separate
+        # migration history (see app/plugins/migrations.py).
+        plugin_row = plugin_cls.model(id=asset_id, **values)
+        self.db.add(model)
+        self.db.add(plugin_row)
+        self.db.commit()
+        return model
+
+    def hydrate_plugin_values(
+        self, item: GetTechnicalAssetsResponseItem
+    ) -> GetTechnicalAssetsResponseItem:
+        """Attach a plugin-backed technical asset's own configured values.
+
+        Not populated by `GetTechnicalAssetsResponseItem.model_validate` - the
+        plugin's row lives in its own table, outside the portal's ORM graph.
+        A no-op for a built-in-type technical asset.
+        """
+        if not item.plugin_key:
+            return item
+        plugin_cls = next(
+            (p for p in discover_plugins() if p.key == item.plugin_key), None
+        )
+        if not plugin_cls:
+            return item
+        plugin_row = self.db.get(plugin_cls.model, item.id)
+        if not plugin_row:
+            return item
+        values = {
+            column.name: getattr(plugin_row, column.name)
+            for column in plugin_row.__table__.columns
+            if column.name != "id"
+        }
+        return item.model_copy(update={"values": values})
 
     def remove_data_output(
         self, data_product_id: UUID, id: UUID

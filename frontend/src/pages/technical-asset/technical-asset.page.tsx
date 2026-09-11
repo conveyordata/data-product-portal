@@ -52,8 +52,8 @@ export function TechnicalAsset() {
     }, [setBreadcrumbs, dataProduct, dataOutput, dataProductId, t]);
 
     const dataOutputTypeIcon = useMemo(() => {
-        return getTechnicalAssetIcon(dataOutput?.configuration.configuration_type, plugins);
-    }, [dataOutput?.configuration.configuration_type, plugins]);
+        return getTechnicalAssetIcon(dataOutput?.configuration?.configuration_type, plugins);
+    }, [dataOutput?.configuration?.configuration_type, plugins]);
 
     const dataOutputOwners = useGetDataProductOwners(dataProduct?.id);
 
@@ -109,7 +109,7 @@ export function TechnicalAsset() {
                         <TechnicalAssetDescription
                             status={dataOutput.status}
                             namespace={dataOutput.namespace}
-                            type={dataOutput.configuration.configuration_type}
+                            type={dataOutput.configuration?.configuration_type ?? ''}
                             description={dataOutput.description}
                             tags={dataOutput.tags}
                             accessModes={dataOutput.access_modes}
