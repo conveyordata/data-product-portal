@@ -3,7 +3,6 @@ on:
   pull_request:
     paths:
       - 'docs/**'
-      - '.github/workflows/docs-workflow.yml'
 
 permissions:
   contents: read
