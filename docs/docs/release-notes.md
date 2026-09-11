@@ -6,6 +6,11 @@ sidebar_position: 200
 
 ## Unreleased
 
+### bugfixes
+
+- **[Explorations]**: Fixed a bug where requesting an output port as an exploration input port could fail with a 500 error due to a misconfigured access duration.
+- **[Explorer]**: Fixed a bug where explorer returned empty results if hidden products where returned.
+
 ## 0.7.1
 
 ### breaking changes
@@ -33,10 +38,6 @@ sidebar_position: 200
 ### bugfixes
 
 - **[Provisioner]**: Access to the finalizer endpoint of exploration and data product is now only possible as an admin. The provisioner should always run with admin credentials.
-
-### bugfixes
-
-- **[Explorations]**: Fixed a bug where requesting an output port as an exploration input port could fail with a 500 error due to a misconfigured access duration.
 
 ## 0.7.0
 
