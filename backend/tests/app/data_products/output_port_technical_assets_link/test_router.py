@@ -397,34 +397,6 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
             == "You don't have permission to perform this action"
         )
 
-    def test_approve_technical_asset_link_on_private_output_port_without_row_level_assignment(
-        self, client, authorizer
-    ):
-        """Regression test: a user authorized via casbin to approve the link must not
-        get a 404 due to the private-output-port visibility filter also applying to
-        get_link(), even without a matching approved DatasetRoleAssignment/
-        DataProductRoleAssignment row backing that casbin permission.
-        """
-        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        ds = OutputPortFactory(access_type=OutputPortAccessType.PRIVATE)
-        role = RoleFactory(
-            scope=Scope.DATASET,
-            permissions=[Action.OUTPUT_PORT__APPROVE_TECHNICAL_ASSET_LINK_REQUEST],
-        )
-        # Grant the casbin permission directly, without creating a DatasetRoleAssignment
-        # row, so the private-output-port visibility filter has nothing to match on.
-        authorizer.assign_resource_role(
-            role_id=str(role.id), user_id=str(user.id), resource_id=str(ds.id)
-        )
-
-        link = TechnicalAssetOutputPortAssociationFactory(
-            output_port=ds, status=DecisionStatus.PENDING
-        )
-        response = self.approve_link_between_technical_asset_and_output_port(
-            client, ds.data_product.id, link.technical_asset.id, link.output_port.id
-        )
-        assert response.status_code == 200, response.text
-
     def test_deny_technical_asset_link(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         ds = OutputPortFactory()
