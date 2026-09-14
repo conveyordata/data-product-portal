@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 def as_user(session: Session, user_id: UUID) -> Iterator[None]:
     """Run a block of code as if `user_id` were the authenticated user.
 
-    Service tests call services directly with `session`/`test_session`,
+    Service tests call services directly with `session`/`TestingSessionLocal()`,
     bypassing `get_db_session` (which normally sets this for real requests).
     Without a `current_user_id`, the DataProduct visibility filter has
     nothing to scope by and raises. Use this to opt in to a real user

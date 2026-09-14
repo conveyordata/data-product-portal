@@ -1,13 +1,13 @@
 # ruff: noqa: S311, S105
 from collections.abc import Iterator
-from contextlib import contextmanager
+from contextlib import contextmanager, suppress
 from datetime import datetime, timedelta
-from typing import Any, Generator
+from typing import TYPE_CHECKING, Any, Generator
 from unittest.mock import MagicMock, patch
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import select, text  # noqa: TID251
+from sqlalchemy import event, select
 from sqlalchemy.orm import Session
 from starlette.routing import _DefaultLifespan
 
@@ -20,7 +20,7 @@ from app.core.authz.authorization import Authorization
 from app.core.context import _pending_events
 from app.core.webhooks.events import V2Event
 from app.data_products.output_ports.enums import OutputPortAccessType
-from app.database.database import Base, get_system_db_session
+from app.database.database import get_system_db_session
 from app.main import app
 from app.settings import settings
 from tests.factories import reset_unique_fakers
@@ -32,6 +32,9 @@ from .factories.data_product_type import DataProductTypeFactory
 from .factories.domain import DomainFactory
 from .factories.user import UserFactory
 
+if TYPE_CHECKING:
+    from sqlalchemy.engine import Connection
+
 
 @pytest.fixture(scope="session", autouse=True)
 def setup_and_teardown_database():
@@ -42,18 +45,33 @@ def setup_and_teardown_database():
     return
 
 
-def override_unauthenticated_get_db():
-    test_db = None
+@pytest.fixture
+def session() -> Generator[Session, None, None]:
+    TestingSessionLocal.remove()
+    bind = TestingSessionLocal.bind
+    assert bind is not None, "TestingSessionLocal is not bound to an engine"
+    connection: Connection = bind.connect()
+    transaction = connection.begin()
+    test_db = TestingSessionLocal()
+    test_db.bind = connection
+    test_db.begin_nested()
+
+    @event.listens_for(test_db, "after_transaction_end")
+    def restart_nested_transaction(session_: Session, transaction_: Any) -> None:
+        if transaction_.nested and not transaction_._parent.nested:
+            session_.expire_all()
+            session_.begin_nested()
+
     try:
-        test_db = TestingSessionLocal()
         yield test_db
-        test_db.commit()  # noqa: allow-commit
     finally:
-        if test_db:
-            test_db.close()
+        event.remove(test_db, "after_transaction_end", restart_nested_transaction)
+        TestingSessionLocal.remove()
+        test_db.close()
+        if transaction.is_active:
+            transaction.rollback()
+        connection.close()
 
-
-session = pytest.fixture(override_unauthenticated_get_db)
 
 from app.core.auth import jwt  # noqa: E402
 
@@ -73,11 +91,14 @@ def mock_oidc_config():
 
 
 @pytest.fixture
-def client() -> Generator[TestClient, None, None]:
+def client(session: Session) -> Generator[TestClient, None, None]:
     # Disable lifespan for testing
     app.router.lifespan_context = _DefaultLifespan(app.router)
 
-    app.dependency_overrides[get_system_db_session] = override_unauthenticated_get_db
+    def override_get_system_db_session():
+        yield session
+
+    app.dependency_overrides[get_system_db_session] = override_get_system_db_session
     app.dependency_overrides[verify_auth_header] = lambda: "test"
 
     with TestClient(app) as test_client:
@@ -151,19 +172,10 @@ def default_dataset_payload() -> dict[str, Any]:
 
 
 @pytest.fixture(autouse=True)
-def clear_db(session: Session) -> None:
-    """Clear database after each test."""
-    truncate_tables = [
-        table
-        for table in Base.metadata.tables
-        if table not in {"casbin_rule", "roles", "alembic_version"}
-    ]
-    session.execute(text(f"TRUNCATE TABLE {', '.join(truncate_tables)}"))
-    roles_table = Base.metadata.tables.get("roles")
-    if roles_table is not None:
-        session.execute(roles_table.delete().where(roles_table.c.prototype == 0))
-    AuthorizationService(session).reload_enforcer()
-    session.commit()  # noqa: allow-commit
+def reset_authorization(session: Session) -> Generator[None, None, None]:
+    yield
+    with suppress(Exception):
+        AuthorizationService(session).reload_enforcer()
     reset_unique_fakers()
 
 

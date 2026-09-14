@@ -9,7 +9,7 @@ from app.authorization.roles.model import Role
 from app.authorization.roles.schema import Prototype
 from app.core.authz.actions import AuthorizationAction
 from app.core.authz.authorization import Authorization
-from tests import test_session
+from tests import TestingSessionLocal
 
 faker: Final[Faker] = Faker()
 
@@ -36,11 +36,11 @@ class RoleFactory(factory.alchemy.SQLAlchemyModelFactory):
 
     @classmethod
     def admin(cls):
-        return test_session.get(Role, ADMIN_UUID)
+        return TestingSessionLocal().get(Role, ADMIN_UUID)
 
     @classmethod
     def data_product_owner(cls) -> Role:
-        return test_session.scalar(
+        return TestingSessionLocal().scalar(
             select(Role)
             .where(Role.prototype == Prototype.OWNER)
             .where(Role.scope == "data_product")
@@ -48,7 +48,7 @@ class RoleFactory(factory.alchemy.SQLAlchemyModelFactory):
 
     @classmethod
     def dataset_owner(cls) -> Role:
-        return test_session.scalar(
+        return TestingSessionLocal().scalar(
             select(Role)
             .where(Role.prototype == Prototype.OWNER)
             .where(Role.scope == "dataset")
