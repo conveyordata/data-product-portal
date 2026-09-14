@@ -1,4 +1,4 @@
-from tests import test_session
+from tests import TestingSessionLocal
 
 from .access_duration import AccessDurationFactory
 from .access_mode import AccessModeFactory
@@ -97,5 +97,5 @@ factories = [
 ]
 
 for factory_model in factories:
-    factory_model._meta.sqlalchemy_session = test_session  # type: ignore
-    factory_model._meta.sqlalchemy_session_persistence = "commit"  # type: ignore
+    factory_model._meta.sqlalchemy_session = TestingSessionLocal  # type: ignore
+    factory_model._meta.sqlalchemy_session_persistence = "flush"  # type: ignore

@@ -45,6 +45,12 @@ class TestAccessDurationsRouter:
             days=14,
             is_default=True,
         )
+        AccessDurationFactory(
+            abstract_data_product_type=AbstractDataProductType.DATA_PRODUCT,
+            access_duration_type=AccessDurationType.PERMANENT,
+            days=None,
+            is_default=False,
+        )
         response = client.get(f"{ENDPOINT}/data_products/default")
         assert response.status_code == 200
         data = response.json()
@@ -53,7 +59,7 @@ class TestAccessDurationsRouter:
         assert data["is_default"] is True
 
     def test_get_default_not_found(self, client):
-        response = client.get(f"{ENDPOINT}/data_products/default")
+        response = client.get(f"{ENDPOINT}/unknown/default")
         assert response.status_code == 404
 
     def test_update_requires_admin(self, client):
@@ -153,6 +159,12 @@ class TestAccessDurationsRouter:
             abstract_data_product_type=AbstractDataProductType.EXPLORATION,
             access_duration_type=AccessDurationType.PERMANENT,
             is_default=True,
+        )
+        AccessDurationFactory(
+            abstract_data_product_type=AbstractDataProductType.EXPLORATION,
+            access_duration_type=AccessDurationType.TIME_BOUND,
+            days=30,
+            is_default=False,
         )
         client.put(f"{ENDPOINT}/data_products", json=TIME_BOUND_PAYLOAD)
         # Exploration row must be untouched

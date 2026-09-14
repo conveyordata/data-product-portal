@@ -3,11 +3,12 @@ from faker import Faker
 
 from app.abstract_data_product.type import AbstractDataProductType
 from app.configuration.access_durations.enums import AccessDurationType
+from app.configuration.access_durations.model import AccessDuration
 from app.data_products.output_ports.enums import OutputPortAccessType
 from app.data_products.output_ports.model import OutputPort
 from app.data_products.output_ports.service import OutputPortService
 from app.data_products.output_ports.status import OutputPortStatus
-from tests import test_session
+from tests import TestingSessionLocal
 
 from .access_duration import AccessDurationFactory
 from .data_product import DataProductFactory
@@ -45,7 +46,7 @@ class OutputPortFactory(factory.alchemy.SQLAlchemyModelFactory):
         else:
             # If called without arguments, create a default tag
             self.tags.append(TagFactory())
-        test_session.flush()
+        TestingSessionLocal().flush()
 
     @factory.post_generation
     def access_durations(self, create, extracted, **kwargs):
@@ -62,13 +63,24 @@ class OutputPortFactory(factory.alchemy.SQLAlchemyModelFactory):
                 self.exploration_access_duration_type,
             ),
         ):
+            if (
+                TestingSessionLocal()
+                .query(AccessDuration)
+                .filter(
+                    AccessDuration.abstract_data_product_type == abstract_type,
+                    AccessDuration.access_duration_type == duration_type,
+                )
+                .first()
+            ):
+                continue
+
             if duration_type == AccessDurationType.PERMANENT:
                 AccessDurationFactory(
                     abstract_data_product_type=abstract_type,
                     access_duration_type=AccessDurationType.PERMANENT,
                     days=None,
                 )
-        test_session.flush()
+        TestingSessionLocal().flush()
 
     @factory.post_generation
     def sync_public_reader_grouping(self, create, extracted, **kwargs):

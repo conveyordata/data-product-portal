@@ -2,7 +2,7 @@ import factory
 
 from app.data_products.technical_assets.model import TechnicalAsset
 from app.data_products.technical_assets.status import TechnicalAssetStatus
-from tests import test_session
+from tests import TestingSessionLocal
 from tests.factories.data_product import DataProductFactory
 from tests.factories.platform_service import PlatformServiceFactory
 from tests.factories.s3_data_output import S3DataOutputFactory
@@ -44,4 +44,4 @@ class TechnicalAssetFactory(factory.alchemy.SQLAlchemyModelFactory):
             # If called without arguments, create a default tag
             self.tags.append(TagFactory())
         # This is broken somehow without an explicit commit
-        test_session.commit()  # noqa: allow-commit
+        TestingSessionLocal().flush()

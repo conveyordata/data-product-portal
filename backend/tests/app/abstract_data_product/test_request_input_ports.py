@@ -44,6 +44,10 @@ def _request_for(input_port, session):
     ).one()
 
 
+def _refresh_adp_input_ports(session, adp):
+    session.refresh(adp, attribute_names=["input_ports"])
+
+
 class TestRequestInputPortsDuration:
     def test_request_input_ports__time_bound_data_product_port_sets_window(
         self, session
@@ -218,7 +222,7 @@ class TestRequestInputPortsDuration:
             "need access",
             actor=actor,
         )
-        assert ip.latest_request.access_mode_id == access_mode.id
+        assert str(ip.latest_request.access_mode_id) == str(access_mode.id)
 
     def test_request_input_ports__access_mode_required(self, session):
         actor = UserFactory()
@@ -306,7 +310,7 @@ class TestRequestInputPortsDuration:
             actor=actor,
         )
 
-        assert ip.latest_request.access_mode_id == approved_mode.id
+        assert str(ip.latest_request.access_mode_id) == str(approved_mode.id)
 
     def _restricted_time_bound_port(self):
         port = OutputPortFactory(
@@ -332,6 +336,7 @@ class TestRequestInputPortsDuration:
             request__requested_duration_days=30,
             request__valid_until=date.today() + timedelta(days=10),
         )
+        _refresh_adp_input_ports(session, dp)
 
         ip = AbstractDataProductService(session).renew_input_port(
             dp.id, port.id, actor=actor
@@ -357,6 +362,7 @@ class TestRequestInputPortsDuration:
             request__requested_duration_days=30,
             request__valid_until=date.today() + timedelta(days=10),
         )
+        _refresh_adp_input_ports(session, dp)
 
         AbstractDataProductService(session).renew_input_port(
             dp.id, port.id, actor=actor
@@ -377,6 +383,7 @@ class TestRequestInputPortsDuration:
             output_port=port,
             status=DecisionStatus.PENDING,
         )
+        _refresh_adp_input_ports(session, dp)
 
         with pytest.raises(HTTPException) as exc:
             AbstractDataProductService(session).renew_input_port(
@@ -394,6 +401,7 @@ class TestRequestInputPortsDuration:
             output_port=port,
             status=DecisionStatus.APPROVED,
         )
+        _refresh_adp_input_ports(session, dp)
 
         with pytest.raises(HTTPException) as exc:
             AbstractDataProductService(session).renew_input_port(
@@ -410,6 +418,7 @@ class TestRequestInputPortsDuration:
             output_port=port,
             status=DecisionStatus.DENIED,
         )
+        _refresh_adp_input_ports(session, dp)
 
         ip = AbstractDataProductService(session).renew_input_port(
             dp.id, port.id, actor=actor
@@ -449,6 +458,7 @@ class TestRequestInputPortsDuration:
             request__valid_until=date.today() + timedelta(days=10),
             request__access_mode_id=access_mode.id,
         )
+        _refresh_adp_input_ports(session, dp)
 
         ip = AbstractDataProductService(session).renew_input_port(
             dp.id, port.id, actor=actor
@@ -473,6 +483,7 @@ class TestRequestInputPortsDuration:
             request__valid_until=date.today() + timedelta(days=10),
         )
         grant = _request_for(link, session)
+        _refresh_adp_input_ports(session, dp)
 
         ip = AbstractDataProductService(session).revoke_input_port(
             dp.id, port.id, actor=actor
@@ -495,6 +506,7 @@ class TestRequestInputPortsDuration:
             output_port=port,
             status=DecisionStatus.PENDING,
         )
+        _refresh_adp_input_ports(session, dp)
 
         with pytest.raises(HTTPException) as exc:
             AbstractDataProductService(session).revoke_input_port(
@@ -523,6 +535,7 @@ class TestRequestInputPortsDuration:
             status=DecisionStatus.PENDING,
         )
         pending = _request_for(link, session)
+        _refresh_adp_input_ports(session, dp)
 
         ip = AbstractDataProductService(session).cancel_input_port_request(
             dp.id, port.id, actor=actor
@@ -546,6 +559,7 @@ class TestRequestInputPortsDuration:
             output_port=port,
             status=DecisionStatus.PENDING,
         )
+        _refresh_adp_input_ports(session, dp)
 
         AbstractDataProductService(session).cancel_input_port_request(
             dp.id, port.id, actor=actor
@@ -570,6 +584,7 @@ class TestRequestInputPortsDuration:
             output_port=port,
             status=DecisionStatus.APPROVED,
         )
+        _refresh_adp_input_ports(session, dp)
 
         with pytest.raises(HTTPException) as exc:
             AbstractDataProductService(session).cancel_input_port_request(
