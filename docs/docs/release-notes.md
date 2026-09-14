@@ -9,7 +9,7 @@ sidebar_position: 200
 ### bugfixes
 
 - **[Explorations]**: Fixed a bug where requesting an output port as an exploration input port could fail with a 500 error due to a misconfigured access duration.
-- **[Explorer]**: Fixed a bug where explorer returned empty results if hidden products where returned.
+- **[Explorer]**: Fixed a bug where explorer returned empty results if hidden products were returned.
 
 ## 0.7.1
 
