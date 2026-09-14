@@ -7,7 +7,7 @@ from sqlalchemy import select
 from app.abstract_data_product.input_ports.background_tasks import expire_input_ports
 from app.abstract_data_product.input_ports.enums import InputPortStatus
 from app.core.auth.auth import SYSTEM_ACCOUNT_BOT_EXTERNAL_ID
-from app.events.enums import EventType
+from app.events.enums import EventReferenceEntity, EventType
 from app.events.model import Event
 from app.users.notifications.model import Notification
 from tests.factories import (
@@ -120,3 +120,7 @@ class TestExpireInputPorts:
         ).all()
         assert len(events) == 1
         assert events[0].actor_id == system_user.id
+        assert events[0].subject_id == link.output_port_id
+        assert events[0].subject_type == EventReferenceEntity.DATASET
+        assert events[0].target_id == link.consuming_abstract_data_product_id
+        assert events[0].target_type == EventReferenceEntity.DATA_PRODUCT
