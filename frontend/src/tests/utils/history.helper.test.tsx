@@ -3,7 +3,11 @@ import { EventEntityType } from '@/store/api/services/generated/dataProductsApi.
 import i18n from '@/tests/i18n.ts';
 import { renderWithProviders } from '@/tests/test-utils.tsx';
 import { EventType } from '@/types/events/event-types.ts';
-import { getEventTypeDisplayText, getNotificationDisplayName } from '@/utils/history.helper.tsx';
+import {
+    getEventTypeDisplayName,
+    getEventTypeDisplayText,
+    getNotificationDisplayName,
+} from '@/utils/history.helper.tsx';
 
 const t = i18n.t.bind(i18n);
 
@@ -47,5 +51,23 @@ describe('getNotificationDisplayName', () => {
         expect(container).toHaveTextContent(
             'Orders Output Port Output Port access for the Customer 360 Data Product is expiring soon',
         );
+    });
+});
+
+describe('getEventTypeDisplayName', () => {
+    it('shows expiring soon event history text for the new dataset link event', () => {
+        const { container } = renderWithProviders(
+            <div>
+                {getEventTypeDisplayName(
+                    t,
+                    EventType.DATA_PRODUCT_DATASET_LINK_EXPIRING_SOON,
+                    EventEntityType.OutputPort,
+                    'Orders Output Port',
+                    <span />,
+                )}
+            </div>,
+        );
+
+        expect(container).toHaveTextContent('Consuming link with the Orders Output Port Output Port is expiring soon');
     });
 });
