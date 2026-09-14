@@ -26,7 +26,7 @@ router = APIRouter(tags=["Configuration - Tags"], prefix="/v2/configuration/tags
     ],
 )
 def create_tag(
-    tag: TagCreate, db: Session = Depends(get_db_session)
+    tag: TagCreate, db: Session = Depends(get_db_session, scope="function")
 ) -> CreateTagResponse:
     return TagService(db).create_tag(tag)
 
@@ -40,7 +40,7 @@ def create_tag(
     ],
 )
 def update_tag(
-    id: UUID, tag: TagUpdate, db: Session = Depends(get_db_session)
+    id: UUID, tag: TagUpdate, db: Session = Depends(get_db_session, scope="function")
 ) -> UpdateTagResponse:
     return TagService(db).update_tag(id, tag)
 
@@ -53,10 +53,12 @@ def update_tag(
         ),
     ],
 )
-def remove_tag(id: UUID, db: Session = Depends(get_db_session)) -> None:
+def remove_tag(
+    id: UUID, db: Session = Depends(get_db_session, scope="function")
+) -> None:
     return TagService(db).remove_tag(id)
 
 
 @router.get("")
-def get_tags(db: Session = Depends(get_db_session)) -> TagsGet:
+def get_tags(db: Session = Depends(get_db_session, scope="function")) -> TagsGet:
     return TagsGet(tags=TagService(db).get_tags())

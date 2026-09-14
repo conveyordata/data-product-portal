@@ -15,7 +15,7 @@ from app.database.deps import get_db_session
 
 
 class PlatformServiceConfigurationService:
-    def __init__(self, db: Session = Depends(get_db_session)):
+    def __init__(self, db: Session = Depends(get_db_session, scope="function")):
         self.db = db
 
     def get_platform_service_configuration(

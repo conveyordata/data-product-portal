@@ -22,7 +22,7 @@ def search_output_ports(
     query: Annotated[str | SkipJsonSchema[None], Query(min_length=3)] = None,
     limit: Annotated[int, Query(ge=1, le=1000)] = 100,
     assignment_filter: AssignmentFilter = AssignmentFilter.ALL,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
     user: User = Depends(get_authenticated_user),
 ) -> SearchOutputPortsResponse:
     return SearchOutputPortsResponse(

@@ -32,7 +32,9 @@ router = APIRouter(
 
 
 @router.get("/{id}")
-def get_environment(id: UUID, db: Session = Depends(get_db_session)) -> Environment:
+def get_environment(
+    id: UUID, db: Session = Depends(get_db_session, scope="function")
+) -> Environment:
     return EnvironmentService(db).get_environment(id)
 
 
@@ -46,7 +48,7 @@ def get_environment(id: UUID, db: Session = Depends(get_db_session)) -> Environm
 )
 def get_environment_configs_by_id(
     config_id: UUID,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
 ) -> EnvironmentConfigsGetItem:
     return EnvironmentPlatformServiceConfigurationService(
         db
@@ -65,7 +67,7 @@ def get_environment_platform_service_config(
     id: UUID,
     platform_id: UUID,
     service_id: UUID,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
 ) -> EnvironmentConfigsGetItem:
     return EnvironmentPlatformServiceConfigurationService(
         db
@@ -83,7 +85,7 @@ def get_environment_platform_service_config(
 def get_environment_platform_config(
     id: UUID,
     platform_id: UUID,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
 ) -> EnvironmentPlatformConfigGet:
     return EnvironmentPlatformConfigurationService(db).get_environment_platform_config(
         id, platform_id
@@ -91,7 +93,9 @@ def get_environment_platform_config(
 
 
 @router.get("")
-def get_environments(db: Session = Depends(get_db_session)) -> EnvironmentsGet:
+def get_environments(
+    db: Session = Depends(get_db_session, scope="function"),
+) -> EnvironmentsGet:
     return EnvironmentsGet(environments=EnvironmentService(db).get_environments())
 
 
@@ -106,7 +110,7 @@ def get_environments(db: Session = Depends(get_db_session)) -> EnvironmentsGet:
 def update_environment_is_global(
     id: UUID,
     environment_update: EnvironmentUpdateGlobal,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
 ) -> Environment:
     return EnvironmentService(db).update_is_global(id, environment_update.is_global)
 
@@ -114,7 +118,7 @@ def update_environment_is_global(
 @router.get("/{id}/configs")
 def get_environment_configs(
     id: UUID,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
 ) -> EnvironmentConfigsGet:
     return EnvironmentConfigsGet(
         environment_configs=EnvironmentPlatformServiceConfigurationService(
@@ -129,7 +133,7 @@ def get_environment_configs(
 def get_environment_platform_service_config_for_all_envs(
     platform_id: UUID,
     service_id: UUID,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
 ) -> EnvironmentConfigsGet:
     return EnvironmentPlatformServiceConfigurationService(
         db

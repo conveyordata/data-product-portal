@@ -42,7 +42,10 @@ class SubjectResolver(ABC):
 
     @classmethod
     async def _resolve(
-        cls, request: Request, key: str, db: Session = Depends(get_db_session)
+        cls,
+        request: Request,
+        key: str,
+        db: Session = Depends(get_db_session, scope="function"),
     ):
         if (result := request.query_params.get(key)) is not None:
             return result
@@ -71,7 +74,10 @@ class SubjectResolver(ABC):
 
     @classmethod
     async def resolve_context(
-        cls, request: Request, key: str, db: Session = Depends(get_db_session)
+        cls,
+        request: Request,
+        key: str,
+        db: Session = Depends(get_db_session, scope="function"),
     ) -> AuthorizationContext:
         object_id = str(await cls._resolve(request, key, db))
         return AuthorizationContext(
@@ -84,7 +90,10 @@ class SubjectResolver(ABC):
 class EmptyResolver(SubjectResolver):
     @classmethod
     async def _resolve(
-        cls, request: Request, key: str, db: Session = Depends(get_db_session)
+        cls,
+        request: Request,
+        key: str,
+        db: Session = Depends(get_db_session, scope="function"),
     ):
         return cls.DEFAULT
 
@@ -102,7 +111,10 @@ class OutputPortRoleAssignmentResolver(SubjectResolver):
 
     @classmethod
     async def _resolve(
-        cls, request: Request, key: str, db: Session = Depends(get_db_session)
+        cls,
+        request: Request,
+        key: str,
+        db: Session = Depends(get_db_session, scope="function"),
     ):
         obj = await super()._resolve(request, key, db)
         if obj != cls.DEFAULT:
@@ -131,7 +143,10 @@ class DataProductRoleAssignmentResolver(SubjectResolver):
 
     @classmethod
     async def _resolve(
-        cls, request: Request, key: str, db: Session = Depends(get_db_session)
+        cls,
+        request: Request,
+        key: str,
+        db: Session = Depends(get_db_session, scope="function"),
     ):
         obj = await super()._resolve(request, key, db)
         if obj != cls.DEFAULT:
@@ -180,7 +195,10 @@ class DataProductNameResolver(SubjectResolver):
 
     @classmethod
     async def _resolve(
-        cls, request: Request, key: str, db: Session = Depends(get_db_session)
+        cls,
+        request: Request,
+        key: str,
+        db: Session = Depends(get_db_session, scope="function"),
     ):
         obj = await DataProductResolver._resolve(request, key, db)
         if obj != cls.DEFAULT:
@@ -199,7 +217,10 @@ class TechnicalAssetResolver(SubjectResolver):
 
     @classmethod
     async def _resolve(
-        cls, request: Request, key: str, db: Session = Depends(get_db_session)
+        cls,
+        request: Request,
+        key: str,
+        db: Session = Depends(get_db_session, scope="function"),
     ):
         obj = await DataProductResolver._resolve(request, key, db)
         if obj != cls.DEFAULT:
@@ -216,7 +237,10 @@ class TechnicalAssetResolver(SubjectResolver):
 class TechnicalAssetOutputPortAssociationResolver(OutputPortResolver):
     @classmethod
     async def _resolve(
-        cls, request: Request, key: str, db: Session = Depends(get_db_session)
+        cls,
+        request: Request,
+        key: str,
+        db: Session = Depends(get_db_session, scope="function"),
     ):
         obj = await SubjectResolver._resolve(request, key, db)
         if obj != cls.DEFAULT:
@@ -233,7 +257,10 @@ class TechnicalAssetOutputPortAssociationResolver(OutputPortResolver):
 class DataProductOutputPortAssociationResolver(OutputPortResolver):
     @classmethod
     async def _resolve(
-        cls, request: Request, key: str, db: Session = Depends(get_db_session)
+        cls,
+        request: Request,
+        key: str,
+        db: Session = Depends(get_db_session, scope="function"),
     ):
         obj = await DataProductResolver._resolve(request, key, db)
         if obj != cls.DEFAULT:

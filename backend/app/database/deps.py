@@ -9,7 +9,7 @@ from app.users.model import User
 
 
 def get_db_session(
-    session: Session = Depends(get_system_db_session),
+    session: Session = Depends(get_system_db_session, scope="function"),
     user: User = Depends(get_authenticated_user),
 ) -> Generator[Session, None, None]:
     session.info["current_user_id"] = user.id

@@ -18,7 +18,7 @@ from .schema_request import CreateExplorationRequest
 
 
 class ExplorationService(AbstractDataProductService):
-    def __init__(self, db: Session = Depends(get_db_session)):
+    def __init__(self, db: Session = Depends(get_db_session, scope="function")):
         super().__init__(db)
         self.namespace_validator = NamespaceValidator(ExplorationModel)
 

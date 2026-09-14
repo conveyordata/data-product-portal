@@ -33,7 +33,7 @@ def get_expiring_soon_threshold():
 @router.get("/{abstract_data_product_type}/default", response_model=AccessDuration)
 def get_default_access_duration(
     abstract_data_product_type: AbstractDataProductType,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
 ):
     access_duration = AccessDurationService(db).get_default_access_duration(
         abstract_data_product_type
@@ -47,7 +47,7 @@ def get_default_access_duration(
 
 
 @router.get("", response_model=list[AccessDuration])
-def get_all_access_durations(db: Session = Depends(get_db_session)):
+def get_all_access_durations(db: Session = Depends(get_db_session, scope="function")):
     return AccessDurationService(db).get_access_durations()
 
 
@@ -62,7 +62,7 @@ def get_all_access_durations(db: Session = Depends(get_db_session)):
 def update_access_duration(
     abstract_data_product_type: AbstractDataProductType,
     update: AccessDurationUpdate,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
 ) -> list[AccessDuration]:
     return AccessDurationService(db).upsert_access_duration(
         abstract_data_product_type, update

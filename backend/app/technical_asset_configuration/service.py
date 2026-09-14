@@ -25,7 +25,7 @@ from app.technical_asset_configuration.schema_response import (
 
 
 class PluginService:
-    def __init__(self, db: Session = Depends(get_db_session)):
+    def __init__(self, db: Session = Depends(get_db_session, scope="function")):
         self.db = db
 
     def get_all_technical_assets_ui_metadata(

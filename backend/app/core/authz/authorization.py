@@ -65,7 +65,7 @@ class Authorization(metaclass=Singleton):
         async def inner(
             request: Request,
             user: User = Depends(get_authenticated_user),
-            db: Session = Depends(get_db_session),
+            db: Session = Depends(get_db_session, scope="function"),
         ) -> None:
             context = await resolver.resolve_context(request, object_id, db)
 

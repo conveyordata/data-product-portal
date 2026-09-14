@@ -38,7 +38,7 @@ def get_output_port_query_stats(
     id: UUID,
     granularity: QueryStatsGranularity = Query(default=QueryStatsGranularity.WEEK),
     day_range: int = Query(default=DEFAULT_DAY_RANGE, ge=1),
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
 ) -> OutputPortQueryStatsResponses:
     ds = ensure_output_port_exists(id, db, data_product_id=data_product_id)
     return OutputPortStatsService(db).get_query_stats(
@@ -61,7 +61,7 @@ def update_output_port_query_stats(
     data_product_id: UUID,
     id: UUID,
     input_data: UpdateOutputPortQueryStatus,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
 ) -> None:
     ds = ensure_output_port_exists(id, db, data_product_id=data_product_id)
     OutputPortStatsService(db).update_query_stats(
@@ -84,7 +84,7 @@ def delete_output_port_query_stat(
     data_product_id: UUID,
     id: UUID,
     input_data: OutputPortQueryStatsDelete,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
 ) -> None:
     ds = ensure_output_port_exists(id, db, data_product_id=data_product_id)
     OutputPortStatsService(db).delete_query_stats(
