@@ -25,6 +25,7 @@ export const EventType = {
     DATA_PRODUCT_DATASET_LINK_REMOVED: 'data_product_dataset_link_removed',
     DATA_PRODUCT_DATASET_LINK_REVOKED: 'data_product_dataset_link_revoked',
     DATA_PRODUCT_DATASET_LINK_CANCELLED: 'data_product_dataset_link_cancelled',
+    DATA_PRODUCT_DATASET_LINK_EXPIRING_SOON: 'data_product_dataset_link_expiring_soon',
 
     DATASET_CREATED: 'dataset_created',
     DATASET_UPDATED: 'dataset_updated',
