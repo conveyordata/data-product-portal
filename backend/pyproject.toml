@@ -28,7 +28,7 @@ alembic = "^1.19.2"
 sqlalchemy = { version = "^2.0.52", extras = ['asyncio'] }
 sqlalchemy-utils = "^0.42.1"
 sqlalchemy-easy-softdelete = "^0.9.1"
-psycopg2-binary = "^2.9.12"
+psycopg2-binary = "^2.9.13"
 pyyaml = "^6.0.3"
 pyjwt = "^2.13.0"
 shortuuid = "^1.0.13"
