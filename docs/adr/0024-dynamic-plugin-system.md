@@ -30,7 +30,7 @@ For reference, in this ADR we will use Portal Core to reference the source code 
 This will be a next ADR
 * The concrete, long-term data model for a plugin's technical asset (tags/access-mode compatibility rules, search indexing, and similar) is out of scope.
 * API changes are out of scope: current endpoints are already generic, so they are reused as-is for plugins.
-* Frontend rendering changes are out of scope: the portal reuses the `UIElementMetadata` class as-is for a plugin's fields, the same as every other technical asset type (see "The plugin's field vocabulary, and who owns turning it into a form").
+* Frontend rendering changes are out of scope: the portal reuses the `UIElementMetadata` class as-is for a plugin's fields, the same as every other technical asset type (see "UI rendering of a plugin's fields and form").
 * An admin UI interface for managing integrations. Integrations (including the ones with no code) remain reachable only through the underlying data/API for now, matching how they're exposed to the rest of the interface today.
 * Plugins only support custom technical assets.
 * Logging, tracing, and observability conventions for plugin authors, beyond the portal catching exceptions at the plugin call boundary. Structured logging format, distributed tracing, and metrics for plugin calls are not addressed here.
@@ -45,7 +45,7 @@ A real, versioned Python package, installed into the customer's own image, was t
 
 ### Loading the python packages inside portal core
 
-#### Option 1: Discover plugins automatically via Python entry points
+#### Option 1 (chosen): Discover plugins automatically via Python entry points
 - Python's standard entry-points mechanism - the same one Airflow's own classic plugin registration uses for operators, hooks, executors, and UI views. (Airflow separately uses `pluggy`'s hookspec/hookimpl system for its listener API, where many plugins can each optionally implement several lifecycle hooks - a different shape of problem than one class per plugin, so not a reason to pull `pluggy` in here.)
 - Installing the package is enough - nothing extra to configure.
 - Robust and well-established: this is what "advertise yourself as a plugin" means in the Python packaging ecosystem.
@@ -59,10 +59,6 @@ A real, versioned Python package, installed into the customer's own image, was t
 
 A plugin's identity - its name, icon, and fields - lives directly on its own Python class, inherited from the portal's `TechnicalAssetPlugin` ABC (see Decision Outcome), alongside the configuration behavior described below; it isn't a separate thing to store. The icon is referenced as a bundled file path next to the plugin's own code, not inlined as a raw string.
 
-### The plugin's field vocabulary, and who owns turning it into a form
-
-A plugin declares its fields by returning `UIElementMetadata` instances directly - the same class already used to render every technical asset type's form, imported from the new package (see "Distributing portal core as an installable Python package" below) rather than reimplemented or expressed as JSON. There is no separate, plugin-only vocabulary and no adapter step translating one shape into another: a plugin author gets exactly the same building block core types use, which is far less work than hand-writing a JSON schema. The two are meant to fully converge - core's own technical asset types move onto this same interface too (see Decision Outcome), so there ends up being one single, working way to declare a technical asset's form, not two.
-
 #### Option 1: Single table for all plugins with a JSON column
 - Needs a stored version per row, and some tooling to reload against it.
 - Hard for migrations: a plugin author who changes a field has no real migration to write - either the portal builds a way to make that easier, or it's on the plugin author to deal with it defensively, in their own code.
@@ -70,7 +66,7 @@ A plugin declares its fields by returning `UIElementMetadata` instances directly
 - Keeps the number of tables small - the fixed identity fields of every plugin type live in one shared table.
 - Harder to index or join against, since the configured values themselves sit inside a JSON blob.
 
-#### Option 2: Separate table for each plugin, plus one table tracking versions
+#### Option 2 (chosen): Separate table for each plugin, plus one table tracking versions
 Creating a table for each plugin - the schema can be partially defined by portal core (an id, a name, a version, ...) and partially self-defined by the plugin. This stays a single table per plugin, not a denormalized model.
 Included is also some basic tooling to test out Alembic database migrations of the plugin's own tables, since plugin authors should be able to try out their own migrations before shipping them, the same as they would for portal core's own.
 Alongside that, one shared table tracks each plugin's table, its version, and its schema. Only the latest version needs to be kept there - older versions live in the plugin's own migration history, not in this tracking table.
@@ -80,6 +76,13 @@ Alongside that, one shared table tracks each plugin's table, its version, and it
 - Lots of new tables, growing with however many plugins are installed.
 
 The core project's own migrations already run as a deploy-time step, before the app starts serving traffic. That same step extends to also walk every named plugin: each plugin's own class hardcodes the revision it wants (set by the plugin author, versioned right alongside its code, discovered the same way its identity is); the portal core compares that to the plugin's tracked current revision and reconciles the table to match, upgrading or downgrading as needed.
+
+### UI rendering of a plugin's fields and form
+
+#### Option 1 (chosen): A plugin returns `UIElementMetadata` instances directly
+- Same class already used to render every technical asset type's form, imported from the new package (see "Distributing portal core as an installable Python package" below) - nothing new to design.
+- No adapter step: a plugin author gets exactly the same building block core types use, which is far less work than hand-writing a JSON schema.
+- Core's own technical asset types are expected to converge onto this same interface too, so there ends up being one single, working way to declare a technical asset's form, not two.
 
 ### Distributing portal core as an installable Python package
 
@@ -94,8 +97,8 @@ Technically, this reuses the path the `sdk` package already publishes through: a
 - Loading the python packages inside portal core: Option 1 - automatic discovery via Python entry points.
 - The shape a plugin's class must implement: an ABC, `TechnicalAssetPlugin`, that a plugin class inherits from.
 - Where and how is the configuration of the plugin stored: Option 2 - a dedicated table per plugin, migrated by the plugin's own Alembic revisions.
-- Distributing portal core as an installable Python package: portal core is published to PyPI as its own package, all of it for now . `TechnicalAssetPlugin` lives here, alongside whatever a plugin needs to read environments, platforms, and platform services.
-- A plugin declares its fields by returning `UIElementMetadata` instances directly - the exact class and rendering path every technical asset type already uses, not a smaller vocabulary or a JSON shape the portal translates (see "The plugin's field vocabulary, and who owns turning it into a form" above). Built-in types are expected to converge onto this same interface too, so there ends up being one single way to declare a technical asset's form, not a plugin-specific one.
+- Distributing portal core as an installable Python package: portal core is published to PyPI as its own package, all of it for now. `TechnicalAssetPlugin` lives here, alongside whatever a plugin needs to read environments, platforms, and platform services.
+- UI rendering of a plugin's fields and form: Option 1 - a plugin returns `UIElementMetadata` instances directly, the exact class and rendering path every technical asset type already uses. Built-in types are expected to converge onto this same interface too, so there ends up being one single way to declare a technical asset's form, not a plugin-specific one.
 - The current, in-tree plugins also move onto this interface, not just future third-party ones - gradually, one plugin per PR, so the portal eats its own dog food.
 
 ### Confirmation
@@ -108,7 +111,7 @@ This decision is reflected in the application by:
 * A technical asset's specific, filled-in values live in a table that belongs to that plugin, migrated by the plugin's own Alembic revisions; a shared table tracks which revision each plugin's table is currently at, and `python -m app.db_tool migrate` reconciles both core and plugin tables to their declared target revision (upgrading or downgrading as needed) in the same existing deploy step. Plugin authors get the same basic tooling to try out their own migrations before shipping them as they would for portal core's own.
 * The portal's published API description treats a technical asset's configuration lazily, and as a generic value for every type; anything needing a type's exact fields looks them up separately, at the moment it needs them.
 * The API regarding technical assets is not different for dynamically loaded plugins and is read through the same `/v2/data_products/{data_product_id}/technical_assets` endpoints every built-in type already uses, not a separate, plugin-only API - so there is exactly one way to create or read a technical asset in every generated SDK/CLI/frontend client, regardless of which system backs it.
-* A plugin declares its fields as `UIElementMetadata` instances directly (see "The plugin's field vocabulary, and who owns turning it into a form") - the same class and rendering path every technical asset type already uses to describe its form. A plugin author never writes frontend code and never hand-writes JSON for its form; it returns the objects, and the portal renders them.
+* A plugin declares its fields as `UIElementMetadata` instances directly (see "UI rendering of a plugin's fields and form") - the same class and rendering path every technical asset type already uses to describe its form. A plugin author never writes frontend code and never hand-writes JSON for its form; it returns the objects, and the portal renders them.
 * Existing integrations move onto the new interface one at a time; both the old, table-per-type mechanism and the new, plugin-owned-table mechanism are supported until the last one moves.
 
 ## Design Details
@@ -122,7 +125,7 @@ Lower-level implementation choices that follow from the decision above, but aren
 
 ## Pros and Cons of the Options
 
-### Loading the python packages inside portal core - Option 1: automatic, via entry points
+### Loading the python packages inside portal core - Option 1 (chosen): automatic, via entry points
 - **Good, because** installing the package is enough - nothing extra to configure or forget.
 - **Good, because** it's a standard, well-understood Python mechanism, not something built from scratch.
 - **Bad, because** anything already installed - including a dependency nobody chose on purpose - could advertise itself the same way and get loaded; what's running is only visible in the dependency tree, not the Dockerfile. Mitigated by having the portal log every discovered plugin at startup, so what's actually loaded is always visible at runtime.
@@ -136,12 +139,17 @@ Lower-level implementation choices that follow from the decision above, but aren
 - **Bad, because** validating at save time doesn't help with rows already saved under an older version of a plugin's fields - every plugin author defensively guesses at a shape they can't fully trust.
 - **Bad, because** a plain database query against one specific field, across every technical asset using it, becomes a more roundabout query against the JSON blob instead.
 
-### Where and how is the configuration of the plugin stored - Option 2: dedicated table per plugin, Alembic-migrated
+### Where and how is the configuration of the plugin stored - Option 2 (chosen): dedicated table per plugin, Alembic-migrated
 - **Good, because** a migration can reshape or backfill old data as part of the same change that needs it - something the JSON column can't do.
 - **Good, because** it reuses the deploy-time migration step the core project already runs; no new infrastructure needed to apply it.
 - **Good, because** running several independent migration histories side by side is a documented Alembic pattern, not something built from scratch.
 - **Bad, because** every field change now needs a real, shipped migration, authored by the plugin - more work than editing a declared field.
 - **Neutral, because** uninstalling a plugin doesn't clean up its table - it's left in place, untouched, with nothing else happening; picked up again if the plugin is reinstalled.
+
+### UI rendering of a plugin's fields and form - Option 1 (chosen): a plugin returns `UIElementMetadata` directly
+- **Good, because** nothing new to design - a plugin author reuses the exact class every technical asset type already renders with.
+- **Good, because** no adapter, no translation layer to maintain.
+- **Neutral, because** a plugin is coupled to `UIElementMetadata`'s own shape; the same is already true for every built-in type, and built-ins are expected to converge onto this same interface too.
 
 
 ## Appendix
@@ -150,7 +158,7 @@ Lower-level implementation choices that follow from the decision above, but aren
 
 1. **Build it into the core project (today's situation)** - rejected, this is the exact problem being solved.
 2. **Ship it as a separately installable package** - built and versioned like any other Python package, installed into the customer's own image.
-   * **2a - discovered automatically**, via Python's standard package-registration mechanism.
+   * **2a (chosen) - discovered automatically**, via Python's standard package-registration mechanism.
    * **2b - discovered by explicit name** - the image author names exactly which modules to load, in one setting.
 3. **Drop it into a scanned folder, loaded in-process** - the portal imports a plugin file directly at startup, no packaging needed.
 4. **Drop it into a scanned folder, run as a separate program per call** - any language, isolates a broken plugin, but slower per call and more work to build.
