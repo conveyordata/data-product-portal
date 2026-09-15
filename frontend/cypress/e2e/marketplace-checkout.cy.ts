@@ -10,11 +10,16 @@ const explorationDomainName = 'Customer Insights';
 
 describe('Marketplace checkout', () => {
     it('lets a user search for a data product, add it to cart, and request access', () => {
+        cy.intercept('GET', '**/v2/search/output_ports*').as('searchOutputPorts');
         cy.visit('/marketplace');
+        // The page fires an unfiltered search on mount; drain it first so the wait
+        // below can't accidentally resolve on that request instead of ours.
+        cy.wait('@searchOutputPorts', { timeout: 30000 });
 
         cy.get('.ant-input-search input').type(outputPortName);
         cy.get('.ant-input-search input').should('have.value', outputPortName);
         cy.get('.ant-input-search input').type('{enter}');
+        cy.wait('@searchOutputPorts', { timeout: 30000 });
 
         cy.contains('.ant-card', outputPortName, { timeout: 20000 }).should('be.visible');
 
@@ -52,11 +57,16 @@ describe('Marketplace checkout', () => {
     it('lets a user search for a data product, add it to cart, and create a new exploration', () => {
         const explorationName = `Cypress E2E Exploration ${Date.now()}`;
 
+        cy.intercept('GET', '**/v2/search/output_ports*').as('searchOutputPorts');
         cy.visit('/marketplace');
+        // The page fires an unfiltered search on mount; drain it first so the wait
+        // below can't accidentally resolve on that request instead of ours.
+        cy.wait('@searchOutputPorts', { timeout: 30000 });
 
         cy.get('.ant-input-search input').type(explorationOutputPortName);
         cy.get('.ant-input-search input').should('have.value', explorationOutputPortName);
         cy.get('.ant-input-search input').type('{enter}');
+        cy.wait('@searchOutputPorts', { timeout: 30000 });
 
         cy.contains('.ant-card', explorationOutputPortName, { timeout: 20000 }).should('be.visible');
 
