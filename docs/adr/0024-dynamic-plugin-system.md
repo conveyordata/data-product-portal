@@ -76,7 +76,7 @@ Included is also some basic tooling to test out Alembic database migrations of t
 Alongside that, one shared table tracks each plugin's table, its version, and its schema. Only the latest version needs to be kept there - older versions live in the plugin's own migration history, not in this tracking table.
 
 - Comes with a built-in versioning system via Alembic - and this isn't custom machinery: Alembic already supports running multiple, independent migration histories side by side ("Run Multiple Alembic Environments" in its own docs), each with its own version-tracking table.
-- Easier to put indexes and joins in place than against a JSON column.
+- Easier to put indexes, joins and constraints in place than against a JSON column.
 - Lots of new tables, growing with however many plugins are installed.
 
 The core project's own migrations already run as a deploy-time step, before the app starts serving traffic. That same step extends to also walk every named plugin: each plugin's own class hardcodes the revision it wants (set by the plugin author, versioned right alongside its code, discovered the same way its identity is); the portal core compares that to the plugin's tracked current revision and reconciles the table to match, upgrading or downgrading as needed.
