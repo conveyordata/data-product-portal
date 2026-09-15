@@ -18,4 +18,4 @@ class ThemeSettingsService:
         for attr, value in updated_settings.items():
             setattr(current_settings, attr, value)
 
-        self.db.commit()
+        self.db.flush()

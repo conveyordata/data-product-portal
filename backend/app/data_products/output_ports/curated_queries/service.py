@@ -51,5 +51,5 @@ class DatasetCuratedQueryService:
                     sort_order=index,
                 )
             )
-        self.db.commit()
+        self.db.flush()
         return self.get_curated_queries(dataset_id)

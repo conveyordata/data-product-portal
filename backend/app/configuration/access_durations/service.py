@@ -61,7 +61,7 @@ class AccessDurationService:
 
     def update_access_duration(self, access_duration: AccessDurationModel):
         self.db.add(access_duration)
-        self.db.commit()
+        self.db.flush()
         self.db.refresh(access_duration)
         return access_duration
 
@@ -105,7 +105,7 @@ class AccessDurationService:
             abstract_data_product_type, allowed_types, update.access_duration_type
         )
 
-        self.db.commit()
+        self.db.flush()
         return self.get_access_durations_by_type(abstract_data_product_type)
 
     def _cascade_output_ports(

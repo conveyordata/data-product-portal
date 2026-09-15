@@ -225,7 +225,7 @@ class DataProductService(AbstractDataProductService):
 
         result = copy.deepcopy(data_product)
         self.db.delete(data_product)
-        self.db.commit()
+        self.db.flush()
         return result
 
     def update_data_product(
@@ -279,7 +279,7 @@ class DataProductService(AbstractDataProductService):
         current_data_product = ensure_data_product_exists(id, self.db)
         self._ensure_not_deleting(current_data_product)
         current_data_product.about = data_product.about
-        self.db.commit()
+        self.db.flush()
         return current_data_product
 
     def update_data_product_status(
@@ -290,7 +290,7 @@ class DataProductService(AbstractDataProductService):
         current_data_product = ensure_data_product_exists(id, self.db)
         self._ensure_not_deleting(current_data_product)
         current_data_product.status = data_product.status
-        self.db.commit()
+        self.db.flush()
         return current_data_product
 
     def update_data_product_usage(
@@ -301,7 +301,7 @@ class DataProductService(AbstractDataProductService):
         current_data_product = ensure_data_product_exists(id, self.db)
         self._ensure_not_deleting(current_data_product)
         current_data_product.usage = usage.usage
-        self.db.commit()
+        self.db.flush()
         return current_data_product
 
     @deprecated("Should use generate_signin_url instead")

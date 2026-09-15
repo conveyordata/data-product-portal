@@ -34,7 +34,7 @@ class DataProductLifeCycleService:
             **data_product_lifecycle.parse_pydantic_schema()
         )
         self.db.add(data_product_lifecycle)
-        self.db.commit()
+        self.db.flush()
         return CreateDataProductLifeCycleResponse(id=data_product_lifecycle.id)
 
     def update_data_product_lifecycle(
@@ -45,11 +45,11 @@ class DataProductLifeCycleService:
         lifecycle.is_default = data_product_lifecycle.is_default
         lifecycle.name = data_product_lifecycle.name
         lifecycle.value = data_product_lifecycle.value
-        self.db.commit()
+        self.db.flush()
         return UpdateDataProductLifeCycleResponse(id=id)
 
     def delete_data_product_lifecycle(self, lifecycle_id: UUID) -> None:
         lifecycle = self.db.get(DataProductLifeCycleModel, lifecycle_id)
         self.db.delete(lifecycle)
-        self.db.commit()
+        self.db.flush()
         return
