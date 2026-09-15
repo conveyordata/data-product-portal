@@ -3081,3 +3081,7 @@ SELECT
     timezone('utc'::text, current_timestamp),
     NULL
 FROM link;
+
+-- All output ports default to 'permanent' exploration access (server default);
+-- override so exploration access requests are time-bound in the demo data.
+UPDATE public.datasets SET exploration_access_duration_type = 'time_bound';
