@@ -6,6 +6,8 @@ sidebar_position: 200
 
 ## Unreleased
 
+## 0.7.2
+
 ### bugfixes
 
 - **[Explorations]**: Fixed a bug where requesting an output port as an exploration input port could fail with a 500 error due to a misconfigured access duration.
