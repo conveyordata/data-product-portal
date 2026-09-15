@@ -3,6 +3,8 @@ from typing import Sequence, get_origin
 from fastapi.dependencies.models import Dependant
 from fastapi.routing import APIRoute
 
+from app.database.database import get_system_db_session
+from app.database.deps import get_db_session
 from app.main import app
 from app.open_api_export import custom_openapi
 
@@ -239,6 +241,12 @@ def _route_has_authorization_enforce(route) -> bool:
     return False
 
 
+def _iter_dependants(dependant: Dependant):
+    yield dependant
+    for dependency in dependant.dependencies:
+        yield from _iter_dependants(dependency)
+
+
 def test_every_protected_v2_route_has_authorization_enforce_dependency():
     excluded_paths = {
         # Everyone is allowed to read the list of data products, so no authorization is needed.
@@ -262,6 +270,28 @@ def test_every_protected_v2_route_has_authorization_enforce_dependency():
     assert not missing, (
         "The following API routes do not declare an Authorization.enforce dependency:\n"
         + "\n".join(missing)
+    )
+
+
+def test_db_session_dependencies_use_function_scope():
+    invalid = []
+
+    for route in _iter_app_routes():
+        if not getattr(route, "path", "").startswith("/api/v2/"):
+            continue
+
+        for dependant in _iter_dependants(route.dependant):
+            call = getattr(dependant, "call", None)
+            if call not in {get_db_session, get_system_db_session}:
+                continue
+            if getattr(dependant, "scope", None) != "function":
+                invalid.append(
+                    f"{route.path} [{route.name}] uses {call.__name__} without scope='function'"
+                )
+
+    assert not invalid, (
+        "The following API routes use database session dependencies without "
+        "scope='function':\n" + "\n".join(invalid)
     )
 
 

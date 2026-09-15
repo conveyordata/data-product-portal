@@ -64,7 +64,7 @@ TECHNICAL_ASSET_NOT_ACTIVE_ERROR = HTTPException(
 
 
 class TechnicalAssetService:
-    def __init__(self, db: Session = Depends(get_db_session)):
+    def __init__(self, db: Session = Depends(get_db_session, scope="function")):
         self.db = db
         self.namespace_validator = TechnicalAssetNamespaceValidator()
 

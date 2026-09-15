@@ -53,7 +53,7 @@ router = APIRouter(
 )
 def create_data_product_lifecycle(
     data_product_lifecycle: DataProductLifeCycleCreate,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
 ) -> CreateDataProductLifeCycleResponse:
     return DataProductLifeCycleService(db).create_data_product_lifecycle(
         data_product_lifecycle
@@ -89,7 +89,7 @@ def create_data_product_lifecycle(
 def update_data_product_lifecycle(
     id: UUID,
     data_product_lifecycle: DataProductLifeCycleUpdate,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
 ) -> UpdateDataProductLifeCycleResponse:
     return DataProductLifeCycleService(db).update_data_product_lifecycle(
         id, data_product_lifecycle
@@ -106,14 +106,14 @@ def update_data_product_lifecycle(
 )
 def remove_data_product_lifecycle(
     id: UUID,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
 ) -> None:
     return DataProductLifeCycleService(db).delete_data_product_lifecycle(id)
 
 
 @router.get("")
 def get_data_products_lifecycles(
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
 ) -> DataProductLifeCyclesGet:
     return DataProductLifeCyclesGet(
         data_product_life_cycles=DataProductLifeCycleService(

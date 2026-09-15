@@ -39,7 +39,7 @@ router = APIRouter(
 def get_output_port_schema(
     data_product_id: UUID,
     id: UUID,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
 ) -> OutputPortSchemaResponse:
     ds = ensure_output_port_exists(id, db, data_product_id=data_product_id)
     return OutputPortContractService(db).get_schema(ds.id)
@@ -67,7 +67,7 @@ def ingest_output_port_contract(
     data_product_id: UUID,
     id: UUID,
     contract: BitolContractRequest,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
 ) -> OutputPortSchemaResponse:
     ds = ensure_output_port_exists(id, db, data_product_id=data_product_id)
     return OutputPortContractService(db).ingest_contract(ds.id, contract)
@@ -95,7 +95,7 @@ def ingest_output_port_contract_yaml(
     data_product_id: UUID,
     id: UUID,
     file: UploadFile = File(...),
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
 ) -> OutputPortSchemaResponse:
     try:
         payload = yaml.safe_load(file.file.read())

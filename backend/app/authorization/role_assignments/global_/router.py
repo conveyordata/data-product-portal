@@ -35,7 +35,7 @@ router = APIRouter(prefix="/v2/authz/role_assignments/global")
 )
 def become_admin(
     request: BecomeAdmin,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
     user: User = Depends(get_authenticated_user),
 ):
     user = ensure_user_exists(user.id, db)
@@ -53,7 +53,7 @@ def become_admin(
     "/revoke_admin",
 )
 def revoke_admin(
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
     user: User = Depends(get_authenticated_user),
 ):
     user = ensure_user_exists(user.id, db)
@@ -71,7 +71,7 @@ def revoke_admin(
 )
 def create_global_role_assignment(
     request: CreateGlobalRoleAssignment,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
     user: User = Depends(get_authenticated_user),
 ) -> GlobalRoleAssignmentResponse:
     role_id = _resolve_role_id(request.role_id)
@@ -91,7 +91,7 @@ def create_global_role_assignment(
 )
 def delete_global_role_assignment(
     id: UUID,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
 ) -> DeleteGlobalRoleAssignmentResponse:
     assignment = RoleAssignmentService(db).delete_assignment(id)
 
@@ -110,7 +110,7 @@ def _resolve_role_id(role_id: Union[UUID, Literal["admin"]]) -> UUID:
 def list_global_role_assignments(
     user_id: Annotated[UUID | SkipJsonSchema[None], Query()] = None,
     role_id: Annotated[UUID | SkipJsonSchema[None], Query()] = None,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
 ) -> ListGlobalRoleAssignmentsResponse:
     return ListGlobalRoleAssignmentsResponse(
         role_assignments=RoleAssignmentService(db).list_assignments(
@@ -130,7 +130,7 @@ def list_global_role_assignments(
 def decide_global_role_assignment(
     id: UUID,
     request: DecideGlobalRoleAssignment,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
     user: User = Depends(get_authenticated_user),
 ) -> GlobalRoleAssignmentResponse:
     service = RoleAssignmentService(db)
@@ -163,7 +163,7 @@ def decide_global_role_assignment(
 def modify_global_role_assignment(
     id: UUID,
     request: ModifyGlobalRoleAssignment,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
     user: User = Depends(get_authenticated_user),
 ) -> GlobalRoleAssignmentResponse:
     service = RoleAssignmentService(db)

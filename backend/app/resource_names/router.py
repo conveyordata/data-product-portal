@@ -33,7 +33,7 @@ def validate_resource_name(
     resource_name: str,
     model: ResourceNameModel,
     data_product_id: Annotated[UUID | SkipJsonSchema[None], Query()] = None,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
 ) -> ResourceNameValidation:
     match model:
         case ResourceNameModel.DATA_PRODUCT:
