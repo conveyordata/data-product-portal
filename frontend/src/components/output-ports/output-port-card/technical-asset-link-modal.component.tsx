@@ -128,6 +128,7 @@ export function TechnicalAssetLinkModal({ onClose, dataProductId, datasetId, dat
                 <Button
                     key="submit"
                     type="primary"
+                    data-cy="link-technical-assets-submit"
                     onClick={handleSubmit}
                     loading={isLinking}
                     disabled={selectedOutputs.size === 0}
@@ -169,9 +170,10 @@ export function TechnicalAssetLinkModal({ onClose, dataProductId, datasetId, dat
                 }}
                 locale={{ emptyText: t('No Technical Assets available') }}
                 renderItem={(output) => (
-                    <List.Item>
+                    <List.Item data-cy="technical-asset-link-item">
                         <Flex align="center" gap={12} style={{ width: '100%' }}>
                             <Checkbox
+                                data-cy="technical-asset-link-checkbox"
                                 checked={selectedOutputs.has(output.id)}
                                 onChange={() => handleOutputToggle(output.id)}
                             />

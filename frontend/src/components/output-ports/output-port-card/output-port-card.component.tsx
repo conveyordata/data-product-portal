@@ -203,6 +203,7 @@ export function OutputPortCard({ outputPortId, dataProductId, draggedDataOutputI
     return (
         <>
             <Card
+                data-cy="output-port-card"
                 className={`${styles.card}  ${dragOver ? styles.dragOver : ''} ${invalidDrop ? styles.invalidDrop : ''}`}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
@@ -226,6 +227,7 @@ export function OutputPortCard({ outputPortId, dataProductId, draggedDataOutputI
                                         disabled={!canLink}
                                         type="link"
                                         size="small"
+                                        data-cy="link-technical-assets"
                                     >
                                         {t('Link Technical Assets')}
                                     </Button>

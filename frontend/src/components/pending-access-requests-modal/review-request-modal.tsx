@@ -446,10 +446,21 @@ export function ReviewRequestModal({ action, open, onClose, onAccept, onReject, 
                 footer={
                     readOnly ? null : (
                         <Flex gap="small" justify="flex-end">
-                            <Button danger icon={<CloseOutlined />} loading={isAccepting} onClick={handleReject}>
+                            <Button
+                                danger
+                                icon={<CloseOutlined />}
+                                data-cy="decline-request"
+                                loading={isAccepting}
+                                onClick={handleReject}
+                            >
                                 {t('Decline')}
                             </Button>
-                            <Button type="primary" icon={<CheckOutlined />} onClick={handleAccept}>
+                            <Button
+                                type="primary"
+                                icon={<CheckOutlined />}
+                                data-cy="accept-request"
+                                onClick={handleAccept}
+                            >
                                 {t('Accept')}
                             </Button>
                         </Flex>

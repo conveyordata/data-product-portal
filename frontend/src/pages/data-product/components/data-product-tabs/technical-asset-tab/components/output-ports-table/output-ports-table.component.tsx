@@ -61,6 +61,7 @@ export function OutputPortsTable({ dataProductId, draggedDataOutputId }: Props) 
                         onClick={handleOpen}
                         disabled={!canCreateDataset}
                         type="primary"
+                        data-cy="add-output-port"
                         loading={isLoadingDataProduct}
                     >
                         {t('Add Output Port')}

@@ -526,7 +526,7 @@ export function OutputPortForm({
                     },
                 ]}
             >
-                <Input />
+                <Input data-cy="output-port-name" />
             </Form.Item>
             <ResourceNameFormItem
                 form={form}
@@ -571,6 +571,7 @@ export function OutputPortForm({
                 ]}
             >
                 <Select
+                    data-cy="output-port-lifecycle"
                     loading={isFetchingLifecycles}
                     allowClear
                     showSearch={{ filterOption: selectFilterOptionByLabelAndValue }}
@@ -620,7 +621,11 @@ export function OutputPortForm({
                     },
                 ]}
             >
-                <TextArea rows={4} count={{ show: true, max: MAX_DESCRIPTION_INPUT_LENGTH }} />
+                <TextArea
+                    data-cy="output-port-description"
+                    rows={4}
+                    count={{ show: true, max: MAX_DESCRIPTION_INPUT_LENGTH }}
+                />
             </Form.Item>
             {mode !== 'create' && (
                 <Form.Item>

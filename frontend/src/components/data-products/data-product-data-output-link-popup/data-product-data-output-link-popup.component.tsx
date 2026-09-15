@@ -27,6 +27,7 @@ export function DataProductLinkPopup({ onClose, isOpen, title, formRef, children
                         className={styles.formButton}
                         type="primary"
                         htmlType="submit"
+                        data-cy="link-popup-submit"
                         onClick={() => formRef.current?.submit()}
                     >
                         {t('Create')}

@@ -130,7 +130,7 @@ export const DataProductFormItems = <T extends DataProductCreate>({
                     },
                 ]}
             >
-                <Input />
+                <Input data-cy="data-product-name" />
             </Form.Item>
             <ResourceNameFormItem
                 form={form}
@@ -173,6 +173,7 @@ export const DataProductFormItems = <T extends DataProductCreate>({
                 ]}
             >
                 <Select
+                    data-cy="data-product-type"
                     loading={isFetchingDataProductTypes}
                     allowClear
                     showSearch={{ filterOption: selectFilterOptionByLabelAndValue }}
@@ -190,6 +191,7 @@ export const DataProductFormItems = <T extends DataProductCreate>({
                 ]}
             >
                 <Select
+                    data-cy="data-product-lifecycle"
                     loading={isFetchingLifecycles}
                     options={lifecycles?.data_product_life_cycles.map((lifecycle) => ({
                         value: lifecycle.id,
@@ -211,6 +213,7 @@ export const DataProductFormItems = <T extends DataProductCreate>({
                 ]}
             >
                 <Select
+                    data-cy="data-product-domain"
                     loading={isFetchingDomains}
                     options={domains.map((domain) => ({ label: domain.name, value: domain.id }))}
                     showSearch={{ filterOption: selectFilterOptionByLabelAndValue }}
@@ -243,7 +246,11 @@ export const DataProductFormItems = <T extends DataProductCreate>({
                     },
                 ]}
             >
-                <TextArea rows={4} count={{ show: true, max: MAX_DESCRIPTION_INPUT_LENGTH }} />
+                <TextArea
+                    data-cy="data-product-description"
+                    rows={4}
+                    count={{ show: true, max: MAX_DESCRIPTION_INPUT_LENGTH }}
+                />
             </Form.Item>
         </>
     );
