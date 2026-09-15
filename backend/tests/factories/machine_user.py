@@ -2,7 +2,7 @@ import factory
 from faker import Faker
 
 from app.machine_users.model import MachineUser
-from tests.factories.Identity import IdentityFactory
+from tests.factories.identity import IdentityFactory
 
 fake = Faker()
 

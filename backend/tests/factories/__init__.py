@@ -20,6 +20,7 @@ from .group import GroupFactory, GroupMembershipFactory
 from .input_port import InputPortFactory
 from .input_port_request import InputPortRequestFactory
 from .lifecycle import LifecycleFactory
+from .machine_user import MachineUserFactory
 from .notification import NotificationFactory
 from .output_port import OutputPortFactory
 from .output_port import fake as dataset_fake
@@ -96,7 +97,7 @@ factories = [
     TechnicalAssetAccessModeFactory,
     DeviceFlowFactory,
     GroupFactory,
-    GroupMembershipFactory
+    GroupMembershipFactory,
 ]
 
 for factory_model in factories:
