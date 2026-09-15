@@ -154,6 +154,7 @@ export function OutputPortMarketplaceCard({ outputPort }: Props) {
                     >
                         <Button
                             key="add to cart"
+                            data-cy="add-to-cart"
                             type="text"
                             size="middle"
                             onClick={(e) => {

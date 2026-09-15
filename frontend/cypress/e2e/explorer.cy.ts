@@ -6,5 +6,6 @@ describe('Explorer page', () => {
 
         // The graph is rendered by @xyflow/react once the graph data query resolves.
         cy.get('.react-flow__node', { timeout: 20000 }).should('have.length.greaterThan', 0);
+        cy.get('.react-flow__edge').should('have.length.greaterThan', 0);
     });
 });

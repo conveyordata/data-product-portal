@@ -158,7 +158,7 @@ export const NewExplorationForm = () => {
                     },
                 ]}
             >
-                <Input />
+                <Input data-cy="exploration-name" />
             </Form.Item>
             <Form.Item<CreateExplorationRequestForm>
                 name="domain_id"
@@ -171,6 +171,7 @@ export const NewExplorationForm = () => {
                 ]}
             >
                 <Select
+                    data-cy="exploration-domain-select"
                     loading={isFetchingDomains}
                     options={domains.map((domain) => ({ label: domain.name, value: domain.id }))}
                     showSearch={{ filterOption: selectFilterOptionByLabelAndValue }}
@@ -184,6 +185,7 @@ export const NewExplorationForm = () => {
                         className={styles.formButton}
                         type="primary"
                         htmlType="submit"
+                        data-cy="create-exploration"
                         loading={isCreatingExploration}
                         disabled={
                             isFetchingDomains ||
