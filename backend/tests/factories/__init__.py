@@ -16,6 +16,7 @@ from .environment import EnvironmentFactory
 from .environment import fake as environment_fake
 from .event import EventFactory
 from .exploration import ExplorationFactory
+from .group import GroupFactory, GroupMembershipFactory
 from .input_port import InputPortFactory
 from .input_port_request import InputPortRequestFactory
 from .lifecycle import LifecycleFactory
@@ -94,6 +95,8 @@ factories = [
     ExplorationFactory,
     TechnicalAssetAccessModeFactory,
     DeviceFlowFactory,
+    GroupFactory,
+    GroupMembershipFactory
 ]
 
 for factory_model in factories:

@@ -180,6 +180,8 @@ class Authorization(metaclass=Singleton):
     def start_enforcer_after_reload(self) -> None:
         """This resumes autoloading and auto policy saving of the enforcer. It also flushes the current policy to the database.
         To be used when you want to recreate the casbin table, to be used after pause_enforcer_for_reload."""
+        self._cache.clear()
+        self._enforcer.build_role_links() # Reconstructs the user → group → role graph to avoid stale user → group relationships
         self._enforcer.save_policy()
         self._enforcer.start_auto_load_policy(settings.AUTHORIZER_AUTOLOAD_INTERVAL)
         self._enforcer.enable_auto_save(True)

@@ -314,6 +314,88 @@ class TestAuthorization:
 
         assert authorizer.has_domain_role(user_id=user, role_id=role, domain_id=dom2)
 
+    def test_resource_role_inherited_from_group(self, authorizer: Authorization):
+        user = "test_user"
+        group = "test_group"
+        role = "test_role"
+        dp1 = "test_data_product"
+        dp2 = "other_data_product"
+        action = AuthorizationAction.DATA_PRODUCT__UPDATE_PROPERTIES
+
+        authorizer.sync_role_permissions(role_id=role, actions=[action])
+        authorizer.assign_resource_role(
+            user_id=group,
+            role_id=role,
+            resource_id=dp1,
+        )
+        authorizer.assign_resource_group_membership(
+            member_identity_id=user,
+            group_id=group,
+            resource_id=dp1,
+        )
+
+        assert authorizer.has_access(
+            sub=user,
+            dom=ANY,
+            obj=dp1,
+            act=action,
+        )
+        assert not authorizer.has_access(
+            sub=user,
+            dom=ANY,
+            obj=dp2,
+            act=action,
+        )
+
+        authorizer.revoke_resource_group_membership(
+            member_identity_id=user,
+            group_id=group,
+            resource_id=dp1,
+        )
+        assert not authorizer.has_access(
+            sub=user,
+            dom=ANY,
+            obj=dp1,
+            act=action,
+        )
+
+    def test_global_role_inherited_from_group(
+            self,
+            authorizer: Authorization,
+            everyone_role_permissions,
+    ):
+        user = "test_user"
+        group = "test_group"
+        role = "test_role"
+        action = AuthorizationAction.GLOBAL__REQUEST_OUTPUT_PORT_ACCESS
+
+        with everyone_role_permissions(permissions=[]):
+            authorizer.sync_role_permissions(role_id=role, actions=[action])
+            authorizer.assign_global_role(user_id=group, role_id=role)
+            authorizer.assign_global_group_membership(
+                member_identity_id=user,
+                group_id=group,
+            )
+
+            assert authorizer.has_access(
+                sub=user,
+                dom=ANY,
+                obj=ANY,
+                act=action,
+            )
+
+            authorizer.revoke_global_group_membership(
+                member_identity_id=user,
+                group_id=group,
+            )
+
+            assert not authorizer.has_access(
+                sub=user,
+                dom=ANY,
+                obj=ANY,
+                act=action,
+            )
+
 
 class TestCrossWorkerStaleness:
     def test_auto_reload_resolves_stale_policy(self, authorizer: Authorization):
