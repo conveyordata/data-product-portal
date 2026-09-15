@@ -156,6 +156,7 @@ function ExplorationsCart() {
                                 description: t('I need a one-time answer or personal sandbox'),
                                 icon: <ExplorationBorderIcon />,
                                 value: DataProductChoiceOptions.exploration,
+                                dataCy: 'checkout-explore-data',
                             },
                             {
                                 title: t('I want to build Data Products'),
@@ -172,6 +173,7 @@ function ExplorationsCart() {
                                     />
                                 ),
                                 value: DataProductChoiceOptions.data_product,
+                                dataCy: 'checkout-build-data-products',
                             },
                         ]}
                     />
@@ -189,6 +191,7 @@ function ExplorationsCart() {
                                     }),
                                     icon: <PlusOutlined />,
                                     value: ExistingOrNew.new,
+                                    dataCy: 'checkout-create-new',
                                 },
                                 {
                                     title: t('Select an existing {{dataProductChoice}}', {
@@ -199,6 +202,7 @@ function ExplorationsCart() {
                                     }),
                                     icon: <UnorderedListOutlined />,
                                     value: ExistingOrNew.existing,
+                                    dataCy: 'checkout-select-existing',
                                 },
                             ]}
                         />
