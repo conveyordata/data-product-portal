@@ -57,7 +57,7 @@ A real, versioned Python package, installed into the customer's own image, was t
 
 ### Where and how is the configuration of the plugin stored
 
-A plugin's identity - its name, icon, and fields - lives directly on its own Python class, inherited from the portal's `TechnicalAssetPlugin` ABC (see Decision Outcome), alongside the configuration behavior described below; it isn't a separate thing to store. The icon is referenced as a bundled file path next to the plugin's own code, not inlined as a raw string.
+A plugin's identity - its name, icon, and fields - lives directly on its own Python class, inherited from the portal's `TechnicalAssetPlugin` ABC (see Decision Outcome), alongside the configuration behavior described below; it isn't a separate thing to store.
 
 ### The plugin's field vocabulary, and who owns turning it into a form
 
