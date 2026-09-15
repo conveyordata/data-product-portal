@@ -2,9 +2,6 @@ name: Nightly Docker Compose Test & E2E
 on:
   schedule:
     - cron: '0 2 * * *'
-  push:
-    branches:
-      - feature/cypress-e2e-tests
 permissions:
   contents: read
 
