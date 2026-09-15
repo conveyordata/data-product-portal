@@ -479,6 +479,12 @@ export function OutputPortForm({
     const dataProductOwners = useGetDataProductOwnerIds(dataProduct?.id);
     const ownerIds = mode === 'edit' ? datasetOwners : dataProductOwners;
 
+    useEffect(() => {
+        if (mode === 'create' && dataProductOwners) {
+            form.setFieldValue('owners', dataProductOwners);
+        }
+    }, [mode, dataProductOwners, form]);
+
     if (mode === 'edit' && (!currentDataset || ownerIds === undefined)) {
         return <Skeleton active />;
     }
