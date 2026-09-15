@@ -1,5 +1,3 @@
-// Relies on backend/sample_data.sql seeding the "Analytics" data product type,
-// "Draft" lifecycle and "Customer Insights" domain.
 describe('Create data product', () => {
     it('creates a new data product and lands on its detail page', () => {
         const dataProductName = `Cypress E2E Data Product ${Date.now()}`;
@@ -7,28 +5,19 @@ describe('Create data product', () => {
         cy.visit('/studio/new');
 
         cy.intercept('GET', '**/resource_names/validate*').as('validateNamespace');
-        cy.contains('label', 'Name').closest('.ant-form-item').find('input').type(dataProductName);
+        cy.get('[data-cy="data-product-name"]').type(dataProductName);
 
-        // Namespace is derived from the name asynchronously; wait for it before submitting.
-        cy.contains('label', 'Namespace')
-            .closest('.ant-form-item')
-            .find('input')
-            .should('not.have.value', '', { timeout: 10000 });
-        // The namespace field is also validated asynchronously (debounced); wait for
-        // that network call so the Create click isn't silently blocked mid-validation.
+        cy.get('[data-cy="namespace"]').should('not.have.value', '', { timeout: 10000 });
         cy.wait('@validateNamespace', { timeout: 10000 });
 
-        cy.selectAntOption('Type', 'Analytics');
-        cy.selectAntOption('Status', 'Draft');
-        cy.selectAntOption('Domain', 'Customer Insights');
+        cy.selectAntOption('data-product-type', 'Analytics');
+        cy.selectAntOption('data-product-lifecycle', 'Draft');
+        cy.selectAntOption('data-product-domain', 'Customer Insights');
 
-        cy.contains('label', 'Description')
-            .closest('.ant-form-item')
-            .find('textarea')
-            .type('Created by the Cypress end-to-end test.');
+        cy.get('[data-cy="data-product-description"]').type('Created by the Cypress end-to-end test.');
 
         cy.intercept('POST', '**/v2/data_products').as('createDataProduct');
-        cy.contains('button', 'Create').should('be.enabled').click();
+        cy.get('[data-cy="data-product-form-submit"]').should('be.enabled').click();
         cy.wait('@createDataProduct', { timeout: 30000 });
 
         cy.contains('Data Product created successfully').should('be.visible');

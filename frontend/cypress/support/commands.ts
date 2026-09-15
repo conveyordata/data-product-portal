@@ -1,5 +1,5 @@
-Cypress.Commands.add('selectAntOption', (labelText: string, optionText: string) => {
-    cy.contains('label', labelText).closest('.ant-form-item').find('.ant-select').click();
+Cypress.Commands.add('selectAntOption', (dataCy: string, optionText: string) => {
+    cy.get(`[data-cy="${dataCy}"]`).click();
     cy.get('.ant-select-dropdown')
         .filter(':visible')
         .last()

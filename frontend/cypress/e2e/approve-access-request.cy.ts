@@ -7,16 +7,16 @@ describe('Approve pending access request', () => {
 
         cy.visit('/studio?tab=pending-requests');
 
-        cy.contains('.ant-table-row', requestDescription, { timeout: 20000 })
+        cy.contains('[data-cy="pending-request-row"]', requestDescription, { timeout: 20000 })
             .should('be.visible')
             .within(() => {
-                cy.contains('button', 'Review').click();
+                cy.get('[data-cy="review-request"]').click();
             });
 
         cy.get('.ant-modal').should('be.visible');
 
         cy.intercept('POST', '**/input_ports/approve').as('approveInputPort');
-        cy.contains('button', 'Accept').click();
+        cy.get('[data-cy="accept-request"]').click();
         cy.wait('@approveInputPort', { timeout: 30000 });
 
         cy.contains('Output Port request has been successfully approved').should('be.visible');

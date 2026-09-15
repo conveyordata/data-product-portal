@@ -47,6 +47,7 @@ export function UserPopup({ onClose, isOpen, roles, item, isLoading, userIdsToHi
             centered
         >
             <Input.Search
+                data-cy="user-popup-search"
                 placeholder={t('Search users by email or name')}
                 allowClear
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -60,7 +61,7 @@ export function UserPopup({ onClose, isOpen, roles, item, isLoading, userIdsToHi
                     dataSource={filteredUsers}
                     renderItem={(user) => {
                         return (
-                            <List.Item key={user.id}>
+                            <List.Item key={user.id} data-cy="user-popup-item">
                                 <List.Item.Meta
                                     title={
                                         <Typography.Text
@@ -72,6 +73,7 @@ export function UserPopup({ onClose, isOpen, roles, item, isLoading, userIdsToHi
 
                                 <Select
                                     className={styles.roleDropdown}
+                                    data-cy="user-popup-role-select"
                                     placeholder={t('Select a role')}
                                     disabled={isLoading || isFetchingUsers}
                                     loading={isLoading || isFetchingUsers}
