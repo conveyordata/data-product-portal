@@ -333,7 +333,8 @@ class OutputPortService:
             if batch_datasets:
                 self._recalculate_embeddings_and_search_vector(batch_datasets)
                 self.db.flush()
-        self.db.commit()
+        # Allow commit since this is a batch operation and we want to persist changes. Not used in routing
+        self.db.commit()  # noqa: allow-commit
 
     def _fetch_tags(self, tag_ids: Iterable[UUID] = ()) -> list[TagModel]:
         tags = []
@@ -462,7 +463,7 @@ class OutputPortService:
             id, self.db, data_product_id=data_product_id
         )
         current_dataset.about = output_port.about
-        self.db.commit()
+        self.db.flush()
 
     def update_dataset_status(
         self,
@@ -475,7 +476,7 @@ class OutputPortService:
             id, self.db, data_product_id=data_product_id
         )
         current_output_port.status = output_port.status
-        self.db.commit()
+        self.db.flush()
 
     def update_dataset_usage(
         self,
@@ -485,7 +486,7 @@ class OutputPortService:
         current_dataset = ensure_output_port_exists(id, self.db)
         self._ensure_data_product_not_deleting(current_dataset.data_product_id)
         current_dataset.usage = usage.usage
-        self.db.commit()
+        self.db.flush()
         return current_dataset
 
     def get_graph_data(self, id: UUID, data_product_id: UUID, level: int) -> Graph:

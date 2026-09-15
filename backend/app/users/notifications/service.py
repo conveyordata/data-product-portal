@@ -55,13 +55,13 @@ class NotificationService:
             )
 
         self.db.delete(notification)
-        self.db.commit()
+        self.db.flush()
 
     def remove_all_notifications(self, user: User) -> None:
         self.db.execute(
             delete(NotificationModel).where(NotificationModel.user_id == user.id)
         )
-        self.db.commit()
+        self.db.flush()
 
     def create_dataset_notifications(
         self,

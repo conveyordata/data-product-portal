@@ -70,5 +70,5 @@ class ExplorationService(AbstractDataProductService):
             )
         result = copy.deepcopy(exploration)
         self.db.delete(exploration)
-        self.db.commit()
+        self.db.flush()
         return result

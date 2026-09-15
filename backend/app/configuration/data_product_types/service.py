@@ -60,7 +60,7 @@ class DataProductTypeService:
             **data_product_type.parse_pydantic_schema()
         )
         self.db.add(data_product_type)
-        self.db.commit()
+        self.db.flush()
         return CreateDataProductTypeResponse(id=data_product_type.id)
 
     def update_data_product_type(
@@ -72,7 +72,7 @@ class DataProductTypeService:
         for attr, value in updated_data_product_type.items():
             setattr(current_data_product_type, attr, value)
 
-        self.db.commit()
+        self.db.flush()
         return UpdateDataProductTypeResponse(id=id)
 
     def remove_data_product_type(self, id: UUID) -> None:

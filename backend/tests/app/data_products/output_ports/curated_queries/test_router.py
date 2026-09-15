@@ -1,11 +1,5 @@
 from app.authorization.roles.schema import Scope
 from app.core.authz.actions import AuthorizationAction
-from app.data_products.output_ports.curated_queries.schema_request import (
-    OutputPortCuratedQueryInput,
-)
-from app.data_products.output_ports.curated_queries.service import (
-    DatasetCuratedQueryService,
-)
 from app.settings import settings
 from tests.factories import (
     DatasetRoleAssignmentFactory,
@@ -68,17 +62,20 @@ class TestCuratedQueriesRouter:
         dataset = OutputPortFactory()
         _assign_update_role(session, dataset)
 
-        service = DatasetCuratedQueryService(session)
-        service.replace_curated_queries(
-            dataset.id,
-            [
-                OutputPortCuratedQueryInput(
-                    title="Existing query",
-                    description="Stored during setup",
-                    query_text="SELECT 1",
-                )
-            ],
+        put_response = client.put(
+            f"{ENDPOINT}/{dataset.data_product.id}/output_ports/{dataset.id}/curated_queries",
+            json={
+                "curated_queries": [
+                    {
+                        "title": "Existing query",
+                        "description": "Stored during setup",
+                        "query_text": "SELECT 1",
+                    }
+                ]
+            },
         )
+        assert put_response.status_code == 200, put_response.text
+
         response = client.delete(
             f"{ENDPOINT}/{dataset.data_product.id}/output_ports/{dataset.id}"
         )
@@ -89,17 +86,19 @@ class TestCuratedQueriesRouter:
         dataset = OutputPortFactory()
         _assign_update_role(session, dataset)
 
-        service = DatasetCuratedQueryService(session)
-        service.replace_curated_queries(
-            dataset.id,
-            [
-                OutputPortCuratedQueryInput(
-                    title="Existing query",
-                    description="Stored during setup",
-                    query_text="SELECT 1",
-                )
-            ],
+        put_response = client.put(
+            f"{ENDPOINT}/{dataset.data_product.id}/output_ports/{dataset.id}/curated_queries",
+            json={
+                "curated_queries": [
+                    {
+                        "title": "Existing query",
+                        "description": "Stored during setup",
+                        "query_text": "SELECT 1",
+                    }
+                ]
+            },
         )
+        assert put_response.status_code == 200, put_response.text
 
         get_response = client.get(
             f"{ENDPOINT}/{dataset.data_product.id}/output_ports/{dataset.id}/curated_queries"

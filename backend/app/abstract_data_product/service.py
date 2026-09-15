@@ -440,7 +440,7 @@ class AbstractDataProductService:
         if finalizer in (adp.finalizers or []):
             return adp
         adp.finalizers = list(adp.finalizers or []) + [finalizer]
-        self.db.commit()
+        self.db.flush()
         return adp
 
     def mark_for_deletion(self, id: UUID) -> bool:
@@ -453,7 +453,7 @@ class AbstractDataProductService:
         if not adp.finalizers:
             return True
         adp.status = AbstractDataProductStatus.DELETING
-        self.db.commit()
+        self.db.flush()
         return False
 
     def remove_finalizer(self, id: UUID, finalizer: str) -> bool:
@@ -471,5 +471,5 @@ class AbstractDataProductService:
             )
         current.remove(finalizer)
         adp.finalizers = current
-        self.db.commit()
+        self.db.flush()
         return adp.status == AbstractDataProductStatus.DELETING and not current
