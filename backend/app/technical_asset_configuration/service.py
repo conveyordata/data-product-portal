@@ -14,8 +14,8 @@ from app.technical_asset_configuration.schema_request import (
 if TYPE_CHECKING:
     from app.users.schema import User
 
+from app.core.logging import logger
 from app.plugins.registry import plugin_registry
-from app.plugins.runtime import call_plugin
 from app.technical_asset_configuration.base_schema import (
     TechnicalAssetPlugin,
 )
@@ -61,12 +61,7 @@ class PluginService:
         try:
             platform_meta = plugin_class.get_platform_metadata()
             return UIElementMetadataResponse(
-                ui_metadata=call_plugin(
-                    plugin_class.name,
-                    "get_ui_metadata",
-                    plugin_class.get_ui_metadata,
-                    self.db,
-                ),
+                ui_metadata=plugin_class.get_ui_metadata(self.db),
                 plugin=plugin_class.name,
                 platform=platform_meta.platform_key,
                 display_name=platform_meta.display_name,
@@ -93,6 +88,11 @@ class PluginService:
                 detailed_name=platform_meta.detailed_name,
                 has_environments=platform_meta.has_environments,
             )
+        except Exception:
+            logger.exception(
+                f"Plugin '{plugin_class.name}' failed to describe its form, skipping"
+            )
+            return None
 
     def get_platform_tiles(self) -> Sequence[PlatformTile]:
         """Build the complete platform tile structure for the UI"""
@@ -134,15 +134,7 @@ class PluginService:
                 detail=f"Plugin '{plugin_name}' not found",
             )
         try:
-            return call_plugin(
-                plugin_class.name,
-                "get_url",
-                plugin_class.get_url,
-                id,
-                self.db,
-                actor,
-                environment,
-            )
+            return plugin_class.get_url(id, self.db, actor, environment)
         except NotImplementedError:
             raise HTTPException(
                 status_code=status.HTTP_501_NOT_IMPLEMENTED,

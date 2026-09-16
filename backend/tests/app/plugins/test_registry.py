@@ -83,16 +83,15 @@ def test_get__returns_an_enabled_plugin(registry):
     )
 
 
-def test_get__rejects_a_plugin_that_is_not_enabled(registry, monkeypatch):
+def test_get__still_resolves_a_plugin_that_is_not_enabled(registry, monkeypatch):
     monkeypatch.setattr(settings, "ENABLED_PLUGINS", [])
 
-    with pytest.raises(HTTPException) as exc_info:
-        registry.get("S3TechnicalAssetConfiguration")
+    assert registry.get("S3TechnicalAssetConfiguration").name == (
+        "S3TechnicalAssetConfiguration"
+    )
 
-    assert exc_info.value.status_code == 400
 
-
-def test_get__rejects_an_unknown_plugin(registry):
+def test_get__rejects_a_plugin_that_is_not_installed(registry):
     with pytest.raises(HTTPException) as exc_info:
         registry.get("NoSuchPlugin")
 
