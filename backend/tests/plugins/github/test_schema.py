@@ -1,6 +1,7 @@
 from unittest.mock import patch
 
-from app.technical_asset_configuration.github.schema import GitHubPlugin
+from portal_plugins.github.plugin import GitHubPlugin
+
 from tests.factories import DataProductFactory, UserFactory
 from tests.session_util import as_user
 
@@ -13,7 +14,7 @@ class TestGitHubPlugin:
         assert meta.show_in_form is False
         assert meta.has_environments is False
 
-    @patch("app.technical_asset_configuration.github.schema.settings")
+    @patch("portal_plugins.github.plugin.settings")
     def test_get_url_builds_repo_link_from_data_product_namespace(
         self, mock_settings, session
     ):

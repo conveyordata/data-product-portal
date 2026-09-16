@@ -15,9 +15,6 @@ from app.technical_asset_configuration.conveyor.schema import (  # noqa: F401
 from app.technical_asset_configuration.databricks.schema import (  # noqa: F401
     DatabricksTechnicalAssetConfiguration,
 )
-from app.technical_asset_configuration.github.schema import (  # noqa: F401
-    GitHubPlugin,
-)
 from app.technical_asset_configuration.glue.schema import (  # noqa: F401
     GlueTechnicalAssetConfiguration,
 )
@@ -32,9 +29,6 @@ from app.technical_asset_configuration.redshift.schema import (  # noqa: F401
 )
 from app.technical_asset_configuration.rustfs.schema import (  # noqa: F401
     RustFSTechnicalAssetConfiguration,
-)
-from app.technical_asset_configuration.s3.schema import (  # noqa: F401
-    S3TechnicalAssetConfiguration,
 )
 from app.technical_asset_configuration.snowflake.schema import (  # noqa: F401
     SnowflakeTechnicalAssetConfiguration,

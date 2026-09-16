@@ -6,8 +6,8 @@ from sqlalchemy.orm import Session
 from app.data_products.model import DataProduct as DataProductModel
 from app.settings import settings
 from app.technical_asset_configuration.base_schema import (
-    PlatformMetadata,
     TechnicalAssetPlugin,
+    PlatformMetadata,
 )
 from app.users.schema import User
 

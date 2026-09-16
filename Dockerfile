@@ -43,6 +43,11 @@ RUN pip install -r requirements-poetry.txt --require-hashes
 COPY backend/poetry.lock backend/pyproject.toml backend/alembic.ini backend/sample_data.sql /
 RUN poetry install --no-root
 
+# Our own plugins are installed like any third-party plugin: the portal finds
+# them through their entry points, not because it knows they exist.
+COPY plugins/ /plugins/
+RUN pip install --no-deps /plugins
+
 # ---------------------------------------------------------------------------
 # Stage 3 – final runtime image
 # ---------------------------------------------------------------------------

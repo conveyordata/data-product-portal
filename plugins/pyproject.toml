@@ -1,0 +1,23 @@
+[project]
+name = "data-product-portal-plugins"
+version = "0.0.1"
+description = "Technical asset plugins shipped with the Data Product Portal."
+requires-python = ">=3.13"
+# No dependency on data-product-portal on purpose. These plugins ship inside the
+# portal's own image, so the portal is always already there, and declaring it
+# would make the two packages depend on each other in this repository. A
+# third-party plugin does declare it.
+dependencies = []
+
+# Discovery is entirely this table: the portal finds a plugin because its
+# package advertises itself here. Nothing names these plugins in the portal.
+[project.entry-points."data_product_portal.plugins"]
+github = "portal_plugins.github.plugin:GitHubPlugin"
+s3 = "portal_plugins.s3.plugin:S3TechnicalAssetConfiguration"
+
+[tool.poetry]
+packages = [{ include = "portal_plugins", from = "." }]
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"

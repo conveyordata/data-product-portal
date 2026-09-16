@@ -69,6 +69,8 @@ pytest-dotenv= "^0.5.2"
 factory-boy = "^3.3.3"
 freezegun = "^1.5.5"
 data-product-portal-sdk = { path = "../sdk", develop = true }
+# Installed so the test environment resolves real plugin entry points.
+data-product-portal-plugins = { path = "../plugins", develop = true }
 
 [tool.poetry.group.dev]
 optional = true

@@ -1,6 +1,5 @@
 import pytest
-
-from app.technical_asset_configuration.s3.schema import S3TechnicalAssetConfiguration
+from portal_plugins.s3.plugin import S3TechnicalAssetConfiguration
 
 
 def make_s3_config(

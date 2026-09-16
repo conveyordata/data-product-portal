@@ -16,27 +16,20 @@ def _entry_point(name: str, value: str) -> EntryPoint:
     return EntryPoint(name=name, value=value, group=ENTRY_POINT_GROUP)
 
 
-def test_discovered__includes_plugins_living_in_this_repository(registry):
+@pytest.fixture
+def no_entry_points(monkeypatch):
+    monkeypatch.setattr("app.plugins.registry.entry_points", lambda group: [])
+
+
+def test_discovered__loads_installed_plugins_from_entry_points(registry):
+    """GitHub and S3 live outside the backend and are found only by entry point."""
     names = {plugin.name for plugin in registry.discovered()}
 
-    assert "GlueTechnicalAssetConfiguration" in names
+    assert "GitHubPlugin" in names
     assert "S3TechnicalAssetConfiguration" in names
 
 
-def test_discovered__loads_a_plugin_advertised_through_an_entry_point(
-    registry, monkeypatch
-):
-    monkeypatch.setattr(
-        "app.plugins.registry.entry_points",
-        lambda group: [
-            _entry_point(
-                "glue",
-                "app.technical_asset_configuration.glue.schema:"
-                "GlueTechnicalAssetConfiguration",
-            )
-        ],
-    )
-
+def test_discovered__includes_in_tree_plugins(registry):
     names = {plugin.name for plugin in registry.discovered()}
 
     assert "GlueTechnicalAssetConfiguration" in names
