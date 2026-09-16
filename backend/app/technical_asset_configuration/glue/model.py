@@ -3,7 +3,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from app.technical_asset_configuration.base_model import BaseTechnicalAssetConfiguration
 
-NAME = "GlueTechnicalAssetConfiguration"
+CONFIGURATION_TYPE = "GlueTechnicalAssetConfiguration"
 
 
 class GlueTechnicalAssetConfiguration(BaseTechnicalAssetConfiguration):
@@ -18,5 +18,5 @@ class GlueTechnicalAssetConfiguration(BaseTechnicalAssetConfiguration):
     access_granularity: Mapped[str] = mapped_column(String, nullable=True)
 
     __mapper_args__ = {
-        "polymorphic_identity": NAME,
+        "polymorphic_identity": CONFIGURATION_TYPE,
     }

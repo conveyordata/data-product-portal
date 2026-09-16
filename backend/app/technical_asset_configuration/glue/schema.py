@@ -1,4 +1,4 @@
-from typing import ClassVar, Literal, Optional, Self
+from typing import ClassVar, Optional, Self
 from uuid import UUID
 
 from fastapi import HTTPException, status
@@ -20,10 +20,9 @@ from app.technical_asset_configuration.base_schema import (
     UIElementSelect,
     UIElementString,
 )
-from app.technical_asset_configuration.data_output_types import DataOutputTypes
 from app.technical_asset_configuration.enums import AccessGranularity, UIElementType
 from app.technical_asset_configuration.glue.model import (
-    NAME,
+    CONFIGURATION_TYPE,
 )
 from app.technical_asset_configuration.glue.model import (
     GlueTechnicalAssetConfiguration as GlueTechnicalAssetConfigurationModel,
@@ -32,7 +31,7 @@ from app.users.schema import User
 
 
 class GlueTechnicalAssetConfiguration(TechnicalAssetPlugin):
-    name: ClassVar[str] = NAME
+    name: ClassVar[str] = CONFIGURATION_TYPE
     version: ClassVar[str] = "1.0"
 
     database: str
@@ -41,7 +40,7 @@ class GlueTechnicalAssetConfiguration(TechnicalAssetPlugin):
     bucket_identifier: str = ""
     database_path: str = ""
     table_path: str = ""
-    configuration_type: Literal[DataOutputTypes.GlueTechnicalAssetConfiguration]
+    configuration_type: str = CONFIGURATION_TYPE
     access_granularity: AccessGranularity
 
     _platform_metadata = PlatformMetadata(

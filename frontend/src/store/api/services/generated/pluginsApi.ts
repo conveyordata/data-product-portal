@@ -60,6 +60,7 @@ export type PlatformTile = {
   label: string;
   value: string;
   icon_name: string;
+  icon_data_uri?: string | null;
   has_environments?: boolean;
   has_config?: boolean;
   children?: PlatformTile[];
@@ -126,6 +127,7 @@ export type UiElementMetadataResponse = {
   platform: string;
   display_name: string;
   icon_name: string;
+  icon_data_uri?: string | null;
   parent_platform?: string | null;
   platform_tile?: PlatformTile | null;
   show_in_form?: boolean;
@@ -140,117 +142,19 @@ export type UrlResponse = {
 export type RenderTechnicalAssetAccessPathResponse = {
   technical_asset_access_path: string;
 };
-export type AzureBlobTechnicalAssetConfiguration = {
-  configuration_type: "AzureBlobTechnicalAssetConfiguration";
-  domain?: string;
-  path?: string;
-  container_name: string;
-};
-export type DatabricksTechnicalAssetConfiguration = {
-  configuration_type: "DatabricksTechnicalAssetConfiguration";
-  catalog: string;
-  schema?: string;
-  table?: string;
-  bucket_identifier?: string;
-  catalog_path?: string;
-  table_path?: string;
-  access_granularity: AccessGranularity;
-};
-export type GlueTechnicalAssetConfiguration = {
-  configuration_type: "GlueTechnicalAssetConfiguration";
-  database: string;
-  database_suffix?: string;
-  table?: string;
-  bucket_identifier?: string;
-  database_path?: string;
-  table_path?: string;
-  access_granularity: AccessGranularity;
-};
-export type OsiSemanticModelTechnicalAssetConfiguration = {
-  configuration_type: "OSISemanticModelTechnicalAssetConfiguration";
-  model_name?: string;
-  location?: string;
-};
-export type PostgreSqlTechnicalAssetConfiguration = {
-  configuration_type: "PostgreSQLTechnicalAssetConfiguration";
-  database: string;
-  schema?: string;
-  table?: string;
-  access_granularity: AccessGranularity;
-};
-export type RedshiftTechnicalAssetConfiguration = {
-  configuration_type: "RedshiftTechnicalAssetConfiguration";
-  database: string;
-  schema?: string;
-  table?: string;
-  bucket_identifier?: string;
-  database_path?: string;
-  table_path?: string;
-  access_granularity: AccessGranularity;
-};
-export type RustFsTechnicalAssetConfiguration = {
-  configuration_type: "RustFSTechnicalAssetConfiguration";
-  bucket: string;
-  suffix?: string;
-  path: string;
-};
-export type S3TechnicalAssetConfiguration = {
-  configuration_type: "S3TechnicalAssetConfiguration";
-  bucket: string;
-  suffix?: string;
-  path: string;
-};
-export type SnowflakeTechnicalAssetConfiguration = {
-  configuration_type: "SnowflakeTechnicalAssetConfiguration";
-  database: string;
-  schema?: string;
-  table?: string;
-  bucket_identifier?: string;
-  database_path?: string;
-  table_path?: string;
-  access_granularity: AccessGranularity;
-};
 export type RenderTechnicalAssetAccessPathRequest = {
   platform_id: string;
   service_id: string;
-  configuration:
-    | ({
-        configuration_type: "AzureBlobTechnicalAssetConfiguration";
-      } & AzureBlobTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "DatabricksTechnicalAssetConfiguration";
-      } & DatabricksTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "GlueTechnicalAssetConfiguration";
-      } & GlueTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "OSISemanticModelTechnicalAssetConfiguration";
-      } & OsiSemanticModelTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "PostgreSQLTechnicalAssetConfiguration";
-      } & PostgreSqlTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "RedshiftTechnicalAssetConfiguration";
-      } & RedshiftTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "RustFSTechnicalAssetConfiguration";
-      } & RustFsTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "S3TechnicalAssetConfiguration";
-      } & S3TechnicalAssetConfiguration)
-    | ({
-        configuration_type: "SnowflakeTechnicalAssetConfiguration";
-      } & SnowflakeTechnicalAssetConfiguration);
+  /** Configuration of the technical asset. The available fields depend on `configuration_type`; retrieve them from /v2/plugins/{name}/form. */
+  configuration: {
+    [key: string]: any;
+  };
 };
 export enum UIElementType {
   String = "string",
   Select = "select",
   Checkbox = "checkbox",
   Radio = "radio",
-}
-export enum AccessGranularity {
-  Schema = "schema",
-  Table = "table",
 }
 export const {
   useGetPlatformTilesQuery,

@@ -1,4 +1,6 @@
 from abc import ABC
+from base64 import b64encode
+from importlib import resources
 from typing import Any, ClassVar, Optional
 from uuid import UUID
 
@@ -18,7 +20,6 @@ from app.configuration.platforms.platform_services.model import (
     PlatformService as PlatformServiceModel,
 )
 from app.shared.schema import ORMModel
-from app.technical_asset_configuration.data_output_types import DataOutputTypes
 from app.technical_asset_configuration.enums import UIElementType
 from app.users.schema import User
 
@@ -99,6 +100,9 @@ class PlatformMetadata(ORMModel):
 
     display_name: str
     icon_name: str
+    icon_package: Optional[str] = (
+        None  # Python package the icon file is bundled in. Set by out-of-tree plugins; in-tree types leave it None and the frontend resolves icon_name from its own assets.
+    )
     platform_key: str
     has_environments: bool = True
     parent_platform: Optional[str] = None
@@ -109,14 +113,13 @@ class PlatformMetadata(ORMModel):
 
 
 class TechnicalAssetPlugin(ORMModel, ABC):
-    """Base class for all data output provider plugins"""
+    """Base class for every technical asset plugin, in-tree or installed."""
 
     name: ClassVar[str]
     version: ClassVar[str] = "1.0"
     mcp_instructions: ClassVar[str] = ""
-    configuration_type: DataOutputTypes
+    configuration_type: str
 
-    # Platform metadata - should be overridden in subclasses
     _platform_metadata: ClassVar[Optional[PlatformMetadata]] = None
 
     def render_template(self, template: str, **context: dict[str, Any]) -> str:
@@ -176,6 +179,22 @@ class TechnicalAssetPlugin(ORMModel, ABC):
                 platform_key=platform_key,
             )
         return cls._platform_metadata
+
+    @classmethod
+    def get_icon_data_uri(cls) -> Optional[str]:
+        """Icon bytes bundled in the plugin's own package, as a data URI.
+
+        None for in-tree types, which the frontend resolves via icon_name.
+        """
+        platform_meta = cls.get_platform_metadata()
+        if not platform_meta.icon_package:
+            return None
+        icon = (
+            resources.files(platform_meta.icon_package)
+            .joinpath(platform_meta.icon_name)
+            .read_bytes()
+        )
+        return f"data:image/svg+xml;base64,{b64encode(icon).decode()}"
 
     @classmethod
     def get_logo(cls) -> str:

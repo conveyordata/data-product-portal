@@ -1,7 +1,7 @@
 import type { TFunction } from 'i18next';
 
-import type { UiElementMetadataResponse } from '@/store/api/services/generated/pluginsApi';
-import { getIcon } from './icon-loader';
+import type { PlatformTile, UiElementMetadataResponse } from '@/store/api/services/generated/pluginsApi';
+import { getIcon, getIconFromDataUri } from './icon-loader';
 
 export function getTechnicalAssetIcon(configuration_type: string | undefined, plugins?: UiElementMetadataResponse[]) {
     if (!configuration_type || !plugins) {
@@ -11,6 +11,10 @@ export function getTechnicalAssetIcon(configuration_type: string | undefined, pl
     const plugin = plugins.find((p) => p.plugin === configuration_type);
     if (!plugin) {
         return undefined;
+    }
+
+    if (plugin.icon_data_uri) {
+        return getIconFromDataUri(plugin.icon_data_uri);
     }
 
     // Replace logo with border-icon
@@ -33,4 +37,8 @@ export function getTechnicalAssetType(
     }
 
     return t(plugin.display_name);
+}
+
+export function getPlatformTileIcon(tile: PlatformTile) {
+    return tile.icon_data_uri ? getIconFromDataUri(tile.icon_data_uri) : getIcon(tile.icon_name);
 }
