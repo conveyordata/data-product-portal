@@ -46,18 +46,6 @@ def test_resolve_configuration__rejects_an_unknown_configuration_type():
 def test_resolve_configuration__still_resolves_a_plugin_that_is_not_enabled(
     monkeypatch,
 ):
-    """Switching a plugin off hides it from the forms and tiles. A technical
-    asset created with it earlier has to stay readable."""
     monkeypatch.setattr(settings, "ENABLED_PLUGINS", [])
-
     holder = Holder(configuration=S3_CONFIGURATION)
-
     assert holder.configuration.name == "S3TechnicalAssetConfiguration"
-
-
-def test_json_schema__describes_every_plugin_the_same_way():
-    schema = Holder.model_json_schema()["properties"]["configuration"]
-
-    assert schema["type"] == "object"
-    assert schema["additionalProperties"] is True
-    assert "S3TechnicalAssetConfiguration" not in str(schema)

@@ -44,12 +44,8 @@ from sdk.api_client.models import (
     GetDataProductInputPortsResponse,
     GetTechnicalAssetsResponse,
 )
-from sdk.api_client.models.access_granularity import AccessGranularity
-from sdk.api_client.models.postgre_sql_technical_asset_configuration import (
-    PostgreSQLTechnicalAssetConfiguration,
-)
-from sdk.api_client.models.osi_semantic_model_technical_asset_configuration import (
-    OSISemanticModelTechnicalAssetConfiguration,
+from sdk.api_client.models.create_technical_asset_request_configuration import (
+    CreateTechnicalAssetRequestConfiguration,
 )
 from sdk.api_client.models.technical_asset_status import TechnicalAssetStatus
 from sdk.api_client.models.technical_mapping import TechnicalMapping
@@ -229,10 +225,14 @@ class DataProductReconciler(Reconciler):
         ):
             osi_cfg = next((c for c in configs if c.service.name == "OSI"), None)
             if osi_cfg:
-                configuration = OSISemanticModelTechnicalAssetConfiguration(
-                    configuration_type="OSISemanticModelTechnicalAssetConfiguration",
-                    model_name=f"{name} Semantic Model",
-                    location=f"/products/{namespace}/osi.yml",
+                configuration = CreateTechnicalAssetRequestConfiguration.from_dict(
+                    {
+                        "configuration_type": (
+                            "OSISemanticModelTechnicalAssetConfiguration"
+                        ),
+                        "model_name": f"{name} Semantic Model",
+                        "location": f"/products/{namespace}/osi.yml",
+                    }
                 )
                 await self._create_technical_asset(
                     resource_id, dp, osi_cfg, configuration, f"{namespace}-semantic"
@@ -245,12 +245,14 @@ class DataProductReconciler(Reconciler):
         ):
             pg_cfg = next((c for c in configs if c.service.name == "PostgreSQL"), None)
             if pg_cfg:
-                configuration = PostgreSQLTechnicalAssetConfiguration(
-                    configuration_type="PostgreSQLTechnicalAssetConfiguration",
-                    database=demo_db_name,
-                    schema=schema_name,
-                    access_granularity=AccessGranularity.SCHEMA,
-                    table="*",
+                configuration = CreateTechnicalAssetRequestConfiguration.from_dict(
+                    {
+                        "configuration_type": "PostgreSQLTechnicalAssetConfiguration",
+                        "database": demo_db_name,
+                        "schema": schema_name,
+                        "access_granularity": "schema",
+                        "table": "*",
+                    }
                 )
                 await self._create_technical_asset(
                     resource_id, dp, pg_cfg, configuration

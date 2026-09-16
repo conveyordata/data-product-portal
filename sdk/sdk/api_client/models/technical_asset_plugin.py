@@ -11,8 +11,7 @@ T = TypeVar("T", bound="TechnicalAssetPlugin")
 
 @_attrs_define
 class TechnicalAssetPlugin:
-    """Base class for every technical asset plugin, in-tree or installed.
-
+    """
     Attributes:
         configuration_type (str):
     """

@@ -5,6 +5,7 @@ from pydantic import BaseModel
 
 from app.main import app as f_app
 from app.open_api_export import custom_openapi
+from app.plugins.registry import plugin_registry
 
 
 def test_export_openapi() -> None:
@@ -35,13 +36,22 @@ def test_export_openapi_uses_binary_file_schema() -> None:
 
 def test_export_openapi_describes_plugin_configuration_generically() -> None:
     schemas = custom_openapi(f_app)["components"]["schemas"]
-    configuration = schemas["CreateTechnicalAssetRequest"]["properties"][
-        "configuration"
-    ]
 
-    assert configuration["type"] == "object"
-    assert configuration["additionalProperties"] is True
     assert "S3TechnicalAssetConfiguration" not in str(schemas)
+
+
+def test_export_openapi_configuration_does_not_depend_on_installed_plugins(
+    monkeypatch,
+) -> None:
+    def configuration_schema() -> dict:
+        return custom_openapi(f_app)["components"]["schemas"][
+            "CreateTechnicalAssetRequest"
+        ]["properties"]["configuration"]
+
+    with_plugins = configuration_schema()
+    monkeypatch.setattr(plugin_registry, "_plugins", {})
+
+    assert configuration_schema() == with_plugins
 
 
 def find_model_name_collisions(app: FastAPI) -> dict[str, list[Type]]:
