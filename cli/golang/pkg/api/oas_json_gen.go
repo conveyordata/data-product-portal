@@ -13121,6 +13121,112 @@ func (s *FinalizerRequest) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
+func (s *GetAccessDurationResponse) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *GetAccessDurationResponse) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("access_durations")
+		e.ArrStart()
+		for _, elem := range s.AccessDurations {
+			elem.Encode(e)
+		}
+		e.ArrEnd()
+	}
+}
+
+var jsonFieldsNameOfGetAccessDurationResponse = [1]string{
+	0: "access_durations",
+}
+
+// Decode decodes GetAccessDurationResponse from json.
+func (s *GetAccessDurationResponse) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode GetAccessDurationResponse to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "access_durations":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				s.AccessDurations = make([]AccessDuration, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem AccessDuration
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.AccessDurations = append(s.AccessDurations, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"access_durations\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode GetAccessDurationResponse")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000001,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfGetAccessDurationResponse) {
+					name = jsonFieldsNameOfGetAccessDurationResponse[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *GetAccessDurationResponse) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *GetAccessDurationResponse) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
 func (s *GetAccessModes) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
@@ -13306,56 +13412,6 @@ func (s GetAccessModesNotFoundApplicationJSON) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *GetAccessModesNotFoundApplicationJSON) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode encodes GetAllAccessDurationsOKApplicationJSON as json.
-func (s GetAllAccessDurationsOKApplicationJSON) Encode(e *jx.Encoder) {
-	unwrapped := []AccessDuration(s)
-
-	e.ArrStart()
-	for _, elem := range unwrapped {
-		elem.Encode(e)
-	}
-	e.ArrEnd()
-}
-
-// Decode decodes GetAllAccessDurationsOKApplicationJSON from json.
-func (s *GetAllAccessDurationsOKApplicationJSON) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode GetAllAccessDurationsOKApplicationJSON to nil")
-	}
-	var unwrapped []AccessDuration
-	if err := func() error {
-		unwrapped = make([]AccessDuration, 0)
-		if err := d.Arr(func(d *jx.Decoder) error {
-			var elem AccessDuration
-			if err := elem.Decode(d); err != nil {
-				return err
-			}
-			unwrapped = append(unwrapped, elem)
-			return nil
-		}); err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		return errors.Wrap(err, "alias")
-	}
-	*s = GetAllAccessDurationsOKApplicationJSON(unwrapped)
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s GetAllAccessDurationsOKApplicationJSON) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *GetAllAccessDurationsOKApplicationJSON) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -36506,52 +36562,108 @@ func (s *UnlinkOutputPortFromTechnicalAssetOKApplicationJSON) UnmarshalJSON(data
 	return s.Decode(d)
 }
 
-// Encode encodes UpdateAccessDurationOKApplicationJSON as json.
-func (s UpdateAccessDurationOKApplicationJSON) Encode(e *jx.Encoder) {
-	unwrapped := []AccessDuration(s)
-
-	e.ArrStart()
-	for _, elem := range unwrapped {
-		elem.Encode(e)
-	}
-	e.ArrEnd()
+// Encode implements json.Marshaler.
+func (s *UpdateAccessDurationResponse) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
 }
 
-// Decode decodes UpdateAccessDurationOKApplicationJSON from json.
-func (s *UpdateAccessDurationOKApplicationJSON) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode UpdateAccessDurationOKApplicationJSON to nil")
+// encodeFields encodes fields.
+func (s *UpdateAccessDurationResponse) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("access_durations")
+		e.ArrStart()
+		for _, elem := range s.AccessDurations {
+			elem.Encode(e)
+		}
+		e.ArrEnd()
 	}
-	var unwrapped []AccessDuration
-	if err := func() error {
-		unwrapped = make([]AccessDuration, 0)
-		if err := d.Arr(func(d *jx.Decoder) error {
-			var elem AccessDuration
-			if err := elem.Decode(d); err != nil {
-				return err
+}
+
+var jsonFieldsNameOfUpdateAccessDurationResponse = [1]string{
+	0: "access_durations",
+}
+
+// Decode decodes UpdateAccessDurationResponse from json.
+func (s *UpdateAccessDurationResponse) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode UpdateAccessDurationResponse to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "access_durations":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				s.AccessDurations = make([]AccessDuration, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem AccessDuration
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.AccessDurations = append(s.AccessDurations, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"access_durations\"")
 			}
-			unwrapped = append(unwrapped, elem)
-			return nil
-		}); err != nil {
-			return err
+		default:
+			return d.Skip()
 		}
 		return nil
-	}(); err != nil {
-		return errors.Wrap(err, "alias")
+	}); err != nil {
+		return errors.Wrap(err, "decode UpdateAccessDurationResponse")
 	}
-	*s = UpdateAccessDurationOKApplicationJSON(unwrapped)
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000001,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfUpdateAccessDurationResponse) {
+					name = jsonFieldsNameOfUpdateAccessDurationResponse[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
 	return nil
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s UpdateAccessDurationOKApplicationJSON) MarshalJSON() ([]byte, error) {
+func (s *UpdateAccessDurationResponse) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *UpdateAccessDurationOKApplicationJSON) UnmarshalJSON(data []byte) error {
+func (s *UpdateAccessDurationResponse) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

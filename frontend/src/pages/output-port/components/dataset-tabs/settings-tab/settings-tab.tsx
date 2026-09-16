@@ -58,7 +58,7 @@ export function SettingsTab({ datasetId, dataProductId }: Props) {
         { skip: !datasetId },
     );
     const canEditAccess = edit_access?.allowed || false;
-    const { data: allDurations = [] } = useGetAllAccessDurationsQuery();
+    const { data: { access_durations: allDurations = [] } = {} } = useGetAllAccessDurationsQuery();
     const [updateOutputPort] = useUpdateOutputPortMutation();
 
     const [accessType, setAccessType] = useState(outputPort?.access_type);

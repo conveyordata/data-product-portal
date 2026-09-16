@@ -3505,7 +3505,7 @@ func decodeGetAllAccessDurationsResponse(resp *http.Response) (res GetAllAccessD
 			}
 			d := jx.DecodeBytes(buf)
 
-			var response GetAllAccessDurationsOKApplicationJSON
+			var response GetAccessDurationResponse
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -13214,7 +13214,7 @@ func decodeUpdateAccessDurationResponse(resp *http.Response) (res UpdateAccessDu
 			}
 			d := jx.DecodeBytes(buf)
 
-			var response UpdateAccessDurationOKApplicationJSON
+			var response UpdateAccessDurationResponse
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err

@@ -156,6 +156,7 @@ from .exploration import Exploration
 from .exploration_event import ExplorationEvent
 from .field_dependency import FieldDependency
 from .finalizer_request import FinalizerRequest
+from .get_access_duration_response import GetAccessDurationResponse
 from .get_access_modes import GetAccessModes
 from .get_all_platform_service_configurations_response import (
     GetAllPlatformServiceConfigurationsResponse,
@@ -354,6 +355,7 @@ from .ui_element_type import UIElementType
 from .un_link_technical_asset_to_output_port_request import (
     UnLinkTechnicalAssetToOutputPortRequest,
 )
+from .update_access_duration_response import UpdateAccessDurationResponse
 from .update_data_product_life_cycle_response import UpdateDataProductLifeCycleResponse
 from .update_data_product_response import UpdateDataProductResponse
 from .update_data_product_setting_response import UpdateDataProductSettingResponse
@@ -496,6 +498,7 @@ __all__ = (
     "ExplorationEvent",
     "FieldDependency",
     "FinalizerRequest",
+    "GetAccessDurationResponse",
     "GetAccessModes",
     "GetAllPlatformServiceConfigurationsResponse",
     "GetAllPlatformsResponse",
@@ -646,6 +649,7 @@ __all__ = (
     "UIElementString",
     "UIElementType",
     "UnLinkTechnicalAssetToOutputPortRequest",
+    "UpdateAccessDurationResponse",
     "UpdateDataProductLifeCycleResponse",
     "UpdateDataProductResponse",
     "UpdateDataProductSettingResponse",
