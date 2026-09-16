@@ -5,7 +5,7 @@ describe('Explorer page', () => {
         cy.contains('h1, h2, h3', 'Explorer').should('be.visible');
 
         // The graph is rendered by @xyflow/react once the graph data query resolves.
-        cy.get('[data-cy="graph-node"]', { timeout: 20000 }).should('have.length.greaterThan', 0);
+        cy.contains('Customer Segmentation', { timeout: 20000 }).should('be.visible');
         cy.get('[data-cy="graph-edge"]').should('have.length.greaterThan', 0);
     });
 });

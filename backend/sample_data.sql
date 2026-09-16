@@ -3082,6 +3082,5 @@ SELECT
     NULL
 FROM link;
 
--- All output ports default to 'permanent' exploration access (server default);
--- override so exploration access requests are time-bound in the demo data.
-UPDATE public.datasets SET exploration_access_duration_type = 'time_bound';
+INSERT INTO public.access_durations (id, abstract_data_product_type, access_duration_type, is_default, created_on)
+VALUES (gen_random_uuid(), 'explorations', 'permanent', FALSE, timezone('utc'::text, current_timestamp));
