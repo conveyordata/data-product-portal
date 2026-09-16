@@ -9,12 +9,6 @@ from app.settings import settings
 
 @pytest.fixture
 def registry():
-    """A registry of its own per test.
-
-    PluginRegistry memoises discovery, so sharing the module-level instance
-    would leave a warm cache behind and make monkeypatching entry_points a
-    no-op for whichever test ran second.
-    """
     return PluginRegistry()
 
 
