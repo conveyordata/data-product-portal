@@ -1,0 +1,166 @@
+"""Brings each plugin's own table to the revision that plugin declares.
+
+Alembic supports running several independent migration histories side by side.
+Every plugin's `versions/` directory is handed to one Alembic environment through
+`version_locations`, and because each plugin's first revision has no
+`down_revision`, each plugin is a separate branch with its own base and its own
+head. Alembic already tracks one row per head, so all plugins share a single
+version table.
+
+Handing all the directories to one environment is what makes the shared table
+work. Alembic resolves every row it finds in the version table against the
+revisions it knows about, so a config that only knows one plugin's revisions
+fails on another plugin's row with "Can't locate revision".
+
+Runs from `python -m app.db_tool migrate`, after the core migrations.
+See docs/adr/0024-dynamic-plugin-system.md.
+"""
+
+import os
+from contextlib import ExitStack, contextmanager
+from importlib import resources
+from pathlib import Path
+from typing import Iterator, Sequence
+
+from alembic import command
+from alembic.config import Config
+from alembic.runtime.migration import MigrationContext
+from alembic.script import ScriptDirectory
+from sqlalchemy import Engine
+
+from app.core.logging import logger
+from app.technical_asset_configuration.base_schema import TechnicalAssetPlugin
+
+PLUGIN_VERSION_TABLE = "plugin_migration_state"
+_RUNNER_DIR = Path(__file__).parent / "alembic_runner"
+
+
+def owns_a_table(plugin: type[TechnicalAssetPlugin]) -> bool:
+    return bool(plugin.target_revision and plugin.migrations_package)
+
+
+@contextmanager
+def _config(
+    plugins: Sequence[type[TechnicalAssetPlugin]], url: str
+) -> Iterator[Config]:
+    """One Alembic environment holding every given plugin's revisions."""
+    with ExitStack() as stack:
+        version_locations = [
+            str(
+                stack.enter_context(
+                    resources.as_file(
+                        resources.files(plugin.migrations_package) / "versions"
+                    )
+                )
+            )
+            for plugin in plugins
+        ]
+        config = Config()
+        config.set_main_option("script_location", str(_RUNNER_DIR))
+        config.set_main_option("version_path_separator", "os")
+        config.set_main_option("version_locations", os.pathsep.join(version_locations))
+        config.set_main_option("sqlalchemy.url", url)
+        config.attributes["version_table"] = PLUGIN_VERSION_TABLE
+        yield config
+
+
+def _current_heads(engine: Engine) -> tuple[str, ...]:
+    with engine.connect() as connection:
+        return MigrationContext.configure(
+            connection, opts={"version_table": PLUGIN_VERSION_TABLE}
+        ).get_current_heads()
+
+
+def _base_of(script: ScriptDirectory, revision: str) -> str:
+    return list(script.iterate_revisions(revision, "base"))[-1].revision
+
+
+def _branch_revisions(script: ScriptDirectory, target: str) -> list[str]:
+    """Every revision belonging to the same plugin as `target`, newest first.
+
+    A plugin's branch is identified by its base, not by a naming convention, so
+    a plugin author is free to name revisions however they like.
+    """
+    base = _base_of(script, target)
+    return [
+        revision.revision
+        for revision in script.walk_revisions()
+        if _base_of(script, revision.revision) == base
+    ]
+
+
+def _reconcile(
+    target: str,
+    config: Config,
+    script: ScriptDirectory,
+    heads: tuple[str, ...],
+) -> str:
+    own_revisions = _branch_revisions(script, target)
+    current = next((head for head in heads if head in own_revisions), None)
+
+    if current == target:
+        return f"up to date at {target}"
+
+    if current is None:
+        command.upgrade(config, target)
+        return f"installed at {target}"
+
+    # own_revisions runs newest first, so a lower index means newer.
+    if own_revisions.index(target) < own_revisions.index(current):
+        command.upgrade(config, target)
+        return f"upgraded {current} to {target}"
+
+    command.downgrade(config, target)
+    return f"downgraded {current} to {target}"
+
+
+def reconcile_all(
+    plugins: Sequence[type[TechnicalAssetPlugin]], engine: Engine
+) -> dict[str, str]:
+    """Reconcile every plugin that owns a table. Fails loudly, like a core migration."""
+    owning = [plugin for plugin in plugins if owns_a_table(plugin)]
+    if not owning:
+        return {}
+
+    url = engine.url.render_as_string(hide_password=False)
+    results: dict[str, str] = {}
+
+    with _config(owning, url) as config:
+        script = ScriptDirectory.from_config(config)
+        known = {revision.revision for revision in script.walk_revisions()}
+
+        for plugin in owning:
+            if plugin.target_revision not in known:
+                raise ValueError(
+                    f"Plugin '{plugin.name}' declares target_revision "
+                    f"'{plugin.target_revision}', which is not in its own "
+                    "migration history"
+                )
+
+        # The version table is shared, so Alembic resolves every row in it
+        # against the revisions this config knows about. A row left behind by a
+        # plugin that is no longer installed, or that failed to import, would
+        # otherwise fail here as an unreadable "Can't locate revision".
+        orphans = [head for head in _current_heads(engine) if head not in known]
+        if orphans:
+            raise ValueError(
+                f"{PLUGIN_VERSION_TABLE} holds revisions belonging to no installed "
+                f"plugin: {', '.join(sorted(orphans))}. Reinstall the plugin that "
+                f"owns them, or delete those rows from {PLUGIN_VERSION_TABLE} to "
+                "give up its migration history."
+            )
+
+        for plugin in owning:
+            logger.info(
+                f"Reconciling plugin '{plugin.name}' to {plugin.target_revision}"
+            )
+            # owns_a_table above guarantees target_revision is set.
+            results[plugin.name] = _reconcile(
+                str(plugin.target_revision), config, script, _current_heads(engine)
+            )
+    return results
+
+
+def reconcile_plugin(plugin: type[TechnicalAssetPlugin], engine: Engine) -> str:
+    """Reconcile a single plugin. Convenience around reconcile_all."""
+    return reconcile_all([plugin], engine)[plugin.name]

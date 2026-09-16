@@ -118,6 +118,12 @@ class TechnicalAssetPlugin(ORMModel, ABC):
     name: ClassVar[str]
     version: ClassVar[str] = "1.0"
     mcp_instructions: ClassVar[str] = ""
+    target_revision: ClassVar[Optional[str]] = (
+        None  # Alembic revision this plugin's own table should be at. None for a plugin without a table.
+    )
+    migrations_package: ClassVar[Optional[str]] = (
+        None  # Package holding this plugin's versions/ directory.
+    )
     configuration_type: str
 
     _platform_metadata: ClassVar[Optional[PlatformMetadata]] = None
