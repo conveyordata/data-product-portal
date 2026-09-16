@@ -16,7 +16,6 @@ def test_call_plugin__turns_an_unexpected_exception_into_a_clean_error():
         call_plugin("SomePlugin", "get_url", boom)
 
     assert exc_info.value.status_code == 500
-    # The plugin's own message never reaches the caller.
     assert "the plugin is broken" not in exc_info.value.detail
     assert "SomePlugin" in exc_info.value.detail
 
