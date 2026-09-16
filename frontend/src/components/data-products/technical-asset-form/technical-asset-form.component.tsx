@@ -224,15 +224,18 @@ export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallback
     );
 
     const setResultString = useDebouncedCallback((values: CreateTechnicalAssetRequest) => {
+        // A plugin that uses no platform service has no template to render against.
+        if (!values.platform_id || !values.service_id) {
+            form.setFieldValue('result', undefined);
+            return;
+        }
+        const request = {
+            platform_id: values.platform_id,
+            service_id: values.service_id,
+            configuration: values.configuration,
+        };
         form.validateFields(['configuration'], { validateOnly: true, recursive: true })
-            .then(() => {
-                const request = {
-                    platform_id: values.platform_id,
-                    service_id: values.service_id,
-                    configuration: values.configuration,
-                };
-                return fetchResultString(request).unwrap();
-            })
+            .then(() => fetchResultString(request).unwrap())
             .then((result) => form.setFieldValue('result', result.technical_asset_access_path))
             .catch(() => form.setFieldValue('result', undefined));
     }, debounce);

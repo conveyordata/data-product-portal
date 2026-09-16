@@ -116,6 +116,7 @@ class PlatformMetadata(ORMModel):
 class TechnicalAssetPlugin(ORMModel, ABC):
     version: ClassVar[str] = "1.0"
     mcp_instructions: ClassVar[str] = ""
+    result_string_template: ClassVar[Optional[str]] = None
 
     @computed_field  # type: ignore[prop-decorator]
     @property
