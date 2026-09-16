@@ -19,6 +19,7 @@ from app.configuration.platform_service_configurations.schema import (
 from app.configuration.platforms.platform_services.model import (
     PlatformService as PlatformServiceModel,
 )
+from app.core.logging import logger
 from app.shared.schema import ORMModel
 from app.technical_asset_configuration.enums import UIElementType
 from app.users.schema import User
@@ -100,9 +101,7 @@ class PlatformMetadata(ORMModel):
 
     display_name: str
     icon_name: str
-    icon_package: Optional[str] = (
-        None  # Python package the icon file is bundled in. Set by out-of-tree plugins; in-tree types leave it None and the frontend resolves icon_name from its own assets.
-    )
+    icon_package: Optional[str] = None
     platform_key: str
     has_environments: bool = True
     parent_platform: Optional[str] = None
@@ -113,8 +112,6 @@ class PlatformMetadata(ORMModel):
 
 
 class TechnicalAssetPlugin(ORMModel, ABC):
-    """Base class for every technical asset plugin, in-tree or installed."""
-
     name: ClassVar[str]
     version: ClassVar[str] = "1.0"
     mcp_instructions: ClassVar[str] = ""
@@ -123,11 +120,9 @@ class TechnicalAssetPlugin(ORMModel, ABC):
     _platform_metadata: ClassVar[Optional[PlatformMetadata]] = None
 
     def render_template(self, template: str, **context: dict[str, Any]) -> str:
-        """Render a template with configuration values. Template is fetched from db, context is filled with the full technical asset configuration + env info as dict."""
         return template.format(**self.model_dump(), **context)
 
     def get_configuration(self, configs: list[ConfigType]) -> Optional[ConfigType]:
-        """Get platform and environment specific configuration"""
         raise NotImplementedError
 
     @classmethod
@@ -185,11 +180,18 @@ class TechnicalAssetPlugin(ORMModel, ABC):
         platform_meta = cls.get_platform_metadata()
         if not platform_meta.icon_package:
             return None
-        icon = (
-            resources.files(platform_meta.icon_package)
-            .joinpath(platform_meta.icon_name)
-            .read_bytes()
-        )
+        try:
+            icon = (
+                resources.files(platform_meta.icon_package)
+                .joinpath(platform_meta.icon_name)
+                .read_bytes()
+            )
+        except Exception:
+            logger.exception(
+                f"Plugin '{cls.name}' has no readable icon at "
+                f"{platform_meta.icon_package}/{platform_meta.icon_name}"
+            )
+            return None
         return f"data:image/svg+xml;base64,{b64encode(icon).decode()}"
 
     @classmethod

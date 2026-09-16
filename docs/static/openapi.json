@@ -16254,8 +16254,7 @@
         "required": [
           "configuration_type"
         ],
-        "title": "TechnicalAssetPlugin",
-        "description": "Base class for every technical asset plugin, in-tree or installed."
+        "title": "TechnicalAssetPlugin"
       },
       "TechnicalAssetStatus": {
         "type": "string",

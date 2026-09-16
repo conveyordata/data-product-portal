@@ -36,9 +36,8 @@ from sdk.api_client.models import (
     HTTPValidationError,
     PlatformServiceConfiguration,
 )
-from sdk.api_client.models.access_granularity import AccessGranularity
-from sdk.api_client.models.postgre_sql_technical_asset_configuration import (
-    PostgreSQLTechnicalAssetConfiguration,
+from sdk.api_client.models.create_technical_asset_request_configuration import (
+    CreateTechnicalAssetRequestConfiguration,
 )
 from sdk.api_client.models.technical_asset_status import TechnicalAssetStatus
 from sdk.api_client.models.technical_mapping import TechnicalMapping
@@ -252,12 +251,14 @@ class DataProductReconciler(sdk.Reconciler):
         if not postgres_config:
             raise Exception("Configuration error: 'PostgreSQL' service not found.")
 
-        configuration = PostgreSQLTechnicalAssetConfiguration(
-            configuration_type="PostgreSQLTechnicalAssetConfiguration",
-            database=database,
-            schema=schema_name,
-            access_granularity=AccessGranularity.SCHEMA,
-            table="*",
+        configuration = CreateTechnicalAssetRequestConfiguration.from_dict(
+            {
+                "configuration_type": "PostgreSQLTechnicalAssetConfiguration",
+                "database": database,
+                "schema": schema_name,
+                "access_granularity": "schema",
+                "table": "*",
+            }
         )
 
         technical_asset_body = CreateTechnicalAssetRequest(
@@ -305,8 +306,8 @@ class DataProductReconciler(sdk.Reconciler):
                 for a in result.technical_assets
                 if a.configuration.configuration_type
                 == "PostgreSQLTechnicalAssetConfiguration"
-                and a.configuration.database == database
-                and a.configuration.schema == schema
+                and a.configuration["database"] == database
+                and a.configuration["schema"] == schema
             ),
             None,
         )

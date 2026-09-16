@@ -24,13 +24,13 @@ class UIElementMetadataResponse(ORMModel):
     has_environments: bool
     result_label: str = "Resulting path"
     result_tooltip: str = "The path you can access through this technical asset"
-    platform: str  # e.g., "s3", "redshift", "snowflake"
-    display_name: str  # Display name for the platform tile
-    icon_name: str  # Icon filename (e.g., "s3-logo.svg")
+    platform: str
+    display_name: str
+    icon_name: str
     icon_data_uri: Optional[str] = None
-    parent_platform: Optional[str] = None  # e.g., "aws" for s3, redshift, glue
-    platform_tile: Optional[PlatformTile] = None  # Complete tile structure
-    show_in_form: bool = True  # Whether to show this platform in the configuration form, can be set to False for platforms that are only meant to be shown as tiles without detailed configuration options
+    parent_platform: Optional[str] = None
+    platform_tile: Optional[PlatformTile] = None
+    show_in_form: bool = True
     detailed_name: str
 
 
