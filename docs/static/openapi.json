@@ -8254,11 +8254,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/AccessDuration"
-                  },
-                  "type": "array",
-                  "title": "Response Get All Access Durations"
+                  "$ref": "#/components/schemas/GetAccessDurationResponse"
                 }
               }
             }
@@ -8309,11 +8305,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/AccessDuration"
-                  },
-                  "title": "Response Update Access Duration"
+                  "$ref": "#/components/schemas/UpdateAccessDurationResponse"
                 }
               }
             }
@@ -12060,6 +12052,22 @@
           "finalizer"
         ],
         "title": "FinalizerRequest"
+      },
+      "GetAccessDurationResponse": {
+        "properties": {
+          "access_durations": {
+            "items": {
+              "$ref": "#/components/schemas/AccessDuration"
+            },
+            "type": "array",
+            "title": "Access Durations"
+          }
+        },
+        "type": "object",
+        "required": [
+          "access_durations"
+        ],
+        "title": "GetAccessDurationResponse"
       },
       "GetAccessModes": {
         "properties": {
@@ -17160,6 +17168,22 @@
           "technical_asset_id"
         ],
         "title": "UnLinkTechnicalAssetToOutputPortRequest"
+      },
+      "UpdateAccessDurationResponse": {
+        "properties": {
+          "access_durations": {
+            "items": {
+              "$ref": "#/components/schemas/AccessDuration"
+            },
+            "type": "array",
+            "title": "Access Durations"
+          }
+        },
+        "type": "object",
+        "required": [
+          "access_durations"
+        ],
+        "title": "UpdateAccessDurationResponse"
       },
       "UpdateDataProductLifeCycleResponse": {
         "properties": {

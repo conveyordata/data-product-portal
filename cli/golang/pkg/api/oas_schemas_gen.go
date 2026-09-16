@@ -4602,6 +4602,23 @@ func (s *FinalizerRequest) SetFinalizer(val string) {
 	s.Finalizer = val
 }
 
+// Ref: #/components/schemas/GetAccessDurationResponse
+type GetAccessDurationResponse struct {
+	AccessDurations []AccessDuration `json:"access_durations"`
+}
+
+// GetAccessDurations returns the value of AccessDurations.
+func (s *GetAccessDurationResponse) GetAccessDurations() []AccessDuration {
+	return s.AccessDurations
+}
+
+// SetAccessDurations sets the value of AccessDurations.
+func (s *GetAccessDurationResponse) SetAccessDurations(val []AccessDuration) {
+	s.AccessDurations = val
+}
+
+func (*GetAccessDurationResponse) getAllAccessDurationsRes() {}
+
 // Ref: #/components/schemas/GetAccessModes
 type GetAccessModes struct {
 	AccessModes []AccessModeWithType `json:"access_modes"`
@@ -4626,10 +4643,6 @@ func (*GetAccessModesBadRequestApplicationJSON) getAccessModesRes() {}
 type GetAccessModesNotFoundApplicationJSON jx.Raw
 
 func (*GetAccessModesNotFoundApplicationJSON) getAccessModesRes() {}
-
-type GetAllAccessDurationsOKApplicationJSON []AccessDuration
-
-func (*GetAllAccessDurationsOKApplicationJSON) getAllAccessDurationsRes() {}
 
 // Ref: #/components/schemas/GetAllPlatformServiceConfigurationsResponse
 type GetAllPlatformServiceConfigurationsResponse struct {
@@ -14803,9 +14816,22 @@ type UnlinkOutputPortFromTechnicalAssetOKApplicationJSON jx.Raw
 
 func (*UnlinkOutputPortFromTechnicalAssetOKApplicationJSON) unlinkOutputPortFromTechnicalAssetRes() {}
 
-type UpdateAccessDurationOKApplicationJSON []AccessDuration
+// Ref: #/components/schemas/UpdateAccessDurationResponse
+type UpdateAccessDurationResponse struct {
+	AccessDurations []AccessDuration `json:"access_durations"`
+}
 
-func (*UpdateAccessDurationOKApplicationJSON) updateAccessDurationRes() {}
+// GetAccessDurations returns the value of AccessDurations.
+func (s *UpdateAccessDurationResponse) GetAccessDurations() []AccessDuration {
+	return s.AccessDurations
+}
+
+// SetAccessDurations sets the value of AccessDurations.
+func (s *UpdateAccessDurationResponse) SetAccessDurations(val []AccessDuration) {
+	s.AccessDurations = val
+}
+
+func (*UpdateAccessDurationResponse) updateAccessDurationRes() {}
 
 type UpdateDataProductAboutNotFoundApplicationJSON jx.Raw
 

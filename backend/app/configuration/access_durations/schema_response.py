@@ -19,3 +19,11 @@ class TimeBoundAccessEnabledResponse(ORMModel):
 
 class ExpiringSoonThresholdResponse(ORMModel):
     days: int
+
+
+class GetAccessDurationResponse(ORMModel):
+    access_durations: list[AccessDuration]
+
+
+class UpdateAccessDurationResponse(ORMModel):
+    access_durations: list[AccessDuration]

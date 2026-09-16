@@ -6,7 +6,9 @@ from app.configuration.access_durations.schema_request import AccessDurationUpda
 from app.configuration.access_durations.schema_response import (
     AccessDuration,
     ExpiringSoonThresholdResponse,
+    GetAccessDurationResponse,
     TimeBoundAccessEnabledResponse,
+    UpdateAccessDurationResponse,
 )
 from app.configuration.access_durations.service import AccessDurationService
 from app.core.authz import Action, Authorization
@@ -46,9 +48,13 @@ def get_default_access_duration(
     return access_duration
 
 
-@router.get("", response_model=list[AccessDuration])
-def get_all_access_durations(db: Session = Depends(get_db_session, scope="function")):
-    return AccessDurationService(db).get_access_durations()
+@router.get("")
+def get_all_access_durations(
+    db: Session = Depends(get_db_session, scope="function"),
+) -> GetAccessDurationResponse:
+    return GetAccessDurationResponse(
+        access_durations=AccessDurationService(db).get_access_durations()
+    )
 
 
 @router.put(
@@ -63,7 +69,9 @@ def update_access_duration(
     abstract_data_product_type: AbstractDataProductType,
     update: AccessDurationUpdate,
     db: Session = Depends(get_db_session, scope="function"),
-) -> list[AccessDuration]:
-    return AccessDurationService(db).upsert_access_duration(
-        abstract_data_product_type, update
+) -> UpdateAccessDurationResponse:
+    return UpdateAccessDurationResponse(
+        access_durations=AccessDurationService(db).upsert_access_duration(
+            abstract_data_product_type, update
+        )
     )
