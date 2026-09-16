@@ -61,7 +61,12 @@ class PluginService:
         try:
             platform_meta = plugin_class.get_platform_metadata()
             return UIElementMetadataResponse(
-                ui_metadata=plugin_class.get_ui_metadata(self.db),
+                ui_metadata=call_plugin(
+                    plugin_class.name,
+                    "get_ui_metadata",
+                    plugin_class.get_ui_metadata,
+                    self.db,
+                ),
                 plugin=plugin_class.name,
                 platform=platform_meta.platform_key,
                 display_name=platform_meta.display_name,
