@@ -1,3 +1,4 @@
+import { render } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
 import type { PlatformTile, UiElementMetadataResponse } from '@/store/api/services/generated/pluginsApi';
@@ -27,17 +28,26 @@ function tile(overrides: Partial<PlatformTile> = {}): PlatformTile {
     } as PlatformTile;
 }
 
+function renderIcon(Icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>) {
+    if (!Icon) {
+        throw new Error('expected an icon component');
+    }
+    return render(<Icon />).container.firstElementChild;
+}
+
 describe('getTechnicalAssetIcon', () => {
     it('uses the icon a plugin bundles in its own package', () => {
-        const icon = getTechnicalAssetIcon('SomePlugin', [plugin({ icon_data_uri: DATA_URI })]);
+        const icon = renderIcon(getTechnicalAssetIcon('SomePlugin', [plugin({ icon_data_uri: DATA_URI })]));
 
-        expect(icon).toBeDefined();
+        expect(icon?.tagName).toBe('IMG');
+        expect(icon?.getAttribute('src')).toBe(DATA_URI);
     });
 
     it('falls back to the bundled frontend asset when the plugin ships no icon', () => {
-        const icon = getTechnicalAssetIcon('SomePlugin', [plugin()]);
+        const icon = renderIcon(getTechnicalAssetIcon('SomePlugin', [plugin()]));
 
-        expect(icon).toBeDefined();
+        // The bundled assets are inlined as SVG, never as an img data URI.
+        expect(icon?.tagName).not.toBe('IMG');
     });
 
     it('returns nothing for an unknown plugin', () => {
@@ -47,10 +57,15 @@ describe('getTechnicalAssetIcon', () => {
 
 describe('getPlatformTileIcon', () => {
     it('uses the tile icon a plugin bundles in its own package', () => {
-        expect(getPlatformTileIcon(tile({ icon_data_uri: DATA_URI }))).toBeDefined();
+        const icon = renderIcon(getPlatformTileIcon(tile({ icon_data_uri: DATA_URI })));
+
+        expect(icon?.tagName).toBe('IMG');
+        expect(icon?.getAttribute('src')).toBe(DATA_URI);
     });
 
     it('falls back to the bundled frontend asset', () => {
-        expect(getPlatformTileIcon(tile())).toBeDefined();
+        const icon = renderIcon(getPlatformTileIcon(tile()));
+
+        expect(icon?.tagName).not.toBe('IMG');
     });
 });

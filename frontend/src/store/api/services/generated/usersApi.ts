@@ -320,6 +320,7 @@ export type OwnedTechnicalAsset = {
   service_id: string;
   /** Configuration of the technical asset. The available fields depend on `configuration_type`; retrieve them from /v2/plugins/{name}/form. */
   configuration: {
+    configuration_type: string;
     [key: string]: any;
   };
   owner: DataProduct;

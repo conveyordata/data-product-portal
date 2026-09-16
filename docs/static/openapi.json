@@ -10029,8 +10029,16 @@
             "title": "Service Id"
           },
           "configuration": {
+            "properties": {
+              "configuration_type": {
+                "type": "string"
+              }
+            },
             "additionalProperties": true,
             "type": "object",
+            "required": [
+              "configuration_type"
+            ],
             "title": "Configuration",
             "description": "Configuration of the technical asset. The available fields depend on `configuration_type`; retrieve them from /v2/plugins/{name}/form."
           },
@@ -12828,8 +12836,16 @@
             "title": "Access Modes"
           },
           "configuration": {
+            "properties": {
+              "configuration_type": {
+                "type": "string"
+              }
+            },
             "additionalProperties": true,
             "type": "object",
+            "required": [
+              "configuration_type"
+            ],
             "title": "Configuration",
             "description": "Configuration of the technical asset. The available fields depend on `configuration_type`; retrieve them from /v2/plugins/{name}/form."
           },
@@ -14631,8 +14647,16 @@
             "title": "Service Id"
           },
           "configuration": {
+            "properties": {
+              "configuration_type": {
+                "type": "string"
+              }
+            },
             "additionalProperties": true,
             "type": "object",
+            "required": [
+              "configuration_type"
+            ],
             "title": "Configuration",
             "description": "Configuration of the technical asset. The available fields depend on `configuration_type`; retrieve them from /v2/plugins/{name}/form."
           },
@@ -14963,8 +14987,16 @@
             "title": "Service Id"
           },
           "configuration": {
+            "properties": {
+              "configuration_type": {
+                "type": "string"
+              }
+            },
             "additionalProperties": true,
             "type": "object",
+            "required": [
+              "configuration_type"
+            ],
             "title": "Configuration",
             "description": "Configuration of the technical asset. The available fields depend on `configuration_type`; retrieve them from /v2/plugins/{name}/form."
           }
@@ -16018,8 +16050,16 @@
             "title": "Service Id"
           },
           "configuration": {
+            "properties": {
+              "configuration_type": {
+                "type": "string"
+              }
+            },
             "additionalProperties": true,
             "type": "object",
+            "required": [
+              "configuration_type"
+            ],
             "title": "Configuration",
             "description": "Configuration of the technical asset. The available fields depend on `configuration_type`; retrieve them from /v2/plugins/{name}/form."
           }

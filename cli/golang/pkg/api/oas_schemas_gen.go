@@ -1555,9 +1555,34 @@ func (s *CreateTechnicalAssetRequest) SetTagIds(val []uuid.UUID) {
 
 // Configuration of the technical asset. The available fields depend on `configuration_type`; retrieve
 // them from /v2/plugins/{name}/form.
-type CreateTechnicalAssetRequestConfiguration map[string]jx.Raw
+type CreateTechnicalAssetRequestConfiguration struct {
+	ConfigurationType string `json:"configuration_type"`
+	AdditionalProps   CreateTechnicalAssetRequestConfigurationAdditional
+}
 
-func (s *CreateTechnicalAssetRequestConfiguration) init() CreateTechnicalAssetRequestConfiguration {
+// GetConfigurationType returns the value of ConfigurationType.
+func (s *CreateTechnicalAssetRequestConfiguration) GetConfigurationType() string {
+	return s.ConfigurationType
+}
+
+// GetAdditionalProps returns the value of AdditionalProps.
+func (s *CreateTechnicalAssetRequestConfiguration) GetAdditionalProps() CreateTechnicalAssetRequestConfigurationAdditional {
+	return s.AdditionalProps
+}
+
+// SetConfigurationType sets the value of ConfigurationType.
+func (s *CreateTechnicalAssetRequestConfiguration) SetConfigurationType(val string) {
+	s.ConfigurationType = val
+}
+
+// SetAdditionalProps sets the value of AdditionalProps.
+func (s *CreateTechnicalAssetRequestConfiguration) SetAdditionalProps(val CreateTechnicalAssetRequestConfigurationAdditional) {
+	s.AdditionalProps = val
+}
+
+type CreateTechnicalAssetRequestConfigurationAdditional map[string]jx.Raw
+
+func (s *CreateTechnicalAssetRequestConfigurationAdditional) init() CreateTechnicalAssetRequestConfigurationAdditional {
 	m := *s
 	if m == nil {
 		m = map[string]jx.Raw{}
@@ -5573,9 +5598,34 @@ func (*GetTechnicalAssetsResponseItem) getTechnicalAssetRes() {}
 
 // Configuration of the technical asset. The available fields depend on `configuration_type`; retrieve
 // them from /v2/plugins/{name}/form.
-type GetTechnicalAssetsResponseItemConfiguration map[string]jx.Raw
+type GetTechnicalAssetsResponseItemConfiguration struct {
+	ConfigurationType string `json:"configuration_type"`
+	AdditionalProps   GetTechnicalAssetsResponseItemConfigurationAdditional
+}
 
-func (s *GetTechnicalAssetsResponseItemConfiguration) init() GetTechnicalAssetsResponseItemConfiguration {
+// GetConfigurationType returns the value of ConfigurationType.
+func (s *GetTechnicalAssetsResponseItemConfiguration) GetConfigurationType() string {
+	return s.ConfigurationType
+}
+
+// GetAdditionalProps returns the value of AdditionalProps.
+func (s *GetTechnicalAssetsResponseItemConfiguration) GetAdditionalProps() GetTechnicalAssetsResponseItemConfigurationAdditional {
+	return s.AdditionalProps
+}
+
+// SetConfigurationType sets the value of ConfigurationType.
+func (s *GetTechnicalAssetsResponseItemConfiguration) SetConfigurationType(val string) {
+	s.ConfigurationType = val
+}
+
+// SetAdditionalProps sets the value of AdditionalProps.
+func (s *GetTechnicalAssetsResponseItemConfiguration) SetAdditionalProps(val GetTechnicalAssetsResponseItemConfigurationAdditional) {
+	s.AdditionalProps = val
+}
+
+type GetTechnicalAssetsResponseItemConfigurationAdditional map[string]jx.Raw
+
+func (s *GetTechnicalAssetsResponseItemConfigurationAdditional) init() GetTechnicalAssetsResponseItemConfigurationAdditional {
 	m := *s
 	if m == nil {
 		m = map[string]jx.Raw{}
@@ -10760,9 +10810,34 @@ func (s *RenderTechnicalAssetAccessPathRequest) SetConfiguration(val RenderTechn
 
 // Configuration of the technical asset. The available fields depend on `configuration_type`; retrieve
 // them from /v2/plugins/{name}/form.
-type RenderTechnicalAssetAccessPathRequestConfiguration map[string]jx.Raw
+type RenderTechnicalAssetAccessPathRequestConfiguration struct {
+	ConfigurationType string `json:"configuration_type"`
+	AdditionalProps   RenderTechnicalAssetAccessPathRequestConfigurationAdditional
+}
 
-func (s *RenderTechnicalAssetAccessPathRequestConfiguration) init() RenderTechnicalAssetAccessPathRequestConfiguration {
+// GetConfigurationType returns the value of ConfigurationType.
+func (s *RenderTechnicalAssetAccessPathRequestConfiguration) GetConfigurationType() string {
+	return s.ConfigurationType
+}
+
+// GetAdditionalProps returns the value of AdditionalProps.
+func (s *RenderTechnicalAssetAccessPathRequestConfiguration) GetAdditionalProps() RenderTechnicalAssetAccessPathRequestConfigurationAdditional {
+	return s.AdditionalProps
+}
+
+// SetConfigurationType sets the value of ConfigurationType.
+func (s *RenderTechnicalAssetAccessPathRequestConfiguration) SetConfigurationType(val string) {
+	s.ConfigurationType = val
+}
+
+// SetAdditionalProps sets the value of AdditionalProps.
+func (s *RenderTechnicalAssetAccessPathRequestConfiguration) SetAdditionalProps(val RenderTechnicalAssetAccessPathRequestConfigurationAdditional) {
+	s.AdditionalProps = val
+}
+
+type RenderTechnicalAssetAccessPathRequestConfigurationAdditional map[string]jx.Raw
+
+func (s *RenderTechnicalAssetAccessPathRequestConfigurationAdditional) init() RenderTechnicalAssetAccessPathRequestConfigurationAdditional {
 	m := *s
 	if m == nil {
 		m = map[string]jx.Raw{}
@@ -12447,9 +12522,34 @@ func (s *TechnicalAsset) SetConfiguration(val TechnicalAssetConfiguration) {
 
 // Configuration of the technical asset. The available fields depend on `configuration_type`; retrieve
 // them from /v2/plugins/{name}/form.
-type TechnicalAssetConfiguration map[string]jx.Raw
+type TechnicalAssetConfiguration struct {
+	ConfigurationType string `json:"configuration_type"`
+	AdditionalProps   TechnicalAssetConfigurationAdditional
+}
 
-func (s *TechnicalAssetConfiguration) init() TechnicalAssetConfiguration {
+// GetConfigurationType returns the value of ConfigurationType.
+func (s *TechnicalAssetConfiguration) GetConfigurationType() string {
+	return s.ConfigurationType
+}
+
+// GetAdditionalProps returns the value of AdditionalProps.
+func (s *TechnicalAssetConfiguration) GetAdditionalProps() TechnicalAssetConfigurationAdditional {
+	return s.AdditionalProps
+}
+
+// SetConfigurationType sets the value of ConfigurationType.
+func (s *TechnicalAssetConfiguration) SetConfigurationType(val string) {
+	s.ConfigurationType = val
+}
+
+// SetAdditionalProps sets the value of AdditionalProps.
+func (s *TechnicalAssetConfiguration) SetAdditionalProps(val TechnicalAssetConfigurationAdditional) {
+	s.AdditionalProps = val
+}
+
+type TechnicalAssetConfigurationAdditional map[string]jx.Raw
+
+func (s *TechnicalAssetConfigurationAdditional) init() TechnicalAssetConfigurationAdditional {
 	m := *s
 	if m == nil {
 		m = map[string]jx.Raw{}

@@ -14,21 +14,34 @@ class GetTechnicalAssetsResponseItemConfiguration:
     """Configuration of the technical asset. The available fields depend on `configuration_type`; retrieve them from
     /v2/plugins/{name}/form.
 
+        Attributes:
+            configuration_type (str):
     """
 
+    configuration_type: str
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
+        configuration_type = self.configuration_type
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
+        field_dict.update(
+            {
+                "configuration_type": configuration_type,
+            }
+        )
 
         return field_dict
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        get_technical_assets_response_item_configuration = cls()
+        configuration_type = d.pop("configuration_type")
+
+        get_technical_assets_response_item_configuration = cls(
+            configuration_type=configuration_type,
+        )
 
         get_technical_assets_response_item_configuration.additional_properties = d
         return get_technical_assets_response_item_configuration
