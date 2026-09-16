@@ -53,11 +53,11 @@ class PluginRegistry:
         ]
 
     def get(self, name: str) -> type[TechnicalAssetPlugin]:
-        plugin = next((p for p in self.enabled() if p.name == name), None)
+        plugin = next((p for p in self.discovered() if p.name == name), None)
         if plugin is None:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Plugin '{name}' is not available",
+                detail=f"Plugin '{name}' is not installed",
             )
         return plugin
 

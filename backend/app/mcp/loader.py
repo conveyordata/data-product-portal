@@ -7,13 +7,19 @@ To add MCP tools for a plugin:
 
 from fastmcp import FastMCP
 
+from app.core.logging import logger
 from app.plugins.registry import plugin_registry
 
 
 def load_plugins(mcp: FastMCP) -> None:
-    """Register MCP tools from every enabled plugin."""
+
     for plugin in plugin_registry.enabled():
-        plugin.register_mcp_tools(mcp)
+        try:
+            plugin.register_mcp_tools(mcp)
+        except Exception:  # noqa: PERF203
+            logger.exception(
+                f"Plugin '{plugin.name}' failed to register MCP tools, skipping"
+            )
 
 
 def get_plugin_instructions() -> str:
