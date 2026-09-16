@@ -10,17 +10,15 @@ from app.configuration.environments.platform_service_configurations.schemas impo
 from app.core.aws.get_url import get_aws_url
 from app.data_products.schema import DataProduct
 from app.technical_asset_configuration.base_schema import (
-    PlatformMetadata,
     TechnicalAssetPlugin,
+    PlatformMetadata,
     UIElementMetadata,
     UIElementSelect,
     UIElementString,
 )
 from app.technical_asset_configuration.enums import UIElementType
-from app.technical_asset_configuration.s3.model import (
+from portal_plugins.s3.model import (
     CONFIGURATION_TYPE,
-)
-from app.technical_asset_configuration.s3.model import (
     S3TechnicalAssetConfiguration as S3TechnicalAssetConfigurationModel,
 )
 from app.users.schema import User
@@ -29,6 +27,8 @@ from app.users.schema import User
 class S3TechnicalAssetConfiguration(TechnicalAssetPlugin):
     name: ClassVar[str] = CONFIGURATION_TYPE
     version: ClassVar[str] = "1.0"
+    target_revision: ClassVar[str] = "s3_0001_baseline"
+    migrations_package: ClassVar[str] = "portal_plugins.s3"
 
     bucket: str
     suffix: str = ""

@@ -74,6 +74,55 @@ jobs:
         working-directory: ./scripts
         run: ./check_coverage.sh
 
+  test-packaging:
+    name: Check portal core and plugins install from a wheel
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout github repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install Poetry
+        uses: snok/install-poetry@a783c322200f0519c7926aa6faa857c4e23e9263 # v1.4.2
+        with:
+          version: ${{ env.POETRY_VERSION }}
+      - name: Setup Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version-file: 'backend/.python-version'
+      - name: Build both wheels
+        run: |
+          poetry build --directory backend
+          poetry build --directory plugins
+      # A plugin author gets the ABC from the published wheel, so the wheel has to
+      # actually contain it, and an installed plugin has to be discoverable through
+      # its entry point alone. Both fail silently in the repo, where everything is
+      # importable anyway.
+      - name: Install both wheels into a clean environment
+        run: |
+          python -m venv /tmp/wheel-check
+          /tmp/wheel-check/bin/pip install backend/dist/*.whl plugins/dist/*.whl
+      - name: Check the plugin interface and entry points resolve
+        # Loading a plugin imports app.settings, which the portal always has
+        # configured at runtime.
+        env:
+          POSTGRES_PASSWORD: unused
+          POSTGRES_DB: unused
+          POSTGRES_USER: unused
+          POSTGRES_SERVER: unused
+          HOST: unused
+          LOGGING_DIRECTORY: /tmp
+        run: |
+          /tmp/wheel-check/bin/python -c "
+          import app.core.authz  # noqa: F401  pre-existing import-order requirement in portal core
+          from importlib.metadata import entry_points
+          from app.technical_asset_configuration.base_schema import TechnicalAssetPlugin
+
+          found = {e.name: e.load() for e in entry_points(group='data_product_portal.plugins')}
+          assert set(found) == {'github', 's3'}, found
+          for name, plugin in found.items():
+              assert issubclass(plugin, TechnicalAssetPlugin), name
+          print('ok:', sorted(found))
+          "
+
   test-sdk:
     name: Run SDK tests
     runs-on: ubuntu-latest

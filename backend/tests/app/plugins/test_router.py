@@ -1,9 +1,9 @@
 from fastapi.testclient import TestClient
+from portal_plugins.s3.plugin import S3TechnicalAssetConfiguration
 
 from app.authorization.roles.schema import Scope
 from app.core.authz.actions import AuthorizationAction as Action
 from app.settings import settings
-from app.technical_asset_configuration.s3.schema import S3TechnicalAssetConfiguration
 from app.technical_asset_configuration.schema_request import (
     RenderTechnicalAssetAccessPathRequest,
 )
