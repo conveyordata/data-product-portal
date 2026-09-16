@@ -6,6 +6,7 @@ import httpx
 from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.get_access_modes import GetAccessModes
+from ...models.http_validation_error import HTTPValidationError
 from ...types import Response
 
 
@@ -21,7 +22,7 @@ def _get_kwargs() -> dict[str, Any]:
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Any | GetAccessModes | None:
+) -> Any | GetAccessModes | HTTPValidationError | None:
     if response.status_code == 200:
         response_200 = GetAccessModes.from_dict(response.json())
 
@@ -35,6 +36,11 @@ def _parse_response(
         response_404 = cast(Any, None)
         return response_404
 
+    if response.status_code == 422:
+        response_422 = HTTPValidationError.from_dict(response.json())
+
+        return response_422
+
     if client.raise_on_unexpected_status:
         raise errors.UnexpectedStatus(response.status_code, response.content)
     else:
@@ -43,7 +49,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[Any | GetAccessModes]:
+) -> Response[Any | GetAccessModes | HTTPValidationError]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -55,7 +61,7 @@ def _build_response(
 def sync_detailed(
     *,
     client: AuthenticatedClient | Client,
-) -> Response[Any | GetAccessModes]:
+) -> Response[Any | GetAccessModes | HTTPValidationError]:
     """Get Access Modes
 
     Raises:
@@ -63,7 +69,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Any | GetAccessModes]
+        Response[Any | GetAccessModes | HTTPValidationError]
     """
 
     kwargs = _get_kwargs()
@@ -78,7 +84,7 @@ def sync_detailed(
 def sync(
     *,
     client: AuthenticatedClient | Client,
-) -> Any | GetAccessModes | None:
+) -> Any | GetAccessModes | HTTPValidationError | None:
     """Get Access Modes
 
     Raises:
@@ -86,7 +92,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Any | GetAccessModes
+        Any | GetAccessModes | HTTPValidationError
     """
 
     return sync_detailed(
@@ -97,7 +103,7 @@ def sync(
 async def asyncio_detailed(
     *,
     client: AuthenticatedClient | Client,
-) -> Response[Any | GetAccessModes]:
+) -> Response[Any | GetAccessModes | HTTPValidationError]:
     """Get Access Modes
 
     Raises:
@@ -105,7 +111,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Any | GetAccessModes]
+        Response[Any | GetAccessModes | HTTPValidationError]
     """
 
     kwargs = _get_kwargs()
@@ -118,7 +124,7 @@ async def asyncio_detailed(
 async def asyncio(
     *,
     client: AuthenticatedClient | Client,
-) -> Any | GetAccessModes | None:
+) -> Any | GetAccessModes | HTTPValidationError | None:
     """Get Access Modes
 
     Raises:
@@ -126,7 +132,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Any | GetAccessModes
+        Any | GetAccessModes | HTTPValidationError
     """
 
     return (

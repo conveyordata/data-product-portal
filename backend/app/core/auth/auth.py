@@ -1,7 +1,7 @@
-from typing import Optional
+from typing import Annotated, Optional
 
 import httpx
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, Header, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -81,7 +81,7 @@ if settings.OIDC_ENABLED:
 
     def get_authenticated_user(
         token: JWTToken = Depends(api_key_authenticated),
-        db: Session = Depends(get_system_db_session),
+        db: Session = Depends(get_system_db_session, scope="function"),
     ) -> User:
         result = db.scalars(
             select(UserModel).where(UserModel.external_id == token.sub)
@@ -95,31 +95,38 @@ else:
     def unvalidated_token(token: str = "") -> str:
         return token
 
-    def dummy_token() -> str:
-        return ""
+    def user(
+        user: Annotated[
+            Optional[str], Header(alias="X-User", include_in_schema=False)
+        ] = None,
+    ) -> str:
+        if user:
+            return user
+        return settings.DEFAULT_USERNAME
 
-    # The dummy_token dependency ensure no token query parameter is added to every route
-    def secured_call(token: str = Depends(dummy_token)) -> JWTToken:
-        return generate_default_jwt_token()
+    # The token dependency is replaced by the user we want to use in this mode
+    def secured_call(
+        token: str = Depends(user),
+    ) -> JWTToken:
+        return generate_default_jwt_token(user=token)
 
     def generate_default_jwt_token(
-        default_username=settings.DEFAULT_USERNAME,
+        user: str,
     ) -> JWTToken:
-        return JWTToken(sub=default_username, token="")
+        return JWTToken(sub=user, token="")
 
     def authorize_user(
         token: JWTToken = Depends(secured_call),
         db: Session = Depends(get_system_db_session, scope="function"),
     ) -> User:
-        default_username = settings.DEFAULT_USERNAME
-        if "@" not in default_username:
+        if "@" not in token.sub:
             raise Exception("Default username must be an email address")
         oidc_user = OIDCIdentity(
-            sub=default_username,
-            name=default_username.split(".")[0],
-            family_name=default_username.split("@")[0].split(".")[1],
-            email=default_username,
-            username=default_username,
+            sub=token.sub,
+            name=token.sub.split(".")[0],
+            family_name=token.sub.split("@")[0].split(".")[1],
+            email=token.sub,
+            username=token.sub,
         )
         return update_db_user(oidc_user, token, db)
 

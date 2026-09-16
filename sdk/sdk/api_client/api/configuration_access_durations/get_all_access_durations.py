@@ -6,6 +6,7 @@ import httpx
 from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.access_duration import AccessDuration
+from ...models.http_validation_error import HTTPValidationError
 from ...types import Response
 
 
@@ -21,7 +22,7 @@ def _get_kwargs() -> dict[str, Any]:
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> list[AccessDuration] | None:
+) -> HTTPValidationError | list[AccessDuration] | None:
     if response.status_code == 200:
         response_200 = []
         _response_200 = response.json()
@@ -32,6 +33,11 @@ def _parse_response(
 
         return response_200
 
+    if response.status_code == 422:
+        response_422 = HTTPValidationError.from_dict(response.json())
+
+        return response_422
+
     if client.raise_on_unexpected_status:
         raise errors.UnexpectedStatus(response.status_code, response.content)
     else:
@@ -40,7 +46,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[list[AccessDuration]]:
+) -> Response[HTTPValidationError | list[AccessDuration]]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -52,7 +58,7 @@ def _build_response(
 def sync_detailed(
     *,
     client: AuthenticatedClient | Client,
-) -> Response[list[AccessDuration]]:
+) -> Response[HTTPValidationError | list[AccessDuration]]:
     """Get All Access Durations
 
     Raises:
@@ -60,7 +66,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[list[AccessDuration]]
+        Response[HTTPValidationError | list[AccessDuration]]
     """
 
     kwargs = _get_kwargs()
@@ -75,7 +81,7 @@ def sync_detailed(
 def sync(
     *,
     client: AuthenticatedClient | Client,
-) -> list[AccessDuration] | None:
+) -> HTTPValidationError | list[AccessDuration] | None:
     """Get All Access Durations
 
     Raises:
@@ -83,7 +89,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        list[AccessDuration]
+        HTTPValidationError | list[AccessDuration]
     """
 
     return sync_detailed(
@@ -94,7 +100,7 @@ def sync(
 async def asyncio_detailed(
     *,
     client: AuthenticatedClient | Client,
-) -> Response[list[AccessDuration]]:
+) -> Response[HTTPValidationError | list[AccessDuration]]:
     """Get All Access Durations
 
     Raises:
@@ -102,7 +108,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[list[AccessDuration]]
+        Response[HTTPValidationError | list[AccessDuration]]
     """
 
     kwargs = _get_kwargs()
@@ -115,7 +121,7 @@ async def asyncio_detailed(
 async def asyncio(
     *,
     client: AuthenticatedClient | Client,
-) -> list[AccessDuration] | None:
+) -> HTTPValidationError | list[AccessDuration] | None:
     """Get All Access Durations
 
     Raises:
@@ -123,7 +129,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        list[AccessDuration]
+        HTTPValidationError | list[AccessDuration]
     """
 
     return (
