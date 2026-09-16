@@ -17,8 +17,8 @@ from app.technical_asset_configuration.azure_blob.model import (
     AzureBlobTechnicalAssetConfiguration as AzureBlobTechnicalAssetConfigurationModel,
 )
 from app.technical_asset_configuration.base_schema import (
-    AssetProviderPlugin,
     PlatformMetadata,
+    TechnicalAssetPlugin,
     UIElementMetadata,
     UIElementString,
 )
@@ -29,7 +29,7 @@ from app.users.schema import User
 logger = logging.getLogger(__name__)
 
 
-class AzureBlobTechnicalAssetConfiguration(AssetProviderPlugin):
+class AzureBlobTechnicalAssetConfiguration(TechnicalAssetPlugin):
     name: ClassVar[str] = NAME
     version: ClassVar[str] = "1.0"
 
