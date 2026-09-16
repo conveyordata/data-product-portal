@@ -1,11 +1,3 @@
-"""The technical asset configuration union, and the import site that registers
-every plugin class.
-
-Importing a plugin's module is what makes it a subclass the registry can see, so
-the plugins with no configuration of their own (Agno, Coder, Conveyor, GitHub)
-are imported here too, for that side effect only.
-"""
-
 from typing import Annotated, Union
 
 from pydantic import Field
