@@ -1,10 +1,11 @@
 import copy
+from operator import and_
 from typing import Sequence, assert_never
 from uuid import UUID
 from warnings import deprecated
 
 from fastapi import HTTPException, status
-from sqlalchemy import asc, select
+from sqlalchemy import asc, select, or_
 from sqlalchemy.orm import Session, joinedload, selectinload, undefer
 
 from app.abstract_data_product.graph_utils import (
@@ -14,6 +15,7 @@ from app.abstract_data_product.input_ports.model import (
     InputPort as InputPortModel,
 )
 from app.abstract_data_product.service import AbstractDataProductService
+from app.authorization.role_assignments.data_product.model import DataProductRoleAssignment
 from app.authorization.role_assignments.enums import AssignmentFilter, DecisionStatus
 from app.authorization.roles.schema import Prototype
 from app.authorization.service import DATA_PRODUCT_READER_ROLE
@@ -53,6 +55,7 @@ from app.data_products.technical_assets.model import (
 from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
+from app.groups.model import GroupMembership
 from app.resource_names.service import ResourceNameService, ResourceNameValidityType
 from app.users.model import User as UserModel
 from app.users.schema import User
@@ -155,10 +158,18 @@ class DataProductService(AbstractDataProductService):
             case AssignmentFilter.ALL:
                 pass
             case AssignmentFilter.ONLY_ASSIGNED:
-                query = query.filter(
+                user_group_ids = select(GroupMembership.group_id).where(
+                    GroupMembership.member_identity_id == current_user.id
+                )
+                query = query.where(
                     DataProductModel.assignments.any(
-                        identity_id=current_user.id,
-                        decision=DecisionStatus.APPROVED,
+                        and_(
+                            DataProductRoleAssignment.decision == DecisionStatus.APPROVED,
+                            or_(
+                                DataProductRoleAssignment.identity_id == current_user.id,
+                                DataProductRoleAssignment.identity_id.in_(user_group_ids),
+                            ),
+                        )
                     )
                 )
             case _:

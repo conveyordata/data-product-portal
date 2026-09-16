@@ -33,6 +33,7 @@ from app.core.webhooks.events import (
 from app.data_products.technical_assets.model import TechnicalAsset
 from app.database.database import ensure_exists
 from app.database.event_mixin import EventTrackedMixin
+from app.groups.model import GroupMembership
 
 if TYPE_CHECKING:
     from app.configuration.data_product_lifecycles.model import DataProductLifecycle
@@ -48,10 +49,16 @@ class DataProductVisibility(enum.Enum):
 
 
 def _has_user_access_to_hidden_data_product(cls, user_id: uuid.UUID):
+    user_group_ids = select(GroupMembership.group_id).where(
+        GroupMembership.member_identity_id == user_id
+    )
     return (
         select(DataProductRoleAssignment.id)
         .where(DataProductRoleAssignment.data_product_id == cls.id)
-        .where(DataProductRoleAssignment.identity_id == user_id)
+        .where(or_(
+            DataProductRoleAssignment.identity_id == user_id,
+            DataProductRoleAssignment.identity_id.in_(user_group_ids)
+        ))
         .where(DataProductRoleAssignment.decision == DecisionStatus.APPROVED)
         .exists()
     )
