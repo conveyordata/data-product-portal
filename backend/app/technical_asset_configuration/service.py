@@ -63,6 +63,7 @@ class PluginService:
             return UIElementMetadataResponse(
                 ui_metadata=plugin_class.get_ui_metadata(self.db),
                 plugin=plugin_class.name,
+                icon_data_uri=plugin_class.get_icon_data_uri(),
                 platform=platform_meta.platform_key,
                 display_name=platform_meta.display_name,
                 icon_name=platform_meta.icon_name,
@@ -78,6 +79,7 @@ class PluginService:
                 not_configured=True,
                 ui_metadata=[],
                 plugin=plugin_class.name,
+                icon_data_uri=plugin_class.get_icon_data_uri(),
                 platform=platform_meta.platform_key,
                 display_name=platform_meta.display_name,
                 icon_name=platform_meta.icon_name,
@@ -156,6 +158,7 @@ class PluginService:
                 label=meta.display_name,
                 value=meta.platform,
                 icon_name=meta.icon_name,
+                icon_data_uri=meta.icon_data_uri,
                 has_environments=meta.has_environments,
                 has_config=True,
                 show_in_form=meta.show_in_form,

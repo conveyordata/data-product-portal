@@ -10,6 +10,9 @@ class PlatformTile(ORMModel):
     label: str
     value: str  # platform identifier
     icon_name: str
+    icon_data_uri: Optional[str] = (
+        None  # Set for plugins that bundle their own icon; see UIElementMetadataResponse.
+    )
     has_environments: bool = True
     has_config: bool = True
     children: list["PlatformTile"] = []
@@ -26,6 +29,9 @@ class UIElementMetadataResponse(ORMModel):
     platform: str  # e.g., "s3", "redshift", "snowflake"
     display_name: str  # Display name for the platform tile
     icon_name: str  # Icon filename (e.g., "s3-logo.svg")
+    icon_data_uri: Optional[str] = (
+        None  # Icon bundled in the plugin's own package, for plugins installed from a package. In-tree types leave this None and the frontend resolves icon_name from its own assets.
+    )
     parent_platform: Optional[str] = None  # e.g., "aws" for s3, redshift, glue
     platform_tile: Optional[PlatformTile] = None  # Complete tile structure
     show_in_form: bool = True  # Whether to show this platform in the configuration form, can be set to False for platforms that are only meant to be shown as tiles without detailed configuration options

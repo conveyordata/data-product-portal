@@ -30,7 +30,7 @@ import type { CustomDropdownItemProps } from '@/types/shared';
 import type { TechnicalAssetsCreateForm } from '@/types/technical-asset';
 import { dispatchMessage } from '@/utils/feedback.ts';
 import { selectFilterOptionByLabel } from '@/utils/form.helper';
-import { getIcon } from '@/utils/icon-loader';
+import { getPlatformTileIcon } from '@/utils/technical-asset-type.helper';
 import { AccessModeSelector } from './access-mode-selector.component';
 import { TechnicalAssetConfigurationForm } from './technical-asset-configuration-form.component';
 
@@ -120,7 +120,7 @@ export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallback
         const transformTile = (tile: PlatformTile): CustomDropdownItemProps<string> => ({
             label: t(tile.label),
             value: tile.value,
-            icon: getIcon(tile.icon_name),
+            icon: getPlatformTileIcon(tile),
             hasEnvironments: tile.has_environments,
             hasConfig: tile.has_config,
             children: tile.children?.map(transformTile) || [],

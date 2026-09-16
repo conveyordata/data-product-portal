@@ -1,4 +1,4 @@
-from typing import ClassVar, Literal, Optional, Self
+from typing import ClassVar, Optional, Self
 
 from pydantic import model_validator
 from sqlalchemy.orm import Session
@@ -17,10 +17,9 @@ from app.technical_asset_configuration.base_schema import (
     UIElementSelect,
     UIElementString,
 )
-from app.technical_asset_configuration.data_output_types import DataOutputTypes
 from app.technical_asset_configuration.enums import AccessGranularity, UIElementType
 from app.technical_asset_configuration.redshift.model import (
-    NAME,
+    CONFIGURATION_TYPE,
 )
 from app.technical_asset_configuration.redshift.model import (
     RedshiftTechnicalAssetConfiguration as RedshiftTechnicalAssetConfigurationModel,
@@ -28,12 +27,12 @@ from app.technical_asset_configuration.redshift.model import (
 
 
 class RedshiftTechnicalAssetConfiguration(TechnicalAssetPlugin):
-    name: ClassVar[str] = NAME
+    name: ClassVar[str] = CONFIGURATION_TYPE
     version: ClassVar[str] = "1.0"
 
     database: str
     schema: str = ""
-    configuration_type: Literal[DataOutputTypes.RedshiftTechnicalAssetConfiguration]
+    configuration_type: str = CONFIGURATION_TYPE
     table: str = "*"
     bucket_identifier: str = ""
     database_path: str = ""

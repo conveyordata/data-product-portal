@@ -3,7 +3,6 @@ from fastapi.testclient import TestClient
 from app.authorization.roles.schema import Scope
 from app.core.authz.actions import AuthorizationAction as Action
 from app.settings import settings
-from app.technical_asset_configuration.data_output_types import DataOutputTypes
 from app.technical_asset_configuration.s3.schema import S3TechnicalAssetConfiguration
 from app.technical_asset_configuration.schema_request import (
     RenderTechnicalAssetAccessPathRequest,
@@ -287,7 +286,7 @@ class TestPlatformTilesEndpoint:
             bucket="bucket",
             suffix="suffix",
             path="path",
-            configuration_type=DataOutputTypes.S3TechnicalAssetConfiguration,
+            configuration_type="S3TechnicalAssetConfiguration",
         )
         request = RenderTechnicalAssetAccessPathRequest(
             platform_id=service.platform.id,

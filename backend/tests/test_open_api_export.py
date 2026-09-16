@@ -33,6 +33,23 @@ def test_export_openapi_uses_binary_file_schema() -> None:
     }
 
 
+def test_export_openapi_describes_plugin_configuration_generically() -> None:
+    """A technical asset's configuration is a free-form object for every plugin.
+
+    If the published schema named the installed plugins instead, every customer
+    would generate a different SDK, CLI and frontend client, and
+    scripts/check_generated_sdk.sh could no longer check against one spec.
+    """
+    schemas = custom_openapi(f_app)["components"]["schemas"]
+    configuration = schemas["CreateTechnicalAssetRequest"]["properties"][
+        "configuration"
+    ]
+
+    assert configuration["type"] == "object"
+    assert configuration["additionalProperties"] is True
+    assert "S3TechnicalAssetConfiguration" not in str(schemas)
+
+
 def find_model_name_collisions(app: FastAPI) -> dict[str, list[Type]]:
     # Collect all models used in the application
     unique_models: set[Type] = set()
