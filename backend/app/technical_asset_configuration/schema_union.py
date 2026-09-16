@@ -2,12 +2,11 @@ from typing import Annotated, Any
 
 from pydantic import PlainSerializer, PlainValidator, WithJsonSchema
 
+from app.plugins.registry import plugin_registry
 from app.technical_asset_configuration.base_schema import TechnicalAssetPlugin
 
 
 def _resolve_configuration(value: Any) -> TechnicalAssetPlugin:
-    from app.plugins.registry import plugin_registry
-
     if isinstance(value, TechnicalAssetPlugin):
         return value
 
