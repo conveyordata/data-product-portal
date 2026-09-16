@@ -24,7 +24,6 @@ export const CardSelection = <T,>({ options, onChange, value, style }: Props<T>)
             {options.map((option) => (
                 <Card
                     key={option.value as string}
-                    data-cy={option.dataCy}
                     style={{ flex: 1 }}
                     hoverable
                     onClick={() => onChange?.(option.value)}

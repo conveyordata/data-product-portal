@@ -15,7 +15,6 @@ Prefer selectors that mimic how a real user finds the element: by its visible te
 - This is the default choice. Only move to step 2 when no stable, unique visible text exists (e.g. an icon-only button, a generic container with no unique label).
 
 ```ts
-cy.contains('[data-cy="output-port-card"]', outputPortName).should('be.visible');
 cy.contains('button', 'Add to cart').click();
 ```
 

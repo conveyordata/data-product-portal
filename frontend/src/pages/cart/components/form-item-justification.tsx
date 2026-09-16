@@ -23,7 +23,6 @@ export const JustificationFormItem = ({ extra, onChange }: Props) => {
             ]}
         >
             <TextArea
-                data-cy="justification"
                 rows={4}
                 onChange={onChange}
                 placeholder={t('Explain why you need access to these Output Ports')}
