@@ -11,10 +11,10 @@ from app.configuration.environments.platform_service_configurations.schemas impo
 from app.core.aws.get_url import get_aws_url
 from app.data_products.schema import DataProduct
 from app.technical_asset_configuration.base_schema import (
-    AssetProviderPlugin,
     FieldDependency,
     PlatformMetadata,
     SelectOption,
+    TechnicalAssetPlugin,
     UIElementMetadata,
     UIElementRadio,
     UIElementSelect,
@@ -31,7 +31,7 @@ from app.technical_asset_configuration.glue.model import (
 from app.users.schema import User
 
 
-class GlueTechnicalAssetConfiguration(AssetProviderPlugin):
+class GlueTechnicalAssetConfiguration(TechnicalAssetPlugin):
     name: ClassVar[str] = NAME
     version: ClassVar[str] = "1.0"
 

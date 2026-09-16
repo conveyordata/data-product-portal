@@ -108,7 +108,7 @@ class PlatformMetadata(ORMModel):
     show_in_form: bool = True
 
 
-class AssetProviderPlugin(ORMModel, ABC):
+class TechnicalAssetPlugin(ORMModel, ABC):
     """Base class for all data output provider plugins"""
 
     name: ClassVar[str]

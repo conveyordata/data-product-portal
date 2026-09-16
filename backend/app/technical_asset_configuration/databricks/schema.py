@@ -14,10 +14,10 @@ from app.configuration.environments.platform_service_configurations.schemas impo
 from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.schema import DataProduct
 from app.technical_asset_configuration.base_schema import (
-    AssetProviderPlugin,
     FieldDependency,
     PlatformMetadata,
     SelectOption,
+    TechnicalAssetPlugin,
     UIElementMetadata,
     UIElementRadio,
     UIElementSelect,
@@ -33,7 +33,7 @@ from app.technical_asset_configuration.databricks.model import (
 from app.technical_asset_configuration.enums import AccessGranularity, UIElementType
 
 
-class DatabricksTechnicalAssetConfiguration(AssetProviderPlugin):
+class DatabricksTechnicalAssetConfiguration(TechnicalAssetPlugin):
     name: ClassVar[str] = NAME
     version: ClassVar[str] = "1.0"
 
