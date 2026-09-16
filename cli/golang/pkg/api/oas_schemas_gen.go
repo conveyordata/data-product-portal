@@ -1436,11 +1436,11 @@ func (*CreateTagResponse) createTagRes() {}
 
 // Ref: #/components/schemas/CreateTechnicalAssetRequest
 type CreateTechnicalAssetRequest struct {
-	Name        string    `json:"name"`
-	Description string    `json:"description"`
-	Namespace   string    `json:"namespace"`
-	PlatformID  uuid.UUID `json:"platform_id"`
-	ServiceID   uuid.UUID `json:"service_id"`
+	Name        string     `json:"name"`
+	Description string     `json:"description"`
+	Namespace   string     `json:"namespace"`
+	PlatformID  OptNilUUID `json:"platform_id"`
+	ServiceID   OptNilUUID `json:"service_id"`
 	// Configuration of the technical asset. The available fields depend on `configuration_type`; retrieve
 	// them from /v2/plugins/{name}/form.
 	Configuration CreateTechnicalAssetRequestConfiguration `json:"configuration"`
@@ -1469,12 +1469,12 @@ func (s *CreateTechnicalAssetRequest) GetNamespace() string {
 }
 
 // GetPlatformID returns the value of PlatformID.
-func (s *CreateTechnicalAssetRequest) GetPlatformID() uuid.UUID {
+func (s *CreateTechnicalAssetRequest) GetPlatformID() OptNilUUID {
 	return s.PlatformID
 }
 
 // GetServiceID returns the value of ServiceID.
-func (s *CreateTechnicalAssetRequest) GetServiceID() uuid.UUID {
+func (s *CreateTechnicalAssetRequest) GetServiceID() OptNilUUID {
 	return s.ServiceID
 }
 
@@ -1519,12 +1519,12 @@ func (s *CreateTechnicalAssetRequest) SetNamespace(val string) {
 }
 
 // SetPlatformID sets the value of PlatformID.
-func (s *CreateTechnicalAssetRequest) SetPlatformID(val uuid.UUID) {
+func (s *CreateTechnicalAssetRequest) SetPlatformID(val OptNilUUID) {
 	s.PlatformID = val
 }
 
 // SetServiceID sets the value of ServiceID.
-func (s *CreateTechnicalAssetRequest) SetServiceID(val uuid.UUID) {
+func (s *CreateTechnicalAssetRequest) SetServiceID(val OptNilUUID) {
 	s.ServiceID = val
 }
 
@@ -5364,8 +5364,8 @@ type GetTechnicalAssetsResponseItem struct {
 	Description      string               `json:"description"`
 	Namespace        string               `json:"namespace"`
 	OwnerID          uuid.UUID            `json:"owner_id"`
-	PlatformID       uuid.UUID            `json:"platform_id"`
-	ServiceID        uuid.UUID            `json:"service_id"`
+	PlatformID       OptNilUUID           `json:"platform_id"`
+	ServiceID        OptNilUUID           `json:"service_id"`
 	Status           TechnicalAssetStatus `json:"status"`
 	TechnicalMapping TechnicalMapping     `json:"technical_mapping"`
 	AccessModes      []AccessMode         `json:"access_modes"`
@@ -5407,12 +5407,12 @@ func (s *GetTechnicalAssetsResponseItem) GetOwnerID() uuid.UUID {
 }
 
 // GetPlatformID returns the value of PlatformID.
-func (s *GetTechnicalAssetsResponseItem) GetPlatformID() uuid.UUID {
+func (s *GetTechnicalAssetsResponseItem) GetPlatformID() OptNilUUID {
 	return s.PlatformID
 }
 
 // GetServiceID returns the value of ServiceID.
-func (s *GetTechnicalAssetsResponseItem) GetServiceID() uuid.UUID {
+func (s *GetTechnicalAssetsResponseItem) GetServiceID() OptNilUUID {
 	return s.ServiceID
 }
 
@@ -5492,12 +5492,12 @@ func (s *GetTechnicalAssetsResponseItem) SetOwnerID(val uuid.UUID) {
 }
 
 // SetPlatformID sets the value of PlatformID.
-func (s *GetTechnicalAssetsResponseItem) SetPlatformID(val uuid.UUID) {
+func (s *GetTechnicalAssetsResponseItem) SetPlatformID(val OptNilUUID) {
 	s.PlatformID = val
 }
 
 // SetServiceID sets the value of ServiceID.
-func (s *GetTechnicalAssetsResponseItem) SetServiceID(val uuid.UUID) {
+func (s *GetTechnicalAssetsResponseItem) SetServiceID(val OptNilUUID) {
 	s.ServiceID = val
 }
 
@@ -12276,8 +12276,8 @@ type TechnicalAsset struct {
 	Status           TechnicalAssetStatus `json:"status"`
 	TechnicalMapping TechnicalMapping     `json:"technical_mapping"`
 	OwnerID          uuid.UUID            `json:"owner_id"`
-	PlatformID       uuid.UUID            `json:"platform_id"`
-	ServiceID        uuid.UUID            `json:"service_id"`
+	PlatformID       OptNilUUID           `json:"platform_id"`
+	ServiceID        OptNilUUID           `json:"service_id"`
 	// Configuration of the technical asset. The available fields depend on `configuration_type`; retrieve
 	// them from /v2/plugins/{name}/form.
 	Configuration TechnicalAssetConfiguration `json:"configuration"`
@@ -12319,12 +12319,12 @@ func (s *TechnicalAsset) GetOwnerID() uuid.UUID {
 }
 
 // GetPlatformID returns the value of PlatformID.
-func (s *TechnicalAsset) GetPlatformID() uuid.UUID {
+func (s *TechnicalAsset) GetPlatformID() OptNilUUID {
 	return s.PlatformID
 }
 
 // GetServiceID returns the value of ServiceID.
-func (s *TechnicalAsset) GetServiceID() uuid.UUID {
+func (s *TechnicalAsset) GetServiceID() OptNilUUID {
 	return s.ServiceID
 }
 
@@ -12369,12 +12369,12 @@ func (s *TechnicalAsset) SetOwnerID(val uuid.UUID) {
 }
 
 // SetPlatformID sets the value of PlatformID.
-func (s *TechnicalAsset) SetPlatformID(val uuid.UUID) {
+func (s *TechnicalAsset) SetPlatformID(val OptNilUUID) {
 	s.PlatformID = val
 }
 
 // SetServiceID sets the value of ServiceID.
-func (s *TechnicalAsset) SetServiceID(val uuid.UUID) {
+func (s *TechnicalAsset) SetServiceID(val OptNilUUID) {
 	s.ServiceID = val
 }
 

@@ -1,3 +1,4 @@
+from typing import Optional
 from uuid import UUID
 from warnings import deprecated, warn
 
@@ -13,8 +14,9 @@ class CreateTechnicalAssetRequest(ORMModel):
     name: str
     description: str
     namespace: str
-    platform_id: UUID
-    service_id: UUID
+    # Unset for a plugin that uses no platform or platform service.
+    platform_id: Optional[UUID] = None
+    service_id: Optional[UUID] = None
     configuration: DataOutputConfiguration
     sourceAligned: bool | None = Field(
         default=None,
@@ -72,9 +74,3 @@ class DataOutputUpdate(ORMModel):
 
 class DataOutputStatusUpdate(ORMModel):
     status: TechnicalAssetStatus
-
-
-class DataOutputResultStringRequest(ORMModel):
-    platform_id: UUID
-    service_id: UUID
-    configuration: DataOutputConfiguration

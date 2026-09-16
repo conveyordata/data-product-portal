@@ -124,6 +124,9 @@ class TechnicalAssetPlugin(ORMModel, ABC):
     migrations_package: ClassVar[Optional[str]] = (
         None  # Package holding this plugin's versions/ directory.
     )
+    result_string_template: ClassVar[Optional[str]] = (
+        None  # Template for the resulting path, for a plugin that uses no platform service. Plugins that use one take the template from PlatformService instead.
+    )
     configuration_type: str
 
     _platform_metadata: ClassVar[Optional[PlatformMetadata]] = None

@@ -272,8 +272,8 @@ export type GetTechnicalAssetsResponseItem = {
   description: string;
   namespace: string;
   owner_id: string;
-  platform_id: string;
-  service_id: string;
+  platform_id?: string | null;
+  service_id?: string | null;
   status: TechnicalAssetStatus;
   technical_mapping: TechnicalMapping;
   access_modes: AccessMode[];
@@ -299,8 +299,8 @@ export type CreateTechnicalAssetRequest = {
   name: string;
   description: string;
   namespace: string;
-  platform_id: string;
-  service_id: string;
+  platform_id?: string | null;
+  service_id?: string | null;
   /** Configuration of the technical asset. The available fields depend on `configuration_type`; retrieve them from /v2/plugins/{name}/form. */
   configuration: {
     [key: string]: any;
@@ -337,8 +337,8 @@ export type TechnicalAsset = {
   status: TechnicalAssetStatus;
   technical_mapping: TechnicalMapping;
   owner_id: string;
-  platform_id: string;
-  service_id: string;
+  platform_id?: string | null;
+  service_id?: string | null;
   /** Configuration of the technical asset. The available fields depend on `configuration_type`; retrieve them from /v2/plugins/{name}/form. */
   configuration: {
     [key: string]: any;
