@@ -1,17 +1,19 @@
 [project]
-name = "app"
+name = "data-product-portal"
 version = "0.0.1"
+description = "Data Product Portal core"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
-name = "app"
+name = "data-product-portal"
 version = "0.0.1"
-description = ""
+description = "Data Product Portal core"
 authors = ["Stijn Janssens <stijn.janssens@dataminded.com>"]
 readme = "README.md"
+packages = [{ include = "app" }]
 
 [tool.poetry.dependencies]
 python = "^3.13"

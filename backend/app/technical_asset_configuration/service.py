@@ -14,9 +14,10 @@ from app.technical_asset_configuration.schema_request import (
 if TYPE_CHECKING:
     from app.users.schema import User
 
-from app.settings import settings
+from app.plugins.registry import plugin_registry
+from app.plugins.runtime import call_plugin
 from app.technical_asset_configuration.base_schema import (
-    AssetProviderPlugin,
+    TechnicalAssetPlugin,
 )
 from app.technical_asset_configuration.schema_response import (
     PlatformTile,
@@ -31,17 +32,10 @@ class PluginService:
     def get_all_technical_assets_ui_metadata(
         self,
     ) -> Sequence[UIElementMetadataResponse]:
-        """Generate UI metadata for all registered data output types"""
-        data_output_configurations = AssetProviderPlugin.__subclasses__()
-        configured_plugins = settings.ENABLED_PLUGINS
-        configured_metadata = [
-            name
-            for name in data_output_configurations
-            if name.name in configured_plugins
-        ]
+        """Generate UI metadata for every enabled plugin"""
         return [
             metadata_response
-            for plugin in configured_metadata
+            for plugin in plugin_registry.enabled()
             if (metadata_response := self._build_metadata_response(plugin)) is not None
         ]
 
@@ -61,14 +55,14 @@ class PluginService:
         return plugin
 
     def _build_metadata_response(
-        self, plugin_class: type[AssetProviderPlugin]
+        self, plugin_class: type[TechnicalAssetPlugin]
     ) -> Optional[UIElementMetadataResponse]:
         """Build a complete metadata response for a plugin"""
         try:
             platform_meta = plugin_class.get_platform_metadata()
             return UIElementMetadataResponse(
                 ui_metadata=plugin_class.get_ui_metadata(self.db),
-                plugin=plugin_class.__name__,
+                plugin=plugin_class.name,
                 platform=platform_meta.platform_key,
                 display_name=platform_meta.display_name,
                 icon_name=platform_meta.icon_name,
@@ -83,7 +77,7 @@ class PluginService:
             return UIElementMetadataResponse(
                 not_configured=True,
                 ui_metadata=[],
-                plugin=plugin_class.__name__,
+                plugin=plugin_class.name,
                 platform=platform_meta.platform_key,
                 display_name=platform_meta.display_name,
                 icon_name=platform_meta.icon_name,
@@ -108,11 +102,13 @@ class PluginService:
         actor: "User",
         environment: Optional[str] = None,
     ) -> str:
-        data_output_configurations = AssetProviderPlugin.__subclasses__()
+        # Every installed plugin, not only the enabled ones: an access tile URL is
+        # looked up for an asset that already exists.
+        discovered_plugins = plugin_registry.discovered()
         plugin_class = next(
             (
                 cls
-                for cls in data_output_configurations
+                for cls in discovered_plugins
                 if cls.get_platform_metadata().platform_key == plugin_name
             ),
             None,
@@ -122,7 +118,7 @@ class PluginService:
             plugin_class = next(
                 (
                     cls
-                    for cls in data_output_configurations
+                    for cls in discovered_plugins
                     if cls.get_platform_metadata().parent_platform == plugin_name
                 ),
                 None,
@@ -133,7 +129,15 @@ class PluginService:
                 detail=f"Plugin '{plugin_name}' not found",
             )
         try:
-            return plugin_class.get_url(id, self.db, actor, environment)
+            return call_plugin(
+                plugin_class.name,
+                "get_url",
+                plugin_class.get_url,
+                id,
+                self.db,
+                actor,
+                environment,
+            )
         except NotImplementedError:
             raise HTTPException(
                 status_code=status.HTTP_501_NOT_IMPLEMENTED,

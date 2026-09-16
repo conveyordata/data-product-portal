@@ -5,8 +5,8 @@ from sqlalchemy.orm import Session
 
 from app.data_products.schema import DataProduct
 from app.technical_asset_configuration.base_schema import (
-    AssetProviderPlugin,
     PlatformMetadata,
+    TechnicalAssetPlugin,
     UIElementMetadata,
 )
 from app.technical_asset_configuration.data_output_types import DataOutputTypes
@@ -20,7 +20,7 @@ from app.technical_asset_configuration.osi_sem_model.model import (
 from app.users.schema import User
 
 
-class OSISemanticModelTechnicalAssetConfiguration(AssetProviderPlugin):
+class OSISemanticModelTechnicalAssetConfiguration(TechnicalAssetPlugin):
     name: ClassVar[str] = NAME
     version: ClassVar[str] = "1.0"
 

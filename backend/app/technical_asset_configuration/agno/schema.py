@@ -5,13 +5,13 @@ from sqlalchemy.orm import Session
 
 from app.data_products.model import DataProduct as DataProductModel
 from app.technical_asset_configuration.base_schema import (
-    AssetProviderPlugin,
     PlatformMetadata,
+    TechnicalAssetPlugin,
 )
 from app.users.schema import User
 
 
-class AgnoPlugin(AssetProviderPlugin):
+class AgnoPlugin(TechnicalAssetPlugin):
     name: ClassVar[str] = "AgnoPlugin"
     version: ClassVar[str] = "1.0"
 
