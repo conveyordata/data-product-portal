@@ -5,6 +5,11 @@ from pydantic import PlainSerializer, PlainValidator, WithJsonSchema
 from app.plugins.registry import plugin_registry
 from app.technical_asset_configuration.base_schema import TechnicalAssetPlugin
 
+# Load every plugin at import, not on first use. Besides being what the ADR
+# asks for, importing a plugin is what registers its SQLAlchemy model, and
+# TechnicalAsset.configuration cannot resolve its relationship without them.
+plugin_registry.discovered()
+
 
 def _resolve_configuration(value: Any) -> TechnicalAssetPlugin:
     if isinstance(value, TechnicalAssetPlugin):
