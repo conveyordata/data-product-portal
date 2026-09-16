@@ -34,12 +34,6 @@ def test_export_openapi_uses_binary_file_schema() -> None:
 
 
 def test_export_openapi_describes_plugin_configuration_generically() -> None:
-    """A technical asset's configuration is a free-form object for every plugin.
-
-    If the published schema named the installed plugins instead, every customer
-    would generate a different SDK, CLI and frontend client, and
-    scripts/check_generated_sdk.sh could no longer check against one spec.
-    """
     schemas = custom_openapi(f_app)["components"]["schemas"]
     configuration = schemas["CreateTechnicalAssetRequest"]["properties"][
         "configuration"

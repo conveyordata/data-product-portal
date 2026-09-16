@@ -182,10 +182,6 @@ class TechnicalAssetPlugin(ORMModel, ABC):
 
     @classmethod
     def get_icon_data_uri(cls) -> Optional[str]:
-        """Icon bytes bundled in the plugin's own package, as a data URI.
-
-        None for in-tree types, which the frontend resolves via icon_name.
-        """
         platform_meta = cls.get_platform_metadata()
         if not platform_meta.icon_package:
             return None

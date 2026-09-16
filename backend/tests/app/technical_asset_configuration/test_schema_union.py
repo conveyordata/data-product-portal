@@ -26,8 +26,6 @@ def test_resolve_configuration__builds_the_plugin_named_by_configuration_type():
 
 
 def test_resolve_configuration__round_trips_unchanged():
-    """The wire format has to survive untouched: the frontend and every generated
-    client still read configuration_type from inside the configuration object."""
     assert Holder(configuration=S3_CONFIGURATION).model_dump()["configuration"] == (
         S3_CONFIGURATION
     )
@@ -55,8 +53,6 @@ def test_resolve_configuration__rejects_a_plugin_that_is_not_enabled(monkeypatch
 
 
 def test_json_schema__describes_every_plugin_the_same_way():
-    """The published schema must not depend on which plugins are installed, or
-    every customer's generated SDK/CLI/frontend client drifts apart."""
     schema = Holder.model_json_schema()["properties"]["configuration"]
 
     assert schema["type"] == "object"

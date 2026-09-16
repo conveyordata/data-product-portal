@@ -5,9 +5,6 @@ const icons = import.meta.glob('@/assets/icons/*.svg', {
     import: 'default',
 });
 
-// A plugin installed as a package ships its own icon, which the backend sends
-// as a data URI because the frontend bundle cannot know about it. Wrapped in a
-// component so callers treat both kinds of icon the same way.
 export function getIconFromDataUri(dataUri: string): React.ComponentType<React.SVGProps<SVGSVGElement>> {
     return function PluginIcon(props: React.SVGProps<SVGSVGElement>) {
         return <img src={dataUri} alt="" width={props.width ?? 24} height={props.height ?? 24} />;
