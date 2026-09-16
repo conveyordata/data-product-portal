@@ -14,7 +14,7 @@ describe('Marketplace checkout', () => {
         // actual search request instead of resolving on this earlier one.
         cy.wait('@searchOutputPorts', { timeout: 30000 });
 
-        cy.findByRole('searchbox', { name: /search/i }).type(`${outputPortName}{enter}`);
+        cy.get('[data-cy="marketplace-search"]').type(`${outputPortName}{enter}`);
         cy.wait('@searchOutputPorts', { timeout: 30000 });
 
         cy.contains('[data-cy="output-port-card"]', outputPortName, { timeout: 20000 }).should('be.visible');
@@ -25,22 +25,20 @@ describe('Marketplace checkout', () => {
 
         cy.visit('/marketplace/cart');
 
-        cy.findByText(outputPortName).should('be.visible');
+        cy.contains(outputPortName).should('be.visible');
 
         cy.get('[data-cy="checkout-build-data-products"]').click();
         cy.get('[data-cy="checkout-select-existing"]').click();
 
         cy.get('[data-cy="data-product-select"]').click();
         cy.get('[data-cy="data-product-select"]').find('input').type(consumingDataProductName);
-        // The option also renders the data product's description, so its accessible name
-        // is more than just the name: match it as a substring instead of an exact string.
-        cy.findByRole('option', { name: new RegExp(consumingDataProductName) }).click();
+        cy.contains(consumingDataProductName).click();
 
         cy.get('[data-cy="justification"]').type('Needed for the Cypress end-to-end test.');
 
         cy.get('[data-cy="submit-access-requests"]').should('be.enabled').click();
 
-        cy.findByText('Your requests have successfully been created.').should('be.visible');
+        cy.contains('Your requests have successfully been created.').should('be.visible');
     });
 
     it('lets a user search for a data product, add it to cart, and create a new exploration', () => {
@@ -53,7 +51,7 @@ describe('Marketplace checkout', () => {
         // actual search request instead of resolving on this earlier one.
         cy.wait('@searchOutputPorts', { timeout: 30000 });
 
-        cy.findByRole('searchbox', { name: /search/i }).type(`${explorationOutputPortName}{enter}`);
+        cy.get('[data-cy="marketplace-search"]').type(`${explorationOutputPortName}{enter}`);
         cy.wait('@searchOutputPorts', { timeout: 30000 });
 
         cy.contains('[data-cy="output-port-card"]', explorationOutputPortName, { timeout: 20000 }).should('be.visible');
@@ -64,7 +62,7 @@ describe('Marketplace checkout', () => {
 
         cy.visit('/marketplace/cart');
 
-        cy.findByText(explorationOutputPortName).should('be.visible');
+        cy.contains(explorationOutputPortName).should('be.visible');
 
         cy.get('[data-cy="checkout-explore-data"]').click();
         cy.get('[data-cy="checkout-create-new"]').click();
@@ -72,12 +70,12 @@ describe('Marketplace checkout', () => {
         cy.get('[data-cy="exploration-name"]').type(explorationName);
 
         cy.get('[data-cy="exploration-domain-select"]').click();
-        cy.findByRole('option', { name: explorationDomainName }).click();
+        cy.contains(explorationDomainName).click();
 
         cy.get('[data-cy="justification"]').type('Needed for the Cypress end-to-end test.');
 
         cy.get('[data-cy="create-exploration"]').should('be.enabled').click();
 
-        cy.findByText('Your Exploration has been created.').should('be.visible');
+        cy.contains('Your Exploration has been created.').should('be.visible');
     });
 });

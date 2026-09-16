@@ -175,7 +175,6 @@ export const NewExplorationForm = () => {
                     loading={isFetchingDomains}
                     options={domains.map((domain) => ({ label: domain.name, value: domain.id }))}
                     showSearch={{ filterOption: selectFilterOptionByLabelAndValue }}
-                    virtual={false}
                     allowClear
                 />
             </Form.Item>

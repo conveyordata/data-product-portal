@@ -137,7 +137,6 @@ export const ExistingDataProductForm = ({ setSelectedDataProductId }: Props) => 
                     showSearch={{
                         optionFilterProp: 'label',
                     }}
-                    virtual={false}
                     autoFocus={isRestored && selectedDataProductId === undefined}
                     defaultOpen={isRestored && selectedDataProductId === undefined}
                     loading={isFetchingUserDataProducts}
