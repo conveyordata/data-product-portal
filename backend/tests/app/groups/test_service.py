@@ -1,8 +1,13 @@
 import pytest
 from fastapi import HTTPException
 
+from app.authorization.roles.schema import Scope
 from app.groups.service import GroupService
-from tests.factories import GroupFactory, UserFactory, MachineUserFactory
+from tests.factories import GroupFactory, UserFactory, MachineUserFactory, DataProductFactory, RoleFactory, DataProductRoleAssignmentFactory, \
+    GlobalRoleAssignmentFactory
+
+from app.authorization.role_assignments.data_product.service import RoleAssignmentService as DataProductRoleAssignmentService
+from app.authorization.role_assignments.global_.service import RoleAssignmentService as GlobalRoleAssignmentService
 
 
 class TestGroupService:
@@ -58,10 +63,41 @@ class TestGroupService:
         service.delete_group(group_id=group_id)
         with pytest.raises(HTTPException):
             service.get_group(group_id=group_id)
-        with pytest.raises(HTTPException):
             service.get_membership(group_id=group_id, member_identity_id=user1.id)
             service.get_membership(group_id=group_id, member_identity_id=user2.id)
 
         # Members themselves must remain.
         assert user1 in session
         assert user2 in session
+
+    def test_deleting_group_deletes_its_role_assignments(self, session):
+        group = GroupFactory()
+        actor = UserFactory()
+        data_product = DataProductFactory()
+        data_product_role = RoleFactory(scope=Scope.DATA_PRODUCT, permissions=[])
+        global_role = RoleFactory(scope=Scope.GLOBAL, permissions=[])
+        service = GroupService(session)
+
+        data_product_assignment = DataProductRoleAssignmentFactory(
+            identity_id=group.id,
+            data_product_id=data_product.id,
+            role_id=data_product_role.id,
+            requested_by_id=actor.id,
+            decided_by_id=actor.id,
+        )
+        global_assignment = GlobalRoleAssignmentFactory(
+            identity_id=group.id,
+            role_id=global_role.id,
+            requested_by_id=actor.id,
+            decided_by_id=actor.id,
+        )
+
+        group_id = group.id
+        data_product_assignment_id = data_product_assignment.id
+        global_assignment_id = global_assignment.id
+
+        service.delete_group(group_id=group_id)
+        with pytest.raises(HTTPException):
+            service.get_group(group_id=group_id)
+            DataProductRoleAssignmentService(session).get_assignment(data_product_assignment_id)
+            GlobalRoleAssignmentService(session).get_assignment(global_assignment_id)

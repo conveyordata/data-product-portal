@@ -55,9 +55,10 @@ class Identity(Base, BaseORM):
         "data_product",
     )
 
-    global_role: Mapped["GlobalRoleAssignment | None"] = relationship(
+    global_role: Mapped["GlobalRoleAssignment"] = relationship(
         foreign_keys="GlobalRoleAssignment.identity_id",
         back_populates="identity",
+        cascade="all, delete-orphan",  # TODO discuss this with the team
         lazy="select",
     )
 
