@@ -579,6 +579,7 @@ export function OutputPortForm({
                         value: lifecycle.id,
                         label: lifecycle.name,
                     }))}
+                    popupRender={(menu) => <div data-cy="output-port-lifecycle-options">{menu}</div>}
                 />
             </Form.Item>
             <Form.Item<CreateOutputPortRequest>

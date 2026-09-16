@@ -178,6 +178,7 @@ export const DataProductFormItems = <T extends DataProductCreate>({
                     allowClear
                     showSearch={{ filterOption: selectFilterOptionByLabelAndValue }}
                     options={dataProductTypeSelectOptions}
+                    popupRender={(menu) => <div data-cy="data-product-type-options">{menu}</div>}
                 />
             </Form.Item>
             <Form.Item<DataProductCreate>
@@ -199,6 +200,7 @@ export const DataProductFormItems = <T extends DataProductCreate>({
                     }))}
                     showSearch={{ filterOption: selectFilterOptionByLabelAndValue }}
                     allowClear
+                    popupRender={(menu) => <div data-cy="data-product-lifecycle-options">{menu}</div>}
                 />
             </Form.Item>
             <Form.Item<DataProductCreate>
@@ -218,6 +220,7 @@ export const DataProductFormItems = <T extends DataProductCreate>({
                     options={domains.map((domain) => ({ label: domain.name, value: domain.id }))}
                     showSearch={{ filterOption: selectFilterOptionByLabelAndValue }}
                     allowClear
+                    popupRender={(menu) => <div data-cy="data-product-domain-options">{menu}</div>}
                 />
             </Form.Item>
             <Form.Item<DataProductCreate> name="tag_ids" label={t('Tags')}>
