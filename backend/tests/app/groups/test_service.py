@@ -54,10 +54,13 @@ class TestGroupService:
 
         service.add_member(group_id=group_id, member_identity_id=user1.id)
         service.add_member(group_id=group_id, member_identity_id=user2.id)
-        service.delete_group(group_id=group_id)
 
+        service.delete_group(group_id=group_id)
         with pytest.raises(HTTPException):
             service.get_group(group_id=group_id)
+        with pytest.raises(HTTPException):
+            service.get_membership(group_id=group_id, member_identity_id=user1.id)
+            service.get_membership(group_id=group_id, member_identity_id=user2.id)
 
         # Members themselves must remain.
         assert user1 in session
