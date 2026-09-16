@@ -98,6 +98,7 @@ factories = [
     DeviceFlowFactory,
     GroupFactory,
     GroupMembershipFactory,
+    MachineUserFactory,
 ]
 
 for factory_model in factories:

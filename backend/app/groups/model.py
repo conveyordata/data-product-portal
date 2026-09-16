@@ -2,9 +2,9 @@ import uuid
 
 from sqlalchemy import CheckConstraint, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship, Session
 
-from app.database.database import Base
+from app.database.database import Base, ensure_exists
 from app.identities.model import Identity
 from app.identities.type import IdentityType
 from app.shared.model import BaseORM
@@ -61,3 +61,6 @@ class GroupMembership(Base, BaseORM):
         foreign_keys=[member_identity_id],
         lazy="joined",
     )
+
+def ensure_group_exists(group_id: UUID, db: Session, options: list = []) -> Group:
+    return ensure_exists(group_id, db, Group, options=options)

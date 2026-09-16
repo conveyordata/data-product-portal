@@ -2,10 +2,10 @@ import uuid
 
 from sqlalchemy import CheckConstraint, String, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship, Session
 from sqlalchemy.ext.associationproxy import association_proxy, AssociationProxy
 
-from app.database.database import Base
+from app.database.database import Base, ensure_exists
 from app.shared.model import BaseORM
 
 from typing import TYPE_CHECKING
@@ -64,3 +64,6 @@ class Identity(Base, BaseORM):
     __mapper_args__ = {
         "polymorphic_on": type
     }
+
+def ensure_identity_exists(identity_id: UUID, db: Session, options: list = []) -> Identity:
+    return ensure_exists(identity_id, db, Identity, options=options)

@@ -148,7 +148,7 @@ class AuthorizationService:
 
         service = GroupService(self.db)
         memberships = service.list_memberships()
-        assigned_data_products = service.list_assigned_data_products()
+        assigned_data_products = service.list_all_assigned_data_products()
 
         changes = 0
         total = 0
