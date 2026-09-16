@@ -52,7 +52,7 @@ describe('Output port management', () => {
 
         // The toast is transient and may already be gone by now; assert on the
         // resulting state instead, which is what actually matters.
-        cy.get('.ant-modal').should('not.exist');
+        cy.contains(`Link Technical Assets to ${outputPortName}`).should('not.exist');
         cy.contains('[data-cy="output-port-card"]', outputPortName)
             .contains('2 linked Technical Assets')
             .should('be.visible');

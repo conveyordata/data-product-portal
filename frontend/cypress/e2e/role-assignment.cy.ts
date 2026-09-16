@@ -18,11 +18,7 @@ describe('Role assignment', () => {
             });
 
         cy.intercept('POST', '**/authz/role_assignments/data_product').as('createRoleAssignment');
-        cy.get('.ant-select-dropdown')
-            .should('be.visible')
-            .within(() => {
-                cy.contains('Member').click();
-            });
+        cy.contains('Member').click();
         cy.wait('@createRoleAssignment', { timeout: 30000 });
 
         cy.contains('User has been granted access to the Data Product').should('be.visible');

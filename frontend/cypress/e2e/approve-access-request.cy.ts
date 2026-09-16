@@ -13,7 +13,7 @@ describe('Approve pending access request', () => {
                 cy.get('[data-cy="review-request"]').click();
             });
 
-        cy.get('.ant-modal').should('be.visible');
+        cy.contains('button', 'Accept').should('be.visible');
 
         cy.intercept('POST', '**/input_ports/approve').as('approveInputPort');
         cy.get('[data-cy="accept-request"]').click();
