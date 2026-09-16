@@ -337,12 +337,13 @@ class TestRequestInputPortsDuration:
             request__valid_until=date.today() + timedelta(days=10),
         )
         _refresh_adp_input_ports(session, dp)
+        session.refresh(port, attribute_names=["data_product_links"])
 
         ip = AbstractDataProductService(session).renew_input_port(
             dp.id, port.id, actor=actor
         )
 
-        assert ip.id == link.id
+        assert str(ip.id) == str(link.id)
         reqs = _requests_for(link.id, session)
         assert len(reqs) == 2
         assert sum(r.decision == InputPortRequestDecision.PENDING for r in reqs) == 1
@@ -424,7 +425,7 @@ class TestRequestInputPortsDuration:
             dp.id, port.id, actor=actor
         )
 
-        assert ip.id == link.id
+        assert str(ip.id) == str(link.id)
         assert len(_requests_for(link.id, session)) == 2
 
     def test_renew_input_port__404_when_no_existing_link(self, session):
@@ -464,7 +465,7 @@ class TestRequestInputPortsDuration:
             dp.id, port.id, actor=actor
         )
 
-        assert ip.id == link.id
+        assert str(ip.id) == str(link.id)
         reqs = _requests_for(link.id, session)
         assert len(reqs) == 2
         for req in reqs:
@@ -489,7 +490,7 @@ class TestRequestInputPortsDuration:
             dp.id, port.id, actor=actor
         )
 
-        assert ip.id == link.id
+        assert str(ip.id) == str(link.id)
         session.refresh(link)
         session.refresh(grant)
         assert link.status == InputPortStatus.REVOKED
@@ -541,7 +542,7 @@ class TestRequestInputPortsDuration:
             dp.id, port.id, actor=actor
         )
 
-        assert ip.id == link.id
+        assert str(ip.id) == str(link.id)
         session.refresh(link)
         session.refresh(pending)
         assert link.status == InputPortStatus.CANCELLED
