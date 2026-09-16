@@ -13310,6 +13310,56 @@ func (s *GetAccessModesNotFoundApplicationJSON) UnmarshalJSON(data []byte) error
 	return s.Decode(d)
 }
 
+// Encode encodes GetAllAccessDurationsOKApplicationJSON as json.
+func (s GetAllAccessDurationsOKApplicationJSON) Encode(e *jx.Encoder) {
+	unwrapped := []AccessDuration(s)
+
+	e.ArrStart()
+	for _, elem := range unwrapped {
+		elem.Encode(e)
+	}
+	e.ArrEnd()
+}
+
+// Decode decodes GetAllAccessDurationsOKApplicationJSON from json.
+func (s *GetAllAccessDurationsOKApplicationJSON) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode GetAllAccessDurationsOKApplicationJSON to nil")
+	}
+	var unwrapped []AccessDuration
+	if err := func() error {
+		unwrapped = make([]AccessDuration, 0)
+		if err := d.Arr(func(d *jx.Decoder) error {
+			var elem AccessDuration
+			if err := elem.Decode(d); err != nil {
+				return err
+			}
+			unwrapped = append(unwrapped, elem)
+			return nil
+		}); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = GetAllAccessDurationsOKApplicationJSON(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s GetAllAccessDurationsOKApplicationJSON) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *GetAllAccessDurationsOKApplicationJSON) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode implements json.Marshaler.
 func (s *GetAllPlatformServiceConfigurationsResponse) Encode(e *jx.Encoder) {
 	e.ObjStart()
@@ -19878,6 +19928,48 @@ func (s *ListOutputPortRoleAssignmentsResponse) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *ListOutputPortRoleAssignmentsResponse) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes MarkTourAsSeenOKApplicationJSON as json.
+func (s MarkTourAsSeenOKApplicationJSON) Encode(e *jx.Encoder) {
+	unwrapped := jx.Raw(s)
+
+	if len(unwrapped) != 0 {
+		e.Raw(unwrapped)
+	}
+}
+
+// Decode decodes MarkTourAsSeenOKApplicationJSON from json.
+func (s *MarkTourAsSeenOKApplicationJSON) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode MarkTourAsSeenOKApplicationJSON to nil")
+	}
+	var unwrapped jx.Raw
+	if err := func() error {
+		v, err := d.RawAppend(nil)
+		unwrapped = jx.Raw(v)
+		if err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = MarkTourAsSeenOKApplicationJSON(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s MarkTourAsSeenOKApplicationJSON) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *MarkTourAsSeenOKApplicationJSON) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -26968,6 +27060,48 @@ func (s *RedshiftTechnicalAssetConfiguration) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
+// Encode encodes RemoveAllUserNotificationsOKApplicationJSON as json.
+func (s RemoveAllUserNotificationsOKApplicationJSON) Encode(e *jx.Encoder) {
+	unwrapped := jx.Raw(s)
+
+	if len(unwrapped) != 0 {
+		e.Raw(unwrapped)
+	}
+}
+
+// Decode decodes RemoveAllUserNotificationsOKApplicationJSON from json.
+func (s *RemoveAllUserNotificationsOKApplicationJSON) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode RemoveAllUserNotificationsOKApplicationJSON to nil")
+	}
+	var unwrapped jx.Raw
+	if err := func() error {
+		v, err := d.RawAppend(nil)
+		unwrapped = jx.Raw(v)
+		if err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = RemoveAllUserNotificationsOKApplicationJSON(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s RemoveAllUserNotificationsOKApplicationJSON) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *RemoveAllUserNotificationsOKApplicationJSON) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode encodes RemoveDataProductFinalizerOKApplicationJSON as json.
 func (s RemoveDataProductFinalizerOKApplicationJSON) Encode(e *jx.Encoder) {
 	unwrapped := jx.Raw(s)
@@ -30354,6 +30488,48 @@ func (s ResourceNameValidityType) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *ResourceNameValidityType) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes RevokeAdminOKApplicationJSON as json.
+func (s RevokeAdminOKApplicationJSON) Encode(e *jx.Encoder) {
+	unwrapped := jx.Raw(s)
+
+	if len(unwrapped) != 0 {
+		e.Raw(unwrapped)
+	}
+}
+
+// Decode decodes RevokeAdminOKApplicationJSON from json.
+func (s *RevokeAdminOKApplicationJSON) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode RevokeAdminOKApplicationJSON to nil")
+	}
+	var unwrapped jx.Raw
+	if err := func() error {
+		v, err := d.RawAppend(nil)
+		unwrapped = jx.Raw(v)
+		if err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = RevokeAdminOKApplicationJSON(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s RevokeAdminOKApplicationJSON) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *RevokeAdminOKApplicationJSON) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

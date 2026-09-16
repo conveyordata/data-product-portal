@@ -239,25 +239,25 @@ type Invoker interface {
 	// Get All Access Durations.
 	//
 	// GET /api/v2/configuration/access_durations
-	GetAllAccessDurations(ctx context.Context) ([]AccessDuration, error)
+	GetAllAccessDurations(ctx context.Context) (GetAllAccessDurationsRes, error)
 	// GetAllPlatformServiceConfigurations invokes get_all_platform_service_configurations operation.
 	//
 	// Get All Platform Service Configurations.
 	//
 	// GET /api/v2/configuration/platforms/configs
-	GetAllPlatformServiceConfigurations(ctx context.Context) (*GetAllPlatformServiceConfigurationsResponse, error)
+	GetAllPlatformServiceConfigurations(ctx context.Context) (GetAllPlatformServiceConfigurationsRes, error)
 	// GetAllPlatforms invokes get_all_platforms operation.
 	//
 	// Get All Platforms.
 	//
 	// GET /api/v2/configuration/platforms
-	GetAllPlatforms(ctx context.Context) (*GetAllPlatformsResponse, error)
+	GetAllPlatforms(ctx context.Context) (GetAllPlatformsRes, error)
 	// GetCurrentUser invokes get_current_user operation.
 	//
 	// Get Current User.
 	//
 	// GET /api/v2/users/current
-	GetCurrentUser(ctx context.Context) (*User, error)
+	GetCurrentUser(ctx context.Context) (GetCurrentUserRes, error)
 	// GetDataProduct invokes get_data_product operation.
 	//
 	// Get Data Product.
@@ -317,19 +317,19 @@ type Invoker interface {
 	// Get Data Products Lifecycles.
 	//
 	// GET /api/v2/configuration/data_product_lifecycles
-	GetDataProductsLifecycles(ctx context.Context) (*DataProductLifeCyclesGet, error)
+	GetDataProductsLifecycles(ctx context.Context) (GetDataProductsLifecyclesRes, error)
 	// GetDataProductsSettings invokes get_data_products_settings operation.
 	//
 	// Get Data Products Settings.
 	//
 	// GET /api/v2/configuration/data_product_settings
-	GetDataProductsSettings(ctx context.Context) (*DataProductSettingsGet, error)
+	GetDataProductsSettings(ctx context.Context) (GetDataProductsSettingsRes, error)
 	// GetDataProductsTypes invokes get_data_products_types operation.
 	//
 	// Get Data Products Types.
 	//
 	// GET /api/v2/configuration/data_product_types
-	GetDataProductsTypes(ctx context.Context) (*DataProductTypesGet, error)
+	GetDataProductsTypes(ctx context.Context) (GetDataProductsTypesRes, error)
 	// GetDefaultAccessDuration invokes get_default_access_duration operation.
 	//
 	// Get Default Access Duration.
@@ -353,7 +353,7 @@ type Invoker interface {
 	// Get Domains.
 	//
 	// GET /api/v2/configuration/domains
-	GetDomains(ctx context.Context) (*GetDomainsResponse, error)
+	GetDomains(ctx context.Context) (GetDomainsRes, error)
 	// GetEnvironment invokes get_environment operation.
 	//
 	// Get Environment.
@@ -365,7 +365,7 @@ type Invoker interface {
 	// Get Environments.
 	//
 	// GET /api/v2/configuration/environments
-	GetEnvironments(ctx context.Context) (*EnvironmentsGet, error)
+	GetEnvironments(ctx context.Context) (GetEnvironmentsRes, error)
 	// GetExpiringSoonThreshold invokes get_expiring_soon_threshold operation.
 	//
 	// Get Expiring Soon Threshold.
@@ -461,7 +461,7 @@ type Invoker interface {
 	// Get Platform Tiles.
 	//
 	// GET /api/v2/plugins/platform-tiles
-	GetPlatformTiles(ctx context.Context) (*PlatformTileResponse, error)
+	GetPlatformTiles(ctx context.Context) (GetPlatformTilesRes, error)
 	// GetPluginForm invokes get_plugin_form operation.
 	//
 	// Get form metadata for a specific plugin (ADR-compliant endpoint).
@@ -479,7 +479,7 @@ type Invoker interface {
 	// List all available plugins with their metadata (ADR-compliant endpoint).
 	//
 	// GET /api/v2/plugins/
-	GetPlugins(ctx context.Context) (*PluginResponse, error)
+	GetPlugins(ctx context.Context) (GetPluginsRes, error)
 	// GetRoles invokes get_roles operation.
 	//
 	// Get Roles.
@@ -497,7 +497,7 @@ type Invoker interface {
 	// Get Tags.
 	//
 	// GET /api/v2/configuration/tags
-	GetTags(ctx context.Context) (*TagsGet, error)
+	GetTags(ctx context.Context) (GetTagsRes, error)
 	// GetTechnicalAsset invokes get_technical_asset operation.
 	//
 	// Get Technical Asset.
@@ -515,19 +515,19 @@ type Invoker interface {
 	// Get Theme Settings.
 	//
 	// GET /api/v2/configuration/theme_settings
-	GetThemeSettings(ctx context.Context) (*ThemeSettings, error)
+	GetThemeSettings(ctx context.Context) (GetThemeSettingsRes, error)
 	// GetUserNotifications invokes get_user_notifications operation.
 	//
 	// Get User Notifications.
 	//
 	// GET /api/v2/users/current/notifications
-	GetUserNotifications(ctx context.Context) (*GetUserNotificationsResponse, error)
+	GetUserNotifications(ctx context.Context) (GetUserNotificationsRes, error)
 	// GetUsers invokes get_users operation.
 	//
 	// Get Users.
 	//
 	// GET /api/v2/users
-	GetUsers(ctx context.Context) (*GetUsersResponse, error)
+	GetUsers(ctx context.Context) (GetUsersRes, error)
 	// GetVersion invokes get_version operation.
 	//
 	// Get Version.
@@ -551,7 +551,7 @@ type Invoker interface {
 	// Is Admin.
 	//
 	// GET /api/v2/authz/admin
-	IsAdmin(ctx context.Context) (*IsAdminResponse, error)
+	IsAdmin(ctx context.Context) (IsAdminRes, error)
 	// IsTimeBoundAccessEnabled invokes is_time_bound_access_enabled operation.
 	//
 	// Is Time Bound Access Enabled.
@@ -587,7 +587,7 @@ type Invoker interface {
 	// Mark Tour As Seen.
 	//
 	// POST /api/v2/users/current/seen_tour
-	MarkTourAsSeen(ctx context.Context) (jx.Raw, error)
+	MarkTourAsSeen(ctx context.Context) (MarkTourAsSeenRes, error)
 	// MigrateDataProductType invokes migrate_data_product_type operation.
 	//
 	// Migrate Data Product Type.
@@ -623,7 +623,7 @@ type Invoker interface {
 	// Remove All User Notifications.
 	//
 	// DELETE /api/v2/users/current/notifications/all
-	RemoveAllUserNotifications(ctx context.Context) (jx.Raw, error)
+	RemoveAllUserNotifications(ctx context.Context) (RemoveAllUserNotificationsRes, error)
 	// RemoveDataProduct invokes remove_data_product operation.
 	//
 	// Remove Data Product.
@@ -785,7 +785,7 @@ type Invoker interface {
 	// Revoke Admin.
 	//
 	// POST /api/v2/authz/role_assignments/global/revoke_admin
-	RevokeAdmin(ctx context.Context) (jx.Raw, error)
+	RevokeAdmin(ctx context.Context) (RevokeAdminRes, error)
 	// RevokeInputPortForDataProduct invokes revoke_input_port_for_data_product operation.
 	//
 	// Revoke Input Port For Data Product.
@@ -3193,12 +3193,12 @@ func (c *Client) sendGetAccessModes(ctx context.Context) (res GetAccessModesRes,
 // Get All Access Durations.
 //
 // GET /api/v2/configuration/access_durations
-func (c *Client) GetAllAccessDurations(ctx context.Context) ([]AccessDuration, error) {
+func (c *Client) GetAllAccessDurations(ctx context.Context) (GetAllAccessDurationsRes, error) {
 	res, err := c.sendGetAllAccessDurations(ctx)
 	return res, err
 }
 
-func (c *Client) sendGetAllAccessDurations(ctx context.Context) (res []AccessDuration, err error) {
+func (c *Client) sendGetAllAccessDurations(ctx context.Context) (res GetAllAccessDurationsRes, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
@@ -3236,12 +3236,12 @@ func (c *Client) sendGetAllAccessDurations(ctx context.Context) (res []AccessDur
 // Get All Platform Service Configurations.
 //
 // GET /api/v2/configuration/platforms/configs
-func (c *Client) GetAllPlatformServiceConfigurations(ctx context.Context) (*GetAllPlatformServiceConfigurationsResponse, error) {
+func (c *Client) GetAllPlatformServiceConfigurations(ctx context.Context) (GetAllPlatformServiceConfigurationsRes, error) {
 	res, err := c.sendGetAllPlatformServiceConfigurations(ctx)
 	return res, err
 }
 
-func (c *Client) sendGetAllPlatformServiceConfigurations(ctx context.Context) (res *GetAllPlatformServiceConfigurationsResponse, err error) {
+func (c *Client) sendGetAllPlatformServiceConfigurations(ctx context.Context) (res GetAllPlatformServiceConfigurationsRes, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
@@ -3279,12 +3279,12 @@ func (c *Client) sendGetAllPlatformServiceConfigurations(ctx context.Context) (r
 // Get All Platforms.
 //
 // GET /api/v2/configuration/platforms
-func (c *Client) GetAllPlatforms(ctx context.Context) (*GetAllPlatformsResponse, error) {
+func (c *Client) GetAllPlatforms(ctx context.Context) (GetAllPlatformsRes, error) {
 	res, err := c.sendGetAllPlatforms(ctx)
 	return res, err
 }
 
-func (c *Client) sendGetAllPlatforms(ctx context.Context) (res *GetAllPlatformsResponse, err error) {
+func (c *Client) sendGetAllPlatforms(ctx context.Context) (res GetAllPlatformsRes, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
@@ -3322,12 +3322,12 @@ func (c *Client) sendGetAllPlatforms(ctx context.Context) (res *GetAllPlatformsR
 // Get Current User.
 //
 // GET /api/v2/users/current
-func (c *Client) GetCurrentUser(ctx context.Context) (*User, error) {
+func (c *Client) GetCurrentUser(ctx context.Context) (GetCurrentUserRes, error) {
 	res, err := c.sendGetCurrentUser(ctx)
 	return res, err
 }
 
-func (c *Client) sendGetCurrentUser(ctx context.Context) (res *User, err error) {
+func (c *Client) sendGetCurrentUser(ctx context.Context) (res GetCurrentUserRes, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
@@ -3922,12 +3922,12 @@ func (c *Client) sendGetDataProducts(ctx context.Context, params GetDataProducts
 // Get Data Products Lifecycles.
 //
 // GET /api/v2/configuration/data_product_lifecycles
-func (c *Client) GetDataProductsLifecycles(ctx context.Context) (*DataProductLifeCyclesGet, error) {
+func (c *Client) GetDataProductsLifecycles(ctx context.Context) (GetDataProductsLifecyclesRes, error) {
 	res, err := c.sendGetDataProductsLifecycles(ctx)
 	return res, err
 }
 
-func (c *Client) sendGetDataProductsLifecycles(ctx context.Context) (res *DataProductLifeCyclesGet, err error) {
+func (c *Client) sendGetDataProductsLifecycles(ctx context.Context) (res GetDataProductsLifecyclesRes, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
@@ -3965,12 +3965,12 @@ func (c *Client) sendGetDataProductsLifecycles(ctx context.Context) (res *DataPr
 // Get Data Products Settings.
 //
 // GET /api/v2/configuration/data_product_settings
-func (c *Client) GetDataProductsSettings(ctx context.Context) (*DataProductSettingsGet, error) {
+func (c *Client) GetDataProductsSettings(ctx context.Context) (GetDataProductsSettingsRes, error) {
 	res, err := c.sendGetDataProductsSettings(ctx)
 	return res, err
 }
 
-func (c *Client) sendGetDataProductsSettings(ctx context.Context) (res *DataProductSettingsGet, err error) {
+func (c *Client) sendGetDataProductsSettings(ctx context.Context) (res GetDataProductsSettingsRes, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
@@ -4008,12 +4008,12 @@ func (c *Client) sendGetDataProductsSettings(ctx context.Context) (res *DataProd
 // Get Data Products Types.
 //
 // GET /api/v2/configuration/data_product_types
-func (c *Client) GetDataProductsTypes(ctx context.Context) (*DataProductTypesGet, error) {
+func (c *Client) GetDataProductsTypes(ctx context.Context) (GetDataProductsTypesRes, error) {
 	res, err := c.sendGetDataProductsTypes(ctx)
 	return res, err
 }
 
-func (c *Client) sendGetDataProductsTypes(ctx context.Context) (res *DataProductTypesGet, err error) {
+func (c *Client) sendGetDataProductsTypes(ctx context.Context) (res GetDataProductsTypesRes, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
@@ -4287,12 +4287,12 @@ func (c *Client) sendGetDomain(ctx context.Context, params GetDomainParams) (res
 // Get Domains.
 //
 // GET /api/v2/configuration/domains
-func (c *Client) GetDomains(ctx context.Context) (*GetDomainsResponse, error) {
+func (c *Client) GetDomains(ctx context.Context) (GetDomainsRes, error) {
 	res, err := c.sendGetDomains(ctx)
 	return res, err
 }
 
-func (c *Client) sendGetDomains(ctx context.Context) (res *GetDomainsResponse, err error) {
+func (c *Client) sendGetDomains(ctx context.Context) (res GetDomainsRes, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
@@ -4391,12 +4391,12 @@ func (c *Client) sendGetEnvironment(ctx context.Context, params GetEnvironmentPa
 // Get Environments.
 //
 // GET /api/v2/configuration/environments
-func (c *Client) GetEnvironments(ctx context.Context) (*EnvironmentsGet, error) {
+func (c *Client) GetEnvironments(ctx context.Context) (GetEnvironmentsRes, error) {
 	res, err := c.sendGetEnvironments(ctx)
 	return res, err
 }
 
-func (c *Client) sendGetEnvironments(ctx context.Context) (res *EnvironmentsGet, err error) {
+func (c *Client) sendGetEnvironments(ctx context.Context) (res GetEnvironmentsRes, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
@@ -5613,12 +5613,12 @@ func (c *Client) sendGetPlatformServices(ctx context.Context, params GetPlatform
 // Get Platform Tiles.
 //
 // GET /api/v2/plugins/platform-tiles
-func (c *Client) GetPlatformTiles(ctx context.Context) (*PlatformTileResponse, error) {
+func (c *Client) GetPlatformTiles(ctx context.Context) (GetPlatformTilesRes, error) {
 	res, err := c.sendGetPlatformTiles(ctx)
 	return res, err
 }
 
-func (c *Client) sendGetPlatformTiles(ctx context.Context) (res *PlatformTileResponse, err error) {
+func (c *Client) sendGetPlatformTiles(ctx context.Context) (res GetPlatformTilesRes, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
@@ -5814,12 +5814,12 @@ func (c *Client) sendGetPluginURL(ctx context.Context, params GetPluginURLParams
 // List all available plugins with their metadata (ADR-compliant endpoint).
 //
 // GET /api/v2/plugins/
-func (c *Client) GetPlugins(ctx context.Context) (*PluginResponse, error) {
+func (c *Client) GetPlugins(ctx context.Context) (GetPluginsRes, error) {
 	res, err := c.sendGetPlugins(ctx)
 	return res, err
 }
 
-func (c *Client) sendGetPlugins(ctx context.Context) (res *PluginResponse, err error) {
+func (c *Client) sendGetPlugins(ctx context.Context) (res GetPluginsRes, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
@@ -5979,12 +5979,12 @@ func (c *Client) sendGetSinglePlatformServiceConfiguration(ctx context.Context, 
 // Get Tags.
 //
 // GET /api/v2/configuration/tags
-func (c *Client) GetTags(ctx context.Context) (*TagsGet, error) {
+func (c *Client) GetTags(ctx context.Context) (GetTagsRes, error) {
 	res, err := c.sendGetTags(ctx)
 	return res, err
 }
 
-func (c *Client) sendGetTags(ctx context.Context) (res *TagsGet, err error) {
+func (c *Client) sendGetTags(ctx context.Context) (res GetTagsRes, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
@@ -6183,12 +6183,12 @@ func (c *Client) sendGetTechnicalAssetEventHistory(ctx context.Context, params G
 // Get Theme Settings.
 //
 // GET /api/v2/configuration/theme_settings
-func (c *Client) GetThemeSettings(ctx context.Context) (*ThemeSettings, error) {
+func (c *Client) GetThemeSettings(ctx context.Context) (GetThemeSettingsRes, error) {
 	res, err := c.sendGetThemeSettings(ctx)
 	return res, err
 }
 
-func (c *Client) sendGetThemeSettings(ctx context.Context) (res *ThemeSettings, err error) {
+func (c *Client) sendGetThemeSettings(ctx context.Context) (res GetThemeSettingsRes, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
@@ -6226,12 +6226,12 @@ func (c *Client) sendGetThemeSettings(ctx context.Context) (res *ThemeSettings, 
 // Get User Notifications.
 //
 // GET /api/v2/users/current/notifications
-func (c *Client) GetUserNotifications(ctx context.Context) (*GetUserNotificationsResponse, error) {
+func (c *Client) GetUserNotifications(ctx context.Context) (GetUserNotificationsRes, error) {
 	res, err := c.sendGetUserNotifications(ctx)
 	return res, err
 }
 
-func (c *Client) sendGetUserNotifications(ctx context.Context) (res *GetUserNotificationsResponse, err error) {
+func (c *Client) sendGetUserNotifications(ctx context.Context) (res GetUserNotificationsRes, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
@@ -6269,12 +6269,12 @@ func (c *Client) sendGetUserNotifications(ctx context.Context) (res *GetUserNoti
 // Get Users.
 //
 // GET /api/v2/users
-func (c *Client) GetUsers(ctx context.Context) (*GetUsersResponse, error) {
+func (c *Client) GetUsers(ctx context.Context) (GetUsersRes, error) {
 	res, err := c.sendGetUsers(ctx)
 	return res, err
 }
 
-func (c *Client) sendGetUsers(ctx context.Context) (res *GetUsersResponse, err error) {
+func (c *Client) sendGetUsers(ctx context.Context) (res GetUsersRes, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
@@ -6523,12 +6523,12 @@ func (c *Client) sendIngestOutputPortContractYaml(ctx context.Context, request *
 // Is Admin.
 //
 // GET /api/v2/authz/admin
-func (c *Client) IsAdmin(ctx context.Context) (*IsAdminResponse, error) {
+func (c *Client) IsAdmin(ctx context.Context) (IsAdminRes, error) {
 	res, err := c.sendIsAdmin(ctx)
 	return res, err
 }
 
-func (c *Client) sendIsAdmin(ctx context.Context) (res *IsAdminResponse, err error) {
+func (c *Client) sendIsAdmin(ctx context.Context) (res IsAdminRes, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
@@ -7001,12 +7001,12 @@ func (c *Client) sendListOutputPortRoleAssignments(ctx context.Context, params L
 // Mark Tour As Seen.
 //
 // POST /api/v2/users/current/seen_tour
-func (c *Client) MarkTourAsSeen(ctx context.Context) (jx.Raw, error) {
+func (c *Client) MarkTourAsSeen(ctx context.Context) (MarkTourAsSeenRes, error) {
 	res, err := c.sendMarkTourAsSeen(ctx)
 	return res, err
 }
 
-func (c *Client) sendMarkTourAsSeen(ctx context.Context) (res jx.Raw, err error) {
+func (c *Client) sendMarkTourAsSeen(ctx context.Context) (res MarkTourAsSeenRes, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
@@ -7434,12 +7434,12 @@ func (c *Client) sendOverwriteOutputPortDataQualitySummary(ctx context.Context, 
 // Remove All User Notifications.
 //
 // DELETE /api/v2/users/current/notifications/all
-func (c *Client) RemoveAllUserNotifications(ctx context.Context) (jx.Raw, error) {
+func (c *Client) RemoveAllUserNotifications(ctx context.Context) (RemoveAllUserNotificationsRes, error) {
 	res, err := c.sendRemoveAllUserNotifications(ctx)
 	return res, err
 }
 
-func (c *Client) sendRemoveAllUserNotifications(ctx context.Context) (res jx.Raw, err error) {
+func (c *Client) sendRemoveAllUserNotifications(ctx context.Context) (res RemoveAllUserNotificationsRes, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
@@ -9208,12 +9208,12 @@ func (c *Client) sendResourceNameConstraints(ctx context.Context) (res *Resource
 // Revoke Admin.
 //
 // POST /api/v2/authz/role_assignments/global/revoke_admin
-func (c *Client) RevokeAdmin(ctx context.Context) (jx.Raw, error) {
+func (c *Client) RevokeAdmin(ctx context.Context) (RevokeAdminRes, error) {
 	res, err := c.sendRevokeAdmin(ctx)
 	return res, err
 }
 
-func (c *Client) sendRevokeAdmin(ctx context.Context) (res jx.Raw, err error) {
+func (c *Client) sendRevokeAdmin(ctx context.Context) (res RevokeAdminRes, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
