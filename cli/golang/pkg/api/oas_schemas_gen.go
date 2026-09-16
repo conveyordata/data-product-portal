@@ -2081,6 +2081,8 @@ func (s *DataProductLifeCyclesGet) SetDataProductLifeCycles(val []DataProductLif
 	s.DataProductLifeCycles = val
 }
 
+func (*DataProductLifeCyclesGet) getDataProductsLifecyclesRes() {}
+
 // Ref: #/components/schemas/DataProductLifeCyclesGetItem
 type DataProductLifeCyclesGetItem struct {
 	ID        uuid.UUID `json:"id"`
@@ -2700,6 +2702,8 @@ func (s *DataProductSettingsGet) SetDataProductSettings(val []DataProductSetting
 	s.DataProductSettings = val
 }
 
+func (*DataProductSettingsGet) getDataProductsSettingsRes() {}
+
 // Ref: #/components/schemas/DataProductSettingsGetItem
 type DataProductSettingsGetItem struct {
 	ID        uuid.UUID               `json:"id"`
@@ -3015,6 +3019,8 @@ func (s *DataProductTypesGet) GetDataProductTypes() []DataProductTypesGetItem {
 func (s *DataProductTypesGet) SetDataProductTypes(val []DataProductTypesGetItem) {
 	s.DataProductTypes = val
 }
+
+func (*DataProductTypesGet) getDataProductsTypesRes() {}
 
 // Ref: #/components/schemas/DataProductTypesGetItem
 type DataProductTypesGetItem struct {
@@ -3966,6 +3972,8 @@ func (s *EnvironmentsGet) SetEnvironments(val []EnvironmentGetItem) {
 	s.Environments = val
 }
 
+func (*EnvironmentsGet) getEnvironmentsRes() {}
+
 // Ref: #/components/schemas/EventEntityType
 type EventEntityType string
 
@@ -4204,6 +4212,10 @@ type GetAccessModesNotFoundApplicationJSON jx.Raw
 
 func (*GetAccessModesNotFoundApplicationJSON) getAccessModesRes() {}
 
+type GetAllAccessDurationsOKApplicationJSON []AccessDuration
+
+func (*GetAllAccessDurationsOKApplicationJSON) getAllAccessDurationsRes() {}
+
 // Ref: #/components/schemas/GetAllPlatformServiceConfigurationsResponse
 type GetAllPlatformServiceConfigurationsResponse struct {
 	PlatformServiceConfigurations []PlatformServiceConfiguration `json:"platform_service_configurations"`
@@ -4219,6 +4231,8 @@ func (s *GetAllPlatformServiceConfigurationsResponse) SetPlatformServiceConfigur
 	s.PlatformServiceConfigurations = val
 }
 
+func (*GetAllPlatformServiceConfigurationsResponse) getAllPlatformServiceConfigurationsRes() {}
+
 // Ref: #/components/schemas/GetAllPlatformsResponse
 type GetAllPlatformsResponse struct {
 	Platforms []Platform `json:"platforms"`
@@ -4233,6 +4247,8 @@ func (s *GetAllPlatformsResponse) GetPlatforms() []Platform {
 func (s *GetAllPlatformsResponse) SetPlatforms(val []Platform) {
 	s.Platforms = val
 }
+
+func (*GetAllPlatformsResponse) getAllPlatformsRes() {}
 
 // Ref: #/components/schemas/GetDataProductInputPortsResponse
 type GetDataProductInputPortsResponse struct {
@@ -4738,6 +4754,8 @@ func (s *GetDomainsResponse) GetDomains() []GetDomainsItem {
 func (s *GetDomainsResponse) SetDomains(val []GetDomainsItem) {
 	s.Domains = val
 }
+
+func (*GetDomainsResponse) getDomainsRes() {}
 
 // Ref: #/components/schemas/GetEventHistoryResponse
 type GetEventHistoryResponse struct {
@@ -5598,6 +5616,8 @@ func (s *GetUserNotificationsResponse) SetNotifications(val []GetUserNotificatio
 	s.Notifications = val
 }
 
+func (*GetUserNotificationsResponse) getUserNotificationsRes() {}
+
 // Ref: #/components/schemas/GetUserNotificationsResponseItem
 type GetUserNotificationsResponseItem struct {
 	ID      uuid.UUID                   `json:"id"`
@@ -5671,6 +5691,8 @@ func (s *GetUsersResponse) GetUsers() []UsersGet {
 func (s *GetUsersResponse) SetUsers(val []UsersGet) {
 	s.Users = val
 }
+
+func (*GetUsersResponse) getUsersRes() {}
 
 // Ref: #/components/schemas/GlobalRoleAssignmentResponse
 type GlobalRoleAssignmentResponse struct {
@@ -5851,6 +5873,11 @@ func (*HTTPValidationError) deleteOutputPortRoleAssignmentRes()           {}
 func (*HTTPValidationError) denyOutputPortAsInputPortRes()                {}
 func (*HTTPValidationError) denyOutputPortTechnicalAssetLinkRes()         {}
 func (*HTTPValidationError) getAWSCredentialsRes()                        {}
+func (*HTTPValidationError) getAccessModesRes()                           {}
+func (*HTTPValidationError) getAllAccessDurationsRes()                    {}
+func (*HTTPValidationError) getAllPlatformServiceConfigurationsRes()      {}
+func (*HTTPValidationError) getAllPlatformsRes()                          {}
+func (*HTTPValidationError) getCurrentUserRes()                           {}
 func (*HTTPValidationError) getDataProductEventHistoryRes()               {}
 func (*HTTPValidationError) getDataProductInputPortsRes()                 {}
 func (*HTTPValidationError) getDataProductOutputPortsRes()                {}
@@ -5859,11 +5886,16 @@ func (*HTTPValidationError) getDataProductRolledUpTagsRes()               {}
 func (*HTTPValidationError) getDataProductSettingsRes()                   {}
 func (*HTTPValidationError) getDataProductTechnicalAssetsRes()            {}
 func (*HTTPValidationError) getDataProductTypeRes()                       {}
+func (*HTTPValidationError) getDataProductsLifecyclesRes()                {}
 func (*HTTPValidationError) getDataProductsRes()                          {}
+func (*HTTPValidationError) getDataProductsSettingsRes()                  {}
+func (*HTTPValidationError) getDataProductsTypesRes()                     {}
 func (*HTTPValidationError) getDefaultAccessDurationRes()                 {}
 func (*HTTPValidationError) getDeviceTokenRes()                           {}
 func (*HTTPValidationError) getDomainRes()                                {}
+func (*HTTPValidationError) getDomainsRes()                               {}
 func (*HTTPValidationError) getEnvironmentRes()                           {}
+func (*HTTPValidationError) getEnvironmentsRes()                          {}
 func (*HTTPValidationError) getExplorationInputPortsRes()                 {}
 func (*HTTPValidationError) getExplorationRes()                           {}
 func (*HTTPValidationError) getExplorationsRes()                          {}
@@ -5878,23 +5910,32 @@ func (*HTTPValidationError) getOutputPortSchemaRes()                      {}
 func (*HTTPValidationError) getOutputPortsEventHistoryRes()               {}
 func (*HTTPValidationError) getPlatformServiceConfigRes()                 {}
 func (*HTTPValidationError) getPlatformServicesRes()                      {}
+func (*HTTPValidationError) getPlatformTilesRes()                         {}
 func (*HTTPValidationError) getPluginFormRes()                            {}
 func (*HTTPValidationError) getPluginURLRes()                             {}
+func (*HTTPValidationError) getPluginsRes()                               {}
 func (*HTTPValidationError) getRolesRes()                                 {}
 func (*HTTPValidationError) getSinglePlatformServiceConfigurationRes()    {}
+func (*HTTPValidationError) getTagsRes()                                  {}
 func (*HTTPValidationError) getTechnicalAssetEventHistoryRes()            {}
 func (*HTTPValidationError) getTechnicalAssetRes()                        {}
+func (*HTTPValidationError) getThemeSettingsRes()                         {}
+func (*HTTPValidationError) getUserNotificationsRes()                     {}
+func (*HTTPValidationError) getUsersRes()                                 {}
 func (*HTTPValidationError) ingestOutputPortContractRes()                 {}
 func (*HTTPValidationError) ingestOutputPortContractYamlRes()             {}
+func (*HTTPValidationError) isAdminRes()                                  {}
 func (*HTTPValidationError) linkOutputPortToTechnicalAssetRes()           {}
 func (*HTTPValidationError) listDataProductRoleAssignmentsRes()           {}
 func (*HTTPValidationError) listGlobalRoleAssignmentsRes()                {}
 func (*HTTPValidationError) listOutputPortRoleAssignmentsRes()            {}
+func (*HTTPValidationError) markTourAsSeenRes()                           {}
 func (*HTTPValidationError) migrateDataProductTypeRes()                   {}
 func (*HTTPValidationError) migrateDomainRes()                            {}
 func (*HTTPValidationError) modifyDataProductRoleAssignmentRes()          {}
 func (*HTTPValidationError) modifyOutputPortRoleAssignmentRes()           {}
 func (*HTTPValidationError) overwriteOutputPortDataQualitySummaryRes()    {}
+func (*HTTPValidationError) removeAllUserNotificationsRes()               {}
 func (*HTTPValidationError) removeDataProductFinalizerRes()               {}
 func (*HTTPValidationError) removeDataProductLifecycleRes()               {}
 func (*HTTPValidationError) removeDataProductRes()                        {}
@@ -5920,6 +5961,7 @@ func (*HTTPValidationError) requestDataProductRoleAssignmentRes()         {}
 func (*HTTPValidationError) requestInputPortsForDataProductRes()          {}
 func (*HTTPValidationError) requestInputPortsForExplorationRes()          {}
 func (*HTTPValidationError) requestOutputPortRoleAssignmentRes()          {}
+func (*HTTPValidationError) revokeAdminRes()                              {}
 func (*HTTPValidationError) revokeInputPortForDataProductRes()            {}
 func (*HTTPValidationError) revokeInputPortForExplorationRes()            {}
 func (*HTTPValidationError) revokeOutputPortAsInputPortRes()              {}
@@ -6294,6 +6336,8 @@ func (s *IsAdminResponse) SetTime(val OptNilString) {
 	s.Time = val
 }
 
+func (*IsAdminResponse) isAdminRes() {}
+
 type LinkOutputPortToTechnicalAssetNotFoundApplicationJSON jx.Raw
 
 func (*LinkOutputPortToTechnicalAssetNotFoundApplicationJSON) linkOutputPortToTechnicalAssetRes() {}
@@ -6380,6 +6424,10 @@ func (s *ListOutputPortRoleAssignmentsResponse) SetRoleAssignments(val []OutputP
 }
 
 func (*ListOutputPortRoleAssignmentsResponse) listOutputPortRoleAssignmentsRes() {}
+
+type MarkTourAsSeenOKApplicationJSON jx.Raw
+
+func (*MarkTourAsSeenOKApplicationJSON) markTourAsSeenRes() {}
 
 type MigrateDataProductTypeOKApplicationJSON jx.Raw
 
@@ -10470,6 +10518,8 @@ func (s *PlatformTileResponse) SetPlatformTiles(val []PlatformTile) {
 	s.PlatformTiles = val
 }
 
+func (*PlatformTileResponse) getPlatformTilesRes() {}
+
 // Response model for listing available plugins.
 // Ref: #/components/schemas/PluginResponse
 type PluginResponse struct {
@@ -10485,6 +10535,8 @@ func (s *PluginResponse) GetPlugins() []UIElementMetadataResponse {
 func (s *PluginResponse) SetPlugins(val []UIElementMetadataResponse) {
 	s.Plugins = val
 }
+
+func (*PluginResponse) getPluginsRes() {}
 
 // Ref: #/components/schemas/Prototype
 type Prototype int
@@ -10554,6 +10606,10 @@ func (s *QueryStatsGranularity) UnmarshalText(data []byte) error {
 		return errors.Errorf("invalid value: %q", data)
 	}
 }
+
+type RemoveAllUserNotificationsOKApplicationJSON jx.Raw
+
+func (*RemoveAllUserNotificationsOKApplicationJSON) removeAllUserNotificationsRes() {}
 
 // RemoveDataProductAccepted is response for RemoveDataProduct operation.
 type RemoveDataProductAccepted struct{}
@@ -11206,6 +11262,10 @@ func (s *ResourceNameValidityType) UnmarshalText(data []byte) error {
 		return errors.Errorf("invalid value: %q", data)
 	}
 }
+
+type RevokeAdminOKApplicationJSON jx.Raw
+
+func (*RevokeAdminOKApplicationJSON) revokeAdminRes() {}
 
 type RevokeInputPortForDataProductBadRequestApplicationJSON jx.Raw
 
@@ -12258,6 +12318,8 @@ func (s *TagsGet) SetTags(val []TagsGetItem) {
 	s.Tags = val
 }
 
+func (*TagsGet) getTagsRes() {}
+
 // Ref: #/components/schemas/TagsGetItem
 type TagsGetItem struct {
 	ID    uuid.UUID `json:"id"`
@@ -12614,6 +12676,8 @@ func (s *ThemeSettings) GetPortalName() string {
 func (s *ThemeSettings) SetPortalName(val string) {
 	s.PortalName = val
 }
+
+func (*ThemeSettings) getThemeSettingsRes() {}
 
 // Ref: #/components/schemas/TimeBoundAccessEnabledResponse
 type TimeBoundAccessEnabledResponse struct {
@@ -13492,6 +13556,8 @@ func (s *User) SetCanBecomeAdmin(val bool) {
 func (s *User) SetAdminExpiry(val OptNilDateTime) {
 	s.AdminExpiry = val
 }
+
+func (*User) getCurrentUserRes() {}
 
 // Ref: #/components/schemas/UserCreate
 type UserCreate struct {
