@@ -14,14 +14,12 @@ describe('Marketplace checkout', () => {
         // actual search request instead of resolving on this earlier one.
         cy.wait('@searchOutputPorts', { timeout: 30000 });
 
-        cy.get('.ant-input-search input').type(outputPortName);
-        cy.get('.ant-input-search input').should('have.value', outputPortName);
-        cy.get('.ant-input-search input').type('{enter}');
+        cy.get('[data-cy="marketplace-search"]').type(`${outputPortName}{enter}`);
         cy.wait('@searchOutputPorts', { timeout: 30000 });
 
-        cy.contains('.ant-card', outputPortName, { timeout: 20000 }).should('be.visible');
+        cy.contains('[data-cy="output-port-card"]', outputPortName, { timeout: 20000 }).should('be.visible');
 
-        cy.contains('.ant-card', outputPortName).within(() => {
+        cy.contains('[data-cy="output-port-card"]', outputPortName).within(() => {
             cy.get('[data-cy="add-to-cart"]').click();
         });
 
@@ -34,11 +32,7 @@ describe('Marketplace checkout', () => {
 
         cy.get('[data-cy="data-product-select"]').click();
         cy.get('[data-cy="data-product-select"]').find('input').type(consumingDataProductName);
-        cy.get('.ant-select-dropdown')
-            .should('be.visible')
-            .within(() => {
-                cy.contains(consumingDataProductName).click();
-            });
+        cy.contains(consumingDataProductName).click();
 
         cy.get('[data-cy="justification"]').type('Needed for the Cypress end-to-end test.');
 
@@ -57,14 +51,12 @@ describe('Marketplace checkout', () => {
         // actual search request instead of resolving on this earlier one.
         cy.wait('@searchOutputPorts', { timeout: 30000 });
 
-        cy.get('.ant-input-search input').type(explorationOutputPortName);
-        cy.get('.ant-input-search input').should('have.value', explorationOutputPortName);
-        cy.get('.ant-input-search input').type('{enter}');
+        cy.get('[data-cy="marketplace-search"]').type(`${explorationOutputPortName}{enter}`);
         cy.wait('@searchOutputPorts', { timeout: 30000 });
 
-        cy.contains('.ant-card', explorationOutputPortName, { timeout: 20000 }).should('be.visible');
+        cy.contains('[data-cy="output-port-card"]', explorationOutputPortName, { timeout: 20000 }).should('be.visible');
 
-        cy.contains('.ant-card', explorationOutputPortName).within(() => {
+        cy.contains('[data-cy="output-port-card"]', explorationOutputPortName).within(() => {
             cy.get('[data-cy="add-to-cart"]').click();
         });
 
@@ -78,11 +70,7 @@ describe('Marketplace checkout', () => {
         cy.get('[data-cy="exploration-name"]').type(explorationName);
 
         cy.get('[data-cy="exploration-domain-select"]').click();
-        cy.get('.ant-select-dropdown')
-            .should('be.visible')
-            .within(() => {
-                cy.contains(explorationDomainName).click();
-            });
+        cy.contains(explorationDomainName).click();
 
         cy.get('[data-cy="justification"]').type('Needed for the Cypress end-to-end test.');
 

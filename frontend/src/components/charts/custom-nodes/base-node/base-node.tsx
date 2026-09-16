@@ -80,7 +80,12 @@ export function BaseNode<T extends BaseNodeProps>({
                 />
                 {nodeToolbarActions && <NodeToolbar position={Position.Bottom}>{nodeToolbarActions}</NodeToolbar>}
             </Flex>
-            <Typography.Paragraph onClick={onClick} ellipsis={{ tooltip: name, rows: 2 }} className={styles.nodeLabel}>
+            <Typography.Paragraph
+                data-cy="graph-node"
+                onClick={onClick}
+                ellipsis={{ tooltip: name, rows: 2 }}
+                className={styles.nodeLabel}
+            >
                 {name}
             </Typography.Paragraph>
         </>
