@@ -11,9 +11,6 @@ from app.technical_asset_configuration.glue.schema import (
 
 
 class PluginWithBundledIcon(TechnicalAssetPlugin):
-    """A plugin that ships its icon inside its own package, as an installed
-    third-party plugin does."""
-
     name: ClassVar[str] = "PluginWithBundledIcon"
     configuration_type: str = "PluginWithBundledIcon"
 
@@ -27,8 +24,6 @@ class PluginWithBundledIcon(TechnicalAssetPlugin):
 
 
 def test_get_icon_data_uri__returns_none_when_no_package_is_declared():
-    """In-tree types leave this unset; the frontend resolves icon_name against
-    its own bundled assets."""
     assert GlueTechnicalAssetConfiguration.get_icon_data_uri() is None
 
 
