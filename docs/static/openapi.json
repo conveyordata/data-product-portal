@@ -8901,14 +8901,6 @@
         ],
         "title": "AccessDurationUpdate"
       },
-      "AccessGranularity": {
-        "type": "string",
-        "enum": [
-          "schema",
-          "table"
-        ],
-        "title": "AccessGranularity"
-      },
       "AccessMode": {
         "properties": {
           "id": {
@@ -9141,35 +9133,6 @@
           "storage_account_names"
         ],
         "title": "AzureBlobConfig"
-      },
-      "AzureBlobTechnicalAssetConfiguration": {
-        "properties": {
-          "configuration_type": {
-            "type": "string",
-            "const": "AzureBlobTechnicalAssetConfiguration",
-            "title": "Configuration Type"
-          },
-          "domain": {
-            "type": "string",
-            "title": "Domain",
-            "default": ""
-          },
-          "path": {
-            "type": "string",
-            "title": "Path",
-            "default": ""
-          },
-          "container_name": {
-            "type": "string",
-            "title": "Container Name"
-          }
-        },
-        "type": "object",
-        "required": [
-          "configuration_type",
-          "container_name"
-        ],
-        "title": "AzureBlobTechnicalAssetConfiguration"
       },
       "AzureEnvironmentPlatformConfiguration": {
         "properties": {
@@ -10058,50 +10021,10 @@
             "title": "Service Id"
           },
           "configuration": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/S3TechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/RustFSTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/GlueTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/DatabricksTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/RedshiftTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/PostgreSQLTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/AzureBlobTechnicalAssetConfiguration"
-              }
-            ],
+            "additionalProperties": true,
+            "type": "object",
             "title": "Configuration",
-            "discriminator": {
-              "propertyName": "configuration_type",
-              "mapping": {
-                "AzureBlobTechnicalAssetConfiguration": "#/components/schemas/AzureBlobTechnicalAssetConfiguration",
-                "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
-                "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
-                "OSISemanticModelTechnicalAssetConfiguration": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration",
-                "PostgreSQLTechnicalAssetConfiguration": "#/components/schemas/PostgreSQLTechnicalAssetConfiguration",
-                "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
-                "RustFSTechnicalAssetConfiguration": "#/components/schemas/RustFSTechnicalAssetConfiguration",
-                "S3TechnicalAssetConfiguration": "#/components/schemas/S3TechnicalAssetConfiguration",
-                "SnowflakeTechnicalAssetConfiguration": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
-              }
-            }
+            "description": "Configuration of the technical asset. The available fields depend on `configuration_type`; retrieve them from /v2/plugins/{name}/form."
           },
           "sourceAligned": {
             "anyOf": [
@@ -11309,54 +11232,6 @@
           "credential_name"
         ],
         "title": "DatabricksEnvironmentPlatformConfiguration"
-      },
-      "DatabricksTechnicalAssetConfiguration": {
-        "properties": {
-          "configuration_type": {
-            "type": "string",
-            "const": "DatabricksTechnicalAssetConfiguration",
-            "title": "Configuration Type"
-          },
-          "catalog": {
-            "type": "string",
-            "title": "Catalog"
-          },
-          "schema": {
-            "type": "string",
-            "title": "Schema",
-            "default": ""
-          },
-          "table": {
-            "type": "string",
-            "title": "Table",
-            "default": "*"
-          },
-          "bucket_identifier": {
-            "type": "string",
-            "title": "Bucket Identifier",
-            "default": ""
-          },
-          "catalog_path": {
-            "type": "string",
-            "title": "Catalog Path",
-            "default": ""
-          },
-          "table_path": {
-            "type": "string",
-            "title": "Table Path",
-            "default": ""
-          },
-          "access_granularity": {
-            "$ref": "#/components/schemas/AccessGranularity"
-          }
-        },
-        "type": "object",
-        "required": [
-          "configuration_type",
-          "catalog",
-          "access_granularity"
-        ],
-        "title": "DatabricksTechnicalAssetConfiguration"
       },
       "DecideDataProductRoleAssignment": {
         "properties": {
@@ -12961,50 +12836,10 @@
             "title": "Access Modes"
           },
           "configuration": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/S3TechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/RustFSTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/GlueTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/DatabricksTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/RedshiftTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/PostgreSQLTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/AzureBlobTechnicalAssetConfiguration"
-              }
-            ],
+            "additionalProperties": true,
+            "type": "object",
             "title": "Configuration",
-            "discriminator": {
-              "propertyName": "configuration_type",
-              "mapping": {
-                "AzureBlobTechnicalAssetConfiguration": "#/components/schemas/AzureBlobTechnicalAssetConfiguration",
-                "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
-                "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
-                "OSISemanticModelTechnicalAssetConfiguration": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration",
-                "PostgreSQLTechnicalAssetConfiguration": "#/components/schemas/PostgreSQLTechnicalAssetConfiguration",
-                "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
-                "RustFSTechnicalAssetConfiguration": "#/components/schemas/RustFSTechnicalAssetConfiguration",
-                "S3TechnicalAssetConfiguration": "#/components/schemas/S3TechnicalAssetConfiguration",
-                "SnowflakeTechnicalAssetConfiguration": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
-              }
-            }
+            "description": "Configuration of the technical asset. The available fields depend on `configuration_type`; retrieve them from /v2/plugins/{name}/form."
           },
           "owner": {
             "$ref": "#/components/schemas/DataProduct"
@@ -13201,54 +13036,6 @@
           "decided_by"
         ],
         "title": "GlobalRoleAssignmentResponse"
-      },
-      "GlueTechnicalAssetConfiguration": {
-        "properties": {
-          "configuration_type": {
-            "type": "string",
-            "const": "GlueTechnicalAssetConfiguration",
-            "title": "Configuration Type"
-          },
-          "database": {
-            "type": "string",
-            "title": "Database"
-          },
-          "database_suffix": {
-            "type": "string",
-            "title": "Database Suffix",
-            "default": ""
-          },
-          "table": {
-            "type": "string",
-            "title": "Table",
-            "default": "*"
-          },
-          "bucket_identifier": {
-            "type": "string",
-            "title": "Bucket Identifier",
-            "default": ""
-          },
-          "database_path": {
-            "type": "string",
-            "title": "Database Path",
-            "default": ""
-          },
-          "table_path": {
-            "type": "string",
-            "title": "Table Path",
-            "default": ""
-          },
-          "access_granularity": {
-            "$ref": "#/components/schemas/AccessGranularity"
-          }
-        },
-        "type": "object",
-        "required": [
-          "configuration_type",
-          "database",
-          "access_granularity"
-        ],
-        "title": "GlueTechnicalAssetConfiguration"
       },
       "Graph": {
         "properties": {
@@ -13969,30 +13756,6 @@
         ],
         "title": "OIDCTokenResponse",
         "description": "OIDC token endpoint response."
-      },
-      "OSISemanticModelTechnicalAssetConfiguration": {
-        "properties": {
-          "configuration_type": {
-            "type": "string",
-            "const": "OSISemanticModelTechnicalAssetConfiguration",
-            "title": "Configuration Type"
-          },
-          "model_name": {
-            "type": "string",
-            "title": "Model Name",
-            "default": ""
-          },
-          "location": {
-            "type": "string",
-            "title": "Location",
-            "default": ""
-          }
-        },
-        "type": "object",
-        "required": [
-          "configuration_type"
-        ],
-        "title": "OSISemanticModelTechnicalAssetConfiguration"
       },
       "OutputPort": {
         "properties": {
@@ -14876,50 +14639,10 @@
             "title": "Service Id"
           },
           "configuration": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/S3TechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/RustFSTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/GlueTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/DatabricksTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/RedshiftTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/PostgreSQLTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/AzureBlobTechnicalAssetConfiguration"
-              }
-            ],
+            "additionalProperties": true,
+            "type": "object",
             "title": "Configuration",
-            "discriminator": {
-              "propertyName": "configuration_type",
-              "mapping": {
-                "AzureBlobTechnicalAssetConfiguration": "#/components/schemas/AzureBlobTechnicalAssetConfiguration",
-                "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
-                "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
-                "OSISemanticModelTechnicalAssetConfiguration": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration",
-                "PostgreSQLTechnicalAssetConfiguration": "#/components/schemas/PostgreSQLTechnicalAssetConfiguration",
-                "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
-                "RustFSTechnicalAssetConfiguration": "#/components/schemas/RustFSTechnicalAssetConfiguration",
-                "S3TechnicalAssetConfiguration": "#/components/schemas/S3TechnicalAssetConfiguration",
-                "SnowflakeTechnicalAssetConfiguration": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
-              }
-            }
+            "description": "Configuration of the technical asset. The available fields depend on `configuration_type`; retrieve them from /v2/plugins/{name}/form."
           },
           "owner": {
             "$ref": "#/components/schemas/DataProduct"
@@ -15063,6 +14786,17 @@
             "type": "string",
             "title": "Icon Name"
           },
+          "icon_data_uri": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Icon Data Uri"
+          },
           "has_environments": {
             "type": "boolean",
             "title": "Has Environments",
@@ -15163,39 +14897,6 @@
         ],
         "title": "PostgreSQLConfig"
       },
-      "PostgreSQLTechnicalAssetConfiguration": {
-        "properties": {
-          "configuration_type": {
-            "type": "string",
-            "const": "PostgreSQLTechnicalAssetConfiguration",
-            "title": "Configuration Type"
-          },
-          "database": {
-            "type": "string",
-            "title": "Database"
-          },
-          "schema": {
-            "type": "string",
-            "title": "Schema",
-            "default": ""
-          },
-          "table": {
-            "type": "string",
-            "title": "Table",
-            "default": "*"
-          },
-          "access_granularity": {
-            "$ref": "#/components/schemas/AccessGranularity"
-          }
-        },
-        "type": "object",
-        "required": [
-          "configuration_type",
-          "database",
-          "access_granularity"
-        ],
-        "title": "PostgreSQLTechnicalAssetConfiguration"
-      },
       "Prototype": {
         "type": "integer",
         "enum": [
@@ -15243,54 +14944,6 @@
         ],
         "title": "RedshiftConfig"
       },
-      "RedshiftTechnicalAssetConfiguration": {
-        "properties": {
-          "configuration_type": {
-            "type": "string",
-            "const": "RedshiftTechnicalAssetConfiguration",
-            "title": "Configuration Type"
-          },
-          "database": {
-            "type": "string",
-            "title": "Database"
-          },
-          "schema": {
-            "type": "string",
-            "title": "Schema",
-            "default": ""
-          },
-          "table": {
-            "type": "string",
-            "title": "Table",
-            "default": "*"
-          },
-          "bucket_identifier": {
-            "type": "string",
-            "title": "Bucket Identifier",
-            "default": ""
-          },
-          "database_path": {
-            "type": "string",
-            "title": "Database Path",
-            "default": ""
-          },
-          "table_path": {
-            "type": "string",
-            "title": "Table Path",
-            "default": ""
-          },
-          "access_granularity": {
-            "$ref": "#/components/schemas/AccessGranularity"
-          }
-        },
-        "type": "object",
-        "required": [
-          "configuration_type",
-          "database",
-          "access_granularity"
-        ],
-        "title": "RedshiftTechnicalAssetConfiguration"
-      },
       "RemoveOutputPortAsInputPortRequest": {
         "properties": {
           "consuming_data_product_id": {
@@ -15318,50 +14971,10 @@
             "title": "Service Id"
           },
           "configuration": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/S3TechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/RustFSTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/GlueTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/DatabricksTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/RedshiftTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/PostgreSQLTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/AzureBlobTechnicalAssetConfiguration"
-              }
-            ],
+            "additionalProperties": true,
+            "type": "object",
             "title": "Configuration",
-            "discriminator": {
-              "propertyName": "configuration_type",
-              "mapping": {
-                "AzureBlobTechnicalAssetConfiguration": "#/components/schemas/AzureBlobTechnicalAssetConfiguration",
-                "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
-                "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
-                "OSISemanticModelTechnicalAssetConfiguration": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration",
-                "PostgreSQLTechnicalAssetConfiguration": "#/components/schemas/PostgreSQLTechnicalAssetConfiguration",
-                "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
-                "RustFSTechnicalAssetConfiguration": "#/components/schemas/RustFSTechnicalAssetConfiguration",
-                "S3TechnicalAssetConfiguration": "#/components/schemas/S3TechnicalAssetConfiguration",
-                "SnowflakeTechnicalAssetConfiguration": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
-              }
-            }
+            "description": "Configuration of the technical asset. The available fields depend on `configuration_type`; retrieve them from /v2/plugins/{name}/form."
           }
         },
         "type": "object",
@@ -15716,64 +15329,6 @@
           "prototype"
         ],
         "title": "Role"
-      },
-      "RustFSTechnicalAssetConfiguration": {
-        "properties": {
-          "configuration_type": {
-            "type": "string",
-            "const": "RustFSTechnicalAssetConfiguration",
-            "title": "Configuration Type"
-          },
-          "bucket": {
-            "type": "string",
-            "title": "Bucket"
-          },
-          "suffix": {
-            "type": "string",
-            "title": "Suffix",
-            "default": ""
-          },
-          "path": {
-            "type": "string",
-            "title": "Path"
-          }
-        },
-        "type": "object",
-        "required": [
-          "configuration_type",
-          "bucket",
-          "path"
-        ],
-        "title": "RustFSTechnicalAssetConfiguration"
-      },
-      "S3TechnicalAssetConfiguration": {
-        "properties": {
-          "configuration_type": {
-            "type": "string",
-            "const": "S3TechnicalAssetConfiguration",
-            "title": "Configuration Type"
-          },
-          "bucket": {
-            "type": "string",
-            "title": "Bucket"
-          },
-          "suffix": {
-            "type": "string",
-            "title": "Suffix",
-            "default": ""
-          },
-          "path": {
-            "type": "string",
-            "title": "Path"
-          }
-        },
-        "type": "object",
-        "required": [
-          "configuration_type",
-          "bucket",
-          "path"
-        ],
-        "title": "S3TechnicalAssetConfiguration"
       },
       "SchemaObjectRequest": {
         "properties": {
@@ -16350,54 +15905,6 @@
         ],
         "title": "SnowflakeConfig"
       },
-      "SnowflakeTechnicalAssetConfiguration": {
-        "properties": {
-          "configuration_type": {
-            "type": "string",
-            "const": "SnowflakeTechnicalAssetConfiguration",
-            "title": "Configuration Type"
-          },
-          "database": {
-            "type": "string",
-            "title": "Database"
-          },
-          "schema": {
-            "type": "string",
-            "title": "Schema",
-            "default": ""
-          },
-          "table": {
-            "type": "string",
-            "title": "Table",
-            "default": "*"
-          },
-          "bucket_identifier": {
-            "type": "string",
-            "title": "Bucket Identifier",
-            "default": ""
-          },
-          "database_path": {
-            "type": "string",
-            "title": "Database Path",
-            "default": ""
-          },
-          "table_path": {
-            "type": "string",
-            "title": "Table Path",
-            "default": ""
-          },
-          "access_granularity": {
-            "$ref": "#/components/schemas/AccessGranularity"
-          }
-        },
-        "type": "object",
-        "required": [
-          "configuration_type",
-          "database",
-          "access_granularity"
-        ],
-        "title": "SnowflakeTechnicalAssetConfiguration"
-      },
       "Tag": {
         "properties": {
           "id": {
@@ -16519,50 +16026,10 @@
             "title": "Service Id"
           },
           "configuration": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/S3TechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/RustFSTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/GlueTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/DatabricksTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/RedshiftTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/PostgreSQLTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/AzureBlobTechnicalAssetConfiguration"
-              }
-            ],
+            "additionalProperties": true,
+            "type": "object",
             "title": "Configuration",
-            "discriminator": {
-              "propertyName": "configuration_type",
-              "mapping": {
-                "AzureBlobTechnicalAssetConfiguration": "#/components/schemas/AzureBlobTechnicalAssetConfiguration",
-                "DatabricksTechnicalAssetConfiguration": "#/components/schemas/DatabricksTechnicalAssetConfiguration",
-                "GlueTechnicalAssetConfiguration": "#/components/schemas/GlueTechnicalAssetConfiguration",
-                "OSISemanticModelTechnicalAssetConfiguration": "#/components/schemas/OSISemanticModelTechnicalAssetConfiguration",
-                "PostgreSQLTechnicalAssetConfiguration": "#/components/schemas/PostgreSQLTechnicalAssetConfiguration",
-                "RedshiftTechnicalAssetConfiguration": "#/components/schemas/RedshiftTechnicalAssetConfiguration",
-                "RustFSTechnicalAssetConfiguration": "#/components/schemas/RustFSTechnicalAssetConfiguration",
-                "S3TechnicalAssetConfiguration": "#/components/schemas/S3TechnicalAssetConfiguration",
-                "SnowflakeTechnicalAssetConfiguration": "#/components/schemas/SnowflakeTechnicalAssetConfiguration"
-              }
-            }
+            "description": "Configuration of the technical asset. The available fields depend on `configuration_type`; retrieve them from /v2/plugins/{name}/form."
           }
         },
         "type": "object",
@@ -16735,6 +16202,20 @@
           "approved_by"
         ],
         "title": "TechnicalAssetOutputPortRequest"
+      },
+      "TechnicalAssetPlugin": {
+        "properties": {
+          "configuration_type": {
+            "type": "string",
+            "title": "Configuration Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "configuration_type"
+        ],
+        "title": "TechnicalAssetPlugin",
+        "description": "Base class for every technical asset plugin, in-tree or installed."
       },
       "TechnicalAssetStatus": {
         "type": "string",
@@ -16995,6 +16476,17 @@
           "icon_name": {
             "type": "string",
             "title": "Icon Name"
+          },
+          "icon_data_uri": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Icon Data Uri"
           },
           "parent_platform": {
             "anyOf": [

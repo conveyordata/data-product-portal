@@ -3,7 +3,6 @@ import pytest
 from app.technical_asset_configuration.azure_blob.schema import (
     AzureBlobTechnicalAssetConfiguration,
 )
-from app.technical_asset_configuration.data_output_types import DataOutputTypes
 
 
 def make_blob_config(
@@ -15,7 +14,7 @@ def make_blob_config(
         domain=domain,
         container_name=container_name,
         path=path,
-        configuration_type=DataOutputTypes.AzureBlobTechnicalAssetConfiguration,
+        configuration_type="AzureBlobTechnicalAssetConfiguration",
     )
 
 

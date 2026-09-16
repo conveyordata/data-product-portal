@@ -1,4 +1,4 @@
-from typing import ClassVar, Literal, Optional
+from typing import ClassVar, Optional
 from uuid import UUID
 
 from sqlalchemy.orm import Session
@@ -13,10 +13,9 @@ from app.technical_asset_configuration.base_schema import (
     UIElementSelect,
     UIElementString,
 )
-from app.technical_asset_configuration.data_output_types import DataOutputTypes
 from app.technical_asset_configuration.enums import UIElementType
 from app.technical_asset_configuration.rustfs.model import (
-    NAME,
+    CONFIGURATION_TYPE,
 )
 from app.technical_asset_configuration.rustfs.model import (
     RustFSTechnicalAssetConfiguration as RustFSTechnicalAssetConfigurationModel,
@@ -29,13 +28,13 @@ from app.users.schema import User
 # extracting a shared base (e.g. ObjectStorageTechnicalAssetConfiguration) for just
 # two plugins with diverging get_url/metadata - revisit if a third one shows up.
 class RustFSTechnicalAssetConfiguration(TechnicalAssetPlugin):
-    name: ClassVar[str] = NAME
+    name: ClassVar[str] = CONFIGURATION_TYPE
     version: ClassVar[str] = "1.0"
 
     bucket: str
     suffix: str = ""
     path: str
-    configuration_type: Literal[DataOutputTypes.RustFSTechnicalAssetConfiguration]
+    configuration_type: str = CONFIGURATION_TYPE
 
     _platform_metadata = PlatformMetadata(
         display_name="RustFS",

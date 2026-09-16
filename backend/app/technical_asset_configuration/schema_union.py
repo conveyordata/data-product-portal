@@ -1,59 +1,39 @@
-from typing import Annotated, Union
+from typing import Annotated, Any
 
-from pydantic import Field
+from pydantic import PlainSerializer, PlainValidator, WithJsonSchema
 
-from app.technical_asset_configuration.azure_blob.schema import (
-    AzureBlobTechnicalAssetConfiguration,
-)
-from app.technical_asset_configuration.data_output_types import DataOutputTypes
-from app.technical_asset_configuration.databricks.schema import (
-    DatabricksTechnicalAssetConfiguration,
-)
-from app.technical_asset_configuration.glue.schema import (
-    GlueTechnicalAssetConfiguration,
-)
-from app.technical_asset_configuration.osi_sem_model.schema import (
-    OSISemanticModelTechnicalAssetConfiguration,
-)
-from app.technical_asset_configuration.postgresql.schema import (
-    PostgreSQLTechnicalAssetConfiguration,
-)
-from app.technical_asset_configuration.redshift.schema import (
-    RedshiftTechnicalAssetConfiguration,
-)
-from app.technical_asset_configuration.rustfs.schema import (
-    RustFSTechnicalAssetConfiguration,
-)
-from app.technical_asset_configuration.s3.schema import S3TechnicalAssetConfiguration
-from app.technical_asset_configuration.snowflake.schema import (
-    SnowflakeTechnicalAssetConfiguration,
-)
+from app.technical_asset_configuration.base_schema import TechnicalAssetPlugin
 
-DataOutputs = Union[
-    S3TechnicalAssetConfiguration,
-    RustFSTechnicalAssetConfiguration,
-    GlueTechnicalAssetConfiguration,
-    DatabricksTechnicalAssetConfiguration,
-    SnowflakeTechnicalAssetConfiguration,
-    RedshiftTechnicalAssetConfiguration,
-    PostgreSQLTechnicalAssetConfiguration,
-    OSISemanticModelTechnicalAssetConfiguration,
-    AzureBlobTechnicalAssetConfiguration,
-]
 
-DataOutputMap = {
-    DataOutputTypes.S3TechnicalAssetConfiguration: S3TechnicalAssetConfiguration,
-    DataOutputTypes.RustFSTechnicalAssetConfiguration: RustFSTechnicalAssetConfiguration,
-    DataOutputTypes.GlueTechnicalAssetConfiguration: GlueTechnicalAssetConfiguration,
-    DataOutputTypes.DatabricksTechnicalAssetConfiguration: DatabricksTechnicalAssetConfiguration,
-    DataOutputTypes.SnowflakeTechnicalAssetConfiguration: SnowflakeTechnicalAssetConfiguration,
-    DataOutputTypes.RedshiftTechnicalAssetConfiguration: RedshiftTechnicalAssetConfiguration,
-    DataOutputTypes.PostgreSQLTechnicalAssetConfiguration: PostgreSQLTechnicalAssetConfiguration,
-    DataOutputTypes.OSISemanticModelTechnicalAssetConfiguration: OSISemanticModelTechnicalAssetConfiguration,
-    DataOutputTypes.AzureBlobTechnicalAssetConfiguration: AzureBlobTechnicalAssetConfiguration,
-}
+def _resolve_configuration(value: Any) -> TechnicalAssetPlugin:
+    from app.plugins.registry import plugin_registry
+
+    if isinstance(value, TechnicalAssetPlugin):
+        return value
+
+    configuration_type = (
+        value.get("configuration_type")
+        if isinstance(value, dict)
+        else getattr(value, "configuration_type", None)
+    )
+    if not configuration_type:
+        raise ValueError("configuration_type is required")
+
+    return plugin_registry.get(configuration_type).model_validate(value)
+
 
 DataOutputConfiguration = Annotated[
-    DataOutputs,
-    Field(discriminator="configuration_type"),
+    TechnicalAssetPlugin,
+    PlainValidator(_resolve_configuration),
+    PlainSerializer(lambda configuration: configuration.model_dump(), return_type=dict),
+    WithJsonSchema(
+        {
+            "type": "object",
+            "additionalProperties": True,
+            "description": (
+                "Configuration of the technical asset. The available fields depend on "
+                "`configuration_type`; retrieve them from /v2/plugins/{name}/form."
+            ),
+        }
+    ),
 ]
