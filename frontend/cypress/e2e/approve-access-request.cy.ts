@@ -10,13 +10,13 @@ describe('Approve pending access request', () => {
         cy.contains('[data-cy="pending-request-row"]', requestDescription, { timeout: 20000 })
             .should('be.visible')
             .within(() => {
-                cy.get('[data-cy="review-request"]').click();
+                cy.contains('button', 'Review').click();
             });
 
         cy.contains('button', 'Accept').should('be.visible');
 
         cy.intercept('POST', '**/input_ports/approve').as('approveInputPort');
-        cy.get('[data-cy="accept-request"]').click();
+        cy.contains('button', 'Accept').click();
         cy.wait('@approveInputPort', { timeout: 30000 });
 
         cy.contains('Output Port request has been successfully approved').should('be.visible');

@@ -128,7 +128,6 @@ export function TechnicalAssetLinkModal({ onClose, dataProductId, datasetId, dat
                 <Button
                     key="submit"
                     type="primary"
-                    data-cy="link-technical-assets-submit"
                     onClick={handleSubmit}
                     loading={isLinking}
                     disabled={selectedOutputs.size === 0}

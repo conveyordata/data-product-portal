@@ -7,14 +7,14 @@ describe('Role assignment', () => {
 
         cy.visit(`/studio/${dataProductId}?tab=team`);
 
-        cy.get('[data-cy="add-user"]').click();
+        cy.contains('button', 'Add User').click();
 
         cy.get('[data-cy="user-popup-search"]').type(userName);
 
         cy.contains('[data-cy="user-popup-item"]', userName, { timeout: 20000 })
             .should('be.visible')
             .within(() => {
-                cy.get('[data-cy="user-popup-role-select"]').click();
+                cy.contains('Select a role').click({ force: true });
             });
 
         cy.intercept('POST', '**/authz/role_assignments/data_product').as('createRoleAssignment');

@@ -73,7 +73,6 @@ export function UserPopup({ onClose, isOpen, roles, item, isLoading, userIdsToHi
 
                                 <Select
                                     className={styles.roleDropdown}
-                                    data-cy="user-popup-role-select"
                                     placeholder={t('Select a role')}
                                     disabled={isLoading || isFetchingUsers}
                                     loading={isLoading || isFetchingUsers}

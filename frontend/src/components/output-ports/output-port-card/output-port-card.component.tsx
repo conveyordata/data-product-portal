@@ -227,7 +227,6 @@ export function OutputPortCard({ outputPortId, dataProductId, draggedDataOutputI
                                         disabled={!canLink}
                                         type="link"
                                         size="small"
-                                        data-cy="link-technical-assets"
                                     >
                                         {t('Link Technical Assets')}
                                     </Button>

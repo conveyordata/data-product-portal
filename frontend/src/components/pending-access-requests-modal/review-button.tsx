@@ -16,7 +16,6 @@ export function ReviewButton({ action, onReview }: Props) {
             type="primary"
             size="small"
             icon={<EyeOutlined />}
-            data-cy="review-request"
             onClick={(e) => {
                 e.stopPropagation();
                 onReview(action);

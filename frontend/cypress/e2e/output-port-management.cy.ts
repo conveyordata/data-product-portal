@@ -7,7 +7,7 @@ describe('Output port management', () => {
 
         cy.visit(`/studio/${dataProductId}?tab=outputs`);
 
-        cy.get('[data-cy="add-output-port"]').click();
+        cy.contains('button', 'Add Output Port').click();
 
         cy.intercept('GET', '**/resource_names/validate*').as('validateNamespace');
         cy.get('[data-cy="output-port-name"]').type(outputPortName);
@@ -19,7 +19,7 @@ describe('Output port management', () => {
         cy.get('[data-cy="output-port-description"]').type('Created by the Cypress end-to-end test.');
 
         cy.intercept('POST', '**/output_ports').as('createOutputPort');
-        cy.get('[data-cy="link-popup-submit"]').click();
+        cy.contains('button', 'Create').click();
         cy.wait('@createOutputPort', { timeout: 30000 });
 
         cy.contains('Output Port created successfully').should('be.visible');
@@ -38,7 +38,7 @@ describe('Output port management', () => {
         cy.contains('[data-cy="output-port-card"]', outputPortName, { timeout: 20000 })
             .should('be.visible')
             .within(() => {
-                cy.get('[data-cy="link-technical-assets"]').click();
+                cy.contains('button', 'Link Technical Assets').click();
             });
 
         cy.intercept('POST', '**/technical_assets/add').as('linkTechnicalAsset');
@@ -46,7 +46,7 @@ describe('Output port management', () => {
         cy.contains('[data-cy="technical-asset-link-item"]', technicalAssetName)
             .find('input[type="checkbox"]')
             .check({ force: true });
-        cy.get('[data-cy="link-technical-assets-submit"]').click();
+        cy.contains('button', /Link \d+ assets?/).click();
         cy.wait('@linkTechnicalAsset', { timeout: 30000 });
         cy.wait('@approveTechnicalAssetLink', { timeout: 30000 });
 

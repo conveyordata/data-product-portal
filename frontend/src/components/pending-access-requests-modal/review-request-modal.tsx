@@ -455,12 +455,7 @@ export function ReviewRequestModal({ action, open, onClose, onAccept, onReject, 
                             >
                                 {t('Decline')}
                             </Button>
-                            <Button
-                                type="primary"
-                                icon={<CheckOutlined />}
-                                data-cy="accept-request"
-                                onClick={handleAccept}
-                            >
+                            <Button type="primary" icon={<CheckOutlined />} onClick={handleAccept}>
                                 {t('Accept')}
                             </Button>
                         </Flex>

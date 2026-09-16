@@ -17,7 +17,7 @@ describe('Edit data product', () => {
         cy.get('[data-cy="data-product-description"]').type('Created by the Cypress end-to-end test, to be edited.');
 
         cy.intercept('POST', '**/v2/data_products').as('createDataProduct');
-        cy.get('[data-cy="data-product-form-submit"]').should('be.enabled').click();
+        cy.contains('button', 'Create').should('be.enabled').click();
         cy.wait('@createDataProduct', { timeout: 30000 });
         cy.contains('Data Product created successfully').should('be.visible');
 
@@ -30,7 +30,7 @@ describe('Edit data product', () => {
             cy.get('[data-cy="data-product-name"]').clear().type(updatedName);
 
             cy.intercept('PUT', `**/v2/data_products/${dataProductId}`).as('updateDataProduct');
-            cy.get('[data-cy="data-product-form-submit"]').should('be.enabled').click();
+            cy.contains('button', 'Save').should('be.enabled').click();
             cy.wait('@updateDataProduct', { timeout: 30000 });
 
             cy.contains('Data Product updated successfully').should('be.visible');

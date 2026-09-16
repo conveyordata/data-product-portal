@@ -89,13 +89,7 @@ export function TeamTab({ dataProductId }: Props) {
                         allowClear
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
-                    <Button
-                        type="primary"
-                        className={styles.formButton}
-                        data-cy="add-user"
-                        onClick={handleOpen}
-                        disabled={!canAddUser}
-                    >
+                    <Button type="primary" className={styles.formButton} onClick={handleOpen} disabled={!canAddUser}>
                         {t('Add User')}
                     </Button>
                 </Flex>
