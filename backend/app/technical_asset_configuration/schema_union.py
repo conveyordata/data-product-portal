@@ -2,20 +2,12 @@ from typing import Annotated, Union
 
 from pydantic import Field
 
-from app.technical_asset_configuration.agno.schema import AgnoPlugin  # noqa: F401
 from app.technical_asset_configuration.azure_blob.schema import (
     AzureBlobTechnicalAssetConfiguration,
-)
-from app.technical_asset_configuration.coder.schema import CoderPlugin  # noqa: F401
-from app.technical_asset_configuration.conveyor.schema import (  # noqa: F401
-    ConveyorPlugin,
 )
 from app.technical_asset_configuration.data_output_types import DataOutputTypes
 from app.technical_asset_configuration.databricks.schema import (
     DatabricksTechnicalAssetConfiguration,
-)
-from app.technical_asset_configuration.github.schema import (  # noqa: F401
-    GitHubPlugin,
 )
 from app.technical_asset_configuration.glue.schema import (
     GlueTechnicalAssetConfiguration,

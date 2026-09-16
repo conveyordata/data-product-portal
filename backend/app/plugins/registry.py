@@ -15,9 +15,6 @@ class PluginRegistry:
         self._plugins: Optional[dict[str, type[TechnicalAssetPlugin]]] = None
 
     def _discover(self) -> dict[str, type[TechnicalAssetPlugin]]:
-        # Imported for its side effect: registers every in-tree plugin class.
-        import app.technical_asset_configuration.schema_union  # noqa: F401
-
         plugins: dict[str, type[TechnicalAssetPlugin]] = {}
 
         for entry_point in entry_points(group=ENTRY_POINT_GROUP):
@@ -37,11 +34,6 @@ class PluginRegistry:
                 )
                 continue
             plugins[plugin.name] = plugin
-
-        for plugin in TechnicalAssetPlugin.__subclasses__():
-            name = getattr(plugin, "name", None)
-            if name:
-                plugins.setdefault(name, plugin)
 
         logger.info(f"Discovered plugins: {', '.join(sorted(plugins)) or 'none'}")
         return plugins

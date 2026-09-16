@@ -16,53 +16,53 @@ def _entry_point(name: str, value: str) -> EntryPoint:
     return EntryPoint(name=name, value=value, group=ENTRY_POINT_GROUP)
 
 
-def test_discovered__includes_plugins_living_in_this_repository(registry):
+GLUE = "app.technical_asset_configuration.glue.schema:GlueTechnicalAssetConfiguration"
+
+
+def test_discovered__finds_the_plugins_this_package_advertises(registry):
     names = {plugin.name for plugin in registry.discovered()}
 
     assert "GlueTechnicalAssetConfiguration" in names
     assert "S3TechnicalAssetConfiguration" in names
 
 
-def test_discovered__loads_a_plugin_advertised_through_an_entry_point(
-    registry, monkeypatch
-):
+def test_discovered__loads_only_what_the_entry_points_advertise(registry, monkeypatch):
     monkeypatch.setattr(
         "app.plugins.registry.entry_points",
-        lambda group: [
-            _entry_point(
-                "glue",
-                "app.technical_asset_configuration.glue.schema:"
-                "GlueTechnicalAssetConfiguration",
-            )
-        ],
+        lambda group: [_entry_point("glue", GLUE)],
     )
 
     names = {plugin.name for plugin in registry.discovered()}
 
-    assert "GlueTechnicalAssetConfiguration" in names
+    assert names == {"GlueTechnicalAssetConfiguration"}
 
 
 def test_discovered__skips_entry_point_that_fails_to_import(registry, monkeypatch):
     monkeypatch.setattr(
         "app.plugins.registry.entry_points",
-        lambda group: [_entry_point("broken", "no_such_module:Plugin")],
+        lambda group: [
+            _entry_point("broken", "no_such_module:Plugin"),
+            _entry_point("glue", GLUE),
+        ],
     )
 
     names = {plugin.name for plugin in registry.discovered()}
 
-    assert "broken" not in names
-    assert "GlueTechnicalAssetConfiguration" in names
+    assert names == {"GlueTechnicalAssetConfiguration"}
 
 
 def test_discovered__skips_entry_point_that_is_not_a_plugin(registry, monkeypatch):
     monkeypatch.setattr(
         "app.plugins.registry.entry_points",
-        lambda group: [_entry_point("wrong", "json:JSONDecoder")],
+        lambda group: [
+            _entry_point("wrong", "json:JSONDecoder"),
+            _entry_point("glue", GLUE),
+        ],
     )
 
     names = {plugin.name for plugin in registry.discovered()}
-    assert "wrong" not in names
-    assert "JSONDecoder" not in names
+
+    assert names == {"GlueTechnicalAssetConfiguration"}
 
 
 def test_enabled__excludes_a_plugin_that_is_installed_but_not_configured(

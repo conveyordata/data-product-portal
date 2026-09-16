@@ -3,6 +3,21 @@ name = "data-product-portal"
 version = "0.0.1"
 description = "Data Product Portal core"
 
+[project.entry-points."data_product_portal.plugins"]
+agno = "app.technical_asset_configuration.agno.schema:AgnoPlugin"
+azure-blob = "app.technical_asset_configuration.azure_blob.schema:AzureBlobTechnicalAssetConfiguration"
+coder = "app.technical_asset_configuration.coder.schema:CoderPlugin"
+conveyor = "app.technical_asset_configuration.conveyor.schema:ConveyorPlugin"
+databricks = "app.technical_asset_configuration.databricks.schema:DatabricksTechnicalAssetConfiguration"
+github = "app.technical_asset_configuration.github.schema:GitHubPlugin"
+glue = "app.technical_asset_configuration.glue.schema:GlueTechnicalAssetConfiguration"
+osi-semantic-model = "app.technical_asset_configuration.osi_sem_model.schema:OSISemanticModelTechnicalAssetConfiguration"
+postgresql = "app.technical_asset_configuration.postgresql.schema:PostgreSQLTechnicalAssetConfiguration"
+redshift = "app.technical_asset_configuration.redshift.schema:RedshiftTechnicalAssetConfiguration"
+rustfs = "app.technical_asset_configuration.rustfs.schema:RustFSTechnicalAssetConfiguration"
+s3 = "app.technical_asset_configuration.s3.schema:S3TechnicalAssetConfiguration"
+snowflake = "app.technical_asset_configuration.snowflake.schema:SnowflakeTechnicalAssetConfiguration"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
