@@ -3081,3 +3081,6 @@ SELECT
     timezone('utc'::text, current_timestamp),
     NULL
 FROM link;
+
+INSERT INTO public.access_durations (id, abstract_data_product_type, access_duration_type, is_default, created_on)
+VALUES (gen_random_uuid(), 'explorations', 'permanent', FALSE, timezone('utc'::text, current_timestamp));

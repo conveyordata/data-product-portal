@@ -28,3 +28,7 @@ config.local.js
 *.sln
 *.sw?
 public/locales/en/translation_old.json
+
+cypress/videos
+cypress/screenshots
+cypress/downloads

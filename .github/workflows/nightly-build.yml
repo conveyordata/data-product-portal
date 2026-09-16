@@ -1,4 +1,4 @@
-name: Nightly Docker Compose Test
+name: Nightly Docker Compose Test & E2E
 on:
   schedule:
     - cron: '0 2 * * *'
@@ -28,6 +28,25 @@ jobs:
           echo "Portal did not become healthy in time"
           docker compose logs
           exit 1
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+          node-version-file: frontend/package.json
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci --prefer-offline --no-audit --progress=false
+      - name: Run Cypress end-to-end tests
+        working-directory: frontend
+        run: npx cypress run --config baseUrl=http://localhost:5050
+      - name: Upload Cypress screenshots on failure
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: cypress-screenshots
+          path: frontend/cypress/screenshots
+          retention-days: 7
 
   demo-basic:
     runs-on: ubuntu-latest
