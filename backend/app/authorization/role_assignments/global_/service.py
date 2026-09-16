@@ -57,14 +57,14 @@ class RoleAssignmentService:
             requested_by_id=actor.id,
         )
         self.db.add(role_assignment)
-        self.db.commit()
+        self.db.flush()
         return role_assignment
 
     def delete_assignment(self, id_: UUID) -> GlobalRoleAssignment:
         assignment = self.get_assignment(id_)
 
         self.db.delete(assignment)
-        self.db.commit()
+        self.db.flush()
         return assignment
 
     def update_assignment(
@@ -80,7 +80,7 @@ class RoleAssignmentService:
             assignment.decided_on = datetime.now()
             assignment.decided_by_id = actor.id
 
-        self.db.commit()
+        self.db.flush()
         return assignment
 
     def ensure_is_global_scope(self, role_id: UUID) -> None:

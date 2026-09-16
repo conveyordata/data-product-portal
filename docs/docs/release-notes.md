@@ -6,10 +6,19 @@ sidebar_position: 200
 
 ## Unreleased
 
+## 0.7.2
+
+### bugfixes
+
+- **[Explorations]**: Fixed a bug where requesting an output port as an exploration input port could fail with a 500 error due to a misconfigured access duration.
+- **[Explorer]**: Fixed a bug where explorer returned empty results if hidden products were returned.
+
+## 0.7.1
+
 ### breaking changes
 
 - **[API]**: Access durations configuration switched URL path from /v2/access_durations to /v2/configuration/access_durations. Please update your API calls accordingly.
-- **[API]**: Remove deprecated /v2/data_products/{id}/link_input_ports
+- **[API]**: Remove deprecated `/v2/data_products/{id}/link_input_ports`
 - **[API]**: Modified the body of the following routes to enable selection of access modes:
   - Create data product: `/v2/data_products`
   - Request input ports for data product: `/v2/data_products/{id}/input_ports`

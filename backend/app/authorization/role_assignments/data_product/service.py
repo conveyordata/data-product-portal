@@ -93,7 +93,7 @@ class RoleAssignmentService:
             requested_by_id=actor.id,
         )
         self.db.add(role_assignment)
-        self.db.commit()
+        self.db.flush()
         return role_assignment
 
     def delete_assignment(self, id_: UUID) -> DataProductRoleAssignment:
@@ -102,7 +102,7 @@ class RoleAssignmentService:
 
         result = copy.deepcopy(assignment)
         self.db.delete(assignment)
-        self.db.commit()
+        self.db.flush()
         return result
 
     def update_assignment(
@@ -119,7 +119,8 @@ class RoleAssignmentService:
             assignment.decided_on = datetime.now()
             assignment.decided_by_id = actor.id
 
-        self.db.commit()
+        self.db.flush()
+        self.db.refresh(assignment)
         return assignment
 
     def ensure_is_data_product_scope(self, role_id: UUID) -> None:

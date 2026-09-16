@@ -54,7 +54,7 @@ router = APIRouter(
     ],
 )
 def get_data_product_technical_assets(
-    data_product_id: UUID, db: Session = Depends(get_db_session)
+    data_product_id: UUID, db: Session = Depends(get_db_session, scope="function")
 ) -> GetTechnicalAssetsResponse:
     return GetTechnicalAssetsResponse(
         technical_assets=[
@@ -79,7 +79,9 @@ def get_data_product_technical_assets(
     ],
 )
 def get_technical_asset(
-    data_product_id: UUID, id: UUID, db: Session = Depends(get_db_session)
+    data_product_id: UUID,
+    id: UUID,
+    db: Session = Depends(get_db_session, scope="function"),
 ) -> GetTechnicalAssetsResponseItem:
     return GetTechnicalAssetsResponseItem.model_validate(
         TechnicalAssetService(db).get_technical_asset(data_product_id, id)
@@ -99,7 +101,9 @@ def get_technical_asset(
     ],
 )
 def get_technical_asset_event_history(
-    data_product_id: UUID, id: UUID, db: Session = Depends(get_db_session)
+    data_product_id: UUID,
+    id: UUID,
+    db: Session = Depends(get_db_session, scope="function"),
 ) -> GetEventHistoryResponse:
     ensure_technical_asset_exists(id, db, data_product_id=data_product_id)
     return GetEventHistoryResponse(
@@ -136,7 +140,7 @@ def get_technical_asset_event_history(
 def remove_technical_asset(
     data_product_id: UUID,
     id: UUID,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
     data_output = TechnicalAssetService(db).remove_data_output(data_product_id, id)
@@ -182,7 +186,7 @@ def update_technical_asset(
     data_product_id: UUID,
     id: UUID,
     data_output: DataOutputUpdate,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> UpdateTechnicalAssetResponse:
     result = TechnicalAssetService(db).update_data_output(
@@ -222,7 +226,7 @@ def update_technical_asset_status(
     data_product_id: UUID,
     id: UUID,
     data_output: DataOutputStatusUpdate,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
     TechnicalAssetService(db).update_data_output_status(
@@ -253,7 +257,7 @@ def update_technical_asset_status(
 def get_technical_asset_graph_data(
     data_product_id: UUID,
     id: UUID,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
     level: int = 3,
 ) -> Graph:
     return TechnicalAssetService(db).get_graph_data(data_product_id, id, level)
@@ -284,7 +288,7 @@ def get_technical_asset_graph_data(
 def create_technical_asset(
     data_product_id: UUID,
     technical_asset: CreateTechnicalAssetRequest,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> CreateTechnicalAssetResponse:
     technical_asset = TechnicalAssetService(db).create_technical_asset(

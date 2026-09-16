@@ -25,9 +25,9 @@ from tests.session_util import as_user
 def test_search_output_ports(session):
     ds1 = OutputPortFactory(name="Customer Data")
     ds2 = OutputPortFactory(name="Sales Data")
-    OutputPortService(db=session).recalculate_search_for_all_output_ports()
-
-    result = search_output_ports(query="Data", db=session)
+    with as_user(session, UserFactory().id):
+        OutputPortService(db=session).recalculate_search_for_all_output_ports()
+        result = search_output_ports(query="Data", db=session)
 
     assert "output_ports" in result
     assert result["count"] >= 2
@@ -38,9 +38,9 @@ def test_search_output_ports(session):
 
 def test_search_output_ports_no_query(session):
     OutputPortFactory(name="Customer Data")
-    OutputPortService(db=session).recalculate_search_for_all_output_ports()
-
-    result = search_output_ports(query=None, db=session)
+    with as_user(session, UserFactory().id):
+        OutputPortService(db=session).recalculate_search_for_all_output_ports()
+        result = search_output_ports(query=None, db=session)
 
     assert "output_ports" in result
     assert result["count"] == 1

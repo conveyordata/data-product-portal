@@ -265,7 +265,7 @@ def add_exploration_finalizer(
 def remove_exploration_finalizer(
     id: UUID,
     finalizer: str,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
 ) -> None:
     service = ExplorationService(db)
     should_delete = service.remove_finalizer(id, finalizer)

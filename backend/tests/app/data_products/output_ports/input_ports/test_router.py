@@ -596,7 +596,7 @@ class TestInputPortsRouter:
             scope=Scope.DATASET, permissions=[Action.OUTPUT_PORT__DELETE]
         )
         DatasetRoleAssignmentFactory(
-            user_id=str(user.id), role_id=str(role.id), output_port_id=str(ds.id)
+            user_id=user.id, role_id=role.id, output_port_id=ds.id
         )
         link = InputPortFactory(output_port=ds)
         response = client.get(

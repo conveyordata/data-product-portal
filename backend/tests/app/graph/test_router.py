@@ -1,10 +1,12 @@
 from app.authorization.roles.schema import Scope
 from app.core.authz.actions import AuthorizationAction
 from app.data_products.model import DataProductVisibility
+from app.data_products.output_ports.enums import OutputPortAccessType
 from app.settings import settings
 from tests.factories import (
     DataProductFactory,
     DataProductRoleAssignmentFactory,
+    DatasetRoleAssignmentFactory,
     DomainFactory,
     ExplorationFactory,
     InputPortFactory,
@@ -50,6 +52,49 @@ class TestGraphRouter:
         assert response.status_code == 200, response.text
         assert len(response.json()["edges"]) == 0
         assert len(response.json()["nodes"]) == 1
+
+    def test_get_graph_data__filters_edges_to_hidden_data_product(self, client):
+        """Regression test: an edge must not reference a data product that got
+        filtered out of the nodes, since that produces a dangling edge the
+        frontend graph can't render.
+        """
+        producer = DataProductFactory()
+        output_port = OutputPortFactory(data_product=producer)
+        hidden_consumer = DataProductFactory(visibility=DataProductVisibility.HIDDEN)
+        InputPortFactory(
+            output_port=output_port, consuming_abstract_data_product=hidden_consumer
+        )
+
+        response = client.get(ENDPOINT)
+        assert response.status_code == 200, response.text
+
+        node_ids = {node["id"] for node in response.json()["nodes"]}
+        assert str(hidden_consumer.id) not in node_ids
+        for edge in response.json()["edges"]:
+            assert edge["source"] in node_ids
+            assert edge["target"] in node_ids
+
+    def test_get_graph_data__filters_private_output_ports(self, client):
+        output_port = OutputPortFactory(access_type=OutputPortAccessType.PRIVATE)
+        OutputPortFactory(access_type=OutputPortAccessType.PRIVATE)
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        role = RoleFactory(
+            scope=Scope.DATASET,
+            permissions=[AuthorizationAction.OUTPUT_PORT__UPDATE_QUERY_STATS],
+        )
+        DatasetRoleAssignmentFactory(
+            output_port_id=output_port.id,
+            user_id=user.id,
+            role_id=role.id,
+        )
+        response = client.get(ENDPOINT, params={"output_port_nodes_enabled": "true"})
+        assert response.status_code == 200, response.text
+        assert len(response.json()["edges"]) == 1, (
+            "We expect 1 edge between the data product and the accessible private output port"
+        )
+        assert len(response.json()["nodes"]) == 3, (
+            "We expect 2 nodes 2 data products and 1 output port"
+        )
 
     def test_get_graph_data_include_output_ports(self, client):
         domain = DomainFactory()

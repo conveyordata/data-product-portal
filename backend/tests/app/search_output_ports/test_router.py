@@ -19,6 +19,7 @@ from tests.factories import (
     RoleFactory,
     UserFactory,
 )
+from tests.session_util import as_user
 
 EMBEDDING_LATENCY_BOUND: Final[float] = float(
     os.getenv("TEST_EMBEDDING_LATENCY_BOUND", 1.100)
@@ -132,10 +133,11 @@ class TestOutputPortSearchRouter:
         ]
 
         user = UserFactory()
-        valid_output_ports = {
-            port.name
-            for port in OutputPortService(session).get_output_ports(None, user)
-        }
+        with as_user(session, UserFactory().id):
+            valid_output_ports = {
+                port.name
+                for port in OutputPortService(session).get_output_ports(None, user)
+            }
         for config in configuration:
             for value in config["expected"]:
                 assert value in valid_output_ports, (

@@ -109,7 +109,7 @@ else:
 
     def authorize_user(
         token: JWTToken = Depends(secured_call),
-        db: Session = Depends(get_system_db_session),
+        db: Session = Depends(get_system_db_session, scope="function"),
     ) -> User:
         default_username = settings.DEFAULT_USERNAME
         if "@" not in default_username:
@@ -125,7 +125,7 @@ else:
 
     def get_authenticated_user(
         token: JWTToken = Depends(secured_call),
-        db: Session = Depends(get_system_db_session),
+        db: Session = Depends(get_system_db_session, scope="function"),
     ) -> User:
         user: Optional[User] = db.scalars(
             select(UserModel).where(UserModel.external_id == token.sub)

@@ -3,7 +3,6 @@ from datetime import datetime, timezone
 
 from sqlalchemy import select
 
-from app.abstract_data_product.model import AbstractDataProduct
 from app.core.logging import logger
 from app.data_products.status import AbstractDataProductStatus
 from app.database.database import SessionLocal
@@ -13,6 +12,8 @@ STUCK_THRESHOLD_SECONDS = 3600  # warn after 1 hour in DELETING
 
 
 async def check_stuck_deletions() -> None:
+    from app.abstract_data_product.model import AbstractDataProduct
+
     while True:
         try:
             with SessionLocal() as db:

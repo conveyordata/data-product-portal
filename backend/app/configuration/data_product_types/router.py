@@ -26,7 +26,7 @@ router = APIRouter(
 
 @router.get("/{id}")
 def get_data_product_type(
-    id: UUID, db: Session = Depends(get_db_session)
+    id: UUID, db: Session = Depends(get_db_session, scope="function")
 ) -> DataProductTypeGet:
     return DataProductTypeService(db).get_data_product_type(id)
 
@@ -58,7 +58,8 @@ def get_data_product_type(
     ],
 )
 def create_data_product_type(
-    data_product_type: DataProductTypeCreate, db: Session = Depends(get_db_session)
+    data_product_type: DataProductTypeCreate,
+    db: Session = Depends(get_db_session, scope="function"),
 ) -> CreateDataProductTypeResponse:
     return DataProductTypeService(db).create_data_product_type(data_product_type)
 
@@ -74,7 +75,7 @@ def create_data_product_type(
 def update_data_product_type(
     id: UUID,
     data_product_type: DataProductTypeUpdate,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
 ) -> UpdateDataProductTypeResponse:
     return DataProductTypeService(db).update_data_product_type(id, data_product_type)
 
@@ -87,7 +88,9 @@ def update_data_product_type(
         ),
     ],
 )
-def remove_data_product_type(id: UUID, db: Session = Depends(get_db_session)) -> None:
+def remove_data_product_type(
+    id: UUID, db: Session = Depends(get_db_session, scope="function")
+) -> None:
     return DataProductTypeService(db).remove_data_product_type(id)
 
 
@@ -100,14 +103,14 @@ def remove_data_product_type(id: UUID, db: Session = Depends(get_db_session)) ->
     ],
 )
 def migrate_data_product_type(
-    from_id: UUID, to_id: UUID, db: Session = Depends(get_db_session)
+    from_id: UUID, to_id: UUID, db: Session = Depends(get_db_session, scope="function")
 ) -> None:
     return DataProductTypeService(db).migrate_data_product_type(from_id, to_id)
 
 
 @router.get("")
 def get_data_products_types(
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
 ) -> DataProductTypesGet:
     return DataProductTypesGet(
         data_product_types=DataProductTypeService(db).get_data_product_types()

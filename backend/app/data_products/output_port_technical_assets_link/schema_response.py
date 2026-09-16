@@ -2,8 +2,6 @@ from datetime import datetime
 from typing import Optional
 from uuid import UUID
 
-from pydantic import Field
-
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.data_products.output_ports.schema import OutputPort
 from app.data_products.schema import DataProduct
@@ -20,10 +18,10 @@ class OwnedTechnicalAsset(TechnicalAssetBaseSchema):
 
 class TechnicalAssetOutputPortAssociationsGet(ORMModel):
     id: UUID
-    output_port_id: UUID = Field(validation_alias="output_port_id")
-    output_port: OutputPort = Field(validation_alias="output_port")
-    technical_asset_id: UUID = Field(validation_alias="data_output_id")
-    technical_asset: OwnedTechnicalAsset = Field(validation_alias="data_output")
+    output_port_id: UUID
+    output_port: OutputPort
+    technical_asset_id: UUID
+    technical_asset: OwnedTechnicalAsset
     status: DecisionStatus
     requested_on: datetime
     denied_on: Optional[datetime]

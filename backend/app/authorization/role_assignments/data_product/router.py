@@ -62,7 +62,7 @@ router = APIRouter(prefix="/v2/authz/role_assignments/data_product")
 )
 def delete_data_product_role_assignment(
     id: UUID,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
     user: User = Depends(get_authenticated_user),
 ) -> DeleteDataProductRoleAssignmentResponse:
     assignment = RoleAssignmentService(db=db).delete_assignment(id)
@@ -98,7 +98,7 @@ def list_data_product_role_assignments(
     identity_id: Annotated[UUID | SkipJsonSchema[None], Query()] = None,
     role_id: Annotated[UUID | SkipJsonSchema[None], Query()] = None,
     decision: Annotated[DecisionStatus | SkipJsonSchema[None], Query()] = None,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
 ) -> ListDataProductRoleAssignmentsResponse:
     return ListDataProductRoleAssignmentsResponse(
         role_assignments=RoleAssignmentService(db).list_assignments(
@@ -123,7 +123,7 @@ def list_data_product_role_assignments(
 def request_data_product_role_assignment(
     request: RequestDataProductRoleAssignment,
     background_tasks: BackgroundTasks,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
     user: User = Depends(get_authenticated_user),
 ) -> DataProductRoleAssignmentResponse:
     service = RoleAssignmentService(db=db)
@@ -174,7 +174,7 @@ def request_data_product_role_assignment(
 def create_data_product_role_assignment(
     body: CreateDataProductRoleAssignment,
     background_tasks: BackgroundTasks,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
     user: User = Depends(get_authenticated_user),
 ) -> DataProductRoleAssignmentResponse:
     service = RoleAssignmentService(db=db)
@@ -237,7 +237,7 @@ def create_data_product_role_assignment(
 def decide_data_product_role_assignment(
     id: UUID,
     request: DecideDataProductRoleAssignment,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
     user: User = Depends(get_authenticated_user),
 ) -> DataProductRoleAssignmentResponse:
     service = RoleAssignmentService(db)
@@ -299,7 +299,7 @@ def decide_data_product_role_assignment(
 def modify_data_product_role_assignment(
     id: UUID,
     body: ModifyDataProductRoleAssignment,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
     user: User = Depends(get_authenticated_user),
 ) -> DataProductRoleAssignmentResponse:
     service = RoleAssignmentService(db)

@@ -44,18 +44,18 @@ class UserService:
         user.data_products = []
         user.datasets = []
         self.db.delete(user)
-        self.db.commit()
+        self.db.flush()
 
     def create_user(self, user: UserCreate) -> UserCreateResponse:
         user = UserModel(**user.parse_pydantic_schema())
         self.db.add(user)
-        self.db.commit()
+        self.db.flush()
         return UserCreateResponse(id=user.id)
 
     def mark_tour_as_seen(self, user_id: UUID) -> None:
         user = ensure_user_exists(user_id, self.db)
         user.has_seen_tour = True
-        self.db.commit()
+        self.db.flush()
 
     def set_can_become_admin(self, request: CanBecomeAdminUpdate) -> None:
         if not request.can_become_admin and (
@@ -69,7 +69,7 @@ class UserService:
             raise ValueError("At least one user must be able to become admin.")
         user = ensure_user_exists(request.user_id, self.db)
         user.can_become_admin = request.can_become_admin
-        self.db.commit()
+        self.db.flush()
 
     def get_user_pending_actions(self, user: User) -> PendingActionResponse:
         input_port_actions = InputPortService(self.db).get_user_pending_actions(user)

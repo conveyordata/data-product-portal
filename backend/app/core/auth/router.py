@@ -30,7 +30,7 @@ def get_aws_credentials(
     data_product_name: str,
     environment: str,
     authorized_user: User = Depends(authorize_user),
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
 ) -> AWSCredentials:
     return AuthService().get_aws_credentials(
         data_product_name, environment, authorized_user, db

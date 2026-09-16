@@ -67,7 +67,7 @@ def approve_output_port_technical_asset_link(
     data_product_id: UUID,
     output_port_id: UUID,
     link_request: ApproveLinkBetweenTechnicalAssetAndOutputPortRequest,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
     output_link = TechnicalAssetOutputPortService(db).approve_data_output_link(
@@ -81,7 +81,7 @@ def approve_output_port_technical_asset_link(
             name=EventType.DATA_OUTPUT_DATASET_LINK_APPROVED,
             subject_id=output_link.output_port_id,
             subject_type=EventReferenceEntity.DATASET,
-            target_id=output_link.data_output_id,
+            target_id=output_link.technical_asset_id,
             target_type=EventReferenceEntity.DATA_OUTPUT,
             actor_id=authenticated_user.id,
         ),
@@ -109,7 +109,7 @@ def deny_output_port_technical_asset_link(
     data_product_id: UUID,
     output_port_id: UUID,
     link_request: DenyLinkBetweenTechnicalAssetAndOutputPortRequest,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
     output_link = TechnicalAssetOutputPortService(db).deny_data_output_link(
@@ -124,7 +124,7 @@ def deny_output_port_technical_asset_link(
             name=EventType.DATA_OUTPUT_DATASET_LINK_DENIED,
             subject_id=output_link.output_port_id,
             subject_type=EventReferenceEntity.DATASET,
-            target_id=output_link.data_output_id,
+            target_id=output_link.technical_asset_id,
             target_type=EventReferenceEntity.DATA_OUTPUT,
             actor_id=authenticated_user.id,
         ),
@@ -161,7 +161,7 @@ def link_output_port_to_technical_asset(
     output_port_id: UUID,
     link_request: LinkTechnicalAssetToOutputPortRequest,
     background_tasks: BackgroundTasks,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> LinkTechnicalAssetsToOutputPortResponse:
     dataset_link = TechnicalAssetService(db).link_dataset_to_data_output(
@@ -191,7 +191,7 @@ def link_output_port_to_technical_asset(
         background_tasks.add_task(
             email.send_link_output_port_email(
                 dataset_link.output_port,
-                dataset_link.data_output,
+                dataset_link.technical_asset,
                 requester=deepcopy(authenticated_user),
                 approvers=[deepcopy(approver) for approver in other_approvers],
             )
@@ -223,7 +223,7 @@ def unlink_output_port_from_technical_asset(
     data_product_id: UUID,
     output_port_id: UUID,
     link_request: UnLinkTechnicalAssetToOutputPortRequest,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
     data_output = TechnicalAssetService(db).unlink_dataset_from_data_output(

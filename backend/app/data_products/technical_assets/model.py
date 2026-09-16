@@ -19,7 +19,7 @@ if TYPE_CHECKING:
     from app.configuration.platforms.platform_services.model import PlatformService
     from app.data_products.model import DataProduct
     from app.data_products.output_port_technical_assets_link.model import (
-        DataOutputDatasetAssociation,
+        TechnicalAssetOutputPortAssociation,
     )
     from app.technical_asset_configuration.base_model import TechnicalAssetConfiguration
 
@@ -62,12 +62,14 @@ class TechnicalAsset(Base, BaseORM, EventTrackedMixin):
     )
     configuration: Mapped["TechnicalAssetConfiguration"] = relationship(lazy="joined")
 
-    dataset_links: Mapped[list["DataOutputDatasetAssociation"]] = relationship(
-        "DataOutputDatasetAssociation",
-        back_populates="data_output",
-        cascade="all, delete-orphan",
-        order_by="DataOutputDatasetAssociation.status.desc()",
-        lazy="raise",
+    output_port_links: Mapped[list["TechnicalAssetOutputPortAssociation"]] = (
+        relationship(
+            "TechnicalAssetOutputPortAssociation",
+            back_populates="technical_asset",
+            cascade="all, delete-orphan",
+            order_by="TechnicalAssetOutputPortAssociation.status.desc()",
+            lazy="raise",
+        )
     )
     tags: Mapped[list[Tag]] = relationship(
         secondary=tag_data_output_table, back_populates="data_outputs", lazy="selectin"

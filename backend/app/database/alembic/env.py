@@ -3,6 +3,7 @@ from logging.config import fileConfig
 from os.path import abspath, dirname
 
 from sqlalchemy import engine_from_config, pool
+from sqlalchemy.orm import Session
 
 from alembic import context
 
@@ -72,6 +73,11 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
+        Session(bind=connection).info["current_user_id"] = None
+        connection = connection.execution_options(
+            skip_data_product_visibility_filter=True,
+            skip_output_port_access_type_filter=True,
+        )
         context.configure(connection=connection, target_metadata=target_metadata)
 
         with context.begin_transaction():

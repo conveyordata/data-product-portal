@@ -100,7 +100,7 @@ class RoleAssignmentService:
 
         result = copy.deepcopy(assignment)
         self.db.delete(assignment)
-        self.db.commit()
+        self.db.flush()
         return result
 
     def update_assignment(
@@ -117,7 +117,8 @@ class RoleAssignmentService:
             assignment.decided_on = datetime.now()
             assignment.decided_by_id = actor.id
 
-        self.db.commit()
+        self.db.flush()
+        self.db.refresh(assignment)
         return assignment
 
     def _guard_against_illegal_owner_removal(

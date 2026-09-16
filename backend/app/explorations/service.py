@@ -18,7 +18,7 @@ from .schema_request import CreateExplorationRequest
 
 
 class ExplorationService(AbstractDataProductService):
-    def __init__(self, db: Session = Depends(get_db_session)):
+    def __init__(self, db: Session = Depends(get_db_session, scope="function")):
         super().__init__(db)
         self.namespace_validator = NamespaceValidator(ExplorationModel)
 
@@ -70,5 +70,5 @@ class ExplorationService(AbstractDataProductService):
             )
         result = copy.deepcopy(exploration)
         self.db.delete(exploration)
-        self.db.commit()
+        self.db.flush()
         return result

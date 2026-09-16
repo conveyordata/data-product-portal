@@ -37,7 +37,7 @@ def check_access(
     resource: Annotated[UUID | SkipJsonSchema[None], Query()] = None,
     domain: Annotated[UUID | SkipJsonSchema[None], Query()] = None,
     user: User = Depends(get_authenticated_user),
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
 ) -> AccessResponse:
     """Allows the requesting user to check whether an access check will fail or succeed.
     Useful to conditionally disable parts of the UI that are known to be inaccessible.

@@ -44,10 +44,10 @@ class DatasetEmbedModel(ORMModel):
     description: str
     data_product: DataProductEmbed
     technical_assets: list[TechnicalAssetEmbed] = Field(
-        validation_alias="data_output_links"
+        validation_alias="technical_asset_links"
     )
 
     @field_validator("technical_assets", mode="before")
     @classmethod
     def map_technical_assets(cls, v):
-        return [link.data_output for link in v]
+        return [link.technical_asset for link in v]

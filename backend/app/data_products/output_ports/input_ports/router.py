@@ -48,7 +48,7 @@ router = APIRouter(
 def get_input_ports_for_output_port(
     data_product_id: UUID,
     output_port_id: UUID,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> GetInputPortsForOutputPortResponse:
     return GetInputPortsForOutputPortResponse(
@@ -76,7 +76,7 @@ def approve_output_port_as_input_port(
     data_product_id: UUID,
     output_port_id: UUID,
     body: ApproveOutputPortAsInputPortRequest,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
     input_port = InputPortService(db).approve_output_port_as_input_port(
@@ -120,7 +120,7 @@ def deny_output_port_as_input_port(
     data_product_id: UUID,
     output_port_id: UUID,
     body: DenyOutputPortAsInputPortRequest,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
     input_port = InputPortService(db).deny_output_port_as_input_port(
@@ -164,7 +164,7 @@ def revoke_output_port_as_input_port(
     data_product_id: UUID,
     output_port_id: UUID,
     body: RevokeOutputPortAsInputPortRequest,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
     input_port = InputPortService(db).revoke_output_port_as_input_port(
@@ -207,7 +207,7 @@ def remove_output_port_as_input_port(
     data_product_id: UUID,
     output_port_id: UUID,
     body: RemoveOutputPortAsInputPortRequest,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
     input_port = InputPortService(db).remove_output_port_as_input_port(

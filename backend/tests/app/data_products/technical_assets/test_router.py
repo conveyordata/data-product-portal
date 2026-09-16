@@ -199,7 +199,7 @@ class TestTechnicalAssetsRouter:
     def test_get_data_outputs(self, client):
         data_output = TechnicalAssetFactory()
         response = client.get(ENDPOINT.format(data_output.owner.id))
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
         data = response.json()
         assert len(data) == 1
         assert data["technical_assets"][0]["id"] == str(data_output.id)

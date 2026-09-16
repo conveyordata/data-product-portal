@@ -33,7 +33,7 @@ from app.core.namespace.validation import (
 from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.model import DataProductVisibility, ensure_data_product_exists
 from app.data_products.output_port_technical_assets_link.model import (
-    DataOutputDatasetAssociation,
+    TechnicalAssetOutputPortAssociation,
 )
 from app.data_products.output_ports.model import OutputPort as OutputPortModel
 from app.data_products.schema_request import (
@@ -225,7 +225,7 @@ class DataProductService(AbstractDataProductService):
 
         result = copy.deepcopy(data_product)
         self.db.delete(data_product)
-        self.db.commit()
+        self.db.flush()
         return result
 
     def update_data_product(
@@ -279,7 +279,7 @@ class DataProductService(AbstractDataProductService):
         current_data_product = ensure_data_product_exists(id, self.db)
         self._ensure_not_deleting(current_data_product)
         current_data_product.about = data_product.about
-        self.db.commit()
+        self.db.flush()
         return current_data_product
 
     def update_data_product_status(
@@ -290,7 +290,7 @@ class DataProductService(AbstractDataProductService):
         current_data_product = ensure_data_product_exists(id, self.db)
         self._ensure_not_deleting(current_data_product)
         current_data_product.status = data_product.status
-        self.db.commit()
+        self.db.flush()
         return current_data_product
 
     def update_data_product_usage(
@@ -301,7 +301,7 @@ class DataProductService(AbstractDataProductService):
         current_data_product = ensure_data_product_exists(id, self.db)
         self._ensure_not_deleting(current_data_product)
         current_data_product.usage = usage.usage
-        self.db.commit()
+        self.db.flush()
         return current_data_product
 
     @deprecated("Should use generate_signin_url instead")
@@ -336,8 +336,8 @@ class DataProductService(AbstractDataProductService):
             self.db.scalars(
                 select(TechnicalAssetModel)
                 .options(
-                    joinedload(TechnicalAssetModel.dataset_links)
-                    .selectinload(DataOutputDatasetAssociation.output_port)
+                    joinedload(TechnicalAssetModel.output_port_links)
+                    .selectinload(TechnicalAssetOutputPortAssociation.output_port)
                     .selectinload(OutputPortModel.data_product_links)
                 )
                 .filter_by(owner_id=id)
@@ -390,7 +390,7 @@ class DataProductService(AbstractDataProductService):
                 )
             )
             if level >= 2:
-                for downstream_datasets in data_output.dataset_links:
+                for downstream_datasets in data_output.output_port_links:
                     nodes.append(
                         Node(
                             id=f"{downstream_datasets.output_port_id}_2",
