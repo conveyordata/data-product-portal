@@ -172,7 +172,6 @@ export function TechnicalAssetLinkModal({ onClose, dataProductId, datasetId, dat
                     <List.Item data-cy="technical-asset-link-item">
                         <Flex align="center" gap={12} style={{ width: '100%' }}>
                             <Checkbox
-                                data-cy="technical-asset-link-checkbox"
                                 checked={selectedOutputs.has(output.id)}
                                 onChange={() => handleOutputToggle(output.id)}
                             />
