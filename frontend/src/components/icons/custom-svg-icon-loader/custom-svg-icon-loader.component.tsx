@@ -10,7 +10,8 @@ type Props = {
         | ComponentType<CustomIconComponentProps | SVGProps<SVGSVGElement>>
         | ForwardRefExoticComponent<CustomIconComponentProps>
         | undefined;
-    size?: 'x-small' | 'small' | 'default' | 'large' | 'x-large';
+    //'font-small' matches the size of small fonts, used for inline icons, also matches the size of the default antd icon size
+    size?: 'font-small' | 'x-small' | 'small' | 'default' | 'large' | 'x-large';
     hasRoundBorder?: boolean;
     hasSquareBorder?: boolean;
     color?: 'primary' | 'success' | 'warning' | 'danger' | 'info' | 'light' | 'dark';

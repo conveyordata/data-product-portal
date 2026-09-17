@@ -11,6 +11,11 @@ sidebar_position: 200
 - **[API]**: A technical asset's `configuration` is now published as a generic object rather than a typed union, so the schema is identical regardless of which plugins are installed. Regenerated SDK, CLI and frontend clients will see the type change, and `AccessGranularity` no longer appears in generated code.
 - **[API]**: A technical asset's `configuration` object identifies its plugin type with `name` instead of `configuration_type`. Existing clients sending or reading `configuration_type` need to switch to `name`.
 
+### features
+
+- **[General]**: Added support for Hidden Data Products, they are only visible to people with direct access to them.
+  This allows you to use Data Product Portal to also manage sensitive data products that should not be visible to everyone in the organization.
+
 ## 0.7.3
 
 ### bugfixes

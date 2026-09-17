@@ -1755,6 +1755,7 @@ type DataProductCreate struct {
 	DomainID    uuid.UUID                                    `json:"domain_id"`
 	TagIds      []uuid.UUID                                  `json:"tag_ids"`
 	LifecycleID uuid.UUID                                    `json:"lifecycle_id"`
+	Visibility  OptDataProductVisibility                     `json:"visibility"`
 	Owners      []uuid.UUID                                  `json:"owners"`
 	InputPorts  OptNilRequestInputPortsForDataProductRequest `json:"input_ports"`
 }
@@ -1797,6 +1798,11 @@ func (s *DataProductCreate) GetTagIds() []uuid.UUID {
 // GetLifecycleID returns the value of LifecycleID.
 func (s *DataProductCreate) GetLifecycleID() uuid.UUID {
 	return s.LifecycleID
+}
+
+// GetVisibility returns the value of Visibility.
+func (s *DataProductCreate) GetVisibility() OptDataProductVisibility {
+	return s.Visibility
 }
 
 // GetOwners returns the value of Owners.
@@ -1847,6 +1853,11 @@ func (s *DataProductCreate) SetTagIds(val []uuid.UUID) {
 // SetLifecycleID sets the value of LifecycleID.
 func (s *DataProductCreate) SetLifecycleID(val uuid.UUID) {
 	s.LifecycleID = val
+}
+
+// SetVisibility sets the value of Visibility.
+func (s *DataProductCreate) SetVisibility(val OptDataProductVisibility) {
+	s.Visibility = val
 }
 
 // SetOwners sets the value of Owners.
@@ -3213,6 +3224,48 @@ func (s *DataProductUsageUpdate) SetUsage(val string) {
 	s.Usage = val
 }
 
+// Ref: #/components/schemas/DataProductVisibility
+type DataProductVisibility string
+
+const (
+	DataProductVisibilityHidden       DataProductVisibility = "hidden"
+	DataProductVisibilityDiscoverable DataProductVisibility = "discoverable"
+)
+
+// AllValues returns all DataProductVisibility values.
+func (DataProductVisibility) AllValues() []DataProductVisibility {
+	return []DataProductVisibility{
+		DataProductVisibilityHidden,
+		DataProductVisibilityDiscoverable,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s DataProductVisibility) MarshalText() ([]byte, error) {
+	switch s {
+	case DataProductVisibilityHidden:
+		return []byte(s), nil
+	case DataProductVisibilityDiscoverable:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *DataProductVisibility) UnmarshalText(data []byte) error {
+	switch DataProductVisibility(data) {
+	case DataProductVisibilityHidden:
+		*s = DataProductVisibilityHidden
+		return nil
+	case DataProductVisibilityDiscoverable:
+		*s = DataProductVisibilityDiscoverable
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
 // Ref: #/components/schemas/DataQualityStatus
 type DataQualityStatus string
 
@@ -4318,6 +4371,7 @@ type GetDataProductResponse struct {
 	Domain      Domain                    `json:"domain"`
 	Type        DataProductType           `json:"type"`
 	Lifecycle   NilDataProductLifeCycle   `json:"lifecycle"`
+	Visibility  DataProductVisibility     `json:"visibility"`
 	About       NilString                 `json:"about"`
 }
 
@@ -4374,6 +4428,11 @@ func (s *GetDataProductResponse) GetType() DataProductType {
 // GetLifecycle returns the value of Lifecycle.
 func (s *GetDataProductResponse) GetLifecycle() NilDataProductLifeCycle {
 	return s.Lifecycle
+}
+
+// GetVisibility returns the value of Visibility.
+func (s *GetDataProductResponse) GetVisibility() DataProductVisibility {
+	return s.Visibility
 }
 
 // GetAbout returns the value of About.
@@ -4434,6 +4493,11 @@ func (s *GetDataProductResponse) SetType(val DataProductType) {
 // SetLifecycle sets the value of Lifecycle.
 func (s *GetDataProductResponse) SetLifecycle(val NilDataProductLifeCycle) {
 	s.Lifecycle = val
+}
+
+// SetVisibility sets the value of Visibility.
+func (s *GetDataProductResponse) SetVisibility(val DataProductVisibility) {
+	s.Visibility = val
 }
 
 // SetAbout sets the value of About.
@@ -4507,6 +4571,7 @@ type GetDataProductsResponseItem struct {
 	Domain              Domain                    `json:"domain"`
 	Type                DataProductType           `json:"type"`
 	Lifecycle           NilDataProductLifeCycle   `json:"lifecycle"`
+	Visibility          DataProductVisibility     `json:"visibility"`
 	UserCount           int                       `json:"user_count"`
 	InputPortCount      int                       `json:"input_port_count"`
 	TechnicalAssetCount int                       `json:"technical_asset_count"`
@@ -4565,6 +4630,11 @@ func (s *GetDataProductsResponseItem) GetType() DataProductType {
 // GetLifecycle returns the value of Lifecycle.
 func (s *GetDataProductsResponseItem) GetLifecycle() NilDataProductLifeCycle {
 	return s.Lifecycle
+}
+
+// GetVisibility returns the value of Visibility.
+func (s *GetDataProductsResponseItem) GetVisibility() DataProductVisibility {
+	return s.Visibility
 }
 
 // GetUserCount returns the value of UserCount.
@@ -4635,6 +4705,11 @@ func (s *GetDataProductsResponseItem) SetType(val DataProductType) {
 // SetLifecycle sets the value of Lifecycle.
 func (s *GetDataProductsResponseItem) SetLifecycle(val NilDataProductLifeCycle) {
 	s.Lifecycle = val
+}
+
+// SetVisibility sets the value of Visibility.
+func (s *GetDataProductsResponseItem) SetVisibility(val DataProductVisibility) {
+	s.Visibility = val
 }
 
 // SetUserCount sets the value of UserCount.
@@ -7021,6 +7096,52 @@ func (o OptBool) Get() (v bool, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptBool) Or(d bool) bool {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptDataProductVisibility returns new OptDataProductVisibility with value set to v.
+func NewOptDataProductVisibility(v DataProductVisibility) OptDataProductVisibility {
+	return OptDataProductVisibility{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptDataProductVisibility is optional DataProductVisibility.
+type OptDataProductVisibility struct {
+	Value DataProductVisibility
+	Set   bool
+}
+
+// IsSet returns true if OptDataProductVisibility was set.
+func (o OptDataProductVisibility) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptDataProductVisibility) Reset() {
+	var v DataProductVisibility
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptDataProductVisibility) SetTo(v DataProductVisibility) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptDataProductVisibility) Get() (v DataProductVisibility, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptDataProductVisibility) Or(d DataProductVisibility) DataProductVisibility {
 	if v, ok := o.Get(); ok {
 		return v
 	}

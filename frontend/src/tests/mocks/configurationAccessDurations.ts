@@ -28,6 +28,10 @@ export const mockAccessDurationsGet = (accessDurations: AccessDuration[] = mockA
     server.use(http.get(endpoint, () => HttpResponse.json({ access_durations: accessDurations })));
 };
 
+export const mockTimeBoundAccessEnabled = (enabled = true) => {
+    server.use(http.get('*/api/v2/configuration/access_durations/enabled', () => HttpResponse.json({ enabled })));
+};
+
 export const mockUpdateAccessDuration = (savedAccessDurations: AccessDuration[] = mockAccessDurations) => {
     server.use(
         http.put('*/api/v2/configuration/access_durations/:abstractDataProductType', () => {
