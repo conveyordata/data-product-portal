@@ -32,7 +32,6 @@ from app.configuration.tags.model import Tag, tag_dataset_table
 from app.core.authz.db_utils import (
     is_system_account,
     is_user_admin,
-    statement_references_model,
 )
 from app.core.webhooks.events import OutputPortEvent
 from app.data_products.output_port_technical_assets_link.model import (
@@ -256,39 +255,20 @@ def enforce_private_output_port_filter(execute_state):
     if not execute_state.is_select:
         return
 
-    if execute_state.is_column_load:
-        return
-
     if execute_state.execution_options.get("skip_output_port_access_type_filter"):
         return
 
+    # The current user is only set while serving a request. Everything else
+    # (migrations, casbin, startup sync) is a system level operation that is not
+    # performed on behalf of a user and therefore has nothing to filter against.
     user_id = execute_state.session.info.get("current_user_id")
-
-    is_output_port_entity_query = any(
-        desc.get("entity") is OutputPort
-        for desc in execute_state.statement.column_descriptions
-    )
-    references_output_port = statement_references_model(
-        execute_state.statement, OutputPort
-    )
-
-    if not (is_output_port_entity_query or references_output_port):
+    if user_id is None:
         return
 
-    if user_id is None:
-        raise Exception(
-            "User id must be set when skip_output_port_access_type_filter is False or not set"
+    execute_state.statement = execute_state.statement.options(
+        with_loader_criteria(
+            OutputPort,
+            lambda cls: _access_type_filter_for_user(user_id),
+            include_aliases=True,
         )
-
-    if is_output_port_entity_query:
-        execute_state.statement = execute_state.statement.options(
-            with_loader_criteria(
-                OutputPort,
-                lambda cls: _access_type_filter_for_user(user_id),
-                include_aliases=True,
-            )
-        )
-    elif references_output_port:
-        execute_state.statement = execute_state.statement.where(
-            _access_type_filter_for_user(user_id)
-        )
+    )

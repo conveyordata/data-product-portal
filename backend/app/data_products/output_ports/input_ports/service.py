@@ -301,7 +301,9 @@ class InputPortService:
                         InputPortModel.requests
                     )
                 )
-                .order_by(asc(InputPortRequestModel.created_on))
+                .order_by(asc(InputPortRequestModel.created_on)),
+                # Skip since we will redact manually
+                execution_options={"skip_data_product_visibility_filter": True},
             )
             .unique()
             .all()
@@ -344,6 +346,13 @@ class InputPortService:
                 )
             )
 
-        requests = self.db.scalars(query).unique().all()
+        # We skip visibility because we will redact manually
+        requests = (
+            self.db.scalars(
+                query, execution_options={"skip_data_product_visibility_filter": True}
+            )
+            .unique()
+            .all()
+        )
 
         return [self.compute_redaction(user, request) for request in requests]

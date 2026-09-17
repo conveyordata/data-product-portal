@@ -11,6 +11,7 @@ from app.authorization.role_assignments.enums import AssignmentFilter
 from app.authorization.roles.schema import Scope
 from app.core.authz import Action
 from app.data_products.model import DataProductVisibility
+from app.data_products.output_ports.enums import OutputPortAccessType
 from app.resource_names.service import ResourceNameValidityType
 from app.settings import settings
 from tests.factories import (
@@ -586,14 +587,47 @@ class TestDataProductsRouter:
         TechnicalAssetOutputPortAssociationFactory(
             technical_asset=ta, output_port=output_port
         )
-        downstream_dataset = OutputPortFactory()
         InputPortFactory(
             output_port=output_port,
-            consuming_abstract_data_product=downstream_dataset.data_product,
         )
         response = client.get(f"{ENDPOINT}/{data_product.id}/graph")
         assert len(response.json()["edges"]) == 3
         assert len(response.json()["nodes"]) == 4
+
+    def test_get_data_product_graph_data_consumer_private_output_port(self, client):
+        input_port = InputPortFactory(
+            output_port=OutputPortFactory(
+                access_type=OutputPortAccessType.PRIVATE,
+            )
+        )
+        response = client.get(
+            f"{ENDPOINT}/{input_port.consuming_abstract_data_product_id}/graph"
+        )
+
+        assert response.status_code == 200, response.text
+        assert len(response.json()["edges"]) == 0
+        node_ids = [
+            node["data"]["id"] for node in response.json()["nodes"] if node["id"]
+        ]
+        assert len(node_ids) == 1
+        assert str(input_port.consuming_abstract_data_product_id) in node_ids
+        assert str(input_port.output_port.id) not in node_ids
+
+    def test_get_data_product_graph_data_hidden_consumer(self, client):
+        ip = InputPortFactory(
+            consuming_abstract_data_product=DataProductFactory(
+                visibility=DataProductVisibility.HIDDEN
+            )
+        )
+        ta = TechnicalAssetFactory(owner=ip.output_port.data_product)
+        TechnicalAssetOutputPortAssociationFactory(
+            technical_asset=ta, output_port=ip.output_port
+        )
+        response = client.get(f"{ENDPOINT}/{ip.output_port.data_product_id}/graph")
+        assert response.status_code == 200, response.text
+        node_ids = [node["data"]["id"] for node in response.json()["nodes"]]
+        assert str(ip.output_port.data_product_id) in node_ids
+        assert str(ip.consuming_abstract_data_product_id) not in node_ids
 
     def test_get_data_product_graph_data_exploration_included(self, client):
         data_product = DataProductFactory()
@@ -610,6 +644,19 @@ class TestDataProductsRouter:
         response = client.get(f"{ENDPOINT}/{data_product.id}/graph")
         assert len(response.json()["edges"]) == 3
         assert len(response.json()["nodes"]) == 4
+
+    def test_get_data_product_graph_data_filters_private_output_port_without_access(
+        self, client
+    ):
+        data_product = DataProductFactory()
+        output_port = OutputPortFactory(
+            access_type=OutputPortAccessType.PRIVATE, data_product=data_product
+        )
+        response = client.get(f"{ENDPOINT}/{data_product.id}/graph")
+        assert response.status_code == 200, response.text
+        assert response.json()["edges"] == []
+
+        assert output_port.id not in [node["id"] for node in response.json()["nodes"]]
 
     def test_get_signin_url_not_implemented(self, client):
         EnvironmentFactory(name="production")
