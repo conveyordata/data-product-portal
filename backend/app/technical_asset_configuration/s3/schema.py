@@ -33,7 +33,6 @@ class S3TechnicalAssetConfiguration(TechnicalAssetPlugin):
     bucket: str
     suffix: str = ""
     path: str
-    configuration_type: str = CONFIGURATION_TYPE
 
     _platform_metadata = PlatformMetadata(
         display_name="S3",

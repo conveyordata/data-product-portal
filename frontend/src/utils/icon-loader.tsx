@@ -1,3 +1,5 @@
+import { ApiOutlined } from '@ant-design/icons';
+
 // Dynamically import all SVG icons from the assets/icons directory
 const icons = import.meta.glob('@/assets/icons/*.svg', {
     eager: true,
@@ -17,8 +19,7 @@ export function getIcon(iconName: string): React.ComponentType<React.SVGProps<SV
 
     if (!icon) {
         console.warn(`Icon not found: ${iconName}`);
-        // Return a default icon or null
-        return icons['/src/assets/icons/s3-logo.svg'] as React.ComponentType<React.SVGProps<SVGSVGElement>>;
+        return ApiOutlined as React.ComponentType<React.SVGProps<SVGSVGElement>>;
     }
 
     return icon as React.ComponentType<React.SVGProps<SVGSVGElement>>;

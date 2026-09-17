@@ -9,7 +9,7 @@ from app.technical_asset_configuration.base_schema import TechnicalAssetPlugin
 plugin_registry.discovered()
 
 
-def _resolve_configuration(value: Any) -> TechnicalAssetPlugin:
+def technical_asset_validator(value: Any) -> TechnicalAssetPlugin:
     if isinstance(value, TechnicalAssetPlugin):
         return value
 
@@ -32,7 +32,7 @@ def _resolve_configuration(value: Any) -> TechnicalAssetPlugin:
 
 DataOutputConfiguration = Annotated[
     TechnicalAssetPlugin,
-    PlainValidator(_resolve_configuration),
+    PlainValidator(technical_asset_validator),
     PlainSerializer(lambda configuration: configuration.model_dump(), return_type=dict),
     WithJsonSchema(
         {

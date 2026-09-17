@@ -16235,19 +16235,6 @@
         ],
         "title": "TechnicalAssetOutputPortRequest"
       },
-      "TechnicalAssetPlugin": {
-        "properties": {
-          "configuration_type": {
-            "type": "string",
-            "title": "Configuration Type"
-          }
-        },
-        "type": "object",
-        "required": [
-          "configuration_type"
-        ],
-        "title": "TechnicalAssetPlugin"
-      },
       "TechnicalAssetStatus": {
         "type": "string",
         "enum": [
@@ -17117,6 +17104,19 @@
           "type"
         ],
         "title": "ValidationError"
+      },
+      "TechnicalAssetPlugin": {
+        "properties": {
+          "configuration_type": {
+            "type": "string",
+            "title": "Configuration Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "configuration_type"
+        ],
+        "title": "TechnicalAssetPlugin"
       }
     },
     "securitySchemes": {

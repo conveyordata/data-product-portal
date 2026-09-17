@@ -32,7 +32,6 @@ class PostgreSQLTechnicalAssetConfiguration(TechnicalAssetPlugin):
 
     database: str
     schema: str = ""
-    configuration_type: str = CONFIGURATION_TYPE
     table: str = "*"
     access_granularity: AccessGranularity
 

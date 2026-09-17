@@ -27,7 +27,9 @@ class UIElementMetadataResponse(ORMModel):
     platform: str
     display_name: str
     icon_name: str
-    icon_data_uri: Optional[str] = None
+    icon_data_uri: Optional[str] = (
+        None  # Set by plugins that ship their own icon. In-tree types leave it unset and the frontend resolves icon_name from its own assets.
+    )
     parent_platform: Optional[str] = None
     platform_tile: Optional[PlatformTile] = None
     show_in_form: bool = True

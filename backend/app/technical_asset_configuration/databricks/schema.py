@@ -38,7 +38,6 @@ class DatabricksTechnicalAssetConfiguration(TechnicalAssetPlugin):
 
     catalog: str
     schema: str = ""
-    configuration_type: str = CONFIGURATION_TYPE
     table: str = "*"
     bucket_identifier: str = ""
     catalog_path: str = ""

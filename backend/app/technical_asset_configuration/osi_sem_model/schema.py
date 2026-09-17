@@ -25,7 +25,6 @@ class OSISemanticModelTechnicalAssetConfiguration(TechnicalAssetPlugin):
 
     model_name: str = ""
     location: str = ""
-    configuration_type: str = CONFIGURATION_TYPE
 
     _platform_metadata = PlatformMetadata(
         display_name="OSI",

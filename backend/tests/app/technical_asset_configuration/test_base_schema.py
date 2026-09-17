@@ -9,7 +9,6 @@ from app.technical_asset_configuration.base_schema import (
 
 class PluginWithBundledIcon(TechnicalAssetPlugin):
     name: ClassVar[str] = "PluginWithBundledIcon"
-    configuration_type: str = "PluginWithBundledIcon"
 
     _platform_metadata = PlatformMetadata(
         display_name="Bundled icon",
