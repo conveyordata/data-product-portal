@@ -6,13 +6,13 @@ from sqlalchemy.orm import Session
 from app.core.conveyor.notebook_builder import CONVEYOR_SERVICE
 from app.data_products.model import DataProduct as DataProductModel
 from app.technical_asset_configuration.base_schema import (
-    AssetProviderPlugin,
     PlatformMetadata,
+    TechnicalAssetPlugin,
 )
 from app.users.schema import User
 
 
-class ConveyorPlugin(AssetProviderPlugin):
+class ConveyorPlugin(TechnicalAssetPlugin):
     name: ClassVar[str] = "ConveyorPlugin"
     version: ClassVar[str] = "1.0"
 

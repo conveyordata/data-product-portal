@@ -1,5 +1,3 @@
-from typing import get_args
-
 from fastmcp import FastMCP
 
 from app.core.logging import logger
@@ -10,7 +8,7 @@ from app.mcp.loader import get_plugin_instructions, load_plugins
 from app.mcp.permissions import register_permission_tools
 from app.mcp.resources import register_resources
 from app.mcp.search import register_search_tools
-from app.technical_asset_configuration.schema_union import DataOutputs
+from app.plugins.registry import plugin_registry
 
 initialize_models()
 
@@ -81,5 +79,5 @@ load_plugins(mcp)
 
 logger.info(
     "[MCP] Server ready. Active plugins: "
-    + str([cls.__name__ for cls in get_args(DataOutputs) if cls.mcp_instructions])
+    + str([p.name for p in plugin_registry.enabled() if p.mcp_instructions])
 )
