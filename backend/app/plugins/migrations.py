@@ -25,7 +25,6 @@ def owns_a_table(plugin: type[TechnicalAssetPlugin]) -> bool:
 def _config(
     plugins: Sequence[type[TechnicalAssetPlugin]], url: str
 ) -> Iterator[Config]:
-    """One Alembic environment holding every given plugin's revisions."""
     with ExitStack() as stack:
         version_locations = [
             str(
@@ -41,7 +40,7 @@ def _config(
         config.set_main_option("script_location", str(_RUNNER_DIR))
         config.set_main_option("version_path_separator", "os")
         config.set_main_option("version_locations", os.pathsep.join(version_locations))
-        config.set_main_option("sqlalchemy.url", url)
+        config.set_main_option("sqlalchemy.url", url.replace("%", "%%"))
         config.attributes["version_table"] = PLUGIN_VERSION_TABLE
         yield config
 
@@ -94,7 +93,6 @@ def _reconcile(
 def reconcile_all(
     plugins: Sequence[type[TechnicalAssetPlugin]], engine: Engine
 ) -> dict[str, str]:
-    """Reconcile every plugin that owns a table. Fails loudly, like a core migration."""
     owning = [plugin for plugin in plugins if owns_a_table(plugin)]
     if not owning:
         return {}
@@ -136,8 +134,3 @@ def reconcile_all(
                 str(plugin.target_revision), config, script, _current_heads(engine)
             )
     return results
-
-
-def reconcile_plugin(plugin: type[TechnicalAssetPlugin], engine: Engine) -> str:
-    """Reconcile a single plugin. Convenience around reconcile_all."""
-    return reconcile_all([plugin], engine)[plugin.name]
