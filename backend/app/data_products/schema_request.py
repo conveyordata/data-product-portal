@@ -8,6 +8,7 @@ from pydantic import field_validator
 from app.abstract_data_product.schema_request import (
     RequestInputPortsForAbstractDataProductRequestItem,
 )
+from app.data_products.model import DataProductVisibility
 from app.data_products.status import AbstractDataProductStatus
 from app.shared.schema import ORMModel
 
@@ -29,6 +30,7 @@ class RequestInputPortsForDataProductRequest(ORMModel):
 
 
 class DataProductCreate(DataProductUpdate):
+    visibility: DataProductVisibility = DataProductVisibility.DISCOVERABLE
     owners: Annotated[list[UUID], MinLen(1)]
 
     input_ports: Optional[RequestInputPortsForDataProductRequest] = None

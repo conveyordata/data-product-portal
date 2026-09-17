@@ -110,6 +110,7 @@ from .data_product_types_get import DataProductTypesGet
 from .data_product_types_get_item import DataProductTypesGetItem
 from .data_product_update import DataProductUpdate
 from .data_product_usage_update import DataProductUsageUpdate
+from .data_product_visibility import DataProductVisibility
 from .data_quality_status import DataQualityStatus
 from .data_quality_technical_asset import DataQualityTechnicalAsset
 from .databricks_config import DatabricksConfig
@@ -468,6 +469,7 @@ __all__ = (
     "DataProductTypeUpdate",
     "DataProductUpdate",
     "DataProductUsageUpdate",
+    "DataProductVisibility",
     "DataQualityStatus",
     "DataQualityTechnicalAsset",
     "DecideDataProductRoleAssignment",
