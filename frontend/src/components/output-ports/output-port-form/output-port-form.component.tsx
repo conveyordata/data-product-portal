@@ -480,7 +480,7 @@ export function OutputPortForm({
     const ownerIds = mode === 'edit' ? datasetOwners : dataProductOwners;
 
     useEffect(() => {
-        if (mode === 'create' && dataProductOwners) {
+        if (mode === 'create' && dataProductOwners && form.getFieldValue('owners') === undefined) {
             form.setFieldValue('owners', dataProductOwners);
         }
     }, [mode, dataProductOwners, form]);
