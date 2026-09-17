@@ -1,8 +1,5 @@
 describe('Approve pending access request', () => {
     it('approves a pending input port access request', () => {
-        // Seeded PENDING request in backend/sample_data.sql: "Financial Risk Assessment"
-        // requesting access to the "Daily Feature Engagement" output port, owned by the
-        // default authenticated user.
         const requestDescription = 'Financial Risk Assessment requests read access to Daily Feature Engagement';
 
         cy.visit('/studio?tab=pending-requests');

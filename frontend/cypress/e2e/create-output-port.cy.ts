@@ -1,4 +1,4 @@
-describe('Output port management', () => {
+describe('Create Output port', () => {
     it('creates a new output port on an existing data product', () => {
         // "Access modes example" data product from backend/sample_data.sql; the
         // default authenticated user is its Owner, unlike e.g. Customer Segmentation.
@@ -52,7 +52,7 @@ describe('Output port management', () => {
 
         // The toast is transient and may already be gone by now; assert on the
         // resulting state instead, which is what actually matters.
-        cy.contains(`Link Technical Assets to ${outputPortName}`).should('not.be.visible');
+        cy.contains(`Link Technical Assets to ${outputPortName}`).should('not.exist');
         cy.contains('[data-cy="output-port-card"]', outputPortName)
             .contains('2 linked Technical Assets')
             .should('be.visible');
