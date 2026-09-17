@@ -63,8 +63,7 @@ def _field_lines(plugin_class: ast.ClassDef, source: str) -> list[str]:
     for node in plugin_class.body:
         if not isinstance(node, ast.AnnAssign) or not isinstance(node.target, ast.Name):
             continue
-        field_name = node.target.id
-        if field_name.startswith("_") or field_name in (
+        if node.target.id.startswith("_") or node.target.id in (
             "name",
             "version",
             "target_revision",

@@ -1,14 +1,3 @@
-"""Baseline for the Databricks technical asset configuration table.
-
-The table already exists in every deployment that ran the core migrations
-from before Databricks became a plugin, so this revision creates it only when
-it is missing. From here on the table belongs to this plugin's own migration
-history.
-
-Revision ID: databricks_0001_baseline
-Revises:
-"""
-
 from typing import Sequence, Union
 
 import sqlalchemy as sa

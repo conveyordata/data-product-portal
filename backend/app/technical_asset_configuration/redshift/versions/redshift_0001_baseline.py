@@ -1,14 +1,3 @@
-"""Baseline for the Redshift technical asset configuration table.
-
-The table already exists in every deployment that ran the core migrations
-from before Redshift became a plugin, so this revision creates it only when
-it is missing. From here on the table belongs to this plugin's own migration
-history.
-
-Revision ID: redshift_0001_baseline
-Revises:
-"""
-
 from typing import Sequence, Union
 
 import sqlalchemy as sa

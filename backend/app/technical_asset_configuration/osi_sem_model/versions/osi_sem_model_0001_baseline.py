@@ -1,14 +1,3 @@
-"""Baseline for the OSI Semantic Model technical asset configuration table.
-
-The table already exists in every deployment that ran the core migrations
-from before OSI Semantic Model became a plugin, so this revision creates it
-only when it is missing. From here on the table belongs to this plugin's own
-migration history.
-
-Revision ID: osi_sem_model_0001_baseline
-Revises:
-"""
-
 from typing import Sequence, Union
 
 import sqlalchemy as sa
