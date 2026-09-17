@@ -18,13 +18,7 @@ class PluginRegistry:
         plugins: dict[str, type[TechnicalAssetPlugin]] = {}
 
         for entry_point in entry_points(group=ENTRY_POINT_GROUP):
-            try:
-                plugin = entry_point.load()
-            except Exception:
-                logger.exception(
-                    f"Failed to load plugin entry point '{entry_point.name}', skipping"
-                )
-                continue
+            plugin = entry_point.load()
             if not (
                 isinstance(plugin, type) and issubclass(plugin, TechnicalAssetPlugin)
             ):
