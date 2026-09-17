@@ -101,9 +101,7 @@ class TestOutputPortSearchRouter:
                 "query": "Which features are used the most?",
                 "expected": {
                     "Daily Feature Engagement",
-                    "Product KPI Dashboard",
                     "Release Engagement By Segment",
-                    "Release Impact Summary",
                     "Weekly Feature Summary",
                 },
             },

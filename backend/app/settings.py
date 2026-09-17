@@ -114,6 +114,8 @@ class Settings(BaseSettings):
 
     TIME_BOUND_ACCESS_ENABLED: bool = True
     EXPIRING_SOON_THRESHOLD_DAYS: int = 14
+    OUTPUT_PORT_SEARCH_RERANK_CANDIDATE_MULTIPLIER: int = 5
+    OUTPUT_PORT_SEARCH_RERANK_CANDIDATE_MAX: int = 100
 
 
 class LogLevel(str, Enum):

@@ -3,6 +3,7 @@ from typing import Iterable, Optional, Sequence, assert_never
 from uuid import UUID
 
 from fastapi import HTTPException, status
+from opentelemetry import trace
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session, joinedload, raiseload, selectinload, undefer
 from sqlalchemy.sql.base import ExecutableOption
@@ -27,7 +28,7 @@ from app.configuration.data_product_lifecycles.model import (
 from app.configuration.tags.model import Tag as TagModel
 from app.configuration.tags.model import ensure_tag_exists
 from app.core.authz import Authorization
-from app.core.embed.model import get_text_embedding_model
+from app.core.embed.model import get_text_embedding_model, get_text_reranker_model
 from app.core.namespace.validation import (
     NamespaceValidator,
 )
@@ -65,8 +66,11 @@ from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
 from app.resource_names.service import ResourceNameValidityType
+from app.settings import settings
 from app.users.model import User as UserModel
 from app.users.schema import User
+
+tracer = trace.get_tracer(__name__)
 
 
 def get_dataset_load_options() -> Sequence[ExecutableOption]:
@@ -89,6 +93,7 @@ class OutputPortService:
         self.db = db
         self.namespace_validator = NamespaceValidator(OutputPortModel)
         self.embedding_model = get_text_embedding_model()
+        self.reranker_model = get_text_reranker_model()
 
     def _ensure_access_durations_are_configured(
         self,
@@ -206,11 +211,8 @@ class OutputPortService:
         user: UserModel,
         assignment_filter: AssignmentFilter,
     ) -> Sequence[OutputPortModel]:
-        """An attempt was made to use the elbow method to determine a cut-off for returned results.
-        The results of this method were quite poor, hence the search currently works as a sorting operation only,
-        no filtering is applied other than the limit.
-        """
         ordered_by = OutputPortModel.name.asc()
+        candidate_limit = limit
         if query:
             query_embedding = self.embedding_model.embed(query)
             semantic_score = (
@@ -228,8 +230,15 @@ class OutputPortService:
                 .label("hybrid_score")
                 .desc()
             )
+            candidate_limit = min(
+                max(
+                    limit * settings.OUTPUT_PORT_SEARCH_RERANK_CANDIDATE_MULTIPLIER,
+                    limit,
+                ),
+                settings.OUTPUT_PORT_SEARCH_RERANK_CANDIDATE_MAX,
+            )
 
-        stmt = select(OutputPortModel).order_by(ordered_by).limit(limit)
+        stmt = select(OutputPortModel).order_by(ordered_by).limit(candidate_limit)
         match assignment_filter:
             case AssignmentFilter.ALL:
                 pass
@@ -240,10 +249,40 @@ class OutputPortService:
         stmt = stmt.options(
             undefer(OutputPortModel.abstract_data_product_count),
             undefer(OutputPortModel.technical_assets_count),
+            *self.recalculate_embeddings_load_options(),
         )
         results = self.db.scalars(stmt).unique().all()
+        if query:
+            results = self._rerank_output_ports(query, results, limit)
 
         return results
+
+    def _rerank_output_ports(
+        self,
+        query: str,
+        output_ports: Sequence[OutputPortModel],
+        limit: int,
+    ) -> list[OutputPortModel]:
+        if not output_ports:
+            return []
+        with tracer.start_as_current_span("rerank_output_ports") as span:
+            span.set_attribute("output_port_search.query_length", len(query))
+            span.set_attribute("output_port_search.candidate_count", len(output_ports))
+            span.set_attribute("output_port_search.limit", limit)
+
+            with tracer.start_as_current_span("serialize_rerank_candidates"):
+                documents = [
+                    DatasetEmbedModel.model_validate(output_port).model_dump_json()
+                    for output_port in output_ports
+                ]
+            with tracer.start_as_current_span("run_output_port_reranker"):
+                scores = list(self.reranker_model.rerank(query, documents))
+            ranked_pairs = sorted(
+                zip(output_ports, scores, strict=True),
+                key=lambda pair: pair[1],
+                reverse=True,
+            )
+            return [output_port for output_port, _ in ranked_pairs[:limit]]
 
     @staticmethod
     def recalculate_embeddings_load_options():

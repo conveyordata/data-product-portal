@@ -134,6 +134,32 @@ class TestDatasetsService:
             "Owner should also see public datasets"
         )
 
+    def test_search_output_ports_reranks_hybrid_candidates(self, session):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        roi_output_port = OutputPortFactory(
+            name="Campaign Performance Summary",
+            description="Shows which campaigns delivered the best ROI",
+        )
+        generic_output_port = OutputPortFactory(
+            name="Campaign Archive",
+            description="Historical archive of campaign exports",
+        )
+
+        service = OutputPortService(session)
+        service.recalculate_search(roi_output_port.id)
+        service.recalculate_search(generic_output_port.id)
+
+        with as_user(session, user.id):
+            search_results = service.search_output_ports(
+                query="Which campaigns delivered the best ROI?",
+                limit=1,
+                user=user,
+                assignment_filter=AssignmentFilter.ALL,
+            )
+
+        assert len(search_results) == 1
+        assert search_results[0].id == roi_output_port.id
+
     @staticmethod
     def get_output_port(output_port: OutputPort, session) -> OutputPort:
         return session.get(
