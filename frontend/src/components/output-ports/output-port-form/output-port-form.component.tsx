@@ -137,7 +137,7 @@ export function AccessDurationSection({
 
 function AccessDurationInfo({ mode }: { mode: 'create' | 'edit' }) {
     const { t } = useTranslation();
-    const { data: allDurations = [] } = useGetAllAccessDurationsQuery();
+    const { data: { access_durations: allDurations = [] } = {} } = useGetAllAccessDurationsQuery();
     const { data: enabledState } = useIsTimeBoundAccessEnabledQuery();
     const enabled = enabledState?.enabled ?? true;
 

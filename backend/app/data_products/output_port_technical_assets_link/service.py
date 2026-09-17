@@ -89,7 +89,7 @@ class TechnicalAssetOutputPortService:
         current_link.status = DecisionStatus.APPROVED
         current_link.approved_by = actor
         current_link.approved_on = datetime.now(tz=pytz.utc)
-        self.db.commit()
+        self.db.flush()
         return current_link
 
     def deny_data_output_link(
@@ -108,7 +108,7 @@ class TechnicalAssetOutputPortService:
         current_link.status = DecisionStatus.DENIED
         current_link.denied_by = actor
         current_link.denied_on = datetime.now(tz=pytz.utc)
-        self.db.commit()
+        self.db.flush()
         return current_link
 
     def remove_data_output_link(
@@ -125,7 +125,7 @@ class TechnicalAssetOutputPortService:
             output_port_id=output_port_id,
         )
         self.db.delete(current_link)
-        self.db.commit()
+        self.db.flush()
         return current_link
 
     def get_user_requests(self, user: User, hide_old_inactive: bool):

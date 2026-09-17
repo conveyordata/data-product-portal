@@ -199,7 +199,7 @@ class TechnicalAssetService:
             status=technical_asset_status,
         )
         self.db.add(model)
-        self.db.commit()
+        self.db.flush()
         return model
 
     def remove_data_output(
@@ -212,7 +212,7 @@ class TechnicalAssetService:
         self.db.flush()
 
         self.update_search_for_associated_datasets(result)
-        self.db.commit()
+        self.db.flush()
         return result
 
     def get_data_output_with_links(
@@ -246,7 +246,7 @@ class TechnicalAssetService:
         self.db.flush()
 
         self.update_search_for_associated_datasets(current_data_output)
-        self.db.commit()
+        self.db.flush()
 
     def link_dataset_to_data_output(
         self,
@@ -316,7 +316,7 @@ class TechnicalAssetService:
         data_output.output_port_links.remove(data_output_dataset)
         self.db.flush()
         OutputPortService(self.db).recalculate_search(output_port_id)
-        self.db.commit()
+        self.db.flush()
         return data_output
 
     def update_data_output(
@@ -334,7 +334,7 @@ class TechnicalAssetService:
             else:
                 setattr(current_data_output, k, v) if v else None
 
-        self.db.commit()
+        self.db.flush()
         return UpdateTechnicalAssetResponse(id=current_data_output.id)
 
     def get_graph_data(self, data_product_id: UUID, id: UUID, level: int) -> Graph:

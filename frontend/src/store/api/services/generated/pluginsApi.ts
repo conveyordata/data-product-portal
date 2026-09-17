@@ -68,6 +68,16 @@ export type PlatformTile = {
 export type PlatformTileResponse = {
   platform_tiles: PlatformTile[];
 };
+export type ValidationError = {
+  loc: (string | number)[];
+  msg: string;
+  type: string;
+  input?: any;
+  ctx?: object;
+};
+export type HttpValidationError = {
+  detail?: ValidationError[];
+};
 export type UiElementCheckbox = {
   initial_value?: boolean | null;
 };
@@ -123,16 +133,6 @@ export type UiElementMetadataResponse = {
 };
 export type PluginResponse = {
   plugins: UiElementMetadataResponse[];
-};
-export type ValidationError = {
-  loc: (string | number)[];
-  msg: string;
-  type: string;
-  input?: any;
-  ctx?: object;
-};
-export type HttpValidationError = {
-  detail?: ValidationError[];
 };
 export type UrlResponse = {
   url: string;

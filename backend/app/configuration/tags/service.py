@@ -24,7 +24,7 @@ class TagService:
     def create_tag(self, tag: TagCreate) -> CreateTagResponse:
         tag = TagModel(**tag.parse_pydantic_schema())
         self.db.add(tag)
-        self.db.commit()
+        self.db.flush()
 
         return CreateTagResponse(id=tag.id)
 
@@ -35,10 +35,10 @@ class TagService:
         for attr, value in updated_tag.items():
             setattr(current_tag, attr, value)
 
-        self.db.commit()
+        self.db.flush()
         return UpdateTagResponse(id=id)
 
     def remove_tag(self, id: UUID) -> None:
         tag = self.db.get(TagModel, id)
         self.db.delete(tag)
-        self.db.commit()
+        self.db.flush()

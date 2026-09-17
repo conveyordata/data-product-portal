@@ -36,7 +36,7 @@ class TestAccessDurationsRouter:
         )
         response = client.get(ENDPOINT)
         assert response.status_code == 200
-        assert len(response.json()) == 2
+        assert len(response.json()["access_durations"]) == 2
 
     def test_get_default_returns_default_row(self, client):
         AccessDurationFactory(
@@ -64,7 +64,7 @@ class TestAccessDurationsRouter:
     def test_update_sets_permanent_default(self, client):
         response = client.put(f"{ENDPOINT}/data_products", json=PERMANENT_PAYLOAD)
         assert response.status_code == 200
-        rows = response.json()
+        rows = response.json()["access_durations"]
         assert len(rows) == 1
         assert rows[0]["access_duration_type"] == "permanent"
         assert rows[0]["days"] is None
@@ -74,7 +74,7 @@ class TestAccessDurationsRouter:
     def test_update_sets_time_bound_default_with_days(self, client):
         response = client.put(f"{ENDPOINT}/data_products", json=TIME_BOUND_PAYLOAD)
         assert response.status_code == 200
-        rows = response.json()
+        rows = response.json()["access_durations"]
         assert len(rows) == 1
         assert rows[0]["access_duration_type"] == "time_bound"
         assert rows[0]["days"] == 30
@@ -102,7 +102,7 @@ class TestAccessDurationsRouter:
         }
         response = client.put(f"{ENDPOINT}/data_products", json=payload)
         assert response.status_code == 200
-        rows = response.json()
+        rows = response.json()["access_durations"]
         assert len(rows) == 2
         defaults = [r for r in rows if r["is_default"]]
         alternatives = [r for r in rows if not r["is_default"]]
@@ -122,7 +122,7 @@ class TestAccessDurationsRouter:
         }
         response = client.put(f"{ENDPOINT}/data_products", json=payload)
         assert response.status_code == 200
-        rows = response.json()
+        rows = response.json()["access_durations"]
         assert len(rows) == 2
         alt = next(r for r in rows if not r["is_default"])
         assert alt["access_duration_type"] == "time_bound"

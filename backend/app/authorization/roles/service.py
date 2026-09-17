@@ -35,7 +35,7 @@ class RoleService:
         model = RoleModel(**role.parse_pydantic_schema())
         model.prototype = prototype
         self.db.add(model)
-        self.db.commit()
+        self.db.flush()
         return model
 
     def update_role(self, id: UUID, request: UpdateRole) -> Role:
@@ -54,7 +54,7 @@ class RoleService:
         for k, v in update.items():
             setattr(role, k, v)
 
-        self.db.commit()
+        self.db.flush()
         return role
 
     def delete_role(self, id_: UUID) -> Role:
@@ -66,7 +66,7 @@ class RoleService:
             )
 
         self.db.delete(role)
-        self.db.commit()
+        self.db.flush()
         return role
 
     def find_prototype(self, scope: Scope, prototype: Prototype) -> Role:

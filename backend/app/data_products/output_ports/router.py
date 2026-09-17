@@ -152,11 +152,13 @@ def get_output_ports_event_history(
     id: UUID,
     db: Session = Depends(get_db_session, scope="function"),
 ) -> GetEventHistoryResponse:
-    ds = ensure_output_port_exists(id, db, data_product_id=data_product_id)
+    output_port = ensure_output_port_exists(id, db, data_product_id=data_product_id)
     return GetEventHistoryResponse(
         events=[
-            GetEventHistoryResponseItemOld.model_validate(ds).convert()
-            for ds in EventService(db).get_history(ds.id, EventReferenceEntity.DATASET)
+            GetEventHistoryResponseItemOld.model_validate(event).convert()
+            for event in EventService(db).get_history(
+                output_port.id, EventReferenceEntity.DATASET
+            )
         ]
     )
 

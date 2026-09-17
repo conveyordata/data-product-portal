@@ -19,10 +19,12 @@ pushd sdk
   # Regenerate the provisioner event handler from the generated CloudEvent models
   poetry run python generation/build_event_handler.py
 
-  #Ensure the generated files are added to git context
-  git add ./sdk
-
   if [[ -n "${CI}" ]]; then
+    # Ensure newly generated files show up in the diff below. Only in CI: a
+    # pre-commit hook must never stage files itself, or it fights pre-commit's
+    # own stash and restore of unstaged changes and corrupts the index.
+    git add ./sdk
+
     if [[ -z "$(git status --porcelain .)" ]];
     then
       exit 0

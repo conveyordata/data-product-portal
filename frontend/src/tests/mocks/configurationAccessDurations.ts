@@ -25,7 +25,7 @@ export const mockAccessDurations: AccessDuration[] = [
 
 const endpoint = '*/api/v2/configuration/access_durations';
 export const mockAccessDurationsGet = (accessDurations: AccessDuration[] = mockAccessDurations) => {
-    server.use(http.get(endpoint, () => HttpResponse.json(accessDurations)));
+    server.use(http.get(endpoint, () => HttpResponse.json({ access_durations: accessDurations })));
 };
 
 export const mockUpdateAccessDuration = (savedAccessDurations: AccessDuration[] = mockAccessDurations) => {
