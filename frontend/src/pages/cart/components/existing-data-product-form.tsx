@@ -154,7 +154,6 @@ export const ExistingDataProductForm = ({ setSelectedDataProductId }: Props) => 
                 <Button
                     type="primary"
                     htmlType="submit"
-                    data-cy="submit-access-requests"
                     style={{ width: '100%' }}
                     loading={isRequestingAccess}
                     disabled={

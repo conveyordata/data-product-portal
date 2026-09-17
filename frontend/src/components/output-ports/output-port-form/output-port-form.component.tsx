@@ -479,6 +479,12 @@ export function OutputPortForm({
     const dataProductOwners = useGetDataProductOwnerIds(dataProduct?.id);
     const ownerIds = mode === 'edit' ? datasetOwners : dataProductOwners;
 
+    useEffect(() => {
+        if (mode === 'create' && dataProductOwners && form.getFieldValue('owners') === undefined) {
+            form.setFieldValue('owners', dataProductOwners);
+        }
+    }, [mode, dataProductOwners, form]);
+
     if (mode === 'edit' && (!currentDataset || ownerIds === undefined)) {
         return <Skeleton active />;
     }
@@ -520,7 +526,7 @@ export function OutputPortForm({
                     },
                 ]}
             >
-                <Input />
+                <Input data-cy="output-port-name" />
             </Form.Item>
             <ResourceNameFormItem
                 form={form}
@@ -565,6 +571,7 @@ export function OutputPortForm({
                 ]}
             >
                 <Select
+                    data-cy="output-port-lifecycle"
                     loading={isFetchingLifecycles}
                     allowClear
                     showSearch={{ filterOption: selectFilterOptionByLabelAndValue }}
@@ -572,6 +579,7 @@ export function OutputPortForm({
                         value: lifecycle.id,
                         label: lifecycle.name,
                     }))}
+                    popupRender={(menu) => <div data-cy="output-port-lifecycle-options">{menu}</div>}
                 />
             </Form.Item>
             <Form.Item<CreateOutputPortRequest>
@@ -614,7 +622,11 @@ export function OutputPortForm({
                     },
                 ]}
             >
-                <TextArea rows={4} count={{ show: true, max: MAX_DESCRIPTION_INPUT_LENGTH }} />
+                <TextArea
+                    data-cy="output-port-description"
+                    rows={4}
+                    count={{ show: true, max: MAX_DESCRIPTION_INPUT_LENGTH }}
+                />
             </Form.Item>
             {mode !== 'create' && (
                 <Form.Item>
