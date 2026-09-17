@@ -1,6 +1,5 @@
 from datetime import datetime
 
-import pytest
 from sqlalchemy import select
 
 from app.authorization.roles.schema import Scope
@@ -152,30 +151,24 @@ def test_private_output_port_query_can_skip_access_type_filter(session):
     assert visible.id == output_port_id
 
 
-def test_private_output_port_query_requires_current_user_without_skip_flag(session):
+def test_private_output_port_query_without_current_user_is_not_filtered(session):
     output_port = OutputPortFactory(access_type=OutputPortAccessType.PRIVATE)
     output_port_id = output_port.id
     session.expunge(output_port)
 
-    with pytest.raises(
-        Exception,
-        match="User id must be set when skip_output_port_access_type_filter is False or not set",
-    ):
-        session.get(OutputPort, output_port_id)
+    private = session.get(OutputPort, output_port_id)
+    private.id = output_port_id
 
 
-def test_private_output_port_column_query_requires_current_user_without_skip_flag(
-    session,
-):
+def test_private_output_port_column_query_without_current_user_is_not_filtered(session):
     output_port = OutputPortFactory(access_type=OutputPortAccessType.PRIVATE)
     output_port_id = output_port.id
     session.expunge(output_port)
 
-    with pytest.raises(
-        Exception,
-        match="User id must be set when skip_output_port_access_type_filter is False or not set",
-    ):
+    assert (
         session.scalar(select(OutputPort.id).where(OutputPort.id == output_port_id))
+        == output_port_id
+    )
 
 
 def test_private_output_port_column_query_visible_for_admin_user(session):

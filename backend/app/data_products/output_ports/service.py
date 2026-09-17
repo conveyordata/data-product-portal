@@ -515,6 +515,9 @@ class OutputPortService:
         ]
         edges = []
         for downstream_products in output_port.data_product_links:
+            if downstream_products.consuming_abstract_data_product is None:
+                # Hidden data product which the user has no access to
+                continue
             nodes.append(
                 get_graph_data_from_abstract_data_product(
                     str(downstream_products.consuming_abstract_data_product_id),
@@ -530,45 +533,45 @@ class OutputPortService:
                 )
             )
 
-        for data_output_link in output_port.technical_asset_links:
-            data_output = data_output_link.technical_asset
+        for technical_asset_link in output_port.technical_asset_links:
+            technical_asset = technical_asset_link.technical_asset
             nodes.append(
                 Node(
-                    id=data_output.id,
+                    id=technical_asset.id,
                     data=NodeData(
-                        id=data_output.id,
-                        icon_key=data_output.configuration.configuration_type,
-                        name=data_output.name,
-                        link_to_id=data_output.owner_id,
+                        id=technical_asset.id,
+                        icon_key=technical_asset.configuration.configuration_type,
+                        name=technical_asset.name,
+                        link_to_id=technical_asset.owner_id,
                     ),
                     type=NodeType.technicalAssetNode,
                 )
             )
             edges.append(
                 Edge(
-                    id=f"{data_output.id}-{output_port.id}",
-                    source=data_output.id,
+                    id=f"{technical_asset.id}-{output_port.id}",
+                    source=technical_asset.id,
                     target=output_port.id,
-                    animated=data_output_link.status == DecisionStatus.APPROVED,
+                    animated=technical_asset_link.status == DecisionStatus.APPROVED,
                 )
             )
             if level >= 2:
                 nodes.append(
                     Node(
-                        id=f"{data_output.owner.id}_2",
+                        id=f"{technical_asset.owner.id}_2",
                         data=NodeData(
-                            id=f"{data_output.owner.id}",
-                            name=data_output.owner.name,
-                            icon_key=data_output.owner.type.icon_key,
+                            id=f"{technical_asset.owner.id}",
+                            name=technical_asset.owner.name,
+                            icon_key=technical_asset.owner.type.icon_key,
                         ),
                         type=NodeType.dataProductNode,
                     )
                 )
                 edges.append(
                     Edge(
-                        id=f"{data_output.owner.id}-{data_output.id}-2",
-                        target=data_output.id,
-                        source=f"{data_output.owner.id}_2",
+                        id=f"{technical_asset.owner.id}-{technical_asset.id}-2",
+                        target=technical_asset.id,
+                        source=f"{technical_asset.owner.id}_2",
                         animated=True,
                     )
                 )

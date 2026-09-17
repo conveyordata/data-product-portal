@@ -18,4 +18,5 @@ __all__ = (
     "DataProductOutputPortAssociationResolver",
     "DataProductResolver",
     "OutputPortResolver",
+    "REDACTION_VALUE",
 )

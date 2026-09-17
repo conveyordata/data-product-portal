@@ -266,9 +266,6 @@ def test_db_session_dependencies_use_function_scope():
     invalid = []
 
     for route in _iter_app_routes():
-        if not getattr(route, "path", "").startswith("/api/v2/"):
-            continue
-
         for dependant in _iter_dependants(route.dependant):
             call = getattr(dependant, "call", None)
             if call not in {get_db_session, get_system_db_session}:
@@ -281,6 +278,38 @@ def test_db_session_dependencies_use_function_scope():
     assert not invalid, (
         "The following API routes use database session dependencies without "
         "scope='function':\n" + "\n".join(invalid)
+    )
+
+
+def test_routes_only_use_get_db_session():
+    exceptions = [
+        # Device flow routs don't need an authenticated session, since the user is unauthenticated at this point.
+        "/api/v2/authn/device/device_token",
+        "/api/v2/authn/device/jwt_token",
+        "/api/v2/authn/device",
+        "/api/v2/authn/device/deny",
+        "/api/v2/authn/device/allow",
+        "/api/v2/authn/device/callback",
+    ]
+
+    invalid = []
+
+    for route in _iter_app_routes():
+        if route.path in exceptions:
+            continue
+        direct_calls = {
+            getattr(dependant, "call", None)
+            for dependant in getattr(route.dependant, "dependencies", []) or []
+        }
+
+        if get_system_db_session in direct_calls:
+            invalid.append(
+                f"{route.path} [{route.name}] uses get_system_db_session directly"
+            )
+
+    assert not invalid, (
+        "The following API routes use get_system_db_session directly instead of "
+        "get_db_session:\n" + "\n".join(invalid)
     )
 
 
