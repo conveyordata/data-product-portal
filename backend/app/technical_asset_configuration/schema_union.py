@@ -1,5 +1,6 @@
 from typing import Annotated, Any
 
+from fastapi import HTTPException, status
 from pydantic import PlainSerializer, PlainValidator, WithJsonSchema
 
 from app.plugins.registry import plugin_registry
@@ -20,7 +21,13 @@ def _resolve_configuration(value: Any) -> TechnicalAssetPlugin:
     if not configuration_type:
         raise ValueError("configuration_type is required")
 
-    return plugin_registry.get(configuration_type).model_validate(value)
+    plugin = plugin_registry.get(configuration_type)
+    if not hasattr(plugin, "Meta"):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Plugin '{configuration_type}' has no configuration of its own",
+        )
+    return plugin.model_validate(value)
 
 
 DataOutputConfiguration = Annotated[

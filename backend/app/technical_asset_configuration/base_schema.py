@@ -1,5 +1,6 @@
 from abc import ABC
 from base64 import b64encode
+from functools import cache
 from importlib import resources
 from typing import Any, ClassVar, Optional
 from uuid import UUID
@@ -176,6 +177,7 @@ class TechnicalAssetPlugin(ORMModel, ABC):
         return cls._platform_metadata
 
     @classmethod
+    @cache
     def get_icon_data_uri(cls) -> Optional[str]:
         platform_meta = cls.get_platform_metadata()
         if not platform_meta.icon_package:

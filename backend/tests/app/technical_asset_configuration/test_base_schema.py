@@ -42,3 +42,13 @@ class PluginWithBrokenIcon(TechnicalAssetPlugin):
 
 def test_get_icon_data_uri__returns_none_when_the_icon_cannot_be_read():
     assert PluginWithBrokenIcon.get_icon_data_uri() is None
+
+
+def test_get_icon_data_uri__reads_the_icon_once_per_plugin():
+    PluginWithBundledIcon.get_icon_data_uri.cache_clear()
+
+    first = PluginWithBundledIcon.get_icon_data_uri()
+    second = PluginWithBundledIcon.get_icon_data_uri()
+
+    assert first == second
+    assert PluginWithBundledIcon.get_icon_data_uri.cache_info().hits == 1

@@ -49,3 +49,11 @@ def test_resolve_configuration__still_resolves_a_plugin_that_is_not_enabled(
     monkeypatch.setattr(settings, "ENABLED_PLUGINS", [])
     holder = Holder(configuration=S3_CONFIGURATION)
     assert holder.configuration.name == "S3TechnicalAssetConfiguration"
+
+
+def test_resolve_configuration__rejects_a_plugin_that_has_no_configuration():
+    with pytest.raises(HTTPException) as exc_info:
+        Holder(configuration={"configuration_type": "GitHubPlugin"})
+
+    assert exc_info.value.status_code == 400
+    assert "no configuration of its own" in exc_info.value.detail
