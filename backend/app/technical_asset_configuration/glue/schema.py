@@ -40,7 +40,6 @@ class GlueTechnicalAssetConfiguration(TechnicalAssetPlugin):
     bucket_identifier: str = ""
     database_path: str = ""
     table_path: str = ""
-    configuration_type: str = CONFIGURATION_TYPE
     access_granularity: AccessGranularity
 
     _platform_metadata = PlatformMetadata(

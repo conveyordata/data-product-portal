@@ -36,8 +36,9 @@ from sdk.api_client.models import (
     HTTPValidationError,
     PlatformServiceConfiguration,
 )
-from sdk.api_client.models.create_technical_asset_request_configuration import (
-    CreateTechnicalAssetRequestConfiguration,
+from sdk.plugins import (
+    AccessGranularity,
+    PostgreSQLTechnicalAssetConfiguration,
 )
 from sdk.api_client.models.technical_asset_status import TechnicalAssetStatus
 from sdk.api_client.models.technical_mapping import TechnicalMapping
@@ -251,14 +252,11 @@ class DataProductReconciler(sdk.Reconciler):
         if not postgres_config:
             raise Exception("Configuration error: 'PostgreSQL' service not found.")
 
-        configuration = CreateTechnicalAssetRequestConfiguration.from_dict(
-            {
-                "configuration_type": "PostgreSQLTechnicalAssetConfiguration",
-                "database": database,
-                "schema": schema_name,
-                "access_granularity": "schema",
-                "table": "*",
-            }
+        configuration = PostgreSQLTechnicalAssetConfiguration(
+            database=database,
+            schema=schema_name,
+            access_granularity=AccessGranularity.Schema,
+            table="*",
         )
 
         technical_asset_body = CreateTechnicalAssetRequest(
@@ -304,10 +302,14 @@ class DataProductReconciler(sdk.Reconciler):
             (
                 a
                 for a in result.technical_assets
-                if a.configuration.configuration_type
-                == "PostgreSQLTechnicalAssetConfiguration"
-                and a.configuration["database"] == database
-                and a.configuration["schema"] == schema
+                if (
+                    configuration
+                    := PostgreSQLTechnicalAssetConfiguration.from_configuration(
+                        a.configuration
+                    )
+                )
+                and configuration.database == database
+                and configuration.schema == schema
             ),
             None,
         )

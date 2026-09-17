@@ -5,6 +5,7 @@ from importlib import resources
 from typing import Any, ClassVar, Optional
 from uuid import UUID
 
+from pydantic import computed_field
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
@@ -114,9 +115,14 @@ class PlatformMetadata(ORMModel):
 
 class TechnicalAssetPlugin(ORMModel, ABC):
     name: ClassVar[str]
+
     version: ClassVar[str] = "1.0"
     mcp_instructions: ClassVar[str] = ""
-    configuration_type: str
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def configuration_type(self) -> str:
+        return self.name
 
     _platform_metadata: ClassVar[Optional[PlatformMetadata]] = None
 

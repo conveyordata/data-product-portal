@@ -44,8 +44,10 @@ from sdk.api_client.models import (
     GetDataProductInputPortsResponse,
     GetTechnicalAssetsResponse,
 )
-from sdk.api_client.models.create_technical_asset_request_configuration import (
-    CreateTechnicalAssetRequestConfiguration,
+from sdk.plugins import (
+    AccessGranularity,
+    OSISemanticModelTechnicalAssetConfiguration,
+    PostgreSQLTechnicalAssetConfiguration,
 )
 from sdk.api_client.models.technical_asset_status import TechnicalAssetStatus
 from sdk.api_client.models.technical_mapping import TechnicalMapping
@@ -219,40 +221,32 @@ class DataProductReconciler(Reconciler):
         configs = await self._get_platform_configs()
 
         if not any(
-            a.configuration.configuration_type
-            == "OSISemanticModelTechnicalAssetConfiguration"
+            OSISemanticModelTechnicalAssetConfiguration.from_configuration(
+                a.configuration
+            )
             for a in existing_assets
         ):
             osi_cfg = next((c for c in configs if c.service.name == "OSI"), None)
             if osi_cfg:
-                configuration = CreateTechnicalAssetRequestConfiguration.from_dict(
-                    {
-                        "configuration_type": (
-                            "OSISemanticModelTechnicalAssetConfiguration"
-                        ),
-                        "model_name": f"{name} Semantic Model",
-                        "location": f"/products/{namespace}/osi.yml",
-                    }
+                configuration = OSISemanticModelTechnicalAssetConfiguration(
+                    model_name=f"{name} Semantic Model",
+                    location=f"/products/{namespace}/osi.yml",
                 )
                 await self._create_technical_asset(
                     resource_id, dp, osi_cfg, configuration, f"{namespace}-semantic"
                 )
 
         if not any(
-            a.configuration.configuration_type
-            == "PostgreSQLTechnicalAssetConfiguration"
+            PostgreSQLTechnicalAssetConfiguration.from_configuration(a.configuration)
             for a in existing_assets
         ):
             pg_cfg = next((c for c in configs if c.service.name == "PostgreSQL"), None)
             if pg_cfg:
-                configuration = CreateTechnicalAssetRequestConfiguration.from_dict(
-                    {
-                        "configuration_type": "PostgreSQLTechnicalAssetConfiguration",
-                        "database": demo_db_name,
-                        "schema": schema_name,
-                        "access_granularity": "schema",
-                        "table": "*",
-                    }
+                configuration = PostgreSQLTechnicalAssetConfiguration(
+                    database=demo_db_name,
+                    schema=schema_name,
+                    access_granularity=AccessGranularity.Schema,
+                    table="*",
                 )
                 await self._create_technical_asset(
                     resource_id, dp, pg_cfg, configuration

@@ -36,8 +36,6 @@ class AzureBlobTechnicalAssetConfiguration(TechnicalAssetPlugin):
     path: str = ""
     container_name: str
 
-    configuration_type: str = CONFIGURATION_TYPE
-
     _platform_metadata = PlatformMetadata(
         display_name="Blob",
         icon_name="azure-storage-account-logo.svg",

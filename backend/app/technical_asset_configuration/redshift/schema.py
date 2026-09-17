@@ -32,7 +32,6 @@ class RedshiftTechnicalAssetConfiguration(TechnicalAssetPlugin):
 
     database: str
     schema: str = ""
-    configuration_type: str = CONFIGURATION_TYPE
     table: str = "*"
     bucket_identifier: str = ""
     database_path: str = ""
