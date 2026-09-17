@@ -212,7 +212,7 @@ class OutputPortService:
         """
         ordered_by = OutputPortModel.name.asc()
         if query:
-            query_embedding = self.embedding_model.embed(query)
+            query_embedding = self.embedding_model.query_embed(query)
             semantic_score = (
                 1 - OutputPortModel.embeddings.cosine_distance(*query_embedding)
             ).label("semantic_score")
@@ -290,7 +290,7 @@ class OutputPortService:
     def _recalculate_embeddings_and_search_vector(
         self, datasets: Sequence[OutputPortModel]
     ) -> None:
-        embeddings = self.embedding_model.embed(
+        embeddings = self.embedding_model.passage_embed(
             DatasetEmbedModel.model_validate(ds).model_dump_json() for ds in datasets
         )
         for dataset, emb in zip(datasets, embeddings):
