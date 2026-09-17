@@ -22,6 +22,10 @@ from app.users.schema import User
 class OSISemanticModelTechnicalAssetConfiguration(TechnicalAssetPlugin):
     name: ClassVar[str] = NAME
     version: ClassVar[str] = "1.0"
+    target_revision: ClassVar[str] = "osi_sem_model_0001_baseline"
+    migrations_package: ClassVar[str] = (
+        "app.technical_asset_configuration.osi_sem_model"
+    )
 
     model_name: str = ""
     location: str = ""

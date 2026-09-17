@@ -29,6 +29,8 @@ from app.technical_asset_configuration.redshift.model import (
 class RedshiftTechnicalAssetConfiguration(TechnicalAssetPlugin):
     name: ClassVar[str] = NAME
     version: ClassVar[str] = "1.0"
+    target_revision: ClassVar[str] = "redshift_0001_baseline"
+    migrations_package: ClassVar[str] = "app.technical_asset_configuration.redshift"
 
     database: str
     schema: str = ""

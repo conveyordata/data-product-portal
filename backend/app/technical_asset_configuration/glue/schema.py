@@ -33,6 +33,8 @@ from app.users.schema import User
 class GlueTechnicalAssetConfiguration(TechnicalAssetPlugin):
     name: ClassVar[str] = NAME
     version: ClassVar[str] = "1.0"
+    target_revision: ClassVar[str] = "glue_0001_baseline"
+    migrations_package: ClassVar[str] = "app.technical_asset_configuration.glue"
 
     database: str
     database_suffix: str = ""
