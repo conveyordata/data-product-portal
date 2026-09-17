@@ -22,11 +22,9 @@ class PluginRegistry:
             if not (
                 isinstance(plugin, type) and issubclass(plugin, TechnicalAssetPlugin)
             ):
-                logger.error(
-                    f"Entry point '{entry_point.name}' does not subclass "
-                    "TechnicalAssetPlugin, skipping"
+                raise Exception(
+                    "The registered plugin does not subclass TechnicalAssetPlugin or is not a class"
                 )
-                continue
             plugins[plugin.name] = plugin
 
         logger.info(f"Discovered plugins: {', '.join(sorted(plugins)) or 'none'}")
