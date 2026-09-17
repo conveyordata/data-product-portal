@@ -14,7 +14,6 @@ from app.technical_asset_configuration.schema_request import (
 if TYPE_CHECKING:
     from app.users.schema import User
 
-from app.core.logging import logger
 from app.plugins.registry import plugin_registry
 from app.technical_asset_configuration.base_schema import (
     TechnicalAssetPlugin,
@@ -88,11 +87,6 @@ class PluginService:
                 detailed_name=platform_meta.detailed_name,
                 has_environments=platform_meta.has_environments,
             )
-        except Exception:
-            logger.exception(
-                f"Plugin '{plugin_class.name}' failed to describe its form, skipping"
-            )
-            return None
 
     def get_platform_tiles(self) -> Sequence[PlatformTile]:
         """Build the complete platform tile structure for the UI"""
