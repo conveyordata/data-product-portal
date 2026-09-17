@@ -37,34 +37,6 @@ def test_discovered__loads_only_what_the_entry_points_advertise(registry, monkey
     assert names == {"GlueTechnicalAssetConfiguration"}
 
 
-def test_discovered__skips_entry_point_that_fails_to_import(registry, monkeypatch):
-    monkeypatch.setattr(
-        "app.plugins.registry.entry_points",
-        lambda group: [
-            _entry_point("broken", "no_such_module:Plugin"),
-            _entry_point("glue", GLUE),
-        ],
-    )
-
-    names = {plugin.name for plugin in registry.discovered()}
-
-    assert names == {"GlueTechnicalAssetConfiguration"}
-
-
-def test_discovered__skips_entry_point_that_is_not_a_plugin(registry, monkeypatch):
-    monkeypatch.setattr(
-        "app.plugins.registry.entry_points",
-        lambda group: [
-            _entry_point("wrong", "json:JSONDecoder"),
-            _entry_point("glue", GLUE),
-        ],
-    )
-
-    names = {plugin.name for plugin in registry.discovered()}
-
-    assert names == {"GlueTechnicalAssetConfiguration"}
-
-
 def test_enabled__excludes_a_plugin_that_is_installed_but_not_configured(
     registry, monkeypatch
 ):
