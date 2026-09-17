@@ -1,21 +1,3 @@
-"""Brings each plugin's own table to the revision that plugin declares.
-
-Alembic supports running several independent migration histories side by side.
-Every plugin's `versions/` directory is handed to one Alembic environment through
-`version_locations`, and because each plugin's first revision has no
-`down_revision`, each plugin is a separate branch with its own base and its own
-head. Alembic already tracks one row per head, so all plugins share a single
-version table.
-
-Handing all the directories to one environment is what makes the shared table
-work. Alembic resolves every row it finds in the version table against the
-revisions it knows about, so a config that only knows one plugin's revisions
-fails on another plugin's row with "Can't locate revision".
-
-Runs from `python -m app.db_tool migrate`, after the core migrations.
-See docs/adr/0024-dynamic-plugin-system.md.
-"""
-
 import os
 from contextlib import ExitStack, contextmanager
 from importlib import resources
@@ -76,11 +58,6 @@ def _base_of(script: ScriptDirectory, revision: str) -> str:
 
 
 def _branch_revisions(script: ScriptDirectory, target: str) -> list[str]:
-    """Every revision belonging to the same plugin as `target`, newest first.
-
-    A plugin's branch is identified by its base, not by a naming convention, so
-    a plugin author is free to name revisions however they like.
-    """
     base = _base_of(script, target)
     return [
         revision.revision

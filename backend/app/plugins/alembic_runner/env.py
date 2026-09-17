@@ -1,10 +1,3 @@
-"""One Alembic environment shared by every plugin.
-
-A plugin author writes revision files and nothing else: no env.py, no
-alembic.ini. Plugins are kept apart from each other through `version_locations`,
-which app.plugins.migrations sets per call.
-"""
-
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 
