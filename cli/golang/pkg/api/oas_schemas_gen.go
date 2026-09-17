@@ -4237,10 +4237,6 @@ type GetAccessModesNotFoundApplicationJSON jx.Raw
 
 func (*GetAccessModesNotFoundApplicationJSON) getAccessModesRes() {}
 
-type GetAllAccessDurationsOKApplicationJSON []AccessDuration
-
-func (*GetAllAccessDurationsOKApplicationJSON) getAllAccessDurationsRes() {}
-
 // Ref: #/components/schemas/GetAllPlatformServiceConfigurationsResponse
 type GetAllPlatformServiceConfigurationsResponse struct {
 	PlatformServiceConfigurations []PlatformServiceConfiguration `json:"platform_service_configurations"`
