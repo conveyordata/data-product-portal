@@ -31,6 +31,8 @@ logger = logging.getLogger(__name__)
 class AzureBlobTechnicalAssetConfiguration(TechnicalAssetPlugin):
     name: ClassVar[str] = NAME
     version: ClassVar[str] = "1.0"
+    target_revision: ClassVar[str] = "azure_blob_0001_baseline"
+    migrations_package: ClassVar[str] = "app.technical_asset_configuration.azure_blob"
 
     domain: str = ""
     path: str = ""

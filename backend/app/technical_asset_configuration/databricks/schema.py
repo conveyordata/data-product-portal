@@ -35,6 +35,8 @@ from app.technical_asset_configuration.enums import AccessGranularity, UIElement
 class DatabricksTechnicalAssetConfiguration(TechnicalAssetPlugin):
     name: ClassVar[str] = NAME
     version: ClassVar[str] = "1.0"
+    target_revision: ClassVar[str] = "databricks_0001_baseline"
+    migrations_package: ClassVar[str] = "app.technical_asset_configuration.databricks"
 
     catalog: str
     schema: str = ""

@@ -29,6 +29,8 @@ from app.users.schema import User
 class S3TechnicalAssetConfiguration(TechnicalAssetPlugin):
     name: ClassVar[str] = NAME
     version: ClassVar[str] = "1.0"
+    target_revision: ClassVar[str] = "s3_0001_baseline"
+    migrations_package: ClassVar[str] = "app.technical_asset_configuration.s3"
 
     bucket: str
     suffix: str = ""
