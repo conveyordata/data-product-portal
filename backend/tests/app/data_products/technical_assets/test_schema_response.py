@@ -19,14 +19,12 @@ class PluginWithoutPlatform(TechnicalAssetPlugin):
     name: ClassVar[str] = "PluginWithoutPlatform"
     result_string_template: ClassVar[str] = "https://example.com/{repository}"
 
-    configuration_type: str = "PluginWithoutPlatform"
     repository: str
 
 
 class PluginWithoutTemplate(TechnicalAssetPlugin):
     name: ClassVar[str] = "PluginWithoutTemplate"
 
-    configuration_type: str = "PluginWithoutTemplate"
     repository: str
 
 
