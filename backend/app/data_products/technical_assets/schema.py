@@ -15,7 +15,6 @@ class TechnicalAsset(ORMModel):
     status: TechnicalAssetStatus
     technical_mapping: TechnicalMapping
     owner_id: UUID
-    # Unset for a plugin that uses no platform or platform service.
     platform_id: Optional[UUID] = None
     service_id: Optional[UUID] = None
 

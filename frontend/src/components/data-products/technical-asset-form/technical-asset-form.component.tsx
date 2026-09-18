@@ -224,7 +224,6 @@ export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallback
     );
 
     const setResultString = useDebouncedCallback((values: CreateTechnicalAssetRequest) => {
-        // A plugin that uses no platform service has no template to render against.
         if (!values.platform_id || !values.service_id) {
             form.setFieldValue('result', undefined);
             return;

@@ -14,7 +14,6 @@ class CreateTechnicalAssetRequest(ORMModel):
     name: str
     description: str
     namespace: str
-    # Unset for a plugin that uses no platform or platform service.
     platform_id: Optional[UUID] = None
     service_id: Optional[UUID] = None
     configuration: DataOutputConfiguration
