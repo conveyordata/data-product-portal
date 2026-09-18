@@ -665,7 +665,7 @@ class TestDataProductRoleAssignmentsRouter:
             f"{ENDPOINT}",
             json={
                 "data_product_id": str(data_product.id),
-                "identity_id": str(user_requester.id),
+                "user_id": str(user_requester.id),
                 "role_id": str(role2.id),
             },
         )
