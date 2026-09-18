@@ -1,4 +1,4 @@
-from typing import ClassVar, Literal, Optional
+from typing import ClassVar, Optional
 from uuid import UUID
 
 from sqlalchemy.orm import Session
@@ -13,7 +13,6 @@ from app.technical_asset_configuration.base_schema import (
     UIElementSelect,
     UIElementString,
 )
-from app.technical_asset_configuration.data_output_types import DataOutputTypes
 from app.technical_asset_configuration.enums import UIElementType
 from app.technical_asset_configuration.rustfs.model import (
     NAME,
@@ -35,7 +34,6 @@ class RustFSTechnicalAssetConfiguration(TechnicalAssetPlugin):
     bucket: str
     suffix: str = ""
     path: str
-    configuration_type: Literal[DataOutputTypes.RustFSTechnicalAssetConfiguration]
 
     _platform_metadata = PlatformMetadata(
         display_name="RustFS",

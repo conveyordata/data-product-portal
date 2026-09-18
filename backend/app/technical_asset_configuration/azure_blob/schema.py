@@ -1,5 +1,5 @@
 import logging
-from typing import ClassVar, Literal, Optional
+from typing import ClassVar, Optional
 from uuid import UUID
 
 from sqlalchemy import select
@@ -22,7 +22,6 @@ from app.technical_asset_configuration.base_schema import (
     UIElementMetadata,
     UIElementString,
 )
-from app.technical_asset_configuration.data_output_types import DataOutputTypes
 from app.technical_asset_configuration.enums import UIElementType
 from app.users.schema import User
 
@@ -36,8 +35,6 @@ class AzureBlobTechnicalAssetConfiguration(TechnicalAssetPlugin):
     domain: str = ""
     path: str = ""
     container_name: str
-
-    configuration_type: Literal[DataOutputTypes.AzureBlobTechnicalAssetConfiguration]
 
     _platform_metadata = PlatformMetadata(
         display_name="Blob",

@@ -36,8 +36,8 @@ from sdk.api_client.models import (
     HTTPValidationError,
     PlatformServiceConfiguration,
 )
-from sdk.api_client.models.access_granularity import AccessGranularity
-from sdk.api_client.models.postgre_sql_technical_asset_configuration import (
+from sdk.plugins import (
+    AccessGranularity,
     PostgreSQLTechnicalAssetConfiguration,
 )
 from sdk.api_client.models.technical_asset_status import TechnicalAssetStatus
@@ -253,10 +253,9 @@ class DataProductReconciler(sdk.Reconciler):
             raise Exception("Configuration error: 'PostgreSQL' service not found.")
 
         configuration = PostgreSQLTechnicalAssetConfiguration(
-            configuration_type="PostgreSQLTechnicalAssetConfiguration",
             database=database,
             schema=schema_name,
-            access_granularity=AccessGranularity.SCHEMA,
+            access_granularity=AccessGranularity.Schema,
             table="*",
         )
 
@@ -303,10 +302,14 @@ class DataProductReconciler(sdk.Reconciler):
             (
                 a
                 for a in result.technical_assets
-                if a.configuration.configuration_type
-                == "PostgreSQLTechnicalAssetConfiguration"
-                and a.configuration.database == database
-                and a.configuration.schema == schema
+                if (
+                    configuration
+                    := PostgreSQLTechnicalAssetConfiguration.from_configuration(
+                        a.configuration
+                    )
+                )
+                and configuration.database == database
+                and configuration.schema == schema
             ),
             None,
         )

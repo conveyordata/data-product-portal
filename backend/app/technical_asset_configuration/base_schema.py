@@ -1,7 +1,11 @@
 from abc import ABC
+from base64 import b64encode
+from functools import cache
+from importlib import resources
 from typing import Any, ClassVar, Optional
 from uuid import UUID
 
+from pydantic import computed_field
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
@@ -17,8 +21,8 @@ from app.configuration.platform_service_configurations.schema import (
 from app.configuration.platforms.platform_services.model import (
     PlatformService as PlatformServiceModel,
 )
+from app.core.logging import logger
 from app.shared.schema import ORMModel
-from app.technical_asset_configuration.data_output_types import DataOutputTypes
 from app.technical_asset_configuration.enums import UIElementType
 from app.users.schema import User
 
@@ -99,6 +103,7 @@ class PlatformMetadata(ORMModel):
 
     display_name: str
     icon_name: str
+    icon_package: Optional[str] = None
     platform_key: str
     has_environments: bool = True
     parent_platform: Optional[str] = None
@@ -109,22 +114,20 @@ class PlatformMetadata(ORMModel):
 
 
 class TechnicalAssetPlugin(ORMModel, ABC):
-    """Base class for all data output provider plugins"""
-
-    name: ClassVar[str]
     version: ClassVar[str] = "1.0"
     mcp_instructions: ClassVar[str] = ""
-    configuration_type: DataOutputTypes
 
-    # Platform metadata - should be overridden in subclasses
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def name(self) -> str:
+        raise NotImplementedError
+
     _platform_metadata: ClassVar[Optional[PlatformMetadata]] = None
 
     def render_template(self, template: str, **context: dict[str, Any]) -> str:
-        """Render a template with configuration values. Template is fetched from db, context is filled with the full technical asset configuration + env info as dict."""
         return template.format(**self.model_dump(), **context)
 
     def get_configuration(self, configs: list[ConfigType]) -> Optional[ConfigType]:
-        """Get platform and environment specific configuration"""
         raise NotImplementedError
 
     @classmethod
@@ -176,6 +179,26 @@ class TechnicalAssetPlugin(ORMModel, ABC):
                 platform_key=platform_key,
             )
         return cls._platform_metadata
+
+    @classmethod
+    @cache
+    def get_icon_data_uri(cls) -> Optional[str]:
+        platform_meta = cls.get_platform_metadata()
+        if not platform_meta.icon_package:
+            return None
+        try:
+            icon = (
+                resources.files(platform_meta.icon_package)
+                .joinpath(platform_meta.icon_name)
+                .read_bytes()
+            )
+        except Exception:
+            logger.exception(
+                f"Plugin '{cls.name}' has no readable icon at "
+                f"{platform_meta.icon_package}/{platform_meta.icon_name}"
+            )
+            return None
+        return f"data:image/svg+xml;base64,{b64encode(icon).decode()}"
 
     @classmethod
     def get_logo(cls) -> str:

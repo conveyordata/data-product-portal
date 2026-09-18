@@ -1,6 +1,5 @@
 import pytest
 
-from app.technical_asset_configuration.data_output_types import DataOutputTypes
 from app.technical_asset_configuration.s3.schema import S3TechnicalAssetConfiguration
 
 
@@ -13,7 +12,6 @@ def make_s3_config(
         bucket=bucket,
         path=path,
         suffix=suffix,
-        configuration_type=DataOutputTypes.S3TechnicalAssetConfiguration,
     )
 
 

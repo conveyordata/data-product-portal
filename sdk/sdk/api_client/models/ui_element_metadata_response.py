@@ -30,6 +30,7 @@ class UIElementMetadataResponse:
         not_configured (bool | Unset):  Default: False.
         result_label (str | Unset):  Default: 'Resulting path'.
         result_tooltip (str | Unset):  Default: 'The path you can access through this technical asset'.
+        icon_data_uri (None | str | Unset):
         parent_platform (None | str | Unset):
         platform_tile (None | PlatformTile | Unset):
         show_in_form (bool | Unset):  Default: True.
@@ -45,6 +46,7 @@ class UIElementMetadataResponse:
     not_configured: bool | Unset = False
     result_label: str | Unset = "Resulting path"
     result_tooltip: str | Unset = "The path you can access through this technical asset"
+    icon_data_uri: None | str | Unset = UNSET
     parent_platform: None | str | Unset = UNSET
     platform_tile: None | PlatformTile | Unset = UNSET
     show_in_form: bool | Unset = True
@@ -75,6 +77,12 @@ class UIElementMetadataResponse:
         result_label = self.result_label
 
         result_tooltip = self.result_tooltip
+
+        icon_data_uri: None | str | Unset
+        if isinstance(self.icon_data_uri, Unset):
+            icon_data_uri = UNSET
+        else:
+            icon_data_uri = self.icon_data_uri
 
         parent_platform: None | str | Unset
         if isinstance(self.parent_platform, Unset):
@@ -111,6 +119,8 @@ class UIElementMetadataResponse:
             field_dict["result_label"] = result_label
         if result_tooltip is not UNSET:
             field_dict["result_tooltip"] = result_tooltip
+        if icon_data_uri is not UNSET:
+            field_dict["icon_data_uri"] = icon_data_uri
         if parent_platform is not UNSET:
             field_dict["parent_platform"] = parent_platform
         if platform_tile is not UNSET:
@@ -151,6 +161,15 @@ class UIElementMetadataResponse:
 
         result_tooltip = d.pop("result_tooltip", UNSET)
 
+        def _parse_icon_data_uri(data: object) -> None | str | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(None | str | Unset, data)
+
+        icon_data_uri = _parse_icon_data_uri(d.pop("icon_data_uri", UNSET))
+
         def _parse_parent_platform(data: object) -> None | str | Unset:
             if data is None:
                 return data
@@ -190,6 +209,7 @@ class UIElementMetadataResponse:
             not_configured=not_configured,
             result_label=result_label,
             result_tooltip=result_tooltip,
+            icon_data_uri=icon_data_uri,
             parent_platform=parent_platform,
             platform_tile=platform_tile,
             show_in_form=show_in_form,

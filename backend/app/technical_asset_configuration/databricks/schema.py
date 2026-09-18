@@ -1,5 +1,5 @@
 import json
-from typing import ClassVar, Literal, Optional, Self
+from typing import ClassVar, Optional, Self
 
 from fastapi import HTTPException, status
 from pydantic import model_validator
@@ -23,7 +23,6 @@ from app.technical_asset_configuration.base_schema import (
     UIElementSelect,
     UIElementString,
 )
-from app.technical_asset_configuration.data_output_types import DataOutputTypes
 from app.technical_asset_configuration.databricks.model import (
     NAME,
 )
@@ -39,7 +38,6 @@ class DatabricksTechnicalAssetConfiguration(TechnicalAssetPlugin):
 
     catalog: str
     schema: str = ""
-    configuration_type: Literal[DataOutputTypes.DatabricksTechnicalAssetConfiguration]
     table: str = "*"
     bucket_identifier: str = ""
     catalog_path: str = ""

@@ -53,10 +53,7 @@ export const getDatasetDataProductsColumns = ({
                         linkTo={createDataOutputIdPath(technical_asset.id, technical_asset.owner_id)}
                         icon={
                             <CustomSvgIconLoader
-                                iconComponent={getTechnicalAssetIcon(
-                                    technical_asset.configuration.configuration_type,
-                                    plugins,
-                                )}
+                                iconComponent={getTechnicalAssetIcon(technical_asset.configuration.name, plugins)}
                                 size="default"
                             />
                         }

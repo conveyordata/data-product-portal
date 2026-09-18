@@ -435,48 +435,6 @@ func (s *AccessDurationUpdate) SetAlternativeDays(val OptNilInt) {
 	s.AlternativeDays = val
 }
 
-// Ref: #/components/schemas/AccessGranularity
-type AccessGranularity string
-
-const (
-	AccessGranularitySchema AccessGranularity = "schema"
-	AccessGranularityTable  AccessGranularity = "table"
-)
-
-// AllValues returns all AccessGranularity values.
-func (AccessGranularity) AllValues() []AccessGranularity {
-	return []AccessGranularity{
-		AccessGranularitySchema,
-		AccessGranularityTable,
-	}
-}
-
-// MarshalText implements encoding.TextMarshaler.
-func (s AccessGranularity) MarshalText() ([]byte, error) {
-	switch s {
-	case AccessGranularitySchema:
-		return []byte(s), nil
-	case AccessGranularityTable:
-		return []byte(s), nil
-	default:
-		return nil, errors.Errorf("invalid value: %q", s)
-	}
-}
-
-// UnmarshalText implements encoding.TextUnmarshaler.
-func (s *AccessGranularity) UnmarshalText(data []byte) error {
-	switch AccessGranularity(data) {
-	case AccessGranularitySchema:
-		*s = AccessGranularitySchema
-		return nil
-	case AccessGranularityTable:
-		*s = AccessGranularityTable
-		return nil
-	default:
-		return errors.Errorf("invalid value: %q", data)
-	}
-}
-
 // Ref: #/components/schemas/AccessMode
 type AccessMode struct {
 	ID          uuid.UUID `json:"id"`
@@ -857,54 +815,6 @@ func (AuthorizationAction) AllValues() []AuthorizationAction {
 		AuthorizationAction901,
 		AuthorizationAction902,
 	}
-}
-
-// Ref: #/components/schemas/AzureBlobTechnicalAssetConfiguration
-type AzureBlobTechnicalAssetConfiguration struct {
-	ConfigurationType string    `json:"configuration_type"`
-	Domain            OptString `json:"domain"`
-	Path              OptString `json:"path"`
-	ContainerName     string    `json:"container_name"`
-}
-
-// GetConfigurationType returns the value of ConfigurationType.
-func (s *AzureBlobTechnicalAssetConfiguration) GetConfigurationType() string {
-	return s.ConfigurationType
-}
-
-// GetDomain returns the value of Domain.
-func (s *AzureBlobTechnicalAssetConfiguration) GetDomain() OptString {
-	return s.Domain
-}
-
-// GetPath returns the value of Path.
-func (s *AzureBlobTechnicalAssetConfiguration) GetPath() OptString {
-	return s.Path
-}
-
-// GetContainerName returns the value of ContainerName.
-func (s *AzureBlobTechnicalAssetConfiguration) GetContainerName() string {
-	return s.ContainerName
-}
-
-// SetConfigurationType sets the value of ConfigurationType.
-func (s *AzureBlobTechnicalAssetConfiguration) SetConfigurationType(val string) {
-	s.ConfigurationType = val
-}
-
-// SetDomain sets the value of Domain.
-func (s *AzureBlobTechnicalAssetConfiguration) SetDomain(val OptString) {
-	s.Domain = val
-}
-
-// SetPath sets the value of Path.
-func (s *AzureBlobTechnicalAssetConfiguration) SetPath(val OptString) {
-	s.Path = val
-}
-
-// SetContainerName sets the value of ContainerName.
-func (s *AzureBlobTechnicalAssetConfiguration) SetContainerName(val string) {
-	s.ContainerName = val
 }
 
 // Ref: #/components/schemas/BecomeAdmin
@@ -1526,11 +1436,13 @@ func (*CreateTagResponse) createTagRes() {}
 
 // Ref: #/components/schemas/CreateTechnicalAssetRequest
 type CreateTechnicalAssetRequest struct {
-	Name          string                                   `json:"name"`
-	Description   string                                   `json:"description"`
-	Namespace     string                                   `json:"namespace"`
-	PlatformID    uuid.UUID                                `json:"platform_id"`
-	ServiceID     uuid.UUID                                `json:"service_id"`
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
+	Namespace   string    `json:"namespace"`
+	PlatformID  uuid.UUID `json:"platform_id"`
+	ServiceID   uuid.UUID `json:"service_id"`
+	// Configuration of the technical asset. The available fields depend on `name`; retrieve them from
+	// /v2/plugins/{name}/form.
 	Configuration CreateTechnicalAssetRequestConfiguration `json:"configuration"`
 	// DEPRECATED: Use 'technical_mapping' instead. This field will be removed in a future version.
 	//
@@ -1641,269 +1553,42 @@ func (s *CreateTechnicalAssetRequest) SetTagIds(val []uuid.UUID) {
 	s.TagIds = val
 }
 
-// CreateTechnicalAssetRequestConfiguration represents sum type.
+// Configuration of the technical asset. The available fields depend on `name`; retrieve them from
+// /v2/plugins/{name}/form.
 type CreateTechnicalAssetRequestConfiguration struct {
-	// Type selects the active sum variant, switch on this field.
-	Type                                        CreateTechnicalAssetRequestConfigurationType
-	S3TechnicalAssetConfiguration               S3TechnicalAssetConfiguration
-	RustFSTechnicalAssetConfiguration           RustFSTechnicalAssetConfiguration
-	GlueTechnicalAssetConfiguration             GlueTechnicalAssetConfiguration
-	DatabricksTechnicalAssetConfiguration       DatabricksTechnicalAssetConfiguration
-	SnowflakeTechnicalAssetConfiguration        SnowflakeTechnicalAssetConfiguration
-	RedshiftTechnicalAssetConfiguration         RedshiftTechnicalAssetConfiguration
-	PostgreSQLTechnicalAssetConfiguration       PostgreSQLTechnicalAssetConfiguration
-	OSISemanticModelTechnicalAssetConfiguration OSISemanticModelTechnicalAssetConfiguration
-	AzureBlobTechnicalAssetConfiguration        AzureBlobTechnicalAssetConfiguration
+	Name            string `json:"name"`
+	AdditionalProps CreateTechnicalAssetRequestConfigurationAdditional
 }
 
-// CreateTechnicalAssetRequestConfigurationType is oneOf type of CreateTechnicalAssetRequestConfiguration.
-type CreateTechnicalAssetRequestConfigurationType string
-
-// Possible values for CreateTechnicalAssetRequestConfigurationType.
-const (
-	S3TechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration               CreateTechnicalAssetRequestConfigurationType = "S3TechnicalAssetConfiguration"
-	RustFSTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration           CreateTechnicalAssetRequestConfigurationType = "RustFSTechnicalAssetConfiguration"
-	GlueTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration             CreateTechnicalAssetRequestConfigurationType = "GlueTechnicalAssetConfiguration"
-	DatabricksTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration       CreateTechnicalAssetRequestConfigurationType = "DatabricksTechnicalAssetConfiguration"
-	SnowflakeTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration        CreateTechnicalAssetRequestConfigurationType = "SnowflakeTechnicalAssetConfiguration"
-	RedshiftTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration         CreateTechnicalAssetRequestConfigurationType = "RedshiftTechnicalAssetConfiguration"
-	PostgreSQLTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration       CreateTechnicalAssetRequestConfigurationType = "PostgreSQLTechnicalAssetConfiguration"
-	OSISemanticModelTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration CreateTechnicalAssetRequestConfigurationType = "OSISemanticModelTechnicalAssetConfiguration"
-	AzureBlobTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration        CreateTechnicalAssetRequestConfigurationType = "AzureBlobTechnicalAssetConfiguration"
-)
-
-// IsS3TechnicalAssetConfiguration reports whether CreateTechnicalAssetRequestConfiguration is S3TechnicalAssetConfiguration.
-func (s CreateTechnicalAssetRequestConfiguration) IsS3TechnicalAssetConfiguration() bool {
-	return s.Type == S3TechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration
+// GetName returns the value of Name.
+func (s *CreateTechnicalAssetRequestConfiguration) GetName() string {
+	return s.Name
 }
 
-// IsRustFSTechnicalAssetConfiguration reports whether CreateTechnicalAssetRequestConfiguration is RustFSTechnicalAssetConfiguration.
-func (s CreateTechnicalAssetRequestConfiguration) IsRustFSTechnicalAssetConfiguration() bool {
-	return s.Type == RustFSTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration
+// GetAdditionalProps returns the value of AdditionalProps.
+func (s *CreateTechnicalAssetRequestConfiguration) GetAdditionalProps() CreateTechnicalAssetRequestConfigurationAdditional {
+	return s.AdditionalProps
 }
 
-// IsGlueTechnicalAssetConfiguration reports whether CreateTechnicalAssetRequestConfiguration is GlueTechnicalAssetConfiguration.
-func (s CreateTechnicalAssetRequestConfiguration) IsGlueTechnicalAssetConfiguration() bool {
-	return s.Type == GlueTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration
+// SetName sets the value of Name.
+func (s *CreateTechnicalAssetRequestConfiguration) SetName(val string) {
+	s.Name = val
 }
 
-// IsDatabricksTechnicalAssetConfiguration reports whether CreateTechnicalAssetRequestConfiguration is DatabricksTechnicalAssetConfiguration.
-func (s CreateTechnicalAssetRequestConfiguration) IsDatabricksTechnicalAssetConfiguration() bool {
-	return s.Type == DatabricksTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration
+// SetAdditionalProps sets the value of AdditionalProps.
+func (s *CreateTechnicalAssetRequestConfiguration) SetAdditionalProps(val CreateTechnicalAssetRequestConfigurationAdditional) {
+	s.AdditionalProps = val
 }
 
-// IsSnowflakeTechnicalAssetConfiguration reports whether CreateTechnicalAssetRequestConfiguration is SnowflakeTechnicalAssetConfiguration.
-func (s CreateTechnicalAssetRequestConfiguration) IsSnowflakeTechnicalAssetConfiguration() bool {
-	return s.Type == SnowflakeTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration
-}
+type CreateTechnicalAssetRequestConfigurationAdditional map[string]jx.Raw
 
-// IsRedshiftTechnicalAssetConfiguration reports whether CreateTechnicalAssetRequestConfiguration is RedshiftTechnicalAssetConfiguration.
-func (s CreateTechnicalAssetRequestConfiguration) IsRedshiftTechnicalAssetConfiguration() bool {
-	return s.Type == RedshiftTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration
-}
-
-// IsPostgreSQLTechnicalAssetConfiguration reports whether CreateTechnicalAssetRequestConfiguration is PostgreSQLTechnicalAssetConfiguration.
-func (s CreateTechnicalAssetRequestConfiguration) IsPostgreSQLTechnicalAssetConfiguration() bool {
-	return s.Type == PostgreSQLTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration
-}
-
-// IsOSISemanticModelTechnicalAssetConfiguration reports whether CreateTechnicalAssetRequestConfiguration is OSISemanticModelTechnicalAssetConfiguration.
-func (s CreateTechnicalAssetRequestConfiguration) IsOSISemanticModelTechnicalAssetConfiguration() bool {
-	return s.Type == OSISemanticModelTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration
-}
-
-// IsAzureBlobTechnicalAssetConfiguration reports whether CreateTechnicalAssetRequestConfiguration is AzureBlobTechnicalAssetConfiguration.
-func (s CreateTechnicalAssetRequestConfiguration) IsAzureBlobTechnicalAssetConfiguration() bool {
-	return s.Type == AzureBlobTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration
-}
-
-// SetS3TechnicalAssetConfiguration sets CreateTechnicalAssetRequestConfiguration to S3TechnicalAssetConfiguration.
-func (s *CreateTechnicalAssetRequestConfiguration) SetS3TechnicalAssetConfiguration(v S3TechnicalAssetConfiguration) {
-	s.Type = S3TechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration
-	s.S3TechnicalAssetConfiguration = v
-}
-
-// GetS3TechnicalAssetConfiguration returns S3TechnicalAssetConfiguration and true boolean if CreateTechnicalAssetRequestConfiguration is S3TechnicalAssetConfiguration.
-func (s CreateTechnicalAssetRequestConfiguration) GetS3TechnicalAssetConfiguration() (v S3TechnicalAssetConfiguration, ok bool) {
-	if !s.IsS3TechnicalAssetConfiguration() {
-		return v, false
+func (s *CreateTechnicalAssetRequestConfigurationAdditional) init() CreateTechnicalAssetRequestConfigurationAdditional {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
 	}
-	return s.S3TechnicalAssetConfiguration, true
-}
-
-// NewS3TechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration returns new CreateTechnicalAssetRequestConfiguration from S3TechnicalAssetConfiguration.
-func NewS3TechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration(v S3TechnicalAssetConfiguration) CreateTechnicalAssetRequestConfiguration {
-	var s CreateTechnicalAssetRequestConfiguration
-	s.SetS3TechnicalAssetConfiguration(v)
-	return s
-}
-
-// SetRustFSTechnicalAssetConfiguration sets CreateTechnicalAssetRequestConfiguration to RustFSTechnicalAssetConfiguration.
-func (s *CreateTechnicalAssetRequestConfiguration) SetRustFSTechnicalAssetConfiguration(v RustFSTechnicalAssetConfiguration) {
-	s.Type = RustFSTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration
-	s.RustFSTechnicalAssetConfiguration = v
-}
-
-// GetRustFSTechnicalAssetConfiguration returns RustFSTechnicalAssetConfiguration and true boolean if CreateTechnicalAssetRequestConfiguration is RustFSTechnicalAssetConfiguration.
-func (s CreateTechnicalAssetRequestConfiguration) GetRustFSTechnicalAssetConfiguration() (v RustFSTechnicalAssetConfiguration, ok bool) {
-	if !s.IsRustFSTechnicalAssetConfiguration() {
-		return v, false
-	}
-	return s.RustFSTechnicalAssetConfiguration, true
-}
-
-// NewRustFSTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration returns new CreateTechnicalAssetRequestConfiguration from RustFSTechnicalAssetConfiguration.
-func NewRustFSTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration(v RustFSTechnicalAssetConfiguration) CreateTechnicalAssetRequestConfiguration {
-	var s CreateTechnicalAssetRequestConfiguration
-	s.SetRustFSTechnicalAssetConfiguration(v)
-	return s
-}
-
-// SetGlueTechnicalAssetConfiguration sets CreateTechnicalAssetRequestConfiguration to GlueTechnicalAssetConfiguration.
-func (s *CreateTechnicalAssetRequestConfiguration) SetGlueTechnicalAssetConfiguration(v GlueTechnicalAssetConfiguration) {
-	s.Type = GlueTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration
-	s.GlueTechnicalAssetConfiguration = v
-}
-
-// GetGlueTechnicalAssetConfiguration returns GlueTechnicalAssetConfiguration and true boolean if CreateTechnicalAssetRequestConfiguration is GlueTechnicalAssetConfiguration.
-func (s CreateTechnicalAssetRequestConfiguration) GetGlueTechnicalAssetConfiguration() (v GlueTechnicalAssetConfiguration, ok bool) {
-	if !s.IsGlueTechnicalAssetConfiguration() {
-		return v, false
-	}
-	return s.GlueTechnicalAssetConfiguration, true
-}
-
-// NewGlueTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration returns new CreateTechnicalAssetRequestConfiguration from GlueTechnicalAssetConfiguration.
-func NewGlueTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration(v GlueTechnicalAssetConfiguration) CreateTechnicalAssetRequestConfiguration {
-	var s CreateTechnicalAssetRequestConfiguration
-	s.SetGlueTechnicalAssetConfiguration(v)
-	return s
-}
-
-// SetDatabricksTechnicalAssetConfiguration sets CreateTechnicalAssetRequestConfiguration to DatabricksTechnicalAssetConfiguration.
-func (s *CreateTechnicalAssetRequestConfiguration) SetDatabricksTechnicalAssetConfiguration(v DatabricksTechnicalAssetConfiguration) {
-	s.Type = DatabricksTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration
-	s.DatabricksTechnicalAssetConfiguration = v
-}
-
-// GetDatabricksTechnicalAssetConfiguration returns DatabricksTechnicalAssetConfiguration and true boolean if CreateTechnicalAssetRequestConfiguration is DatabricksTechnicalAssetConfiguration.
-func (s CreateTechnicalAssetRequestConfiguration) GetDatabricksTechnicalAssetConfiguration() (v DatabricksTechnicalAssetConfiguration, ok bool) {
-	if !s.IsDatabricksTechnicalAssetConfiguration() {
-		return v, false
-	}
-	return s.DatabricksTechnicalAssetConfiguration, true
-}
-
-// NewDatabricksTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration returns new CreateTechnicalAssetRequestConfiguration from DatabricksTechnicalAssetConfiguration.
-func NewDatabricksTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration(v DatabricksTechnicalAssetConfiguration) CreateTechnicalAssetRequestConfiguration {
-	var s CreateTechnicalAssetRequestConfiguration
-	s.SetDatabricksTechnicalAssetConfiguration(v)
-	return s
-}
-
-// SetSnowflakeTechnicalAssetConfiguration sets CreateTechnicalAssetRequestConfiguration to SnowflakeTechnicalAssetConfiguration.
-func (s *CreateTechnicalAssetRequestConfiguration) SetSnowflakeTechnicalAssetConfiguration(v SnowflakeTechnicalAssetConfiguration) {
-	s.Type = SnowflakeTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration
-	s.SnowflakeTechnicalAssetConfiguration = v
-}
-
-// GetSnowflakeTechnicalAssetConfiguration returns SnowflakeTechnicalAssetConfiguration and true boolean if CreateTechnicalAssetRequestConfiguration is SnowflakeTechnicalAssetConfiguration.
-func (s CreateTechnicalAssetRequestConfiguration) GetSnowflakeTechnicalAssetConfiguration() (v SnowflakeTechnicalAssetConfiguration, ok bool) {
-	if !s.IsSnowflakeTechnicalAssetConfiguration() {
-		return v, false
-	}
-	return s.SnowflakeTechnicalAssetConfiguration, true
-}
-
-// NewSnowflakeTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration returns new CreateTechnicalAssetRequestConfiguration from SnowflakeTechnicalAssetConfiguration.
-func NewSnowflakeTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration(v SnowflakeTechnicalAssetConfiguration) CreateTechnicalAssetRequestConfiguration {
-	var s CreateTechnicalAssetRequestConfiguration
-	s.SetSnowflakeTechnicalAssetConfiguration(v)
-	return s
-}
-
-// SetRedshiftTechnicalAssetConfiguration sets CreateTechnicalAssetRequestConfiguration to RedshiftTechnicalAssetConfiguration.
-func (s *CreateTechnicalAssetRequestConfiguration) SetRedshiftTechnicalAssetConfiguration(v RedshiftTechnicalAssetConfiguration) {
-	s.Type = RedshiftTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration
-	s.RedshiftTechnicalAssetConfiguration = v
-}
-
-// GetRedshiftTechnicalAssetConfiguration returns RedshiftTechnicalAssetConfiguration and true boolean if CreateTechnicalAssetRequestConfiguration is RedshiftTechnicalAssetConfiguration.
-func (s CreateTechnicalAssetRequestConfiguration) GetRedshiftTechnicalAssetConfiguration() (v RedshiftTechnicalAssetConfiguration, ok bool) {
-	if !s.IsRedshiftTechnicalAssetConfiguration() {
-		return v, false
-	}
-	return s.RedshiftTechnicalAssetConfiguration, true
-}
-
-// NewRedshiftTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration returns new CreateTechnicalAssetRequestConfiguration from RedshiftTechnicalAssetConfiguration.
-func NewRedshiftTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration(v RedshiftTechnicalAssetConfiguration) CreateTechnicalAssetRequestConfiguration {
-	var s CreateTechnicalAssetRequestConfiguration
-	s.SetRedshiftTechnicalAssetConfiguration(v)
-	return s
-}
-
-// SetPostgreSQLTechnicalAssetConfiguration sets CreateTechnicalAssetRequestConfiguration to PostgreSQLTechnicalAssetConfiguration.
-func (s *CreateTechnicalAssetRequestConfiguration) SetPostgreSQLTechnicalAssetConfiguration(v PostgreSQLTechnicalAssetConfiguration) {
-	s.Type = PostgreSQLTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration
-	s.PostgreSQLTechnicalAssetConfiguration = v
-}
-
-// GetPostgreSQLTechnicalAssetConfiguration returns PostgreSQLTechnicalAssetConfiguration and true boolean if CreateTechnicalAssetRequestConfiguration is PostgreSQLTechnicalAssetConfiguration.
-func (s CreateTechnicalAssetRequestConfiguration) GetPostgreSQLTechnicalAssetConfiguration() (v PostgreSQLTechnicalAssetConfiguration, ok bool) {
-	if !s.IsPostgreSQLTechnicalAssetConfiguration() {
-		return v, false
-	}
-	return s.PostgreSQLTechnicalAssetConfiguration, true
-}
-
-// NewPostgreSQLTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration returns new CreateTechnicalAssetRequestConfiguration from PostgreSQLTechnicalAssetConfiguration.
-func NewPostgreSQLTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration(v PostgreSQLTechnicalAssetConfiguration) CreateTechnicalAssetRequestConfiguration {
-	var s CreateTechnicalAssetRequestConfiguration
-	s.SetPostgreSQLTechnicalAssetConfiguration(v)
-	return s
-}
-
-// SetOSISemanticModelTechnicalAssetConfiguration sets CreateTechnicalAssetRequestConfiguration to OSISemanticModelTechnicalAssetConfiguration.
-func (s *CreateTechnicalAssetRequestConfiguration) SetOSISemanticModelTechnicalAssetConfiguration(v OSISemanticModelTechnicalAssetConfiguration) {
-	s.Type = OSISemanticModelTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration
-	s.OSISemanticModelTechnicalAssetConfiguration = v
-}
-
-// GetOSISemanticModelTechnicalAssetConfiguration returns OSISemanticModelTechnicalAssetConfiguration and true boolean if CreateTechnicalAssetRequestConfiguration is OSISemanticModelTechnicalAssetConfiguration.
-func (s CreateTechnicalAssetRequestConfiguration) GetOSISemanticModelTechnicalAssetConfiguration() (v OSISemanticModelTechnicalAssetConfiguration, ok bool) {
-	if !s.IsOSISemanticModelTechnicalAssetConfiguration() {
-		return v, false
-	}
-	return s.OSISemanticModelTechnicalAssetConfiguration, true
-}
-
-// NewOSISemanticModelTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration returns new CreateTechnicalAssetRequestConfiguration from OSISemanticModelTechnicalAssetConfiguration.
-func NewOSISemanticModelTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration(v OSISemanticModelTechnicalAssetConfiguration) CreateTechnicalAssetRequestConfiguration {
-	var s CreateTechnicalAssetRequestConfiguration
-	s.SetOSISemanticModelTechnicalAssetConfiguration(v)
-	return s
-}
-
-// SetAzureBlobTechnicalAssetConfiguration sets CreateTechnicalAssetRequestConfiguration to AzureBlobTechnicalAssetConfiguration.
-func (s *CreateTechnicalAssetRequestConfiguration) SetAzureBlobTechnicalAssetConfiguration(v AzureBlobTechnicalAssetConfiguration) {
-	s.Type = AzureBlobTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration
-	s.AzureBlobTechnicalAssetConfiguration = v
-}
-
-// GetAzureBlobTechnicalAssetConfiguration returns AzureBlobTechnicalAssetConfiguration and true boolean if CreateTechnicalAssetRequestConfiguration is AzureBlobTechnicalAssetConfiguration.
-func (s CreateTechnicalAssetRequestConfiguration) GetAzureBlobTechnicalAssetConfiguration() (v AzureBlobTechnicalAssetConfiguration, ok bool) {
-	if !s.IsAzureBlobTechnicalAssetConfiguration() {
-		return v, false
-	}
-	return s.AzureBlobTechnicalAssetConfiguration, true
-}
-
-// NewAzureBlobTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration returns new CreateTechnicalAssetRequestConfiguration from AzureBlobTechnicalAssetConfiguration.
-func NewAzureBlobTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration(v AzureBlobTechnicalAssetConfiguration) CreateTechnicalAssetRequestConfiguration {
-	var s CreateTechnicalAssetRequestConfiguration
-	s.SetAzureBlobTechnicalAssetConfiguration(v)
-	return s
+	return m
 }
 
 // Ref: #/components/schemas/CreateTechnicalAssetResponse
@@ -3615,98 +3300,6 @@ func (s *DataQualityTechnicalAsset) SetName(val string) {
 // SetStatus sets the value of Status.
 func (s *DataQualityTechnicalAsset) SetStatus(val DataQualityStatus) {
 	s.Status = val
-}
-
-// Ref: #/components/schemas/DatabricksTechnicalAssetConfiguration
-type DatabricksTechnicalAssetConfiguration struct {
-	ConfigurationType string            `json:"configuration_type"`
-	Catalog           string            `json:"catalog"`
-	Schema            OptString         `json:"schema"`
-	Table             OptString         `json:"table"`
-	BucketIdentifier  OptString         `json:"bucket_identifier"`
-	CatalogPath       OptString         `json:"catalog_path"`
-	TablePath         OptString         `json:"table_path"`
-	AccessGranularity AccessGranularity `json:"access_granularity"`
-}
-
-// GetConfigurationType returns the value of ConfigurationType.
-func (s *DatabricksTechnicalAssetConfiguration) GetConfigurationType() string {
-	return s.ConfigurationType
-}
-
-// GetCatalog returns the value of Catalog.
-func (s *DatabricksTechnicalAssetConfiguration) GetCatalog() string {
-	return s.Catalog
-}
-
-// GetSchema returns the value of Schema.
-func (s *DatabricksTechnicalAssetConfiguration) GetSchema() OptString {
-	return s.Schema
-}
-
-// GetTable returns the value of Table.
-func (s *DatabricksTechnicalAssetConfiguration) GetTable() OptString {
-	return s.Table
-}
-
-// GetBucketIdentifier returns the value of BucketIdentifier.
-func (s *DatabricksTechnicalAssetConfiguration) GetBucketIdentifier() OptString {
-	return s.BucketIdentifier
-}
-
-// GetCatalogPath returns the value of CatalogPath.
-func (s *DatabricksTechnicalAssetConfiguration) GetCatalogPath() OptString {
-	return s.CatalogPath
-}
-
-// GetTablePath returns the value of TablePath.
-func (s *DatabricksTechnicalAssetConfiguration) GetTablePath() OptString {
-	return s.TablePath
-}
-
-// GetAccessGranularity returns the value of AccessGranularity.
-func (s *DatabricksTechnicalAssetConfiguration) GetAccessGranularity() AccessGranularity {
-	return s.AccessGranularity
-}
-
-// SetConfigurationType sets the value of ConfigurationType.
-func (s *DatabricksTechnicalAssetConfiguration) SetConfigurationType(val string) {
-	s.ConfigurationType = val
-}
-
-// SetCatalog sets the value of Catalog.
-func (s *DatabricksTechnicalAssetConfiguration) SetCatalog(val string) {
-	s.Catalog = val
-}
-
-// SetSchema sets the value of Schema.
-func (s *DatabricksTechnicalAssetConfiguration) SetSchema(val OptString) {
-	s.Schema = val
-}
-
-// SetTable sets the value of Table.
-func (s *DatabricksTechnicalAssetConfiguration) SetTable(val OptString) {
-	s.Table = val
-}
-
-// SetBucketIdentifier sets the value of BucketIdentifier.
-func (s *DatabricksTechnicalAssetConfiguration) SetBucketIdentifier(val OptString) {
-	s.BucketIdentifier = val
-}
-
-// SetCatalogPath sets the value of CatalogPath.
-func (s *DatabricksTechnicalAssetConfiguration) SetCatalogPath(val OptString) {
-	s.CatalogPath = val
-}
-
-// SetTablePath sets the value of TablePath.
-func (s *DatabricksTechnicalAssetConfiguration) SetTablePath(val OptString) {
-	s.TablePath = val
-}
-
-// SetAccessGranularity sets the value of AccessGranularity.
-func (s *DatabricksTechnicalAssetConfiguration) SetAccessGranularity(val AccessGranularity) {
-	s.AccessGranularity = val
 }
 
 // Ref: #/components/schemas/DecideDataProductRoleAssignment
@@ -5822,20 +5415,22 @@ func (*GetTechnicalAssetsResponse) getDataProductTechnicalAssetsRes() {}
 
 // Ref: #/components/schemas/GetTechnicalAssetsResponseItem
 type GetTechnicalAssetsResponseItem struct {
-	ID               uuid.UUID                                   `json:"id"`
-	Name             string                                      `json:"name"`
-	Description      string                                      `json:"description"`
-	Namespace        string                                      `json:"namespace"`
-	OwnerID          uuid.UUID                                   `json:"owner_id"`
-	PlatformID       uuid.UUID                                   `json:"platform_id"`
-	ServiceID        uuid.UUID                                   `json:"service_id"`
-	Status           TechnicalAssetStatus                        `json:"status"`
-	TechnicalMapping TechnicalMapping                            `json:"technical_mapping"`
-	AccessModes      []AccessMode                                `json:"access_modes"`
-	Configuration    GetTechnicalAssetsResponseItemConfiguration `json:"configuration"`
-	Owner            DataProduct                                 `json:"owner"`
-	OutputPortLinks  []OutputPortLink                            `json:"output_port_links"`
-	Tags             []Tag                                       `json:"tags"`
+	ID               uuid.UUID            `json:"id"`
+	Name             string               `json:"name"`
+	Description      string               `json:"description"`
+	Namespace        string               `json:"namespace"`
+	OwnerID          uuid.UUID            `json:"owner_id"`
+	PlatformID       uuid.UUID            `json:"platform_id"`
+	ServiceID        uuid.UUID            `json:"service_id"`
+	Status           TechnicalAssetStatus `json:"status"`
+	TechnicalMapping TechnicalMapping     `json:"technical_mapping"`
+	AccessModes      []AccessMode         `json:"access_modes"`
+	// Configuration of the technical asset. The available fields depend on `name`; retrieve them from
+	// /v2/plugins/{name}/form.
+	Configuration   GetTechnicalAssetsResponseItemConfiguration `json:"configuration"`
+	Owner           DataProduct                                 `json:"owner"`
+	OutputPortLinks []OutputPortLink                            `json:"output_port_links"`
+	Tags            []Tag                                       `json:"tags"`
 	// DEPRECATED: Use 'technical_mapping' instead. This field will be removed in a future version.
 	SourceAligned bool            `json:"sourceAligned"`
 	ResultString  string          `json:"result_string"`
@@ -6014,269 +5609,42 @@ func (s *GetTechnicalAssetsResponseItem) SetTechnicalInfo(val []TechnicalInfo) {
 
 func (*GetTechnicalAssetsResponseItem) getTechnicalAssetRes() {}
 
-// GetTechnicalAssetsResponseItemConfiguration represents sum type.
+// Configuration of the technical asset. The available fields depend on `name`; retrieve them from
+// /v2/plugins/{name}/form.
 type GetTechnicalAssetsResponseItemConfiguration struct {
-	// Type selects the active sum variant, switch on this field.
-	Type                                        GetTechnicalAssetsResponseItemConfigurationType
-	S3TechnicalAssetConfiguration               S3TechnicalAssetConfiguration
-	RustFSTechnicalAssetConfiguration           RustFSTechnicalAssetConfiguration
-	GlueTechnicalAssetConfiguration             GlueTechnicalAssetConfiguration
-	DatabricksTechnicalAssetConfiguration       DatabricksTechnicalAssetConfiguration
-	SnowflakeTechnicalAssetConfiguration        SnowflakeTechnicalAssetConfiguration
-	RedshiftTechnicalAssetConfiguration         RedshiftTechnicalAssetConfiguration
-	PostgreSQLTechnicalAssetConfiguration       PostgreSQLTechnicalAssetConfiguration
-	OSISemanticModelTechnicalAssetConfiguration OSISemanticModelTechnicalAssetConfiguration
-	AzureBlobTechnicalAssetConfiguration        AzureBlobTechnicalAssetConfiguration
+	Name            string `json:"name"`
+	AdditionalProps GetTechnicalAssetsResponseItemConfigurationAdditional
 }
 
-// GetTechnicalAssetsResponseItemConfigurationType is oneOf type of GetTechnicalAssetsResponseItemConfiguration.
-type GetTechnicalAssetsResponseItemConfigurationType string
-
-// Possible values for GetTechnicalAssetsResponseItemConfigurationType.
-const (
-	S3TechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration               GetTechnicalAssetsResponseItemConfigurationType = "S3TechnicalAssetConfiguration"
-	RustFSTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration           GetTechnicalAssetsResponseItemConfigurationType = "RustFSTechnicalAssetConfiguration"
-	GlueTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration             GetTechnicalAssetsResponseItemConfigurationType = "GlueTechnicalAssetConfiguration"
-	DatabricksTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration       GetTechnicalAssetsResponseItemConfigurationType = "DatabricksTechnicalAssetConfiguration"
-	SnowflakeTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration        GetTechnicalAssetsResponseItemConfigurationType = "SnowflakeTechnicalAssetConfiguration"
-	RedshiftTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration         GetTechnicalAssetsResponseItemConfigurationType = "RedshiftTechnicalAssetConfiguration"
-	PostgreSQLTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration       GetTechnicalAssetsResponseItemConfigurationType = "PostgreSQLTechnicalAssetConfiguration"
-	OSISemanticModelTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration GetTechnicalAssetsResponseItemConfigurationType = "OSISemanticModelTechnicalAssetConfiguration"
-	AzureBlobTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration        GetTechnicalAssetsResponseItemConfigurationType = "AzureBlobTechnicalAssetConfiguration"
-)
-
-// IsS3TechnicalAssetConfiguration reports whether GetTechnicalAssetsResponseItemConfiguration is S3TechnicalAssetConfiguration.
-func (s GetTechnicalAssetsResponseItemConfiguration) IsS3TechnicalAssetConfiguration() bool {
-	return s.Type == S3TechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration
+// GetName returns the value of Name.
+func (s *GetTechnicalAssetsResponseItemConfiguration) GetName() string {
+	return s.Name
 }
 
-// IsRustFSTechnicalAssetConfiguration reports whether GetTechnicalAssetsResponseItemConfiguration is RustFSTechnicalAssetConfiguration.
-func (s GetTechnicalAssetsResponseItemConfiguration) IsRustFSTechnicalAssetConfiguration() bool {
-	return s.Type == RustFSTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration
+// GetAdditionalProps returns the value of AdditionalProps.
+func (s *GetTechnicalAssetsResponseItemConfiguration) GetAdditionalProps() GetTechnicalAssetsResponseItemConfigurationAdditional {
+	return s.AdditionalProps
 }
 
-// IsGlueTechnicalAssetConfiguration reports whether GetTechnicalAssetsResponseItemConfiguration is GlueTechnicalAssetConfiguration.
-func (s GetTechnicalAssetsResponseItemConfiguration) IsGlueTechnicalAssetConfiguration() bool {
-	return s.Type == GlueTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration
+// SetName sets the value of Name.
+func (s *GetTechnicalAssetsResponseItemConfiguration) SetName(val string) {
+	s.Name = val
 }
 
-// IsDatabricksTechnicalAssetConfiguration reports whether GetTechnicalAssetsResponseItemConfiguration is DatabricksTechnicalAssetConfiguration.
-func (s GetTechnicalAssetsResponseItemConfiguration) IsDatabricksTechnicalAssetConfiguration() bool {
-	return s.Type == DatabricksTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration
+// SetAdditionalProps sets the value of AdditionalProps.
+func (s *GetTechnicalAssetsResponseItemConfiguration) SetAdditionalProps(val GetTechnicalAssetsResponseItemConfigurationAdditional) {
+	s.AdditionalProps = val
 }
 
-// IsSnowflakeTechnicalAssetConfiguration reports whether GetTechnicalAssetsResponseItemConfiguration is SnowflakeTechnicalAssetConfiguration.
-func (s GetTechnicalAssetsResponseItemConfiguration) IsSnowflakeTechnicalAssetConfiguration() bool {
-	return s.Type == SnowflakeTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration
-}
+type GetTechnicalAssetsResponseItemConfigurationAdditional map[string]jx.Raw
 
-// IsRedshiftTechnicalAssetConfiguration reports whether GetTechnicalAssetsResponseItemConfiguration is RedshiftTechnicalAssetConfiguration.
-func (s GetTechnicalAssetsResponseItemConfiguration) IsRedshiftTechnicalAssetConfiguration() bool {
-	return s.Type == RedshiftTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration
-}
-
-// IsPostgreSQLTechnicalAssetConfiguration reports whether GetTechnicalAssetsResponseItemConfiguration is PostgreSQLTechnicalAssetConfiguration.
-func (s GetTechnicalAssetsResponseItemConfiguration) IsPostgreSQLTechnicalAssetConfiguration() bool {
-	return s.Type == PostgreSQLTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration
-}
-
-// IsOSISemanticModelTechnicalAssetConfiguration reports whether GetTechnicalAssetsResponseItemConfiguration is OSISemanticModelTechnicalAssetConfiguration.
-func (s GetTechnicalAssetsResponseItemConfiguration) IsOSISemanticModelTechnicalAssetConfiguration() bool {
-	return s.Type == OSISemanticModelTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration
-}
-
-// IsAzureBlobTechnicalAssetConfiguration reports whether GetTechnicalAssetsResponseItemConfiguration is AzureBlobTechnicalAssetConfiguration.
-func (s GetTechnicalAssetsResponseItemConfiguration) IsAzureBlobTechnicalAssetConfiguration() bool {
-	return s.Type == AzureBlobTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration
-}
-
-// SetS3TechnicalAssetConfiguration sets GetTechnicalAssetsResponseItemConfiguration to S3TechnicalAssetConfiguration.
-func (s *GetTechnicalAssetsResponseItemConfiguration) SetS3TechnicalAssetConfiguration(v S3TechnicalAssetConfiguration) {
-	s.Type = S3TechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration
-	s.S3TechnicalAssetConfiguration = v
-}
-
-// GetS3TechnicalAssetConfiguration returns S3TechnicalAssetConfiguration and true boolean if GetTechnicalAssetsResponseItemConfiguration is S3TechnicalAssetConfiguration.
-func (s GetTechnicalAssetsResponseItemConfiguration) GetS3TechnicalAssetConfiguration() (v S3TechnicalAssetConfiguration, ok bool) {
-	if !s.IsS3TechnicalAssetConfiguration() {
-		return v, false
+func (s *GetTechnicalAssetsResponseItemConfigurationAdditional) init() GetTechnicalAssetsResponseItemConfigurationAdditional {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
 	}
-	return s.S3TechnicalAssetConfiguration, true
-}
-
-// NewS3TechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration returns new GetTechnicalAssetsResponseItemConfiguration from S3TechnicalAssetConfiguration.
-func NewS3TechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration(v S3TechnicalAssetConfiguration) GetTechnicalAssetsResponseItemConfiguration {
-	var s GetTechnicalAssetsResponseItemConfiguration
-	s.SetS3TechnicalAssetConfiguration(v)
-	return s
-}
-
-// SetRustFSTechnicalAssetConfiguration sets GetTechnicalAssetsResponseItemConfiguration to RustFSTechnicalAssetConfiguration.
-func (s *GetTechnicalAssetsResponseItemConfiguration) SetRustFSTechnicalAssetConfiguration(v RustFSTechnicalAssetConfiguration) {
-	s.Type = RustFSTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration
-	s.RustFSTechnicalAssetConfiguration = v
-}
-
-// GetRustFSTechnicalAssetConfiguration returns RustFSTechnicalAssetConfiguration and true boolean if GetTechnicalAssetsResponseItemConfiguration is RustFSTechnicalAssetConfiguration.
-func (s GetTechnicalAssetsResponseItemConfiguration) GetRustFSTechnicalAssetConfiguration() (v RustFSTechnicalAssetConfiguration, ok bool) {
-	if !s.IsRustFSTechnicalAssetConfiguration() {
-		return v, false
-	}
-	return s.RustFSTechnicalAssetConfiguration, true
-}
-
-// NewRustFSTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration returns new GetTechnicalAssetsResponseItemConfiguration from RustFSTechnicalAssetConfiguration.
-func NewRustFSTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration(v RustFSTechnicalAssetConfiguration) GetTechnicalAssetsResponseItemConfiguration {
-	var s GetTechnicalAssetsResponseItemConfiguration
-	s.SetRustFSTechnicalAssetConfiguration(v)
-	return s
-}
-
-// SetGlueTechnicalAssetConfiguration sets GetTechnicalAssetsResponseItemConfiguration to GlueTechnicalAssetConfiguration.
-func (s *GetTechnicalAssetsResponseItemConfiguration) SetGlueTechnicalAssetConfiguration(v GlueTechnicalAssetConfiguration) {
-	s.Type = GlueTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration
-	s.GlueTechnicalAssetConfiguration = v
-}
-
-// GetGlueTechnicalAssetConfiguration returns GlueTechnicalAssetConfiguration and true boolean if GetTechnicalAssetsResponseItemConfiguration is GlueTechnicalAssetConfiguration.
-func (s GetTechnicalAssetsResponseItemConfiguration) GetGlueTechnicalAssetConfiguration() (v GlueTechnicalAssetConfiguration, ok bool) {
-	if !s.IsGlueTechnicalAssetConfiguration() {
-		return v, false
-	}
-	return s.GlueTechnicalAssetConfiguration, true
-}
-
-// NewGlueTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration returns new GetTechnicalAssetsResponseItemConfiguration from GlueTechnicalAssetConfiguration.
-func NewGlueTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration(v GlueTechnicalAssetConfiguration) GetTechnicalAssetsResponseItemConfiguration {
-	var s GetTechnicalAssetsResponseItemConfiguration
-	s.SetGlueTechnicalAssetConfiguration(v)
-	return s
-}
-
-// SetDatabricksTechnicalAssetConfiguration sets GetTechnicalAssetsResponseItemConfiguration to DatabricksTechnicalAssetConfiguration.
-func (s *GetTechnicalAssetsResponseItemConfiguration) SetDatabricksTechnicalAssetConfiguration(v DatabricksTechnicalAssetConfiguration) {
-	s.Type = DatabricksTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration
-	s.DatabricksTechnicalAssetConfiguration = v
-}
-
-// GetDatabricksTechnicalAssetConfiguration returns DatabricksTechnicalAssetConfiguration and true boolean if GetTechnicalAssetsResponseItemConfiguration is DatabricksTechnicalAssetConfiguration.
-func (s GetTechnicalAssetsResponseItemConfiguration) GetDatabricksTechnicalAssetConfiguration() (v DatabricksTechnicalAssetConfiguration, ok bool) {
-	if !s.IsDatabricksTechnicalAssetConfiguration() {
-		return v, false
-	}
-	return s.DatabricksTechnicalAssetConfiguration, true
-}
-
-// NewDatabricksTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration returns new GetTechnicalAssetsResponseItemConfiguration from DatabricksTechnicalAssetConfiguration.
-func NewDatabricksTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration(v DatabricksTechnicalAssetConfiguration) GetTechnicalAssetsResponseItemConfiguration {
-	var s GetTechnicalAssetsResponseItemConfiguration
-	s.SetDatabricksTechnicalAssetConfiguration(v)
-	return s
-}
-
-// SetSnowflakeTechnicalAssetConfiguration sets GetTechnicalAssetsResponseItemConfiguration to SnowflakeTechnicalAssetConfiguration.
-func (s *GetTechnicalAssetsResponseItemConfiguration) SetSnowflakeTechnicalAssetConfiguration(v SnowflakeTechnicalAssetConfiguration) {
-	s.Type = SnowflakeTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration
-	s.SnowflakeTechnicalAssetConfiguration = v
-}
-
-// GetSnowflakeTechnicalAssetConfiguration returns SnowflakeTechnicalAssetConfiguration and true boolean if GetTechnicalAssetsResponseItemConfiguration is SnowflakeTechnicalAssetConfiguration.
-func (s GetTechnicalAssetsResponseItemConfiguration) GetSnowflakeTechnicalAssetConfiguration() (v SnowflakeTechnicalAssetConfiguration, ok bool) {
-	if !s.IsSnowflakeTechnicalAssetConfiguration() {
-		return v, false
-	}
-	return s.SnowflakeTechnicalAssetConfiguration, true
-}
-
-// NewSnowflakeTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration returns new GetTechnicalAssetsResponseItemConfiguration from SnowflakeTechnicalAssetConfiguration.
-func NewSnowflakeTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration(v SnowflakeTechnicalAssetConfiguration) GetTechnicalAssetsResponseItemConfiguration {
-	var s GetTechnicalAssetsResponseItemConfiguration
-	s.SetSnowflakeTechnicalAssetConfiguration(v)
-	return s
-}
-
-// SetRedshiftTechnicalAssetConfiguration sets GetTechnicalAssetsResponseItemConfiguration to RedshiftTechnicalAssetConfiguration.
-func (s *GetTechnicalAssetsResponseItemConfiguration) SetRedshiftTechnicalAssetConfiguration(v RedshiftTechnicalAssetConfiguration) {
-	s.Type = RedshiftTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration
-	s.RedshiftTechnicalAssetConfiguration = v
-}
-
-// GetRedshiftTechnicalAssetConfiguration returns RedshiftTechnicalAssetConfiguration and true boolean if GetTechnicalAssetsResponseItemConfiguration is RedshiftTechnicalAssetConfiguration.
-func (s GetTechnicalAssetsResponseItemConfiguration) GetRedshiftTechnicalAssetConfiguration() (v RedshiftTechnicalAssetConfiguration, ok bool) {
-	if !s.IsRedshiftTechnicalAssetConfiguration() {
-		return v, false
-	}
-	return s.RedshiftTechnicalAssetConfiguration, true
-}
-
-// NewRedshiftTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration returns new GetTechnicalAssetsResponseItemConfiguration from RedshiftTechnicalAssetConfiguration.
-func NewRedshiftTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration(v RedshiftTechnicalAssetConfiguration) GetTechnicalAssetsResponseItemConfiguration {
-	var s GetTechnicalAssetsResponseItemConfiguration
-	s.SetRedshiftTechnicalAssetConfiguration(v)
-	return s
-}
-
-// SetPostgreSQLTechnicalAssetConfiguration sets GetTechnicalAssetsResponseItemConfiguration to PostgreSQLTechnicalAssetConfiguration.
-func (s *GetTechnicalAssetsResponseItemConfiguration) SetPostgreSQLTechnicalAssetConfiguration(v PostgreSQLTechnicalAssetConfiguration) {
-	s.Type = PostgreSQLTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration
-	s.PostgreSQLTechnicalAssetConfiguration = v
-}
-
-// GetPostgreSQLTechnicalAssetConfiguration returns PostgreSQLTechnicalAssetConfiguration and true boolean if GetTechnicalAssetsResponseItemConfiguration is PostgreSQLTechnicalAssetConfiguration.
-func (s GetTechnicalAssetsResponseItemConfiguration) GetPostgreSQLTechnicalAssetConfiguration() (v PostgreSQLTechnicalAssetConfiguration, ok bool) {
-	if !s.IsPostgreSQLTechnicalAssetConfiguration() {
-		return v, false
-	}
-	return s.PostgreSQLTechnicalAssetConfiguration, true
-}
-
-// NewPostgreSQLTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration returns new GetTechnicalAssetsResponseItemConfiguration from PostgreSQLTechnicalAssetConfiguration.
-func NewPostgreSQLTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration(v PostgreSQLTechnicalAssetConfiguration) GetTechnicalAssetsResponseItemConfiguration {
-	var s GetTechnicalAssetsResponseItemConfiguration
-	s.SetPostgreSQLTechnicalAssetConfiguration(v)
-	return s
-}
-
-// SetOSISemanticModelTechnicalAssetConfiguration sets GetTechnicalAssetsResponseItemConfiguration to OSISemanticModelTechnicalAssetConfiguration.
-func (s *GetTechnicalAssetsResponseItemConfiguration) SetOSISemanticModelTechnicalAssetConfiguration(v OSISemanticModelTechnicalAssetConfiguration) {
-	s.Type = OSISemanticModelTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration
-	s.OSISemanticModelTechnicalAssetConfiguration = v
-}
-
-// GetOSISemanticModelTechnicalAssetConfiguration returns OSISemanticModelTechnicalAssetConfiguration and true boolean if GetTechnicalAssetsResponseItemConfiguration is OSISemanticModelTechnicalAssetConfiguration.
-func (s GetTechnicalAssetsResponseItemConfiguration) GetOSISemanticModelTechnicalAssetConfiguration() (v OSISemanticModelTechnicalAssetConfiguration, ok bool) {
-	if !s.IsOSISemanticModelTechnicalAssetConfiguration() {
-		return v, false
-	}
-	return s.OSISemanticModelTechnicalAssetConfiguration, true
-}
-
-// NewOSISemanticModelTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration returns new GetTechnicalAssetsResponseItemConfiguration from OSISemanticModelTechnicalAssetConfiguration.
-func NewOSISemanticModelTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration(v OSISemanticModelTechnicalAssetConfiguration) GetTechnicalAssetsResponseItemConfiguration {
-	var s GetTechnicalAssetsResponseItemConfiguration
-	s.SetOSISemanticModelTechnicalAssetConfiguration(v)
-	return s
-}
-
-// SetAzureBlobTechnicalAssetConfiguration sets GetTechnicalAssetsResponseItemConfiguration to AzureBlobTechnicalAssetConfiguration.
-func (s *GetTechnicalAssetsResponseItemConfiguration) SetAzureBlobTechnicalAssetConfiguration(v AzureBlobTechnicalAssetConfiguration) {
-	s.Type = AzureBlobTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration
-	s.AzureBlobTechnicalAssetConfiguration = v
-}
-
-// GetAzureBlobTechnicalAssetConfiguration returns AzureBlobTechnicalAssetConfiguration and true boolean if GetTechnicalAssetsResponseItemConfiguration is AzureBlobTechnicalAssetConfiguration.
-func (s GetTechnicalAssetsResponseItemConfiguration) GetAzureBlobTechnicalAssetConfiguration() (v AzureBlobTechnicalAssetConfiguration, ok bool) {
-	if !s.IsAzureBlobTechnicalAssetConfiguration() {
-		return v, false
-	}
-	return s.AzureBlobTechnicalAssetConfiguration, true
-}
-
-// NewAzureBlobTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration returns new GetTechnicalAssetsResponseItemConfiguration from AzureBlobTechnicalAssetConfiguration.
-func NewAzureBlobTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration(v AzureBlobTechnicalAssetConfiguration) GetTechnicalAssetsResponseItemConfiguration {
-	var s GetTechnicalAssetsResponseItemConfiguration
-	s.SetAzureBlobTechnicalAssetConfiguration(v)
-	return s
+	return m
 }
 
 // Ref: #/components/schemas/GetUserNotificationsResponse
@@ -6465,98 +5833,6 @@ func (s *GlobalRoleAssignmentResponse) SetDecidedBy(val NilUser) {
 }
 
 func (*GlobalRoleAssignmentResponse) decideGlobalRoleAssignmentRes() {}
-
-// Ref: #/components/schemas/GlueTechnicalAssetConfiguration
-type GlueTechnicalAssetConfiguration struct {
-	ConfigurationType string            `json:"configuration_type"`
-	Database          string            `json:"database"`
-	DatabaseSuffix    OptString         `json:"database_suffix"`
-	Table             OptString         `json:"table"`
-	BucketIdentifier  OptString         `json:"bucket_identifier"`
-	DatabasePath      OptString         `json:"database_path"`
-	TablePath         OptString         `json:"table_path"`
-	AccessGranularity AccessGranularity `json:"access_granularity"`
-}
-
-// GetConfigurationType returns the value of ConfigurationType.
-func (s *GlueTechnicalAssetConfiguration) GetConfigurationType() string {
-	return s.ConfigurationType
-}
-
-// GetDatabase returns the value of Database.
-func (s *GlueTechnicalAssetConfiguration) GetDatabase() string {
-	return s.Database
-}
-
-// GetDatabaseSuffix returns the value of DatabaseSuffix.
-func (s *GlueTechnicalAssetConfiguration) GetDatabaseSuffix() OptString {
-	return s.DatabaseSuffix
-}
-
-// GetTable returns the value of Table.
-func (s *GlueTechnicalAssetConfiguration) GetTable() OptString {
-	return s.Table
-}
-
-// GetBucketIdentifier returns the value of BucketIdentifier.
-func (s *GlueTechnicalAssetConfiguration) GetBucketIdentifier() OptString {
-	return s.BucketIdentifier
-}
-
-// GetDatabasePath returns the value of DatabasePath.
-func (s *GlueTechnicalAssetConfiguration) GetDatabasePath() OptString {
-	return s.DatabasePath
-}
-
-// GetTablePath returns the value of TablePath.
-func (s *GlueTechnicalAssetConfiguration) GetTablePath() OptString {
-	return s.TablePath
-}
-
-// GetAccessGranularity returns the value of AccessGranularity.
-func (s *GlueTechnicalAssetConfiguration) GetAccessGranularity() AccessGranularity {
-	return s.AccessGranularity
-}
-
-// SetConfigurationType sets the value of ConfigurationType.
-func (s *GlueTechnicalAssetConfiguration) SetConfigurationType(val string) {
-	s.ConfigurationType = val
-}
-
-// SetDatabase sets the value of Database.
-func (s *GlueTechnicalAssetConfiguration) SetDatabase(val string) {
-	s.Database = val
-}
-
-// SetDatabaseSuffix sets the value of DatabaseSuffix.
-func (s *GlueTechnicalAssetConfiguration) SetDatabaseSuffix(val OptString) {
-	s.DatabaseSuffix = val
-}
-
-// SetTable sets the value of Table.
-func (s *GlueTechnicalAssetConfiguration) SetTable(val OptString) {
-	s.Table = val
-}
-
-// SetBucketIdentifier sets the value of BucketIdentifier.
-func (s *GlueTechnicalAssetConfiguration) SetBucketIdentifier(val OptString) {
-	s.BucketIdentifier = val
-}
-
-// SetDatabasePath sets the value of DatabasePath.
-func (s *GlueTechnicalAssetConfiguration) SetDatabasePath(val OptString) {
-	s.DatabasePath = val
-}
-
-// SetTablePath sets the value of TablePath.
-func (s *GlueTechnicalAssetConfiguration) SetTablePath(val OptString) {
-	s.TablePath = val
-}
-
-// SetAccessGranularity sets the value of AccessGranularity.
-func (s *GlueTechnicalAssetConfiguration) SetAccessGranularity(val AccessGranularity) {
-	s.AccessGranularity = val
-}
 
 type HTTPBasic struct {
 	Username string
@@ -7658,43 +6934,6 @@ func (s *OIDCTokenResponse) SetRefreshToken(val OptNilString) {
 }
 
 func (*OIDCTokenResponse) getJwtTokenRes() {}
-
-// Ref: #/components/schemas/OSISemanticModelTechnicalAssetConfiguration
-type OSISemanticModelTechnicalAssetConfiguration struct {
-	ConfigurationType string    `json:"configuration_type"`
-	ModelName         OptString `json:"model_name"`
-	Location          OptString `json:"location"`
-}
-
-// GetConfigurationType returns the value of ConfigurationType.
-func (s *OSISemanticModelTechnicalAssetConfiguration) GetConfigurationType() string {
-	return s.ConfigurationType
-}
-
-// GetModelName returns the value of ModelName.
-func (s *OSISemanticModelTechnicalAssetConfiguration) GetModelName() OptString {
-	return s.ModelName
-}
-
-// GetLocation returns the value of Location.
-func (s *OSISemanticModelTechnicalAssetConfiguration) GetLocation() OptString {
-	return s.Location
-}
-
-// SetConfigurationType sets the value of ConfigurationType.
-func (s *OSISemanticModelTechnicalAssetConfiguration) SetConfigurationType(val string) {
-	s.ConfigurationType = val
-}
-
-// SetModelName sets the value of ModelName.
-func (s *OSISemanticModelTechnicalAssetConfiguration) SetModelName(val OptString) {
-	s.ModelName = val
-}
-
-// SetLocation sets the value of Location.
-func (s *OSISemanticModelTechnicalAssetConfiguration) SetLocation(val OptString) {
-	s.Location = val
-}
 
 // NewOptAssignmentFilter returns new OptAssignmentFilter with value set to v.
 func NewOptAssignmentFilter(v AssignmentFilter) OptAssignmentFilter {
@@ -11222,6 +10461,7 @@ type PlatformTile struct {
 	Label           string         `json:"label"`
 	Value           string         `json:"value"`
 	IconName        string         `json:"icon_name"`
+	IconDataURI     OptNilString   `json:"icon_data_uri"`
 	HasEnvironments OptBool        `json:"has_environments"`
 	HasConfig       OptBool        `json:"has_config"`
 	Children        []PlatformTile `json:"children"`
@@ -11241,6 +10481,11 @@ func (s *PlatformTile) GetValue() string {
 // GetIconName returns the value of IconName.
 func (s *PlatformTile) GetIconName() string {
 	return s.IconName
+}
+
+// GetIconDataURI returns the value of IconDataURI.
+func (s *PlatformTile) GetIconDataURI() OptNilString {
+	return s.IconDataURI
 }
 
 // GetHasEnvironments returns the value of HasEnvironments.
@@ -11276,6 +10521,11 @@ func (s *PlatformTile) SetValue(val string) {
 // SetIconName sets the value of IconName.
 func (s *PlatformTile) SetIconName(val string) {
 	s.IconName = val
+}
+
+// SetIconDataURI sets the value of IconDataURI.
+func (s *PlatformTile) SetIconDataURI(val OptNilString) {
+	s.IconDataURI = val
 }
 
 // SetHasEnvironments sets the value of HasEnvironments.
@@ -11333,65 +10583,6 @@ func (s *PluginResponse) SetPlugins(val []UIElementMetadataResponse) {
 }
 
 func (*PluginResponse) getPluginsRes() {}
-
-// Ref: #/components/schemas/PostgreSQLTechnicalAssetConfiguration
-type PostgreSQLTechnicalAssetConfiguration struct {
-	ConfigurationType string            `json:"configuration_type"`
-	Database          string            `json:"database"`
-	Schema            OptString         `json:"schema"`
-	Table             OptString         `json:"table"`
-	AccessGranularity AccessGranularity `json:"access_granularity"`
-}
-
-// GetConfigurationType returns the value of ConfigurationType.
-func (s *PostgreSQLTechnicalAssetConfiguration) GetConfigurationType() string {
-	return s.ConfigurationType
-}
-
-// GetDatabase returns the value of Database.
-func (s *PostgreSQLTechnicalAssetConfiguration) GetDatabase() string {
-	return s.Database
-}
-
-// GetSchema returns the value of Schema.
-func (s *PostgreSQLTechnicalAssetConfiguration) GetSchema() OptString {
-	return s.Schema
-}
-
-// GetTable returns the value of Table.
-func (s *PostgreSQLTechnicalAssetConfiguration) GetTable() OptString {
-	return s.Table
-}
-
-// GetAccessGranularity returns the value of AccessGranularity.
-func (s *PostgreSQLTechnicalAssetConfiguration) GetAccessGranularity() AccessGranularity {
-	return s.AccessGranularity
-}
-
-// SetConfigurationType sets the value of ConfigurationType.
-func (s *PostgreSQLTechnicalAssetConfiguration) SetConfigurationType(val string) {
-	s.ConfigurationType = val
-}
-
-// SetDatabase sets the value of Database.
-func (s *PostgreSQLTechnicalAssetConfiguration) SetDatabase(val string) {
-	s.Database = val
-}
-
-// SetSchema sets the value of Schema.
-func (s *PostgreSQLTechnicalAssetConfiguration) SetSchema(val OptString) {
-	s.Schema = val
-}
-
-// SetTable sets the value of Table.
-func (s *PostgreSQLTechnicalAssetConfiguration) SetTable(val OptString) {
-	s.Table = val
-}
-
-// SetAccessGranularity sets the value of AccessGranularity.
-func (s *PostgreSQLTechnicalAssetConfiguration) SetAccessGranularity(val AccessGranularity) {
-	s.AccessGranularity = val
-}
 
 // Ref: #/components/schemas/Prototype
 type Prototype int
@@ -11460,98 +10651,6 @@ func (s *QueryStatsGranularity) UnmarshalText(data []byte) error {
 	default:
 		return errors.Errorf("invalid value: %q", data)
 	}
-}
-
-// Ref: #/components/schemas/RedshiftTechnicalAssetConfiguration
-type RedshiftTechnicalAssetConfiguration struct {
-	ConfigurationType string            `json:"configuration_type"`
-	Database          string            `json:"database"`
-	Schema            OptString         `json:"schema"`
-	Table             OptString         `json:"table"`
-	BucketIdentifier  OptString         `json:"bucket_identifier"`
-	DatabasePath      OptString         `json:"database_path"`
-	TablePath         OptString         `json:"table_path"`
-	AccessGranularity AccessGranularity `json:"access_granularity"`
-}
-
-// GetConfigurationType returns the value of ConfigurationType.
-func (s *RedshiftTechnicalAssetConfiguration) GetConfigurationType() string {
-	return s.ConfigurationType
-}
-
-// GetDatabase returns the value of Database.
-func (s *RedshiftTechnicalAssetConfiguration) GetDatabase() string {
-	return s.Database
-}
-
-// GetSchema returns the value of Schema.
-func (s *RedshiftTechnicalAssetConfiguration) GetSchema() OptString {
-	return s.Schema
-}
-
-// GetTable returns the value of Table.
-func (s *RedshiftTechnicalAssetConfiguration) GetTable() OptString {
-	return s.Table
-}
-
-// GetBucketIdentifier returns the value of BucketIdentifier.
-func (s *RedshiftTechnicalAssetConfiguration) GetBucketIdentifier() OptString {
-	return s.BucketIdentifier
-}
-
-// GetDatabasePath returns the value of DatabasePath.
-func (s *RedshiftTechnicalAssetConfiguration) GetDatabasePath() OptString {
-	return s.DatabasePath
-}
-
-// GetTablePath returns the value of TablePath.
-func (s *RedshiftTechnicalAssetConfiguration) GetTablePath() OptString {
-	return s.TablePath
-}
-
-// GetAccessGranularity returns the value of AccessGranularity.
-func (s *RedshiftTechnicalAssetConfiguration) GetAccessGranularity() AccessGranularity {
-	return s.AccessGranularity
-}
-
-// SetConfigurationType sets the value of ConfigurationType.
-func (s *RedshiftTechnicalAssetConfiguration) SetConfigurationType(val string) {
-	s.ConfigurationType = val
-}
-
-// SetDatabase sets the value of Database.
-func (s *RedshiftTechnicalAssetConfiguration) SetDatabase(val string) {
-	s.Database = val
-}
-
-// SetSchema sets the value of Schema.
-func (s *RedshiftTechnicalAssetConfiguration) SetSchema(val OptString) {
-	s.Schema = val
-}
-
-// SetTable sets the value of Table.
-func (s *RedshiftTechnicalAssetConfiguration) SetTable(val OptString) {
-	s.Table = val
-}
-
-// SetBucketIdentifier sets the value of BucketIdentifier.
-func (s *RedshiftTechnicalAssetConfiguration) SetBucketIdentifier(val OptString) {
-	s.BucketIdentifier = val
-}
-
-// SetDatabasePath sets the value of DatabasePath.
-func (s *RedshiftTechnicalAssetConfiguration) SetDatabasePath(val OptString) {
-	s.DatabasePath = val
-}
-
-// SetTablePath sets the value of TablePath.
-func (s *RedshiftTechnicalAssetConfiguration) SetTablePath(val OptString) {
-	s.TablePath = val
-}
-
-// SetAccessGranularity sets the value of AccessGranularity.
-func (s *RedshiftTechnicalAssetConfiguration) SetAccessGranularity(val AccessGranularity) {
-	s.AccessGranularity = val
 }
 
 type RemoveAllUserNotificationsOKApplicationJSON jx.Raw
@@ -11685,8 +10784,10 @@ func (*RemoveUserOKApplicationJSON) removeUserRes() {}
 
 // Ref: #/components/schemas/RenderTechnicalAssetAccessPathRequest
 type RenderTechnicalAssetAccessPathRequest struct {
-	PlatformID    uuid.UUID                                          `json:"platform_id"`
-	ServiceID     uuid.UUID                                          `json:"service_id"`
+	PlatformID uuid.UUID `json:"platform_id"`
+	ServiceID  uuid.UUID `json:"service_id"`
+	// Configuration of the technical asset. The available fields depend on `name`; retrieve them from
+	// /v2/plugins/{name}/form.
 	Configuration RenderTechnicalAssetAccessPathRequestConfiguration `json:"configuration"`
 }
 
@@ -11720,269 +10821,42 @@ func (s *RenderTechnicalAssetAccessPathRequest) SetConfiguration(val RenderTechn
 	s.Configuration = val
 }
 
-// RenderTechnicalAssetAccessPathRequestConfiguration represents sum type.
+// Configuration of the technical asset. The available fields depend on `name`; retrieve them from
+// /v2/plugins/{name}/form.
 type RenderTechnicalAssetAccessPathRequestConfiguration struct {
-	// Type selects the active sum variant, switch on this field.
-	Type                                        RenderTechnicalAssetAccessPathRequestConfigurationType
-	S3TechnicalAssetConfiguration               S3TechnicalAssetConfiguration
-	RustFSTechnicalAssetConfiguration           RustFSTechnicalAssetConfiguration
-	GlueTechnicalAssetConfiguration             GlueTechnicalAssetConfiguration
-	DatabricksTechnicalAssetConfiguration       DatabricksTechnicalAssetConfiguration
-	SnowflakeTechnicalAssetConfiguration        SnowflakeTechnicalAssetConfiguration
-	RedshiftTechnicalAssetConfiguration         RedshiftTechnicalAssetConfiguration
-	PostgreSQLTechnicalAssetConfiguration       PostgreSQLTechnicalAssetConfiguration
-	OSISemanticModelTechnicalAssetConfiguration OSISemanticModelTechnicalAssetConfiguration
-	AzureBlobTechnicalAssetConfiguration        AzureBlobTechnicalAssetConfiguration
+	Name            string `json:"name"`
+	AdditionalProps RenderTechnicalAssetAccessPathRequestConfigurationAdditional
 }
 
-// RenderTechnicalAssetAccessPathRequestConfigurationType is oneOf type of RenderTechnicalAssetAccessPathRequestConfiguration.
-type RenderTechnicalAssetAccessPathRequestConfigurationType string
-
-// Possible values for RenderTechnicalAssetAccessPathRequestConfigurationType.
-const (
-	S3TechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration               RenderTechnicalAssetAccessPathRequestConfigurationType = "S3TechnicalAssetConfiguration"
-	RustFSTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration           RenderTechnicalAssetAccessPathRequestConfigurationType = "RustFSTechnicalAssetConfiguration"
-	GlueTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration             RenderTechnicalAssetAccessPathRequestConfigurationType = "GlueTechnicalAssetConfiguration"
-	DatabricksTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration       RenderTechnicalAssetAccessPathRequestConfigurationType = "DatabricksTechnicalAssetConfiguration"
-	SnowflakeTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration        RenderTechnicalAssetAccessPathRequestConfigurationType = "SnowflakeTechnicalAssetConfiguration"
-	RedshiftTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration         RenderTechnicalAssetAccessPathRequestConfigurationType = "RedshiftTechnicalAssetConfiguration"
-	PostgreSQLTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration       RenderTechnicalAssetAccessPathRequestConfigurationType = "PostgreSQLTechnicalAssetConfiguration"
-	OSISemanticModelTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration RenderTechnicalAssetAccessPathRequestConfigurationType = "OSISemanticModelTechnicalAssetConfiguration"
-	AzureBlobTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration        RenderTechnicalAssetAccessPathRequestConfigurationType = "AzureBlobTechnicalAssetConfiguration"
-)
-
-// IsS3TechnicalAssetConfiguration reports whether RenderTechnicalAssetAccessPathRequestConfiguration is S3TechnicalAssetConfiguration.
-func (s RenderTechnicalAssetAccessPathRequestConfiguration) IsS3TechnicalAssetConfiguration() bool {
-	return s.Type == S3TechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration
+// GetName returns the value of Name.
+func (s *RenderTechnicalAssetAccessPathRequestConfiguration) GetName() string {
+	return s.Name
 }
 
-// IsRustFSTechnicalAssetConfiguration reports whether RenderTechnicalAssetAccessPathRequestConfiguration is RustFSTechnicalAssetConfiguration.
-func (s RenderTechnicalAssetAccessPathRequestConfiguration) IsRustFSTechnicalAssetConfiguration() bool {
-	return s.Type == RustFSTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration
+// GetAdditionalProps returns the value of AdditionalProps.
+func (s *RenderTechnicalAssetAccessPathRequestConfiguration) GetAdditionalProps() RenderTechnicalAssetAccessPathRequestConfigurationAdditional {
+	return s.AdditionalProps
 }
 
-// IsGlueTechnicalAssetConfiguration reports whether RenderTechnicalAssetAccessPathRequestConfiguration is GlueTechnicalAssetConfiguration.
-func (s RenderTechnicalAssetAccessPathRequestConfiguration) IsGlueTechnicalAssetConfiguration() bool {
-	return s.Type == GlueTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration
+// SetName sets the value of Name.
+func (s *RenderTechnicalAssetAccessPathRequestConfiguration) SetName(val string) {
+	s.Name = val
 }
 
-// IsDatabricksTechnicalAssetConfiguration reports whether RenderTechnicalAssetAccessPathRequestConfiguration is DatabricksTechnicalAssetConfiguration.
-func (s RenderTechnicalAssetAccessPathRequestConfiguration) IsDatabricksTechnicalAssetConfiguration() bool {
-	return s.Type == DatabricksTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration
+// SetAdditionalProps sets the value of AdditionalProps.
+func (s *RenderTechnicalAssetAccessPathRequestConfiguration) SetAdditionalProps(val RenderTechnicalAssetAccessPathRequestConfigurationAdditional) {
+	s.AdditionalProps = val
 }
 
-// IsSnowflakeTechnicalAssetConfiguration reports whether RenderTechnicalAssetAccessPathRequestConfiguration is SnowflakeTechnicalAssetConfiguration.
-func (s RenderTechnicalAssetAccessPathRequestConfiguration) IsSnowflakeTechnicalAssetConfiguration() bool {
-	return s.Type == SnowflakeTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration
-}
+type RenderTechnicalAssetAccessPathRequestConfigurationAdditional map[string]jx.Raw
 
-// IsRedshiftTechnicalAssetConfiguration reports whether RenderTechnicalAssetAccessPathRequestConfiguration is RedshiftTechnicalAssetConfiguration.
-func (s RenderTechnicalAssetAccessPathRequestConfiguration) IsRedshiftTechnicalAssetConfiguration() bool {
-	return s.Type == RedshiftTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration
-}
-
-// IsPostgreSQLTechnicalAssetConfiguration reports whether RenderTechnicalAssetAccessPathRequestConfiguration is PostgreSQLTechnicalAssetConfiguration.
-func (s RenderTechnicalAssetAccessPathRequestConfiguration) IsPostgreSQLTechnicalAssetConfiguration() bool {
-	return s.Type == PostgreSQLTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration
-}
-
-// IsOSISemanticModelTechnicalAssetConfiguration reports whether RenderTechnicalAssetAccessPathRequestConfiguration is OSISemanticModelTechnicalAssetConfiguration.
-func (s RenderTechnicalAssetAccessPathRequestConfiguration) IsOSISemanticModelTechnicalAssetConfiguration() bool {
-	return s.Type == OSISemanticModelTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration
-}
-
-// IsAzureBlobTechnicalAssetConfiguration reports whether RenderTechnicalAssetAccessPathRequestConfiguration is AzureBlobTechnicalAssetConfiguration.
-func (s RenderTechnicalAssetAccessPathRequestConfiguration) IsAzureBlobTechnicalAssetConfiguration() bool {
-	return s.Type == AzureBlobTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration
-}
-
-// SetS3TechnicalAssetConfiguration sets RenderTechnicalAssetAccessPathRequestConfiguration to S3TechnicalAssetConfiguration.
-func (s *RenderTechnicalAssetAccessPathRequestConfiguration) SetS3TechnicalAssetConfiguration(v S3TechnicalAssetConfiguration) {
-	s.Type = S3TechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration
-	s.S3TechnicalAssetConfiguration = v
-}
-
-// GetS3TechnicalAssetConfiguration returns S3TechnicalAssetConfiguration and true boolean if RenderTechnicalAssetAccessPathRequestConfiguration is S3TechnicalAssetConfiguration.
-func (s RenderTechnicalAssetAccessPathRequestConfiguration) GetS3TechnicalAssetConfiguration() (v S3TechnicalAssetConfiguration, ok bool) {
-	if !s.IsS3TechnicalAssetConfiguration() {
-		return v, false
+func (s *RenderTechnicalAssetAccessPathRequestConfigurationAdditional) init() RenderTechnicalAssetAccessPathRequestConfigurationAdditional {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
 	}
-	return s.S3TechnicalAssetConfiguration, true
-}
-
-// NewS3TechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration returns new RenderTechnicalAssetAccessPathRequestConfiguration from S3TechnicalAssetConfiguration.
-func NewS3TechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration(v S3TechnicalAssetConfiguration) RenderTechnicalAssetAccessPathRequestConfiguration {
-	var s RenderTechnicalAssetAccessPathRequestConfiguration
-	s.SetS3TechnicalAssetConfiguration(v)
-	return s
-}
-
-// SetRustFSTechnicalAssetConfiguration sets RenderTechnicalAssetAccessPathRequestConfiguration to RustFSTechnicalAssetConfiguration.
-func (s *RenderTechnicalAssetAccessPathRequestConfiguration) SetRustFSTechnicalAssetConfiguration(v RustFSTechnicalAssetConfiguration) {
-	s.Type = RustFSTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration
-	s.RustFSTechnicalAssetConfiguration = v
-}
-
-// GetRustFSTechnicalAssetConfiguration returns RustFSTechnicalAssetConfiguration and true boolean if RenderTechnicalAssetAccessPathRequestConfiguration is RustFSTechnicalAssetConfiguration.
-func (s RenderTechnicalAssetAccessPathRequestConfiguration) GetRustFSTechnicalAssetConfiguration() (v RustFSTechnicalAssetConfiguration, ok bool) {
-	if !s.IsRustFSTechnicalAssetConfiguration() {
-		return v, false
-	}
-	return s.RustFSTechnicalAssetConfiguration, true
-}
-
-// NewRustFSTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration returns new RenderTechnicalAssetAccessPathRequestConfiguration from RustFSTechnicalAssetConfiguration.
-func NewRustFSTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration(v RustFSTechnicalAssetConfiguration) RenderTechnicalAssetAccessPathRequestConfiguration {
-	var s RenderTechnicalAssetAccessPathRequestConfiguration
-	s.SetRustFSTechnicalAssetConfiguration(v)
-	return s
-}
-
-// SetGlueTechnicalAssetConfiguration sets RenderTechnicalAssetAccessPathRequestConfiguration to GlueTechnicalAssetConfiguration.
-func (s *RenderTechnicalAssetAccessPathRequestConfiguration) SetGlueTechnicalAssetConfiguration(v GlueTechnicalAssetConfiguration) {
-	s.Type = GlueTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration
-	s.GlueTechnicalAssetConfiguration = v
-}
-
-// GetGlueTechnicalAssetConfiguration returns GlueTechnicalAssetConfiguration and true boolean if RenderTechnicalAssetAccessPathRequestConfiguration is GlueTechnicalAssetConfiguration.
-func (s RenderTechnicalAssetAccessPathRequestConfiguration) GetGlueTechnicalAssetConfiguration() (v GlueTechnicalAssetConfiguration, ok bool) {
-	if !s.IsGlueTechnicalAssetConfiguration() {
-		return v, false
-	}
-	return s.GlueTechnicalAssetConfiguration, true
-}
-
-// NewGlueTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration returns new RenderTechnicalAssetAccessPathRequestConfiguration from GlueTechnicalAssetConfiguration.
-func NewGlueTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration(v GlueTechnicalAssetConfiguration) RenderTechnicalAssetAccessPathRequestConfiguration {
-	var s RenderTechnicalAssetAccessPathRequestConfiguration
-	s.SetGlueTechnicalAssetConfiguration(v)
-	return s
-}
-
-// SetDatabricksTechnicalAssetConfiguration sets RenderTechnicalAssetAccessPathRequestConfiguration to DatabricksTechnicalAssetConfiguration.
-func (s *RenderTechnicalAssetAccessPathRequestConfiguration) SetDatabricksTechnicalAssetConfiguration(v DatabricksTechnicalAssetConfiguration) {
-	s.Type = DatabricksTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration
-	s.DatabricksTechnicalAssetConfiguration = v
-}
-
-// GetDatabricksTechnicalAssetConfiguration returns DatabricksTechnicalAssetConfiguration and true boolean if RenderTechnicalAssetAccessPathRequestConfiguration is DatabricksTechnicalAssetConfiguration.
-func (s RenderTechnicalAssetAccessPathRequestConfiguration) GetDatabricksTechnicalAssetConfiguration() (v DatabricksTechnicalAssetConfiguration, ok bool) {
-	if !s.IsDatabricksTechnicalAssetConfiguration() {
-		return v, false
-	}
-	return s.DatabricksTechnicalAssetConfiguration, true
-}
-
-// NewDatabricksTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration returns new RenderTechnicalAssetAccessPathRequestConfiguration from DatabricksTechnicalAssetConfiguration.
-func NewDatabricksTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration(v DatabricksTechnicalAssetConfiguration) RenderTechnicalAssetAccessPathRequestConfiguration {
-	var s RenderTechnicalAssetAccessPathRequestConfiguration
-	s.SetDatabricksTechnicalAssetConfiguration(v)
-	return s
-}
-
-// SetSnowflakeTechnicalAssetConfiguration sets RenderTechnicalAssetAccessPathRequestConfiguration to SnowflakeTechnicalAssetConfiguration.
-func (s *RenderTechnicalAssetAccessPathRequestConfiguration) SetSnowflakeTechnicalAssetConfiguration(v SnowflakeTechnicalAssetConfiguration) {
-	s.Type = SnowflakeTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration
-	s.SnowflakeTechnicalAssetConfiguration = v
-}
-
-// GetSnowflakeTechnicalAssetConfiguration returns SnowflakeTechnicalAssetConfiguration and true boolean if RenderTechnicalAssetAccessPathRequestConfiguration is SnowflakeTechnicalAssetConfiguration.
-func (s RenderTechnicalAssetAccessPathRequestConfiguration) GetSnowflakeTechnicalAssetConfiguration() (v SnowflakeTechnicalAssetConfiguration, ok bool) {
-	if !s.IsSnowflakeTechnicalAssetConfiguration() {
-		return v, false
-	}
-	return s.SnowflakeTechnicalAssetConfiguration, true
-}
-
-// NewSnowflakeTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration returns new RenderTechnicalAssetAccessPathRequestConfiguration from SnowflakeTechnicalAssetConfiguration.
-func NewSnowflakeTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration(v SnowflakeTechnicalAssetConfiguration) RenderTechnicalAssetAccessPathRequestConfiguration {
-	var s RenderTechnicalAssetAccessPathRequestConfiguration
-	s.SetSnowflakeTechnicalAssetConfiguration(v)
-	return s
-}
-
-// SetRedshiftTechnicalAssetConfiguration sets RenderTechnicalAssetAccessPathRequestConfiguration to RedshiftTechnicalAssetConfiguration.
-func (s *RenderTechnicalAssetAccessPathRequestConfiguration) SetRedshiftTechnicalAssetConfiguration(v RedshiftTechnicalAssetConfiguration) {
-	s.Type = RedshiftTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration
-	s.RedshiftTechnicalAssetConfiguration = v
-}
-
-// GetRedshiftTechnicalAssetConfiguration returns RedshiftTechnicalAssetConfiguration and true boolean if RenderTechnicalAssetAccessPathRequestConfiguration is RedshiftTechnicalAssetConfiguration.
-func (s RenderTechnicalAssetAccessPathRequestConfiguration) GetRedshiftTechnicalAssetConfiguration() (v RedshiftTechnicalAssetConfiguration, ok bool) {
-	if !s.IsRedshiftTechnicalAssetConfiguration() {
-		return v, false
-	}
-	return s.RedshiftTechnicalAssetConfiguration, true
-}
-
-// NewRedshiftTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration returns new RenderTechnicalAssetAccessPathRequestConfiguration from RedshiftTechnicalAssetConfiguration.
-func NewRedshiftTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration(v RedshiftTechnicalAssetConfiguration) RenderTechnicalAssetAccessPathRequestConfiguration {
-	var s RenderTechnicalAssetAccessPathRequestConfiguration
-	s.SetRedshiftTechnicalAssetConfiguration(v)
-	return s
-}
-
-// SetPostgreSQLTechnicalAssetConfiguration sets RenderTechnicalAssetAccessPathRequestConfiguration to PostgreSQLTechnicalAssetConfiguration.
-func (s *RenderTechnicalAssetAccessPathRequestConfiguration) SetPostgreSQLTechnicalAssetConfiguration(v PostgreSQLTechnicalAssetConfiguration) {
-	s.Type = PostgreSQLTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration
-	s.PostgreSQLTechnicalAssetConfiguration = v
-}
-
-// GetPostgreSQLTechnicalAssetConfiguration returns PostgreSQLTechnicalAssetConfiguration and true boolean if RenderTechnicalAssetAccessPathRequestConfiguration is PostgreSQLTechnicalAssetConfiguration.
-func (s RenderTechnicalAssetAccessPathRequestConfiguration) GetPostgreSQLTechnicalAssetConfiguration() (v PostgreSQLTechnicalAssetConfiguration, ok bool) {
-	if !s.IsPostgreSQLTechnicalAssetConfiguration() {
-		return v, false
-	}
-	return s.PostgreSQLTechnicalAssetConfiguration, true
-}
-
-// NewPostgreSQLTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration returns new RenderTechnicalAssetAccessPathRequestConfiguration from PostgreSQLTechnicalAssetConfiguration.
-func NewPostgreSQLTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration(v PostgreSQLTechnicalAssetConfiguration) RenderTechnicalAssetAccessPathRequestConfiguration {
-	var s RenderTechnicalAssetAccessPathRequestConfiguration
-	s.SetPostgreSQLTechnicalAssetConfiguration(v)
-	return s
-}
-
-// SetOSISemanticModelTechnicalAssetConfiguration sets RenderTechnicalAssetAccessPathRequestConfiguration to OSISemanticModelTechnicalAssetConfiguration.
-func (s *RenderTechnicalAssetAccessPathRequestConfiguration) SetOSISemanticModelTechnicalAssetConfiguration(v OSISemanticModelTechnicalAssetConfiguration) {
-	s.Type = OSISemanticModelTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration
-	s.OSISemanticModelTechnicalAssetConfiguration = v
-}
-
-// GetOSISemanticModelTechnicalAssetConfiguration returns OSISemanticModelTechnicalAssetConfiguration and true boolean if RenderTechnicalAssetAccessPathRequestConfiguration is OSISemanticModelTechnicalAssetConfiguration.
-func (s RenderTechnicalAssetAccessPathRequestConfiguration) GetOSISemanticModelTechnicalAssetConfiguration() (v OSISemanticModelTechnicalAssetConfiguration, ok bool) {
-	if !s.IsOSISemanticModelTechnicalAssetConfiguration() {
-		return v, false
-	}
-	return s.OSISemanticModelTechnicalAssetConfiguration, true
-}
-
-// NewOSISemanticModelTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration returns new RenderTechnicalAssetAccessPathRequestConfiguration from OSISemanticModelTechnicalAssetConfiguration.
-func NewOSISemanticModelTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration(v OSISemanticModelTechnicalAssetConfiguration) RenderTechnicalAssetAccessPathRequestConfiguration {
-	var s RenderTechnicalAssetAccessPathRequestConfiguration
-	s.SetOSISemanticModelTechnicalAssetConfiguration(v)
-	return s
-}
-
-// SetAzureBlobTechnicalAssetConfiguration sets RenderTechnicalAssetAccessPathRequestConfiguration to AzureBlobTechnicalAssetConfiguration.
-func (s *RenderTechnicalAssetAccessPathRequestConfiguration) SetAzureBlobTechnicalAssetConfiguration(v AzureBlobTechnicalAssetConfiguration) {
-	s.Type = AzureBlobTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration
-	s.AzureBlobTechnicalAssetConfiguration = v
-}
-
-// GetAzureBlobTechnicalAssetConfiguration returns AzureBlobTechnicalAssetConfiguration and true boolean if RenderTechnicalAssetAccessPathRequestConfiguration is AzureBlobTechnicalAssetConfiguration.
-func (s RenderTechnicalAssetAccessPathRequestConfiguration) GetAzureBlobTechnicalAssetConfiguration() (v AzureBlobTechnicalAssetConfiguration, ok bool) {
-	if !s.IsAzureBlobTechnicalAssetConfiguration() {
-		return v, false
-	}
-	return s.AzureBlobTechnicalAssetConfiguration, true
-}
-
-// NewAzureBlobTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration returns new RenderTechnicalAssetAccessPathRequestConfiguration from AzureBlobTechnicalAssetConfiguration.
-func NewAzureBlobTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration(v AzureBlobTechnicalAssetConfiguration) RenderTechnicalAssetAccessPathRequestConfiguration {
-	var s RenderTechnicalAssetAccessPathRequestConfiguration
-	s.SetAzureBlobTechnicalAssetConfiguration(v)
-	return s
+	return m
 }
 
 // Ref: #/components/schemas/RenderTechnicalAssetAccessPathResponse
@@ -12597,102 +11471,6 @@ func (s *Role) SetPrototype(val Prototype) {
 
 func (*Role) createRoleRes() {}
 func (*Role) updateRoleRes() {}
-
-// Ref: #/components/schemas/RustFSTechnicalAssetConfiguration
-type RustFSTechnicalAssetConfiguration struct {
-	ConfigurationType string    `json:"configuration_type"`
-	Bucket            string    `json:"bucket"`
-	Suffix            OptString `json:"suffix"`
-	Path              string    `json:"path"`
-}
-
-// GetConfigurationType returns the value of ConfigurationType.
-func (s *RustFSTechnicalAssetConfiguration) GetConfigurationType() string {
-	return s.ConfigurationType
-}
-
-// GetBucket returns the value of Bucket.
-func (s *RustFSTechnicalAssetConfiguration) GetBucket() string {
-	return s.Bucket
-}
-
-// GetSuffix returns the value of Suffix.
-func (s *RustFSTechnicalAssetConfiguration) GetSuffix() OptString {
-	return s.Suffix
-}
-
-// GetPath returns the value of Path.
-func (s *RustFSTechnicalAssetConfiguration) GetPath() string {
-	return s.Path
-}
-
-// SetConfigurationType sets the value of ConfigurationType.
-func (s *RustFSTechnicalAssetConfiguration) SetConfigurationType(val string) {
-	s.ConfigurationType = val
-}
-
-// SetBucket sets the value of Bucket.
-func (s *RustFSTechnicalAssetConfiguration) SetBucket(val string) {
-	s.Bucket = val
-}
-
-// SetSuffix sets the value of Suffix.
-func (s *RustFSTechnicalAssetConfiguration) SetSuffix(val OptString) {
-	s.Suffix = val
-}
-
-// SetPath sets the value of Path.
-func (s *RustFSTechnicalAssetConfiguration) SetPath(val string) {
-	s.Path = val
-}
-
-// Ref: #/components/schemas/S3TechnicalAssetConfiguration
-type S3TechnicalAssetConfiguration struct {
-	ConfigurationType string    `json:"configuration_type"`
-	Bucket            string    `json:"bucket"`
-	Suffix            OptString `json:"suffix"`
-	Path              string    `json:"path"`
-}
-
-// GetConfigurationType returns the value of ConfigurationType.
-func (s *S3TechnicalAssetConfiguration) GetConfigurationType() string {
-	return s.ConfigurationType
-}
-
-// GetBucket returns the value of Bucket.
-func (s *S3TechnicalAssetConfiguration) GetBucket() string {
-	return s.Bucket
-}
-
-// GetSuffix returns the value of Suffix.
-func (s *S3TechnicalAssetConfiguration) GetSuffix() OptString {
-	return s.Suffix
-}
-
-// GetPath returns the value of Path.
-func (s *S3TechnicalAssetConfiguration) GetPath() string {
-	return s.Path
-}
-
-// SetConfigurationType sets the value of ConfigurationType.
-func (s *S3TechnicalAssetConfiguration) SetConfigurationType(val string) {
-	s.ConfigurationType = val
-}
-
-// SetBucket sets the value of Bucket.
-func (s *S3TechnicalAssetConfiguration) SetBucket(val string) {
-	s.Bucket = val
-}
-
-// SetSuffix sets the value of Suffix.
-func (s *S3TechnicalAssetConfiguration) SetSuffix(val OptString) {
-	s.Suffix = val
-}
-
-// SetPath sets the value of Path.
-func (s *S3TechnicalAssetConfiguration) SetPath(val string) {
-	s.Path = val
-}
 
 // Ref: #/components/schemas/SchemaObjectRequest
 type SchemaObjectRequest struct {
@@ -13540,98 +12318,6 @@ type SetValueForOutputPortOKApplicationJSON jx.Raw
 
 func (*SetValueForOutputPortOKApplicationJSON) setValueForOutputPortRes() {}
 
-// Ref: #/components/schemas/SnowflakeTechnicalAssetConfiguration
-type SnowflakeTechnicalAssetConfiguration struct {
-	ConfigurationType string            `json:"configuration_type"`
-	Database          string            `json:"database"`
-	Schema            OptString         `json:"schema"`
-	Table             OptString         `json:"table"`
-	BucketIdentifier  OptString         `json:"bucket_identifier"`
-	DatabasePath      OptString         `json:"database_path"`
-	TablePath         OptString         `json:"table_path"`
-	AccessGranularity AccessGranularity `json:"access_granularity"`
-}
-
-// GetConfigurationType returns the value of ConfigurationType.
-func (s *SnowflakeTechnicalAssetConfiguration) GetConfigurationType() string {
-	return s.ConfigurationType
-}
-
-// GetDatabase returns the value of Database.
-func (s *SnowflakeTechnicalAssetConfiguration) GetDatabase() string {
-	return s.Database
-}
-
-// GetSchema returns the value of Schema.
-func (s *SnowflakeTechnicalAssetConfiguration) GetSchema() OptString {
-	return s.Schema
-}
-
-// GetTable returns the value of Table.
-func (s *SnowflakeTechnicalAssetConfiguration) GetTable() OptString {
-	return s.Table
-}
-
-// GetBucketIdentifier returns the value of BucketIdentifier.
-func (s *SnowflakeTechnicalAssetConfiguration) GetBucketIdentifier() OptString {
-	return s.BucketIdentifier
-}
-
-// GetDatabasePath returns the value of DatabasePath.
-func (s *SnowflakeTechnicalAssetConfiguration) GetDatabasePath() OptString {
-	return s.DatabasePath
-}
-
-// GetTablePath returns the value of TablePath.
-func (s *SnowflakeTechnicalAssetConfiguration) GetTablePath() OptString {
-	return s.TablePath
-}
-
-// GetAccessGranularity returns the value of AccessGranularity.
-func (s *SnowflakeTechnicalAssetConfiguration) GetAccessGranularity() AccessGranularity {
-	return s.AccessGranularity
-}
-
-// SetConfigurationType sets the value of ConfigurationType.
-func (s *SnowflakeTechnicalAssetConfiguration) SetConfigurationType(val string) {
-	s.ConfigurationType = val
-}
-
-// SetDatabase sets the value of Database.
-func (s *SnowflakeTechnicalAssetConfiguration) SetDatabase(val string) {
-	s.Database = val
-}
-
-// SetSchema sets the value of Schema.
-func (s *SnowflakeTechnicalAssetConfiguration) SetSchema(val OptString) {
-	s.Schema = val
-}
-
-// SetTable sets the value of Table.
-func (s *SnowflakeTechnicalAssetConfiguration) SetTable(val OptString) {
-	s.Table = val
-}
-
-// SetBucketIdentifier sets the value of BucketIdentifier.
-func (s *SnowflakeTechnicalAssetConfiguration) SetBucketIdentifier(val OptString) {
-	s.BucketIdentifier = val
-}
-
-// SetDatabasePath sets the value of DatabasePath.
-func (s *SnowflakeTechnicalAssetConfiguration) SetDatabasePath(val OptString) {
-	s.DatabasePath = val
-}
-
-// SetTablePath sets the value of TablePath.
-func (s *SnowflakeTechnicalAssetConfiguration) SetTablePath(val OptString) {
-	s.TablePath = val
-}
-
-// SetAccessGranularity sets the value of AccessGranularity.
-func (s *SnowflakeTechnicalAssetConfiguration) SetAccessGranularity(val AccessGranularity) {
-	s.AccessGranularity = val
-}
-
 // Ref: #/components/schemas/Tag
 type Tag struct {
 	ID    uuid.UUID `json:"id"`
@@ -13733,16 +12419,18 @@ func (s *TagsGetItem) SetValue(val string) {
 
 // Ref: #/components/schemas/TechnicalAsset
 type TechnicalAsset struct {
-	ID               uuid.UUID                   `json:"id"`
-	Name             string                      `json:"name"`
-	Namespace        string                      `json:"namespace"`
-	Description      string                      `json:"description"`
-	Status           TechnicalAssetStatus        `json:"status"`
-	TechnicalMapping TechnicalMapping            `json:"technical_mapping"`
-	OwnerID          uuid.UUID                   `json:"owner_id"`
-	PlatformID       uuid.UUID                   `json:"platform_id"`
-	ServiceID        uuid.UUID                   `json:"service_id"`
-	Configuration    TechnicalAssetConfiguration `json:"configuration"`
+	ID               uuid.UUID            `json:"id"`
+	Name             string               `json:"name"`
+	Namespace        string               `json:"namespace"`
+	Description      string               `json:"description"`
+	Status           TechnicalAssetStatus `json:"status"`
+	TechnicalMapping TechnicalMapping     `json:"technical_mapping"`
+	OwnerID          uuid.UUID            `json:"owner_id"`
+	PlatformID       uuid.UUID            `json:"platform_id"`
+	ServiceID        uuid.UUID            `json:"service_id"`
+	// Configuration of the technical asset. The available fields depend on `name`; retrieve them from
+	// /v2/plugins/{name}/form.
+	Configuration TechnicalAssetConfiguration `json:"configuration"`
 }
 
 // GetID returns the value of ID.
@@ -13845,269 +12533,42 @@ func (s *TechnicalAsset) SetConfiguration(val TechnicalAssetConfiguration) {
 	s.Configuration = val
 }
 
-// TechnicalAssetConfiguration represents sum type.
+// Configuration of the technical asset. The available fields depend on `name`; retrieve them from
+// /v2/plugins/{name}/form.
 type TechnicalAssetConfiguration struct {
-	// Type selects the active sum variant, switch on this field.
-	Type                                        TechnicalAssetConfigurationType
-	S3TechnicalAssetConfiguration               S3TechnicalAssetConfiguration
-	RustFSTechnicalAssetConfiguration           RustFSTechnicalAssetConfiguration
-	GlueTechnicalAssetConfiguration             GlueTechnicalAssetConfiguration
-	DatabricksTechnicalAssetConfiguration       DatabricksTechnicalAssetConfiguration
-	SnowflakeTechnicalAssetConfiguration        SnowflakeTechnicalAssetConfiguration
-	RedshiftTechnicalAssetConfiguration         RedshiftTechnicalAssetConfiguration
-	PostgreSQLTechnicalAssetConfiguration       PostgreSQLTechnicalAssetConfiguration
-	OSISemanticModelTechnicalAssetConfiguration OSISemanticModelTechnicalAssetConfiguration
-	AzureBlobTechnicalAssetConfiguration        AzureBlobTechnicalAssetConfiguration
+	Name            string `json:"name"`
+	AdditionalProps TechnicalAssetConfigurationAdditional
 }
 
-// TechnicalAssetConfigurationType is oneOf type of TechnicalAssetConfiguration.
-type TechnicalAssetConfigurationType string
-
-// Possible values for TechnicalAssetConfigurationType.
-const (
-	S3TechnicalAssetConfigurationTechnicalAssetConfiguration               TechnicalAssetConfigurationType = "S3TechnicalAssetConfiguration"
-	RustFSTechnicalAssetConfigurationTechnicalAssetConfiguration           TechnicalAssetConfigurationType = "RustFSTechnicalAssetConfiguration"
-	GlueTechnicalAssetConfigurationTechnicalAssetConfiguration             TechnicalAssetConfigurationType = "GlueTechnicalAssetConfiguration"
-	DatabricksTechnicalAssetConfigurationTechnicalAssetConfiguration       TechnicalAssetConfigurationType = "DatabricksTechnicalAssetConfiguration"
-	SnowflakeTechnicalAssetConfigurationTechnicalAssetConfiguration        TechnicalAssetConfigurationType = "SnowflakeTechnicalAssetConfiguration"
-	RedshiftTechnicalAssetConfigurationTechnicalAssetConfiguration         TechnicalAssetConfigurationType = "RedshiftTechnicalAssetConfiguration"
-	PostgreSQLTechnicalAssetConfigurationTechnicalAssetConfiguration       TechnicalAssetConfigurationType = "PostgreSQLTechnicalAssetConfiguration"
-	OSISemanticModelTechnicalAssetConfigurationTechnicalAssetConfiguration TechnicalAssetConfigurationType = "OSISemanticModelTechnicalAssetConfiguration"
-	AzureBlobTechnicalAssetConfigurationTechnicalAssetConfiguration        TechnicalAssetConfigurationType = "AzureBlobTechnicalAssetConfiguration"
-)
-
-// IsS3TechnicalAssetConfiguration reports whether TechnicalAssetConfiguration is S3TechnicalAssetConfiguration.
-func (s TechnicalAssetConfiguration) IsS3TechnicalAssetConfiguration() bool {
-	return s.Type == S3TechnicalAssetConfigurationTechnicalAssetConfiguration
+// GetName returns the value of Name.
+func (s *TechnicalAssetConfiguration) GetName() string {
+	return s.Name
 }
 
-// IsRustFSTechnicalAssetConfiguration reports whether TechnicalAssetConfiguration is RustFSTechnicalAssetConfiguration.
-func (s TechnicalAssetConfiguration) IsRustFSTechnicalAssetConfiguration() bool {
-	return s.Type == RustFSTechnicalAssetConfigurationTechnicalAssetConfiguration
+// GetAdditionalProps returns the value of AdditionalProps.
+func (s *TechnicalAssetConfiguration) GetAdditionalProps() TechnicalAssetConfigurationAdditional {
+	return s.AdditionalProps
 }
 
-// IsGlueTechnicalAssetConfiguration reports whether TechnicalAssetConfiguration is GlueTechnicalAssetConfiguration.
-func (s TechnicalAssetConfiguration) IsGlueTechnicalAssetConfiguration() bool {
-	return s.Type == GlueTechnicalAssetConfigurationTechnicalAssetConfiguration
+// SetName sets the value of Name.
+func (s *TechnicalAssetConfiguration) SetName(val string) {
+	s.Name = val
 }
 
-// IsDatabricksTechnicalAssetConfiguration reports whether TechnicalAssetConfiguration is DatabricksTechnicalAssetConfiguration.
-func (s TechnicalAssetConfiguration) IsDatabricksTechnicalAssetConfiguration() bool {
-	return s.Type == DatabricksTechnicalAssetConfigurationTechnicalAssetConfiguration
+// SetAdditionalProps sets the value of AdditionalProps.
+func (s *TechnicalAssetConfiguration) SetAdditionalProps(val TechnicalAssetConfigurationAdditional) {
+	s.AdditionalProps = val
 }
 
-// IsSnowflakeTechnicalAssetConfiguration reports whether TechnicalAssetConfiguration is SnowflakeTechnicalAssetConfiguration.
-func (s TechnicalAssetConfiguration) IsSnowflakeTechnicalAssetConfiguration() bool {
-	return s.Type == SnowflakeTechnicalAssetConfigurationTechnicalAssetConfiguration
-}
+type TechnicalAssetConfigurationAdditional map[string]jx.Raw
 
-// IsRedshiftTechnicalAssetConfiguration reports whether TechnicalAssetConfiguration is RedshiftTechnicalAssetConfiguration.
-func (s TechnicalAssetConfiguration) IsRedshiftTechnicalAssetConfiguration() bool {
-	return s.Type == RedshiftTechnicalAssetConfigurationTechnicalAssetConfiguration
-}
-
-// IsPostgreSQLTechnicalAssetConfiguration reports whether TechnicalAssetConfiguration is PostgreSQLTechnicalAssetConfiguration.
-func (s TechnicalAssetConfiguration) IsPostgreSQLTechnicalAssetConfiguration() bool {
-	return s.Type == PostgreSQLTechnicalAssetConfigurationTechnicalAssetConfiguration
-}
-
-// IsOSISemanticModelTechnicalAssetConfiguration reports whether TechnicalAssetConfiguration is OSISemanticModelTechnicalAssetConfiguration.
-func (s TechnicalAssetConfiguration) IsOSISemanticModelTechnicalAssetConfiguration() bool {
-	return s.Type == OSISemanticModelTechnicalAssetConfigurationTechnicalAssetConfiguration
-}
-
-// IsAzureBlobTechnicalAssetConfiguration reports whether TechnicalAssetConfiguration is AzureBlobTechnicalAssetConfiguration.
-func (s TechnicalAssetConfiguration) IsAzureBlobTechnicalAssetConfiguration() bool {
-	return s.Type == AzureBlobTechnicalAssetConfigurationTechnicalAssetConfiguration
-}
-
-// SetS3TechnicalAssetConfiguration sets TechnicalAssetConfiguration to S3TechnicalAssetConfiguration.
-func (s *TechnicalAssetConfiguration) SetS3TechnicalAssetConfiguration(v S3TechnicalAssetConfiguration) {
-	s.Type = S3TechnicalAssetConfigurationTechnicalAssetConfiguration
-	s.S3TechnicalAssetConfiguration = v
-}
-
-// GetS3TechnicalAssetConfiguration returns S3TechnicalAssetConfiguration and true boolean if TechnicalAssetConfiguration is S3TechnicalAssetConfiguration.
-func (s TechnicalAssetConfiguration) GetS3TechnicalAssetConfiguration() (v S3TechnicalAssetConfiguration, ok bool) {
-	if !s.IsS3TechnicalAssetConfiguration() {
-		return v, false
+func (s *TechnicalAssetConfigurationAdditional) init() TechnicalAssetConfigurationAdditional {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
 	}
-	return s.S3TechnicalAssetConfiguration, true
-}
-
-// NewS3TechnicalAssetConfigurationTechnicalAssetConfiguration returns new TechnicalAssetConfiguration from S3TechnicalAssetConfiguration.
-func NewS3TechnicalAssetConfigurationTechnicalAssetConfiguration(v S3TechnicalAssetConfiguration) TechnicalAssetConfiguration {
-	var s TechnicalAssetConfiguration
-	s.SetS3TechnicalAssetConfiguration(v)
-	return s
-}
-
-// SetRustFSTechnicalAssetConfiguration sets TechnicalAssetConfiguration to RustFSTechnicalAssetConfiguration.
-func (s *TechnicalAssetConfiguration) SetRustFSTechnicalAssetConfiguration(v RustFSTechnicalAssetConfiguration) {
-	s.Type = RustFSTechnicalAssetConfigurationTechnicalAssetConfiguration
-	s.RustFSTechnicalAssetConfiguration = v
-}
-
-// GetRustFSTechnicalAssetConfiguration returns RustFSTechnicalAssetConfiguration and true boolean if TechnicalAssetConfiguration is RustFSTechnicalAssetConfiguration.
-func (s TechnicalAssetConfiguration) GetRustFSTechnicalAssetConfiguration() (v RustFSTechnicalAssetConfiguration, ok bool) {
-	if !s.IsRustFSTechnicalAssetConfiguration() {
-		return v, false
-	}
-	return s.RustFSTechnicalAssetConfiguration, true
-}
-
-// NewRustFSTechnicalAssetConfigurationTechnicalAssetConfiguration returns new TechnicalAssetConfiguration from RustFSTechnicalAssetConfiguration.
-func NewRustFSTechnicalAssetConfigurationTechnicalAssetConfiguration(v RustFSTechnicalAssetConfiguration) TechnicalAssetConfiguration {
-	var s TechnicalAssetConfiguration
-	s.SetRustFSTechnicalAssetConfiguration(v)
-	return s
-}
-
-// SetGlueTechnicalAssetConfiguration sets TechnicalAssetConfiguration to GlueTechnicalAssetConfiguration.
-func (s *TechnicalAssetConfiguration) SetGlueTechnicalAssetConfiguration(v GlueTechnicalAssetConfiguration) {
-	s.Type = GlueTechnicalAssetConfigurationTechnicalAssetConfiguration
-	s.GlueTechnicalAssetConfiguration = v
-}
-
-// GetGlueTechnicalAssetConfiguration returns GlueTechnicalAssetConfiguration and true boolean if TechnicalAssetConfiguration is GlueTechnicalAssetConfiguration.
-func (s TechnicalAssetConfiguration) GetGlueTechnicalAssetConfiguration() (v GlueTechnicalAssetConfiguration, ok bool) {
-	if !s.IsGlueTechnicalAssetConfiguration() {
-		return v, false
-	}
-	return s.GlueTechnicalAssetConfiguration, true
-}
-
-// NewGlueTechnicalAssetConfigurationTechnicalAssetConfiguration returns new TechnicalAssetConfiguration from GlueTechnicalAssetConfiguration.
-func NewGlueTechnicalAssetConfigurationTechnicalAssetConfiguration(v GlueTechnicalAssetConfiguration) TechnicalAssetConfiguration {
-	var s TechnicalAssetConfiguration
-	s.SetGlueTechnicalAssetConfiguration(v)
-	return s
-}
-
-// SetDatabricksTechnicalAssetConfiguration sets TechnicalAssetConfiguration to DatabricksTechnicalAssetConfiguration.
-func (s *TechnicalAssetConfiguration) SetDatabricksTechnicalAssetConfiguration(v DatabricksTechnicalAssetConfiguration) {
-	s.Type = DatabricksTechnicalAssetConfigurationTechnicalAssetConfiguration
-	s.DatabricksTechnicalAssetConfiguration = v
-}
-
-// GetDatabricksTechnicalAssetConfiguration returns DatabricksTechnicalAssetConfiguration and true boolean if TechnicalAssetConfiguration is DatabricksTechnicalAssetConfiguration.
-func (s TechnicalAssetConfiguration) GetDatabricksTechnicalAssetConfiguration() (v DatabricksTechnicalAssetConfiguration, ok bool) {
-	if !s.IsDatabricksTechnicalAssetConfiguration() {
-		return v, false
-	}
-	return s.DatabricksTechnicalAssetConfiguration, true
-}
-
-// NewDatabricksTechnicalAssetConfigurationTechnicalAssetConfiguration returns new TechnicalAssetConfiguration from DatabricksTechnicalAssetConfiguration.
-func NewDatabricksTechnicalAssetConfigurationTechnicalAssetConfiguration(v DatabricksTechnicalAssetConfiguration) TechnicalAssetConfiguration {
-	var s TechnicalAssetConfiguration
-	s.SetDatabricksTechnicalAssetConfiguration(v)
-	return s
-}
-
-// SetSnowflakeTechnicalAssetConfiguration sets TechnicalAssetConfiguration to SnowflakeTechnicalAssetConfiguration.
-func (s *TechnicalAssetConfiguration) SetSnowflakeTechnicalAssetConfiguration(v SnowflakeTechnicalAssetConfiguration) {
-	s.Type = SnowflakeTechnicalAssetConfigurationTechnicalAssetConfiguration
-	s.SnowflakeTechnicalAssetConfiguration = v
-}
-
-// GetSnowflakeTechnicalAssetConfiguration returns SnowflakeTechnicalAssetConfiguration and true boolean if TechnicalAssetConfiguration is SnowflakeTechnicalAssetConfiguration.
-func (s TechnicalAssetConfiguration) GetSnowflakeTechnicalAssetConfiguration() (v SnowflakeTechnicalAssetConfiguration, ok bool) {
-	if !s.IsSnowflakeTechnicalAssetConfiguration() {
-		return v, false
-	}
-	return s.SnowflakeTechnicalAssetConfiguration, true
-}
-
-// NewSnowflakeTechnicalAssetConfigurationTechnicalAssetConfiguration returns new TechnicalAssetConfiguration from SnowflakeTechnicalAssetConfiguration.
-func NewSnowflakeTechnicalAssetConfigurationTechnicalAssetConfiguration(v SnowflakeTechnicalAssetConfiguration) TechnicalAssetConfiguration {
-	var s TechnicalAssetConfiguration
-	s.SetSnowflakeTechnicalAssetConfiguration(v)
-	return s
-}
-
-// SetRedshiftTechnicalAssetConfiguration sets TechnicalAssetConfiguration to RedshiftTechnicalAssetConfiguration.
-func (s *TechnicalAssetConfiguration) SetRedshiftTechnicalAssetConfiguration(v RedshiftTechnicalAssetConfiguration) {
-	s.Type = RedshiftTechnicalAssetConfigurationTechnicalAssetConfiguration
-	s.RedshiftTechnicalAssetConfiguration = v
-}
-
-// GetRedshiftTechnicalAssetConfiguration returns RedshiftTechnicalAssetConfiguration and true boolean if TechnicalAssetConfiguration is RedshiftTechnicalAssetConfiguration.
-func (s TechnicalAssetConfiguration) GetRedshiftTechnicalAssetConfiguration() (v RedshiftTechnicalAssetConfiguration, ok bool) {
-	if !s.IsRedshiftTechnicalAssetConfiguration() {
-		return v, false
-	}
-	return s.RedshiftTechnicalAssetConfiguration, true
-}
-
-// NewRedshiftTechnicalAssetConfigurationTechnicalAssetConfiguration returns new TechnicalAssetConfiguration from RedshiftTechnicalAssetConfiguration.
-func NewRedshiftTechnicalAssetConfigurationTechnicalAssetConfiguration(v RedshiftTechnicalAssetConfiguration) TechnicalAssetConfiguration {
-	var s TechnicalAssetConfiguration
-	s.SetRedshiftTechnicalAssetConfiguration(v)
-	return s
-}
-
-// SetPostgreSQLTechnicalAssetConfiguration sets TechnicalAssetConfiguration to PostgreSQLTechnicalAssetConfiguration.
-func (s *TechnicalAssetConfiguration) SetPostgreSQLTechnicalAssetConfiguration(v PostgreSQLTechnicalAssetConfiguration) {
-	s.Type = PostgreSQLTechnicalAssetConfigurationTechnicalAssetConfiguration
-	s.PostgreSQLTechnicalAssetConfiguration = v
-}
-
-// GetPostgreSQLTechnicalAssetConfiguration returns PostgreSQLTechnicalAssetConfiguration and true boolean if TechnicalAssetConfiguration is PostgreSQLTechnicalAssetConfiguration.
-func (s TechnicalAssetConfiguration) GetPostgreSQLTechnicalAssetConfiguration() (v PostgreSQLTechnicalAssetConfiguration, ok bool) {
-	if !s.IsPostgreSQLTechnicalAssetConfiguration() {
-		return v, false
-	}
-	return s.PostgreSQLTechnicalAssetConfiguration, true
-}
-
-// NewPostgreSQLTechnicalAssetConfigurationTechnicalAssetConfiguration returns new TechnicalAssetConfiguration from PostgreSQLTechnicalAssetConfiguration.
-func NewPostgreSQLTechnicalAssetConfigurationTechnicalAssetConfiguration(v PostgreSQLTechnicalAssetConfiguration) TechnicalAssetConfiguration {
-	var s TechnicalAssetConfiguration
-	s.SetPostgreSQLTechnicalAssetConfiguration(v)
-	return s
-}
-
-// SetOSISemanticModelTechnicalAssetConfiguration sets TechnicalAssetConfiguration to OSISemanticModelTechnicalAssetConfiguration.
-func (s *TechnicalAssetConfiguration) SetOSISemanticModelTechnicalAssetConfiguration(v OSISemanticModelTechnicalAssetConfiguration) {
-	s.Type = OSISemanticModelTechnicalAssetConfigurationTechnicalAssetConfiguration
-	s.OSISemanticModelTechnicalAssetConfiguration = v
-}
-
-// GetOSISemanticModelTechnicalAssetConfiguration returns OSISemanticModelTechnicalAssetConfiguration and true boolean if TechnicalAssetConfiguration is OSISemanticModelTechnicalAssetConfiguration.
-func (s TechnicalAssetConfiguration) GetOSISemanticModelTechnicalAssetConfiguration() (v OSISemanticModelTechnicalAssetConfiguration, ok bool) {
-	if !s.IsOSISemanticModelTechnicalAssetConfiguration() {
-		return v, false
-	}
-	return s.OSISemanticModelTechnicalAssetConfiguration, true
-}
-
-// NewOSISemanticModelTechnicalAssetConfigurationTechnicalAssetConfiguration returns new TechnicalAssetConfiguration from OSISemanticModelTechnicalAssetConfiguration.
-func NewOSISemanticModelTechnicalAssetConfigurationTechnicalAssetConfiguration(v OSISemanticModelTechnicalAssetConfiguration) TechnicalAssetConfiguration {
-	var s TechnicalAssetConfiguration
-	s.SetOSISemanticModelTechnicalAssetConfiguration(v)
-	return s
-}
-
-// SetAzureBlobTechnicalAssetConfiguration sets TechnicalAssetConfiguration to AzureBlobTechnicalAssetConfiguration.
-func (s *TechnicalAssetConfiguration) SetAzureBlobTechnicalAssetConfiguration(v AzureBlobTechnicalAssetConfiguration) {
-	s.Type = AzureBlobTechnicalAssetConfigurationTechnicalAssetConfiguration
-	s.AzureBlobTechnicalAssetConfiguration = v
-}
-
-// GetAzureBlobTechnicalAssetConfiguration returns AzureBlobTechnicalAssetConfiguration and true boolean if TechnicalAssetConfiguration is AzureBlobTechnicalAssetConfiguration.
-func (s TechnicalAssetConfiguration) GetAzureBlobTechnicalAssetConfiguration() (v AzureBlobTechnicalAssetConfiguration, ok bool) {
-	if !s.IsAzureBlobTechnicalAssetConfiguration() {
-		return v, false
-	}
-	return s.AzureBlobTechnicalAssetConfiguration, true
-}
-
-// NewAzureBlobTechnicalAssetConfigurationTechnicalAssetConfiguration returns new TechnicalAssetConfiguration from AzureBlobTechnicalAssetConfiguration.
-func NewAzureBlobTechnicalAssetConfigurationTechnicalAssetConfiguration(v AzureBlobTechnicalAssetConfiguration) TechnicalAssetConfiguration {
-	var s TechnicalAssetConfiguration
-	s.SetAzureBlobTechnicalAssetConfiguration(v)
-	return s
+	return m
 }
 
 // Ref: #/components/schemas/TechnicalAssetLink
@@ -14502,6 +12963,7 @@ type UIElementMetadataResponse struct {
 	Platform        string              `json:"platform"`
 	DisplayName     string              `json:"display_name"`
 	IconName        string              `json:"icon_name"`
+	IconDataURI     OptNilString        `json:"icon_data_uri"`
 	ParentPlatform  OptNilString        `json:"parent_platform"`
 	PlatformTile    OptNilPlatformTile  `json:"platform_tile"`
 	ShowInForm      OptBool             `json:"show_in_form"`
@@ -14551,6 +13013,11 @@ func (s *UIElementMetadataResponse) GetDisplayName() string {
 // GetIconName returns the value of IconName.
 func (s *UIElementMetadataResponse) GetIconName() string {
 	return s.IconName
+}
+
+// GetIconDataURI returns the value of IconDataURI.
+func (s *UIElementMetadataResponse) GetIconDataURI() OptNilString {
+	return s.IconDataURI
 }
 
 // GetParentPlatform returns the value of ParentPlatform.
@@ -14616,6 +13083,11 @@ func (s *UIElementMetadataResponse) SetDisplayName(val string) {
 // SetIconName sets the value of IconName.
 func (s *UIElementMetadataResponse) SetIconName(val string) {
 	s.IconName = val
+}
+
+// SetIconDataURI sets the value of IconDataURI.
+func (s *UIElementMetadataResponse) SetIconDataURI(val OptNilString) {
+	s.IconDataURI = val
 }
 
 // SetParentPlatform sets the value of ParentPlatform.
