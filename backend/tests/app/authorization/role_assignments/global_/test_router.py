@@ -47,14 +47,14 @@ class TestGlobalRoleAssignmentsRouter:
         response = client.post(
             f"{ENDPOINT}",
             json={
-                "identity_id": str(user.id),
+                "user_id": str(user.id),
                 "role_id": str(role.id),
             },
         )
         assert response.status_code == status.HTTP_200_OK
 
         data = response.json()
-        assert data["identity"]["id"] == str(user.id)
+        assert data["user"]["id"] == str(user.id)
         assert data["role"]["id"] == str(role.id)
 
     def test_become_admin(self, client: TestClient):
@@ -117,7 +117,7 @@ class TestGlobalRoleAssignmentsRouter:
         response = client.post(
             f"{ENDPOINT}",
             json={
-                "identity_id": str(user.id),
+                "user_id": str(user.id),
                 "role_id": "admin",
             },
         )

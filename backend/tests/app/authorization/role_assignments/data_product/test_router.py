@@ -78,7 +78,7 @@ class TestDataProductRoleAssignmentsRouter:
             f"{ENDPOINT}",
             json={
                 "data_product_id": str(data_product.id),
-                "identity_id": str(user.id),
+                "user_id": str(user.id), # TODO change to identity_id
                 "role_id": str(role.id),
             },
         )
@@ -86,7 +86,7 @@ class TestDataProductRoleAssignmentsRouter:
 
         data = response.json()
         assert data["data_product"]["id"] == str(data_product.id)
-        assert data["identity"]["id"] == str(user.id)
+        assert data["user"]["id"] == str(user.id) # TODO change to identity
         assert data["role"]["id"] == str(role.id)
 
         # Verify Casbin update behavior
@@ -118,7 +118,7 @@ class TestDataProductRoleAssignmentsRouter:
             f"{ENDPOINT}",
             json={
                 "data_product_id": str(data_product.id),
-                "identity_id": str(user.id),
+                "user_id": str(user.id), # TODO change to identity_id
                 "role_id": str(role.id),
             },
         )
@@ -139,7 +139,7 @@ class TestDataProductRoleAssignmentsRouter:
         response = client.post(
             f"{ENDPOINT}/request",
             json={
-                "identity_id": str(user.id),
+                "user_id": str(user.id), # TODO change to identity_id
                 "role_id": str(role.id),
                 "data_product_id": str(data_product.id),
             },
@@ -148,7 +148,7 @@ class TestDataProductRoleAssignmentsRouter:
 
         data = response.json()
         assert data["data_product"]["id"] == str(data_product.id)
-        assert data["identity"]["id"] == str(user.id)
+        assert data["user"]["id"] == str(user.id)
         assert data["role"]["id"] == str(role.id)
 
     def test_request_assignment_generates_webhook_v2_event(
@@ -185,7 +185,7 @@ class TestDataProductRoleAssignmentsRouter:
         response = client.post(
             f"{ENDPOINT}/request",
             json={
-                "identity_id": str(requested_user.id),
+                "user_id": str(requested_user.id),
                 "role_id": str(requested_role.id),
                 "data_product_id": str(data_product.id),
             },
@@ -224,7 +224,7 @@ class TestDataProductRoleAssignmentsRouter:
         response = client.post(
             f"{ENDPOINT}/request",
             json={
-                "identity_id": str(requested_user.id),
+                "user_id": str(requested_user.id),
                 "role_id": str(requested_role.id),
                 "data_product_id": str(data_product.id),
             },
@@ -249,7 +249,7 @@ class TestDataProductRoleAssignmentsRouter:
             response = client.post(
                 f"{ENDPOINT}/request",
                 json={
-                    "identity_id": str(user.id),
+                    "user_id": str(user.id),
                     "role_id": str(role.id),
                     "data_product_id": str(data_product.id),
                 },
@@ -507,7 +507,7 @@ class TestDataProductRoleAssignmentsRouter:
             f"{ENDPOINT}",
             json={
                 "data_product_id": str(data_product.id),
-                "identity_id": str(user.id),
+                "user_id": str(user.id),
                 "role_id": str(role.id),
             },
         )
@@ -628,7 +628,7 @@ class TestDataProductRoleAssignmentsRouter:
             f"{ENDPOINT}",
             json={
                 "data_product_id": str(data_product.id),
-                "identity_id": str(user_requester.id),
+                "user_id": str(user_requester.id),
                 "role_id": str(role2.id),
             },
         )
