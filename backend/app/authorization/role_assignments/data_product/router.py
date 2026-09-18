@@ -106,6 +106,7 @@ def list_data_product_role_assignments(
             identity_id=user_id, ## TODO replace with identity_id
             role_id=role_id,
             decision=decision,
+            users_only=True,
         )
     )
 

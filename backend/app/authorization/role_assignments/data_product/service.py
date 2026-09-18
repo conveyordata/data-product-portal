@@ -42,6 +42,7 @@ class RoleAssignmentService:
         identity_id: Optional[UUID] = None,
         role_id: Optional[UUID] = None,
         decision: Optional[DecisionStatus] = None,
+        users_only: bool = False,
     ) -> Sequence[DataProductRoleAssignment]:
         """
         Lists assignments for a given data product, identity, or role.
@@ -51,8 +52,8 @@ class RoleAssignmentService:
         """
         query = (select(DataProductRoleAssignmentModel)
                  .join(DataProductRoleAssignmentModel.data_product)
-                 .join(UserModel, UserModel.id == DataProductRoleAssignmentModel.identity_id) ## TODO Remove when frontend supports identities
                  .options(contains_eager(DataProductRoleAssignmentModel.data_product)))
+
         if data_product_id is not None:
             query = query.where(
                 DataProductRoleAssignmentModel.data_product_id == data_product_id
@@ -63,6 +64,9 @@ class RoleAssignmentService:
             query = query.where(DataProductRoleAssignmentModel.role_id == role_id)
         if decision is not None:
             query = query.where(DataProductRoleAssignmentModel.decision == decision)
+        # TODO Remove when frontend supports identities
+        if users_only:
+            query = query.join(UserModel, UserModel.id == DataProductRoleAssignmentModel.identity_id)
 
         return self.db.scalars(query).all()
 

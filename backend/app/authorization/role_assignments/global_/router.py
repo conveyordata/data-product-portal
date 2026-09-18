@@ -114,7 +114,9 @@ def list_global_role_assignments(
 ) -> ListGlobalRoleAssignmentsResponse:
     return ListGlobalRoleAssignmentsResponse(
         role_assignments=RoleAssignmentService(db).list_assignments(
-            identity_id=user_id, role_id=role_id # TODO Replace by identity_id
+            identity_id=user_id, # TODO Replace by identity_id
+            role_id=role_id,
+            users_only=True,
         )
     )
 

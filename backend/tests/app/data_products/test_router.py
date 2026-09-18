@@ -9,6 +9,7 @@ from fastapi.testclient import TestClient
 
 from app.authorization.role_assignments.enums import AssignmentFilter
 from app.authorization.roles.schema import Scope
+from app.authorization.service import AuthorizationService
 from app.core.authz import Action
 from app.data_products.model import DataProductVisibility
 from app.data_products.output_ports.enums import OutputPortAccessType
@@ -24,6 +25,8 @@ from tests.factories import (
     EnvPlatformConfigFactory,
     ExplorationFactory,
     GlobalRoleAssignmentFactory,
+    GroupFactory,
+    GroupMembershipFactory,
     InputPortFactory,
     LifecycleFactory,
     OutputPortFactory,
@@ -213,7 +216,7 @@ class TestDataProductsRouter:
         assert response.status_code == 200, response.text
         data = response.json()
         returned_ids = {dp["id"] for dp in data["data_products"]}
-        assert data_product_hidden_no_access not in returned_ids
+        assert str(data_product_hidden_no_access.id) not in returned_ids
         assert str(data_product_discoverable.id) in returned_ids, (
             "Discoverable data product should be returned"
         )
@@ -911,6 +914,66 @@ class TestDataProductsRouter:
         response = self.get_input_ports(client, link.consuming_abstract_data_product.id)
         assert response.status_code == 200, f"Response failed with: {response.text}"
         assert len(response.json()["input_ports"]) == 1
+
+    def test_get_data_products_only_assigned_includes_group_assignments(self, client):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        group = GroupFactory()
+        GroupMembershipFactory(group=group, member=user)
+        directly_assigned = DataProductFactory()
+        assigned_through_group = DataProductFactory()
+        not_assigned = DataProductFactory()
+        role = RoleFactory(scope=Scope.DATA_PRODUCT, permissions=[])
+        DataProductRoleAssignmentFactory(data_product_id=directly_assigned.id, role_id=role.id, identity_id=user.id)
+        DataProductRoleAssignmentFactory(data_product_id=assigned_through_group.id, role_id=role.id, identity_id=group.id)
+
+        response = client.get(ENDPOINT, params={"assignment_filter": AssignmentFilter.ONLY_ASSIGNED.value})
+        assert response.status_code == 200, response.text
+
+        returned_ids = { data_product["id"] for data_product in response.json()["data_products"] }
+        assert returned_ids == { str(directly_assigned.id), str(assigned_through_group.id) }
+        assert str(not_assigned.id) not in returned_ids
+
+    def test_get_data_products_includes_hidden_assigned_through_group(self, client):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        group = GroupFactory()
+        GroupMembershipFactory(group=group, member=user)
+        hidden_assigned_through_group = DataProductFactory(visibility=DataProductVisibility.HIDDEN)
+        hidden_not_assigned = DataProductFactory(visibility=DataProductVisibility.HIDDEN)
+        role = RoleFactory(scope=Scope.DATA_PRODUCT, permissions=[])
+        DataProductRoleAssignmentFactory(data_product_id=hidden_assigned_through_group.id, role_id=role.id, identity_id=group.id)
+
+        response = client.get(ENDPOINT,params={"assignment_filter": AssignmentFilter.ALL.value})
+        assert response.status_code == 200, response.text
+
+        returned_ids = { data_product["id"] for data_product in response.json()["data_products"] }
+        assert str(hidden_assigned_through_group.id) in returned_ids
+        assert str(hidden_not_assigned.id) not in returned_ids
+
+    def test_get_hidden_data_product_assigned_through_group(self, client, session):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        group = GroupFactory()
+        GroupMembershipFactory(group=group, member=user)
+        data_product = DataProductFactory(visibility=DataProductVisibility.HIDDEN)
+        role = RoleFactory(scope=Scope.DATA_PRODUCT, permissions=[Action.DATA_PRODUCT__READ_INTEGRATIONS])
+        DataProductRoleAssignmentFactory(data_product_id=data_product.id, role_id=role.id, identity_id=group.id)
+
+        AuthorizationService(session).reload_enforcer()
+
+        response = self.get_data_product(client, data_product.id)
+        assert response.status_code == 200, response.text
+        assert response.json()["id"] == str(data_product.id)
+
+    def test_get_hidden_data_product_rejects_member_of_different_group(self, client):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        users_group = GroupFactory()
+        assigned_group = GroupFactory()
+        GroupMembershipFactory(group=users_group, member=user)
+        data_product = DataProductFactory(visibility=DataProductVisibility.HIDDEN)
+        role = RoleFactory(scope=Scope.DATA_PRODUCT, permissions=[])
+        DataProductRoleAssignmentFactory(data_product_id=data_product.id, role_id=role.id, identity_id=assigned_group.id)
+
+        response = self.get_data_product(client, data_product.id)
+        assert response.status_code == 403
 
     @staticmethod
     def create_data_product(client: TestClient, default_data_product_payload):

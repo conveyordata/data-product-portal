@@ -35,15 +35,19 @@ class RoleAssignmentService:
         identity_id: Optional[UUID] = None,
         role_id: Optional[UUID] = None,
         decision: Optional[DecisionStatus] = None,
+        users_only: bool = False,
     ) -> Sequence[GlobalRoleAssignment]:
-        query = (select(GlobalRoleAssignmentModel)
-                 .join(UserModel, UserModel.id == GlobalRoleAssignmentModel.identity_id)) ## TODO Remove when frontend supports identities
+        query = select(GlobalRoleAssignmentModel)
+
         if identity_id is not None:
             query = query.where(GlobalRoleAssignmentModel.identity_id == identity_id)
         if role_id is not None:
             query = query.where(GlobalRoleAssignmentModel.role_id == role_id)
         if decision is not None:
             query = query.where(GlobalRoleAssignmentModel.decision == decision)
+        # TODO Remove when frontend supports identities
+        if users_only:
+            query = query.join(UserModel, UserModel.id == GlobalRoleAssignmentModel.identity_id)
 
         return self.db.scalars(query).all()
 
