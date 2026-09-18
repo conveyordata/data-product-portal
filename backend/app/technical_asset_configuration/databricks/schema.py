@@ -24,7 +24,7 @@ from app.technical_asset_configuration.base_schema import (
     UIElementString,
 )
 from app.technical_asset_configuration.databricks.model import (
-    CONFIGURATION_TYPE,
+    NAME,
 )
 from app.technical_asset_configuration.databricks.model import (
     DatabricksTechnicalAssetConfiguration as DatabricksTechnicalAssetConfigurationModel,
@@ -33,7 +33,7 @@ from app.technical_asset_configuration.enums import AccessGranularity, UIElement
 
 
 class DatabricksTechnicalAssetConfiguration(TechnicalAssetPlugin):
-    name: ClassVar[str] = CONFIGURATION_TYPE
+    name: ClassVar[str] = NAME
     version: ClassVar[str] = "1.0"
 
     catalog: str

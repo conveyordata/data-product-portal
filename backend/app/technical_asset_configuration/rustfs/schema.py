@@ -15,7 +15,7 @@ from app.technical_asset_configuration.base_schema import (
 )
 from app.technical_asset_configuration.enums import UIElementType
 from app.technical_asset_configuration.rustfs.model import (
-    CONFIGURATION_TYPE,
+    NAME,
 )
 from app.technical_asset_configuration.rustfs.model import (
     RustFSTechnicalAssetConfiguration as RustFSTechnicalAssetConfigurationModel,
@@ -28,7 +28,7 @@ from app.users.schema import User
 # extracting a shared base (e.g. ObjectStorageTechnicalAssetConfiguration) for just
 # two plugins with diverging get_url/metadata - revisit if a third one shows up.
 class RustFSTechnicalAssetConfiguration(TechnicalAssetPlugin):
-    name: ClassVar[str] = CONFIGURATION_TYPE
+    name: ClassVar[str] = NAME
     version: ClassVar[str] = "1.0"
 
     bucket: str

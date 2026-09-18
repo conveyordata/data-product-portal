@@ -3,7 +3,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from app.technical_asset_configuration.base_model import BaseTechnicalAssetConfiguration
 
-CONFIGURATION_TYPE = "AzureBlobTechnicalAssetConfiguration"
+NAME = "AzureBlobTechnicalAssetConfiguration"
 
 
 class AzureBlobTechnicalAssetConfiguration(BaseTechnicalAssetConfiguration):
@@ -16,5 +16,5 @@ class AzureBlobTechnicalAssetConfiguration(BaseTechnicalAssetConfiguration):
     container_name: Mapped[str] = mapped_column(String, nullable=False)
 
     __mapper_args__ = {
-        "polymorphic_identity": CONFIGURATION_TYPE,
+        "polymorphic_identity": NAME,
     }

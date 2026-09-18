@@ -11,7 +11,7 @@ from app.technical_asset_configuration.base_schema import (
 )
 from app.technical_asset_configuration.enums import UIElementType
 from app.technical_asset_configuration.osi_sem_model.model import (
-    CONFIGURATION_TYPE,
+    NAME,
 )
 from app.technical_asset_configuration.osi_sem_model.model import (
     OSISemanticModelTechnicalAssetConfiguration as OSISemanticModelTechnicalAssetConfigurationModel,
@@ -20,7 +20,7 @@ from app.users.schema import User
 
 
 class OSISemanticModelTechnicalAssetConfiguration(TechnicalAssetPlugin):
-    name: ClassVar[str] = CONFIGURATION_TYPE
+    name: ClassVar[str] = NAME
     version: ClassVar[str] = "1.0"
 
     model_name: str = ""

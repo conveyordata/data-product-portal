@@ -18,7 +18,7 @@ from app.technical_asset_configuration.base_schema import (
 )
 from app.technical_asset_configuration.enums import UIElementType
 from app.technical_asset_configuration.s3.model import (
-    CONFIGURATION_TYPE,
+    NAME,
 )
 from app.technical_asset_configuration.s3.model import (
     S3TechnicalAssetConfiguration as S3TechnicalAssetConfigurationModel,
@@ -27,7 +27,7 @@ from app.users.schema import User
 
 
 class S3TechnicalAssetConfiguration(TechnicalAssetPlugin):
-    name: ClassVar[str] = CONFIGURATION_TYPE
+    name: ClassVar[str] = NAME
     version: ClassVar[str] = "1.0"
 
     bucket: str

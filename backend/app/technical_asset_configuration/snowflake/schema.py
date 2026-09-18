@@ -24,7 +24,7 @@ from app.technical_asset_configuration.base_schema import (
 )
 from app.technical_asset_configuration.enums import AccessGranularity, UIElementType
 from app.technical_asset_configuration.snowflake.model import (
-    CONFIGURATION_TYPE,
+    NAME,
 )
 from app.technical_asset_configuration.snowflake.model import (
     SnowflakeTechnicalAssetConfiguration as SnowflakeTechnicalAssetConfigurationModel,
@@ -32,7 +32,7 @@ from app.technical_asset_configuration.snowflake.model import (
 
 
 class SnowflakeTechnicalAssetConfiguration(TechnicalAssetPlugin):
-    name: ClassVar[str] = CONFIGURATION_TYPE
+    name: ClassVar[str] = NAME
     version: ClassVar[str] = "1.0"
 
     database: str

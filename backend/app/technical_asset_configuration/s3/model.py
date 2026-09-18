@@ -3,7 +3,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from app.technical_asset_configuration.base_model import BaseTechnicalAssetConfiguration
 
-CONFIGURATION_TYPE = "S3TechnicalAssetConfiguration"
+NAME = "S3TechnicalAssetConfiguration"
 
 
 class S3TechnicalAssetConfiguration(BaseTechnicalAssetConfiguration):
@@ -14,5 +14,5 @@ class S3TechnicalAssetConfiguration(BaseTechnicalAssetConfiguration):
     path: Mapped[str] = mapped_column(String, nullable=True)
 
     __mapper_args__ = {
-        "polymorphic_identity": CONFIGURATION_TYPE,
+        "polymorphic_identity": NAME,
     }

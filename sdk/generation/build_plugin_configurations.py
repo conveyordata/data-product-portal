@@ -81,7 +81,7 @@ def build_plugin_module(plugin_dir: Path) -> tuple[str, str, str, set[str]] | No
         return None
 
     plugin_name = _find_assignment(
-        ast.parse((plugin_dir / "model.py").read_text()), "CONFIGURATION_TYPE"
+        ast.parse((plugin_dir / "model.py").read_text()), "NAME"
     )
     fields = _field_lines(plugin_class, schema_source)
     used_enums = {enum for enum in KNOWN_ENUMS if any(enum in f for f in fields)}
