@@ -334,6 +334,7 @@ export type DataProductCreate = {
   domain_id: string;
   tag_ids?: string[];
   lifecycle_id: string;
+  visibility?: DataProductVisibility;
   owners: string[];
   input_ports?: RequestInputPortsForDataProductRequest | null;
 };
@@ -371,6 +372,7 @@ export type GetDataProductsResponseItem = {
   domain: Domain;
   type: DataProductType;
   lifecycle: DataProductLifeCycle | null;
+  visibility: DataProductVisibility;
   user_count: number;
   input_port_count: number;
   technical_asset_count: number;
@@ -403,6 +405,7 @@ export type GetDataProductResponse = {
   domain: Domain;
   type: DataProductType;
   lifecycle: DataProductLifeCycle | null;
+  visibility: DataProductVisibility;
   about: string | null;
 };
 export type FinalizerRequest = {
@@ -671,6 +674,10 @@ export type DataProductSettingValue = {
 export type GetDataProductSettingsResponse = {
   data_product_settings: DataProductSettingValue[];
 };
+export enum DataProductVisibility {
+  Hidden = "hidden",
+  Discoverable = "discoverable",
+}
 export enum AbstractDataProductStatus {
   Pending = "pending",
   Active = "active",

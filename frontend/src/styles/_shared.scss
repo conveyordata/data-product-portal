@@ -39,6 +39,11 @@
         color: colors.$color-text;
     }
 
+    &.font-small {
+        width: variables.$icon-size-font-sm;
+        height: variables.$icon-size-font-sm;
+    }
+
     &.x-small {
         width: variables.$icon-size-extra-small;
         height: variables.$icon-size-extra-small;

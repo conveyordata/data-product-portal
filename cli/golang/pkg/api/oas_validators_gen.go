@@ -779,6 +779,24 @@ func (s *DataProductCreate) Validate() error {
 
 	var failures []validate.FieldError
 	if err := func() error {
+		if value, ok := s.Visibility.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "visibility",
+			Error: err,
+		})
+	}
+	if err := func() error {
 		if s.Owners == nil {
 			return errors.New("nil is invalid value")
 		}
@@ -1393,6 +1411,17 @@ func (s *DataProductTypesGetItem) Validate() error {
 	return nil
 }
 
+func (s DataProductVisibility) Validate() error {
+	switch s {
+	case "hidden":
+		return nil
+	case "discoverable":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
 func (s DataQualityStatus) Validate() error {
 	switch s {
 	case "success":
@@ -1921,6 +1950,17 @@ func (s *GetDataProductResponse) Validate() error {
 			Error: err,
 		})
 	}
+	if err := func() error {
+		if err := s.Visibility.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "visibility",
+			Error: err,
+		})
+	}
 	if len(failures) > 0 {
 		return &validate.Error{Fields: failures}
 	}
@@ -2088,6 +2128,17 @@ func (s *GetDataProductsResponseItem) Validate() error {
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
 			Name:  "type",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if err := s.Visibility.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "visibility",
 			Error: err,
 		})
 	}

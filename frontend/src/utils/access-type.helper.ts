@@ -4,7 +4,6 @@ import { OutputPortAccessType } from '@/store/api/services/generated/dataProduct
 
 export const getDatasetAccessTypeLabel = (t: TFunction, accessType: OutputPortAccessType) => {
     switch (accessType) {
-        // Backwards-compatibility
         case OutputPortAccessType.Unrestricted:
             return t('Unrestricted');
         case OutputPortAccessType.Restricted:

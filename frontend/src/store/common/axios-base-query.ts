@@ -11,6 +11,8 @@ type AxiosBaseQueryExtraOptions = {
     suppressErrorToast?: boolean;
 };
 
+const ACTIVE_USER_HEADER_STORAGE_KEY = 'activeUserHeader';
+
 function getUser() {
     const skipAuth = !AppConfig.isOidcEnabled();
     if (skipAuth) {
@@ -23,6 +25,10 @@ function getUser() {
     }
 
     return User.fromStorageString(oidcStorage);
+}
+
+function getActiveUserHeader() {
+    return localStorage.getItem(ACTIVE_USER_HEADER_STORAGE_KEY);
 }
 
 export const axiosBaseQuery =
@@ -44,6 +50,7 @@ export const axiosBaseQuery =
     async ({ url, method, data, body, params, headers }, api, extraOptions) => {
         try {
             const user = getUser();
+            const activeUserHeader = getActiveUserHeader();
             const result = await axios({
                 url: baseUrl + url,
                 method,
@@ -53,6 +60,7 @@ export const axiosBaseQuery =
                 headers: {
                     ...headers,
                     ...(user?.access_token && { Authorization: `${user.token_type} ${user.access_token}` }),
+                    ...(activeUserHeader && { 'X-user': activeUserHeader }),
                 },
             });
             return { data: result.data };

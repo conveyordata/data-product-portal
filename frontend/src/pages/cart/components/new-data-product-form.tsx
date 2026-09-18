@@ -1,11 +1,12 @@
 import { usePostHog } from '@posthog/react';
-import { Button, Flex, Form, type FormProps } from 'antd';
+import { Button, Flex, Form, type FormProps, Popconfirm } from 'antd';
 import { t } from 'i18next';
 import { useCallback, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router';
 import styles from '@/components/data-products/data-product-form/data-product-form.module.scss';
 import { DataProductFormItems } from '@/components/data-products/data-product-form/data-product-form-items.component.tsx';
+import { HiddenWarningText } from '@/components/data-products/data-product-form/hidden-warning.tsx';
 import { PosthogEvents } from '@/constants/posthog.constants.ts';
 import { useFormPersist } from '@/hooks/use-form-persist.tsx';
 import { JustificationFormItem } from '@/pages/cart/components/form-item-justification.tsx';
@@ -14,6 +15,7 @@ import { useAppDispatch } from '@/store';
 import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
 import {
     type DataProductCreate,
+    DataProductVisibility,
     useCreateDataProductMutation,
 } from '@/store/api/services/generated/dataProductsApi.ts';
 import { clearCart, selectCartOutputPorts } from '@/store/features/cart/cart-slice.ts';
@@ -35,6 +37,7 @@ export const NewDataProductForm = () => {
 
     const [createDataProduct] = useCreateDataProductMutation();
     const [submitting, setSubmitting] = useState(false);
+    const visibility = Form.useWatch('visibility', form);
     const { onValuesChange, clearStorage } = useFormPersist<NewDataProductCartFormData>(
         form,
         'cart-new-data-product-form',
@@ -88,15 +91,24 @@ export const NewDataProductForm = () => {
             <JustificationFormItem />
             <Form.Item>
                 <Flex justify="end">
-                    <Button
-                        className={styles.formButton}
-                        type="primary"
-                        htmlType="submit"
-                        loading={submitting}
-                        disabled={areFormItemsLoading}
+                    <Popconfirm
+                        title={<HiddenWarningText />}
+                        onConfirm={() => form.submit()}
+                        okText={t('Create')}
+                        cancelText={t('Cancel')}
+                        styles={{ root: { maxWidth: '30vw' } }}
+                        disabled={visibility !== DataProductVisibility.Hidden}
                     >
-                        {t('Create')}
-                    </Button>
+                        <Button
+                            className={styles.formButton}
+                            type="primary"
+                            htmlType={visibility === DataProductVisibility.Hidden ? 'button' : 'submit'}
+                            loading={submitting}
+                            disabled={areFormItemsLoading}
+                        >
+                            {t('Create')}
+                        </Button>
+                    </Popconfirm>
                 </Flex>
             </Form.Item>
         </Form>
