@@ -1,14 +1,13 @@
 import uuid
+from typing import TYPE_CHECKING
 
 from sqlalchemy import CheckConstraint, String, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, mapped_column, relationship, Session
-from sqlalchemy.ext.associationproxy import association_proxy, AssociationProxy
+from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
+from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
 
 from app.database.database import Base, ensure_exists
 from app.shared.model import BaseORM
-
-from typing import TYPE_CHECKING
 
 # Added for type checking in the IDE, disabled at runtime to avoid circular dependencies
 if TYPE_CHECKING:
@@ -43,11 +42,10 @@ class Identity(Base, BaseORM):
     type: Mapped[str] = mapped_column(String, nullable=False)
     external_id: Mapped[str] = mapped_column(String, nullable=False)
 
-
     data_product_roles: Mapped[list["DataProductRoleAssignment"]] = relationship(
         foreign_keys="DataProductRoleAssignment.identity_id",
         back_populates="identity",
-        cascade="all, delete-orphan", # TODO discuss this with the team
+        cascade="all, delete-orphan",  # TODO discuss this with the team
         lazy="raise",
     )
     data_products: AssociationProxy[list["DataProduct"]] = association_proxy(
@@ -62,9 +60,10 @@ class Identity(Base, BaseORM):
         lazy="select",
     )
 
-    __mapper_args__ = {
-        "polymorphic_on": type
-    }
+    __mapper_args__ = {"polymorphic_on": type}
 
-def ensure_identity_exists(identity_id: UUID, db: Session, options: list = []) -> Identity:
+
+def ensure_identity_exists(
+    identity_id: UUID, db: Session, options: list = []
+) -> Identity:
     return ensure_exists(identity_id, db, Identity, options=options)

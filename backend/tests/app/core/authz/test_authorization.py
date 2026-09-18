@@ -360,9 +360,9 @@ class TestAuthorization:
         )
 
     def test_global_role_inherited_from_group(
-            self,
-            authorizer: Authorization,
-            everyone_role_permissions,
+        self,
+        authorizer: Authorization,
+        everyone_role_permissions,
     ):
         user = "test_user"
         group = "test_group"

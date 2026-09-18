@@ -21,4 +21,3 @@ class MachineUser(Identity):
     __mapper_args__ = {
         "polymorphic_identity": IdentityType.MACHINE_USER.value,
     }
-

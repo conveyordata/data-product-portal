@@ -1,13 +1,23 @@
 import pytest
 from fastapi import HTTPException
 
+from app.authorization.role_assignments.data_product.service import (
+    RoleAssignmentService as DataProductRoleAssignmentService,
+)
+from app.authorization.role_assignments.global_.service import (
+    RoleAssignmentService as GlobalRoleAssignmentService,
+)
 from app.authorization.roles.schema import Scope
 from app.groups.service import GroupService
-from tests.factories import GroupFactory, UserFactory, MachineUserFactory, DataProductFactory, RoleFactory, DataProductRoleAssignmentFactory, \
-    GlobalRoleAssignmentFactory
-
-from app.authorization.role_assignments.data_product.service import RoleAssignmentService as DataProductRoleAssignmentService
-from app.authorization.role_assignments.global_.service import RoleAssignmentService as GlobalRoleAssignmentService
+from tests.factories import (
+    DataProductFactory,
+    DataProductRoleAssignmentFactory,
+    GlobalRoleAssignmentFactory,
+    GroupFactory,
+    MachineUserFactory,
+    RoleFactory,
+    UserFactory,
+)
 
 
 class TestGroupService:
@@ -16,8 +26,13 @@ class TestGroupService:
         member_group = GroupFactory()
         service = GroupService(session)
 
-        with pytest.raises(HTTPException, match="Only users and machine users can be group members."):
-            service.add_member(group_id=parent_group.id, member_identity_id=member_group.id,)
+        with pytest.raises(
+            HTTPException, match="Only users and machine users can be group members."
+        ):
+            service.add_member(
+                group_id=parent_group.id,
+                member_identity_id=member_group.id,
+            )
 
     def test_user_can_belong_to_group(self, session):
         group = GroupFactory()
@@ -25,7 +40,9 @@ class TestGroupService:
         service = GroupService(session)
 
         service.add_member(group_id=group.id, member_identity_id=user.id)
-        membership = service.get_membership(group_id=group.id, member_identity_id=user.id)
+        membership = service.get_membership(
+            group_id=group.id, member_identity_id=user.id
+        )
         assert membership.group_id == group.id
         assert membership.member_identity_id == user.id
 
@@ -35,7 +52,9 @@ class TestGroupService:
         service = GroupService(session)
 
         service.add_member(group_id=group.id, member_identity_id=machine_user.id)
-        membership = service.get_membership(group_id=group.id, member_identity_id=machine_user.id)
+        membership = service.get_membership(
+            group_id=group.id, member_identity_id=machine_user.id
+        )
         assert membership.group_id == group.id
         assert membership.member_identity_id == machine_user.id
 
@@ -45,7 +64,9 @@ class TestGroupService:
         service = GroupService(session)
 
         service.add_member(group_id=group.id, member_identity_id=user.id)
-        with pytest.raises(HTTPException, match="The identity is already a member of this group."):
+        with pytest.raises(
+            HTTPException, match="The identity is already a member of this group."
+        ):
             service.add_member(group_id=group.id, member_identity_id=user.id)
 
         assert len(service.list_memberships(group_id=group.id)) == 1
@@ -99,5 +120,7 @@ class TestGroupService:
         service.delete_group(group_id=group_id)
         with pytest.raises(HTTPException):
             service.get_group(group_id=group_id)
-            DataProductRoleAssignmentService(session).get_assignment(data_product_assignment_id)
+            DataProductRoleAssignmentService(session).get_assignment(
+                data_product_assignment_id
+            )
             GlobalRoleAssignmentService(session).get_assignment(global_assignment_id)

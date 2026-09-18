@@ -5,7 +5,7 @@ from uuid import UUID
 from warnings import deprecated
 
 from fastapi import HTTPException, status
-from sqlalchemy import asc, select, or_
+from sqlalchemy import asc, or_, select
 from sqlalchemy.orm import Session, joinedload, selectinload, undefer
 
 from app.abstract_data_product.graph_utils import (
@@ -15,7 +15,9 @@ from app.abstract_data_product.input_ports.model import (
     InputPort as InputPortModel,
 )
 from app.abstract_data_product.service import AbstractDataProductService
-from app.authorization.role_assignments.data_product.model import DataProductRoleAssignment
+from app.authorization.role_assignments.data_product.model import (
+    DataProductRoleAssignment,
+)
 from app.authorization.role_assignments.enums import AssignmentFilter, DecisionStatus
 from app.authorization.roles.schema import Prototype
 from app.authorization.service import DATA_PRODUCT_READER_ROLE
@@ -164,10 +166,14 @@ class DataProductService(AbstractDataProductService):
                 query = query.where(
                     DataProductModel.assignments.any(
                         and_(
-                            DataProductRoleAssignment.decision == DecisionStatus.APPROVED,
+                            DataProductRoleAssignment.decision
+                            == DecisionStatus.APPROVED,
                             or_(
-                                DataProductRoleAssignment.identity_id == current_user.id,
-                                DataProductRoleAssignment.identity_id.in_(user_group_ids),
+                                DataProductRoleAssignment.identity_id
+                                == current_user.id,
+                                DataProductRoleAssignment.identity_id.in_(
+                                    user_group_ids
+                                ),
                             ),
                         )
                     )

@@ -4,7 +4,13 @@ from app.authorization.service import AuthorizationService
 from app.core.authz import Authorization
 from app.core.authz.actions import AuthorizationAction
 from app.data_products.model import DataProductVisibility
-from tests.factories import DataProductFactory, UserFactory, RoleFactory, DataProductRoleAssignmentFactory, GlobalRoleAssignmentFactory
+from tests.factories import (
+    DataProductFactory,
+    DataProductRoleAssignmentFactory,
+    GlobalRoleAssignmentFactory,
+    RoleFactory,
+    UserFactory,
+)
 from tests.factories.group import GroupFactory, GroupMembershipFactory
 
 
@@ -28,7 +34,9 @@ class TestAuthorizationService:
             "Syncing did not remove the roles"
         )
 
-    def test_reload_enforcer_ensure_discoverable_data_products_sync(self, authorizer: Authorization, session):
+    def test_reload_enforcer_ensure_discoverable_data_products_sync(
+        self, authorizer: Authorization, session
+    ):
         existing = len(session.query(CasbinRule).all())
 
         for i in range(5):
@@ -46,7 +54,9 @@ class TestAuthorizationService:
             "database not cleared"
         )
 
-    def test_reload_enforcer_syncs_group_data_product_access(self, authorizer: Authorization, session):
+    def test_reload_enforcer_syncs_group_data_product_access(
+        self, authorizer: Authorization, session
+    ):
         user = UserFactory()
         group = GroupFactory()
         GroupMembershipFactory(group=group, member=user)
@@ -71,7 +81,9 @@ class TestAuthorizationService:
             act=AuthorizationAction.DATA_PRODUCT__UPDATE_PROPERTIES,
         )
 
-    def test_reload_enforcer_syncs_group_global_access(self, authorizer: Authorization, session):
+    def test_reload_enforcer_syncs_group_global_access(
+        self, authorizer: Authorization, session
+    ):
         user = UserFactory()
         group = GroupFactory()
         GroupMembershipFactory(group=group, member=user)
@@ -95,7 +107,9 @@ class TestAuthorizationService:
             act=action,
         )
 
-    def test_reload_enforcer_revokes_access_after_membership_removal(self, authorizer: Authorization, session):
+    def test_reload_enforcer_revokes_access_after_membership_removal(
+        self, authorizer: Authorization, session
+    ):
         """
         This test ensures that the authorization service properly revokes access to a user after their membership is removed.
         The access is removed calling `self._enforcer.build_role_links()` in `start_enforcer_after_reload()`.
@@ -135,4 +149,3 @@ class TestAuthorizationService:
             obj=str(data_product.id),
             act=AuthorizationAction.DATA_PRODUCT__UPDATE_PROPERTIES,
         )
-

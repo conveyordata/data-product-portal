@@ -40,7 +40,9 @@ class UserService:
         return users
 
     def remove_user(self, id: UUID) -> None:
-        user = ensure_user_exists(id, self.db, options=[selectinload(User.data_product_roles)])
+        user = ensure_user_exists(
+            id, self.db, options=[selectinload(User.data_product_roles)]
+        )
         user.data_products = []
         user.datasets = []
         self.db.delete(user)

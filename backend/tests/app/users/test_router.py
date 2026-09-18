@@ -1,11 +1,18 @@
 import pytest
 
+from app.authorization.role_assignments.data_product.model import (
+    DataProductRoleAssignment,
+)
 from app.authorization.role_assignments.enums import DecisionStatus
+from app.authorization.role_assignments.output_port.model import (
+    DatasetRoleAssignment,
+)
 from app.authorization.roles.schema import Scope
 from app.core.authz import REDACTION_VALUE
 from app.core.authz.actions import AuthorizationAction
 from app.data_products.model import DataProductVisibility
 from app.settings import settings
+from app.users.model import User
 from tests.app.data_products.output_port_technical_assets_link.test_router import (
     DATA_OUTPUTS_DATASETS_ENDPOINT,
 )
@@ -21,13 +28,6 @@ from tests.factories import (
     TechnicalAssetOutputPortAssociationFactory,
     UserFactory,
 )
-from app.authorization.role_assignments.data_product.model import (
-    DataProductRoleAssignment,
-)
-from app.authorization.role_assignments.output_port.model import (
-    DatasetRoleAssignment,
-)
-from app.users.model import User
 
 ENDPOINT = "/api/v2/users"
 
@@ -134,7 +134,9 @@ class TestUsersRouter:
         assert response.status_code == 200, response.text
         session.expire_all()
         assert session.get(User, user_id) is None
-        assert session.get(DataProductRoleAssignment, data_product_assignment_id) is None
+        assert (
+            session.get(DataProductRoleAssignment, data_product_assignment_id) is None
+        )
         assert session.get(DatasetRoleAssignment, dataset_assignment_id) is None
 
     def test_post_user_not_admin(self, client):

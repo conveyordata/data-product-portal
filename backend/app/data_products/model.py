@@ -56,10 +56,12 @@ def _has_user_access_to_hidden_data_product(cls, user_id: uuid.UUID):
     return (
         select(DataProductRoleAssignment.id)
         .where(DataProductRoleAssignment.data_product_id == cls.id)
-        .where(or_(
-            DataProductRoleAssignment.identity_id == user_id,
-            DataProductRoleAssignment.identity_id.in_(user_group_ids)
-        ))
+        .where(
+            or_(
+                DataProductRoleAssignment.identity_id == user_id,
+                DataProductRoleAssignment.identity_id.in_(user_group_ids),
+            )
+        )
         .where(DataProductRoleAssignment.decision == DecisionStatus.APPROVED)
         .correlate_except(DataProductRoleAssignment)
         .exists()
@@ -100,10 +102,12 @@ def _visibility_filter_for_abstract_data_product(cls, user_id: uuid.UUID):
                 data_products.c.visibility != DataProductVisibility.HIDDEN,
                 select(assignments.c.id)
                 .where(assignments.c.data_product_id == data_products.c.id)
-                .where(or_(
-                    assignments.c.identity_id == user_id,
-                    assignments.c.identity_id.in_(user_group_ids),
-                ))
+                .where(
+                    or_(
+                        assignments.c.identity_id == user_id,
+                        assignments.c.identity_id.in_(user_group_ids),
+                    )
+                )
                 .where(assignments.c.decision == DecisionStatus.APPROVED)
                 .correlate_except(assignments)
                 .exists(),

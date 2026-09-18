@@ -12,4 +12,3 @@ def get_identity_display_name(identity: Identity) -> str:
         return identity.display_name
 
     raise ValueError(f"Unsupported identity type: {identity.type}")
-

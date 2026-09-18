@@ -24,10 +24,11 @@ class GroupService:
         if group_id is None:
             return list(self.db.scalars(select(GroupMembership)).all())
         else:
-            return list(self.db.scalars(
-                select(GroupMembership)
-                .where(GroupMembership.group_id == group_id)
-            ).all())
+            return list(
+                self.db.scalars(
+                    select(GroupMembership).where(GroupMembership.group_id == group_id)
+                ).all()
+            )
 
     def list_all_assigned_data_products(self) -> dict[UUID, set[UUID]]:
         rows = self.db.execute(
@@ -91,10 +92,15 @@ class GroupService:
         self.db.commit()
 
     def has_member(self, group_id: UUID, member_identity_id: UUID) -> bool:
-        membership = self.db.get(GroupMembership,(group_id, member_identity_id),)
+        membership = self.db.get(
+            GroupMembership,
+            (group_id, member_identity_id),
+        )
         return membership is not None
 
-    def get_membership(self, group_id: UUID, member_identity_id: UUID) -> GroupMembership:
+    def get_membership(
+        self, group_id: UUID, member_identity_id: UUID
+    ) -> GroupMembership:
         membership = self.db.get(
             GroupMembership,
             (group_id, member_identity_id),

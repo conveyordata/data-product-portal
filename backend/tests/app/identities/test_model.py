@@ -28,9 +28,12 @@ class TestIdentityModel:
         ids = {user.id, group.id, machine_user.id}
         session.expunge_all()
 
-        identities = { identity.id: identity for identity in session.scalars(
-            select(Identity).where(Identity.id.in_(ids))
-        ).all() }
+        identities = {
+            identity.id: identity
+            for identity in session.scalars(
+                select(Identity).where(Identity.id.in_(ids))
+            ).all()
+        }
 
         assert isinstance(identities[user.id], User)
         assert isinstance(identities[group.id], Group)

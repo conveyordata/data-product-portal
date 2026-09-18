@@ -73,10 +73,12 @@ def _has_user_access_to_private_output_port_via_data_product(cls, user_id: uuid.
     return (
         select(DataProductRoleAssignment.id)
         .where(DataProductRoleAssignment.data_product_id == cls.data_product_id)
-        .where(or_(
-            DataProductRoleAssignment.identity_id == user_id,
-            DataProductRoleAssignment.identity_id.in_(user_group_ids),
-        ))
+        .where(
+            or_(
+                DataProductRoleAssignment.identity_id == user_id,
+                DataProductRoleAssignment.identity_id.in_(user_group_ids),
+            )
+        )
         .where(DataProductRoleAssignment.decision == DecisionStatus.APPROVED)
         .exists()
     )

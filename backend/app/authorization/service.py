@@ -156,20 +156,20 @@ class AuthorizationService:
         for membership in memberships:
             total += 1
             if self.authorizer.assign_global_group_membership(
-                    member_identity_id=membership.member_identity_id,
-                    group_id=membership.group_id,
+                member_identity_id=membership.member_identity_id,
+                group_id=membership.group_id,
             ):
                 changes += 1
 
             for data_product_id in assigned_data_products.get(
-                    membership.group_id,
-                    set(),
+                membership.group_id,
+                set(),
             ):
                 total += 1
                 if self.authorizer.assign_resource_group_membership(
-                        member_identity_id=membership.member_identity_id,
-                        group_id=membership.group_id,
-                        resource_id=data_product_id,
+                    member_identity_id=membership.member_identity_id,
+                    group_id=membership.group_id,
+                    resource_id=data_product_id,
                 ):
                     changes += 1
 

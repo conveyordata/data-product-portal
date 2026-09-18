@@ -428,7 +428,7 @@ INSERT INTO public.identities (id, type, external_id, created_on, updated_on) VA
 
 INSERT INTO public.identities (id, type, external_id, created_on, updated_on) VALUES ('{{ reporting_machine_user_id }}'::uuid, 'machine_user', 'data-quality-service', timezone('utc'::text, current_timestamp), NULL);
 
--- MACHINE USERS    
+-- MACHINE USERS
 INSERT INTO public.machine_users (id, display_name) VALUES ('{{ ingestion_machine_user_id }}'::uuid, 'Analytics Pipeline');
 
 INSERT INTO public.machine_users (id, display_name) VALUES ('{{ reporting_machine_user_id }}'::uuid, 'Data Quality Service');

@@ -1,8 +1,8 @@
 import uuid
 from typing import TYPE_CHECKING
 
-from sqlalchemy import UUID, Boolean, Column, DateTime, String, ForeignKey
-from sqlalchemy.ext.associationproxy import association_proxy, AssociationProxy
+from sqlalchemy import UUID, Boolean, Column, DateTime, ForeignKey, String
+from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
 from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
 
 from app.database.database import ensure_exists
@@ -63,7 +63,9 @@ class User(Identity):
         #  - Complicates get_authenticated_user
         lazy="select",
     )
-    datasets: AssociationProxy[list["OutputPort"]] = association_proxy("dataset_roles", "dataset")
+    datasets: AssociationProxy[list["OutputPort"]] = association_proxy(
+        "dataset_roles", "dataset"
+    )
 
     # Relationships - Data outputs
     requested_dataoutputs: Mapped[list["TechnicalAssetOutputPortAssociation"]] = (

@@ -103,7 +103,7 @@ def list_data_product_role_assignments(
     return ListDataProductRoleAssignmentsResponse(
         role_assignments=RoleAssignmentService(db).list_assignments(
             data_product_id=data_product_id,
-            identity_id=user_id, ## TODO replace with identity_id
+            identity_id=user_id,  ## TODO replace with identity_id
             role_id=role_id,
             decision=decision,
             users_only=True,
@@ -131,7 +131,7 @@ def request_data_product_role_assignment(
     role_assignment = service.create_assignment(
         data_product_id=request.data_product_id,
         role_id=request.role_id,
-        identity_id=request.user_id, ## TODO replace with identity_id
+        identity_id=request.user_id,  ## TODO replace with identity_id
         actor=user,
     )
     EventService(db).create_event(
@@ -181,7 +181,7 @@ def create_data_product_role_assignment(
     service = RoleAssignmentService(db=db)
     role_assignment = service.create_assignment(
         data_product_id=body.data_product_id,
-        identity_id=body.user_id, # TODO replace byy identity_id
+        identity_id=body.user_id,  # TODO replace byy identity_id
         role_id=body.role_id,
         actor=user,
     )
@@ -192,7 +192,7 @@ def create_data_product_role_assignment(
             subject_id=role_assignment.data_product_id,
             subject_type=EventReferenceEntity.DATA_PRODUCT,
             target_id=role_assignment.identity_id,
-            target_type=EventReferenceEntity.USER, # TODO change to identity
+            target_type=EventReferenceEntity.USER,  # TODO change to identity
             actor_id=user.id,
         )
     )

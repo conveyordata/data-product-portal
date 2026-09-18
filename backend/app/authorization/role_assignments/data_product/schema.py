@@ -11,7 +11,6 @@ from app.authorization.role_assignments.data_product.model import (
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.roles.schema import Role
 from app.data_products.schema import DataProduct
-from app.identities.schema import Identity
 from app.shared.schema import ORMModel
 from app.users.schema import User
 
@@ -23,13 +22,13 @@ class CreateDataProductRoleAssignmentOld(BaseModel):
 
 
 class CreateDataProductRoleAssignment(BaseModel):
-    user_id: UUID ## TODO Replace by identity_id
+    user_id: UUID  ## TODO Replace by identity_id
     role_id: UUID
     data_product_id: UUID
 
 
 class RequestDataProductRoleAssignment(BaseModel):
-    user_id: UUID ## TODO Replace by identity_id
+    user_id: UUID  ## TODO Replace by identity_id
     role_id: UUID
     data_product_id: UUID
 
@@ -45,7 +44,9 @@ class ModifyDataProductRoleAssignment(BaseModel):
 class DataProductRoleAssignmentResponse(ORMModel):
     id: UUID
     data_product: DataProduct
-    user: User = Field(validation_alias="identity") # TODO replace by identity: Identity
+    user: User = Field(
+        validation_alias="identity"
+    )  # TODO replace by identity: Identity
     role: Optional[Role]
     decision: DecisionStatus
     requested_on: Optional[datetime]

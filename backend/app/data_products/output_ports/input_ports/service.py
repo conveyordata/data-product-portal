@@ -290,7 +290,8 @@ class InputPortService:
                         InputPortModel.output_port.has(
                             OutputPortModel.data_product.has(
                                 DataProductModel.assignments.any(
-                                    DataProductRoleAssignmentModel.identity_id == user.id
+                                    DataProductRoleAssignmentModel.identity_id
+                                    == user.id
                                 )
                             )
                         ),

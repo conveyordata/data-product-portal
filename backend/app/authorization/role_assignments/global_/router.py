@@ -76,7 +76,9 @@ def create_global_role_assignment(
 ) -> GlobalRoleAssignmentResponse:
     role_id = _resolve_role_id(request.role_id)
     return RoleAssignmentService(db).create_assignment(
-        RoleAssignmentRequest(identity_id=request.user_id, role_id=role_id), # TODO Replace by identity_id
+        RoleAssignmentRequest(
+            identity_id=request.user_id, role_id=role_id
+        ),  # TODO Replace by identity_id
         actor=user,
     )
 
@@ -114,7 +116,7 @@ def list_global_role_assignments(
 ) -> ListGlobalRoleAssignmentsResponse:
     return ListGlobalRoleAssignmentsResponse(
         role_assignments=RoleAssignmentService(db).list_assignments(
-            identity_id=user_id, # TODO Replace by identity_id
+            identity_id=user_id,  # TODO Replace by identity_id
             role_id=role_id,
             users_only=True,
         )

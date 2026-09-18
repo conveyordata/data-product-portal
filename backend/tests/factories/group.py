@@ -2,6 +2,7 @@ import factory
 from faker import Faker
 
 from app.groups.model import Group, GroupMembership
+
 from .identity import IdentityFactory
 from .user import UserFactory
 

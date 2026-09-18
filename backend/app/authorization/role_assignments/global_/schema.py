@@ -9,13 +9,12 @@ from app.authorization.role_assignments.global_.model import (
     GlobalRoleAssignment as GlobalRoleAssignmentModel,
 )
 from app.authorization.roles.schema import Role
-from app.identities.schema import Identity
 from app.shared.schema import ORMModel
 from app.users.schema import User
 
 
 class CreateGlobalRoleAssignment(BaseModel):
-    user_id: UUID ## TODO Replace by identity_id
+    user_id: UUID  ## TODO Replace by identity_id
     role_id: Union[UUID, Literal["admin"]]
 
 
@@ -38,7 +37,9 @@ class RoleAssignmentRequest(BaseModel):
 
 class GlobalRoleAssignmentResponse(ORMModel):
     id: UUID
-    user: User = Field(validation_alias="identity") # TODO replace by identity: Identity
+    user: User = Field(
+        validation_alias="identity"
+    )  # TODO replace by identity: Identity
     role: Role
     decision: DecisionStatus
     requested_on: Optional[datetime]

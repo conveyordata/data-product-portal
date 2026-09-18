@@ -50,23 +50,29 @@ class RoleAssignmentService:
         so the Pydantic validation doesn't fail down the line.
         Uses `contains_eager` to avoid a 2nd query caused by lazy loading that will be executed anyway.
         """
-        query = (select(DataProductRoleAssignmentModel)
-                 .join(DataProductRoleAssignmentModel.data_product)
-                 .options(contains_eager(DataProductRoleAssignmentModel.data_product)))
+        query = (
+            select(DataProductRoleAssignmentModel)
+            .join(DataProductRoleAssignmentModel.data_product)
+            .options(contains_eager(DataProductRoleAssignmentModel.data_product))
+        )
 
         if data_product_id is not None:
             query = query.where(
                 DataProductRoleAssignmentModel.data_product_id == data_product_id
             )
         if identity_id is not None:
-            query = query.where(DataProductRoleAssignmentModel.identity_id == identity_id)
+            query = query.where(
+                DataProductRoleAssignmentModel.identity_id == identity_id
+            )
         if role_id is not None:
             query = query.where(DataProductRoleAssignmentModel.role_id == role_id)
         if decision is not None:
             query = query.where(DataProductRoleAssignmentModel.decision == decision)
         # TODO Remove when frontend supports identities
         if users_only:
-            query = query.join(UserModel, UserModel.id == DataProductRoleAssignmentModel.identity_id)
+            query = query.join(
+                UserModel, UserModel.id == DataProductRoleAssignmentModel.identity_id
+            )
 
         return self.db.scalars(query).all()
 

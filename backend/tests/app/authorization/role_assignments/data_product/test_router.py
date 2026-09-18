@@ -78,7 +78,7 @@ class TestDataProductRoleAssignmentsRouter:
             f"{ENDPOINT}",
             json={
                 "data_product_id": str(data_product.id),
-                "user_id": str(user.id), # TODO change to identity_id
+                "user_id": str(user.id),  # TODO change to identity_id
                 "role_id": str(role.id),
             },
         )
@@ -86,7 +86,7 @@ class TestDataProductRoleAssignmentsRouter:
 
         data = response.json()
         assert data["data_product"]["id"] == str(data_product.id)
-        assert data["user"]["id"] == str(user.id) # TODO change to identity
+        assert data["user"]["id"] == str(user.id)  # TODO change to identity
         assert data["role"]["id"] == str(role.id)
 
         # Verify Casbin update behavior
@@ -118,7 +118,7 @@ class TestDataProductRoleAssignmentsRouter:
             f"{ENDPOINT}",
             json={
                 "data_product_id": str(data_product.id),
-                "user_id": str(user.id), # TODO change to identity_id
+                "user_id": str(user.id),  # TODO change to identity_id
                 "role_id": str(role.id),
             },
         )
@@ -139,7 +139,7 @@ class TestDataProductRoleAssignmentsRouter:
         response = client.post(
             f"{ENDPOINT}/request",
             json={
-                "user_id": str(user.id), # TODO change to identity_id
+                "user_id": str(user.id),  # TODO change to identity_id
                 "role_id": str(role.id),
                 "data_product_id": str(data_product.id),
             },
@@ -522,7 +522,7 @@ class TestDataProductRoleAssignmentsRouter:
         data_product: DataProduct = DataProductFactory()
         me = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
-            scope=Scope.DATASET, # TODO is this correct?
+            scope=Scope.DATASET,  # TODO is this correct?
             permissions=[Action.DATA_PRODUCT__APPROVE_USER_REQUEST],
         )
         DataProductRoleAssignmentFactory(
