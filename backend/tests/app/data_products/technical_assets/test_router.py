@@ -86,6 +86,40 @@ class TestTechnicalAssetsRouter:
         assert created_data_output.status_code == 200, created_data_output.text
         assert "id" in created_data_output.json()
 
+    def test_create_technical_asset__with_platform_and_service_omitted(
+        self, technical_asset_payload, data_product_role_assignment, client
+    ):
+        technical_asset_payload["platform_id"] = None
+        technical_asset_payload["service_id"] = None
+
+        created_technical_asset = self.create_technical_asset(
+            client, technical_asset_payload
+        )
+        assert created_technical_asset.status_code == 200, created_technical_asset.text
+
+        technical_asset = self.get_technical_asset(
+            client,
+            technical_asset_payload["owner_id"],
+            created_technical_asset.json()["id"],
+        )
+        assert technical_asset.status_code == 200, technical_asset.text
+        body = technical_asset.json()
+        assert body["platform_id"] is None
+        assert body["service_id"] is None
+        assert body["result_string"] == ""
+        assert body["technical_info"] == []
+
+    def test_create_technical_asset__rejects_only_one_of_platform_id_or_service_id(
+        self, technical_asset_payload, data_product_role_assignment, client
+    ):
+        technical_asset_payload["service_id"] = None
+
+        created_technical_asset = self.create_technical_asset(
+            client, technical_asset_payload
+        )
+
+        assert created_technical_asset.status_code == 422, created_technical_asset.text
+
     def test_create_technical_asset__with_access_modes(
         self, technical_asset_payload, data_product_role_assignment, client
     ):

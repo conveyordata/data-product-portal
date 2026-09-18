@@ -59,6 +59,12 @@ class CreateTechnicalAssetRequest(ORMModel):
 
         return self
 
+    @model_validator(mode="after")
+    def validate_platform_and_service(self):
+        if (self.platform_id is None) != (self.service_id is None):
+            raise ValueError("platform_id and service_id must be set together")
+        return self
+
 
 @deprecated("Use CreateTechnicalAssetRequest instead")
 class DataOutputCreate(CreateTechnicalAssetRequest):
