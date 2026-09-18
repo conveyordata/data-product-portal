@@ -80,6 +80,14 @@ def _visibility_filter_for_abstract_data_product(cls, user_id: uuid.UUID):
     # into an always true cross join.
     data_products = DataProduct.__table__
     assignments = DataProductRoleAssignment.__table__
+    memberships = GroupMembership.__table__
+
+    user_group_ids = (
+        select(memberships.c.group_id)
+        .where(memberships.c.member_identity_id == user_id)
+        .correlate_except(memberships)
+    )
+
     return or_(
         cls.abstract_data_product_type != AbstractDataProductType.DATA_PRODUCT,
         select(data_products.c.id)
@@ -89,7 +97,10 @@ def _visibility_filter_for_abstract_data_product(cls, user_id: uuid.UUID):
                 data_products.c.visibility != DataProductVisibility.HIDDEN,
                 select(assignments.c.id)
                 .where(assignments.c.data_product_id == data_products.c.id)
-                .where(assignments.c.user_id == user_id)
+                .where(or_(
+                    assignments.c.identity_id == user_id,
+                    assignments.c.identity_id.in_(user_group_ids),
+                ))
                 .where(assignments.c.decision == DecisionStatus.APPROVED)
                 .correlate_except(assignments)
                 .exists(),

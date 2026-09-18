@@ -12,6 +12,8 @@ from app.authorization.role_assignments.data_product.model import (
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.groups.model import Group, GroupMembership, ensure_group_exists
 from app.identities.model import ensure_identity_exists
+from app.machine_users.model import MachineUser
+from app.users.model import User
 
 
 class GroupService:
@@ -57,10 +59,10 @@ class GroupService:
         ensure_group_exists(group_id, self.db)
         member = ensure_identity_exists(member_identity_id, self.db)
 
-        if isinstance(member, Group):
+        if not isinstance(member, (User, MachineUser)):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Nested groups are not allowed.",
+                detail="Only users and machine users can be group members.",
             )
 
         if self.has_member(group_id, member_identity_id):

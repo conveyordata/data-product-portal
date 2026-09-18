@@ -45,6 +45,7 @@ from app.data_products.output_ports.status import OutputPortStatus
 from app.data_products.technical_assets.model import TechnicalAssetAccessMode
 from app.database.database import Base, ensure_exists
 from app.database.event_mixin import EventTrackedMixin
+from app.groups.model import GroupMembership
 from app.shared.model import BaseORM
 
 if TYPE_CHECKING:
@@ -66,10 +67,16 @@ def _has_user_access_to_private_output_port(cls, user_id: uuid.UUID):
 
 
 def _has_user_access_to_private_output_port_via_data_product(cls, user_id: uuid.UUID):
+    user_group_ids = select(GroupMembership.group_id).where(
+        GroupMembership.member_identity_id == user_id
+    )
     return (
         select(DataProductRoleAssignment.id)
         .where(DataProductRoleAssignment.data_product_id == cls.data_product_id)
-        .where(DataProductRoleAssignment.user_id == user_id)
+        .where(or_(
+            DataProductRoleAssignment.identity_id == user_id,
+            DataProductRoleAssignment.identity_id.in_(user_group_ids),
+        ))
         .where(DataProductRoleAssignment.decision == DecisionStatus.APPROVED)
         .exists()
     )
