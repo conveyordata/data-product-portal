@@ -106,7 +106,7 @@ class NotificationService:
 
         receivers = set(
             chain(
-                (assignment.user_id for assignment in assignments),
+                (assignment.identity_id for assignment in assignments),
                 extra_receiver_ids,
             )
         )

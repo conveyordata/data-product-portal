@@ -18,6 +18,7 @@ from app.authorization.role_assignments.global_.schema import (
 from app.authorization.roles.model import Role as RoleModel
 from app.authorization.roles.schema import Prototype, Scope
 from app.database.database import ensure_exists
+from app.users.model import User as UserModel
 from app.users.schema import User
 
 
@@ -31,17 +32,23 @@ class RoleAssignmentService:
     def list_assignments(
         self,
         *,
-        user_id: Optional[UUID] = None,
+        identity_id: Optional[UUID] = None,
         role_id: Optional[UUID] = None,
         decision: Optional[DecisionStatus] = None,
+        users_only: bool = False,
     ) -> Sequence[GlobalRoleAssignment]:
         query = select(GlobalRoleAssignmentModel)
-        if user_id is not None:
-            query = query.where(GlobalRoleAssignmentModel.user_id == user_id)
+
+        if identity_id is not None:
+            query = query.where(GlobalRoleAssignmentModel.identity_id == identity_id)
         if role_id is not None:
             query = query.where(GlobalRoleAssignmentModel.role_id == role_id)
         if decision is not None:
             query = query.where(GlobalRoleAssignmentModel.decision == decision)
+        if users_only:
+            query = query.join(
+                UserModel, UserModel.id == GlobalRoleAssignmentModel.identity_id
+            )
 
         return self.db.scalars(query).all()
 
@@ -51,7 +58,8 @@ class RoleAssignmentService:
         self.ensure_is_global_scope(request.role_id)
         self.ensure_is_not_admin(request.role_id)
         role_assignment = GlobalRoleAssignmentModel(
-            **request.model_dump(),
+            identity_id=request.identity_id,
+            role_id=request.role_id,
             requested_on=datetime.now(),
             requested_by_id=actor.id,
         )

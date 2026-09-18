@@ -9,7 +9,7 @@ from app.users.schema import User
 
 
 def send_role_assignment_request_email(
-    role_assignment_user: User,
+    identity_display_name: str,
     role_assignment_data_product: DataProduct,
     approvers: Sequence[User],
 ) -> None:
@@ -20,8 +20,7 @@ def send_role_assignment_request_email(
     action = emailgen.Table(["User", "Request", "Data Product", "Owned By"])
     action.add_row(
         [
-            f"{role_assignment_user.first_name} {role_assignment_user.last_name}",
-            "Wants to join ",
+            f"{identity_display_name} wants to join ",
             role_assignment_data_product.name,
             ", ".join([f"{user.first_name} {user.last_name}" for user in approvers]),
         ]
@@ -31,7 +30,6 @@ def send_role_assignment_request_email(
         approvers,
         action,
         url,
-        f"Action Required: {role_assignment_user.first_name} "
-        f"{role_assignment_user.last_name} wants "
+        f"Action Required: {identity_display_name} wants "
         f"to join {role_assignment_data_product.name}",
     )

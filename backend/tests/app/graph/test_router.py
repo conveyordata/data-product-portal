@@ -45,7 +45,7 @@ class TestGraphRouter:
         )
         DataProductRoleAssignmentFactory(
             data_product_id=data_product.id,
-            user_id=user.id,
+            identity_id=user.id,
             role_id=role.id,
         )
         response = client.get(ENDPOINT)

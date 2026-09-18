@@ -59,7 +59,7 @@ def test_hidden_data_product_visible_for_approved_user_assignment(session):
         permissions=[AuthorizationAction.DATA_PRODUCT__CREATE_USER],
     )
     DataProductRoleAssignmentFactory(
-        data_product_id=data_product.id, user_id=user.id, role_id=role.id
+        data_product_id=data_product.id, identity_id=user.id, role_id=role.id
     )
 
     with as_user(session, user.id):

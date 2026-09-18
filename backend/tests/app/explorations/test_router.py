@@ -34,7 +34,7 @@ class TestExplorationRouter:
             permissions=[Action.GLOBAL__CREATE_EXPLORATION],
         )
         GlobalRoleAssignmentFactory(
-            user_id=user.id,
+            identity_id=user.id,
             role_id=role.id,
         )
 
@@ -60,7 +60,7 @@ class TestExplorationRouter:
             permissions=[Action.GLOBAL__CREATE_EXPLORATION],
         )
         GlobalRoleAssignmentFactory(
-            user_id=user.id,
+            identity_id=user.id,
             role_id=role.id,
         )
 
@@ -83,7 +83,7 @@ class TestExplorationRouter:
             permissions=[Action.GLOBAL__CREATE_EXPLORATION],
         )
         GlobalRoleAssignmentFactory(
-            user_id=user.id,
+            identity_id=user.id,
             role_id=role.id,
         )
 
@@ -304,7 +304,7 @@ class TestExplorationRouter:
             scope=Scope.GLOBAL,
             permissions=[Action.GLOBAL__CREATE_EXPLORATION],
         )
-        GlobalRoleAssignmentFactory(user_id=user.id, role_id=role.id)
+        GlobalRoleAssignmentFactory(identity_id=user.id, role_id=role.id)
         response = client.delete(f"{ROUTE}/{exploration.id}")
         assert response.status_code == 200, response.text
 
@@ -316,7 +316,7 @@ class TestExplorationRouter:
             scope=Scope.GLOBAL,
             permissions=[Action.GLOBAL__CREATE_EXPLORATION],
         )
-        GlobalRoleAssignmentFactory(user_id=user.id, role_id=role.id)
+        GlobalRoleAssignmentFactory(identity_id=user.id, role_id=role.id)
         response = client.delete(f"{ROUTE}/{exploration.id}")
         assert response.status_code == 403, response.text
 
@@ -327,7 +327,7 @@ class TestExplorationRouter:
             scope=Scope.GLOBAL,
             permissions=[Action.GLOBAL__CREATE_EXPLORATION],
         )
-        GlobalRoleAssignmentFactory(user_id=user.id, role_id=role.id)
+        GlobalRoleAssignmentFactory(identity_id=user.id, role_id=role.id)
         response = client.delete(f"{ROUTE}/{exploration.id}")
         assert response.status_code == 202, response.text
 
@@ -339,7 +339,7 @@ class TestExplorationRouter:
             permissions=[Action.GLOBAL__MANAGE_FINALIZERS],
         )
         GlobalRoleAssignmentFactory(
-            user_id=user.id,
+            identity_id=user.id,
             role_id=role.id,
         )
         response = client.post(
@@ -356,7 +356,7 @@ class TestExplorationRouter:
             scope=Scope.GLOBAL,
             permissions=[Action.GLOBAL__CREATE_EXPLORATION],
         )
-        GlobalRoleAssignmentFactory(user_id=user.id, role_id=role.id)
+        GlobalRoleAssignmentFactory(identity_id=user.id, role_id=role.id)
         response = client.post(
             f"{ROUTE}/{exploration.id}/finalizers",
             json={"finalizer": "my-system"},
@@ -378,7 +378,7 @@ class TestExplorationRouter:
             permissions=[Action.GLOBAL__MANAGE_FINALIZERS],
         )
         GlobalRoleAssignmentFactory(
-            user_id=user.id,
+            identity_id=user.id,
             role_id=role.id,
         )
         response = client.delete(f"{ROUTE}/{exploration.id}/finalizers/last-one")
@@ -400,7 +400,7 @@ class TestExplorationRouter:
             permissions=[Action.GLOBAL__MANAGE_FINALIZERS],
         )
         GlobalRoleAssignmentFactory(
-            user_id=user.id,
+            identity_id=user.id,
             role_id=role.id,
         )
         response = client.delete(f"{ROUTE}/{exploration.id}/finalizers/a")
@@ -415,6 +415,6 @@ class TestExplorationRouter:
             scope=Scope.GLOBAL,
             permissions=[Action.GLOBAL__CREATE_EXPLORATION],
         )
-        GlobalRoleAssignmentFactory(user_id=user.id, role_id=role.id)
+        GlobalRoleAssignmentFactory(identity_id=user.id, role_id=role.id)
         response = client.delete(f"{ROUTE}/{exploration.id}/finalizers/my-system")
         assert response.status_code == 403, response.text

@@ -136,7 +136,7 @@ def _assign_owner_role_assignments(
     for owner_id in owners:
         response = assignment_service.create_assignment(
             data_product_id,
-            user_id=owner_id,
+            identity_id=owner_id,
             role_id=owner_role.id,
             actor=actor,
         )
@@ -152,7 +152,7 @@ def _assign_owner_role_assignments(
                 name=EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_CREATED,
                 subject_id=response.data_product_id,
                 subject_type=EventReferenceEntity.DATA_PRODUCT,
-                target_id=response.user_id,
+                target_id=response.identity_id,
                 target_type=EventReferenceEntity.USER,
                 actor_id=actor.id,
             )

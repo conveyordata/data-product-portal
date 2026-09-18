@@ -21,6 +21,14 @@
 {% set jane_id = "d9f3aae2-391e-46c1-aec6-a7ae1114a7da" %}
 {% set john_id = "b72fca38-17ff-4259-a075-5aaa5973343c" %}
 
+-- Groups
+{% set data_engineering_group_id = "f6f8fa4d-a692-40c1-8957-8607868c8f01" %}
+{% set analytics_group_id = "af899df3-788c-46c7-a0ef-ceb167f9fb02" %}
+
+-- Machine users
+{% set ingestion_machine_user_id = "65ebc761-9141-43a2-8ba7-68243c66ab03" %}
+{% set reporting_machine_user_id = "95205ddd-06eb-475a-9522-206f74015804" %}
+
 -- Domains
 {% set commercial_and_customer_relationship_mgt_domain_id = "acaaaafe-cde9-4746-9835-f1e0c3c85b6c" %}
 {% set customer_domain_id = "672debaf-31f9-4233-820b-ad2165af044e" %}
@@ -376,14 +384,23 @@ INSERT INTO public.domain_environments (domain_id, environment_id, created_on, u
 -- DATA PRODUCT TYPES
 -- ...existing data product types code...
 
+-- USER IDENTITIES
+INSERT INTO public.identities (id, type, external_id, created_on, updated_on) VALUES ('{{ alice_id }}'::uuid, 'user', 'alice.baker@pharma.com', timezone('utc'::text, current_timestamp), NULL);
+
+INSERT INTO public.identities (id, type, external_id, created_on, updated_on) VALUES ('{{ bob_id }}'::uuid, 'user', 'bob.johnson@pharma.com', timezone('utc'::text, current_timestamp), NULL);
+
+INSERT INTO public.identities (id, type, external_id, created_on, updated_on) VALUES ('{{ jane_id }}'::uuid, 'user', 'jane.researcher@pharma.com', timezone('utc'::text, current_timestamp), NULL);
+
+INSERT INTO public.identities (id, type, external_id, created_on, updated_on) VALUES ('{{ john_id }}'::uuid, 'user', 'john.scientist@pharma.com', timezone('utc'::text, current_timestamp), NULL);
+
 -- USERS
-INSERT INTO public.users (email, id, external_id, first_name, last_name, created_on, updated_on, deleted_at) VALUES ('alice.baker@pharma.com', '{{ alice_id }}'::uuid, 'alice.baker@pharma.com', 'Alice', 'Baker', timezone('utc'::text, current_timestamp), NULL, NULL);
+INSERT INTO public.users (email, id, first_name, last_name, deleted_at) VALUES ('alice.baker@pharma.com', '{{ alice_id }}'::uuid, 'Alice', 'Baker', NULL);
 
-INSERT INTO public.users (email, id, external_id, first_name, last_name, created_on, updated_on, deleted_at) VALUES ('bob.johnson@pharma.com', '{{ bob_id }}'::uuid, 'bob.johnson@pharma.com', 'Bob', 'Johnson', timezone('utc'::text, current_timestamp), NULL, NULL);
+INSERT INTO public.users (email, id, first_name, last_name, deleted_at) VALUES ('bob.johnson@pharma.com', '{{ bob_id }}'::uuid, 'Bob', 'Johnson', NULL);
 
-INSERT INTO public.users (email, id, external_id, can_become_admin, first_name, last_name, created_on, updated_on, deleted_at) VALUES ('jane.researcher@pharma.com', '{{ jane_id }}'::uuid, 'jane.researcher@pharma.com', TRUE, 'Jane', 'Researcher', timezone('utc'::text, current_timestamp), NULL, NULL);
+INSERT INTO public.users (email, id, can_become_admin, first_name, last_name, deleted_at) VALUES ('jane.researcher@pharma.com', '{{ jane_id }}'::uuid, TRUE, 'Jane', 'Researcher', NULL);
 
-INSERT INTO public.users (email, id, external_id, can_become_admin, first_name, last_name, created_on, updated_on, deleted_at, has_seen_tour) VALUES ('john.scientist@pharma.com', '{{ john_id }}'::uuid, 'john.scientist@pharma.com', TRUE, 'John', 'Scientist', timezone('utc'::text, current_timestamp), NULL, NULL, TRUE);
+INSERT INTO public.users (email, id, can_become_admin, first_name, last_name, deleted_at, has_seen_tour) VALUES ('john.scientist@pharma.com', '{{ john_id }}'::uuid, TRUE, 'John', 'Scientist', NULL, TRUE);
 
 INSERT INTO data_product_lifecycles (id, name, value, color, is_default) SELECT
     '{{ data_product_lifecycle_id }}'::uuid,
@@ -395,6 +412,37 @@ WHERE NOT EXISTS (
     SELECT 1 FROM public.data_product_lifecycles
     WHERE id = '{{ data_product_lifecycle_id }}'::uuid
 );
+
+-- GROUP IDENTITIES
+INSERT INTO public.identities (id, type, external_id, created_on, updated_on) VALUES ('{{ data_engineering_group_id }}'::uuid, 'group', 'data-engineering', timezone('utc'::text, current_timestamp), NULL);
+
+INSERT INTO public.identities (id, type, external_id, created_on, updated_on) VALUES ('{{ analytics_group_id }}'::uuid, 'group', 'data-science', timezone('utc'::text, current_timestamp), NULL);
+
+-- GROUPS
+INSERT INTO public.groups (id, display_name) VALUES ('{{ data_engineering_group_id }}'::uuid, 'Data Engineering');
+
+INSERT INTO public.groups (id, display_name) VALUES ('{{ analytics_group_id }}'::uuid, 'Data Science');
+
+-- MACHINE USER IDENTITIES
+INSERT INTO public.identities (id, type, external_id, created_on, updated_on) VALUES ('{{ ingestion_machine_user_id }}'::uuid, 'machine_user', 'analytics-pipeline', timezone('utc'::text, current_timestamp), NULL);
+
+INSERT INTO public.identities (id, type, external_id, created_on, updated_on) VALUES ('{{ reporting_machine_user_id }}'::uuid, 'machine_user', 'data-quality-service', timezone('utc'::text, current_timestamp), NULL);
+
+-- MACHINE USERS
+INSERT INTO public.machine_users (id, display_name) VALUES ('{{ ingestion_machine_user_id }}'::uuid, 'Analytics Pipeline');
+
+INSERT INTO public.machine_users (id, display_name) VALUES ('{{ reporting_machine_user_id }}'::uuid, 'Data Quality Service');
+
+-- GROUP MEMBERSHIPSº
+INSERT INTO public.group_memberships (group_id, member_identity_id, created_on, updated_on) VALUES ('{{ data_engineering_group_id }}'::uuid, '{{ alice_id }}'::uuid, timezone('utc'::text, current_timestamp), NULL);
+
+INSERT INTO public.group_memberships (group_id, member_identity_id, created_on, updated_on) VALUES ('{{ data_engineering_group_id }}'::uuid, '{{ bob_id }}'::uuid, timezone('utc'::text, current_timestamp), NULL);
+
+INSERT INTO public.group_memberships (group_id, member_identity_id, created_on, updated_on) VALUES ('{{ data_engineering_group_id }}'::uuid, '{{ ingestion_machine_user_id }}'::uuid, timezone('utc'::text, current_timestamp), NULL);
+
+INSERT INTO public.group_memberships (group_id, member_identity_id, created_on, updated_on) VALUES ('{{ analytics_group_id }}'::uuid, '{{ jane_id }}'::uuid, timezone('utc'::text, current_timestamp), NULL);
+
+INSERT INTO public.group_memberships (group_id, member_identity_id, created_on, updated_on) VALUES ('{{ analytics_group_id }}'::uuid, '{{ reporting_machine_user_id }}'::uuid, timezone('utc'::text, current_timestamp), NULL);
 
 -- Customer segmentation id
 INSERT INTO public.abstract_data_products (id, status, finalizers, name, namespace, abstract_data_product_type, description, domain_id, created_on, updated_on, deleted_at) VALUES ('{{ customer_segmentation_id }}'::uuid, 'active', '{}', 'Customer Segmentation', 'customer_segmentation', 'data_products', 'Groups customers based on demographics, behavior, and purchase patterns.', '{{ customer_domain_id }}'::uuid, timezone('utc'::text, current_timestamp), NULL, NULL);
@@ -409,7 +457,7 @@ INSERT INTO public.abstract_data_products (id, status, finalizers, name, namespa
 INSERT INTO public.data_products (id, about, type_id, lifecycle_id, usage)
 VALUES ('{{ demo_domain_environments_dp_id }}'::uuid, '<h3>Value Proposition</h3><p>Demonstrates a domain configured with a custom environment list (development only) instead of the global environment list.</p>', '{{ analytics_type_id }}'::uuid, '{{ data_product_lifecycle_id }}'::uuid, NULL);
 
-INSERT INTO public.role_assignments_data_product (id, data_product_id, user_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at)
+INSERT INTO public.role_assignments_data_product (id, data_product_id, identity_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at)
 VALUES (gen_random_uuid(), '{{ demo_domain_environments_dp_id }}'::uuid, '{{ john_id }}'::uuid, (
     SELECT r.id FROM public.roles AS r
     WHERE r.scope = 'data_product' AND r.prototype = 2
@@ -726,7 +774,7 @@ VALUES (gen_random_uuid(), 'workforce-demographics', 'Workforce Demographics', '
 INSERT INTO public.data_outputs (id, namespace, name, description, status, platform_id, service_id, owner_id, configuration, configuration_id, created_on, updated_on, deleted_at, technical_mapping)
 VALUES (gen_random_uuid(), 'compensation-equity-data', 'Compensation Equity Data', 'Captures pay and benefits information across roles.', 'ACTIVE', 'baa5c47b-805a-4cbb-ad8b-038c66e81b7e', 'ce208413-b629-44d2-9f98-e5b47a315a56', '{{ dei_insights_dashboard }}'::uuid, NULL, 'e0875fbb-f2ff-4804-a9ba-c9c3b006fca3', '2025-10-28 18:17:20.241114', NULL, NULL, 'default');
 
-INSERT INTO public.role_assignments_data_product (id, data_product_id, user_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at)
+INSERT INTO public.role_assignments_data_product (id, data_product_id, identity_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at)
 VALUES (gen_random_uuid(), '{{ dei_insights_dashboard }}'::uuid, '{{ john_id }}'::uuid, (
     SELECT r.id FROM public.roles AS r
     WHERE r.scope = 'data_product' AND r.prototype = 2
@@ -738,7 +786,7 @@ INSERT INTO public.abstract_data_products (id, status, finalizers, name, namespa
 INSERT INTO public.data_products (id, about, type_id, lifecycle_id, usage)
 VALUES ('{{ access_modes_example }}'::uuid, NULL, '1b4a64b3-96fb-404c-a73c-294802dc9852', '{{ data_product_lifecycle_id }}'::uuid, NULL);
 
-INSERT INTO public.role_assignments_data_product (id, data_product_id, user_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at)
+INSERT INTO public.role_assignments_data_product (id, data_product_id, identity_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at)
 VALUES (gen_random_uuid(), '{{ access_modes_example }}'::uuid, '{{ john_id }}'::uuid, (
     SELECT r.id FROM public.roles AS r
     WHERE r.scope = 'data_product' AND r.prototype = 2
@@ -842,7 +890,7 @@ INSERT INTO public.abstract_data_products (id, status, finalizers, name, namespa
 INSERT INTO public.data_products (id, about, type_id, lifecycle_id, usage)
 VALUES ('{{ access_modes_consumer }}'::uuid, NULL, '1b4a64b3-96fb-404c-a73c-294802dc9852', '{{ data_product_lifecycle_id }}'::uuid, NULL);
 
-INSERT INTO public.role_assignments_data_product (id, data_product_id, user_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at)
+INSERT INTO public.role_assignments_data_product (id, data_product_id, identity_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at)
 VALUES (gen_random_uuid(), '{{ access_modes_consumer }}'::uuid, '{{ john_id }}'::uuid, (
     SELECT r.id FROM public.roles AS r
     WHERE r.scope = 'data_product' AND r.prototype = 2
@@ -884,7 +932,7 @@ VALUES ('{{ hidden_data_product_example }}'::uuid, 'active', '{}', 'Hidden data 
 INSERT INTO public.data_products (id, about, type_id, lifecycle_id, usage, visibility)
 VALUES ('{{ hidden_data_product_example }}'::uuid, NULL, '{{ reporting_type_id }}'::uuid, '{{ data_product_lifecycle_id }}'::uuid, NULL, 'hidden');
 
-INSERT INTO public.role_assignments_data_product (id, data_product_id, user_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at)
+INSERT INTO public.role_assignments_data_product (id, data_product_id, identity_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at)
 VALUES (gen_random_uuid(), '{{ hidden_data_product_example }}'::uuid, '{{ jane_id }}'::uuid, (
     SELECT r.id FROM public.roles AS r
     WHERE r.scope = 'data_product' AND r.prototype = 2
@@ -897,7 +945,7 @@ VALUES ('{{ hidden_data_product_example_consumed }}'::uuid, 'active', '{}', 'Dis
 INSERT INTO public.data_products (id, about, type_id, lifecycle_id, usage)
 VALUES ('{{ hidden_data_product_example_consumed }}'::uuid, NULL, '{{ reporting_type_id }}'::uuid, '{{ data_product_lifecycle_id }}'::uuid, NULL);
 
-INSERT INTO public.role_assignments_data_product (id, data_product_id, user_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at)
+INSERT INTO public.role_assignments_data_product (id, data_product_id, identity_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at)
 VALUES (gen_random_uuid(), '{{ hidden_data_product_example_consumed }}'::uuid, '{{ john_id }}'::uuid, (
     SELECT r.id FROM public.roles AS r
     WHERE r.scope = 'data_product' AND r.prototype = 2
@@ -1358,7 +1406,7 @@ SELECT
 FROM link;
 
 INSERT INTO public.role_assignments_data_product (
-    id, data_product_id, user_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at) VALUES (
+    id, data_product_id, identity_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at) VALUES (
     gen_random_uuid(),
     '{{ feature_usage_metrics }}'::uuid, '{{ john_id }}'::uuid, (
         SELECT r.id FROM public.roles AS r
@@ -1928,77 +1976,77 @@ INSERT INTO public.data_output_configurations (id, configuration_type) VALUES ('
 INSERT INTO public.glue_technical_asset_configurations (id, bucket_identifier, database, database_suffix, "table", database_path, table_path, access_granularity, created_on, updated_on, deleted_at) VALUES ('8b6b6b35-c155-4f13-a847-c7598b08cea9', '', 'rd-portfolio-prioritization-model', '', '*', 'rd-portfolio-prioritization-model', '*', 'table', '2025-10-28 18:36:26.66997', NULL, NULL);
 
 -- INSERT ROLE ASSIGNMENTS FOR DATA PRODUCTS
-INSERT INTO public.role_assignments_data_product (id, data_product_id, user_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at) VALUES ('3502276b-b9b3-47f2-901b-3c4502fb7d1e', '81815c4c-f323-4cf1-b25b-f43f231f510f', '{{ john_id }}'::uuid, (
+INSERT INTO public.role_assignments_data_product (id, data_product_id, identity_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at) VALUES ('3502276b-b9b3-47f2-901b-3c4502fb7d1e', '81815c4c-f323-4cf1-b25b-f43f231f510f', '{{ john_id }}'::uuid, (
     SELECT r.id FROM public.roles AS r
     WHERE r.scope = 'data_product' AND r.prototype = 2
 ), 'APPROVED', '{{ john_id }}'::uuid, '2025-10-28 16:32:57.902449', '{{ john_id }}'::uuid, '2025-10-28 16:32:57.910346', '2025-10-28 16:32:57.89898', '2025-10-28 16:32:57.908607', NULL);
 
-INSERT INTO public.role_assignments_data_product (id, data_product_id, user_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at) VALUES ('5a1f650c-a4cf-4a59-825c-08fa699617ca', '6e580d91-14ea-495e-a6d7-5db236a5c1d5', '{{ jane_id }}'::uuid, (
+INSERT INTO public.role_assignments_data_product (id, data_product_id, identity_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at) VALUES ('5a1f650c-a4cf-4a59-825c-08fa699617ca', '6e580d91-14ea-495e-a6d7-5db236a5c1d5', '{{ jane_id }}'::uuid, (
     SELECT r.id FROM public.roles AS r
     WHERE r.scope = 'data_product' AND r.prototype = 2
 ), 'APPROVED', '{{ john_id }}'::uuid, '2025-10-28 16:37:39.90644', '{{ john_id }}'::uuid, '2025-10-28 16:37:39.917665', '2025-10-28 16:37:39.901065', '2025-10-28 16:37:39.914117', NULL);
 
-INSERT INTO public.role_assignments_data_product (id, data_product_id, user_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at) VALUES ('4c94a3f1-1fd3-44ea-aef2-c220773eb969', '6e580d91-14ea-495e-a6d7-5db236a5c1d5', '{{ john_id }}'::uuid, (
+INSERT INTO public.role_assignments_data_product (id, data_product_id, identity_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at) VALUES ('4c94a3f1-1fd3-44ea-aef2-c220773eb969', '6e580d91-14ea-495e-a6d7-5db236a5c1d5', '{{ john_id }}'::uuid, (
     SELECT r.id FROM public.roles AS r
     WHERE r.scope = 'data_product' AND r.prototype = 2
 ), 'APPROVED', '{{ john_id }}'::uuid, '2025-10-28 16:41:33.829482', '{{ john_id }}'::uuid, '2025-10-28 16:41:33.839374', '2025-10-28 16:41:33.822617', '2025-10-28 16:41:33.836909', NULL);
 
-INSERT INTO public.role_assignments_data_product (id, data_product_id, user_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at) VALUES ('da86ebb4-5e20-4be8-88ed-3d33a890c7a9', '9fa5e299-fcc4-45e0-b48d-cc3deb68eefe', '{{ john_id }}'::uuid, (
+INSERT INTO public.role_assignments_data_product (id, data_product_id, identity_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at) VALUES ('da86ebb4-5e20-4be8-88ed-3d33a890c7a9', '9fa5e299-fcc4-45e0-b48d-cc3deb68eefe', '{{ john_id }}'::uuid, (
     SELECT r.id FROM public.roles AS r
     WHERE r.scope = 'data_product' AND r.prototype = 2
 ), 'APPROVED', '{{ john_id }}'::uuid, '2025-10-28 17:56:19.876226', '{{ john_id }}'::uuid, '2025-10-28 17:56:19.881112', '2025-10-28 17:56:19.873821', '2025-10-28 17:56:19.880351', NULL);
 
-INSERT INTO public.role_assignments_data_product (id, data_product_id, user_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at) VALUES ('d3695c76-2163-41f7-bff7-bd1dedcc8096', 'fbcd7899-2763-4659-bd28-2a278910ef85', '{{ john_id }}'::uuid, (
+INSERT INTO public.role_assignments_data_product (id, data_product_id, identity_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at) VALUES ('d3695c76-2163-41f7-bff7-bd1dedcc8096', 'fbcd7899-2763-4659-bd28-2a278910ef85', '{{ john_id }}'::uuid, (
     SELECT r.id FROM public.roles AS r
     WHERE r.scope = 'data_product' AND r.prototype = 2
 ), 'APPROVED', '{{ john_id }}'::uuid, '2025-10-28 17:59:19.862559', '{{ john_id }}'::uuid, '2025-10-28 17:59:19.8694', '2025-10-28 17:59:19.858731', '2025-10-28 17:59:19.867782', NULL);
 
-INSERT INTO public.role_assignments_data_product (id, data_product_id, user_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at) VALUES ('bfac90c4-9290-472b-9123-0b2f4ae45d2e', 'fbcd7899-2763-4659-bd28-2a278910ef85', '{{ jane_id }}'::uuid, (
+INSERT INTO public.role_assignments_data_product (id, data_product_id, identity_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at) VALUES ('bfac90c4-9290-472b-9123-0b2f4ae45d2e', 'fbcd7899-2763-4659-bd28-2a278910ef85', '{{ jane_id }}'::uuid, (
     SELECT r.id FROM public.roles AS r
     WHERE r.scope = 'data_product' AND r.prototype = 2
 ), 'APPROVED', '{{ john_id }}'::uuid, '2025-10-28 17:59:19.88175', '{{ john_id }}'::uuid, '2025-10-28 17:59:19.887169', '2025-10-28 17:59:19.874011', '2025-10-28 17:59:19.885869', NULL);
 
-INSERT INTO public.role_assignments_data_product (id, data_product_id, user_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at) VALUES ('5c6f6c98-1401-4ca1-a577-0a9e8db701a9', '08039e5d-50a7-447a-b691-f5dc6b420dea', '{{ jane_id }}'::uuid, (
+INSERT INTO public.role_assignments_data_product (id, data_product_id, identity_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at) VALUES ('5c6f6c98-1401-4ca1-a577-0a9e8db701a9', '08039e5d-50a7-447a-b691-f5dc6b420dea', '{{ jane_id }}'::uuid, (
     SELECT r.id FROM public.roles AS r
     WHERE r.scope = 'data_product' AND r.prototype = 2
 ), 'APPROVED', '{{ john_id }}'::uuid, '2025-10-28 18:01:54.338886', '{{ john_id }}'::uuid, '2025-10-28 18:01:54.343617', '2025-10-28 18:01:54.336493', '2025-10-28 18:01:54.342708', NULL);
 
-INSERT INTO public.role_assignments_data_product (id, data_product_id, user_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at) VALUES ('54b4577d-f571-4d53-99e5-e83380c47438', '08039e5d-50a7-447a-b691-f5dc6b420dea', '{{ john_id }}'::uuid, (
+INSERT INTO public.role_assignments_data_product (id, data_product_id, identity_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at) VALUES ('54b4577d-f571-4d53-99e5-e83380c47438', '08039e5d-50a7-447a-b691-f5dc6b420dea', '{{ john_id }}'::uuid, (
     SELECT r.id FROM public.roles AS r
     WHERE r.scope = 'data_product' AND r.prototype = 2
 ), 'APPROVED', '{{ john_id }}'::uuid, '2025-10-28 18:01:54.352817', '{{ john_id }}'::uuid, '2025-10-28 18:01:54.356766', '2025-10-28 18:01:54.347504', '2025-10-28 18:01:54.356012', NULL);
 
-INSERT INTO public.role_assignments_data_product (id, data_product_id, user_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at) VALUES ('7c5123ac-0e60-43a1-bdfd-54ff59d4164c', '625b65b6-13d9-4c8c-a669-865e36fc3dfc', '{{ john_id }}'::uuid, (
+INSERT INTO public.role_assignments_data_product (id, data_product_id, identity_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at) VALUES ('7c5123ac-0e60-43a1-bdfd-54ff59d4164c', '625b65b6-13d9-4c8c-a669-865e36fc3dfc', '{{ john_id }}'::uuid, (
     SELECT r.id FROM public.roles AS r
     WHERE r.scope = 'data_product' AND r.prototype = 2
 ), 'APPROVED', '{{ john_id }}'::uuid, '2025-10-28 18:05:44.192946', '{{ john_id }}'::uuid, '2025-10-28 18:05:44.198121', '2025-10-28 18:05:44.190775', '2025-10-28 18:05:44.197289', NULL);
 
-INSERT INTO public.role_assignments_data_product (id, data_product_id, user_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at) VALUES ('44cec659-3489-447d-850f-c8ea65ec6f5a', '22488fe0-c30a-4447-972e-3eb22a1bd266', '{{ john_id }}'::uuid, (
+INSERT INTO public.role_assignments_data_product (id, data_product_id, identity_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at) VALUES ('44cec659-3489-447d-850f-c8ea65ec6f5a', '22488fe0-c30a-4447-972e-3eb22a1bd266', '{{ john_id }}'::uuid, (
     SELECT r.id FROM public.roles AS r
     WHERE r.scope = 'data_product' AND r.prototype = 2
 ), 'APPROVED', '{{ john_id }}'::uuid, '2025-10-28 18:09:11.683137', '{{ john_id }}'::uuid, '2025-10-28 18:09:11.688498', '2025-10-28 18:09:11.679884', '2025-10-28 18:09:11.6877', NULL);
 
-INSERT INTO public.role_assignments_data_product (id, data_product_id, user_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at) VALUES ('7676860f-32be-49b2-adbf-85087ce9da9d', '90e65438-a942-43e0-a4a9-ee406b92df65', '{{ john_id }}'::uuid, (
+INSERT INTO public.role_assignments_data_product (id, data_product_id, identity_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at) VALUES ('7676860f-32be-49b2-adbf-85087ce9da9d', '90e65438-a942-43e0-a4a9-ee406b92df65', '{{ john_id }}'::uuid, (
     SELECT r.id FROM public.roles AS r
     WHERE r.scope = 'data_product' AND r.prototype = 2
 ), 'APPROVED', '{{ john_id }}'::uuid, '2025-10-28 18:11:47.504193', '{{ john_id }}'::uuid, '2025-10-28 18:11:47.508956', '2025-10-28 18:11:47.502037', '2025-10-28 18:11:47.508201', NULL);
 
-INSERT INTO public.role_assignments_data_product (id, data_product_id, user_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at) VALUES ('8591f923-2696-4aa6-98ed-e396c7cb2ded', '68b28e38-3faa-45ca-9d00-3830d0a7b108', '{{ john_id }}'::uuid, (
+INSERT INTO public.role_assignments_data_product (id, data_product_id, identity_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at) VALUES ('8591f923-2696-4aa6-98ed-e396c7cb2ded', '68b28e38-3faa-45ca-9d00-3830d0a7b108', '{{ john_id }}'::uuid, (
     SELECT r.id FROM public.roles AS r
     WHERE r.scope = 'data_product' AND r.prototype = 2
 ), 'APPROVED', '{{ john_id }}'::uuid, '2025-10-28 18:14:07.388736', '{{ john_id }}'::uuid, '2025-10-28 18:14:07.394139', '2025-10-28 18:14:07.385202', '2025-10-28 18:14:07.393015', NULL);
 
-INSERT INTO public.role_assignments_data_product (id, data_product_id, user_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at) VALUES ('9ef6eaae-f46e-440a-8cd6-88d30de94516', '86b74246-734f-4cea-a984-3dd0d27fc565', '{{ john_id }}'::uuid, (
+INSERT INTO public.role_assignments_data_product (id, data_product_id, identity_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at) VALUES ('9ef6eaae-f46e-440a-8cd6-88d30de94516', '86b74246-734f-4cea-a984-3dd0d27fc565', '{{ john_id }}'::uuid, (
     SELECT r.id FROM public.roles AS r
     WHERE r.scope = 'data_product' AND r.prototype = 2
 ), 'APPROVED', '{{ john_id }}'::uuid, '2025-10-28 18:19:20.46085', '{{ john_id }}'::uuid, '2025-10-28 18:19:20.465528', '2025-10-28 18:19:20.458588', '2025-10-28 18:19:20.464641', NULL);
 
-INSERT INTO public.role_assignments_data_product (id, data_product_id, user_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at) VALUES ('884c0d5e-e442-4bdf-8a67-c0e752e80d86', '58b837a5-33d0-41cf-bf95-eb9af846f4d0', '{{ john_id }}'::uuid, (
+INSERT INTO public.role_assignments_data_product (id, data_product_id, identity_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at) VALUES ('884c0d5e-e442-4bdf-8a67-c0e752e80d86', '58b837a5-33d0-41cf-bf95-eb9af846f4d0', '{{ john_id }}'::uuid, (
     SELECT r.id FROM public.roles AS r
     WHERE r.scope = 'data_product' AND r.prototype = 2
 ), 'APPROVED', '{{ john_id }}'::uuid, '2025-10-28 18:29:24.843296', '{{ john_id }}'::uuid, '2025-10-28 18:29:24.848553', '2025-10-28 18:29:24.841102', '2025-10-28 18:29:24.847524', NULL);
 
-INSERT INTO public.role_assignments_data_product (id, data_product_id, user_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at) VALUES ('240dbbb2-ea7f-4900-8a02-30ec084e0a5d', 'ccdc13fa-4a1a-4dde-ad1c-efa0d58eafb7', '{{ john_id }}'::uuid, (
+INSERT INTO public.role_assignments_data_product (id, data_product_id, identity_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at) VALUES ('240dbbb2-ea7f-4900-8a02-30ec084e0a5d', 'ccdc13fa-4a1a-4dde-ad1c-efa0d58eafb7', '{{ john_id }}'::uuid, (
     SELECT r.id FROM public.roles AS r
     WHERE r.scope = 'data_product' AND r.prototype = 2
 ), 'APPROVED', '{{ john_id }}'::uuid, '2025-10-28 18:34:32.318606', '{{ john_id }}'::uuid, '2025-10-28 18:34:32.323823', '2025-10-28 18:34:32.316108', '2025-10-28 18:34:32.323078', NULL);

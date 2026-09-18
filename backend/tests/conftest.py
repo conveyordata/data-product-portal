@@ -182,7 +182,7 @@ def admin() -> UserFactory:
         external_id=settings.DEFAULT_USERNAME,
         admin_expiry=datetime.now() + timedelta(days=1),
     )
-    GlobalRoleAssignmentFactory(user_id=user.id, role_id=role.id)
+    GlobalRoleAssignmentFactory(identity_id=user.id, role_id=role.id)
     return user
 
 

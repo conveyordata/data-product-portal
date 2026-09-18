@@ -178,6 +178,8 @@ class Authorization(metaclass=Singleton):
     def start_enforcer_after_reload(self) -> None:
         """This resumes autoloading and auto policy saving of the enforcer. It also flushes the current policy to the database.
         To be used when you want to recreate the casbin table, to be used after pause_enforcer_for_reload."""
+        self._cache.clear()
+        self._enforcer.build_role_links()  # Reconstructs the user → group → role graph to avoid stale user → group relationships
         self._enforcer.save_policy()
         if settings.AUTHORIZER_AUTOLOAD_ENABLED:
             self._enforcer.start_auto_load_policy(settings.AUTHORIZER_AUTOLOAD_INTERVAL)
@@ -314,3 +316,35 @@ class Authorization(metaclass=Singleton):
                 )
             case _:
                 assert_never(data_product.visibility)
+
+    def assign_resource_group_membership(
+        self, *, member_identity_id: ID, group_id: ID, resource_id: ID
+    ) -> bool:
+        """Creates an entry in the casbin table,
+        assigning the group member a role for the chosen resource via the group."""
+        return self.assign_resource_role(
+            user_id=member_identity_id, role_id=group_id, resource_id=resource_id
+        )
+
+    def revoke_resource_group_membership(
+        self, *, member_identity_id: ID, group_id: ID, resource_id: ID
+    ) -> bool:
+        """Deletes the entry in the casbin table,
+        revoking the role for the chosen resource and group member via the group."""
+        return self.revoke_resource_role(
+            user_id=member_identity_id, role_id=group_id, resource_id=resource_id
+        )
+
+    def assign_global_group_membership(
+        self, *, member_identity_id: ID, group_id: ID
+    ) -> bool:
+        """Creates an entry in the casbin table,
+        assigning the group member the chosen global role via the group."""
+        return self.assign_global_role(user_id=member_identity_id, role_id=group_id)
+
+    def revoke_global_group_membership(
+        self, *, member_identity_id: ID, group_id: ID
+    ) -> bool:
+        """Deletes the entry in the casbin table,
+        revoking the global role for the chosen group member via the group."""
+        return self.revoke_global_role(user_id=member_identity_id, role_id=group_id)

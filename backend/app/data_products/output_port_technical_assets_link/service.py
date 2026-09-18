@@ -175,7 +175,8 @@ class TechnicalAssetOutputPortService:
                         TechnicalAssetOutputPortAssociationModel.output_port.has(
                             OutputPortModel.data_product.has(
                                 DataProductModel.assignments.any(
-                                    DataProductRoleAssignmentModel.user_id == user.id
+                                    DataProductRoleAssignmentModel.identity_id
+                                    == user.id
                                 )
                             )
                         ),

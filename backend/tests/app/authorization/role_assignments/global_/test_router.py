@@ -26,7 +26,7 @@ class TestGlobalRoleAssignmentsRouter:
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.GLOBAL)
         assignment: GlobalRoleAssignment = GlobalRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id
+            identity_id=user.id, role_id=role.id
         )
         response = client.get(f"{ENDPOINT}")
 
@@ -40,7 +40,7 @@ class TestGlobalRoleAssignmentsRouter:
         authz_role = RoleFactory(
             scope=Scope.GLOBAL, permissions=[AuthorizationAction.GLOBAL__CREATE_USER]
         )
-        GlobalRoleAssignmentFactory(user_id=me.id, role_id=authz_role.id)
+        GlobalRoleAssignmentFactory(identity_id=me.id, role_id=authz_role.id)
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.GLOBAL)
 
@@ -111,7 +111,7 @@ class TestGlobalRoleAssignmentsRouter:
         authz_role = RoleFactory(
             scope=Scope.GLOBAL, permissions=[AuthorizationAction.GLOBAL__CREATE_USER]
         )
-        GlobalRoleAssignmentFactory(user_id=me.id, role_id=authz_role.id)
+        GlobalRoleAssignmentFactory(identity_id=me.id, role_id=authz_role.id)
         user: User = UserFactory()
 
         response = client.post(
@@ -130,11 +130,11 @@ class TestGlobalRoleAssignmentsRouter:
             scope=Scope.GLOBAL,
             permissions=[AuthorizationAction.GLOBAL__DELETE_USER],
         )
-        GlobalRoleAssignmentFactory(user_id=me.id, role_id=authz_role.id)
+        GlobalRoleAssignmentFactory(identity_id=me.id, role_id=authz_role.id)
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.GLOBAL)
         assignment: GlobalRoleAssignment = GlobalRoleAssignmentFactory(
-            user_id=user.id,
+            identity_id=user.id,
             role_id=role.id,
         )
 
@@ -155,11 +155,11 @@ class TestGlobalRoleAssignmentsRouter:
             scope=Scope.GLOBAL,
             permissions=[AuthorizationAction.GLOBAL__CREATE_USER],
         )
-        GlobalRoleAssignmentFactory(user_id=me.id, role_id=authz_role.id)
+        GlobalRoleAssignmentFactory(identity_id=me.id, role_id=authz_role.id)
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.GLOBAL)
         assignment: GlobalRoleAssignment = GlobalRoleAssignmentFactory(
-            user_id=user.id,
+            identity_id=user.id,
             role_id=role.id,
             decision=DecisionStatus.PENDING,
         )
@@ -180,11 +180,11 @@ class TestGlobalRoleAssignmentsRouter:
             scope=Scope.GLOBAL,
             permissions=[AuthorizationAction.GLOBAL__CREATE_USER],
         )
-        GlobalRoleAssignmentFactory(user_id=me.id, role_id=authz_role.id)
+        GlobalRoleAssignmentFactory(identity_id=me.id, role_id=authz_role.id)
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.GLOBAL)
         assignment: GlobalRoleAssignment = GlobalRoleAssignmentFactory(
-            user_id=user.id,
+            identity_id=user.id,
             role_id=role.id,
             decision=DecisionStatus.DENIED,
         )
@@ -203,11 +203,11 @@ class TestGlobalRoleAssignmentsRouter:
             scope=Scope.GLOBAL,
             permissions=[AuthorizationAction.GLOBAL__CREATE_USER],
         )
-        GlobalRoleAssignmentFactory(user_id=me.id, role_id=authz_role.id)
+        GlobalRoleAssignmentFactory(identity_id=me.id, role_id=authz_role.id)
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.GLOBAL)
         assignment: GlobalRoleAssignment = GlobalRoleAssignmentFactory(
-            user_id=user.id,
+            identity_id=user.id,
             role_id=role.id,
             decision=DecisionStatus.DENIED,
         )
@@ -224,13 +224,13 @@ class TestGlobalRoleAssignmentsRouter:
             scope=Scope.GLOBAL,
             permissions=[AuthorizationAction.GLOBAL__CREATE_USER],
         )
-        GlobalRoleAssignmentFactory(user_id=me.id, role_id=authz_role.id)
+        GlobalRoleAssignmentFactory(identity_id=me.id, role_id=authz_role.id)
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.GLOBAL)
         new_role: Role = RoleFactory(scope=Scope.GLOBAL)
 
         assignment: GlobalRoleAssignment = GlobalRoleAssignmentFactory(
-            user_id=user.id,
+            identity_id=user.id,
             role_id=role.id,
             decision=DecisionStatus.APPROVED,
         )
@@ -248,16 +248,16 @@ class TestGlobalRoleAssignmentsRouter:
             scope=Scope.GLOBAL,
             permissions=[AuthorizationAction.GLOBAL__CREATE_USER],
         )
-        GlobalRoleAssignmentFactory(user_id=me.id, role_id=authz_role.id)
+        GlobalRoleAssignmentFactory(identity_id=me.id, role_id=authz_role.id)
         user1, user2 = UserFactory.create_batch(2)
         admin: Role = RoleFactory.admin()
         role: Role = RoleFactory(scope=Scope.GLOBAL)
 
         assignment: GlobalRoleAssignment = GlobalRoleAssignmentFactory(
-            user_id=user1.id,
+            identity_id=user1.id,
             role_id=admin.id,
         )
-        GlobalRoleAssignmentFactory(user_id=user2.id, role_id=admin.id)
+        GlobalRoleAssignmentFactory(identity_id=user2.id, role_id=admin.id)
 
         response = client.put(
             f"{ENDPOINT}/{assignment.id}/role", json={"role_id": str(role.id)}
@@ -272,13 +272,13 @@ class TestGlobalRoleAssignmentsRouter:
             scope=Scope.GLOBAL,
             permissions=[AuthorizationAction.GLOBAL__CREATE_USER],
         )
-        GlobalRoleAssignmentFactory(user_id=me.id, role_id=authz_role.id)
+        GlobalRoleAssignmentFactory(identity_id=me.id, role_id=authz_role.id)
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.GLOBAL)
         admin: Role = RoleFactory.admin()
 
         assignment: GlobalRoleAssignment = GlobalRoleAssignmentFactory(
-            user_id=user.id,
+            identity_id=user.id,
             role_id=role.id,
         )
 
@@ -295,18 +295,18 @@ class TestGlobalRoleAssignmentsRouter:
             scope=Scope.GLOBAL, permissions=[AuthorizationAction.GLOBAL__DELETE_USER]
         )
         GlobalRoleAssignmentFactory(
-            user_id=user.id,
+            identity_id=user.id,
             role_id=role.id,
         )
 
         user_1, user_2 = UserFactory.create_batch(2)
         admin: Role = RoleFactory.admin()
         assignment_1 = GlobalRoleAssignmentFactory(
-            user_id=user_1.id,
+            identity_id=user_1.id,
             role_id=admin.id,
         )
         assignment_2 = GlobalRoleAssignmentFactory(
-            user_id=user_2.id,
+            identity_id=user_2.id,
             role_id=admin.id,
         )
 

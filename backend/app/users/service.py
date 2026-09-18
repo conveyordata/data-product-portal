@@ -3,7 +3,7 @@ from typing import Final, Sequence
 from uuid import UUID
 
 from sqlalchemy import asc, select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from app.authorization.role_assignments.data_product.service import (
     RoleAssignmentService,
@@ -40,9 +40,11 @@ class UserService:
         return users
 
     def remove_user(self, id: UUID) -> None:
-        user = ensure_user_exists(id, self.db)
+        user = ensure_user_exists(
+            id, self.db, options=[selectinload(User.data_product_roles)]
+        )
         user.data_products = []
-        user.owned_datasets = []
+        user.datasets = []
         self.db.delete(user)
         self.db.flush()
 

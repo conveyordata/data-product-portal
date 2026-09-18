@@ -70,7 +70,7 @@ def test_private_output_port_visible_for_approved_data_product_assignment(sessio
     )
     DataProductRoleAssignmentFactory(
         data_product_id=output_port.data_product_id,
-        user_id=user.id,
+        identity_id=user.id,
         role_id=role.id,
     )
     output_port_id = output_port.id

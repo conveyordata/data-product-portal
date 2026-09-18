@@ -314,7 +314,7 @@ class TestCoderPluginEndToEnd:
             permissions=[Action.DATA_PRODUCT__READ_INTEGRATIONS],
         )
         DataProductRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id, data_product_id=data_product.id
+            identity_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
 
         tiles_response = client.get(f"{ENDPOINT}/platform-tiles")
@@ -342,7 +342,7 @@ class TestGitHubPluginEndToEnd:
             permissions=[Action.DATA_PRODUCT__READ_INTEGRATIONS],
         )
         DataProductRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id, data_product_id=data_product.id
+            identity_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
 
         tiles_response = client.get(f"{ENDPOINT}/platform-tiles")

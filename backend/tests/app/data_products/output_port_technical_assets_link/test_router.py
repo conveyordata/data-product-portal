@@ -40,7 +40,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         )
         data_product = DataProductFactory()
         DataProductRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id, data_product_id=data_product.id
+            identity_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
 
         technical_asset = TechnicalAssetFactory(owner=data_product)
@@ -68,7 +68,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         )
         data_product = DataProductFactory()
         DataProductRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id, data_product_id=data_product.id
+            identity_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
 
         technical_asset = TechnicalAssetFactory(owner=data_product)
@@ -96,7 +96,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         )
         data_product = DataProductFactory()
         DataProductRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id, data_product_id=data_product.id
+            identity_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
 
         technical_asset = TechnicalAssetFactory(
@@ -131,7 +131,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
             permissions=[Action.DATA_PRODUCT__REQUEST_TECHNICAL_ASSET_LINK],
         )
         DataProductRoleAssignmentFactory(
-            user_id=requester.id,
+            identity_id=requester.id,
             role_id=request_role.id,
             data_product_id=data_product.id,
         )
@@ -168,7 +168,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
             permissions=[Action.DATA_PRODUCT__REQUEST_TECHNICAL_ASSET_LINK],
         )
         DataProductRoleAssignmentFactory(
-            user_id=requester.id,
+            identity_id=requester.id,
             role_id=request_role.id,
             data_product_id=data_product.id,
         )
@@ -203,7 +203,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         )
         data_product = DataProductFactory()
         DataProductRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id, data_product_id=data_product.id
+            identity_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
 
         technical_asset = TechnicalAssetFactory(owner=data_product)
@@ -222,7 +222,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         )
         data_product = DataProductFactory()
         DataProductRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id, data_product_id=data_product.id
+            identity_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
 
         technical_asset = TechnicalAssetFactory(owner=data_product)
@@ -259,7 +259,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
             permissions=[Action.DATA_PRODUCT__REQUEST_TECHNICAL_ASSET_LINK],
         )
         DataProductRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id, data_product_id=data_product.id
+            identity_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
         response = self.request_technical_asset_output_port_link(
             client, data_product.id, technical_asset.id, ds.id
@@ -281,7 +281,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
             ],
         )
         DataProductRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id, data_product_id=data_product.id
+            identity_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
         response = self.request_technical_asset_output_port_link(
             client, data_product.id, technical_asset.id, ds.id
@@ -307,7 +307,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
             ],
         )
         DataProductRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id, data_product_id=data_product.id
+            identity_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
         response = self.request_technical_asset_output_port_link(
             client, data_product.id, technical_asset.id, ds.id
@@ -469,7 +469,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
             permissions=[Action.DATA_PRODUCT__REVOKE_OUTPUT_PORT_ACCESS],
         )
         DataProductRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id, data_product_id=ds.data_product.id
+            identity_id=user.id, role_id=role.id, data_product_id=ds.data_product.id
         )
         technical_asset = TechnicalAssetFactory(owner=ds.data_product)
         TechnicalAssetOutputPortAssociationFactory(
@@ -536,7 +536,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         )
         data_product = DataProductFactory()
         DataProductRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id, data_product_id=data_product.id
+            identity_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
 
         technical_asset = TechnicalAssetFactory(owner=data_product)
@@ -560,7 +560,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
             permissions=[Action.DATA_PRODUCT__REVOKE_OUTPUT_PORT_ACCESS],
         )
         DataProductRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id, data_product_id=ds.data_product.id
+            identity_id=user.id, role_id=role.id, data_product_id=ds.data_product.id
         )
         technical_asset = TechnicalAssetFactory(owner=ds.data_product)
         link = TechnicalAssetOutputPortAssociationFactory(
@@ -637,7 +637,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
             ],
         )
         DataProductRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id, data_product_id=data_product.id
+            identity_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
         response = self.request_technical_asset_output_port_link(
             client, data_product.id, technical_asset.id, ds.id

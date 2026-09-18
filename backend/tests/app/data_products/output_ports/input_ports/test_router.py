@@ -43,7 +43,7 @@ class TestInputPortsRouter:
         )
         data_product = DataProductFactory()
         DataProductRoleAssignmentFactory(
-            user_id=user.id,
+            identity_id=user.id,
             role_id=role.id,
             data_product_id=data_product.id,
         )
@@ -65,7 +65,7 @@ class TestInputPortsRouter:
         )
         data_product = DataProductFactory()
         DataProductRoleAssignmentFactory(
-            user_id=user.id,
+            identity_id=user.id,
             role_id=role.id,
             data_product_id=data_product.id,
         )
@@ -87,7 +87,7 @@ class TestInputPortsRouter:
         )
         data_product = DataProductFactory()
         DataProductRoleAssignmentFactory(
-            user_id=user.id,
+            identity_id=user.id,
             role_id=role.id,
             data_product_id=data_product.id,
         )
@@ -124,7 +124,7 @@ class TestInputPortsRouter:
             request__valid_until=date.today() + timedelta(days=10),
         )
         DataProductRoleAssignmentFactory(
-            user_id=user.id,
+            identity_id=user.id,
             role_id=role.id,
             data_product_id=assoc.consuming_abstract_data_product.id,
         )
@@ -161,7 +161,7 @@ class TestInputPortsRouter:
             request__valid_until=date.today() + timedelta(days=10),
         )
         DataProductRoleAssignmentFactory(
-            user_id=user.id,
+            identity_id=user.id,
             role_id=role.id,
             data_product_id=assoc.consuming_abstract_data_product.id,
         )
@@ -185,7 +185,7 @@ class TestInputPortsRouter:
         )
         data_product = DataProductFactory()
         DataProductRoleAssignmentFactory(
-            user_id=user.id,
+            identity_id=user.id,
             role_id=role.id,
             data_product_id=data_product.id,
         )
@@ -204,7 +204,7 @@ class TestInputPortsRouter:
         )
         assoc = InputPortFactory(status=DecisionStatus.PENDING)
         DataProductRoleAssignmentFactory(
-            user_id=user.id,
+            identity_id=user.id,
             role_id=role.id,
             data_product_id=assoc.consuming_abstract_data_product.id,
         )
@@ -235,7 +235,7 @@ class TestInputPortsRouter:
         )
         data_product = DataProductFactory()
         DataProductRoleAssignmentFactory(
-            user_id=user.id,
+            identity_id=user.id,
             role_id=role.id,
             data_product_id=data_product.id,
         )
@@ -261,7 +261,7 @@ class TestInputPortsRouter:
             ],
         )
         DataProductRoleAssignmentFactory(
-            user_id=user.id,
+            identity_id=user.id,
             role_id=role.id,
             data_product_id=assoc.consuming_abstract_data_product.id,
         )
@@ -282,7 +282,7 @@ class TestInputPortsRouter:
             ],
         )
         DataProductRoleAssignmentFactory(
-            user_id=user.id,
+            identity_id=user.id,
             role_id=role.id,
             data_product_id=assoc.consuming_abstract_data_product.id,
         )
@@ -305,7 +305,7 @@ class TestInputPortsRouter:
             ],
         )
         DataProductRoleAssignmentFactory(
-            user_id=user.id,
+            identity_id=user.id,
             role_id=role.id,
             data_product_id=assoc.consuming_abstract_data_product.id,
         )
@@ -327,7 +327,7 @@ class TestInputPortsRouter:
             ],
         )
         DataProductRoleAssignmentFactory(
-            user_id=user.id,
+            identity_id=user.id,
             role_id=role.id,
             data_product_id=assoc.consuming_abstract_data_product.id,
         )
@@ -351,7 +351,7 @@ class TestInputPortsRouter:
             ],
         )
         DataProductRoleAssignmentFactory(
-            user_id=user.id,
+            identity_id=user.id,
             role_id=role.id,
             data_product_id=assoc.consuming_abstract_data_product.id,
         )
@@ -582,7 +582,7 @@ class TestInputPortsRouter:
             permissions=[Action.DATA_PRODUCT__REQUEST_OUTPUT_PORT_ACCESS],
         )
         DataProductRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id, data_product_id=data_product.id
+            identity_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
         response = self.request_input_ports_for_data_product(
             client, data_product.id, [self.invalid_id]
@@ -824,7 +824,7 @@ class TestInputPortsRouter:
         )
         data_product = DataProductFactory()
         DataProductRoleAssignmentFactory(
-            user_id=user.id,
+            identity_id=user.id,
             role_id=role.id,
             data_product_id=data_product.id,
         )
@@ -967,7 +967,7 @@ class TestInputPortConsumptionTracking:
         )
         data_product = DataProductFactory()
         DataProductRoleAssignmentFactory(
-            user_id=user.id,
+            identity_id=user.id,
             role_id=role.id,
             data_product_id=data_product.id,
         )
@@ -1000,7 +1000,7 @@ class TestInputPortConsumptionTracking:
         )
         data_product = DataProductFactory()
         DataProductRoleAssignmentFactory(
-            user_id=user.id,
+            identity_id=user.id,
             role_id=role.id,
             data_product_id=data_product.id,
         )
@@ -1063,7 +1063,7 @@ class TestInputPortConsumptionTracking:
         )
         data_product = DataProductFactory()
         DataProductRoleAssignmentFactory(
-            user_id=user.id,
+            identity_id=user.id,
             role_id=role.id,
             data_product_id=data_product.id,
         )

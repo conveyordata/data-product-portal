@@ -30,7 +30,7 @@ class TestDataProductRoleAssignmentsService:
         user = UserFactory()
         role = RoleFactory(scope=Scope.DATA_PRODUCT, permissions=[action])
         DataProductRoleAssignmentFactory(
-            data_product_id=data_product.id, user_id=user.id, role_id=role.id
+            data_product_id=data_product.id, identity_id=user.id, role_id=role.id
         )
 
         authorized_users = service.users_with_authz_action(
@@ -46,7 +46,7 @@ class TestDataProductRoleAssignmentsService:
             permissions=[Action.DATA_PRODUCT__REQUEST_OUTPUT_PORT_ACCESS],
         )
         pending_recent = DataProductRoleAssignmentFactory(
-            user_id=user.id,
+            identity_id=user.id,
             requested_by=user,
             requested_on=datetime.now(timezone.utc),
             decision=DecisionStatus.PENDING,
@@ -54,7 +54,7 @@ class TestDataProductRoleAssignmentsService:
             role_id=role.id,
         )
         pending_old = DataProductRoleAssignmentFactory(
-            user_id=user.id,
+            identity_id=user.id,
             requested_by=user,
             requested_on=datetime.now(timezone.utc) - timedelta(days=60),
             decision=DecisionStatus.PENDING,
@@ -62,7 +62,7 @@ class TestDataProductRoleAssignmentsService:
             role_id=role.id,
         )
         approved_old = DataProductRoleAssignmentFactory(
-            user_id=user.id,
+            identity_id=user.id,
             requested_by=user,
             requested_on=datetime.now(timezone.utc) - timedelta(days=60),
             decision=DecisionStatus.APPROVED,
