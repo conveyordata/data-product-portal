@@ -7,8 +7,8 @@ from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.schema import DataProduct
 from app.settings import settings
 from app.technical_asset_configuration.base_schema import (
-    AssetProviderPlugin,
     PlatformMetadata,
+    TechnicalAssetPlugin,
     UIElementMetadata,
     UIElementSelect,
     UIElementString,
@@ -28,7 +28,7 @@ from app.users.schema import User
 # get_ui_metadata, render_template) since RustFS is S3-API-compatible. Not worth
 # extracting a shared base (e.g. ObjectStorageTechnicalAssetConfiguration) for just
 # two plugins with diverging get_url/metadata - revisit if a third one shows up.
-class RustFSTechnicalAssetConfiguration(AssetProviderPlugin):
+class RustFSTechnicalAssetConfiguration(TechnicalAssetPlugin):
     name: ClassVar[str] = NAME
     version: ClassVar[str] = "1.0"
 

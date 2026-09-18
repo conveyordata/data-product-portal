@@ -53,10 +53,10 @@ export type GetDefaultAccessDurationApiResponse =
   /** status 200 Successful Response */ AccessDuration;
 export type GetDefaultAccessDurationApiArg = AbstractDataProductType;
 export type GetAllAccessDurationsApiResponse =
-  /** status 200 Successful Response */ AccessDuration[];
+  /** status 200 Successful Response */ GetAccessDurationResponse;
 export type GetAllAccessDurationsApiArg = void;
 export type UpdateAccessDurationApiResponse =
-  /** status 200 Successful Response */ AccessDuration[];
+  /** status 200 Successful Response */ UpdateAccessDurationResponse;
 export type UpdateAccessDurationApiArg = {
   abstractDataProductType: AbstractDataProductType;
   accessDurationUpdate: AccessDurationUpdate;
@@ -83,6 +83,12 @@ export type ValidationError = {
 };
 export type HttpValidationError = {
   detail?: ValidationError[];
+};
+export type GetAccessDurationResponse = {
+  access_durations: AccessDuration[];
+};
+export type UpdateAccessDurationResponse = {
+  access_durations: AccessDuration[];
 };
 export type AccessDurationUpdate = {
   access_duration_type: AccessDurationType;

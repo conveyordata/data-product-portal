@@ -1,24 +1,41 @@
 [project]
-name = "app"
+name = "data-product-portal"
 version = "0.0.1"
+description = "Data Product Portal core"
+
+[project.entry-points."data_product_portal.plugins"]
+agno = "app.technical_asset_configuration.agno.schema:AgnoPlugin"
+azure-blob = "app.technical_asset_configuration.azure_blob.schema:AzureBlobTechnicalAssetConfiguration"
+coder = "app.technical_asset_configuration.coder.schema:CoderPlugin"
+conveyor = "app.technical_asset_configuration.conveyor.schema:ConveyorPlugin"
+databricks = "app.technical_asset_configuration.databricks.schema:DatabricksTechnicalAssetConfiguration"
+github = "app.technical_asset_configuration.github.schema:GitHubPlugin"
+glue = "app.technical_asset_configuration.glue.schema:GlueTechnicalAssetConfiguration"
+osi-semantic-model = "app.technical_asset_configuration.osi_sem_model.schema:OSISemanticModelTechnicalAssetConfiguration"
+postgresql = "app.technical_asset_configuration.postgresql.schema:PostgreSQLTechnicalAssetConfiguration"
+redshift = "app.technical_asset_configuration.redshift.schema:RedshiftTechnicalAssetConfiguration"
+rustfs = "app.technical_asset_configuration.rustfs.schema:RustFSTechnicalAssetConfiguration"
+s3 = "app.technical_asset_configuration.s3.schema:S3TechnicalAssetConfiguration"
+snowflake = "app.technical_asset_configuration.snowflake.schema:SnowflakeTechnicalAssetConfiguration"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
-name = "app"
+name = "data-product-portal"
 version = "0.0.1"
-description = ""
+description = "Data Product Portal core"
 authors = ["Stijn Janssens <stijn.janssens@dataminded.com>"]
 readme = "README.md"
+packages = [{ include = "app" }]
 
 [tool.poetry.dependencies]
 python = "^3.13"
 python-dotenv = "^1.2.3"
 fastapi = "0.141.1"
 gunicorn = "^26.2.0"
-uvicorn = "^0.52.4"
+uvicorn = ">=0.52.4,<0.54.0"
 pydantic = { version = "^2.13.5", extras = ['email'] }
 pydantic-settings = "^2.15.0"
 typer = "^0.27.2"

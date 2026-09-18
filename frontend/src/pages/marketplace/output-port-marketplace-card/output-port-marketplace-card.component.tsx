@@ -140,6 +140,7 @@ export function OutputPortMarketplaceCard({ outputPort }: Props) {
         <>
             <Card
                 key={outputPort.id}
+                data-cy="output-port-card"
                 styles={{ body: { padding: 12 } }}
                 className={styles.marketplaceCardContainer}
                 actions={[
@@ -154,6 +155,7 @@ export function OutputPortMarketplaceCard({ outputPort }: Props) {
                     >
                         <Button
                             key="add to cart"
+                            data-cy="add-to-cart"
                             type="text"
                             size="middle"
                             onClick={(e) => {

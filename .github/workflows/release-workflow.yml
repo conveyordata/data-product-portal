@@ -45,12 +45,57 @@ jobs:
     outputs:
       version: ${{ env.APP_VERSION }}
 
+  e2e-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - name: Start Docker Compose
+        run: |
+          docker compose up -d
+          docker compose ps
+      - name: Wait for portal to be healthy
+        run: |
+          for i in $(seq 1 30); do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:5050 || echo "000")
+            echo "Attempt $i: $STATUS"
+            [ "$STATUS" = "200" ] && exit 0
+            sleep 5
+          done
+          echo "Portal did not become healthy in time"
+          docker compose logs
+          exit 1
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+          node-version-file: frontend/package.json
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci --prefer-offline --no-audit --progress=false
+      - name: Run Cypress end-to-end tests
+        working-directory: frontend
+        run: npx cypress run --config baseUrl=http://localhost:5050
+      - name: Upload Cypress screenshots on failure
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: cypress-screenshots
+          path: frontend/cypress/screenshots
+          retention-days: 7
+      - name: Tear down
+        if: always()
+        run: docker compose down -v
+
   helm:
     runs-on: ubuntu-latest
     permissions:
       id-token: write
       contents: read
-    needs: ["prep-version"]
+    needs: ["prep-version", "e2e-tests"]
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -82,7 +127,7 @@ jobs:
     permissions:
       id-token: write
       contents: read
-    needs: ["prep-version"]
+    needs: ["prep-version", "e2e-tests"]
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -208,6 +253,36 @@ jobs:
         uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # v1.14.2
         with:
           packages-dir: sdk/dist/
+
+  publish-portal:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    needs: ["prep-version", "create-gh-release-notes"]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - name: Install Poetry
+        uses: snok/install-poetry@a783c322200f0519c7926aa6faa857c4e23e9263 # v1.4.2
+        with:
+          version: ${{ env.POETRY_VERSION }}
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v5.4.0
+        with:
+          python-version: "3.13"
+          cache: 'poetry'
+          cache-dependency-path: backend/poetry.lock
+      - name: Build portal core
+        working-directory: backend
+        run: |
+          poetry build
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # v1.14.2
+        with:
+          packages-dir: backend/dist/
 
   release-docs:
     runs-on: ubuntu-24.04

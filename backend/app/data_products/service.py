@@ -359,6 +359,9 @@ class DataProductService(AbstractDataProductService):
         )
 
         for upstream_datasets in input_ports:
+            # Skip private output ports with no access they show up as None
+            if upstream_datasets.output_port is None:
+                continue
             nodes.append(
                 Node(
                     id=upstream_datasets.id,
@@ -426,6 +429,9 @@ class DataProductService(AbstractDataProductService):
                         for (
                             downstream_dps
                         ) in downstream_datasets.output_port.data_product_links:
+                            # A hidden data product will result in None, filter it out
+                            if downstream_dps.consuming_abstract_data_product is None:
+                                continue
                             node_id = f"{downstream_dps.id}_3"
                             nodes.append(
                                 get_graph_data_from_abstract_data_product(

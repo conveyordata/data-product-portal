@@ -171,6 +171,7 @@ export const NewExplorationForm = () => {
                 ]}
             >
                 <Select
+                    placeholder={t('Search domains')}
                     loading={isFetchingDomains}
                     options={domains.map((domain) => ({ label: domain.name, value: domain.id }))}
                     showSearch={{ filterOption: selectFilterOptionByLabelAndValue }}

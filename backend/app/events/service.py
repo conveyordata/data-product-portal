@@ -12,7 +12,6 @@ from app.data_products.technical_assets.model import TechnicalAsset
 from app.events.enums import EventReferenceEntity
 from app.events.model import Event as EventModel
 from app.events.schema import CreateEvent
-from app.events.schema_response import GetEventHistoryResponseItemOld
 from app.users.model import User
 
 
@@ -128,9 +127,7 @@ class EventService:
         self.db.flush()
         return [event.id for event in created_events]
 
-    def get_history(
-        self, id: UUID, type: EventReferenceEntity
-    ) -> Sequence[GetEventHistoryResponseItemOld]:
+    def get_history(self, id: UUID, type: EventReferenceEntity) -> Sequence[EventModel]:
         return self.db.scalars(
             select(EventModel)
             .where(

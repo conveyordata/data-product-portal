@@ -60,7 +60,7 @@ const AUTO_SAVE_DELAY = 3000; // 3 seconds
 
 export default function AccessDurations() {
     const { t } = useTranslation();
-    const { data: accessDurations } = useGetAllAccessDurationsQuery();
+    const { data: { access_durations: accessDurations } = {} } = useGetAllAccessDurationsQuery();
     const [policies, setPolicies] = useState<ConsumerPolicy[]>([]);
     const [updateAccessDuration] = useUpdateAccessDurationMutation();
 

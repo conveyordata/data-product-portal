@@ -1,5 +1,3 @@
-from typing import Sequence, get_origin
-
 from fastapi.dependencies.models import Dependant
 from fastapi.routing import APIRoute
 
@@ -11,37 +9,28 @@ from app.open_api_export import custom_openapi
 
 def test_endpoints_return_object_or_none():
     """
-    Scans all FastAPI application routes to ensure no endpoint returns
-    a primitive or sequence type.
+    Scans all FastAPI application routes via the OpenAPI spec to ensure no endpoint
+    returns a primitive or array type at the top level.
     Only Objects (Pydantic Models) or None are allowed.
     """
+    openapi_schema = custom_openapi(app)
     invalid_endpoints = []
 
-    for route in app.routes:
-        if isinstance(route, APIRoute):
-            if not route.path.startswith("/api/v2/"):
-                # We only want to check routes under /api/v2/
-                continue
+    primitive_types = {"string", "integer", "number", "boolean", "null"}
 
-            # This returns the unsubscripted version of a type
-            # For example, get_origin(List[Tuple[T, T]][int]) is list
-            # Returns None if unsupported
-            origin = get_origin(route.response_model)
+    for path, path_item in openapi_schema.get("paths", {}).items():
+        for method, operation in path_item.items():
+            for response in operation.get("responses", {}).values():
+                for media_type_obj in response.get("content", {}).values():
+                    schema = media_type_obj.get("schema")
+                    if not isinstance(schema, dict):
+                        continue
 
-            check_type = origin if origin is not None else route.response_model
-
-            if check_type is not None:
-                if isinstance(check_type, type) and issubclass(check_type, Sequence):
-                    invalid_endpoints.append(
-                        f"Route '{route.name}'/'{route.path}' [{','.join(route.methods)}] returns a Sequence."
-                    )
-                    continue
-
-                if check_type in (str, int, bool, float, list, tuple, set, dict):
-                    invalid_endpoints.append(
-                        f"Route '{route.name}'/'{route.path}' [{','.join(route.methods)}] returns a primitive type: {check_type}."
-                    )
-                    continue
+                    schema_type = schema.get("type")
+                    if schema_type == "array" or schema_type in primitive_types:
+                        invalid_endpoints.append(
+                            f"Route '{method.upper()} {path}' returns forbidden top-level schema type: {schema_type}."
+                        )
 
     error_msg = "The following endpoints return forbidden top-level types (must be Object or None):\n"
     error_msg += "\n".join(invalid_endpoints)
@@ -277,9 +266,6 @@ def test_db_session_dependencies_use_function_scope():
     invalid = []
 
     for route in _iter_app_routes():
-        if not getattr(route, "path", "").startswith("/api/v2/"):
-            continue
-
         for dependant in _iter_dependants(route.dependant):
             call = getattr(dependant, "call", None)
             if call not in {get_db_session, get_system_db_session}:
@@ -292,6 +278,38 @@ def test_db_session_dependencies_use_function_scope():
     assert not invalid, (
         "The following API routes use database session dependencies without "
         "scope='function':\n" + "\n".join(invalid)
+    )
+
+
+def test_routes_only_use_get_db_session():
+    exceptions = [
+        # Device flow routs don't need an authenticated session, since the user is unauthenticated at this point.
+        "/api/v2/authn/device/device_token",
+        "/api/v2/authn/device/jwt_token",
+        "/api/v2/authn/device",
+        "/api/v2/authn/device/deny",
+        "/api/v2/authn/device/allow",
+        "/api/v2/authn/device/callback",
+    ]
+
+    invalid = []
+
+    for route in _iter_app_routes():
+        if route.path in exceptions:
+            continue
+        direct_calls = {
+            getattr(dependant, "call", None)
+            for dependant in getattr(route.dependant, "dependencies", []) or []
+        }
+
+        if get_system_db_session in direct_calls:
+            invalid.append(
+                f"{route.path} [{route.name}] uses get_system_db_session directly"
+            )
+
+    assert not invalid, (
+        "The following API routes use get_system_db_session directly instead of "
+        "get_db_session:\n" + "\n".join(invalid)
     )
 
 

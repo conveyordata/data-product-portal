@@ -65,9 +65,6 @@ export type DataProductLifeCyclesGetItem = {
 export type DataProductLifeCyclesGet = {
   data_product_life_cycles: DataProductLifeCyclesGetItem[];
 };
-export type CreateDataProductLifeCycleResponse = {
-  id: string;
-};
 export type ValidationError = {
   loc: (string | number)[];
   msg: string;
@@ -77,6 +74,9 @@ export type ValidationError = {
 };
 export type HttpValidationError = {
   detail?: ValidationError[];
+};
+export type CreateDataProductLifeCycleResponse = {
+  id: string;
 };
 export type DataProductLifeCycleCreate = {
   value: number;

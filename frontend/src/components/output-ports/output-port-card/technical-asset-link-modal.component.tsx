@@ -169,7 +169,7 @@ export function TechnicalAssetLinkModal({ onClose, dataProductId, datasetId, dat
                 }}
                 locale={{ emptyText: t('No Technical Assets available') }}
                 renderItem={(output) => (
-                    <List.Item>
+                    <List.Item data-cy="technical-asset-link-item">
                         <Flex align="center" gap={12} style={{ width: '100%' }}>
                             <Checkbox
                                 checked={selectedOutputs.has(output.id)}

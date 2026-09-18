@@ -700,6 +700,24 @@ class TestOutputPortRouter:
             "type": "outputPortNode",
         }
 
+    def test_get_output_port_graph_data_hidden_consumer(self, client):
+        output_port = OutputPortFactory()
+
+        hidden_data_product = DataProductFactory(
+            visibility=DataProductVisibility.HIDDEN
+        )
+        InputPortFactory(
+            output_port=output_port, consuming_abstract_data_product=hidden_data_product
+        )
+        response = client.get(
+            f"{ENDPOINT.format(output_port.data_product.id)}/{output_port.id}/graph"
+        )
+        assert response.status_code == 200, response.text
+        nodes = response.json()["nodes"]
+        assert len(nodes) == 2
+        node_ids = [node["data"]["id"] for node in nodes if node["id"]]
+        assert hidden_data_product.id not in node_ids
+
     def test_get_output_port_graph_data_exploration(self, client):
         ds = OutputPortFactory()
         exp = ExplorationFactory()

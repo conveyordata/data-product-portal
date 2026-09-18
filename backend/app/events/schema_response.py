@@ -3,9 +3,9 @@ from typing import Optional, Sequence
 from uuid import UUID
 from warnings import deprecated
 
-from pydantic import Field, NaiveDatetime
+from pydantic import NaiveDatetime
 
-from app.data_products.output_ports.schema import Dataset, OutputPort
+from app.data_products.output_ports.schema import OutputPort
 from app.data_products.schema import DataProduct
 from app.data_products.technical_assets.schema import TechnicalAsset
 from app.shared.schema import ORMModel
@@ -67,16 +67,12 @@ class GetEventHistoryResponseItemOld(ORMModel):
     actor: User
     data_product: Optional[DataProduct] = None
     user: Optional[User] = None
-    dataset: Optional[Dataset] = Field(None, validation_alias="output_port")
-    data_output: Optional[TechnicalAsset] = None
+    output_port: Optional[OutputPort]
+    technical_asset: Optional[TechnicalAsset] = None
 
     def convert(self) -> GetEventHistoryResponseItem:
         return GetEventHistoryResponseItem(
-            **self.model_dump(
-                exclude={"dataset", "data_output", "subject_type", "target_type"}
-            ),
-            output_port=self.dataset.convert() if self.dataset is not None else None,
-            technical_asset=self.data_output,
+            **self.model_dump(exclude={"subject_type", "target_type"}),
             subject_type=EventEntityType.from_old(self.subject_type),
             target_type=EventEntityType.from_old(self.target_type)
             if self.target_type is not None

@@ -9,7 +9,7 @@ ARG PLATFORM=linux/amd64
 # ---------------------------------------------------------------------------
 # Stage 1 – build the React frontend
 # ---------------------------------------------------------------------------
-FROM --platform=${PLATFORM} node:26-alpine@sha256:ef24c5053d50fdc3e4e56eb4e7ddb7861874ab0fdc797046ba897581deb8e868 AS frontend-build
+FROM --platform=${PLATFORM} node:26-alpine@sha256:2c45bdcbf63561a54da9549612084b43ca309854a4110c87857d609ddeb61c9e AS frontend-build
 
 WORKDIR /frontend
 COPY frontend/ ./
@@ -42,6 +42,12 @@ RUN pip install -r requirements-poetry.txt --require-hashes
 
 COPY backend/poetry.lock backend/pyproject.toml backend/alembic.ini backend/sample_data.sql /
 RUN poetry install --no-root
+
+# pyproject declares readme = "README.md", so poetry-core reads it while
+# building the package metadata.
+COPY backend/README.md /README.md
+COPY backend/app /app
+RUN pip install --no-deps --no-build-isolation /
 
 # ---------------------------------------------------------------------------
 # Stage 3 – final runtime image

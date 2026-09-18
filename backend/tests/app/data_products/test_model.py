@@ -1,8 +1,8 @@
 from datetime import datetime
 
-import pytest
 from sqlalchemy import select
 
+from app.abstract_data_product.input_ports.model import InputPort
 from app.abstract_data_product.model import AbstractDataProduct
 from app.authorization.roles.schema import Scope
 from app.core.auth.auth import SYSTEM_ACCOUNT_BOT_EXTERNAL_ID
@@ -12,6 +12,8 @@ from app.settings import settings
 from tests.factories import (
     DataProductFactory,
     DataProductRoleAssignmentFactory,
+    InputPortFactory,
+    OutputPortFactory,
     RoleFactory,
     UserFactory,
 )
@@ -124,26 +126,24 @@ def test_hidden_data_product_query_can_skip_visibility_filter(session):
     assert visible.id == data_product.id
 
 
-def test_hidden_data_product_query_requires_current_user_without_skip_flag(session):
+def test_hidden_data_product_query_without_current_user_is_not_filtered(session):
     data_product = DataProductFactory(visibility=DataProductVisibility.HIDDEN)
 
-    with pytest.raises(
-        Exception,
-        match="User id must be set when skip_data_product_visibility_filter is False or not set",
-    ):
-        session.get(DataProduct, data_product.id)
+    visible = session.get(DataProduct, data_product.id)
+
+    assert visible.id == data_product.id
 
 
-def test_hidden_data_product_column_query_requires_current_user_without_skip_flag(
+def test_hidden_data_product_column_query_without_current_user_is_not_filtered(
     session,
 ):
     data_product = DataProductFactory(visibility=DataProductVisibility.HIDDEN)
 
-    with pytest.raises(
-        Exception,
-        match="User id must be set when skip_data_product_visibility_filter is False or not set",
-    ):
-        session.scalar(select(DataProduct.id).where(DataProduct.id == data_product.id))
+    visible_id = session.scalar(
+        select(DataProduct.id).where(DataProduct.id == data_product.id)
+    )
+
+    assert visible_id == data_product.id
 
 
 def test_hidden_data_product_column_query_visible_for_admin_user(session):
@@ -156,3 +156,43 @@ def test_hidden_data_product_column_query_visible_for_admin_user(session):
         )
 
     assert visible_id == data_product.id
+
+
+def test_hidden_data_product_not_loaded_through_relationship(session):
+    output_port = OutputPortFactory()
+    hidden = DataProductFactory(visibility=DataProductVisibility.HIDDEN)
+    input_port = InputPortFactory(
+        output_port=output_port, consuming_abstract_data_product=hidden
+    )
+    user = UserFactory()
+    session.flush()
+    session.expire_all()
+
+    with as_user(session, user.id):
+        loaded = (
+            session.scalars(select(InputPort).where(InputPort.id == input_port.id))
+            .unique()
+            .one()
+        )
+
+        assert loaded.consuming_abstract_data_product is None
+
+
+def test_discoverable_data_product_loaded_through_relationship(session):
+    output_port = OutputPortFactory()
+    discoverable = DataProductFactory(visibility=DataProductVisibility.DISCOVERABLE)
+    input_port = InputPortFactory(
+        output_port=output_port, consuming_abstract_data_product=discoverable
+    )
+    user = UserFactory()
+    session.flush()
+    session.expire_all()
+
+    with as_user(session, user.id):
+        loaded = (
+            session.scalars(select(InputPort).where(InputPort.id == input_port.id))
+            .unique()
+            .one()
+        )
+
+        assert loaded.consuming_abstract_data_product.id == discoverable.id

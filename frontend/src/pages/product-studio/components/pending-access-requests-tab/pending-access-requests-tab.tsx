@@ -45,6 +45,7 @@ export function PendingAccessRequestsTab() {
                 columns={columns}
                 dataSource={tableData}
                 size="small"
+                onRow={() => ({ 'data-cy': 'pending-request-row' }) as React.HTMLAttributes<HTMLElement>}
                 pagination={{
                     ...pagination,
                     onChange: (page, pageSize) => {

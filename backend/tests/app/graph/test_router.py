@@ -68,7 +68,7 @@ class TestGraphRouter:
         response = client.get(ENDPOINT)
         assert response.status_code == 200, response.text
 
-        node_ids = {node["id"] for node in response.json()["nodes"]}
+        node_ids = {node["data"]["id"] for node in response.json()["nodes"]}
         assert str(hidden_consumer.id) not in node_ids
         for edge in response.json()["edges"]:
             assert edge["source"] in node_ids

@@ -6,6 +6,12 @@ sidebar_position: 200
 
 ## Unreleased
 
+## 0.7.3
+
+### bugfixes
+
+- **[Device Flow]**: Issue in device flow caused failure during login
+
 ## 0.7.2
 
 ### bugfixes

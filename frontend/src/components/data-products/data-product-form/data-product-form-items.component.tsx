@@ -130,7 +130,7 @@ export const DataProductFormItems = <T extends DataProductCreate>({
                     },
                 ]}
             >
-                <Input />
+                <Input data-cy="data-product-name" />
             </Form.Item>
             <ResourceNameFormItem
                 form={form}
@@ -173,10 +173,12 @@ export const DataProductFormItems = <T extends DataProductCreate>({
                 ]}
             >
                 <Select
+                    data-cy="data-product-type"
                     loading={isFetchingDataProductTypes}
                     allowClear
                     showSearch={{ filterOption: selectFilterOptionByLabelAndValue }}
                     options={dataProductTypeSelectOptions}
+                    popupRender={(menu) => <div data-cy="data-product-type-options">{menu}</div>}
                 />
             </Form.Item>
             <Form.Item<DataProductCreate>
@@ -190,6 +192,7 @@ export const DataProductFormItems = <T extends DataProductCreate>({
                 ]}
             >
                 <Select
+                    data-cy="data-product-lifecycle"
                     loading={isFetchingLifecycles}
                     options={lifecycles?.data_product_life_cycles.map((lifecycle) => ({
                         value: lifecycle.id,
@@ -197,6 +200,7 @@ export const DataProductFormItems = <T extends DataProductCreate>({
                     }))}
                     showSearch={{ filterOption: selectFilterOptionByLabelAndValue }}
                     allowClear
+                    popupRender={(menu) => <div data-cy="data-product-lifecycle-options">{menu}</div>}
                 />
             </Form.Item>
             <Form.Item<DataProductCreate>
@@ -211,10 +215,12 @@ export const DataProductFormItems = <T extends DataProductCreate>({
                 ]}
             >
                 <Select
+                    data-cy="data-product-domain"
                     loading={isFetchingDomains}
                     options={domains.map((domain) => ({ label: domain.name, value: domain.id }))}
                     showSearch={{ filterOption: selectFilterOptionByLabelAndValue }}
                     allowClear
+                    popupRender={(menu) => <div data-cy="data-product-domain-options">{menu}</div>}
                 />
             </Form.Item>
             <Form.Item<DataProductCreate> name="tag_ids" label={t('Tags')}>
@@ -243,7 +249,11 @@ export const DataProductFormItems = <T extends DataProductCreate>({
                     },
                 ]}
             >
-                <TextArea rows={4} count={{ show: true, max: MAX_DESCRIPTION_INPUT_LENGTH }} />
+                <TextArea
+                    data-cy="data-product-description"
+                    rows={4}
+                    count={{ show: true, max: MAX_DESCRIPTION_INPUT_LENGTH }}
+                />
             </Form.Item>
         </>
     );
