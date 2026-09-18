@@ -57,8 +57,8 @@ class GetTechnicalAssetsResponseItem(ORMModel):
     description: str
     namespace: str
     owner_id: UUID
-    platform_id: UUID
-    service_id: UUID
+    platform_id: Optional[UUID] = None
+    service_id: Optional[UUID] = None
     status: TechnicalAssetStatus
     technical_mapping: TechnicalMapping
     access_modes: list[AccessMode]
@@ -66,7 +66,7 @@ class GetTechnicalAssetsResponseItem(ORMModel):
     configuration: DataOutputConfiguration
     owner: DataProduct
 
-    service: PlatformService = Field(exclude=True)
+    service: Optional[PlatformService] = Field(default=None, exclude=True)
     environment_configurations: list[EnvironmentConfigsGetItem] = Field(exclude=True)
 
     @computed_field(
@@ -79,10 +79,20 @@ class GetTechnicalAssetsResponseItem(ORMModel):
 
     @computed_field
     def result_string(self) -> str:
-        return self.configuration.render_template(self.service.result_string_template)
+        if self.service is not None:
+            return self.configuration.render_template(
+                self.service.result_string_template
+            )
+        # A plugin that uses no platform service brings its own template.
+        template = self.configuration.result_string_template
+        return self.configuration.render_template(template) if template else ""
 
     @computed_field
     def technical_info(self) -> list[TechnicalInfo]:
+        if self.service is None:
+            # Technical info is per environment platform configuration, and there
+            # is no platform here to have one.
+            return []
         return compute_technical_info(
             self.configuration, self.service, self.environment_configurations
         )

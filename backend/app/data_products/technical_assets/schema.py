@@ -1,3 +1,4 @@
+from typing import Optional
 from uuid import UUID
 
 from app.data_products.technical_assets.enums import TechnicalMapping
@@ -14,7 +15,7 @@ class TechnicalAsset(ORMModel):
     status: TechnicalAssetStatus
     technical_mapping: TechnicalMapping
     owner_id: UUID
-    platform_id: UUID
-    service_id: UUID
+    platform_id: Optional[UUID] = None
+    service_id: Optional[UUID] = None
 
     configuration: DataOutputConfiguration

@@ -118,6 +118,7 @@ class TechnicalAssetPlugin(ORMModel, ABC):
     mcp_instructions: ClassVar[str] = ""
     target_revision: ClassVar[Optional[str]] = None
     migrations_package: ClassVar[Optional[str]] = None
+    result_string_template: ClassVar[Optional[str]] = None
 
     @computed_field  # type: ignore[prop-decorator]
     @property
