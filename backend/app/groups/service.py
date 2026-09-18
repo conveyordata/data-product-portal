@@ -20,15 +20,13 @@ class GroupService:
     def __init__(self, db: Session) -> None:
         self.db = db
 
-    def list_memberships(self, group_id: UUID = None) -> list[GroupMembership]:
-        if group_id is None:
-            return list(self.db.scalars(select(GroupMembership)).all())
-        else:
-            return list(
-                self.db.scalars(
-                    select(GroupMembership).where(GroupMembership.group_id == group_id)
-                ).all()
-            )
+    def list_memberships(self, group_id: UUID | None = None) -> list[GroupMembership]:
+        query = select(GroupMembership)
+
+        if group_id is not None:
+            query = query.where(GroupMembership.group_id == group_id)
+
+        return list(self.db.scalars(query).all())
 
     def list_all_assigned_data_products(self) -> dict[UUID, set[UUID]]:
         rows = self.db.execute(
@@ -77,19 +75,19 @@ class GroupService:
             member_identity_id=member_identity_id,
         )
         self.db.add(membership)
-        self.db.commit()
+        self.db.flush()
 
         return membership
 
     def remove_member(self, group_id: UUID, member_identity_id: UUID):
         membership = self.get_membership(group_id, member_identity_id)
         self.db.delete(membership)
-        self.db.commit()
+        self.db.flush()
 
     def delete_group(self, *, group_id: UUID):
         group = ensure_group_exists(group_id, self.db)
         self.db.delete(group)
-        self.db.commit()
+        self.db.flush()
 
     def has_member(self, group_id: UUID, member_identity_id: UUID) -> bool:
         membership = self.db.get(

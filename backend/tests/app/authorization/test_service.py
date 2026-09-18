@@ -140,7 +140,7 @@ class TestAuthorizationService:
         )
 
         session.delete(membership)
-        session.commit()
+        session.flush()
         service.reload_enforcer()
 
         assert not authorizer.has_access(

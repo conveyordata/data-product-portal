@@ -23,7 +23,7 @@ class TestIdentityModel:
             display_name="Test Machine User",
         )
         session.add_all([user, group, machine_user])
-        session.commit()
+        session.flush()
 
         ids = {user.id, group.id, machine_user.id}
         session.expunge_all()
