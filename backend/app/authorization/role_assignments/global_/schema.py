@@ -14,7 +14,7 @@ from app.users.schema import User
 
 
 class CreateGlobalRoleAssignment(BaseModel):
-    user_id: UUID  
+    user_id: UUID
     role_id: Union[UUID, Literal["admin"]]
 
 
@@ -37,9 +37,7 @@ class RoleAssignmentRequest(BaseModel):
 
 class GlobalRoleAssignmentResponse(ORMModel):
     id: UUID
-    user: User = Field(
-        validation_alias="identity"
-    )  
+    user: User = Field(validation_alias="identity")
     role: Role
     decision: DecisionStatus
     requested_on: Optional[datetime]

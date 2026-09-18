@@ -24,6 +24,6 @@ class DataProductRoleAssignmentFactory(factory.alchemy.SQLAlchemyModelFactory):
             authorizer = Authorization()
             authorizer.assign_resource_role(
                 role_id=str(self.role_id),
-                user_id=str(self.identity_id),  
+                user_id=str(self.identity_id),
                 resource_id=str(self.data_product_id),
             )

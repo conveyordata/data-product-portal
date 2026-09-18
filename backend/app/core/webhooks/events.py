@@ -63,7 +63,7 @@ class DataProductRoleAssignmentEvent(V2Event):
 
     id: UUID
     data_product_id: UUID
-    user_id: UUID  
+    user_id: UUID
 
     @classmethod
     def event_type(cls) -> str:
