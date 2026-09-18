@@ -32,3 +32,5 @@ public/locales/en/translation_old.json
 cypress/videos
 cypress/screenshots
 cypress/downloads
+
+.vitest/

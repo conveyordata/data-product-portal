@@ -162,8 +162,11 @@ export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallback
         }
     };
 
+    const resultRequestId = useRef(0);
+
     const onDataPlatformClick = (dropdown: CustomDropdownItemProps<string>) => {
         if (selectedDataPlatform !== dropdown) {
+            resultRequestId.current += 1;
             form.setFieldsValue({ configuration: undefined, result: undefined });
             setSelectedDataPlatform(dropdown);
 
@@ -179,6 +182,7 @@ export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallback
     const onConfigurationClick = (dropdown: CustomDropdownItemProps<string>) => {
         if (!platformsLoading) {
             if (selectedConfiguration !== dropdown) {
+                resultRequestId.current += 1;
                 form.setFieldsValue({ configuration: undefined, result: undefined });
                 setSelectedConfiguration(dropdown);
             }
@@ -222,8 +226,6 @@ export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallback
             }).unwrap(),
         [validateNamespace, dataProductId],
     );
-
-    const resultRequestId = useRef(0);
 
     const setResultString = useDebouncedCallback((values: CreateTechnicalAssetRequest) => {
         const requestId = ++resultRequestId.current;
