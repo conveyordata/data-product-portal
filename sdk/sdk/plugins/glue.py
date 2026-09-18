@@ -6,7 +6,7 @@ from sdk.plugins.enums import AccessGranularity
 
 
 class GlueTechnicalAssetConfiguration(TechnicalAssetConfiguration):
-    configuration_type: ClassVar[str] = "GlueTechnicalAssetConfiguration"
+    name: ClassVar[str] = "GlueTechnicalAssetConfiguration"
 
     database: str
     database_suffix: str = ""

@@ -12,7 +12,6 @@ def make_s3_config(
         bucket=bucket,
         path=path,
         suffix=suffix,
-        configuration_type="S3TechnicalAssetConfiguration",
     )
 
 

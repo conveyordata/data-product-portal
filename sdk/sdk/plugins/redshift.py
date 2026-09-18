@@ -6,7 +6,7 @@ from sdk.plugins.enums import AccessGranularity
 
 
 class RedshiftTechnicalAssetConfiguration(TechnicalAssetConfiguration):
-    configuration_type: ClassVar[str] = "RedshiftTechnicalAssetConfiguration"
+    name: ClassVar[str] = "RedshiftTechnicalAssetConfiguration"
 
     database: str
     schema: str = ""

@@ -4876,8 +4876,8 @@ func (s *CreateTechnicalAssetRequestConfiguration) Encode(e *jx.Encoder) {
 // encodeFields encodes fields.
 func (s *CreateTechnicalAssetRequestConfiguration) encodeFields(e *jx.Encoder) {
 	{
-		e.FieldStart("configuration_type")
-		e.Str(s.ConfigurationType)
+		e.FieldStart("name")
+		e.Str(s.Name)
 	}
 	for k, elem := range s.AdditionalProps {
 		e.FieldStart(k)
@@ -4889,7 +4889,7 @@ func (s *CreateTechnicalAssetRequestConfiguration) encodeFields(e *jx.Encoder) {
 }
 
 var jsonFieldsNameOfCreateTechnicalAssetRequestConfiguration = [1]string{
-	0: "configuration_type",
+	0: "name",
 }
 
 // Decode decodes CreateTechnicalAssetRequestConfiguration from json.
@@ -4902,17 +4902,17 @@ func (s *CreateTechnicalAssetRequestConfiguration) Decode(d *jx.Decoder) error {
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
-		case "configuration_type":
+		case "name":
 			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
 				v, err := d.Str()
-				s.ConfigurationType = string(v)
+				s.Name = string(v)
 				if err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"configuration_type\"")
+				return errors.Wrap(err, "decode field \"name\"")
 			}
 		default:
 			var elem jx.Raw
@@ -16914,8 +16914,8 @@ func (s *GetTechnicalAssetsResponseItemConfiguration) Encode(e *jx.Encoder) {
 // encodeFields encodes fields.
 func (s *GetTechnicalAssetsResponseItemConfiguration) encodeFields(e *jx.Encoder) {
 	{
-		e.FieldStart("configuration_type")
-		e.Str(s.ConfigurationType)
+		e.FieldStart("name")
+		e.Str(s.Name)
 	}
 	for k, elem := range s.AdditionalProps {
 		e.FieldStart(k)
@@ -16927,7 +16927,7 @@ func (s *GetTechnicalAssetsResponseItemConfiguration) encodeFields(e *jx.Encoder
 }
 
 var jsonFieldsNameOfGetTechnicalAssetsResponseItemConfiguration = [1]string{
-	0: "configuration_type",
+	0: "name",
 }
 
 // Decode decodes GetTechnicalAssetsResponseItemConfiguration from json.
@@ -16940,17 +16940,17 @@ func (s *GetTechnicalAssetsResponseItemConfiguration) Decode(d *jx.Decoder) erro
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
-		case "configuration_type":
+		case "name":
 			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
 				v, err := d.Str()
-				s.ConfigurationType = string(v)
+				s.Name = string(v)
 				if err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"configuration_type\"")
+				return errors.Wrap(err, "decode field \"name\"")
 			}
 		default:
 			var elem jx.Raw
@@ -26855,8 +26855,8 @@ func (s *RenderTechnicalAssetAccessPathRequestConfiguration) Encode(e *jx.Encode
 // encodeFields encodes fields.
 func (s *RenderTechnicalAssetAccessPathRequestConfiguration) encodeFields(e *jx.Encoder) {
 	{
-		e.FieldStart("configuration_type")
-		e.Str(s.ConfigurationType)
+		e.FieldStart("name")
+		e.Str(s.Name)
 	}
 	for k, elem := range s.AdditionalProps {
 		e.FieldStart(k)
@@ -26868,7 +26868,7 @@ func (s *RenderTechnicalAssetAccessPathRequestConfiguration) encodeFields(e *jx.
 }
 
 var jsonFieldsNameOfRenderTechnicalAssetAccessPathRequestConfiguration = [1]string{
-	0: "configuration_type",
+	0: "name",
 }
 
 // Decode decodes RenderTechnicalAssetAccessPathRequestConfiguration from json.
@@ -26881,17 +26881,17 @@ func (s *RenderTechnicalAssetAccessPathRequestConfiguration) Decode(d *jx.Decode
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
-		case "configuration_type":
+		case "name":
 			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
 				v, err := d.Str()
-				s.ConfigurationType = string(v)
+				s.Name = string(v)
 				if err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"configuration_type\"")
+				return errors.Wrap(err, "decode field \"name\"")
 			}
 		default:
 			var elem jx.Raw
@@ -32024,8 +32024,8 @@ func (s *TechnicalAssetConfiguration) Encode(e *jx.Encoder) {
 // encodeFields encodes fields.
 func (s *TechnicalAssetConfiguration) encodeFields(e *jx.Encoder) {
 	{
-		e.FieldStart("configuration_type")
-		e.Str(s.ConfigurationType)
+		e.FieldStart("name")
+		e.Str(s.Name)
 	}
 	for k, elem := range s.AdditionalProps {
 		e.FieldStart(k)
@@ -32037,7 +32037,7 @@ func (s *TechnicalAssetConfiguration) encodeFields(e *jx.Encoder) {
 }
 
 var jsonFieldsNameOfTechnicalAssetConfiguration = [1]string{
-	0: "configuration_type",
+	0: "name",
 }
 
 // Decode decodes TechnicalAssetConfiguration from json.
@@ -32050,17 +32050,17 @@ func (s *TechnicalAssetConfiguration) Decode(d *jx.Decoder) error {
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
-		case "configuration_type":
+		case "name":
 			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
 				v, err := d.Str()
-				s.ConfigurationType = string(v)
+				s.Name = string(v)
 				if err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"configuration_type\"")
+				return errors.Wrap(err, "decode field \"name\"")
 			}
 		default:
 			var elem jx.Raw

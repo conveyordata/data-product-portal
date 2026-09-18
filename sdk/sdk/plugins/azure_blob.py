@@ -5,7 +5,7 @@ from sdk.plugins.base import TechnicalAssetConfiguration
 
 
 class AzureBlobTechnicalAssetConfiguration(TechnicalAssetConfiguration):
-    configuration_type: ClassVar[str] = "AzureBlobTechnicalAssetConfiguration"
+    name: ClassVar[str] = "AzureBlobTechnicalAssetConfiguration"
 
     domain: str = ""
     path: str = ""

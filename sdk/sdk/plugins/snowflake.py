@@ -6,7 +6,7 @@ from sdk.plugins.enums import AccessGranularity
 
 
 class SnowflakeTechnicalAssetConfiguration(TechnicalAssetConfiguration):
-    configuration_type: ClassVar[str] = "SnowflakeTechnicalAssetConfiguration"
+    name: ClassVar[str] = "SnowflakeTechnicalAssetConfiguration"
 
     database: str
     schema: str = ""

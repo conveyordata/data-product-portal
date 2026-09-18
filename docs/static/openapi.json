@@ -10022,17 +10022,17 @@
           },
           "configuration": {
             "properties": {
-              "configuration_type": {
+              "name": {
                 "type": "string"
               }
             },
             "additionalProperties": true,
             "type": "object",
             "required": [
-              "configuration_type"
+              "name"
             ],
             "title": "Configuration",
-            "description": "Configuration of the technical asset. The available fields depend on `configuration_type`; retrieve them from /v2/plugins/{name}/form."
+            "description": "Configuration of the technical asset. The available fields depend on `name`; retrieve them from /v2/plugins/{name}/form."
           },
           "sourceAligned": {
             "anyOf": [
@@ -12845,17 +12845,17 @@
           },
           "configuration": {
             "properties": {
-              "configuration_type": {
+              "name": {
                 "type": "string"
               }
             },
             "additionalProperties": true,
             "type": "object",
             "required": [
-              "configuration_type"
+              "name"
             ],
             "title": "Configuration",
-            "description": "Configuration of the technical asset. The available fields depend on `configuration_type`; retrieve them from /v2/plugins/{name}/form."
+            "description": "Configuration of the technical asset. The available fields depend on `name`; retrieve them from /v2/plugins/{name}/form."
           },
           "owner": {
             "$ref": "#/components/schemas/DataProduct"
@@ -14656,17 +14656,17 @@
           },
           "configuration": {
             "properties": {
-              "configuration_type": {
+              "name": {
                 "type": "string"
               }
             },
             "additionalProperties": true,
             "type": "object",
             "required": [
-              "configuration_type"
+              "name"
             ],
             "title": "Configuration",
-            "description": "Configuration of the technical asset. The available fields depend on `configuration_type`; retrieve them from /v2/plugins/{name}/form."
+            "description": "Configuration of the technical asset. The available fields depend on `name`; retrieve them from /v2/plugins/{name}/form."
           },
           "owner": {
             "$ref": "#/components/schemas/DataProduct"
@@ -14996,17 +14996,17 @@
           },
           "configuration": {
             "properties": {
-              "configuration_type": {
+              "name": {
                 "type": "string"
               }
             },
             "additionalProperties": true,
             "type": "object",
             "required": [
-              "configuration_type"
+              "name"
             ],
             "title": "Configuration",
-            "description": "Configuration of the technical asset. The available fields depend on `configuration_type`; retrieve them from /v2/plugins/{name}/form."
+            "description": "Configuration of the technical asset. The available fields depend on `name`; retrieve them from /v2/plugins/{name}/form."
           }
         },
         "type": "object",
@@ -16059,17 +16059,17 @@
           },
           "configuration": {
             "properties": {
-              "configuration_type": {
+              "name": {
                 "type": "string"
               }
             },
             "additionalProperties": true,
             "type": "object",
             "required": [
-              "configuration_type"
+              "name"
             ],
             "title": "Configuration",
-            "description": "Configuration of the technical asset. The available fields depend on `configuration_type`; retrieve them from /v2/plugins/{name}/form."
+            "description": "Configuration of the technical asset. The available fields depend on `name`; retrieve them from /v2/plugins/{name}/form."
           }
         },
         "type": "object",
@@ -17131,14 +17131,14 @@
       },
       "TechnicalAssetPlugin": {
         "properties": {
-          "configuration_type": {
+          "name": {
             "type": "string",
-            "title": "Configuration Type"
+            "title": "Name"
           }
         },
         "type": "object",
         "required": [
-          "configuration_type"
+          "name"
         ],
         "title": "TechnicalAssetPlugin"
       }

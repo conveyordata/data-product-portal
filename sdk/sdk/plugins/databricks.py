@@ -6,7 +6,7 @@ from sdk.plugins.enums import AccessGranularity
 
 
 class DatabricksTechnicalAssetConfiguration(TechnicalAssetConfiguration):
-    configuration_type: ClassVar[str] = "DatabricksTechnicalAssetConfiguration"
+    name: ClassVar[str] = "DatabricksTechnicalAssetConfiguration"
 
     catalog: str
     schema: str = ""

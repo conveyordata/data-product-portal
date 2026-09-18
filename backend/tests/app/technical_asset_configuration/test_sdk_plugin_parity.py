@@ -20,8 +20,8 @@ def test_sdk_plugin_models__declare_the_same_fields(sdk_model, plugin):
 
 
 @pytest.mark.parametrize(("sdk_model", "plugin"), PLUGIN_PAIRS)
-def test_sdk_plugin_models__use_the_same_configuration_type(sdk_model, plugin):
-    assert sdk_model.configuration_type == plugin.name
+def test_sdk_plugin_models__use_the_same_name(sdk_model, plugin):
+    assert sdk_model.name == plugin.name
 
 
 @pytest.mark.parametrize(("sdk_model", "plugin"), PLUGIN_PAIRS)

@@ -31,7 +31,7 @@ class TechnicalAsset:
         platform_id (UUID):
         service_id (UUID):
         configuration (TechnicalAssetConfiguration): Configuration of the technical asset. The available fields depend
-            on `configuration_type`; retrieve them from /v2/plugins/{name}/form.
+            on `name`; retrieve them from /v2/plugins/{name}/form.
     """
 
     id: UUID

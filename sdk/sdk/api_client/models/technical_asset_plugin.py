@@ -13,20 +13,20 @@ T = TypeVar("T", bound="TechnicalAssetPlugin")
 class TechnicalAssetPlugin:
     """
     Attributes:
-        configuration_type (str):
+        name (str):
     """
 
-    configuration_type: str
+    name: str
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        configuration_type = self.configuration_type
+        name = self.name
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
-                "configuration_type": configuration_type,
+                "name": name,
             }
         )
 
@@ -35,10 +35,10 @@ class TechnicalAssetPlugin:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        configuration_type = d.pop("configuration_type")
+        name = d.pop("name")
 
         technical_asset_plugin = cls(
-            configuration_type=configuration_type,
+            name=name,
         )
 
         technical_asset_plugin.additional_properties = d

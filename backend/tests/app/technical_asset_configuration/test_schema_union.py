@@ -11,14 +11,14 @@ class Holder(BaseModel):
 
 
 S3_CONFIGURATION = {
-    "configuration_type": "S3TechnicalAssetConfiguration",
+    "name": "S3TechnicalAssetConfiguration",
     "bucket": "some-bucket",
     "suffix": "",
     "path": "some/path",
 }
 
 
-def test_resolve_configuration__builds_the_plugin_named_by_configuration_type():
+def test_resolve_configuration__builds_the_plugin_named_by_name():
     holder = Holder(configuration=S3_CONFIGURATION)
 
     assert holder.configuration.name == "S3TechnicalAssetConfiguration"
@@ -31,14 +31,14 @@ def test_resolve_configuration__round_trips_unchanged():
     )
 
 
-def test_resolve_configuration__rejects_a_missing_configuration_type():
-    with pytest.raises(ValidationError, match="configuration_type is required"):
+def test_resolve_configuration__rejects_a_missing_name():
+    with pytest.raises(ValidationError, match="name is required"):
         Holder(configuration={"bucket": "some-bucket"})
 
 
-def test_resolve_configuration__rejects_an_unknown_configuration_type():
+def test_resolve_configuration__rejects_an_unknown_name():
     with pytest.raises(HTTPException) as exc_info:
-        Holder(configuration={"configuration_type": "NoSuchPlugin"})
+        Holder(configuration={"name": "NoSuchPlugin"})
 
     assert exc_info.value.status_code == 400
 
@@ -53,7 +53,7 @@ def test_resolve_configuration__still_resolves_a_plugin_that_is_not_enabled(
 
 def test_resolve_configuration__rejects_a_plugin_that_has_no_configuration():
     with pytest.raises(HTTPException) as exc_info:
-        Holder(configuration={"configuration_type": "GitHubPlugin"})
+        Holder(configuration={"name": "GitHubPlugin"})
 
     assert exc_info.value.status_code == 400
     assert "no configuration of its own" in exc_info.value.detail

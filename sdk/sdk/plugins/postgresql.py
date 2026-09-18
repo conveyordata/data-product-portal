@@ -6,7 +6,7 @@ from sdk.plugins.enums import AccessGranularity
 
 
 class PostgreSQLTechnicalAssetConfiguration(TechnicalAssetConfiguration):
-    configuration_type: ClassVar[str] = "PostgreSQLTechnicalAssetConfiguration"
+    name: ClassVar[str] = "PostgreSQLTechnicalAssetConfiguration"
 
     database: str
     schema: str = ""

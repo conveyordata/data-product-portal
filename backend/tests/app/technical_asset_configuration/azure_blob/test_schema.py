@@ -14,7 +14,6 @@ def make_blob_config(
         domain=domain,
         container_name=container_name,
         path=path,
-        configuration_type="AzureBlobTechnicalAssetConfiguration",
     )
 
 

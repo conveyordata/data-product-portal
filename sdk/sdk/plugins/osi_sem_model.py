@@ -5,7 +5,7 @@ from sdk.plugins.base import TechnicalAssetConfiguration
 
 
 class OSISemanticModelTechnicalAssetConfiguration(TechnicalAssetConfiguration):
-    configuration_type: ClassVar[str] = "OSISemanticModelTechnicalAssetConfiguration"
+    name: ClassVar[str] = "OSISemanticModelTechnicalAssetConfiguration"
 
     model_name: str = ""
     location: str = ""

@@ -39,7 +39,7 @@ class GetTechnicalAssetsResponseItem:
         technical_mapping (TechnicalMapping):
         access_modes (list[AccessMode]):
         configuration (GetTechnicalAssetsResponseItemConfiguration): Configuration of the technical asset. The available
-            fields depend on `configuration_type`; retrieve them from /v2/plugins/{name}/form.
+            fields depend on `name`; retrieve them from /v2/plugins/{name}/form.
         owner (DataProduct):
         output_port_links (list[OutputPortLink]):
         tags (list[Tag]):

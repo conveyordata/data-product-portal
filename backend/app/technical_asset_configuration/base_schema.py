@@ -114,15 +114,13 @@ class PlatformMetadata(ORMModel):
 
 
 class TechnicalAssetPlugin(ORMModel, ABC):
-    name: ClassVar[str]
-
     version: ClassVar[str] = "1.0"
     mcp_instructions: ClassVar[str] = ""
 
     @computed_field  # type: ignore[prop-decorator]
     @property
-    def configuration_type(self) -> str:
-        return self.name
+    def name(self) -> str:
+        raise NotImplementedError
 
     _platform_metadata: ClassVar[Optional[PlatformMetadata]] = None
 

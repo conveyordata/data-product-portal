@@ -5,7 +5,7 @@ from sdk.plugins.base import TechnicalAssetConfiguration
 
 
 class RustFSTechnicalAssetConfiguration(TechnicalAssetConfiguration):
-    configuration_type: ClassVar[str] = "RustFSTechnicalAssetConfiguration"
+    name: ClassVar[str] = "RustFSTechnicalAssetConfiguration"
 
     bucket: str
     suffix: str = ""

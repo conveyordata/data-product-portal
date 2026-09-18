@@ -318,9 +318,9 @@ export type OwnedTechnicalAsset = {
   owner_id: string;
   platform_id: string;
   service_id: string;
-  /** Configuration of the technical asset. The available fields depend on `configuration_type`; retrieve them from /v2/plugins/{name}/form. */
+  /** Configuration of the technical asset. The available fields depend on `name`; retrieve them from /v2/plugins/{name}/form. */
   configuration: {
-    configuration_type: string;
+    name: string;
     [key: string]: any;
   };
   owner: DataProduct;

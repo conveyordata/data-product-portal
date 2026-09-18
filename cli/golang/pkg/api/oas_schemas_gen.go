@@ -1441,8 +1441,8 @@ type CreateTechnicalAssetRequest struct {
 	Namespace   string    `json:"namespace"`
 	PlatformID  uuid.UUID `json:"platform_id"`
 	ServiceID   uuid.UUID `json:"service_id"`
-	// Configuration of the technical asset. The available fields depend on `configuration_type`; retrieve
-	// them from /v2/plugins/{name}/form.
+	// Configuration of the technical asset. The available fields depend on `name`; retrieve them from
+	// /v2/plugins/{name}/form.
 	Configuration CreateTechnicalAssetRequestConfiguration `json:"configuration"`
 	// DEPRECATED: Use 'technical_mapping' instead. This field will be removed in a future version.
 	//
@@ -1553,16 +1553,16 @@ func (s *CreateTechnicalAssetRequest) SetTagIds(val []uuid.UUID) {
 	s.TagIds = val
 }
 
-// Configuration of the technical asset. The available fields depend on `configuration_type`; retrieve
-// them from /v2/plugins/{name}/form.
+// Configuration of the technical asset. The available fields depend on `name`; retrieve them from
+// /v2/plugins/{name}/form.
 type CreateTechnicalAssetRequestConfiguration struct {
-	ConfigurationType string `json:"configuration_type"`
-	AdditionalProps   CreateTechnicalAssetRequestConfigurationAdditional
+	Name            string `json:"name"`
+	AdditionalProps CreateTechnicalAssetRequestConfigurationAdditional
 }
 
-// GetConfigurationType returns the value of ConfigurationType.
-func (s *CreateTechnicalAssetRequestConfiguration) GetConfigurationType() string {
-	return s.ConfigurationType
+// GetName returns the value of Name.
+func (s *CreateTechnicalAssetRequestConfiguration) GetName() string {
+	return s.Name
 }
 
 // GetAdditionalProps returns the value of AdditionalProps.
@@ -1570,9 +1570,9 @@ func (s *CreateTechnicalAssetRequestConfiguration) GetAdditionalProps() CreateTe
 	return s.AdditionalProps
 }
 
-// SetConfigurationType sets the value of ConfigurationType.
-func (s *CreateTechnicalAssetRequestConfiguration) SetConfigurationType(val string) {
-	s.ConfigurationType = val
+// SetName sets the value of Name.
+func (s *CreateTechnicalAssetRequestConfiguration) SetName(val string) {
+	s.Name = val
 }
 
 // SetAdditionalProps sets the value of AdditionalProps.
@@ -5425,8 +5425,8 @@ type GetTechnicalAssetsResponseItem struct {
 	Status           TechnicalAssetStatus `json:"status"`
 	TechnicalMapping TechnicalMapping     `json:"technical_mapping"`
 	AccessModes      []AccessMode         `json:"access_modes"`
-	// Configuration of the technical asset. The available fields depend on `configuration_type`; retrieve
-	// them from /v2/plugins/{name}/form.
+	// Configuration of the technical asset. The available fields depend on `name`; retrieve them from
+	// /v2/plugins/{name}/form.
 	Configuration   GetTechnicalAssetsResponseItemConfiguration `json:"configuration"`
 	Owner           DataProduct                                 `json:"owner"`
 	OutputPortLinks []OutputPortLink                            `json:"output_port_links"`
@@ -5609,16 +5609,16 @@ func (s *GetTechnicalAssetsResponseItem) SetTechnicalInfo(val []TechnicalInfo) {
 
 func (*GetTechnicalAssetsResponseItem) getTechnicalAssetRes() {}
 
-// Configuration of the technical asset. The available fields depend on `configuration_type`; retrieve
-// them from /v2/plugins/{name}/form.
+// Configuration of the technical asset. The available fields depend on `name`; retrieve them from
+// /v2/plugins/{name}/form.
 type GetTechnicalAssetsResponseItemConfiguration struct {
-	ConfigurationType string `json:"configuration_type"`
-	AdditionalProps   GetTechnicalAssetsResponseItemConfigurationAdditional
+	Name            string `json:"name"`
+	AdditionalProps GetTechnicalAssetsResponseItemConfigurationAdditional
 }
 
-// GetConfigurationType returns the value of ConfigurationType.
-func (s *GetTechnicalAssetsResponseItemConfiguration) GetConfigurationType() string {
-	return s.ConfigurationType
+// GetName returns the value of Name.
+func (s *GetTechnicalAssetsResponseItemConfiguration) GetName() string {
+	return s.Name
 }
 
 // GetAdditionalProps returns the value of AdditionalProps.
@@ -5626,9 +5626,9 @@ func (s *GetTechnicalAssetsResponseItemConfiguration) GetAdditionalProps() GetTe
 	return s.AdditionalProps
 }
 
-// SetConfigurationType sets the value of ConfigurationType.
-func (s *GetTechnicalAssetsResponseItemConfiguration) SetConfigurationType(val string) {
-	s.ConfigurationType = val
+// SetName sets the value of Name.
+func (s *GetTechnicalAssetsResponseItemConfiguration) SetName(val string) {
+	s.Name = val
 }
 
 // SetAdditionalProps sets the value of AdditionalProps.
@@ -10786,8 +10786,8 @@ func (*RemoveUserOKApplicationJSON) removeUserRes() {}
 type RenderTechnicalAssetAccessPathRequest struct {
 	PlatformID uuid.UUID `json:"platform_id"`
 	ServiceID  uuid.UUID `json:"service_id"`
-	// Configuration of the technical asset. The available fields depend on `configuration_type`; retrieve
-	// them from /v2/plugins/{name}/form.
+	// Configuration of the technical asset. The available fields depend on `name`; retrieve them from
+	// /v2/plugins/{name}/form.
 	Configuration RenderTechnicalAssetAccessPathRequestConfiguration `json:"configuration"`
 }
 
@@ -10821,16 +10821,16 @@ func (s *RenderTechnicalAssetAccessPathRequest) SetConfiguration(val RenderTechn
 	s.Configuration = val
 }
 
-// Configuration of the technical asset. The available fields depend on `configuration_type`; retrieve
-// them from /v2/plugins/{name}/form.
+// Configuration of the technical asset. The available fields depend on `name`; retrieve them from
+// /v2/plugins/{name}/form.
 type RenderTechnicalAssetAccessPathRequestConfiguration struct {
-	ConfigurationType string `json:"configuration_type"`
-	AdditionalProps   RenderTechnicalAssetAccessPathRequestConfigurationAdditional
+	Name            string `json:"name"`
+	AdditionalProps RenderTechnicalAssetAccessPathRequestConfigurationAdditional
 }
 
-// GetConfigurationType returns the value of ConfigurationType.
-func (s *RenderTechnicalAssetAccessPathRequestConfiguration) GetConfigurationType() string {
-	return s.ConfigurationType
+// GetName returns the value of Name.
+func (s *RenderTechnicalAssetAccessPathRequestConfiguration) GetName() string {
+	return s.Name
 }
 
 // GetAdditionalProps returns the value of AdditionalProps.
@@ -10838,9 +10838,9 @@ func (s *RenderTechnicalAssetAccessPathRequestConfiguration) GetAdditionalProps(
 	return s.AdditionalProps
 }
 
-// SetConfigurationType sets the value of ConfigurationType.
-func (s *RenderTechnicalAssetAccessPathRequestConfiguration) SetConfigurationType(val string) {
-	s.ConfigurationType = val
+// SetName sets the value of Name.
+func (s *RenderTechnicalAssetAccessPathRequestConfiguration) SetName(val string) {
+	s.Name = val
 }
 
 // SetAdditionalProps sets the value of AdditionalProps.
@@ -12428,8 +12428,8 @@ type TechnicalAsset struct {
 	OwnerID          uuid.UUID            `json:"owner_id"`
 	PlatformID       uuid.UUID            `json:"platform_id"`
 	ServiceID        uuid.UUID            `json:"service_id"`
-	// Configuration of the technical asset. The available fields depend on `configuration_type`; retrieve
-	// them from /v2/plugins/{name}/form.
+	// Configuration of the technical asset. The available fields depend on `name`; retrieve them from
+	// /v2/plugins/{name}/form.
 	Configuration TechnicalAssetConfiguration `json:"configuration"`
 }
 
@@ -12533,16 +12533,16 @@ func (s *TechnicalAsset) SetConfiguration(val TechnicalAssetConfiguration) {
 	s.Configuration = val
 }
 
-// Configuration of the technical asset. The available fields depend on `configuration_type`; retrieve
-// them from /v2/plugins/{name}/form.
+// Configuration of the technical asset. The available fields depend on `name`; retrieve them from
+// /v2/plugins/{name}/form.
 type TechnicalAssetConfiguration struct {
-	ConfigurationType string `json:"configuration_type"`
-	AdditionalProps   TechnicalAssetConfigurationAdditional
+	Name            string `json:"name"`
+	AdditionalProps TechnicalAssetConfigurationAdditional
 }
 
-// GetConfigurationType returns the value of ConfigurationType.
-func (s *TechnicalAssetConfiguration) GetConfigurationType() string {
-	return s.ConfigurationType
+// GetName returns the value of Name.
+func (s *TechnicalAssetConfiguration) GetName() string {
+	return s.Name
 }
 
 // GetAdditionalProps returns the value of AdditionalProps.
@@ -12550,9 +12550,9 @@ func (s *TechnicalAssetConfiguration) GetAdditionalProps() TechnicalAssetConfigu
 	return s.AdditionalProps
 }
 
-// SetConfigurationType sets the value of ConfigurationType.
-func (s *TechnicalAssetConfiguration) SetConfigurationType(val string) {
-	s.ConfigurationType = val
+// SetName sets the value of Name.
+func (s *TechnicalAssetConfiguration) SetName(val string) {
+	s.Name = val
 }
 
 // SetAdditionalProps sets the value of AdditionalProps.

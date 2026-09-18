@@ -1,3 +1,17 @@
+"""Generates sdk/plugins/*.py from the backend's own plugin classes.
+
+The API publishes a technical asset's configuration as a generic object, so
+callers get no typed fields for it. This script gives that back for the
+plugins the portal ships: for each backend plugin with its own configuration
+(a Meta.orm_model), it copies that plugin's field declarations verbatim into
+a matching SDK class, without pulling in any of the backend's own
+dependencies (SQLAlchemy, FastAPI, ...).
+
+KNOWN_ENUMS lists the enum types a plugin's fields are allowed to reference.
+Any of those enums actually used by a generated plugin get their own
+generated sdk/plugins/enums.py, copied the same way from the backend.
+"""
+
 import ast
 from pathlib import Path
 
@@ -56,16 +70,17 @@ def _field_lines(plugin_class: ast.ClassDef, source: str) -> list[str]:
     return fields
 
 
-def build_plugin_module(plugin_dir: Path) -> tuple[str, str, str] | None:
-    """Returns (module_name, class_name, source) for a plugin with its own
-    configuration, or None for a plugin that has no configuration to expose."""
+def build_plugin_module(plugin_dir: Path) -> tuple[str, str, str, set[str]] | None:
+    """Returns (module_name, class_name, source, used_enums) for a plugin with
+    its own configuration, or None for a plugin that has no configuration to
+    expose."""
     schema_source = (plugin_dir / "schema.py").read_text()
     plugin_class = _plugin_class(ast.parse(schema_source))
 
     if not _has_configuration(plugin_class):
         return None
 
-    configuration_type = _find_assignment(
+    plugin_name = _find_assignment(
         ast.parse((plugin_dir / "model.py").read_text()), "CONFIGURATION_TYPE"
     )
     fields = _field_lines(plugin_class, schema_source)
@@ -78,12 +93,12 @@ def build_plugin_module(plugin_dir: Path) -> tuple[str, str, str] | None:
     lines.append("")
     lines.append("")
     lines.append(f"class {plugin_class.name}(TechnicalAssetConfiguration):")
-    lines.append(f'    configuration_type: ClassVar[str] = "{configuration_type}"')
+    lines.append(f'    name: ClassVar[str] = "{plugin_name}"')
     lines.append("")
     lines.extend(fields)
     lines.append("")
 
-    return (plugin_dir.name, plugin_class.name, "\n".join(lines))
+    return (plugin_dir.name, plugin_class.name, "\n".join(lines), used_enums)
 
 
 def build_enums_module(used_enums: set[str]) -> str:
@@ -118,8 +133,8 @@ def main() -> None:
         result = build_plugin_module(plugin_dir)
         if result is None:
             continue
-        module_name, class_name, source = result
-        used_enums |= {enum for enum in KNOWN_ENUMS if enum in source}
+        module_name, class_name, source, plugin_enums = result
+        used_enums |= plugin_enums
         (PLUGINS_OUT_DIR / f"{module_name}.py").write_text(HEADER + source)
         generated.append((module_name, class_name))
 

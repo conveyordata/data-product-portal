@@ -286,7 +286,6 @@ class TestPlatformTilesEndpoint:
             bucket="bucket",
             suffix="suffix",
             path="path",
-            configuration_type="S3TechnicalAssetConfiguration",
         )
         request = RenderTechnicalAssetAccessPathRequest(
             platform_id=service.platform.id,

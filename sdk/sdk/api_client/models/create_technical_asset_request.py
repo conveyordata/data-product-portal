@@ -29,7 +29,7 @@ class CreateTechnicalAssetRequest:
         platform_id (UUID):
         service_id (UUID):
         configuration (CreateTechnicalAssetRequestConfiguration): Configuration of the technical asset. The available
-            fields depend on `configuration_type`; retrieve them from /v2/plugins/{name}/form.
+            fields depend on `name`; retrieve them from /v2/plugins/{name}/form.
         tag_ids (list[UUID]):
         source_aligned (bool | None | Unset): DEPRECATED: Use 'technical_mapping' instead. This field will be removed in
             a future version.

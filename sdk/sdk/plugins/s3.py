@@ -5,7 +5,7 @@ from sdk.plugins.base import TechnicalAssetConfiguration
 
 
 class S3TechnicalAssetConfiguration(TechnicalAssetConfiguration):
-    configuration_type: ClassVar[str] = "S3TechnicalAssetConfiguration"
+    name: ClassVar[str] = "S3TechnicalAssetConfiguration"
 
     bucket: str
     suffix: str = ""

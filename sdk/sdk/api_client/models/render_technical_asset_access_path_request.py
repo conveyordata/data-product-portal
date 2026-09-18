@@ -23,7 +23,7 @@ class RenderTechnicalAssetAccessPathRequest:
         platform_id (UUID):
         service_id (UUID):
         configuration (RenderTechnicalAssetAccessPathRequestConfiguration): Configuration of the technical asset. The
-            available fields depend on `configuration_type`; retrieve them from /v2/plugins/{name}/form.
+            available fields depend on `name`; retrieve them from /v2/plugins/{name}/form.
     """
 
     platform_id: UUID

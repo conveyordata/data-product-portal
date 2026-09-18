@@ -12,17 +12,17 @@ class TechnicalAssetConfiguration(BaseModel):
     third-party plugin supplies its own model, or passes a plain dict.
     """
 
-    configuration_type: ClassVar[str]
+    name: ClassVar[str]
 
     def to_dict(self) -> dict[str, Any]:
         return {
-            "configuration_type": self.configuration_type,
+            "name": self.name,
             **self.model_dump(mode="json"),
         }
 
     @classmethod
     def from_configuration(cls, configuration: Any) -> Optional[Self]:
         """Read a configuration off a technical asset, or None for another type."""
-        if getattr(configuration, "configuration_type", None) != cls.configuration_type:
+        if getattr(configuration, "name", None) != cls.name:
             return None
         return cls.model_validate(configuration.to_dict())

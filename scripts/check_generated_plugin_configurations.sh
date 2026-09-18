@@ -11,11 +11,6 @@ pushd sdk
   poetry run ruff check --fix sdk/plugins
 
   if [[ -n "${CI}" ]]; then
-    # Ensure newly generated files show up in the diff below. Only in CI: a
-    # pre-commit hook must never stage files itself, or it fights pre-commit's
-    # own stash and restore of unstaged changes and corrupts the index.
-    git add ./sdk/plugins
-
     if [[ -z "$(git status --porcelain ./sdk/plugins)" ]];
     then
       exit 0
