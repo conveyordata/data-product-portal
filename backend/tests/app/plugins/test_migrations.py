@@ -118,6 +118,23 @@ def test_reconcile_all__rejects_unknown_target_revision():
         reconcile(example_plugin("example_0099_does_not_exist"))
 
 
+def test_reconcile_all__rejects_a_target_revision_that_belongs_to_another_plugin():
+    class ConfusedPlugin:
+        name = "ConfusedPlugin"
+        target_revision = "other_0001_create"
+        migrations_package = "tests.fixtures.example_plugin"
+
+    with pytest.raises(ValueError, match="not in its own migration history"):
+        reconcile(ConfusedPlugin(), other_plugin())  # type: ignore[arg-type]
+
+
+def test_reconcile_all__still_checks_for_orphans_when_no_plugin_owns_a_table():
+    reconcile(example_plugin())
+
+    with pytest.raises(ValueError, match="belonging to no installed plugin"):
+        reconcile_all([], engine)
+
+
 def test_reconcile_all__tracks_two_plugins_in_one_shared_version_table():
     """Each plugin is its own Alembic branch, because its first revision has no
     down_revision, so one row per plugin coexists in the single shared table."""
@@ -155,4 +172,6 @@ def test_reconcile_all__skips_plugins_without_a_table():
         target_revision = None
         migrations_package = None
 
-    assert reconcile_all([PluginWithoutTable()], engine) == {}  # type: ignore[list-item]
+    results = reconcile(PluginWithoutTable())  # type: ignore[arg-type]
+
+    assert "NoTablePlugin" not in results

@@ -25,7 +25,7 @@ class PluginRegistry:
                 raise Exception(
                     "The registered plugin does not subclass TechnicalAssetPlugin or is not a class"
                 )
-            if (plugin.target_revision is None) != (plugin.migrations_package is None):
+            if bool(plugin.target_revision) != bool(plugin.migrations_package):
                 raise Exception(
                     f"Plugin '{plugin.name}' must declare both target_revision and "
                     "migrations_package, or neither"

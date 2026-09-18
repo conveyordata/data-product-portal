@@ -90,33 +90,32 @@ def _reconcile(
     return f"downgraded {current} to {target}"
 
 
+def _owns_revision(plugin: type[TechnicalAssetPlugin], url: str) -> bool:
+    with _config([plugin], url) as config:
+        own_script = ScriptDirectory.from_config(config)
+        return plugin.target_revision in {
+            revision.revision for revision in own_script.walk_revisions()
+        }
+
+
 def reconcile_all(
     plugins: Sequence[type[TechnicalAssetPlugin]], engine: Engine
 ) -> dict[str, str]:
-    owning = [plugin for plugin in plugins if owns_a_table(plugin)]
-    if not owning:
-        return {}
-
+    plugins_owning_tables = [plugin for plugin in plugins if owns_a_table(plugin)]
     url = engine.url.render_as_string(hide_password=False)
     results: dict[str, str] = {}
 
-    with _config(owning, url) as config:
+    with _config(plugins_owning_tables, url) as config:
         script = ScriptDirectory.from_config(config)
-        known = {revision.revision for revision in script.walk_revisions()}
-
-        for plugin in owning:
-            if plugin.target_revision not in known:
-                raise ValueError(
-                    f"Plugin '{plugin.name}' declares target_revision "
-                    f"'{plugin.target_revision}', which is not in its own "
-                    "migration history"
-                )
+        known_revisions = {revision.revision for revision in script.walk_revisions()}
 
         # The version table is shared, so Alembic resolves every row in it
         # against the revisions this config knows about. A row left behind by a
         # plugin that is no longer installed, or that failed to import, would
         # otherwise fail here as an unreadable "Can't locate revision".
-        orphans = [head for head in _current_heads(engine) if head not in known]
+        orphans = [
+            head for head in _current_heads(engine) if head not in known_revisions
+        ]
         if orphans:
             raise ValueError(
                 f"{PLUGIN_VERSION_TABLE} holds revisions belonging to no installed "
@@ -125,7 +124,16 @@ def reconcile_all(
                 "give up its migration history."
             )
 
-        for plugin in owning:
+        if not plugins_owning_tables:
+            return {}
+
+        for plugin in plugins_owning_tables:
+            if not _owns_revision(plugin, url):
+                raise ValueError(
+                    f"Plugin '{plugin.name}' declares target_revision "
+                    f"'{plugin.target_revision}', which is not in its own "
+                    "migration history"
+                )
             logger.info(
                 f"Reconciling plugin '{plugin.name}' to {plugin.target_revision}"
             )
