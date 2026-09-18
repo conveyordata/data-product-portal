@@ -68,7 +68,6 @@ class RoleAssignmentService:
             query = query.where(DataProductRoleAssignmentModel.role_id == role_id)
         if decision is not None:
             query = query.where(DataProductRoleAssignmentModel.decision == decision)
-        # TODO Remove when frontend supports identities
         if users_only:
             query = query.join(
                 UserModel, UserModel.id == DataProductRoleAssignmentModel.identity_id

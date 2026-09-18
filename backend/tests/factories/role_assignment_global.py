@@ -22,9 +22,9 @@ class GlobalRoleAssignmentFactory(factory.alchemy.SQLAlchemyModelFactory):
             if self.role_id == ADMIN_UUID:
                 authorizer.assign_admin_role(
                     user_id=str(self.identity_id)
-                )  # TODO migrate to identity_id
+                )  
             else:
                 authorizer.assign_global_role(
                     role_id=str(self.role_id),
-                    user_id=str(self.identity_id),  # TODO migrate to identity_id
+                    user_id=str(self.identity_id),  
                 )

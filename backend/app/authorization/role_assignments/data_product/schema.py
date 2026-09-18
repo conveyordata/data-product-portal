@@ -22,13 +22,13 @@ class CreateDataProductRoleAssignmentOld(BaseModel):
 
 
 class CreateDataProductRoleAssignment(BaseModel):
-    user_id: UUID  ## TODO Replace by identity_id
+    user_id: UUID  
     role_id: UUID
     data_product_id: UUID
 
 
 class RequestDataProductRoleAssignment(BaseModel):
-    user_id: UUID  ## TODO Replace by identity_id
+    user_id: UUID  
     role_id: UUID
     data_product_id: UUID
 
@@ -46,7 +46,7 @@ class DataProductRoleAssignmentResponse(ORMModel):
     data_product: DataProduct
     user: User = Field(
         validation_alias="identity"
-    )  # TODO replace by identity: Identity
+    )  
     role: Optional[Role]
     decision: DecisionStatus
     requested_on: Optional[datetime]

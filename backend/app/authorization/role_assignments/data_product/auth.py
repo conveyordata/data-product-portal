@@ -19,7 +19,6 @@ class DataProductAuthAssignment(ResourceAuthAssignment):
 
         super().__init__(
             role_id=role_id,
-            # TODO moving user_id to identity_id is a breaking change for the webhook so let's do it later on
             user_id=assignment.identity_id,
             resource_id=assignment.data_product_id,
             previous_role_id=previous_role_id,

@@ -125,7 +125,7 @@ class Authorization(metaclass=Singleton):
         """Removes all the permissions for the chosen role."""
         return self.sync_role_permissions(role_id=role_id, actions=())
 
-    ## TODO cleanup user_id after Dataset direct assignments are gone
+    
     def assign_resource_role(
         self, *, user_id: ID, role_id: ID, resource_id: ID
     ) -> bool:

@@ -45,7 +45,7 @@ class Identity(Base, BaseORM):
     data_product_roles: Mapped[list["DataProductRoleAssignment"]] = relationship(
         foreign_keys="DataProductRoleAssignment.identity_id",
         back_populates="identity",
-        cascade="all, delete-orphan",  # TODO discuss this with the team
+        cascade="all, delete-orphan",  
         lazy="raise",
     )
     data_products: AssociationProxy[list["DataProduct"]] = association_proxy(
@@ -56,7 +56,7 @@ class Identity(Base, BaseORM):
     global_role: Mapped["GlobalRoleAssignment"] = relationship(
         foreign_keys="GlobalRoleAssignment.identity_id",
         back_populates="identity",
-        cascade="all, delete-orphan",  # TODO discuss this with the team
+        cascade="all, delete-orphan",  
         lazy="select",
     )
 
