@@ -21,6 +21,14 @@
 {% set jane_id = "d9f3aae2-391e-46c1-aec6-a7ae1114a7da" %}
 {% set john_id = "b72fca38-17ff-4259-a075-5aaa5973343c" %}
 
+-- Groups
+{% set data_engineering_group_id = "f6f8fa4d-a692-40c1-8957-8607868c8f01" %}
+{% set analytics_group_id = "af899df3-788c-46c7-a0ef-ceb167f9fb02" %}
+
+-- Machine users
+{% set ingestion_machine_user_id = "65ebc761-9141-43a2-8ba7-68243c66ab03" %}
+{% set reporting_machine_user_id = "95205ddd-06eb-475a-9522-206f74015804" %}
+
 -- Domains
 {% set commercial_and_customer_relationship_mgt_domain_id = "acaaaafe-cde9-4746-9835-f1e0c3c85b6c" %}
 {% set customer_domain_id = "672debaf-31f9-4233-820b-ad2165af044e" %}
@@ -376,7 +384,7 @@ INSERT INTO public.domain_environments (domain_id, environment_id, created_on, u
 -- DATA PRODUCT TYPES
 -- ...existing data product types code...
 
--- IDENTITIES
+-- USER IDENTITIES
 INSERT INTO public.identities (id, type, external_id, created_on, updated_on) VALUES ('{{ alice_id }}'::uuid, 'user', 'alice.baker@pharma.com', timezone('utc'::text, current_timestamp), NULL);
 
 INSERT INTO public.identities (id, type, external_id, created_on, updated_on) VALUES ('{{ bob_id }}'::uuid, 'user', 'bob.johnson@pharma.com', timezone('utc'::text, current_timestamp), NULL);
@@ -404,6 +412,37 @@ WHERE NOT EXISTS (
     SELECT 1 FROM public.data_product_lifecycles
     WHERE id = '{{ data_product_lifecycle_id }}'::uuid
 );
+
+-- GROUP IDENTITIES
+INSERT INTO public.identities (id, type, external_id, created_on, updated_on) VALUES ('{{ data_engineering_group_id }}'::uuid, 'group', 'data-engineering', timezone('utc'::text, current_timestamp), NULL);
+
+INSERT INTO public.identities (id, type, external_id, created_on, updated_on) VALUES ('{{ analytics_group_id }}'::uuid, 'group', 'data-science', timezone('utc'::text, current_timestamp), NULL);
+
+-- GROUPS
+INSERT INTO public.groups (id, display_name) VALUES ('{{ data_engineering_group_id }}'::uuid, 'Data Engineering');
+
+INSERT INTO public.groups (id, display_name) VALUES ('{{ analytics_group_id }}'::uuid, 'Data Science');
+
+-- MACHINE USER IDENTITIES
+INSERT INTO public.identities (id, type, external_id, created_on, updated_on) VALUES ('{{ ingestion_machine_user_id }}'::uuid, 'machine_user', 'analytics-pipeline', timezone('utc'::text, current_timestamp), NULL);
+
+INSERT INTO public.identities (id, type, external_id, created_on, updated_on) VALUES ('{{ reporting_machine_user_id }}'::uuid, 'machine_user', 'data-quality-service', timezone('utc'::text, current_timestamp), NULL);
+
+-- MACHINE USERS    
+INSERT INTO public.machine_users (id, display_name) VALUES ('{{ ingestion_machine_user_id }}'::uuid, 'Analytics Pipeline');
+
+INSERT INTO public.machine_users (id, display_name) VALUES ('{{ reporting_machine_user_id }}'::uuid, 'Data Quality Service');
+
+-- GROUP MEMBERSHIPSº
+INSERT INTO public.group_memberships (group_id, member_identity_id, created_on, updated_on) VALUES ('{{ data_engineering_group_id }}'::uuid, '{{ alice_id }}'::uuid, timezone('utc'::text, current_timestamp), NULL);
+
+INSERT INTO public.group_memberships (group_id, member_identity_id, created_on, updated_on) VALUES ('{{ data_engineering_group_id }}'::uuid, '{{ bob_id }}'::uuid, timezone('utc'::text, current_timestamp), NULL);
+
+INSERT INTO public.group_memberships (group_id, member_identity_id, created_on, updated_on) VALUES ('{{ data_engineering_group_id }}'::uuid, '{{ ingestion_machine_user_id }}'::uuid, timezone('utc'::text, current_timestamp), NULL);
+
+INSERT INTO public.group_memberships (group_id, member_identity_id, created_on, updated_on) VALUES ('{{ analytics_group_id }}'::uuid, '{{ jane_id }}'::uuid, timezone('utc'::text, current_timestamp), NULL);
+
+INSERT INTO public.group_memberships (group_id, member_identity_id, created_on, updated_on) VALUES ('{{ analytics_group_id }}'::uuid, '{{ reporting_machine_user_id }}'::uuid, timezone('utc'::text, current_timestamp), NULL);
 
 -- Customer segmentation id
 INSERT INTO public.abstract_data_products (id, status, finalizers, name, namespace, abstract_data_product_type, description, domain_id, created_on, updated_on, deleted_at) VALUES ('{{ customer_segmentation_id }}'::uuid, 'active', '{}', 'Customer Segmentation', 'customer_segmentation', 'data_products', 'Groups customers based on demographics, behavior, and purchase patterns.', '{{ customer_domain_id }}'::uuid, timezone('utc'::text, current_timestamp), NULL, NULL);
