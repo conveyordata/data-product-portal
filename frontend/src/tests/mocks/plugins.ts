@@ -90,6 +90,39 @@ export const mock_plugins: UiElementMetadataResponse[] = [
         show_in_form: true,
         detailed_name: 'Path',
     },
+    {
+        not_configured: false,
+        ui_metadata: [
+            {
+                label: 'Repository',
+                type: UIElementType.String,
+                required: true,
+                name: 'repository',
+                tooltip: null,
+                hidden: null,
+                checkbox: null,
+                select: null,
+                string: {
+                    initial_value: '',
+                },
+                radio: null,
+                depends_on: null,
+                disabled: null,
+                use_namespace_when_not_source_aligned: null,
+            },
+        ],
+        plugin: 'GitHubPlugin',
+        has_environments: false,
+        result_label: 'Repository link',
+        result_tooltip: 'The repository this technical asset points to',
+        platform: 'github',
+        display_name: 'GitHub',
+        icon_name: 'github-logo.svg',
+        parent_platform: null,
+        platform_tile: null,
+        show_in_form: true,
+        detailed_name: 'Repository',
+    },
 ];
 
 export const mockGetPlugins = (plugins: PluginResponse = { plugins: mock_plugins }) => {
@@ -127,6 +160,15 @@ export const mock_platform_tiles: PlatformTile[] = [
                 show_in_form: true,
             },
         ],
+        show_in_form: true,
+    },
+    {
+        label: 'GitHub',
+        value: 'github',
+        icon_name: 'github-logo.svg',
+        has_environments: false,
+        has_config: true,
+        children: [],
         show_in_form: true,
     },
 ];

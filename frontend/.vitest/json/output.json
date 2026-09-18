@@ -1,0 +1,86 @@
+{
+    "numTotalTestSuites": 2,
+    "numPassedTestSuites": 0,
+    "numFailedTestSuites": 2,
+    "numPendingTestSuites": 0,
+    "numTotalTests": 4,
+    "numPassedTests": 3,
+    "numFailedTests": 1,
+    "numPendingTests": 0,
+    "numTodoTests": 0,
+    "snapshot": {
+        "added": 0,
+        "failure": false,
+        "filesAdded": 0,
+        "filesRemoved": 0,
+        "filesRemovedList": [],
+        "filesUnmatched": 0,
+        "filesUpdated": 0,
+        "matched": 0,
+        "total": 0,
+        "unchecked": 0,
+        "uncheckedKeysByFile": [],
+        "unmatched": 0,
+        "updated": 0,
+        "didUpdate": false
+    },
+    "startTime": 1789734252160,
+    "success": false,
+    "testResults": [
+        {
+            "assertionResults": [
+                {
+                    "ancestorTitles": ["TechnicalAssetPopup"],
+                    "fullName": "TechnicalAssetPopup should be able to fill in the whole form",
+                    "status": "passed",
+                    "title": "should be able to fill in the whole form",
+                    "duration": 1092.9477499999998,
+                    "failureMessages": [],
+                    "meta": {},
+                    "tags": [],
+                    "benchmarks": []
+                },
+                {
+                    "ancestorTitles": ["TechnicalAssetPopup"],
+                    "fullName": "TechnicalAssetPopup should be able to select multiple access modes and choose specific modes",
+                    "status": "passed",
+                    "title": "should be able to select multiple access modes and choose specific modes",
+                    "duration": 769.1227909999998,
+                    "failureMessages": [],
+                    "meta": {},
+                    "tags": [],
+                    "benchmarks": []
+                },
+                {
+                    "ancestorTitles": ["TechnicalAssetPopup"],
+                    "fullName": "TechnicalAssetPopup should not show access mode choice when no access mode matches the selected technical asset type",
+                    "status": "passed",
+                    "title": "should not show access mode choice when no access mode matches the selected technical asset type",
+                    "duration": 447.35945800000036,
+                    "failureMessages": [],
+                    "meta": {},
+                    "tags": [],
+                    "benchmarks": []
+                },
+                {
+                    "ancestorTitles": ["TechnicalAssetPopup"],
+                    "fullName": "TechnicalAssetPopup should clear the result and skip rendering the access path for a plugin without a platform",
+                    "status": "failed",
+                    "title": "should clear the result and skip rendering the access path for a plugin without a platform",
+                    "duration": 356.50324999999975,
+                    "failureMessages": [
+                        "AssertionError: expected \"vi.fn()\" to not be called at all, but actually been called 1 times\n\nReceived:\n\n  1st vi.fn() call:\n\n    Array []\n\n\nNumber of calls: 1\n\n    at Proxy.<anonymous> (file:///Users/hannesdesmet/Projects/portal-worktrees/data-product-portal-0024-dynamic-plugin-system/frontend/node_modules/vitest/dist/chunks/index.OVGXnVRj.js:2204:51)\n    at Proxy.<anonymous> (file:///Users/hannesdesmet/Projects/portal-worktrees/data-product-portal-0024-dynamic-plugin-system/frontend/node_modules/vitest/dist/chunks/index.OVGXnVRj.js:1934:14)\n    at Proxy.methodWrapper (file:///Users/hannesdesmet/Projects/portal-worktrees/data-product-portal-0024-dynamic-plugin-system/frontend/node_modules/chai/index.js:1700:25)\n    at /Users/hannesdesmet/Projects/portal-worktrees/data-product-portal-0024-dynamic-plugin-system/frontend/src/tests/pages/data-product/components/data-product-tabs/data-output-tab/components/add-technical-asset-popup/add-technical-asset-popup.test.tsx:155:31\n    at runNextTicks (node:internal/process/task_queues:65:5)\n    at listOnTimeout (node:internal/timers:575:9)\n    at processTimers (node:internal/timers:549:7)\n    at file:///Users/hannesdesmet/Projects/portal-worktrees/data-product-portal-0024-dynamic-plugin-system/frontend/node_modules/vitest/dist/chunks/run.CQOUYP-x.js:2783:20"
+                    ],
+                    "meta": {},
+                    "tags": [],
+                    "benchmarks": []
+                }
+            ],
+            "startTime": 1789734254384,
+            "endTime": 1789734257049.5032,
+            "status": "failed",
+            "message": "",
+            "name": "/Users/hannesdesmet/Projects/portal-worktrees/data-product-portal-0024-dynamic-plugin-system/frontend/src/tests/pages/data-product/components/data-product-tabs/data-output-tab/components/add-technical-asset-popup/add-technical-asset-popup.test.tsx"
+        }
+    ]
+}
