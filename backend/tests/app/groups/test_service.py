@@ -84,7 +84,9 @@ class TestGroupService:
         service.delete_group(group_id=group_id)
         with pytest.raises(HTTPException):
             service.get_group(group_id=group_id)
+        with pytest.raises(HTTPException):
             service.get_membership(group_id=group_id, member_identity_id=user1.id)
+        with pytest.raises(HTTPException):
             service.get_membership(group_id=group_id, member_identity_id=user2.id)
 
         # Members themselves must remain.
@@ -120,7 +122,9 @@ class TestGroupService:
         service.delete_group(group_id=group_id)
         with pytest.raises(HTTPException):
             service.get_group(group_id=group_id)
+        with pytest.raises(HTTPException):
             DataProductRoleAssignmentService(session).get_assignment(
                 data_product_assignment_id
             )
+        with pytest.raises(HTTPException):
             GlobalRoleAssignmentService(session).get_assignment(global_assignment_id)
