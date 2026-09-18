@@ -109,7 +109,7 @@ class TestOutputPortRouter:
             permissions=[AuthorizationAction.GLOBAL__CREATE_OUTPUT_PORT],
         )
         GlobalRoleAssignmentFactory(
-            user_id=user.id,
+            identity_id=user.id,
             role_id=role.id,
         )
         data_product = DataProductFactory()

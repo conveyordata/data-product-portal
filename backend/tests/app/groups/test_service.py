@@ -16,7 +16,7 @@ class TestGroupService:
         member_group = GroupFactory()
         service = GroupService(session)
 
-        with pytest.raises(HTTPException, match="Nested groups are not allowed."):
+        with pytest.raises(HTTPException, match="Only users and machine users can be group members."):
             service.add_member(group_id=parent_group.id, member_identity_id=member_group.id,)
 
     def test_user_can_belong_to_group(self, session):
