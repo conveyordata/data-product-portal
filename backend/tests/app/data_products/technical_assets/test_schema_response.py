@@ -1,9 +1,3 @@
-"""The result string when a plugin uses no platform service.
-
-Built-in types take their template from PlatformService. A plugin that opts out
-of platforms has no service row to read, so it declares its own template.
-"""
-
 from typing import ClassVar, Optional
 from uuid import uuid4
 
@@ -49,7 +43,6 @@ def _item(
 
 
 def test_result_string__still_uses_the_platform_service_template():
-    """Regression: a technical asset backed by a platform service is unchanged."""
     configuration = PluginWithoutPlatform(repository="some-repo")
 
     item = _item(configuration, _service("s3://bucket/{repository}"))
@@ -74,7 +67,6 @@ def test_result_string__is_empty_when_the_plugin_declares_no_template():
 
 
 def test_technical_info__is_empty_without_a_platform_service():
-    """There is no platform, so there are no per-environment configurations."""
     configuration = PluginWithoutPlatform(repository="some-repo")
 
     item = _item(configuration, None)
