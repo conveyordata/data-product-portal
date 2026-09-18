@@ -100,8 +100,8 @@ export type TechnicalAsset = {
   status: TechnicalAssetStatus;
   technical_mapping: TechnicalMapping;
   owner_id: string;
-  platform_id: string;
-  service_id: string;
+  platform_id?: string | null;
+  service_id?: string | null;
   /** Configuration of the technical asset. The available fields depend on `name`; retrieve them from /v2/plugins/{name}/form. */
   configuration: {
     name: string;
