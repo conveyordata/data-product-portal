@@ -48,8 +48,10 @@ class DataProductVisibility(enum.Enum):
 
 
 def _has_user_access_to_hidden_data_product(cls, user_id: uuid.UUID):
-    user_group_ids = select(GroupMembership.group_id).where(
-        GroupMembership.member_identity_id == user_id
+    user_group_ids = (
+        select(GroupMembership.group_id)
+        .where(GroupMembership.member_identity_id == user_id)
+        .correlate_except(GroupMembership)
     )
     return (
         select(DataProductRoleAssignment.id)
@@ -59,6 +61,7 @@ def _has_user_access_to_hidden_data_product(cls, user_id: uuid.UUID):
             DataProductRoleAssignment.identity_id.in_(user_group_ids)
         ))
         .where(DataProductRoleAssignment.decision == DecisionStatus.APPROVED)
+        .correlate_except(DataProductRoleAssignment)
         .exists()
     )
 

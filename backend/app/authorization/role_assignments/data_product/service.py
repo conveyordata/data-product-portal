@@ -5,7 +5,7 @@ from uuid import UUID
 
 from fastapi import HTTPException, status
 from sqlalchemy import asc, func, or_, select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, contains_eager
 
 from app.authorization.role_assignments.data_product.model import (
     DataProductRoleAssignment as DataProductRoleAssignmentModel,
@@ -43,7 +43,15 @@ class RoleAssignmentService:
         role_id: Optional[UUID] = None,
         decision: Optional[DecisionStatus] = None,
     ) -> Sequence[DataProductRoleAssignment]:
-        query = select(DataProductRoleAssignmentModel)
+        """
+        Lists assignments for a given data product, identity, or role.
+        Joins to exclude assignments whose data product is hidden from the current user,
+        so the Pydantic validation doesn't fail down the line.
+        Uses `contains_eager` to avoid a 2nd query caused by lazy loading that will be executed anyway.
+        """
+        query = (select(DataProductRoleAssignmentModel)
+                 .join(DataProductRoleAssignmentModel.data_product)
+                 .options(contains_eager(DataProductRoleAssignmentModel.data_product)))
         if data_product_id is not None:
             query = query.where(
                 DataProductRoleAssignmentModel.data_product_id == data_product_id
