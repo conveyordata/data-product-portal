@@ -18,6 +18,7 @@ from app.authorization.role_assignments.global_.schema import (
 from app.authorization.roles.model import Role as RoleModel
 from app.authorization.roles.schema import Prototype, Scope
 from app.database.database import ensure_exists
+from app.users.model import User as UserModel
 from app.users.schema import User
 
 
@@ -35,7 +36,8 @@ class RoleAssignmentService:
         role_id: Optional[UUID] = None,
         decision: Optional[DecisionStatus] = None,
     ) -> Sequence[GlobalRoleAssignment]:
-        query = select(GlobalRoleAssignmentModel)
+        query = (select(GlobalRoleAssignmentModel)
+                 .join(UserModel, UserModel.id == GlobalRoleAssignmentModel.identity_id)) ## TODO Remove when frontend supports identities
         if identity_id is not None:
             query = query.where(GlobalRoleAssignmentModel.identity_id == identity_id)
         if role_id is not None:

@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Literal, Optional, Sequence, Union
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.role_assignments.global_.model import (
@@ -15,7 +15,7 @@ from app.users.schema import User
 
 
 class CreateGlobalRoleAssignment(BaseModel):
-    identity_id: UUID
+    user_id: UUID ## TODO Replace by identity_id
     role_id: Union[UUID, Literal["admin"]]
 
 
@@ -38,7 +38,7 @@ class RoleAssignmentRequest(BaseModel):
 
 class GlobalRoleAssignmentResponse(ORMModel):
     id: UUID
-    identity: Identity
+    user: User = Field(validation_alias="identity") # TODO replace by identity: Identity
     role: Role
     decision: DecisionStatus
     requested_on: Optional[datetime]

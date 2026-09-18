@@ -51,6 +51,7 @@ class RoleAssignmentService:
         """
         query = (select(DataProductRoleAssignmentModel)
                  .join(DataProductRoleAssignmentModel.data_product)
+                 .join(UserModel, UserModel.id == DataProductRoleAssignmentModel.identity_id) ## TODO Remove when frontend supports identities
                  .options(contains_eager(DataProductRoleAssignmentModel.data_product)))
         if data_product_id is not None:
             query = query.where(
