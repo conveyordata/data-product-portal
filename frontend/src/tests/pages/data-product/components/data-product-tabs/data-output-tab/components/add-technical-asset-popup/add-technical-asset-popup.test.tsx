@@ -1,5 +1,5 @@
 import type { UserEvent } from '@testing-library/user-event/dist/cjs/setup/setup.js';
-import { HttpResponse, http } from 'msw';
+import { delay, HttpResponse, http } from 'msw';
 import { AddTechnicalAssetPopup } from '@/pages/data-product/components/data-product-tabs/technical-asset-tab/components/add-technical-asset-popup/add-technical-asset-popup.tsx';
 import { allowAllAuth } from '@/tests/mocks/auth.ts';
 import { mockAccessModesHttp } from '@/tests/mocks/configurationAccessModes.ts';
@@ -153,5 +153,28 @@ describe('TechnicalAssetPopup', async () => {
 
         await waitFor(() => expect(screen.getByLabelText(/repository link/i)).toHaveValue(''));
         expect(renderSpy).not.toHaveBeenCalled();
+    }, 15000);
+
+    it('should not restore a stale access path when switching to a platformless plugin while a render request is in flight', async () => {
+        defaultMocks();
+        server.use(
+            http.post('*/api/v2/plugins/render_technical_asset_access_path', async () => {
+                await delay(200);
+                return HttpResponse.json({ technical_asset_access_path: 'stale-s3-path' });
+            }),
+        );
+
+        const user = userEvent.setup({ delay: null, pointerEventsCheck: 0 });
+        renderWithProviders(
+            <AddTechnicalAssetPopup onClose={vi.fn()} isOpen dataProductId={mockDataProducts[0].id} debounce={0} />,
+        );
+
+        await fillInNameAndDescription(user);
+        await fillInS3(user);
+        await fillInGitHub(user);
+
+        await new Promise((resolve) => setTimeout(resolve, 300));
+
+        expect(screen.getByLabelText(/repository link/i)).toHaveValue('');
     }, 15000);
 });
