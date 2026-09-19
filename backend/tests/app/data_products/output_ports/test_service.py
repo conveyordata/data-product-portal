@@ -215,9 +215,7 @@ class TestDatasetsService:
         )
         self.set_search_state(finance_dataset, budget_dataset, unrelated_dataset)
 
-        results = self.search_with_static_embeddings(
-            "finance OR budget", user, limit=2
-        )
+        results = self.search_with_static_embeddings("finance OR budget", user, limit=2)
 
         assert {result.id for result in results} == {
             finance_dataset.id,
@@ -282,7 +280,9 @@ class TestDatasetsService:
         expected_default_order = [alpha_dataset.id, zulu_dataset.id]
         assert [result.id for result in whitespace_results] == expected_default_order
         assert [result.id for result in punctuation_results] == expected_default_order
-        assert {result.id for result in stop_word_results} == set(expected_default_order)
+        assert {result.id for result in stop_word_results} == set(
+            expected_default_order
+        )
 
     @staticmethod
     def get_dataset(dataset: Dataset) -> Dataset:
