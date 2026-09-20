@@ -1,4 +1,8 @@
-$color-grey: #6b7280;
+// Each accent carries white button and icon text, so it has to clear 4.5:1
+// against white. The previous values reached 3.7:1 (blue), 2.5:1 (green) and
+// 2.2:1 (orange) and were unreadable on an external screen. Card borders sit at
+// 0.75 alpha to clear 3:1, which the 0.3 alpha tints did not.
+$color-grey: #4b5563; // 7.6:1
 
 $color-blue-background: linear-gradient(
     135deg,
@@ -6,9 +10,9 @@ $color-blue-background: linear-gradient(
     rgba(239, 246, 255, 0.4) 50%,
     rgba(255, 255, 255, 0) 100%
 );
-$color-blue-border: rgba(147, 197, 253, 0.3);
-$color-blue-primary: #3b82f6;
-$color-blue-primary-hover: #2563eb;
+$color-blue-border: rgba(37, 99, 235, 0.75);
+$color-blue-primary: #2563eb; // 5.2:1
+$color-blue-primary-hover: #1d4ed8; // 6.7:1
 
 $color-green-background: linear-gradient(
     135deg,
@@ -16,9 +20,9 @@ $color-green-background: linear-gradient(
     rgba(236, 253, 245, 0.4) 50%,
     rgba(255, 255, 255, 0) 100%
 );
-$color-green-border: rgba(110, 231, 183, 0.3);
-$color-green-primary: #10b981;
-$color-green-primary-hover: #059669;
+$color-green-border: rgba(4, 120, 87, 0.75);
+$color-green-primary: #047857; // 5.5:1
+$color-green-primary-hover: #065f46; // 7.7:1
 
 $color-orange-background: linear-gradient(
     135deg,
@@ -26,9 +30,9 @@ $color-orange-background: linear-gradient(
     rgba(255, 251, 235, 0.4) 50%,
     rgba(255, 255, 255, 0) 100%
 );
-$color-orange-border: rgba(253, 186, 116, 0.3);
-$color-orange-primary: #f59e0b;
-$color-orange-primary-hover: #d97706;
+$color-orange-border: rgba(180, 83, 9, 0.75);
+$color-orange-primary: #b45309; // 5.0:1
+$color-orange-primary-hover: #92400e; // 7.1:1
 
 .sub-text {
     color: $color-grey;
