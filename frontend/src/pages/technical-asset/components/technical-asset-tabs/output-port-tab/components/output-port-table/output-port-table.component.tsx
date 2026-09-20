@@ -2,6 +2,8 @@ import { Flex, Skeleton, Table, type TableColumnsType, type TableProps } from 'a
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { EmptyState } from '@/components/empty-state/empty-state.component.tsx';
+import { OutputPortOutlined } from '@/components/icons';
 import { TABLE_SUBSECTION_PAGINATION } from '@/constants/table.constants.ts';
 import { useTablePagination } from '@/hooks/use-table-pagination.tsx';
 import {
@@ -63,6 +65,15 @@ export function DatasetTable({ dataProductId, dataOutputId, datasets }: Props) {
                 }}
                 rowClassName={styles.tableRow}
                 size="small"
+                locale={{
+                    emptyText: (
+                        <EmptyState
+                            icon={<OutputPortOutlined />}
+                            title={t('No Output Ports yet')}
+                            description={t('Link this Technical Asset to an Output Port to share its data.')}
+                        />
+                    ),
+                }}
             />
         </Flex>
     );

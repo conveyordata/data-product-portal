@@ -47,7 +47,8 @@ export default function QueriesPerConsumerChart({
             title={t('Queries per Consumer')}
             isLoading={isLoading}
             hasData={hasData}
-            emptyDescription={t('No usage data available for this time range')}
+            emptyTitle={t('No usage recorded')}
+            emptyDescription={t('Queries against this Output Port in the selected period appear here.')}
         >
             <Bar {...config} />
         </ChartCard>

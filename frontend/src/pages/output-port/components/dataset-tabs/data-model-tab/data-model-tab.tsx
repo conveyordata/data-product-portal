@@ -1,10 +1,11 @@
 import { FileTextOutlined, UploadOutlined } from '@ant-design/icons';
 import { usePostHog } from '@posthog/react';
 import type { UploadProps } from 'antd';
-import { Alert, Button, Empty, Flex, Space, Table, Tabs, Tag, Typography, Upload } from 'antd';
+import { Button, Flex, Space, Table, Tabs, Tag, Typography, Upload } from 'antd';
 import type { TFunction } from 'i18next';
 import { useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { EmptyState } from '@/components/empty-state/empty-state.component.tsx';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
 import { PosthogEvents } from '@/constants/posthog.constants.ts';
 import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
@@ -17,7 +18,7 @@ import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { dispatchMessage } from '@/utils/feedback.ts';
 import styles from './data-model-tab.module.scss';
 
-const { Text, Title, Paragraph } = Typography;
+const { Text } = Typography;
 
 type Props = {
     datasetId: string;
@@ -158,42 +159,31 @@ export function DataModelTab({ datasetId, dataProductId }: Props) {
 
     if (schemaObjects.length === 0) {
         return (
-            <Flex justify="center" className={styles.emptyContainer}>
-                <Empty
-                    image={<FileTextOutlined className={styles.emptyIcon} />}
-                    style={{ maxWidth: 480 }}
-                    description={
-                        <>
-                            <Title level={4}>{t('Data Model not published yet')}</Title>
-                            <Paragraph type="secondary">
-                                {t(
-                                    "The owner of this Output Port hasn't defined a data model. Reach out to them directly to request it.",
-                                )}
-                            </Paragraph>
-                        </>
-                    }
-                >
-                    {canUpload && (
-                        <Alert
-                            type="info"
-                            showIcon
-                            title={t('As an owner you can upload a schema')}
-                            description={
-                                <Flex align="center" gap="small" wrap>
-                                    {uploadButton}
-                                    <a
-                                        href="https://docs.dataproductportal.com/docs/developer-guide/schema-information"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                    >
-                                        {t('Learn how to upload a schema in the docs')}
-                                    </a>
-                                </Flex>
-                            }
-                        />
-                    )}
-                </Empty>
-            </Flex>
+            <EmptyState
+                icon={<FileTextOutlined />}
+                title={t('No Data Model published yet')}
+                description={
+                    canUpload
+                        ? t('Upload a schema to document the tables and columns behind this Output Port.')
+                        : t(
+                              "The owner of this Output Port hasn't published a data model. Reach out to them to request one.",
+                          )
+                }
+                action={
+                    canUpload && (
+                        <Flex align="center" gap="small" wrap justify="center">
+                            {uploadButton}
+                            <a
+                                href="https://docs.dataproductportal.com/docs/developer-guide/schema-information"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                {t('Learn how to upload a schema')}
+                            </a>
+                        </Flex>
+                    )
+                }
+            />
         );
     }
 
@@ -225,7 +215,15 @@ export function DataModelTab({ datasetId, dataProductId }: Props) {
                     pagination={false}
                     scroll={{ x: 'max-content' }}
                     expandable={{ childrenColumnName: 'properties' }}
-                    locale={{ emptyText: t('No properties defined') }}
+                    locale={{
+                        emptyText: (
+                            <EmptyState
+                                icon={<FileTextOutlined />}
+                                title={t('No columns defined')}
+                                description={t('This table is published without column level detail.')}
+                            />
+                        ),
+                    }}
                 />
             </>
         ),

@@ -3,6 +3,7 @@ import { Col, Input, Row, Table, Typography } from 'antd';
 import { parseAsString, useQueryState } from 'nuqs';
 import { useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { EmptyState } from '@/components/empty-state/empty-state.component.tsx';
 import { useBreadcrumbs } from '@/components/layout/navbar/breadcrumbs/breadcrumb.context.tsx';
 import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
 import {
@@ -180,6 +181,17 @@ export function PeoplePage() {
                     rowClassName={styles.row}
                     size="small"
                     data-testid="people-table"
+                    locale={{
+                        emptyText: (
+                            <EmptyState
+                                icon={<TeamOutlined />}
+                                title={t('No people yet')}
+                                description={t('Everyone with access to the portal appears here.')}
+                                searchTerm={searchTerm ?? undefined}
+                                subject={t('people')}
+                            />
+                        ),
+                    }}
                 />
             </Col>
         </Row>

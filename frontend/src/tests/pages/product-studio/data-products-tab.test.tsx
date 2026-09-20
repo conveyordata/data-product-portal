@@ -53,7 +53,7 @@ describe('DataProductsTab', () => {
         });
 
         await waitFor(() => {
-            expect(screen.getByText('Ready to build your first Data Product?')).toBeInTheDocument();
+            expect(screen.getByText('No Data Products yet')).toBeInTheDocument();
         });
     });
 

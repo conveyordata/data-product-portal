@@ -1,6 +1,8 @@
 import { Table, type TableColumnsType, type TableProps } from 'antd';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { EmptyState } from '@/components/empty-state/empty-state.component.tsx';
+import { ConsumersIcon } from '@/components/icons';
 import { acceptRequest, rejectRequest } from '@/components/pending-access-requests-modal/request-handlers.ts';
 import { ReviewRequestModal } from '@/components/pending-access-requests-modal/review-request-modal.tsx';
 import { DEFAULT_TABLE_PAGINATION } from '@/constants/table.constants.ts';
@@ -22,9 +24,10 @@ type Props = {
     outputPortId: string;
     dataProducts: OutputPortInputPort[];
     isLoading?: boolean;
+    searchTerm?: string;
 };
 
-export function ConsumersTable({ outputPortId, dataProductId, dataProducts, isLoading }: Props) {
+export function ConsumersTable({ outputPortId, dataProductId, dataProducts, isLoading, searchTerm }: Props) {
     const { t } = useTranslation();
     const [revokeOutputPortAsInputPort, { isLoading: isRevokingOutputPortAsInputPort }] =
         useRevokeOutputPortAsInputPortMutation();
@@ -137,6 +140,19 @@ export function ConsumersTable({ outputPortId, dataProductId, dataProducts, isLo
                     className: styles.pagination,
                 }}
                 size="small"
+                locale={{
+                    emptyText: (
+                        <EmptyState
+                            icon={<ConsumersIcon />}
+                            title={t('No consumers yet')}
+                            description={t(
+                                'Data Products and Explorations that are granted access to this Output Port appear here.',
+                            )}
+                            searchTerm={searchTerm}
+                            subject={t('consumers')}
+                        />
+                    ),
+                }}
             />
             {
                 <ReviewRequestModal

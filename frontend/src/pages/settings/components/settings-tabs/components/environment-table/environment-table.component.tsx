@@ -1,5 +1,7 @@
+import { CloudServerOutlined } from '@ant-design/icons';
 import { Flex, Table, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
+import { EmptyState } from '@/components/empty-state/empty-state.component.tsx';
 
 import {
     type EnvironmentGetItem,
@@ -35,6 +37,17 @@ export function EnvironmentTable() {
                 loading={isFetching || isUpdating}
                 rowHoverable
                 size="small"
+                locale={{
+                    emptyText: (
+                        <EmptyState
+                            icon={<CloudServerOutlined />}
+                            title={t('No environments yet')}
+                            description={t(
+                                'Environments are the places data lands, such as development and production.',
+                            )}
+                        />
+                    ),
+                }}
             />
         </Flex>
     );

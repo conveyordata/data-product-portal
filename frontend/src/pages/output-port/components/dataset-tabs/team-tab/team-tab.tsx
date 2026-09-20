@@ -94,7 +94,12 @@ export function TeamTab({ datasetId, dataProductId }: Props) {
                         {t('Add User')}
                     </Button>
                 </Flex>
-                <TeamTable datasetId={datasetId} datasetUsers={filteredUsers} dataProductId={dataProductId} />
+                <TeamTable
+                    datasetId={datasetId}
+                    datasetUsers={filteredUsers}
+                    dataProductId={dataProductId}
+                    searchTerm={searchTerm}
+                />
             </Flex>
             {isVisible && (
                 <UserPopup

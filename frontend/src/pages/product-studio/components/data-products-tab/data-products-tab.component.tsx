@@ -1,13 +1,13 @@
-import { ToolOutlined } from '@ant-design/icons';
 import { usePostHog } from '@posthog/react';
-import { Button, Empty, Flex, Input, Radio, type RadioChangeEvent, Table } from 'antd';
-import Paragraph from 'antd/es/typography/Paragraph';
+import { Button, Flex, Input, Radio, type RadioChangeEvent, Table } from 'antd';
 import { parseAsString, parseAsStringEnum, useQueryState } from 'nuqs';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router';
+import { EmptyState } from '@/components/empty-state/empty-state.component.tsx';
 import { RoleFilter } from '@/components/filters/role-filter.component.tsx';
+import { DataProductOutlined } from '@/components/icons';
 import { PosthogEvents } from '@/constants/posthog.constants.ts';
 import { getDataProductTableColumns } from '@/pages/product-studio/components/data-products-tab/data-products-table-columns.tsx';
 import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
@@ -153,22 +153,15 @@ export function DataProductsTab() {
                 size="small"
                 locale={{
                     emptyText: (
-                        <Empty
-                            styles={{ image: { height: 50 } }}
-                            image={<ToolOutlined style={{ fontSize: 50 }} />}
-                            description={
-                                <>
-                                    <Paragraph style={{ marginTop: 0, opacity: 0.45 }}>
-                                        {t('Ready to build your first Data Product?')}
-                                    </Paragraph>
-                                    <Paragraph style={{ opacity: 0.45 }}>
-                                        {t(
-                                            "It looks like you don't have any Data Products yet. Create one to start managing your data assets.",
-                                        )}
-                                    </Paragraph>
-                                    {createButton}
-                                </>
-                            }
+                        <EmptyState
+                            icon={<DataProductOutlined />}
+                            title={t('No Data Products yet')}
+                            description={t(
+                                'Create a Data Product to start publishing data your organisation can find and use.',
+                            )}
+                            action={createButton}
+                            searchTerm={searchTerm ?? undefined}
+                            subject={t('Data Products')}
                         />
                     ),
                 }}

@@ -1,0 +1,31 @@
+@use "@/styles/globals";
+
+.container {
+    gap: globals.$spacing-s;
+    padding: globals.$spacing-xl globals.$spacing-regular;
+    text-align: center;
+}
+
+.tile {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: globals.$icon-size-ml;
+    height: globals.$icon-size-ml;
+    margin-bottom: globals.$spacing-s;
+    border-radius: globals.$border-radius-lg;
+    font-size: globals.$icon-size-small;
+}
+
+.title {
+    margin: 0;
+}
+
+.description {
+    max-width: 46ch;
+    margin: 0;
+}
+
+.action {
+    margin-top: globals.$spacing-s;
+}

@@ -1,6 +1,8 @@
+import { TagsOutlined } from '@ant-design/icons';
 import { Button, Flex, Space, Table, Typography } from 'antd';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { EmptyState } from '@/components/empty-state/empty-state.component.tsx';
 
 import { useModal } from '@/hooks/use-modal';
 import {
@@ -52,6 +54,15 @@ export function TagsTable() {
                 loading={isFetching || isRemoving}
                 rowHoverable
                 size="small"
+                locale={{
+                    emptyText: (
+                        <EmptyState
+                            icon={<TagsOutlined />}
+                            title={t('No tags yet')}
+                            description={t('Tags help people find related Data Products and Output Ports.')}
+                        />
+                    ),
+                }}
             />
             {isVisible && (mode === 'create' || initial) && (
                 <CreateTagsModal isOpen={isVisible} onClose={handleClose} mode={mode} initial={initial} />

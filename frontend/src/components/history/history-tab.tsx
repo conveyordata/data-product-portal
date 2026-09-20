@@ -1,8 +1,10 @@
+import { HistoryOutlined } from '@ant-design/icons';
 import { Flex, Input, Table, type TableProps } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import type { TFunction } from 'i18next';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { EmptyState } from '@/components/empty-state/empty-state.component.tsx';
 import { HISTORY_PAGINATION } from '@/constants/table.constants';
 import { useTablePagination } from '@/hooks/use-table-pagination';
 import type { GetEventHistoryResponseItem } from '@/store/api/services/generated/dataProductsApi.ts';
@@ -88,6 +90,17 @@ export function HistoryTab({ id, type, history = [], isFetching }: Props) {
                             range1: range[1],
                             count: total,
                         }),
+                }}
+                locale={{
+                    emptyText: (
+                        <EmptyState
+                            icon={<HistoryOutlined />}
+                            title={t('No history yet')}
+                            description={t('Changes made here are recorded and listed in this tab.')}
+                            searchTerm={searchTerm}
+                            subject={t('events')}
+                        />
+                    ),
                 }}
             />
         </Flex>

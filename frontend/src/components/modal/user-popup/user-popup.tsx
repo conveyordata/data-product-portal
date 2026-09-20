@@ -1,7 +1,9 @@
+import { TeamOutlined } from '@ant-design/icons';
 import { Input, List, Modal, Select, Typography } from 'antd';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { EmptyState } from '@/components/empty-state/empty-state.component.tsx';
 import type { Role } from '@/store/api/services/generated/authorizationRolesApi.ts';
 import { type UsersGet, useGetUsersQuery } from '@/store/api/services/generated/usersApi.ts';
 import styles from './user-popup.module.scss';
@@ -56,7 +58,17 @@ export function UserPopup({ onClose, isOpen, roles, item, isLoading, userIdsToHi
                 <List
                     loading={isLoading || isFetchingUsers}
                     size="large"
-                    locale={{ emptyText: t('No users found') }}
+                    locale={{
+                        emptyText: (
+                            <EmptyState
+                                icon={<TeamOutlined />}
+                                title={t('No people to add')}
+                                description={t('Everyone who can be added here already has a role.')}
+                                searchTerm={searchTerm}
+                                subject={t('people')}
+                            />
+                        ),
+                    }}
                     rowKey={(user) => user.id}
                     dataSource={filteredUsers}
                     renderItem={(user) => {

@@ -1,6 +1,8 @@
+import { SettingOutlined } from '@ant-design/icons';
 import { Button, Flex, Table, Typography } from 'antd';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { EmptyState } from '@/components/empty-state/empty-state.component.tsx';
 
 import { useModal } from '@/hooks/use-modal.tsx';
 import {
@@ -82,6 +84,15 @@ export function DataProductSettingsTable({ scope }: Props) {
                 loading={isFetching}
                 rowHoverable
                 size="small"
+                locale={{
+                    emptyText: (
+                        <EmptyState
+                            icon={<SettingOutlined />}
+                            title={t('No custom settings yet')}
+                            description={t('Custom settings add your own fields to Data Products and Output Ports.')}
+                        />
+                    ),
+                }}
             />
             {isVisible && (mode === 'create' || initial) && (
                 <CreateSettingModal scope={scope} onClose={onClose} isOpen={isVisible} mode={mode} initial={initial} />

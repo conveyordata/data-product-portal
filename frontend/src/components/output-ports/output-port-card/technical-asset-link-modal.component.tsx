@@ -2,6 +2,8 @@ import { Button, Checkbox, Flex, Input, List, Modal, Typography } from 'antd';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { EmptyState } from '@/components/empty-state/empty-state.component.tsx';
+import { TechnicalAssetOutlined } from '@/components/icons';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component';
 import { DATA_OUTPUTS_TABLE_PAGINATION } from '@/constants/table.constants';
 import { useTablePagination } from '@/hooks/use-table-pagination';
@@ -167,7 +169,15 @@ export function TechnicalAssetLinkModal({ onClose, dataProductId, datasetId, dat
                         }),
                     onChange: handleCurrentPageChange,
                 }}
-                locale={{ emptyText: t('No Technical Assets available') }}
+                locale={{
+                    emptyText: (
+                        <EmptyState
+                            icon={<TechnicalAssetOutlined />}
+                            title={t('No Technical Assets available')}
+                            description={t('Create a Technical Asset on this Data Product before linking one here.')}
+                        />
+                    ),
+                }}
                 renderItem={(output) => (
                     <List.Item data-cy="technical-asset-link-item">
                         <Flex align="center" gap={12} style={{ width: '100%' }}>

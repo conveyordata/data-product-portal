@@ -1,7 +1,9 @@
+import { TeamOutlined } from '@ant-design/icons';
 import { Flex, Table, type TableColumnsType, type TableProps } from 'antd';
 import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { EmptyState } from '@/components/empty-state/empty-state.component.tsx';
 import { TABLE_SUBSECTION_PAGINATION } from '@/constants/table.constants';
 import { useTablePagination } from '@/hooks/use-table-pagination';
 import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
@@ -22,8 +24,9 @@ type Props = {
     datasetId: string;
     dataProductId: string;
     datasetUsers: OutputPortRoleAssignmentResponse[];
+    searchTerm?: string;
 };
-export function TeamTable({ datasetId, datasetUsers, dataProductId }: Props) {
+export function TeamTable({ datasetId, datasetUsers, dataProductId, searchTerm }: Props) {
     const { t } = useTranslation();
     const { data: dataset, isLoading: isFetchingDataset } = useGetOutputPortQuery({ id: datasetId, dataProductId });
     const [deleteRoleAssignment, { isLoading: isRemovingUser }] = useDeleteOutputPortRoleAssignmentMutation();
@@ -157,6 +160,17 @@ export function TeamTable({ datasetId, datasetUsers, dataProductId }: Props) {
                 }}
                 rowClassName={styles.tableRow}
                 size="small"
+                locale={{
+                    emptyText: (
+                        <EmptyState
+                            icon={<TeamOutlined />}
+                            title={t('No team members yet')}
+                            description={t('Add people to share ownership of this Output Port with them.')}
+                            searchTerm={searchTerm}
+                            subject={t('team members')}
+                        />
+                    ),
+                }}
             />
         </Flex>
     );

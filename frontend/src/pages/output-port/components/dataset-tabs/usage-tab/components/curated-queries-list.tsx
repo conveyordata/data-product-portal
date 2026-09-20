@@ -1,6 +1,8 @@
-import { Card, Empty, List } from 'antd';
+import { ConsoleSqlOutlined } from '@ant-design/icons';
+import { Card, List } from 'antd';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { EmptyState } from '@/components/empty-state/empty-state.component.tsx';
 import type { OutputPortCuratedQuery } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
 import { dispatchMessage } from '@/utils/feedback.ts';
 import { CuratedQueryItem, SQL_LINES_THRESHOLD } from './curated-query-item';
@@ -39,7 +41,15 @@ export function CuratedQueriesList({ queries, isLoading }: CuratedQueriesListPro
                 itemLayout="vertical"
                 dataSource={queriesList}
                 // split={false}
-                locale={{ emptyText: <Empty description={t('No curated queries available')} /> }}
+                locale={{
+                    emptyText: (
+                        <EmptyState
+                            icon={<ConsoleSqlOutlined />}
+                            title={t('No curated queries yet')}
+                            description={t('Owners can publish example queries here to help you get started.')}
+                        />
+                    ),
+                }}
                 bordered={false}
                 renderItem={(item) => {
                     const key = `${item.output_port_id}-${item.sort_order}`;

@@ -1,9 +1,11 @@
 import { ShopOutlined } from '@ant-design/icons';
 import { usePostHog } from '@posthog/react';
-import { Alert, Col, Empty, Flex, Input, Pagination, Row, Typography } from 'antd';
+import { Alert, Col, Flex, Input, Pagination, Row, Typography } from 'antd';
 import { parseAsInteger, parseAsString, useQueryState } from 'nuqs';
 import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { EmptyState } from '@/components/empty-state/empty-state.component.tsx';
+import { OutputPortOutlined } from '@/components/icons';
 import { useBreadcrumbs } from '@/components/layout/navbar/breadcrumbs/breadcrumb.context.tsx';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
 import { PosthogEvents } from '@/constants/posthog.constants';
@@ -113,7 +115,13 @@ export function Marketplace() {
                     </Flex>
                 ) : (
                     <Flex justify="center">
-                        <Empty description={t('No results match you search')} />
+                        <EmptyState
+                            icon={<OutputPortOutlined />}
+                            title={t('No Output Ports published yet')}
+                            description={t('Output Ports shared with the organisation show up here, ready to request.')}
+                            searchTerm={searchTerm ?? undefined}
+                            subject={t('Output Ports')}
+                        />
                     </Flex>
                 )}
 

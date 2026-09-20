@@ -1,7 +1,9 @@
+import { TeamOutlined } from '@ant-design/icons';
 import { Flex, Table, type TableColumnsType, type TableProps } from 'antd';
 import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { EmptyState } from '@/components/empty-state/empty-state.component.tsx';
 import { TABLE_SUBSECTION_PAGINATION } from '@/constants/table.constants';
 import { useTablePagination } from '@/hooks/use-table-pagination';
 import { getDataProductUsersTableColumns } from '@/pages/data-product/components/data-product-tabs/team-tab/components/team-table/team-table-columns';
@@ -21,8 +23,9 @@ import styles from './team-table.module.scss';
 type Props = {
     dataProductId: string;
     dataProductUsers: DataProductRoleAssignmentResponse[];
+    searchTerm?: string;
 };
-export function TeamTable({ dataProductId, dataProductUsers }: Props) {
+export function TeamTable({ dataProductId, dataProductUsers, searchTerm }: Props) {
     const { t } = useTranslation();
     const { data: dataProduct, isLoading: isLoadingDataProduct } = useGetDataProductQuery(dataProductId);
     const [deleteRoleAssignment, { isLoading: isRemovingUserFromDataProduct }] =
@@ -167,6 +170,17 @@ export function TeamTable({ dataProductId, dataProductUsers }: Props) {
                 }}
                 rowClassName={styles.tableRow}
                 size="small"
+                locale={{
+                    emptyText: (
+                        <EmptyState
+                            icon={<TeamOutlined />}
+                            title={t('No team members yet')}
+                            description={t('Add people to share ownership of this Data Product with them.')}
+                            searchTerm={searchTerm}
+                            subject={t('team members')}
+                        />
+                    ),
+                }}
             />
         </Flex>
     );

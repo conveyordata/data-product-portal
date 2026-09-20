@@ -43,6 +43,7 @@ export function ConsumersTab({ outputPortId, dataProductId }: Props) {
                 dataProductId={dataProductId}
                 dataProducts={filteredDataProducts}
                 isLoading={isLoading}
+                searchTerm={searchTerm}
             />
         </Flex>
     );

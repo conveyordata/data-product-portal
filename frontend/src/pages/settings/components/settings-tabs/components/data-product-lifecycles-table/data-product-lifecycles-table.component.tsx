@@ -1,6 +1,8 @@
+import { FlagOutlined } from '@ant-design/icons';
 import { Button, Flex, Table, Typography } from 'antd';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { EmptyState } from '@/components/empty-state/empty-state.component.tsx';
 
 import { useModal } from '@/hooks/use-modal.tsx';
 import {
@@ -68,6 +70,17 @@ export function DataProductLifecyclesTable() {
                 loading={isFetching}
                 rowHoverable
                 size="small"
+                locale={{
+                    emptyText: (
+                        <EmptyState
+                            icon={<FlagOutlined />}
+                            title={t('No lifecycle stages yet')}
+                            description={t(
+                                'Lifecycle stages show how far along a Data Product is, from draft to ready.',
+                            )}
+                        />
+                    ),
+                }}
             />
             {isVisible && (mode === 'create' || initial) && (
                 <CreateLifecycleModal onClose={handleClose} t={t} isOpen={isVisible} mode={mode} initial={initial} />

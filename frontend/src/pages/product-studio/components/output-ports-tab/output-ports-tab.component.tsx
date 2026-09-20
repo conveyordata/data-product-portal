@@ -1,13 +1,13 @@
-import { DeploymentUnitOutlined } from '@ant-design/icons';
 import { usePostHog } from '@posthog/react';
-import { Button, Empty, Flex, Input, Radio, type RadioChangeEvent, Table } from 'antd';
-import Paragraph from 'antd/es/typography/Paragraph';
+import { Button, Flex, Input, Radio, type RadioChangeEvent, Table } from 'antd';
 import { parseAsString, parseAsStringEnum, useQueryState } from 'nuqs';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router';
+import { EmptyState } from '@/components/empty-state/empty-state.component.tsx';
 import { RoleFilter } from '@/components/filters/role-filter.component.tsx';
+import { OutputPortOutlined } from '@/components/icons';
 import { PosthogEvents } from '@/constants/posthog.constants';
 import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
 import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
@@ -184,22 +184,15 @@ export function OutputPortsTab() {
                 size="small"
                 locale={{
                     emptyText: (
-                        <Empty
-                            styles={{ image: { height: 50 } }}
-                            image={<DeploymentUnitOutlined style={{ fontSize: 50 }} />}
-                            description={
-                                <>
-                                    <Paragraph style={{ marginTop: 0, opacity: 0.45 }}>
-                                        {t('Share your data with the organisation')}
-                                    </Paragraph>
-                                    <Paragraph style={{ opacity: 0.45 }}>
-                                        {t(
-                                            'Output Ports are a way for others to access a flavour of your Data Product. You can select an existing Data Product to add a new flavour to it or create a new Data Product to get started.',
-                                        )}
-                                    </Paragraph>
-                                    {createDataProductButton}
-                                </>
-                            }
+                        <EmptyState
+                            icon={<OutputPortOutlined />}
+                            title={t('No Output Ports yet')}
+                            description={t(
+                                'An Output Port is how others get access to part of your Data Product. Create a Data Product first, then add an Output Port to it.',
+                            )}
+                            action={createDataProductButton}
+                            searchTerm={searchTerm ?? undefined}
+                            subject={t('Output Ports')}
                         />
                     ),
                 }}

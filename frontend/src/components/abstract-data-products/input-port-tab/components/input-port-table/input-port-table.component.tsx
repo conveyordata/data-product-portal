@@ -2,6 +2,8 @@ import { Table, type TableColumnsType, type TableProps } from 'antd';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { EmptyState } from '@/components/empty-state/empty-state.component.tsx';
+import { OutputPortOutlined } from '@/components/icons';
 import { DEFAULT_TABLE_PAGINATION } from '@/constants/table.constants.ts';
 import { useTablePagination } from '@/hooks/use-table-pagination.tsx';
 import type { AbstractDataProductInputPort as InputPort } from '@/store/api/services/generated/dataProductsApi.ts';
@@ -70,6 +72,15 @@ export function InputPortTable({
             }}
             rowClassName={styles.tableRow}
             size="small"
+            locale={{
+                emptyText: (
+                    <EmptyState
+                        icon={<OutputPortOutlined />}
+                        title={t('No Input Ports yet')}
+                        description={t('Request access to an Output Port in the Marketplace to consume its data here.')}
+                    />
+                ),
+            }}
         />
     );
 }

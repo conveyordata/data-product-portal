@@ -1,6 +1,8 @@
+import { SafetyCertificateOutlined } from '@ant-design/icons';
 import { Button, Flex, Popconfirm, Table, Typography } from 'antd';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { EmptyState } from '@/components/empty-state/empty-state.component.tsx';
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
 import AccessModesModal from '@/pages/settings/components/settings-tabs/access-policy-tab/access-modes-modal.tsx';
 import {
@@ -162,6 +164,15 @@ export default function AccessModes() {
                 rowKey={(record) => record.id}
                 loading={isFetching}
                 size="small"
+                locale={{
+                    emptyText: (
+                        <EmptyState
+                            icon={<SafetyCertificateOutlined />}
+                            title={t('No access modes yet')}
+                            description={t('Access modes describe how people may use the data they are granted.')}
+                        />
+                    ),
+                }}
             />
             {openModal && <AccessModesModal onClose={cancelModal} editAccessMode={editAccessMode} />}
         </>

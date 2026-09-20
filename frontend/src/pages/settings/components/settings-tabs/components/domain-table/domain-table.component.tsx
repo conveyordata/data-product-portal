@@ -1,6 +1,8 @@
+import { ApartmentOutlined } from '@ant-design/icons';
 import { Button, Flex, Table, Typography } from 'antd';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { EmptyState } from '@/components/empty-state/empty-state.component.tsx';
 
 import { useModal } from '@/hooks/use-modal';
 import {
@@ -74,6 +76,15 @@ export function DomainTable() {
                 rowHoverable
                 rowClassName={() => 'editable-row'}
                 size="small"
+                locale={{
+                    emptyText: (
+                        <EmptyState
+                            icon={<ApartmentOutlined />}
+                            title={t('No domains yet')}
+                            description={t('Domains group Data Products by the part of the business that owns them.')}
+                        />
+                    ),
+                }}
             />
             {isVisible && (mode === 'create' || initial) && (
                 <CreateDomainModal isOpen={isVisible} onClose={handleClose} mode={mode} initial={initial} />

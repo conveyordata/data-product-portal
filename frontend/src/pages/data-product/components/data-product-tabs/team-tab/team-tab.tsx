@@ -93,7 +93,7 @@ export function TeamTab({ dataProductId }: Props) {
                         {t('Add User')}
                     </Button>
                 </Flex>
-                <TeamTable dataProductId={dataProductId} dataProductUsers={filteredUsers} />
+                <TeamTable dataProductId={dataProductId} dataProductUsers={filteredUsers} searchTerm={searchTerm} />
             </Flex>
             {isVisible && (
                 <UserPopup

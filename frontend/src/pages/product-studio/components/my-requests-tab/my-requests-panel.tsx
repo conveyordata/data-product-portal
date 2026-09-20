@@ -1,7 +1,9 @@
+import { InboxOutlined } from '@ant-design/icons';
 import { Flex, Input, Radio, Table, Tooltip } from 'antd';
 import { parseAsBoolean, parseAsString, useQueryState } from 'nuqs';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { EmptyState } from '@/components/empty-state/empty-state.component.tsx';
 import { useTablePagination } from '@/hooks/use-table-pagination.tsx';
 import { useTableColumns } from '@/pages/product-studio/components/my-requests-tab/use-table-columns.tsx';
 import { type TableRow, transformToTableRow } from '@/pages/product-studio/components/requests/request-utils.ts';
@@ -64,7 +66,17 @@ export function MyRequestsTab() {
                     },
                 }}
                 locale={{
-                    emptyText: t('No requests.'),
+                    emptyText: (
+                        <EmptyState
+                            icon={<InboxOutlined />}
+                            title={t('No requests yet')}
+                            description={t(
+                                'Access you request to Output Ports appears here, together with the decision on it.',
+                            )}
+                            searchTerm={searchTerm ?? undefined}
+                            subject={t('requests')}
+                        />
+                    ),
                 }}
             />
         </Flex>

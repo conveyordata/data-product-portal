@@ -1,8 +1,9 @@
-import { InfoCircleOutlined } from '@ant-design/icons';
+import { ClockCircleOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import { Checkbox, Flex, InputNumber, Select, Table, type TableColumnsType, Tooltip, Typography } from 'antd';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDebouncedCallback } from 'use-debounce';
+import { EmptyState } from '@/components/empty-state/empty-state.component.tsx';
 import { AbstractProductIcon } from '@/components/icons/index.tsx';
 import {
     AbstractDataProductType,
@@ -222,6 +223,15 @@ export default function AccessDurations() {
                 pagination={false}
                 tableLayout="fixed"
                 size="small"
+                locale={{
+                    emptyText: (
+                        <EmptyState
+                            icon={<ClockCircleOutlined />}
+                            title={t('No access durations yet')}
+                            description={t('Access durations set how long an approved request stays valid.')}
+                        />
+                    ),
+                }}
             />
         </Flex>
     );

@@ -1,8 +1,7 @@
-import { QuestionCircleOutlined } from '@ant-design/icons';
+import { QuestionCircleOutlined, SettingOutlined } from '@ant-design/icons';
 import {
     Descriptions,
     type DescriptionsProps,
-    Empty,
     Flex,
     Form,
     type FormProps,
@@ -16,6 +15,7 @@ import {
 import { type ReactElement, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { EmptyState } from '@/components/empty-state/empty-state.component.tsx';
 import { DESCRIPTIONS_LABEL_WIDTH, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants';
 import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
 import {
@@ -245,7 +245,15 @@ export function DataProductSettings({ id, scope, dataProductId }: Props) {
         );
     }, [updatedSettings, t, token]);
     const isLoading = isFetching || isFetchingDP || isFetchingDS;
-    if (!isLoading && updatedSettings.length === 0) return <Empty description="No settings to show" />;
+    if (!isLoading && updatedSettings.length === 0) {
+        return (
+            <EmptyState
+                icon={<SettingOutlined />}
+                title={t('No custom settings')}
+                description={t('Settings your administrator defines for this type of resource appear here.')}
+            />
+        );
+    }
 
     return (
         <Form

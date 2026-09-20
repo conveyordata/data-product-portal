@@ -1,6 +1,8 @@
+import { AppstoreOutlined } from '@ant-design/icons';
 import { Button, Flex, Table, Typography } from 'antd';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { EmptyState } from '@/components/empty-state/empty-state.component.tsx';
 
 import { useModal } from '@/hooks/use-modal';
 import {
@@ -71,6 +73,17 @@ export function DataProductTypeTable() {
                 loading={isFetching}
                 rowHoverable
                 size="small"
+                locale={{
+                    emptyText: (
+                        <EmptyState
+                            icon={<AppstoreOutlined />}
+                            title={t('No Data Product types yet')}
+                            description={t(
+                                'Types describe the shape of a Data Product, such as source aligned or consumer aligned.',
+                            )}
+                        />
+                    ),
+                }}
             />
             {isVisible && (mode === 'create' || initial) && (
                 <CreateDataProductTypeModal onClose={handleClose} isOpen={isVisible} mode={mode} initial={initial} />

@@ -57,7 +57,8 @@ export default function QueriesOverTimeChart({
             title={t('Queries over time')}
             isLoading={isLoading}
             hasData={hasData}
-            emptyDescription={t('No usage data available for this time range')}
+            emptyTitle={t('No usage recorded')}
+            emptyDescription={t('Queries against this Output Port in the selected period appear here.')}
         >
             <Area {...config} />
         </ChartCard>

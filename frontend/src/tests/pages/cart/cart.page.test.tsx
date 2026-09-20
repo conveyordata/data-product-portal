@@ -50,7 +50,7 @@ describe('Cart', () => {
                 currentUser: mockUsers[0],
             });
 
-            await screen.findByText(/Your cart is currently empty/);
+            await screen.findByText(/Your cart is empty/);
         });
     });
     describe('Cart should support existing data products', () => {

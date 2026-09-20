@@ -1,7 +1,9 @@
+import { InboxOutlined } from '@ant-design/icons';
 import { Flex, Input, Table } from 'antd';
 import { parseAsString, useQueryState } from 'nuqs';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { EmptyState } from '@/components/empty-state/empty-state.component.tsx';
 import { acceptRequest, rejectRequest } from '@/components/pending-access-requests-modal/request-handlers.ts';
 import { ReviewRequestModal } from '@/components/pending-access-requests-modal/review-request-modal.tsx';
 import { useTablePagination } from '@/hooks/use-table-pagination.tsx';
@@ -53,7 +55,17 @@ export function PendingAccessRequestsTab() {
                     },
                 }}
                 locale={{
-                    emptyText: t('No pending requests.'),
+                    emptyText: (
+                        <EmptyState
+                            icon={<InboxOutlined />}
+                            title={t('Nothing to review')}
+                            description={t(
+                                'When someone requests access to a Data Product or Output Port you own, it appears here for you to approve or deny.',
+                            )}
+                            searchTerm={searchTerm ?? undefined}
+                            subject={t('pending requests')}
+                        />
+                    ),
                 }}
             />
             <ReviewRequestModal

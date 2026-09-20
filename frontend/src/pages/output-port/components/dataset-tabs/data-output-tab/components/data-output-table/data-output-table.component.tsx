@@ -2,6 +2,8 @@ import { Flex, Table, type TableColumnsType, type TableProps } from 'antd';
 import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { EmptyState } from '@/components/empty-state/empty-state.component.tsx';
+import { TechnicalAssetOutlined } from '@/components/icons';
 import { TABLE_SUBSECTION_PAGINATION } from '@/constants/table.constants.ts';
 import { useTablePagination } from '@/hooks/use-table-pagination.tsx';
 import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
@@ -127,6 +129,15 @@ export function DataOutputTable({ dataProductId, datasetId, dataOutputs, isLoadi
                 }}
                 rowClassName={styles.tableRow}
                 size="small"
+                locale={{
+                    emptyText: (
+                        <EmptyState
+                            icon={<TechnicalAssetOutlined />}
+                            title={t('No Technical Assets yet')}
+                            description={t('Link a Technical Asset to expose the data behind this Output Port.')}
+                        />
+                    ),
+                }}
             />
         </Flex>
     );
