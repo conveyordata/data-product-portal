@@ -10,7 +10,12 @@
 
 .editorContent {
     flex: 1;
+    display: flex;
     overflow-y: auto;
+}
+
+.editorContentEditable {
+    cursor: text;
 }
 
 .submitButton {
@@ -20,11 +25,10 @@
 }
 
 .editor {
-    height: 100%;
+    flex: 1;
     border: 1px solid transparent;
     border-radius: globals.$border-radius;
     padding: globals.$spacing-s globals.$spacing-m;
-    overflow-y: auto;
 
     &:focus {
         outline: none;
@@ -52,15 +56,16 @@
     }
     th,
     td {
-        border: 1px solid #ddd;
-        padding: 8px;
+        border: 1px solid globals.$border-color;
+        padding: globals.$spacing-s;
         text-align: left;
     }
     th {
-        background-color: #f2f2f2;
+        background-color: globals.$quaternary-color-fill;
     }
 }
 
 .content {
-    height: 100%;
+    flex: 1;
+    display: flex;
 }

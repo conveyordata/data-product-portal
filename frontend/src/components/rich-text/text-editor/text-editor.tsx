@@ -7,7 +7,8 @@ import { Typography } from '@tiptap/extension-typography';
 import { EditorContent, useEditor } from '@tiptap/react';
 import { StarterKit } from '@tiptap/starter-kit';
 import { Button, Tooltip } from 'antd';
-import { useEffect, useState } from 'react';
+import clsx from 'clsx';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { TextStyleCustomExtension } from '@/components/rich-text/extensions/text-style/text-style-custom-extension.tsx';
@@ -37,6 +38,8 @@ export const TextEditor = ({
     const { t } = useTranslation();
     const [content, setContent] = useState(initialContent);
     const [isEditMode, setIsEditMode] = useState(isInitialEditMode && !isDisabled);
+    const contentRef = useRef<HTMLDivElement>(null);
+    const isEditable = isEditMode && !isDisabled;
     const editor = useEditor({
         extensions,
         onUpdate: ({ editor }) => {
@@ -70,6 +73,20 @@ export const TextEditor = ({
         }
     }, [isEditMode, isDisabled, editor]);
 
+    useEffect(() => {
+        const container = contentRef.current;
+        if (!container || !editor || !isEditable) {
+            return;
+        }
+        const focusEditor = (event: globalThis.MouseEvent) => {
+            if (!editor.view.dom.contains(event.target as globalThis.Node)) {
+                editor.commands.focus('end');
+            }
+        };
+        container.addEventListener('mousedown', focusEditor);
+        return () => container.removeEventListener('mousedown', focusEditor);
+    }, [editor, isEditable]);
+
     if (!editor) {
         return null;
     }
@@ -77,7 +94,7 @@ export const TextEditor = ({
     return (
         <div className={styles.editorContainer}>
             {isEditMode && <TextEditorMenu editor={editor} isDisabled={isDisabled} />}
-            <div className={styles.editorContent}>
+            <div ref={contentRef} className={clsx(styles.editorContent, isEditable && styles.editorContentEditable)}>
                 <EditorContent editor={editor} content={content ?? undefined} className={styles.content} />
             </div>
             {isEditMode ? (

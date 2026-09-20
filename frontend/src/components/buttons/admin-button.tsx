@@ -1,4 +1,4 @@
-import { CrownOutlined, UserSwitchOutlined } from '@ant-design/icons';
+import { CrownOutlined, StopOutlined } from '@ant-design/icons';
 import { usePostHog } from '@posthog/react';
 import type { MenuProps } from 'antd';
 import { useTranslation } from 'react-i18next';
@@ -46,7 +46,7 @@ export function AdminButton({ onAdminAction, isAdmin }: Props): Required<MenuPro
 
     return {
         key: 'BecomeAdmin',
-        icon: isAdmin ? <UserSwitchOutlined /> : <CrownOutlined />,
+        icon: isAdmin ? <StopOutlined /> : <CrownOutlined />,
         label: isAdmin ? t('Remove admin privileges') : t('Gain temporary admin privileges'),
         onClick: handleAdminAction,
     };

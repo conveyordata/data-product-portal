@@ -1,4 +1,4 @@
-import { DatabaseOutlined, SafetyOutlined, UploadOutlined } from '@ant-design/icons';
+import { FileTextOutlined, UploadOutlined } from '@ant-design/icons';
 import { usePostHog } from '@posthog/react';
 import type { UploadProps } from 'antd';
 import { Alert, Button, Empty, Flex, Space, Table, Tabs, Tag, Typography, Upload } from 'antd';
@@ -160,7 +160,7 @@ export function DataModelTab({ datasetId, dataProductId }: Props) {
         return (
             <Flex justify="center" className={styles.emptyContainer}>
                 <Empty
-                    image={<DatabaseOutlined className={styles.emptyIcon} />}
+                    image={<FileTextOutlined className={styles.emptyIcon} />}
                     style={{ maxWidth: 480 }}
                     description={
                         <>
@@ -176,11 +176,11 @@ export function DataModelTab({ datasetId, dataProductId }: Props) {
                     {canUpload && (
                         <Alert
                             type="info"
-                            icon={<SafetyOutlined />}
                             showIcon
                             title={t('As an owner you can upload a schema')}
                             description={
-                                <Space direction="vertical" size="small">
+                                <Flex align="center" gap="small" wrap>
+                                    {uploadButton}
                                     <a
                                         href="https://docs.dataproductportal.com/docs/developer-guide/schema-information"
                                         target="_blank"
@@ -188,11 +188,7 @@ export function DataModelTab({ datasetId, dataProductId }: Props) {
                                     >
                                         {t('Learn how to upload a schema in the docs')}
                                     </a>
-                                    <Space size="small">
-                                        <Text>{t('Or upload a schema now')}</Text>
-                                        {uploadButton}
-                                    </Space>
-                                </Space>
+                                </Flex>
                             }
                         />
                     )}
