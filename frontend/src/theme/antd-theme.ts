@@ -4,6 +4,13 @@ const { getDesignToken } = theme;
 
 const token = getDesignToken();
 
+// Borders must stay legible on projectors and external screens, where the antd
+// defaults (#d9d9d9 and #f0f0f0) wash out to nothing.
+const borderTokens = {
+    colorBorder: '#8c8c8c',
+    colorBorderSecondary: '#bfbfbf',
+};
+
 const spacingTokens = {
     sizeUnit: 4,
     sizeStep: 4,
@@ -82,6 +89,7 @@ const blueThemeConfig: ThemeConfig = {
         colorInfoTextHover: token.colorPrimaryTextHover,
         colorInfoTextActive: token.colorPrimaryTextActive,
         ...spacingTokens,
+        ...borderTokens,
     },
     cssVar: {},
 };
@@ -159,6 +167,7 @@ const datamindedThemeConfig: ThemeConfig = {
         colorInfoTextHover: token.colorPrimaryTextHover,
         colorInfoTextActive: token.colorPrimaryTextActive,
         ...spacingTokens,
+        ...borderTokens,
     },
     cssVar: {},
 };
@@ -228,11 +237,11 @@ const greenThemeConfig: ThemeConfig = {
         borderRadiusXS: 4,
         borderRadius: 10,
         borderRadiusLG: 16,
-        colorBorder: '#E7E7E7',
         // -------- Shadow ---------
         boxShadow: '0px 4px 9.2px 3px rgba(94, 94, 94, 0.09)',
         boxShadowSecondary: '2px 7px 9px 0px rgba(116, 111, 111, 0.15)',
         ...spacingTokens,
+        ...borderTokens,
     },
     algorithm: theme.defaultAlgorithm,
     cssVar: {},
