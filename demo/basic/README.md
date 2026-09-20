@@ -184,3 +184,36 @@ LEFT JOIN shipments s ON o.order_id = s.order_ref
 | `order_total` | `DECIMAL(10, 2)` | The total value of the order. |
 | `days_from_order_to_ship` | `INTEGER` | The number of days between placing the order and shipment. |
 | `delivery_status`| `VARCHAR(20)` | The latest known delivery status of the order. |
+
+### 3. Show the Published Data Model
+
+The three source-aligned output ports ship with a published data model, so the Data Model tab is populated from the
+moment the demo starts. Open any output port and select Data Model to show the columns, their logical and physical
+types, and the primary key, unique and partition flags.
+
+| Output Port | Schema Object | Physical Name |
+| --- | --- | --- |
+| `Customers` | `customers` | `sales_crm_customers.customers` |
+| `Orders` | `orders` | `sales_erp_orders.orders` |
+| `Shipments` | `shipments` | `logistics_wms_shipments.shipments` |
+
+`Orders` is the most interesting one to show: `order_id` is the primary key, `order_date` is marked as the partition
+key, and `customer_id` documents the join back to `Customers`.
+
+To demonstrate the upload flow instead, create a new output port. Its Data Model tab starts empty and offers the
+schema upload, which accepts an [ODCS](https://github.com/bitol-io/open-data-contract-standard) contract; there is a
+worked example in `integrations/bitol/data-contract-example.yml`.
+
+### 4. Show the Data Quality Status
+
+Each output port also carries a data quality summary, so the quality badge is visible in the marketplace and on the
+output port itself. The statuses deliberately differ, so the badge is worth looking at:
+
+| Output Port | Status | Reason |
+| --- | --- | --- |
+| `Customers` | Success | Nightly scan, all checks passed. |
+| `Orders` | Warning | `order_date` is lagging behind the 6 hour freshness SLA. |
+| `Shipments` | Success | Nightly scan, all checks passed. |
+
+The badge links out to the run that produced the summary via its details URL. Data quality results are pushed into the
+portal by the pipeline that produces the data; `integrations/data_quality/` holds example extractors for dbt and Soda.

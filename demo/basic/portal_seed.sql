@@ -48,6 +48,16 @@ declare
     sales_erp_orders_do_config_id uuid;
     logistics_wms_shipments_do_config_id uuid;
 
+    -- OUTPUT PORT DATA MODELS
+    sales_crm_customers_schema_id uuid;
+    sales_erp_orders_schema_id uuid;
+    logistics_wms_shipments_schema_id uuid;
+
+    -- DATA QUALITY
+    sales_crm_customers_dq_id uuid;
+    sales_erp_orders_dq_id uuid;
+    logistics_wms_shipments_dq_id uuid;
+
     -- LIFECYLE
     draft uuid;
     ready uuid;
@@ -71,6 +81,8 @@ begin
     TRUNCATE TABLE public.tags_data_products CASCADE;
     TRUNCATE TABLE public.tags_datasets CASCADE;
     TRUNCATE TABLE public.dataset_query_stats_daily CASCADE;
+    TRUNCATE TABLE public.output_port_schema_objects CASCADE;
+    TRUNCATE TABLE public.output_port_data_quality_summaries CASCADE;
     TRUNCATE TABLE public.data_product_lifecycles CASCADE;
 
     -- DATA PRODUCT LIFECYLCE
@@ -209,9 +221,9 @@ begin
     INSERT INTO public.data_outputs (id, namespace, name, description, status, platform_id, service_id, owner_id, configuration, configuration_id, created_on, updated_on, deleted_at, "technical_mapping") VALUES (gen_random_uuid(), 'logistics-wms-shipments', 'Logistics WMS Shipments', 'Shipment and delivery status', 'ACTIVE', postgresql_id, postgresql_service_id, logistics_wms_shipments_dp_id, NULL, logistics_wms_shipments_do_config_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, 'default') returning id INTO logistics_wms_shipments_do_id;
 
     -- DATASETS
-    INSERT INTO public.datasets (id, namespace, data_product_id, "name", description, about, status, access_type, created_on, updated_on, deleted_at, lifecycle_id) VALUES (gen_random_uuid(), 'customers', sales_crm_customers_dp_id, 'Customers', 'Customer account information from the CRM', '<p><strong>Version:</strong> 1.0.0 &nbsp;|&nbsp; <strong>Freshness:</strong> Daily (Morning sync)</p><p>This dataset contains curated customer information from the Sales CRM, providing a single source of truth for customer identity and contact details.</p><br><h3>How to Use</h3><p>Use this dataset to enrich sales data with customer demographic information or for marketing campaign targeting. Join with the <code>Orders</code> dataset on <code>customer_id</code>.</p><br><h3>Table Schema</h3><table><thead><tr><th>Column Name</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td>id</td><td>Integer</td><td>Unique identifier for the customer.</td></tr><tr><td>first_name</td><td>String</td><td>Customer''s first name.</td></tr><tr><td>last_name</td><td>String</td><td>Customer''s last name.</td></tr><tr><td>email</td><td>String</td><td>Primary contact email address.</td></tr><tr><td>signup_date</td><td>Timestamp</td><td>Timestamp when the customer registered.</td></tr></tbody></table>', 'ACTIVE', 'RESTRICTED', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, ready) returning id INTO sales_crm_customers_ds_id;
-    INSERT INTO public.datasets (id, namespace, data_product_id, "name", description, about, status, access_type, created_on, updated_on, deleted_at, lifecycle_id) VALUES (gen_random_uuid(), 'orders', sales_erp_orders_dp_id, 'Orders', 'Order data from the ERP system', '<p><strong>Version:</strong> 1.1.0 &nbsp;|&nbsp; <strong>Freshness:</strong> Real-time (near real-time via ERP hooks)</p><p>Provides detailed transaction history for all sales orders processed through the ERP system.</p><br><h3>How to Use</h3><p>This dataset is the primary source for revenue analysis and order volume tracking. It can be joined with <code>Customers</code> for customer-level insights or <code>Shipments</code> for fulfillment tracking.</p><br><h3>Table Schema</h3><table><thead><tr><th>Column Name</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td>order_id</td><td>Integer</td><td>Unique identifier for the order.</td></tr><tr><td>customer_id</td><td>Integer</td><td>Reference to the customer who placed the order.</td></tr><tr><td>order_date</td><td>Timestamp</td><td>Timestamp of order placement.</td></tr><tr><td>total_amount</td><td>Decimal</td><td>Total monetary value of the order.</td></tr></tbody></table>', 'ACTIVE', 'RESTRICTED', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, ready) returning id INTO sales_erp_orders_ds_id;
-    INSERT INTO public.datasets (id, namespace, data_product_id, "name", description, about, status, access_type, created_on, updated_on, deleted_at, lifecycle_id) VALUES (gen_random_uuid(), 'shipments', logistics_wms_shipments_dp_id, 'Shipments', 'Shipment and delivery status from the WMS', '<p><strong>Version:</strong> 1.0.2 &nbsp;|&nbsp; <strong>Freshness:</strong> Hourly updates</p><p>Tracks the fulfillment lifecycle of orders, from warehouse dispatch to final delivery status.</p><br><h3>How to Use</h3><p>Utilize this data to monitor delivery times, identify shipping bottlenecks, and calculate order fulfillment rates. Join with <code>Orders</code> on <code>order_ref</code>.</p><br><h3>Table Schema</h3><table><thead><tr><th>Column Name</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td>shipment_id</td><td>Integer</td><td>Unique identifier for the shipment record.</td></tr><tr><td>order_ref</td><td>Integer</td><td>Reference to the corresponding ERP order.</td></tr><tr><td>shipped_date</td><td>Timestamp</td><td>Timestamp when the package left the warehouse.</td></tr><tr><td>delivery_status</td><td>String</td><td>Current status of the delivery (e.g., Shipped, In Transit, Delivered).</td></tr></tbody></table>', 'ACTIVE', 'RESTRICTED', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, ready) returning id INTO logistics_wms_shipments_ds_id;
+    INSERT INTO public.datasets (id, namespace, data_product_id, "name", description, about, status, access_type, created_on, updated_on, deleted_at, lifecycle_id) VALUES (gen_random_uuid(), 'customers', sales_crm_customers_dp_id, 'Customers', 'Customer account information from the CRM', '<p><strong>Version:</strong> 1.0.0 &nbsp;|&nbsp; <strong>Freshness:</strong> Daily (Morning sync)</p><p>This dataset contains curated customer information from the Sales CRM, providing a single source of truth for customer identity and contact details.</p><br><h3>How to Use</h3><p>Use this dataset to enrich sales data with customer demographic information or for marketing campaign targeting. Join with the <code>Orders</code> dataset on <code>customer_id</code>.</p>', 'ACTIVE', 'RESTRICTED', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, ready) returning id INTO sales_crm_customers_ds_id;
+    INSERT INTO public.datasets (id, namespace, data_product_id, "name", description, about, status, access_type, created_on, updated_on, deleted_at, lifecycle_id) VALUES (gen_random_uuid(), 'orders', sales_erp_orders_dp_id, 'Orders', 'Order data from the ERP system', '<p><strong>Version:</strong> 1.1.0 &nbsp;|&nbsp; <strong>Freshness:</strong> Real-time (near real-time via ERP hooks)</p><p>Provides detailed transaction history for all sales orders processed through the ERP system.</p><br><h3>How to Use</h3><p>This dataset is the primary source for revenue analysis and order volume tracking. It can be joined with <code>Customers</code> for customer-level insights or <code>Shipments</code> for fulfillment tracking.</p>', 'ACTIVE', 'RESTRICTED', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, ready) returning id INTO sales_erp_orders_ds_id;
+    INSERT INTO public.datasets (id, namespace, data_product_id, "name", description, about, status, access_type, created_on, updated_on, deleted_at, lifecycle_id) VALUES (gen_random_uuid(), 'shipments', logistics_wms_shipments_dp_id, 'Shipments', 'Shipment and delivery status from the WMS', '<p><strong>Version:</strong> 1.0.2 &nbsp;|&nbsp; <strong>Freshness:</strong> Hourly updates</p><p>Tracks the fulfillment lifecycle of orders, from warehouse dispatch to final delivery status.</p><br><h3>How to Use</h3><p>Utilize this data to monitor delivery times, identify shipping bottlenecks, and calculate order fulfillment rates. Join with <code>Orders</code> on <code>order_ref</code>.</p>', 'ACTIVE', 'RESTRICTED', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, ready) returning id INTO logistics_wms_shipments_ds_id;
 
     INSERT INTO public.role_assignments_dataset (id, dataset_id, data_product_id, user_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), sales_crm_customers_ds_id, (SELECT data_product_id FROM public.datasets WHERE id = sales_crm_customers_ds_id), john_id, '9a9d7deb-14d9-4257-a986-7900aa70ef8f', 'APPROVED', john_id, timezone('utc'::text, CURRENT_TIMESTAMP), john_id, timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
     INSERT INTO public.role_assignments_dataset (id, dataset_id, data_product_id, user_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), sales_erp_orders_ds_id, (SELECT data_product_id FROM public.datasets WHERE id = sales_erp_orders_ds_id), john_id, '9a9d7deb-14d9-4257-a986-7900aa70ef8f', 'APPROVED', john_id, timezone('utc'::text, CURRENT_TIMESTAMP), john_id, timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
@@ -221,6 +233,62 @@ begin
     INSERT INTO public.data_outputs_datasets (id, data_output_id, dataset_id, status, requested_by_id, requested_on, approved_by_id, approved_on, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), sales_crm_customers_do_id, sales_crm_customers_ds_id, 'APPROVED', john_id, timezone('utc'::text, CURRENT_TIMESTAMP), john_id, timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
     INSERT INTO public.data_outputs_datasets (id, data_output_id, dataset_id, status, requested_by_id, requested_on, approved_by_id, approved_on, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), sales_erp_orders_do_id, sales_erp_orders_ds_id, 'APPROVED', john_id, timezone('utc'::text, CURRENT_TIMESTAMP), john_id, timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
     INSERT INTO public.data_outputs_datasets (id, data_output_id, dataset_id, status, requested_by_id, requested_on, approved_by_id, approved_on, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), logistics_wms_shipments_do_id, logistics_wms_shipments_ds_id, 'APPROVED', john_id, timezone('utc'::text, CURRENT_TIMESTAMP), john_id, timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+
+    -- ------------------------------------------------------------------------------------------------
+    -- START of Insert output port data models
+    -- ------------------------------------------------------------------------------------------------
+
+    -- Sales CRM Customers data model
+    INSERT INTO public.output_port_schema_objects (id, output_port_id, name, logical_type, physical_type, physical_name, description, position) VALUES (gen_random_uuid(), sales_crm_customers_ds_id, 'customers', 'object', 'table', 'sales_crm_customers.customers', 'One row per customer account, keyed on the CRM identifier.', 0) returning id INTO sales_crm_customers_schema_id;
+
+    INSERT INTO public.output_port_schema_properties (id, schema_object_id, name, business_name, logical_type, physical_type, description, required, "unique", primary_key, partitioned, primary_key_position, examples, position) VALUES
+        (gen_random_uuid(), sales_crm_customers_schema_id, 'id', 'Customer Identifier', 'integer', 'integer', 'Unique identifier for the customer.', true, true, true, false, 1, '[1001, 1002]', 0),
+        (gen_random_uuid(), sales_crm_customers_schema_id, 'first_name', 'First Name', 'string', 'varchar(50)', 'Customer''s first name.', true, false, false, false, NULL, '["Ada", "Grace"]', 1),
+        (gen_random_uuid(), sales_crm_customers_schema_id, 'last_name', 'Last Name', 'string', 'varchar(50)', 'Customer''s last name.', true, false, false, false, NULL, '["Lovelace", "Hopper"]', 2),
+        (gen_random_uuid(), sales_crm_customers_schema_id, 'email', 'Email Address', 'string', 'varchar(100)', 'Primary contact email address.', true, true, false, false, NULL, '["ada.lovelace@example.com"]', 3),
+        (gen_random_uuid(), sales_crm_customers_schema_id, 'signup_date', 'Signup Date', 'timestamp', 'timestamp', 'Timestamp when the customer registered.', false, false, false, false, NULL, '["2026-01-14T09:30:00Z"]', 4);
+
+    -- Sales ERP Orders data model
+    INSERT INTO public.output_port_schema_objects (id, output_port_id, name, logical_type, physical_type, physical_name, description, position) VALUES (gen_random_uuid(), sales_erp_orders_ds_id, 'orders', 'object', 'table', 'sales_erp_orders.orders', 'One row per sales order, partitioned on the order date.', 0) returning id INTO sales_erp_orders_schema_id;
+
+    INSERT INTO public.output_port_schema_properties (id, schema_object_id, name, business_name, logical_type, physical_type, description, required, "unique", primary_key, partitioned, partition_key_position, primary_key_position, examples, position) VALUES
+        (gen_random_uuid(), sales_erp_orders_schema_id, 'order_id', 'Order Identifier', 'integer', 'integer', 'Unique identifier for the order.', true, true, true, false, NULL, 1, '[500123, 500124]', 0),
+        (gen_random_uuid(), sales_erp_orders_schema_id, 'customer_id', 'Customer Identifier', 'integer', 'integer', 'Reference to the customer who placed the order. Joins to Customers on id.', true, false, false, false, NULL, NULL, '[1001]', 1),
+        (gen_random_uuid(), sales_erp_orders_schema_id, 'order_date', 'Order Date', 'timestamp', 'timestamp', 'Timestamp of order placement.', true, false, false, true, 1, NULL, '["2026-02-03T14:05:00Z"]', 2),
+        (gen_random_uuid(), sales_erp_orders_schema_id, 'total_amount', 'Order Value', 'number', 'decimal(10,2)', 'Total monetary value of the order.', true, false, false, false, NULL, NULL, '[129.99]', 3);
+
+    -- Logistics WMS Shipments data model
+    INSERT INTO public.output_port_schema_objects (id, output_port_id, name, logical_type, physical_type, physical_name, description, position) VALUES (gen_random_uuid(), logistics_wms_shipments_ds_id, 'shipments', 'object', 'table', 'logistics_wms_shipments.shipments', 'One row per shipment, tracking an order from dispatch to delivery.', 0) returning id INTO logistics_wms_shipments_schema_id;
+
+    INSERT INTO public.output_port_schema_properties (id, schema_object_id, name, business_name, logical_type, physical_type, description, required, "unique", primary_key, partitioned, primary_key_position, examples, position) VALUES
+        (gen_random_uuid(), logistics_wms_shipments_schema_id, 'shipment_id', 'Shipment Identifier', 'integer', 'integer', 'Unique identifier for the shipment record.', true, true, true, false, 1, '[900045, 900046]', 0),
+        (gen_random_uuid(), logistics_wms_shipments_schema_id, 'order_ref', 'Order Reference', 'integer', 'integer', 'Reference to the corresponding ERP order. Joins to Orders on order_id.', true, false, false, false, NULL, '[500123]', 1),
+        (gen_random_uuid(), logistics_wms_shipments_schema_id, 'shipped_date', 'Shipped Date', 'timestamp', 'timestamp', 'Timestamp when the package left the warehouse.', false, false, false, false, NULL, '["2026-02-04T08:15:00Z"]', 2),
+        (gen_random_uuid(), logistics_wms_shipments_schema_id, 'delivery_status', 'Delivery Status', 'string', 'varchar(20)', 'Current status of the delivery.', true, false, false, false, NULL, '["Delivered", "In Transit"]', 3);
+
+    -- ------------------------------------------------------------------------------------------------
+    -- END of Insert output port data models
+    -- ------------------------------------------------------------------------------------------------
+
+    -- ------------------------------------------------------------------------------------------------
+    -- START of Insert output port data quality summaries
+    -- ------------------------------------------------------------------------------------------------
+
+    -- Sales CRM Customers: a clean nightly scan
+    INSERT INTO public.output_port_data_quality_summaries (id, output_port_id, details_url, description, created_at, overall_status, assets_with_checks, assets_with_issues, dimensions) VALUES (gen_random_uuid(), sales_crm_customers_ds_id, 'https://ci.example.com/data-quality/runs/1042', 'Nightly scan completed, all checks passed.', CURRENT_TIMESTAMP - INTERVAL '4 hours', 'success', 1, 0, '{"completeness": "success", "uniqueness": "success", "validity": "success"}') returning id INTO sales_crm_customers_dq_id;
+    INSERT INTO public.data_quality_technical_assets (name, status, data_quality_summary_id) VALUES ('customers', 'success', sales_crm_customers_dq_id);
+
+    -- Sales ERP Orders: freshness lagging behind the SLA, so the badge shows a warning
+    INSERT INTO public.output_port_data_quality_summaries (id, output_port_id, details_url, description, created_at, overall_status, assets_with_checks, assets_with_issues, dimensions) VALUES (gen_random_uuid(), sales_erp_orders_ds_id, 'https://ci.example.com/data-quality/runs/1043', 'Nightly scan completed, order_date is lagging behind the 6 hour freshness SLA.', CURRENT_TIMESTAMP - INTERVAL '3 hours', 'warning', 1, 1, '{"completeness": "success", "timeliness": "warning", "validity": "success"}') returning id INTO sales_erp_orders_dq_id;
+    INSERT INTO public.data_quality_technical_assets (name, status, data_quality_summary_id) VALUES ('orders', 'warning', sales_erp_orders_dq_id);
+
+    -- Logistics WMS Shipments: a clean nightly scan
+    INSERT INTO public.output_port_data_quality_summaries (id, output_port_id, details_url, description, created_at, overall_status, assets_with_checks, assets_with_issues, dimensions) VALUES (gen_random_uuid(), logistics_wms_shipments_ds_id, 'https://ci.example.com/data-quality/runs/1044', 'Nightly scan completed, all checks passed.', CURRENT_TIMESTAMP - INTERVAL '2 hours', 'success', 1, 0, '{"completeness": "success", "timeliness": "success", "validity": "success"}') returning id INTO logistics_wms_shipments_dq_id;
+    INSERT INTO public.data_quality_technical_assets (name, status, data_quality_summary_id) VALUES ('shipments', 'success', logistics_wms_shipments_dq_id);
+
+    -- ------------------------------------------------------------------------------------------------
+    -- END of Insert output port data quality summaries
+    -- ------------------------------------------------------------------------------------------------
 
     -- ------------------------------------------------------------------------------------------------
     -- START of Insert dynamic dataset query stats
