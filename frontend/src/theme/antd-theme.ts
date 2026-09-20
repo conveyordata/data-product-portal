@@ -11,6 +11,30 @@ const borderTokens = {
     colorBorderSecondary: '#bfbfbf',
 };
 
+// Placeholders, empty states and secondary labels are real text and have to be
+// readable. The antd defaults reach 1.8:1 against white for placeholders and
+// 3.4:1 for descriptions, which is why "Search by name", "Filter by role" and
+// "No data" disappear on an external screen. These clear 4.5:1. Disabled text
+// stays deliberately faint: it must still read as unavailable.
+const textTokens = {
+    colorTextPlaceholder: 'rgba(0, 0, 0, 0.55)',
+    colorTextTertiary: 'rgba(0, 0, 0, 0.55)',
+    colorTextDescription: 'rgba(0, 0, 0, 0.55)',
+    colorTextDisabled: 'rgba(0, 0, 0, 0.45)',
+};
+
+// Popups float on the same white as the page behind them, so the shadow is the
+// only thing separating a dropdown from the form underneath it. Roughly double
+// the antd opacity and tint it with each theme's own dark, so a dropdown reads
+// as lifted rather than dissolving into the form.
+const elevationTokens = (tint: string) => ({
+    boxShadowSecondary: [
+        `0 6px 16px 0 rgba(${tint}, 0.16)`,
+        `0 3px 6px -4px rgba(${tint}, 0.24)`,
+        `0 9px 28px 8px rgba(${tint}, 0.10)`,
+    ].join(', '),
+});
+
 const spacingTokens = {
     sizeUnit: 4,
     sizeStep: 4,
@@ -38,6 +62,12 @@ const blueThemeConfig: ThemeConfig = {
         Button: {
             defaultBorderColor: token.colorPrimaryBorder,
             defaultColor: token.colorPrimaryText,
+        },
+        Table: {
+            rowHoverBg: token.blue1,
+            headerSortActiveBg: token.blue1,
+            headerSortHoverBg: token.blue2,
+            bodySortBg: token.blue1,
         },
     },
     token: {
@@ -90,6 +120,8 @@ const blueThemeConfig: ThemeConfig = {
         colorInfoTextActive: token.colorPrimaryTextActive,
         ...spacingTokens,
         ...borderTokens,
+        ...textTokens,
+        ...elevationTokens('0, 0, 0'),
     },
     cssVar: {},
 };
@@ -119,6 +151,15 @@ const datamindedThemeConfig: ThemeConfig = {
         },
         Table: {
             headerBorderRadius: 8,
+            // Sort and hover feedback reads as a muddy grey wash by default. Tint
+            // it with the brand purple so the affordance belongs to the palette.
+            rowHoverBg: '#f4f0ff',
+            headerSortActiveBg: '#f0ebff',
+            headerSortHoverBg: '#e4dcff',
+            bodySortBg: '#faf8ff',
+        },
+        Tooltip: {
+            colorBgSpotlight: '#080635',
         },
         Input: {
             activeShadow: 'none',
@@ -168,6 +209,8 @@ const datamindedThemeConfig: ThemeConfig = {
         colorInfoTextActive: token.colorPrimaryTextActive,
         ...spacingTokens,
         ...borderTokens,
+        ...textTokens,
+        ...elevationTokens('8, 6, 53'),
     },
     cssVar: {},
 };
@@ -197,6 +240,13 @@ const greenThemeConfig: ThemeConfig = {
         },
         Table: {
             headerBorderRadius: 8,
+            rowHoverBg: '#ebf4f1',
+            headerSortActiveBg: '#e3efeb',
+            headerSortHoverBg: '#d7e7e1',
+            bodySortBg: '#f3f9f7',
+        },
+        Tooltip: {
+            colorBgSpotlight: '#2F4044',
         },
         Tag: {
             colorInfo: '#E2D34E',
@@ -239,9 +289,10 @@ const greenThemeConfig: ThemeConfig = {
         borderRadiusLG: 16,
         // -------- Shadow ---------
         boxShadow: '0px 4px 9.2px 3px rgba(94, 94, 94, 0.09)',
-        boxShadowSecondary: '2px 7px 9px 0px rgba(116, 111, 111, 0.15)',
         ...spacingTokens,
         ...borderTokens,
+        ...textTokens,
+        ...elevationTokens('47, 64, 68'),
     },
     algorithm: theme.defaultAlgorithm,
     cssVar: {},
