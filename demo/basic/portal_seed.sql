@@ -58,6 +58,10 @@ declare
     sales_erp_orders_dq_id uuid;
     logistics_wms_shipments_dq_id uuid;
 
+    -- ACCESS DURATIONS
+    default_dp_duration varchar;
+    default_exp_duration varchar;
+
     -- LIFECYLE
     draft uuid;
     ready uuid;
@@ -88,6 +92,34 @@ begin
     -- DATA PRODUCT LIFECYLCE
     INSERT INTO data_product_lifecycles (id, name, "value", color, is_default, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), 'Draft', 0, 'grey', true, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO draft;
     INSERT INTO data_product_lifecycles (id, name, "value", color, is_default, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), 'Ready', 1, 'green', false, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO ready;
+
+    -- ACCESS DURATIONS
+    -- The migrations register one duration per abstract data product type: permanent
+    -- for Data Products and time bound for Explorations. That leaves the other option
+    -- greyed out in the Output Port settings, so offer both for the demo.
+    INSERT INTO public.access_durations (id, abstract_data_product_type, access_duration_type, days, is_default, created_on)
+    VALUES (gen_random_uuid(), 'data_products', 'time_bound', 30, false, timezone('utc'::text, CURRENT_TIMESTAMP))
+    ON CONFLICT (abstract_data_product_type, access_duration_type) DO NOTHING;
+
+    INSERT INTO public.access_durations (id, abstract_data_product_type, access_duration_type, days, is_default, created_on)
+    VALUES (gen_random_uuid(), 'explorations', 'permanent', NULL, false, timezone('utc'::text, CURRENT_TIMESTAMP))
+    ON CONFLICT (abstract_data_product_type, access_duration_type) DO NOTHING;
+
+    -- Output Ports must store a duration that is actually configured for its type.
+    -- The datasets columns default to 'permanent', which is not a configured
+    -- Exploration duration, and requesting such a port from an Exploration then
+    -- fails with a 500. Read the configured default instead of hardcoding one.
+    SELECT access_duration_type INTO default_dp_duration
+    FROM public.access_durations
+    WHERE abstract_data_product_type = 'data_products' AND is_default
+    ORDER BY id
+    LIMIT 1;
+
+    SELECT access_duration_type INTO default_exp_duration
+    FROM public.access_durations
+    WHERE abstract_data_product_type = 'explorations' AND is_default
+    ORDER BY id
+    LIMIT 1;
 
     -- DOMAINS
     INSERT INTO public.domains (id, "name", description, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), 'Sales', 'Responsible for all activities related to sales, customer relationships, and order management.', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO sales_id;
@@ -221,9 +253,9 @@ begin
     INSERT INTO public.data_outputs (id, namespace, name, description, status, platform_id, service_id, owner_id, configuration, configuration_id, created_on, updated_on, deleted_at, "technical_mapping") VALUES (gen_random_uuid(), 'logistics-wms-shipments', 'Logistics WMS Shipments', 'Shipment and delivery status', 'ACTIVE', postgresql_id, postgresql_service_id, logistics_wms_shipments_dp_id, NULL, logistics_wms_shipments_do_config_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, 'default') returning id INTO logistics_wms_shipments_do_id;
 
     -- DATASETS
-    INSERT INTO public.datasets (id, namespace, data_product_id, "name", description, about, status, access_type, created_on, updated_on, deleted_at, lifecycle_id) VALUES (gen_random_uuid(), 'customers', sales_crm_customers_dp_id, 'Customers', 'Customer account information from the CRM', '<p><strong>Version:</strong> 1.0.0 &nbsp;|&nbsp; <strong>Freshness:</strong> Daily (Morning sync)</p><p>This dataset contains curated customer information from the Sales CRM, providing a single source of truth for customer identity and contact details.</p><br><h3>How to Use</h3><p>Use this dataset to enrich sales data with customer demographic information or for marketing campaign targeting. Join with the <code>Orders</code> dataset on <code>customer_id</code>.</p>', 'ACTIVE', 'RESTRICTED', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, ready) returning id INTO sales_crm_customers_ds_id;
-    INSERT INTO public.datasets (id, namespace, data_product_id, "name", description, about, status, access_type, created_on, updated_on, deleted_at, lifecycle_id) VALUES (gen_random_uuid(), 'orders', sales_erp_orders_dp_id, 'Orders', 'Order data from the ERP system', '<p><strong>Version:</strong> 1.1.0 &nbsp;|&nbsp; <strong>Freshness:</strong> Real-time (near real-time via ERP hooks)</p><p>Provides detailed transaction history for all sales orders processed through the ERP system.</p><br><h3>How to Use</h3><p>This dataset is the primary source for revenue analysis and order volume tracking. It can be joined with <code>Customers</code> for customer-level insights or <code>Shipments</code> for fulfillment tracking.</p>', 'ACTIVE', 'RESTRICTED', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, ready) returning id INTO sales_erp_orders_ds_id;
-    INSERT INTO public.datasets (id, namespace, data_product_id, "name", description, about, status, access_type, created_on, updated_on, deleted_at, lifecycle_id) VALUES (gen_random_uuid(), 'shipments', logistics_wms_shipments_dp_id, 'Shipments', 'Shipment and delivery status from the WMS', '<p><strong>Version:</strong> 1.0.2 &nbsp;|&nbsp; <strong>Freshness:</strong> Hourly updates</p><p>Tracks the fulfillment lifecycle of orders, from warehouse dispatch to final delivery status.</p><br><h3>How to Use</h3><p>Utilize this data to monitor delivery times, identify shipping bottlenecks, and calculate order fulfillment rates. Join with <code>Orders</code> on <code>order_ref</code>.</p>', 'ACTIVE', 'RESTRICTED', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, ready) returning id INTO logistics_wms_shipments_ds_id;
+    INSERT INTO public.datasets (id, namespace, data_product_id, "name", description, about, status, access_type, created_on, updated_on, deleted_at, lifecycle_id, data_product_access_duration_type, exploration_access_duration_type) VALUES (gen_random_uuid(), 'customers', sales_crm_customers_dp_id, 'Customers', 'Customer account information from the CRM', '<p><strong>Version:</strong> 1.0.0 &nbsp;|&nbsp; <strong>Freshness:</strong> Daily (Morning sync)</p><p>This dataset contains curated customer information from the Sales CRM, providing a single source of truth for customer identity and contact details.</p><br><h3>How to Use</h3><p>Use this dataset to enrich sales data with customer demographic information or for marketing campaign targeting. Join with the <code>Orders</code> dataset on <code>customer_id</code>.</p>', 'ACTIVE', 'RESTRICTED', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, ready, default_dp_duration, default_exp_duration) returning id INTO sales_crm_customers_ds_id;
+    INSERT INTO public.datasets (id, namespace, data_product_id, "name", description, about, status, access_type, created_on, updated_on, deleted_at, lifecycle_id, data_product_access_duration_type, exploration_access_duration_type) VALUES (gen_random_uuid(), 'orders', sales_erp_orders_dp_id, 'Orders', 'Order data from the ERP system', '<p><strong>Version:</strong> 1.1.0 &nbsp;|&nbsp; <strong>Freshness:</strong> Real-time (near real-time via ERP hooks)</p><p>Provides detailed transaction history for all sales orders processed through the ERP system.</p><br><h3>How to Use</h3><p>This dataset is the primary source for revenue analysis and order volume tracking. It can be joined with <code>Customers</code> for customer-level insights or <code>Shipments</code> for fulfillment tracking.</p>', 'ACTIVE', 'RESTRICTED', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, ready, default_dp_duration, default_exp_duration) returning id INTO sales_erp_orders_ds_id;
+    INSERT INTO public.datasets (id, namespace, data_product_id, "name", description, about, status, access_type, created_on, updated_on, deleted_at, lifecycle_id, data_product_access_duration_type, exploration_access_duration_type) VALUES (gen_random_uuid(), 'shipments', logistics_wms_shipments_dp_id, 'Shipments', 'Shipment and delivery status from the WMS', '<p><strong>Version:</strong> 1.0.2 &nbsp;|&nbsp; <strong>Freshness:</strong> Hourly updates</p><p>Tracks the fulfillment lifecycle of orders, from warehouse dispatch to final delivery status.</p><br><h3>How to Use</h3><p>Utilize this data to monitor delivery times, identify shipping bottlenecks, and calculate order fulfillment rates. Join with <code>Orders</code> on <code>order_ref</code>.</p>', 'ACTIVE', 'RESTRICTED', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, ready, default_dp_duration, default_exp_duration) returning id INTO logistics_wms_shipments_ds_id;
 
     INSERT INTO public.role_assignments_dataset (id, dataset_id, data_product_id, user_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), sales_crm_customers_ds_id, (SELECT data_product_id FROM public.datasets WHERE id = sales_crm_customers_ds_id), john_id, '9a9d7deb-14d9-4257-a986-7900aa70ef8f', 'APPROVED', john_id, timezone('utc'::text, CURRENT_TIMESTAMP), john_id, timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
     INSERT INTO public.role_assignments_dataset (id, dataset_id, data_product_id, user_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), sales_erp_orders_ds_id, (SELECT data_product_id FROM public.datasets WHERE id = sales_erp_orders_ds_id), john_id, '9a9d7deb-14d9-4257-a986-7900aa70ef8f', 'APPROVED', john_id, timezone('utc'::text, CURRENT_TIMESTAMP), john_id, timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
