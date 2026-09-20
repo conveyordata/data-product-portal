@@ -1,5 +1,6 @@
 import type { api } from '@/store/api/services/generated/completeServiceApi.ts';
 import { STATIC_TAG_ID, TagTypes } from '@/store/api/services/tag-types.ts';
+import { graphTag, providesGraphData } from '@/store/api/services/tags/graphTags.ts';
 
 type EndpointDefinitions = Parameters<typeof api.enhanceEndpoints>[0]['endpoints'];
 
@@ -26,6 +27,7 @@ const invalidateTechnicalAsset = (dataProductId: string, technicalAssetId: strin
         type: TagTypes.History,
         id: technicalAssetId,
     },
+    graphTag,
 ];
 
 const invalidateTechnicalAssetOutputPort = (dataProductId: string, outputPortId: string) => [
@@ -45,6 +47,7 @@ const invalidateTechnicalAssetOutputPort = (dataProductId: string, outputPortId:
         type: TagTypes.History,
         id: outputPortId,
     },
+    graphTag,
 ];
 
 export const dataProductTechnicalAssetsTags = {
@@ -113,6 +116,7 @@ export const dataProductTechnicalAssetsTags = {
                 type: TagTypes.DataProductTechnicalAssets,
                 id: dataProductId,
             },
+            graphTag,
         ],
     },
     getTechnicalAsset: {
@@ -140,5 +144,5 @@ export const dataProductTechnicalAssetsTags = {
     updateTechnicalAssetStatus: {
         invalidatesTags: invalidateTagsTechnicalAsset,
     },
-    getTechnicalAssetGraphData: {},
+    getTechnicalAssetGraphData: providesGraphData,
 } satisfies EndpointDefinitions;

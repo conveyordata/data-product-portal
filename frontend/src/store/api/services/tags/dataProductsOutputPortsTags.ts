@@ -1,5 +1,6 @@
 import type { api } from '@/store/api/services/generated/completeServiceApi.ts';
 import { STATIC_TAG_ID, TagTypes } from '@/store/api/services/tag-types.ts';
+import { graphTag, providesGraphData } from '@/store/api/services/tags/graphTags.ts';
 
 type EndpointDefinitions = Parameters<typeof api.enhanceEndpoints>[0]['endpoints'];
 
@@ -24,6 +25,7 @@ const invalidateOutputPort = (
         type: TagTypes.History as const,
         id: id,
     },
+    graphTag,
 ];
 
 // Delete deliberately omits the per-id { OutputPort, id } tag: a still-mounted
@@ -47,6 +49,7 @@ const invalidateDeletedOutputPort = (
         type: TagTypes.History as const,
         id: id,
     },
+    graphTag,
 ];
 
 export const dataProductOutputPortTags = {
@@ -58,6 +61,7 @@ export const dataProductOutputPortTags = {
             },
         ],
     },
+    getOutputPortGraphData: providesGraphData,
     getOutputPortQueryStats: {},
     deleteOutputPortQueryStat: {},
     updateOutputPortQueryStats: {},
@@ -75,6 +79,7 @@ export const dataProductOutputPortTags = {
                 type: TagTypes.DataProductOutputPorts,
                 id: dataProductId,
             },
+            graphTag,
         ],
     },
     getOutputPort: {

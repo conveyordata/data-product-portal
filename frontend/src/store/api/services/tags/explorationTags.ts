@@ -1,5 +1,6 @@
 import type { api } from '@/store/api/services/generated/completeServiceApi.ts';
 import { STATIC_TAG_ID, TagTypes } from '@/store/api/services/tag-types.ts';
+import { graphTag } from '@/store/api/services/tags/graphTags.ts';
 
 type EndpointDefinitions = Parameters<typeof api.enhanceEndpoints>[0]['endpoints'];
 
@@ -38,6 +39,7 @@ export const explorationTags = {
             { type: TagTypes.ExplorationInputPorts, id: arg.id },
             { type: TagTypes.MyRequests },
             { type: TagTypes.PendingAction, id: STATIC_TAG_ID.LIST },
+            graphTag,
         ],
     },
     getExplorationInputPorts: {
@@ -51,6 +53,7 @@ export const explorationTags = {
             { type: TagTypes.MyRequests },
             { type: TagTypes.PendingAction, id: STATIC_TAG_ID.LIST },
             { type: TagTypes.OutputPortInputPorts, outputPortId: arg.outputPortId },
+            graphTag,
         ],
     },
     revokeInputPortForExploration: {
@@ -59,6 +62,7 @@ export const explorationTags = {
             { type: TagTypes.History, id: arg.outputPortId },
             { type: TagTypes.ExplorationInputPorts, id: arg.id },
             { type: TagTypes.OutputPortInputPorts, outputPortId: arg.outputPortId },
+            graphTag,
         ],
     },
     cancelInputPortForExploration: {
@@ -68,6 +72,7 @@ export const explorationTags = {
             { type: TagTypes.ExplorationInputPorts, id: arg.id },
             { type: TagTypes.PendingAction, id: STATIC_TAG_ID.LIST },
             { type: TagTypes.OutputPortInputPorts, outputPortId: arg.outputPortId },
+            graphTag,
         ],
     },
 } satisfies EndpointDefinitions;

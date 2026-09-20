@@ -1,10 +1,12 @@
 import type { api } from '@/store/api/services/generated/completeServiceApi.ts';
 import { STATIC_TAG_ID, TagTypes } from '@/store/api/services/tag-types.ts';
+import { providesGraphData } from '@/store/api/services/tags/graphTags.ts';
 
 type EndpointDefinitions = Parameters<typeof api.enhanceEndpoints>[0]['endpoints'];
 
 export const dataProductTags = {
     //Data products api
+    getDataProductGraphData: providesGraphData,
     getDataProducts: {
         providesTags: [{ type: TagTypes.DataProduct, id: STATIC_TAG_ID.LIST }],
     },
