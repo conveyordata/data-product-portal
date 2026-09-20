@@ -19254,6 +19254,50 @@ func (s *NilDataProductLifeCycle) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
+// Encode encodes DataQualityStatus as json.
+func (o NilDataQualityStatus) Encode(e *jx.Encoder) {
+	if o.Null {
+		e.Null()
+		return
+	}
+	e.Str(string(o.Value))
+}
+
+// Decode decodes DataQualityStatus from json.
+func (o *NilDataQualityStatus) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode NilDataQualityStatus to nil")
+	}
+	if d.Next() == jx.Null {
+		if err := d.Null(); err != nil {
+			return err
+		}
+
+		var v DataQualityStatus
+		o.Value = v
+		o.Null = true
+		return nil
+	}
+	o.Null = false
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s NilDataQualityStatus) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *NilDataQualityStatus) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode encodes time.Time as json.
 func (o NilDate) Encode(e *jx.Encoder, format func(*jx.Encoder, time.Time)) {
 	if o.Null {
@@ -30668,9 +30712,13 @@ func (s *SearchOutputPortsResponseItem) encodeFields(e *jx.Encoder) {
 		e.FieldStart("data_product_name")
 		e.Str(s.DataProductName)
 	}
+	{
+		e.FieldStart("quality_status")
+		s.QualityStatus.Encode(e)
+	}
 }
 
-var jsonFieldsNameOfSearchOutputPortsResponseItem = [17]string{
+var jsonFieldsNameOfSearchOutputPortsResponseItem = [18]string{
 	0:  "id",
 	1:  "namespace",
 	2:  "name",
@@ -30688,6 +30736,7 @@ var jsonFieldsNameOfSearchOutputPortsResponseItem = [17]string{
 	14: "abstract_data_product_count",
 	15: "technical_assets_count",
 	16: "data_product_name",
+	17: "quality_status",
 }
 
 // Decode decodes SearchOutputPortsResponseItem from json.
@@ -30901,6 +30950,16 @@ func (s *SearchOutputPortsResponseItem) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"data_product_name\"")
 			}
+		case "quality_status":
+			requiredBitSet[2] |= 1 << 1
+			if err := func() error {
+				if err := s.QualityStatus.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"quality_status\"")
+			}
 		default:
 			return d.Skip()
 		}
@@ -30913,7 +30972,7 @@ func (s *SearchOutputPortsResponseItem) Decode(d *jx.Decoder) error {
 	for i, mask := range [3]uint8{
 		0b11111111,
 		0b11111111,
-		0b00000001,
+		0b00000011,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

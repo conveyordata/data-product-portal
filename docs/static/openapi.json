@@ -15869,6 +15869,16 @@
           "data_product_name": {
             "type": "string",
             "title": "Data Product Name"
+          },
+          "quality_status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DataQualityStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",
@@ -15889,7 +15899,8 @@
           "access_modes",
           "abstract_data_product_count",
           "technical_assets_count",
-          "data_product_name"
+          "data_product_name",
+          "quality_status"
         ],
         "title": "SearchOutputPortsResponseItem"
       },

@@ -1,11 +1,15 @@
 import os
 import time
+from datetime import UTC, datetime
 from typing import Final
 
 from alembic import command
 from alembic.config import Config
 
 from app.authorization.role_assignments.enums import AssignmentFilter, DecisionStatus
+from app.authorization.roles.schema import Scope
+from app.core.authz.actions import AuthorizationAction
+from app.data_products.output_ports.data_quality.enums import DataQualityStatus
 from app.data_products.output_ports.model import OutputPort
 from app.data_products.output_ports.service import OutputPortService
 from app.db_tool import seed_cmd
@@ -62,6 +66,53 @@ class TestOutputPortSearchRouter:
         assert response.status_code == 200, response.text
         output = SearchOutputPortsResponse.model_validate(response.json())
         assert len(output.output_ports) == 1
+
+    def test_search_output_ports__returns_quality_status(self, session, client):
+        output_port = OutputPortFactory(name="Quality Reported Data")
+        OutputPortService(db=session).recalculate_search_for_all_output_ports()
+
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        role = RoleFactory(
+            scope=Scope.DATASET,
+            permissions=[AuthorizationAction.OUTPUT_PORT__UPDATE_DATA_QUALITY],
+        )
+        DatasetRoleAssignmentFactory(
+            user_id=user.id, role_id=role.id, output_port_id=output_port.id
+        )
+        post_response = client.post(
+            f"/api/v2/data_products/{output_port.data_product.id}"
+            f"/output_ports/{output_port.id}/data_quality_summary",
+            json={
+                "overall_status": DataQualityStatus.WARNING.value,
+                "created_at": datetime.now(UTC).isoformat(),
+                "technical_assets": [{"name": "table1", "status": "warning"}],
+            },
+        )
+        assert post_response.status_code == 200, post_response.text
+
+        response = client.get("/api/v2/search/output_ports")
+        assert response.status_code == 200, response.text
+        output = SearchOutputPortsResponse.model_validate(response.json())
+
+        searched = next(
+            port for port in output.output_ports if port.id == output_port.id
+        )
+        assert searched.quality_status == DataQualityStatus.WARNING
+
+    def test_search_output_ports__quality_status_is_none_without_a_summary(
+        self, session, client
+    ):
+        output_port = OutputPortFactory(name="Unreported Data")
+        OutputPortService(db=session).recalculate_search_for_all_output_ports()
+
+        response = client.get("/api/v2/search/output_ports")
+        assert response.status_code == 200, response.text
+        output = SearchOutputPortsResponse.model_validate(response.json())
+
+        searched = next(
+            port for port in output.output_ports if port.id == output_port.id
+        )
+        assert searched.quality_status is None
 
     def test_search_output_ports_no_query(self, session, client):
         output_ports = self.setup(session)
