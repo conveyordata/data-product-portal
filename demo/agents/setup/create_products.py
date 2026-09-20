@@ -10,6 +10,7 @@ Run this after `docker compose up -d` and all services are healthy.
 import sys
 import time
 import traceback
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -78,6 +79,31 @@ def get_lifecycle_id(name: str) -> str:
     if not match:
         raise ValueError(f"Lifecycle '{name}' not found")
     return match["id"]
+
+
+def get_default_access_duration(abstract_data_product_type: str) -> str:
+    """
+    An Output Port must store a duration that is configured for that type, or
+    requesting access to it later fails. Read the configured default rather
+    than assuming one.
+    """
+    response = requests.get(f"{PORTAL_URL}/api/v2/configuration/access_durations")
+    response.raise_for_status()
+    durations = response.json().get("access_durations", [])
+    match = next(
+        (
+            d
+            for d in durations
+            if d["abstract_data_product_type"] == abstract_data_product_type
+            and d["is_default"]
+        ),
+        None,
+    )
+    if not match:
+        raise ValueError(
+            f"No default access duration configured for {abstract_data_product_type}"
+        )
+    return match["access_duration_type"]
 
 
 # ---------------------------------------------------------------------------
@@ -157,6 +183,10 @@ def create_output_port(
         "description": description,
         "about": about,
         "access_type": access_type,
+        "data_product_access_duration_type": get_default_access_duration(
+            "data_products"
+        ),
+        "exploration_access_duration_type": get_default_access_duration("explorations"),
         "owners": [OWNER_ID],
         "tag_ids": [],
     }
@@ -182,6 +212,27 @@ def set_curated_queries(dp_id: str, op_id: str, queries: list[dict]):
     url = f"{PORTAL_URL}/api/v2/data_products/{dp_id}/output_ports/{op_id}/curated_queries"
     requests.put(url, json={"curated_queries": queries}).raise_for_status()
     print(f"  Added {len(queries)} curated queries.")
+
+
+def publish_data_model(dp_id: str, op_id: str, schema_objects: list[dict]):
+    """Publish the schema as a BitOL contract so the Data Model tab is filled in."""
+    url = (
+        f"{PORTAL_URL}/api/v2/data_products/{dp_id}/output_ports/{op_id}/data_contract"
+    )
+    requests.post(url, json={"schema": schema_objects}).raise_for_status()
+    tables = ", ".join(obj["name"] for obj in schema_objects)
+    print(f"  Published data model: {tables}")
+
+
+def publish_data_quality(dp_id: str, op_id: str, summary: dict[str, Any]):
+    """Publish a data quality summary so the quality badge has something to show."""
+    url = f"{PORTAL_URL}/api/v2/data_products/{dp_id}/output_ports/{op_id}/data_quality_summary"
+    payload = {
+        **summary,
+        "created_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+    }
+    requests.post(url, json=payload).raise_for_status()
+    print(f"  Published data quality: {summary['overall_status']}")
 
 
 # ---------------------------------------------------------------------------
@@ -499,6 +550,453 @@ OUTPUT_PORTS: dict[str, Any] = {
 }
 
 # ---------------------------------------------------------------------------
+# Data models per output port
+#
+# Published as BitOL data contracts so the Data Model tab is populated. The
+# quirks this demo relies on (cents, abbreviations, implicit filters, the stale
+# calculated_total) are documented here as well as in the About page.
+# ---------------------------------------------------------------------------
+
+DATA_MODELS: dict[str, Any] = {
+    "inventory-snapshot": [
+        {
+            "name": "inventory_latest",
+            "logicalType": "object",
+            "physicalType": "table",
+            "physicalName": "inventory_snapshot.inventory_latest",
+            "description": "Current daily snapshot of warehouse stock. Use this table for all current-stock questions.",
+            "properties": [
+                {
+                    "name": "sku",
+                    "businessName": "Stock Keeping Unit",
+                    "logicalType": "string",
+                    "physicalType": "varchar(50)",
+                    "description": "Stock Keeping Unit. Camping products follow the CAMP-* prefix convention.",
+                    "examples": ["CAMP-TENT-4P"],
+                    "primaryKey": True,
+                    "primaryKeyPosition": 1,
+                    "unique": True,
+                    "required": True,
+                },
+                {
+                    "name": "qty_oh",
+                    "businessName": "Quantity On Hand",
+                    "logicalType": "integer",
+                    "physicalType": "integer",
+                    "description": "Units currently available in the warehouse.",
+                    "examples": [12],
+                },
+                {
+                    "name": "warehouse_id",
+                    "businessName": "Warehouse",
+                    "logicalType": "integer",
+                    "physicalType": "integer",
+                    "description": "Warehouse location identifier.",
+                    "examples": [1],
+                },
+                {
+                    "name": "updated_at",
+                    "businessName": "Last Updated",
+                    "logicalType": "timestamp",
+                    "physicalType": "timestamp",
+                    "description": "When this row was last refreshed.",
+                },
+            ],
+        },
+        {
+            "name": "stock_levels",
+            "logicalType": "object",
+            "physicalType": "table",
+            "physicalName": "inventory_snapshot.stock_levels",
+            "description": "Historical log of stock level snapshots. Includes retired items, so filter them out for sellable counts.",
+            "properties": [
+                {
+                    "name": "id",
+                    "logicalType": "integer",
+                    "physicalType": "serial",
+                    "description": "Snapshot row identifier.",
+                    "primaryKey": True,
+                    "primaryKeyPosition": 1,
+                    "unique": True,
+                    "required": True,
+                },
+                {
+                    "name": "sku",
+                    "businessName": "Stock Keeping Unit",
+                    "logicalType": "string",
+                    "physicalType": "varchar(50)",
+                    "description": "Joins to inventory_latest.sku.",
+                    "examples": ["CAMP-TENT-4P"],
+                },
+                {
+                    "name": "qty_oh",
+                    "businessName": "Quantity On Hand",
+                    "logicalType": "integer",
+                    "physicalType": "integer",
+                    "description": "Units on hand at the time of the snapshot.",
+                },
+                {
+                    "name": "loc_id",
+                    "businessName": "Location",
+                    "logicalType": "integer",
+                    "physicalType": "integer",
+                    "description": "Location identifier for the snapshot.",
+                },
+                {
+                    "name": "is_retired",
+                    "businessName": "Retired",
+                    "logicalType": "boolean",
+                    "physicalType": "boolean",
+                    "description": "True when the item is no longer for sale. Always filter WHERE is_retired = false for sellable inventory.",
+                    "examples": [False],
+                },
+                {
+                    "name": "captured_at",
+                    "businessName": "Captured At",
+                    "logicalType": "timestamp",
+                    "physicalType": "timestamp",
+                    "description": "When this snapshot was recorded.",
+                    "partitioned": True,
+                    "partitionKeyPosition": 1,
+                },
+            ],
+        },
+    ],
+    "sales-transaction-ledger": [
+        {
+            "name": "orders",
+            "logicalType": "object",
+            "physicalType": "table",
+            "physicalName": "sales_transaction_ledger.orders",
+            "description": "One row per order. Monetary columns are stored in cents.",
+            "properties": [
+                {
+                    "name": "order_id",
+                    "businessName": "Order Identifier",
+                    "logicalType": "integer",
+                    "physicalType": "integer",
+                    "description": "Unique identifier for the order.",
+                    "primaryKey": True,
+                    "primaryKeyPosition": 1,
+                    "unique": True,
+                    "required": True,
+                },
+                {
+                    "name": "customer_id",
+                    "businessName": "Customer",
+                    "logicalType": "integer",
+                    "physicalType": "integer",
+                    "description": "Joins to customer_demographic_master.customers.id.",
+                },
+                {
+                    "name": "total_amount",
+                    "businessName": "Order Total",
+                    "logicalType": "integer",
+                    "physicalType": "integer",
+                    "description": "Authoritative order value, in cents. Divide by 100 for currency.",
+                    "examples": [12999],
+                },
+                {
+                    "name": "calculated_total",
+                    "businessName": "Calculated Total",
+                    "logicalType": "integer",
+                    "physicalType": "integer",
+                    "description": "Stale derived column that drifts from total_amount. Do not use it for revenue; prefer total_amount.",
+                },
+                {
+                    "name": "status",
+                    "businessName": "Order Status",
+                    "logicalType": "string",
+                    "physicalType": "varchar(20)",
+                    "description": "One of DELIVERED, SHIPPED, CANCELLED, or NULL while processing. NULL does not mean cancelled.",
+                    "examples": ["DELIVERED"],
+                },
+                {
+                    "name": "created_at",
+                    "businessName": "Ordered At",
+                    "logicalType": "timestamp",
+                    "physicalType": "timestamp",
+                    "description": "When the order was placed. Use this for order-date reporting.",
+                },
+                {
+                    "name": "updated_at",
+                    "businessName": "Updated At",
+                    "logicalType": "timestamp",
+                    "physicalType": "timestamp",
+                    "description": "When the order row last changed.",
+                },
+                {
+                    "name": "shipped_at",
+                    "businessName": "Shipped At",
+                    "logicalType": "timestamp",
+                    "physicalType": "timestamp",
+                    "description": "When the order shipped. Null until dispatch, so it is not a substitute for the order date.",
+                },
+            ],
+        },
+        {
+            "name": "order_items",
+            "logicalType": "object",
+            "physicalType": "table",
+            "physicalName": "sales_transaction_ledger.order_items",
+            "description": "One row per line item on an order.",
+            "properties": [
+                {
+                    "name": "item_id",
+                    "logicalType": "integer",
+                    "physicalType": "serial",
+                    "description": "Line item identifier.",
+                    "primaryKey": True,
+                    "primaryKeyPosition": 1,
+                    "unique": True,
+                    "required": True,
+                },
+                {
+                    "name": "order_id",
+                    "businessName": "Order",
+                    "logicalType": "integer",
+                    "physicalType": "integer",
+                    "description": "Joins to orders.order_id.",
+                },
+                {
+                    "name": "sku",
+                    "businessName": "Stock Keeping Unit",
+                    "logicalType": "string",
+                    "physicalType": "varchar(50)",
+                    "description": "Joins to inventory_snapshot.inventory_latest.sku.",
+                },
+                {
+                    "name": "quantity",
+                    "businessName": "Quantity",
+                    "logicalType": "integer",
+                    "physicalType": "integer",
+                    "description": "Units ordered for this line.",
+                },
+                {
+                    "name": "price_cents",
+                    "businessName": "Unit Price",
+                    "logicalType": "integer",
+                    "physicalType": "integer",
+                    "description": "Price per unit, in cents.",
+                    "examples": [4999],
+                },
+            ],
+        },
+        {
+            "name": "recurring_revenue",
+            "logicalType": "object",
+            "physicalType": "table",
+            "physicalName": "sales_transaction_ledger.recurring_revenue",
+            "description": "Subscription revenue per customer. Monetary columns are in cents.",
+            "properties": [
+                {
+                    "name": "subscription_id",
+                    "logicalType": "integer",
+                    "physicalType": "serial",
+                    "description": "Subscription identifier.",
+                    "primaryKey": True,
+                    "primaryKeyPosition": 1,
+                    "unique": True,
+                    "required": True,
+                },
+                {
+                    "name": "customer_id",
+                    "businessName": "Customer",
+                    "logicalType": "integer",
+                    "physicalType": "integer",
+                    "description": "Joins to customer_demographic_master.customers.id.",
+                },
+                {
+                    "name": "mrr",
+                    "businessName": "Monthly Recurring Revenue",
+                    "logicalType": "integer",
+                    "physicalType": "integer",
+                    "description": "Monthly recurring revenue, in cents.",
+                },
+                {
+                    "name": "arr",
+                    "businessName": "Annual Recurring Revenue",
+                    "logicalType": "integer",
+                    "physicalType": "integer",
+                    "description": "Annual recurring revenue, in cents.",
+                },
+                {
+                    "name": "status",
+                    "businessName": "Subscription Status",
+                    "logicalType": "string",
+                    "physicalType": "varchar(20)",
+                    "description": "Current state of the subscription.",
+                },
+                {
+                    "name": "started_at",
+                    "businessName": "Started",
+                    "logicalType": "date",
+                    "physicalType": "date",
+                    "description": "Subscription start date.",
+                },
+                {
+                    "name": "ended_at",
+                    "businessName": "Ended",
+                    "logicalType": "date",
+                    "physicalType": "date",
+                    "description": "Subscription end date. Null while active; used for churn.",
+                },
+            ],
+        },
+    ],
+    "customer-demographic-master": [
+        {
+            "name": "customers",
+            "logicalType": "object",
+            "physicalType": "table",
+            "physicalName": "customer_demographic_master.customers",
+            "description": "One row per registered customer.",
+            "properties": [
+                {
+                    "name": "id",
+                    "businessName": "Customer Identifier",
+                    "logicalType": "integer",
+                    "physicalType": "serial",
+                    "description": "Unique identifier for the customer.",
+                    "primaryKey": True,
+                    "primaryKeyPosition": 1,
+                    "unique": True,
+                    "required": True,
+                },
+                {
+                    "name": "email",
+                    "businessName": "Email Address",
+                    "logicalType": "string",
+                    "physicalType": "varchar(100)",
+                    "description": "Contact email address.",
+                },
+                {
+                    "name": "full_name",
+                    "businessName": "Full Name",
+                    "logicalType": "string",
+                    "physicalType": "varchar(100)",
+                    "description": "Customer's full name.",
+                },
+                {
+                    "name": "acquired_by",
+                    "businessName": "Acquired By",
+                    "logicalType": "integer",
+                    "physicalType": "integer",
+                    "description": "Internal admin identifier. The referenced table is not in this database, so it cannot be joined here.",
+                },
+                {
+                    "name": "status",
+                    "businessName": "Account Status",
+                    "logicalType": "string",
+                    "physicalType": "varchar(20)",
+                    "description": "Registration state, defaulting to 'registered'. It does not indicate whether the customer has ever purchased.",
+                    "examples": ["registered"],
+                },
+                {
+                    "name": "signup_date",
+                    "businessName": "Signup Date",
+                    "logicalType": "date",
+                    "physicalType": "date",
+                    "description": "When the customer registered.",
+                },
+            ],
+        },
+        {
+            "name": "web_sessions",
+            "logicalType": "object",
+            "physicalType": "table",
+            "physicalName": "customer_demographic_master.web_sessions",
+            "description": "Page views per anonymous web session.",
+            "properties": [
+                {
+                    "name": "session_id",
+                    "logicalType": "integer",
+                    "physicalType": "serial",
+                    "description": "Session row identifier.",
+                    "primaryKey": True,
+                    "primaryKeyPosition": 1,
+                    "unique": True,
+                    "required": True,
+                },
+                {
+                    "name": "user_id",
+                    "businessName": "Visitor",
+                    "logicalType": "string",
+                    "physicalType": "varchar(50)",
+                    "description": "Anonymous visitor UUID. It does not join to customers.id.",
+                },
+                {
+                    "name": "page_path",
+                    "businessName": "Page",
+                    "logicalType": "string",
+                    "physicalType": "varchar(255)",
+                    "description": "Path of the page viewed.",
+                    "examples": ["/products/camp-tent-4p"],
+                },
+                {
+                    "name": "viewed_at",
+                    "businessName": "Viewed At",
+                    "logicalType": "timestamp",
+                    "physicalType": "timestamp",
+                    "description": "When the page view happened.",
+                    "partitioned": True,
+                    "partitionKeyPosition": 1,
+                },
+            ],
+        },
+    ],
+}
+
+# ---------------------------------------------------------------------------
+# Data quality per output port
+#
+# Statuses deliberately differ so the badge shows something during a demo.
+# ---------------------------------------------------------------------------
+
+DATA_QUALITY: dict[str, Any] = {
+    "inventory-snapshot": {
+        "overall_status": "success",
+        "description": "Nightly scan completed, all checks passed.",
+        "dimensions": {
+            "completeness": "success",
+            "uniqueness": "success",
+            "validity": "success",
+        },
+        "technical_assets": [
+            {"name": "inventory_latest", "status": "success"},
+            {"name": "stock_levels", "status": "success"},
+        ],
+    },
+    "sales-transaction-ledger": {
+        "overall_status": "warning",
+        "description": "Nightly scan completed, calculated_total disagrees with total_amount on a number of orders.",
+        "dimensions": {
+            "completeness": "success",
+            "consistency": "warning",
+            "validity": "success",
+        },
+        "technical_assets": [
+            {"name": "orders", "status": "warning"},
+            {"name": "order_items", "status": "success"},
+            {"name": "recurring_revenue", "status": "success"},
+        ],
+    },
+    "customer-demographic-master": {
+        "overall_status": "success",
+        "description": "Nightly scan completed, all checks passed.",
+        "dimensions": {
+            "completeness": "success",
+            "uniqueness": "success",
+            "validity": "success",
+        },
+        "technical_assets": [
+            {"name": "customers", "status": "success"},
+            {"name": "web_sessions", "status": "success"},
+        ],
+    },
+}
+
+# ---------------------------------------------------------------------------
 # Products
 # ---------------------------------------------------------------------------
 
@@ -623,6 +1121,10 @@ def provision_product(product: dict):
 
     # Set curated queries
     set_curated_queries(dp_id, op_id, op_cfg["curated_queries"])
+
+    # Publish the data model and a data quality summary
+    publish_data_model(dp_id, op_id, DATA_MODELS[namespace])
+    publish_data_quality(dp_id, op_id, DATA_QUALITY[namespace])
 
 
 def main():

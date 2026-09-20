@@ -104,6 +104,18 @@ begin
     SELECT gen_random_uuid(), id, admin_role_id, 'APPROVED', timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP)
     FROM public.users WHERE email = 'john.scientist@pharma.com';
 
+    -- ACCESS DURATIONS
+    -- The migrations register one duration per abstract data product type: permanent
+    -- for Data Products and time bound for Explorations. That leaves the other option
+    -- greyed out in the Output Port settings, so offer both for the demo.
+    INSERT INTO public.access_durations (id, abstract_data_product_type, access_duration_type, days, is_default, created_on)
+    VALUES (gen_random_uuid(), 'data_products', 'time_bound', 30, false, timezone('utc'::text, CURRENT_TIMESTAMP))
+    ON CONFLICT (abstract_data_product_type, access_duration_type) DO NOTHING;
+
+    INSERT INTO public.access_durations (id, abstract_data_product_type, access_duration_type, days, is_default, created_on)
+    VALUES (gen_random_uuid(), 'explorations', 'permanent', NULL, false, timezone('utc'::text, CURRENT_TIMESTAMP))
+    ON CONFLICT (abstract_data_product_type, access_duration_type) DO NOTHING;
+
     -- No data products seeded here — the provisioner creates them via webhooks
 
 end $$;
