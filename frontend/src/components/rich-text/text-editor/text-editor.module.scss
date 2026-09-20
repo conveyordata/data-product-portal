@@ -18,10 +18,10 @@
     cursor: text;
 }
 
-.submitButton {
-    align-self: flex-end;
+.actions {
     margin-top: auto;
-    border-radius: 50%;
+    padding-top: globals.$spacing-m;
+    padding-right: globals.$spacing-s;
 }
 
 .editor {
@@ -30,9 +30,15 @@
     border-radius: globals.$border-radius;
     padding: globals.$spacing-s globals.$spacing-m;
 
+    // Entering edit mode has to look like entering edit mode, rather than
+    // waiting for focus to reveal that this was an editable box all along.
+    &[contenteditable="true"] {
+        border-color: globals.$border-color;
+    }
+
     &:focus {
         outline: none;
-        border: 1px solid globals.$primary-color;
+        border-color: globals.$primary-color;
     }
 
     pre {

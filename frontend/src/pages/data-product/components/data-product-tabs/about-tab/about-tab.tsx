@@ -38,19 +38,21 @@ export function AboutTab({ dataProductId }: Props) {
         return <Empty />;
     }
 
+    // Rethrowing keeps the editor open on failure, so the author does not lose their text.
     async function handleSubmit(content: string) {
-        if (canEdit) {
-            try {
-                await updateDataProductAbout({
-                    id: dataProductId,
-                    dataProductAboutUpdate: { about: content },
-                }).unwrap();
-                dispatchMessage({ content: t('About section successfully updated'), type: 'success' });
-            } catch (_error) {
-                dispatchMessage({ content: t('Could not update about section'), type: 'error' });
-            }
-        } else {
+        if (!canEdit) {
             dispatchMessage({ content: t('You do not have permission to edit this about section'), type: 'error' });
+            throw new Error('Not allowed to edit the about section');
+        }
+        try {
+            await updateDataProductAbout({
+                id: dataProductId,
+                dataProductAboutUpdate: { about: content },
+            }).unwrap();
+            dispatchMessage({ content: t('About section successfully updated'), type: 'success' });
+        } catch (error) {
+            dispatchMessage({ content: t('Could not update about section'), type: 'error' });
+            throw error;
         }
     }
 
