@@ -132,7 +132,7 @@ def migrate_all(
 def check_latest_migration_core(
     plugins: Sequence[type[TechnicalAssetPlugin]], engine: Engine
 ) -> str:
-    """Downgrade core's latest migration by one step, then reapply it.
+    """ONLY USE IN TESTINGS: Downgrade core's latest migration by one step, then reapply it.
 
     A bare `alembic downgrade -1` can't be used for this once any plugin has
     migrated: it only knows core's own script location, not the shared
