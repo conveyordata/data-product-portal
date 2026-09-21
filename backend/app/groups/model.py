@@ -1,6 +1,6 @@
 import uuid
 
-from sqlalchemy import CheckConstraint, ForeignKey, String
+from sqlalchemy import CheckConstraint, ForeignKey, Index, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
 
@@ -38,6 +38,10 @@ class GroupMembership(Base, BaseORM):
         CheckConstraint(
             "group_id <> member_identity_id",
             name="ck_group_memberships_not_self",
+        ),
+        Index(
+            "ix_group_memberships_member_identity_id",
+            "member_identity_id",
         ),
     )
 

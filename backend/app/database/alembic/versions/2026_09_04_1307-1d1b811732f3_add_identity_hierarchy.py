@@ -131,8 +131,19 @@ def upgrade() -> None:
         ),
     )
 
+    op.create_index(
+        "ix_group_memberships_member_identity_id",
+        "group_memberships",
+        ["member_identity_id"],
+        unique=False,
+    )
+
 
 def downgrade() -> None:
+    op.drop_index(
+        "ix_group_memberships_member_identity_id",
+        table_name="group_memberships",
+    )
     op.drop_table("group_memberships")
     op.drop_table("machine_users")
     op.drop_table("groups")
