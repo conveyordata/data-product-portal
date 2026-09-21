@@ -433,7 +433,7 @@ INSERT INTO public.machine_users (id, display_name) VALUES ('{{ ingestion_machin
 
 INSERT INTO public.machine_users (id, display_name) VALUES ('{{ reporting_machine_user_id }}'::uuid, 'Data Quality Service');
 
--- GROUP MEMBERSHIPSº
+-- GROUP MEMBERSHIPS
 INSERT INTO public.group_memberships (group_id, member_identity_id, created_on, updated_on) VALUES ('{{ data_engineering_group_id }}'::uuid, '{{ alice_id }}'::uuid, timezone('utc'::text, current_timestamp), NULL);
 
 INSERT INTO public.group_memberships (group_id, member_identity_id, created_on, updated_on) VALUES ('{{ data_engineering_group_id }}'::uuid, '{{ bob_id }}'::uuid, timezone('utc'::text, current_timestamp), NULL);
