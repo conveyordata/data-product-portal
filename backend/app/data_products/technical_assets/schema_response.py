@@ -79,13 +79,9 @@ class GetTechnicalAssetsResponseItem(ORMModel):
 
     @computed_field
     def result_string(self) -> str:
-        if self.service is not None:
-            return self.configuration.render_template(
-                self.service.result_string_template
-            )
-        # A plugin that uses no platform service brings its own template.
-        template = self.configuration.result_string_template
-        return self.configuration.render_template(template) if template else ""
+        if self.service is None:
+            return ""
+        return self.configuration.render_template(self.service.result_string_template)
 
     @computed_field
     def technical_info(self) -> list[TechnicalInfo]:

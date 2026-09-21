@@ -11,13 +11,6 @@ from app.technical_asset_configuration.base_schema import TechnicalAssetPlugin
 
 class PluginWithoutPlatform(TechnicalAssetPlugin):
     name: ClassVar[str] = "PluginWithoutPlatform"
-    result_string_template: ClassVar[str] = "https://example.com/{repository}"
-
-    repository: str
-
-
-class PluginWithoutTemplate(TechnicalAssetPlugin):
-    name: ClassVar[str] = "PluginWithoutTemplate"
 
     repository: str
 
@@ -50,16 +43,8 @@ def test_result_string__still_uses_the_platform_service_template():
     assert item.result_string == "s3://bucket/some-repo"
 
 
-def test_result_string__falls_back_to_the_plugin_template_without_a_service():
+def test_result_string__is_empty_without_a_service():
     configuration = PluginWithoutPlatform(repository="some-repo")
-
-    item = _item(configuration, None)
-
-    assert item.result_string == "https://example.com/some-repo"
-
-
-def test_result_string__is_empty_when_the_plugin_declares_no_template():
-    configuration = PluginWithoutTemplate(repository="some-repo")
 
     item = _item(configuration, None)
 
