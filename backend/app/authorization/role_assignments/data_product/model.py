@@ -53,5 +53,4 @@ class DataProductRoleAssignment(Base, BaseORM, EventTrackedMixin):
         return DataProductRoleAssignmentEvent(
             id=self.id,
             data_product_id=self.data_product_id,
-            user_id=self.identity_id,
         )
