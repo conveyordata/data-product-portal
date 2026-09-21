@@ -106,7 +106,7 @@ export function DatasetTabs({ datasetId, dataProductId, isLoading }: Props) {
                 label: t('Settings'),
                 key: TabKeys.Settings,
                 icon: <SettingOutlined />,
-                children: <SettingsTab datasetId={datasetId} dataProductId={dataProductId} />,
+                children: <SettingsTab outputPortId={datasetId} dataProductId={dataProductId} />,
             },
             {
                 label: t('History'),

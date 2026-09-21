@@ -10,6 +10,7 @@ from app.configuration.data_product_settings.schema import DataProductSettingVal
 from app.configuration.data_product_types.schema import DataProductType
 from app.configuration.domains.schema import Domain
 from app.configuration.tags.schema import Tag
+from app.data_products.model import DataProductVisibility
 from app.data_products.status import AbstractDataProductStatus
 from app.shared.schema import ORMModel
 
@@ -27,6 +28,7 @@ class BaseDataProductGet(ORMModel):
     domain: Domain
     type: DataProductType
     lifecycle: Optional[DataProductLifeCycle]
+    visibility: DataProductVisibility
 
 
 class GetDataProductResponse(BaseDataProductGet):

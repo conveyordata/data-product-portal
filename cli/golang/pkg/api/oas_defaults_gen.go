@@ -28,6 +28,10 @@ func (s *DataProductCreate) setDefaults() {
 		var defaultVal0 []uuid.UUID
 		s.TagIds = defaultVal0
 	}
+	{
+		val := DataProductVisibility("discoverable")
+		s.Visibility.SetTo(val)
+	}
 }
 
 // setDefaults set default value of fields.
@@ -131,6 +135,22 @@ func (s *EnvironmentGetItem) setDefaults() {
 	{
 		val := bool(true)
 		s.IsGlobal.SetTo(val)
+	}
+}
+
+// setDefaults set default value of fields.
+func (s *GetDataProductResponse) setDefaults() {
+	{
+		val := DataProductVisibility("discoverable")
+		s.Visibility = val
+	}
+}
+
+// setDefaults set default value of fields.
+func (s *GetDataProductsResponseItem) setDefaults() {
+	{
+		val := DataProductVisibility("discoverable")
+		s.Visibility = val
 	}
 }
 
