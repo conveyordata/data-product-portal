@@ -1,3 +1,11 @@
+"""grant API user admin
+
+Revision ID: 6441623a586b
+Revises: 7727032896e7
+Create Date: 2025-05-21 10:55:00.964055
+
+"""
+
 from typing import Sequence, Union
 
 from alembic import op
