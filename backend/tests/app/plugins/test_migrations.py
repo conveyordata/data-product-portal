@@ -5,63 +5,51 @@ from alembic import command
 from sqlalchemy import inspect
 
 from app.plugins.migrations import (
-    PLUGIN_VERSION_TABLE,
+    _CORE_VERSIONS_DIR,
+    VERSION_TABLE,
     _config,
+    _core_head,
+    _owned_versions_dir,
+    check_latest_migration_core,
+    migrate_all,
     owns_a_table,
-    reconcile_all,
 )
 from app.plugins.registry import plugin_registry
 from tests import engine
+from tests.fixtures.example_plugin import ExamplePlugin
+from tests.fixtures.other_plugin import OtherPlugin
 
 
 def installed() -> list:
     """The plugins the portal itself would reconcile, e.g. S3.
 
-    reconcile_all is always called with every installed plugin, because the
+    migrate_all is always called with every installed plugin, because the
     version table is shared and Alembic resolves every row in it. Passing a
     subset is what an uninstalled plugin looks like, which is its own test.
     """
     return [p for p in plugin_registry.discovered() if owns_a_table(p)]
 
 
-def reconcile(*plugins) -> dict:
-    return reconcile_all([*installed(), *plugins], engine)
-
-
-class FakePlugin:
-    """Enough of a plugin for the reconciler: a name, a target, and revisions.
-
-    Deliberately not a TechnicalAssetPlugin subclass, so these fixtures never
-    show up in plugin discovery. Hence the type: ignore at the call sites.
-    """
-
-    def __init__(self, name: str, migrations_package: str, target_revision: str):
-        self.name = name
-        self.migrations_package = migrations_package
-        self.target_revision = target_revision
-
-
-def example_plugin(target_revision: str = "example_0002_add_extra") -> FakePlugin:
-    return FakePlugin("ExamplePlugin", "tests.fixtures.example_plugin", target_revision)
-
-
-def other_plugin() -> FakePlugin:
-    return FakePlugin("OtherPlugin", "tests.fixtures.other_plugin", "other_0001_create")
+def migrate(*plugins) -> dict:
+    return migrate_all([*installed(), *plugins], engine)
 
 
 @pytest.fixture(autouse=True)
 def _clean_fixture_plugins():
     yield
-    fixtures = [example_plugin(), other_plugin()]
+    fixtures = [ExamplePlugin, OtherPlugin]
     url = engine.url.render_as_string(hide_password=False)
-    # One config covering every fixture, not one per fixture: the version table
-    # is shared, so a config that does not know one fixture's revisions cannot
-    # resolve its row and would fail before undoing anything.
-    with _config([*installed(), *fixtures], url) as config:  # type: ignore[list-item]
-        for plugin in fixtures:
-            # Nothing to undo if that plugin never ran in this test.
-            with suppress(Exception):
-                command.downgrade(config, f"{plugin.target_revision}@base")
+    # One config covering core and every fixture, not one per fixture: the
+    # version table is shared, so a config that does not know one owner's
+    # revisions cannot resolve its row and would fail before undoing anything.
+    version_locations = [_CORE_VERSIONS_DIR] + [
+        _owned_versions_dir(plugin) for plugin in [*installed(), *fixtures]
+    ]
+    config = _config(version_locations, url)
+    for revision in ("example_0002_add_extra", "other_0001_create"):
+        # Nothing to undo if that plugin never ran in this test.
+        with suppress(Exception):
+            command.downgrade(config, f"{revision}@base")
 
 
 def _tables() -> list[str]:
@@ -73,105 +61,91 @@ def _tracked_revisions() -> set[str]:
         return {
             row[0]
             for row in connection.exec_driver_sql(
-                f"select version_num from {PLUGIN_VERSION_TABLE}"  # noqa: S608
+                f"select version_num from {VERSION_TABLE}"  # noqa: S608
             )
         }
 
 
-def test_reconcile_plugin__installs_from_scratch():
-    outcome = reconcile(example_plugin("example_0001_create"))["ExamplePlugin"]
+def test_owns_a_table__true_when_a_versions_folder_sits_next_to_the_plugin_class():
+    assert owns_a_table(ExamplePlugin)  # type: ignore[arg-type]
 
-    assert outcome == "installed at example_0001_create"
+
+def test_owns_a_table__false_without_a_versions_folder():
+    class NoVersionsPlugin:
+        name = "NoVersionsPlugin"
+
+    assert not owns_a_table(NoVersionsPlugin)  # type: ignore[arg-type]
+
+
+def test_migrate_plugin__installs_from_scratch_to_latest():
+    outcome = migrate(ExamplePlugin)["ExamplePlugin"]
+
+    assert outcome == "installed at example_0002_add_extra"
     assert "example_plugin_assets" in _tables()
-
-
-def test_reconcile_plugin__upgrades_to_target():
-    reconcile(example_plugin("example_0001_create"))["ExamplePlugin"]
-
-    outcome = reconcile(example_plugin("example_0002_add_extra"))["ExamplePlugin"]
-
-    assert outcome == "upgraded example_0001_create to example_0002_add_extra"
     columns = {c["name"] for c in inspect(engine).get_columns("example_plugin_assets")}
     assert "extra" in columns
 
 
-def test_reconcile_plugin__downgrades_when_target_is_older():
-    reconcile(example_plugin("example_0002_add_extra"))["ExamplePlugin"]
+def test_migrate_plugin__is_idempotent():
+    migrate(ExamplePlugin)
 
-    outcome = reconcile(example_plugin("example_0001_create"))["ExamplePlugin"]
-
-    assert outcome == "downgraded example_0002_add_extra to example_0001_create"
-    columns = {c["name"] for c in inspect(engine).get_columns("example_plugin_assets")}
-    assert "extra" not in columns
-
-
-def test_reconcile_plugin__is_idempotent():
-    reconcile(example_plugin())["ExamplePlugin"]
-
-    outcome = reconcile(example_plugin())["ExamplePlugin"]
+    outcome = migrate(ExamplePlugin)["ExamplePlugin"]
 
     assert outcome == "up to date at example_0002_add_extra"
 
 
-def test_reconcile_all__rejects_unknown_target_revision():
-    with pytest.raises(ValueError, match="not in its own migration history"):
-        reconcile(example_plugin("example_0099_does_not_exist"))
-
-
-def test_reconcile_all__rejects_a_target_revision_that_belongs_to_another_plugin():
-    class ConfusedPlugin:
-        name = "ConfusedPlugin"
-        target_revision = "other_0001_create"
-        migrations_package = "tests.fixtures.example_plugin"
-
-    with pytest.raises(ValueError, match="not in its own migration history"):
-        reconcile(ConfusedPlugin(), other_plugin())  # type: ignore[arg-type]
-
-
-def test_reconcile_all__still_checks_for_orphans_when_no_plugin_owns_a_table():
-    reconcile(example_plugin())
+def test_migrate_all__still_checks_for_orphans_when_no_plugin_owns_a_table():
+    migrate(ExamplePlugin)
 
     with pytest.raises(ValueError, match="belonging to no installed plugin"):
-        reconcile_all([], engine)
+        migrate_all([], engine)
 
 
-def test_reconcile_all__tracks_two_plugins_in_one_shared_version_table():
+def test_migrate_all__tracks_two_plugins_in_one_shared_version_table():
     """Each plugin is its own Alembic branch, because its first revision has no
-    down_revision, so one row per plugin coexists in the single shared table."""
-    results = reconcile(example_plugin(), other_plugin())
+    down_revision, so one row per plugin coexists in the single shared table
+    alongside core's own."""
+    results = migrate(ExamplePlugin, OtherPlugin)
 
     assert results["ExamplePlugin"] == "installed at example_0002_add_extra"
     assert results["OtherPlugin"] == "installed at other_0001_create"
     assert {"example_0002_add_extra", "other_0001_create"} <= _tracked_revisions()
 
 
-def test_reconcile_all__leaves_other_plugins_alone_when_one_moves():
-    reconcile(example_plugin(), other_plugin())
+def test_migrate_all__leaves_other_plugins_alone_when_one_is_reinstalled():
+    migrate(ExamplePlugin, OtherPlugin)
 
-    reconcile(example_plugin("example_0001_create"), other_plugin())
+    migrate(ExamplePlugin, OtherPlugin)
 
     tracked = _tracked_revisions()
-    assert "example_0001_create" in tracked
+    assert "example_0002_add_extra" in tracked
     assert "other_0001_create" in tracked
 
 
-def test_reconcile_all__names_the_plugin_whose_row_it_cannot_resolve():
+def test_migrate_all__names_the_plugin_whose_row_it_cannot_resolve():
     """The shared version table is the cost of one table instead of one per
     plugin: a row left behind by an uninstalled plugin blocks every plugin's
     migrations, so say so in terms an operator can act on."""
-    reconcile(example_plugin(), other_plugin())
+    migrate(ExamplePlugin, OtherPlugin)
 
     # Reconciling without the example plugin is what uninstalling it looks like.
     with pytest.raises(ValueError, match="belonging to no installed plugin"):
-        reconcile(other_plugin())
+        migrate(OtherPlugin)
 
 
-def test_reconcile_all__skips_plugins_without_a_table():
-    class PluginWithoutTable:
+def test_migrate_all__skips_plugins_without_a_table():
+    class NoTablePlugin:
         name = "NoTablePlugin"
-        target_revision = None
-        migrations_package = None
 
-    results = reconcile(PluginWithoutTable())  # type: ignore[arg-type]
+    results = migrate(NoTablePlugin)  # type: ignore[arg-type]
 
     assert "NoTablePlugin" not in results
+
+
+def test_check_latest_migration__round_trips_the_latest_core_revision():
+    url = engine.url.render_as_string(hide_password=False)
+
+    head = check_latest_migration_core(installed(), engine)
+
+    assert head == _core_head(url)
+    assert head in _tracked_revisions()

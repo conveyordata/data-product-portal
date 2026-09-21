@@ -63,12 +63,7 @@ def _field_lines(plugin_class: ast.ClassDef, source: str) -> list[str]:
     for node in plugin_class.body:
         if not isinstance(node, ast.AnnAssign) or not isinstance(node.target, ast.Name):
             continue
-        if node.target.id.startswith("_") or node.target.id in (
-            "name",
-            "version",
-            "target_revision",
-            "migrations_package",
-        ):
+        if node.target.id.startswith("_") or node.target.id in ("name", "version"):
             continue
         assert node.end_lineno is not None
         fields.append("\n".join(source_lines[node.lineno - 1 : node.end_lineno]))

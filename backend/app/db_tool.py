@@ -1,9 +1,6 @@
-import os
 from typing import Optional
 
 import typer
-from alembic import command
-from alembic.config import Config
 from rich import print
 from rich.console import Console
 from sqlalchemy_utils.functions import create_database, database_exists, drop_database
@@ -13,7 +10,10 @@ from app.core.helpers.local import add_additional_env_vars
 add_additional_env_vars()
 
 from app.database.database import engine, get_url  # noqa: E402
-from app.plugins.migrations import reconcile_all  # noqa: E402
+from app.plugins.migrations import (  # noqa: E402
+    check_latest_migration_core,
+    migrate_all,
+)
 from app.plugins.registry import plugin_registry  # noqa: E402
 from app.seed import seed_db  # noqa: E402
 
@@ -40,14 +40,7 @@ def migrate():
     print("[bold blue]Migration :rocket:[/bold blue]")
     print("Migration started")
     try:
-        cfg = Config(
-            os.path.join(os.path.dirname(os.path.abspath("__file__")), "alembic.ini")
-        )
-        command.upgrade(cfg, "heads")
-        print("Core migration finished successfully")
-
-        print("[bold blue]Reconciling plugin tables :electric_plug:[/bold blue]")
-        results = reconcile_all(plugin_registry.discovered(), engine)
+        results = migrate_all(plugin_registry.discovered(), engine)
         for plugin_name, outcome in results.items():
             print(f"  {plugin_name}: {outcome}")
         if not results:
@@ -56,6 +49,21 @@ def migrate():
         print("Migration finished successfully")
     except Exception as e:
         print("Something went wrong when migrating", e)
+        exit(1)
+
+
+@app.command(name="check-latest-migration")
+def check_latest_migration_cmd():
+    """
+    Downgrade the latest core migration by one step and reapply it, to catch
+    a malformed upgrade/downgrade pair before it ships.
+    """
+    print("[bold blue]Checking latest migration[/bold blue]")
+    try:
+        head = check_latest_migration_core(plugin_registry.discovered(), engine)
+        print(f"Round-tripped {head} successfully")
+    except Exception as e:
+        print("Migration check failed", e)
         exit(1)
 
 

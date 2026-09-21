@@ -34,8 +34,6 @@ from app.technical_asset_configuration.snowflake.model import (
 class SnowflakeTechnicalAssetConfiguration(TechnicalAssetPlugin):
     name: ClassVar[str] = NAME
     version: ClassVar[str] = "1.0"
-    target_revision: ClassVar[str] = "snowflake_0001_baseline"
-    migrations_package: ClassVar[str] = "app.technical_asset_configuration.snowflake"
 
     database: str
     schema: str = ""

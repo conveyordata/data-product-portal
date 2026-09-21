@@ -30,8 +30,6 @@ from app.users.schema import User
 class RustFSTechnicalAssetConfiguration(TechnicalAssetPlugin):
     name: ClassVar[str] = NAME
     version: ClassVar[str] = "1.0"
-    target_revision: ClassVar[str] = "rustfs_0001_baseline"
-    migrations_package: ClassVar[str] = "app.technical_asset_configuration.rustfs"
 
     bucket: str
     suffix: str = ""

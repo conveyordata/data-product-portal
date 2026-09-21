@@ -39,4 +39,6 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
+    if TABLE not in sa.inspect(op.get_bind()).get_table_names():
+        return
     op.drop_table(TABLE)
