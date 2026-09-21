@@ -15,8 +15,10 @@ from app.authorization.role_assignments.output_port.model import (
 )
 from app.core.authz.authorization import Authorization
 from app.events.model import Event as EventModel
+from app.groups.model import GroupMembership
 from app.users.notifications.model import Notification as NotificationModel
 from app.users.notifications.schema_response import NotificationGet
+from app.users.model import User as UserModel
 from app.users.schema import User
 
 
@@ -97,19 +99,40 @@ class NotificationService:
         event_id: UUID,
         extra_receiver_ids: Sequence[UUID] = (),
     ) -> None:
-        assignments = self.db.scalars(
-            select(DataProductRoleAssignment).where(
+        """
+        Creates notifications for users related to a data product event.
+
+        As approved Data Product assignments can target machine users and groups,
+        those need to be excluded while includinggroup members when th target is a group.
+        """
+        direct_user_ids = select(UserModel.id).join(
+            DataProductRoleAssignment,
+            DataProductRoleAssignment.identity_id == UserModel.id,
+        ).where(
+            DataProductRoleAssignment.data_product_id == data_product_id,
+            DataProductRoleAssignment.decision == DecisionStatus.APPROVED,
+        )
+
+        group_member_user_ids = (
+            select(UserModel.id)
+            .join(
+                GroupMembership,
+                GroupMembership.member_identity_id == UserModel.id,
+            )
+            .join(
+                DataProductRoleAssignment,
+                DataProductRoleAssignment.identity_id == GroupMembership.group_id,
+            )
+            .where(
                 DataProductRoleAssignment.data_product_id == data_product_id,
                 DataProductRoleAssignment.decision == DecisionStatus.APPROVED,
             )
-        ).all()
-
-        receivers = set(
-            chain(
-                (assignment.identity_id for assignment in assignments),
-                extra_receiver_ids,
-            )
         )
+
+        receivers = set(chain(
+            self.db.scalars(direct_user_ids.union(group_member_user_ids)).all(),
+            extra_receiver_ids,
+        ))
 
         event = self.db.get(EventModel, event_id)
         for receiver in receivers:
