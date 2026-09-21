@@ -223,15 +223,7 @@ class TestOutputPortSearchRouter:
 
     @staticmethod
     def reseed(session) -> None:
-        # A bare alembic.ini Config only knows core's own versions folder, but
-        # the shared version table also holds every plugin's tracked revision
-        # by this point in the suite - it can't resolve those rows at all.
-        # Build the same all-branches config migrate_all does. Core's own
-        # downgrade unconditionally drops a plugin's table too (the same
-        # overlap migrate_all works around going up), so bring core down to
-        # base first, same order as migrate_all's own upgrade, before the
-        # rest of the table: a plugin's own downgrade only no-ops once its
-        # table is already gone.
+        # Downgrade plugins first, then downgrade core. 
         url = engine.url.render_as_string(hide_password=False)
         owning_plugins = [p for p in plugin_registry.discovered() if owns_a_table(p)]
         version_locations = [_CORE_VERSIONS_DIR] + [
