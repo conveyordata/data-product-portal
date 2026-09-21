@@ -1,8 +1,8 @@
 from datetime import datetime, timedelta, timezone
 
-from app.authorization.service import AuthorizationService
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.roles.schema import Scope
+from app.authorization.service import AuthorizationService
 from app.core.authz import Action
 from app.data_products.output_port_technical_assets_link.service import (
     TechnicalAssetOutputPortService,
@@ -55,7 +55,9 @@ class TestDataOutputDatasetService:
         assert pending_old.id in requests_ids
         assert approved_old.id not in requests_ids
 
-    def test_get_user_pending_actions__includes_group_inherited_permission(self, session):
+    def test_get_user_pending_actions__includes_group_inherited_permission(
+        self, session
+    ):
         user = UserFactory()
         group = GroupFactory()
         GroupMembershipFactory(group=group, member=user)
@@ -86,6 +88,4 @@ class TestDataOutputDatasetService:
             session
         ).get_user_pending_actions(user)
 
-        assert {action.id for action in pending_actions} == {
-            pending_association.id
-        }
+        assert {action.id for action in pending_actions} == {pending_association.id}

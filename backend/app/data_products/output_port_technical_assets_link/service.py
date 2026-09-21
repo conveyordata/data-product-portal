@@ -159,7 +159,9 @@ class TechnicalAssetOutputPortService:
     def get_user_pending_actions(
         self, user: User
     ) -> Sequence[TechnicalAssetOutputPortRequest]:
-        user_group_ids = GroupService(self.db).get_groups_ids_identity_is_member_of(user.id)
+        user_group_ids = GroupService(self.db).get_groups_ids_identity_is_member_of(
+            user.id
+        )
         requested_associations = (
             self.db.scalars(
                 select(TechnicalAssetOutputPortAssociationModel)
@@ -178,8 +180,11 @@ class TechnicalAssetOutputPortService:
                             OutputPortModel.data_product.has(
                                 DataProductModel.assignments.any(
                                     or_(
-                                        DataProductRoleAssignmentModel.identity_id == user.id,
-                                        DataProductRoleAssignmentModel.identity_id.in_(user_group_ids),
+                                        DataProductRoleAssignmentModel.identity_id
+                                        == user.id,
+                                        DataProductRoleAssignmentModel.identity_id.in_(
+                                            user_group_ids
+                                        ),
                                     )
                                 )
                             )
