@@ -26,7 +26,7 @@ def test_create_data_product_notifications__resolves_users_and_group_members(
     data_product = DataProductFactory()
     role = RoleFactory(scope=Scope.DATA_PRODUCT, permissions=[])
 
-    GroupMembershipFactory(group=group, ember=group_member)
+    GroupMembershipFactory(group=group, member=group_member)
     DataProductRoleAssignmentFactory(
         identity_id=direct_user.id,
         data_product_id=data_product.id,
