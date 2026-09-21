@@ -1,3 +1,8 @@
+---
+name: code-review
+description: Review philosophy for GitHub Copilot code review comments - high-confidence, concise, actionable feedback.
+---
+
 ## Review Philosophy
 - Only comment when you have HIGH CONFIDENCE (>80%) that an issue exists
 - Be concise: one sentence per comment when possible. Use Humaniser language skill for writing.
