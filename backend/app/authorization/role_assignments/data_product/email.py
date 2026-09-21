@@ -20,7 +20,8 @@ def send_role_assignment_request_email(
     action = emailgen.Table(["User", "Request", "Data Product", "Owned By"])
     action.add_row(
         [
-            f"{identity_display_name} wants to join ",
+            f"{identity_display_name}",
+            "Wants to join ",
             role_assignment_data_product.name,
             ", ".join([f"{user.first_name} {user.last_name}" for user in approvers]),
         ]
