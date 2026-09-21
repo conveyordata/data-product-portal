@@ -53,9 +53,7 @@ class TestDataProductRoleAssignmentsRouter:
             ],
         ],
     )
-    @patch(
-        "app.authorization.role_assignments.data_product.router.GroupService"
-    )
+    @patch("app.authorization.role_assignments.data_product.router.GroupService")
     @patch(
         "app.authorization.role_assignments.data_product.router.DataProductAuthAssignment"
     )
@@ -299,17 +297,15 @@ class TestDataProductRoleAssignmentsRouter:
         assert response.status_code == 200
         assert len(response.json()["role_assignments"]) == 1
 
-    @patch(
-        "app.authorization.role_assignments.data_product.router.GroupService"
-    )
+    @patch("app.authorization.role_assignments.data_product.router.GroupService")
     @patch(
         "app.authorization.role_assignments.data_product.router.DataProductAuthAssignment"
     )
     def test_delete_assignment_removes_group_membership_edges(
-            self,
-            mock_data_product_auth_assignment,
-            mock_group_service_class,
-            client: TestClient,
+        self,
+        mock_data_product_auth_assignment,
+        mock_group_service_class,
+        client: TestClient,
     ):
         group_service = mock_group_service_class.return_value
         group_service.is_group.return_value = True
@@ -409,17 +405,15 @@ class TestDataProductRoleAssignmentsRouter:
         assert data["id"] == str(assignment.id)
         assert data["decision"] == DecisionStatus.APPROVED
 
-    @patch(
-        "app.authorization.role_assignments.data_product.router.GroupService"
-    )
+    @patch("app.authorization.role_assignments.data_product.router.GroupService")
     @patch(
         "app.authorization.role_assignments.data_product.router.DataProductAuthAssignment"
     )
     def test_decide_assignment_adds_group_membership_edges(
-            self,
-            mock_data_product_auth_assignment,
-            mock_group_service_class,
-            client: TestClient,
+        self,
+        mock_data_product_auth_assignment,
+        mock_group_service_class,
+        client: TestClient,
     ):
         group_service = mock_group_service_class.return_value
         group_service.is_group.return_value = True
