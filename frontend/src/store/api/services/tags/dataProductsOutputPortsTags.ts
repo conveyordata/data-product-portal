@@ -75,6 +75,10 @@ export const dataProductOutputPortTags = {
                 type: TagTypes.DataProductOutputPorts,
                 id: dataProductId,
             },
+            {
+                type: TagTypes.OutputPort,
+                id: STATIC_TAG_ID.LIST,
+            },
         ],
     },
     getOutputPort: {

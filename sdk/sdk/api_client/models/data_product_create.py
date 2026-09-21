@@ -7,6 +7,7 @@ from uuid import UUID
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
+from ..models.data_product_visibility import DataProductVisibility
 from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
@@ -31,6 +32,7 @@ class DataProductCreate:
         owners (list[UUID]):
         about (None | str | Unset):
         tag_ids (list[UUID] | Unset):
+        visibility (DataProductVisibility | Unset):
         input_ports (None | RequestInputPortsForDataProductRequest | Unset):
     """
 
@@ -43,6 +45,7 @@ class DataProductCreate:
     owners: list[UUID]
     about: None | str | Unset = UNSET
     tag_ids: list[UUID] | Unset = UNSET
+    visibility: DataProductVisibility | Unset = UNSET
     input_ports: None | RequestInputPortsForDataProductRequest | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
@@ -81,6 +84,10 @@ class DataProductCreate:
                 tag_ids_item = str(tag_ids_item_data)
                 tag_ids.append(tag_ids_item)
 
+        visibility: str | Unset = UNSET
+        if not isinstance(self.visibility, Unset):
+            visibility = self.visibility.value
+
         input_ports: dict[str, Any] | None | Unset
         if isinstance(self.input_ports, Unset):
             input_ports = UNSET
@@ -106,6 +113,8 @@ class DataProductCreate:
             field_dict["about"] = about
         if tag_ids is not UNSET:
             field_dict["tag_ids"] = tag_ids
+        if visibility is not UNSET:
+            field_dict["visibility"] = visibility
         if input_ports is not UNSET:
             field_dict["input_ports"] = input_ports
 
@@ -155,6 +164,13 @@ class DataProductCreate:
 
                 tag_ids.append(tag_ids_item)
 
+        _visibility = d.pop("visibility", UNSET)
+        visibility: DataProductVisibility | Unset
+        if isinstance(_visibility, Unset):
+            visibility = UNSET
+        else:
+            visibility = DataProductVisibility(_visibility)
+
         def _parse_input_ports(
             data: object,
         ) -> None | RequestInputPortsForDataProductRequest | Unset:
@@ -186,6 +202,7 @@ class DataProductCreate:
             owners=owners,
             about=about,
             tag_ids=tag_ids,
+            visibility=visibility,
             input_ports=input_ports,
         )
 

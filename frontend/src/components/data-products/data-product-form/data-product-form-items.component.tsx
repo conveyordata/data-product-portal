@@ -1,9 +1,10 @@
-import { Form, Input, Select, Skeleton } from 'antd';
+import { Alert, Form, Input, Radio, Select, Skeleton } from 'antd';
 import type { FormInstance } from 'antd/es/form/hooks/useForm';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useDebouncedCallback } from 'use-debounce';
+import { HiddenWarningText } from '@/components/data-products/data-product-form/hidden-warning.tsx';
 import { ResourceNameFormItem } from '@/components/resource-name/resource-name-form-item.tsx';
 import { MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
 import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
@@ -11,7 +12,11 @@ import { useGetDataProductsLifecyclesQuery } from '@/store/api/services/generate
 import { useGetDataProductsTypesQuery } from '@/store/api/services/generated/configurationDataProductTypesApi.ts';
 import { useGetDomainsQuery } from '@/store/api/services/generated/configurationDomainsApi.ts';
 import { useGetTagsQuery } from '@/store/api/services/generated/configurationTagsApi.ts';
-import type { DataProductCreate, GetDataProductResponse } from '@/store/api/services/generated/dataProductsApi.ts';
+import {
+    type DataProductCreate,
+    DataProductVisibility,
+    type GetDataProductResponse,
+} from '@/store/api/services/generated/dataProductsApi.ts';
 import {
     ResourceNameModel,
     useLazySanitizeResourceNameQuery,
@@ -69,6 +74,7 @@ export const DataProductFormItems = <T extends DataProductCreate>({
     ]);
 
     const dataProductNameValue = Form.useWatch('name', form);
+    const visibility = Form.useWatch('visibility', form);
 
     const [canEditResourceName, setCanEditResourceName] = useState<boolean>(false);
 
@@ -232,6 +238,26 @@ export const DataProductFormItems = <T extends DataProductCreate>({
                     showSearch={{ filterOption: selectFilterOptionByLabel }}
                 />
             </Form.Item>
+            <Form.Item
+                name="visibility"
+                label={t('Visibility')}
+                tooltip={t('The visibility of the Data Product, this cannot be changed after creation')}
+                initialValue={DataProductVisibility.Discoverable}
+            >
+                <Radio.Group
+                    optionType="button"
+                    options={[
+                        { label: t('Discoverable'), value: DataProductVisibility.Discoverable },
+                        { label: t('Hidden'), value: DataProductVisibility.Hidden },
+                    ]}
+                    disabled={mode === 'edit'}
+                />
+            </Form.Item>
+            {visibility === DataProductVisibility.Hidden && (
+                <Form.Item>
+                    <Alert type="warning" showIcon title={<HiddenWarningText />} />
+                </Form.Item>
+            )}
             <Form.Item<DataProductCreate>
                 name="description"
                 label={t('Description')}

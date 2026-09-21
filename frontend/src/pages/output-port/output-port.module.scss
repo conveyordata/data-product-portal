@@ -14,11 +14,6 @@
     margin-bottom: globals.$spacing-l;
     gap: globals.$column-gap-regular;
 
-    .dataset-icon {
-        width: globals.$icon-size-ml;
-        height: globals.$icon-size-ml;
-    }
-
     h3 {
         margin: 0;
         text-wrap: avoid;

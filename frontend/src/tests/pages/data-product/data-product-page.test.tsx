@@ -3,7 +3,7 @@ import { Route, Routes } from 'react-router';
 import { describe, expect, it } from 'vitest';
 import { DataProduct } from '@/pages/data-product/data-product.page.tsx';
 import { allowAllAuth } from '@/tests/mocks/auth.ts';
-import { mockDataProductDetailCalls, mockDataProducts } from '@/tests/mocks/dataProducts.ts';
+import { mockDataProductDetailCalls } from '@/tests/mocks/dataProducts.ts';
 import { server } from '@/tests/mocks/server.ts';
 import { mockUsers } from '@/tests/mocks/users.ts';
 import { renderWithProviders, screen, waitFor, within } from '@/tests/test-utils.tsx';
@@ -24,7 +24,7 @@ function mockUserCalls() {
 
 function setupDefaultMocks() {
     allowAllAuth();
-    mockDataProductDetailCalls(mockDataProducts[0]);
+    mockDataProductDetailCalls();
     mockUserCalls();
     server.use(
         http.get('*/api/v2/configuration/environments', () => {
@@ -119,7 +119,7 @@ describe('DataProduct Page', () => {
     });
 
     it('hides edit button when user lacks edit access', async () => {
-        mockDataProductDetailCalls(mockDataProducts[0]);
+        mockDataProductDetailCalls();
         mockUserCalls();
         server.use(
             http.get('*/api/v2/authz/roles/:scope', () => {

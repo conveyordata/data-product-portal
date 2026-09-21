@@ -10239,6 +10239,10 @@
             "format": "uuid",
             "title": "Lifecycle Id"
           },
+          "visibility": {
+            "$ref": "#/components/schemas/DataProductVisibility",
+            "default": "discoverable"
+          },
           "owners": {
             "items": {
               "type": "string",
@@ -11168,6 +11172,14 @@
         ],
         "title": "DataProductUsageUpdate"
       },
+      "DataProductVisibility": {
+        "type": "string",
+        "enum": [
+          "hidden",
+          "discoverable"
+        ],
+        "title": "DataProductVisibility"
+      },
       "DataQualityStatus": {
         "type": "string",
         "enum": [
@@ -12095,6 +12107,9 @@
               }
             ]
           },
+          "visibility": {
+            "$ref": "#/components/schemas/DataProductVisibility"
+          },
           "about": {
             "anyOf": [
               {
@@ -12120,6 +12135,7 @@
           "domain",
           "type",
           "lifecycle",
+          "visibility",
           "about"
         ],
         "title": "GetDataProductResponse"
@@ -12236,6 +12252,9 @@
               }
             ]
           },
+          "visibility": {
+            "$ref": "#/components/schemas/DataProductVisibility"
+          },
           "user_count": {
             "type": "integer",
             "title": "User Count"
@@ -12262,6 +12281,7 @@
           "domain",
           "type",
           "lifecycle",
+          "visibility",
           "user_count",
           "input_port_count",
           "technical_asset_count"

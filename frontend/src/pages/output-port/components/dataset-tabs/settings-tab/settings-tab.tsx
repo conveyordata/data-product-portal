@@ -19,6 +19,7 @@ import {
     AbstractDataProductType,
     useGetAllAccessDurationsQuery,
 } from '@/store/api/services/generated/configurationAccessDurationsApi.ts';
+import { DataProductVisibility, useGetDataProductQuery } from '@/store/api/services/generated/dataProductsApi.ts';
 import {
     AccessDurationType,
     type OutputPortAccessDuration,
@@ -32,7 +33,7 @@ import { getDatasetAccessTypeLabel } from '@/utils/access-type.helper';
 import { dispatchMessage } from '@/utils/feedback.ts';
 
 type Props = {
-    datasetId: string;
+    outputPortId: string;
     dataProductId: string;
 };
 
@@ -42,20 +43,21 @@ function formatAccessDuration(duration: OutputPortAccessDuration, t: TFunction):
         : t('{{count}} days', { count: duration.days });
 }
 
-export function SettingsTab({ datasetId, dataProductId }: Props) {
+export function SettingsTab({ outputPortId, dataProductId }: Props) {
     const { t } = useTranslation();
     const { token } = theme.useToken();
     const { data: outputPort, isLoading } = useGetOutputPortQuery(
-        { id: datasetId, dataProductId },
-        { skip: !datasetId || !dataProductId },
+        { id: outputPortId, dataProductId },
+        { skip: !outputPortId || !dataProductId },
     );
     const { data: accessDurations } = useGetOutputPortAccessDurationsQuery(
-        { dataProductId, id: datasetId },
-        { skip: !datasetId || !dataProductId },
+        { dataProductId, id: outputPortId },
+        { skip: !outputPortId || !dataProductId },
     );
+    const { data: dataProduct } = useGetDataProductQuery(dataProductId || '');
     const { data: edit_access } = useCheckAccessQuery(
-        { resource: datasetId, action: AuthorizationAction.OUTPUT_PORT__UPDATE_PROPERTIES },
-        { skip: !datasetId },
+        { resource: outputPortId, action: AuthorizationAction.OUTPUT_PORT__UPDATE_PROPERTIES },
+        { skip: !outputPortId },
     );
     const canEditAccess = edit_access?.allowed || false;
     const { data: { access_durations: allDurations = [] } = {} } = useGetAllAccessDurationsQuery();
@@ -95,7 +97,7 @@ export function SettingsTab({ datasetId, dataProductId }: Props) {
         if (!outputPort) return;
         try {
             await updateOutputPort({
-                id: datasetId,
+                id: outputPortId,
                 dataProductId,
                 outputPortUpdate: {
                     name: outputPort.name,
@@ -145,6 +147,7 @@ export function SettingsTab({ datasetId, dataProductId }: Props) {
                         setAccessType(value);
                         saveAccessField({ access_type: value }, () => setAccessType(previous));
                     }}
+                    hiddenDataProduct={dataProduct?.visibility === DataProductVisibility.Hidden}
                 />
             ) : (
                 getDatasetAccessTypeLabel(t, outputPort.access_type)
@@ -234,7 +237,7 @@ export function SettingsTab({ datasetId, dataProductId }: Props) {
                 {t('Custom Settings')}
             </Title>
             <Divider style={{ margin: 0 }} />
-            <DataProductSettings id={datasetId} scope="dataset" dataProductId={dataProductId} />
+            <DataProductSettings id={outputPortId} scope="dataset" dataProductId={dataProductId} />
         </Flex>
     );
 }

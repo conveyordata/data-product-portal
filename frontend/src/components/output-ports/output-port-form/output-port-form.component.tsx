@@ -16,7 +16,6 @@ import {
     Tooltip,
     Typography,
 } from 'antd';
-import type { TFunction } from 'i18next';
 import { type Ref, useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
@@ -34,7 +33,11 @@ import {
 } from '@/store/api/services/generated/configurationAccessDurationsApi.ts';
 import { useGetDataProductsLifecyclesQuery } from '@/store/api/services/generated/configurationDataProductLifecyclesApi.ts';
 import { useGetTagsQuery } from '@/store/api/services/generated/configurationTagsApi.ts';
-import { OutputPortAccessType, useGetDataProductQuery } from '@/store/api/services/generated/dataProductsApi.ts';
+import {
+    DataProductVisibility,
+    OutputPortAccessType,
+    useGetDataProductQuery,
+} from '@/store/api/services/generated/dataProductsApi.ts';
 import {
     type CreateOutputPortRequest,
     type OutputPortUpdate,
@@ -43,7 +46,6 @@ import {
     useRemoveOutputPortMutation,
     useUpdateOutputPortMutation,
 } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
-import { useLinkOutputPortToTechnicalAssetMutation } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
 import {
     ResourceNameModel,
     useLazySanitizeResourceNameQuery,
@@ -54,7 +56,6 @@ import { useGetUsersQuery } from '@/store/api/services/generated/usersApi.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import {
     ApplicationPaths,
-    createDataOutputIdPath,
     createDataProductIdPath,
     createMarketplaceOutputPortPath,
     createOutputPortPath,
@@ -216,9 +217,8 @@ function AccessDurationInfo({ mode }: { mode: 'create' | 'edit' }) {
 
 type Props = {
     mode: 'create' | 'edit';
-    datasetId?: string;
+    outputPortId?: string;
     dataProductId?: string;
-    dataOutputId?: string;
     modalCallbackOnSubmit?: () => void;
     formRef?: Ref<FormInstance<CreateOutputPortRequest>>;
 };
@@ -227,46 +227,50 @@ const { TextArea } = Input;
 
 const DEBOUNCE = 500;
 
-export const getAccessTypeOptions = (t: TFunction) => {
+export function AccessTypeSection({
+    value,
+    onChange,
+    block = true,
+    hiddenDataProduct = false,
+}: {
+    value?: OutputPortAccessType;
+    onChange?: (value: OutputPortAccessType) => void;
+    block?: boolean;
+    hiddenDataProduct: boolean;
+}) {
+    const { t } = useTranslation();
+    const selectedValue = hiddenDataProduct ? OutputPortAccessType.Private : value;
     const options = [
         {
-            value: OutputPortAccessType.Restricted,
-            tooltip: t('Restricted Output Ports are visible to everyone but require permission to use'),
+            value: OutputPortAccessType.Unrestricted,
+            tooltip: t(
+                'Unrestricted Output Ports are visible and accessible to use by anyone, only allowed when the Data Product is not hidden',
+            ),
         },
         {
-            value: OutputPortAccessType.Unrestricted,
-            tooltip: t('Unrestricted Output Ports are visible and accessible to use by anyone'),
+            value: OutputPortAccessType.Restricted,
+            tooltip: t(
+                'Restricted Output Ports are visible to everyone but require permission to use, only allowed when the Data Product is not hidden',
+            ),
         },
         {
             value: OutputPortAccessType.Private,
             tooltip: t('Private Output Ports are only visible to owners and users with access'),
         },
-    ];
-
-    return options.map(({ value, tooltip }) => ({
+    ].map(({ value, tooltip }) => ({
         label: (
             <Tooltip title={tooltip}>
                 <span>{getDatasetAccessTypeLabel(t, value)}</span>
             </Tooltip>
         ),
         value,
+        disabled: hiddenDataProduct && value !== OutputPortAccessType.Private,
     }));
-};
 
-export function AccessTypeSection({
-    value,
-    onChange,
-    block = true,
-}: {
-    value?: OutputPortAccessType;
-    onChange?: (value: OutputPortAccessType) => void;
-    block?: boolean;
-}) {
-    const { t } = useTranslation();
     return (
         <Radio.Group
-            value={value}
-            options={getAccessTypeOptions(t)}
+            value={selectedValue}
+            options={options}
             optionType="button"
             block={block}
             onChange={(e) => onChange?.(e.target.value)}
@@ -274,31 +278,21 @@ export function AccessTypeSection({
     );
 }
 
-export function OutputPortForm({
-    mode,
-    modalCallbackOnSubmit,
-    formRef,
-    datasetId,
-    dataProductId,
-    dataOutputId,
-}: Props) {
+export function OutputPortForm({ mode, modalCallbackOnSubmit, formRef, outputPortId, dataProductId }: Props) {
     const { t } = useTranslation();
     const navigate = useNavigate();
 
-    const { data: currentDataset, isFetching: isFetchingInitialValues } = useGetOutputPortQuery(
-        { id: datasetId || '', dataProductId: dataProductId || '' },
+    const { data: currentOutputPort, isFetching: isFetchingInitialValues } = useGetOutputPortQuery(
+        { id: outputPortId || '', dataProductId: dataProductId || '' },
         {
-            skip: mode === 'create' || !datasetId || !dataProductId,
+            skip: mode === 'create' || !outputPortId || !dataProductId,
         },
     );
-    const { data: dataProduct, isFetching: isFetchingDataProduct } = useGetDataProductQuery(dataProductId || '', {
-        skip: mode === 'edit' || !dataProductId,
-    });
+    const { data: dataProduct, isFetching: isFetchingDataProduct } = useGetDataProductQuery(dataProductId || '');
     const { data: lifecycles = undefined, isFetching: isFetchingLifecycles } = useGetDataProductsLifecyclesQuery();
     const { data: { users = [] } = {}, isFetching: isFetchingUsers } = useGetUsersQuery();
     const { data: { tags: availableTags = [] } = {}, isFetching: isFetchingTags } = useGetTagsQuery();
     const [createDataset, { isLoading: isCreating }] = useCreateOutputPortMutation();
-    const [requestDatasetsAccessForDataOutput] = useLinkOutputPortToTechnicalAssetMutation();
     const [updateDataset, { isLoading: isUpdating }] = useUpdateOutputPortMutation();
     const [deleteDataset, { isLoading: isArchiving }] = useRemoveOutputPortMutation();
     const [sanitizeResourceName, { data: sanitizedResourceName }] = useLazySanitizeResourceNameQuery();
@@ -313,17 +307,17 @@ export function OutputPortForm({
     const { data: create_access } = useCheckAccessQuery({ action: AuthorizationAction.GLOBAL__CREATE_OUTPUT_PORT });
     const { data: update_access } = useCheckAccessQuery(
         {
-            resource: datasetId,
+            resource: outputPortId,
             action: AuthorizationAction.OUTPUT_PORT__UPDATE_PROPERTIES,
         },
-        { skip: !datasetId },
+        { skip: !outputPortId },
     );
     const { data: delete_access } = useCheckAccessQuery(
         {
-            resource: datasetId,
+            resource: outputPortId,
             action: AuthorizationAction.OUTPUT_PORT__DELETE,
         },
-        { skip: !datasetId },
+        { skip: !outputPortId },
     );
 
     const canCreate = mode === 'create' && (create_access?.allowed ?? false);
@@ -368,23 +362,12 @@ export function OutputPortForm({
                 modalCallbackOnSubmit?.();
                 dispatchMessage({ content: t('Output Port created successfully'), type: 'success' });
                 // If dataProductId was provided, navigate back to the Data Product page
-                if (dataOutputId && dataProductId) {
-                    await requestDatasetsAccessForDataOutput({
-                        dataProductId,
-                        outputPortId: response.id,
-                        linkTechnicalAssetToOutputPortRequest: {
-                            technical_asset_id: dataOutputId,
-                        },
-                    });
-                    navigate(createDataOutputIdPath(dataOutputId, dataProductId));
+                if (dataProductId && !outputPortId) {
+                    navigate(createDataProductIdPath(dataProductId, TabKeys.OutputPorts));
                 } else {
-                    if (dataProductId && !datasetId) {
-                        navigate(createDataProductIdPath(dataProductId, TabKeys.OutputPorts));
-                    } else {
-                        navigate(createOutputPortPath(dataProductId || '', response.id));
-                    }
+                    navigate(createOutputPortPath(dataProductId || '', response.id));
                 }
-            } else if (mode === 'edit' && datasetId && currentDataset) {
+            } else if (mode === 'edit' && outputPortId && currentOutputPort) {
                 if (!canEdit) {
                     dispatchMessage({ content: t('You are not allowed to edit this Output Port'), type: 'error' });
                     return;
@@ -403,12 +386,12 @@ export function OutputPortForm({
 
                 const response = await updateDataset({
                     outputPortUpdate: request,
-                    id: datasetId,
-                    dataProductId: currentDataset.data_product_id,
+                    id: outputPortId,
+                    dataProductId: currentOutputPort.data_product_id,
                 }).unwrap();
                 dispatchMessage({ content: t('Output Port updated successfully'), type: 'success' });
 
-                navigate(createOutputPortPath(currentDataset.data_product_id, response.id));
+                navigate(createOutputPortPath(currentOutputPort.data_product_id, response.id));
             }
             form.resetFields();
         } catch (_e) {
@@ -420,10 +403,8 @@ export function OutputPortForm({
 
     const onCancel = () => {
         form.resetFields();
-        if (mode === 'edit' && datasetId && dataProductId) {
-            navigate(createMarketplaceOutputPortPath(datasetId, dataProductId));
-        } else if (dataOutputId && dataProductId) {
-            navigate(createOutputPortPath(dataOutputId, dataProductId));
+        if (mode === 'edit' && outputPortId && dataProductId) {
+            navigate(createMarketplaceOutputPortPath(outputPortId, dataProductId));
         } else {
             navigate(ApplicationPaths.Marketplace);
         }
@@ -434,9 +415,12 @@ export function OutputPortForm({
     };
 
     const handleDeleteDataset = async () => {
-        if (canDelete && currentDataset) {
+        if (canDelete && currentOutputPort) {
             try {
-                await deleteDataset({ dataProductId: currentDataset.data_product_id, id: currentDataset.id }).unwrap();
+                await deleteDataset({
+                    dataProductId: currentOutputPort.data_product_id,
+                    id: currentOutputPort.id,
+                }).unwrap();
                 dispatchMessage({ content: t('Output Port deleted successfully'), type: 'success' });
                 navigate(ApplicationPaths.Marketplace);
             } catch (_error) {
@@ -475,9 +459,10 @@ export function OutputPortForm({
             validateResourceName({ resourceName: resourceName, model: ResourceNameModel.OutputPort }).unwrap(),
         [validateResourceName],
     );
-    const datasetOwners = useGetDatasetOwnerIds(currentDataset?.id);
+    const datasetOwners = useGetDatasetOwnerIds(currentOutputPort?.id);
     const dataProductOwners = useGetDataProductOwnerIds(dataProduct?.id);
     const ownerIds = mode === 'edit' ? datasetOwners : dataProductOwners;
+    const isHiddenDataProduct = dataProduct?.visibility === DataProductVisibility.Hidden;
 
     useEffect(() => {
         if (mode === 'create' && dataProductOwners && form.getFieldValue('owners') === undefined) {
@@ -485,20 +470,35 @@ export function OutputPortForm({
         }
     }, [mode, dataProductOwners, form]);
 
-    if (mode === 'edit' && (!currentDataset || ownerIds === undefined)) {
+    useEffect(() => {
+        if (
+            mode === 'create' &&
+            isHiddenDataProduct &&
+            form.getFieldValue('access_type') !== OutputPortAccessType.Private
+        ) {
+            form.setFieldValue('access_type', OutputPortAccessType.Private);
+        }
+    }, [form, isHiddenDataProduct, mode]);
+
+    if (mode === 'edit' && (!currentOutputPort || ownerIds === undefined)) {
         return <Skeleton active />;
     }
 
     const initialValues = {
-        name: currentDataset?.name,
-        namespace: currentDataset?.namespace,
-        description: currentDataset?.description,
-        access_type: mode === 'create' ? OutputPortAccessType.Unrestricted : currentDataset?.access_type,
-        lifecycle_id: currentDataset?.lifecycle?.id,
-        tag_ids: currentDataset?.tags.map((tag) => tag.id),
+        name: currentOutputPort?.name,
+        namespace: currentOutputPort?.namespace,
+        description: currentOutputPort?.description,
+        access_type:
+            mode === 'create'
+                ? isHiddenDataProduct
+                    ? OutputPortAccessType.Private
+                    : OutputPortAccessType.Unrestricted
+                : currentOutputPort?.access_type,
+        lifecycle_id: currentOutputPort?.lifecycle?.id,
+        tag_ids: currentOutputPort?.tags.map((tag) => tag.id),
         owners: ownerIds,
-        data_product_access_duration_type: currentDataset?.data_product_access_duration_type,
-        exploration_access_duration_type: currentDataset?.exploration_access_duration_type,
+        data_product_access_duration_type: currentOutputPort?.data_product_access_duration_type,
+        exploration_access_duration_type: currentOutputPort?.exploration_access_duration_type,
     };
 
     return (
@@ -593,7 +593,7 @@ export function OutputPortForm({
                     },
                 ]}
             >
-                <AccessTypeSection />
+                <AccessTypeSection hiddenDataProduct={isHiddenDataProduct} />
             </Form.Item>
             <AccessDurationInfo mode={mode} />
             <Form.Item<CreateOutputPortRequest> name="tag_ids" label={t('Tags')}>
