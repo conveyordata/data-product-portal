@@ -30,8 +30,8 @@ def installed() -> list:
     return [p for p in plugin_registry.discovered() if owns_a_table(p)]
 
 
-def migrate(*plugins) -> dict:
-    return migrate_all([*installed(), *plugins], engine)
+def migrate(*plugins) -> None:
+    migrate_all([*installed(), *plugins], engine)
 
 
 @pytest.fixture(autouse=True)
@@ -78,37 +78,40 @@ def test_owns_a_table__false_without_a_versions_folder():
 
 
 def test_migrate_plugin__installs_from_scratch_to_latest():
-    outcome = migrate(ExamplePlugin)["ExamplePlugin"]
+    migrate(ExamplePlugin)
 
-    assert outcome == "installed at example_0002_add_extra"
     assert "example_plugin_assets" in _tables()
     columns = {c["name"] for c in inspect(engine).get_columns("example_plugin_assets")}
     assert "extra" in columns
+    assert "example_0002_add_extra" in _tracked_revisions()
 
 
 def test_migrate_plugin__is_idempotent():
     migrate(ExamplePlugin)
 
-    outcome = migrate(ExamplePlugin)["ExamplePlugin"]
+    migrate(ExamplePlugin)  # must not raise on a plugin already at its head
 
-    assert outcome == "up to date at example_0002_add_extra"
+    assert "example_0002_add_extra" in _tracked_revisions()
 
 
-def test_migrate_all__still_checks_for_orphans_when_no_plugin_owns_a_table():
+def test_migrate_all__still_checks_for_orphans_when_a_plugin_is_dropped():
     migrate(ExamplePlugin)
 
+    # Reconciling without ExamplePlugin is what uninstalling it looks like.
+    # A literal [] can't be used here: a few of core's own migrations depend
+    # on a specific plugin's baseline (see migrations.py's _core_head), so
+    # resolving core's own history needs those plugins' directories present
+    # regardless - installed() is the smallest list that can.
     with pytest.raises(ValueError, match="belonging to no installed plugin"):
-        migrate_all([], engine)
+        migrate_all(installed(), engine)
 
 
 def test_migrate_all__tracks_two_plugins_in_one_shared_version_table():
     """Each plugin is its own Alembic branch, because its first revision has no
     down_revision, so one row per plugin coexists in the single shared table
     alongside core's own."""
-    results = migrate(ExamplePlugin, OtherPlugin)
+    migrate(ExamplePlugin, OtherPlugin)
 
-    assert results["ExamplePlugin"] == "installed at example_0002_add_extra"
-    assert results["OtherPlugin"] == "installed at other_0001_create"
     assert {"example_0002_add_extra", "other_0001_create"} <= _tracked_revisions()
 
 
@@ -137,9 +140,7 @@ def test_migrate_all__skips_plugins_without_a_table():
     class NoTablePlugin:
         name = "NoTablePlugin"
 
-    results = migrate(NoTablePlugin)  # type: ignore[arg-type]
-
-    assert "NoTablePlugin" not in results
+    migrate(NoTablePlugin)  # type: ignore[arg-type]  # must not raise
 
 
 def test_check_latest_migration__round_trips_the_latest_core_revision():
@@ -147,5 +148,5 @@ def test_check_latest_migration__round_trips_the_latest_core_revision():
 
     head = check_latest_migration_core(installed(), engine)
 
-    assert head == _core_head(url)
+    assert head == _core_head(installed(), url)
     assert head in _tracked_revisions()

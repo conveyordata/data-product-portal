@@ -8,42 +8,20 @@ Create Date: 2026-01-28 12:41:00.000000
 
 from typing import Sequence, Union
 
-import sqlalchemy as sa
 from alembic import op
-from sqlalchemy.dialects import postgresql
-
-from app.shared.model import utcnow
 
 # revision identifiers, used by Alembic.
 revision: str = "snowflake_separate_table"
 down_revision: Union[str, None] = "7601ac14662a"
 branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+# This migration reads columns off data_output_configurations that a later
+# core migration removes, so it must run at this exact point in core's own
+# history - it can't move into the plugin's independent branch. It only
+# needs the snowflake plugin's own baseline to have created the table first.
+depends_on: Union[str, Sequence[str], None] = "snowflake_0001_baseline"
 
 
 def upgrade() -> None:
-    # Create the new snowflake_technical_asset_configurations table
-    # The 'id' column is both a primary key and a foreign key to data_output_configurations
-    op.create_table(
-        "snowflake_technical_asset_configurations",
-        sa.Column(
-            "id",
-            postgresql.UUID(as_uuid=True),
-            sa.ForeignKey("data_output_configurations.id", ondelete="CASCADE"),
-            primary_key=True,
-        ),
-        sa.Column("database", sa.String(), nullable=True),
-        sa.Column("schema", sa.String(), nullable=True),
-        sa.Column("table", sa.String(), nullable=True),
-        sa.Column("bucket_identifier", sa.String(), nullable=True),
-        sa.Column("database_path", sa.String(), nullable=True),
-        sa.Column("table_path", sa.String(), nullable=True),
-        sa.Column("access_granularity", sa.String(), nullable=True),
-        sa.Column("created_on", sa.DateTime(timezone=False), server_default=utcnow()),
-        sa.Column("updated_on", sa.DateTime(timezone=False), onupdate=utcnow()),
-        sa.Column("deleted_at", sa.DateTime(timezone=False), nullable=True),
-    )
-
     # Migrate existing Snowflake data from polymorphic table to new table
     # Note: The base table data_output_configurations already has the id and timestamps,
     # we just need to copy the Snowflake-specific columns
@@ -108,5 +86,6 @@ def downgrade() -> None:
         """
     )
 
-    # Drop the separate table
-    op.drop_table("snowflake_technical_asset_configurations")
+    # Drop the separate table so a full downgrade-to-base sweep reaches this
+    # point with core's shared base table no longer referenced by it.
+    op.drop_table("snowflake_technical_asset_configurations", if_exists=True)

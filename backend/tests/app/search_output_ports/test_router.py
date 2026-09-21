@@ -12,7 +12,6 @@ from app.db_tool import seed_cmd
 from app.plugins.migrations import (
     _CORE_VERSIONS_DIR,
     _config,
-    _core_head,
     _owned_versions_dir,
     migrate_all,
     owns_a_table,
@@ -223,14 +222,21 @@ class TestOutputPortSearchRouter:
 
     @staticmethod
     def reseed(session) -> None:
-        # Downgrade plugins first, then downgrade core. 
+        # A bare alembic.ini Config only knows core's own versions folder, but
+        # the shared version table also holds every plugin's tracked revision
+        # by this point in the suite - build the same all-branches config
+        # migrate_all does. Several of core's own migrations `depends_on` a
+        # plugin's baseline (see migrations.py), and Alembic enforces that
+        # ordering on the way down too, so a single downgrade to "base" is
+        # safe: dependents (core) always go before their dependency (the
+        # plugin), which is also the order a plugin's table can actually be
+        # dropped in, since core's data still references it until then.
         url = engine.url.render_as_string(hide_password=False)
         owning_plugins = [p for p in plugin_registry.discovered() if owns_a_table(p)]
         version_locations = [_CORE_VERSIONS_DIR] + [
             _owned_versions_dir(p) for p in owning_plugins
         ]
         cfg = _config(version_locations, url)
-        command.downgrade(cfg, f"{_core_head(url)}@base")
         command.downgrade(cfg, "base")
 
         migrate_all(owning_plugins, engine)

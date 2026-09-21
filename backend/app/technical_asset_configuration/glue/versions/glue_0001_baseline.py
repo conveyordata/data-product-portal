@@ -15,8 +15,6 @@ TABLE = "glue_technical_asset_configurations"
 
 
 def upgrade() -> None:
-    if TABLE in sa.inspect(op.get_bind()).get_table_names():
-        return
     op.create_table(
         TABLE,
         sa.Column(
@@ -35,10 +33,9 @@ def upgrade() -> None:
         sa.Column("created_on", sa.DateTime(timezone=False), server_default=utcnow()),
         sa.Column("updated_on", sa.DateTime(timezone=False), onupdate=utcnow()),
         sa.Column("deleted_at", sa.DateTime(timezone=False), nullable=True),
+        if_not_exists=True,
     )
 
 
 def downgrade() -> None:
-    if TABLE not in sa.inspect(op.get_bind()).get_table_names():
-        return
-    op.drop_table(TABLE)
+    op.drop_table(TABLE, if_exists=True)

@@ -8,37 +8,20 @@ Create Date: 2026-01-28 12:43:00.000000
 
 from typing import Sequence, Union
 
-import sqlalchemy as sa
 from alembic import op
-from sqlalchemy.dialects import postgresql
-
-from app.shared.model import utcnow
 
 # revision identifiers, used by Alembic.
 revision: str = "s3_separate_table"
 down_revision: Union[str, None] = "databricks_separate_table"
 branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+# This migration reads columns off data_output_configurations that a later
+# core migration removes, so it must run at this exact point in core's own
+# history - it can't move into the plugin's independent branch. It only
+# needs the s3 plugin's own baseline to have created the table first.
+depends_on: Union[str, Sequence[str], None] = "s3_0001_baseline"
 
 
 def upgrade() -> None:
-    # Create the new s3_technical_asset_configurations table
-    op.create_table(
-        "s3_technical_asset_configurations",
-        sa.Column(
-            "id",
-            postgresql.UUID(as_uuid=True),
-            sa.ForeignKey("data_output_configurations.id", ondelete="CASCADE"),
-            primary_key=True,
-        ),
-        sa.Column("bucket", sa.String(), nullable=True),
-        sa.Column("suffix", sa.String(), nullable=True),
-        sa.Column("path", sa.String(), nullable=True),
-        sa.Column("created_on", sa.DateTime(timezone=False), server_default=utcnow()),
-        sa.Column("updated_on", sa.DateTime(timezone=False), onupdate=utcnow()),
-        sa.Column("deleted_at", sa.DateTime(timezone=False), nullable=True),
-    )
-
     # Migrate existing S3 data
     op.execute(
         """
@@ -93,4 +76,4 @@ def downgrade() -> None:
         """
     )
 
-    op.drop_table("s3_technical_asset_configurations")
+    op.drop_table("s3_technical_asset_configurations", if_exists=True)

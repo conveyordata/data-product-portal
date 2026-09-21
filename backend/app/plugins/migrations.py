@@ -67,17 +67,30 @@ def _own_head(plugin: type[TechnicalAssetPlugin], url: str) -> str:
     return head
 
 
-def _core_head(url: str) -> str:
-    script = ScriptDirectory.from_config(_config([_CORE_VERSIONS_DIR], url))
-    head = script.get_current_head()
-    if head is None:
-        raise ValueError("Core has no migrations in its own versions folder")
-    return head
+def _core_head(plugins: Sequence[type[TechnicalAssetPlugin]], url: str) -> str:
+    # A few core migrations `depends_on` a plugin's baseline (see those files
+    # for why), so resolving core's own revisions requires every such
+    # plugin's directory to be present too - a core-only config raises
+    # `KeyError` on that dependency. Building the same full config
+    # migrate_all uses, then picking out the head whose file lives under
+    # core's own versions folder, works regardless of which plugins that
+    # happens to include.
+    plugins_owning_tables = [plugin for plugin in plugins if owns_a_table(plugin)]
+    version_locations = [_CORE_VERSIONS_DIR] + [
+        _owned_versions_dir(plugin) for plugin in plugins_owning_tables
+    ]
+    script = ScriptDirectory.from_config(_config(version_locations, url))
+    core_heads = [
+        head
+        for head in script.get_heads()
+        if str(_CORE_VERSIONS_DIR) in str(script.get_revision(head)._script_path)  # noqa: SLF001
+    ]
+    if len(core_heads) != 1:
+        raise ValueError(f"Expected exactly one core head, found {core_heads}")
+    return core_heads[0]
 
 
-def migrate_all(
-    plugins: Sequence[type[TechnicalAssetPlugin]], engine: Engine
-) -> dict[str, str]:
+def migrate_all(plugins: Sequence[type[TechnicalAssetPlugin]], engine: Engine) -> None:
     """Upgrade core and every plugin's own table to the latest revision.
 
     Core and each plugin are independent Alembic branches sharing one
@@ -109,24 +122,18 @@ def migrate_all(
         )
 
     before = set(_current_heads(engine))
-
-    # Core's head first, then heads: core and a plugin can create the same table and only the plugin's create is guarded, so upgrading everyone to heads in one call could let Alembic run the plugin's create before core's unguarded one and fail on a duplicate table.
-    command.upgrade(config, _core_head(url))
     command.upgrade(config, "heads")
 
-    results: dict[str, str] = {}
     for plugin in plugins_owning_tables:
         head = _own_head(plugin, url)
         previous = next((h for h in before if h in _own_revisions(plugin, url)), None)
         if previous == head:
-            results[plugin.name] = f"up to date at {head}"
+            outcome = f"up to date at {head}"
         elif previous is None:
-            results[plugin.name] = f"installed at {head}"
+            outcome = f"installed at {head}"
         else:
-            results[plugin.name] = f"upgraded {previous} to {head}"
-        logger.info(f"Reconciled plugin '{plugin.name}': {results[plugin.name]}")
-
-    return results
+            outcome = f"upgraded {previous} to {head}"
+        logger.info(f"Reconciled plugin '{plugin.name}': {outcome}")
 
 
 def check_latest_migration_core(
@@ -149,7 +156,7 @@ def check_latest_migration_core(
     config = _config(version_locations, url)
     script = ScriptDirectory.from_config(config)
 
-    head = _core_head(url)
+    head = _core_head(plugins, url)
     down_revision = script.get_revision(head).down_revision
     if down_revision is not None and not isinstance(down_revision, str):
         raise ValueError(f"Core's latest revision {head} has multiple parents")
