@@ -1,4 +1,4 @@
-from typing import ClassVar, Literal, Optional
+from typing import ClassVar, Optional
 from uuid import UUID
 
 from sqlalchemy.orm import Session
@@ -9,7 +9,6 @@ from app.technical_asset_configuration.base_schema import (
     TechnicalAssetPlugin,
     UIElementMetadata,
 )
-from app.technical_asset_configuration.data_output_types import DataOutputTypes
 from app.technical_asset_configuration.enums import UIElementType
 from app.technical_asset_configuration.osi_sem_model.model import (
     NAME,
@@ -26,9 +25,6 @@ class OSISemanticModelTechnicalAssetConfiguration(TechnicalAssetPlugin):
 
     model_name: str = ""
     location: str = ""
-    configuration_type: Literal[
-        DataOutputTypes.OSISemanticModelTechnicalAssetConfiguration
-    ]
 
     _platform_metadata = PlatformMetadata(
         display_name="OSI",

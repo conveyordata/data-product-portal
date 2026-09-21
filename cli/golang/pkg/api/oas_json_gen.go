@@ -910,46 +910,6 @@ func (s *AccessDurationUpdate) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
-// Encode encodes AccessGranularity as json.
-func (s AccessGranularity) Encode(e *jx.Encoder) {
-	e.Str(string(s))
-}
-
-// Decode decodes AccessGranularity from json.
-func (s *AccessGranularity) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode AccessGranularity to nil")
-	}
-	v, err := d.StrBytes()
-	if err != nil {
-		return err
-	}
-	// Try to use constant string.
-	switch AccessGranularity(v) {
-	case AccessGranularitySchema:
-		*s = AccessGranularitySchema
-	case AccessGranularityTable:
-		*s = AccessGranularityTable
-	default:
-		*s = AccessGranularity(v)
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s AccessGranularity) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *AccessGranularity) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
 // Encode implements json.Marshaler.
 func (s *AccessMode) Encode(e *jx.Encoder) {
 	e.ObjStart()
@@ -2133,154 +2093,6 @@ func (s AuthorizationAction) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *AuthorizationAction) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode implements json.Marshaler.
-func (s *AzureBlobTechnicalAssetConfiguration) Encode(e *jx.Encoder) {
-	e.ObjStart()
-	s.encodeFields(e)
-	e.ObjEnd()
-}
-
-// encodeFields encodes fields.
-func (s *AzureBlobTechnicalAssetConfiguration) encodeFields(e *jx.Encoder) {
-	{
-		e.FieldStart("configuration_type")
-		e.Str("AzureBlobTechnicalAssetConfiguration")
-	}
-	{
-		if s.Domain.Set {
-			e.FieldStart("domain")
-			s.Domain.Encode(e)
-		}
-	}
-	{
-		if s.Path.Set {
-			e.FieldStart("path")
-			s.Path.Encode(e)
-		}
-	}
-	{
-		e.FieldStart("container_name")
-		e.Str(s.ContainerName)
-	}
-}
-
-var jsonFieldsNameOfAzureBlobTechnicalAssetConfiguration = [4]string{
-	0: "configuration_type",
-	1: "domain",
-	2: "path",
-	3: "container_name",
-}
-
-// Decode decodes AzureBlobTechnicalAssetConfiguration from json.
-func (s *AzureBlobTechnicalAssetConfiguration) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode AzureBlobTechnicalAssetConfiguration to nil")
-	}
-	var requiredBitSet [1]uint8
-	s.setDefaults()
-
-	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		switch string(k) {
-		case "configuration_type":
-			requiredBitSet[0] |= 1 << 0
-			if err := func() error {
-				v, err := d.Str()
-				s.ConfigurationType = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"configuration_type\"")
-			}
-		case "domain":
-			if err := func() error {
-				s.Domain.Reset()
-				if err := s.Domain.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"domain\"")
-			}
-		case "path":
-			if err := func() error {
-				s.Path.Reset()
-				if err := s.Path.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"path\"")
-			}
-		case "container_name":
-			requiredBitSet[0] |= 1 << 3
-			if err := func() error {
-				v, err := d.Str()
-				s.ContainerName = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"container_name\"")
-			}
-		default:
-			return d.Skip()
-		}
-		return nil
-	}); err != nil {
-		return errors.Wrap(err, "decode AzureBlobTechnicalAssetConfiguration")
-	}
-	// Validate required fields.
-	var failures []validate.FieldError
-	for i, mask := range [1]uint8{
-		0b00001001,
-	} {
-		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
-			// Mask only required fields and check equality to mask using XOR.
-			//
-			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
-			// Bits of fields which would be set are actually bits of missed fields.
-			missed := bits.OnesCount8(result)
-			for bitN := 0; bitN < missed; bitN++ {
-				bitIdx := bits.TrailingZeros8(result)
-				fieldIdx := i*8 + bitIdx
-				var name string
-				if fieldIdx < len(jsonFieldsNameOfAzureBlobTechnicalAssetConfiguration) {
-					name = jsonFieldsNameOfAzureBlobTechnicalAssetConfiguration[fieldIdx]
-				} else {
-					name = strconv.Itoa(fieldIdx)
-				}
-				failures = append(failures, validate.FieldError{
-					Name:  name,
-					Error: validate.ErrFieldRequired,
-				})
-				// Reset bit.
-				result &^= 1 << bitIdx
-			}
-		}
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s *AzureBlobTechnicalAssetConfiguration) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *AzureBlobTechnicalAssetConfiguration) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -5054,298 +4866,30 @@ func (s *CreateTechnicalAssetRequest) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
-// Encode encodes CreateTechnicalAssetRequestConfiguration as json.
-func (s CreateTechnicalAssetRequestConfiguration) Encode(e *jx.Encoder) {
+// Encode implements json.Marshaler.
+func (s *CreateTechnicalAssetRequestConfiguration) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
-func (s CreateTechnicalAssetRequestConfiguration) encodeFields(e *jx.Encoder) {
-	switch s.Type {
-	case S3TechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration:
-		e.FieldStart("configuration_type")
-		e.Str("S3TechnicalAssetConfiguration")
-		{
-			s := s.S3TechnicalAssetConfiguration
-			{
-				e.FieldStart("bucket")
-				e.Str(s.Bucket)
-			}
-			{
-				if s.Suffix.Set {
-					e.FieldStart("suffix")
-					s.Suffix.Encode(e)
-				}
-			}
-			{
-				e.FieldStart("path")
-				e.Str(s.Path)
-			}
-		}
-	case RustFSTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration:
-		e.FieldStart("configuration_type")
-		e.Str("RustFSTechnicalAssetConfiguration")
-		{
-			s := s.RustFSTechnicalAssetConfiguration
-			{
-				e.FieldStart("bucket")
-				e.Str(s.Bucket)
-			}
-			{
-				if s.Suffix.Set {
-					e.FieldStart("suffix")
-					s.Suffix.Encode(e)
-				}
-			}
-			{
-				e.FieldStart("path")
-				e.Str(s.Path)
-			}
-		}
-	case GlueTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration:
-		e.FieldStart("configuration_type")
-		e.Str("GlueTechnicalAssetConfiguration")
-		{
-			s := s.GlueTechnicalAssetConfiguration
-			{
-				e.FieldStart("database")
-				e.Str(s.Database)
-			}
-			{
-				if s.DatabaseSuffix.Set {
-					e.FieldStart("database_suffix")
-					s.DatabaseSuffix.Encode(e)
-				}
-			}
-			{
-				if s.Table.Set {
-					e.FieldStart("table")
-					s.Table.Encode(e)
-				}
-			}
-			{
-				if s.BucketIdentifier.Set {
-					e.FieldStart("bucket_identifier")
-					s.BucketIdentifier.Encode(e)
-				}
-			}
-			{
-				if s.DatabasePath.Set {
-					e.FieldStart("database_path")
-					s.DatabasePath.Encode(e)
-				}
-			}
-			{
-				if s.TablePath.Set {
-					e.FieldStart("table_path")
-					s.TablePath.Encode(e)
-				}
-			}
-			{
-				e.FieldStart("access_granularity")
-				s.AccessGranularity.Encode(e)
-			}
-		}
-	case DatabricksTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration:
-		e.FieldStart("configuration_type")
-		e.Str("DatabricksTechnicalAssetConfiguration")
-		{
-			s := s.DatabricksTechnicalAssetConfiguration
-			{
-				e.FieldStart("catalog")
-				e.Str(s.Catalog)
-			}
-			{
-				if s.Schema.Set {
-					e.FieldStart("schema")
-					s.Schema.Encode(e)
-				}
-			}
-			{
-				if s.Table.Set {
-					e.FieldStart("table")
-					s.Table.Encode(e)
-				}
-			}
-			{
-				if s.BucketIdentifier.Set {
-					e.FieldStart("bucket_identifier")
-					s.BucketIdentifier.Encode(e)
-				}
-			}
-			{
-				if s.CatalogPath.Set {
-					e.FieldStart("catalog_path")
-					s.CatalogPath.Encode(e)
-				}
-			}
-			{
-				if s.TablePath.Set {
-					e.FieldStart("table_path")
-					s.TablePath.Encode(e)
-				}
-			}
-			{
-				e.FieldStart("access_granularity")
-				s.AccessGranularity.Encode(e)
-			}
-		}
-	case SnowflakeTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration:
-		e.FieldStart("configuration_type")
-		e.Str("SnowflakeTechnicalAssetConfiguration")
-		{
-			s := s.SnowflakeTechnicalAssetConfiguration
-			{
-				e.FieldStart("database")
-				e.Str(s.Database)
-			}
-			{
-				if s.Schema.Set {
-					e.FieldStart("schema")
-					s.Schema.Encode(e)
-				}
-			}
-			{
-				if s.Table.Set {
-					e.FieldStart("table")
-					s.Table.Encode(e)
-				}
-			}
-			{
-				if s.BucketIdentifier.Set {
-					e.FieldStart("bucket_identifier")
-					s.BucketIdentifier.Encode(e)
-				}
-			}
-			{
-				if s.DatabasePath.Set {
-					e.FieldStart("database_path")
-					s.DatabasePath.Encode(e)
-				}
-			}
-			{
-				if s.TablePath.Set {
-					e.FieldStart("table_path")
-					s.TablePath.Encode(e)
-				}
-			}
-			{
-				e.FieldStart("access_granularity")
-				s.AccessGranularity.Encode(e)
-			}
-		}
-	case RedshiftTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration:
-		e.FieldStart("configuration_type")
-		e.Str("RedshiftTechnicalAssetConfiguration")
-		{
-			s := s.RedshiftTechnicalAssetConfiguration
-			{
-				e.FieldStart("database")
-				e.Str(s.Database)
-			}
-			{
-				if s.Schema.Set {
-					e.FieldStart("schema")
-					s.Schema.Encode(e)
-				}
-			}
-			{
-				if s.Table.Set {
-					e.FieldStart("table")
-					s.Table.Encode(e)
-				}
-			}
-			{
-				if s.BucketIdentifier.Set {
-					e.FieldStart("bucket_identifier")
-					s.BucketIdentifier.Encode(e)
-				}
-			}
-			{
-				if s.DatabasePath.Set {
-					e.FieldStart("database_path")
-					s.DatabasePath.Encode(e)
-				}
-			}
-			{
-				if s.TablePath.Set {
-					e.FieldStart("table_path")
-					s.TablePath.Encode(e)
-				}
-			}
-			{
-				e.FieldStart("access_granularity")
-				s.AccessGranularity.Encode(e)
-			}
-		}
-	case PostgreSQLTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration:
-		e.FieldStart("configuration_type")
-		e.Str("PostgreSQLTechnicalAssetConfiguration")
-		{
-			s := s.PostgreSQLTechnicalAssetConfiguration
-			{
-				e.FieldStart("database")
-				e.Str(s.Database)
-			}
-			{
-				if s.Schema.Set {
-					e.FieldStart("schema")
-					s.Schema.Encode(e)
-				}
-			}
-			{
-				if s.Table.Set {
-					e.FieldStart("table")
-					s.Table.Encode(e)
-				}
-			}
-			{
-				e.FieldStart("access_granularity")
-				s.AccessGranularity.Encode(e)
-			}
-		}
-	case OSISemanticModelTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration:
-		e.FieldStart("configuration_type")
-		e.Str("OSISemanticModelTechnicalAssetConfiguration")
-		{
-			s := s.OSISemanticModelTechnicalAssetConfiguration
-			{
-				if s.ModelName.Set {
-					e.FieldStart("model_name")
-					s.ModelName.Encode(e)
-				}
-			}
-			{
-				if s.Location.Set {
-					e.FieldStart("location")
-					s.Location.Encode(e)
-				}
-			}
-		}
-	case AzureBlobTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration:
-		e.FieldStart("configuration_type")
-		e.Str("AzureBlobTechnicalAssetConfiguration")
-		{
-			s := s.AzureBlobTechnicalAssetConfiguration
-			{
-				if s.Domain.Set {
-					e.FieldStart("domain")
-					s.Domain.Encode(e)
-				}
-			}
-			{
-				if s.Path.Set {
-					e.FieldStart("path")
-					s.Path.Encode(e)
-				}
-			}
-			{
-				e.FieldStart("container_name")
-				e.Str(s.ContainerName)
-			}
+// encodeFields encodes fields.
+func (s *CreateTechnicalAssetRequestConfiguration) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("name")
+		e.Str(s.Name)
+	}
+	for k, elem := range s.AdditionalProps {
+		e.FieldStart(k)
+
+		if len(elem) != 0 {
+			e.Raw(elem)
 		}
 	}
+}
+
+var jsonFieldsNameOfCreateTechnicalAssetRequestConfiguration = [1]string{
+	0: "name",
 }
 
 // Decode decodes CreateTechnicalAssetRequestConfiguration from json.
@@ -5353,109 +4897,79 @@ func (s *CreateTechnicalAssetRequestConfiguration) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode CreateTechnicalAssetRequestConfiguration to nil")
 	}
-	// Sum type discriminator.
-	if typ := d.Next(); typ != jx.Object {
-		return errors.Errorf("unexpected json type %q", typ)
-	}
+	var requiredBitSet [1]uint8
+	s.AdditionalProps = map[string]jx.Raw{}
 
-	var found bool
-	if err := d.Capture(func(d *jx.Decoder) error {
-		return d.ObjBytes(func(d *jx.Decoder, key []byte) error {
-			if found {
-				return d.Skip()
-			}
-			switch string(key) {
-			case "configuration_type":
-				typ, err := d.Str()
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "name":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Str()
+				s.Name = string(v)
 				if err != nil {
 					return err
 				}
-				switch typ {
-				case "S3TechnicalAssetConfiguration":
-					s.Type = S3TechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration
-					found = true
-				case "RustFSTechnicalAssetConfiguration":
-					s.Type = RustFSTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration
-					found = true
-				case "GlueTechnicalAssetConfiguration":
-					s.Type = GlueTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration
-					found = true
-				case "DatabricksTechnicalAssetConfiguration":
-					s.Type = DatabricksTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration
-					found = true
-				case "SnowflakeTechnicalAssetConfiguration":
-					s.Type = SnowflakeTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration
-					found = true
-				case "RedshiftTechnicalAssetConfiguration":
-					s.Type = RedshiftTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration
-					found = true
-				case "PostgreSQLTechnicalAssetConfiguration":
-					s.Type = PostgreSQLTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration
-					found = true
-				case "OSISemanticModelTechnicalAssetConfiguration":
-					s.Type = OSISemanticModelTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration
-					found = true
-				case "AzureBlobTechnicalAssetConfiguration":
-					s.Type = AzureBlobTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration
-					found = true
-				default:
-					return errors.Errorf("unknown type %s", typ)
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"name\"")
+			}
+		default:
+			var elem jx.Raw
+			if err := func() error {
+				v, err := d.RawAppend(nil)
+				elem = jx.Raw(v)
+				if err != nil {
+					return err
 				}
 				return nil
+			}(); err != nil {
+				return errors.Wrapf(err, "decode field %q", k)
 			}
-			return d.Skip()
-		})
+			s.AdditionalProps[string(k)] = elem
+		}
+		return nil
 	}); err != nil {
-		return errors.Wrap(err, "capture")
+		return errors.Wrap(err, "decode CreateTechnicalAssetRequestConfiguration")
 	}
-	if !found {
-		return errors.New("unable to detect sum type variant")
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000001,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfCreateTechnicalAssetRequestConfiguration) {
+					name = jsonFieldsNameOfCreateTechnicalAssetRequestConfiguration[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
 	}
-	switch s.Type {
-	case S3TechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration:
-		if err := s.S3TechnicalAssetConfiguration.Decode(d); err != nil {
-			return err
-		}
-	case RustFSTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration:
-		if err := s.RustFSTechnicalAssetConfiguration.Decode(d); err != nil {
-			return err
-		}
-	case GlueTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration:
-		if err := s.GlueTechnicalAssetConfiguration.Decode(d); err != nil {
-			return err
-		}
-	case DatabricksTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration:
-		if err := s.DatabricksTechnicalAssetConfiguration.Decode(d); err != nil {
-			return err
-		}
-	case SnowflakeTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration:
-		if err := s.SnowflakeTechnicalAssetConfiguration.Decode(d); err != nil {
-			return err
-		}
-	case RedshiftTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration:
-		if err := s.RedshiftTechnicalAssetConfiguration.Decode(d); err != nil {
-			return err
-		}
-	case PostgreSQLTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration:
-		if err := s.PostgreSQLTechnicalAssetConfiguration.Decode(d); err != nil {
-			return err
-		}
-	case OSISemanticModelTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration:
-		if err := s.OSISemanticModelTechnicalAssetConfiguration.Decode(d); err != nil {
-			return err
-		}
-	case AzureBlobTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration:
-		if err := s.AzureBlobTechnicalAssetConfiguration.Decode(d); err != nil {
-			return err
-		}
-	default:
-		return errors.Errorf("inferred invalid type: %s", s.Type)
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
 	}
+
 	return nil
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s CreateTechnicalAssetRequestConfiguration) MarshalJSON() ([]byte, error) {
+func (s *CreateTechnicalAssetRequestConfiguration) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
@@ -5463,6 +4977,64 @@ func (s CreateTechnicalAssetRequestConfiguration) MarshalJSON() ([]byte, error) 
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *CreateTechnicalAssetRequestConfiguration) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s CreateTechnicalAssetRequestConfigurationAdditional) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields implements json.Marshaler.
+func (s CreateTechnicalAssetRequestConfigurationAdditional) encodeFields(e *jx.Encoder) {
+	for k, elem := range s {
+		e.FieldStart(k)
+
+		if len(elem) != 0 {
+			e.Raw(elem)
+		}
+	}
+}
+
+// Decode decodes CreateTechnicalAssetRequestConfigurationAdditional from json.
+func (s *CreateTechnicalAssetRequestConfigurationAdditional) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode CreateTechnicalAssetRequestConfigurationAdditional to nil")
+	}
+	m := s.init()
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		var elem jx.Raw
+		if err := func() error {
+			v, err := d.RawAppend(nil)
+			elem = jx.Raw(v)
+			if err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			return errors.Wrapf(err, "decode field %q", k)
+		}
+		m[string(k)] = elem
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode CreateTechnicalAssetRequestConfigurationAdditional")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s CreateTechnicalAssetRequestConfigurationAdditional) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *CreateTechnicalAssetRequestConfigurationAdditional) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -9992,220 +9564,6 @@ func (s *DataQualityTechnicalAsset) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *DataQualityTechnicalAsset) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode implements json.Marshaler.
-func (s *DatabricksTechnicalAssetConfiguration) Encode(e *jx.Encoder) {
-	e.ObjStart()
-	s.encodeFields(e)
-	e.ObjEnd()
-}
-
-// encodeFields encodes fields.
-func (s *DatabricksTechnicalAssetConfiguration) encodeFields(e *jx.Encoder) {
-	{
-		e.FieldStart("configuration_type")
-		e.Str("DatabricksTechnicalAssetConfiguration")
-	}
-	{
-		e.FieldStart("catalog")
-		e.Str(s.Catalog)
-	}
-	{
-		if s.Schema.Set {
-			e.FieldStart("schema")
-			s.Schema.Encode(e)
-		}
-	}
-	{
-		if s.Table.Set {
-			e.FieldStart("table")
-			s.Table.Encode(e)
-		}
-	}
-	{
-		if s.BucketIdentifier.Set {
-			e.FieldStart("bucket_identifier")
-			s.BucketIdentifier.Encode(e)
-		}
-	}
-	{
-		if s.CatalogPath.Set {
-			e.FieldStart("catalog_path")
-			s.CatalogPath.Encode(e)
-		}
-	}
-	{
-		if s.TablePath.Set {
-			e.FieldStart("table_path")
-			s.TablePath.Encode(e)
-		}
-	}
-	{
-		e.FieldStart("access_granularity")
-		s.AccessGranularity.Encode(e)
-	}
-}
-
-var jsonFieldsNameOfDatabricksTechnicalAssetConfiguration = [8]string{
-	0: "configuration_type",
-	1: "catalog",
-	2: "schema",
-	3: "table",
-	4: "bucket_identifier",
-	5: "catalog_path",
-	6: "table_path",
-	7: "access_granularity",
-}
-
-// Decode decodes DatabricksTechnicalAssetConfiguration from json.
-func (s *DatabricksTechnicalAssetConfiguration) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode DatabricksTechnicalAssetConfiguration to nil")
-	}
-	var requiredBitSet [1]uint8
-	s.setDefaults()
-
-	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		switch string(k) {
-		case "configuration_type":
-			requiredBitSet[0] |= 1 << 0
-			if err := func() error {
-				v, err := d.Str()
-				s.ConfigurationType = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"configuration_type\"")
-			}
-		case "catalog":
-			requiredBitSet[0] |= 1 << 1
-			if err := func() error {
-				v, err := d.Str()
-				s.Catalog = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"catalog\"")
-			}
-		case "schema":
-			if err := func() error {
-				s.Schema.Reset()
-				if err := s.Schema.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"schema\"")
-			}
-		case "table":
-			if err := func() error {
-				s.Table.Reset()
-				if err := s.Table.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"table\"")
-			}
-		case "bucket_identifier":
-			if err := func() error {
-				s.BucketIdentifier.Reset()
-				if err := s.BucketIdentifier.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"bucket_identifier\"")
-			}
-		case "catalog_path":
-			if err := func() error {
-				s.CatalogPath.Reset()
-				if err := s.CatalogPath.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"catalog_path\"")
-			}
-		case "table_path":
-			if err := func() error {
-				s.TablePath.Reset()
-				if err := s.TablePath.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"table_path\"")
-			}
-		case "access_granularity":
-			requiredBitSet[0] |= 1 << 7
-			if err := func() error {
-				if err := s.AccessGranularity.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"access_granularity\"")
-			}
-		default:
-			return d.Skip()
-		}
-		return nil
-	}); err != nil {
-		return errors.Wrap(err, "decode DatabricksTechnicalAssetConfiguration")
-	}
-	// Validate required fields.
-	var failures []validate.FieldError
-	for i, mask := range [1]uint8{
-		0b10000011,
-	} {
-		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
-			// Mask only required fields and check equality to mask using XOR.
-			//
-			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
-			// Bits of fields which would be set are actually bits of missed fields.
-			missed := bits.OnesCount8(result)
-			for bitN := 0; bitN < missed; bitN++ {
-				bitIdx := bits.TrailingZeros8(result)
-				fieldIdx := i*8 + bitIdx
-				var name string
-				if fieldIdx < len(jsonFieldsNameOfDatabricksTechnicalAssetConfiguration) {
-					name = jsonFieldsNameOfDatabricksTechnicalAssetConfiguration[fieldIdx]
-				} else {
-					name = strconv.Itoa(fieldIdx)
-				}
-				failures = append(failures, validate.FieldError{
-					Name:  name,
-					Error: validate.ErrFieldRequired,
-				})
-				// Reset bit.
-				result &^= 1 << bitIdx
-			}
-		}
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s *DatabricksTechnicalAssetConfiguration) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *DatabricksTechnicalAssetConfiguration) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -17546,298 +16904,30 @@ func (s *GetTechnicalAssetsResponseItem) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
-// Encode encodes GetTechnicalAssetsResponseItemConfiguration as json.
-func (s GetTechnicalAssetsResponseItemConfiguration) Encode(e *jx.Encoder) {
+// Encode implements json.Marshaler.
+func (s *GetTechnicalAssetsResponseItemConfiguration) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
-func (s GetTechnicalAssetsResponseItemConfiguration) encodeFields(e *jx.Encoder) {
-	switch s.Type {
-	case S3TechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration:
-		e.FieldStart("configuration_type")
-		e.Str("S3TechnicalAssetConfiguration")
-		{
-			s := s.S3TechnicalAssetConfiguration
-			{
-				e.FieldStart("bucket")
-				e.Str(s.Bucket)
-			}
-			{
-				if s.Suffix.Set {
-					e.FieldStart("suffix")
-					s.Suffix.Encode(e)
-				}
-			}
-			{
-				e.FieldStart("path")
-				e.Str(s.Path)
-			}
-		}
-	case RustFSTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration:
-		e.FieldStart("configuration_type")
-		e.Str("RustFSTechnicalAssetConfiguration")
-		{
-			s := s.RustFSTechnicalAssetConfiguration
-			{
-				e.FieldStart("bucket")
-				e.Str(s.Bucket)
-			}
-			{
-				if s.Suffix.Set {
-					e.FieldStart("suffix")
-					s.Suffix.Encode(e)
-				}
-			}
-			{
-				e.FieldStart("path")
-				e.Str(s.Path)
-			}
-		}
-	case GlueTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration:
-		e.FieldStart("configuration_type")
-		e.Str("GlueTechnicalAssetConfiguration")
-		{
-			s := s.GlueTechnicalAssetConfiguration
-			{
-				e.FieldStart("database")
-				e.Str(s.Database)
-			}
-			{
-				if s.DatabaseSuffix.Set {
-					e.FieldStart("database_suffix")
-					s.DatabaseSuffix.Encode(e)
-				}
-			}
-			{
-				if s.Table.Set {
-					e.FieldStart("table")
-					s.Table.Encode(e)
-				}
-			}
-			{
-				if s.BucketIdentifier.Set {
-					e.FieldStart("bucket_identifier")
-					s.BucketIdentifier.Encode(e)
-				}
-			}
-			{
-				if s.DatabasePath.Set {
-					e.FieldStart("database_path")
-					s.DatabasePath.Encode(e)
-				}
-			}
-			{
-				if s.TablePath.Set {
-					e.FieldStart("table_path")
-					s.TablePath.Encode(e)
-				}
-			}
-			{
-				e.FieldStart("access_granularity")
-				s.AccessGranularity.Encode(e)
-			}
-		}
-	case DatabricksTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration:
-		e.FieldStart("configuration_type")
-		e.Str("DatabricksTechnicalAssetConfiguration")
-		{
-			s := s.DatabricksTechnicalAssetConfiguration
-			{
-				e.FieldStart("catalog")
-				e.Str(s.Catalog)
-			}
-			{
-				if s.Schema.Set {
-					e.FieldStart("schema")
-					s.Schema.Encode(e)
-				}
-			}
-			{
-				if s.Table.Set {
-					e.FieldStart("table")
-					s.Table.Encode(e)
-				}
-			}
-			{
-				if s.BucketIdentifier.Set {
-					e.FieldStart("bucket_identifier")
-					s.BucketIdentifier.Encode(e)
-				}
-			}
-			{
-				if s.CatalogPath.Set {
-					e.FieldStart("catalog_path")
-					s.CatalogPath.Encode(e)
-				}
-			}
-			{
-				if s.TablePath.Set {
-					e.FieldStart("table_path")
-					s.TablePath.Encode(e)
-				}
-			}
-			{
-				e.FieldStart("access_granularity")
-				s.AccessGranularity.Encode(e)
-			}
-		}
-	case SnowflakeTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration:
-		e.FieldStart("configuration_type")
-		e.Str("SnowflakeTechnicalAssetConfiguration")
-		{
-			s := s.SnowflakeTechnicalAssetConfiguration
-			{
-				e.FieldStart("database")
-				e.Str(s.Database)
-			}
-			{
-				if s.Schema.Set {
-					e.FieldStart("schema")
-					s.Schema.Encode(e)
-				}
-			}
-			{
-				if s.Table.Set {
-					e.FieldStart("table")
-					s.Table.Encode(e)
-				}
-			}
-			{
-				if s.BucketIdentifier.Set {
-					e.FieldStart("bucket_identifier")
-					s.BucketIdentifier.Encode(e)
-				}
-			}
-			{
-				if s.DatabasePath.Set {
-					e.FieldStart("database_path")
-					s.DatabasePath.Encode(e)
-				}
-			}
-			{
-				if s.TablePath.Set {
-					e.FieldStart("table_path")
-					s.TablePath.Encode(e)
-				}
-			}
-			{
-				e.FieldStart("access_granularity")
-				s.AccessGranularity.Encode(e)
-			}
-		}
-	case RedshiftTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration:
-		e.FieldStart("configuration_type")
-		e.Str("RedshiftTechnicalAssetConfiguration")
-		{
-			s := s.RedshiftTechnicalAssetConfiguration
-			{
-				e.FieldStart("database")
-				e.Str(s.Database)
-			}
-			{
-				if s.Schema.Set {
-					e.FieldStart("schema")
-					s.Schema.Encode(e)
-				}
-			}
-			{
-				if s.Table.Set {
-					e.FieldStart("table")
-					s.Table.Encode(e)
-				}
-			}
-			{
-				if s.BucketIdentifier.Set {
-					e.FieldStart("bucket_identifier")
-					s.BucketIdentifier.Encode(e)
-				}
-			}
-			{
-				if s.DatabasePath.Set {
-					e.FieldStart("database_path")
-					s.DatabasePath.Encode(e)
-				}
-			}
-			{
-				if s.TablePath.Set {
-					e.FieldStart("table_path")
-					s.TablePath.Encode(e)
-				}
-			}
-			{
-				e.FieldStart("access_granularity")
-				s.AccessGranularity.Encode(e)
-			}
-		}
-	case PostgreSQLTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration:
-		e.FieldStart("configuration_type")
-		e.Str("PostgreSQLTechnicalAssetConfiguration")
-		{
-			s := s.PostgreSQLTechnicalAssetConfiguration
-			{
-				e.FieldStart("database")
-				e.Str(s.Database)
-			}
-			{
-				if s.Schema.Set {
-					e.FieldStart("schema")
-					s.Schema.Encode(e)
-				}
-			}
-			{
-				if s.Table.Set {
-					e.FieldStart("table")
-					s.Table.Encode(e)
-				}
-			}
-			{
-				e.FieldStart("access_granularity")
-				s.AccessGranularity.Encode(e)
-			}
-		}
-	case OSISemanticModelTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration:
-		e.FieldStart("configuration_type")
-		e.Str("OSISemanticModelTechnicalAssetConfiguration")
-		{
-			s := s.OSISemanticModelTechnicalAssetConfiguration
-			{
-				if s.ModelName.Set {
-					e.FieldStart("model_name")
-					s.ModelName.Encode(e)
-				}
-			}
-			{
-				if s.Location.Set {
-					e.FieldStart("location")
-					s.Location.Encode(e)
-				}
-			}
-		}
-	case AzureBlobTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration:
-		e.FieldStart("configuration_type")
-		e.Str("AzureBlobTechnicalAssetConfiguration")
-		{
-			s := s.AzureBlobTechnicalAssetConfiguration
-			{
-				if s.Domain.Set {
-					e.FieldStart("domain")
-					s.Domain.Encode(e)
-				}
-			}
-			{
-				if s.Path.Set {
-					e.FieldStart("path")
-					s.Path.Encode(e)
-				}
-			}
-			{
-				e.FieldStart("container_name")
-				e.Str(s.ContainerName)
-			}
+// encodeFields encodes fields.
+func (s *GetTechnicalAssetsResponseItemConfiguration) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("name")
+		e.Str(s.Name)
+	}
+	for k, elem := range s.AdditionalProps {
+		e.FieldStart(k)
+
+		if len(elem) != 0 {
+			e.Raw(elem)
 		}
 	}
+}
+
+var jsonFieldsNameOfGetTechnicalAssetsResponseItemConfiguration = [1]string{
+	0: "name",
 }
 
 // Decode decodes GetTechnicalAssetsResponseItemConfiguration from json.
@@ -17845,109 +16935,79 @@ func (s *GetTechnicalAssetsResponseItemConfiguration) Decode(d *jx.Decoder) erro
 	if s == nil {
 		return errors.New("invalid: unable to decode GetTechnicalAssetsResponseItemConfiguration to nil")
 	}
-	// Sum type discriminator.
-	if typ := d.Next(); typ != jx.Object {
-		return errors.Errorf("unexpected json type %q", typ)
-	}
+	var requiredBitSet [1]uint8
+	s.AdditionalProps = map[string]jx.Raw{}
 
-	var found bool
-	if err := d.Capture(func(d *jx.Decoder) error {
-		return d.ObjBytes(func(d *jx.Decoder, key []byte) error {
-			if found {
-				return d.Skip()
-			}
-			switch string(key) {
-			case "configuration_type":
-				typ, err := d.Str()
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "name":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Str()
+				s.Name = string(v)
 				if err != nil {
 					return err
 				}
-				switch typ {
-				case "S3TechnicalAssetConfiguration":
-					s.Type = S3TechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration
-					found = true
-				case "RustFSTechnicalAssetConfiguration":
-					s.Type = RustFSTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration
-					found = true
-				case "GlueTechnicalAssetConfiguration":
-					s.Type = GlueTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration
-					found = true
-				case "DatabricksTechnicalAssetConfiguration":
-					s.Type = DatabricksTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration
-					found = true
-				case "SnowflakeTechnicalAssetConfiguration":
-					s.Type = SnowflakeTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration
-					found = true
-				case "RedshiftTechnicalAssetConfiguration":
-					s.Type = RedshiftTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration
-					found = true
-				case "PostgreSQLTechnicalAssetConfiguration":
-					s.Type = PostgreSQLTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration
-					found = true
-				case "OSISemanticModelTechnicalAssetConfiguration":
-					s.Type = OSISemanticModelTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration
-					found = true
-				case "AzureBlobTechnicalAssetConfiguration":
-					s.Type = AzureBlobTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration
-					found = true
-				default:
-					return errors.Errorf("unknown type %s", typ)
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"name\"")
+			}
+		default:
+			var elem jx.Raw
+			if err := func() error {
+				v, err := d.RawAppend(nil)
+				elem = jx.Raw(v)
+				if err != nil {
+					return err
 				}
 				return nil
+			}(); err != nil {
+				return errors.Wrapf(err, "decode field %q", k)
 			}
-			return d.Skip()
-		})
+			s.AdditionalProps[string(k)] = elem
+		}
+		return nil
 	}); err != nil {
-		return errors.Wrap(err, "capture")
+		return errors.Wrap(err, "decode GetTechnicalAssetsResponseItemConfiguration")
 	}
-	if !found {
-		return errors.New("unable to detect sum type variant")
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000001,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfGetTechnicalAssetsResponseItemConfiguration) {
+					name = jsonFieldsNameOfGetTechnicalAssetsResponseItemConfiguration[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
 	}
-	switch s.Type {
-	case S3TechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration:
-		if err := s.S3TechnicalAssetConfiguration.Decode(d); err != nil {
-			return err
-		}
-	case RustFSTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration:
-		if err := s.RustFSTechnicalAssetConfiguration.Decode(d); err != nil {
-			return err
-		}
-	case GlueTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration:
-		if err := s.GlueTechnicalAssetConfiguration.Decode(d); err != nil {
-			return err
-		}
-	case DatabricksTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration:
-		if err := s.DatabricksTechnicalAssetConfiguration.Decode(d); err != nil {
-			return err
-		}
-	case SnowflakeTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration:
-		if err := s.SnowflakeTechnicalAssetConfiguration.Decode(d); err != nil {
-			return err
-		}
-	case RedshiftTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration:
-		if err := s.RedshiftTechnicalAssetConfiguration.Decode(d); err != nil {
-			return err
-		}
-	case PostgreSQLTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration:
-		if err := s.PostgreSQLTechnicalAssetConfiguration.Decode(d); err != nil {
-			return err
-		}
-	case OSISemanticModelTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration:
-		if err := s.OSISemanticModelTechnicalAssetConfiguration.Decode(d); err != nil {
-			return err
-		}
-	case AzureBlobTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration:
-		if err := s.AzureBlobTechnicalAssetConfiguration.Decode(d); err != nil {
-			return err
-		}
-	default:
-		return errors.Errorf("inferred invalid type: %s", s.Type)
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
 	}
+
 	return nil
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s GetTechnicalAssetsResponseItemConfiguration) MarshalJSON() ([]byte, error) {
+func (s *GetTechnicalAssetsResponseItemConfiguration) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
@@ -17955,6 +17015,64 @@ func (s GetTechnicalAssetsResponseItemConfiguration) MarshalJSON() ([]byte, erro
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *GetTechnicalAssetsResponseItemConfiguration) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s GetTechnicalAssetsResponseItemConfigurationAdditional) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields implements json.Marshaler.
+func (s GetTechnicalAssetsResponseItemConfigurationAdditional) encodeFields(e *jx.Encoder) {
+	for k, elem := range s {
+		e.FieldStart(k)
+
+		if len(elem) != 0 {
+			e.Raw(elem)
+		}
+	}
+}
+
+// Decode decodes GetTechnicalAssetsResponseItemConfigurationAdditional from json.
+func (s *GetTechnicalAssetsResponseItemConfigurationAdditional) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode GetTechnicalAssetsResponseItemConfigurationAdditional to nil")
+	}
+	m := s.init()
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		var elem jx.Raw
+		if err := func() error {
+			v, err := d.RawAppend(nil)
+			elem = jx.Raw(v)
+			if err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			return errors.Wrapf(err, "decode field %q", k)
+		}
+		m[string(k)] = elem
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode GetTechnicalAssetsResponseItemConfigurationAdditional")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s GetTechnicalAssetsResponseItemConfigurationAdditional) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *GetTechnicalAssetsResponseItemConfigurationAdditional) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -18528,220 +17646,6 @@ func (s *GlobalRoleAssignmentResponse) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *GlobalRoleAssignmentResponse) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode implements json.Marshaler.
-func (s *GlueTechnicalAssetConfiguration) Encode(e *jx.Encoder) {
-	e.ObjStart()
-	s.encodeFields(e)
-	e.ObjEnd()
-}
-
-// encodeFields encodes fields.
-func (s *GlueTechnicalAssetConfiguration) encodeFields(e *jx.Encoder) {
-	{
-		e.FieldStart("configuration_type")
-		e.Str("GlueTechnicalAssetConfiguration")
-	}
-	{
-		e.FieldStart("database")
-		e.Str(s.Database)
-	}
-	{
-		if s.DatabaseSuffix.Set {
-			e.FieldStart("database_suffix")
-			s.DatabaseSuffix.Encode(e)
-		}
-	}
-	{
-		if s.Table.Set {
-			e.FieldStart("table")
-			s.Table.Encode(e)
-		}
-	}
-	{
-		if s.BucketIdentifier.Set {
-			e.FieldStart("bucket_identifier")
-			s.BucketIdentifier.Encode(e)
-		}
-	}
-	{
-		if s.DatabasePath.Set {
-			e.FieldStart("database_path")
-			s.DatabasePath.Encode(e)
-		}
-	}
-	{
-		if s.TablePath.Set {
-			e.FieldStart("table_path")
-			s.TablePath.Encode(e)
-		}
-	}
-	{
-		e.FieldStart("access_granularity")
-		s.AccessGranularity.Encode(e)
-	}
-}
-
-var jsonFieldsNameOfGlueTechnicalAssetConfiguration = [8]string{
-	0: "configuration_type",
-	1: "database",
-	2: "database_suffix",
-	3: "table",
-	4: "bucket_identifier",
-	5: "database_path",
-	6: "table_path",
-	7: "access_granularity",
-}
-
-// Decode decodes GlueTechnicalAssetConfiguration from json.
-func (s *GlueTechnicalAssetConfiguration) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode GlueTechnicalAssetConfiguration to nil")
-	}
-	var requiredBitSet [1]uint8
-	s.setDefaults()
-
-	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		switch string(k) {
-		case "configuration_type":
-			requiredBitSet[0] |= 1 << 0
-			if err := func() error {
-				v, err := d.Str()
-				s.ConfigurationType = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"configuration_type\"")
-			}
-		case "database":
-			requiredBitSet[0] |= 1 << 1
-			if err := func() error {
-				v, err := d.Str()
-				s.Database = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"database\"")
-			}
-		case "database_suffix":
-			if err := func() error {
-				s.DatabaseSuffix.Reset()
-				if err := s.DatabaseSuffix.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"database_suffix\"")
-			}
-		case "table":
-			if err := func() error {
-				s.Table.Reset()
-				if err := s.Table.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"table\"")
-			}
-		case "bucket_identifier":
-			if err := func() error {
-				s.BucketIdentifier.Reset()
-				if err := s.BucketIdentifier.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"bucket_identifier\"")
-			}
-		case "database_path":
-			if err := func() error {
-				s.DatabasePath.Reset()
-				if err := s.DatabasePath.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"database_path\"")
-			}
-		case "table_path":
-			if err := func() error {
-				s.TablePath.Reset()
-				if err := s.TablePath.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"table_path\"")
-			}
-		case "access_granularity":
-			requiredBitSet[0] |= 1 << 7
-			if err := func() error {
-				if err := s.AccessGranularity.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"access_granularity\"")
-			}
-		default:
-			return d.Skip()
-		}
-		return nil
-	}); err != nil {
-		return errors.Wrap(err, "decode GlueTechnicalAssetConfiguration")
-	}
-	// Validate required fields.
-	var failures []validate.FieldError
-	for i, mask := range [1]uint8{
-		0b10000011,
-	} {
-		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
-			// Mask only required fields and check equality to mask using XOR.
-			//
-			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
-			// Bits of fields which would be set are actually bits of missed fields.
-			missed := bits.OnesCount8(result)
-			for bitN := 0; bitN < missed; bitN++ {
-				bitIdx := bits.TrailingZeros8(result)
-				fieldIdx := i*8 + bitIdx
-				var name string
-				if fieldIdx < len(jsonFieldsNameOfGlueTechnicalAssetConfiguration) {
-					name = jsonFieldsNameOfGlueTechnicalAssetConfiguration[fieldIdx]
-				} else {
-					name = strconv.Itoa(fieldIdx)
-				}
-				failures = append(failures, validate.FieldError{
-					Name:  name,
-					Error: validate.ErrFieldRequired,
-				})
-				// Reset bit.
-				result &^= 1 << bitIdx
-			}
-		}
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s *GlueTechnicalAssetConfiguration) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *GlueTechnicalAssetConfiguration) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -20826,137 +19730,6 @@ func (s *OIDCTokenResponse) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *OIDCTokenResponse) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode implements json.Marshaler.
-func (s *OSISemanticModelTechnicalAssetConfiguration) Encode(e *jx.Encoder) {
-	e.ObjStart()
-	s.encodeFields(e)
-	e.ObjEnd()
-}
-
-// encodeFields encodes fields.
-func (s *OSISemanticModelTechnicalAssetConfiguration) encodeFields(e *jx.Encoder) {
-	{
-		e.FieldStart("configuration_type")
-		e.Str("OSISemanticModelTechnicalAssetConfiguration")
-	}
-	{
-		if s.ModelName.Set {
-			e.FieldStart("model_name")
-			s.ModelName.Encode(e)
-		}
-	}
-	{
-		if s.Location.Set {
-			e.FieldStart("location")
-			s.Location.Encode(e)
-		}
-	}
-}
-
-var jsonFieldsNameOfOSISemanticModelTechnicalAssetConfiguration = [3]string{
-	0: "configuration_type",
-	1: "model_name",
-	2: "location",
-}
-
-// Decode decodes OSISemanticModelTechnicalAssetConfiguration from json.
-func (s *OSISemanticModelTechnicalAssetConfiguration) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode OSISemanticModelTechnicalAssetConfiguration to nil")
-	}
-	var requiredBitSet [1]uint8
-	s.setDefaults()
-
-	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		switch string(k) {
-		case "configuration_type":
-			requiredBitSet[0] |= 1 << 0
-			if err := func() error {
-				v, err := d.Str()
-				s.ConfigurationType = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"configuration_type\"")
-			}
-		case "model_name":
-			if err := func() error {
-				s.ModelName.Reset()
-				if err := s.ModelName.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"model_name\"")
-			}
-		case "location":
-			if err := func() error {
-				s.Location.Reset()
-				if err := s.Location.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"location\"")
-			}
-		default:
-			return d.Skip()
-		}
-		return nil
-	}); err != nil {
-		return errors.Wrap(err, "decode OSISemanticModelTechnicalAssetConfiguration")
-	}
-	// Validate required fields.
-	var failures []validate.FieldError
-	for i, mask := range [1]uint8{
-		0b00000001,
-	} {
-		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
-			// Mask only required fields and check equality to mask using XOR.
-			//
-			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
-			// Bits of fields which would be set are actually bits of missed fields.
-			missed := bits.OnesCount8(result)
-			for bitN := 0; bitN < missed; bitN++ {
-				bitIdx := bits.TrailingZeros8(result)
-				fieldIdx := i*8 + bitIdx
-				var name string
-				if fieldIdx < len(jsonFieldsNameOfOSISemanticModelTechnicalAssetConfiguration) {
-					name = jsonFieldsNameOfOSISemanticModelTechnicalAssetConfiguration[fieldIdx]
-				} else {
-					name = strconv.Itoa(fieldIdx)
-				}
-				failures = append(failures, validate.FieldError{
-					Name:  name,
-					Error: validate.ErrFieldRequired,
-				})
-				// Reset bit.
-				result &^= 1 << bitIdx
-			}
-		}
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s *OSISemanticModelTechnicalAssetConfiguration) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *OSISemanticModelTechnicalAssetConfiguration) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -26307,6 +25080,12 @@ func (s *PlatformTile) encodeFields(e *jx.Encoder) {
 		e.Str(s.IconName)
 	}
 	{
+		if s.IconDataURI.Set {
+			e.FieldStart("icon_data_uri")
+			s.IconDataURI.Encode(e)
+		}
+	}
+	{
 		if s.HasEnvironments.Set {
 			e.FieldStart("has_environments")
 			s.HasEnvironments.Encode(e)
@@ -26336,14 +25115,15 @@ func (s *PlatformTile) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfPlatformTile = [7]string{
+var jsonFieldsNameOfPlatformTile = [8]string{
 	0: "label",
 	1: "value",
 	2: "icon_name",
-	3: "has_environments",
-	4: "has_config",
-	5: "children",
-	6: "show_in_form",
+	3: "icon_data_uri",
+	4: "has_environments",
+	5: "has_config",
+	6: "children",
+	7: "show_in_form",
 }
 
 // Decode decodes PlatformTile from json.
@@ -26391,6 +25171,16 @@ func (s *PlatformTile) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"icon_name\"")
+			}
+		case "icon_data_uri":
+			if err := func() error {
+				s.IconDataURI.Reset()
+				if err := s.IconDataURI.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"icon_data_uri\"")
 			}
 		case "has_environments":
 			if err := func() error {
@@ -26707,169 +25497,6 @@ func (s *PluginResponse) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
-// Encode implements json.Marshaler.
-func (s *PostgreSQLTechnicalAssetConfiguration) Encode(e *jx.Encoder) {
-	e.ObjStart()
-	s.encodeFields(e)
-	e.ObjEnd()
-}
-
-// encodeFields encodes fields.
-func (s *PostgreSQLTechnicalAssetConfiguration) encodeFields(e *jx.Encoder) {
-	{
-		e.FieldStart("configuration_type")
-		e.Str("PostgreSQLTechnicalAssetConfiguration")
-	}
-	{
-		e.FieldStart("database")
-		e.Str(s.Database)
-	}
-	{
-		if s.Schema.Set {
-			e.FieldStart("schema")
-			s.Schema.Encode(e)
-		}
-	}
-	{
-		if s.Table.Set {
-			e.FieldStart("table")
-			s.Table.Encode(e)
-		}
-	}
-	{
-		e.FieldStart("access_granularity")
-		s.AccessGranularity.Encode(e)
-	}
-}
-
-var jsonFieldsNameOfPostgreSQLTechnicalAssetConfiguration = [5]string{
-	0: "configuration_type",
-	1: "database",
-	2: "schema",
-	3: "table",
-	4: "access_granularity",
-}
-
-// Decode decodes PostgreSQLTechnicalAssetConfiguration from json.
-func (s *PostgreSQLTechnicalAssetConfiguration) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode PostgreSQLTechnicalAssetConfiguration to nil")
-	}
-	var requiredBitSet [1]uint8
-	s.setDefaults()
-
-	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		switch string(k) {
-		case "configuration_type":
-			requiredBitSet[0] |= 1 << 0
-			if err := func() error {
-				v, err := d.Str()
-				s.ConfigurationType = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"configuration_type\"")
-			}
-		case "database":
-			requiredBitSet[0] |= 1 << 1
-			if err := func() error {
-				v, err := d.Str()
-				s.Database = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"database\"")
-			}
-		case "schema":
-			if err := func() error {
-				s.Schema.Reset()
-				if err := s.Schema.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"schema\"")
-			}
-		case "table":
-			if err := func() error {
-				s.Table.Reset()
-				if err := s.Table.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"table\"")
-			}
-		case "access_granularity":
-			requiredBitSet[0] |= 1 << 4
-			if err := func() error {
-				if err := s.AccessGranularity.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"access_granularity\"")
-			}
-		default:
-			return d.Skip()
-		}
-		return nil
-	}); err != nil {
-		return errors.Wrap(err, "decode PostgreSQLTechnicalAssetConfiguration")
-	}
-	// Validate required fields.
-	var failures []validate.FieldError
-	for i, mask := range [1]uint8{
-		0b00010011,
-	} {
-		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
-			// Mask only required fields and check equality to mask using XOR.
-			//
-			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
-			// Bits of fields which would be set are actually bits of missed fields.
-			missed := bits.OnesCount8(result)
-			for bitN := 0; bitN < missed; bitN++ {
-				bitIdx := bits.TrailingZeros8(result)
-				fieldIdx := i*8 + bitIdx
-				var name string
-				if fieldIdx < len(jsonFieldsNameOfPostgreSQLTechnicalAssetConfiguration) {
-					name = jsonFieldsNameOfPostgreSQLTechnicalAssetConfiguration[fieldIdx]
-				} else {
-					name = strconv.Itoa(fieldIdx)
-				}
-				failures = append(failures, validate.FieldError{
-					Name:  name,
-					Error: validate.ErrFieldRequired,
-				})
-				// Reset bit.
-				result &^= 1 << bitIdx
-			}
-		}
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s *PostgreSQLTechnicalAssetConfiguration) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *PostgreSQLTechnicalAssetConfiguration) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
 // Encode encodes Prototype as json.
 func (s Prototype) Encode(e *jx.Encoder) {
 	e.Int(int(s))
@@ -26898,220 +25525,6 @@ func (s Prototype) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *Prototype) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode implements json.Marshaler.
-func (s *RedshiftTechnicalAssetConfiguration) Encode(e *jx.Encoder) {
-	e.ObjStart()
-	s.encodeFields(e)
-	e.ObjEnd()
-}
-
-// encodeFields encodes fields.
-func (s *RedshiftTechnicalAssetConfiguration) encodeFields(e *jx.Encoder) {
-	{
-		e.FieldStart("configuration_type")
-		e.Str("RedshiftTechnicalAssetConfiguration")
-	}
-	{
-		e.FieldStart("database")
-		e.Str(s.Database)
-	}
-	{
-		if s.Schema.Set {
-			e.FieldStart("schema")
-			s.Schema.Encode(e)
-		}
-	}
-	{
-		if s.Table.Set {
-			e.FieldStart("table")
-			s.Table.Encode(e)
-		}
-	}
-	{
-		if s.BucketIdentifier.Set {
-			e.FieldStart("bucket_identifier")
-			s.BucketIdentifier.Encode(e)
-		}
-	}
-	{
-		if s.DatabasePath.Set {
-			e.FieldStart("database_path")
-			s.DatabasePath.Encode(e)
-		}
-	}
-	{
-		if s.TablePath.Set {
-			e.FieldStart("table_path")
-			s.TablePath.Encode(e)
-		}
-	}
-	{
-		e.FieldStart("access_granularity")
-		s.AccessGranularity.Encode(e)
-	}
-}
-
-var jsonFieldsNameOfRedshiftTechnicalAssetConfiguration = [8]string{
-	0: "configuration_type",
-	1: "database",
-	2: "schema",
-	3: "table",
-	4: "bucket_identifier",
-	5: "database_path",
-	6: "table_path",
-	7: "access_granularity",
-}
-
-// Decode decodes RedshiftTechnicalAssetConfiguration from json.
-func (s *RedshiftTechnicalAssetConfiguration) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode RedshiftTechnicalAssetConfiguration to nil")
-	}
-	var requiredBitSet [1]uint8
-	s.setDefaults()
-
-	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		switch string(k) {
-		case "configuration_type":
-			requiredBitSet[0] |= 1 << 0
-			if err := func() error {
-				v, err := d.Str()
-				s.ConfigurationType = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"configuration_type\"")
-			}
-		case "database":
-			requiredBitSet[0] |= 1 << 1
-			if err := func() error {
-				v, err := d.Str()
-				s.Database = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"database\"")
-			}
-		case "schema":
-			if err := func() error {
-				s.Schema.Reset()
-				if err := s.Schema.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"schema\"")
-			}
-		case "table":
-			if err := func() error {
-				s.Table.Reset()
-				if err := s.Table.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"table\"")
-			}
-		case "bucket_identifier":
-			if err := func() error {
-				s.BucketIdentifier.Reset()
-				if err := s.BucketIdentifier.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"bucket_identifier\"")
-			}
-		case "database_path":
-			if err := func() error {
-				s.DatabasePath.Reset()
-				if err := s.DatabasePath.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"database_path\"")
-			}
-		case "table_path":
-			if err := func() error {
-				s.TablePath.Reset()
-				if err := s.TablePath.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"table_path\"")
-			}
-		case "access_granularity":
-			requiredBitSet[0] |= 1 << 7
-			if err := func() error {
-				if err := s.AccessGranularity.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"access_granularity\"")
-			}
-		default:
-			return d.Skip()
-		}
-		return nil
-	}); err != nil {
-		return errors.Wrap(err, "decode RedshiftTechnicalAssetConfiguration")
-	}
-	// Validate required fields.
-	var failures []validate.FieldError
-	for i, mask := range [1]uint8{
-		0b10000011,
-	} {
-		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
-			// Mask only required fields and check equality to mask using XOR.
-			//
-			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
-			// Bits of fields which would be set are actually bits of missed fields.
-			missed := bits.OnesCount8(result)
-			for bitN := 0; bitN < missed; bitN++ {
-				bitIdx := bits.TrailingZeros8(result)
-				fieldIdx := i*8 + bitIdx
-				var name string
-				if fieldIdx < len(jsonFieldsNameOfRedshiftTechnicalAssetConfiguration) {
-					name = jsonFieldsNameOfRedshiftTechnicalAssetConfiguration[fieldIdx]
-				} else {
-					name = strconv.Itoa(fieldIdx)
-				}
-				failures = append(failures, validate.FieldError{
-					Name:  name,
-					Error: validate.ErrFieldRequired,
-				})
-				// Reset bit.
-				result &^= 1 << bitIdx
-			}
-		}
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s *RedshiftTechnicalAssetConfiguration) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *RedshiftTechnicalAssetConfiguration) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -28432,298 +26845,30 @@ func (s *RenderTechnicalAssetAccessPathRequest) UnmarshalJSON(data []byte) error
 	return s.Decode(d)
 }
 
-// Encode encodes RenderTechnicalAssetAccessPathRequestConfiguration as json.
-func (s RenderTechnicalAssetAccessPathRequestConfiguration) Encode(e *jx.Encoder) {
+// Encode implements json.Marshaler.
+func (s *RenderTechnicalAssetAccessPathRequestConfiguration) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
-func (s RenderTechnicalAssetAccessPathRequestConfiguration) encodeFields(e *jx.Encoder) {
-	switch s.Type {
-	case S3TechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration:
-		e.FieldStart("configuration_type")
-		e.Str("S3TechnicalAssetConfiguration")
-		{
-			s := s.S3TechnicalAssetConfiguration
-			{
-				e.FieldStart("bucket")
-				e.Str(s.Bucket)
-			}
-			{
-				if s.Suffix.Set {
-					e.FieldStart("suffix")
-					s.Suffix.Encode(e)
-				}
-			}
-			{
-				e.FieldStart("path")
-				e.Str(s.Path)
-			}
-		}
-	case RustFSTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration:
-		e.FieldStart("configuration_type")
-		e.Str("RustFSTechnicalAssetConfiguration")
-		{
-			s := s.RustFSTechnicalAssetConfiguration
-			{
-				e.FieldStart("bucket")
-				e.Str(s.Bucket)
-			}
-			{
-				if s.Suffix.Set {
-					e.FieldStart("suffix")
-					s.Suffix.Encode(e)
-				}
-			}
-			{
-				e.FieldStart("path")
-				e.Str(s.Path)
-			}
-		}
-	case GlueTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration:
-		e.FieldStart("configuration_type")
-		e.Str("GlueTechnicalAssetConfiguration")
-		{
-			s := s.GlueTechnicalAssetConfiguration
-			{
-				e.FieldStart("database")
-				e.Str(s.Database)
-			}
-			{
-				if s.DatabaseSuffix.Set {
-					e.FieldStart("database_suffix")
-					s.DatabaseSuffix.Encode(e)
-				}
-			}
-			{
-				if s.Table.Set {
-					e.FieldStart("table")
-					s.Table.Encode(e)
-				}
-			}
-			{
-				if s.BucketIdentifier.Set {
-					e.FieldStart("bucket_identifier")
-					s.BucketIdentifier.Encode(e)
-				}
-			}
-			{
-				if s.DatabasePath.Set {
-					e.FieldStart("database_path")
-					s.DatabasePath.Encode(e)
-				}
-			}
-			{
-				if s.TablePath.Set {
-					e.FieldStart("table_path")
-					s.TablePath.Encode(e)
-				}
-			}
-			{
-				e.FieldStart("access_granularity")
-				s.AccessGranularity.Encode(e)
-			}
-		}
-	case DatabricksTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration:
-		e.FieldStart("configuration_type")
-		e.Str("DatabricksTechnicalAssetConfiguration")
-		{
-			s := s.DatabricksTechnicalAssetConfiguration
-			{
-				e.FieldStart("catalog")
-				e.Str(s.Catalog)
-			}
-			{
-				if s.Schema.Set {
-					e.FieldStart("schema")
-					s.Schema.Encode(e)
-				}
-			}
-			{
-				if s.Table.Set {
-					e.FieldStart("table")
-					s.Table.Encode(e)
-				}
-			}
-			{
-				if s.BucketIdentifier.Set {
-					e.FieldStart("bucket_identifier")
-					s.BucketIdentifier.Encode(e)
-				}
-			}
-			{
-				if s.CatalogPath.Set {
-					e.FieldStart("catalog_path")
-					s.CatalogPath.Encode(e)
-				}
-			}
-			{
-				if s.TablePath.Set {
-					e.FieldStart("table_path")
-					s.TablePath.Encode(e)
-				}
-			}
-			{
-				e.FieldStart("access_granularity")
-				s.AccessGranularity.Encode(e)
-			}
-		}
-	case SnowflakeTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration:
-		e.FieldStart("configuration_type")
-		e.Str("SnowflakeTechnicalAssetConfiguration")
-		{
-			s := s.SnowflakeTechnicalAssetConfiguration
-			{
-				e.FieldStart("database")
-				e.Str(s.Database)
-			}
-			{
-				if s.Schema.Set {
-					e.FieldStart("schema")
-					s.Schema.Encode(e)
-				}
-			}
-			{
-				if s.Table.Set {
-					e.FieldStart("table")
-					s.Table.Encode(e)
-				}
-			}
-			{
-				if s.BucketIdentifier.Set {
-					e.FieldStart("bucket_identifier")
-					s.BucketIdentifier.Encode(e)
-				}
-			}
-			{
-				if s.DatabasePath.Set {
-					e.FieldStart("database_path")
-					s.DatabasePath.Encode(e)
-				}
-			}
-			{
-				if s.TablePath.Set {
-					e.FieldStart("table_path")
-					s.TablePath.Encode(e)
-				}
-			}
-			{
-				e.FieldStart("access_granularity")
-				s.AccessGranularity.Encode(e)
-			}
-		}
-	case RedshiftTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration:
-		e.FieldStart("configuration_type")
-		e.Str("RedshiftTechnicalAssetConfiguration")
-		{
-			s := s.RedshiftTechnicalAssetConfiguration
-			{
-				e.FieldStart("database")
-				e.Str(s.Database)
-			}
-			{
-				if s.Schema.Set {
-					e.FieldStart("schema")
-					s.Schema.Encode(e)
-				}
-			}
-			{
-				if s.Table.Set {
-					e.FieldStart("table")
-					s.Table.Encode(e)
-				}
-			}
-			{
-				if s.BucketIdentifier.Set {
-					e.FieldStart("bucket_identifier")
-					s.BucketIdentifier.Encode(e)
-				}
-			}
-			{
-				if s.DatabasePath.Set {
-					e.FieldStart("database_path")
-					s.DatabasePath.Encode(e)
-				}
-			}
-			{
-				if s.TablePath.Set {
-					e.FieldStart("table_path")
-					s.TablePath.Encode(e)
-				}
-			}
-			{
-				e.FieldStart("access_granularity")
-				s.AccessGranularity.Encode(e)
-			}
-		}
-	case PostgreSQLTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration:
-		e.FieldStart("configuration_type")
-		e.Str("PostgreSQLTechnicalAssetConfiguration")
-		{
-			s := s.PostgreSQLTechnicalAssetConfiguration
-			{
-				e.FieldStart("database")
-				e.Str(s.Database)
-			}
-			{
-				if s.Schema.Set {
-					e.FieldStart("schema")
-					s.Schema.Encode(e)
-				}
-			}
-			{
-				if s.Table.Set {
-					e.FieldStart("table")
-					s.Table.Encode(e)
-				}
-			}
-			{
-				e.FieldStart("access_granularity")
-				s.AccessGranularity.Encode(e)
-			}
-		}
-	case OSISemanticModelTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration:
-		e.FieldStart("configuration_type")
-		e.Str("OSISemanticModelTechnicalAssetConfiguration")
-		{
-			s := s.OSISemanticModelTechnicalAssetConfiguration
-			{
-				if s.ModelName.Set {
-					e.FieldStart("model_name")
-					s.ModelName.Encode(e)
-				}
-			}
-			{
-				if s.Location.Set {
-					e.FieldStart("location")
-					s.Location.Encode(e)
-				}
-			}
-		}
-	case AzureBlobTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration:
-		e.FieldStart("configuration_type")
-		e.Str("AzureBlobTechnicalAssetConfiguration")
-		{
-			s := s.AzureBlobTechnicalAssetConfiguration
-			{
-				if s.Domain.Set {
-					e.FieldStart("domain")
-					s.Domain.Encode(e)
-				}
-			}
-			{
-				if s.Path.Set {
-					e.FieldStart("path")
-					s.Path.Encode(e)
-				}
-			}
-			{
-				e.FieldStart("container_name")
-				e.Str(s.ContainerName)
-			}
+// encodeFields encodes fields.
+func (s *RenderTechnicalAssetAccessPathRequestConfiguration) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("name")
+		e.Str(s.Name)
+	}
+	for k, elem := range s.AdditionalProps {
+		e.FieldStart(k)
+
+		if len(elem) != 0 {
+			e.Raw(elem)
 		}
 	}
+}
+
+var jsonFieldsNameOfRenderTechnicalAssetAccessPathRequestConfiguration = [1]string{
+	0: "name",
 }
 
 // Decode decodes RenderTechnicalAssetAccessPathRequestConfiguration from json.
@@ -28731,109 +26876,79 @@ func (s *RenderTechnicalAssetAccessPathRequestConfiguration) Decode(d *jx.Decode
 	if s == nil {
 		return errors.New("invalid: unable to decode RenderTechnicalAssetAccessPathRequestConfiguration to nil")
 	}
-	// Sum type discriminator.
-	if typ := d.Next(); typ != jx.Object {
-		return errors.Errorf("unexpected json type %q", typ)
-	}
+	var requiredBitSet [1]uint8
+	s.AdditionalProps = map[string]jx.Raw{}
 
-	var found bool
-	if err := d.Capture(func(d *jx.Decoder) error {
-		return d.ObjBytes(func(d *jx.Decoder, key []byte) error {
-			if found {
-				return d.Skip()
-			}
-			switch string(key) {
-			case "configuration_type":
-				typ, err := d.Str()
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "name":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Str()
+				s.Name = string(v)
 				if err != nil {
 					return err
 				}
-				switch typ {
-				case "S3TechnicalAssetConfiguration":
-					s.Type = S3TechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration
-					found = true
-				case "RustFSTechnicalAssetConfiguration":
-					s.Type = RustFSTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration
-					found = true
-				case "GlueTechnicalAssetConfiguration":
-					s.Type = GlueTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration
-					found = true
-				case "DatabricksTechnicalAssetConfiguration":
-					s.Type = DatabricksTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration
-					found = true
-				case "SnowflakeTechnicalAssetConfiguration":
-					s.Type = SnowflakeTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration
-					found = true
-				case "RedshiftTechnicalAssetConfiguration":
-					s.Type = RedshiftTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration
-					found = true
-				case "PostgreSQLTechnicalAssetConfiguration":
-					s.Type = PostgreSQLTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration
-					found = true
-				case "OSISemanticModelTechnicalAssetConfiguration":
-					s.Type = OSISemanticModelTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration
-					found = true
-				case "AzureBlobTechnicalAssetConfiguration":
-					s.Type = AzureBlobTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration
-					found = true
-				default:
-					return errors.Errorf("unknown type %s", typ)
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"name\"")
+			}
+		default:
+			var elem jx.Raw
+			if err := func() error {
+				v, err := d.RawAppend(nil)
+				elem = jx.Raw(v)
+				if err != nil {
+					return err
 				}
 				return nil
+			}(); err != nil {
+				return errors.Wrapf(err, "decode field %q", k)
 			}
-			return d.Skip()
-		})
+			s.AdditionalProps[string(k)] = elem
+		}
+		return nil
 	}); err != nil {
-		return errors.Wrap(err, "capture")
+		return errors.Wrap(err, "decode RenderTechnicalAssetAccessPathRequestConfiguration")
 	}
-	if !found {
-		return errors.New("unable to detect sum type variant")
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000001,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfRenderTechnicalAssetAccessPathRequestConfiguration) {
+					name = jsonFieldsNameOfRenderTechnicalAssetAccessPathRequestConfiguration[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
 	}
-	switch s.Type {
-	case S3TechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration:
-		if err := s.S3TechnicalAssetConfiguration.Decode(d); err != nil {
-			return err
-		}
-	case RustFSTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration:
-		if err := s.RustFSTechnicalAssetConfiguration.Decode(d); err != nil {
-			return err
-		}
-	case GlueTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration:
-		if err := s.GlueTechnicalAssetConfiguration.Decode(d); err != nil {
-			return err
-		}
-	case DatabricksTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration:
-		if err := s.DatabricksTechnicalAssetConfiguration.Decode(d); err != nil {
-			return err
-		}
-	case SnowflakeTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration:
-		if err := s.SnowflakeTechnicalAssetConfiguration.Decode(d); err != nil {
-			return err
-		}
-	case RedshiftTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration:
-		if err := s.RedshiftTechnicalAssetConfiguration.Decode(d); err != nil {
-			return err
-		}
-	case PostgreSQLTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration:
-		if err := s.PostgreSQLTechnicalAssetConfiguration.Decode(d); err != nil {
-			return err
-		}
-	case OSISemanticModelTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration:
-		if err := s.OSISemanticModelTechnicalAssetConfiguration.Decode(d); err != nil {
-			return err
-		}
-	case AzureBlobTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration:
-		if err := s.AzureBlobTechnicalAssetConfiguration.Decode(d); err != nil {
-			return err
-		}
-	default:
-		return errors.Errorf("inferred invalid type: %s", s.Type)
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
 	}
+
 	return nil
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s RenderTechnicalAssetAccessPathRequestConfiguration) MarshalJSON() ([]byte, error) {
+func (s *RenderTechnicalAssetAccessPathRequestConfiguration) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
@@ -28841,6 +26956,64 @@ func (s RenderTechnicalAssetAccessPathRequestConfiguration) MarshalJSON() ([]byt
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *RenderTechnicalAssetAccessPathRequestConfiguration) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s RenderTechnicalAssetAccessPathRequestConfigurationAdditional) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields implements json.Marshaler.
+func (s RenderTechnicalAssetAccessPathRequestConfigurationAdditional) encodeFields(e *jx.Encoder) {
+	for k, elem := range s {
+		e.FieldStart(k)
+
+		if len(elem) != 0 {
+			e.Raw(elem)
+		}
+	}
+}
+
+// Decode decodes RenderTechnicalAssetAccessPathRequestConfigurationAdditional from json.
+func (s *RenderTechnicalAssetAccessPathRequestConfigurationAdditional) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode RenderTechnicalAssetAccessPathRequestConfigurationAdditional to nil")
+	}
+	m := s.init()
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		var elem jx.Raw
+		if err := func() error {
+			v, err := d.RawAppend(nil)
+			elem = jx.Raw(v)
+			if err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			return errors.Wrapf(err, "decode field %q", k)
+		}
+		m[string(k)] = elem
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode RenderTechnicalAssetAccessPathRequestConfigurationAdditional")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s RenderTechnicalAssetAccessPathRequestConfigurationAdditional) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *RenderTechnicalAssetAccessPathRequestConfigurationAdditional) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -31192,302 +29365,6 @@ func (s *Role) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
-func (s *RustFSTechnicalAssetConfiguration) Encode(e *jx.Encoder) {
-	e.ObjStart()
-	s.encodeFields(e)
-	e.ObjEnd()
-}
-
-// encodeFields encodes fields.
-func (s *RustFSTechnicalAssetConfiguration) encodeFields(e *jx.Encoder) {
-	{
-		e.FieldStart("configuration_type")
-		e.Str("RustFSTechnicalAssetConfiguration")
-	}
-	{
-		e.FieldStart("bucket")
-		e.Str(s.Bucket)
-	}
-	{
-		if s.Suffix.Set {
-			e.FieldStart("suffix")
-			s.Suffix.Encode(e)
-		}
-	}
-	{
-		e.FieldStart("path")
-		e.Str(s.Path)
-	}
-}
-
-var jsonFieldsNameOfRustFSTechnicalAssetConfiguration = [4]string{
-	0: "configuration_type",
-	1: "bucket",
-	2: "suffix",
-	3: "path",
-}
-
-// Decode decodes RustFSTechnicalAssetConfiguration from json.
-func (s *RustFSTechnicalAssetConfiguration) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode RustFSTechnicalAssetConfiguration to nil")
-	}
-	var requiredBitSet [1]uint8
-	s.setDefaults()
-
-	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		switch string(k) {
-		case "configuration_type":
-			requiredBitSet[0] |= 1 << 0
-			if err := func() error {
-				v, err := d.Str()
-				s.ConfigurationType = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"configuration_type\"")
-			}
-		case "bucket":
-			requiredBitSet[0] |= 1 << 1
-			if err := func() error {
-				v, err := d.Str()
-				s.Bucket = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"bucket\"")
-			}
-		case "suffix":
-			if err := func() error {
-				s.Suffix.Reset()
-				if err := s.Suffix.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"suffix\"")
-			}
-		case "path":
-			requiredBitSet[0] |= 1 << 3
-			if err := func() error {
-				v, err := d.Str()
-				s.Path = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"path\"")
-			}
-		default:
-			return d.Skip()
-		}
-		return nil
-	}); err != nil {
-		return errors.Wrap(err, "decode RustFSTechnicalAssetConfiguration")
-	}
-	// Validate required fields.
-	var failures []validate.FieldError
-	for i, mask := range [1]uint8{
-		0b00001011,
-	} {
-		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
-			// Mask only required fields and check equality to mask using XOR.
-			//
-			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
-			// Bits of fields which would be set are actually bits of missed fields.
-			missed := bits.OnesCount8(result)
-			for bitN := 0; bitN < missed; bitN++ {
-				bitIdx := bits.TrailingZeros8(result)
-				fieldIdx := i*8 + bitIdx
-				var name string
-				if fieldIdx < len(jsonFieldsNameOfRustFSTechnicalAssetConfiguration) {
-					name = jsonFieldsNameOfRustFSTechnicalAssetConfiguration[fieldIdx]
-				} else {
-					name = strconv.Itoa(fieldIdx)
-				}
-				failures = append(failures, validate.FieldError{
-					Name:  name,
-					Error: validate.ErrFieldRequired,
-				})
-				// Reset bit.
-				result &^= 1 << bitIdx
-			}
-		}
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s *RustFSTechnicalAssetConfiguration) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *RustFSTechnicalAssetConfiguration) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode implements json.Marshaler.
-func (s *S3TechnicalAssetConfiguration) Encode(e *jx.Encoder) {
-	e.ObjStart()
-	s.encodeFields(e)
-	e.ObjEnd()
-}
-
-// encodeFields encodes fields.
-func (s *S3TechnicalAssetConfiguration) encodeFields(e *jx.Encoder) {
-	{
-		e.FieldStart("configuration_type")
-		e.Str("S3TechnicalAssetConfiguration")
-	}
-	{
-		e.FieldStart("bucket")
-		e.Str(s.Bucket)
-	}
-	{
-		if s.Suffix.Set {
-			e.FieldStart("suffix")
-			s.Suffix.Encode(e)
-		}
-	}
-	{
-		e.FieldStart("path")
-		e.Str(s.Path)
-	}
-}
-
-var jsonFieldsNameOfS3TechnicalAssetConfiguration = [4]string{
-	0: "configuration_type",
-	1: "bucket",
-	2: "suffix",
-	3: "path",
-}
-
-// Decode decodes S3TechnicalAssetConfiguration from json.
-func (s *S3TechnicalAssetConfiguration) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode S3TechnicalAssetConfiguration to nil")
-	}
-	var requiredBitSet [1]uint8
-	s.setDefaults()
-
-	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		switch string(k) {
-		case "configuration_type":
-			requiredBitSet[0] |= 1 << 0
-			if err := func() error {
-				v, err := d.Str()
-				s.ConfigurationType = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"configuration_type\"")
-			}
-		case "bucket":
-			requiredBitSet[0] |= 1 << 1
-			if err := func() error {
-				v, err := d.Str()
-				s.Bucket = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"bucket\"")
-			}
-		case "suffix":
-			if err := func() error {
-				s.Suffix.Reset()
-				if err := s.Suffix.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"suffix\"")
-			}
-		case "path":
-			requiredBitSet[0] |= 1 << 3
-			if err := func() error {
-				v, err := d.Str()
-				s.Path = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"path\"")
-			}
-		default:
-			return d.Skip()
-		}
-		return nil
-	}); err != nil {
-		return errors.Wrap(err, "decode S3TechnicalAssetConfiguration")
-	}
-	// Validate required fields.
-	var failures []validate.FieldError
-	for i, mask := range [1]uint8{
-		0b00001011,
-	} {
-		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
-			// Mask only required fields and check equality to mask using XOR.
-			//
-			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
-			// Bits of fields which would be set are actually bits of missed fields.
-			missed := bits.OnesCount8(result)
-			for bitN := 0; bitN < missed; bitN++ {
-				bitIdx := bits.TrailingZeros8(result)
-				fieldIdx := i*8 + bitIdx
-				var name string
-				if fieldIdx < len(jsonFieldsNameOfS3TechnicalAssetConfiguration) {
-					name = jsonFieldsNameOfS3TechnicalAssetConfiguration[fieldIdx]
-				} else {
-					name = strconv.Itoa(fieldIdx)
-				}
-				failures = append(failures, validate.FieldError{
-					Name:  name,
-					Error: validate.ErrFieldRequired,
-				})
-				// Reset bit.
-				result &^= 1 << bitIdx
-			}
-		}
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s *S3TechnicalAssetConfiguration) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *S3TechnicalAssetConfiguration) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode implements json.Marshaler.
 func (s *SchemaObjectRequest) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
@@ -33370,220 +31247,6 @@ func (s *SetValueForOutputPortOKApplicationJSON) UnmarshalJSON(data []byte) erro
 }
 
 // Encode implements json.Marshaler.
-func (s *SnowflakeTechnicalAssetConfiguration) Encode(e *jx.Encoder) {
-	e.ObjStart()
-	s.encodeFields(e)
-	e.ObjEnd()
-}
-
-// encodeFields encodes fields.
-func (s *SnowflakeTechnicalAssetConfiguration) encodeFields(e *jx.Encoder) {
-	{
-		e.FieldStart("configuration_type")
-		e.Str("SnowflakeTechnicalAssetConfiguration")
-	}
-	{
-		e.FieldStart("database")
-		e.Str(s.Database)
-	}
-	{
-		if s.Schema.Set {
-			e.FieldStart("schema")
-			s.Schema.Encode(e)
-		}
-	}
-	{
-		if s.Table.Set {
-			e.FieldStart("table")
-			s.Table.Encode(e)
-		}
-	}
-	{
-		if s.BucketIdentifier.Set {
-			e.FieldStart("bucket_identifier")
-			s.BucketIdentifier.Encode(e)
-		}
-	}
-	{
-		if s.DatabasePath.Set {
-			e.FieldStart("database_path")
-			s.DatabasePath.Encode(e)
-		}
-	}
-	{
-		if s.TablePath.Set {
-			e.FieldStart("table_path")
-			s.TablePath.Encode(e)
-		}
-	}
-	{
-		e.FieldStart("access_granularity")
-		s.AccessGranularity.Encode(e)
-	}
-}
-
-var jsonFieldsNameOfSnowflakeTechnicalAssetConfiguration = [8]string{
-	0: "configuration_type",
-	1: "database",
-	2: "schema",
-	3: "table",
-	4: "bucket_identifier",
-	5: "database_path",
-	6: "table_path",
-	7: "access_granularity",
-}
-
-// Decode decodes SnowflakeTechnicalAssetConfiguration from json.
-func (s *SnowflakeTechnicalAssetConfiguration) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode SnowflakeTechnicalAssetConfiguration to nil")
-	}
-	var requiredBitSet [1]uint8
-	s.setDefaults()
-
-	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		switch string(k) {
-		case "configuration_type":
-			requiredBitSet[0] |= 1 << 0
-			if err := func() error {
-				v, err := d.Str()
-				s.ConfigurationType = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"configuration_type\"")
-			}
-		case "database":
-			requiredBitSet[0] |= 1 << 1
-			if err := func() error {
-				v, err := d.Str()
-				s.Database = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"database\"")
-			}
-		case "schema":
-			if err := func() error {
-				s.Schema.Reset()
-				if err := s.Schema.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"schema\"")
-			}
-		case "table":
-			if err := func() error {
-				s.Table.Reset()
-				if err := s.Table.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"table\"")
-			}
-		case "bucket_identifier":
-			if err := func() error {
-				s.BucketIdentifier.Reset()
-				if err := s.BucketIdentifier.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"bucket_identifier\"")
-			}
-		case "database_path":
-			if err := func() error {
-				s.DatabasePath.Reset()
-				if err := s.DatabasePath.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"database_path\"")
-			}
-		case "table_path":
-			if err := func() error {
-				s.TablePath.Reset()
-				if err := s.TablePath.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"table_path\"")
-			}
-		case "access_granularity":
-			requiredBitSet[0] |= 1 << 7
-			if err := func() error {
-				if err := s.AccessGranularity.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"access_granularity\"")
-			}
-		default:
-			return d.Skip()
-		}
-		return nil
-	}); err != nil {
-		return errors.Wrap(err, "decode SnowflakeTechnicalAssetConfiguration")
-	}
-	// Validate required fields.
-	var failures []validate.FieldError
-	for i, mask := range [1]uint8{
-		0b10000011,
-	} {
-		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
-			// Mask only required fields and check equality to mask using XOR.
-			//
-			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
-			// Bits of fields which would be set are actually bits of missed fields.
-			missed := bits.OnesCount8(result)
-			for bitN := 0; bitN < missed; bitN++ {
-				bitIdx := bits.TrailingZeros8(result)
-				fieldIdx := i*8 + bitIdx
-				var name string
-				if fieldIdx < len(jsonFieldsNameOfSnowflakeTechnicalAssetConfiguration) {
-					name = jsonFieldsNameOfSnowflakeTechnicalAssetConfiguration[fieldIdx]
-				} else {
-					name = strconv.Itoa(fieldIdx)
-				}
-				failures = append(failures, validate.FieldError{
-					Name:  name,
-					Error: validate.ErrFieldRequired,
-				})
-				// Reset bit.
-				result &^= 1 << bitIdx
-			}
-		}
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s *SnowflakeTechnicalAssetConfiguration) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *SnowflakeTechnicalAssetConfiguration) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode implements json.Marshaler.
 func (s *Tag) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
@@ -34351,298 +32014,30 @@ func (s *TechnicalAsset) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
-// Encode encodes TechnicalAssetConfiguration as json.
-func (s TechnicalAssetConfiguration) Encode(e *jx.Encoder) {
+// Encode implements json.Marshaler.
+func (s *TechnicalAssetConfiguration) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
-func (s TechnicalAssetConfiguration) encodeFields(e *jx.Encoder) {
-	switch s.Type {
-	case S3TechnicalAssetConfigurationTechnicalAssetConfiguration:
-		e.FieldStart("configuration_type")
-		e.Str("S3TechnicalAssetConfiguration")
-		{
-			s := s.S3TechnicalAssetConfiguration
-			{
-				e.FieldStart("bucket")
-				e.Str(s.Bucket)
-			}
-			{
-				if s.Suffix.Set {
-					e.FieldStart("suffix")
-					s.Suffix.Encode(e)
-				}
-			}
-			{
-				e.FieldStart("path")
-				e.Str(s.Path)
-			}
-		}
-	case RustFSTechnicalAssetConfigurationTechnicalAssetConfiguration:
-		e.FieldStart("configuration_type")
-		e.Str("RustFSTechnicalAssetConfiguration")
-		{
-			s := s.RustFSTechnicalAssetConfiguration
-			{
-				e.FieldStart("bucket")
-				e.Str(s.Bucket)
-			}
-			{
-				if s.Suffix.Set {
-					e.FieldStart("suffix")
-					s.Suffix.Encode(e)
-				}
-			}
-			{
-				e.FieldStart("path")
-				e.Str(s.Path)
-			}
-		}
-	case GlueTechnicalAssetConfigurationTechnicalAssetConfiguration:
-		e.FieldStart("configuration_type")
-		e.Str("GlueTechnicalAssetConfiguration")
-		{
-			s := s.GlueTechnicalAssetConfiguration
-			{
-				e.FieldStart("database")
-				e.Str(s.Database)
-			}
-			{
-				if s.DatabaseSuffix.Set {
-					e.FieldStart("database_suffix")
-					s.DatabaseSuffix.Encode(e)
-				}
-			}
-			{
-				if s.Table.Set {
-					e.FieldStart("table")
-					s.Table.Encode(e)
-				}
-			}
-			{
-				if s.BucketIdentifier.Set {
-					e.FieldStart("bucket_identifier")
-					s.BucketIdentifier.Encode(e)
-				}
-			}
-			{
-				if s.DatabasePath.Set {
-					e.FieldStart("database_path")
-					s.DatabasePath.Encode(e)
-				}
-			}
-			{
-				if s.TablePath.Set {
-					e.FieldStart("table_path")
-					s.TablePath.Encode(e)
-				}
-			}
-			{
-				e.FieldStart("access_granularity")
-				s.AccessGranularity.Encode(e)
-			}
-		}
-	case DatabricksTechnicalAssetConfigurationTechnicalAssetConfiguration:
-		e.FieldStart("configuration_type")
-		e.Str("DatabricksTechnicalAssetConfiguration")
-		{
-			s := s.DatabricksTechnicalAssetConfiguration
-			{
-				e.FieldStart("catalog")
-				e.Str(s.Catalog)
-			}
-			{
-				if s.Schema.Set {
-					e.FieldStart("schema")
-					s.Schema.Encode(e)
-				}
-			}
-			{
-				if s.Table.Set {
-					e.FieldStart("table")
-					s.Table.Encode(e)
-				}
-			}
-			{
-				if s.BucketIdentifier.Set {
-					e.FieldStart("bucket_identifier")
-					s.BucketIdentifier.Encode(e)
-				}
-			}
-			{
-				if s.CatalogPath.Set {
-					e.FieldStart("catalog_path")
-					s.CatalogPath.Encode(e)
-				}
-			}
-			{
-				if s.TablePath.Set {
-					e.FieldStart("table_path")
-					s.TablePath.Encode(e)
-				}
-			}
-			{
-				e.FieldStart("access_granularity")
-				s.AccessGranularity.Encode(e)
-			}
-		}
-	case SnowflakeTechnicalAssetConfigurationTechnicalAssetConfiguration:
-		e.FieldStart("configuration_type")
-		e.Str("SnowflakeTechnicalAssetConfiguration")
-		{
-			s := s.SnowflakeTechnicalAssetConfiguration
-			{
-				e.FieldStart("database")
-				e.Str(s.Database)
-			}
-			{
-				if s.Schema.Set {
-					e.FieldStart("schema")
-					s.Schema.Encode(e)
-				}
-			}
-			{
-				if s.Table.Set {
-					e.FieldStart("table")
-					s.Table.Encode(e)
-				}
-			}
-			{
-				if s.BucketIdentifier.Set {
-					e.FieldStart("bucket_identifier")
-					s.BucketIdentifier.Encode(e)
-				}
-			}
-			{
-				if s.DatabasePath.Set {
-					e.FieldStart("database_path")
-					s.DatabasePath.Encode(e)
-				}
-			}
-			{
-				if s.TablePath.Set {
-					e.FieldStart("table_path")
-					s.TablePath.Encode(e)
-				}
-			}
-			{
-				e.FieldStart("access_granularity")
-				s.AccessGranularity.Encode(e)
-			}
-		}
-	case RedshiftTechnicalAssetConfigurationTechnicalAssetConfiguration:
-		e.FieldStart("configuration_type")
-		e.Str("RedshiftTechnicalAssetConfiguration")
-		{
-			s := s.RedshiftTechnicalAssetConfiguration
-			{
-				e.FieldStart("database")
-				e.Str(s.Database)
-			}
-			{
-				if s.Schema.Set {
-					e.FieldStart("schema")
-					s.Schema.Encode(e)
-				}
-			}
-			{
-				if s.Table.Set {
-					e.FieldStart("table")
-					s.Table.Encode(e)
-				}
-			}
-			{
-				if s.BucketIdentifier.Set {
-					e.FieldStart("bucket_identifier")
-					s.BucketIdentifier.Encode(e)
-				}
-			}
-			{
-				if s.DatabasePath.Set {
-					e.FieldStart("database_path")
-					s.DatabasePath.Encode(e)
-				}
-			}
-			{
-				if s.TablePath.Set {
-					e.FieldStart("table_path")
-					s.TablePath.Encode(e)
-				}
-			}
-			{
-				e.FieldStart("access_granularity")
-				s.AccessGranularity.Encode(e)
-			}
-		}
-	case PostgreSQLTechnicalAssetConfigurationTechnicalAssetConfiguration:
-		e.FieldStart("configuration_type")
-		e.Str("PostgreSQLTechnicalAssetConfiguration")
-		{
-			s := s.PostgreSQLTechnicalAssetConfiguration
-			{
-				e.FieldStart("database")
-				e.Str(s.Database)
-			}
-			{
-				if s.Schema.Set {
-					e.FieldStart("schema")
-					s.Schema.Encode(e)
-				}
-			}
-			{
-				if s.Table.Set {
-					e.FieldStart("table")
-					s.Table.Encode(e)
-				}
-			}
-			{
-				e.FieldStart("access_granularity")
-				s.AccessGranularity.Encode(e)
-			}
-		}
-	case OSISemanticModelTechnicalAssetConfigurationTechnicalAssetConfiguration:
-		e.FieldStart("configuration_type")
-		e.Str("OSISemanticModelTechnicalAssetConfiguration")
-		{
-			s := s.OSISemanticModelTechnicalAssetConfiguration
-			{
-				if s.ModelName.Set {
-					e.FieldStart("model_name")
-					s.ModelName.Encode(e)
-				}
-			}
-			{
-				if s.Location.Set {
-					e.FieldStart("location")
-					s.Location.Encode(e)
-				}
-			}
-		}
-	case AzureBlobTechnicalAssetConfigurationTechnicalAssetConfiguration:
-		e.FieldStart("configuration_type")
-		e.Str("AzureBlobTechnicalAssetConfiguration")
-		{
-			s := s.AzureBlobTechnicalAssetConfiguration
-			{
-				if s.Domain.Set {
-					e.FieldStart("domain")
-					s.Domain.Encode(e)
-				}
-			}
-			{
-				if s.Path.Set {
-					e.FieldStart("path")
-					s.Path.Encode(e)
-				}
-			}
-			{
-				e.FieldStart("container_name")
-				e.Str(s.ContainerName)
-			}
+// encodeFields encodes fields.
+func (s *TechnicalAssetConfiguration) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("name")
+		e.Str(s.Name)
+	}
+	for k, elem := range s.AdditionalProps {
+		e.FieldStart(k)
+
+		if len(elem) != 0 {
+			e.Raw(elem)
 		}
 	}
+}
+
+var jsonFieldsNameOfTechnicalAssetConfiguration = [1]string{
+	0: "name",
 }
 
 // Decode decodes TechnicalAssetConfiguration from json.
@@ -34650,109 +32045,79 @@ func (s *TechnicalAssetConfiguration) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode TechnicalAssetConfiguration to nil")
 	}
-	// Sum type discriminator.
-	if typ := d.Next(); typ != jx.Object {
-		return errors.Errorf("unexpected json type %q", typ)
-	}
+	var requiredBitSet [1]uint8
+	s.AdditionalProps = map[string]jx.Raw{}
 
-	var found bool
-	if err := d.Capture(func(d *jx.Decoder) error {
-		return d.ObjBytes(func(d *jx.Decoder, key []byte) error {
-			if found {
-				return d.Skip()
-			}
-			switch string(key) {
-			case "configuration_type":
-				typ, err := d.Str()
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "name":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Str()
+				s.Name = string(v)
 				if err != nil {
 					return err
 				}
-				switch typ {
-				case "S3TechnicalAssetConfiguration":
-					s.Type = S3TechnicalAssetConfigurationTechnicalAssetConfiguration
-					found = true
-				case "RustFSTechnicalAssetConfiguration":
-					s.Type = RustFSTechnicalAssetConfigurationTechnicalAssetConfiguration
-					found = true
-				case "GlueTechnicalAssetConfiguration":
-					s.Type = GlueTechnicalAssetConfigurationTechnicalAssetConfiguration
-					found = true
-				case "DatabricksTechnicalAssetConfiguration":
-					s.Type = DatabricksTechnicalAssetConfigurationTechnicalAssetConfiguration
-					found = true
-				case "SnowflakeTechnicalAssetConfiguration":
-					s.Type = SnowflakeTechnicalAssetConfigurationTechnicalAssetConfiguration
-					found = true
-				case "RedshiftTechnicalAssetConfiguration":
-					s.Type = RedshiftTechnicalAssetConfigurationTechnicalAssetConfiguration
-					found = true
-				case "PostgreSQLTechnicalAssetConfiguration":
-					s.Type = PostgreSQLTechnicalAssetConfigurationTechnicalAssetConfiguration
-					found = true
-				case "OSISemanticModelTechnicalAssetConfiguration":
-					s.Type = OSISemanticModelTechnicalAssetConfigurationTechnicalAssetConfiguration
-					found = true
-				case "AzureBlobTechnicalAssetConfiguration":
-					s.Type = AzureBlobTechnicalAssetConfigurationTechnicalAssetConfiguration
-					found = true
-				default:
-					return errors.Errorf("unknown type %s", typ)
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"name\"")
+			}
+		default:
+			var elem jx.Raw
+			if err := func() error {
+				v, err := d.RawAppend(nil)
+				elem = jx.Raw(v)
+				if err != nil {
+					return err
 				}
 				return nil
+			}(); err != nil {
+				return errors.Wrapf(err, "decode field %q", k)
 			}
-			return d.Skip()
-		})
+			s.AdditionalProps[string(k)] = elem
+		}
+		return nil
 	}); err != nil {
-		return errors.Wrap(err, "capture")
+		return errors.Wrap(err, "decode TechnicalAssetConfiguration")
 	}
-	if !found {
-		return errors.New("unable to detect sum type variant")
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000001,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfTechnicalAssetConfiguration) {
+					name = jsonFieldsNameOfTechnicalAssetConfiguration[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
 	}
-	switch s.Type {
-	case S3TechnicalAssetConfigurationTechnicalAssetConfiguration:
-		if err := s.S3TechnicalAssetConfiguration.Decode(d); err != nil {
-			return err
-		}
-	case RustFSTechnicalAssetConfigurationTechnicalAssetConfiguration:
-		if err := s.RustFSTechnicalAssetConfiguration.Decode(d); err != nil {
-			return err
-		}
-	case GlueTechnicalAssetConfigurationTechnicalAssetConfiguration:
-		if err := s.GlueTechnicalAssetConfiguration.Decode(d); err != nil {
-			return err
-		}
-	case DatabricksTechnicalAssetConfigurationTechnicalAssetConfiguration:
-		if err := s.DatabricksTechnicalAssetConfiguration.Decode(d); err != nil {
-			return err
-		}
-	case SnowflakeTechnicalAssetConfigurationTechnicalAssetConfiguration:
-		if err := s.SnowflakeTechnicalAssetConfiguration.Decode(d); err != nil {
-			return err
-		}
-	case RedshiftTechnicalAssetConfigurationTechnicalAssetConfiguration:
-		if err := s.RedshiftTechnicalAssetConfiguration.Decode(d); err != nil {
-			return err
-		}
-	case PostgreSQLTechnicalAssetConfigurationTechnicalAssetConfiguration:
-		if err := s.PostgreSQLTechnicalAssetConfiguration.Decode(d); err != nil {
-			return err
-		}
-	case OSISemanticModelTechnicalAssetConfigurationTechnicalAssetConfiguration:
-		if err := s.OSISemanticModelTechnicalAssetConfiguration.Decode(d); err != nil {
-			return err
-		}
-	case AzureBlobTechnicalAssetConfigurationTechnicalAssetConfiguration:
-		if err := s.AzureBlobTechnicalAssetConfiguration.Decode(d); err != nil {
-			return err
-		}
-	default:
-		return errors.Errorf("inferred invalid type: %s", s.Type)
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
 	}
+
 	return nil
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s TechnicalAssetConfiguration) MarshalJSON() ([]byte, error) {
+func (s *TechnicalAssetConfiguration) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
@@ -34760,6 +32125,64 @@ func (s TechnicalAssetConfiguration) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *TechnicalAssetConfiguration) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s TechnicalAssetConfigurationAdditional) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields implements json.Marshaler.
+func (s TechnicalAssetConfigurationAdditional) encodeFields(e *jx.Encoder) {
+	for k, elem := range s {
+		e.FieldStart(k)
+
+		if len(elem) != 0 {
+			e.Raw(elem)
+		}
+	}
+}
+
+// Decode decodes TechnicalAssetConfigurationAdditional from json.
+func (s *TechnicalAssetConfigurationAdditional) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode TechnicalAssetConfigurationAdditional to nil")
+	}
+	m := s.init()
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		var elem jx.Raw
+		if err := func() error {
+			v, err := d.RawAppend(nil)
+			elem = jx.Raw(v)
+			if err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			return errors.Wrapf(err, "decode field %q", k)
+		}
+		m[string(k)] = elem
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode TechnicalAssetConfigurationAdditional")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s TechnicalAssetConfigurationAdditional) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *TechnicalAssetConfigurationAdditional) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -35744,6 +33167,12 @@ func (s *UIElementMetadataResponse) encodeFields(e *jx.Encoder) {
 		e.Str(s.IconName)
 	}
 	{
+		if s.IconDataURI.Set {
+			e.FieldStart("icon_data_uri")
+			s.IconDataURI.Encode(e)
+		}
+	}
+	{
 		if s.ParentPlatform.Set {
 			e.FieldStart("parent_platform")
 			s.ParentPlatform.Encode(e)
@@ -35767,7 +33196,7 @@ func (s *UIElementMetadataResponse) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfUIElementMetadataResponse = [13]string{
+var jsonFieldsNameOfUIElementMetadataResponse = [14]string{
 	0:  "not_configured",
 	1:  "ui_metadata",
 	2:  "plugin",
@@ -35777,10 +33206,11 @@ var jsonFieldsNameOfUIElementMetadataResponse = [13]string{
 	6:  "platform",
 	7:  "display_name",
 	8:  "icon_name",
-	9:  "parent_platform",
-	10: "platform_tile",
-	11: "show_in_form",
-	12: "detailed_name",
+	9:  "icon_data_uri",
+	10: "parent_platform",
+	11: "platform_tile",
+	12: "show_in_form",
+	13: "detailed_name",
 }
 
 // Decode decodes UIElementMetadataResponse from json.
@@ -35901,6 +33331,16 @@ func (s *UIElementMetadataResponse) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"icon_name\"")
 			}
+		case "icon_data_uri":
+			if err := func() error {
+				s.IconDataURI.Reset()
+				if err := s.IconDataURI.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"icon_data_uri\"")
+			}
 		case "parent_platform":
 			if err := func() error {
 				s.ParentPlatform.Reset()
@@ -35932,7 +33372,7 @@ func (s *UIElementMetadataResponse) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"show_in_form\"")
 			}
 		case "detailed_name":
-			requiredBitSet[1] |= 1 << 4
+			requiredBitSet[1] |= 1 << 5
 			if err := func() error {
 				v, err := d.Str()
 				s.DetailedName = string(v)
@@ -35954,7 +33394,7 @@ func (s *UIElementMetadataResponse) Decode(d *jx.Decoder) error {
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
 		0b11001110,
-		0b00010001,
+		0b00100001,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

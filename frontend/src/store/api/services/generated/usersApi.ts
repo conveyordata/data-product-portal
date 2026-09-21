@@ -281,77 +281,6 @@ export type InputPortRequest = {
 };
 export type TechnicalAssetStatus = "pending" | "active" | "archived";
 export type TechnicalMapping = "default" | "custom";
-export type AzureBlobTechnicalAssetConfiguration = {
-  configuration_type: "AzureBlobTechnicalAssetConfiguration";
-  domain?: string;
-  path?: string;
-  container_name: string;
-};
-export type AccessGranularity = "schema" | "table";
-export type DatabricksTechnicalAssetConfiguration = {
-  configuration_type: "DatabricksTechnicalAssetConfiguration";
-  catalog: string;
-  schema?: string;
-  table?: string;
-  bucket_identifier?: string;
-  catalog_path?: string;
-  table_path?: string;
-  access_granularity: AccessGranularity;
-};
-export type GlueTechnicalAssetConfiguration = {
-  configuration_type: "GlueTechnicalAssetConfiguration";
-  database: string;
-  database_suffix?: string;
-  table?: string;
-  bucket_identifier?: string;
-  database_path?: string;
-  table_path?: string;
-  access_granularity: AccessGranularity;
-};
-export type OsiSemanticModelTechnicalAssetConfiguration = {
-  configuration_type: "OSISemanticModelTechnicalAssetConfiguration";
-  model_name?: string;
-  location?: string;
-};
-export type PostgreSqlTechnicalAssetConfiguration = {
-  configuration_type: "PostgreSQLTechnicalAssetConfiguration";
-  database: string;
-  schema?: string;
-  table?: string;
-  access_granularity: AccessGranularity;
-};
-export type RedshiftTechnicalAssetConfiguration = {
-  configuration_type: "RedshiftTechnicalAssetConfiguration";
-  database: string;
-  schema?: string;
-  table?: string;
-  bucket_identifier?: string;
-  database_path?: string;
-  table_path?: string;
-  access_granularity: AccessGranularity;
-};
-export type RustFsTechnicalAssetConfiguration = {
-  configuration_type: "RustFSTechnicalAssetConfiguration";
-  bucket: string;
-  suffix?: string;
-  path: string;
-};
-export type S3TechnicalAssetConfiguration = {
-  configuration_type: "S3TechnicalAssetConfiguration";
-  bucket: string;
-  suffix?: string;
-  path: string;
-};
-export type SnowflakeTechnicalAssetConfiguration = {
-  configuration_type: "SnowflakeTechnicalAssetConfiguration";
-  database: string;
-  schema?: string;
-  table?: string;
-  bucket_identifier?: string;
-  database_path?: string;
-  table_path?: string;
-  access_granularity: AccessGranularity;
-};
 export type AbstractDataProductStatus =
   | "pending"
   | "active"
@@ -389,34 +318,11 @@ export type OwnedTechnicalAsset = {
   owner_id: string;
   platform_id: string;
   service_id: string;
-  configuration:
-    | ({
-        configuration_type: "AzureBlobTechnicalAssetConfiguration";
-      } & AzureBlobTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "DatabricksTechnicalAssetConfiguration";
-      } & DatabricksTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "GlueTechnicalAssetConfiguration";
-      } & GlueTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "OSISemanticModelTechnicalAssetConfiguration";
-      } & OsiSemanticModelTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "PostgreSQLTechnicalAssetConfiguration";
-      } & PostgreSqlTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "RedshiftTechnicalAssetConfiguration";
-      } & RedshiftTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "RustFSTechnicalAssetConfiguration";
-      } & RustFsTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "S3TechnicalAssetConfiguration";
-      } & S3TechnicalAssetConfiguration)
-    | ({
-        configuration_type: "SnowflakeTechnicalAssetConfiguration";
-      } & SnowflakeTechnicalAssetConfiguration);
+  /** Configuration of the technical asset. The available fields depend on `name`; retrieve them from /v2/plugins/{name}/form. */
+  configuration: {
+    name: string;
+    [key: string]: any;
+  };
   owner: DataProduct;
 };
 export type TechnicalAssetOutputPortRequest = {

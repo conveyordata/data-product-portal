@@ -51,7 +51,7 @@
         "antd": "^6.6.4",
         "axios": "^1.20.0",
         "clsx": "^2.1.1",
-        "cypress": "^16.0.0",
+        "cypress": "^16.1.0",
         "date-fns": "^4.4.0",
         "dayjs": "^1.11.23",
         "elkjs": "^0.12.0",
@@ -62,13 +62,13 @@
         "js-sha256": "^1.0.0",
         "nuqs": "^2.10.1",
         "oidc-client-ts": "^3.5.0",
-        "posthog-js": "^1.433.3",
+        "posthog-js": "^1.433.5",
         "react": "^19.3.0",
         "react-dom": "^19.3.0",
         "react-i18next": "^17.0.14",
         "react-oidc-context": "^3.3.1",
         "react-redux": "^9.3.0",
-        "react-router": "^8.3.1",
+        "react-router": "^8.4.0",
         "react-syntax-highlighter": "^16.1.1",
         "use-debounce": "^10.1.1",
         "web-worker": "^1.5.0"
@@ -79,7 +79,7 @@
         "@testing-library/jest-dom": "^7.0.1",
         "@testing-library/react": "^16.3.3",
         "@testing-library/user-event": "^14.6.7",
-        "@types/node": "^26.5.1",
+        "@types/node": "^26.6.1",
         "@types/react": "^19.3.0",
         "@types/react-dom": "^19.3.0",
         "@types/react-syntax-highlighter": "^15.5.13",
@@ -95,7 +95,7 @@
         "typescript": "^7.0.2",
         "vite": "^8.3.0",
         "vite-plugin-svgr": "^5.2.0",
-        "vitest": "^5.0.0"
+        "vitest": "^5.0.1"
     },
     "volta": {
         "node": "22.22.0"

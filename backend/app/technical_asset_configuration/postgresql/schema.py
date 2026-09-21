@@ -1,4 +1,4 @@
-from typing import ClassVar, Literal, Optional, Self
+from typing import ClassVar, Optional, Self
 
 from pydantic import model_validator
 from sqlalchemy.orm import Session
@@ -17,7 +17,6 @@ from app.technical_asset_configuration.base_schema import (
     UIElementSelect,
     UIElementString,
 )
-from app.technical_asset_configuration.data_output_types import DataOutputTypes
 from app.technical_asset_configuration.enums import AccessGranularity, UIElementType
 from app.technical_asset_configuration.postgresql.model import (
     NAME,
@@ -33,7 +32,6 @@ class PostgreSQLTechnicalAssetConfiguration(TechnicalAssetPlugin):
 
     database: str
     schema: str = ""
-    configuration_type: Literal[DataOutputTypes.PostgreSQLTechnicalAssetConfiguration]
     table: str = "*"
     access_granularity: AccessGranularity
 

@@ -143,5 +143,5 @@ Verb: POST
 Address: api/v2/data_products/970be9df-4d42-4fb7-968c-f516345a9495/technical_assets
 Payload:
 ```
-{"name":"Customer 360","namespace":"customer-360","description":"Customer 369","tag_ids":[],"status":"active","technical_mapping":"custom","platform_id":"99898d61-ba3b-4f30-a929-8356ccfe521f","service_id":"242d7e16-edd5-41e1-9e25-775ecc29706e","configuration":{"configuration_type":"PostgreSQLTechnicalAssetConfiguration","database":"dpp_demo","schema":"customer+360","access_granularity":"schema","table":"*"},"result":"dpp_demo.customer+360.*"}
+{"name":"Customer 360","namespace":"customer-360","description":"Customer 369","tag_ids":[],"status":"active","technical_mapping":"custom","platform_id":"99898d61-ba3b-4f30-a929-8356ccfe521f","service_id":"242d7e16-edd5-41e1-9e25-775ecc29706e","configuration":{"name":"PostgreSQLTechnicalAssetConfiguration","database":"dpp_demo","schema":"customer+360","access_granularity":"schema","table":"*"},"result":"dpp_demo.customer+360.*"}
 ```

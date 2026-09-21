@@ -1,4 +1,4 @@
-from typing import ClassVar, Literal, Optional
+from typing import ClassVar, Optional
 from uuid import UUID
 
 from fastapi import HTTPException, status
@@ -16,7 +16,6 @@ from app.technical_asset_configuration.base_schema import (
     UIElementSelect,
     UIElementString,
 )
-from app.technical_asset_configuration.data_output_types import DataOutputTypes
 from app.technical_asset_configuration.enums import UIElementType
 from app.technical_asset_configuration.s3.model import (
     NAME,
@@ -34,7 +33,6 @@ class S3TechnicalAssetConfiguration(TechnicalAssetPlugin):
     bucket: str
     suffix: str = ""
     path: str
-    configuration_type: Literal[DataOutputTypes.S3TechnicalAssetConfiguration]
 
     _platform_metadata = PlatformMetadata(
         display_name="S3",

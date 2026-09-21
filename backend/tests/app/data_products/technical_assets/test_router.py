@@ -49,7 +49,7 @@ def technical_asset_payload():
         "configuration": {
             "bucket": "test",
             "path": "test",
-            "configuration_type": "S3TechnicalAssetConfiguration",
+            "name": "S3TechnicalAssetConfiguration",
         },
         "owner_id": str(data_product.id),
         "platform_id": str(service.platform.id),
@@ -90,9 +90,7 @@ class TestTechnicalAssetsRouter:
         self, technical_asset_payload, data_product_role_assignment, client
     ):
         access_mode = AccessModeFactory(
-            technical_asset_types=[
-                technical_asset_payload["configuration"]["configuration_type"]
-            ]
+            technical_asset_types=[technical_asset_payload["configuration"]["name"]]
         )
         technical_asset_payload["access_mode_ids"] = [
             str(access_mode.id),
@@ -855,7 +853,7 @@ def ta_event_payload():
         "configuration": {
             "bucket": "test",
             "path": "test",
-            "configuration_type": "S3TechnicalAssetConfiguration",
+            "name": "S3TechnicalAssetConfiguration",
         },
         "platform_id": str(service.platform.id),
         "service_id": str(service.id),
