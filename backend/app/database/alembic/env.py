@@ -65,9 +65,6 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
     """
     config_section = config.get_section(config.config_ini_section, {})
-    # A plugin's reconciliation config supplies its own sqlalchemy.url, since
-    # its version_locations aren't known to this file's static alembic.ini.
-    # Bare `alembic` CLI usage never sets it, so it falls back to get_url().
     config_section.setdefault("sqlalchemy.url", get_url())
     version_table = config.attributes.get("version_table", "alembic_version")
     connectable = engine_from_config(
