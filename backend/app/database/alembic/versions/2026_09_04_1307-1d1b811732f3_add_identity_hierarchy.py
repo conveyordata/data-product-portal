@@ -1,7 +1,7 @@
 """add identity hierarchy
 
 Revision ID: 1d1b811732f3
-Revises: c8fbf0cf31e4
+Revises: c2a4e91f7b3d
 Create Date: 2026-09-04 13:07:24.707189
 """
 
@@ -14,7 +14,7 @@ from sqlalchemy.dialects import postgresql
 from app.shared.model import utcnow
 
 revision: str = "1d1b811732f3"
-down_revision: Union[str, None] = "c8fbf0cf31e4"
+down_revision: Union[str, None] = "c2a4e91f7b3d"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
