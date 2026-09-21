@@ -63,6 +63,7 @@ from app.events.schema_response import (
 )
 from app.events.service import EventService
 from app.graph.graph import Graph
+from app.groups.service import GroupService
 from app.users.notifications.service import NotificationService
 from app.users.schema import User
 
@@ -147,6 +148,15 @@ def _assign_owner_role_assignments(
             actor=actor,
         )
         DataProductAuthAssignment(assignment).add()
+
+        # Enforces group role inheritance for its members
+        group_service = GroupService(db)
+        if group_service.is_group(assignment.identity_id):
+            group_service.add_data_product_membership_edges(
+                group_id=assignment.identity_id,
+                data_product_id=assignment.data_product_id,
+            )
+
         EventService(db).create_event(
             CreateEvent(
                 name=EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_CREATED,

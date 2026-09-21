@@ -42,6 +42,7 @@ from app.database.deps import get_db_session
 from app.events.enums import EventReferenceEntity, EventType
 from app.events.schema import CreateEvent
 from app.events.service import EventService
+from app.groups.service import GroupService
 from app.identities.service import get_identity_display_name
 from app.users.notifications.service import NotificationService
 from app.users.schema import User
@@ -69,6 +70,13 @@ def delete_data_product_role_assignment(
 
     if assignment.decision is DecisionStatus.APPROVED:
         DataProductAuthAssignment(assignment).remove()
+        # Enforces group role inheritance removal for its members
+        group_service = GroupService(db)
+        if group_service.is_group(assignment.identity_id):
+            group_service.remove_data_product_membership_edges(
+                group_id=assignment.identity_id,
+                data_product_id=assignment.data_product_id,
+            )
 
     event_id = EventService(db).create_event(
         CreateEvent(
@@ -214,6 +222,14 @@ def create_data_product_role_assignment(
             actor=user,
         )
         DataProductAuthAssignment(assignment).add()
+
+        # Enforces group role inheritance for its members
+        group_service = GroupService(db)
+        if group_service.is_group(assignment.identity_id):
+            group_service.add_data_product_membership_edges(
+                group_id=assignment.identity_id,
+                data_product_id=assignment.data_product_id,
+            )
     else:
         background_tasks.add_task(
             email.send_role_assignment_request_email,
@@ -260,6 +276,13 @@ def decide_data_product_role_assignment(
     )
     if assignment.decision is DecisionStatus.APPROVED:
         DataProductAuthAssignment(assignment).add()
+        # Enforces group role inheritance for its members
+        group_service = GroupService(db)
+        if group_service.is_group(assignment.identity_id):
+            group_service.add_data_product_membership_edges(
+                group_id=assignment.identity_id,
+                data_product_id=assignment.data_product_id,
+            )
 
     event_id = EventService(db).create_event(
         CreateEvent(

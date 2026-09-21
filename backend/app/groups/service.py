@@ -10,6 +10,7 @@ from app.authorization.role_assignments.data_product.model import (
     DataProductRoleAssignment,
 )
 from app.authorization.role_assignments.enums import DecisionStatus
+from app.core.authz import Authorization
 from app.groups.model import Group, GroupMembership, ensure_group_exists
 from app.identities.model import ensure_identity_exists
 from app.machine_users.model import MachineUser
@@ -77,10 +78,39 @@ class GroupService:
         self.db.add(membership)
         self.db.flush()
 
+        # Refresh Casbin graph after member addition
+        authorizer = Authorization()
+        authorizer.assign_global_group_membership(
+            member_identity_id=member_identity_id,
+            group_id=group_id,
+        )
+
+        for data_product_id in self.list_assigned_data_products(group_id):
+            authorizer.assign_resource_group_membership(
+                member_identity_id=member_identity_id,
+                group_id=group_id,
+                resource_id=data_product_id,
+            )
+
         return membership
 
     def remove_member(self, group_id: UUID, member_identity_id: UUID):
         membership = self.get_membership(group_id, member_identity_id)
+
+        # Revoke the roles before removing the member
+        authorizer = Authorization()
+        authorizer.revoke_global_group_membership(
+            member_identity_id=member_identity_id,
+            group_id=group_id,
+        )
+
+        for data_product_id in self.list_assigned_data_products(group_id):
+            authorizer.revoke_resource_group_membership(
+                member_identity_id=member_identity_id,
+                group_id=group_id,
+                resource_id=data_product_id,
+            )
+
         self.db.delete(membership)
         self.db.flush()
 
@@ -112,3 +142,32 @@ class GroupService:
 
     def get_group(self, group_id: UUID) -> Group:
         return ensure_group_exists(group_id, self.db)
+
+    def add_data_product_membership_edges(
+        self,
+        group_id: UUID,
+        data_product_id: UUID,
+    ) -> None:
+        authorizer = Authorization()
+        for membership in self.list_memberships(group_id):
+            authorizer.assign_resource_group_membership(
+                member_identity_id=membership.member_identity_id,
+                group_id=group_id,
+                resource_id=data_product_id,
+            )
+
+    def remove_data_product_membership_edges(
+        self,
+        group_id: UUID,
+        data_product_id: UUID,
+    ) -> None:
+        authorizer = Authorization()
+        for membership in self.list_memberships(group_id):
+            authorizer.revoke_resource_group_membership(
+                member_identity_id=membership.member_identity_id,
+                group_id=group_id,
+                resource_id=data_product_id,
+            )
+
+    def is_group(self, identity_id: UUID) -> bool:
+        return self.db.get(Group, identity_id) is not None
