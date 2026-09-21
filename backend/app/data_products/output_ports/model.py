@@ -67,9 +67,12 @@ def _has_user_access_to_private_output_port(cls, user_id: uuid.UUID):
 
 
 def _has_user_access_to_private_output_port_via_data_product(cls, user_id: uuid.UUID):
-    user_group_ids = select(GroupMembership.group_id).where(
-        GroupMembership.member_identity_id == user_id
+    user_group_ids = (
+        select(GroupMembership.group_id)
+        .where(GroupMembership.member_identity_id == user_id)
+        .correlate_except(GroupMembership)
     )
+
     return (
         select(DataProductRoleAssignment.id)
         .where(DataProductRoleAssignment.data_product_id == cls.data_product_id)

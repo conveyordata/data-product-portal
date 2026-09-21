@@ -21,6 +21,8 @@ from app.core.authz import Action
 from app.data_products.model import ensure_data_product_exists
 from app.data_products.status import AbstractDataProductStatus
 from app.database.database import ensure_exists
+from app.groups.model import GroupMembership
+from app.groups.service import GroupService
 from app.users.model import User as UserModel
 from app.users.schema import User
 from app.users.schema_response import (
@@ -202,10 +204,18 @@ class RoleAssignmentService:
     def get_pending_data_product_role_assignments(
         self, user: User
     ) -> Sequence[DataProductRoleAssignmentRequest]:
+        user_group_ids = GroupService(self.db).get_groups_ids_identity_is_member_of(
+            user.id
+        )
+
         data_product_ids = (
             select(DataProductRoleAssignmentModel.data_product_id)
+            .join(Role, DataProductRoleAssignmentModel.role_id == Role.id)
             .where(
-                DataProductRoleAssignmentModel.identity_id == user.id,
+                or_(
+                    DataProductRoleAssignmentModel.identity_id == user.id,
+                    DataProductRoleAssignmentModel.identity_id.in_(user_group_ids),
+                ),
                 DataProductRoleAssignmentModel.decision == DecisionStatus.APPROVED,
                 Role.permissions.contains(
                     [Action.DATA_PRODUCT__APPROVE_USER_REQUEST.value]
@@ -236,19 +246,49 @@ class RoleAssignmentService:
     def users_with_authz_action(
         self, data_product_id: UUID, action: Action
     ) -> Sequence[User]:
+        direct_user_ids = (
+            select(UserModel.id)
+            .join(
+                DataProductRoleAssignmentModel,
+                DataProductRoleAssignmentModel.identity_id == UserModel.id,
+            )
+            .join(
+                Role,
+                DataProductRoleAssignmentModel.role_id == Role.id,
+            )
+            .where(
+                DataProductRoleAssignmentModel.data_product_id == data_product_id,
+                DataProductRoleAssignmentModel.decision == DecisionStatus.APPROVED,
+                Role.permissions.contains([action]),
+            )
+        )
+
+        group_member_user_ids = (
+            select(UserModel.id)
+            .join(
+                GroupMembership,
+                GroupMembership.member_identity_id == UserModel.id,
+            )
+            .join(
+                DataProductRoleAssignmentModel,
+                DataProductRoleAssignmentModel.identity_id == GroupMembership.group_id,
+            )
+            .join(
+                Role,
+                DataProductRoleAssignmentModel.role_id == Role.id,
+            )
+            .where(
+                DataProductRoleAssignmentModel.data_product_id == data_product_id,
+                DataProductRoleAssignmentModel.decision == DecisionStatus.APPROVED,
+                Role.permissions.contains([action]),
+            )
+        )
+
+        authorized_user_ids = direct_user_ids.union(group_member_user_ids)
+
         return (
             self.db.scalars(
-                select(UserModel)
-                .join(
-                    DataProductRoleAssignmentModel,
-                    DataProductRoleAssignmentModel.identity_id == UserModel.id,
-                )
-                .join(Role, DataProductRoleAssignmentModel.role_id == Role.id)
-                .where(
-                    DataProductRoleAssignmentModel.data_product_id == data_product_id,
-                    DataProductRoleAssignmentModel.decision == DecisionStatus.APPROVED,
-                    Role.permissions.contains([action]),
-                )
+                select(UserModel).where(UserModel.id.in_(authorized_user_ids))
             )
             .unique()
             .all()

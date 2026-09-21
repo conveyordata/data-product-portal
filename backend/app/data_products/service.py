@@ -57,7 +57,7 @@ from app.data_products.technical_assets.model import (
 from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
-from app.groups.model import GroupMembership
+from app.groups.service import GroupService
 from app.resource_names.service import ResourceNameService, ResourceNameValidityType
 from app.users.model import User as UserModel
 from app.users.schema import User
@@ -160,9 +160,9 @@ class DataProductService(AbstractDataProductService):
             case AssignmentFilter.ALL:
                 pass
             case AssignmentFilter.ONLY_ASSIGNED:
-                user_group_ids = select(GroupMembership.group_id).where(
-                    GroupMembership.member_identity_id == current_user.id
-                )
+                user_group_ids = GroupService(
+                    self.db
+                ).get_groups_ids_identity_is_member_of(current_user.id)
                 query = query.where(
                     DataProductModel.assignments.any(
                         and_(

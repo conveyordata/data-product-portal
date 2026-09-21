@@ -23,7 +23,6 @@ class GroupService:
 
     def list_memberships(self, group_id: UUID | None = None) -> list[GroupMembership]:
         query = select(GroupMembership)
-
         if group_id is not None:
             query = query.where(GroupMembership.group_id == group_id)
 
@@ -171,3 +170,12 @@ class GroupService:
 
     def is_group(self, identity_id: UUID) -> bool:
         return self.db.get(Group, identity_id) is not None
+
+    def get_groups_ids_identity_is_member_of(self, identity_id: UUID) -> list[UUID]:
+        return list(
+            self.db.scalars(
+                select(GroupMembership.group_id).where(
+                    GroupMembership.member_identity_id == identity_id
+                )
+            ).all()
+        )
