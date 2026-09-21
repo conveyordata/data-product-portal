@@ -89,8 +89,8 @@ class TestTechnicalAssetsRouter:
     def test_create_technical_asset__with_platform_and_service_omitted(
         self, technical_asset_payload, data_product_role_assignment, client
     ):
-        technical_asset_payload["platform_id"] = None
-        technical_asset_payload["service_id"] = None
+        technical_asset_payload.pop("platform_id")
+        technical_asset_payload.pop("service_id")
 
         created_technical_asset = self.create_technical_asset(
             client, technical_asset_payload
