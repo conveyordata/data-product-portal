@@ -230,12 +230,14 @@ const DEBOUNCE = 500;
 export const getAccessTypeOptions = (t: TFunction) => {
     const options = [
         {
-            value: OutputPortAccessType.Restricted,
-            tooltip: t('Restricted Output Ports are visible to everyone but require permission to use'),
+            value: OutputPortAccessType.Unrestricted,
+            tooltip: t(
+                'Unrestricted Output Ports are visible and accessible to use by anyone without explicit approval',
+            ),
         },
         {
-            value: OutputPortAccessType.Unrestricted,
-            tooltip: t('Unrestricted Output Ports are visible and accessible to use by anyone'),
+            value: OutputPortAccessType.Restricted,
+            tooltip: t('Restricted Output Ports are visible to everyone but require permission to use'),
         },
         {
             value: OutputPortAccessType.Private,

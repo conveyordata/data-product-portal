@@ -788,7 +788,7 @@
     "Unknown node type: {{ nodeType }}": "Unknown node type: {{ nodeType }}",
     "Unlink Output Port": "Unlink Output Port",
     "Unrestricted": "Unrestricted",
-    "Unrestricted Output Ports are visible and accessible to use by anyone": "Unrestricted Output Ports are visible and accessible to use by anyone",
+    "Unrestricted Output Ports are visible and accessible to use by anyone without explicit approval": "Unrestricted Output Ports are visible and accessible to use by anyone without explicit approval",
     "Until": "Until",
     "Update": "Update",
     "Update {{ name }} Data Product role": "Update {{ name }} $t(Data Product) role",
