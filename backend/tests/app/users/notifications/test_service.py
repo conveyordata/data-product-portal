@@ -51,9 +51,7 @@ def test_create_data_product_notifications__resolves_users_and_group_members(
 
     receiver_ids = set(
         session.scalars(
-            select(Notification.user_id).where(
-                Notification.event_id == event.id
-            )
+            select(Notification.user_id).where(Notification.event_id == event.id)
         ).all()
     )
 
@@ -61,6 +59,7 @@ def test_create_data_product_notifications__resolves_users_and_group_members(
         direct_user.id,
         group_member.id,
     }
+
 
 def test_create_data_product_notifications__deduplicates_recipients(
     session,
@@ -103,6 +102,7 @@ def test_create_data_product_notifications__deduplicates_recipients(
 
     assert len(notifications) == 1
 
+
 def test_create_data_product_notifications__excludes_machine_users(
     session,
 ):
@@ -141,6 +141,7 @@ def test_create_data_product_notifications__excludes_machine_users(
     ).all()
 
     assert notifications == []
+
 
 def test_create_data_product_notifications__ignores_pending_group_assignments(
     session,
