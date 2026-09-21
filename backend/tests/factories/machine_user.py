@@ -11,4 +11,4 @@ class MachineUserFactory(IdentityFactory):
     class Meta:
         model = MachineUser
 
-    display_name = factory.Sequence(lambda n: f"Machine USer {n}")
+    display_name = factory.Sequence(lambda n: f"Machine User {n}")
