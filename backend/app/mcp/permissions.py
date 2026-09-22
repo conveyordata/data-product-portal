@@ -105,7 +105,7 @@ def register_permission_tools(mcp) -> None:
 
         return {
             "user_id": target_user_id,
-            "is_current_user": target_user_id == str(current_user["id"]),
+            "is_current_user": target_user_id == str(current_user.id),
             "total_assignments": total_assignments,
             "roles": {
                 "global": global_roles,
