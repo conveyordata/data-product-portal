@@ -89,7 +89,7 @@ class TestFetchAwsCredentials:
 
 
 class TestListGlueTables:
-    def test_returns_tables_from_paginator(self, session, user, mock_creds):
+    def test_returns_tables_from_paginator(self, mcp, session, user, mock_creds):
         fake_page = {
             "TableList": [
                 {"Name": "orders", "TableType": "EXTERNAL_TABLE"},
@@ -109,7 +109,7 @@ class TestListGlueTables:
             patch("boto3.client", return_value=mock_client),
         ):
             result = call_mcp_tool(
-                _get_mcp(),
+                mcp,
                 session,
                 user,
                 "list_glue_tables",
@@ -124,7 +124,9 @@ class TestListGlueTables:
         assert "orders" in result["table_names"]
         assert "customers" in result["table_names"]
 
-    def test_raises_tool_error_for_missing_database(self, session, user, mock_creds):
+    def test_raises_tool_error_for_missing_database(
+        self, mcp, session, user, mock_creds
+    ):
         class EntityNotFoundException(Exception):
             pass
 
@@ -142,7 +144,7 @@ class TestListGlueTables:
             pytest.raises(EntityNotFoundException, match="missing_db"),
         ):
             call_mcp_tool(
-                _get_mcp(),
+                mcp,
                 session,
                 user,
                 "list_glue_tables",
@@ -155,7 +157,7 @@ class TestListGlueTables:
 
 
 class TestQueryAthena:
-    def test_returns_execution_id_on_success(self, session, user, mock_creds):
+    def test_returns_execution_id_on_success(self, mcp, session, user, mock_creds):
         mock_client = MagicMock()
         mock_client.start_query_execution.return_value = {"QueryExecutionId": "qry-123"}
 
@@ -167,7 +169,7 @@ class TestQueryAthena:
             patch("boto3.client", return_value=mock_client),
         ):
             result = call_mcp_tool(
-                _get_mcp(),
+                mcp,
                 session,
                 user,
                 "query_athena",
@@ -181,7 +183,7 @@ class TestQueryAthena:
         assert result["query_execution_id"] == "qry-123"
         assert result["data_product_namespace"] == "my-product"
 
-    def test_passes_workgroup_when_provided(self, session, user, mock_creds):
+    def test_passes_workgroup_when_provided(self, mcp, session, user, mock_creds):
         mock_client = MagicMock()
         mock_client.start_query_execution.return_value = {"QueryExecutionId": "qry-456"}
 
@@ -193,7 +195,7 @@ class TestQueryAthena:
             patch("boto3.client", return_value=mock_client),
         ):
             result = call_mcp_tool(
-                _get_mcp(),
+                mcp,
                 session,
                 user,
                 "query_athena",
@@ -209,7 +211,7 @@ class TestQueryAthena:
         assert call_kwargs["WorkGroup"] == "my-workgroup"
         assert result["workgroup"] == "my-workgroup"
 
-    def test_raises_tool_error_on_invalid_query(self, session, user, mock_creds):
+    def test_raises_tool_error_on_invalid_query(self, mcp, session, user, mock_creds):
         class InvalidRequestException(Exception):
             pass
 
@@ -227,7 +229,7 @@ class TestQueryAthena:
             pytest.raises(InvalidRequestException, match="bad SQL"),
         ):
             call_mcp_tool(
-                _get_mcp(),
+                mcp,
                 session,
                 user,
                 "query_athena",
@@ -254,7 +256,7 @@ class TestGetAthenaQueryResults:
             execution["QueryExecution"]["Status"]["StateChangeReason"] = error
         return execution
 
-    def test_returns_running_status(self, session, user, mock_creds):
+    def test_returns_running_status(self, mcp, session, user, mock_creds):
         mock_client = MagicMock()
         mock_client.get_query_execution.return_value = self._make_execution("RUNNING")
 
@@ -266,7 +268,7 @@ class TestGetAthenaQueryResults:
             patch("boto3.client", return_value=mock_client),
         ):
             result = call_mcp_tool(
-                _get_mcp(),
+                mcp,
                 session,
                 user,
                 "get_athena_query_results",
@@ -280,7 +282,7 @@ class TestGetAthenaQueryResults:
         assert result["status"] == "RUNNING"
         assert "Retry" in result["message"]
 
-    def test_raises_tool_error_on_failed_query(self, session, user, mock_creds):
+    def test_raises_tool_error_on_failed_query(self, mcp, session, user, mock_creds):
         mock_client = MagicMock()
         mock_client.get_query_execution.return_value = self._make_execution(
             "FAILED", error="Syntax error in SQL"
@@ -295,7 +297,7 @@ class TestGetAthenaQueryResults:
             pytest.raises(RuntimeError, match="Syntax error in SQL"),
         ):
             call_mcp_tool(
-                _get_mcp(),
+                mcp,
                 session,
                 user,
                 "get_athena_query_results",
@@ -306,7 +308,7 @@ class TestGetAthenaQueryResults:
                 },
             )
 
-    def test_returns_rows_on_success(self, session, user, mock_creds):
+    def test_returns_rows_on_success(self, mcp, session, user, mock_creds):
         mock_client = MagicMock()
         mock_client.get_query_execution.return_value = self._make_execution("SUCCEEDED")
         mock_client.get_query_results.return_value = {
@@ -327,7 +329,7 @@ class TestGetAthenaQueryResults:
             patch("boto3.client", return_value=mock_client),
         ):
             result = call_mcp_tool(
-                _get_mcp(),
+                mcp,
                 session,
                 user,
                 "get_athena_query_results",
@@ -343,7 +345,7 @@ class TestGetAthenaQueryResults:
         assert result["columns"] == ["id", "name"]
         assert result["rows"][0] == {"id": "1", "name": "Alice"}
 
-    def test_returns_empty_rows_when_no_results(self, session, user, mock_creds):
+    def test_returns_empty_rows_when_no_results(self, mcp, session, user, mock_creds):
         mock_client = MagicMock()
         mock_client.get_query_execution.return_value = self._make_execution("SUCCEEDED")
         mock_client.get_query_results.return_value = {"ResultSet": {"Rows": []}}
@@ -356,7 +358,7 @@ class TestGetAthenaQueryResults:
             patch("boto3.client", return_value=mock_client),
         ):
             result = call_mcp_tool(
-                _get_mcp(),
+                mcp,
                 session,
                 user,
                 "get_athena_query_results",
@@ -371,15 +373,10 @@ class TestGetAthenaQueryResults:
         assert result["rows"] == []
 
 
-_MCP = None
+@pytest.fixture
+def mcp():
+    from app.technical_asset_configuration.glue.mcp_tools import register_tools
 
-
-def _get_mcp():
-    global _MCP
-    if _MCP is None:
-        from app.technical_asset_configuration.glue.mcp_tools import register_tools
-
-        mcp = FastMCP()
-        register_tools(mcp)
-        _MCP = mcp
-    return _MCP
+    mcp = FastMCP()
+    register_tools(mcp)
+    return mcp
