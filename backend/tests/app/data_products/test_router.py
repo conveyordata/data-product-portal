@@ -1009,6 +1009,20 @@ class TestDataProductsRouter:
         response = self.get_data_product(client, data_product.id)
         assert response.status_code == 403
 
+    def test_create_data_product_with_group_owner(
+        self,
+        payload,
+        client,
+        user_with_create_data_product_rights,
+    ):
+        group = GroupFactory()
+        member = UserFactory()
+        GroupMembershipFactory(group=group, member=member)
+        payload["owners"] = [str(group.id)]
+
+        response = self.create_data_product(client, payload)
+        assert response.status_code == 200, response.text
+
     @staticmethod
     def create_data_product(client: TestClient, default_data_product_payload):
         return client.post(ENDPOINT, json=default_data_product_payload)

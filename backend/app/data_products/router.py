@@ -115,7 +115,6 @@ def create_data_product(
     NotificationService(db).create_data_product_notifications(
         data_product_id=created_id,
         event_id=event_id,
-        extra_receiver_ids=owners,
     )
     if data_product.input_ports is not None:
         request_input_ports_for_data_product(

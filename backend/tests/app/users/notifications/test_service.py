@@ -133,6 +133,7 @@ def test_create_data_product_notifications__excludes_machine_users(
     NotificationService(session).create_data_product_notifications(
         data_product_id=data_product.id,
         event_id=event.id,
+        extra_receiver_ids=[machine_user.id, group.id],
     )
     session.flush()
 

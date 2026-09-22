@@ -103,7 +103,9 @@ class NotificationService:
         Creates notifications for users related to a data product event.
 
         As approved Data Product assignments can target machine users and groups,
-        those need to be excluded while includinggroup members when th target is a group.
+        those need to be excluded while including group members when the target is a group.
+
+        `extra_receiver_ids` paraam is also filtered out to allow only users.
         """
         direct_user_ids = (
             select(UserModel.id)
@@ -133,11 +135,17 @@ class NotificationService:
             )
         )
 
+        extra_user_ids = select(UserModel.id).where(
+            UserModel.id.in_(extra_receiver_ids)
+        )
+
         receivers = set(
-            chain(
-                self.db.scalars(direct_user_ids.union(group_member_user_ids)).all(),
-                extra_receiver_ids,
-            )
+            self.db.scalars(
+                direct_user_ids.union(
+                    group_member_user_ids,
+                    extra_user_ids,
+                )
+            ).all()
         )
 
         event = self.db.get(EventModel, event_id)
