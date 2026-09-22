@@ -155,12 +155,12 @@ describe('TechnicalAssetPopup', async () => {
         expect(renderSpy).not.toHaveBeenCalled();
     }, 15000);
 
-    it('should not restore a stale access path when switching to a platformless plugin while a render request is in flight', async () => {
+    it('should block switching platforms while a render request is in flight', async () => {
         defaultMocks();
         server.use(
             http.post('*/api/v2/plugins/render_technical_asset_access_path', async () => {
                 await delay(200);
-                return HttpResponse.json({ technical_asset_access_path: 'stale-s3-path' });
+                return HttpResponse.json({ technical_asset_access_path: 's3-path' });
             }),
         );
 
@@ -171,10 +171,9 @@ describe('TechnicalAssetPopup', async () => {
 
         await fillInNameAndDescription(user);
         await fillInS3(user);
-        await fillInGitHub(user);
 
-        await new Promise((resolve) => setTimeout(resolve, 300));
+        await waitFor(() => expect(screen.getByLabelText(/github/i)).toBeDisabled());
 
-        expect(screen.getByLabelText(/repository link/i)).toHaveValue('');
+        await waitFor(() => expect(screen.getByLabelText(/github/i)).not.toBeDisabled(), { timeout: 2000 });
     }, 15000);
 });

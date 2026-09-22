@@ -1,5 +1,5 @@
 import { Form, type FormInstance, type FormProps, Input, Radio, Select, Space } from 'antd';
-import { type RefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { type RefObject, useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDebouncedCallback } from 'use-debounce';
 import { CardSelection } from '@/components/card-selection/card-selection.tsx';
@@ -95,7 +95,7 @@ export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallback
     const [canEditNamespace, setCanEditNamespace] = useState<boolean>(false);
     const accessMode = Form.useWatch('access_mode_type', form) as 'single' | 'multiple' | undefined;
 
-    const [fetchResultString] = useRenderTechnicalAssetAccessPathMutation();
+    const [fetchResultString, { isLoading: isFetchingResultString }] = useRenderTechnicalAssetAccessPathMutation();
 
     const isLoading =
         platformsLoading ||
@@ -162,11 +162,8 @@ export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallback
         }
     };
 
-    const resultRequestId = useRef(0);
-
     const onDataPlatformClick = (dropdown: CustomDropdownItemProps<string>) => {
         if (selectedDataPlatform !== dropdown) {
-            resultRequestId.current += 1;
             form.setFieldsValue({ configuration: undefined, result: undefined });
             setSelectedDataPlatform(dropdown);
 
@@ -182,7 +179,6 @@ export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallback
     const onConfigurationClick = (dropdown: CustomDropdownItemProps<string>) => {
         if (!platformsLoading) {
             if (selectedConfiguration !== dropdown) {
-                resultRequestId.current += 1;
                 form.setFieldsValue({ configuration: undefined, result: undefined });
                 setSelectedConfiguration(dropdown);
             }
@@ -228,7 +224,6 @@ export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallback
     );
 
     const setResultString = useDebouncedCallback((values: CreateTechnicalAssetRequest) => {
-        const requestId = ++resultRequestId.current;
         if (!values.platform_id || !values.service_id) {
             form.setFieldValue('result', undefined);
             return;
@@ -240,16 +235,8 @@ export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallback
         };
         form.validateFields(['configuration'], { validateOnly: true, recursive: true })
             .then(() => fetchResultString(request).unwrap())
-            .then((result) => {
-                if (requestId === resultRequestId.current) {
-                    form.setFieldValue('result', result.technical_asset_access_path);
-                }
-            })
-            .catch(() => {
-                if (requestId === resultRequestId.current) {
-                    form.setFieldValue('result', undefined);
-                }
-            });
+            .then((result) => form.setFieldValue('result', result.technical_asset_access_path))
+            .catch(() => form.setFieldValue('result', undefined));
     }, debounce);
 
     const onValuesChange: FormProps<CreateTechnicalAssetRequest>['onValuesChange'] = (
@@ -341,7 +328,7 @@ export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallback
                             <TechnicalAssetPlatformTile<string>
                                 key={dataPlatform.value}
                                 dataPlatform={dataPlatform}
-                                isDisabled={isLoading}
+                                isDisabled={isLoading || isFetchingResultString}
                                 isSelected={dataPlatform === selectedDataPlatform}
                                 onTileClick={onDataPlatformClick}
                                 value={
@@ -362,7 +349,7 @@ export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallback
                             <TechnicalAssetPlatformTile<string>
                                 key={dataPlatform.value}
                                 dataPlatform={dataPlatform}
-                                isDisabled={isLoading}
+                                isDisabled={isLoading || isFetchingResultString}
                                 isSelected={dataPlatform === selectedConfiguration}
                                 onTileClick={onConfigurationClick}
                                 value={platformServiceConfigMap.get(dataPlatform.value)?.service_id}
