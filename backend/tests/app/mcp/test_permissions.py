@@ -44,5 +44,5 @@ def test_get_user_roles__end_to_end_through_mcp_protocol(session):
         result = call_mcp_tool("get_user_roles", {"user_id": str(user.id)})
 
     data = result.data
-    assert data["identity_id"] == str(user.id)
+    assert data["user_id"] == str(user.id)
     assert data["summary"]["global_roles_count"] == 1
