@@ -7,22 +7,29 @@ underlying function directly and bypassing that machinery.
 """
 
 import asyncio
+from unittest.mock import patch
 
 from fastmcp import Client
 
 from app.mcp.mcp import mcp
+from app.settings import settings
 from tests.factories import GlobalRoleAssignmentFactory, RoleFactory, UserFactory
-from tests.session_util import as_user
 
 
-def call_mcp_tool(tool_name: str, arguments: dict):
+def call_mcp_tool(session, tool_name: str, arguments: dict):
     """Call an MCP tool through the real FastMCP client/DI stack."""
 
-    async def call():
-        async with Client(mcp) as client:
-            return await client.call_tool(tool_name, arguments)
+    with (
+        patch("app.database.database.SessionLocal", return_value=session),
+        patch.object(session, "commit"),
+        patch.object(session, "close"),
+    ):
 
-    return asyncio.run(call())
+        async def call():
+            async with Client(mcp) as client:
+                return await client.call_tool(tool_name, arguments)
+
+        return asyncio.run(call())
 
 
 def test_get_user_roles__end_to_end_through_mcp_protocol(session):
@@ -36,12 +43,11 @@ def test_get_user_roles__end_to_end_through_mcp_protocol(session):
     and any `db.scalars(...)` call raised
     `AttributeError: 'generator' object has no attribute 'scalars'`.
     """
-    user = UserFactory()
+    user = UserFactory(external_id=settings.DEFAULT_USERNAME)
     role = RoleFactory(scope="global")
     GlobalRoleAssignmentFactory(user_id=user.id, role_id=role.id)
 
-    with as_user(session, user.id):
-        result = call_mcp_tool("get_user_roles", {"user_id": str(user.id)})
+    result = call_mcp_tool(session, "get_user_roles", {"user_id": str(user.id)})
 
     data = result.data
     assert data["user_id"] == str(user.id)

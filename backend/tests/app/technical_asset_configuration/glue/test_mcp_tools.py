@@ -2,15 +2,17 @@ import asyncio as _asyncio
 from unittest.mock import MagicMock, patch
 
 import pytest
+from fastmcp import Client, FastMCP
 
 from app.core.auth.credentials import AWSCredentials
+from app.settings import settings
 from app.technical_asset_configuration.glue.mcp_tools import _fetch_aws_credentials
 from tests.factories import UserFactory
 
 
 @pytest.fixture
 def user(session):
-    return UserFactory()
+    return UserFactory(external_id=settings.DEFAULT_USERNAME)
 
 
 @pytest.fixture
@@ -107,13 +109,15 @@ class TestListGlueTables:
             ),
             patch("boto3.client", return_value=mock_client),
         ):
-            result = _call_list_glue_tables(
-                data_product_namespace="my-product",
-                env="prod",
-                database_name="mydb",
-                authorized_user=user,
-                db=session,
-            )
+            result = _call_mcp_tool(
+                session,
+                "list_glue_tables",
+                {
+                    "data_product_namespace": "my-product",
+                    "env": "prod",
+                    "database_name": "mydb",
+                },
+            ).data
 
         assert result["table_count"] == 2
         assert "orders" in result["table_names"]
@@ -136,12 +140,14 @@ class TestListGlueTables:
             patch("boto3.client", return_value=mock_client),
             pytest.raises(EntityNotFoundException, match="missing_db"),
         ):
-            _call_list_glue_tables(
-                data_product_namespace="my-product",
-                env="prod",
-                database_name="missing_db",
-                authorized_user=user,
-                db=session,
+            _call_mcp_tool(
+                session,
+                "list_glue_tables",
+                {
+                    "data_product_namespace": "my-product",
+                    "env": "prod",
+                    "database_name": "missing_db",
+                },
             )
 
 
@@ -157,13 +163,15 @@ class TestQueryAthena:
             ),
             patch("boto3.client", return_value=mock_client),
         ):
-            result = _call_query_athena(
-                data_product_namespace="my-product",
-                env="prod",
-                query="SELECT 1",
-                authorized_user=user,
-                db=session,
-            )
+            result = _call_mcp_tool(
+                session,
+                "query_athena",
+                {
+                    "data_product_namespace": "my-product",
+                    "env": "prod",
+                    "query": "SELECT 1",
+                },
+            ).data
 
         assert result["query_execution_id"] == "qry-123"
         assert result["data_product_namespace"] == "my-product"
@@ -179,14 +187,16 @@ class TestQueryAthena:
             ),
             patch("boto3.client", return_value=mock_client),
         ):
-            result = _call_query_athena(
-                data_product_namespace="my-product",
-                env="prod",
-                query="SELECT 1",
-                workgroup="my-workgroup",
-                authorized_user=user,
-                db=session,
-            )
+            result = _call_mcp_tool(
+                session,
+                "query_athena",
+                {
+                    "data_product_namespace": "my-product",
+                    "env": "prod",
+                    "query": "SELECT 1",
+                    "workgroup": "my-workgroup",
+                },
+            ).data
 
         call_kwargs = mock_client.start_query_execution.call_args[1]
         assert call_kwargs["WorkGroup"] == "my-workgroup"
@@ -209,12 +219,14 @@ class TestQueryAthena:
             patch("boto3.client", return_value=mock_client),
             pytest.raises(InvalidRequestException, match="bad SQL"),
         ):
-            _call_query_athena(
-                data_product_namespace="my-product",
-                env="prod",
-                query="SELECT ??? INVALID",
-                authorized_user=user,
-                db=session,
+            _call_mcp_tool(
+                session,
+                "query_athena",
+                {
+                    "data_product_namespace": "my-product",
+                    "env": "prod",
+                    "query": "SELECT ??? INVALID",
+                },
             )
 
 
@@ -244,13 +256,15 @@ class TestGetAthenaQueryResults:
             ),
             patch("boto3.client", return_value=mock_client),
         ):
-            result = _call_get_athena_query_results(
-                query_execution_id="qry-123",
-                data_product_namespace="my-product",
-                env="prod",
-                authorized_user=user,
-                db=session,
-            )
+            result = _call_mcp_tool(
+                session,
+                "get_athena_query_results",
+                {
+                    "query_execution_id": "qry-123",
+                    "data_product_namespace": "my-product",
+                    "env": "prod",
+                },
+            ).data
 
         assert result["status"] == "RUNNING"
         assert "Retry" in result["message"]
@@ -269,12 +283,14 @@ class TestGetAthenaQueryResults:
             patch("boto3.client", return_value=mock_client),
             pytest.raises(RuntimeError, match="Syntax error in SQL"),
         ):
-            _call_get_athena_query_results(
-                query_execution_id="qry-123",
-                data_product_namespace="my-product",
-                env="prod",
-                authorized_user=user,
-                db=session,
+            _call_mcp_tool(
+                session,
+                "get_athena_query_results",
+                {
+                    "query_execution_id": "qry-123",
+                    "data_product_namespace": "my-product",
+                    "env": "prod",
+                },
             )
 
     def test_returns_rows_on_success(self, session, user, mock_creds):
@@ -297,13 +313,15 @@ class TestGetAthenaQueryResults:
             ),
             patch("boto3.client", return_value=mock_client),
         ):
-            result = _call_get_athena_query_results(
-                query_execution_id="qry-123",
-                data_product_namespace="my-product",
-                env="prod",
-                authorized_user=user,
-                db=session,
-            )
+            result = _call_mcp_tool(
+                session,
+                "get_athena_query_results",
+                {
+                    "query_execution_id": "qry-123",
+                    "data_product_namespace": "my-product",
+                    "env": "prod",
+                },
+            ).data
 
         assert result["status"] == "SUCCEEDED"
         assert result["row_count"] == 2
@@ -322,44 +340,43 @@ class TestGetAthenaQueryResults:
             ),
             patch("boto3.client", return_value=mock_client),
         ):
-            result = _call_get_athena_query_results(
-                query_execution_id="qry-123",
-                data_product_namespace="my-product",
-                env="prod",
-                authorized_user=user,
-                db=session,
-            )
+            result = _call_mcp_tool(
+                session,
+                "get_athena_query_results",
+                {
+                    "query_execution_id": "qry-123",
+                    "data_product_namespace": "my-product",
+                    "env": "prod",
+                },
+            ).data
 
         assert result["row_count"] == 0
         assert result["rows"] == []
 
 
-_TOOLS = None
+_MCP = None
 
 
-def _get_tools():
-    global _TOOLS
-    if _TOOLS is None:
-        _TOOLS = {}
-        from fastmcp import FastMCP
-
+def _get_mcp():
+    global _MCP
+    if _MCP is None:
         from app.technical_asset_configuration.glue.mcp_tools import register_tools
 
         mcp = FastMCP()
         register_tools(mcp)
-        for t in _asyncio.run(mcp.list_tools()):
-            tool_obj = _asyncio.run(mcp.get_tool(t.name))
-            _TOOLS[t.name] = tool_obj.fn
-    return _TOOLS
+        _MCP = mcp
+    return _MCP
 
 
-def _call_list_glue_tables(**kwargs):
-    return _get_tools()["list_glue_tables"](**kwargs)
+def _call_mcp_tool(session, tool_name: str, arguments: dict):
+    with (
+        patch("app.database.database.SessionLocal", return_value=session),
+        patch.object(session, "commit"),
+        patch.object(session, "close"),
+    ):
 
+        async def call():
+            async with Client(_get_mcp()) as client:
+                return await client.call_tool(tool_name, arguments)
 
-def _call_query_athena(**kwargs):
-    return _get_tools()["query_athena"](**kwargs)
-
-
-def _call_get_athena_query_results(**kwargs):
-    return _get_tools()["get_athena_query_results"](**kwargs)
+        return _asyncio.run(call())
