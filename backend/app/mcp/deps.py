@@ -4,6 +4,7 @@ Kept in a separate module so both core portal tools and plugin tools can import
 these utilities without creating circular dependencies.
 """
 
+from contextlib import contextmanager
 from typing import Any, Optional
 
 import jwt as pyjwt
@@ -129,6 +130,7 @@ def get_mcp_authenticated_user(db: Session = Depends(db_session)) -> UserModel:
     return user_model
 
 
+@contextmanager
 def get_user_db_session(user: User = Depends(get_mcp_authenticated_user)):
     with db_session() as db:
         db.info["current_user_id"] = user.id
