@@ -96,8 +96,10 @@ export function OutputPort() {
                 <Flex className={styles.datasetHeaderContainer}>
                     <Flex className={styles.datasetHeader} align="center">
                         <CustomSvgIconLoader iconComponent={outputPortBorderIcon} size="large" />
-                        <Typography.Title level={3}>{outputPort?.name}</Typography.Title>
-                        <OutputPortAccessIcon accessType={outputPort.access_type} />
+                        <Flex align="baseline" gap="small">
+                            <Typography.Title level={3}>{outputPort?.name}</Typography.Title>
+                            <OutputPortAccessIcon accessType={outputPort.access_type} />
+                        </Flex>
                     </Flex>
                     {canEdit && (
                         <CircleIconButton
