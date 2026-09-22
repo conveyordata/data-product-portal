@@ -1,11 +1,11 @@
-import asyncio as _asyncio
 from unittest.mock import MagicMock, patch
 
 import pytest
-from fastmcp import Client, FastMCP
+from fastmcp import FastMCP
 
 from app.core.auth.credentials import AWSCredentials
 from app.technical_asset_configuration.glue.mcp_tools import _fetch_aws_credentials
+from tests.app.mcp.util import call_mcp_tool
 from tests.factories import UserFactory
 
 
@@ -24,23 +24,6 @@ def mock_creds():
         SessionToken="token",
         Expiration=datetime(2099, 1, 1, tzinfo=timezone.utc),
     )
-
-
-def call_mcp_tool(mcp, session, user, tool_name: str, arguments: dict):
-    """Call an MCP tool through the real FastMCP client/DI stack."""
-
-    with (
-        patch("app.database.database.SessionLocal", return_value=session),
-        patch.object(session, "commit"),
-        patch.object(session, "close"),
-        patch("app.mcp.deps.get_authenticated_user", return_value=user),
-    ):
-
-        async def call():
-            async with Client(mcp) as client:
-                return await client.call_tool(tool_name, arguments)
-
-        return _asyncio.run(call())
 
 
 class TestFetchAwsCredentials:
