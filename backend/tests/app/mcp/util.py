@@ -1,23 +1,25 @@
 import asyncio
+from typing import Any
 from unittest.mock import patch
 
-from fastmcp import Client
+from fastmcp import Client, FastMCP
+from sqlalchemy.orm import Session
 
-from app.settings import settings
+from app.users.model import User as UserModel
 
 
 def call_mcp_tool(
-    mcp_server,
-    session,
-    user,
+    mcp_server: FastMCP,
+    session: Session,
+    user: UserModel,
     tool_name: str,
     arguments: dict | None = None,
-):
+) -> Any:
     with (
         patch("app.database.database.SessionLocal", return_value=session),
         patch.object(session, "commit"),
         patch.object(session, "close"),
-        patch.object(settings, "DEFAULT_USERNAME", user.external_id),
+        patch("app.mcp.deps.get_authenticated_user", return_value=user),
     ):
 
         async def call():
