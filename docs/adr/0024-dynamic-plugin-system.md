@@ -35,6 +35,7 @@ This will be a next ADR
 * Plugins only support custom technical assets.
 * Logging, tracing, and observability conventions for plugin authors, beyond the portal catching exceptions at the plugin call boundary. Structured logging format, distributed tracing, and metrics for plugin calls are not addressed here.
 * Portal Core has no responsibility of keeping and storing permanent credentials for a plugin's own API calls. If a plugin needs to make authenticated calls, it can implement calls based on the user authenticated and making the plugin call.
+* A plugin defining its own MCP tools. `TechnicalAssetPlugin.register_mcp_tools` exists and is exercised by tests, but no out-of-tree plugin is expected to override it today: Glue's own MCP tools (querying Glue/Athena) are portal core's, not the plugin's, precisely because they reach deep into portal internals (auth, environments, technical asset service) that this decision doesn't ask a plugin author to depend on. Making MCP tool authoring a real plugin-author capability is future work.
 * Curating exactly which subset of portal core a plugin actually needs, rather than exposing all of it as a package - see "Distributing portal core as an installable Python package" below. Revisit once the existing plugins have migrated onto the new interface (targeting roughly three months out).
 
 ## Considered Options

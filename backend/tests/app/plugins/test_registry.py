@@ -16,7 +16,7 @@ def _entry_point(name: str, value: str) -> EntryPoint:
     return EntryPoint(name=name, value=value, group=ENTRY_POINT_GROUP)
 
 
-GLUE = "app.technical_asset_configuration.glue.schema:GlueTechnicalAssetConfiguration"
+GLUE = "portal_plugins.glue.schema:GlueTechnicalAssetConfiguration"
 
 
 def test_discovered__finds_the_plugins_this_package_advertises(registry):

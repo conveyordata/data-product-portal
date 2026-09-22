@@ -21,10 +21,10 @@ from app.technical_asset_configuration.base_schema import (
     UIElementString,
 )
 from app.technical_asset_configuration.enums import AccessGranularity, UIElementType
-from app.technical_asset_configuration.glue.model import (
+from portal_plugins.glue.model import (
     NAME,
 )
-from app.technical_asset_configuration.glue.model import (
+from portal_plugins.glue.model import (
     GlueTechnicalAssetConfiguration as GlueTechnicalAssetConfigurationModel,
 )
 from app.users.schema import User
@@ -154,13 +154,3 @@ class GlueTechnicalAssetConfiguration(TechnicalAssetPlugin):
     @classmethod
     def get_parent_platform(cls) -> Optional[str]:
         return "aws"
-
-    @classmethod
-    def register_mcp_tools(cls, mcp: object) -> None:
-        from app.technical_asset_configuration.glue.mcp_tools import (
-            MCP_INSTRUCTIONS,
-            register_tools,
-        )
-
-        cls.mcp_instructions = MCP_INSTRUCTIONS
-        register_tools(mcp)  # type: ignore[arg-type]

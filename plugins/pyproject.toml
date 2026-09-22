@@ -1,0 +1,24 @@
+[project]
+name = "data-product-portal-plugins"
+version = "0.0.1"
+description = "First-party technical asset plugins for Data Product Portal"
+requires-python = ">=3.13"
+dependencies = [
+    "fastapi>=0.141.1",
+    "pydantic>=2.13.5",
+    "sqlalchemy>=2.0.52",
+    "alembic>=1.20.0",
+]
+
+[project.entry-points."data_product_portal.plugins"]
+glue = "portal_plugins.glue.schema:GlueTechnicalAssetConfiguration"
+
+[tool.poetry]
+packages = [{ include = "portal_plugins", from = "." }]
+
+[tool.poetry.dependencies]
+python = "^3.13"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
