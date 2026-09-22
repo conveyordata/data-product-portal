@@ -10011,13 +10011,27 @@
             "title": "Namespace"
           },
           "platform_id": {
-            "type": "string",
-            "format": "uuid",
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Platform Id"
           },
           "service_id": {
-            "type": "string",
-            "format": "uuid",
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Service Id"
           },
           "configuration": {
@@ -10080,8 +10094,6 @@
           "name",
           "description",
           "namespace",
-          "platform_id",
-          "service_id",
           "configuration",
           "tag_ids"
         ],
@@ -12841,13 +12853,27 @@
             "title": "Owner Id"
           },
           "platform_id": {
-            "type": "string",
-            "format": "uuid",
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Platform Id"
           },
           "service_id": {
-            "type": "string",
-            "format": "uuid",
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Service Id"
           },
           "status": {
@@ -12918,8 +12944,6 @@
           "description",
           "namespace",
           "owner_id",
-          "platform_id",
-          "service_id",
           "status",
           "technical_mapping",
           "access_modes",
@@ -14665,13 +14689,27 @@
             "title": "Owner Id"
           },
           "platform_id": {
-            "type": "string",
-            "format": "uuid",
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Platform Id"
           },
           "service_id": {
-            "type": "string",
-            "format": "uuid",
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Service Id"
           },
           "configuration": {
@@ -14701,8 +14739,6 @@
           "status",
           "technical_mapping",
           "owner_id",
-          "platform_id",
-          "service_id",
           "configuration",
           "owner"
         ],
@@ -16068,13 +16104,27 @@
             "title": "Owner Id"
           },
           "platform_id": {
-            "type": "string",
-            "format": "uuid",
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Platform Id"
           },
           "service_id": {
-            "type": "string",
-            "format": "uuid",
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Service Id"
           },
           "configuration": {
@@ -16101,8 +16151,6 @@
           "status",
           "technical_mapping",
           "owner_id",
-          "platform_id",
-          "service_id",
           "configuration"
         ],
         "title": "TechnicalAsset"

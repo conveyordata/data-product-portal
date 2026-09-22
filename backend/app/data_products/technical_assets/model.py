@@ -50,13 +50,13 @@ class TechnicalAsset(Base, BaseORM, EventTrackedMixin):
     status: TechnicalAssetStatus = Column(Enum(TechnicalAssetStatus))
     technical_mapping = Column(String)
 
-    platform_id: Mapped[UUID] = Column(ForeignKey("platforms.id"))
-    service_id: Mapped[UUID] = Column(ForeignKey("platform_services.id"))
+    platform_id: Mapped[Optional[UUID]] = Column(ForeignKey("platforms.id"))
+    service_id: Mapped[Optional[UUID]] = Column(ForeignKey("platform_services.id"))
     owner_id: Mapped[UUID] = Column(ForeignKey("data_products.id"))
     configuration_id: Mapped[UUID] = Column(ForeignKey("data_output_configurations.id"))
 
-    platform: Mapped["Platform"] = relationship(lazy="joined")
-    service: Mapped["PlatformService"] = relationship(lazy="joined")
+    platform: Mapped[Optional["Platform"]] = relationship(lazy="joined")
+    service: Mapped[Optional["PlatformService"]] = relationship(lazy="joined")
     owner: Mapped["DataProduct"] = relationship(
         back_populates="data_outputs", lazy="joined"
     )
