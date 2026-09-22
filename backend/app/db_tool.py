@@ -1,22 +1,22 @@
-import os
 from typing import Optional
 
 import typer
-from alembic import command
-from alembic.config import Config
-from rich import print
-from rich.console import Console
 from sqlalchemy_utils.functions import create_database, database_exists, drop_database
 
 from app.core.helpers.local import add_additional_env_vars
 
 add_additional_env_vars()
 
-from app.database.database import get_url  # noqa: E402
+from app.core.logging import logger  # noqa: E402
+from app.database.database import engine, get_url  # noqa: E402
+from app.plugins.migrations import (  # noqa: E402
+    check_latest_migration_core,
+    migrate_all,
+)
+from app.plugins.registry import plugin_registry  # noqa: E402
 from app.seed import seed_db  # noqa: E402
 
 app = typer.Typer(help="Database migration toolkit for the Data product portal.")
-write_console = Console()
 
 
 @app.command(name="seed")
@@ -24,10 +24,9 @@ def seed_cmd(path: str = typer.Argument(..., help="Path to the seed script.")):
     """
     Seed the data with pregenerated test data
     """
-    print("[bold green]Seeding :seedling:[/bold green]")
-    print("Seeding started -> source =", path)
+    logger.info(f"Seeding started -> source = {path}")
     seed_db(path)
-    print("Seeding finished successfully")
+    logger.info("Seeding finished successfully")
 
 
 @app.command()
@@ -35,16 +34,27 @@ def migrate():
     """
     Migrate database to the latest version.
     """
-    print("[bold blue]Migration :rocket:[/bold blue]")
-    print("Migration started")
+    logger.info("Migration started")
     try:
-        cfg = Config(
-            os.path.join(os.path.dirname(os.path.abspath("__file__")), "alembic.ini")
-        )
-        command.upgrade(cfg, "heads")
-        print("Migration finished successfully")
-    except Exception as e:
-        print("Something went wrong when migrating", e)
+        migrate_all(plugin_registry.discovered(), engine)
+        logger.info("Migration finished successfully")
+    except Exception:
+        logger.exception("Something went wrong when migrating")
+        exit(1)
+
+
+@app.command(name="check-latest-migration")
+def check_latest_migration_cmd():
+    """
+    Downgrade the latest core migration by one step and reapply it, to catch
+    a malformed upgrade/downgrade pair before it ships.
+    """
+    logger.info("Checking latest migration")
+    try:
+        head = check_latest_migration_core(plugin_registry.discovered(), engine)
+        logger.info(f"Round-tripped {head} successfully")
+    except Exception:
+        logger.exception("Migration check failed")
         exit(1)
 
 
@@ -67,22 +77,19 @@ def init(
     Reinitialize the database from scratch.
     """
     if force:
-        print("[bold red]Deleting :put_litter_in_its_place:[/bold red]")
         if database_exists(get_url()):
-            write_console.print(
-                f"Deleting current database {get_url()}", highlight=False
-            )
+            logger.info(f"Deleting current database {get_url()}")
             drop_database(get_url())
         else:
-            print("Database does not exist, not deleting")
-        print("Initializing database")
+            logger.info("Database does not exist, not deleting")
+        logger.info("Initializing database")
         create_database(get_url())
         migrate()
 
         if seed_path:
             seed_cmd(seed_path)
     else:
-        print("Operation cancelled")
+        logger.info("Operation cancelled")
 
 
 if __name__ == "__main__":
