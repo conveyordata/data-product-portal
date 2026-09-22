@@ -41,6 +41,8 @@ COPY backend/requirements-poetry.txt .
 RUN pip install -r requirements-poetry.txt --require-hashes
 
 COPY backend/poetry.lock backend/pyproject.toml backend/alembic.ini backend/sample_data.sql /
+COPY plugins /plugins
+COPY sdk /sdk
 RUN poetry install --no-root
 
 # pyproject declares readme = "README.md", so poetry-core reads it while
@@ -58,6 +60,10 @@ RUN apt-get update && apt-get upgrade -y && apt-get install -y curl
 
 # Copy installed Python packages and tools from build stage
 COPY --from=python-build /usr/local /usr/local
+
+# portal_plugins is installed editable (path dependency), so the interpreter
+# resolves it from this path at import time, not from site-packages.
+COPY --from=python-build /plugins /plugins
 
 # Copy backend application
 COPY backend/app ./app
