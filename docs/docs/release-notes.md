@@ -6,6 +6,12 @@ sidebar_position: 200
 
 ## Unreleased
 
+## 0.7.4
+
+### bugfixes
+
+- **[MCP]**: Fix MCP tool calls
+
 ## 0.7.3
 
 ### bugfixes
