@@ -60,6 +60,11 @@ class AuthorizationService:
         self._sync_data_products_reader_role()
         logger.info("Synced data products reader role permissions")
 
+        from app.data_products.service import DataProductService
+
+        DataProductService(self.db).sync_data_product_consumer_access()
+        logger.info("Synced data product consumer access")
+
         self._sync_output_ports_reader_role()
         logger.info("Synced output ports reader role permissions")
 

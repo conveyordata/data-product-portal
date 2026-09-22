@@ -16,6 +16,7 @@ from sqlalchemy.orm import (
     with_loader_criteria,
 )
 
+from app.abstract_data_product.input_ports.enums import InputPortStatus
 from app.abstract_data_product.input_ports.model import (
     InputPort,
 )
@@ -87,11 +88,42 @@ def _has_user_access_to_private_output_port_via_data_product(cls, user_id: uuid.
     )
 
 
+def _has_user_access_through_input_port(cls, user_id: uuid.UUID):
+    input_ports = InputPort.__table__
+    assignments = DataProductRoleAssignment.__table__
+    user_group_ids = (
+        select(GroupMembership.group_id)
+        .where(GroupMembership.member_identity_id == user_id)
+        .correlate_except(GroupMembership)
+    )
+    return (
+        select(assignments.c.id)
+        .where(
+            or_(
+                assignments.c.identity_id == user_id,
+                assignments.c.identity_id.in_(user_group_ids),
+            ),
+            assignments.c.decision == DecisionStatus.APPROVED,
+            assignments.c.data_product_id.in_(
+                select(input_ports.c.consuming_abstract_data_product_id)
+                .where(
+                    input_ports.c.dataset_id == cls.id,
+                    input_ports.c.status == InputPortStatus.APPROVED,
+                )
+                .correlate_except(input_ports)
+            ),
+        )
+        .correlate_except(assignments)
+        .exists()
+    )
+
+
 def _access_type_filter_for_user(user_id: uuid.UUID):
     return or_(
         OutputPort.access_type != OutputPortAccessType.PRIVATE,
         _has_user_access_to_private_output_port(OutputPort, user_id),
         _has_user_access_to_private_output_port_via_data_product(OutputPort, user_id),
+        _has_user_access_through_input_port(OutputPort, user_id),
         is_user_admin(user_id),
         is_system_account(user_id),
     )
@@ -248,16 +280,16 @@ class OutputPort(Base, BaseORM, EventTrackedMixin):
 
 
 def ensure_output_port_exists(
-    dataset_id: UUID,
+    output_port_id: UUID,
     db: Session,
     data_product_id: Optional[UUID] = None,
     **kwargs,
 ) -> OutputPort:
-    output_port: OutputPort = ensure_exists(dataset_id, db, OutputPort, **kwargs)
+    output_port: OutputPort = ensure_exists(output_port_id, db, OutputPort, **kwargs)
     if data_product_id is not None and output_port.data_product_id != data_product_id:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Required item {dataset_id} does not exist",
+            detail=f"Required item {output_port_id} does not exist",
         )
     return output_port
 

@@ -3,14 +3,135 @@ from typing import cast
 from sqlalchemy import text  # noqa: TID251
 
 from app.core.authz.actions import AuthorizationAction
-from app.core.authz.authorization import Authorization
+from app.core.authz.authorization import (
+    Authorization,
+    InputPortLink,
+    _has_access_through_consumer_role,
+)
 from app.database.database import engine
 
 ANY: str = "does_not_matter"
 ANY_ACT: AuthorizationAction = cast("AuthorizationAction", 0)
 
 
+class TestHasAccessThroughConsumerRole:
+    def test_returns_false_for_other_actions(self, authorizer: Authorization):
+        authorizer.assign_resource_role(
+            user_id="user", role_id="owner", resource_id="consumer"
+        )
+        authorizer.add_input_port_link(
+            consumer_id="consumer",
+            producer_data_product_id="producer",
+            producer_output_port_id="output_port",
+        )
+
+        assert not _has_access_through_consumer_role(
+            authorizer._enforcer,
+            sub="user",
+            role="owner",
+            resource="producer",
+            parent="*",
+            action=str(AuthorizationAction.DATA_PRODUCT__UPDATE_PROPERTIES),
+        )
+
+    def test_returns_true_when_role_exists_on_a_linked_consumer(
+        self, authorizer: Authorization
+    ):
+        authorizer.add_input_port_link(
+            consumer_id="consumer_without_role",
+            producer_data_product_id="producer",
+            producer_output_port_id="output_port_a",
+        )
+        authorizer.add_input_port_link(
+            consumer_id="consumer_with_role",
+            producer_data_product_id="producer",
+            producer_output_port_id="output_port_b",
+        )
+        authorizer.assign_resource_role(
+            user_id="user",
+            role_id="owner",
+            resource_id="consumer_with_role",
+        )
+
+        assert _has_access_through_consumer_role(
+            authorizer._enforcer,
+            sub="user",
+            role="owner",
+            resource="producer",
+            parent="*",
+            action=str(AuthorizationAction.HIDDEN__DATA_PRODUCT__READ),
+        )
+
+    def test_returns_true_for_an_output_port_of_a_linked_producer(
+        self, authorizer: Authorization
+    ):
+        authorizer.add_input_port_link(
+            consumer_id="consumer",
+            producer_data_product_id="producer",
+            producer_output_port_id="consumed_output_port",
+        )
+        authorizer.assign_resource_role(
+            user_id="user", role_id="owner", resource_id="consumer"
+        )
+
+        assert _has_access_through_consumer_role(
+            authorizer._enforcer,
+            sub="user",
+            role="owner",
+            resource="consumed_output_port",
+            parent="producer",
+            action=str(AuthorizationAction.HIDDEN__OUTPUT_PORT__READ),
+        )
+
+        assert not _has_access_through_consumer_role(
+            authorizer._enforcer,
+            sub="user",
+            role="owner",
+            resource="other_output_port",
+            parent="producer",
+            action=str(AuthorizationAction.HIDDEN__OUTPUT_PORT__READ),
+        )
+
+    def test_returns_false_when_role_exists_only_on_an_unlinked_consumer(
+        self, authorizer: Authorization
+    ):
+        authorizer.add_input_port_link(
+            consumer_id="linked_consumer",
+            producer_data_product_id="producer",
+            producer_output_port_id="output_port",
+        )
+        authorizer.assign_resource_role(
+            user_id="user",
+            role_id="owner",
+            resource_id="unlinked_consumer",
+        )
+
+        assert not _has_access_through_consumer_role(
+            authorizer._enforcer,
+            sub="user",
+            role="owner",
+            resource="producer",
+            parent="*",
+            action=str(AuthorizationAction.HIDDEN__DATA_PRODUCT__READ),
+        )
+
+
 class TestAuthorization:
+    def test_get_consumer_links_returns_named_links(self, authorizer: Authorization):
+        authorizer.add_input_port_link(
+            consumer_id="consumer",
+            producer_data_product_id="producer",
+            producer_output_port_id="output_port",
+        )
+
+        assert authorizer.get_input_port_link(producer_data_product_id="producer") == {
+            InputPortLink(
+                consumer_id="consumer",
+                producer_data_product_id="producer",
+                producer_output_port_id="output_port",
+            )
+        }
+
     def test_everyone_role(self, authorizer: Authorization):
         allowed = AuthorizationAction.DATA_PRODUCT__UPDATE_PROPERTIES
         denied = AuthorizationAction.DATA_PRODUCT__UPDATE_SETTINGS
@@ -44,6 +165,44 @@ class TestAuthorization:
         # Clear role assignment again
         authorizer.revoke_resource_role(user_id=user, role_id=role, resource_id=obj)
         assert authorizer.has_access(sub=user, dom=ANY, obj=obj, act=allowed) is False
+
+    def test_access_through_consumer_role(self, authorizer: Authorization):
+        role = "test_role"
+        user = "test_user"
+        consumer = "consumer"
+        producer = "producer"
+        allowed = AuthorizationAction.HIDDEN__DATA_PRODUCT__READ
+        output_port_allowed = AuthorizationAction.HIDDEN__OUTPUT_PORT__READ
+        denied = AuthorizationAction.DATA_PRODUCT__UPDATE_PROPERTIES
+
+        authorizer.sync_role_permissions(
+            role_id=role, actions=[allowed, output_port_allowed, denied]
+        )
+        authorizer.assign_resource_role(
+            user_id=user, role_id=role, resource_id=consumer
+        )
+        authorizer.add_input_port_link(
+            consumer_id=consumer,
+            producer_data_product_id=producer,
+            producer_output_port_id="output_port",
+        )
+
+        assert authorizer.has_access(sub=user, dom=ANY, obj=producer, act=allowed)
+        assert not authorizer.has_access(sub=user, dom=ANY, obj=producer, act=denied)
+        assert authorizer.has_access(
+            sub=user,
+            dom=ANY,
+            obj="output_port",
+            parent=producer,
+            act=output_port_allowed,
+        )
+
+        authorizer.remove_input_port_link(
+            consumer_id=consumer,
+            producer_data_product_id=producer,
+            producer_output_port_id="output_port",
+        )
+        assert not authorizer.has_access(sub=user, dom=ANY, obj=producer, act=allowed)
 
     def test_wildcard_resource_role(self, authorizer: Authorization):
         role = "public_reader"
