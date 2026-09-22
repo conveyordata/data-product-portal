@@ -2,6 +2,9 @@
 
 Registers tools that allow AI clients to query AWS Glue databases via Athena,
 using the credentials obtained through the portal's access control system.
+
+These tools are portal core's own, not the glue plugin's: MCP tool authoring
+is not (yet) a plugin-author capability, see ADR-0024's "Out of scope".
 """
 
 from typing import TYPE_CHECKING, Any, Dict
@@ -10,6 +13,12 @@ from uuid import UUID
 import boto3
 from fastmcp import FastMCP
 from fastmcp.dependencies import Depends
+from portal_plugins.glue.model import (
+    GlueTechnicalAssetConfiguration as GlueTechnicalAssetConfigurationModel,
+)
+from portal_plugins.glue.schema import (
+    GlueTechnicalAssetConfiguration,
+)
 from sqlalchemy import select as sa_select
 from sqlalchemy.orm import Session
 
@@ -32,16 +41,16 @@ from app.mcp.deps import (
     get_user_db_session,
 )
 from app.settings import settings
-from app.technical_asset_configuration.glue.model import (
-    GlueTechnicalAssetConfiguration as GlueTechnicalAssetConfigurationModel,
-)
-from app.technical_asset_configuration.glue.schema import (
-    GlueTechnicalAssetConfiguration,
-)
 from app.users.schema import User
 
 if TYPE_CHECKING:
     from app.technical_asset_configuration.schema_union import DataOutputConfiguration
+
+GLUE_PLUGIN_NAME = "GlueTechnicalAssetConfiguration"
+
+
+def is_enabled() -> bool:
+    return GLUE_PLUGIN_NAME in settings.ENABLED_PLUGINS
 
 
 def _fetch_aws_credentials(

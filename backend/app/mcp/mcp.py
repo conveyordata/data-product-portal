@@ -1,6 +1,7 @@
 from fastmcp import FastMCP
 
 from app.core.logging import logger
+from app.mcp import glue_tools
 from app.mcp.config import register_config_tools
 from app.mcp.deps import get_auth_provider, initialize_models
 from app.mcp.details import register_detail_tools
@@ -65,7 +66,9 @@ GENERAL RULES
 
 mcp = FastMCP(
     name="DataProductPortalMCP",
-    instructions=_BASE_INSTRUCTIONS + get_plugin_instructions(),
+    instructions=_BASE_INSTRUCTIONS
+    + get_plugin_instructions()
+    + (glue_tools.MCP_INSTRUCTIONS if glue_tools.is_enabled() else ""),
     auth=get_auth_provider(),
 )
 
@@ -75,9 +78,15 @@ register_config_tools(mcp)
 register_resources(mcp)
 register_permission_tools(mcp)
 
+if glue_tools.is_enabled():
+    glue_tools.register_tools(mcp)
+
 load_plugins(mcp)
 
 logger.info(
     "[MCP] Server ready. Active plugins: "
-    + str([p.name for p in plugin_registry.enabled() if p.mcp_instructions])
+    + str(
+        [p.name for p in plugin_registry.enabled() if p.mcp_instructions]
+        + ([glue_tools.GLUE_PLUGIN_NAME] if glue_tools.is_enabled() else [])
+    )
 )
