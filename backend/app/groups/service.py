@@ -1,11 +1,13 @@
 from uuid import UUID
 
 from fastapi import HTTPException, status
-from sqlalchemy import select
+from sqlalchemy import select, asc
 from sqlalchemy.orm import Session
 
 from app.core.authz import Authorization
 from app.groups.model import Group, GroupMembership, ensure_group_exists
+from app.groups.schema_request import GroupCreate, GroupUpdate
+from app.groups.schema_response import GroupCreateResponse, GroupUpdateResponse, GroupGet
 from app.identities.model import ensure_identity_exists
 from app.machine_users.model import MachineUser
 from app.users.model import User
@@ -73,7 +75,7 @@ class GroupService:
         self.db.delete(membership)
         self.db.flush()
 
-    def delete_group(self, *, group_id: UUID):
+    def delete_group(self, *, group_id: UUID) -> None:
         group = ensure_group_exists(group_id, self.db)
 
         # Removes assignments for users against this group
@@ -114,8 +116,6 @@ class GroupService:
             )
         return membership
 
-    def get_group(self, group_id: UUID) -> Group:
-        return ensure_group_exists(group_id, self.db)
 
     def get_groups_ids_identity_is_member_of(self, identity_id: UUID) -> list[UUID]:
         return list(
@@ -125,3 +125,27 @@ class GroupService:
                 )
             ).all()
         )
+
+    def get_groups(self) -> Sequence[GroupGet]:
+        return self.db.scalars(
+            select(Group).order_by(asc(Group.display_name), asc(Group.external_id))
+        ).all()
+
+    def get_group(self, group_id: UUID) -> GroupGet:
+        return ensure_group_exists(group_id, self.db)
+
+    def create_group(self, group: GroupCreate) -> GroupCreateResponse:
+        group_model = Group(**group.parse_pydantic_schema())
+        self.db.add(group_model)
+        self.db.flush()
+
+        return GroupCreateResponse(id=group_model.id)
+
+    def update_group(self, group_id: UUID, group: GroupUpdate) -> GroupUpdateResponse:
+        current_group = ensure_group_exists(group_id, self.db)
+
+        for attribute, value in group.model_dump(exclude_unset=True).items():
+            setattr(current_group, attribute, value)
+
+        self.db.flush()
+        return GroupUpdateResponse(id=current_group.id)
