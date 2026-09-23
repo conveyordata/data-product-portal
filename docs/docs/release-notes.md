@@ -16,6 +16,12 @@ sidebar_position: 200
 - **[General]**: Added support for Hidden Data Products, they are only visible to people with direct access to them.
   This allows you to use Data Product Portal to also manage sensitive data products that should not be visible to everyone in the organization.
 
+## 0.7.4
+
+### bugfixes
+
+- **[MCP]**: Fix MCP tool calls
+
 ## 0.7.3
 
 ### bugfixes
