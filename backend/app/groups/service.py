@@ -52,8 +52,7 @@ class GroupService:
             group_id=group_id,
         )
         authorizer.assign_resource_group_membership(
-            member_identity_id=member_identity_id,
-            group_id=group_id
+            member_identity_id=member_identity_id, group_id=group_id
         )
 
         return membership
@@ -68,8 +67,7 @@ class GroupService:
             group_id=group_id,
         )
         authorizer.revoke_resource_group_membership(
-            member_identity_id=member_identity_id,
-            group_id=group_id
+            member_identity_id=member_identity_id, group_id=group_id
         )
 
         self.db.delete(membership)
@@ -77,6 +75,21 @@ class GroupService:
 
     def delete_group(self, *, group_id: UUID):
         group = ensure_group_exists(group_id, self.db)
+
+        # Removes assignments for users against this group
+        authorizer = Authorization()
+        for membership in self.list_memberships(group_id):
+            authorizer.revoke_resource_group_membership(
+                member_identity_id=membership.member_identity_id,
+                group_id=group_id,
+            )
+            authorizer.revoke_global_group_membership(
+                member_identity_id=membership.member_identity_id,
+                group_id=group_id,
+            )
+        # Remove assignments where the group itself is the subject.
+        authorizer.clear_assignments_for_user(user_id=group_id)
+
         self.db.delete(group)
         self.db.flush()
 
@@ -115,5 +128,3 @@ class GroupService:
                 )
             ).all()
         )
-
-    def

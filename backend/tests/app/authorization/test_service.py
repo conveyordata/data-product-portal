@@ -73,12 +73,21 @@ class TestAuthorizationService:
         )
 
         AuthorizationService(session).reload_enforcer()
-
         assert authorizer.has_access(
             sub=str(user.id),
             dom=str(data_product.domain_id),
             obj=str(data_product.id),
             act=AuthorizationAction.DATA_PRODUCT__UPDATE_PROPERTIES,
+        )
+        assert authorizer.has_resource_role(
+            user_id=str(user.id),
+            role_id=str(group.id),
+            resource_id="*",
+        )
+        assert not authorizer.has_resource_role(
+            user_id=str(user.id),
+            role_id=str(group.id),
+            resource_id=str(data_product.id),
         )
 
     def test_reload_enforcer_syncs_group_global_access(

@@ -329,8 +329,18 @@ class TestAuthorization:
             resource_id=dp1,
         )
         authorizer.assign_resource_group_membership(
-            member_identity_id=user,
-            group_id=group
+            member_identity_id=user, group_id=group
+        )
+
+        assert authorizer.has_resource_role(
+            user_id=user,
+            role_id=group,
+            resource_id="*",
+        )
+        assert not authorizer.has_resource_role(
+            user_id=user,
+            role_id=group,
+            resource_id=dp1,
         )
 
         assert authorizer.has_access(
@@ -347,8 +357,7 @@ class TestAuthorization:
         )
 
         authorizer.revoke_resource_group_membership(
-            member_identity_id=user,
-            group_id=group
+            member_identity_id=user, group_id=group
         )
         assert not authorizer.has_access(
             sub=user,
@@ -393,6 +402,54 @@ class TestAuthorization:
                 obj=ANY,
                 act=action,
             )
+
+    def test_group_role_added_after_membership_is_inherited(
+        self,
+        authorizer: Authorization,
+    ):
+        user = "test_user"
+        group = "test_group"
+        role = "test_role"
+        data_product = "test_data_product"
+        action = AuthorizationAction.DATA_PRODUCT__UPDATE_PROPERTIES
+
+        authorizer.sync_role_permissions(role_id=role, actions=[action])
+
+        # Membership exists before the group receives the role.
+        authorizer.assign_resource_group_membership(
+            member_identity_id=user,
+            group_id=group,
+        )
+        assert not authorizer.has_access(
+            sub=user,
+            dom=ANY,
+            obj=data_product,
+            act=action,
+        )
+
+        authorizer.assign_resource_role(
+            user_id=group,
+            role_id=role,
+            resource_id=data_product,
+        )
+        assert authorizer.has_access(
+            sub=user,
+            dom=ANY,
+            obj=data_product,
+            act=action,
+        )
+
+        authorizer.revoke_resource_role(
+            user_id=group,
+            role_id=role,
+            resource_id=data_product,
+        )
+        assert not authorizer.has_access(
+            sub=user,
+            dom=ANY,
+            obj=data_product,
+            act=action,
+        )
 
 
 class TestCrossWorkerStaleness:

@@ -53,20 +53,15 @@ class TestDataProductRoleAssignmentsRouter:
             ],
         ],
     )
-    @patch("app.authorization.role_assignments.data_product.router.GroupService")
     @patch(
         "app.authorization.role_assignments.data_product.router.DataProductAuthAssignment"
     )
     def test_create_assignment(
         self,
         mock_data_product_auth_assignment,
-        mock_group_service_class,
         permissions: list[Action],
         client: TestClient,
     ):
-        group_service = mock_group_service_class.return_value
-        group_service.is_group.return_value = True
-
         data_product: DataProduct = DataProductFactory()
         me = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
@@ -98,15 +93,8 @@ class TestDataProductRoleAssignmentsRouter:
         if Action.DATA_PRODUCT__APPROVE_USER_REQUEST in permissions:
             mock_data_product_auth_assignment.assert_called_once()
             mock_data_product_auth_assignment.return_value.add.assert_called_once()
-
-            group_service.is_group.assert_called_once_with(user.id)
-            group_service.add_data_product_membership_edges.assert_called_once_with(
-                group_id=user.id,
-                data_product_id=data_product.id,
-            )
         else:
             mock_data_product_auth_assignment.assert_not_called()
-            mock_group_service_class.assert_not_called()
 
     @patch(
         "app.authorization.role_assignments.data_product.router.DataProductAuthAssignment"
@@ -297,55 +285,9 @@ class TestDataProductRoleAssignmentsRouter:
         assert response.status_code == 200
         assert len(response.json()["role_assignments"]) == 1
 
-    @patch("app.authorization.role_assignments.data_product.router.GroupService")
     @patch(
         "app.authorization.role_assignments.data_product.router.DataProductAuthAssignment"
     )
-    def test_delete_assignment_removes_group_membership_edges(
-        self,
-        mock_data_product_auth_assignment,
-        mock_group_service_class,
-        client: TestClient,
-    ):
-        group_service = mock_group_service_class.return_value
-        group_service.is_group.return_value = True
-
-        data_product: DataProduct = DataProductFactory()
-        authenticated_user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        authorization_role = RoleFactory(
-            scope=Scope.DATASET,
-            permissions=[Action.DATA_PRODUCT__DELETE_USER],
-        )
-        DataProductRoleAssignmentFactory(
-            identity_id=authenticated_user.id,
-            role_id=authorization_role.id,
-            data_product_id=data_product.id,
-        )
-
-        assigned_user: User = UserFactory()
-        assigned_role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
-        assignment: DataProductRoleAssignment = DataProductRoleAssignmentFactory(
-            data_product_id=data_product.id,
-            identity_id=assigned_user.id,
-            role_id=assigned_role.id,
-            decision=DecisionStatus.APPROVED,
-        )
-
-        response = self.delete_data_product_role_assignment(
-            client,
-            assignment.id,
-        )
-
-        assert response.status_code == 200
-        mock_data_product_auth_assignment.assert_called_once()
-        mock_data_product_auth_assignment.return_value.remove.assert_called_once()
-
-        group_service.is_group.assert_called_once_with(assigned_user.id)
-        group_service.remove_data_product_membership_edges.assert_called_once_with(
-            group_id=assigned_user.id,
-            data_product_id=data_product.id,
-        )
-
     def test_delete_assignment_generates_webhook_v2_event(self, client, capture_events):
         self.test_delete_assignment(client)
         assert_event_in_queue("data_product_role_assignment.event", capture_events)
@@ -405,57 +347,9 @@ class TestDataProductRoleAssignmentsRouter:
         assert data["id"] == str(assignment.id)
         assert data["decision"] == DecisionStatus.APPROVED
 
-    @patch("app.authorization.role_assignments.data_product.router.GroupService")
     @patch(
         "app.authorization.role_assignments.data_product.router.DataProductAuthAssignment"
     )
-    def test_decide_assignment_adds_group_membership_edges(
-        self,
-        mock_data_product_auth_assignment,
-        mock_group_service_class,
-        client: TestClient,
-    ):
-        group_service = mock_group_service_class.return_value
-        group_service.is_group.return_value = True
-
-        data_product: DataProduct = DataProductFactory()
-        authenticated_user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        authorization_role = RoleFactory(
-            scope=Scope.DATASET,
-            permissions=[Action.DATA_PRODUCT__APPROVE_USER_REQUEST],
-        )
-        DataProductRoleAssignmentFactory(
-            identity_id=authenticated_user.id,
-            role_id=authorization_role.id,
-            data_product_id=data_product.id,
-        )
-
-        assigned_user: User = UserFactory()
-        assigned_role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
-        assignment: DataProductRoleAssignment = DataProductRoleAssignmentFactory(
-            data_product_id=data_product.id,
-            identity_id=assigned_user.id,
-            role_id=assigned_role.id,
-            decision=DecisionStatus.PENDING,
-        )
-
-        response = self.approve_data_product_role_assignment(
-            client,
-            assignment.id,
-        )
-
-        assert response.status_code == 200
-        assert response.json()["decision"] == DecisionStatus.APPROVED
-
-        mock_data_product_auth_assignment.assert_called_once()
-        mock_data_product_auth_assignment.return_value.add.assert_called_once()
-
-        group_service.is_group.assert_called_once_with(assigned_user.id)
-        group_service.add_data_product_membership_edges.assert_called_once_with(
-            group_id=assigned_user.id,
-            data_product_id=data_product.id,
-        )
-
     def test_decide_assignment_generates_webhook_v2_event(self, client, capture_events):
         self.test_decide_assignment(client)
         assert_event_in_queue("data_product_role_assignment.event", capture_events)

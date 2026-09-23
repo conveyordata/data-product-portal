@@ -151,6 +151,6 @@ class AuthorizationService:
             )
             self.authorizer.assign_resource_group_membership(
                 member_identity_id=membership.member_identity_id,
-                group_id=membership.group_id
+                group_id=membership.group_id,
             )
         return

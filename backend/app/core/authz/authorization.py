@@ -322,8 +322,8 @@ class Authorization(metaclass=Singleton):
     def assign_resource_group_membership(
         self, *, member_identity_id: ID, group_id: ID
     ) -> bool:
-        """Creates an entry in the casbin table,
-        assigning the group member a role for the chosen resource via the group."""
+        """Creates a wildcard-scoped membership edge so the member inherits
+        the group's resource-specific roles."""
         return self.assign_resource_role(
             user_id=member_identity_id, role_id=group_id, resource_id="*"
         )
@@ -331,8 +331,8 @@ class Authorization(metaclass=Singleton):
     def revoke_resource_group_membership(
         self, *, member_identity_id: ID, group_id: ID
     ) -> bool:
-        """Deletes the entry in the casbin table,
-        revoking the role for the chosen resource and group member via the group."""
+        """Deletes a wildcard-scoped membership edge so the member no longer inherits
+        the group's resource-specific roles."""
         return self.revoke_resource_role(
             user_id=member_identity_id, role_id=group_id, resource_id="*"
         )

@@ -63,7 +63,6 @@ from app.events.schema_response import (
 )
 from app.events.service import EventService
 from app.graph.graph import Graph
-from app.groups.service import GroupService
 from app.users.notifications.service import NotificationService
 from app.users.schema import User
 

@@ -207,7 +207,7 @@ class TestGroupService:
             act=global_action,
         )
 
-    def test_data_product_membership_edges__immediately_updates_existing_members(
+    def test_existing_member_immediately_inherits_new_group_data_product_role(
         self,
         authorizer: Authorization,
         session,
@@ -215,24 +215,21 @@ class TestGroupService:
         group = GroupFactory()
         user = UserFactory()
         data_product = DataProductFactory()
+        other_data_product = DataProductFactory()
         action = AuthorizationAction.DATA_PRODUCT__UPDATE_PROPERTIES
 
         service = GroupService(session)
-        service.add_member(
-            group_id=group.id,
-            member_identity_id=user.id,
+        service.add_member(group_id=group.id, member_identity_id=user.id)
+        assert authorizer.has_resource_role(
+            user_id=user.id,
+            role_id=group.id,
+            resource_id="*",
         )
-
-        role = RoleFactory(
-            scope=Scope.DATA_PRODUCT,
-            permissions=[action],
+        assert not authorizer.has_resource_role(
+            user_id=user.id,
+            role_id=group.id,
+            resource_id=data_product.id,
         )
-        DataProductRoleAssignmentFactory(
-            identity_id=group.id,
-            data_product_id=data_product.id,
-            role_id=role.id,
-        )
-
         assert not authorizer.has_access(
             sub=str(user.id),
             dom=str(data_product.domain_id),
@@ -240,26 +237,111 @@ class TestGroupService:
             act=action,
         )
 
-        service.add_data_product_membership_edges(
-            group_id=group.id,
+        role = RoleFactory(scope=Scope.DATA_PRODUCT, permissions=[action])
+        DataProductRoleAssignmentFactory(
+            identity_id=group.id,
             data_product_id=data_product.id,
+            role_id=role.id,
         )
-
         assert authorizer.has_access(
             sub=str(user.id),
             dom=str(data_product.domain_id),
             obj=str(data_product.id),
             act=action,
         )
-
-        service.remove_data_product_membership_edges(
-            group_id=group.id,
-            data_product_id=data_product.id,
+        assert not authorizer.has_access(
+            sub=str(user.id),
+            dom=str(other_data_product.domain_id),
+            obj=str(other_data_product.id),
+            act=action,
         )
 
+        authorizer.revoke_resource_role(
+            user_id=group.id,
+            role_id=role.id,
+            resource_id=data_product.id,
+        )
         assert not authorizer.has_access(
             sub=str(user.id),
             dom=str(data_product.domain_id),
             obj=str(data_product.id),
             act=action,
+        )
+        # The reusable membership edge remains.
+        assert authorizer.has_resource_role(
+            user_id=user.id,
+            role_id=group.id,
+            resource_id="*",
+        )
+
+    def test_deleting_group_revokes_inherited_access(
+        self,
+        authorizer: Authorization,
+        session,
+    ):
+        group = GroupFactory()
+        user = UserFactory()
+        data_product = DataProductFactory()
+
+        data_product_action = AuthorizationAction.DATA_PRODUCT__UPDATE_PROPERTIES
+        global_action = AuthorizationAction.DATA_PRODUCT__DELETE
+
+        data_product_role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[data_product_action],
+        )
+        global_role = RoleFactory(
+            scope=Scope.GLOBAL,
+            permissions=[global_action],
+        )
+
+        DataProductRoleAssignmentFactory(
+            identity_id=group.id,
+            data_product_id=data_product.id,
+            role_id=data_product_role.id,
+        )
+        GlobalRoleAssignmentFactory(
+            identity_id=group.id,
+            role_id=global_role.id,
+        )
+
+        service = GroupService(session)
+        service.add_member(
+            group_id=group.id,
+            member_identity_id=user.id,
+        )
+        assert authorizer.has_access(
+            sub=str(user.id),
+            dom=str(data_product.domain_id),
+            obj=str(data_product.id),
+            act=data_product_action,
+        )
+        assert authorizer.has_access(
+            sub=str(user.id),
+            dom="*",
+            obj="*",
+            act=global_action,
+        )
+
+        service.delete_group(group_id=group.id)
+        assert not authorizer.has_access(
+            sub=str(user.id),
+            dom=str(data_product.domain_id),
+            obj=str(data_product.id),
+            act=data_product_action,
+        )
+        assert not authorizer.has_access(
+            sub=str(user.id),
+            dom="*",
+            obj="*",
+            act=global_action,
+        )
+        assert not authorizer.has_resource_role(
+            user_id=user.id,
+            role_id=group.id,
+            resource_id="*",
+        )
+        assert not authorizer.has_global_role(
+            user_id=user.id,
+            role_id=group.id,
         )
