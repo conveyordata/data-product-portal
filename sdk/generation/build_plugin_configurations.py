@@ -128,13 +128,26 @@ def main() -> None:
     generated: list[tuple[str, str]] = []
     used_enums: set[str] = set()
 
-    plugin_dirs = list(TECHNICAL_ASSET_CONFIGURATION_DIR.iterdir())
-    if OUT_OF_TREE_PLUGINS_DIR.is_dir():
-        plugin_dirs += list(OUT_OF_TREE_PLUGINS_DIR.iterdir())
+    plugin_dirs = [
+        d
+        for d in list(TECHNICAL_ASSET_CONFIGURATION_DIR.iterdir())
+        + (
+            list(OUT_OF_TREE_PLUGINS_DIR.iterdir())
+            if OUT_OF_TREE_PLUGINS_DIR.is_dir()
+            else []
+        )
+        if d.is_dir() and (d / "schema.py").exists()
+    ]
+    names = [d.name for d in plugin_dirs]
+    duplicates = {name for name in names if names.count(name) > 1}
+    if duplicates:
+        raise ValueError(
+            f"Plugin(s) {sorted(duplicates)} exist both in-tree under "
+            f"{TECHNICAL_ASSET_CONFIGURATION_DIR} and out-of-tree under "
+            f"{OUT_OF_TREE_PLUGINS_DIR} - remove the stale copy before regenerating."
+        )
 
     for plugin_dir in sorted(plugin_dirs):
-        if not plugin_dir.is_dir() or not (plugin_dir / "schema.py").exists():
-            continue
         result = build_plugin_module(plugin_dir)
         if result is None:
             continue

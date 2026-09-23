@@ -1,7 +1,9 @@
+from types import ModuleType
+from typing import Optional
+
 from fastmcp import FastMCP
 
 from app.core.logging import logger
-from app.mcp import glue_tools
 from app.mcp.config import register_config_tools
 from app.mcp.deps import get_auth_provider, initialize_models
 from app.mcp.details import register_detail_tools
@@ -10,6 +12,13 @@ from app.mcp.permissions import register_permission_tools
 from app.mcp.resources import register_resources
 from app.mcp.search import register_search_tools
 from app.plugins.registry import plugin_registry
+
+glue_tools: Optional[ModuleType]
+try:
+    from app.mcp import glue_tools
+except Exception:
+    logger.exception("Glue MCP tools failed to import; disabling them")
+    glue_tools = None
 
 initialize_models()
 
@@ -64,11 +73,25 @@ GENERAL RULES
 ✗ Don't request credentials for pure metadata questions
 """
 
+
+def glue_enabled() -> bool:
+    return glue_tools is not None and glue_tools.is_enabled()
+
+
+def glue_instructions() -> str:
+    if glue_tools is None or not glue_tools.is_enabled():
+        return ""
+    return glue_tools.MCP_INSTRUCTIONS
+
+
+def register_glue(mcp: FastMCP) -> None:
+    if glue_tools is not None and glue_tools.is_enabled():
+        glue_tools.register_tools(mcp)
+
+
 mcp = FastMCP(
     name="DataProductPortalMCP",
-    instructions=_BASE_INSTRUCTIONS
-    + get_plugin_instructions()
-    + (glue_tools.MCP_INSTRUCTIONS if glue_tools.is_enabled() else ""),
+    instructions=_BASE_INSTRUCTIONS + get_plugin_instructions() + glue_instructions(),
     auth=get_auth_provider(),
 )
 
@@ -78,8 +101,7 @@ register_config_tools(mcp)
 register_resources(mcp)
 register_permission_tools(mcp)
 
-if glue_tools.is_enabled():
-    glue_tools.register_tools(mcp)
+register_glue(mcp)
 
 load_plugins(mcp)
 
@@ -87,6 +109,6 @@ logger.info(
     "[MCP] Server ready. Active plugins: "
     + str(
         [p.name for p in plugin_registry.enabled() if p.mcp_instructions]
-        + ([glue_tools.GLUE_PLUGIN_NAME] if glue_tools.is_enabled() else [])
+        + ([glue_tools.GLUE_PLUGIN_NAME] if glue_enabled() and glue_tools else [])
     )
 )
