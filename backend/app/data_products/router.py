@@ -148,14 +148,6 @@ def _assign_owner_role_assignments(
         )
         DataProductAuthAssignment(assignment).add()
 
-        # Enforces group role inheritance for its members
-        group_service = GroupService(db)
-        if group_service.is_group(assignment.identity_id):
-            group_service.add_data_product_membership_edges(
-                group_id=assignment.identity_id,
-                data_product_id=assignment.data_product_id,
-            )
-
         EventService(db).create_event(
             CreateEvent(
                 name=EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_CREATED,

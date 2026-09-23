@@ -330,8 +330,7 @@ class TestAuthorization:
         )
         authorizer.assign_resource_group_membership(
             member_identity_id=user,
-            group_id=group,
-            resource_id=dp1,
+            group_id=group
         )
 
         assert authorizer.has_access(
@@ -349,8 +348,7 @@ class TestAuthorization:
 
         authorizer.revoke_resource_group_membership(
             member_identity_id=user,
-            group_id=group,
-            resource_id=dp1,
+            group_id=group
         )
         assert not authorizer.has_access(
             sub=user,

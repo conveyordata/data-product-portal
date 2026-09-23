@@ -4,7 +4,7 @@ from uuid import UUID
 
 import casbin_sqlalchemy_adapter as sqlalchemy_adapter
 from cachetools import Cache, TTLCache, cachedmethod
-from casbin import SyncedEnforcer
+from casbin import SyncedEnforcer, util
 from fastapi import Depends, HTTPException, Request, status
 from opentelemetry import trace
 from sqlalchemy.orm import Session
@@ -45,6 +45,8 @@ class Authorization(metaclass=Singleton):
         """Initializes the casbin table in the DB and constructs the enforcer."""
         adapter = sqlalchemy_adapter.Adapter(database.get_url())
         enforcer = SyncedEnforcer(model, adapter)
+        # Used to allow g(user, group, *) rules so users inherit group permissions
+        enforcer.add_named_domain_matching_func("g", util.key_match)
         if settings.AUTHORIZER_AUTOLOAD_ENABLED:
             enforcer.start_auto_load_policy(settings.AUTHORIZER_AUTOLOAD_INTERVAL)
         return enforcer
@@ -318,21 +320,21 @@ class Authorization(metaclass=Singleton):
                 assert_never(data_product.visibility)
 
     def assign_resource_group_membership(
-        self, *, member_identity_id: ID, group_id: ID, resource_id: ID
+        self, *, member_identity_id: ID, group_id: ID
     ) -> bool:
         """Creates an entry in the casbin table,
         assigning the group member a role for the chosen resource via the group."""
         return self.assign_resource_role(
-            user_id=member_identity_id, role_id=group_id, resource_id=resource_id
+            user_id=member_identity_id, role_id=group_id, resource_id="*"
         )
 
     def revoke_resource_group_membership(
-        self, *, member_identity_id: ID, group_id: ID, resource_id: ID
+        self, *, member_identity_id: ID, group_id: ID
     ) -> bool:
         """Deletes the entry in the casbin table,
         revoking the role for the chosen resource and group member via the group."""
         return self.revoke_resource_role(
-            user_id=member_identity_id, role_id=group_id, resource_id=resource_id
+            user_id=member_identity_id, role_id=group_id, resource_id="*"
         )
 
     def assign_global_group_membership(

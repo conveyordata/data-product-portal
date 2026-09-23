@@ -1,15 +1,9 @@
-from collections import defaultdict
-from typing import Sequence
 from uuid import UUID
 
 from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.authorization.role_assignments.data_product.model import (
-    DataProductRoleAssignment,
-)
-from app.authorization.role_assignments.enums import DecisionStatus
 from app.core.authz import Authorization
 from app.groups.model import Group, GroupMembership, ensure_group_exists
 from app.identities.model import ensure_identity_exists
@@ -27,32 +21,6 @@ class GroupService:
             query = query.where(GroupMembership.group_id == group_id)
 
         return list(self.db.scalars(query).all())
-
-    def list_all_assigned_data_products(self) -> dict[UUID, set[UUID]]:
-        rows = self.db.execute(
-            select(
-                DataProductRoleAssignment.identity_id,
-                DataProductRoleAssignment.data_product_id,
-            )
-            .join(Group, Group.id == DataProductRoleAssignment.identity_id)
-            .where(DataProductRoleAssignment.decision == DecisionStatus.APPROVED)
-        ).all()
-
-        assignments: dict[UUID, set[UUID]] = defaultdict(set)
-        for group_id, data_product_id in rows:
-            assignments[group_id].add(data_product_id)
-
-        return assignments
-
-    def list_assigned_data_products(self, group_id: UUID) -> Sequence[UUID]:
-        return self.db.scalars(
-            select(DataProductRoleAssignment.data_product_id)
-            .join(Group, Group.id == DataProductRoleAssignment.identity_id)
-            .where(
-                DataProductRoleAssignment.decision == DecisionStatus.APPROVED,
-                Group.id == group_id,
-            )
-        ).all()
 
     def add_member(self, group_id: UUID, member_identity_id: UUID) -> GroupMembership:
         ensure_group_exists(group_id, self.db)
@@ -83,13 +51,10 @@ class GroupService:
             member_identity_id=member_identity_id,
             group_id=group_id,
         )
-
-        for data_product_id in self.list_assigned_data_products(group_id):
-            authorizer.assign_resource_group_membership(
-                member_identity_id=member_identity_id,
-                group_id=group_id,
-                resource_id=data_product_id,
-            )
+        authorizer.assign_resource_group_membership(
+            member_identity_id=member_identity_id,
+            group_id=group_id
+        )
 
         return membership
 
@@ -102,13 +67,10 @@ class GroupService:
             member_identity_id=member_identity_id,
             group_id=group_id,
         )
-
-        for data_product_id in self.list_assigned_data_products(group_id):
-            authorizer.revoke_resource_group_membership(
-                member_identity_id=member_identity_id,
-                group_id=group_id,
-                resource_id=data_product_id,
-            )
+        authorizer.revoke_resource_group_membership(
+            member_identity_id=member_identity_id,
+            group_id=group_id
+        )
 
         self.db.delete(membership)
         self.db.flush()
@@ -142,32 +104,6 @@ class GroupService:
     def get_group(self, group_id: UUID) -> Group:
         return ensure_group_exists(group_id, self.db)
 
-    def add_data_product_membership_edges(
-        self,
-        group_id: UUID,
-        data_product_id: UUID,
-    ) -> None:
-        authorizer = Authorization()
-        for membership in self.list_memberships(group_id):
-            authorizer.assign_resource_group_membership(
-                member_identity_id=membership.member_identity_id,
-                group_id=group_id,
-                resource_id=data_product_id,
-            )
-
-    def remove_data_product_membership_edges(
-        self,
-        group_id: UUID,
-        data_product_id: UUID,
-    ) -> None:
-        authorizer = Authorization()
-        for membership in self.list_memberships(group_id):
-            authorizer.revoke_resource_group_membership(
-                member_identity_id=membership.member_identity_id,
-                group_id=group_id,
-                resource_id=data_product_id,
-            )
-
     def is_group(self, identity_id: UUID) -> bool:
         return self.db.get(Group, identity_id) is not None
 
@@ -179,3 +115,5 @@ class GroupService:
                 )
             ).all()
         )
+
+    def
