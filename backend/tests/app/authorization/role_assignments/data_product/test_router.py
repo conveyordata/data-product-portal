@@ -285,9 +285,6 @@ class TestDataProductRoleAssignmentsRouter:
         assert response.status_code == 200
         assert len(response.json()["role_assignments"]) == 1
 
-    @patch(
-        "app.authorization.role_assignments.data_product.router.DataProductAuthAssignment"
-    )
     def test_delete_assignment_generates_webhook_v2_event(self, client, capture_events):
         self.test_delete_assignment(client)
         assert_event_in_queue("data_product_role_assignment.event", capture_events)
@@ -347,9 +344,6 @@ class TestDataProductRoleAssignmentsRouter:
         assert data["id"] == str(assignment.id)
         assert data["decision"] == DecisionStatus.APPROVED
 
-    @patch(
-        "app.authorization.role_assignments.data_product.router.DataProductAuthAssignment"
-    )
     def test_decide_assignment_generates_webhook_v2_event(self, client, capture_events):
         self.test_decide_assignment(client)
         assert_event_in_queue("data_product_role_assignment.event", capture_events)
