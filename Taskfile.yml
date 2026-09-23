@@ -147,3 +147,21 @@ tasks:
     dir: backend
     cmds:
       - poetry install
+
+  setup:backend:
+    desc: "Install backend dependencies, including the test group"
+    dir: backend
+    cmds:
+      - poetry install --no-interaction --with test
+
+  setup:sdk:
+    desc: "Install SDK dependencies"
+    dir: sdk
+    cmds:
+      - poetry install --all-groups
+
+  setup:frontend:
+    desc: "Install frontend dependencies"
+    dir: frontend
+    cmds:
+      - npm ci --legacy-peer-deps --prefer-offline --no-audit --progress=false
