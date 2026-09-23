@@ -1,5 +1,5 @@
 from datetime import date, timedelta
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 from unittest.mock import MagicMock, patch
 from uuid import UUID
 
@@ -27,6 +27,9 @@ from tests.factories import (
     RoleFactory,
     UserFactory,
 )
+
+if TYPE_CHECKING:
+    from app.abstract_data_product.model import AbstractDataProduct
 
 DATA_PRODUCTS_DATASETS_ENDPOINT = "/api/v2/data_products/{}/output_ports/{}/input_ports"
 DATA_PRODUCTS_ENDPOINT = "/api/v2/data_products"
@@ -387,6 +390,18 @@ class TestInputPortsRouter:
         )
         assert response.status_code == 200, response.text
 
+    def test_approve_output_port_as_input_port__hidden_consumer(self, client):
+        link = self.create_link_with_status(
+            consumer=DataProductFactory(visibility=DataProductVisibility.HIDDEN)
+        )
+        response = self.approve_output_port_as_input_port(
+            client,
+            link.output_port.data_product.id,
+            link.output_port.id,
+            link.consuming_abstract_data_product.id,
+        )
+        assert response.status_code == 200, response.text
+
     def test_approve_output_port_as_input_port_reasoning(self, client):
         link = self.create_link_with_status()
         response = self.approve_output_port_as_input_port(
@@ -428,7 +443,10 @@ class TestInputPortsRouter:
         )
 
     @staticmethod
-    def create_link_with_status(status: DecisionStatus = DecisionStatus.PENDING):
+    def create_link_with_status(
+        status: DecisionStatus = DecisionStatus.PENDING,
+        consumer: Optional["AbstractDataProduct"] = None,
+    ):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         ds = OutputPortFactory()
         role = RoleFactory(
@@ -441,13 +459,28 @@ class TestInputPortsRouter:
         DatasetRoleAssignmentFactory(
             user_id=user.id, role_id=role.id, output_port_id=ds.id
         )
+        if not consumer:
+            consumer = DataProductFactory()
         return InputPortFactory(
             output_port=ds,
             status=status,
+            consuming_abstract_data_product=consumer,
         )
 
     def test_deny_output_port_as_input_port(self, client):
         link = self.create_link_with_status()
+        response = self.deny_output_port_as_input_port(
+            client,
+            link.output_port.data_product.id,
+            link.output_port.id,
+            link.consuming_abstract_data_product.id,
+        )
+        assert response.status_code == 200, response.text
+
+    def test_deny_output_port_as_input_port__hidden_consumer(self, client):
+        link = self.create_link_with_status(
+            consumer=DataProductFactory(visibility=DataProductVisibility.HIDDEN)
+        )
         response = self.deny_output_port_as_input_port(
             client,
             link.output_port.data_product.id,
@@ -975,7 +1008,7 @@ class TestInputPortConsumptionTracking:
 
         mock_posthog = MagicMock()
         with patch(
-            "app.abstract_data_product.service.get_posthog_client",
+            "app.core.logging.posthog_analytics.get_posthog_client",
             return_value=mock_posthog,
         ):
             response = self.request_input_ports_for_data_product(
@@ -1008,7 +1041,7 @@ class TestInputPortConsumptionTracking:
 
         mock_posthog = MagicMock()
         with patch(
-            "app.abstract_data_product.service.get_posthog_client",
+            "app.core.logging.posthog_analytics.get_posthog_client",
             return_value=mock_posthog,
         ):
             response = self.request_input_ports_for_data_product(
@@ -1035,7 +1068,7 @@ class TestInputPortConsumptionTracking:
 
         mock_posthog = MagicMock()
         with patch(
-            "app.data_products.output_ports.input_ports.service.get_posthog_client",
+            "app.core.logging.posthog_analytics.get_posthog_client",
             return_value=mock_posthog,
         ):
             response = self.approve_output_port_as_input_port(
@@ -1070,7 +1103,7 @@ class TestInputPortConsumptionTracking:
         ds = OutputPortFactory(access_type=OutputPortAccessType.UNRESTRICTED)
 
         with patch(
-            "app.abstract_data_product.service.get_posthog_client",
+            "app.core.logging.posthog_analytics.get_posthog_client",
             return_value=None,
         ):
             response = self.request_input_ports_for_data_product(

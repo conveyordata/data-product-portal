@@ -1,12 +1,12 @@
 import json
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 from fastmcp.server.dependencies import AccessToken, get_access_token
 from fastmcp.server.middleware import Middleware, MiddlewareContext
 
 from app.core.auth.auth import get_authenticated_user
 from app.core.auth.jwt import JWTToken
-from app.core.logging.posthog_analytics import get_posthog_client
+from app.core.logging.posthog_analytics import PosthogAnalyticsClient
 from app.database.deps import get_db_session
 
 
@@ -15,27 +15,25 @@ class LoggingMiddleware(Middleware):
 
     def __init__(self) -> None:
         super().__init__()
-        self.posthog = get_posthog_client()
+        self.posthog = PosthogAnalyticsClient()
 
     async def on_message(self, context: MiddlewareContext, call_next) -> Any:
         """Called for all MCP messages."""
-        entry = self._build_log_entry(context)
-        user_id = await self._get_user_id()
-        self._log_to_posthog(user_id, entry)
-
-        return await call_next(context)
-
-    def _build_log_entry(self, context: MiddlewareContext) -> Dict[str, Any]:
-        """Build the log entry from the middleware context."""
         entry = {
             "timestamp": context.timestamp.isoformat(),
             "source": context.source,
             "type": context.type,
             "method": context.method,
+            "payload": self._extract_payload(context.message),
         }
+        user_id = await self._get_user_id()
+        self.posthog.capture(
+            distinct_id=user_id or "unknown",
+            event="MCP Method Call API",
+            properties=entry,
+        )
 
-        entry["payload"] = self._extract_payload(context.message)
-        return entry
+        return await call_next(context)
 
     def _extract_payload(self, message: Any) -> str:
         """Return JSON-encoded payload or placeholder string."""
@@ -56,17 +54,3 @@ class LoggingMiddleware(Middleware):
 
         except Exception:
             return None
-
-    def _log_to_posthog(self, user_id: Optional[str], entry: Dict[str, Any]) -> None:
-        """Log the entry to PostHog if client is available."""
-        if not self.posthog:
-            return
-
-        try:
-            self.posthog.capture(
-                distinct_id=user_id or None,
-                event="MCP Method Call API",
-                properties=entry,
-            )
-        except Exception:
-            return
