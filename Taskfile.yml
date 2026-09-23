@@ -152,7 +152,7 @@ tasks:
     desc: "Install backend dependencies, including the test group"
     dir: backend
     cmds:
-      - poetry install --no-interaction --with test
+      - poetry install --all-groups
 
   setup:sdk:
     desc: "Install SDK dependencies"
