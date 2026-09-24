@@ -1,0 +1,86 @@
+name: "Copilot Agent Setup Steps"
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+  pull_request:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+
+permissions:
+  contents: read
+
+env:
+  POETRY_VERSION: '2.4.1'
+
+jobs:
+  # Job must be named exactly `copilot-setup-steps` for the Copilot coding
+  # agent to pick it up as its environment setup.
+  copilot-setup-steps:
+    name: Copilot Setup Steps
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: pgvector/pgvector:0.8.0-pg17
+        env:
+          POSTGRES_PASSWORD: abc123
+          POSTGRES_USER: postgres
+          POSTGRES_DB: data_product_portal_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 2s
+          --health-timeout 2s
+          --health-retries 25
+        ports:
+          - 5432:5432
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Install Poetry
+        uses: snok/install-poetry@a783c322200f0519c7926aa6faa857c4e23e9263 # v1.4.2
+        with:
+          version: ${{ env.POETRY_VERSION }}
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
+      - name: Install Task
+        uses: go-task/setup-task@a00fbb05ce67b35648be3c78cbc9fd85354c757e # v2.2.0
+
+      - name: Setup Python (backend)
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          cache: 'poetry'
+          cache-dependency-path: 'backend/poetry.lock'
+          python-version-file: 'backend/.python-version'
+
+      - name: Install backend dependencies
+        run: task setup:backend
+
+      - name: Setup Python (sdk)
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          cache: 'poetry'
+          cache-dependency-path: 'sdk/poetry.lock'
+          python-version-file: 'sdk/.python-version'
+
+      - name: Install SDK dependencies
+        run: task setup:sdk
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+          node-version-file: frontend/package.json
+
+      - name: Install frontend dependencies
+        run: task setup:frontend
+
+      - name: Install pre-commit
+        run: pip install pre-commit
+
+      - name: Warm pre-commit hook environments
+        run: pre-commit install-hooks

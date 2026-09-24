@@ -4614,12 +4614,16 @@ func (s *CreateTechnicalAssetRequest) encodeFields(e *jx.Encoder) {
 		e.Str(s.Namespace)
 	}
 	{
-		e.FieldStart("platform_id")
-		json.EncodeUUID(e, s.PlatformID)
+		if s.PlatformID.Set {
+			e.FieldStart("platform_id")
+			s.PlatformID.Encode(e)
+		}
 	}
 	{
-		e.FieldStart("service_id")
-		json.EncodeUUID(e, s.ServiceID)
+		if s.ServiceID.Set {
+			e.FieldStart("service_id")
+			s.ServiceID.Encode(e)
+		}
 	}
 	{
 		e.FieldStart("configuration")
@@ -4717,11 +4721,9 @@ func (s *CreateTechnicalAssetRequest) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"namespace\"")
 			}
 		case "platform_id":
-			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
-				v, err := json.DecodeUUID(d)
-				s.PlatformID = v
-				if err != nil {
+				s.PlatformID.Reset()
+				if err := s.PlatformID.Decode(d); err != nil {
 					return err
 				}
 				return nil
@@ -4729,11 +4731,9 @@ func (s *CreateTechnicalAssetRequest) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"platform_id\"")
 			}
 		case "service_id":
-			requiredBitSet[0] |= 1 << 4
 			if err := func() error {
-				v, err := json.DecodeUUID(d)
-				s.ServiceID = v
-				if err != nil {
+				s.ServiceID.Reset()
+				if err := s.ServiceID.Decode(d); err != nil {
 					return err
 				}
 				return nil
@@ -4819,7 +4819,7 @@ func (s *CreateTechnicalAssetRequest) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
-		0b00111111,
+		0b00100111,
 		0b00000010,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
@@ -16621,12 +16621,16 @@ func (s *GetTechnicalAssetsResponseItem) encodeFields(e *jx.Encoder) {
 		json.EncodeUUID(e, s.OwnerID)
 	}
 	{
-		e.FieldStart("platform_id")
-		json.EncodeUUID(e, s.PlatformID)
+		if s.PlatformID.Set {
+			e.FieldStart("platform_id")
+			s.PlatformID.Encode(e)
+		}
 	}
 	{
-		e.FieldStart("service_id")
-		json.EncodeUUID(e, s.ServiceID)
+		if s.ServiceID.Set {
+			e.FieldStart("service_id")
+			s.ServiceID.Encode(e)
+		}
 	}
 	{
 		e.FieldStart("status")
@@ -16776,11 +16780,9 @@ func (s *GetTechnicalAssetsResponseItem) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"owner_id\"")
 			}
 		case "platform_id":
-			requiredBitSet[0] |= 1 << 5
 			if err := func() error {
-				v, err := json.DecodeUUID(d)
-				s.PlatformID = v
-				if err != nil {
+				s.PlatformID.Reset()
+				if err := s.PlatformID.Decode(d); err != nil {
 					return err
 				}
 				return nil
@@ -16788,11 +16790,9 @@ func (s *GetTechnicalAssetsResponseItem) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"platform_id\"")
 			}
 		case "service_id":
-			requiredBitSet[0] |= 1 << 6
 			if err := func() error {
-				v, err := json.DecodeUUID(d)
-				s.ServiceID = v
-				if err != nil {
+				s.ServiceID.Reset()
+				if err := s.ServiceID.Decode(d); err != nil {
 					return err
 				}
 				return nil
@@ -16945,7 +16945,7 @@ func (s *GetTechnicalAssetsResponseItem) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [3]uint8{
-		0b11111111,
+		0b10011111,
 		0b11111111,
 		0b00000001,
 	} {
@@ -31930,12 +31930,16 @@ func (s *TechnicalAsset) encodeFields(e *jx.Encoder) {
 		json.EncodeUUID(e, s.OwnerID)
 	}
 	{
-		e.FieldStart("platform_id")
-		json.EncodeUUID(e, s.PlatformID)
+		if s.PlatformID.Set {
+			e.FieldStart("platform_id")
+			s.PlatformID.Encode(e)
+		}
 	}
 	{
-		e.FieldStart("service_id")
-		json.EncodeUUID(e, s.ServiceID)
+		if s.ServiceID.Set {
+			e.FieldStart("service_id")
+			s.ServiceID.Encode(e)
+		}
 	}
 	{
 		e.FieldStart("configuration")
@@ -32046,11 +32050,9 @@ func (s *TechnicalAsset) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"owner_id\"")
 			}
 		case "platform_id":
-			requiredBitSet[0] |= 1 << 7
 			if err := func() error {
-				v, err := json.DecodeUUID(d)
-				s.PlatformID = v
-				if err != nil {
+				s.PlatformID.Reset()
+				if err := s.PlatformID.Decode(d); err != nil {
 					return err
 				}
 				return nil
@@ -32058,11 +32060,9 @@ func (s *TechnicalAsset) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"platform_id\"")
 			}
 		case "service_id":
-			requiredBitSet[1] |= 1 << 0
 			if err := func() error {
-				v, err := json.DecodeUUID(d)
-				s.ServiceID = v
-				if err != nil {
+				s.ServiceID.Reset()
+				if err := s.ServiceID.Decode(d); err != nil {
 					return err
 				}
 				return nil
@@ -32089,8 +32089,8 @@ func (s *TechnicalAsset) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
-		0b11111111,
-		0b00000011,
+		0b01111111,
+		0b00000010,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

@@ -1,4 +1,5 @@
 import copy
+from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from typing import Optional, Sequence
 from uuid import UUID
@@ -25,7 +26,9 @@ from app.authorization.role_assignments.output_port.model import (
 )
 from app.configuration.access_durations.enums import AccessDurationType
 from app.core.authz import Action, Authorization
-from app.core.logging.posthog_analytics import get_posthog_client
+from app.core.logging.posthog_analytics import (
+    PosthogAnalyticsClient,
+)
 from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.output_ports.input_ports.schema_response import (
     OutputPortInputPort,
@@ -43,10 +46,17 @@ from app.users.schema_response import (
 )
 
 
+@dataclass
+class RedactedInputPort:
+    output_port_id: UUID
+    consuming_abstract_data_product_id: UUID
+    requested_by_id: UUID
+
+
 class InputPortService:
     def __init__(self, db: Session):
         self.db = db
-        self.posthog = get_posthog_client()
+        self.posthog = PosthogAnalyticsClient()
 
     def get_link_by_id(self, id: UUID) -> InputPortModel:
         current_link = self.db.get(InputPortModel, id)
@@ -62,6 +72,7 @@ class InputPortService:
         data_product_id: UUID,
         output_port_id: UUID,
         consuming_data_product_id: UUID,
+        execution_options: Optional[dict] = None,
     ) -> InputPortModel:
         current_link = self.db.scalar(
             select(InputPortModel)
@@ -77,7 +88,8 @@ class InputPortService:
             .where(
                 OutputPort.data_product_id == data_product_id,
             )
-            .options(selectinload(InputPortModel.requests)),
+            .options(selectinload(InputPortModel.requests))
+            .execution_options(**(execution_options or {})),
         )
         if not current_link:
             raise HTTPException(
@@ -121,9 +133,12 @@ class InputPortService:
         consuming_data_product_id: UUID,
         actor: User,
         decision_note: Optional[str] = None,
-    ) -> InputPortModel:
+    ) -> RedactedInputPort:
         current_link = self.get_link(
-            data_product_id, output_port_id, consuming_data_product_id
+            data_product_id,
+            output_port_id,
+            consuming_data_product_id,
+            execution_options={"skip_data_product_visibility_filter": True},
         )
         pending_request = current_link.pending_request
         if pending_request is None:
@@ -141,21 +156,23 @@ class InputPortService:
 
         consuming_data_product = current_link.consuming_abstract_data_product
 
-        if self.posthog:
-            self.posthog.capture(
-                distinct_id=actor.id,
-                event="Input Port Approved",
-                properties={
-                    "data_product_id": str(data_product_id),
-                    "output_port_id": str(output_port_id),
-                    "consuming_data_product_id": str(consuming_data_product_id),
-                    "type": str(
-                        consuming_data_product.abstract_data_product_type.value
-                    ),
-                },
-            )
-
-        return current_link
+        self.posthog.capture(
+            distinct_id=actor.id,
+            event="Input Port Approved",
+            properties={
+                "data_product_id": str(data_product_id),
+                "output_port_id": str(output_port_id),
+                "consuming_data_product_id": str(consuming_data_product_id),
+                "type": str(consuming_data_product.abstract_data_product_type.value),
+            },
+        )
+        # We don't return the raw model, as it might contain sensitive information. See `skip_data_product_visibility_filter`
+        # used in the get_link call above. Instead, we return a dataclass with only the relevant information.
+        return RedactedInputPort(
+            output_port_id=current_link.output_port_id,
+            consuming_abstract_data_product_id=current_link.consuming_abstract_data_product_id,
+            requested_by_id=pending_request.requested_by_id,
+        )
 
     def deny_output_port_as_input_port(
         self,
@@ -165,9 +182,12 @@ class InputPortService:
         consuming_data_product_id: UUID,
         actor: User,
         decision_note: str,
-    ) -> InputPortModel:
+    ) -> RedactedInputPort:
         current_link = self.get_link(
-            data_product_id, output_port_id, consuming_data_product_id
+            data_product_id,
+            output_port_id,
+            consuming_data_product_id,
+            execution_options={"skip_data_product_visibility_filter": True},
         )
         target = current_link.pending_request
         if target is None:
@@ -181,7 +201,14 @@ class InputPortService:
         target.decision_note = decision_note
         target.decision = InputPortRequestDecision.DENIED
         current_link.recompute_status()
-        return current_link
+
+        # We don't return the raw model, as it might contain sensitive information. See `skip_data_product_visibility_filter`
+        # used in the get_link call above. Instead, we return a dataclass with only the relevant information.
+        return RedactedInputPort(
+            output_port_id=current_link.output_port_id,
+            consuming_abstract_data_product_id=current_link.consuming_abstract_data_product_id,
+            requested_by_id=current_link.latest_request.requested_by_id,
+        )
 
     def revoke_output_port_as_input_port(
         self,

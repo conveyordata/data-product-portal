@@ -30,7 +30,9 @@ from app.configuration.access_durations.enums import AccessDurationType
 from app.configuration.access_durations.model import AccessDuration
 from app.configuration.access_durations.service import AccessDurationService
 from app.core.authz import Action
-from app.core.logging.posthog_analytics import get_posthog_client
+from app.core.logging.posthog_analytics import (
+    PosthogAnalyticsClient,
+)
 from app.data_products import email
 from app.data_products.output_ports.enums import OutputPortAccessType
 from app.data_products.output_ports.input_ports.service import InputPortService
@@ -43,7 +45,7 @@ from app.users.model import User
 class AbstractDataProductService:
     def __init__(self, db: Session):
         self.db = db
-        self.posthog = get_posthog_client()
+        self.posthog = PosthogAnalyticsClient()
 
     def _ensure_not_deleting(self, adp: AbstractDataProduct) -> None:
         if adp.status == AbstractDataProductStatus.DELETING:
@@ -140,7 +142,7 @@ class AbstractDataProductService:
             request.decision = InputPortRequestDecision.PENDING
         input_port.recompute_status()
 
-        if request.decision == InputPortRequestDecision.APPROVED and self.posthog:
+        if request.decision == InputPortRequestDecision.APPROVED:
             self.posthog.capture(
                 distinct_id=actor.id,
                 event="Input Port Approved",

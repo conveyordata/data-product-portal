@@ -247,34 +247,43 @@ class DataOutputTypes(str, Enum):
 
 ### 6. Create a Database Migration
 
-Generate an Alembic migration for the new table:
+If your plugin owns its own table(s), add a `versions/` folder next to `schema.py` (i.e. `app/technical_asset_configuration/<your_plugin>/versions/`). The portal finds it automatically from the location of your plugin class — nothing needs to be declared on the class itself.
 
-```bash
-cd backend
-poetry run alembic revision --autogenerate -m "add_azure_blob_technical_asset"
-```
-
-Update the migration script to create the new table. It must inherit from the base `data_output_configurations` table via a foreign key `id`:
+Write the baseline revision by hand (there is no autogenerate against a plugin's own isolated migration history):
 
 ```python
+# app/technical_asset_configuration/<your_plugin>/versions/<your_plugin>_0001_baseline.py
+"""Create <your_plugin>_assets
+
+Revision ID: <your_plugin>_0001_baseline
+Revises:
+"""
+
+import sqlalchemy as sa
+from alembic import op
+from sqlalchemy.dialects import postgresql
+
+revision = "<your_plugin>_0001_baseline"
+down_revision = None
+branch_labels = None
+depends_on = None
+
+
 def upgrade() -> None:
     op.create_table(
-        "postgresql_technical_asset_configurations",
-        sa.Column(
-            "id",
-            postgresql.UUID(as_uuid=True),
-            sa.ForeignKey("data_output_configurations.id", ondelete="CASCADE"),
-            primary_key=True,
-        ),
-        sa.Column("database", sa.String(), nullable=True),
-        sa.Column("schema", sa.String(), nullable=True),
-        sa.Column("table", sa.String(), nullable=True),
+        "<your_plugin>_assets",
+        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True),
         # ... other columns
-        sa.Column("created_on", sa.DateTime(timezone=False), server_default=utcnow()),
-        sa.Column("updated_on", sa.DateTime(timezone=False), onupdate=utcnow()),
-        sa.Column("deleted_at", sa.DateTime(timezone=False), nullable=True),
     )
+
+
+def downgrade() -> None:
+    op.drop_table("<your_plugin>_assets")
 ```
+
+At deploy time, the portal always migrates every plugin's table(s) to the latest revision in its `versions/` folder — there is nothing to configure for "which revision" a plugin should be at.
+
+If your plugin has no table of its own, skip this step entirely; no `versions/` folder means the portal does nothing for it.
 
 ---
 
