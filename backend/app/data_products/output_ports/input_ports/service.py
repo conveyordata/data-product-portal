@@ -98,6 +98,11 @@ class InputPortService:
             )
         return current_link
 
+    def _sync_hidden_data_product_access(self, data_product_id: UUID) -> None:
+        from app.data_products.service import DataProductService
+
+        DataProductService(self.db)._sync_consumer_reader_grouping(data_product_id)
+
     def approve_request(
         self,
         request: InputPortRequestModel,
@@ -124,6 +129,11 @@ class InputPortService:
                 request.valid_until = now.date() + timedelta(
                     days=request.requested_duration_days
                 )
+        request.input_port.recompute_status()
+        self.db.flush()
+        self._sync_hidden_data_product_access(
+            request.input_port.output_port.data_product_id
+        )
 
     def approve_output_port_as_input_port(
         self,
@@ -152,7 +162,6 @@ class InputPortService:
             decided_by=actor,
             decision_note=decision_note,
         )
-        current_link.recompute_status()
 
         consuming_data_product = current_link.consuming_abstract_data_product
 
@@ -231,6 +240,7 @@ class InputPortService:
         target.revoked_by = actor
         target.revoked_at = datetime.now(timezone.utc)
         current_link.recompute_status()
+        self._sync_hidden_data_product_access(data_product_id)
         return current_link
 
     def remove_output_port_as_input_port(
@@ -245,6 +255,8 @@ class InputPortService:
         )
         result = copy.deepcopy(current_link)
         self.db.delete(current_link)
+        self.db.flush()
+        self._sync_hidden_data_product_access(data_product_id)
         return result
 
     @staticmethod
