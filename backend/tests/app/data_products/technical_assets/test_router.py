@@ -67,7 +67,7 @@ def data_product_role_assignment(technical_asset_payload) -> Role:
         permissions=[Action.DATA_PRODUCT__CREATE_TECHNICAL_ASSET],
     )
     DataProductRoleAssignmentFactory(
-        user_id=technical_asset_payload["user_id"],
+        identity_id=technical_asset_payload["user_id"],
         role_id=role.id,
         data_product_id=technical_asset_payload["owner_id"],
     )
@@ -370,7 +370,7 @@ class TestTechnicalAssetsRouter:
             permissions=[Action.DATA_PRODUCT__UPDATE_TECHNICAL_ASSET],
         )
         DataProductRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id, data_product_id=data_product.id
+            identity_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
         tag = TagFactory()
         technical_asset = TechnicalAssetFactory(owner=data_product)
@@ -411,7 +411,7 @@ class TestTechnicalAssetsRouter:
             permissions=[Action.DATA_PRODUCT__DELETE_TECHNICAL_ASSET],
         )
         DataProductRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id, data_product_id=data_product.id
+            identity_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
         data_output = TechnicalAssetFactory(owner=data_product)
         response = self.delete_technical_asset(
@@ -427,7 +427,7 @@ class TestTechnicalAssetsRouter:
             permissions=[Action.DATA_PRODUCT__DELETE_TECHNICAL_ASSET],
         )
         DataProductRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id, data_product_id=data_product.id
+            identity_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
         data_output = TechnicalAssetFactory(owner=data_product, tags=[TagFactory()])
         response = self.delete_technical_asset(
@@ -450,7 +450,7 @@ class TestTechnicalAssetsRouter:
             permissions=[Action.DATA_PRODUCT__UPDATE_TECHNICAL_ASSET],
         )
         DataProductRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id, data_product_id=data_product.id
+            identity_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
         data_output = TechnicalAssetFactory(owner=data_product)
         response = self.get_technical_asset(
@@ -473,7 +473,7 @@ class TestTechnicalAssetsRouter:
             permissions=[Action.DATA_PRODUCT__UPDATE_TECHNICAL_ASSET],
         )
         DataProductRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id, data_product_id=data_product.id
+            identity_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
         technical_asset = TechnicalAssetFactory(owner=data_product)
         response = self.get_technical_asset(
@@ -636,7 +636,7 @@ class TestTechnicalAssetsRouter:
             permissions=[Action.DATA_PRODUCT__UPDATE_TECHNICAL_ASSET],
         )
         DataProductRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id, data_product_id=data_product.id
+            identity_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
         data_output = TechnicalAssetFactory(owner=data_product)
         response = self.update_technical_asset_status(
@@ -660,7 +660,7 @@ class TestTechnicalAssetsRouter:
             permissions=[Action.DATA_PRODUCT__UPDATE_TECHNICAL_ASSET],
         )
         DataProductRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id, data_product_id=data_product.id
+            identity_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
         tag = TagFactory()
         data_output = TechnicalAssetFactory(owner=data_product)
@@ -687,7 +687,7 @@ class TestTechnicalAssetsRouter:
             permissions=[Action.DATA_PRODUCT__DELETE_TECHNICAL_ASSET],
         )
         DataProductRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id, data_product_id=data_product.id
+            identity_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
         data_output = TechnicalAssetFactory(owner=data_product)
         response = self.delete_technical_asset(
@@ -713,7 +713,7 @@ class TestTechnicalAssetsRouter:
             permissions=[Action.DATA_PRODUCT__DELETE_TECHNICAL_ASSET],
         )
         DataProductRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id, data_product_id=data_product.id
+            identity_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
         data_output = TechnicalAssetFactory(owner=data_product)
         data_output_name = data_output.name
@@ -747,7 +747,7 @@ class TestTechnicalAssetsRouter:
         )
 
         DataProductRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id, data_product_id=data_product.id
+            identity_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
         ds_role = RoleFactory(
             scope=Scope.DATASET,
@@ -783,7 +783,7 @@ class TestTechnicalAssetsRouter:
             permissions=[Action.DATA_PRODUCT__REQUEST_TECHNICAL_ASSET_LINK],
         )
         DataProductRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id, data_product_id=data_product.id
+            identity_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
         approver_role = RoleFactory(
             scope=Scope.DATASET,

@@ -3,7 +3,7 @@ from typing import Optional, Sequence
 from uuid import UUID
 from warnings import deprecated
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from app.authorization.role_assignments.data_product.model import (
     DataProductRoleAssignment as DataProductRoleAssignmentModel,
@@ -44,7 +44,7 @@ class ModifyDataProductRoleAssignment(BaseModel):
 class DataProductRoleAssignmentResponse(ORMModel):
     id: UUID
     data_product: DataProduct
-    user: User
+    user: User = Field(validation_alias="identity")
     role: Optional[Role]
     decision: DecisionStatus
     requested_on: Optional[datetime]
@@ -62,7 +62,7 @@ class ListDataProductRoleAssignmentsResponse(ORMModel):
 
 class DataProductRoleAssignment(DataProductRoleAssignmentResponse):
     data_product_id: UUID
-    user_id: UUID
+    identity_id: UUID
     role_id: Optional[UUID]
     requested_by_id: Optional[UUID]
     decided_by_id: Optional[UUID]

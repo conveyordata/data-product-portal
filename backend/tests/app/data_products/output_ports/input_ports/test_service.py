@@ -13,15 +13,22 @@ from app.abstract_data_product.input_ports.model import (
     InputPortRequest as InputPortRequestModel,
 )
 from app.authorization.role_assignments.enums import DecisionStatus
+from app.authorization.roles.schema import Scope
+from app.authorization.service import AuthorizationService
 from app.configuration.access_durations.enums import AccessDurationType
+from app.core.authz import Action
 from app.data_products.output_ports.enums import OutputPortAccessType
 from app.data_products.output_ports.input_ports.service import InputPortService
 from app.settings import settings
 from tests.factories import (
     DataProductFactory,
+    DataProductRoleAssignmentFactory,
+    GroupFactory,
+    GroupMembershipFactory,
     InputPortFactory,
     InputPortRequestFactory,
     OutputPortFactory,
+    RoleFactory,
     UserFactory,
 )
 
@@ -254,3 +261,41 @@ class TestInputPortDecisions:
         requests = _by_id(input_port)
         assert requests[renewal.id].valid_from == date.today()
         assert requests[renewal.id].valid_until == date.today() + timedelta(days=30)
+
+    def test_get_user_pending_actions__includes_group_inherited_permission(
+        self,
+        session,
+    ):
+        approver = UserFactory()
+        group = GroupFactory()
+        GroupMembershipFactory(group=group, member=approver)
+
+        data_product = DataProductFactory()
+        output_port = OutputPortFactory(data_product=data_product)
+        input_port = InputPortFactory(
+            output_port=output_port,
+            status=InputPortStatus.PENDING,
+            request=False,
+        )
+        pending_request = InputPortRequestFactory(
+            input_port=input_port,
+            decision=InputPortRequestDecision.PENDING,
+        )
+
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[
+                Action.OUTPUT_PORT__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
+            ],
+        )
+        DataProductRoleAssignmentFactory(
+            identity_id=group.id,
+            data_product_id=data_product.id,
+            role_id=role.id,
+            decision=DecisionStatus.APPROVED,
+        )
+
+        # Factories bypass incremental authorization synchronization.
+        AuthorizationService(session).reload_enforcer()
+        pending_actions = InputPortService(session).get_user_pending_actions(approver)
+        assert {action.id for action in pending_actions} == {pending_request.id}

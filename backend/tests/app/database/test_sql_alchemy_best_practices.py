@@ -10,7 +10,7 @@ models = [mapper.class_ for mapper in Base.registry.mappers]
 ignore_list = {
     "TechnicalAsset": ["tags", "access_modes"],
     "Platform": ["services"],
-    "User": ["data_product_roles", "dataset_roles"],
+    "User": ["dataset_roles"],
     "OutputPort": ["tags", "access_modes"],
 }
 

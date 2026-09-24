@@ -114,7 +114,6 @@ def create_data_product(
     NotificationService(db).create_data_product_notifications(
         data_product_id=created_id,
         event_id=event_id,
-        extra_receiver_ids=owners,
     )
     if data_product.input_ports is not None:
         request_input_ports_for_data_product(
@@ -136,7 +135,7 @@ def _assign_owner_role_assignments(
     for owner_id in owners:
         response = assignment_service.create_assignment(
             data_product_id,
-            user_id=owner_id,
+            identity_id=owner_id,
             role_id=owner_role.id,
             actor=actor,
         )
@@ -147,12 +146,13 @@ def _assign_owner_role_assignments(
             actor=actor,
         )
         DataProductAuthAssignment(assignment).add()
+
         EventService(db).create_event(
             CreateEvent(
                 name=EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_CREATED,
                 subject_id=response.data_product_id,
                 subject_type=EventReferenceEntity.DATA_PRODUCT,
-                target_id=response.user_id,
+                target_id=response.identity_id,
                 target_type=EventReferenceEntity.USER,
                 actor_id=actor.id,
             )

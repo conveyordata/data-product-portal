@@ -38,6 +38,7 @@ from app.data_products.output_ports.model import OutputPort as OutputPortModel
 from app.data_products.output_ports.schema_response import (
     output_port_not_found_exception,
 )
+from app.groups.service import GroupService
 from app.users.model import User as UserModel
 from app.users.schema import User
 from app.users.schema_response import (
@@ -300,6 +301,9 @@ class InputPortService:
         return result
 
     def get_user_pending_actions(self, user: User) -> Sequence[InputPortRequest]:
+        user_group_ids = GroupService(self.db).get_groups_ids_identity_is_member_of(
+            user.id
+        )
         requested_associations = (
             self.db.scalars(
                 select(InputPortRequestModel)
@@ -316,8 +320,12 @@ class InputPortService:
                         ),
                         InputPortModel.output_port.has(
                             OutputPortModel.data_product.has(
-                                DataProductModel.assignments.any(
-                                    DataProductRoleAssignmentModel.user_id == user.id
+                                or_(
+                                    DataProductRoleAssignmentModel.identity_id
+                                    == user.id,
+                                    DataProductRoleAssignmentModel.identity_id.in_(
+                                        user_group_ids
+                                    ),
                                 )
                             )
                         ),

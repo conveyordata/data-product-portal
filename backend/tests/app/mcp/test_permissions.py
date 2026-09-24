@@ -38,7 +38,7 @@ def test_get_user_roles__end_to_end_through_mcp_protocol(session):
     """
     user = UserFactory()
     role = RoleFactory(scope="global")
-    GlobalRoleAssignmentFactory(user_id=user.id, role_id=role.id)
+    GlobalRoleAssignmentFactory(identity_id=user.id, role_id=role.id)
 
     with as_user(session, user.id):
         result = call_mcp_tool("get_user_roles", {"user_id": str(user.id)})

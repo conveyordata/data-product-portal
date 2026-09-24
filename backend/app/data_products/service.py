@@ -1,10 +1,11 @@
 import copy
+from operator import and_
 from typing import Sequence, assert_never
 from uuid import UUID
 from warnings import deprecated
 
 from fastapi import HTTPException, status
-from sqlalchemy import asc, select
+from sqlalchemy import asc, or_, select
 from sqlalchemy.orm import Session, joinedload, selectinload, undefer
 
 from app.abstract_data_product.graph_utils import (
@@ -14,6 +15,9 @@ from app.abstract_data_product.input_ports.model import (
     InputPort as InputPortModel,
 )
 from app.abstract_data_product.service import AbstractDataProductService
+from app.authorization.role_assignments.data_product.model import (
+    DataProductRoleAssignment,
+)
 from app.authorization.role_assignments.enums import AssignmentFilter, DecisionStatus
 from app.authorization.roles.schema import Prototype
 from app.authorization.service import DATA_PRODUCT_READER_ROLE
@@ -53,6 +57,7 @@ from app.data_products.technical_assets.model import (
 from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
+from app.groups.service import GroupService
 from app.resource_names.service import ResourceNameService, ResourceNameValidityType
 from app.users.model import User as UserModel
 from app.users.schema import User
@@ -155,10 +160,22 @@ class DataProductService(AbstractDataProductService):
             case AssignmentFilter.ALL:
                 pass
             case AssignmentFilter.ONLY_ASSIGNED:
-                query = query.filter(
+                user_group_ids = GroupService(
+                    self.db
+                ).get_groups_ids_identity_is_member_of(current_user.id)
+                query = query.where(
                     DataProductModel.assignments.any(
-                        user_id=current_user.id,
-                        decision=DecisionStatus.APPROVED,
+                        and_(
+                            DataProductRoleAssignment.decision
+                            == DecisionStatus.APPROVED,
+                            or_(
+                                DataProductRoleAssignment.identity_id
+                                == current_user.id,
+                                DataProductRoleAssignment.identity_id.in_(
+                                    user_group_ids
+                                ),
+                            ),
+                        )
                     )
                 )
             case _:
@@ -180,13 +197,13 @@ class DataProductService(AbstractDataProductService):
             options=[selectinload(DataProductModel.assignments)],
             populate_existing=True,
         )
-        user_ids = [
-            assignment.user_id
+        identity_ids = [
+            assignment.identity_id
             for assignment in data_product.assignments
             if assignment.role.prototype == Prototype.OWNER
         ]
         return self.db.scalars(
-            select(UserModel).filter(UserModel.id.in_(user_ids))
+            select(UserModel).filter(UserModel.id.in_(identity_ids))
         ).all()
 
     def _get_tags(self, tag_ids: list[UUID]) -> list[TagModel]:

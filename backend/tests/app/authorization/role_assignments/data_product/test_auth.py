@@ -33,7 +33,7 @@ class TestAuth:
 
         DataProductRoleAssignmentFactory(
             data_product_id=data_product.id,
-            user_id=user.id,
+            identity_id=user.id,
             role_id=role.id,
             decision=DecisionStatus.APPROVED,
         )
@@ -53,7 +53,7 @@ class TestAuth:
 
         assignment: DataProductRoleAssignment = DataProductRoleAssignmentFactory(
             data_product_id=data_product.id,
-            user_id=user.id,
+            identity_id=user.id,
             role_id=role.id,
             decision=DecisionStatus.APPROVED,
         )
@@ -74,7 +74,7 @@ class TestAuth:
 
         assignment: DataProductRoleAssignment = DataProductRoleAssignmentFactory(
             data_product_id=data_product.id,
-            user_id=user.id,
+            identity_id=user.id,
             role_id=role.id,
             decision=DecisionStatus.APPROVED,
         )

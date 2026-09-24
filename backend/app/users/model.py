@@ -1,25 +1,19 @@
 import uuid
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Sequence
 
-from sqlalchemy import UUID, Boolean, Column, DateTime, String
-from sqlalchemy.ext.associationproxy import association_proxy
+from sqlalchemy import UUID, Boolean, Column, DateTime, ForeignKey, String
+from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
 from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
 
-from app.database.database import Base, ensure_exists
+from app.database.database import ensure_exists
 from app.events.model import Event
-from app.shared.model import BaseORM
+from app.identities.model import Identity
+from app.identities.type import IdentityType
 
 if TYPE_CHECKING:
-    from app.authorization.role_assignments.data_product.model import (
-        DataProductRoleAssignment,
-    )
-    from app.authorization.role_assignments.global_.model import (
-        GlobalRoleAssignment,
-    )
     from app.authorization.role_assignments.output_port.model import (
         DatasetRoleAssignment,
     )
-    from app.data_products.model import DataProduct
     from app.data_products.output_port_technical_assets_link.model import (
         TechnicalAssetOutputPortAssociation,
     )
@@ -30,12 +24,15 @@ if TYPE_CHECKING:
     from app.users.notifications.model import Notification
 
 
-class User(Base, BaseORM):
+class User(Identity):
     __tablename__ = "users"
 
-    id = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("identities.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
     email = Column(String, unique=True)
-    external_id = Column(String)
     first_name = Column(String)
     last_name = Column(String)
     events: Mapped[list[Event]] = relationship(
@@ -52,47 +49,23 @@ class User(Base, BaseORM):
         lazy="raise",
     )
 
-    # Relationships - Data Products
-    data_product_roles: Mapped[list["DataProductRoleAssignment"]] = relationship(
-        foreign_keys="DataProductRoleAssignment.user_id",
-        back_populates="user",
-        # Deliberately lazy:
-        #  - Used in limited cases, only on a single user
-        #  - Complicates get_authenticated_user
-        #  - Private dataset test cases become more complex
-        #    (need to manipulate the session to avoid a user being cached with a
-        #     membership field with raise load strategy)
-        lazy="select",
-    )
-    data_products: Mapped[list["DataProduct"]] = association_proxy(
-        "data_product_roles", "data_product"
-    )
     explorations: Mapped[list["Exploration"]] = relationship(
         foreign_keys="Exploration.owner_id", back_populates="owner", lazy="raise"
-    )
-
-    global_role: Mapped["GlobalRoleAssignment"] = relationship(
-        foreign_keys="GlobalRoleAssignment.user_id",
-        back_populates="user",
-        # Deliberately lazy:
-        #  - Used in limited cases, only on a single user
-        #  - Complicates get_authenticated_user
-        #  - Private dataset test cases become more complex
-        #    (need to manipulate the session to avoid a user being cached with a
-        #     membership field with raise load strategy)
-        lazy="select",
     )
 
     # Relationships - Datasets
     dataset_roles: Mapped[list["DatasetRoleAssignment"]] = relationship(
         foreign_keys="DatasetRoleAssignment.user_id",
         back_populates="user",
+        cascade="all, delete-orphan",
         # Deliberately lazy:
         #  - Used in limited cases, only on a single user
         #  - Complicates get_authenticated_user
         lazy="select",
     )
-    datasets: Mapped[list["OutputPort"]] = association_proxy("dataset_roles", "dataset")
+    datasets: AssociationProxy[list["OutputPort"]] = association_proxy(
+        "dataset_roles", "dataset"
+    )
 
     # Relationships - Data outputs
     requested_dataoutputs: Mapped[list["TechnicalAssetOutputPortAssociation"]] = (
@@ -117,6 +90,10 @@ class User(Base, BaseORM):
         )
     )
 
+    __mapper_args__ = {
+        "polymorphic_identity": IdentityType.USER.value,
+    }
+
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, User):
             return NotImplemented
@@ -128,5 +105,5 @@ class User(Base, BaseORM):
         return hash(self.id) if self.id is not None else id(self)
 
 
-def ensure_user_exists(user_id: UUID, db: Session) -> User:
-    return ensure_exists(user_id, db, User)
+def ensure_user_exists(user_id: UUID, db: Session, options: Sequence[Any] = ()) -> User:
+    return ensure_exists(user_id, db, User, options=options)
