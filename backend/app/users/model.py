@@ -1,5 +1,5 @@
 import uuid
-from typing import TYPE_CHECKING, Sequence, Any
+from typing import TYPE_CHECKING, Any, Sequence
 
 from sqlalchemy import UUID, Boolean, Column, DateTime, ForeignKey, String
 from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
