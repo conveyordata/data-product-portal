@@ -1,5 +1,5 @@
 import uuid
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Sequence, Any
 
 from sqlalchemy import UUID, Boolean, Column, DateTime, ForeignKey, String
 from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
@@ -105,5 +105,5 @@ class User(Identity):
         return hash(self.id) if self.id is not None else id(self)
 
 
-def ensure_user_exists(user_id: UUID, db: Session, options: list = []) -> User:
+def ensure_user_exists(user_id: UUID, db: Session, options: Sequence[Any] = ()) -> User:
     return ensure_exists(user_id, db, User, options=options)

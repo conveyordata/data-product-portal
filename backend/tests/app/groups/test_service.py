@@ -131,14 +131,6 @@ class TestGroupService:
         with pytest.raises(HTTPException):
             GlobalRoleAssignmentService(session).get_assignment(global_assignment_id)
 
-    def test_is_group__identifies_group_identity(self, session):
-        group = GroupFactory()
-        user = UserFactory()
-        service = GroupService(session)
-
-        assert service.is_group(group.id)
-        assert not service.is_group(user.id)
-
     def test_membership__immediately_adds_and_revokes_existing_group_access(
         self,
         authorizer: Authorization,

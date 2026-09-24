@@ -117,9 +117,6 @@ class GroupService:
     def get_group(self, group_id: UUID) -> Group:
         return ensure_group_exists(group_id, self.db)
 
-    def is_group(self, identity_id: UUID) -> bool:
-        return self.db.get(Group, identity_id) is not None
-
     def get_groups_ids_identity_is_member_of(self, identity_id: UUID) -> list[UUID]:
         return list(
             self.db.scalars(
