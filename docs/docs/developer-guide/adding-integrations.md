@@ -62,7 +62,7 @@ The [Glue plugin's `schema.py`](https://github.com/conveyordata/data-product-por
 class GlueTechnicalAssetConfiguration(TechnicalAssetPlugin):
     name: ClassVar[str] = "GlueTechnicalAssetConfiguration"
 
-    # the values the owner fills in, these are handpicked for Glue so yours will look differently.
+    # the values the owner fills in, these are handpicked for Glue so yours will look different.
     database: str
     table: str = "*"
 
