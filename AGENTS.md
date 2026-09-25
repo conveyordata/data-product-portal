@@ -12,6 +12,7 @@ It consists of a 3-tier web architecture.
 *   `backend/`:See [backend/AGENTS.md](backend/AGENTS.md).
 *   `frontend/`: See [frontend/AGENTS.md](frontend/AGENTS.md).
 *   `cli/go`: Cli in Go
+*   `plugins/`: The technical asset plugins the portal ships, published as `data-product-portal-plugins` and found through entry points. No plugin code lives in `backend/`.
 *   `demo/`: Demo setups.
 *   `docs/`: Docusaurus documentation and Architecture Decision Records (ADRs in `docs/adr/`). Do not edit versioned docs
 *   `integrations/`: Platform-specific integration logic (Terraform, BitOL, data quality).

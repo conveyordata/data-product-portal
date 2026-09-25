@@ -9,7 +9,7 @@ import styles from './dataset-actions.module.scss';
 
 // TODO: Catalog platforms for output ports (e.g. Collibra/Datahub) are not yet exposed
 // through the backend plugin system. That system currently mixes data-product-scoped
-// and output-port-scoped plugins into a single list (e.g. Coder/GitHub vs RustFS) -
+// and output-port-scoped plugins into a single list (e.g. GitHub vs S3) -
 // to be investigated as part of the wider plugin rework.
 const dataPlatforms: CustomDropdownItemProps<string>[] = [];
 

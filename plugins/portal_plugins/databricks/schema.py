@@ -1,14 +1,17 @@
+import json
 from typing import ClassVar, Optional, Self
-from uuid import UUID
 
 from fastapi import HTTPException, status
 from pydantic import model_validator
 from sqlalchemy.orm import Session
 
-from app.configuration.environments.platform_service_configurations.schemas import (
-    AWSGlueConfig,
+from app.configuration.environments.platform_configurations.service import (
+    EnvironmentPlatformConfigurationService,
 )
-from app.core.aws.get_url import get_aws_url
+from app.configuration.environments.platform_service_configurations.schemas import (
+    DatabricksConfig,
+)
+from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.schema import DataProduct
 from app.technical_asset_configuration.base_schema import (
     FieldDependency,
@@ -20,48 +23,45 @@ from app.technical_asset_configuration.base_schema import (
     UIElementSelect,
     UIElementString,
 )
-from app.technical_asset_configuration.enums import AccessGranularity, UIElementType
-from portal_plugins.glue.mcp_instructions import MCP_INSTRUCTIONS
-from portal_plugins.glue.model import (
+from portal_plugins.databricks.model import (
     NAME,
 )
-from portal_plugins.glue.model import (
-    GlueTechnicalAssetConfiguration as GlueTechnicalAssetConfigurationModel,
+from portal_plugins.databricks.model import (
+    DatabricksTechnicalAssetConfiguration as DatabricksTechnicalAssetConfigurationModel,
 )
-from app.users.schema import User
+from app.technical_asset_configuration.enums import AccessGranularity, UIElementType
 
 
-class GlueTechnicalAssetConfiguration(TechnicalAssetPlugin):
+class DatabricksTechnicalAssetConfiguration(TechnicalAssetPlugin):
     name: ClassVar[str] = NAME
     version: ClassVar[str] = "1.0"
-    mcp_instructions: ClassVar[str] = MCP_INSTRUCTIONS
 
-    database: str
-    database_suffix: str = ""
+    catalog: str
+    schema: str = ""
     table: str = "*"
     bucket_identifier: str = ""
-    database_path: str = ""
+    catalog_path: str = ""
     table_path: str = ""
     access_granularity: AccessGranularity
 
     _platform_metadata = PlatformMetadata(
-        display_name="Glue",
-        icon_name="glue-logo.svg",
-        icon_package="portal_plugins.glue",
-        platform_key="glue",
-        parent_platform="aws",
+        display_name="Databricks",
+        icon_name="databricks-logo.svg",
+        icon_package="portal_plugins.databricks",
+        platform_key="databricks",
+        parent_platform=None,
         result_label="Resulting table",
         result_tooltip="The table you can access through this technical asset",
-        detailed_name="Database",
+        detailed_name="Schema",
     )
 
     class Meta:
-        orm_model = GlueTechnicalAssetConfigurationModel
+        orm_model = DatabricksTechnicalAssetConfigurationModel
 
     @model_validator(mode="after")
     def validate_paths(self) -> Self:
-        if not self.database_path:
-            self.database_path = self.database
+        if not self.catalog_path:
+            self.catalog_path = self.catalog
         if not self.table_path:
             self.table_path = self.table
         if self.access_granularity == AccessGranularity.Schema:
@@ -69,55 +69,53 @@ class GlueTechnicalAssetConfiguration(TechnicalAssetPlugin):
         return self
 
     def validate_configuration(self, data_product: DataProduct, db: Session):
-        if not self.database.startswith(data_product.namespace):
-            raise ValueError("Invalid database specified")
+        # If product aligned
+        if not self.catalog.startswith(data_product.namespace):
+            raise ValueError("Invalid catalog specified")
 
     def on_create(self):
         pass
 
-    def render_template(self, template, **context):
-        return ".".join(
-            [
-                part.rstrip("_")
-                for part in super().render_template(template, **context).split(".")
-            ]
-        )
-
     def get_configuration(
-        self, configs: list[AWSGlueConfig]
-    ) -> Optional[AWSGlueConfig]:
+        self, configs: list[DatabricksConfig]
+    ) -> Optional[DatabricksConfig]:
         return next(
-            (config for config in configs if config.identifier == self.database), None
+            (config for config in configs if config.identifier == self.catalog), None
         )
 
     @classmethod
-    def get_url(
-        cls, id: UUID, db: Session, actor: User, environment: Optional[str] = None
-    ) -> str:
-        if environment is None:
+    def get_url(cls, id, db, actor, environment=None) -> str:
+        platform_config = EnvironmentPlatformConfigurationService(
+            db
+        ).get_env_platform_config(environment, "Databricks")
+        data_product = db.get(DataProductModel, id)
+        config = json.loads(platform_config)["workspace_urls"]
+        if str(data_product.domain_id) not in config:
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Environment is required to get the URL for S3 technical asset configurations",
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=(
+                    f"Workspace not configured for domain {data_product.domain.name}"
+                ),
             )
-        return get_aws_url(id, db, actor, environment)
+        return config[str(data_product.domain_id)]
 
     @classmethod
     def get_ui_metadata(cls, db: Session) -> list[UIElementMetadata]:
         base_metadata = super().get_ui_metadata(db)
         base_metadata += [
             UIElementMetadata(
-                name="database",
-                label="Database",
+                name="catalog",
+                label="Catalog",
                 type=UIElementType.Select,
                 required=True,
                 use_namespace_when_not_source_aligned=True,
                 select=UIElementSelect(options=cls.get_platform_options(db)),
             ),
             UIElementMetadata(
-                name="database_suffix",
+                name="schema",
                 type=UIElementType.String,
-                label="Database suffix",
-                tooltip="The name of the database to give write access to. Defaults to data product namespace",
+                label="Schema",
+                tooltip="The name of the schema to give write access to. Defaults to data product namespace",
                 required=True,
             ),
             UIElementMetadata(
@@ -153,13 +151,3 @@ class GlueTechnicalAssetConfiguration(TechnicalAssetPlugin):
             ),
         ]
         return base_metadata
-
-    @classmethod
-    def get_parent_platform(cls) -> Optional[str]:
-        return "aws"
-
-    @classmethod
-    def register_mcp_tools(cls, mcp: object) -> None:
-        from portal_plugins.glue.mcp_tools import register_tools
-
-        register_tools(mcp)  # type: ignore[arg-type]
