@@ -56,11 +56,17 @@ repos:
       language_version: python3.13
       files: ^backend/
       args: [--config-file=backend/pyproject.toml]
-      additional_dependencies:
+      additional_dependencies: &mypy-stubs
         - types-cachetools
         - types-requests
         - types-pytz
         - types-PyYAML
+    - id: mypy
+      name: mypy (plugins)
+      language_version: python3.13
+      files: ^plugins/
+      args: [--config-file=plugins/pyproject.toml]
+      additional_dependencies: *mypy-stubs
 - repo: https://github.com/pre-commit/mirrors-mypy
   rev: v1.16.1
   hooks:
@@ -105,7 +111,7 @@ repos:
       entry: ./scripts/check_generated_plugin_configurations.sh
       language: script
       types: [text]
-      files: ^backend/app/technical_asset_configuration/.*/(schema|model)\.py$
+      files: ^(backend/app/technical_asset_configuration|plugins/portal_plugins)/.*/(schema|model)\.py$
       pass_filenames: false
     - id: check-generated-cli
       name: Check generated CLI is up to date

@@ -1,6 +1,10 @@
 from typing import ClassVar
 
-from app.mcp.loader import load_plugins
+import pytest
+from fastmcp import FastMCP
+
+from app.mcp.loader import get_plugin_instructions, load_plugins
+from app.plugins.registry import PluginRegistry
 from app.technical_asset_configuration.base_schema import TechnicalAssetPlugin
 
 
@@ -14,6 +18,7 @@ class BrokenPlugin(TechnicalAssetPlugin):
 
 class WorkingPlugin(TechnicalAssetPlugin):
     name: ClassVar[str] = "WorkingPlugin"
+    mcp_instructions: ClassVar[str] = "working plugin instructions"
 
     registered: ClassVar[bool] = False
 
@@ -22,27 +27,40 @@ class WorkingPlugin(TechnicalAssetPlugin):
         cls.registered = True
 
 
-def test_load_plugins__keeps_going_when_a_plugin_raises(monkeypatch):
+def test_load_plugins__registers_every_enabled_plugin(monkeypatch):
     WorkingPlugin.registered = False
+    monkeypatch.setattr(
+        "app.mcp.loader.plugin_registry.enabled", lambda: [WorkingPlugin]
+    )
+
+    registered = load_plugins(mcp=None)
+
+    assert WorkingPlugin.registered
+    assert registered == [WorkingPlugin]
+
+
+def test_load_plugins__propagates_a_plugins_exception(monkeypatch):
     monkeypatch.setattr(
         "app.mcp.loader.plugin_registry.enabled",
         lambda: [BrokenPlugin, WorkingPlugin],
     )
 
-    load_plugins(mcp=None)
+    with pytest.raises(RuntimeError, match="this plugin is broken"):
+        load_plugins(mcp=None)
 
-    assert WorkingPlugin.registered
 
+def test_get_plugin_instructions__joins_instructions_from_plugins_that_declare_them():
+    class NoInstructionsPlugin(TechnicalAssetPlugin):
+        name: ClassVar[str] = "NoInstructionsPlugin"
 
-def test_load_plugins__logs_the_plugin_that_failed(monkeypatch):
-    logged = []
-    monkeypatch.setattr(
-        "app.mcp.loader.logger.exception", lambda message: logged.append(message)
+    assert (
+        get_plugin_instructions([WorkingPlugin, NoInstructionsPlugin])
+        == "working plugin instructions"
     )
-    monkeypatch.setattr(
-        "app.mcp.loader.plugin_registry.enabled", lambda: [BrokenPlugin]
-    )
 
-    load_plugins(mcp=None)
 
-    assert logged == ["Plugin 'BrokenPlugin' failed to register MCP tools, skipping"]
+def test_register_mcp_tools__every_discovered_plugin_registers_without_raising():
+    mcp = FastMCP()
+
+    for plugin in PluginRegistry().discovered():
+        plugin.register_mcp_tools(mcp)
