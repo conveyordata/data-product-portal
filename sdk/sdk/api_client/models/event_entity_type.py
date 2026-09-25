@@ -3,6 +3,7 @@ from enum import Enum
 
 class EventEntityType(str, Enum):
     DATA_PRODUCT = "data_product"
+    EXPLORATION = "exploration"
     OUTPUT_PORT = "output_port"
     TECHNICAL_ASSET = "technical_asset"
     USER = "user"

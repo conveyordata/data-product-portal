@@ -333,6 +333,10 @@ type GetUsersRes interface {
 	getUsersRes()
 }
 
+type GrantOutputPortAccessRes interface {
+	grantOutputPortAccessRes()
+}
+
 type IngestOutputPortContractRes interface {
 	ingestOutputPortContractRes()
 }

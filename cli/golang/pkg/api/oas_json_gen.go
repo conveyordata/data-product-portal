@@ -12002,6 +12002,8 @@ func (s *EventEntityType) Decode(d *jx.Decoder) error {
 		*s = EventEntityTypeTechnicalAsset
 	case EventEntityTypeUser:
 		*s = EventEntityTypeUser
+	case EventEntityTypeExploration:
+		*s = EventEntityTypeExploration
 	default:
 		*s = EventEntityType(v)
 	}
@@ -14857,9 +14859,15 @@ func (s *GetEventHistoryResponseItem) encodeFields(e *jx.Encoder) {
 			s.TechnicalAsset.Encode(e)
 		}
 	}
+	{
+		if s.Exploration.Set {
+			e.FieldStart("exploration")
+			s.Exploration.Encode(e)
+		}
+	}
 }
 
-var jsonFieldsNameOfGetEventHistoryResponseItem = [15]string{
+var jsonFieldsNameOfGetEventHistoryResponseItem = [16]string{
 	0:  "id",
 	1:  "name",
 	2:  "subject_id",
@@ -14875,6 +14883,7 @@ var jsonFieldsNameOfGetEventHistoryResponseItem = [15]string{
 	12: "user",
 	13: "output_port",
 	14: "technical_asset",
+	15: "exploration",
 }
 
 // Decode decodes GetEventHistoryResponseItem from json.
@@ -15045,6 +15054,16 @@ func (s *GetEventHistoryResponseItem) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"technical_asset\"")
+			}
+		case "exploration":
+			if err := func() error {
+				s.Exploration.Reset()
+				if err := s.Exploration.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"exploration\"")
 			}
 		default:
 			return d.Skip()
@@ -17739,6 +17758,178 @@ func (s *GlobalRoleAssignmentResponse) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
+// Encode encodes GrantOutputPortAccessOKApplicationJSON as json.
+func (s GrantOutputPortAccessOKApplicationJSON) Encode(e *jx.Encoder) {
+	unwrapped := jx.Raw(s)
+
+	if len(unwrapped) != 0 {
+		e.Raw(unwrapped)
+	}
+}
+
+// Decode decodes GrantOutputPortAccessOKApplicationJSON from json.
+func (s *GrantOutputPortAccessOKApplicationJSON) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode GrantOutputPortAccessOKApplicationJSON to nil")
+	}
+	var unwrapped jx.Raw
+	if err := func() error {
+		v, err := d.RawAppend(nil)
+		unwrapped = jx.Raw(v)
+		if err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = GrantOutputPortAccessOKApplicationJSON(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s GrantOutputPortAccessOKApplicationJSON) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *GrantOutputPortAccessOKApplicationJSON) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *GrantOutputPortAccessRequest) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *GrantOutputPortAccessRequest) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("consuming_abstract_data_product_id")
+		json.EncodeUUID(e, s.ConsumingAbstractDataProductID)
+	}
+	{
+		e.FieldStart("justification")
+		e.Str(s.Justification)
+	}
+	{
+		if s.AccessModeID.Set {
+			e.FieldStart("access_mode_id")
+			s.AccessModeID.Encode(e)
+		}
+	}
+}
+
+var jsonFieldsNameOfGrantOutputPortAccessRequest = [3]string{
+	0: "consuming_abstract_data_product_id",
+	1: "justification",
+	2: "access_mode_id",
+}
+
+// Decode decodes GrantOutputPortAccessRequest from json.
+func (s *GrantOutputPortAccessRequest) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode GrantOutputPortAccessRequest to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "consuming_abstract_data_product_id":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := json.DecodeUUID(d)
+				s.ConsumingAbstractDataProductID = v
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"consuming_abstract_data_product_id\"")
+			}
+		case "justification":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Str()
+				s.Justification = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"justification\"")
+			}
+		case "access_mode_id":
+			if err := func() error {
+				s.AccessModeID.Reset()
+				if err := s.AccessModeID.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"access_mode_id\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode GrantOutputPortAccessRequest")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000011,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfGrantOutputPortAccessRequest) {
+					name = jsonFieldsNameOfGrantOutputPortAccessRequest[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *GrantOutputPortAccessRequest) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *GrantOutputPortAccessRequest) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode implements json.Marshaler.
 func (s *HTTPValidationError) Encode(e *jx.Encoder) {
 	e.ObjStart()
@@ -20381,6 +20572,55 @@ func (s OptNilEventEntityType) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *OptNilEventEntityType) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes Exploration as json.
+func (o OptNilExploration) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	if o.Null {
+		e.Null()
+		return
+	}
+	o.Value.Encode(e)
+}
+
+// Decode decodes Exploration from json.
+func (o *OptNilExploration) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptNilExploration to nil")
+	}
+	if d.Next() == jx.Null {
+		if err := d.Null(); err != nil {
+			return err
+		}
+
+		var v Exploration
+		o.Value = v
+		o.Set = true
+		o.Null = true
+		return nil
+	}
+	o.Set = true
+	o.Null = false
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptNilExploration) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptNilExploration) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

@@ -91,6 +91,7 @@ const (
 	GetUserNotificationsOperation                     OperationName = "GetUserNotifications"
 	GetUsersOperation                                 OperationName = "GetUsers"
 	GetVersionOperation                               OperationName = "GetVersion"
+	GrantOutputPortAccessOperation                    OperationName = "GrantOutputPortAccess"
 	IngestOutputPortContractOperation                 OperationName = "IngestOutputPortContract"
 	IngestOutputPortContractYamlOperation             OperationName = "IngestOutputPortContractYaml"
 	IsAdminOperation                                  OperationName = "IsAdmin"

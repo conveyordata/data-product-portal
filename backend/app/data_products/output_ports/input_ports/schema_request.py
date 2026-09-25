@@ -20,3 +20,9 @@ class RevokeOutputPortAsInputPortRequest(ORMModel):
 
 class RemoveOutputPortAsInputPortRequest(ORMModel):
     consuming_data_product_id: UUID
+
+
+class GrantOutputPortAccessRequest(ORMModel):
+    consuming_abstract_data_product_id: UUID
+    justification: str
+    access_mode_id: Optional[UUID] = None

@@ -1553,6 +1553,8 @@ func (s EventEntityType) Validate() error {
 		return nil
 	case "user":
 		return nil
+	case "exploration":
+		return nil
 	default:
 		return errors.Errorf("invalid value: %v", s)
 	}
@@ -2304,6 +2306,24 @@ func (s *GetEventHistoryResponseItem) Validate() error {
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
 			Name:  "technical_asset",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if value, ok := s.Exploration.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "exploration",
 			Error: err,
 		})
 	}

@@ -7,7 +7,14 @@ import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
 from httpx import Response
+from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 
+from app.abstract_data_product.input_ports.enums import (
+    InputPortRequestDecision,
+    InputPortStatus,
+)
+from app.abstract_data_product.input_ports.model import InputPort
 from app.abstract_data_product.type import AbstractDataProductType
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.roles.schema import Scope
@@ -16,6 +23,7 @@ from app.core.authz import REDACTION_VALUE, Action
 from app.data_products.model import DataProductVisibility
 from app.data_products.output_ports.enums import OutputPortAccessType
 from app.settings import settings
+from app.users.notifications.model import Notification
 from tests.factories import (
     AccessDurationFactory,
     DataProductFactory,
@@ -37,6 +45,144 @@ DATA_PRODUCTS_ENDPOINT = "/api/v2/data_products"
 
 class TestInputPortsRouter:
     invalid_id = "00000000-0000-0000-0000-000000000000"
+
+    @pytest.mark.parametrize(
+        "consumer_type",
+        [
+            pytest.param(AbstractDataProductType.DATA_PRODUCT, id="data-product"),
+            pytest.param(AbstractDataProductType.EXPLORATION, id="exploration"),
+        ],
+    )
+    def test_grant_output_port_access(self, client, session, consumer_type):
+        actor = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        output_port = OutputPortFactory()
+        role = RoleFactory(
+            scope=Scope.DATASET,
+            permissions=[Action.OUTPUT_PORT__APPROVE_DATAPRODUCT_ACCESS_REQUEST],
+        )
+        DatasetRoleAssignmentFactory(
+            user_id=actor.id,
+            role_id=role.id,
+            output_port_id=output_port.id,
+        )
+
+        consumer_id, consumer_owner_id = self.create_output_port_access_consumer(
+            consumer_type
+        )
+
+        response = self.grant_output_port_access(
+            client,
+            output_port.data_product_id,
+            output_port.id,
+            consumer_id,
+        )
+
+        assert response.status_code == 200, response.text
+        input_port = session.scalar(
+            select(InputPort)
+            .where(
+                InputPort.output_port_id == output_port.id,
+                InputPort.consuming_abstract_data_product_id == consumer_id,
+            )
+            .options(selectinload(InputPort.requests))
+        )
+        assert input_port.status == InputPortStatus.APPROVED
+        assert input_port.current_request.decision == InputPortRequestDecision.APPROVED
+        assert input_port.current_request.requested_by_id == consumer_owner_id
+        assert input_port.current_request.decided_by_id == actor.id
+        assert input_port.current_request.justification == "Needed for reporting"
+        assert input_port.current_request.valid_until is None
+        assert session.scalar(
+            select(Notification).where(Notification.user_id == consumer_owner_id)
+        )
+
+    @staticmethod
+    def create_output_port_access_consumer(consumer_type: AbstractDataProductType):
+        match consumer_type:
+            case AbstractDataProductType.DATA_PRODUCT:
+                owner_id = UserFactory().id
+                data_product = DataProductFactory()
+                DataProductRoleAssignmentFactory(
+                    identity_id=owner_id,
+                    data_product_id=data_product.id,
+                    role_id=RoleFactory.data_product_owner().id,
+                )
+                return data_product.id, owner_id
+
+            case AbstractDataProductType.EXPLORATION:
+                exploration = ExplorationFactory()
+                return exploration.id, exploration.owner_id
+
+        raise ValueError(f"Invalid consumer type: {consumer_type}")
+
+    def test_grant_output_port_access_requires_permission(self, client):
+        output_port = OutputPortFactory()
+        consumer = DataProductFactory()
+
+        response = self.grant_output_port_access(
+            client,
+            output_port.data_product_id,
+            output_port.id,
+            consumer.id,
+        )
+
+        assert response.status_code == 403
+
+    def test_grant_output_port_access_requires_data_product_user_owner(self, client):
+        actor = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        output_port = OutputPortFactory()
+        role = RoleFactory(
+            scope=Scope.DATASET,
+            permissions=[Action.OUTPUT_PORT__APPROVE_DATAPRODUCT_ACCESS_REQUEST],
+        )
+        DatasetRoleAssignmentFactory(
+            user_id=actor.id,
+            role_id=role.id,
+            output_port_id=output_port.id,
+        )
+
+        response = self.grant_output_port_access(
+            client,
+            output_port.data_product_id,
+            output_port.id,
+            DataProductFactory().id,
+        )
+
+        assert response.status_code == 409
+        assert (
+            response.json()["detail"]
+            == "Cannot grant access to a data product without a user owner"
+        )
+
+    def test_grant_output_port_access_rejects_wrong_producing_data_product(
+        self, client
+    ):
+        actor = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        output_port = OutputPortFactory()
+        role = RoleFactory(
+            scope=Scope.DATASET,
+            permissions=[Action.OUTPUT_PORT__APPROVE_DATAPRODUCT_ACCESS_REQUEST],
+        )
+        DatasetRoleAssignmentFactory(
+            user_id=actor.id,
+            role_id=role.id,
+            output_port_id=output_port.id,
+        )
+        consumer = DataProductFactory()
+        DataProductRoleAssignmentFactory(
+            identity_id=UserFactory().id,
+            data_product_id=consumer.id,
+            role_id=RoleFactory.data_product_owner().id,
+        )
+
+        response = self.grant_output_port_access(
+            client,
+            DataProductFactory().id,
+            output_port.id,
+            consumer.id,
+        )
+
+        assert response.status_code == 404
 
     def test_request_input_ports_for_data_product(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
@@ -935,6 +1081,23 @@ class TestInputPortsRouter:
         return client.post(
             f"{DATA_PRODUCTS_DATASETS_ENDPOINT.format(data_product_id, output_port_id)}/approve",
             json=body,
+        )
+
+    @staticmethod
+    def grant_output_port_access(
+        client: TestClient,
+        data_product_id,
+        output_port_id,
+        consuming_abstract_data_product_id,
+    ) -> Response:
+        return client.post(
+            f"{DATA_PRODUCTS_DATASETS_ENDPOINT.format(data_product_id, output_port_id)}/grant",
+            json={
+                "consuming_abstract_data_product_id": str(
+                    consuming_abstract_data_product_id
+                ),
+                "justification": "Needed for reporting",
+            },
         )
 
     @staticmethod

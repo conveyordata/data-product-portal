@@ -23,9 +23,15 @@ from app.abstract_data_product.schema_request import (
     RequestInputPortsForAbstractDataProductRequestItem,
 )
 from app.abstract_data_product.type import AbstractDataProductType
+from app.authorization.role_assignments.data_product.model import (
+    DataProductRoleAssignment,
+)
+from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.role_assignments.output_port.service import (
     RoleAssignmentService as OutputPortRoleAssignmentService,
 )
+from app.authorization.roles.model import Role
+from app.authorization.roles.schema import Prototype
 from app.configuration.access_durations.enums import AccessDurationType
 from app.configuration.access_durations.model import AccessDuration
 from app.configuration.access_durations.service import AccessDurationService
@@ -34,12 +40,14 @@ from app.core.logging.posthog_analytics import (
     PosthogAnalyticsClient,
 )
 from app.data_products import email
+from app.data_products.model import DataProduct
 from app.data_products.output_ports.enums import OutputPortAccessType
 from app.data_products.output_ports.input_ports.service import InputPortService
 from app.data_products.output_ports.model import OutputPort as OutputPortModel
 from app.data_products.output_ports.model import ensure_output_port_exists
 from app.data_products.status import AbstractDataProductStatus
-from app.users.model import User
+from app.explorations.model import Exploration
+from app.users.model import User, ensure_user_exists
 
 
 class AbstractDataProductService:
@@ -122,13 +130,15 @@ class AbstractDataProductService:
         input_port: InputPortModel,
         justification: str,
         access_mode_id: Optional[UUID] = None,
+        created_by_output_port_owner: bool = False,
+        requester: Optional[User] = None,
         *,
         actor: User,
     ) -> InputPortModel:
         access_duration = self._resolve_access_duration(adp, output_port)
         request = InputPortRequestModel(
             justification=justification,
-            requested_by=actor,
+            requested_by=requester or actor,
             requested_on=datetime.now(tz=pytz.utc),
             access_duration_type=access_duration.access_duration_type,
             requested_duration_days=access_duration.days,
@@ -137,7 +147,14 @@ class AbstractDataProductService:
         )
         self.db.add(request)
         self.db.flush()
-        if output_port.access_type == OutputPortAccessType.UNRESTRICTED:
+        if created_by_output_port_owner:
+            InputPortService(self.db).approve_request(
+                request,
+                now=datetime.now(tz=pytz.utc),
+                decided_by=actor,
+                decision_note="Access granted directly by output port owner",
+            )
+        elif output_port.access_type == OutputPortAccessType.UNRESTRICTED:
             InputPortService(self.db).approve_request(
                 request,
                 now=datetime.now(tz=pytz.utc),
@@ -166,6 +183,8 @@ class AbstractDataProductService:
         output_port_id: UUID,
         justification: str,
         access_mode_id: Optional[UUID] = None,
+        created_by_output_port_owner: bool = False,
+        requester: Optional[User] = None,
         *,
         actor: User,
     ) -> InputPortModel:
@@ -216,6 +235,8 @@ class AbstractDataProductService:
             input_port,
             justification,
             access_mode_id=access_mode_id,
+            created_by_output_port_owner=created_by_output_port_owner,
+            requester=requester,
             actor=actor,
         )
         adp.input_ports.append(input_port)
@@ -314,6 +335,73 @@ class AbstractDataProductService:
         ]
         self.db.flush()
         return input_ports
+
+    def grant_output_port_access(
+        self,
+        consumer_id: UUID,
+        data_product_id: UUID,
+        output_port_id: UUID,
+        justification: str,
+        access_mode_id: Optional[UUID],
+        *,
+        actor: User,
+    ) -> InputPortModel:
+        """
+        grant_output_port_access is meant to be used by the owner of an output port to grant direct access to a consumer
+        """
+        adp = self._get_adp_with_input_ports(consumer_id)
+        op = ensure_output_port_exists(
+            output_port_id,
+            self.db,
+            data_product_id=data_product_id,
+        )
+        requester = self._get_direct_grant_requester(adp)
+        input_port = self._add_single_input_port(
+            adp,
+            op.id,
+            justification,
+            access_mode_id=access_mode_id,
+            created_by_output_port_owner=True,
+            requester=requester,
+            actor=actor,
+        )
+        self.db.flush()
+        return input_port
+
+    def _get_direct_grant_requester(self, adp: AbstractDataProduct) -> User:
+        if isinstance(adp, Exploration):
+            return ensure_user_exists(adp.owner_id, self.db)
+
+        if isinstance(adp, DataProduct):
+            requester = self.db.scalar(
+                select(User)
+                .join(
+                    DataProductRoleAssignment,
+                    DataProductRoleAssignment.identity_id == User.id,
+                )
+                .join(Role, Role.id == DataProductRoleAssignment.role_id)
+                .where(
+                    DataProductRoleAssignment.data_product_id == adp.id,
+                    DataProductRoleAssignment.decision == DecisionStatus.APPROVED,
+                    Role.prototype == Prototype.OWNER,
+                )
+                .order_by(
+                    DataProductRoleAssignment.requested_on,
+                    DataProductRoleAssignment.id,
+                )
+                .limit(1)
+            )
+            if requester is not None:
+                return requester
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Cannot grant access to a data product without a user owner",
+            )
+
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Unsupported consumer type",
+        )
 
     def renew_input_port(
         self,

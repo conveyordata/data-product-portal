@@ -21,6 +21,8 @@ what is the justification for accessing this data, for what period of time, who 
 
 Input Ports allow tracking the consumers of a certain **[Output Port](./output-ports)**.
 By listing all the consuming Input Ports, an Output Port owner can easily track the usage of their assets.
+Users who can approve access requests can also grant access directly from the Output Port's **Consumers** tab by selecting a Data Product or Exploration, providing a business justification, and choosing an access mode when the Output Port has access modes configured.
+The consumer owner is notified when access is granted.
 The owner of the data always stays in control, and can **revoke** a consumer's access at any time.
 
 Access can be granted **permanently** or **time-bound** (valid for a limited number of days), depending on the portal's [Access Duration Policy](./output-ports#access-duration-policy) for the consuming type and what the requester asked for.
