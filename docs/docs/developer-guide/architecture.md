@@ -77,7 +77,7 @@ When relevant API calls complete successfully, the backend emits a webhook event
 
 The backend supports a **plugin system** that allows platform-specific behaviour to be injected without modifying core logic. Plugins handle concerns such as data output configuration, technical asset validation, and platform-specific mappings (e.g. S3 paths, Glue tables, Snowflake schemas).
 
-Plugins are configured via the `ENABLED_PLUGINS` environment variable.
+Plugins are Python packages that the backend discovers at startup through entry points, and they are enabled via the `ENABLED_PLUGINS` environment variable. See [Adding Integrations](./adding-integrations.md) to build your own.
 
 ### Database
 

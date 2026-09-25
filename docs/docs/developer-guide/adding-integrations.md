@@ -1,450 +1,281 @@
 # Adding Integrations to the Data Product Portal
 
-This guide explains the core configuration concepts and walks you through adding a new platform integration (e.g., Azure Blob Storage, AWS S3, Snowflake).
+**Warning**: Installations older than portal 0.7.3 must upgrade to 0.7.3 before moving to 0.8.0, because the technical asset tables changed and the older migration logic is gone; see the [release notes](../release-notes.md).
 
-## Core Concepts
+**Warning**: Provisioners must switch their technical asset imports from `sdk.api_client.models` to `sdk.plugins`, because plugin classes are no longer known when the API is generated; see the [release notes](../release-notes.md).
 
-The configuration system has three layers: **Platforms**, **Platform Services**, and **Environments**. Together they define *what* infrastructure is available and *where* it is deployed.
+Your data products live on real tools: a database in Glue, a bucket in S3, a repository in GitHub. Integrations connect the portal to those tools. They let a data product owner register the resources their product owns, and they give everyone a quick link from the data product page to the tool itself.
 
-### Platform
+The portal ships with a set of integrations out of the box (see [Integrations](./integrations.md)). If the tool you use isn't among them, you can write your own as a plugin. A plugin is a small Python package that you install next to the portal. The portal picks it up when it starts, so you don't have to change the portal's code or maintain a fork of it.
 
-A **Platform** represents a cloud provider or technology vendor (e.g., AWS, Azure, Databricks, Snowflake). It is a simple entity with a name and ID.
 
-Platforms are defined in `app/configuration/platforms/`.
+This guide uses the [Glue plugin](https://github.com/conveyordata/data-product-portal/tree/main/plugins/portal_plugins/glue) as its running example. With it, a data product owner registers a Glue database as a [technical asset](../concepts/technical-assets.md) of their product. It lives in its own package, [`plugins/`](https://github.com/conveyordata/data-product-portal/tree/main/plugins), and registers itself the same way this guide describes, so it's the best place to see complete, working code. Because it sits in the portal's own repository, it doesn't list `data-product-portal` as a dependency, but yours should. Still we believe it to be a good reference
 
-### Platform Service
+## Step 1: Install the portal package
 
-A **Platform Service** represents a specific service offered by a platform (e.g., S3 on AWS, Blob Storage on Azure, Unity Catalog on Databricks). Each service belongs to exactly one platform.
+Building a plugin starts with installing the `data-product-portal` package from PyPI. It is published with every release since 0.8.0 and contains everything you need to build a plugin, and more: the base class your plugin extends, the building blocks for forms, and access to the portal's environments and platforms.
 
-Key fields:
-- **`name`** -- identifier used to look up the service (e.g., `s3`, `azureblob`, `snowflake`).
-- **`result_string_template`** -- a Python format string rendered with the technical asset's configuration to produce a human-readable result (e.g., `{bucket}/{path}`).
-- **`technical_info_template`** -- a Python format string rendered per-environment with both the technical asset configuration and environment-specific values.
+Always use the same version as the portal you run. If your portal runs 0.8.0, install 0.8.0. The portal image already contains this package, so a matching version means nothing gets replaced when your plugin is installed into it later.
 
-Platform services are defined in `app/configuration/platforms/platform_services/`.
+Create a new project and add the package. Depending on the package manager you use:
 
-### Environment
-
-An **Environment** represents a deployment stage (e.g., dev, staging, production). Environments are where the platform team configures concrete infrastructure details.
-
-Environments are defined in `app/configuration/environments/`.
-
-Each environment has an `is_global` flag. A **Domain** either inherits the full list of global environments (the default, when it hasn't customized its own list) or is pinned to a specific subset via its own `environments` list. Toggling `is_global` on an environment changes what every domain without a custom list sees, so it's managed from the Metadata settings tab rather than being freely editable per environment.
-
-### How Defaults Work
-
-When defining an environment, the platform team configures two types of defaults:
-
-1. **Environment Platform Configuration** -- platform-level settings for a specific environment.
-   For example, the AWS platform config for the "dev" environment might specify `account_id`, `region`, and `can_read_from`. For Azure it would be `tenant_id`, `subscription_id`, and `region`.
-
-   Schema location: `app/configuration/environments/platform_configurations/schemas/`
-
-2. **Environment Platform Service Configuration** -- service-level settings for a specific environment.
-   For example, the S3 service config for "dev" might list available buckets with their ARNs and KMS keys. For Azure Blob, it would list available storage accounts, resource groups, and containers.
-
-   Schema location: `app/configuration/environments/platform_service_configurations/schemas/`
-
-There is also a **global Platform Service Configuration** (not environment-specific) that defines the list of identifiers available across all environments (e.g., `["datalake", "ingress", "egress"]`). This lives in `app/configuration/platform_service_configurations/`.
-
-```
-Platform (e.g., Azure)
-│
-├── Platform Service (e.g., azureblob)
-│   ├── Global Service Config: ["datalake", "ingress", "egress"]
-│   └── templates: result_string_template, technical_info_template
-│
-└── Per-Environment Configuration
-    ├── Environment Platform Config (dev):
-    │     tenant_id, subscription_id, region
-    │
-    └── Environment Platform Service Config (dev, azureblob):
-          [{identifier: "datalake", storage_account_name: "...", container_name: "...", resource_group_name: "..."},
-           {identifier: "ingress", ...}]
-```
-
-### Technical Assets (Data Output Configurations)
-
-When a data product owner creates a **Technical Asset**, they pick a platform service and fill in service-specific fields (e.g., bucket name, path, schema). The technical asset configuration is what ties a data product to real infrastructure.
-
-Technical asset configurations use a **plugin system** based on SQLAlchemy's Class Table Inheritance and Pydantic's discriminated unions. Each plugin:
-- Has its own database table (for service-specific columns).
-- Has a Pydantic schema with UI metadata (for form generation).
-- Registers itself in a union type so the API can serialize/deserialize it.
-
-These live in `app/technical_asset_configuration/<service_name>/`.
-
-## Step-by-Step: Adding a New Integration
-
-We'll use Azure Blob Storage as the running example. The same pattern applies to any new service.
-
-### 1. Define the Environment Platform Configuration Schema
-
-If your platform is new (not just a new service on an existing platform), create a platform config schema.
-
-**File:** `app/configuration/environments/platform_configurations/schemas/azure_schema.py`
-
-```python
-from app.shared.schema import ORMModel
-
-class AzureEnvironmentPlatformConfiguration(ORMModel):
-    tenant_id: str
-    subscription_id: str
-    region: str
-```
-
-Register it in the `ConfigType` union in `app/configuration/environments/platform_configurations/schema_response.py`.
-
-### 2. Define the Environment Platform Service Configuration Schema
-
-Create a schema describing what the platform team configures per environment for your service.
-
-**File:** `app/configuration/environments/platform_service_configurations/schemas/azure_blob_schema.py`
-
-```python
-from .config_schema import BaseEnvironmentPlatformServiceConfigurationDetail
-
-class AzureBlobConfig(BaseEnvironmentPlatformServiceConfigurationDetail):
-    storage_account_name: str
-    resource_group_name: str
-    container_name: str
-```
-
-Every service config must extend `BaseEnvironmentPlatformServiceConfigurationDetail`, which provides an `identifier` field used to match technical assets to their environment-specific config.
-
-Export it in the `schemas/__init__.py` and add it to the `ConfigType` union in `app/configuration/environments/platform_service_configurations/schema_response.py`.
-
-### 3. Create the Technical Asset Database Model
-
-Create a new table for your service-specific columns using Class Table Inheritance.
-
-**File:** `app/technical_asset_configuration/azure_blob/model.py`
-
-```python
-from sqlalchemy import String
-from sqlalchemy.orm import Mapped, mapped_column
-from app.technical_asset_configuration.base_model import BaseTechnicalAssetConfiguration
-
-class AzureBlobTechnicalAssetConfiguration(BaseTechnicalAssetConfiguration):
-    __tablename__ = "azure_blob_technical_asset_configurations"
-
-    storage_account: Mapped[str] = mapped_column(String, nullable=True)
-    resource_group: Mapped[str] = mapped_column(String, nullable=True)
-    path: Mapped[str] = mapped_column(String, nullable=True)
-    container_name: Mapped[str] = mapped_column(String, nullable=True)
-
-    __mapper_args__ = {
-        "polymorphic_identity": "AzureBlobTechnicalAssetConfiguration",
-    }
-```
-
-The `polymorphic_identity` string must match the enum value you'll add in step 5.
-
-### 4. Create the Technical Asset Plugin
-
-This is the core of your integration. It defines configuration fields, UI metadata, template rendering, and environment config matching.
-
-**File:** `app/data_output_configuration/azure_blob/schema.py`
-
-```python
-from typing import ClassVar, Literal, Optional
-from uuid import UUID
-from sqlalchemy.orm import Session
-
-from app.data_output_configuration.base_schema import (
-    AssetProviderPlugin, PlatformMetadata,
-    UIElementMetadata, UIElementSelect, UIElementString,
-)
-from app.data_output_configuration.data_output_types import DataOutputTypes
-from app.data_output_configuration.enums import UIElementType
-from app.data_output_configuration.azure_blob.model import (
-    AzureBlobTechnicalAssetConfiguration as AzureBlobTechnicalAssetConfigurationModel,
-)
-from app.data_products.schema import DataProduct
-from app.users.schema import User
-
-
-class AzureBlobTechnicalAssetConfiguration(AssetProviderPlugin):
-    name: ClassVar[str] = "AzureBlobTechnicalAssetConfiguration"
-    version: ClassVar[str] = "1.0"
-
-    storage_account: str
-    path: str = ""
-    resource_group: str
-    container_name: str
-
-    configuration_type: Literal[DataOutputTypes.AzureBlobTechnicalAssetConfiguration]
-
-    _platform_metadata = PlatformMetadata(
-        display_name="Blob",
-        icon_name="azure-storage-account-logo.svg",
-        platform_key="azureblob",       # must match the platform_services.name in DB
-        parent_platform="azure",         # groups this under the Azure platform in UI
-        result_label="Resulting path",
-        result_tooltip="The path you can access through this technical asset",
-        detailed_name="Path",
-    )
-
-    class Meta:
-        orm_model = AzureBlobTechnicalAssetConfigurationModel
-
-    def validate_configuration(self, data_product: DataProduct):
-        pass  # Add validation logic if needed
-
-    def on_create(self):
-        pass  # Hook called when a technical asset is created
-
-    @classmethod
-    def get_url(cls, id: UUID, db: Session, actor: User, environment: Optional[str] = None) -> str:
-        return "https://portal.azure.com/"
-
-    @classmethod
-    def get_ui_metadata(cls, db: Session) -> list[UIElementMetadata]:
-        base_metadata = super().get_ui_metadata(db)
-        base_metadata += [
-            UIElementMetadata(
-                name="storage_account",
-                label="Storage Account",
-                type=UIElementType.Select,
-                required=True,
-                select=UIElementSelect(options=cls.get_platform_options(db)),
-            ),
-            UIElementMetadata(
-                name="container_name",
-                label="Container",
-                required=True,
-                type=UIElementType.Select,
-                select=UIElementSelect(options=cls.get_platform_options(db)),
-            ),
-            # ... more fields
-        ]
-        return base_metadata
-```
-
-Key things to implement in your plugin:
-- **`_platform_metadata`** -- controls how the service appears in the UI. Set `platform_key` to match the `platform_services.name` in the database so the options dropdown can look up the global config.
-- **`get_ui_metadata()`** -- returns a list of form fields. Use `get_platform_options(db)` to populate select dropdowns from the global `PlatformServiceConfiguration`.
-- **`get_configuration()`** -- given a list of environment configs, return the one matching this technical asset (typically matched by `identifier`).
-- **`render_template()`** -- override if you need to post-process template output (e.g., S3 strips empty path segments, Snowflake replaces hyphens).
-- **`get_url()`** -- returns a link to the resource in the cloud provider's console.
-
-### 5. Register the Plugin
-
-**a)** Add an entry to the `DataOutputTypes` enum:
-
-**File:** `app/data_output_configuration/data_output_types.py`
-```python
-class DataOutputTypes(str, Enum):
-    # ... existing types
-    AzureBlobTechnicalAssetConfiguration = "AzureBlobTechnicalAssetConfiguration"
-```
-
-**b)** Add to the `DataOutputs` union and `DataOutputMap`:
-
-**File:** `app/data_output_configuration/schema_union.py`
-
-**c)** Export from `app/data_output_configuration/__init__.py`
-
-### 6. Create a Database Migration
-
-If your plugin owns its own table(s), add a `versions/` folder next to `schema.py` (i.e. `app/technical_asset_configuration/<your_plugin>/versions/`). The portal finds it automatically from the location of your plugin class — nothing needs to be declared on the class itself.
-
-Write the baseline revision by hand (there is no autogenerate against a plugin's own isolated migration history):
-
-```python
-# app/technical_asset_configuration/<your_plugin>/versions/<your_plugin>_0001_baseline.py
-"""Create <your_plugin>_assets
-
-Revision ID: <your_plugin>_0001_baseline
-Revises:
-"""
-
-import sqlalchemy as sa
-from alembic import op
-from sqlalchemy.dialects import postgresql
-
-revision = "<your_plugin>_0001_baseline"
-down_revision = None
-branch_labels = None
-depends_on = None
-
-
-def upgrade() -> None:
-    op.create_table(
-        "<your_plugin>_assets",
-        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True),
-        # ... other columns
-    )
-
-
-def downgrade() -> None:
-    op.drop_table("<your_plugin>_assets")
-```
-
-At deploy time, the portal always migrates every plugin's table(s) to the latest revision in its `versions/` folder — there is nothing to configure for "which revision" a plugin should be at.
-
-If your plugin has no table of its own, skip this step entirely; no `versions/` folder means the portal does nothing for it.
-
----
-
-### 7. Seed Data
-
-Add seed data in `sample_data.sql` for:
-- The **platform** (if new): `INSERT INTO platforms ...`
-- The **platform service**: `INSERT INTO platform_services ...` with `result_string_template` and `technical_info_template`
-- The **global service config**: `INSERT INTO platform_service_configs ...` with the list of available identifiers (e.g., `["datalake", "ingress", "egress"]`)
-- **Environment platform config**: `INSERT INTO env_platform_configs ...` with platform credentials per environment
-- **Environment service config**: `INSERT INTO env_platform_service_configs ...` with the concrete infrastructure details per environment
-
-### 8. Backend: Enable the Plugin
-
-Update `backend/app/settings.py` to add your plugin to the list of available plugins.
-
-```python
-class Settings(BaseSettings):
-    # ...
-    ENABLED_PLUGINS: list[str] = [
-        # ... existing plugins
-        "PostgreSQLTechnicalAssetConfiguration",
-    ]
-```
-
-#### Enabling via Environment Variables
-
-Alternatively, you can override the enabled plugins using the `ENABLED_PLUGINS` environment variable. This is useful for different deployments or demo environments. The value should be a JSON-encoded list of strings.
-
-In your `.env` or `compose.yaml`:
-
-```env
-ENABLED_PLUGINS='["PostgreSQLTechnicalAssetConfiguration", "S3TechnicalAssetConfiguration"]'
-```
-
----
-
-### 9. Frontend: Add Assets and Update Generated Code
-
-To display the integration correctly in the UI:
-
-1. **Icons:** Add an SVG logo (e.g., `postgresql-logo.svg`) and a border icon (e.g., `postgresql-border-icon.svg`) to `frontend/src/assets/icons/`.
-2. **Code Generation:** Because the OpenAPI spec has changed (due to the backend modifications), you need to regenerate the frontend API client.
-
-Ensure your backend is running, then generate the new spec and update the frontend:
+With Poetry:
 
 ```bash
-# Export the new OpenAPI spec
-task update:open-api-spec
-
-# Regenerate frontend API clients
-cd frontend
-npm run generate-api
+poetry new my-portal-plugins
+cd my-portal-plugins
+poetry add "data-product-portal==0.8.0"
 ```
 
-This will automatically update the files in `frontend/src/store/api/services/generated/`.
+With uv:
 
----
+```bash
+uv init --lib my-portal-plugins
+cd my-portal-plugins
+uv add data-product-portal>=0.8.0
+```
 
-## Summary
+With setuptools, list it in `install_requires` in your `setup.py`, and install it into your environment:
 
-| Concept | What it represents | Who configures it | Where in code |
-|---|---|---|---|
-| Platform | Cloud provider (AWS, Azure) | Admin | `app/configuration/platforms/` |
-| Platform Service | Service on a platform (S3, Blob) | Admin | `app/configuration/platforms/platform_services/` |
-| Environment | Deployment stage (dev, prod) | Platform team | `app/configuration/environments/` |
-| Env Platform Config | Platform credentials per env | Platform team | `app/configuration/environments/platform_configurations/` |
-| Env Platform Service Config | Available resources per env | Platform team | `app/configuration/environments/platform_service_configurations/` |
-| Global Service Config | Available identifiers (all envs) | Platform team | `app/configuration/platform_service_configurations/` |
-| Technical Asset Plugin | Data output type for products | Developer | `app/data_output_configuration/<service>/` |
+```bash
+pip install data-product-portal==0.8.0
+```
 
----
+A plugin package can hold one plugin or several. Each one gets its own folder:
 
-## Database & Service Architecture
+```
+my_portal_plugins/
+└── glue/
+    ├── schema.py        # the plugin class
+    ├── model.py         # the database table
+    ├── glue-logo.svg    # the icon shown in the portal
+    └── versions/        # database migrations
+        └── glue_0001_baseline.py
+```
 
-Understanding the underlying data model helps when debugging integration issues or seeding a new environment.
+## Step 2: Write your plugin
 
-### Table Overview
+Every plugin is a Python class that extends `TechnicalAssetPlugin`. The class tells the portal what the plugin is called, how it looks in the portal, what a data product owner fills in, and where that gets stored.
+The [Glue plugin's `schema.py`](https://github.com/conveyordata/data-product-portal/blob/main/plugins/portal_plugins/glue/schema.py) has the full code. Its outline looks like this:
 
-| Table | Purpose |
-|---|---|
-| `platforms` | Top-level platform identity (e.g. `AWS`, `PostgreSQL`, `OSI`) |
-| `platform_services` | Services offered by a platform (e.g. `S3`, `Glue`). Holds `result_string_template` and `technical_info_template`. |
-| `platform_service_configs` | Available options for a service (e.g. the list of S3 bucket names). Required for every service, even if empty. The names defined here are used to render technical asset forms via `get_platform_options`, and are often linked by an `"identifier"` field in `env_platform_service_configs`. |
-| `environments` | Deployment environments (e.g. `development`, `production`) |
-| `env_platform_configs` | Environment-specific details at the platform level (e.g. AWS account details, Snowflake credentials). |
-| `env_platform_service_configs` | Environment-specific connection details for a platform/service combination. Typically used alongside `platform_service_configs` — the entries here are matched by `"identifier"` in JSON to the options listed there. The correct config is looked up in each plugin's `technical_info` method. |
-| `data_output_configurations` | Polymorphic base table for technical asset configurations. Each plugin has its own child table joined on `id`. |
-| `data_outputs` | The technical asset record itself — links a data product to a `platform`, `service`, and `data_output_configurations` row |
+```python
+class GlueTechnicalAssetConfiguration(TechnicalAssetPlugin):
+    name: ClassVar[str] = "GlueTechnicalAssetConfiguration"
 
-### How Templates Work
+    # the values the owner fills in, these are handpicked for Glue so yours will look different.
+    database: str
+    table: str = "*"
 
-`platform_services.result_string_template` and `technical_info_template` are Python `.format()`-style strings rendered using the field names from the plugin's Pydantic schema. For example:
+    # This is platform metadata, that helps the portal show the plugin in the right place.
+    _platform_metadata = PlatformMetadata(display_name="Glue", parent_platform="aws", ...)
 
-- PostgreSQL: `"{database}.{schema}.{table}"` — fields `database`, `schema`, `table` come from `PostgreSQLTechnicalAssetConfiguration`
-- OSI Semantic Model: `"{model_name}"` — field `model_name` comes from `OSISemanticModelTechnicalAssetConfiguration`
+    class Meta:
+        orm_model = GlueModel  # the table that stores the values
 
-### `has_environments` Flag
+    @classmethod
+    def get_ui_metadata(cls, db):
+        # describe the form: one UIElementMetadata per field
 
-The `has_environments` flag on `PlatformMetadata` controls two things: whether the plugin needs environment-specific platform configuration, and whether the environment selector dropdown is shown on the platform tile in the UI.
+    def validate_configuration(self, data_product, db):
+        # raise an error if the input isn't acceptable
 
-| `has_environments` | `env_platform_service_configs` needed? | `platform_service_configs` needed? |
+    def get_configuration(self, configs):
+        # pick the settings that belong to this asset
+```
+
+The sections below go through this outline one part at a time, in the order you'd build it.
+
+### The name and the tile
+
+`name` identifies your plugin. It has to be unique among all plugins in your portal, and you'll use it again when you enable the plugin in step 4.
+
+`_platform_metadata` describes how your plugin looks in the portal. Every plugin shows up as a tile, and these are the settings you'll use most:
+
+- `display_name` is the label on the tile, such as "Glue".
+- `icon_name` and `icon_package` point to the tile's icon. Every plugin brings its own icon: put the SVG file in your plugin's folder, set `icon_name` to the file name, and set `icon_package` to the Python package that holds it, for example `my_portal_plugins.glue`. The portal reads the file from your package.
+- `parent_platform` groups the tile under another one. Glue appears under AWS.
+- `platform_key` links the plugin to its platform service, explained in the next section.
+- `has_environments` decides whether the tile lets you pick an environment, such as development or production. It's on by default.
+- `show_in_form` decides whether the plugin appears in the form for creating a technical asset. It's on by default.
+
+If you override `get_url`, the tile opens a link, for example to the resource in its own tool.
+
+Those are the only parts every plugin needs. A plugin that only has a name, a tile and `get_url` adds a link from the data product page to another tool. Set `show_in_form=False` and `has_environments=False` for that, and skip the rest of this step. The [GitHub plugin](https://github.com/conveyordata/data-product-portal/blob/main/backend/app/technical_asset_configuration/github/schema.py) works like this.
+
+### The platform and platform service
+
+When a data product owner creates a Glue technical asset, they pick a database from a dropdown. That list has to come from somewhere, and the right AWS account for each environment too. The portal keeps this information in three places:
+
+- A platform is a technology vendor or cloud provider, such as AWS, Azure, Databricks or Snowflake.
+- A platform service is one service of a platform, such as S3 or Glue on AWS. It holds the list of options your form offers, for example `["datalake", "ingress", "egress"]`. It also holds `result_string_template`, which turns what the owner filled in into the name everyone sees, such as `{bucket}/{path}` for S3. The names between braces are your plugin's fields.
+- An environment is a stage such as development or production. Per environment it contains the settings that differ, such as the AWS account and region, or which real bucket belongs to each option. They're linked to an option through its `identifier`.
+
+
+Your plugin uses this in two places. `get_platform_options` reads the list of options, to fill a dropdown in your form. `get_configuration` gets the settings of the chosen environment, and returns the entry that belongs to this asset, usually the one whose `identifier` matches what the owner picked. The portal already knows the format of these environment settings for the platforms it supports, such as `AWSGlueConfig` for Glue. A plugin for another tool can reuse one of them, or do without environment settings by setting `has_environments=False`.
+
+These rows live in the portal's database, and you add them with SQL. A plugin that only adds a link needs none of them:
+
+| Table | What goes in it | Needed for a plugin with a form |
 |---|---|---|
-| `True` (default) | Yes — connection details per environment | Yes — list of available options (e.g. buckets) |
-| `False` | No | **Yes — still required, use `'[]'` as config** |
+| `platforms` | The platform, such as AWS | Yes |
+| `platform_services` | The platform service, with its templates | Yes |
+| `platform_service_configs` | The list of options | Yes, use `'[]'` if there are none |
+| `env_platform_configs` | Platform settings per environment | Only if `has_environments=True` |
+| `env_platform_service_configs` | Platform service settings per environment | Only if `has_environments=True` |
 
-The `platform_service_configs` row is always required because the frontend uses it to populate `platformConfig`, which is the source of truth for `platform_id` and `service_id` in the creation form. Without it, the platform tile will appear in the UI but the form will silently fail to set these IDs.
+The portal finds these rows by name, so two names have to match your `_platform_metadata`, ignoring upper and lower case. If they don't, the form can't find your platform and creating a technical asset fails:
 
----
+- The platform service's `name` has to equal `platform_key`.
+- The platform's `name` has to equal the tile it sits under: `parent_platform` if you set one, otherwise `display_name`.
 
-## Critical Naming Conventions
-
-The frontend resolves `platform_id` and `service_id` through two independent lookups, both driven by names. Getting these wrong causes silent failures during technical asset creation.
-
-### 1. `platform.name` must equal `display_name`
-
-The `platform_id` form field is populated by matching:
-```
-platformConfig.find(config => config.platform.name === tile.label)
-```
-`tile.label` comes from `_platform_metadata.display_name`. So:
-
-```python
-# In schema.py
-_platform_metadata = PlatformMetadata(display_name="OSI", ...)
-
-# In seed SQL / DB
-INSERT INTO platforms (name) VALUES ('OSI')  -- must match display_name exactly
-```
-
-### 2. `service.name.toLowerCase()` must equal `platform_key`
-
-The `service_id` is looked up via a map keyed by `service.name.toLowerCase()`, using `platform_key` as the lookup key:
-
-```python
-# In schema.py
-_platform_metadata = PlatformMetadata(platform_key="osi", ...)
-
-# In seed SQL / DB
-INSERT INTO platform_services (name) VALUES ('OSI')  -- 'OSI'.toLowerCase() == 'osi' == platform_key ✓
-```
-
-A mismatch here means the `service_id` is never set, and the subsequent `render_technical_asset_access_path` call returns a 422.
-
-### Summary Checklist for a New Integration
-
-When seeding a new environment (e.g. `demo/basic/portal_seed.sql`), ensure all three rows exist and names align:
+For Glue, which sits under AWS, that looks like this:
 
 ```sql
--- 1. Platform — name must match _platform_metadata.display_name
-INSERT INTO platforms (name) VALUES ('MyPlatform');
-
--- 2. Service — name.toLowerCase() must match _platform_metadata.platform_key
+INSERT INTO platforms (name) VALUES ('AWS');                          -- matches parent_platform "aws"
 INSERT INTO platform_services (name, platform_id, result_string_template, technical_info_template)
-VALUES ('myplatform', <platform_id>, '{field_name}', '{other_field}');
-
--- 3. Config — required even if empty; without this the frontend cannot resolve platform_id/service_id
+VALUES ('Glue', <aws_id>, '{database}.{table}', '...');                -- matches platform_key "glue"
 INSERT INTO platform_service_configs (platform_id, service_id, config)
-VALUES (<platform_id>, <service_id>, '[]');
-
--- 4. Only if has_environments=True: environment-specific connection details
-INSERT INTO env_platform_service_configs (environment_id, platform_id, service_id, config)
-VALUES (<env_id>, <platform_id>, <service_id>, '[{...connection details...}]');
+VALUES (<aws_id>, <glue_id>, '["datalake", "ingress"]');
 ```
+
+The demo seed file [`demo/basic/portal_seed.sql`](https://github.com/conveyordata/data-product-portal/blob/main/demo/basic/portal_seed.sql) has complete examples, including the settings per environment.
+
+### The fields and the form
+
+The fields, `database` and `table` for Glue, are what a data product owner fills in for one technical asset. You pick them for your own tool.
+
+`get_ui_metadata` describes the form that asks for them. Each field in the form is one `UIElementMetadata`: a dropdown, a text box, a checkbox or a set of radio buttons, and it can depend on the value of another field. The portal draws the form for you, so you never write frontend code. A dropdown filled with the platform service's options looks like this:
+
+```python
+UIElementMetadata(
+    name="database",
+    label="Database",
+    type=UIElementType.Select,
+    required=True,
+    select=UIElementSelect(options=cls.get_platform_options(db)),
+)
+```
+
+The Glue plugin also uses a text field, radio buttons and a field that only appears for one of those radio choices, so it's a good place to see the other types.
+
+`validate_configuration` runs just before a technical asset is saved. Raise an error there when the input isn't acceptable. Glue, for example, only accepts databases that start with the data product's namespace. You can also override `render_template` if the name built from `result_string_template` needs some cleaning up.
+
+### The database table
+
+The values an owner fills in are stored in a table that belongs to your plugin. You describe it as a SQLAlchemy model in `model.py`, with one column per field, and point to it from `Meta.orm_model` in your plugin class. The model extends `BaseTechnicalAssetConfiguration`, which links each row to the portal's own record of the technical asset. Set `polymorphic_identity` to the plugin's `name`, so the portal knows which plugin a row belongs to:
+
+```python
+class GlueModel(BaseTechnicalAssetConfiguration):
+    __tablename__ = "glue_technical_asset_configurations"
+    __mapper_args__ = {"polymorphic_identity": "GlueTechnicalAssetConfiguration"}
+
+    database: Mapped[str] = mapped_column(String, nullable=True)
+    table: Mapped[str] = mapped_column(String, nullable=True)
+```
+
+The Glue plugin's [`model.py`](https://github.com/conveyordata/data-product-portal/blob/main/plugins/portal_plugins/glue/model.py) is the complete version.
+
+### Migrations
+
+The model describes the table, but something still has to create it in the database. That is what a migration does. The portal uses [Alembic](https://alembic.sqlalchemy.org/) for this, and runs your plugin's migrations together with its own every time it's deployed.
+
+Put your migrations in a `versions/` folder next to the file with your plugin class. The portal looks for that folder automatically. Write the first migration by hand; Alembic can't generate it for you here. Copying the [Glue baseline migration](https://github.com/conveyordata/data-product-portal/blob/main/plugins/portal_plugins/glue/versions/glue_0001_baseline.py) and changing the columns is the easiest start. Its core is:
+
+```python
+revision = "glue_0001_baseline"
+down_revision = None
+
+def upgrade():
+    op.create_table(
+        "glue_technical_asset_configurations",
+        sa.Column("id", UUID, sa.ForeignKey("data_output_configurations.id", ondelete="CASCADE"), primary_key=True),
+        sa.Column("database", sa.String()),
+        ...
+    )
+```
+
+A few things to keep in mind:
+
+- The `id` column has to point to `data_output_configurations.id`, the portal's own record of each technical asset.
+- Start each revision id with your plugin's name, like `glue_0001_baseline`. The portal and all plugins share one list of applied migrations, so ids have to be unique across all of them.
+- The first migration has `down_revision = None`. Each later one points to the migration before it.
+- When you add or change a field later, add a new migration to the same folder. It can also move or fill in existing data.
+
+To try your migrations before you ship them, run `python -m app.db_tool migrate` against a local database. It brings the portal and every installed plugin up to date in one go.
+
+If you ever uninstall a plugin, its table stays in the database. The migration step will then stop with an error, because it finds migrations for a plugin that is no longer there. Reinstall the plugin, or remove its rows from the `alembic_version` table if you don't need its history anymore.
+
+### MCP tools
+
+If your portal runs the MCP server, a plugin can add its own tools to it by overriding `register_mcp_tools`, and add to the server's instructions with the `mcp_instructions` attribute. The Glue plugin does both, see its [`mcp_tools.py`](https://github.com/conveyordata/data-product-portal/blob/main/plugins/portal_plugins/glue/mcp_tools.py).
+
+## Step 3: Tell the portal about your plugin
+
+The portal finds plugins through a standard Python feature called [entry points](https://packaging.python.org/en/latest/specifications/entry-points/). In your package settings, you list your plugin classes under the group `data_product_portal.plugins`. When the package is installed, the portal sees that list and loads your plugins.
+
+Each entry has a name of your choice on the left, and the location of the class on the right, written as `module:Class`. The portal's own [`plugins/pyproject.toml`](https://github.com/conveyordata/data-product-portal/blob/main/plugins/pyproject.toml) is a working example.
+
+With Poetry 2 or later, or with uv, add this to `pyproject.toml`:
+
+```toml
+[project.entry-points."data_product_portal.plugins"]
+github = "my_portal_plugins.github.schema:GitHubPlugin"
+glue = "my_portal_plugins.glue.schema:GlueTechnicalAssetConfiguration"
+```
+
+Poetry versions before 2.0 use a slightly different table:
+
+```toml
+[tool.poetry.plugins."data_product_portal.plugins"]
+github = "my_portal_plugins.github.schema:GitHubPlugin"
+```
+
+With setuptools, add it to the `setup()` call in `setup.py`:
+
+```python
+entry_points={
+    "data_product_portal.plugins": [
+        "github = my_portal_plugins.github.schema:GitHubPlugin",
+    ],
+},
+package_data={"": ["*.svg", "versions/*.py"]},
+```
+
+Your icons and the `versions/` folder have to be part of the package you build, or the portal can't find them. Setuptools leaves them out unless you list them in `package_data`, as above. Whichever tool you use, build the package and check its contents with `unzip -l dist/*.whl`.
+
+## Step 4: Add the plugin to your portal
+
+The portal runs as a Docker image, and your plugin has to be installed in that image. You don't need to rebuild the portal for this. Start from the official image and install your package on top of it:
+
+```dockerfile
+FROM public.ecr.aws/conveyordata/data-product-portal:0.8.0
+
+RUN pip install my-portal-plugins==0.1.0
+```
+
+If your package isn't published to a package index, `COPY` the built wheel into the image and `pip install` that file instead.
+
+Build the image and push it to your own registry. If you deploy with the Helm chart, point it at your image with `image.repository` and `image.tag`. The chart runs the database migrations from the same image before the portal starts, so your plugin's table is created on the first deploy.
+
+If you are using k8s to deploy your image turn the plugin on by adding its `name` to the list of enabled plugins. With Helm, that is `enabled_plugins` in your values file:
+
+```yaml
+enabled_plugins:
+  - GitHubPlugin
+  - GlueTechnicalAssetConfiguration
+```
+
+If not, set the `ENABLED_PLUGINS` environment variable to a JSON list, such as `'["GitHubPlugin", "GlueTechnicalAssetConfiguration"]'`. Tihs will enable all the plugins you list.
+
+A plugin that is installed but not enabled still gets its migrations, and technical assets that already exist keep working. It just won't show up for new ones.
+
+## Check that it works
+
+When the portal starts, it logs every plugin it found:
+
+```
+Discovered plugins: GitHubPlugin, GlueTechnicalAssetConfiguration, ...
+```
+
+If your plugin isn't in that list, the entry point from step 3 is usually the cause: check the group name and the `module:Class` path. If it is in the list but doesn't show up in the portal, check that its `name` is in the enabled plugins.
+Other setup problems may appear either in startup logs or when the portal loads the plugin's metadata; use the reported error to identify the failing configuration.
