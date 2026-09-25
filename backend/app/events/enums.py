@@ -7,6 +7,7 @@ class EventReferenceEntity(str, Enum):
     DATASET = "dataset"
     DATA_OUTPUT = "data_output"
     USER = "user"
+    EXPLORATION = "exploration"
 
 
 @verify(UNIQUE)

@@ -307,6 +307,12 @@ type GetTechnicalAssetEventHistoryParams struct {
 	ID            uuid.UUID
 }
 
+// GrantOutputPortAccessParams is parameters of grant_output_port_access operation.
+type GrantOutputPortAccessParams struct {
+	DataProductID uuid.UUID
+	OutputPortID  uuid.UUID
+}
+
 // IngestOutputPortContractParams is parameters of ingest_output_port_contract operation.
 type IngestOutputPortContractParams struct {
 	DataProductID uuid.UUID

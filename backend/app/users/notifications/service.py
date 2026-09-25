@@ -15,6 +15,7 @@ from app.authorization.role_assignments.output_port.model import (
 )
 from app.core.authz.authorization import Authorization
 from app.events.model import Event as EventModel
+from app.explorations.model import Exploration
 from app.groups.model import GroupMembership
 from app.users.model import User as UserModel
 from app.users.notifications.model import Notification as NotificationModel
@@ -153,3 +154,22 @@ class NotificationService:
             if receiver != event.actor_id:
                 notification = NotificationModel(user_id=receiver, event_id=event_id)
                 self.db.add(notification)
+
+    def create_exploration_notifications(
+        self,
+        *,
+        exploration_id: UUID,
+        event_id: UUID,
+    ) -> None:
+        owner_id = self.db.scalar(
+            select(Exploration.owner_id).where(Exploration.id == exploration_id)
+        )
+        if owner_id is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Exploration {exploration_id} not found",
+            )
+
+        event = self.db.get(EventModel, event_id)
+        if owner_id != event.actor_id:
+            self.db.add(NotificationModel(user_id=owner_id, event_id=event_id))

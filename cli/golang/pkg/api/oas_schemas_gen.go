@@ -4060,6 +4060,7 @@ const (
 	EventEntityTypeOutputPort     EventEntityType = "output_port"
 	EventEntityTypeTechnicalAsset EventEntityType = "technical_asset"
 	EventEntityTypeUser           EventEntityType = "user"
+	EventEntityTypeExploration    EventEntityType = "exploration"
 )
 
 // AllValues returns all EventEntityType values.
@@ -4069,6 +4070,7 @@ func (EventEntityType) AllValues() []EventEntityType {
 		EventEntityTypeOutputPort,
 		EventEntityTypeTechnicalAsset,
 		EventEntityTypeUser,
+		EventEntityTypeExploration,
 	}
 }
 
@@ -4082,6 +4084,8 @@ func (s EventEntityType) MarshalText() ([]byte, error) {
 	case EventEntityTypeTechnicalAsset:
 		return []byte(s), nil
 	case EventEntityTypeUser:
+		return []byte(s), nil
+	case EventEntityTypeExploration:
 		return []byte(s), nil
 	default:
 		return nil, errors.Errorf("invalid value: %q", s)
@@ -4102,6 +4106,9 @@ func (s *EventEntityType) UnmarshalText(data []byte) error {
 		return nil
 	case EventEntityTypeUser:
 		*s = EventEntityTypeUser
+		return nil
+	case EventEntityTypeExploration:
+		*s = EventEntityTypeExploration
 		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)
@@ -4889,6 +4896,7 @@ type GetEventHistoryResponseItem struct {
 	User                     OptNilUser            `json:"user"`
 	OutputPort               OptNilOutputPort      `json:"output_port"`
 	TechnicalAsset           OptNilTechnicalAsset  `json:"technical_asset"`
+	Exploration              OptNilExploration     `json:"exploration"`
 }
 
 // GetID returns the value of ID.
@@ -4966,6 +4974,11 @@ func (s *GetEventHistoryResponseItem) GetTechnicalAsset() OptNilTechnicalAsset {
 	return s.TechnicalAsset
 }
 
+// GetExploration returns the value of Exploration.
+func (s *GetEventHistoryResponseItem) GetExploration() OptNilExploration {
+	return s.Exploration
+}
+
 // SetID sets the value of ID.
 func (s *GetEventHistoryResponseItem) SetID(val uuid.UUID) {
 	s.ID = val
@@ -5039,6 +5052,11 @@ func (s *GetEventHistoryResponseItem) SetOutputPort(val OptNilOutputPort) {
 // SetTechnicalAsset sets the value of TechnicalAsset.
 func (s *GetEventHistoryResponseItem) SetTechnicalAsset(val OptNilTechnicalAsset) {
 	s.TechnicalAsset = val
+}
+
+// SetExploration sets the value of Exploration.
+func (s *GetEventHistoryResponseItem) SetExploration(val OptNilExploration) {
+	s.Exploration = val
 }
 
 // Ref: #/components/schemas/GetExplorationInputPortsResponse
@@ -5909,6 +5927,47 @@ func (s *GlobalRoleAssignmentResponse) SetDecidedBy(val NilUser) {
 
 func (*GlobalRoleAssignmentResponse) decideGlobalRoleAssignmentRes() {}
 
+type GrantOutputPortAccessOKApplicationJSON jx.Raw
+
+func (*GrantOutputPortAccessOKApplicationJSON) grantOutputPortAccessRes() {}
+
+// Ref: #/components/schemas/GrantOutputPortAccessRequest
+type GrantOutputPortAccessRequest struct {
+	ConsumingAbstractDataProductID uuid.UUID  `json:"consuming_abstract_data_product_id"`
+	Justification                  string     `json:"justification"`
+	AccessModeID                   OptNilUUID `json:"access_mode_id"`
+}
+
+// GetConsumingAbstractDataProductID returns the value of ConsumingAbstractDataProductID.
+func (s *GrantOutputPortAccessRequest) GetConsumingAbstractDataProductID() uuid.UUID {
+	return s.ConsumingAbstractDataProductID
+}
+
+// GetJustification returns the value of Justification.
+func (s *GrantOutputPortAccessRequest) GetJustification() string {
+	return s.Justification
+}
+
+// GetAccessModeID returns the value of AccessModeID.
+func (s *GrantOutputPortAccessRequest) GetAccessModeID() OptNilUUID {
+	return s.AccessModeID
+}
+
+// SetConsumingAbstractDataProductID sets the value of ConsumingAbstractDataProductID.
+func (s *GrantOutputPortAccessRequest) SetConsumingAbstractDataProductID(val uuid.UUID) {
+	s.ConsumingAbstractDataProductID = val
+}
+
+// SetJustification sets the value of Justification.
+func (s *GrantOutputPortAccessRequest) SetJustification(val string) {
+	s.Justification = val
+}
+
+// SetAccessModeID sets the value of AccessModeID.
+func (s *GrantOutputPortAccessRequest) SetAccessModeID(val OptNilUUID) {
+	s.AccessModeID = val
+}
+
 type HTTPBasic struct {
 	Username string
 	Password string
@@ -6043,6 +6102,7 @@ func (*HTTPValidationError) getTechnicalAssetRes()                        {}
 func (*HTTPValidationError) getThemeSettingsRes()                         {}
 func (*HTTPValidationError) getUserNotificationsRes()                     {}
 func (*HTTPValidationError) getUsersRes()                                 {}
+func (*HTTPValidationError) grantOutputPortAccessRes()                    {}
 func (*HTTPValidationError) ingestOutputPortContractRes()                 {}
 func (*HTTPValidationError) ingestOutputPortContractYamlRes()             {}
 func (*HTTPValidationError) isAdminRes()                                  {}
@@ -7778,6 +7838,74 @@ func (o OptNilEventEntityType) Get() (v EventEntityType, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptNilEventEntityType) Or(d EventEntityType) EventEntityType {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptNilExploration returns new OptNilExploration with value set to v.
+func NewOptNilExploration(v Exploration) OptNilExploration {
+	return OptNilExploration{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptNilExploration is optional nullable Exploration.
+type OptNilExploration struct {
+	Value Exploration
+	Set   bool
+	Null  bool
+}
+
+// IsSet returns true if OptNilExploration was set.
+func (o OptNilExploration) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptNilExploration) Reset() {
+	var v Exploration
+	o.Value = v
+	o.Set = false
+	o.Null = false
+}
+
+// SetTo sets value to v.
+func (o *OptNilExploration) SetTo(v Exploration) {
+	o.Set = true
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o OptNilExploration) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *OptNilExploration) SetToNull() {
+	o.Set = true
+	o.Null = true
+	var v Exploration
+	o.Value = v
+}
+
+// IsEmpty returns true if the field was omitted from the payload (not Set and not Null).
+func (o OptNilExploration) IsEmpty() bool {
+	return !o.Set && !o.Null
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptNilExploration) Get() (v Exploration, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptNilExploration) Or(d Exploration) Exploration {
 	if v, ok := o.Get(); ok {
 		return v
 	}

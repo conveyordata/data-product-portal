@@ -190,6 +190,7 @@ from .get_user_notifications_response import GetUserNotificationsResponse
 from .get_user_notifications_response_item import GetUserNotificationsResponseItem
 from .get_users_response import GetUsersResponse
 from .global_role_assignment_response import GlobalRoleAssignmentResponse
+from .grant_output_port_access_request import GrantOutputPortAccessRequest
 from .graph import Graph
 from .http_validation_error import HTTPValidationError
 from .ingest_output_port_contract_yaml_body import IngestOutputPortContractYamlBody
@@ -521,6 +522,7 @@ __all__ = (
     "GetUserNotificationsResponseItem",
     "GetUsersResponse",
     "GlobalRoleAssignmentResponse",
+    "GrantOutputPortAccessRequest",
     "Graph",
     "HTTPValidationError",
     "IngestOutputPortContractYamlBody",

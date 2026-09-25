@@ -3558,6 +3558,67 @@
         }
       }
     },
+    "/api/v2/data_products/{data_product_id}/output_ports/{output_port_id}/input_ports/grant": {
+      "post": {
+        "tags": [
+          "Data Products - Output ports - Input ports"
+        ],
+        "summary": "Grant Output Port Access",
+        "operationId": "grant_output_port_access",
+        "parameters": [
+          {
+            "name": "data_product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Data Product Id"
+            }
+          },
+          {
+            "name": "output_port_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Output Port Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GrantOutputPortAccessRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v2/data_products/{data_product_id}/output_ports/{output_port_id}/input_ports/": {
       "get": {
         "tags": [
@@ -11853,7 +11914,8 @@
           "data_product",
           "output_port",
           "technical_asset",
-          "user"
+          "user",
+          "exploration"
         ],
         "title": "EventEntityType"
       },
@@ -12516,6 +12578,16 @@
                 "type": "null"
               }
             ]
+          },
+          "exploration": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Exploration"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",
@@ -13096,6 +13168,37 @@
           "decided_by"
         ],
         "title": "GlobalRoleAssignmentResponse"
+      },
+      "GrantOutputPortAccessRequest": {
+        "properties": {
+          "consuming_abstract_data_product_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Consuming Abstract Data Product Id"
+          },
+          "justification": {
+            "type": "string",
+            "title": "Justification"
+          },
+          "access_mode_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Access Mode Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "consuming_abstract_data_product_id",
+          "justification"
+        ],
+        "title": "GrantOutputPortAccessRequest"
       },
       "Graph": {
         "properties": {
