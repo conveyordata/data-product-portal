@@ -24,7 +24,7 @@ With Poetry:
 ```bash
 poetry new my-portal-plugins
 cd my-portal-plugins
-poetry add data-product-portal>=0.8.0
+poetry add "data-product-portal==0.8.0"
 ```
 
 With uv:
