@@ -5,14 +5,17 @@ To add MCP tools for a plugin:
 2. Set `mcp_instructions` on the class if needed.
 """
 
+from typing import Sequence
+
 from fastmcp import FastMCP
 
 from app.core.logging import logger
 from app.plugins.registry import plugin_registry
+from app.technical_asset_configuration.base_schema import TechnicalAssetPlugin
 
 
-def load_plugins(mcp: FastMCP) -> None:
-
+def load_plugins(mcp: FastMCP) -> list[type[TechnicalAssetPlugin]]:
+    registered = []
     for plugin in plugin_registry.enabled():
         try:
             plugin.register_mcp_tools(mcp)
@@ -20,12 +23,13 @@ def load_plugins(mcp: FastMCP) -> None:
             logger.exception(
                 f"Plugin '{plugin.name}' failed to register MCP tools, skipping"
             )
+        else:
+            registered.append(plugin)
+    return registered
 
 
-def get_plugin_instructions() -> str:
-    """Combine MCP instructions from all plugins that define them."""
+def get_plugin_instructions(plugins: Sequence[type[TechnicalAssetPlugin]]) -> str:
+    """Combine MCP instructions from plugins that registered successfully."""
     return "\n\n".join(
-        plugin.mcp_instructions
-        for plugin in plugin_registry.enabled()
-        if plugin.mcp_instructions
+        plugin.mcp_instructions for plugin in plugins if plugin.mcp_instructions
     )
