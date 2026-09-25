@@ -9,7 +9,7 @@ ARG PLATFORM=linux/amd64
 # ---------------------------------------------------------------------------
 # Stage 1 – build the React frontend
 # ---------------------------------------------------------------------------
-FROM --platform=${PLATFORM} node:26-alpine@sha256:dbaa92e5758cbbcf85d65d5403fdb530fe3442cbe8c6dbfb7ef23365450d5070 AS frontend-build
+FROM --platform=${PLATFORM} node:26-alpine@sha256:0b36e8c136b94cd4fcf02188228e76c31ad5872eef3fec8cbd2eee500cfd9e80 AS frontend-build
 
 WORKDIR /frontend
 COPY frontend/ ./
