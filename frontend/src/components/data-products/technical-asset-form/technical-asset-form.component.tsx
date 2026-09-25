@@ -164,7 +164,7 @@ export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallback
 
     const onSubmitFailed: FormProps<CreateTechnicalAssetRequest>['onFinishFailed'] = ({ errorFields }) => {
         if (errorFields.length > 0) {
-            form.scrollToField(errorFields[0].name);
+            form.scrollToField(errorFields[0].name, { focus: true });
         }
         dispatchMessage({ content: t('Please make sure all required fields are filled in'), type: 'info' });
     };
