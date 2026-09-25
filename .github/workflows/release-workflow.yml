@@ -284,6 +284,36 @@ jobs:
         with:
           packages-dir: backend/dist/
 
+  publish-plugins:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    needs: ["prep-version", "create-gh-release-notes"]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - name: Install Poetry
+        uses: snok/install-poetry@a783c322200f0519c7926aa6faa857c4e23e9263 # v1.4.2
+        with:
+          version: ${{ env.POETRY_VERSION }}
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v5.4.0
+        with:
+          python-version: "3.13"
+          cache: 'poetry'
+          cache-dependency-path: plugins/poetry.lock
+      - name: Build plugins
+        working-directory: plugins
+        run: |
+          poetry build
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # v1.14.2
+        with:
+          packages-dir: plugins/dist/
+
   release-docs:
     runs-on: ubuntu-24.04
     permissions:

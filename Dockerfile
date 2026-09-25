@@ -43,7 +43,7 @@ RUN pip install -r requirements-poetry.txt --require-hashes
 COPY backend/poetry.lock backend/pyproject.toml backend/alembic.ini backend/sample_data.sql /
 COPY plugins /plugins
 COPY sdk /sdk
-RUN poetry install --no-root
+RUN poetry install --no-root --with plugins
 
 # pyproject declares readme = "README.md", so poetry-core reads it while
 # building the package metadata.
