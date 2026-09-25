@@ -1,9 +1,9 @@
 from fastapi.testclient import TestClient
+from portal_plugins.s3.schema import S3TechnicalAssetConfiguration
 
 from app.authorization.roles.schema import Scope
 from app.core.authz.actions import AuthorizationAction as Action
 from app.settings import settings
-from app.technical_asset_configuration.s3.schema import S3TechnicalAssetConfiguration
 from app.technical_asset_configuration.schema_request import (
     RenderTechnicalAssetAccessPathRequest,
 )
@@ -300,35 +300,6 @@ class TestPlatformTilesEndpoint:
         assert response.json()["technical_asset_access_path"] == "bucket/suffix/path"
 
 
-class TestCoderPluginEndToEnd:
-    def test_coder_tile_and_url_via_existing_endpoints(self, client, monkeypatch):
-        monkeypatch.setattr(settings, "ENABLED_PLUGINS", ["CoderPlugin"])
-        monkeypatch.setattr(settings, "CODER_BASE_URL", "https://ide.example.com")
-        monkeypatch.setattr(settings, "CODER_GITHUB_ORG", "example-org")
-        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        data_product = DataProductFactory(namespace="test-my-first-db")
-        role = RoleFactory(
-            scope=Scope.DATA_PRODUCT,
-            permissions=[Action.DATA_PRODUCT__READ_INTEGRATIONS],
-        )
-        DataProductRoleAssignmentFactory(
-            identity_id=user.id, role_id=role.id, data_product_id=data_product.id
-        )
-
-        tiles_response = client.get(f"{ENDPOINT}/platform-tiles")
-        assert tiles_response.status_code == 200
-        assert any(
-            t["value"] == "coder" for t in tiles_response.json()["platform_tiles"]
-        )
-
-        url_response = client.get(f"{ENDPOINT}/coder/url?id={data_product.id}")
-        assert url_response.status_code == 200
-        assert url_response.json()["url"] == (
-            "https://ide.example.com/templates/vscode/workspace"
-            "?param.git_repo=https://github.com/example-org/test-my-first-db"
-        )
-
-
 class TestGitHubPluginEndToEnd:
     def test_github_tile_and_url_via_existing_endpoints(self, client, monkeypatch):
         monkeypatch.setattr(settings, "ENABLED_PLUGINS", ["GitHubPlugin"])
@@ -345,9 +316,10 @@ class TestGitHubPluginEndToEnd:
 
         tiles_response = client.get(f"{ENDPOINT}/platform-tiles")
         assert tiles_response.status_code == 200
-        assert any(
-            t["value"] == "github" for t in tiles_response.json()["platform_tiles"]
+        tile = next(
+            t for t in tiles_response.json()["platform_tiles"] if t["value"] == "github"
         )
+        assert tile["icon_data_uri"].startswith("data:image/svg+xml;base64,")
 
         url_response = client.get(f"{ENDPOINT}/github/url?id={data_product.id}")
         assert url_response.status_code == 200

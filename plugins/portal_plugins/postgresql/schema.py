@@ -1,14 +1,11 @@
 from typing import ClassVar, Optional, Self
-from uuid import UUID
 
-from fastapi import HTTPException, status
 from pydantic import model_validator
 from sqlalchemy.orm import Session
 
-from app.configuration.environments.platform_service_configurations.schemas import (
-    AWSGlueConfig,
+from app.configuration.environments.platform_service_configurations.schema_response import (
+    PostgreSQLConfig,
 )
-from app.core.aws.get_url import get_aws_url
 from app.data_products.schema import DataProduct
 from app.technical_asset_configuration.base_schema import (
     FieldDependency,
@@ -21,49 +18,39 @@ from app.technical_asset_configuration.base_schema import (
     UIElementString,
 )
 from app.technical_asset_configuration.enums import AccessGranularity, UIElementType
-from portal_plugins.glue.mcp_instructions import MCP_INSTRUCTIONS
-from portal_plugins.glue.model import (
+from portal_plugins.postgresql.model import (
     NAME,
 )
-from portal_plugins.glue.model import (
-    GlueTechnicalAssetConfiguration as GlueTechnicalAssetConfigurationModel,
+from portal_plugins.postgresql.model import (
+    PostgreSQLTechnicalAssetConfiguration as PostgreSQLTechnicalAssetConfigurationModel,
 )
-from app.users.schema import User
 
 
-class GlueTechnicalAssetConfiguration(TechnicalAssetPlugin):
+class PostgreSQLTechnicalAssetConfiguration(TechnicalAssetPlugin):
     name: ClassVar[str] = NAME
     version: ClassVar[str] = "1.0"
-    mcp_instructions: ClassVar[str] = MCP_INSTRUCTIONS
 
     database: str
-    database_suffix: str = ""
+    schema: str = ""
     table: str = "*"
-    bucket_identifier: str = ""
-    database_path: str = ""
-    table_path: str = ""
     access_granularity: AccessGranularity
 
     _platform_metadata = PlatformMetadata(
-        display_name="Glue",
-        icon_name="glue-logo.svg",
-        icon_package="portal_plugins.glue",
-        platform_key="glue",
-        parent_platform="aws",
+        display_name="PostgreSQL",
+        icon_name="postgresql-logo.svg",
+        icon_package="portal_plugins.postgresql",
+        platform_key="postgresql",
+        parent_platform=None,
         result_label="Resulting table",
         result_tooltip="The table you can access through this technical asset",
-        detailed_name="Database",
+        detailed_name="Schema",
     )
 
     class Meta:
-        orm_model = GlueTechnicalAssetConfigurationModel
+        orm_model = PostgreSQLTechnicalAssetConfigurationModel
 
     @model_validator(mode="after")
     def validate_paths(self) -> Self:
-        if not self.database_path:
-            self.database_path = self.database
-        if not self.table_path:
-            self.table_path = self.table
         if self.access_granularity == AccessGranularity.Schema:
             self.table = "*"
         return self
@@ -84,22 +71,17 @@ class GlueTechnicalAssetConfiguration(TechnicalAssetPlugin):
         )
 
     def get_configuration(
-        self, configs: list[AWSGlueConfig]
-    ) -> Optional[AWSGlueConfig]:
+        self, configs: list[PostgreSQLConfig]
+    ) -> Optional[PostgreSQLConfig]:
+        # Implementation depends on the exact PostgreSQL config type added
         return next(
             (config for config in configs if config.identifier == self.database), None
         )
 
     @classmethod
-    def get_url(
-        cls, id: UUID, db: Session, actor: User, environment: Optional[str] = None
-    ) -> str:
-        if environment is None:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Environment is required to get the URL for S3 technical asset configurations",
-            )
-        return get_aws_url(id, db, actor, environment)
+    def get_url(cls, id, db, actor, environment=None) -> str:
+        # Implementation for PostgreSQL URL
+        return ""
 
     @classmethod
     def get_ui_metadata(cls, db: Session) -> list[UIElementMetadata]:
@@ -111,13 +93,14 @@ class GlueTechnicalAssetConfiguration(TechnicalAssetPlugin):
                 type=UIElementType.Select,
                 required=True,
                 use_namespace_when_not_source_aligned=True,
+                options=cls.get_platform_options(db),
                 select=UIElementSelect(options=cls.get_platform_options(db)),
             ),
             UIElementMetadata(
-                name="database_suffix",
+                name="schema",
                 type=UIElementType.String,
-                label="Database suffix",
-                tooltip="The name of the database to give write access to. Defaults to data product namespace",
+                label="Schema",
+                tooltip="The name of the schema to give write access to. Defaults to data product namespace",
                 required=True,
             ),
             UIElementMetadata(
@@ -153,13 +136,3 @@ class GlueTechnicalAssetConfiguration(TechnicalAssetPlugin):
             ),
         ]
         return base_metadata
-
-    @classmethod
-    def get_parent_platform(cls) -> Optional[str]:
-        return "aws"
-
-    @classmethod
-    def register_mcp_tools(cls, mcp: object) -> None:
-        from portal_plugins.glue.mcp_tools import register_tools
-
-        register_tools(mcp)  # type: ignore[arg-type]

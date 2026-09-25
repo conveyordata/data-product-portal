@@ -7,7 +7,6 @@ from sdk.plugins.glue import GlueTechnicalAssetConfiguration
 from sdk.plugins.osi_sem_model import OSISemanticModelTechnicalAssetConfiguration
 from sdk.plugins.postgresql import PostgreSQLTechnicalAssetConfiguration
 from sdk.plugins.redshift import RedshiftTechnicalAssetConfiguration
-from sdk.plugins.rustfs import RustFSTechnicalAssetConfiguration
 from sdk.plugins.s3 import S3TechnicalAssetConfiguration
 from sdk.plugins.snowflake import SnowflakeTechnicalAssetConfiguration
 
@@ -19,7 +18,6 @@ __all__ = [
     "OSISemanticModelTechnicalAssetConfiguration",
     "PostgreSQLTechnicalAssetConfiguration",
     "RedshiftTechnicalAssetConfiguration",
-    "RustFSTechnicalAssetConfiguration",
     "S3TechnicalAssetConfiguration",
     "SnowflakeTechnicalAssetConfiguration",
     "TechnicalAssetConfiguration",
