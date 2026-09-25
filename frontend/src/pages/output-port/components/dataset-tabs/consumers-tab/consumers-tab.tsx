@@ -1,11 +1,15 @@
-import { Flex, Input } from 'antd';
+import { UserAddOutlined } from '@ant-design/icons';
+import { Button, Flex, Input, Tooltip } from 'antd';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
 import {
     type OutputPortInputPort,
     useGetInputPortsForOutputPortQuery,
 } from '@/store/api/services/generated/dataProductsOutputPortsInputPortsApi.ts';
+import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import { ConsumersTable } from './components/consumers-table/consumers-table.component';
+import { GrantOutputPortAccessModal } from './components/grant-output-port-access-modal.tsx';
 
 type Props = {
     outputPortId: string;
@@ -27,23 +31,47 @@ export function ConsumersTab({ outputPortId, dataProductId }: Props) {
         dataProductId,
     });
     const [searchTerm, setSearchTerm] = useState<string>('');
+    const [isGrantModalOpen, setIsGrantModalOpen] = useState(false);
+    const { data: approveAccess } = useCheckAccessQuery({
+        resource: outputPortId,
+        action: AuthorizationAction.OUTPUT_PORT__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
+    });
     const filteredDataProducts = useMemo(() => {
         return filterDataProducts(inputPorts, searchTerm);
     }, [inputPorts, searchTerm]);
 
     return (
         <Flex vertical gap="middle">
-            <Input.Search
-                placeholder={t('Search Data Products by name')}
-                allowClear
-                onChange={(e) => setSearchTerm(e.target.value)}
-            />
+            <Flex gap="middle">
+                <Input.Search
+                    placeholder={t('Search consumers by name')}
+                    allowClear
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                />
+                {approveAccess?.allowed && (
+                    <Tooltip title="You can use this to directly add a new consumer to this Output Port, this is the only way to add consumers to private Output Ports.">
+                        <Button type="primary" icon={<UserAddOutlined />} onClick={() => setIsGrantModalOpen(true)}>
+                            {t('Add consumer')}
+                        </Button>
+                    </Tooltip>
+                )}
+            </Flex>
             <ConsumersTable
                 outputPortId={outputPortId}
                 dataProductId={dataProductId}
                 dataProducts={filteredDataProducts}
                 isLoading={isLoading}
             />
+            {isGrantModalOpen && (
+                <GrantOutputPortAccessModal
+                    dataProductId={dataProductId}
+                    outputPortId={outputPortId}
+                    existingConsumerIds={inputPorts.map(
+                        ({ consuming_abstract_data_product_id }) => consuming_abstract_data_product_id,
+                    )}
+                    onClose={() => setIsGrantModalOpen(false)}
+                />
+            )}
         </Flex>
     );
 }
