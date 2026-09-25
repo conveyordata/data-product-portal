@@ -35,7 +35,6 @@ This will be a next ADR
 * Plugins only support custom technical assets.
 * Logging, tracing, and observability conventions for plugin authors, beyond the portal catching exceptions at the plugin call boundary. Structured logging format, distributed tracing, and metrics for plugin calls are not addressed here.
 * Portal Core has no responsibility of keeping and storing permanent credentials for a plugin's own API calls. If a plugin needs to make authenticated calls, it can implement calls based on the user authenticated and making the plugin call.
-* A plugin defining its own MCP tools. `TechnicalAssetPlugin.register_mcp_tools` exists and is exercised by tests, but no out-of-tree plugin is expected to override it today: Glue's own MCP tools (querying Glue/Athena) are portal core's, not the plugin's, precisely because they reach deep into portal internals (auth, environments, technical asset service) that this decision doesn't ask a plugin author to depend on. Making MCP tool authoring a real plugin-author capability is future work.
 * Curating exactly which subset of portal core a plugin actually needs, rather than exposing all of it as a package - see "Distributing portal core as an installable Python package" below. Revisit once the existing plugins have migrated onto the new interface (targeting roughly three months out).
 
 ## Considered Options
@@ -121,6 +120,7 @@ Lower-level implementation choices that follow from the decision above, but aren
 
 * Running a customer's own plugin code safely is that customer's own responsibility; the portal does not add sandboxing, code review, or resource limits as part of this decision.
 * Calls into a plugin's code are wrapped by the portal at the call boundary: an uncaught exception is caught, logged with its stack trace, and surfaced as a clean error, so one broken plugin can't take down the request it's handling.
+* A plugin can expose its own MCP tools by overriding `register_mcp_tools`, and add to the MCP server's instructions through its `mcp_instructions` class attribute. The instructions are read before any tools are registered, so they must be set on the class itself rather than during registration. A plugin whose tools fail to register is logged and skipped, leaving the rest of the MCP server running. Tools are built on the `fastmcp` version and the MCP dependencies (`app.mcp.deps`) portal core ships.
 * Alongside its own `values`, a plugin's methods are passed a context object carrying whatever's generic across every technical asset type (its own id/name, its output port, its data product, its domain).
 * If a plugin's own validation is backed by a dynamically-built model (e.g. Pydantic) for nicer error messages, that model stays internal to `validate` - it never becomes part of the generated OpenAPI schema, SDK, or CLI types.
 

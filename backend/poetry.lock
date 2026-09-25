@@ -1168,7 +1168,9 @@ develop = true
 
 [package.dependencies]
 alembic = ">=1.20.0"
+boto3 = ">=1.43.93"
 fastapi = ">=0.141.1"
+fastmcp = ">=3.4.7"
 pydantic = ">=2.13.5"
 sqlalchemy = ">=2.0.52"
 

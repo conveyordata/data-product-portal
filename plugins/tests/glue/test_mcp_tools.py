@@ -4,13 +4,17 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from app.core.auth.credentials import AWSCredentials
-from app.mcp.glue_tools import _fetch_aws_credentials
-from tests.factories import UserFactory
+from portal_plugins.glue.mcp_tools import _fetch_aws_credentials
 
 
 @pytest.fixture
-def user(session):
-    return UserFactory()
+def session():
+    return MagicMock()
+
+
+@pytest.fixture
+def user():
+    return MagicMock()
 
 
 @pytest.fixture
@@ -29,7 +33,7 @@ class TestFetchAwsCredentials:
     def test_raises_tool_error_on_permission_denied(self, session, user):
         with (
             patch(
-                "app.mcp.glue_tools.authorize_data_product_read_integrations",
+                "portal_plugins.glue.mcp_tools.authorize_data_product_read_integrations",
                 side_effect=PermissionError("no access"),
             ),
             pytest.raises(PermissionError, match="no access"),
@@ -39,7 +43,7 @@ class TestFetchAwsCredentials:
     def test_raises_tool_error_on_invalid_namespace(self, session, user):
         with (
             patch(
-                "app.mcp.glue_tools.authorize_data_product_read_integrations",
+                "portal_plugins.glue.mcp_tools.authorize_data_product_read_integrations",
                 side_effect=ValueError("unknown namespace"),
             ),
             pytest.raises(ValueError, match="unknown namespace"),
@@ -50,13 +54,15 @@ class TestFetchAwsCredentials:
         mock_env = MagicMock()
         mock_env.name = "prod"
         with (
-            patch("app.mcp.glue_tools.authorize_data_product_read_integrations"),
             patch(
-                "app.mcp.glue_tools.EnvironmentService.get_environments",
+                "portal_plugins.glue.mcp_tools.authorize_data_product_read_integrations"
+            ),
+            patch(
+                "portal_plugins.glue.mcp_tools.EnvironmentService.get_environments",
                 return_value=[mock_env],
             ),
             patch(
-                "app.mcp.glue_tools.AuthService.get_aws_credentials",
+                "portal_plugins.glue.mcp_tools.AuthService.get_aws_credentials",
                 side_effect=Exception("STS error"),
             ),
             pytest.raises(Exception, match="STS error"),
@@ -67,13 +73,15 @@ class TestFetchAwsCredentials:
         mock_env = MagicMock()
         mock_env.name = "prod"
         with (
-            patch("app.mcp.glue_tools.authorize_data_product_read_integrations"),
             patch(
-                "app.mcp.glue_tools.EnvironmentService.get_environments",
+                "portal_plugins.glue.mcp_tools.authorize_data_product_read_integrations"
+            ),
+            patch(
+                "portal_plugins.glue.mcp_tools.EnvironmentService.get_environments",
                 return_value=[mock_env],
             ),
             patch(
-                "app.mcp.glue_tools.AuthService.get_aws_credentials",
+                "portal_plugins.glue.mcp_tools.AuthService.get_aws_credentials",
                 return_value=mock_creds,
             ),
         ):
@@ -98,7 +106,7 @@ class TestListGlueTables:
 
         with (
             patch(
-                "app.mcp.glue_tools._fetch_aws_credentials",
+                "portal_plugins.glue.mcp_tools._fetch_aws_credentials",
                 return_value=mock_creds,
             ),
             patch("boto3.client", return_value=mock_client),
@@ -126,7 +134,7 @@ class TestListGlueTables:
 
         with (
             patch(
-                "app.mcp.glue_tools._fetch_aws_credentials",
+                "portal_plugins.glue.mcp_tools._fetch_aws_credentials",
                 return_value=mock_creds,
             ),
             patch("boto3.client", return_value=mock_client),
@@ -148,7 +156,7 @@ class TestQueryAthena:
 
         with (
             patch(
-                "app.mcp.glue_tools._fetch_aws_credentials",
+                "portal_plugins.glue.mcp_tools._fetch_aws_credentials",
                 return_value=mock_creds,
             ),
             patch("boto3.client", return_value=mock_client),
@@ -170,7 +178,7 @@ class TestQueryAthena:
 
         with (
             patch(
-                "app.mcp.glue_tools._fetch_aws_credentials",
+                "portal_plugins.glue.mcp_tools._fetch_aws_credentials",
                 return_value=mock_creds,
             ),
             patch("boto3.client", return_value=mock_client),
@@ -199,7 +207,7 @@ class TestQueryAthena:
 
         with (
             patch(
-                "app.mcp.glue_tools._fetch_aws_credentials",
+                "portal_plugins.glue.mcp_tools._fetch_aws_credentials",
                 return_value=mock_creds,
             ),
             patch("boto3.client", return_value=mock_client),
@@ -235,7 +243,7 @@ class TestGetAthenaQueryResults:
 
         with (
             patch(
-                "app.mcp.glue_tools._fetch_aws_credentials",
+                "portal_plugins.glue.mcp_tools._fetch_aws_credentials",
                 return_value=mock_creds,
             ),
             patch("boto3.client", return_value=mock_client),
@@ -259,7 +267,7 @@ class TestGetAthenaQueryResults:
 
         with (
             patch(
-                "app.mcp.glue_tools._fetch_aws_credentials",
+                "portal_plugins.glue.mcp_tools._fetch_aws_credentials",
                 return_value=mock_creds,
             ),
             patch("boto3.client", return_value=mock_client),
@@ -288,7 +296,7 @@ class TestGetAthenaQueryResults:
 
         with (
             patch(
-                "app.mcp.glue_tools._fetch_aws_credentials",
+                "portal_plugins.glue.mcp_tools._fetch_aws_credentials",
                 return_value=mock_creds,
             ),
             patch("boto3.client", return_value=mock_client),
@@ -313,7 +321,7 @@ class TestGetAthenaQueryResults:
 
         with (
             patch(
-                "app.mcp.glue_tools._fetch_aws_credentials",
+                "portal_plugins.glue.mcp_tools._fetch_aws_credentials",
                 return_value=mock_creds,
             ),
             patch("boto3.client", return_value=mock_client),
@@ -339,7 +347,7 @@ def _get_tools():
         _TOOLS = {}
         from fastmcp import FastMCP
 
-        from app.mcp.glue_tools import register_tools
+        from portal_plugins.glue.mcp_tools import register_tools
 
         mcp = FastMCP()
         register_tools(mcp)
