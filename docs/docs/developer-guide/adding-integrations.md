@@ -278,4 +278,4 @@ Discovered plugins: GitHubPlugin, GlueTechnicalAssetConfiguration, ...
 ```
 
 If your plugin isn't in that list, the entry point from step 3 is usually the cause: check the group name and the `module:Class` path. If it is in the list but doesn't show up in the portal, check that its `name` is in the enabled plugins.
-If there is another issue with the setup itself, it will fail fast and give you an error that will be easy to start with to resove the issue at hand.
+Other setup problems may appear either in startup logs or when the portal loads the plugin's metadata; use the reported error to identify the failing configuration.
