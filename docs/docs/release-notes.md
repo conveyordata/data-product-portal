@@ -22,6 +22,7 @@ sidebar_position: 200
 ### bugfixes
 
 - **[MCP]**: Fix MCP tool calls
+- **[Helm]**: Fix translation override file path
 
 ## 0.7.3
 
