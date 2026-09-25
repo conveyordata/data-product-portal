@@ -1,6 +1,6 @@
 # Adding Integrations to the Data Product Portal
 
-**Warning**: Upgrade to portal 0.7.3 before moving to 0.8.0, because the technical asset tables changed and the older migration logic is gone; see the [release notes](../release-notes.md).
+**Warning**: Installations older than portal 0.7.3 must upgrade to 0.7.3 before moving to 0.8.0, because the technical asset tables changed and the older migration logic is gone; see the [release notes](../release-notes.md).
 
 **Warning**: Provisioners must switch their technical asset imports from `sdk.api_client.models` to `sdk.plugins`, because plugin classes are no longer known when the API is generated; see the [release notes](../release-notes.md).
 
