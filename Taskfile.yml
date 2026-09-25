@@ -21,6 +21,7 @@ tasks:
         (cd backend && poetry version {{.CLI_ARGS}})
         (cd plugins && poetry version {{.CLI_ARGS}})
         sed -i "s/\"data-product-portal>=[^\"]*\"/\"data-product-portal>={{.CLI_ARGS}}\"/" plugins/pyproject.toml
+        (cd backend && poetry lock)
 
   bump:release-notes:
     desc: "Update release notes with new version and date"
