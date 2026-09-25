@@ -13,7 +13,17 @@ dependencies = [
 ]
 
 [project.entry-points."data_product_portal.plugins"]
+agno = "portal_plugins.agno.schema:AgnoPlugin"
+azure-blob = "portal_plugins.azure_blob.schema:AzureBlobTechnicalAssetConfiguration"
+conveyor = "portal_plugins.conveyor.schema:ConveyorPlugin"
+databricks = "portal_plugins.databricks.schema:DatabricksTechnicalAssetConfiguration"
+github = "portal_plugins.github.schema:GitHubPlugin"
 glue = "portal_plugins.glue.schema:GlueTechnicalAssetConfiguration"
+osi-semantic-model = "portal_plugins.osi_sem_model.schema:OSISemanticModelTechnicalAssetConfiguration"
+postgresql = "portal_plugins.postgresql.schema:PostgreSQLTechnicalAssetConfiguration"
+redshift = "portal_plugins.redshift.schema:RedshiftTechnicalAssetConfiguration"
+s3 = "portal_plugins.s3.schema:S3TechnicalAssetConfiguration"
+snowflake = "portal_plugins.snowflake.schema:SnowflakeTechnicalAssetConfiguration"
 
 [tool.poetry]
 packages = [{ include = "portal_plugins", from = "." }]
@@ -23,7 +33,8 @@ python = "^3.13"
 
 [tool.mypy]
 ignore_missing_imports = true
-mypy_path = "$MYPY_CONFIG_FILE_DIR/../backend"
+explicit_package_bases = true
+mypy_path = "$MYPY_CONFIG_FILE_DIR:$MYPY_CONFIG_FILE_DIR/../backend"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]

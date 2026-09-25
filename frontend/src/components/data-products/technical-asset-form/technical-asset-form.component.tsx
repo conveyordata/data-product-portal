@@ -335,7 +335,7 @@ export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallback
                                     platformConfig?.find(
                                         (config) =>
                                             config.platform.name.toLowerCase() === dataPlatform.label.toLowerCase(),
-                                    )?.platform.id
+                                    )?.platform.id ?? dataPlatform.value
                                 }
                             />
                         ))}
@@ -352,7 +352,9 @@ export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallback
                                 isDisabled={isLoading || isFetchingResultString}
                                 isSelected={dataPlatform === selectedConfiguration}
                                 onTileClick={onConfigurationClick}
-                                value={platformServiceConfigMap.get(dataPlatform.value)?.service_id}
+                                value={
+                                    platformServiceConfigMap.get(dataPlatform.value)?.service_id ?? dataPlatform.value
+                                }
                             />
                         ))}
                     </Space>

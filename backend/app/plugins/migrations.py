@@ -7,7 +7,7 @@ from alembic import command
 from alembic.config import Config
 from alembic.runtime.migration import MigrationContext
 from alembic.script import ScriptDirectory
-from sqlalchemy import Engine
+from sqlalchemy import Column, Engine, MetaData, String, Table
 
 from app.core.logging import logger
 from app.technical_asset_configuration.base_schema import TechnicalAssetPlugin
@@ -15,6 +15,14 @@ from app.technical_asset_configuration.base_schema import TechnicalAssetPlugin
 VERSION_TABLE = "alembic_version"
 _SCRIPT_LOCATION = Path(__file__).parent.parent / "database" / "alembic"
 _CORE_VERSIONS_DIR = _SCRIPT_LOCATION / "versions"
+
+RETIRED_PLUGIN_REVISIONS = frozenset({"rustfs_0001_baseline"})
+
+_version_table = Table(
+    VERSION_TABLE,
+    MetaData(),
+    Column("version_num", String(32), primary_key=True),
+)
 
 
 def _versions_dir(plugin: type[TechnicalAssetPlugin]) -> Optional[Path]:
@@ -50,6 +58,21 @@ def _current_heads(engine: Engine) -> tuple[str, ...]:
         return MigrationContext.configure(
             connection, opts={"version_table": VERSION_TABLE}
         ).get_current_heads()
+
+
+def _forget_retired_revisions(engine: Engine) -> None:
+    retired = sorted(RETIRED_PLUGIN_REVISIONS.intersection(_current_heads(engine)))
+    if not retired:
+        return
+
+    with engine.begin() as connection:
+        connection.execute(
+            _version_table.delete().where(_version_table.c.version_num.in_(retired))
+        )
+    logger.info(
+        "Dropped the migration history of plugin(s) the portal no longer ships: "
+        + ", ".join(retired)
+    )
 
 
 def _own_revisions(plugin: type[TechnicalAssetPlugin], url: str) -> set[str]:
@@ -98,6 +121,8 @@ def migrate_all(plugins: Sequence[type[TechnicalAssetPlugin]], engine: Engine) -
     down_revision on its own first revision, exactly like a plugin's, so
     Alembic resolves and upgrades every branch's head with a single call.
     """
+    _forget_retired_revisions(engine)
+
     plugins_owning_tables = [plugin for plugin in plugins if owns_a_table(plugin)]
     url = engine.url.render_as_string(hide_password=False)
 

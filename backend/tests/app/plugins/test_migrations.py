@@ -6,10 +6,12 @@ from sqlalchemy import inspect
 
 from app.plugins.migrations import (
     _CORE_VERSIONS_DIR,
+    RETIRED_PLUGIN_REVISIONS,
     VERSION_TABLE,
     _config,
     _core_head,
     _owned_versions_dir,
+    _version_table,
     check_latest_migration_core,
     migrate_all,
     owns_a_table,
@@ -104,6 +106,21 @@ def test_migrate_all__still_checks_for_orphans_when_a_plugin_is_dropped():
     # regardless - installed() is the smallest list that can.
     with pytest.raises(ValueError, match="belonging to no installed plugin"):
         migrate_all(installed(), engine)
+
+
+def test_migrate_all__forgets_the_revision_of_a_plugin_the_portal_dropped():
+    """A database that ran a plugin the portal has since deleted keeps that
+    plugin's row. Without reconciling it, the orphan check above would abort
+    every later migration, and no core revision could clean it up because the
+    check runs first."""
+    retired = next(iter(RETIRED_PLUGIN_REVISIONS))
+    with engine.begin() as connection:
+        connection.execute(_version_table.insert().values(version_num=retired))
+    assert retired in _tracked_revisions()
+
+    migrate()
+
+    assert retired not in _tracked_revisions()
 
 
 def test_migrate_all__tracks_two_plugins_in_one_shared_version_table():

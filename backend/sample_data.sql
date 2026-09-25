@@ -222,6 +222,20 @@ INSERT INTO public.platform_service_configs (id, platform_id, service_id, config
 ), '[]', timezone('utc'::text, current_timestamp
 ), NULL, NULL);
 
+INSERT INTO public.platform_service_configs (id, platform_id, service_id, config, created_on, updated_on, deleted_at) VALUES ('7c1e4b90-2d63-4a18-9b5f-3e8d6a2c4f71', '{{ snowflake_id }}'::uuid, '{{ snowflake_service_id }}'::uuid, '["clean","master"]', timezone('utc'::text, current_timestamp), NULL, NULL);
+
+INSERT INTO public.platforms (id, name) VALUES ('9f2c7a41-6b58-4e3d-8c19-5d7a3b6e2f84', 'PostgreSQL');
+
+INSERT INTO public.platform_services (id, name, platform_id, result_string_template, technical_info_template) VALUES ('4a8d2f63-9c17-4b5e-a238-7e1b4c6d9f05', 'PostgreSQL', '9f2c7a41-6b58-4e3d-8c19-5d7a3b6e2f84'::uuid, '{database}.{schema}.{table}', '{database}.{schema}.{table}');
+
+INSERT INTO public.platform_service_configs (id, platform_id, service_id, config, created_on, updated_on, deleted_at) VALUES ('2e6b9d47-3f81-4c25-b7a6-8d4e1f9c3a52', '9f2c7a41-6b58-4e3d-8c19-5d7a3b6e2f84'::uuid, '4a8d2f63-9c17-4b5e-a238-7e1b4c6d9f05'::uuid, '["clean","master"]', timezone('utc'::text, current_timestamp), NULL, NULL);
+
+INSERT INTO public.platforms (id, name) VALUES ('6d3f8c25-7a94-4e61-b8d2-1c5a9e4b7f36', 'OSI');
+
+INSERT INTO public.platform_services (id, name, platform_id, result_string_template, technical_info_template) VALUES ('8b5a1e94-2c67-4d38-9f41-6a3e7b2d5c81', 'OSI', '6d3f8c25-7a94-4e61-b8d2-1c5a9e4b7f36'::uuid, '{model_name}', '{location}');
+
+INSERT INTO public.platform_service_configs (id, platform_id, service_id, config, created_on, updated_on, deleted_at) VALUES ('5c9e2b78-4d16-4a93-8e57-2f8b6c1d4a93', '6d3f8c25-7a94-4e61-b8d2-1c5a9e4b7f36'::uuid, '8b5a1e94-2c67-4d38-9f41-6a3e7b2d5c81'::uuid, '[]', timezone('utc'::text, current_timestamp), NULL, NULL);
+
 INSERT INTO public.data_product_types (id, name, description, icon_key, created_on, updated_on, deleted_at) VALUES ('{{ processing_type_id }}'::uuid, 'Processing', 'Data products that transform, clean, or enrich data to make it usable for other systems or analysis.', 'PROCESSING', timezone('utc'::text, current_timestamp), NULL, NULL);
 
 INSERT INTO public.data_product_types (id, name, description, icon_key, created_on, updated_on, deleted_at) VALUES ('{{ reporting_type_id }}'::uuid, 'Reporting', 'Data products that provide structured reports and dashboards for decision-making.', 'REPORTING', timezone('utc'::text, current_timestamp), NULL, NULL);
