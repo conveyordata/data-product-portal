@@ -176,4 +176,30 @@ describe('TechnicalAssetPopup', async () => {
 
         await waitFor(() => expect(screen.getByLabelText(/github/i)).not.toBeDisabled(), { timeout: 2000 });
     }, 15000);
+
+    it('should scroll to the first invalid field when submitting an incomplete form', async () => {
+        defaultMocks();
+
+        const user = userEvent.setup({ delay: null, pointerEventsCheck: 0 });
+        const mockCloseFunction = vi.fn();
+        renderWithProviders(
+            <AddTechnicalAssetPopup
+                onClose={mockCloseFunction}
+                isOpen
+                dataProductId={mockDataProducts[0].id}
+                debounce={0}
+            />,
+        );
+
+        const nameInput = screen.getByLabelText(/name/i);
+        await waitFor(() => expect(nameInput).not.toBeDisabled());
+
+        const createButton = screen.getByRole('button', { name: /Create/i });
+        await user.click(createButton);
+
+        expect(await screen.findByText('Please make sure all required fields are filled in')).toBeInTheDocument();
+        expect(screen.getByText('Please provide the name of the Technical Asset')).toBeInTheDocument();
+        expect(screen.getByText('Please provide a description for the Technical Asset')).toBeInTheDocument();
+        expect(mockCloseFunction).not.toHaveBeenCalled();
+    }, 15000);
 });
