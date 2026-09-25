@@ -1,6 +1,6 @@
 [project]
 name = "data-product-portal"
-version = "0.0.1"
+version = "0.7.4"
 description = "Data Product Portal core"
 
 [project.entry-points."data_product_portal.plugins"]
@@ -23,7 +23,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "data-product-portal"
-version = "0.0.1"
+version = "0.7.4"
 description = "Data Product Portal core"
 authors = ["Stijn Janssens <stijn.janssens@dataminded.com>"]
 readme = "README.md"
@@ -71,6 +71,8 @@ opentelemetry-instrumentation-fastapi = "^0.64b0"
 opentelemetry-instrumentation-sqlalchemy = "^0.64b0"
 opentelemetry-distro = "^0.64b0"
 pycasbin = "^2.8.0"
+
+[tool.poetry.group.plugins.dependencies]
 data-product-portal-plugins = { path = "../plugins", develop = true }
 
 [tool.poetry.group.test]
