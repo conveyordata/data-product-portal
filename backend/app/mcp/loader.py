@@ -9,7 +9,6 @@ from typing import Sequence
 
 from fastmcp import FastMCP
 
-from app.core.logging import logger
 from app.plugins.registry import plugin_registry
 from app.technical_asset_configuration.base_schema import TechnicalAssetPlugin
 
@@ -17,14 +16,8 @@ from app.technical_asset_configuration.base_schema import TechnicalAssetPlugin
 def load_plugins(mcp: FastMCP) -> list[type[TechnicalAssetPlugin]]:
     registered = []
     for plugin in plugin_registry.enabled():
-        try:
-            plugin.register_mcp_tools(mcp)
-        except Exception:  # noqa: PERF203
-            logger.exception(
-                f"Plugin '{plugin.name}' failed to register MCP tools, skipping"
-            )
-        else:
-            registered.append(plugin)
+        plugin.register_mcp_tools(mcp)
+        registered.append(plugin)
     return registered
 
 
