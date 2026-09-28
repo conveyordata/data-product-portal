@@ -38,6 +38,7 @@ from app.technical_asset_configuration.router import router as plugin
 from app.users.notifications.router import router as notification
 from app.users.router import router as user
 from app.groups.router import router as group
+from app.machine_users.router import router as machine_user
 
 router = (
     APIRouter(dependencies=[Security(api_key_authenticated)])
@@ -71,3 +72,4 @@ router.include_router(plugin)
 router.include_router(exploration)
 router.include_router(access_duration)
 router.include_router(group)
+router.include_router(machine_user)
