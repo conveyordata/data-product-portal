@@ -3,7 +3,7 @@
 ## Context and Problem Statement
 
 Output Ports have a hardcoded access type (`UNRESTRICTED`, `RESTRICTED`, `PRIVATE`) that is both the label users see and the
-behaviour Portal enforces. Customers such as VITO run their own classification schemes (e.g. Public / Internal / Confidential / Secret)
+behaviour Portal enforces. Customers often run their own classification schemes (e.g. Public / Internal / Confidential / Secret)
 and want to use those names directly. We introduce admin-defined **Classifications** that each map to one of the three fixed
 **Access Functions** (see `CONTEXT.md`). The behaviour of the three functions does not change.
 

@@ -117,7 +117,7 @@ class TestOutputPortRouter:
         GlobalRoleAssignmentFactory(identity_id=user.id, role_id=role.id)
         data_product = DataProductFactory()
         classification = OutputPortClassificationFactory(
-            name="VITO Secret",
+            name="Top Secret",
             access_type=OutputPortAccessType.PRIVATE,
         )
         output_port_payload["classification_id"] = str(classification.id)
@@ -370,7 +370,7 @@ class TestOutputPortRouter:
             user_id=user.id, role_id=role.id, output_port_id=ds.id
         )
         classification = OutputPortClassificationFactory(
-            name="VITO Secret",
+            name="Top Secret",
             access_type=OutputPortAccessType.PRIVATE,
         )
         update_payload = {

@@ -32,7 +32,7 @@ One of three fixed behaviours that governs an Output Port: Auto-approve, Approva
 _Avoid_: Access type, private, public
 
 **Classification**:
-An admin-defined label on an Output Port (e.g. "VITO Secret") that maps to exactly one Access Function. Many Classifications may map to the same Access Function; only the name differs.
+An admin-defined label on an Output Port (e.g. "Top Secret") that maps to exactly one Access Function. Many Classifications may map to the same Access Function; only the name differs.
 _Avoid_: Access type, sensitivity label
 
 ## Relationships
