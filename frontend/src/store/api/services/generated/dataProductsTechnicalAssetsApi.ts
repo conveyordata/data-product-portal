@@ -83,7 +83,7 @@ const injectedRtkApi = api.injectEndpoints({
       query: (queryArg) => ({
         url: `/api/v2/data_products/${queryArg.dataProductId}/technical_assets/${queryArg.id}`,
         method: "PUT",
-        body: queryArg.dataOutputUpdate,
+        body: queryArg.technicalAssetUpdate,
       }),
     }),
     getTechnicalAssetEventHistory: build.query<
@@ -101,7 +101,7 @@ const injectedRtkApi = api.injectEndpoints({
       query: (queryArg) => ({
         url: `/api/v2/data_products/${queryArg.dataProductId}/technical_assets/${queryArg.id}/status`,
         method: "PUT",
-        body: queryArg.dataOutputStatusUpdate,
+        body: queryArg.technicalAssetStatusUpdate,
       }),
     }),
     getTechnicalAssetGraphData: build.query<
@@ -173,7 +173,7 @@ export type UpdateTechnicalAssetApiResponse =
 export type UpdateTechnicalAssetApiArg = {
   dataProductId: string;
   id: string;
-  dataOutputUpdate: DataOutputUpdate;
+  technicalAssetUpdate: TechnicalAssetUpdate;
 };
 export type GetTechnicalAssetEventHistoryApiResponse =
   /** status 200 Successful Response */ GetEventHistoryResponse;
@@ -186,7 +186,7 @@ export type UpdateTechnicalAssetStatusApiResponse =
 export type UpdateTechnicalAssetStatusApiArg = {
   dataProductId: string;
   id: string;
-  dataOutputStatusUpdate: DataOutputStatusUpdate;
+  technicalAssetStatusUpdate: TechnicalAssetStatusUpdate;
 };
 export type GetTechnicalAssetGraphDataApiResponse =
   /** status 200 Successful Response */ Graph;
@@ -316,7 +316,7 @@ export type CreateTechnicalAssetRequest = {
 export type UpdateTechnicalAssetResponse = {
   id: string;
 };
-export type DataOutputUpdate = {
+export type TechnicalAssetUpdate = {
   name: string;
   description: string;
   tag_ids: string[];
@@ -367,7 +367,7 @@ export type GetEventHistoryResponseItem = {
 export type GetEventHistoryResponse = {
   events: GetEventHistoryResponseItem[];
 };
-export type DataOutputStatusUpdate = {
+export type TechnicalAssetStatusUpdate = {
   status: TechnicalAssetStatus;
 };
 export type Edge = {

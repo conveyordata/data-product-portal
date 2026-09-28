@@ -132,11 +132,11 @@ def register_tools(mcp: FastMCP) -> None:
         """
         asset_uuid = UUID(technical_asset_id)
         do = ensure_technical_asset_exists(asset_uuid, db=db)
-        data_output = TechnicalAssetService(db).get_technical_asset(
+        technical_asset = TechnicalAssetService(db).get_technical_asset(
             do.owner_id, id=asset_uuid
         )
 
-        configuration: DataOutputConfiguration = data_output.configuration  # type: ignore[assignment]
+        configuration: DataOutputConfiguration = technical_asset.configuration  # type: ignore[assignment]
         if not isinstance(configuration, GlueTechnicalAssetConfigurationModel):
             return {
                 "error": f"Technical asset {technical_asset_id} is not a Glue asset"
@@ -144,7 +144,7 @@ def register_tools(mcp: FastMCP) -> None:
 
         data_product = db.scalar(
             sa_select(DataProductModel).where(
-                DataProductModel.id == data_output.owner_id
+                DataProductModel.id == technical_asset.owner_id
             )
         )
         owner_namespace = data_product.namespace if data_product else ""
@@ -157,13 +157,13 @@ def register_tools(mcp: FastMCP) -> None:
         )
         env_configs = [
             EnvironmentConfigsGetItem.model_validate(e)
-            for e in data_output.environment_configurations
+            for e in technical_asset.environment_configurations
         ]
         for env_config in env_configs:
             if env_config.environment.name.lower() != environment.lower():
                 continue
             tech_infos = compute_technical_info(
-                config_schema, data_output.service, [env_config]
+                config_schema, technical_asset.service, [env_config]
             )
             if not tech_infos or not tech_infos[0].info:
                 return {

@@ -7,11 +7,11 @@ from uuid import UUID
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-T = TypeVar("T", bound="DataOutputUpdate")
+T = TypeVar("T", bound="TechnicalAssetUpdate")
 
 
 @_attrs_define
-class DataOutputUpdate:
+class TechnicalAssetUpdate:
     """
     Attributes:
         name (str):
@@ -60,14 +60,14 @@ class DataOutputUpdate:
 
             tag_ids.append(tag_ids_item)
 
-        data_output_update = cls(
+        technical_asset_update = cls(
             name=name,
             description=description,
             tag_ids=tag_ids,
         )
 
-        data_output_update.additional_properties = d
-        return data_output_update
+        technical_asset_update.additional_properties = d
+        return technical_asset_update
 
     @property
     def additional_keys(self) -> list[str]:

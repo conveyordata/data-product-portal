@@ -76,8 +76,6 @@ from .create_technical_asset_request_configuration import (
     CreateTechnicalAssetRequestConfiguration,
 )
 from .create_technical_asset_response import CreateTechnicalAssetResponse
-from .data_output_status_update import DataOutputStatusUpdate
-from .data_output_update import DataOutputUpdate
 from .data_product import DataProduct
 from .data_product_about_update import DataProductAboutUpdate
 from .data_product_create import DataProductCreate
@@ -334,6 +332,8 @@ from .technical_asset_link import TechnicalAssetLink
 from .technical_asset_output_port_request import TechnicalAssetOutputPortRequest
 from .technical_asset_plugin import TechnicalAssetPlugin
 from .technical_asset_status import TechnicalAssetStatus
+from .technical_asset_status_update import TechnicalAssetStatusUpdate
+from .technical_asset_update import TechnicalAssetUpdate
 from .technical_info import TechnicalInfo
 from .technical_mapping import TechnicalMapping
 from .theme_settings import ThemeSettings
@@ -426,8 +426,6 @@ __all__ = (
     "DatabricksConfig",
     "DatabricksEnvironmentPlatformConfiguration",
     "DatabricksEnvironmentPlatformConfigurationWorkspaceUrls",
-    "DataOutputStatusUpdate",
-    "DataOutputUpdate",
     "DataProduct",
     "DataProductAboutUpdate",
     "DataProductCreate",
@@ -627,6 +625,8 @@ __all__ = (
     "TechnicalAssetOutputPortRequest",
     "TechnicalAssetPlugin",
     "TechnicalAssetStatus",
+    "TechnicalAssetStatusUpdate",
+    "TechnicalAssetUpdate",
     "TechnicalInfo",
     "TechnicalMapping",
     "ThemeSettings",

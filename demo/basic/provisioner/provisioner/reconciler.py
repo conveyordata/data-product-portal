@@ -26,7 +26,7 @@ from sdk.api_client.api.data_products_technical_assets import (
 from sdk.api_client.models import (
     AbstractDataProductStatus,
     CreateTechnicalAssetRequest,
-    DataOutputStatusUpdate,
+    TechnicalAssetStatusUpdate,
     DataProductLifeCyclesGetItem,
     DataProductUpdate,
     FinalizerRequest,
@@ -329,7 +329,7 @@ class DataProductReconciler(sdk.Reconciler):
         status_response = await update_technical_asset_status.asyncio_detailed(
             data_product_id=resource_id,
             id=technical_asset_id,
-            body=DataOutputStatusUpdate.from_dict(
+            body=TechnicalAssetStatusUpdate.from_dict(
                 {"status": TechnicalAssetStatus.ACTIVE.value}
             ),
             client=self._client,

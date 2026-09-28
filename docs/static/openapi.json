@@ -4391,7 +4391,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/DataOutputUpdate"
+                "$ref": "#/components/schemas/TechnicalAssetUpdate"
               }
             }
           }
@@ -4517,7 +4517,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/DataOutputStatusUpdate"
+                "$ref": "#/components/schemas/TechnicalAssetStatusUpdate"
               }
             }
           }
@@ -10112,45 +10112,6 @@
           "id"
         ],
         "title": "CreateTechnicalAssetResponse"
-      },
-      "DataOutputStatusUpdate": {
-        "properties": {
-          "status": {
-            "$ref": "#/components/schemas/TechnicalAssetStatus"
-          }
-        },
-        "type": "object",
-        "required": [
-          "status"
-        ],
-        "title": "DataOutputStatusUpdate"
-      },
-      "DataOutputUpdate": {
-        "properties": {
-          "name": {
-            "type": "string",
-            "title": "Name"
-          },
-          "description": {
-            "type": "string",
-            "title": "Description"
-          },
-          "tag_ids": {
-            "items": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "type": "array",
-            "title": "Tag Ids"
-          }
-        },
-        "type": "object",
-        "required": [
-          "name",
-          "description",
-          "tag_ids"
-        ],
-        "title": "DataOutputUpdate"
       },
       "DataProduct": {
         "properties": {
@@ -16319,6 +16280,45 @@
           "archived"
         ],
         "title": "TechnicalAssetStatus"
+      },
+      "TechnicalAssetStatusUpdate": {
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/TechnicalAssetStatus"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "title": "TechnicalAssetStatusUpdate"
+      },
+      "TechnicalAssetUpdate": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "tag_ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Tag Ids"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "description",
+          "tag_ids"
+        ],
+        "title": "TechnicalAssetUpdate"
       },
       "TechnicalInfo": {
         "properties": {

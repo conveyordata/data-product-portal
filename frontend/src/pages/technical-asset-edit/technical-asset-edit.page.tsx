@@ -48,7 +48,7 @@ export function TechnicalAssetEdit() {
                 {dataOutput?.name}
             </Typography.Title>
             <Space orientation="vertical" size="large" className={styles.container}>
-                <TechnicalAssetForm dataOutputId={dataOutputId} dataProductId={dataProductId} mode="edit" />
+                <TechnicalAssetForm technicalAssetId={dataOutputId} dataProductId={dataProductId} mode="edit" />
             </Space>
         </Flex>
     );

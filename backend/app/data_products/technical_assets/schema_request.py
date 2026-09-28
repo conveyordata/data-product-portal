@@ -71,11 +71,11 @@ class DataOutputCreate(CreateTechnicalAssetRequest):
     pass
 
 
-class DataOutputUpdate(ORMModel):
+class TechnicalAssetUpdate(ORMModel):
     name: str
     description: str
     tag_ids: list[UUID]
 
 
-class DataOutputStatusUpdate(ORMModel):
+class TechnicalAssetStatusUpdate(ORMModel):
     status: TechnicalAssetStatus

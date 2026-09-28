@@ -256,7 +256,7 @@ class DataProduct(
         order_by="DataProductSettingValue.data_product_id",
         lazy="raise",
     )
-    data_outputs: Mapped[list["TechnicalAsset"]] = relationship(
+    technical_assets: Mapped[list["TechnicalAsset"]] = relationship(
         back_populates="owner",
         cascade="all, delete-orphan",
         lazy="raise",
@@ -270,7 +270,7 @@ class DataProduct(
         .scalar_subquery()
     )
 
-    data_outputs_count = column_property(
+    technical_asset_count = column_property(
         select(func.count(TechnicalAsset.id))
         .where(TechnicalAsset.owner_id == id)
         .correlate_except(TechnicalAsset)

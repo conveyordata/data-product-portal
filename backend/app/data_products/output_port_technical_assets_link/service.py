@@ -68,7 +68,7 @@ class TechnicalAssetOutputPortService:
             )
         return current_link
 
-    def approve_data_output_link(
+    def approve_technical_asset_link(
         self,
         *,
         data_product_id: UUID,
@@ -93,7 +93,7 @@ class TechnicalAssetOutputPortService:
         self.db.flush()
         return current_link
 
-    def deny_data_output_link(
+    def deny_technical_asset_link(
         self,
         *,
         data_product_id: UUID,
@@ -112,7 +112,7 @@ class TechnicalAssetOutputPortService:
         self.db.flush()
         return current_link
 
-    def remove_data_output_link(
+    def remove_technical_asset_link(
         self,
         data_product_id: UUID,
         technical_asset_id: UUID,
