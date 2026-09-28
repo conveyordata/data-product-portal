@@ -7,5 +7,4 @@ class GroupCreate(ORMModel):
 
 
 class GroupUpdate(ORMModel):
-    external_id: str
     display_name: str

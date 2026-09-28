@@ -2,6 +2,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
+from starlette import status
 
 from app.core.authz import Action, Authorization
 from app.core.authz.resolvers import EmptyResolver
@@ -62,6 +63,7 @@ def update_group(
 
 @router.delete(
     "/{id}",
+    status_code=status.HTTP_204_NO_CONTENT,
     dependencies=[
         Depends(Authorization.enforce(Action.GLOBAL__DELETE_GROUP, EmptyResolver)),
     ],

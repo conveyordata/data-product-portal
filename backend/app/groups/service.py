@@ -1,13 +1,18 @@
+from typing import Sequence
 from uuid import UUID
 
 from fastapi import HTTPException, status
-from sqlalchemy import select, asc
+from sqlalchemy import asc, select
 from sqlalchemy.orm import Session
 
 from app.core.authz import Authorization
 from app.groups.model import Group, GroupMembership, ensure_group_exists
 from app.groups.schema_request import GroupCreate, GroupUpdate
-from app.groups.schema_response import GroupCreateResponse, GroupUpdateResponse, GroupGet
+from app.groups.schema_response import (
+    GroupCreateResponse,
+    GroupGet,
+    GroupUpdateResponse,
+)
 from app.identities.model import ensure_identity_exists
 from app.machine_users.model import MachineUser
 from app.users.model import User
@@ -135,6 +140,7 @@ class GroupService:
         return ensure_group_exists(group_id, self.db)
 
     def create_group(self, group: GroupCreate) -> GroupCreateResponse:
+        self._ensure_external_id_available(group.external_id)
         group_model = Group(**group.parse_pydantic_schema())
         self.db.add(group_model)
         self.db.flush()
@@ -143,9 +149,14 @@ class GroupService:
 
     def update_group(self, group_id: UUID, group: GroupUpdate) -> GroupUpdateResponse:
         current_group = ensure_group_exists(group_id, self.db)
-
-        for attribute, value in group.model_dump(exclude_unset=True).items():
-            setattr(current_group, attribute, value)
-
+        current_group.display_name = group.display_name
         self.db.flush()
         return GroupUpdateResponse(id=current_group.id)
+    
+    def _ensure_external_id_available(self, external_id: str) -> None:
+        query = select(Group.id).where(Group.external_id == external_id)    
+        if self.db.scalar(query) is not None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="A group with this external ID already exists.",
+            )

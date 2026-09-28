@@ -1,3 +1,5 @@
+from uuid import uuid4
+
 import pytest
 from fastapi import HTTPException
 
@@ -10,6 +12,7 @@ from app.authorization.role_assignments.global_.service import (
 from app.authorization.roles.schema import Scope
 from app.core.authz import Authorization
 from app.core.authz.actions import AuthorizationAction
+from app.groups.schema_request import GroupCreate, GroupUpdate
 from app.groups.service import GroupService
 from tests.factories import (
     DataProductFactory,
@@ -337,3 +340,90 @@ class TestGroupService:
             user_id=user.id,
             role_id=group.id,
         )
+
+    def test_get_groups_returns_groups_ordered_by_display_name(self, session):
+        second = GroupFactory(display_name="Beta", external_id="beta")
+        first = GroupFactory(display_name="Alpha", external_id="alpha")
+
+        groups = GroupService(session).get_groups()
+
+        assert [group.id for group in groups] == [first.id, second.id]
+
+    def test_get_group(self, session):
+        group = GroupFactory()
+
+        result = GroupService(session).get_group(group.id)
+
+        assert result.id == group.id
+        assert result.external_id == group.external_id
+        assert result.display_name == group.display_name
+
+    def test_get_unknown_group_raises_not_found(self, session):
+        service = GroupService(session)
+
+        with pytest.raises(HTTPException) as exc_info:
+            service.get_group(uuid4())
+
+        assert exc_info.value.status_code == 404
+
+    def test_create_group(self, session):
+        service = GroupService(session)
+
+        result = service.create_group(
+            GroupCreate(
+                external_id="engineering",
+                display_name="Engineering",
+            )
+        )
+
+        group = service.get_group(result.id)
+        assert group.external_id == "engineering"
+        assert group.display_name == "Engineering"
+
+    def test_create_group_rejects_duplicate_external_id(self, session):
+        GroupFactory(external_id="engineering")
+        service = GroupService(session)
+
+        with pytest.raises(HTTPException) as exc_info:
+            service.create_group(
+                GroupCreate(
+                    external_id="engineering",
+                    display_name="Another Engineering Group",
+                )
+            )
+
+        assert exc_info.value.status_code == 400
+        assert exc_info.value.detail == "A group with this external ID already exists."
+
+    def test_update_group_replaces_mutable_fields(self, session):
+        group = GroupFactory(
+            external_id="old-external-id",
+            display_name="Old name",
+        )
+        service = GroupService(session)
+
+        result = service.update_group(
+            group.id,
+            GroupUpdate(display_name="New name"),
+        )
+
+        session.refresh(group)
+        assert result.id == group.id
+        assert group.display_name == "New name"
+
+    def test_update_unknown_group_raises_not_found(self, session):
+        service = GroupService(session)
+
+        with pytest.raises(HTTPException) as exc_info:
+            service.update_group(
+                uuid4(),
+                GroupUpdate(display_name="New name"),
+            )
+
+        assert exc_info.value.status_code == 404
+
+    def test_delete_unknown_group_raises_not_found(self, session):
+        with pytest.raises(HTTPException) as exc_info:
+            GroupService(session).delete_group(group_id=uuid4())
+
+        assert exc_info.value.status_code == 404

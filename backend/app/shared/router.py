@@ -37,6 +37,7 @@ from app.search_output_ports.router import router as search_output_ports
 from app.technical_asset_configuration.router import router as plugin
 from app.users.notifications.router import router as notification
 from app.users.router import router as user
+from app.groups.router import router as group
 
 router = (
     APIRouter(dependencies=[Security(api_key_authenticated)])
@@ -69,3 +70,4 @@ router.include_router(resource_name)
 router.include_router(plugin)
 router.include_router(exploration)
 router.include_router(access_duration)
+router.include_router(group)
