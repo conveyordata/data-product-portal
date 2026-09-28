@@ -11,7 +11,7 @@ const ACCESS_FUNCTION_ORDER = [
 export const compareAccessFunctions = (a: OutputPortAccessType, b: OutputPortAccessType) =>
     ACCESS_FUNCTION_ORDER.indexOf(a) - ACCESS_FUNCTION_ORDER.indexOf(b);
 
-export const isAllowedForDataProduct = (accessType: OutputPortAccessType, hiddenDataProduct: boolean) =>
+export const fitsDataProductVisibility = (accessType: OutputPortAccessType, hiddenDataProduct: boolean) =>
     !hiddenDataProduct || accessType === OutputPortAccessType.Private;
 
 export const getAccessFunctionLabel = (t: TFunction, accessType: OutputPortAccessType) => {

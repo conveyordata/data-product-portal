@@ -61,7 +61,7 @@ import {
     createMarketplaceOutputPortPath,
     createOutputPortPath,
 } from '@/types/navigation.ts';
-import { compareAccessFunctions, isAllowedForDataProduct } from '@/utils/access-type.helper.ts';
+import { compareAccessFunctions, fitsDataProductVisibility } from '@/utils/access-type.helper.ts';
 import { useGetDataProductOwnerIds } from '@/utils/data-product-user-role.helper';
 import { useGetDatasetOwnerIds } from '@/utils/dataset-user-role.helper.ts';
 import { dispatchMessage } from '@/utils/feedback.ts';
@@ -263,7 +263,7 @@ export function ClassificationSection({
                 </Tooltip>
             ),
             value: classification.id,
-            disabled: !isAllowedForDataProduct(classification.access_type, hiddenDataProduct),
+            disabled: !fitsDataProductVisibility(classification.access_type, hiddenDataProduct),
         }));
 
     return (
@@ -474,13 +474,16 @@ export function OutputPortForm({ mode, modalCallbackOnSubmit, formRef, outputPor
         if (mode !== 'create') {
             return;
         }
-        const allowed = classifications.filter((classification) =>
-            isAllowedForDataProduct(classification.access_type, isHiddenDataProduct),
+        const selectableClassifications = classifications.filter((classification) =>
+            fitsDataProductVisibility(classification.access_type, isHiddenDataProduct),
         );
         const selectedId = form.getFieldValue('classification_id');
-        if (allowed.length === 1) {
-            form.setFieldValue('classification_id', allowed[0].id);
-        } else if (selectedId && !allowed.some((classification) => classification.id === selectedId)) {
+        if (selectableClassifications.length === 1) {
+            form.setFieldValue('classification_id', selectableClassifications[0].id);
+        } else if (
+            selectedId &&
+            !selectableClassifications.some((classification) => classification.id === selectedId)
+        ) {
             form.setFieldValue('classification_id', undefined);
         }
     }, [form, isHiddenDataProduct, mode, classifications]);
