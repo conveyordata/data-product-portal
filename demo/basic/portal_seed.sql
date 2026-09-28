@@ -88,10 +88,14 @@ begin
     INSERT INTO public.data_product_types (id, "name", description, icon_key, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), 'consumer aligned', 'Data product aligned with the needs of a specific consumer', 'REPORTING', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO consumer_aligned_type_id;
 
     -- USERS
-    INSERT INTO public.users (email, id, external_id, first_name, last_name, created_on, updated_on, deleted_at) VALUES ('alice.baker@pharma.com', 'a02d3714-97e3-40d8-92b7-3b018fd1229f', 'alice.baker@pharma.com', 'Alice', 'Baker', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) ON CONFLICT (email) DO NOTHING returning id INTO alice_id;
-    INSERT INTO public.users (email, id, external_id, first_name, last_name, created_on, updated_on, deleted_at) VALUES ('bob.johnson@pharma.com', '35f2dd11-3119-4eb3-8f19-01b323131221', 'bob.johnson@pharma.com', 'Bob', 'Johnson', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) ON CONFLICT (email) DO NOTHING returning id INTO bob_id;
-    INSERT INTO public.users (email, id, external_id, can_become_admin, first_name, last_name, created_on, updated_on, deleted_at) VALUES ('jane.researcher@pharma.com', 'd9f3aae2-391e-46c1-aec6-a7ae1114a7da', 'jane.researcher@pharma.com', true, 'Jane', 'Researcher', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) ON CONFLICT (email) DO NOTHING returning id INTO jane_id;
-    INSERT INTO public.users (email, id, external_id, can_become_admin, first_name, last_name, created_on, updated_on, deleted_at, has_seen_tour) VALUES ('john.scientist@pharma.com', 'b72fca38-17ff-4259-a075-5aaa5973343c', 'john.scientist@pharma.com', true, 'John', 'Scientist', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, True) ON CONFLICT (email) DO NOTHING returning id INTO john_id;
+    INSERT INTO public.identities (id, type, external_id) VALUES ('a02d3714-97e3-40d8-92b7-3b018fd1229f', 'user', 'alice.baker@pharma.com') ON CONFLICT (type, external_id) DO NOTHING;
+    INSERT INTO public.users (email, id, first_name, last_name, deleted_at) VALUES ('alice.baker@pharma.com', 'a02d3714-97e3-40d8-92b7-3b018fd1229f', 'Alice', 'Baker', NULL) ON CONFLICT (email) DO NOTHING returning id INTO alice_id;
+    INSERT INTO public.identities (id, type, external_id) VALUES ('35f2dd11-3119-4eb3-8f19-01b323131221', 'user', 'bob.johnson@pharma.com') ON CONFLICT (type, external_id) DO NOTHING;
+    INSERT INTO public.users (email, id, first_name, last_name, deleted_at) VALUES ('bob.johnson@pharma.com', '35f2dd11-3119-4eb3-8f19-01b323131221', 'Bob', 'Johnson', NULL) ON CONFLICT (email) DO NOTHING returning id INTO bob_id;
+    INSERT INTO public.identities (id, type, external_id) VALUES ('d9f3aae2-391e-46c1-aec6-a7ae1114a7da', 'user', 'jane.researcher@pharma.com') ON CONFLICT (type, external_id) DO NOTHING;
+    INSERT INTO public.users (email, id, can_become_admin, first_name, last_name, deleted_at) VALUES ('jane.researcher@pharma.com', 'd9f3aae2-391e-46c1-aec6-a7ae1114a7da', true, 'Jane', 'Researcher', NULL) ON CONFLICT (email) DO NOTHING returning id INTO jane_id;
+    INSERT INTO public.identities (id, type, external_id) VALUES ('b72fca38-17ff-4259-a075-5aaa5973343c', 'user', 'john.scientist@pharma.com') ON CONFLICT (type, external_id) DO NOTHING;
+    INSERT INTO public.users (email, id, can_become_admin, first_name, last_name, deleted_at, has_seen_tour) VALUES ('john.scientist@pharma.com', 'b72fca38-17ff-4259-a075-5aaa5973343c', true, 'John', 'Scientist', NULL, True) ON CONFLICT (email) DO NOTHING returning id INTO john_id;
 
     -- ROLES
     INSERT INTO public.roles (id, name, scope, prototype, description, permissions, created_on, updated_on, deleted_at) VALUES ('f80c101c-345c-4d5b-9524-57c55bd12d2d', 'Everyone', 'global', 1, 'This is the role that is used as fallback for users that don''t have another role', ARRAY [102, 103, 104, 105], timezone('utc'::text, CURRENT_TIMESTAMP + INTERVAL '1 seconds'), NULL, NULL);
@@ -127,7 +131,7 @@ begin
 
     -- GLOBAL ROLE ASSIGNMENTS
     -- Make john.scientist an admin
-    INSERT into public.role_assignments_global (id, user_id, role_id, decision, requested_on, decided_on)
+    INSERT into public.role_assignments_global (id, identity_id, role_id, decision, requested_on, decided_on)
     SELECT gen_random_uuid(), id, admin_role_id, 'APPROVED', timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP)
     FROM public.users WHERE email = 'john.scientist@pharma.com';
 
@@ -186,9 +190,9 @@ begin
 <p><strong>Usage:</strong> Approved for logistics optimization, carrier management, and customer service inquiry resolution.</p>
 <p><strong>Limitations:</strong> Data accuracy is dependent on third-party carrier scan events. Not suitable as sole evidence in legal delivery disputes without secondary carrier documentation.</p>', source_aligned_type_id, ready);
 
-    INSERT INTO public.role_assignments_data_product (id, data_product_id, user_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), sales_crm_customers_dp_id, john_id, 'e43b6f7a-e776-49b2-9b51-117d8644d971', 'APPROVED', john_id, timezone('utc'::text, CURRENT_TIMESTAMP), john_id, timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
-    INSERT INTO public.role_assignments_data_product (id, data_product_id, user_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), sales_erp_orders_dp_id, john_id, 'e43b6f7a-e776-49b2-9b51-117d8644d971', 'APPROVED', john_id, timezone('utc'::text, CURRENT_TIMESTAMP), john_id, timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
-    INSERT INTO public.role_assignments_data_product (id, data_product_id, user_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), logistics_wms_shipments_dp_id, john_id, 'e43b6f7a-e776-49b2-9b51-117d8644d971', 'APPROVED', john_id, timezone('utc'::text, CURRENT_TIMESTAMP), john_id, timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+    INSERT INTO public.role_assignments_data_product (id, data_product_id, identity_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), sales_crm_customers_dp_id, john_id, 'e43b6f7a-e776-49b2-9b51-117d8644d971', 'APPROVED', john_id, timezone('utc'::text, CURRENT_TIMESTAMP), john_id, timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+    INSERT INTO public.role_assignments_data_product (id, data_product_id, identity_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), sales_erp_orders_dp_id, john_id, 'e43b6f7a-e776-49b2-9b51-117d8644d971', 'APPROVED', john_id, timezone('utc'::text, CURRENT_TIMESTAMP), john_id, timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+    INSERT INTO public.role_assignments_data_product (id, data_product_id, identity_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), logistics_wms_shipments_dp_id, john_id, 'e43b6f7a-e776-49b2-9b51-117d8644d971', 'APPROVED', john_id, timezone('utc'::text, CURRENT_TIMESTAMP), john_id, timezone('utc'::text, CURRENT_TIMESTAMP), timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
 
     -- DATA OUTPUT CONFIGURATIONS
     SELECT gen_random_uuid() INTO sales_crm_customers_do_config_id;

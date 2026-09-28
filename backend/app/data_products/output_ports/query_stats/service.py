@@ -173,7 +173,7 @@ class OutputPortStatsService:
             set_={"query_count": stmt.excluded.query_count},
         )
         self.db.execute(stmt)
-        self.db.commit()
+        self.db.flush()
 
     def delete_query_stats(
         self, output_port_id: UUID, delete_request: OutputPortQueryStatsDelete
@@ -190,7 +190,7 @@ class OutputPortStatsService:
             OutputPortQueryStatsDaily.date == target_date,
         )
         self.db.execute(stmt)
-        self.db.commit()
+        self.db.flush()
 
     def _group_low_volume_consumers(
         self,

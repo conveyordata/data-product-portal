@@ -21,6 +21,7 @@ from app.data_products.output_port_technical_assets_link.model import (
 )
 from app.data_products.output_ports.model import OutputPort
 from app.data_products.output_ports.model import OutputPort as OutputPortModel
+from app.groups.service import GroupService
 from app.users.schema import User
 from app.users.schema_response import (
     TechnicalAssetOutputPortRequest,
@@ -67,7 +68,7 @@ class TechnicalAssetOutputPortService:
             )
         return current_link
 
-    def approve_data_output_link(
+    def approve_technical_asset_link(
         self,
         *,
         data_product_id: UUID,
@@ -89,10 +90,10 @@ class TechnicalAssetOutputPortService:
         current_link.status = DecisionStatus.APPROVED
         current_link.approved_by = actor
         current_link.approved_on = datetime.now(tz=pytz.utc)
-        self.db.commit()
+        self.db.flush()
         return current_link
 
-    def deny_data_output_link(
+    def deny_technical_asset_link(
         self,
         *,
         data_product_id: UUID,
@@ -108,10 +109,10 @@ class TechnicalAssetOutputPortService:
         current_link.status = DecisionStatus.DENIED
         current_link.denied_by = actor
         current_link.denied_on = datetime.now(tz=pytz.utc)
-        self.db.commit()
+        self.db.flush()
         return current_link
 
-    def remove_data_output_link(
+    def remove_technical_asset_link(
         self,
         data_product_id: UUID,
         technical_asset_id: UUID,
@@ -125,7 +126,7 @@ class TechnicalAssetOutputPortService:
             output_port_id=output_port_id,
         )
         self.db.delete(current_link)
-        self.db.commit()
+        self.db.flush()
         return current_link
 
     def get_user_requests(self, user: User, hide_old_inactive: bool):
@@ -158,6 +159,9 @@ class TechnicalAssetOutputPortService:
     def get_user_pending_actions(
         self, user: User
     ) -> Sequence[TechnicalAssetOutputPortRequest]:
+        user_group_ids = GroupService(self.db).get_groups_ids_identity_is_member_of(
+            user.id
+        )
         requested_associations = (
             self.db.scalars(
                 select(TechnicalAssetOutputPortAssociationModel)
@@ -175,7 +179,13 @@ class TechnicalAssetOutputPortService:
                         TechnicalAssetOutputPortAssociationModel.output_port.has(
                             OutputPortModel.data_product.has(
                                 DataProductModel.assignments.any(
-                                    DataProductRoleAssignmentModel.user_id == user.id
+                                    or_(
+                                        DataProductRoleAssignmentModel.identity_id
+                                        == user.id,
+                                        DataProductRoleAssignmentModel.identity_id.in_(
+                                            user_group_ids
+                                        ),
+                                    )
                                 )
                             )
                         ),

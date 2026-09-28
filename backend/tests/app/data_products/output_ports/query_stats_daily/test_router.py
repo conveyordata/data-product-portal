@@ -226,7 +226,7 @@ class TestDatasetQueryStatsDailyRouter:
             permissions=[AuthorizationAction.DATA_PRODUCT__DELETE],
         )
         DataProductRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id, data_product_id=data_product.id
+            identity_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
 
         # Delete the data product via API

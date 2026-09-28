@@ -28,7 +28,7 @@ class TestAuthRouter:
             permissions=[AuthorizationAction.DATA_PRODUCT__READ_INTEGRATIONS],
         )
         DataProductRoleAssignmentFactory(
-            user_id=user.id,
+            identity_id=user.id,
             role_id=role.id,
             data_product_id=data_product.id,
         )

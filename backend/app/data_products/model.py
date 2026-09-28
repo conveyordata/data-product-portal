@@ -14,6 +14,8 @@ from sqlalchemy.orm import (
     with_loader_criteria,
 )
 
+from app.abstract_data_product.input_ports.enums import InputPortStatus
+from app.abstract_data_product.input_ports.model import InputPort
 from app.abstract_data_product.model import AbstractDataProduct
 from app.abstract_data_product.type import AbstractDataProductType
 from app.authorization.role_assignments.data_product.model import (
@@ -25,21 +27,21 @@ from app.configuration.tags.model import Tag, tag_data_product_table
 from app.core.authz.db_utils import (
     is_system_account,
     is_user_admin,
-    statement_references_model,
 )
 from app.core.webhooks.events import (
     DataProductEvent,
 )
+from app.data_products.output_ports.model import (
+    OutputPort,
+)
 from app.data_products.technical_assets.model import TechnicalAsset
 from app.database.database import ensure_exists
 from app.database.event_mixin import EventTrackedMixin
+from app.groups.model import GroupMembership
 
 if TYPE_CHECKING:
     from app.configuration.data_product_lifecycles.model import DataProductLifecycle
     from app.configuration.data_product_settings.model import DataProductSettingValue
-    from app.data_products.output_ports.model import (
-        OutputPort,
-    )
 
 
 class DataProductVisibility(enum.Enum):
@@ -48,11 +50,99 @@ class DataProductVisibility(enum.Enum):
 
 
 def _has_user_access_to_hidden_data_product(cls, user_id: uuid.UUID):
+    user_group_ids = (
+        select(GroupMembership.group_id)
+        .where(GroupMembership.member_identity_id == user_id)
+        .correlate_except(GroupMembership)
+    )
     return (
         select(DataProductRoleAssignment.id)
         .where(DataProductRoleAssignment.data_product_id == cls.id)
-        .where(DataProductRoleAssignment.user_id == user_id)
+        .where(
+            or_(
+                DataProductRoleAssignment.identity_id == user_id,
+                DataProductRoleAssignment.identity_id.in_(user_group_ids),
+            )
+        )
         .where(DataProductRoleAssignment.decision == DecisionStatus.APPROVED)
+        .correlate_except(DataProductRoleAssignment)
+        .exists()
+    )
+
+
+def _has_user_access_through_input_port(user_id: uuid.UUID):
+    input_ports = InputPort.__table__
+    output_ports = OutputPort.__table__
+    assignments = DataProductRoleAssignment.__table__
+    user_group_ids = (
+        select(GroupMembership.group_id)
+        .where(GroupMembership.member_identity_id == user_id)
+        .correlate_except(GroupMembership)
+    )
+
+    return (
+        select(assignments.c.id)
+        .where(
+            or_(
+                assignments.c.identity_id == user_id,
+                assignments.c.identity_id.in_(user_group_ids),
+            ),
+            assignments.c.decision == DecisionStatus.APPROVED,
+            assignments.c.data_product_id.in_(
+                select(input_ports.c.consuming_abstract_data_product_id)
+                .select_from(
+                    input_ports.join(
+                        output_ports,
+                        output_ports.c.id == input_ports.c.dataset_id,
+                    )
+                )
+                .where(
+                    output_ports.c.data_product_id == DataProduct.id,
+                    input_ports.c.status == InputPortStatus.APPROVED,
+                )
+                .correlate_except(input_ports, output_ports)
+            ),
+        )
+        .exists()
+    )
+
+
+def _has_user_access_through_input_port_for_abstract_data_product(
+    cls, user_id: uuid.UUID
+):
+    input_ports = InputPort.__table__
+    output_ports = OutputPort.__table__
+    assignments = DataProductRoleAssignment.__table__
+    user_group_ids = (
+        select(GroupMembership.group_id)
+        .where(GroupMembership.member_identity_id == user_id)
+        .correlate_except(GroupMembership)
+    )
+
+    return (
+        select(assignments.c.id)
+        .where(
+            or_(
+                assignments.c.identity_id == user_id,
+                assignments.c.identity_id.in_(user_group_ids),
+            ),
+            assignments.c.decision == DecisionStatus.APPROVED,
+            assignments.c.data_product_id.in_(
+                select(input_ports.c.consuming_abstract_data_product_id)
+                .select_from(
+                    input_ports.join(
+                        output_ports,
+                        output_ports.c.id == input_ports.c.dataset_id,
+                    )
+                )
+                .where(
+                    output_ports.c.data_product_id == cls.c.id,
+                    input_ports.c.status == InputPortStatus.APPROVED,
+                )
+                .correlate_except(input_ports, output_ports)
+            ),
+        )
+        .correlate_except(assignments)
         .exists()
     )
 
@@ -61,18 +151,54 @@ def _visibility_filter_for_user(user_id: uuid.UUID):
     return or_(
         DataProduct.visibility != DataProductVisibility.HIDDEN,
         _has_user_access_to_hidden_data_product(DataProduct, user_id),
+        _has_user_access_through_input_port(user_id),
         is_user_admin(user_id),
         is_system_account(user_id),
     )
 
 
 def _visibility_filter_for_abstract_data_product(cls, user_id: uuid.UUID):
+    # This filter is nested inside a subquery, so it must be expressed purely in
+    # terms of Core tables. The ORM variant above refers to DataProduct, whose id
+    # is shared with abstract_data_products through joined table inheritance, and
+    # alias adaptation would rewrite it to the outer alias and turn the EXISTS
+    # into an always true cross join.
+    data_products = DataProduct.__table__
+    assignments = DataProductRoleAssignment.__table__
+    memberships = GroupMembership.__table__
+
+    user_group_ids = (
+        select(memberships.c.group_id)
+        .where(memberships.c.member_identity_id == user_id)
+        .correlate_except(memberships)
+    )
+
     return or_(
         cls.abstract_data_product_type != AbstractDataProductType.DATA_PRODUCT,
-        select(DataProduct.id)
-        .where(DataProduct.id == cls.id)
-        .where(_visibility_filter_for_user(user_id))
-        .correlate_except(DataProduct.__table__)
+        select(data_products.c.id)
+        .where(data_products.c.id == cls.id)
+        .where(
+            or_(
+                data_products.c.visibility != DataProductVisibility.HIDDEN,
+                select(assignments.c.id)
+                .where(assignments.c.data_product_id == data_products.c.id)
+                .where(
+                    or_(
+                        assignments.c.identity_id == user_id,
+                        assignments.c.identity_id.in_(user_group_ids),
+                    )
+                )
+                .where(assignments.c.decision == DecisionStatus.APPROVED)
+                .correlate_except(assignments)
+                .exists(),
+                _has_user_access_through_input_port_for_abstract_data_product(
+                    data_products, user_id
+                ),
+                is_user_admin(user_id),
+                is_system_account(user_id),
+            )
+        )
+        .correlate_except(data_products)
         .exists(),
     )
 
@@ -130,7 +256,7 @@ class DataProduct(
         order_by="DataProductSettingValue.data_product_id",
         lazy="raise",
     )
-    data_outputs: Mapped[list["TechnicalAsset"]] = relationship(
+    technical_assets: Mapped[list["TechnicalAsset"]] = relationship(
         back_populates="owner",
         cascade="all, delete-orphan",
         lazy="raise",
@@ -144,7 +270,7 @@ class DataProduct(
         .scalar_subquery()
     )
 
-    data_outputs_count = column_property(
+    technical_asset_count = column_property(
         select(func.count(TechnicalAsset.id))
         .where(TechnicalAsset.owner_id == id)
         .correlate_except(TechnicalAsset)
@@ -172,72 +298,25 @@ def enforce_hidden_data_product_filter(execute_state):
     if not execute_state.is_select:
         return
 
-    # Refreshing an expired scalar attribute is not a new application-level
-    # query; the row was already authorized when originally loaded, so don't
-    # re-apply/require the visibility filter here. Relationship loads (lazy
-    # loading a collection/association) can return rows that were never
-    # authorized before, so those must still go through the filter.
-    if execute_state.is_column_load:
-        return
-
     if execute_state.execution_options.get("skip_data_product_visibility_filter"):
         return
 
+    # The current user is only set while serving a request. Everything else
+    # (migrations, casbin, startup sync) is a system level operation that is not
+    # performed on behalf of a user and therefore has nothing to filter against.
     user_id = execute_state.session.info.get("current_user_id")
-
-    # ORM entity loads use loader criteria. Scalar queries that directly select
-    # model columns (for example select(DataProduct.id)) do not carry an ORM
-    # entity description, but they still need the same visibility guard.
-    is_data_product_entity_query = any(
-        desc.get("entity") is DataProduct
-        for desc in execute_state.statement.column_descriptions
-    )
-    is_abstract_data_product_entity_query = any(
-        desc.get("entity") is AbstractDataProduct
-        for desc in execute_state.statement.column_descriptions
-    )
-    references_data_product = statement_references_model(
-        execute_state.statement, DataProduct
-    )
-    references_abstract_data_product = statement_references_model(
-        execute_state.statement, AbstractDataProduct
-    )
-
-    if not (
-        is_data_product_entity_query
-        or is_abstract_data_product_entity_query
-        or references_data_product
-        or references_abstract_data_product
-    ):
+    if user_id is None:
         return
 
-    if user_id is None:
-        raise Exception(
-            "User id must be set when skip_data_product_visibility_filter is False or not set"
-        )
-
-    if is_data_product_entity_query:
-        execute_state.statement = execute_state.statement.options(
-            with_loader_criteria(
-                DataProduct,
-                lambda cls: _visibility_filter_for_user(user_id),
-                include_aliases=True,
-            )
-        )
-    elif references_data_product:
-        execute_state.statement = execute_state.statement.where(
-            _visibility_filter_for_user(user_id)
-        )
-
-    if is_abstract_data_product_entity_query:
-        execute_state.statement = execute_state.statement.options(
-            with_loader_criteria(
-                AbstractDataProduct,
-                lambda cls: _visibility_filter_for_abstract_data_product(cls, user_id),
-                include_aliases=True,
-            )
-        )
-    elif references_abstract_data_product:
-        execute_state.statement = execute_state.statement.where(
-            _visibility_filter_for_abstract_data_product(AbstractDataProduct, user_id)
-        )
+    execute_state.statement = execute_state.statement.options(
+        with_loader_criteria(
+            DataProduct,
+            lambda cls: _visibility_filter_for_user(user_id),
+            include_aliases=True,
+        ),
+        with_loader_criteria(
+            AbstractDataProduct,
+            lambda cls: _visibility_filter_for_abstract_data_product(cls, user_id),
+            include_aliases=True,
+        ),
+    )

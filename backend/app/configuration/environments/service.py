@@ -30,5 +30,5 @@ class EnvironmentService:
             )
 
         environment.is_global = is_global
-        self.db.commit()
+        self.db.flush()
         return environment

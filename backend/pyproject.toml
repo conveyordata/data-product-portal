@@ -1,39 +1,55 @@
 [project]
-name = "app"
+name = "data-product-portal"
 version = "0.0.1"
+description = "Data Product Portal core"
+
+[project.entry-points."data_product_portal.plugins"]
+agno = "app.technical_asset_configuration.agno.schema:AgnoPlugin"
+azure-blob = "app.technical_asset_configuration.azure_blob.schema:AzureBlobTechnicalAssetConfiguration"
+coder = "app.technical_asset_configuration.coder.schema:CoderPlugin"
+conveyor = "app.technical_asset_configuration.conveyor.schema:ConveyorPlugin"
+databricks = "app.technical_asset_configuration.databricks.schema:DatabricksTechnicalAssetConfiguration"
+github = "app.technical_asset_configuration.github.schema:GitHubPlugin"
+osi-semantic-model = "app.technical_asset_configuration.osi_sem_model.schema:OSISemanticModelTechnicalAssetConfiguration"
+postgresql = "app.technical_asset_configuration.postgresql.schema:PostgreSQLTechnicalAssetConfiguration"
+redshift = "app.technical_asset_configuration.redshift.schema:RedshiftTechnicalAssetConfiguration"
+rustfs = "app.technical_asset_configuration.rustfs.schema:RustFSTechnicalAssetConfiguration"
+s3 = "app.technical_asset_configuration.s3.schema:S3TechnicalAssetConfiguration"
+snowflake = "app.technical_asset_configuration.snowflake.schema:SnowflakeTechnicalAssetConfiguration"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
-name = "app"
+name = "data-product-portal"
 version = "0.0.1"
-description = ""
+description = "Data Product Portal core"
 authors = ["Stijn Janssens <stijn.janssens@dataminded.com>"]
 readme = "README.md"
+packages = [{ include = "app" }]
 
 [tool.poetry.dependencies]
 python = "^3.13"
 python-dotenv = "^1.2.3"
 fastapi = "0.141.1"
 gunicorn = "^26.2.0"
-uvicorn = "^0.52.4"
+uvicorn = ">=0.52.4,<0.54.0"
 pydantic = { version = "^2.13.5", extras = ['email'] }
 pydantic-settings = "^2.15.0"
 typer = "^0.27.2"
 requests = "^2.34.2"
 httpx = "^0.28.1"
-alembic = "^1.19.2"
+alembic = "^1.20.0"
 sqlalchemy = { version = "^2.0.52", extras = ['asyncio'] }
 sqlalchemy-utils = "^0.42.1"
 sqlalchemy-easy-softdelete = "^0.9.1"
-psycopg2-binary = "^2.9.12"
+psycopg2-binary = "^2.9.13"
 pyyaml = "^6.0.3"
-pyjwt = "^2.13.0"
+pyjwt = "^2.14.0"
 shortuuid = "^1.0.13"
 pytz = "^2026.3"
-boto3 = "^1.43.89"
+boto3 = "^1.43.93"
 jinja2 = "^3.1.6"
 asgi-correlation-id = "^5.0.1"
 cryptography = "^50.0.1"
@@ -44,7 +60,7 @@ cachetools = "^7.1.8"
 greenlet = "^3.5.5"
 h11 = "^0.16.0"
 fastmcp = "3.4.7"
-posthog = "^7.47.1"
+posthog = "^7.53.0"
 authlib = "1.8.0"
 fastembed = "^0.8.0"
 pgvector = "^0.5.0"
@@ -55,6 +71,7 @@ opentelemetry-instrumentation-fastapi = "^0.64b0"
 opentelemetry-instrumentation-sqlalchemy = "^0.64b0"
 opentelemetry-distro = "^0.64b0"
 pycasbin = "^2.8.0"
+data-product-portal-plugins = { path = "../plugins", develop = true }
 
 [tool.poetry.group.test]
 optional = true

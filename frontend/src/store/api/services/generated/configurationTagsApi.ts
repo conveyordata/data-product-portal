@@ -48,9 +48,6 @@ export type TagsGetItem = {
 export type TagsGet = {
   tags: TagsGetItem[];
 };
-export type CreateTagResponse = {
-  id: string;
-};
 export type ValidationError = {
   loc: (string | number)[];
   msg: string;
@@ -60,6 +57,9 @@ export type ValidationError = {
 };
 export type HttpValidationError = {
   detail?: ValidationError[];
+};
+export type CreateTagResponse = {
+  id: string;
 };
 export type TagCreate = {
   value: string;

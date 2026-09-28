@@ -59,7 +59,7 @@ def convert_technical_assets_to_api(
 def get_latest_data_quality_summary_for_output_port(
     data_product_id: UUID,
     id: UUID,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
 ) -> OutputPortDataQualitySummaryResponse:
     ds = ensure_output_port_exists(id, db, data_product_id=data_product_id)
     summary = OutputPortDataQualityService(db).get_latest_data_quality_summary(ds.id)
@@ -103,7 +103,7 @@ def add_output_port_data_quality_run(
     data_product_id: UUID,
     id: UUID,
     data_quality_summary: OutputPortDataQualitySummary,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
 ) -> OutputPortDataQualitySummaryResponse:
     ds = ensure_output_port_exists(id, db, data_product_id=data_product_id)
     summary_response = OutputPortDataQualityService(db).save_data_quality_summary(
@@ -133,7 +133,7 @@ def overwrite_output_port_data_quality_summary(
     id: UUID,
     summary_id: UUID,
     data_quality_summary: OutputPortDataQualitySummary,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
 ) -> OutputPortDataQualitySummaryResponse:
     ds = ensure_output_port_exists(id, db, data_product_id=data_product_id)
     updated = OutputPortDataQualityService(db).overwrite_data_quality_summary(

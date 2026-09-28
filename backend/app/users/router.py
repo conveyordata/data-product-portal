@@ -34,7 +34,9 @@ router = APIRouter(tags=["Users"], prefix="/v2/users")
         Depends(Authorization.enforce(Action.GLOBAL__DELETE_USER, EmptyResolver)),
     ],
 )
-def remove_user(id: UUID, db: Session = Depends(get_db_session)) -> None:
+def remove_user(
+    id: UUID, db: Session = Depends(get_db_session, scope="function")
+) -> None:
     return UserService(db).remove_user(id)
 
 
@@ -53,7 +55,7 @@ def remove_user(id: UUID, db: Session = Depends(get_db_session)) -> None:
     ],
 )
 def create_user(
-    user: UserCreate, db: Session = Depends(get_db_session)
+    user: UserCreate, db: Session = Depends(get_db_session, scope="function")
 ) -> UserCreateResponse:
     return UserService(db).create_user(user)
 
@@ -66,19 +68,21 @@ def create_user(
 )
 def set_can_become_admin(
     request: CanBecomeAdminUpdate,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
 ) -> None:
     UserService(db).set_can_become_admin(request)
 
 
 @router.get("")
-def get_users(db: Session = Depends(get_db_session)) -> GetUsersResponse:
+def get_users(
+    db: Session = Depends(get_db_session, scope="function"),
+) -> GetUsersResponse:
     return GetUsersResponse(users=UserService(db).get_users())
 
 
 @router.post("/current/seen_tour")
 def mark_tour_as_seen(
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
     user: User = Depends(get_authenticated_user),
 ) -> None:
     UserService(db).mark_tour_as_seen(user.id)
@@ -86,7 +90,7 @@ def mark_tour_as_seen(
 
 @router.get("/current/pending_actions")
 def get_user_pending_actions(
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> PendingActionResponse:
     return UserService(db).get_user_pending_actions(authenticated_user)
@@ -94,7 +98,7 @@ def get_user_pending_actions(
 
 @router.get("/current/my_requests")
 def get_user_requests(
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
     authenticated_user: User = Depends(get_authenticated_user),
     hide_old_inactive: bool = Query(
         default=True, description="Filter out inactive requests older than 30 days"

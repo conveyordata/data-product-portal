@@ -233,4 +233,11 @@ class GraphService:
                 ]
             )
 
+        node_ids = {node.id for node in nodes}
+        edges = [
+            edge
+            for edge in edges
+            if edge.source in node_ids and edge.target in node_ids
+        ]
+
         return Graph(nodes=set(nodes), edges=set(edges))

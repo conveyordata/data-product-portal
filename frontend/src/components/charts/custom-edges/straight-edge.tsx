@@ -33,7 +33,7 @@ export function StraightEdge({ id, sourceX, sourceY, targetX, targetY, style, da
 
     return (
         <>
-            <BaseEdge id={id} path={edgePath} style={style} />;{/* Arrow in the middle */}
+            <BaseEdge id={id} path={edgePath} style={style} data-cy="graph-edge" />;{/* Arrow in the middle */}
             {/* Only show the arrow if the edge is not dimmed */}
             {!dimmed && (
                 <polygon

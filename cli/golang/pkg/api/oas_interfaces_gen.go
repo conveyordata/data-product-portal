@@ -141,6 +141,22 @@ type GetAccessModesRes interface {
 	getAccessModesRes()
 }
 
+type GetAllAccessDurationsRes interface {
+	getAllAccessDurationsRes()
+}
+
+type GetAllPlatformServiceConfigurationsRes interface {
+	getAllPlatformServiceConfigurationsRes()
+}
+
+type GetAllPlatformsRes interface {
+	getAllPlatformsRes()
+}
+
+type GetCurrentUserRes interface {
+	getCurrentUserRes()
+}
+
 type GetDataProductEventHistoryRes interface {
 	getDataProductEventHistoryRes()
 }
@@ -173,8 +189,20 @@ type GetDataProductTypeRes interface {
 	getDataProductTypeRes()
 }
 
+type GetDataProductsLifecyclesRes interface {
+	getDataProductsLifecyclesRes()
+}
+
 type GetDataProductsRes interface {
 	getDataProductsRes()
+}
+
+type GetDataProductsSettingsRes interface {
+	getDataProductsSettingsRes()
+}
+
+type GetDataProductsTypesRes interface {
+	getDataProductsTypesRes()
 }
 
 type GetDefaultAccessDurationRes interface {
@@ -189,8 +217,16 @@ type GetDomainRes interface {
 	getDomainRes()
 }
 
+type GetDomainsRes interface {
+	getDomainsRes()
+}
+
 type GetEnvironmentRes interface {
 	getEnvironmentRes()
+}
+
+type GetEnvironmentsRes interface {
+	getEnvironmentsRes()
 }
 
 type GetExplorationInputPortsRes interface {
@@ -249,12 +285,20 @@ type GetPlatformServicesRes interface {
 	getPlatformServicesRes()
 }
 
+type GetPlatformTilesRes interface {
+	getPlatformTilesRes()
+}
+
 type GetPluginFormRes interface {
 	getPluginFormRes()
 }
 
 type GetPluginURLRes interface {
 	getPluginURLRes()
+}
+
+type GetPluginsRes interface {
+	getPluginsRes()
 }
 
 type GetRolesRes interface {
@@ -265,6 +309,10 @@ type GetSinglePlatformServiceConfigurationRes interface {
 	getSinglePlatformServiceConfigurationRes()
 }
 
+type GetTagsRes interface {
+	getTagsRes()
+}
+
 type GetTechnicalAssetEventHistoryRes interface {
 	getTechnicalAssetEventHistoryRes()
 }
@@ -273,12 +321,28 @@ type GetTechnicalAssetRes interface {
 	getTechnicalAssetRes()
 }
 
+type GetThemeSettingsRes interface {
+	getThemeSettingsRes()
+}
+
+type GetUserNotificationsRes interface {
+	getUserNotificationsRes()
+}
+
+type GetUsersRes interface {
+	getUsersRes()
+}
+
 type IngestOutputPortContractRes interface {
 	ingestOutputPortContractRes()
 }
 
 type IngestOutputPortContractYamlRes interface {
 	ingestOutputPortContractYamlRes()
+}
+
+type IsAdminRes interface {
+	isAdminRes()
 }
 
 type LinkOutputPortToTechnicalAssetRes interface {
@@ -295,6 +359,10 @@ type ListGlobalRoleAssignmentsRes interface {
 
 type ListOutputPortRoleAssignmentsRes interface {
 	listOutputPortRoleAssignmentsRes()
+}
+
+type MarkTourAsSeenRes interface {
+	markTourAsSeenRes()
 }
 
 type MigrateDataProductTypeRes interface {
@@ -315,6 +383,10 @@ type ModifyOutputPortRoleAssignmentRes interface {
 
 type OverwriteOutputPortDataQualitySummaryRes interface {
 	overwriteOutputPortDataQualitySummaryRes()
+}
+
+type RemoveAllUserNotificationsRes interface {
+	removeAllUserNotificationsRes()
 }
 
 type RemoveDataProductFinalizerRes interface {
@@ -415,6 +487,10 @@ type RequestInputPortsForExplorationRes interface {
 
 type RequestOutputPortRoleAssignmentRes interface {
 	requestOutputPortRoleAssignmentRes()
+}
+
+type RevokeAdminRes interface {
+	revokeAdminRes()
 }
 
 type RevokeInputPortForDataProductRes interface {

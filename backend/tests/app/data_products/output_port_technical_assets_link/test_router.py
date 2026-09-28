@@ -24,7 +24,7 @@ from tests.factories import (
 from tests.factories.access_mode import AccessModeFactory
 from tests.webhook_util import assert_event_in_queue, assert_event_not_in_queue
 
-DATA_OUTPUTS_DATASETS_ENDPOINT = (
+TECHNICAL_ASSETS_OUTPUT_PORTS_ENDPOINT = (
     "api/v2/data_products/{}/output_ports/{}/technical_assets"
 )
 
@@ -40,7 +40,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         )
         data_product = DataProductFactory()
         DataProductRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id, data_product_id=data_product.id
+            identity_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
 
         technical_asset = TechnicalAssetFactory(owner=data_product)
@@ -68,7 +68,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         )
         data_product = DataProductFactory()
         DataProductRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id, data_product_id=data_product.id
+            identity_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
 
         technical_asset = TechnicalAssetFactory(owner=data_product)
@@ -96,7 +96,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         )
         data_product = DataProductFactory()
         DataProductRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id, data_product_id=data_product.id
+            identity_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
 
         technical_asset = TechnicalAssetFactory(
@@ -131,7 +131,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
             permissions=[Action.DATA_PRODUCT__REQUEST_TECHNICAL_ASSET_LINK],
         )
         DataProductRoleAssignmentFactory(
-            user_id=requester.id,
+            identity_id=requester.id,
             role_id=request_role.id,
             data_product_id=data_product.id,
         )
@@ -168,7 +168,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
             permissions=[Action.DATA_PRODUCT__REQUEST_TECHNICAL_ASSET_LINK],
         )
         DataProductRoleAssignmentFactory(
-            user_id=requester.id,
+            identity_id=requester.id,
             role_id=request_role.id,
             data_product_id=data_product.id,
         )
@@ -203,7 +203,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         )
         data_product = DataProductFactory()
         DataProductRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id, data_product_id=data_product.id
+            identity_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
 
         technical_asset = TechnicalAssetFactory(owner=data_product)
@@ -222,7 +222,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         )
         data_product = DataProductFactory()
         DataProductRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id, data_product_id=data_product.id
+            identity_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
 
         technical_asset = TechnicalAssetFactory(owner=data_product)
@@ -259,7 +259,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
             permissions=[Action.DATA_PRODUCT__REQUEST_TECHNICAL_ASSET_LINK],
         )
         DataProductRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id, data_product_id=data_product.id
+            identity_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
         response = self.request_technical_asset_output_port_link(
             client, data_product.id, technical_asset.id, ds.id
@@ -281,7 +281,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
             ],
         )
         DataProductRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id, data_product_id=data_product.id
+            identity_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
         response = self.request_technical_asset_output_port_link(
             client, data_product.id, technical_asset.id, ds.id
@@ -307,7 +307,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
             ],
         )
         DataProductRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id, data_product_id=data_product.id
+            identity_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
         response = self.request_technical_asset_output_port_link(
             client, data_product.id, technical_asset.id, ds.id
@@ -469,7 +469,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
             permissions=[Action.DATA_PRODUCT__REVOKE_OUTPUT_PORT_ACCESS],
         )
         DataProductRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id, data_product_id=ds.data_product.id
+            identity_id=user.id, role_id=role.id, data_product_id=ds.data_product.id
         )
         technical_asset = TechnicalAssetFactory(owner=ds.data_product)
         TechnicalAssetOutputPortAssociationFactory(
@@ -536,7 +536,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         )
         data_product = DataProductFactory()
         DataProductRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id, data_product_id=data_product.id
+            identity_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
 
         technical_asset = TechnicalAssetFactory(owner=data_product)
@@ -560,7 +560,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
             permissions=[Action.DATA_PRODUCT__REVOKE_OUTPUT_PORT_ACCESS],
         )
         DataProductRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id, data_product_id=ds.data_product.id
+            identity_id=user.id, role_id=role.id, data_product_id=ds.data_product.id
         )
         technical_asset = TechnicalAssetFactory(owner=ds.data_product)
         link = TechnicalAssetOutputPortAssociationFactory(
@@ -637,7 +637,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
             ],
         )
         DataProductRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id, data_product_id=data_product.id
+            identity_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
         response = self.request_technical_asset_output_port_link(
             client, data_product.id, technical_asset.id, ds.id
@@ -660,7 +660,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         client, data_product_id, technical_asset_id, output_port_id
     ):
         return client.post(
-            f"{DATA_OUTPUTS_DATASETS_ENDPOINT.format(data_product_id, output_port_id)}/add",
+            f"{TECHNICAL_ASSETS_OUTPUT_PORTS_ENDPOINT.format(data_product_id, output_port_id)}/add",
             json={"technical_asset_id": f"{technical_asset_id}"},
         )
 
@@ -669,7 +669,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         client, data_product_id, technical_asset_id, output_port_id
     ):
         return client.post(
-            f"{DATA_OUTPUTS_DATASETS_ENDPOINT.format(data_product_id, output_port_id)}/approve_link_request",
+            f"{TECHNICAL_ASSETS_OUTPUT_PORTS_ENDPOINT.format(data_product_id, output_port_id)}/approve_link_request",
             json={"technical_asset_id": f"{technical_asset_id}"},
         )
 
@@ -678,7 +678,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         client, data_product_id, technical_asset_id, output_port_id
     ):
         return client.post(
-            f"{DATA_OUTPUTS_DATASETS_ENDPOINT.format(data_product_id, output_port_id)}/deny_link_request",
+            f"{TECHNICAL_ASSETS_OUTPUT_PORTS_ENDPOINT.format(data_product_id, output_port_id)}/deny_link_request",
             json={"technical_asset_id": f"{technical_asset_id}"},
         )
 
@@ -688,7 +688,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
     ):
         return client.request(
             method="DELETE",
-            url=f"{DATA_OUTPUTS_DATASETS_ENDPOINT.format(data_product_id, output_port_id)}/remove",
+            url=f"{TECHNICAL_ASSETS_OUTPUT_PORTS_ENDPOINT.format(data_product_id, output_port_id)}/remove",
             json={"technical_asset_id": f"{technical_asset_id}"},
         )
 

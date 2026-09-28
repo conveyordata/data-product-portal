@@ -64,11 +64,6 @@ export type AccessModeWithType = {
 export type GetAccessModes = {
   access_modes: AccessModeWithType[];
 };
-export type AccessMode = {
-  id: string;
-  name: string;
-  description: string;
-};
 export type ValidationError = {
   loc: (string | number)[];
   msg: string;
@@ -78,6 +73,11 @@ export type ValidationError = {
 };
 export type HttpValidationError = {
   detail?: ValidationError[];
+};
+export type AccessMode = {
+  id: string;
+  name: string;
+  description: string;
 };
 export type AccessModeCreate = {
   name: string;

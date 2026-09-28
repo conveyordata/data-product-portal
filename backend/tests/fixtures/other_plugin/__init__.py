@@ -1,0 +1,2 @@
+class OtherPlugin:
+    name = "OtherPlugin"

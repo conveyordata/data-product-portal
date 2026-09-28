@@ -148,10 +148,7 @@ export function TechnicalAssetCard({ technicalAsset, dataProductId, onDragStart,
                     <Flex justify="space-between" align="flex-start">
                         <Flex gap="medium" align="center">
                             <CustomSvgIconLoader
-                                iconComponent={getTechnicalAssetIcon(
-                                    technicalAsset.configuration.configuration_type,
-                                    plugins,
-                                )}
+                                iconComponent={getTechnicalAssetIcon(technicalAsset.configuration.name, plugins)}
                             />
                             <Flex>
                                 <Link to={createDataOutputIdPath(technicalAsset.id, technicalAsset.owner_id)}>

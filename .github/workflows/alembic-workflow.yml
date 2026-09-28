@@ -6,7 +6,9 @@ on:
     paths:
       - 'backend/app/database/alembic/**'
       - 'backend/app/**/model.py'
-      - 'docker-compose.yml'
+      - 'backend/app/technical_asset_configuration/**/versions/**'
+      - 'backend/app/plugins/migrations.py'
+      - 'compose.yaml'
       - '.github/workflows/alembic-workflow.yml'
 
 permissions:
@@ -50,11 +52,8 @@ jobs:
             done
           done
 
-      - name: Downgrade to Previous Migration
-        run: docker compose exec portal alembic downgrade -1
-
-      - name: Upgrade to Head Migration
-        run: docker compose exec portal alembic upgrade head
+      - name: Downgrade and Reapply Latest Migration
+        run: docker compose exec portal python -m app.db_tool check-latest-migration
 
       - name: Verify Frontend API is Responding
         run: |

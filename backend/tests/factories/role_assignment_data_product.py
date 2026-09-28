@@ -14,7 +14,7 @@ class DataProductRoleAssignmentFactory(factory.alchemy.SQLAlchemyModelFactory):
 
     id = factory.Faker("uuid4")
     data_product_id = factory.Faker("uuid4")
-    user_id = factory.Faker("uuid4")
+    identity_id = factory.Faker("uuid4")
     role_id = factory.SubFactory(RoleFactory)
     decision = DecisionStatus.APPROVED
 
@@ -24,6 +24,6 @@ class DataProductRoleAssignmentFactory(factory.alchemy.SQLAlchemyModelFactory):
             authorizer = Authorization()
             authorizer.assign_resource_role(
                 role_id=str(self.role_id),
-                user_id=str(self.user_id),
+                user_id=str(self.identity_id),
                 resource_id=str(self.data_product_id),
             )

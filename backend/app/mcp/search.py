@@ -88,22 +88,25 @@ def universal_search(
         total_count += len(filtered_output_ports)
 
     if "technical_assets" in search_types:
-        all_data_outputs = TechnicalAssetService(db).get_data_outputs()
-        filtered_data_outputs = []
-        for do in all_data_outputs:
+        all_technical_assets = TechnicalAssetService(db).get_technical_assets()
+        filtered_technical_assets = []
+        for do in all_technical_assets:
             if query.lower() in do.name.lower() or (
                 do.description and query.lower() in do.description.lower()
             ):
-                filtered_data_outputs.append(do)
-                if len(filtered_data_outputs) >= limit:
+                filtered_technical_assets.append(do)
+                if len(filtered_technical_assets) >= limit:
                     break
 
-        result_data_outputs = [
-            GetTechnicalAssetsResponseItem.model_validate(do)
-            for do in filtered_data_outputs
-        ]
-        query_results.update({"technical_assets": result_data_outputs})
-        total_count += len(filtered_data_outputs)
+        query_results.update(
+            {
+                "technical_assets": [
+                    GetTechnicalAssetsResponseItem.model_validate(do)
+                    for do in filtered_technical_assets
+                ]
+            }
+        )
+        total_count += len(filtered_technical_assets)
 
     if "domains" in search_types:
         from app.configuration.domains.schema_response import GetDomainsItem

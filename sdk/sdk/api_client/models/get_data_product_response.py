@@ -8,6 +8,7 @@ from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..models.abstract_data_product_status import AbstractDataProductStatus
+from ..models.data_product_visibility import DataProductVisibility
 
 if TYPE_CHECKING:
     from ..models.data_product_life_cycle import DataProductLifeCycle
@@ -34,6 +35,7 @@ class GetDataProductResponse:
         domain (Domain):
         type_ (DataProductType):
         lifecycle (DataProductLifeCycle | None):
+        visibility (DataProductVisibility):
         about (None | str):
     """
 
@@ -48,6 +50,7 @@ class GetDataProductResponse:
     domain: Domain
     type_: DataProductType
     lifecycle: DataProductLifeCycle | None
+    visibility: DataProductVisibility
     about: None | str
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
@@ -84,6 +87,8 @@ class GetDataProductResponse:
         else:
             lifecycle = self.lifecycle
 
+        visibility = self.visibility.value
+
         about: None | str
         about = self.about
 
@@ -102,6 +107,7 @@ class GetDataProductResponse:
                 "domain": domain,
                 "type": type_,
                 "lifecycle": lifecycle,
+                "visibility": visibility,
                 "about": about,
             }
         )
@@ -161,6 +167,8 @@ class GetDataProductResponse:
 
         lifecycle = _parse_lifecycle(d.pop("lifecycle"))
 
+        visibility = DataProductVisibility(d.pop("visibility"))
+
         def _parse_about(data: object) -> None | str:
             if data is None:
                 return data
@@ -180,6 +188,7 @@ class GetDataProductResponse:
             domain=domain,
             type_=type_,
             lifecycle=lifecycle,
+            visibility=visibility,
             about=about,
         )
 

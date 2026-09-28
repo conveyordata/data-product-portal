@@ -60,7 +60,7 @@ def register_permission_tools(mcp) -> None:
         if not scope_type or scope_type == "global":
             global_role_service = GlobalRoleAssignmentService(db)
             global_assignments = global_role_service.list_assignments(
-                user_id=UUID(target_user_id)
+                identity_id=UUID(target_user_id)
             )
             global_roles = [
                 GlobalRoleAssignmentResponse.model_validate(assignment).model_dump()
@@ -70,7 +70,7 @@ def register_permission_tools(mcp) -> None:
         if not scope_type or scope_type == "data_product":
             data_product_role_service = DataProductRoleAssignmentService(db)
             dp_assignments = data_product_role_service.list_assignments(
-                user_id=UUID(target_user_id)
+                identity_id=UUID(target_user_id)
             )
 
             for assignment in dp_assignments[:limit]:
@@ -105,7 +105,7 @@ def register_permission_tools(mcp) -> None:
 
         return {
             "user_id": target_user_id,
-            "is_current_user": target_user_id == str(current_user["id"]),
+            "is_current_user": target_user_id == str(current_user.id),
             "total_assignments": total_assignments,
             "roles": {
                 "global": global_roles,

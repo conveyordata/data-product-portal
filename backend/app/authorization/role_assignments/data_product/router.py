@@ -42,6 +42,7 @@ from app.database.deps import get_db_session
 from app.events.enums import EventReferenceEntity, EventType
 from app.events.schema import CreateEvent
 from app.events.service import EventService
+from app.identities.service import get_identity_display_name
 from app.users.notifications.service import NotificationService
 from app.users.schema import User
 
@@ -61,7 +62,7 @@ router = APIRouter(prefix="/v2/authz/role_assignments/data_product")
 )
 def delete_data_product_role_assignment(
     id: UUID,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
     user: User = Depends(get_authenticated_user),
 ) -> DeleteDataProductRoleAssignmentResponse:
     assignment = RoleAssignmentService(db=db).delete_assignment(id)
@@ -74,7 +75,7 @@ def delete_data_product_role_assignment(
             name=EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_REMOVED,
             subject_id=assignment.data_product_id,
             subject_type=EventReferenceEntity.DATA_PRODUCT,
-            target_id=assignment.user_id,
+            target_id=assignment.identity_id,
             target_type=EventReferenceEntity.USER,
             actor_id=user.id,
         ),
@@ -97,14 +98,15 @@ def list_data_product_role_assignments(
     user_id: Annotated[UUID | SkipJsonSchema[None], Query()] = None,
     role_id: Annotated[UUID | SkipJsonSchema[None], Query()] = None,
     decision: Annotated[DecisionStatus | SkipJsonSchema[None], Query()] = None,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
 ) -> ListDataProductRoleAssignmentsResponse:
     return ListDataProductRoleAssignmentsResponse(
         role_assignments=RoleAssignmentService(db).list_assignments(
             data_product_id=data_product_id,
-            user_id=user_id,
+            identity_id=user_id,
             role_id=role_id,
             decision=decision,
+            users_only=True,
         )
     )
 
@@ -122,14 +124,14 @@ def list_data_product_role_assignments(
 def request_data_product_role_assignment(
     request: RequestDataProductRoleAssignment,
     background_tasks: BackgroundTasks,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
     user: User = Depends(get_authenticated_user),
 ) -> DataProductRoleAssignmentResponse:
     service = RoleAssignmentService(db=db)
     role_assignment = service.create_assignment(
         data_product_id=request.data_product_id,
         role_id=request.role_id,
-        user_id=request.user_id,
+        identity_id=request.user_id,
         actor=user,
     )
     EventService(db).create_event(
@@ -137,7 +139,7 @@ def request_data_product_role_assignment(
             name=EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_REQUESTED,
             subject_id=role_assignment.data_product_id,
             subject_type=EventReferenceEntity.DATA_PRODUCT,
-            target_id=role_assignment.user_id,
+            target_id=role_assignment.identity_id,
             target_type=EventReferenceEntity.USER,
             actor_id=user.id,
         )
@@ -151,7 +153,7 @@ def request_data_product_role_assignment(
     if other_approvers:
         background_tasks.add_task(
             email.send_role_assignment_request_email,
-            deepcopy(role_assignment.user),
+            get_identity_display_name(role_assignment.identity),
             deepcopy(role_assignment.data_product),
             [deepcopy(approver) for approver in other_approvers],
         )
@@ -173,13 +175,13 @@ def request_data_product_role_assignment(
 def create_data_product_role_assignment(
     body: CreateDataProductRoleAssignment,
     background_tasks: BackgroundTasks,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
     user: User = Depends(get_authenticated_user),
 ) -> DataProductRoleAssignmentResponse:
     service = RoleAssignmentService(db=db)
     role_assignment = service.create_assignment(
         data_product_id=body.data_product_id,
-        user_id=body.user_id,
+        identity_id=body.user_id,
         role_id=body.role_id,
         actor=user,
     )
@@ -189,7 +191,7 @@ def create_data_product_role_assignment(
             name=EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_CREATED,
             subject_id=role_assignment.data_product_id,
             subject_type=EventReferenceEntity.DATA_PRODUCT,
-            target_id=role_assignment.user_id,
+            target_id=role_assignment.identity_id,
             target_type=EventReferenceEntity.USER,
             actor_id=user.id,
         )
@@ -215,7 +217,7 @@ def create_data_product_role_assignment(
     else:
         background_tasks.add_task(
             email.send_role_assignment_request_email,
-            deepcopy(role_assignment.user),
+            get_identity_display_name(role_assignment.identity),
             deepcopy(role_assignment.data_product),
             [deepcopy(approver) for approver in approvers],
         )
@@ -236,7 +238,7 @@ def create_data_product_role_assignment(
 def decide_data_product_role_assignment(
     id: UUID,
     request: DecideDataProductRoleAssignment,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
     user: User = Depends(get_authenticated_user),
 ) -> DataProductRoleAssignmentResponse:
     service = RoleAssignmentService(db)
@@ -268,7 +270,7 @@ def decide_data_product_role_assignment(
             ),
             subject_id=assignment.data_product_id,
             subject_type=EventReferenceEntity.DATA_PRODUCT,
-            target_id=assignment.user_id,
+            target_id=assignment.identity_id,
             target_type=EventReferenceEntity.USER,
             actor_id=user.id,
         ),
@@ -298,7 +300,7 @@ def decide_data_product_role_assignment(
 def modify_data_product_role_assignment(
     id: UUID,
     body: ModifyDataProductRoleAssignment,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
     user: User = Depends(get_authenticated_user),
 ) -> DataProductRoleAssignmentResponse:
     service = RoleAssignmentService(db)
@@ -315,7 +317,7 @@ def modify_data_product_role_assignment(
             name=EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_UPDATED,
             subject_id=assignment.data_product_id,
             subject_type=EventReferenceEntity.DATA_PRODUCT,
-            target_id=assignment.user_id,
+            target_id=assignment.identity_id,
             target_type=EventReferenceEntity.USER,
             actor_id=user.id,
         ),

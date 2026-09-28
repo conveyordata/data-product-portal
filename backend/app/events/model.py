@@ -58,7 +58,7 @@ class Event(Base, BaseORM):
         "and_(Event.target_id == foreign(OutputPort.id),"
         " Event.target_type == 'DATASET'))",
     )
-    data_output: Mapped["TechnicalAsset"] = relationship(
+    technical_asset: Mapped["TechnicalAsset"] = relationship(
         primaryjoin="or_(and_(Event.subject_id == "
         "foreign(TechnicalAsset.id), Event.subject_type == 'DATA_OUTPUT'),"
         "and_(Event.target_id == foreign(TechnicalAsset.id),"

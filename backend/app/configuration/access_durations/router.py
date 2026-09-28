@@ -6,7 +6,9 @@ from app.configuration.access_durations.schema_request import AccessDurationUpda
 from app.configuration.access_durations.schema_response import (
     AccessDuration,
     ExpiringSoonThresholdResponse,
+    GetAccessDurationResponse,
     TimeBoundAccessEnabledResponse,
+    UpdateAccessDurationResponse,
 )
 from app.configuration.access_durations.service import AccessDurationService
 from app.core.authz import Action, Authorization
@@ -33,7 +35,7 @@ def get_expiring_soon_threshold():
 @router.get("/{abstract_data_product_type}/default", response_model=AccessDuration)
 def get_default_access_duration(
     abstract_data_product_type: AbstractDataProductType,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
 ):
     access_duration = AccessDurationService(db).get_default_access_duration(
         abstract_data_product_type
@@ -46,9 +48,13 @@ def get_default_access_duration(
     return access_duration
 
 
-@router.get("", response_model=list[AccessDuration])
-def get_all_access_durations(db: Session = Depends(get_db_session)):
-    return AccessDurationService(db).get_access_durations()
+@router.get("")
+def get_all_access_durations(
+    db: Session = Depends(get_db_session, scope="function"),
+) -> GetAccessDurationResponse:
+    return GetAccessDurationResponse(
+        access_durations=AccessDurationService(db).get_access_durations()
+    )
 
 
 @router.put(
@@ -62,8 +68,10 @@ def get_all_access_durations(db: Session = Depends(get_db_session)):
 def update_access_duration(
     abstract_data_product_type: AbstractDataProductType,
     update: AccessDurationUpdate,
-    db: Session = Depends(get_db_session),
-) -> list[AccessDuration]:
-    return AccessDurationService(db).upsert_access_duration(
-        abstract_data_product_type, update
+    db: Session = Depends(get_db_session, scope="function"),
+) -> UpdateAccessDurationResponse:
+    return UpdateAccessDurationResponse(
+        access_durations=AccessDurationService(db).upsert_access_duration(
+            abstract_data_product_type, update
+        )
     )

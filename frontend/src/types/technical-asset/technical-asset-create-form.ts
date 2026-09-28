@@ -3,7 +3,7 @@ import type {
     TechnicalMapping,
 } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
 export type TechnicalAssetConfiguration = Record<string, unknown> & {
-    configuration_type: string;
+    name: string;
 };
 
 export type TechnicalAssetsCreateForm = {

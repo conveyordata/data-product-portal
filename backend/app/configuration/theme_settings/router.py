@@ -14,7 +14,9 @@ router = APIRouter(
 
 
 @router.get("")
-def get_theme_settings(db: Session = Depends(get_db_session)) -> ThemeSettings:
+def get_theme_settings(
+    db: Session = Depends(get_db_session, scope="function"),
+) -> ThemeSettings:
     return ThemeSettingsService(db).get_theme_settings()
 
 
@@ -27,6 +29,6 @@ def get_theme_settings(db: Session = Depends(get_db_session)) -> ThemeSettings:
     ],
 )
 def update_theme_settings(
-    new_settings: ThemeSettings, db: Session = Depends(get_db_session)
+    new_settings: ThemeSettings, db: Session = Depends(get_db_session, scope="function")
 ):
     return ThemeSettingsService(db).update_theme_settings(new_settings)

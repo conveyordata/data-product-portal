@@ -1,36 +1,43 @@
 import type { TFunction } from 'i18next';
 
-import type { UiElementMetadataResponse } from '@/store/api/services/generated/pluginsApi';
-import { getIcon } from './icon-loader';
+import type { PlatformTile, UiElementMetadataResponse } from '@/store/api/services/generated/pluginsApi';
+import { getIcon, getIconFromDataUri } from './icon-loader';
 
-export function getTechnicalAssetIcon(configuration_type: string | undefined, plugins?: UiElementMetadataResponse[]) {
-    if (!configuration_type || !plugins) {
+export function getTechnicalAssetIcon(name: string | undefined, plugins?: UiElementMetadataResponse[]) {
+    if (!name || !plugins) {
         return undefined;
     }
 
-    const plugin = plugins.find((p) => p.plugin === configuration_type);
+    const plugin = plugins.find((p) => p.plugin === name);
     if (!plugin) {
         return undefined;
     }
 
-    // Replace logo with border-icon
+    if (plugin.icon_data_uri) {
+        return getIconFromDataUri(plugin.icon_data_uri);
+    }
+
     const borderIcon = plugin.icon_name.replace('logo', 'border-icon');
     return getIcon(borderIcon);
 }
 
 export function getTechnicalAssetType(
-    configuration_type: string | undefined,
+    name: string | undefined,
     plugins: UiElementMetadataResponse[] | undefined,
     t: TFunction,
 ) {
-    if (!configuration_type || !plugins) {
+    if (!name || !plugins) {
         return undefined;
     }
 
-    const plugin = plugins.find((p) => p.plugin === configuration_type);
+    const plugin = plugins.find((p) => p.plugin === name);
     if (!plugin) {
         return undefined;
     }
 
     return t(plugin.display_name);
+}
+
+export function getPlatformTileIcon(tile: PlatformTile) {
+    return tile.icon_data_uri ? getIconFromDataUri(tile.icon_data_uri) : getIcon(tile.icon_name);
 }

@@ -4,6 +4,7 @@
 .default-icon {
     width: variables.$icon-size-default;
     height: variables.$icon-size-default;
+    flex-shrink: 0;
     color: colors.$primary-color;
 
     svg {
@@ -37,6 +38,11 @@
 
     &.dark {
         color: colors.$color-text;
+    }
+
+    &.font-small {
+        width: variables.$icon-size-font-sm;
+        height: variables.$icon-size-font-sm;
     }
 
     &.x-small {

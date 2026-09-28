@@ -69,9 +69,6 @@ export type DataProductSettingsGetItem = {
 export type DataProductSettingsGet = {
   data_product_settings: DataProductSettingsGetItem[];
 };
-export type CreateDataProductSettingResponse = {
-  id: string;
-};
 export type ValidationError = {
   loc: (string | number)[];
   msg: string;
@@ -81,6 +78,9 @@ export type ValidationError = {
 };
 export type HttpValidationError = {
   detail?: ValidationError[];
+};
+export type CreateDataProductSettingResponse = {
+  id: string;
 };
 export type DataProductSettingCreate = {
   category: string;

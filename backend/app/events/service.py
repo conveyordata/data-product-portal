@@ -12,7 +12,6 @@ from app.data_products.technical_assets.model import TechnicalAsset
 from app.events.enums import EventReferenceEntity
 from app.events.model import Event as EventModel
 from app.events.schema import CreateEvent
-from app.events.schema_response import GetEventHistoryResponseItemOld
 from app.users.model import User
 
 
@@ -89,7 +88,7 @@ def _backup_data_product_name_on_delete(mapper, connection, target):
 
 
 @sql_event.listens_for(TechnicalAsset, "before_delete")
-def _backup_data_output_name_on_delete(mapper, connection, target):
+def _backup_technical_asset_name_on_delete(mapper, connection, target):
     connection.execute(
         update(EventModel.__table__)
         .where(
@@ -128,9 +127,7 @@ class EventService:
         self.db.flush()
         return [event.id for event in created_events]
 
-    def get_history(
-        self, id: UUID, type: EventReferenceEntity
-    ) -> Sequence[GetEventHistoryResponseItemOld]:
+    def get_history(self, id: UUID, type: EventReferenceEntity) -> Sequence[EventModel]:
         return self.db.scalars(
             select(EventModel)
             .where(

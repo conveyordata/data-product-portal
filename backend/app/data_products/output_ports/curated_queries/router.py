@@ -30,7 +30,7 @@ router = APIRouter(prefix="/{id}/curated_queries")
 def get_output_port_curated_queries(
     data_product_id: UUID,
     id: UUID,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
 ) -> OutputPortCuratedQueries:
     ds = ensure_output_port_exists(id, db, data_product_id=data_product_id)
     return DatasetCuratedQueryService(db).get_curated_queries(ds.id)
@@ -58,7 +58,7 @@ def replace_output_port_curated_queries(
     data_product_id: UUID,
     id: UUID,
     curated_queries: OutputPortCuratedQueriesUpdate,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
 ) -> OutputPortCuratedQueries:
     ds = ensure_output_port_exists(id, db, data_product_id=data_product_id)
     return DatasetCuratedQueryService(db).replace_curated_queries(

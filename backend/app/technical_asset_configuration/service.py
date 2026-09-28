@@ -14,9 +14,9 @@ from app.technical_asset_configuration.schema_request import (
 if TYPE_CHECKING:
     from app.users.schema import User
 
-from app.settings import settings
+from app.plugins.registry import plugin_registry
 from app.technical_asset_configuration.base_schema import (
-    AssetProviderPlugin,
+    TechnicalAssetPlugin,
 )
 from app.technical_asset_configuration.schema_response import (
     PlatformTile,
@@ -25,23 +25,16 @@ from app.technical_asset_configuration.schema_response import (
 
 
 class PluginService:
-    def __init__(self, db: Session = Depends(get_db_session)):
+    def __init__(self, db: Session = Depends(get_db_session, scope="function")):
         self.db = db
 
     def get_all_technical_assets_ui_metadata(
         self,
     ) -> Sequence[UIElementMetadataResponse]:
-        """Generate UI metadata for all registered data output types"""
-        data_output_configurations = AssetProviderPlugin.__subclasses__()
-        configured_plugins = settings.ENABLED_PLUGINS
-        configured_metadata = [
-            name
-            for name in data_output_configurations
-            if name.name in configured_plugins
-        ]
+        """Generate UI metadata for every enabled plugin"""
         return [
             metadata_response
-            for plugin in configured_metadata
+            for plugin in plugin_registry.enabled()
             if (metadata_response := self._build_metadata_response(plugin)) is not None
         ]
 
@@ -61,14 +54,15 @@ class PluginService:
         return plugin
 
     def _build_metadata_response(
-        self, plugin_class: type[AssetProviderPlugin]
+        self, plugin_class: type[TechnicalAssetPlugin]
     ) -> Optional[UIElementMetadataResponse]:
         """Build a complete metadata response for a plugin"""
         try:
             platform_meta = plugin_class.get_platform_metadata()
             return UIElementMetadataResponse(
                 ui_metadata=plugin_class.get_ui_metadata(self.db),
-                plugin=plugin_class.__name__,
+                plugin=plugin_class.name,
+                icon_data_uri=plugin_class.get_icon_data_uri(),
                 platform=platform_meta.platform_key,
                 display_name=platform_meta.display_name,
                 icon_name=platform_meta.icon_name,
@@ -83,7 +77,8 @@ class PluginService:
             return UIElementMetadataResponse(
                 not_configured=True,
                 ui_metadata=[],
-                plugin=plugin_class.__name__,
+                plugin=plugin_class.name,
+                icon_data_uri=plugin_class.get_icon_data_uri(),
                 platform=platform_meta.platform_key,
                 display_name=platform_meta.display_name,
                 icon_name=platform_meta.icon_name,
@@ -108,11 +103,13 @@ class PluginService:
         actor: "User",
         environment: Optional[str] = None,
     ) -> str:
-        data_output_configurations = AssetProviderPlugin.__subclasses__()
+        # Every installed plugin, not only the enabled ones: an access tile URL is
+        # looked up for an asset that already exists.
+        discovered_plugins = plugin_registry.discovered()
         plugin_class = next(
             (
                 cls
-                for cls in data_output_configurations
+                for cls in discovered_plugins
                 if cls.get_platform_metadata().platform_key == plugin_name
             ),
             None,
@@ -122,7 +119,7 @@ class PluginService:
             plugin_class = next(
                 (
                     cls
-                    for cls in data_output_configurations
+                    for cls in discovered_plugins
                     if cls.get_platform_metadata().parent_platform == plugin_name
                 ),
                 None,
@@ -152,6 +149,7 @@ class PluginService:
                 label=meta.display_name,
                 value=meta.platform,
                 icon_name=meta.icon_name,
+                icon_data_uri=meta.icon_data_uri,
                 has_environments=meta.has_environments,
                 has_config=True,
                 show_in_form=meta.show_in_form,

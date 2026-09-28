@@ -24,6 +24,34 @@ def get_posthog_client() -> Optional[Posthog]:
     return None
 
 
+class PosthogAnalyticsClient:
+    """Wraps an optional Posthog client so callers don't need to check for
+    None or guard against capture() failures (e.g. non-serializable
+    properties, network errors) themselves.
+    """
+
+    def __init__(self) -> None:
+        self._client = get_posthog_client()
+
+    def capture(
+        self,
+        *,
+        distinct_id: Any,
+        event: str,
+        properties: Optional[dict[str, Any]] = None,
+    ) -> None:
+        if not self._client:
+            return
+        try:
+            self._client.capture(
+                distinct_id=str(distinct_id),
+                event=event,
+                properties=properties,
+            )
+        except Exception:
+            logger.warning(f"Failed to send posthog event '{event}'", exc_info=True)
+
+
 def _seconds_until_next_midnight_utc() -> float:
     now = datetime.now(tz=pytz.utc)
     next_midnight = (now + timedelta(days=1)).replace(

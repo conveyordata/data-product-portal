@@ -27,7 +27,7 @@ In principle should always be present on non GET endpoints and sensitive GET end
 
 ## Testing
 
-*   Run `task test:backend` (or `poetry run pytest -v tests/`). Tests live in `backend/tests/`, organized to mirror `backend/app/`.
+*   Run `task test:backend` (or `poetry run pytest -v tests/` in the `backend` folder). Tests live in `backend/tests/`, organized to mirror `backend/app/`.
 *   Name tests `test_<method_name>__<scenario>`.
 *   Use factories to build test data.
 *   Every new route must ship with full test coverage.

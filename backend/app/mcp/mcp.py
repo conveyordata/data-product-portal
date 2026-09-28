@@ -1,5 +1,3 @@
-from typing import get_args
-
 from fastmcp import FastMCP
 
 from app.core.logging import logger
@@ -10,7 +8,6 @@ from app.mcp.loader import get_plugin_instructions, load_plugins
 from app.mcp.permissions import register_permission_tools
 from app.mcp.resources import register_resources
 from app.mcp.search import register_search_tools
-from app.technical_asset_configuration.schema_union import DataOutputs
 
 initialize_models()
 
@@ -20,7 +17,7 @@ Portal for discovering and exploring data products and output ports.
 CORE CONCEPTS:
 - Output ports (datasets) = published, queryable datasets
 - Data products = containers grouping related output ports and infrastructure
-- Technical assets = underlying infrastructure (e.g. Glue databases)
+- Technical assets = underlying infrastructure
 - Environments = deployment stages (prod, staging, dev)
 
 ═══════════════════════════════════════════════════════════════════════
@@ -54,7 +51,7 @@ Step 2: GET METADATA & CONSUMING DATA PRODUCTS 🔑
 Step 3: DETERMINE ENVIRONMENT
   Call get_environments() if the user didn't specify one.
 
-Steps 4+ are provided by the active data-access plugin (e.g. Glue/Athena).
+Steps 4+ are provided by the active data-access plugins.
 
 ═══════════════════════════════════════════════════════════════════════
 GENERAL RULES
@@ -67,7 +64,7 @@ GENERAL RULES
 
 mcp = FastMCP(
     name="DataProductPortalMCP",
-    instructions=_BASE_INSTRUCTIONS + get_plugin_instructions(),
+    instructions=_BASE_INSTRUCTIONS,
     auth=get_auth_provider(),
 )
 
@@ -77,9 +74,10 @@ register_config_tools(mcp)
 register_resources(mcp)
 register_permission_tools(mcp)
 
-load_plugins(mcp)
+registered_plugins = load_plugins(mcp)
+mcp.instructions = _BASE_INSTRUCTIONS + get_plugin_instructions(registered_plugins)
 
 logger.info(
     "[MCP] Server ready. Active plugins: "
-    + str([cls.__name__ for cls in get_args(DataOutputs) if cls.mcp_instructions])
+    + str([p.name for p in registered_plugins if p.mcp_instructions])
 )

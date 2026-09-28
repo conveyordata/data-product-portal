@@ -1,19 +1,24 @@
 import copy
+from operator import and_
 from typing import Sequence, assert_never
 from uuid import UUID
 from warnings import deprecated
 
 from fastapi import HTTPException, status
-from sqlalchemy import asc, select
+from sqlalchemy import asc, or_, select
 from sqlalchemy.orm import Session, joinedload, selectinload, undefer
 
 from app.abstract_data_product.graph_utils import (
     get_graph_data_from_abstract_data_product,
 )
+from app.abstract_data_product.input_ports.enums import InputPortStatus
 from app.abstract_data_product.input_ports.model import (
     InputPort as InputPortModel,
 )
 from app.abstract_data_product.service import AbstractDataProductService
+from app.authorization.role_assignments.data_product.model import (
+    DataProductRoleAssignment,
+)
 from app.authorization.role_assignments.enums import AssignmentFilter, DecisionStatus
 from app.authorization.roles.schema import Prototype
 from app.authorization.service import DATA_PRODUCT_READER_ROLE
@@ -53,6 +58,7 @@ from app.data_products.technical_assets.model import (
 from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
+from app.groups.service import GroupService
 from app.resource_names.service import ResourceNameService, ResourceNameValidityType
 from app.users.model import User as UserModel
 from app.users.schema import User
@@ -83,6 +89,68 @@ class DataProductService(AbstractDataProductService):
                 )
             case _:
                 assert_never(visibility)
+
+    def _sync_consumer_reader_grouping(self, data_product_id: UUID) -> None:
+        """
+        Will sync consumer relations for data products and output ports.
+        This is made to ensure hidden data products and private output ports are only accessible to consumers that have been approved.
+        We sync it for every data product, since output ports can be changed from unrestricted to private.
+        """
+        active_input_ports = set(
+            self.db.execute(
+                select(
+                    InputPortModel.consuming_abstract_data_product_id,
+                    InputPortModel.output_port_id,
+                )
+                .join(
+                    OutputPortModel,
+                    OutputPortModel.id == InputPortModel.output_port_id,
+                )
+                .where(
+                    OutputPortModel.data_product_id == data_product_id,
+                    InputPortModel.status == InputPortStatus.APPROVED,
+                )
+                .distinct()
+            ).tuples()
+        )
+
+        authorizer = Authorization()
+        current_input_port_links = {
+            (str(link.consumer_id), str(link.producer_output_port_id))
+            for link in authorizer.get_input_port_link(
+                producer_data_product_id=data_product_id
+            )
+        }
+        desired_input_port_links = {
+            (str(consumer_id), str(output_port_id))
+            for consumer_id, output_port_id in active_input_ports
+        }
+
+        for consumer_id, output_port_id in sorted(
+            current_input_port_links - desired_input_port_links
+        ):
+            authorizer.remove_input_port_link(
+                consumer_id=consumer_id,
+                producer_data_product_id=data_product_id,
+                producer_output_port_id=output_port_id,
+            )
+
+        for consumer_id, output_port_id in sorted(
+            desired_input_port_links - current_input_port_links
+        ):
+            authorizer.add_input_port_link(
+                consumer_id=consumer_id,
+                producer_data_product_id=data_product_id,
+                producer_output_port_id=output_port_id,
+            )
+
+    def sync_data_product_consumer_access(self) -> None:
+        data_product_ids = self.db.scalars(
+            select(DataProductModel.id),
+            execution_options={"skip_data_product_visibility_filter": True},
+        ).all()
+        for data_product_id in data_product_ids:
+            self._sync_consumer_reader_grouping(data_product_id)
 
     def get_data_product_settings(
         self, data_product_id: UUID
@@ -155,10 +223,22 @@ class DataProductService(AbstractDataProductService):
             case AssignmentFilter.ALL:
                 pass
             case AssignmentFilter.ONLY_ASSIGNED:
-                query = query.filter(
+                user_group_ids = GroupService(
+                    self.db
+                ).get_groups_ids_identity_is_member_of(current_user.id)
+                query = query.where(
                     DataProductModel.assignments.any(
-                        user_id=current_user.id,
-                        decision=DecisionStatus.APPROVED,
+                        and_(
+                            DataProductRoleAssignment.decision
+                            == DecisionStatus.APPROVED,
+                            or_(
+                                DataProductRoleAssignment.identity_id
+                                == current_user.id,
+                                DataProductRoleAssignment.identity_id.in_(
+                                    user_group_ids
+                                ),
+                            ),
+                        )
                     )
                 )
             case _:
@@ -180,13 +260,13 @@ class DataProductService(AbstractDataProductService):
             options=[selectinload(DataProductModel.assignments)],
             populate_existing=True,
         )
-        user_ids = [
-            assignment.user_id
+        identity_ids = [
+            assignment.identity_id
             for assignment in data_product.assignments
             if assignment.role.prototype == Prototype.OWNER
         ]
         return self.db.scalars(
-            select(UserModel).filter(UserModel.id.in_(user_ids))
+            select(UserModel).filter(UserModel.id.in_(identity_ids))
         ).all()
 
     def _get_tags(self, tag_ids: list[UUID]) -> list[TagModel]:
@@ -213,6 +293,8 @@ class DataProductService(AbstractDataProductService):
         self.db.add(model)
         self.db.flush()
         self._sync_public_reader_grouping(model.id, model.visibility)
+        if model.visibility == DataProductVisibility.HIDDEN:
+            self._sync_consumer_reader_grouping(model.id)
         return model
 
     def remove_data_product(self, id: UUID) -> DataProductModel:
@@ -225,7 +307,7 @@ class DataProductService(AbstractDataProductService):
 
         result = copy.deepcopy(data_product)
         self.db.delete(data_product)
-        self.db.commit()
+        self.db.flush()
         return result
 
     def update_data_product(
@@ -268,6 +350,8 @@ class DataProductService(AbstractDataProductService):
             self._sync_public_reader_grouping(
                 current_data_product.id, current_data_product.visibility
             )
+            if current_data_product.visibility == DataProductVisibility.HIDDEN:
+                self._sync_consumer_reader_grouping(current_data_product.id)
         self.db.flush()
         return UpdateDataProductResponse(id=current_data_product.id)
 
@@ -279,7 +363,7 @@ class DataProductService(AbstractDataProductService):
         current_data_product = ensure_data_product_exists(id, self.db)
         self._ensure_not_deleting(current_data_product)
         current_data_product.about = data_product.about
-        self.db.commit()
+        self.db.flush()
         return current_data_product
 
     def update_data_product_status(
@@ -290,7 +374,7 @@ class DataProductService(AbstractDataProductService):
         current_data_product = ensure_data_product_exists(id, self.db)
         self._ensure_not_deleting(current_data_product)
         current_data_product.status = data_product.status
-        self.db.commit()
+        self.db.flush()
         return current_data_product
 
     def update_data_product_usage(
@@ -301,7 +385,7 @@ class DataProductService(AbstractDataProductService):
         current_data_product = ensure_data_product_exists(id, self.db)
         self._ensure_not_deleting(current_data_product)
         current_data_product.usage = usage.usage
-        self.db.commit()
+        self.db.flush()
         return current_data_product
 
     @deprecated("Should use generate_signin_url instead")
@@ -332,7 +416,7 @@ class DataProductService(AbstractDataProductService):
             .unique()
             .all()
         )
-        data_outputs = (
+        technical_assets = (
             self.db.scalars(
                 select(TechnicalAssetModel)
                 .options(
@@ -348,6 +432,9 @@ class DataProductService(AbstractDataProductService):
         )
 
         for upstream_datasets in input_ports:
+            # Skip private output ports with no access they show up as None
+            if upstream_datasets.output_port is None:
+                continue
             nodes.append(
                 Node(
                     id=upstream_datasets.id,
@@ -368,29 +455,29 @@ class DataProductService(AbstractDataProductService):
                 )
             )
 
-        for data_output in data_outputs:
+        for technical_asset in technical_assets:
             nodes.append(
                 Node(
-                    id=data_output.id,
+                    id=technical_asset.id,
                     data=NodeData(
-                        id=data_output.id,
-                        icon_key=data_output.configuration.configuration_type,
-                        name=data_output.name,
-                        link_to_id=data_output.owner_id,
+                        id=technical_asset.id,
+                        icon_key=technical_asset.configuration.configuration_type,
+                        name=technical_asset.name,
+                        link_to_id=technical_asset.owner_id,
                     ),
                     type=NodeType.technicalAssetNode,
                 )
             )
             edges.append(
                 Edge(
-                    id=f"{data_output.id}-{product.id}",
+                    id=f"{technical_asset.id}-{product.id}",
                     source=product.id,
-                    target=data_output.id,
+                    target=technical_asset.id,
                     animated=True,
                 )
             )
             if level >= 2:
-                for downstream_datasets in data_output.output_port_links:
+                for downstream_datasets in technical_asset.output_port_links:
                     nodes.append(
                         Node(
                             id=f"{downstream_datasets.output_port_id}_2",
@@ -404,9 +491,9 @@ class DataProductService(AbstractDataProductService):
                     )
                     edges.append(
                         Edge(
-                            id=f"{downstream_datasets.output_port_id}-{data_output.id}-2",
+                            id=f"{downstream_datasets.output_port_id}-{technical_asset.id}-2",
                             target=f"{downstream_datasets.output_port_id}_2",
-                            source=data_output.id,
+                            source=technical_asset.id,
                             animated=downstream_datasets.status
                             == DecisionStatus.APPROVED,
                         )
@@ -415,6 +502,9 @@ class DataProductService(AbstractDataProductService):
                         for (
                             downstream_dps
                         ) in downstream_datasets.output_port.data_product_links:
+                            # A hidden data product will result in None, filter it out
+                            if downstream_dps.consuming_abstract_data_product is None:
+                                continue
                             node_id = f"{downstream_dps.id}_3"
                             nodes.append(
                                 get_graph_data_from_abstract_data_product(
@@ -436,7 +526,7 @@ class DataProductService(AbstractDataProductService):
                             )
 
         # if no data outputs are present, still show the children datasets
-        if not data_outputs:
+        if not technical_assets:
             for downstream_dataset in product.datasets:
                 nodes.append(
                     Node(

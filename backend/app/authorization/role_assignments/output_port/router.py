@@ -49,7 +49,7 @@ router = APIRouter(prefix="/v2/authz/role_assignments/output_port")
 )
 def delete_output_port_role_assignment(
     id: UUID,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> DeleteOutputPortRoleAssignmentResponse:
     assignment = RoleAssignmentService(db).delete_assignment(id)
@@ -101,7 +101,7 @@ def list_output_port_role_assignments(
     user_id: Annotated[UUID | SkipJsonSchema[None], Query()] = None,
     role_id: Annotated[UUID | SkipJsonSchema[None], Query()] = None,
     decision: Annotated[DecisionStatus | SkipJsonSchema[None], Query()] = None,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
 ) -> ListOutputPortRoleAssignmentsResponse:
     return ListOutputPortRoleAssignmentsResponse(
         role_assignments=[
@@ -128,7 +128,7 @@ def list_output_port_role_assignments(
 )
 def request_output_port_role_assignment(
     request: RequestOutputPortRoleAssignment,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> OutputPortRoleAssignmentResponse:
     assignment = RoleAssignmentService(db).create_assignment(
@@ -165,7 +165,7 @@ def request_output_port_role_assignment(
 )
 def create_output_port_role_assignment(
     request: CreateOutputPortRoleAssignment,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> OutputPortRoleAssignmentResponse:
     service = RoleAssignmentService(db)
@@ -224,7 +224,7 @@ def create_output_port_role_assignment(
 def decide_output_port_role_assignment(
     id: UUID,
     request: DecideOutputPortRoleAssignment,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
     user: User = Depends(get_authenticated_user),
 ) -> OutputPortRoleAssignmentResponse:
     service = RoleAssignmentService(db)
@@ -288,7 +288,7 @@ def decide_output_port_role_assignment(
 def modify_output_port_role_assignment(
     id: UUID,
     request: ModifyOutputPortRoleAssignment,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
     user: User = Depends(get_authenticated_user),
 ) -> OutputPortRoleAssignmentResponse:
     service = RoleAssignmentService(db)

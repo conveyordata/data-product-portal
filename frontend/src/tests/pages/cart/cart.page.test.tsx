@@ -162,10 +162,43 @@ describe('Cart', () => {
             const existingChoice = await screen.findByText('Create a new Data Product');
             await userEvent.click(existingChoice);
         };
+
+        const fillRequiredDataProductFields = async ({
+            name = 'My New Data Product',
+            description = 'A detailed description of the data product.',
+            hidden = false,
+            justification = 'I need this data for my analysis.',
+        } = {}) => {
+            const nameInput = await screen.findByRole('textbox', { name: /name/i });
+            await userEvent.type(nameInput, name);
+
+            if (hidden) {
+                await userEvent.click(screen.getByText('Hidden'));
+                await waitFor(() => {
+                    expect(screen.getByText(/Only use a hidden Data Product when it's really required/i)).toBeTruthy();
+                });
+            }
+
+            await userEvent.click(screen.getByRole('combobox', { name: /type/i }));
+            await userEvent.click(await screen.findByText('Reporting'));
+
+            await userEvent.click(screen.getByRole('combobox', { name: /status/i }));
+            await userEvent.click(await screen.findByText('Draft'));
+
+            await userEvent.click(screen.getByRole('combobox', { name: /domain/i }));
+            await userEvent.click(await screen.findByText('Finance'));
+
+            await userEvent.type(screen.getByRole('textbox', { name: /description/i }), description);
+
+            const justificationTextArea = await screen.findByPlaceholderText(
+                'Explain why you need access to these Output Ports',
+            );
+            await userEvent.type(justificationTextArea, justification);
+        };
+
         it('Should succeed when filling in the form completely', async () => {
             allowAllAuth();
 
-            // Mock the output ports search (cart items)
             const cartOutputPortId = 'op-1';
 
             mockOutputPortsSearch();
@@ -190,37 +223,56 @@ describe('Cart', () => {
 
             await selectDataProducts();
             await createNewDataProduct();
-
-            const nameInput = await screen.findByRole('textbox', { name: /name/i });
-            await userEvent.type(nameInput, 'My New Data Product');
-
-            const typeSelect = screen.getByRole('combobox', { name: /type/i });
-            await userEvent.click(typeSelect);
-            const typeOption = await screen.findByText('Reporting');
-            await userEvent.click(typeOption);
-
-            const statusSelect = screen.getByRole('combobox', { name: /status/i });
-            await userEvent.click(statusSelect);
-            const statusOption = await screen.findByText('Draft');
-            await userEvent.click(statusOption);
-
-            const domainSelect = screen.getByRole('combobox', { name: /domain/i });
-            await userEvent.click(domainSelect);
-            const domainOption = await screen.findByText('Finance');
-            await userEvent.click(domainOption);
-
-            const descriptionTextArea = screen.getByRole('textbox', { name: /description/i });
-            await userEvent.type(descriptionTextArea, 'A detailed description of the data product.');
-
-            const justificationTextArea = await screen.findByPlaceholderText(
-                'Explain why you need access to these Output Ports',
-            );
-            await userEvent.type(justificationTextArea, 'I need this data for my analysis.');
+            await fillRequiredDataProductFields();
 
             const submitButton = await screen.findByText('Create');
             await userEvent.click(submitButton);
 
-            // Assert the create and link APIs were called
+            await waitFor(() => {
+                expect(createHandler).toHaveBeenCalled();
+            });
+        });
+
+        it('should warn before creating a hidden data product', async () => {
+            allowAllAuth();
+
+            const cartOutputPortId = 'op-1';
+
+            mockOutputPortsSearch();
+            mockUsersHttp(mockUsers);
+            mockGetTags();
+            mockGetResourceNamesConstraints();
+            mockResourceNamesSanitize();
+            mockResourceNamesValidate();
+            mockGetDataProductTypes();
+            mockDataProductLifecycles();
+            mockGetDomains();
+
+            const createHandler = vi.fn(() => HttpResponse.json({ id: 'new-hidden-dp-id' }));
+            server.use(http.post('*/api/v2/data_products', createHandler));
+
+            renderWithProviders(<Cart />, {
+                routerProps: { initialEntries: ['/cart'] },
+                preloadedState: { cart: { DatasetIds: [cartOutputPortId] } },
+                currentUser: mockUsers[0],
+            });
+
+            await selectDataProducts();
+            await createNewDataProduct();
+            await fillRequiredDataProductFields({
+                name: 'My Hidden Data Product',
+                description: 'Secret product details',
+                hidden: true,
+            });
+
+            await userEvent.click(screen.getByRole('button', { name: 'Create' }));
+            await waitFor(() => {
+                expect(screen.getAllByRole('button', { name: 'Create' }).length).toBeGreaterThan(1);
+            });
+
+            const confirmButtons = screen.getAllByRole('button', { name: 'Create' });
+            await userEvent.click(confirmButtons[confirmButtons.length - 1]);
+
             await waitFor(() => {
                 expect(createHandler).toHaveBeenCalled();
             });

@@ -203,6 +203,7 @@ export function OutputPortCard({ outputPortId, dataProductId, draggedDataOutputI
     return (
         <>
             <Card
+                data-cy="output-port-card"
                 className={`${styles.card}  ${dragOver ? styles.dragOver : ''} ${invalidDrop ? styles.invalidDrop : ''}`}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}

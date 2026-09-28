@@ -1,4 +1,4 @@
-from typing import ClassVar, Literal, Optional
+from typing import ClassVar, Optional
 from uuid import UUID
 
 from fastapi import HTTPException, status
@@ -10,13 +10,12 @@ from app.configuration.environments.platform_service_configurations.schemas impo
 from app.core.aws.get_url import get_aws_url
 from app.data_products.schema import DataProduct
 from app.technical_asset_configuration.base_schema import (
-    AssetProviderPlugin,
     PlatformMetadata,
+    TechnicalAssetPlugin,
     UIElementMetadata,
     UIElementSelect,
     UIElementString,
 )
-from app.technical_asset_configuration.data_output_types import DataOutputTypes
 from app.technical_asset_configuration.enums import UIElementType
 from app.technical_asset_configuration.s3.model import (
     NAME,
@@ -27,14 +26,13 @@ from app.technical_asset_configuration.s3.model import (
 from app.users.schema import User
 
 
-class S3TechnicalAssetConfiguration(AssetProviderPlugin):
+class S3TechnicalAssetConfiguration(TechnicalAssetPlugin):
     name: ClassVar[str] = NAME
     version: ClassVar[str] = "1.0"
 
     bucket: str
     suffix: str = ""
     path: str
-    configuration_type: Literal[DataOutputTypes.S3TechnicalAssetConfiguration]
 
     _platform_metadata = PlatformMetadata(
         display_name="S3",

@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Literal, Optional, Sequence, Union
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.role_assignments.global_.model import (
@@ -31,13 +31,13 @@ class ModifyGlobalRoleAssignment(BaseModel):
 
 
 class RoleAssignmentRequest(BaseModel):
-    user_id: UUID
+    identity_id: UUID
     role_id: UUID
 
 
 class GlobalRoleAssignmentResponse(ORMModel):
     id: UUID
-    user: User
+    user: User = Field(validation_alias="identity")
     role: Role
     decision: DecisionStatus
     requested_on: Optional[datetime]
@@ -54,7 +54,7 @@ class ListGlobalRoleAssignmentsResponse(ORMModel):
 
 
 class GlobalRoleAssignment(GlobalRoleAssignmentResponse):
-    user_id: UUID
+    identity_id: UUID
     role_id: UUID
     requested_by_id: Optional[UUID]
     decided_by_id: Optional[UUID]

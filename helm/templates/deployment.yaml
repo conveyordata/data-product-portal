@@ -92,7 +92,7 @@ spec:
             {{- toYaml .Values.volumeMounts | nindent 12 }}
             {{- if .Values.custom_translation_file_path }}
             - name: translation
-              mountPath: /app/frontend_dist/locales/en-override/translation.json
+              mountPath: /frontend_dist/locales/en-override/translation.json
               subPath: translation.json
             {{- end }}
 

@@ -169,14 +169,14 @@ export function TechnicalAssetLinkModal({ onClose, dataProductId, datasetId, dat
                 }}
                 locale={{ emptyText: t('No Technical Assets available') }}
                 renderItem={(output) => (
-                    <List.Item>
+                    <List.Item data-cy="technical-asset-link-item">
                         <Flex align="center" gap={12} style={{ width: '100%' }}>
                             <Checkbox
                                 checked={selectedOutputs.has(output.id)}
                                 onChange={() => handleOutputToggle(output.id)}
                             />
                             <CustomSvgIconLoader
-                                iconComponent={getTechnicalAssetIcon(output.configuration.configuration_type, plugins)}
+                                iconComponent={getTechnicalAssetIcon(output.configuration.name, plugins)}
                             />
                             <Flex vertical style={{ flex: 1 }}>
                                 <Typography.Text strong>{output.result_string}</Typography.Text>

@@ -68,7 +68,7 @@ class OutputPortDataQualityService:
         )
 
         merged_summary = self.db.merge(db_summary)
-        self.db.commit()
+        self.db.flush()
         self.db.refresh(merged_summary, ["technical_assets"])
         return merged_summary
 
@@ -97,7 +97,7 @@ class OutputPortDataQualityService:
         # Replace collection; delete-orphan will remove old rows
         existing_summary.technical_assets = technical_assets
 
-        self.db.commit()
+        self.db.flush()
         self.db.refresh(existing_summary, ["technical_assets"])
         return existing_summary
 

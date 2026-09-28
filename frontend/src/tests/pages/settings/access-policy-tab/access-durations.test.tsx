@@ -8,13 +8,15 @@ import { renderWithProviders, screen, userEvent, waitFor } from '@/tests/test-ut
 describe('AccessDurations', () => {
     it('auto-saves changes after a brief idle period and hides the save button', async () => {
         mockAccessDurationsGet();
-        const mockSavedAccessDurations = [
-            mockAccessDurations[0],
-            {
-                ...mockAccessDurations[1],
-                is_default: false,
-            },
-        ];
+        const mockSavedAccessDurations = {
+            access_durations: [
+                mockAccessDurations[0],
+                {
+                    ...mockAccessDurations[1],
+                    is_default: false,
+                },
+            ],
+        };
         const updateAccessDurationHandler = vi.fn(() => HttpResponse.json(mockSavedAccessDurations));
         server.use(
             http.put('*/api/v2/configuration/access_durations/:abstractDataProductType', updateAccessDurationHandler),

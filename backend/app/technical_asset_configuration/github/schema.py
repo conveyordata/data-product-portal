@@ -6,13 +6,13 @@ from sqlalchemy.orm import Session
 from app.data_products.model import DataProduct as DataProductModel
 from app.settings import settings
 from app.technical_asset_configuration.base_schema import (
-    AssetProviderPlugin,
     PlatformMetadata,
+    TechnicalAssetPlugin,
 )
 from app.users.schema import User
 
 
-class GitHubPlugin(AssetProviderPlugin):
+class GitHubPlugin(TechnicalAssetPlugin):
     name: ClassVar[str] = "GitHubPlugin"
     version: ClassVar[str] = "1.0"
 

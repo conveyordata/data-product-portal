@@ -136,7 +136,7 @@ class TestDatasetRoleAssignmentsRouter:
             scope=Scope.GLOBAL,
             permissions=[Action.GLOBAL__REQUEST_OUTPUT_PORT_ACCESS],
         )
-        GlobalRoleAssignmentFactory(user_id=me.id, role_id=authz_role.id)
+        GlobalRoleAssignmentFactory(identity_id=me.id, role_id=authz_role.id)
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATASET)
 
@@ -422,7 +422,7 @@ class TestDatasetRoleAssignmentsRouter:
             scope=Scope.GLOBAL,
             permissions=[Action.GLOBAL__REQUEST_OUTPUT_PORT_ACCESS],
         )
-        GlobalRoleAssignmentFactory(user_id=me.id, role_id=authz_role.id)
+        GlobalRoleAssignmentFactory(identity_id=me.id, role_id=authz_role.id)
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATASET)
 

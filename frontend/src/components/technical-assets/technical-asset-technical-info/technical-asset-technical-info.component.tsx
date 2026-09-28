@@ -20,8 +20,8 @@ export function TechnicalAssetTechnicalInfo({ technicalAssetId, dataProductId }:
     const { data: { plugins: uiMetadataGroups } = {}, isLoading: isLoadingMetadata } = useGetPluginsQuery();
     const technicalInfo = technicalASset?.technical_info || [];
     const info_column =
-        uiMetadataGroups?.find((plugin) => plugin.plugin === technicalASset?.configuration.configuration_type)
-            ?.detailed_name ?? 'Info';
+        uiMetadataGroups?.find((plugin) => plugin.plugin === technicalASset?.configuration.name)?.detailed_name ??
+        'Info';
 
     const columns: TableColumnsType<TechnicalInfo> = useMemo(() => {
         return getTechnicalInformationColumns({

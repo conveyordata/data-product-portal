@@ -35,7 +35,7 @@ router = APIRouter(tags=["Configuration - Domains"], prefix="/v2/configuration/d
     ],
 )
 def create_domain(
-    domain: DomainCreate, db: Session = Depends(get_db_session)
+    domain: DomainCreate, db: Session = Depends(get_db_session, scope="function")
 ) -> CreateDomainResponse:
     return DomainService(db).create_domain(domain)
 
@@ -49,7 +49,9 @@ def create_domain(
     ],
 )
 def update_domain(
-    id: UUID, domain: DomainUpdate, db: Session = Depends(get_db_session)
+    id: UUID,
+    domain: DomainUpdate,
+    db: Session = Depends(get_db_session, scope="function"),
 ) -> UpdateDomainResponse:
     return DomainService(db).update_domain(id, domain)
 
@@ -62,7 +64,9 @@ def update_domain(
         ),
     ],
 )
-def remove_domain(id: UUID, db: Session = Depends(get_db_session)) -> None:
+def remove_domain(
+    id: UUID, db: Session = Depends(get_db_session, scope="function")
+) -> None:
     return DomainService(db).remove_domain(id)
 
 
@@ -75,18 +79,22 @@ def remove_domain(id: UUID, db: Session = Depends(get_db_session)) -> None:
     ],
 )
 def migrate_domain(
-    from_id: UUID, to_id: UUID, db: Session = Depends(get_db_session)
+    from_id: UUID, to_id: UUID, db: Session = Depends(get_db_session, scope="function")
 ) -> None:
     return DomainService(db).migrate_domain(from_id, to_id)
 
 
 @router.get("")
-def get_domains(db: Session = Depends(get_db_session)) -> GetDomainsResponse:
+def get_domains(
+    db: Session = Depends(get_db_session, scope="function"),
+) -> GetDomainsResponse:
     return GetDomainsResponse(
         domains=DomainService(db).get_domains(),
     )
 
 
 @router.get("/{id}")
-def get_domain(id: UUID, db: Session = Depends(get_db_session)) -> GetDomainResponse:
+def get_domain(
+    id: UUID, db: Session = Depends(get_db_session, scope="function")
+) -> GetDomainResponse:
     return DomainService(db).get_domain(id)

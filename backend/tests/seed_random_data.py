@@ -21,7 +21,7 @@ def add_random_data(
     Add random data products and datasets to the database.
     """
     data_products = []
-    data_outputs = []
+    technical_assets = []
 
     # Get the S3 service from the database for data output creation
     service = test_session.scalar(
@@ -33,8 +33,8 @@ def add_random_data(
         data_product = DataProductFactory()
 
         for _ in range(random.randint(0, 3)):
-            data_output = TechnicalAssetFactory(owner=data_product, service=service)
-            data_outputs.append(data_output)
+            technical_asset = TechnicalAssetFactory(owner=data_product, service=service)
+            technical_assets.append(technical_asset)
 
         data_products.append(data_product)
 
@@ -44,10 +44,10 @@ def add_random_data(
 
         # Add data outputs to the dataset
         for _ in range(random.randint(0, 3)):
-            data_output = random.choice(data_outputs)
+            technical_asset = random.choice(technical_assets)
 
             TechnicalAssetOutputPortAssociationFactory(
-                data_output=data_output,
+                technical_asset=technical_asset,
                 output_port=dataset,
             )
 

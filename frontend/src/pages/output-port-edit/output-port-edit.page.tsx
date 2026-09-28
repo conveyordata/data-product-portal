@@ -72,7 +72,7 @@ export function OutputPortEdit() {
     return (
         <>
             <Typography.Title level={3}>{data?.name}</Typography.Title>
-            <OutputPortForm mode="edit" datasetId={datasetId} dataProductId={dataProductId} />
+            <OutputPortForm mode="edit" outputPortId={datasetId} dataProductId={dataProductId} />
         </>
     );
 }

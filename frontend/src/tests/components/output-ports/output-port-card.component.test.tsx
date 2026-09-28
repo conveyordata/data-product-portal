@@ -61,7 +61,7 @@ const technicalAsset: GetTechnicalAssetsResponseItem = {
         },
     ],
     configuration: {
-        configuration_type: 'S3TechnicalAssetConfiguration',
+        name: 'S3TechnicalAssetConfiguration',
         bucket: 'bucket',
         path: '/orders',
     },

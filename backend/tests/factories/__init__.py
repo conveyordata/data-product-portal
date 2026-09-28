@@ -16,9 +16,11 @@ from .environment import EnvironmentFactory
 from .environment import fake as environment_fake
 from .event import EventFactory
 from .exploration import ExplorationFactory
+from .group import GroupFactory, GroupMembershipFactory
 from .input_port import InputPortFactory
 from .input_port_request import InputPortRequestFactory
 from .lifecycle import LifecycleFactory
+from .machine_user import MachineUserFactory
 from .notification import NotificationFactory
 from .output_port import OutputPortFactory
 from .output_port import fake as dataset_fake
@@ -31,7 +33,7 @@ from .role import RoleFactory
 from .role_assignment_data_product import DataProductRoleAssignmentFactory
 from .role_assignment_dataset import DatasetRoleAssignmentFactory
 from .role_assignment_global import GlobalRoleAssignmentFactory
-from .s3_data_output import S3DataOutputFactory
+from .s3_technical_asset import S3TechnicalAssetFactory
 from .tags import TagFactory
 from .technical_asset import TechnicalAssetFactory
 from .technical_asset_access_mode import TechnicalAssetAccessModeFactory
@@ -85,7 +87,7 @@ factories = [
     PlatformServiceFactory,
     PlatformServiceConfigFactory,
     RoleFactory,
-    S3DataOutputFactory,
+    S3TechnicalAssetFactory,
     TagFactory,
     UserFactory,
     TechnicalAssetFactory,
@@ -94,6 +96,9 @@ factories = [
     ExplorationFactory,
     TechnicalAssetAccessModeFactory,
     DeviceFlowFactory,
+    GroupFactory,
+    GroupMembershipFactory,
+    MachineUserFactory,
 ]
 
 for factory_model in factories:

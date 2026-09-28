@@ -7,7 +7,6 @@ from .abstract_data_product_type import AbstractDataProductType
 from .access_duration import AccessDuration
 from .access_duration_type import AccessDurationType
 from .access_duration_update import AccessDurationUpdate
-from .access_granularity import AccessGranularity
 from .access_mode import AccessMode
 from .access_mode_create import AccessModeCreate
 from .access_mode_update import AccessModeUpdate
@@ -27,9 +26,6 @@ from .aws_glue_config import AWSGlueConfig
 from .awss3_config import AWSS3Config
 from .azure_blob_config import AzureBlobConfig
 from .azure_blob_config_storage_account_names import AzureBlobConfigStorageAccountNames
-from .azure_blob_technical_asset_configuration import (
-    AzureBlobTechnicalAssetConfiguration,
-)
 from .azure_environment_platform_configuration import (
     AzureEnvironmentPlatformConfiguration,
 )
@@ -76,9 +72,10 @@ from .create_output_port_role_assignment import CreateOutputPortRoleAssignment
 from .create_role import CreateRole
 from .create_tag_response import CreateTagResponse
 from .create_technical_asset_request import CreateTechnicalAssetRequest
+from .create_technical_asset_request_configuration import (
+    CreateTechnicalAssetRequestConfiguration,
+)
 from .create_technical_asset_response import CreateTechnicalAssetResponse
-from .data_output_status_update import DataOutputStatusUpdate
-from .data_output_update import DataOutputUpdate
 from .data_product import DataProduct
 from .data_product_about_update import DataProductAboutUpdate
 from .data_product_create import DataProductCreate
@@ -110,6 +107,7 @@ from .data_product_types_get import DataProductTypesGet
 from .data_product_types_get_item import DataProductTypesGetItem
 from .data_product_update import DataProductUpdate
 from .data_product_usage_update import DataProductUsageUpdate
+from .data_product_visibility import DataProductVisibility
 from .data_quality_status import DataQualityStatus
 from .data_quality_technical_asset import DataQualityTechnicalAsset
 from .databricks_config import DatabricksConfig
@@ -118,9 +116,6 @@ from .databricks_environment_platform_configuration import (
 )
 from .databricks_environment_platform_configuration_workspace_urls import (
     DatabricksEnvironmentPlatformConfigurationWorkspaceUrls,
-)
-from .databricks_technical_asset_configuration import (
-    DatabricksTechnicalAssetConfiguration,
 )
 from .decide_data_product_role_assignment import DecideDataProductRoleAssignment
 from .decide_global_role_assignment import DecideGlobalRoleAssignment
@@ -156,6 +151,7 @@ from .exploration import Exploration
 from .exploration_event import ExplorationEvent
 from .field_dependency import FieldDependency
 from .finalizer_request import FinalizerRequest
+from .get_access_duration_response import GetAccessDurationResponse
 from .get_access_modes import GetAccessModes
 from .get_all_platform_service_configurations_response import (
     GetAllPlatformServiceConfigurationsResponse,
@@ -185,11 +181,13 @@ from .get_platform_services_response import GetPlatformServicesResponse
 from .get_roles_response import GetRolesResponse
 from .get_technical_assets_response import GetTechnicalAssetsResponse
 from .get_technical_assets_response_item import GetTechnicalAssetsResponseItem
+from .get_technical_assets_response_item_configuration import (
+    GetTechnicalAssetsResponseItemConfiguration,
+)
 from .get_user_notifications_response import GetUserNotificationsResponse
 from .get_user_notifications_response_item import GetUserNotificationsResponseItem
 from .get_users_response import GetUsersResponse
 from .global_role_assignment_response import GlobalRoleAssignmentResponse
-from .glue_technical_asset_configuration import GlueTechnicalAssetConfiguration
 from .graph import Graph
 from .http_validation_error import HTTPValidationError
 from .ingest_output_port_contract_yaml_body import IngestOutputPortContractYamlBody
@@ -220,9 +218,6 @@ from .node import Node
 from .node_data import NodeData
 from .node_type import NodeType
 from .oidc_token_response import OIDCTokenResponse
-from .osi_semantic_model_technical_asset_configuration import (
-    OSISemanticModelTechnicalAssetConfiguration,
-)
 from .output_port import OutputPort
 from .output_port_about_update import OutputPortAboutUpdate
 from .output_port_access_duration import OutputPortAccessDuration
@@ -257,6 +252,7 @@ from .output_port_status_update import OutputPortStatusUpdate
 from .output_port_technical_asset_link_event import OutputPortTechnicalAssetLinkEvent
 from .output_port_update import OutputPortUpdate
 from .owned_technical_asset import OwnedTechnicalAsset
+from .owned_technical_asset_configuration import OwnedTechnicalAssetConfiguration
 from .pending_action_response import PendingActionResponse
 from .platform import Platform
 from .platform_service import PlatformService
@@ -265,16 +261,15 @@ from .platform_tile import PlatformTile
 from .platform_tile_response import PlatformTileResponse
 from .plugin_response import PluginResponse
 from .postgre_sql_config import PostgreSQLConfig
-from .postgre_sql_technical_asset_configuration import (
-    PostgreSQLTechnicalAssetConfiguration,
-)
 from .prototype import Prototype
 from .query_stats_granularity import QueryStatsGranularity
 from .redshift_config import RedshiftConfig
-from .redshift_technical_asset_configuration import RedshiftTechnicalAssetConfiguration
 from .remove_output_port_as_input_port_request import RemoveOutputPortAsInputPortRequest
 from .render_technical_asset_access_path_request import (
     RenderTechnicalAssetAccessPathRequest,
+)
+from .render_technical_asset_access_path_request_configuration import (
+    RenderTechnicalAssetAccessPathRequestConfiguration,
 )
 from .render_technical_asset_access_path_response import (
     RenderTechnicalAssetAccessPathResponse,
@@ -316,8 +311,6 @@ from .revoke_input_port_for_exploration_response import (
 )
 from .revoke_output_port_as_input_port_request import RevokeOutputPortAsInputPortRequest
 from .role import Role
-from .rust_fs_technical_asset_configuration import RustFSTechnicalAssetConfiguration
-from .s3_technical_asset_configuration import S3TechnicalAssetConfiguration
 from .schema_object_request import SchemaObjectRequest
 from .schema_object_response import SchemaObjectResponse
 from .schema_property_request import SchemaPropertyRequest
@@ -327,19 +320,20 @@ from .search_output_ports_response import SearchOutputPortsResponse
 from .search_output_ports_response_item import SearchOutputPortsResponseItem
 from .select_option import SelectOption
 from .snowflake_config import SnowflakeConfig
-from .snowflake_technical_asset_configuration import (
-    SnowflakeTechnicalAssetConfiguration,
-)
 from .tag import Tag
 from .tag_create import TagCreate
 from .tag_update import TagUpdate
 from .tags_get import TagsGet
 from .tags_get_item import TagsGetItem
 from .technical_asset import TechnicalAsset
+from .technical_asset_configuration import TechnicalAssetConfiguration
 from .technical_asset_event import TechnicalAssetEvent
 from .technical_asset_link import TechnicalAssetLink
 from .technical_asset_output_port_request import TechnicalAssetOutputPortRequest
+from .technical_asset_plugin import TechnicalAssetPlugin
 from .technical_asset_status import TechnicalAssetStatus
+from .technical_asset_status_update import TechnicalAssetStatusUpdate
+from .technical_asset_update import TechnicalAssetUpdate
 from .technical_info import TechnicalInfo
 from .technical_mapping import TechnicalMapping
 from .theme_settings import ThemeSettings
@@ -354,6 +348,7 @@ from .ui_element_type import UIElementType
 from .un_link_technical_asset_to_output_port_request import (
     UnLinkTechnicalAssetToOutputPortRequest,
 )
+from .update_access_duration_response import UpdateAccessDurationResponse
 from .update_data_product_life_cycle_response import UpdateDataProductLifeCycleResponse
 from .update_data_product_response import UpdateDataProductResponse
 from .update_data_product_setting_response import UpdateDataProductSettingResponse
@@ -381,7 +376,6 @@ __all__ = (
     "AccessDuration",
     "AccessDurationType",
     "AccessDurationUpdate",
-    "AccessGranularity",
     "AccessMode",
     "AccessModeCreate",
     "AccessModeUpdate",
@@ -397,7 +391,6 @@ __all__ = (
     "AWSS3Config",
     "AzureBlobConfig",
     "AzureBlobConfigStorageAccountNames",
-    "AzureBlobTechnicalAssetConfiguration",
     "AzureEnvironmentPlatformConfiguration",
     "BecomeAdmin",
     "BitolContractRequest",
@@ -428,13 +421,11 @@ __all__ = (
     "CreateRole",
     "CreateTagResponse",
     "CreateTechnicalAssetRequest",
+    "CreateTechnicalAssetRequestConfiguration",
     "CreateTechnicalAssetResponse",
     "DatabricksConfig",
     "DatabricksEnvironmentPlatformConfiguration",
     "DatabricksEnvironmentPlatformConfigurationWorkspaceUrls",
-    "DatabricksTechnicalAssetConfiguration",
-    "DataOutputStatusUpdate",
-    "DataOutputUpdate",
     "DataProduct",
     "DataProductAboutUpdate",
     "DataProductCreate",
@@ -466,6 +457,7 @@ __all__ = (
     "DataProductTypeUpdate",
     "DataProductUpdate",
     "DataProductUsageUpdate",
+    "DataProductVisibility",
     "DataQualityStatus",
     "DataQualityTechnicalAsset",
     "DecideDataProductRoleAssignment",
@@ -496,6 +488,7 @@ __all__ = (
     "ExplorationEvent",
     "FieldDependency",
     "FinalizerRequest",
+    "GetAccessDurationResponse",
     "GetAccessModes",
     "GetAllPlatformServiceConfigurationsResponse",
     "GetAllPlatformsResponse",
@@ -521,11 +514,11 @@ __all__ = (
     "GetRolesResponse",
     "GetTechnicalAssetsResponse",
     "GetTechnicalAssetsResponseItem",
+    "GetTechnicalAssetsResponseItemConfiguration",
     "GetUserNotificationsResponse",
     "GetUserNotificationsResponseItem",
     "GetUsersResponse",
     "GlobalRoleAssignmentResponse",
-    "GlueTechnicalAssetConfiguration",
     "Graph",
     "HTTPValidationError",
     "IngestOutputPortContractYamlBody",
@@ -548,7 +541,6 @@ __all__ = (
     "NodeData",
     "NodeType",
     "OIDCTokenResponse",
-    "OSISemanticModelTechnicalAssetConfiguration",
     "OutputPort",
     "OutputPortAboutUpdate",
     "OutputPortAccessDuration",
@@ -577,6 +569,7 @@ __all__ = (
     "OutputPortTechnicalAssetLinkEvent",
     "OutputPortUpdate",
     "OwnedTechnicalAsset",
+    "OwnedTechnicalAssetConfiguration",
     "PendingActionResponse",
     "Platform",
     "PlatformService",
@@ -585,13 +578,12 @@ __all__ = (
     "PlatformTileResponse",
     "PluginResponse",
     "PostgreSQLConfig",
-    "PostgreSQLTechnicalAssetConfiguration",
     "Prototype",
     "QueryStatsGranularity",
     "RedshiftConfig",
-    "RedshiftTechnicalAssetConfiguration",
     "RemoveOutputPortAsInputPortRequest",
     "RenderTechnicalAssetAccessPathRequest",
+    "RenderTechnicalAssetAccessPathRequestConfiguration",
     "RenderTechnicalAssetAccessPathResponse",
     "RenewalStatus",
     "RenewInputPortForDataProductResponse",
@@ -612,8 +604,6 @@ __all__ = (
     "RevokeInputPortForExplorationResponse",
     "RevokeOutputPortAsInputPortRequest",
     "Role",
-    "RustFSTechnicalAssetConfiguration",
-    "S3TechnicalAssetConfiguration",
     "SchemaObjectRequest",
     "SchemaObjectResponse",
     "SchemaPropertyRequest",
@@ -623,17 +613,20 @@ __all__ = (
     "SearchOutputPortsResponseItem",
     "SelectOption",
     "SnowflakeConfig",
-    "SnowflakeTechnicalAssetConfiguration",
     "Tag",
     "TagCreate",
     "TagsGet",
     "TagsGetItem",
     "TagUpdate",
     "TechnicalAsset",
+    "TechnicalAssetConfiguration",
     "TechnicalAssetEvent",
     "TechnicalAssetLink",
     "TechnicalAssetOutputPortRequest",
+    "TechnicalAssetPlugin",
     "TechnicalAssetStatus",
+    "TechnicalAssetStatusUpdate",
+    "TechnicalAssetUpdate",
     "TechnicalInfo",
     "TechnicalMapping",
     "ThemeSettings",
@@ -646,6 +639,7 @@ __all__ = (
     "UIElementString",
     "UIElementType",
     "UnLinkTechnicalAssetToOutputPortRequest",
+    "UpdateAccessDurationResponse",
     "UpdateDataProductLifeCycleResponse",
     "UpdateDataProductResponse",
     "UpdateDataProductSettingResponse",

@@ -8,6 +8,7 @@ from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..models.abstract_data_product_status import AbstractDataProductStatus
+from ..models.data_product_visibility import DataProductVisibility
 
 if TYPE_CHECKING:
     from ..models.data_product_life_cycle import DataProductLifeCycle
@@ -34,6 +35,7 @@ class GetDataProductsResponseItem:
         domain (Domain):
         type_ (DataProductType):
         lifecycle (DataProductLifeCycle | None):
+        visibility (DataProductVisibility):
         user_count (int):
         input_port_count (int):
         technical_asset_count (int):
@@ -50,6 +52,7 @@ class GetDataProductsResponseItem:
     domain: Domain
     type_: DataProductType
     lifecycle: DataProductLifeCycle | None
+    visibility: DataProductVisibility
     user_count: int
     input_port_count: int
     technical_asset_count: int
@@ -88,6 +91,8 @@ class GetDataProductsResponseItem:
         else:
             lifecycle = self.lifecycle
 
+        visibility = self.visibility.value
+
         user_count = self.user_count
 
         input_port_count = self.input_port_count
@@ -109,6 +114,7 @@ class GetDataProductsResponseItem:
                 "domain": domain,
                 "type": type_,
                 "lifecycle": lifecycle,
+                "visibility": visibility,
                 "user_count": user_count,
                 "input_port_count": input_port_count,
                 "technical_asset_count": technical_asset_count,
@@ -170,6 +176,8 @@ class GetDataProductsResponseItem:
 
         lifecycle = _parse_lifecycle(d.pop("lifecycle"))
 
+        visibility = DataProductVisibility(d.pop("visibility"))
+
         user_count = d.pop("user_count")
 
         input_port_count = d.pop("input_port_count")
@@ -188,6 +196,7 @@ class GetDataProductsResponseItem:
             domain=domain,
             type_=type_,
             lifecycle=lifecycle,
+            visibility=visibility,
             user_count=user_count,
             input_port_count=input_port_count,
             technical_asset_count=technical_asset_count,

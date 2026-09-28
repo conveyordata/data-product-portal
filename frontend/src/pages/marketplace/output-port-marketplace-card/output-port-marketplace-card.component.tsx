@@ -140,6 +140,7 @@ export function OutputPortMarketplaceCard({ outputPort }: Props) {
         <>
             <Card
                 key={outputPort.id}
+                data-cy="output-port-card"
                 styles={{ body: { padding: 12 } }}
                 className={styles.marketplaceCardContainer}
                 actions={[
@@ -154,6 +155,7 @@ export function OutputPortMarketplaceCard({ outputPort }: Props) {
                     >
                         <Button
                             key="add to cart"
+                            data-cy="add-to-cart"
                             type="text"
                             size="middle"
                             onClick={(e) => {
@@ -164,20 +166,20 @@ export function OutputPortMarketplaceCard({ outputPort }: Props) {
                             {cartOutputPortIds.includes(outputPort.id) ? (
                                 <>
                                     <CustomSvgIconLoader
-                                        size="x-small"
+                                        size="small"
                                         iconComponent={ShoppingCartOutlined}
                                         color="success"
                                     />
-                                    <CustomSvgIconLoader size="x-small" iconComponent={CheckOutlined} color="success" />
+                                    <CustomSvgIconLoader size="small" iconComponent={CheckOutlined} color="success" />
                                 </>
                             ) : (
                                 <>
                                     <CustomSvgIconLoader
-                                        size="x-small"
+                                        size="small"
                                         iconComponent={ShoppingCartOutlined}
                                         color="primary"
                                     />
-                                    <CustomSvgIconLoader size="x-small" iconComponent={PlusOutlined} color="primary" />
+                                    <CustomSvgIconLoader size="small" iconComponent={PlusOutlined} color="primary" />
                                 </>
                             )}
                         </Button>

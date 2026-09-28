@@ -121,6 +121,8 @@ def db_session() -> Generator[Session]:
 
 def get_system_db_session() -> Generator[Session]:
     """
+    In routing always use this as a dependency with `scope='function'` to ensure the commit or rollback happens before
+    the response is sent.
     This session should only be used with caution! Without this the data product visilibity filter will fail.
     So only use it when no user is available. For example in migrations or when running background tasks that are not user specific.
     :return:

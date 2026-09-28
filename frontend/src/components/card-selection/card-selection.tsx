@@ -8,6 +8,7 @@ type CardSelectionOption<T> = {
     description?: string;
     icon?: React.JSX.Element;
     value: T;
+    dataCy?: string;
 };
 
 type Props<T> = {

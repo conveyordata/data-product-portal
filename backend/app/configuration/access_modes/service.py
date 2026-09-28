@@ -33,7 +33,7 @@ CAN_NOT_REMOVE_ACCESS_MODE_IN_USE_ERROR = HTTPException(
 class AccessModeService:
     def __init__(
         self,
-        db: Session = Depends(get_db_session),
+        db: Session = Depends(get_db_session, scope="function"),
         plugin_service: PluginService = Depends(PluginService),
     ) -> None:
         self.db = db

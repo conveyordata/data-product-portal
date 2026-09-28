@@ -1,15 +1,15 @@
 from typing import TYPE_CHECKING, cast
 
-from app.abstract_data_product.model import AbstractDataProduct
 from app.abstract_data_product.type import AbstractDataProductType
 from app.graph.node import Node, NodeData, NodeType
 
 if TYPE_CHECKING:
+    from app.abstract_data_product.model import AbstractDataProduct
     from app.data_products.model import DataProduct
 
 
 def get_graph_data_from_abstract_data_product(
-    id: str, adp: AbstractDataProduct
+    id: str, adp: "AbstractDataProduct"
 ) -> Node:
     icon = None
     node_type = NodeType.dataProductNode

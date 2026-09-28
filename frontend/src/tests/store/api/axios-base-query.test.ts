@@ -51,6 +51,23 @@ describe('axiosBaseQuery', () => {
         );
     });
 
+    it('adds the active user header from localStorage when available', async () => {
+        const query = axiosBaseQuery({ baseUrl: 'https://example.test' });
+        const api = createBaseQueryApi();
+        vi.mocked(axios).mockResolvedValueOnce({ data: { ok: true } });
+        localStorage.setItem('activeUserHeader', 'user-123');
+
+        await query({ url: '/resource' }, api, {});
+
+        expect(axios).toHaveBeenCalledWith(
+            expect.objectContaining({
+                headers: expect.objectContaining({
+                    'X-user': 'user-123',
+                }),
+            }),
+        );
+    });
+
     it('shows the error toast when extraOptions is undefined', async () => {
         const query = axiosBaseQuery({ baseUrl: 'https://example.test' });
         const api = createBaseQueryApi();

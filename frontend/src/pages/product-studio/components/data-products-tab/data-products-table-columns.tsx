@@ -1,7 +1,7 @@
 import { TeamOutlined } from '@ant-design/icons';
 import { Badge, Popover, type TableColumnsType, Tag } from 'antd';
 import type { TFunction } from 'i18next';
-
+import { DataProductVisibilityIcon } from '@/components/data-products/data-product-visibility-icon.tsx';
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
 import type {
     AbstractDataProductStatus,
@@ -50,8 +50,12 @@ export const getDataProductTableColumns = ({
             ellipsis: {
                 showTitle: false,
             },
-            render: (name) => {
-                return <TableCellItem text={name} tooltip={{ content: name }} />;
+            render: (name, { visibility }) => {
+                return (
+                    <TableCellItem text={name} tooltip={{ content: name }}>
+                        <DataProductVisibilityIcon visibility={visibility} iconOnly />
+                    </TableCellItem>
+                );
             },
             sorter: sorter.stringSorter((dp) => dp.name),
             defaultSortOrder: 'ascend',

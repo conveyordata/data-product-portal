@@ -83,9 +83,6 @@ export type GetDomainsItem = {
 export type GetDomainsResponse = {
   domains: GetDomainsItem[];
 };
-export type CreateDomainResponse = {
-  id: string;
-};
 export type ValidationError = {
   loc: (string | number)[];
   msg: string;
@@ -95,6 +92,9 @@ export type ValidationError = {
 };
 export type HttpValidationError = {
   detail?: ValidationError[];
+};
+export type CreateDomainResponse = {
+  id: string;
 };
 export type DomainCreate = {
   name: string;

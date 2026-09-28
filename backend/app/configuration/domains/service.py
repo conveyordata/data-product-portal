@@ -86,7 +86,7 @@ class DomainService:
         environments = self._get_environments(domain_create.environment_ids)
         domain = DomainModel(**domain_schema, environments=environments)
         self.db.add(domain)
-        self.db.commit()
+        self.db.flush()
         return CreateDomainResponse(id=domain.id)
 
     def update_domain(self, id: UUID, domain: DomainUpdate) -> UpdateDomainResponse:
@@ -101,7 +101,7 @@ class DomainService:
         for attr, value in updated_domain.items():
             setattr(current_domain, attr, value)
 
-        self.db.commit()
+        self.db.flush()
         return UpdateDomainResponse(id=id)
 
     def remove_domain(self, id: UUID) -> None:
@@ -128,7 +128,7 @@ class DomainService:
             )
 
         self.db.delete(domain)
-        self.db.commit()
+        self.db.flush()
 
     def migrate_domain(self, from_id: UUID, to_id: UUID) -> None:
         domain = ensure_domain_exists(
@@ -143,4 +143,4 @@ class DomainService:
         for data_product in domain.abstract_data_products:
             data_product.domain_id = new_domain.id
 
-        self.db.commit()
+        self.db.flush()

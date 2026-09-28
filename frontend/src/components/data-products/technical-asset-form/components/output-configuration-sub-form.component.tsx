@@ -22,12 +22,12 @@ export function ConfigurationSubForm({ form, configurationType, resultLabel, res
     }
 
     useEffect(() => {
-        form.setFieldValue(configurationFieldName('configuration_type'), configurationType);
+        form.setFieldValue(configurationFieldName('name'), configurationType);
     }, [form, configurationType]);
 
     return (
         <div>
-            <ConfigurationFormItem name="configuration_type" hidden required>
+            <ConfigurationFormItem name="name" hidden required>
                 <Input />
             </ConfigurationFormItem>
             {children}

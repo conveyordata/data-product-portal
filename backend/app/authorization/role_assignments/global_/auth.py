@@ -26,7 +26,7 @@ class GlobalAuthAssignment(_GlobalAuthAssignment):
         previous_role_id: Optional[UUID] = None,
     ) -> None:
         super().__init__(
-            user_id=assignment.user_id,
+            user_id=assignment.identity_id,
             role_id=assignment.role_id,
             previous_role_id=previous_role_id,
         )

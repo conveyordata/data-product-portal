@@ -76,6 +76,7 @@ export function ResourceNameFormItem({
                     rules={validationRequired ? validationRules : []}
                 >
                     <Input
+                        data-cy="namespace"
                         disabled={!canEditResourceName}
                         showCount
                         maxLength={max_length}

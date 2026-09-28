@@ -171,7 +171,7 @@ def test_search_data_products__filters_out_hidden(session):
         scope=Scope.DATA_PRODUCT,
         permissions=[AuthorizationAction.DATA_PRODUCT__REQUEST_OUTPUT_PORT_ACCESS],
     )
-    DataProductRoleAssignmentFactory(data_product=dp1, user=user, role=role)
+    DataProductRoleAssignmentFactory(data_product=dp1, identity=user, role=role)
     with as_user(session, user.id):
         result = search_data_products(db=session)
 

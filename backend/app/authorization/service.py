@@ -22,6 +22,7 @@ from app.authorization.roles.service import RoleService
 from app.core.authz import Authorization
 from app.core.authz.actions import AuthorizationAction
 from app.core.logging import logger
+from app.groups.service import GroupService
 
 DATA_PRODUCT_READER_ROLE = "/role/data-product-reader"
 OUTPUT_PORT_READER_ROLE = "/role/output-port-reader"
@@ -59,8 +60,16 @@ class AuthorizationService:
         self._sync_data_products_reader_role()
         logger.info("Synced data products reader role permissions")
 
+        from app.data_products.service import DataProductService
+
+        DataProductService(self.db).sync_data_product_consumer_access()
+        logger.info("Synced data product consumer access")
+
         self._sync_output_ports_reader_role()
         logger.info("Synced output ports reader role permissions")
+
+        self._sync_group_memberships()
+        logger.info("Synced group membership edges to the casbin table")
 
         self.authorizer.start_enforcer_after_reload()
 
@@ -86,7 +95,7 @@ class AuthorizationService:
     def _sync_product_assignments(self) -> tuple[int, int]:
         service = DataProductRoleAssignmentService(self.db)
         product_assignments = service.list_assignments(
-            data_product_id=None, user_id=None, decision=DecisionStatus.APPROVED
+            data_product_id=None, identity_id=None, decision=DecisionStatus.APPROVED
         )
 
         changes = 0
@@ -110,7 +119,7 @@ class AuthorizationService:
     def _sync_global_assignments(self) -> tuple[int, int]:
         service = GlobalRoleAssignmentService(self.db)
         global_assignments = service.list_assignments(
-            user_id=None, decision=DecisionStatus.APPROVED
+            identity_id=None, decision=DecisionStatus.APPROVED
         )
 
         changes = 0
@@ -136,3 +145,17 @@ class AuthorizationService:
             actions=[AuthorizationAction.HIDDEN__OUTPUT_PORT__READ],
         )
         OutputPortService(self.db).sync_read_rights_output_ports()
+
+    def _sync_group_memberships(self) -> None:
+        service = GroupService(self.db)
+        memberships = service.list_memberships()
+        for membership in memberships:
+            self.authorizer.assign_global_group_membership(
+                member_identity_id=membership.member_identity_id,
+                group_id=membership.group_id,
+            )
+            self.authorizer.assign_resource_group_membership(
+                member_identity_id=membership.member_identity_id,
+                group_id=membership.group_id,
+            )
+        return

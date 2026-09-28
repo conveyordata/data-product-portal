@@ -2,14 +2,13 @@ from typing import Optional, Sequence
 from uuid import UUID
 from warnings import deprecated
 
-from pydantic import Field
-
 from app.abstract_data_product.schema_response import AbstractDataProductInputPort
 from app.configuration.data_product_lifecycles.schema import DataProductLifeCycle
 from app.configuration.data_product_settings.schema import DataProductSettingValue
 from app.configuration.data_product_types.schema import DataProductType
 from app.configuration.domains.schema import Domain
 from app.configuration.tags.schema import Tag
+from app.data_products.model import DataProductVisibility
 from app.data_products.status import AbstractDataProductStatus
 from app.shared.schema import ORMModel
 
@@ -27,6 +26,7 @@ class BaseDataProductGet(ORMModel):
     domain: Domain
     type: DataProductType
     lifecycle: Optional[DataProductLifeCycle]
+    visibility: DataProductVisibility
 
 
 class GetDataProductResponse(BaseDataProductGet):
@@ -48,7 +48,7 @@ class GetDataProductRolledUpTagsResponse(ORMModel):
 class GetDataProductsResponseItem(BaseDataProductGet):
     user_count: int
     input_port_count: int
-    technical_asset_count: int = Field(validation_alias="data_outputs_count")
+    technical_asset_count: int
 
 
 @deprecated("Use LinkInputPortsToDataProductPost instead")

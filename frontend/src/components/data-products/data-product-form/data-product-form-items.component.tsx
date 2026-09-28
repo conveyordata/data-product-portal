@@ -1,9 +1,10 @@
-import { Form, Input, Select, Skeleton } from 'antd';
+import { Alert, Form, Input, Radio, Select, Skeleton } from 'antd';
 import type { FormInstance } from 'antd/es/form/hooks/useForm';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useDebouncedCallback } from 'use-debounce';
+import { HiddenWarningText } from '@/components/data-products/data-product-form/hidden-warning.tsx';
 import { ResourceNameFormItem } from '@/components/resource-name/resource-name-form-item.tsx';
 import { MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
 import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
@@ -11,7 +12,11 @@ import { useGetDataProductsLifecyclesQuery } from '@/store/api/services/generate
 import { useGetDataProductsTypesQuery } from '@/store/api/services/generated/configurationDataProductTypesApi.ts';
 import { useGetDomainsQuery } from '@/store/api/services/generated/configurationDomainsApi.ts';
 import { useGetTagsQuery } from '@/store/api/services/generated/configurationTagsApi.ts';
-import type { DataProductCreate, GetDataProductResponse } from '@/store/api/services/generated/dataProductsApi.ts';
+import {
+    type DataProductCreate,
+    DataProductVisibility,
+    type GetDataProductResponse,
+} from '@/store/api/services/generated/dataProductsApi.ts';
 import {
     ResourceNameModel,
     useLazySanitizeResourceNameQuery,
@@ -69,6 +74,7 @@ export const DataProductFormItems = <T extends DataProductCreate>({
     ]);
 
     const dataProductNameValue = Form.useWatch('name', form);
+    const visibility = Form.useWatch('visibility', form);
 
     const [canEditResourceName, setCanEditResourceName] = useState<boolean>(false);
 
@@ -130,7 +136,7 @@ export const DataProductFormItems = <T extends DataProductCreate>({
                     },
                 ]}
             >
-                <Input />
+                <Input data-cy="data-product-name" />
             </Form.Item>
             <ResourceNameFormItem
                 form={form}
@@ -173,10 +179,12 @@ export const DataProductFormItems = <T extends DataProductCreate>({
                 ]}
             >
                 <Select
+                    data-cy="data-product-type"
                     loading={isFetchingDataProductTypes}
                     allowClear
                     showSearch={{ filterOption: selectFilterOptionByLabelAndValue }}
                     options={dataProductTypeSelectOptions}
+                    popupRender={(menu) => <div data-cy="data-product-type-options">{menu}</div>}
                 />
             </Form.Item>
             <Form.Item<DataProductCreate>
@@ -190,6 +198,7 @@ export const DataProductFormItems = <T extends DataProductCreate>({
                 ]}
             >
                 <Select
+                    data-cy="data-product-lifecycle"
                     loading={isFetchingLifecycles}
                     options={lifecycles?.data_product_life_cycles.map((lifecycle) => ({
                         value: lifecycle.id,
@@ -197,6 +206,7 @@ export const DataProductFormItems = <T extends DataProductCreate>({
                     }))}
                     showSearch={{ filterOption: selectFilterOptionByLabelAndValue }}
                     allowClear
+                    popupRender={(menu) => <div data-cy="data-product-lifecycle-options">{menu}</div>}
                 />
             </Form.Item>
             <Form.Item<DataProductCreate>
@@ -211,10 +221,12 @@ export const DataProductFormItems = <T extends DataProductCreate>({
                 ]}
             >
                 <Select
+                    data-cy="data-product-domain"
                     loading={isFetchingDomains}
                     options={domains.map((domain) => ({ label: domain.name, value: domain.id }))}
                     showSearch={{ filterOption: selectFilterOptionByLabelAndValue }}
                     allowClear
+                    popupRender={(menu) => <div data-cy="data-product-domain-options">{menu}</div>}
                 />
             </Form.Item>
             <Form.Item<DataProductCreate> name="tag_ids" label={t('Tags')}>
@@ -226,6 +238,26 @@ export const DataProductFormItems = <T extends DataProductCreate>({
                     showSearch={{ filterOption: selectFilterOptionByLabel }}
                 />
             </Form.Item>
+            <Form.Item
+                name="visibility"
+                label={t('Visibility')}
+                tooltip={t('The visibility of the Data Product, this cannot be changed after creation')}
+                initialValue={DataProductVisibility.Discoverable}
+            >
+                <Radio.Group
+                    optionType="button"
+                    options={[
+                        { label: t('Discoverable'), value: DataProductVisibility.Discoverable },
+                        { label: t('Hidden'), value: DataProductVisibility.Hidden },
+                    ]}
+                    disabled={mode === 'edit'}
+                />
+            </Form.Item>
+            {visibility === DataProductVisibility.Hidden && (
+                <Form.Item>
+                    <Alert type="warning" showIcon title={<HiddenWarningText />} />
+                </Form.Item>
+            )}
             <Form.Item<DataProductCreate>
                 name="description"
                 label={t('Description')}
@@ -243,7 +275,11 @@ export const DataProductFormItems = <T extends DataProductCreate>({
                     },
                 ]}
             >
-                <TextArea rows={4} count={{ show: true, max: MAX_DESCRIPTION_INPUT_LENGTH }} />
+                <TextArea
+                    data-cy="data-product-description"
+                    rows={4}
+                    count={{ show: true, max: MAX_DESCRIPTION_INPUT_LENGTH }}
+                />
             </Form.Item>
         </>
     );

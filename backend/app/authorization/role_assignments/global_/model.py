@@ -10,18 +10,23 @@ from app.shared.model import BaseORM, utcnow
 
 if TYPE_CHECKING:
     from app.authorization.roles.model import Role
+    from app.identities.model import Identity
     from app.users.model import User
 
 
 class GlobalRoleAssignment(Base, BaseORM):
     __tablename__ = "role_assignments_global"
-    __table_args__ = (UniqueConstraint("user_id", name="unique_global_assignment"),)
+    __table_args__ = (UniqueConstraint("identity_id", name="unique_global_assignment"),)
 
     id = Column(UUID, primary_key=True, default=uuid4)
-    user_id: Mapped[UUID] = mapped_column("user_id", ForeignKey("users.id"))
-    user: Mapped["User"] = relationship("User", foreign_keys=[user_id])
+    identity_id: Mapped[UUID] = mapped_column(
+        "identity_id", ForeignKey("identities.id")
+    )
+    identity: Mapped["Identity"] = relationship(
+        back_populates="global_role", foreign_keys=[identity_id]
+    )
     role_id: Mapped[UUID] = mapped_column("role_id", ForeignKey("roles.id"))
-    role: Mapped["Role"] = relationship("Role", foreign_keys=[role_id])
+    role: Mapped["Role"] = relationship(foreign_keys=[role_id])
     decision: Mapped[DecisionStatus] = mapped_column(
         Enum(DecisionStatus), default=DecisionStatus.PENDING
     )

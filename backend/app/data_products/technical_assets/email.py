@@ -5,14 +5,14 @@ import emailgen
 
 from app.core.email.send_mail import send_mail
 from app.data_products.output_ports.schema import OutputPort
-from app.data_products.technical_assets.schema import TechnicalAsset
+from app.data_products.technical_assets.model import TechnicalAsset
 from app.settings import settings
 from app.users.schema import User
 
 
 def send_link_output_port_email(
     output_port: OutputPort,
-    data_output: TechnicalAsset,
+    technical_asset: TechnicalAsset,
     *,
     requester: User,
     approvers: Sequence[User],
@@ -23,7 +23,7 @@ def send_link_output_port_email(
     )
     action.add_row(
         [
-            data_output.owner.name,
+            technical_asset.owner.name,
             "Wants to provide data to ",
             output_port.name,
             ", ".join(
@@ -41,6 +41,6 @@ def send_link_output_port_email(
         recipients=approvers,
         action=action,
         url=url,
-        subject=f"Action Required: {data_output.owner.name}"
+        subject=f"Action Required: {technical_asset.owner.name}"
         f" wants to provide data to {output_port.name}",
     )

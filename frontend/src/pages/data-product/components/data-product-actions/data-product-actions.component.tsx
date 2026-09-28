@@ -19,7 +19,7 @@ import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { DecisionStatus } from '@/types/roles';
 import type { CustomDropdownItemProps } from '@/types/shared';
 import { dispatchMessage } from '@/utils/feedback.ts';
-import { getIcon } from '@/utils/icon-loader';
+import { getPlatformTileIcon } from '@/utils/technical-asset-type.helper';
 import styles from './data-product-actions.module.scss';
 
 type Props = {
@@ -62,7 +62,7 @@ export function DataProductActions({ dataProductId }: Props) {
         const transformTile = (tile: PlatformTile): CustomDropdownItemProps<string> => ({
             label: t(tile.label),
             value: tile.value,
-            icon: getIcon(tile.icon_name),
+            icon: getPlatformTileIcon(tile),
             hasEnvironments: tile.has_environments,
             hasConfig: tile.has_config,
             children: tile.children?.map(transformTile) || [],

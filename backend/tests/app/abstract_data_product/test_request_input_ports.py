@@ -30,6 +30,7 @@ from tests.factories import (
     TechnicalAssetOutputPortAssociationFactory,
     UserFactory,
 )
+from tests.session_util import as_user
 
 
 def _requests_for(input_port_id, session):
@@ -82,7 +83,10 @@ class TestRequestInputPortsDuration:
         port = OutputPortFactory(
             access_type=OutputPortAccessType.PRIVATE,
         )
-        with pytest.raises(HTTPException) as exc_info:
+        with (
+            pytest.raises(HTTPException) as exc_info,
+            as_user(session, UserFactory().id),
+        ):
             AbstractDataProductService(session).request_input_ports(
                 dp.id,
                 [

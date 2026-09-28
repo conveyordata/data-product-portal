@@ -105,7 +105,7 @@ class DeviceFlowService:
 
         if utc_now() > device_flow.max_expiry:
             device_flow.status = DeviceFlowStatus.EXPIRED
-            db.commit()
+            db.flush()
             raise ExpiredDeviceCodeError("The device code has expired")
         if utc_now() <= device_flow.last_checked + timedelta(
             seconds=device_flow.interval
@@ -115,14 +115,14 @@ class DeviceFlowService:
                 {device_flow.last_checked}"
             )
             device_flow.last_checked = utc_now()
-            db.commit()
+            db.flush()
             raise SlowDownException
 
         device_flow.last_checked = utc_now()
         self.logger.debug(
             f"Client is on time for checking, we got a status {device_flow.status}"
         )
-        db.commit()
+        db.flush()
         if device_flow.status in (
             DeviceFlowStatus.AUTHORIZATION_PENDING,
             DeviceFlowStatus.DENIED,
@@ -159,7 +159,7 @@ class DeviceFlowService:
             tokens = response.json()
             self.logger.debug(tokens)
             device_flow.status = DeviceFlowStatus.EXPIRED
-            db.commit()
+            db.flush()
             return OIDCTokenResponse(**tokens)
         else:
             raise ExpiredDeviceCodeError
@@ -219,7 +219,7 @@ class DeviceFlowService:
         if utc_now() > device_flow.max_expiry:
             self.logger.debug("User Code has expired")
             device_flow.status = DeviceFlowStatus.EXPIRED
-            db.commit()
+            db.flush()
             raise ExpiredUserCodeError
         self.logger.debug("User Code is valid and action is authorize")
         # Generate URIs using url_for for base path, then add query params manually
@@ -248,7 +248,7 @@ class DeviceFlowService:
     def deny_device_flow(device_code: str, db: Session) -> RedirectResponse:
         device = db.get(DeviceFlowModel, device_code)
         device.status = DeviceFlowStatus.DENIED
-        db.commit()
+        db.flush()
         return RedirectResponse("/")
 
     @staticmethod
@@ -264,7 +264,7 @@ class DeviceFlowService:
         device = db.get(DeviceFlowModel, device_code)
         device.authz_state = state
         device.authz_verif = code_verifier
-        db.commit()
+        db.flush()
 
         oidc = get_oidc()
         callback_url = (
@@ -300,5 +300,5 @@ class DeviceFlowService:
         device = devices[0]
         device.authz_code = authz_code
         device.status = DeviceFlowStatus.AUTHORIZED
-        db.commit()
+        db.flush()
         return HTMLResponse(content=render_html_template("device_authorized.html"))

@@ -4,6 +4,7 @@ Kept in a separate module so both core portal tools and plugin tools can import
 these utilities without creating circular dependencies.
 """
 
+from contextlib import contextmanager
 from typing import Any, Optional
 
 import jwt as pyjwt
@@ -95,7 +96,9 @@ def get_mcp_authenticated_user(db: Session = Depends(db_session)) -> UserModel:
         from app.core.auth.auth import generate_default_jwt_token
 
         logger.debug("[MCP] OIDC disabled — resolving default user")
-        return get_authenticated_user(token=generate_default_jwt_token(), db=db)
+        return get_authenticated_user(
+            token=generate_default_jwt_token(settings.DEFAULT_USERNAME), db=db
+        )
 
     access_token = get_access_token()
     if access_token is None:
@@ -127,6 +130,7 @@ def get_mcp_authenticated_user(db: Session = Depends(db_session)) -> UserModel:
     return user_model
 
 
+@contextmanager
 def get_user_db_session(user: User = Depends(get_mcp_authenticated_user)):
     with db_session() as db:
         db.info["current_user_id"] = user.id

@@ -2,9 +2,10 @@ import { HttpResponse, http } from 'msw';
 import {
     AbstractDataProductStatus,
     AccessDurationType,
-    type DataProduct,
     DataProductIconKey,
+    DataProductVisibility,
     type GetDataProductInputPortsResponse,
+    type GetDataProductResponse,
     type GetDataProductRolledUpTagsResponse,
     type GetDataProductsResponse,
     type GetDataProductsResponseItem,
@@ -32,6 +33,7 @@ export const mockDataProducts: GetDataProductsResponseItem[] = [
             description: 'Reporting type',
             icon_key: DataProductIconKey.Reporting,
         },
+        visibility: DataProductVisibility.Discoverable,
         finalizers: [],
         lifecycle: { id: 'lc-1', name: 'Draft', value: 3, color: 'green', is_default: false },
         user_count: 5,
@@ -54,6 +56,7 @@ export const mockDataProducts: GetDataProductsResponseItem[] = [
             description: 'Exploration type',
             icon_key: DataProductIconKey.Exploration,
         },
+        visibility: DataProductVisibility.Discoverable,
         lifecycle: { id: 'lc-2', name: 'Production', value: 1, color: 'blue', is_default: true },
         user_count: 3,
         input_port_count: 1,
@@ -71,7 +74,7 @@ export const mockDataProductsHttp = (dataProducts: GetDataProductsResponseItem[]
 
 export const mockDataProductHttp = (
     data_product_id: string = mockDataProducts[0].id,
-    data_product: DataProduct = mockDataProducts[0],
+    data_product: GetDataProductResponse = { ...mockDataProducts[0], about: '' },
 ) => {
     server.use(
         http.get(`*/api/v2/data_products/${data_product_id}`, () => {
@@ -128,7 +131,9 @@ export const mockDataProductInputPorts = (
     );
 };
 
-export const mockDataProductDetailCalls = (dataProduct: GetDataProductsResponseItem) => {
+export const mockDataProductDetailCalls = (
+    dataProduct: GetDataProductResponse = { ...mockDataProducts[0], about: '' },
+) => {
     mockDataProductHttp(dataProduct.id, dataProduct);
     server.use(
         http.get(`*/api/v2/data_products/${dataProduct.id}/rolled_up_tags`, () => {

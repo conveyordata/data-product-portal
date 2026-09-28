@@ -77,6 +77,7 @@ export function Marketplace() {
             </Col>
             <Col span={10}>
                 <Input.Search
+                    data-cy="marketplace-search"
                     placeholder={t('Ask a business question to find the relevant data')}
                     allowClear
                     onSearch={(e) => {

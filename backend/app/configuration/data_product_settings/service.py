@@ -91,7 +91,7 @@ class DataProductSettingService:
             self.db.add(
                 DataProductSettingValueModel(**new_setting.parse_pydantic_schema())
             )
-        self.db.commit()
+        self.db.flush()
 
     def create_data_product_setting(
         self, setting: DataProductSettingCreate
@@ -108,7 +108,7 @@ class DataProductSettingService:
 
         setting = DataProductSettingModel(**setting.parse_pydantic_schema())
         self.db.add(setting)
-        self.db.commit()
+        self.db.flush()
         return CreateDataProductSettingResponse(id=setting.id)
 
     def update_data_product_setting(
@@ -134,7 +134,7 @@ class DataProductSettingService:
         for k, v in update_setting.items():
             setattr(current_setting, k, v)
 
-        self.db.commit()
+        self.db.flush()
         return UpdateDataProductSettingResponse(id=id)
 
     def delete_data_product_setting(self, setting_id: UUID) -> None:
@@ -143,4 +143,4 @@ class DataProductSettingService:
             setting_id,
         )
         self.db.delete(data_product_setting)
-        self.db.commit()
+        self.db.flush()

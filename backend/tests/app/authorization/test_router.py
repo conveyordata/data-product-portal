@@ -56,7 +56,7 @@ class TestAuthorizationRouter:
         action = Action.OUTPUT_PORT__UPDATE_PROPERTIES
         role = RoleFactory(permissions=[action])
         DataProductRoleAssignmentFactory(
-            role_id=role.id, user_id=user.id, data_product_id=data_product.id
+            role_id=role.id, identity_id=user.id, data_product_id=data_product.id
         )
 
         response = client.get(f"{ENDPOINT}/access/{action}?resource={output_port.id}")

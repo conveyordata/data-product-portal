@@ -6,7 +6,7 @@ from uuid import UUID
 import pytz
 from fastapi import BackgroundTasks, HTTPException, status
 from sqlalchemy import select
-from sqlalchemy.orm import Session, selectinload
+from sqlalchemy.orm import Session, contains_eager, selectinload
 
 from app.abstract_data_product.input_ports.enums import InputPortRequestDecision
 from app.abstract_data_product.input_ports.model import (
@@ -30,7 +30,9 @@ from app.configuration.access_durations.enums import AccessDurationType
 from app.configuration.access_durations.model import AccessDuration
 from app.configuration.access_durations.service import AccessDurationService
 from app.core.authz import Action
-from app.core.logging.posthog_analytics import get_posthog_client
+from app.core.logging.posthog_analytics import (
+    PosthogAnalyticsClient,
+)
 from app.data_products import email
 from app.data_products.output_ports.enums import OutputPortAccessType
 from app.data_products.output_ports.input_ports.service import InputPortService
@@ -43,7 +45,7 @@ from app.users.model import User
 class AbstractDataProductService:
     def __init__(self, db: Session):
         self.db = db
-        self.posthog = get_posthog_client()
+        self.posthog = PosthogAnalyticsClient()
 
     def _ensure_not_deleting(self, adp: AbstractDataProduct) -> None:
         if adp.status == AbstractDataProductStatus.DELETING:
@@ -57,8 +59,13 @@ class AbstractDataProductService:
         return (
             self.db.scalars(
                 select(InputPortModel)
+                # Join (rather than selectinload) the output port so that the
+                # private output port visibility filter excludes the whole
+                # input port row when its output port isn't visible to the
+                # current user, instead of just nulling out the relationship.
+                .join(InputPortModel.output_port)
                 .options(
-                    selectinload(InputPortModel.output_port),
+                    contains_eager(InputPortModel.output_port),
                     selectinload(InputPortModel.requests),
                 )
                 .filter(
@@ -140,7 +147,7 @@ class AbstractDataProductService:
             request.decision = InputPortRequestDecision.PENDING
         input_port.recompute_status()
 
-        if request.decision == InputPortRequestDecision.APPROVED and self.posthog:
+        if request.decision == InputPortRequestDecision.APPROVED:
             self.posthog.capture(
                 distinct_id=actor.id,
                 event="Input Port Approved",
@@ -366,6 +373,9 @@ class AbstractDataProductService:
         target.revoked_at = datetime.now(tz=pytz.utc)
         input_port.recompute_status()
         self.db.flush()
+        InputPortService(self.db)._sync_hidden_data_product_access(
+            input_port.output_port.data_product_id
+        )
         return input_port
 
     def cancel_input_port_request(
@@ -396,7 +406,10 @@ class AbstractDataProductService:
         output_port_id: UUID,
     ) -> InputPortModel:
         input_port = self._get_input_port(id, output_port_id)
+        data_product_id = input_port.output_port.data_product_id
         self.db.delete(input_port)
+        self.db.flush()
+        InputPortService(self.db)._sync_hidden_data_product_access(data_product_id)
         return input_port
 
     def send_input_port_requested_emails_to_output_port_owners(
@@ -440,7 +453,7 @@ class AbstractDataProductService:
         if finalizer in (adp.finalizers or []):
             return adp
         adp.finalizers = list(adp.finalizers or []) + [finalizer]
-        self.db.commit()
+        self.db.flush()
         return adp
 
     def mark_for_deletion(self, id: UUID) -> bool:
@@ -453,7 +466,7 @@ class AbstractDataProductService:
         if not adp.finalizers:
             return True
         adp.status = AbstractDataProductStatus.DELETING
-        self.db.commit()
+        self.db.flush()
         return False
 
     def remove_finalizer(self, id: UUID, finalizer: str) -> bool:
@@ -471,5 +484,5 @@ class AbstractDataProductService:
             )
         current.remove(finalizer)
         adp.finalizers = current
-        self.db.commit()
+        self.db.flush()
         return adp.status == AbstractDataProductStatus.DELETING and not current

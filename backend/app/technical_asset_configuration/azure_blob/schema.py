@@ -1,5 +1,5 @@
 import logging
-from typing import ClassVar, Literal, Optional
+from typing import ClassVar, Optional
 from uuid import UUID
 
 from sqlalchemy import select
@@ -17,27 +17,24 @@ from app.technical_asset_configuration.azure_blob.model import (
     AzureBlobTechnicalAssetConfiguration as AzureBlobTechnicalAssetConfigurationModel,
 )
 from app.technical_asset_configuration.base_schema import (
-    AssetProviderPlugin,
     PlatformMetadata,
+    TechnicalAssetPlugin,
     UIElementMetadata,
     UIElementString,
 )
-from app.technical_asset_configuration.data_output_types import DataOutputTypes
 from app.technical_asset_configuration.enums import UIElementType
 from app.users.schema import User
 
 logger = logging.getLogger(__name__)
 
 
-class AzureBlobTechnicalAssetConfiguration(AssetProviderPlugin):
+class AzureBlobTechnicalAssetConfiguration(TechnicalAssetPlugin):
     name: ClassVar[str] = NAME
     version: ClassVar[str] = "1.0"
 
     domain: str = ""
     path: str = ""
     container_name: str
-
-    configuration_type: Literal[DataOutputTypes.AzureBlobTechnicalAssetConfiguration]
 
     _platform_metadata = PlatformMetadata(
         display_name="Blob",

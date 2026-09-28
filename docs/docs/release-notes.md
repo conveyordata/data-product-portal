@@ -6,6 +6,42 @@ sidebar_position: 200
 
 ## Unreleased
 
+### breaking changes
+
+- **[API]**: A technical asset's `configuration` is now published as a generic object rather than a typed union, so the schema is identical regardless of which plugins are installed. Regenerated SDK, CLI and frontend clients will see the type change, and `AccessGranularity` no longer appears in generated code.
+- **[API]**: A technical asset's `configuration` object identifies its plugin type with `name` instead of `configuration_type`. Existing clients sending or reading `configuration_type` need to switch to `name`.
+- **[Database]**: Installations older than 0.7.3 must upgrade to 0.7.3 before upgrading further. The migrations that moved the Snowflake, Databricks, S3, Glue, Redshift and PostgreSQL technical asset tables out of core had their old data-migration logic removed.
+
+### features
+
+- **[General]**: Added support for Hidden Data Products, they are only visible to people with direct access to them.
+  This allows you to use Data Product Portal to also manage sensitive data products that should not be visible to everyone in the organization.
+
+### bugfixes
+
+- **[Helm]**: Fix translation override file path
+- **[General]**: Fix translation file by adding more nested translations for Data Products, Output ports and Technical assets.
+
+
+## 0.7.4
+
+### bugfixes
+
+- **[MCP]**: Fix MCP tool calls
+
+## 0.7.3
+
+### bugfixes
+
+- **[Device Flow]**: Issue in device flow caused failure during login
+
+## 0.7.2
+
+### bugfixes
+
+- **[Explorations]**: Fixed a bug where requesting an output port as an exploration input port could fail with a 500 error due to a misconfigured access duration.
+- **[Explorer]**: Fixed a bug where explorer returned empty results if hidden products were returned.
+
 ## 0.7.1
 
 ### breaking changes
@@ -33,10 +69,6 @@ sidebar_position: 200
 ### bugfixes
 
 - **[Provisioner]**: Access to the finalizer endpoint of exploration and data product is now only possible as an admin. The provisioner should always run with admin credentials.
-
-### bugfixes
-
-- **[Explorations]**: Fixed a bug where requesting an output port as an exploration input port could fail with a 500 error due to a misconfigured access duration.
 
 ## 0.7.0
 

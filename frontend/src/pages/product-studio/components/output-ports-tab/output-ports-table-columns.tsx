@@ -2,6 +2,7 @@ import { Badge, Popover, type TableColumnsType, Tag } from 'antd';
 import type { TFunction } from 'i18next';
 import { ConsumersIcon } from '@/components/icons';
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
+import { OutputPortAccessIcon } from '@/components/output-ports/output-port-access-icon/output-port-access-icon.tsx';
 import { QualityBadge } from '@/components/quality-badge/quality-badge.component';
 import { DataQualityStatus } from '@/store/api/services/generated/dataProductsOutputPortsDataQualityApi';
 import type { SearchOutputPortsResponseItem } from '@/store/api/services/generated/outputPortsSearchApi.ts';
@@ -44,12 +45,16 @@ export const getOutputPortTableColumns = ({
             ellipsis: {
                 showTitle: false,
             },
-            render: (name) => {
-                return <TableCellItem text={name} tooltip={{ content: name }} />;
+            render: (name, { access_type: accessType }) => {
+                return (
+                    <TableCellItem text={name} tooltip={{ content: name }}>
+                        <OutputPortAccessIcon accessType={accessType} iconOnly />
+                    </TableCellItem>
+                );
             },
             sorter: sorter.stringSorter((op) => op.name),
             defaultSortOrder: 'ascend',
-            width: '20%',
+            width: '25%',
         },
         {
             title: t('Data Product'),
@@ -72,16 +77,6 @@ export const getOutputPortTableColumns = ({
             },
             ...new FilterSettings(data, (op) => (op.lifecycle !== null ? op.lifecycle.name : '')),
             sorter: sorter.stringSorter((op) => (op.lifecycle !== null ? op.lifecycle.name : '')),
-            width: '10%',
-        },
-        {
-            title: t('Access Type'),
-            dataIndex: 'access_type',
-            render: (accessType: string) => {
-                return <Tag>{accessType}</Tag>;
-            },
-            ...new FilterSettings(data, (op) => op.access_type),
-            sorter: sorter.stringSorter((op) => op.access_type),
             width: '10%',
         },
         {

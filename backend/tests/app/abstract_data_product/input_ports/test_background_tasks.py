@@ -121,7 +121,7 @@ class TestExpireInputPorts:
         )
         DataProductRoleAssignmentFactory(
             data_product_id=link.consuming_abstract_data_product_id,
-            user_id=consumer.id,
+            identity_id=consumer.id,
             role_id=RoleFactory().id,
         )
 

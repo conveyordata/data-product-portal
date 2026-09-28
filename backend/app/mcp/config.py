@@ -75,7 +75,7 @@ def register_config_tools(mcp) -> None:
             user=user,
             assignment_filter=AssignmentFilter.ALL,
         )
-        all_technical_assets = TechnicalAssetService(db).get_data_outputs()
+        all_technical_assets = TechnicalAssetService(db).get_technical_assets()
         all_domains = DomainService(db).get_domains()
 
         popular_data_products = all_data_products[:5]
@@ -131,7 +131,7 @@ def register_config_tools(mcp) -> None:
             user=user, data_product_id=UUID(data_product_id)
         )
 
-        technical_assets = TechnicalAssetService(db).get_data_outputs()
+        technical_assets = TechnicalAssetService(db).get_technical_assets()
         related_technical_assets = [
             do
             for do in technical_assets

@@ -30,7 +30,7 @@ import type { CustomDropdownItemProps } from '@/types/shared';
 import type { TechnicalAssetsCreateForm } from '@/types/technical-asset';
 import { dispatchMessage } from '@/utils/feedback.ts';
 import { selectFilterOptionByLabel } from '@/utils/form.helper';
-import { getIcon } from '@/utils/icon-loader';
+import { getPlatformTileIcon } from '@/utils/technical-asset-type.helper';
 import { AccessModeSelector } from './access-mode-selector.component';
 import { TechnicalAssetConfigurationForm } from './technical-asset-configuration-form.component';
 
@@ -95,7 +95,7 @@ export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallback
     const [canEditNamespace, setCanEditNamespace] = useState<boolean>(false);
     const accessMode = Form.useWatch('access_mode_type', form) as 'single' | 'multiple' | undefined;
 
-    const [fetchResultString] = useRenderTechnicalAssetAccessPathMutation();
+    const [fetchResultString, { isLoading: isFetchingResultString }] = useRenderTechnicalAssetAccessPathMutation();
 
     const isLoading =
         platformsLoading ||
@@ -120,7 +120,7 @@ export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallback
         const transformTile = (tile: PlatformTile): CustomDropdownItemProps<string> => ({
             label: t(tile.label),
             value: tile.value,
-            icon: getIcon(tile.icon_name),
+            icon: getPlatformTileIcon(tile),
             hasEnvironments: tile.has_environments,
             hasConfig: tile.has_config,
             children: tile.children?.map(transformTile) || [],
@@ -224,15 +224,17 @@ export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallback
     );
 
     const setResultString = useDebouncedCallback((values: CreateTechnicalAssetRequest) => {
+        if (!values.platform_id || !values.service_id) {
+            form.setFieldValue('result', undefined);
+            return;
+        }
+        const request = {
+            platform_id: values.platform_id,
+            service_id: values.service_id,
+            configuration: values.configuration,
+        };
         form.validateFields(['configuration'], { validateOnly: true, recursive: true })
-            .then(() => {
-                const request = {
-                    platform_id: values.platform_id,
-                    service_id: values.service_id,
-                    configuration: values.configuration,
-                };
-                return fetchResultString(request).unwrap();
-            })
+            .then(() => fetchResultString(request).unwrap())
             .then((result) => form.setFieldValue('result', result.technical_asset_access_path))
             .catch(() => form.setFieldValue('result', undefined));
     }, debounce);
@@ -326,7 +328,7 @@ export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallback
                             <TechnicalAssetPlatformTile<string>
                                 key={dataPlatform.value}
                                 dataPlatform={dataPlatform}
-                                isDisabled={isLoading}
+                                isDisabled={isLoading || isFetchingResultString}
                                 isSelected={dataPlatform === selectedDataPlatform}
                                 onTileClick={onDataPlatformClick}
                                 value={
@@ -347,7 +349,7 @@ export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallback
                             <TechnicalAssetPlatformTile<string>
                                 key={dataPlatform.value}
                                 dataPlatform={dataPlatform}
-                                isDisabled={isLoading}
+                                isDisabled={isLoading || isFetchingResultString}
                                 isSelected={dataPlatform === selectedConfiguration}
                                 onTileClick={onConfigurationClick}
                                 value={platformServiceConfigMap.get(dataPlatform.value)?.service_id}

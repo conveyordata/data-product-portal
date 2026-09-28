@@ -7,6 +7,7 @@ import { useNavigate, useParams } from 'react-router';
 
 import { CircleIconButton } from '@/components/buttons/circle-icon-button/circle-icon-button.tsx';
 import { UserAccessOverview } from '@/components/data-access/user-access-overview/user-access-overview.component.tsx';
+import { DataProductVisibilityIcon } from '@/components/data-products/data-product-visibility-icon.tsx';
 import { useBreadcrumbs } from '@/components/layout/navbar/breadcrumbs/breadcrumb.context.tsx';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
 import { DataProductActions } from '@/pages/data-product/components/data-product-actions/data-product-actions.component.tsx';
@@ -87,8 +88,8 @@ export function DataProduct() {
 
     return (
         <Splitter className={styles.invisibleSplitter}>
-            <Splitter.Panel size={sidebarCollapsed ? '100%' : '80%'} resizable={false} className={styles.container}>
-                <Flex vertical gap="middle" className={styles.mainPanel}>
+            <Splitter.Panel size={sidebarCollapsed ? '100%' : '80%'} resizable={false}>
+                <Flex vertical gap="middle">
                     <Flex justify="space-between">
                         <Flex gap="middle" align="center" justify="center">
                             <Icon
@@ -102,6 +103,7 @@ export function DataProduct() {
                             >
                                 {dataProduct?.name}
                             </Typography.Title>
+                            <DataProductVisibilityIcon visibility={dataProduct?.visibility} />
                         </Flex>
                         <Space>
                             {canEdit && (

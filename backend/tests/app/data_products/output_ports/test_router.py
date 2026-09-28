@@ -90,7 +90,7 @@ class TestOutputPortRouter:
             permissions=[AuthorizationAction.GLOBAL__CREATE_OUTPUT_PORT],
         )
         GlobalRoleAssignmentFactory(
-            user_id=user.id,
+            identity_id=user.id,
             role_id=role.id,
         )
         data_product = DataProductFactory()
@@ -109,7 +109,7 @@ class TestOutputPortRouter:
             permissions=[AuthorizationAction.GLOBAL__CREATE_OUTPUT_PORT],
         )
         GlobalRoleAssignmentFactory(
-            user_id=user.id,
+            identity_id=user.id,
             role_id=role.id,
         )
         data_product = DataProductFactory()
@@ -129,7 +129,7 @@ class TestOutputPortRouter:
             permissions=[AuthorizationAction.GLOBAL__CREATE_OUTPUT_PORT],
         )
         GlobalRoleAssignmentFactory(
-            user_id=user.id,
+            identity_id=user.id,
             role_id=role.id,
         )
         data_product_id = DataProductFactory().id
@@ -148,7 +148,7 @@ class TestOutputPortRouter:
             permissions=[AuthorizationAction.GLOBAL__CREATE_OUTPUT_PORT],
         )
         GlobalRoleAssignmentFactory(
-            user_id=user.id,
+            identity_id=user.id,
             role_id=role.id,
         )
         data_product_id = DataProductFactory().id
@@ -175,7 +175,7 @@ class TestOutputPortRouter:
             permissions=[AuthorizationAction.GLOBAL__CREATE_OUTPUT_PORT],
         )
         GlobalRoleAssignmentFactory(
-            user_id=user.id,
+            identity_id=user.id,
             role_id=role.id,
         )
         data_product_id = DataProductFactory(visibility=DataProductVisibility.HIDDEN).id
@@ -184,7 +184,7 @@ class TestOutputPortRouter:
             permissions=[AuthorizationAction.DATA_PRODUCT__CREATE_USER],
         )
         DataProductRoleAssignmentFactory(
-            data_product_id=data_product_id, user_id=user.id, role_id=role.id
+            data_product_id=data_product_id, identity_id=user.id, role_id=role.id
         )
 
         output_port_payload["access_type"] = OutputPortAccessType.UNRESTRICTED.value
@@ -212,7 +212,7 @@ class TestOutputPortRouter:
             permissions=[AuthorizationAction.GLOBAL__CREATE_OUTPUT_PORT],
         )
         GlobalRoleAssignmentFactory(
-            user_id=user.id,
+            identity_id=user.id,
             role_id=role.id,
         )
         create_payload = deepcopy(output_port_payload)
@@ -231,7 +231,7 @@ class TestOutputPortRouter:
             permissions=[AuthorizationAction.GLOBAL__CREATE_OUTPUT_PORT],
         )
         GlobalRoleAssignmentFactory(
-            user_id=user.id,
+            identity_id=user.id,
             role_id=role.id,
         )
         OutputPortFactory(namespace=output_port_payload["namespace"])
@@ -250,7 +250,7 @@ class TestOutputPortRouter:
             permissions=[AuthorizationAction.GLOBAL__CREATE_OUTPUT_PORT],
         )
         GlobalRoleAssignmentFactory(
-            user_id=user.id,
+            identity_id=user.id,
             role_id=role.id,
         )
         create_payload = deepcopy(output_port_payload)
@@ -270,7 +270,7 @@ class TestOutputPortRouter:
             permissions=[AuthorizationAction.GLOBAL__CREATE_OUTPUT_PORT],
         )
         GlobalRoleAssignmentFactory(
-            user_id=user.id,
+            identity_id=user.id,
             role_id=role.id,
         )
         create_payload = deepcopy(output_port_payload)
@@ -431,7 +431,7 @@ class TestOutputPortRouter:
             permissions=[AuthorizationAction.DATA_PRODUCT__CREATE_USER],
         )
         DataProductRoleAssignmentFactory(
-            data_product_id=dp.id, user_id=user.id, role_id=role.id
+            data_product_id=dp.id, identity_id=user.id, role_id=role.id
         )
 
         update_payload = {
@@ -513,7 +513,7 @@ class TestOutputPortRouter:
         )
         ds = OutputPortFactory()
         DataProductRoleAssignmentFactory(
-            user_id=user.id,
+            identity_id=user.id,
             role_id=role.id,
             data_product_id=ds.data_product.id,
         )
@@ -700,6 +700,24 @@ class TestOutputPortRouter:
             "type": "outputPortNode",
         }
 
+    def test_get_output_port_graph_data_hidden_consumer(self, client):
+        output_port = OutputPortFactory()
+
+        hidden_data_product = DataProductFactory(
+            visibility=DataProductVisibility.HIDDEN
+        )
+        InputPortFactory(
+            output_port=output_port, consuming_abstract_data_product=hidden_data_product
+        )
+        response = client.get(
+            f"{ENDPOINT.format(output_port.data_product.id)}/{output_port.id}/graph"
+        )
+        assert response.status_code == 200, response.text
+        nodes = response.json()["nodes"]
+        assert len(nodes) == 2
+        node_ids = [node["data"]["id"] for node in nodes if node["id"]]
+        assert hidden_data_product.id not in node_ids
+
     def test_get_output_port_graph_data_exploration(self, client):
         ds = OutputPortFactory()
         exp = ExplorationFactory()
@@ -790,7 +808,7 @@ class TestOutputPortRouter:
         role = RoleFactory.data_product_owner()
         ds = OutputPortFactory(access_type=OutputPortAccessType.PRIVATE)
         DataProductRoleAssignmentFactory(
-            user_id=user.id,
+            identity_id=user.id,
             role_id=role.id,
             data_product_id=ds.data_product.id,
         )
@@ -871,7 +889,7 @@ class TestOutputPortRouter:
             permissions=[AuthorizationAction.GLOBAL__CREATE_OUTPUT_PORT],
         )
         GlobalRoleAssignmentFactory(
-            user_id=user.id,
+            identity_id=user.id,
             role_id=role.id,
         )
         data_product = DataProductFactory()
@@ -895,7 +913,7 @@ class TestOutputPortRouter:
             permissions=[AuthorizationAction.GLOBAL__CREATE_OUTPUT_PORT],
         )
         GlobalRoleAssignmentFactory(
-            user_id=user.id,
+            identity_id=user.id,
             role_id=role.id,
         )
         data_product = DataProductFactory()

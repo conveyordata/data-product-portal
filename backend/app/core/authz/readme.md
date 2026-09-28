@@ -55,6 +55,26 @@ john, domain1, dataset1, read -- false, john has no role assigned
 anyone, domain1, product1, read -- true, everyone can read product1
 ```
 
+## Group access
+
+A user can inherit a resource role through a group:
+
+```
+g, group1, role1, product1
+g, john, group1, *
+```
+
+The first rule assigns `role1` to `group1` for `product1`.
+The second rule makes `john` a member of `group1`, thus inheriting the role assigned to the group.
+
+```
+john, domain1, product1, update -- true
+john, domain1, product2, update -- false
+```
+
+The wildcard allows access to all resources the group has a role assigned to, while
+specific group-resource role assignments can be specified.
+
 ## Hidden data product access
 
 Hidden data products are supported through a read only role, that is added with policy read.
