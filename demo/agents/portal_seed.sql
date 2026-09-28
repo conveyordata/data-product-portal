@@ -49,11 +49,7 @@ begin
     TRUNCATE TABLE public.tags_data_products CASCADE;
     TRUNCATE TABLE public.tags_datasets CASCADE;
     TRUNCATE TABLE public.dataset_query_stats_daily CASCADE;
-    TRUNCATE TABLE public.data_product_lifecycles CASCADE;
 
-    -- DATA PRODUCT LIFECYLCE
-    INSERT INTO data_product_lifecycles (id, name, "value", color, is_default, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), 'Draft', 0, 'grey', true, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO draft;
-    INSERT INTO data_product_lifecycles (id, name, "value", color, is_default, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), 'Ready', 1, 'green', false, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO ready;
 
     -- DOMAINS
     INSERT INTO public.domains (id, "name", description, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), 'Sales', 'Responsible for all activities related to sales, customer relationships, and order management.', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO sales_id;

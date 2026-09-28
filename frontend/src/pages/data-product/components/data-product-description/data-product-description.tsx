@@ -1,10 +1,8 @@
 import { Flex, Space, Tag, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
-import type { DataProductLifeCycle } from '@/store/api/services/generated/dataProductsApi.ts';
 import type { TagModel } from '@/types/tag';
 
 type Props = {
-    lifecycle: DataProductLifeCycle | null;
     type: string;
     description: string;
     domain: string;
@@ -12,16 +10,12 @@ type Props = {
     namespace: string;
 };
 
-export function DataProductDescription({ lifecycle, type, description, domain, tags, namespace }: Props) {
+export function DataProductDescription({ type, description, domain, tags, namespace }: Props) {
     const { t } = useTranslation();
 
     return (
         <Flex vertical gap="middle">
             <Space size="large">
-                <Flex gap="small">
-                    <Typography.Text strong>{t('Status')}</Typography.Text>
-                    <Tag color={lifecycle?.color ?? 'default'}>{lifecycle?.name ?? t('Unknown')}</Tag>
-                </Flex>
                 <Flex gap="small">
                     <Typography.Text strong>{t('Namespace')}</Typography.Text>
                     <Typography.Text>{namespace}</Typography.Text>

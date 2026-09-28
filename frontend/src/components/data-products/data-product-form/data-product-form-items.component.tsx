@@ -8,7 +8,6 @@ import { HiddenWarningText } from '@/components/data-products/data-product-form/
 import { ResourceNameFormItem } from '@/components/resource-name/resource-name-form-item.tsx';
 import { MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
 import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
-import { useGetDataProductsLifecyclesQuery } from '@/store/api/services/generated/configurationDataProductLifecyclesApi.ts';
 import { useGetDataProductsTypesQuery } from '@/store/api/services/generated/configurationDataProductTypesApi.ts';
 import { useGetDomainsQuery } from '@/store/api/services/generated/configurationDomainsApi.ts';
 import { useGetTagsQuery } from '@/store/api/services/generated/configurationTagsApi.ts';
@@ -45,7 +44,6 @@ export const DataProductFormItems = <T extends DataProductCreate>({
     const { t } = useTranslation();
     const currentUser = useSelector(selectCurrentUser);
 
-    const { data: lifecycles = undefined, isFetching: isFetchingLifecycles } = useGetDataProductsLifecyclesQuery();
     const { data: { domains = [] } = {}, isFetching: isFetchingDomains } = useGetDomainsQuery();
     const { data: dataProductTypes = undefined, isFetching: isFetchingDataProductTypes } =
         useGetDataProductsTypesQuery();
@@ -57,21 +55,9 @@ export const DataProductFormItems = <T extends DataProductCreate>({
     const { data: constraints } = useResourceNameConstraintsQuery();
     useEffect(() => {
         setAreFormItemsLoading(
-            (isFetchingTags ||
-                isFetchingUsers ||
-                isFetchingDataProductTypes ||
-                isFetchingDomains ||
-                isFetchingLifecycles) ??
-                true,
+            (isFetchingTags || isFetchingUsers || isFetchingDataProductTypes || isFetchingDomains) ?? true,
         );
-    }, [
-        isFetchingTags,
-        isFetchingUsers,
-        isFetchingDataProductTypes,
-        isFetchingDomains,
-        isFetchingLifecycles,
-        setAreFormItemsLoading,
-    ]);
+    }, [isFetchingTags, isFetchingUsers, isFetchingDataProductTypes, isFetchingDomains, setAreFormItemsLoading]);
 
     const dataProductNameValue = Form.useWatch('name', form);
     const visibility = Form.useWatch('visibility', form);
@@ -185,28 +171,6 @@ export const DataProductFormItems = <T extends DataProductCreate>({
                     showSearch={{ filterOption: selectFilterOptionByLabelAndValue }}
                     options={dataProductTypeSelectOptions}
                     popupRender={(menu) => <div data-cy="data-product-type-options">{menu}</div>}
-                />
-            </Form.Item>
-            <Form.Item<DataProductCreate>
-                name="lifecycle_id"
-                label={t('Status')}
-                rules={[
-                    {
-                        required: true,
-                        message: t('Please select the status of the Data Product'),
-                    },
-                ]}
-            >
-                <Select
-                    data-cy="data-product-lifecycle"
-                    loading={isFetchingLifecycles}
-                    options={lifecycles?.data_product_life_cycles.map((lifecycle) => ({
-                        value: lifecycle.id,
-                        label: lifecycle.name,
-                    }))}
-                    showSearch={{ filterOption: selectFilterOptionByLabelAndValue }}
-                    allowClear
-                    popupRender={(menu) => <div data-cy="data-product-lifecycle-options">{menu}</div>}
                 />
             </Form.Item>
             <Form.Item<DataProductCreate>

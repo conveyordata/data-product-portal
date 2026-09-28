@@ -135,7 +135,6 @@ def universal_search(
 def search_data_products(
     query: Optional[str] = None,
     domain_id: Optional[str] = None,
-    status: Optional[str] = None,
     limit: int = 20,
     db: Session = Depends(get_user_db_session),
     user: UserModel = Depends(get_mcp_authenticated_user),
@@ -155,8 +154,6 @@ def search_data_products(
             continue
         if domain_id and str(dp.domain_id) != domain_id:
             continue
-        if status and dp.status != status:
-            continue
 
         filtered_data_products.append(GetDataProductsResponseItem.model_validate(dp))
         if len(filtered_data_products) >= limit:
@@ -170,7 +167,6 @@ def search_data_products(
         "filters_applied": {
             "query": query,
             "domain_id": domain_id,
-            "status": status,
         },
     }
 
@@ -258,7 +254,6 @@ Args:
     Args:
         query: Keyword search on name and description. Leave empty to list all data products.
         domain_id: UUID of the domain to filter by — use get_marketplace_overview to list available domains.
-        status: Lifecycle state. Common values: 'active', 'pending', 'archived'.
         limit: Maximum number of results to return.
     """
     )(search_data_products)

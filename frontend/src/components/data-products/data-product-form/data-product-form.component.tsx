@@ -115,7 +115,6 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                     namespace: values.namespace,
                     description: values.description,
                     owners: values.owners,
-                    lifecycle_id: values.lifecycle_id,
                     type_id: values.type_id,
                     tag_ids: values.tag_ids ?? [],
                     domain_id: values.domain_id,
@@ -144,7 +143,6 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                     namespace: values.namespace,
                     description: values.description,
                     type_id: values.type_id,
-                    lifecycle_id: values.lifecycle_id,
                     domain_id: values.domain_id,
                     tag_ids: values.tag_ids,
                 };
@@ -204,7 +202,6 @@ export function DataProductForm({ mode, dataProductId }: Props) {
         namespace: currentDataProduct?.namespace,
         description: currentDataProduct?.description,
         type_id: currentDataProduct?.type.id,
-        lifecycle_id: currentDataProduct?.lifecycle?.id,
         domain_id: currentDataProduct?.domain.id,
         tag_ids: currentDataProduct?.tags.map((tag) => tag.id),
         owners: mode === 'edit' ? ownerIds : currentUser?.id ? [currentUser?.id] : [],

@@ -65,7 +65,7 @@ def register_detail_tools(mcp) -> None:
     mcp.tool(
         description="""
     Get full details of a single data product by its UUID, including its description,
-    domain, lifecycle status, owners, output ports, and technical assets.
+    domain, owners, output ports, and technical assets.
     Use after search_data_products or search_output_ports to drill into a related data product.
 
     Args:

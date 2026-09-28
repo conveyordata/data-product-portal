@@ -3016,194 +3016,6 @@
         }
       }
     },
-    "/api/v2/configuration/data_product_lifecycles": {
-      "get": {
-        "tags": [
-          "Configuration - Data Product lifecycles"
-        ],
-        "summary": "Get Data Products Lifecycles",
-        "operationId": "get_data_products_lifecycles",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DataProductLifeCyclesGet"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "Configuration - Data Product lifecycles"
-        ],
-        "summary": "Create Data Product Lifecycle",
-        "operationId": "create_data_product_lifecycle",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DataProductLifeCycleCreate"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "Data Product successfully created",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CreateDataProductLifeCycleResponse"
-                },
-                "example": {
-                  "id": "random id of the new data product"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Owner not found",
-            "content": {
-              "application/json": {
-                "example": {
-                  "detail": "User id for owner not found"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v2/configuration/data_product_lifecycles/{id}": {
-      "put": {
-        "tags": [
-          "Configuration - Data Product lifecycles"
-        ],
-        "summary": "Update Data Product Lifecycle",
-        "operationId": "update_data_product_lifecycle",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Id"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DataProductLifeCycleUpdate"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Data Product lifecycle updated",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UpdateDataProductLifeCycleResponse"
-                },
-                "example": {
-                  "id": "random id of the updated data product lifecycle"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Owner not found",
-            "content": {
-              "application/json": {
-                "example": {
-                  "detail": "User id for owner not found"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "tags": [
-          "Configuration - Data Product lifecycles"
-        ],
-        "summary": "Remove Data Product Lifecycle",
-        "operationId": "remove_data_product_lifecycle",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/v2/configuration/data_product_settings": {
       "get": {
         "tags": [
@@ -9627,20 +9439,6 @@
         ],
         "title": "CloudEvent_TechnicalAssetEvent"
       },
-      "CreateDataProductLifeCycleResponse": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id"
-        ],
-        "title": "CreateDataProductLifeCycleResponse"
-      },
       "CreateDataProductResponse": {
         "properties": {
           "id": {
@@ -9868,18 +9666,6 @@
               }
             ],
             "title": "About"
-          },
-          "lifecycle_id": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Lifecycle Id"
           },
           "tag_ids": {
             "items": {
@@ -10207,11 +9993,6 @@
             "title": "Tag Ids",
             "default": []
           },
-          "lifecycle_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Lifecycle Id"
-          },
           "visibility": {
             "$ref": "#/components/schemas/DataProductVisibility",
             "default": "discoverable"
@@ -10243,7 +10024,6 @@
           "description",
           "type_id",
           "domain_id",
-          "lifecycle_id",
           "owners"
         ],
         "title": "DataProductCreate"
@@ -10274,146 +10054,6 @@
           "default"
         ],
         "title": "DataProductIconKey"
-      },
-      "DataProductLifeCycle": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "name": {
-            "type": "string",
-            "title": "Name"
-          },
-          "value": {
-            "type": "integer",
-            "title": "Value"
-          },
-          "color": {
-            "type": "string",
-            "title": "Color"
-          },
-          "is_default": {
-            "type": "boolean",
-            "title": "Is Default"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "name",
-          "value",
-          "color",
-          "is_default"
-        ],
-        "title": "DataProductLifeCycle"
-      },
-      "DataProductLifeCycleCreate": {
-        "properties": {
-          "value": {
-            "type": "integer",
-            "title": "Value"
-          },
-          "name": {
-            "type": "string",
-            "title": "Name"
-          },
-          "color": {
-            "type": "string",
-            "title": "Color"
-          },
-          "is_default": {
-            "type": "boolean",
-            "title": "Is Default",
-            "default": false
-          }
-        },
-        "type": "object",
-        "required": [
-          "value",
-          "name",
-          "color"
-        ],
-        "title": "DataProductLifeCycleCreate"
-      },
-      "DataProductLifeCycleUpdate": {
-        "properties": {
-          "value": {
-            "type": "integer",
-            "title": "Value"
-          },
-          "name": {
-            "type": "string",
-            "title": "Name"
-          },
-          "color": {
-            "type": "string",
-            "title": "Color"
-          },
-          "is_default": {
-            "type": "boolean",
-            "title": "Is Default",
-            "default": false
-          }
-        },
-        "type": "object",
-        "required": [
-          "value",
-          "name",
-          "color"
-        ],
-        "title": "DataProductLifeCycleUpdate"
-      },
-      "DataProductLifeCyclesGet": {
-        "properties": {
-          "data_product_life_cycles": {
-            "items": {
-              "$ref": "#/components/schemas/DataProductLifeCyclesGetItem"
-            },
-            "type": "array",
-            "title": "Data Product Life Cycles"
-          }
-        },
-        "type": "object",
-        "required": [
-          "data_product_life_cycles"
-        ],
-        "title": "DataProductLifeCyclesGet"
-      },
-      "DataProductLifeCyclesGetItem": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "value": {
-            "type": "integer",
-            "title": "Value"
-          },
-          "name": {
-            "type": "string",
-            "title": "Name"
-          },
-          "color": {
-            "type": "string",
-            "title": "Color"
-          },
-          "is_default": {
-            "type": "boolean",
-            "title": "Is Default"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "value",
-          "name",
-          "color",
-          "is_default"
-        ],
-        "title": "DataProductLifeCyclesGetItem"
       },
       "DataProductRoleAssignmentEvent": {
         "properties": {
@@ -11114,11 +10754,6 @@
             "type": "array",
             "title": "Tag Ids",
             "default": []
-          },
-          "lifecycle_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Lifecycle Id"
           }
         },
         "type": "object",
@@ -11127,8 +10762,7 @@
           "namespace",
           "description",
           "type_id",
-          "domain_id",
-          "lifecycle_id"
+          "domain_id"
         ],
         "title": "DataProductUpdate"
       },
@@ -12070,16 +11704,6 @@
           "type": {
             "$ref": "#/components/schemas/DataProductType"
           },
-          "lifecycle": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/DataProductLifeCycle"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
           "visibility": {
             "$ref": "#/components/schemas/DataProductVisibility"
           },
@@ -12107,7 +11731,6 @@
           "usage",
           "domain",
           "type",
-          "lifecycle",
           "visibility",
           "about"
         ],
@@ -12215,16 +11838,6 @@
           "type": {
             "$ref": "#/components/schemas/DataProductType"
           },
-          "lifecycle": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/DataProductLifeCycle"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
           "visibility": {
             "$ref": "#/components/schemas/DataProductVisibility"
           },
@@ -12253,7 +11866,6 @@
           "usage",
           "domain",
           "type",
-          "lifecycle",
           "visibility",
           "user_count",
           "input_port_count",
@@ -12667,16 +12279,6 @@
           "domain": {
             "$ref": "#/components/schemas/Domain"
           },
-          "lifecycle": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/DataProductLifeCycle"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
           "access_modes": {
             "items": {
               "$ref": "#/components/schemas/AccessMode"
@@ -12732,7 +12334,6 @@
           "data_product_id",
           "tags",
           "domain",
-          "lifecycle",
           "access_modes",
           "about",
           "rolled_up_tags",
@@ -14586,18 +14187,6 @@
             ],
             "title": "About"
           },
-          "lifecycle_id": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Lifecycle Id"
-          },
           "tag_ids": {
             "items": {
               "type": "string",
@@ -15858,16 +15447,6 @@
           "domain": {
             "$ref": "#/components/schemas/Domain"
           },
-          "lifecycle": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/DataProductLifeCycle"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
           "access_modes": {
             "items": {
               "$ref": "#/components/schemas/AccessMode"
@@ -15902,7 +15481,6 @@
           "data_product_id",
           "tags",
           "domain",
-          "lifecycle",
           "access_modes",
           "abstract_data_product_count",
           "technical_assets_count",
@@ -16770,20 +16348,6 @@
           "access_durations"
         ],
         "title": "UpdateAccessDurationResponse"
-      },
-      "UpdateDataProductLifeCycleResponse": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id"
-        ],
-        "title": "UpdateDataProductLifeCycleResponse"
       },
       "UpdateDataProductResponse": {
         "properties": {

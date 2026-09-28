@@ -19,7 +19,6 @@ from .exploration import ExplorationFactory
 from .group import GroupFactory, GroupMembershipFactory
 from .input_port import InputPortFactory
 from .input_port_request import InputPortRequestFactory
-from .lifecycle import LifecycleFactory
 from .machine_user import MachineUserFactory
 from .notification import NotificationFactory
 from .output_port import OutputPortFactory
@@ -82,7 +81,6 @@ factories = [
     EnvironmentFactory,
     EventFactory,
     GlobalRoleAssignmentFactory,
-    LifecycleFactory,
     PlatformFactory,
     PlatformServiceFactory,
     PlatformServiceConfigFactory,

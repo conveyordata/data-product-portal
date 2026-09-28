@@ -4,7 +4,6 @@ from faker import Faker
 from app.data_products.model import DataProduct, DataProductVisibility
 from app.data_products.service import DataProductService
 from app.data_products.status import AbstractDataProductStatus
-from tests.factories.lifecycle import LifecycleFactory
 
 from .data_product_type import DataProductTypeFactory
 from .domain import DomainFactory
@@ -26,7 +25,6 @@ class DataProductFactory(factory.alchemy.SQLAlchemyModelFactory):
 
     type = factory.SubFactory(DataProductTypeFactory)
     domain = factory.SubFactory(DomainFactory)
-    lifecycle = factory.SubFactory(LifecycleFactory)
     usage = factory.Faker("word")
 
     @factory.post_generation

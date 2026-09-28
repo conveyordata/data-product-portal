@@ -28,7 +28,6 @@ from tests.factories import (
     GroupFactory,
     GroupMembershipFactory,
     InputPortFactory,
-    LifecycleFactory,
     OutputPortFactory,
     PlatformFactory,
     RoleFactory,
@@ -61,7 +60,6 @@ def user_with_create_data_product_rights():
 @pytest.fixture
 def payload() -> dict[str, Any]:
     domain = DomainFactory()
-    lifecycle = LifecycleFactory()
     data_product_type = DataProductTypeFactory()
     user = UserFactory()
     tag = TagFactory()
@@ -72,7 +70,6 @@ def payload() -> dict[str, Any]:
         "tag_ids": [str(tag.id)],
         "type_id": str(data_product_type.id),
         "owners": [str(user.id)],
-        "lifecycle_id": str(lifecycle.id),
         "domain_id": str(domain.id),
     }
 

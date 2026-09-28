@@ -90,12 +90,6 @@ type Invoker interface {
 	//
 	// POST /api/v2/data_products
 	CreateDataProduct(ctx context.Context, request *DataProductCreate) (CreateDataProductRes, error)
-	// CreateDataProductLifecycle invokes create_data_product_lifecycle operation.
-	//
-	// Create Data Product Lifecycle.
-	//
-	// POST /api/v2/configuration/data_product_lifecycles
-	CreateDataProductLifecycle(ctx context.Context, request *DataProductLifeCycleCreate) (CreateDataProductLifecycleRes, error)
 	// CreateDataProductRoleAssignment invokes create_data_product_role_assignment operation.
 	//
 	// Create Data Product Role Assignment.
@@ -312,12 +306,6 @@ type Invoker interface {
 	//
 	// GET /api/v2/data_products
 	GetDataProducts(ctx context.Context, params GetDataProductsParams) (GetDataProductsRes, error)
-	// GetDataProductsLifecycles invokes get_data_products_lifecycles operation.
-	//
-	// Get Data Products Lifecycles.
-	//
-	// GET /api/v2/configuration/data_product_lifecycles
-	GetDataProductsLifecycles(ctx context.Context) (GetDataProductsLifecyclesRes, error)
 	// GetDataProductsSettings invokes get_data_products_settings operation.
 	//
 	// Get Data Products Settings.
@@ -636,12 +624,6 @@ type Invoker interface {
 	//
 	// DELETE /api/v2/data_products/{id}/finalizers/{finalizer}
 	RemoveDataProductFinalizer(ctx context.Context, params RemoveDataProductFinalizerParams) (RemoveDataProductFinalizerRes, error)
-	// RemoveDataProductLifecycle invokes remove_data_product_lifecycle operation.
-	//
-	// Remove Data Product Lifecycle.
-	//
-	// DELETE /api/v2/configuration/data_product_lifecycles/{id}
-	RemoveDataProductLifecycle(ctx context.Context, params RemoveDataProductLifecycleParams) (RemoveDataProductLifecycleRes, error)
 	// RemoveDataProductSetting invokes remove_data_product_setting operation.
 	//
 	// Remove Data Product Setting.
@@ -864,12 +846,6 @@ type Invoker interface {
 	//
 	// PUT /api/v2/data_products/{id}/about
 	UpdateDataProductAbout(ctx context.Context, request *DataProductAboutUpdate, params UpdateDataProductAboutParams) (UpdateDataProductAboutRes, error)
-	// UpdateDataProductLifecycle invokes update_data_product_lifecycle operation.
-	//
-	// Update Data Product Lifecycle.
-	//
-	// PUT /api/v2/configuration/data_product_lifecycles/{id}
-	UpdateDataProductLifecycle(ctx context.Context, request *DataProductLifeCycleUpdate, params UpdateDataProductLifecycleParams) (UpdateDataProductLifecycleRes, error)
 	// UpdateDataProductSetting invokes update_data_product_setting operation.
 	//
 	// Update Data Product Setting.
@@ -1783,52 +1759,6 @@ func (c *Client) sendCreateDataProduct(ctx context.Context, request *DataProduct
 	}()
 
 	result, err := decodeCreateDataProductResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
-// CreateDataProductLifecycle invokes create_data_product_lifecycle operation.
-//
-// Create Data Product Lifecycle.
-//
-// POST /api/v2/configuration/data_product_lifecycles
-func (c *Client) CreateDataProductLifecycle(ctx context.Context, request *DataProductLifeCycleCreate) (CreateDataProductLifecycleRes, error) {
-	res, err := c.sendCreateDataProductLifecycle(ctx, request)
-	return res, err
-}
-
-func (c *Client) sendCreateDataProductLifecycle(ctx context.Context, request *DataProductLifeCycleCreate) (res CreateDataProductLifecycleRes, err error) {
-
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [1]string
-	pathParts[0] = "/api/v2/configuration/data_product_lifecycles"
-	uri.AddPathParts(u, pathParts[:]...)
-
-	r, err := ht.NewRequest(ctx, "POST", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-	if err := encodeCreateDataProductLifecycleRequest(request, r); err != nil {
-		return res, errors.Wrap(err, "encode request")
-	}
-
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	body := resp.Body
-	defer func() {
-		// Drain the body to EOF before closing, so the underlying
-		// connection can be reused by the Transport regardless of the
-		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
-		_, _ = io.Copy(io.Discard, body)
-		_ = body.Close()
-	}()
-
-	result, err := decodeCreateDataProductLifecycleResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -3910,49 +3840,6 @@ func (c *Client) sendGetDataProducts(ctx context.Context, params GetDataProducts
 	}()
 
 	result, err := decodeGetDataProductsResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
-// GetDataProductsLifecycles invokes get_data_products_lifecycles operation.
-//
-// Get Data Products Lifecycles.
-//
-// GET /api/v2/configuration/data_product_lifecycles
-func (c *Client) GetDataProductsLifecycles(ctx context.Context) (GetDataProductsLifecyclesRes, error) {
-	res, err := c.sendGetDataProductsLifecycles(ctx)
-	return res, err
-}
-
-func (c *Client) sendGetDataProductsLifecycles(ctx context.Context) (res GetDataProductsLifecyclesRes, err error) {
-
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [1]string
-	pathParts[0] = "/api/v2/configuration/data_product_lifecycles"
-	uri.AddPathParts(u, pathParts[:]...)
-
-	r, err := ht.NewRequest(ctx, "GET", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	body := resp.Body
-	defer func() {
-		// Drain the body to EOF before closing, so the underlying
-		// connection can be reused by the Transport regardless of the
-		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
-		_, _ = io.Copy(io.Discard, body)
-		_ = body.Close()
-	}()
-
-	result, err := decodeGetDataProductsLifecyclesResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -7613,67 +7500,6 @@ func (c *Client) sendRemoveDataProductFinalizer(ctx context.Context, params Remo
 	return result, nil
 }
 
-// RemoveDataProductLifecycle invokes remove_data_product_lifecycle operation.
-//
-// Remove Data Product Lifecycle.
-//
-// DELETE /api/v2/configuration/data_product_lifecycles/{id}
-func (c *Client) RemoveDataProductLifecycle(ctx context.Context, params RemoveDataProductLifecycleParams) (RemoveDataProductLifecycleRes, error) {
-	res, err := c.sendRemoveDataProductLifecycle(ctx, params)
-	return res, err
-}
-
-func (c *Client) sendRemoveDataProductLifecycle(ctx context.Context, params RemoveDataProductLifecycleParams) (res RemoveDataProductLifecycleRes, err error) {
-
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [2]string
-	pathParts[0] = "/api/v2/configuration/data_product_lifecycles/"
-	{
-		// Encode "id" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "id",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			return e.EncodeValue(conv.UUIDToString(params.ID))
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		encoded, err := e.Result()
-		if err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		pathParts[1] = encoded
-	}
-	uri.AddPathParts(u, pathParts[:]...)
-
-	r, err := ht.NewRequest(ctx, "DELETE", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	body := resp.Body
-	defer func() {
-		// Drain the body to EOF before closing, so the underlying
-		// connection can be reused by the Transport regardless of the
-		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
-		_, _ = io.Copy(io.Discard, body)
-		_ = body.Close()
-	}()
-
-	result, err := decodeRemoveDataProductLifecycleResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
 // RemoveDataProductSetting invokes remove_data_product_setting operation.
 //
 // Remove Data Product Setting.
@@ -10242,70 +10068,6 @@ func (c *Client) sendUpdateDataProductAbout(ctx context.Context, request *DataPr
 	}()
 
 	result, err := decodeUpdateDataProductAboutResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
-// UpdateDataProductLifecycle invokes update_data_product_lifecycle operation.
-//
-// Update Data Product Lifecycle.
-//
-// PUT /api/v2/configuration/data_product_lifecycles/{id}
-func (c *Client) UpdateDataProductLifecycle(ctx context.Context, request *DataProductLifeCycleUpdate, params UpdateDataProductLifecycleParams) (UpdateDataProductLifecycleRes, error) {
-	res, err := c.sendUpdateDataProductLifecycle(ctx, request, params)
-	return res, err
-}
-
-func (c *Client) sendUpdateDataProductLifecycle(ctx context.Context, request *DataProductLifeCycleUpdate, params UpdateDataProductLifecycleParams) (res UpdateDataProductLifecycleRes, err error) {
-
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [2]string
-	pathParts[0] = "/api/v2/configuration/data_product_lifecycles/"
-	{
-		// Encode "id" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "id",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			return e.EncodeValue(conv.UUIDToString(params.ID))
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		encoded, err := e.Result()
-		if err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		pathParts[1] = encoded
-	}
-	uri.AddPathParts(u, pathParts[:]...)
-
-	r, err := ht.NewRequest(ctx, "PUT", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-	if err := encodeUpdateDataProductLifecycleRequest(request, r); err != nil {
-		return res, errors.Wrap(err, "encode request")
-	}
-
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	body := resp.Body
-	defer func() {
-		// Drain the body to EOF before closing, so the underlying
-		// connection can be reused by the Transport regardless of the
-		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
-		_, _ = io.Copy(io.Discard, body)
-		_ = body.Close()
-	}()
-
-	result, err := decodeUpdateDataProductLifecycleResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

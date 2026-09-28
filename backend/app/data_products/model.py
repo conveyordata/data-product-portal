@@ -40,7 +40,6 @@ from app.database.event_mixin import EventTrackedMixin
 from app.groups.model import GroupMembership
 
 if TYPE_CHECKING:
-    from app.configuration.data_product_lifecycles.model import DataProductLifecycle
     from app.configuration.data_product_settings.model import DataProductSettingValue
 
 
@@ -226,14 +225,8 @@ class DataProduct(
     )
 
     type_id: Mapped[UUID] = mapped_column(ForeignKey("data_product_types.id"))
-    lifecycle_id: Mapped[UUID] = mapped_column(
-        ForeignKey("data_product_lifecycles.id", ondelete="SET NULL")
-    )
 
     type: Mapped[DataProductType] = relationship(
-        back_populates="data_products", lazy="joined"
-    )
-    lifecycle: Mapped["DataProductLifecycle"] = relationship(
         back_populates="data_products", lazy="joined"
     )
     assignments: Mapped[list["DataProductRoleAssignment"]] = relationship(

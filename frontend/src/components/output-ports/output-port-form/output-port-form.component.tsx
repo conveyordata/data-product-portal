@@ -31,7 +31,6 @@ import {
     useGetAllAccessDurationsQuery,
     useIsTimeBoundAccessEnabledQuery,
 } from '@/store/api/services/generated/configurationAccessDurationsApi.ts';
-import { useGetDataProductsLifecyclesQuery } from '@/store/api/services/generated/configurationDataProductLifecyclesApi.ts';
 import { useGetTagsQuery } from '@/store/api/services/generated/configurationTagsApi.ts';
 import {
     DataProductVisibility,
@@ -289,7 +288,6 @@ export function OutputPortForm({ mode, modalCallbackOnSubmit, formRef, outputPor
         },
     );
     const { data: dataProduct, isFetching: isFetchingDataProduct } = useGetDataProductQuery(dataProductId || '');
-    const { data: lifecycles = undefined, isFetching: isFetchingLifecycles } = useGetDataProductsLifecyclesQuery();
     const { data: { users = [] } = {}, isFetching: isFetchingUsers } = useGetUsersQuery();
     const { data: { tags: availableTags = [] } = {}, isFetching: isFetchingTags } = useGetTagsQuery();
     const [createDataset, { isLoading: isCreating }] = useCreateOutputPortMutation();
@@ -349,7 +347,6 @@ export function OutputPortForm({ mode, modalCallbackOnSubmit, formRef, outputPor
                     description: values.description,
                     owners: values.owners,
                     tag_ids: values.tag_ids ?? [],
-                    lifecycle_id: values.lifecycle_id,
                     access_type: values.access_type,
                     data_product_access_duration_type: values.data_product_access_duration_type,
                     exploration_access_duration_type: values.exploration_access_duration_type,
@@ -378,7 +375,6 @@ export function OutputPortForm({ mode, modalCallbackOnSubmit, formRef, outputPor
                     namespace: values.namespace,
                     description: values.description,
                     tag_ids: values.tag_ids,
-                    lifecycle_id: values.lifecycle_id,
                     access_type: values.access_type,
                     data_product_access_duration_type: values.data_product_access_duration_type,
                     exploration_access_duration_type: values.exploration_access_duration_type,
@@ -494,7 +490,6 @@ export function OutputPortForm({ mode, modalCallbackOnSubmit, formRef, outputPor
                     ? OutputPortAccessType.Private
                     : OutputPortAccessType.Unrestricted
                 : currentOutputPort?.access_type,
-        lifecycle_id: currentOutputPort?.lifecycle?.id,
         tag_ids: currentOutputPort?.tags.map((tag) => tag.id),
         owners: ownerIds,
         data_product_access_duration_type: currentOutputPort?.data_product_access_duration_type,
@@ -560,28 +555,6 @@ export function OutputPortForm({ mode, modalCallbackOnSubmit, formRef, outputPor
                     />
                 </Form.Item>
             )}
-            <Form.Item<CreateOutputPortRequest>
-                name="lifecycle_id"
-                label={t('Status')}
-                rules={[
-                    {
-                        required: true,
-                        message: t('Please select the status of the Output Port'),
-                    },
-                ]}
-            >
-                <Select
-                    data-cy="output-port-lifecycle"
-                    loading={isFetchingLifecycles}
-                    allowClear
-                    showSearch={{ filterOption: selectFilterOptionByLabelAndValue }}
-                    options={lifecycles?.data_product_life_cycles.map((lifecycle) => ({
-                        value: lifecycle.id,
-                        label: lifecycle.name,
-                    }))}
-                    popupRender={(menu) => <div data-cy="output-port-lifecycle-options">{menu}</div>}
-                />
-            </Form.Item>
             <Form.Item<CreateOutputPortRequest>
                 name="access_type"
                 label={t('Access Type')}

@@ -3,7 +3,6 @@ from uuid import UUID
 from warnings import deprecated
 
 from app.abstract_data_product.schema_response import AbstractDataProductInputPort
-from app.configuration.data_product_lifecycles.schema import DataProductLifeCycle
 from app.configuration.data_product_settings.schema import DataProductSettingValue
 from app.configuration.data_product_types.schema import DataProductType
 from app.configuration.domains.schema import Domain
@@ -25,7 +24,6 @@ class BaseDataProductGet(ORMModel):
     usage: Optional[str]
     domain: Domain
     type: DataProductType
-    lifecycle: Optional[DataProductLifeCycle]
     visibility: DataProductVisibility
 
 

@@ -11,7 +11,6 @@ from ..models.abstract_data_product_status import AbstractDataProductStatus
 from ..models.data_product_visibility import DataProductVisibility
 
 if TYPE_CHECKING:
-    from ..models.data_product_life_cycle import DataProductLifeCycle
     from ..models.data_product_type import DataProductType
     from ..models.domain import Domain
     from ..models.tag import Tag
@@ -34,7 +33,6 @@ class GetDataProductResponse:
         usage (None | str):
         domain (Domain):
         type_ (DataProductType):
-        lifecycle (DataProductLifeCycle | None):
         visibility (DataProductVisibility):
         about (None | str):
     """
@@ -49,14 +47,11 @@ class GetDataProductResponse:
     usage: None | str
     domain: Domain
     type_: DataProductType
-    lifecycle: DataProductLifeCycle | None
     visibility: DataProductVisibility
     about: None | str
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        from ..models.data_product_life_cycle import DataProductLifeCycle
-
         id = str(self.id)
 
         name = self.name
@@ -81,12 +76,6 @@ class GetDataProductResponse:
 
         type_ = self.type_.to_dict()
 
-        lifecycle: dict[str, Any] | None
-        if isinstance(self.lifecycle, DataProductLifeCycle):
-            lifecycle = self.lifecycle.to_dict()
-        else:
-            lifecycle = self.lifecycle
-
         visibility = self.visibility.value
 
         about: None | str
@@ -106,7 +95,6 @@ class GetDataProductResponse:
                 "usage": usage,
                 "domain": domain,
                 "type": type_,
-                "lifecycle": lifecycle,
                 "visibility": visibility,
                 "about": about,
             }
@@ -116,7 +104,6 @@ class GetDataProductResponse:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.data_product_life_cycle import DataProductLifeCycle
         from ..models.data_product_type import DataProductType
         from ..models.domain import Domain
         from ..models.tag import Tag
@@ -152,21 +139,6 @@ class GetDataProductResponse:
 
         type_ = DataProductType.from_dict(d.pop("type"))
 
-        def _parse_lifecycle(data: object) -> DataProductLifeCycle | None:
-            if data is None:
-                return data
-            try:
-                if not isinstance(data, dict):
-                    raise TypeError()
-                lifecycle_type_0 = DataProductLifeCycle.from_dict(data)
-
-                return lifecycle_type_0
-            except (TypeError, ValueError, AttributeError, KeyError):
-                pass
-            return cast(DataProductLifeCycle | None, data)
-
-        lifecycle = _parse_lifecycle(d.pop("lifecycle"))
-
         visibility = DataProductVisibility(d.pop("visibility"))
 
         def _parse_about(data: object) -> None | str:
@@ -187,7 +159,6 @@ class GetDataProductResponse:
             usage=usage,
             domain=domain,
             type_=type_,
-            lifecycle=lifecycle,
             visibility=visibility,
             about=about,
         )

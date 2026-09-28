@@ -9,7 +9,6 @@ import {
 } from '@/store/api/services/generated/dataProductsApi.ts';
 import { allowAllAuth } from '@/tests/mocks/auth.ts';
 import { mockAccessDurationsGet, mockTimeBoundAccessEnabled } from '@/tests/mocks/configurationAccessDurations.ts';
-import { mockDataProductLifecycles } from '@/tests/mocks/configurationDataProductLifecycles.ts';
 import { mockDataProductHttp } from '@/tests/mocks/dataProducts.ts';
 import {
     mockGetResourceNamesConstraints,
@@ -26,7 +25,6 @@ describe('OutputPortForm', () => {
         allowAllAuth();
         mockAccessDurationsGet();
         mockTimeBoundAccessEnabled();
-        mockDataProductLifecycles();
         mockUsersHttp(mockUsers);
         mockGetTags();
         mockGetResourceNamesConstraints();
@@ -55,7 +53,6 @@ describe('OutputPortForm', () => {
                 icon_key: DataProductIconKey.Reporting,
             },
             finalizers: [],
-            lifecycle: { id: 'lc-1', name: 'Draft', value: 1, color: 'green', is_default: true },
         });
 
         renderWithProviders(<OutputPortForm mode="create" dataProductId="dp-hidden" />, {

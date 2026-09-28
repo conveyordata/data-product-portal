@@ -4,7 +4,6 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import Cart from '@/pages/cart/cart.page.tsx';
 import { ResourceNameValidityType } from '@/store/api/services/generated/resourceNamesApi.ts';
 import { allowAllAuth } from '@/tests/mocks/auth.ts';
-import { mockDataProductLifecycles } from '@/tests/mocks/configurationDataProductLifecycles.ts';
 import { mockGetDataProductTypes } from '@/tests/mocks/configurationDataProductTypes.ts';
 import { mockGetDomains } from '@/tests/mocks/configurationDomains.ts';
 import { mockDataProductOutputPorts } from '@/tests/mocks/dataProductOutputPorts.ts';
@@ -208,7 +207,6 @@ describe('Cart', () => {
             mockResourceNamesSanitize();
             mockResourceNamesValidate();
             mockGetDataProductTypes();
-            mockDataProductLifecycles();
             mockGetDomains();
 
             const createdDataProductId = 'new-dp-id';
@@ -245,7 +243,6 @@ describe('Cart', () => {
             mockResourceNamesSanitize();
             mockResourceNamesValidate();
             mockGetDataProductTypes();
-            mockDataProductLifecycles();
             mockGetDomains();
 
             const createHandler = vi.fn(() => HttpResponse.json({ id: 'new-hidden-dp-id' }));

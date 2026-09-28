@@ -34,13 +34,6 @@ export type Domain = {
   name: string;
   description: string;
 };
-export type DataProductLifeCycle = {
-  id: string;
-  name: string;
-  value: number;
-  color: string;
-  is_default: boolean;
-};
 export type AccessMode = {
   id: string;
   name: string;
@@ -59,7 +52,6 @@ export type SearchOutputPortsResponseItem = {
   data_product_id: string;
   tags: Tag[];
   domain: Domain;
-  lifecycle: DataProductLifeCycle | null;
   access_modes: AccessMode[];
   abstract_data_product_count: number;
   technical_assets_count: number;

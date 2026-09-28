@@ -527,7 +527,6 @@ export type CreateOutputPortRequest = {
   data_product_access_duration_type: AccessDurationType;
   exploration_access_duration_type: AccessDurationType;
   about?: string | null;
-  lifecycle_id?: string | null;
   tag_ids: string[];
   owners: string[];
 };
@@ -535,13 +534,6 @@ export type Domain = {
   id: string;
   name: string;
   description: string;
-};
-export type DataProductLifeCycle = {
-  id: string;
-  name: string;
-  value: number;
-  color: string;
-  is_default: boolean;
 };
 export type DataProductSetting = {
   id: string;
@@ -597,7 +589,6 @@ export type GetOutputPortResponse = {
   data_product_id: string;
   tags: Tag[];
   domain: Domain;
-  lifecycle: DataProductLifeCycle | null;
   access_modes: AccessMode[];
   about: string | null;
   rolled_up_tags: Tag[];
@@ -615,7 +606,6 @@ export type OutputPortUpdate = {
   data_product_access_duration_type: AccessDurationType;
   exploration_access_duration_type: AccessDurationType;
   about?: string | null;
-  lifecycle_id?: string | null;
   tag_ids: string[];
 };
 export type User = {

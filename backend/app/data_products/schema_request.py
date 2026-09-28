@@ -21,7 +21,6 @@ class DataProductUpdate(ORMModel):
     about: Optional[str] = None
     domain_id: UUID
     tag_ids: list[UUID] = []
-    lifecycle_id: UUID
 
 
 class RequestInputPortsForDataProductRequest(ORMModel):

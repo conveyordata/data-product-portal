@@ -14,8 +14,6 @@ describe('Create Output port', () => {
         cy.get('[data-cy="namespace"]').should('not.have.value', '', { timeout: 10000 });
         cy.wait('@validateNamespace', { timeout: 10000 });
 
-        cy.selectAntOption('output-port-lifecycle', 'Draft');
-
         cy.get('[data-cy="output-port-description"]').type('Created by the Cypress end-to-end test.');
 
         cy.intercept('POST', '**/output_ports').as('createOutputPort');

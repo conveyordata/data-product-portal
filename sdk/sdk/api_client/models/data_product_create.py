@@ -28,7 +28,6 @@ class DataProductCreate:
         description (str):
         type_id (UUID):
         domain_id (UUID):
-        lifecycle_id (UUID):
         owners (list[UUID]):
         about (None | str | Unset):
         tag_ids (list[UUID] | Unset):
@@ -41,7 +40,6 @@ class DataProductCreate:
     description: str
     type_id: UUID
     domain_id: UUID
-    lifecycle_id: UUID
     owners: list[UUID]
     about: None | str | Unset = UNSET
     tag_ids: list[UUID] | Unset = UNSET
@@ -63,8 +61,6 @@ class DataProductCreate:
         type_id = str(self.type_id)
 
         domain_id = str(self.domain_id)
-
-        lifecycle_id = str(self.lifecycle_id)
 
         owners = []
         for owners_item_data in self.owners:
@@ -105,7 +101,6 @@ class DataProductCreate:
                 "description": description,
                 "type_id": type_id,
                 "domain_id": domain_id,
-                "lifecycle_id": lifecycle_id,
                 "owners": owners,
             }
         )
@@ -136,8 +131,6 @@ class DataProductCreate:
         type_id = UUID(d.pop("type_id"))
 
         domain_id = UUID(d.pop("domain_id"))
-
-        lifecycle_id = UUID(d.pop("lifecycle_id"))
 
         owners = []
         _owners = d.pop("owners")
@@ -198,7 +191,6 @@ class DataProductCreate:
             description=description,
             type_id=type_id,
             domain_id=domain_id,
-            lifecycle_id=lifecycle_id,
             owners=owners,
             about=about,
             tag_ids=tag_ids,

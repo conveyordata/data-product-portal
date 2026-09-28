@@ -183,19 +183,6 @@ api.enhanceEndpoints({
             },
         },
 
-        getDataProductsLifecycles: {
-            providesTags: [{ type: TagTypes.DataProductLifecycle, id: STATIC_TAG_ID.LIST }],
-        },
-        createDataProductLifecycle: {
-            invalidatesTags: [{ type: TagTypes.DataProductLifecycle, id: STATIC_TAG_ID.LIST }],
-        },
-        removeDataProductLifecycle: {
-            invalidatesTags: [{ type: TagTypes.DataProductLifecycle, id: STATIC_TAG_ID.LIST }],
-        },
-        updateDataProductLifecycle: {
-            invalidatesTags: [{ type: TagTypes.DataProductLifecycle, id: STATIC_TAG_ID.LIST }],
-        },
-
         getDataProductsSettings: {
             providesTags: [{ type: TagTypes.DataProductSetting, id: STATIC_TAG_ID.LIST }],
         },

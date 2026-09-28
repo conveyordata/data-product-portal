@@ -67,19 +67,6 @@ export const getOutputPortTableColumns = ({
             width: '15%',
         },
         {
-            title: t('Status'),
-            dataIndex: 'lifecycle',
-            render: (lifecycle) => {
-                if (lifecycle !== null) {
-                    return <Tag color={lifecycle.color || 'default'}>{lifecycle.name}</Tag>;
-                }
-                return;
-            },
-            ...new FilterSettings(data, (op) => (op.lifecycle !== null ? op.lifecycle.name : '')),
-            sorter: sorter.stringSorter((op) => (op.lifecycle !== null ? op.lifecycle.name : '')),
-            width: '10%',
-        },
-        {
             title: t('Consumers'),
             dataIndex: 'abstract_data_product_count',
             render: (count: number) => {

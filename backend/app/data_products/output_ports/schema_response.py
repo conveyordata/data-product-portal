@@ -6,7 +6,6 @@ from pydantic import AliasPath, ConfigDict, Field
 
 from app.configuration.access_durations.enums import AccessDurationType
 from app.configuration.access_modes.schema_response import AccessMode
-from app.configuration.data_product_lifecycles.schema import DataProductLifeCycle
 from app.configuration.data_product_settings.schema import (
     OutputPortSettingValue,
 )
@@ -57,7 +56,6 @@ class BaseOutputPortGet(ORMModel):
 
     tags: list[Tag]
     domain: Domain = Field(validation_alias=AliasPath("data_product", "domain"))
-    lifecycle: Optional[DataProductLifeCycle]
     access_modes: list[AccessMode]
 
 

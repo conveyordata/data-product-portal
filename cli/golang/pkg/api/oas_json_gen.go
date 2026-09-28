@@ -2699,144 +2699,6 @@ func (s *CancelInputPortForExplorationResponse) UnmarshalJSON(data []byte) error
 	return s.Decode(d)
 }
 
-// Encode implements json.Marshaler.
-func (s *CreateDataProductLifeCycleResponse) Encode(e *jx.Encoder) {
-	e.ObjStart()
-	s.encodeFields(e)
-	e.ObjEnd()
-}
-
-// encodeFields encodes fields.
-func (s *CreateDataProductLifeCycleResponse) encodeFields(e *jx.Encoder) {
-	{
-		e.FieldStart("id")
-		json.EncodeUUID(e, s.ID)
-	}
-}
-
-var jsonFieldsNameOfCreateDataProductLifeCycleResponse = [1]string{
-	0: "id",
-}
-
-// Decode decodes CreateDataProductLifeCycleResponse from json.
-func (s *CreateDataProductLifeCycleResponse) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode CreateDataProductLifeCycleResponse to nil")
-	}
-	var requiredBitSet [1]uint8
-
-	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		switch string(k) {
-		case "id":
-			requiredBitSet[0] |= 1 << 0
-			if err := func() error {
-				v, err := json.DecodeUUID(d)
-				s.ID = v
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"id\"")
-			}
-		default:
-			return d.Skip()
-		}
-		return nil
-	}); err != nil {
-		return errors.Wrap(err, "decode CreateDataProductLifeCycleResponse")
-	}
-	// Validate required fields.
-	var failures []validate.FieldError
-	for i, mask := range [1]uint8{
-		0b00000001,
-	} {
-		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
-			// Mask only required fields and check equality to mask using XOR.
-			//
-			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
-			// Bits of fields which would be set are actually bits of missed fields.
-			missed := bits.OnesCount8(result)
-			for bitN := 0; bitN < missed; bitN++ {
-				bitIdx := bits.TrailingZeros8(result)
-				fieldIdx := i*8 + bitIdx
-				var name string
-				if fieldIdx < len(jsonFieldsNameOfCreateDataProductLifeCycleResponse) {
-					name = jsonFieldsNameOfCreateDataProductLifeCycleResponse[fieldIdx]
-				} else {
-					name = strconv.Itoa(fieldIdx)
-				}
-				failures = append(failures, validate.FieldError{
-					Name:  name,
-					Error: validate.ErrFieldRequired,
-				})
-				// Reset bit.
-				result &^= 1 << bitIdx
-			}
-		}
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s *CreateDataProductLifeCycleResponse) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *CreateDataProductLifeCycleResponse) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode encodes CreateDataProductLifecycleNotFoundApplicationJSON as json.
-func (s CreateDataProductLifecycleNotFoundApplicationJSON) Encode(e *jx.Encoder) {
-	unwrapped := jx.Raw(s)
-
-	if len(unwrapped) != 0 {
-		e.Raw(unwrapped)
-	}
-}
-
-// Decode decodes CreateDataProductLifecycleNotFoundApplicationJSON from json.
-func (s *CreateDataProductLifecycleNotFoundApplicationJSON) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode CreateDataProductLifecycleNotFoundApplicationJSON to nil")
-	}
-	var unwrapped jx.Raw
-	if err := func() error {
-		v, err := d.RawAppend(nil)
-		unwrapped = jx.Raw(v)
-		if err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		return errors.Wrap(err, "alias")
-	}
-	*s = CreateDataProductLifecycleNotFoundApplicationJSON(unwrapped)
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s CreateDataProductLifecycleNotFoundApplicationJSON) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *CreateDataProductLifecycleNotFoundApplicationJSON) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
 // Encode encodes CreateDataProductNotFoundApplicationJSON as json.
 func (s CreateDataProductNotFoundApplicationJSON) Encode(e *jx.Encoder) {
 	unwrapped := jx.Raw(s)
@@ -3887,12 +3749,6 @@ func (s *CreateOutputPortRequest) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
-		if s.LifecycleID.Set {
-			e.FieldStart("lifecycle_id")
-			s.LifecycleID.Encode(e)
-		}
-	}
-	{
 		e.FieldStart("tag_ids")
 		e.ArrStart()
 		for _, elem := range s.TagIds {
@@ -3910,7 +3766,7 @@ func (s *CreateOutputPortRequest) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfCreateOutputPortRequest = [10]string{
+var jsonFieldsNameOfCreateOutputPortRequest = [9]string{
 	0: "name",
 	1: "namespace",
 	2: "description",
@@ -3918,9 +3774,8 @@ var jsonFieldsNameOfCreateOutputPortRequest = [10]string{
 	4: "data_product_access_duration_type",
 	5: "exploration_access_duration_type",
 	6: "about",
-	7: "lifecycle_id",
-	8: "tag_ids",
-	9: "owners",
+	7: "tag_ids",
+	8: "owners",
 }
 
 // Decode decodes CreateOutputPortRequest from json.
@@ -4008,18 +3863,8 @@ func (s *CreateOutputPortRequest) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"about\"")
 			}
-		case "lifecycle_id":
-			if err := func() error {
-				s.LifecycleID.Reset()
-				if err := s.LifecycleID.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"lifecycle_id\"")
-			}
 		case "tag_ids":
-			requiredBitSet[1] |= 1 << 0
+			requiredBitSet[0] |= 1 << 7
 			if err := func() error {
 				s.TagIds = make([]uuid.UUID, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
@@ -4039,7 +3884,7 @@ func (s *CreateOutputPortRequest) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"tag_ids\"")
 			}
 		case "owners":
-			requiredBitSet[1] |= 1 << 1
+			requiredBitSet[1] |= 1 << 0
 			if err := func() error {
 				s.Owners = make([]uuid.UUID, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
@@ -4068,8 +3913,8 @@ func (s *CreateOutputPortRequest) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
-		0b00111111,
-		0b00000011,
+		0b10111111,
+		0b00000001,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -5454,10 +5299,6 @@ func (s *DataProductCreate) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
-		e.FieldStart("lifecycle_id")
-		json.EncodeUUID(e, s.LifecycleID)
-	}
-	{
 		if s.Visibility.Set {
 			e.FieldStart("visibility")
 			s.Visibility.Encode(e)
@@ -5479,18 +5320,17 @@ func (s *DataProductCreate) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfDataProductCreate = [11]string{
-	0:  "name",
-	1:  "namespace",
-	2:  "description",
-	3:  "type_id",
-	4:  "about",
-	5:  "domain_id",
-	6:  "tag_ids",
-	7:  "lifecycle_id",
-	8:  "visibility",
-	9:  "owners",
-	10: "input_ports",
+var jsonFieldsNameOfDataProductCreate = [10]string{
+	0: "name",
+	1: "namespace",
+	2: "description",
+	3: "type_id",
+	4: "about",
+	5: "domain_id",
+	6: "tag_ids",
+	7: "visibility",
+	8: "owners",
+	9: "input_ports",
 }
 
 // Decode decodes DataProductCreate from json.
@@ -5592,18 +5432,6 @@ func (s *DataProductCreate) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"tag_ids\"")
 			}
-		case "lifecycle_id":
-			requiredBitSet[0] |= 1 << 7
-			if err := func() error {
-				v, err := json.DecodeUUID(d)
-				s.LifecycleID = v
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"lifecycle_id\"")
-			}
 		case "visibility":
 			if err := func() error {
 				s.Visibility.Reset()
@@ -5615,7 +5443,7 @@ func (s *DataProductCreate) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"visibility\"")
 			}
 		case "owners":
-			requiredBitSet[1] |= 1 << 1
+			requiredBitSet[1] |= 1 << 0
 			if err := func() error {
 				s.Owners = make([]uuid.UUID, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
@@ -5654,8 +5482,8 @@ func (s *DataProductCreate) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
-		0b10101111,
-		0b00000010,
+		0b00101111,
+		0b00000001,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -5747,736 +5575,6 @@ func (s DataProductIconKey) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *DataProductIconKey) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode implements json.Marshaler.
-func (s *DataProductLifeCycle) Encode(e *jx.Encoder) {
-	e.ObjStart()
-	s.encodeFields(e)
-	e.ObjEnd()
-}
-
-// encodeFields encodes fields.
-func (s *DataProductLifeCycle) encodeFields(e *jx.Encoder) {
-	{
-		e.FieldStart("id")
-		json.EncodeUUID(e, s.ID)
-	}
-	{
-		e.FieldStart("name")
-		e.Str(s.Name)
-	}
-	{
-		e.FieldStart("value")
-		e.Int(s.Value)
-	}
-	{
-		e.FieldStart("color")
-		e.Str(s.Color)
-	}
-	{
-		e.FieldStart("is_default")
-		e.Bool(s.IsDefault)
-	}
-}
-
-var jsonFieldsNameOfDataProductLifeCycle = [5]string{
-	0: "id",
-	1: "name",
-	2: "value",
-	3: "color",
-	4: "is_default",
-}
-
-// Decode decodes DataProductLifeCycle from json.
-func (s *DataProductLifeCycle) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode DataProductLifeCycle to nil")
-	}
-	var requiredBitSet [1]uint8
-
-	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		switch string(k) {
-		case "id":
-			requiredBitSet[0] |= 1 << 0
-			if err := func() error {
-				v, err := json.DecodeUUID(d)
-				s.ID = v
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"id\"")
-			}
-		case "name":
-			requiredBitSet[0] |= 1 << 1
-			if err := func() error {
-				v, err := d.Str()
-				s.Name = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"name\"")
-			}
-		case "value":
-			requiredBitSet[0] |= 1 << 2
-			if err := func() error {
-				v, err := d.Int()
-				s.Value = int(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"value\"")
-			}
-		case "color":
-			requiredBitSet[0] |= 1 << 3
-			if err := func() error {
-				v, err := d.Str()
-				s.Color = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"color\"")
-			}
-		case "is_default":
-			requiredBitSet[0] |= 1 << 4
-			if err := func() error {
-				v, err := d.Bool()
-				s.IsDefault = bool(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"is_default\"")
-			}
-		default:
-			return d.Skip()
-		}
-		return nil
-	}); err != nil {
-		return errors.Wrap(err, "decode DataProductLifeCycle")
-	}
-	// Validate required fields.
-	var failures []validate.FieldError
-	for i, mask := range [1]uint8{
-		0b00011111,
-	} {
-		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
-			// Mask only required fields and check equality to mask using XOR.
-			//
-			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
-			// Bits of fields which would be set are actually bits of missed fields.
-			missed := bits.OnesCount8(result)
-			for bitN := 0; bitN < missed; bitN++ {
-				bitIdx := bits.TrailingZeros8(result)
-				fieldIdx := i*8 + bitIdx
-				var name string
-				if fieldIdx < len(jsonFieldsNameOfDataProductLifeCycle) {
-					name = jsonFieldsNameOfDataProductLifeCycle[fieldIdx]
-				} else {
-					name = strconv.Itoa(fieldIdx)
-				}
-				failures = append(failures, validate.FieldError{
-					Name:  name,
-					Error: validate.ErrFieldRequired,
-				})
-				// Reset bit.
-				result &^= 1 << bitIdx
-			}
-		}
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s *DataProductLifeCycle) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *DataProductLifeCycle) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode implements json.Marshaler.
-func (s *DataProductLifeCycleCreate) Encode(e *jx.Encoder) {
-	e.ObjStart()
-	s.encodeFields(e)
-	e.ObjEnd()
-}
-
-// encodeFields encodes fields.
-func (s *DataProductLifeCycleCreate) encodeFields(e *jx.Encoder) {
-	{
-		e.FieldStart("value")
-		e.Int(s.Value)
-	}
-	{
-		e.FieldStart("name")
-		e.Str(s.Name)
-	}
-	{
-		e.FieldStart("color")
-		e.Str(s.Color)
-	}
-	{
-		if s.IsDefault.Set {
-			e.FieldStart("is_default")
-			s.IsDefault.Encode(e)
-		}
-	}
-}
-
-var jsonFieldsNameOfDataProductLifeCycleCreate = [4]string{
-	0: "value",
-	1: "name",
-	2: "color",
-	3: "is_default",
-}
-
-// Decode decodes DataProductLifeCycleCreate from json.
-func (s *DataProductLifeCycleCreate) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode DataProductLifeCycleCreate to nil")
-	}
-	var requiredBitSet [1]uint8
-	s.setDefaults()
-
-	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		switch string(k) {
-		case "value":
-			requiredBitSet[0] |= 1 << 0
-			if err := func() error {
-				v, err := d.Int()
-				s.Value = int(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"value\"")
-			}
-		case "name":
-			requiredBitSet[0] |= 1 << 1
-			if err := func() error {
-				v, err := d.Str()
-				s.Name = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"name\"")
-			}
-		case "color":
-			requiredBitSet[0] |= 1 << 2
-			if err := func() error {
-				v, err := d.Str()
-				s.Color = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"color\"")
-			}
-		case "is_default":
-			if err := func() error {
-				s.IsDefault.Reset()
-				if err := s.IsDefault.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"is_default\"")
-			}
-		default:
-			return d.Skip()
-		}
-		return nil
-	}); err != nil {
-		return errors.Wrap(err, "decode DataProductLifeCycleCreate")
-	}
-	// Validate required fields.
-	var failures []validate.FieldError
-	for i, mask := range [1]uint8{
-		0b00000111,
-	} {
-		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
-			// Mask only required fields and check equality to mask using XOR.
-			//
-			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
-			// Bits of fields which would be set are actually bits of missed fields.
-			missed := bits.OnesCount8(result)
-			for bitN := 0; bitN < missed; bitN++ {
-				bitIdx := bits.TrailingZeros8(result)
-				fieldIdx := i*8 + bitIdx
-				var name string
-				if fieldIdx < len(jsonFieldsNameOfDataProductLifeCycleCreate) {
-					name = jsonFieldsNameOfDataProductLifeCycleCreate[fieldIdx]
-				} else {
-					name = strconv.Itoa(fieldIdx)
-				}
-				failures = append(failures, validate.FieldError{
-					Name:  name,
-					Error: validate.ErrFieldRequired,
-				})
-				// Reset bit.
-				result &^= 1 << bitIdx
-			}
-		}
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s *DataProductLifeCycleCreate) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *DataProductLifeCycleCreate) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode implements json.Marshaler.
-func (s *DataProductLifeCycleUpdate) Encode(e *jx.Encoder) {
-	e.ObjStart()
-	s.encodeFields(e)
-	e.ObjEnd()
-}
-
-// encodeFields encodes fields.
-func (s *DataProductLifeCycleUpdate) encodeFields(e *jx.Encoder) {
-	{
-		e.FieldStart("value")
-		e.Int(s.Value)
-	}
-	{
-		e.FieldStart("name")
-		e.Str(s.Name)
-	}
-	{
-		e.FieldStart("color")
-		e.Str(s.Color)
-	}
-	{
-		if s.IsDefault.Set {
-			e.FieldStart("is_default")
-			s.IsDefault.Encode(e)
-		}
-	}
-}
-
-var jsonFieldsNameOfDataProductLifeCycleUpdate = [4]string{
-	0: "value",
-	1: "name",
-	2: "color",
-	3: "is_default",
-}
-
-// Decode decodes DataProductLifeCycleUpdate from json.
-func (s *DataProductLifeCycleUpdate) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode DataProductLifeCycleUpdate to nil")
-	}
-	var requiredBitSet [1]uint8
-	s.setDefaults()
-
-	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		switch string(k) {
-		case "value":
-			requiredBitSet[0] |= 1 << 0
-			if err := func() error {
-				v, err := d.Int()
-				s.Value = int(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"value\"")
-			}
-		case "name":
-			requiredBitSet[0] |= 1 << 1
-			if err := func() error {
-				v, err := d.Str()
-				s.Name = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"name\"")
-			}
-		case "color":
-			requiredBitSet[0] |= 1 << 2
-			if err := func() error {
-				v, err := d.Str()
-				s.Color = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"color\"")
-			}
-		case "is_default":
-			if err := func() error {
-				s.IsDefault.Reset()
-				if err := s.IsDefault.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"is_default\"")
-			}
-		default:
-			return d.Skip()
-		}
-		return nil
-	}); err != nil {
-		return errors.Wrap(err, "decode DataProductLifeCycleUpdate")
-	}
-	// Validate required fields.
-	var failures []validate.FieldError
-	for i, mask := range [1]uint8{
-		0b00000111,
-	} {
-		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
-			// Mask only required fields and check equality to mask using XOR.
-			//
-			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
-			// Bits of fields which would be set are actually bits of missed fields.
-			missed := bits.OnesCount8(result)
-			for bitN := 0; bitN < missed; bitN++ {
-				bitIdx := bits.TrailingZeros8(result)
-				fieldIdx := i*8 + bitIdx
-				var name string
-				if fieldIdx < len(jsonFieldsNameOfDataProductLifeCycleUpdate) {
-					name = jsonFieldsNameOfDataProductLifeCycleUpdate[fieldIdx]
-				} else {
-					name = strconv.Itoa(fieldIdx)
-				}
-				failures = append(failures, validate.FieldError{
-					Name:  name,
-					Error: validate.ErrFieldRequired,
-				})
-				// Reset bit.
-				result &^= 1 << bitIdx
-			}
-		}
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s *DataProductLifeCycleUpdate) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *DataProductLifeCycleUpdate) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode implements json.Marshaler.
-func (s *DataProductLifeCyclesGet) Encode(e *jx.Encoder) {
-	e.ObjStart()
-	s.encodeFields(e)
-	e.ObjEnd()
-}
-
-// encodeFields encodes fields.
-func (s *DataProductLifeCyclesGet) encodeFields(e *jx.Encoder) {
-	{
-		e.FieldStart("data_product_life_cycles")
-		e.ArrStart()
-		for _, elem := range s.DataProductLifeCycles {
-			elem.Encode(e)
-		}
-		e.ArrEnd()
-	}
-}
-
-var jsonFieldsNameOfDataProductLifeCyclesGet = [1]string{
-	0: "data_product_life_cycles",
-}
-
-// Decode decodes DataProductLifeCyclesGet from json.
-func (s *DataProductLifeCyclesGet) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode DataProductLifeCyclesGet to nil")
-	}
-	var requiredBitSet [1]uint8
-
-	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		switch string(k) {
-		case "data_product_life_cycles":
-			requiredBitSet[0] |= 1 << 0
-			if err := func() error {
-				s.DataProductLifeCycles = make([]DataProductLifeCyclesGetItem, 0)
-				if err := d.Arr(func(d *jx.Decoder) error {
-					var elem DataProductLifeCyclesGetItem
-					if err := elem.Decode(d); err != nil {
-						return err
-					}
-					s.DataProductLifeCycles = append(s.DataProductLifeCycles, elem)
-					return nil
-				}); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"data_product_life_cycles\"")
-			}
-		default:
-			return d.Skip()
-		}
-		return nil
-	}); err != nil {
-		return errors.Wrap(err, "decode DataProductLifeCyclesGet")
-	}
-	// Validate required fields.
-	var failures []validate.FieldError
-	for i, mask := range [1]uint8{
-		0b00000001,
-	} {
-		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
-			// Mask only required fields and check equality to mask using XOR.
-			//
-			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
-			// Bits of fields which would be set are actually bits of missed fields.
-			missed := bits.OnesCount8(result)
-			for bitN := 0; bitN < missed; bitN++ {
-				bitIdx := bits.TrailingZeros8(result)
-				fieldIdx := i*8 + bitIdx
-				var name string
-				if fieldIdx < len(jsonFieldsNameOfDataProductLifeCyclesGet) {
-					name = jsonFieldsNameOfDataProductLifeCyclesGet[fieldIdx]
-				} else {
-					name = strconv.Itoa(fieldIdx)
-				}
-				failures = append(failures, validate.FieldError{
-					Name:  name,
-					Error: validate.ErrFieldRequired,
-				})
-				// Reset bit.
-				result &^= 1 << bitIdx
-			}
-		}
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s *DataProductLifeCyclesGet) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *DataProductLifeCyclesGet) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode implements json.Marshaler.
-func (s *DataProductLifeCyclesGetItem) Encode(e *jx.Encoder) {
-	e.ObjStart()
-	s.encodeFields(e)
-	e.ObjEnd()
-}
-
-// encodeFields encodes fields.
-func (s *DataProductLifeCyclesGetItem) encodeFields(e *jx.Encoder) {
-	{
-		e.FieldStart("id")
-		json.EncodeUUID(e, s.ID)
-	}
-	{
-		e.FieldStart("value")
-		e.Int(s.Value)
-	}
-	{
-		e.FieldStart("name")
-		e.Str(s.Name)
-	}
-	{
-		e.FieldStart("color")
-		e.Str(s.Color)
-	}
-	{
-		e.FieldStart("is_default")
-		e.Bool(s.IsDefault)
-	}
-}
-
-var jsonFieldsNameOfDataProductLifeCyclesGetItem = [5]string{
-	0: "id",
-	1: "value",
-	2: "name",
-	3: "color",
-	4: "is_default",
-}
-
-// Decode decodes DataProductLifeCyclesGetItem from json.
-func (s *DataProductLifeCyclesGetItem) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode DataProductLifeCyclesGetItem to nil")
-	}
-	var requiredBitSet [1]uint8
-
-	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		switch string(k) {
-		case "id":
-			requiredBitSet[0] |= 1 << 0
-			if err := func() error {
-				v, err := json.DecodeUUID(d)
-				s.ID = v
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"id\"")
-			}
-		case "value":
-			requiredBitSet[0] |= 1 << 1
-			if err := func() error {
-				v, err := d.Int()
-				s.Value = int(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"value\"")
-			}
-		case "name":
-			requiredBitSet[0] |= 1 << 2
-			if err := func() error {
-				v, err := d.Str()
-				s.Name = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"name\"")
-			}
-		case "color":
-			requiredBitSet[0] |= 1 << 3
-			if err := func() error {
-				v, err := d.Str()
-				s.Color = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"color\"")
-			}
-		case "is_default":
-			requiredBitSet[0] |= 1 << 4
-			if err := func() error {
-				v, err := d.Bool()
-				s.IsDefault = bool(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"is_default\"")
-			}
-		default:
-			return d.Skip()
-		}
-		return nil
-	}); err != nil {
-		return errors.Wrap(err, "decode DataProductLifeCyclesGetItem")
-	}
-	// Validate required fields.
-	var failures []validate.FieldError
-	for i, mask := range [1]uint8{
-		0b00011111,
-	} {
-		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
-			// Mask only required fields and check equality to mask using XOR.
-			//
-			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
-			// Bits of fields which would be set are actually bits of missed fields.
-			missed := bits.OnesCount8(result)
-			for bitN := 0; bitN < missed; bitN++ {
-				bitIdx := bits.TrailingZeros8(result)
-				fieldIdx := i*8 + bitIdx
-				var name string
-				if fieldIdx < len(jsonFieldsNameOfDataProductLifeCyclesGetItem) {
-					name = jsonFieldsNameOfDataProductLifeCyclesGetItem[fieldIdx]
-				} else {
-					name = strconv.Itoa(fieldIdx)
-				}
-				failures = append(failures, validate.FieldError{
-					Name:  name,
-					Error: validate.ErrFieldRequired,
-				})
-				// Reset bit.
-				result &^= 1 << bitIdx
-			}
-		}
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s *DataProductLifeCyclesGetItem) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *DataProductLifeCyclesGetItem) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -8912,13 +8010,9 @@ func (s *DataProductUpdate) encodeFields(e *jx.Encoder) {
 			e.ArrEnd()
 		}
 	}
-	{
-		e.FieldStart("lifecycle_id")
-		json.EncodeUUID(e, s.LifecycleID)
-	}
 }
 
-var jsonFieldsNameOfDataProductUpdate = [8]string{
+var jsonFieldsNameOfDataProductUpdate = [7]string{
 	0: "name",
 	1: "namespace",
 	2: "description",
@@ -8926,7 +8020,6 @@ var jsonFieldsNameOfDataProductUpdate = [8]string{
 	4: "about",
 	5: "domain_id",
 	6: "tag_ids",
-	7: "lifecycle_id",
 }
 
 // Decode decodes DataProductUpdate from json.
@@ -9028,18 +8121,6 @@ func (s *DataProductUpdate) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"tag_ids\"")
 			}
-		case "lifecycle_id":
-			requiredBitSet[0] |= 1 << 7
-			if err := func() error {
-				v, err := json.DecodeUUID(d)
-				s.LifecycleID = v
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"lifecycle_id\"")
-			}
 		default:
 			return d.Skip()
 		}
@@ -9050,7 +8131,7 @@ func (s *DataProductUpdate) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b10101111,
+		0b00101111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -13077,10 +12158,6 @@ func (s *GetDataProductResponse) encodeFields(e *jx.Encoder) {
 		s.Type.Encode(e)
 	}
 	{
-		e.FieldStart("lifecycle")
-		s.Lifecycle.Encode(e)
-	}
-	{
 		e.FieldStart("visibility")
 		s.Visibility.Encode(e)
 	}
@@ -13090,7 +12167,7 @@ func (s *GetDataProductResponse) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfGetDataProductResponse = [13]string{
+var jsonFieldsNameOfGetDataProductResponse = [12]string{
 	0:  "id",
 	1:  "name",
 	2:  "description",
@@ -13101,9 +12178,8 @@ var jsonFieldsNameOfGetDataProductResponse = [13]string{
 	7:  "usage",
 	8:  "domain",
 	9:  "type",
-	10: "lifecycle",
-	11: "visibility",
-	12: "about",
+	10: "visibility",
+	11: "about",
 }
 
 // Decode decodes GetDataProductResponse from json.
@@ -13242,18 +12318,8 @@ func (s *GetDataProductResponse) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"type\"")
 			}
-		case "lifecycle":
-			requiredBitSet[1] |= 1 << 2
-			if err := func() error {
-				if err := s.Lifecycle.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"lifecycle\"")
-			}
 		case "visibility":
-			requiredBitSet[1] |= 1 << 3
+			requiredBitSet[1] |= 1 << 2
 			if err := func() error {
 				if err := s.Visibility.Decode(d); err != nil {
 					return err
@@ -13263,7 +12329,7 @@ func (s *GetDataProductResponse) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"visibility\"")
 			}
 		case "about":
-			requiredBitSet[1] |= 1 << 4
+			requiredBitSet[1] |= 1 << 3
 			if err := func() error {
 				if err := s.About.Decode(d); err != nil {
 					return err
@@ -13283,7 +12349,7 @@ func (s *GetDataProductResponse) Decode(d *jx.Decoder) error {
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
 		0b11111111,
-		0b00011111,
+		0b00001111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -13705,10 +12771,6 @@ func (s *GetDataProductsResponseItem) encodeFields(e *jx.Encoder) {
 		s.Type.Encode(e)
 	}
 	{
-		e.FieldStart("lifecycle")
-		s.Lifecycle.Encode(e)
-	}
-	{
 		e.FieldStart("visibility")
 		s.Visibility.Encode(e)
 	}
@@ -13726,7 +12788,7 @@ func (s *GetDataProductsResponseItem) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfGetDataProductsResponseItem = [15]string{
+var jsonFieldsNameOfGetDataProductsResponseItem = [14]string{
 	0:  "id",
 	1:  "name",
 	2:  "description",
@@ -13737,11 +12799,10 @@ var jsonFieldsNameOfGetDataProductsResponseItem = [15]string{
 	7:  "usage",
 	8:  "domain",
 	9:  "type",
-	10: "lifecycle",
-	11: "visibility",
-	12: "user_count",
-	13: "input_port_count",
-	14: "technical_asset_count",
+	10: "visibility",
+	11: "user_count",
+	12: "input_port_count",
+	13: "technical_asset_count",
 }
 
 // Decode decodes GetDataProductsResponseItem from json.
@@ -13880,18 +12941,8 @@ func (s *GetDataProductsResponseItem) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"type\"")
 			}
-		case "lifecycle":
-			requiredBitSet[1] |= 1 << 2
-			if err := func() error {
-				if err := s.Lifecycle.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"lifecycle\"")
-			}
 		case "visibility":
-			requiredBitSet[1] |= 1 << 3
+			requiredBitSet[1] |= 1 << 2
 			if err := func() error {
 				if err := s.Visibility.Decode(d); err != nil {
 					return err
@@ -13901,7 +12952,7 @@ func (s *GetDataProductsResponseItem) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"visibility\"")
 			}
 		case "user_count":
-			requiredBitSet[1] |= 1 << 4
+			requiredBitSet[1] |= 1 << 3
 			if err := func() error {
 				v, err := d.Int()
 				s.UserCount = int(v)
@@ -13913,7 +12964,7 @@ func (s *GetDataProductsResponseItem) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"user_count\"")
 			}
 		case "input_port_count":
-			requiredBitSet[1] |= 1 << 5
+			requiredBitSet[1] |= 1 << 4
 			if err := func() error {
 				v, err := d.Int()
 				s.InputPortCount = int(v)
@@ -13925,7 +12976,7 @@ func (s *GetDataProductsResponseItem) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"input_port_count\"")
 			}
 		case "technical_asset_count":
-			requiredBitSet[1] |= 1 << 6
+			requiredBitSet[1] |= 1 << 5
 			if err := func() error {
 				v, err := d.Int()
 				s.TechnicalAssetCount = int(v)
@@ -13947,7 +12998,7 @@ func (s *GetDataProductsResponseItem) Decode(d *jx.Decoder) error {
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
 		0b11111111,
-		0b01111111,
+		0b00111111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -15594,10 +14645,6 @@ func (s *GetOutputPortResponse) encodeFields(e *jx.Encoder) {
 		s.Domain.Encode(e)
 	}
 	{
-		e.FieldStart("lifecycle")
-		s.Lifecycle.Encode(e)
-	}
-	{
 		e.FieldStart("access_modes")
 		e.ArrStart()
 		for _, elem := range s.AccessModes {
@@ -15635,7 +14682,7 @@ func (s *GetOutputPortResponse) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfGetOutputPortResponse = [18]string{
+var jsonFieldsNameOfGetOutputPortResponse = [17]string{
 	0:  "id",
 	1:  "namespace",
 	2:  "name",
@@ -15648,12 +14695,11 @@ var jsonFieldsNameOfGetOutputPortResponse = [18]string{
 	9:  "data_product_id",
 	10: "tags",
 	11: "domain",
-	12: "lifecycle",
-	13: "access_modes",
-	14: "about",
-	15: "rolled_up_tags",
-	16: "data_product_settings",
-	17: "technical_asset_links",
+	12: "access_modes",
+	13: "about",
+	14: "rolled_up_tags",
+	15: "data_product_settings",
+	16: "technical_asset_links",
 }
 
 // Decode decodes GetOutputPortResponse from json.
@@ -15803,18 +14849,8 @@ func (s *GetOutputPortResponse) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"domain\"")
 			}
-		case "lifecycle":
-			requiredBitSet[1] |= 1 << 4
-			if err := func() error {
-				if err := s.Lifecycle.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"lifecycle\"")
-			}
 		case "access_modes":
-			requiredBitSet[1] |= 1 << 5
+			requiredBitSet[1] |= 1 << 4
 			if err := func() error {
 				s.AccessModes = make([]AccessMode, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
@@ -15832,7 +14868,7 @@ func (s *GetOutputPortResponse) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"access_modes\"")
 			}
 		case "about":
-			requiredBitSet[1] |= 1 << 6
+			requiredBitSet[1] |= 1 << 5
 			if err := func() error {
 				if err := s.About.Decode(d); err != nil {
 					return err
@@ -15842,7 +14878,7 @@ func (s *GetOutputPortResponse) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"about\"")
 			}
 		case "rolled_up_tags":
-			requiredBitSet[1] |= 1 << 7
+			requiredBitSet[1] |= 1 << 6
 			if err := func() error {
 				s.RolledUpTags = make([]Tag, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
@@ -15860,7 +14896,7 @@ func (s *GetOutputPortResponse) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"rolled_up_tags\"")
 			}
 		case "data_product_settings":
-			requiredBitSet[2] |= 1 << 0
+			requiredBitSet[1] |= 1 << 7
 			if err := func() error {
 				s.DataProductSettings = make([]OutputPortSettingValue, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
@@ -15878,7 +14914,7 @@ func (s *GetOutputPortResponse) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"data_product_settings\"")
 			}
 		case "technical_asset_links":
-			requiredBitSet[2] |= 1 << 1
+			requiredBitSet[2] |= 1 << 0
 			if err := func() error {
 				s.TechnicalAssetLinks = make([]TechnicalAssetLink, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
@@ -15907,7 +14943,7 @@ func (s *GetOutputPortResponse) Decode(d *jx.Decoder) error {
 	for i, mask := range [3]uint8{
 		0b11111111,
 		0b11111111,
-		0b00000011,
+		0b00000001,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -19059,50 +18095,6 @@ func (s *ModifyOutputPortRoleAssignment) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *ModifyOutputPortRoleAssignment) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode encodes DataProductLifeCycle as json.
-func (o NilDataProductLifeCycle) Encode(e *jx.Encoder) {
-	if o.Null {
-		e.Null()
-		return
-	}
-	o.Value.Encode(e)
-}
-
-// Decode decodes DataProductLifeCycle from json.
-func (o *NilDataProductLifeCycle) Decode(d *jx.Decoder) error {
-	if o == nil {
-		return errors.New("invalid: unable to decode NilDataProductLifeCycle to nil")
-	}
-	if d.Next() == jx.Null {
-		if err := d.Null(); err != nil {
-			return err
-		}
-
-		var v DataProductLifeCycle
-		o.Value = v
-		o.Null = true
-		return nil
-	}
-	o.Null = false
-	if err := o.Value.Decode(d); err != nil {
-		return err
-	}
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s NilDataProductLifeCycle) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *NilDataProductLifeCycle) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -24273,12 +23265,6 @@ func (s *OutputPortUpdate) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
-		if s.LifecycleID.Set {
-			e.FieldStart("lifecycle_id")
-			s.LifecycleID.Encode(e)
-		}
-	}
-	{
 		e.FieldStart("tag_ids")
 		e.ArrStart()
 		for _, elem := range s.TagIds {
@@ -24288,7 +23274,7 @@ func (s *OutputPortUpdate) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfOutputPortUpdate = [9]string{
+var jsonFieldsNameOfOutputPortUpdate = [8]string{
 	0: "name",
 	1: "namespace",
 	2: "description",
@@ -24296,8 +23282,7 @@ var jsonFieldsNameOfOutputPortUpdate = [9]string{
 	4: "data_product_access_duration_type",
 	5: "exploration_access_duration_type",
 	6: "about",
-	7: "lifecycle_id",
-	8: "tag_ids",
+	7: "tag_ids",
 }
 
 // Decode decodes OutputPortUpdate from json.
@@ -24305,7 +23290,7 @@ func (s *OutputPortUpdate) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode OutputPortUpdate to nil")
 	}
-	var requiredBitSet [2]uint8
+	var requiredBitSet [1]uint8
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
@@ -24385,18 +23370,8 @@ func (s *OutputPortUpdate) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"about\"")
 			}
-		case "lifecycle_id":
-			if err := func() error {
-				s.LifecycleID.Reset()
-				if err := s.LifecycleID.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"lifecycle_id\"")
-			}
 		case "tag_ids":
-			requiredBitSet[1] |= 1 << 0
+			requiredBitSet[0] |= 1 << 7
 			if err := func() error {
 				s.TagIds = make([]uuid.UUID, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
@@ -24424,9 +23399,8 @@ func (s *OutputPortUpdate) Decode(d *jx.Decoder) error {
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
-	for i, mask := range [2]uint8{
-		0b00111111,
-		0b00000001,
+	for i, mask := range [1]uint8{
+		0b10111111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -25495,48 +24469,6 @@ func (s RemoveDataProductFinalizerOKApplicationJSON) MarshalJSON() ([]byte, erro
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *RemoveDataProductFinalizerOKApplicationJSON) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode encodes RemoveDataProductLifecycleOKApplicationJSON as json.
-func (s RemoveDataProductLifecycleOKApplicationJSON) Encode(e *jx.Encoder) {
-	unwrapped := jx.Raw(s)
-
-	if len(unwrapped) != 0 {
-		e.Raw(unwrapped)
-	}
-}
-
-// Decode decodes RemoveDataProductLifecycleOKApplicationJSON from json.
-func (s *RemoveDataProductLifecycleOKApplicationJSON) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode RemoveDataProductLifecycleOKApplicationJSON to nil")
-	}
-	var unwrapped jx.Raw
-	if err := func() error {
-		v, err := d.RawAppend(nil)
-		unwrapped = jx.Raw(v)
-		if err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		return errors.Wrap(err, "alias")
-	}
-	*s = RemoveDataProductLifecycleOKApplicationJSON(unwrapped)
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s RemoveDataProductLifecycleOKApplicationJSON) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *RemoveDataProductLifecycleOKApplicationJSON) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -30531,10 +29463,6 @@ func (s *SearchOutputPortsResponseItem) encodeFields(e *jx.Encoder) {
 		s.Domain.Encode(e)
 	}
 	{
-		e.FieldStart("lifecycle")
-		s.Lifecycle.Encode(e)
-	}
-	{
 		e.FieldStart("access_modes")
 		e.ArrStart()
 		for _, elem := range s.AccessModes {
@@ -30556,7 +29484,7 @@ func (s *SearchOutputPortsResponseItem) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfSearchOutputPortsResponseItem = [17]string{
+var jsonFieldsNameOfSearchOutputPortsResponseItem = [16]string{
 	0:  "id",
 	1:  "namespace",
 	2:  "name",
@@ -30569,11 +29497,10 @@ var jsonFieldsNameOfSearchOutputPortsResponseItem = [17]string{
 	9:  "data_product_id",
 	10: "tags",
 	11: "domain",
-	12: "lifecycle",
-	13: "access_modes",
-	14: "abstract_data_product_count",
-	15: "technical_assets_count",
-	16: "data_product_name",
+	12: "access_modes",
+	13: "abstract_data_product_count",
+	14: "technical_assets_count",
+	15: "data_product_name",
 }
 
 // Decode decodes SearchOutputPortsResponseItem from json.
@@ -30581,7 +29508,7 @@ func (s *SearchOutputPortsResponseItem) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode SearchOutputPortsResponseItem to nil")
 	}
-	var requiredBitSet [3]uint8
+	var requiredBitSet [2]uint8
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
@@ -30723,18 +29650,8 @@ func (s *SearchOutputPortsResponseItem) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"domain\"")
 			}
-		case "lifecycle":
-			requiredBitSet[1] |= 1 << 4
-			if err := func() error {
-				if err := s.Lifecycle.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"lifecycle\"")
-			}
 		case "access_modes":
-			requiredBitSet[1] |= 1 << 5
+			requiredBitSet[1] |= 1 << 4
 			if err := func() error {
 				s.AccessModes = make([]AccessMode, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
@@ -30752,7 +29669,7 @@ func (s *SearchOutputPortsResponseItem) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"access_modes\"")
 			}
 		case "abstract_data_product_count":
-			requiredBitSet[1] |= 1 << 6
+			requiredBitSet[1] |= 1 << 5
 			if err := func() error {
 				v, err := d.Int()
 				s.AbstractDataProductCount = int(v)
@@ -30764,7 +29681,7 @@ func (s *SearchOutputPortsResponseItem) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"abstract_data_product_count\"")
 			}
 		case "technical_assets_count":
-			requiredBitSet[1] |= 1 << 7
+			requiredBitSet[1] |= 1 << 6
 			if err := func() error {
 				v, err := d.Int()
 				s.TechnicalAssetsCount = int(v)
@@ -30776,7 +29693,7 @@ func (s *SearchOutputPortsResponseItem) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"technical_assets_count\"")
 			}
 		case "data_product_name":
-			requiredBitSet[2] |= 1 << 0
+			requiredBitSet[1] |= 1 << 7
 			if err := func() error {
 				v, err := d.Str()
 				s.DataProductName = string(v)
@@ -30796,10 +29713,9 @@ func (s *SearchOutputPortsResponseItem) Decode(d *jx.Decoder) error {
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
-	for i, mask := range [3]uint8{
+	for i, mask := range [2]uint8{
 		0b11111111,
 		0b11111111,
-		0b00000001,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -34310,144 +33226,6 @@ func (s UpdateDataProductAboutOKApplicationJSON) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *UpdateDataProductAboutOKApplicationJSON) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode implements json.Marshaler.
-func (s *UpdateDataProductLifeCycleResponse) Encode(e *jx.Encoder) {
-	e.ObjStart()
-	s.encodeFields(e)
-	e.ObjEnd()
-}
-
-// encodeFields encodes fields.
-func (s *UpdateDataProductLifeCycleResponse) encodeFields(e *jx.Encoder) {
-	{
-		e.FieldStart("id")
-		json.EncodeUUID(e, s.ID)
-	}
-}
-
-var jsonFieldsNameOfUpdateDataProductLifeCycleResponse = [1]string{
-	0: "id",
-}
-
-// Decode decodes UpdateDataProductLifeCycleResponse from json.
-func (s *UpdateDataProductLifeCycleResponse) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode UpdateDataProductLifeCycleResponse to nil")
-	}
-	var requiredBitSet [1]uint8
-
-	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		switch string(k) {
-		case "id":
-			requiredBitSet[0] |= 1 << 0
-			if err := func() error {
-				v, err := json.DecodeUUID(d)
-				s.ID = v
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"id\"")
-			}
-		default:
-			return d.Skip()
-		}
-		return nil
-	}); err != nil {
-		return errors.Wrap(err, "decode UpdateDataProductLifeCycleResponse")
-	}
-	// Validate required fields.
-	var failures []validate.FieldError
-	for i, mask := range [1]uint8{
-		0b00000001,
-	} {
-		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
-			// Mask only required fields and check equality to mask using XOR.
-			//
-			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
-			// Bits of fields which would be set are actually bits of missed fields.
-			missed := bits.OnesCount8(result)
-			for bitN := 0; bitN < missed; bitN++ {
-				bitIdx := bits.TrailingZeros8(result)
-				fieldIdx := i*8 + bitIdx
-				var name string
-				if fieldIdx < len(jsonFieldsNameOfUpdateDataProductLifeCycleResponse) {
-					name = jsonFieldsNameOfUpdateDataProductLifeCycleResponse[fieldIdx]
-				} else {
-					name = strconv.Itoa(fieldIdx)
-				}
-				failures = append(failures, validate.FieldError{
-					Name:  name,
-					Error: validate.ErrFieldRequired,
-				})
-				// Reset bit.
-				result &^= 1 << bitIdx
-			}
-		}
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s *UpdateDataProductLifeCycleResponse) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *UpdateDataProductLifeCycleResponse) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode encodes UpdateDataProductLifecycleNotFoundApplicationJSON as json.
-func (s UpdateDataProductLifecycleNotFoundApplicationJSON) Encode(e *jx.Encoder) {
-	unwrapped := jx.Raw(s)
-
-	if len(unwrapped) != 0 {
-		e.Raw(unwrapped)
-	}
-}
-
-// Decode decodes UpdateDataProductLifecycleNotFoundApplicationJSON from json.
-func (s *UpdateDataProductLifecycleNotFoundApplicationJSON) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode UpdateDataProductLifecycleNotFoundApplicationJSON to nil")
-	}
-	var unwrapped jx.Raw
-	if err := func() error {
-		v, err := d.RawAppend(nil)
-		unwrapped = jx.Raw(v)
-		if err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		return errors.Wrap(err, "alias")
-	}
-	*s = UpdateDataProductLifecycleNotFoundApplicationJSON(unwrapped)
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s UpdateDataProductLifecycleNotFoundApplicationJSON) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *UpdateDataProductLifecycleNotFoundApplicationJSON) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

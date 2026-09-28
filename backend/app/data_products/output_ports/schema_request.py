@@ -17,7 +17,6 @@ class OutputPortUpdate(ORMModel):
     data_product_access_duration_type: AccessDurationType
     exploration_access_duration_type: AccessDurationType
     about: Optional[str] = None
-    lifecycle_id: Optional[UUID] = None
     tag_ids: list[UUID]
 
 

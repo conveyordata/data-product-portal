@@ -10,9 +10,6 @@ import yaml
 
 
 from sdk import AuthenticatedClient, Client, Reconciler
-from sdk.api_client.api.configuration_data_product_lifecycles import (
-    get_data_products_lifecycles,
-)
 from sdk.api_client.api.configuration_platforms import (
     get_all_platform_service_configurations,
 )
@@ -21,7 +18,6 @@ from sdk.api_client.api.data_products import (
     get_data_product,
     get_data_products,
     remove_data_product_finalizer,
-    update_data_product,
     get_data_product_input_ports,
 )
 
@@ -34,8 +30,6 @@ from sdk.api_client.models import (
     AbstractDataProductStatus,
     CreateTechnicalAssetRequest,
     TechnicalAssetStatusUpdate,
-    DataProductLifeCyclesGetItem,
-    DataProductUpdate,
     FinalizerRequest,
     GetDataProductResponse,
     GetDataProductsResponse,
@@ -70,7 +64,6 @@ FINALIZER_NAME = "postgres-agent-provisioner"
 class DataProductReconciler(Reconciler):
     def __init__(self, client: Client | AuthenticatedClient) -> None:
         self._client = client
-        self._lifecycle_cache: list[DataProductLifeCyclesGetItem] = []
         self._platform_config_cache: list[PlatformServiceConfiguration] = []
 
     async def list_ids(self) -> Iterable[UUID]:
@@ -154,9 +147,6 @@ class DataProductReconciler(Reconciler):
         self._write_agent_config(
             dp, approved_providers, schema_name, db_user, db_password
         )
-
-        # Advance Lifecycle to "Ready" if it isn't already there
-        await self._ensure_lifecycle_ready(resource_id, dp)
 
     # --- Helper methods ---
 
@@ -333,31 +323,6 @@ class DataProductReconciler(Reconciler):
         with open(config_path, "w") as f:
             yaml.dump(config, f, default_flow_style=False, allow_unicode=True)
 
-    async def _ensure_lifecycle_ready(
-        self, resource_id: UUID, dp: GetDataProductResponse
-    ):
-        if dp.lifecycle is not None and dp.lifecycle.name == "Ready":
-            return
-
-        lifecycles = await self._get_lifecycles()
-        ready_lc = next((lc for lc in lifecycles if lc.name == "Ready"), None)
-        if not ready_lc:
-            logging.error("Ready lifecycle state configuration missing on Portal.")
-            return
-
-        update_payload = DataProductUpdate(
-            name=dp.name,
-            namespace=dp.namespace,
-            description=dp.description,
-            type_id=dp.type_.id,
-            lifecycle_id=ready_lc.id,
-            domain_id=dp.domain.id,
-            tag_ids=[tag.id for tag in dp.tags],
-        )
-        await update_data_product.asyncio(
-            id=resource_id, body=update_payload, client=self._client
-        )
-
     @classmethod
     async def _deprovision(cls, namespace: str | None):
         if not namespace:
@@ -366,13 +331,6 @@ class DataProductReconciler(Reconciler):
         if os.path.exists(config_path):
             os.remove(config_path)
             logging.info(f"Removed agent config file: {config_path}")
-
-    async def _get_lifecycles(self) -> list[DataProductLifeCyclesGetItem]:
-        if not self._lifecycle_cache:
-            resp = await get_data_products_lifecycles.asyncio(client=self._client)
-            if resp is not None and not isinstance(resp, HTTPValidationError):
-                self._lifecycle_cache = resp.data_product_life_cycles
-        return self._lifecycle_cache
 
     async def _get_platform_configs(self) -> list[PlatformServiceConfiguration]:
         if not self._platform_config_cache:

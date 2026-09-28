@@ -11,7 +11,6 @@ from ..models.abstract_data_product_status import AbstractDataProductStatus
 from ..models.data_product_visibility import DataProductVisibility
 
 if TYPE_CHECKING:
-    from ..models.data_product_life_cycle import DataProductLifeCycle
     from ..models.data_product_type import DataProductType
     from ..models.domain import Domain
     from ..models.tag import Tag
@@ -34,7 +33,6 @@ class GetDataProductsResponseItem:
         usage (None | str):
         domain (Domain):
         type_ (DataProductType):
-        lifecycle (DataProductLifeCycle | None):
         visibility (DataProductVisibility):
         user_count (int):
         input_port_count (int):
@@ -51,7 +49,6 @@ class GetDataProductsResponseItem:
     usage: None | str
     domain: Domain
     type_: DataProductType
-    lifecycle: DataProductLifeCycle | None
     visibility: DataProductVisibility
     user_count: int
     input_port_count: int
@@ -59,8 +56,6 @@ class GetDataProductsResponseItem:
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        from ..models.data_product_life_cycle import DataProductLifeCycle
-
         id = str(self.id)
 
         name = self.name
@@ -85,12 +80,6 @@ class GetDataProductsResponseItem:
 
         type_ = self.type_.to_dict()
 
-        lifecycle: dict[str, Any] | None
-        if isinstance(self.lifecycle, DataProductLifeCycle):
-            lifecycle = self.lifecycle.to_dict()
-        else:
-            lifecycle = self.lifecycle
-
         visibility = self.visibility.value
 
         user_count = self.user_count
@@ -113,7 +102,6 @@ class GetDataProductsResponseItem:
                 "usage": usage,
                 "domain": domain,
                 "type": type_,
-                "lifecycle": lifecycle,
                 "visibility": visibility,
                 "user_count": user_count,
                 "input_port_count": input_port_count,
@@ -125,7 +113,6 @@ class GetDataProductsResponseItem:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.data_product_life_cycle import DataProductLifeCycle
         from ..models.data_product_type import DataProductType
         from ..models.domain import Domain
         from ..models.tag import Tag
@@ -161,21 +148,6 @@ class GetDataProductsResponseItem:
 
         type_ = DataProductType.from_dict(d.pop("type"))
 
-        def _parse_lifecycle(data: object) -> DataProductLifeCycle | None:
-            if data is None:
-                return data
-            try:
-                if not isinstance(data, dict):
-                    raise TypeError()
-                lifecycle_type_0 = DataProductLifeCycle.from_dict(data)
-
-                return lifecycle_type_0
-            except (TypeError, ValueError, AttributeError, KeyError):
-                pass
-            return cast(DataProductLifeCycle | None, data)
-
-        lifecycle = _parse_lifecycle(d.pop("lifecycle"))
-
         visibility = DataProductVisibility(d.pop("visibility"))
 
         user_count = d.pop("user_count")
@@ -195,7 +167,6 @@ class GetDataProductsResponseItem:
             usage=usage,
             domain=domain,
             type_=type_,
-            lifecycle=lifecycle,
             visibility=visibility,
             user_count=user_count,
             input_port_count=input_port_count,

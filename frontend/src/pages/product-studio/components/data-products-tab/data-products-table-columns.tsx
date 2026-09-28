@@ -5,7 +5,6 @@ import { DataProductVisibilityIcon } from '@/components/data-products/data-produ
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
 import type {
     AbstractDataProductStatus,
-    DataProductLifeCycle,
     DataProductType,
     Domain,
     GetDataProductsResponseItem,
@@ -14,7 +13,6 @@ import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper.ts
 import { getBadgeStatus, getStatusLabel } from '@/utils/status.helper.ts';
 import { FilterSettings } from '@/utils/table-filter.helper.ts';
 import { Sorter } from '@/utils/table-sorter.helper.ts';
-import styles from './data-products-table-columns.module.scss';
 
 const iconColumnWidth = 30;
 export const getDataProductTableColumns = ({
@@ -60,23 +58,6 @@ export const getDataProductTableColumns = ({
             sorter: sorter.stringSorter((dp) => dp.name),
             defaultSortOrder: 'ascend',
             width: '25%',
-        },
-        {
-            title: t('Status'),
-            dataIndex: 'lifecycle',
-            render: (lifecycle: DataProductLifeCycle) => {
-                if (lifecycle !== null) {
-                    return (
-                        <Tag color={lifecycle.color || 'default'} className={styles.tag}>
-                            {lifecycle.name}
-                        </Tag>
-                    );
-                }
-                return;
-            },
-            ...new FilterSettings(data, (dp) => (dp.lifecycle !== null ? dp.lifecycle.name : '')),
-            sorter: sorter.stringSorter((dp) => (dp.lifecycle !== null ? dp.lifecycle.name : '')),
-            width: '10%',
         },
         {
             title: t('Domain'),

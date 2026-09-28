@@ -31,7 +31,7 @@ def wait_for_portal(max_retries=30, delay=2):
     for _ in range(max_retries):
         try:
             response = requests.get(
-                f"{PORTAL_URL}/api/v2/configuration/data_product_lifecycles"
+                f"{PORTAL_URL}/api/v2/configuration/data_product_types"
             )
             if response.status_code == 200:
                 print("Portal is ready.")
@@ -68,18 +68,6 @@ def get_domain_id(name: str) -> str:
     return match["id"]
 
 
-def get_lifecycle_id(name: str) -> str:
-    response = requests.get(
-        f"{PORTAL_URL}/api/v2/configuration/data_product_lifecycles"
-    )
-    response.raise_for_status()
-    lifecycles = response.json().get("data_product_life_cycles", [])
-    match = next((lc for lc in lifecycles if lc["name"] == name), None)
-    if not match:
-        raise ValueError(f"Lifecycle '{name}' not found")
-    return match["id"]
-
-
 # ---------------------------------------------------------------------------
 # Data product creation
 # ---------------------------------------------------------------------------
@@ -95,7 +83,6 @@ def create_data_product(
 ):
     type_id = get_type_id(type_name)
     domain_id = get_domain_id(domain_name)
-    lifecycle_id = get_lifecycle_id("Draft")
 
     payload = {
         "name": name,
@@ -104,7 +91,6 @@ def create_data_product(
         "about": about,
         "type_id": type_id,
         "domain_id": domain_id,
-        "lifecycle_id": lifecycle_id,
         "owners": [OWNER_ID],
         "tag_ids": [],
     }

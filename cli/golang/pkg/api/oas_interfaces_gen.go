@@ -41,10 +41,6 @@ type CreateAccessModeRes interface {
 	createAccessModeRes()
 }
 
-type CreateDataProductLifecycleRes interface {
-	createDataProductLifecycleRes()
-}
-
 type CreateDataProductRes interface {
 	createDataProductRes()
 }
@@ -187,10 +183,6 @@ type GetDataProductTechnicalAssetsRes interface {
 
 type GetDataProductTypeRes interface {
 	getDataProductTypeRes()
-}
-
-type GetDataProductsLifecyclesRes interface {
-	getDataProductsLifecyclesRes()
 }
 
 type GetDataProductsRes interface {
@@ -393,10 +385,6 @@ type RemoveDataProductFinalizerRes interface {
 	removeDataProductFinalizerRes()
 }
 
-type RemoveDataProductLifecycleRes interface {
-	removeDataProductLifecycleRes()
-}
-
 type RemoveDataProductRes interface {
 	removeDataProductRes()
 }
@@ -539,10 +527,6 @@ type UpdateAccessModeRes interface {
 
 type UpdateDataProductAboutRes interface {
 	updateDataProductAboutRes()
-}
-
-type UpdateDataProductLifecycleRes interface {
-	updateDataProductLifecycleRes()
 }
 
 type UpdateDataProductRes interface {

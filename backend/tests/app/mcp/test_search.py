@@ -120,25 +120,6 @@ def test_search_data_products_by_domain(session):
     assert result["count"] == 1
 
 
-def test_search_data_products_by_status(session):
-    from app.data_products.status import AbstractDataProductStatus
-
-    active_dp = DataProductFactory(status=AbstractDataProductStatus.ACTIVE.value)
-    DataProductFactory(status=AbstractDataProductStatus.PENDING.value)
-
-    user = UserFactory()
-    with as_user(session, user.id):
-        result = search_data_products(
-            status=AbstractDataProductStatus.ACTIVE.value, db=session
-        )
-
-    assert "data_products" in result
-    returned_ids = {dp["id"] for dp in result["data_products"]}
-    assert active_dp.id in returned_ids
-    for dp in result["data_products"]:
-        assert dp["status"] == "active"
-
-
 def test_search_data_products_limit(session):
     for _ in range(5):
         DataProductFactory()
@@ -154,13 +135,10 @@ def test_search_data_products_limit(session):
 def test_search_data_products_filters_applied(session):
     user = UserFactory()
     with as_user(session, user.id):
-        result = search_data_products(
-            query="test", domain_id=None, status="active", db=session
-        )
+        result = search_data_products(query="test", domain_id=None, db=session)
 
     assert result["filters_applied"]["query"] == "test"
     assert result["filters_applied"]["domain_id"] is None
-    assert result["filters_applied"]["status"] == "active"
 
 
 def test_search_data_products__filters_out_hidden(session):

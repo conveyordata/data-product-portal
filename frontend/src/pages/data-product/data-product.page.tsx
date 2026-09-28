@@ -121,7 +121,6 @@ export function DataProduct() {
                         </Space>
                     </Flex>
                     <DataProductDescription
-                        lifecycle={dataProduct.lifecycle}
                         type={dataProduct.type.name}
                         description={dataProduct.description}
                         domain={dataProduct.domain.name}

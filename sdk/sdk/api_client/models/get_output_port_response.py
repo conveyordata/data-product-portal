@@ -13,7 +13,6 @@ from ..models.output_port_status import OutputPortStatus
 
 if TYPE_CHECKING:
     from ..models.access_mode import AccessMode
-    from ..models.data_product_life_cycle import DataProductLifeCycle
     from ..models.domain import Domain
     from ..models.output_port_setting_value import OutputPortSettingValue
     from ..models.tag import Tag
@@ -39,7 +38,6 @@ class GetOutputPortResponse:
         data_product_id (UUID):
         tags (list[Tag]):
         domain (Domain):
-        lifecycle (DataProductLifeCycle | None):
         access_modes (list[AccessMode]):
         about (None | str):
         rolled_up_tags (list[Tag]):
@@ -59,7 +57,6 @@ class GetOutputPortResponse:
     data_product_id: UUID
     tags: list[Tag]
     domain: Domain
-    lifecycle: DataProductLifeCycle | None
     access_modes: list[AccessMode]
     about: None | str
     rolled_up_tags: list[Tag]
@@ -68,8 +65,6 @@ class GetOutputPortResponse:
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        from ..models.data_product_life_cycle import DataProductLifeCycle
-
         id = str(self.id)
 
         namespace = self.namespace
@@ -97,12 +92,6 @@ class GetOutputPortResponse:
             tags.append(tags_item)
 
         domain = self.domain.to_dict()
-
-        lifecycle: dict[str, Any] | None
-        if isinstance(self.lifecycle, DataProductLifeCycle):
-            lifecycle = self.lifecycle.to_dict()
-        else:
-            lifecycle = self.lifecycle
 
         access_modes = []
         for access_modes_item_data in self.access_modes:
@@ -143,7 +132,6 @@ class GetOutputPortResponse:
                 "data_product_id": data_product_id,
                 "tags": tags,
                 "domain": domain,
-                "lifecycle": lifecycle,
                 "access_modes": access_modes,
                 "about": about,
                 "rolled_up_tags": rolled_up_tags,
@@ -157,7 +145,6 @@ class GetOutputPortResponse:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.access_mode import AccessMode
-        from ..models.data_product_life_cycle import DataProductLifeCycle
         from ..models.domain import Domain
         from ..models.output_port_setting_value import OutputPortSettingValue
         from ..models.tag import Tag
@@ -201,21 +188,6 @@ class GetOutputPortResponse:
             tags.append(tags_item)
 
         domain = Domain.from_dict(d.pop("domain"))
-
-        def _parse_lifecycle(data: object) -> DataProductLifeCycle | None:
-            if data is None:
-                return data
-            try:
-                if not isinstance(data, dict):
-                    raise TypeError()
-                lifecycle_type_0 = DataProductLifeCycle.from_dict(data)
-
-                return lifecycle_type_0
-            except (TypeError, ValueError, AttributeError, KeyError):
-                pass
-            return cast(DataProductLifeCycle | None, data)
-
-        lifecycle = _parse_lifecycle(d.pop("lifecycle"))
 
         access_modes = []
         _access_modes = d.pop("access_modes")
@@ -269,7 +241,6 @@ class GetOutputPortResponse:
             data_product_id=data_product_id,
             tags=tags,
             domain=domain,
-            lifecycle=lifecycle,
             access_modes=access_modes,
             about=about,
             rolled_up_tags=rolled_up_tags,

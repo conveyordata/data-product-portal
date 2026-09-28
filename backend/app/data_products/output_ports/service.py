@@ -21,9 +21,6 @@ from app.configuration.access_durations.model import (
     AccessDuration as AccessDurationModel,
 )
 from app.configuration.access_durations.service import AccessDurationService
-from app.configuration.data_product_lifecycles.model import (
-    DataProductLifecycle as DataProductLifeCycleModel,
-)
 from app.configuration.tags.model import Tag as TagModel
 from app.configuration.tags.model import ensure_tag_exists
 from app.core.authz import Authorization
@@ -190,13 +187,6 @@ class OutputPortService:
 
         output_port.rolled_up_tags = rolled_up_tags
 
-        if not output_port.lifecycle:
-            default_lifecycle = self.db.scalar(
-                select(DataProductLifeCycleModel).where(
-                    DataProductLifeCycleModel.is_default
-                )
-            )
-            output_port.lifecycle = default_lifecycle
         return output_port
 
     def search_output_ports(
