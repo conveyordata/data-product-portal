@@ -43,6 +43,7 @@ export function OutputPortClassificationFormModal({ onClose, initial, isLastInvi
 
     const submitButton = (
         <Button
+            key="submit"
             type="primary"
             loading={isCreating || isUpdating}
             onClick={affectedOutputPorts ? undefined : () => form.submit()}
@@ -78,7 +79,7 @@ export function OutputPortClassificationFormModal({ onClose, initial, isLastInvi
                         {submitButton}
                     </Popconfirm>
                 ) : (
-                    <span key="submit">{submitButton}</span>
+                    submitButton
                 ),
                 <Button key="cancel" onClick={onClose}>
                     {t('Cancel')}

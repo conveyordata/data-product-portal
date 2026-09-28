@@ -24,6 +24,7 @@ export const getOutputPortClassificationsTableColumns = ({
         {
             title: t('Name'),
             dataIndex: 'name',
+            width: '15%',
             render: (name: string) => <TableCellItem text={name} tooltip={{ content: name }} />,
             sorter: sorter.stringSorter((c) => c.name),
             defaultSortOrder: 'ascend',
@@ -37,24 +38,29 @@ export const getOutputPortClassificationsTableColumns = ({
         {
             title: t('Access function'),
             dataIndex: 'access_type',
+            width: '15%',
             render: (_, record) => <TableCellItem text={getAccessFunctionLabel(t, record.access_type)} />,
             sorter: (a, b) => compareAccessFunctions(a.access_type, b.access_type),
         },
         {
             title: t('Output Ports'),
             dataIndex: 'output_port_count',
+            width: '10%',
+            onCell: () => ({ style: { textAlign: 'right' } }),
             sorter: sorter.numberSorter((c) => c.output_port_count),
         },
         {
             title: t('Actions'),
             key: 'action',
-            width: '10%',
+            width: '15%',
             render: (_, record) => {
                 const removeBlockedReason =
                     record.id === lastInviteOnlyId
                         ? t('At least one classification must stay Invite only')
                         : record.output_port_count > 0
-                          ? t('Reassign the Output Ports using this classification first')
+                          ? t('Reassign the {{count}} Output Ports using this classification first', {
+                                count: record.output_port_count,
+                            })
                           : undefined;
                 return (
                     <Flex>
