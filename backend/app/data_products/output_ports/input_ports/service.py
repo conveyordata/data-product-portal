@@ -1,5 +1,5 @@
 import copy
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 from typing import Optional, Sequence
 from uuid import UUID
 
@@ -9,6 +9,8 @@ from sqlalchemy.orm import Session, selectinload
 
 from app.abstract_data_product.input_ports.enums import (
     InputPortRequestDecision,
+    InputPortStatus,
+    RenewalStatus,
 )
 from app.abstract_data_product.input_ports.model import (
     InputPort as InputPortModel,
@@ -35,7 +37,13 @@ from app.data_products.output_ports.model import OutputPort as OutputPortModel
 from app.data_products.output_ports.schema_response import (
     output_port_not_found_exception,
 )
+from app.events.enums import EventReferenceEntity, EventType
+from app.events.model import Event as EventModel
+from app.events.schema import CreateEvent
+from app.events.service import EventService
+from app.settings import settings
 from app.users.model import User as UserModel
+from app.users.notifications.service import NotificationService
 from app.users.schema import User
 from app.users.schema_response import (
     InputPortRequest,
@@ -218,6 +226,52 @@ class InputPortService:
         result = copy.deepcopy(current_link)
         self.db.delete(current_link)
         return result
+
+    def notify_if_expiring_soon(
+        self, input_port: InputPortModel, system_actor_id: UUID
+    ) -> bool:
+        grant = input_port.active_grant
+        if (
+            input_port.status != InputPortStatus.APPROVED
+            or grant is None
+            or grant.valid_until is None
+            or input_port.renewal_status == RenewalStatus.PENDING
+            or not 0
+            <= (grant.valid_until - date.today()).days
+            <= settings.EXPIRING_SOON_THRESHOLD_DAYS
+        ):
+            return False
+        already_notified = self.db.scalar(
+            select(
+                select(EventModel.id)
+                .where(
+                    EventModel.name == EventType.INPUT_PORT_EXPIRING_SOON,
+                    EventModel.subject_id == input_port.output_port_id,
+                    EventModel.target_id
+                    == input_port.consuming_abstract_data_product_id,
+                    EventModel.created_on >= grant.requested_on,
+                )
+                .exists()
+            )
+        )
+        if already_notified:
+            return False
+        event_id = EventService(self.db).create_event(
+            CreateEvent(
+                name=EventType.INPUT_PORT_EXPIRING_SOON,
+                subject_id=input_port.output_port_id,
+                subject_type=EventReferenceEntity.DATASET,
+                target_id=input_port.consuming_abstract_data_product_id,
+                target_type=EventReferenceEntity.DATA_PRODUCT,
+                actor_id=system_actor_id,
+            )
+        )
+        NotificationService(self.db).create_data_product_notifications(
+            data_product_id=input_port.consuming_abstract_data_product_id,
+            event_id=event_id,
+            extra_receiver_ids=[grant.requested_by_id],
+        )
+        return True
 
     @staticmethod
     def calculate_redaction_of_consumer(

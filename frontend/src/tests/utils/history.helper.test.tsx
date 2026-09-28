@@ -16,14 +16,14 @@ describe('getEventTypeDisplayText', () => {
         i18n.addResource(
             'en',
             'translation',
-            'EventDataProductDatasetLinkExpiringSoon',
+            'EventInputPortExpiringSoon',
             'Consuming link with the {{entity}} {{entity_type}} is expiring soon',
         );
 
         expect(
             getEventTypeDisplayText(
                 t,
-                EventType.DATA_PRODUCT_DATASET_LINK_EXPIRING_SOON,
+                EventType.INPUT_PORT_EXPIRING_SOON,
                 'Orders Output Port',
                 EventEntityType.OutputPort,
             ),
@@ -37,7 +37,7 @@ describe('getNotificationDisplayName', () => {
             <div>
                 {getNotificationDisplayName(
                     t,
-                    EventType.DATA_PRODUCT_DATASET_LINK_EXPIRING_SOON,
+                    EventType.INPUT_PORT_EXPIRING_SOON,
                     EventEntityType.OutputPort,
                     'Orders Output Port',
                     EventEntityType.DataProduct,
@@ -60,7 +60,7 @@ describe('getEventTypeDisplayName', () => {
             <div>
                 {getEventTypeDisplayName(
                     t,
-                    EventType.DATA_PRODUCT_DATASET_LINK_EXPIRING_SOON,
+                    EventType.INPUT_PORT_EXPIRING_SOON,
                     EventEntityType.OutputPort,
                     'Orders Output Port',
                     <span />,

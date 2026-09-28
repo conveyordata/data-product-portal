@@ -282,11 +282,11 @@ export function getEventTypeDisplayName(
                     components={{ element }}
                 />
             );
-        case EventType.DATA_PRODUCT_DATASET_LINK_EXPIRING_SOON:
+        case EventType.INPUT_PORT_EXPIRING_SOON:
             return (
                 <Trans
                     t={t}
-                    i18nKey="EventDataProductDatasetLinkExpiringSoon"
+                    i18nKey="EventInputPortExpiringSoon"
                     defaults="Consuming link with the <element>{{entity}}</element> {{entity_type}} is expiring soon"
                     values={{ entity, entity_type }}
                     components={{ element }}
@@ -452,11 +452,11 @@ export function getNotificationDisplayName(
             );
         case EventType.DATA_PRODUCT_DATASET_LINK_CANCELLED:
             return;
-        case EventType.DATA_PRODUCT_DATASET_LINK_EXPIRING_SOON:
+        case EventType.INPUT_PORT_EXPIRING_SOON:
             return (
                 <Trans
                     t={t}
-                    i18nKey="NotificationDataProductLinkExpiringSoon"
+                    i18nKey="NotificationInputPortExpiringSoon"
                     defaults="<subject>{{subject_entity}}</subject> {{subject_entity_type}} access for the <target>{{target_entity}}</target> {{target_entity_type}} is expiring soon"
                     values={{ subject_entity, subject_entity_type, target_entity, target_entity_type }}
                     components={{ subject, target }}
@@ -619,8 +619,8 @@ function getEventTypeDisplayTranslation(
             return t('EventDataProductDatasetLinkRevoked', { entity, entity_type });
         case EventType.DATA_PRODUCT_DATASET_LINK_CANCELLED:
             return t('EventDataProductDatasetLinkCancelled', { entity, entity_type });
-        case EventType.DATA_PRODUCT_DATASET_LINK_EXPIRING_SOON:
-            return t('EventDataProductDatasetLinkExpiringSoon', { entity, entity_type });
+        case EventType.INPUT_PORT_EXPIRING_SOON:
+            return t('EventInputPortExpiringSoon', { entity, entity_type });
 
         case EventType.DATASET_ROLE_ASSIGNMENT_CREATED:
             return t('EventDatasetRoleAssignmentCreated', { entity });

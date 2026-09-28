@@ -37,7 +37,6 @@ class EventType(str, Enum):
     DATA_PRODUCT_DATASET_LINK_REMOVED = "data_product_dataset_link_removed"
     DATA_PRODUCT_DATASET_LINK_REVOKED = "data_product_dataset_link_revoked"
     DATA_PRODUCT_DATASET_LINK_CANCELLED = "data_product_dataset_link_cancelled"
-    DATA_PRODUCT_DATASET_LINK_EXPIRING_SOON = "data_product_dataset_link_expiring_soon"
 
     DATASET_CREATED = "dataset_created"
     DATASET_UPDATED = "dataset_updated"
@@ -49,3 +48,5 @@ class EventType(str, Enum):
     DATASET_ROLE_ASSIGNMENT_REQUESTED = "dataset_role_assignment_requested"
     DATASET_ROLE_ASSIGNMENT_APPROVED = "dataset_role_assignment_approved"
     DATASET_ROLE_ASSIGNMENT_DENIED = "dataset_role_assignment_denied"
+
+    INPUT_PORT_EXPIRING_SOON = "input_port_expiring_soon"
