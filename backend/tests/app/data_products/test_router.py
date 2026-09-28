@@ -87,6 +87,18 @@ class TestDataProductsRouter:
         assert created_data_product.status_code == 200
         assert "id" in created_data_product.json()
 
+    def test_create_data_product__duplicate_name(
+        self, payload, client, user_with_create_data_product_rights
+    ):
+        DataProductFactory(name=payload["name"])
+
+        response = self.create_data_product(client, payload)
+
+        assert response.status_code == 400
+        assert response.json()["detail"] == (
+            "A data product with this name already exists."
+        )
+
     def test_create_data_product_generate_webhook_v2_event(
         self,
         payload,

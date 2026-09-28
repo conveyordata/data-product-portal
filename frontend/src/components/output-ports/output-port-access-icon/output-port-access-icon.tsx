@@ -4,16 +4,16 @@ import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import shieldHalfIcon from '@/assets/icons/shield-half-icon.svg?react';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component';
-import { OutputPortAccessType } from '@/store/api/services/generated/dataProductsApi.ts';
-import { getDatasetAccessTypeLabel } from '@/utils/access-type.helper.ts';
+import { OutputPortAccessType, type OutputPortClassification } from '@/store/api/services/generated/dataProductsApi.ts';
 
 type Props = {
-    accessType: OutputPortAccessType;
+    classification: OutputPortClassification;
     iconOnly?: boolean;
 };
 
-export const OutputPortAccessIcon = ({ accessType, iconOnly }: Props) => {
+export const OutputPortAccessIcon = ({ classification, iconOnly }: Props) => {
     const { t } = useTranslation();
+    const accessType = classification.access_type;
 
     const icon = useMemo(() => {
         switch (accessType) {
@@ -34,20 +34,16 @@ export const OutputPortAccessIcon = ({ accessType, iconOnly }: Props) => {
                 return undefined;
             case OutputPortAccessType.Restricted:
                 return t(
-                    'This is a restricted Output Port, to gain access users can request access through the Marketplace, and access requests will be approved by the owner',
+                    'To gain access to this Output Port, users request access through the Marketplace, and the owner approves the requests',
                 );
             case OutputPortAccessType.Private:
                 return t(
-                    'This is a private Output Port, private Output Ports are hidden from the rest of the organisation and can only be accessed by users with access to the Output Port. The owner has the ability to add consumers directly',
+                    'This Output Port is hidden from the rest of the organisation and can only be accessed by users with access to it. The owner can add consumers directly',
                 );
             default:
                 return undefined;
         }
     };
 
-    return (
-        <Tooltip title={tooltipTitle()}>
-            {iconOnly ? icon : <Tag icon={icon}>{getDatasetAccessTypeLabel(t, accessType)}</Tag>}
-        </Tooltip>
-    );
+    return <Tooltip title={tooltipTitle()}>{iconOnly ? icon : <Tag icon={icon}>{classification.name}</Tag>}</Tooltip>;
 };

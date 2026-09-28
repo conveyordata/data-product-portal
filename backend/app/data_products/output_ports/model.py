@@ -29,6 +29,9 @@ from app.authorization.role_assignments.output_port.model import (
 )
 from app.configuration.access_durations.enums import AccessDurationType
 from app.configuration.access_modes.model import AccessMode
+from app.configuration.output_port_classifications.model import (
+    OutputPortClassification,
+)
 from app.configuration.tags.model import Tag, tag_output_port_table
 from app.core.auth.db_utils import (
     is_system_account,
@@ -152,9 +155,7 @@ class OutputPort(Base, BaseORM, EventTrackedMixin):
     name = Column(String)
     description = Column(String)
     about = Column(String)
-    access_type = Column(
-        Enum(OutputPortAccessType), default=OutputPortAccessType.UNRESTRICTED
-    )
+    access_type = Column(Enum(OutputPortAccessType), nullable=False)
     status: OutputPortStatus = Column(
         Enum(OutputPortStatus), default=OutputPortStatus.ACTIVE
     )
@@ -166,6 +167,9 @@ class OutputPort(Base, BaseORM, EventTrackedMixin):
         ForeignKey("data_product_lifecycles.id", ondelete="SET NULL")
     )
     data_product_id: Mapped[UUID] = mapped_column(ForeignKey("data_products.id"))
+    classification_id: Mapped[UUID] = mapped_column(
+        ForeignKey("output_port_classifications.id"), nullable=False
+    )
 
     assignments: Mapped[list["DatasetRoleAssignment"]] = relationship(
         back_populates="output_port",
@@ -202,6 +206,7 @@ class OutputPort(Base, BaseORM, EventTrackedMixin):
     lifecycle: Mapped["DataProductLifecycle"] = relationship(
         back_populates="datasets", lazy="joined"
     )
+    classification: Mapped[OutputPortClassification] = relationship(lazy="joined")
     data_product: Mapped["DataProduct"] = relationship(
         back_populates="datasets", lazy="joined"
     )

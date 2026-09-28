@@ -11,7 +11,7 @@ import { DataProductSettings } from '@/components/data-products/data-product-set
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
 import {
     AccessDurationSection,
-    AccessTypeSection,
+    ClassificationSection,
 } from '@/components/output-ports/output-port-form/output-port-form.component.tsx';
 import { DESCRIPTIONS_LABEL_WIDTH } from '@/constants/form.constants.ts';
 import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
@@ -29,7 +29,6 @@ import {
     useUpdateOutputPortMutation,
 } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
-import { getDatasetAccessTypeLabel } from '@/utils/access-type.helper';
 import { dispatchMessage } from '@/utils/feedback.ts';
 
 type Props = {
@@ -63,11 +62,11 @@ export function SettingsTab({ outputPortId, dataProductId }: Props) {
     const { data: { access_durations: allDurations = [] } = {} } = useGetAllAccessDurationsQuery();
     const [updateOutputPort] = useUpdateOutputPortMutation();
 
-    const [accessType, setAccessType] = useState(outputPort?.access_type);
+    const [classificationId, setClassificationId] = useState(outputPort?.classification.id);
     const [dataProductDuration, setDataProductDuration] = useState(outputPort?.data_product_access_duration_type);
     const [explorationDuration, setExplorationDuration] = useState(outputPort?.exploration_access_duration_type);
 
-    useEffect(() => setAccessType(outputPort?.access_type), [outputPort?.access_type]);
+    useEffect(() => setClassificationId(outputPort?.classification.id), [outputPort?.classification.id]);
     useEffect(
         () => setDataProductDuration(outputPort?.data_product_access_duration_type),
         [outputPort?.data_product_access_duration_type],
@@ -89,7 +88,7 @@ export function SettingsTab({ outputPortId, dataProductId }: Props) {
         partial: Partial<
             Pick<
                 OutputPortUpdate,
-                'access_type' | 'data_product_access_duration_type' | 'exploration_access_duration_type'
+                'classification_id' | 'data_product_access_duration_type' | 'exploration_access_duration_type'
             >
         >,
         revert: () => void,
@@ -105,7 +104,7 @@ export function SettingsTab({ outputPortId, dataProductId }: Props) {
                     description: outputPort.description,
                     tag_ids: outputPort.tags.map((tag) => tag.id),
                     lifecycle_id: outputPort.lifecycle?.id ?? null,
-                    access_type: outputPort.access_type,
+                    classification_id: outputPort.classification.id,
                     data_product_access_duration_type: outputPort.data_product_access_duration_type,
                     exploration_access_duration_type: outputPort.exploration_access_duration_type,
                     ...partial,
@@ -136,21 +135,24 @@ export function SettingsTab({ outputPortId, dataProductId }: Props) {
 
     const items: DescriptionsProps['items'] = [
         {
-            key: 'access-type',
-            label: labelWithTooltip(t('Access Type'), t('The access type of the Output Port')),
+            key: 'classification',
+            label: labelWithTooltip(
+                t('Classification'),
+                t('The classification of the Output Port, which determines who can see and access it'),
+            ),
             span: 2,
             children: canEditAccess ? (
-                <AccessTypeSection
-                    value={accessType}
+                <ClassificationSection
+                    value={classificationId}
                     onChange={(value) => {
-                        const previous = accessType;
-                        setAccessType(value);
-                        saveAccessField({ access_type: value }, () => setAccessType(previous));
+                        const previous = classificationId;
+                        setClassificationId(value);
+                        saveAccessField({ classification_id: value }, () => setClassificationId(previous));
                     }}
                     hiddenDataProduct={dataProduct?.visibility === DataProductVisibility.Hidden}
                 />
             ) : (
-                getDatasetAccessTypeLabel(t, outputPort.access_type)
+                outputPort.classification.name
             ),
         },
         ...(accessDurations

@@ -8,13 +8,13 @@ from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..models.access_duration_type import AccessDurationType
-from ..models.output_port_access_type import OutputPortAccessType
 from ..models.output_port_status import OutputPortStatus
 
 if TYPE_CHECKING:
     from ..models.access_mode import AccessMode
     from ..models.data_product_life_cycle import DataProductLifeCycle
     from ..models.domain import Domain
+    from ..models.output_port_classification import OutputPortClassification
     from ..models.output_port_setting_value import OutputPortSettingValue
     from ..models.tag import Tag
     from ..models.technical_asset_link import TechnicalAssetLink
@@ -33,7 +33,7 @@ class GetOutputPortResponse:
         description (str):
         status (OutputPortStatus):
         usage (None | str):
-        access_type (OutputPortAccessType):
+        classification (OutputPortClassification):
         data_product_access_duration_type (AccessDurationType):
         exploration_access_duration_type (AccessDurationType):
         data_product_id (UUID):
@@ -53,7 +53,7 @@ class GetOutputPortResponse:
     description: str
     status: OutputPortStatus
     usage: None | str
-    access_type: OutputPortAccessType
+    classification: OutputPortClassification
     data_product_access_duration_type: AccessDurationType
     exploration_access_duration_type: AccessDurationType
     data_product_id: UUID
@@ -83,7 +83,7 @@ class GetOutputPortResponse:
         usage: None | str
         usage = self.usage
 
-        access_type = self.access_type.value
+        classification = self.classification.to_dict()
 
         data_product_access_duration_type = self.data_product_access_duration_type.value
 
@@ -137,7 +137,7 @@ class GetOutputPortResponse:
                 "description": description,
                 "status": status,
                 "usage": usage,
-                "access_type": access_type,
+                "classification": classification,
                 "data_product_access_duration_type": data_product_access_duration_type,
                 "exploration_access_duration_type": exploration_access_duration_type,
                 "data_product_id": data_product_id,
@@ -159,6 +159,7 @@ class GetOutputPortResponse:
         from ..models.access_mode import AccessMode
         from ..models.data_product_life_cycle import DataProductLifeCycle
         from ..models.domain import Domain
+        from ..models.output_port_classification import OutputPortClassification
         from ..models.output_port_setting_value import OutputPortSettingValue
         from ..models.tag import Tag
         from ..models.technical_asset_link import TechnicalAssetLink
@@ -181,7 +182,7 @@ class GetOutputPortResponse:
 
         usage = _parse_usage(d.pop("usage"))
 
-        access_type = OutputPortAccessType(d.pop("access_type"))
+        classification = OutputPortClassification.from_dict(d.pop("classification"))
 
         data_product_access_duration_type = AccessDurationType(
             d.pop("data_product_access_duration_type")
@@ -263,7 +264,7 @@ class GetOutputPortResponse:
             description=description,
             status=status,
             usage=usage,
-            access_type=access_type,
+            classification=classification,
             data_product_access_duration_type=data_product_access_duration_type,
             exploration_access_duration_type=exploration_access_duration_type,
             data_product_id=data_product_id,

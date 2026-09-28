@@ -15,7 +15,11 @@ export const mockOutputPorts: SearchOutputPortsResponseItem[] = [
         description: '',
         status: OutputPortStatus.Pending,
         usage: null,
-        access_type: OutputPortAccessType.Unrestricted,
+        classification: {
+            id: 'classification-1',
+            name: 'Unrestricted',
+            access_type: OutputPortAccessType.Unrestricted,
+        },
         data_product_id: 'dp-1',
         tags: [],
         domain: {

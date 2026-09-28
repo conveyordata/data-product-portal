@@ -66,6 +66,9 @@ from .create_exploration_request_with_input_ports import (
 )
 from .create_exploration_response import CreateExplorationResponse
 from .create_global_role_assignment import CreateGlobalRoleAssignment
+from .create_output_port_classification_response import (
+    CreateOutputPortClassificationResponse,
+)
 from .create_output_port_request import CreateOutputPortRequest
 from .create_output_port_response import CreateOutputPortResponse
 from .create_output_port_role_assignment import CreateOutputPortRoleAssignment
@@ -222,6 +225,11 @@ from .output_port import OutputPort
 from .output_port_about_update import OutputPortAboutUpdate
 from .output_port_access_duration import OutputPortAccessDuration
 from .output_port_access_type import OutputPortAccessType
+from .output_port_classification import OutputPortClassification
+from .output_port_classification_create import OutputPortClassificationCreate
+from .output_port_classification_update import OutputPortClassificationUpdate
+from .output_port_classifications_get import OutputPortClassificationsGet
+from .output_port_classifications_get_item import OutputPortClassificationsGetItem
 from .output_port_curated_queries import OutputPortCuratedQueries
 from .output_port_curated_queries_update import OutputPortCuratedQueriesUpdate
 from .output_port_curated_query import OutputPortCuratedQuery
@@ -354,6 +362,9 @@ from .update_data_product_response import UpdateDataProductResponse
 from .update_data_product_setting_response import UpdateDataProductSettingResponse
 from .update_data_product_type_response import UpdateDataProductTypeResponse
 from .update_domain_response import UpdateDomainResponse
+from .update_output_port_classification_response import (
+    UpdateOutputPortClassificationResponse,
+)
 from .update_output_port_query_status import UpdateOutputPortQueryStatus
 from .update_output_port_response import UpdateOutputPortResponse
 from .update_role import UpdateRole
@@ -415,6 +426,7 @@ __all__ = (
     "CreateExplorationRequestWithInputPorts",
     "CreateExplorationResponse",
     "CreateGlobalRoleAssignment",
+    "CreateOutputPortClassificationResponse",
     "CreateOutputPortRequest",
     "CreateOutputPortResponse",
     "CreateOutputPortRoleAssignment",
@@ -545,6 +557,11 @@ __all__ = (
     "OutputPortAboutUpdate",
     "OutputPortAccessDuration",
     "OutputPortAccessType",
+    "OutputPortClassification",
+    "OutputPortClassificationCreate",
+    "OutputPortClassificationsGet",
+    "OutputPortClassificationsGetItem",
+    "OutputPortClassificationUpdate",
     "OutputPortCuratedQueries",
     "OutputPortCuratedQueriesUpdate",
     "OutputPortCuratedQuery",
@@ -645,6 +662,7 @@ __all__ = (
     "UpdateDataProductSettingResponse",
     "UpdateDataProductTypeResponse",
     "UpdateDomainResponse",
+    "UpdateOutputPortClassificationResponse",
     "UpdateOutputPortQueryStatus",
     "UpdateOutputPortResponse",
     "UpdateRole",

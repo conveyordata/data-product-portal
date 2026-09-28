@@ -25,7 +25,11 @@ const dataset: GetOutputPortResponse = {
     description: 'Orders dataset',
     status: OutputPortStatus.Active,
     usage: null,
-    access_type: OutputPortAccessType.Unrestricted,
+    classification: {
+        id: 'classification-1',
+        name: 'Unrestricted',
+        access_type: OutputPortAccessType.Unrestricted,
+    },
     data_product_access_duration_type: AccessDurationType.Permanent,
     exploration_access_duration_type: AccessDurationType.Permanent,
     data_product_id: 'dp-1',

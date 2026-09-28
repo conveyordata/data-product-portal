@@ -45,10 +45,10 @@ export const getOutputPortTableColumns = ({
             ellipsis: {
                 showTitle: false,
             },
-            render: (name, { access_type: accessType }) => {
+            render: (name, { classification }) => {
                 return (
                     <TableCellItem text={name} tooltip={{ content: name }}>
-                        <OutputPortAccessIcon accessType={accessType} iconOnly />
+                        <OutputPortAccessIcon classification={classification} iconOnly />
                     </TableCellItem>
                 );
             },

@@ -28,6 +28,7 @@ It consists of a 3-tier web architecture.
 
 ## General Rules for Agents
 
+*   **Domain Language**: Use the terms defined in `CONTEXT.md` (e.g. Output Port, not Dataset; Access Function, not access type) in code, docs and conversation.
 *   **Analyze First**: Use search tools to find and replicate existing patterns before inventing new ones.
 *   **Surgical Changes**: Modify only what is necessary. Avoid unsolicited refactoring. Edit files directly rather than through one-off scripts; split large edits into multiple steps if needed.
 *   **Validation**: Always verify your changes.

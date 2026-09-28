@@ -24,6 +24,9 @@ from app.configuration.access_durations.service import AccessDurationService
 from app.configuration.data_product_lifecycles.model import (
     DataProductLifecycle as DataProductLifeCycleModel,
 )
+from app.configuration.output_port_classifications.model import (
+    OutputPortClassification as OutputPortClassificationModel,
+)
 from app.configuration.tags.model import Tag as TagModel
 from app.configuration.tags.model import ensure_tag_exists
 from app.core.authz import Authorization
@@ -61,6 +64,7 @@ from app.data_products.status import AbstractDataProductStatus
 from app.data_products.technical_assets.model import (
     TechnicalAsset as TechnicalAssetModel,
 )
+from app.database.database import ensure_exists
 from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
@@ -360,12 +364,45 @@ class OutputPortService:
             case _:
                 assert_never(dp.visibility)
 
+    def _resolve_classification(
+        self, dp: DataProductModel, classification_id: UUID
+    ) -> OutputPortClassificationModel:
+        classification: OutputPortClassificationModel = ensure_exists(
+            classification_id, self.db, OutputPortClassificationModel
+        )
+        self.ensure_access_type_matches_visibility(dp, classification.access_type)
+        return classification
+
+    def reclassify_output_ports(
+        self, classification_id: UUID, access_type: OutputPortAccessType
+    ) -> None:
+        output_ports = (
+            self.db.scalars(
+                select(OutputPortModel).where(
+                    OutputPortModel.classification_id == classification_id
+                ),
+                execution_options={
+                    "skip_data_product_visibility_filter": True,
+                    "skip_output_port_access_type_filter": True,
+                },
+            )
+            .unique()
+            .all()
+        )
+        for output_port in output_ports:
+            self.ensure_access_type_matches_visibility(
+                output_port.data_product, access_type
+            )
+        for output_port in output_ports:
+            output_port.access_type = access_type
+            self._sync_public_reader_grouping(output_port.id, access_type)
+
     def create_output_port(
         self, data_product_id: UUID, create_output_port_request: CreateOutputPortRequest
     ) -> OutputPortModel:
         dp = self._ensure_data_product_not_deleting(data_product_id)
-        self.ensure_access_type_matches_visibility(
-            dp, create_output_port_request.access_type
+        classification = self._resolve_classification(
+            dp, create_output_port_request.classification_id
         )
         if (
             validity := self.namespace_validator.validate_namespace(
@@ -383,6 +420,7 @@ class OutputPortService:
 
         output_port_schema = create_output_port_request.parse_pydantic_schema()
         output_port_schema["data_product_id"] = data_product_id
+        output_port_schema["access_type"] = classification.access_type
         tags = self._fetch_tags(output_port_schema.pop("tag_ids", []))
         _ = output_port_schema.pop("owners", [])
         model = OutputPortModel(**output_port_schema, tags=tags)
@@ -409,9 +447,11 @@ class OutputPortService:
         self, id: UUID, data_product_id: UUID, output_port_update: OutputPortUpdate
     ) -> UUID:
         dp = self._ensure_data_product_not_deleting(data_product_id)
-        self.ensure_access_type_matches_visibility(dp, output_port_update.access_type)
         current_output_port = ensure_output_port_exists(
             id, self.db, data_product_id=data_product_id
+        )
+        classification = self._resolve_classification(
+            dp, output_port_update.classification_id
         )
         updated_output_port = output_port_update.model_dump(exclude_unset=True)
 
@@ -433,18 +473,18 @@ class OutputPortService:
             output_port_update.exploration_access_duration_type,
         )
 
-        access_type_change = None
+        access_type_changed = (
+            current_output_port.access_type != classification.access_type
+        )
+        current_output_port.access_type = classification.access_type
         for k, v in updated_output_port.items():
             if k == "tag_ids":
                 new_tags = self._fetch_tags(v)
                 current_output_port.tags = new_tags
-            elif k == "access_type":
-                access_type_change = current_output_port.access_type
-                setattr(current_output_port, k, v)
             else:
                 setattr(current_output_port, k, v) if v else None
         self.db.flush()
-        if access_type_change is not None:
+        if access_type_changed:
             self._sync_public_reader_grouping(
                 current_output_port.id, current_output_port.access_type
             )

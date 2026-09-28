@@ -196,6 +196,19 @@ api.enhanceEndpoints({
             invalidatesTags: [{ type: TagTypes.DataProductLifecycle, id: STATIC_TAG_ID.LIST }],
         },
 
+        getOutputPortClassifications: {
+            providesTags: [{ type: TagTypes.OutputPortClassification, id: STATIC_TAG_ID.LIST }],
+        },
+        createOutputPortClassification: {
+            invalidatesTags: [{ type: TagTypes.OutputPortClassification, id: STATIC_TAG_ID.LIST }],
+        },
+        removeOutputPortClassification: {
+            invalidatesTags: [{ type: TagTypes.OutputPortClassification, id: STATIC_TAG_ID.LIST }],
+        },
+        updateOutputPortClassification: {
+            invalidatesTags: [{ type: TagTypes.OutputPortClassification, id: STATIC_TAG_ID.LIST }, TagTypes.OutputPort],
+        },
+
         getDataProductsSettings: {
             providesTags: [{ type: TagTypes.DataProductSetting, id: STATIC_TAG_ID.LIST }],
         },

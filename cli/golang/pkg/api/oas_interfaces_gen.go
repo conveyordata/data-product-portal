@@ -69,6 +69,10 @@ type CreateExplorationRes interface {
 	createExplorationRes()
 }
 
+type CreateOutputPortClassificationRes interface {
+	createOutputPortClassificationRes()
+}
+
 type CreateOutputPortRes interface {
 	createOutputPortRes()
 }
@@ -257,6 +261,10 @@ type GetOutputPortAccessDurationsRes interface {
 	getOutputPortAccessDurationsRes()
 }
 
+type GetOutputPortClassificationsRes interface {
+	getOutputPortClassificationsRes()
+}
+
 type GetOutputPortCuratedQueriesRes interface {
 	getOutputPortCuratedQueriesRes()
 }
@@ -433,6 +441,10 @@ type RemoveOutputPortAsInputPortRes interface {
 	removeOutputPortAsInputPortRes()
 }
 
+type RemoveOutputPortClassificationRes interface {
+	removeOutputPortClassificationRes()
+}
+
 type RemoveOutputPortRes interface {
 	removeOutputPortRes()
 }
@@ -575,6 +587,10 @@ type UpdateEnvironmentIsGlobalRes interface {
 
 type UpdateOutputPortAboutRes interface {
 	updateOutputPortAboutRes()
+}
+
+type UpdateOutputPortClassificationRes interface {
+	updateOutputPortClassificationRes()
 }
 
 type UpdateOutputPortQueryStatsRes interface {

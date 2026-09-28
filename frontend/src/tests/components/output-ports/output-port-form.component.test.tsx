@@ -5,11 +5,11 @@ import {
     AbstractDataProductStatus,
     DataProductIconKey,
     DataProductVisibility,
-    OutputPortAccessType,
 } from '@/store/api/services/generated/dataProductsApi.ts';
 import { allowAllAuth } from '@/tests/mocks/auth.ts';
 import { mockAccessDurationsGet, mockTimeBoundAccessEnabled } from '@/tests/mocks/configurationAccessDurations.ts';
 import { mockDataProductLifecycles } from '@/tests/mocks/configurationDataProductLifecycles.ts';
+import { mockOutputPortClassifications } from '@/tests/mocks/configurationOutputPortClassifications.ts';
 import { mockDataProductHttp } from '@/tests/mocks/dataProducts.ts';
 import {
     mockGetResourceNamesConstraints,
@@ -22,11 +22,12 @@ import { mockUsers, mockUsersHttp } from '@/tests/mocks/users.ts';
 import { renderWithProviders, screen } from '@/tests/test-utils.tsx';
 
 describe('OutputPortForm', () => {
-    it('only allows private access type for hidden data products', async () => {
+    it('only allows Invite only classifications for hidden data products', async () => {
         allowAllAuth();
         mockAccessDurationsGet();
         mockTimeBoundAccessEnabled();
         mockDataProductLifecycles();
+        mockOutputPortClassifications();
         mockUsersHttp(mockUsers);
         mockGetTags();
         mockGetResourceNamesConstraints();
@@ -68,6 +69,7 @@ describe('OutputPortForm', () => {
 
         expect(restricted).toBeDisabled();
         expect(unrestricted).toBeDisabled();
-        expect(privateOption).toHaveAttribute('value', OutputPortAccessType.Private);
+        expect(privateOption).toBeEnabled();
+        expect(privateOption).toBeChecked();
     });
 });

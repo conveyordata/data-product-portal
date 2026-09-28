@@ -23,7 +23,11 @@ const mockInputPortAction: InputPortRequest = {
             namespace: 'sales',
             description: 'Sales data output port',
             status: 'active',
-            access_type: 'restricted',
+            classification: {
+                id: 'classification-1',
+                name: 'Restricted',
+                access_type: 'restricted',
+            },
             data_product_id: 'dp-1',
             tags: [],
             access_modes: [],

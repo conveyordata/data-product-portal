@@ -239,6 +239,11 @@ export type DataProduct = {
   status: AbstractDataProductStatus;
   type: DataProductType;
 };
+export type OutputPortClassification = {
+  id: string;
+  name: string;
+  access_type: OutputPortAccessType;
+};
 export type Tag = {
   id: string;
   value: string;
@@ -249,7 +254,7 @@ export type OutputPort = {
   namespace: string;
   description: string;
   status: OutputPortStatus;
-  access_type: OutputPortAccessType;
+  classification: OutputPortClassification;
   data_product_id: string;
   tags: Tag[];
   access_modes: AccessMode[];

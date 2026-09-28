@@ -8,16 +8,16 @@ import { useTabParam } from '@/hooks/use-tab-param.tsx';
 import { useIsTimeBoundAccessEnabledQuery } from '@/store/api/services/generated/configurationAccessDurationsApi';
 import { AccessPolicyTab } from './access-policy-tab/access-policy-tab.component';
 import { DataProductTab } from './data-product-tab/data-product-tab.component';
-import { DatasetTab } from './dataset-tab/dataset-tab.component';
 import { GeneralTab } from './general-tab/general-tab.component';
 import { MetadataTab } from './metadata-tab/metadata-tab.component';
+import { OutputPortTab } from './output-port-tab/output-port-tab.component';
 import { PlatformTab } from './platform-tab/platform-tab.component';
 import { RolesTab } from './roles-tab/roles-tab.component';
 
 enum TabKeys {
     General = 'general',
     DataProduct = 'data-product',
-    Dataset = 'dataset',
+    OutputPort = 'output-port',
     Platform = 'platform',
     Roles = 'roles',
     Metadata = 'metadata',
@@ -53,8 +53,8 @@ export function SettingsTabs() {
             },
             {
                 label: t('Output Port'),
-                key: TabKeys.Dataset,
-                children: <DatasetTab />,
+                key: TabKeys.OutputPort,
+                children: <OutputPortTab />,
                 icon: <OutputPortOutlined />,
             },
             {

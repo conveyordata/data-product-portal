@@ -32,6 +32,7 @@ import {
     useIsTimeBoundAccessEnabledQuery,
 } from '@/store/api/services/generated/configurationAccessDurationsApi.ts';
 import { useGetDataProductsLifecyclesQuery } from '@/store/api/services/generated/configurationDataProductLifecyclesApi.ts';
+import { useGetOutputPortClassificationsQuery } from '@/store/api/services/generated/configurationOutputPortClassificationsApi.ts';
 import { useGetTagsQuery } from '@/store/api/services/generated/configurationTagsApi.ts';
 import {
     DataProductVisibility,
@@ -60,7 +61,7 @@ import {
     createMarketplaceOutputPortPath,
     createOutputPortPath,
 } from '@/types/navigation.ts';
-import { getDatasetAccessTypeLabel } from '@/utils/access-type.helper.ts';
+import { compareAccessFunctions, isAllowedForDataProduct } from '@/utils/access-type.helper.ts';
 import { useGetDataProductOwnerIds } from '@/utils/data-product-user-role.helper';
 import { useGetDatasetOwnerIds } from '@/utils/dataset-user-role.helper.ts';
 import { dispatchMessage } from '@/utils/feedback.ts';
@@ -227,52 +228,50 @@ const { TextArea } = Input;
 
 const DEBOUNCE = 500;
 
-export function AccessTypeSection({
+export function ClassificationSection({
     value,
     onChange,
-    block = true,
     hiddenDataProduct = false,
 }: {
-    value?: OutputPortAccessType;
-    onChange?: (value: OutputPortAccessType) => void;
-    block?: boolean;
+    value?: string;
+    onChange?: (value: string) => void;
     hiddenDataProduct: boolean;
 }) {
     const { t } = useTranslation();
-    const selectedValue = hiddenDataProduct ? OutputPortAccessType.Private : value;
-    const options = [
-        {
-            value: OutputPortAccessType.Unrestricted,
-            tooltip: t(
-                'Unrestricted Output Ports are visible and accessible to use by anyone, only allowed when the Data Product is not hidden',
-            ),
-        },
-        {
-            value: OutputPortAccessType.Restricted,
-            tooltip: t(
-                'Restricted Output Ports are visible to everyone but require permission to use, only allowed when the Data Product is not hidden',
-            ),
-        },
-        {
-            value: OutputPortAccessType.Private,
-            tooltip: t('Private Output Ports are only visible to owners and users with access'),
-        },
-    ].map(({ value, tooltip }) => ({
-        label: (
-            <Tooltip title={tooltip}>
-                <span>{getDatasetAccessTypeLabel(t, value)}</span>
-            </Tooltip>
+    const { data: { output_port_classifications: classifications = [] } = {} } = useGetOutputPortClassificationsQuery();
+    const tooltips = {
+        [OutputPortAccessType.Unrestricted]: t(
+            'Auto-approve: visible to everyone and access requests are approved automatically, not allowed for hidden Data Products',
         ),
-        value,
-        disabled: hiddenDataProduct && value !== OutputPortAccessType.Private,
-    }));
+        [OutputPortAccessType.Restricted]: t(
+            'Approval required: visible to everyone and access requests need owner approval, not allowed for hidden Data Products',
+        ),
+        [OutputPortAccessType.Private]: t(
+            'Invite only: hidden from everyone outside the Data Product and access requests need owner approval',
+        ),
+    };
+    const options = [...classifications]
+        .sort((a, b) => compareAccessFunctions(a.access_type, b.access_type))
+        .map((classification) => ({
+            label: (
+                <Tooltip
+                    title={[classification.description, tooltips[classification.access_type]]
+                        .filter(Boolean)
+                        .join(' - ')}
+                >
+                    <span>{classification.name}</span>
+                </Tooltip>
+            ),
+            value: classification.id,
+            disabled: !isAllowedForDataProduct(classification.access_type, hiddenDataProduct),
+        }));
 
     return (
         <Radio.Group
-            value={selectedValue}
+            value={value}
             options={options}
             optionType="button"
-            block={block}
+            block
             onChange={(e) => onChange?.(e.target.value)}
         />
     );
@@ -350,7 +349,7 @@ export function OutputPortForm({ mode, modalCallbackOnSubmit, formRef, outputPor
                     owners: values.owners,
                     tag_ids: values.tag_ids ?? [],
                     lifecycle_id: values.lifecycle_id,
-                    access_type: values.access_type,
+                    classification_id: values.classification_id,
                     data_product_access_duration_type: values.data_product_access_duration_type,
                     exploration_access_duration_type: values.exploration_access_duration_type,
                 };
@@ -379,7 +378,7 @@ export function OutputPortForm({ mode, modalCallbackOnSubmit, formRef, outputPor
                     description: values.description,
                     tag_ids: values.tag_ids,
                     lifecycle_id: values.lifecycle_id,
-                    access_type: values.access_type,
+                    classification_id: values.classification_id,
                     data_product_access_duration_type: values.data_product_access_duration_type,
                     exploration_access_duration_type: values.exploration_access_duration_type,
                 };
@@ -463,6 +462,7 @@ export function OutputPortForm({ mode, modalCallbackOnSubmit, formRef, outputPor
     const dataProductOwners = useGetDataProductOwnerIds(dataProduct?.id);
     const ownerIds = mode === 'edit' ? datasetOwners : dataProductOwners;
     const isHiddenDataProduct = dataProduct?.visibility === DataProductVisibility.Hidden;
+    const { data: { output_port_classifications: classifications = [] } = {} } = useGetOutputPortClassificationsQuery();
 
     useEffect(() => {
         if (mode === 'create' && dataProductOwners && form.getFieldValue('owners') === undefined) {
@@ -471,14 +471,19 @@ export function OutputPortForm({ mode, modalCallbackOnSubmit, formRef, outputPor
     }, [mode, dataProductOwners, form]);
 
     useEffect(() => {
-        if (
-            mode === 'create' &&
-            isHiddenDataProduct &&
-            form.getFieldValue('access_type') !== OutputPortAccessType.Private
-        ) {
-            form.setFieldValue('access_type', OutputPortAccessType.Private);
+        if (mode !== 'create') {
+            return;
         }
-    }, [form, isHiddenDataProduct, mode]);
+        const allowed = classifications.filter((classification) =>
+            isAllowedForDataProduct(classification.access_type, isHiddenDataProduct),
+        );
+        const selectedId = form.getFieldValue('classification_id');
+        if (allowed.length === 1) {
+            form.setFieldValue('classification_id', allowed[0].id);
+        } else if (selectedId && !allowed.some((classification) => classification.id === selectedId)) {
+            form.setFieldValue('classification_id', undefined);
+        }
+    }, [form, isHiddenDataProduct, mode, classifications]);
 
     if (mode === 'edit' && (!currentOutputPort || ownerIds === undefined)) {
         return <Skeleton active />;
@@ -488,12 +493,7 @@ export function OutputPortForm({ mode, modalCallbackOnSubmit, formRef, outputPor
         name: currentOutputPort?.name,
         namespace: currentOutputPort?.namespace,
         description: currentOutputPort?.description,
-        access_type:
-            mode === 'create'
-                ? isHiddenDataProduct
-                    ? OutputPortAccessType.Private
-                    : OutputPortAccessType.Unrestricted
-                : currentOutputPort?.access_type,
+        classification_id: currentOutputPort?.classification.id,
         lifecycle_id: currentOutputPort?.lifecycle?.id,
         tag_ids: currentOutputPort?.tags.map((tag) => tag.id),
         owners: ownerIds,
@@ -583,17 +583,17 @@ export function OutputPortForm({ mode, modalCallbackOnSubmit, formRef, outputPor
                 />
             </Form.Item>
             <Form.Item<CreateOutputPortRequest>
-                name="access_type"
-                label={t('Access Type')}
-                tooltip={t('The access type of the Output Port')}
+                name="classification_id"
+                label={t('Classification')}
+                tooltip={t('The classification of the Output Port, which determines who can see and access it')}
                 rules={[
                     {
                         required: true,
-                        message: t('Please select the access type of the Output Port'),
+                        message: t('Please select the classification of the Output Port'),
                     },
                 ]}
             >
-                <AccessTypeSection hiddenDataProduct={isHiddenDataProduct} />
+                <ClassificationSection hiddenDataProduct={isHiddenDataProduct} />
             </Form.Item>
             <AccessDurationInfo mode={mode} />
             <Form.Item<CreateOutputPortRequest> name="tag_ids" label={t('Tags')}>

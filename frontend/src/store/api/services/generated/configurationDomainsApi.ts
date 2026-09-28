@@ -1,4 +1,4 @@
-import { api } from "@/store/api/services/generated/configurationDataProductTypesApi";
+import { api } from "@/store/api/services/generated/configurationOutputPortClassificationsApi";
 const injectedRtkApi = api.injectEndpoints({
   endpoints: (build) => ({
     getDomains: build.query<GetDomainsApiResponse, GetDomainsApiArg>({

@@ -4,7 +4,6 @@ from uuid import UUID
 from annotated_types import MinLen
 
 from app.configuration.access_durations.enums import AccessDurationType
-from app.data_products.output_ports.enums import OutputPortAccessType
 from app.data_products.output_ports.status import OutputPortStatus
 from app.shared.schema import ORMModel
 
@@ -13,7 +12,7 @@ class OutputPortUpdate(ORMModel):
     name: str
     namespace: str
     description: str
-    access_type: OutputPortAccessType
+    classification_id: UUID
     data_product_access_duration_type: AccessDurationType
     exploration_access_duration_type: AccessDurationType
     about: Optional[str] = None

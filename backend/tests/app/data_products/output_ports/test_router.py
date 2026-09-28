@@ -5,7 +5,9 @@ import pytest
 
 from app.abstract_data_product.type import AbstractDataProductType
 from app.authorization.roles.schema import Scope
+from app.authorization.service import OUTPUT_PORT_READER_ROLE
 from app.configuration.access_durations.enums import AccessDurationType
+from app.core.authz import Authorization
 from app.core.authz.actions import AuthorizationAction
 from app.data_products.model import DataProductVisibility
 from app.data_products.output_ports.enums import OutputPortAccessType
@@ -24,16 +26,20 @@ from tests.factories import (
     ExplorationFactory,
     GlobalRoleAssignmentFactory,
     InputPortFactory,
+    OutputPortClassificationFactory,
     OutputPortFactory,
     RoleFactory,
     TechnicalAssetFactory,
     TechnicalAssetOutputPortAssociationFactory,
     UserFactory,
 )
-from tests.session_util import as_user
 from tests.webhook_util import assert_event_in_queue
 
 ENDPOINT = "/api/v2/data_products/{}/output_ports"
+
+
+def classification_id(access_type: OutputPortAccessType) -> str:
+    return str(OutputPortClassificationFactory(access_type=access_type).id)
 
 
 @pytest.fixture
@@ -61,7 +67,7 @@ def output_port_payload(seed_time_bound_access_durations):
         "owners": [
             str(user.id),
         ],
-        "access_type": OutputPortAccessType.RESTRICTED.value,
+        "classification_id": classification_id(OutputPortAccessType.RESTRICTED),
         "exploration_access_duration_type": AccessDurationType.TIME_BOUND.value,
         "data_product_access_duration_type": AccessDurationType.TIME_BOUND.value,
     }
@@ -76,7 +82,7 @@ def output_port_event_payload():
         "namespace": "test-op-event-ns",
         "tag_ids": [],
         "owners": [str(user.id)],
-        "access_type": "restricted",
+        "classification_id": classification_id(OutputPortAccessType.RESTRICTED),
     }
 
 
@@ -99,6 +105,29 @@ class TestOutputPortRouter:
         )
         assert created_dataset.status_code == 200, created_dataset.text
         assert "id" in created_dataset.json()
+
+    def test_create_output_port__with_classification(
+        self, output_port_payload, client, session
+    ):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        role = RoleFactory(
+            scope=Scope.GLOBAL,
+            permissions=[AuthorizationAction.GLOBAL__CREATE_OUTPUT_PORT],
+        )
+        GlobalRoleAssignmentFactory(identity_id=user.id, role_id=role.id)
+        data_product = DataProductFactory()
+        classification = OutputPortClassificationFactory(
+            name="VITO Secret",
+            access_type=OutputPortAccessType.PRIVATE,
+        )
+        output_port_payload["classification_id"] = str(classification.id)
+
+        response = self.create_output_port(client, data_product.id, output_port_payload)
+
+        assert response.status_code == 200, response.text
+        output_port = session.get(OutputPort, response.json()["id"])
+        assert output_port.access_type == OutputPortAccessType.PRIVATE
+        assert output_port.classification_id == classification.id
 
     def test_create_output_port__unconfigured_access_duration_type(
         self, output_port_payload, client
@@ -139,33 +168,6 @@ class TestOutputPortRouter:
         assert created_dataset.status_code == 200
         assert "id" in created_dataset.json()
 
-    def test_create_output_port_type_public(
-        self, session, output_port_payload, client
-    ) -> None:
-        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        role = RoleFactory(
-            scope=Scope.GLOBAL,
-            permissions=[AuthorizationAction.GLOBAL__CREATE_OUTPUT_PORT],
-        )
-        GlobalRoleAssignmentFactory(
-            identity_id=user.id,
-            role_id=role.id,
-        )
-        data_product_id = DataProductFactory().id
-        output_port_payload["access_type"] = "public"
-        created_dataset = self.create_output_port(
-            client, data_product_id, output_port_payload
-        )
-        assert created_dataset.status_code == 200
-        assert "id" in created_dataset.json()
-        with as_user(session, user.id):
-            output_port: OutputPort = (
-                session.query(OutputPort)
-                .filter_by(id=created_dataset.json()["id"])
-                .first()
-            )
-        assert output_port.access_type == OutputPortAccessType.UNRESTRICTED.value
-
     def test_create_output_port__hidden_data_product_only_allows_private_output_port(
         self, output_port_payload, client
     ) -> None:
@@ -187,19 +189,25 @@ class TestOutputPortRouter:
             data_product_id=data_product_id, identity_id=user.id, role_id=role.id
         )
 
-        output_port_payload["access_type"] = OutputPortAccessType.UNRESTRICTED.value
+        output_port_payload["classification_id"] = classification_id(
+            OutputPortAccessType.UNRESTRICTED
+        )
         created_output_port = self.create_output_port(
             client, data_product_id, output_port_payload
         )
         assert created_output_port.status_code == 400, created_output_port.text
 
-        output_port_payload["access_type"] = OutputPortAccessType.RESTRICTED.value
+        output_port_payload["classification_id"] = classification_id(
+            OutputPortAccessType.RESTRICTED
+        )
         created_output_port = self.create_output_port(
             client, data_product_id, output_port_payload
         )
         assert created_output_port.status_code == 400, created_output_port.text
 
-        output_port_payload["access_type"] = OutputPortAccessType.PRIVATE.value
+        output_port_payload["classification_id"] = classification_id(
+            OutputPortAccessType.PRIVATE
+        )
         created_output_port = self.create_output_port(
             client, data_product_id, output_port_payload
         )
@@ -312,7 +320,7 @@ class TestOutputPortRouter:
             "namespace": "new_namespace",
             "description": "new_description",
             "tags": [],
-            "access_type": "restricted",
+            "classification_id": classification_id(OutputPortAccessType.RESTRICTED),
         }
 
         updated_dataset = self.update_output_port(
@@ -320,40 +328,6 @@ class TestOutputPortRouter:
         )
 
         assert updated_dataset.status_code == 403
-
-    def test_update_dataset_type_public_renamed(
-        self, session, client, seed_time_bound_access_durations
-    ) -> None:
-        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        role = RoleFactory(
-            scope=Scope.DATASET,
-            permissions=[AuthorizationAction.OUTPUT_PORT__UPDATE_PROPERTIES],
-        )
-        ds = OutputPortFactory()
-        DatasetRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id, output_port_id=ds.id
-        )
-        update_payload = {
-            "name": "new_name",
-            "namespace": "new_namespace",
-            "description": "new_description",
-            "tag_ids": [],
-            "access_type": "public",
-            "data_product_access_duration_type": AccessDurationType.TIME_BOUND.value,
-            "exploration_access_duration_type": AccessDurationType.TIME_BOUND.value,
-        }
-
-        updated_dataset = self.update_output_port(
-            client, ds.data_product.id, ds.id, update_payload
-        )
-
-        assert updated_dataset.status_code == 200
-        dataset_id = updated_dataset.json()["id"]
-        with as_user(session, user.id):
-            output_port: OutputPort = (
-                session.query(OutputPort).filter_by(id=dataset_id).first()
-            )
-        assert output_port.access_type == OutputPortAccessType.UNRESTRICTED.value
 
     def test_update_output_port(self, client, seed_time_bound_access_durations):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
@@ -371,7 +345,7 @@ class TestOutputPortRouter:
             "namespace": "new_namespace",
             "description": "new_description",
             "tag_ids": [],
-            "access_type": "restricted",
+            "classification_id": classification_id(OutputPortAccessType.RESTRICTED),
             "data_product_access_duration_type": AccessDurationType.TIME_BOUND.value,
             "exploration_access_duration_type": AccessDurationType.TIME_BOUND.value,
         }
@@ -382,6 +356,45 @@ class TestOutputPortRouter:
 
         assert updated_dataset.status_code == 200
         assert updated_dataset.json()["id"] == str(ds.id)
+
+    def test_update_output_port__classification(
+        self, client, session, seed_time_bound_access_durations
+    ):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        role = RoleFactory(
+            scope=Scope.DATASET,
+            permissions=[AuthorizationAction.OUTPUT_PORT__UPDATE_PROPERTIES],
+        )
+        ds = OutputPortFactory()
+        DatasetRoleAssignmentFactory(
+            user_id=user.id, role_id=role.id, output_port_id=ds.id
+        )
+        classification = OutputPortClassificationFactory(
+            name="VITO Secret",
+            access_type=OutputPortAccessType.PRIVATE,
+        )
+        update_payload = {
+            "name": "new_name",
+            "namespace": "new_namespace",
+            "description": "new_description",
+            "tag_ids": [],
+            "classification_id": str(classification.id),
+            "data_product_access_duration_type": AccessDurationType.TIME_BOUND.value,
+            "exploration_access_duration_type": AccessDurationType.TIME_BOUND.value,
+        }
+
+        response = self.update_output_port(
+            client, ds.data_product.id, ds.id, update_payload
+        )
+
+        assert response.status_code == 200, response.text
+        session.expire_all()
+        output_port = session.get(OutputPort, ds.id)
+        assert output_port.classification_id == classification.id
+        assert output_port.access_type == OutputPortAccessType.PRIVATE
+        assert not Authorization().has_resource_role(
+            user_id="*", role_id=OUTPUT_PORT_READER_ROLE, resource_id=ds.id
+        )
 
     def test_update_output_port__unconfigured_access_duration_type(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
@@ -399,7 +412,7 @@ class TestOutputPortRouter:
             "namespace": "new_namespace",
             "description": "new_description",
             "tag_ids": [],
-            "access_type": "restricted",
+            "classification_id": classification_id(OutputPortAccessType.RESTRICTED),
             "data_product_access_duration_type": AccessDurationType.PERMANENT.value,
             "exploration_access_duration_type": AccessDurationType.TIME_BOUND.value,
         }
@@ -447,7 +460,12 @@ class TestOutputPortRouter:
             client,
             ds.data_product.id,
             ds.id,
-            {**update_payload, "access_type": OutputPortAccessType.UNRESTRICTED.value},
+            {
+                **update_payload,
+                "classification_id": classification_id(
+                    OutputPortAccessType.UNRESTRICTED
+                ),
+            },
         )
         assert updated_dataset.status_code == 400
 
@@ -455,7 +473,10 @@ class TestOutputPortRouter:
             client,
             ds.data_product.id,
             ds.id,
-            {**update_payload, "access_type": OutputPortAccessType.RESTRICTED.value},
+            {
+                **update_payload,
+                "classification_id": classification_id(OutputPortAccessType.RESTRICTED),
+            },
         )
         assert updated_dataset.status_code == 400
 
@@ -463,7 +484,10 @@ class TestOutputPortRouter:
             client,
             ds.data_product.id,
             ds.id,
-            {**update_payload, "access_type": OutputPortAccessType.PRIVATE.value},
+            {
+                **update_payload,
+                "classification_id": classification_id(OutputPortAccessType.PRIVATE),
+            },
         )
         assert updated_dataset.status_code == 200
 
@@ -589,7 +613,7 @@ class TestOutputPortRouter:
             "namespace": "new_namespace",
             "description": "new_description",
             "tags": [],
-            "access_type": "public",
+            "classification_id": classification_id(OutputPortAccessType.UNRESTRICTED),
         }
         dataset = self.update_output_port(
             client, ds.data_product.id, self.invalid_id, update_payload
@@ -871,7 +895,7 @@ class TestOutputPortRouter:
             "namespace": namespace,
             "description": "new_description",
             "tag_ids": [],
-            "access_type": "public",
+            "classification_id": classification_id(OutputPortAccessType.UNRESTRICTED),
             "data_product_access_duration_type": AccessDurationType.TIME_BOUND.value,
             "exploration_access_duration_type": AccessDurationType.TIME_BOUND.value,
         }
@@ -949,7 +973,7 @@ class TestOutputPortRouter:
             "namespace": "new_namespace",
             "description": "new_description",
             "tag_ids": [],
-            "access_type": "public",
+            "classification_id": classification_id(OutputPortAccessType.UNRESTRICTED),
             "data_product_access_duration_type": AccessDurationType.TIME_BOUND.value,
             "exploration_access_duration_type": AccessDurationType.TIME_BOUND.value,
         }

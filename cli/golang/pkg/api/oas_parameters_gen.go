@@ -442,6 +442,11 @@ type RemoveOutputPortAsInputPortParams struct {
 	OutputPortID  uuid.UUID
 }
 
+// RemoveOutputPortClassificationParams is parameters of remove_output_port_classification operation.
+type RemoveOutputPortClassificationParams struct {
+	ID uuid.UUID
+}
+
 // RemoveRoleParams is parameters of remove_role operation.
 type RemoveRoleParams struct {
 	ID uuid.UUID
@@ -612,6 +617,11 @@ type UpdateOutputPortParams struct {
 type UpdateOutputPortAboutParams struct {
 	DataProductID uuid.UUID
 	ID            uuid.UUID
+}
+
+// UpdateOutputPortClassificationParams is parameters of update_output_port_classification operation.
+type UpdateOutputPortClassificationParams struct {
+	ID uuid.UUID
 }
 
 // UpdateOutputPortQueryStatsParams is parameters of update_output_port_query_stats operation.

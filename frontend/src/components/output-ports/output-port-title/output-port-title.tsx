@@ -1,35 +1,34 @@
 import { Flex, Popover, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { OutputPortAccessType } from '@/store/api/services/generated/dataProductsApi.ts';
-import { getDatasetAccessTypeLabel } from '@/utils/access-type.helper';
+import { OutputPortAccessType, type OutputPortClassification } from '@/store/api/services/generated/dataProductsApi.ts';
 import { OutputPortAccessIcon } from '../output-port-access-icon/output-port-access-icon.tsx';
 import styles from './output-port-title.module.scss';
 
 type Props = {
     name: string;
-    accessType: OutputPortAccessType;
+    classification: OutputPortClassification;
     hasIcon?: boolean;
     hasPopover?: boolean;
 };
 
-export function OutputPortTitle({ name, accessType, hasIcon = true, hasPopover = false }: Props) {
+export function OutputPortTitle({ name, classification, hasIcon = true, hasPopover = false }: Props) {
     const { t } = useTranslation();
 
     const title = (
         <Flex className={styles.datasetTitle}>
             <Typography.Text strong>{name}</Typography.Text>
-            {accessType !== OutputPortAccessType.Unrestricted && hasIcon && (
-                <OutputPortAccessIcon accessType={accessType} />
+            {classification.access_type !== OutputPortAccessType.Unrestricted && hasIcon && (
+                <OutputPortAccessIcon classification={classification} />
             )}
         </Flex>
     );
 
-    if (accessType === OutputPortAccessType.Unrestricted) {
+    if (classification.access_type === OutputPortAccessType.Unrestricted) {
         return title;
     }
 
     return hasPopover ? (
-        <Popover content={t('{{Type}} access', { Type: getDatasetAccessTypeLabel(t, accessType) })} trigger="hover">
+        <Popover content={t('{{Type}} access', { Type: classification.name })} trigger="hover">
             {title}
         </Popover>
     ) : (

@@ -53,7 +53,7 @@ export const getDataProductDatasetsColumns = ({
                 const popoverTitle = (
                     <OutputPortPopoverTitle
                         name={output_port.name}
-                        accessType={output_port.access_type}
+                        accessType={output_port.classification.access_type}
                         isApproved={isDatasetRequestApproved}
                     />
                 );
@@ -62,7 +62,7 @@ export const getDataProductDatasetsColumns = ({
                         popover={{ title: popoverTitle, content: output_port.description }}
                         linkTo={createMarketplaceOutputPortPath(output_port.id, output_port.data_product_id)}
                         icon={<CustomSvgIconLoader iconComponent={outputPortBorderIcon} />}
-                        title={<OutputPortTitle name={output_port.name} accessType={output_port.access_type} />}
+                        title={<OutputPortTitle name={output_port.name} classification={output_port.classification} />}
                     />
                 );
             },
