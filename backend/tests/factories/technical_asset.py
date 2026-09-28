@@ -3,10 +3,12 @@ import factory
 from app.data_products.technical_assets.model import TechnicalAsset
 from app.data_products.technical_assets.status import TechnicalAssetStatus
 from tests import test_session
-from tests.factories.data_product import DataProductFactory
-from tests.factories.platform_service import PlatformServiceFactory
-from tests.factories.s3_data_output import S3DataOutputFactory
-from tests.factories.tags import TagFactory
+from tests.factories import (
+    DataProductFactory,
+    PlatformServiceFactory,
+    S3TechnicalAssetFactory,
+    TagFactory,
+)
 
 
 class TechnicalAssetFactory(factory.alchemy.SQLAlchemyModelFactory):
@@ -28,7 +30,7 @@ class TechnicalAssetFactory(factory.alchemy.SQLAlchemyModelFactory):
     owner = factory.SubFactory(DataProductFactory)
 
     technical_mapping = "default"
-    configuration = factory.SubFactory(S3DataOutputFactory)
+    configuration = factory.SubFactory(S3TechnicalAssetFactory)
 
     @factory.post_generation
     def tags(self, create, extracted, **kwargs):

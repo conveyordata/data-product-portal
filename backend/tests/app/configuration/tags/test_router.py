@@ -60,7 +60,7 @@ class TestTagsRouter:
         assert response.status_code == 200
 
     @pytest.mark.usefixtures("admin")
-    def test_remove_tag_coupled_with_data_output(self, client):
+    def test_remove_tag_coupled_with_technical_asset(self, client):
         tag = TagFactory()
         TechnicalAssetFactory(tags=[tag])
         response = self.remove_tag(client, tag.id)

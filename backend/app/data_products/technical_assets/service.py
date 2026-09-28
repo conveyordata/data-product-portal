@@ -35,8 +35,8 @@ from app.data_products.technical_assets.model import (
 from app.data_products.technical_assets.model import ensure_technical_asset_exists
 from app.data_products.technical_assets.schema_request import (
     CreateTechnicalAssetRequest,
-    DataOutputStatusUpdate,
-    DataOutputUpdate,
+    TechnicalAssetStatusUpdate,
+    TechnicalAssetUpdate,
 )
 from app.data_products.technical_assets.schema_response import (
     UpdateTechnicalAssetResponse,
@@ -122,7 +122,7 @@ class TechnicalAssetService:
                 if config.environment_id in allowed_environment_ids
             ]
 
-    def get_data_outputs(self) -> Sequence[TechnicalAssetModel]:
+    def get_technical_assets(self) -> Sequence[TechnicalAssetModel]:
         technical_assets = (
             self.db.scalars(
                 select(TechnicalAssetModel).options(
@@ -202,53 +202,55 @@ class TechnicalAssetService:
         self.db.flush()
         return model
 
-    def remove_data_output(
+    def remove_technical_asset(
         self, data_product_id: UUID, id: UUID
     ) -> TechnicalAssetModel:
-        data_output = self.get_data_output_with_links(data_product_id, id)
+        technical_asset = self.get_technical_asset_with_links(data_product_id, id)
 
-        result = copy.deepcopy(data_output)
-        self.db.delete(data_output)
+        result = copy.deepcopy(technical_asset)
+        self.db.delete(technical_asset)
         self.db.flush()
 
         self.update_search_for_associated_datasets(result)
         self.db.flush()
         return result
 
-    def get_data_output_with_links(
+    def get_technical_asset_with_links(
         self, data_product_id: UUID, id: UUID
     ) -> TechnicalAssetModel:
-        data_output: TechnicalAssetModel | None = self.get_technical_asset(
+        technical_asset: TechnicalAssetModel | None = self.get_technical_asset(
             data_product_id, id
         )
-        if not data_output:
+        if not technical_asset:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Required data output with {id} does not exist",
+                detail=f"Required technical asset with {id} does not exist",
             )
-        return data_output
+        return technical_asset
 
     def update_search_for_associated_datasets(self, result: TechnicalAssetModel):
         dataset_service = OutputPortService(self.db)
         for dataset_link in result.output_port_links:
             dataset_service.recalculate_search(dataset_link.output_port_id)
 
-    def update_data_output_status(
+    def update_technical_asset_status(
         self,
         data_product_id: UUID,
         id: UUID,
-        data_output: DataOutputStatusUpdate,
+        technical_asset_update: TechnicalAssetStatusUpdate,
         *,
         actor: User,
     ) -> None:
-        current_data_output = self.get_data_output_with_links(data_product_id, id)
-        current_data_output.status = data_output.status
+        current_technical_asset = self.get_technical_asset_with_links(
+            data_product_id, id
+        )
+        current_technical_asset.status = technical_asset_update.status
         self.db.flush()
 
-        self.update_search_for_associated_datasets(current_data_output)
+        self.update_search_for_associated_datasets(current_technical_asset)
         self.db.flush()
 
-    def link_dataset_to_data_output(
+    def link_output_port_to_technical_asset(
         self,
         data_product_id: UUID,
         id: UUID,
@@ -293,49 +295,49 @@ class TechnicalAssetService:
         OutputPortService(self.db).recalculate_search(output_port_id)
         return output_port_link
 
-    def unlink_dataset_from_data_output(
+    def unlink_output_port_from_technical_asset(
         self, data_product_id: UUID, id: UUID, output_port_id: UUID
     ) -> TechnicalAssetModel:
         ensure_output_port_exists(output_port_id, self.db)
-        data_output = self.get_technical_asset(data_product_id, id)
+        technical_asset = self.get_technical_asset(data_product_id, id)
 
-        data_output_dataset = next(
+        link = next(
             (
                 dataset
-                for dataset in data_output.output_port_links
+                for dataset in technical_asset.output_port_links
                 if dataset.output_port_id == output_port_id
             ),
             None,
         )
-        if not data_output_dataset:
+        if not link:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Data product dataset for data output {id} not found",
+                detail=f"Data product output port for technical asset {id} not found",
             )
 
-        data_output.output_port_links.remove(data_output_dataset)
+        technical_asset.output_port_links.remove(link)
         self.db.flush()
         OutputPortService(self.db).recalculate_search(output_port_id)
         self.db.flush()
-        return data_output
+        return technical_asset
 
-    def update_data_output(
-        self, data_product_id: UUID, id: UUID, data_output: DataOutputUpdate
+    def update_technical_asset(
+        self, data_product_id: UUID, id: UUID, technical_asset: TechnicalAssetUpdate
     ) -> UpdateTechnicalAssetResponse:
-        current_data_output = ensure_technical_asset_exists(
+        current_technical_asset = ensure_technical_asset_exists(
             id, self.db, data_product_id=data_product_id
         )
-        update_data_output = data_output.model_dump(exclude_unset=True)
+        update_technical_asset = technical_asset.model_dump(exclude_unset=True)
 
-        for k, v in update_data_output.items():
+        for k, v in update_technical_asset.items():
             if k == "tag_ids":
                 new_tags = self._get_tags(v)
-                current_data_output.tags = new_tags
+                current_technical_asset.tags = new_tags
             else:
-                setattr(current_data_output, k, v) if v else None
+                setattr(current_technical_asset, k, v) if v else None
 
         self.db.flush()
-        return UpdateTechnicalAssetResponse(id=current_data_output.id)
+        return UpdateTechnicalAssetResponse(id=current_technical_asset.id)
 
     def get_graph_data(self, data_product_id: UUID, id: UUID, level: int) -> Graph:
         ensure_technical_asset_exists(id, self.db, data_product_id=data_product_id)

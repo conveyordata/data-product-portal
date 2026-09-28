@@ -45,11 +45,11 @@ def get_technical_asset_details(
     db: Session = Depends(get_user_db_session),
 ) -> dict[str, Any]:
     do = ensure_technical_asset_exists(UUID(technical_asset_id), db=db)
-    data_output = TechnicalAssetService(db).get_technical_asset(
+    technical_asset = TechnicalAssetService(db).get_technical_asset(
         do.owner_id,
         id=UUID(technical_asset_id),
     )
-    return GetTechnicalAssetsResponseItem.model_validate(data_output).model_dump()
+    return GetTechnicalAssetsResponseItem.model_validate(technical_asset).model_dump()
 
 
 def get_domain_details(
@@ -84,14 +84,14 @@ def register_detail_tools(mcp) -> None:
     query the data. Extract the namespace from each data_product_links[].data_product.namespace
     and try those FIRST when getting credentials.
 
-    Also returns data_output_links[] with technical_asset configuration including the database name.
+    Also returns technical_asset_links[] with technical_asset configuration including the database name.
 
     Args:
         output_port_id: UUID obtained from search_output_ports or universal_search.
 
     Returns:
         - data_product_links: List of consuming data products (YOUR access path!)
-        - data_output_links: Technical assets with database configuration
+        - technical_asset_links: Technical assets with database configuration
         - namespace: Owner data product namespace (try as fallback only)
     """
     )(get_output_port_details)

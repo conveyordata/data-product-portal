@@ -76,7 +76,7 @@ class UserService:
     def get_user_pending_actions(self, user: User) -> PendingActionResponse:
         input_port_actions = InputPortService(self.db).get_user_pending_actions(user)
 
-        data_output_dataset_actions = TechnicalAssetOutputPortService(
+        technical_asset_output_port_actions = TechnicalAssetOutputPortService(
             self.db
         ).get_user_pending_actions(user)
         data_product_role_assignment_actions = RoleAssignmentService(
@@ -86,7 +86,7 @@ class UserService:
             pending_actions=sorted(
                 chain[Request](
                     input_port_actions,
-                    data_output_dataset_actions,
+                    technical_asset_output_port_actions,
                     data_product_role_assignment_actions,
                 ),
                 key=lambda action: (action.requested_on is None, action.requested_on),

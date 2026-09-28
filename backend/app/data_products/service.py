@@ -416,7 +416,7 @@ class DataProductService(AbstractDataProductService):
             .unique()
             .all()
         )
-        data_outputs = (
+        technical_assets = (
             self.db.scalars(
                 select(TechnicalAssetModel)
                 .options(
@@ -455,29 +455,29 @@ class DataProductService(AbstractDataProductService):
                 )
             )
 
-        for data_output in data_outputs:
+        for technical_asset in technical_assets:
             nodes.append(
                 Node(
-                    id=data_output.id,
+                    id=technical_asset.id,
                     data=NodeData(
-                        id=data_output.id,
-                        icon_key=data_output.configuration.configuration_type,
-                        name=data_output.name,
-                        link_to_id=data_output.owner_id,
+                        id=technical_asset.id,
+                        icon_key=technical_asset.configuration.configuration_type,
+                        name=technical_asset.name,
+                        link_to_id=technical_asset.owner_id,
                     ),
                     type=NodeType.technicalAssetNode,
                 )
             )
             edges.append(
                 Edge(
-                    id=f"{data_output.id}-{product.id}",
+                    id=f"{technical_asset.id}-{product.id}",
                     source=product.id,
-                    target=data_output.id,
+                    target=technical_asset.id,
                     animated=True,
                 )
             )
             if level >= 2:
-                for downstream_datasets in data_output.output_port_links:
+                for downstream_datasets in technical_asset.output_port_links:
                     nodes.append(
                         Node(
                             id=f"{downstream_datasets.output_port_id}_2",
@@ -491,9 +491,9 @@ class DataProductService(AbstractDataProductService):
                     )
                     edges.append(
                         Edge(
-                            id=f"{downstream_datasets.output_port_id}-{data_output.id}-2",
+                            id=f"{downstream_datasets.output_port_id}-{technical_asset.id}-2",
                             target=f"{downstream_datasets.output_port_id}_2",
-                            source=data_output.id,
+                            source=technical_asset.id,
                             animated=downstream_datasets.status
                             == DecisionStatus.APPROVED,
                         )
@@ -526,7 +526,7 @@ class DataProductService(AbstractDataProductService):
                             )
 
         # if no data outputs are present, still show the children datasets
-        if not data_outputs:
+        if not technical_assets:
             for downstream_dataset in product.datasets:
                 nodes.append(
                     Node(

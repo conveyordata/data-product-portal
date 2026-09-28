@@ -70,7 +70,7 @@ def approve_output_port_technical_asset_link(
     db: Session = Depends(get_db_session, scope="function"),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    output_link = TechnicalAssetOutputPortService(db).approve_data_output_link(
+    output_link = TechnicalAssetOutputPortService(db).approve_technical_asset_link(
         data_product_id=data_product_id,
         technical_asset_id=link_request.technical_asset_id,
         output_port_id=output_port_id,
@@ -112,7 +112,7 @@ def deny_output_port_technical_asset_link(
     db: Session = Depends(get_db_session, scope="function"),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    output_link = TechnicalAssetOutputPortService(db).deny_data_output_link(
+    output_link = TechnicalAssetOutputPortService(db).deny_technical_asset_link(
         data_product_id=data_product_id,
         technical_asset_id=link_request.technical_asset_id,
         output_port_id=output_port_id,
@@ -164,7 +164,7 @@ def link_output_port_to_technical_asset(
     db: Session = Depends(get_db_session, scope="function"),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> LinkTechnicalAssetsToOutputPortResponse:
-    dataset_link = TechnicalAssetService(db).link_dataset_to_data_output(
+    output_port_link = TechnicalAssetService(db).link_output_port_to_technical_asset(
         data_product_id,
         link_request.technical_asset_id,
         output_port_id,
@@ -183,20 +183,20 @@ def link_output_port_to_technical_asset(
     )
 
     approvers = RoleAssignmentService(db).users_with_authz_action(
-        dataset_link.output_port_id,
+        output_port_link.output_port_id,
         Action.OUTPUT_PORT__APPROVE_TECHNICAL_ASSET_LINK_REQUEST,
     )
     other_approvers = [a for a in approvers if a != authenticated_user]
     if other_approvers:
         background_tasks.add_task(
             email.send_link_output_port_email(
-                dataset_link.output_port,
-                dataset_link.technical_asset,
+                output_port_link.output_port,
+                output_port_link.technical_asset,
                 requester=deepcopy(authenticated_user),
                 approvers=[deepcopy(approver) for approver in other_approvers],
             )
         )
-    return LinkTechnicalAssetsToOutputPortResponse(link_id=dataset_link.id)
+    return LinkTechnicalAssetsToOutputPortResponse(link_id=output_port_link.id)
 
 
 @router.delete(
@@ -226,7 +226,7 @@ def unlink_output_port_from_technical_asset(
     db: Session = Depends(get_db_session, scope="function"),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    data_output = TechnicalAssetService(db).unlink_dataset_from_data_output(
+    technical_asset = TechnicalAssetService(db).unlink_output_port_from_technical_asset(
         data_product_id=data_product_id,
         id=link_request.technical_asset_id,
         output_port_id=output_port_id,
@@ -243,5 +243,5 @@ def unlink_output_port_from_technical_asset(
         ),
     )
     NotificationService(db).create_data_product_notifications(
-        data_product_id=data_output.owner_id, event_id=event_id
+        data_product_id=technical_asset.owner_id, event_id=event_id
     )

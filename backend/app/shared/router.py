@@ -22,14 +22,14 @@ from app.configuration.theme_settings.router import router as theme_settings
 from app.core.auth.auth import api_key_authenticated
 from app.core.config.env_var_parser import get_boolean_variable
 from app.data_products.output_port_technical_assets_link.router import (
-    router as data_output_dataset,
+    router as technical_asset_output_port,
 )
 from app.data_products.output_ports.input_ports.router import (
     router as data_product_dataset,
 )
 from app.data_products.output_ports.router import router as dataset
 from app.data_products.router import router as data_product
-from app.data_products.technical_assets.router import router as data_outputs
+from app.data_products.technical_assets.router import router as technical_assets
 from app.explorations.router import router as exploration
 from app.graph.router import router as graph
 from app.resource_names.router import router as resource_name
@@ -53,8 +53,8 @@ router.include_router(data_product_lifecycle)
 router.include_router(data_product_setting)
 router.include_router(access_modes)
 router.include_router(data_product_dataset)
-router.include_router(data_output_dataset)
-router.include_router(data_outputs)
+router.include_router(technical_asset_output_port)
+router.include_router(technical_assets)
 router.include_router(domain)
 router.include_router(environment)
 router.include_router(platform)

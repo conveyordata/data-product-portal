@@ -23,7 +23,7 @@ if TYPE_CHECKING:
     )
     from app.technical_asset_configuration.base_model import TechnicalAssetConfiguration
 
-from app.configuration.tags.model import Tag, tag_data_output_table
+from app.configuration.tags.model import Tag, tag_technical_asset_table
 from app.database.database import Base, ensure_exists
 from app.shared.model import BaseORM
 
@@ -58,7 +58,7 @@ class TechnicalAsset(Base, BaseORM, EventTrackedMixin):
     platform: Mapped[Optional["Platform"]] = relationship(lazy="joined")
     service: Mapped[Optional["PlatformService"]] = relationship(lazy="joined")
     owner: Mapped["DataProduct"] = relationship(
-        back_populates="data_outputs", lazy="joined"
+        back_populates="technical_assets", lazy="joined"
     )
     configuration: Mapped["TechnicalAssetConfiguration"] = relationship(lazy="joined")
 
@@ -72,7 +72,9 @@ class TechnicalAsset(Base, BaseORM, EventTrackedMixin):
         )
     )
     tags: Mapped[list[Tag]] = relationship(
-        secondary=tag_data_output_table, back_populates="data_outputs", lazy="selectin"
+        secondary=tag_technical_asset_table,
+        back_populates="technical_assets",
+        lazy="selectin",
     )
 
     environment_configurations: Mapped[

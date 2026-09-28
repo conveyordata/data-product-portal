@@ -100,7 +100,7 @@ def register_resources(mcp) -> None:
             user=user,
             assignment_filter=AssignmentFilter.ALL,
         )
-        all_technical_assets = TechnicalAssetService(db).get_data_outputs()
+        all_technical_assets = TechnicalAssetService(db).get_technical_assets()
         all_domains = DomainService(db).get_domains()
 
         stats = {

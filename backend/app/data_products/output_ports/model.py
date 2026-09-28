@@ -29,7 +29,7 @@ from app.authorization.role_assignments.output_port.model import (
 )
 from app.configuration.access_durations.enums import AccessDurationType
 from app.configuration.access_modes.model import AccessMode
-from app.configuration.tags.model import Tag, tag_dataset_table
+from app.configuration.tags.model import Tag, tag_output_port_table
 from app.core.authz.db_utils import (
     is_system_account,
     is_user_admin,
@@ -190,7 +190,7 @@ class OutputPort(Base, BaseORM, EventTrackedMixin):
         )
     )
     tags: Mapped[list[Tag]] = relationship(
-        secondary=tag_dataset_table, back_populates="output_ports", lazy="selectin"
+        secondary=tag_output_port_table, back_populates="output_ports", lazy="selectin"
     )
     data_product_settings: Mapped[list["DataProductSettingValue"]] = relationship(
         "DataProductSettingValue",
