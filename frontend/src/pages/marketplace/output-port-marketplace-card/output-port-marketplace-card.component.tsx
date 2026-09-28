@@ -10,7 +10,19 @@ import {
     TeamOutlined,
     UnorderedListOutlined,
 } from '@ant-design/icons';
-import { Button, Card, Descriptions, type DescriptionsProps, Space, Tag, Tooltip, Typography } from 'antd';
+import {
+    Button,
+    Card,
+    ConfigProvider,
+    Descriptions,
+    type DescriptionsProps,
+    Flex,
+    Space,
+    Tag,
+    Tooltip,
+    Typography,
+    theme,
+} from 'antd';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -27,7 +39,7 @@ import {
 } from '@/store/features/cart/cart-slice.ts';
 import { createDataProductIdPath, createMarketplaceOutputPortPath } from '@/types/navigation.ts';
 import { OutputPortCardTooltip } from './output-port-card-tooltip.component';
-import styles from './output-port-marketplace-card.module.scss';
+import styles from './output-port-marketplace-card-layout.module.scss';
 
 type Props = {
     outputPort: SearchOutputPortsResponseItem;
@@ -35,6 +47,7 @@ type Props = {
 
 export function OutputPortMarketplaceCard({ outputPort }: Props) {
     const { t } = useTranslation();
+    const { token } = theme.useToken();
     const dispatch = useAppDispatch();
     const cartOutputPortIds = useSelector(selectCartOutputPortIds);
 
@@ -105,11 +118,8 @@ export function OutputPortMarketplaceCard({ outputPort }: Props) {
                     </Space>
                 ),
                 children: (
-                    <Typography.Paragraph
-                        style={{ height: '44px' }} // To keep 2 rows for the Data Product height
-                        ellipsis={{ rows: 2, tooltip: true }}
-                    >
-                        <Link to={createDataProductIdPath(outputPort.data_product_id)} className={styles.link}>
+                    <Typography.Paragraph ellipsis={{ rows: 2, tooltip: true }}>
+                        <Link to={createDataProductIdPath(outputPort.data_product_id)}>
                             {outputPort.data_product_name}
                         </Link>
                     </Typography.Paragraph>
@@ -137,12 +147,30 @@ export function OutputPortMarketplaceCard({ outputPort }: Props) {
 
     if (!outputPort) return <LoadingSpinner />;
     return (
-        <>
+        <ConfigProvider
+            theme={{
+                components: {
+                    Card: {
+                        actionsLiMargin: `${token.paddingXS}px 0`,
+                        colorBorderSecondary: token.colorBorder,
+                    },
+                },
+            }}
+        >
             <Card
                 key={outputPort.id}
                 data-cy="output-port-card"
-                styles={{ body: { padding: 12 } }}
-                className={styles.marketplaceCardContainer}
+                // Subgrid rows (title, description, details, actions) come from the marketplace grid to align cards per row
+                styles={{
+                    root: { display: 'grid', gridRow: 'span 4', gridTemplateRows: 'subgrid', rowGap: 0 },
+                    body: {
+                        display: 'grid',
+                        gridRow: 'span 3',
+                        gridTemplateRows: 'subgrid',
+                        rowGap: token.paddingXXS,
+                        padding: 12,
+                    },
+                }}
                 actions={[
                     <Tooltip key="details" title={t('View details')}>
                         <Link to={createMarketplaceOutputPortPath(outputPort.id, outputPort.data_product_id)}>
@@ -150,7 +178,7 @@ export function OutputPortMarketplaceCard({ outputPort }: Props) {
                         </Link>
                     </Tooltip>,
                     <Tooltip
-                        key="details"
+                        key="cart"
                         title={cartOutputPortIds.includes(outputPort.id) ? t('Remove from cart') : t('Add to cart')}
                     >
                         <Button
@@ -186,34 +214,33 @@ export function OutputPortMarketplaceCard({ outputPort }: Props) {
                     </Tooltip>,
                 ]}
             >
-                <Space orientation="vertical" size="small" style={{ width: '100%' }}>
-                    <Link to={createMarketplaceOutputPortPath(outputPort.id, outputPort.data_product_id)}>
-                        <Typography.Title level={5} style={{ marginBottom: 0 }}>
-                            {outputPort.name}
-                        </Typography.Title>
-                    </Link>
-                    <Typography.Paragraph
-                        ellipsis={{ rows: 2, tooltip: true }}
-                        style={{ height: '44px', marginBottom: 0 }}
-                    >
+                <Link to={createMarketplaceOutputPortPath(outputPort.id, outputPort.data_product_id)}>
+                    <Typography.Title level={5} ellipsis={{ rows: 2, tooltip: true }} style={{ marginBottom: 0 }}>
+                        {outputPort.name}
+                    </Typography.Title>
+                </Link>
+                <Flex vertical gap="small">
+                    <Typography.Paragraph ellipsis={{ rows: 2, tooltip: true }} style={{ marginBottom: 0 }}>
                         {outputPort.description || 'No description available.'}
                     </Typography.Paragraph>
-                    <Space size={2} style={{ height: '22px' }}>
-                        {outputPort.tags?.map((tag) => (
-                            <Tag color="success" key={tag.value}>
-                                {tag.value}
-                            </Tag>
-                        ))}
-                    </Space>
-
-                    <Descriptions
-                        layout="vertical"
-                        size="small"
-                        colon={false}
-                        column={2}
-                        items={createCardDetails(outputPort)}
-                    />
-                </Space>
+                    {outputPort.tags?.length > 0 && (
+                        <Space size="small" wrap>
+                            {outputPort.tags.map((tag) => (
+                                <Tag color="success" key={tag.value}>
+                                    {tag.value}
+                                </Tag>
+                            ))}
+                        </Space>
+                    )}
+                </Flex>
+                <Descriptions
+                    layout="vertical"
+                    size="small"
+                    colon={false}
+                    column={2}
+                    className={styles.cardDetails}
+                    items={createCardDetails(outputPort)}
+                />
             </Card>
             {selectAccessModesOutputPort !== undefined && (
                 <SelectAccessModeModal
@@ -225,6 +252,6 @@ export function OutputPortMarketplaceCard({ outputPort }: Props) {
                     }}
                 />
             )}
-        </>
+        </ConfigProvider>
     );
 }

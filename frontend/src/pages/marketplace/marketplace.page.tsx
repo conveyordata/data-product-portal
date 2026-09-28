@@ -1,6 +1,6 @@
 import { ShopOutlined } from '@ant-design/icons';
 import { usePostHog } from '@posthog/react';
-import { Alert, Col, Empty, Flex, Input, Pagination, Row, Typography } from 'antd';
+import { Alert, Col, Empty, Flex, Input, Pagination, Row, Typography, theme } from 'antd';
 import { parseAsInteger, parseAsString, useQueryState } from 'nuqs';
 import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -13,6 +13,7 @@ import { OutputPortMarketplaceCard } from './output-port-marketplace-card/output
 
 export function Marketplace() {
     const { t } = useTranslation();
+    const { token } = theme.useToken();
     const posthog = usePostHog();
     const { setBreadcrumbs } = useBreadcrumbs();
     useEffect(() => {
@@ -95,22 +96,27 @@ export function Marketplace() {
             <Col span={14} />
             <Col span={24}>
                 {searchTerm && searchTerm.length < 3 && (
-                    <>
-                        <Alert
-                            title={t('Search only works when providing at least 3 characters as a search term')}
-                            type="warning"
-                        />
-                        <br />
-                    </>
+                    <Alert
+                        title={t('Search only works when providing at least 3 characters as a search term')}
+                        type="warning"
+                        style={{ marginBottom: token.paddingSM }}
+                    />
                 )}
                 {isFetching ? (
                     <LoadingSpinner spinProps={{ style: { height: '200px' } }} />
                 ) : paginatedOutputPorts?.length > 0 ? (
-                    <Flex wrap="wrap" gap="small">
+                    // Cards use CSS subgrid on these rows so their sections align across each visual row
+                    <div
+                        style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))',
+                            gap: token.paddingSM,
+                        }}
+                    >
                         {paginatedOutputPorts.map((outputPort) => (
                             <OutputPortMarketplaceCard key={outputPort.id} outputPort={outputPort} />
                         ))}
-                    </Flex>
+                    </div>
                 ) : (
                     <Flex justify="center">
                         <Empty description={t('No results match you search')} />
