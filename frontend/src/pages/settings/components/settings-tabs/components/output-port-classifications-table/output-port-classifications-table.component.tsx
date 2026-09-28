@@ -15,9 +15,7 @@ import { getOutputPortClassificationsTableColumns } from './output-port-classifi
 
 export function OutputPortClassificationsTable() {
     const { t } = useTranslation();
-    const { data, isFetching } = useGetOutputPortClassificationsQuery(undefined, {
-        refetchOnMountOrArgChange: true,
-    });
+    const { data, isFetching } = useGetOutputPortClassificationsQuery();
     const { isVisible, handleOpen, handleClose } = useModal();
     const [initial, setInitial] = useState<OutputPortClassificationsGetItem | undefined>(undefined);
     const [removeClassification] = useRemoveOutputPortClassificationMutation();

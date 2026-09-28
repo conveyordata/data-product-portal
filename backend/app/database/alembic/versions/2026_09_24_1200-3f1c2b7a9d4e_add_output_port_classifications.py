@@ -33,9 +33,9 @@ def upgrade() -> None:
         """
         INSERT INTO output_port_classifications (id, name, description, access_type, created_on)
         VALUES
-            ('00000000-0000-0000-0002-000000000001', 'Unrestricted', 'Data that anyone in the organisation may use. Access requests are approved automatically.', 'UNRESTRICTED', NOW()),
-            ('00000000-0000-0000-0002-000000000002', 'Restricted', 'Data that requires owner approval before a Data Product can use it.', 'RESTRICTED', NOW()),
-            ('00000000-0000-0000-0002-000000000003', 'Private', 'Data that is hidden from the rest of the organisation. Access requires owner approval.', 'PRIVATE', NOW())
+            (gen_random_uuid(), 'Unrestricted', 'Data that anyone in the organisation may use. Access requests are approved automatically.', 'UNRESTRICTED', NOW()),
+            (gen_random_uuid(), 'Restricted', 'Data that requires owner approval before a Data Product can use it.', 'RESTRICTED', NOW()),
+            (gen_random_uuid(), 'Private', 'Data that is hidden from the rest of the organisation. Access requires owner approval.', 'PRIVATE', NOW())
         """
     )
     op.add_column("datasets", sa.Column("classification_id", sa.UUID(), nullable=True))
