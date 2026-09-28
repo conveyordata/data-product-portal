@@ -53,7 +53,7 @@ export const getDataProductDatasetsColumns = ({
                 const popoverTitle = (
                     <OutputPortPopoverTitle
                         name={output_port.name}
-                        accessType={output_port.classification.access_type}
+                        classification={output_port.classification}
                         isApproved={isDatasetRequestApproved}
                     />
                 );
