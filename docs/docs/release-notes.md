@@ -20,6 +20,7 @@ sidebar_position: 200
 ### bugfixes
 
 - **[Helm]**: Fix translation override file path
+- **[General]**: Fix translation file by adding more nested translations for Data Products, Output ports and Technical assets.
 
 
 ## 0.7.4
