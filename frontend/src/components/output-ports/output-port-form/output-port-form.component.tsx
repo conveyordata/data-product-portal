@@ -61,7 +61,11 @@ import {
     createMarketplaceOutputPortPath,
     createOutputPortPath,
 } from '@/types/navigation.ts';
-import { compareAccessFunctions, fitsDataProductVisibility } from '@/utils/access-type.helper.ts';
+import {
+    compareAccessFunctions,
+    fitsDataProductVisibility,
+    getAccessFunctionLabel,
+} from '@/utils/access-type.helper.ts';
 import { useGetDataProductOwnerIds } from '@/utils/data-product-user-role.helper';
 import { useGetDatasetOwnerIds } from '@/utils/dataset-user-role.helper.ts';
 import { dispatchMessage } from '@/utils/feedback.ts';
@@ -229,51 +233,58 @@ const { TextArea } = Input;
 const DEBOUNCE = 500;
 
 export function ClassificationSection({
+    id,
     value,
     onChange,
     hiddenDataProduct = false,
 }: {
+    id?: string;
     value?: string;
     onChange?: (value: string) => void;
     hiddenDataProduct: boolean;
 }) {
     const { t } = useTranslation();
     const { data: { output_port_classifications: classifications = [] } = {} } = useGetOutputPortClassificationsQuery();
-    const tooltips = {
-        [OutputPortAccessType.Unrestricted]: t(
-            'Auto-approve: visible to everyone and access requests are approved automatically, not allowed for hidden Data Products',
-        ),
-        [OutputPortAccessType.Restricted]: t(
-            'Approval required: visible to everyone and access requests need owner approval, not allowed for hidden Data Products',
-        ),
-        [OutputPortAccessType.Private]: t(
-            'Invite only: hidden from everyone outside the Data Product and access requests need owner approval',
-        ),
-    };
-    const options = [...classifications]
-        .sort((a, b) => compareAccessFunctions(a.access_type, b.access_type))
-        .map((classification) => ({
-            label: (
-                <Tooltip
-                    title={[classification.description, tooltips[classification.access_type]]
-                        .filter(Boolean)
-                        .join(' - ')}
-                >
-                    <span>{classification.name}</span>
-                </Tooltip>
-            ),
-            value: classification.id,
-            disabled: !fitsDataProductVisibility(classification.access_type, hiddenDataProduct),
-        }));
+    const options = Object.values(OutputPortAccessType)
+        .sort(compareAccessFunctions)
+        .map((accessType) => {
+            const allowed = fitsDataProductVisibility(accessType, hiddenDataProduct);
+            return {
+                label: allowed
+                    ? getAccessFunctionLabel(t, accessType)
+                    : `${getAccessFunctionLabel(t, accessType)} (${t('not allowed for hidden Data Products')})`,
+                options: classifications
+                    .filter((classification) => classification.access_type === accessType)
+                    .map((classification) => ({
+                        label: classification.name,
+                        value: classification.id,
+                        disabled: !allowed,
+                    })),
+            };
+        })
+        .filter((group) => group.options.length > 0);
+    const getDescription = (id?: string | number | null) =>
+        classifications.find((classification) => classification.id === id)?.description;
+    const selectedDescription = getDescription(value);
 
     return (
-        <Radio.Group
-            value={value}
-            options={options}
-            optionType="button"
-            block
-            onChange={(e) => onChange?.(e.target.value)}
-        />
+        <Flex vertical gap="small">
+            <Select
+                id={id}
+                value={value}
+                onChange={onChange}
+                options={options}
+                showSearch={{ optionFilterProp: 'label' }}
+                placeholder={t('Select a classification')}
+                optionRender={(option) => (
+                    <Flex vertical>
+                        {option.label}
+                        <Typography.Text type="secondary">{getDescription(option.value)}</Typography.Text>
+                    </Flex>
+                )}
+            />
+            {selectedDescription && <Typography.Text type="secondary">{selectedDescription}</Typography.Text>}
+        </Flex>
     );
 }
 

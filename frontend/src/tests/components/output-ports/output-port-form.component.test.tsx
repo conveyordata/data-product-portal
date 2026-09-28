@@ -1,3 +1,4 @@
+import userEvent from '@testing-library/user-event';
 import { HttpResponse, http } from 'msw';
 import { describe, expect, it } from 'vitest';
 import { OutputPortForm } from '@/components/output-ports/output-port-form/output-port-form.component.tsx';
@@ -63,13 +64,18 @@ describe('OutputPortForm', () => {
             routerProps: { initialEntries: ['/'] },
         });
 
-        const restricted = await screen.findByRole('radio', { name: 'Restricted' });
-        const unrestricted = screen.getByRole('radio', { name: 'Unrestricted' });
-        const privateOption = screen.getByRole('radio', { name: 'Private' });
+        const select = await screen.findByRole('combobox', { name: /classification/i });
+        expect(await screen.findByTitle('Private')).toBeInTheDocument();
 
-        expect(restricted).toBeDisabled();
-        expect(unrestricted).toBeDisabled();
-        expect(privateOption).toBeEnabled();
-        expect(privateOption).toBeChecked();
+        await userEvent.click(select);
+
+        const option = (name: string) =>
+            screen
+                .getAllByText(name)
+                .find((el) => el.closest('.ant-select-item-option'))
+                ?.closest('.ant-select-item-option');
+        expect(option('Unrestricted')).toHaveClass('ant-select-item-option-disabled');
+        expect(option('Restricted')).toHaveClass('ant-select-item-option-disabled');
+        expect(option('Private')).not.toHaveClass('ant-select-item-option-disabled');
     });
 });
