@@ -11,6 +11,7 @@ from app.core.logging import logger  # noqa: E402
 from app.database.database import engine, get_url  # noqa: E402
 from app.plugins.migrations import (  # noqa: E402
     check_latest_migration_core,
+    create_core_revision,
     migrate_all,
 )
 from app.plugins.registry import plugin_registry  # noqa: E402
@@ -40,6 +41,21 @@ def migrate():
         logger.info("Migration finished successfully")
     except Exception:
         logger.exception("Something went wrong when migrating")
+        exit(1)
+
+
+@app.command()
+def revision(
+    message: str = typer.Argument(..., help="Description of the migration."),
+):
+    """
+    Create a new empty core migration script.
+    """
+    try:
+        path = create_core_revision(plugin_registry.discovered(), engine, message)
+        logger.info(f"Created migration {path}")
+    except Exception:
+        logger.exception("Could not create the migration")
         exit(1)
 
 
