@@ -166,7 +166,6 @@ export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallback
         if (errorFields.length > 0) {
             form.scrollToField(errorFields[0].name, { focus: true });
         }
-        dispatchMessage({ content: t('Please make sure all required fields are filled in'), type: 'info' });
     };
 
     const onDataPlatformClick = (dropdown: CustomDropdownItemProps<string>) => {
