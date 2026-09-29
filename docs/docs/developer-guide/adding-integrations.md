@@ -1,3 +1,6 @@
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
 # Adding Integrations to the Data Product Portal
 
 **Warning**: Installations older than portal 0.7.3 must upgrade to 0.7.3 before moving to 0.8.0, because the technical asset tables changed and the older migration logic is gone; see the [release notes](../release-notes.md).
@@ -9,7 +12,7 @@ Your data products live on real tools: a database in Glue, a bucket in S3, a rep
 The portal ships with a set of integrations out of the box (see [Integrations](./integrations.md)). If the tool you use isn't among them, you can write your own as a plugin. A plugin is a small Python package that you install next to the portal. The portal picks it up when it starts, so you don't have to change the portal's code or maintain a fork of it.
 
 
-This guide uses the [Glue plugin](https://github.com/conveyordata/data-product-portal/tree/main/plugins/portal_plugins/glue) as its running example. With it, a data product owner registers a Glue database as a [technical asset](../concepts/technical-assets.md) of their product. It lives in its own package, [`plugins/`](https://github.com/conveyordata/data-product-portal/tree/main/plugins), and registers itself the same way this guide describes, so it's the best place to see complete, working code. Because it sits in the portal's own repository, it doesn't list `data-product-portal` as a dependency, but yours should. Still we believe it to be a good reference
+This guide uses the [Glue plugin](https://github.com/conveyordata/data-product-portal/tree/main/plugins/portal_plugins/glue) as its running example. With it, a data product owner registers a Glue database as a [technical asset](../concepts/technical-assets.md) of their product. It lives in its own package, [`plugins/`](https://github.com/conveyordata/data-product-portal/tree/main/plugins), and registers itself the same way this guide describes, so it's the best place to see complete, working code. Because it sits in the portal's own repository, it doesn't list `data-product-portal` as a dependency: the portal's backend installs it as a local package, so its imports resolve there. Your plugin lives in its own repository, so it does need the dependency.
 
 ## Step 1: Install the portal package
 
@@ -17,9 +20,10 @@ Building a plugin starts with installing the `data-product-portal` package from 
 
 Always use the same version as the portal you run. If your portal runs 0.8.0, install 0.8.0. The portal image already contains this package, so a matching version means nothing gets replaced when your plugin is installed into it later.
 
-Create a new project and add the package. Depending on the package manager you use:
+Create a new project and add the package:
 
-With Poetry:
+<Tabs groupId="package-manager">
+<TabItem value="poetry" label="Poetry">
 
 ```bash
 poetry new my-portal-plugins
@@ -27,19 +31,26 @@ cd my-portal-plugins
 poetry add "data-product-portal==0.8.0"
 ```
 
-With uv:
+</TabItem>
+<TabItem value="uv" label="uv">
 
 ```bash
 uv init --lib my-portal-plugins
 cd my-portal-plugins
-uv add data-product-portal>=0.8.0
+uv add "data-product-portal==0.8.0"
 ```
 
-With setuptools, list it in `install_requires` in your `setup.py`, and install it into your environment:
+</TabItem>
+<TabItem value="setuptools" label="setuptools">
+
+List it in `install_requires` in your `setup.py`, and install it into your environment:
 
 ```bash
-pip install data-product-portal==0.8.0
+pip install "data-product-portal==0.8.0"
 ```
+
+</TabItem>
+</Tabs>
 
 A plugin package can hold one plugin or several. Each one gets its own folder:
 
@@ -89,13 +100,13 @@ The sections below go through this outline one part at a time, in the order you'
 
 `name` identifies your plugin. It has to be unique among all plugins in your portal, and you'll use it again when you enable the plugin in step 4.
 
-`_platform_metadata` describes how your plugin looks in the portal. Every plugin shows up as a tile, and these are the settings you'll use most:
+`_platform_metadata` describes how your plugin looks in the portal. Every plugin shows up as a tile in the technical asset creation form, and these are the settings you'll use most:
 
 - `display_name` is the label on the tile, such as "Glue".
 - `icon_name` and `icon_package` point to the tile's icon. Every plugin brings its own icon: put the SVG file in your plugin's folder, set `icon_name` to the file name, and set `icon_package` to the Python package that holds it, for example `my_portal_plugins.glue`. The portal reads the file from your package.
 - `parent_platform` groups the tile under another one. Glue appears under AWS.
-- `platform_key` links the plugin to its platform service, explained in the next section.
-- `has_environments` decides whether the tile lets you pick an environment, such as development or production. It's on by default.
+- `platform_key` links the plugin to its platform service, explained in [the platform and platform service](#the-platform-and-platform-service).
+- `has_environments` decides what happens when someone clicks the tile on the data product page. When it's on, they first pick an environment, such as development or production, and `get_url` receives it. When it's off, the tile opens the link straight away. It's on by default.
 - `show_in_form` decides whether the plugin appears in the form for creating a technical asset. It's on by default.
 
 If you override `get_url`, the tile opens a link, for example to the resource in its own tool.
@@ -111,17 +122,17 @@ When a data product owner creates a Glue technical asset, they pick a database f
 - An environment is a stage such as development or production. Per environment it contains the settings that differ, such as the AWS account and region, or which real bucket belongs to each option. They're linked to an option through its `identifier`.
 
 
-Your plugin uses this in two places. `get_platform_options` reads the list of options, to fill a dropdown in your form. `get_configuration` gets the settings of the chosen environment, and returns the entry that belongs to this asset, usually the one whose `identifier` matches what the owner picked. The portal already knows the format of these environment settings for the platforms it supports, such as `AWSGlueConfig` for Glue. A plugin for another tool can reuse one of them, or do without environment settings by setting `has_environments=False`.
+Your plugin uses this in two places. `get_platform_options` reads the list of options, to fill a dropdown in your form. `get_configuration` gets the settings of the chosen environment, and returns the entry that belongs to this asset, usually the one whose `identifier` matches what the owner picked. The portal already knows the format of these environment settings for the platforms it supports, such as `AWSGlueConfig` for Glue. A plugin for another tool can reuse one of them, or do without environment settings: then skip `get_configuration` and the per-environment rows below.
 
-These rows live in the portal's database, and you add them with SQL. A plugin that only adds a link needs none of them:
+These rows live in the portal's database, and you add them with SQL (for now). A plugin that only adds a link needs none of them:
 
 | Table | What goes in it | Needed for a plugin with a form |
 |---|---|---|
 | `platforms` | The platform, such as AWS | Yes |
 | `platform_services` | The platform service, with its templates | Yes |
 | `platform_service_configs` | The list of options | Yes, use `'[]'` if there are none |
-| `env_platform_configs` | Platform settings per environment | Only if `has_environments=True` |
-| `env_platform_service_configs` | Platform service settings per environment | Only if `has_environments=True` |
+| `env_platform_configs` | Platform settings per environment | Only if your plugin uses environment settings |
+| `env_platform_service_configs` | Platform service settings per environment | Only if your plugin uses environment settings |
 
 The portal finds these rows by name, so two names have to match your `_platform_metadata`, ignoring upper and lower case. If they don't, the form can't find your platform and creating a technical asset fails:
 
@@ -196,7 +207,7 @@ def upgrade():
 
 A few things to keep in mind:
 
-- The `id` column has to point to `data_output_configurations.id`, the portal's own record of each technical asset.
+- The `id` column is mandatory and is linked to the technical asset table via `data_output_configurations.id`.
 - Start each revision id with your plugin's name, like `glue_0001_baseline`. The portal and all plugins share one list of applied migrations, so ids have to be unique across all of them.
 - The first migration has `down_revision = None`. Each later one points to the migration before it.
 - When you add or change a field later, add a new migration to the same folder. It can also move or fill in existing data.
@@ -215,7 +226,10 @@ The portal finds plugins through a standard Python feature called [entry points]
 
 Each entry has a name of your choice on the left, and the location of the class on the right, written as `module:Class`. The portal's own [`plugins/pyproject.toml`](https://github.com/conveyordata/data-product-portal/blob/main/plugins/pyproject.toml) is a working example.
 
-With Poetry 2 or later, or with uv, add this to `pyproject.toml`:
+<Tabs groupId="package-manager">
+<TabItem value="poetry" label="Poetry">
+
+With Poetry 2 or later, add this to `pyproject.toml`:
 
 ```toml
 [project.entry-points."data_product_portal.plugins"]
@@ -228,18 +242,37 @@ Poetry versions before 2.0 use a slightly different table:
 ```toml
 [tool.poetry.plugins."data_product_portal.plugins"]
 github = "my_portal_plugins.github.schema:GitHubPlugin"
+glue = "my_portal_plugins.glue.schema:GlueTechnicalAssetConfiguration"
 ```
 
-With setuptools, add it to the `setup()` call in `setup.py`:
+</TabItem>
+<TabItem value="uv" label="uv">
+
+Add this to `pyproject.toml`:
+
+```toml
+[project.entry-points."data_product_portal.plugins"]
+github = "my_portal_plugins.github.schema:GitHubPlugin"
+glue = "my_portal_plugins.glue.schema:GlueTechnicalAssetConfiguration"
+```
+
+</TabItem>
+<TabItem value="setuptools" label="setuptools">
+
+Add it to the `setup()` call in `setup.py`:
 
 ```python
 entry_points={
     "data_product_portal.plugins": [
         "github = my_portal_plugins.github.schema:GitHubPlugin",
+        "glue = my_portal_plugins.glue.schema:GlueTechnicalAssetConfiguration",
     ],
 },
 package_data={"": ["*.svg", "versions/*.py"]},
 ```
+
+</TabItem>
+</Tabs>
 
 Your icons and the `versions/` folder have to be part of the package you build, or the portal can't find them. Setuptools leaves them out unless you list them in `package_data`, as above. Whichever tool you use, build the package and check its contents with `unzip -l dist/*.whl`.
 
@@ -265,7 +298,7 @@ enabled_plugins:
   - GlueTechnicalAssetConfiguration
 ```
 
-If not, set the `ENABLED_PLUGINS` environment variable to a JSON list, such as `'["GitHubPlugin", "GlueTechnicalAssetConfiguration"]'`. Tihs will enable all the plugins you list.
+If not, set the `ENABLED_PLUGINS` environment variable to a JSON list, such as `'["GitHubPlugin", "GlueTechnicalAssetConfiguration"]'`. This will enable all the plugins you list.
 
 A plugin that is installed but not enabled still gets its migrations, and technical assets that already exist keep working. It just won't show up for new ones.
 
