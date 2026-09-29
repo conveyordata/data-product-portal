@@ -1,13 +1,16 @@
 import { Table, type TableColumnsType, type TableProps } from 'antd';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { DEFAULT_EXPIRING_SOON_THRESHOLD_DAYS } from '@/components/input-port/access-status.tsx';
 import { acceptRequest, rejectRequest } from '@/components/pending-access-requests-modal/request-handlers.ts';
 import { ReviewRequestModal } from '@/components/pending-access-requests-modal/review-request-modal.tsx';
 import { DEFAULT_TABLE_PAGINATION } from '@/constants/table.constants.ts';
 import { useTablePagination } from '@/hooks/use-table-pagination.tsx';
 import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
+import { useGetExpiringSoonThresholdQuery } from '@/store/api/services/generated/configurationAccessDurationsApi.ts';
 import {
     type OutputPortInputPort,
+    useRenewOutputPortAsInputPortMutation,
     useRevokeOutputPortAsInputPortMutation,
 } from '@/store/api/services/generated/dataProductsOutputPortsInputPortsApi.ts';
 import { useGetUserPendingActionsQuery } from '@/store/api/services/generated/usersApi.ts';
@@ -28,6 +31,9 @@ export function ConsumersTable({ outputPortId, dataProductId, dataProducts, isLo
     const { t } = useTranslation();
     const [revokeOutputPortAsInputPort, { isLoading: isRevokingOutputPortAsInputPort }] =
         useRevokeOutputPortAsInputPortMutation();
+    const [renewOutputPortAsInputPort, { isLoading: isRenewingOutputPortAsInputPort }] =
+        useRenewOutputPortAsInputPortMutation();
+    const { data: expiringSoonThreshold } = useGetExpiringSoonThresholdQuery();
 
     const [reviewingOutputPortInputPortId, setReviewingOutputPortInputPortId] = useState<string | null>(null);
 
@@ -92,14 +98,45 @@ export function ConsumersTable({ outputPortId, dataProductId, dataProducts, isLo
         [outputPortId, dataProductId, revokeOutputPortAsInputPort, t],
     );
 
+    const handleRenewDatasetForDataProduct = useCallback(
+        async (consumingDataProductName: string, consumingDataProductId: string) => {
+            try {
+                await renewOutputPortAsInputPort({
+                    outputPortId: outputPortId,
+                    dataProductId,
+                    renewOutputPortAsInputPortRequest: {
+                        consuming_data_product_id: consumingDataProductId,
+                    },
+                }).unwrap();
+                dispatchMessage({
+                    content: t('Access to Output Port has been renewed for {{name}}', {
+                        name: consumingDataProductName,
+                    }),
+                    type: 'success',
+                });
+            } catch (_error) {
+                dispatchMessage({
+                    content: t('Failed to renew access to Output Port'),
+                    type: 'error',
+                });
+            }
+        },
+        [outputPortId, dataProductId, renewOutputPortAsInputPort, t],
+    );
+
     const columns: TableColumnsType<OutputPortInputPort> = useMemo(() => {
         return getConsumerColumns({
             t,
             outputPortId,
             dataProductLinks: dataProducts,
             onRevokeDataProductDatasetLink: handleRevokeDatasetFromDataProduct,
+            onRenewDataProductDatasetLink: handleRenewDatasetForDataProduct,
             isLoading:
-                isRevokingOutputPortAsInputPort || isApprovingDataProductLink || isRejectingDataProductLinkFromHandler,
+                isRevokingOutputPortAsInputPort ||
+                isRenewingOutputPortAsInputPort ||
+                isApprovingDataProductLink ||
+                isRejectingDataProductLinkFromHandler,
+            expiringSoonThresholdDays: expiringSoonThreshold?.days ?? DEFAULT_EXPIRING_SOON_THRESHOLD_DAYS,
             canApprove: canApprove,
             canRevoke: canRevoke,
             setReviewingOutputPortInputPortId,
@@ -109,8 +146,11 @@ export function ConsumersTable({ outputPortId, dataProductId, dataProducts, isLo
         outputPortId,
         dataProducts,
         handleRevokeDatasetFromDataProduct,
+        handleRenewDatasetForDataProduct,
         isApprovingDataProductLink,
         isRevokingOutputPortAsInputPort,
+        isRenewingOutputPortAsInputPort,
+        expiringSoonThreshold,
         canApprove,
         canRevoke,
         isRejectingDataProductLinkFromHandler,

@@ -21,6 +21,7 @@ sidebar_position: 200
 
 - **[Helm]**: Fix translation override file path
 - **[General]**: Fix translation file by adding more nested translations for Data Products, Output ports and Technical assets.
+- **[General]**: Output Port owners can renew access for consumers whose access was revoked, expired, denied or cancelled, while keeping the access history. Icons were removed from the access action buttons.
 
 
 ## 0.7.4

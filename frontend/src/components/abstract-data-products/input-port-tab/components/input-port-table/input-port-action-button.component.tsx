@@ -1,8 +1,7 @@
-import { CloseCircleOutlined, ReloadOutlined, StopOutlined } from '@ant-design/icons';
 import { Button, Flex, Popconfirm } from 'antd';
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { DEFAULT_EXPIRING_SOON_THRESHOLD_DAYS, isExpiringSoon } from '@/components/input-port/access-status.tsx';
+import { canRenewAccess, DEFAULT_EXPIRING_SOON_THRESHOLD_DAYS } from '@/components/input-port/access-status.tsx';
 import { useGetExpiringSoonThresholdQuery } from '@/store/api/services/generated/configurationAccessDurationsApi.ts';
 import { InputPortStatus, type OutputPort, RenewalStatus } from '@/store/api/services/generated/dataProductsApi.ts';
 import { dispatchMessage } from '@/utils/feedback.ts';
@@ -35,14 +34,7 @@ export function InputPortActionButton({
     const { data } = useGetExpiringSoonThresholdQuery();
     const thresholdDays = data?.days ?? DEFAULT_EXPIRING_SOON_THRESHOLD_DAYS;
 
-    const canRenew =
-        renewalStatus !== RenewalStatus.Pending &&
-        (status === InputPortStatus.Expired ||
-            status === InputPortStatus.Denied ||
-            status === InputPortStatus.Revoked ||
-            status === InputPortStatus.Cancelled ||
-            renewalStatus === RenewalStatus.Denied ||
-            isExpiringSoon(status, validUntil, thresholdDays));
+    const canRenew = canRenewAccess(status, validUntil, renewalStatus, thresholdDays);
 
     const handleCancelRequest = useCallback(
         async (outputPortId: string, name: string) => {
@@ -107,13 +99,7 @@ export function InputPortActionButton({
     return (
         <Flex gap="small" wrap>
             {canRenew && (
-                <Button
-                    icon={<ReloadOutlined />}
-                    loading={renewing}
-                    disabled={!canRequestAccess}
-                    type="link"
-                    onClick={handleRenewClick}
-                >
+                <Button loading={renewing} disabled={!canRequestAccess} type="link" onClick={handleRenewClick}>
                     {t('Renew Access')}
                 </Button>
             )}
@@ -130,7 +116,7 @@ export function InputPortActionButton({
                     okButtonProps={{ loading }}
                     autoAdjustOverflow={true}
                 >
-                    <Button icon={<StopOutlined />} loading={loading} disabled={!canRemoveAccess} type="link">
+                    <Button loading={loading} disabled={!canRemoveAccess} type="link">
                         {t('Cancel Request')}
                     </Button>
                 </Popconfirm>
@@ -148,7 +134,7 @@ export function InputPortActionButton({
                     okButtonProps={{ loading }}
                     autoAdjustOverflow={true}
                 >
-                    <Button icon={<CloseCircleOutlined />} loading={loading} disabled={!canRemoveAccess} type="link">
+                    <Button loading={loading} disabled={!canRemoveAccess} type="link">
                         {t('Cancel Access')}
                     </Button>
                 </Popconfirm>
