@@ -6,7 +6,7 @@ MONTHS="${MONTHS:-6}"
 SINCE=$(date -u -d "-${MONTHS} months" +%Y-%m-01 2>/dev/null || date -u -v-"${MONTHS}"m +%Y-%m-01)
 
 prs=$(gh pr list -R "$REPO" --state all --limit 2000 \
-  --search "created:>=$SINCE -author:app/dependabot" \
+  --search "updated:>=$SINCE -author:app/dependabot" \
   --json author,state,createdAt,mergedAt,reviews)
 bugs=$(gh issue list -R "$REPO" --state all --limit 1000 --label bug \
   --search "created:>=$SINCE" --json body)
@@ -24,22 +24,28 @@ query($endCursor: String) {
 releases=$(gh release list -R "$REPO" --limit 100 --json tagName,publishedAt \
   --jq "[.[] | select(.publishedAt >= \"$SINCE\")]")
 
-jq -rn --argjson prs "$prs" --argjson bugs "$bugs" --argjson releases "$releases" --argjson threads "$threads" '
+jq -rn --arg since "$SINCE" --argjson prs "$prs" --argjson bugs "$bugs" --argjson releases "$releases" --argjson threads "$threads" '
 def hours(a; b): ((b | fromdate) - (a | fromdate)) / 3600;
-def median: sort | if length == 0 then null else .[length / 2 | floor] end;
+def median: sort | length as $n | if $n == 0 then null elif $n % 2 == 1 then .[$n / 2 | floor] else (.[$n / 2 - 1] + .[$n / 2]) / 2 end;
 def fmt: if . == null then "-" else (. * 10 | round / 10 | tostring) end;
 def agent: .author.login | test("copilot|claude"; "i");
 def first_review: [.reviews[] | select(.author.login | test("copilot"; "i") | not) | .submittedAt] | min;
 
-($prs | map(. + {month: .createdAt[0:7]}) | group_by(.month) | map({
-  month: .[0].month,
-  opened: length,
-  merged: map(select(.mergedAt)) | length,
-  lead: map(select(.mergedAt) | hours(.createdAt; .mergedAt)) | median,
-  review: map(select(first_review) | hours(.createdAt; first_review)) | median,
-  agent_opened: map(select(agent)) | length,
-  agent_merged: map(select(agent and .mergedAt)) | length
-})) as $rows
+($since[0:7]) as $first
+| ($prs | map(select(.createdAt[0:7] >= $first) | . + {month: .createdAt[0:7]})) as $opened
+| ($prs | map(select(.mergedAt and .mergedAt[0:7] >= $first) | . + {month: .mergedAt[0:7]})) as $merged
+| ([$opened[].month, $merged[].month] | unique | map(. as $m
+  | ($opened | map(select(.month == $m))) as $o
+  | ($merged | map(select(.month == $m))) as $g
+  | {
+    month: $m,
+    opened: ($o | length),
+    merged: ($g | length),
+    lead: ($g | map(hours(.createdAt; .mergedAt)) | median),
+    review: ($o | map(select(first_review) | hours(.createdAt; first_review)) | median),
+    agent_opened: ($o | map(select(agent)) | length),
+    agent_merged: ($g | map(select(agent)) | length)
+  })) as $rows
 | ($threads | map(.comments.nodes[0] as $c
     | ($c.reactionGroups | map({(.content): .reactors.totalCount}) | add) as $r
     | {month: $c.createdAt[0:7], signal: (
@@ -54,7 +60,7 @@ def first_review: [.reviews[] | select(.author.login | test("copilot"; "i") | no
 | ($releases | map(.tagName | ltrimstr("v")) | map(. as $v | {v: $v, bugs: ($found | map(select(. == $v)) | length)})) as $rel
 | "# Delivery metrics",
   "",
-  "Since \($rows[0].month), excluding Dependabot. Updated \(now | todate[0:10]).",
+  "Since \($rows[0].month), excluding Dependabot. Updated \(now | todate[0:10]). Opened and first review count by month opened; merged and lead time by month merged.",
   "",
   "| Month | PRs opened | Merged | Median lead time (h) | Median first human review (h) | Agent PRs opened | Agent PRs merged |",
   "|---|---|---|---|---|---|---|",
