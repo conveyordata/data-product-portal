@@ -115,9 +115,10 @@ class TestGroupsRouter:
         )
 
         assert response.status_code == 400
-        assert response.json() == {
-            "detail": "A group with this external ID already exists."
-        }
+        assert response.json()["detail"] == (
+            "A group with this external ID already exists."
+        )
+        assert response.json()["correlation_id"]
 
     @pytest.mark.usefixtures("admin")
     def test_update_group__updates_mutable_fields(self, client):
@@ -241,15 +242,19 @@ class TestGroupMembershipRouter:
 
     @pytest.mark.usefixtures("admin")
     def test_add_group_members_ignores_existing_members(
-        self,
-        client,
-        session,
+            self,
+            client,
+            session,
     ):
         group = GroupFactory()
         existing = UserFactory()
         new = UserFactory()
-        service = GroupService(session)
-        service.add_members(group.id, [existing.id])
+
+        first_response = client.post(
+            f"{ENDPOINT}/{group.id}/members",
+            json={"member_identity_ids": [str(existing.id)]},
+        )
+        assert first_response.status_code == 204
 
         response = client.post(
             f"{ENDPOINT}/{group.id}/members",
@@ -264,11 +269,13 @@ class TestGroupMembershipRouter:
         assert response.status_code == 204
         assert response.content == b""
 
+        service = GroupService(session)
         memberships = service.list_memberships(group.id)
+
         assert {
-            membership.member_identity_id
-            for membership in memberships
-        } == {existing.id, new.id}
+           membership.member_identity_id
+           for membership in memberships
+       } == {existing.id, new.id}
 
     def test_add_group_members_requires_permission(self, client):
         group = GroupFactory()
@@ -314,8 +321,17 @@ class TestGroupMembershipRouter:
         group = GroupFactory()
         removed = UserFactory()
         retained = UserFactory()
-        service = GroupService(session)
-        service.add_members(group.id, [removed.id, retained.id])
+
+        setup_response = client.post(
+            f"{ENDPOINT}/{group.id}/members",
+            json={
+                "member_identity_ids": [
+                    str(removed.id),
+                    str(retained.id),
+                ]
+            },
+        )
+        assert setup_response.status_code == 204
 
         response = client.request(
             "DELETE",
@@ -325,20 +341,28 @@ class TestGroupMembershipRouter:
 
         assert response.status_code == 204
         assert response.content == b""
+
+        session.expire_all()
+        service = GroupService(session)
+
         assert not service.has_member(group.id, removed.id)
         assert service.has_member(group.id, retained.id)
 
     @pytest.mark.usefixtures("admin")
     def test_remove_group_members_ignores_absent_members(
-        self,
-        client,
-        session,
+            self,
+            client,
+            session,
     ):
         group = GroupFactory()
         member = UserFactory()
         absent = UserFactory()
-        service = GroupService(session)
-        service.add_members(group.id, [member.id])
+
+        setup_response = client.post(
+            f"{ENDPOINT}/{group.id}/members",
+            json={"member_identity_ids": [str(member.id)]},
+        )
+        assert setup_response.status_code == 204
 
         response = client.request(
             "DELETE",
@@ -348,7 +372,9 @@ class TestGroupMembershipRouter:
 
         assert response.status_code == 204
         assert response.content == b""
-        assert service.has_member(group.id, member.id)
+
+        session.expire_all()
+        assert GroupService(session).has_member(group.id, member.id)
 
     def test_remove_group_members_requires_permission(self, client):
         group = GroupFactory()
@@ -380,8 +406,17 @@ class TestGroupMembershipRouter:
         retained = UserFactory()
         removed = UserFactory()
         added = UserFactory()
-        service = GroupService(session)
-        service.add_members(group.id, [retained.id, removed.id])
+
+        setup_response = client.post(
+            f"{ENDPOINT}/{group.id}/members",
+            json={
+                "member_identity_ids": [
+                    str(retained.id),
+                    str(removed.id),
+                ]
+            },
+        )
+        assert setup_response.status_code == 204
 
         response = client.put(
             f"{ENDPOINT}/{group.id}/members",
@@ -396,28 +431,37 @@ class TestGroupMembershipRouter:
         assert response.status_code == 204
         assert response.content == b""
 
-        memberships = service.list_memberships(group.id)
+        memberships = GroupService(session).list_memberships(group.id)
         assert {
-            membership.member_identity_id
-            for membership in memberships
-        } == {retained.id, added.id}
+           membership.member_identity_id
+           for membership in memberships
+       } == {retained.id, added.id}
 
     @pytest.mark.usefixtures("admin")
-    def test_replace_group_members_rejects_duplicate_ids(self, client):
+    def test_replace_group_members_rejects_invalid_identity_without_changes(
+            self,
+            client,
+            session,
+    ):
         group = GroupFactory()
-        user = UserFactory()
+        existing = UserFactory()
+
+        setup_response = client.post(
+            f"{ENDPOINT}/{group.id}/members",
+            json={"member_identity_ids": [str(existing.id)]},
+        )
+        assert setup_response.status_code == 204
 
         response = client.put(
             f"{ENDPOINT}/{group.id}/members",
-            json={
-                "member_identity_ids": [
-                    str(user.id),
-                    str(user.id),
-                ]
-            },
+            json={"member_identity_ids": [str(uuid4())]},
         )
 
-        assert response.status_code == 422
+        assert response.status_code == 400
+        assert response.json()["detail"] == (
+            "All member identities must exist and be users or machine users."
+        )
+        assert GroupService(session).has_member(group.id, existing.id)
 
     @pytest.mark.usefixtures("admin")
     def test_replace_group_members_rejects_invalid_identity_without_changes(
