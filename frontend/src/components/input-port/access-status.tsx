@@ -16,6 +16,23 @@ export function isExpiringSoon(status: string, validUntil: string | null, thresh
     return daysUntilExpiry >= 0 && daysUntilExpiry <= thresholdDays;
 }
 
+export function canRenewAccess(
+    status: string,
+    validUntil: string | null,
+    renewalStatus: string | null | undefined,
+    thresholdDays: number,
+): boolean {
+    return (
+        renewalStatus !== RenewalStatus.Pending &&
+        (status === InputPortStatus.Expired ||
+            status === InputPortStatus.Denied ||
+            status === InputPortStatus.Revoked ||
+            status === InputPortStatus.Cancelled ||
+            renewalStatus === RenewalStatus.Denied ||
+            isExpiringSoon(status, validUntil, thresholdDays))
+    );
+}
+
 type RenewalTagProps = {
     renewalStatus?: string | null;
 };
