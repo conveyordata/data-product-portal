@@ -80,15 +80,15 @@ def get_lifecycle_id(name: str) -> str:
     return match["id"]
 
 
-def get_classification_id(name: str) -> str:
+def get_access_type_id(name: str) -> str:
     response = requests.get(
-        f"{PORTAL_URL}/api/v2/configuration/output_port_classifications"
+        f"{PORTAL_URL}/api/v2/configuration/output_port_access_types"
     )
     response.raise_for_status()
-    classifications = response.json().get("output_port_classifications", [])
-    match = next((c for c in classifications if c["name"] == name), None)
+    access_types = response.json().get("output_port_access_types", [])
+    match = next((c for c in access_types if c["name"] == name), None)
     if not match:
-        raise ValueError(f"Classification '{name}' not found")
+        raise ValueError(f"Access type '{name}' not found")
     return match["id"]
 
 
@@ -161,14 +161,14 @@ def create_output_port(
     namespace: str,
     description: str,
     about: str,
-    classification: str,
+    access_type: str,
 ) -> str:
     payload = {
         "name": name,
         "namespace": namespace,
         "description": description,
         "about": about,
-        "classification_id": get_classification_id(classification),
+        "access_type_id": get_access_type_id(access_type),
         "data_product_access_duration_type": "permanent",
         "exploration_access_duration_type": "permanent",
         "owners": [OWNER_ID],
@@ -179,7 +179,7 @@ def create_output_port(
     )
     response.raise_for_status()
     op_id = response.json()["id"]
-    print(f"  Created output port: {name} [{classification}] (id={op_id})")
+    print(f"  Created output port: {name} [{access_type}] (id={op_id})")
     return op_id
 
 
@@ -207,7 +207,7 @@ OUTPUT_PORTS: dict[str, Any] = {
         "name": "Inventory Data",
         "namespace": "inventory-data",
         "description": "Daily stock snapshots and historical inventory levels by SKU and warehouse.",
-        "classification": "Unrestricted",
+        "access_type": "Unrestricted",
         "about": (
             "<h3>Connection Details</h3>"
             "<table><thead><tr><th>Property</th><th>Value</th></tr></thead><tbody>"
@@ -304,7 +304,7 @@ OUTPUT_PORTS: dict[str, Any] = {
         "name": "Sales & Revenue Data",
         "namespace": "sales-revenue-data",
         "description": "Transactional orders, line items, and subscription revenue for revenue reporting and analytics.",
-        "classification": "Unrestricted",
+        "access_type": "Unrestricted",
         "about": (
             "<h3>Connection Details</h3>"
             "<table><thead><tr><th>Property</th><th>Value</th></tr></thead><tbody>"
@@ -415,7 +415,7 @@ OUTPUT_PORTS: dict[str, Any] = {
         "name": "Customer Records",
         "namespace": "customer-records",
         "description": "Master customer identities and anonymous web session logs for segmentation and acquisition analysis.",
-        "classification": "Unrestricted",
+        "access_type": "Unrestricted",
         "about": (
             "<h3>Connection Details</h3>"
             "<table><thead><tr><th>Property</th><th>Value</th></tr></thead><tbody>"
@@ -627,7 +627,7 @@ def provision_product(product: dict):
         namespace=op_cfg["namespace"],
         description=op_cfg["description"],
         about=add_osi_model_to_about(namespace, op_cfg["about"]),
-        classification=op_cfg["classification"],
+        access_type=op_cfg["access_type"],
     )
 
     # Link and approve both technical assets

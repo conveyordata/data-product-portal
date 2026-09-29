@@ -29,15 +29,15 @@ _Avoid_: Private Data Product, public Data Product
 
 **Access Function**:
 One of three fixed behaviours that governs an Output Port: Auto-approve, Approval required, or Invite only (hidden and approval required).
-_Avoid_: Access type, private, public
+_Avoid_: private, public
 
-**Classification**:
-An admin-defined label on an Output Port (e.g. "Top Secret") that maps to exactly one Access Function. Many Classifications may map to the same Access Function; only the name differs.
-_Avoid_: Access type, sensitivity label
+**Access Type**:
+An admin-defined label on an Output Port (e.g. "Need to know") that maps to exactly one Access Function. Many Access Types may map to the same Access Function; only the name differs.
+_Avoid_: Classification, sensitivity label
 
 ## Relationships
 
-- An **Output Port** has exactly one **Classification**; its **Access Function** is the Classification's.
-- An **Output Port** of a **Hidden** **Data Product** must have a Classification mapped to **Invite only**.
-- At least one **Classification** is always mapped to **Invite only**.
+- An **Output Port** has exactly one **Access Type**; its **Access Function** is the Access Type's.
+- An **Output Port** of a **Hidden** **Data Product** must have an Access Type mapped to **Invite only**.
+- At least one **Access Type** is always mapped to **Invite only**.
 - Members of a **Consuming Data Product** may read an **Invite only** **Output Port** it consumes; nobody else outside the owning Data Product sees it.

@@ -458,7 +458,7 @@ export type OutputPortAccessFunction =
   | "restricted"
   | "private"
   | "unrestricted";
-export type OutputPortClassification = {
+export type OutputPortAccessType = {
   id: string;
   name: string;
   access_function: OutputPortAccessFunction;
@@ -478,7 +478,7 @@ export type OutputPort = {
   namespace: string;
   description: string;
   status: OutputPortStatus;
-  classification: OutputPortClassification;
+  access_type: OutputPortAccessType;
   data_product_id: string;
   tags: Tag[];
   access_modes: AccessMode[];

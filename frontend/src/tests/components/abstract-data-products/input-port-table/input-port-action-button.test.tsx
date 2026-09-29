@@ -15,8 +15,8 @@ const outputPort: OutputPort = {
     namespace: 'test',
     description: '',
     status: OutputPortStatus.Active,
-    classification: {
-        id: 'classification-1',
+    access_type: {
+        id: 'access-type-1',
         name: 'Restricted',
         access_function: OutputPortAccessFunction.Restricted,
     },

@@ -9,8 +9,8 @@ from app.database.database import Base, ensure_exists
 from app.shared.model import BaseORM
 
 
-class OutputPortClassification(Base, BaseORM):
-    __tablename__ = "output_port_classifications"
+class OutputPortAccessType(Base, BaseORM):
+    __tablename__ = "output_port_access_types"
 
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
@@ -21,12 +21,10 @@ class OutputPortClassification(Base, BaseORM):
         Enum(OutputPortAccessFunction, native_enum=False), nullable=False
     )
 
-    __table_args__ = (
-        UniqueConstraint("name", name="uq_output_port_classification_name"),
-    )
+    __table_args__ = (UniqueConstraint("name", name="uq_output_port_access_type_name"),)
 
 
-def ensure_output_port_classification_exists(
-    classification_id: uuid.UUID, db: Session
-) -> OutputPortClassification:
-    return ensure_exists(classification_id, db, OutputPortClassification)
+def ensure_output_port_access_type_exists(
+    access_type_id: uuid.UUID, db: Session
+) -> OutputPortAccessType:
+    return ensure_exists(access_type_id, db, OutputPortAccessType)

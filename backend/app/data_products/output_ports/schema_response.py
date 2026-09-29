@@ -11,8 +11,8 @@ from app.configuration.data_product_settings.schema import (
     OutputPortSettingValue,
 )
 from app.configuration.domains.schema import Domain
-from app.configuration.output_port_classifications.schema import (
-    OutputPortClassification,
+from app.configuration.output_port_access_types.schema import (
+    OutputPortAccessType,
 )
 from app.configuration.tags.schema import Tag
 from app.data_products.output_port_technical_assets_link.schema import (
@@ -52,7 +52,7 @@ class BaseOutputPortGet(ORMModel):
     description: str
     status: OutputPortStatus
     usage: Optional[str]
-    classification: OutputPortClassification
+    access_type: OutputPortAccessType
     data_product_access_duration_type: AccessDurationType
     exploration_access_duration_type: AccessDurationType
     data_product_id: UUID

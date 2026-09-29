@@ -25,20 +25,20 @@ describe('dataProductOutputPortTags invalidation', () => {
         expect(tags).toContainEqual({ type: TagTypes.OutputPort, id: 'op1' });
     });
 
-    it('output port mutations refresh the classification counts', () => {
-        const classificationList = { type: TagTypes.OutputPortClassification, id: STATIC_TAG_ID.LIST };
+    it('output port mutations refresh the access type counts', () => {
+        const accessTypeList = { type: TagTypes.OutputPortAccessType, id: STATIC_TAG_ID.LIST };
 
         expect(
             dataProductOutputPortTags.createOutputPort.invalidatesTags(undefined, undefined, {
                 dataProductId: 'dp1',
                 createOutputPortRequest: {} as CreateOutputPortRequest,
             }),
-        ).toContainEqual(classificationList);
+        ).toContainEqual(accessTypeList);
         expect(dataProductOutputPortTags.updateOutputPort.invalidatesTags(undefined, undefined, args)).toContainEqual(
-            classificationList,
+            accessTypeList,
         );
         expect(dataProductOutputPortTags.removeOutputPort.invalidatesTags(undefined, undefined, args)).toContainEqual(
-            classificationList,
+            accessTypeList,
         );
     });
 

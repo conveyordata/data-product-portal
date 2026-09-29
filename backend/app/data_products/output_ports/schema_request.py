@@ -12,7 +12,7 @@ class OutputPortUpdate(ORMModel):
     name: str
     namespace: str
     description: str
-    classification_id: UUID
+    access_type_id: UUID
     data_product_access_duration_type: AccessDurationType
     exploration_access_duration_type: AccessDurationType
     about: Optional[str] = None

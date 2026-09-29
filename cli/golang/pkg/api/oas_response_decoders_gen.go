@@ -1885,7 +1885,7 @@ func decodeCreateOutputPortResponse(resp *http.Response) (res CreateOutputPortRe
 	return res, validate.UnexpectedStatusCodeWithResponse(resp)
 }
 
-func decodeCreateOutputPortClassificationResponse(resp *http.Response) (res CreateOutputPortClassificationRes, _ error) {
+func decodeCreateOutputPortAccessTypeResponse(resp *http.Response) (res CreateOutputPortAccessTypeRes, _ error) {
 	switch resp.StatusCode {
 	case 200:
 		// Code 200.
@@ -1901,7 +1901,7 @@ func decodeCreateOutputPortClassificationResponse(resp *http.Response) (res Crea
 			}
 			d := jx.DecodeBytes(buf)
 
-			var response CreateOutputPortClassificationResponse
+			var response CreateOutputPortAccessTypeResponse
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -6417,7 +6417,7 @@ func decodeGetOutputPortAccessDurationsResponse(resp *http.Response) (res GetOut
 	return res, validate.UnexpectedStatusCodeWithResponse(resp)
 }
 
-func decodeGetOutputPortClassificationsResponse(resp *http.Response) (res GetOutputPortClassificationsRes, _ error) {
+func decodeGetOutputPortAccessTypesResponse(resp *http.Response) (res GetOutputPortAccessTypesRes, _ error) {
 	switch resp.StatusCode {
 	case 200:
 		// Code 200.
@@ -6433,7 +6433,7 @@ func decodeGetOutputPortClassificationsResponse(resp *http.Response) (res GetOut
 			}
 			d := jx.DecodeBytes(buf)
 
-			var response OutputPortClassificationsGet
+			var response OutputPortAccessTypesGet
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -10857,7 +10857,7 @@ func decodeRemoveOutputPortResponse(resp *http.Response) (res RemoveOutputPortRe
 	return res, validate.UnexpectedStatusCodeWithResponse(resp)
 }
 
-func decodeRemoveOutputPortAsInputPortResponse(resp *http.Response) (res RemoveOutputPortAsInputPortRes, _ error) {
+func decodeRemoveOutputPortAccessTypeResponse(resp *http.Response) (res RemoveOutputPortAccessTypeRes, _ error) {
 	switch resp.StatusCode {
 	case 200:
 		// Code 200.
@@ -10873,7 +10873,7 @@ func decodeRemoveOutputPortAsInputPortResponse(resp *http.Response) (res RemoveO
 			}
 			d := jx.DecodeBytes(buf)
 
-			var response RemoveOutputPortAsInputPortOKApplicationJSON
+			var response RemoveOutputPortAccessTypeOKApplicationJSON
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -10942,7 +10942,7 @@ func decodeRemoveOutputPortAsInputPortResponse(resp *http.Response) (res RemoveO
 	return res, validate.UnexpectedStatusCodeWithResponse(resp)
 }
 
-func decodeRemoveOutputPortClassificationResponse(resp *http.Response) (res RemoveOutputPortClassificationRes, _ error) {
+func decodeRemoveOutputPortAsInputPortResponse(resp *http.Response) (res RemoveOutputPortAsInputPortRes, _ error) {
 	switch resp.StatusCode {
 	case 200:
 		// Code 200.
@@ -10958,7 +10958,7 @@ func decodeRemoveOutputPortClassificationResponse(resp *http.Response) (res Remo
 			}
 			d := jx.DecodeBytes(buf)
 
-			var response RemoveOutputPortClassificationOKApplicationJSON
+			var response RemoveOutputPortAsInputPortOKApplicationJSON
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -14786,7 +14786,7 @@ func decodeUpdateOutputPortAboutResponse(resp *http.Response) (res UpdateOutputP
 	return res, validate.UnexpectedStatusCodeWithResponse(resp)
 }
 
-func decodeUpdateOutputPortClassificationResponse(resp *http.Response) (res UpdateOutputPortClassificationRes, _ error) {
+func decodeUpdateOutputPortAccessTypeResponse(resp *http.Response) (res UpdateOutputPortAccessTypeRes, _ error) {
 	switch resp.StatusCode {
 	case 200:
 		// Code 200.
@@ -14802,7 +14802,7 @@ func decodeUpdateOutputPortClassificationResponse(resp *http.Response) (res Upda
 			}
 			d := jx.DecodeBytes(buf)
 
-			var response UpdateOutputPortClassificationResponse
+			var response UpdateOutputPortAccessTypeResponse
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err

@@ -11,7 +11,7 @@ import { DataProductSettings } from '@/components/data-products/data-product-set
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
 import {
     AccessDurationSection,
-    ClassificationSection,
+    AccessTypeSection,
 } from '@/components/output-ports/output-port-form/output-port-form.component.tsx';
 import { DESCRIPTIONS_LABEL_WIDTH } from '@/constants/form.constants.ts';
 import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
@@ -62,11 +62,11 @@ export function SettingsTab({ outputPortId, dataProductId }: Props) {
     const { data: { access_durations: allDurations = [] } = {} } = useGetAllAccessDurationsQuery();
     const [updateOutputPort] = useUpdateOutputPortMutation();
 
-    const [classificationId, setClassificationId] = useState(outputPort?.classification.id);
+    const [accessTypeId, setAccessTypeId] = useState(outputPort?.access_type.id);
     const [dataProductDuration, setDataProductDuration] = useState(outputPort?.data_product_access_duration_type);
     const [explorationDuration, setExplorationDuration] = useState(outputPort?.exploration_access_duration_type);
 
-    useEffect(() => setClassificationId(outputPort?.classification.id), [outputPort?.classification.id]);
+    useEffect(() => setAccessTypeId(outputPort?.access_type.id), [outputPort?.access_type.id]);
     useEffect(
         () => setDataProductDuration(outputPort?.data_product_access_duration_type),
         [outputPort?.data_product_access_duration_type],
@@ -88,7 +88,7 @@ export function SettingsTab({ outputPortId, dataProductId }: Props) {
         partial: Partial<
             Pick<
                 OutputPortUpdate,
-                'classification_id' | 'data_product_access_duration_type' | 'exploration_access_duration_type'
+                'access_type_id' | 'data_product_access_duration_type' | 'exploration_access_duration_type'
             >
         >,
         revert: () => void,
@@ -104,7 +104,7 @@ export function SettingsTab({ outputPortId, dataProductId }: Props) {
                     description: outputPort.description,
                     tag_ids: outputPort.tags.map((tag) => tag.id),
                     lifecycle_id: outputPort.lifecycle?.id ?? null,
-                    classification_id: outputPort.classification.id,
+                    access_type_id: outputPort.access_type.id,
                     data_product_access_duration_type: outputPort.data_product_access_duration_type,
                     exploration_access_duration_type: outputPort.exploration_access_duration_type,
                     ...partial,
@@ -135,24 +135,24 @@ export function SettingsTab({ outputPortId, dataProductId }: Props) {
 
     const items: DescriptionsProps['items'] = [
         {
-            key: 'classification',
+            key: 'access_type',
             label: labelWithTooltip(
-                t('Classification'),
-                t('The classification of the Output Port, which determines who can see and access it'),
+                t('Access Type'),
+                t('The access type of the Output Port, which determines who can see and access it'),
             ),
             span: 2,
             children: canEditAccess ? (
-                <ClassificationSection
-                    value={classificationId}
+                <AccessTypeSection
+                    value={accessTypeId}
                     onChange={(value) => {
-                        const previous = classificationId;
-                        setClassificationId(value);
-                        saveAccessField({ classification_id: value }, () => setClassificationId(previous));
+                        const previous = accessTypeId;
+                        setAccessTypeId(value);
+                        saveAccessField({ access_type_id: value }, () => setAccessTypeId(previous));
                     }}
                     hiddenDataProduct={dataProduct?.visibility === DataProductVisibility.Hidden}
                 />
             ) : (
-                outputPort.classification.name
+                outputPort.access_type.name
             ),
         },
         ...(accessDurations

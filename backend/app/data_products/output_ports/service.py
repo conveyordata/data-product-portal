@@ -24,11 +24,11 @@ from app.configuration.access_durations.service import AccessDurationService
 from app.configuration.data_product_lifecycles.model import (
     DataProductLifecycle as DataProductLifeCycleModel,
 )
-from app.configuration.output_port_classifications.model import (
-    OutputPortClassification as OutputPortClassificationModel,
+from app.configuration.output_port_access_types.model import (
+    OutputPortAccessType as OutputPortAccessTypeModel,
 )
-from app.configuration.output_port_classifications.model import (
-    ensure_output_port_classification_exists,
+from app.configuration.output_port_access_types.model import (
+    ensure_output_port_access_type_exists,
 )
 from app.configuration.tags.model import Tag as TagModel
 from app.configuration.tags.model import ensure_tag_exists
@@ -349,7 +349,7 @@ class OutputPortService:
                 if access_function != OutputPortAccessFunction.PRIVATE:
                     raise HTTPException(
                         status_code=status.HTTP_400_BAD_REQUEST,
-                        detail="Output Ports of a Hidden Data Product need a Classification mapped to Invite only",
+                        detail="Output Ports of a Hidden Data Product need an Access Type mapped to Invite only",
                     )
             case DataProductVisibility.DISCOVERABLE:
                 pass
@@ -357,40 +357,36 @@ class OutputPortService:
                 assert_never(dp.visibility)
 
     @staticmethod
-    def _set_classification(
-        output_port: OutputPortModel, classification: OutputPortClassificationModel
+    def _set_access_type(
+        output_port: OutputPortModel, access_type: OutputPortAccessTypeModel
     ) -> None:
-        output_port.classification = classification
-        output_port.access_function = classification.access_function
+        output_port.access_type = access_type
+        output_port.access_function = access_type.access_function
 
-    def _resolve_classification(
-        self, dp: DataProductModel, classification_id: UUID
-    ) -> OutputPortClassificationModel:
-        classification = ensure_output_port_classification_exists(
-            classification_id, self.db
-        )
-        self.ensure_access_function_matches_visibility(
-            dp, classification.access_function
-        )
-        return classification
+    def _resolve_access_type(
+        self, dp: DataProductModel, access_type_id: UUID
+    ) -> OutputPortAccessTypeModel:
+        access_type = ensure_output_port_access_type_exists(access_type_id, self.db)
+        self.ensure_access_function_matches_visibility(dp, access_type.access_function)
+        return access_type
 
-    def count_by_classification(self, include_hidden: bool) -> dict[UUID, int]:
+    def count_by_access_type(self, include_hidden: bool) -> dict[UUID, int]:
         return dict(
             self.db.execute(
-                select(OutputPortModel.classification_id, func.count()).group_by(
-                    OutputPortModel.classification_id
+                select(OutputPortModel.access_type_id, func.count()).group_by(
+                    OutputPortModel.access_type_id
                 ),
                 execution_options=UNFILTERED if include_hidden else {},
             ).all()
         )
 
-    def reclassify_output_ports(
-        self, classification_id: UUID, access_function: OutputPortAccessFunction
+    def remap_output_ports_access_function(
+        self, access_type_id: UUID, access_function: OutputPortAccessFunction
     ) -> None:
         output_ports = (
             self.db.scalars(
                 select(OutputPortModel).where(
-                    OutputPortModel.classification_id == classification_id
+                    OutputPortModel.access_type_id == access_type_id
                 ),
                 execution_options=UNFILTERED,
             )
@@ -411,8 +407,8 @@ class OutputPortService:
         self, data_product_id: UUID, create_output_port_request: CreateOutputPortRequest
     ) -> OutputPortModel:
         dp = self._ensure_data_product_not_deleting(data_product_id)
-        classification = self._resolve_classification(
-            dp, create_output_port_request.classification_id
+        access_type = self._resolve_access_type(
+            dp, create_output_port_request.access_type_id
         )
         if (
             validity := self.namespace_validator.validate_namespace(
@@ -433,7 +429,7 @@ class OutputPortService:
         tags = self._fetch_tags(output_port_schema.pop("tag_ids", []))
         _ = output_port_schema.pop("owners", [])
         model = OutputPortModel(**output_port_schema, tags=tags)
-        self._set_classification(model, classification)
+        self._set_access_type(model, access_type)
 
         self.db.add(model)
         self.db.flush()
@@ -460,11 +456,9 @@ class OutputPortService:
         current_output_port = ensure_output_port_exists(
             id, self.db, data_product_id=data_product_id
         )
-        classification = self._resolve_classification(
-            dp, output_port_update.classification_id
-        )
+        access_type = self._resolve_access_type(dp, output_port_update.access_type_id)
         updated_output_port = output_port_update.model_dump(exclude_unset=True)
-        updated_output_port.pop("classification_id")
+        updated_output_port.pop("access_type_id")
 
         if (
             current_output_port.namespace != output_port_update.namespace
@@ -485,9 +479,9 @@ class OutputPortService:
         )
 
         access_function_changed = (
-            current_output_port.access_function != classification.access_function
+            current_output_port.access_function != access_type.access_function
         )
-        self._set_classification(current_output_port, classification)
+        self._set_access_type(current_output_port, access_type)
         for k, v in updated_output_port.items():
             if k == "tag_ids":
                 new_tags = self._fetch_tags(v)

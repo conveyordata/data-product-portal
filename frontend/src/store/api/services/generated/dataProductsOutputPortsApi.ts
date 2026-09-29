@@ -493,7 +493,7 @@ export type SchemaObjectRequest = {
 export type BitolContractRequest = {
   schema?: SchemaObjectRequest[];
 };
-export type OutputPortClassification = {
+export type OutputPortAccessType = {
   id: string;
   name: string;
   access_function: OutputPortAccessFunction;
@@ -513,7 +513,7 @@ export type OutputPort = {
   namespace: string;
   description: string;
   status: OutputPortStatus;
-  classification: OutputPortClassification;
+  access_type: OutputPortAccessType;
   data_product_id: string;
   tags: Tag[];
   access_modes: AccessMode[];
@@ -528,7 +528,7 @@ export type CreateOutputPortRequest = {
   name: string;
   namespace: string;
   description: string;
-  classification_id: string;
+  access_type_id: string;
   data_product_access_duration_type: AccessDurationType;
   exploration_access_duration_type: AccessDurationType;
   about?: string | null;
@@ -596,7 +596,7 @@ export type GetOutputPortResponse = {
   description: string;
   status: OutputPortStatus;
   usage: string | null;
-  classification: OutputPortClassification;
+  access_type: OutputPortAccessType;
   data_product_access_duration_type: AccessDurationType;
   exploration_access_duration_type: AccessDurationType;
   data_product_id: string;
@@ -616,7 +616,7 @@ export type OutputPortUpdate = {
   name: string;
   namespace: string;
   description: string;
-  classification_id: string;
+  access_type_id: string;
   data_product_access_duration_type: AccessDurationType;
   exploration_access_duration_type: AccessDurationType;
   about?: string | null;

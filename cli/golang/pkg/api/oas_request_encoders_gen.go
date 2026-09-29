@@ -224,8 +224,8 @@ func encodeCreateOutputPortRequest(
 	return nil
 }
 
-func encodeCreateOutputPortClassificationRequest(
-	req *OutputPortClassificationCreate,
+func encodeCreateOutputPortAccessTypeRequest(
+	req *OutputPortAccessTypeCreate,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
@@ -805,8 +805,8 @@ func encodeUpdateOutputPortAboutRequest(
 	return nil
 }
 
-func encodeUpdateOutputPortClassificationRequest(
-	req *OutputPortClassificationUpdate,
+func encodeUpdateOutputPortAccessTypeRequest(
+	req *OutputPortAccessTypeUpdate,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"

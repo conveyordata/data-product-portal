@@ -11,7 +11,7 @@ from ..models.output_port_status import OutputPortStatus
 
 if TYPE_CHECKING:
     from ..models.access_mode import AccessMode
-    from ..models.output_port_classification import OutputPortClassification
+    from ..models.output_port_access_type import OutputPortAccessType
     from ..models.tag import Tag
 
 
@@ -27,7 +27,7 @@ class OutputPort:
         namespace (str):
         description (str):
         status (OutputPortStatus):
-        classification (OutputPortClassification):
+        access_type (OutputPortAccessType):
         data_product_id (UUID):
         tags (list[Tag]):
         access_modes (list[AccessMode]):
@@ -38,7 +38,7 @@ class OutputPort:
     namespace: str
     description: str
     status: OutputPortStatus
-    classification: OutputPortClassification
+    access_type: OutputPortAccessType
     data_product_id: UUID
     tags: list[Tag]
     access_modes: list[AccessMode]
@@ -55,7 +55,7 @@ class OutputPort:
 
         status = self.status.value
 
-        classification = self.classification.to_dict()
+        access_type = self.access_type.to_dict()
 
         data_product_id = str(self.data_product_id)
 
@@ -78,7 +78,7 @@ class OutputPort:
                 "namespace": namespace,
                 "description": description,
                 "status": status,
-                "classification": classification,
+                "access_type": access_type,
                 "data_product_id": data_product_id,
                 "tags": tags,
                 "access_modes": access_modes,
@@ -90,7 +90,7 @@ class OutputPort:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.access_mode import AccessMode
-        from ..models.output_port_classification import OutputPortClassification
+        from ..models.output_port_access_type import OutputPortAccessType
         from ..models.tag import Tag
 
         d = dict(src_dict)
@@ -104,7 +104,7 @@ class OutputPort:
 
         status = OutputPortStatus(d.pop("status"))
 
-        classification = OutputPortClassification.from_dict(d.pop("classification"))
+        access_type = OutputPortAccessType.from_dict(d.pop("access_type"))
 
         data_product_id = UUID(d.pop("data_product_id"))
 
@@ -128,7 +128,7 @@ class OutputPort:
             namespace=namespace,
             description=description,
             status=status,
-            classification=classification,
+            access_type=access_type,
             data_product_id=data_product_id,
             tags=tags,
             access_modes=access_modes,

@@ -155,7 +155,7 @@ func (s *GetDataProductsResponseItem) setDefaults() {
 }
 
 // setDefaults set default value of fields.
-func (s *OutputPortClassificationCreate) setDefaults() {
+func (s *OutputPortAccessTypeCreate) setDefaults() {
 	{
 		val := string("")
 		s.Description.SetTo(val)
@@ -163,7 +163,7 @@ func (s *OutputPortClassificationCreate) setDefaults() {
 }
 
 // setDefaults set default value of fields.
-func (s *OutputPortClassificationUpdate) setDefaults() {
+func (s *OutputPortAccessTypeUpdate) setDefaults() {
 	{
 		val := string("")
 		s.Description.SetTo(val)

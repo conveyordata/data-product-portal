@@ -30,7 +30,7 @@ from tests.factories.role_assignment_global import GlobalRoleAssignmentFactory
 from . import TestingSessionLocal
 from .factories.data_product_type import DataProductTypeFactory
 from .factories.domain import DomainFactory
-from .factories.output_port_classification import OutputPortClassificationFactory
+from .factories.output_port_access_type import OutputPortAccessTypeFactory
 from .factories.user import UserFactory
 
 
@@ -162,9 +162,9 @@ def clear_db(session: Session) -> None:
 
 
 @pytest.fixture(autouse=True)
-def default_output_port_classifications(clear_db: None) -> None:
+def default_output_port_access_types(clear_db: None) -> None:
     for access_function in OutputPortAccessFunction:
-        OutputPortClassificationFactory(access_function=access_function)
+        OutputPortAccessTypeFactory(access_function=access_function)
 
 
 @pytest.fixture

@@ -2,66 +2,67 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from typing import Any, TypeVar
-from uuid import UUID
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..models.output_port_access_function import OutputPortAccessFunction
+from ..types import UNSET, Unset
 
-T = TypeVar("T", bound="OutputPortClassification")
+T = TypeVar("T", bound="OutputPortAccessTypeUpdate")
 
 
 @_attrs_define
-class OutputPortClassification:
+class OutputPortAccessTypeUpdate:
     """
     Attributes:
-        id (UUID):
         name (str):
         access_function (OutputPortAccessFunction):
+        description (str | Unset):  Default: ''.
     """
 
-    id: UUID
     name: str
     access_function: OutputPortAccessFunction
+    description: str | Unset = ""
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        id = str(self.id)
-
         name = self.name
 
         access_function = self.access_function.value
+
+        description = self.description
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
-                "id": id,
                 "name": name,
                 "access_function": access_function,
             }
         )
+        if description is not UNSET:
+            field_dict["description"] = description
 
         return field_dict
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        id = UUID(d.pop("id"))
-
         name = d.pop("name")
 
         access_function = OutputPortAccessFunction(d.pop("access_function"))
 
-        output_port_classification = cls(
-            id=id,
+        description = d.pop("description", UNSET)
+
+        output_port_access_type_update = cls(
             name=name,
             access_function=access_function,
+            description=description,
         )
 
-        output_port_classification.additional_properties = d
-        return output_port_classification
+        output_port_access_type_update.additional_properties = d
+        return output_port_access_type_update
 
     @property
     def additional_keys(self) -> list[str]:

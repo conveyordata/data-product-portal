@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from ..models.access_mode import AccessMode
     from ..models.data_product_life_cycle import DataProductLifeCycle
     from ..models.domain import Domain
-    from ..models.output_port_classification import OutputPortClassification
+    from ..models.output_port_access_type import OutputPortAccessType
     from ..models.tag import Tag
 
 
@@ -31,7 +31,7 @@ class SearchOutputPortsResponseItem:
         description (str):
         status (OutputPortStatus):
         usage (None | str):
-        classification (OutputPortClassification):
+        access_type (OutputPortAccessType):
         data_product_access_duration_type (AccessDurationType):
         exploration_access_duration_type (AccessDurationType):
         data_product_id (UUID):
@@ -50,7 +50,7 @@ class SearchOutputPortsResponseItem:
     description: str
     status: OutputPortStatus
     usage: None | str
-    classification: OutputPortClassification
+    access_type: OutputPortAccessType
     data_product_access_duration_type: AccessDurationType
     exploration_access_duration_type: AccessDurationType
     data_product_id: UUID
@@ -79,7 +79,7 @@ class SearchOutputPortsResponseItem:
         usage: None | str
         usage = self.usage
 
-        classification = self.classification.to_dict()
+        access_type = self.access_type.to_dict()
 
         data_product_access_duration_type = self.data_product_access_duration_type.value
 
@@ -121,7 +121,7 @@ class SearchOutputPortsResponseItem:
                 "description": description,
                 "status": status,
                 "usage": usage,
-                "classification": classification,
+                "access_type": access_type,
                 "data_product_access_duration_type": data_product_access_duration_type,
                 "exploration_access_duration_type": exploration_access_duration_type,
                 "data_product_id": data_product_id,
@@ -142,7 +142,7 @@ class SearchOutputPortsResponseItem:
         from ..models.access_mode import AccessMode
         from ..models.data_product_life_cycle import DataProductLifeCycle
         from ..models.domain import Domain
-        from ..models.output_port_classification import OutputPortClassification
+        from ..models.output_port_access_type import OutputPortAccessType
         from ..models.tag import Tag
 
         d = dict(src_dict)
@@ -163,7 +163,7 @@ class SearchOutputPortsResponseItem:
 
         usage = _parse_usage(d.pop("usage"))
 
-        classification = OutputPortClassification.from_dict(d.pop("classification"))
+        access_type = OutputPortAccessType.from_dict(d.pop("access_type"))
 
         data_product_access_duration_type = AccessDurationType(
             d.pop("data_product_access_duration_type")
@@ -219,7 +219,7 @@ class SearchOutputPortsResponseItem:
             description=description,
             status=status,
             usage=usage,
-            classification=classification,
+            access_type=access_type,
             data_product_access_duration_type=data_product_access_duration_type,
             exploration_access_duration_type=exploration_access_duration_type,
             data_product_id=data_product_id,

@@ -32,7 +32,7 @@ import {
     useIsTimeBoundAccessEnabledQuery,
 } from '@/store/api/services/generated/configurationAccessDurationsApi.ts';
 import { useGetDataProductsLifecyclesQuery } from '@/store/api/services/generated/configurationDataProductLifecyclesApi.ts';
-import { useGetOutputPortClassificationsQuery } from '@/store/api/services/generated/configurationOutputPortClassificationsApi.ts';
+import { useGetOutputPortAccessTypesQuery } from '@/store/api/services/generated/configurationOutputPortAccessTypesApi.ts';
 import { useGetTagsQuery } from '@/store/api/services/generated/configurationTagsApi.ts';
 import { DataProductVisibility, useGetDataProductQuery } from '@/store/api/services/generated/dataProductsApi.ts';
 import {
@@ -228,7 +228,7 @@ const { TextArea } = Input;
 
 const DEBOUNCE = 500;
 
-export function ClassificationSection({
+export function AccessTypeSection({
     id,
     value,
     onChange,
@@ -240,7 +240,7 @@ export function ClassificationSection({
     hiddenDataProduct: boolean;
 }) {
     const { t } = useTranslation();
-    const { data: { output_port_classifications: classifications = [] } = {} } = useGetOutputPortClassificationsQuery();
+    const { data: { output_port_access_types: accessTypes = [] } = {} } = useGetOutputPortAccessTypesQuery();
 
     const options = ACCESS_FUNCTION_ORDER.map((accessFunction) => {
         const allowed = fitsDataProductVisibility(accessFunction, hiddenDataProduct);
@@ -248,18 +248,18 @@ export function ClassificationSection({
             label: allowed
                 ? getAccessFunctionLabel(t, accessFunction)
                 : `${getAccessFunctionLabel(t, accessFunction)} (${t('not allowed for hidden Data Products')})`,
-            options: classifications
-                .filter((classification) => classification.access_function === accessFunction)
-                .map((classification) => ({
-                    label: classification.name,
-                    value: classification.id,
+            options: accessTypes
+                .filter((accessType) => accessType.access_function === accessFunction)
+                .map((accessType) => ({
+                    label: accessType.name,
+                    value: accessType.id,
                     disabled: !allowed,
                 })),
         };
     }).filter((group) => group.options.length > 0);
 
     const getDescription = (id?: string | number | null) =>
-        classifications.find((classification) => classification.id === id)?.description;
+        accessTypes.find((accessType) => accessType.id === id)?.description;
     const selectedDescription = getDescription(value);
 
     return (
@@ -270,7 +270,7 @@ export function ClassificationSection({
                 onChange={onChange}
                 options={options}
                 showSearch={{ optionFilterProp: 'label' }}
-                placeholder={t('Select a classification')}
+                placeholder={t('Select an access type')}
                 optionRender={(option) => {
                     const description = getDescription(option.value);
                     return (
@@ -306,8 +306,8 @@ export function OutputPortForm({ mode, modalCallbackOnSubmit, formRef, outputPor
     const [sanitizeResourceName, { data: sanitizedResourceName }] = useLazySanitizeResourceNameQuery();
     const [validateResourceName] = useLazyValidateResourceNameQuery();
     const { data: constraints } = useResourceNameConstraintsQuery();
-    const { data: { output_port_classifications: classifications = [] } = {}, isFetching: isFetchingClassifications } =
-        useGetOutputPortClassificationsQuery();
+    const { data: { output_port_access_types: accessTypes = [] } = {}, isFetching: isFetchingAccessTypes } =
+        useGetOutputPortAccessTypesQuery();
 
     const [form] = Form.useForm<CreateOutputPortRequest>();
     const datasetNameValue = Form.useWatch('name', form);
@@ -360,7 +360,7 @@ export function OutputPortForm({ mode, modalCallbackOnSubmit, formRef, outputPor
                     owners: values.owners,
                     tag_ids: values.tag_ids ?? [],
                     lifecycle_id: values.lifecycle_id,
-                    classification_id: values.classification_id,
+                    access_type_id: values.access_type_id,
                     data_product_access_duration_type: values.data_product_access_duration_type,
                     exploration_access_duration_type: values.exploration_access_duration_type,
                 };
@@ -389,7 +389,7 @@ export function OutputPortForm({ mode, modalCallbackOnSubmit, formRef, outputPor
                     description: values.description,
                     tag_ids: values.tag_ids,
                     lifecycle_id: values.lifecycle_id,
-                    classification_id: values.classification_id,
+                    access_type_id: values.access_type_id,
                     data_product_access_duration_type: values.data_product_access_duration_type,
                     exploration_access_duration_type: values.exploration_access_duration_type,
                 };
@@ -481,14 +481,14 @@ export function OutputPortForm({ mode, modalCallbackOnSubmit, formRef, outputPor
     }, [mode, dataProductOwners, form]);
 
     useEffect(() => {
-        if (mode !== 'create' || !dataProduct || isFetchingClassifications) return;
-        const selectable = classifications.filter((classification) =>
-            fitsDataProductVisibility(classification.access_function, isHiddenDataProduct),
+        if (mode !== 'create' || !dataProduct || isFetchingAccessTypes) return;
+        const selectable = accessTypes.filter((accessType) =>
+            fitsDataProductVisibility(accessType.access_function, isHiddenDataProduct),
         );
-        if (selectable.length === 1 && form.getFieldValue('classification_id') === undefined) {
-            form.setFieldValue('classification_id', selectable[0].id);
+        if (selectable.length === 1 && form.getFieldValue('access_type_id') === undefined) {
+            form.setFieldValue('access_type_id', selectable[0].id);
         }
-    }, [mode, dataProduct, isFetchingClassifications, classifications, isHiddenDataProduct, form]);
+    }, [mode, dataProduct, isFetchingAccessTypes, accessTypes, isHiddenDataProduct, form]);
 
     if (mode === 'edit' && (!currentOutputPort || ownerIds === undefined)) {
         return <Skeleton active />;
@@ -498,7 +498,7 @@ export function OutputPortForm({ mode, modalCallbackOnSubmit, formRef, outputPor
         name: currentOutputPort?.name,
         namespace: currentOutputPort?.namespace,
         description: currentOutputPort?.description,
-        classification_id: currentOutputPort?.classification.id,
+        access_type_id: currentOutputPort?.access_type.id,
         lifecycle_id: currentOutputPort?.lifecycle?.id,
         tag_ids: currentOutputPort?.tags.map((tag) => tag.id),
         owners: ownerIds,
@@ -588,17 +588,17 @@ export function OutputPortForm({ mode, modalCallbackOnSubmit, formRef, outputPor
                 />
             </Form.Item>
             <Form.Item<CreateOutputPortRequest>
-                name="classification_id"
-                label={t('Classification')}
-                tooltip={t('The classification of the Output Port, which determines who can see and access it')}
+                name="access_type_id"
+                label={t('Access Type')}
+                tooltip={t('The access type of the Output Port, which determines who can see and access it')}
                 rules={[
                     {
                         required: true,
-                        message: t('Please select the classification of the Output Port'),
+                        message: t('Please select the access type of the Output Port'),
                     },
                 ]}
             >
-                <ClassificationSection hiddenDataProduct={isHiddenDataProduct} />
+                <AccessTypeSection hiddenDataProduct={isHiddenDataProduct} />
             </Form.Item>
             <AccessDurationInfo mode={mode} />
             <Form.Item<CreateOutputPortRequest> name="tag_ids" label={t('Tags')}>

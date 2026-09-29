@@ -2,24 +2,24 @@ import { Button, Flex, Popconfirm, type TableColumnsType, Tooltip } from 'antd';
 import type { TFunction } from 'i18next';
 
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
-import type { OutputPortClassificationsGetItem } from '@/store/api/services/generated/configurationOutputPortClassificationsApi.ts';
+import type { OutputPortAccessTypesGetItem } from '@/store/api/services/generated/configurationOutputPortAccessTypesApi.ts';
 import { compareAccessFunctions, getAccessFunctionLabel } from '@/utils/access-function.helper.tsx';
 import { Sorter } from '@/utils/table-sorter.helper';
 
 type Props = {
     t: TFunction;
-    handleEdit: (record: OutputPortClassificationsGetItem) => () => void;
-    handleRemove: (record: OutputPortClassificationsGetItem) => void;
+    handleEdit: (record: OutputPortAccessTypesGetItem) => () => void;
+    handleRemove: (record: OutputPortAccessTypesGetItem) => void;
     lastInviteOnlyId?: string;
 };
 
-export const getOutputPortClassificationsTableColumns = ({
+export const getOutputPortAccessTypesTableColumns = ({
     t,
     handleEdit,
     handleRemove,
     lastInviteOnlyId,
-}: Props): TableColumnsType<OutputPortClassificationsGetItem> => {
-    const sorter = new Sorter<OutputPortClassificationsGetItem>();
+}: Props): TableColumnsType<OutputPortAccessTypesGetItem> => {
+    const sorter = new Sorter<OutputPortAccessTypesGetItem>();
     return [
         {
             title: t('Name'),
@@ -55,9 +55,9 @@ export const getOutputPortClassificationsTableColumns = ({
             render: (_, record) => {
                 const removeBlockedReason =
                     record.id === lastInviteOnlyId
-                        ? t('At least one classification must stay Invite only')
+                        ? t('At least one access type must stay Invite only')
                         : record.output_port_count > 0
-                          ? t('Reassign the {{count}} Output Ports using this classification first', {
+                          ? t('Reassign the {{count}} Output Ports using this access type first', {
                                 count: record.output_port_count,
                             })
                           : undefined;
@@ -75,7 +75,7 @@ export const getOutputPortClassificationsTableColumns = ({
                         ) : (
                             <Popconfirm
                                 title={t('Remove')}
-                                description={t('Are you sure you want to delete the classification?')}
+                                description={t('Are you sure you want to delete the access type?')}
                                 onConfirm={() => handleRemove(record)}
                                 placement="leftTop"
                                 okText={t('Confirm')}

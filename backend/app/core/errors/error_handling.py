@@ -122,7 +122,7 @@ async def value_error_exception_handler(_: Request, exc: ValueError):
 
 UNIQUE_CONSTRAINT_MESSAGES = {
     "uq_abstract_data_products_name": "A data product with this name already exists.",
-    "uq_output_port_classification_name": "A classification with this name already exists.",
+    "uq_output_port_access_type_name": "An access type with this name already exists.",
 }
 
 

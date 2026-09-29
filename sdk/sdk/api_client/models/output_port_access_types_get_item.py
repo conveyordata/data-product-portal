@@ -2,67 +2,82 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from typing import Any, TypeVar
+from uuid import UUID
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..models.output_port_access_function import OutputPortAccessFunction
-from ..types import UNSET, Unset
 
-T = TypeVar("T", bound="OutputPortClassificationCreate")
+T = TypeVar("T", bound="OutputPortAccessTypesGetItem")
 
 
 @_attrs_define
-class OutputPortClassificationCreate:
+class OutputPortAccessTypesGetItem:
     """
     Attributes:
+        id (UUID):
         name (str):
         access_function (OutputPortAccessFunction):
-        description (str | Unset):  Default: ''.
+        description (str):
+        output_port_count (int):
     """
 
+    id: UUID
     name: str
     access_function: OutputPortAccessFunction
-    description: str | Unset = ""
+    description: str
+    output_port_count: int
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
+        id = str(self.id)
+
         name = self.name
 
         access_function = self.access_function.value
 
         description = self.description
 
+        output_port_count = self.output_port_count
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
+                "id": id,
                 "name": name,
                 "access_function": access_function,
+                "description": description,
+                "output_port_count": output_port_count,
             }
         )
-        if description is not UNSET:
-            field_dict["description"] = description
 
         return field_dict
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
+        id = UUID(d.pop("id"))
+
         name = d.pop("name")
 
         access_function = OutputPortAccessFunction(d.pop("access_function"))
 
-        description = d.pop("description", UNSET)
+        description = d.pop("description")
 
-        output_port_classification_create = cls(
+        output_port_count = d.pop("output_port_count")
+
+        output_port_access_types_get_item = cls(
+            id=id,
             name=name,
             access_function=access_function,
             description=description,
+            output_port_count=output_port_count,
         )
 
-        output_port_classification_create.additional_properties = d
-        return output_port_classification_create
+        output_port_access_types_get_item.additional_properties = d
+        return output_port_access_types_get_item
 
     @property
     def additional_keys(self) -> list[str]:

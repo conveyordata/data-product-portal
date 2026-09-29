@@ -2473,13 +2473,13 @@ func (s *GetOutputPortResponse) Validate() error {
 		})
 	}
 	if err := func() error {
-		if err := s.Classification.Validate(); err != nil {
+		if err := s.AccessType.Validate(); err != nil {
 			return err
 		}
 		return nil
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
-			Name:  "classification",
+			Name:  "access_type",
 			Error: err,
 		})
 	}
@@ -3305,13 +3305,13 @@ func (s *OutputPort) Validate() error {
 		})
 	}
 	if err := func() error {
-		if err := s.Classification.Validate(); err != nil {
+		if err := s.AccessType.Validate(); err != nil {
 			return err
 		}
 		return nil
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
-			Name:  "classification",
+			Name:  "access_type",
 			Error: err,
 		})
 	}
@@ -3379,7 +3379,7 @@ func (s OutputPortAccessFunction) Validate() error {
 	}
 }
 
-func (s *OutputPortClassification) Validate() error {
+func (s *OutputPortAccessType) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer
 	}
@@ -3402,7 +3402,7 @@ func (s *OutputPortClassification) Validate() error {
 	return nil
 }
 
-func (s *OutputPortClassificationCreate) Validate() error {
+func (s *OutputPortAccessTypeCreate) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer
 	}
@@ -3448,7 +3448,7 @@ func (s *OutputPortClassificationCreate) Validate() error {
 	return nil
 }
 
-func (s *OutputPortClassificationUpdate) Validate() error {
+func (s *OutputPortAccessTypeUpdate) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer
 	}
@@ -3494,18 +3494,18 @@ func (s *OutputPortClassificationUpdate) Validate() error {
 	return nil
 }
 
-func (s *OutputPortClassificationsGet) Validate() error {
+func (s *OutputPortAccessTypesGet) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer
 	}
 
 	var failures []validate.FieldError
 	if err := func() error {
-		if s.OutputPortClassifications == nil {
+		if s.OutputPortAccessTypes == nil {
 			return errors.New("nil is invalid value")
 		}
 		var failures []validate.FieldError
-		for i, elem := range s.OutputPortClassifications {
+		for i, elem := range s.OutputPortAccessTypes {
 			if err := func() error {
 				if err := elem.Validate(); err != nil {
 					return err
@@ -3524,7 +3524,7 @@ func (s *OutputPortClassificationsGet) Validate() error {
 		return nil
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
-			Name:  "output_port_classifications",
+			Name:  "output_port_access_types",
 			Error: err,
 		})
 	}
@@ -3534,7 +3534,7 @@ func (s *OutputPortClassificationsGet) Validate() error {
 	return nil
 }
 
-func (s *OutputPortClassificationsGetItem) Validate() error {
+func (s *OutputPortAccessTypesGetItem) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer
 	}
@@ -4748,13 +4748,13 @@ func (s *SearchOutputPortsResponseItem) Validate() error {
 		})
 	}
 	if err := func() error {
-		if err := s.Classification.Validate(); err != nil {
+		if err := s.AccessType.Validate(); err != nil {
 			return err
 		}
 		return nil
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
-			Name:  "classification",
+			Name:  "access_type",
 			Error: err,
 		})
 	}

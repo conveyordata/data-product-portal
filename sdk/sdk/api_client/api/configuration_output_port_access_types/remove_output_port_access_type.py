@@ -17,7 +17,7 @@ def _get_kwargs(
 
     _kwargs: dict[str, Any] = {
         "method": "delete",
-        "url": "/api/v2/configuration/output_port_classifications/{id}".format(
+        "url": "/api/v2/configuration/output_port_access_types/{id}".format(
             id=quote(str(id), safe=""),
         ),
     }
@@ -59,7 +59,7 @@ def sync_detailed(
     *,
     client: AuthenticatedClient | Client,
 ) -> Response[Any | HTTPValidationError]:
-    """Remove Output Port Classification
+    """Remove Output Port Access Type
 
     Args:
         id (UUID):
@@ -88,7 +88,7 @@ def sync(
     *,
     client: AuthenticatedClient | Client,
 ) -> Any | HTTPValidationError | None:
-    """Remove Output Port Classification
+    """Remove Output Port Access Type
 
     Args:
         id (UUID):
@@ -112,7 +112,7 @@ async def asyncio_detailed(
     *,
     client: AuthenticatedClient | Client,
 ) -> Response[Any | HTTPValidationError]:
-    """Remove Output Port Classification
+    """Remove Output Port Access Type
 
     Args:
         id (UUID):
@@ -139,7 +139,7 @@ async def asyncio(
     *,
     client: AuthenticatedClient | Client,
 ) -> Any | HTTPValidationError | None:
-    """Remove Output Port Classification
+    """Remove Output Port Access Type
 
     Args:
         id (UUID):

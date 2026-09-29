@@ -3806,28 +3806,28 @@ func (s *CreateExplorationResponse) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
-func (s *CreateOutputPortClassificationResponse) Encode(e *jx.Encoder) {
+func (s *CreateOutputPortAccessTypeResponse) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
 // encodeFields encodes fields.
-func (s *CreateOutputPortClassificationResponse) encodeFields(e *jx.Encoder) {
+func (s *CreateOutputPortAccessTypeResponse) encodeFields(e *jx.Encoder) {
 	{
 		e.FieldStart("id")
 		json.EncodeUUID(e, s.ID)
 	}
 }
 
-var jsonFieldsNameOfCreateOutputPortClassificationResponse = [1]string{
+var jsonFieldsNameOfCreateOutputPortAccessTypeResponse = [1]string{
 	0: "id",
 }
 
-// Decode decodes CreateOutputPortClassificationResponse from json.
-func (s *CreateOutputPortClassificationResponse) Decode(d *jx.Decoder) error {
+// Decode decodes CreateOutputPortAccessTypeResponse from json.
+func (s *CreateOutputPortAccessTypeResponse) Decode(d *jx.Decoder) error {
 	if s == nil {
-		return errors.New("invalid: unable to decode CreateOutputPortClassificationResponse to nil")
+		return errors.New("invalid: unable to decode CreateOutputPortAccessTypeResponse to nil")
 	}
 	var requiredBitSet [1]uint8
 
@@ -3850,7 +3850,7 @@ func (s *CreateOutputPortClassificationResponse) Decode(d *jx.Decoder) error {
 		}
 		return nil
 	}); err != nil {
-		return errors.Wrap(err, "decode CreateOutputPortClassificationResponse")
+		return errors.Wrap(err, "decode CreateOutputPortAccessTypeResponse")
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
@@ -3867,8 +3867,8 @@ func (s *CreateOutputPortClassificationResponse) Decode(d *jx.Decoder) error {
 				bitIdx := bits.TrailingZeros8(result)
 				fieldIdx := i*8 + bitIdx
 				var name string
-				if fieldIdx < len(jsonFieldsNameOfCreateOutputPortClassificationResponse) {
-					name = jsonFieldsNameOfCreateOutputPortClassificationResponse[fieldIdx]
+				if fieldIdx < len(jsonFieldsNameOfCreateOutputPortAccessTypeResponse) {
+					name = jsonFieldsNameOfCreateOutputPortAccessTypeResponse[fieldIdx]
 				} else {
 					name = strconv.Itoa(fieldIdx)
 				}
@@ -3889,14 +3889,14 @@ func (s *CreateOutputPortClassificationResponse) Decode(d *jx.Decoder) error {
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s *CreateOutputPortClassificationResponse) MarshalJSON() ([]byte, error) {
+func (s *CreateOutputPortAccessTypeResponse) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *CreateOutputPortClassificationResponse) UnmarshalJSON(data []byte) error {
+func (s *CreateOutputPortAccessTypeResponse) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -3965,8 +3965,8 @@ func (s *CreateOutputPortRequest) encodeFields(e *jx.Encoder) {
 		e.Str(s.Description)
 	}
 	{
-		e.FieldStart("classification_id")
-		json.EncodeUUID(e, s.ClassificationID)
+		e.FieldStart("access_type_id")
+		json.EncodeUUID(e, s.AccessTypeID)
 	}
 	{
 		e.FieldStart("data_product_access_duration_type")
@@ -4010,7 +4010,7 @@ var jsonFieldsNameOfCreateOutputPortRequest = [10]string{
 	0: "name",
 	1: "namespace",
 	2: "description",
-	3: "classification_id",
+	3: "access_type_id",
 	4: "data_product_access_duration_type",
 	5: "exploration_access_duration_type",
 	6: "about",
@@ -4064,17 +4064,17 @@ func (s *CreateOutputPortRequest) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"description\"")
 			}
-		case "classification_id":
+		case "access_type_id":
 			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
 				v, err := json.DecodeUUID(d)
-				s.ClassificationID = v
+				s.AccessTypeID = v
 				if err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"classification_id\"")
+				return errors.Wrap(err, "decode field \"access_type_id\"")
 			}
 		case "data_product_access_duration_type":
 			requiredBitSet[0] |= 1 << 4
@@ -15664,8 +15664,8 @@ func (s *GetOutputPortResponse) encodeFields(e *jx.Encoder) {
 		s.Usage.Encode(e)
 	}
 	{
-		e.FieldStart("classification")
-		s.Classification.Encode(e)
+		e.FieldStart("access_type")
+		s.AccessType.Encode(e)
 	}
 	{
 		e.FieldStart("data_product_access_duration_type")
@@ -15740,7 +15740,7 @@ var jsonFieldsNameOfGetOutputPortResponse = [18]string{
 	3:  "description",
 	4:  "status",
 	5:  "usage",
-	6:  "classification",
+	6:  "access_type",
 	7:  "data_product_access_duration_type",
 	8:  "exploration_access_duration_type",
 	9:  "data_product_id",
@@ -15831,15 +15831,15 @@ func (s *GetOutputPortResponse) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"usage\"")
 			}
-		case "classification":
+		case "access_type":
 			requiredBitSet[0] |= 1 << 6
 			if err := func() error {
-				if err := s.Classification.Decode(d); err != nil {
+				if err := s.AccessType.Decode(d); err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"classification\"")
+				return errors.Wrap(err, "decode field \"access_type\"")
 			}
 		case "data_product_access_duration_type":
 			requiredBitSet[0] |= 1 << 7
@@ -21336,8 +21336,8 @@ func (s *OutputPort) encodeFields(e *jx.Encoder) {
 		s.Status.Encode(e)
 	}
 	{
-		e.FieldStart("classification")
-		s.Classification.Encode(e)
+		e.FieldStart("access_type")
+		s.AccessType.Encode(e)
 	}
 	{
 		e.FieldStart("data_product_id")
@@ -21367,7 +21367,7 @@ var jsonFieldsNameOfOutputPort = [9]string{
 	2: "namespace",
 	3: "description",
 	4: "status",
-	5: "classification",
+	5: "access_type",
 	6: "data_product_id",
 	7: "tags",
 	8: "access_modes",
@@ -21440,15 +21440,15 @@ func (s *OutputPort) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"status\"")
 			}
-		case "classification":
+		case "access_type":
 			requiredBitSet[0] |= 1 << 5
 			if err := func() error {
-				if err := s.Classification.Decode(d); err != nil {
+				if err := s.AccessType.Decode(d); err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"classification\"")
+				return errors.Wrap(err, "decode field \"access_type\"")
 			}
 		case "data_product_id":
 			requiredBitSet[0] |= 1 << 6
@@ -21805,14 +21805,14 @@ func (s *OutputPortAccessFunction) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
-func (s *OutputPortClassification) Encode(e *jx.Encoder) {
+func (s *OutputPortAccessType) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
 // encodeFields encodes fields.
-func (s *OutputPortClassification) encodeFields(e *jx.Encoder) {
+func (s *OutputPortAccessType) encodeFields(e *jx.Encoder) {
 	{
 		e.FieldStart("id")
 		json.EncodeUUID(e, s.ID)
@@ -21827,16 +21827,16 @@ func (s *OutputPortClassification) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfOutputPortClassification = [3]string{
+var jsonFieldsNameOfOutputPortAccessType = [3]string{
 	0: "id",
 	1: "name",
 	2: "access_function",
 }
 
-// Decode decodes OutputPortClassification from json.
-func (s *OutputPortClassification) Decode(d *jx.Decoder) error {
+// Decode decodes OutputPortAccessType from json.
+func (s *OutputPortAccessType) Decode(d *jx.Decoder) error {
 	if s == nil {
-		return errors.New("invalid: unable to decode OutputPortClassification to nil")
+		return errors.New("invalid: unable to decode OutputPortAccessType to nil")
 	}
 	var requiredBitSet [1]uint8
 
@@ -21881,7 +21881,7 @@ func (s *OutputPortClassification) Decode(d *jx.Decoder) error {
 		}
 		return nil
 	}); err != nil {
-		return errors.Wrap(err, "decode OutputPortClassification")
+		return errors.Wrap(err, "decode OutputPortAccessType")
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
@@ -21898,8 +21898,8 @@ func (s *OutputPortClassification) Decode(d *jx.Decoder) error {
 				bitIdx := bits.TrailingZeros8(result)
 				fieldIdx := i*8 + bitIdx
 				var name string
-				if fieldIdx < len(jsonFieldsNameOfOutputPortClassification) {
-					name = jsonFieldsNameOfOutputPortClassification[fieldIdx]
+				if fieldIdx < len(jsonFieldsNameOfOutputPortAccessType) {
+					name = jsonFieldsNameOfOutputPortAccessType[fieldIdx]
 				} else {
 					name = strconv.Itoa(fieldIdx)
 				}
@@ -21920,27 +21920,27 @@ func (s *OutputPortClassification) Decode(d *jx.Decoder) error {
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s *OutputPortClassification) MarshalJSON() ([]byte, error) {
+func (s *OutputPortAccessType) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *OutputPortClassification) UnmarshalJSON(data []byte) error {
+func (s *OutputPortAccessType) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
 
 // Encode implements json.Marshaler.
-func (s *OutputPortClassificationCreate) Encode(e *jx.Encoder) {
+func (s *OutputPortAccessTypeCreate) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
 // encodeFields encodes fields.
-func (s *OutputPortClassificationCreate) encodeFields(e *jx.Encoder) {
+func (s *OutputPortAccessTypeCreate) encodeFields(e *jx.Encoder) {
 	{
 		e.FieldStart("name")
 		e.Str(s.Name)
@@ -21957,16 +21957,16 @@ func (s *OutputPortClassificationCreate) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfOutputPortClassificationCreate = [3]string{
+var jsonFieldsNameOfOutputPortAccessTypeCreate = [3]string{
 	0: "name",
 	1: "description",
 	2: "access_function",
 }
 
-// Decode decodes OutputPortClassificationCreate from json.
-func (s *OutputPortClassificationCreate) Decode(d *jx.Decoder) error {
+// Decode decodes OutputPortAccessTypeCreate from json.
+func (s *OutputPortAccessTypeCreate) Decode(d *jx.Decoder) error {
 	if s == nil {
-		return errors.New("invalid: unable to decode OutputPortClassificationCreate to nil")
+		return errors.New("invalid: unable to decode OutputPortAccessTypeCreate to nil")
 	}
 	var requiredBitSet [1]uint8
 	s.setDefaults()
@@ -22010,7 +22010,7 @@ func (s *OutputPortClassificationCreate) Decode(d *jx.Decoder) error {
 		}
 		return nil
 	}); err != nil {
-		return errors.Wrap(err, "decode OutputPortClassificationCreate")
+		return errors.Wrap(err, "decode OutputPortAccessTypeCreate")
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
@@ -22027,8 +22027,8 @@ func (s *OutputPortClassificationCreate) Decode(d *jx.Decoder) error {
 				bitIdx := bits.TrailingZeros8(result)
 				fieldIdx := i*8 + bitIdx
 				var name string
-				if fieldIdx < len(jsonFieldsNameOfOutputPortClassificationCreate) {
-					name = jsonFieldsNameOfOutputPortClassificationCreate[fieldIdx]
+				if fieldIdx < len(jsonFieldsNameOfOutputPortAccessTypeCreate) {
+					name = jsonFieldsNameOfOutputPortAccessTypeCreate[fieldIdx]
 				} else {
 					name = strconv.Itoa(fieldIdx)
 				}
@@ -22049,27 +22049,27 @@ func (s *OutputPortClassificationCreate) Decode(d *jx.Decoder) error {
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s *OutputPortClassificationCreate) MarshalJSON() ([]byte, error) {
+func (s *OutputPortAccessTypeCreate) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *OutputPortClassificationCreate) UnmarshalJSON(data []byte) error {
+func (s *OutputPortAccessTypeCreate) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
 
 // Encode implements json.Marshaler.
-func (s *OutputPortClassificationUpdate) Encode(e *jx.Encoder) {
+func (s *OutputPortAccessTypeUpdate) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
 // encodeFields encodes fields.
-func (s *OutputPortClassificationUpdate) encodeFields(e *jx.Encoder) {
+func (s *OutputPortAccessTypeUpdate) encodeFields(e *jx.Encoder) {
 	{
 		e.FieldStart("name")
 		e.Str(s.Name)
@@ -22086,16 +22086,16 @@ func (s *OutputPortClassificationUpdate) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfOutputPortClassificationUpdate = [3]string{
+var jsonFieldsNameOfOutputPortAccessTypeUpdate = [3]string{
 	0: "name",
 	1: "description",
 	2: "access_function",
 }
 
-// Decode decodes OutputPortClassificationUpdate from json.
-func (s *OutputPortClassificationUpdate) Decode(d *jx.Decoder) error {
+// Decode decodes OutputPortAccessTypeUpdate from json.
+func (s *OutputPortAccessTypeUpdate) Decode(d *jx.Decoder) error {
 	if s == nil {
-		return errors.New("invalid: unable to decode OutputPortClassificationUpdate to nil")
+		return errors.New("invalid: unable to decode OutputPortAccessTypeUpdate to nil")
 	}
 	var requiredBitSet [1]uint8
 	s.setDefaults()
@@ -22139,7 +22139,7 @@ func (s *OutputPortClassificationUpdate) Decode(d *jx.Decoder) error {
 		}
 		return nil
 	}); err != nil {
-		return errors.Wrap(err, "decode OutputPortClassificationUpdate")
+		return errors.Wrap(err, "decode OutputPortAccessTypeUpdate")
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
@@ -22156,8 +22156,8 @@ func (s *OutputPortClassificationUpdate) Decode(d *jx.Decoder) error {
 				bitIdx := bits.TrailingZeros8(result)
 				fieldIdx := i*8 + bitIdx
 				var name string
-				if fieldIdx < len(jsonFieldsNameOfOutputPortClassificationUpdate) {
-					name = jsonFieldsNameOfOutputPortClassificationUpdate[fieldIdx]
+				if fieldIdx < len(jsonFieldsNameOfOutputPortAccessTypeUpdate) {
+					name = jsonFieldsNameOfOutputPortAccessTypeUpdate[fieldIdx]
 				} else {
 					name = strconv.Itoa(fieldIdx)
 				}
@@ -22178,74 +22178,74 @@ func (s *OutputPortClassificationUpdate) Decode(d *jx.Decoder) error {
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s *OutputPortClassificationUpdate) MarshalJSON() ([]byte, error) {
+func (s *OutputPortAccessTypeUpdate) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *OutputPortClassificationUpdate) UnmarshalJSON(data []byte) error {
+func (s *OutputPortAccessTypeUpdate) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
 
 // Encode implements json.Marshaler.
-func (s *OutputPortClassificationsGet) Encode(e *jx.Encoder) {
+func (s *OutputPortAccessTypesGet) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
 // encodeFields encodes fields.
-func (s *OutputPortClassificationsGet) encodeFields(e *jx.Encoder) {
+func (s *OutputPortAccessTypesGet) encodeFields(e *jx.Encoder) {
 	{
-		e.FieldStart("output_port_classifications")
+		e.FieldStart("output_port_access_types")
 		e.ArrStart()
-		for _, elem := range s.OutputPortClassifications {
+		for _, elem := range s.OutputPortAccessTypes {
 			elem.Encode(e)
 		}
 		e.ArrEnd()
 	}
 }
 
-var jsonFieldsNameOfOutputPortClassificationsGet = [1]string{
-	0: "output_port_classifications",
+var jsonFieldsNameOfOutputPortAccessTypesGet = [1]string{
+	0: "output_port_access_types",
 }
 
-// Decode decodes OutputPortClassificationsGet from json.
-func (s *OutputPortClassificationsGet) Decode(d *jx.Decoder) error {
+// Decode decodes OutputPortAccessTypesGet from json.
+func (s *OutputPortAccessTypesGet) Decode(d *jx.Decoder) error {
 	if s == nil {
-		return errors.New("invalid: unable to decode OutputPortClassificationsGet to nil")
+		return errors.New("invalid: unable to decode OutputPortAccessTypesGet to nil")
 	}
 	var requiredBitSet [1]uint8
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
-		case "output_port_classifications":
+		case "output_port_access_types":
 			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				s.OutputPortClassifications = make([]OutputPortClassificationsGetItem, 0)
+				s.OutputPortAccessTypes = make([]OutputPortAccessTypesGetItem, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
-					var elem OutputPortClassificationsGetItem
+					var elem OutputPortAccessTypesGetItem
 					if err := elem.Decode(d); err != nil {
 						return err
 					}
-					s.OutputPortClassifications = append(s.OutputPortClassifications, elem)
+					s.OutputPortAccessTypes = append(s.OutputPortAccessTypes, elem)
 					return nil
 				}); err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"output_port_classifications\"")
+				return errors.Wrap(err, "decode field \"output_port_access_types\"")
 			}
 		default:
 			return d.Skip()
 		}
 		return nil
 	}); err != nil {
-		return errors.Wrap(err, "decode OutputPortClassificationsGet")
+		return errors.Wrap(err, "decode OutputPortAccessTypesGet")
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
@@ -22262,8 +22262,8 @@ func (s *OutputPortClassificationsGet) Decode(d *jx.Decoder) error {
 				bitIdx := bits.TrailingZeros8(result)
 				fieldIdx := i*8 + bitIdx
 				var name string
-				if fieldIdx < len(jsonFieldsNameOfOutputPortClassificationsGet) {
-					name = jsonFieldsNameOfOutputPortClassificationsGet[fieldIdx]
+				if fieldIdx < len(jsonFieldsNameOfOutputPortAccessTypesGet) {
+					name = jsonFieldsNameOfOutputPortAccessTypesGet[fieldIdx]
 				} else {
 					name = strconv.Itoa(fieldIdx)
 				}
@@ -22284,27 +22284,27 @@ func (s *OutputPortClassificationsGet) Decode(d *jx.Decoder) error {
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s *OutputPortClassificationsGet) MarshalJSON() ([]byte, error) {
+func (s *OutputPortAccessTypesGet) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *OutputPortClassificationsGet) UnmarshalJSON(data []byte) error {
+func (s *OutputPortAccessTypesGet) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
 
 // Encode implements json.Marshaler.
-func (s *OutputPortClassificationsGetItem) Encode(e *jx.Encoder) {
+func (s *OutputPortAccessTypesGetItem) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
 // encodeFields encodes fields.
-func (s *OutputPortClassificationsGetItem) encodeFields(e *jx.Encoder) {
+func (s *OutputPortAccessTypesGetItem) encodeFields(e *jx.Encoder) {
 	{
 		e.FieldStart("id")
 		json.EncodeUUID(e, s.ID)
@@ -22327,7 +22327,7 @@ func (s *OutputPortClassificationsGetItem) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfOutputPortClassificationsGetItem = [5]string{
+var jsonFieldsNameOfOutputPortAccessTypesGetItem = [5]string{
 	0: "id",
 	1: "name",
 	2: "access_function",
@@ -22335,10 +22335,10 @@ var jsonFieldsNameOfOutputPortClassificationsGetItem = [5]string{
 	4: "output_port_count",
 }
 
-// Decode decodes OutputPortClassificationsGetItem from json.
-func (s *OutputPortClassificationsGetItem) Decode(d *jx.Decoder) error {
+// Decode decodes OutputPortAccessTypesGetItem from json.
+func (s *OutputPortAccessTypesGetItem) Decode(d *jx.Decoder) error {
 	if s == nil {
-		return errors.New("invalid: unable to decode OutputPortClassificationsGetItem to nil")
+		return errors.New("invalid: unable to decode OutputPortAccessTypesGetItem to nil")
 	}
 	var requiredBitSet [1]uint8
 
@@ -22407,7 +22407,7 @@ func (s *OutputPortClassificationsGetItem) Decode(d *jx.Decoder) error {
 		}
 		return nil
 	}); err != nil {
-		return errors.Wrap(err, "decode OutputPortClassificationsGetItem")
+		return errors.Wrap(err, "decode OutputPortAccessTypesGetItem")
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
@@ -22424,8 +22424,8 @@ func (s *OutputPortClassificationsGetItem) Decode(d *jx.Decoder) error {
 				bitIdx := bits.TrailingZeros8(result)
 				fieldIdx := i*8 + bitIdx
 				var name string
-				if fieldIdx < len(jsonFieldsNameOfOutputPortClassificationsGetItem) {
-					name = jsonFieldsNameOfOutputPortClassificationsGetItem[fieldIdx]
+				if fieldIdx < len(jsonFieldsNameOfOutputPortAccessTypesGetItem) {
+					name = jsonFieldsNameOfOutputPortAccessTypesGetItem[fieldIdx]
 				} else {
 					name = strconv.Itoa(fieldIdx)
 				}
@@ -22446,14 +22446,14 @@ func (s *OutputPortClassificationsGetItem) Decode(d *jx.Decoder) error {
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s *OutputPortClassificationsGetItem) MarshalJSON() ([]byte, error) {
+func (s *OutputPortAccessTypesGetItem) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *OutputPortClassificationsGetItem) UnmarshalJSON(data []byte) error {
+func (s *OutputPortAccessTypesGetItem) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -25007,8 +25007,8 @@ func (s *OutputPortUpdate) encodeFields(e *jx.Encoder) {
 		e.Str(s.Description)
 	}
 	{
-		e.FieldStart("classification_id")
-		json.EncodeUUID(e, s.ClassificationID)
+		e.FieldStart("access_type_id")
+		json.EncodeUUID(e, s.AccessTypeID)
 	}
 	{
 		e.FieldStart("data_product_access_duration_type")
@@ -25044,7 +25044,7 @@ var jsonFieldsNameOfOutputPortUpdate = [9]string{
 	0: "name",
 	1: "namespace",
 	2: "description",
-	3: "classification_id",
+	3: "access_type_id",
 	4: "data_product_access_duration_type",
 	5: "exploration_access_duration_type",
 	6: "about",
@@ -25097,17 +25097,17 @@ func (s *OutputPortUpdate) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"description\"")
 			}
-		case "classification_id":
+		case "access_type_id":
 			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
 				v, err := json.DecodeUUID(d)
-				s.ClassificationID = v
+				s.AccessTypeID = v
 				if err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"classification_id\"")
+				return errors.Wrap(err, "decode field \"access_type_id\"")
 			}
 		case "data_product_access_duration_type":
 			requiredBitSet[0] |= 1 << 4
@@ -26799,6 +26799,48 @@ func (s *RemoveInputPortForExplorationOKApplicationJSON) UnmarshalJSON(data []by
 	return s.Decode(d)
 }
 
+// Encode encodes RemoveOutputPortAccessTypeOKApplicationJSON as json.
+func (s RemoveOutputPortAccessTypeOKApplicationJSON) Encode(e *jx.Encoder) {
+	unwrapped := jx.Raw(s)
+
+	if len(unwrapped) != 0 {
+		e.Raw(unwrapped)
+	}
+}
+
+// Decode decodes RemoveOutputPortAccessTypeOKApplicationJSON from json.
+func (s *RemoveOutputPortAccessTypeOKApplicationJSON) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode RemoveOutputPortAccessTypeOKApplicationJSON to nil")
+	}
+	var unwrapped jx.Raw
+	if err := func() error {
+		v, err := d.RawAppend(nil)
+		unwrapped = jx.Raw(v)
+		if err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = RemoveOutputPortAccessTypeOKApplicationJSON(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s RemoveOutputPortAccessTypeOKApplicationJSON) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *RemoveOutputPortAccessTypeOKApplicationJSON) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode encodes RemoveOutputPortAsInputPortOKApplicationJSON as json.
 func (s RemoveOutputPortAsInputPortOKApplicationJSON) Encode(e *jx.Encoder) {
 	unwrapped := jx.Raw(s)
@@ -26933,48 +26975,6 @@ func (s *RemoveOutputPortAsInputPortRequest) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *RemoveOutputPortAsInputPortRequest) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode encodes RemoveOutputPortClassificationOKApplicationJSON as json.
-func (s RemoveOutputPortClassificationOKApplicationJSON) Encode(e *jx.Encoder) {
-	unwrapped := jx.Raw(s)
-
-	if len(unwrapped) != 0 {
-		e.Raw(unwrapped)
-	}
-}
-
-// Decode decodes RemoveOutputPortClassificationOKApplicationJSON from json.
-func (s *RemoveOutputPortClassificationOKApplicationJSON) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode RemoveOutputPortClassificationOKApplicationJSON to nil")
-	}
-	var unwrapped jx.Raw
-	if err := func() error {
-		v, err := d.RawAppend(nil)
-		unwrapped = jx.Raw(v)
-		if err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		return errors.Wrap(err, "alias")
-	}
-	*s = RemoveOutputPortClassificationOKApplicationJSON(unwrapped)
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s RemoveOutputPortClassificationOKApplicationJSON) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *RemoveOutputPortClassificationOKApplicationJSON) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -31299,8 +31299,8 @@ func (s *SearchOutputPortsResponseItem) encodeFields(e *jx.Encoder) {
 		s.Usage.Encode(e)
 	}
 	{
-		e.FieldStart("classification")
-		s.Classification.Encode(e)
+		e.FieldStart("access_type")
+		s.AccessType.Encode(e)
 	}
 	{
 		e.FieldStart("data_product_access_duration_type")
@@ -31359,7 +31359,7 @@ var jsonFieldsNameOfSearchOutputPortsResponseItem = [17]string{
 	3:  "description",
 	4:  "status",
 	5:  "usage",
-	6:  "classification",
+	6:  "access_type",
 	7:  "data_product_access_duration_type",
 	8:  "exploration_access_duration_type",
 	9:  "data_product_id",
@@ -31449,15 +31449,15 @@ func (s *SearchOutputPortsResponseItem) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"usage\"")
 			}
-		case "classification":
+		case "access_type":
 			requiredBitSet[0] |= 1 << 6
 			if err := func() error {
-				if err := s.Classification.Decode(d); err != nil {
+				if err := s.AccessType.Decode(d); err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"classification\"")
+				return errors.Wrap(err, "decode field \"access_type\"")
 			}
 		case "data_product_access_duration_type":
 			requiredBitSet[0] |= 1 << 7
@@ -35885,28 +35885,28 @@ func (s *UpdateOutputPortAboutOKApplicationJSON) UnmarshalJSON(data []byte) erro
 }
 
 // Encode implements json.Marshaler.
-func (s *UpdateOutputPortClassificationResponse) Encode(e *jx.Encoder) {
+func (s *UpdateOutputPortAccessTypeResponse) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
 // encodeFields encodes fields.
-func (s *UpdateOutputPortClassificationResponse) encodeFields(e *jx.Encoder) {
+func (s *UpdateOutputPortAccessTypeResponse) encodeFields(e *jx.Encoder) {
 	{
 		e.FieldStart("id")
 		json.EncodeUUID(e, s.ID)
 	}
 }
 
-var jsonFieldsNameOfUpdateOutputPortClassificationResponse = [1]string{
+var jsonFieldsNameOfUpdateOutputPortAccessTypeResponse = [1]string{
 	0: "id",
 }
 
-// Decode decodes UpdateOutputPortClassificationResponse from json.
-func (s *UpdateOutputPortClassificationResponse) Decode(d *jx.Decoder) error {
+// Decode decodes UpdateOutputPortAccessTypeResponse from json.
+func (s *UpdateOutputPortAccessTypeResponse) Decode(d *jx.Decoder) error {
 	if s == nil {
-		return errors.New("invalid: unable to decode UpdateOutputPortClassificationResponse to nil")
+		return errors.New("invalid: unable to decode UpdateOutputPortAccessTypeResponse to nil")
 	}
 	var requiredBitSet [1]uint8
 
@@ -35929,7 +35929,7 @@ func (s *UpdateOutputPortClassificationResponse) Decode(d *jx.Decoder) error {
 		}
 		return nil
 	}); err != nil {
-		return errors.Wrap(err, "decode UpdateOutputPortClassificationResponse")
+		return errors.Wrap(err, "decode UpdateOutputPortAccessTypeResponse")
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
@@ -35946,8 +35946,8 @@ func (s *UpdateOutputPortClassificationResponse) Decode(d *jx.Decoder) error {
 				bitIdx := bits.TrailingZeros8(result)
 				fieldIdx := i*8 + bitIdx
 				var name string
-				if fieldIdx < len(jsonFieldsNameOfUpdateOutputPortClassificationResponse) {
-					name = jsonFieldsNameOfUpdateOutputPortClassificationResponse[fieldIdx]
+				if fieldIdx < len(jsonFieldsNameOfUpdateOutputPortAccessTypeResponse) {
+					name = jsonFieldsNameOfUpdateOutputPortAccessTypeResponse[fieldIdx]
 				} else {
 					name = strconv.Itoa(fieldIdx)
 				}
@@ -35968,14 +35968,14 @@ func (s *UpdateOutputPortClassificationResponse) Decode(d *jx.Decoder) error {
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s *UpdateOutputPortClassificationResponse) MarshalJSON() ([]byte, error) {
+func (s *UpdateOutputPortAccessTypeResponse) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *UpdateOutputPortClassificationResponse) UnmarshalJSON(data []byte) error {
+func (s *UpdateOutputPortAccessTypeResponse) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

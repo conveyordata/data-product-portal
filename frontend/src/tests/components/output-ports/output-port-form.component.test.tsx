@@ -2,7 +2,7 @@ import userEvent from '@testing-library/user-event';
 import { HttpResponse, http } from 'msw';
 import { describe, expect, it, vi } from 'vitest';
 import {
-    ClassificationSection,
+    AccessTypeSection,
     OutputPortForm,
 } from '@/components/output-ports/output-port-form/output-port-form.component.tsx';
 import {
@@ -13,7 +13,7 @@ import {
 import { allowAllAuth } from '@/tests/mocks/auth.ts';
 import { mockAccessDurationsGet, mockTimeBoundAccessEnabled } from '@/tests/mocks/configurationAccessDurations.ts';
 import { mockDataProductLifecycles } from '@/tests/mocks/configurationDataProductLifecycles.ts';
-import { mockOutputPortClassifications } from '@/tests/mocks/configurationOutputPortClassifications.ts';
+import { mockOutputPortAccessTypes } from '@/tests/mocks/configurationOutputPortAccessTypes.ts';
 import { mockDataProductHttp } from '@/tests/mocks/dataProducts.ts';
 import {
     mockGetResourceNamesConstraints,
@@ -26,12 +26,12 @@ import { mockUsers, mockUsersHttp } from '@/tests/mocks/users.ts';
 import { renderWithProviders, screen } from '@/tests/test-utils.tsx';
 
 describe('OutputPortForm', () => {
-    it('only allows Invite only classifications for hidden data products', async () => {
+    it('only allows Invite only access types for hidden data products', async () => {
         allowAllAuth();
         mockAccessDurationsGet();
         mockTimeBoundAccessEnabled();
         mockDataProductLifecycles();
-        mockOutputPortClassifications();
+        mockOutputPortAccessTypes();
         mockUsersHttp(mockUsers);
         mockGetTags();
         mockGetResourceNamesConstraints();
@@ -67,7 +67,7 @@ describe('OutputPortForm', () => {
             routerProps: { initialEntries: ['/'] },
         });
 
-        const select = await screen.findByRole('combobox', { name: /classification/i });
+        const select = await screen.findByRole('combobox', { name: /access type/i });
         expect(await screen.findByTitle('Private')).toBeInTheDocument();
 
         await userEvent.click(select);
@@ -82,13 +82,11 @@ describe('OutputPortForm', () => {
         expect(option('Private')).not.toHaveClass('ant-select-item-option-disabled');
     });
 
-    it('does not change an existing classification while classifications load', async () => {
-        mockOutputPortClassifications();
+    it('does not change an existing access type while access types load', async () => {
+        mockOutputPortAccessTypes();
         const onChange = vi.fn();
 
-        renderWithProviders(
-            <ClassificationSection value="classification-private" onChange={onChange} hiddenDataProduct />,
-        );
+        renderWithProviders(<AccessTypeSection value="access-type-private" onChange={onChange} hiddenDataProduct />);
 
         expect(await screen.findByTitle('Private')).toBeInTheDocument();
         expect(onChange).not.toHaveBeenCalled();

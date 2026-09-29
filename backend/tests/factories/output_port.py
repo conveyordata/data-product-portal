@@ -11,7 +11,7 @@ from tests import test_session
 
 from .access_duration import AccessDurationFactory
 from .data_product import DataProductFactory
-from .output_port_classification import OutputPortClassificationFactory
+from .output_port_access_type import OutputPortAccessTypeFactory
 from .tags import TagFactory
 
 fake = Faker()
@@ -28,8 +28,8 @@ class OutputPortFactory(factory.alchemy.SQLAlchemyModelFactory):
     about = factory.Faker("text", max_nb_chars=20)
     status = OutputPortStatus.ACTIVE.value
     access_function = OutputPortAccessFunction.UNRESTRICTED.value
-    classification = factory.SubFactory(
-        OutputPortClassificationFactory,
+    access_type = factory.SubFactory(
+        OutputPortAccessTypeFactory,
         access_function=factory.SelfAttribute("..access_function"),
     )
     usage = factory.Faker("word")
@@ -80,4 +80,4 @@ class OutputPortFactory(factory.alchemy.SQLAlchemyModelFactory):
         if not create:
             return
 
-        OutputPortService._sync_public_reader_grouping(self.id, self.access_function)
+        OutputPortService._sync_public_reader_grouping([self.id], self.access_function)

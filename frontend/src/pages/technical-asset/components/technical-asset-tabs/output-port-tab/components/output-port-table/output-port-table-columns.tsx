@@ -32,7 +32,7 @@ export const getDataOutputDatasetsColumns = ({ t, dataProductId }: Props): Table
                 const popoverTitle = (
                     <OutputPortPopoverTitle
                         name={output_port.name}
-                        classification={output_port.classification}
+                        accessType={output_port.access_type}
                         isApproved={isDatasetRequestApproved}
                     />
                 );
@@ -41,7 +41,7 @@ export const getDataOutputDatasetsColumns = ({ t, dataProductId }: Props): Table
                         popover={{ title: popoverTitle, content: output_port.description }}
                         linkTo={createMarketplaceOutputPortPath(output_port.id, output_port.data_product_id)}
                         icon={<CustomSvgIconLoader iconComponent={outputPortBorderIcon} />}
-                        title={<OutputPortTitle name={output_port.name} classification={output_port.classification} />}
+                        title={<OutputPortTitle name={output_port.name} accessType={output_port.access_type} />}
                         subtitle={
                             <Badge
                                 status={getDecisionStatusBadgeStatus(status)}

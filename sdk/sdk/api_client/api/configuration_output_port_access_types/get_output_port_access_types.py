@@ -1,47 +1,30 @@
 from http import HTTPStatus
 from typing import Any
-from urllib.parse import quote
-from uuid import UUID
 
 import httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.http_validation_error import HTTPValidationError
-from ...models.output_port_classification_update import OutputPortClassificationUpdate
-from ...models.update_output_port_classification_response import (
-    UpdateOutputPortClassificationResponse,
-)
+from ...models.output_port_access_types_get import OutputPortAccessTypesGet
 from ...types import Response
 
 
-def _get_kwargs(
-    id: UUID,
-    *,
-    body: OutputPortClassificationUpdate,
-) -> dict[str, Any]:
-    headers: dict[str, Any] = {}
+def _get_kwargs() -> dict[str, Any]:
 
     _kwargs: dict[str, Any] = {
-        "method": "put",
-        "url": "/api/v2/configuration/output_port_classifications/{id}".format(
-            id=quote(str(id), safe=""),
-        ),
+        "method": "get",
+        "url": "/api/v2/configuration/output_port_access_types",
     }
 
-    _kwargs["json"] = body.to_dict()
-
-    headers["Content-Type"] = "application/json"
-
-    _kwargs["headers"] = headers
     return _kwargs
 
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> HTTPValidationError | UpdateOutputPortClassificationResponse | None:
+) -> HTTPValidationError | OutputPortAccessTypesGet | None:
     if response.status_code == 200:
-        response_200 = UpdateOutputPortClassificationResponse.from_dict(response.json())
+        response_200 = OutputPortAccessTypesGet.from_dict(response.json())
 
         return response_200
 
@@ -58,7 +41,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[HTTPValidationError | UpdateOutputPortClassificationResponse]:
+) -> Response[HTTPValidationError | OutputPortAccessTypesGet]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -68,29 +51,20 @@ def _build_response(
 
 
 def sync_detailed(
-    id: UUID,
     *,
     client: AuthenticatedClient | Client,
-    body: OutputPortClassificationUpdate,
-) -> Response[HTTPValidationError | UpdateOutputPortClassificationResponse]:
-    """Update Output Port Classification
-
-    Args:
-        id (UUID):
-        body (OutputPortClassificationUpdate):
+) -> Response[HTTPValidationError | OutputPortAccessTypesGet]:
+    """Get Output Port Access Types
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[HTTPValidationError | UpdateOutputPortClassificationResponse]
+        Response[HTTPValidationError | OutputPortAccessTypesGet]
     """
 
-    kwargs = _get_kwargs(
-        id=id,
-        body=body,
-    )
+    kwargs = _get_kwargs()
 
     response = client.get_httpx_client().request(
         **kwargs,
@@ -100,56 +74,39 @@ def sync_detailed(
 
 
 def sync(
-    id: UUID,
     *,
     client: AuthenticatedClient | Client,
-    body: OutputPortClassificationUpdate,
-) -> HTTPValidationError | UpdateOutputPortClassificationResponse | None:
-    """Update Output Port Classification
-
-    Args:
-        id (UUID):
-        body (OutputPortClassificationUpdate):
+) -> HTTPValidationError | OutputPortAccessTypesGet | None:
+    """Get Output Port Access Types
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        HTTPValidationError | UpdateOutputPortClassificationResponse
+        HTTPValidationError | OutputPortAccessTypesGet
     """
 
     return sync_detailed(
-        id=id,
         client=client,
-        body=body,
     ).parsed
 
 
 async def asyncio_detailed(
-    id: UUID,
     *,
     client: AuthenticatedClient | Client,
-    body: OutputPortClassificationUpdate,
-) -> Response[HTTPValidationError | UpdateOutputPortClassificationResponse]:
-    """Update Output Port Classification
-
-    Args:
-        id (UUID):
-        body (OutputPortClassificationUpdate):
+) -> Response[HTTPValidationError | OutputPortAccessTypesGet]:
+    """Get Output Port Access Types
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[HTTPValidationError | UpdateOutputPortClassificationResponse]
+        Response[HTTPValidationError | OutputPortAccessTypesGet]
     """
 
-    kwargs = _get_kwargs(
-        id=id,
-        body=body,
-    )
+    kwargs = _get_kwargs()
 
     response = await client.get_async_httpx_client().request(**kwargs)
 
@@ -157,29 +114,21 @@ async def asyncio_detailed(
 
 
 async def asyncio(
-    id: UUID,
     *,
     client: AuthenticatedClient | Client,
-    body: OutputPortClassificationUpdate,
-) -> HTTPValidationError | UpdateOutputPortClassificationResponse | None:
-    """Update Output Port Classification
-
-    Args:
-        id (UUID):
-        body (OutputPortClassificationUpdate):
+) -> HTTPValidationError | OutputPortAccessTypesGet | None:
+    """Get Output Port Access Types
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        HTTPValidationError | UpdateOutputPortClassificationResponse
+        HTTPValidationError | OutputPortAccessTypesGet
     """
 
     return (
         await asyncio_detailed(
-            id=id,
             client=client,
-            body=body,
         )
     ).parsed

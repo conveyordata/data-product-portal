@@ -7,11 +7,11 @@ from uuid import UUID
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-T = TypeVar("T", bound="CreateOutputPortClassificationResponse")
+T = TypeVar("T", bound="UpdateOutputPortAccessTypeResponse")
 
 
 @_attrs_define
-class CreateOutputPortClassificationResponse:
+class UpdateOutputPortAccessTypeResponse:
     """
     Attributes:
         id (UUID):
@@ -38,12 +38,12 @@ class CreateOutputPortClassificationResponse:
         d = dict(src_dict)
         id = UUID(d.pop("id"))
 
-        create_output_port_classification_response = cls(
+        update_output_port_access_type_response = cls(
             id=id,
         )
 
-        create_output_port_classification_response.additional_properties = d
-        return create_output_port_classification_response
+        update_output_port_access_type_response.additional_properties = d
+        return update_output_port_access_type_response
 
     @property
     def additional_keys(self) -> list[str]:

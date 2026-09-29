@@ -20,7 +20,7 @@ class CreateOutputPortRequest:
         name (str):
         namespace (str):
         description (str):
-        classification_id (UUID):
+        access_type_id (UUID):
         data_product_access_duration_type (AccessDurationType):
         exploration_access_duration_type (AccessDurationType):
         tag_ids (list[UUID]):
@@ -32,7 +32,7 @@ class CreateOutputPortRequest:
     name: str
     namespace: str
     description: str
-    classification_id: UUID
+    access_type_id: UUID
     data_product_access_duration_type: AccessDurationType
     exploration_access_duration_type: AccessDurationType
     tag_ids: list[UUID]
@@ -48,7 +48,7 @@ class CreateOutputPortRequest:
 
         description = self.description
 
-        classification_id = str(self.classification_id)
+        access_type_id = str(self.access_type_id)
 
         data_product_access_duration_type = self.data_product_access_duration_type.value
 
@@ -85,7 +85,7 @@ class CreateOutputPortRequest:
                 "name": name,
                 "namespace": namespace,
                 "description": description,
-                "classification_id": classification_id,
+                "access_type_id": access_type_id,
                 "data_product_access_duration_type": data_product_access_duration_type,
                 "exploration_access_duration_type": exploration_access_duration_type,
                 "tag_ids": tag_ids,
@@ -108,7 +108,7 @@ class CreateOutputPortRequest:
 
         description = d.pop("description")
 
-        classification_id = UUID(d.pop("classification_id"))
+        access_type_id = UUID(d.pop("access_type_id"))
 
         data_product_access_duration_type = AccessDurationType(
             d.pop("data_product_access_duration_type")
@@ -162,7 +162,7 @@ class CreateOutputPortRequest:
             name=name,
             namespace=namespace,
             description=description,
-            classification_id=classification_id,
+            access_type_id=access_type_id,
             data_product_access_duration_type=data_product_access_duration_type,
             exploration_access_duration_type=exploration_access_duration_type,
             tag_ids=tag_ids,

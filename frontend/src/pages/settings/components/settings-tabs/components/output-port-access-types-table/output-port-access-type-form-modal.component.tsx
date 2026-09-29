@@ -3,11 +3,11 @@ import { useTranslation } from 'react-i18next';
 
 import {
     OutputPortAccessFunction,
-    type OutputPortClassificationCreate,
-    type OutputPortClassificationsGetItem,
-    useCreateOutputPortClassificationMutation,
-    useUpdateOutputPortClassificationMutation,
-} from '@/store/api/services/generated/configurationOutputPortClassificationsApi.ts';
+    type OutputPortAccessTypeCreate,
+    type OutputPortAccessTypesGetItem,
+    useCreateOutputPortAccessTypeMutation,
+    useUpdateOutputPortAccessTypeMutation,
+} from '@/store/api/services/generated/configurationOutputPortAccessTypesApi.ts';
 import {
     ACCESS_FUNCTION_ORDER,
     compareAccessFunctions,
@@ -17,36 +17,36 @@ import { dispatchMessage } from '@/utils/feedback.ts';
 
 type Props = {
     onClose: () => void;
-    initial?: OutputPortClassificationsGetItem;
+    initial?: OutputPortAccessTypesGetItem;
     isLastInviteOnly: boolean;
 };
 
-export function OutputPortClassificationFormModal({ onClose, initial, isLastInviteOnly }: Props) {
+export function OutputPortAccessTypeFormModal({ onClose, initial, isLastInviteOnly }: Props) {
     const { t } = useTranslation();
-    const [form] = Form.useForm<OutputPortClassificationCreate>();
-    const [createClassification, { isLoading: isCreating }] = useCreateOutputPortClassificationMutation();
-    const [updateClassification, { isLoading: isUpdating }] = useUpdateOutputPortClassificationMutation();
+    const [form] = Form.useForm<OutputPortAccessTypeCreate>();
+    const [createAccessType, { isLoading: isCreating }] = useCreateOutputPortAccessTypeMutation();
+    const [updateAccessType, { isLoading: isUpdating }] = useUpdateOutputPortAccessTypeMutation();
     const accessFunction = Form.useWatch('access_function', form);
 
     const affectedOutputPorts = initial && accessFunction !== initial.access_function ? initial.output_port_count : 0;
     const loosensAccess =
         initial && accessFunction && compareAccessFunctions(accessFunction, initial.access_function) < 0;
 
-    const handleFinish = async (values: OutputPortClassificationCreate) => {
+    const handleFinish = async (values: OutputPortAccessTypeCreate) => {
         const result = initial
-            ? await updateClassification({ id: initial.id, outputPortClassificationUpdate: values })
-            : await createClassification(values);
+            ? await updateAccessType({ id: initial.id, outputPortAccessTypeUpdate: values })
+            : await createAccessType(values);
         if (result.error) {
             return;
         }
-        dispatchMessage({ content: t('Classification saved successfully'), type: 'success' });
+        dispatchMessage({ content: t('Access Type saved successfully'), type: 'success' });
         onClose();
     };
 
     return (
         <Modal
             open
-            title={initial ? t('Update Classification') : t('Create new Classification')}
+            title={initial ? t('Update Access Type') : t('Create new Access Type')}
             onCancel={onClose}
             footer={[
                 <Popconfirm
@@ -100,7 +100,7 @@ export function OutputPortClassificationFormModal({ onClose, initial, isLastInvi
                 <Form.Item
                     name="access_function"
                     label={t('Function')}
-                    tooltip={isLastInviteOnly ? t('At least one classification must stay Invite only') : undefined}
+                    tooltip={isLastInviteOnly ? t('At least one access type must stay Invite only') : undefined}
                     rules={[{ required: true }]}
                 >
                     <Select

@@ -4,8 +4,8 @@ from warnings import deprecated
 from pydantic import Field, field_validator
 
 from app.configuration.access_modes.schema_response import AccessMode
-from app.configuration.output_port_classifications.schema import (
-    OutputPortClassification,
+from app.configuration.output_port_access_types.schema import (
+    OutputPortAccessType,
 )
 from app.configuration.tags.schema import Tag
 from app.data_products.output_ports.status import OutputPortStatus
@@ -18,7 +18,7 @@ class OutputPort(ORMModel):
     namespace: str
     description: str
     status: OutputPortStatus
-    classification: OutputPortClassification
+    access_type: OutputPortAccessType
     data_product_id: UUID
     tags: list[Tag]
     access_modes: list[AccessMode]

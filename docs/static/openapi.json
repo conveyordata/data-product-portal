@@ -3204,20 +3204,20 @@
         }
       }
     },
-    "/api/v2/configuration/output_port_classifications": {
+    "/api/v2/configuration/output_port_access_types": {
       "get": {
         "tags": [
-          "Configuration - Output Port classifications"
+          "Configuration - Output Port access types"
         ],
-        "summary": "Get Output Port Classifications",
-        "operationId": "get_output_port_classifications",
+        "summary": "Get Output Port Access Types",
+        "operationId": "get_output_port_access_types",
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/OutputPortClassificationsGet"
+                  "$ref": "#/components/schemas/OutputPortAccessTypesGet"
                 }
               }
             }
@@ -3236,15 +3236,15 @@
       },
       "post": {
         "tags": [
-          "Configuration - Output Port classifications"
+          "Configuration - Output Port access types"
         ],
-        "summary": "Create Output Port Classification",
-        "operationId": "create_output_port_classification",
+        "summary": "Create Output Port Access Type",
+        "operationId": "create_output_port_access_type",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/OutputPortClassificationCreate"
+                "$ref": "#/components/schemas/OutputPortAccessTypeCreate"
               }
             }
           },
@@ -3256,7 +3256,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CreateOutputPortClassificationResponse"
+                  "$ref": "#/components/schemas/CreateOutputPortAccessTypeResponse"
                 }
               }
             }
@@ -3274,13 +3274,13 @@
         }
       }
     },
-    "/api/v2/configuration/output_port_classifications/{id}": {
+    "/api/v2/configuration/output_port_access_types/{id}": {
       "put": {
         "tags": [
-          "Configuration - Output Port classifications"
+          "Configuration - Output Port access types"
         ],
-        "summary": "Update Output Port Classification",
-        "operationId": "update_output_port_classification",
+        "summary": "Update Output Port Access Type",
+        "operationId": "update_output_port_access_type",
         "parameters": [
           {
             "name": "id",
@@ -3298,7 +3298,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/OutputPortClassificationUpdate"
+                "$ref": "#/components/schemas/OutputPortAccessTypeUpdate"
               }
             }
           }
@@ -3309,7 +3309,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UpdateOutputPortClassificationResponse"
+                  "$ref": "#/components/schemas/UpdateOutputPortAccessTypeResponse"
                 }
               }
             }
@@ -3328,10 +3328,10 @@
       },
       "delete": {
         "tags": [
-          "Configuration - Output Port classifications"
+          "Configuration - Output Port access types"
         ],
-        "summary": "Remove Output Port Classification",
-        "operationId": "remove_output_port_classification",
+        "summary": "Remove Output Port Access Type",
+        "operationId": "remove_output_port_access_type",
         "parameters": [
           {
             "name": "id",
@@ -9997,7 +9997,7 @@
         ],
         "title": "CreateGlobalRoleAssignment"
       },
-      "CreateOutputPortClassificationResponse": {
+      "CreateOutputPortAccessTypeResponse": {
         "properties": {
           "id": {
             "type": "string",
@@ -10009,7 +10009,7 @@
         "required": [
           "id"
         ],
-        "title": "CreateOutputPortClassificationResponse"
+        "title": "CreateOutputPortAccessTypeResponse"
       },
       "CreateOutputPortRequest": {
         "properties": {
@@ -10025,10 +10025,10 @@
             "type": "string",
             "title": "Description"
           },
-          "classification_id": {
+          "access_type_id": {
             "type": "string",
             "format": "uuid",
-            "title": "Classification Id"
+            "title": "Access Type Id"
           },
           "data_product_access_duration_type": {
             "$ref": "#/components/schemas/AccessDurationType"
@@ -10082,7 +10082,7 @@
           "name",
           "namespace",
           "description",
-          "classification_id",
+          "access_type_id",
           "data_product_access_duration_type",
           "exploration_access_duration_type",
           "tag_ids",
@@ -12821,8 +12821,8 @@
             ],
             "title": "Usage"
           },
-          "classification": {
-            "$ref": "#/components/schemas/OutputPortClassification"
+          "access_type": {
+            "$ref": "#/components/schemas/OutputPortAccessType"
           },
           "data_product_access_duration_type": {
             "$ref": "#/components/schemas/AccessDurationType"
@@ -12904,7 +12904,7 @@
           "description",
           "status",
           "usage",
-          "classification",
+          "access_type",
           "data_product_access_duration_type",
           "exploration_access_duration_type",
           "data_product_id",
@@ -13978,8 +13978,8 @@
           "status": {
             "$ref": "#/components/schemas/OutputPortStatus"
           },
-          "classification": {
-            "$ref": "#/components/schemas/OutputPortClassification"
+          "access_type": {
+            "$ref": "#/components/schemas/OutputPortAccessType"
           },
           "data_product_id": {
             "type": "string",
@@ -14008,7 +14008,7 @@
           "namespace",
           "description",
           "status",
-          "classification",
+          "access_type",
           "data_product_id",
           "tags",
           "access_modes"
@@ -14054,7 +14054,7 @@
         ],
         "title": "OutputPortAccessFunction"
       },
-      "OutputPortClassification": {
+      "OutputPortAccessType": {
         "properties": {
           "id": {
             "type": "string",
@@ -14075,9 +14075,9 @@
           "name",
           "access_function"
         ],
-        "title": "OutputPortClassification"
+        "title": "OutputPortAccessType"
       },
-      "OutputPortClassificationCreate": {
+      "OutputPortAccessTypeCreate": {
         "properties": {
           "name": {
             "type": "string",
@@ -14098,9 +14098,9 @@
           "name",
           "access_function"
         ],
-        "title": "OutputPortClassificationCreate"
+        "title": "OutputPortAccessTypeCreate"
       },
-      "OutputPortClassificationUpdate": {
+      "OutputPortAccessTypeUpdate": {
         "properties": {
           "name": {
             "type": "string",
@@ -14121,25 +14121,25 @@
           "name",
           "access_function"
         ],
-        "title": "OutputPortClassificationUpdate"
+        "title": "OutputPortAccessTypeUpdate"
       },
-      "OutputPortClassificationsGet": {
+      "OutputPortAccessTypesGet": {
         "properties": {
-          "output_port_classifications": {
+          "output_port_access_types": {
             "items": {
-              "$ref": "#/components/schemas/OutputPortClassificationsGetItem"
+              "$ref": "#/components/schemas/OutputPortAccessTypesGetItem"
             },
             "type": "array",
-            "title": "Output Port Classifications"
+            "title": "Output Port Access Types"
           }
         },
         "type": "object",
         "required": [
-          "output_port_classifications"
+          "output_port_access_types"
         ],
-        "title": "OutputPortClassificationsGet"
+        "title": "OutputPortAccessTypesGet"
       },
-      "OutputPortClassificationsGetItem": {
+      "OutputPortAccessTypesGetItem": {
         "properties": {
           "id": {
             "type": "string",
@@ -14170,7 +14170,7 @@
           "description",
           "output_port_count"
         ],
-        "title": "OutputPortClassificationsGetItem"
+        "title": "OutputPortAccessTypesGetItem"
       },
       "OutputPortCuratedQueries": {
         "properties": {
@@ -14862,10 +14862,10 @@
             "type": "string",
             "title": "Description"
           },
-          "classification_id": {
+          "access_type_id": {
             "type": "string",
             "format": "uuid",
-            "title": "Classification Id"
+            "title": "Access Type Id"
           },
           "data_product_access_duration_type": {
             "$ref": "#/components/schemas/AccessDurationType"
@@ -14910,7 +14910,7 @@
           "name",
           "namespace",
           "description",
-          "classification_id",
+          "access_type_id",
           "data_product_access_duration_type",
           "exploration_access_duration_type",
           "tag_ids"
@@ -16132,8 +16132,8 @@
             ],
             "title": "Usage"
           },
-          "classification": {
-            "$ref": "#/components/schemas/OutputPortClassification"
+          "access_type": {
+            "$ref": "#/components/schemas/OutputPortAccessType"
           },
           "data_product_access_duration_type": {
             "$ref": "#/components/schemas/AccessDurationType"
@@ -16194,7 +16194,7 @@
           "description",
           "status",
           "usage",
-          "classification",
+          "access_type",
           "data_product_access_duration_type",
           "exploration_access_duration_type",
           "data_product_id",
@@ -17139,7 +17139,7 @@
         ],
         "title": "UpdateDomainResponse"
       },
-      "UpdateOutputPortClassificationResponse": {
+      "UpdateOutputPortAccessTypeResponse": {
         "properties": {
           "id": {
             "type": "string",
@@ -17151,7 +17151,7 @@
         "required": [
           "id"
         ],
-        "title": "UpdateOutputPortClassificationResponse"
+        "title": "UpdateOutputPortAccessTypeResponse"
       },
       "UpdateOutputPortQueryStatus": {
         "properties": {

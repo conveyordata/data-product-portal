@@ -25,7 +25,7 @@ export type SearchOutputPortsApiArg = {
   limit?: number;
   assignmentFilter?: AssignmentFilter;
 };
-export type OutputPortClassification = {
+export type OutputPortAccessType = {
   id: string;
   name: string;
   access_function: OutputPortAccessFunction;
@@ -58,7 +58,7 @@ export type SearchOutputPortsResponseItem = {
   description: string;
   status: OutputPortStatus;
   usage: string | null;
-  classification: OutputPortClassification;
+  access_type: OutputPortAccessType;
   data_product_access_duration_type: AccessDurationType;
   exploration_access_duration_type: AccessDurationType;
   data_product_id: string;

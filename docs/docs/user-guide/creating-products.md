@@ -77,21 +77,21 @@ For more information about output ports, take a look at the concept page describ
    - **Owners**
    - **Domain**
    - **Status**: Identifying the lifecycle stage of this output port.
-   - **Classification**: Identifying who can see and request access to this Output Port (see [Classifications](#classifications) below).
+   - **Access Type**: Identifying who can see and request access to this Output Port (see [Access Types](#access-types) below).
    - **Description**
 4. **Submit**: Once your Output Port is configured, click **Create Output Port**.
 
-### Classifications
+### Access Types
 
-Each Output Port has a classification. Administrators define the classifications of the organisation in **Settings > Output Port**,
+Each Output Port has an access type. Administrators define the access types of the organisation in **Settings > Output Port**,
 and map each of them to one of three access functions:
 
 - Auto-approve: All access requests are immediately approved. Any Data Product can use your Output Port as input.
 - Approval required: Access requests are delivered to the Output Port owners. These owners are in control over which Data Products can use the data downstream.
 - Invite only (hidden): The Output Port doesn't show up for users outside the owning Data Product, and access requests require approval.
 
-Out of the box, Portal provides the classifications Unrestricted, Restricted and Private, mapped to these functions in that order.
-Output Ports of hidden Data Products can only use classifications mapped to Invite only, so at least one classification always stays mapped to it.
+Out of the box, Portal provides the access types Unrestricted, Restricted and Private, mapped to these functions in that order.
+Output Ports of hidden Data Products can only use access types mapped to Invite only, so at least one access type always stays mapped to it.
 
 ![Creating an output port](./img/output-port-modal.png)
 

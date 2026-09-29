@@ -24,7 +24,7 @@ from .machine_user import MachineUserFactory
 from .notification import NotificationFactory
 from .output_port import OutputPortFactory
 from .output_port import fake as dataset_fake
-from .output_port_classification import OutputPortClassificationFactory
+from .output_port_access_type import OutputPortAccessTypeFactory
 from .output_port_query_stats_daily import OutputPortQueryStatsFactory
 from .platform import PlatformFactory
 from .platform import fake as platform_fake
@@ -75,7 +75,7 @@ factories = [
     InputPortRequestFactory,
     DataProductRoleAssignmentFactory,
     OutputPortFactory,
-    OutputPortClassificationFactory,
+    OutputPortAccessTypeFactory,
     OutputPortQueryStatsFactory,
     DatasetRoleAssignmentFactory,
     DomainFactory,

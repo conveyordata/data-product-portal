@@ -94,12 +94,10 @@ export function OutputPortMarketplaceCard({ outputPort }: Props) {
                 label: (
                     <Space>
                         <DatabaseOutlined />
-                        {t('Classification')}
+                        {t('Access Type')}
                     </Space>
                 ),
-                children: (
-                    <Typography.Text ellipsis={{ tooltip: true }}>{outputPort.classification.name}</Typography.Text>
-                ),
+                children: <Typography.Text ellipsis={{ tooltip: true }}>{outputPort.access_type.name}</Typography.Text>,
             },
             {
                 key: 'technical assets',

@@ -26,7 +26,7 @@ from tests.factories import (
     ExplorationFactory,
     GlobalRoleAssignmentFactory,
     InputPortFactory,
-    OutputPortClassificationFactory,
+    OutputPortAccessTypeFactory,
     OutputPortFactory,
     RoleFactory,
     TechnicalAssetFactory,
@@ -38,8 +38,8 @@ from tests.webhook_util import assert_event_in_queue
 ENDPOINT = "/api/v2/data_products/{}/output_ports"
 
 
-def classification_id(access_function: OutputPortAccessFunction) -> str:
-    return str(OutputPortClassificationFactory(access_function=access_function).id)
+def access_type_id(access_function: OutputPortAccessFunction) -> str:
+    return str(OutputPortAccessTypeFactory(access_function=access_function).id)
 
 
 @pytest.fixture
@@ -67,7 +67,7 @@ def output_port_payload(seed_time_bound_access_durations):
         "owners": [
             str(user.id),
         ],
-        "classification_id": classification_id(OutputPortAccessFunction.RESTRICTED),
+        "access_type_id": access_type_id(OutputPortAccessFunction.RESTRICTED),
         "exploration_access_duration_type": AccessDurationType.TIME_BOUND.value,
         "data_product_access_duration_type": AccessDurationType.TIME_BOUND.value,
     }
@@ -82,7 +82,7 @@ def output_port_event_payload():
         "namespace": "test-op-event-ns",
         "tag_ids": [],
         "owners": [str(user.id)],
-        "classification_id": classification_id(OutputPortAccessFunction.RESTRICTED),
+        "access_type_id": access_type_id(OutputPortAccessFunction.RESTRICTED),
     }
 
 
@@ -106,7 +106,7 @@ class TestOutputPortRouter:
         assert created_dataset.status_code == 200, created_dataset.text
         assert "id" in created_dataset.json()
 
-    def test_create_output_port__with_classification(
+    def test_create_output_port__with_access_type(
         self, output_port_payload, client, session
     ):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
@@ -116,18 +116,18 @@ class TestOutputPortRouter:
         )
         GlobalRoleAssignmentFactory(identity_id=user.id, role_id=role.id)
         data_product = DataProductFactory()
-        classification = OutputPortClassificationFactory(
+        access_type = OutputPortAccessTypeFactory(
             name="Top Secret",
             access_function=OutputPortAccessFunction.PRIVATE,
         )
-        output_port_payload["classification_id"] = str(classification.id)
+        output_port_payload["access_type_id"] = str(access_type.id)
 
         response = self.create_output_port(client, data_product.id, output_port_payload)
 
         assert response.status_code == 200, response.text
         output_port = session.get(OutputPort, response.json()["id"])
         assert output_port.access_function == OutputPortAccessFunction.PRIVATE
-        assert output_port.classification_id == classification.id
+        assert output_port.access_type_id == access_type.id
 
     def test_create_output_port__unconfigured_access_duration_type(
         self, output_port_payload, client
@@ -189,7 +189,7 @@ class TestOutputPortRouter:
             data_product_id=data_product_id, identity_id=user.id, role_id=role.id
         )
 
-        output_port_payload["classification_id"] = classification_id(
+        output_port_payload["access_type_id"] = access_type_id(
             OutputPortAccessFunction.UNRESTRICTED
         )
         created_output_port = self.create_output_port(
@@ -197,7 +197,7 @@ class TestOutputPortRouter:
         )
         assert created_output_port.status_code == 400, created_output_port.text
 
-        output_port_payload["classification_id"] = classification_id(
+        output_port_payload["access_type_id"] = access_type_id(
             OutputPortAccessFunction.RESTRICTED
         )
         created_output_port = self.create_output_port(
@@ -205,7 +205,7 @@ class TestOutputPortRouter:
         )
         assert created_output_port.status_code == 400, created_output_port.text
 
-        output_port_payload["classification_id"] = classification_id(
+        output_port_payload["access_type_id"] = access_type_id(
             OutputPortAccessFunction.PRIVATE
         )
         created_output_port = self.create_output_port(
@@ -320,7 +320,7 @@ class TestOutputPortRouter:
             "namespace": "new_namespace",
             "description": "new_description",
             "tags": [],
-            "classification_id": classification_id(OutputPortAccessFunction.RESTRICTED),
+            "access_type_id": access_type_id(OutputPortAccessFunction.RESTRICTED),
         }
 
         updated_dataset = self.update_output_port(
@@ -345,7 +345,7 @@ class TestOutputPortRouter:
             "namespace": "new_namespace",
             "description": "new_description",
             "tag_ids": [],
-            "classification_id": classification_id(OutputPortAccessFunction.RESTRICTED),
+            "access_type_id": access_type_id(OutputPortAccessFunction.RESTRICTED),
             "data_product_access_duration_type": AccessDurationType.TIME_BOUND.value,
             "exploration_access_duration_type": AccessDurationType.TIME_BOUND.value,
         }
@@ -357,7 +357,7 @@ class TestOutputPortRouter:
         assert updated_dataset.status_code == 200
         assert updated_dataset.json()["id"] == str(ds.id)
 
-    def test_update_output_port__classification(
+    def test_update_output_port__access_type(
         self, client, session, seed_time_bound_access_durations
     ):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
@@ -369,7 +369,7 @@ class TestOutputPortRouter:
         DatasetRoleAssignmentFactory(
             user_id=user.id, role_id=role.id, output_port_id=ds.id
         )
-        classification = OutputPortClassificationFactory(
+        access_type = OutputPortAccessTypeFactory(
             name="Top Secret",
             access_function=OutputPortAccessFunction.PRIVATE,
         )
@@ -378,7 +378,7 @@ class TestOutputPortRouter:
             "namespace": "new_namespace",
             "description": "new_description",
             "tag_ids": [],
-            "classification_id": str(classification.id),
+            "access_type_id": str(access_type.id),
             "data_product_access_duration_type": AccessDurationType.TIME_BOUND.value,
             "exploration_access_duration_type": AccessDurationType.TIME_BOUND.value,
         }
@@ -390,7 +390,7 @@ class TestOutputPortRouter:
         assert response.status_code == 200, response.text
         session.expire_all()
         output_port = session.get(OutputPort, ds.id)
-        assert output_port.classification_id == classification.id
+        assert output_port.access_type_id == access_type.id
         assert output_port.access_function == OutputPortAccessFunction.PRIVATE
         assert not Authorization().has_resource_role(
             user_id="*", role_id=OUTPUT_PORT_READER_ROLE, resource_id=ds.id
@@ -412,7 +412,7 @@ class TestOutputPortRouter:
             "namespace": "new_namespace",
             "description": "new_description",
             "tag_ids": [],
-            "classification_id": classification_id(OutputPortAccessFunction.RESTRICTED),
+            "access_type_id": access_type_id(OutputPortAccessFunction.RESTRICTED),
             "data_product_access_duration_type": AccessDurationType.PERMANENT.value,
             "exploration_access_duration_type": AccessDurationType.TIME_BOUND.value,
         }
@@ -462,9 +462,7 @@ class TestOutputPortRouter:
             ds.id,
             {
                 **update_payload,
-                "classification_id": classification_id(
-                    OutputPortAccessFunction.UNRESTRICTED
-                ),
+                "access_type_id": access_type_id(OutputPortAccessFunction.UNRESTRICTED),
             },
         )
         assert updated_dataset.status_code == 400
@@ -475,9 +473,7 @@ class TestOutputPortRouter:
             ds.id,
             {
                 **update_payload,
-                "classification_id": classification_id(
-                    OutputPortAccessFunction.RESTRICTED
-                ),
+                "access_type_id": access_type_id(OutputPortAccessFunction.RESTRICTED),
             },
         )
         assert updated_dataset.status_code == 400
@@ -488,9 +484,7 @@ class TestOutputPortRouter:
             ds.id,
             {
                 **update_payload,
-                "classification_id": classification_id(
-                    OutputPortAccessFunction.PRIVATE
-                ),
+                "access_type_id": access_type_id(OutputPortAccessFunction.PRIVATE),
             },
         )
         assert updated_dataset.status_code == 200
@@ -617,9 +611,7 @@ class TestOutputPortRouter:
             "namespace": "new_namespace",
             "description": "new_description",
             "tags": [],
-            "classification_id": classification_id(
-                OutputPortAccessFunction.UNRESTRICTED
-            ),
+            "access_type_id": access_type_id(OutputPortAccessFunction.UNRESTRICTED),
         }
         dataset = self.update_output_port(
             client, ds.data_product.id, self.invalid_id, update_payload
@@ -901,9 +893,7 @@ class TestOutputPortRouter:
             "namespace": namespace,
             "description": "new_description",
             "tag_ids": [],
-            "classification_id": classification_id(
-                OutputPortAccessFunction.UNRESTRICTED
-            ),
+            "access_type_id": access_type_id(OutputPortAccessFunction.UNRESTRICTED),
             "data_product_access_duration_type": AccessDurationType.TIME_BOUND.value,
             "exploration_access_duration_type": AccessDurationType.TIME_BOUND.value,
         }
@@ -981,9 +971,7 @@ class TestOutputPortRouter:
             "namespace": "new_namespace",
             "description": "new_description",
             "tag_ids": [],
-            "classification_id": classification_id(
-                OutputPortAccessFunction.UNRESTRICTED
-            ),
+            "access_type_id": access_type_id(OutputPortAccessFunction.UNRESTRICTED),
             "data_product_access_duration_type": AccessDurationType.TIME_BOUND.value,
             "exploration_access_duration_type": AccessDurationType.TIME_BOUND.value,
         }

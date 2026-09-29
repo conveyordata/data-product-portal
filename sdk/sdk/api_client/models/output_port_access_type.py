@@ -7,27 +7,39 @@ from uuid import UUID
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-T = TypeVar("T", bound="UpdateOutputPortClassificationResponse")
+from ..models.output_port_access_function import OutputPortAccessFunction
+
+T = TypeVar("T", bound="OutputPortAccessType")
 
 
 @_attrs_define
-class UpdateOutputPortClassificationResponse:
+class OutputPortAccessType:
     """
     Attributes:
         id (UUID):
+        name (str):
+        access_function (OutputPortAccessFunction):
     """
 
     id: UUID
+    name: str
+    access_function: OutputPortAccessFunction
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         id = str(self.id)
+
+        name = self.name
+
+        access_function = self.access_function.value
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
                 "id": id,
+                "name": name,
+                "access_function": access_function,
             }
         )
 
@@ -38,12 +50,18 @@ class UpdateOutputPortClassificationResponse:
         d = dict(src_dict)
         id = UUID(d.pop("id"))
 
-        update_output_port_classification_response = cls(
+        name = d.pop("name")
+
+        access_function = OutputPortAccessFunction(d.pop("access_function"))
+
+        output_port_access_type = cls(
             id=id,
+            name=name,
+            access_function=access_function,
         )
 
-        update_output_port_classification_response.additional_properties = d
-        return update_output_port_classification_response
+        output_port_access_type.additional_properties = d
+        return output_port_access_type
 
     @property
     def additional_keys(self) -> list[str]:
