@@ -53,9 +53,16 @@ export function OutputPortAccessTypesTable() {
     );
 
     return (
-        <Flex vertical gap="large">
+        <Flex vertical gap="middle">
             <Flex justify="space-between" align="center">
-                <Typography.Title level={3}>{t('Access Types')}</Typography.Title>
+                <Flex vertical>
+                    <Typography.Title level={3} style={{ margin: 0 }}>
+                        {t('Access Types')}
+                    </Typography.Title>
+                    <Typography.Text type="secondary">
+                        {t('Configure how openly Output Ports can be shared and whether access needs approval.')}
+                    </Typography.Text>
+                </Flex>
                 <Button type="primary" onClick={handleAdd}>
                     {t('Add Access Type')}
                 </Button>
@@ -65,6 +72,7 @@ export function OutputPortAccessTypesTable() {
                 columns={columns}
                 rowKey={(record) => record.id}
                 loading={isFetching}
+                pagination={{ hideOnSinglePage: true }}
                 rowHoverable
                 size="small"
             />

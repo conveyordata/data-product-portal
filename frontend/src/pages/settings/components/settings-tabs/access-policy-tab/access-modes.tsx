@@ -76,17 +76,19 @@ export default function AccessModes() {
     );
 
     return (
-        <>
-            <Flex vertical gap="small">
-                <Flex justify="space-between" align="center">
-                    <Typography.Title level={3}>{t('Access modes')}</Typography.Title>
-                    <Button type="primary" onClick={() => setOpenModal(true)}>
-                        {t('Add access mode')}
-                    </Button>
+        <Flex vertical gap="middle">
+            <Flex justify="space-between" align="center">
+                <Flex vertical>
+                    <Typography.Title level={3} style={{ margin: 0 }}>
+                        {t('Access Modes')}
+                    </Typography.Title>
+                    <Typography.Text type="secondary">
+                        {t('Configure available access modes for Technical Assets and Output Ports')}
+                    </Typography.Text>
                 </Flex>
-                <Typography.Text type="secondary">
-                    {t('Configure available access modes for Technical Assets and Output Ports')}
-                </Typography.Text>
+                <Button type="primary" onClick={() => setOpenModal(true)}>
+                    {t('Add Access Mode')}
+                </Button>
             </Flex>
             <Table<AccessModeWithType>
                 dataSource={access_modes}
@@ -161,9 +163,10 @@ export default function AccessModes() {
                 ]}
                 rowKey={(record) => record.id}
                 loading={isFetching}
+                pagination={{ hideOnSinglePage: true }}
                 size="small"
             />
             {openModal && <AccessModesModal onClose={cancelModal} editAccessMode={editAccessMode} />}
-        </>
+        </Flex>
     );
 }

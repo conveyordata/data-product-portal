@@ -1,9 +1,10 @@
+import { InfoCircleOutlined } from '@ant-design/icons';
 import { Button, Flex, Popconfirm, type TableColumnsType, Tooltip } from 'antd';
 import type { TFunction } from 'i18next';
 
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
 import type { OutputPortAccessTypesGetItem } from '@/store/api/services/generated/configurationOutputPortAccessTypesApi.ts';
-import { compareAccessFunctions, getAccessFunctionLabel } from '@/utils/access-function.helper.tsx';
+import { compareAccessFunctions, getAccessFunctionInfo } from '@/utils/access-function.helper.tsx';
 import { Sorter } from '@/utils/table-sorter.helper';
 
 type Props = {
@@ -12,6 +13,15 @@ type Props = {
     handleRemove: (record: OutputPortAccessTypesGetItem) => void;
     lastInviteOnlyId?: string;
 };
+
+const titleWithInfo = (title: string, info: string, justify?: 'flex-end') => (
+    <Flex align="center" gap="small" justify={justify}>
+        {title}
+        <Tooltip title={info}>
+            <InfoCircleOutlined style={{ color: 'var(--ant-color-text-secondary)', cursor: 'help' }} />
+        </Tooltip>
+    </Flex>
+);
 
 export const getOutputPortAccessTypesTableColumns = ({
     t,
@@ -30,10 +40,22 @@ export const getOutputPortAccessTypesTableColumns = ({
             defaultSortOrder: 'ascend',
         },
         {
-            title: t('Function'),
+            title: titleWithInfo(
+                t('Function'),
+                t(
+                    'Decides how access requests are handled: approved automatically, approved by the owner, or invite only with the Output Port hidden.',
+                ),
+            ),
             dataIndex: 'access_function',
             width: '15%',
-            render: (_, record) => <TableCellItem text={getAccessFunctionLabel(t, record.access_function)} />,
+            render: (_, record) => {
+                const { label, tooltip } = getAccessFunctionInfo(t, record.access_function);
+                return (
+                    <Tooltip title={tooltip ?? t('Access requests are approved automatically')}>
+                        <span>{label}</span>
+                    </Tooltip>
+                );
+            },
             sorter: (a, b) => compareAccessFunctions(a.access_function, b.access_function),
         },
         {
@@ -43,7 +65,11 @@ export const getOutputPortAccessTypesTableColumns = ({
             render: (description: string) => <TableCellItem text={description} tooltip={{ content: description }} />,
         },
         {
-            title: t('Output Ports'),
+            title: titleWithInfo(
+                t('Output Ports'),
+                t("Number of Output Ports using this access type. An access type that is in use can't be removed."),
+                'flex-end',
+            ),
             dataIndex: 'output_port_count',
             width: '10%',
             align: 'right',

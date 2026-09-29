@@ -210,11 +210,15 @@ export default function AccessDurations() {
     ];
 
     return (
-        <Flex vertical gap="small">
-            <Typography.Title level={3}>{t('Access Durations')}</Typography.Title>
-            <Typography.Text type="secondary">
-                {t('Configure default access durations for Input Ports.')}
-            </Typography.Text>
+        <Flex vertical gap="middle">
+            <Flex vertical>
+                <Typography.Title level={3} style={{ margin: 0 }}>
+                    {t('Access Durations')}
+                </Typography.Title>
+                <Typography.Text type="secondary">
+                    {t('Configure default access durations for Input Ports.')}
+                </Typography.Text>
+            </Flex>
             <Table<ConsumerPolicy>
                 columns={columns}
                 dataSource={policies}
