@@ -20,9 +20,13 @@ export const fitsDataProductVisibility = (accessFunction: OutputPortAccessFuncti
 export const getAccessFunctionInfo = (
     t: TFunction,
     accessFunction: OutputPortAccessFunction,
-): { label: string; icon: ReactNode; tooltip?: string } =>
+): { label: string; icon: ReactNode; tooltip: string } =>
     ({
-        [OutputPortAccessFunction.Unrestricted]: { label: t('Auto-approve'), icon: null },
+        [OutputPortAccessFunction.Unrestricted]: {
+            label: t('Auto-approve'),
+            icon: null,
+            tooltip: t('Access requests are approved automatically'),
+        },
         [OutputPortAccessFunction.Restricted]: {
             label: t('Approval required'),
             icon: <CustomSvgIconLoader iconComponent={shieldHalfIcon} size="font-small" color="dark" />,

@@ -6,11 +6,12 @@ import chipIcon from '@/assets/icons/data-product-types/chip-icon.svg?react';
 import { DataProductOutlined, OutputPortOutlined } from '@/components/icons';
 import { useTabParam } from '@/hooks/use-tab-param.tsx';
 import { useIsTimeBoundAccessEnabledQuery } from '@/store/api/services/generated/configurationAccessDurationsApi';
+import { DataProductSettingScope } from '@/store/api/services/generated/configurationDataProductSettingsApi.ts';
 import { AccessPolicyTab } from './access-policy-tab/access-policy-tab.component';
+import { DataProductSettingsTable } from './components/data-product-settings-table/data-product-settings-table.component';
 import { DataProductTab } from './data-product-tab/data-product-tab.component';
 import { GeneralTab } from './general-tab/general-tab.component';
 import { MetadataTab } from './metadata-tab/metadata-tab.component';
-import { OutputPortTab } from './output-port-tab/output-port-tab.component';
 import { PlatformTab } from './platform-tab/platform-tab.component';
 import { RolesTab } from './roles-tab/roles-tab.component';
 
@@ -54,7 +55,7 @@ export function SettingsTabs() {
             {
                 label: t('Output Port'),
                 key: TabKeys.OutputPort,
-                children: <OutputPortTab />,
+                children: <DataProductSettingsTable scope={DataProductSettingScope.Dataset} />,
                 icon: <OutputPortOutlined />,
             },
             {

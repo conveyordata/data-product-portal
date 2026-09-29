@@ -1,8 +1,9 @@
-import { Button, Flex, Popconfirm, Table, Typography } from 'antd';
+import { Button, Flex, Popconfirm, Table } from 'antd';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
 import AccessModesModal from '@/pages/settings/components/settings-tabs/access-policy-tab/access-modes-modal.tsx';
+import { SettingsSectionHeader } from '@/pages/settings/components/settings-tabs/components/settings-section-header/settings-section-header.component.tsx';
 import {
     type AccessModeWithType,
     useDeleteAccessModeMutation,
@@ -77,19 +78,15 @@ export default function AccessModes() {
 
     return (
         <Flex vertical gap="middle">
-            <Flex justify="space-between" align="center">
-                <Flex vertical>
-                    <Typography.Title level={3} style={{ margin: 0 }}>
-                        {t('Access Modes')}
-                    </Typography.Title>
-                    <Typography.Text type="secondary">
-                        {t('Configure available access modes for Technical Assets and Output Ports')}
-                    </Typography.Text>
-                </Flex>
-                <Button type="primary" onClick={() => setOpenModal(true)}>
-                    {t('Add Access Mode')}
-                </Button>
-            </Flex>
+            <SettingsSectionHeader
+                title={t('Access Modes')}
+                description={t('Configure available access modes for Technical Assets and Output Ports')}
+                extra={
+                    <Button type="primary" onClick={() => setOpenModal(true)}>
+                        {t('Add Access Mode')}
+                    </Button>
+                }
+            />
             <Table<AccessModeWithType>
                 dataSource={access_modes}
                 columns={[

@@ -1,8 +1,8 @@
-import { Button, Flex, Table, Typography } from 'antd';
+import { Button, Flex, Table } from 'antd';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-
 import { useModal } from '@/hooks/use-modal.tsx';
+import { SettingsSectionHeader } from '@/pages/settings/components/settings-tabs/components/settings-section-header/settings-section-header.component.tsx';
 import {
     OutputPortAccessFunction,
     type OutputPortAccessTypesGetItem,
@@ -54,19 +54,15 @@ export function OutputPortAccessTypesTable() {
 
     return (
         <Flex vertical gap="middle">
-            <Flex justify="space-between" align="center">
-                <Flex vertical>
-                    <Typography.Title level={3} style={{ margin: 0 }}>
-                        {t('Access Types')}
-                    </Typography.Title>
-                    <Typography.Text type="secondary">
-                        {t('Configure how openly Output Ports can be shared and whether access needs approval.')}
-                    </Typography.Text>
-                </Flex>
-                <Button type="primary" onClick={handleAdd}>
-                    {t('Add Access Type')}
-                </Button>
-            </Flex>
+            <SettingsSectionHeader
+                title={t('Access Types')}
+                description={t('Configure how openly Output Ports can be shared and whether access needs approval.')}
+                extra={
+                    <Button type="primary" onClick={handleAdd}>
+                        {t('Add Access Type')}
+                    </Button>
+                }
+            />
             <Table<OutputPortAccessTypesGetItem>
                 dataSource={data?.output_port_access_types}
                 columns={columns}

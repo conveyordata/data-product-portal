@@ -51,7 +51,7 @@ export const getOutputPortAccessTypesTableColumns = ({
             render: (_, record) => {
                 const { label, tooltip } = getAccessFunctionInfo(t, record.access_function);
                 return (
-                    <Tooltip title={tooltip ?? t('Access requests are approved automatically')}>
+                    <Tooltip title={tooltip}>
                         <span>{label}</span>
                     </Tooltip>
                 );
