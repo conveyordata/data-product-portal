@@ -31,20 +31,23 @@ class TestGroupService:
         member_group = GroupFactory()
         service = GroupService(session)
 
-        with pytest.raises(
-            HTTPException, match="Only users and machine users can be group members."
-        ):
-            service.add_member(
+        with pytest.raises(HTTPException) as exc_info:
+            service.add_members(
                 group_id=parent_group.id,
-                member_identity_id=member_group.id,
+                member_identity_ids=[member_group.id],
             )
+
+        assert exc_info.value.status_code == 400
+        assert exc_info.value.detail == (
+            "All member identities must exist and be users or machine users."
+        )
 
     def test_user_can_belong_to_group(self, session):
         group = GroupFactory()
         user = UserFactory()
         service = GroupService(session)
 
-        service.add_member(group_id=group.id, member_identity_id=user.id)
+        service.add_members(group_id=group.id, member_identity_ids=[user.id])
         membership = service.get_membership(
             group_id=group.id, member_identity_id=user.id
         )
@@ -56,25 +59,32 @@ class TestGroupService:
         machine_user = MachineUserFactory()
         service = GroupService(session)
 
-        service.add_member(group_id=group.id, member_identity_id=machine_user.id)
+        service.add_members(group_id=group.id, member_identity_ids=[machine_user.id])
         membership = service.get_membership(
             group_id=group.id, member_identity_id=machine_user.id
         )
         assert membership.group_id == group.id
         assert membership.member_identity_id == machine_user.id
 
-    def test_duplicate_membership_is_rejected(self, session):
+    def test_duplicate_membership_is_ignored(self, session):
         group = GroupFactory()
         user = UserFactory()
         service = GroupService(session)
 
-        service.add_member(group_id=group.id, member_identity_id=user.id)
-        with pytest.raises(
-            HTTPException, match="The identity is already a member of this group."
-        ):
-            service.add_member(group_id=group.id, member_identity_id=user.id)
+        service.add_members(
+            group_id=group.id,
+            member_identity_ids=[user.id],
+        )
+        service.add_members(
+            group_id=group.id,
+            member_identity_ids=[user.id],
+        )
 
-        assert len(service.list_memberships(group_id=group.id)) == 1
+        memberships = service.list_memberships(group_id=group.id)
+
+        assert len(memberships) == 1
+        assert memberships[0].group_id == group.id
+        assert memberships[0].member_identity_id == user.id
 
     def test_deleting_group_deletes_its_memberships(self, session):
         group = GroupFactory()
@@ -83,8 +93,8 @@ class TestGroupService:
         user2 = UserFactory()
         service = GroupService(session)
 
-        service.add_member(group_id=group_id, member_identity_id=user1.id)
-        service.add_member(group_id=group_id, member_identity_id=user2.id)
+        service.add_members(group_id=group_id, member_identity_ids=[user1.id])
+        service.add_members(group_id=group_id, member_identity_ids=[user2.id])
 
         service.delete_group(group_id=group_id)
         with pytest.raises(HTTPException):
@@ -166,9 +176,9 @@ class TestGroupService:
         )
 
         service = GroupService(session)
-        service.add_member(
+        service.add_members(
             group_id=group.id,
-            member_identity_id=user.id,
+            member_identity_ids=[user.id],
         )
 
         assert authorizer.has_access(
@@ -184,9 +194,9 @@ class TestGroupService:
             act=global_action,
         )
 
-        service.remove_member(
+        service.remove_members(
             group_id=group.id,
-            member_identity_id=user.id,
+            member_identity_ids=[user.id],
         )
 
         assert not authorizer.has_access(
@@ -214,7 +224,7 @@ class TestGroupService:
         action = AuthorizationAction.DATA_PRODUCT__UPDATE_PROPERTIES
 
         service = GroupService(session)
-        service.add_member(group_id=group.id, member_identity_id=user.id)
+        service.add_members(group_id=group.id, member_identity_ids=[user.id])
         assert authorizer.has_resource_role(
             user_id=user.id,
             role_id=group.id,
@@ -301,9 +311,9 @@ class TestGroupService:
         )
 
         service = GroupService(session)
-        service.add_member(
+        service.add_members(
             group_id=group.id,
-            member_identity_id=user.id,
+            member_identity_ids=[user.id],
         )
         assert authorizer.has_access(
             sub=str(user.id),
