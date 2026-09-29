@@ -2,7 +2,7 @@ import type { TFunction } from 'i18next';
 
 import { OutputPortAccessFunction } from '@/store/api/services/generated/dataProductsApi.ts';
 
-const ACCESS_FUNCTION_ORDER = [
+export const ACCESS_FUNCTION_ORDER = [
     OutputPortAccessFunction.Unrestricted,
     OutputPortAccessFunction.Restricted,
     OutputPortAccessFunction.Private,

@@ -129,7 +129,7 @@ UNIQUE_CONSTRAINT_MESSAGES = {
 async def integrity_error_exception_handler(
     _: Request, exc: IntegrityError
 ) -> JSONResponse:
-    constraint = getattr(getattr(exc.orig, "diag", None), "constraint_name", "") or ""
+    constraint = getattr(getattr(exc.orig, "diag", None), "constraint_name", None)
     return ErrorHandler().raise_bad_request_exception(
-        exc, UNIQUE_CONSTRAINT_MESSAGES.get(constraint)
+        exc, UNIQUE_CONSTRAINT_MESSAGES.get(constraint or "")
     )

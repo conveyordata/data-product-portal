@@ -8,7 +8,11 @@ import {
     useCreateOutputPortClassificationMutation,
     useUpdateOutputPortClassificationMutation,
 } from '@/store/api/services/generated/configurationOutputPortClassificationsApi.ts';
-import { compareAccessFunctions, getAccessFunctionLabel } from '@/utils/access-function.helper.ts';
+import {
+    ACCESS_FUNCTION_ORDER,
+    compareAccessFunctions,
+    getAccessFunctionLabel,
+} from '@/utils/access-function.helper.ts';
 import { dispatchMessage } from '@/utils/feedback.ts';
 
 type Props = {
@@ -42,46 +46,38 @@ export function OutputPortClassificationFormModal({ onClose, initial, isLastInvi
         }
     };
 
-    const submitButton = (
-        <Button
-            key="submit"
-            type="primary"
-            loading={isCreating || isUpdating}
-            onClick={affectedOutputPorts ? undefined : () => form.submit()}
-        >
-            {initial ? t('Update') : t('Create')}
-        </Button>
-    );
-
     return (
         <Modal
             open
             title={initial ? t('Update Classification') : t('Create new Classification')}
             onCancel={onClose}
             footer={[
-                affectedOutputPorts ? (
-                    <Popconfirm
-                        key="submit"
-                        title={t('Change access function')}
-                        description={
-                            loosensAccess
-                                ? t(
-                                      'This loosens access for {{count}} Output Ports: users may get access with less or no approval.',
-                                      { count: affectedOutputPorts },
-                                  )
-                                : t('This changes the access function of {{count}} Output Ports.', {
-                                      count: affectedOutputPorts,
-                                  })
-                        }
-                        onConfirm={() => form.submit()}
-                        okText={t('Confirm')}
-                        cancelText={t('Cancel')}
+                <Popconfirm
+                    key="submit"
+                    disabled={!affectedOutputPorts}
+                    title={t('Change access function')}
+                    description={
+                        loosensAccess
+                            ? t(
+                                  'This loosens access for {{count}} Output Ports: users may get access with less or no approval.',
+                                  { count: affectedOutputPorts },
+                              )
+                            : t('This changes the access function of {{count}} Output Ports.', {
+                                  count: affectedOutputPorts,
+                              })
+                    }
+                    onConfirm={() => form.submit()}
+                    okText={t('Confirm')}
+                    cancelText={t('Cancel')}
+                >
+                    <Button
+                        type="primary"
+                        loading={isCreating || isUpdating}
+                        onClick={affectedOutputPorts ? undefined : () => form.submit()}
                     >
-                        {submitButton}
-                    </Popconfirm>
-                ) : (
-                    submitButton
-                ),
+                        {initial ? t('Update') : t('Create')}
+                    </Button>
+                </Popconfirm>,
                 <Button key="cancel" onClick={onClose}>
                     {t('Cancel')}
                 </Button>,
@@ -112,7 +108,7 @@ export function OutputPortClassificationFormModal({ onClose, initial, isLastInvi
                 >
                     <Select
                         disabled={isLastInviteOnly}
-                        options={Object.values(OutputPortAccessFunction).map((value) => ({
+                        options={ACCESS_FUNCTION_ORDER.map((value) => ({
                             value,
                             label: getAccessFunctionLabel(t, value),
                         }))}

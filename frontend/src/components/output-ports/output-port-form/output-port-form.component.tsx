@@ -34,11 +34,7 @@ import {
 import { useGetDataProductsLifecyclesQuery } from '@/store/api/services/generated/configurationDataProductLifecyclesApi.ts';
 import { useGetOutputPortClassificationsQuery } from '@/store/api/services/generated/configurationOutputPortClassificationsApi.ts';
 import { useGetTagsQuery } from '@/store/api/services/generated/configurationTagsApi.ts';
-import {
-    DataProductVisibility,
-    OutputPortAccessFunction,
-    useGetDataProductQuery,
-} from '@/store/api/services/generated/dataProductsApi.ts';
+import { DataProductVisibility, useGetDataProductQuery } from '@/store/api/services/generated/dataProductsApi.ts';
 import {
     type CreateOutputPortRequest,
     type OutputPortUpdate,
@@ -62,7 +58,7 @@ import {
     createOutputPortPath,
 } from '@/types/navigation.ts';
 import {
-    compareAccessFunctions,
+    ACCESS_FUNCTION_ORDER,
     fitsDataProductVisibility,
     getAccessFunctionLabel,
 } from '@/utils/access-function.helper.ts';
@@ -245,24 +241,21 @@ export function ClassificationSection({
 }) {
     const { t } = useTranslation();
     const { data: { output_port_classifications: classifications = [] } = {} } = useGetOutputPortClassificationsQuery();
-    const options = Object.values(OutputPortAccessFunction)
-        .sort(compareAccessFunctions)
-        .map((accessFunction) => {
-            const allowed = fitsDataProductVisibility(accessFunction, hiddenDataProduct);
-            return {
-                label: allowed
-                    ? getAccessFunctionLabel(t, accessFunction)
-                    : `${getAccessFunctionLabel(t, accessFunction)} (${t('not allowed for hidden Data Products')})`,
-                options: classifications
-                    .filter((classification) => classification.access_function === accessFunction)
-                    .map((classification) => ({
-                        label: classification.name,
-                        value: classification.id,
-                        disabled: !allowed,
-                    })),
-            };
-        })
-        .filter((group) => group.options.length > 0);
+    const options = ACCESS_FUNCTION_ORDER.map((accessFunction) => {
+        const allowed = fitsDataProductVisibility(accessFunction, hiddenDataProduct);
+        return {
+            label: allowed
+                ? getAccessFunctionLabel(t, accessFunction)
+                : `${getAccessFunctionLabel(t, accessFunction)} (${t('not allowed for hidden Data Products')})`,
+            options: classifications
+                .filter((classification) => classification.access_function === accessFunction)
+                .map((classification) => ({
+                    label: classification.name,
+                    value: classification.id,
+                    disabled: !allowed,
+                })),
+        };
+    }).filter((group) => group.options.length > 0);
     const getDescription = (id?: string | number | null) =>
         classifications.find((classification) => classification.id === id)?.description;
     const selectedDescription = getDescription(value);

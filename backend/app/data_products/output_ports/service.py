@@ -272,11 +272,8 @@ class OutputPortService:
                 select(OutputPortModel)
                 .where(OutputPortModel.data_product_id == data_product_id)
                 .options(*self.recalculate_embeddings_load_options()),
-                execution_options={
-                    # Recalculation will never be done by users, so we can safely skip the filters here
-                    "skip_data_product_visibility_filter": True,
-                    "skip_output_port_access_function_filter": True,
-                },
+                # Recalculation will never be done by users, so we can safely skip the filters here
+                execution_options=UNFILTERED,
             )
             .unique()
             .all()
@@ -288,11 +285,8 @@ class OutputPortService:
             select(OutputPortModel)
             .where(OutputPortModel.id == dataset_id)
             .options(*self.recalculate_embeddings_load_options()),
-            execution_options={
-                # Recalculation will never be done by users, so we can safely skip the filters here
-                "skip_data_product_visibility_filter": True,
-                "skip_output_port_access_function_filter": True,
-            },
+            # Recalculation will never be done by users, so we can safely skip the filters here
+            execution_options=UNFILTERED,
         )
         self._recalculate_embeddings_and_search_vector([dataset])
 
