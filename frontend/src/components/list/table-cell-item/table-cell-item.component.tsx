@@ -1,6 +1,6 @@
 import Icon from '@ant-design/icons';
 import type { CustomIconComponentProps } from '@ant-design/icons/lib/components/Icon';
-import { Flex, Tooltip, Typography, type TypographyProps } from 'antd';
+import { Flex, Popover, Typography, type TypographyProps } from 'antd';
 import type { TooltipPlacement } from 'antd/es/tooltip';
 import { type ComponentType, type ForwardRefExoticComponent, type ReactNode, type SVGProps, useState } from 'react';
 import styles from './table-cell-item.module.scss';
@@ -17,6 +17,7 @@ type Props = {
     textComponent?: ReactNode;
     textProps?: TypographyProps;
     tooltip?: {
+        title?: ReactNode;
         content?: ReactNode;
         placement?: TooltipPlacement;
     };
@@ -32,26 +33,35 @@ export function TableCellItem({
     tooltip,
     ...otherProps
 }: Props) {
-    const [isTruncated, setIsTruncated] = useState(false);
+    const [hasEllipsis, setHasEllipsis] = useState<boolean>(false);
 
-    return (
+    const tableCellItem = (
         <Flex className={styles.tableCellWrapper} {...otherProps}>
             {icon}
             {reactSVGComponent && <Icon component={reactSVGComponent} className={styles.customIcon} />}
             {text && (
-                <Tooltip title={isTruncated && tooltip?.content} placement={tooltip?.placement ?? 'topLeft'}>
-                    <Text
-                        {...textProps}
-                        ellipsis
-                        className={styles.text}
-                        onMouseEnter={(e) => setIsTruncated(e.currentTarget.scrollWidth > e.currentTarget.clientWidth)}
-                    >
-                        {text}
-                    </Text>
-                </Tooltip>
+                <Text
+                    {...textProps}
+                    ellipsis={{
+                        onEllipsis: () => {
+                            if (tooltip) setHasEllipsis(true);
+                        },
+                    }}
+                    className={styles.text}
+                >
+                    {text}
+                </Text>
             )}
             {textComponent && textComponent}
             {children}
         </Flex>
+    );
+
+    return hasEllipsis ? (
+        <Popover placement={tooltip?.placement || 'topLeft'} {...tooltip}>
+            {tableCellItem}
+        </Popover>
+    ) : (
+        tableCellItem
     );
 }

@@ -22,7 +22,9 @@ from app.configuration.output_port_classifications.schema_response import (
 )
 from app.core.authz import Action, Authorization
 from app.data_products.output_ports.enums import OutputPortAccessFunction
+from app.data_products.output_ports.model import OutputPort as OutputPortModel
 from app.data_products.output_ports.service import OutputPortService
+from app.database.database import UNFILTERED
 from app.users.model import User
 
 
@@ -73,20 +75,21 @@ class OutputPortClassificationService:
         classification.description = request.description
         if request.access_function != classification.access_function:
             self._ensure_not_last_invite_only(classification)
+            classification.access_function = request.access_function
             OutputPortService(self.db).reclassify_output_ports(
                 classification.id, request.access_function
             )
-            classification.access_function = request.access_function
         self.db.flush()
         return UpdateOutputPortClassificationResponse(id=id)
 
     def delete_output_port_classification(self, id: UUID) -> None:
         classification = ensure_output_port_classification_exists(id, self.db)
         self._ensure_not_last_invite_only(classification)
-        in_use = (
-            OutputPortService(self.db)
-            .count_by_classification(include_hidden=True)
-            .get(id, 0)
+        in_use = self.db.scalar(
+            select(func.count())
+            .select_from(OutputPortModel)
+            .where(OutputPortModel.classification_id == id),
+            execution_options=UNFILTERED,
         )
         if in_use:
             raise HTTPException(

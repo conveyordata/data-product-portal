@@ -59,6 +59,7 @@ def upgrade() -> None:
         ["classification_id"],
         ["id"],
     )
+    op.create_index("ix_datasets_classification_id", "datasets", ["classification_id"])
 
 
 def downgrade() -> None:

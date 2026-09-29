@@ -11,8 +11,7 @@ sys.path.insert(
     0, dirname(dirname(dirname(dirname(abspath(__file__)))))
 )  # Insert <.>/ # allows import from app.
 
-from app.data_products.output_ports.model import UNFILTERED  # noqa: E402
-from app.database.database import get_url  # noqa: E402
+from app.database.database import UNFILTERED, get_url  # noqa: E402
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

@@ -99,7 +99,7 @@ export function OutputPortClassificationFormModal({ onClose, initial, isLastInvi
                 </Form.Item>
                 <Form.Item
                     name="access_function"
-                    label={t('Access function')}
+                    label={t('Function')}
                     tooltip={isLastInviteOnly ? t('At least one classification must stay Invite only') : undefined}
                     rules={[{ required: true }]}
                 >

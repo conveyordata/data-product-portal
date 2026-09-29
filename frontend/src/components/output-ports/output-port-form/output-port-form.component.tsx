@@ -242,17 +242,6 @@ export function ClassificationSection({
     const { t } = useTranslation();
     const { data: { output_port_classifications: classifications = [] } = {} } = useGetOutputPortClassificationsQuery();
 
-    useEffect(() => {
-        const selectable = classifications.filter((classification) =>
-            fitsDataProductVisibility(classification.access_function, hiddenDataProduct),
-        );
-        if (selectable.length === 1 && value !== selectable[0].id) {
-            onChange?.(selectable[0].id);
-        } else if (value && !selectable.some((classification) => classification.id === value)) {
-            onChange?.(undefined);
-        }
-    }, [classifications, hiddenDataProduct, value, onChange]);
-
     const options = ACCESS_FUNCTION_ORDER.map((accessFunction) => {
         const allowed = fitsDataProductVisibility(accessFunction, hiddenDataProduct);
         return {
@@ -317,6 +306,8 @@ export function OutputPortForm({ mode, modalCallbackOnSubmit, formRef, outputPor
     const [sanitizeResourceName, { data: sanitizedResourceName }] = useLazySanitizeResourceNameQuery();
     const [validateResourceName] = useLazyValidateResourceNameQuery();
     const { data: constraints } = useResourceNameConstraintsQuery();
+    const { data: { output_port_classifications: classifications = [] } = {}, isFetching: isFetchingClassifications } =
+        useGetOutputPortClassificationsQuery();
 
     const [form] = Form.useForm<CreateOutputPortRequest>();
     const datasetNameValue = Form.useWatch('name', form);
@@ -488,6 +479,16 @@ export function OutputPortForm({ mode, modalCallbackOnSubmit, formRef, outputPor
             form.setFieldValue('owners', dataProductOwners);
         }
     }, [mode, dataProductOwners, form]);
+
+    useEffect(() => {
+        if (mode !== 'create' || !dataProduct || isFetchingClassifications) return;
+        const selectable = classifications.filter((classification) =>
+            fitsDataProductVisibility(classification.access_function, isHiddenDataProduct),
+        );
+        if (selectable.length === 1 && form.getFieldValue('classification_id') === undefined) {
+            form.setFieldValue('classification_id', selectable[0].id);
+        }
+    }, [mode, dataProduct, isFetchingClassifications, classifications, isHiddenDataProduct, form]);
 
     if (mode === 'edit' && (!currentOutputPort || ownerIds === undefined)) {
         return <Skeleton active />;

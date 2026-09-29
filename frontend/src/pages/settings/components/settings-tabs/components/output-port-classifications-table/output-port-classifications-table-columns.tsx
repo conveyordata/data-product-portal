@@ -30,24 +30,23 @@ export const getOutputPortClassificationsTableColumns = ({
             defaultSortOrder: 'ascend',
         },
         {
-            title: t('Description'),
-            dataIndex: 'description',
-            ellipsis: { showTitle: false },
-            render: (description: string) => <TableCellItem text={description} tooltip={{ content: description }} />,
-        },
-        {
-            title: t('Access function'),
+            title: t('Function'),
             dataIndex: 'access_function',
             width: '15%',
             render: (_, record) => <TableCellItem text={getAccessFunctionLabel(t, record.access_function)} />,
             sorter: (a, b) => compareAccessFunctions(a.access_function, b.access_function),
         },
         {
+            title: t('Description'),
+            dataIndex: 'description',
+            ellipsis: { showTitle: false },
+            render: (description: string) => <TableCellItem text={description} tooltip={{ content: description }} />,
+        },
+        {
             title: t('Output Ports'),
             dataIndex: 'output_port_count',
             width: '10%',
-            onCell: () => ({ style: { textAlign: 'right' } }),
-            sorter: sorter.numberSorter((c) => c.output_port_count),
+            align: 'right',
         },
         {
             title: t('Actions'),

@@ -170,7 +170,7 @@ class OutputPort(Base, BaseORM, EventTrackedMixin):
     )
     data_product_id: Mapped[UUID] = mapped_column(ForeignKey("data_products.id"))
     classification_id: Mapped[UUID] = mapped_column(
-        ForeignKey("output_port_classifications.id"), nullable=False
+        ForeignKey("output_port_classifications.id"), nullable=False, index=True
     )
 
     assignments: Mapped[list["DatasetRoleAssignment"]] = relationship(
@@ -299,12 +299,6 @@ def ensure_output_port_exists(
             detail=f"Required item {output_port_id} does not exist",
         )
     return output_port
-
-
-UNFILTERED = {
-    "skip_output_port_access_function_filter": True,
-    "skip_data_product_visibility_filter": True,
-}
 
 
 @event.listens_for(Session, "do_orm_execute")

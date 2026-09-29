@@ -1,7 +1,10 @@
 import userEvent from '@testing-library/user-event';
 import { HttpResponse, http } from 'msw';
-import { describe, expect, it } from 'vitest';
-import { OutputPortForm } from '@/components/output-ports/output-port-form/output-port-form.component.tsx';
+import { describe, expect, it, vi } from 'vitest';
+import {
+    ClassificationSection,
+    OutputPortForm,
+} from '@/components/output-ports/output-port-form/output-port-form.component.tsx';
 import {
     AbstractDataProductStatus,
     DataProductIconKey,
@@ -77,5 +80,17 @@ describe('OutputPortForm', () => {
         expect(option('Unrestricted')).toHaveClass('ant-select-item-option-disabled');
         expect(option('Restricted')).toHaveClass('ant-select-item-option-disabled');
         expect(option('Private')).not.toHaveClass('ant-select-item-option-disabled');
+    });
+
+    it('does not change an existing classification while classifications load', async () => {
+        mockOutputPortClassifications();
+        const onChange = vi.fn();
+
+        renderWithProviders(
+            <ClassificationSection value="classification-private" onChange={onChange} hiddenDataProduct />,
+        );
+
+        expect(await screen.findByTitle('Private')).toBeInTheDocument();
+        expect(onChange).not.toHaveBeenCalled();
     });
 });
