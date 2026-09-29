@@ -197,7 +197,7 @@ describe('TechnicalAssetPopup', async () => {
         const createButton = screen.getByRole('button', { name: /Create/i });
         await user.click(createButton);
 
-        expect(screen.getByText('Please provide the name of the Technical Asset')).toBeInTheDocument();
+        expect(await screen.findByText('Please provide the name of the Technical Asset')).toBeInTheDocument();
         expect(screen.getByText('Please provide a description for the Technical Asset')).toBeInTheDocument();
         expect(mockCloseFunction).not.toHaveBeenCalled();
     }, 15000);
