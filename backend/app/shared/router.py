@@ -32,13 +32,13 @@ from app.data_products.router import router as data_product
 from app.data_products.technical_assets.router import router as data_outputs
 from app.explorations.router import router as exploration
 from app.graph.router import router as graph
+from app.groups.router import router as group
+from app.machine_users.router import router as machine_user
 from app.resource_names.router import router as resource_name
 from app.search_output_ports.router import router as search_output_ports
 from app.technical_asset_configuration.router import router as plugin
 from app.users.notifications.router import router as notification
 from app.users.router import router as user
-from app.groups.router import router as group
-from app.machine_users.router import router as machine_user
 
 router = (
     APIRouter(dependencies=[Security(api_key_authenticated)])

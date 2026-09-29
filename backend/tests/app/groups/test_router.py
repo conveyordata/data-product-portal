@@ -242,9 +242,9 @@ class TestGroupMembershipRouter:
 
     @pytest.mark.usefixtures("admin")
     def test_add_group_members_ignores_existing_members(
-            self,
-            client,
-            session,
+        self,
+        client,
+        session,
     ):
         group = GroupFactory()
         existing = UserFactory()
@@ -272,10 +272,10 @@ class TestGroupMembershipRouter:
         service = GroupService(session)
         memberships = service.list_memberships(group.id)
 
-        assert {
-           membership.member_identity_id
-           for membership in memberships
-       } == {existing.id, new.id}
+        assert {membership.member_identity_id for membership in memberships} == {
+            existing.id,
+            new.id,
+        }
 
     def test_add_group_members_requires_permission(self, client):
         group = GroupFactory()
@@ -350,9 +350,9 @@ class TestGroupMembershipRouter:
 
     @pytest.mark.usefixtures("admin")
     def test_remove_group_members_ignores_absent_members(
-            self,
-            client,
-            session,
+        self,
+        client,
+        session,
     ):
         group = GroupFactory()
         member = UserFactory()
@@ -432,16 +432,16 @@ class TestGroupMembershipRouter:
         assert response.content == b""
 
         memberships = GroupService(session).list_memberships(group.id)
-        assert {
-           membership.member_identity_id
-           for membership in memberships
-       } == {retained.id, added.id}
+        assert {membership.member_identity_id for membership in memberships} == {
+            retained.id,
+            added.id,
+        }
 
     @pytest.mark.usefixtures("admin")
     def test_replace_group_members_rejects_invalid_identity_without_changes(
-            self,
-            client,
-            session,
+        self,
+        client,
+        session,
     ):
         group = GroupFactory()
         existing = UserFactory()
@@ -463,25 +463,6 @@ class TestGroupMembershipRouter:
         )
         assert GroupService(session).has_member(group.id, existing.id)
 
-    @pytest.mark.usefixtures("admin")
-    def test_replace_group_members_rejects_invalid_identity_without_changes(
-        self,
-        client,
-        session,
-    ):
-        group = GroupFactory()
-        existing = UserFactory()
-        service = GroupService(session)
-        service.add_members(group.id, [existing.id])
-
-        response = client.put(
-            f"{ENDPOINT}/{group.id}/members",
-            json={"member_identity_ids": [str(uuid4())]},
-        )
-
-        assert response.status_code == 400
-        assert service.has_member(group.id, existing.id)
-
     def test_replace_group_members_requires_permission(self, client):
         group = GroupFactory()
         user = UserFactory()
@@ -492,4 +473,3 @@ class TestGroupMembershipRouter:
         )
 
         assert response.status_code == 403
-

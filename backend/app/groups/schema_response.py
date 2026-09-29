@@ -21,6 +21,7 @@ class GroupCreateResponse(ORMModel):
 class GroupUpdateResponse(ORMModel):
     id: UUID
 
+
 class GroupMemberIdentityGet(ORMModel):
     id: UUID
     type: IdentityType

@@ -114,9 +114,7 @@ class TestMachineUsersRouter:
 
         assert response.status_code == 400
         assert response.json() == {
-            "detail": (
-                "A machine user with this external ID already exists."
-            )
+            "detail": ("A machine user with this external ID already exists.")
         }
 
     @pytest.mark.usefixtures("admin")
@@ -252,9 +250,12 @@ class TestMachineUsersRouter:
         )
 
         assert response.status_code == 403
-        assert client.get(
-            f"{ENDPOINT}/{machine_user.id}",
-        ).status_code == 200
+        assert (
+            client.get(
+                f"{ENDPOINT}/{machine_user.id}",
+            ).status_code
+            == 200
+        )
 
     @pytest.mark.usefixtures("admin")
     def test_delete_machine_user__unknown_id_returns_not_found(

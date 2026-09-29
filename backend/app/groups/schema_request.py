@@ -14,6 +14,7 @@ class GroupUpdate(ORMModel):
     model_config = ConfigDict(from_attributes=True, extra="forbid")
     display_name: str
 
+
 class GroupMembersRequest(ORMModel):
     member_identity_ids: list[UUID]
 
@@ -24,11 +25,14 @@ class GroupMembersRequest(ORMModel):
             raise ValueError("Member identity IDs must be unique.")
         return value
 
+
 class GroupMembersAdd(GroupMembersRequest):
     member_identity_ids: list[UUID] = Field(min_length=1)
 
+
 class GroupMembersRemove(GroupMembersRequest):
     member_identity_ids: list[UUID] = Field(min_length=1)
+
 
 class GroupMembersReplace(GroupMembersRequest):
     member_identity_ids: list[UUID] = Field(min_length=1)

@@ -611,6 +611,11 @@ type AddExplorationFinalizerOKApplicationJSON jx.Raw
 
 func (*AddExplorationFinalizerOKApplicationJSON) addExplorationFinalizerRes() {}
 
+// AddGroupMembersNoContent is response for AddGroupMembers operation.
+type AddGroupMembersNoContent struct{}
+
+func (*AddGroupMembersNoContent) addGroupMembersRes() {}
+
 type AddOutputPortDataQualityRunNotFoundApplicationJSON jx.Raw
 
 func (*AddOutputPortDataQualityRunNotFoundApplicationJSON) addOutputPortDataQualityRunRes() {}
@@ -734,6 +739,12 @@ const (
 	AuthorizationAction107 AuthorizationAction = 107
 	AuthorizationAction108 AuthorizationAction = 108
 	AuthorizationAction109 AuthorizationAction = 109
+	AuthorizationAction110 AuthorizationAction = 110
+	AuthorizationAction111 AuthorizationAction = 111
+	AuthorizationAction112 AuthorizationAction = 112
+	AuthorizationAction113 AuthorizationAction = 113
+	AuthorizationAction114 AuthorizationAction = 114
+	AuthorizationAction115 AuthorizationAction = 115
 	AuthorizationAction301 AuthorizationAction = 301
 	AuthorizationAction302 AuthorizationAction = 302
 	AuthorizationAction303 AuthorizationAction = 303
@@ -781,6 +792,12 @@ func (AuthorizationAction) AllValues() []AuthorizationAction {
 		AuthorizationAction107,
 		AuthorizationAction108,
 		AuthorizationAction109,
+		AuthorizationAction110,
+		AuthorizationAction111,
+		AuthorizationAction112,
+		AuthorizationAction113,
+		AuthorizationAction114,
+		AuthorizationAction115,
 		AuthorizationAction301,
 		AuthorizationAction302,
 		AuthorizationAction303,
@@ -3502,6 +3519,16 @@ func (s *DeleteGlobalRoleAssignmentResponse) SetID(val uuid.UUID) {
 
 func (*DeleteGlobalRoleAssignmentResponse) deleteGlobalRoleAssignmentRes() {}
 
+// DeleteGroupNoContent is response for DeleteGroup operation.
+type DeleteGroupNoContent struct{}
+
+func (*DeleteGroupNoContent) deleteGroupRes() {}
+
+// DeleteMachineUserNoContent is response for DeleteMachineUser operation.
+type DeleteMachineUserNoContent struct{}
+
+func (*DeleteMachineUserNoContent) deleteMachineUserRes() {}
+
 type DeleteOutputPortQueryStatOKApplicationJSON jx.Raw
 
 func (*DeleteOutputPortQueryStatOKApplicationJSON) deleteOutputPortQueryStatRes() {}
@@ -5909,6 +5936,182 @@ func (s *GlobalRoleAssignmentResponse) SetDecidedBy(val NilUser) {
 
 func (*GlobalRoleAssignmentResponse) decideGlobalRoleAssignmentRes() {}
 
+// Ref: #/components/schemas/GroupCreate
+type GroupCreate struct {
+	ExternalID  string `json:"external_id"`
+	DisplayName string `json:"display_name"`
+}
+
+// GetExternalID returns the value of ExternalID.
+func (s *GroupCreate) GetExternalID() string {
+	return s.ExternalID
+}
+
+// GetDisplayName returns the value of DisplayName.
+func (s *GroupCreate) GetDisplayName() string {
+	return s.DisplayName
+}
+
+// SetExternalID sets the value of ExternalID.
+func (s *GroupCreate) SetExternalID(val string) {
+	s.ExternalID = val
+}
+
+// SetDisplayName sets the value of DisplayName.
+func (s *GroupCreate) SetDisplayName(val string) {
+	s.DisplayName = val
+}
+
+// Ref: #/components/schemas/GroupCreateResponse
+type GroupCreateResponse struct {
+	ID uuid.UUID `json:"id"`
+}
+
+// GetID returns the value of ID.
+func (s *GroupCreateResponse) GetID() uuid.UUID {
+	return s.ID
+}
+
+// SetID sets the value of ID.
+func (s *GroupCreateResponse) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+func (*GroupCreateResponse) createGroupRes() {}
+
+// Ref: #/components/schemas/GroupGet
+type GroupGet struct {
+	ID          uuid.UUID `json:"id"`
+	ExternalID  string    `json:"external_id"`
+	DisplayName string    `json:"display_name"`
+}
+
+// GetID returns the value of ID.
+func (s *GroupGet) GetID() uuid.UUID {
+	return s.ID
+}
+
+// GetExternalID returns the value of ExternalID.
+func (s *GroupGet) GetExternalID() string {
+	return s.ExternalID
+}
+
+// GetDisplayName returns the value of DisplayName.
+func (s *GroupGet) GetDisplayName() string {
+	return s.DisplayName
+}
+
+// SetID sets the value of ID.
+func (s *GroupGet) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+// SetExternalID sets the value of ExternalID.
+func (s *GroupGet) SetExternalID(val string) {
+	s.ExternalID = val
+}
+
+// SetDisplayName sets the value of DisplayName.
+func (s *GroupGet) SetDisplayName(val string) {
+	s.DisplayName = val
+}
+
+func (*GroupGet) getGroupRes() {}
+
+// Ref: #/components/schemas/GroupMembersAdd
+type GroupMembersAdd struct {
+	MemberIdentityIds []uuid.UUID `json:"member_identity_ids"`
+}
+
+// GetMemberIdentityIds returns the value of MemberIdentityIds.
+func (s *GroupMembersAdd) GetMemberIdentityIds() []uuid.UUID {
+	return s.MemberIdentityIds
+}
+
+// SetMemberIdentityIds sets the value of MemberIdentityIds.
+func (s *GroupMembersAdd) SetMemberIdentityIds(val []uuid.UUID) {
+	s.MemberIdentityIds = val
+}
+
+// Ref: #/components/schemas/GroupMembersRemove
+type GroupMembersRemove struct {
+	MemberIdentityIds []uuid.UUID `json:"member_identity_ids"`
+}
+
+// GetMemberIdentityIds returns the value of MemberIdentityIds.
+func (s *GroupMembersRemove) GetMemberIdentityIds() []uuid.UUID {
+	return s.MemberIdentityIds
+}
+
+// SetMemberIdentityIds sets the value of MemberIdentityIds.
+func (s *GroupMembersRemove) SetMemberIdentityIds(val []uuid.UUID) {
+	s.MemberIdentityIds = val
+}
+
+// Ref: #/components/schemas/GroupMembersReplace
+type GroupMembersReplace struct {
+	MemberIdentityIds []uuid.UUID `json:"member_identity_ids"`
+}
+
+// GetMemberIdentityIds returns the value of MemberIdentityIds.
+func (s *GroupMembersReplace) GetMemberIdentityIds() []uuid.UUID {
+	return s.MemberIdentityIds
+}
+
+// SetMemberIdentityIds sets the value of MemberIdentityIds.
+func (s *GroupMembersReplace) SetMemberIdentityIds(val []uuid.UUID) {
+	s.MemberIdentityIds = val
+}
+
+// Ref: #/components/schemas/GroupUpdate
+type GroupUpdate struct {
+	DisplayName string `json:"display_name"`
+}
+
+// GetDisplayName returns the value of DisplayName.
+func (s *GroupUpdate) GetDisplayName() string {
+	return s.DisplayName
+}
+
+// SetDisplayName sets the value of DisplayName.
+func (s *GroupUpdate) SetDisplayName(val string) {
+	s.DisplayName = val
+}
+
+// Ref: #/components/schemas/GroupUpdateResponse
+type GroupUpdateResponse struct {
+	ID uuid.UUID `json:"id"`
+}
+
+// GetID returns the value of ID.
+func (s *GroupUpdateResponse) GetID() uuid.UUID {
+	return s.ID
+}
+
+// SetID sets the value of ID.
+func (s *GroupUpdateResponse) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+func (*GroupUpdateResponse) updateGroupRes() {}
+
+// Ref: #/components/schemas/GroupsGetResponse
+type GroupsGetResponse struct {
+	Groups []GroupGet `json:"groups"`
+}
+
+// GetGroups returns the value of Groups.
+func (s *GroupsGetResponse) GetGroups() []GroupGet {
+	return s.Groups
+}
+
+// SetGroups sets the value of Groups.
+func (s *GroupsGetResponse) SetGroups(val []GroupGet) {
+	s.Groups = val
+}
+
+func (*GroupsGetResponse) getGroupsRes() {}
+
 type HTTPBasic struct {
 	Username string
 	Password string
@@ -5962,6 +6165,7 @@ func (s *HTTPValidationError) SetDetail(val []ValidationError) {
 
 func (*HTTPValidationError) addDataProductFinalizerRes()                  {}
 func (*HTTPValidationError) addExplorationFinalizerRes()                  {}
+func (*HTTPValidationError) addGroupMembersRes()                          {}
 func (*HTTPValidationError) addOutputPortDataQualityRunRes()              {}
 func (*HTTPValidationError) approveOutputPortAsInputPortRes()             {}
 func (*HTTPValidationError) approveOutputPortTechnicalAssetLinkRes()      {}
@@ -5977,6 +6181,8 @@ func (*HTTPValidationError) createDataProductSettingRes()                 {}
 func (*HTTPValidationError) createDataProductTypeRes()                    {}
 func (*HTTPValidationError) createDomainRes()                             {}
 func (*HTTPValidationError) createExplorationRes()                        {}
+func (*HTTPValidationError) createGroupRes()                              {}
+func (*HTTPValidationError) createMachineUserRes()                        {}
 func (*HTTPValidationError) createOutputPortRes()                         {}
 func (*HTTPValidationError) createOutputPortRoleAssignmentRes()           {}
 func (*HTTPValidationError) createRoleRes()                               {}
@@ -5989,6 +6195,8 @@ func (*HTTPValidationError) decideOutputPortRoleAssignmentRes()           {}
 func (*HTTPValidationError) deleteAccessModeRes()                         {}
 func (*HTTPValidationError) deleteDataProductRoleAssignmentRes()          {}
 func (*HTTPValidationError) deleteGlobalRoleAssignmentRes()               {}
+func (*HTTPValidationError) deleteGroupRes()                              {}
+func (*HTTPValidationError) deleteMachineUserRes()                        {}
 func (*HTTPValidationError) deleteOutputPortQueryStatRes()                {}
 func (*HTTPValidationError) deleteOutputPortRoleAssignmentRes()           {}
 func (*HTTPValidationError) denyOutputPortAsInputPortRes()                {}
@@ -6020,9 +6228,13 @@ func (*HTTPValidationError) getEnvironmentsRes()                          {}
 func (*HTTPValidationError) getExplorationInputPortsRes()                 {}
 func (*HTTPValidationError) getExplorationRes()                           {}
 func (*HTTPValidationError) getExplorationsRes()                          {}
+func (*HTTPValidationError) getGroupRes()                                 {}
+func (*HTTPValidationError) getGroupsRes()                                {}
 func (*HTTPValidationError) getInputPortsForOutputPortRes()               {}
 func (*HTTPValidationError) getJwtTokenRes()                              {}
 func (*HTTPValidationError) getLatestDataQualitySummaryForOutputPortRes() {}
+func (*HTTPValidationError) getMachineUserRes()                           {}
+func (*HTTPValidationError) getMachineUsersRes()                          {}
 func (*HTTPValidationError) getOutputPortAccessDurationsRes()             {}
 func (*HTTPValidationError) getOutputPortCuratedQueriesRes()              {}
 func (*HTTPValidationError) getOutputPortQueryStatsRes()                  {}
@@ -6065,6 +6277,7 @@ func (*HTTPValidationError) removeDataProductTypeRes()                    {}
 func (*HTTPValidationError) removeDomainRes()                             {}
 func (*HTTPValidationError) removeExplorationFinalizerRes()               {}
 func (*HTTPValidationError) removeExplorationRes()                        {}
+func (*HTTPValidationError) removeGroupMembersRes()                       {}
 func (*HTTPValidationError) removeInputPortForDataProductRes()            {}
 func (*HTTPValidationError) removeInputPortForExplorationRes()            {}
 func (*HTTPValidationError) removeOutputPortAsInputPortRes()              {}
@@ -6077,6 +6290,7 @@ func (*HTTPValidationError) removeUserRes()                               {}
 func (*HTTPValidationError) renderTechnicalAssetAccessPathRes()           {}
 func (*HTTPValidationError) renewInputPortForDataProductRes()             {}
 func (*HTTPValidationError) renewInputPortForExplorationRes()             {}
+func (*HTTPValidationError) replaceGroupMembersRes()                      {}
 func (*HTTPValidationError) replaceOutputPortCuratedQueriesRes()          {}
 func (*HTTPValidationError) requestDataProductRoleAssignmentRes()         {}
 func (*HTTPValidationError) requestInputPortsForDataProductRes()          {}
@@ -6103,6 +6317,8 @@ func (*HTTPValidationError) updateDataProductTypeRes()                    {}
 func (*HTTPValidationError) updateDataProductUsageRes()                   {}
 func (*HTTPValidationError) updateDomainRes()                             {}
 func (*HTTPValidationError) updateEnvironmentIsGlobalRes()                {}
+func (*HTTPValidationError) updateGroupRes()                              {}
+func (*HTTPValidationError) updateMachineUserRes()                        {}
 func (*HTTPValidationError) updateOutputPortAboutRes()                    {}
 func (*HTTPValidationError) updateOutputPortQueryStatsRes()               {}
 func (*HTTPValidationError) updateOutputPortRes()                         {}
@@ -6545,6 +6761,137 @@ func (s *ListOutputPortRoleAssignmentsResponse) SetRoleAssignments(val []OutputP
 }
 
 func (*ListOutputPortRoleAssignmentsResponse) listOutputPortRoleAssignmentsRes() {}
+
+// Ref: #/components/schemas/MachineUserCreate
+type MachineUserCreate struct {
+	ExternalID  string `json:"external_id"`
+	DisplayName string `json:"display_name"`
+}
+
+// GetExternalID returns the value of ExternalID.
+func (s *MachineUserCreate) GetExternalID() string {
+	return s.ExternalID
+}
+
+// GetDisplayName returns the value of DisplayName.
+func (s *MachineUserCreate) GetDisplayName() string {
+	return s.DisplayName
+}
+
+// SetExternalID sets the value of ExternalID.
+func (s *MachineUserCreate) SetExternalID(val string) {
+	s.ExternalID = val
+}
+
+// SetDisplayName sets the value of DisplayName.
+func (s *MachineUserCreate) SetDisplayName(val string) {
+	s.DisplayName = val
+}
+
+// Ref: #/components/schemas/MachineUserCreateResponse
+type MachineUserCreateResponse struct {
+	ID uuid.UUID `json:"id"`
+}
+
+// GetID returns the value of ID.
+func (s *MachineUserCreateResponse) GetID() uuid.UUID {
+	return s.ID
+}
+
+// SetID sets the value of ID.
+func (s *MachineUserCreateResponse) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+func (*MachineUserCreateResponse) createMachineUserRes() {}
+
+// Ref: #/components/schemas/MachineUserGet
+type MachineUserGet struct {
+	ID          uuid.UUID `json:"id"`
+	ExternalID  string    `json:"external_id"`
+	DisplayName string    `json:"display_name"`
+}
+
+// GetID returns the value of ID.
+func (s *MachineUserGet) GetID() uuid.UUID {
+	return s.ID
+}
+
+// GetExternalID returns the value of ExternalID.
+func (s *MachineUserGet) GetExternalID() string {
+	return s.ExternalID
+}
+
+// GetDisplayName returns the value of DisplayName.
+func (s *MachineUserGet) GetDisplayName() string {
+	return s.DisplayName
+}
+
+// SetID sets the value of ID.
+func (s *MachineUserGet) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+// SetExternalID sets the value of ExternalID.
+func (s *MachineUserGet) SetExternalID(val string) {
+	s.ExternalID = val
+}
+
+// SetDisplayName sets the value of DisplayName.
+func (s *MachineUserGet) SetDisplayName(val string) {
+	s.DisplayName = val
+}
+
+func (*MachineUserGet) getMachineUserRes() {}
+
+// Ref: #/components/schemas/MachineUserUpdate
+type MachineUserUpdate struct {
+	DisplayName string `json:"display_name"`
+}
+
+// GetDisplayName returns the value of DisplayName.
+func (s *MachineUserUpdate) GetDisplayName() string {
+	return s.DisplayName
+}
+
+// SetDisplayName sets the value of DisplayName.
+func (s *MachineUserUpdate) SetDisplayName(val string) {
+	s.DisplayName = val
+}
+
+// Ref: #/components/schemas/MachineUserUpdateResponse
+type MachineUserUpdateResponse struct {
+	ID uuid.UUID `json:"id"`
+}
+
+// GetID returns the value of ID.
+func (s *MachineUserUpdateResponse) GetID() uuid.UUID {
+	return s.ID
+}
+
+// SetID sets the value of ID.
+func (s *MachineUserUpdateResponse) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+func (*MachineUserUpdateResponse) updateMachineUserRes() {}
+
+// Ref: #/components/schemas/MachineUsersGetResponse
+type MachineUsersGetResponse struct {
+	MachineUsers []MachineUserGet `json:"machine_users"`
+}
+
+// GetMachineUsers returns the value of MachineUsers.
+func (s *MachineUsersGetResponse) GetMachineUsers() []MachineUserGet {
+	return s.MachineUsers
+}
+
+// SetMachineUsers sets the value of MachineUsers.
+func (s *MachineUsersGetResponse) SetMachineUsers(val []MachineUserGet) {
+	s.MachineUsers = val
+}
+
+func (*MachineUsersGetResponse) getMachineUsersRes() {}
 
 type MarkTourAsSeenOKApplicationJSON jx.Raw
 
@@ -10828,6 +11175,11 @@ type RemoveExplorationOKApplicationJSON jx.Raw
 
 func (*RemoveExplorationOKApplicationJSON) removeExplorationRes() {}
 
+// RemoveGroupMembersNoContent is response for RemoveGroupMembers operation.
+type RemoveGroupMembersNoContent struct{}
+
+func (*RemoveGroupMembersNoContent) removeGroupMembersRes() {}
+
 type RemoveInputPortForDataProductBadRequestApplicationJSON jx.Raw
 
 func (*RemoveInputPortForDataProductBadRequestApplicationJSON) removeInputPortForDataProductRes() {}
@@ -11080,6 +11432,11 @@ func (s *RenewalStatus) UnmarshalText(data []byte) error {
 		return errors.Errorf("invalid value: %q", data)
 	}
 }
+
+// ReplaceGroupMembersNoContent is response for ReplaceGroupMembers operation.
+type ReplaceGroupMembersNoContent struct{}
+
+func (*ReplaceGroupMembersNoContent) replaceGroupMembersRes() {}
 
 type ReplaceOutputPortCuratedQueriesNotFoundApplicationJSON jx.Raw
 

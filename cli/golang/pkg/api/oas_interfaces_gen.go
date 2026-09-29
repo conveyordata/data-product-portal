@@ -9,6 +9,10 @@ type AddExplorationFinalizerRes interface {
 	addExplorationFinalizerRes()
 }
 
+type AddGroupMembersRes interface {
+	addGroupMembersRes()
+}
+
 type AddOutputPortDataQualityRunRes interface {
 	addOutputPortDataQualityRunRes()
 }
@@ -69,6 +73,14 @@ type CreateExplorationRes interface {
 	createExplorationRes()
 }
 
+type CreateGroupRes interface {
+	createGroupRes()
+}
+
+type CreateMachineUserRes interface {
+	createMachineUserRes()
+}
+
 type CreateOutputPortRes interface {
 	createOutputPortRes()
 }
@@ -115,6 +127,14 @@ type DeleteDataProductRoleAssignmentRes interface {
 
 type DeleteGlobalRoleAssignmentRes interface {
 	deleteGlobalRoleAssignmentRes()
+}
+
+type DeleteGroupRes interface {
+	deleteGroupRes()
+}
+
+type DeleteMachineUserRes interface {
+	deleteMachineUserRes()
 }
 
 type DeleteOutputPortQueryStatRes interface {
@@ -241,6 +261,14 @@ type GetExplorationsRes interface {
 	getExplorationsRes()
 }
 
+type GetGroupRes interface {
+	getGroupRes()
+}
+
+type GetGroupsRes interface {
+	getGroupsRes()
+}
+
 type GetInputPortsForOutputPortRes interface {
 	getInputPortsForOutputPortRes()
 }
@@ -251,6 +279,14 @@ type GetJwtTokenRes interface {
 
 type GetLatestDataQualitySummaryForOutputPortRes interface {
 	getLatestDataQualitySummaryForOutputPortRes()
+}
+
+type GetMachineUserRes interface {
+	getMachineUserRes()
+}
+
+type GetMachineUsersRes interface {
+	getMachineUsersRes()
 }
 
 type GetOutputPortAccessDurationsRes interface {
@@ -421,6 +457,10 @@ type RemoveExplorationRes interface {
 	removeExplorationRes()
 }
 
+type RemoveGroupMembersRes interface {
+	removeGroupMembersRes()
+}
+
 type RemoveInputPortForDataProductRes interface {
 	removeInputPortForDataProductRes()
 }
@@ -467,6 +507,10 @@ type RenewInputPortForDataProductRes interface {
 
 type RenewInputPortForExplorationRes interface {
 	renewInputPortForExplorationRes()
+}
+
+type ReplaceGroupMembersRes interface {
+	replaceGroupMembersRes()
 }
 
 type ReplaceOutputPortCuratedQueriesRes interface {
@@ -571,6 +615,14 @@ type UpdateDomainRes interface {
 
 type UpdateEnvironmentIsGlobalRes interface {
 	updateEnvironmentIsGlobalRes()
+}
+
+type UpdateGroupRes interface {
+	updateGroupRes()
+}
+
+type UpdateMachineUserRes interface {
+	updateMachineUserRes()
 }
 
 type UpdateOutputPortAboutRes interface {

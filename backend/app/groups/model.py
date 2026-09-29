@@ -1,5 +1,5 @@
 import uuid
-from typing import Sequence, Any
+from typing import Any, Sequence
 
 from sqlalchemy import CheckConstraint, ForeignKey, Index, String
 from sqlalchemy.dialects.postgresql import UUID
@@ -68,5 +68,7 @@ class GroupMembership(Base, BaseORM):
     )
 
 
-def ensure_group_exists(group_id: UUID, db: Session, options: Sequence[Any] = ()) -> Group:
+def ensure_group_exists(
+    group_id: UUID, db: Session, options: Sequence[Any] = ()
+) -> Group:
     return ensure_exists(group_id, db, Group, options=options)

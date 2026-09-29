@@ -79,6 +79,7 @@ def delete_group(
 ) -> None:
     GroupService(db).delete_group(group_id=id)
 
+
 @router.post(
     "/{id}/members",
     status_code=status.HTTP_204_NO_CONTENT,
@@ -101,6 +102,7 @@ def add_group_members(
         member_identity_ids=request.member_identity_ids,
     )
 
+
 @router.delete(
     "/{id}/members",
     status_code=status.HTTP_204_NO_CONTENT,
@@ -122,6 +124,7 @@ def remove_group_members(
         group_id=id,
         member_identity_ids=request.member_identity_ids,
     )
+
 
 @router.put(
     "/{id}/members",

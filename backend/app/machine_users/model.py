@@ -3,7 +3,7 @@ from typing import Any, Sequence
 
 from sqlalchemy import ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, mapped_column, Session
+from sqlalchemy.orm import Mapped, Session, mapped_column
 
 from app.database.database import ensure_exists
 from app.identities.model import Identity
@@ -23,6 +23,7 @@ class MachineUser(Identity):
     __mapper_args__ = {
         "polymorphic_identity": IdentityType.MACHINE_USER.value,
     }
+
 
 def ensure_machine_user_exists(
     machine_user_id: uuid.UUID,

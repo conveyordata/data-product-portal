@@ -191,6 +191,15 @@ from .get_user_notifications_response_item import GetUserNotificationsResponseIt
 from .get_users_response import GetUsersResponse
 from .global_role_assignment_response import GlobalRoleAssignmentResponse
 from .graph import Graph
+from .group_create import GroupCreate
+from .group_create_response import GroupCreateResponse
+from .group_get import GroupGet
+from .group_members_add import GroupMembersAdd
+from .group_members_remove import GroupMembersRemove
+from .group_members_replace import GroupMembersReplace
+from .group_update import GroupUpdate
+from .group_update_response import GroupUpdateResponse
+from .groups_get_response import GroupsGetResponse
 from .http_validation_error import HTTPValidationError
 from .ingest_output_port_contract_yaml_body import IngestOutputPortContractYamlBody
 from .input_port_event import InputPortEvent
@@ -212,6 +221,12 @@ from .list_global_role_assignments_response import ListGlobalRoleAssignmentsResp
 from .list_output_port_role_assignments_response import (
     ListOutputPortRoleAssignmentsResponse,
 )
+from .machine_user_create import MachineUserCreate
+from .machine_user_create_response import MachineUserCreateResponse
+from .machine_user_get import MachineUserGet
+from .machine_user_update import MachineUserUpdate
+from .machine_user_update_response import MachineUserUpdateResponse
+from .machine_users_get_response import MachineUsersGetResponse
 from .modify_data_product_role_assignment import ModifyDataProductRoleAssignment
 from .modify_global_role_assignment import ModifyGlobalRoleAssignment
 from .modify_output_port_role_assignment import ModifyOutputPortRoleAssignment
@@ -522,6 +537,15 @@ __all__ = (
     "GetUsersResponse",
     "GlobalRoleAssignmentResponse",
     "Graph",
+    "GroupCreate",
+    "GroupCreateResponse",
+    "GroupGet",
+    "GroupMembersAdd",
+    "GroupMembersRemove",
+    "GroupMembersReplace",
+    "GroupsGetResponse",
+    "GroupUpdate",
+    "GroupUpdateResponse",
     "HTTPValidationError",
     "IngestOutputPortContractYamlBody",
     "InputPortEvent",
@@ -535,6 +559,12 @@ __all__ = (
     "ListDataProductRoleAssignmentsResponse",
     "ListGlobalRoleAssignmentsResponse",
     "ListOutputPortRoleAssignmentsResponse",
+    "MachineUserCreate",
+    "MachineUserCreateResponse",
+    "MachineUserGet",
+    "MachineUsersGetResponse",
+    "MachineUserUpdate",
+    "MachineUserUpdateResponse",
     "ModifyDataProductRoleAssignment",
     "ModifyGlobalRoleAssignment",
     "ModifyOutputPortRoleAssignment",
