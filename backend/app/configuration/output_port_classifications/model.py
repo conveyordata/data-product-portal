@@ -2,10 +2,10 @@ import uuid
 
 from sqlalchemy import Enum, String, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, Session, mapped_column
 
 from app.data_products.output_ports.enums import OutputPortAccessFunction
-from app.database.database import Base
+from app.database.database import Base, ensure_exists
 from app.shared.model import BaseORM
 
 
@@ -24,3 +24,9 @@ class OutputPortClassification(Base, BaseORM):
     __table_args__ = (
         UniqueConstraint("name", name="uq_output_port_classification_name"),
     )
+
+
+def ensure_output_port_classification_exists(
+    classification_id: uuid.UUID, db: Session
+) -> OutputPortClassification:
+    return ensure_exists(classification_id, db, OutputPortClassification)

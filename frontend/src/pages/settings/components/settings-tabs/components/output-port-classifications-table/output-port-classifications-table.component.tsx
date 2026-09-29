@@ -39,11 +39,9 @@ export function OutputPortClassificationsTable() {
 
     const handleRemove = useCallback(
         async (classification: OutputPortClassificationsGetItem) => {
-            try {
-                await removeClassification(classification.id).unwrap();
+            const result = await removeClassification(classification.id);
+            if (!result.error) {
                 dispatchMessage({ content: t('Classification removed successfully'), type: 'success' });
-            } catch (_) {
-                dispatchMessage({ content: t('Could not remove classification'), type: 'error' });
             }
         },
         [t, removeClassification],

@@ -8,6 +8,9 @@ from sqlalchemy.orm import Session
 from app.configuration.output_port_classifications.model import (
     OutputPortClassification as OutputPortClassificationModel,
 )
+from app.configuration.output_port_classifications.model import (
+    ensure_output_port_classification_exists,
+)
 from app.configuration.output_port_classifications.schema_request import (
     OutputPortClassificationCreate,
     OutputPortClassificationUpdate,
@@ -17,10 +20,10 @@ from app.configuration.output_port_classifications.schema_response import (
     OutputPortClassificationsGetItem,
     UpdateOutputPortClassificationResponse,
 )
+from app.core.authz import Action, Authorization
 from app.data_products.output_ports.enums import OutputPortAccessFunction
-from app.data_products.output_ports.model import OutputPort as OutputPortModel
-from app.data_products.output_ports.service import UNFILTERED, OutputPortService
-from app.database.database import ensure_exists
+from app.data_products.output_ports.service import OutputPortService
+from app.users.model import User
 
 
 class OutputPortClassificationService:
@@ -28,15 +31,13 @@ class OutputPortClassificationService:
         self.db = db
 
     def get_output_port_classifications(
-        self, count_hidden_output_ports: bool
+        self, user: User
     ) -> Sequence[OutputPortClassificationsGetItem]:
-        counts = dict(
-            self.db.execute(
-                select(OutputPortModel.classification_id, func.count()).group_by(
-                    OutputPortModel.classification_id
-                ),
-                execution_options=UNFILTERED if count_hidden_output_ports else {},
-            ).all()
+        can_configure = Authorization().has_access(
+            sub=str(user.id), dom="*", obj="*", act=Action.GLOBAL__UPDATE_CONFIGURATION
+        )
+        counts = OutputPortService(self.db).count_by_classification(
+            include_hidden=can_configure
         )
         classifications = self.db.scalars(
             select(OutputPortClassificationModel).order_by(
@@ -67,9 +68,7 @@ class OutputPortClassificationService:
     def update_output_port_classification(
         self, id: UUID, request: OutputPortClassificationUpdate
     ) -> UpdateOutputPortClassificationResponse:
-        classification: OutputPortClassificationModel = ensure_exists(
-            id, self.db, OutputPortClassificationModel
-        )
+        classification = ensure_output_port_classification_exists(id, self.db)
         classification.name = request.name
         classification.description = request.description
         if request.access_function != classification.access_function:
@@ -82,15 +81,12 @@ class OutputPortClassificationService:
         return UpdateOutputPortClassificationResponse(id=id)
 
     def delete_output_port_classification(self, id: UUID) -> None:
-        classification: OutputPortClassificationModel = ensure_exists(
-            id, self.db, OutputPortClassificationModel
-        )
+        classification = ensure_output_port_classification_exists(id, self.db)
         self._ensure_not_last_invite_only(classification)
-        in_use = self.db.scalar(
-            select(func.count())
-            .select_from(OutputPortModel)
-            .where(OutputPortModel.classification_id == id),
-            execution_options=UNFILTERED,
+        in_use = (
+            OutputPortService(self.db)
+            .count_by_classification(include_hidden=True)
+            .get(id, 0)
         )
         if in_use:
             raise HTTPException(

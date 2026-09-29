@@ -155,7 +155,9 @@ class OutputPort(Base, BaseORM, EventTrackedMixin):
     name = Column(String)
     description = Column(String)
     about = Column(String)
-    access_function = Column(Enum(OutputPortAccessFunction), nullable=False)
+    access_function = Column(
+        Enum(OutputPortAccessFunction, native_enum=False), nullable=False
+    )
     status: OutputPortStatus = Column(
         Enum(OutputPortStatus), default=OutputPortStatus.ACTIVE
     )
@@ -297,6 +299,12 @@ def ensure_output_port_exists(
             detail=f"Required item {output_port_id} does not exist",
         )
     return output_port
+
+
+UNFILTERED = {
+    "skip_output_port_access_function_filter": True,
+    "skip_data_product_visibility_filter": True,
+}
 
 
 @event.listens_for(Session, "do_orm_execute")

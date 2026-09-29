@@ -112,6 +112,14 @@ class TestOutputPortClassificationsRouter:
         assert response.status_code == 200, response.text
         assert "id" in response.json()
 
+    @pytest.mark.usefixtures("admin")
+    def test_create_output_port_classification__empty_name(self, client):
+        response = client.post(
+            ENDPOINT, json=payload("  ", OutputPortAccessFunction.PRIVATE)
+        )
+
+        assert response.status_code == 422
+
     def test_create_output_port_classification__admin_only(self, client):
         response = client.post(
             ENDPOINT, json=payload("Top Secret", OutputPortAccessFunction.PRIVATE)

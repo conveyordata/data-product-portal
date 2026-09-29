@@ -15,7 +15,8 @@ Read access for Data Products that consume an Invite only Output Port is out of 
 
 ## Decision Drivers
 
-* No behaviour change for organisations that do not configure Classifications
+* Existing Output Ports keep their behaviour for organisations that do not configure Classifications;
+  new Output Ports require an explicit Classification instead of defaulting to Unrestricted
 * No extra join on the visibility hot paths
 * API clients read the resolved Access Function as `classification.access_function`; requests select a Classification by `classification_id`
 

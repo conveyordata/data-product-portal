@@ -3,7 +3,7 @@ import type { TFunction } from 'i18next';
 
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
 import type { OutputPortClassificationsGetItem } from '@/store/api/services/generated/configurationOutputPortClassificationsApi.ts';
-import { compareAccessFunctions, getAccessFunctionLabel } from '@/utils/access-function.helper.ts';
+import { compareAccessFunctions, getAccessFunctionLabel } from '@/utils/access-function.helper.tsx';
 import { Sorter } from '@/utils/table-sorter.helper';
 
 type Props = {

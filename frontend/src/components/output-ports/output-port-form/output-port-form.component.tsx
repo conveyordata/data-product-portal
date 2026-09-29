@@ -61,7 +61,7 @@ import {
     ACCESS_FUNCTION_ORDER,
     fitsDataProductVisibility,
     getAccessFunctionLabel,
-} from '@/utils/access-function.helper.ts';
+} from '@/utils/access-function.helper.tsx';
 import { useGetDataProductOwnerIds } from '@/utils/data-product-user-role.helper';
 import { useGetDatasetOwnerIds } from '@/utils/dataset-user-role.helper.ts';
 import { dispatchMessage } from '@/utils/feedback.ts';
@@ -236,11 +236,23 @@ export function ClassificationSection({
 }: {
     id?: string;
     value?: string;
-    onChange?: (value: string) => void;
+    onChange?: (value?: string) => void;
     hiddenDataProduct: boolean;
 }) {
     const { t } = useTranslation();
     const { data: { output_port_classifications: classifications = [] } = {} } = useGetOutputPortClassificationsQuery();
+
+    useEffect(() => {
+        const selectable = classifications.filter((classification) =>
+            fitsDataProductVisibility(classification.access_function, hiddenDataProduct),
+        );
+        if (selectable.length === 1 && value !== selectable[0].id) {
+            onChange?.(selectable[0].id);
+        } else if (value && !selectable.some((classification) => classification.id === value)) {
+            onChange?.(undefined);
+        }
+    }, [classifications, hiddenDataProduct, value, onChange]);
+
     const options = ACCESS_FUNCTION_ORDER.map((accessFunction) => {
         const allowed = fitsDataProductVisibility(accessFunction, hiddenDataProduct);
         return {
@@ -256,6 +268,7 @@ export function ClassificationSection({
                 })),
         };
     }).filter((group) => group.options.length > 0);
+
     const getDescription = (id?: string | number | null) =>
         classifications.find((classification) => classification.id === id)?.description;
     const selectedDescription = getDescription(value);
@@ -469,31 +482,12 @@ export function OutputPortForm({ mode, modalCallbackOnSubmit, formRef, outputPor
     const dataProductOwners = useGetDataProductOwnerIds(dataProduct?.id);
     const ownerIds = mode === 'edit' ? datasetOwners : dataProductOwners;
     const isHiddenDataProduct = dataProduct?.visibility === DataProductVisibility.Hidden;
-    const { data: { output_port_classifications: classifications = [] } = {} } = useGetOutputPortClassificationsQuery();
 
     useEffect(() => {
         if (mode === 'create' && dataProductOwners && form.getFieldValue('owners') === undefined) {
             form.setFieldValue('owners', dataProductOwners);
         }
     }, [mode, dataProductOwners, form]);
-
-    useEffect(() => {
-        if (mode !== 'create') {
-            return;
-        }
-        const selectableClassifications = classifications.filter((classification) =>
-            fitsDataProductVisibility(classification.access_function, isHiddenDataProduct),
-        );
-        const selectedId = form.getFieldValue('classification_id');
-        if (selectableClassifications.length === 1) {
-            form.setFieldValue('classification_id', selectableClassifications[0].id);
-        } else if (
-            selectedId &&
-            !selectableClassifications.some((classification) => classification.id === selectedId)
-        ) {
-            form.setFieldValue('classification_id', undefined);
-        }
-    }, [form, isHiddenDataProduct, mode, classifications]);
 
     if (mode === 'edit' && (!currentOutputPort || ownerIds === undefined)) {
         return <Skeleton active />;

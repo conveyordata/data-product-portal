@@ -17,7 +17,7 @@ export function OutputPortTitle({ name, classification, hasIcon = true, hasPopov
     const { t } = useTranslation();
 
     const title = (
-        <Flex vertical align="flex-start" gap={4}>
+        <Flex vertical align="flex-start" gap="small">
             <Typography.Text strong>{name}</Typography.Text>
             {classification.access_function !== OutputPortAccessFunction.Unrestricted && hasIcon && (
                 <OutputPortAccessIcon classification={classification} />

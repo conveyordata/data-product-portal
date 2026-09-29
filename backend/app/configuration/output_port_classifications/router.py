@@ -32,13 +32,10 @@ def get_output_port_classifications(
     db: Session = Depends(get_db_session, scope="function"),
     user: User = Depends(get_authenticated_user),
 ) -> OutputPortClassificationsGet:
-    can_configure = Authorization().has_access(
-        sub=str(user.id), dom="*", obj="*", act=Action.GLOBAL__UPDATE_CONFIGURATION
-    )
     return OutputPortClassificationsGet(
         output_port_classifications=OutputPortClassificationService(
             db
-        ).get_output_port_classifications(count_hidden_output_ports=can_configure)
+        ).get_output_port_classifications(user)
     )
 
 

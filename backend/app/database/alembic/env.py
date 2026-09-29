@@ -11,6 +11,7 @@ sys.path.insert(
     0, dirname(dirname(dirname(dirname(abspath(__file__)))))
 )  # Insert <.>/ # allows import from app.
 
+from app.data_products.output_ports.model import UNFILTERED  # noqa: E402
 from app.database.database import get_url  # noqa: E402
 
 # this is the Alembic Config object, which provides
@@ -75,10 +76,7 @@ def run_migrations_online() -> None:
 
     with connectable.connect() as connection:
         Session(bind=connection).info["current_user_id"] = None
-        connection = connection.execution_options(
-            skip_data_product_visibility_filter=True,
-            skip_output_port_access_function_filter=True,
-        )
+        connection = connection.execution_options(**UNFILTERED)
         context.configure(
             connection=connection,
             target_metadata=target_metadata,

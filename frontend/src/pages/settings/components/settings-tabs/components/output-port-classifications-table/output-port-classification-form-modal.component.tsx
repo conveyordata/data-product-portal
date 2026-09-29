@@ -12,7 +12,7 @@ import {
     ACCESS_FUNCTION_ORDER,
     compareAccessFunctions,
     getAccessFunctionLabel,
-} from '@/utils/access-function.helper.ts';
+} from '@/utils/access-function.helper.tsx';
 import { dispatchMessage } from '@/utils/feedback.ts';
 
 type Props = {
@@ -33,17 +33,14 @@ export function OutputPortClassificationFormModal({ onClose, initial, isLastInvi
         initial && accessFunction && compareAccessFunctions(accessFunction, initial.access_function) < 0;
 
     const handleFinish = async (values: OutputPortClassificationCreate) => {
-        try {
-            if (initial) {
-                await updateClassification({ id: initial.id, outputPortClassificationUpdate: values }).unwrap();
-            } else {
-                await createClassification(values).unwrap();
-            }
-            dispatchMessage({ content: t('Classification saved successfully'), type: 'success' });
-            onClose();
-        } catch (_e) {
-            dispatchMessage({ content: t('Failed to save classification'), type: 'error' });
+        const result = initial
+            ? await updateClassification({ id: initial.id, outputPortClassificationUpdate: values })
+            : await createClassification(values);
+        if (result.error) {
+            return;
         }
+        dispatchMessage({ content: t('Classification saved successfully'), type: 'success' });
+        onClose();
     };
 
     return (

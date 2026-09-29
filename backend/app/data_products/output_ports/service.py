@@ -27,6 +27,9 @@ from app.configuration.data_product_lifecycles.model import (
 from app.configuration.output_port_classifications.model import (
     OutputPortClassification as OutputPortClassificationModel,
 )
+from app.configuration.output_port_classifications.model import (
+    ensure_output_port_classification_exists,
+)
 from app.configuration.tags.model import Tag as TagModel
 from app.configuration.tags.model import ensure_tag_exists
 from app.core.authz import Authorization
@@ -45,8 +48,8 @@ from app.data_products.output_port_technical_assets_link.model import (
     TechnicalAssetOutputPortAssociation as TechnicalAssetOutputPortAssociationModel,
 )
 from app.data_products.output_ports.enums import OutputPortAccessFunction
+from app.data_products.output_ports.model import UNFILTERED, ensure_output_port_exists
 from app.data_products.output_ports.model import OutputPort as OutputPortModel
-from app.data_products.output_ports.model import ensure_output_port_exists
 from app.data_products.output_ports.schema import DatasetEmbedModel, OutputPort
 from app.data_products.output_ports.schema_request import (
     CreateOutputPortRequest,
@@ -64,18 +67,12 @@ from app.data_products.status import AbstractDataProductStatus
 from app.data_products.technical_assets.model import (
     TechnicalAsset as TechnicalAssetModel,
 )
-from app.database.database import ensure_exists
 from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
 from app.resource_names.service import ResourceNameValidityType
 from app.users.model import User as UserModel
 from app.users.schema import User
-
-UNFILTERED = {
-    "skip_output_port_access_function_filter": True,
-    "skip_data_product_visibility_filter": True,
-}
 
 
 def get_dataset_load_options() -> Sequence[ExecutableOption]:
@@ -324,10 +321,7 @@ class OutputPortService:
                     select(OutputPortModel)
                     .where(OutputPortModel.id.in_(batch_ids))
                     .options(*self.recalculate_embeddings_load_options())
-                    .execution_options(
-                        skip_data_product_visibility_filter=True,
-                        skip_output_port_access_function_filter=True,
-                    ),
+                    .execution_options(**UNFILTERED),
                 )
                 .unique()
                 .all()
@@ -356,23 +350,40 @@ class OutputPortService:
                 if access_function != OutputPortAccessFunction.PRIVATE:
                     raise HTTPException(
                         status_code=status.HTTP_400_BAD_REQUEST,
-                        detail="Hidden data products can only have private output ports",
+                        detail="Output Ports of a Hidden Data Product need a Classification mapped to Invite only",
                     )
             case DataProductVisibility.DISCOVERABLE:
                 pass
             case _:
                 assert_never(dp.visibility)
 
+    @staticmethod
+    def _set_classification(
+        output_port: OutputPortModel, classification: OutputPortClassificationModel
+    ) -> None:
+        output_port.classification = classification
+        output_port.access_function = classification.access_function
+
     def _resolve_classification(
         self, dp: DataProductModel, classification_id: UUID
     ) -> OutputPortClassificationModel:
-        classification: OutputPortClassificationModel = ensure_exists(
-            classification_id, self.db, OutputPortClassificationModel
+        classification = ensure_output_port_classification_exists(
+            classification_id, self.db
         )
         self.ensure_access_function_matches_visibility(
             dp, classification.access_function
         )
         return classification
+
+    def count_by_classification(self, include_hidden: bool) -> dict[UUID, int]:
+        return dict(
+            self.db.execute(
+                select(OutputPortModel.classification_id, func.count()).group_by(
+                    OutputPortModel.classification_id
+                ),
+                execution_options=UNFILTERED if include_hidden else {},
+            ).all()
+        )
 
     def reclassify_output_ports(
         self, classification_id: UUID, access_function: OutputPortAccessFunction
@@ -419,10 +430,10 @@ class OutputPortService:
 
         output_port_schema = create_output_port_request.parse_pydantic_schema()
         output_port_schema["data_product_id"] = data_product_id
-        output_port_schema["access_function"] = classification.access_function
         tags = self._fetch_tags(output_port_schema.pop("tag_ids", []))
         _ = output_port_schema.pop("owners", [])
         model = OutputPortModel(**output_port_schema, tags=tags)
+        self._set_classification(model, classification)
 
         self.db.add(model)
         self.db.flush()
@@ -475,13 +486,11 @@ class OutputPortService:
         access_function_changed = (
             current_output_port.access_function != classification.access_function
         )
-        current_output_port.access_function = classification.access_function
+        self._set_classification(current_output_port, classification)
         for k, v in updated_output_port.items():
             if k == "tag_ids":
                 new_tags = self._fetch_tags(v)
                 current_output_port.tags = new_tags
-            elif k == "classification_id":
-                current_output_port.classification = classification
             else:
                 setattr(current_output_port, k, v) if v else None
         self.db.flush()
