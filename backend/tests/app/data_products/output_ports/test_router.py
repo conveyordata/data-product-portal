@@ -86,6 +86,14 @@ def output_port_event_payload():
     }
 
 
+# Hidden data products only accept invite-only (private) access types.
+HIDDEN_DATA_PRODUCT_ACCESS_STATUSES = [
+    (OutputPortAccessFunction.UNRESTRICTED, 400),
+    (OutputPortAccessFunction.RESTRICTED, 400),
+    (OutputPortAccessFunction.PRIVATE, 200),
+]
+
+
 class TestOutputPortRouter:
     invalid_id = "00000000-0000-0000-0000-000000000000"
 
@@ -189,29 +197,12 @@ class TestOutputPortRouter:
             data_product_id=data_product_id, identity_id=user.id, role_id=role.id
         )
 
-        output_port_payload["access_type_id"] = access_type_id(
-            OutputPortAccessFunction.UNRESTRICTED
-        )
-        created_output_port = self.create_output_port(
-            client, data_product_id, output_port_payload
-        )
-        assert created_output_port.status_code == 400, created_output_port.text
-
-        output_port_payload["access_type_id"] = access_type_id(
-            OutputPortAccessFunction.RESTRICTED
-        )
-        created_output_port = self.create_output_port(
-            client, data_product_id, output_port_payload
-        )
-        assert created_output_port.status_code == 400, created_output_port.text
-
-        output_port_payload["access_type_id"] = access_type_id(
-            OutputPortAccessFunction.PRIVATE
-        )
-        created_output_port = self.create_output_port(
-            client, data_product_id, output_port_payload
-        )
-        assert created_output_port.status_code == 200
+        for access_function, expected_status in HIDDEN_DATA_PRODUCT_ACCESS_STATUSES:
+            output_port_payload["access_type_id"] = access_type_id(access_function)
+            response = self.create_output_port(
+                client, data_product_id, output_port_payload
+            )
+            assert response.status_code == expected_status, response.text
 
     def test_create_dataset_no_owners(self, session, output_port_payload, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
@@ -456,38 +447,14 @@ class TestOutputPortRouter:
             "exploration_access_duration_type": AccessDurationType.TIME_BOUND.value,
         }
 
-        updated_dataset = self.update_output_port(
-            client,
-            ds.data_product.id,
-            ds.id,
-            {
-                **update_payload,
-                "access_type_id": access_type_id(OutputPortAccessFunction.UNRESTRICTED),
-            },
-        )
-        assert updated_dataset.status_code == 400
-
-        updated_dataset = self.update_output_port(
-            client,
-            ds.data_product.id,
-            ds.id,
-            {
-                **update_payload,
-                "access_type_id": access_type_id(OutputPortAccessFunction.RESTRICTED),
-            },
-        )
-        assert updated_dataset.status_code == 400
-
-        updated_dataset = self.update_output_port(
-            client,
-            ds.data_product.id,
-            ds.id,
-            {
-                **update_payload,
-                "access_type_id": access_type_id(OutputPortAccessFunction.PRIVATE),
-            },
-        )
-        assert updated_dataset.status_code == 200
+        for access_function, expected_status in HIDDEN_DATA_PRODUCT_ACCESS_STATUSES:
+            response = self.update_output_port(
+                client,
+                ds.data_product.id,
+                ds.id,
+                {**update_payload, "access_type_id": access_type_id(access_function)},
+            )
+            assert response.status_code == expected_status, response.text
 
     def test_update_output_port_about_no_role(self, client):
         ds = OutputPortFactory()

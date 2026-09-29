@@ -265,19 +265,16 @@ export function AccessTypeSection({
                 options={options}
                 showSearch={{ optionFilterProp: 'label' }}
                 placeholder={t('Select an access type')}
-                optionRender={(option) => {
-                    const { description } = option.data;
-                    return (
-                        <Flex vertical>
-                            {option.label}
-                            {description && (
-                                <Typography.Text type="secondary" disabled={option.data.disabled}>
-                                    {description}
-                                </Typography.Text>
-                            )}
-                        </Flex>
-                    );
-                }}
+                optionRender={({ label, data: { description, disabled } }) => (
+                    <Flex vertical>
+                        {label}
+                        {description && (
+                            <Typography.Text type="secondary" disabled={disabled}>
+                                {description}
+                            </Typography.Text>
+                        )}
+                    </Flex>
+                )}
                 popupRender={(menu) =>
                     hiddenDataProduct ? (
                         <>

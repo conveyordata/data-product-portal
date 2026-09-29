@@ -206,20 +206,22 @@ class Authorization(metaclass=Singleton):
         self, *, user_id: ID, role_id: ID, resource_ids: Sequence[ID], granted: bool
     ) -> None:
         enforcer: SyncedEnforcer = self._enforcer
+        uid, rid = str(user_id), str(role_id)
+
         rules = [
-            rule
-            for rule in (
-                [str(user_id), str(role_id), str(resource_id)]
-                for resource_id in resource_ids
-            )
-            if enforcer.has_named_grouping_policy("g", *rule) != granted
+            [uid, rid, str(r)]
+            for r in resource_ids
+            if enforcer.has_named_grouping_policy("g", uid, rid, str(r)) != granted
         ]
-        if rules:
-            if granted:
-                enforcer.add_named_grouping_policies("g", rules)
-            else:
-                enforcer.remove_named_grouping_policies("g", rules)
-            self._after_update()
+
+        if not rules:
+            return
+
+        if granted:
+            enforcer.add_named_grouping_policies("g", rules)
+        else:
+            enforcer.remove_named_grouping_policies("g", rules)
+        self._after_update()
 
     def has_resource_role(self, *, user_id: ID, role_id: ID, resource_id: ID) -> bool:
         """Determines whether this resource role is assigned to the chosen user."""
