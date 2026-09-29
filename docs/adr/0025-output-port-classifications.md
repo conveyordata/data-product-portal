@@ -17,17 +17,17 @@ Read access for Data Products that consume an Invite only Output Port is out of 
 
 * No behaviour change for organisations that do not configure Classifications
 * No extra join on the visibility hot paths
-* API clients read the resolved Access Function as `classification.access_type`; requests select a Classification by `classification_id`
+* API clients read the resolved Access Function as `classification.access_function`; requests select a Classification by `classification_id`
 
 ## Considered Options
 
 * **Option 1: Resolve on read** Output Ports only store `classification_id`; every check joins to the Classification.
-* **Option 2: Resolve on write** Output Ports store `classification_id` and keep `access_type` as the resolved Access Function,
+* **Option 2: Resolve on write** Output Ports store `classification_id` and keep `access_function` as the resolved Access Function,
   rewritten whenever the Classification is set or remapped.
 
 ## Decision Outcome
 
-**Chosen option:** *Option 2: Resolve on write*. It leaves every existing branch on `access_type` untouched and adds no join to the access checks.
+**Chosen option:** *Option 2: Resolve on write*. It leaves every existing branch on `access_function` untouched and adds no join to the access checks.
 Loading the Classification to display its name is a join on a primary key into a small table and is acceptable; only the
 access checks must avoid it.
 Remapping a Classification is a rare admin action, so paying for it there (updating the affected ports and resyncing their Casbin
@@ -35,15 +35,15 @@ reader grouping) is cheap.
 
 ### Confirmation
 
-* A `output_port_classifications` table holds name, description and Access Function. It is seeded with Unrestricted,
+* A `output_port_classifications` table holds name, description and Access Function (`access_function`). It is seeded with Unrestricted,
   Restricted and Private, mapped 1:1.
 * `datasets.classification_id` is backfilled from `access_type` and becomes required. `access_type` stays on the port as the
-  resolved Access Function.
+  resolved Access Function and is renamed to `access_function`.
 * This is a breaking API change. Output Port create and update requests require `classification_id` and no longer accept
-  `access_type`. Responses embed `classification` with its `id`, `name` and `access_type`, and drop the top-level `access_type`.
+  `access_type`. Responses embed `classification` with its `id`, `name` and `access_function`, and drop the top-level `access_type`.
   Clients look up the Classification id with `GET /api/v2/configuration/output_port_classifications`
   (see `demo/agents/setup/create_products.py`).
-* Remapping a Classification updates `access_type` on its Output Ports and re-runs `_sync_public_reader_grouping` for each of them.
+* Remapping a Classification updates `access_function` on its Output Ports and re-runs `_sync_public_reader_grouping` for each of them.
   A remap that moves a Classification in use under a Hidden Data Product out of Invite only is refused.
 * A Classification in use cannot be deleted. The last Classification mapped to Invite only cannot be deleted or remapped, so
   Hidden Data Products can always create Output Ports.
@@ -58,6 +58,6 @@ reader grouping) is cheap.
 
 ### Option 2: Resolve on write
 
-* **Good, because** all current checks on `access_type` keep working unchanged.
+* **Good, because** all current checks on `access_function` keep working unchanged.
 * **Good, because** hot paths stay as fast as today.
-* **Bad, because** `access_type` is derived data that must be rewritten on every Classification change.
+* **Bad, because** `access_function` is derived data that must be rewritten on every Classification change.

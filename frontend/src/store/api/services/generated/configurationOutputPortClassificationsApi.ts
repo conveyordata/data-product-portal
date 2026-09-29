@@ -61,7 +61,7 @@ export type RemoveOutputPortClassificationApiArg = string;
 export type OutputPortClassificationsGetItem = {
   id: string;
   name: string;
-  access_type: OutputPortAccessType;
+  access_function: OutputPortAccessFunction;
   description: string;
   output_port_count: number;
 };
@@ -84,7 +84,7 @@ export type CreateOutputPortClassificationResponse = {
 export type OutputPortClassificationCreate = {
   name: string;
   description?: string;
-  access_type: OutputPortAccessType;
+  access_function: OutputPortAccessFunction;
 };
 export type UpdateOutputPortClassificationResponse = {
   id: string;
@@ -92,9 +92,9 @@ export type UpdateOutputPortClassificationResponse = {
 export type OutputPortClassificationUpdate = {
   name: string;
   description?: string;
-  access_type: OutputPortAccessType;
+  access_function: OutputPortAccessFunction;
 };
-export enum OutputPortAccessType {
+export enum OutputPortAccessFunction {
   Restricted = "restricted",
   Private = "private",
   Unrestricted = "unrestricted",

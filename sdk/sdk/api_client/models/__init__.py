@@ -224,7 +224,7 @@ from .oidc_token_response import OIDCTokenResponse
 from .output_port import OutputPort
 from .output_port_about_update import OutputPortAboutUpdate
 from .output_port_access_duration import OutputPortAccessDuration
-from .output_port_access_type import OutputPortAccessType
+from .output_port_access_function import OutputPortAccessFunction
 from .output_port_classification import OutputPortClassification
 from .output_port_classification_create import OutputPortClassificationCreate
 from .output_port_classification_update import OutputPortClassificationUpdate
@@ -556,7 +556,7 @@ __all__ = (
     "OutputPort",
     "OutputPortAboutUpdate",
     "OutputPortAccessDuration",
-    "OutputPortAccessType",
+    "OutputPortAccessFunction",
     "OutputPortClassification",
     "OutputPortClassificationCreate",
     "OutputPortClassificationsGet",

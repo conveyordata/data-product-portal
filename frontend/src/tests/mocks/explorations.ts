@@ -8,7 +8,7 @@ import {
     type AbstractDataProductInputPort as InputPort,
     InputPortRequestDecision,
     InputPortStatus,
-    OutputPortAccessType,
+    OutputPortAccessFunction,
     OutputPortStatus,
 } from '@/store/api/services/generated/explorationsApi.ts';
 import { server } from '@/tests/mocks/server.ts';
@@ -74,7 +74,7 @@ const mockInputPorts: InputPort[] = [
             classification: {
                 id: 'classification-1',
                 name: 'Unrestricted',
-                access_type: OutputPortAccessType.Unrestricted,
+                access_function: OutputPortAccessFunction.Unrestricted,
             },
             data_product_id: 'dp-1',
             tags: [],

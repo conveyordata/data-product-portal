@@ -15,7 +15,7 @@ from sqlalchemy.dialects.postgresql import UUID
 
 from app.configuration.data_product_types.enums import DataProductIconKey
 from app.core.auth.device_flows.schema import DeviceFlowStatus
-from app.data_products.output_ports.enums import OutputPortAccessType
+from app.data_products.output_ports.enums import OutputPortAccessFunction
 from app.data_products.output_ports.status import OutputPortStatus
 from app.data_products.status import AbstractDataProductStatus
 from app.shared.model import utcnow
@@ -136,7 +136,7 @@ def upgrade() -> None:
         ),
         sa.Column(
             "access_type",
-            sa.Enum(OutputPortAccessType),
+            sa.Enum(OutputPortAccessFunction, name="outputportaccesstype"),
             default="public",
         ),
         sa.Column("business_area_id", UUID, sa.ForeignKey("business_areas.id")),

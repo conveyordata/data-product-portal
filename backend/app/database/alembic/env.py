@@ -77,7 +77,7 @@ def run_migrations_online() -> None:
         Session(bind=connection).info["current_user_id"] = None
         connection = connection.execution_options(
             skip_data_product_visibility_filter=True,
-            skip_output_port_access_type_filter=True,
+            skip_output_port_access_function_filter=True,
         )
         context.configure(
             connection=connection,

@@ -21762,44 +21762,44 @@ func (s *OutputPortAccessDuration) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
-// Encode encodes OutputPortAccessType as json.
-func (s OutputPortAccessType) Encode(e *jx.Encoder) {
+// Encode encodes OutputPortAccessFunction as json.
+func (s OutputPortAccessFunction) Encode(e *jx.Encoder) {
 	e.Str(string(s))
 }
 
-// Decode decodes OutputPortAccessType from json.
-func (s *OutputPortAccessType) Decode(d *jx.Decoder) error {
+// Decode decodes OutputPortAccessFunction from json.
+func (s *OutputPortAccessFunction) Decode(d *jx.Decoder) error {
 	if s == nil {
-		return errors.New("invalid: unable to decode OutputPortAccessType to nil")
+		return errors.New("invalid: unable to decode OutputPortAccessFunction to nil")
 	}
 	v, err := d.StrBytes()
 	if err != nil {
 		return err
 	}
 	// Try to use constant string.
-	switch OutputPortAccessType(v) {
-	case OutputPortAccessTypeRestricted:
-		*s = OutputPortAccessTypeRestricted
-	case OutputPortAccessTypePrivate:
-		*s = OutputPortAccessTypePrivate
-	case OutputPortAccessTypeUnrestricted:
-		*s = OutputPortAccessTypeUnrestricted
+	switch OutputPortAccessFunction(v) {
+	case OutputPortAccessFunctionRestricted:
+		*s = OutputPortAccessFunctionRestricted
+	case OutputPortAccessFunctionPrivate:
+		*s = OutputPortAccessFunctionPrivate
+	case OutputPortAccessFunctionUnrestricted:
+		*s = OutputPortAccessFunctionUnrestricted
 	default:
-		*s = OutputPortAccessType(v)
+		*s = OutputPortAccessFunction(v)
 	}
 
 	return nil
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s OutputPortAccessType) MarshalJSON() ([]byte, error) {
+func (s OutputPortAccessFunction) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *OutputPortAccessType) UnmarshalJSON(data []byte) error {
+func (s *OutputPortAccessFunction) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -21822,15 +21822,15 @@ func (s *OutputPortClassification) encodeFields(e *jx.Encoder) {
 		e.Str(s.Name)
 	}
 	{
-		e.FieldStart("access_type")
-		s.AccessType.Encode(e)
+		e.FieldStart("access_function")
+		s.AccessFunction.Encode(e)
 	}
 }
 
 var jsonFieldsNameOfOutputPortClassification = [3]string{
 	0: "id",
 	1: "name",
-	2: "access_type",
+	2: "access_function",
 }
 
 // Decode decodes OutputPortClassification from json.
@@ -21866,15 +21866,15 @@ func (s *OutputPortClassification) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"name\"")
 			}
-		case "access_type":
+		case "access_function":
 			requiredBitSet[0] |= 1 << 2
 			if err := func() error {
-				if err := s.AccessType.Decode(d); err != nil {
+				if err := s.AccessFunction.Decode(d); err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"access_type\"")
+				return errors.Wrap(err, "decode field \"access_function\"")
 			}
 		default:
 			return d.Skip()
@@ -21952,15 +21952,15 @@ func (s *OutputPortClassificationCreate) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
-		e.FieldStart("access_type")
-		s.AccessType.Encode(e)
+		e.FieldStart("access_function")
+		s.AccessFunction.Encode(e)
 	}
 }
 
 var jsonFieldsNameOfOutputPortClassificationCreate = [3]string{
 	0: "name",
 	1: "description",
-	2: "access_type",
+	2: "access_function",
 }
 
 // Decode decodes OutputPortClassificationCreate from json.
@@ -21995,15 +21995,15 @@ func (s *OutputPortClassificationCreate) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"description\"")
 			}
-		case "access_type":
+		case "access_function":
 			requiredBitSet[0] |= 1 << 2
 			if err := func() error {
-				if err := s.AccessType.Decode(d); err != nil {
+				if err := s.AccessFunction.Decode(d); err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"access_type\"")
+				return errors.Wrap(err, "decode field \"access_function\"")
 			}
 		default:
 			return d.Skip()
@@ -22081,15 +22081,15 @@ func (s *OutputPortClassificationUpdate) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
-		e.FieldStart("access_type")
-		s.AccessType.Encode(e)
+		e.FieldStart("access_function")
+		s.AccessFunction.Encode(e)
 	}
 }
 
 var jsonFieldsNameOfOutputPortClassificationUpdate = [3]string{
 	0: "name",
 	1: "description",
-	2: "access_type",
+	2: "access_function",
 }
 
 // Decode decodes OutputPortClassificationUpdate from json.
@@ -22124,15 +22124,15 @@ func (s *OutputPortClassificationUpdate) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"description\"")
 			}
-		case "access_type":
+		case "access_function":
 			requiredBitSet[0] |= 1 << 2
 			if err := func() error {
-				if err := s.AccessType.Decode(d); err != nil {
+				if err := s.AccessFunction.Decode(d); err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"access_type\"")
+				return errors.Wrap(err, "decode field \"access_function\"")
 			}
 		default:
 			return d.Skip()
@@ -22314,8 +22314,8 @@ func (s *OutputPortClassificationsGetItem) encodeFields(e *jx.Encoder) {
 		e.Str(s.Name)
 	}
 	{
-		e.FieldStart("access_type")
-		s.AccessType.Encode(e)
+		e.FieldStart("access_function")
+		s.AccessFunction.Encode(e)
 	}
 	{
 		e.FieldStart("description")
@@ -22330,7 +22330,7 @@ func (s *OutputPortClassificationsGetItem) encodeFields(e *jx.Encoder) {
 var jsonFieldsNameOfOutputPortClassificationsGetItem = [5]string{
 	0: "id",
 	1: "name",
-	2: "access_type",
+	2: "access_function",
 	3: "description",
 	4: "output_port_count",
 }
@@ -22368,15 +22368,15 @@ func (s *OutputPortClassificationsGetItem) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"name\"")
 			}
-		case "access_type":
+		case "access_function":
 			requiredBitSet[0] |= 1 << 2
 			if err := func() error {
-				if err := s.AccessType.Decode(d); err != nil {
+				if err := s.AccessFunction.Decode(d); err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"access_type\"")
+				return errors.Wrap(err, "decode field \"access_function\"")
 			}
 		case "description":
 			requiredBitSet[0] |= 1 << 3

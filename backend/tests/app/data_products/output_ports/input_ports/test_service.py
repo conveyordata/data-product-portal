@@ -17,7 +17,7 @@ from app.authorization.roles.schema import Scope
 from app.authorization.service import AuthorizationService
 from app.configuration.access_durations.enums import AccessDurationType
 from app.core.authz import Action
-from app.data_products.output_ports.enums import OutputPortAccessType
+from app.data_products.output_ports.enums import OutputPortAccessFunction
 from app.data_products.output_ports.input_ports.service import InputPortService
 from app.settings import settings
 from tests.factories import (
@@ -100,7 +100,7 @@ class TestInputPortDecisions:
     def test_approve__syncs_consumer_access(self, session, monkeypatch):
         actor = UserFactory()
         consumer = DataProductFactory()
-        port = OutputPortFactory(access_type=OutputPortAccessType.RESTRICTED)
+        port = OutputPortFactory(access_function=OutputPortAccessFunction.RESTRICTED)
         link = InputPortFactory(
             consuming_abstract_data_product=consumer,
             output_port=port,
@@ -131,7 +131,7 @@ class TestInputPortDecisions:
         actor = UserFactory()
         consumer = DataProductFactory()
         port = OutputPortFactory(
-            access_type=OutputPortAccessType.RESTRICTED,
+            access_function=OutputPortAccessFunction.RESTRICTED,
             data_product_access_duration_type=AccessDurationType.TIME_BOUND,
         )
         input_port, grant, renewal = _grant_and_pending_renewal(consumer, port, session)
@@ -155,7 +155,7 @@ class TestInputPortDecisions:
         actor = UserFactory()
         consumer = DataProductFactory()
         port = OutputPortFactory(
-            access_type=OutputPortAccessType.RESTRICTED,
+            access_function=OutputPortAccessFunction.RESTRICTED,
             data_product_access_duration_type=AccessDurationType.TIME_BOUND,
         )
         input_port, grant, renewal = _grant_and_pending_renewal(consumer, port, session)
@@ -177,7 +177,7 @@ class TestInputPortDecisions:
         actor = UserFactory()
         consumer = DataProductFactory()
         port = OutputPortFactory(
-            access_type=OutputPortAccessType.RESTRICTED,
+            access_function=OutputPortAccessFunction.RESTRICTED,
             data_product_access_duration_type=AccessDurationType.TIME_BOUND,
         )
         InputPortFactory(
@@ -204,7 +204,7 @@ class TestInputPortDecisions:
         actor = UserFactory()
         consumer = DataProductFactory()
         port = OutputPortFactory(
-            access_type=OutputPortAccessType.RESTRICTED,
+            access_function=OutputPortAccessFunction.RESTRICTED,
             data_product_access_duration_type=AccessDurationType.TIME_BOUND,
         )
         link = InputPortFactory(
@@ -239,7 +239,7 @@ class TestInputPortDecisions:
     def test_revoke__raises_when_no_active_grant(self, session):
         actor = UserFactory()
         consumer = DataProductFactory()
-        port = OutputPortFactory(access_type=OutputPortAccessType.RESTRICTED)
+        port = OutputPortFactory(access_function=OutputPortAccessFunction.RESTRICTED)
         InputPortFactory(
             consuming_abstract_data_product=consumer,
             output_port=port,
@@ -260,7 +260,7 @@ class TestInputPortDecisions:
         actor = UserFactory()
         consumer = DataProductFactory()
         port = OutputPortFactory(
-            access_type=OutputPortAccessType.RESTRICTED,
+            access_function=OutputPortAccessFunction.RESTRICTED,
             data_product_access_duration_type=AccessDurationType.TIME_BOUND,
         )
         input_port = InputPortFactory(

@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { useModal } from '@/hooks/use-modal.tsx';
 import {
-    OutputPortAccessType,
+    OutputPortAccessFunction,
     type OutputPortClassificationsGetItem,
     useGetOutputPortClassificationsQuery,
     useRemoveOutputPortClassificationMutation,
@@ -20,7 +20,7 @@ export function OutputPortClassificationsTable() {
     const [initial, setInitial] = useState<OutputPortClassificationsGetItem | undefined>(undefined);
     const [removeClassification] = useRemoveOutputPortClassificationMutation();
     const inviteOnlyClassifications = data?.output_port_classifications.filter(
-        (classification) => classification.access_type === OutputPortAccessType.Private,
+        (classification) => classification.access_function === OutputPortAccessFunction.Private,
     );
     const lastInviteOnlyId = inviteOnlyClassifications?.length === 1 ? inviteOnlyClassifications[0].id : undefined;
 

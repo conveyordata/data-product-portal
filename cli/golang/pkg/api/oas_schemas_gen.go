@@ -9395,32 +9395,32 @@ func (s *OutputPortAccessDuration) SetDays(val int) {
 	s.Days = val
 }
 
-// Ref: #/components/schemas/OutputPortAccessType
-type OutputPortAccessType string
+// Ref: #/components/schemas/OutputPortAccessFunction
+type OutputPortAccessFunction string
 
 const (
-	OutputPortAccessTypeRestricted   OutputPortAccessType = "restricted"
-	OutputPortAccessTypePrivate      OutputPortAccessType = "private"
-	OutputPortAccessTypeUnrestricted OutputPortAccessType = "unrestricted"
+	OutputPortAccessFunctionRestricted   OutputPortAccessFunction = "restricted"
+	OutputPortAccessFunctionPrivate      OutputPortAccessFunction = "private"
+	OutputPortAccessFunctionUnrestricted OutputPortAccessFunction = "unrestricted"
 )
 
-// AllValues returns all OutputPortAccessType values.
-func (OutputPortAccessType) AllValues() []OutputPortAccessType {
-	return []OutputPortAccessType{
-		OutputPortAccessTypeRestricted,
-		OutputPortAccessTypePrivate,
-		OutputPortAccessTypeUnrestricted,
+// AllValues returns all OutputPortAccessFunction values.
+func (OutputPortAccessFunction) AllValues() []OutputPortAccessFunction {
+	return []OutputPortAccessFunction{
+		OutputPortAccessFunctionRestricted,
+		OutputPortAccessFunctionPrivate,
+		OutputPortAccessFunctionUnrestricted,
 	}
 }
 
 // MarshalText implements encoding.TextMarshaler.
-func (s OutputPortAccessType) MarshalText() ([]byte, error) {
+func (s OutputPortAccessFunction) MarshalText() ([]byte, error) {
 	switch s {
-	case OutputPortAccessTypeRestricted:
+	case OutputPortAccessFunctionRestricted:
 		return []byte(s), nil
-	case OutputPortAccessTypePrivate:
+	case OutputPortAccessFunctionPrivate:
 		return []byte(s), nil
-	case OutputPortAccessTypeUnrestricted:
+	case OutputPortAccessFunctionUnrestricted:
 		return []byte(s), nil
 	default:
 		return nil, errors.Errorf("invalid value: %q", s)
@@ -9428,16 +9428,16 @@ func (s OutputPortAccessType) MarshalText() ([]byte, error) {
 }
 
 // UnmarshalText implements encoding.TextUnmarshaler.
-func (s *OutputPortAccessType) UnmarshalText(data []byte) error {
-	switch OutputPortAccessType(data) {
-	case OutputPortAccessTypeRestricted:
-		*s = OutputPortAccessTypeRestricted
+func (s *OutputPortAccessFunction) UnmarshalText(data []byte) error {
+	switch OutputPortAccessFunction(data) {
+	case OutputPortAccessFunctionRestricted:
+		*s = OutputPortAccessFunctionRestricted
 		return nil
-	case OutputPortAccessTypePrivate:
-		*s = OutputPortAccessTypePrivate
+	case OutputPortAccessFunctionPrivate:
+		*s = OutputPortAccessFunctionPrivate
 		return nil
-	case OutputPortAccessTypeUnrestricted:
-		*s = OutputPortAccessTypeUnrestricted
+	case OutputPortAccessFunctionUnrestricted:
+		*s = OutputPortAccessFunctionUnrestricted
 		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)
@@ -9446,9 +9446,9 @@ func (s *OutputPortAccessType) UnmarshalText(data []byte) error {
 
 // Ref: #/components/schemas/OutputPortClassification
 type OutputPortClassification struct {
-	ID         uuid.UUID            `json:"id"`
-	Name       string               `json:"name"`
-	AccessType OutputPortAccessType `json:"access_type"`
+	ID             uuid.UUID                `json:"id"`
+	Name           string                   `json:"name"`
+	AccessFunction OutputPortAccessFunction `json:"access_function"`
 }
 
 // GetID returns the value of ID.
@@ -9461,9 +9461,9 @@ func (s *OutputPortClassification) GetName() string {
 	return s.Name
 }
 
-// GetAccessType returns the value of AccessType.
-func (s *OutputPortClassification) GetAccessType() OutputPortAccessType {
-	return s.AccessType
+// GetAccessFunction returns the value of AccessFunction.
+func (s *OutputPortClassification) GetAccessFunction() OutputPortAccessFunction {
+	return s.AccessFunction
 }
 
 // SetID sets the value of ID.
@@ -9476,16 +9476,16 @@ func (s *OutputPortClassification) SetName(val string) {
 	s.Name = val
 }
 
-// SetAccessType sets the value of AccessType.
-func (s *OutputPortClassification) SetAccessType(val OutputPortAccessType) {
-	s.AccessType = val
+// SetAccessFunction sets the value of AccessFunction.
+func (s *OutputPortClassification) SetAccessFunction(val OutputPortAccessFunction) {
+	s.AccessFunction = val
 }
 
 // Ref: #/components/schemas/OutputPortClassificationCreate
 type OutputPortClassificationCreate struct {
-	Name        string               `json:"name"`
-	Description OptString            `json:"description"`
-	AccessType  OutputPortAccessType `json:"access_type"`
+	Name           string                   `json:"name"`
+	Description    OptString                `json:"description"`
+	AccessFunction OutputPortAccessFunction `json:"access_function"`
 }
 
 // GetName returns the value of Name.
@@ -9498,9 +9498,9 @@ func (s *OutputPortClassificationCreate) GetDescription() OptString {
 	return s.Description
 }
 
-// GetAccessType returns the value of AccessType.
-func (s *OutputPortClassificationCreate) GetAccessType() OutputPortAccessType {
-	return s.AccessType
+// GetAccessFunction returns the value of AccessFunction.
+func (s *OutputPortClassificationCreate) GetAccessFunction() OutputPortAccessFunction {
+	return s.AccessFunction
 }
 
 // SetName sets the value of Name.
@@ -9513,16 +9513,16 @@ func (s *OutputPortClassificationCreate) SetDescription(val OptString) {
 	s.Description = val
 }
 
-// SetAccessType sets the value of AccessType.
-func (s *OutputPortClassificationCreate) SetAccessType(val OutputPortAccessType) {
-	s.AccessType = val
+// SetAccessFunction sets the value of AccessFunction.
+func (s *OutputPortClassificationCreate) SetAccessFunction(val OutputPortAccessFunction) {
+	s.AccessFunction = val
 }
 
 // Ref: #/components/schemas/OutputPortClassificationUpdate
 type OutputPortClassificationUpdate struct {
-	Name        string               `json:"name"`
-	Description OptString            `json:"description"`
-	AccessType  OutputPortAccessType `json:"access_type"`
+	Name           string                   `json:"name"`
+	Description    OptString                `json:"description"`
+	AccessFunction OutputPortAccessFunction `json:"access_function"`
 }
 
 // GetName returns the value of Name.
@@ -9535,9 +9535,9 @@ func (s *OutputPortClassificationUpdate) GetDescription() OptString {
 	return s.Description
 }
 
-// GetAccessType returns the value of AccessType.
-func (s *OutputPortClassificationUpdate) GetAccessType() OutputPortAccessType {
-	return s.AccessType
+// GetAccessFunction returns the value of AccessFunction.
+func (s *OutputPortClassificationUpdate) GetAccessFunction() OutputPortAccessFunction {
+	return s.AccessFunction
 }
 
 // SetName sets the value of Name.
@@ -9550,9 +9550,9 @@ func (s *OutputPortClassificationUpdate) SetDescription(val OptString) {
 	s.Description = val
 }
 
-// SetAccessType sets the value of AccessType.
-func (s *OutputPortClassificationUpdate) SetAccessType(val OutputPortAccessType) {
-	s.AccessType = val
+// SetAccessFunction sets the value of AccessFunction.
+func (s *OutputPortClassificationUpdate) SetAccessFunction(val OutputPortAccessFunction) {
+	s.AccessFunction = val
 }
 
 // Ref: #/components/schemas/OutputPortClassificationsGet
@@ -9574,11 +9574,11 @@ func (*OutputPortClassificationsGet) getOutputPortClassificationsRes() {}
 
 // Ref: #/components/schemas/OutputPortClassificationsGetItem
 type OutputPortClassificationsGetItem struct {
-	ID              uuid.UUID            `json:"id"`
-	Name            string               `json:"name"`
-	AccessType      OutputPortAccessType `json:"access_type"`
-	Description     string               `json:"description"`
-	OutputPortCount int                  `json:"output_port_count"`
+	ID              uuid.UUID                `json:"id"`
+	Name            string                   `json:"name"`
+	AccessFunction  OutputPortAccessFunction `json:"access_function"`
+	Description     string                   `json:"description"`
+	OutputPortCount int                      `json:"output_port_count"`
 }
 
 // GetID returns the value of ID.
@@ -9591,9 +9591,9 @@ func (s *OutputPortClassificationsGetItem) GetName() string {
 	return s.Name
 }
 
-// GetAccessType returns the value of AccessType.
-func (s *OutputPortClassificationsGetItem) GetAccessType() OutputPortAccessType {
-	return s.AccessType
+// GetAccessFunction returns the value of AccessFunction.
+func (s *OutputPortClassificationsGetItem) GetAccessFunction() OutputPortAccessFunction {
+	return s.AccessFunction
 }
 
 // GetDescription returns the value of Description.
@@ -9616,9 +9616,9 @@ func (s *OutputPortClassificationsGetItem) SetName(val string) {
 	s.Name = val
 }
 
-// SetAccessType sets the value of AccessType.
-func (s *OutputPortClassificationsGetItem) SetAccessType(val OutputPortAccessType) {
-	s.AccessType = val
+// SetAccessFunction sets the value of AccessFunction.
+func (s *OutputPortClassificationsGetItem) SetAccessFunction(val OutputPortAccessFunction) {
+	s.AccessFunction = val
 }
 
 // SetDescription sets the value of Description.

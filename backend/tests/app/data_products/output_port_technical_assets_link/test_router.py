@@ -5,7 +5,7 @@ import pytest
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.roles.schema import Scope
 from app.core.authz import Action
-from app.data_products.output_ports.enums import OutputPortAccessType
+from app.data_products.output_ports.enums import OutputPortAccessFunction
 from app.settings import settings
 from tests.conftest import (
     webhook_v2_input_port_events_from_technical_asset_output_port_link,
@@ -240,7 +240,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
     def test_request_technical_asset_link_private_output_port_no_access(self, client):
         data_product = DataProductFactory()
         technical_asset = TechnicalAssetFactory(owner=data_product)
-        ds = OutputPortFactory(access_type=OutputPortAccessType.PRIVATE)
+        ds = OutputPortFactory(access_function=OutputPortAccessFunction.PRIVATE)
 
         response = self.request_technical_asset_output_port_link(
             client, data_product.id, technical_asset.id, ds.id
@@ -252,7 +252,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         data_product = DataProductFactory()
         technical_asset = TechnicalAssetFactory(owner=data_product)
         ds = OutputPortFactory(
-            access_type=OutputPortAccessType.PRIVATE, data_product=data_product
+            access_function=OutputPortAccessFunction.PRIVATE, data_product=data_product
         )
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,

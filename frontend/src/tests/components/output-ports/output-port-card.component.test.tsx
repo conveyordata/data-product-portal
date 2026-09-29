@@ -4,7 +4,7 @@ import { OutputPortCard } from '@/components/output-ports/output-port-card/outpu
 import {
     AccessDurationType,
     type GetOutputPortResponse,
-    OutputPortAccessType,
+    OutputPortAccessFunction,
     OutputPortStatus,
 } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
 import {
@@ -28,7 +28,7 @@ const dataset: GetOutputPortResponse = {
     classification: {
         id: 'classification-1',
         name: 'Unrestricted',
-        access_type: OutputPortAccessType.Unrestricted,
+        access_function: OutputPortAccessFunction.Unrestricted,
     },
     data_product_access_duration_type: AccessDurationType.Permanent,
     exploration_access_duration_type: AccessDurationType.Permanent,

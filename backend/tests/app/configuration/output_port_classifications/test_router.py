@@ -8,7 +8,7 @@ from app.configuration.output_port_classifications.model import (
 from app.core.authz import Authorization
 from app.core.authz.actions import AuthorizationAction
 from app.data_products.model import DataProductVisibility
-from app.data_products.output_ports.enums import OutputPortAccessType
+from app.data_products.output_ports.enums import OutputPortAccessFunction
 from app.data_products.output_ports.model import OutputPort
 from app.settings import settings
 from tests.factories import (
@@ -23,14 +23,14 @@ from tests.factories import (
 ENDPOINT = "/api/v2/configuration/output_port_classifications"
 
 
-def payload(name: str, access_type: OutputPortAccessType):
-    return {"name": name, "description": "", "access_type": access_type.value}
+def payload(name: str, access_function: OutputPortAccessFunction):
+    return {"name": name, "description": "", "access_function": access_function.value}
 
 
 class TestOutputPortClassificationsRouter:
     @pytest.mark.usefixtures("admin")
     def test_get_output_port_classifications__seeded_with_counts(self, client):
-        OutputPortFactory(access_type=OutputPortAccessType.PRIVATE)
+        OutputPortFactory(access_function=OutputPortAccessFunction.PRIVATE)
 
         response = client.get(ENDPOINT)
 
@@ -44,7 +44,7 @@ class TestOutputPortClassificationsRouter:
         assert items["Restricted"]["output_port_count"] == 0
 
     def test_get_output_port_classifications__hides_invite_only_counts(self, client):
-        OutputPortFactory(access_type=OutputPortAccessType.PRIVATE)
+        OutputPortFactory(access_function=OutputPortAccessFunction.PRIVATE)
 
         response = client.get(ENDPOINT)
 
@@ -64,7 +64,7 @@ class TestOutputPortClassificationsRouter:
             permissions=[AuthorizationAction.GLOBAL__UPDATE_CONFIGURATION],
         )
         GlobalRoleAssignmentFactory(identity_id=user.id, role_id=role.id)
-        OutputPortFactory(access_type=OutputPortAccessType.PRIVATE)
+        OutputPortFactory(access_function=OutputPortAccessFunction.PRIVATE)
 
         response = client.get(ENDPOINT)
 
@@ -78,7 +78,7 @@ class TestOutputPortClassificationsRouter:
     @pytest.mark.usefixtures("admin")
     def test_create_output_port_classification__duplicate_name(self, client):
         response = client.post(
-            ENDPOINT, json=payload("Restricted", OutputPortAccessType.RESTRICTED)
+            ENDPOINT, json=payload("Restricted", OutputPortAccessFunction.RESTRICTED)
         )
 
         assert response.status_code == 400
@@ -90,12 +90,12 @@ class TestOutputPortClassificationsRouter:
     def test_update_output_port_classification__duplicate_name(self, client):
         classification = OutputPortClassificationFactory(
             name="Internal",
-            access_type=OutputPortAccessType.RESTRICTED,
+            access_function=OutputPortAccessFunction.RESTRICTED,
         )
 
         response = client.put(
             f"{ENDPOINT}/{classification.id}",
-            json=payload("Private", OutputPortAccessType.RESTRICTED),
+            json=payload("Private", OutputPortAccessFunction.RESTRICTED),
         )
 
         assert response.status_code == 400
@@ -106,7 +106,7 @@ class TestOutputPortClassificationsRouter:
     @pytest.mark.usefixtures("admin")
     def test_create_output_port_classification(self, client):
         response = client.post(
-            ENDPOINT, json=payload("Top Secret", OutputPortAccessType.PRIVATE)
+            ENDPOINT, json=payload("Top Secret", OutputPortAccessFunction.PRIVATE)
         )
 
         assert response.status_code == 200, response.text
@@ -114,7 +114,7 @@ class TestOutputPortClassificationsRouter:
 
     def test_create_output_port_classification__admin_only(self, client):
         response = client.post(
-            ENDPOINT, json=payload("Top Secret", OutputPortAccessType.PRIVATE)
+            ENDPOINT, json=payload("Top Secret", OutputPortAccessFunction.PRIVATE)
         )
 
         assert response.status_code == 403
@@ -122,12 +122,12 @@ class TestOutputPortClassificationsRouter:
     @pytest.mark.usefixtures("admin")
     def test_update_output_port_classification__rename(self, client, session):
         classification = OutputPortClassificationFactory(
-            access_type=OutputPortAccessType.RESTRICTED
+            access_function=OutputPortAccessFunction.RESTRICTED
         )
 
         response = client.put(
             f"{ENDPOINT}/{classification.id}",
-            json=payload("Internal", OutputPortAccessType.RESTRICTED),
+            json=payload("Internal", OutputPortAccessFunction.RESTRICTED),
         )
 
         assert response.status_code == 200, response.text
@@ -139,31 +139,31 @@ class TestOutputPortClassificationsRouter:
     @pytest.mark.usefixtures("admin")
     def test_update_output_port_classification__remap_unused(self, client, session):
         classification = OutputPortClassificationFactory(
-            access_type=OutputPortAccessType.RESTRICTED
+            access_function=OutputPortAccessFunction.RESTRICTED
         )
 
         response = client.put(
             f"{ENDPOINT}/{classification.id}",
-            json=payload("Restricted", OutputPortAccessType.UNRESTRICTED),
+            json=payload("Restricted", OutputPortAccessFunction.UNRESTRICTED),
         )
 
         assert response.status_code == 200, response.text
         session.expire_all()
-        assert session.get(OutputPortClassification, classification.id).access_type == (
-            OutputPortAccessType.UNRESTRICTED
-        )
+        assert session.get(
+            OutputPortClassification, classification.id
+        ).access_function == (OutputPortAccessFunction.UNRESTRICTED)
 
     @pytest.mark.usefixtures("admin")
     def test_update_output_port_classification__last_invite_only_cannot_be_remapped(
         self, client
     ):
         classification = OutputPortClassificationFactory(
-            access_type=OutputPortAccessType.PRIVATE
+            access_function=OutputPortAccessFunction.PRIVATE
         )
 
         response = client.put(
             f"{ENDPOINT}/{classification.id}",
-            json=payload("Private", OutputPortAccessType.RESTRICTED),
+            json=payload("Private", OutputPortAccessFunction.RESTRICTED),
         )
 
         assert response.status_code == 400
@@ -174,21 +174,22 @@ class TestOutputPortClassificationsRouter:
     ):
         classification = OutputPortClassificationFactory(
             name="Confidential",
-            access_type=OutputPortAccessType.RESTRICTED,
+            access_function=OutputPortAccessFunction.RESTRICTED,
         )
         output_port = OutputPortFactory(
-            access_type=OutputPortAccessType.RESTRICTED, classification=classification
+            access_function=OutputPortAccessFunction.RESTRICTED,
+            classification=classification,
         )
 
         response = client.put(
             f"{ENDPOINT}/{classification.id}",
-            json=payload("Confidential", OutputPortAccessType.PRIVATE),
+            json=payload("Confidential", OutputPortAccessFunction.PRIVATE),
         )
 
         assert response.status_code == 200, response.text
         session.expire_all()
-        assert session.get(OutputPort, output_port.id).access_type == (
-            OutputPortAccessType.PRIVATE
+        assert session.get(OutputPort, output_port.id).access_function == (
+            OutputPortAccessFunction.PRIVATE
         )
         assert not Authorization().has_resource_role(
             user_id="*", role_id=OUTPUT_PORT_READER_ROLE, resource_id=output_port.id
@@ -199,29 +200,51 @@ class TestOutputPortClassificationsRouter:
         self, client
     ):
         classification = OutputPortClassificationFactory(
-            name="Secret", access_type=OutputPortAccessType.PRIVATE
+            name="Secret", access_function=OutputPortAccessFunction.PRIVATE
         )
         OutputPortFactory(
-            access_type=OutputPortAccessType.PRIVATE,
+            access_function=OutputPortAccessFunction.PRIVATE,
             classification=classification,
             data_product=DataProductFactory(visibility=DataProductVisibility.HIDDEN),
         )
 
         response = client.put(
             f"{ENDPOINT}/{classification.id}",
-            json=payload("Secret", OutputPortAccessType.RESTRICTED),
+            json=payload("Secret", OutputPortAccessFunction.RESTRICTED),
         )
 
         assert response.status_code == 400
 
-    def test_update_output_port_classification__admin_only(self, client):
+    @pytest.mark.usefixtures("admin")
+    def test_update_output_port_classification__failed_remap_keeps_reader_grants(
+        self, client
+    ):
         classification = OutputPortClassificationFactory(
-            access_type=OutputPortAccessType.RESTRICTED
+            name="Secret", access_function=OutputPortAccessFunction.PRIVATE
+        )
+        output_port = OutputPortFactory(
+            access_function=OutputPortAccessFunction.PRIVATE,
+            classification=classification,
         )
 
         response = client.put(
             f"{ENDPOINT}/{classification.id}",
-            json=payload("Internal", OutputPortAccessType.RESTRICTED),
+            json=payload("Restricted", OutputPortAccessFunction.RESTRICTED),
+        )
+
+        assert response.status_code == 400
+        assert not Authorization().has_resource_role(
+            user_id="*", role_id=OUTPUT_PORT_READER_ROLE, resource_id=output_port.id
+        )
+
+    def test_update_output_port_classification__admin_only(self, client):
+        classification = OutputPortClassificationFactory(
+            access_function=OutputPortAccessFunction.RESTRICTED
+        )
+
+        response = client.put(
+            f"{ENDPOINT}/{classification.id}",
+            json=payload("Internal", OutputPortAccessFunction.RESTRICTED),
         )
 
         assert response.status_code == 403
@@ -229,7 +252,7 @@ class TestOutputPortClassificationsRouter:
     @pytest.mark.usefixtures("admin")
     def test_remove_output_port_classification(self, client, session):
         classification_id = OutputPortClassificationFactory(
-            name="Unused", access_type=OutputPortAccessType.PRIVATE
+            name="Unused", access_function=OutputPortAccessFunction.PRIVATE
         ).id
 
         response = client.delete(f"{ENDPOINT}/{classification_id}")
@@ -241,7 +264,7 @@ class TestOutputPortClassificationsRouter:
     @pytest.mark.usefixtures("admin")
     def test_remove_output_port_classification__last_invite_only(self, client):
         classification = OutputPortClassificationFactory(
-            access_type=OutputPortAccessType.PRIVATE
+            access_function=OutputPortAccessFunction.PRIVATE
         )
 
         response = client.delete(f"{ENDPOINT}/{classification.id}")
@@ -251,10 +274,11 @@ class TestOutputPortClassificationsRouter:
     @pytest.mark.usefixtures("admin")
     def test_remove_output_port_classification__in_use(self, client):
         classification = OutputPortClassificationFactory(
-            name="Used", access_type=OutputPortAccessType.PRIVATE
+            name="Used", access_function=OutputPortAccessFunction.PRIVATE
         )
         OutputPortFactory(
-            access_type=OutputPortAccessType.PRIVATE, classification=classification
+            access_function=OutputPortAccessFunction.PRIVATE,
+            classification=classification,
         )
 
         response = client.delete(f"{ENDPOINT}/{classification.id}")
@@ -263,7 +287,7 @@ class TestOutputPortClassificationsRouter:
 
     def test_remove_output_port_classification__admin_only(self, client):
         classification = OutputPortClassificationFactory(
-            name="Unused", access_type=OutputPortAccessType.PRIVATE
+            name="Unused", access_function=OutputPortAccessFunction.PRIVATE
         )
 
         response = client.delete(f"{ENDPOINT}/{classification.id}")

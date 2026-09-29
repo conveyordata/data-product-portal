@@ -6,7 +6,7 @@ from typing import Any, TypeVar
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..models.output_port_access_type import OutputPortAccessType
+from ..models.output_port_access_function import OutputPortAccessFunction
 from ..types import UNSET, Unset
 
 T = TypeVar("T", bound="OutputPortClassificationCreate")
@@ -17,19 +17,19 @@ class OutputPortClassificationCreate:
     """
     Attributes:
         name (str):
-        access_type (OutputPortAccessType):
+        access_function (OutputPortAccessFunction):
         description (str | Unset):  Default: ''.
     """
 
     name: str
-    access_type: OutputPortAccessType
+    access_function: OutputPortAccessFunction
     description: str | Unset = ""
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         name = self.name
 
-        access_type = self.access_type.value
+        access_function = self.access_function.value
 
         description = self.description
 
@@ -38,7 +38,7 @@ class OutputPortClassificationCreate:
         field_dict.update(
             {
                 "name": name,
-                "access_type": access_type,
+                "access_function": access_function,
             }
         )
         if description is not UNSET:
@@ -51,13 +51,13 @@ class OutputPortClassificationCreate:
         d = dict(src_dict)
         name = d.pop("name")
 
-        access_type = OutputPortAccessType(d.pop("access_type"))
+        access_function = OutputPortAccessFunction(d.pop("access_function"))
 
         description = d.pop("description", UNSET)
 
         output_port_classification_create = cls(
             name=name,
-            access_type=access_type,
+            access_function=access_function,
             description=description,
         )
 

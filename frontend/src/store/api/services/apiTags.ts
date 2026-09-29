@@ -206,7 +206,14 @@ api.enhanceEndpoints({
             invalidatesTags: [{ type: TagTypes.OutputPortClassification, id: STATIC_TAG_ID.LIST }],
         },
         updateOutputPortClassification: {
-            invalidatesTags: [{ type: TagTypes.OutputPortClassification, id: STATIC_TAG_ID.LIST }, TagTypes.OutputPort],
+            invalidatesTags: [
+                { type: TagTypes.OutputPortClassification, id: STATIC_TAG_ID.LIST },
+                { type: TagTypes.OutputPort },
+                { type: TagTypes.DataProductOutputPorts },
+                { type: TagTypes.DataProductInputPorts },
+                { type: TagTypes.ExplorationInputPorts },
+                { type: TagTypes.UserOutputPorts },
+            ],
         },
 
         getDataProductsSettings: {

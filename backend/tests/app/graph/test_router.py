@@ -1,7 +1,7 @@
 from app.authorization.roles.schema import Scope
 from app.core.authz.actions import AuthorizationAction
 from app.data_products.model import DataProductVisibility
-from app.data_products.output_ports.enums import OutputPortAccessType
+from app.data_products.output_ports.enums import OutputPortAccessFunction
 from app.settings import settings
 from tests.factories import (
     DataProductFactory,
@@ -75,8 +75,10 @@ class TestGraphRouter:
             assert edge["target"] in node_ids
 
     def test_get_graph_data__filters_private_output_ports(self, client):
-        output_port = OutputPortFactory(access_type=OutputPortAccessType.PRIVATE)
-        OutputPortFactory(access_type=OutputPortAccessType.PRIVATE)
+        output_port = OutputPortFactory(
+            access_function=OutputPortAccessFunction.PRIVATE
+        )
+        OutputPortFactory(access_function=OutputPortAccessFunction.PRIVATE)
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory(
             scope=Scope.DATASET,

@@ -10,7 +10,7 @@ from app.configuration.access_durations.enums import AccessDurationType
 from app.core.authz import Authorization
 from app.core.authz.actions import AuthorizationAction
 from app.data_products.model import DataProductVisibility
-from app.data_products.output_ports.enums import OutputPortAccessType
+from app.data_products.output_ports.enums import OutputPortAccessFunction
 from app.data_products.output_ports.model import OutputPort
 from app.events.enums import EventReferenceEntity
 from app.events.service import EventService
@@ -38,8 +38,8 @@ from tests.webhook_util import assert_event_in_queue
 ENDPOINT = "/api/v2/data_products/{}/output_ports"
 
 
-def classification_id(access_type: OutputPortAccessType) -> str:
-    return str(OutputPortClassificationFactory(access_type=access_type).id)
+def classification_id(access_function: OutputPortAccessFunction) -> str:
+    return str(OutputPortClassificationFactory(access_function=access_function).id)
 
 
 @pytest.fixture
@@ -67,7 +67,7 @@ def output_port_payload(seed_time_bound_access_durations):
         "owners": [
             str(user.id),
         ],
-        "classification_id": classification_id(OutputPortAccessType.RESTRICTED),
+        "classification_id": classification_id(OutputPortAccessFunction.RESTRICTED),
         "exploration_access_duration_type": AccessDurationType.TIME_BOUND.value,
         "data_product_access_duration_type": AccessDurationType.TIME_BOUND.value,
     }
@@ -82,7 +82,7 @@ def output_port_event_payload():
         "namespace": "test-op-event-ns",
         "tag_ids": [],
         "owners": [str(user.id)],
-        "classification_id": classification_id(OutputPortAccessType.RESTRICTED),
+        "classification_id": classification_id(OutputPortAccessFunction.RESTRICTED),
     }
 
 
@@ -118,7 +118,7 @@ class TestOutputPortRouter:
         data_product = DataProductFactory()
         classification = OutputPortClassificationFactory(
             name="Top Secret",
-            access_type=OutputPortAccessType.PRIVATE,
+            access_function=OutputPortAccessFunction.PRIVATE,
         )
         output_port_payload["classification_id"] = str(classification.id)
 
@@ -126,7 +126,7 @@ class TestOutputPortRouter:
 
         assert response.status_code == 200, response.text
         output_port = session.get(OutputPort, response.json()["id"])
-        assert output_port.access_type == OutputPortAccessType.PRIVATE
+        assert output_port.access_function == OutputPortAccessFunction.PRIVATE
         assert output_port.classification_id == classification.id
 
     def test_create_output_port__unconfigured_access_duration_type(
@@ -190,7 +190,7 @@ class TestOutputPortRouter:
         )
 
         output_port_payload["classification_id"] = classification_id(
-            OutputPortAccessType.UNRESTRICTED
+            OutputPortAccessFunction.UNRESTRICTED
         )
         created_output_port = self.create_output_port(
             client, data_product_id, output_port_payload
@@ -198,7 +198,7 @@ class TestOutputPortRouter:
         assert created_output_port.status_code == 400, created_output_port.text
 
         output_port_payload["classification_id"] = classification_id(
-            OutputPortAccessType.RESTRICTED
+            OutputPortAccessFunction.RESTRICTED
         )
         created_output_port = self.create_output_port(
             client, data_product_id, output_port_payload
@@ -206,7 +206,7 @@ class TestOutputPortRouter:
         assert created_output_port.status_code == 400, created_output_port.text
 
         output_port_payload["classification_id"] = classification_id(
-            OutputPortAccessType.PRIVATE
+            OutputPortAccessFunction.PRIVATE
         )
         created_output_port = self.create_output_port(
             client, data_product_id, output_port_payload
@@ -299,10 +299,10 @@ class TestOutputPortRouter:
 
     def test_get_output_ports__filters_private(self, client):
         unrestricted_output_port = OutputPortFactory(
-            access_type=OutputPortAccessType.UNRESTRICTED
+            access_function=OutputPortAccessFunction.UNRESTRICTED
         )
         private_output_port = OutputPortFactory(
-            access_type=OutputPortAccessType.PRIVATE,
+            access_function=OutputPortAccessFunction.PRIVATE,
             data_product=unrestricted_output_port.data_product,
         )
         response = client.get(ENDPOINT.format(unrestricted_output_port.data_product.id))
@@ -320,7 +320,7 @@ class TestOutputPortRouter:
             "namespace": "new_namespace",
             "description": "new_description",
             "tags": [],
-            "classification_id": classification_id(OutputPortAccessType.RESTRICTED),
+            "classification_id": classification_id(OutputPortAccessFunction.RESTRICTED),
         }
 
         updated_dataset = self.update_output_port(
@@ -345,7 +345,7 @@ class TestOutputPortRouter:
             "namespace": "new_namespace",
             "description": "new_description",
             "tag_ids": [],
-            "classification_id": classification_id(OutputPortAccessType.RESTRICTED),
+            "classification_id": classification_id(OutputPortAccessFunction.RESTRICTED),
             "data_product_access_duration_type": AccessDurationType.TIME_BOUND.value,
             "exploration_access_duration_type": AccessDurationType.TIME_BOUND.value,
         }
@@ -371,7 +371,7 @@ class TestOutputPortRouter:
         )
         classification = OutputPortClassificationFactory(
             name="Top Secret",
-            access_type=OutputPortAccessType.PRIVATE,
+            access_function=OutputPortAccessFunction.PRIVATE,
         )
         update_payload = {
             "name": "new_name",
@@ -391,7 +391,7 @@ class TestOutputPortRouter:
         session.expire_all()
         output_port = session.get(OutputPort, ds.id)
         assert output_port.classification_id == classification.id
-        assert output_port.access_type == OutputPortAccessType.PRIVATE
+        assert output_port.access_function == OutputPortAccessFunction.PRIVATE
         assert not Authorization().has_resource_role(
             user_id="*", role_id=OUTPUT_PORT_READER_ROLE, resource_id=ds.id
         )
@@ -412,7 +412,7 @@ class TestOutputPortRouter:
             "namespace": "new_namespace",
             "description": "new_description",
             "tag_ids": [],
-            "classification_id": classification_id(OutputPortAccessType.RESTRICTED),
+            "classification_id": classification_id(OutputPortAccessFunction.RESTRICTED),
             "data_product_access_duration_type": AccessDurationType.PERMANENT.value,
             "exploration_access_duration_type": AccessDurationType.TIME_BOUND.value,
         }
@@ -434,7 +434,7 @@ class TestOutputPortRouter:
         )
         dp = DataProductFactory(visibility=DataProductVisibility.HIDDEN)
         ds = OutputPortFactory(
-            data_product=dp, access_type=OutputPortAccessType.PRIVATE
+            data_product=dp, access_function=OutputPortAccessFunction.PRIVATE
         )
         DatasetRoleAssignmentFactory(
             user_id=user.id, role_id=role.id, output_port_id=ds.id
@@ -463,7 +463,7 @@ class TestOutputPortRouter:
             {
                 **update_payload,
                 "classification_id": classification_id(
-                    OutputPortAccessType.UNRESTRICTED
+                    OutputPortAccessFunction.UNRESTRICTED
                 ),
             },
         )
@@ -475,7 +475,9 @@ class TestOutputPortRouter:
             ds.id,
             {
                 **update_payload,
-                "classification_id": classification_id(OutputPortAccessType.RESTRICTED),
+                "classification_id": classification_id(
+                    OutputPortAccessFunction.RESTRICTED
+                ),
             },
         )
         assert updated_dataset.status_code == 400
@@ -486,7 +488,9 @@ class TestOutputPortRouter:
             ds.id,
             {
                 **update_payload,
-                "classification_id": classification_id(OutputPortAccessType.PRIVATE),
+                "classification_id": classification_id(
+                    OutputPortAccessFunction.PRIVATE
+                ),
             },
         )
         assert updated_dataset.status_code == 200
@@ -613,7 +617,9 @@ class TestOutputPortRouter:
             "namespace": "new_namespace",
             "description": "new_description",
             "tags": [],
-            "classification_id": classification_id(OutputPortAccessType.UNRESTRICTED),
+            "classification_id": classification_id(
+                OutputPortAccessFunction.UNRESTRICTED
+            ),
         }
         dataset = self.update_output_port(
             client, ds.data_product.id, self.invalid_id, update_payload
@@ -801,14 +807,14 @@ class TestOutputPortRouter:
         assert response.json()["data_product_settings"][0]["value"] == "false"
 
     def test_get_private_dataset_not_allowed(self, client):
-        ds = OutputPortFactory(access_type=OutputPortAccessType.PRIVATE)
+        ds = OutputPortFactory(access_function=OutputPortAccessFunction.PRIVATE)
         response = self.get_output_port(client, ds.id, ds.data_product.id)
         assert response.status_code == 403
 
     def test_get_private_dataset_by_owner(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory.dataset_owner()
-        ds = OutputPortFactory(access_type=OutputPortAccessType.PRIVATE)
+        ds = OutputPortFactory(access_function=OutputPortAccessFunction.PRIVATE)
         DatasetRoleAssignmentFactory(
             user_id=user.id, role_id=role.id, output_port_id=ds.id
         )
@@ -817,12 +823,12 @@ class TestOutputPortRouter:
 
     @pytest.mark.usefixtures("admin")
     def test_get_private_dataset_by_admin(self, client):
-        ds = OutputPortFactory(access_type=OutputPortAccessType.PRIVATE)
+        ds = OutputPortFactory(access_function=OutputPortAccessFunction.PRIVATE)
         response = self.get_output_port(client, ds.id, ds.data_product.id)
         assert response.status_code == 200
 
     def test_get_private_datasets_not_allowed(self, client):
-        ds = OutputPortFactory(access_type=OutputPortAccessType.PRIVATE)
+        ds = OutputPortFactory(access_function=OutputPortAccessFunction.PRIVATE)
         response = client.get(ENDPOINT.format(ds.data_product.id))
         assert response.status_code == 200, response.text
         assert len(response.json()["output_ports"]) == 0
@@ -830,7 +836,7 @@ class TestOutputPortRouter:
     def test_get_private_datasets_by_owner(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory.data_product_owner()
-        ds = OutputPortFactory(access_type=OutputPortAccessType.PRIVATE)
+        ds = OutputPortFactory(access_function=OutputPortAccessFunction.PRIVATE)
         DataProductRoleAssignmentFactory(
             identity_id=user.id,
             role_id=role.id,
@@ -842,7 +848,7 @@ class TestOutputPortRouter:
 
     @pytest.mark.usefixtures("admin")
     def test_get_private_datasets_by_admin(self, client):
-        ds = OutputPortFactory(access_type=OutputPortAccessType.PRIVATE)
+        ds = OutputPortFactory(access_function=OutputPortAccessFunction.PRIVATE)
         response = client.get(ENDPOINT.format(ds.data_product.id))
         assert response.status_code == 200
         assert len(response.json()["output_ports"]) == 1
@@ -895,7 +901,9 @@ class TestOutputPortRouter:
             "namespace": namespace,
             "description": "new_description",
             "tag_ids": [],
-            "classification_id": classification_id(OutputPortAccessType.UNRESTRICTED),
+            "classification_id": classification_id(
+                OutputPortAccessFunction.UNRESTRICTED
+            ),
             "data_product_access_duration_type": AccessDurationType.TIME_BOUND.value,
             "exploration_access_duration_type": AccessDurationType.TIME_BOUND.value,
         }
@@ -973,7 +981,9 @@ class TestOutputPortRouter:
             "namespace": "new_namespace",
             "description": "new_description",
             "tag_ids": [],
-            "classification_id": classification_id(OutputPortAccessType.UNRESTRICTED),
+            "classification_id": classification_id(
+                OutputPortAccessFunction.UNRESTRICTED
+            ),
             "data_product_access_duration_type": AccessDurationType.TIME_BOUND.value,
             "exploration_access_duration_type": AccessDurationType.TIME_BOUND.value,
         }
@@ -1169,7 +1179,7 @@ class TestOutputPortRouter:
 
     def test_private_dataset_forbidden_for_non_member(self, client):
         UserFactory(external_id=settings.DEFAULT_USERNAME)
-        ds = OutputPortFactory(access_type=OutputPortAccessType.PRIVATE)
+        ds = OutputPortFactory(access_function=OutputPortAccessFunction.PRIVATE)
 
         response = self.get_access_durations(client, ds.data_product_id, ds.id)
 

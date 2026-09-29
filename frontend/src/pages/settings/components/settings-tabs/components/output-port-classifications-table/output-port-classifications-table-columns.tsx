@@ -3,7 +3,7 @@ import type { TFunction } from 'i18next';
 
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
 import type { OutputPortClassificationsGetItem } from '@/store/api/services/generated/configurationOutputPortClassificationsApi.ts';
-import { compareAccessFunctions, getAccessFunctionLabel } from '@/utils/access-type.helper.ts';
+import { compareAccessFunctions, getAccessFunctionLabel } from '@/utils/access-function.helper.ts';
 import { Sorter } from '@/utils/table-sorter.helper';
 
 type Props = {
@@ -37,10 +37,10 @@ export const getOutputPortClassificationsTableColumns = ({
         },
         {
             title: t('Access function'),
-            dataIndex: 'access_type',
+            dataIndex: 'access_function',
             width: '15%',
-            render: (_, record) => <TableCellItem text={getAccessFunctionLabel(t, record.access_type)} />,
-            sorter: (a, b) => compareAccessFunctions(a.access_type, b.access_type),
+            render: (_, record) => <TableCellItem text={getAccessFunctionLabel(t, record.access_function)} />,
+            sorter: (a, b) => compareAccessFunctions(a.access_function, b.access_function),
         },
         {
             title: t('Output Ports'),

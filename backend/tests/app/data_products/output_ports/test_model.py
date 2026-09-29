@@ -8,7 +8,7 @@ from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.roles.schema import Scope
 from app.core.auth.auth import SYSTEM_ACCOUNT_BOT_EXTERNAL_ID
 from app.core.authz.actions import AuthorizationAction
-from app.data_products.output_ports.enums import OutputPortAccessType
+from app.data_products.output_ports.enums import OutputPortAccessFunction
 from app.data_products.output_ports.model import OutputPort
 from app.settings import settings
 from tests.factories import (
@@ -36,7 +36,7 @@ access. And for list calls the filter will be used.
 
 
 def test_private_output_port_visible_for_currently_activated_admin(session):
-    output_port = OutputPortFactory(access_type=OutputPortAccessType.PRIVATE)
+    output_port = OutputPortFactory(access_function=OutputPortAccessFunction.PRIVATE)
     admin = UserFactory(admin_expiry=datetime(2099, 1, 1))
     output_port_id = output_port.id
     session.expunge(output_port)
@@ -48,7 +48,7 @@ def test_private_output_port_visible_for_currently_activated_admin(session):
 
 
 def test_private_output_port_visible_for_approved_user_assignment(session):
-    output_port = OutputPortFactory(access_type=OutputPortAccessType.PRIVATE)
+    output_port = OutputPortFactory(access_function=OutputPortAccessFunction.PRIVATE)
     user = UserFactory(external_id=settings.DEFAULT_USERNAME)
 
     role = RoleFactory(
@@ -68,7 +68,7 @@ def test_private_output_port_visible_for_approved_user_assignment(session):
 
 
 def test_private_output_port_visible_for_approved_data_product_assignment(session):
-    output_port = OutputPortFactory(access_type=OutputPortAccessType.PRIVATE)
+    output_port = OutputPortFactory(access_function=OutputPortAccessFunction.PRIVATE)
     user = UserFactory(external_id=settings.DEFAULT_USERNAME)
 
     role = RoleFactory(
@@ -105,7 +105,7 @@ def _group_owner_identity(user):
 def test_private_output_port_visible_for_owner_of_approved_consumer(
     session, owner_identity
 ):
-    output_port = OutputPortFactory(access_type=OutputPortAccessType.PRIVATE)
+    output_port = OutputPortFactory(access_function=OutputPortAccessFunction.PRIVATE)
     consumer = DataProductFactory()
     user = UserFactory()
     role = RoleFactory.data_product_owner()
@@ -134,10 +134,12 @@ def test_private_output_port_visible_for_owner_of_approved_consumer(
 def test_private_sibling_output_port_not_visible_for_owner_of_consumer(
     session, owner_identity
 ):
-    consumed_output_port = OutputPortFactory(access_type=OutputPortAccessType.PRIVATE)
+    consumed_output_port = OutputPortFactory(
+        access_function=OutputPortAccessFunction.PRIVATE
+    )
     sibling_output_port = OutputPortFactory(
         data_product=consumed_output_port.data_product,
-        access_type=OutputPortAccessType.PRIVATE,
+        access_function=OutputPortAccessFunction.PRIVATE,
     )
     consumer = DataProductFactory()
     user = UserFactory()
@@ -167,7 +169,7 @@ def test_private_sibling_output_port_not_visible_for_owner_of_consumer(
 def test_private_output_port_not_visible_for_owner_of_revoked_consumer(
     session, owner_identity
 ):
-    output_port = OutputPortFactory(access_type=OutputPortAccessType.PRIVATE)
+    output_port = OutputPortFactory(access_function=OutputPortAccessFunction.PRIVATE)
     consumer = DataProductFactory()
     user = UserFactory()
     role = RoleFactory.data_product_owner()
@@ -196,7 +198,7 @@ def test_private_output_port_not_visible_for_owner_of_revoked_consumer(
 def test_private_output_port_not_visible_for_pending_consumer_role(
     session, owner_identity
 ):
-    output_port = OutputPortFactory(access_type=OutputPortAccessType.PRIVATE)
+    output_port = OutputPortFactory(access_function=OutputPortAccessFunction.PRIVATE)
     consumer = DataProductFactory()
     user = UserFactory()
     role = RoleFactory.data_product_owner()
@@ -221,7 +223,7 @@ def test_private_output_port_not_visible_for_pending_consumer_role(
 
 
 def test_private_output_port_not_visible_without_approved_user_assignment(session):
-    output_port = OutputPortFactory(access_type=OutputPortAccessType.PRIVATE)
+    output_port = OutputPortFactory(access_function=OutputPortAccessFunction.PRIVATE)
     output_port_id = output_port.id
     session.expunge(output_port)
     user = UserFactory()
@@ -235,7 +237,7 @@ def test_private_output_port_not_visible_without_approved_user_assignment(sessio
 def test_private_output_port_not_visible_without_approved_data_product_assignment(
     session,
 ):
-    output_port = OutputPortFactory(access_type=OutputPortAccessType.PRIVATE)
+    output_port = OutputPortFactory(access_function=OutputPortAccessFunction.PRIVATE)
     output_port_id = output_port.id
     session.expunge(output_port)
     user = UserFactory()
@@ -248,8 +250,10 @@ def test_private_output_port_not_visible_without_approved_data_product_assignmen
 
 def test_non_private_output_port_visible_without_assignment(session):
     user = UserFactory()
-    unrestricted = OutputPortFactory(access_type=OutputPortAccessType.UNRESTRICTED)
-    restricted = OutputPortFactory(access_type=OutputPortAccessType.RESTRICTED)
+    unrestricted = OutputPortFactory(
+        access_function=OutputPortAccessFunction.UNRESTRICTED
+    )
+    restricted = OutputPortFactory(access_function=OutputPortAccessFunction.RESTRICTED)
     unrestricted_id = unrestricted.id
     restricted_id = restricted.id
     session.expunge(unrestricted)
@@ -264,7 +268,7 @@ def test_non_private_output_port_visible_without_assignment(session):
 
 
 def test_private_output_port_visible_for_system_account(session):
-    output_port = OutputPortFactory(access_type=OutputPortAccessType.PRIVATE)
+    output_port = OutputPortFactory(access_function=OutputPortAccessFunction.PRIVATE)
     system_user = UserFactory(external_id=SYSTEM_ACCOUNT_BOT_EXTERNAL_ID)
     output_port_id = output_port.id
     session.expunge(output_port)
@@ -275,22 +279,22 @@ def test_private_output_port_visible_for_system_account(session):
     assert visible.id == output_port_id
 
 
-def test_private_output_port_query_can_skip_access_type_filter(session):
-    output_port = OutputPortFactory(access_type=OutputPortAccessType.PRIVATE)
+def test_private_output_port_query_can_skip_access_function_filter(session):
+    output_port = OutputPortFactory(access_function=OutputPortAccessFunction.PRIVATE)
     output_port_id = output_port.id
     session.expunge(output_port)
 
     visible = session.get(
         OutputPort,
         output_port_id,
-        execution_options={"skip_output_port_access_type_filter": True},
+        execution_options={"skip_output_port_access_function_filter": True},
     )
 
     assert visible.id == output_port_id
 
 
 def test_private_output_port_query_without_current_user_is_not_filtered(session):
-    output_port = OutputPortFactory(access_type=OutputPortAccessType.PRIVATE)
+    output_port = OutputPortFactory(access_function=OutputPortAccessFunction.PRIVATE)
     output_port_id = output_port.id
     session.expunge(output_port)
 
@@ -299,7 +303,7 @@ def test_private_output_port_query_without_current_user_is_not_filtered(session)
 
 
 def test_private_output_port_column_query_without_current_user_is_not_filtered(session):
-    output_port = OutputPortFactory(access_type=OutputPortAccessType.PRIVATE)
+    output_port = OutputPortFactory(access_function=OutputPortAccessFunction.PRIVATE)
     output_port_id = output_port.id
     session.expunge(output_port)
 
@@ -310,7 +314,7 @@ def test_private_output_port_column_query_without_current_user_is_not_filtered(s
 
 
 def test_private_output_port_column_query_visible_for_admin_user(session):
-    output_port = OutputPortFactory(access_type=OutputPortAccessType.PRIVATE)
+    output_port = OutputPortFactory(access_function=OutputPortAccessFunction.PRIVATE)
     admin = UserFactory(admin_expiry=datetime(2099, 1, 1))
     output_port_id = output_port.id
     session.expunge(output_port)

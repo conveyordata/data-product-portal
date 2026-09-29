@@ -26,7 +26,7 @@ const mockInputPortAction: InputPortRequest = {
             classification: {
                 id: 'classification-1',
                 name: 'Restricted',
-                access_type: 'restricted',
+                access_function: 'restricted',
             },
             data_product_id: 'dp-1',
             tags: [],

@@ -1,7 +1,7 @@
 import { HttpResponse, http } from 'msw';
 import {
     AccessDurationType,
-    OutputPortAccessType,
+    OutputPortAccessFunction,
     OutputPortStatus,
     type SearchOutputPortsResponseItem,
 } from '@/store/api/services/generated/outputPortsSearchApi.ts';
@@ -18,7 +18,7 @@ export const mockOutputPorts: SearchOutputPortsResponseItem[] = [
         classification: {
             id: 'classification-1',
             name: 'Unrestricted',
-            access_type: OutputPortAccessType.Unrestricted,
+            access_function: OutputPortAccessFunction.Unrestricted,
         },
         data_product_id: 'dp-1',
         tags: [],

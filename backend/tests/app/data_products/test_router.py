@@ -12,7 +12,7 @@ from app.authorization.roles.schema import Scope
 from app.authorization.service import AuthorizationService
 from app.core.authz import Action
 from app.data_products.model import DataProductVisibility
-from app.data_products.output_ports.enums import OutputPortAccessType
+from app.data_products.output_ports.enums import OutputPortAccessFunction
 from app.resource_names.service import ResourceNameValidityType
 from app.settings import settings
 from tests.factories import (
@@ -612,7 +612,7 @@ class TestDataProductsRouter:
     def test_get_data_product_graph_data_consumer_private_output_port(self, client):
         input_port = InputPortFactory(
             output_port=OutputPortFactory(
-                access_type=OutputPortAccessType.PRIVATE,
+                access_function=OutputPortAccessFunction.PRIVATE,
             )
         )
         response = client.get(
@@ -665,7 +665,7 @@ class TestDataProductsRouter:
     ):
         data_product = DataProductFactory()
         output_port = OutputPortFactory(
-            access_type=OutputPortAccessType.PRIVATE, data_product=data_product
+            access_function=OutputPortAccessFunction.PRIVATE, data_product=data_product
         )
         response = client.get(f"{ENDPOINT}/{data_product.id}/graph")
         assert response.status_code == 200, response.text

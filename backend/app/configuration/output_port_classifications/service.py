@@ -17,15 +17,10 @@ from app.configuration.output_port_classifications.schema_response import (
     OutputPortClassificationsGetItem,
     UpdateOutputPortClassificationResponse,
 )
-from app.data_products.output_ports.enums import OutputPortAccessType
+from app.data_products.output_ports.enums import OutputPortAccessFunction
 from app.data_products.output_ports.model import OutputPort as OutputPortModel
-from app.data_products.output_ports.service import OutputPortService
+from app.data_products.output_ports.service import UNFILTERED, OutputPortService
 from app.database.database import ensure_exists
-
-UNFILTERED = {
-    "skip_output_port_access_type_filter": True,
-    "skip_data_product_visibility_filter": True,
-}
 
 
 class OutputPortClassificationService:
@@ -53,7 +48,7 @@ class OutputPortClassificationService:
                 id=classification.id,
                 name=classification.name,
                 description=classification.description,
-                access_type=classification.access_type,
+                access_function=classification.access_function,
                 output_port_count=counts.get(classification.id, 0),
             )
             for classification in classifications
@@ -77,8 +72,12 @@ class OutputPortClassificationService:
         )
         classification.name = request.name
         classification.description = request.description
-        if request.access_type != classification.access_type:
-            self._remap(classification, request.access_type)
+        if request.access_function != classification.access_function:
+            self._ensure_not_last_invite_only(classification)
+            OutputPortService(self.db).reclassify_output_ports(
+                classification.id, request.access_function
+            )
+            classification.access_function = request.access_function
         self.db.flush()
         return UpdateOutputPortClassificationResponse(id=id)
 
@@ -105,13 +104,13 @@ class OutputPortClassificationService:
         self, classification: OutputPortClassificationModel
     ) -> None:
         if (
-            classification.access_type == OutputPortAccessType.PRIVATE
+            classification.access_function == OutputPortAccessFunction.PRIVATE
             and self.db.scalar(
                 select(func.count())
                 .select_from(OutputPortClassificationModel)
                 .where(
-                    OutputPortClassificationModel.access_type
-                    == OutputPortAccessType.PRIVATE
+                    OutputPortClassificationModel.access_function
+                    == OutputPortAccessFunction.PRIVATE
                 )
             )
             == 1
@@ -120,14 +119,3 @@ class OutputPortClassificationService:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="At least one classification must stay Invite only",
             )
-
-    def _remap(
-        self,
-        classification: OutputPortClassificationModel,
-        access_type: OutputPortAccessType,
-    ) -> None:
-        self._ensure_not_last_invite_only(classification)
-        OutputPortService(self.db).reclassify_output_ports(
-            classification.id, access_type
-        )
-        classification.access_type = access_type

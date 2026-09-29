@@ -2,13 +2,13 @@ import { Button, Form, Input, Modal, Popconfirm, Select } from 'antd';
 import { useTranslation } from 'react-i18next';
 
 import {
-    OutputPortAccessType,
+    OutputPortAccessFunction,
     type OutputPortClassificationCreate,
     type OutputPortClassificationsGetItem,
     useCreateOutputPortClassificationMutation,
     useUpdateOutputPortClassificationMutation,
 } from '@/store/api/services/generated/configurationOutputPortClassificationsApi.ts';
-import { compareAccessFunctions, getAccessFunctionLabel } from '@/utils/access-type.helper.ts';
+import { compareAccessFunctions, getAccessFunctionLabel } from '@/utils/access-function.helper.ts';
 import { dispatchMessage } from '@/utils/feedback.ts';
 
 type Props = {
@@ -22,10 +22,11 @@ export function OutputPortClassificationFormModal({ onClose, initial, isLastInvi
     const [form] = Form.useForm<OutputPortClassificationCreate>();
     const [createClassification, { isLoading: isCreating }] = useCreateOutputPortClassificationMutation();
     const [updateClassification, { isLoading: isUpdating }] = useUpdateOutputPortClassificationMutation();
-    const accessType = Form.useWatch('access_type', form);
+    const accessFunction = Form.useWatch('access_function', form);
 
-    const affectedOutputPorts = initial && accessType !== initial.access_type ? initial.output_port_count : 0;
-    const loosensAccess = initial && accessType && compareAccessFunctions(accessType, initial.access_type) < 0;
+    const affectedOutputPorts = initial && accessFunction !== initial.access_function ? initial.output_port_count : 0;
+    const loosensAccess =
+        initial && accessFunction && compareAccessFunctions(accessFunction, initial.access_function) < 0;
 
     const handleFinish = async (values: OutputPortClassificationCreate) => {
         try {
@@ -91,7 +92,7 @@ export function OutputPortClassificationFormModal({ onClose, initial, isLastInvi
                 form={form}
                 layout="vertical"
                 onFinish={handleFinish}
-                initialValues={initial ?? { description: '', access_type: OutputPortAccessType.Restricted }}
+                initialValues={initial ?? { description: '', access_function: OutputPortAccessFunction.Restricted }}
             >
                 <Form.Item
                     name="name"
@@ -104,14 +105,14 @@ export function OutputPortClassificationFormModal({ onClose, initial, isLastInvi
                     <Input.TextArea />
                 </Form.Item>
                 <Form.Item
-                    name="access_type"
+                    name="access_function"
                     label={t('Access function')}
                     tooltip={isLastInviteOnly ? t('At least one classification must stay Invite only') : undefined}
                     rules={[{ required: true }]}
                 >
                     <Select
                         disabled={isLastInviteOnly}
-                        options={Object.values(OutputPortAccessType).map((value) => ({
+                        options={Object.values(OutputPortAccessFunction).map((value) => ({
                             value,
                             label: getAccessFunctionLabel(t, value),
                         }))}

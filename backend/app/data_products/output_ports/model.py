@@ -44,7 +44,7 @@ from app.data_products.output_port_technical_assets_link.model import (
 from app.data_products.output_ports.data_quality.model import (  # noqa: TCH001
     DataQualitySummary,
 )
-from app.data_products.output_ports.enums import OutputPortAccessType
+from app.data_products.output_ports.enums import OutputPortAccessFunction
 from app.data_products.output_ports.status import OutputPortStatus
 from app.data_products.technical_assets.model import TechnicalAssetAccessMode
 from app.database.database import Base, ensure_exists
@@ -121,9 +121,9 @@ def _has_user_access_through_input_port(cls, user_id: uuid.UUID):
     )
 
 
-def _access_type_filter_for_user(user_id: uuid.UUID):
+def _access_function_filter_for_user(user_id: uuid.UUID):
     return or_(
-        OutputPort.access_type != OutputPortAccessType.PRIVATE,
+        OutputPort.access_function != OutputPortAccessFunction.PRIVATE,
         _has_user_access_to_private_output_port(OutputPort, user_id),
         _has_user_access_to_private_output_port_via_data_product(OutputPort, user_id),
         _has_user_access_through_input_port(OutputPort, user_id),
@@ -155,7 +155,7 @@ class OutputPort(Base, BaseORM, EventTrackedMixin):
     name = Column(String)
     description = Column(String)
     about = Column(String)
-    access_type = Column(Enum(OutputPortAccessType), nullable=False)
+    access_function = Column(Enum(OutputPortAccessFunction), nullable=False)
     status: OutputPortStatus = Column(
         Enum(OutputPortStatus), default=OutputPortStatus.ACTIVE
     )
@@ -304,7 +304,7 @@ def enforce_private_output_port_filter(execute_state):
     if not execute_state.is_select:
         return
 
-    if execute_state.execution_options.get("skip_output_port_access_type_filter"):
+    if execute_state.execution_options.get("skip_output_port_access_function_filter"):
         return
 
     # The current user is only set while serving a request. Everything else
@@ -317,7 +317,7 @@ def enforce_private_output_port_filter(execute_state):
     execute_state.statement = execute_state.statement.options(
         with_loader_criteria(
             OutputPort,
-            lambda cls: _access_type_filter_for_user(user_id),
+            lambda cls: _access_function_filter_for_user(user_id),
             include_aliases=True,
         )
     )

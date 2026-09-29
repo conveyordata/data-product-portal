@@ -3,6 +3,8 @@ import { STATIC_TAG_ID, TagTypes } from '@/store/api/services/tag-types.ts';
 
 type EndpointDefinitions = Parameters<typeof api.enhanceEndpoints>[0]['endpoints'];
 
+const classificationListTag = { type: TagTypes.OutputPortClassification as const, id: STATIC_TAG_ID.LIST };
+
 const invalidateOutputPort = (
     _: unknown,
     __: unknown,
@@ -47,6 +49,7 @@ const invalidateDeletedOutputPort = (
         type: TagTypes.History as const,
         id: id,
     },
+    classificationListTag,
 ];
 
 export const dataProductOutputPortTags = {
@@ -79,6 +82,7 @@ export const dataProductOutputPortTags = {
                 type: TagTypes.OutputPort,
                 id: STATIC_TAG_ID.LIST,
             },
+            classificationListTag,
         ],
     },
     getOutputPort: {
@@ -93,7 +97,10 @@ export const dataProductOutputPortTags = {
         invalidatesTags: invalidateDeletedOutputPort,
     },
     updateOutputPort: {
-        invalidatesTags: invalidateOutputPort,
+        invalidatesTags: (_: unknown, __: unknown, arg: { dataProductId: string; id: string }) => [
+            ...invalidateOutputPort(_, __, arg),
+            classificationListTag,
+        ],
     },
     getOutputPortsEventHistory: {
         providesTags: (_, __, { id }) => [

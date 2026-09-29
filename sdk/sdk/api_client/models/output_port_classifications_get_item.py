@@ -7,7 +7,7 @@ from uuid import UUID
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..models.output_port_access_type import OutputPortAccessType
+from ..models.output_port_access_function import OutputPortAccessFunction
 
 T = TypeVar("T", bound="OutputPortClassificationsGetItem")
 
@@ -18,14 +18,14 @@ class OutputPortClassificationsGetItem:
     Attributes:
         id (UUID):
         name (str):
-        access_type (OutputPortAccessType):
+        access_function (OutputPortAccessFunction):
         description (str):
         output_port_count (int):
     """
 
     id: UUID
     name: str
-    access_type: OutputPortAccessType
+    access_function: OutputPortAccessFunction
     description: str
     output_port_count: int
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
@@ -35,7 +35,7 @@ class OutputPortClassificationsGetItem:
 
         name = self.name
 
-        access_type = self.access_type.value
+        access_function = self.access_function.value
 
         description = self.description
 
@@ -47,7 +47,7 @@ class OutputPortClassificationsGetItem:
             {
                 "id": id,
                 "name": name,
-                "access_type": access_type,
+                "access_function": access_function,
                 "description": description,
                 "output_port_count": output_port_count,
             }
@@ -62,7 +62,7 @@ class OutputPortClassificationsGetItem:
 
         name = d.pop("name")
 
-        access_type = OutputPortAccessType(d.pop("access_type"))
+        access_function = OutputPortAccessFunction(d.pop("access_function"))
 
         description = d.pop("description")
 
@@ -71,7 +71,7 @@ class OutputPortClassificationsGetItem:
         output_port_classifications_get_item = cls(
             id=id,
             name=name,
-            access_type=access_type,
+            access_function=access_function,
             description=description,
             output_port_count=output_port_count,
         )

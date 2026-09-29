@@ -3366,7 +3366,7 @@ func (s *OutputPortAccessDuration) Validate() error {
 	return nil
 }
 
-func (s OutputPortAccessType) Validate() error {
+func (s OutputPortAccessFunction) Validate() error {
 	switch s {
 	case "restricted":
 		return nil
@@ -3386,13 +3386,13 @@ func (s *OutputPortClassification) Validate() error {
 
 	var failures []validate.FieldError
 	if err := func() error {
-		if err := s.AccessType.Validate(); err != nil {
+		if err := s.AccessFunction.Validate(); err != nil {
 			return err
 		}
 		return nil
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
-			Name:  "access_type",
+			Name:  "access_function",
 			Error: err,
 		})
 	}
@@ -3409,13 +3409,13 @@ func (s *OutputPortClassificationCreate) Validate() error {
 
 	var failures []validate.FieldError
 	if err := func() error {
-		if err := s.AccessType.Validate(); err != nil {
+		if err := s.AccessFunction.Validate(); err != nil {
 			return err
 		}
 		return nil
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
-			Name:  "access_type",
+			Name:  "access_function",
 			Error: err,
 		})
 	}
@@ -3432,13 +3432,13 @@ func (s *OutputPortClassificationUpdate) Validate() error {
 
 	var failures []validate.FieldError
 	if err := func() error {
-		if err := s.AccessType.Validate(); err != nil {
+		if err := s.AccessFunction.Validate(); err != nil {
 			return err
 		}
 		return nil
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
-			Name:  "access_type",
+			Name:  "access_function",
 			Error: err,
 		})
 	}
@@ -3495,13 +3495,13 @@ func (s *OutputPortClassificationsGetItem) Validate() error {
 
 	var failures []validate.FieldError
 	if err := func() error {
-		if err := s.AccessType.Validate(); err != nil {
+		if err := s.AccessFunction.Validate(); err != nil {
 			return err
 		}
 		return nil
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
-			Name:  "access_type",
+			Name:  "access_function",
 			Error: err,
 		})
 	}

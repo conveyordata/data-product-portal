@@ -1,7 +1,10 @@
 import { Space, Typography, type TypographyProps } from 'antd';
 import { useTranslation } from 'react-i18next';
 
-import { OutputPortAccessType, type OutputPortClassification } from '@/store/api/services/generated/dataProductsApi.ts';
+import {
+    OutputPortAccessFunction,
+    type OutputPortClassification,
+} from '@/store/api/services/generated/dataProductsApi.ts';
 
 const { Text } = Typography;
 
@@ -19,7 +22,7 @@ export function OutputPortPopoverTitle({ name, classification, titleProps, isApp
     return (
         <Space>
             <Text {...titleProps}>{name}</Text>
-            {classification.access_type !== OutputPortAccessType.Unrestricted && (
+            {classification.access_function !== OutputPortAccessFunction.Unrestricted && (
                 <Text italic>
                     ({classification.name} · {subtitle})
                 </Text>

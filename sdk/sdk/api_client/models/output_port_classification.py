@@ -7,7 +7,7 @@ from uuid import UUID
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..models.output_port_access_type import OutputPortAccessType
+from ..models.output_port_access_function import OutputPortAccessFunction
 
 T = TypeVar("T", bound="OutputPortClassification")
 
@@ -18,12 +18,12 @@ class OutputPortClassification:
     Attributes:
         id (UUID):
         name (str):
-        access_type (OutputPortAccessType):
+        access_function (OutputPortAccessFunction):
     """
 
     id: UUID
     name: str
-    access_type: OutputPortAccessType
+    access_function: OutputPortAccessFunction
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -31,7 +31,7 @@ class OutputPortClassification:
 
         name = self.name
 
-        access_type = self.access_type.value
+        access_function = self.access_function.value
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
@@ -39,7 +39,7 @@ class OutputPortClassification:
             {
                 "id": id,
                 "name": name,
-                "access_type": access_type,
+                "access_function": access_function,
             }
         )
 
@@ -52,12 +52,12 @@ class OutputPortClassification:
 
         name = d.pop("name")
 
-        access_type = OutputPortAccessType(d.pop("access_type"))
+        access_function = OutputPortAccessFunction(d.pop("access_function"))
 
         output_port_classification = cls(
             id=id,
             name=name,
-            access_type=access_type,
+            access_function=access_function,
         )
 
         output_port_classification.additional_properties = d

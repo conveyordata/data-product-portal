@@ -4,7 +4,10 @@ import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import shieldHalfIcon from '@/assets/icons/shield-half-icon.svg?react';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component';
-import { OutputPortAccessType, type OutputPortClassification } from '@/store/api/services/generated/dataProductsApi.ts';
+import {
+    OutputPortAccessFunction,
+    type OutputPortClassification,
+} from '@/store/api/services/generated/dataProductsApi.ts';
 
 type Props = {
     classification: OutputPortClassification;
@@ -13,30 +16,30 @@ type Props = {
 
 export const OutputPortAccessIcon = ({ classification, iconOnly }: Props) => {
     const { t } = useTranslation();
-    const accessType = classification.access_type;
+    const accessFunction = classification.access_function;
 
     const icon = useMemo(() => {
-        switch (accessType) {
-            case OutputPortAccessType.Unrestricted:
+        switch (accessFunction) {
+            case OutputPortAccessFunction.Unrestricted:
                 return null;
-            case OutputPortAccessType.Restricted:
+            case OutputPortAccessFunction.Restricted:
                 return <CustomSvgIconLoader iconComponent={shieldHalfIcon} size="font-small" color="dark" />;
-            case OutputPortAccessType.Private:
+            case OutputPortAccessFunction.Private:
                 return <EyeInvisibleOutlined />;
             default:
                 return null;
         }
-    }, [accessType]);
+    }, [accessFunction]);
 
     const tooltipTitle = () => {
-        switch (accessType) {
-            case OutputPortAccessType.Unrestricted:
+        switch (accessFunction) {
+            case OutputPortAccessFunction.Unrestricted:
                 return undefined;
-            case OutputPortAccessType.Restricted:
+            case OutputPortAccessFunction.Restricted:
                 return t(
                     'To gain access to this Output Port, users request access through the Marketplace, and the owner approves the requests',
                 );
-            case OutputPortAccessType.Private:
+            case OutputPortAccessFunction.Private:
                 return t(
                     'This Output Port is hidden from the rest of the organisation and can only be accessed by users with access to it. The owner can add consumers directly',
                 );

@@ -18,7 +18,7 @@ from app.abstract_data_product.service import AbstractDataProductService
 from app.abstract_data_product.type import AbstractDataProductType
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.configuration.access_durations.enums import AccessDurationType
-from app.data_products.output_ports.enums import OutputPortAccessType
+from app.data_products.output_ports.enums import OutputPortAccessFunction
 from tests.factories import (
     AccessDurationFactory,
     AccessModeFactory,
@@ -52,7 +52,7 @@ class TestRequestInputPortsDuration:
         actor = UserFactory()
         dp = DataProductFactory()
         port = OutputPortFactory(
-            access_type=OutputPortAccessType.UNRESTRICTED,
+            access_function=OutputPortAccessFunction.UNRESTRICTED,
             data_product_access_duration_type=AccessDurationType.TIME_BOUND,
         )
         AccessDurationFactory(
@@ -81,7 +81,7 @@ class TestRequestInputPortsDuration:
         actor = UserFactory()
         dp = DataProductFactory()
         port = OutputPortFactory(
-            access_type=OutputPortAccessType.PRIVATE,
+            access_function=OutputPortAccessFunction.PRIVATE,
         )
         with (
             pytest.raises(HTTPException) as exc_info,
@@ -103,7 +103,7 @@ class TestRequestInputPortsDuration:
     def test_request_input_ports__permanent_port_has_no_window(self, session):
         actor = UserFactory()
         dp = DataProductFactory()
-        port = OutputPortFactory(access_type=OutputPortAccessType.UNRESTRICTED)
+        port = OutputPortFactory(access_function=OutputPortAccessFunction.UNRESTRICTED)
 
         [ip] = AbstractDataProductService(session).request_input_ports(
             dp.id,
@@ -127,7 +127,7 @@ class TestRequestInputPortsDuration:
         actor = UserFactory()
         exploration = ExplorationFactory()
         port = OutputPortFactory(
-            access_type=OutputPortAccessType.UNRESTRICTED,
+            access_function=OutputPortAccessFunction.UNRESTRICTED,
             exploration_access_duration_type=AccessDurationType.TIME_BOUND,
         )
         AccessDurationFactory(
@@ -155,7 +155,7 @@ class TestRequestInputPortsDuration:
         actor = UserFactory()
         dp = DataProductFactory()
         port = OutputPortFactory(
-            access_type=OutputPortAccessType.UNRESTRICTED,
+            access_function=OutputPortAccessFunction.UNRESTRICTED,
             data_product_access_duration_type=AccessDurationType.TIME_BOUND,
         )
 
@@ -179,7 +179,7 @@ class TestRequestInputPortsDuration:
     def test_request_input_ports__fails_when_link_already_exists(self, status, session):
         actor = UserFactory()
         dp = DataProductFactory()
-        port = OutputPortFactory(access_type=OutputPortAccessType.RESTRICTED)
+        port = OutputPortFactory(access_function=OutputPortAccessFunction.RESTRICTED)
         link = InputPortFactory(
             consuming_abstract_data_product=dp,
             output_port=port,
@@ -204,7 +204,7 @@ class TestRequestInputPortsDuration:
         actor = UserFactory()
         dp = DataProductFactory()
         port = OutputPortFactory(
-            access_type=OutputPortAccessType.UNRESTRICTED,
+            access_function=OutputPortAccessFunction.UNRESTRICTED,
         )
         access_mode = AccessModeFactory(name="a name")
         TechnicalAssetOutputPortAssociationFactory(
@@ -228,7 +228,7 @@ class TestRequestInputPortsDuration:
         actor = UserFactory()
         dp = DataProductFactory()
         port = OutputPortFactory(
-            access_type=OutputPortAccessType.UNRESTRICTED,
+            access_function=OutputPortAccessFunction.UNRESTRICTED,
         )
         TechnicalAssetOutputPortAssociationFactory(
             technical_asset=TechnicalAssetFactory(
@@ -255,7 +255,7 @@ class TestRequestInputPortsDuration:
         actor = UserFactory()
         dp = DataProductFactory()
         port = OutputPortFactory(
-            access_type=OutputPortAccessType.UNRESTRICTED,
+            access_function=OutputPortAccessFunction.UNRESTRICTED,
         )
         TechnicalAssetOutputPortAssociationFactory(
             technical_asset=TechnicalAssetFactory(
@@ -284,7 +284,7 @@ class TestRequestInputPortsDuration:
         actor = UserFactory()
         dp = DataProductFactory()
         port = OutputPortFactory(
-            access_type=OutputPortAccessType.UNRESTRICTED,
+            access_function=OutputPortAccessFunction.UNRESTRICTED,
         )
         denied_mode = AccessModeFactory(name="denied mode")
         approved_mode = AccessModeFactory(name="approved mode")
@@ -314,7 +314,7 @@ class TestRequestInputPortsDuration:
 
     def _restricted_time_bound_port(self):
         port = OutputPortFactory(
-            access_type=OutputPortAccessType.RESTRICTED,
+            access_function=OutputPortAccessFunction.RESTRICTED,
             data_product_access_duration_type=AccessDurationType.TIME_BOUND,
         )
         AccessDurationFactory(
@@ -392,7 +392,7 @@ class TestRequestInputPortsDuration:
     def test_renew_input_port__blocked_when_active_grant_is_permanent(self, session):
         actor = UserFactory()
         dp = DataProductFactory()
-        port = OutputPortFactory(access_type=OutputPortAccessType.RESTRICTED)
+        port = OutputPortFactory(access_function=OutputPortAccessFunction.RESTRICTED)
         InputPortFactory(
             consuming_abstract_data_product=dp,
             output_port=port,
@@ -425,7 +425,7 @@ class TestRequestInputPortsDuration:
     def test_renew_input_port__404_when_no_existing_link(self, session):
         actor = UserFactory()
         dp = DataProductFactory()
-        port = OutputPortFactory(access_type=OutputPortAccessType.RESTRICTED)
+        port = OutputPortFactory(access_function=OutputPortAccessFunction.RESTRICTED)
 
         with pytest.raises(HTTPException) as exc:
             AbstractDataProductService(session).renew_input_port(
@@ -437,7 +437,7 @@ class TestRequestInputPortsDuration:
         actor = UserFactory()
         dp = DataProductFactory()
         port = OutputPortFactory(
-            access_type=OutputPortAccessType.UNRESTRICTED,
+            access_function=OutputPortAccessFunction.UNRESTRICTED,
         )
         access_mode = AccessModeFactory(name="a mode")
         TechnicalAssetOutputPortAssociationFactory(
@@ -493,7 +493,7 @@ class TestRequestInputPortsDuration:
     def test_revoke_input_port__raises_when_no_active_grant(self, session):
         actor = UserFactory()
         dp = DataProductFactory()
-        port = OutputPortFactory(access_type=OutputPortAccessType.RESTRICTED)
+        port = OutputPortFactory(access_function=OutputPortAccessFunction.RESTRICTED)
         InputPortFactory(
             consuming_abstract_data_product=dp,
             output_port=port,
@@ -509,7 +509,7 @@ class TestRequestInputPortsDuration:
     def test_revoke_input_port__404_when_no_existing_link(self, session):
         actor = UserFactory()
         dp = DataProductFactory()
-        port = OutputPortFactory(access_type=OutputPortAccessType.RESTRICTED)
+        port = OutputPortFactory(access_function=OutputPortAccessFunction.RESTRICTED)
 
         with pytest.raises(HTTPException) as exc:
             AbstractDataProductService(session).revoke_input_port(
@@ -520,7 +520,7 @@ class TestRequestInputPortsDuration:
     def test_cancel_input_port__cancels_the_pending_request(self, session):
         actor = UserFactory()
         dp = DataProductFactory()
-        port = OutputPortFactory(access_type=OutputPortAccessType.RESTRICTED)
+        port = OutputPortFactory(access_function=OutputPortAccessFunction.RESTRICTED)
         link = InputPortFactory(
             consuming_abstract_data_product=dp,
             output_port=port,
@@ -544,7 +544,7 @@ class TestRequestInputPortsDuration:
     def test_cancel_input_port__allows_a_new_request_afterwards(self, session):
         actor = UserFactory()
         dp = DataProductFactory()
-        port = OutputPortFactory(access_type=OutputPortAccessType.RESTRICTED)
+        port = OutputPortFactory(access_function=OutputPortAccessFunction.RESTRICTED)
         link = InputPortFactory(
             consuming_abstract_data_product=dp,
             output_port=port,
@@ -568,7 +568,7 @@ class TestRequestInputPortsDuration:
     def test_cancel_input_port__raises_when_no_pending_request(self, session):
         actor = UserFactory()
         dp = DataProductFactory()
-        port = OutputPortFactory(access_type=OutputPortAccessType.RESTRICTED)
+        port = OutputPortFactory(access_function=OutputPortAccessFunction.RESTRICTED)
         InputPortFactory(
             consuming_abstract_data_product=dp,
             output_port=port,
@@ -584,7 +584,7 @@ class TestRequestInputPortsDuration:
     def test_cancel_input_port__404_when_no_existing_link(self, session):
         actor = UserFactory()
         dp = DataProductFactory()
-        port = OutputPortFactory(access_type=OutputPortAccessType.RESTRICTED)
+        port = OutputPortFactory(access_function=OutputPortAccessFunction.RESTRICTED)
 
         with pytest.raises(HTTPException) as exc:
             AbstractDataProductService(session).cancel_input_port_request(

@@ -3,7 +3,7 @@ from faker import Faker
 
 from app.abstract_data_product.type import AbstractDataProductType
 from app.configuration.access_durations.enums import AccessDurationType
-from app.data_products.output_ports.enums import OutputPortAccessType
+from app.data_products.output_ports.enums import OutputPortAccessFunction
 from app.data_products.output_ports.model import OutputPort
 from app.data_products.output_ports.service import OutputPortService
 from app.data_products.output_ports.status import OutputPortStatus
@@ -27,10 +27,10 @@ class OutputPortFactory(factory.alchemy.SQLAlchemyModelFactory):
     description = factory.Faker("text", max_nb_chars=20)
     about = factory.Faker("text", max_nb_chars=20)
     status = OutputPortStatus.ACTIVE.value
-    access_type = OutputPortAccessType.UNRESTRICTED.value
+    access_function = OutputPortAccessFunction.UNRESTRICTED.value
     classification = factory.SubFactory(
         OutputPortClassificationFactory,
-        access_type=factory.SelfAttribute("..access_type"),
+        access_function=factory.SelfAttribute("..access_function"),
     )
     usage = factory.Faker("word")
     data_product = factory.SubFactory(DataProductFactory)
@@ -80,4 +80,4 @@ class OutputPortFactory(factory.alchemy.SQLAlchemyModelFactory):
         if not create:
             return
 
-        OutputPortService._sync_public_reader_grouping(self.id, self.access_type)
+        OutputPortService._sync_public_reader_grouping(self.id, self.access_function)

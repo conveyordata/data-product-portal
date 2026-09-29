@@ -36,7 +36,7 @@ import { useGetOutputPortClassificationsQuery } from '@/store/api/services/gener
 import { useGetTagsQuery } from '@/store/api/services/generated/configurationTagsApi.ts';
 import {
     DataProductVisibility,
-    OutputPortAccessType,
+    OutputPortAccessFunction,
     useGetDataProductQuery,
 } from '@/store/api/services/generated/dataProductsApi.ts';
 import {
@@ -65,7 +65,7 @@ import {
     compareAccessFunctions,
     fitsDataProductVisibility,
     getAccessFunctionLabel,
-} from '@/utils/access-type.helper.ts';
+} from '@/utils/access-function.helper.ts';
 import { useGetDataProductOwnerIds } from '@/utils/data-product-user-role.helper';
 import { useGetDatasetOwnerIds } from '@/utils/dataset-user-role.helper.ts';
 import { dispatchMessage } from '@/utils/feedback.ts';
@@ -245,16 +245,16 @@ export function ClassificationSection({
 }) {
     const { t } = useTranslation();
     const { data: { output_port_classifications: classifications = [] } = {} } = useGetOutputPortClassificationsQuery();
-    const options = Object.values(OutputPortAccessType)
+    const options = Object.values(OutputPortAccessFunction)
         .sort(compareAccessFunctions)
-        .map((accessType) => {
-            const allowed = fitsDataProductVisibility(accessType, hiddenDataProduct);
+        .map((accessFunction) => {
+            const allowed = fitsDataProductVisibility(accessFunction, hiddenDataProduct);
             return {
                 label: allowed
-                    ? getAccessFunctionLabel(t, accessType)
-                    : `${getAccessFunctionLabel(t, accessType)} (${t('not allowed for hidden Data Products')})`,
+                    ? getAccessFunctionLabel(t, accessFunction)
+                    : `${getAccessFunctionLabel(t, accessFunction)} (${t('not allowed for hidden Data Products')})`,
                 options: classifications
-                    .filter((classification) => classification.access_type === accessType)
+                    .filter((classification) => classification.access_function === accessFunction)
                     .map((classification) => ({
                         label: classification.name,
                         value: classification.id,
@@ -276,12 +276,15 @@ export function ClassificationSection({
                 options={options}
                 showSearch={{ optionFilterProp: 'label' }}
                 placeholder={t('Select a classification')}
-                optionRender={(option) => (
-                    <Flex vertical>
-                        {option.label}
-                        <Typography.Text type="secondary">{getDescription(option.value)}</Typography.Text>
-                    </Flex>
-                )}
+                optionRender={(option) => {
+                    const description = getDescription(option.value);
+                    return (
+                        <Flex vertical>
+                            {option.label}
+                            {description && <Typography.Text type="secondary">{description}</Typography.Text>}
+                        </Flex>
+                    );
+                }}
             />
             {selectedDescription && <Typography.Text type="secondary">{selectedDescription}</Typography.Text>}
         </Flex>
@@ -486,7 +489,7 @@ export function OutputPortForm({ mode, modalCallbackOnSubmit, formRef, outputPor
             return;
         }
         const selectableClassifications = classifications.filter((classification) =>
-            fitsDataProductVisibility(classification.access_type, isHiddenDataProduct),
+            fitsDataProductVisibility(classification.access_function, isHiddenDataProduct),
         );
         const selectedId = form.getFieldValue('classification_id');
         if (selectableClassifications.length === 1) {

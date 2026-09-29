@@ -14045,14 +14045,14 @@
         ],
         "title": "OutputPortAccessDuration"
       },
-      "OutputPortAccessType": {
+      "OutputPortAccessFunction": {
         "type": "string",
         "enum": [
           "restricted",
           "private",
           "unrestricted"
         ],
-        "title": "OutputPortAccessType"
+        "title": "OutputPortAccessFunction"
       },
       "OutputPortClassification": {
         "properties": {
@@ -14065,15 +14065,15 @@
             "type": "string",
             "title": "Name"
           },
-          "access_type": {
-            "$ref": "#/components/schemas/OutputPortAccessType"
+          "access_function": {
+            "$ref": "#/components/schemas/OutputPortAccessFunction"
           }
         },
         "type": "object",
         "required": [
           "id",
           "name",
-          "access_type"
+          "access_function"
         ],
         "title": "OutputPortClassification"
       },
@@ -14088,14 +14088,14 @@
             "title": "Description",
             "default": ""
           },
-          "access_type": {
-            "$ref": "#/components/schemas/OutputPortAccessType"
+          "access_function": {
+            "$ref": "#/components/schemas/OutputPortAccessFunction"
           }
         },
         "type": "object",
         "required": [
           "name",
-          "access_type"
+          "access_function"
         ],
         "title": "OutputPortClassificationCreate"
       },
@@ -14110,14 +14110,14 @@
             "title": "Description",
             "default": ""
           },
-          "access_type": {
-            "$ref": "#/components/schemas/OutputPortAccessType"
+          "access_function": {
+            "$ref": "#/components/schemas/OutputPortAccessFunction"
           }
         },
         "type": "object",
         "required": [
           "name",
-          "access_type"
+          "access_function"
         ],
         "title": "OutputPortClassificationUpdate"
       },
@@ -14148,8 +14148,8 @@
             "type": "string",
             "title": "Name"
           },
-          "access_type": {
-            "$ref": "#/components/schemas/OutputPortAccessType"
+          "access_function": {
+            "$ref": "#/components/schemas/OutputPortAccessFunction"
           },
           "description": {
             "type": "string",
@@ -14164,7 +14164,7 @@
         "required": [
           "id",
           "name",
-          "access_type",
+          "access_function",
           "description",
           "output_port_count"
         ],
