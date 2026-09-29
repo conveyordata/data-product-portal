@@ -38,8 +38,6 @@ repos:
 - repo: https://github.com/sqlfluff/sqlfluff
   rev: 3.5.0
   hooks:
-    - id: sqlfluff-lint
-      args: [--config, .sqlfluff]
     - id: sqlfluff-fix
       args: [--config, .sqlfluff]
 - repo: https://github.com/gitleaks/gitleaks
