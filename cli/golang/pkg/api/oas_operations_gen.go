@@ -126,6 +126,7 @@ const (
 	RenderTechnicalAssetAccessPathOperation           OperationName = "RenderTechnicalAssetAccessPath"
 	RenewInputPortForDataProductOperation             OperationName = "RenewInputPortForDataProduct"
 	RenewInputPortForExplorationOperation             OperationName = "RenewInputPortForExploration"
+	RenewOutputPortAsInputPortOperation               OperationName = "RenewOutputPortAsInputPort"
 	ReplaceOutputPortCuratedQueriesOperation          OperationName = "ReplaceOutputPortCuratedQueries"
 	RequestDataProductRoleAssignmentOperation         OperationName = "RequestDataProductRoleAssignment"
 	RequestInputPortsForDataProductOperation          OperationName = "RequestInputPortsForDataProduct"

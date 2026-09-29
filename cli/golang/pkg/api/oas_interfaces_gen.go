@@ -469,6 +469,10 @@ type RenewInputPortForExplorationRes interface {
 	renewInputPortForExplorationRes()
 }
 
+type RenewOutputPortAsInputPortRes interface {
+	renewOutputPortAsInputPortRes()
+}
+
 type ReplaceOutputPortCuratedQueriesRes interface {
 	replaceOutputPortCuratedQueriesRes()
 }

@@ -6025,6 +6025,7 @@ func (*HTTPValidationError) removeUserRes()                               {}
 func (*HTTPValidationError) renderTechnicalAssetAccessPathRes()           {}
 func (*HTTPValidationError) renewInputPortForDataProductRes()             {}
 func (*HTTPValidationError) renewInputPortForExplorationRes()             {}
+func (*HTTPValidationError) renewOutputPortAsInputPortRes()               {}
 func (*HTTPValidationError) replaceOutputPortCuratedQueriesRes()          {}
 func (*HTTPValidationError) requestDataProductRoleAssignmentRes()         {}
 func (*HTTPValidationError) requestInputPortsForDataProductRes()          {}
@@ -10986,6 +10987,25 @@ func (s *RenewInputPortForExplorationResponse) SetInputPortID(val uuid.UUID) {
 }
 
 func (*RenewInputPortForExplorationResponse) renewInputPortForExplorationRes() {}
+
+type RenewOutputPortAsInputPortOKApplicationJSON jx.Raw
+
+func (*RenewOutputPortAsInputPortOKApplicationJSON) renewOutputPortAsInputPortRes() {}
+
+// Ref: #/components/schemas/RenewOutputPortAsInputPortRequest
+type RenewOutputPortAsInputPortRequest struct {
+	ConsumingDataProductID uuid.UUID `json:"consuming_data_product_id"`
+}
+
+// GetConsumingDataProductID returns the value of ConsumingDataProductID.
+func (s *RenewOutputPortAsInputPortRequest) GetConsumingDataProductID() uuid.UUID {
+	return s.ConsumingDataProductID
+}
+
+// SetConsumingDataProductID sets the value of ConsumingDataProductID.
+func (s *RenewOutputPortAsInputPortRequest) SetConsumingDataProductID(val uuid.UUID) {
+	s.ConsumingDataProductID = val
+}
 
 // Ref: #/components/schemas/RenewalStatus
 type RenewalStatus string
