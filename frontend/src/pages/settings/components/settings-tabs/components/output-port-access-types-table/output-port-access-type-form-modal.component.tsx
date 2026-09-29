@@ -11,7 +11,7 @@ import {
 import {
     ACCESS_FUNCTION_ORDER,
     compareAccessFunctions,
-    getAccessFunctionLabel,
+    getAccessFunctionInfo,
 } from '@/utils/access-function.helper.tsx';
 import { dispatchMessage } from '@/utils/feedback.ts';
 
@@ -107,7 +107,7 @@ export function OutputPortAccessTypeFormModal({ onClose, initial, isLastInviteOn
                         disabled={isLastInviteOnly}
                         options={ACCESS_FUNCTION_ORDER.map((value) => ({
                             value,
-                            label: getAccessFunctionLabel(t, value),
+                            label: getAccessFunctionInfo(t, value).label,
                         }))}
                     />
                 </Form.Item>

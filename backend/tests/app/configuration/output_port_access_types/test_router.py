@@ -27,6 +27,13 @@ def payload(name: str, access_function: OutputPortAccessFunction):
     return {"name": name, "description": "", "access_function": access_function.value}
 
 
+def counts(response):
+    return {
+        item["name"]: item["output_port_count"]
+        for item in response.json()["output_port_access_types"]
+    }
+
+
 class TestOutputPortAccessTypesRouter:
     @pytest.mark.usefixtures("admin")
     def test_get_output_port_access_types__seeded_with_counts(self, client):
@@ -35,12 +42,9 @@ class TestOutputPortAccessTypesRouter:
         response = client.get(ENDPOINT)
 
         assert response.status_code == 200
-        items = {
-            item["name"]: item for item in response.json()["output_port_access_types"]
-        }
-        assert set(items) == {"Unrestricted", "Restricted", "Private"}
-        assert items["Private"]["output_port_count"] == 1
-        assert items["Restricted"]["output_port_count"] == 0
+        assert set(counts(response)) == {"Unrestricted", "Restricted", "Private"}
+        assert counts(response)["Private"] == 1
+        assert counts(response)["Restricted"] == 0
 
     def test_get_output_port_access_types__hides_invite_only_counts(self, client):
         OutputPortFactory(access_function=OutputPortAccessFunction.PRIVATE)
@@ -48,10 +52,7 @@ class TestOutputPortAccessTypesRouter:
         response = client.get(ENDPOINT)
 
         assert response.status_code == 200
-        items = {
-            item["name"]: item for item in response.json()["output_port_access_types"]
-        }
-        assert items["Private"]["output_port_count"] == 0
+        assert counts(response)["Private"] == 0
 
     def test_get_output_port_access_types__config_managers_see_invite_only_counts(
         self, client
@@ -67,38 +68,7 @@ class TestOutputPortAccessTypesRouter:
         response = client.get(ENDPOINT)
 
         assert response.status_code == 200
-        items = {
-            item["name"]: item for item in response.json()["output_port_access_types"]
-        }
-        assert items["Private"]["output_port_count"] == 1
-
-    @pytest.mark.usefixtures("admin")
-    def test_create_output_port_access_type__duplicate_name(self, client):
-        response = client.post(
-            ENDPOINT, json=payload("Restricted", OutputPortAccessFunction.RESTRICTED)
-        )
-
-        assert response.status_code == 400
-        assert response.json()["detail"] == (
-            "An access type with this name already exists."
-        )
-
-    @pytest.mark.usefixtures("admin")
-    def test_update_output_port_access_type__duplicate_name(self, client):
-        access_type = OutputPortAccessTypeFactory(
-            name="Internal",
-            access_function=OutputPortAccessFunction.RESTRICTED,
-        )
-
-        response = client.put(
-            f"{ENDPOINT}/{access_type.id}",
-            json=payload("Private", OutputPortAccessFunction.RESTRICTED),
-        )
-
-        assert response.status_code == 400
-        assert response.json()["detail"] == (
-            "An access type with this name already exists."
-        )
+        assert counts(response)["Private"] == 1
 
     @pytest.mark.usefixtures("admin")
     def test_create_output_port_access_type(self, client):
@@ -116,13 +86,6 @@ class TestOutputPortAccessTypesRouter:
         )
 
         assert response.status_code == 422
-
-    def test_create_output_port_access_type__admin_only(self, client):
-        response = client.post(
-            ENDPOINT, json=payload("Top Secret", OutputPortAccessFunction.PRIVATE)
-        )
-
-        assert response.status_code == 403
 
     @pytest.mark.usefixtures("admin")
     def test_update_output_port_access_type__rename(self, client, session):
@@ -240,18 +203,6 @@ class TestOutputPortAccessTypesRouter:
             user_id="*", role_id=OUTPUT_PORT_READER_ROLE, resource_id=output_port.id
         )
 
-    def test_update_output_port_access_type__admin_only(self, client):
-        access_type = OutputPortAccessTypeFactory(
-            access_function=OutputPortAccessFunction.RESTRICTED
-        )
-
-        response = client.put(
-            f"{ENDPOINT}/{access_type.id}",
-            json=payload("Internal", OutputPortAccessFunction.RESTRICTED),
-        )
-
-        assert response.status_code == 403
-
     @pytest.mark.usefixtures("admin")
     def test_remove_output_port_access_type(self, client, session):
         access_type_id = OutputPortAccessTypeFactory(
@@ -288,11 +239,32 @@ class TestOutputPortAccessTypesRouter:
 
         assert response.status_code == 400
 
-    def test_remove_output_port_access_type__admin_only(self, client):
+    @pytest.mark.usefixtures("admin")
+    @pytest.mark.parametrize("method", ["post", "put"])
+    def test_output_port_access_type__duplicate_name(self, client, method):
         access_type = OutputPortAccessTypeFactory(
-            name="Unused", access_function=OutputPortAccessFunction.PRIVATE
+            name="Internal", access_function=OutputPortAccessFunction.RESTRICTED
+        )
+        url = ENDPOINT if method == "post" else f"{ENDPOINT}/{access_type.id}"
+
+        response = client.request(
+            method, url, json=payload("Private", OutputPortAccessFunction.RESTRICTED)
         )
 
-        response = client.delete(f"{ENDPOINT}/{access_type.id}")
+        assert response.status_code == 400
+        assert response.json()["detail"] == (
+            "An access type with this name already exists."
+        )
+
+    @pytest.mark.parametrize("method", ["post", "put", "delete"])
+    def test_output_port_access_type__admin_only(self, client, method):
+        access_type = OutputPortAccessTypeFactory(
+            name="Internal", access_function=OutputPortAccessFunction.RESTRICTED
+        )
+        url = ENDPOINT if method == "post" else f"{ENDPOINT}/{access_type.id}"
+
+        response = client.request(
+            method, url, json=payload("Top Secret", OutputPortAccessFunction.RESTRICTED)
+        )
 
         assert response.status_code == 403

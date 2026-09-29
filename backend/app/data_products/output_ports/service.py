@@ -659,32 +659,17 @@ class OutputPortService:
     def _sync_public_reader_grouping(
         output_port_ids: Sequence[UUID], access_function: OutputPortAccessFunction
     ):
-        match access_function:
-            case (
-                OutputPortAccessFunction.UNRESTRICTED
-                | OutputPortAccessFunction.RESTRICTED
-            ):
-                granted = True
-            case OutputPortAccessFunction.PRIVATE:
-                granted = False
-            case _:
-                assert_never(access_function)
         Authorization().sync_resource_roles(
             user_id="*",
             role_id=OUTPUT_PORT_READER_ROLE,
             resource_ids=output_port_ids,
-            granted=granted,
+            granted=access_function != OutputPortAccessFunction.PRIVATE,
         )
 
     def sync_read_rights_output_ports(self):
         visible_output_port_ids = self.db.scalars(
             select(OutputPortModel.id).where(
-                OutputPortModel.access_function.in_(
-                    [
-                        OutputPortAccessFunction.UNRESTRICTED,
-                        OutputPortAccessFunction.RESTRICTED,
-                    ]
-                )
+                OutputPortModel.access_function != OutputPortAccessFunction.PRIVATE
             ),
             execution_options=UNFILTERED,
         ).all()

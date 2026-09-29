@@ -245,6 +245,7 @@ export function AccessTypeSection({
         .map((accessType) => ({
             label: accessType.name,
             value: accessType.id,
+            description: accessType.description,
             accessFunction: accessType.access_function,
             disabled: !fitsDataProductVisibility(accessType.access_function, hiddenDataProduct),
         }))
@@ -253,9 +254,7 @@ export function AccessTypeSection({
                 Number(a.disabled) - Number(b.disabled) || compareAccessFunctions(a.accessFunction, b.accessFunction),
         );
 
-    const getDescription = (id?: string | number | null) =>
-        accessTypes.find((accessType) => accessType.id === id)?.description;
-    const selectedDescription = getDescription(value);
+    const selectedDescription = options.find((option) => option.value === value)?.description;
 
     return (
         <Flex vertical gap="small">
@@ -267,7 +266,7 @@ export function AccessTypeSection({
                 showSearch={{ optionFilterProp: 'label' }}
                 placeholder={t('Select an access type')}
                 optionRender={(option) => {
-                    const description = getDescription(option.value);
+                    const { description } = option.data;
                     return (
                         <Flex vertical>
                             {option.label}

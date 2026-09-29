@@ -2,11 +2,10 @@ import { HttpResponse, http } from 'msw';
 import {
     type GetOutputPortAccessTypesApiResponse,
     OutputPortAccessFunction,
-    type OutputPortAccessTypesGetItem,
 } from '@/store/api/services/generated/configurationOutputPortAccessTypesApi.ts';
 import { server } from '@/tests/mocks/server.ts';
 
-export const mock_output_port_access_types: OutputPortAccessTypesGetItem[] = [
+const output_port_access_types = [
     OutputPortAccessFunction.Unrestricted,
     OutputPortAccessFunction.Restricted,
     OutputPortAccessFunction.Private,
@@ -18,9 +17,7 @@ export const mock_output_port_access_types: OutputPortAccessTypesGetItem[] = [
     output_port_count: 0,
 }));
 
-export const mockOutputPortAccessTypes = (
-    output_port_access_types: OutputPortAccessTypesGetItem[] = mock_output_port_access_types,
-) => {
+export const mockOutputPortAccessTypes = () => {
     server.use(
         http.get('*/api/v2/configuration/output_port_access_types', () => {
             return HttpResponse.json({ output_port_access_types } as GetOutputPortAccessTypesApiResponse);

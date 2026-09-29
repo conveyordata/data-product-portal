@@ -42,6 +42,3 @@ export const getAccessFunctionInfo = (
             ),
         },
     })[accessFunction];
-
-export const getAccessFunctionLabel = (t: TFunction, accessFunction: OutputPortAccessFunction) =>
-    getAccessFunctionInfo(t, accessFunction).label;

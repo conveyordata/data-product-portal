@@ -17,7 +17,7 @@ export function OutputPortAccessTypesTable() {
     const { t } = useTranslation();
     const { data, isFetching } = useGetOutputPortAccessTypesQuery();
     const { isVisible, handleOpen, handleClose } = useModal();
-    const [initial, setInitial] = useState<OutputPortAccessTypesGetItem | undefined>(undefined);
+    const [initial, setInitial] = useState<OutputPortAccessTypesGetItem>();
     const [removeAccessType] = useRemoveOutputPortAccessTypeMutation();
     const inviteOnlyAccessTypes = data?.output_port_access_types.filter(
         (accessType) => accessType.access_function === OutputPortAccessFunction.Private,
