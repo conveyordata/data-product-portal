@@ -1,6 +1,7 @@
 import { HttpResponse, http } from 'msw';
 import { describe, expect, it } from 'vitest';
 import { ConsumersTable } from '@/pages/output-port/components/dataset-tabs/consumers-tab/components/consumers-table/consumers-table.component.tsx';
+import { ConsumersTab } from '@/pages/output-port/components/dataset-tabs/consumers-tab/consumers-tab.tsx';
 import {
     AbstractDataProductType,
     AccessDurationType,
@@ -151,5 +152,30 @@ describe('ConsumersTable', () => {
         await userEvent.click(await screen.findByRole('button', { name: 'Confirm' }));
 
         await waitFor(() => expect(body).toEqual({ consuming_data_product_id: 'consumer-1' }));
+    });
+
+    it('refreshes the consumers after renewing access', async () => {
+        let renewed = false;
+        mockApi();
+        server.use(
+            http.get('*/api/v2/data_products/dp-1/output_ports/op-1/input_ports/', () =>
+                HttpResponse.json({
+                    input_ports: [consumer(renewed ? InputPortStatus.Approved : InputPortStatus.Revoked, null, null)],
+                }),
+            ),
+            http.post('*/api/v2/data_products/dp-1/output_ports/op-1/input_ports/renew', () => {
+                renewed = true;
+                return HttpResponse.json(null);
+            }),
+        );
+        renderWithProviders(<ConsumersTab dataProductId="dp-1" outputPortId="op-1" />, { routerProps: {} });
+
+        const renewButton = await screen.findByRole('button', { name: 'Renew Access' });
+        await waitFor(() => expect(renewButton).toBeEnabled());
+        await userEvent.click(renewButton);
+        await userEvent.click(await screen.findByRole('button', { name: 'Confirm' }));
+
+        expect(await screen.findByRole('button', { name: 'Revoke Access' })).toBeInTheDocument();
+        expect(screen.queryByRole('button', { name: 'Renew Access' })).not.toBeInTheDocument();
     });
 });
