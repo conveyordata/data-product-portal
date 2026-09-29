@@ -201,6 +201,58 @@ class InputPortService:
         # used in the get_link call above. Instead, we return a dataclass with only the relevant information.
         return RedactedInputPort.of(current_link, pending_request.requested_by_id)
 
+    def renew_output_port_as_input_port(
+        self,
+        *,
+        data_product_id: UUID,
+        output_port_id: UUID,
+        consuming_data_product_id: UUID,
+        actor: User,
+    ) -> RedactedInputPort:
+        from app.abstract_data_product.service import AbstractDataProductService
+
+        current_link = self.get_link(
+            data_product_id,
+            output_port_id,
+            consuming_data_product_id,
+            execution_options={"skip_data_product_visibility_filter": True},
+        )
+        if current_link.pending_request is not None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="A request is already pending for this input port",
+            )
+        active_grant = current_link.active_grant
+        if active_grant is not None and active_grant.valid_until is None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="This input port already has permanent access; there is nothing to renew",
+            )
+
+        previous_request = current_link.latest_request
+        access_duration = AbstractDataProductService(self.db)._resolve_access_duration(
+            current_link.consuming_abstract_data_product, current_link.output_port
+        )
+        now = datetime.now(timezone.utc)
+        request = InputPortRequestModel(
+            justification=previous_request.justification,
+            requested_by_id=actor.id,
+            requested_on=now,
+            access_duration_type=access_duration.access_duration_type,
+            requested_duration_days=access_duration.days,
+            input_port=current_link,
+            access_mode_id=previous_request.access_mode_id,
+        )
+        self.db.add(request)
+        self.db.flush()
+        self.approve_request(request, now=now, decided_by=actor)
+
+        return RedactedInputPort(
+            output_port_id=current_link.output_port_id,
+            consuming_abstract_data_product_id=current_link.consuming_abstract_data_product_id,
+            requested_by_id=previous_request.requested_by_id,
+        )
+
     def deny_output_port_as_input_port(
         self,
         *,
