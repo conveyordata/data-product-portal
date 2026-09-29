@@ -80,6 +80,7 @@ describe('OutputPortForm', () => {
         expect(option('Unrestricted')).toHaveClass('ant-select-item-option-disabled');
         expect(option('Restricted')).toHaveClass('ant-select-item-option-disabled');
         expect(option('Private')).not.toHaveClass('ant-select-item-option-disabled');
+        expect(screen.getByText('Hidden Data Products can only have hidden Output Ports')).toBeInTheDocument();
     });
 
     it('does not change an existing access type while access types load', async () => {

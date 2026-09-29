@@ -1,3 +1,4 @@
+import { InfoCircleOutlined } from '@ant-design/icons';
 import {
     Alert,
     Button,
@@ -15,6 +16,7 @@ import {
     Space,
     Tooltip,
     Typography,
+    theme,
 } from 'antd';
 import { type Ref, useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -57,11 +59,7 @@ import {
     createMarketplaceOutputPortPath,
     createOutputPortPath,
 } from '@/types/navigation.ts';
-import {
-    ACCESS_FUNCTION_ORDER,
-    fitsDataProductVisibility,
-    getAccessFunctionLabel,
-} from '@/utils/access-function.helper.tsx';
+import { compareAccessFunctions, fitsDataProductVisibility } from '@/utils/access-function.helper.tsx';
 import { useGetDataProductOwnerIds } from '@/utils/data-product-user-role.helper';
 import { useGetDatasetOwnerIds } from '@/utils/dataset-user-role.helper.ts';
 import { dispatchMessage } from '@/utils/feedback.ts';
@@ -240,23 +238,20 @@ export function AccessTypeSection({
     hiddenDataProduct: boolean;
 }) {
     const { t } = useTranslation();
+    const { token } = theme.useToken();
     const { data: { output_port_access_types: accessTypes = [] } = {} } = useGetOutputPortAccessTypesQuery();
 
-    const options = ACCESS_FUNCTION_ORDER.map((accessFunction) => {
-        const allowed = fitsDataProductVisibility(accessFunction, hiddenDataProduct);
-        return {
-            label: allowed
-                ? getAccessFunctionLabel(t, accessFunction)
-                : `${getAccessFunctionLabel(t, accessFunction)} (${t('not allowed for hidden Data Products')})`,
-            options: accessTypes
-                .filter((accessType) => accessType.access_function === accessFunction)
-                .map((accessType) => ({
-                    label: accessType.name,
-                    value: accessType.id,
-                    disabled: !allowed,
-                })),
-        };
-    }).filter((group) => group.options.length > 0);
+    const options = accessTypes
+        .map((accessType) => ({
+            label: accessType.name,
+            value: accessType.id,
+            accessFunction: accessType.access_function,
+            disabled: !fitsDataProductVisibility(accessType.access_function, hiddenDataProduct),
+        }))
+        .sort(
+            (a, b) =>
+                Number(a.disabled) - Number(b.disabled) || compareAccessFunctions(a.accessFunction, b.accessFunction),
+        );
 
     const getDescription = (id?: string | number | null) =>
         accessTypes.find((accessType) => accessType.id === id)?.description;
@@ -276,10 +271,39 @@ export function AccessTypeSection({
                     return (
                         <Flex vertical>
                             {option.label}
-                            {description && <Typography.Text type="secondary">{description}</Typography.Text>}
+                            {description && (
+                                <Typography.Text type="secondary" disabled={option.data.disabled}>
+                                    {description}
+                                </Typography.Text>
+                            )}
                         </Flex>
                     );
                 }}
+                popupRender={(menu) =>
+                    hiddenDataProduct ? (
+                        <>
+                            {menu}
+                            <Flex
+                                gap="small"
+                                style={{
+                                    // Negative margins cancel antd's Select popup padding (paddingXXS) so the footer spans the full width
+                                    margin: `${token.paddingXXS}px -${token.paddingXXS}px -${token.paddingXXS}px`,
+                                    padding: `${token.paddingXS}px ${token.paddingXXS + token.controlPaddingHorizontal}px`,
+                                    borderTop: `${token.lineWidth}px solid ${token.colorSplit}`,
+                                    borderRadius: `0 0 ${token.borderRadiusLG}px ${token.borderRadiusLG}px`,
+                                    background: token.colorPrimaryBg,
+                                }}
+                            >
+                                <InfoCircleOutlined style={{ color: token.colorPrimary }} />
+                                <Typography.Text>
+                                    {t('Hidden Data Products can only have hidden Output Ports')}
+                                </Typography.Text>
+                            </Flex>
+                        </>
+                    ) : (
+                        menu
+                    )
+                }
             />
             {selectedDescription && <Typography.Text type="secondary">{selectedDescription}</Typography.Text>}
         </Flex>
