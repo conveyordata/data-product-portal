@@ -1,13 +1,18 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
-from starlette import status
 
 from app.core.authz import Action, Authorization
 from app.core.authz.resolvers import EmptyResolver
 from app.database.deps import get_db_session
-from app.groups.schema_request import GroupCreate, GroupUpdate
+from app.groups.schema_request import (
+    GroupCreate,
+    GroupMembersAdd,
+    GroupMembersRemove,
+    GroupMembersReplace,
+    GroupUpdate,
+)
 from app.groups.schema_response import (
     GroupCreateResponse,
     GroupGet,
@@ -73,3 +78,69 @@ def delete_group(
     db: Session = Depends(get_db_session, scope="function"),
 ) -> None:
     GroupService(db).delete_group(group_id=id)
+
+@router.post(
+    "/{id}/members",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                Action.GLOBAL__UPDATE_GROUP,
+                EmptyResolver,
+            )
+        ),
+    ],
+)
+def add_group_members(
+    id: UUID,
+    request: GroupMembersAdd,
+    db: Session = Depends(get_db_session, scope="function"),
+) -> None:
+    GroupService(db).add_members(
+        group_id=id,
+        member_identity_ids=request.member_identity_ids,
+    )
+
+@router.delete(
+    "/{id}/members",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                Action.GLOBAL__UPDATE_GROUP,
+                EmptyResolver,
+            )
+        ),
+    ],
+)
+def remove_group_members(
+    id: UUID,
+    request: GroupMembersRemove,
+    db: Session = Depends(get_db_session, scope="function"),
+) -> None:
+    GroupService(db).remove_members(
+        group_id=id,
+        member_identity_ids=request.member_identity_ids,
+    )
+
+@router.put(
+    "/{id}/members",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                Action.GLOBAL__UPDATE_GROUP,
+                EmptyResolver,
+            )
+        ),
+    ],
+)
+def replace_group_members(
+    id: UUID,
+    request: GroupMembersReplace,
+    db: Session = Depends(get_db_session, scope="function"),
+) -> None:
+    GroupService(db).replace_members(
+        group_id=id,
+        member_identity_ids=request.member_identity_ids,
+    )

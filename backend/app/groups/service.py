@@ -1,8 +1,9 @@
-from typing import Sequence
+from typing import Sequence, Any, Iterator
 from uuid import UUID
 
 from fastapi import HTTPException, status
-from sqlalchemy import asc, select
+from sqlalchemy import asc, func, select, delete
+from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
 
 from app.core.authz import Authorization
@@ -13,14 +14,14 @@ from app.groups.schema_response import (
     GroupGet,
     GroupUpdateResponse,
 )
-from app.identities.model import ensure_identity_exists
-from app.machine_users.model import MachineUser
-from app.users.model import User
+from app.identities.model import Identity
+from app.identities.type import IdentityType
 
 
 class GroupService:
     def __init__(self, db: Session) -> None:
         self.db = db
+        self.authorizer = Authorization()
 
     def list_memberships(self, group_id: UUID | None = None) -> list[GroupMembership]:
         query = select(GroupMembership)
@@ -29,73 +30,79 @@ class GroupService:
 
         return list(self.db.scalars(query).all())
 
-    def add_member(self, group_id: UUID, member_identity_id: UUID) -> GroupMembership:
+    def add_members(
+            self,
+            group_id: UUID,
+            member_identity_ids: list[UUID],
+    ) -> None:
+        """
+        Adds members in batch to a group. Already existing members are ignored.
+        """
+        requested_ids = set(member_identity_ids)
+        if not requested_ids:
+            return
+
         ensure_group_exists(group_id, self.db)
-        member = ensure_identity_exists(member_identity_id, self.db)
+        self._validate_member_identities(requested_ids)
 
-        if not isinstance(member, (User, MachineUser)):
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Only users and machine users can be group members.",
-            )
-
-        if self.has_member(group_id, member_identity_id):
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="The identity is already a member of this group.",
-            )
-
-        membership = GroupMembership(
-            group_id=group_id,
-            member_identity_id=member_identity_id,
-        )
-        self.db.add(membership)
+        inserted_ids = self._insert_member_ids(group_id, requested_ids)
+        self._add_members_auth(group_id, inserted_ids)
         self.db.flush()
+        return
 
-        # Refresh Casbin graph after member addition
-        authorizer = Authorization()
-        authorizer.assign_global_group_membership(
-            member_identity_id=member_identity_id,
-            group_id=group_id,
+    def remove_members(
+        self,
+        group_id: UUID,
+        member_identity_ids: list[UUID],
+    ) -> None:
+        requested_ids = set(member_identity_ids)
+        if not requested_ids:
+            return
+        
+        ensure_group_exists(group_id, self.db)
+
+        removed_ids = self._remove_member_ids(group_id, requested_ids)
+        self._remove_members_auth(group_id, removed_ids)
+
+    def replace_members(
+        self,
+        group_id: UUID,
+        member_identity_ids: list[UUID],
+    ) -> None:
+        """
+        Allows a full replacement of the members of a group.
+        """
+        requested_ids = set(member_identity_ids)
+        if not requested_ids:
+            return
+
+        ensure_group_exists(group_id, self.db)
+        self._validate_member_identities(requested_ids)
+
+        current_ids = set(
+            self.db.scalars(
+                select(GroupMembership.member_identity_id).where(
+                    GroupMembership.group_id == group_id,
+                )
+            ).all()
         )
-        authorizer.assign_resource_group_membership(
-            member_identity_id=member_identity_id, group_id=group_id
-        )
 
-        return membership
+        ids_to_add = requested_ids - current_ids
+        ids_to_remove = current_ids - requested_ids
 
-    def remove_member(self, group_id: UUID, member_identity_id: UUID):
-        membership = self.get_membership(group_id, member_identity_id)
+        inserted_ids = self._insert_member_ids(group_id, ids_to_add) if ids_to_add else []
+        removed_ids = self._remove_member_ids(group_id, ids_to_remove) if ids_to_remove else []
 
-        # Revoke the roles before removing the member
-        authorizer = Authorization()
-        authorizer.revoke_global_group_membership(
-            member_identity_id=member_identity_id,
-            group_id=group_id,
-        )
-        authorizer.revoke_resource_group_membership(
-            member_identity_id=member_identity_id, group_id=group_id
-        )
-
-        self.db.delete(membership)
-        self.db.flush()
+        self._add_members_auth(group_id, inserted_ids)
+        self._remove_members_auth(group_id, removed_ids)
 
     def delete_group(self, *, group_id: UUID) -> None:
         group = ensure_group_exists(group_id, self.db)
 
         # Removes assignments for users against this group
-        authorizer = Authorization()
-        for membership in self.list_memberships(group_id):
-            authorizer.revoke_resource_group_membership(
-                member_identity_id=membership.member_identity_id,
-                group_id=group_id,
-            )
-            authorizer.revoke_global_group_membership(
-                member_identity_id=membership.member_identity_id,
-                group_id=group_id,
-            )
+        self._remove_members_auth(group_id, (membership.member_identity_id for membership in self.list_memberships(group_id)))
         # Remove assignments where the group itself is the subject.
-        authorizer.clear_assignments_for_user(user_id=group_id)
+        self.authorizer.clear_assignments_for_user(user_id=group_id)
 
         self.db.delete(group)
         self.db.flush()
@@ -160,3 +167,91 @@ class GroupService:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="A group with this external ID already exists.",
             )
+
+    def _validate_member_identities(
+            self,
+            member_identity_ids: set[UUID],
+    ) -> None:
+        """
+        Validates a list of member identity IDs to ensure they exist and correspond to
+        users or machine users.
+
+        For performance reasons, only one query is performed to check the validity
+        of both conditions.
+        """
+        valid_count = self.db.scalar(
+            select(func.count(Identity.id)).where(
+                Identity.id.in_(member_identity_ids),
+                Identity.type.in_(
+                    (
+                        IdentityType.USER.value,
+                        IdentityType.MACHINE_USER.value,
+                    )
+                ),
+            )
+        )
+        if valid_count != len(member_identity_ids):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=(
+                    "All member identities must exist and be users "
+                    "or machine users."
+                ),
+            )
+
+    def _add_members_auth(self, group_id: UUID, member_identity_ids: Iterator[UUID]) -> None:
+        for member_identity_id in member_identity_ids:
+            self.authorizer.assign_global_group_membership(
+                member_identity_id=member_identity_id,
+                group_id=group_id,
+            )
+            self.authorizer.assign_resource_group_membership(
+                member_identity_id=member_identity_id,
+                group_id=group_id,
+            )
+            
+    def _remove_members_auth(self, group_id: UUID, member_identity_ids: Iterator[UUID]) -> None:
+        for member_identity_id in member_identity_ids:
+            self.authorizer.revoke_global_group_membership(
+                member_identity_id=member_identity_id,
+                group_id=group_id,
+            )
+            self.authorizer.revoke_resource_group_membership(
+                member_identity_id=member_identity_id,
+                group_id=group_id,
+            )
+    
+    def _insert_member_ids(self, group_id: UUID, member_identity_ids: set[UUID]) -> Sequence[UUID]:
+        """
+        Inserts a list of member identity IDs into the group_memberships table.
+        Already existing members are ignored.
+        """
+        return self.db.scalars(
+            insert(GroupMembership)
+            .values(
+                [
+                    {
+                        "group_id": group_id,
+                        "member_identity_id": member_identity_id,
+                    }
+                    for member_identity_id in member_identity_ids
+                ]
+            )
+            .on_conflict_do_nothing(
+                index_elements=[
+                    GroupMembership.group_id,
+                    GroupMembership.member_identity_id,
+                ]
+            )
+            .returning(GroupMembership.member_identity_id)
+        ).all()
+        
+    def _remove_member_ids(self, group_id: UUID, member_identity_ids: set[UUID]) -> Sequence[UUID]:
+        return self.db.scalars(
+            delete(GroupMembership)
+            .where(
+                GroupMembership.group_id == group_id,
+                GroupMembership.member_identity_id.in_(member_identity_ids),
+            )
+            .returning(GroupMembership.member_identity_id)
+        ).all()
