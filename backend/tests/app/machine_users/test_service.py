@@ -127,9 +127,9 @@ class TestMachineUserService:
         machine_user = MachineUserFactory()
         group_service = GroupService(session)
 
-        group_service.add_member(
+        group_service.add_members(
             group_id=group.id,
-            member_identity_id=machine_user.id,
+            member_identity_ids=[machine_user.id],
         )
         assert group_service.has_member(group.id, machine_user.id)
 

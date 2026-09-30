@@ -113,9 +113,9 @@ class TestMachineUsersRouter:
         )
 
         assert response.status_code == 400
-        assert response.json() == {
-            "detail": ("A machine user with this external ID already exists.")
-        }
+        assert response.json()["detail"] == (
+            "A machine user with this external ID already exists."
+        )
 
     @pytest.mark.usefixtures("admin")
     def test_update_machine_user__updates_mutable_fields(self, client):

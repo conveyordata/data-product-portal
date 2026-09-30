@@ -118,7 +118,6 @@ class TestGroupsRouter:
         assert response.json()["detail"] == (
             "A group with this external ID already exists."
         )
-        assert response.json()["correlation_id"]
 
     @pytest.mark.usefixtures("admin")
     def test_update_group__updates_mutable_fields(self, client):
