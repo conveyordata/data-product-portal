@@ -9,7 +9,8 @@ from app.data_products.output_ports.enums import OutputPortAccessFunction
 class OutputPortAccessTypeFactory(factory.alchemy.SQLAlchemyModelFactory):
     class Meta:
         model = OutputPortAccessType
-        # Without an explicit name this returns the seeded access type of access_function.
+        # This returns the default access type for access_function
+        # (created per test in conftest) instead of inserting a duplicate.
         sqlalchemy_get_or_create = ("name",)
 
     id = factory.Faker("uuid4")
