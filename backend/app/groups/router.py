@@ -81,6 +81,16 @@ def delete_group(
     GroupService(db).delete_group(group_id=id)
 
 
+@router.get("/{id}/members")
+def get_group_members(
+    id: UUID,
+    db: Session = Depends(get_db_session, scope="function"),
+) -> GroupMembershipsGetResponse:
+    return GroupMembershipsGetResponse(
+        members=GroupService(db).get_members(id),
+    )
+
+
 @router.post(
     "/{id}/members",
     status_code=status.HTTP_204_NO_CONTENT,
@@ -99,29 +109,6 @@ def add_group_members(
     db: Session = Depends(get_db_session, scope="function"),
 ) -> None:
     GroupService(db).add_members(
-        group_id=id,
-        member_identity_ids=request.member_identity_ids,
-    )
-
-
-@router.delete(
-    "/{id}/members",
-    status_code=status.HTTP_204_NO_CONTENT,
-    dependencies=[
-        Depends(
-            Authorization.enforce(
-                Action.GLOBAL__UPDATE_GROUP,
-                EmptyResolver,
-            )
-        ),
-    ],
-)
-def remove_group_members(
-    id: UUID,
-    request: GroupMembersRemove,
-    db: Session = Depends(get_db_session, scope="function"),
-) -> None:
-    GroupService(db).remove_members(
         group_id=id,
         member_identity_ids=request.member_identity_ids,
     )
@@ -150,11 +137,24 @@ def replace_group_members(
     )
 
 
-@router.get("/{id}/members")
-def get_group_members(
+@router.delete(
+    "/{id}/members",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                Action.GLOBAL__UPDATE_GROUP,
+                EmptyResolver,
+            )
+        ),
+    ],
+)
+def remove_group_members(
     id: UUID,
+    request: GroupMembersRemove,
     db: Session = Depends(get_db_session, scope="function"),
-) -> GroupMembershipsGetResponse:
-    return GroupMembershipsGetResponse(
-        members=GroupService(db).get_members(id),
+) -> None:
+    GroupService(db).remove_members(
+        group_id=id,
+        member_identity_ids=request.member_identity_ids,
     )
