@@ -95,9 +95,6 @@ export function OutputPortAccessTypeFormModal({ onClose, initial, isLastInviteOn
                 >
                     <Input />
                 </Form.Item>
-                <Form.Item name="description" label={t('Description')}>
-                    <Input.TextArea />
-                </Form.Item>
                 <Form.Item
                     name="access_function"
                     label={t('Function')}
@@ -111,6 +108,9 @@ export function OutputPortAccessTypeFormModal({ onClose, initial, isLastInviteOn
                             label: getAccessFunctionInfo(t, value).label,
                         }))}
                     />
+                </Form.Item>
+                <Form.Item name="description" label={t('Description')}>
+                    <Input.TextArea />
                 </Form.Item>
             </Form>
         </Modal>
