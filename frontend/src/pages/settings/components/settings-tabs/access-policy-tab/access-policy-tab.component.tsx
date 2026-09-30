@@ -10,8 +10,8 @@ export function AccessPolicyTab() {
     return (
         <Flex vertical gap={token.sizeXL}>
             <AccessDurations />
-            <AccessModes />
             <OutputPortAccessTypesTable />
+            <AccessModes />
         </Flex>
     );
 }
