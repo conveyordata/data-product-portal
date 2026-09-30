@@ -224,6 +224,11 @@ type GetGroupParams struct {
 	ID uuid.UUID
 }
 
+// GetGroupMembersParams is parameters of get_group_members operation.
+type GetGroupMembersParams struct {
+	ID uuid.UUID
+}
+
 // GetInputPortsForOutputPortParams is parameters of get_input_ports_for_output_port operation.
 type GetInputPortsForOutputPortParams struct {
 	DataProductID uuid.UUID

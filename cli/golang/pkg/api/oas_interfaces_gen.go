@@ -261,6 +261,10 @@ type GetExplorationsRes interface {
 	getExplorationsRes()
 }
 
+type GetGroupMembersRes interface {
+	getGroupMembersRes()
+}
+
 type GetGroupRes interface {
 	getGroupRes()
 }

@@ -73,6 +73,7 @@ const (
 	GetExplorationInputPortsOperation                 OperationName = "GetExplorationInputPorts"
 	GetExplorationsOperation                          OperationName = "GetExplorations"
 	GetGroupOperation                                 OperationName = "GetGroup"
+	GetGroupMembersOperation                          OperationName = "GetGroupMembers"
 	GetGroupsOperation                                OperationName = "GetGroups"
 	GetInputPortsForOutputPortOperation               OperationName = "GetInputPortsForOutputPort"
 	GetJwtTokenOperation                              OperationName = "GetJwtToken"

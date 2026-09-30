@@ -6018,6 +6018,43 @@ func (s *GroupGet) SetDisplayName(val string) {
 
 func (*GroupGet) getGroupRes() {}
 
+// Ref: #/components/schemas/GroupMemberIdentityGet
+type GroupMemberIdentityGet struct {
+	ID         uuid.UUID    `json:"id"`
+	Type       IdentityType `json:"type"`
+	ExternalID string       `json:"external_id"`
+}
+
+// GetID returns the value of ID.
+func (s *GroupMemberIdentityGet) GetID() uuid.UUID {
+	return s.ID
+}
+
+// GetType returns the value of Type.
+func (s *GroupMemberIdentityGet) GetType() IdentityType {
+	return s.Type
+}
+
+// GetExternalID returns the value of ExternalID.
+func (s *GroupMemberIdentityGet) GetExternalID() string {
+	return s.ExternalID
+}
+
+// SetID sets the value of ID.
+func (s *GroupMemberIdentityGet) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+// SetType sets the value of Type.
+func (s *GroupMemberIdentityGet) SetType(val IdentityType) {
+	s.Type = val
+}
+
+// SetExternalID sets the value of ExternalID.
+func (s *GroupMemberIdentityGet) SetExternalID(val string) {
+	s.ExternalID = val
+}
+
 // Ref: #/components/schemas/GroupMembersAdd
 type GroupMembersAdd struct {
 	MemberIdentityIds []uuid.UUID `json:"member_identity_ids"`
@@ -6062,6 +6099,60 @@ func (s *GroupMembersReplace) GetMemberIdentityIds() []uuid.UUID {
 func (s *GroupMembersReplace) SetMemberIdentityIds(val []uuid.UUID) {
 	s.MemberIdentityIds = val
 }
+
+// Ref: #/components/schemas/GroupMembershipGet
+type GroupMembershipGet struct {
+	GroupID          uuid.UUID              `json:"group_id"`
+	MemberIdentityID uuid.UUID              `json:"member_identity_id"`
+	Member           GroupMemberIdentityGet `json:"member"`
+}
+
+// GetGroupID returns the value of GroupID.
+func (s *GroupMembershipGet) GetGroupID() uuid.UUID {
+	return s.GroupID
+}
+
+// GetMemberIdentityID returns the value of MemberIdentityID.
+func (s *GroupMembershipGet) GetMemberIdentityID() uuid.UUID {
+	return s.MemberIdentityID
+}
+
+// GetMember returns the value of Member.
+func (s *GroupMembershipGet) GetMember() GroupMemberIdentityGet {
+	return s.Member
+}
+
+// SetGroupID sets the value of GroupID.
+func (s *GroupMembershipGet) SetGroupID(val uuid.UUID) {
+	s.GroupID = val
+}
+
+// SetMemberIdentityID sets the value of MemberIdentityID.
+func (s *GroupMembershipGet) SetMemberIdentityID(val uuid.UUID) {
+	s.MemberIdentityID = val
+}
+
+// SetMember sets the value of Member.
+func (s *GroupMembershipGet) SetMember(val GroupMemberIdentityGet) {
+	s.Member = val
+}
+
+// Ref: #/components/schemas/GroupMembershipsGetResponse
+type GroupMembershipsGetResponse struct {
+	Members []GroupMembershipGet `json:"members"`
+}
+
+// GetMembers returns the value of Members.
+func (s *GroupMembershipsGetResponse) GetMembers() []GroupMembershipGet {
+	return s.Members
+}
+
+// SetMembers sets the value of Members.
+func (s *GroupMembershipsGetResponse) SetMembers(val []GroupMembershipGet) {
+	s.Members = val
+}
+
+func (*GroupMembershipsGetResponse) getGroupMembersRes() {}
 
 // Ref: #/components/schemas/GroupUpdate
 type GroupUpdate struct {
@@ -6228,6 +6319,7 @@ func (*HTTPValidationError) getEnvironmentsRes()                          {}
 func (*HTTPValidationError) getExplorationInputPortsRes()                 {}
 func (*HTTPValidationError) getExplorationRes()                           {}
 func (*HTTPValidationError) getExplorationsRes()                          {}
+func (*HTTPValidationError) getGroupMembersRes()                          {}
 func (*HTTPValidationError) getGroupRes()                                 {}
 func (*HTTPValidationError) getGroupsRes()                                {}
 func (*HTTPValidationError) getInputPortsForOutputPortRes()               {}
@@ -6329,6 +6421,55 @@ func (*HTTPValidationError) updateTechnicalAssetRes()                     {}
 func (*HTTPValidationError) updateTechnicalAssetStatusRes()               {}
 func (*HTTPValidationError) updateThemeSettingsRes()                      {}
 func (*HTTPValidationError) validateResourceNameRes()                     {}
+
+// Ref: #/components/schemas/IdentityType
+type IdentityType string
+
+const (
+	IdentityTypeUser        IdentityType = "user"
+	IdentityTypeGroup       IdentityType = "group"
+	IdentityTypeMachineUser IdentityType = "machine_user"
+)
+
+// AllValues returns all IdentityType values.
+func (IdentityType) AllValues() []IdentityType {
+	return []IdentityType{
+		IdentityTypeUser,
+		IdentityTypeGroup,
+		IdentityTypeMachineUser,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s IdentityType) MarshalText() ([]byte, error) {
+	switch s {
+	case IdentityTypeUser:
+		return []byte(s), nil
+	case IdentityTypeGroup:
+		return []byte(s), nil
+	case IdentityTypeMachineUser:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *IdentityType) UnmarshalText(data []byte) error {
+	switch IdentityType(data) {
+	case IdentityTypeUser:
+		*s = IdentityTypeUser
+		return nil
+	case IdentityTypeGroup:
+		*s = IdentityTypeGroup
+		return nil
+	case IdentityTypeMachineUser:
+		*s = IdentityTypeMachineUser
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
 
 type IngestOutputPortContractNotFoundApplicationJSON jx.Raw
 

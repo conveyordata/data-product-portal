@@ -194,13 +194,17 @@ from .graph import Graph
 from .group_create import GroupCreate
 from .group_create_response import GroupCreateResponse
 from .group_get import GroupGet
+from .group_member_identity_get import GroupMemberIdentityGet
 from .group_members_add import GroupMembersAdd
 from .group_members_remove import GroupMembersRemove
 from .group_members_replace import GroupMembersReplace
+from .group_membership_get import GroupMembershipGet
+from .group_memberships_get_response import GroupMembershipsGetResponse
 from .group_update import GroupUpdate
 from .group_update_response import GroupUpdateResponse
 from .groups_get_response import GroupsGetResponse
 from .http_validation_error import HTTPValidationError
+from .identity_type import IdentityType
 from .ingest_output_port_contract_yaml_body import IngestOutputPortContractYamlBody
 from .input_port_event import InputPortEvent
 from .input_port_request import InputPortRequest
@@ -540,13 +544,17 @@ __all__ = (
     "GroupCreate",
     "GroupCreateResponse",
     "GroupGet",
+    "GroupMemberIdentityGet",
     "GroupMembersAdd",
+    "GroupMembershipGet",
+    "GroupMembershipsGetResponse",
     "GroupMembersRemove",
     "GroupMembersReplace",
     "GroupsGetResponse",
     "GroupUpdate",
     "GroupUpdateResponse",
     "HTTPValidationError",
+    "IdentityType",
     "IngestOutputPortContractYamlBody",
     "InputPortEvent",
     "InputPortRequest",

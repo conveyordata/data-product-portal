@@ -4,6 +4,8 @@ from pydantic import ConfigDict, Field, field_validator
 
 from app.shared.schema import ORMModel
 
+MAX_GROUP_MEMBERS_PER_REQUEST = 30
+
 
 class GroupCreate(ORMModel):
     external_id: str
@@ -27,12 +29,18 @@ class GroupMembersRequest(ORMModel):
 
 
 class GroupMembersAdd(GroupMembersRequest):
-    member_identity_ids: list[UUID] = Field(min_length=1)
+    member_identity_ids: list[UUID] = Field(
+        min_length=1, max_length=MAX_GROUP_MEMBERS_PER_REQUEST
+    )
 
 
 class GroupMembersRemove(GroupMembersRequest):
-    member_identity_ids: list[UUID] = Field(min_length=1)
+    member_identity_ids: list[UUID] = Field(
+        min_length=1, max_length=MAX_GROUP_MEMBERS_PER_REQUEST
+    )
 
 
 class GroupMembersReplace(GroupMembersRequest):
-    member_identity_ids: list[UUID] = Field(min_length=1)
+    member_identity_ids: list[UUID] = Field(
+        min_length=1, max_length=MAX_GROUP_MEMBERS_PER_REQUEST
+    )

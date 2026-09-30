@@ -3084,6 +3084,29 @@ func (s *GlobalRoleAssignmentResponse) Validate() error {
 	return nil
 }
 
+func (s *GroupMemberIdentityGet) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.Type.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "type",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
 func (s *GroupMembersAdd) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer
@@ -3097,8 +3120,8 @@ func (s *GroupMembersAdd) Validate() error {
 		if err := (validate.Array{
 			MinLength:    1,
 			MinLengthSet: true,
-			MaxLength:    0,
-			MaxLengthSet: false,
+			MaxLength:    30,
+			MaxLengthSet: true,
 		}).ValidateLength(len(s.MemberIdentityIds)); err != nil {
 			return errors.Wrap(err, "array")
 		}
@@ -3128,8 +3151,8 @@ func (s *GroupMembersRemove) Validate() error {
 		if err := (validate.Array{
 			MinLength:    1,
 			MinLengthSet: true,
-			MaxLength:    0,
-			MaxLengthSet: false,
+			MaxLength:    30,
+			MaxLengthSet: true,
 		}).ValidateLength(len(s.MemberIdentityIds)); err != nil {
 			return errors.Wrap(err, "array")
 		}
@@ -3159,8 +3182,8 @@ func (s *GroupMembersReplace) Validate() error {
 		if err := (validate.Array{
 			MinLength:    1,
 			MinLengthSet: true,
-			MaxLength:    0,
-			MaxLengthSet: false,
+			MaxLength:    30,
+			MaxLengthSet: true,
 		}).ValidateLength(len(s.MemberIdentityIds)); err != nil {
 			return errors.Wrap(err, "array")
 		}
@@ -3168,6 +3191,69 @@ func (s *GroupMembersReplace) Validate() error {
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
 			Name:  "member_identity_ids",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *GroupMembershipGet) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.Member.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "member",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *GroupMembershipsGetResponse) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if s.Members == nil {
+			return errors.New("nil is invalid value")
+		}
+		var failures []validate.FieldError
+		for i, elem := range s.Members {
+			if err := func() error {
+				if err := elem.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				failures = append(failures, validate.FieldError{
+					Name:  fmt.Sprintf("[%d]", i),
+					Error: err,
+				})
+			}
+		}
+		if len(failures) > 0 {
+			return &validate.Error{Fields: failures}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "members",
 			Error: err,
 		})
 	}
@@ -3235,6 +3321,19 @@ func (s *HTTPValidationError) Validate() error {
 		return &validate.Error{Fields: failures}
 	}
 	return nil
+}
+
+func (s IdentityType) Validate() error {
+	switch s {
+	case "user":
+		return nil
+	case "group":
+		return nil
+	case "machine_user":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
 }
 
 func (s *InputPortRequestBase) Validate() error {

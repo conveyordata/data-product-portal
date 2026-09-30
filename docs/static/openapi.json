@@ -8522,6 +8522,47 @@
       }
     },
     "/api/v2/groups/{id}/members": {
+      "get": {
+        "tags": [
+          "Groups"
+        ],
+        "summary": "Get Group Members",
+        "operationId": "get_group_members",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupMembershipsGetResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
       "post": {
         "tags": [
           "Groups"
@@ -8566,50 +8607,6 @@
           }
         }
       },
-      "delete": {
-        "tags": [
-          "Groups"
-        ],
-        "summary": "Remove Group Members",
-        "operationId": "remove_group_members",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Id"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/GroupMembersRemove"
-              }
-            }
-          }
-        },
-        "responses": {
-          "204": {
-            "description": "Successful Response"
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
       "put": {
         "tags": [
           "Groups"
@@ -8634,6 +8631,50 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/GroupMembersReplace"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Groups"
+        ],
+        "summary": "Remove Group Members",
+        "operationId": "remove_group_members",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GroupMembersRemove"
               }
             }
           }
@@ -13715,6 +13756,29 @@
         ],
         "title": "GroupGet"
       },
+      "GroupMemberIdentityGet": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "type": {
+            "$ref": "#/components/schemas/IdentityType"
+          },
+          "external_id": {
+            "type": "string",
+            "title": "External Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "type",
+          "external_id"
+        ],
+        "title": "GroupMemberIdentityGet"
+      },
       "GroupMembersAdd": {
         "properties": {
           "member_identity_ids": {
@@ -13723,6 +13787,7 @@
               "format": "uuid"
             },
             "type": "array",
+            "maxItems": 30,
             "minItems": 1,
             "title": "Member Identity Ids"
           }
@@ -13741,6 +13806,7 @@
               "format": "uuid"
             },
             "type": "array",
+            "maxItems": 30,
             "minItems": 1,
             "title": "Member Identity Ids"
           }
@@ -13759,6 +13825,7 @@
               "format": "uuid"
             },
             "type": "array",
+            "maxItems": 30,
             "minItems": 1,
             "title": "Member Identity Ids"
           }
@@ -13768,6 +13835,46 @@
           "member_identity_ids"
         ],
         "title": "GroupMembersReplace"
+      },
+      "GroupMembershipGet": {
+        "properties": {
+          "group_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Group Id"
+          },
+          "member_identity_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Member Identity Id"
+          },
+          "member": {
+            "$ref": "#/components/schemas/GroupMemberIdentityGet"
+          }
+        },
+        "type": "object",
+        "required": [
+          "group_id",
+          "member_identity_id",
+          "member"
+        ],
+        "title": "GroupMembershipGet"
+      },
+      "GroupMembershipsGetResponse": {
+        "properties": {
+          "members": {
+            "items": {
+              "$ref": "#/components/schemas/GroupMembershipGet"
+            },
+            "type": "array",
+            "title": "Members"
+          }
+        },
+        "type": "object",
+        "required": [
+          "members"
+        ],
+        "title": "GroupMembershipsGetResponse"
       },
       "GroupUpdate": {
         "properties": {
@@ -13825,6 +13932,15 @@
         },
         "type": "object",
         "title": "HTTPValidationError"
+      },
+      "IdentityType": {
+        "type": "string",
+        "enum": [
+          "user",
+          "group",
+          "machine_user"
+        ],
+        "title": "IdentityType"
       },
       "InputPortEvent": {
         "properties": {

@@ -426,6 +426,12 @@ type Invoker interface {
 	//
 	// GET /api/v2/groups/{id}
 	GetGroup(ctx context.Context, params GetGroupParams) (GetGroupRes, error)
+	// GetGroupMembers invokes get_group_members operation.
+	//
+	// Get Group Members.
+	//
+	// GET /api/v2/groups/{id}/members
+	GetGroupMembers(ctx context.Context, params GetGroupMembersParams) (GetGroupMembersRes, error)
 	// GetGroups invokes get_groups operation.
 	//
 	// Get Groups.
@@ -5069,6 +5075,68 @@ func (c *Client) sendGetGroup(ctx context.Context, params GetGroupParams) (res G
 	}()
 
 	result, err := decodeGetGroupResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetGroupMembers invokes get_group_members operation.
+//
+// Get Group Members.
+//
+// GET /api/v2/groups/{id}/members
+func (c *Client) GetGroupMembers(ctx context.Context, params GetGroupMembersParams) (GetGroupMembersRes, error) {
+	res, err := c.sendGetGroupMembers(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendGetGroupMembers(ctx context.Context, params GetGroupMembersParams) (res GetGroupMembersRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/api/v2/groups/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/members"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeGetGroupMembersResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

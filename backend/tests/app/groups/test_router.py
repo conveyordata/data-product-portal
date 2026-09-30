@@ -3,6 +3,7 @@ from uuid import uuid4
 
 import pytest
 
+from app.groups.schema_request import MAX_GROUP_MEMBERS_PER_REQUEST
 from app.groups.service import GroupService
 from tests.factories import (
     GroupFactory,
@@ -549,3 +550,50 @@ class TestGroupMembershipRouter:
         response = client.get(f"{ENDPOINT}/{uuid4()}/members")
 
         assert response.status_code == 404
+
+    @pytest.mark.usefixtures("admin")
+    def test_add_group_members_rejects_more_than_max_members(self, client):
+        group = GroupFactory()
+
+        response = client.post(
+            f"{ENDPOINT}/{group.id}/members",
+            json={
+                "member_identity_ids": [
+                    str(uuid4()) for _ in range(MAX_GROUP_MEMBERS_PER_REQUEST + 1)
+                ]
+            },
+        )
+
+        assert response.status_code == 422
+
+    @pytest.mark.usefixtures("admin")
+    def test_remove_group_members_rejects_more_than_max_members(self, client):
+        group = GroupFactory()
+
+        response = client.request(
+            "DELETE",
+            f"{ENDPOINT}/{group.id}/members",
+            json={
+                "member_identity_ids": [
+                    str(uuid4()) for _ in range(MAX_GROUP_MEMBERS_PER_REQUEST + 1)
+                ]
+            },
+        )
+
+        assert response.status_code == 422
+
+    @pytest.mark.usefixtures("admin")
+    def test_replace_group_members_rejects_more_than_max_members(self, client):
+        group = GroupFactory()
+
+        response = client.request(
+            "DELETE",
+            f"{ENDPOINT}/{group.id}/members",
+            json={
+                "member_identity_ids": [
+                    str(uuid4()) for _ in range(MAX_GROUP_MEMBERS_PER_REQUEST + 1)
+                ]
+            },
+        )
+
+        assert response.status_code == 422
