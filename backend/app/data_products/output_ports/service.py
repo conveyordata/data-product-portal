@@ -1,5 +1,5 @@
 import copy
-from typing import Iterable, Optional, Sequence, assert_never
+from typing import Iterable, Mapping, Optional, Sequence, assert_never
 from uuid import UUID
 
 from fastapi import HTTPException, status
@@ -370,7 +370,7 @@ class OutputPortService:
         self.ensure_access_function_matches_visibility(dp, access_type.access_function)
         return access_type
 
-    def count_by_access_type(self, include_hidden: bool) -> dict[UUID, int]:
+    def count_by_access_type(self, include_hidden: bool) -> Mapping[UUID, int]:
         return dict(
             self.db.execute(
                 select(OutputPortModel.access_type_id, func.count()).group_by(
@@ -397,9 +397,8 @@ class OutputPortService:
             self.ensure_access_function_matches_visibility(
                 output_port.data_product, access_function
             )
-        self.db.flush()
-        for output_port in output_ports:
             self.db.expire(output_port, ["access_function"])
+        self.db.flush()
         self._sync_public_reader_grouping(
             [output_port.id for output_port in output_ports], access_function
         )

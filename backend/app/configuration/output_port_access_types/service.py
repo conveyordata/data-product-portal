@@ -46,6 +46,7 @@ class OutputPortAccessTypeService:
             counts = OutputPortService(self.db).count_by_access_type(
                 include_hidden=can_configure
             )
+
         access_types = self.db.scalars(
             select(OutputPortAccessTypeModel).order_by(OutputPortAccessTypeModel.name)
         ).all()
@@ -105,18 +106,19 @@ class OutputPortAccessTypeService:
     def _ensure_not_last_invite_only(
         self, access_type: OutputPortAccessTypeModel
     ) -> None:
-        if (
-            access_type.access_function == OutputPortAccessFunction.PRIVATE
-            and self.db.scalar(
-                select(func.count())
-                .select_from(OutputPortAccessTypeModel)
-                .where(
-                    OutputPortAccessTypeModel.access_function
-                    == OutputPortAccessFunction.PRIVATE
-                )
+        if access_type.access_function != OutputPortAccessFunction.PRIVATE:
+            # The check only applies to invite only access types
+            return
+
+        invite_only_count = (
+            select(func.count())
+            .select_from(OutputPortAccessTypeModel)
+            .where(
+                OutputPortAccessTypeModel.access_function
+                == OutputPortAccessFunction.PRIVATE
             )
-            == 1
-        ):
+        )
+        if self.db.scalar(invite_only_count) == 1:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="At least one access type must stay Invite only",

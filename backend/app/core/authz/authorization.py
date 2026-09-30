@@ -213,7 +213,6 @@ class Authorization(metaclass=Singleton):
             for r in resource_ids
             if enforcer.has_named_grouping_policy("g", uid, rid, str(r)) != granted
         ]
-
         if not rules:
             return
 

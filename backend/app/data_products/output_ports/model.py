@@ -159,9 +159,9 @@ output_port_access_modes = (
 
 class OutputPort(Base, BaseORM, EventTrackedMixin):
     __tablename__ = "datasets"
-    # access_function is a copy of access_type.access_function; the database
-    # keeps it in sync when an access type is remapped.
     __table_args__ = (
+        # access_function is a copy of access_type.access_function;
+        # the database keeps it in sync when an access type is remapped.
         ForeignKeyConstraint(
             ["access_type_id", "access_function"],
             [
