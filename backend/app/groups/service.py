@@ -30,6 +30,14 @@ class GroupService:
 
         return list(self.db.scalars(query).all())
 
+    def get_members(self, group_id: UUID) -> Sequence[GroupMembership]:
+        ensure_group_exists(group_id, self.db)
+
+        return sorted(
+            self.list_memberships(group_id),
+            key=lambda membership: membership.member_identity_id,
+        )
+
     def add_members(
         self,
         group_id: UUID,

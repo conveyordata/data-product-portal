@@ -6,6 +6,7 @@ import pytest
 from app.groups.service import GroupService
 from tests.factories import (
     GroupFactory,
+    GroupMembershipFactory,
     MachineUserFactory,
     UserFactory,
 )
@@ -472,3 +473,79 @@ class TestGroupMembershipRouter:
         )
 
         assert response.status_code == 403
+
+    def test_get_group_members__returns_members(self, client):
+        group = GroupFactory()
+        user = UserFactory()
+        machine_user = MachineUserFactory()
+
+        GroupMembershipFactory(group=group, member=user)
+        GroupMembershipFactory(group=group, member=machine_user)
+
+        response = client.get(f"{ENDPOINT}/{group.id}/members")
+
+        assert response.status_code == 200
+        assert response.json() == {
+            "members": sorted(
+                [
+                    {
+                        "group_id": str(group.id),
+                        "member_identity_id": str(user.id),
+                        "member": {
+                            "id": str(user.id),
+                            "type": "user",
+                            "external_id": user.external_id,
+                        },
+                    },
+                    {
+                        "group_id": str(group.id),
+                        "member_identity_id": str(machine_user.id),
+                        "member": {
+                            "id": str(machine_user.id),
+                            "type": "machine_user",
+                            "external_id": machine_user.external_id,
+                        },
+                    },
+                ],
+                key=lambda membership: membership["member_identity_id"],
+            )
+        }
+
+    def test_get_group_members__excludes_members_of_other_groups(self, client):
+        group = GroupFactory()
+        other_group = GroupFactory()
+        member = UserFactory()
+        other_member = UserFactory()
+
+        GroupMembershipFactory(group=group, member=member)
+        GroupMembershipFactory(group=other_group, member=other_member)
+
+        response = client.get(f"{ENDPOINT}/{group.id}/members")
+
+        assert response.status_code == 200
+        assert response.json() == {
+            "members": [
+                {
+                    "group_id": str(group.id),
+                    "member_identity_id": str(member.id),
+                    "member": {
+                        "id": str(member.id),
+                        "type": "user",
+                        "external_id": member.external_id,
+                    },
+                }
+            ]
+        }
+
+    def test_get_group_members__empty_group_returns_empty_list(self, client):
+        group = GroupFactory()
+
+        response = client.get(f"{ENDPOINT}/{group.id}/members")
+
+        assert response.status_code == 200
+        assert response.json() == {"members": []}
+
+    def test_get_group_members__unknown_group_returns_not_found(self, client):
+        response = client.get(f"{ENDPOINT}/{uuid4()}/members")
+
+        assert response.status_code == 404

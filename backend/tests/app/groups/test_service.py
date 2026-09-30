@@ -19,6 +19,7 @@ from tests.factories import (
     DataProductRoleAssignmentFactory,
     GlobalRoleAssignmentFactory,
     GroupFactory,
+    GroupMembershipFactory,
     MachineUserFactory,
     RoleFactory,
     UserFactory,
@@ -435,5 +436,63 @@ class TestGroupService:
     def test_delete_unknown_group_raises_not_found(self, session):
         with pytest.raises(HTTPException) as exc_info:
             GroupService(session).delete_group(group_id=uuid4())
+
+        assert exc_info.value.status_code == 404
+
+    def test_get_members__returns_members_ordered_by_identity_id(self, session):
+        group = GroupFactory()
+        user = UserFactory()
+        machine_user = MachineUserFactory()
+
+        GroupMembershipFactory(group=group, member=user)
+        GroupMembershipFactory(group=group, member=machine_user)
+
+        memberships = GroupService(session).get_members(group.id)
+
+        assert [membership.member_identity_id for membership in memberships] == sorted(
+            [user.id, machine_user.id]
+        )
+
+        memberships_by_id = {
+            membership.member_identity_id: membership for membership in memberships
+        }
+
+        user_membership = memberships_by_id[user.id]
+        assert user_membership.group_id == group.id
+        assert user_membership.member.id == user.id
+        assert user_membership.member.external_id == user.external_id
+        assert user_membership.member.type == "user"
+
+        machine_user_membership = memberships_by_id[machine_user.id]
+        assert machine_user_membership.group_id == group.id
+        assert machine_user_membership.member.id == machine_user.id
+        assert machine_user_membership.member.external_id == machine_user.external_id
+        assert machine_user_membership.member.type == "machine_user"
+
+    def test_get_members__excludes_members_of_other_groups(self, session):
+        group = GroupFactory()
+        other_group = GroupFactory()
+        member = UserFactory()
+        other_member = UserFactory()
+
+        GroupMembershipFactory(group=group, member=member)
+        GroupMembershipFactory(group=other_group, member=other_member)
+
+        memberships = GroupService(session).get_members(group.id)
+
+        assert len(memberships) == 1
+        assert memberships[0].group_id == group.id
+        assert memberships[0].member_identity_id == member.id
+
+    def test_get_members__empty_group_returns_empty_list(self, session):
+        group = GroupFactory()
+
+        memberships = GroupService(session).get_members(group.id)
+
+        assert memberships == []
+
+    def test_get_members__unknown_group_raises_not_found(self, session):
+        with pytest.raises(HTTPException) as exc_info:
+            GroupService(session).get_members(uuid4())
 
         assert exc_info.value.status_code == 404

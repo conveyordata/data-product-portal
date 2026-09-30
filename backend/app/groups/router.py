@@ -16,6 +16,7 @@ from app.groups.schema_request import (
 from app.groups.schema_response import (
     GroupCreateResponse,
     GroupGet,
+    GroupMembershipsGetResponse,
     GroupsGetResponse,
     GroupUpdateResponse,
 )
@@ -146,4 +147,14 @@ def replace_group_members(
     GroupService(db).replace_members(
         group_id=id,
         member_identity_ids=request.member_identity_ids,
+    )
+
+
+@router.get("/{id}/members")
+def get_group_members(
+    id: UUID,
+    db: Session = Depends(get_db_session, scope="function"),
+) -> GroupMembershipsGetResponse:
+    return GroupMembershipsGetResponse(
+        members=GroupService(db).get_members(id),
     )
