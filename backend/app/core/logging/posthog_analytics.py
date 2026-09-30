@@ -1,5 +1,6 @@
 import asyncio
 from datetime import datetime, timedelta
+from functools import cache
 from typing import Any, Optional
 
 import pytz
@@ -14,6 +15,7 @@ from app.database.database import SessionLocal
 from app.settings import settings
 
 
+@cache
 def get_posthog_client() -> Optional[Posthog]:
     if settings.POSTHOG_ENABLED:
         return Posthog(
@@ -146,7 +148,7 @@ async def report_daily_metrics() -> None:
     while True:
         await asyncio.sleep(_seconds_until_next_midnight_utc())
         try:
-            _do_report_daily_metrics(posthog)
+            await asyncio.to_thread(_do_report_daily_metrics, posthog)
         except Exception as e:
             logger.warning(f"Failed to report daily metrics: {e}")
         await asyncio.sleep(1)
