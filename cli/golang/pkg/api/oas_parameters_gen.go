@@ -236,6 +236,11 @@ type GetOutputPortAccessDurationsParams struct {
 	ID            uuid.UUID
 }
 
+// GetOutputPortAccessTypesParams is parameters of get_output_port_access_types operation.
+type GetOutputPortAccessTypesParams struct {
+	IncludeOutputPortCount OptBool `json:",omitempty,omitzero"`
+}
+
 // GetOutputPortCuratedQueriesParams is parameters of get_output_port_curated_queries operation.
 type GetOutputPortCuratedQueriesParams struct {
 	DataProductID uuid.UUID

@@ -29,13 +29,14 @@ router = APIRouter(
 
 @router.get("")
 def get_output_port_access_types(
+    include_output_port_count: bool = False,
     db: Session = Depends(get_db_session, scope="function"),
     user: User = Depends(get_authenticated_user),
 ) -> OutputPortAccessTypesGet:
     return OutputPortAccessTypesGet(
         output_port_access_types=OutputPortAccessTypeService(
             db
-        ).get_output_port_access_types(user)
+        ).get_output_port_access_types(user, include_output_port_count)
     )
 
 

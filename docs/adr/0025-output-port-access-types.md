@@ -43,12 +43,14 @@ labelling, while these entries only decide who can see and access an Output Port
   Restricted and Private, mapped 1:1.
 * `datasets.access_type_id` is backfilled from the former `access_type` enum column, which stays on the port as the
   resolved Access Function and is renamed to `access_function`. `access_type_id` then becomes required.
+  A composite foreign key `(access_type_id, access_function)` → `output_port_access_types(id, access_function)` with
+  `ON UPDATE CASCADE` keeps the copy equal to its Access Type.
 * This is a breaking API change. Output Port create and update requests require `access_type_id` and no longer accept
   the `access_type` enum. Responses return `access_type` as an object with its `id`, `name` and `access_function` instead of the
   former enum string.
   Clients look up the Access Type id with `GET /api/v2/configuration/output_port_access_types`
   (see `demo/agents/setup/create_products.py`).
-* Remapping an Access Type updates `access_function` on its Output Ports and re-runs `_sync_public_reader_grouping` for each of them.
+* Remapping an Access Type cascades the new `access_function` to its Output Ports and re-runs `_sync_public_reader_grouping` for them.
   A remap that moves an Access Type in use under a Hidden Data Product out of Invite only is refused.
 * An Access Type in use cannot be deleted. The last Access Type mapped to Invite only cannot be deleted or remapped, so
   Hidden Data Products can always create Output Ports.

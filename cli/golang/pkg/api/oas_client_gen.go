@@ -431,7 +431,7 @@ type Invoker interface {
 	// Get Output Port Access Types.
 	//
 	// GET /api/v2/configuration/output_port_access_types
-	GetOutputPortAccessTypes(ctx context.Context) (GetOutputPortAccessTypesRes, error)
+	GetOutputPortAccessTypes(ctx context.Context, params GetOutputPortAccessTypesParams) (GetOutputPortAccessTypesRes, error)
 	// GetOutputPortCuratedQueries invokes get_output_port_curated_queries operation.
 	//
 	// Get Output Port Curated Queries.
@@ -5180,17 +5180,37 @@ func (c *Client) sendGetOutputPortAccessDurations(ctx context.Context, params Ge
 // Get Output Port Access Types.
 //
 // GET /api/v2/configuration/output_port_access_types
-func (c *Client) GetOutputPortAccessTypes(ctx context.Context) (GetOutputPortAccessTypesRes, error) {
-	res, err := c.sendGetOutputPortAccessTypes(ctx)
+func (c *Client) GetOutputPortAccessTypes(ctx context.Context, params GetOutputPortAccessTypesParams) (GetOutputPortAccessTypesRes, error) {
+	res, err := c.sendGetOutputPortAccessTypes(ctx, params)
 	return res, err
 }
 
-func (c *Client) sendGetOutputPortAccessTypes(ctx context.Context) (res GetOutputPortAccessTypesRes, err error) {
+func (c *Client) sendGetOutputPortAccessTypes(ctx context.Context, params GetOutputPortAccessTypesParams) (res GetOutputPortAccessTypesRes, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
 	pathParts[0] = "/api/v2/configuration/output_port_access_types"
 	uri.AddPathParts(u, pathParts[:]...)
+
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "include_output_port_count" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "include_output_port_count",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.IncludeOutputPortCount.Get(); ok {
+				return e.EncodeValue(conv.BoolToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
 
 	r, err := ht.NewRequest(ctx, "GET", u)
 	if err != nil {

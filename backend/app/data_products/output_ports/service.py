@@ -397,8 +397,9 @@ class OutputPortService:
             self.ensure_access_function_matches_visibility(
                 output_port.data_product, access_function
             )
-            output_port.access_function = access_function
         self.db.flush()
+        for output_port in output_ports:
+            self.db.expire(output_port, ["access_function"])
         self._sync_public_reader_grouping(
             [output_port.id for output_port in output_ports], access_function
         )
@@ -673,6 +674,9 @@ class OutputPortService:
             ),
             execution_options=UNFILTERED,
         ).all()
-        self._sync_public_reader_grouping(
-            visible_output_port_ids, OutputPortAccessFunction.UNRESTRICTED
+        Authorization().sync_resource_roles(
+            user_id="*",
+            role_id=OUTPUT_PORT_READER_ROLE,
+            resource_ids=visible_output_port_ids,
+            granted=True,
         )

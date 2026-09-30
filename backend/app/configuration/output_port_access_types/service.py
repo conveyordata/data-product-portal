@@ -22,7 +22,9 @@ from app.configuration.output_port_access_types.schema_response import (
 )
 from app.core.authz import Action, Authorization
 from app.data_products.output_ports.enums import OutputPortAccessFunction
+from app.data_products.output_ports.model import OutputPort as OutputPortModel
 from app.data_products.output_ports.service import OutputPortService
+from app.database.database import UNFILTERED
 from app.users.model import User
 
 
@@ -31,14 +33,19 @@ class OutputPortAccessTypeService:
         self.db = db
 
     def get_output_port_access_types(
-        self, user: User
+        self, user: User, include_output_port_count: bool
     ) -> Sequence[OutputPortAccessTypesGetItem]:
-        can_configure = Authorization().has_access(
-            sub=str(user.id), dom="*", obj="*", act=Action.GLOBAL__UPDATE_CONFIGURATION
-        )
-        counts = OutputPortService(self.db).count_by_access_type(
-            include_hidden=can_configure
-        )
+        counts = None
+        if include_output_port_count:
+            can_configure = Authorization().has_access(
+                sub=str(user.id),
+                dom="*",
+                obj="*",
+                act=Action.GLOBAL__UPDATE_CONFIGURATION,
+            )
+            counts = OutputPortService(self.db).count_by_access_type(
+                include_hidden=can_configure
+            )
         access_types = self.db.scalars(
             select(OutputPortAccessTypeModel).order_by(OutputPortAccessTypeModel.name)
         ).all()
@@ -48,7 +55,9 @@ class OutputPortAccessTypeService:
                 name=access_type.name,
                 description=access_type.description,
                 access_function=access_type.access_function,
-                output_port_count=counts.get(access_type.id, 0),
+                output_port_count=None
+                if counts is None
+                else counts.get(access_type.id, 0),
             )
             for access_type in access_types
         ]
@@ -79,8 +88,11 @@ class OutputPortAccessTypeService:
     def delete_output_port_access_type(self, id: UUID) -> None:
         access_type = ensure_output_port_access_type_exists(id, self.db)
         self._ensure_not_last_invite_only(access_type)
-        in_use = (
-            OutputPortService(self.db).count_by_access_type(include_hidden=True).get(id)
+        in_use = self.db.scalar(
+            select(func.count())
+            .select_from(OutputPortModel)
+            .where(OutputPortModel.access_type_id == id),
+            execution_options=UNFILTERED,
         )
         if in_use:
             raise HTTPException(

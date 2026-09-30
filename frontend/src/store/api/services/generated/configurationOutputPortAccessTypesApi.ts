@@ -5,7 +5,12 @@ const injectedRtkApi = api.injectEndpoints({
       GetOutputPortAccessTypesApiResponse,
       GetOutputPortAccessTypesApiArg
     >({
-      query: () => ({ url: `/api/v2/configuration/output_port_access_types` }),
+      query: (queryArg) => ({
+        url: `/api/v2/configuration/output_port_access_types`,
+        params: {
+          include_output_port_count: queryArg,
+        },
+      }),
     }),
     createOutputPortAccessType: build.mutation<
       CreateOutputPortAccessTypeApiResponse,
@@ -42,7 +47,7 @@ const injectedRtkApi = api.injectEndpoints({
 export { injectedRtkApi as api };
 export type GetOutputPortAccessTypesApiResponse =
   /** status 200 Successful Response */ OutputPortAccessTypesGet;
-export type GetOutputPortAccessTypesApiArg = void;
+export type GetOutputPortAccessTypesApiArg = boolean | undefined;
 export type CreateOutputPortAccessTypeApiResponse =
   /** status 200 Successful Response */ CreateOutputPortAccessTypeResponse;
 export type CreateOutputPortAccessTypeApiArg = OutputPortAccessTypeCreate;
@@ -60,7 +65,7 @@ export type OutputPortAccessTypesGetItem = {
   name: string;
   access_function: OutputPortAccessFunction;
   description: string;
-  output_port_count: number;
+  output_port_count?: number | null;
 };
 export type OutputPortAccessTypesGet = {
   output_port_access_types: OutputPortAccessTypesGetItem[];

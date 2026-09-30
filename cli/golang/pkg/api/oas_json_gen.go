@@ -22322,8 +22322,10 @@ func (s *OutputPortAccessTypesGetItem) encodeFields(e *jx.Encoder) {
 		e.Str(s.Description)
 	}
 	{
-		e.FieldStart("output_port_count")
-		e.Int(s.OutputPortCount)
+		if s.OutputPortCount.Set {
+			e.FieldStart("output_port_count")
+			s.OutputPortCount.Encode(e)
+		}
 	}
 }
 
@@ -22391,11 +22393,9 @@ func (s *OutputPortAccessTypesGetItem) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"description\"")
 			}
 		case "output_port_count":
-			requiredBitSet[0] |= 1 << 4
 			if err := func() error {
-				v, err := d.Int()
-				s.OutputPortCount = int(v)
-				if err != nil {
+				s.OutputPortCount.Reset()
+				if err := s.OutputPortCount.Decode(d); err != nil {
 					return err
 				}
 				return nil
@@ -22412,7 +22412,7 @@ func (s *OutputPortAccessTypesGetItem) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00011111,
+		0b00001111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

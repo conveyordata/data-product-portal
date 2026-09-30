@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import Any, TypeVar
+from typing import Any, TypeVar, cast
 from uuid import UUID
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..models.output_port_access_function import OutputPortAccessFunction
+from ..types import UNSET, Unset
 
 T = TypeVar("T", bound="OutputPortAccessTypesGetItem")
 
@@ -20,14 +21,14 @@ class OutputPortAccessTypesGetItem:
         name (str):
         access_function (OutputPortAccessFunction):
         description (str):
-        output_port_count (int):
+        output_port_count (int | None | Unset):
     """
 
     id: UUID
     name: str
     access_function: OutputPortAccessFunction
     description: str
-    output_port_count: int
+    output_port_count: int | None | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -39,7 +40,11 @@ class OutputPortAccessTypesGetItem:
 
         description = self.description
 
-        output_port_count = self.output_port_count
+        output_port_count: int | None | Unset
+        if isinstance(self.output_port_count, Unset):
+            output_port_count = UNSET
+        else:
+            output_port_count = self.output_port_count
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
@@ -49,9 +54,10 @@ class OutputPortAccessTypesGetItem:
                 "name": name,
                 "access_function": access_function,
                 "description": description,
-                "output_port_count": output_port_count,
             }
         )
+        if output_port_count is not UNSET:
+            field_dict["output_port_count"] = output_port_count
 
         return field_dict
 
@@ -66,7 +72,14 @@ class OutputPortAccessTypesGetItem:
 
         description = d.pop("description")
 
-        output_port_count = d.pop("output_port_count")
+        def _parse_output_port_count(data: object) -> int | None | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(int | None | Unset, data)
+
+        output_port_count = _parse_output_port_count(d.pop("output_port_count", UNSET))
 
         output_port_access_types_get_item = cls(
             id=id,

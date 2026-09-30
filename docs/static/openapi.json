@@ -3211,6 +3211,18 @@
         ],
         "summary": "Get Output Port Access Types",
         "operationId": "get_output_port_access_types",
+        "parameters": [
+          {
+            "name": "include_output_port_count",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Include Output Port Count"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -3241,14 +3253,14 @@
         "summary": "Create Output Port Access Type",
         "operationId": "create_output_port_access_type",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/OutputPortAccessTypeCreate"
               }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "200": {
@@ -14158,7 +14170,14 @@
             "title": "Description"
           },
           "output_port_count": {
-            "type": "integer",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Output Port Count"
           }
         },
@@ -14167,8 +14186,7 @@
           "id",
           "name",
           "access_function",
-          "description",
-          "output_port_count"
+          "description"
         ],
         "title": "OutputPortAccessTypesGetItem"
       },

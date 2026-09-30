@@ -15,10 +15,10 @@ import { getOutputPortAccessTypesTableColumns } from './output-port-access-types
 
 export function OutputPortAccessTypesTable() {
     const { t } = useTranslation();
-    const { data, isFetching } = useGetOutputPortAccessTypesQuery();
+    const { data, isFetching } = useGetOutputPortAccessTypesQuery(true);
     const { isVisible, handleOpen, handleClose } = useModal();
     const [initial, setInitial] = useState<OutputPortAccessTypesGetItem>();
-    const [removeAccessType] = useRemoveOutputPortAccessTypeMutation();
+    const [removeAccessType, { isLoading: isRemoving }] = useRemoveOutputPortAccessTypeMutation();
     const inviteOnlyAccessTypes = data?.output_port_access_types.filter(
         (accessType) => accessType.access_function === OutputPortAccessFunction.Private,
     );
@@ -48,8 +48,8 @@ export function OutputPortAccessTypesTable() {
     );
 
     const columns = useMemo(
-        () => getOutputPortAccessTypesTableColumns({ t, handleEdit, handleRemove, lastInviteOnlyId }),
-        [t, handleEdit, handleRemove, lastInviteOnlyId],
+        () => getOutputPortAccessTypesTableColumns({ t, handleEdit, handleRemove, lastInviteOnlyId, isRemoving }),
+        [t, handleEdit, handleRemove, lastInviteOnlyId, isRemoving],
     );
 
     return (

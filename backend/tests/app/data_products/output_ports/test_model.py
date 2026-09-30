@@ -1,7 +1,8 @@
 from datetime import datetime
 
 import pytest
-from sqlalchemy import select
+from sqlalchemy import select, update
+from sqlalchemy.exc import IntegrityError
 
 from app.abstract_data_product.input_ports.enums import InputPortStatus
 from app.authorization.role_assignments.enums import DecisionStatus
@@ -325,3 +326,14 @@ def test_private_output_port_column_query_visible_for_admin_user(session):
         )
 
     assert visible_id == output_port_id
+
+
+def test_access_function_must_match_access_type(session):
+    output_port = OutputPortFactory(access_function=OutputPortAccessFunction.PRIVATE)
+
+    with pytest.raises(IntegrityError), session.begin_nested():
+        session.execute(
+            update(OutputPort)
+            .where(OutputPort.id == output_port.id)
+            .values(access_function=OutputPortAccessFunction.UNRESTRICTED)
+        )

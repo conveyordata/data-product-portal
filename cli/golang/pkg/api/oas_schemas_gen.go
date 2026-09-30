@@ -9578,7 +9578,7 @@ type OutputPortAccessTypesGetItem struct {
 	Name            string                   `json:"name"`
 	AccessFunction  OutputPortAccessFunction `json:"access_function"`
 	Description     string                   `json:"description"`
-	OutputPortCount int                      `json:"output_port_count"`
+	OutputPortCount OptNilInt                `json:"output_port_count"`
 }
 
 // GetID returns the value of ID.
@@ -9602,7 +9602,7 @@ func (s *OutputPortAccessTypesGetItem) GetDescription() string {
 }
 
 // GetOutputPortCount returns the value of OutputPortCount.
-func (s *OutputPortAccessTypesGetItem) GetOutputPortCount() int {
+func (s *OutputPortAccessTypesGetItem) GetOutputPortCount() OptNilInt {
 	return s.OutputPortCount
 }
 
@@ -9627,7 +9627,7 @@ func (s *OutputPortAccessTypesGetItem) SetDescription(val string) {
 }
 
 // SetOutputPortCount sets the value of OutputPortCount.
-func (s *OutputPortAccessTypesGetItem) SetOutputPortCount(val int) {
+func (s *OutputPortAccessTypesGetItem) SetOutputPortCount(val OptNilInt) {
 	s.OutputPortCount = val
 }
 

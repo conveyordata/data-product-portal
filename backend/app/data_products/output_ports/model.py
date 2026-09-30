@@ -3,7 +3,17 @@ from typing import TYPE_CHECKING, Optional
 
 from fastapi import HTTPException, status
 from pgvector.sqlalchemy import Vector
-from sqlalchemy import Column, Enum, ForeignKey, String, event, func, or_, select
+from sqlalchemy import (
+    Column,
+    Enum,
+    ForeignKey,
+    ForeignKeyConstraint,
+    String,
+    event,
+    func,
+    or_,
+    select,
+)
 from sqlalchemy.dialects.postgresql import TSVECTOR, UUID
 from sqlalchemy.orm import (
     Mapped,
@@ -149,6 +159,19 @@ output_port_access_modes = (
 
 class OutputPort(Base, BaseORM, EventTrackedMixin):
     __tablename__ = "datasets"
+    # access_function is a copy of access_type.access_function; the database
+    # keeps it in sync when an access type is remapped.
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["access_type_id", "access_function"],
+            [
+                "output_port_access_types.id",
+                "output_port_access_types.access_function",
+            ],
+            name="datasets_access_type_fkey",
+            onupdate="CASCADE",
+        ),
+    )
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     namespace = Column(String)
@@ -170,7 +193,7 @@ class OutputPort(Base, BaseORM, EventTrackedMixin):
     )
     data_product_id: Mapped[UUID] = mapped_column(ForeignKey("data_products.id"))
     access_type_id: Mapped[UUID] = mapped_column(
-        ForeignKey("output_port_access_types.id"), nullable=False, index=True
+        UUID(as_uuid=True), nullable=False, index=True
     )
 
     assignments: Mapped[list["DatasetRoleAssignment"]] = relationship(

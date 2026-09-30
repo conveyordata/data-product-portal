@@ -1,7 +1,10 @@
 import userEvent from '@testing-library/user-event';
 import { HttpResponse, http } from 'msw';
-import { describe, expect, it } from 'vitest';
-import { OutputPortForm } from '@/components/output-ports/output-port-form/output-port-form.component.tsx';
+import { describe, expect, it, vi } from 'vitest';
+import {
+    AccessTypeSection,
+    OutputPortForm,
+} from '@/components/output-ports/output-port-form/output-port-form.component.tsx';
 import {
     AbstractDataProductStatus,
     DataProductIconKey,
@@ -78,5 +81,15 @@ describe('OutputPortForm', () => {
         expect(option('Restricted')).toHaveClass('ant-select-item-option-disabled');
         expect(option('Private')).not.toHaveClass('ant-select-item-option-disabled');
         expect(screen.getByText('Hidden Data Products can only have hidden Output Ports')).toBeInTheDocument();
+    });
+
+    it('does not change an existing access type while access types load', async () => {
+        mockOutputPortAccessTypes();
+        const onChange = vi.fn();
+
+        renderWithProviders(<AccessTypeSection value="access-type-private" onChange={onChange} hiddenDataProduct />);
+
+        expect(await screen.findByTitle('Private')).toBeInTheDocument();
+        expect(onChange).not.toHaveBeenCalled();
     });
 });

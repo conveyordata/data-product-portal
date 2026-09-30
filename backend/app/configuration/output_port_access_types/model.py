@@ -21,7 +21,13 @@ class OutputPortAccessType(Base, BaseORM):
         Enum(OutputPortAccessFunction, native_enum=False), nullable=False
     )
 
-    __table_args__ = (UniqueConstraint("name", name="uq_output_port_access_type_name"),)
+    __table_args__ = (
+        UniqueConstraint("name", name="uq_output_port_access_type_name"),
+        # Target of the composite FK that keeps datasets.access_function in sync
+        UniqueConstraint(
+            "id", "access_function", name="uq_output_port_access_type_id_function"
+        ),
+    )
 
 
 def ensure_output_port_access_type_exists(

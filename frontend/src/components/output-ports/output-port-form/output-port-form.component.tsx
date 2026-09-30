@@ -239,7 +239,16 @@ export function AccessTypeSection({
 }) {
     const { t } = useTranslation();
     const { token } = theme.useToken();
-    const { data: { output_port_access_types: accessTypes = [] } = {} } = useGetOutputPortAccessTypesQuery();
+    const { data: { output_port_access_types: accessTypes = [] } = {}, isFetching } =
+        useGetOutputPortAccessTypesQuery(undefined);
+
+    useEffect(() => {
+        if (isFetching || value !== undefined) return;
+        const selectable = accessTypes.filter((accessType) =>
+            fitsDataProductVisibility(accessType.access_function, hiddenDataProduct),
+        );
+        if (selectable.length === 1) onChange?.(selectable[0].id);
+    }, [isFetching, value, accessTypes, hiddenDataProduct, onChange]);
 
     const options = accessTypes
         .map((accessType) => ({
@@ -275,18 +284,16 @@ export function AccessTypeSection({
                         )}
                     </Flex>
                 )}
+                styles={hiddenDataProduct ? { popup: { root: { padding: 0, overflow: 'hidden' } } } : undefined}
                 popupRender={(menu) =>
                     hiddenDataProduct ? (
                         <>
-                            {menu}
+                            <div style={{ padding: token.paddingXXS }}>{menu}</div>
                             <Flex
                                 gap="small"
                                 style={{
-                                    // Negative margins cancel antd's Select popup padding (paddingXXS) so the footer spans the full width
-                                    margin: `${token.paddingXXS}px -${token.paddingXXS}px -${token.paddingXXS}px`,
                                     padding: `${token.paddingXS}px ${token.paddingXXS + token.controlPaddingHorizontal}px`,
                                     borderTop: `${token.lineWidth}px solid ${token.colorSplit}`,
-                                    borderRadius: `0 0 ${token.borderRadiusLG}px ${token.borderRadiusLG}px`,
                                     background: token.colorPrimaryBg,
                                 }}
                             >
@@ -326,8 +333,6 @@ export function OutputPortForm({ mode, modalCallbackOnSubmit, formRef, outputPor
     const [sanitizeResourceName, { data: sanitizedResourceName }] = useLazySanitizeResourceNameQuery();
     const [validateResourceName] = useLazyValidateResourceNameQuery();
     const { data: constraints } = useResourceNameConstraintsQuery();
-    const { data: { output_port_access_types: accessTypes = [] } = {}, isFetching: isFetchingAccessTypes } =
-        useGetOutputPortAccessTypesQuery();
 
     const [form] = Form.useForm<CreateOutputPortRequest>();
     const datasetNameValue = Form.useWatch('name', form);
@@ -499,16 +504,6 @@ export function OutputPortForm({ mode, modalCallbackOnSubmit, formRef, outputPor
             form.setFieldValue('owners', dataProductOwners);
         }
     }, [mode, dataProductOwners, form]);
-
-    useEffect(() => {
-        if (mode !== 'create' || !dataProduct || isFetchingAccessTypes) return;
-        const selectable = accessTypes.filter((accessType) =>
-            fitsDataProductVisibility(accessType.access_function, isHiddenDataProduct),
-        );
-        if (selectable.length === 1 && form.getFieldValue('access_type_id') === undefined) {
-            form.setFieldValue('access_type_id', selectable[0].id);
-        }
-    }, [mode, dataProduct, isFetchingAccessTypes, accessTypes, isHiddenDataProduct, form]);
 
     if (mode === 'edit' && (!currentOutputPort || ownerIds === undefined)) {
         return <Skeleton active />;

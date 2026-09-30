@@ -1,5 +1,5 @@
 import { InfoCircleOutlined } from '@ant-design/icons';
-import { Button, Flex, Popconfirm, type TableColumnsType, Tooltip } from 'antd';
+import { Button, Flex, Popconfirm, type TableColumnsType, Tooltip, Typography } from 'antd';
 import type { TFunction } from 'i18next';
 
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
@@ -12,13 +12,16 @@ type Props = {
     handleEdit: (record: OutputPortAccessTypesGetItem) => () => void;
     handleRemove: (record: OutputPortAccessTypesGetItem) => void;
     lastInviteOnlyId?: string;
+    isRemoving: boolean;
 };
 
 const titleWithInfo = (title: string, info: string, justify?: 'flex-end') => (
     <Flex align="center" gap="small" justify={justify}>
         {title}
         <Tooltip title={info}>
-            <InfoCircleOutlined style={{ color: 'var(--ant-color-text-secondary)', cursor: 'help' }} />
+            <Typography.Text type="secondary">
+                <InfoCircleOutlined style={{ cursor: 'help' }} />
+            </Typography.Text>
         </Tooltip>
     </Flex>
 );
@@ -28,6 +31,7 @@ export const getOutputPortAccessTypesTableColumns = ({
     handleEdit,
     handleRemove,
     lastInviteOnlyId,
+    isRemoving,
 }: Props): TableColumnsType<OutputPortAccessTypesGetItem> => {
     const sorter = new Sorter<OutputPortAccessTypesGetItem>();
     return [
@@ -82,7 +86,7 @@ export const getOutputPortAccessTypesTableColumns = ({
                 const removeBlockedReason =
                     record.id === lastInviteOnlyId
                         ? t('At least one access type must stay Invite only')
-                        : record.output_port_count > 0
+                        : (record.output_port_count ?? 0) > 0
                           ? t('Reassign the {{count}} Output Ports using this access type first', {
                                 count: record.output_port_count,
                             })
@@ -107,7 +111,9 @@ export const getOutputPortAccessTypesTableColumns = ({
                                 okText={t('Confirm')}
                                 cancelText={t('Cancel')}
                             >
-                                <Button type="link">{t('Remove')}</Button>
+                                <Button type="link" disabled={isRemoving}>
+                                    {t('Remove')}
+                                </Button>
                             </Popconfirm>
                         )}
                     </Flex>

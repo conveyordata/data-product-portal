@@ -39,7 +39,7 @@ class TestOutputPortAccessTypesRouter:
     def test_get_output_port_access_types__seeded_with_counts(self, client):
         OutputPortFactory(access_function=OutputPortAccessFunction.PRIVATE)
 
-        response = client.get(ENDPOINT)
+        response = client.get(ENDPOINT, params={"include_output_port_count": True})
 
         assert response.status_code == 200
         assert set(counts(response)) == {"Unrestricted", "Restricted", "Private"}
@@ -49,7 +49,7 @@ class TestOutputPortAccessTypesRouter:
     def test_get_output_port_access_types__hides_invite_only_counts(self, client):
         OutputPortFactory(access_function=OutputPortAccessFunction.PRIVATE)
 
-        response = client.get(ENDPOINT)
+        response = client.get(ENDPOINT, params={"include_output_port_count": True})
 
         assert response.status_code == 200
         assert counts(response)["Private"] == 0
@@ -65,10 +65,16 @@ class TestOutputPortAccessTypesRouter:
         GlobalRoleAssignmentFactory(identity_id=user.id, role_id=role.id)
         OutputPortFactory(access_function=OutputPortAccessFunction.PRIVATE)
 
-        response = client.get(ENDPOINT)
+        response = client.get(ENDPOINT, params={"include_output_port_count": True})
 
         assert response.status_code == 200
         assert counts(response)["Private"] == 1
+
+    def test_get_output_port_access_types__counts_are_opt_in(self, client):
+        response = client.get(ENDPOINT)
+
+        assert response.status_code == 200
+        assert set(counts(response).values()) == {None}
 
     @pytest.mark.usefixtures("admin")
     def test_create_output_port_access_type(self, client):

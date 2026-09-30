@@ -9,7 +9,7 @@ from app.shared.schema import ORMModel
 
 class OutputPortAccessTypesGetItem(OutputPortAccessType):
     description: str
-    output_port_count: int
+    output_port_count: int | None = None
 
 
 class OutputPortAccessTypesGet(ORMModel):

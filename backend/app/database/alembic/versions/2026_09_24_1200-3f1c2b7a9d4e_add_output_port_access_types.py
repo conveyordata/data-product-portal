@@ -28,6 +28,9 @@ def upgrade() -> None:
         sa.Column("updated_on", sa.DateTime(), nullable=True),
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("name", name="uq_output_port_access_type_name"),
+        sa.UniqueConstraint(
+            "id", "access_function", name="uq_output_port_access_type_id_function"
+        ),
     )
     op.execute(
         """
@@ -53,17 +56,18 @@ def upgrade() -> None:
     )
     op.alter_column("datasets", "access_type_id", nullable=False)
     op.create_foreign_key(
-        "datasets_access_type_id_fkey",
+        "datasets_access_type_fkey",
         "datasets",
         "output_port_access_types",
-        ["access_type_id"],
-        ["id"],
+        ["access_type_id", "access_function"],
+        ["id", "access_function"],
+        onupdate="CASCADE",
     )
     op.create_index("ix_datasets_access_type_id", "datasets", ["access_type_id"])
 
 
 def downgrade() -> None:
-    op.drop_constraint("datasets_access_type_id_fkey", "datasets", type_="foreignkey")
+    op.drop_constraint("datasets_access_type_fkey", "datasets", type_="foreignkey")
     op.drop_column("datasets", "access_type_id")
     op.alter_column(
         "datasets", "access_function", new_column_name="access_type", nullable=True

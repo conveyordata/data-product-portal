@@ -28,7 +28,8 @@ export function OutputPortAccessTypeFormModal({ onClose, initial, isLastInviteOn
     const [updateAccessType, { isLoading: isUpdating }] = useUpdateOutputPortAccessTypeMutation();
     const accessFunction = Form.useWatch('access_function', form);
 
-    const affectedOutputPorts = initial && accessFunction !== initial.access_function ? initial.output_port_count : 0;
+    const affectedOutputPorts =
+        initial && accessFunction !== initial.access_function ? (initial.output_port_count ?? 0) : 0;
     const loosensAccess =
         initial && accessFunction && compareAccessFunctions(accessFunction, initial.access_function) < 0;
 
