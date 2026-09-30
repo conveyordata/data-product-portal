@@ -1,6 +1,7 @@
 import { InfoCircleOutlined } from '@ant-design/icons';
 import { Button, Flex, Popconfirm, type TableColumnsType, Tooltip, Typography } from 'antd';
 import type { TFunction } from 'i18next';
+import { Trans } from 'react-i18next';
 
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
 import type { OutputPortAccessTypesGetItem } from '@/store/api/services/generated/configurationOutputPortAccessTypesApi.ts';
@@ -104,11 +105,20 @@ export const getOutputPortAccessTypesTableColumns = ({
                             </Tooltip>
                         ) : (
                             <Popconfirm
-                                title={t('Remove')}
-                                description={t('Are you sure you want to delete the access type?')}
+                                title={t('Remove Access Type')}
+                                description={
+                                    <Trans
+                                        t={t}
+                                        i18nKey="ConfirmRemoveAccessType"
+                                        defaults="Are you sure you want to remove <strong>{{name}}</strong>? This action cannot be undone."
+                                        values={{ name: record.name }}
+                                        components={{ strong: <Typography.Text strong /> }}
+                                    />
+                                }
                                 onConfirm={() => handleRemove(record)}
                                 placement="leftTop"
-                                okText={t('Confirm')}
+                                okText={t('Remove')}
+                                okButtonProps={{ danger: true }}
                                 cancelText={t('Cancel')}
                             >
                                 <Button type="link" disabled={isRemoving}>

@@ -1,5 +1,5 @@
-import { Button, Form, Input, Modal, Popconfirm, Select } from 'antd';
-import { useTranslation } from 'react-i18next';
+import { Button, Form, Input, Modal, Select, Typography, theme } from 'antd';
+import { Trans, useTranslation } from 'react-i18next';
 
 import {
     OutputPortAccessFunction,
@@ -8,11 +8,7 @@ import {
     useCreateOutputPortAccessTypeMutation,
     useUpdateOutputPortAccessTypeMutation,
 } from '@/store/api/services/generated/configurationOutputPortAccessTypesApi.ts';
-import {
-    ACCESS_FUNCTION_ORDER,
-    compareAccessFunctions,
-    getAccessFunctionInfo,
-} from '@/utils/access-function.helper.tsx';
+import { ACCESS_FUNCTION_ORDER, getAccessFunctionInfo } from '@/utils/access-function.helper.tsx';
 import { dispatchMessage } from '@/utils/feedback.ts';
 
 type Props = {
@@ -23,17 +19,39 @@ type Props = {
 
 export function OutputPortAccessTypeFormModal({ onClose, initial, isLastInviteOnly }: Props) {
     const { t } = useTranslation();
+    const { token } = theme.useToken();
     const [form] = Form.useForm<OutputPortAccessTypeCreate>();
+    const [modal, modalContextHolder] = Modal.useModal();
     const [createAccessType, { isLoading: isCreating }] = useCreateOutputPortAccessTypeMutation();
     const [updateAccessType, { isLoading: isUpdating }] = useUpdateOutputPortAccessTypeMutation();
-    const accessFunction = Form.useWatch('access_function', form);
 
-    const affectedOutputPorts =
-        initial && accessFunction !== initial.access_function ? (initial.output_port_count ?? 0) : 0;
-    const loosensAccess =
-        initial && accessFunction && compareAccessFunctions(accessFunction, initial.access_function) < 0;
+    const outputPortCount = initial?.output_port_count ?? 0;
 
-    const handleFinish = async (values: OutputPortAccessTypeCreate) => {
+    const getAccessFunctionChangeConsequence = (
+        from: OutputPortAccessFunction,
+        to: OutputPortAccessFunction,
+        count: number,
+    ): string =>
+        from === OutputPortAccessFunction.Private
+            ? t('This will affect {{count}} Output Ports, which will become visible to the whole organisation.', {
+                  count,
+              })
+            : {
+                  [OutputPortAccessFunction.Unrestricted]: t(
+                      'This will affect {{count}} Output Ports, whose access requests will be approved automatically.',
+                      { count },
+                  ),
+                  [OutputPortAccessFunction.Restricted]: t(
+                      'This will affect {{count}} Output Ports, whose access requests will need owner approval.',
+                      { count },
+                  ),
+                  [OutputPortAccessFunction.Private]: t(
+                      'This will affect {{count}} Output Ports, which will be hidden from everyone outside the owning team.',
+                      { count },
+                  ),
+              }[to];
+
+    const save = async (values: OutputPortAccessTypeCreate) => {
         const result = initial
             ? await updateAccessType({ id: initial.id, outputPortAccessTypeUpdate: values })
             : await createAccessType(values);
@@ -44,44 +62,65 @@ export function OutputPortAccessTypeFormModal({ onClose, initial, isLastInviteOn
         onClose();
     };
 
+    const handleFinish = (values: OutputPortAccessTypeCreate) => {
+        if (!initial || !outputPortCount || values.access_function === initial.access_function) {
+            return save(values);
+        }
+
+        const content = (
+            <>
+                <Typography.Paragraph>
+                    <Trans
+                        t={t}
+                        i18nKey="ConfirmAccessFunctionChange"
+                        defaults="You are changing the function of <strong>{{name}}</strong> from <strong>{{from}}</strong> to <strong>{{to}}</strong>."
+                        values={{
+                            name: initial.name,
+                            from: getAccessFunctionInfo(t, initial.access_function).label,
+                            to: getAccessFunctionInfo(t, values.access_function).label,
+                        }}
+                        components={{ strong: <Typography.Text strong /> }}
+                    />
+                </Typography.Paragraph>
+                <Typography.Text type="secondary">
+                    {getAccessFunctionChangeConsequence(
+                        initial.access_function,
+                        values.access_function,
+                        outputPortCount,
+                    )}
+                </Typography.Text>
+            </>
+        );
+
+        const confirmation = modal.confirm({
+            title: t('Confirm function change'),
+            content: content,
+            okText: t('Confirm change'),
+            cancelText: t('Cancel'),
+            centered: true,
+            onOk: () => {
+                confirmation.update({ cancelButtonProps: { disabled: true }, keyboard: false });
+                return save(values);
+            },
+        });
+    };
+
     return (
         <Modal
             open
+            centered
             title={initial ? t('Update Access Type') : t('Create new Access Type')}
             onCancel={onClose}
             footer={[
-                <Popconfirm
-                    key="submit"
-                    disabled={!affectedOutputPorts}
-                    title={t('Change access function')}
-                    description={
-                        loosensAccess
-                            ? t(
-                                  'This loosens access for {{count}} Output Ports: users may get access with less or no approval.',
-                                  { count: affectedOutputPorts },
-                              )
-                            : t('This changes the access function of {{count}} Output Ports.', {
-                                  count: affectedOutputPorts,
-                              })
-                    }
-                    onConfirm={() => form.submit()}
-                    okText={t('Confirm')}
-                    cancelText={t('Cancel')}
-                >
-                    <Button
-                        type="primary"
-                        loading={isCreating || isUpdating}
-                        onClick={affectedOutputPorts ? undefined : () => form.submit()}
-                    >
-                        {initial ? t('Update') : t('Create')}
-                    </Button>
-                </Popconfirm>,
                 <Button key="cancel" onClick={onClose}>
                     {t('Cancel')}
                 </Button>,
+                <Button key="submit" type="primary" loading={isCreating || isUpdating} onClick={() => form.submit()}>
+                    {initial ? t('Update') : t('Create')}
+                </Button>,
             ]}
-            centered
         >
+            {modalContextHolder}
             <Form
                 form={form}
                 layout="vertical"
@@ -99,6 +138,23 @@ export function OutputPortAccessTypeFormModal({ onClose, initial, isLastInviteOn
                     name="access_function"
                     label={t('Function')}
                     tooltip={isLastInviteOnly ? t('At least one access type must stay Invite only') : undefined}
+                    extra={
+                        outputPortCount && !isLastInviteOnly ? (
+                            <Typography.Paragraph
+                                type="secondary"
+                                style={{
+                                    marginTop: token.marginXXS,
+                                    marginBottom: 0,
+                                    paddingInlineStart: token.paddingXXS,
+                                    fontSize: token.fontSizeSM,
+                                }}
+                            >
+                                {t(
+                                    'The function determines access-control behavior for Output Ports. Changing the function of an existing Access Type will trigger a confirmation step.',
+                                )}
+                            </Typography.Paragraph>
+                        ) : undefined
+                    }
                     rules={[{ required: true }]}
                 >
                     <Select
