@@ -274,7 +274,9 @@ jobs:
         with:
           python-version: "3.13"
           cache: 'poetry'
-          cache-dependency-path: backend/poetry.lock
+          cache-dependency-path: |
+            backend/poetry.lock
+            plugins/pyproject.toml
       - name: Build portal core
         working-directory: backend
         run: |

@@ -1,4 +1,5 @@
 from contextlib import suppress
+from uuid import uuid4
 
 import pytest
 from alembic import command
@@ -9,6 +10,7 @@ from app.plugins.migrations import (
     RETIRED_PLUGIN_REVISIONS,
     VERSION_TABLE,
     _config,
+    _configuration_table,
     _core_head,
     _owned_versions_dir,
     _version_table,
@@ -18,6 +20,7 @@ from app.plugins.migrations import (
 )
 from app.plugins.registry import plugin_registry
 from tests import engine
+from tests.factories import TechnicalAssetFactory
 from tests.fixtures.example_plugin import ExamplePlugin
 from tests.fixtures.other_plugin import OtherPlugin
 
@@ -121,6 +124,46 @@ def test_migrate_all__forgets_the_revision_of_a_plugin_the_portal_dropped():
     migrate()
 
     assert retired not in _tracked_revisions()
+
+
+def _set_configuration_type(configuration_id, configuration_type) -> None:
+    with engine.begin() as connection:
+        connection.execute(
+            _configuration_table.update()
+            .where(_configuration_table.c.id == str(configuration_id))
+            .values(configuration_type=configuration_type)
+        )
+
+
+def test_migrate_all__refuses_technical_assets_whose_plugin_is_not_installed():
+    asset = TechnicalAssetFactory()
+    _set_configuration_type(asset.configuration_id, "GonePlugin")
+    try:
+        with pytest.raises(
+            ValueError, match="no installed plugin provides: GonePlugin"
+        ):
+            migrate()
+    finally:
+        _set_configuration_type(
+            asset.configuration_id, "FakeTechnicalAssetConfiguration"
+        )
+
+
+def test_migrate_all__ignores_configurations_no_technical_asset_uses():
+    orphan = str(uuid4())
+    with engine.begin() as connection:
+        connection.execute(
+            _configuration_table.insert().values(
+                id=orphan, configuration_type="GonePlugin"
+            )
+        )
+    try:
+        migrate()
+    finally:
+        with engine.begin() as connection:
+            connection.execute(
+                _configuration_table.delete().where(_configuration_table.c.id == orphan)
+            )
 
 
 def test_migrate_all__tracks_two_plugins_in_one_shared_version_table():

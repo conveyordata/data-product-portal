@@ -24,7 +24,7 @@ from app.authorization.role_assignments.data_product.model import (
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.configuration.data_product_types.model import DataProductType
 from app.configuration.tags.model import Tag, tag_data_product_table
-from app.core.authz.db_utils import (
+from app.core.auth.db_utils import (
     is_system_account,
     is_user_admin,
 )
