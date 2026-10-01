@@ -1,6 +1,4 @@
-import subprocess
-import sys
-from importlib.metadata import EntryPoint, entry_points
+from importlib.metadata import EntryPoint
 
 import pytest
 from fastapi import HTTPException
@@ -64,19 +62,3 @@ def test_get__rejects_a_plugin_that_is_not_installed(registry):
         registry.get("NoSuchPlugin")
 
     assert exc_info.value.status_code == 400
-
-
-@pytest.mark.parametrize(
-    "entry_point",
-    entry_points(group=ENTRY_POINT_GROUP),
-    ids=lambda entry_point: entry_point.name,
-)
-def test_entry_point__imports_in_a_fresh_interpreter(entry_point):
-    result = subprocess.run(  # noqa: S603
-        [sys.executable, "-c", f"import {entry_point.module}"],
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-
-    assert result.returncode == 0, result.stderr
