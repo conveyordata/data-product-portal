@@ -5,7 +5,6 @@ import { useTranslation } from 'react-i18next';
 import chipIcon from '@/assets/icons/data-product-types/chip-icon.svg?react';
 import { DataProductOutlined, OutputPortOutlined } from '@/components/icons';
 import { useTabParam } from '@/hooks/use-tab-param.tsx';
-import { useIsTimeBoundAccessEnabledQuery } from '@/store/api/services/generated/configurationAccessDurationsApi';
 import { DataProductSettingScope } from '@/store/api/services/generated/configurationDataProductSettingsApi.ts';
 import { AccessPolicyTab } from './access-policy-tab/access-policy-tab.component';
 import { DataProductSettingsTable } from './components/data-product-settings-table/data-product-settings-table.component';
@@ -36,7 +35,6 @@ type Tab = {
 export function SettingsTabs() {
     const { t } = useTranslation();
     const { activeTab, onTabChange } = useTabParam(TabKeys.General, Object.values(TabKeys));
-    const { data: isTimeBoundAccessEnabled } = useIsTimeBoundAccessEnabledQuery();
 
     const tabs: Tab[] = useMemo(() => {
         return [
@@ -82,10 +80,9 @@ export function SettingsTabs() {
                 key: TabKeys.AccessPolicy,
                 children: <AccessPolicyTab />,
                 icon: <SafetyOutlined />,
-                hidden: !isTimeBoundAccessEnabled?.enabled,
             },
         ];
-    }, [t, isTimeBoundAccessEnabled]);
+    }, [t]);
 
     return (
         <Tabs
