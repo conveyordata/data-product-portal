@@ -17,8 +17,7 @@ export function getTechnicalAssetIcon(name: string | undefined, plugins?: UiElem
         return getIconFromDataUri(plugin.icon_data_uri);
     }
 
-    const borderIcon = plugin.icon_name.replace('logo', 'border-icon');
-    return getIcon(borderIcon);
+    return getIcon(plugin.icon_name);
 }
 
 export function getTechnicalAssetType(

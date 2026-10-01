@@ -14,7 +14,7 @@ def access_mode_payload():
     return {
         "name": "Test Access Mode",
         "description": "Test Description",
-        "technical_asset_types": ["RedshiftTechnicalAssetConfiguration"],
+        "technical_asset_types": ["FakeLinkPlugin"],
     }
 
 
@@ -36,8 +36,8 @@ class TestAccessModesRouter:
         self, access_mode_payload, client
     ):
         access_mode_payload["technical_asset_types"] = [
-            "RedshiftTechnicalAssetConfiguration",
-            "S3TechnicalAssetConfiguration",
+            "FakeLinkPlugin",
+            "FakeTechnicalAssetConfiguration",
         ]
         response = self.create_access_mode(client, access_mode_payload)
         assert response.status_code == 200
@@ -57,7 +57,7 @@ class TestAccessModesRouter:
             {
                 "description": "Updated Description",
                 "technical_asset_types": [
-                    "S3TechnicalAssetConfiguration",
+                    "FakeTechnicalAssetConfiguration",
                     *access_mode.technical_asset_types,
                 ],
             },
@@ -70,15 +70,15 @@ class TestAccessModesRouter:
     def test_update_access_mode__remove_technical_asset_type(self, client):
         access_mode = AccessModeFactory(
             technical_asset_types=[
-                "RedshiftTechnicalAssetConfiguration",
-                "S3TechnicalAssetConfiguration",
+                "FakeLinkPlugin",
+                "FakeTechnicalAssetConfiguration",
             ]
         )
         response = self.update_access_mode(
             client,
             {
                 "description": access_mode.description,
-                "technical_asset_types": ["S3TechnicalAssetConfiguration"],
+                "technical_asset_types": ["FakeTechnicalAssetConfiguration"],
             },
             access_mode.id,
         )
@@ -91,19 +91,16 @@ class TestAccessModesRouter:
     ):
         access_mode = AccessModeFactory(
             technical_asset_types=[
-                "RedshiftTechnicalAssetConfiguration",
-                "S3TechnicalAssetConfiguration",
+                "FakeLinkPlugin",
+                "FakeTechnicalAssetConfiguration",
             ]
         )
-        TechnicalAssetFactory(
-            access_modes=[access_mode],
-            configuration__configuration_type="RedshiftTechnicalAssetConfiguration",
-        )
+        TechnicalAssetFactory(access_modes=[access_mode])
         response = self.update_access_mode(
             client,
             {
                 "description": access_mode.description,
-                "technical_asset_types": ["S3TechnicalAssetConfiguration"],
+                "technical_asset_types": ["FakeLinkPlugin"],
             },
             access_mode.id,
         )
@@ -115,8 +112,8 @@ class TestAccessModesRouter:
     ):
         access_mode = AccessModeFactory(
             technical_asset_types=[
-                "RedshiftTechnicalAssetConfiguration",
-                "S3TechnicalAssetConfiguration",
+                "FakeLinkPlugin",
+                "FakeTechnicalAssetConfiguration",
             ]
         )
         InputPortRequestFactory(
@@ -126,7 +123,7 @@ class TestAccessModesRouter:
             client,
             {
                 "description": access_mode.description,
-                "technical_asset_types": ["S3TechnicalAssetConfiguration"],
+                "technical_asset_types": ["FakeTechnicalAssetConfiguration"],
             },
             access_mode.id,
         )

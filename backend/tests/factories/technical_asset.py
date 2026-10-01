@@ -6,8 +6,10 @@ from tests import test_session
 from tests.factories import (
     DataProductFactory,
     PlatformServiceFactory,
-    S3TechnicalAssetFactory,
     TagFactory,
+)
+from tests.factories.technical_asset_configuration import (
+    TechnicalAssetConfigurationFactory,
 )
 
 
@@ -30,7 +32,7 @@ class TechnicalAssetFactory(factory.alchemy.SQLAlchemyModelFactory):
     owner = factory.SubFactory(DataProductFactory)
 
     technical_mapping = "default"
-    configuration = factory.SubFactory(S3TechnicalAssetFactory)
+    configuration = factory.SubFactory(TechnicalAssetConfigurationFactory)
 
     @factory.post_generation
     def tags(self, create, extracted, **kwargs):

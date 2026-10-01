@@ -335,23 +335,13 @@ class DataProductService(AbstractDataProductService):
                 detail=f"Invalid namespace: {validity.value}",
             )
 
-        visibility_change = None
         for k, v in update_data_product.items():
             if k == "tag_ids":
                 new_tags = self._get_tags(v)
                 current_data_product.tags = new_tags
-            elif k == "visibility":
-                visibility_change = current_data_product.visibility
-                setattr(current_data_product, k, v)
             else:
                 setattr(current_data_product, k, v) if v else None
 
-        if visibility_change is not None:
-            self._sync_public_reader_grouping(
-                current_data_product.id, current_data_product.visibility
-            )
-            if current_data_product.visibility == DataProductVisibility.HIDDEN:
-                self._sync_consumer_reader_grouping(current_data_product.id)
         self.db.flush()
         return UpdateDataProductResponse(id=current_data_product.id)
 

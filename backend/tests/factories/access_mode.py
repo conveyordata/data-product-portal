@@ -13,4 +13,4 @@ class AccessModeFactory(factory.alchemy.SQLAlchemyModelFactory):
     id = factory.Faker("uuid4")
     name = factory.Sequence(lambda _: fake.unique.word())
     description = factory.Faker("text", max_nb_chars=120)
-    technical_asset_types = ["RedshiftTechnicalAssetConfiguration"]
+    technical_asset_types = ["FakeLinkPlugin"]

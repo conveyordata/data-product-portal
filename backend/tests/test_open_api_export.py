@@ -36,7 +36,7 @@ def test_export_openapi_uses_binary_file_schema() -> None:
 def test_export_openapi_describes_plugin_configuration_generically() -> None:
     schemas = custom_openapi(f_app)["components"]["schemas"]
 
-    assert "S3TechnicalAssetConfiguration" not in str(schemas)
+    assert "FakeTechnicalAssetConfiguration" not in str(schemas)
 
 
 def find_model_name_collisions(app: FastAPI) -> dict[str, list[Type]]:
