@@ -83,7 +83,7 @@ For more information about output ports, take a look at the concept page describ
 
 ### Access Types
 
-Each Output Port has an access type. Administrators define the access types of the organisation in **Settings > Output Port**,
+Each Output Port has an access type. Administrators define the access types of the organisation in **Settings > Access Policy**,
 and map each of them to one of three access functions:
 
 - Auto-approve: All access requests are immediately approved. Any Data Product can use your Output Port as input.
