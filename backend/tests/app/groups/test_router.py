@@ -41,6 +41,45 @@ class TestGroupsRouter:
             "display_name": "Engineering",
         }
 
+    def test_get_groups__returns_groups_ordered_by_display_name_and_external_id(
+            self,
+            client,
+    ):
+        first = GroupFactory(
+            external_id="engineering-a",
+            display_name="Engineering",
+        )
+        second = GroupFactory(
+            external_id="engineering-b",
+            display_name="Engineering",
+        )
+        third = GroupFactory(
+            external_id="finance",
+            display_name="Finance",
+        )
+        response = client.get(ENDPOINT)
+
+        assert response.status_code == 200
+        assert response.json() == {
+            "groups": [
+                {
+                    "id": str(first.id),
+                    "external_id": "engineering-a",
+                    "display_name": "Engineering",
+                },
+                {
+                    "id": str(second.id),
+                    "external_id": "engineering-b",
+                    "display_name": "Engineering",
+                },
+                {
+                    "id": str(third.id),
+                    "external_id": "finance",
+                    "display_name": "Finance",
+                },
+            ]
+        }
+
     def test_get_group__unknown_id_returns_not_found(self, client):
         response = client.get(f"{ENDPOINT}/{uuid4()}")
 
