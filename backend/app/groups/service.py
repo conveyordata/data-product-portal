@@ -1,4 +1,4 @@
-from typing import Iterator, Sequence
+from typing import Sequence, Iterable
 from uuid import UUID
 
 from fastapi import HTTPException, status
@@ -216,7 +216,7 @@ class GroupService:
             )
 
     def _add_members_auth(
-        self, group_id: UUID, member_identity_ids: Iterator[UUID]
+        self, group_id: UUID, member_identity_ids: Iterable[UUID]
     ) -> None:
         for member_identity_id in member_identity_ids:
             self.authorizer.assign_global_group_membership(
@@ -229,7 +229,7 @@ class GroupService:
             )
 
     def _remove_members_auth(
-        self, group_id: UUID, member_identity_ids: Iterator[UUID]
+        self, group_id: UUID, member_identity_ids: Iterable[UUID]
     ) -> None:
         for member_identity_id in member_identity_ids:
             self.authorizer.revoke_global_group_membership(
