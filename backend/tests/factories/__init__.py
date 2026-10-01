@@ -33,10 +33,10 @@ from .role import RoleFactory
 from .role_assignment_data_product import DataProductRoleAssignmentFactory
 from .role_assignment_dataset import DatasetRoleAssignmentFactory
 from .role_assignment_global import GlobalRoleAssignmentFactory
-from .s3_technical_asset import S3TechnicalAssetFactory
 from .tags import TagFactory
 from .technical_asset import TechnicalAssetFactory
 from .technical_asset_access_mode import TechnicalAssetAccessModeFactory
+from .technical_asset_configuration import TechnicalAssetConfigurationFactory
 from .technical_asset_output_ports import TechnicalAssetOutputPortAssociationFactory
 from .theme_settings import ThemeSettingsFactory
 from .user import UserFactory
@@ -87,7 +87,7 @@ factories = [
     PlatformServiceFactory,
     PlatformServiceConfigFactory,
     RoleFactory,
-    S3TechnicalAssetFactory,
+    TechnicalAssetConfigurationFactory,
     TagFactory,
     UserFactory,
     TechnicalAssetFactory,
