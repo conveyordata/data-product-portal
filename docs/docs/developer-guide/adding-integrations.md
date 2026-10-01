@@ -7,7 +7,7 @@ import TabItem from '@theme/TabItem';
 
 **Warning**: Provisioners must switch their technical asset imports from `sdk.api_client.models` to `sdk.plugins`, because plugin classes are no longer known when the API is generated; see the [release notes](../release-notes.md).
 
-Your data products live on real tools: a database in Glue, a bucket in S3, a repository in GitHub. Integrations connect the portal to those tools. They let a data product owner register the resources their product owns, and they give everyone a quick link from the data product page to the tool itself.
+Your data products live on real infrastructure: a database in Glue, a bucket in S3, a repository in GitHub. Integrations connect the portal to those tools. They let a data product owner register the resources their product owns, and they give everyone a quick link from the data product page to the tool itself.
 
 The portal ships with a set of integrations out of the box (see [Integrations](./integrations.md)). If the tool you use isn't among them, you can write your own as a plugin. A plugin is a small Python package that you install next to the portal. The portal picks it up when it starts, so you don't have to change the portal's code or maintain a fork of it.
 
