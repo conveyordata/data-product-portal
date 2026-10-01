@@ -7,7 +7,8 @@ from alembic import command
 from alembic.config import Config
 from alembic.runtime.migration import MigrationContext
 from alembic.script import ScriptDirectory
-from sqlalchemy import Column, Engine, MetaData, String, Table
+from sqlalchemy import Column, Engine, MetaData, String, Table, select
+from sqlalchemy import inspect as sa_inspect
 
 from app.core.logging import logger
 from app.technical_asset_configuration.base_schema import TechnicalAssetPlugin
@@ -25,6 +26,18 @@ _version_table = Table(
     VERSION_TABLE,
     MetaData(),
     Column("version_num", String(32), primary_key=True),
+)
+
+_configuration_table = Table(
+    "data_output_configurations",
+    MetaData(),
+    Column("id", String),
+    Column("configuration_type", String),
+)
+_technical_asset_table = Table(
+    "data_outputs",
+    MetaData(),
+    Column("configuration_id", String),
 )
 
 
@@ -82,6 +95,26 @@ def _forget_retired_revisions(engine: Engine) -> None:
         "Dropped the migration history of plugin(s) the portal no longer ships: "
         + ", ".join(retired)
     )
+
+
+def _types_without_a_plugin(
+    plugins: Sequence[type[TechnicalAssetPlugin]], engine: Engine
+) -> list[str]:
+    if not sa_inspect(engine).has_table(_technical_asset_table.name):
+        return []
+    with engine.connect() as connection:
+        types = set(
+            connection.scalars(
+                select(_configuration_table.c.configuration_type)
+                .join(
+                    _technical_asset_table,
+                    _technical_asset_table.c.configuration_id
+                    == _configuration_table.c.id,
+                )
+                .distinct()
+            )
+        )
+    return sorted(types - {None} - {plugin.name for plugin in plugins})
 
 
 def _own_revisions(plugin: type[TechnicalAssetPlugin], url: str) -> set[str]:
@@ -146,6 +179,16 @@ def migrate_all(plugins: Sequence[type[TechnicalAssetPlugin]], engine: Engine) -
             f"plugin: {', '.join(sorted(orphans))}. Reinstall the plugin that "
             f"owns them, or delete those rows from {VERSION_TABLE} to "
             "give up its migration history."
+        )
+
+    # SQLAlchemy cannot load a technical asset whose configuration_type no
+    # mapped plugin claims, so every request touching one would fail.
+    missing = _types_without_a_plugin(plugins, engine)
+    if missing:
+        raise ValueError(
+            f"Technical assets use configuration types no installed plugin "
+            f"provides: {', '.join(missing)}. Install the plugin that provides "
+            "them, or delete those technical assets."
         )
 
     before = set(_current_heads(engine))

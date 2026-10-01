@@ -2,7 +2,7 @@ from abc import ABC
 from base64 import b64encode
 from functools import cache
 from importlib import resources
-from typing import Any, ClassVar, Optional
+from typing import TYPE_CHECKING, Any, ClassVar, Optional
 from uuid import UUID
 
 from pydantic import computed_field
@@ -25,6 +25,9 @@ from app.core.logging import logger
 from app.shared.schema import ORMModel
 from app.technical_asset_configuration.enums import UIElementType
 from app.users.schema import User
+
+if TYPE_CHECKING:
+    from app.data_products.schema import DataProduct
 
 
 class FieldDependency(ORMModel):
@@ -129,6 +132,9 @@ class TechnicalAssetPlugin(ORMModel, ABC):
 
     def get_configuration(self, configs: list[ConfigType]) -> Optional[ConfigType]:
         raise NotImplementedError
+
+    def validate_configuration(self, data_product: "DataProduct", db: Session) -> None:
+        """Raise when the configuration isn't acceptable, on create with the default technical mapping."""
 
     @classmethod
     def get_url(

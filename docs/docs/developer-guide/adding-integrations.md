@@ -169,7 +169,7 @@ UIElementMetadata(
 
 The Glue plugin also uses a text field, radio buttons and a field that only appears for one of those radio choices, so it's a good place to see the other types.
 
-`validate_configuration` runs just before a technical asset is saved. Raise an error there when the input isn't acceptable. Glue, for example, only accepts databases that start with the data product's namespace. You can also override `render_template` if the name built from `result_string_template` needs some cleaning up.
+`validate_configuration` runs when a technical asset with the default technical mapping is created. Raise an error there when the input isn't acceptable. It's optional: by default it accepts everything. Glue, for example, only accepts databases that start with the data product's namespace. You can also override `render_template` if the name built from `result_string_template` needs some cleaning up.
 
 ### The database table
 
@@ -214,7 +214,26 @@ A few things to keep in mind:
 
 To try your migrations before you ship them, run `python -m app.db_tool migrate` against a local database. It brings the portal and every installed plugin up to date in one go.
 
-If you ever uninstall a plugin, its table stays in the database. The migration step will then stop with an error, because it finds migrations for a plugin that is no longer there. Reinstall the plugin, or remove its rows from the `alembic_version` table if you don't need its history anymore.
+If you ever uninstall a plugin, its table stays in the database. The migration step will then stop with an error, because it finds migrations for a plugin that is no longer there. Reinstall the plugin, or remove its rows from the `alembic_version` table if you don't need its history anymore. The migration step also stops while technical assets of that plugin still exist, because the portal can't load them without it. Delete those technical assets first.
+
+### Settings
+
+If your plugin needs settings, such as the URL of the tool a link points to, read them from environment variables in your own package. The portal's settings only hold what the portal itself needs. [Pydantic settings](https://docs.pydantic.dev/latest/concepts/pydantic_settings/) is already installed with the portal:
+
+```python
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+class Settings(BaseSettings):
+    model_config = SettingsConfigDict(extra="ignore")
+
+    MY_TOOL_BASE_URL: str = ""
+
+
+settings = Settings()
+```
+
+Set the variables on the portal's container next to `ENABLED_PLUGINS` (see step 4).
 
 ### MCP tools
 

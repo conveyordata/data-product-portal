@@ -21,6 +21,9 @@ sidebar_position: 200
 ### bugfixes
 
 - **[Helm]**: Fix translation override file path
+- **[Database]**: `python -m app.db_tool migrate` now stops when technical assets exist whose plugin is not installed, instead of the portal failing every request that loads them. Reinstall the plugin, or delete those technical assets.
+- **[Plugins]**: Plugin modules can be imported on their own, without importing `app.main` first.
+- **[Auth]**: A `DEFAULT_USERNAME` without a dot before the `@` no longer fails when OIDC is disabled.
 - **[General]**: Fix translation file by adding more nested translations for Data Products, Output ports and Technical assets.
 
 

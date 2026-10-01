@@ -19,6 +19,14 @@ class TestAuthRouter:
         assert response.status_code == 200
         assert response.json()["external_id"] == settings.DEFAULT_USERNAME
 
+    def test_authorize_user__accepts_an_email_without_a_dot_before_the_at(self, client):
+        response = client.get(
+            CURRENT_USER_ENDPOINT, headers={"X-User": "jane@pharma.com"}
+        )
+        assert response.status_code == 200
+        assert response.json()["first_name"] == "jane"
+        assert response.json()["last_name"] == ""
+
     def test_aws_credentials(self, client):
         EnvironmentFactory(name="production")
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
