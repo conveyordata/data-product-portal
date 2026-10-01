@@ -36,7 +36,7 @@ This section describes how to integrate the portal with your platform of choice.
 - **OSI**: [Open Semantic Interchange](https://open-semantic-interchange.org/) which registers your semantic layers
 - **Snowflake**: You can register schemas, databases, tables etc
 
-You can build an integration yourself without changing the portal. Each integration is a plugin, a Python package installed into your portal image. See [Adding Integrations](./adding-integrations.md) for how to build one.
+You can build an integration yourself without changing the portal. You define and install plugins as a Python package to add integrations to your portal image. See [Adding Integrations](./adding-integrations.md) for how to build one.
 
 ## Automatically provisioning infra when Portal changes
 
