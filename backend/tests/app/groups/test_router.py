@@ -628,7 +628,7 @@ class TestGroupMembershipRouter:
         group = GroupFactory()
 
         response = client.request(
-            "DELETE",
+            "PUT",
             f"{ENDPOINT}/{group.id}/members",
             json={
                 "member_identity_ids": [
