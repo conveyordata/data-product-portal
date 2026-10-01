@@ -46,7 +46,19 @@ def get_groups(
     return GroupsGetResponse(groups=GroupService(db).get_groups())
 
 
-@router.get("/{id}")
+@router.get(
+    "/{id}",
+    responses={
+        404: {
+            "description": "Group not found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Required group does not exist"}
+                }
+            },
+        }
+    },
+)
 def get_group(
     id: UUID,
     db: Session = Depends(get_db_session, scope="function"),
@@ -59,6 +71,26 @@ def get_group(
     dependencies=[
         Depends(Authorization.enforce(Action.GLOBAL__CREATE_GROUP, EmptyResolver)),
     ],
+    responses={
+        400: {
+            "description": "Group external ID already exists",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "detail": "A group with this external ID already exists."
+                    }
+                }
+            },
+        },
+        404: {
+            "description": "Group not found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Required group does not exist"}
+                }
+            },
+        }
+    },
 )
 def create_group(
     group: GroupCreate,
@@ -72,6 +104,16 @@ def create_group(
     dependencies=[
         Depends(Authorization.enforce(Action.GLOBAL__UPDATE_GROUP, EmptyResolver)),
     ],
+    responses={
+        404: {
+            "description": "Group not found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Required group does not exist"}
+                }
+            },
+        }
+    },
 )
 def update_group(
     id: UUID,
@@ -87,6 +129,16 @@ def update_group(
     dependencies=[
         Depends(Authorization.enforce(Action.GLOBAL__DELETE_GROUP, EmptyResolver)),
     ],
+    responses={
+        404: {
+            "description": "Group not found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Required group does not exist"}
+                }
+            },
+        }
+    },
 )
 def delete_group(
     id: UUID,
@@ -95,7 +147,19 @@ def delete_group(
     GroupService(db).delete_group(group_id=id)
 
 
-@router.get("/{id}/members")
+@router.get(
+    "/{id}/members",
+    responses={
+        404: {
+            "description": "Group not found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Required group does not exist"}
+                }
+            },
+        }
+    },
+)
 def get_group_members(
     id: UUID,
     db: Session = Depends(get_db_session, scope="function"),
@@ -116,6 +180,26 @@ def get_group_members(
             )
         ),
     ],
+    responses={
+        400: {
+            "description": "Invalid group member identities",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "detail": "All member identities must exist and be users or machine users."
+                    }
+                }
+            },
+        },
+        404: {
+            "description": "Group not found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Required group does not exist"}
+                }
+            },
+        },
+    },
 )
 def add_group_members(
     id: UUID,
@@ -140,6 +224,26 @@ def add_group_members(
         ),
         Depends(_serialize_group_members_replacement, scope="request"),
     ],
+    responses={
+        400: {
+            "description": "Invalid group member identities",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "detail": "All member identities must exist and be users or machine users."
+                    }
+                }
+            },
+        },
+        404: {
+            "description": "Group not found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Required group does not exist"}
+                }
+            },
+        },
+    },
 )
 def replace_group_members(
     id: UUID,
@@ -167,6 +271,16 @@ def replace_group_members(
             )
         ),
     ],
+    responses={
+        404: {
+            "description": "Group not found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Required group does not exist"}
+                }
+            },
+        },
+    },
 )
 def remove_group_members(
     id: UUID,

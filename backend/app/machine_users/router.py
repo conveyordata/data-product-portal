@@ -33,7 +33,19 @@ def get_machine_users(
     )
 
 
-@router.get("/{id}")
+@router.get(
+    "/{id}",
+    responses={
+        404: {
+            "description": "Machine user not found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Required machine user does not exist"}
+                }
+            },
+        }
+    },
+)
 def get_machine_user(
     id: UUID,
     db: Session = Depends(get_db_session, scope="function"),
@@ -51,6 +63,26 @@ def get_machine_user(
             )
         ),
     ],
+    responses={
+        400: {
+            "description": "Machine user external ID already exists",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "detail": "A machine user with this external ID already exists."
+                    }
+                }
+            },
+        },
+        404: {
+            "description": "Machine user not found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Required machine user does not exist"}
+                }
+            },
+        }
+    },
 )
 def create_machine_user(
     machine_user: MachineUserCreate,
@@ -69,6 +101,16 @@ def create_machine_user(
             )
         ),
     ],
+    responses={
+        404: {
+            "description": "Machine user not found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Required machine user does not exist"}
+                }
+            },
+        }
+    },
 )
 def update_machine_user(
     id: UUID,
@@ -89,6 +131,16 @@ def update_machine_user(
             )
         ),
     ],
+    responses={
+        404: {
+            "description": "Machine user not found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Required machine user does not exist"}
+                }
+            },
+        }
+    },
 )
 def delete_machine_user(
     id: UUID,
