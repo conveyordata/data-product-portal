@@ -32,6 +32,45 @@ class TestMachineUsersRouter:
             "display_name": "Deployment Agent",
         }
 
+    def test_get_machine_users__returns_machine_users_ordered_by_display_name_and_external_id(
+            self,
+            client,
+    ):
+        first = MachineUserFactory(
+            external_id="deployment-agent-a",
+            display_name="Deployment Agent",
+        )
+        second = MachineUserFactory(
+            external_id="deployment-agent-b",
+            display_name="Deployment Agent",
+        )
+        third = MachineUserFactory(
+            external_id="monitoring-agent",
+            display_name="Monitoring Agent",
+        )
+        response = client.get(ENDPOINT)
+
+        assert response.status_code == 200
+        assert response.json() == {
+            "machine_users": [
+                {
+                    "id": str(first.id),
+                    "external_id": "deployment-agent-a",
+                    "display_name": "Deployment Agent",
+                },
+                {
+                    "id": str(second.id),
+                    "external_id": "deployment-agent-b",
+                    "display_name": "Deployment Agent",
+                },
+                {
+                    "id": str(third.id),
+                    "external_id": "monitoring-agent",
+                    "display_name": "Monitoring Agent",
+                },
+            ]
+        }
+
     def test_get_machine_user__unknown_id_returns_not_found(self, client):
         response = client.get(f"{ENDPOINT}/{uuid4()}")
 
