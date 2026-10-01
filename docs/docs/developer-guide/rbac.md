@@ -31,6 +31,8 @@ Examples of actions include:
 - `GLOBAL__CREATE_OUTPUT_PORT` - Create new output ports
 - `GLOBAL__UPDATE_CONFIGURATION` - Modify platform configuration
 - `GLOBAL__CREATE_USER` - Add users to the platform
+- `GLOBAL__CREATE_GROUP` - Add groups to the platform
+- `GLOBAL__CREATE_MACHINE_USER` - Add machine users to the platform
 
 **Data Product Actions:**
 - `DATA_PRODUCT__UPDATE_PROPERTIES` - Modify data product metadata
@@ -71,7 +73,14 @@ Role assignments link users to roles within a specific scope:
 - **Data Product roles** are assigned when adding team members to a data product
 - **Output Port roles** are assigned when granting access to output ports
 - Users can have different roles in different scopes simultaneously
-- Each user can have only **one global role** at a time (excluding temporary admin privileges)
+- Each user can have only **one global role** at a time (excluding temporary admin privileges)ç
+
+#### Group Role Assignments
+
+Groups can receive global and resource-specific role assignments. 
+Users and machine users that belong to a group inherit the group's access. 
+Removing a member revokes the access inherited through that group. 
+Groups cannot contain other groups.
 
 ## Accessing RBAC Settings
 
