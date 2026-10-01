@@ -110,15 +110,16 @@ class OutputPortAccessTypeService:
             # The check only applies to invite only access types
             return
 
-        invite_only_count = (
-            select(func.count())
-            .select_from(OutputPortAccessTypeModel)
+        invite_only_ids = self.db.scalars(
+            select(OutputPortAccessTypeModel.id)
             .where(
                 OutputPortAccessTypeModel.access_function
                 == OutputPortAccessFunction.PRIVATE
             )
-        )
-        if self.db.scalar(invite_only_count) == 1:
+            .order_by(OutputPortAccessTypeModel.id)
+            .with_for_update()
+        ).all()
+        if len(invite_only_ids) == 1:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="At least one access type must stay Invite only",
