@@ -7,10 +7,6 @@ import type { CustomDropdownItemProps } from '@/types/shared';
 
 import styles from './technical-asset-actions.module.scss';
 
-// TODO: Catalog platforms for technical assets (e.g. Collibra/Datahub) are not yet exposed
-// through the backend plugin system. That system currently mixes data-product-scoped
-// and output-port-scoped plugins into a single list (e.g. Coder/GitHub vs RustFS) -
-// to be investigated as part of the wider plugin rework.
 const dataPlatforms: CustomDropdownItemProps<string>[] = [];
 
 type Props = {

@@ -47,9 +47,8 @@ def technical_asset_payload():
         "namespace": "namespace-updated",
         "technical_mapping": "custom",
         "configuration": {
-            "bucket": "test",
             "path": "test",
-            "name": "S3TechnicalAssetConfiguration",
+            "name": "FakeTechnicalAssetConfiguration",
         },
         "owner_id": str(data_product.id),
         "platform_id": str(service.platform.id),
@@ -509,7 +508,7 @@ class TestTechnicalAssetsRouter:
             if node["type"] == "technicalAssetNode":
                 assert node == {
                     "data": {
-                        "icon_key": "S3TechnicalAssetConfiguration",
+                        "icon_key": "FakeTechnicalAssetConfiguration",
                         "id": str(technical_asset.id),
                         "link_to_id": str(technical_asset.owner.id),
                         "name": technical_asset.name,
@@ -888,9 +887,8 @@ def ta_event_payload():
         "namespace": "test-ta-event-ns",
         "technical_mapping": "default",
         "configuration": {
-            "bucket": "test",
             "path": "test",
-            "name": "S3TechnicalAssetConfiguration",
+            "name": "FakeTechnicalAssetConfiguration",
         },
         "platform_id": str(service.platform.id),
         "service_id": str(service.id),

@@ -1,14 +1,16 @@
+import json
 from typing import ClassVar, Optional, Self
-from uuid import UUID
 
 from fastapi import HTTPException, status
 from pydantic import model_validator
 from sqlalchemy.orm import Session
 
-from app.configuration.environments.platform_service_configurations.schemas import (
-    AWSGlueConfig,
+from app.configuration.environments.platform_configurations.service import (
+    EnvironmentPlatformConfigurationService,
 )
-from app.core.aws.get_url import get_aws_url
+from app.configuration.environments.platform_service_configurations.schema_response import (
+    SnowflakeConfig,
+)
 from app.data_products.schema import DataProduct
 from app.technical_asset_configuration.base_schema import (
     FieldDependency,
@@ -21,23 +23,20 @@ from app.technical_asset_configuration.base_schema import (
     UIElementString,
 )
 from app.technical_asset_configuration.enums import AccessGranularity, UIElementType
-from portal_plugins.glue.mcp_instructions import MCP_INSTRUCTIONS
-from portal_plugins.glue.model import (
+from portal_plugins.snowflake.model import (
     NAME,
 )
-from portal_plugins.glue.model import (
-    GlueTechnicalAssetConfiguration as GlueTechnicalAssetConfigurationModel,
+from portal_plugins.snowflake.model import (
+    SnowflakeTechnicalAssetConfiguration as SnowflakeTechnicalAssetConfigurationModel,
 )
-from app.users.schema import User
 
 
-class GlueTechnicalAssetConfiguration(TechnicalAssetPlugin):
+class SnowflakeTechnicalAssetConfiguration(TechnicalAssetPlugin):
     name: ClassVar[str] = NAME
     version: ClassVar[str] = "1.0"
-    mcp_instructions: ClassVar[str] = MCP_INSTRUCTIONS
 
     database: str
-    database_suffix: str = ""
+    schema: str = ""
     table: str = "*"
     bucket_identifier: str = ""
     database_path: str = ""
@@ -45,18 +44,18 @@ class GlueTechnicalAssetConfiguration(TechnicalAssetPlugin):
     access_granularity: AccessGranularity
 
     _platform_metadata = PlatformMetadata(
-        display_name="Glue",
-        icon_name="glue-logo.svg",
-        icon_package="portal_plugins.glue",
-        platform_key="glue",
-        parent_platform="aws",
+        display_name="Snowflake",
+        icon_name="snowflake-logo.svg",
+        icon_package="portal_plugins.snowflake",
+        platform_key="snowflake",
+        parent_platform=None,
         result_label="Resulting table",
         result_tooltip="The table you can access through this technical asset",
-        detailed_name="Database",
+        detailed_name="Schema",
     )
 
     class Meta:
-        orm_model = GlueTechnicalAssetConfigurationModel
+        orm_model = SnowflakeTechnicalAssetConfigurationModel
 
     @model_validator(mode="after")
     def validate_paths(self) -> Self:
@@ -69,37 +68,36 @@ class GlueTechnicalAssetConfiguration(TechnicalAssetPlugin):
         return self
 
     def validate_configuration(self, data_product: DataProduct, db: Session):
+        # If product aligned
         if not self.database.startswith(data_product.namespace):
             raise ValueError("Invalid database specified")
 
     def on_create(self):
         pass
 
-    def render_template(self, template, **context):
-        return ".".join(
-            [
-                part.rstrip("_")
-                for part in super().render_template(template, **context).split(".")
-            ]
+    @classmethod
+    def get_url(cls, id, db, actor, environment=None) -> str:
+        config = json.loads(
+            EnvironmentPlatformConfigurationService(db).get_env_platform_config(
+                environment, "Snowflake"
+            )
         )
+        if "login_url" not in config:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="login_url missing from Snowflake configuration",
+            )
+        return config["login_url"]
+
+    def render_template(self, template, **context) -> str:
+        return super().render_template(template, **context).replace("-", "_")
 
     def get_configuration(
-        self, configs: list[AWSGlueConfig]
-    ) -> Optional[AWSGlueConfig]:
+        self, configs: list[SnowflakeConfig]
+    ) -> Optional[SnowflakeConfig]:
         return next(
             (config for config in configs if config.identifier == self.database), None
         )
-
-    @classmethod
-    def get_url(
-        cls, id: UUID, db: Session, actor: User, environment: Optional[str] = None
-    ) -> str:
-        if environment is None:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Environment is required to get the URL for S3 technical asset configurations",
-            )
-        return get_aws_url(id, db, actor, environment)
 
     @classmethod
     def get_ui_metadata(cls, db: Session) -> list[UIElementMetadata]:
@@ -114,10 +112,10 @@ class GlueTechnicalAssetConfiguration(TechnicalAssetPlugin):
                 select=UIElementSelect(options=cls.get_platform_options(db)),
             ),
             UIElementMetadata(
-                name="database_suffix",
+                name="schema",
                 type=UIElementType.String,
-                label="Database suffix",
-                tooltip="The name of the database to give write access to. Defaults to data product namespace",
+                label="Schema",
+                tooltip="The name of the schema to give write access to. Defaults to data product namespace",
                 required=True,
             ),
             UIElementMetadata(
@@ -153,13 +151,3 @@ class GlueTechnicalAssetConfiguration(TechnicalAssetPlugin):
             ),
         ]
         return base_metadata
-
-    @classmethod
-    def get_parent_platform(cls) -> Optional[str]:
-        return "aws"
-
-    @classmethod
-    def register_mcp_tools(cls, mcp: object) -> None:
-        from portal_plugins.glue.mcp_tools import register_tools
-
-        register_tools(mcp)  # type: ignore[arg-type]

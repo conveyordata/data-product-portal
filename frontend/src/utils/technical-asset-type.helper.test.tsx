@@ -39,15 +39,15 @@ describe('getTechnicalAssetIcon', () => {
     it('uses the icon a plugin bundles in its own package', () => {
         const icon = renderIcon(getTechnicalAssetIcon('SomePlugin', [plugin({ icon_data_uri: DATA_URI })]));
 
-        expect(icon?.tagName).toBe('IMG');
-        expect(icon?.getAttribute('src')).toBe(DATA_URI);
+        // An <svg>, so the `svg { width; height }` rule every caller relies on sizes it.
+        expect(icon?.tagName.toLowerCase()).toBe('svg');
+        expect(icon?.querySelector('image')?.getAttribute('href')).toBe(DATA_URI);
     });
 
     it('falls back to the bundled frontend asset when the plugin ships no icon', () => {
         const icon = renderIcon(getTechnicalAssetIcon('SomePlugin', [plugin()]));
 
-        // The bundled assets are inlined as SVG, never as an img data URI.
-        expect(icon?.tagName).not.toBe('IMG');
+        expect(icon?.querySelector('image')).toBeNull();
     });
 
     it('returns nothing for an unknown plugin', () => {
@@ -59,13 +59,19 @@ describe('getPlatformTileIcon', () => {
     it('uses the tile icon a plugin bundles in its own package', () => {
         const icon = renderIcon(getPlatformTileIcon(tile({ icon_data_uri: DATA_URI })));
 
-        expect(icon?.tagName).toBe('IMG');
-        expect(icon?.getAttribute('src')).toBe(DATA_URI);
+        expect(icon?.tagName.toLowerCase()).toBe('svg');
+        expect(icon?.querySelector('image')?.getAttribute('href')).toBe(DATA_URI);
     });
 
     it('falls back to the bundled frontend asset', () => {
         const icon = renderIcon(getPlatformTileIcon(tile()));
 
-        expect(icon?.tagName).not.toBe('IMG');
+        expect(icon?.querySelector('image')).toBeNull();
+    });
+
+    it('returns the same component for the same icon, so React does not remount it', () => {
+        expect(getPlatformTileIcon(tile({ icon_data_uri: DATA_URI }))).toBe(
+            getPlatformTileIcon(tile({ icon_data_uri: DATA_URI })),
+        );
     });
 });
