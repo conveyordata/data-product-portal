@@ -73,7 +73,7 @@ Role assignments link users to roles within a specific scope:
 - **Data Product roles** are assigned when adding team members to a data product
 - **Output Port roles** are assigned when granting access to output ports
 - Users can have different roles in different scopes simultaneously
-- Each user can have only **one global role** at a time (excluding temporary admin privileges)ç
+- Each user can have only **one global role** at a time (excluding temporary admin privileges)
 
 #### Group Role Assignments
 

@@ -251,7 +251,7 @@ def replace_group_members(
     db: Session = Depends(get_db_session, scope="function"),
 ) -> None:
     """
-    Because the service method does add and replace operations internally,
+    Because the service method performs add and replace operations internally,
     a lock is used to ensure that only one request is processed at a time.
     """
     GroupService(db).replace_members(
