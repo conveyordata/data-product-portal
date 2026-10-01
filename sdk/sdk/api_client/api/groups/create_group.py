@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from typing import Any
+from typing import Any, cast
 
 import httpx
 
@@ -32,11 +32,19 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> GroupCreateResponse | HTTPValidationError | None:
+) -> Any | GroupCreateResponse | HTTPValidationError | None:
     if response.status_code == 200:
         response_200 = GroupCreateResponse.from_dict(response.json())
 
         return response_200
+
+    if response.status_code == 400:
+        response_400 = cast(Any, None)
+        return response_400
+
+    if response.status_code == 404:
+        response_404 = cast(Any, None)
+        return response_404
 
     if response.status_code == 422:
         response_422 = HTTPValidationError.from_dict(response.json())
@@ -51,7 +59,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[GroupCreateResponse | HTTPValidationError]:
+) -> Response[Any | GroupCreateResponse | HTTPValidationError]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -64,7 +72,7 @@ def sync_detailed(
     *,
     client: AuthenticatedClient | Client,
     body: GroupCreate,
-) -> Response[GroupCreateResponse | HTTPValidationError]:
+) -> Response[Any | GroupCreateResponse | HTTPValidationError]:
     """Create Group
 
     Args:
@@ -75,7 +83,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[GroupCreateResponse | HTTPValidationError]
+        Response[Any | GroupCreateResponse | HTTPValidationError]
     """
 
     kwargs = _get_kwargs(
@@ -93,7 +101,7 @@ def sync(
     *,
     client: AuthenticatedClient | Client,
     body: GroupCreate,
-) -> GroupCreateResponse | HTTPValidationError | None:
+) -> Any | GroupCreateResponse | HTTPValidationError | None:
     """Create Group
 
     Args:
@@ -104,7 +112,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        GroupCreateResponse | HTTPValidationError
+        Any | GroupCreateResponse | HTTPValidationError
     """
 
     return sync_detailed(
@@ -117,7 +125,7 @@ async def asyncio_detailed(
     *,
     client: AuthenticatedClient | Client,
     body: GroupCreate,
-) -> Response[GroupCreateResponse | HTTPValidationError]:
+) -> Response[Any | GroupCreateResponse | HTTPValidationError]:
     """Create Group
 
     Args:
@@ -128,7 +136,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[GroupCreateResponse | HTTPValidationError]
+        Response[Any | GroupCreateResponse | HTTPValidationError]
     """
 
     kwargs = _get_kwargs(
@@ -144,7 +152,7 @@ async def asyncio(
     *,
     client: AuthenticatedClient | Client,
     body: GroupCreate,
-) -> GroupCreateResponse | HTTPValidationError | None:
+) -> Any | GroupCreateResponse | HTTPValidationError | None:
     """Create Group
 
     Args:
@@ -155,7 +163,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        GroupCreateResponse | HTTPValidationError
+        Any | GroupCreateResponse | HTTPValidationError
     """
 
     return (

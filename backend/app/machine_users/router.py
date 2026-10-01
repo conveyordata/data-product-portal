@@ -81,7 +81,7 @@ def get_machine_user(
                     "example": {"detail": "Required machine user does not exist"}
                 }
             },
-        }
+        },
     },
 )
 def create_machine_user(

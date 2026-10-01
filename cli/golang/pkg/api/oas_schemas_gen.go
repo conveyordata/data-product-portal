@@ -611,10 +611,18 @@ type AddExplorationFinalizerOKApplicationJSON jx.Raw
 
 func (*AddExplorationFinalizerOKApplicationJSON) addExplorationFinalizerRes() {}
 
+type AddGroupMembersBadRequestApplicationJSON jx.Raw
+
+func (*AddGroupMembersBadRequestApplicationJSON) addGroupMembersRes() {}
+
 // AddGroupMembersNoContent is response for AddGroupMembers operation.
 type AddGroupMembersNoContent struct{}
 
 func (*AddGroupMembersNoContent) addGroupMembersRes() {}
+
+type AddGroupMembersNotFoundApplicationJSON jx.Raw
+
+func (*AddGroupMembersNotFoundApplicationJSON) addGroupMembersRes() {}
 
 type AddOutputPortDataQualityRunNotFoundApplicationJSON jx.Raw
 
@@ -1213,6 +1221,22 @@ func (s *CreateExplorationResponse) SetFinalizers(val []string) {
 }
 
 func (*CreateExplorationResponse) createExplorationRes() {}
+
+type CreateGroupBadRequestApplicationJSON jx.Raw
+
+func (*CreateGroupBadRequestApplicationJSON) createGroupRes() {}
+
+type CreateGroupNotFoundApplicationJSON jx.Raw
+
+func (*CreateGroupNotFoundApplicationJSON) createGroupRes() {}
+
+type CreateMachineUserBadRequestApplicationJSON jx.Raw
+
+func (*CreateMachineUserBadRequestApplicationJSON) createMachineUserRes() {}
+
+type CreateMachineUserNotFoundApplicationJSON jx.Raw
+
+func (*CreateMachineUserNotFoundApplicationJSON) createMachineUserRes() {}
 
 type CreateOutputPortNotFoundApplicationJSON jx.Raw
 
@@ -3472,10 +3496,18 @@ type DeleteGroupNoContent struct{}
 
 func (*DeleteGroupNoContent) deleteGroupRes() {}
 
+type DeleteGroupNotFoundApplicationJSON jx.Raw
+
+func (*DeleteGroupNotFoundApplicationJSON) deleteGroupRes() {}
+
 // DeleteMachineUserNoContent is response for DeleteMachineUser operation.
 type DeleteMachineUserNoContent struct{}
 
 func (*DeleteMachineUserNoContent) deleteMachineUserRes() {}
+
+type DeleteMachineUserNotFoundApplicationJSON jx.Raw
+
+func (*DeleteMachineUserNotFoundApplicationJSON) deleteMachineUserRes() {}
 
 type DeleteOutputPortQueryStatOKApplicationJSON jx.Raw
 
@@ -5144,6 +5176,14 @@ func (s *GetExplorationsResponse) SetExplorations(val []Exploration) {
 
 func (*GetExplorationsResponse) getExplorationsRes() {}
 
+type GetGroupMembersNotFoundApplicationJSON jx.Raw
+
+func (*GetGroupMembersNotFoundApplicationJSON) getGroupMembersRes() {}
+
+type GetGroupNotFoundApplicationJSON jx.Raw
+
+func (*GetGroupNotFoundApplicationJSON) getGroupRes() {}
+
 // Ref: #/components/schemas/GetInputPortsForOutputPortResponse
 type GetInputPortsForOutputPortResponse struct {
 	InputPorts []OutputPortInputPort `json:"input_ports"`
@@ -5160,6 +5200,10 @@ func (s *GetInputPortsForOutputPortResponse) SetInputPorts(val []OutputPortInput
 }
 
 func (*GetInputPortsForOutputPortResponse) getInputPortsForOutputPortRes() {}
+
+type GetMachineUserNotFoundApplicationJSON jx.Raw
+
+func (*GetMachineUserNotFoundApplicationJSON) getMachineUserRes() {}
 
 // Ref: #/components/schemas/GetOutputPortAccessDurationsResponse
 type GetOutputPortAccessDurationsResponse struct {
@@ -11269,6 +11313,10 @@ type RemoveGroupMembersNoContent struct{}
 
 func (*RemoveGroupMembersNoContent) removeGroupMembersRes() {}
 
+type RemoveGroupMembersNotFoundApplicationJSON jx.Raw
+
+func (*RemoveGroupMembersNotFoundApplicationJSON) removeGroupMembersRes() {}
+
 type RemoveInputPortForDataProductBadRequestApplicationJSON jx.Raw
 
 func (*RemoveInputPortForDataProductBadRequestApplicationJSON) removeInputPortForDataProductRes() {}
@@ -11522,10 +11570,18 @@ func (s *RenewalStatus) UnmarshalText(data []byte) error {
 	}
 }
 
+type ReplaceGroupMembersBadRequestApplicationJSON jx.Raw
+
+func (*ReplaceGroupMembersBadRequestApplicationJSON) replaceGroupMembersRes() {}
+
 // ReplaceGroupMembersNoContent is response for ReplaceGroupMembers operation.
 type ReplaceGroupMembersNoContent struct{}
 
 func (*ReplaceGroupMembersNoContent) replaceGroupMembersRes() {}
+
+type ReplaceGroupMembersNotFoundApplicationJSON jx.Raw
+
+func (*ReplaceGroupMembersNotFoundApplicationJSON) replaceGroupMembersRes() {}
 
 type ReplaceOutputPortCuratedQueriesNotFoundApplicationJSON jx.Raw
 
@@ -14036,6 +14092,14 @@ func (s *UpdateDomainResponse) SetID(val uuid.UUID) {
 }
 
 func (*UpdateDomainResponse) updateDomainRes() {}
+
+type UpdateGroupNotFoundApplicationJSON jx.Raw
+
+func (*UpdateGroupNotFoundApplicationJSON) updateGroupRes() {}
+
+type UpdateMachineUserNotFoundApplicationJSON jx.Raw
+
+func (*UpdateMachineUserNotFoundApplicationJSON) updateMachineUserRes() {}
 
 type UpdateOutputPortAboutNotFoundApplicationJSON jx.Raw
 

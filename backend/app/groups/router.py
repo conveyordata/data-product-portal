@@ -89,7 +89,7 @@ def get_group(
                     "example": {"detail": "Required group does not exist"}
                 }
             },
-        }
+        },
     },
 )
 def create_group(
