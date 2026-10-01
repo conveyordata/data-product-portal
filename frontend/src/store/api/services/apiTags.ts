@@ -209,6 +209,8 @@ api.enhanceEndpoints({
             invalidatesTags: [
                 { type: TagTypes.OutputPortAccessType, id: STATIC_TAG_ID.LIST },
                 { type: TagTypes.OutputPort },
+                { type: TagTypes.TechnicalAsset },
+                { type: TagTypes.DataProductTechnicalAssets },
                 { type: TagTypes.DataProductOutputPorts },
                 { type: TagTypes.DataProductInputPorts },
                 { type: TagTypes.ExplorationInputPorts },
