@@ -8612,6 +8612,7 @@
           "Groups"
         ],
         "summary": "Replace Group Members",
+        "description": "Because the service method does add and replace operations internally,\na lock is used to ensure that only one request is processed at a time.",
         "operationId": "replace_group_members",
         "parameters": [
           {
