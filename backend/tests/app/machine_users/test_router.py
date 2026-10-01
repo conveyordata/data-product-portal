@@ -33,8 +33,8 @@ class TestMachineUsersRouter:
         }
 
     def test_get_machine_users__returns_machine_users_ordered_by_display_name_and_external_id(
-            self,
-            client,
+        self,
+        client,
     ):
         first = MachineUserFactory(
             external_id="deployment-agent-a",

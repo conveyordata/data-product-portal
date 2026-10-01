@@ -42,8 +42,8 @@ class TestGroupsRouter:
         }
 
     def test_get_groups__returns_groups_ordered_by_display_name_and_external_id(
-            self,
-            client,
+        self,
+        client,
     ):
         first = GroupFactory(
             external_id="engineering-a",

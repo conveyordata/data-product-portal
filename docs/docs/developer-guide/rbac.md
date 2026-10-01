@@ -77,9 +77,9 @@ Role assignments link users to roles within a specific scope:
 
 #### Group Role Assignments
 
-Groups can receive global and resource-specific role assignments. 
-Users and machine users that belong to a group inherit the group's access. 
-Removing a member revokes the access inherited through that group. 
+Groups can receive global and resource-specific role assignments.
+Users and machine users that belong to a group inherit the group's access.
+Removing a member revokes the access inherited through that group.
 Groups cannot contain other groups.
 
 ## Accessing RBAC Settings
