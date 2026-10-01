@@ -1,4 +1,4 @@
-from typing import Sequence, Iterable
+from typing import Iterable, Sequence
 from uuid import UUID
 
 from fastapi import HTTPException, status
