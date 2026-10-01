@@ -1,3 +1,5 @@
+import asyncio
+from collections.abc import AsyncIterator
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, status
@@ -23,6 +25,18 @@ from app.groups.schema_response import (
 from app.groups.service import GroupService
 
 router = APIRouter(tags=["Groups"], prefix="/v2/groups")
+_group_members_replace_locks: dict[UUID, asyncio.Lock] = {}
+
+
+async def _serialize_group_members_replacement(
+    id: UUID,
+) -> AsyncIterator[None]:
+    """
+    Used to enforce locking on group members replacement.
+    """
+    lock = _group_members_replace_locks.setdefault(id, asyncio.Lock())
+    async with lock:
+        yield
 
 
 @router.get("")
@@ -124,6 +138,7 @@ def add_group_members(
                 EmptyResolver,
             )
         ),
+        Depends(_serialize_group_members_replacement, scope="request"),
     ],
 )
 def replace_group_members(
@@ -131,6 +146,10 @@ def replace_group_members(
     request: GroupMembersReplace,
     db: Session = Depends(get_db_session, scope="function"),
 ) -> None:
+    """
+    Because the service method does add and replace operations internally,
+    a lock is used to ensure that only one request is processed at a time.
+    """
     GroupService(db).replace_members(
         group_id=id,
         member_identity_ids=request.member_identity_ids,
