@@ -15,6 +15,9 @@ from app.technical_asset_configuration.base_schema import TechnicalAssetPlugin
 VERSION_TABLE = "alembic_version"
 _SCRIPT_LOCATION = Path(__file__).parent.parent / "database" / "alembic"
 _CORE_VERSIONS_DIR = _SCRIPT_LOCATION / "versions"
+_FILE_TEMPLATE = (
+    "%%(year)d_%%(month).2d_%%(day).2d_%%(hour).2d%%(minute).2d-%%(rev)s_%%(slug)s"
+)
 
 
 def _versions_dir(plugin: type[TechnicalAssetPlugin]) -> Optional[Path]:
@@ -31,6 +34,12 @@ def _owned_versions_dir(plugin: type[TechnicalAssetPlugin]) -> Path:
     if versions_dir is None:
         raise ValueError(f"Plugin '{plugin.name}' has no versions folder")
     return versions_dir
+
+
+def _version_locations(plugins: Sequence[type[TechnicalAssetPlugin]]) -> list[Path]:
+    return [_CORE_VERSIONS_DIR] + [
+        _owned_versions_dir(plugin) for plugin in plugins if owns_a_table(plugin)
+    ]
 
 
 def _config(version_locations: Sequence[Path], url: str) -> Config:
@@ -75,11 +84,7 @@ def _core_head(plugins: Sequence[type[TechnicalAssetPlugin]], url: str) -> str:
     # migrate_all uses, then picking out the head whose file lives under
     # core's own versions folder, works regardless of which plugins that
     # happens to include.
-    plugins_owning_tables = [plugin for plugin in plugins if owns_a_table(plugin)]
-    version_locations = [_CORE_VERSIONS_DIR] + [
-        _owned_versions_dir(plugin) for plugin in plugins_owning_tables
-    ]
-    script = ScriptDirectory.from_config(_config(version_locations, url))
+    script = ScriptDirectory.from_config(_config(_version_locations(plugins), url))
     core_heads = [
         head
         for head in script.get_heads()
@@ -101,10 +106,7 @@ def migrate_all(plugins: Sequence[type[TechnicalAssetPlugin]], engine: Engine) -
     plugins_owning_tables = [plugin for plugin in plugins if owns_a_table(plugin)]
     url = engine.url.render_as_string(hide_password=False)
 
-    version_locations = [_CORE_VERSIONS_DIR] + [
-        _owned_versions_dir(plugin) for plugin in plugins_owning_tables
-    ]
-    config = _config(version_locations, url)
+    config = _config(_version_locations(plugins), url)
     script = ScriptDirectory.from_config(config)
     known_revisions = {revision.revision for revision in script.walk_revisions()}
 
@@ -147,13 +149,9 @@ def check_latest_migration_core(
     core's own previous revision through the same shared config migrate_all
     uses, then calls migrate_all to bring everything back.
     """
-    plugins_owning_tables = [plugin for plugin in plugins if owns_a_table(plugin)]
     url = engine.url.render_as_string(hide_password=False)
 
-    version_locations = [_CORE_VERSIONS_DIR] + [
-        _owned_versions_dir(plugin) for plugin in plugins_owning_tables
-    ]
-    config = _config(version_locations, url)
+    config = _config(_version_locations(plugins), url)
     script = ScriptDirectory.from_config(config)
 
     head = _core_head(plugins, url)
@@ -164,3 +162,31 @@ def check_latest_migration_core(
     command.downgrade(config, down_revision or "base")
     migrate_all(plugins, engine)
     return head
+
+
+def create_core_revision(
+    plugins: Sequence[type[TechnicalAssetPlugin]], engine: Engine, message: str
+) -> str:
+    """Create a new empty core migration on top of core's own head.
+
+    A bare `alembic revision` can't be used for this: its config only knows
+    core's script location, so the core migrations that `depends_on` a
+    plugin baseline fail to resolve. This builds the same shared config
+    migrate_all uses and pins the new revision to core's branch.
+    """
+    url = engine.url.render_as_string(hide_password=False)
+
+    config = _config(_version_locations(plugins), url)
+    config.set_main_option("file_template", _FILE_TEMPLATE)
+
+    script = command.revision(
+        config,
+        message=message,
+        head=_core_head(plugins, url),
+        version_path=str(_CORE_VERSIONS_DIR),
+    )
+    if isinstance(script, list):
+        script = script[0]
+    if script is None:
+        raise ValueError("Alembic did not generate a revision")
+    return str(script.path)

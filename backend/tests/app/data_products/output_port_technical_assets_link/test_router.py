@@ -24,7 +24,7 @@ from tests.factories import (
 from tests.factories.access_mode import AccessModeFactory
 from tests.webhook_util import assert_event_in_queue, assert_event_not_in_queue
 
-DATA_OUTPUTS_DATASETS_ENDPOINT = (
+TECHNICAL_ASSETS_OUTPUT_PORTS_ENDPOINT = (
     "api/v2/data_products/{}/output_ports/{}/technical_assets"
 )
 
@@ -660,7 +660,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         client, data_product_id, technical_asset_id, output_port_id
     ):
         return client.post(
-            f"{DATA_OUTPUTS_DATASETS_ENDPOINT.format(data_product_id, output_port_id)}/add",
+            f"{TECHNICAL_ASSETS_OUTPUT_PORTS_ENDPOINT.format(data_product_id, output_port_id)}/add",
             json={"technical_asset_id": f"{technical_asset_id}"},
         )
 
@@ -669,7 +669,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         client, data_product_id, technical_asset_id, output_port_id
     ):
         return client.post(
-            f"{DATA_OUTPUTS_DATASETS_ENDPOINT.format(data_product_id, output_port_id)}/approve_link_request",
+            f"{TECHNICAL_ASSETS_OUTPUT_PORTS_ENDPOINT.format(data_product_id, output_port_id)}/approve_link_request",
             json={"technical_asset_id": f"{technical_asset_id}"},
         )
 
@@ -678,7 +678,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         client, data_product_id, technical_asset_id, output_port_id
     ):
         return client.post(
-            f"{DATA_OUTPUTS_DATASETS_ENDPOINT.format(data_product_id, output_port_id)}/deny_link_request",
+            f"{TECHNICAL_ASSETS_OUTPUT_PORTS_ENDPOINT.format(data_product_id, output_port_id)}/deny_link_request",
             json={"technical_asset_id": f"{technical_asset_id}"},
         )
 
@@ -688,7 +688,7 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
     ):
         return client.request(
             method="DELETE",
-            url=f"{DATA_OUTPUTS_DATASETS_ENDPOINT.format(data_product_id, output_port_id)}/remove",
+            url=f"{TECHNICAL_ASSETS_OUTPUT_PORTS_ENDPOINT.format(data_product_id, output_port_id)}/remove",
             json={"technical_asset_id": f"{technical_asset_id}"},
         )
 

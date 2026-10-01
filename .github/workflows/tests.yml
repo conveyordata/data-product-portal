@@ -71,6 +71,9 @@ jobs:
         env:
           TEST_EMBEDDING_LATENCY_BOUND: "3.000"
           TEST_LATENCY_BOUND: "0.800"
+      - name: Run the plugin tests
+        working-directory: ./backend
+        run: poetry run pytest -v -c pytest.ini --cov=portal_plugins --cov-report=term ../plugins
       - name: Ensure 100% coverage for router files
         working-directory: ./scripts
         run: ./check_coverage.sh

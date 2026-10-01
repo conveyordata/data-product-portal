@@ -8,11 +8,11 @@ from attrs import field as _attrs_field
 
 from ..models.technical_asset_status import TechnicalAssetStatus
 
-T = TypeVar("T", bound="DataOutputStatusUpdate")
+T = TypeVar("T", bound="TechnicalAssetStatusUpdate")
 
 
 @_attrs_define
-class DataOutputStatusUpdate:
+class TechnicalAssetStatusUpdate:
     """
     Attributes:
         status (TechnicalAssetStatus):
@@ -39,12 +39,12 @@ class DataOutputStatusUpdate:
         d = dict(src_dict)
         status = TechnicalAssetStatus(d.pop("status"))
 
-        data_output_status_update = cls(
+        technical_asset_status_update = cls(
             status=status,
         )
 
-        data_output_status_update.additional_properties = d
-        return data_output_status_update
+        technical_asset_status_update.additional_properties = d
+        return technical_asset_status_update
 
     @property
     def additional_keys(self) -> list[str]:

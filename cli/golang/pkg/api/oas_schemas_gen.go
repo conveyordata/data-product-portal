@@ -1625,58 +1625,6 @@ func (s *CreateTechnicalAssetResponse) SetID(val uuid.UUID) {
 
 func (*CreateTechnicalAssetResponse) createTechnicalAssetRes() {}
 
-// Ref: #/components/schemas/DataOutputStatusUpdate
-type DataOutputStatusUpdate struct {
-	Status TechnicalAssetStatus `json:"status"`
-}
-
-// GetStatus returns the value of Status.
-func (s *DataOutputStatusUpdate) GetStatus() TechnicalAssetStatus {
-	return s.Status
-}
-
-// SetStatus sets the value of Status.
-func (s *DataOutputStatusUpdate) SetStatus(val TechnicalAssetStatus) {
-	s.Status = val
-}
-
-// Ref: #/components/schemas/DataOutputUpdate
-type DataOutputUpdate struct {
-	Name        string      `json:"name"`
-	Description string      `json:"description"`
-	TagIds      []uuid.UUID `json:"tag_ids"`
-}
-
-// GetName returns the value of Name.
-func (s *DataOutputUpdate) GetName() string {
-	return s.Name
-}
-
-// GetDescription returns the value of Description.
-func (s *DataOutputUpdate) GetDescription() string {
-	return s.Description
-}
-
-// GetTagIds returns the value of TagIds.
-func (s *DataOutputUpdate) GetTagIds() []uuid.UUID {
-	return s.TagIds
-}
-
-// SetName sets the value of Name.
-func (s *DataOutputUpdate) SetName(val string) {
-	s.Name = val
-}
-
-// SetDescription sets the value of Description.
-func (s *DataOutputUpdate) SetDescription(val string) {
-	s.Description = val
-}
-
-// SetTagIds sets the value of TagIds.
-func (s *DataOutputUpdate) SetTagIds(val []uuid.UUID) {
-	s.TagIds = val
-}
-
 // Ref: #/components/schemas/DataProduct
 type DataProduct struct {
 	ID          uuid.UUID                 `json:"id"`
@@ -13296,6 +13244,58 @@ func (s *TechnicalAssetStatus) UnmarshalText(data []byte) error {
 	default:
 		return errors.Errorf("invalid value: %q", data)
 	}
+}
+
+// Ref: #/components/schemas/TechnicalAssetStatusUpdate
+type TechnicalAssetStatusUpdate struct {
+	Status TechnicalAssetStatus `json:"status"`
+}
+
+// GetStatus returns the value of Status.
+func (s *TechnicalAssetStatusUpdate) GetStatus() TechnicalAssetStatus {
+	return s.Status
+}
+
+// SetStatus sets the value of Status.
+func (s *TechnicalAssetStatusUpdate) SetStatus(val TechnicalAssetStatus) {
+	s.Status = val
+}
+
+// Ref: #/components/schemas/TechnicalAssetUpdate
+type TechnicalAssetUpdate struct {
+	Name        string      `json:"name"`
+	Description string      `json:"description"`
+	TagIds      []uuid.UUID `json:"tag_ids"`
+}
+
+// GetName returns the value of Name.
+func (s *TechnicalAssetUpdate) GetName() string {
+	return s.Name
+}
+
+// GetDescription returns the value of Description.
+func (s *TechnicalAssetUpdate) GetDescription() string {
+	return s.Description
+}
+
+// GetTagIds returns the value of TagIds.
+func (s *TechnicalAssetUpdate) GetTagIds() []uuid.UUID {
+	return s.TagIds
+}
+
+// SetName sets the value of Name.
+func (s *TechnicalAssetUpdate) SetName(val string) {
+	s.Name = val
+}
+
+// SetDescription sets the value of Description.
+func (s *TechnicalAssetUpdate) SetDescription(val string) {
+	s.Description = val
+}
+
+// SetTagIds sets the value of TagIds.
+func (s *TechnicalAssetUpdate) SetTagIds(val []uuid.UUID) {
+	s.TagIds = val
 }
 
 // Ref: #/components/schemas/TechnicalInfo

@@ -1,6 +1,6 @@
 [project]
 name = "data-product-portal"
-version = "0.0.1"
+version = "0.7.4"
 description = "Data Product Portal core"
 
 [project.entry-points."data_product_portal.plugins"]
@@ -10,7 +10,6 @@ coder = "app.technical_asset_configuration.coder.schema:CoderPlugin"
 conveyor = "app.technical_asset_configuration.conveyor.schema:ConveyorPlugin"
 databricks = "app.technical_asset_configuration.databricks.schema:DatabricksTechnicalAssetConfiguration"
 github = "app.technical_asset_configuration.github.schema:GitHubPlugin"
-glue = "app.technical_asset_configuration.glue.schema:GlueTechnicalAssetConfiguration"
 osi-semantic-model = "app.technical_asset_configuration.osi_sem_model.schema:OSISemanticModelTechnicalAssetConfiguration"
 postgresql = "app.technical_asset_configuration.postgresql.schema:PostgreSQLTechnicalAssetConfiguration"
 redshift = "app.technical_asset_configuration.redshift.schema:RedshiftTechnicalAssetConfiguration"
@@ -24,7 +23,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "data-product-portal"
-version = "0.0.1"
+version = "0.7.4"
 description = "Data Product Portal core"
 authors = ["Stijn Janssens <stijn.janssens@dataminded.com>"]
 readme = "README.md"
@@ -35,7 +34,7 @@ python = "^3.13"
 python-dotenv = "^1.2.3"
 fastapi = "0.141.1"
 gunicorn = "^26.2.0"
-uvicorn = ">=0.52.4,<0.54.0"
+uvicorn = ">=0.52.4,<0.55.0"
 pydantic = { version = "^2.13.5", extras = ['email'] }
 pydantic-settings = "^2.15.0"
 typer = "^0.27.2"
@@ -72,6 +71,9 @@ opentelemetry-instrumentation-fastapi = "^0.64b0"
 opentelemetry-instrumentation-sqlalchemy = "^0.64b0"
 opentelemetry-distro = "^0.64b0"
 pycasbin = "^2.8.0"
+
+[tool.poetry.group.plugins.dependencies]
+data-product-portal-plugins = { path = "../plugins", develop = true }
 
 [tool.poetry.group.test]
 optional = true

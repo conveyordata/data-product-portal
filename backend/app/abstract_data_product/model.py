@@ -6,11 +6,9 @@ from sqlalchemy.dialects.postgresql import ARRAY, UUID
 from sqlalchemy.orm import Mapped, Session, deferred, mapped_column, relationship
 
 from app.abstract_data_product.input_ports.enums import InputPortStatus
+from app.abstract_data_product.input_ports.model import InputPort
 from app.abstract_data_product.type import AbstractDataProductType
 from app.configuration.domains.model import Domain
-from app.data_products.output_ports.model import (
-    InputPort,
-)
 from app.data_products.status import AbstractDataProductStatus
 from app.database.database import Base, ensure_exists
 from app.shared.model import BaseORM
@@ -75,5 +73,5 @@ class AbstractDataProduct(Base, BaseORM):
 
 def ensure_abstract_data_product_exists(
     id: UUID, db: Session, **kwargs
-) -> AbstractDataProduct:
+) -> "AbstractDataProduct":
     return ensure_exists(id, db, AbstractDataProduct, **kwargs)

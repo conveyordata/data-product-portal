@@ -88,7 +88,7 @@ def _backup_data_product_name_on_delete(mapper, connection, target):
 
 
 @sql_event.listens_for(TechnicalAsset, "before_delete")
-def _backup_data_output_name_on_delete(mapper, connection, target):
+def _backup_technical_asset_name_on_delete(mapper, connection, target):
     connection.execute(
         update(EventModel.__table__)
         .where(

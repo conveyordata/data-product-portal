@@ -9,7 +9,7 @@ ARG PLATFORM=linux/amd64
 # ---------------------------------------------------------------------------
 # Stage 1 – build the React frontend
 # ---------------------------------------------------------------------------
-FROM --platform=${PLATFORM} node:26-alpine@sha256:dbaa92e5758cbbcf85d65d5403fdb530fe3442cbe8c6dbfb7ef23365450d5070 AS frontend-build
+FROM --platform=${PLATFORM} node:26-alpine@sha256:0b36e8c136b94cd4fcf02188228e76c31ad5872eef3fec8cbd2eee500cfd9e80 AS frontend-build
 
 WORKDIR /frontend
 COPY frontend/ ./
@@ -41,6 +41,8 @@ COPY backend/requirements-poetry.txt .
 RUN pip install -r requirements-poetry.txt --require-hashes
 
 COPY backend/poetry.lock backend/pyproject.toml backend/alembic.ini backend/sample_data.sql /
+COPY plugins /plugins
+COPY sdk /sdk
 RUN poetry install --no-root
 
 # pyproject declares readme = "README.md", so poetry-core reads it while
@@ -58,6 +60,10 @@ RUN apt-get update && apt-get upgrade -y && apt-get install -y curl
 
 # Copy installed Python packages and tools from build stage
 COPY --from=python-build /usr/local /usr/local
+
+# portal_plugins is installed editable (path dependency), so the interpreter
+# resolves it from this path at import time, not from site-packages.
+COPY --from=python-build /plugins /plugins
 
 # Copy backend application
 COPY backend/app ./app

@@ -12,7 +12,7 @@ from app.core.authz import Action
 from app.data_products.model import DataProduct
 from app.settings import settings
 from tests.app.data_products.output_port_technical_assets_link.test_router import (
-    DATA_OUTPUTS_DATASETS_ENDPOINT,
+    TECHNICAL_ASSETS_OUTPUT_PORTS_ENDPOINT,
 )
 from tests.factories import (
     AccessModeFactory,
@@ -80,11 +80,11 @@ class TestTechnicalAssetsRouter:
     def test_create_technical_asset(
         self, technical_asset_payload, data_product_role_assignment, client: TestClient
     ):
-        created_data_output = self.create_technical_asset(
+        created_technical_asset = self.create_technical_asset(
             client, technical_asset_payload
         )
-        assert created_data_output.status_code == 200, created_data_output.text
-        assert "id" in created_data_output.json()
+        assert created_technical_asset.status_code == 200, created_technical_asset.text
+        assert "id" in created_technical_asset.json()
 
     def test_create_technical_asset__with_platform_and_service_omitted(
         self, technical_asset_payload, data_product_role_assignment, client
@@ -186,9 +186,9 @@ class TestTechnicalAssetsRouter:
         payload = deepcopy(technical_asset_payload)
         payload["technical_mapping"] = "default"
 
-        created_data_output = self.create_technical_asset(client, payload)
-        assert created_data_output.status_code == 200
-        assert "id" in created_data_output.json()
+        created_technical_asset = self.create_technical_asset(client, payload)
+        assert created_technical_asset.status_code == 200
+        assert "id" in created_technical_asset.json()
 
     def test_create_technical_asset_product_aligned_new(
         self, technical_asset_payload, data_product_role_assignment, client: TestClient
@@ -196,9 +196,9 @@ class TestTechnicalAssetsRouter:
         payload = deepcopy(technical_asset_payload)
         payload["technical_mapping"] = "default"
 
-        created_data_output = self.create_technical_asset(client, payload)
-        assert created_data_output.status_code == 200
-        assert "id" in created_data_output.json()
+        created_technical_asset = self.create_technical_asset(client, payload)
+        assert created_technical_asset.status_code == 200
+        assert "id" in created_technical_asset.json()
 
     def test_deprecated_source_aligned(
         self, technical_asset_payload, data_product_role_assignment, client: TestClient
@@ -207,14 +207,14 @@ class TestTechnicalAssetsRouter:
         payload.pop("technical_mapping")
         payload["sourceAligned"] = True
 
-        created_data_output = self.create_technical_asset(client, payload)
-        assert created_data_output.status_code == 200
-        assert "id" in created_data_output.json()
+        created_technical_asset = self.create_technical_asset(client, payload)
+        assert created_technical_asset.status_code == 200
+        assert "id" in created_technical_asset.json()
         assert (
             self.get_technical_asset(
                 client,
                 technical_asset_payload["owner_id"],
-                created_data_output.json().get("id"),
+                created_technical_asset.json().get("id"),
             ).json()["technical_mapping"]
             == "custom"
         )
@@ -223,47 +223,47 @@ class TestTechnicalAssetsRouter:
         self, technical_asset_payload, client: TestClient
     ):
         technical_asset_payload.pop("user_id")
-        created_data_output = self.create_technical_asset(
+        created_technical_asset = self.create_technical_asset(
             client, technical_asset_payload
         )
-        assert created_data_output.status_code == 403
+        assert created_technical_asset.status_code == 403
 
-    def test_get_data_outputs(self, client):
-        data_output = TechnicalAssetFactory()
-        response = client.get(ENDPOINT.format(data_output.owner.id))
+    def test_get_technical_assets(self, client):
+        technical_asset = TechnicalAssetFactory()
+        response = client.get(ENDPOINT.format(technical_asset.owner.id))
         assert response.status_code == 200, response.text
         data = response.json()
         assert len(data) == 1
-        assert data["technical_assets"][0]["id"] == str(data_output.id)
+        assert data["technical_assets"][0]["id"] == str(technical_asset.id)
 
     def test_get_technical_asset(self, client: TestClient):
-        data_output = TechnicalAssetFactory()
+        technical_asset = TechnicalAssetFactory()
 
         response = self.get_technical_asset(
-            client, data_output.owner.id, data_output.id
+            client, technical_asset.owner.id, technical_asset.id
         )
         assert response.status_code == 200
-        assert response.json()["id"] == str(data_output.id)
+        assert response.json()["id"] == str(technical_asset.id)
 
     def test_get_technical_asset__environment_info_uses_global_list_by_default(
         self, client: TestClient
     ):
         dev_env = EnvironmentFactory(name="dev", acronym="dev")
         prd_env = EnvironmentFactory(name="prd", acronym="prd")
-        data_output = TechnicalAssetFactory()
+        technical_asset = TechnicalAssetFactory()
         EnvPlatformServiceConfigFactory(
-            platform=data_output.platform,
-            service=data_output.service,
+            platform=technical_asset.platform,
+            service=technical_asset.service,
             environment=dev_env,
         )
         EnvPlatformServiceConfigFactory(
-            platform=data_output.platform,
-            service=data_output.service,
+            platform=technical_asset.platform,
+            service=technical_asset.service,
             environment=prd_env,
         )
 
         response = self.get_technical_asset(
-            client, data_output.owner.id, data_output.id
+            client, technical_asset.owner.id, technical_asset.id
         )
         assert response.status_code == 200
         environment_ids = {
@@ -278,20 +278,20 @@ class TestTechnicalAssetsRouter:
         sandbox_env = EnvironmentFactory(
             name="sandbox", acronym="sandbox", is_global=False
         )
-        data_output = TechnicalAssetFactory()
+        technical_asset = TechnicalAssetFactory()
         EnvPlatformServiceConfigFactory(
-            platform=data_output.platform,
-            service=data_output.service,
+            platform=technical_asset.platform,
+            service=technical_asset.service,
             environment=dev_env,
         )
         EnvPlatformServiceConfigFactory(
-            platform=data_output.platform,
-            service=data_output.service,
+            platform=technical_asset.platform,
+            service=technical_asset.service,
             environment=sandbox_env,
         )
 
         response = self.get_technical_asset(
-            client, data_output.owner.id, data_output.id
+            client, technical_asset.owner.id, technical_asset.id
         )
         assert response.status_code == 200
         environment_ids = {
@@ -306,20 +306,20 @@ class TestTechnicalAssetsRouter:
         prd_env = EnvironmentFactory(name="prd", acronym="prd")
         domain = DomainFactory(environments=[dev_env])
         data_product = DataProductFactory(domain=domain)
-        data_output = TechnicalAssetFactory(owner=data_product)
+        technical_asset = TechnicalAssetFactory(owner=data_product)
         EnvPlatformServiceConfigFactory(
-            platform=data_output.platform,
-            service=data_output.service,
+            platform=technical_asset.platform,
+            service=technical_asset.service,
             environment=dev_env,
         )
         EnvPlatformServiceConfigFactory(
-            platform=data_output.platform,
-            service=data_output.service,
+            platform=technical_asset.platform,
+            service=technical_asset.service,
             environment=prd_env,
         )
 
         response = self.get_technical_asset(
-            client, data_output.owner.id, data_output.id
+            client, technical_asset.owner.id, technical_asset.id
         )
         assert response.status_code == 200
         environment_ids = {
@@ -336,20 +336,20 @@ class TestTechnicalAssetsRouter:
         prd_env = EnvironmentFactory(name="prd", acronym="prd", is_global=True)
         domain = DomainFactory(environments=[sandbox_env])
         data_product = DataProductFactory(domain=domain)
-        data_output = TechnicalAssetFactory(owner=data_product)
+        technical_asset = TechnicalAssetFactory(owner=data_product)
         EnvPlatformServiceConfigFactory(
-            platform=data_output.platform,
-            service=data_output.service,
+            platform=technical_asset.platform,
+            service=technical_asset.service,
             environment=sandbox_env,
         )
         EnvPlatformServiceConfigFactory(
-            platform=data_output.platform,
-            service=data_output.service,
+            platform=technical_asset.platform,
+            service=technical_asset.service,
             environment=prd_env,
         )
 
         response = self.get_technical_asset(
-            client, data_output.owner.id, data_output.id
+            client, technical_asset.owner.id, technical_asset.id
         )
         assert response.status_code == 200
         environment_ids = {
@@ -357,9 +357,11 @@ class TestTechnicalAssetsRouter:
         }
         assert environment_ids == {str(sandbox_env.id)}
 
-    def test_get_data_output_by_id_not_found(self, client: TestClient):
-        data_output = TechnicalAssetFactory()
-        response = self.get_technical_asset(client, data_output.owner.id, uuid.uuid4())
+    def test_get_technical_asset_by_id_not_found(self, client: TestClient):
+        technical_asset = TechnicalAssetFactory()
+        response = self.get_technical_asset(
+            client, technical_asset.owner.id, uuid.uuid4()
+        )
         assert response.status_code == 404
 
     def test_update_technical_asset(self, client: TestClient):
@@ -387,23 +389,23 @@ class TestTechnicalAssetsRouter:
         assert response.json()["id"] == str(technical_asset.id)
 
     def test_update_data_product_no_member(self, client: TestClient):
-        data_output = TechnicalAssetFactory()
+        technical_asset = TechnicalAssetFactory()
         response = self.update_technical_asset(
             client,
             {"name": "update", "description": "update"},
-            data_output.owner.id,
-            data_output.id,
+            technical_asset.owner.id,
+            technical_asset.id,
         )
         assert response.status_code == 403
 
-    def test_remove_data_output_no_access(self, client: TestClient):
-        data_output = TechnicalAssetFactory()
+    def test_remove_technical_asset_no_access(self, client: TestClient):
+        technical_asset = TechnicalAssetFactory()
         response = self.delete_technical_asset(
-            client, data_output.owner.id, data_output.id
+            client, technical_asset.owner.id, technical_asset.id
         )
         assert response.status_code == 403
 
-    def test_remove_data_output(self, client: TestClient):
+    def test_remove_technical_asset(self, client: TestClient):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
         role = RoleFactory(
@@ -413,13 +415,13 @@ class TestTechnicalAssetsRouter:
         DataProductRoleAssignmentFactory(
             identity_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
-        data_output = TechnicalAssetFactory(owner=data_product)
+        technical_asset = TechnicalAssetFactory(owner=data_product)
         response = self.delete_technical_asset(
-            client, data_output.owner.id, data_output.id
+            client, technical_asset.owner.id, technical_asset.id
         )
         assert response.status_code == 200
 
-    def test_remove_data_output_with_tags(self, client: TestClient):
+    def test_remove_technical_asset_with_tags(self, client: TestClient):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
         role = RoleFactory(
@@ -429,9 +431,9 @@ class TestTechnicalAssetsRouter:
         DataProductRoleAssignmentFactory(
             identity_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
-        data_output = TechnicalAssetFactory(owner=data_product, tags=[TagFactory()])
+        technical_asset = TechnicalAssetFactory(owner=data_product, tags=[TagFactory()])
         response = self.delete_technical_asset(
-            client, data_output.owner.id, data_output.id
+            client, technical_asset.owner.id, technical_asset.id
         )
         assert response.status_code == 200
 
@@ -452,16 +454,16 @@ class TestTechnicalAssetsRouter:
         DataProductRoleAssignmentFactory(
             identity_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
-        data_output = TechnicalAssetFactory(owner=data_product)
+        technical_asset = TechnicalAssetFactory(owner=data_product)
         response = self.get_technical_asset(
-            client, data_output.owner.id, data_output.id
+            client, technical_asset.owner.id, technical_asset.id
         )
         assert response.json()["status"] == "active"
         _ = self.update_technical_asset_status(
-            client, {"status": "pending"}, data_output.owner.id, data_output.id
+            client, {"status": "pending"}, technical_asset.owner.id, technical_asset.id
         )
         response = self.get_technical_asset(
-            client, data_output.owner.id, data_output.id
+            client, technical_asset.owner.id, technical_asset.id
         )
         assert response.json()["status"] == "pending"
 
@@ -489,16 +491,16 @@ class TestTechnicalAssetsRouter:
         assert response.json()["status"] == "pending"
 
     def test_get_graph_data(self, client: TestClient):
-        data_output = TechnicalAssetFactory()
+        technical_asset = TechnicalAssetFactory()
         response = client.get(
-            f"{ENDPOINT.format(data_output.owner.id)}/{data_output.id}/graph"
+            f"{ENDPOINT.format(technical_asset.owner.id)}/{technical_asset.id}/graph"
         )
         assert response.json()["edges"] == [
             {
                 "animated": True,
-                "id": f"{str(data_output.id)}-{str(data_output.owner.id)}",
-                "source": str(data_output.owner.id),
-                "target": str(data_output.id),
+                "id": f"{str(technical_asset.id)}-{str(technical_asset.owner.id)}",
+                "source": str(technical_asset.owner.id),
+                "target": str(technical_asset.id),
                 "sourceHandle": "right_s",
                 "targetHandle": "left_t",
             }
@@ -508,14 +510,14 @@ class TestTechnicalAssetsRouter:
                 assert node == {
                     "data": {
                         "icon_key": "S3TechnicalAssetConfiguration",
-                        "id": str(data_output.id),
-                        "link_to_id": str(data_output.owner.id),
-                        "name": data_output.name,
+                        "id": str(technical_asset.id),
+                        "link_to_id": str(technical_asset.owner.id),
+                        "name": technical_asset.name,
                         "domain": None,
                         "domain_id": None,
                         "description": None,
                     },
-                    "id": str(data_output.id),
+                    "id": str(technical_asset.id),
                     "isMain": True,
                     "type": "technicalAssetNode",
                 }
@@ -523,14 +525,14 @@ class TestTechnicalAssetsRouter:
                 assert node == {
                     "data": {
                         "icon_key": "default",
-                        "id": str(data_output.owner.id),
+                        "id": str(technical_asset.owner.id),
                         "link_to_id": None,
-                        "name": data_output.owner.name,
+                        "name": technical_asset.owner.name,
                         "domain": None,
                         "domain_id": None,
                         "description": None,
                     },
-                    "id": str(data_output.owner.id),
+                    "id": str(technical_asset.owner.id),
                     "isMain": False,
                     "type": "dataProductNode",
                 }
@@ -595,40 +597,40 @@ class TestTechnicalAssetsRouter:
         response = self.create_technical_asset(client, create_payload)
         assert response.status_code == 400
 
-    def test_history_event_created_on_data_output_creation(
+    def test_history_event_created_on_technical_asset_creation(
         self, technical_asset_payload, data_product_role_assignment, client
     ):
-        created_data_output = self.create_technical_asset(
+        created_technical_asset = self.create_technical_asset(
             client, technical_asset_payload
         )
-        assert created_data_output.status_code == 200
-        assert "id" in created_data_output.json()
+        assert created_technical_asset.status_code == 200
+        assert "id" in created_technical_asset.json()
 
         history = self.get_technical_asset_history(
             client,
             technical_asset_payload["owner_id"],
-            created_data_output.json().get("id"),
+            created_technical_asset.json().get("id"),
         ).json()
         assert len(history["events"]) == 1
 
     def test_get_technical_asset_history(
         self, technical_asset_payload, data_product_role_assignment, client
     ):
-        created_data_output = self.create_technical_asset(
+        created_technical_asset = self.create_technical_asset(
             client, technical_asset_payload
         )
-        assert created_data_output.status_code == 200
-        assert "id" in created_data_output.json()
+        assert created_technical_asset.status_code == 200
+        assert "id" in created_technical_asset.json()
 
         history = self.get_technical_asset_history(
             client,
             technical_asset_payload["owner_id"],
-            created_data_output.json().get("id"),
+            created_technical_asset.json().get("id"),
         )
         assert history.status_code == 200, history.text
         assert len(history.json()["events"]) == 1
 
-    def test_history_event_created_on_data_output_status_update(self, client):
+    def test_history_event_created_on_technical_asset_status_update(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
         role = RoleFactory(
@@ -638,21 +640,22 @@ class TestTechnicalAssetsRouter:
         DataProductRoleAssignmentFactory(
             identity_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
-        data_output = TechnicalAssetFactory(owner=data_product)
+        technical_asset = TechnicalAssetFactory(owner=data_product)
         response = self.update_technical_asset_status(
-            client, {"status": "pending"}, data_output.owner.id, data_output.id
+            client, {"status": "pending"}, technical_asset.owner.id, technical_asset.id
         )
+        assert response.status_code == 200, response.text
         response = self.get_technical_asset(
-            client, data_output.owner.id, data_output.id
+            client, technical_asset.owner.id, technical_asset.id
         )
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
 
         history = self.get_technical_asset_history(
-            client, data_output.owner.id, data_output.id
+            client, technical_asset.owner.id, technical_asset.id
         ).json()
         assert len(history["events"]) == 1
 
-    def test_history_event_created_on_data_output_update(self, client):
+    def test_history_event_created_on_technical_asset_update(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
         role = RoleFactory(
@@ -663,23 +666,23 @@ class TestTechnicalAssetsRouter:
             identity_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
         tag = TagFactory()
-        data_output = TechnicalAssetFactory(owner=data_product)
+        technical_asset = TechnicalAssetFactory(owner=data_product)
         update_payload = {
             "name": "update",
             "description": "update",
             "tag_ids": [str(tag.id)],
         }
         response = self.update_technical_asset(
-            client, update_payload, data_output.owner.id, data_output.id
+            client, update_payload, technical_asset.owner.id, technical_asset.id
         )
         assert response.status_code == 200
 
         history = self.get_technical_asset_history(
-            client, data_output.owner.id, data_output.id
+            client, technical_asset.owner.id, technical_asset.id
         ).json()
         assert len(history["events"]) == 1
 
-    def test_history_event_created_on_data_output_deletion(self, client):
+    def test_history_event_created_on_technical_asset_deletion(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
         role = RoleFactory(
@@ -689,23 +692,23 @@ class TestTechnicalAssetsRouter:
         DataProductRoleAssignmentFactory(
             identity_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
-        data_output = TechnicalAssetFactory(owner=data_product)
+        technical_asset = TechnicalAssetFactory(owner=data_product)
         response = self.delete_technical_asset(
-            client, data_output.owner.id, data_output.id
+            client, technical_asset.owner.id, technical_asset.id
         )
         assert response.status_code == 200
 
         # get_data_product_history should return 1
-        history = self.get_data_product_history(client, data_output.owner.id).json()
+        history = self.get_data_product_history(client, technical_asset.owner.id).json()
         assert len(history["events"]) == 1
 
-        # get_data_output_history should fail
+        # get_technical_asset_history should fail
         response = self.get_technical_asset_history(
-            client, data_output.owner.id, data_output.id
+            client, technical_asset.owner.id, technical_asset.id
         )
         assert response.status_code == 404
 
-    def test_retain_deleted_data_output_name_in_history(self, client):
+    def test_retain_deleted_technical_asset_name_in_history(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
         role = RoleFactory(
@@ -715,19 +718,19 @@ class TestTechnicalAssetsRouter:
         DataProductRoleAssignmentFactory(
             identity_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
-        data_output = TechnicalAssetFactory(owner=data_product)
-        data_output_name = data_output.name
+        technical_asset = TechnicalAssetFactory(owner=data_product)
+        technical_asset_name = technical_asset.name
 
         response = self.delete_technical_asset(
-            client, data_output.owner.id, data_output.id
+            client, technical_asset.owner.id, technical_asset.id
         )
         assert response.status_code == 200
 
-        response = self.get_data_product_history(client, data_output.owner.id)
+        response = self.get_data_product_history(client, technical_asset.owner.id)
         assert len(response.json()["events"]) == 1
         assert (
             response.json()["events"][0]["deleted_subject_identifier"]
-            == data_output_name
+            == technical_asset_name
         )
 
     @patch("app.data_products.technical_assets.email.send_link_output_port_email")
@@ -738,7 +741,7 @@ class TestTechnicalAssetsRouter:
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
         dataset = OutputPortFactory(data_product=data_product)
-        data_output = TechnicalAssetFactory(owner=data_product)
+        technical_asset = TechnicalAssetFactory(owner=data_product)
 
         # Create role that allows linking datasets
         role = RoleFactory(
@@ -758,8 +761,8 @@ class TestTechnicalAssetsRouter:
         )
         # Mock auto-approval scenario (same data product owner)
         response = client.post(
-            f"{DATA_OUTPUTS_DATASETS_ENDPOINT.format(data_product.id, dataset.id)}/add",
-            json={"technical_asset_id": f"{data_output.id}"},
+            f"{TECHNICAL_ASSETS_OUTPUT_PORTS_ENDPOINT.format(data_product.id, dataset.id)}/add",
+            json={"technical_asset_id": f"{technical_asset.id}"},
         )
 
         assert response.status_code == 200
@@ -775,7 +778,7 @@ class TestTechnicalAssetsRouter:
         other_approver = UserFactory()
         data_product = DataProductFactory()
         dataset = OutputPortFactory(data_product=data_product)  # Different owner
-        data_output = TechnicalAssetFactory(owner=data_product)
+        technical_asset = TechnicalAssetFactory(owner=data_product)
 
         # Create role that allows linking datasets
         role = RoleFactory(
@@ -797,8 +800,8 @@ class TestTechnicalAssetsRouter:
 
         # Mock manual approval scenario (different data product owner)
         response = client.post(
-            f"{DATA_OUTPUTS_DATASETS_ENDPOINT.format(data_product.id, dataset.id)}/add",
-            json={"technical_asset_id": f"{data_output.id}"},
+            f"{TECHNICAL_ASSETS_OUTPUT_PORTS_ENDPOINT.format(data_product.id, dataset.id)}/add",
+            json={"technical_asset_id": f"{technical_asset.id}"},
         )
 
         assert response.status_code == 200
@@ -813,11 +816,11 @@ class TestTechnicalAssetsRouter:
 
     @staticmethod
     def create_technical_asset(
-        client: TestClient, default_data_output_payload
+        client: TestClient, default_technical_asset_payload
     ) -> Response:
         return client.post(
-            f"/api/v2/data_products/{default_data_output_payload.get('owner_id')}/technical_assets",
-            json=default_data_output_payload,
+            f"/api/v2/data_products/{default_technical_asset_payload.get('owner_id')}/technical_assets",
+            json=default_technical_asset_payload,
         )
 
     @staticmethod
@@ -865,9 +868,9 @@ class TestTechnicalAssetsRouter:
         return client.get("/api/v2/resource_names/constraints")
 
     @staticmethod
-    def get_technical_asset_history(client, data_product_id, data_output_id):
+    def get_technical_asset_history(client, data_product_id, technical_asset_id):
         return client.get(
-            f"{ENDPOINT.format(data_product_id)}/{data_output_id}/history"
+            f"{ENDPOINT.format(data_product_id)}/{technical_asset_id}/history"
         )
 
     @staticmethod

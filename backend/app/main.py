@@ -26,7 +26,7 @@ from app.core.embed.model import warm_text_embedding_model
 from app.core.errors.error_handling import add_exception_handlers
 from app.core.logging import logger
 from app.core.logging.middleware import RequestLoggingMiddleware
-from app.core.logging.posthog_analytics import report_daily_metrics
+from app.core.logging.posthog_analytics import get_posthog_client, report_daily_metrics
 from app.core.logging.scarf_analytics import backend_analytics
 from app.core.webhooks.middleware import (
     DispatchQueuedEventsMiddleware,
@@ -118,6 +118,8 @@ async def lifespan(app: FastAPI):
     yield
     await _cancel_tasks(background_tasks)
     await stop_event_dispatcher(app)
+    if posthog := get_posthog_client():
+        posthog.shutdown()
 
 
 mcp.add_middleware(LoggingMiddleware())

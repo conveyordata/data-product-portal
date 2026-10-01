@@ -22,22 +22,22 @@ import styles from './technical-asset-form.module.scss';
 type Props = {
     mode: 'edit';
     dataProductId: string;
-    dataOutputId: string;
+    technicalAssetId: string;
 };
 
-export function TechnicalAssetForm({ mode, dataProductId, dataOutputId }: Props) {
+export function TechnicalAssetForm({ mode, dataProductId, technicalAssetId }: Props) {
     const { t } = useTranslation();
     const navigate = useNavigate();
-    const { data: currentDataOutput, isFetching: isFetchingInitialValues } = useGetTechnicalAssetQuery({
-        id: dataOutputId,
+    const { data: currentTechnicalAsset, isFetching: isFetchingInitialValues } = useGetTechnicalAssetQuery({
+        id: technicalAssetId,
         dataProductId: dataProductId,
     });
-    const { data: dataProduct } = useGetDataProductQuery(currentDataOutput?.owner.id ?? '', {
-        skip: !currentDataOutput?.owner.id || isFetchingInitialValues || !dataOutputId,
+    const { data: dataProduct } = useGetDataProductQuery(currentTechnicalAsset?.owner.id ?? '', {
+        skip: !currentTechnicalAsset?.owner.id || isFetchingInitialValues || !technicalAssetId,
     });
     const { data: { tags: availableTags = [] } = {}, isFetching: isFetchingTags } = useGetTagsQuery();
-    const [updateDataOutput, { isLoading: isUpdating }] = useUpdateTechnicalAssetMutation();
-    const [deleteDataOutput, { isLoading: isArchiving }] = useRemoveTechnicalAssetMutation();
+    const [updateTechnicalAsset, { isLoading: isUpdating }] = useUpdateTechnicalAssetMutation();
+    const [deleteTechnicalAsset, { isLoading: isArchiving }] = useRemoveTechnicalAssetMutation();
     const [form] = Form.useForm<TechnicalAssetsCreateForm>();
 
     const { data: update_access } = useCheckAccessQuery(
@@ -62,12 +62,12 @@ export function TechnicalAssetForm({ mode, dataProductId, dataOutputId }: Props)
     const tagSelectOptions = availableTags.map((tag) => ({ label: tag.value, value: tag.id }));
     const { data: constraints } = useResourceNameConstraintsQuery();
 
-    const handleDeleteDataOutput = async () => {
-        if (canDelete && currentDataOutput && dataProduct) {
+    const handleDeleteTechnicalAsset = async () => {
+        if (canDelete && currentTechnicalAsset && dataProduct) {
             try {
-                await deleteDataOutput({
-                    dataProductId: currentDataOutput.owner_id,
-                    id: currentDataOutput.id,
+                await deleteTechnicalAsset({
+                    dataProductId: currentTechnicalAsset.owner_id,
+                    id: currentTechnicalAsset.id,
                 }).unwrap();
                 dispatchMessage({ content: t('Technical Asset deleted successfully'), type: 'success' });
                 navigate(createDataProductIdPath(dataProduct.id));
@@ -82,16 +82,16 @@ export function TechnicalAssetForm({ mode, dataProductId, dataOutputId }: Props)
 
     const onSubmit: FormProps<TechnicalAssetsCreateForm>['onFinish'] = async (values) => {
         try {
-            if (dataOutputId && currentDataOutput) {
+            if (technicalAssetId && currentTechnicalAsset) {
                 if (!canEdit) {
                     dispatchMessage({ content: t('You are not allowed to edit this Technical Asset'), type: 'error' });
                     return;
                 }
 
-                const response = await updateDataOutput({
-                    id: dataOutputId,
-                    dataProductId: currentDataOutput.owner_id,
-                    dataOutputUpdate: {
+                const response = await updateTechnicalAsset({
+                    id: technicalAssetId,
+                    dataProductId: currentTechnicalAsset.owner_id,
+                    technicalAssetUpdate: {
                         name: values.name,
                         description: values.description,
                         tag_ids: values.tag_ids ?? [],
@@ -99,7 +99,7 @@ export function TechnicalAssetForm({ mode, dataProductId, dataOutputId }: Props)
                 }).unwrap();
                 dispatchMessage({ content: t('Technical Asset updated successfully'), type: 'success' });
 
-                navigate(createDataOutputIdPath(response.id, currentDataOutput.owner.id));
+                navigate(createDataOutputIdPath(response.id, currentTechnicalAsset.owner.id));
             }
 
             form.resetFields();
@@ -115,20 +115,20 @@ export function TechnicalAssetForm({ mode, dataProductId, dataOutputId }: Props)
 
     const onCancel = () => {
         form.resetFields();
-        if (dataOutputId && currentDataOutput) {
-            navigate(createDataOutputIdPath(dataOutputId, currentDataOutput.owner.id));
+        if (technicalAssetId && currentTechnicalAsset) {
+            navigate(createDataOutputIdPath(technicalAssetId, currentTechnicalAsset.owner.id));
         }
     };
 
-    if (mode === 'edit' && !currentDataOutput) {
+    if (mode === 'edit' && !currentTechnicalAsset) {
         return <Skeleton active />;
     }
 
     const initialValues = {
-        namespace: currentDataOutput?.namespace,
-        name: currentDataOutput?.name,
-        description: currentDataOutput?.description,
-        tag_ids: currentDataOutput?.tags.map((tag) => tag.id),
+        namespace: currentTechnicalAsset?.namespace,
+        name: currentTechnicalAsset?.name,
+        description: currentTechnicalAsset?.description,
+        tag_ids: currentTechnicalAsset?.tags.map((tag) => tag.id),
     };
 
     return (
@@ -215,7 +215,7 @@ export function TechnicalAssetForm({ mode, dataProductId, dataOutputId }: Props)
                     {canDelete && (
                         <Popconfirm
                             title={t('Are you sure you want to delete this Technical Asset?')}
-                            onConfirm={handleDeleteDataOutput}
+                            onConfirm={handleDeleteTechnicalAsset}
                             okText={t('Yes')}
                             cancelText={t('No')}
                         >

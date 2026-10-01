@@ -1,7 +1,10 @@
 from datetime import datetime
 
+import pytest
 from sqlalchemy import select
 
+from app.abstract_data_product.input_ports.enums import InputPortStatus
+from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.roles.schema import Scope
 from app.core.auth.auth import SYSTEM_ACCOUNT_BOT_EXTERNAL_ID
 from app.core.authz.actions import AuthorizationAction
@@ -9,8 +12,12 @@ from app.data_products.output_ports.enums import OutputPortAccessType
 from app.data_products.output_ports.model import OutputPort
 from app.settings import settings
 from tests.factories import (
+    DataProductFactory,
     DataProductRoleAssignmentFactory,
     DatasetRoleAssignmentFactory,
+    GroupFactory,
+    GroupMembershipFactory,
+    InputPortFactory,
     OutputPortFactory,
     RoleFactory,
     UserFactory,
@@ -80,6 +87,137 @@ def test_private_output_port_visible_for_approved_data_product_assignment(sessio
         visible = session.get(OutputPort, output_port_id)
 
     assert visible.id == output_port_id
+
+
+def _direct_owner_identity(user):
+    return user.id
+
+
+def _group_owner_identity(user):
+    group = GroupFactory()
+    GroupMembershipFactory(group=group, member=user)
+    return group.id
+
+
+@pytest.mark.parametrize(
+    "owner_identity", [_direct_owner_identity, _group_owner_identity]
+)
+def test_private_output_port_visible_for_owner_of_approved_consumer(
+    session, owner_identity
+):
+    output_port = OutputPortFactory(access_type=OutputPortAccessType.PRIVATE)
+    consumer = DataProductFactory()
+    user = UserFactory()
+    role = RoleFactory.data_product_owner()
+    DataProductRoleAssignmentFactory(
+        data_product_id=consumer.id,
+        identity_id=owner_identity(user),
+        role_id=role.id,
+    )
+    InputPortFactory(
+        output_port=output_port,
+        consuming_abstract_data_product=consumer,
+        status=InputPortStatus.APPROVED,
+    )
+    output_port_id = output_port.id
+    session.expunge(output_port)
+
+    with as_user(session, user.id):
+        visible = session.get(OutputPort, output_port_id)
+
+    assert visible.id == output_port_id
+
+
+@pytest.mark.parametrize(
+    "owner_identity", [_direct_owner_identity, _group_owner_identity]
+)
+def test_private_sibling_output_port_not_visible_for_owner_of_consumer(
+    session, owner_identity
+):
+    consumed_output_port = OutputPortFactory(access_type=OutputPortAccessType.PRIVATE)
+    sibling_output_port = OutputPortFactory(
+        data_product=consumed_output_port.data_product,
+        access_type=OutputPortAccessType.PRIVATE,
+    )
+    consumer = DataProductFactory()
+    user = UserFactory()
+    role = RoleFactory.data_product_owner()
+    DataProductRoleAssignmentFactory(
+        data_product_id=consumer.id,
+        identity_id=owner_identity(user),
+        role_id=role.id,
+    )
+    InputPortFactory(
+        output_port=consumed_output_port,
+        consuming_abstract_data_product=consumer,
+        status=InputPortStatus.APPROVED,
+    )
+    sibling_output_port_id = sibling_output_port.id
+    session.expunge(sibling_output_port)
+
+    with as_user(session, user.id):
+        visible = session.get(OutputPort, sibling_output_port_id)
+
+    assert visible is None
+
+
+@pytest.mark.parametrize(
+    "owner_identity", [_direct_owner_identity, _group_owner_identity]
+)
+def test_private_output_port_not_visible_for_owner_of_revoked_consumer(
+    session, owner_identity
+):
+    output_port = OutputPortFactory(access_type=OutputPortAccessType.PRIVATE)
+    consumer = DataProductFactory()
+    user = UserFactory()
+    role = RoleFactory.data_product_owner()
+    DataProductRoleAssignmentFactory(
+        data_product_id=consumer.id,
+        identity_id=owner_identity(user),
+        role_id=role.id,
+    )
+    InputPortFactory(
+        output_port=output_port,
+        consuming_abstract_data_product=consumer,
+        status=InputPortStatus.REVOKED,
+    )
+    output_port_id = output_port.id
+    session.expunge(output_port)
+
+    with as_user(session, user.id):
+        visible = session.get(OutputPort, output_port_id)
+
+    assert visible is None
+
+
+@pytest.mark.parametrize(
+    "owner_identity", [_direct_owner_identity, _group_owner_identity]
+)
+def test_private_output_port_not_visible_for_pending_consumer_role(
+    session, owner_identity
+):
+    output_port = OutputPortFactory(access_type=OutputPortAccessType.PRIVATE)
+    consumer = DataProductFactory()
+    user = UserFactory()
+    role = RoleFactory.data_product_owner()
+    DataProductRoleAssignmentFactory(
+        data_product_id=consumer.id,
+        identity_id=owner_identity(user),
+        role_id=role.id,
+        decision=DecisionStatus.PENDING,
+    )
+    InputPortFactory(
+        output_port=output_port,
+        consuming_abstract_data_product=consumer,
+        status=InputPortStatus.APPROVED,
+    )
+    output_port_id = output_port.id
+    session.expunge(output_port)
+
+    with as_user(session, user.id):
+        visible = session.get(OutputPort, output_port_id)
+
+    assert visible is None
 
 
 def test_private_output_port_not_visible_without_approved_user_assignment(session):

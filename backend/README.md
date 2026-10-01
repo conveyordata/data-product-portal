@@ -116,7 +116,7 @@ python -m app.db_tool init --force "sample_data.sql"
 
 Whenever you develop functionality that would include a database structure change,
 you will need to [create an alembic migration script](https://alembic.sqlalchemy.org/en/latest/tutorial.html#create-a-migration-script) for it.
-This comes down to running `alembic revision -m "{your message}"` in the `/backend` directory.
+This comes down to running `python -m app.db_tool revision "{your message}"` in the `/backend` directory.
 
 In order to apply this migration using the database CLI tool you need to execute the command below.
 

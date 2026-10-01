@@ -946,7 +946,7 @@ func encodeUpdateTagRequest(
 }
 
 func encodeUpdateTechnicalAssetRequest(
-	req *DataOutputUpdate,
+	req *TechnicalAssetUpdate,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
@@ -960,7 +960,7 @@ func encodeUpdateTechnicalAssetRequest(
 }
 
 func encodeUpdateTechnicalAssetStatusRequest(
-	req *DataOutputStatusUpdate,
+	req *TechnicalAssetStatusUpdate,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"

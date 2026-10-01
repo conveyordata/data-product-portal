@@ -13,8 +13,8 @@ from app.core.authz import (
 from app.data_products.technical_assets.model import ensure_technical_asset_exists
 from app.data_products.technical_assets.schema_request import (
     CreateTechnicalAssetRequest,
-    DataOutputStatusUpdate,
-    DataOutputUpdate,
+    TechnicalAssetStatusUpdate,
+    TechnicalAssetUpdate,
 )
 from app.data_products.technical_assets.schema_response import (
     CreateTechnicalAssetResponse,
@@ -143,21 +143,23 @@ def remove_technical_asset(
     db: Session = Depends(get_db_session, scope="function"),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    data_output = TechnicalAssetService(db).remove_data_output(data_product_id, id)
+    technical_asset = TechnicalAssetService(db).remove_technical_asset(
+        data_product_id, id
+    )
     event_id = EventService(db).create_event(
         CreateEvent(
             name=EventType.DATA_OUTPUT_REMOVED,
             actor_id=authenticated_user.id,
             subject_id=id,
             subject_type=EventReferenceEntity.DATA_OUTPUT,
-            deleted_subject_identifier=data_output.name,
-            target_id=data_output.owner_id,
+            deleted_subject_identifier=technical_asset.name,
+            target_id=technical_asset.owner_id,
             target_type=EventReferenceEntity.DATA_PRODUCT,
-            deleted_target_identifier=data_output.owner.name,
+            deleted_target_identifier=technical_asset.owner.name,
         ),
     )
     NotificationService(db).create_data_product_notifications(
-        data_product_id=data_output.owner_id, event_id=event_id
+        data_product_id=technical_asset.owner_id, event_id=event_id
     )
 
 
@@ -185,12 +187,12 @@ def remove_technical_asset(
 def update_technical_asset(
     data_product_id: UUID,
     id: UUID,
-    data_output: DataOutputUpdate,
+    technical_asset: TechnicalAssetUpdate,
     db: Session = Depends(get_db_session, scope="function"),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> UpdateTechnicalAssetResponse:
-    result = TechnicalAssetService(db).update_data_output(
-        data_product_id, id, data_output
+    result = TechnicalAssetService(db).update_technical_asset(
+        data_product_id, id, technical_asset
     )
     EventService(db).create_event(
         CreateEvent(
@@ -225,12 +227,12 @@ def update_technical_asset(
 def update_technical_asset_status(
     data_product_id: UUID,
     id: UUID,
-    data_output: DataOutputStatusUpdate,
+    technical_asset: TechnicalAssetStatusUpdate,
     db: Session = Depends(get_db_session, scope="function"),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    TechnicalAssetService(db).update_data_output_status(
-        data_product_id, id, data_output, actor=authenticated_user
+    TechnicalAssetService(db).update_technical_asset_status(
+        data_product_id, id, technical_asset, actor=authenticated_user
     )
     EventService(db).create_event(
         CreateEvent(

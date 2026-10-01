@@ -1,5 +1,15 @@
+from dataclasses import dataclass
+from functools import partial
 from pathlib import Path
-from typing import Awaitable, Callable, Sequence, TypeAlias, Union, assert_never
+from typing import (
+    TYPE_CHECKING,
+    Awaitable,
+    Callable,
+    Sequence,
+    TypeAlias,
+    Union,
+    assert_never,
+)
 from uuid import UUID
 
 import casbin_sqlalchemy_adapter as sqlalchemy_adapter
@@ -10,7 +20,7 @@ from opentelemetry import trace
 from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
-from app.data_products.model import DataProduct, DataProductVisibility
+from app.data_products.model import DataProductVisibility
 from app.database import database
 from app.database.deps import get_db_session
 from app.settings import settings
@@ -20,9 +30,46 @@ from app.utils.singleton import Singleton
 from .actions import AuthorizationAction
 from .resolvers import SubjectResolver
 
+if TYPE_CHECKING:
+    from app.data_products.model import DataProduct
+
 ID: TypeAlias = Union[str, UUID]
 
 tracer = trace.get_tracer(__name__)
+
+
+@dataclass(frozen=True)
+class InputPortLink:
+    consumer_id: str
+    producer_data_product_id: str
+    producer_output_port_id: str
+
+
+def _has_access_through_consumer_role(
+    enforcer: SyncedEnforcer,
+    sub: str,
+    role: str,
+    resource: str,
+    parent: str,
+    action: str,
+) -> bool:
+    if action == str(AuthorizationAction.HIDDEN__DATA_PRODUCT__READ):
+        linked_resources = enforcer.get_filtered_named_grouping_policy(
+            "g4", 1, resource
+        )
+    elif action == str(AuthorizationAction.HIDDEN__OUTPUT_PORT__READ):
+        linked_resources = enforcer.get_filtered_named_grouping_policy(
+            "g4", 1, parent, resource
+        )
+    else:
+        return False
+
+    # g4 identifies consumers of the requested product or exact output port;
+    # g checks whether the subject has the evaluated role on one of them.
+    return any(
+        enforcer.get_role_manager().has_link(sub, role, consumer_id)
+        for consumer_id, _, _ in linked_resources
+    )
 
 
 class Authorization(metaclass=Singleton):
@@ -47,6 +94,10 @@ class Authorization(metaclass=Singleton):
         enforcer = SyncedEnforcer(model, adapter)
         # Used to allow g(user, group, *) rules so users inherit group permissions
         enforcer.add_named_domain_matching_func("g", util.key_match)
+        enforcer.add_function(
+            "hasAccessThroughConsumerRole",
+            partial(_has_access_through_consumer_role, enforcer),
+        )
         if settings.AUTHORIZER_AUTOLOAD_ENABLED:
             enforcer.start_auto_load_policy(settings.AUTHORIZER_AUTOLOAD_INTERVAL)
         return enforcer
@@ -157,6 +208,63 @@ class Authorization(metaclass=Singleton):
         return enforcer.has_named_grouping_policy(
             "g", str(user_id), str(role_id), str(resource_id)
         )
+
+    def add_input_port_link(
+        self,
+        *,
+        consumer_id: ID,
+        producer_data_product_id: ID,
+        producer_output_port_id: ID,
+    ):
+        """
+        Establishes an input port relationship between a consumer and a producer output
+        port identified by the provided IDs. This ensures that a consumer can access
+        a hidden data product, or private output port that it consumes.
+
+        :param consumer_id: Identifier for the consumer entity.
+        :param producer_data_product_id: Identifier for the producer's data product.
+        :param producer_output_port_id: Identifier for the specific output port of the
+            producer.
+        """
+        enforcer: SyncedEnforcer = self._enforcer
+        enforcer.add_named_grouping_policy(
+            "g4",
+            str(consumer_id),
+            str(producer_data_product_id),
+            str(producer_output_port_id),
+        )
+        self._after_update()
+
+    def remove_input_port_link(
+        self,
+        *,
+        consumer_id: ID,
+        producer_data_product_id: ID,
+        producer_output_port_id: ID,
+    ):
+        enforcer: SyncedEnforcer = self._enforcer
+        enforcer.remove_named_grouping_policy(
+            "g4",
+            str(consumer_id),
+            str(producer_data_product_id),
+            str(producer_output_port_id),
+        )
+        self._after_update()
+
+    def get_input_port_link(
+        self, *, producer_data_product_id: ID
+    ) -> set[InputPortLink]:
+        """Retrieves consumer links created with ``add_consumer_link``."""
+        return {
+            InputPortLink(
+                consumer_id=consumer_id,
+                producer_data_product_id=producer_data_product_id,
+                producer_output_port_id=producer_output_port_id,
+            )
+            for consumer_id, producer_data_product_id, producer_output_port_id in self._enforcer.get_filtered_named_grouping_policy(
+                "g4", 1, str(producer_data_product_id)
+            )
+        }
 
     def assign_domain_role(self, *, user_id: ID, role_id: ID, domain_id: ID) -> bool:
         """Creates an entry in the casbin table,
@@ -284,11 +392,25 @@ class Authorization(metaclass=Singleton):
         Should be called when a resource is removed.
         """
         enforcer: SyncedEnforcer = self._enforcer
-        updates = enforcer.remove_filtered_named_grouping_policy(
+        role_updates = enforcer.remove_filtered_named_grouping_policy(
             "g", 2, str(resource_id)
         )
+        source_link_updates = enforcer.remove_filtered_named_grouping_policy(
+            "g4", 0, str(resource_id)
+        )
+        target_link_updates = enforcer.remove_filtered_named_grouping_policy(
+            "g4", 1, str(resource_id)
+        )
+        output_port_link_updates = enforcer.remove_filtered_named_grouping_policy(
+            "g4", 2, str(resource_id)
+        )
         self._after_update()
-        return bool(updates)
+        return bool(
+            role_updates
+            or source_link_updates
+            or target_link_updates
+            or output_port_link_updates
+        )
 
     def clear_assignments_for_domain(self, *, domain_id: ID) -> bool:
         """Removes all assignments to a domain inside the casbin table.
@@ -302,8 +424,9 @@ class Authorization(metaclass=Singleton):
         return bool(updates)
 
     def has_read_access_to_data_product(
-        self, current_user: User, data_product: DataProduct
+        self, current_user: User, data_product: "DataProduct"
     ) -> bool:
+
         # The check for visibility is a performance optimization to avoid unnecessary
         # has_access checks for discoverable data products.
         match data_product.visibility:

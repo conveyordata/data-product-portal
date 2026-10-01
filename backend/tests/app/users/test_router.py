@@ -14,7 +14,7 @@ from app.data_products.model import DataProductVisibility
 from app.settings import settings
 from app.users.model import User
 from tests.app.data_products.output_port_technical_assets_link.test_router import (
-    DATA_OUTPUTS_DATASETS_ENDPOINT,
+    TECHNICAL_ASSETS_OUTPUT_PORTS_ENDPOINT,
 )
 from tests.factories import (
     DataProductFactory,
@@ -355,7 +355,7 @@ class TestUsersRouter:
     def test_get_pending_actions(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
-        data_output = TechnicalAssetFactory(owner=data_product)
+        technical_asset = TechnicalAssetFactory(owner=data_product)
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
             permissions=[
@@ -378,13 +378,13 @@ class TestUsersRouter:
         )
 
         response = client.post(
-            f"{DATA_OUTPUTS_DATASETS_ENDPOINT.format(data_product.id, ds.id)}/add",
-            json={"technical_asset_id": f"{data_output.id}"},
+            f"{TECHNICAL_ASSETS_OUTPUT_PORTS_ENDPOINT.format(data_product.id, ds.id)}/add",
+            json={"technical_asset_id": f"{technical_asset.id}"},
         )
         assert response.status_code == 200
         response = client.get("/api/v2/users/current/pending_actions")
         assert response.json()["pending_actions"][0]["technical_asset_id"] == str(
-            data_output.id
+            technical_asset.id
         )
         assert response.json()["pending_actions"][0]["status"] == "pending"
 

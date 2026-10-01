@@ -17,6 +17,12 @@ sidebar_position: 200
 - **[General]**: Added support for Hidden Data Products, they are only visible to people with direct access to them.
   This allows you to use Data Product Portal to also manage sensitive data products that should not be visible to everyone in the organization.
 
+### bugfixes
+
+- **[Helm]**: Fix translation override file path
+- **[General]**: Fix translation file by adding more nested translations for Data Products, Output ports and Technical assets.
+
+
 ## 0.7.4
 
 ### bugfixes

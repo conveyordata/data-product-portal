@@ -270,11 +270,11 @@ class TestDataProductsRouter:
 
     def test_get_technical_assets(self, client):
         data_product = DataProductFactory()
-        data_output = TechnicalAssetFactory(owner=data_product)
+        technical_asset = TechnicalAssetFactory(owner=data_product)
         response = self.get_technical_assets(client, data_product.id)
         assert response.status_code == 200, f"Failed with response: {response.text}"
         assert len(response.json()) == 1
-        assert response.json()["technical_assets"][0]["id"] == str(data_output.id)
+        assert response.json()["technical_assets"][0]["id"] == str(technical_asset.id)
 
     def test_update_data_product_no_member(self, payload, client):
         data_product = DataProductFactory()
@@ -897,7 +897,7 @@ class TestDataProductsRouter:
 
     def test_get_rolled_up_tags(self, client: TestClient):
         data_product = DataProductFactory()
-        data_output = TechnicalAssetFactory(owner=data_product)
+        technical_asset = TechnicalAssetFactory(owner=data_product)
         dataset = OutputPortFactory(data_product=data_product)
         response = self.get_rolled_up_tags(client, dataset.data_product.id)
         assert response.status_code == 200, f"Response failed with: {response.text}"
@@ -905,7 +905,7 @@ class TestDataProductsRouter:
         assert dataset.tags[0].id.__str__() in [
             tag["id"] for tag in response.json()["rolled_up_tags"]
         ]
-        assert data_output.tags[0].id.__str__() in [
+        assert technical_asset.tags[0].id.__str__() in [
             tag["id"] for tag in response.json()["rolled_up_tags"]
         ]
 

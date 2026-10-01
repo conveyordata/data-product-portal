@@ -1031,13 +1031,13 @@ type Invoker interface {
 	// Update Technical Asset.
 	//
 	// PUT /api/v2/data_products/{data_product_id}/technical_assets/{id}
-	UpdateTechnicalAsset(ctx context.Context, request *DataOutputUpdate, params UpdateTechnicalAssetParams) (UpdateTechnicalAssetRes, error)
+	UpdateTechnicalAsset(ctx context.Context, request *TechnicalAssetUpdate, params UpdateTechnicalAssetParams) (UpdateTechnicalAssetRes, error)
 	// UpdateTechnicalAssetStatus invokes update_technical_asset_status operation.
 	//
 	// Update Technical Asset Status.
 	//
 	// PUT /api/v2/data_products/{data_product_id}/technical_assets/{id}/status
-	UpdateTechnicalAssetStatus(ctx context.Context, request *DataOutputStatusUpdate, params UpdateTechnicalAssetStatusParams) (UpdateTechnicalAssetStatusRes, error)
+	UpdateTechnicalAssetStatus(ctx context.Context, request *TechnicalAssetStatusUpdate, params UpdateTechnicalAssetStatusParams) (UpdateTechnicalAssetStatusRes, error)
 	// UpdateThemeSettings invokes update_theme_settings operation.
 	//
 	// Update Theme Settings.
@@ -12058,12 +12058,12 @@ func (c *Client) sendUpdateTag(ctx context.Context, request *TagUpdate, params U
 // Update Technical Asset.
 //
 // PUT /api/v2/data_products/{data_product_id}/technical_assets/{id}
-func (c *Client) UpdateTechnicalAsset(ctx context.Context, request *DataOutputUpdate, params UpdateTechnicalAssetParams) (UpdateTechnicalAssetRes, error) {
+func (c *Client) UpdateTechnicalAsset(ctx context.Context, request *TechnicalAssetUpdate, params UpdateTechnicalAssetParams) (UpdateTechnicalAssetRes, error) {
 	res, err := c.sendUpdateTechnicalAsset(ctx, request, params)
 	return res, err
 }
 
-func (c *Client) sendUpdateTechnicalAsset(ctx context.Context, request *DataOutputUpdate, params UpdateTechnicalAssetParams) (res UpdateTechnicalAssetRes, err error) {
+func (c *Client) sendUpdateTechnicalAsset(ctx context.Context, request *TechnicalAssetUpdate, params UpdateTechnicalAssetParams) (res UpdateTechnicalAssetRes, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [4]string
@@ -12141,12 +12141,12 @@ func (c *Client) sendUpdateTechnicalAsset(ctx context.Context, request *DataOutp
 // Update Technical Asset Status.
 //
 // PUT /api/v2/data_products/{data_product_id}/technical_assets/{id}/status
-func (c *Client) UpdateTechnicalAssetStatus(ctx context.Context, request *DataOutputStatusUpdate, params UpdateTechnicalAssetStatusParams) (UpdateTechnicalAssetStatusRes, error) {
+func (c *Client) UpdateTechnicalAssetStatus(ctx context.Context, request *TechnicalAssetStatusUpdate, params UpdateTechnicalAssetStatusParams) (UpdateTechnicalAssetStatusRes, error) {
 	res, err := c.sendUpdateTechnicalAssetStatus(ctx, request, params)
 	return res, err
 }
 
-func (c *Client) sendUpdateTechnicalAssetStatus(ctx context.Context, request *DataOutputStatusUpdate, params UpdateTechnicalAssetStatusParams) (res UpdateTechnicalAssetStatusRes, err error) {
+func (c *Client) sendUpdateTechnicalAssetStatus(ctx context.Context, request *TechnicalAssetStatusUpdate, params UpdateTechnicalAssetStatusParams) (res UpdateTechnicalAssetStatusRes, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [5]string
