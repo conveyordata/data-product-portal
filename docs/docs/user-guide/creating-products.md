@@ -88,7 +88,7 @@ and map each of them to one of three access functions:
 
 - Auto-approve: All access requests are immediately approved. Any Data Product can use your Output Port as input.
 - Approval required: Access requests are delivered to the Output Port owners. These owners are in control over which Data Products can use the data downstream.
-- Invite only (hidden): The Output Port doesn't show up for users outside the owning Data Product, and access requests require approval.
+- Invite only (hidden): The Output Port is hidden except from members of its owning Data Product, users with direct access, and members of approved Consuming Data Products; access requests require approval.
 
 Out of the box, Portal provides the access types Unrestricted, Restricted and Private, mapped to these functions in that order.
 Output Ports of hidden Data Products can only use access types mapped to Invite only, so at least one access type always stays mapped to it.
