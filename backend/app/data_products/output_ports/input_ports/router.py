@@ -81,7 +81,7 @@ def grant_output_port_access(
         dataset_id=output_port_id, event_id=event_id
     )
     notification_service.create_consumer_notifications(
-        consumer=consumer, event_id=event_id
+        consumer_id=consumer.id, event_id=event_id
     )
 
 
@@ -154,7 +154,7 @@ def approve_output_port_as_input_port(
     NotificationService(db).create_dataset_notifications(
         dataset_id=approved_input_port.output_port_id,
         event_id=event_id,
-        extra_receiver_ids=approved_input_port.receiver_ids,
+        extra_receiver_ids=[approved_input_port.requested_by_id],
     )
 
 
@@ -200,7 +200,7 @@ def deny_output_port_as_input_port(
     NotificationService(db).create_dataset_notifications(
         dataset_id=input_port.output_port_id,
         event_id=event_id,
-        extra_receiver_ids=input_port.receiver_ids,
+        extra_receiver_ids=[input_port.requested_by_id],
     )
 
 
@@ -242,10 +242,14 @@ def revoke_output_port_as_input_port(
             actor_id=authenticated_user.id,
         ),
     )
-    NotificationService(db).create_dataset_notifications(
+    notification_service = NotificationService(db)
+    notification_service.create_dataset_notifications(
         dataset_id=input_port.output_port_id,
         event_id=event_id,
-        extra_receiver_ids=input_port.receiver_ids,
+        extra_receiver_ids=[input_port.requested_by_id],
+    )
+    notification_service.create_consumer_notifications(
+        consumer_id=input_port.consuming_abstract_data_product_id, event_id=event_id
     )
 
 
@@ -286,8 +290,13 @@ def remove_output_port_as_input_port(
         ),
     )
     if input_port.status == InputPortStatus.APPROVED:
-        NotificationService(db).create_dataset_notifications(
+        notification_service = NotificationService(db)
+        notification_service.create_dataset_notifications(
             dataset_id=input_port.output_port_id,
             event_id=event_id,
-            extra_receiver_ids=input_port.receiver_ids,
+            extra_receiver_ids=[input_port.requested_by_id],
+        )
+        notification_service.create_consumer_notifications(
+            consumer_id=input_port.consuming_abstract_data_product_id,
+            event_id=event_id,
         )

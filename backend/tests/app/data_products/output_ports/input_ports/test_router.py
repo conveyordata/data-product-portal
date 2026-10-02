@@ -823,6 +823,30 @@ class TestInputPortsRouter:
         )
         assert response.status_code == 200, response.text
 
+    def test_revoke_output_port_as_input_port__notifies_consumer_team(
+        self, client, session
+    ):
+        consumer = DataProductFactory()
+        team_member = UserFactory()
+        DataProductRoleAssignmentFactory(
+            identity_id=team_member.id,
+            data_product_id=consumer.id,
+            role_id=RoleFactory.data_product_owner().id,
+        )
+        link = self.create_link_with_status(DecisionStatus.APPROVED, consumer=consumer)
+
+        response = self.revoke_output_port_as_input_port(
+            client,
+            link.output_port.data_product.id,
+            link.output_port.id,
+            consumer.id,
+        )
+
+        assert response.status_code == 200, response.text
+        assert session.scalar(
+            select(Notification).where(Notification.user_id == team_member.id)
+        )
+
     def test_revoke_output_port_as_input_port__exploration_notifies_owner(
         self, client, session
     ):

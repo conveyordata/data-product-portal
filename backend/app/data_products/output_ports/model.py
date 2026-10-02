@@ -59,6 +59,7 @@ from app.data_products.output_ports.status import OutputPortStatus
 from app.data_products.technical_assets.model import TechnicalAssetAccessMode
 from app.database.database import Base, ensure_exists
 from app.database.event_mixin import EventTrackedMixin
+from app.explorations.model import Exploration
 from app.groups.model import GroupMembership
 from app.shared.model import BaseORM
 
@@ -104,12 +105,21 @@ def _has_user_access_to_private_output_port_via_data_product(cls, user_id: uuid.
 def _has_user_access_through_input_port(cls, user_id: uuid.UUID):
     input_ports = InputPort.__table__
     assignments = DataProductRoleAssignment.__table__
+    explorations = Exploration.__table__
     user_group_ids = (
         select(GroupMembership.group_id)
         .where(GroupMembership.member_identity_id == user_id)
         .correlate_except(GroupMembership)
     )
-    return (
+    approved_consumer_ids = (
+        select(input_ports.c.consuming_abstract_data_product_id)
+        .where(
+            input_ports.c.dataset_id == cls.id,
+            input_ports.c.status == InputPortStatus.APPROVED,
+        )
+        .correlate_except(input_ports)
+    )
+    return or_(
         select(assignments.c.id)
         .where(
             or_(
@@ -117,17 +127,17 @@ def _has_user_access_through_input_port(cls, user_id: uuid.UUID):
                 assignments.c.identity_id.in_(user_group_ids),
             ),
             assignments.c.decision == DecisionStatus.APPROVED,
-            assignments.c.data_product_id.in_(
-                select(input_ports.c.consuming_abstract_data_product_id)
-                .where(
-                    input_ports.c.dataset_id == cls.id,
-                    input_ports.c.status == InputPortStatus.APPROVED,
-                )
-                .correlate_except(input_ports)
-            ),
+            assignments.c.data_product_id.in_(approved_consumer_ids),
         )
         .correlate_except(assignments)
-        .exists()
+        .exists(),
+        select(explorations.c.id)
+        .where(
+            explorations.c.owner_id == user_id,
+            explorations.c.id.in_(approved_consumer_ids),
+        )
+        .correlate_except(explorations)
+        .exists(),
     )
 
 

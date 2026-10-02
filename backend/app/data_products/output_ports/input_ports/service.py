@@ -44,7 +44,6 @@ from app.events.enums import EventReferenceEntity, EventType
 from app.events.model import Event as EventModel
 from app.events.schema import CreateEvent
 from app.events.service import EventService
-from app.explorations.model import Exploration
 from app.groups.service import GroupService
 from app.settings import settings
 from app.users.model import User as UserModel
@@ -61,20 +60,16 @@ class RedactedInputPort:
     consuming_abstract_data_product_id: UUID
     consuming_abstract_data_product_type: AbstractDataProductType
     status: InputPortStatus
-    receiver_ids: list[UUID]
+    requested_by_id: UUID
 
     @staticmethod
     def of(link: InputPortModel, requested_by_id: UUID) -> "RedactedInputPort":
-        consumer = link.consuming_abstract_data_product
         return RedactedInputPort(
             output_port_id=link.output_port_id,
             consuming_abstract_data_product_id=link.consuming_abstract_data_product_id,
-            consuming_abstract_data_product_type=consumer.abstract_data_product_type,
+            consuming_abstract_data_product_type=link.consuming_abstract_data_product.abstract_data_product_type,
             status=link.status,
-            receiver_ids=[
-                requested_by_id,
-                *([consumer.owner_id] if isinstance(consumer, Exploration) else []),
-            ],
+            requested_by_id=requested_by_id,
         )
 
 
@@ -331,7 +326,7 @@ class InputPortService:
             )
         )
         NotificationService(self.db).create_consumer_notifications(
-            consumer=input_port.consuming_abstract_data_product,
+            consumer_id=input_port.consuming_abstract_data_product_id,
             event_id=event_id,
             extra_receiver_ids=[grant.requested_by_id],
         )

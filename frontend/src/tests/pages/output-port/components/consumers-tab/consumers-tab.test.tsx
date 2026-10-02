@@ -1,6 +1,14 @@
 import { HttpResponse, http } from 'msw';
 import { describe, expect, it } from 'vitest';
-import { ConsumersTab } from '@/pages/output-port/components/dataset-tabs/consumers-tab/consumers-tab.tsx';
+import {
+    ConsumersTab,
+    hasAccessOrPendingRequest,
+} from '@/pages/output-port/components/dataset-tabs/consumers-tab/consumers-tab.tsx';
+import {
+    InputPortStatus,
+    type OutputPortInputPort,
+    RenewalStatus,
+} from '@/store/api/services/generated/dataProductsOutputPortsInputPortsApi.ts';
 import { server } from '@/tests/mocks/server.ts';
 import { renderWithProviders, screen } from '@/tests/test-utils.tsx';
 
@@ -24,5 +32,21 @@ describe('ConsumersTab', () => {
         } else {
             expect(screen.queryByText('Add consumer')).not.toBeInTheDocument();
         }
+    });
+
+    it.each([
+        ['active grant', InputPortStatus.Approved, null, null, true],
+        ['lapsed grant not yet recomputed', InputPortStatus.Approved, '2000-01-01', null, false],
+        ['pending request', InputPortStatus.Pending, null, null, true],
+        ['pending renewal', InputPortStatus.Expired, '2000-01-01', RenewalStatus.Pending, true],
+        ['revoked access', InputPortStatus.Revoked, null, null, false],
+    ])('treats a link with %s as in use: %s', (_label, status, validUntil, renewalStatus, expected) => {
+        const inputPort = {
+            status,
+            renewal_status: renewalStatus,
+            current_request: { valid_until: validUntil },
+        } as OutputPortInputPort;
+
+        expect(hasAccessOrPendingRequest(inputPort)).toBe(expected);
     });
 });

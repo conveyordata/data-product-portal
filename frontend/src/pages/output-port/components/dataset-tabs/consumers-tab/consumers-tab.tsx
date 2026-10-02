@@ -1,5 +1,6 @@
 import { UserAddOutlined } from '@ant-design/icons';
 import { Button, Flex, Input, Tooltip } from 'antd';
+import { isBefore, parseISO, startOfToday } from 'date-fns';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
@@ -23,6 +24,16 @@ function filterDataProducts(dataProductLinks: OutputPortInputPort[], searchTerm:
         dataProductLinks.filter((item) =>
             item?.consuming_abstract_data_product.name?.toLowerCase()?.includes(searchTerm?.toLowerCase()),
         ) ?? []
+    );
+}
+
+export function hasAccessOrPendingRequest({ status, renewal_status, current_request }: OutputPortInputPort) {
+    const { valid_until: validUntil } = current_request;
+    const isExpired = validUntil !== null && isBefore(parseISO(validUntil), startOfToday());
+    return (
+        (status === InputPortStatus.Approved && !isExpired) ||
+        status === InputPortStatus.Pending ||
+        renewal_status === RenewalStatus.Pending
     );
 }
 
@@ -73,12 +84,7 @@ export function ConsumersTab({ outputPortId, dataProductId }: Props) {
                     dataProductId={dataProductId}
                     outputPortId={outputPortId}
                     existingConsumerIds={inputPorts
-                        .filter(
-                            ({ status, renewal_status }) =>
-                                status === InputPortStatus.Approved ||
-                                status === InputPortStatus.Pending ||
-                                renewal_status === RenewalStatus.Pending,
-                        )
+                        .filter(hasAccessOrPendingRequest)
                         .map(({ consuming_abstract_data_product_id }) => consuming_abstract_data_product_id)}
                     onClose={() => setIsGrantModalOpen(false)}
                 />

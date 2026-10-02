@@ -6,7 +6,6 @@ from fastapi import HTTPException, status
 from sqlalchemy import delete, desc, select
 from sqlalchemy.orm import Session, joinedload
 
-from app.abstract_data_product.model import AbstractDataProduct
 from app.authorization.role_assignments.data_product.model import (
     DataProductRoleAssignment,
 )
@@ -151,15 +150,18 @@ class NotificationService:
     def create_consumer_notifications(
         self,
         *,
-        consumer: AbstractDataProduct,
+        consumer_id: UUID,
         event_id: UUID,
         extra_receiver_ids: Sequence[UUID] = (),
     ) -> None:
-        if isinstance(consumer, Exploration):
-            self._notify({consumer.owner_id, *extra_receiver_ids}, event_id)
+        exploration_owner_id = self.db.scalar(
+            select(Exploration.owner_id).where(Exploration.id == consumer_id)
+        )
+        if exploration_owner_id:
+            self._notify({exploration_owner_id, *extra_receiver_ids}, event_id)
         else:
             self.create_data_product_notifications(
-                data_product_id=consumer.id,
+                data_product_id=consumer_id,
                 event_id=event_id,
                 extra_receiver_ids=extra_receiver_ids,
             )

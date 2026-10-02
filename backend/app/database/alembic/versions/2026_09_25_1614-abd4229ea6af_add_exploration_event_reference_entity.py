@@ -23,11 +23,20 @@ def upgrade() -> None:
         sa.table("event_reference_entities", sa.column("key", sa.String)),
         [{"key": "EXPLORATION"}],
     )
+    op.execute(
+        "UPDATE events SET target_type = 'EXPLORATION' "
+        "WHERE target_type = 'DATA_PRODUCT' "
+        "AND target_id IN (SELECT id FROM explorations)"
+    )
 
 
 def downgrade() -> None:
     op.execute(
-        "DELETE FROM events "
-        "WHERE subject_type = 'EXPLORATION' OR target_type = 'EXPLORATION'"
+        "UPDATE events SET subject_type = 'DATA_PRODUCT' "
+        "WHERE subject_type = 'EXPLORATION'"
+    )
+    op.execute(
+        "UPDATE events SET target_type = 'DATA_PRODUCT' "
+        "WHERE target_type = 'EXPLORATION'"
     )
     op.execute("DELETE FROM event_reference_entities WHERE key = 'EXPLORATION'")
