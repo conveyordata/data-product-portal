@@ -35,6 +35,12 @@ type Invoker interface {
 	//
 	// POST /api/v2/explorations/{id}/finalizers
 	AddExplorationFinalizer(ctx context.Context, request *FinalizerRequest, params AddExplorationFinalizerParams) (AddExplorationFinalizerRes, error)
+	// AddGroupMembers invokes add_group_members operation.
+	//
+	// Add Group Members.
+	//
+	// POST /api/v2/groups/{id}/members
+	AddGroupMembers(ctx context.Context, request *GroupMembersAdd, params AddGroupMembersParams) (AddGroupMembersRes, error)
 	// AddOutputPortDataQualityRun invokes add_output_port_data_quality_run operation.
 	//
 	// Add Output Port Data Quality Run.
@@ -126,6 +132,18 @@ type Invoker interface {
 	//
 	// POST /api/v2/explorations
 	CreateExploration(ctx context.Context, request *CreateExplorationRequestWithInputPorts) (CreateExplorationRes, error)
+	// CreateGroup invokes create_group operation.
+	//
+	// Create Group.
+	//
+	// POST /api/v2/groups
+	CreateGroup(ctx context.Context, request *GroupCreate) (CreateGroupRes, error)
+	// CreateMachineUser invokes create_machine_user operation.
+	//
+	// Create Machine User.
+	//
+	// POST /api/v2/machine-users
+	CreateMachineUser(ctx context.Context, request *MachineUserCreate) (CreateMachineUserRes, error)
 	// CreateOutputPort invokes create_output_port operation.
 	//
 	// Create Output Port.
@@ -198,6 +216,18 @@ type Invoker interface {
 	//
 	// DELETE /api/v2/authz/role_assignments/global/{id}
 	DeleteGlobalRoleAssignment(ctx context.Context, params DeleteGlobalRoleAssignmentParams) (DeleteGlobalRoleAssignmentRes, error)
+	// DeleteGroup invokes delete_group operation.
+	//
+	// Delete Group.
+	//
+	// DELETE /api/v2/groups/{id}
+	DeleteGroup(ctx context.Context, params DeleteGroupParams) (DeleteGroupRes, error)
+	// DeleteMachineUser invokes delete_machine_user operation.
+	//
+	// Delete Machine User.
+	//
+	// DELETE /api/v2/machine-users/{id}
+	DeleteMachineUser(ctx context.Context, params DeleteMachineUserParams) (DeleteMachineUserRes, error)
 	// DeleteOutputPortQueryStat invokes delete_output_port_query_stat operation.
 	//
 	// Delete Output Port Query Stat.
@@ -390,6 +420,24 @@ type Invoker interface {
 	//
 	// GET /api/v2/explorations
 	GetExplorations(ctx context.Context, params GetExplorationsParams) (GetExplorationsRes, error)
+	// GetGroup invokes get_group operation.
+	//
+	// Get Group.
+	//
+	// GET /api/v2/groups/{id}
+	GetGroup(ctx context.Context, params GetGroupParams) (GetGroupRes, error)
+	// GetGroupMembers invokes get_group_members operation.
+	//
+	// Get Group Members.
+	//
+	// GET /api/v2/groups/{id}/members
+	GetGroupMembers(ctx context.Context, params GetGroupMembersParams) (GetGroupMembersRes, error)
+	// GetGroups invokes get_groups operation.
+	//
+	// Get Groups.
+	//
+	// GET /api/v2/groups
+	GetGroups(ctx context.Context) (GetGroupsRes, error)
 	// GetInputPortsForOutputPort invokes get_input_ports_for_output_port operation.
 	//
 	// Get Input Ports For Output Port.
@@ -408,6 +456,18 @@ type Invoker interface {
 	//
 	// GET /api/v2/data_products/{data_product_id}/output_ports/{id}/data_quality_summary
 	GetLatestDataQualitySummaryForOutputPort(ctx context.Context, params GetLatestDataQualitySummaryForOutputPortParams) (GetLatestDataQualitySummaryForOutputPortRes, error)
+	// GetMachineUser invokes get_machine_user operation.
+	//
+	// Get Machine User.
+	//
+	// GET /api/v2/machine-users/{id}
+	GetMachineUser(ctx context.Context, params GetMachineUserParams) (GetMachineUserRes, error)
+	// GetMachineUsers invokes get_machine_users operation.
+	//
+	// Get Machine Users.
+	//
+	// GET /api/v2/machine-users
+	GetMachineUsers(ctx context.Context) (GetMachineUsersRes, error)
 	// GetOutputPort invokes get_output_port operation.
 	//
 	// Get Output Port.
@@ -672,6 +732,12 @@ type Invoker interface {
 	//
 	// DELETE /api/v2/explorations/{id}/finalizers/{finalizer}
 	RemoveExplorationFinalizer(ctx context.Context, params RemoveExplorationFinalizerParams) (RemoveExplorationFinalizerRes, error)
+	// RemoveGroupMembers invokes remove_group_members operation.
+	//
+	// Remove Group Members.
+	//
+	// DELETE /api/v2/groups/{id}/members
+	RemoveGroupMembers(ctx context.Context, request *GroupMembersRemove, params RemoveGroupMembersParams) (RemoveGroupMembersRes, error)
 	// RemoveInputPortForDataProduct invokes remove_input_port_for_data_product operation.
 	//
 	// Remove Input Port For Data Product.
@@ -744,6 +810,13 @@ type Invoker interface {
 	//
 	// POST /api/v2/explorations/{id}/input_ports/{output_port_id}/renew
 	RenewInputPortForExploration(ctx context.Context, params RenewInputPortForExplorationParams) (RenewInputPortForExplorationRes, error)
+	// ReplaceGroupMembers invokes replace_group_members operation.
+	//
+	// Because the service method performs add and replace operations internally, a lock is used to ensure
+	// that only one request is processed at a time.
+	//
+	// PUT /api/v2/groups/{id}/members
+	ReplaceGroupMembers(ctx context.Context, request *GroupMembersReplace, params ReplaceGroupMembersParams) (ReplaceGroupMembersRes, error)
 	// ReplaceOutputPortCuratedQueries invokes replace_output_port_curated_queries operation.
 	//
 	// Replace Output Port Curated Queries.
@@ -906,6 +979,18 @@ type Invoker interface {
 	//
 	// PATCH /api/v2/configuration/environments/{id}
 	UpdateEnvironmentIsGlobal(ctx context.Context, request *EnvironmentUpdateGlobal, params UpdateEnvironmentIsGlobalParams) (UpdateEnvironmentIsGlobalRes, error)
+	// UpdateGroup invokes update_group operation.
+	//
+	// Update Group.
+	//
+	// PUT /api/v2/groups/{id}
+	UpdateGroup(ctx context.Context, request *GroupUpdate, params UpdateGroupParams) (UpdateGroupRes, error)
+	// UpdateMachineUser invokes update_machine_user operation.
+	//
+	// Update Machine User.
+	//
+	// PUT /api/v2/machine-users/{id}
+	UpdateMachineUser(ctx context.Context, request *MachineUserUpdate, params UpdateMachineUserParams) (UpdateMachineUserRes, error)
 	// UpdateOutputPort invokes update_output_port operation.
 	//
 	// Update Output Port.
@@ -1132,6 +1217,71 @@ func (c *Client) sendAddExplorationFinalizer(ctx context.Context, request *Final
 	}()
 
 	result, err := decodeAddExplorationFinalizerResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// AddGroupMembers invokes add_group_members operation.
+//
+// Add Group Members.
+//
+// POST /api/v2/groups/{id}/members
+func (c *Client) AddGroupMembers(ctx context.Context, request *GroupMembersAdd, params AddGroupMembersParams) (AddGroupMembersRes, error) {
+	res, err := c.sendAddGroupMembers(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendAddGroupMembers(ctx context.Context, request *GroupMembersAdd, params AddGroupMembersParams) (res AddGroupMembersRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/api/v2/groups/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/members"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeAddGroupMembersRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeAddGroupMembersResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -2066,6 +2216,98 @@ func (c *Client) sendCreateExploration(ctx context.Context, request *CreateExplo
 	return result, nil
 }
 
+// CreateGroup invokes create_group operation.
+//
+// Create Group.
+//
+// POST /api/v2/groups
+func (c *Client) CreateGroup(ctx context.Context, request *GroupCreate) (CreateGroupRes, error) {
+	res, err := c.sendCreateGroup(ctx, request)
+	return res, err
+}
+
+func (c *Client) sendCreateGroup(ctx context.Context, request *GroupCreate) (res CreateGroupRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/api/v2/groups"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeCreateGroupRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeCreateGroupResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// CreateMachineUser invokes create_machine_user operation.
+//
+// Create Machine User.
+//
+// POST /api/v2/machine-users
+func (c *Client) CreateMachineUser(ctx context.Context, request *MachineUserCreate) (CreateMachineUserRes, error) {
+	res, err := c.sendCreateMachineUser(ctx, request)
+	return res, err
+}
+
+func (c *Client) sendCreateMachineUser(ctx context.Context, request *MachineUserCreate) (res CreateMachineUserRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/api/v2/machine-users"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeCreateMachineUserRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeCreateMachineUserResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // CreateOutputPort invokes create_output_port operation.
 //
 // Create Output Port.
@@ -2751,6 +2993,128 @@ func (c *Client) sendDeleteGlobalRoleAssignment(ctx context.Context, params Dele
 	}()
 
 	result, err := decodeDeleteGlobalRoleAssignmentResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// DeleteGroup invokes delete_group operation.
+//
+// Delete Group.
+//
+// DELETE /api/v2/groups/{id}
+func (c *Client) DeleteGroup(ctx context.Context, params DeleteGroupParams) (DeleteGroupRes, error) {
+	res, err := c.sendDeleteGroup(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendDeleteGroup(ctx context.Context, params DeleteGroupParams) (res DeleteGroupRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [2]string
+	pathParts[0] = "/api/v2/groups/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "DELETE", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeDeleteGroupResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// DeleteMachineUser invokes delete_machine_user operation.
+//
+// Delete Machine User.
+//
+// DELETE /api/v2/machine-users/{id}
+func (c *Client) DeleteMachineUser(ctx context.Context, params DeleteMachineUserParams) (DeleteMachineUserRes, error) {
+	res, err := c.sendDeleteMachineUser(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendDeleteMachineUser(ctx context.Context, params DeleteMachineUserParams) (res DeleteMachineUserRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [2]string
+	pathParts[0] = "/api/v2/machine-users/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "DELETE", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeDeleteMachineUserResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -4658,6 +5022,172 @@ func (c *Client) sendGetExplorations(ctx context.Context, params GetExplorations
 	return result, nil
 }
 
+// GetGroup invokes get_group operation.
+//
+// Get Group.
+//
+// GET /api/v2/groups/{id}
+func (c *Client) GetGroup(ctx context.Context, params GetGroupParams) (GetGroupRes, error) {
+	res, err := c.sendGetGroup(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendGetGroup(ctx context.Context, params GetGroupParams) (res GetGroupRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [2]string
+	pathParts[0] = "/api/v2/groups/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeGetGroupResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetGroupMembers invokes get_group_members operation.
+//
+// Get Group Members.
+//
+// GET /api/v2/groups/{id}/members
+func (c *Client) GetGroupMembers(ctx context.Context, params GetGroupMembersParams) (GetGroupMembersRes, error) {
+	res, err := c.sendGetGroupMembers(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendGetGroupMembers(ctx context.Context, params GetGroupMembersParams) (res GetGroupMembersRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/api/v2/groups/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/members"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeGetGroupMembersResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetGroups invokes get_groups operation.
+//
+// Get Groups.
+//
+// GET /api/v2/groups
+func (c *Client) GetGroups(ctx context.Context) (GetGroupsRes, error) {
+	res, err := c.sendGetGroups(ctx)
+	return res, err
+}
+
+func (c *Client) sendGetGroups(ctx context.Context) (res GetGroupsRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/api/v2/groups"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeGetGroupsResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // GetInputPortsForOutputPort invokes get_input_ports_for_output_port operation.
 //
 // Get Input Ports For Output Port.
@@ -4937,6 +5467,110 @@ func (c *Client) sendGetLatestDataQualitySummaryForOutputPort(ctx context.Contex
 	}()
 
 	result, err := decodeGetLatestDataQualitySummaryForOutputPortResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetMachineUser invokes get_machine_user operation.
+//
+// Get Machine User.
+//
+// GET /api/v2/machine-users/{id}
+func (c *Client) GetMachineUser(ctx context.Context, params GetMachineUserParams) (GetMachineUserRes, error) {
+	res, err := c.sendGetMachineUser(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendGetMachineUser(ctx context.Context, params GetMachineUserParams) (res GetMachineUserRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [2]string
+	pathParts[0] = "/api/v2/machine-users/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeGetMachineUserResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetMachineUsers invokes get_machine_users operation.
+//
+// Get Machine Users.
+//
+// GET /api/v2/machine-users
+func (c *Client) GetMachineUsers(ctx context.Context) (GetMachineUsersRes, error) {
+	res, err := c.sendGetMachineUsers(ctx)
+	return res, err
+}
+
+func (c *Client) sendGetMachineUsers(ctx context.Context) (res GetMachineUsersRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/api/v2/machine-users"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeGetMachineUsersResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -7998,6 +8632,71 @@ func (c *Client) sendRemoveExplorationFinalizer(ctx context.Context, params Remo
 	return result, nil
 }
 
+// RemoveGroupMembers invokes remove_group_members operation.
+//
+// Remove Group Members.
+//
+// DELETE /api/v2/groups/{id}/members
+func (c *Client) RemoveGroupMembers(ctx context.Context, request *GroupMembersRemove, params RemoveGroupMembersParams) (RemoveGroupMembersRes, error) {
+	res, err := c.sendRemoveGroupMembers(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendRemoveGroupMembers(ctx context.Context, request *GroupMembersRemove, params RemoveGroupMembersParams) (res RemoveGroupMembersRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/api/v2/groups/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/members"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "DELETE", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeRemoveGroupMembersRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeRemoveGroupMembersResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // RemoveInputPortForDataProduct invokes remove_input_port_for_data_product operation.
 //
 // Remove Input Port For Data Product.
@@ -8847,6 +9546,72 @@ func (c *Client) sendRenewInputPortForExploration(ctx context.Context, params Re
 	}()
 
 	result, err := decodeRenewInputPortForExplorationResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// ReplaceGroupMembers invokes replace_group_members operation.
+//
+// Because the service method performs add and replace operations internally, a lock is used to ensure
+// that only one request is processed at a time.
+//
+// PUT /api/v2/groups/{id}/members
+func (c *Client) ReplaceGroupMembers(ctx context.Context, request *GroupMembersReplace, params ReplaceGroupMembersParams) (ReplaceGroupMembersRes, error) {
+	res, err := c.sendReplaceGroupMembers(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendReplaceGroupMembers(ctx context.Context, request *GroupMembersReplace, params ReplaceGroupMembersParams) (res ReplaceGroupMembersRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/api/v2/groups/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/members"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "PUT", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeReplaceGroupMembersRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeReplaceGroupMembersResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -10692,6 +11457,134 @@ func (c *Client) sendUpdateEnvironmentIsGlobal(ctx context.Context, request *Env
 	}()
 
 	result, err := decodeUpdateEnvironmentIsGlobalResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// UpdateGroup invokes update_group operation.
+//
+// Update Group.
+//
+// PUT /api/v2/groups/{id}
+func (c *Client) UpdateGroup(ctx context.Context, request *GroupUpdate, params UpdateGroupParams) (UpdateGroupRes, error) {
+	res, err := c.sendUpdateGroup(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendUpdateGroup(ctx context.Context, request *GroupUpdate, params UpdateGroupParams) (res UpdateGroupRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [2]string
+	pathParts[0] = "/api/v2/groups/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "PUT", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeUpdateGroupRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeUpdateGroupResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// UpdateMachineUser invokes update_machine_user operation.
+//
+// Update Machine User.
+//
+// PUT /api/v2/machine-users/{id}
+func (c *Client) UpdateMachineUser(ctx context.Context, request *MachineUserUpdate, params UpdateMachineUserParams) (UpdateMachineUserRes, error) {
+	res, err := c.sendUpdateMachineUser(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendUpdateMachineUser(ctx context.Context, request *MachineUserUpdate, params UpdateMachineUserParams) (res UpdateMachineUserRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [2]string
+	pathParts[0] = "/api/v2/machine-users/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "PUT", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeUpdateMachineUserRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeUpdateMachineUserResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

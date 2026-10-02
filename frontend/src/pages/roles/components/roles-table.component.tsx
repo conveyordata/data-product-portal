@@ -294,6 +294,52 @@ function determinePermissionsForScope(scope: Scope, roles: Role[], t: TFunction)
                     name: 'Delete User',
                     description: t('Allows the deletion of a user'),
                 },
+                {
+                    type: 'Group',
+                    id: 'Manage Groups',
+                    name: t('Manage Groups'),
+                },
+                {
+                    type: 'Instance',
+                    id: AuthorizationAction.GLOBAL__CREATE_GROUP,
+                    name: t('Create Group'),
+                    description: t('Allows the creation of a new group'),
+                },
+                {
+                    type: 'Instance',
+                    id: AuthorizationAction.GLOBAL__UPDATE_GROUP,
+                    name: t('Update Group'),
+                    description: t('Allows updating fields and members of a group'),
+                },
+                {
+                    type: 'Instance',
+                    id: AuthorizationAction.GLOBAL__DELETE_GROUP,
+                    name: t('Delete Group'),
+                    description: t('Allows deleting a group'),
+                },
+                {
+                    type: 'Group',
+                    id: 'Manage Machine Users',
+                    name: t('Manage Machine Users'),
+                },
+                {
+                    type: 'Instance',
+                    id: AuthorizationAction.GLOBAL__CREATE_MACHINE_USER,
+                    name: t('Create Machine User'),
+                    description: t('Allows the creation of a new machine user'),
+                },
+                {
+                    type: 'Instance',
+                    id: AuthorizationAction.GLOBAL__UPDATE_MACHINE_USER,
+                    name: t('Update Machine User'),
+                    description: t('Allows updating a machine user'),
+                },
+                {
+                    type: 'Instance',
+                    id: AuthorizationAction.GLOBAL__DELETE_MACHINE_USER,
+                    name: t('Delete Machine User'),
+                    description: t('Allows deleting a machine user'),
+                },
             ];
             break;
         case Scope.DATA_PRODUCT:

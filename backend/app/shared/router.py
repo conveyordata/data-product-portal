@@ -32,6 +32,8 @@ from app.data_products.router import router as data_product
 from app.data_products.technical_assets.router import router as technical_assets
 from app.explorations.router import router as exploration
 from app.graph.router import router as graph
+from app.groups.router import router as group
+from app.machine_users.router import router as machine_user
 from app.resource_names.router import router as resource_name
 from app.search_output_ports.router import router as search_output_ports
 from app.technical_asset_configuration.router import router as plugin
@@ -69,3 +71,5 @@ router.include_router(resource_name)
 router.include_router(plugin)
 router.include_router(exploration)
 router.include_router(access_duration)
+router.include_router(group)
+router.include_router(machine_user)

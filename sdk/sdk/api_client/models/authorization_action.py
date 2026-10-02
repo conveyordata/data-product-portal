@@ -11,6 +11,12 @@ class AuthorizationAction(IntEnum):
     VALUE_107 = 107
     VALUE_108 = 108
     VALUE_109 = 109
+    VALUE_110 = 110
+    VALUE_111 = 111
+    VALUE_112 = 112
+    VALUE_113 = 113
+    VALUE_114 = 114
+    VALUE_115 = 115
     VALUE_301 = 301
     VALUE_302 = 302
     VALUE_303 = 303
