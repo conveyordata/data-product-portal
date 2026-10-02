@@ -13,7 +13,6 @@ from ..models.output_port_status import OutputPortStatus
 
 if TYPE_CHECKING:
     from ..models.access_mode import AccessMode
-    from ..models.data_product_life_cycle import DataProductLifeCycle
     from ..models.domain import Domain
     from ..models.tag import Tag
 
@@ -37,7 +36,6 @@ class SearchOutputPortsResponseItem:
         data_product_id (UUID):
         tags (list[Tag]):
         domain (Domain):
-        lifecycle (DataProductLifeCycle | None):
         access_modes (list[AccessMode]):
         abstract_data_product_count (int):
         technical_assets_count (int):
@@ -56,7 +54,6 @@ class SearchOutputPortsResponseItem:
     data_product_id: UUID
     tags: list[Tag]
     domain: Domain
-    lifecycle: DataProductLifeCycle | None
     access_modes: list[AccessMode]
     abstract_data_product_count: int
     technical_assets_count: int
@@ -64,8 +61,6 @@ class SearchOutputPortsResponseItem:
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        from ..models.data_product_life_cycle import DataProductLifeCycle
-
         id = str(self.id)
 
         namespace = self.namespace
@@ -94,12 +89,6 @@ class SearchOutputPortsResponseItem:
 
         domain = self.domain.to_dict()
 
-        lifecycle: dict[str, Any] | None
-        if isinstance(self.lifecycle, DataProductLifeCycle):
-            lifecycle = self.lifecycle.to_dict()
-        else:
-            lifecycle = self.lifecycle
-
         access_modes = []
         for access_modes_item_data in self.access_modes:
             access_modes_item = access_modes_item_data.to_dict()
@@ -127,7 +116,6 @@ class SearchOutputPortsResponseItem:
                 "data_product_id": data_product_id,
                 "tags": tags,
                 "domain": domain,
-                "lifecycle": lifecycle,
                 "access_modes": access_modes,
                 "abstract_data_product_count": abstract_data_product_count,
                 "technical_assets_count": technical_assets_count,
@@ -140,7 +128,6 @@ class SearchOutputPortsResponseItem:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.access_mode import AccessMode
-        from ..models.data_product_life_cycle import DataProductLifeCycle
         from ..models.domain import Domain
         from ..models.tag import Tag
 
@@ -183,21 +170,6 @@ class SearchOutputPortsResponseItem:
 
         domain = Domain.from_dict(d.pop("domain"))
 
-        def _parse_lifecycle(data: object) -> DataProductLifeCycle | None:
-            if data is None:
-                return data
-            try:
-                if not isinstance(data, dict):
-                    raise TypeError()
-                lifecycle_type_0 = DataProductLifeCycle.from_dict(data)
-
-                return lifecycle_type_0
-            except (TypeError, ValueError, AttributeError, KeyError):
-                pass
-            return cast(DataProductLifeCycle | None, data)
-
-        lifecycle = _parse_lifecycle(d.pop("lifecycle"))
-
         access_modes = []
         _access_modes = d.pop("access_modes")
         for access_modes_item_data in _access_modes:
@@ -224,7 +196,6 @@ class SearchOutputPortsResponseItem:
             data_product_id=data_product_id,
             tags=tags,
             domain=domain,
-            lifecycle=lifecycle,
             access_modes=access_modes,
             abstract_data_product_count=abstract_data_product_count,
             technical_assets_count=technical_assets_count,

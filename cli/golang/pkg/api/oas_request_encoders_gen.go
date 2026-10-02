@@ -126,20 +126,6 @@ func encodeCreateDataProductRequest(
 	return nil
 }
 
-func encodeCreateDataProductLifecycleRequest(
-	req *DataProductLifeCycleCreate,
-	r *http.Request,
-) error {
-	const contentType = "application/json"
-	e := new(jx.Encoder)
-	{
-		req.Encode(e)
-	}
-	encoded := e.Bytes()
-	ht.SetBody(r, bytes.NewReader(encoded), contentType)
-	return nil
-}
-
 func encodeCreateDataProductRoleAssignmentRequest(
 	req *CreateDataProductRoleAssignment,
 	r *http.Request,
@@ -653,20 +639,6 @@ func encodeUpdateDataProductRequest(
 
 func encodeUpdateDataProductAboutRequest(
 	req *DataProductAboutUpdate,
-	r *http.Request,
-) error {
-	const contentType = "application/json"
-	e := new(jx.Encoder)
-	{
-		req.Encode(e)
-	}
-	encoded := e.Bytes()
-	ht.SetBody(r, bytes.NewReader(encoded), contentType)
-	return nil
-}
-
-func encodeUpdateDataProductLifecycleRequest(
-	req *DataProductLifeCycleUpdate,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"

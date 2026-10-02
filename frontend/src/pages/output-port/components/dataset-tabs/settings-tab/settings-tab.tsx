@@ -104,7 +104,6 @@ export function SettingsTab({ outputPortId, dataProductId }: Props) {
                     namespace: outputPort.namespace,
                     description: outputPort.description,
                     tag_ids: outputPort.tags.map((tag) => tag.id),
-                    lifecycle_id: outputPort.lifecycle?.id ?? null,
                     access_type: outputPort.access_type,
                     data_product_access_duration_type: outputPort.data_product_access_duration_type,
                     exploration_access_duration_type: outputPort.exploration_access_duration_type,

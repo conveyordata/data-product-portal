@@ -126,7 +126,7 @@ Verb: PUT
 Address: api/v2/data_products/970be9df-4d42-4fb7-968c-f516345a9495
 Payload:
 ```
-{"name":"Logistics WMS Shipments","namespace":"logistics-wms-shipments","description":"Tracks order shipment and delivery status from the warehouse.","type_id":"99ed24ed-2816-417f-b8b2-7ec4300d3f34","lifecycle_id":"1264036d-2430-4125-a5e2-784fafaedc72","domain_id":"03341c55-92ca-456a-9331-fb23055472fe","tag_ids":[]}
+{"name":"Logistics WMS Shipments","namespace":"logistics-wms-shipments","description":"Tracks order shipment and delivery status from the warehouse.","type_id":"99ed24ed-2816-417f-b8b2-7ec4300d3f34","domain_id":"03341c55-92ca-456a-9331-fb23055472fe","tag_ids":[]}
 ```
 
 ## Updating the about of a data product

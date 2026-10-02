@@ -11,7 +11,6 @@ describe('Create and edit data product', () => {
         cy.wait('@validateNamespace', { timeout: 10000 });
 
         cy.selectAntOption('data-product-type', 'Analytics');
-        cy.selectAntOption('data-product-lifecycle', 'Draft');
         cy.selectAntOption('data-product-domain', 'Customer Insights');
 
         cy.get('[data-cy="data-product-description"]').type('Created by the Cypress end-to-end test.');

@@ -66,7 +66,6 @@ Portal UI
     │                    provisions DB schema          writes agent config
     │                    creates OSI TA                to /agent_configs/
     │                    creates PostgreSQL TA         {namespace}.yml
-    │                    updates lifecycle → Ready
     │
     ├── approves input port → webhook → Provisioner
     │                                        │
@@ -117,7 +116,6 @@ This triggers the provisioner for each product, which:
 - Creates an OSI Semantic Model technical asset pointing to `/products/{namespace}/osi.yml`
 - Creates a PostgreSQL technical asset scoped to the product's schema
 - Writes an agent config YAML to the shared `agent_configs` volume
-- Advances the data product lifecycle to **Ready**
 
 ### 3. Three Data Products, Three Agents
 

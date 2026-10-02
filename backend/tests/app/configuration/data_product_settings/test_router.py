@@ -174,8 +174,8 @@ class TestDataProductSettingsRouter:
         return client.post(ENDPOINT, json=data_product_setting_payload)
 
     @staticmethod
-    def get_data_product_setting(client, lifecycle_id):
-        return client.get(f"{ENDPOINT}/{lifecycle_id}")
+    def get_data_product_setting(client, setting_id):
+        return client.get(f"{ENDPOINT}/{setting_id}")
 
     @staticmethod
     def update_data_product_setting(client, payload, data_product_setting_id):

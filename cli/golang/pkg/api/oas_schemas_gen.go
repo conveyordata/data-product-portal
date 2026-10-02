@@ -921,27 +921,6 @@ func (s *CancelInputPortForExplorationResponse) SetInputPortID(val uuid.UUID) {
 
 func (*CancelInputPortForExplorationResponse) cancelInputPortForExplorationRes() {}
 
-// Ref: #/components/schemas/CreateDataProductLifeCycleResponse
-type CreateDataProductLifeCycleResponse struct {
-	ID uuid.UUID `json:"id"`
-}
-
-// GetID returns the value of ID.
-func (s *CreateDataProductLifeCycleResponse) GetID() uuid.UUID {
-	return s.ID
-}
-
-// SetID sets the value of ID.
-func (s *CreateDataProductLifeCycleResponse) SetID(val uuid.UUID) {
-	s.ID = val
-}
-
-func (*CreateDataProductLifeCycleResponse) createDataProductLifecycleRes() {}
-
-type CreateDataProductLifecycleNotFoundApplicationJSON jx.Raw
-
-func (*CreateDataProductLifecycleNotFoundApplicationJSON) createDataProductLifecycleRes() {}
-
 type CreateDataProductNotFoundApplicationJSON jx.Raw
 
 func (*CreateDataProductNotFoundApplicationJSON) createDataProductRes() {}
@@ -1210,7 +1189,6 @@ type CreateOutputPortRequest struct {
 	DataProductAccessDurationType AccessDurationType   `json:"data_product_access_duration_type"`
 	ExplorationAccessDurationType AccessDurationType   `json:"exploration_access_duration_type"`
 	About                         OptNilString         `json:"about"`
-	LifecycleID                   OptNilUUID           `json:"lifecycle_id"`
 	TagIds                        []uuid.UUID          `json:"tag_ids"`
 	Owners                        []uuid.UUID          `json:"owners"`
 }
@@ -1248,11 +1226,6 @@ func (s *CreateOutputPortRequest) GetExplorationAccessDurationType() AccessDurat
 // GetAbout returns the value of About.
 func (s *CreateOutputPortRequest) GetAbout() OptNilString {
 	return s.About
-}
-
-// GetLifecycleID returns the value of LifecycleID.
-func (s *CreateOutputPortRequest) GetLifecycleID() OptNilUUID {
-	return s.LifecycleID
 }
 
 // GetTagIds returns the value of TagIds.
@@ -1298,11 +1271,6 @@ func (s *CreateOutputPortRequest) SetExplorationAccessDurationType(val AccessDur
 // SetAbout sets the value of About.
 func (s *CreateOutputPortRequest) SetAbout(val OptNilString) {
 	s.About = val
-}
-
-// SetLifecycleID sets the value of LifecycleID.
-func (s *CreateOutputPortRequest) SetLifecycleID(val OptNilUUID) {
-	s.LifecycleID = val
 }
 
 // SetTagIds sets the value of TagIds.
@@ -1702,7 +1670,6 @@ type DataProductCreate struct {
 	About       OptNilString                                 `json:"about"`
 	DomainID    uuid.UUID                                    `json:"domain_id"`
 	TagIds      []uuid.UUID                                  `json:"tag_ids"`
-	LifecycleID uuid.UUID                                    `json:"lifecycle_id"`
 	Visibility  OptDataProductVisibility                     `json:"visibility"`
 	Owners      []uuid.UUID                                  `json:"owners"`
 	InputPorts  OptNilRequestInputPortsForDataProductRequest `json:"input_ports"`
@@ -1741,11 +1708,6 @@ func (s *DataProductCreate) GetDomainID() uuid.UUID {
 // GetTagIds returns the value of TagIds.
 func (s *DataProductCreate) GetTagIds() []uuid.UUID {
 	return s.TagIds
-}
-
-// GetLifecycleID returns the value of LifecycleID.
-func (s *DataProductCreate) GetLifecycleID() uuid.UUID {
-	return s.LifecycleID
 }
 
 // GetVisibility returns the value of Visibility.
@@ -1796,11 +1758,6 @@ func (s *DataProductCreate) SetDomainID(val uuid.UUID) {
 // SetTagIds sets the value of TagIds.
 func (s *DataProductCreate) SetTagIds(val []uuid.UUID) {
 	s.TagIds = val
-}
-
-// SetLifecycleID sets the value of LifecycleID.
-func (s *DataProductCreate) SetLifecycleID(val uuid.UUID) {
-	s.LifecycleID = val
 }
 
 // SetVisibility sets the value of Visibility.
@@ -1893,237 +1850,6 @@ func (s *DataProductIconKey) UnmarshalText(data []byte) error {
 	default:
 		return errors.Errorf("invalid value: %q", data)
 	}
-}
-
-// Ref: #/components/schemas/DataProductLifeCycle
-type DataProductLifeCycle struct {
-	ID        uuid.UUID `json:"id"`
-	Name      string    `json:"name"`
-	Value     int       `json:"value"`
-	Color     string    `json:"color"`
-	IsDefault bool      `json:"is_default"`
-}
-
-// GetID returns the value of ID.
-func (s *DataProductLifeCycle) GetID() uuid.UUID {
-	return s.ID
-}
-
-// GetName returns the value of Name.
-func (s *DataProductLifeCycle) GetName() string {
-	return s.Name
-}
-
-// GetValue returns the value of Value.
-func (s *DataProductLifeCycle) GetValue() int {
-	return s.Value
-}
-
-// GetColor returns the value of Color.
-func (s *DataProductLifeCycle) GetColor() string {
-	return s.Color
-}
-
-// GetIsDefault returns the value of IsDefault.
-func (s *DataProductLifeCycle) GetIsDefault() bool {
-	return s.IsDefault
-}
-
-// SetID sets the value of ID.
-func (s *DataProductLifeCycle) SetID(val uuid.UUID) {
-	s.ID = val
-}
-
-// SetName sets the value of Name.
-func (s *DataProductLifeCycle) SetName(val string) {
-	s.Name = val
-}
-
-// SetValue sets the value of Value.
-func (s *DataProductLifeCycle) SetValue(val int) {
-	s.Value = val
-}
-
-// SetColor sets the value of Color.
-func (s *DataProductLifeCycle) SetColor(val string) {
-	s.Color = val
-}
-
-// SetIsDefault sets the value of IsDefault.
-func (s *DataProductLifeCycle) SetIsDefault(val bool) {
-	s.IsDefault = val
-}
-
-// Ref: #/components/schemas/DataProductLifeCycleCreate
-type DataProductLifeCycleCreate struct {
-	Value     int     `json:"value"`
-	Name      string  `json:"name"`
-	Color     string  `json:"color"`
-	IsDefault OptBool `json:"is_default"`
-}
-
-// GetValue returns the value of Value.
-func (s *DataProductLifeCycleCreate) GetValue() int {
-	return s.Value
-}
-
-// GetName returns the value of Name.
-func (s *DataProductLifeCycleCreate) GetName() string {
-	return s.Name
-}
-
-// GetColor returns the value of Color.
-func (s *DataProductLifeCycleCreate) GetColor() string {
-	return s.Color
-}
-
-// GetIsDefault returns the value of IsDefault.
-func (s *DataProductLifeCycleCreate) GetIsDefault() OptBool {
-	return s.IsDefault
-}
-
-// SetValue sets the value of Value.
-func (s *DataProductLifeCycleCreate) SetValue(val int) {
-	s.Value = val
-}
-
-// SetName sets the value of Name.
-func (s *DataProductLifeCycleCreate) SetName(val string) {
-	s.Name = val
-}
-
-// SetColor sets the value of Color.
-func (s *DataProductLifeCycleCreate) SetColor(val string) {
-	s.Color = val
-}
-
-// SetIsDefault sets the value of IsDefault.
-func (s *DataProductLifeCycleCreate) SetIsDefault(val OptBool) {
-	s.IsDefault = val
-}
-
-// Ref: #/components/schemas/DataProductLifeCycleUpdate
-type DataProductLifeCycleUpdate struct {
-	Value     int     `json:"value"`
-	Name      string  `json:"name"`
-	Color     string  `json:"color"`
-	IsDefault OptBool `json:"is_default"`
-}
-
-// GetValue returns the value of Value.
-func (s *DataProductLifeCycleUpdate) GetValue() int {
-	return s.Value
-}
-
-// GetName returns the value of Name.
-func (s *DataProductLifeCycleUpdate) GetName() string {
-	return s.Name
-}
-
-// GetColor returns the value of Color.
-func (s *DataProductLifeCycleUpdate) GetColor() string {
-	return s.Color
-}
-
-// GetIsDefault returns the value of IsDefault.
-func (s *DataProductLifeCycleUpdate) GetIsDefault() OptBool {
-	return s.IsDefault
-}
-
-// SetValue sets the value of Value.
-func (s *DataProductLifeCycleUpdate) SetValue(val int) {
-	s.Value = val
-}
-
-// SetName sets the value of Name.
-func (s *DataProductLifeCycleUpdate) SetName(val string) {
-	s.Name = val
-}
-
-// SetColor sets the value of Color.
-func (s *DataProductLifeCycleUpdate) SetColor(val string) {
-	s.Color = val
-}
-
-// SetIsDefault sets the value of IsDefault.
-func (s *DataProductLifeCycleUpdate) SetIsDefault(val OptBool) {
-	s.IsDefault = val
-}
-
-// Ref: #/components/schemas/DataProductLifeCyclesGet
-type DataProductLifeCyclesGet struct {
-	DataProductLifeCycles []DataProductLifeCyclesGetItem `json:"data_product_life_cycles"`
-}
-
-// GetDataProductLifeCycles returns the value of DataProductLifeCycles.
-func (s *DataProductLifeCyclesGet) GetDataProductLifeCycles() []DataProductLifeCyclesGetItem {
-	return s.DataProductLifeCycles
-}
-
-// SetDataProductLifeCycles sets the value of DataProductLifeCycles.
-func (s *DataProductLifeCyclesGet) SetDataProductLifeCycles(val []DataProductLifeCyclesGetItem) {
-	s.DataProductLifeCycles = val
-}
-
-func (*DataProductLifeCyclesGet) getDataProductsLifecyclesRes() {}
-
-// Ref: #/components/schemas/DataProductLifeCyclesGetItem
-type DataProductLifeCyclesGetItem struct {
-	ID        uuid.UUID `json:"id"`
-	Value     int       `json:"value"`
-	Name      string    `json:"name"`
-	Color     string    `json:"color"`
-	IsDefault bool      `json:"is_default"`
-}
-
-// GetID returns the value of ID.
-func (s *DataProductLifeCyclesGetItem) GetID() uuid.UUID {
-	return s.ID
-}
-
-// GetValue returns the value of Value.
-func (s *DataProductLifeCyclesGetItem) GetValue() int {
-	return s.Value
-}
-
-// GetName returns the value of Name.
-func (s *DataProductLifeCyclesGetItem) GetName() string {
-	return s.Name
-}
-
-// GetColor returns the value of Color.
-func (s *DataProductLifeCyclesGetItem) GetColor() string {
-	return s.Color
-}
-
-// GetIsDefault returns the value of IsDefault.
-func (s *DataProductLifeCyclesGetItem) GetIsDefault() bool {
-	return s.IsDefault
-}
-
-// SetID sets the value of ID.
-func (s *DataProductLifeCyclesGetItem) SetID(val uuid.UUID) {
-	s.ID = val
-}
-
-// SetValue sets the value of Value.
-func (s *DataProductLifeCyclesGetItem) SetValue(val int) {
-	s.Value = val
-}
-
-// SetName sets the value of Name.
-func (s *DataProductLifeCyclesGetItem) SetName(val string) {
-	s.Name = val
-}
-
-// SetColor sets the value of Color.
-func (s *DataProductLifeCyclesGetItem) SetColor(val string) {
-	s.Color = val
-}
-
-// SetIsDefault sets the value of IsDefault.
-func (s *DataProductLifeCyclesGetItem) SetIsDefault(val bool) {
-	s.IsDefault = val
 }
 
 // Ref: #/components/schemas/DataProductRoleAssignmentResponse
@@ -3074,7 +2800,6 @@ type DataProductUpdate struct {
 	About       OptNilString `json:"about"`
 	DomainID    uuid.UUID    `json:"domain_id"`
 	TagIds      []uuid.UUID  `json:"tag_ids"`
-	LifecycleID uuid.UUID    `json:"lifecycle_id"`
 }
 
 // GetName returns the value of Name.
@@ -3112,11 +2837,6 @@ func (s *DataProductUpdate) GetTagIds() []uuid.UUID {
 	return s.TagIds
 }
 
-// GetLifecycleID returns the value of LifecycleID.
-func (s *DataProductUpdate) GetLifecycleID() uuid.UUID {
-	return s.LifecycleID
-}
-
 // SetName sets the value of Name.
 func (s *DataProductUpdate) SetName(val string) {
 	s.Name = val
@@ -3150,11 +2870,6 @@ func (s *DataProductUpdate) SetDomainID(val uuid.UUID) {
 // SetTagIds sets the value of TagIds.
 func (s *DataProductUpdate) SetTagIds(val []uuid.UUID) {
 	s.TagIds = val
-}
-
-// SetLifecycleID sets the value of LifecycleID.
-func (s *DataProductUpdate) SetLifecycleID(val uuid.UUID) {
-	s.LifecycleID = val
 }
 
 // Ref: #/components/schemas/DataProductUsageUpdate
@@ -4318,7 +4033,6 @@ type GetDataProductResponse struct {
 	Usage       NilString                 `json:"usage"`
 	Domain      Domain                    `json:"domain"`
 	Type        DataProductType           `json:"type"`
-	Lifecycle   NilDataProductLifeCycle   `json:"lifecycle"`
 	Visibility  DataProductVisibility     `json:"visibility"`
 	About       NilString                 `json:"about"`
 }
@@ -4371,11 +4085,6 @@ func (s *GetDataProductResponse) GetDomain() Domain {
 // GetType returns the value of Type.
 func (s *GetDataProductResponse) GetType() DataProductType {
 	return s.Type
-}
-
-// GetLifecycle returns the value of Lifecycle.
-func (s *GetDataProductResponse) GetLifecycle() NilDataProductLifeCycle {
-	return s.Lifecycle
 }
 
 // GetVisibility returns the value of Visibility.
@@ -4436,11 +4145,6 @@ func (s *GetDataProductResponse) SetDomain(val Domain) {
 // SetType sets the value of Type.
 func (s *GetDataProductResponse) SetType(val DataProductType) {
 	s.Type = val
-}
-
-// SetLifecycle sets the value of Lifecycle.
-func (s *GetDataProductResponse) SetLifecycle(val NilDataProductLifeCycle) {
-	s.Lifecycle = val
 }
 
 // SetVisibility sets the value of Visibility.
@@ -4518,7 +4222,6 @@ type GetDataProductsResponseItem struct {
 	Usage               NilString                 `json:"usage"`
 	Domain              Domain                    `json:"domain"`
 	Type                DataProductType           `json:"type"`
-	Lifecycle           NilDataProductLifeCycle   `json:"lifecycle"`
 	Visibility          DataProductVisibility     `json:"visibility"`
 	UserCount           int                       `json:"user_count"`
 	InputPortCount      int                       `json:"input_port_count"`
@@ -4573,11 +4276,6 @@ func (s *GetDataProductsResponseItem) GetDomain() Domain {
 // GetType returns the value of Type.
 func (s *GetDataProductsResponseItem) GetType() DataProductType {
 	return s.Type
-}
-
-// GetLifecycle returns the value of Lifecycle.
-func (s *GetDataProductsResponseItem) GetLifecycle() NilDataProductLifeCycle {
-	return s.Lifecycle
 }
 
 // GetVisibility returns the value of Visibility.
@@ -4648,11 +4346,6 @@ func (s *GetDataProductsResponseItem) SetDomain(val Domain) {
 // SetType sets the value of Type.
 func (s *GetDataProductsResponseItem) SetType(val DataProductType) {
 	s.Type = val
-}
-
-// SetLifecycle sets the value of Lifecycle.
-func (s *GetDataProductsResponseItem) SetLifecycle(val NilDataProductLifeCycle) {
-	s.Lifecycle = val
 }
 
 // SetVisibility sets the value of Visibility.
@@ -5187,7 +4880,6 @@ type GetOutputPortResponse struct {
 	DataProductID                 uuid.UUID                `json:"data_product_id"`
 	Tags                          []Tag                    `json:"tags"`
 	Domain                        Domain                   `json:"domain"`
-	Lifecycle                     NilDataProductLifeCycle  `json:"lifecycle"`
 	AccessModes                   []AccessMode             `json:"access_modes"`
 	About                         NilString                `json:"about"`
 	RolledUpTags                  []Tag                    `json:"rolled_up_tags"`
@@ -5253,11 +4945,6 @@ func (s *GetOutputPortResponse) GetTags() []Tag {
 // GetDomain returns the value of Domain.
 func (s *GetOutputPortResponse) GetDomain() Domain {
 	return s.Domain
-}
-
-// GetLifecycle returns the value of Lifecycle.
-func (s *GetOutputPortResponse) GetLifecycle() NilDataProductLifeCycle {
-	return s.Lifecycle
 }
 
 // GetAccessModes returns the value of AccessModes.
@@ -5343,11 +5030,6 @@ func (s *GetOutputPortResponse) SetTags(val []Tag) {
 // SetDomain sets the value of Domain.
 func (s *GetOutputPortResponse) SetDomain(val Domain) {
 	s.Domain = val
-}
-
-// SetLifecycle sets the value of Lifecycle.
-func (s *GetOutputPortResponse) SetLifecycle(val NilDataProductLifeCycle) {
-	s.Lifecycle = val
 }
 
 // SetAccessModes sets the value of AccessModes.
@@ -5918,7 +5600,6 @@ func (*HTTPValidationError) cancelInputPortForDataProductRes()            {}
 func (*HTTPValidationError) cancelInputPortForExplorationRes()            {}
 func (*HTTPValidationError) checkAccessRes()                              {}
 func (*HTTPValidationError) createAccessModeRes()                         {}
-func (*HTTPValidationError) createDataProductLifecycleRes()               {}
 func (*HTTPValidationError) createDataProductRes()                        {}
 func (*HTTPValidationError) createDataProductRoleAssignmentRes()          {}
 func (*HTTPValidationError) createDataProductSettingRes()                 {}
@@ -5955,7 +5636,6 @@ func (*HTTPValidationError) getDataProductRolledUpTagsRes()               {}
 func (*HTTPValidationError) getDataProductSettingsRes()                   {}
 func (*HTTPValidationError) getDataProductTechnicalAssetsRes()            {}
 func (*HTTPValidationError) getDataProductTypeRes()                       {}
-func (*HTTPValidationError) getDataProductsLifecyclesRes()                {}
 func (*HTTPValidationError) getDataProductsRes()                          {}
 func (*HTTPValidationError) getDataProductsSettingsRes()                  {}
 func (*HTTPValidationError) getDataProductsTypesRes()                     {}
@@ -6006,7 +5686,6 @@ func (*HTTPValidationError) modifyOutputPortRoleAssignmentRes()           {}
 func (*HTTPValidationError) overwriteOutputPortDataQualitySummaryRes()    {}
 func (*HTTPValidationError) removeAllUserNotificationsRes()               {}
 func (*HTTPValidationError) removeDataProductFinalizerRes()               {}
-func (*HTTPValidationError) removeDataProductLifecycleRes()               {}
 func (*HTTPValidationError) removeDataProductRes()                        {}
 func (*HTTPValidationError) removeDataProductSettingRes()                 {}
 func (*HTTPValidationError) removeDataProductTypeRes()                    {}
@@ -6043,7 +5722,6 @@ func (*HTTPValidationError) unlinkOutputPortFromTechnicalAssetRes()       {}
 func (*HTTPValidationError) updateAccessDurationRes()                     {}
 func (*HTTPValidationError) updateAccessModeRes()                         {}
 func (*HTTPValidationError) updateDataProductAboutRes()                   {}
-func (*HTTPValidationError) updateDataProductLifecycleRes()               {}
 func (*HTTPValidationError) updateDataProductRes()                        {}
 func (*HTTPValidationError) updateDataProductSettingRes()                 {}
 func (*HTTPValidationError) updateDataProductStatusRes()                  {}
@@ -6534,51 +6212,6 @@ func (s *ModifyOutputPortRoleAssignment) GetRoleID() uuid.UUID {
 // SetRoleID sets the value of RoleID.
 func (s *ModifyOutputPortRoleAssignment) SetRoleID(val uuid.UUID) {
 	s.RoleID = val
-}
-
-// NewNilDataProductLifeCycle returns new NilDataProductLifeCycle with value set to v.
-func NewNilDataProductLifeCycle(v DataProductLifeCycle) NilDataProductLifeCycle {
-	return NilDataProductLifeCycle{
-		Value: v,
-	}
-}
-
-// NilDataProductLifeCycle is nullable DataProductLifeCycle.
-type NilDataProductLifeCycle struct {
-	Value DataProductLifeCycle
-	Null  bool
-}
-
-// SetTo sets value to v.
-func (o *NilDataProductLifeCycle) SetTo(v DataProductLifeCycle) {
-	o.Null = false
-	o.Value = v
-}
-
-// IsNull returns true if value is Null.
-func (o NilDataProductLifeCycle) IsNull() bool { return o.Null }
-
-// SetToNull sets value to null.
-func (o *NilDataProductLifeCycle) SetToNull() {
-	o.Null = true
-	var v DataProductLifeCycle
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o NilDataProductLifeCycle) Get() (v DataProductLifeCycle, ok bool) {
-	if o.Null {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o NilDataProductLifeCycle) Or(d DataProductLifeCycle) DataProductLifeCycle {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
 }
 
 // NewNilDate returns new NilDate with value set to v.
@@ -10289,7 +9922,6 @@ type OutputPortUpdate struct {
 	DataProductAccessDurationType AccessDurationType   `json:"data_product_access_duration_type"`
 	ExplorationAccessDurationType AccessDurationType   `json:"exploration_access_duration_type"`
 	About                         OptNilString         `json:"about"`
-	LifecycleID                   OptNilUUID           `json:"lifecycle_id"`
 	TagIds                        []uuid.UUID          `json:"tag_ids"`
 }
 
@@ -10326,11 +9958,6 @@ func (s *OutputPortUpdate) GetExplorationAccessDurationType() AccessDurationType
 // GetAbout returns the value of About.
 func (s *OutputPortUpdate) GetAbout() OptNilString {
 	return s.About
-}
-
-// GetLifecycleID returns the value of LifecycleID.
-func (s *OutputPortUpdate) GetLifecycleID() OptNilUUID {
-	return s.LifecycleID
 }
 
 // GetTagIds returns the value of TagIds.
@@ -10371,11 +9998,6 @@ func (s *OutputPortUpdate) SetExplorationAccessDurationType(val AccessDurationTy
 // SetAbout sets the value of About.
 func (s *OutputPortUpdate) SetAbout(val OptNilString) {
 	s.About = val
-}
-
-// SetLifecycleID sets the value of LifecycleID.
-func (s *OutputPortUpdate) SetLifecycleID(val OptNilUUID) {
-	s.LifecycleID = val
 }
 
 // SetTagIds sets the value of TagIds.
@@ -10734,10 +10356,6 @@ func (*RemoveDataProductAccepted) removeDataProductRes() {}
 type RemoveDataProductFinalizerOKApplicationJSON jx.Raw
 
 func (*RemoveDataProductFinalizerOKApplicationJSON) removeDataProductFinalizerRes() {}
-
-type RemoveDataProductLifecycleOKApplicationJSON jx.Raw
-
-func (*RemoveDataProductLifecycleOKApplicationJSON) removeDataProductLifecycleRes() {}
 
 type RemoveDataProductNotFoundApplicationJSON jx.Raw
 
@@ -12094,23 +11712,22 @@ func (*SearchOutputPortsResponse) searchOutputPortsRes() {}
 
 // Ref: #/components/schemas/SearchOutputPortsResponseItem
 type SearchOutputPortsResponseItem struct {
-	ID                            uuid.UUID               `json:"id"`
-	Namespace                     string                  `json:"namespace"`
-	Name                          string                  `json:"name"`
-	Description                   string                  `json:"description"`
-	Status                        OutputPortStatus        `json:"status"`
-	Usage                         NilString               `json:"usage"`
-	AccessType                    OutputPortAccessType    `json:"access_type"`
-	DataProductAccessDurationType AccessDurationType      `json:"data_product_access_duration_type"`
-	ExplorationAccessDurationType AccessDurationType      `json:"exploration_access_duration_type"`
-	DataProductID                 uuid.UUID               `json:"data_product_id"`
-	Tags                          []Tag                   `json:"tags"`
-	Domain                        Domain                  `json:"domain"`
-	Lifecycle                     NilDataProductLifeCycle `json:"lifecycle"`
-	AccessModes                   []AccessMode            `json:"access_modes"`
-	AbstractDataProductCount      int                     `json:"abstract_data_product_count"`
-	TechnicalAssetsCount          int                     `json:"technical_assets_count"`
-	DataProductName               string                  `json:"data_product_name"`
+	ID                            uuid.UUID            `json:"id"`
+	Namespace                     string               `json:"namespace"`
+	Name                          string               `json:"name"`
+	Description                   string               `json:"description"`
+	Status                        OutputPortStatus     `json:"status"`
+	Usage                         NilString            `json:"usage"`
+	AccessType                    OutputPortAccessType `json:"access_type"`
+	DataProductAccessDurationType AccessDurationType   `json:"data_product_access_duration_type"`
+	ExplorationAccessDurationType AccessDurationType   `json:"exploration_access_duration_type"`
+	DataProductID                 uuid.UUID            `json:"data_product_id"`
+	Tags                          []Tag                `json:"tags"`
+	Domain                        Domain               `json:"domain"`
+	AccessModes                   []AccessMode         `json:"access_modes"`
+	AbstractDataProductCount      int                  `json:"abstract_data_product_count"`
+	TechnicalAssetsCount          int                  `json:"technical_assets_count"`
+	DataProductName               string               `json:"data_product_name"`
 }
 
 // GetID returns the value of ID.
@@ -12171,11 +11788,6 @@ func (s *SearchOutputPortsResponseItem) GetTags() []Tag {
 // GetDomain returns the value of Domain.
 func (s *SearchOutputPortsResponseItem) GetDomain() Domain {
 	return s.Domain
-}
-
-// GetLifecycle returns the value of Lifecycle.
-func (s *SearchOutputPortsResponseItem) GetLifecycle() NilDataProductLifeCycle {
-	return s.Lifecycle
 }
 
 // GetAccessModes returns the value of AccessModes.
@@ -12256,11 +11868,6 @@ func (s *SearchOutputPortsResponseItem) SetTags(val []Tag) {
 // SetDomain sets the value of Domain.
 func (s *SearchOutputPortsResponseItem) SetDomain(val Domain) {
 	s.Domain = val
-}
-
-// SetLifecycle sets the value of Lifecycle.
-func (s *SearchOutputPortsResponseItem) SetLifecycle(val NilDataProductLifeCycle) {
-	s.Lifecycle = val
 }
 
 // SetAccessModes sets the value of AccessModes.
@@ -13433,27 +13040,6 @@ func (*UpdateDataProductAboutNotFoundApplicationJSON) updateDataProductAboutRes(
 type UpdateDataProductAboutOKApplicationJSON jx.Raw
 
 func (*UpdateDataProductAboutOKApplicationJSON) updateDataProductAboutRes() {}
-
-// Ref: #/components/schemas/UpdateDataProductLifeCycleResponse
-type UpdateDataProductLifeCycleResponse struct {
-	ID uuid.UUID `json:"id"`
-}
-
-// GetID returns the value of ID.
-func (s *UpdateDataProductLifeCycleResponse) GetID() uuid.UUID {
-	return s.ID
-}
-
-// SetID sets the value of ID.
-func (s *UpdateDataProductLifeCycleResponse) SetID(val uuid.UUID) {
-	s.ID = val
-}
-
-func (*UpdateDataProductLifeCycleResponse) updateDataProductLifecycleRes() {}
-
-type UpdateDataProductLifecycleNotFoundApplicationJSON jx.Raw
-
-func (*UpdateDataProductLifecycleNotFoundApplicationJSON) updateDataProductLifecycleRes() {}
 
 type UpdateDataProductNotFoundApplicationJSON jx.Raw
 

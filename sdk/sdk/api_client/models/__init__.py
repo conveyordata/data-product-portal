@@ -55,7 +55,6 @@ from .cloud_event_output_port_technical_asset_link_event import (
     CloudEventOutputPortTechnicalAssetLinkEvent,
 )
 from .cloud_event_technical_asset_event import CloudEventTechnicalAssetEvent
-from .create_data_product_life_cycle_response import CreateDataProductLifeCycleResponse
 from .create_data_product_response import CreateDataProductResponse
 from .create_data_product_role_assignment import CreateDataProductRoleAssignment
 from .create_data_product_setting_response import CreateDataProductSettingResponse
@@ -81,11 +80,6 @@ from .data_product_about_update import DataProductAboutUpdate
 from .data_product_create import DataProductCreate
 from .data_product_event import DataProductEvent
 from .data_product_icon_key import DataProductIconKey
-from .data_product_life_cycle import DataProductLifeCycle
-from .data_product_life_cycle_create import DataProductLifeCycleCreate
-from .data_product_life_cycle_update import DataProductLifeCycleUpdate
-from .data_product_life_cycles_get import DataProductLifeCyclesGet
-from .data_product_life_cycles_get_item import DataProductLifeCyclesGetItem
 from .data_product_role_assignment_event import DataProductRoleAssignmentEvent
 from .data_product_role_assignment_request import DataProductRoleAssignmentRequest
 from .data_product_role_assignment_response import DataProductRoleAssignmentResponse
@@ -349,7 +343,6 @@ from .un_link_technical_asset_to_output_port_request import (
     UnLinkTechnicalAssetToOutputPortRequest,
 )
 from .update_access_duration_response import UpdateAccessDurationResponse
-from .update_data_product_life_cycle_response import UpdateDataProductLifeCycleResponse
 from .update_data_product_response import UpdateDataProductResponse
 from .update_data_product_setting_response import UpdateDataProductSettingResponse
 from .update_data_product_type_response import UpdateDataProductTypeResponse
@@ -406,7 +399,6 @@ __all__ = (
     "CloudEventOutputPortRoleAssignmentEvent",
     "CloudEventOutputPortTechnicalAssetLinkEvent",
     "CloudEventTechnicalAssetEvent",
-    "CreateDataProductLifeCycleResponse",
     "CreateDataProductResponse",
     "CreateDataProductRoleAssignment",
     "CreateDataProductSettingResponse",
@@ -431,11 +423,6 @@ __all__ = (
     "DataProductCreate",
     "DataProductEvent",
     "DataProductIconKey",
-    "DataProductLifeCycle",
-    "DataProductLifeCycleCreate",
-    "DataProductLifeCyclesGet",
-    "DataProductLifeCyclesGetItem",
-    "DataProductLifeCycleUpdate",
     "DataProductRoleAssignmentEvent",
     "DataProductRoleAssignmentRequest",
     "DataProductRoleAssignmentResponse",
@@ -640,7 +627,6 @@ __all__ = (
     "UIElementType",
     "UnLinkTechnicalAssetToOutputPortRequest",
     "UpdateAccessDurationResponse",
-    "UpdateDataProductLifeCycleResponse",
     "UpdateDataProductResponse",
     "UpdateDataProductSettingResponse",
     "UpdateDataProductTypeResponse",

@@ -26,7 +26,6 @@ class OutputPortUpdate:
         exploration_access_duration_type (AccessDurationType):
         tag_ids (list[UUID]):
         about (None | str | Unset):
-        lifecycle_id (None | Unset | UUID):
     """
 
     name: str
@@ -37,7 +36,6 @@ class OutputPortUpdate:
     exploration_access_duration_type: AccessDurationType
     tag_ids: list[UUID]
     about: None | str | Unset = UNSET
-    lifecycle_id: None | Unset | UUID = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -64,14 +62,6 @@ class OutputPortUpdate:
         else:
             about = self.about
 
-        lifecycle_id: None | str | Unset
-        if isinstance(self.lifecycle_id, Unset):
-            lifecycle_id = UNSET
-        elif isinstance(self.lifecycle_id, UUID):
-            lifecycle_id = str(self.lifecycle_id)
-        else:
-            lifecycle_id = self.lifecycle_id
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
@@ -87,8 +77,6 @@ class OutputPortUpdate:
         )
         if about is not UNSET:
             field_dict["about"] = about
-        if lifecycle_id is not UNSET:
-            field_dict["lifecycle_id"] = lifecycle_id
 
         return field_dict
 
@@ -127,23 +115,6 @@ class OutputPortUpdate:
 
         about = _parse_about(d.pop("about", UNSET))
 
-        def _parse_lifecycle_id(data: object) -> None | Unset | UUID:
-            if data is None:
-                return data
-            if isinstance(data, Unset):
-                return data
-            try:
-                if not isinstance(data, str):
-                    raise TypeError()
-                lifecycle_id_type_0 = UUID(data)
-
-                return lifecycle_id_type_0
-            except (TypeError, ValueError, AttributeError, KeyError):
-                pass
-            return cast(None | Unset | UUID, data)
-
-        lifecycle_id = _parse_lifecycle_id(d.pop("lifecycle_id", UNSET))
-
         output_port_update = cls(
             name=name,
             namespace=namespace,
@@ -153,7 +124,6 @@ class OutputPortUpdate:
             exploration_access_duration_type=exploration_access_duration_type,
             tag_ids=tag_ids,
             about=about,
-            lifecycle_id=lifecycle_id,
         )
 
         output_port_update.additional_properties = d

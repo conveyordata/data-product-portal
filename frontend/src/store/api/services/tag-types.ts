@@ -7,7 +7,6 @@ export enum TagTypes {
     UserTechnicalAssets = 'UserTechnicalAssets',
     DataProductType = 'DataProductType',
     Tags = 'Tags',
-    DataProductLifecycle = 'DataProductLifecycle',
     DataProductSetting = 'DataProductSetting',
     CurrentUser = 'CurrentUser',
     User = 'User',

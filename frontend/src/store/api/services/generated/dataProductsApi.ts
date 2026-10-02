@@ -333,7 +333,6 @@ export type DataProductCreate = {
   about?: string | null;
   domain_id: string;
   tag_ids?: string[];
-  lifecycle_id: string;
   visibility?: DataProductVisibility;
   owners: string[];
   input_ports?: RequestInputPortsForDataProductRequest | null;
@@ -353,13 +352,6 @@ export type DataProductType = {
   description: string;
   icon_key: DataProductIconKey;
 };
-export type DataProductLifeCycle = {
-  id: string;
-  name: string;
-  value: number;
-  color: string;
-  is_default: boolean;
-};
 export type GetDataProductsResponseItem = {
   id: string;
   name: string;
@@ -371,7 +363,6 @@ export type GetDataProductsResponseItem = {
   usage: string | null;
   domain: Domain;
   type: DataProductType;
-  lifecycle: DataProductLifeCycle | null;
   visibility: DataProductVisibility;
   user_count: number;
   input_port_count: number;
@@ -391,7 +382,6 @@ export type DataProductUpdate = {
   about?: string | null;
   domain_id: string;
   tag_ids?: string[];
-  lifecycle_id: string;
 };
 export type GetDataProductResponse = {
   id: string;
@@ -404,7 +394,6 @@ export type GetDataProductResponse = {
   usage: string | null;
   domain: Domain;
   type: DataProductType;
-  lifecycle: DataProductLifeCycle | null;
   visibility: DataProductVisibility;
   about: string | null;
 };

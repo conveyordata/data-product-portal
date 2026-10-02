@@ -21,7 +21,6 @@ class DataProductUpdate:
         description (str):
         type_id (UUID):
         domain_id (UUID):
-        lifecycle_id (UUID):
         about (None | str | Unset):
         tag_ids (list[UUID] | Unset):
     """
@@ -31,7 +30,6 @@ class DataProductUpdate:
     description: str
     type_id: UUID
     domain_id: UUID
-    lifecycle_id: UUID
     about: None | str | Unset = UNSET
     tag_ids: list[UUID] | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
@@ -46,8 +44,6 @@ class DataProductUpdate:
         type_id = str(self.type_id)
 
         domain_id = str(self.domain_id)
-
-        lifecycle_id = str(self.lifecycle_id)
 
         about: None | str | Unset
         if isinstance(self.about, Unset):
@@ -71,7 +67,6 @@ class DataProductUpdate:
                 "description": description,
                 "type_id": type_id,
                 "domain_id": domain_id,
-                "lifecycle_id": lifecycle_id,
             }
         )
         if about is not UNSET:
@@ -93,8 +88,6 @@ class DataProductUpdate:
         type_id = UUID(d.pop("type_id"))
 
         domain_id = UUID(d.pop("domain_id"))
-
-        lifecycle_id = UUID(d.pop("lifecycle_id"))
 
         def _parse_about(data: object) -> None | str | Unset:
             if data is None:
@@ -120,7 +113,6 @@ class DataProductUpdate:
             description=description,
             type_id=type_id,
             domain_id=domain_id,
-            lifecycle_id=lifecycle_id,
             about=about,
             tag_ids=tag_ids,
         )

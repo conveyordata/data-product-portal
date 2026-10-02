@@ -5,9 +5,6 @@ from typing import Any, Iterable, Optional
 from uuid import UUID
 
 from cookiecutter.main import cookiecutter
-from sdk.api_client.api.configuration_data_product_lifecycles import (
-    get_data_products_lifecycles,
-)
 from sdk.api_client.api.configuration_platforms import (
     get_all_platform_service_configurations,
 )
@@ -16,7 +13,6 @@ from sdk.api_client.api.data_products import (
     get_data_product,
     get_data_products,
     remove_data_product_finalizer,
-    update_data_product,
 )
 from sdk.api_client.api.data_products_technical_assets import (
     create_technical_asset,
@@ -27,8 +23,6 @@ from sdk.api_client.models import (
     AbstractDataProductStatus,
     CreateTechnicalAssetRequest,
     TechnicalAssetStatusUpdate,
-    DataProductLifeCyclesGetItem,
-    DataProductUpdate,
     FinalizerRequest,
     GetDataProductResponse,
     GetDataProductsResponse,
@@ -77,14 +71,6 @@ class DataProductReconciler(sdk.Reconciler):
             raise Exception(response.detail)
         raise Exception("Unexpected response")
 
-    async def _get_lifecycles(self) -> list[DataProductLifeCyclesGetItem]:
-        logging.info("Fetching lifecycles from portal API")
-        result = await get_data_products_lifecycles.asyncio(client=self._client)
-        if result is None or isinstance(result, HTTPValidationError):
-            raise Exception("Failed to fetch lifecycles")
-
-        return result.data_product_life_cycles
-
     async def _get_platform_service_configurations(
         self,
     ) -> list[PlatformServiceConfiguration]:
@@ -129,8 +115,7 @@ class DataProductReconciler(sdk.Reconciler):
         """Reconcile a single data product towards its desired provisioned state.
 
         This runs on startup and on every create/update event, so each step is
-        idempotent: rendering is skipped when its output already exists, the
-        lifecycle is only moved when it is not already ``Ready``, and the technical
+        idempotent: rendering is skipped when its output already exists, and the technical
         asset is reused when one already exists for the data product's namespace.
         """
         logging.info(f"Reconciling data product {resource_id}")
@@ -181,48 +166,10 @@ class DataProductReconciler(sdk.Reconciler):
                 output_dir=template_output_path,
             )
 
-        # Ensure the data product is in the "Ready" lifecycle state
-        await self._ensure_ready_lifecycle(resource_id, data_product_details)
-
         # Ensure a PostgreSQL technical asset exists and is active
         await self._ensure_technical_asset(resource_id, data_product_details)
 
         logging.info(f"Successfully reconciled data product {resource_id}")
-
-    async def _ensure_ready_lifecycle(
-        self, resource_id: UUID, data_product_details: Any
-    ) -> None:
-        current_lifecycle = data_product_details.lifecycle
-        if current_lifecycle is not None and current_lifecycle.name == "Ready":
-            logging.info(
-                f"Data product {resource_id} already in 'Ready' state, skipping"
-            )
-            return
-
-        lifecycles = await self._get_lifecycles()
-        ready_lifecycle = next((lc for lc in lifecycles if lc.name == "Ready"), None)
-        if not ready_lifecycle:
-            raise Exception("Configuration error: 'Ready' lifecycle not found.")
-
-        update_body = DataProductUpdate(
-            name=data_product_details.name,
-            namespace=data_product_details.namespace,
-            description=data_product_details.description,
-            type_id=data_product_details.type_.id,
-            lifecycle_id=ready_lifecycle.id,
-            domain_id=data_product_details.domain.id,
-            tag_ids=[tag.id for tag in data_product_details.tags],
-        )
-
-        logging.info(f"Updating data product {resource_id} to 'Ready' state")
-        update_result = await update_data_product.asyncio(
-            id=resource_id, body=update_body, client=self._client
-        )
-        if update_result is None or isinstance(update_result, HTTPValidationError):
-            raise Exception(f"Failed to update data product state for id {resource_id}")
-        logging.info(
-            f"Successfully updated data product {resource_id} to 'Ready' state."
-        )
 
     async def _ensure_technical_asset(
         self, resource_id: UUID, data_product_details: Any

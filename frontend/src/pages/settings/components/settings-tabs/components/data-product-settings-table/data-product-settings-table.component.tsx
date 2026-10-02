@@ -49,9 +49,9 @@ export function DataProductSettingsTable({ scope }: Props) {
         async (setting: DataProductSettingsGetItem) => {
             try {
                 await onRemoveDataProductSetting(setting.id).unwrap();
-                dispatchMessage({ content: t('Data Product lifecycle removed successfully'), type: 'success' });
+                dispatchMessage({ content: t('Data Product setting removed successfully'), type: 'success' });
             } catch (_) {
-                dispatchMessage({ content: t('Could not remove Data Product lifecycle'), type: 'error' });
+                dispatchMessage({ content: t('Could not remove Data Product setting'), type: 'error' });
             }
         },
         [t, onRemoveDataProductSetting],

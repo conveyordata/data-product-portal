@@ -752,29 +752,6 @@ func (s DataProductIconKey) Validate() error {
 	}
 }
 
-func (s *DataProductLifeCyclesGet) Validate() error {
-	if s == nil {
-		return validate.ErrNilPointer
-	}
-
-	var failures []validate.FieldError
-	if err := func() error {
-		if s.DataProductLifeCycles == nil {
-			return errors.New("nil is invalid value")
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "data_product_life_cycles",
-			Error: err,
-		})
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-	return nil
-}
-
 func (s *DataProductRoleAssignmentResponse) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer

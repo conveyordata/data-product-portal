@@ -109,7 +109,6 @@ export function OutputPort() {
                 </Flex>
                 <Flex vertical className={styles.datasetOverview}>
                     <OutputPortDescription
-                        lifecycle={outputPort.lifecycle}
                         data_product={data_product}
                         description={outputPort.description}
                         domain={outputPort.domain.name}

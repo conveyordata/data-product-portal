@@ -387,11 +387,6 @@ type RemoveDataProductFinalizerParams struct {
 	Finalizer string
 }
 
-// RemoveDataProductLifecycleParams is parameters of remove_data_product_lifecycle operation.
-type RemoveDataProductLifecycleParams struct {
-	ID uuid.UUID
-}
-
 // RemoveDataProductSettingParams is parameters of remove_data_product_setting operation.
 type RemoveDataProductSettingParams struct {
 	ID uuid.UUID
@@ -564,11 +559,6 @@ type UpdateDataProductParams struct {
 
 // UpdateDataProductAboutParams is parameters of update_data_product_about operation.
 type UpdateDataProductAboutParams struct {
-	ID uuid.UUID
-}
-
-// UpdateDataProductLifecycleParams is parameters of update_data_product_lifecycle operation.
-type UpdateDataProductLifecycleParams struct {
 	ID uuid.UUID
 }
 

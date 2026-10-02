@@ -35,22 +35,6 @@ func (s *DataProductCreate) setDefaults() {
 }
 
 // setDefaults set default value of fields.
-func (s *DataProductLifeCycleCreate) setDefaults() {
-	{
-		val := bool(false)
-		s.IsDefault.SetTo(val)
-	}
-}
-
-// setDefaults set default value of fields.
-func (s *DataProductLifeCycleUpdate) setDefaults() {
-	{
-		val := bool(false)
-		s.IsDefault.SetTo(val)
-	}
-}
-
-// setDefaults set default value of fields.
 func (s *DataProductSetting) setDefaults() {
 	{
 		val := int(100)

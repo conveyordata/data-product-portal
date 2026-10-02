@@ -80,16 +80,6 @@ export function OutputPortMarketplaceCard({ outputPort }: Props) {
                 children: <Typography.Text ellipsis={{ tooltip: true }}>{outputPort.domain.name}</Typography.Text>,
             },
             {
-                key: 'status',
-                label: (
-                    <Space>
-                        <EyeOutlined />
-                        {t('Status')}
-                    </Space>
-                ),
-                children: <Tag color={outputPort.lifecycle?.color}>{outputPort.lifecycle?.name}</Tag>,
-            },
-            {
                 key: 'access type',
                 label: (
                     <Space>

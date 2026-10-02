@@ -7,9 +7,6 @@ from app.configuration.access_durations.router import router as access_duration
 from app.configuration.access_modes.router import (
     router as access_modes,
 )
-from app.configuration.data_product_lifecycles.router import (
-    router as data_product_lifecycle,
-)
 from app.configuration.data_product_settings.router import (
     router as data_product_setting,
 )
@@ -49,7 +46,6 @@ router.include_router(search_output_ports)
 router.include_router(dataset)
 router.include_router(data_product)
 router.include_router(data_product_type)
-router.include_router(data_product_lifecycle)
 router.include_router(data_product_setting)
 router.include_router(access_modes)
 router.include_router(data_product_dataset)

@@ -50,7 +50,6 @@ from app.groups.model import GroupMembership
 from app.shared.model import BaseORM
 
 if TYPE_CHECKING:
-    from app.configuration.data_product_lifecycles.model import DataProductLifecycle
     from app.configuration.data_product_settings.model import DataProductSettingValue
     from app.data_products.model import (
         DataProduct,
@@ -162,9 +161,6 @@ class OutputPort(Base, BaseORM, EventTrackedMixin):
     search_vector = Column(TSVECTOR)
     embeddings = deferred(Column(Vector(384)))
 
-    lifecycle_id: Mapped[UUID] = mapped_column(
-        ForeignKey("data_product_lifecycles.id", ondelete="SET NULL")
-    )
     data_product_id: Mapped[UUID] = mapped_column(ForeignKey("data_products.id"))
 
     assignments: Mapped[list["DatasetRoleAssignment"]] = relationship(
@@ -198,9 +194,6 @@ class OutputPort(Base, BaseORM, EventTrackedMixin):
         cascade="all, delete-orphan",
         order_by="DataProductSettingValue.output_port_id",
         lazy="raise",
-    )
-    lifecycle: Mapped["DataProductLifecycle"] = relationship(
-        back_populates="datasets", lazy="joined"
     )
     data_product: Mapped["DataProduct"] = relationship(
         back_populates="datasets", lazy="joined"
