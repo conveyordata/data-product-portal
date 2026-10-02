@@ -26,4 +26,8 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
+    op.execute(
+        "DELETE FROM events "
+        "WHERE subject_type = 'EXPLORATION' OR target_type = 'EXPLORATION'"
+    )
     op.execute("DELETE FROM event_reference_entities WHERE key = 'EXPLORATION'")
