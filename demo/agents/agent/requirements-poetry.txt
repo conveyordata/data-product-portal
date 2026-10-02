@@ -498,7 +498,6 @@ platformdirs==4.9.6 \
     # via
     #   findpython
     #   poetry
-    #   python-discovery
     #   virtualenv
 poetry==2.3.4 \
     --hash=sha256:2755806ed8a9f31340ea1b5f0e507da54c96437647ebf2873b6ca349be04e231 \
@@ -518,9 +517,9 @@ pyproject-hooks==1.2.0 \
     # via
     #   build
     #   poetry
-python-discovery==1.2.2 \
-    --hash=sha256:876e9c57139eb757cb5878cbdd9ae5379e5d96266c99ef731119e04fffe533bb \
-    --hash=sha256:e1ae95d9af875e78f15e19aed0c6137ab1bb49c200f21f5061786490c9585c7a
+python-discovery==1.6.1 \
+    --hash=sha256:cf87d3627dfb4412437fdd5b13eae402607722998d21567993aedbc59b23c15e \
+    --hash=sha256:d43fcdef879fe795352bd13ccf8d185ba5a9f86f36cfcd00529f596e737442b3
     # via virtualenv
 rapidfuzz==3.14.5 \
     --hash=sha256:0084b687b02b4e569b46d8d6d4ad25659528e6081cd6d067ca453a69035f07e4 \
@@ -642,9 +641,9 @@ urllib3==2.7.0 \
     # via
     #   dulwich
     #   requests
-virtualenv==21.2.4 \
-    --hash=sha256:29d21e941795206138d0f22f4e45ff7050e5da6c6472299fb7103318763861ac \
-    --hash=sha256:b294ef68192638004d72524ce7ef303e9d0cf5a44c95ce2e54a7500a6381cada
+virtualenv==21.7.13 \
+    --hash=sha256:0355558b6f33619aab31347e43643b0ebc97f61ea3acf617b2b69e1f8a843d11 \
+    --hash=sha256:1bea5af7463f59c4719db48fe739579a2a4f569c96f26c086edda85c96da9f59
     # via poetry
 zstandard==0.25.0 \
     --hash=sha256:011d388c76b11a0c165374ce660ce2c8efa8e5d87f34996aa80f9c0816698b64 \
