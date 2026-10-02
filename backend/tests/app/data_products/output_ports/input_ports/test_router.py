@@ -7,8 +7,10 @@ import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
 from httpx import Response
+from sqlalchemy import select
 
 from app.abstract_data_product.input_ports.enums import InputPortStatus
+from app.abstract_data_product.input_ports.model import InputPortRequest
 from app.abstract_data_product.type import AbstractDataProductType
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.roles.schema import Scope
@@ -16,7 +18,9 @@ from app.configuration.access_durations.enums import AccessDurationType
 from app.core.authz import REDACTION_VALUE, Action
 from app.data_products.model import DataProductVisibility
 from app.data_products.output_ports.enums import OutputPortAccessType
+from app.data_products.status import AbstractDataProductStatus
 from app.settings import settings
+from app.users.notifications.model import Notification
 from tests.factories import (
     AccessDurationFactory,
     DataProductFactory,
@@ -575,7 +579,7 @@ class TestInputPortsRouter:
         ],
     )
     def test_renew_output_port_as_input_port__regrants_access_and_keeps_history(
-        self, client, link_status, valid_until
+        self, client, session, link_status, valid_until
     ):
         link = self.create_link_with_status(
             link_status, request__valid_until=valid_until
@@ -583,11 +587,26 @@ class TestInputPortsRouter:
         data_product_id = link.output_port.data_product.id
         output_port_id = link.output_port.id
         consumer_id = link.consuming_abstract_data_product.id
+        previous_request_id, previous_decision = session.execute(
+            select(InputPortRequest.id, InputPortRequest.decision).where(
+                InputPortRequest.input_port_id == link.id
+            )
+        ).one()
 
         response = self.renew_output_port_as_input_port(
             client, data_product_id, output_port_id, consumer_id
         )
         assert response.status_code == 200, response.text
+
+        decisions = dict(
+            session.execute(
+                select(InputPortRequest.id, InputPortRequest.decision).where(
+                    InputPortRequest.input_port_id == link.id
+                )
+            ).all()
+        )
+        assert len(decisions) == 2
+        assert decisions[previous_request_id] == previous_decision
 
         input_port = client.get(
             DATA_PRODUCTS_DATASETS_ENDPOINT.format(data_product_id, output_port_id)
@@ -640,7 +659,7 @@ class TestInputPortsRouter:
         )
         assert input_port["renewal_status"] is None
 
-    def test_renew_output_port_as_input_port__hidden_consumer(self, client):
+    def test_renew_output_port_as_input_port__hidden_consumer(self, client, session):
         link = self.create_link_with_status(
             InputPortStatus.REVOKED,
             consumer=DataProductFactory(visibility=DataProductVisibility.HIDDEN),
@@ -652,6 +671,8 @@ class TestInputPortsRouter:
             link.consuming_abstract_data_product.id,
         )
         assert response.status_code == 200, response.text
+        session.refresh(link)
+        assert link.status == InputPortStatus.APPROVED
 
     def test_renew_output_port_as_input_port__pending_request(self, client):
         link = self.create_link_with_status(DecisionStatus.PENDING)
@@ -672,6 +693,60 @@ class TestInputPortsRouter:
             link.consuming_abstract_data_product.id,
         )
         assert response.status_code == 400, response.text
+
+    def test_renew_output_port_as_input_port__notifies_original_requester(
+        self, client, session
+    ):
+        requester = UserFactory()
+        link = self.create_link_with_status(
+            InputPortStatus.REVOKED, request__requested_by=requester
+        )
+        response = self.renew_output_port_as_input_port(
+            client,
+            link.output_port.data_product.id,
+            link.output_port.id,
+            link.consuming_abstract_data_product.id,
+        )
+        assert response.status_code == 200, response.text
+
+        notified = session.scalars(select(Notification.user_id)).all()
+        assert notified == [requester.id]
+
+    def test_renew_output_port_as_input_port__exploration(self, client, session):
+        link = self.create_link_with_status(
+            InputPortStatus.REVOKED, consumer=ExplorationFactory()
+        )
+        response = self.renew_output_port_as_input_port(
+            client,
+            link.output_port.data_product.id,
+            link.output_port.id,
+            link.consuming_abstract_data_product.id,
+        )
+        assert response.status_code == 200, response.text
+        session.refresh(link)
+        assert link.status == InputPortStatus.APPROVED
+
+    @pytest.mark.parametrize("deleting_side", ["consumer", "producer"])
+    def test_renew_output_port_as_input_port__pending_deletion(
+        self, client, deleting_side
+    ):
+        deleting = DataProductFactory(status=AbstractDataProductStatus.DELETING.value)
+        link = self.create_link_with_status(
+            InputPortStatus.REVOKED,
+            consumer=deleting if deleting_side == "consumer" else None,
+            output_port=(
+                OutputPortFactory(data_product=deleting)
+                if deleting_side == "producer"
+                else None
+            ),
+        )
+        response = self.renew_output_port_as_input_port(
+            client,
+            link.output_port.data_product.id,
+            link.output_port.id,
+            link.consuming_abstract_data_product.id,
+        )
+        assert response.status_code == 409, response.text
 
     def test_renew_output_port_as_input_port__no_role(self, client):
         link = InputPortFactory(status=InputPortStatus.REVOKED)

@@ -17,8 +17,8 @@ type Props = {
     t: TFunction;
     outputPortId: string;
     dataProductLinks: OutputPortInputPort[];
-    onRevokeDataProductDatasetLink: (name: string, consumingDataProductId: string) => void;
-    onRenewDataProductDatasetLink: (name: string, consumingDataProductId: string) => void;
+    onRevokeInputPort: (name: string, consumingDataProductId: string) => void;
+    onRenewInputPort: (name: string, consumingDataProductId: string) => void;
     isLoading?: boolean;
     expiringSoonThresholdDays: number;
     canApprove?: boolean;
@@ -29,8 +29,8 @@ type Props = {
 export const getConsumerColumns = ({
     t,
     dataProductLinks,
-    onRevokeDataProductDatasetLink,
-    onRenewDataProductDatasetLink,
+    onRevokeInputPort,
+    onRenewInputPort,
     canApprove,
     canRevoke,
     setReviewingOutputPortInputPortId,
@@ -145,10 +145,7 @@ export const getConsumerColumns = ({
                                     name: consuming_data_product.name,
                                 })}
                                 onConfirm={() =>
-                                    onRenewDataProductDatasetLink(
-                                        consuming_data_product.name,
-                                        consuming_data_product_id,
-                                    )
+                                    onRenewInputPort(consuming_data_product.name, consuming_data_product_id)
                                 }
                                 placement="leftTop"
                                 okText={t('Confirm')}
@@ -168,10 +165,7 @@ export const getConsumerColumns = ({
                                     name: consuming_data_product.name,
                                 })}
                                 onConfirm={() =>
-                                    onRevokeDataProductDatasetLink(
-                                        consuming_data_product.name,
-                                        consuming_data_product_id,
-                                    )
+                                    onRevokeInputPort(consuming_data_product.name, consuming_data_product_id)
                                 }
                                 placement="leftTop"
                                 okText={t('Confirm')}

@@ -199,6 +199,9 @@ class InputPortService:
             consuming_data_product_id,
             execution_options={"skip_data_product_visibility_filter": True},
         )
+        adp_service = AbstractDataProductService(self.db)
+        adp_service._ensure_not_deleting(current_link.consuming_abstract_data_product)
+        adp_service._ensure_not_deleting(current_link.output_port.data_product)
         if current_link.pending_request is not None:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -212,7 +215,7 @@ class InputPortService:
             )
 
         previous_request = current_link.latest_request
-        access_duration = AbstractDataProductService(self.db)._resolve_access_duration(
+        access_duration = adp_service._resolve_access_duration(
             current_link.consuming_abstract_data_product, current_link.output_port
         )
         now = datetime.now(timezone.utc)
@@ -229,6 +232,18 @@ class InputPortService:
         self.db.flush()
         self.approve_request(request, now=now, decided_by=actor)
 
+        self.posthog.capture(
+            distinct_id=actor.id,
+            event="Input Port Approved",
+            properties={
+                "data_product_id": str(data_product_id),
+                "output_port_id": str(output_port_id),
+                "consuming_data_product_id": str(consuming_data_product_id),
+                "type": str(
+                    current_link.consuming_abstract_data_product.abstract_data_product_type.value
+                ),
+            },
+        )
         return RedactedInputPort(
             output_port_id=current_link.output_port_id,
             consuming_abstract_data_product_id=current_link.consuming_abstract_data_product_id,

@@ -72,7 +72,7 @@ export function ConsumersTable({ outputPortId, dataProductId, dataProducts, isLo
         handlePaginationChange(pagination);
     };
 
-    const handleRevokeDatasetFromDataProduct = useCallback(
+    const handleRevokeInputPort = useCallback(
         async (consumingDataProductName: string, consumingDataProductId: string) => {
             try {
                 await revokeOutputPortAsInputPort({
@@ -98,7 +98,7 @@ export function ConsumersTable({ outputPortId, dataProductId, dataProducts, isLo
         [outputPortId, dataProductId, revokeOutputPortAsInputPort, t],
     );
 
-    const handleRenewDatasetForDataProduct = useCallback(
+    const handleRenewInputPort = useCallback(
         async (consumingDataProductName: string, consumingDataProductId: string) => {
             try {
                 await renewOutputPortAsInputPort({
@@ -129,8 +129,8 @@ export function ConsumersTable({ outputPortId, dataProductId, dataProducts, isLo
             t,
             outputPortId,
             dataProductLinks: dataProducts,
-            onRevokeDataProductDatasetLink: handleRevokeDatasetFromDataProduct,
-            onRenewDataProductDatasetLink: handleRenewDatasetForDataProduct,
+            onRevokeInputPort: handleRevokeInputPort,
+            onRenewInputPort: handleRenewInputPort,
             isLoading:
                 isRevokingOutputPortAsInputPort ||
                 isRenewingOutputPortAsInputPort ||
@@ -145,8 +145,8 @@ export function ConsumersTable({ outputPortId, dataProductId, dataProducts, isLo
         t,
         outputPortId,
         dataProducts,
-        handleRevokeDatasetFromDataProduct,
-        handleRenewDatasetForDataProduct,
+        handleRevokeInputPort,
+        handleRenewInputPort,
         isApprovingDataProductLink,
         isRevokingOutputPortAsInputPort,
         isRenewingOutputPortAsInputPort,
