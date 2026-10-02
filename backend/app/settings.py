@@ -109,6 +109,8 @@ class Settings(BaseSettings):
     TIME_BOUND_ACCESS_ENABLED: bool = True
     EXPIRING_SOON_THRESHOLD_DAYS: int = 14
 
+    MAX_ITEMS_PER_BATCH_REQUEST: int = 50
+
 
 class LogLevel(str, Enum):
     DEBUG = "DEBUG"

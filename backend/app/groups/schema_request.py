@@ -2,9 +2,8 @@ from uuid import UUID
 
 from pydantic import ConfigDict, Field, field_validator
 
+from app.settings import settings
 from app.shared.schema import ORMModel
-
-MAX_GROUP_MEMBERS_PER_REQUEST = 30
 
 
 class GroupCreate(ORMModel):
@@ -30,17 +29,17 @@ class GroupMembersRequest(ORMModel):
 
 class GroupMembersAdd(GroupMembersRequest):
     member_identity_ids: list[UUID] = Field(
-        min_length=1, max_length=MAX_GROUP_MEMBERS_PER_REQUEST
+        min_length=1, max_length=settings.MAX_ITEMS_PER_BATCH_REQUEST
     )
 
 
 class GroupMembersRemove(GroupMembersRequest):
     member_identity_ids: list[UUID] = Field(
-        min_length=1, max_length=MAX_GROUP_MEMBERS_PER_REQUEST
+        min_length=1, max_length=settings.MAX_ITEMS_PER_BATCH_REQUEST
     )
 
 
 class GroupMembersReplace(GroupMembersRequest):
     member_identity_ids: list[UUID] = Field(
-        min_length=1, max_length=MAX_GROUP_MEMBERS_PER_REQUEST
+        min_length=1, max_length=settings.MAX_ITEMS_PER_BATCH_REQUEST
     )
