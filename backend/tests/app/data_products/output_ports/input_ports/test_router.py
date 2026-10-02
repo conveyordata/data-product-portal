@@ -59,7 +59,9 @@ class TestInputPortsRouter:
             pytest.param(AbstractDataProductType.EXPLORATION, id="exploration"),
         ],
     )
-    def test_grant_output_port_access(self, client, session, consumer_type):
+    def test_grant_output_port_access__grants_access(
+        self, client, session, consumer_type
+    ):
         actor = UserFactory(external_id=settings.DEFAULT_USERNAME)
         output_port = OutputPortFactory()
         self.create_output_port_approver(actor, output_port)

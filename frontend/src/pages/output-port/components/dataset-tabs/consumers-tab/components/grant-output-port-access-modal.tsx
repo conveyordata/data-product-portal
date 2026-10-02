@@ -35,23 +35,20 @@ type Props = {
 export function GrantOutputPortAccessModal({ dataProductId, outputPortId, existingConsumerIds, onClose }: Props) {
     const { t } = useTranslation();
     const [form] = Form.useForm<FormValues>();
-    const consumerType = Form.useWatch('consumerType', form) ?? AbstractDataProductType.DataProducts;
+    const isDataProduct = Form.useWatch('consumerType', form) !== AbstractDataProductType.Explorations;
     const { data: { data_products: dataProducts = [] } = {}, isFetching: isFetchingDataProducts } =
-        useGetDataProductsQuery(AssignmentFilter.All, { skip: consumerType !== AbstractDataProductType.DataProducts });
+        useGetDataProductsQuery(AssignmentFilter.All, { skip: !isDataProduct });
     const { data: { explorations = [] } = {}, isFetching: isFetchingExplorations } = useGetExplorationsQuery(
         undefined,
-        {
-            skip: consumerType !== AbstractDataProductType.Explorations,
-        },
+        { skip: isDataProduct },
     );
     const { data: outputPort } = useGetOutputPortQuery({ dataProductId, id: outputPortId });
     const [grantOutputPortAccess, { isLoading }] = useGrantOutputPortAccessMutation();
 
     const consumerOptions = useMemo(() => {
-        const consumers =
-            consumerType === AbstractDataProductType.DataProducts
-                ? dataProducts.filter((consumer) => consumer.status !== DataProductStatus.Deleting)
-                : explorations.filter((consumer) => consumer.status !== ExplorationStatus.Deleting);
+        const consumers = isDataProduct
+            ? dataProducts.filter((consumer) => consumer.status !== DataProductStatus.Deleting)
+            : explorations.filter((consumer) => consumer.status !== ExplorationStatus.Deleting);
         return consumers
             .filter((consumer) => consumer.id !== dataProductId && !existingConsumerIds.includes(consumer.id))
             .map((consumer) => ({
@@ -59,7 +56,7 @@ export function GrantOutputPortAccessModal({ dataProductId, outputPortId, existi
                 label: consumer.name,
                 description: consumer.description,
             }));
-    }, [consumerType, dataProducts, explorations, dataProductId, existingConsumerIds]);
+    }, [isDataProduct, dataProducts, explorations, dataProductId, existingConsumerIds]);
 
     const onFinish = async (values: FormValues) => {
         try {
@@ -114,7 +111,7 @@ export function GrantOutputPortAccessModal({ dataProductId, outputPortId, existi
                 </Form.Item>
                 <Form.Item<FormValues>
                     name="consumerId"
-                    label={consumerType === AbstractDataProductType.DataProducts ? t('Data Product') : t('Exploration')}
+                    label={isDataProduct ? t('Data Product') : t('Exploration')}
                     rules={[{ required: true, message: t('Please select a consumer') }]}
                 >
                     <Select

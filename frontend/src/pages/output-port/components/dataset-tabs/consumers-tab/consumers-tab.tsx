@@ -34,7 +34,7 @@ export function ConsumersTab({ outputPortId, dataProductId }: Props) {
     });
     const [searchTerm, setSearchTerm] = useState<string>('');
     const [isGrantModalOpen, setIsGrantModalOpen] = useState(false);
-    const { data: approveAccess } = useCheckAccessQuery({
+    const { data: { allowed: canApproveAccess } = {} } = useCheckAccessQuery({
         resource: outputPortId,
         action: AuthorizationAction.OUTPUT_PORT__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
     });
@@ -50,7 +50,7 @@ export function ConsumersTab({ outputPortId, dataProductId }: Props) {
                     allowClear
                     onChange={(e) => setSearchTerm(e.target.value)}
                 />
-                {approveAccess?.allowed && (
+                {canApproveAccess && (
                     <Tooltip
                         title={t(
                             'You can use this to directly add a new consumer to this Output Port, this is the only way to add consumers to private Output Ports.',
