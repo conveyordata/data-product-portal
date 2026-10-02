@@ -96,6 +96,9 @@ export function GrantOutputPortAccessModal({ dataProductId, outputPortId, existi
                 layout="vertical"
                 initialValues={{ consumerType }}
                 onFinish={onFinish}
+                onFinishFailed={() =>
+                    dispatchMessage({ content: t('Please check for invalid form fields'), type: 'info' })
+                }
                 disabled={isLoading}
             >
                 <Form.Item<FormValues> name="consumerType" label={t('Consumer type')}>
