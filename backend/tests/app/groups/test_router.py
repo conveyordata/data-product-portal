@@ -601,7 +601,7 @@ class TestGroupMembershipRouter:
             json={
                 "member_identity_ids": [
                     str(uuid4())
-                    for _ in range(settings.MAX_GROUP_MEMBERS_PER_REQUEST + 1)
+                    for _ in range(settings.MAX_ITEMS_PER_BATCH_REQUEST + 1)
                 ]
             },
         )
@@ -618,7 +618,7 @@ class TestGroupMembershipRouter:
             json={
                 "member_identity_ids": [
                     str(uuid4())
-                    for _ in range(settings.MAX_GROUP_MEMBERS_PER_REQUEST + 1)
+                    for _ in range(settings.MAX_ITEMS_PER_BATCH_REQUEST + 1)
                 ]
             },
         )
@@ -635,7 +635,7 @@ class TestGroupMembershipRouter:
             json={
                 "member_identity_ids": [
                     str(uuid4())
-                    for _ in range(settings.MAX_GROUP_MEMBERS_PER_REQUEST + 1)
+                    for _ in range(settings.MAX_ITEMS_PER_BATCH_REQUEST + 1)
                 ]
             },
         )
