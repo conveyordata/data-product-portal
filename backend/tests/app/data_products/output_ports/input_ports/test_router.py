@@ -14,7 +14,7 @@ from app.authorization.roles.schema import Scope
 from app.configuration.access_durations.enums import AccessDurationType
 from app.core.authz import REDACTION_VALUE, Action
 from app.data_products.model import DataProductVisibility
-from app.data_products.output_ports.enums import OutputPortAccessType
+from app.data_products.output_ports.enums import OutputPortAccessFunction
 from app.settings import settings
 from tests.factories import (
     AccessDurationFactory,
@@ -112,7 +112,7 @@ class TestInputPortsRouter:
             permissions=[Action.DATA_PRODUCT__REQUEST_OUTPUT_PORT_ACCESS],
         )
         ds = OutputPortFactory(
-            access_type=OutputPortAccessType.RESTRICTED,
+            access_function=OutputPortAccessFunction.RESTRICTED,
             data_product_access_duration_type=AccessDurationType.TIME_BOUND,
         )
         AccessDurationFactory(
@@ -149,7 +149,7 @@ class TestInputPortsRouter:
             permissions=[Action.DATA_PRODUCT__REQUEST_OUTPUT_PORT_ACCESS],
         )
         ds = OutputPortFactory(
-            access_type=OutputPortAccessType.RESTRICTED,
+            access_function=OutputPortAccessFunction.RESTRICTED,
             data_product_access_duration_type=AccessDurationType.TIME_BOUND,
         )
         AccessDurationFactory(
@@ -223,7 +223,7 @@ class TestInputPortsRouter:
         self, client
     ):
         data_product = DataProductFactory()
-        ds = OutputPortFactory(access_type=OutputPortAccessType.PRIVATE)
+        ds = OutputPortFactory(access_function=OutputPortAccessFunction.PRIVATE)
 
         response = self.request_input_ports_for_data_product(
             client, data_product.id, [ds.id]
@@ -242,7 +242,7 @@ class TestInputPortsRouter:
             role_id=role.id,
             data_product_id=data_product.id,
         )
-        ds = OutputPortFactory(access_type=OutputPortAccessType.PRIVATE)
+        ds = OutputPortFactory(access_function=OutputPortAccessFunction.PRIVATE)
         role = RoleFactory(scope=Scope.DATASET)
         DatasetRoleAssignmentFactory(
             user_id=user.id, role_id=role.id, output_port_id=ds.id
@@ -1004,7 +1004,7 @@ class TestInputPortConsumptionTracking:
             role_id=role.id,
             data_product_id=data_product.id,
         )
-        ds = OutputPortFactory(access_type=OutputPortAccessType.UNRESTRICTED)
+        ds = OutputPortFactory(access_function=OutputPortAccessFunction.UNRESTRICTED)
 
         mock_posthog = MagicMock()
         with patch(
@@ -1037,7 +1037,7 @@ class TestInputPortConsumptionTracking:
             role_id=role.id,
             data_product_id=data_product.id,
         )
-        ds = OutputPortFactory(access_type=OutputPortAccessType.RESTRICTED)
+        ds = OutputPortFactory(access_function=OutputPortAccessFunction.RESTRICTED)
 
         mock_posthog = MagicMock()
         with patch(
@@ -1054,7 +1054,7 @@ class TestInputPortConsumptionTracking:
     def test_posthog_capture_called_on_manual_approval(self, client):
         """Manual approval of a pending link must fire a posthog event."""
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        ds = OutputPortFactory(access_type=OutputPortAccessType.RESTRICTED)
+        ds = OutputPortFactory(access_function=OutputPortAccessFunction.RESTRICTED)
         role = RoleFactory(
             scope=Scope.DATASET,
             permissions=[
@@ -1100,7 +1100,7 @@ class TestInputPortConsumptionTracking:
             role_id=role.id,
             data_product_id=data_product.id,
         )
-        ds = OutputPortFactory(access_type=OutputPortAccessType.UNRESTRICTED)
+        ds = OutputPortFactory(access_function=OutputPortAccessFunction.UNRESTRICTED)
 
         with patch(
             "app.core.logging.posthog_analytics.get_posthog_client",

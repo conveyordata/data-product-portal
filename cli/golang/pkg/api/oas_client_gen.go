@@ -132,6 +132,12 @@ type Invoker interface {
 	//
 	// POST /api/v2/data_products/{data_product_id}/output_ports
 	CreateOutputPort(ctx context.Context, request *CreateOutputPortRequest, params CreateOutputPortParams) (CreateOutputPortRes, error)
+	// CreateOutputPortAccessType invokes create_output_port_access_type operation.
+	//
+	// Create Output Port Access Type.
+	//
+	// POST /api/v2/configuration/output_port_access_types
+	CreateOutputPortAccessType(ctx context.Context, request *OutputPortAccessTypeCreate) (CreateOutputPortAccessTypeRes, error)
 	// CreateOutputPortRoleAssignment invokes create_output_port_role_assignment operation.
 	//
 	// Create Output Port Role Assignment.
@@ -420,6 +426,12 @@ type Invoker interface {
 	//
 	// GET /api/v2/data_products/{data_product_id}/output_ports/{id}/access_durations
 	GetOutputPortAccessDurations(ctx context.Context, params GetOutputPortAccessDurationsParams) (GetOutputPortAccessDurationsRes, error)
+	// GetOutputPortAccessTypes invokes get_output_port_access_types operation.
+	//
+	// Get Output Port Access Types.
+	//
+	// GET /api/v2/configuration/output_port_access_types
+	GetOutputPortAccessTypes(ctx context.Context, params GetOutputPortAccessTypesParams) (GetOutputPortAccessTypesRes, error)
 	// GetOutputPortCuratedQueries invokes get_output_port_curated_queries operation.
 	//
 	// Get Output Port Curated Queries.
@@ -690,6 +702,12 @@ type Invoker interface {
 	//
 	// DELETE /api/v2/data_products/{data_product_id}/output_ports/{id}
 	RemoveOutputPort(ctx context.Context, params RemoveOutputPortParams) (RemoveOutputPortRes, error)
+	// RemoveOutputPortAccessType invokes remove_output_port_access_type operation.
+	//
+	// Remove Output Port Access Type.
+	//
+	// DELETE /api/v2/configuration/output_port_access_types/{id}
+	RemoveOutputPortAccessType(ctx context.Context, params RemoveOutputPortAccessTypeParams) (RemoveOutputPortAccessTypeRes, error)
 	// RemoveOutputPortAsInputPort invokes remove_output_port_as_input_port operation.
 	//
 	// Remove Output Port As Input Port.
@@ -918,6 +936,12 @@ type Invoker interface {
 	//
 	// PUT /api/v2/data_products/{data_product_id}/output_ports/{id}/about
 	UpdateOutputPortAbout(ctx context.Context, request *OutputPortAboutUpdate, params UpdateOutputPortAboutParams) (UpdateOutputPortAboutRes, error)
+	// UpdateOutputPortAccessType invokes update_output_port_access_type operation.
+	//
+	// Update Output Port Access Type.
+	//
+	// PUT /api/v2/configuration/output_port_access_types/{id}
+	UpdateOutputPortAccessType(ctx context.Context, request *OutputPortAccessTypeUpdate, params UpdateOutputPortAccessTypeParams) (UpdateOutputPortAccessTypeRes, error)
 	// UpdateOutputPortQueryStats invokes update_output_port_query_stats operation.
 	//
 	// Update Output Port Query Stats.
@@ -2124,6 +2148,52 @@ func (c *Client) sendCreateOutputPort(ctx context.Context, request *CreateOutput
 	}()
 
 	result, err := decodeCreateOutputPortResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// CreateOutputPortAccessType invokes create_output_port_access_type operation.
+//
+// Create Output Port Access Type.
+//
+// POST /api/v2/configuration/output_port_access_types
+func (c *Client) CreateOutputPortAccessType(ctx context.Context, request *OutputPortAccessTypeCreate) (CreateOutputPortAccessTypeRes, error) {
+	res, err := c.sendCreateOutputPortAccessType(ctx, request)
+	return res, err
+}
+
+func (c *Client) sendCreateOutputPortAccessType(ctx context.Context, request *OutputPortAccessTypeCreate) (res CreateOutputPortAccessTypeRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/api/v2/configuration/output_port_access_types"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeCreateOutputPortAccessTypeRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeCreateOutputPortAccessTypeResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -5098,6 +5168,69 @@ func (c *Client) sendGetOutputPortAccessDurations(ctx context.Context, params Ge
 	}()
 
 	result, err := decodeGetOutputPortAccessDurationsResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetOutputPortAccessTypes invokes get_output_port_access_types operation.
+//
+// Get Output Port Access Types.
+//
+// GET /api/v2/configuration/output_port_access_types
+func (c *Client) GetOutputPortAccessTypes(ctx context.Context, params GetOutputPortAccessTypesParams) (GetOutputPortAccessTypesRes, error) {
+	res, err := c.sendGetOutputPortAccessTypes(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendGetOutputPortAccessTypes(ctx context.Context, params GetOutputPortAccessTypesParams) (res GetOutputPortAccessTypesRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/api/v2/configuration/output_port_access_types"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	q := uri.NewQueryEncoder()
+	{
+		// Encode "include_output_port_count" parameter.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "include_output_port_count",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.IncludeOutputPortCount.Get(); ok {
+				return e.EncodeValue(conv.BoolToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode query")
+		}
+	}
+	u.RawQuery = q.Values().Encode()
+
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeGetOutputPortAccessTypesResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -8238,6 +8371,67 @@ func (c *Client) sendRemoveOutputPort(ctx context.Context, params RemoveOutputPo
 	return result, nil
 }
 
+// RemoveOutputPortAccessType invokes remove_output_port_access_type operation.
+//
+// Remove Output Port Access Type.
+//
+// DELETE /api/v2/configuration/output_port_access_types/{id}
+func (c *Client) RemoveOutputPortAccessType(ctx context.Context, params RemoveOutputPortAccessTypeParams) (RemoveOutputPortAccessTypeRes, error) {
+	res, err := c.sendRemoveOutputPortAccessType(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendRemoveOutputPortAccessType(ctx context.Context, params RemoveOutputPortAccessTypeParams) (res RemoveOutputPortAccessTypeRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [2]string
+	pathParts[0] = "/api/v2/configuration/output_port_access_types/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "DELETE", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeRemoveOutputPortAccessTypeResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // RemoveOutputPortAsInputPort invokes remove_output_port_as_input_port operation.
 //
 // Remove Output Port As Input Port.
@@ -10859,6 +11053,70 @@ func (c *Client) sendUpdateOutputPortAbout(ctx context.Context, request *OutputP
 	}()
 
 	result, err := decodeUpdateOutputPortAboutResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// UpdateOutputPortAccessType invokes update_output_port_access_type operation.
+//
+// Update Output Port Access Type.
+//
+// PUT /api/v2/configuration/output_port_access_types/{id}
+func (c *Client) UpdateOutputPortAccessType(ctx context.Context, request *OutputPortAccessTypeUpdate, params UpdateOutputPortAccessTypeParams) (UpdateOutputPortAccessTypeRes, error) {
+	res, err := c.sendUpdateOutputPortAccessType(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendUpdateOutputPortAccessType(ctx context.Context, request *OutputPortAccessTypeUpdate, params UpdateOutputPortAccessTypeParams) (res UpdateOutputPortAccessTypeRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [2]string
+	pathParts[0] = "/api/v2/configuration/output_port_access_types/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "PUT", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeUpdateOutputPortAccessTypeRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeUpdateOutputPortAccessTypeResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

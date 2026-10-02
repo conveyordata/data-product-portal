@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDebouncedCallback } from 'use-debounce';
 import { AbstractProductIcon } from '@/components/icons/index.tsx';
+import { SettingsSectionHeader } from '@/pages/settings/components/settings-tabs/components/settings-section-header/settings-section-header.component.tsx';
 import {
     AbstractDataProductType,
     type AccessDuration,
@@ -210,11 +211,11 @@ export default function AccessDurations() {
     ];
 
     return (
-        <Flex vertical gap="small">
-            <Typography.Title level={3}>{t('Access Durations')}</Typography.Title>
-            <Typography.Text type="secondary">
-                {t('Configure default access durations for Input Ports.')}
-            </Typography.Text>
+        <Flex vertical gap="middle">
+            <SettingsSectionHeader
+                title={t('Access Durations')}
+                description={t('Configure default access durations for Input Ports.')}
+            />
             <Table<ConsumerPolicy>
                 columns={columns}
                 dataSource={policies}

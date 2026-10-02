@@ -16,6 +16,9 @@ from app.configuration.data_product_settings.router import (
 from app.configuration.data_product_types.router import router as data_product_type
 from app.configuration.domains.router import router as domain
 from app.configuration.environments.router import router as environment
+from app.configuration.output_port_access_types.router import (
+    router as output_port_access_type,
+)
 from app.configuration.platforms.router import router as platform
 from app.configuration.tags.router import router as tag
 from app.configuration.theme_settings.router import router as theme_settings
@@ -50,6 +53,7 @@ router.include_router(dataset)
 router.include_router(data_product)
 router.include_router(data_product_type)
 router.include_router(data_product_lifecycle)
+router.include_router(output_port_access_type)
 router.include_router(data_product_setting)
 router.include_router(access_modes)
 router.include_router(data_product_dataset)

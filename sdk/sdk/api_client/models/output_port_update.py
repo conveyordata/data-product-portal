@@ -8,7 +8,6 @@ from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..models.access_duration_type import AccessDurationType
-from ..models.output_port_access_type import OutputPortAccessType
 from ..types import UNSET, Unset
 
 T = TypeVar("T", bound="OutputPortUpdate")
@@ -21,7 +20,7 @@ class OutputPortUpdate:
         name (str):
         namespace (str):
         description (str):
-        access_type (OutputPortAccessType):
+        access_type_id (UUID):
         data_product_access_duration_type (AccessDurationType):
         exploration_access_duration_type (AccessDurationType):
         tag_ids (list[UUID]):
@@ -32,7 +31,7 @@ class OutputPortUpdate:
     name: str
     namespace: str
     description: str
-    access_type: OutputPortAccessType
+    access_type_id: UUID
     data_product_access_duration_type: AccessDurationType
     exploration_access_duration_type: AccessDurationType
     tag_ids: list[UUID]
@@ -47,7 +46,7 @@ class OutputPortUpdate:
 
         description = self.description
 
-        access_type = self.access_type.value
+        access_type_id = str(self.access_type_id)
 
         data_product_access_duration_type = self.data_product_access_duration_type.value
 
@@ -79,7 +78,7 @@ class OutputPortUpdate:
                 "name": name,
                 "namespace": namespace,
                 "description": description,
-                "access_type": access_type,
+                "access_type_id": access_type_id,
                 "data_product_access_duration_type": data_product_access_duration_type,
                 "exploration_access_duration_type": exploration_access_duration_type,
                 "tag_ids": tag_ids,
@@ -101,7 +100,7 @@ class OutputPortUpdate:
 
         description = d.pop("description")
 
-        access_type = OutputPortAccessType(d.pop("access_type"))
+        access_type_id = UUID(d.pop("access_type_id"))
 
         data_product_access_duration_type = AccessDurationType(
             d.pop("data_product_access_duration_type")
@@ -148,7 +147,7 @@ class OutputPortUpdate:
             name=name,
             namespace=namespace,
             description=description,
-            access_type=access_type,
+            access_type_id=access_type_id,
             data_product_access_duration_type=data_product_access_duration_type,
             exploration_access_duration_type=exploration_access_duration_type,
             tag_ids=tag_ids,

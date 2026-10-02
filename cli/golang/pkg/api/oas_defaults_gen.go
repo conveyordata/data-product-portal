@@ -155,6 +155,22 @@ func (s *GetDataProductsResponseItem) setDefaults() {
 }
 
 // setDefaults set default value of fields.
+func (s *OutputPortAccessTypeCreate) setDefaults() {
+	{
+		val := string("")
+		s.Description.SetTo(val)
+	}
+}
+
+// setDefaults set default value of fields.
+func (s *OutputPortAccessTypeUpdate) setDefaults() {
+	{
+		val := string("")
+		s.Description.SetTo(val)
+	}
+}
+
+// setDefaults set default value of fields.
 func (s *OutputPortSchemaResponse) setDefaults() {
 	{
 		var defaultVal0 []SchemaObjectResponse

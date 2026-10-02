@@ -217,7 +217,15 @@ export type AbstractDataProductInfo = {
   is_redacted: boolean;
 };
 export type OutputPortStatus = "pending" | "active" | "archived";
-export type OutputPortAccessType = "restricted" | "private" | "unrestricted";
+export type OutputPortAccessFunction =
+  | "restricted"
+  | "private"
+  | "unrestricted";
+export type OutputPortAccessType = {
+  id: string;
+  name: string;
+  access_function: OutputPortAccessFunction;
+};
 export type Tag = {
   id: string;
   value: string;

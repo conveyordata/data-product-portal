@@ -19,7 +19,7 @@ from app.core.authz import Action
 from app.core.authz.authorization import Authorization
 from app.core.context import _pending_events
 from app.core.webhooks.events import V2Event
-from app.data_products.output_ports.enums import OutputPortAccessType
+from app.data_products.output_ports.enums import OutputPortAccessFunction
 from app.database.database import Base, get_system_db_session
 from app.main import app
 from app.settings import settings
@@ -30,6 +30,7 @@ from tests.factories.role_assignment_global import GlobalRoleAssignmentFactory
 from . import TestingSessionLocal
 from .factories.data_product_type import DataProductTypeFactory
 from .factories.domain import DomainFactory
+from .factories.output_port_access_type import OutputPortAccessTypeFactory
 from .factories.user import UserFactory
 
 
@@ -143,21 +144,6 @@ def default_data_product_payload() -> dict[str, Any]:
     }
 
 
-@pytest.fixture
-def default_dataset_payload() -> dict[str, Any]:
-    user = UserFactory()
-    domain = DomainFactory()
-    return {
-        "name": "Test Dataset",
-        "description": "Test Description",
-        "namespace": "test-dataset",
-        "tags": [],
-        "owners": [str(user.id)],
-        "access_type": OutputPortAccessType.RESTRICTED,
-        "domain_id": str(domain.id),
-    }
-
-
 @pytest.fixture(autouse=True)
 def clear_db(session: Session) -> None:
     """Clear database after each test."""
@@ -173,6 +159,12 @@ def clear_db(session: Session) -> None:
     AuthorizationService(session).reload_enforcer()
     session.commit()  # noqa: allow-commit
     reset_unique_fakers()
+
+
+@pytest.fixture(autouse=True)
+def default_output_port_access_types(clear_db: None) -> None:
+    for access_function in OutputPortAccessFunction:
+        OutputPortAccessTypeFactory(access_function=access_function)
 
 
 @pytest.fixture

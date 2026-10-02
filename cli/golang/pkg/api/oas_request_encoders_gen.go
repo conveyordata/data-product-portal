@@ -224,6 +224,20 @@ func encodeCreateOutputPortRequest(
 	return nil
 }
 
+func encodeCreateOutputPortAccessTypeRequest(
+	req *OutputPortAccessTypeCreate,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
 func encodeCreateOutputPortRoleAssignmentRequest(
 	req *CreateOutputPortRoleAssignment,
 	r *http.Request,
@@ -779,6 +793,20 @@ func encodeUpdateOutputPortRequest(
 
 func encodeUpdateOutputPortAboutRequest(
 	req *OutputPortAboutUpdate,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeUpdateOutputPortAccessTypeRequest(
+	req *OutputPortAccessTypeUpdate,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
