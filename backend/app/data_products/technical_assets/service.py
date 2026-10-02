@@ -27,6 +27,7 @@ from app.data_products.output_port_technical_assets_link.model import (
 from app.data_products.output_ports.model import OutputPort as OutputPortModel
 from app.data_products.output_ports.model import ensure_output_port_exists
 from app.data_products.output_ports.service import OutputPortService
+from app.data_products.schema import DataProduct
 from app.data_products.service import DataProductService
 from app.data_products.technical_assets.enums import TechnicalMapping
 from app.data_products.technical_assets.model import (
@@ -179,7 +180,9 @@ class TechnicalAssetService:
             )
 
         if technical_asset.technical_mapping == TechnicalMapping.Default:
-            data_product = self.db.get(DataProductModel, data_product_id)
+            data_product = DataProduct.model_validate(
+                self.db.get(DataProductModel, data_product_id)
+            )
             technical_asset.configuration.validate_configuration(data_product, self.db)
 
         technical_asset_schema = technical_asset.parse_pydantic_schema()

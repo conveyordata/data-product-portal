@@ -24,14 +24,15 @@ query($endCursor: String) {
 releases=$(gh release list -R "$REPO" --limit 100 --json tagName,publishedAt \
   --jq "[.[] | select(.publishedAt >= \"$SINCE\")]")
 
-jq -rn --arg since "$SINCE" --argjson prs "$prs" --argjson bugs "$bugs" --argjson releases "$releases" --argjson threads "$threads" '
+printf '%s\n' "$prs" "$bugs" "$releases" "$threads" | jq -rn --arg since "$SINCE" '
 def hours(a; b): ((b | fromdate) - (a | fromdate)) / 3600;
 def median: sort | length as $n | if $n == 0 then null elif $n % 2 == 1 then .[$n / 2 | floor] else (.[$n / 2 - 1] + .[$n / 2]) / 2 end;
 def fmt: if . == null then "-" else (. * 10 | round / 10 | tostring) end;
 def agent: .author.login | test("copilot|claude"; "i");
 def first_review: [.reviews[] | select(.author.login | test("copilot"; "i") | not) | .submittedAt] | min;
 
-($since[0:7]) as $first
+(input) as $prs | (input) as $bugs | (input) as $releases | (input) as $threads
+| ($since[0:7]) as $first
 | ($prs | map(select(.createdAt[0:7] >= $first) | . + {month: .createdAt[0:7]})) as $opened
 | ($prs | map(select(.mergedAt and .mergedAt[0:7] >= $first) | . + {month: .mergedAt[0:7]})) as $merged
 | ([$opened[].month, $merged[].month] | unique | map(. as $m

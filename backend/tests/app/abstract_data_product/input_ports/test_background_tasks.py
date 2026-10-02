@@ -2,9 +2,24 @@ import asyncio
 from datetime import date, timedelta
 from unittest.mock import AsyncMock, patch
 
-from app.abstract_data_product.input_ports.background_tasks import expire_input_ports
+from sqlalchemy import func, select
+
+from app.abstract_data_product.input_ports.background_tasks import (
+    EXPIRY_LOCK_KEY,
+    expire_input_ports,
+)
 from app.abstract_data_product.input_ports.enums import InputPortStatus
-from tests.factories import InputPortFactory
+from app.core.auth.auth import SYSTEM_ACCOUNT_BOT_EXTERNAL_ID
+from app.events.enums import EventReferenceEntity, EventType
+from app.events.model import Event
+from app.users.notifications.model import Notification
+from tests import engine
+from tests.factories import (
+    DataProductRoleAssignmentFactory,
+    InputPortFactory,
+    RoleFactory,
+    UserFactory,
+)
 
 TODAY = date.today()
 
@@ -37,10 +52,27 @@ class TestExpireInputPorts:
         assert events[0].event_type() == "input_port.event"
         assert events[0].id == link.id
 
+    def test_expire_input_ports__skips_when_another_instance_holds_the_lock(
+        self, session
+    ):
+        link = InputPortFactory(
+            status=InputPortStatus.APPROVED,
+            request__valid_until=TODAY - timedelta(days=1),
+            request__decided_by=None,
+        )
+
+        with engine.connect() as other, _mock_emit() as mock_emit:
+            other.execute(select(func.pg_advisory_xact_lock(EXPIRY_LOCK_KEY)))
+            asyncio.run(expire_input_ports(session))
+
+        session.refresh(link)
+        assert link.status == InputPortStatus.APPROVED
+        mock_emit.assert_not_awaited()
+
     def test_expire_input_ports__active_grant_is_untouched(self, session):
         link = InputPortFactory(
             status=InputPortStatus.APPROVED,
-            request__valid_until=TODAY + timedelta(days=10),
+            request__valid_until=TODAY + timedelta(days=20),
             request__decided_by=None,
         )
 
@@ -74,3 +106,40 @@ class TestExpireInputPorts:
         session.refresh(link)
         assert link.status == InputPortStatus.PENDING
         mock_emit.assert_awaited_once_with([])
+
+    def test_expire_input_ports__expiring_soon_grant_creates_consumer_notifications_once(
+        self, session
+    ):
+        system_user = UserFactory(external_id=SYSTEM_ACCOUNT_BOT_EXTERNAL_ID)
+        requester = UserFactory()
+        consumer = UserFactory()
+        link = InputPortFactory(
+            status=InputPortStatus.APPROVED,
+            request__requested_by=requester,
+            request__valid_until=TODAY + timedelta(days=10),
+            request__decided_by=None,
+        )
+        DataProductRoleAssignmentFactory(
+            data_product_id=link.consuming_abstract_data_product_id,
+            identity_id=consumer.id,
+            role_id=RoleFactory().id,
+        )
+
+        with _mock_emit():
+            asyncio.run(expire_input_ports(session))
+            asyncio.run(expire_input_ports(session))
+
+        notifications = session.scalars(select(Notification)).all()
+        assert {notification.user_id for notification in notifications} == {
+            requester.id,
+            consumer.id,
+        }
+        events = session.scalars(
+            select(Event).where(Event.name == EventType.INPUT_PORT_EXPIRING_SOON)
+        ).all()
+        assert len(events) == 1
+        assert events[0].actor_id == system_user.id
+        assert events[0].subject_id == link.output_port_id
+        assert events[0].subject_type == EventReferenceEntity.DATASET
+        assert events[0].target_id == link.consuming_abstract_data_product_id
+        assert events[0].target_type == EventReferenceEntity.DATA_PRODUCT

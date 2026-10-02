@@ -121,10 +121,11 @@ else:
     ) -> User:
         if "@" not in token.sub:
             raise Exception("Default username must be an email address")
+        name, _, family_name = token.sub.split("@")[0].partition(".")
         oidc_user = OIDCIdentity(
             sub=token.sub,
-            name=token.sub.split(".")[0],
-            family_name=token.sub.split("@")[0].split(".")[1],
+            name=name,
+            family_name=family_name,
             email=token.sub,
             username=token.sub,
         )

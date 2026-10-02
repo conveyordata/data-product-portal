@@ -162,6 +162,12 @@ export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallback
         }
     };
 
+    const onSubmitFailed: FormProps<CreateTechnicalAssetRequest>['onFinishFailed'] = ({ errorFields }) => {
+        if (errorFields.length > 0) {
+            form.scrollToField(errorFields[0].name, { focus: true });
+        }
+    };
+
     const onDataPlatformClick = (dropdown: CustomDropdownItemProps<string>) => {
         if (selectedDataPlatform !== dropdown) {
             form.setFieldsValue({ configuration: undefined, result: undefined });
@@ -254,6 +260,7 @@ export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallback
             ref={formRef}
             layout="vertical"
             onFinish={onSubmit}
+            onFinishFailed={onSubmitFailed}
             onValuesChange={onValuesChange}
             autoComplete="off"
             labelWrap
