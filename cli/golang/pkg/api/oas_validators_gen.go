@@ -3074,7 +3074,7 @@ func (s *GroupMembersAdd) Validate() error {
 		if err := (validate.Array{
 			MinLength:    1,
 			MinLengthSet: true,
-			MaxLength:    30,
+			MaxLength:    50,
 			MaxLengthSet: true,
 		}).ValidateLength(len(s.MemberIdentityIds)); err != nil {
 			return errors.Wrap(err, "array")
@@ -3105,7 +3105,7 @@ func (s *GroupMembersRemove) Validate() error {
 		if err := (validate.Array{
 			MinLength:    1,
 			MinLengthSet: true,
-			MaxLength:    30,
+			MaxLength:    50,
 			MaxLengthSet: true,
 		}).ValidateLength(len(s.MemberIdentityIds)); err != nil {
 			return errors.Wrap(err, "array")
@@ -3136,7 +3136,7 @@ func (s *GroupMembersReplace) Validate() error {
 		if err := (validate.Array{
 			MinLength:    1,
 			MinLengthSet: true,
-			MaxLength:    30,
+			MaxLength:    50,
 			MaxLengthSet: true,
 		}).ValidateLength(len(s.MemberIdentityIds)); err != nil {
 			return errors.Wrap(err, "array")

@@ -13909,7 +13909,7 @@
               "format": "uuid"
             },
             "type": "array",
-            "maxItems": 30,
+            "maxItems": 50,
             "minItems": 1,
             "title": "Member Identity Ids"
           }
@@ -13928,7 +13928,7 @@
               "format": "uuid"
             },
             "type": "array",
-            "maxItems": 30,
+            "maxItems": 50,
             "minItems": 1,
             "title": "Member Identity Ids"
           }
@@ -13947,7 +13947,7 @@
               "format": "uuid"
             },
             "type": "array",
-            "maxItems": 30,
+            "maxItems": 50,
             "minItems": 1,
             "title": "Member Identity Ids"
           }

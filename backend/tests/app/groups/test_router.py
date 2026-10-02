@@ -5,8 +5,8 @@ from uuid import uuid4
 import pytest
 
 from app.groups.router import _serialize_group_members_replacement
-from app.groups.schema_request import MAX_GROUP_MEMBERS_PER_REQUEST
 from app.groups.service import GroupService
+from app.settings import settings
 from tests.factories import (
     GroupFactory,
     GroupMembershipFactory,
@@ -600,7 +600,8 @@ class TestGroupMembershipRouter:
             f"{ENDPOINT}/{group.id}/members",
             json={
                 "member_identity_ids": [
-                    str(uuid4()) for _ in range(MAX_GROUP_MEMBERS_PER_REQUEST + 1)
+                    str(uuid4())
+                    for _ in range(settings.MAX_GROUP_MEMBERS_PER_REQUEST + 1)
                 ]
             },
         )
@@ -616,7 +617,8 @@ class TestGroupMembershipRouter:
             f"{ENDPOINT}/{group.id}/members",
             json={
                 "member_identity_ids": [
-                    str(uuid4()) for _ in range(MAX_GROUP_MEMBERS_PER_REQUEST + 1)
+                    str(uuid4())
+                    for _ in range(settings.MAX_GROUP_MEMBERS_PER_REQUEST + 1)
                 ]
             },
         )
@@ -632,7 +634,8 @@ class TestGroupMembershipRouter:
             f"{ENDPOINT}/{group.id}/members",
             json={
                 "member_identity_ids": [
-                    str(uuid4()) for _ in range(MAX_GROUP_MEMBERS_PER_REQUEST + 1)
+                    str(uuid4())
+                    for _ in range(settings.MAX_GROUP_MEMBERS_PER_REQUEST + 1)
                 ]
             },
         )
