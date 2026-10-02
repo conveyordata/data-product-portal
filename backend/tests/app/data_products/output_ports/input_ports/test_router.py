@@ -22,10 +22,14 @@ from app.configuration.access_durations.enums import AccessDurationType
 from app.core.authz import REDACTION_VALUE, Action
 from app.data_products.model import DataProductVisibility
 from app.data_products.output_ports.enums import OutputPortAccessFunction
+from app.data_products.status import AbstractDataProductStatus
+from app.events.enums import EventReferenceEntity, EventType
+from app.events.model import Event
 from app.settings import settings
 from app.users.notifications.model import Notification
 from tests.factories import (
     AccessDurationFactory,
+    AccessModeFactory,
     DataProductFactory,
     DataProductRoleAssignmentFactory,
     DatasetRoleAssignmentFactory,
@@ -33,6 +37,8 @@ from tests.factories import (
     InputPortFactory,
     OutputPortFactory,
     RoleFactory,
+    TechnicalAssetFactory,
+    TechnicalAssetOutputPortAssociationFactory,
     UserFactory,
 )
 
@@ -56,15 +62,9 @@ class TestInputPortsRouter:
     def test_grant_output_port_access(self, client, session, consumer_type):
         actor = UserFactory(external_id=settings.DEFAULT_USERNAME)
         output_port = OutputPortFactory()
-        role = RoleFactory(
-            scope=Scope.DATASET,
-            permissions=[Action.OUTPUT_PORT__APPROVE_DATAPRODUCT_ACCESS_REQUEST],
-        )
-        DatasetRoleAssignmentFactory(
-            user_id=actor.id,
-            role_id=role.id,
-            output_port_id=output_port.id,
-        )
+        self.create_output_port_approver(actor, output_port)
+        co_owner = UserFactory()
+        self.create_output_port_approver(co_owner, output_port)
 
         consumer_id, consumer_owner_id = self.create_output_port_access_consumer(
             consumer_type
@@ -88,13 +88,12 @@ class TestInputPortsRouter:
         )
         assert input_port.status == InputPortStatus.APPROVED
         assert input_port.current_request.decision == InputPortRequestDecision.APPROVED
-        assert input_port.current_request.requested_by_id == consumer_owner_id
+        assert input_port.current_request.requested_by_id == actor.id
         assert input_port.current_request.decided_by_id == actor.id
         assert input_port.current_request.justification == "Needed for reporting"
         assert input_port.current_request.valid_until is None
-        assert session.scalar(
-            select(Notification).where(Notification.user_id == consumer_owner_id)
-        )
+        notified_user_ids = set(session.scalars(select(Notification.user_id)))
+        assert notified_user_ids == {consumer_owner_id, co_owner.id}
 
     @staticmethod
     def create_output_port_access_consumer(consumer_type: AbstractDataProductType):
@@ -115,7 +114,32 @@ class TestInputPortsRouter:
 
         raise ValueError(f"Invalid consumer type: {consumer_type}")
 
-    def test_grant_output_port_access_requires_permission(self, client):
+    def test_grant_output_port_access__notifies_shared_member_once(
+        self, client, session
+    ):
+        actor = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        output_port = OutputPortFactory()
+        self.create_output_port_approver(actor, output_port)
+        shared_member = UserFactory()
+        self.create_output_port_approver(shared_member, output_port)
+        consumer = DataProductFactory()
+        DataProductRoleAssignmentFactory(
+            identity_id=shared_member.id,
+            data_product_id=consumer.id,
+            role_id=RoleFactory.data_product_owner().id,
+        )
+
+        response = self.grant_output_port_access(
+            client,
+            output_port.data_product_id,
+            output_port.id,
+            consumer.id,
+        )
+
+        assert response.status_code == 200, response.text
+        assert session.scalars(select(Notification.user_id)).all() == [shared_member.id]
+
+    def test_grant_output_port_access__requires_permission(self, client):
         output_port = OutputPortFactory()
         consumer = DataProductFactory()
 
@@ -128,52 +152,129 @@ class TestInputPortsRouter:
 
         assert response.status_code == 403
 
-    def test_grant_output_port_access_requires_data_product_user_owner(self, client):
+    @pytest.mark.parametrize(
+        ("existing_status", "request_kwargs"),
+        [
+            (InputPortStatus.DENIED, {}),
+            (InputPortStatus.REVOKED, {}),
+            (InputPortStatus.CANCELLED, {}),
+            (
+                InputPortStatus.EXPIRED,
+                {"request__valid_until": date.today() - timedelta(days=1)},
+            ),
+        ],
+    )
+    def test_grant_output_port_access__overrides_inactive_input_port(
+        self, client, session, existing_status, request_kwargs
+    ):
         actor = UserFactory(external_id=settings.DEFAULT_USERNAME)
         output_port = OutputPortFactory()
-        role = RoleFactory(
-            scope=Scope.DATASET,
-            permissions=[Action.OUTPUT_PORT__APPROVE_DATAPRODUCT_ACCESS_REQUEST],
-        )
-        DatasetRoleAssignmentFactory(
-            user_id=actor.id,
-            role_id=role.id,
-            output_port_id=output_port.id,
+        self.create_output_port_approver(actor, output_port)
+        existing = InputPortFactory(
+            output_port=output_port, status=existing_status, **request_kwargs
         )
 
         response = self.grant_output_port_access(
             client,
             output_port.data_product_id,
             output_port.id,
-            DataProductFactory().id,
+            existing.consuming_abstract_data_product_id,
+        )
+
+        assert response.status_code == 200, response.text
+        session.expire_all()
+        input_ports = session.scalars(
+            select(InputPort)
+            .where(InputPort.output_port_id == output_port.id)
+            .options(selectinload(InputPort.requests))
+        ).all()
+        assert [input_port.id for input_port in input_ports] == [existing.id]
+        assert input_ports[0].status == InputPortStatus.APPROVED
+        assert len(input_ports[0].requests) == 2
+
+    @pytest.mark.parametrize(
+        "existing_status", [InputPortStatus.APPROVED, InputPortStatus.PENDING]
+    )
+    def test_grant_output_port_access__rejects_active_or_pending_input_port(
+        self, client, existing_status
+    ):
+        actor = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        output_port = OutputPortFactory()
+        self.create_output_port_approver(actor, output_port)
+        existing = InputPortFactory(output_port=output_port, status=existing_status)
+
+        response = self.grant_output_port_access(
+            client,
+            output_port.data_product_id,
+            output_port.id,
+            existing.consuming_abstract_data_product_id,
+        )
+
+        assert response.status_code == 400
+
+    def test_grant_output_port_access__rejects_deleting_consumer(self, client):
+        actor = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        output_port = OutputPortFactory()
+        self.create_output_port_approver(actor, output_port)
+        consumer = DataProductFactory(status=AbstractDataProductStatus.DELETING)
+
+        response = self.grant_output_port_access(
+            client, output_port.data_product_id, output_port.id, consumer.id
         )
 
         assert response.status_code == 409
-        assert (
-            response.json()["detail"]
-            == "Cannot grant access to a data product without a user owner"
+
+    @pytest.mark.parametrize(
+        ("access_mode_id", "expected_status"),
+        [
+            pytest.param(None, 400, id="missing"),
+            pytest.param("00000000-0000-0000-0000-000000000000", 400, id="unknown"),
+            pytest.param("valid", 200, id="valid"),
+        ],
+    )
+    def test_grant_output_port_access__validates_access_mode(
+        self, client, session, access_mode_id, expected_status
+    ):
+        actor = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        output_port = OutputPortFactory()
+        self.create_output_port_approver(actor, output_port)
+        access_mode = AccessModeFactory()
+        TechnicalAssetOutputPortAssociationFactory(
+            output_port=output_port,
+            technical_asset=TechnicalAssetFactory(
+                owner=output_port.data_product, access_modes=[access_mode]
+            ),
+        )
+        consumer = DataProductFactory()
+
+        response = self.grant_output_port_access(
+            client,
+            output_port.data_product_id,
+            output_port.id,
+            consumer.id,
+            access_mode_id=access_mode.id
+            if access_mode_id == "valid"
+            else access_mode_id,
         )
 
-    def test_grant_output_port_access_rejects_wrong_producing_data_product(
+        assert response.status_code == expected_status, response.text
+        if expected_status == 400:
+            assert "access mode" in response.json()["detail"]
+        else:
+            input_port = session.scalar(
+                select(InputPort)
+                .where(InputPort.consuming_abstract_data_product_id == consumer.id)
+                .options(selectinload(InputPort.requests))
+            )
+            assert input_port.current_request.access_mode_id == access_mode.id
+
+    def test_grant_output_port_access__rejects_wrong_producing_data_product(
         self, client
     ):
         actor = UserFactory(external_id=settings.DEFAULT_USERNAME)
         output_port = OutputPortFactory()
-        role = RoleFactory(
-            scope=Scope.DATASET,
-            permissions=[Action.OUTPUT_PORT__APPROVE_DATAPRODUCT_ACCESS_REQUEST],
-        )
-        DatasetRoleAssignmentFactory(
-            user_id=actor.id,
-            role_id=role.id,
-            output_port_id=output_port.id,
-        )
+        self.create_output_port_approver(actor, output_port)
         consumer = DataProductFactory()
-        DataProductRoleAssignmentFactory(
-            identity_id=UserFactory().id,
-            data_product_id=consumer.id,
-            role_id=RoleFactory.data_product_owner().id,
-        )
 
         response = self.grant_output_port_access(
             client,
@@ -548,6 +649,32 @@ class TestInputPortsRouter:
         )
         assert response.status_code == 200, response.text
 
+    def test_revoke_output_port_as_input_port__hidden_consumer(self, client):
+        link = self.create_link_with_status(
+            DecisionStatus.APPROVED,
+            consumer=DataProductFactory(visibility=DataProductVisibility.HIDDEN),
+        )
+        response = self.revoke_output_port_as_input_port(
+            client,
+            link.output_port.data_product.id,
+            link.output_port.id,
+            link.consuming_abstract_data_product.id,
+        )
+        assert response.status_code == 200, response.text
+
+    def test_remove_output_port_as_input_port__hidden_consumer(self, client):
+        link = self.create_link_with_status(
+            DecisionStatus.APPROVED,
+            consumer=DataProductFactory(visibility=DataProductVisibility.HIDDEN),
+        )
+        response = self.remove_output_port_as_input_port(
+            client,
+            link.output_port.data_product.id,
+            link.output_port.id,
+            link.consuming_abstract_data_product.id,
+        )
+        assert response.status_code == 200, response.text
+
     def test_approve_output_port_as_input_port_reasoning(self, client):
         link = self.create_link_with_status()
         response = self.approve_output_port_as_input_port(
@@ -693,6 +820,32 @@ class TestInputPortsRouter:
             link.consuming_abstract_data_product.id,
         )
         assert response.status_code == 200, response.text
+
+    def test_revoke_output_port_as_input_port__exploration_notifies_owner(
+        self, client, session
+    ):
+        exploration = ExplorationFactory()
+        link = self.create_link_with_status(
+            DecisionStatus.APPROVED, consumer=exploration
+        )
+
+        response = self.revoke_output_port_as_input_port(
+            client,
+            link.output_port.data_product.id,
+            link.output_port.id,
+            exploration.id,
+        )
+
+        assert response.status_code == 200, response.text
+        event = session.scalar(
+            select(Event).where(
+                Event.name == EventType.DATA_PRODUCT_DATASET_LINK_REVOKED
+            )
+        )
+        assert event.target_type == EventReferenceEntity.EXPLORATION
+        assert session.scalar(
+            select(Notification).where(Notification.user_id == exploration.owner_id)
+        )
 
     def test_revoke_output_port_as_input_port_blocked_when_no_active_grant(
         self, client
@@ -1084,11 +1237,23 @@ class TestInputPortsRouter:
         )
 
     @staticmethod
+    def create_output_port_approver(user, output_port) -> None:
+        DatasetRoleAssignmentFactory(
+            user_id=user.id,
+            role_id=RoleFactory(
+                scope=Scope.DATASET,
+                permissions=[Action.OUTPUT_PORT__APPROVE_DATAPRODUCT_ACCESS_REQUEST],
+            ).id,
+            output_port_id=output_port.id,
+        )
+
+    @staticmethod
     def grant_output_port_access(
         client: TestClient,
         data_product_id,
         output_port_id,
         consuming_abstract_data_product_id,
+        access_mode_id=None,
     ) -> Response:
         return client.post(
             f"{DATA_PRODUCTS_DATASETS_ENDPOINT.format(data_product_id, output_port_id)}/grant",
@@ -1097,6 +1262,7 @@ class TestInputPortsRouter:
                     consuming_abstract_data_product_id
                 ),
                 "justification": "Needed for reporting",
+                "access_mode_id": str(access_mode_id) if access_mode_id else None,
             },
         )
 

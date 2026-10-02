@@ -5,7 +5,6 @@ from sqlalchemy.orm import Session
 
 from app.abstract_data_product.input_ports.enums import InputPortStatus
 from app.abstract_data_product.service import AbstractDataProductService
-from app.abstract_data_product.type import AbstractDataProductType
 from app.core.auth.auth import get_authenticated_user
 from app.core.authz import (
     Action,
@@ -64,36 +63,26 @@ def grant_output_port_access(
         actor=authenticated_user,
     )
 
-    consumer_type = (
-        input_port.consuming_abstract_data_product.abstract_data_product_type
-    )
-    target_type = (
-        EventReferenceEntity.EXPLORATION
-        if consumer_type == AbstractDataProductType.EXPLORATION
-        else EventReferenceEntity.DATA_PRODUCT
-    )
+    consumer = input_port.consuming_abstract_data_product
     event_id = EventService(db).create_event(
         CreateEvent(
             name=EventType.DATA_PRODUCT_DATASET_LINK_APPROVED,
             subject_id=output_port_id,
             subject_type=EventReferenceEntity.DATASET,
-            target_id=input_port.consuming_abstract_data_product_id,
-            target_type=target_type,
+            target_id=consumer.id,
+            target_type=EventReferenceEntity.for_consumer(
+                consumer.abstract_data_product_type
+            ),
             actor_id=authenticated_user.id,
         ),
     )
     notification_service = NotificationService(db)
-    match consumer_type:
-        case AbstractDataProductType.DATA_PRODUCT:
-            notification_service.create_data_product_notifications(
-                data_product_id=input_port.consuming_abstract_data_product_id,
-                event_id=event_id,
-            )
-        case AbstractDataProductType.EXPLORATION:
-            notification_service.create_exploration_notifications(
-                exploration_id=input_port.consuming_abstract_data_product_id,
-                event_id=event_id,
-            )
+    notification_service.create_dataset_notifications(
+        dataset_id=output_port_id, event_id=event_id
+    )
+    notification_service.create_consumer_notifications(
+        consumer=consumer, event_id=event_id
+    )
 
 
 @router.get(
@@ -156,14 +145,16 @@ def approve_output_port_as_input_port(
             subject_id=approved_input_port.output_port_id,
             subject_type=EventReferenceEntity.DATASET,
             target_id=approved_input_port.consuming_abstract_data_product_id,
-            target_type=EventReferenceEntity.DATA_PRODUCT,
+            target_type=EventReferenceEntity.for_consumer(
+                approved_input_port.consuming_abstract_data_product_type
+            ),
             actor_id=authenticated_user.id,
         ),
     )
     NotificationService(db).create_dataset_notifications(
         dataset_id=approved_input_port.output_port_id,
         event_id=event_id,
-        extra_receiver_ids=[approved_input_port.requested_by_id],
+        extra_receiver_ids=approved_input_port.receiver_ids,
     )
 
 
@@ -200,14 +191,16 @@ def deny_output_port_as_input_port(
             subject_id=input_port.output_port_id,
             subject_type=EventReferenceEntity.DATASET,
             target_id=input_port.consuming_abstract_data_product_id,
-            target_type=EventReferenceEntity.DATA_PRODUCT,
+            target_type=EventReferenceEntity.for_consumer(
+                input_port.consuming_abstract_data_product_type
+            ),
             actor_id=authenticated_user.id,
         ),
     )
     NotificationService(db).create_dataset_notifications(
         dataset_id=input_port.output_port_id,
         event_id=event_id,
-        extra_receiver_ids=[input_port.requested_by_id],
+        extra_receiver_ids=input_port.receiver_ids,
     )
 
 
@@ -243,14 +236,16 @@ def revoke_output_port_as_input_port(
             subject_id=input_port.output_port_id,
             subject_type=EventReferenceEntity.DATASET,
             target_id=input_port.consuming_abstract_data_product_id,
-            target_type=EventReferenceEntity.DATA_PRODUCT,
+            target_type=EventReferenceEntity.for_consumer(
+                input_port.consuming_abstract_data_product_type
+            ),
             actor_id=authenticated_user.id,
         ),
     )
     NotificationService(db).create_dataset_notifications(
         dataset_id=input_port.output_port_id,
         event_id=event_id,
-        extra_receiver_ids=[input_port.latest_request.requested_by_id],
+        extra_receiver_ids=input_port.receiver_ids,
     )
 
 
@@ -284,7 +279,9 @@ def remove_output_port_as_input_port(
             subject_id=input_port.output_port_id,
             subject_type=EventReferenceEntity.DATASET,
             target_id=input_port.consuming_abstract_data_product_id,
-            target_type=EventReferenceEntity.DATA_PRODUCT,
+            target_type=EventReferenceEntity.for_consumer(
+                input_port.consuming_abstract_data_product_type
+            ),
             actor_id=authenticated_user.id,
         ),
     )
@@ -292,5 +289,5 @@ def remove_output_port_as_input_port(
         NotificationService(db).create_dataset_notifications(
             dataset_id=input_port.output_port_id,
             event_id=event_id,
-            extra_receiver_ids=[input_port.latest_request.requested_by_id],
+            extra_receiver_ids=input_port.receiver_ids,
         )

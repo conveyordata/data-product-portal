@@ -1,4 +1,4 @@
-import { HttpResponse, http } from 'msw';
+import { delay, HttpResponse, http } from 'msw';
 import { describe, expect, it } from 'vitest';
 import { GrantOutputPortAccessModal } from '@/pages/output-port/components/dataset-tabs/consumers-tab/components/grant-output-port-access-modal.tsx';
 import { server } from '@/tests/mocks/server.ts';
@@ -45,7 +45,7 @@ describe('GrantOutputPortAccessModal', () => {
         await user.click(await screen.findByRole('combobox'));
         await user.click(await screen.findByText('Consumer'));
         await user.type(screen.getByLabelText('Business justification'), 'Required for reporting');
-        await user.click(screen.getByRole('button', { name: 'Grant access' }));
+        await user.click(screen.getByRole('button', { name: 'Grant Access' }));
 
         await waitFor(() =>
             expect(requestBody).toEqual({
@@ -53,5 +53,52 @@ describe('GrantOutputPortAccessModal', () => {
                 justification: 'Required for reporting',
             }),
         );
+    });
+
+    it('disables granting until the output port has loaded', async () => {
+        server.use(
+            http.get('*/api/v2/data_products', () => HttpResponse.json({ data_products: [] })),
+            http.get('*/api/v2/data_products/:dataProductId/output_ports/:outputPortId', () => delay('infinite')),
+        );
+
+        renderWithProviders(
+            <GrantOutputPortAccessModal
+                dataProductId="producer-id"
+                outputPortId="output-port-id"
+                existingConsumerIds={[]}
+                onClose={() => undefined}
+            />,
+        );
+
+        expect(await screen.findByRole('button', { name: 'Grant Access' })).toBeDisabled();
+    });
+
+    it('lists explorations after switching the consumer type', async () => {
+        server.use(
+            http.get('*/api/v2/data_products', () => HttpResponse.json({ data_products: [] })),
+            http.get('*/api/v2/explorations', () =>
+                HttpResponse.json({
+                    explorations: [{ id: 'exploration-id', name: 'My exploration', description: '', status: 'active' }],
+                }),
+            ),
+            http.get('*/api/v2/data_products/:dataProductId/output_ports/:outputPortId', () =>
+                HttpResponse.json({ access_modes: [] }),
+            ),
+        );
+        const user = userEvent.setup();
+
+        renderWithProviders(
+            <GrantOutputPortAccessModal
+                dataProductId="producer-id"
+                outputPortId="output-port-id"
+                existingConsumerIds={[]}
+                onClose={() => undefined}
+            />,
+        );
+
+        await user.click(await screen.findByText('Exploration'));
+        await user.click(await screen.findByRole('combobox'));
+
+        expect(await screen.findByText('My exploration')).toBeInTheDocument();
     });
 });

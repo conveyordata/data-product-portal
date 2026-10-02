@@ -1,5 +1,7 @@
 from enum import UNIQUE, Enum, verify
 
+from app.abstract_data_product.type import AbstractDataProductType
+
 
 @verify(UNIQUE)
 class EventReferenceEntity(str, Enum):
@@ -8,6 +10,14 @@ class EventReferenceEntity(str, Enum):
     DATA_OUTPUT = "data_output"
     USER = "user"
     EXPLORATION = "exploration"
+
+    @staticmethod
+    def for_consumer(
+        consumer_type: AbstractDataProductType,
+    ) -> "EventReferenceEntity":
+        if consumer_type == AbstractDataProductType.EXPLORATION:
+            return EventReferenceEntity.EXPLORATION
+        return EventReferenceEntity.DATA_PRODUCT
 
 
 @verify(UNIQUE)

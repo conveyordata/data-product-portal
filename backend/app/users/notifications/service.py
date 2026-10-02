@@ -6,6 +6,7 @@ from fastapi import HTTPException, status
 from sqlalchemy import delete, desc, select
 from sqlalchemy.orm import Session, joinedload
 
+from app.abstract_data_product.model import AbstractDataProduct
 from app.authorization.role_assignments.data_product.model import (
     DataProductRoleAssignment,
 )
@@ -87,11 +88,7 @@ class NotificationService:
             )
         )
 
-        event = self.db.get(EventModel, event_id)
-        for receiver in receivers:
-            if receiver != event.actor_id:
-                notification = NotificationModel(user_id=receiver, event_id=event_id)
-                self.db.add(notification)
+        self._notify(receivers, event_id)
 
     def create_data_product_notifications(
         self,
@@ -149,27 +146,33 @@ class NotificationService:
             ).all()
         )
 
-        event = self.db.get(EventModel, event_id)
-        for receiver in receivers:
-            if receiver != event.actor_id:
-                notification = NotificationModel(user_id=receiver, event_id=event_id)
-                self.db.add(notification)
+        self._notify(receivers, event_id)
 
-    def create_exploration_notifications(
+    def create_consumer_notifications(
         self,
         *,
-        exploration_id: UUID,
+        consumer: AbstractDataProduct,
         event_id: UUID,
+        extra_receiver_ids: Sequence[UUID] = (),
     ) -> None:
-        owner_id = self.db.scalar(
-            select(Exploration.owner_id).where(Exploration.id == exploration_id)
-        )
-        if owner_id is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Exploration {exploration_id} not found",
+        if isinstance(consumer, Exploration):
+            self._notify({consumer.owner_id, *extra_receiver_ids}, event_id)
+        else:
+            self.create_data_product_notifications(
+                data_product_id=consumer.id,
+                event_id=event_id,
+                extra_receiver_ids=extra_receiver_ids,
             )
 
+    def _notify(self, receivers: set[UUID], event_id: UUID) -> None:
+        self.db.flush()
         event = self.db.get(EventModel, event_id)
-        if owner_id != event.actor_id:
-            self.db.add(NotificationModel(user_id=owner_id, event_id=event_id))
+        already_notified = set(
+            self.db.scalars(
+                select(NotificationModel.user_id).where(
+                    NotificationModel.event_id == event_id
+                )
+            )
+        )
+        for receiver in receivers - already_notified - {event.actor_id}:
+            self.db.add(NotificationModel(user_id=receiver, event_id=event_id))

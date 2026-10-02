@@ -1,5 +1,5 @@
 import { Form, Input, Modal, Radio, Select, Space, Typography } from 'antd';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AccessModeSelector } from '@/components/data-products/technical-asset-form/access-mode-selector.component.tsx';
 import {
@@ -8,17 +8,18 @@ import {
     useGetDataProductsQuery,
 } from '@/store/api/services/generated/dataProductsApi.ts';
 import { useGetOutputPortQuery } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
-import { useGrantOutputPortAccessMutation } from '@/store/api/services/generated/dataProductsOutputPortsInputPortsApi.ts';
+import {
+    AbstractDataProductType,
+    useGrantOutputPortAccessMutation,
+} from '@/store/api/services/generated/dataProductsOutputPortsInputPortsApi.ts';
 import {
     AbstractDataProductStatus as ExplorationStatus,
     useGetExplorationsQuery,
 } from '@/store/api/services/generated/explorationsApi.ts';
 import { dispatchMessage } from '@/utils/feedback.ts';
 
-type ConsumerType = 'data_product' | 'exploration';
-
 type FormValues = {
-    consumerType: ConsumerType;
+    consumerType: AbstractDataProductType;
     consumerId: string;
     justification: string;
     accessModeIds?: string[];
@@ -34,32 +35,31 @@ type Props = {
 export function GrantOutputPortAccessModal({ dataProductId, outputPortId, existingConsumerIds, onClose }: Props) {
     const { t } = useTranslation();
     const [form] = Form.useForm<FormValues>();
-    const [consumerType, setConsumerType] = useState<ConsumerType>('data_product');
+    const consumerType = Form.useWatch('consumerType', form) ?? AbstractDataProductType.DataProducts;
     const { data: { data_products: dataProducts = [] } = {}, isFetching: isFetchingDataProducts } =
-        useGetDataProductsQuery(AssignmentFilter.All, { skip: consumerType !== 'data_product' });
+        useGetDataProductsQuery(AssignmentFilter.All, { skip: consumerType !== AbstractDataProductType.DataProducts });
     const { data: { explorations = [] } = {}, isFetching: isFetchingExplorations } = useGetExplorationsQuery(
         undefined,
         {
-            skip: consumerType !== 'exploration',
+            skip: consumerType !== AbstractDataProductType.Explorations,
         },
     );
     const { data: outputPort } = useGetOutputPortQuery({ dataProductId, id: outputPortId });
     const [grantOutputPortAccess, { isLoading }] = useGrantOutputPortAccessMutation();
-    const existingConsumerIdSet = useMemo(() => new Set(existingConsumerIds), [existingConsumerIds]);
 
     const consumerOptions = useMemo(() => {
         const consumers =
-            consumerType === 'data_product'
+            consumerType === AbstractDataProductType.DataProducts
                 ? dataProducts.filter((consumer) => consumer.status !== DataProductStatus.Deleting)
                 : explorations.filter((consumer) => consumer.status !== ExplorationStatus.Deleting);
         return consumers
-            .filter((consumer) => consumer.id !== dataProductId && !existingConsumerIdSet.has(consumer.id))
+            .filter((consumer) => consumer.id !== dataProductId && !existingConsumerIds.includes(consumer.id))
             .map((consumer) => ({
                 value: consumer.id,
                 label: consumer.name,
                 description: consumer.description,
             }));
-    }, [consumerType, dataProducts, explorations, dataProductId, existingConsumerIdSet]);
+    }, [consumerType, dataProducts, explorations, dataProductId, existingConsumerIds]);
 
     const onFinish = async (values: FormValues) => {
         try {
@@ -87,14 +87,14 @@ export function GrantOutputPortAccessModal({ dataProductId, outputPortId, existi
             onCancel={onClose}
             onOk={() => form.submit()}
             confirmLoading={isLoading}
-            okText={t('Grant access')}
-            okButtonProps={{ disabled: isLoading }}
+            okText={t('Grant Access')}
+            okButtonProps={{ disabled: isLoading || !outputPort }}
             cancelButtonProps={{ disabled: isLoading }}
         >
             <Form<FormValues>
                 form={form}
                 layout="vertical"
-                initialValues={{ consumerType }}
+                initialValues={{ consumerType: AbstractDataProductType.DataProducts }}
                 onFinish={onFinish}
                 onFinishFailed={() =>
                     dispatchMessage({ content: t('Please check for invalid form fields'), type: 'info' })
@@ -106,18 +106,15 @@ export function GrantOutputPortAccessModal({ dataProductId, outputPortId, existi
                         optionType="button"
                         buttonStyle="solid"
                         options={[
-                            { label: t('Data Product'), value: 'data_product' },
-                            { label: t('Exploration'), value: 'exploration' },
+                            { label: t('Data Product'), value: AbstractDataProductType.DataProducts },
+                            { label: t('Exploration'), value: AbstractDataProductType.Explorations },
                         ]}
-                        onChange={(event) => {
-                            setConsumerType(event.target.value);
-                            form.setFieldValue('consumerId', undefined);
-                        }}
+                        onChange={() => form.setFieldValue('consumerId', undefined)}
                     />
                 </Form.Item>
                 <Form.Item<FormValues>
                     name="consumerId"
-                    label={consumerType === 'data_product' ? t('Data Product') : t('Exploration')}
+                    label={consumerType === AbstractDataProductType.DataProducts ? t('Data Product') : t('Exploration')}
                     rules={[{ required: true, message: t('Please select a consumer') }]}
                 >
                     <Select

@@ -1,4 +1,3 @@
-import copy
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta, timezone
 from typing import Optional, Sequence
@@ -20,6 +19,7 @@ from app.abstract_data_product.input_ports.model import (
     InputPortRequest as InputPortRequestModel,
 )
 from app.abstract_data_product.model import AbstractDataProduct
+from app.abstract_data_product.type import AbstractDataProductType
 from app.authorization.role_assignments.data_product.model import (
     DataProductRoleAssignment as DataProductRoleAssignmentModel,
 )
@@ -44,6 +44,7 @@ from app.events.enums import EventReferenceEntity, EventType
 from app.events.model import Event as EventModel
 from app.events.schema import CreateEvent
 from app.events.service import EventService
+from app.explorations.model import Exploration
 from app.groups.service import GroupService
 from app.settings import settings
 from app.users.model import User as UserModel
@@ -58,7 +59,23 @@ from app.users.schema_response import (
 class RedactedInputPort:
     output_port_id: UUID
     consuming_abstract_data_product_id: UUID
-    requested_by_id: UUID
+    consuming_abstract_data_product_type: AbstractDataProductType
+    status: InputPortStatus
+    receiver_ids: list[UUID]
+
+    @staticmethod
+    def of(link: InputPortModel, requested_by_id: UUID) -> "RedactedInputPort":
+        consumer = link.consuming_abstract_data_product
+        return RedactedInputPort(
+            output_port_id=link.output_port_id,
+            consuming_abstract_data_product_id=link.consuming_abstract_data_product_id,
+            consuming_abstract_data_product_type=consumer.abstract_data_product_type,
+            status=link.status,
+            receiver_ids=[
+                requested_by_id,
+                *([consumer.owner_id] if isinstance(consumer, Exploration) else []),
+            ],
+        )
 
 
 class InputPortService:
@@ -186,11 +203,7 @@ class InputPortService:
         )
         # We don't return the raw model, as it might contain sensitive information. See `skip_data_product_visibility_filter`
         # used in the get_link call above. Instead, we return a dataclass with only the relevant information.
-        return RedactedInputPort(
-            output_port_id=current_link.output_port_id,
-            consuming_abstract_data_product_id=current_link.consuming_abstract_data_product_id,
-            requested_by_id=pending_request.requested_by_id,
-        )
+        return RedactedInputPort.of(current_link, pending_request.requested_by_id)
 
     def deny_output_port_as_input_port(
         self,
@@ -222,10 +235,8 @@ class InputPortService:
 
         # We don't return the raw model, as it might contain sensitive information. See `skip_data_product_visibility_filter`
         # used in the get_link call above. Instead, we return a dataclass with only the relevant information.
-        return RedactedInputPort(
-            output_port_id=current_link.output_port_id,
-            consuming_abstract_data_product_id=current_link.consuming_abstract_data_product_id,
-            requested_by_id=current_link.latest_request.requested_by_id,
+        return RedactedInputPort.of(
+            current_link, current_link.latest_request.requested_by_id
         )
 
     def revoke_output_port_as_input_port(
@@ -235,9 +246,12 @@ class InputPortService:
         output_port_id: UUID,
         consuming_data_product_id: UUID,
         actor: User,
-    ) -> InputPortModel:
+    ) -> RedactedInputPort:
         current_link = self.get_link(
-            data_product_id, output_port_id, consuming_data_product_id
+            data_product_id,
+            output_port_id,
+            consuming_data_product_id,
+            execution_options={"skip_data_product_visibility_filter": True},
         )
         target = current_link.active_grant
         if target is None:
@@ -250,7 +264,9 @@ class InputPortService:
         target.revoked_at = datetime.now(timezone.utc)
         current_link.recompute_status()
         self._sync_hidden_data_product_access(data_product_id)
-        return current_link
+        return RedactedInputPort.of(
+            current_link, current_link.latest_request.requested_by_id
+        )
 
     def remove_output_port_as_input_port(
         self,
@@ -258,11 +274,16 @@ class InputPortService:
         data_product_id: UUID,
         output_port_id: UUID,
         consuming_data_product_id: UUID,
-    ) -> InputPortModel:
+    ) -> RedactedInputPort:
         current_link = self.get_link(
-            data_product_id, output_port_id, consuming_data_product_id
+            data_product_id,
+            output_port_id,
+            consuming_data_product_id,
+            execution_options={"skip_data_product_visibility_filter": True},
         )
-        result = copy.deepcopy(current_link)
+        result = RedactedInputPort.of(
+            current_link, current_link.latest_request.requested_by_id
+        )
         self.db.delete(current_link)
         self.db.flush()
         self._sync_hidden_data_product_access(data_product_id)
@@ -303,12 +324,14 @@ class InputPortService:
                 subject_id=input_port.output_port_id,
                 subject_type=EventReferenceEntity.DATASET,
                 target_id=input_port.consuming_abstract_data_product_id,
-                target_type=EventReferenceEntity.DATA_PRODUCT,
+                target_type=EventReferenceEntity.for_consumer(
+                    input_port.consuming_abstract_data_product.abstract_data_product_type
+                ),
                 actor_id=system_actor_id,
             )
         )
-        NotificationService(self.db).create_data_product_notifications(
-            data_product_id=input_port.consuming_abstract_data_product_id,
+        NotificationService(self.db).create_consumer_notifications(
+            consumer=input_port.consuming_abstract_data_product,
             event_id=event_id,
             extra_receiver_ids=[grant.requested_by_id],
         )
