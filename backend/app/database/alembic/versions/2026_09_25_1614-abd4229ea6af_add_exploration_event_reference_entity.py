@@ -1,7 +1,7 @@
 """add exploration event reference entity
 
 Revision ID: abd4229ea6af
-Revises: 18fb80f18c7d
+Revises: 3f1c2b7a9d4e
 Create Date: 2026-09-25 16:14:00.000000
 
 """
@@ -13,7 +13,7 @@ from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "abd4229ea6af"
-down_revision: Union[str, None] = "18fb80f18c7d"
+down_revision: Union[str, None] = "3f1c2b7a9d4e"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

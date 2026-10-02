@@ -22,7 +22,7 @@ what is the justification for accessing this data, for what period of time, who 
 Input Ports allow tracking the consumers of a certain **[Output Port](./output-ports)**.
 By listing all the consuming Input Ports, an Output Port owner can easily track the usage of their assets.
 Users who can approve access requests can also grant access directly from the Output Port's **Consumers** tab by selecting a Data Product or Exploration, providing a business justification, and choosing an access mode when the Output Port has access modes configured.
-This is the only way to add consumers to a private Output Port.
+This is the only way to add consumers to an Invite only Output Port; Explorations can't consume Invite only Output Ports.
 A direct grant also restores access for consumers whose earlier access was denied, revoked, expired or cancelled.
 The consumer's team and the other Output Port owners are notified when access is granted.
 The owner of the data always stays in control, and can **revoke** a consumer's access at any time.

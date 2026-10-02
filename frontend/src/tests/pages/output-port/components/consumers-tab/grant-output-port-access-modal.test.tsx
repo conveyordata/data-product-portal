@@ -21,7 +21,7 @@ describe('GrantOutputPortAccessModal', () => {
                 }),
             ),
             http.get('*/api/v2/data_products/:dataProductId/output_ports/:outputPortId', () =>
-                HttpResponse.json({ access_modes: [] }),
+                HttpResponse.json({ access_modes: [], access_type: { access_function: 'restricted' } }),
             ),
             http.post(
                 '*/api/v2/data_products/:dataProductId/output_ports/:outputPortId/input_ports/grant',
@@ -82,7 +82,7 @@ describe('GrantOutputPortAccessModal', () => {
                 }),
             ),
             http.get('*/api/v2/data_products/:dataProductId/output_ports/:outputPortId', () =>
-                HttpResponse.json({ access_modes: [] }),
+                HttpResponse.json({ access_modes: [], access_type: { access_function: 'restricted' } }),
             ),
         );
         const user = userEvent.setup();
@@ -100,5 +100,26 @@ describe('GrantOutputPortAccessModal', () => {
         await user.click(await screen.findByRole('combobox'));
 
         expect(await screen.findByText('My exploration')).toBeInTheDocument();
+    });
+
+    it('disables Explorations for Invite only Output Ports', async () => {
+        server.use(
+            http.get('*/api/v2/data_products', () => HttpResponse.json({ data_products: [] })),
+            http.get('*/api/v2/data_products/:dataProductId/output_ports/:outputPortId', () =>
+                HttpResponse.json({ access_modes: [], access_type: { access_function: 'private' } }),
+            ),
+        );
+
+        renderWithProviders(
+            <GrantOutputPortAccessModal
+                dataProductId="producer-id"
+                outputPortId="output-port-id"
+                existingConsumerIds={[]}
+                onClose={() => undefined}
+            />,
+        );
+
+        await waitFor(() => expect(screen.getByRole('radio', { name: 'Exploration' })).toBeDisabled());
+        expect(screen.getByRole('radio', { name: 'Data Product' })).toBeEnabled();
     });
 });

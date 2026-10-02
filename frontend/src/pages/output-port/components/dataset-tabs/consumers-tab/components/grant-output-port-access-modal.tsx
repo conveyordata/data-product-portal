@@ -7,7 +7,10 @@ import {
     AbstractDataProductStatus as DataProductStatus,
     useGetDataProductsQuery,
 } from '@/store/api/services/generated/dataProductsApi.ts';
-import { useGetOutputPortQuery } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
+import {
+    OutputPortAccessFunction,
+    useGetOutputPortQuery,
+} from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
 import {
     AbstractDataProductType,
     useGrantOutputPortAccessMutation,
@@ -43,6 +46,7 @@ export function GrantOutputPortAccessModal({ dataProductId, outputPortId, existi
         { skip: isDataProduct },
     );
     const { data: outputPort } = useGetOutputPortQuery({ dataProductId, id: outputPortId });
+    const isInviteOnly = outputPort?.access_type.access_function === OutputPortAccessFunction.Private;
     const [grantOutputPortAccess, { isLoading }] = useGrantOutputPortAccessMutation();
 
     const consumerOptions = useMemo(() => {
@@ -104,7 +108,14 @@ export function GrantOutputPortAccessModal({ dataProductId, outputPortId, existi
                         buttonStyle="solid"
                         options={[
                             { label: t('Data Product'), value: AbstractDataProductType.DataProducts },
-                            { label: t('Exploration'), value: AbstractDataProductType.Explorations },
+                            {
+                                label: t('Exploration'),
+                                value: AbstractDataProductType.Explorations,
+                                disabled: isInviteOnly,
+                                title: isInviteOnly
+                                    ? t('Explorations cannot consume Invite only Output Ports')
+                                    : undefined,
+                            },
                         ]}
                         onChange={() => form.setFieldValue('consumerId', undefined)}
                     />

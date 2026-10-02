@@ -64,7 +64,7 @@ export function ConsumersTab({ outputPortId, dataProductId }: Props) {
                 {canApproveAccess && (
                     <Tooltip
                         title={t(
-                            'You can use this to directly add a new consumer to this Output Port, this is the only way to add consumers to private Output Ports.',
+                            'You can use this to directly add a new consumer to this Output Port, this is the only way to add consumers to Invite only Output Ports.',
                         )}
                     >
                         <Button type="primary" icon={<UserAddOutlined />} onClick={() => setIsGrantModalOpen(true)}>

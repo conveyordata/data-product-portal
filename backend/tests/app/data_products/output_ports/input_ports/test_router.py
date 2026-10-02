@@ -15,11 +15,12 @@ from app.abstract_data_product.input_ports.enums import (
     InputPortStatus,
 )
 from app.abstract_data_product.input_ports.model import InputPort
+from app.abstract_data_product.service import AbstractDataProductService
 from app.abstract_data_product.type import AbstractDataProductType
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.roles.schema import Scope
 from app.configuration.access_durations.enums import AccessDurationType
-from app.core.authz import REDACTION_VALUE, Action
+from app.core.authz import REDACTION_VALUE, Action, Authorization
 from app.data_products.model import DataProductVisibility
 from app.data_products.output_ports.enums import OutputPortAccessFunction
 from app.data_products.status import AbstractDataProductStatus
@@ -140,6 +141,58 @@ class TestInputPortsRouter:
 
         assert response.status_code == 200, response.text
         assert session.scalars(select(Notification.user_id)).all() == [shared_member.id]
+
+    def test_grant_output_port_access__consumer_can_read_invite_only_output_port(
+        self, session
+    ):
+        user = UserFactory()
+        output_port = OutputPortFactory(
+            access_function=OutputPortAccessFunction.PRIVATE
+        )
+        consumer = DataProductFactory()
+        DataProductRoleAssignmentFactory(
+            identity_id=user.id,
+            data_product_id=consumer.id,
+            role_id=RoleFactory.data_product_owner().id,
+        )
+
+        AbstractDataProductService(session).grant_output_port_access(
+            consumer_id=consumer.id,
+            data_product_id=output_port.data_product_id,
+            output_port_id=output_port.id,
+            justification="Needed for reporting",
+            access_mode_id=None,
+            actor=UserFactory(),
+        )
+
+        assert Authorization().has_access(
+            act=Action.HIDDEN__OUTPUT_PORT__READ,
+            dom=str(output_port.data_product.domain_id),
+            obj=str(output_port.id),
+            parent=str(output_port.data_product_id),
+            sub=str(user.id),
+        )
+
+    def test_grant_output_port_access__rejects_exploration_on_invite_only_output_port(
+        self, client
+    ):
+        actor = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        output_port = OutputPortFactory(
+            access_function=OutputPortAccessFunction.PRIVATE
+        )
+        self.create_output_port_approver(actor, output_port)
+
+        response = self.grant_output_port_access(
+            client,
+            output_port.data_product_id,
+            output_port.id,
+            ExplorationFactory().id,
+        )
+
+        assert response.status_code == 400
+        assert response.json()["detail"] == (
+            "Explorations cannot consume Invite only output ports"
+        )
 
     def test_grant_output_port_access__requires_permission(self, client):
         output_port = OutputPortFactory()

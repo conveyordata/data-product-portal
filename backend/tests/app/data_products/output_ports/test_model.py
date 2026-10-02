@@ -16,7 +16,6 @@ from tests.factories import (
     DataProductFactory,
     DataProductRoleAssignmentFactory,
     DatasetRoleAssignmentFactory,
-    ExplorationFactory,
     GroupFactory,
     GroupMembershipFactory,
     InputPortFactory,
@@ -125,25 +124,6 @@ def test_private_output_port_visible_for_owner_of_approved_consumer(
     session.expunge(output_port)
 
     with as_user(session, user.id):
-        visible = session.get(OutputPort, output_port_id)
-
-    assert visible.id == output_port_id
-
-
-def test_private_output_port_visible_for_owner_of_approved_exploration_consumer(
-    session,
-):
-    output_port = OutputPortFactory(access_type=OutputPortAccessType.PRIVATE)
-    exploration = ExplorationFactory()
-    InputPortFactory(
-        output_port=output_port,
-        consuming_abstract_data_product=exploration,
-        status=InputPortStatus.APPROVED,
-    )
-    output_port_id = output_port.id
-    session.expunge(output_port)
-
-    with as_user(session, exploration.owner_id):
         visible = session.get(OutputPort, output_port_id)
 
     assert visible.id == output_port_id

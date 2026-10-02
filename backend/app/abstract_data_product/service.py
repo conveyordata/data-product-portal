@@ -138,7 +138,10 @@ class AbstractDataProductService:
         )
         self.db.add(request)
         self.db.flush()
-        if created_by_output_port_owner:
+        if (
+            direct_grant
+            or output_port.access_function == OutputPortAccessFunction.UNRESTRICTED
+        ):
             InputPortService(self.db).approve_request(
                 request,
                 now=datetime.now(tz=pytz.utc),
@@ -146,12 +149,6 @@ class AbstractDataProductService:
                 decision_note="Access granted directly by output port owner"
                 if direct_grant
                 else "Auto approved for unrestricted output port",
-            )
-        elif output_port.access_function == OutputPortAccessFunction.UNRESTRICTED:
-            InputPortService(self.db).approve_request(
-                request,
-                now=datetime.now(tz=pytz.utc),
-                decision_note="Auto approved for unrestricted output port",
             )
         else:
             request.decision = InputPortRequestDecision.PENDING
@@ -210,6 +207,14 @@ class AbstractDataProductService:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Cannot link own output port to data product",
+            )
+        if (
+            adp.abstract_data_product_type == AbstractDataProductType.EXPLORATION
+            and output_port.access_function == OutputPortAccessFunction.PRIVATE
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Explorations cannot consume Invite only output ports",
             )
 
         if output_port.access_modes and not access_mode_id:
