@@ -106,6 +106,7 @@ export function GrantOutputPortAccessModal({ dataProductId, outputPortId, existi
                     <Radio.Group
                         optionType="button"
                         buttonStyle="solid"
+                        disabled={!outputPort}
                         options={[
                             { label: t('Data Product'), value: AbstractDataProductType.DataProducts },
                             {

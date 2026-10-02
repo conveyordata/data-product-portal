@@ -71,6 +71,7 @@ describe('GrantOutputPortAccessModal', () => {
         );
 
         expect(await screen.findByRole('button', { name: 'Grant Access' })).toBeDisabled();
+        expect(screen.getByRole('radio', { name: 'Exploration' })).toBeDisabled();
     });
 
     it('lists explorations after switching the consumer type', async () => {
