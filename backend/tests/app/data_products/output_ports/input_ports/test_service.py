@@ -230,8 +230,8 @@ class TestInputPortDecisions:
         )
         session.flush()
 
-        requests = _by_id(input_port)
         assert input_port.status == InputPortStatus.REVOKED
+        requests = _by_id(link)
         assert requests[grant.id].revoked_at is not None
         assert requests[grant.id].revoked_by_id == actor.id
         assert requests[grant.id].decision == InputPortRequestDecision.APPROVED
