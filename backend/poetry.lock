@@ -1201,18 +1201,6 @@ type = "directory"
 url = "../sdk"
 
 [[package]]
-name = "distlib"
-version = "0.4.3"
-description = "Distribution utilities"
-optional = false
-python-versions = "*"
-groups = ["dev"]
-files = [
-    {file = "distlib-0.4.3-py2.py3-none-any.whl", hash = "sha256:4b0ce306c966eb73bc3a7b6abad017c556dadd92c44701562cd528ac7fde4d5b"},
-    {file = "distlib-0.4.3.tar.gz", hash = "sha256:f152097224a0ae24be5a0f6bae1b9359af82133bce63f98a95f86cae1aede9ed"},
-]
-
-[[package]]
 name = "distro"
 version = "1.9.0"
 description = "Distro - an OS platform information API"
@@ -1487,7 +1475,7 @@ version = "3.32.7"
 description = "A platform independent file lock."
 optional = false
 python-versions = ">=3.10"
-groups = ["main", "dev"]
+groups = ["main"]
 files = [
     {file = "filelock-3.32.7-py3-none-any.whl", hash = "sha256:65ff0d0190ea42038b32bda4b77834fb05be2cad4c5b9b01aa4dfb3614536e52"},
     {file = "filelock-3.32.7.tar.gz", hash = "sha256:37b8a3d9811b0f9aef7e5ec5c71bb320de52df51e6ca9bcd6f5ad81187660da7"},
@@ -3768,7 +3756,7 @@ version = "4.11.13"
 description = "A small Python package for determining appropriate platform-specific dirs, e.g. a `user data dir`."
 optional = false
 python-versions = ">=3.10"
-groups = ["main", "dev", "plugins"]
+groups = ["main", "plugins"]
 files = [
     {file = "platformdirs-4.11.13-py3-none-any.whl", hash = "sha256:228b2283af5c1f32673cdf55271216a52bbd8258cb31374e302ad7bd26cd7513"},
     {file = "platformdirs-4.11.13.tar.gz", hash = "sha256:6985eefdc2298693e4ce1fe124645524cb967428eb6384e0ce5b49767e7ea8ba"},
@@ -3811,14 +3799,14 @@ poetry-plugin = ["poetry (>=1.2.0,<3.0.0) ; python_version < \"4.0\""]
 
 [[package]]
 name = "posthog"
-version = "7.60.1"
+version = "7.60.2"
 description = "Integrate PostHog into any python application."
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "posthog-7.60.1-py3-none-any.whl", hash = "sha256:67bc374907c3cafc1b378c4011d5e7cf6b249c240a98470cf908da2c44f76483"},
-    {file = "posthog-7.60.1.tar.gz", hash = "sha256:99436369a40b2f9e628145e997f1dcd98a5e5389da1605d4ab630d742cc1bd5d"},
+    {file = "posthog-7.60.2-py3-none-any.whl", hash = "sha256:1fb11696b135eee3d36d4079dc126f44b0255f6cad956521fc34885cf38a873f"},
+    {file = "posthog-7.60.2.tar.gz", hash = "sha256:2abae8868a1d1413fb77828c02bfce7feee51ad56e7e2ec59bfc183518929b2b"},
 ]
 
 [package.dependencies]
@@ -4424,21 +4412,6 @@ files = [
 
 [package.dependencies]
 six = ">=1.5"
-
-[[package]]
-name = "python-discovery"
-version = "1.6.1"
-description = "Python interpreter discovery"
-optional = false
-python-versions = ">=3.8"
-groups = ["dev"]
-files = [
-    {file = "python_discovery-1.6.1-py3-none-any.whl", hash = "sha256:d43fcdef879fe795352bd13ccf8d185ba5a9f86f36cfcd00529f596e737442b3"},
-    {file = "python_discovery-1.6.1.tar.gz", hash = "sha256:cf87d3627dfb4412437fdd5b13eae402607722998d21567993aedbc59b23c15e"},
-]
-
-[package.dependencies]
-filelock = ">=3.15.4"
 
 [[package]]
 name = "python-dotenv"
@@ -5452,24 +5425,6 @@ h11 = ">=0.8"
 
 [package.extras]
 standard = ["httptools (>=0.8.0)", "python-dotenv (>=0.13)", "pyyaml (>=5.1)", "uvloop (>=0.15.1) ; sys_platform != \"win32\" and sys_platform != \"cygwin\" and platform_python_implementation != \"PyPy\"", "watchfiles (>=0.20)", "websockets (>=13.0)"]
-
-[[package]]
-name = "virtualenv"
-version = "21.7.13"
-description = "Virtual Python Environment builder"
-optional = false
-python-versions = ">=3.9"
-groups = ["dev"]
-files = [
-    {file = "virtualenv-21.7.13-py3-none-any.whl", hash = "sha256:1bea5af7463f59c4719db48fe739579a2a4f569c96f26c086edda85c96da9f59"},
-    {file = "virtualenv-21.7.13.tar.gz", hash = "sha256:0355558b6f33619aab31347e43643b0ebc97f61ea3acf617b2b69e1f8a843d11"},
-]
-
-[package.dependencies]
-distlib = ">=0.3.7,<1"
-filelock = {version = ">=3.24.2,<4", markers = "python_version >= \"3.10\""}
-platformdirs = ">=3.9.1,<5"
-python-discovery = ">=1.6"
 
 [[package]]
 name = "watchfiles"
