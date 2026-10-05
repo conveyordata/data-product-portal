@@ -469,3 +469,29 @@ class TestUsersRouter:
         response = client.get(f"{ENDPOINT}/{uuid4()}/groups")
 
         assert response.status_code == 404
+
+    def test_get_current_user_groups__returns_authenticated_users_groups(self, client):
+        authenticated_user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        other_user = UserFactory()
+
+        expected_group = GroupFactory(
+            external_id="engineering",
+            display_name="Engineering",
+        )
+        other_group = GroupFactory()
+
+        GroupMembershipFactory(group=expected_group, member=authenticated_user)
+        GroupMembershipFactory(group=other_group, member=other_user)
+
+        response = client.get(f"{ENDPOINT}/current/groups")
+
+        assert response.status_code == 200
+        assert response.json() == {
+            "groups": [
+                {
+                    "id": str(expected_group.id),
+                    "external_id": expected_group.external_id,
+                    "display_name": expected_group.display_name,
+                }
+            ]
+        }

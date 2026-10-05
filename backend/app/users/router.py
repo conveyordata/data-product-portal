@@ -79,6 +79,14 @@ def get_users(
     return GetUsersResponse(users=UserService(db).get_users())
 
 
+@router.get("/current/groups")
+def get_current_user_groups(
+    db: Session = Depends(get_db_session, scope="function"),
+    authenticated_user: User = Depends(get_authenticated_user),
+) -> GroupsGetResponse:
+    return GroupsGetResponse(groups=UserService(db).get_groups(authenticated_user.id))
+
+
 @router.get(
     "/{id}/groups",
     responses={
@@ -125,11 +133,3 @@ def get_user_requests(
 @router.get("/current")
 def get_current_user(authorized_user: User = Depends(authorize_user)) -> User:
     return authorized_user
-
-
-@router.get("/current/groups")
-def get_current_user_groups(
-    db: Session = Depends(get_db_session, scope="function"),
-    authenticated_user: User = Depends(get_authenticated_user),
-) -> GroupsGetResponse:
-    return GroupsGetResponse(groups=UserService(db).get_groups(authenticated_user.id))

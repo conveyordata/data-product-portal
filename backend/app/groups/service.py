@@ -48,7 +48,7 @@ class GroupService:
         if not requested_ids:
             return
 
-        ensure_group_exists(group_id, self.db)
+        self._lock_group(group_id)
         self._validate_member_identities(requested_ids)
 
         inserted_ids = self._insert_member_ids(group_id, requested_ids)
@@ -59,11 +59,14 @@ class GroupService:
         group_id: UUID,
         member_identity_ids: list[UUID],
     ) -> None:
+        """
+        Removes members in batch to a group. Silently ignores missing members.
+        """
         requested_ids = set(member_identity_ids)
         if not requested_ids:
             return
 
-        ensure_group_exists(group_id, self.db)
+        self._lock_group(group_id)
 
         removed_ids = self._remove_member_ids(group_id, requested_ids)
         self._remove_members_auth(group_id, removed_ids)
@@ -80,7 +83,7 @@ class GroupService:
         if not requested_ids:
             return
 
-        ensure_group_exists(group_id, self.db)
+        self._lock_group(group_id)
         self._validate_member_identities(requested_ids)
 
         current_ids = set(
@@ -268,3 +271,13 @@ class GroupService:
             )
             .returning(GroupMembership.member_identity_id)
         ).all()
+
+    def _lock_group(self, group_id: UUID) -> None:
+        locked_group_id = self.db.scalar(
+            select(Group.id).where(Group.id == group_id).with_for_update(of=Group)
+        )
+        if locked_group_id is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Group {group_id} does not exist",
+            )
