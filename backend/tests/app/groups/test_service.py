@@ -24,6 +24,12 @@ from tests.factories import (
     RoleFactory,
     UserFactory,
 )
+from sqlalchemy import select
+from sqlalchemy.exc import OperationalError
+from sqlalchemy.orm import Session
+
+from app.groups.model import Group
+from tests import engine
 
 
 class TestGroupService:
@@ -496,3 +502,41 @@ class TestGroupService:
             GroupService(session).get_members(uuid4())
 
         assert exc_info.value.status_code == 404
+
+    def test_replace_members__holds_group_lock_until_transaction_ends(self):
+        group = GroupFactory()
+        member = UserFactory()
+
+        first_session = Session(bind=engine)
+        second_session = Session(bind=engine)
+
+        try:
+            GroupService(first_session).replace_members(
+                group_id=group.id,
+                member_identity_ids=[member.id],
+            )
+
+            with pytest.raises(OperationalError) as exc_info:
+                second_session.scalar(
+                    select(Group.id)
+                    .where(Group.id == group.id)
+                    .with_for_update(of=Group, nowait=True) # NOWAIT to fail inmediately with 55P03
+                )
+
+            assert exc_info.value.orig.pgcode == "55P03"
+
+            second_session.rollback()
+            first_session.commit()  # noqa: allow-commit
+
+            locked_group_id = second_session.scalar(
+                select(Group.id)
+                .where(Group.id == group.id)
+                .with_for_update(of=Group, nowait=True)
+            )
+
+            assert locked_group_id == group.id
+        finally:
+            first_session.rollback()
+            second_session.rollback()
+            first_session.close()
+            second_session.close()
