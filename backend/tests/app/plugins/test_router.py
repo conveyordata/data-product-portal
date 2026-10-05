@@ -39,6 +39,23 @@ class TestPluginEndpoints:
             assert "result_tooltip" in plugin
             assert isinstance(plugin["ui_metadata"], list)
 
+    def test_list_plugins__shareable_flag(self, client: TestClient, monkeypatch):
+        monkeypatch.setattr(
+            FakeTechnicalAssetConfiguration,
+            "_platform_metadata",
+            FakeTechnicalAssetConfiguration.get_platform_metadata().model_copy(
+                update={"shareable": False}
+            ),
+        )
+        response = client.get(ENDPOINT)
+
+        assert response.status_code == 200
+        shareable = {p["plugin"]: p["shareable"] for p in response.json()["plugins"]}
+        assert shareable == {
+            "FakeTechnicalAssetConfiguration": False,
+            "FakeLinkPlugin": True,
+        }
+
     def test_list_plugins_includes_expected_platforms(self, client: TestClient):
         """Test that all expected plugins are in the list"""
         response = client.get(ENDPOINT)
