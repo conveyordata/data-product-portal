@@ -4,7 +4,6 @@ from uuid import uuid4
 
 import pytest
 
-from app.groups.router import _serialize_group_members_replacement
 from app.groups.service import GroupService
 from app.settings import settings
 from tests.factories import (

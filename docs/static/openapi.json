@@ -5965,6 +5965,37 @@
         }
       }
     },
+    "/api/v2/users/current/groups": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Get Current User Groups",
+        "operationId": "get_current_user_groups",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupsGetResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v2/users/{id}/groups": {
       "get": {
         "tags": [
@@ -6137,37 +6168,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/User"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v2/users/current/groups": {
-      "get": {
-        "tags": [
-          "Users"
-        ],
-        "summary": "Get Current User Groups",
-        "operationId": "get_current_user_groups",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GroupsGetResponse"
                 }
               }
             }

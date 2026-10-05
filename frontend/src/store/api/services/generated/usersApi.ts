@@ -27,6 +27,12 @@ const injectedRtkApi = api.injectEndpoints({
         body: queryArg,
       }),
     }),
+    getCurrentUserGroups: build.query<
+      GetCurrentUserGroupsApiResponse,
+      GetCurrentUserGroupsApiArg
+    >({
+      query: () => ({ url: `/api/v2/users/current/groups` }),
+    }),
     getUserGroups: build.query<GetUserGroupsApiResponse, GetUserGroupsApiArg>({
       query: (queryArg) => ({ url: `/api/v2/users/${queryArg}/groups` }),
     }),
@@ -59,12 +65,6 @@ const injectedRtkApi = api.injectEndpoints({
     >({
       query: () => ({ url: `/api/v2/users/current` }),
     }),
-    getCurrentUserGroups: build.query<
-      GetCurrentUserGroupsApiResponse,
-      GetCurrentUserGroupsApiArg
-    >({
-      query: () => ({ url: `/api/v2/users/current/groups` }),
-    }),
   }),
   overrideExisting: false,
 });
@@ -80,6 +80,9 @@ export type CreateUserApiArg = UserCreate;
 export type SetCanBecomeAdminApiResponse =
   /** status 200 Successful Response */ any;
 export type SetCanBecomeAdminApiArg = CanBecomeAdminUpdate;
+export type GetCurrentUserGroupsApiResponse =
+  /** status 200 Successful Response */ GroupsGetResponse;
+export type GetCurrentUserGroupsApiArg = void;
 export type GetUserGroupsApiResponse =
   /** status 200 Successful Response */ GroupsGetResponse;
 export type GetUserGroupsApiArg = string;
@@ -96,9 +99,6 @@ export type GetUserRequestsApiArg =
 export type GetCurrentUserApiResponse =
   /** status 200 Successful Response */ User;
 export type GetCurrentUserApiArg = void;
-export type GetCurrentUserGroupsApiResponse =
-  /** status 200 Successful Response */ GroupsGetResponse;
-export type GetCurrentUserGroupsApiArg = void;
 export type ValidationError = {
   loc: (string | number)[];
   msg: string;
@@ -409,6 +409,8 @@ export const {
   useLazyGetUsersQuery,
   useCreateUserMutation,
   useSetCanBecomeAdminMutation,
+  useGetCurrentUserGroupsQuery,
+  useLazyGetCurrentUserGroupsQuery,
   useGetUserGroupsQuery,
   useLazyGetUserGroupsQuery,
   useMarkTourAsSeenMutation,
@@ -418,6 +420,4 @@ export const {
   useLazyGetUserRequestsQuery,
   useGetCurrentUserQuery,
   useLazyGetCurrentUserQuery,
-  useGetCurrentUserGroupsQuery,
-  useLazyGetCurrentUserGroupsQuery,
 } = injectedRtkApi;
