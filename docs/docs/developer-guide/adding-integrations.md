@@ -108,6 +108,7 @@ The sections below go through this outline one part at a time, in the order you'
 - `platform_key` links the plugin to its platform service, explained in [the platform and platform service](#the-platform-and-platform-service).
 - `has_environments` decides what happens when someone clicks the tile on the data product page. When it's on, they first pick an environment, such as development or production, and `get_url` receives it. When it's off, the tile opens the link straight away. It's on by default.
 - `show_in_form` decides whether the plugin appears in the form for creating a technical asset. It's on by default.
+- `shareable` decides whether technical assets of this type can be linked to an output port. When it's off, the portal refuses new links and approvals of pending ones, and producers see that the type isn't shareable. Links that already exist stay. It's on by default.
 
 If you override `get_url`, the tile opens a link, for example to the resource in its own tool.
 

@@ -5,6 +5,7 @@ import DataProductOutlinedIcon from '@/assets/icons/outline-icons/data-product-o
 import ExplorationOutlinedIcon from '@/assets/icons/outline-icons/exploration-outline-icon.svg?react';
 import OutputPortOutlinedIcon from '@/assets/icons/outline-icons/output-port-outline-icon.svg?react';
 import TechnicalAssetOutlineIcon from '@/assets/icons/outline-icons/technical-asset-outline-icon.svg?react';
+import UnshareableOutlineIcon from '@/assets/icons/outline-icons/unshareable-outline-icon.svg?react';
 import type { AbstractDataProductType } from '@/store/api/services/generated/usersApi.ts';
 import styles from './index.module.scss';
 
@@ -28,6 +29,10 @@ export function OutputPortOutlined(props: IconProps) {
 
 export function TechnicalAssetOutlined(props: IconProps) {
     return <Icon component={TechnicalAssetOutlineIcon} {...props} />;
+}
+
+export function UnshareableOutlined(props: IconProps) {
+    return <Icon component={UnshareableOutlineIcon} {...props} />;
 }
 
 export function ConsumersIcon() {

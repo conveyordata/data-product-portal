@@ -21,11 +21,22 @@ from app.data_products.output_port_technical_assets_link.model import (
 )
 from app.data_products.output_ports.model import OutputPort
 from app.data_products.output_ports.model import OutputPort as OutputPortModel
+from app.data_products.technical_assets.model import TechnicalAsset
 from app.groups.service import GroupService
+from app.plugins.registry import plugin_registry
 from app.users.schema import User
 from app.users.schema_response import (
     TechnicalAssetOutputPortRequest,
 )
+
+
+def ensure_technical_asset_shareable(technical_asset: TechnicalAsset) -> None:
+    plugin = plugin_registry.get(technical_asset.configuration.configuration_type)
+    if not plugin.get_platform_metadata().shareable:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"Technical assets of type {plugin.get_platform_metadata().display_name} cannot be linked to an output port",
+        )
 
 
 class TechnicalAssetOutputPortService:
@@ -86,6 +97,7 @@ class TechnicalAssetOutputPortService:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Request can not be already approved or denied",
             )
+        ensure_technical_asset_shareable(current_link.technical_asset)
 
         current_link.status = DecisionStatus.APPROVED
         current_link.approved_by = actor

@@ -3,6 +3,7 @@ import { Badge, Button, Card, Collapse, Flex, List, Popconfirm, Tooltip, Typogra
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
+import { UnshareableOutlined } from '@/components/icons';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
 import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
 import {
@@ -16,7 +17,7 @@ import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import { createDataOutputIdPath } from '@/types/navigation';
 import { dispatchMessage } from '@/utils/feedback.ts';
 import { getDecisionStatusBadgeStatus } from '@/utils/status.helper';
-import { getTechnicalAssetIcon } from '@/utils/technical-asset-type.helper.ts';
+import { getTechnicalAssetIcon, isTechnicalAssetShareable } from '@/utils/technical-asset-type.helper.ts';
 import styles from './technical-asset-card.module.scss';
 
 type Props = {
@@ -101,6 +102,7 @@ export function TechnicalAssetCard({ technicalAsset, dataProductId, onDragStart,
 
     const canRemove = deleteAccess?.allowed ?? false;
     const isActive = technicalAsset.status === TechnicalAssetStatus.Active;
+    const isShareable = isTechnicalAssetShareable(technicalAsset.configuration.name, plugins);
 
     const getDeleteDescription = () => {
         if (technicalAsset.output_port_links && technicalAsset.output_port_links.length > 0) {
@@ -127,13 +129,17 @@ export function TechnicalAssetCard({ technicalAsset, dataProductId, onDragStart,
     return (
         <Card
             className={styles.card}
-            draggable={isActive}
+            draggable={isActive && isShareable}
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
             size="small"
         >
             <Flex gap="medium">
-                {isActive ? (
+                {!isShareable ? (
+                    <Tooltip title={t('Technical Assets of this type cannot be linked to an Output Port')}>
+                        <HolderOutlined style={{ cursor: 'not-allowed', opacity: 0.5 }} />
+                    </Tooltip>
+                ) : isActive ? (
                     <HolderOutlined />
                 ) : (
                     <Tooltip
@@ -164,6 +170,11 @@ export function TechnicalAssetCard({ technicalAsset, dataProductId, onDragStart,
                                     </Typography.Text>
                                 </Link>
                             </Flex>
+                            {!isShareable && (
+                                <Tooltip title={t('Technical Assets of this type cannot be linked to an Output Port')}>
+                                    <UnshareableOutlined />
+                                </Tooltip>
+                            )}
                         </Flex>
                         <Popconfirm
                             title={t('Remove Technical Asset')}

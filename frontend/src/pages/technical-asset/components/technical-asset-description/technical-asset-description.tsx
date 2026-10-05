@@ -1,6 +1,7 @@
-import { Badge, Flex, Space, Tag, Typography } from 'antd';
+import { Badge, Flex, Space, Tag, Tooltip, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { AccessModesField } from '@/components/access-modes/access-modes-field.component.tsx';
+import { UnshareableOutlined } from '@/components/icons';
 import type {
     AccessMode,
     TechnicalAssetStatus,
@@ -8,7 +9,7 @@ import type {
 import { useGetPluginsQuery } from '@/store/api/services/generated/pluginsApi';
 import type { TagModel } from '@/types/tag';
 import { getBadgeStatus, getStatusLabel } from '@/utils/status.helper.ts';
-import { getTechnicalAssetType } from '@/utils/technical-asset-type.helper.ts';
+import { getTechnicalAssetType, isTechnicalAssetShareable } from '@/utils/technical-asset-type.helper.ts';
 
 type Props = {
     status: TechnicalAssetStatus;
@@ -37,6 +38,11 @@ export function TechnicalAssetDescription({ status, type, description, tags, nam
                 <Space>
                     <Typography.Text strong>{t('Type')}</Typography.Text>
                     <Typography.Text>{getTechnicalAssetType(type, plugins, t)}</Typography.Text>
+                    {!isTechnicalAssetShareable(type, plugins) && (
+                        <Tooltip title={t('Technical Assets of this type cannot be linked to an Output Port')}>
+                            <UnshareableOutlined />
+                        </Tooltip>
+                    )}
                 </Space>
                 <AccessModesField accessModes={accessModes} />
             </Flex>

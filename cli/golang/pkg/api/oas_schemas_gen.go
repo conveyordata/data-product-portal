@@ -13984,6 +13984,7 @@ type UIElementMetadataResponse struct {
 	ParentPlatform  OptNilString        `json:"parent_platform"`
 	PlatformTile    OptNilPlatformTile  `json:"platform_tile"`
 	ShowInForm      OptBool             `json:"show_in_form"`
+	Shareable       OptBool             `json:"shareable"`
 	DetailedName    string              `json:"detailed_name"`
 }
 
@@ -14050,6 +14051,11 @@ func (s *UIElementMetadataResponse) GetPlatformTile() OptNilPlatformTile {
 // GetShowInForm returns the value of ShowInForm.
 func (s *UIElementMetadataResponse) GetShowInForm() OptBool {
 	return s.ShowInForm
+}
+
+// GetShareable returns the value of Shareable.
+func (s *UIElementMetadataResponse) GetShareable() OptBool {
+	return s.Shareable
 }
 
 // GetDetailedName returns the value of DetailedName.
@@ -14120,6 +14126,11 @@ func (s *UIElementMetadataResponse) SetPlatformTile(val OptNilPlatformTile) {
 // SetShowInForm sets the value of ShowInForm.
 func (s *UIElementMetadataResponse) SetShowInForm(val OptBool) {
 	s.ShowInForm = val
+}
+
+// SetShareable sets the value of Shareable.
+func (s *UIElementMetadataResponse) SetShareable(val OptBool) {
+	s.Shareable = val
 }
 
 // SetDetailedName sets the value of DetailedName.

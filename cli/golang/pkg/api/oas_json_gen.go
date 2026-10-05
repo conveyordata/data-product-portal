@@ -36921,12 +36921,18 @@ func (s *UIElementMetadataResponse) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
+		if s.Shareable.Set {
+			e.FieldStart("shareable")
+			s.Shareable.Encode(e)
+		}
+	}
+	{
 		e.FieldStart("detailed_name")
 		e.Str(s.DetailedName)
 	}
 }
 
-var jsonFieldsNameOfUIElementMetadataResponse = [14]string{
+var jsonFieldsNameOfUIElementMetadataResponse = [15]string{
 	0:  "not_configured",
 	1:  "ui_metadata",
 	2:  "plugin",
@@ -36940,7 +36946,8 @@ var jsonFieldsNameOfUIElementMetadataResponse = [14]string{
 	10: "parent_platform",
 	11: "platform_tile",
 	12: "show_in_form",
-	13: "detailed_name",
+	13: "shareable",
+	14: "detailed_name",
 }
 
 // Decode decodes UIElementMetadataResponse from json.
@@ -37101,8 +37108,18 @@ func (s *UIElementMetadataResponse) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"show_in_form\"")
 			}
+		case "shareable":
+			if err := func() error {
+				s.Shareable.Reset()
+				if err := s.Shareable.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"shareable\"")
+			}
 		case "detailed_name":
-			requiredBitSet[1] |= 1 << 5
+			requiredBitSet[1] |= 1 << 6
 			if err := func() error {
 				v, err := d.Str()
 				s.DetailedName = string(v)
@@ -37124,7 +37141,7 @@ func (s *UIElementMetadataResponse) Decode(d *jx.Decoder) error {
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
 		0b11001110,
-		0b00100001,
+		0b01000001,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

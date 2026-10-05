@@ -751,6 +751,7 @@
     "Technical Asset unlinked successfully": "$t(Technical Asset) unlinked successfully",
     "Technical Asset updated successfully": "$t(Technical Asset) updated successfully",
     "Technical Assets": "Technical Assets",
+    "Technical Assets of this type cannot be linked to an Output Port": "Technical Assets of this type cannot be linked to an Output Port",
     "Technical information": "Technical information",
     "Technical Mapping": "Technical Mapping",
     "Text": "Text",

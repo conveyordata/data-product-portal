@@ -22,11 +22,23 @@ from tests.factories import (
     UserFactory,
 )
 from tests.factories.access_mode import AccessModeFactory
+from tests.fixtures.fake_plugin.schema import FakeTechnicalAssetConfiguration
 from tests.webhook_util import assert_event_in_queue, assert_event_not_in_queue
 
 TECHNICAL_ASSETS_OUTPUT_PORTS_ENDPOINT = (
     "api/v2/data_products/{}/output_ports/{}/technical_assets"
 )
+
+
+@pytest.fixture
+def unshareable_fake_plugin(monkeypatch):
+    monkeypatch.setattr(
+        FakeTechnicalAssetConfiguration,
+        "_platform_metadata",
+        FakeTechnicalAssetConfiguration.get_platform_metadata().model_copy(
+            update={"shareable": False}
+        ),
+    )
 
 
 class TestOutputPortsTechnicalAssetsLinkRouter:
@@ -117,6 +129,27 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
         )
         assert response.status_code == 409, response.text
         assert "incompatible" in response.text, response.text
+
+    def test_request_technical_asset_link__unshareable_type(
+        self, client, unshareable_fake_plugin
+    ):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__REQUEST_TECHNICAL_ASSET_LINK],
+        )
+        data_product = DataProductFactory()
+        DataProductRoleAssignmentFactory(
+            identity_id=user.id, role_id=role.id, data_product_id=data_product.id
+        )
+        technical_asset = TechnicalAssetFactory(owner=data_product)
+        ds = OutputPortFactory(data_product=data_product)
+
+        response = self.request_technical_asset_output_port_link(
+            client, data_product.id, technical_asset.id, ds.id
+        )
+        assert response.status_code == 409, response.text
+        assert "cannot be linked" in response.text, response.text
 
     @patch(
         "app.data_products.output_port_technical_assets_link.router.email.send_link_output_port_email"
@@ -350,6 +383,27 @@ class TestOutputPortsTechnicalAssetsLinkRouter:
             client, ds.data_product.id, link.technical_asset.id, link.output_port.id
         )
         assert response.status_code == 200, response.text
+
+    def test_approve_technical_asset_link__unshareable_type(
+        self, client, unshareable_fake_plugin
+    ):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        ds = OutputPortFactory()
+        role = RoleFactory(
+            scope=Scope.DATASET,
+            permissions=[Action.OUTPUT_PORT__APPROVE_TECHNICAL_ASSET_LINK_REQUEST],
+        )
+        DatasetRoleAssignmentFactory(
+            user_id=user.id, role_id=role.id, output_port_id=ds.id
+        )
+        link = TechnicalAssetOutputPortAssociationFactory(
+            output_port=ds, status=DecisionStatus.PENDING
+        )
+
+        response = self.approve_link_between_technical_asset_and_output_port(
+            client, ds.data_product.id, link.technical_asset.id, link.output_port.id
+        )
+        assert response.status_code == 409, response.text
 
     def test_approve_link_between_technical_asset_and_output_port(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)

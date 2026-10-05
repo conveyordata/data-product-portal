@@ -72,6 +72,7 @@ class PluginService:
                 result_tooltip=platform_meta.result_tooltip,
                 detailed_name=platform_meta.detailed_name,
                 show_in_form=platform_meta.show_in_form,
+                shareable=platform_meta.shareable,
             )
         except NotImplementedError:
             return UIElementMetadataResponse(
@@ -84,6 +85,7 @@ class PluginService:
                 icon_name=platform_meta.icon_name,
                 parent_platform=platform_meta.parent_platform,
                 show_in_form=platform_meta.show_in_form,
+                shareable=platform_meta.shareable,
                 result_label=platform_meta.result_label,
                 result_tooltip=platform_meta.result_tooltip,
                 detailed_name=platform_meta.detailed_name,

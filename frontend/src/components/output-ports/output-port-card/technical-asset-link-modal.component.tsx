@@ -1,4 +1,4 @@
-import { Button, Checkbox, Flex, Input, List, Modal, Typography } from 'antd';
+import { Button, Checkbox, Flex, Input, List, Modal, Tooltip, Typography } from 'antd';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -13,7 +13,7 @@ import {
 } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
 import { useGetPluginsQuery } from '@/store/api/services/generated/pluginsApi';
 import { dispatchMessage } from '@/utils/feedback.ts';
-import { getTechnicalAssetIcon } from '@/utils/technical-asset-type.helper.ts';
+import { getTechnicalAssetIcon, isTechnicalAssetShareable } from '@/utils/technical-asset-type.helper.ts';
 
 type Props = {
     onClose: () => void;
@@ -54,6 +54,11 @@ export function TechnicalAssetLinkModal({ onClose, dataProductId, datasetId, dat
         );
     }, [availableDataOutputs, searchTerm]);
 
+    const selectableDataOutputs = useMemo(
+        () => filteredDataOutputs.filter((output) => isTechnicalAssetShareable(output.configuration.name, plugins)),
+        [filteredDataOutputs, plugins],
+    );
+
     const { pagination, handleCurrentPageChange } = useTablePagination(filteredDataOutputs, {
         initialPagination: DATA_OUTPUTS_TABLE_PAGINATION,
     });
@@ -71,10 +76,10 @@ export function TechnicalAssetLinkModal({ onClose, dataProductId, datasetId, dat
     };
 
     const handleSelectAll = () => {
-        if (selectedOutputs.size === filteredDataOutputs.length) {
+        if (selectedOutputs.size === selectableDataOutputs.length) {
             setSelectedOutputs(new Set());
         } else {
-            setSelectedOutputs(new Set(filteredDataOutputs.map((output) => output.id)));
+            setSelectedOutputs(new Set(selectableDataOutputs.map((output) => output.id)));
         }
     };
 
@@ -148,7 +153,7 @@ export function TechnicalAssetLinkModal({ onClose, dataProductId, datasetId, dat
                         {t('{{count}} available Technical Assets', { count: filteredDataOutputs.length })}
                     </Typography.Text>
                     <Button type="link" onClick={handleSelectAll}>
-                        {selectedOutputs.size === filteredDataOutputs.length ? t('Deselect All') : t('Select All')}
+                        {selectedOutputs.size === selectableDataOutputs.length ? t('Deselect All') : t('Select All')}
                     </Button>
                 </Flex>
             )}
@@ -168,23 +173,37 @@ export function TechnicalAssetLinkModal({ onClose, dataProductId, datasetId, dat
                     onChange: handleCurrentPageChange,
                 }}
                 locale={{ emptyText: t('No Technical Assets available') }}
-                renderItem={(output) => (
-                    <List.Item data-cy="technical-asset-link-item">
-                        <Flex align="center" gap={12} style={{ width: '100%' }}>
-                            <Checkbox
-                                checked={selectedOutputs.has(output.id)}
-                                onChange={() => handleOutputToggle(output.id)}
-                            />
-                            <CustomSvgIconLoader
-                                iconComponent={getTechnicalAssetIcon(output.configuration.name, plugins)}
-                            />
-                            <Flex vertical style={{ flex: 1 }}>
-                                <Typography.Text strong>{output.result_string}</Typography.Text>
-                                <Typography.Text type="secondary">{output.name}</Typography.Text>
-                            </Flex>
-                        </Flex>
-                    </List.Item>
-                )}
+                renderItem={(output) => {
+                    const shareable = isTechnicalAssetShareable(output.configuration.name, plugins);
+                    return (
+                        <Tooltip
+                            title={
+                                shareable
+                                    ? undefined
+                                    : t('Technical Assets of this type cannot be linked to an Output Port')
+                            }
+                        >
+                            <List.Item data-cy="technical-asset-link-item">
+                                <Flex align="center" gap={12} style={{ width: '100%' }}>
+                                    <Checkbox
+                                        checked={selectedOutputs.has(output.id)}
+                                        disabled={!shareable}
+                                        onChange={() => handleOutputToggle(output.id)}
+                                    />
+                                    <CustomSvgIconLoader
+                                        iconComponent={getTechnicalAssetIcon(output.configuration.name, plugins)}
+                                    />
+                                    <Flex vertical style={{ flex: 1 }}>
+                                        <Typography.Text strong disabled={!shareable}>
+                                            {output.result_string}
+                                        </Typography.Text>
+                                        <Typography.Text type="secondary">{output.name}</Typography.Text>
+                                    </Flex>
+                                </Flex>
+                            </List.Item>
+                        </Tooltip>
+                    );
+                }}
             />
         </Modal>
     );

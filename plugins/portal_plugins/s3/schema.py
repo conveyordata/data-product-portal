@@ -43,6 +43,7 @@ class S3TechnicalAssetConfiguration(TechnicalAssetPlugin):
         result_label="Resulting path",
         result_tooltip="The path you can access through this technical asset",
         detailed_name="Path",
+        shareable=False,
     )
 
     class Meta:

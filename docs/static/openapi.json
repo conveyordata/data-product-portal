@@ -18153,6 +18153,11 @@
             "title": "Show In Form",
             "default": true
           },
+          "shareable": {
+            "type": "boolean",
+            "title": "Shareable",
+            "default": true
+          },
           "detailed_name": {
             "type": "string",
             "title": "Detailed Name"

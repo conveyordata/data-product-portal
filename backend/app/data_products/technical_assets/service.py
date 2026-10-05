@@ -24,6 +24,9 @@ from app.data_products.output_port_technical_assets_link.model import (
 from app.data_products.output_port_technical_assets_link.model import (
     TechnicalAssetOutputPortAssociation as TechnicalAssetOutputPortAssociationModel,
 )
+from app.data_products.output_port_technical_assets_link.service import (
+    ensure_technical_asset_shareable,
+)
 from app.data_products.output_ports.model import OutputPort as OutputPortModel
 from app.data_products.output_ports.model import ensure_output_port_exists
 from app.data_products.output_ports.service import OutputPortService
@@ -272,6 +275,7 @@ class TechnicalAssetService:
         technical_asset = self.get_technical_asset(data_product_id, id)
         if technical_asset.status != TechnicalAssetStatus.ACTIVE:
             raise TECHNICAL_ASSET_NOT_ACTIVE_ERROR
+        ensure_technical_asset_shareable(technical_asset)
 
         if output_port.id in [
             link.output_port_id
