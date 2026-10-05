@@ -1,7 +1,6 @@
 import { Badge, Flex, Space, Tag, Tooltip, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { AccessModesField } from '@/components/access-modes/access-modes-field.component.tsx';
-import { UnshareableOutlined } from '@/components/icons';
 import type {
     AccessMode,
     TechnicalAssetStatus,
@@ -40,7 +39,7 @@ export function TechnicalAssetDescription({ status, type, description, tags, nam
                     <Typography.Text>{getTechnicalAssetType(type, plugins, t)}</Typography.Text>
                     {!isTechnicalAssetShareable(type, plugins) && (
                         <Tooltip title={t('Technical Assets of this type cannot be linked to an Output Port')}>
-                            <UnshareableOutlined />
+                            <Tag>{t('Not shareable')}</Tag>
                         </Tooltip>
                     )}
                 </Space>

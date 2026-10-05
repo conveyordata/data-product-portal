@@ -20,6 +20,7 @@ sidebar_position: 200
   This allows you to use Data Product Portal to also manage sensitive data products that should not be visible to everyone in the organization.
 - **[General]**: Added Output Port Access Types. Admins define their own Access Types in Settings and map each one to an Access Function (Auto-approve, Approval required or Invite only). Existing Output Ports are migrated to the preconfigured Unrestricted, Restricted and Private Access Types.
 - **[API]**: Added CRUD operations for new identities Groups and Machine Users alongside group membership management endpoints; the latter working in batch fashion.
+- **[Plugins]**: Plugins can mark their technical asset type as not shareable with `shareable=False` in their platform metadata. Technical assets of that type can't be linked to an Output Port, and producers see this in the UI.
 
 ### bugfixes
 

@@ -1,9 +1,8 @@
 import { HolderOutlined } from '@ant-design/icons';
-import { Badge, Button, Card, Collapse, Flex, List, Popconfirm, Tooltip, Typography } from 'antd';
+import { Badge, Button, Card, Collapse, Flex, List, Popconfirm, Tag, Tooltip, Typography } from 'antd';
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
-import { UnshareableOutlined } from '@/components/icons';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
 import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
 import {
@@ -172,7 +171,7 @@ export function TechnicalAssetCard({ technicalAsset, dataProductId, onDragStart,
                             </Flex>
                             {!isShareable && (
                                 <Tooltip title={t('Technical Assets of this type cannot be linked to an Output Port')}>
-                                    <UnshareableOutlined />
+                                    <Tag>{t('Not shareable')}</Tag>
                                 </Tooltip>
                             )}
                         </Flex>

@@ -504,6 +504,7 @@
     "None": "None",
     "Not allowed by admin": "Not allowed by admin",
     "Not allowed by Admin.": "Not allowed by Admin.",
+    "Not shareable": "Not shareable",
     "Notification has been acknowledged": "Notification has been acknowledged",
     "NotificationDataOutputCreated": "<subject>{{subject_entity}}</subject> {{subject_entity_type}} has been created for the <target>{{target_entity}}</target> {{target_entity_type}}",
     "NotificationDataOutputLinkApproved": "<subject>{{subject_entity}}</subject> {{subject_entity_type}} is now linked to the <target>{{target_entity}}</target> {{target_entity_type}}",
