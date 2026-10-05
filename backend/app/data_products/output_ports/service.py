@@ -1,5 +1,5 @@
 import copy
-from typing import Iterable, Optional, Sequence, assert_never
+from typing import Iterable, Mapping, Optional, Sequence, assert_never
 from uuid import UUID
 
 from fastapi import HTTPException, status
@@ -24,6 +24,12 @@ from app.configuration.access_durations.service import AccessDurationService
 from app.configuration.data_product_lifecycles.model import (
     DataProductLifecycle as DataProductLifeCycleModel,
 )
+from app.configuration.output_port_access_types.model import (
+    OutputPortAccessType as OutputPortAccessTypeModel,
+)
+from app.configuration.output_port_access_types.model import (
+    ensure_output_port_access_type_exists,
+)
 from app.configuration.tags.model import Tag as TagModel
 from app.configuration.tags.model import ensure_tag_exists
 from app.core.authz import Authorization
@@ -41,7 +47,7 @@ from app.data_products.model import (
 from app.data_products.output_port_technical_assets_link.model import (
     TechnicalAssetOutputPortAssociation as TechnicalAssetOutputPortAssociationModel,
 )
-from app.data_products.output_ports.enums import OutputPortAccessType
+from app.data_products.output_ports.enums import OutputPortAccessFunction
 from app.data_products.output_ports.model import OutputPort as OutputPortModel
 from app.data_products.output_ports.model import ensure_output_port_exists
 from app.data_products.output_ports.schema import DatasetEmbedModel, OutputPort
@@ -61,6 +67,7 @@ from app.data_products.status import AbstractDataProductStatus
 from app.data_products.technical_assets.model import (
     TechnicalAsset as TechnicalAssetModel,
 )
+from app.database.database import UNFILTERED
 from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
@@ -263,11 +270,8 @@ class OutputPortService:
                 select(OutputPortModel)
                 .where(OutputPortModel.data_product_id == data_product_id)
                 .options(*self.recalculate_embeddings_load_options()),
-                execution_options={
-                    # Recalculation will never be done by users, so we can safely skip the filters here
-                    "skip_data_product_visibility_filter": True,
-                    "skip_output_port_access_type_filter": True,
-                },
+                # Recalculation will never be done by users, so we can safely skip the filters here
+                execution_options=UNFILTERED,
             )
             .unique()
             .all()
@@ -279,11 +283,8 @@ class OutputPortService:
             select(OutputPortModel)
             .where(OutputPortModel.id == dataset_id)
             .options(*self.recalculate_embeddings_load_options()),
-            execution_options={
-                # Recalculation will never be done by users, so we can safely skip the filters here
-                "skip_data_product_visibility_filter": True,
-                "skip_output_port_access_type_filter": True,
-            },
+            # Recalculation will never be done by users, so we can safely skip the filters here
+            execution_options=UNFILTERED,
         )
         self._recalculate_embeddings_and_search_vector([dataset])
 
@@ -308,9 +309,7 @@ class OutputPortService:
 
     def recalculate_search_for_all_output_ports(self, batch_size: int = 50) -> None:
         dataset_ids = self.db.scalars(
-            select(OutputPortModel.id).execution_options(
-                skip_output_port_access_type_filter=True
-            )
+            select(OutputPortModel.id).execution_options(**UNFILTERED)
         ).all()
         # Process in batches to reduce load
         for i in range(0, len(dataset_ids), batch_size):
@@ -321,10 +320,7 @@ class OutputPortService:
                     select(OutputPortModel)
                     .where(OutputPortModel.id.in_(batch_ids))
                     .options(*self.recalculate_embeddings_load_options())
-                    .execution_options(
-                        skip_data_product_visibility_filter=True,
-                        skip_output_port_access_type_filter=True,
-                    ),
+                    .execution_options(**UNFILTERED),
                 )
                 .unique()
                 .all()
@@ -345,27 +341,74 @@ class OutputPortService:
         return tags
 
     @staticmethod
-    def ensure_access_type_matches_visibility(
-        dp: DataProductModel, access_type: OutputPortAccessType
+    def ensure_access_function_matches_visibility(
+        dp: DataProductModel, access_function: OutputPortAccessFunction
     ) -> None:
         match dp.visibility:
             case DataProductVisibility.HIDDEN:
-                if access_type != OutputPortAccessType.PRIVATE:
+                if access_function != OutputPortAccessFunction.PRIVATE:
                     raise HTTPException(
                         status_code=status.HTTP_400_BAD_REQUEST,
-                        detail="Hidden data products can only have private output ports",
+                        detail="Output Ports of a Hidden Data Product need an Access Type mapped to Invite only",
                     )
             case DataProductVisibility.DISCOVERABLE:
                 pass
             case _:
                 assert_never(dp.visibility)
 
+    @staticmethod
+    def _set_access_type(
+        output_port: OutputPortModel, access_type: OutputPortAccessTypeModel
+    ) -> None:
+        output_port.access_type = access_type
+        output_port.access_function = access_type.access_function
+
+    def _resolve_access_type(
+        self, dp: DataProductModel, access_type_id: UUID
+    ) -> OutputPortAccessTypeModel:
+        access_type = ensure_output_port_access_type_exists(access_type_id, self.db)
+        self.ensure_access_function_matches_visibility(dp, access_type.access_function)
+        return access_type
+
+    def count_by_access_type(self, include_hidden: bool) -> Mapping[UUID, int]:
+        return dict(
+            self.db.execute(
+                select(OutputPortModel.access_type_id, func.count()).group_by(
+                    OutputPortModel.access_type_id
+                ),
+                execution_options=UNFILTERED if include_hidden else {},
+            ).all()
+        )
+
+    def remap_output_ports_access_function(
+        self, access_type_id: UUID, access_function: OutputPortAccessFunction
+    ) -> None:
+        output_ports = (
+            self.db.scalars(
+                select(OutputPortModel).where(
+                    OutputPortModel.access_type_id == access_type_id
+                ),
+                execution_options=UNFILTERED,
+            )
+            .unique()
+            .all()
+        )
+        for output_port in output_ports:
+            self.ensure_access_function_matches_visibility(
+                output_port.data_product, access_function
+            )
+            self.db.expire(output_port, ["access_function"])
+        self.db.flush()
+        self._sync_public_reader_grouping(
+            [output_port.id for output_port in output_ports], access_function
+        )
+
     def create_output_port(
         self, data_product_id: UUID, create_output_port_request: CreateOutputPortRequest
     ) -> OutputPortModel:
         dp = self._ensure_data_product_not_deleting(data_product_id)
-        self.ensure_access_type_matches_visibility(
-            dp, create_output_port_request.access_type
+        access_type = self._resolve_access_type(
+            dp, create_output_port_request.access_type_id
         )
         if (
             validity := self.namespace_validator.validate_namespace(
@@ -386,10 +429,11 @@ class OutputPortService:
         tags = self._fetch_tags(output_port_schema.pop("tag_ids", []))
         _ = output_port_schema.pop("owners", [])
         model = OutputPortModel(**output_port_schema, tags=tags)
+        self._set_access_type(model, access_type)
 
         self.db.add(model)
         self.db.flush()
-        self._sync_public_reader_grouping(model.id, model.access_type)
+        self._sync_public_reader_grouping([model.id], model.access_function)
         self.recalculate_search(model.id)
         return model
 
@@ -409,11 +453,12 @@ class OutputPortService:
         self, id: UUID, data_product_id: UUID, output_port_update: OutputPortUpdate
     ) -> UUID:
         dp = self._ensure_data_product_not_deleting(data_product_id)
-        self.ensure_access_type_matches_visibility(dp, output_port_update.access_type)
         current_output_port = ensure_output_port_exists(
             id, self.db, data_product_id=data_product_id
         )
+        access_type = self._resolve_access_type(dp, output_port_update.access_type_id)
         updated_output_port = output_port_update.model_dump(exclude_unset=True)
+        updated_output_port.pop("access_type_id")
 
         if (
             current_output_port.namespace != output_port_update.namespace
@@ -433,20 +478,20 @@ class OutputPortService:
             output_port_update.exploration_access_duration_type,
         )
 
-        access_type_change = None
+        access_function_changed = (
+            current_output_port.access_function != access_type.access_function
+        )
+        self._set_access_type(current_output_port, access_type)
         for k, v in updated_output_port.items():
             if k == "tag_ids":
                 new_tags = self._fetch_tags(v)
                 current_output_port.tags = new_tags
-            elif k == "access_type":
-                access_type_change = current_output_port.access_type
-                setattr(current_output_port, k, v)
             else:
                 setattr(current_output_port, k, v) if v else None
         self.db.flush()
-        if access_type_change is not None:
+        if access_function_changed:
             self._sync_public_reader_grouping(
-                current_output_port.id, current_output_port.access_type
+                [current_output_port.id], current_output_port.access_function
             )
         self.recalculate_search(id)
 
@@ -612,34 +657,25 @@ class OutputPortService:
 
     @staticmethod
     def _sync_public_reader_grouping(
-        output_port_id: UUID, access_type: OutputPortAccessType
+        output_port_ids: Sequence[UUID], access_function: OutputPortAccessFunction
     ):
-        match access_type:
-            case OutputPortAccessType.UNRESTRICTED | OutputPortAccessType.RESTRICTED:
-                Authorization().assign_resource_role(
-                    user_id="*",
-                    role_id=OUTPUT_PORT_READER_ROLE,
-                    resource_id=str(output_port_id),
-                )
-            case OutputPortAccessType.PRIVATE:
-                Authorization().revoke_resource_role(
-                    user_id="*",
-                    role_id=OUTPUT_PORT_READER_ROLE,
-                    resource_id=str(output_port_id),
-                )
-            case _:
-                assert_never(access_type)
+        Authorization().sync_resource_roles(
+            user_id="*",
+            role_id=OUTPUT_PORT_READER_ROLE,
+            resource_ids=output_port_ids,
+            granted=access_function != OutputPortAccessFunction.PRIVATE,
+        )
 
     def sync_read_rights_output_ports(self):
-        visible_output_ports = self.db.execute(
-            select(OutputPortModel.id, OutputPortModel.access_type).where(
-                OutputPortModel.access_type.in_(
-                    [OutputPortAccessType.UNRESTRICTED, OutputPortAccessType.RESTRICTED]
-                )
+        visible_output_port_ids = self.db.scalars(
+            select(OutputPortModel.id).where(
+                OutputPortModel.access_function != OutputPortAccessFunction.PRIVATE
             ),
-            execution_options={"skip_output_port_access_type_filter": True},
+            execution_options=UNFILTERED,
         ).all()
-        if not visible_output_ports:
-            return
-        for id, access_type in visible_output_ports:
-            self._sync_public_reader_grouping(id, access_type)
+        Authorization().sync_resource_roles(
+            user_id="*",
+            role_id=OUTPUT_PORT_READER_ROLE,
+            resource_ids=visible_output_port_ids,
+            granted=True,
+        )

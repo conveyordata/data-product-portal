@@ -34,7 +34,7 @@ from app.core.logging.posthog_analytics import (
     PosthogAnalyticsClient,
 )
 from app.data_products import email
-from app.data_products.output_ports.enums import OutputPortAccessType
+from app.data_products.output_ports.enums import OutputPortAccessFunction
 from app.data_products.output_ports.input_ports.service import InputPortService
 from app.data_products.output_ports.model import OutputPort as OutputPortModel
 from app.data_products.output_ports.model import ensure_output_port_exists
@@ -137,7 +137,7 @@ class AbstractDataProductService:
         )
         self.db.add(request)
         self.db.flush()
-        if output_port.access_type == OutputPortAccessType.UNRESTRICTED:
+        if output_port.access_function == OutputPortAccessFunction.UNRESTRICTED:
             InputPortService(self.db).approve_request(
                 request,
                 now=datetime.now(tz=pytz.utc),
@@ -419,7 +419,10 @@ class AbstractDataProductService:
         actor: User,
     ):
         for input_port in input_ports:
-            if input_port.output_port.access_type != OutputPortAccessType.UNRESTRICTED:
+            if (
+                input_port.output_port.access_function
+                != OutputPortAccessFunction.UNRESTRICTED
+            ):
                 approvers = OutputPortRoleAssignmentService(
                     self.db
                 ).users_with_authz_action(

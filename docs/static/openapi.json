@@ -3204,6 +3204,180 @@
         }
       }
     },
+    "/api/v2/configuration/output_port_access_types": {
+      "get": {
+        "tags": [
+          "Configuration - Output Port access types"
+        ],
+        "summary": "Get Output Port Access Types",
+        "operationId": "get_output_port_access_types",
+        "parameters": [
+          {
+            "name": "include_output_port_count",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Include Output Port Count"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OutputPortAccessTypesGet"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Configuration - Output Port access types"
+        ],
+        "summary": "Create Output Port Access Type",
+        "operationId": "create_output_port_access_type",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OutputPortAccessTypeCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateOutputPortAccessTypeResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/configuration/output_port_access_types/{id}": {
+      "put": {
+        "tags": [
+          "Configuration - Output Port access types"
+        ],
+        "summary": "Update Output Port Access Type",
+        "operationId": "update_output_port_access_type",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OutputPortAccessTypeUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateOutputPortAccessTypeResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Configuration - Output Port access types"
+        ],
+        "summary": "Remove Output Port Access Type",
+        "operationId": "remove_output_port_access_type",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v2/configuration/data_product_settings": {
       "get": {
         "tags": [
@@ -10573,6 +10747,20 @@
         ],
         "title": "CreateGlobalRoleAssignment"
       },
+      "CreateOutputPortAccessTypeResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "title": "CreateOutputPortAccessTypeResponse"
+      },
       "CreateOutputPortRequest": {
         "properties": {
           "name": {
@@ -10587,8 +10775,10 @@
             "type": "string",
             "title": "Description"
           },
-          "access_type": {
-            "$ref": "#/components/schemas/OutputPortAccessType"
+          "access_type_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Access Type Id"
           },
           "data_product_access_duration_type": {
             "$ref": "#/components/schemas/AccessDurationType"
@@ -10642,7 +10832,7 @@
           "name",
           "namespace",
           "description",
-          "access_type",
+          "access_type_id",
           "data_product_access_duration_type",
           "exploration_access_duration_type",
           "tag_ids",
@@ -14934,14 +15124,138 @@
         ],
         "title": "OutputPortAccessDuration"
       },
-      "OutputPortAccessType": {
+      "OutputPortAccessFunction": {
         "type": "string",
         "enum": [
           "restricted",
           "private",
           "unrestricted"
         ],
+        "title": "OutputPortAccessFunction"
+      },
+      "OutputPortAccessType": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "access_function": {
+            "$ref": "#/components/schemas/OutputPortAccessFunction"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "access_function"
+        ],
         "title": "OutputPortAccessType"
+      },
+      "OutputPortAccessTypeCreate": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Name"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "default": ""
+          },
+          "access_function": {
+            "$ref": "#/components/schemas/OutputPortAccessFunction"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "access_function"
+        ],
+        "title": "OutputPortAccessTypeCreate"
+      },
+      "OutputPortAccessTypeUpdate": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Name"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "default": ""
+          },
+          "access_function": {
+            "$ref": "#/components/schemas/OutputPortAccessFunction"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "access_function"
+        ],
+        "title": "OutputPortAccessTypeUpdate"
+      },
+      "OutputPortAccessTypesGet": {
+        "properties": {
+          "output_port_access_types": {
+            "items": {
+              "$ref": "#/components/schemas/OutputPortAccessTypesGetItem"
+            },
+            "type": "array",
+            "title": "Output Port Access Types"
+          }
+        },
+        "type": "object",
+        "required": [
+          "output_port_access_types"
+        ],
+        "title": "OutputPortAccessTypesGet"
+      },
+      "OutputPortAccessTypesGetItem": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "access_function": {
+            "$ref": "#/components/schemas/OutputPortAccessFunction"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "output_port_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Output Port Count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "access_function",
+          "description"
+        ],
+        "title": "OutputPortAccessTypesGetItem"
       },
       "OutputPortCuratedQueries": {
         "properties": {
@@ -15633,8 +15947,10 @@
             "type": "string",
             "title": "Description"
           },
-          "access_type": {
-            "$ref": "#/components/schemas/OutputPortAccessType"
+          "access_type_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Access Type Id"
           },
           "data_product_access_duration_type": {
             "$ref": "#/components/schemas/AccessDurationType"
@@ -15679,7 +15995,7 @@
           "name",
           "namespace",
           "description",
-          "access_type",
+          "access_type_id",
           "data_product_access_duration_type",
           "exploration_access_duration_type",
           "tag_ids"
@@ -17907,6 +18223,20 @@
           "id"
         ],
         "title": "UpdateDomainResponse"
+      },
+      "UpdateOutputPortAccessTypeResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "title": "UpdateOutputPortAccessTypeResponse"
       },
       "UpdateOutputPortQueryStatus": {
         "properties": {

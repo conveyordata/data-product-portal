@@ -239,6 +239,11 @@ export type DataProduct = {
   status: AbstractDataProductStatus;
   type: DataProductType;
 };
+export type OutputPortAccessType = {
+  id: string;
+  name: string;
+  access_function: OutputPortAccessFunction;
+};
 export type Tag = {
   id: string;
   value: string;
@@ -431,7 +436,7 @@ export enum OutputPortStatus {
   Active = "active",
   Archived = "archived",
 }
-export enum OutputPortAccessType {
+export enum OutputPortAccessFunction {
   Restricted = "restricted",
   Private = "private",
   Unrestricted = "unrestricted",

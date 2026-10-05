@@ -29,7 +29,6 @@ import {
     useUpdateOutputPortMutation,
 } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
-import { getDatasetAccessTypeLabel } from '@/utils/access-type.helper';
 import { dispatchMessage } from '@/utils/feedback.ts';
 
 type Props = {
@@ -63,11 +62,11 @@ export function SettingsTab({ outputPortId, dataProductId }: Props) {
     const { data: { access_durations: allDurations = [] } = {} } = useGetAllAccessDurationsQuery();
     const [updateOutputPort] = useUpdateOutputPortMutation();
 
-    const [accessType, setAccessType] = useState(outputPort?.access_type);
+    const [accessTypeId, setAccessTypeId] = useState(outputPort?.access_type.id);
     const [dataProductDuration, setDataProductDuration] = useState(outputPort?.data_product_access_duration_type);
     const [explorationDuration, setExplorationDuration] = useState(outputPort?.exploration_access_duration_type);
 
-    useEffect(() => setAccessType(outputPort?.access_type), [outputPort?.access_type]);
+    useEffect(() => setAccessTypeId(outputPort?.access_type.id), [outputPort?.access_type.id]);
     useEffect(
         () => setDataProductDuration(outputPort?.data_product_access_duration_type),
         [outputPort?.data_product_access_duration_type],
@@ -89,7 +88,7 @@ export function SettingsTab({ outputPortId, dataProductId }: Props) {
         partial: Partial<
             Pick<
                 OutputPortUpdate,
-                'access_type' | 'data_product_access_duration_type' | 'exploration_access_duration_type'
+                'access_type_id' | 'data_product_access_duration_type' | 'exploration_access_duration_type'
             >
         >,
         revert: () => void,
@@ -105,7 +104,7 @@ export function SettingsTab({ outputPortId, dataProductId }: Props) {
                     description: outputPort.description,
                     tag_ids: outputPort.tags.map((tag) => tag.id),
                     lifecycle_id: outputPort.lifecycle?.id ?? null,
-                    access_type: outputPort.access_type,
+                    access_type_id: outputPort.access_type.id,
                     data_product_access_duration_type: outputPort.data_product_access_duration_type,
                     exploration_access_duration_type: outputPort.exploration_access_duration_type,
                     ...partial,
@@ -136,21 +135,24 @@ export function SettingsTab({ outputPortId, dataProductId }: Props) {
 
     const items: DescriptionsProps['items'] = [
         {
-            key: 'access-type',
-            label: labelWithTooltip(t('Access Type'), t('The access type of the Output Port')),
+            key: 'access_type',
+            label: labelWithTooltip(
+                t('Access Type'),
+                t('The access type of the Output Port, which determines who can see and access it'),
+            ),
             span: 2,
             children: canEditAccess ? (
                 <AccessTypeSection
-                    value={accessType}
+                    value={accessTypeId}
                     onChange={(value) => {
-                        const previous = accessType;
-                        setAccessType(value);
-                        saveAccessField({ access_type: value }, () => setAccessType(previous));
+                        const previous = accessTypeId;
+                        setAccessTypeId(value);
+                        saveAccessField({ access_type_id: value }, () => setAccessTypeId(previous));
                     }}
                     hiddenDataProduct={dataProduct?.visibility === DataProductVisibility.Hidden}
                 />
             ) : (
-                getDatasetAccessTypeLabel(t, outputPort.access_type)
+                outputPort.access_type.name
             ),
         },
         ...(accessDurations

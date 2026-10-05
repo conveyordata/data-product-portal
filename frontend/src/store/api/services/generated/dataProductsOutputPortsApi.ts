@@ -493,6 +493,11 @@ export type SchemaObjectRequest = {
 export type BitolContractRequest = {
   schema?: SchemaObjectRequest[];
 };
+export type OutputPortAccessType = {
+  id: string;
+  name: string;
+  access_function: OutputPortAccessFunction;
+};
 export type Tag = {
   id: string;
   value: string;
@@ -523,7 +528,7 @@ export type CreateOutputPortRequest = {
   name: string;
   namespace: string;
   description: string;
-  access_type: OutputPortAccessType;
+  access_type_id: string;
   data_product_access_duration_type: AccessDurationType;
   exploration_access_duration_type: AccessDurationType;
   about?: string | null;
@@ -611,7 +616,7 @@ export type OutputPortUpdate = {
   name: string;
   namespace: string;
   description: string;
-  access_type: OutputPortAccessType;
+  access_type_id: string;
   data_product_access_duration_type: AccessDurationType;
   exploration_access_duration_type: AccessDurationType;
   about?: string | null;
@@ -721,7 +726,7 @@ export enum OutputPortStatus {
   Active = "active",
   Archived = "archived",
 }
-export enum OutputPortAccessType {
+export enum OutputPortAccessFunction {
   Restricted = "restricted",
   Private = "private",
   Unrestricted = "unrestricted",

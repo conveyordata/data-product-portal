@@ -2,7 +2,7 @@ import { HttpResponse, http } from 'msw';
 import {
     type GetDataProductOutputPortsResponse,
     type OutputPort,
-    OutputPortAccessType,
+    OutputPortAccessFunction,
     OutputPortStatus,
 } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
 import { server } from '@/tests/mocks/server.ts';
@@ -14,7 +14,11 @@ const mockOutputPorts: OutputPort[] = [
         namespace: 'op1',
         description: 'Output port 1',
         status: OutputPortStatus.Pending,
-        access_type: OutputPortAccessType.Unrestricted,
+        access_type: {
+            id: 'access-type-1',
+            name: 'Unrestricted',
+            access_function: OutputPortAccessFunction.Unrestricted,
+        },
         data_product_id: 'dp-1',
         tags: [],
         access_modes: [],

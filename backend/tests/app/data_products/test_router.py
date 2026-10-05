@@ -12,7 +12,7 @@ from app.authorization.roles.schema import Scope
 from app.authorization.service import AuthorizationService
 from app.core.authz import Action
 from app.data_products.model import DataProductVisibility
-from app.data_products.output_ports.enums import OutputPortAccessType
+from app.data_products.output_ports.enums import OutputPortAccessFunction
 from app.resource_names.service import ResourceNameValidityType
 from app.settings import settings
 from tests.factories import (
@@ -86,6 +86,18 @@ class TestDataProductsRouter:
         created_data_product = self.create_data_product(client, payload)
         assert created_data_product.status_code == 200
         assert "id" in created_data_product.json()
+
+    def test_create_data_product__duplicate_name(
+        self, payload, client, user_with_create_data_product_rights
+    ):
+        DataProductFactory(name=payload["name"])
+
+        response = self.create_data_product(client, payload)
+
+        assert response.status_code == 400
+        assert response.json()["detail"] == (
+            "A data product with this name already exists."
+        )
 
     def test_create_data_product_generate_webhook_v2_event(
         self,
@@ -600,7 +612,7 @@ class TestDataProductsRouter:
     def test_get_data_product_graph_data_consumer_private_output_port(self, client):
         input_port = InputPortFactory(
             output_port=OutputPortFactory(
-                access_type=OutputPortAccessType.PRIVATE,
+                access_function=OutputPortAccessFunction.PRIVATE,
             )
         )
         response = client.get(
@@ -653,7 +665,7 @@ class TestDataProductsRouter:
     ):
         data_product = DataProductFactory()
         output_port = OutputPortFactory(
-            access_type=OutputPortAccessType.PRIVATE, data_product=data_product
+            access_function=OutputPortAccessFunction.PRIVATE, data_product=data_product
         )
         response = client.get(f"{ENDPOINT}/{data_product.id}/graph")
         assert response.status_code == 200, response.text

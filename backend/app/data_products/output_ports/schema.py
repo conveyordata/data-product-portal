@@ -4,8 +4,10 @@ from warnings import deprecated
 from pydantic import Field, field_validator
 
 from app.configuration.access_modes.schema_response import AccessMode
+from app.configuration.output_port_access_types.schema import (
+    OutputPortAccessType,
+)
 from app.configuration.tags.schema import Tag
-from app.data_products.output_ports.enums import OutputPortAccessType
 from app.data_products.output_ports.status import OutputPortStatus
 from app.shared.schema import ORMModel
 

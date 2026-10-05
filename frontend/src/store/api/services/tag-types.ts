@@ -8,6 +8,7 @@ export enum TagTypes {
     DataProductType = 'DataProductType',
     Tags = 'Tags',
     DataProductLifecycle = 'DataProductLifecycle',
+    OutputPortAccessType = 'OutputPortAccessType',
     DataProductSetting = 'DataProductSetting',
     CurrentUser = 'CurrentUser',
     User = 'User',

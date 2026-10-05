@@ -4,7 +4,7 @@ import { OutputPortCard } from '@/components/output-ports/output-port-card/outpu
 import {
     AccessDurationType,
     type GetOutputPortResponse,
-    OutputPortAccessType,
+    OutputPortAccessFunction,
     OutputPortStatus,
 } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
 import {
@@ -25,7 +25,11 @@ const dataset: GetOutputPortResponse = {
     description: 'Orders dataset',
     status: OutputPortStatus.Active,
     usage: null,
-    access_type: OutputPortAccessType.Unrestricted,
+    access_type: {
+        id: 'access-type-1',
+        name: 'Unrestricted',
+        access_function: OutputPortAccessFunction.Unrestricted,
+    },
     data_product_access_duration_type: AccessDurationType.Permanent,
     exploration_access_duration_type: AccessDurationType.Permanent,
     data_product_id: 'dp-1',

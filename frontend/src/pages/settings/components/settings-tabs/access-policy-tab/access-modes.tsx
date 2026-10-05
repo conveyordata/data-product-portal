@@ -1,8 +1,9 @@
-import { Button, Flex, Popconfirm, Table, Typography } from 'antd';
+import { Button, Flex, Popconfirm, Table } from 'antd';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
 import AccessModesModal from '@/pages/settings/components/settings-tabs/access-policy-tab/access-modes-modal.tsx';
+import { SettingsSectionHeader } from '@/pages/settings/components/settings-tabs/components/settings-section-header/settings-section-header.component.tsx';
 import {
     type AccessModeWithType,
     useDeleteAccessModeMutation,
@@ -76,18 +77,16 @@ export default function AccessModes() {
     );
 
     return (
-        <>
-            <Flex vertical gap="small">
-                <Flex justify="space-between" align="center">
-                    <Typography.Title level={3}>{t('Access modes')}</Typography.Title>
+        <Flex vertical gap="middle">
+            <SettingsSectionHeader
+                title={t('Access Modes')}
+                description={t('Configure available access modes for Technical Assets and Output Ports')}
+                extra={
                     <Button type="primary" onClick={() => setOpenModal(true)}>
-                        {t('Add access mode')}
+                        {t('Add Access Mode')}
                     </Button>
-                </Flex>
-                <Typography.Text type="secondary">
-                    {t('Configure available access modes for Technical Assets and Output Ports')}
-                </Typography.Text>
-            </Flex>
+                }
+            />
             <Table<AccessModeWithType>
                 dataSource={access_modes}
                 columns={[
@@ -161,9 +160,10 @@ export default function AccessModes() {
                 ]}
                 rowKey={(record) => record.id}
                 loading={isFetching}
+                pagination={{ hideOnSinglePage: true }}
                 size="small"
             />
             {openModal && <AccessModesModal onClose={cancelModal} editAccessMode={editAccessMode} />}
-        </>
+        </Flex>
     );
 }

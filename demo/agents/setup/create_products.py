@@ -80,6 +80,18 @@ def get_lifecycle_id(name: str) -> str:
     return match["id"]
 
 
+def get_access_type_id(name: str) -> str:
+    response = requests.get(
+        f"{PORTAL_URL}/api/v2/configuration/output_port_access_types"
+    )
+    response.raise_for_status()
+    access_types = response.json().get("output_port_access_types", [])
+    match = next((c for c in access_types if c["name"] == name), None)
+    if not match:
+        raise ValueError(f"Access type '{name}' not found")
+    return match["id"]
+
+
 # ---------------------------------------------------------------------------
 # Data product creation
 # ---------------------------------------------------------------------------
@@ -149,14 +161,16 @@ def create_output_port(
     namespace: str,
     description: str,
     about: str,
-    access_type: str,  # "public" | "restricted" | "private"
+    access_type: str,
 ) -> str:
     payload = {
         "name": name,
         "namespace": namespace,
         "description": description,
         "about": about,
-        "access_type": access_type,
+        "access_type_id": get_access_type_id(access_type),
+        "data_product_access_duration_type": "permanent",
+        "exploration_access_duration_type": "permanent",
         "owners": [OWNER_ID],
         "tag_ids": [],
     }
@@ -193,7 +207,7 @@ OUTPUT_PORTS: dict[str, Any] = {
         "name": "Inventory Data",
         "namespace": "inventory-data",
         "description": "Daily stock snapshots and historical inventory levels by SKU and warehouse.",
-        "access_type": "public",
+        "access_type": "Unrestricted",
         "about": (
             "<h3>Connection Details</h3>"
             "<table><thead><tr><th>Property</th><th>Value</th></tr></thead><tbody>"
@@ -290,7 +304,7 @@ OUTPUT_PORTS: dict[str, Any] = {
         "name": "Sales & Revenue Data",
         "namespace": "sales-revenue-data",
         "description": "Transactional orders, line items, and subscription revenue for revenue reporting and analytics.",
-        "access_type": "public",
+        "access_type": "Unrestricted",
         "about": (
             "<h3>Connection Details</h3>"
             "<table><thead><tr><th>Property</th><th>Value</th></tr></thead><tbody>"
@@ -401,7 +415,7 @@ OUTPUT_PORTS: dict[str, Any] = {
         "name": "Customer Records",
         "namespace": "customer-records",
         "description": "Master customer identities and anonymous web session logs for segmentation and acquisition analysis.",
-        "access_type": "public",
+        "access_type": "Unrestricted",
         "about": (
             "<h3>Connection Details</h3>"
             "<table><thead><tr><th>Property</th><th>Value</th></tr></thead><tbody>"

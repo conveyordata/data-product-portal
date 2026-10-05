@@ -8,7 +8,7 @@ import {
     type AbstractDataProductInputPort as InputPort,
     InputPortRequestDecision,
     InputPortStatus,
-    OutputPortAccessType,
+    OutputPortAccessFunction,
     OutputPortStatus,
 } from '@/store/api/services/generated/explorationsApi.ts';
 import { server } from '@/tests/mocks/server.ts';
@@ -71,7 +71,11 @@ const mockInputPorts: InputPort[] = [
             namespace: 'op_numero_uno',
             description: 'I am the first output port',
             status: OutputPortStatus.Pending,
-            access_type: OutputPortAccessType.Unrestricted,
+            access_type: {
+                id: 'access-type-1',
+                name: 'Unrestricted',
+                access_function: OutputPortAccessFunction.Unrestricted,
+            },
             data_product_id: 'dp-1',
             tags: [],
             access_modes: [],
