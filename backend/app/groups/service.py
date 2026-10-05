@@ -24,7 +24,7 @@ class GroupService:
         self.authorizer = Authorization()
 
     def list_memberships(self, group_id: UUID | None = None) -> list[GroupMembership]:
-        query = select(GroupMembership)
+        query = select(GroupMembership).order_by(asc(GroupMembership.member_identity_id))
         if group_id is not None:
             query = query.where(GroupMembership.group_id == group_id)
 
@@ -32,11 +32,7 @@ class GroupService:
 
     def get_members(self, group_id: UUID) -> Sequence[GroupMembership]:
         ensure_group_exists(group_id, self.db)
-
-        return sorted(
-            self.list_memberships(group_id),
-            key=lambda membership: membership.member_identity_id,
-        )
+        return self.list_memberships(group_id)
 
     def add_members(
         self,
