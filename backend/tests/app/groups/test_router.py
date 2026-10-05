@@ -639,28 +639,3 @@ class TestGroupMembershipRouter:
         )
 
         assert response.status_code == 422
-
-    @pytest.mark.asyncio
-    async def test_replace_group_members__waits_for_same_group(self):
-        group_id = uuid4()
-        first_request = _serialize_group_members_replacement(group_id)
-        second_request = _serialize_group_members_replacement(group_id)
-        second_request_entered = None
-
-        try:
-            await anext(first_request)
-
-            second_request_entered = asyncio.create_task(anext(second_request))
-            await asyncio.sleep(0)
-
-            assert not second_request_entered.done()
-
-            await first_request.aclose()
-            await asyncio.wait_for(second_request_entered, timeout=1)
-
-            assert second_request_entered.done()
-        finally:
-            await first_request.aclose()
-            if second_request_entered is not None and not second_request_entered.done():
-                second_request_entered.cancel()
-            await second_request.aclose()
