@@ -125,13 +125,6 @@ class GroupService:
         self.db.delete(group)
         self.db.flush()
 
-    def has_member(self, group_id: UUID, member_identity_id: UUID) -> bool:
-        membership = self.db.get(
-            GroupMembership,
-            (group_id, member_identity_id),
-        )
-        return membership is not None
-
     def get_membership(
         self, group_id: UUID, member_identity_id: UUID
     ) -> GroupMembership:

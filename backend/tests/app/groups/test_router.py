@@ -13,6 +13,7 @@ from tests.factories import (
     MachineUserFactory,
     UserFactory,
 )
+from tests.groups_util import group_has_member
 
 ENDPOINT = "/api/v2/groups"
 
@@ -278,9 +279,8 @@ class TestGroupMembershipRouter:
         assert response.status_code == 204
         assert response.content == b""
 
-        service = GroupService(session)
-        assert service.has_member(group.id, first.id)
-        assert service.has_member(group.id, second.id)
+        assert group_has_member(session, group.id, first.id)
+        assert group_has_member(session, group.id, second.id)
 
     @pytest.mark.usefixtures("admin")
     def test_add_group_members_ignores_existing_members(
@@ -385,10 +385,9 @@ class TestGroupMembershipRouter:
         assert response.content == b""
 
         session.expire_all()
-        service = GroupService(session)
 
-        assert not service.has_member(group.id, removed.id)
-        assert service.has_member(group.id, retained.id)
+        assert not group_has_member(session, group.id, removed.id)
+        assert group_has_member(session, group.id, retained.id)
 
     @pytest.mark.usefixtures("admin")
     def test_remove_group_members_ignores_absent_members(
@@ -416,7 +415,7 @@ class TestGroupMembershipRouter:
         assert response.content == b""
 
         session.expire_all()
-        assert GroupService(session).has_member(group.id, member.id)
+        assert group_has_member(session, group.id, member.id)
 
     def test_remove_group_members_requires_permission(self, client):
         group = GroupFactory()
@@ -503,7 +502,7 @@ class TestGroupMembershipRouter:
         assert response.json()["detail"] == (
             "All member identities must exist and be users or machine users."
         )
-        assert GroupService(session).has_member(group.id, existing.id)
+        assert group_has_member(session, group.id, existing.id)
 
     def test_replace_group_members_requires_permission(self, client):
         group = GroupFactory()
