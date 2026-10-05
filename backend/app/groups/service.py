@@ -24,7 +24,9 @@ class GroupService:
         self.authorizer = Authorization()
 
     def list_memberships(self, group_id: UUID | None = None) -> list[GroupMembership]:
-        query = select(GroupMembership).order_by(asc(GroupMembership.member_identity_id))
+        query = select(GroupMembership).order_by(
+            asc(GroupMembership.member_identity_id)
+        )
         if group_id is not None:
             query = query.where(GroupMembership.group_id == group_id)
 

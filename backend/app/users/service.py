@@ -12,6 +12,8 @@ from app.data_products.output_port_technical_assets_link.service import (
     TechnicalAssetOutputPortService,
 )
 from app.data_products.output_ports.input_ports.service import InputPortService
+from app.groups.model import Group, GroupMembership
+from app.groups.schema_response import GroupGet
 from app.users.model import User, ensure_user_exists
 from app.users.model import User as UserModel
 from app.users.schema_request import CanBecomeAdminUpdate, UserCreate
@@ -115,3 +117,16 @@ class UserService:
                 key=lambda action: (action.requested_on is None, action.requested_on),
             )
         )
+
+    def get_groups(self, user_id: UUID) -> Sequence[GroupGet]:
+        ensure_user_exists(user_id, self.db)
+
+        return self.db.scalars(
+            select(Group)
+            .join(
+                GroupMembership,
+                GroupMembership.group_id == Group.id,
+            )
+            .where(GroupMembership.member_identity_id == user_id)
+            .order_by(asc(Group.display_name), asc(Group.external_id))
+        ).all()

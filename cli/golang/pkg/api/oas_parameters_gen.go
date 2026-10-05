@@ -342,6 +342,11 @@ type GetTechnicalAssetEventHistoryParams struct {
 	ID            uuid.UUID
 }
 
+// GetUserGroupsParams is parameters of get_user_groups operation.
+type GetUserGroupsParams struct {
+	ID uuid.UUID
+}
+
 // IngestOutputPortContractParams is parameters of ingest_output_port_contract operation.
 type IngestOutputPortContractParams struct {
 	DataProductID uuid.UUID

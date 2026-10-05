@@ -294,6 +294,12 @@ type Invoker interface {
 	//
 	// GET /api/v2/users/current
 	GetCurrentUser(ctx context.Context) (GetCurrentUserRes, error)
+	// GetCurrentUserGroups invokes get_current_user_groups operation.
+	//
+	// Get Current User Groups.
+	//
+	// GET /api/v2/users/current/groups
+	GetCurrentUserGroups(ctx context.Context) (GetCurrentUserGroupsRes, error)
 	// GetDataProduct invokes get_data_product operation.
 	//
 	// Get Data Product.
@@ -588,6 +594,12 @@ type Invoker interface {
 	//
 	// GET /api/v2/configuration/theme_settings
 	GetThemeSettings(ctx context.Context) (GetThemeSettingsRes, error)
+	// GetUserGroups invokes get_user_groups operation.
+	//
+	// Get User Groups.
+	//
+	// GET /api/v2/users/{id}/groups
+	GetUserGroups(ctx context.Context, params GetUserGroupsParams) (GetUserGroupsRes, error)
 	// GetUserNotifications invokes get_user_notifications operation.
 	//
 	// Get User Notifications.
@@ -830,7 +842,7 @@ type Invoker interface {
 	RenewInputPortForExploration(ctx context.Context, params RenewInputPortForExplorationParams) (RenewInputPortForExplorationRes, error)
 	// ReplaceGroupMembers invokes replace_group_members operation.
 	//
-	// Because the service method performs add and replace operations internally, a lock is used to ensure
+	// Because the service method performs add and remove operations internally, a lock is used to ensure
 	// that only one request is processed at a time.
 	//
 	// PUT /api/v2/groups/{id}/members
@@ -3787,6 +3799,49 @@ func (c *Client) sendGetCurrentUser(ctx context.Context) (res GetCurrentUserRes,
 	}()
 
 	result, err := decodeGetCurrentUserResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetCurrentUserGroups invokes get_current_user_groups operation.
+//
+// Get Current User Groups.
+//
+// GET /api/v2/users/current/groups
+func (c *Client) GetCurrentUserGroups(ctx context.Context) (GetCurrentUserGroupsRes, error) {
+	res, err := c.sendGetCurrentUserGroups(ctx)
+	return res, err
+}
+
+func (c *Client) sendGetCurrentUserGroups(ctx context.Context) (res GetCurrentUserGroupsRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/api/v2/users/current/groups"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeGetCurrentUserGroupsResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -6988,6 +7043,68 @@ func (c *Client) sendGetThemeSettings(ctx context.Context) (res GetThemeSettings
 	return result, nil
 }
 
+// GetUserGroups invokes get_user_groups operation.
+//
+// Get User Groups.
+//
+// GET /api/v2/users/{id}/groups
+func (c *Client) GetUserGroups(ctx context.Context, params GetUserGroupsParams) (GetUserGroupsRes, error) {
+	res, err := c.sendGetUserGroups(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendGetUserGroups(ctx context.Context, params GetUserGroupsParams) (res GetUserGroupsRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/api/v2/users/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/groups"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeGetUserGroupsResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // GetUserNotifications invokes get_user_notifications operation.
 //
 // Get User Notifications.
@@ -9749,7 +9866,7 @@ func (c *Client) sendRenewInputPortForExploration(ctx context.Context, params Re
 
 // ReplaceGroupMembers invokes replace_group_members operation.
 //
-// Because the service method performs add and replace operations internally, a lock is used to ensure
+// Because the service method performs add and remove operations internally, a lock is used to ensure
 // that only one request is processed at a time.
 //
 // PUT /api/v2/groups/{id}/members

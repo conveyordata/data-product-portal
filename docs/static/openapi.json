@@ -5835,7 +5835,7 @@
             "content": {
               "application/json": {
                 "example": {
-                  "detail": "User email not found"
+                  "detail": "User not found"
                 }
               }
             }
@@ -5949,6 +5949,59 @@
             "content": {
               "application/json": {
                 "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/users/{id}/groups": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Get User Groups",
+        "operationId": "get_user_groups",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupsGetResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "User not found"
+                }
               }
             }
           },
@@ -6084,6 +6137,37 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/users/current/groups": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Get Current User Groups",
+        "operationId": "get_current_user_groups",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupsGetResponse"
                 }
               }
             }
@@ -8839,16 +8923,6 @@
               }
             }
           },
-          "404": {
-            "description": "Group not found",
-            "content": {
-              "application/json": {
-                "example": {
-                  "detail": "Required group does not exist"
-                }
-              }
-            }
-          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -8866,7 +8940,7 @@
           "Groups"
         ],
         "summary": "Replace Group Members",
-        "description": "Because the service method performs add and replace operations internally,\na lock is used to ensure that only one request is processed at a time.",
+        "description": "Because the service method performs add and remove operations internally,\na lock is used to ensure that only one request is processed at a time.",
         "operationId": "replace_group_members",
         "parameters": [
           {
@@ -9044,16 +9118,6 @@
               "application/json": {
                 "example": {
                   "detail": "A machine user with this external ID already exists."
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Machine user not found",
-            "content": {
-              "application/json": {
-                "example": {
-                  "detail": "Required machine user does not exist"
                 }
               }
             }

@@ -46,12 +46,12 @@ class TestGroupsRouter:
         self,
         client,
     ):
-        first = GroupFactory(
-            external_id="engineering-a",
-            display_name="Engineering",
-        )
         second = GroupFactory(
             external_id="engineering-b",
+            display_name="Engineering",
+        )
+        first = GroupFactory(
+            external_id="engineering-a",
             display_name="Engineering",
         )
         third = GroupFactory(
