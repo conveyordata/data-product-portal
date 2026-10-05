@@ -74,14 +74,6 @@ def get_machine_user(
                 }
             },
         },
-        404: {
-            "description": "Machine user not found",
-            "content": {
-                "application/json": {
-                    "example": {"detail": "Required machine user does not exist"}
-                }
-            },
-        },
     },
 )
 def create_machine_user(

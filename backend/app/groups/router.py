@@ -191,14 +191,6 @@ def get_group_members(
                 }
             },
         },
-        404: {
-            "description": "Group not found",
-            "content": {
-                "application/json": {
-                    "example": {"detail": "Required group does not exist"}
-                }
-            },
-        },
     },
 )
 def add_group_members(
