@@ -51,8 +51,6 @@ class GroupService:
 
         inserted_ids = self._insert_member_ids(group_id, requested_ids)
         self._add_members_auth(group_id, inserted_ids)
-        self.db.flush()
-        return
 
     def remove_members(
         self,
