@@ -21,6 +21,8 @@ $icon-size: calc(#{$tile-size} / 2);
 }
 
 .icon {
+    display: flex;
+
     svg {
         height: $icon-size;
         width: $icon-size;
