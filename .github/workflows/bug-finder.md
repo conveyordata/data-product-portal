@@ -23,13 +23,14 @@ safe-outputs:
     title-prefix: "[bug] "
     labels: [background-agent, agent-bug, bug]
   noop:
+    report-as-issue: false
 ---
 
 # Bug finder
 
 Find the single most impactful real bug: code that does the wrong thing for a realistic input or state, and fix it.
 
-Look across backend, plugins, frontend, SDK and CLI, for example: logic errors and wrong conditions, unhandled edge cases (empty, missing, duplicate, concurrent), state that is not updated or cleaned up, mismatches between the frontend and the API contract, broken lifecycle or status transitions, off-by-one and pagination errors, and errors that are swallowed silently. Open issues labelled `bug` are good leads; if you fix one, link it instead of creating a duplicate issue.
+Look across backend, plugins, frontend, SDK and CLI, for example: logic errors and wrong conditions, unhandled edge cases (empty, missing, duplicate, concurrent), state that is not updated or cleaned up, mismatches between the frontend and the API contract, broken lifecycle or status transitions, off-by-one and pagination errors, and errors that are swallowed silently.
 
 Rank by user impact: data loss or corruption first, then wrong data shown or written, then broken flows. A suspicion is not a bug. Code you merely find unusual is not a bug.
 

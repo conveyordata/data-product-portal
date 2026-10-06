@@ -1,5 +1,8 @@
 ---
 engine: copilot
+runtimes:
+  python:
+    version: "3.13"
 network:
   allowed:
     - defaults
@@ -33,14 +36,6 @@ steps:
       virtualenvs-in-project: true
   - name: Install Task
     uses: go-task/setup-task@a00fbb05ce67b35648be3c78cbc9fd85354c757e # v2.2.0
-  - name: Setup Python
-    uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
-    with:
-      cache: 'poetry'
-      cache-dependency-path: |
-        backend/poetry.lock
-        plugins/pyproject.toml
-      python-version-file: 'backend/.python-version'
   - name: Install backend dependencies
     run: task setup:backend
   - name: Setup Node.js
@@ -81,7 +76,7 @@ If the top candidate does not clearly pass every point above, or you cannot prod
 
 ### 5. Fix and verify
 
-Make the minimal change. Add the regression test or proof your role asks for. Run `pre-commit run --all-files` and the test suites of every area you changed (see the AGENTS.md files for the commands). Everything must pass. The PostgreSQL service is reachable at `host.docker.internal:5432`; set `POSTGRES_SERVER=host.docker.internal` when running backend tests. If you cannot get the checks green, call `noop` instead.
+Make the minimal change. Add the regression test or proof your role asks for. Run `pre-commit run --all-files` and the test suites of every area you changed (see the AGENTS.md files for the commands). Everything must pass. The PostgreSQL service is reachable at `host.docker.internal:5432`; set `POSTGRES_SERVER=host.docker.internal` and pass `-o env_override_existing_values=0` to pytest when running backend tests, otherwise `backend/.test.env` resets it to `localhost`. If you cannot get the checks green, call `noop` instead.
 
 ### 6. Report
 

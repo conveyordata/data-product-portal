@@ -23,6 +23,7 @@ safe-outputs:
     title-prefix: "[backend consistency] "
     labels: [background-agent, agent-backend-consistency]
   noop:
+    report-as-issue: false
 ---
 
 # Backend code consistency

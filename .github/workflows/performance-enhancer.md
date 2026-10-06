@@ -23,6 +23,7 @@ safe-outputs:
     title-prefix: "[performance] "
     labels: [background-agent, agent-performance]
   noop:
+    report-as-issue: false
 ---
 
 # Performance enhancer
