@@ -124,20 +124,6 @@ class GroupService:
         self.db.delete(group)
         self.db.flush()
 
-    def get_membership(
-        self, group_id: UUID, member_identity_id: UUID
-    ) -> GroupMembership:
-        membership = self.db.get(
-            GroupMembership,
-            (group_id, member_identity_id),
-        )
-        if membership is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Member not found.",
-            )
-        return membership
-
     def get_groups_ids_identity_is_member_of(self, identity_id: UUID) -> list[UUID]:
         return list(
             self.db.scalars(

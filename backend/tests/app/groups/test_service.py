@@ -29,6 +29,7 @@ from tests.factories import (
     RoleFactory,
     UserFactory,
 )
+from tests.groups_util import group_has_member
 
 
 class TestGroupService:
@@ -54,11 +55,7 @@ class TestGroupService:
         service = GroupService(session)
 
         service.add_members(group_id=group.id, member_identity_ids=[user.id])
-        membership = service.get_membership(
-            group_id=group.id, member_identity_id=user.id
-        )
-        assert membership.group_id == group.id
-        assert membership.member_identity_id == user.id
+        assert group_has_member(session, group_id=group.id, member_identity_id=user.id)
 
     def test_machine_user_can_belong_to_group(self, session):
         group = GroupFactory()
@@ -66,11 +63,7 @@ class TestGroupService:
         service = GroupService(session)
 
         service.add_members(group_id=group.id, member_identity_ids=[machine_user.id])
-        membership = service.get_membership(
-            group_id=group.id, member_identity_id=machine_user.id
-        )
-        assert membership.group_id == group.id
-        assert membership.member_identity_id == machine_user.id
+        assert group_has_member(session, group_id=group.id, member_identity_id=machine_user.id)
 
     def test_duplicate_membership_is_ignored(self, session):
         group = GroupFactory()
@@ -105,10 +98,8 @@ class TestGroupService:
         service.delete_group(group_id=group_id)
         with pytest.raises(HTTPException):
             service.get_group(group_id=group_id)
-        with pytest.raises(HTTPException):
-            service.get_membership(group_id=group_id, member_identity_id=user1.id)
-        with pytest.raises(HTTPException):
-            service.get_membership(group_id=group_id, member_identity_id=user2.id)
+        assert not group_has_member(session, group_id=group_id, member_identity_id=user1.id)
+        assert not group_has_member(session, group_id=group_id, member_identity_id=user2.id)
 
         # Members themselves must remain.
         assert user1 in session
