@@ -40,6 +40,7 @@ from app.data_products.output_ports.model import OutputPort as OutputPortModel
 from app.data_products.output_ports.schema_response import (
     output_port_not_found_exception,
 )
+from app.database.database import UNFILTERED
 from app.events.enums import EventReferenceEntity, EventType
 from app.events.model import Event as EventModel
 from app.events.schema import CreateEvent
@@ -422,8 +423,8 @@ class InputPortService:
                     )
                 )
                 .order_by(asc(InputPortRequestModel.created_on)),
-                # Skip since we will redact manually
-                execution_options={"skip_data_product_visibility_filter": True},
+                # Skip since we will authorize and redact manually
+                execution_options=UNFILTERED,
             )
             .unique()
             .all()
@@ -448,6 +449,7 @@ class InputPortService:
         query = (
             select(InputPortRequestModel)
             .join(InputPortModel)
+            .join(InputPortModel.output_port)
             .where(InputPortRequestModel.requested_by_id == user.id)
             .options(
                 selectinload(InputPortRequestModel.input_port).selectinload(
