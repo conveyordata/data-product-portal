@@ -1,5 +1,5 @@
 from app.data_products.output_ports.enums import OutputPortAccessFunction
-from app.shared.schema import ORMModel, NonEmptyStr
+from app.shared.schema import NonEmptyStr, ORMModel
 
 
 class OutputPortAccessTypeCreate(ORMModel):

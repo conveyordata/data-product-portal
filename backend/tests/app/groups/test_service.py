@@ -63,7 +63,9 @@ class TestGroupService:
         service = GroupService(session)
 
         service.add_members(group_id=group.id, member_identity_ids=[machine_user.id])
-        assert group_has_member(session, group_id=group.id, member_identity_id=machine_user.id)
+        assert group_has_member(
+            session, group_id=group.id, member_identity_id=machine_user.id
+        )
 
     def test_duplicate_membership_is_ignored(self, session):
         group = GroupFactory()
@@ -98,8 +100,12 @@ class TestGroupService:
         service.delete_group(group_id=group_id)
         with pytest.raises(HTTPException):
             service.get_group(group_id=group_id)
-        assert not group_has_member(session, group_id=group_id, member_identity_id=user1.id)
-        assert not group_has_member(session, group_id=group_id, member_identity_id=user2.id)
+        assert not group_has_member(
+            session, group_id=group_id, member_identity_id=user1.id
+        )
+        assert not group_has_member(
+            session, group_id=group_id, member_identity_id=user2.id
+        )
 
         # Members themselves must remain.
         assert user1 in session

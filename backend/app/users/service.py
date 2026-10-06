@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session, selectinload
 from app.authorization.role_assignments.data_product.service import (
     RoleAssignmentService,
 )
+from app.core.authz import Authorization
 from app.data_products.output_port_technical_assets_link.service import (
     TechnicalAssetOutputPortService,
 )
@@ -47,6 +48,7 @@ class UserService:
         )
         user.data_products = []
         user.datasets = []
+        Authorization().clear_assignments_for_user(user_id=id)
         self.db.delete(user)
         self.db.flush()
 

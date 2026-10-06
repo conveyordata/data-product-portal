@@ -1,6 +1,6 @@
 from pydantic import ConfigDict
 
-from app.shared.schema import ORMModel, NonEmptyStr
+from app.shared.schema import NonEmptyStr, ORMModel
 
 
 class MachineUserCreate(ORMModel):

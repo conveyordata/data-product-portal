@@ -5943,27 +5943,27 @@ func (*GlobalRoleAssignmentResponse) decideGlobalRoleAssignmentRes() {}
 
 // Ref: #/components/schemas/GroupCreate
 type GroupCreate struct {
-	ExternalID  string `json:"external_id"`
-	DisplayName string `json:"display_name"`
+	ExternalID  NonEmptyStr `json:"external_id"`
+	DisplayName NonEmptyStr `json:"display_name"`
 }
 
 // GetExternalID returns the value of ExternalID.
-func (s *GroupCreate) GetExternalID() string {
+func (s *GroupCreate) GetExternalID() NonEmptyStr {
 	return s.ExternalID
 }
 
 // GetDisplayName returns the value of DisplayName.
-func (s *GroupCreate) GetDisplayName() string {
+func (s *GroupCreate) GetDisplayName() NonEmptyStr {
 	return s.DisplayName
 }
 
 // SetExternalID sets the value of ExternalID.
-func (s *GroupCreate) SetExternalID(val string) {
+func (s *GroupCreate) SetExternalID(val NonEmptyStr) {
 	s.ExternalID = val
 }
 
 // SetDisplayName sets the value of DisplayName.
-func (s *GroupCreate) SetDisplayName(val string) {
+func (s *GroupCreate) SetDisplayName(val NonEmptyStr) {
 	s.DisplayName = val
 }
 
@@ -6161,16 +6161,16 @@ func (*GroupMembershipsGetResponse) getGroupMembersRes() {}
 
 // Ref: #/components/schemas/GroupUpdate
 type GroupUpdate struct {
-	DisplayName string `json:"display_name"`
+	DisplayName NonEmptyStr `json:"display_name"`
 }
 
 // GetDisplayName returns the value of DisplayName.
-func (s *GroupUpdate) GetDisplayName() string {
+func (s *GroupUpdate) GetDisplayName() NonEmptyStr {
 	return s.DisplayName
 }
 
 // SetDisplayName sets the value of DisplayName.
-func (s *GroupUpdate) SetDisplayName(val string) {
+func (s *GroupUpdate) SetDisplayName(val NonEmptyStr) {
 	s.DisplayName = val
 }
 
@@ -6918,27 +6918,27 @@ func (*ListOutputPortRoleAssignmentsResponse) listOutputPortRoleAssignmentsRes()
 
 // Ref: #/components/schemas/MachineUserCreate
 type MachineUserCreate struct {
-	ExternalID  string `json:"external_id"`
-	DisplayName string `json:"display_name"`
+	ExternalID  NonEmptyStr `json:"external_id"`
+	DisplayName NonEmptyStr `json:"display_name"`
 }
 
 // GetExternalID returns the value of ExternalID.
-func (s *MachineUserCreate) GetExternalID() string {
+func (s *MachineUserCreate) GetExternalID() NonEmptyStr {
 	return s.ExternalID
 }
 
 // GetDisplayName returns the value of DisplayName.
-func (s *MachineUserCreate) GetDisplayName() string {
+func (s *MachineUserCreate) GetDisplayName() NonEmptyStr {
 	return s.DisplayName
 }
 
 // SetExternalID sets the value of ExternalID.
-func (s *MachineUserCreate) SetExternalID(val string) {
+func (s *MachineUserCreate) SetExternalID(val NonEmptyStr) {
 	s.ExternalID = val
 }
 
 // SetDisplayName sets the value of DisplayName.
-func (s *MachineUserCreate) SetDisplayName(val string) {
+func (s *MachineUserCreate) SetDisplayName(val NonEmptyStr) {
 	s.DisplayName = val
 }
 
@@ -7000,16 +7000,16 @@ func (*MachineUserGet) getMachineUserRes() {}
 
 // Ref: #/components/schemas/MachineUserUpdate
 type MachineUserUpdate struct {
-	DisplayName string `json:"display_name"`
+	DisplayName NonEmptyStr `json:"display_name"`
 }
 
 // GetDisplayName returns the value of DisplayName.
-func (s *MachineUserUpdate) GetDisplayName() string {
+func (s *MachineUserUpdate) GetDisplayName() NonEmptyStr {
 	return s.DisplayName
 }
 
 // SetDisplayName sets the value of DisplayName.
-func (s *MachineUserUpdate) SetDisplayName(val string) {
+func (s *MachineUserUpdate) SetDisplayName(val NonEmptyStr) {
 	s.DisplayName = val
 }
 
@@ -7448,6 +7448,8 @@ func (o NilUser) Or(d User) User {
 	}
 	return d
 }
+
+type NonEmptyStr string
 
 // OIDC token endpoint response.
 // Ref: #/components/schemas/OIDCTokenResponse
@@ -10015,13 +10017,13 @@ func (s *OutputPortAccessType) SetAccessFunction(val OutputPortAccessFunction) {
 
 // Ref: #/components/schemas/OutputPortAccessTypeCreate
 type OutputPortAccessTypeCreate struct {
-	Name           string                   `json:"name"`
+	Name           NonEmptyStr              `json:"name"`
 	Description    OptString                `json:"description"`
 	AccessFunction OutputPortAccessFunction `json:"access_function"`
 }
 
 // GetName returns the value of Name.
-func (s *OutputPortAccessTypeCreate) GetName() string {
+func (s *OutputPortAccessTypeCreate) GetName() NonEmptyStr {
 	return s.Name
 }
 
@@ -10036,7 +10038,7 @@ func (s *OutputPortAccessTypeCreate) GetAccessFunction() OutputPortAccessFunctio
 }
 
 // SetName sets the value of Name.
-func (s *OutputPortAccessTypeCreate) SetName(val string) {
+func (s *OutputPortAccessTypeCreate) SetName(val NonEmptyStr) {
 	s.Name = val
 }
 
@@ -10052,13 +10054,13 @@ func (s *OutputPortAccessTypeCreate) SetAccessFunction(val OutputPortAccessFunct
 
 // Ref: #/components/schemas/OutputPortAccessTypeUpdate
 type OutputPortAccessTypeUpdate struct {
-	Name           string                   `json:"name"`
+	Name           NonEmptyStr              `json:"name"`
 	Description    OptString                `json:"description"`
 	AccessFunction OutputPortAccessFunction `json:"access_function"`
 }
 
 // GetName returns the value of Name.
-func (s *OutputPortAccessTypeUpdate) GetName() string {
+func (s *OutputPortAccessTypeUpdate) GetName() NonEmptyStr {
 	return s.Name
 }
 
@@ -10073,7 +10075,7 @@ func (s *OutputPortAccessTypeUpdate) GetAccessFunction() OutputPortAccessFunctio
 }
 
 // SetName sets the value of Name.
-func (s *OutputPortAccessTypeUpdate) SetName(val string) {
+func (s *OutputPortAccessTypeUpdate) SetName(val NonEmptyStr) {
 	s.Name = val
 }
 

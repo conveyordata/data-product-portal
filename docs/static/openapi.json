@@ -14079,12 +14079,10 @@
       "GroupCreate": {
         "properties": {
           "external_id": {
-            "type": "string",
-            "title": "External Id"
+            "$ref": "#/components/schemas/NonEmptyStr"
           },
           "display_name": {
-            "type": "string",
-            "title": "Display Name"
+            "$ref": "#/components/schemas/NonEmptyStr"
           }
         },
         "type": "object",
@@ -14255,8 +14253,7 @@
       "GroupUpdate": {
         "properties": {
           "display_name": {
-            "type": "string",
-            "title": "Display Name"
+            "$ref": "#/components/schemas/NonEmptyStr"
           }
         },
         "additionalProperties": false,
@@ -14747,12 +14744,10 @@
       "MachineUserCreate": {
         "properties": {
           "external_id": {
-            "type": "string",
-            "title": "External Id"
+            "$ref": "#/components/schemas/NonEmptyStr"
           },
           "display_name": {
-            "type": "string",
-            "title": "Display Name"
+            "$ref": "#/components/schemas/NonEmptyStr"
           }
         },
         "type": "object",
@@ -14803,8 +14798,7 @@
       "MachineUserUpdate": {
         "properties": {
           "display_name": {
-            "type": "string",
-            "title": "Display Name"
+            "$ref": "#/components/schemas/NonEmptyStr"
           }
         },
         "additionalProperties": false,
@@ -15053,6 +15047,11 @@
         ],
         "title": "NodeType"
       },
+      "NonEmptyStr": {
+        "type": "string",
+        "minLength": 1,
+        "title": "NonEmptyStr"
+      },
       "OIDCTokenResponse": {
         "properties": {
           "access_token": {
@@ -15223,9 +15222,7 @@
       "OutputPortAccessTypeCreate": {
         "properties": {
           "name": {
-            "type": "string",
-            "minLength": 1,
-            "title": "Name"
+            "$ref": "#/components/schemas/NonEmptyStr"
           },
           "description": {
             "type": "string",
@@ -15246,9 +15243,7 @@
       "OutputPortAccessTypeUpdate": {
         "properties": {
           "name": {
-            "type": "string",
-            "minLength": 1,
-            "title": "Name"
+            "$ref": "#/components/schemas/NonEmptyStr"
           },
           "description": {
             "type": "string",

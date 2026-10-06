@@ -18032,11 +18032,11 @@ func (s *GroupCreate) Encode(e *jx.Encoder) {
 func (s *GroupCreate) encodeFields(e *jx.Encoder) {
 	{
 		e.FieldStart("external_id")
-		e.Str(s.ExternalID)
+		s.ExternalID.Encode(e)
 	}
 	{
 		e.FieldStart("display_name")
-		e.Str(s.DisplayName)
+		s.DisplayName.Encode(e)
 	}
 }
 
@@ -18057,9 +18057,7 @@ func (s *GroupCreate) Decode(d *jx.Decoder) error {
 		case "external_id":
 			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				v, err := d.Str()
-				s.ExternalID = string(v)
-				if err != nil {
+				if err := s.ExternalID.Decode(d); err != nil {
 					return err
 				}
 				return nil
@@ -18069,9 +18067,7 @@ func (s *GroupCreate) Decode(d *jx.Decoder) error {
 		case "display_name":
 			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
-				v, err := d.Str()
-				s.DisplayName = string(v)
-				if err != nil {
+				if err := s.DisplayName.Decode(d); err != nil {
 					return err
 				}
 				return nil
@@ -19057,7 +19053,7 @@ func (s *GroupUpdate) Encode(e *jx.Encoder) {
 func (s *GroupUpdate) encodeFields(e *jx.Encoder) {
 	{
 		e.FieldStart("display_name")
-		e.Str(s.DisplayName)
+		s.DisplayName.Encode(e)
 	}
 }
 
@@ -19077,9 +19073,7 @@ func (s *GroupUpdate) Decode(d *jx.Decoder) error {
 		case "display_name":
 			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				v, err := d.Str()
-				s.DisplayName = string(v)
-				if err != nil {
+				if err := s.DisplayName.Decode(d); err != nil {
 					return err
 				}
 				return nil
@@ -20639,11 +20633,11 @@ func (s *MachineUserCreate) Encode(e *jx.Encoder) {
 func (s *MachineUserCreate) encodeFields(e *jx.Encoder) {
 	{
 		e.FieldStart("external_id")
-		e.Str(s.ExternalID)
+		s.ExternalID.Encode(e)
 	}
 	{
 		e.FieldStart("display_name")
-		e.Str(s.DisplayName)
+		s.DisplayName.Encode(e)
 	}
 }
 
@@ -20664,9 +20658,7 @@ func (s *MachineUserCreate) Decode(d *jx.Decoder) error {
 		case "external_id":
 			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				v, err := d.Str()
-				s.ExternalID = string(v)
-				if err != nil {
+				if err := s.ExternalID.Decode(d); err != nil {
 					return err
 				}
 				return nil
@@ -20676,9 +20668,7 @@ func (s *MachineUserCreate) Decode(d *jx.Decoder) error {
 		case "display_name":
 			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
-				v, err := d.Str()
-				s.DisplayName = string(v)
-				if err != nil {
+				if err := s.DisplayName.Decode(d); err != nil {
 					return err
 				}
 				return nil
@@ -20978,7 +20968,7 @@ func (s *MachineUserUpdate) Encode(e *jx.Encoder) {
 func (s *MachineUserUpdate) encodeFields(e *jx.Encoder) {
 	{
 		e.FieldStart("display_name")
-		e.Str(s.DisplayName)
+		s.DisplayName.Encode(e)
 	}
 }
 
@@ -20998,9 +20988,7 @@ func (s *MachineUserUpdate) Decode(d *jx.Decoder) error {
 		case "display_name":
 			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				v, err := d.Str()
-				s.DisplayName = string(v)
-				if err != nil {
+				if err := s.DisplayName.Decode(d); err != nil {
 					return err
 				}
 				return nil
@@ -21939,6 +21927,46 @@ func (s NilUser) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *NilUser) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes NonEmptyStr as json.
+func (s NonEmptyStr) Encode(e *jx.Encoder) {
+	unwrapped := string(s)
+
+	e.Str(unwrapped)
+}
+
+// Decode decodes NonEmptyStr from json.
+func (s *NonEmptyStr) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode NonEmptyStr to nil")
+	}
+	var unwrapped string
+	if err := func() error {
+		v, err := d.Str()
+		unwrapped = string(v)
+		if err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = NonEmptyStr(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s NonEmptyStr) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *NonEmptyStr) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -24365,7 +24393,7 @@ func (s *OutputPortAccessTypeCreate) Encode(e *jx.Encoder) {
 func (s *OutputPortAccessTypeCreate) encodeFields(e *jx.Encoder) {
 	{
 		e.FieldStart("name")
-		e.Str(s.Name)
+		s.Name.Encode(e)
 	}
 	{
 		if s.Description.Set {
@@ -24398,9 +24426,7 @@ func (s *OutputPortAccessTypeCreate) Decode(d *jx.Decoder) error {
 		case "name":
 			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				v, err := d.Str()
-				s.Name = string(v)
-				if err != nil {
+				if err := s.Name.Decode(d); err != nil {
 					return err
 				}
 				return nil
@@ -24494,7 +24520,7 @@ func (s *OutputPortAccessTypeUpdate) Encode(e *jx.Encoder) {
 func (s *OutputPortAccessTypeUpdate) encodeFields(e *jx.Encoder) {
 	{
 		e.FieldStart("name")
-		e.Str(s.Name)
+		s.Name.Encode(e)
 	}
 	{
 		if s.Description.Set {
@@ -24527,9 +24553,7 @@ func (s *OutputPortAccessTypeUpdate) Decode(d *jx.Decoder) error {
 		case "name":
 			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				v, err := d.Str()
-				s.Name = string(v)
-				if err != nil {
+				if err := s.Name.Decode(d); err != nil {
 					return err
 				}
 				return nil

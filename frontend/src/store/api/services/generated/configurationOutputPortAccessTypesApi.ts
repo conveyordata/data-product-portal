@@ -83,8 +83,9 @@ export type HttpValidationError = {
 export type CreateOutputPortAccessTypeResponse = {
   id: string;
 };
+export type NonEmptyStr = string;
 export type OutputPortAccessTypeCreate = {
-  name: string;
+  name: NonEmptyStr;
   description?: string;
   access_function: OutputPortAccessFunction;
 };
@@ -92,7 +93,7 @@ export type UpdateOutputPortAccessTypeResponse = {
   id: string;
 };
 export type OutputPortAccessTypeUpdate = {
-  name: string;
+  name: NonEmptyStr;
   description?: string;
   access_function: OutputPortAccessFunction;
 };

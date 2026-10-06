@@ -3,7 +3,7 @@ from uuid import UUID
 from pydantic import ConfigDict, Field, field_validator
 
 from app.settings import settings
-from app.shared.schema import ORMModel, NonEmptyStr
+from app.shared.schema import NonEmptyStr, ORMModel
 
 
 class GroupCreate(ORMModel):
