@@ -21,22 +21,12 @@ from app.data_products.output_port_technical_assets_link.model import (
 )
 from app.data_products.output_ports.model import OutputPort
 from app.data_products.output_ports.model import OutputPort as OutputPortModel
-from app.data_products.technical_assets.model import TechnicalAsset
+from app.data_products.technical_assets.service import ensure_technical_asset_shareable
 from app.groups.service import GroupService
-from app.plugins.registry import plugin_registry
 from app.users.schema import User
 from app.users.schema_response import (
     TechnicalAssetOutputPortRequest,
 )
-
-
-def ensure_technical_asset_shareable(technical_asset: TechnicalAsset) -> None:
-    plugin = plugin_registry.get(technical_asset.configuration.configuration_type)
-    if not plugin.get_platform_metadata().shareable:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail=f"Technical assets of type {plugin.get_platform_metadata().display_name} cannot be linked to an output port",
-        )
 
 
 class TechnicalAssetOutputPortService:

@@ -5,6 +5,7 @@ from sdk.plugins.databricks import DatabricksTechnicalAssetConfiguration
 from sdk.plugins.enums import AccessGranularity
 from sdk.plugins.glue import GlueTechnicalAssetConfiguration
 from sdk.plugins.osi_sem_model import OSISemanticModelTechnicalAssetConfiguration
+from sdk.plugins.parameter_store import ParameterStoreTechnicalAssetConfiguration
 from sdk.plugins.postgresql import PostgreSQLTechnicalAssetConfiguration
 from sdk.plugins.redshift import RedshiftTechnicalAssetConfiguration
 from sdk.plugins.s3 import S3TechnicalAssetConfiguration
@@ -16,6 +17,7 @@ __all__ = [
     "DatabricksTechnicalAssetConfiguration",
     "GlueTechnicalAssetConfiguration",
     "OSISemanticModelTechnicalAssetConfiguration",
+    "ParameterStoreTechnicalAssetConfiguration",
     "PostgreSQLTechnicalAssetConfiguration",
     "RedshiftTechnicalAssetConfiguration",
     "S3TechnicalAssetConfiguration",

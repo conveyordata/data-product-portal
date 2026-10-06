@@ -12,6 +12,7 @@ import {
     useLinkOutputPortToTechnicalAssetMutation,
 } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
 import { useGetPluginsQuery } from '@/store/api/services/generated/pluginsApi';
+import { isTechnicalAssetNotShareableError } from '@/store/common/api-errors.ts';
 import { dispatchMessage } from '@/utils/feedback.ts';
 import { getTechnicalAssetIcon, isTechnicalAssetShareable } from '@/utils/technical-asset-type.helper.ts';
 
@@ -55,9 +56,14 @@ export function TechnicalAssetLinkModal({ onClose, dataProductId, datasetId, dat
     }, [availableDataOutputs, searchTerm]);
 
     const selectableDataOutputs = useMemo(
-        () => filteredDataOutputs.filter((output) => isTechnicalAssetShareable(output.configuration.name, plugins)),
+        () =>
+            plugins
+                ? filteredDataOutputs.filter((output) => isTechnicalAssetShareable(output.configuration.name, plugins))
+                : [],
         [filteredDataOutputs, plugins],
     );
+
+    const allSelected = selectableDataOutputs.length > 0 && selectedOutputs.size === selectableDataOutputs.length;
 
     const { pagination, handleCurrentPageChange } = useTablePagination(filteredDataOutputs, {
         initialPagination: DATA_OUTPUTS_TABLE_PAGINATION,
@@ -76,7 +82,7 @@ export function TechnicalAssetLinkModal({ onClose, dataProductId, datasetId, dat
     };
 
     const handleSelectAll = () => {
-        if (selectedOutputs.size === selectableDataOutputs.length) {
+        if (allSelected) {
             setSelectedOutputs(new Set());
         } else {
             setSelectedOutputs(new Set(selectableDataOutputs.map((output) => output.id)));
@@ -112,7 +118,16 @@ export function TechnicalAssetLinkModal({ onClose, dataProductId, datasetId, dat
 
             setSelectedOutputs(new Set());
             onClose();
-        } catch (_error) {
+        } catch (error) {
+            if (isTechnicalAssetNotShareableError(error)) {
+                dispatchMessage({
+                    content: t(
+                        "You can't link these Technical Assets to an Output Port because one of their types is not shareable",
+                    ),
+                    type: 'error',
+                });
+                return;
+            }
             dispatchMessage({
                 content: t('Failed to link Technical Assets'),
                 type: 'error',
@@ -152,8 +167,8 @@ export function TechnicalAssetLinkModal({ onClose, dataProductId, datasetId, dat
                     <Typography.Text type="secondary">
                         {t('{{count}} available Technical Assets', { count: filteredDataOutputs.length })}
                     </Typography.Text>
-                    <Button type="link" onClick={handleSelectAll}>
-                        {selectedOutputs.size === selectableDataOutputs.length ? t('Deselect All') : t('Select All')}
+                    <Button type="link" onClick={handleSelectAll} disabled={selectableDataOutputs.length === 0}>
+                        {allSelected ? t('Deselect All') : t('Select All')}
                     </Button>
                 </Flex>
             )}
@@ -187,7 +202,7 @@ export function TechnicalAssetLinkModal({ onClose, dataProductId, datasetId, dat
                                 <Flex align="center" gap={12} style={{ width: '100%' }}>
                                     <Checkbox
                                         checked={selectedOutputs.has(output.id)}
-                                        disabled={!shareable}
+                                        disabled={!plugins || !shareable}
                                         onChange={() => handleOutputToggle(output.id)}
                                     />
                                     <CustomSvgIconLoader

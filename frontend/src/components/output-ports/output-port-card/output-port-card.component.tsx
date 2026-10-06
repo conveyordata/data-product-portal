@@ -15,7 +15,7 @@ import {
     useLinkOutputPortToTechnicalAssetMutation,
     useUnlinkOutputPortFromTechnicalAssetMutation,
 } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
-import { isIncompatibleAccessModesError } from '@/store/common/api-errors.ts';
+import { isIncompatibleAccessModesError, isTechnicalAssetNotShareableError } from '@/store/common/api-errors.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import { createMarketplaceOutputPortPath } from '@/types/navigation';
 import { dispatchMessage } from '@/utils/feedback.ts';
@@ -173,6 +173,17 @@ export function OutputPortCard({ outputPortId, dataProductId, draggedDataOutputI
         } catch (error) {
             if (isIncompatibleAccessModesError(error)) {
                 setIncompatibleAccessModesTechnicalAssetId(dragData.id);
+                return;
+            }
+
+            if (isTechnicalAssetNotShareableError(error)) {
+                dispatchMessage({
+                    content: t(
+                        "You can't link {{name}} to an Output Port because its Technical Asset type is not shareable",
+                        { name: dragData.name },
+                    ),
+                    type: 'error',
+                });
                 return;
             }
 

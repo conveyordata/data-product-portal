@@ -6889,6 +6889,10 @@ func (s *IsAdminResponse) SetTime(val OptNilString) {
 
 func (*IsAdminResponse) isAdminRes() {}
 
+type LinkOutputPortToTechnicalAssetConflictApplicationJSON jx.Raw
+
+func (*LinkOutputPortToTechnicalAssetConflictApplicationJSON) linkOutputPortToTechnicalAssetRes() {}
+
 type LinkOutputPortToTechnicalAssetNotFoundApplicationJSON jx.Raw
 
 func (*LinkOutputPortToTechnicalAssetNotFoundApplicationJSON) linkOutputPortToTechnicalAssetRes() {}
