@@ -1,8 +1,8 @@
-import { Button, Checkbox, Flex, Input, List, Modal, Tooltip, Typography } from 'antd';
+import { Button, Checkbox, Flex, Input, List, Modal, Typography } from 'antd';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component';
+import { NotShareableIcon } from '@/components/technical-assets/not-shareable-icon/not-shareable-icon.component.tsx';
 import { DATA_OUTPUTS_TABLE_PAGINATION } from '@/constants/table.constants';
 import { useTablePagination } from '@/hooks/use-table-pagination';
 import type { TechnicalAssetLink } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
@@ -191,32 +191,27 @@ export function TechnicalAssetLinkModal({ onClose, dataProductId, datasetId, dat
                 renderItem={(output) => {
                     const shareable = isTechnicalAssetShareable(output.configuration.name, plugins);
                     return (
-                        <Tooltip
-                            title={
-                                shareable
-                                    ? undefined
-                                    : t('Technical Assets of this type cannot be linked to an Output Port')
-                            }
-                        >
-                            <List.Item data-cy="technical-asset-link-item">
-                                <Flex align="center" gap={12} style={{ width: '100%' }}>
-                                    <Checkbox
-                                        checked={selectedOutputs.has(output.id)}
-                                        disabled={!plugins || !shareable}
-                                        onChange={() => handleOutputToggle(output.id)}
-                                    />
-                                    <CustomSvgIconLoader
-                                        iconComponent={getTechnicalAssetIcon(output.configuration.name, plugins)}
-                                    />
-                                    <Flex vertical style={{ flex: 1 }}>
+                        <List.Item data-cy="technical-asset-link-item">
+                            <Flex align="center" gap={12} style={{ width: '100%' }}>
+                                <Checkbox
+                                    checked={selectedOutputs.has(output.id)}
+                                    disabled={!plugins || !shareable}
+                                    onChange={() => handleOutputToggle(output.id)}
+                                />
+                                <CustomSvgIconLoader
+                                    iconComponent={getTechnicalAssetIcon(output.configuration.name, plugins)}
+                                />
+                                <Flex vertical style={{ flex: 1 }}>
+                                    <Flex gap="small" align="center">
                                         <Typography.Text strong disabled={!shareable}>
                                             {output.result_string}
                                         </Typography.Text>
-                                        <Typography.Text type="secondary">{output.name}</Typography.Text>
+                                        {!shareable && <NotShareableIcon iconOnly />}
                                     </Flex>
+                                    <Typography.Text type="secondary">{output.name}</Typography.Text>
                                 </Flex>
-                            </List.Item>
-                        </Tooltip>
+                            </Flex>
+                        </List.Item>
                     );
                 }}
             />

@@ -1,7 +1,7 @@
 import { Badge, Flex, Space, Tag, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { AccessModesField } from '@/components/access-modes/access-modes-field.component.tsx';
-import { NotShareableTag } from '@/components/technical-assets/not-shareable-tag/not-shareable-tag.component.tsx';
+import { NotShareableIcon } from '@/components/technical-assets/not-shareable-icon/not-shareable-icon.component.tsx';
 import type {
     AccessMode,
     TechnicalAssetStatus,
@@ -38,7 +38,7 @@ export function TechnicalAssetDescription({ status, type, description, tags, nam
                 <Space>
                     <Typography.Text strong>{t('Type')}</Typography.Text>
                     <Typography.Text>{getTechnicalAssetType(type, plugins, t)}</Typography.Text>
-                    {!isTechnicalAssetShareable(type, plugins) && <NotShareableTag />}
+                    {!isTechnicalAssetShareable(type, plugins) && <NotShareableIcon />}
                 </Space>
                 <AccessModesField accessModes={accessModes} />
             </Flex>

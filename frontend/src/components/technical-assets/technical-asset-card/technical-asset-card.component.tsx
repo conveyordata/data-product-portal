@@ -4,7 +4,7 @@ import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
-import { NotShareableTag } from '@/components/technical-assets/not-shareable-tag/not-shareable-tag.component.tsx';
+import { NotShareableIcon } from '@/components/technical-assets/not-shareable-icon/not-shareable-icon.component.tsx';
 import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
 import {
     type GetTechnicalAssetsResponseItem,
@@ -175,7 +175,7 @@ export function TechnicalAssetCard({ technicalAsset, dataProductId, onDragStart,
                                     </Typography.Text>
                                 </Link>
                             </Flex>
-                            {!isShareable && <NotShareableTag />}
+                            {!isShareable && <NotShareableIcon />}
                         </Flex>
                         <Popconfirm
                             title={t('Remove Technical Asset')}
