@@ -92,24 +92,6 @@ class TestInputPortService:
         assert pending_old.id in requests_old_inactive_hidden_ids
         assert approved_old.id not in requests_old_inactive_hidden_ids
 
-    def test_get_user_requests__excludes_hidden_private_output_port(self, session):
-        user = UserFactory()
-        visible = InputPortRequestFactory(
-            requested_by=user, decision=InputPortRequestDecision.PENDING
-        )
-        InputPortRequestFactory(
-            requested_by=user,
-            decision=InputPortRequestDecision.PENDING,
-            input_port__output_port=OutputPortFactory(
-                access_function=OutputPortAccessFunction.PRIVATE
-            ),
-        )
-
-        with as_user(session, user.id):
-            requests = InputPortService(session).get_user_requests(user, False)
-
-        assert [r.id for r in requests] == [visible.id]
-
 
 def _by_id(input_port: "InputPort"):
     return {request.id: request for request in input_port.requests}

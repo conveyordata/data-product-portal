@@ -439,7 +439,6 @@ class InputPortService:
         query = (
             select(InputPortRequestModel)
             .join(InputPortModel)
-            .join(InputPortModel.output_port)
             .where(InputPortRequestModel.requested_by_id == user.id)
             .options(
                 selectinload(InputPortRequestModel.input_port).selectinload(
