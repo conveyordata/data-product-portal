@@ -3,17 +3,17 @@ from uuid import UUID
 from pydantic import ConfigDict, Field, field_validator
 
 from app.settings import settings
-from app.shared.schema import ORMModel
+from app.shared.schema import ORMModel, NonEmptyStr
 
 
 class GroupCreate(ORMModel):
-    external_id: str
-    display_name: str
+    external_id: NonEmptyStr
+    display_name: NonEmptyStr
 
 
 class GroupUpdate(ORMModel):
     model_config = ConfigDict(from_attributes=True, extra="forbid")
-    display_name: str
+    display_name: NonEmptyStr
 
 
 class GroupMembersRequest(ORMModel):
