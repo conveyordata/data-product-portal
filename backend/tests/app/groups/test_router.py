@@ -259,7 +259,7 @@ class TestGroupsRouter:
 
 class TestGroupMembershipRouter:
     @pytest.mark.usefixtures("admin")
-    def test_add_group_members(self, client, session):
+    def test_add_group_members__adds_members(self, client, session):
         group = GroupFactory()
         first = UserFactory()
         second = UserFactory()
@@ -281,7 +281,7 @@ class TestGroupMembershipRouter:
         assert group_has_member(session, group.id, second.id)
 
     @pytest.mark.usefixtures("admin")
-    def test_add_group_members_ignores_existing_members(
+    def test_add_group_members__ignores_existing_members(
         self,
         client,
         session,
@@ -317,7 +317,7 @@ class TestGroupMembershipRouter:
             new.id,
         }
 
-    def test_add_group_members_requires_permission(self, client):
+    def test_add_group_members__requires_permission(self, client):
         group = GroupFactory()
         user = UserFactory()
 
@@ -329,7 +329,7 @@ class TestGroupMembershipRouter:
         assert response.status_code == 403
 
     @pytest.mark.usefixtures("admin")
-    def test_add_group_members_rejects_empty_request(self, client):
+    def test_add_group_members__rejects_empty_request(self, client):
         group = GroupFactory()
 
         response = client.post(
@@ -340,7 +340,7 @@ class TestGroupMembershipRouter:
         assert response.status_code == 422
 
     @pytest.mark.usefixtures("admin")
-    def test_add_group_members_rejects_duplicate_ids(self, client):
+    def test_add_group_members__rejects_duplicate_ids(self, client):
         group = GroupFactory()
         user = UserFactory()
 
@@ -357,7 +357,7 @@ class TestGroupMembershipRouter:
         assert response.status_code == 422
 
     @pytest.mark.usefixtures("admin")
-    def test_remove_group_members(self, client, session):
+    def test_remove_group_members__removes_members(self, client, session):
         group = GroupFactory()
         removed = UserFactory()
         retained = UserFactory()
@@ -388,7 +388,7 @@ class TestGroupMembershipRouter:
         assert group_has_member(session, group.id, retained.id)
 
     @pytest.mark.usefixtures("admin")
-    def test_remove_group_members_ignores_absent_members(
+    def test_remove_group_members__ignores_absent_members(
         self,
         client,
         session,
@@ -415,7 +415,7 @@ class TestGroupMembershipRouter:
         session.expire_all()
         assert group_has_member(session, group.id, member.id)
 
-    def test_remove_group_members_requires_permission(self, client):
+    def test_remove_group_members__requires_permission(self, client):
         group = GroupFactory()
         user = UserFactory()
 
@@ -428,7 +428,7 @@ class TestGroupMembershipRouter:
         assert response.status_code == 403
 
     @pytest.mark.usefixtures("admin")
-    def test_remove_group_members_rejects_empty_request(self, client):
+    def test_remove_group_members__rejects_empty_request(self, client):
         group = GroupFactory()
 
         response = client.request(
@@ -440,7 +440,7 @@ class TestGroupMembershipRouter:
         assert response.status_code == 422
 
     @pytest.mark.usefixtures("admin")
-    def test_replace_group_members(self, client, session):
+    def test_replace_group_members__replaces_members(self, client, session):
         group = GroupFactory()
         retained = UserFactory()
         removed = UserFactory()
@@ -477,7 +477,7 @@ class TestGroupMembershipRouter:
         }
 
     @pytest.mark.usefixtures("admin")
-    def test_replace_group_members_rejects_invalid_identity_without_changes(
+    def test_replace_group_members__rejects_invalid_identity_without_changes(
         self,
         client,
         session,
@@ -502,7 +502,7 @@ class TestGroupMembershipRouter:
         )
         assert group_has_member(session, group.id, existing.id)
 
-    def test_replace_group_members_requires_permission(self, client):
+    def test_replace_group_members__requires_permission(self, client):
         group = GroupFactory()
         user = UserFactory()
 
@@ -590,7 +590,7 @@ class TestGroupMembershipRouter:
         assert response.status_code == 404
 
     @pytest.mark.usefixtures("admin")
-    def test_add_group_members_rejects_more_than_max_members(self, client):
+    def test_add_group_members__rejects_more_than_max_members(self, client):
         group = GroupFactory()
 
         response = client.post(
@@ -606,7 +606,7 @@ class TestGroupMembershipRouter:
         assert response.status_code == 422
 
     @pytest.mark.usefixtures("admin")
-    def test_remove_group_members_rejects_more_than_max_members(self, client):
+    def test_remove_group_members__rejects_more_than_max_members(self, client):
         group = GroupFactory()
 
         response = client.request(
@@ -623,7 +623,7 @@ class TestGroupMembershipRouter:
         assert response.status_code == 422
 
     @pytest.mark.usefixtures("admin")
-    def test_replace_group_members_rejects_more_than_max_members(self, client):
+    def test_replace_group_members__rejects_more_than_max_members(self, client):
         group = GroupFactory()
 
         response = client.request(
