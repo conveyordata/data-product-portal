@@ -316,6 +316,26 @@ class TestDataProductsRouter:
         assert response.status_code == 200
         assert response.json()["id"] == str(data_product.id)
 
+    def test_update_data_product__ignores_visibility(self, payload, client, session):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        data_product = DataProductFactory()
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__UPDATE_PROPERTIES],
+        )
+        DataProductRoleAssignmentFactory(
+            identity_id=user.id,
+            role_id=role.id,
+            data_product_id=data_product.id,
+        )
+        update_payload = deepcopy(payload)
+        update_payload["visibility"] = DataProductVisibility.HIDDEN.value
+        response = self.update_data_product(client, update_payload, data_product.id)
+
+        assert response.status_code == 200
+        session.refresh(data_product)
+        assert data_product.visibility == DataProductVisibility.DISCOVERABLE
+
     def test_update_data_product_about_no_member(self, client):
         data_product = DataProductFactory()
         response = self.update_data_product_about(client, data_product.id)
