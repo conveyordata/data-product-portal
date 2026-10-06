@@ -34,11 +34,14 @@ from app.core.logging.posthog_analytics import (
     PosthogAnalyticsClient,
 )
 from app.data_products import email
+from app.data_products.model import DataProduct as DataProductModel
+from app.data_products.model import _has_user_access_to_hidden_data_product
 from app.data_products.output_ports.enums import OutputPortAccessFunction
 from app.data_products.output_ports.input_ports.service import InputPortService
 from app.data_products.output_ports.model import OutputPort as OutputPortModel
 from app.data_products.output_ports.model import ensure_output_port_exists
 from app.data_products.status import AbstractDataProductStatus
+from app.database.database import SKIP_OUTPUT_PORT_ACCESS_FUNCTION_FILTER, UNFILTERED
 from app.users.model import User
 
 
@@ -53,6 +56,15 @@ class AbstractDataProductService:
                 status_code=status.HTTP_409_CONFLICT,
                 detail=f"{adp.abstract_data_product_type.value} '{adp.name}' is pending deletion and cannot be modified",
             )
+
+    def _is_data_product_member(self, data_product_id: UUID) -> bool:
+        user_id = self.db.info.get("current_user_id")
+        return user_id is not None and self.db.scalar(
+            select(
+                _has_user_access_to_hidden_data_product(DataProductModel, user_id)
+            ).where(DataProductModel.id == data_product_id),
+            execution_options=UNFILTERED,
+        )
 
     def get_input_ports(self, data_product_id: UUID) -> Sequence[InputPortModel]:
         ensure_abstract_data_product_exists(data_product_id, self.db)
@@ -71,6 +83,11 @@ class AbstractDataProductService:
                 .filter(
                     InputPortModel.consuming_abstract_data_product_id == data_product_id
                 ),
+                execution_options={
+                    SKIP_OUTPUT_PORT_ACCESS_FUNCTION_FILTER: self._is_data_product_member(
+                        data_product_id
+                    )
+                },
             )
             .unique()
             .all()
@@ -261,8 +278,10 @@ class AbstractDataProductService:
             options=[
                 selectinload(OutputPortModel.data_product_links)
                 .selectinload(InputPortModel.consuming_abstract_data_product)
-                .selectinload(AbstractDataProduct.input_ports)
+                .selectinload(AbstractDataProduct.input_ports),
+                selectinload(OutputPortModel.data_product),
             ],
+            execution_options=UNFILTERED,
         )
         self._ensure_not_deleting(adp)
         self._ensure_not_deleting(output_port.data_product)
@@ -307,9 +326,13 @@ class AbstractDataProductService:
             options=[
                 selectinload(AbstractDataProduct.input_ports).selectinload(
                     InputPortModel.requests
-                )
+                ),
+                selectinload(AbstractDataProduct.input_ports).selectinload(
+                    InputPortModel.output_port
+                ),
             ],
             populate_existing=True,
+            execution_options=UNFILTERED,
         )
         if not adp:
             raise HTTPException(
@@ -375,17 +398,8 @@ class AbstractDataProductService:
         return input_port
 
     def _get_input_port(self, id: UUID, output_port_id: UUID) -> InputPortModel:
-        ensure_output_port_exists(output_port_id, self.db)
-        adp = ensure_abstract_data_product_exists(
-            id,
-            self.db,
-            options=[
-                selectinload(AbstractDataProduct.input_ports).selectinload(
-                    InputPortModel.requests
-                )
-            ],
-            populate_existing=True,
-        )
+        ensure_output_port_exists(output_port_id, self.db, execution_options=UNFILTERED)
+        adp = self._get_adp_with_input_ports(id)
         input_port = next(
             (
                 input_port
@@ -420,9 +434,6 @@ class AbstractDataProductService:
         target.revoked_at = datetime.now(tz=pytz.utc)
         input_port.recompute_status()
         self.db.flush()
-        InputPortService(self.db)._sync_hidden_data_product_access(
-            input_port.output_port.data_product_id
-        )
         return input_port
 
     def cancel_input_port_request(
@@ -453,10 +464,7 @@ class AbstractDataProductService:
         output_port_id: UUID,
     ) -> InputPortModel:
         input_port = self._get_input_port(id, output_port_id)
-        data_product_id = input_port.output_port.data_product_id
         self.db.delete(input_port)
-        self.db.flush()
-        InputPortService(self.db)._sync_hidden_data_product_access(data_product_id)
         return input_port
 
     def send_input_port_requested_emails_to_output_port_owners(

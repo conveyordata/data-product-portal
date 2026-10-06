@@ -116,7 +116,7 @@ def _by_id(input_port: "InputPort"):
 
 
 class TestInputPortDecisions:
-    def test_approve__syncs_consumer_access(self, session, monkeypatch):
+    def test_approve__marks_link_approved(self, session):
         actor = UserFactory()
         consumer = DataProductFactory()
         port = OutputPortFactory(access_function=OutputPortAccessFunction.RESTRICTED)
@@ -124,16 +124,6 @@ class TestInputPortDecisions:
             consuming_abstract_data_product=consumer,
             output_port=port,
             status=DecisionStatus.PENDING,
-        )
-        synced_data_product_ids = []
-
-        def sync_hidden_data_product_access(_, data_product_id):
-            synced_data_product_ids.append(data_product_id)
-
-        monkeypatch.setattr(
-            InputPortService,
-            "_sync_hidden_data_product_access",
-            sync_hidden_data_product_access,
         )
 
         InputPortService(session).approve_output_port_as_input_port(
@@ -143,7 +133,6 @@ class TestInputPortDecisions:
             actor=actor,
         )
 
-        assert synced_data_product_ids == [port.data_product_id]
         assert link.status == InputPortStatus.APPROVED
 
     def test_approve__renewal_window_starts_at_current_date(self, session):

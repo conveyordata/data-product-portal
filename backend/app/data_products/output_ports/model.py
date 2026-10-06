@@ -26,7 +26,6 @@ from sqlalchemy.orm import (
     with_loader_criteria,
 )
 
-from app.abstract_data_product.input_ports.enums import InputPortStatus
 from app.abstract_data_product.input_ports.model import (
     InputPort,
 )
@@ -57,7 +56,11 @@ from app.data_products.output_ports.data_quality.model import (  # noqa: TCH001
 from app.data_products.output_ports.enums import OutputPortAccessFunction
 from app.data_products.output_ports.status import OutputPortStatus
 from app.data_products.technical_assets.model import TechnicalAssetAccessMode
-from app.database.database import Base, ensure_exists
+from app.database.database import (
+    SKIP_OUTPUT_PORT_ACCESS_FUNCTION_FILTER,
+    Base,
+    ensure_exists,
+)
 from app.database.event_mixin import EventTrackedMixin
 from app.groups.model import GroupMembership
 from app.shared.model import BaseORM
@@ -101,42 +104,11 @@ def _has_user_access_to_private_output_port_via_data_product(cls, user_id: uuid.
     )
 
 
-def _has_user_access_through_input_port(cls, user_id: uuid.UUID):
-    input_ports = InputPort.__table__
-    assignments = DataProductRoleAssignment.__table__
-    user_group_ids = (
-        select(GroupMembership.group_id)
-        .where(GroupMembership.member_identity_id == user_id)
-        .correlate_except(GroupMembership)
-    )
-    return (
-        select(assignments.c.id)
-        .where(
-            or_(
-                assignments.c.identity_id == user_id,
-                assignments.c.identity_id.in_(user_group_ids),
-            ),
-            assignments.c.decision == DecisionStatus.APPROVED,
-            assignments.c.data_product_id.in_(
-                select(input_ports.c.consuming_abstract_data_product_id)
-                .where(
-                    input_ports.c.dataset_id == cls.id,
-                    input_ports.c.status == InputPortStatus.APPROVED,
-                )
-                .correlate_except(input_ports)
-            ),
-        )
-        .correlate_except(assignments)
-        .exists()
-    )
-
-
 def _access_function_filter_for_user(user_id: uuid.UUID):
     return or_(
         OutputPort.access_function != OutputPortAccessFunction.PRIVATE,
         _has_user_access_to_private_output_port(OutputPort, user_id),
         _has_user_access_to_private_output_port_via_data_product(OutputPort, user_id),
-        _has_user_access_through_input_port(OutputPort, user_id),
         is_user_admin(user_id),
         is_system_account(user_id),
     )
@@ -329,7 +301,7 @@ def enforce_private_output_port_filter(execute_state):
     if not execute_state.is_select:
         return
 
-    if execute_state.execution_options.get("skip_output_port_access_function_filter"):
+    if execute_state.execution_options.get(SKIP_OUTPUT_PORT_ACCESS_FUNCTION_FILTER):
         return
 
     # The current user is only set while serving a request. Everything else
