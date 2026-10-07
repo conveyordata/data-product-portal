@@ -16,6 +16,11 @@ type AddExplorationFinalizerParams struct {
 	ID uuid.UUID
 }
 
+// AddGroupMembersParams is parameters of add_group_members operation.
+type AddGroupMembersParams struct {
+	ID uuid.UUID
+}
+
 // AddOutputPortDataQualityRunParams is parameters of add_output_port_data_quality_run operation.
 type AddOutputPortDataQualityRunParams struct {
 	DataProductID uuid.UUID
@@ -90,6 +95,16 @@ type DeleteDataProductRoleAssignmentParams struct {
 
 // DeleteGlobalRoleAssignmentParams is parameters of delete_global_role_assignment operation.
 type DeleteGlobalRoleAssignmentParams struct {
+	ID uuid.UUID
+}
+
+// DeleteGroupParams is parameters of delete_group operation.
+type DeleteGroupParams struct {
+	ID uuid.UUID
+}
+
+// DeleteMachineUserParams is parameters of delete_machine_user operation.
+type DeleteMachineUserParams struct {
 	ID uuid.UUID
 }
 
@@ -204,6 +219,16 @@ type GetExplorationsParams struct {
 	FilterToUserWithAssigment OptUUID `json:",omitempty,omitzero"`
 }
 
+// GetGroupParams is parameters of get_group operation.
+type GetGroupParams struct {
+	ID uuid.UUID
+}
+
+// GetGroupMembersParams is parameters of get_group_members operation.
+type GetGroupMembersParams struct {
+	ID uuid.UUID
+}
+
 // GetInputPortsForOutputPortParams is parameters of get_input_ports_for_output_port operation.
 type GetInputPortsForOutputPortParams struct {
 	DataProductID uuid.UUID
@@ -222,6 +247,11 @@ type GetJwtTokenParams struct {
 type GetLatestDataQualitySummaryForOutputPortParams struct {
 	DataProductID uuid.UUID
 	ID            uuid.UUID
+}
+
+// GetMachineUserParams is parameters of get_machine_user operation.
+type GetMachineUserParams struct {
+	ID uuid.UUID
 }
 
 // GetOutputPortParams is parameters of get_output_port operation.
@@ -310,6 +340,11 @@ type GetTechnicalAssetParams struct {
 type GetTechnicalAssetEventHistoryParams struct {
 	DataProductID uuid.UUID
 	ID            uuid.UUID
+}
+
+// GetUserGroupsParams is parameters of get_user_groups operation.
+type GetUserGroupsParams struct {
+	ID uuid.UUID
 }
 
 // IngestOutputPortContractParams is parameters of ingest_output_port_contract operation.
@@ -423,6 +458,11 @@ type RemoveExplorationFinalizerParams struct {
 	Finalizer string
 }
 
+// RemoveGroupMembersParams is parameters of remove_group_members operation.
+type RemoveGroupMembersParams struct {
+	ID uuid.UUID
+}
+
 // RemoveInputPortForDataProductParams is parameters of remove_input_port_for_data_product operation.
 type RemoveInputPortForDataProductParams struct {
 	ID           uuid.UUID
@@ -488,6 +528,11 @@ type RenewInputPortForDataProductParams struct {
 type RenewInputPortForExplorationParams struct {
 	ID           uuid.UUID
 	OutputPortID uuid.UUID
+}
+
+// ReplaceGroupMembersParams is parameters of replace_group_members operation.
+type ReplaceGroupMembersParams struct {
+	ID uuid.UUID
 }
 
 // ReplaceOutputPortCuratedQueriesParams is parameters of replace_output_port_curated_queries operation.
@@ -609,6 +654,16 @@ type UpdateDomainParams struct {
 
 // UpdateEnvironmentIsGlobalParams is parameters of update_environment_is_global operation.
 type UpdateEnvironmentIsGlobalParams struct {
+	ID uuid.UUID
+}
+
+// UpdateGroupParams is parameters of update_group operation.
+type UpdateGroupParams struct {
+	ID uuid.UUID
+}
+
+// UpdateMachineUserParams is parameters of update_machine_user operation.
+type UpdateMachineUserParams struct {
 	ID uuid.UUID
 }
 
