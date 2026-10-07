@@ -1144,6 +1144,22 @@ class TestDataProductsRouter:
         assert response.status_code == 200, response.text
         assert response.json()["id"] == str(output_port.id)
 
+    def test_get_output_port_graph_data__consumer_does_not_see_hidden_producer(
+        self, client, session
+    ):
+        producer, output_port, _, _ = self.setup_consumer_of_private_output_port(
+            session
+        )
+
+        response = client.get(
+            f"{ENDPOINT}/{producer.id}/output_ports/{output_port.id}/graph"
+        )
+
+        assert response.status_code == 200, response.text
+        assert str(producer.id) not in {
+            node["data"]["id"] for node in response.json()["nodes"]
+        }
+
     def test_search_output_ports__consumed_private_output_port_not_listed_for_consumer(
         self, client, session
     ):

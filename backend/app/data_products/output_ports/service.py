@@ -629,7 +629,11 @@ class OutputPortService:
                 )
 
         # if no data outputs are linked yet, still show the owner data product
-        if level >= 2 and not output_port.technical_asset_links:
+        if (
+            level >= 2
+            and not output_port.technical_asset_links
+            and output_port.data_product is not None
+        ):
             nodes.append(
                 Node(
                     id=f"{output_port.data_product.id}_2",
