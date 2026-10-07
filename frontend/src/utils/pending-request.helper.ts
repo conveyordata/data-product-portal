@@ -90,15 +90,10 @@ export const usePendingActionHandlers = () => {
                     type: 'success',
                 });
             } catch (error) {
-                if (isTechnicalAssetNotShareableError(error)) {
-                    dispatchMessage({
-                        content: t("You can't approve this link because the Technical Asset type is not shareable"),
-                        type: 'error',
-                    });
-                    return;
-                }
                 dispatchMessage({
-                    content: t('Failed to approve Technical Asset Output Port link'),
+                    content: isTechnicalAssetNotShareableError(error)
+                        ? t("You can't approve this link because the Technical Asset type is not shareable")
+                        : t('Failed to approve Technical Asset Output Port link'),
                     type: 'error',
                 });
             }

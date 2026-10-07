@@ -4,7 +4,7 @@ import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
-import { NotShareableIcon } from '@/components/technical-assets/not-shareable-icon/not-shareable-icon.component.tsx';
+import { NotShareableTag } from '@/components/technical-assets/not-shareable-tag/not-shareable-tag.component.tsx';
 import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
 import {
     type GetTechnicalAssetsResponseItem,
@@ -77,6 +77,10 @@ export function TechnicalAssetCard({ technicalAsset, dataProductId, onDragStart,
     );
 
     const handleDragStart = (event: React.DragEvent) => {
+        if (!canDrag) {
+            event.preventDefault();
+            return;
+        }
         event.dataTransfer.setData(
             'text/plain',
             JSON.stringify({
@@ -116,6 +120,7 @@ export function TechnicalAssetCard({ technicalAsset, dataProductId, onDragStart,
         return undefined;
     };
     const dragDisabledReason = getDragDisabledReason();
+    const canDrag = plugins !== undefined && !dragDisabledReason;
 
     const getDeleteDescription = () => {
         if (technicalAsset.output_port_links && technicalAsset.output_port_links.length > 0) {
@@ -142,7 +147,7 @@ export function TechnicalAssetCard({ technicalAsset, dataProductId, onDragStart,
     return (
         <Card
             className={styles.card}
-            draggable={plugins !== undefined && !dragDisabledReason}
+            draggable={canDrag}
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
             size="small"
@@ -175,7 +180,7 @@ export function TechnicalAssetCard({ technicalAsset, dataProductId, onDragStart,
                                     </Typography.Text>
                                 </Link>
                             </Flex>
-                            {!isShareable && <NotShareableIcon />}
+                            {!isShareable && <NotShareableTag />}
                         </Flex>
                         <Popconfirm
                             title={t('Remove Technical Asset')}

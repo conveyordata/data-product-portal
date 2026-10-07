@@ -176,19 +176,12 @@ export function OutputPortCard({ outputPortId, dataProductId, draggedDataOutputI
                 return;
             }
 
-            if (isTechnicalAssetNotShareableError(error)) {
-                dispatchMessage({
-                    content: t(
-                        "You can't link {{name}} to an Output Port because its Technical Asset type is not shareable",
-                        { name: dragData.name },
-                    ),
-                    type: 'error',
-                });
-                return;
-            }
-
             dispatchMessage({
-                content: t('Failed to link Technical Asset to Output Port'),
+                content: isTechnicalAssetNotShareableError(error)
+                    ? t("You can't link {{name}} to an Output Port because its Technical Asset type is not shareable", {
+                          name: dragData.name,
+                      })
+                    : t('Failed to link Technical Asset to Output Port'),
                 type: 'error',
             });
         }

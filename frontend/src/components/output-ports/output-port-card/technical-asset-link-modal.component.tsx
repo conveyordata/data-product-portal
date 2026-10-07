@@ -2,7 +2,7 @@ import { Button, Checkbox, Flex, Input, List, Modal, Typography } from 'antd';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component';
-import { NotShareableIcon } from '@/components/technical-assets/not-shareable-icon/not-shareable-icon.component.tsx';
+import { NotShareableTag } from '@/components/technical-assets/not-shareable-tag/not-shareable-tag.component.tsx';
 import { DATA_OUTPUTS_TABLE_PAGINATION } from '@/constants/table.constants';
 import { useTablePagination } from '@/hooks/use-table-pagination';
 import type { TechnicalAssetLink } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
@@ -119,17 +119,12 @@ export function TechnicalAssetLinkModal({ onClose, dataProductId, datasetId, dat
             setSelectedOutputs(new Set());
             onClose();
         } catch (error) {
-            if (isTechnicalAssetNotShareableError(error)) {
-                dispatchMessage({
-                    content: t(
-                        "You can't link these Technical Assets to an Output Port because one of their types is not shareable",
-                    ),
-                    type: 'error',
-                });
-                return;
-            }
             dispatchMessage({
-                content: t('Failed to link Technical Assets'),
+                content: isTechnicalAssetNotShareableError(error)
+                    ? t(
+                          "You can't link these Technical Assets to an Output Port because one of their types is not shareable",
+                      )
+                    : t('Failed to link Technical Assets'),
                 type: 'error',
             });
         }
@@ -165,7 +160,7 @@ export function TechnicalAssetLinkModal({ onClose, dataProductId, datasetId, dat
             {filteredDataOutputs.length > 0 && (
                 <Flex justify="space-between" align="center">
                     <Typography.Text type="secondary">
-                        {t('{{count}} available Technical Assets', { count: filteredDataOutputs.length })}
+                        {t('{{count}} shareable Technical Assets', { count: selectableDataOutputs.length })}
                     </Typography.Text>
                     <Button type="link" onClick={handleSelectAll} disabled={selectableDataOutputs.length === 0}>
                         {allSelected ? t('Deselect All') : t('Select All')}
@@ -192,7 +187,7 @@ export function TechnicalAssetLinkModal({ onClose, dataProductId, datasetId, dat
                     const shareable = isTechnicalAssetShareable(output.configuration.name, plugins);
                     return (
                         <List.Item data-cy="technical-asset-link-item">
-                            <Flex align="center" gap={12} style={{ width: '100%' }}>
+                            <Flex align="center" gap="medium" style={{ width: '100%' }}>
                                 <Checkbox
                                     checked={selectedOutputs.has(output.id)}
                                     disabled={!plugins || !shareable}
@@ -206,7 +201,7 @@ export function TechnicalAssetLinkModal({ onClose, dataProductId, datasetId, dat
                                         <Typography.Text strong disabled={!shareable}>
                                             {output.result_string}
                                         </Typography.Text>
-                                        {!shareable && <NotShareableIcon iconOnly />}
+                                        {!shareable && <NotShareableTag />}
                                     </Flex>
                                     <Typography.Text type="secondary">{output.name}</Typography.Text>
                                 </Flex>
