@@ -1,5 +1,7 @@
 ---
 engine: copilot
+env:
+  FASTEMBED_CACHE_PATH: /tmp/gh-aw/fastembed
 runtimes:
   python:
     version: "3.13"
@@ -8,6 +10,7 @@ network:
     - defaults
     - python
     - node
+    - go
 tools:
   edit:
   bash: [":*"]
@@ -48,6 +51,9 @@ steps:
     run: task setup:frontend
   - name: Install pre-commit
     run: pip install pre-commit && pre-commit install-hooks
+  - name: Preload embedding model
+    working-directory: backend
+    run: mkdir -p $FASTEMBED_CACHE_PATH && poetry run python -m app.embed
 ---
 
 ## How every background agent works
@@ -76,7 +82,7 @@ If the top candidate does not clearly pass every point above, or you cannot prod
 
 ### 5. Fix and verify
 
-Make the minimal change. Add the regression test or proof your role asks for. Run `pre-commit run --all-files` and the test suites of every area you changed (see the AGENTS.md files for the commands). Everything must pass. The PostgreSQL service is reachable at `host.docker.internal:5432`; set `POSTGRES_SERVER=host.docker.internal` and pass `-o env_override_existing_values=0` to pytest when running backend tests, otherwise `backend/.test.env` resets it to `localhost`. If you cannot get the checks green, call `noop` instead.
+Make the minimal change. Add the regression test or proof your role asks for. Run `pre-commit run --files <the files you changed>` and the test suites of every area you changed (see the AGENTS.md files for the commands). Everything must pass. The PostgreSQL service is reachable at `host.docker.internal:5432`; set `POSTGRES_SERVER=host.docker.internal` and pass `-o env_override_existing_values=0` to pytest when running backend tests, otherwise `backend/.test.env` resets it to `localhost`. If you cannot get the checks green, call `noop` instead.
 
 ### 6. Report
 
