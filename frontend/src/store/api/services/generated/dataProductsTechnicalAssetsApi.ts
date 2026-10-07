@@ -352,6 +352,20 @@ export type TechnicalAsset = {
     [key: string]: any;
   };
 };
+export type Domain = {
+  id: string;
+  name: string;
+  description: string;
+};
+export type Exploration = {
+  id: string;
+  name: string;
+  namespace: string;
+  description: string;
+  domain: Domain;
+  status: AbstractDataProductStatus;
+  finalizers: string[];
+};
 export type GetEventHistoryResponseItem = {
   id: string;
   name: string;
@@ -368,6 +382,7 @@ export type GetEventHistoryResponseItem = {
   user?: User | null;
   output_port?: OutputPort | null;
   technical_asset?: TechnicalAsset | null;
+  exploration?: Exploration | null;
 };
 export type GetEventHistoryResponse = {
   events: GetEventHistoryResponseItem[];
@@ -446,6 +461,7 @@ export enum EventEntityType {
   OutputPort = "output_port",
   TechnicalAsset = "technical_asset",
   User = "user",
+  Exploration = "exploration",
 }
 export enum NodeType {
   DataProductNode = "dataProductNode",

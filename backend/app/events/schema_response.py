@@ -8,6 +8,7 @@ from pydantic import NaiveDatetime
 from app.data_products.output_ports.schema import OutputPort
 from app.data_products.schema import DataProduct
 from app.data_products.technical_assets.schema import TechnicalAsset
+from app.explorations.schema_response import Exploration
 from app.shared.schema import ORMModel
 from app.users.schema import User
 
@@ -20,6 +21,7 @@ class EventEntityType(str, Enum):
     OUTPUT_PORT = "output_port"
     TECHNICAL_ASSET = "technical_asset"
     USER = "user"
+    EXPLORATION = "exploration"
 
     @staticmethod
     def from_old(old: EventReferenceEntityOld) -> "EventEntityType":
@@ -32,6 +34,8 @@ class EventEntityType(str, Enum):
                 return EventEntityType.TECHNICAL_ASSET
             case EventReferenceEntityOld.USER:
                 return EventEntityType.USER
+            case EventReferenceEntityOld.EXPLORATION:
+                return EventEntityType.EXPLORATION
 
 
 class GetEventHistoryResponseItem(ORMModel):
@@ -50,6 +54,7 @@ class GetEventHistoryResponseItem(ORMModel):
     user: Optional[User] = None
     output_port: Optional[OutputPort] = None
     technical_asset: Optional[TechnicalAsset] = None
+    exploration: Optional[Exploration] = None
 
 
 @deprecated("Use GetEventHistoryResponseItem instead")
@@ -69,6 +74,7 @@ class GetEventHistoryResponseItemOld(ORMModel):
     user: Optional[User] = None
     output_port: Optional[OutputPort]
     technical_asset: Optional[TechnicalAsset] = None
+    exploration: Optional[Exploration] = None
 
     def convert(self) -> GetEventHistoryResponseItem:
         return GetEventHistoryResponseItem(

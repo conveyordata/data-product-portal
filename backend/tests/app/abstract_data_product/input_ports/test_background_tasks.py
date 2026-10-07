@@ -16,6 +16,7 @@ from app.users.notifications.model import Notification
 from tests import engine
 from tests.factories import (
     DataProductRoleAssignmentFactory,
+    ExplorationFactory,
     InputPortFactory,
     RoleFactory,
     UserFactory,
@@ -143,3 +144,26 @@ class TestExpireInputPorts:
         assert events[0].subject_type == EventReferenceEntity.DATASET
         assert events[0].target_id == link.consuming_abstract_data_product_id
         assert events[0].target_type == EventReferenceEntity.DATA_PRODUCT
+
+    def test_expire_input_ports__expiring_soon_exploration_notifies_owner(
+        self, session
+    ):
+        UserFactory(external_id=SYSTEM_ACCOUNT_BOT_EXTERNAL_ID)
+        exploration = ExplorationFactory()
+        InputPortFactory(
+            status=InputPortStatus.APPROVED,
+            consuming_abstract_data_product=exploration,
+            request__valid_until=TODAY + timedelta(days=10),
+            request__decided_by=None,
+        )
+
+        with _mock_emit():
+            asyncio.run(expire_input_ports(session))
+
+        assert exploration.owner_id in set(
+            session.scalars(select(Notification.user_id))
+        )
+        event = session.scalar(
+            select(Event).where(Event.name == EventType.INPUT_PORT_EXPIRING_SOON)
+        )
+        assert event.target_type == EventReferenceEntity.EXPLORATION

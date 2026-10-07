@@ -122,6 +122,7 @@ class AbstractDataProductService:
         input_port: InputPortModel,
         justification: str,
         access_mode_id: Optional[UUID] = None,
+        direct_grant: bool = False,
         *,
         actor: User,
     ) -> InputPortModel:
@@ -137,11 +138,17 @@ class AbstractDataProductService:
         )
         self.db.add(request)
         self.db.flush()
-        if output_port.access_function == OutputPortAccessFunction.UNRESTRICTED:
+        if (
+            direct_grant
+            or output_port.access_function == OutputPortAccessFunction.UNRESTRICTED
+        ):
             InputPortService(self.db).approve_request(
                 request,
                 now=datetime.now(tz=pytz.utc),
-                decision_note="Auto approved for unrestricted output port",
+                decided_by=actor if direct_grant else None,
+                decision_note="Access granted directly by output port owner"
+                if direct_grant
+                else "Auto approved for unrestricted output port",
             )
         else:
             request.decision = InputPortRequestDecision.PENDING
@@ -166,12 +173,15 @@ class AbstractDataProductService:
         output_port_id: UUID,
         justification: str,
         access_mode_id: Optional[UUID] = None,
+        data_product_id: Optional[UUID] = None,
+        direct_grant: bool = False,
         *,
         actor: User,
     ) -> InputPortModel:
         output_port = ensure_output_port_exists(
             output_port_id,
             self.db,
+            data_product_id=data_product_id,
             options=[
                 selectinload(OutputPortModel.data_product_links)
                 .selectinload(InputPortModel.consuming_abstract_data_product)
@@ -181,15 +191,30 @@ class AbstractDataProductService:
         )
         self._ensure_not_deleting(adp)
         self._ensure_not_deleting(output_port.data_product)
-        if any(link.output_port_id == output_port.id for link in adp.input_ports):
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Input port connection to Output Port ({output_port_id}) already exists in {adp.abstract_data_product_type} {adp.id}",
-            )
+        existing = next(
+            (link for link in adp.input_ports if link.output_port_id == output_port.id),
+            None,
+        )
+        if existing:
+            if direct_grant:
+                self.db.refresh(existing, ["requests"])
+            if not direct_grant or existing.active_grant or existing.pending_request:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Input port connection to Output Port ({output_port_id}) already exists in {adp.abstract_data_product_type} {adp.id}",
+                )
         if output_port.data_product_id == adp.id:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Cannot link own output port to data product",
+            )
+        if (
+            adp.abstract_data_product_type == AbstractDataProductType.EXPLORATION
+            and output_port.access_function == OutputPortAccessFunction.PRIVATE
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Explorations cannot consume Invite only output ports",
             )
 
         if output_port.access_modes and not access_mode_id:
@@ -205,7 +230,7 @@ class AbstractDataProductService:
                 detail="The specified access mode does not exist",
             )
 
-        input_port = InputPortModel(
+        input_port = existing or InputPortModel(
             output_port=output_port,
             output_port_id=output_port_id,
             consuming_abstract_data_product=adp,
@@ -216,9 +241,11 @@ class AbstractDataProductService:
             input_port,
             justification,
             access_mode_id=access_mode_id,
+            direct_grant=direct_grant,
             actor=actor,
         )
-        adp.input_ports.append(input_port)
+        if not existing:
+            adp.input_ports.append(input_port)
         return input_port
 
     def _renew_single_input_port(
@@ -314,6 +341,26 @@ class AbstractDataProductService:
         ]
         self.db.flush()
         return input_ports
+
+    def grant_output_port_access(
+        self,
+        consumer_id: UUID,
+        data_product_id: UUID,
+        output_port_id: UUID,
+        justification: str,
+        access_mode_id: Optional[UUID],
+        *,
+        actor: User,
+    ) -> InputPortModel:
+        return self._add_single_input_port(
+            self._get_adp_with_input_ports(consumer_id),
+            output_port_id,
+            justification,
+            access_mode_id=access_mode_id,
+            data_product_id=data_product_id,
+            direct_grant=True,
+            actor=actor,
+        )
 
     def renew_input_port(
         self,
