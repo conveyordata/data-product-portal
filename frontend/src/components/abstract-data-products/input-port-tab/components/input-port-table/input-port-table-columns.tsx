@@ -13,7 +13,6 @@ import { OutputPortTitle } from '@/components/output-ports/output-port-title/out
 import {
     type AbstractDataProductInputPort as InputPort,
     InputPortStatus,
-    OutputPortAccessFunction,
 } from '@/store/api/services/generated/dataProductsApi.ts';
 import { createMarketplaceOutputPortPath } from '@/types/navigation.ts';
 import { getInputPortStatusBadgeStatus, getInputPortStatusLabel } from '@/utils/status.helper.ts';
@@ -61,11 +60,7 @@ export const getDataProductDatasetsColumns = ({
                 return (
                     <TableCellAvatar
                         popover={{ title: popoverTitle, content: output_port.description }}
-                        linkTo={
-                            output_port.access_type.access_function === OutputPortAccessFunction.Private
-                                ? undefined
-                                : createMarketplaceOutputPortPath(output_port.id, output_port.data_product_id)
-                        }
+                        linkTo={createMarketplaceOutputPortPath(output_port.id, output_port.data_product_id)}
                         icon={<CustomSvgIconLoader iconComponent={outputPortBorderIcon} />}
                         title={<OutputPortTitle name={output_port.name} accessType={output_port.access_type} />}
                     />

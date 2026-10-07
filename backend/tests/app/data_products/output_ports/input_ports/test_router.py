@@ -20,10 +20,9 @@ from app.abstract_data_product.type import AbstractDataProductType
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.roles.schema import Scope
 from app.configuration.access_durations.enums import AccessDurationType
-from app.core.authz import REDACTION_VALUE, Action
+from app.core.authz import REDACTION_VALUE, Action, Authorization
 from app.data_products.model import DataProductVisibility
 from app.data_products.output_ports.enums import OutputPortAccessFunction
-from app.data_products.output_ports.model import OutputPort
 from app.data_products.status import AbstractDataProductStatus
 from app.events.enums import EventReferenceEntity, EventType
 from app.events.model import Event
@@ -43,7 +42,6 @@ from tests.factories import (
     TechnicalAssetOutputPortAssociationFactory,
     UserFactory,
 )
-from tests.session_util import as_user
 
 if TYPE_CHECKING:
     from app.abstract_data_product.model import AbstractDataProduct
@@ -144,7 +142,7 @@ class TestInputPortsRouter:
         assert response.status_code == 200, response.text
         assert session.scalars(select(Notification.user_id)).all() == [shared_member.id]
 
-    def test_grant_output_port_access__consumer_sees_invite_only_output_port_only_in_own_input_ports(
+    def test_grant_output_port_access__consumer_can_read_invite_only_output_port(
         self, session
     ):
         user = UserFactory()
@@ -166,17 +164,14 @@ class TestInputPortsRouter:
             access_mode_id=None,
             actor=UserFactory(),
         )
-        user_id, consumer_id, output_port_id = user.id, consumer.id, output_port.id
-        session.expunge_all()
 
-        with as_user(session, user_id):
-            visible_output_port = session.get(OutputPort, output_port_id)
-            input_ports = AbstractDataProductService(session).get_input_ports(
-                consumer_id
-            )
-
-        assert [ip.output_port_id for ip in input_ports] == [output_port_id]
-        assert visible_output_port is None
+        assert Authorization().has_access(
+            act=Action.HIDDEN__OUTPUT_PORT__READ,
+            dom=str(output_port.data_product.domain_id),
+            obj=str(output_port.id),
+            parent=str(output_port.data_product_id),
+            sub=str(user.id),
+        )
 
     def test_grant_output_port_access__rejects_exploration_on_invite_only_output_port(
         self, client

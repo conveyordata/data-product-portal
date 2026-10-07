@@ -1132,6 +1132,30 @@ class TestDataProductsRouter:
             data_product["id"] for data_product in response.json()["data_products"]
         }
 
+    def test_get_output_port__consumer_can_read_consumed_private_output_port(
+        self, client, session
+    ):
+        producer, output_port, _, _ = self.setup_consumer_of_private_output_port(
+            session
+        )
+
+        response = client.get(f"{ENDPOINT}/{producer.id}/output_ports/{output_port.id}")
+
+        assert response.status_code == 200, response.text
+        assert response.json()["id"] == str(output_port.id)
+
+    def test_search_output_ports__consumed_private_output_port_not_listed_for_consumer(
+        self, client, session
+    ):
+        _, output_port, _, _ = self.setup_consumer_of_private_output_port(session)
+
+        response = client.get("/api/v2/search/output_ports")
+
+        assert response.status_code == 200, response.text
+        assert str(output_port.id) not in {
+            op["id"] for op in response.json()["output_ports"]
+        }
+
     def test_get_input_ports__consumer_sees_own_private_input_port(
         self, client, session
     ):

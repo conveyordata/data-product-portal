@@ -92,13 +92,31 @@ class TestInputPortService:
         assert pending_old.id in requests_old_inactive_hidden_ids
         assert approved_old.id not in requests_old_inactive_hidden_ids
 
+    def test_get_user_requests__excludes_hidden_private_output_port(self, session):
+        user = UserFactory()
+        visible = InputPortRequestFactory(
+            requested_by=user, decision=InputPortRequestDecision.PENDING
+        )
+        InputPortRequestFactory(
+            requested_by=user,
+            decision=InputPortRequestDecision.PENDING,
+            input_port__output_port=OutputPortFactory(
+                access_function=OutputPortAccessFunction.PRIVATE
+            ),
+        )
+
+        with as_user(session, user.id):
+            requests = InputPortService(session).get_user_requests(user, False)
+
+        assert [r.id for r in requests] == [visible.id]
+
 
 def _by_id(input_port: "InputPort"):
     return {request.id: request for request in input_port.requests}
 
 
 class TestInputPortDecisions:
-    def test_approve__marks_link_approved(self, session):
+    def test_approve__syncs_consumer_access(self, session, monkeypatch):
         actor = UserFactory()
         consumer = DataProductFactory()
         port = OutputPortFactory(access_function=OutputPortAccessFunction.RESTRICTED)
@@ -106,6 +124,16 @@ class TestInputPortDecisions:
             consuming_abstract_data_product=consumer,
             output_port=port,
             status=DecisionStatus.PENDING,
+        )
+        synced_data_product_ids = []
+
+        def sync_hidden_data_product_access(_, data_product_id):
+            synced_data_product_ids.append(data_product_id)
+
+        monkeypatch.setattr(
+            InputPortService,
+            "_sync_hidden_data_product_access",
+            sync_hidden_data_product_access,
         )
 
         InputPortService(session).approve_output_port_as_input_port(
@@ -115,6 +143,7 @@ class TestInputPortDecisions:
             actor=actor,
         )
 
+        assert synced_data_product_ids == [port.data_product_id]
         assert link.status == InputPortStatus.APPROVED
 
     def test_approve__renewal_window_starts_at_current_date(self, session):

@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session, joinedload, selectinload, undefer
 from app.abstract_data_product.graph_utils import (
     get_graph_data_from_abstract_data_product,
 )
+from app.abstract_data_product.input_ports.enums import InputPortStatus
 from app.abstract_data_product.input_ports.model import (
     InputPort as InputPortModel,
 )
@@ -88,6 +89,68 @@ class DataProductService(AbstractDataProductService):
                 )
             case _:
                 assert_never(visibility)
+
+    def _sync_consumer_reader_grouping(self, data_product_id: UUID) -> None:
+        """
+        Will sync consumer relations for the output ports of a data product.
+        This is made to ensure private output ports are only accessible to consumers that have been approved.
+        We sync it for every data product, since output ports can be changed from unrestricted to private.
+        """
+        active_input_ports = set(
+            self.db.execute(
+                select(
+                    InputPortModel.consuming_abstract_data_product_id,
+                    InputPortModel.output_port_id,
+                )
+                .join(
+                    OutputPortModel,
+                    OutputPortModel.id == InputPortModel.output_port_id,
+                )
+                .where(
+                    OutputPortModel.data_product_id == data_product_id,
+                    InputPortModel.status == InputPortStatus.APPROVED,
+                )
+                .distinct()
+            ).tuples()
+        )
+
+        authorizer = Authorization()
+        current_input_port_links = {
+            (str(link.consumer_id), str(link.producer_output_port_id))
+            for link in authorizer.get_input_port_link(
+                producer_data_product_id=data_product_id
+            )
+        }
+        desired_input_port_links = {
+            (str(consumer_id), str(output_port_id))
+            for consumer_id, output_port_id in active_input_ports
+        }
+
+        for consumer_id, output_port_id in sorted(
+            current_input_port_links - desired_input_port_links
+        ):
+            authorizer.remove_input_port_link(
+                consumer_id=consumer_id,
+                producer_data_product_id=data_product_id,
+                producer_output_port_id=output_port_id,
+            )
+
+        for consumer_id, output_port_id in sorted(
+            desired_input_port_links - current_input_port_links
+        ):
+            authorizer.add_input_port_link(
+                consumer_id=consumer_id,
+                producer_data_product_id=data_product_id,
+                producer_output_port_id=output_port_id,
+            )
+
+    def sync_data_product_consumer_access(self) -> None:
+        data_product_ids = self.db.scalars(
+            select(DataProductModel.id),
+            execution_options={"skip_data_product_visibility_filter": True},
+        ).all()
+        for data_product_id in data_product_ids:
+            self._sync_consumer_reader_grouping(data_product_id)
 
     def get_data_product_settings(
         self, data_product_id: UUID

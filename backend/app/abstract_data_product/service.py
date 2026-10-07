@@ -39,7 +39,10 @@ from app.data_products.model import _has_user_access_to_hidden_data_product
 from app.data_products.output_ports.enums import OutputPortAccessFunction
 from app.data_products.output_ports.input_ports.service import InputPortService
 from app.data_products.output_ports.model import OutputPort as OutputPortModel
-from app.data_products.output_ports.model import ensure_output_port_exists
+from app.data_products.output_ports.model import (
+    access_function_filter_excluding_consumers,
+    ensure_output_port_exists,
+)
 from app.data_products.status import AbstractDataProductStatus
 from app.database.database import SKIP_OUTPUT_PORT_ACCESS_FUNCTION_FILTER, UNFILTERED
 from app.users.model import User
@@ -57,37 +60,43 @@ class AbstractDataProductService:
                 detail=f"{adp.abstract_data_product_type.value} '{adp.name}' is pending deletion and cannot be modified",
             )
 
-    def _is_data_product_member(self, data_product_id: UUID) -> bool:
-        user_id = self.db.info.get("current_user_id")
-        return user_id is not None and self.db.scalar(
-            select(
-                _has_user_access_to_hidden_data_product(DataProductModel, user_id)
-            ).where(DataProductModel.id == data_product_id),
-            execution_options=UNFILTERED,
+    def _is_data_product_member(self, data_product_id: UUID, user_id: UUID) -> bool:
+        return bool(
+            self.db.scalar(
+                select(
+                    _has_user_access_to_hidden_data_product(DataProductModel, user_id)
+                ).where(DataProductModel.id == data_product_id),
+                execution_options=UNFILTERED,
+            )
         )
 
     def get_input_ports(self, data_product_id: UUID) -> Sequence[InputPortModel]:
         ensure_abstract_data_product_exists(data_product_id, self.db)
+        query = (
+            select(InputPortModel)
+            # Join (rather than selectinload) the output port so that the
+            # private output port visibility filter excludes the whole
+            # input port row when its output port isn't visible to the
+            # current user, instead of just nulling out the relationship.
+            .join(InputPortModel.output_port)
+            .options(
+                contains_eager(InputPortModel.output_port),
+                selectinload(InputPortModel.requests),
+            )
+            .filter(
+                InputPortModel.consuming_abstract_data_product_id == data_product_id
+            )
+        )
+        user_id = self.db.info.get("current_user_id")
+        is_member = user_id is not None and self._is_data_product_member(
+            data_product_id, user_id
+        )
+        if user_id is not None and not is_member:
+            query = query.where(access_function_filter_excluding_consumers(user_id))
         return (
             self.db.scalars(
-                select(InputPortModel)
-                # Join (rather than selectinload) the output port so that the
-                # private output port visibility filter excludes the whole
-                # input port row when its output port isn't visible to the
-                # current user, instead of just nulling out the relationship.
-                .join(InputPortModel.output_port)
-                .options(
-                    contains_eager(InputPortModel.output_port),
-                    selectinload(InputPortModel.requests),
-                )
-                .filter(
-                    InputPortModel.consuming_abstract_data_product_id == data_product_id
-                ),
-                execution_options={
-                    SKIP_OUTPUT_PORT_ACCESS_FUNCTION_FILTER: self._is_data_product_member(
-                        data_product_id
-                    )
-                },
+                query,
+                execution_options={SKIP_OUTPUT_PORT_ACCESS_FUNCTION_FILTER: is_member},
             )
             .unique()
             .all()
@@ -434,6 +443,9 @@ class AbstractDataProductService:
         target.revoked_at = datetime.now(tz=pytz.utc)
         input_port.recompute_status()
         self.db.flush()
+        InputPortService(self.db)._sync_hidden_data_product_access(
+            input_port.output_port.data_product_id
+        )
         return input_port
 
     def cancel_input_port_request(
@@ -464,7 +476,10 @@ class AbstractDataProductService:
         output_port_id: UUID,
     ) -> InputPortModel:
         input_port = self._get_input_port(id, output_port_id)
+        data_product_id = input_port.output_port.data_product_id
         self.db.delete(input_port)
+        self.db.flush()
+        InputPortService(self.db)._sync_hidden_data_product_access(data_product_id)
         return input_port
 
     def send_input_port_requested_emails_to_output_port_owners(

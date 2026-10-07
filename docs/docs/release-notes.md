@@ -27,7 +27,7 @@ sidebar_position: 200
 - **[Database]**: `python -m app.db_tool migrate` now stops when technical assets exist whose plugin is not installed, instead of the portal failing every request that loads them. Reinstall the plugin, or delete those technical assets.
 - **[Auth]**: A `DEFAULT_USERNAME` without a dot before the `@` no longer fails when OIDC is disabled.
 - **[General]**: Fix translation file by adding more nested translations for Data Products, Output ports and Technical assets.
-- **[General]**: Consumers of a Private Output Port no longer see it, or its Hidden Data Product, outside their own Input Ports (Marketplace, Explorer, other Data Products' Input Ports).
+- **[General]**: Consumers of a Private Output Port can still open it, but no longer see it in the Marketplace or in other Data Products' Input Ports, and no longer see its Hidden Data Product.
 
 
 ## 0.7.4

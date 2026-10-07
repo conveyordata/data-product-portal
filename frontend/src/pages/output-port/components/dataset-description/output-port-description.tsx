@@ -9,7 +9,7 @@ import type { TagModel } from '@/types/tag';
 type Props = {
     lifecycle: DataProductLifeCycle | null;
     description: string;
-    data_product: GetDataProductResponse;
+    data_product?: GetDataProductResponse;
     domain: string;
     tags: TagModel[];
     namespace: string;
@@ -22,12 +22,14 @@ export function OutputPortDescription({ lifecycle, description, data_product, do
     return (
         <Flex vertical gap="medium">
             <Flex wrap gap="12px 36px">
-                <Space>
-                    <Typography.Text strong>{t('Data Product')}</Typography.Text>
-                    <Link to={createDataProductIdPath(data_product.id)}>
-                        <Typography.Text style={{ color: token.colorPrimary }}>{data_product.name}</Typography.Text>
-                    </Link>
-                </Space>
+                {data_product && (
+                    <Space>
+                        <Typography.Text strong>{t('Data Product')}</Typography.Text>
+                        <Link to={createDataProductIdPath(data_product.id)}>
+                            <Typography.Text style={{ color: token.colorPrimary }}>{data_product.name}</Typography.Text>
+                        </Link>
+                    </Space>
+                )}
 
                 <Space>
                     <Typography.Text strong>{t('Domain')}</Typography.Text>
