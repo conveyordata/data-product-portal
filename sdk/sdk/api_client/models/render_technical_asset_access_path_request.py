@@ -53,7 +53,7 @@ class RenderTechnicalAssetAccessPathRequest:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.render_technical_asset_access_path_request_configuration import (
-            RenderTechnicalAssetAccessPathRequestConfiguration,
+            RenderTechnicalAssetAccessPathRequestConfiguration,  # noqa: PLC0415
         )
 
         d = dict(src_dict)

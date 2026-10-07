@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class AbstractDataProductType(str, Enum):
+class AbstractDataProductType(StrEnum):
     DATA_PRODUCTS = "data_products"
     EXPLORATIONS = "explorations"
     UNKNOWN = "unknown"

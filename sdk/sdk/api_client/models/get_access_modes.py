@@ -41,7 +41,7 @@ class GetAccessModes:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.access_mode_with_type import AccessModeWithType
+        from ..models.access_mode_with_type import AccessModeWithType  # noqa: PLC0415
 
         d = dict(src_dict)
         access_modes = []

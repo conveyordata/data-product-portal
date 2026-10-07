@@ -44,7 +44,7 @@ class ListOutputPortRoleAssignmentsResponse:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.output_port_role_assignment_response import (
-            OutputPortRoleAssignmentResponse,
+            OutputPortRoleAssignmentResponse,  # noqa: PLC0415
         )
 
         d = dict(src_dict)

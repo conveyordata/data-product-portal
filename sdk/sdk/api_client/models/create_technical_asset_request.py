@@ -127,7 +127,7 @@ class CreateTechnicalAssetRequest:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.create_technical_asset_request_configuration import (
-            CreateTechnicalAssetRequestConfiguration,
+            CreateTechnicalAssetRequestConfiguration,  # noqa: PLC0415
         )
 
         d = dict(src_dict)

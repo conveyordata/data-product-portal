@@ -57,7 +57,7 @@ class GetDomainResponse:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.environment_get_item import EnvironmentGetItem
+        from ..models.environment_get_item import EnvironmentGetItem  # noqa: PLC0415
 
         d = dict(src_dict)
         id = UUID(d.pop("id"))

@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class ResourceNameValidityType(str, Enum):
+class ResourceNameValidityType(StrEnum):
     DUPLICATE = "DUPLICATE"
     INVALID_CHARACTERS = "INVALID_CHARACTERS"
     INVALID_LENGTH = "INVALID_LENGTH"

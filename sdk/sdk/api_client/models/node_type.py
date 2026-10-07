@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class NodeType(str, Enum):
+class NodeType(StrEnum):
     DATAPRODUCTNODE = "dataProductNode"
     EXPLORATIONNODE = "explorationNode"
     OUTPUTPORTNODE = "outputPortNode"

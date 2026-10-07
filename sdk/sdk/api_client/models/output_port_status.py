@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class OutputPortStatus(str, Enum):
+class OutputPortStatus(StrEnum):
     ACTIVE = "active"
     ARCHIVED = "archived"
     PENDING = "pending"

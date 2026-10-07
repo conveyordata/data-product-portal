@@ -42,7 +42,7 @@ class GetExplorationInputPortsResponse:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.abstract_data_product_input_port import (
-            AbstractDataProductInputPort,
+            AbstractDataProductInputPort,  # noqa: PLC0415
         )
 
         d = dict(src_dict)

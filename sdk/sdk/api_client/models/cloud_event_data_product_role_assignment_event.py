@@ -80,7 +80,7 @@ class CloudEventDataProductRoleAssignmentEvent:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.data_product_role_assignment_event import (
-            DataProductRoleAssignmentEvent,
+            DataProductRoleAssignmentEvent,  # noqa: PLC0415
         )
 
         d = dict(src_dict)

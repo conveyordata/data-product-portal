@@ -48,7 +48,7 @@ class OutputPortQueryStatsResponses:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.output_port_query_stats_response import (
-            OutputPortQueryStatsResponse,
+            OutputPortQueryStatsResponse,  # noqa: PLC0415
         )
 
         d = dict(src_dict)

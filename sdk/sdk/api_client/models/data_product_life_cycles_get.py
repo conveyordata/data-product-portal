@@ -42,7 +42,7 @@ class DataProductLifeCyclesGet:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.data_product_life_cycles_get_item import (
-            DataProductLifeCyclesGetItem,
+            DataProductLifeCyclesGetItem,  # noqa: PLC0415
         )
 
         d = dict(src_dict)

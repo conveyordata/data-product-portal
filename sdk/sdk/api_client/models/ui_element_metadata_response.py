@@ -53,7 +53,7 @@ class UIElementMetadataResponse:
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        from ..models.platform_tile import PlatformTile
+        from ..models.platform_tile import PlatformTile  # noqa: PLC0415
 
         ui_metadata = []
         for ui_metadata_item_data in self.ui_metadata:
@@ -132,8 +132,8 @@ class UIElementMetadataResponse:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.platform_tile import PlatformTile
-        from ..models.ui_element_metadata import UIElementMetadata
+        from ..models.platform_tile import PlatformTile  # noqa: PLC0415
+        from ..models.ui_element_metadata import UIElementMetadata  # noqa: PLC0415
 
         d = dict(src_dict)
         ui_metadata = []

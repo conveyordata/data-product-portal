@@ -13,8 +13,6 @@ T = TypeVar("T", bound="OutputPortDataQualitySummaryResponseDimensionsType0")
 
 @_attrs_define
 class OutputPortDataQualitySummaryResponseDimensionsType0:
-    """ """
-
     additional_properties: dict[str, DataQualityStatus] = _attrs_field(
         init=False, factory=dict
     )

@@ -78,7 +78,7 @@ class CloudEventDataProductSettingValueEvent:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.data_product_setting_value_event import (
-            DataProductSettingValueEvent,
+            DataProductSettingValueEvent,  # noqa: PLC0415
         )
 
         d = dict(src_dict)

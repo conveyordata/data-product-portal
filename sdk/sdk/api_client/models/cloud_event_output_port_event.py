@@ -75,7 +75,7 @@ class CloudEventOutputPortEvent:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.output_port_event import OutputPortEvent
+        from ..models.output_port_event import OutputPortEvent  # noqa: PLC0415
 
         d = dict(src_dict)
         id = d.pop("id")

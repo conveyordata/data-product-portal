@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class DataQualityStatus(str, Enum):
+class DataQualityStatus(StrEnum):
     ERROR = "error"
     FAILURE = "failure"
     SUCCESS = "success"

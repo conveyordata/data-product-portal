@@ -49,7 +49,7 @@ class OutputPortDataQualitySummaryResponse:
 
     def to_dict(self) -> dict[str, Any]:
         from ..models.output_port_data_quality_summary_response_dimensions_type_0 import (
-            OutputPortDataQualitySummaryResponseDimensionsType0,
+            OutputPortDataQualitySummaryResponseDimensionsType0,  # noqa: PLC0415
         )
 
         created_at = self.created_at.isoformat()
@@ -109,9 +109,11 @@ class OutputPortDataQualitySummaryResponse:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.data_quality_technical_asset import DataQualityTechnicalAsset
+        from ..models.data_quality_technical_asset import (
+            DataQualityTechnicalAsset,  # noqa: PLC0415
+        )
         from ..models.output_port_data_quality_summary_response_dimensions_type_0 import (
-            OutputPortDataQualitySummaryResponseDimensionsType0,
+            OutputPortDataQualitySummaryResponseDimensionsType0,  # noqa: PLC0415
         )
 
         d = dict(src_dict)

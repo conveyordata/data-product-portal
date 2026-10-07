@@ -41,7 +41,7 @@ class GetPlatformServicesResponse:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.platform_service import PlatformService
+        from ..models.platform_service import PlatformService  # noqa: PLC0415
 
         d = dict(src_dict)
         platform_services = []
