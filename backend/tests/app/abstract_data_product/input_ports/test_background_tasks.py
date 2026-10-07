@@ -10,7 +10,7 @@ from app.abstract_data_product.input_ports.background_tasks import (
 )
 from app.abstract_data_product.input_ports.enums import InputPortStatus
 from app.core.auth.auth import SYSTEM_ACCOUNT_BOT_EXTERNAL_ID
-from app.events.enums import EventReferenceEntity, EventType
+from app.events.enums import EventEntityType, EventType
 from app.events.model import Event
 from app.users.notifications.model import Notification
 from tests import engine
@@ -140,6 +140,6 @@ class TestExpireInputPorts:
         assert len(events) == 1
         assert events[0].actor_id == system_user.id
         assert events[0].subject_id == link.output_port_id
-        assert events[0].subject_type == EventReferenceEntity.DATASET
+        assert events[0].subject_type == EventEntityType.OUTPUT_PORT
         assert events[0].target_id == link.consuming_abstract_data_product_id
-        assert events[0].target_type == EventReferenceEntity.DATA_PRODUCT
+        assert events[0].target_type == EventEntityType.DATA_PRODUCT

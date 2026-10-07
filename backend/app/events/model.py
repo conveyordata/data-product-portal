@@ -9,7 +9,7 @@ from app.database.database import Base
 from app.shared.model import BaseORM
 from app.users.notifications.model import Notification
 
-from .enums import EventReferenceEntity
+from .enums import EventEntityType
 
 if TYPE_CHECKING:
     from app.data_products.model import DataProduct
@@ -27,8 +27,8 @@ class Event(Base, BaseORM):
     subject_id = Column(UUID(as_uuid=True))
     deleted_target_identifier: Mapped[str] = mapped_column(nullable=True)
     target_id = Column(UUID(as_uuid=True))
-    subject_type = Column(Enum(EventReferenceEntity))
-    target_type = Column(Enum(EventReferenceEntity))
+    subject_type = Column(Enum(EventEntityType, native_enum=False))
+    target_type = Column(Enum(EventEntityType, native_enum=False))
     actor_id = Column(UUID(as_uuid=True), ForeignKey("users.id"))
     actor: Mapped["User"] = relationship("User")
 
@@ -54,13 +54,13 @@ class Event(Base, BaseORM):
     )
     output_port: Mapped["OutputPort"] = relationship(
         primaryjoin="or_(and_(Event.subject_id == foreign(OutputPort.id),"
-        " Event.subject_type == 'DATASET'),"
+        " Event.subject_type == 'OUTPUT_PORT'),"
         "and_(Event.target_id == foreign(OutputPort.id),"
-        " Event.target_type == 'DATASET'))",
+        " Event.target_type == 'OUTPUT_PORT'))",
     )
     technical_asset: Mapped["TechnicalAsset"] = relationship(
         primaryjoin="or_(and_(Event.subject_id == "
-        "foreign(TechnicalAsset.id), Event.subject_type == 'DATA_OUTPUT'),"
+        "foreign(TechnicalAsset.id), Event.subject_type == 'TECHNICAL_ASSET'),"
         "and_(Event.target_id == foreign(TechnicalAsset.id),"
-        " Event.target_type == 'DATA_OUTPUT'))",
+        " Event.target_type == 'TECHNICAL_ASSET'))",
     )

@@ -2,10 +2,10 @@ from enum import UNIQUE, Enum, verify
 
 
 @verify(UNIQUE)
-class EventReferenceEntity(str, Enum):
+class EventEntityType(str, Enum):
     DATA_PRODUCT = "data_product"
-    DATASET = "dataset"
-    DATA_OUTPUT = "data_output"
+    OUTPUT_PORT = "output_port"
+    TECHNICAL_ASSET = "technical_asset"
     USER = "user"
 
 

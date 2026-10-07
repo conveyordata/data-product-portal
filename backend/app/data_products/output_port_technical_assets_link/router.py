@@ -32,7 +32,7 @@ from app.data_products.technical_assets.service import (
     TechnicalAssetService,
 )
 from app.database.deps import get_db_session
-from app.events.enums import EventReferenceEntity, EventType
+from app.events.enums import EventEntityType, EventType
 from app.events.schema import CreateEvent
 from app.events.service import EventService
 from app.users.notifications.service import NotificationService
@@ -80,9 +80,9 @@ def approve_output_port_technical_asset_link(
         CreateEvent(
             name=EventType.DATA_OUTPUT_DATASET_LINK_APPROVED,
             subject_id=output_link.output_port_id,
-            subject_type=EventReferenceEntity.DATASET,
+            subject_type=EventEntityType.OUTPUT_PORT,
             target_id=output_link.technical_asset_id,
-            target_type=EventReferenceEntity.DATA_OUTPUT,
+            target_type=EventEntityType.TECHNICAL_ASSET,
             actor_id=authenticated_user.id,
         ),
     )
@@ -123,9 +123,9 @@ def deny_output_port_technical_asset_link(
         CreateEvent(
             name=EventType.DATA_OUTPUT_DATASET_LINK_DENIED,
             subject_id=output_link.output_port_id,
-            subject_type=EventReferenceEntity.DATASET,
+            subject_type=EventEntityType.OUTPUT_PORT,
             target_id=output_link.technical_asset_id,
-            target_type=EventReferenceEntity.DATA_OUTPUT,
+            target_type=EventEntityType.TECHNICAL_ASSET,
             actor_id=authenticated_user.id,
         ),
     )
@@ -175,9 +175,9 @@ def link_output_port_to_technical_asset(
         CreateEvent(
             name=EventType.DATA_OUTPUT_DATASET_LINK_REQUESTED,
             subject_id=link_request.technical_asset_id,
-            subject_type=EventReferenceEntity.DATA_OUTPUT,
+            subject_type=EventEntityType.TECHNICAL_ASSET,
             target_id=output_port_id,
-            target_type=EventReferenceEntity.DATASET,
+            target_type=EventEntityType.OUTPUT_PORT,
             actor_id=authenticated_user.id,
         ),
     )
@@ -236,9 +236,9 @@ def unlink_output_port_from_technical_asset(
         CreateEvent(
             name=EventType.DATA_OUTPUT_DATASET_LINK_REMOVED,
             subject_id=link_request.technical_asset_id,
-            subject_type=EventReferenceEntity.DATA_OUTPUT,
+            subject_type=EventEntityType.TECHNICAL_ASSET,
             target_id=output_port_id,
-            target_type=EventReferenceEntity.DATASET,
+            target_type=EventEntityType.OUTPUT_PORT,
             actor_id=authenticated_user.id,
         ),
     )

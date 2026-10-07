@@ -1,6 +1,6 @@
 import factory
 
-from app.events.enums import EventReferenceEntity, EventType
+from app.events.enums import EventEntityType, EventType
 from app.events.model import Event
 from tests.factories.user import UserFactory
 
@@ -13,6 +13,6 @@ class EventFactory(factory.alchemy.SQLAlchemyModelFactory):
     name = EventType.DATASET_CREATED
     subject_id = factory.Faker("uuid4")
     deleted_subject_identifier = factory.Faker("text", max_nb_chars=20)
-    subject_type = EventReferenceEntity.DATASET
+    subject_type = EventEntityType.OUTPUT_PORT
 
     actor = factory.SubFactory(UserFactory)

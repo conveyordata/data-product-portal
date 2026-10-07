@@ -44,11 +44,11 @@ from app.data_products.output_ports.schema_response import (
 )
 from app.data_products.output_ports.service import OutputPortService
 from app.database.deps import get_db_session
-from app.events.enums import EventReferenceEntity, EventType
+from app.events.enums import EventEntityType, EventType
 from app.events.schema import CreateEvent
 from app.events.schema_response import (
     GetEventHistoryResponse,
-    GetEventHistoryResponseItemOld,
+    GetEventHistoryResponseItem,
 )
 from app.events.service import EventService
 from app.graph.graph import Graph
@@ -81,9 +81,9 @@ def _assign_owner_role_assignments(
             CreateEvent(
                 name=EventType.DATASET_ROLE_ASSIGNMENT_CREATED,
                 subject_id=assignment.output_port_id,
-                subject_type=EventReferenceEntity.DATASET,
+                subject_type=EventEntityType.OUTPUT_PORT,
                 target_id=assignment.user_id,
-                target_type=EventReferenceEntity.USER,
+                target_type=EventEntityType.USER,
                 actor_id=actor.id,
             )
         )
@@ -155,9 +155,9 @@ def get_output_ports_event_history(
     output_port = ensure_output_port_exists(id, db, data_product_id=data_product_id)
     return GetEventHistoryResponse(
         events=[
-            GetEventHistoryResponseItemOld.model_validate(event).convert()
+            GetEventHistoryResponseItem.model_validate(event)
             for event in EventService(db).get_history(
-                output_port.id, EventReferenceEntity.DATASET
+                output_port.id, EventEntityType.OUTPUT_PORT
             )
         ]
     )
@@ -198,7 +198,7 @@ def create_output_port(
         CreateEvent(
             name=EventType.DATASET_CREATED,
             subject_id=output_port.id,
-            subject_type=EventReferenceEntity.DATASET,
+            subject_type=EventEntityType.OUTPUT_PORT,
             actor_id=authenticated_user.id,
         ),
     )
@@ -236,10 +236,10 @@ def remove_output_port(
             name=EventType.DATASET_REMOVED,
             actor_id=authenticated_user.id,
             subject_id=dataset.id,
-            subject_type=EventReferenceEntity.DATASET,
+            subject_type=EventEntityType.OUTPUT_PORT,
             deleted_subject_identifier=dataset.name,
             target_id=dataset.data_product_id,
-            target_type=EventReferenceEntity.DATA_PRODUCT,
+            target_type=EventEntityType.DATA_PRODUCT,
         ),
     )
     NotificationService(db).create_dataset_notifications(
@@ -278,7 +278,7 @@ def update_output_port(
         CreateEvent(
             name=EventType.DATASET_UPDATED,
             subject_id=id,
-            subject_type=EventReferenceEntity.DATASET,
+            subject_type=EventEntityType.OUTPUT_PORT,
             actor_id=authenticated_user.id,
         )
     )
@@ -316,7 +316,7 @@ def update_output_port_about(
         CreateEvent(
             name=EventType.DATASET_UPDATED,
             subject_id=id,
-            subject_type=EventReferenceEntity.DATASET,
+            subject_type=EventEntityType.OUTPUT_PORT,
             actor_id=authenticated_user.id,
         )
     )
@@ -351,7 +351,7 @@ def update_output_port_status(
         CreateEvent(
             name=EventType.DATASET_UPDATED,
             subject_id=id,
-            subject_type=EventReferenceEntity.DATASET,
+            subject_type=EventEntityType.OUTPUT_PORT,
             actor_id=authenticated_user.id,
         )
     )
@@ -398,7 +398,7 @@ def set_value_for_output_port(
         CreateEvent(
             name=EventType.DATASET_SETTING_UPDATED,
             subject_id=id,
-            subject_type=EventReferenceEntity.DATASET,
+            subject_type=EventEntityType.OUTPUT_PORT,
             actor_id=authenticated_user.id,
         )
     )

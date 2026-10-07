@@ -18,7 +18,6 @@ from app.events.model import Event as EventModel
 from app.groups.model import GroupMembership
 from app.users.model import User as UserModel
 from app.users.notifications.model import Notification as NotificationModel
-from app.users.notifications.schema_response import NotificationGet
 from app.users.schema import User
 
 
@@ -26,7 +25,7 @@ class NotificationService:
     def __init__(self, db: Session):
         self.db = db
 
-    def get_user_notifications(self, user: User) -> Sequence[NotificationGet]:
+    def get_user_notifications(self, user: User) -> Sequence[NotificationModel]:
         return self.db.scalars(
             select(NotificationModel)
             .options(

@@ -7,7 +7,7 @@ from app.core.auth.auth import get_authenticated_user
 from app.database.deps import get_db_session
 from app.users.notifications.schema_response import (
     GetUserNotificationsResponse,
-    NotificationGet,
+    GetUserNotificationsResponseItem,
 )
 from app.users.notifications.service import NotificationService
 from app.users.schema import User
@@ -40,7 +40,7 @@ def get_user_notifications(
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> GetUserNotificationsResponse:
     notifications = [
-        NotificationGet.model_validate(event).convert()
+        GetUserNotificationsResponseItem.model_validate(event)
         for event in NotificationService(db).get_user_notifications(authenticated_user)
     ]
     return GetUserNotificationsResponse(notifications=notifications)

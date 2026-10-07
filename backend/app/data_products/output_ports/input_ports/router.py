@@ -21,7 +21,7 @@ from app.data_products.output_ports.input_ports.schema_response import (
 )
 from app.data_products.output_ports.input_ports.service import InputPortService
 from app.database.deps import get_db_session
-from app.events.enums import EventReferenceEntity, EventType
+from app.events.enums import EventEntityType, EventType
 from app.events.schema import CreateEvent
 from app.events.service import EventService
 from app.users.notifications.service import NotificationService
@@ -91,9 +91,9 @@ def approve_output_port_as_input_port(
         CreateEvent(
             name=EventType.DATA_PRODUCT_DATASET_LINK_APPROVED,
             subject_id=approved_input_port.output_port_id,
-            subject_type=EventReferenceEntity.DATASET,
+            subject_type=EventEntityType.OUTPUT_PORT,
             target_id=approved_input_port.consuming_abstract_data_product_id,
-            target_type=EventReferenceEntity.DATA_PRODUCT,
+            target_type=EventEntityType.DATA_PRODUCT,
             actor_id=authenticated_user.id,
         ),
     )
@@ -135,9 +135,9 @@ def deny_output_port_as_input_port(
         CreateEvent(
             name=EventType.DATA_PRODUCT_DATASET_LINK_DENIED,
             subject_id=input_port.output_port_id,
-            subject_type=EventReferenceEntity.DATASET,
+            subject_type=EventEntityType.OUTPUT_PORT,
             target_id=input_port.consuming_abstract_data_product_id,
-            target_type=EventReferenceEntity.DATA_PRODUCT,
+            target_type=EventEntityType.DATA_PRODUCT,
             actor_id=authenticated_user.id,
         ),
     )
@@ -178,9 +178,9 @@ def revoke_output_port_as_input_port(
         CreateEvent(
             name=EventType.DATA_PRODUCT_DATASET_LINK_REVOKED,
             subject_id=input_port.output_port_id,
-            subject_type=EventReferenceEntity.DATASET,
+            subject_type=EventEntityType.OUTPUT_PORT,
             target_id=input_port.consuming_abstract_data_product_id,
-            target_type=EventReferenceEntity.DATA_PRODUCT,
+            target_type=EventEntityType.DATA_PRODUCT,
             actor_id=authenticated_user.id,
         ),
     )
@@ -219,9 +219,9 @@ def remove_output_port_as_input_port(
         CreateEvent(
             name=EventType.DATA_PRODUCT_DATASET_LINK_REMOVED,
             subject_id=input_port.output_port_id,
-            subject_type=EventReferenceEntity.DATASET,
+            subject_type=EventEntityType.OUTPUT_PORT,
             target_id=input_port.consuming_abstract_data_product_id,
-            target_type=EventReferenceEntity.DATA_PRODUCT,
+            target_type=EventEntityType.DATA_PRODUCT,
             actor_id=authenticated_user.id,
         ),
     )

@@ -55,11 +55,11 @@ from app.data_products.schema_response import (
 )
 from app.data_products.service import DataProductService
 from app.database.deps import get_db_session
-from app.events.enums import EventReferenceEntity, EventType
+from app.events.enums import EventEntityType, EventType
 from app.events.schema import CreateEvent
 from app.events.schema_response import (
     GetEventHistoryResponse,
-    GetEventHistoryResponseItemOld,
+    GetEventHistoryResponseItem,
 )
 from app.events.service import EventService
 from app.graph.graph import Graph
@@ -107,7 +107,7 @@ def create_data_product(
         CreateEvent(
             name=EventType.DATA_PRODUCT_CREATED,
             subject_id=created_id,
-            subject_type=EventReferenceEntity.DATA_PRODUCT,
+            subject_type=EventEntityType.DATA_PRODUCT,
             actor_id=authenticated_user.id,
         ),
     )
@@ -151,9 +151,9 @@ def _assign_owner_role_assignments(
             CreateEvent(
                 name=EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_CREATED,
                 subject_id=response.data_product_id,
-                subject_type=EventReferenceEntity.DATA_PRODUCT,
+                subject_type=EventEntityType.DATA_PRODUCT,
                 target_id=response.identity_id,
-                target_type=EventReferenceEntity.USER,
+                target_type=EventEntityType.USER,
                 actor_id=actor.id,
             )
         )
@@ -203,7 +203,7 @@ def _do_delete_data_product(
             name=EventType.DATA_PRODUCT_REMOVED,
             actor_id=authenticated_user.id,
             subject_id=data_product.id,
-            subject_type=EventReferenceEntity.DATA_PRODUCT,
+            subject_type=EventEntityType.DATA_PRODUCT,
             deleted_subject_identifier=data_product.name,
         ),
     )
@@ -272,7 +272,7 @@ def update_data_product(
         CreateEvent(
             name=EventType.DATA_PRODUCT_UPDATED,
             subject_id=id,
-            subject_type=EventReferenceEntity.DATA_PRODUCT,
+            subject_type=EventEntityType.DATA_PRODUCT,
             actor_id=authenticated_user.id,
         )
     )
@@ -309,7 +309,7 @@ def update_data_product_about(
         CreateEvent(
             name=EventType.DATA_PRODUCT_UPDATED,
             subject_id=id,
-            subject_type=EventReferenceEntity.DATA_PRODUCT,
+            subject_type=EventEntityType.DATA_PRODUCT,
             actor_id=authenticated_user.id,
         )
     )
@@ -344,7 +344,7 @@ def update_data_product_status(
         CreateEvent(
             name=EventType.DATA_PRODUCT_UPDATED,
             subject_id=id,
-            subject_type=EventReferenceEntity.DATA_PRODUCT,
+            subject_type=EventEntityType.DATA_PRODUCT,
             actor_id=authenticated_user.id,
         )
     )
@@ -371,7 +371,7 @@ def update_data_product_usage(
         CreateEvent(
             name=EventType.DATA_PRODUCT_UPDATED,
             subject_id=id,
-            subject_type=EventReferenceEntity.DATA_PRODUCT,
+            subject_type=EventEntityType.DATA_PRODUCT,
             actor_id=authenticated_user.id,
         )
     )
@@ -415,7 +415,7 @@ def set_value_for_data_product(
         CreateEvent(
             name=EventType.DATA_PRODUCT_SETTING_UPDATED,
             subject_id=id,
-            subject_type=EventReferenceEntity.DATA_PRODUCT,
+            subject_type=EventEntityType.DATA_PRODUCT,
             actor_id=authenticated_user.id,
         )
     )
@@ -460,9 +460,9 @@ def _notify_input_port_links(
                     else EventType.DATA_PRODUCT_DATASET_LINK_APPROVED
                 ),
                 subject_id=input_port.consuming_abstract_data_product_id,
-                subject_type=EventReferenceEntity.DATA_PRODUCT,
+                subject_type=EventEntityType.DATA_PRODUCT,
                 target_id=input_port.output_port_id,
-                target_type=EventReferenceEntity.DATASET,
+                target_type=EventEntityType.OUTPUT_PORT,
                 actor_id=authenticated_user.id,
             )
             for input_port in input_ports
@@ -553,9 +553,9 @@ def revoke_input_port_for_data_product(
         CreateEvent(
             name=EventType.DATA_PRODUCT_DATASET_LINK_REVOKED,
             subject_id=id,
-            subject_type=EventReferenceEntity.DATA_PRODUCT,
+            subject_type=EventEntityType.DATA_PRODUCT,
             target_id=input_port.output_port_id,
-            target_type=EventReferenceEntity.DATASET,
+            target_type=EventEntityType.OUTPUT_PORT,
             actor_id=authenticated_user.id,
         ),
     )
@@ -598,10 +598,8 @@ def get_data_product_event_history(
 ) -> GetEventHistoryResponse:
     return GetEventHistoryResponse(
         events=[
-            GetEventHistoryResponseItemOld.model_validate(event).convert()
-            for event in EventService(db).get_history(
-                id, EventReferenceEntity.DATA_PRODUCT
-            )
+            GetEventHistoryResponseItem.model_validate(event)
+            for event in EventService(db).get_history(id, EventEntityType.DATA_PRODUCT)
         ]
     )
 
@@ -688,9 +686,9 @@ def cancel_input_port_for_data_product(
         CreateEvent(
             name=EventType.DATA_PRODUCT_DATASET_LINK_CANCELLED,
             subject_id=id,
-            subject_type=EventReferenceEntity.DATA_PRODUCT,
+            subject_type=EventEntityType.DATA_PRODUCT,
             target_id=input_port.output_port_id,
-            target_type=EventReferenceEntity.DATASET,
+            target_type=EventEntityType.OUTPUT_PORT,
             actor_id=authenticated_user.id,
         ),
     )
@@ -722,9 +720,9 @@ def remove_input_port_for_data_product(
         CreateEvent(
             name=EventType.DATA_PRODUCT_DATASET_LINK_REMOVED,
             subject_id=id,
-            subject_type=EventReferenceEntity.DATA_PRODUCT,
+            subject_type=EventEntityType.DATA_PRODUCT,
             target_id=input_port.output_port_id,
-            target_type=EventReferenceEntity.DATASET,
+            target_type=EventEntityType.OUTPUT_PORT,
             actor_id=authenticated_user.id,
         ),
     )
