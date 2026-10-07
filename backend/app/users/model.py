@@ -36,7 +36,11 @@ class User(Identity):
     first_name = Column(String)
     last_name = Column(String)
     events: Mapped[list[Event]] = relationship(
-        "Event", back_populates="actor", foreign_keys="Event.actor_id", lazy="raise"
+        "Event",
+        back_populates="actor",
+        primaryjoin="User.id == foreign(Event.actor_id)",
+        passive_deletes="all",
+        lazy="raise",
     )
 
     has_seen_tour = Column(Boolean, default=False, nullable=False)

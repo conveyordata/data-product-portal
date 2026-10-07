@@ -40,3 +40,5 @@ class AuthRole(_AuthRole):
             authorizer.clear_assignments_for_resource_role(role_id=self.id)
         elif self.scope == Scope.DOMAIN:
             authorizer.clear_assignments_for_domain_role(role_id=self.id)
+        elif self.scope == Scope.GLOBAL:
+            authorizer.clear_assignments_for_global_role(role_id=self.id)

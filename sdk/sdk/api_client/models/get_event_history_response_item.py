@@ -31,11 +31,12 @@ class GetEventHistoryResponseItem:
         subject_type (EventEntityType):
         actor_id (UUID):
         created_on (datetime.datetime):
-        actor (User):
         target_id (None | Unset | UUID):
         target_type (EventEntityType | None | Unset):
         deleted_subject_identifier (None | str | Unset):
         deleted_target_identifier (None | str | Unset):
+        deleted_actor_identifier (None | str | Unset):
+        actor (None | Unset | User):
         data_product (DataProduct | None | Unset):
         user (None | Unset | User):
         output_port (None | OutputPort | Unset):
@@ -48,11 +49,12 @@ class GetEventHistoryResponseItem:
     subject_type: EventEntityType
     actor_id: UUID
     created_on: datetime.datetime
-    actor: User
     target_id: None | Unset | UUID = UNSET
     target_type: EventEntityType | None | Unset = UNSET
     deleted_subject_identifier: None | str | Unset = UNSET
     deleted_target_identifier: None | str | Unset = UNSET
+    deleted_actor_identifier: None | str | Unset = UNSET
+    actor: None | Unset | User = UNSET
     data_product: DataProduct | None | Unset = UNSET
     user: None | Unset | User = UNSET
     output_port: None | OutputPort | Unset = UNSET
@@ -76,8 +78,6 @@ class GetEventHistoryResponseItem:
         actor_id = str(self.actor_id)
 
         created_on = self.created_on.isoformat()
-
-        actor = self.actor.to_dict()
 
         target_id: None | str | Unset
         if isinstance(self.target_id, Unset):
@@ -106,6 +106,20 @@ class GetEventHistoryResponseItem:
             deleted_target_identifier = UNSET
         else:
             deleted_target_identifier = self.deleted_target_identifier
+
+        deleted_actor_identifier: None | str | Unset
+        if isinstance(self.deleted_actor_identifier, Unset):
+            deleted_actor_identifier = UNSET
+        else:
+            deleted_actor_identifier = self.deleted_actor_identifier
+
+        actor: dict[str, Any] | None | Unset
+        if isinstance(self.actor, Unset):
+            actor = UNSET
+        elif isinstance(self.actor, User):
+            actor = self.actor.to_dict()
+        else:
+            actor = self.actor
 
         data_product: dict[str, Any] | None | Unset
         if isinstance(self.data_product, Unset):
@@ -149,7 +163,6 @@ class GetEventHistoryResponseItem:
                 "subject_type": subject_type,
                 "actor_id": actor_id,
                 "created_on": created_on,
-                "actor": actor,
             }
         )
         if target_id is not UNSET:
@@ -160,6 +173,10 @@ class GetEventHistoryResponseItem:
             field_dict["deleted_subject_identifier"] = deleted_subject_identifier
         if deleted_target_identifier is not UNSET:
             field_dict["deleted_target_identifier"] = deleted_target_identifier
+        if deleted_actor_identifier is not UNSET:
+            field_dict["deleted_actor_identifier"] = deleted_actor_identifier
+        if actor is not UNSET:
+            field_dict["actor"] = actor
         if data_product is not UNSET:
             field_dict["data_product"] = data_product
         if user is not UNSET:
@@ -190,8 +207,6 @@ class GetEventHistoryResponseItem:
         actor_id = UUID(d.pop("actor_id"))
 
         created_on = datetime.datetime.fromisoformat(d.pop("created_on"))
-
-        actor = User.from_dict(d.pop("actor"))
 
         def _parse_target_id(data: object) -> None | Unset | UUID:
             if data is None:
@@ -248,6 +263,34 @@ class GetEventHistoryResponseItem:
         deleted_target_identifier = _parse_deleted_target_identifier(
             d.pop("deleted_target_identifier", UNSET)
         )
+
+        def _parse_deleted_actor_identifier(data: object) -> None | str | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(None | str | Unset, data)
+
+        deleted_actor_identifier = _parse_deleted_actor_identifier(
+            d.pop("deleted_actor_identifier", UNSET)
+        )
+
+        def _parse_actor(data: object) -> None | Unset | User:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, dict):
+                    raise TypeError()
+                actor_type_0 = User.from_dict(data)
+
+                return actor_type_0
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            return cast(None | Unset | User, data)
+
+        actor = _parse_actor(d.pop("actor", UNSET))
 
         def _parse_data_product(data: object) -> DataProduct | None | Unset:
             if data is None:
@@ -324,11 +367,12 @@ class GetEventHistoryResponseItem:
             subject_type=subject_type,
             actor_id=actor_id,
             created_on=created_on,
-            actor=actor,
             target_id=target_id,
             target_type=target_type,
             deleted_subject_identifier=deleted_subject_identifier,
             deleted_target_identifier=deleted_target_identifier,
+            deleted_actor_identifier=deleted_actor_identifier,
+            actor=actor,
             data_product=data_product,
             user=user,
             output_port=output_port,

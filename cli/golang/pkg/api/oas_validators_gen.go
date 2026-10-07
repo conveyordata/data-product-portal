@@ -2180,8 +2180,15 @@ func (s *GetEventHistoryResponseItem) Validate() error {
 		})
 	}
 	if err := func() error {
-		if err := s.Actor.Validate(); err != nil {
-			return err
+		if value, ok := s.Actor.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
 		}
 		return nil
 	}(); err != nil {

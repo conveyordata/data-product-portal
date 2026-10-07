@@ -45,7 +45,8 @@ class GetEventHistoryResponseItem(ORMModel):
     created_on: NaiveDatetime
     deleted_subject_identifier: Optional[str] = None
     deleted_target_identifier: Optional[str] = None
-    actor: User
+    deleted_actor_identifier: Optional[str] = None
+    actor: Optional[User] = None
     data_product: Optional[DataProduct] = None
     user: Optional[User] = None
     output_port: Optional[OutputPort] = None
@@ -64,7 +65,8 @@ class GetEventHistoryResponseItemOld(ORMModel):
     created_on: NaiveDatetime
     deleted_subject_identifier: Optional[str] = None
     deleted_target_identifier: Optional[str] = None
-    actor: User
+    deleted_actor_identifier: Optional[str] = None
+    actor: Optional[User] = None
     data_product: Optional[DataProduct] = None
     user: Optional[User] = None
     output_port: Optional[OutputPort]
