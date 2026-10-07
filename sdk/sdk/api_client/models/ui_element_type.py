@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class UIElementType(str, Enum):
+class UIElementType(StrEnum):
     CHECKBOX = "checkbox"
     RADIO = "radio"
     SELECT = "select"

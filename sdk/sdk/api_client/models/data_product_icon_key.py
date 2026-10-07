@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class DataProductIconKey(str, Enum):
+class DataProductIconKey(StrEnum):
     ANALYTICS = "analytics"
     DEFAULT = "default"
     EXPLORATION = "exploration"

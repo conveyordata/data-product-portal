@@ -60,10 +60,10 @@ class GetEventHistoryResponseItem:
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        from ..models.data_product import DataProduct
-        from ..models.output_port import OutputPort
-        from ..models.technical_asset import TechnicalAsset
-        from ..models.user import User
+        from ..models.data_product import DataProduct  # noqa: PLC0415
+        from ..models.output_port import OutputPort  # noqa: PLC0415
+        from ..models.technical_asset import TechnicalAsset  # noqa: PLC0415
+        from ..models.user import User  # noqa: PLC0415
 
         id = str(self.id)
 
@@ -173,10 +173,10 @@ class GetEventHistoryResponseItem:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.data_product import DataProduct
-        from ..models.output_port import OutputPort
-        from ..models.technical_asset import TechnicalAsset
-        from ..models.user import User
+        from ..models.data_product import DataProduct  # noqa: PLC0415
+        from ..models.output_port import OutputPort  # noqa: PLC0415
+        from ..models.technical_asset import TechnicalAsset  # noqa: PLC0415
+        from ..models.user import User  # noqa: PLC0415
 
         d = dict(src_dict)
         id = UUID(d.pop("id"))

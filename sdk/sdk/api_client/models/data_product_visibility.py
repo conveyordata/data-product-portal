@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class DataProductVisibility(str, Enum):
+class DataProductVisibility(StrEnum):
     DISCOVERABLE = "discoverable"
     HIDDEN = "hidden"
 

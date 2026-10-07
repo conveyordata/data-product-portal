@@ -68,7 +68,7 @@ class UIElementRadio:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.select_option import SelectOption
+        from ..models.select_option import SelectOption  # noqa: PLC0415
 
         d = dict(src_dict)
 

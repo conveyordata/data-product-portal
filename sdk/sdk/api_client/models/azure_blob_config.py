@@ -46,7 +46,7 @@ class AzureBlobConfig:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.azure_blob_config_storage_account_names import (
-            AzureBlobConfigStorageAccountNames,
+            AzureBlobConfigStorageAccountNames,  # noqa: PLC0415
         )
 
         d = dict(src_dict)

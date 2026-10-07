@@ -80,7 +80,7 @@ class CloudEventOutputPortTechnicalAssetLinkEvent:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.output_port_technical_asset_link_event import (
-            OutputPortTechnicalAssetLinkEvent,
+            OutputPortTechnicalAssetLinkEvent,  # noqa: PLC0415
         )
 
         d = dict(src_dict)

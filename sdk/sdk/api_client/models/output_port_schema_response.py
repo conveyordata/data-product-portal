@@ -52,7 +52,9 @@ class OutputPortSchemaResponse:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.schema_object_response import SchemaObjectResponse
+        from ..models.schema_object_response import (
+            SchemaObjectResponse,  # noqa: PLC0415
+        )
 
         d = dict(src_dict)
         output_port_id = UUID(d.pop("output_port_id"))

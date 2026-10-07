@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class TechnicalMapping(str, Enum):
+class TechnicalMapping(StrEnum):
     CUSTOM = "custom"
     DEFAULT = "default"
 

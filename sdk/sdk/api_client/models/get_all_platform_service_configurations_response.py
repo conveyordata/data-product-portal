@@ -45,7 +45,9 @@ class GetAllPlatformServiceConfigurationsResponse:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.platform_service_configuration import PlatformServiceConfiguration
+        from ..models.platform_service_configuration import (
+            PlatformServiceConfiguration,  # noqa: PLC0415
+        )
 
         d = dict(src_dict)
         platform_service_configurations = []

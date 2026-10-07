@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class RenewalStatus(str, Enum):
+class RenewalStatus(StrEnum):
     DENIED = "denied"
     PENDING = "pending"
 

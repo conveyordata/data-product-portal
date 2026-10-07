@@ -47,10 +47,10 @@ class EnvironmentPlatformConfigGet:
 
     def to_dict(self) -> dict[str, Any]:
         from ..models.aws_environment_platform_configuration import (
-            AWSEnvironmentPlatformConfiguration,
+            AWSEnvironmentPlatformConfiguration,  # noqa: PLC0415
         )
         from ..models.databricks_environment_platform_configuration import (
-            DatabricksEnvironmentPlatformConfiguration,
+            DatabricksEnvironmentPlatformConfiguration,  # noqa: PLC0415
         )
 
         config: dict[str, Any]
@@ -83,16 +83,16 @@ class EnvironmentPlatformConfigGet:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.aws_environment_platform_configuration import (
-            AWSEnvironmentPlatformConfiguration,
+            AWSEnvironmentPlatformConfiguration,  # noqa: PLC0415
         )
         from ..models.azure_environment_platform_configuration import (
-            AzureEnvironmentPlatformConfiguration,
+            AzureEnvironmentPlatformConfiguration,  # noqa: PLC0415
         )
         from ..models.databricks_environment_platform_configuration import (
-            DatabricksEnvironmentPlatformConfiguration,
+            DatabricksEnvironmentPlatformConfiguration,  # noqa: PLC0415
         )
-        from ..models.environment import Environment
-        from ..models.platform import Platform
+        from ..models.environment import Environment  # noqa: PLC0415
+        from ..models.platform import Platform  # noqa: PLC0415
 
         d = dict(src_dict)
 

@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class EventEntityType(str, Enum):
+class EventEntityType(StrEnum):
     DATA_PRODUCT = "data_product"
     OUTPUT_PORT = "output_port"
     TECHNICAL_ASSET = "technical_asset"

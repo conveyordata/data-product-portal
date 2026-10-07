@@ -55,10 +55,10 @@ class UIElementMetadata:
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        from ..models.ui_element_checkbox import UIElementCheckbox
-        from ..models.ui_element_radio import UIElementRadio
-        from ..models.ui_element_select import UIElementSelect
-        from ..models.ui_element_string import UIElementString
+        from ..models.ui_element_checkbox import UIElementCheckbox  # noqa: PLC0415
+        from ..models.ui_element_radio import UIElementRadio  # noqa: PLC0415
+        from ..models.ui_element_select import UIElementSelect  # noqa: PLC0415
+        from ..models.ui_element_string import UIElementString  # noqa: PLC0415
 
         label = self.label
 
@@ -173,11 +173,11 @@ class UIElementMetadata:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.field_dependency import FieldDependency
-        from ..models.ui_element_checkbox import UIElementCheckbox
-        from ..models.ui_element_radio import UIElementRadio
-        from ..models.ui_element_select import UIElementSelect
-        from ..models.ui_element_string import UIElementString
+        from ..models.field_dependency import FieldDependency  # noqa: PLC0415
+        from ..models.ui_element_checkbox import UIElementCheckbox  # noqa: PLC0415
+        from ..models.ui_element_radio import UIElementRadio  # noqa: PLC0415
+        from ..models.ui_element_select import UIElementSelect  # noqa: PLC0415
+        from ..models.ui_element_string import UIElementString  # noqa: PLC0415
 
         d = dict(src_dict)
         label = d.pop("label")

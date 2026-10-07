@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class InputPortRequestDecision(str, Enum):
+class InputPortRequestDecision(StrEnum):
     APPROVED = "approved"
     CANCELLED = "cancelled"
     DENIED = "denied"

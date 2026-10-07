@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class DataProductSettingScope(str, Enum):
+class DataProductSettingScope(StrEnum):
     DATAPRODUCT = "dataproduct"
     DATASET = "dataset"
 
