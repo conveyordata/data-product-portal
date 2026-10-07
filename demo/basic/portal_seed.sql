@@ -129,10 +129,10 @@ begin
     SELECT id FROM public.platform_services WHERE platform_id = aws_id AND name = 'Glue' INTO glue_service_id;
     INSERT INTO public.platform_service_configs (id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES('6bd82fd6-9a23-4517-a07c-9110d83ab38f', aws_id, s3_service_id, '["datalake","ingress","egress"]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
     INSERT INTO public.platform_service_configs (id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES('fa026b3a-7a17-4c32-b279-995af021f6c2', aws_id, glue_service_id, '["clean","master"]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
-    INSERT INTO public.platform_service_configs (id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES(gen_random_uuid(), aws_id, (SELECT id FROM public.platform_services WHERE platform_id = aws_id AND name = 'ParameterStore'), '[]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
 
     -- ENVIRONMENTS
     INSERT INTO public.environments ("name", context, acronym, is_default, created_on, updated_on, deleted_at) VALUES ('development', '', 'dev', true, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO environment_id_dev;
+    INSERT INTO public.env_platform_service_configs (id, environment_id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), environment_id_dev, aws_id, (SELECT id FROM public.platform_services WHERE platform_id = aws_id AND name = 'ParameterStore'), '[]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
     INSERT INTO public.env_platform_service_configs (id, environment_id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES ('daa8e3e8-1485-4eb2-8b4b-575e8d10a570', environment_id_dev, postgresql_id, postgresql_service_id, '[{"identifier":"database", "host": "data-product-portal-postgresql-demo", "port": "5432", "admin_user": "postgres", "admin_pwd": "abc123"}]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
 
     -- GLOBAL ROLE ASSIGNMENTS

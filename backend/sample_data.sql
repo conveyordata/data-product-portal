@@ -210,14 +210,6 @@ INSERT INTO public.platform_service_configs (id, platform_id, service_id, "confi
     WHERE p.name = 'AWS'
 ), '{{ redshift_service_id }}', '[]', timezone('utc'::text, current_timestamp), NULL, NULL);
 
-INSERT INTO public.platform_service_configs (id, platform_id, service_id, config, created_on, updated_on, deleted_at) VALUES ('8d2e6b41-9a7f-4c35-b0d8-1e5f3a7c9b62', (
-    SELECT p.id FROM public.platforms AS p
-    WHERE p.name = 'AWS'
-), (
-    SELECT ps.id FROM public.platform_services AS ps
-    WHERE ps.name = 'ParameterStore'
-), '[]', timezone('utc'::text, current_timestamp), NULL, NULL);
-
 INSERT INTO public.platform_service_configs (id, platform_id, service_id, config, created_on, updated_on, deleted_at) VALUES ('fa026b3a-7a17-4c32-b279-995af021f6c2', (
     SELECT p.id FROM public.platforms AS p
     WHERE p.name = 'AWS'), (
@@ -311,6 +303,20 @@ INSERT INTO public.env_platform_configs (id, environment_id, platform_id, config
     WHERE p.name = 'Azure'
 ), '{"tenant_id": "{{ AZURE_TENANT_ID }}", "region": "{{ AZURE_REGION }}", "subscription_id": "{{ AZURE_SUBSCRIPTION_ID }}", "can_read_from": []}', timezone('utc'::text, current_timestamp
 ), NULL, NULL);
+
+INSERT INTO public.env_platform_service_configs (id, environment_id, platform_id, service_id, config, created_on, updated_on, deleted_at) VALUES ('4b7e2c91-6d38-4f15-a2c7-8e9d1b3f5a60', '{{ returned_environment_id_dev }}'::uuid, (
+    SELECT p.id FROM public.platforms AS p
+    WHERE p.name = 'AWS'), (
+    SELECT ps.id FROM public.platform_services AS ps
+    WHERE ps.name = 'ParameterStore'
+), '[]', timezone('utc'::text, current_timestamp), NULL, NULL);
+
+INSERT INTO public.env_platform_service_configs (id, environment_id, platform_id, service_id, config, created_on, updated_on, deleted_at) VALUES ('5c8f3da2-7e49-4026-b3d8-9fae2c4b6b71', '{{ returned_environment_id_prd }}'::uuid, (
+    SELECT p.id FROM public.platforms AS p
+    WHERE p.name = 'AWS'), (
+    SELECT ps.id FROM public.platform_services AS ps
+    WHERE ps.name = 'ParameterStore'
+), '[]', timezone('utc'::text, current_timestamp), NULL, NULL);
 
 INSERT INTO public.env_platform_service_configs (id, environment_id, platform_id, service_id, config, created_on, updated_on, deleted_at) VALUES ('93f4b677-5ae8-450d-91a6-e15196b2e774', '{{ returned_environment_id_dev }}'::uuid, (
     SELECT p.id FROM public.platforms AS p
