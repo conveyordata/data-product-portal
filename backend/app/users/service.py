@@ -8,10 +8,13 @@ from sqlalchemy.orm import Session, selectinload
 from app.authorization.role_assignments.data_product.service import (
     RoleAssignmentService,
 )
+from app.core.authz import Authorization
 from app.data_products.output_port_technical_assets_link.service import (
     TechnicalAssetOutputPortService,
 )
 from app.data_products.output_ports.input_ports.service import InputPortService
+from app.groups.model import Group, GroupMembership
+from app.groups.schema_response import GroupGet
 from app.users.model import User, ensure_user_exists
 from app.users.model import User as UserModel
 from app.users.schema_request import CanBecomeAdminUpdate, UserCreate
@@ -45,6 +48,7 @@ class UserService:
         )
         user.data_products = []
         user.datasets = []
+        Authorization().clear_assignments_for_user(user_id=id)
         self.db.delete(user)
         self.db.flush()
 
@@ -115,3 +119,16 @@ class UserService:
                 key=lambda action: (action.requested_on is None, action.requested_on),
             )
         )
+
+    def get_groups(self, user_id: UUID) -> Sequence[GroupGet]:
+        ensure_user_exists(user_id, self.db)
+
+        return self.db.scalars(
+            select(Group)
+            .join(
+                GroupMembership,
+                GroupMembership.group_id == Group.id,
+            )
+            .where(GroupMembership.member_identity_id == user_id)
+            .order_by(asc(Group.display_name), asc(Group.external_id))
+        ).all()

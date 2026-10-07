@@ -22,7 +22,7 @@ from app.authorization.roles.service import RoleService
 from app.core.authz import Authorization
 from app.core.authz.actions import AuthorizationAction
 from app.core.logging import logger
-from app.groups.service import GroupService
+from app.groups.model import GroupMembership
 
 DATA_PRODUCT_READER_ROLE = "/role/data-product-reader"
 OUTPUT_PORT_READER_ROLE = "/role/output-port-reader"
@@ -147,15 +147,25 @@ class AuthorizationService:
         OutputPortService(self.db).sync_read_rights_output_ports()
 
     def _sync_group_memberships(self) -> None:
-        service = GroupService(self.db)
-        memberships = service.list_memberships()
-        for membership in memberships:
+        """
+        Synchronizes group memberships by assigning both global and resource-level
+        permissions for all group-member relationships found in the database.
+
+        Queries UUID's directly from the database to avoid loading polymorphic Identity
+        objects that will cause issues on application startup. Also is more efficient.
+        """
+        memberships = self.db.execute(
+            select(
+                GroupMembership.group_id,
+                GroupMembership.member_identity_id,
+            )
+        )
+        for group_id, member_identity_id in memberships:
             self.authorizer.assign_global_group_membership(
-                member_identity_id=membership.member_identity_id,
-                group_id=membership.group_id,
+                member_identity_id=member_identity_id,
+                group_id=group_id,
             )
             self.authorizer.assign_resource_group_membership(
-                member_identity_id=membership.member_identity_id,
-                group_id=membership.group_id,
+                member_identity_id=member_identity_id,
+                group_id=group_id,
             )
-        return

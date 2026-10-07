@@ -27,6 +27,15 @@ const injectedRtkApi = api.injectEndpoints({
         body: queryArg,
       }),
     }),
+    getCurrentUserGroups: build.query<
+      GetCurrentUserGroupsApiResponse,
+      GetCurrentUserGroupsApiArg
+    >({
+      query: () => ({ url: `/api/v2/users/current/groups` }),
+    }),
+    getUserGroups: build.query<GetUserGroupsApiResponse, GetUserGroupsApiArg>({
+      query: (queryArg) => ({ url: `/api/v2/users/${queryArg}/groups` }),
+    }),
     markTourAsSeen: build.mutation<
       MarkTourAsSeenApiResponse,
       MarkTourAsSeenApiArg
@@ -71,6 +80,12 @@ export type CreateUserApiArg = UserCreate;
 export type SetCanBecomeAdminApiResponse =
   /** status 200 Successful Response */ any;
 export type SetCanBecomeAdminApiArg = CanBecomeAdminUpdate;
+export type GetCurrentUserGroupsApiResponse =
+  /** status 200 Successful Response */ GroupsGetResponse;
+export type GetCurrentUserGroupsApiArg = void;
+export type GetUserGroupsApiResponse =
+  /** status 200 Successful Response */ GroupsGetResponse;
+export type GetUserGroupsApiArg = string;
 export type MarkTourAsSeenApiResponse =
   /** status 200 Successful Response */ any;
 export type MarkTourAsSeenApiArg = void;
@@ -115,6 +130,12 @@ export type AuthorizationAction =
   | 107
   | 108
   | 109
+  | 110
+  | 111
+  | 112
+  | 113
+  | 114
+  | 115
   | 301
   | 302
   | 303
@@ -194,6 +215,14 @@ export type UserCreate = {
 export type CanBecomeAdminUpdate = {
   user_id: string;
   can_become_admin: boolean;
+};
+export type GroupGet = {
+  id: string;
+  external_id: string;
+  display_name: string;
+};
+export type GroupsGetResponse = {
+  groups: GroupGet[];
 };
 export type AccessDurationType = "permanent" | "time_bound";
 export type InputPortRequestDecision =
@@ -380,6 +409,10 @@ export const {
   useLazyGetUsersQuery,
   useCreateUserMutation,
   useSetCanBecomeAdminMutation,
+  useGetCurrentUserGroupsQuery,
+  useLazyGetCurrentUserGroupsQuery,
+  useGetUserGroupsQuery,
+  useLazyGetUserGroupsQuery,
   useMarkTourAsSeenMutation,
   useGetUserPendingActionsQuery,
   useLazyGetUserPendingActionsQuery,

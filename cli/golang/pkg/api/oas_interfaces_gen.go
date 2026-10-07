@@ -9,6 +9,10 @@ type AddExplorationFinalizerRes interface {
 	addExplorationFinalizerRes()
 }
 
+type AddGroupMembersRes interface {
+	addGroupMembersRes()
+}
+
 type AddOutputPortDataQualityRunRes interface {
 	addOutputPortDataQualityRunRes()
 }
@@ -69,6 +73,14 @@ type CreateExplorationRes interface {
 	createExplorationRes()
 }
 
+type CreateGroupRes interface {
+	createGroupRes()
+}
+
+type CreateMachineUserRes interface {
+	createMachineUserRes()
+}
+
 type CreateOutputPortAccessTypeRes interface {
 	createOutputPortAccessTypeRes()
 }
@@ -121,6 +133,14 @@ type DeleteGlobalRoleAssignmentRes interface {
 	deleteGlobalRoleAssignmentRes()
 }
 
+type DeleteGroupRes interface {
+	deleteGroupRes()
+}
+
+type DeleteMachineUserRes interface {
+	deleteMachineUserRes()
+}
+
 type DeleteOutputPortQueryStatRes interface {
 	deleteOutputPortQueryStatRes()
 }
@@ -155,6 +175,10 @@ type GetAllPlatformServiceConfigurationsRes interface {
 
 type GetAllPlatformsRes interface {
 	getAllPlatformsRes()
+}
+
+type GetCurrentUserGroupsRes interface {
+	getCurrentUserGroupsRes()
 }
 
 type GetCurrentUserRes interface {
@@ -245,6 +269,18 @@ type GetExplorationsRes interface {
 	getExplorationsRes()
 }
 
+type GetGroupMembersRes interface {
+	getGroupMembersRes()
+}
+
+type GetGroupRes interface {
+	getGroupRes()
+}
+
+type GetGroupsRes interface {
+	getGroupsRes()
+}
+
 type GetInputPortsForOutputPortRes interface {
 	getInputPortsForOutputPortRes()
 }
@@ -255,6 +291,14 @@ type GetJwtTokenRes interface {
 
 type GetLatestDataQualitySummaryForOutputPortRes interface {
 	getLatestDataQualitySummaryForOutputPortRes()
+}
+
+type GetMachineUserRes interface {
+	getMachineUserRes()
+}
+
+type GetMachineUsersRes interface {
+	getMachineUsersRes()
 }
 
 type GetOutputPortAccessDurationsRes interface {
@@ -331,6 +375,10 @@ type GetTechnicalAssetRes interface {
 
 type GetThemeSettingsRes interface {
 	getThemeSettingsRes()
+}
+
+type GetUserGroupsRes interface {
+	getUserGroupsRes()
 }
 
 type GetUserNotificationsRes interface {
@@ -433,6 +481,10 @@ type RemoveExplorationRes interface {
 	removeExplorationRes()
 }
 
+type RemoveGroupMembersRes interface {
+	removeGroupMembersRes()
+}
+
 type RemoveInputPortForDataProductRes interface {
 	removeInputPortForDataProductRes()
 }
@@ -483,6 +535,10 @@ type RenewInputPortForDataProductRes interface {
 
 type RenewInputPortForExplorationRes interface {
 	renewInputPortForExplorationRes()
+}
+
+type ReplaceGroupMembersRes interface {
+	replaceGroupMembersRes()
 }
 
 type ReplaceOutputPortCuratedQueriesRes interface {
@@ -587,6 +643,14 @@ type UpdateDomainRes interface {
 
 type UpdateEnvironmentIsGlobalRes interface {
 	updateEnvironmentIsGlobalRes()
+}
+
+type UpdateGroupRes interface {
+	updateGroupRes()
+}
+
+type UpdateMachineUserRes interface {
+	updateMachineUserRes()
 }
 
 type UpdateOutputPortAboutRes interface {

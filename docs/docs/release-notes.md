@@ -19,6 +19,7 @@ sidebar_position: 200
 - **[General]**: Added support for Hidden Data Products, they are only visible to people with direct access to them.
   This allows you to use Data Product Portal to also manage sensitive data products that should not be visible to everyone in the organization.
 - **[General]**: Added Output Port Access Types. Admins define their own Access Types in Settings and map each one to an Access Function (Auto-approve, Approval required or Invite only). Existing Output Ports are migrated to the preconfigured Unrestricted, Restricted and Private Access Types.
+- **[API]**: Added CRUD operations for new identities Groups and Machine Users alongside group membership management endpoints; the latter working in batch fashion.
 
 ### bugfixes
 

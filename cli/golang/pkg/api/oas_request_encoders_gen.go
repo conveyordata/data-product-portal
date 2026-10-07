@@ -42,6 +42,20 @@ func encodeAddExplorationFinalizerRequest(
 	return nil
 }
 
+func encodeAddGroupMembersRequest(
+	req *GroupMembersAdd,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
 func encodeAddOutputPortDataQualityRunRequest(
 	req *OutputPortDataQualitySummary,
 	r *http.Request,
@@ -198,6 +212,34 @@ func encodeCreateDomainRequest(
 
 func encodeCreateExplorationRequest(
 	req *CreateExplorationRequestWithInputPorts,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeCreateGroupRequest(
+	req *GroupCreate,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeCreateMachineUserRequest(
+	req *MachineUserCreate,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
@@ -497,6 +539,20 @@ func encodeOverwriteOutputPortDataQualitySummaryRequest(
 	return nil
 }
 
+func encodeRemoveGroupMembersRequest(
+	req *GroupMembersRemove,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
 func encodeRemoveOutputPortAsInputPortRequest(
 	req *RemoveOutputPortAsInputPortRequest,
 	r *http.Request,
@@ -513,6 +569,20 @@ func encodeRemoveOutputPortAsInputPortRequest(
 
 func encodeRenderTechnicalAssetAccessPathRequest(
 	req *RenderTechnicalAssetAccessPathRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeReplaceGroupMembersRequest(
+	req *GroupMembersReplace,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
@@ -779,6 +849,34 @@ func encodeUpdateDomainRequest(
 
 func encodeUpdateEnvironmentIsGlobalRequest(
 	req *EnvironmentUpdateGlobal,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeUpdateGroupRequest(
+	req *GroupUpdate,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeUpdateMachineUserRequest(
+	req *MachineUserUpdate,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
