@@ -239,7 +239,7 @@ class InputPortService:
         now = datetime.now(timezone.utc)
         request = InputPortRequestModel(
             justification=previous_request.justification,
-            requested_by_id=actor.id,
+            requested_by_id=previous_request.requested_by_id,
             requested_on=now,
             access_duration_type=access_duration.access_duration_type,
             requested_duration_days=access_duration.days,
@@ -262,11 +262,7 @@ class InputPortService:
                 ),
             },
         )
-        return RedactedInputPort(
-            output_port_id=current_link.output_port_id,
-            consuming_abstract_data_product_id=current_link.consuming_abstract_data_product_id,
-            requested_by_id=previous_request.requested_by_id,
-        )
+        return RedactedInputPort.of(current_link, previous_request.requested_by_id)
 
     def deny_output_port_as_input_port(
         self,

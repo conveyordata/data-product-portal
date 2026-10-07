@@ -1007,7 +1007,7 @@ class TestInputPortsRouter:
         link = self.create_link_with_status(
             DecisionStatus.APPROVED,
             output_port=OutputPortFactory(
-                access_type=OutputPortAccessType.RESTRICTED,
+                access_function=OutputPortAccessFunction.RESTRICTED,
                 data_product_access_duration_type=AccessDurationType.TIME_BOUND,
             ),
             request__access_duration_type=AccessDurationType.TIME_BOUND,
@@ -1084,6 +1084,28 @@ class TestInputPortsRouter:
 
         notified = session.scalars(select(Notification.user_id)).all()
         assert notified == [requester.id]
+
+    def test_renew_output_port_as_input_port__keeps_original_requester(
+        self, client, session
+    ):
+        requester = UserFactory()
+        link = self.create_link_with_status(
+            InputPortStatus.REVOKED, request__requested_by=requester
+        )
+        response = self.renew_output_port_as_input_port(
+            client,
+            link.output_port.data_product.id,
+            link.output_port.id,
+            link.consuming_abstract_data_product.id,
+        )
+        assert response.status_code == 200, response.text
+
+        requested_by_ids = session.scalars(
+            select(InputPortRequest.requested_by_id).where(
+                InputPortRequest.input_port_id == link.id
+            )
+        ).all()
+        assert requested_by_ids == [requester.id, requester.id]
 
     def test_renew_output_port_as_input_port__exploration(self, client, session):
         link = self.create_link_with_status(
