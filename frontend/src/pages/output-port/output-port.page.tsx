@@ -15,18 +15,13 @@ import { DatasetActions } from '@/pages/output-port/components/dataset-actions/d
 import { OutputPortDescription } from '@/pages/output-port/components/dataset-description/output-port-description.tsx';
 import { DatasetQuality } from '@/pages/output-port/components/dataset-quality/dataset-quality.component.tsx';
 import { DatasetTabs } from '@/pages/output-port/components/dataset-tabs/dataset-tabs';
-import {
-    type AuthorizationAction as AccessCheckAction,
-    useCheckAccessQuery,
-} from '@/store/api/services/generated/authorizationApi.ts';
+import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
 import { useGetDataProductQuery } from '@/store/api/services/generated/dataProductsApi.ts';
 import { useGetOutputPortQuery } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { ApplicationPaths, createDataProductIdPath, DynamicPathParams } from '@/types/navigation';
 import { useGetDatasetOwners } from '@/utils/dataset-user-role.helper';
 import styles from './output-port.module.scss';
-
-const HIDDEN_DATA_PRODUCT_READ: AccessCheckAction = 901;
 
 export function OutputPort() {
     const { t } = useTranslation();
@@ -41,7 +36,7 @@ export function OutputPort() {
         {
             resource: dataProductId,
             domain: outputPort?.domain.id,
-            action: HIDDEN_DATA_PRODUCT_READ,
+            action: AuthorizationAction.HIDDEN__DATA_PRODUCT__READ,
         },
         { skip: !dataProductId || !outputPort },
     );
