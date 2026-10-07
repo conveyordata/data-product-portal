@@ -1,5 +1,6 @@
 import os
 import time
+from datetime import UTC, datetime, timedelta
 from typing import Final
 
 import pytest
@@ -51,6 +52,7 @@ class TestOutputPortSearchRouter:
                 DataQualitySummary(
                     output_port_id=output_port.id,
                     overall_status=quality_status,
+                    dimensions={},
                     technical_assets=[],
                 )
             )
@@ -72,6 +74,42 @@ class TestOutputPortSearchRouter:
             assert (
                 ports[0]["quality_status"] == summary_response.json()["overall_status"]
             )
+
+    def test_search_output_ports__uses_latest_quality_summary(self, session, client):
+        output_port = OutputPortFactory(name="A Output Port")
+        other_port = OutputPortFactory(name="B Output Port")
+        now = datetime.now(UTC)
+        session.add_all(
+            [
+                DataQualitySummary(
+                    output_port_id=output_port.id,
+                    overall_status=quality_status,
+                    created_at=created_at,
+                    dimensions={},
+                    technical_assets=[],
+                )
+                for quality_status, created_at in [
+                    (DataQualityStatus.FAILURE, now - timedelta(days=1)),
+                    (DataQualityStatus.SUCCESS, now),
+                    (DataQualityStatus.ERROR, now - timedelta(days=2)),
+                ]
+            ]
+        )
+        session.flush()
+
+        response = client.get("/api/v2/search/output_ports", params={"limit": 2})
+        assert response.status_code == 200, response.text
+        ports = response.json()["output_ports"]
+        assert len(ports) == 2
+        assert ports[0]["quality_status"] == DataQualityStatus.SUCCESS
+        assert ports[1]["id"] == str(other_port.id)
+        assert ports[1]["quality_status"] is None
+
+        summary_response = client.get(
+            f"/api/v2/data_products/{output_port.data_product_id}/output_ports/{output_port.id}/data_quality_summary"
+        )
+        assert summary_response.status_code == 200, summary_response.text
+        assert ports[0]["quality_status"] == summary_response.json()["overall_status"]
 
     def test_search_output_ports(self, session, client):
         ds_1, ds_2, ds_3 = self.setup(session)

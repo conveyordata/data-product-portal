@@ -247,6 +247,8 @@ class OutputPortService:
         stmt = stmt.options(
             undefer(OutputPortModel.abstract_data_product_count),
             undefer(OutputPortModel.technical_assets_count),
+            undefer(OutputPortModel.quality_status),
+            raiseload(OutputPortModel.quality_summary),
         )
         results = self.db.scalars(stmt).unique().all()
 
