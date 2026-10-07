@@ -224,7 +224,7 @@ def renew_output_port_as_input_port(
     db: Session = Depends(get_db_session, scope="function"),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    input_port = InputPortService(db).renew_output_port_as_input_port(
+    input_port = AbstractDataProductService(db).renew_output_port_as_input_port(
         data_product_id=data_product_id,
         output_port_id=output_port_id,
         consuming_data_product_id=body.consuming_data_product_id,
