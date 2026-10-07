@@ -10,6 +10,10 @@ sidebar_position: 200
 
 - **[Helm]**: The blue and green themes and the `theme_configuration` value were removed. The portal always uses the Dataminded theme.
 
+### bugfixes
+
+- **[UI]**: Output Port tables now show the same quality status as the Output Port detail page.
+
 ## 0.8.0
 
 ### breaking changes
