@@ -1,2 +1,4 @@
 frontend/src/store/api/services/generated/** linguist-generated=true
 sdk/sdk/api_client/** linguist-generated=true
+
+.github/workflows/*.lock.yml linguist-generated=true

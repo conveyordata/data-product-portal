@@ -189,6 +189,7 @@ from .get_user_notifications_response import GetUserNotificationsResponse
 from .get_user_notifications_response_item import GetUserNotificationsResponseItem
 from .get_users_response import GetUsersResponse
 from .global_role_assignment_response import GlobalRoleAssignmentResponse
+from .grant_output_port_access_request import GrantOutputPortAccessRequest
 from .graph import Graph
 from .group_create import GroupCreate
 from .group_create_response import GroupCreateResponse
@@ -546,6 +547,7 @@ __all__ = (
     "GetUserNotificationsResponseItem",
     "GetUsersResponse",
     "GlobalRoleAssignmentResponse",
+    "GrantOutputPortAccessRequest",
     "Graph",
     "GroupCreate",
     "GroupCreateResponse",

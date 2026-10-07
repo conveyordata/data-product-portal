@@ -15,6 +15,7 @@ from app.authorization.role_assignments.output_port.model import (
 )
 from app.core.authz.authorization import Authorization
 from app.events.model import Event as EventModel
+from app.explorations.model import Exploration
 from app.groups.model import GroupMembership
 from app.users.model import User as UserModel
 from app.users.notifications.model import Notification as NotificationModel
@@ -86,11 +87,7 @@ class NotificationService:
             )
         )
 
-        event = self.db.get(EventModel, event_id)
-        for receiver in receivers:
-            if receiver != event.actor_id:
-                notification = NotificationModel(user_id=receiver, event_id=event_id)
-                self.db.add(notification)
+        self._notify(receivers, event_id)
 
     def create_data_product_notifications(
         self,
@@ -148,8 +145,36 @@ class NotificationService:
             ).all()
         )
 
+        self._notify(receivers, event_id)
+
+    def create_consumer_notifications(
+        self,
+        *,
+        consumer_id: UUID,
+        event_id: UUID,
+        extra_receiver_ids: Sequence[UUID] = (),
+    ) -> None:
+        exploration_owner_id = self.db.scalar(
+            select(Exploration.owner_id).where(Exploration.id == consumer_id)
+        )
+        if exploration_owner_id:
+            self._notify({exploration_owner_id, *extra_receiver_ids}, event_id)
+        else:
+            self.create_data_product_notifications(
+                data_product_id=consumer_id,
+                event_id=event_id,
+                extra_receiver_ids=extra_receiver_ids,
+            )
+
+    def _notify(self, receivers: set[UUID], event_id: UUID) -> None:
+        self.db.flush()
         event = self.db.get(EventModel, event_id)
-        for receiver in receivers:
-            if receiver != event.actor_id:
-                notification = NotificationModel(user_id=receiver, event_id=event_id)
-                self.db.add(notification)
+        already_notified = set(
+            self.db.scalars(
+                select(NotificationModel.user_id).where(
+                    NotificationModel.event_id == event_id
+                )
+            )
+        )
+        for receiver in receivers - already_notified - {event.actor_id}:
+            self.db.add(NotificationModel(user_id=receiver, event_id=event_id))

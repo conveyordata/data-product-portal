@@ -13,6 +13,7 @@ from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
     from ..models.data_product import DataProduct
+    from ..models.exploration import Exploration
     from ..models.output_port import OutputPort
     from ..models.technical_asset import TechnicalAsset
     from ..models.user import User
@@ -41,6 +42,7 @@ class GetEventHistoryResponseItem:
         user (None | Unset | User):
         output_port (None | OutputPort | Unset):
         technical_asset (None | TechnicalAsset | Unset):
+        exploration (Exploration | None | Unset):
     """
 
     id: UUID
@@ -59,10 +61,12 @@ class GetEventHistoryResponseItem:
     user: None | Unset | User = UNSET
     output_port: None | OutputPort | Unset = UNSET
     technical_asset: None | TechnicalAsset | Unset = UNSET
+    exploration: Exploration | None | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         from ..models.data_product import DataProduct
+        from ..models.exploration import Exploration
         from ..models.output_port import OutputPort
         from ..models.technical_asset import TechnicalAsset
         from ..models.user import User
@@ -153,6 +157,14 @@ class GetEventHistoryResponseItem:
         else:
             technical_asset = self.technical_asset
 
+        exploration: dict[str, Any] | None | Unset
+        if isinstance(self.exploration, Unset):
+            exploration = UNSET
+        elif isinstance(self.exploration, Exploration):
+            exploration = self.exploration.to_dict()
+        else:
+            exploration = self.exploration
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
@@ -185,12 +197,15 @@ class GetEventHistoryResponseItem:
             field_dict["output_port"] = output_port
         if technical_asset is not UNSET:
             field_dict["technical_asset"] = technical_asset
+        if exploration is not UNSET:
+            field_dict["exploration"] = exploration
 
         return field_dict
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.data_product import DataProduct
+        from ..models.exploration import Exploration
         from ..models.output_port import OutputPort
         from ..models.technical_asset import TechnicalAsset
         from ..models.user import User
@@ -360,6 +375,23 @@ class GetEventHistoryResponseItem:
 
         technical_asset = _parse_technical_asset(d.pop("technical_asset", UNSET))
 
+        def _parse_exploration(data: object) -> Exploration | None | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, dict):
+                    raise TypeError()
+                exploration_type_0 = Exploration.from_dict(data)
+
+                return exploration_type_0
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            return cast(Exploration | None | Unset, data)
+
+        exploration = _parse_exploration(d.pop("exploration", UNSET))
+
         get_event_history_response_item = cls(
             id=id,
             name=name,
@@ -377,6 +409,7 @@ class GetEventHistoryResponseItem:
             user=user,
             output_port=output_port,
             technical_asset=technical_asset,
+            exploration=exploration,
         )
 
         get_event_history_response_item.additional_properties = d

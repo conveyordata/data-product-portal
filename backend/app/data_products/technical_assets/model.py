@@ -37,7 +37,6 @@ class TechnicalAssetAccessMode(Base, BaseORM):
     access_mode_id = Column(
         UUID(as_uuid=True), ForeignKey("access_modes.id"), primary_key=True
     )
-    access_mode: Mapped["AccessMode"] = relationship(lazy="joined")
 
 
 class TechnicalAsset(Base, BaseORM, EventTrackedMixin):
