@@ -333,11 +333,9 @@ class AbstractDataProductService:
             AbstractDataProduct,
             id,
             options=[
-                selectinload(AbstractDataProduct.input_ports).selectinload(
-                    InputPortModel.requests
-                ),
-                selectinload(AbstractDataProduct.input_ports).selectinload(
-                    InputPortModel.output_port
+                selectinload(AbstractDataProduct.input_ports).options(
+                    selectinload(InputPortModel.requests),
+                    selectinload(InputPortModel.output_port),
                 ),
             ],
             populate_existing=True,
