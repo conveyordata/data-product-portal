@@ -7,7 +7,6 @@ permissions:
   contents: read
   issues: read
   pull-requests: read
-  copilot-requests: write
 timeout-minutes: 60
 sandbox:
   agent:
