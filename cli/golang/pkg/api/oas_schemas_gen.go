@@ -8143,6 +8143,74 @@ func (o OptNilDataProduct) Or(d DataProduct) DataProduct {
 	return d
 }
 
+// NewOptNilDataQualityStatus returns new OptNilDataQualityStatus with value set to v.
+func NewOptNilDataQualityStatus(v DataQualityStatus) OptNilDataQualityStatus {
+	return OptNilDataQualityStatus{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptNilDataQualityStatus is optional nullable DataQualityStatus.
+type OptNilDataQualityStatus struct {
+	Value DataQualityStatus
+	Set   bool
+	Null  bool
+}
+
+// IsSet returns true if OptNilDataQualityStatus was set.
+func (o OptNilDataQualityStatus) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptNilDataQualityStatus) Reset() {
+	var v DataQualityStatus
+	o.Value = v
+	o.Set = false
+	o.Null = false
+}
+
+// SetTo sets value to v.
+func (o *OptNilDataQualityStatus) SetTo(v DataQualityStatus) {
+	o.Set = true
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o OptNilDataQualityStatus) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *OptNilDataQualityStatus) SetToNull() {
+	o.Set = true
+	o.Null = true
+	var v DataQualityStatus
+	o.Value = v
+}
+
+// IsEmpty returns true if the field was omitted from the payload (not Set and not Null).
+func (o OptNilDataQualityStatus) IsEmpty() bool {
+	return !o.Set && !o.Null
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptNilDataQualityStatus) Get() (v DataQualityStatus, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptNilDataQualityStatus) Or(d DataQualityStatus) DataQualityStatus {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptNilDate returns new OptNilDate with value set to v.
 func NewOptNilDate(v time.Time) OptNilDate {
 	return OptNilDate{
@@ -13007,6 +13075,7 @@ type SearchOutputPortsResponseItem struct {
 	AbstractDataProductCount      int                     `json:"abstract_data_product_count"`
 	TechnicalAssetsCount          int                     `json:"technical_assets_count"`
 	DataProductName               string                  `json:"data_product_name"`
+	QualityStatus                 OptNilDataQualityStatus `json:"quality_status"`
 }
 
 // GetID returns the value of ID.
@@ -13094,6 +13163,11 @@ func (s *SearchOutputPortsResponseItem) GetDataProductName() string {
 	return s.DataProductName
 }
 
+// GetQualityStatus returns the value of QualityStatus.
+func (s *SearchOutputPortsResponseItem) GetQualityStatus() OptNilDataQualityStatus {
+	return s.QualityStatus
+}
+
 // SetID sets the value of ID.
 func (s *SearchOutputPortsResponseItem) SetID(val uuid.UUID) {
 	s.ID = val
@@ -13177,6 +13251,11 @@ func (s *SearchOutputPortsResponseItem) SetTechnicalAssetsCount(val int) {
 // SetDataProductName sets the value of DataProductName.
 func (s *SearchOutputPortsResponseItem) SetDataProductName(val string) {
 	s.DataProductName = val
+}
+
+// SetQualityStatus sets the value of QualityStatus.
+func (s *SearchOutputPortsResponseItem) SetQualityStatus(val OptNilDataQualityStatus) {
+	s.QualityStatus = val
 }
 
 // Option for select UI elements.

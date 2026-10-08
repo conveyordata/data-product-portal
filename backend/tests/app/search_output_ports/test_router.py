@@ -1,10 +1,14 @@
 import os
 import time
+from datetime import UTC, datetime, timedelta
 from typing import Final
 
+import pytest
 from alembic import command
 
 from app.authorization.role_assignments.enums import AssignmentFilter, DecisionStatus
+from app.data_products.output_ports.data_quality.enums import DataQualityStatus
+from app.data_products.output_ports.data_quality.model import DataQualitySummary
 from app.data_products.output_ports.model import OutputPort
 from app.data_products.output_ports.service import OutputPortService
 from app.database.database import engine
@@ -38,6 +42,75 @@ RECALL_BOUND: Final[float] = 0.8
 
 
 class TestOutputPortSearchRouter:
+    @pytest.mark.parametrize("quality_status", [None, *DataQualityStatus])
+    def test_search_output_ports__quality_status_matches_summary(
+        self, session, client, quality_status
+    ):
+        output_port = OutputPortFactory()
+        if quality_status is not None:
+            session.add(
+                DataQualitySummary(
+                    output_port_id=output_port.id,
+                    overall_status=quality_status,
+                    dimensions={},
+                    technical_assets=[],
+                )
+            )
+            session.flush()
+
+        response = client.get("/api/v2/search/output_ports")
+        assert response.status_code == 200, response.text
+        ports = response.json()["output_ports"]
+        assert len(ports) == 1
+        assert ports[0]["quality_status"] == quality_status
+
+        summary_response = client.get(
+            f"/api/v2/data_products/{output_port.data_product_id}/output_ports/{output_port.id}/data_quality_summary"
+        )
+        if quality_status is None:
+            assert summary_response.status_code == 404
+        else:
+            assert summary_response.status_code == 200, summary_response.text
+            assert (
+                ports[0]["quality_status"] == summary_response.json()["overall_status"]
+            )
+
+    def test_search_output_ports__uses_latest_quality_summary(self, session, client):
+        output_port = OutputPortFactory(name="A Output Port")
+        other_port = OutputPortFactory(name="B Output Port")
+        now = datetime.now(UTC)
+        session.add_all(
+            [
+                DataQualitySummary(
+                    output_port_id=output_port.id,
+                    overall_status=quality_status,
+                    created_at=created_at,
+                    dimensions={},
+                    technical_assets=[],
+                )
+                for quality_status, created_at in [
+                    (DataQualityStatus.FAILURE, now - timedelta(days=1)),
+                    (DataQualityStatus.SUCCESS, now),
+                    (DataQualityStatus.ERROR, now - timedelta(days=2)),
+                ]
+            ]
+        )
+        session.flush()
+
+        response = client.get("/api/v2/search/output_ports", params={"limit": 2})
+        assert response.status_code == 200, response.text
+        ports = response.json()["output_ports"]
+        assert len(ports) == 2
+        assert ports[0]["quality_status"] == DataQualityStatus.SUCCESS
+        assert ports[1]["id"] == str(other_port.id)
+        assert ports[1]["quality_status"] is None
+
+        summary_response = client.get(
+            f"/api/v2/data_products/{output_port.data_product_id}/output_ports/{output_port.id}/data_quality_summary"
+        )
+        assert summary_response.status_code == 200, summary_response.text
+        assert ports[0]["quality_status"] == summary_response.json()["overall_status"]
+
     def test_search_output_ports(self, session, client):
         ds_1, ds_2, ds_3 = self.setup(session)
 

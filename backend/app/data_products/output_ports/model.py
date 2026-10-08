@@ -242,10 +242,17 @@ class OutputPort(Base, BaseORM, EventTrackedMixin):
         cascade="all, delete-orphan",
     )
 
-    @property
-    def quality_status(self) -> Optional[str]:
-        """Returns the overall_status from the quality_summary if it exists."""
-        return self.quality_summary.overall_status if self.quality_summary else None
+    quality_status = deferred(
+        column_property(
+            select(DataQualitySummary.overall_status)
+            .where(DataQualitySummary.output_port_id == id)
+            .order_by(DataQualitySummary.created_at.desc())
+            .limit(1)
+            .correlate_except(DataQualitySummary)
+            .scalar_subquery()
+        ),
+        raiseload=True,
+    )
 
     @property
     def data_product_name(self) -> str:
