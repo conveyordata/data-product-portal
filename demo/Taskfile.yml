@@ -12,5 +12,5 @@ tasks:
     cmds:
       - cd basic/products && poetry update
       - cd basic/provisioner && poetry update
-      - cd agents/agent && uv pip compile requirements-poetry.in -o requirements-poetry.txt --generate-hashes && poetry update
+      - cd agents/agent && uv pip compile requirements-poetry.in --python-platform linux --python-version 3.13  -o requirements-poetry.txt --generate-hashes && poetry update
       - cd agents/provisioner && poetry update
