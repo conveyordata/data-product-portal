@@ -21,6 +21,7 @@ databricks = "portal_plugins.databricks.schema:DatabricksTechnicalAssetConfigura
 github = "portal_plugins.github.schema:GitHubPlugin"
 glue = "portal_plugins.glue.schema:GlueTechnicalAssetConfiguration"
 osi-semantic-model = "portal_plugins.osi_sem_model.schema:OSISemanticModelTechnicalAssetConfiguration"
+parameter-store = "portal_plugins.parameter_store.schema:ParameterStoreTechnicalAssetConfiguration"
 postgresql = "portal_plugins.postgresql.schema:PostgreSQLTechnicalAssetConfiguration"
 redshift = "portal_plugins.redshift.schema:RedshiftTechnicalAssetConfiguration"
 s3 = "portal_plugins.s3.schema:S3TechnicalAssetConfiguration"

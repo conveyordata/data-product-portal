@@ -108,6 +108,7 @@ The sections below go through this outline one part at a time, in the order you'
 - `platform_key` links the plugin to its platform service, explained in [the platform and platform service](#the-platform-and-platform-service).
 - `has_environments` decides what happens when someone clicks the tile on the data product page. When it's on, they first pick an environment, such as development or production, and `get_url` receives it. When it's off, the tile opens the link straight away. It's on by default.
 - `show_in_form` decides whether the plugin appears in the form for creating a technical asset. It's on by default.
+- `shareable` decides whether technical assets of this type can be linked to an Output Port. When it's off, the portal refuses new links and approvals of pending ones, and producers see that the type isn't shareable. Links that already exist stay. It's on by default.
 
 If you override `get_url`, the tile opens a link, for example to the resource in its own tool.
 
@@ -118,13 +119,13 @@ Those are the only parts every plugin needs. A plugin that only has a name, a ti
 When a data product owner creates a Glue technical asset, they pick a database from a dropdown. That list has to come from somewhere, and the right AWS account for each environment too. The portal keeps this information in three places:
 
 - A platform is a technology vendor or cloud provider, such as AWS, Azure, Databricks or Snowflake.
-- A platform service is one service of a platform, such as S3 or Glue on AWS. It holds the list of options your form offers, for example `["datalake", "ingress", "egress"]`. It also holds `result_string_template`, which turns what the owner filled in into the name everyone sees, such as `{bucket}/{path}` for S3. The names between braces are your plugin's fields.
+- A platform service is one service of a platform, such as S3 or Glue on AWS. It holds the list of options your form offers, for example `["datalake", "ingress", "egress"]`. It also holds `result_string_template`, which turns what the owner filled in into the name everyone sees, such as `{bucket}/{path}` for S3. The names between braces are your plugin's fields. `technical_info_template` does the same once per environment, and can also use `{environment}`, the environment's acronym.
 - An environment is a stage such as development or production. Per environment it contains the settings that differ, such as the AWS account and region, or which real bucket belongs to each option. They're linked to an option through its `identifier`.
 
 
 Your plugin uses this in two places. `get_platform_options` reads the list of options, to fill a dropdown in your form. `get_configuration` gets the settings of the chosen environment, and returns the entry that belongs to this asset, usually the one whose `identifier` matches what the owner picked. The portal already knows the format of these environment settings for the platforms it supports, such as `AWSGlueConfig` for Glue. A plugin for another tool can reuse one of them, or do without environment settings: then skip `get_configuration` and the per-environment rows below.
 
-These rows live in the portal's database, and you add them with SQL (for now). A plugin that only adds a link needs none of them:
+These rows live in the portal's database, and you add them with SQL (for now), or from a migration of your plugin as explained under [Migrations](#migrations). A plugin that only adds a link needs none of them:
 
 | Table | What goes in it | Needed for a plugin with a form |
 |---|---|---|
@@ -211,6 +212,7 @@ A few things to keep in mind:
 - Start each revision id with your plugin's name, like `glue_0001_baseline`. The portal and all plugins share one list of applied migrations, so ids have to be unique across all of them.
 - The first migration has `down_revision = None`. Each later one points to the migration before it.
 - When you add or change a field later, add a new migration to the same folder. It can also move or fill in existing data.
+- The portal always runs its own migrations before those of plugins, so yours can use the portal's tables, for example to add your platform service. The Parameter Store plugin's `parameter_store_0002_service` does this.
 
 To try your migrations before you ship them, run `python -m app.db_tool migrate` against a local database. It brings the portal and every installed plugin up to date in one go.
 

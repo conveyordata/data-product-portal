@@ -1,8 +1,8 @@
 import { Button, Checkbox, Flex, Input, List, Modal, Typography } from 'antd';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component';
+import { NotShareableTag } from '@/components/technical-assets/not-shareable-tag/not-shareable-tag.component.tsx';
 import { DATA_OUTPUTS_TABLE_PAGINATION } from '@/constants/table.constants';
 import { useTablePagination } from '@/hooks/use-table-pagination';
 import type { TechnicalAssetLink } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
@@ -12,8 +12,9 @@ import {
     useLinkOutputPortToTechnicalAssetMutation,
 } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
 import { useGetPluginsQuery } from '@/store/api/services/generated/pluginsApi';
+import { isTechnicalAssetNotShareableError } from '@/store/common/api-errors.ts';
 import { dispatchMessage } from '@/utils/feedback.ts';
-import { getTechnicalAssetIcon } from '@/utils/technical-asset-type.helper.ts';
+import { getTechnicalAssetIcon, isTechnicalAssetShareable } from '@/utils/technical-asset-type.helper.ts';
 
 type Props = {
     onClose: () => void;
@@ -54,6 +55,16 @@ export function TechnicalAssetLinkModal({ onClose, dataProductId, datasetId, dat
         );
     }, [availableDataOutputs, searchTerm]);
 
+    const selectableDataOutputs = useMemo(
+        () =>
+            plugins
+                ? filteredDataOutputs.filter((output) => isTechnicalAssetShareable(output.configuration.name, plugins))
+                : [],
+        [filteredDataOutputs, plugins],
+    );
+
+    const allSelected = selectableDataOutputs.length > 0 && selectedOutputs.size === selectableDataOutputs.length;
+
     const { pagination, handleCurrentPageChange } = useTablePagination(filteredDataOutputs, {
         initialPagination: DATA_OUTPUTS_TABLE_PAGINATION,
     });
@@ -71,10 +82,10 @@ export function TechnicalAssetLinkModal({ onClose, dataProductId, datasetId, dat
     };
 
     const handleSelectAll = () => {
-        if (selectedOutputs.size === filteredDataOutputs.length) {
+        if (allSelected) {
             setSelectedOutputs(new Set());
         } else {
-            setSelectedOutputs(new Set(filteredDataOutputs.map((output) => output.id)));
+            setSelectedOutputs(new Set(selectableDataOutputs.map((output) => output.id)));
         }
     };
 
@@ -107,9 +118,13 @@ export function TechnicalAssetLinkModal({ onClose, dataProductId, datasetId, dat
 
             setSelectedOutputs(new Set());
             onClose();
-        } catch (_error) {
+        } catch (error) {
             dispatchMessage({
-                content: t('Failed to link Technical Assets'),
+                content: isTechnicalAssetNotShareableError(error)
+                    ? t(
+                          "You can't link these Technical Assets to an Output Port because one of their types is not shareable",
+                      )
+                    : t('Failed to link Technical Assets'),
                 type: 'error',
             });
         }
@@ -145,10 +160,10 @@ export function TechnicalAssetLinkModal({ onClose, dataProductId, datasetId, dat
             {filteredDataOutputs.length > 0 && (
                 <Flex justify="space-between" align="center">
                     <Typography.Text type="secondary">
-                        {t('{{count}} available Technical Assets', { count: filteredDataOutputs.length })}
+                        {t('{{count}} shareable Technical Assets', { count: selectableDataOutputs.length })}
                     </Typography.Text>
-                    <Button type="link" onClick={handleSelectAll}>
-                        {selectedOutputs.size === filteredDataOutputs.length ? t('Deselect All') : t('Select All')}
+                    <Button type="link" onClick={handleSelectAll} disabled={selectableDataOutputs.length === 0}>
+                        {allSelected ? t('Deselect All') : t('Select All')}
                     </Button>
                 </Flex>
             )}
@@ -168,23 +183,32 @@ export function TechnicalAssetLinkModal({ onClose, dataProductId, datasetId, dat
                     onChange: handleCurrentPageChange,
                 }}
                 locale={{ emptyText: t('No Technical Assets available') }}
-                renderItem={(output) => (
-                    <List.Item data-cy="technical-asset-link-item">
-                        <Flex align="center" gap={12} style={{ width: '100%' }}>
-                            <Checkbox
-                                checked={selectedOutputs.has(output.id)}
-                                onChange={() => handleOutputToggle(output.id)}
-                            />
-                            <CustomSvgIconLoader
-                                iconComponent={getTechnicalAssetIcon(output.configuration.name, plugins)}
-                            />
-                            <Flex vertical style={{ flex: 1 }}>
-                                <Typography.Text strong>{output.result_string}</Typography.Text>
-                                <Typography.Text type="secondary">{output.name}</Typography.Text>
+                renderItem={(output) => {
+                    const shareable = isTechnicalAssetShareable(output.configuration.name, plugins);
+                    return (
+                        <List.Item data-cy="technical-asset-link-item">
+                            <Flex align="center" gap="medium" style={{ width: '100%' }}>
+                                <Checkbox
+                                    checked={selectedOutputs.has(output.id)}
+                                    disabled={!plugins || !shareable}
+                                    onChange={() => handleOutputToggle(output.id)}
+                                />
+                                <CustomSvgIconLoader
+                                    iconComponent={getTechnicalAssetIcon(output.configuration.name, plugins)}
+                                />
+                                <Flex vertical style={{ flex: 1 }}>
+                                    <Flex gap="small" align="center">
+                                        <Typography.Text strong disabled={!shareable}>
+                                            {output.result_string}
+                                        </Typography.Text>
+                                        {!shareable && <NotShareableTag />}
+                                    </Flex>
+                                    <Typography.Text type="secondary">{output.name}</Typography.Text>
+                                </Flex>
                             </Flex>
-                        </Flex>
-                    </List.Item>
-                )}
+                        </List.Item>
+                    );
+                }}
             />
         </Modal>
     );

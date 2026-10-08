@@ -20261,6 +20261,48 @@ func (s *IsAdminResponse) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
+// Encode encodes LinkOutputPortToTechnicalAssetConflictApplicationJSON as json.
+func (s LinkOutputPortToTechnicalAssetConflictApplicationJSON) Encode(e *jx.Encoder) {
+	unwrapped := jx.Raw(s)
+
+	if len(unwrapped) != 0 {
+		e.Raw(unwrapped)
+	}
+}
+
+// Decode decodes LinkOutputPortToTechnicalAssetConflictApplicationJSON from json.
+func (s *LinkOutputPortToTechnicalAssetConflictApplicationJSON) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode LinkOutputPortToTechnicalAssetConflictApplicationJSON to nil")
+	}
+	var unwrapped jx.Raw
+	if err := func() error {
+		v, err := d.RawAppend(nil)
+		unwrapped = jx.Raw(v)
+		if err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = LinkOutputPortToTechnicalAssetConflictApplicationJSON(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s LinkOutputPortToTechnicalAssetConflictApplicationJSON) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *LinkOutputPortToTechnicalAssetConflictApplicationJSON) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode encodes LinkOutputPortToTechnicalAssetNotFoundApplicationJSON as json.
 func (s LinkOutputPortToTechnicalAssetNotFoundApplicationJSON) Encode(e *jx.Encoder) {
 	unwrapped := jx.Raw(s)
@@ -36921,12 +36963,18 @@ func (s *UIElementMetadataResponse) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
+		if s.Shareable.Set {
+			e.FieldStart("shareable")
+			s.Shareable.Encode(e)
+		}
+	}
+	{
 		e.FieldStart("detailed_name")
 		e.Str(s.DetailedName)
 	}
 }
 
-var jsonFieldsNameOfUIElementMetadataResponse = [14]string{
+var jsonFieldsNameOfUIElementMetadataResponse = [15]string{
 	0:  "not_configured",
 	1:  "ui_metadata",
 	2:  "plugin",
@@ -36940,7 +36988,8 @@ var jsonFieldsNameOfUIElementMetadataResponse = [14]string{
 	10: "parent_platform",
 	11: "platform_tile",
 	12: "show_in_form",
-	13: "detailed_name",
+	13: "shareable",
+	14: "detailed_name",
 }
 
 // Decode decodes UIElementMetadataResponse from json.
@@ -37101,8 +37150,18 @@ func (s *UIElementMetadataResponse) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"show_in_form\"")
 			}
+		case "shareable":
+			if err := func() error {
+				s.Shareable.Reset()
+				if err := s.Shareable.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"shareable\"")
+			}
 		case "detailed_name":
-			requiredBitSet[1] |= 1 << 5
+			requiredBitSet[1] |= 1 << 6
 			if err := func() error {
 				v, err := d.Str()
 				s.DetailedName = string(v)
@@ -37124,7 +37183,7 @@ func (s *UIElementMetadataResponse) Decode(d *jx.Decoder) error {
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
 		0b11001110,
-		0b00100001,
+		0b01000001,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

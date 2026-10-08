@@ -21,6 +21,7 @@ from app.data_products.output_port_technical_assets_link.model import (
 )
 from app.data_products.output_ports.model import OutputPort
 from app.data_products.output_ports.model import OutputPort as OutputPortModel
+from app.data_products.technical_assets.service import ensure_technical_asset_shareable
 from app.groups.service import GroupService
 from app.users.schema import User
 from app.users.schema_response import (
@@ -86,6 +87,7 @@ class TechnicalAssetOutputPortService:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Request can not be already approved or denied",
             )
+        ensure_technical_asset_shareable(current_link.technical_asset)
 
         current_link.status = DecisionStatus.APPROVED
         current_link.approved_by = actor

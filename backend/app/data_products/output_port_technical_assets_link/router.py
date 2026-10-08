@@ -29,6 +29,7 @@ from app.data_products.technical_assets.service import (
     TECHNICAL_ASSET_ACCESS_MODES_INCOMPATIBLE_ERROR,
     TECHNICAL_ASSET_ALREADY_LINKED_ERROR,
     TECHNICAL_ASSET_NOT_ACTIVE_ERROR,
+    TECHNICAL_ASSET_NOT_SHAREABLE_ERROR,
     TechnicalAssetService,
 )
 from app.database.deps import get_db_session
@@ -51,6 +52,7 @@ router = APIRouter(
             TECHNICAL_ASSET_NOT_ACTIVE_ERROR,
             TECHNICAL_ASSET_ALREADY_LINKED_ERROR,
             TECHNICAL_ASSET_ACCESS_MODES_INCOMPATIBLE_ERROR,
+            TECHNICAL_ASSET_NOT_SHAREABLE_ERROR,
         ]
     ),
     dependencies=[
@@ -145,6 +147,7 @@ def deny_output_port_technical_asset_link(
                 "application/json": {"example": {"detail": "Data Product id not found"}}
             },
         },
+        **process_errors_as_route_responses([TECHNICAL_ASSET_NOT_SHAREABLE_ERROR]),
     },
     dependencies=[
         Depends(

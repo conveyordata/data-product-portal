@@ -276,6 +276,10 @@ func (s *UIElementMetadataResponse) setDefaults() {
 		val := bool(true)
 		s.ShowInForm.SetTo(val)
 	}
+	{
+		val := bool(true)
+		s.Shareable.SetTo(val)
+	}
 }
 
 // setDefaults set default value of fields.

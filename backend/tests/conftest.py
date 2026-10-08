@@ -26,6 +26,7 @@ from app.settings import settings
 from tests.factories import reset_unique_fakers
 from tests.factories.role import RoleFactory
 from tests.factories.role_assignment_global import GlobalRoleAssignmentFactory
+from tests.fixtures.fake_plugin.schema import FakeTechnicalAssetConfiguration
 
 from . import TestingSessionLocal
 from .factories.data_product_type import DataProductTypeFactory
@@ -239,3 +240,14 @@ def capture_events() -> Iterator["CapturedEventsMock"]:
         webhook_v2_config(),
     ):
         yield mock
+
+
+@pytest.fixture
+def unshareable_fake_plugin(monkeypatch):
+    monkeypatch.setattr(
+        FakeTechnicalAssetConfiguration,
+        "_platform_metadata",
+        FakeTechnicalAssetConfiguration.get_platform_metadata().model_copy(
+            update={"shareable": False}
+        ),
+    )

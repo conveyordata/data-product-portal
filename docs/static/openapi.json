@@ -4158,11 +4158,20 @@
             }
           },
           "409": {
-            "description": "Access modes of technical asset are incompatible with access modes of output port",
+            "description": "Possible errors",
             "content": {
               "application/json": {
-                "example": {
-                  "detail": "Access modes of technical asset are incompatible with access modes of output port"
+                "examples": {
+                  "access_modes_of_technical_asset_are_incompatible_with_access_modes_of_output_port": {
+                    "value": {
+                      "detail": "Access modes of technical asset are incompatible with access modes of output port"
+                    }
+                  },
+                  "technical_assets_of_this_type_are_not_shareable_and_cannot_be_linked_to_an_output_port": {
+                    "value": {
+                      "detail": "Technical assets of this type are not shareable and cannot be linked to an Output Port"
+                    }
+                  }
                 }
               }
             }
@@ -4297,6 +4306,16 @@
               "application/json": {
                 "example": {
                   "detail": "Data Product id not found"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Technical assets of this type are not shareable and cannot be linked to an Output Port",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Technical assets of this type are not shareable and cannot be linked to an Output Port"
                 }
               }
             }
@@ -18151,6 +18170,11 @@
           "show_in_form": {
             "type": "boolean",
             "title": "Show In Form",
+            "default": true
+          },
+          "shareable": {
+            "type": "boolean",
+            "title": "Shareable",
             "default": true
           },
           "detailed_name": {

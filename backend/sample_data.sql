@@ -304,6 +304,20 @@ INSERT INTO public.env_platform_configs (id, environment_id, platform_id, config
 ), '{"tenant_id": "{{ AZURE_TENANT_ID }}", "region": "{{ AZURE_REGION }}", "subscription_id": "{{ AZURE_SUBSCRIPTION_ID }}", "can_read_from": []}', timezone('utc'::text, current_timestamp
 ), NULL, NULL);
 
+INSERT INTO public.env_platform_service_configs (id, environment_id, platform_id, service_id, config, created_on, updated_on, deleted_at) VALUES ('4b7e2c91-6d38-4f15-a2c7-8e9d1b3f5a60', '{{ returned_environment_id_dev }}'::uuid, (
+    SELECT p.id FROM public.platforms AS p
+    WHERE p.name = 'AWS'), (
+    SELECT ps.id FROM public.platform_services AS ps
+    WHERE ps.name = 'ParameterStore'
+), '[]', timezone('utc'::text, current_timestamp), NULL, NULL);
+
+INSERT INTO public.env_platform_service_configs (id, environment_id, platform_id, service_id, config, created_on, updated_on, deleted_at) VALUES ('5c8f3da2-7e49-4026-b3d8-9fae2c4b6b71', '{{ returned_environment_id_prd }}'::uuid, (
+    SELECT p.id FROM public.platforms AS p
+    WHERE p.name = 'AWS'), (
+    SELECT ps.id FROM public.platform_services AS ps
+    WHERE ps.name = 'ParameterStore'
+), '[]', timezone('utc'::text, current_timestamp), NULL, NULL);
+
 INSERT INTO public.env_platform_service_configs (id, environment_id, platform_id, service_id, config, created_on, updated_on, deleted_at) VALUES ('93f4b677-5ae8-450d-91a6-e15196b2e774', '{{ returned_environment_id_dev }}'::uuid, (
     SELECT p.id FROM public.platforms AS p
     WHERE p.name = 'AWS'), (
@@ -512,6 +526,17 @@ INSERT INTO public.data_outputs (id, namespace, name, description, status, platf
 ), '{{ customer_segmentation_id }}'::uuid, NULL, 'e08b4635-809b-452e-bcb3-e4dac788ce86', '2025-10-28 16:34:02.355842', NULL, NULL, 'default');
 
 INSERT INTO public.tags_data_outputs (data_output_id, tag_id, created_on, updated_on) VALUES ('{{ customer_segmentation_weekly_technical_asset_id }}'::uuid, '{{ tag_pii_id }}'::uuid, '2025-10-28 17:56:57.829806', NULL);
+
+INSERT INTO public.data_output_configurations (id, configuration_type) VALUES ('7a4c9e21-3b58-4f60-9d17-2e8b5c6a1f43', 'ParameterStoreTechnicalAssetConfiguration');
+
+INSERT INTO public.parameter_store_technical_asset_configurations (id, prefix, parameter_name, created_on, updated_on, deleted_at) VALUES ('7a4c9e21-3b58-4f60-9d17-2e8b5c6a1f43', 'customer_segmentation', 'segmentation-api-key', timezone('utc'::text, current_timestamp), NULL, NULL);
+
+INSERT INTO public.data_outputs (id, namespace, name, description, status, platform_id, service_id, owner_id, configuration, configuration_id, created_on, updated_on, deleted_at, technical_mapping) VALUES ('c5e8a3f9-1d24-4b7e-8a63-9f0b2d4e7c18'::uuid, 'segmentation-api-key', 'Segmentation API key', 'Secret used by the segmentation jobs, not shareable', 'ACTIVE', (
+    SELECT p.id FROM public.platforms AS p
+    WHERE p.name = 'AWS'), (
+    SELECT ps.id FROM public.platform_services AS ps
+    WHERE ps.name = 'ParameterStore'
+), '{{ customer_segmentation_id }}'::uuid, NULL, '7a4c9e21-3b58-4f60-9d17-2e8b5c6a1f43', timezone('utc'::text, current_timestamp), NULL, NULL, 'default');
 
 INSERT INTO public.data_outputs_datasets (id, data_output_id, dataset_id, status, requested_by_id, requested_on, approved_by_id, approved_on, denied_by_id, denied_on, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), '{{ customer_segmentation_weekly_technical_asset_id }}'::uuid, '{{ customer_segmentation_weekly_output_port_id }}'::uuid, 'APPROVED', '{{ john_id }}'::uuid, '2025-10-28 16:36:36.784134', '{{ john_id }}'::uuid, '2025-10-28 16:36:36.936773', NULL, NULL, '2025-10-28 16:36:36.677803', '2025-10-28 16:36:36.838041', NULL);
 

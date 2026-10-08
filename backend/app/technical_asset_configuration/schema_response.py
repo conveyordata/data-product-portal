@@ -33,6 +33,7 @@ class UIElementMetadataResponse(ORMModel):
     parent_platform: Optional[str] = None
     platform_tile: Optional[PlatformTile] = None
     show_in_form: bool = True
+    shareable: bool = True
     detailed_name: str
 
 
