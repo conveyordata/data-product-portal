@@ -156,8 +156,9 @@ def migrate_all(plugins: Sequence[type[TechnicalAssetPlugin]], engine: Engine) -
 
     Core and each plugin are independent Alembic branches sharing one
     version_locations config and one version table: core's history has no
-    down_revision on its own first revision, exactly like a plugin's, so
-    Alembic resolves and upgrades every branch's head with a single call.
+    down_revision on its own first revision, exactly like a plugin's. Core is
+    upgraded first, so plugin migrations can rely on its tables, and only
+    then every plugin's head. Alembic would otherwise interleave the branches.
     """
     _forget_retired_revisions(engine)
 
@@ -192,6 +193,7 @@ def migrate_all(plugins: Sequence[type[TechnicalAssetPlugin]], engine: Engine) -
         )
 
     before = set(_current_heads(engine))
+    command.upgrade(config, _core_head(plugins, url))
     command.upgrade(config, "heads")
 
     for plugin in plugins_owning_tables:

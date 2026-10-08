@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import type { CreateOutputPortRequest } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
 import { STATIC_TAG_ID, TagTypes } from '@/store/api/services/tag-types.ts';
 import { dataProductOutputPortTags } from '@/store/api/services/tags/dataProductsOutputPortsTags.ts';
 
@@ -22,6 +23,23 @@ describe('dataProductOutputPortTags invalidation', () => {
         const tags = dataProductOutputPortTags.updateOutputPort.invalidatesTags(undefined, undefined, args);
 
         expect(tags).toContainEqual({ type: TagTypes.OutputPort, id: 'op1' });
+    });
+
+    it('output port mutations refresh the access type counts', () => {
+        const accessTypeList = { type: TagTypes.OutputPortAccessType, id: STATIC_TAG_ID.LIST };
+
+        expect(
+            dataProductOutputPortTags.createOutputPort.invalidatesTags(undefined, undefined, {
+                dataProductId: 'dp1',
+                createOutputPortRequest: {} as CreateOutputPortRequest,
+            }),
+        ).toContainEqual(accessTypeList);
+        expect(dataProductOutputPortTags.updateOutputPort.invalidatesTags(undefined, undefined, args)).toContainEqual(
+            accessTypeList,
+        );
+        expect(dataProductOutputPortTags.removeOutputPort.invalidatesTags(undefined, undefined, args)).toContainEqual(
+            accessTypeList,
+        );
     });
 
     it('suppresses the toast for latest data quality summary requests', () => {

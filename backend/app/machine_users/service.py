@@ -5,6 +5,7 @@ from fastapi import HTTPException, status
 from sqlalchemy import asc, select
 from sqlalchemy.orm import Session
 
+from app.core.authz import Authorization
 from app.machine_users.model import MachineUser, ensure_machine_user_exists
 from app.machine_users.schema_request import MachineUserCreate, MachineUserUpdate
 from app.machine_users.schema_response import (
@@ -60,6 +61,7 @@ class MachineUserService:
 
     def delete_machine_user(self, machine_user_id: UUID) -> None:
         machine_user = ensure_machine_user_exists(machine_user_id, self.db)
+        Authorization().clear_assignments_for_user(user_id=machine_user.id)
         self.db.delete(machine_user)
         self.db.flush()
 

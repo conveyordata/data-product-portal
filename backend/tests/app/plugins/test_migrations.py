@@ -210,3 +210,16 @@ def test_check_latest_migration__round_trips_the_latest_core_revision():
 
     assert head == _core_head(installed(), url)
     assert head in _tracked_revisions()
+
+
+def test_migrate_all__upgrades_core_before_any_plugin(monkeypatch):
+    url = engine.url.render_as_string(hide_password=False)
+    targets: list[str] = []
+    monkeypatch.setattr(
+        "app.plugins.migrations.command.upgrade",
+        lambda config, target: targets.append(target),
+    )
+
+    migrate(ExamplePlugin)
+
+    assert targets == [_core_head([*installed(), ExamplePlugin], url), "heads"]

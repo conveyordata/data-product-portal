@@ -266,6 +266,11 @@ type GetOutputPortAccessDurationsParams struct {
 	ID            uuid.UUID
 }
 
+// GetOutputPortAccessTypesParams is parameters of get_output_port_access_types operation.
+type GetOutputPortAccessTypesParams struct {
+	IncludeOutputPortCount OptBool `json:",omitempty,omitzero"`
+}
+
 // GetOutputPortCuratedQueriesParams is parameters of get_output_port_curated_queries operation.
 type GetOutputPortCuratedQueriesParams struct {
 	DataProductID uuid.UUID
@@ -335,6 +340,17 @@ type GetTechnicalAssetParams struct {
 type GetTechnicalAssetEventHistoryParams struct {
 	DataProductID uuid.UUID
 	ID            uuid.UUID
+}
+
+// GetUserGroupsParams is parameters of get_user_groups operation.
+type GetUserGroupsParams struct {
+	ID uuid.UUID
+}
+
+// GrantOutputPortAccessParams is parameters of grant_output_port_access operation.
+type GrantOutputPortAccessParams struct {
+	DataProductID uuid.UUID
+	OutputPortID  uuid.UUID
 }
 
 // IngestOutputPortContractParams is parameters of ingest_output_port_contract operation.
@@ -469,6 +485,11 @@ type RemoveInputPortForExplorationParams struct {
 type RemoveOutputPortParams struct {
 	DataProductID uuid.UUID
 	ID            uuid.UUID
+}
+
+// RemoveOutputPortAccessTypeParams is parameters of remove_output_port_access_type operation.
+type RemoveOutputPortAccessTypeParams struct {
+	ID uuid.UUID
 }
 
 // RemoveOutputPortAsInputPortParams is parameters of remove_output_port_as_input_port operation.
@@ -662,6 +683,11 @@ type UpdateOutputPortParams struct {
 type UpdateOutputPortAboutParams struct {
 	DataProductID uuid.UUID
 	ID            uuid.UUID
+}
+
+// UpdateOutputPortAccessTypeParams is parameters of update_output_port_access_type operation.
+type UpdateOutputPortAccessTypeParams struct {
+	ID uuid.UUID
 }
 
 // UpdateOutputPortQueryStatsParams is parameters of update_output_port_query_stats operation.

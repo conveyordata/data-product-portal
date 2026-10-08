@@ -5,7 +5,7 @@ from app.abstract_data_product.input_ports.enums import InputPortStatus
 from app.core.authz import Authorization
 from app.core.authz.actions import AuthorizationAction
 from app.data_products.model import DataProduct, DataProductVisibility
-from app.data_products.output_ports.enums import OutputPortAccessType
+from app.data_products.output_ports.enums import OutputPortAccessFunction
 from app.data_products.service import DataProductService
 from tests.factories import (
     DataProductFactory,
@@ -38,7 +38,7 @@ class TestDataProductService:
         consumer = DataProductFactory()
         output_port = OutputPortFactory(
             data_product=producer,
-            access_type=OutputPortAccessType.PRIVATE,
+            access_function=OutputPortAccessFunction.PRIVATE,
         )
         user = UserFactory()
 
@@ -75,7 +75,7 @@ class TestDataProductService:
         )
         other_output_port = OutputPortFactory(
             data_product=result.producer,
-            access_type=OutputPortAccessType.PRIVATE,
+            access_function=OutputPortAccessFunction.PRIVATE,
         )
         DataProductService(session)._sync_consumer_reader_grouping(result.producer.id)
 

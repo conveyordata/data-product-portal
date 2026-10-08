@@ -1,17 +1,20 @@
 from itertools import chain
-from typing import Final, Sequence, Any
+from typing import Final, Sequence
 from uuid import UUID
 
-from sqlalchemy import asc, or_, select
+from sqlalchemy import asc, select
 from sqlalchemy.orm import Session, selectinload
 
 from app.authorization.role_assignments.data_product.service import (
     RoleAssignmentService,
 )
+from app.core.authz import Authorization
 from app.data_products.output_port_technical_assets_link.service import (
     TechnicalAssetOutputPortService,
 )
 from app.data_products.output_ports.input_ports.service import InputPortService
+from app.groups.model import Group, GroupMembership
+from app.groups.schema_response import GroupGet
 from app.users.model import User, ensure_user_exists
 from app.users.model import User as UserModel
 from app.users.schema_request import CanBecomeAdminUpdate, UserCreate
@@ -22,11 +25,6 @@ from app.users.schema_response import (
     UserCreateResponse,
     UsersGet,
 )
-from app.identities.schema_response import (
-    IdentityBatchCreateError,
-    IdentityBatchCreateResponse,
-)
-from app.identities.service import validate_batch_create_items
 
 SYSTEM_ACCOUNT: Final[str] = "systemaccount@noreply.com"
 
@@ -50,6 +48,7 @@ class UserService:
         )
         user.data_products = []
         user.datasets = []
+        Authorization().clear_assignments_for_user(user_id=id)
         self.db.delete(user)
         self.db.flush()
 
@@ -121,80 +120,15 @@ class UserService:
             )
         )
 
-    def create_users_batch(
-            self,
-            items: list[Any],
-    ) -> IdentityBatchCreateResponse:
-        validated_items, errors = validate_batch_create_items(
-            items,
-            UserCreate,
-        )
+    def get_groups(self, user_id: UUID) -> Sequence[GroupGet]:
+        ensure_user_exists(user_id, self.db)
 
-        emails = set()
-        external_ids = set()
-        for user in validated_items:
-            emails.add(user.email)
-            external_ids.add(user.external_id)
-
-        existing_users = self.db.execute(
-            select(UserModel.email, UserModel.external_id).where(
-                or_(
-                    UserModel.email.in_(emails),
-                    UserModel.external_id.in_(external_ids),
-                )
+        return self.db.scalars(
+            select(Group)
+            .join(
+                GroupMembership,
+                GroupMembership.group_id == Group.id,
             )
+            .where(GroupMembership.member_identity_id == user_id)
+            .order_by(asc(Group.display_name), asc(Group.external_id))
         ).all()
-
-        unavailable_emails = set()
-        unavailable_external_ids = set()
-        for email, external_id in existing_users:
-            unavailable_emails.add(email)
-            unavailable_external_ids.add(external_id)
-
-        users: list[UserModel] = []
-
-        for user in validated_items:
-            if user.email in unavailable_emails:
-                errors.append(
-                    IdentityBatchCreateError(
-                        item=user,
-                        errors=["A user with this email already exists."],
-                    )
-                )
-                continue
-
-            if user.external_id in unavailable_external_ids:
-                errors.append(
-                    IdentityBatchCreateError(
-                        item=user,
-                        errors=["A user with this external ID already exists."],
-                    )
-                )
-                continue
-
-            unavailable_emails.add(user.email)
-            unavailable_external_ids.add(user.external_id)
-            users.append(UserModel(**user.parse_pydantic_schema()))
-
-        self.db.add_all(users)
-        self.db.flush()
-
-        return IdentityBatchCreateResponse(
-            ids=[user.id for user in users],
-            errors=errors,
-        )
-
-    def remove_users_batch(self, ids: list[UUID]) -> None:
-        users = self.db.scalars(
-            select(UserModel)
-            .where(UserModel.id.in_(ids))
-            .options(selectinload(UserModel.data_product_roles))
-        ).all()
-
-        for user in users:
-            user.data_products = []
-            user.datasets = []
-            self.db.delete(user)
-
-        self.db.flush()
-

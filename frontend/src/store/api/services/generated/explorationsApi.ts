@@ -264,6 +264,11 @@ export type InputPortRequestBase = {
   requested_on: string;
   access_mode?: AccessMode | null;
 };
+export type OutputPortAccessType = {
+  id: string;
+  name: string;
+  access_function: OutputPortAccessFunction;
+};
 export type Tag = {
   id: string;
   value: string;
@@ -338,7 +343,7 @@ export enum OutputPortStatus {
   Active = "active",
   Archived = "archived",
 }
-export enum OutputPortAccessType {
+export enum OutputPortAccessFunction {
   Restricted = "restricted",
   Private = "private",
   Unrestricted = "unrestricted",

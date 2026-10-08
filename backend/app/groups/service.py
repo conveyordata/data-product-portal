@@ -24,7 +24,9 @@ class GroupService:
         self.authorizer = Authorization()
 
     def list_memberships(self, group_id: UUID | None = None) -> list[GroupMembership]:
-        query = select(GroupMembership)
+        query = select(GroupMembership).order_by(
+            asc(GroupMembership.member_identity_id)
+        )
         if group_id is not None:
             query = query.where(GroupMembership.group_id == group_id)
 
@@ -32,11 +34,7 @@ class GroupService:
 
     def get_members(self, group_id: UUID) -> Sequence[GroupMembership]:
         ensure_group_exists(group_id, self.db)
-
-        return sorted(
-            self.list_memberships(group_id),
-            key=lambda membership: membership.member_identity_id,
-        )
+        return self.list_memberships(group_id)
 
     def add_members(
         self,
@@ -50,24 +48,25 @@ class GroupService:
         if not requested_ids:
             return
 
-        ensure_group_exists(group_id, self.db)
+        self._lock_group(group_id)
         self._validate_member_identities(requested_ids)
 
         inserted_ids = self._insert_member_ids(group_id, requested_ids)
         self._add_members_auth(group_id, inserted_ids)
-        self.db.flush()
-        return
 
     def remove_members(
         self,
         group_id: UUID,
         member_identity_ids: list[UUID],
     ) -> None:
+        """
+        Removes members in batch to a group. Silently ignores missing members.
+        """
         requested_ids = set(member_identity_ids)
         if not requested_ids:
             return
 
-        ensure_group_exists(group_id, self.db)
+        self._lock_group(group_id)
 
         removed_ids = self._remove_member_ids(group_id, requested_ids)
         self._remove_members_auth(group_id, removed_ids)
@@ -84,7 +83,7 @@ class GroupService:
         if not requested_ids:
             return
 
-        ensure_group_exists(group_id, self.db)
+        self._lock_group(group_id)
         self._validate_member_identities(requested_ids)
 
         current_ids = set(
@@ -124,27 +123,6 @@ class GroupService:
 
         self.db.delete(group)
         self.db.flush()
-
-    def has_member(self, group_id: UUID, member_identity_id: UUID) -> bool:
-        membership = self.db.get(
-            GroupMembership,
-            (group_id, member_identity_id),
-        )
-        return membership is not None
-
-    def get_membership(
-        self, group_id: UUID, member_identity_id: UUID
-    ) -> GroupMembership:
-        membership = self.db.get(
-            GroupMembership,
-            (group_id, member_identity_id),
-        )
-        if membership is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Member not found.",
-            )
-        return membership
 
     def get_groups_ids_identity_is_member_of(self, identity_id: UUID) -> list[UUID]:
         return list(
@@ -279,3 +257,13 @@ class GroupService:
             )
             .returning(GroupMembership.member_identity_id)
         ).all()
+
+    def _lock_group(self, group_id: UUID) -> None:
+        locked_group_id = self.db.scalar(
+            select(Group.id).where(Group.id == group_id).with_for_update(of=Group)
+        )
+        if locked_group_id is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Group {group_id} does not exist",
+            )

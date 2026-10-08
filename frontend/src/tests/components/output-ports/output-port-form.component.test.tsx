@@ -1,15 +1,19 @@
+import userEvent from '@testing-library/user-event';
 import { HttpResponse, http } from 'msw';
-import { describe, expect, it } from 'vitest';
-import { OutputPortForm } from '@/components/output-ports/output-port-form/output-port-form.component.tsx';
+import { describe, expect, it, vi } from 'vitest';
+import {
+    AccessTypeSection,
+    OutputPortForm,
+} from '@/components/output-ports/output-port-form/output-port-form.component.tsx';
 import {
     AbstractDataProductStatus,
     DataProductIconKey,
     DataProductVisibility,
-    OutputPortAccessType,
 } from '@/store/api/services/generated/dataProductsApi.ts';
 import { allowAllAuth } from '@/tests/mocks/auth.ts';
 import { mockAccessDurationsGet, mockTimeBoundAccessEnabled } from '@/tests/mocks/configurationAccessDurations.ts';
 import { mockDataProductLifecycles } from '@/tests/mocks/configurationDataProductLifecycles.ts';
+import { mockOutputPortAccessTypes } from '@/tests/mocks/configurationOutputPortAccessTypes.ts';
 import { mockDataProductHttp } from '@/tests/mocks/dataProducts.ts';
 import {
     mockGetResourceNamesConstraints,
@@ -22,11 +26,12 @@ import { mockUsers, mockUsersHttp } from '@/tests/mocks/users.ts';
 import { renderWithProviders, screen } from '@/tests/test-utils.tsx';
 
 describe('OutputPortForm', () => {
-    it('only allows private access type for hidden data products', async () => {
+    it('only allows Invite only access types for hidden data products', async () => {
         allowAllAuth();
         mockAccessDurationsGet();
         mockTimeBoundAccessEnabled();
         mockDataProductLifecycles();
+        mockOutputPortAccessTypes();
         mockUsersHttp(mockUsers);
         mockGetTags();
         mockGetResourceNamesConstraints();
@@ -62,12 +67,29 @@ describe('OutputPortForm', () => {
             routerProps: { initialEntries: ['/'] },
         });
 
-        const restricted = await screen.findByRole('radio', { name: 'Restricted' });
-        const unrestricted = screen.getByRole('radio', { name: 'Unrestricted' });
-        const privateOption = screen.getByRole('radio', { name: 'Private' });
+        const select = await screen.findByRole('combobox', { name: /access type/i });
+        expect(await screen.findByTitle('Private')).toBeInTheDocument();
 
-        expect(restricted).toBeDisabled();
-        expect(unrestricted).toBeDisabled();
-        expect(privateOption).toHaveAttribute('value', OutputPortAccessType.Private);
+        await userEvent.click(select);
+
+        const option = (name: string) =>
+            screen
+                .getAllByText(name)
+                .find((el) => el.closest('.ant-select-item-option'))
+                ?.closest('.ant-select-item-option');
+        expect(option('Unrestricted')).toHaveClass('ant-select-item-option-disabled');
+        expect(option('Restricted')).toHaveClass('ant-select-item-option-disabled');
+        expect(option('Private')).not.toHaveClass('ant-select-item-option-disabled');
+        expect(screen.getByText('Hidden Data Products can only have hidden Output Ports')).toBeInTheDocument();
+    });
+
+    it('does not change an existing access type while access types load', async () => {
+        mockOutputPortAccessTypes();
+        const onChange = vi.fn();
+
+        renderWithProviders(<AccessTypeSection value="access-type-private" onChange={onChange} hiddenDataProduct />);
+
+        expect(await screen.findByTitle('Private')).toBeInTheDocument();
+        expect(onChange).not.toHaveBeenCalled();
     });
 });

@@ -493,6 +493,11 @@ export type SchemaObjectRequest = {
 export type BitolContractRequest = {
   schema?: SchemaObjectRequest[];
 };
+export type OutputPortAccessType = {
+  id: string;
+  name: string;
+  access_function: OutputPortAccessFunction;
+};
 export type Tag = {
   id: string;
   value: string;
@@ -523,7 +528,7 @@ export type CreateOutputPortRequest = {
   name: string;
   namespace: string;
   description: string;
-  access_type: OutputPortAccessType;
+  access_type_id: string;
   data_product_access_duration_type: AccessDurationType;
   exploration_access_duration_type: AccessDurationType;
   about?: string | null;
@@ -611,7 +616,7 @@ export type OutputPortUpdate = {
   name: string;
   namespace: string;
   description: string;
-  access_type: OutputPortAccessType;
+  access_type_id: string;
   data_product_access_duration_type: AccessDurationType;
   exploration_access_duration_type: AccessDurationType;
   about?: string | null;
@@ -642,6 +647,15 @@ export type DataProduct = {
   status: AbstractDataProductStatus;
   type: DataProductType;
 };
+export type Exploration = {
+  id: string;
+  name: string;
+  namespace: string;
+  description: string;
+  domain: Domain;
+  status: AbstractDataProductStatus;
+  finalizers: string[];
+};
 export type GetEventHistoryResponseItem = {
   id: string;
   name: string;
@@ -658,6 +672,7 @@ export type GetEventHistoryResponseItem = {
   user?: User | null;
   output_port?: OutputPort | null;
   technical_asset?: TechnicalAsset | null;
+  exploration?: Exploration | null;
 };
 export type GetEventHistoryResponse = {
   events: GetEventHistoryResponseItem[];
@@ -721,7 +736,7 @@ export enum OutputPortStatus {
   Active = "active",
   Archived = "archived",
 }
-export enum OutputPortAccessType {
+export enum OutputPortAccessFunction {
   Restricted = "restricted",
   Private = "private",
   Unrestricted = "unrestricted",
@@ -758,6 +773,7 @@ export enum EventEntityType {
   OutputPort = "output_port",
   TechnicalAsset = "technical_asset",
   User = "user",
+  Exploration = "exploration",
 }
 export enum AbstractDataProductStatus {
   Pending = "pending",

@@ -81,6 +81,10 @@ type CreateMachineUserRes interface {
 	createMachineUserRes()
 }
 
+type CreateOutputPortAccessTypeRes interface {
+	createOutputPortAccessTypeRes()
+}
+
 type CreateOutputPortRes interface {
 	createOutputPortRes()
 }
@@ -171,6 +175,10 @@ type GetAllPlatformServiceConfigurationsRes interface {
 
 type GetAllPlatformsRes interface {
 	getAllPlatformsRes()
+}
+
+type GetCurrentUserGroupsRes interface {
+	getCurrentUserGroupsRes()
 }
 
 type GetCurrentUserRes interface {
@@ -297,6 +305,10 @@ type GetOutputPortAccessDurationsRes interface {
 	getOutputPortAccessDurationsRes()
 }
 
+type GetOutputPortAccessTypesRes interface {
+	getOutputPortAccessTypesRes()
+}
+
 type GetOutputPortCuratedQueriesRes interface {
 	getOutputPortCuratedQueriesRes()
 }
@@ -365,12 +377,20 @@ type GetThemeSettingsRes interface {
 	getThemeSettingsRes()
 }
 
+type GetUserGroupsRes interface {
+	getUserGroupsRes()
+}
+
 type GetUserNotificationsRes interface {
 	getUserNotificationsRes()
 }
 
 type GetUsersRes interface {
 	getUsersRes()
+}
+
+type GrantOutputPortAccessRes interface {
+	grantOutputPortAccessRes()
 }
 
 type IngestOutputPortContractRes interface {
@@ -471,6 +491,10 @@ type RemoveInputPortForDataProductRes interface {
 
 type RemoveInputPortForExplorationRes interface {
 	removeInputPortForExplorationRes()
+}
+
+type RemoveOutputPortAccessTypeRes interface {
+	removeOutputPortAccessTypeRes()
 }
 
 type RemoveOutputPortAsInputPortRes interface {
@@ -631,6 +655,10 @@ type UpdateMachineUserRes interface {
 
 type UpdateOutputPortAboutRes interface {
 	updateOutputPortAboutRes()
+}
+
+type UpdateOutputPortAccessTypeRes interface {
+	updateOutputPortAccessTypeRes()
 }
 
 type UpdateOutputPortQueryStatsRes interface {

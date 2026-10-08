@@ -1,3 +1,4 @@
+import { InfoCircleOutlined } from '@ant-design/icons';
 import {
     Alert,
     Button,
@@ -15,6 +16,7 @@ import {
     Space,
     Tooltip,
     Typography,
+    theme,
 } from 'antd';
 import { type Ref, useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -32,12 +34,9 @@ import {
     useIsTimeBoundAccessEnabledQuery,
 } from '@/store/api/services/generated/configurationAccessDurationsApi.ts';
 import { useGetDataProductsLifecyclesQuery } from '@/store/api/services/generated/configurationDataProductLifecyclesApi.ts';
+import { useGetOutputPortAccessTypesQuery } from '@/store/api/services/generated/configurationOutputPortAccessTypesApi.ts';
 import { useGetTagsQuery } from '@/store/api/services/generated/configurationTagsApi.ts';
-import {
-    DataProductVisibility,
-    OutputPortAccessType,
-    useGetDataProductQuery,
-} from '@/store/api/services/generated/dataProductsApi.ts';
+import { DataProductVisibility, useGetDataProductQuery } from '@/store/api/services/generated/dataProductsApi.ts';
 import {
     type CreateOutputPortRequest,
     type OutputPortUpdate,
@@ -60,7 +59,7 @@ import {
     createMarketplaceOutputPortPath,
     createOutputPortPath,
 } from '@/types/navigation.ts';
-import { getDatasetAccessTypeLabel } from '@/utils/access-type.helper.ts';
+import { compareAccessFunctions, fitsDataProductVisibility } from '@/utils/access-function.helper.tsx';
 import { useGetDataProductOwnerIds } from '@/utils/data-product-user-role.helper';
 import { useGetDatasetOwnerIds } from '@/utils/dataset-user-role.helper.ts';
 import { dispatchMessage } from '@/utils/feedback.ts';
@@ -228,53 +227,89 @@ const { TextArea } = Input;
 const DEBOUNCE = 500;
 
 export function AccessTypeSection({
+    id,
     value,
     onChange,
-    block = true,
     hiddenDataProduct = false,
 }: {
-    value?: OutputPortAccessType;
-    onChange?: (value: OutputPortAccessType) => void;
-    block?: boolean;
+    id?: string;
+    value?: string;
+    onChange?: (value?: string) => void;
     hiddenDataProduct: boolean;
 }) {
     const { t } = useTranslation();
-    const selectedValue = hiddenDataProduct ? OutputPortAccessType.Private : value;
-    const options = [
-        {
-            value: OutputPortAccessType.Unrestricted,
-            tooltip: t(
-                'Unrestricted Output Ports are visible and accessible to use by anyone, only allowed when the Data Product is not hidden',
-            ),
-        },
-        {
-            value: OutputPortAccessType.Restricted,
-            tooltip: t(
-                'Restricted Output Ports are visible to everyone but require permission to use, only allowed when the Data Product is not hidden',
-            ),
-        },
-        {
-            value: OutputPortAccessType.Private,
-            tooltip: t('Private Output Ports are only visible to owners and users with access'),
-        },
-    ].map(({ value, tooltip }) => ({
-        label: (
-            <Tooltip title={tooltip}>
-                <span>{getDatasetAccessTypeLabel(t, value)}</span>
-            </Tooltip>
-        ),
-        value,
-        disabled: hiddenDataProduct && value !== OutputPortAccessType.Private,
-    }));
+    const { token } = theme.useToken();
+    const { data: { output_port_access_types: accessTypes = [] } = {}, isFetching } =
+        useGetOutputPortAccessTypesQuery(undefined);
+
+    useEffect(() => {
+        if (isFetching || value !== undefined) return;
+        const selectable = accessTypes.filter((accessType) =>
+            fitsDataProductVisibility(accessType.access_function, hiddenDataProduct),
+        );
+        if (selectable.length === 1) onChange?.(selectable[0].id);
+    }, [isFetching, value, accessTypes, hiddenDataProduct, onChange]);
+
+    const options = accessTypes
+        .map((accessType) => ({
+            label: accessType.name,
+            value: accessType.id,
+            description: accessType.description,
+            accessFunction: accessType.access_function,
+            disabled: !fitsDataProductVisibility(accessType.access_function, hiddenDataProduct),
+        }))
+        .sort(
+            (a, b) =>
+                Number(a.disabled) - Number(b.disabled) || compareAccessFunctions(a.accessFunction, b.accessFunction),
+        );
+
+    const selectedDescription = options.find((option) => option.value === value)?.description;
 
     return (
-        <Radio.Group
-            value={selectedValue}
-            options={options}
-            optionType="button"
-            block={block}
-            onChange={(e) => onChange?.(e.target.value)}
-        />
+        <Flex vertical gap="small">
+            <Select
+                id={id}
+                value={value}
+                onChange={onChange}
+                options={options}
+                showSearch={{ optionFilterProp: 'label' }}
+                placeholder={t('Select an access type')}
+                optionRender={({ label, data: { description, disabled } }) => (
+                    <Flex vertical>
+                        {label}
+                        {description && (
+                            <Typography.Text type="secondary" disabled={disabled}>
+                                {description}
+                            </Typography.Text>
+                        )}
+                    </Flex>
+                )}
+                styles={hiddenDataProduct ? { popup: { root: { padding: 0, overflow: 'hidden' } } } : undefined}
+                popupRender={(menu) =>
+                    hiddenDataProduct ? (
+                        <>
+                            <div style={{ padding: token.paddingXXS }}>{menu}</div>
+                            <Flex
+                                gap="small"
+                                style={{
+                                    padding: `${token.paddingXS}px ${token.paddingXXS + token.controlPaddingHorizontal}px`,
+                                    borderTop: `${token.lineWidth}px solid ${token.colorSplit}`,
+                                    background: token.colorPrimaryBg,
+                                }}
+                            >
+                                <InfoCircleOutlined style={{ color: token.colorPrimary }} />
+                                <Typography.Text>
+                                    {t('Hidden Data Products can only have hidden Output Ports')}
+                                </Typography.Text>
+                            </Flex>
+                        </>
+                    ) : (
+                        menu
+                    )
+                }
+            />
+            {selectedDescription && <Typography.Text type="secondary">{selectedDescription}</Typography.Text>}
+        </Flex>
     );
 }
 
@@ -350,7 +385,7 @@ export function OutputPortForm({ mode, modalCallbackOnSubmit, formRef, outputPor
                     owners: values.owners,
                     tag_ids: values.tag_ids ?? [],
                     lifecycle_id: values.lifecycle_id,
-                    access_type: values.access_type,
+                    access_type_id: values.access_type_id,
                     data_product_access_duration_type: values.data_product_access_duration_type,
                     exploration_access_duration_type: values.exploration_access_duration_type,
                 };
@@ -379,7 +414,7 @@ export function OutputPortForm({ mode, modalCallbackOnSubmit, formRef, outputPor
                     description: values.description,
                     tag_ids: values.tag_ids,
                     lifecycle_id: values.lifecycle_id,
-                    access_type: values.access_type,
+                    access_type_id: values.access_type_id,
                     data_product_access_duration_type: values.data_product_access_duration_type,
                     exploration_access_duration_type: values.exploration_access_duration_type,
                 };
@@ -470,16 +505,6 @@ export function OutputPortForm({ mode, modalCallbackOnSubmit, formRef, outputPor
         }
     }, [mode, dataProductOwners, form]);
 
-    useEffect(() => {
-        if (
-            mode === 'create' &&
-            isHiddenDataProduct &&
-            form.getFieldValue('access_type') !== OutputPortAccessType.Private
-        ) {
-            form.setFieldValue('access_type', OutputPortAccessType.Private);
-        }
-    }, [form, isHiddenDataProduct, mode]);
-
     if (mode === 'edit' && (!currentOutputPort || ownerIds === undefined)) {
         return <Skeleton active />;
     }
@@ -488,12 +513,7 @@ export function OutputPortForm({ mode, modalCallbackOnSubmit, formRef, outputPor
         name: currentOutputPort?.name,
         namespace: currentOutputPort?.namespace,
         description: currentOutputPort?.description,
-        access_type:
-            mode === 'create'
-                ? isHiddenDataProduct
-                    ? OutputPortAccessType.Private
-                    : OutputPortAccessType.Unrestricted
-                : currentOutputPort?.access_type,
+        access_type_id: currentOutputPort?.access_type.id,
         lifecycle_id: currentOutputPort?.lifecycle?.id,
         tag_ids: currentOutputPort?.tags.map((tag) => tag.id),
         owners: ownerIds,
@@ -583,9 +603,9 @@ export function OutputPortForm({ mode, modalCallbackOnSubmit, formRef, outputPor
                 />
             </Form.Item>
             <Form.Item<CreateOutputPortRequest>
-                name="access_type"
+                name="access_type_id"
                 label={t('Access Type')}
-                tooltip={t('The access type of the Output Port')}
+                tooltip={t('The access type of the Output Port, which determines who can see and access it')}
                 rules={[
                     {
                         required: true,

@@ -3,21 +3,23 @@ from uuid import UUID
 from pydantic import ConfigDict, Field, field_validator
 
 from app.settings import settings
-from app.shared.schema import ORMModel
+from app.shared.schema import NonEmptyStr, ORMModel
 
 
 class GroupCreate(ORMModel):
-    external_id: str
-    display_name: str
+    external_id: NonEmptyStr
+    display_name: NonEmptyStr
 
 
 class GroupUpdate(ORMModel):
     model_config = ConfigDict(from_attributes=True, extra="forbid")
-    display_name: str
+    display_name: NonEmptyStr
 
 
 class GroupMembersRequest(ORMModel):
-    member_identity_ids: list[UUID]
+    member_identity_ids: list[UUID] = Field(
+        min_length=1, max_length=settings.MAX_ITEMS_PER_BATCH_REQUEST
+    )
 
     @field_validator("member_identity_ids")
     @classmethod
@@ -28,18 +30,12 @@ class GroupMembersRequest(ORMModel):
 
 
 class GroupMembersAdd(GroupMembersRequest):
-    member_identity_ids: list[UUID] = Field(
-        min_length=1, max_length=settings.MAX_ITEMS_PER_BATCH_REQUEST
-    )
+    pass
 
 
 class GroupMembersRemove(GroupMembersRequest):
-    member_identity_ids: list[UUID] = Field(
-        min_length=1, max_length=settings.MAX_ITEMS_PER_BATCH_REQUEST
-    )
+    pass
 
 
 class GroupMembersReplace(GroupMembersRequest):
-    member_identity_ids: list[UUID] = Field(
-        min_length=1, max_length=settings.MAX_ITEMS_PER_BATCH_REQUEST
-    )
+    pass

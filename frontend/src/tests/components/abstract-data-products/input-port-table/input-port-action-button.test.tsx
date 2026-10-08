@@ -3,7 +3,7 @@ import { InputPortActionButton } from '@/components/abstract-data-products/input
 import {
     InputPortStatus,
     type OutputPort,
-    OutputPortAccessType,
+    OutputPortAccessFunction,
     OutputPortStatus,
     RenewalStatus,
 } from '@/store/api/services/generated/dataProductsApi.ts';
@@ -15,7 +15,11 @@ const outputPort: OutputPort = {
     namespace: 'test',
     description: '',
     status: OutputPortStatus.Active,
-    access_type: OutputPortAccessType.Restricted,
+    access_type: {
+        id: 'access-type-1',
+        name: 'Restricted',
+        access_function: OutputPortAccessFunction.Restricted,
+    },
     data_product_id: 'dp-1',
     tags: [],
     access_modes: [],

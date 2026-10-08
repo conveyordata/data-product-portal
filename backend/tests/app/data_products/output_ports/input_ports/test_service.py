@@ -17,7 +17,7 @@ from app.authorization.roles.schema import Scope
 from app.authorization.service import AuthorizationService
 from app.configuration.access_durations.enums import AccessDurationType
 from app.core.authz import Action
-from app.data_products.output_ports.enums import OutputPortAccessType
+from app.data_products.output_ports.enums import OutputPortAccessFunction
 from app.data_products.output_ports.input_ports.service import InputPortService
 from app.settings import settings
 from tests.factories import (
@@ -31,6 +31,7 @@ from tests.factories import (
     RoleFactory,
     UserFactory,
 )
+from tests.session_util import as_user
 
 
 def _grant_and_pending_renewal(consumer, port, session):
@@ -91,6 +92,24 @@ class TestInputPortService:
         assert pending_old.id in requests_old_inactive_hidden_ids
         assert approved_old.id not in requests_old_inactive_hidden_ids
 
+    def test_get_user_requests__excludes_hidden_private_output_port(self, session):
+        user = UserFactory()
+        visible = InputPortRequestFactory(
+            requested_by=user, decision=InputPortRequestDecision.PENDING
+        )
+        InputPortRequestFactory(
+            requested_by=user,
+            decision=InputPortRequestDecision.PENDING,
+            input_port__output_port=OutputPortFactory(
+                access_function=OutputPortAccessFunction.PRIVATE
+            ),
+        )
+
+        with as_user(session, user.id):
+            requests = InputPortService(session).get_user_requests(user, False)
+
+        assert [r.id for r in requests] == [visible.id]
+
 
 def _by_id(input_port: "InputPort"):
     return {request.id: request for request in input_port.requests}
@@ -100,7 +119,7 @@ class TestInputPortDecisions:
     def test_approve__syncs_consumer_access(self, session, monkeypatch):
         actor = UserFactory()
         consumer = DataProductFactory()
-        port = OutputPortFactory(access_type=OutputPortAccessType.RESTRICTED)
+        port = OutputPortFactory(access_function=OutputPortAccessFunction.RESTRICTED)
         link = InputPortFactory(
             consuming_abstract_data_product=consumer,
             output_port=port,
@@ -131,7 +150,7 @@ class TestInputPortDecisions:
         actor = UserFactory()
         consumer = DataProductFactory()
         port = OutputPortFactory(
-            access_type=OutputPortAccessType.RESTRICTED,
+            access_function=OutputPortAccessFunction.RESTRICTED,
             data_product_access_duration_type=AccessDurationType.TIME_BOUND,
         )
         input_port, grant, renewal = _grant_and_pending_renewal(consumer, port, session)
@@ -155,7 +174,7 @@ class TestInputPortDecisions:
         actor = UserFactory()
         consumer = DataProductFactory()
         port = OutputPortFactory(
-            access_type=OutputPortAccessType.RESTRICTED,
+            access_function=OutputPortAccessFunction.RESTRICTED,
             data_product_access_duration_type=AccessDurationType.TIME_BOUND,
         )
         input_port, grant, renewal = _grant_and_pending_renewal(consumer, port, session)
@@ -177,7 +196,7 @@ class TestInputPortDecisions:
         actor = UserFactory()
         consumer = DataProductFactory()
         port = OutputPortFactory(
-            access_type=OutputPortAccessType.RESTRICTED,
+            access_function=OutputPortAccessFunction.RESTRICTED,
             data_product_access_duration_type=AccessDurationType.TIME_BOUND,
         )
         InputPortFactory(
@@ -204,7 +223,7 @@ class TestInputPortDecisions:
         actor = UserFactory()
         consumer = DataProductFactory()
         port = OutputPortFactory(
-            access_type=OutputPortAccessType.RESTRICTED,
+            access_function=OutputPortAccessFunction.RESTRICTED,
             data_product_access_duration_type=AccessDurationType.TIME_BOUND,
         )
         link = InputPortFactory(
@@ -230,8 +249,8 @@ class TestInputPortDecisions:
         )
         session.flush()
 
-        requests = _by_id(input_port)
         assert input_port.status == InputPortStatus.REVOKED
+        requests = _by_id(link)
         assert requests[grant.id].revoked_at is not None
         assert requests[grant.id].revoked_by_id == actor.id
         assert requests[grant.id].decision == InputPortRequestDecision.APPROVED
@@ -239,7 +258,7 @@ class TestInputPortDecisions:
     def test_revoke__raises_when_no_active_grant(self, session):
         actor = UserFactory()
         consumer = DataProductFactory()
-        port = OutputPortFactory(access_type=OutputPortAccessType.RESTRICTED)
+        port = OutputPortFactory(access_function=OutputPortAccessFunction.RESTRICTED)
         InputPortFactory(
             consuming_abstract_data_product=consumer,
             output_port=port,
@@ -260,7 +279,7 @@ class TestInputPortDecisions:
         actor = UserFactory()
         consumer = DataProductFactory()
         port = OutputPortFactory(
-            access_type=OutputPortAccessType.RESTRICTED,
+            access_function=OutputPortAccessFunction.RESTRICTED,
             data_product_access_duration_type=AccessDurationType.TIME_BOUND,
         )
         input_port = InputPortFactory(
@@ -329,3 +348,31 @@ class TestInputPortDecisions:
         AuthorizationService(session).reload_enforcer()
         pending_actions = InputPortService(session).get_user_pending_actions(approver)
         assert {action.id for action in pending_actions} == {pending_request.id}
+
+    def test_get_user_pending_actions__skips_private_output_port_of_pending_member(
+        self,
+        session,
+    ):
+        user = UserFactory()
+        data_product = DataProductFactory()
+        output_port = OutputPortFactory(
+            data_product=data_product,
+            access_function=OutputPortAccessFunction.PRIVATE,
+        )
+        InputPortRequestFactory(
+            input_port=InputPortFactory(
+                output_port=output_port,
+                status=InputPortStatus.PENDING,
+                request=False,
+            ),
+            decision=InputPortRequestDecision.PENDING,
+        )
+        DataProductRoleAssignmentFactory(
+            identity_id=user.id,
+            data_product_id=data_product.id,
+            role_id=RoleFactory(scope=Scope.DATA_PRODUCT).id,
+            decision=DecisionStatus.PENDING,
+        )
+
+        with as_user(session, user.id):
+            assert InputPortService(session).get_user_pending_actions(user) == []

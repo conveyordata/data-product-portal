@@ -482,17 +482,6 @@ func (s *CreateOutputPortRequest) Validate() error {
 
 	var failures []validate.FieldError
 	if err := func() error {
-		if err := s.AccessType.Validate(); err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "access_type",
-			Error: err,
-		})
-	}
-	if err := func() error {
 		if err := s.DataProductAccessDurationType.Validate(); err != nil {
 			return err
 		}
@@ -1519,6 +1508,8 @@ func (s EventEntityType) Validate() error {
 		return nil
 	case "user":
 		return nil
+	case "exploration":
+		return nil
 	default:
 		return errors.Errorf("invalid value: %v", s)
 	}
@@ -2270,6 +2261,24 @@ func (s *GetEventHistoryResponseItem) Validate() error {
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
 			Name:  "technical_asset",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if value, ok := s.Exploration.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "exploration",
 			Error: err,
 		})
 	}
@@ -3038,6 +3047,40 @@ func (s *GlobalRoleAssignmentResponse) Validate() error {
 	return nil
 }
 
+func (s *GroupCreate) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.ExternalID.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "external_id",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if err := s.DisplayName.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "display_name",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
 func (s *GroupMemberIdentityGet) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer
@@ -3074,7 +3117,7 @@ func (s *GroupMembersAdd) Validate() error {
 		if err := (validate.Array{
 			MinLength:    1,
 			MinLengthSet: true,
-			MaxLength:    30,
+			MaxLength:    50,
 			MaxLengthSet: true,
 		}).ValidateLength(len(s.MemberIdentityIds)); err != nil {
 			return errors.Wrap(err, "array")
@@ -3105,7 +3148,7 @@ func (s *GroupMembersRemove) Validate() error {
 		if err := (validate.Array{
 			MinLength:    1,
 			MinLengthSet: true,
-			MaxLength:    30,
+			MaxLength:    50,
 			MaxLengthSet: true,
 		}).ValidateLength(len(s.MemberIdentityIds)); err != nil {
 			return errors.Wrap(err, "array")
@@ -3136,7 +3179,7 @@ func (s *GroupMembersReplace) Validate() error {
 		if err := (validate.Array{
 			MinLength:    1,
 			MinLengthSet: true,
-			MaxLength:    30,
+			MaxLength:    50,
 			MaxLengthSet: true,
 		}).ValidateLength(len(s.MemberIdentityIds)); err != nil {
 			return errors.Wrap(err, "array")
@@ -3208,6 +3251,29 @@ func (s *GroupMembershipsGetResponse) Validate() error {
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
 			Name:  "members",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *GroupUpdate) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.DisplayName.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "display_name",
 			Error: err,
 		})
 	}
@@ -3525,6 +3591,63 @@ func (s *ListOutputPortRoleAssignmentsResponse) Validate() error {
 	return nil
 }
 
+func (s *MachineUserCreate) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.ExternalID.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "external_id",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if err := s.DisplayName.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "display_name",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *MachineUserUpdate) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.DisplayName.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "display_name",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
 func (s *MachineUsersGetResponse) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer
@@ -3544,6 +3667,26 @@ func (s *MachineUsersGetResponse) Validate() error {
 	}
 	if len(failures) > 0 {
 		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s NonEmptyStr) Validate() error {
+	alias := (string)(s)
+	if err := (validate.String{
+		MinLength:     1,
+		MinLengthSet:  true,
+		MaxLength:     0,
+		MaxLengthSet:  false,
+		Email:         false,
+		Hostname:      false,
+		Regex:         nil,
+		MinNumeric:    0,
+		MinNumericSet: false,
+		MaxNumeric:    0,
+		MaxNumericSet: false,
+	}).Validate(string(alias)); err != nil {
+		return errors.Wrap(err, "string")
 	}
 	return nil
 }
@@ -3627,7 +3770,7 @@ func (s *OutputPortAccessDuration) Validate() error {
 	return nil
 }
 
-func (s OutputPortAccessType) Validate() error {
+func (s OutputPortAccessFunction) Validate() error {
 	switch s {
 	case "restricted":
 		return nil
@@ -3638,6 +3781,160 @@ func (s OutputPortAccessType) Validate() error {
 	default:
 		return errors.Errorf("invalid value: %v", s)
 	}
+}
+
+func (s *OutputPortAccessType) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.AccessFunction.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "access_function",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *OutputPortAccessTypeCreate) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.Name.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "name",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if err := s.AccessFunction.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "access_function",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *OutputPortAccessTypeUpdate) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.Name.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "name",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if err := s.AccessFunction.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "access_function",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *OutputPortAccessTypesGet) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if s.OutputPortAccessTypes == nil {
+			return errors.New("nil is invalid value")
+		}
+		var failures []validate.FieldError
+		for i, elem := range s.OutputPortAccessTypes {
+			if err := func() error {
+				if err := elem.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				failures = append(failures, validate.FieldError{
+					Name:  fmt.Sprintf("[%d]", i),
+					Error: err,
+				})
+			}
+		}
+		if len(failures) > 0 {
+			return &validate.Error{Fields: failures}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "output_port_access_types",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *OutputPortAccessTypesGetItem) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.AccessFunction.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "access_function",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
 }
 
 func (s *OutputPortCuratedQueries) Validate() error {
@@ -4189,17 +4486,6 @@ func (s *OutputPortUpdate) Validate() error {
 	}
 
 	var failures []validate.FieldError
-	if err := func() error {
-		if err := s.AccessType.Validate(); err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "access_type",
-			Error: err,
-		})
-	}
 	if err := func() error {
 		if err := s.DataProductAccessDurationType.Validate(); err != nil {
 			return err

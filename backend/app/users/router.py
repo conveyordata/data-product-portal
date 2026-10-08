@@ -7,6 +7,7 @@ from app.core.auth.auth import authorize_user, get_authenticated_user
 from app.core.authz import Action, Authorization
 from app.core.authz.resolvers import EmptyResolver
 from app.database.deps import get_db_session
+from app.groups.schema_response import GroupsGetResponse
 from app.users.schema import User
 from app.users.schema_request import CanBecomeAdminUpdate, UserCreate
 from app.users.schema_response import (
@@ -25,9 +26,7 @@ router = APIRouter(tags=["Users"], prefix="/v2/users")
     responses={
         404: {
             "description": "User not found",
-            "content": {
-                "application/json": {"example": {"detail": "User email not found"}}
-            },
+            "content": {"application/json": {"example": {"detail": "User not found"}}},
         }
     },
     dependencies=[
@@ -78,6 +77,30 @@ def get_users(
     db: Session = Depends(get_db_session, scope="function"),
 ) -> GetUsersResponse:
     return GetUsersResponse(users=UserService(db).get_users())
+
+
+@router.get("/current/groups")
+def get_current_user_groups(
+    db: Session = Depends(get_db_session, scope="function"),
+    authenticated_user: User = Depends(get_authenticated_user),
+) -> GroupsGetResponse:
+    return GroupsGetResponse(groups=UserService(db).get_groups(authenticated_user.id))
+
+
+@router.get(
+    "/{id}/groups",
+    responses={
+        404: {
+            "description": "User not found",
+            "content": {"application/json": {"example": {"detail": "User not found"}}},
+        }
+    },
+)
+def get_user_groups(
+    id: UUID,
+    db: Session = Depends(get_db_session, scope="function"),
+) -> GroupsGetResponse:
+    return GroupsGetResponse(groups=UserService(db).get_groups(id))
 
 
 @router.post("/current/seen_tour")

@@ -3204,6 +3204,180 @@
         }
       }
     },
+    "/api/v2/configuration/output_port_access_types": {
+      "get": {
+        "tags": [
+          "Configuration - Output Port access types"
+        ],
+        "summary": "Get Output Port Access Types",
+        "operationId": "get_output_port_access_types",
+        "parameters": [
+          {
+            "name": "include_output_port_count",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Include Output Port Count"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OutputPortAccessTypesGet"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Configuration - Output Port access types"
+        ],
+        "summary": "Create Output Port Access Type",
+        "operationId": "create_output_port_access_type",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OutputPortAccessTypeCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateOutputPortAccessTypeResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/configuration/output_port_access_types/{id}": {
+      "put": {
+        "tags": [
+          "Configuration - Output Port access types"
+        ],
+        "summary": "Update Output Port Access Type",
+        "operationId": "update_output_port_access_type",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OutputPortAccessTypeUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateOutputPortAccessTypeResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Configuration - Output Port access types"
+        ],
+        "summary": "Remove Output Port Access Type",
+        "operationId": "remove_output_port_access_type",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v2/configuration/data_product_settings": {
       "get": {
         "tags": [
@@ -3542,6 +3716,67 @@
                 "example": {
                   "detail": "Cannot remove the specified access mode because it is in use by technical assets or input port requests."
                 }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/data_products/{data_product_id}/output_ports/{output_port_id}/input_ports/grant": {
+      "post": {
+        "tags": [
+          "Data Products - Output ports - Input ports"
+        ],
+        "summary": "Grant Output Port Access",
+        "operationId": "grant_output_port_access",
+        "parameters": [
+          {
+            "name": "data_product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Data Product Id"
+            }
+          },
+          {
+            "name": "output_port_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Output Port Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GrantOutputPortAccessRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
               }
             }
           },
@@ -3923,11 +4158,20 @@
             }
           },
           "409": {
-            "description": "Access modes of technical asset are incompatible with access modes of output port",
+            "description": "Possible errors",
             "content": {
               "application/json": {
-                "example": {
-                  "detail": "Access modes of technical asset are incompatible with access modes of output port"
+                "examples": {
+                  "access_modes_of_technical_asset_are_incompatible_with_access_modes_of_output_port": {
+                    "value": {
+                      "detail": "Access modes of technical asset are incompatible with access modes of output port"
+                    }
+                  },
+                  "technical_assets_of_this_type_are_not_shareable_and_cannot_be_linked_to_an_output_port": {
+                    "value": {
+                      "detail": "Technical assets of this type are not shareable and cannot be linked to an Output Port"
+                    }
+                  }
                 }
               }
             }
@@ -4062,6 +4306,16 @@
               "application/json": {
                 "example": {
                   "detail": "Data Product id not found"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Technical assets of this type are not shareable and cannot be linked to an Output Port",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Technical assets of this type are not shareable and cannot be linked to an Output Port"
                 }
               }
             }
@@ -5661,7 +5915,7 @@
             "content": {
               "application/json": {
                 "example": {
-                  "detail": "User email not found"
+                  "detail": "User not found"
                 }
               }
             }
@@ -5775,6 +6029,90 @@
             "content": {
               "application/json": {
                 "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/users/current/groups": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Get Current User Groups",
+        "operationId": "get_current_user_groups",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupsGetResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/users/{id}/groups": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Get User Groups",
+        "operationId": "get_user_groups",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GroupsGetResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "User not found"
+                }
               }
             }
           },
@@ -8665,16 +9003,6 @@
               }
             }
           },
-          "404": {
-            "description": "Group not found",
-            "content": {
-              "application/json": {
-                "example": {
-                  "detail": "Required group does not exist"
-                }
-              }
-            }
-          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -8692,7 +9020,7 @@
           "Groups"
         ],
         "summary": "Replace Group Members",
-        "description": "Because the service method performs add and replace operations internally,\na lock is used to ensure that only one request is processed at a time.",
+        "description": "Because the service method performs add and remove operations internally,\na lock is used to ensure that only one request is processed at a time.",
         "operationId": "replace_group_members",
         "parameters": [
           {
@@ -8870,16 +9198,6 @@
               "application/json": {
                 "example": {
                   "detail": "A machine user with this external ID already exists."
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Machine user not found",
-            "content": {
-              "application/json": {
-                "example": {
-                  "detail": "Required machine user does not exist"
                 }
               }
             }
@@ -10573,6 +10891,20 @@
         ],
         "title": "CreateGlobalRoleAssignment"
       },
+      "CreateOutputPortAccessTypeResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "title": "CreateOutputPortAccessTypeResponse"
+      },
       "CreateOutputPortRequest": {
         "properties": {
           "name": {
@@ -10587,8 +10919,10 @@
             "type": "string",
             "title": "Description"
           },
-          "access_type": {
-            "$ref": "#/components/schemas/OutputPortAccessType"
+          "access_type_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Access Type Id"
           },
           "data_product_access_duration_type": {
             "$ref": "#/components/schemas/AccessDurationType"
@@ -10642,7 +10976,7 @@
           "name",
           "namespace",
           "description",
-          "access_type",
+          "access_type_id",
           "data_product_access_duration_type",
           "exploration_access_duration_type",
           "tag_ids",
@@ -12552,7 +12886,8 @@
           "data_product",
           "output_port",
           "technical_asset",
-          "user"
+          "user",
+          "exploration"
         ],
         "title": "EventEntityType"
       },
@@ -13215,6 +13550,16 @@
                 "type": "null"
               }
             ]
+          },
+          "exploration": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Exploration"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",
@@ -13796,6 +14141,37 @@
         ],
         "title": "GlobalRoleAssignmentResponse"
       },
+      "GrantOutputPortAccessRequest": {
+        "properties": {
+          "consuming_abstract_data_product_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Consuming Abstract Data Product Id"
+          },
+          "justification": {
+            "type": "string",
+            "title": "Justification"
+          },
+          "access_mode_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Access Mode Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "consuming_abstract_data_product_id",
+          "justification"
+        ],
+        "title": "GrantOutputPortAccessRequest"
+      },
       "Graph": {
         "properties": {
           "edges": {
@@ -13825,12 +14201,10 @@
       "GroupCreate": {
         "properties": {
           "external_id": {
-            "type": "string",
-            "title": "External Id"
+            "$ref": "#/components/schemas/NonEmptyStr"
           },
           "display_name": {
-            "type": "string",
-            "title": "Display Name"
+            "$ref": "#/components/schemas/NonEmptyStr"
           }
         },
         "type": "object",
@@ -13909,7 +14283,7 @@
               "format": "uuid"
             },
             "type": "array",
-            "maxItems": 30,
+            "maxItems": 50,
             "minItems": 1,
             "title": "Member Identity Ids"
           }
@@ -13928,7 +14302,7 @@
               "format": "uuid"
             },
             "type": "array",
-            "maxItems": 30,
+            "maxItems": 50,
             "minItems": 1,
             "title": "Member Identity Ids"
           }
@@ -13947,7 +14321,7 @@
               "format": "uuid"
             },
             "type": "array",
-            "maxItems": 30,
+            "maxItems": 50,
             "minItems": 1,
             "title": "Member Identity Ids"
           }
@@ -14001,8 +14375,7 @@
       "GroupUpdate": {
         "properties": {
           "display_name": {
-            "type": "string",
-            "title": "Display Name"
+            "$ref": "#/components/schemas/NonEmptyStr"
           }
         },
         "additionalProperties": false,
@@ -14493,12 +14866,10 @@
       "MachineUserCreate": {
         "properties": {
           "external_id": {
-            "type": "string",
-            "title": "External Id"
+            "$ref": "#/components/schemas/NonEmptyStr"
           },
           "display_name": {
-            "type": "string",
-            "title": "Display Name"
+            "$ref": "#/components/schemas/NonEmptyStr"
           }
         },
         "type": "object",
@@ -14549,8 +14920,7 @@
       "MachineUserUpdate": {
         "properties": {
           "display_name": {
-            "type": "string",
-            "title": "Display Name"
+            "$ref": "#/components/schemas/NonEmptyStr"
           }
         },
         "additionalProperties": false,
@@ -14799,6 +15169,11 @@
         ],
         "title": "NodeType"
       },
+      "NonEmptyStr": {
+        "type": "string",
+        "minLength": 1,
+        "title": "NonEmptyStr"
+      },
       "OIDCTokenResponse": {
         "properties": {
           "access_token": {
@@ -14934,14 +15309,134 @@
         ],
         "title": "OutputPortAccessDuration"
       },
-      "OutputPortAccessType": {
+      "OutputPortAccessFunction": {
         "type": "string",
         "enum": [
           "restricted",
           "private",
           "unrestricted"
         ],
+        "title": "OutputPortAccessFunction"
+      },
+      "OutputPortAccessType": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "access_function": {
+            "$ref": "#/components/schemas/OutputPortAccessFunction"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "access_function"
+        ],
         "title": "OutputPortAccessType"
+      },
+      "OutputPortAccessTypeCreate": {
+        "properties": {
+          "name": {
+            "$ref": "#/components/schemas/NonEmptyStr"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "default": ""
+          },
+          "access_function": {
+            "$ref": "#/components/schemas/OutputPortAccessFunction"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "access_function"
+        ],
+        "title": "OutputPortAccessTypeCreate"
+      },
+      "OutputPortAccessTypeUpdate": {
+        "properties": {
+          "name": {
+            "$ref": "#/components/schemas/NonEmptyStr"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "default": ""
+          },
+          "access_function": {
+            "$ref": "#/components/schemas/OutputPortAccessFunction"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "access_function"
+        ],
+        "title": "OutputPortAccessTypeUpdate"
+      },
+      "OutputPortAccessTypesGet": {
+        "properties": {
+          "output_port_access_types": {
+            "items": {
+              "$ref": "#/components/schemas/OutputPortAccessTypesGetItem"
+            },
+            "type": "array",
+            "title": "Output Port Access Types"
+          }
+        },
+        "type": "object",
+        "required": [
+          "output_port_access_types"
+        ],
+        "title": "OutputPortAccessTypesGet"
+      },
+      "OutputPortAccessTypesGetItem": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "access_function": {
+            "$ref": "#/components/schemas/OutputPortAccessFunction"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "output_port_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Output Port Count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "access_function",
+          "description"
+        ],
+        "title": "OutputPortAccessTypesGetItem"
       },
       "OutputPortCuratedQueries": {
         "properties": {
@@ -15633,8 +16128,10 @@
             "type": "string",
             "title": "Description"
           },
-          "access_type": {
-            "$ref": "#/components/schemas/OutputPortAccessType"
+          "access_type_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Access Type Id"
           },
           "data_product_access_duration_type": {
             "$ref": "#/components/schemas/AccessDurationType"
@@ -15679,7 +16176,7 @@
           "name",
           "namespace",
           "description",
-          "access_type",
+          "access_type_id",
           "data_product_access_duration_type",
           "exploration_access_duration_type",
           "tag_ids"
@@ -17675,6 +18172,11 @@
             "title": "Show In Form",
             "default": true
           },
+          "shareable": {
+            "type": "boolean",
+            "title": "Shareable",
+            "default": true
+          },
           "detailed_name": {
             "type": "string",
             "title": "Detailed Name"
@@ -17907,6 +18409,20 @@
           "id"
         ],
         "title": "UpdateDomainResponse"
+      },
+      "UpdateOutputPortAccessTypeResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "title": "UpdateOutputPortAccessTypeResponse"
       },
       "UpdateOutputPortQueryStatus": {
         "properties": {

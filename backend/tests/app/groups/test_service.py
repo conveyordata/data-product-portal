@@ -2,6 +2,9 @@ from uuid import uuid4
 
 import pytest
 from fastapi import HTTPException
+from sqlalchemy import select
+from sqlalchemy.exc import OperationalError
+from sqlalchemy.orm import Session
 
 from app.authorization.role_assignments.data_product.service import (
     RoleAssignmentService as DataProductRoleAssignmentService,
@@ -12,8 +15,10 @@ from app.authorization.role_assignments.global_.service import (
 from app.authorization.roles.schema import Scope
 from app.core.authz import Authorization
 from app.core.authz.actions import AuthorizationAction
+from app.groups.model import Group
 from app.groups.schema_request import GroupCreate, GroupUpdate
 from app.groups.service import GroupService
+from tests import engine
 from tests.factories import (
     DataProductFactory,
     DataProductRoleAssignmentFactory,
@@ -24,6 +29,7 @@ from tests.factories import (
     RoleFactory,
     UserFactory,
 )
+from tests.groups_util import group_has_member
 
 
 class TestGroupService:
@@ -49,11 +55,7 @@ class TestGroupService:
         service = GroupService(session)
 
         service.add_members(group_id=group.id, member_identity_ids=[user.id])
-        membership = service.get_membership(
-            group_id=group.id, member_identity_id=user.id
-        )
-        assert membership.group_id == group.id
-        assert membership.member_identity_id == user.id
+        assert group_has_member(session, group_id=group.id, member_identity_id=user.id)
 
     def test_machine_user_can_belong_to_group(self, session):
         group = GroupFactory()
@@ -61,11 +63,9 @@ class TestGroupService:
         service = GroupService(session)
 
         service.add_members(group_id=group.id, member_identity_ids=[machine_user.id])
-        membership = service.get_membership(
-            group_id=group.id, member_identity_id=machine_user.id
+        assert group_has_member(
+            session, group_id=group.id, member_identity_id=machine_user.id
         )
-        assert membership.group_id == group.id
-        assert membership.member_identity_id == machine_user.id
 
     def test_duplicate_membership_is_ignored(self, session):
         group = GroupFactory()
@@ -100,10 +100,12 @@ class TestGroupService:
         service.delete_group(group_id=group_id)
         with pytest.raises(HTTPException):
             service.get_group(group_id=group_id)
-        with pytest.raises(HTTPException):
-            service.get_membership(group_id=group_id, member_identity_id=user1.id)
-        with pytest.raises(HTTPException):
-            service.get_membership(group_id=group_id, member_identity_id=user2.id)
+        assert not group_has_member(
+            session, group_id=group_id, member_identity_id=user1.id
+        )
+        assert not group_has_member(
+            session, group_id=group_id, member_identity_id=user2.id
+        )
 
         # Members themselves must remain.
         assert user1 in session
@@ -213,7 +215,7 @@ class TestGroupService:
             act=global_action,
         )
 
-    def test_existing_member_immediately_inherits_new_group_data_product_role(
+    def test_add_members__existing_member_immediately_inherits_new_group_data_product_role(
         self,
         authorizer: Authorization,
         session,
@@ -280,7 +282,7 @@ class TestGroupService:
             resource_id="*",
         )
 
-    def test_deleting_group_revokes_inherited_access(
+    def test_delete_group_deleting_group_revokes_inherited_access(
         self,
         authorizer: Authorization,
         session,
@@ -352,7 +354,7 @@ class TestGroupService:
             role_id=group.id,
         )
 
-    def test_get_groups_returns_groups_ordered_by_display_name(self, session):
+    def test_get_groups__returns_groups_ordered_by_display_name(self, session):
         second = GroupFactory(display_name="Beta", external_id="beta")
         first = GroupFactory(display_name="Alpha", external_id="alpha")
 
@@ -360,7 +362,7 @@ class TestGroupService:
 
         assert [group.id for group in groups] == [first.id, second.id]
 
-    def test_get_group(self, session):
+    def test_get_group__returns_group(self, session):
         group = GroupFactory()
 
         result = GroupService(session).get_group(group.id)
@@ -369,7 +371,7 @@ class TestGroupService:
         assert result.external_id == group.external_id
         assert result.display_name == group.display_name
 
-    def test_get_unknown_group_raises_not_found(self, session):
+    def test_get_group__unknown_group_raises_not_found(self, session):
         service = GroupService(session)
 
         with pytest.raises(HTTPException) as exc_info:
@@ -377,7 +379,7 @@ class TestGroupService:
 
         assert exc_info.value.status_code == 404
 
-    def test_create_group(self, session):
+    def test_create_group__creates_group(self, session):
         service = GroupService(session)
 
         result = service.create_group(
@@ -391,7 +393,7 @@ class TestGroupService:
         assert group.external_id == "engineering"
         assert group.display_name == "Engineering"
 
-    def test_create_group_rejects_duplicate_external_id(self, session):
+    def test_create_group__rejects_duplicate_external_id(self, session):
         GroupFactory(external_id="engineering")
         service = GroupService(session)
 
@@ -406,7 +408,7 @@ class TestGroupService:
         assert exc_info.value.status_code == 400
         assert exc_info.value.detail == "A group with this external ID already exists."
 
-    def test_update_group_replaces_mutable_fields(self, session):
+    def test_update_group__replaces_mutable_fields(self, session):
         group = GroupFactory(
             external_id="old-external-id",
             display_name="Old name",
@@ -422,7 +424,7 @@ class TestGroupService:
         assert result.id == group.id
         assert group.display_name == "New name"
 
-    def test_update_unknown_group_raises_not_found(self, session):
+    def test_update_group__unknown_group_raises_not_found(self, session):
         service = GroupService(session)
 
         with pytest.raises(HTTPException) as exc_info:
@@ -433,7 +435,7 @@ class TestGroupService:
 
         assert exc_info.value.status_code == 404
 
-    def test_delete_unknown_group_raises_not_found(self, session):
+    def test_delete_group__unknown_group_raises_not_found(self, session):
         with pytest.raises(HTTPException) as exc_info:
             GroupService(session).delete_group(group_id=uuid4())
 
@@ -496,3 +498,38 @@ class TestGroupService:
             GroupService(session).get_members(uuid4())
 
         assert exc_info.value.status_code == 404
+
+    def test_replace_members__holds_group_lock_until_transaction_ends(self):
+        group = GroupFactory()
+        member = UserFactory()
+
+        with (
+            Session(bind=engine) as first_session,
+            Session(bind=engine) as second_session,
+        ):
+            with first_session.begin():
+                GroupService(first_session).replace_members(
+                    group_id=group.id,
+                    member_identity_ids=[member.id],
+                )
+
+                with pytest.raises(OperationalError) as exc_info:
+                    second_session.scalar(
+                        select(Group.id)
+                        .where(Group.id == group.id)
+                        .with_for_update(
+                            of=Group,
+                            nowait=True,  # NOWAIT to fail inmediately with 55P03
+                        )
+                    )
+
+                assert exc_info.value.orig.pgcode == "55P03"
+                second_session.rollback()
+
+            locked_group_id = second_session.scalar(
+                select(Group.id)
+                .where(Group.id == group.id)
+                .with_for_update(of=Group, nowait=True)
+            )
+
+            assert locked_group_id == group.id

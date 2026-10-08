@@ -13,6 +13,7 @@ from tests.factories import (
     GroupFactory,
     MachineUserFactory,
 )
+from tests.groups_util import group_has_member
 
 
 class TestMachineUserService:
@@ -131,11 +132,11 @@ class TestMachineUserService:
             group_id=group.id,
             member_identity_ids=[machine_user.id],
         )
-        assert group_service.has_member(group.id, machine_user.id)
+        assert group_has_member(session, group.id, machine_user.id)
 
         MachineUserService(session).delete_machine_user(machine_user.id)
 
-        assert not group_service.has_member(group.id, machine_user.id)
+        assert not group_has_member(session, group.id, machine_user.id)
 
     def test_delete_machine_user__unknown_id_raises_not_found(
         self,

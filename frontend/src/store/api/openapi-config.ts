@@ -10,6 +10,7 @@ const services = [
     { name: 'Configuration - Data Product lifecycles', file: 'configurationDataProductLifecycles' },
     { name: 'Configuration - Data Product settings', file: 'configurationDataProductSettings' },
     { name: 'Configuration - Data Product types', file: 'configurationDataProductTypes' },
+    { name: 'Configuration - Output Port access types', file: 'configurationOutputPortAccessTypes' },
     { name: 'Configuration - Domains', file: 'configurationDomains' },
     { name: 'Configuration - Environments', file: 'configurationEnvironments' },
     { name: 'Configuration - Platforms', file: 'configurationPlatforms' },

@@ -2,7 +2,7 @@
 useDefault = true
 
 [[allowlists]]
-description = "Ignore demo access mode UUIDs in sample data"
+description = "Ignore demo access mode and access type UUIDs in sample data"
 condition = "AND"
 paths = ['''backend/sample_data\.sql''']
 regexTarget = "line"
@@ -12,4 +12,5 @@ regexes = [
   '''\{% set access_mode_write = "[0-9a-fA-F-]+" %\}''',
   '''\{% set access_modes_consumer = "[0-9a-fA-F-]+" %\}''',
   '''\{% set access_modes_example = "[0-9a-fA-F-]+" %\}''',
+  '''\{% set [a-z]+_access_type_id = "[0-9a-fA-F-]+" %\}''',
 ]

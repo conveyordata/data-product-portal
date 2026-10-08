@@ -1,7 +1,7 @@
 from sqlalchemy.orm import selectinload
 
 from app.authorization.role_assignments.enums import AssignmentFilter
-from app.data_products.output_ports.enums import OutputPortAccessType
+from app.data_products.output_ports.enums import OutputPortAccessFunction
 from app.data_products.output_ports.model import OutputPort
 from app.data_products.output_ports.service import OutputPortService
 from app.settings import settings
@@ -42,19 +42,21 @@ class TestDatasetsService:
         # Create a unrestricted output port that should be visible
         unrestricted_dataset = OutputPortFactory(
             name="Public Analytics Dataset",
-            access_type=OutputPortAccessType.UNRESTRICTED,
+            access_function=OutputPortAccessFunction.UNRESTRICTED,
         )
 
         # Create a private output port that should NOT be visible
         private_dataset = OutputPortFactory(
-            name="Private Sensitive Dataset", access_type=OutputPortAccessType.PRIVATE
+            name="Private Sensitive Dataset",
+            access_function=OutputPortAccessFunction.PRIVATE,
         )
 
         # Create another private output port owned by a different user
         owner = UserFactory()
         owner_role = RoleFactory.dataset_owner()
         owned_private_dataset = OutputPortFactory(
-            name="Owner Private Dataset", access_type=OutputPortAccessType.PRIVATE
+            name="Owner Private Dataset",
+            access_function=OutputPortAccessFunction.PRIVATE,
         )
         DatasetRoleAssignmentFactory(
             role_id=owner_role.id,
@@ -100,7 +102,7 @@ class TestDatasetsService:
 
         # Create a private output port owned by this user
         private_dataset = OutputPortFactory(
-            name="My Private Dataset", access_type=OutputPortAccessType.PRIVATE
+            name="My Private Dataset", access_function=OutputPortAccessFunction.PRIVATE
         )
         DatasetRoleAssignmentFactory(
             role_id=owner_role.id, output_port_id=private_dataset.id, user_id=owner.id
@@ -108,7 +110,8 @@ class TestDatasetsService:
 
         # Create a unrestricted dataset for comparison
         unrestricted_dataset = OutputPortFactory(
-            name="Unrestricted Dataset", access_type=OutputPortAccessType.UNRESTRICTED
+            name="Unrestricted Dataset",
+            access_function=OutputPortAccessFunction.UNRESTRICTED,
         )
         # Recalculate search embeddings
         OutputPortService(session).recalculate_search(private_dataset.id)

@@ -114,6 +114,7 @@ class PlatformMetadata(ORMModel):
     result_tooltip: str = "The output you can access through this technical asset"
     detailed_name: str
     show_in_form: bool = True
+    shareable: bool = True
 
 
 class TechnicalAssetPlugin(ORMModel, ABC):

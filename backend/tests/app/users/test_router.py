@@ -1,3 +1,5 @@
+from uuid import uuid4
+
 import pytest
 
 from app.authorization.role_assignments.data_product.model import (
@@ -21,6 +23,8 @@ from tests.factories import (
     DataProductRoleAssignmentFactory,
     DatasetRoleAssignmentFactory,
     GlobalRoleAssignmentFactory,
+    GroupFactory,
+    GroupMembershipFactory,
     InputPortFactory,
     OutputPortFactory,
     RoleFactory,
@@ -418,3 +422,76 @@ class TestUsersRouter:
             ]["name"]
             == REDACTION_VALUE
         )
+
+    def test_get_user_groups__returns_groups(self, client):
+        user = UserFactory()
+        first = GroupFactory(
+            external_id="engineering",
+            display_name="Engineering",
+        )
+        second = GroupFactory(
+            external_id="finance",
+            display_name="Finance",
+        )
+        unrelated = GroupFactory()
+
+        GroupMembershipFactory(group=second, member=user)
+        GroupMembershipFactory(group=first, member=user)
+
+        response = client.get(f"{ENDPOINT}/{user.id}/groups")
+
+        assert response.status_code == 200
+        assert response.json() == {
+            "groups": [
+                {
+                    "id": str(first.id),
+                    "external_id": first.external_id,
+                    "display_name": first.display_name,
+                },
+                {
+                    "id": str(second.id),
+                    "external_id": second.external_id,
+                    "display_name": second.display_name,
+                },
+            ]
+        }
+        assert str(unrelated.id) not in response.text
+
+    def test_get_user_groups__user_without_groups_returns_empty_list(self, client):
+        user = UserFactory()
+
+        response = client.get(f"{ENDPOINT}/{user.id}/groups")
+
+        assert response.status_code == 200
+        assert response.json() == {"groups": []}
+
+    def test_get_user_groups__unknown_user_returns_not_found(self, client):
+        response = client.get(f"{ENDPOINT}/{uuid4()}/groups")
+
+        assert response.status_code == 404
+
+    def test_get_current_user_groups__returns_authenticated_users_groups(self, client):
+        authenticated_user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        other_user = UserFactory()
+
+        expected_group = GroupFactory(
+            external_id="engineering",
+            display_name="Engineering",
+        )
+        other_group = GroupFactory()
+
+        GroupMembershipFactory(group=expected_group, member=authenticated_user)
+        GroupMembershipFactory(group=other_group, member=other_user)
+
+        response = client.get(f"{ENDPOINT}/current/groups")
+
+        assert response.status_code == 200
+        assert response.json() == {
+            "groups": [
+                {
+                    "id": str(expected_group.id),
+                    "external_id": expected_group.external_id,
+                    "display_name": expected_group.display_name,
+                }
+            ]
+        }

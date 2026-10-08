@@ -72,6 +72,11 @@ export type DataProduct = {
   status: AbstractDataProductStatus;
   type: DataProductType;
 };
+export type OutputPortAccessType = {
+  id: string;
+  name: string;
+  access_function: OutputPortAccessFunction;
+};
 export type Tag = {
   id: string;
   value: string;
@@ -108,6 +113,20 @@ export type TechnicalAsset = {
     [key: string]: any;
   };
 };
+export type Domain = {
+  id: string;
+  name: string;
+  description: string;
+};
+export type Exploration = {
+  id: string;
+  name: string;
+  namespace: string;
+  description: string;
+  domain: Domain;
+  status: AbstractDataProductStatus;
+  finalizers: string[];
+};
 export type GetEventHistoryResponseItem = {
   id: string;
   name: string;
@@ -124,6 +143,7 @@ export type GetEventHistoryResponseItem = {
   user?: User | null;
   output_port?: OutputPort | null;
   technical_asset?: TechnicalAsset | null;
+  exploration?: Exploration | null;
 };
 export type GetUserNotificationsResponseItem = {
   id: string;
@@ -140,6 +160,7 @@ export enum EventEntityType {
   OutputPort = "output_port",
   TechnicalAsset = "technical_asset",
   User = "user",
+  Exploration = "exploration",
 }
 export enum AbstractDataProductStatus {
   Pending = "pending",
@@ -161,7 +182,7 @@ export enum OutputPortStatus {
   Active = "active",
   Archived = "archived",
 }
-export enum OutputPortAccessType {
+export enum OutputPortAccessFunction {
   Restricted = "restricted",
   Private = "private",
   Unrestricted = "unrestricted",

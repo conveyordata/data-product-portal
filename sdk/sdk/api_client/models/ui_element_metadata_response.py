@@ -34,6 +34,7 @@ class UIElementMetadataResponse:
         parent_platform (None | str | Unset):
         platform_tile (None | PlatformTile | Unset):
         show_in_form (bool | Unset):  Default: True.
+        shareable (bool | Unset):  Default: True.
     """
 
     ui_metadata: list[UIElementMetadata]
@@ -50,6 +51,7 @@ class UIElementMetadataResponse:
     parent_platform: None | str | Unset = UNSET
     platform_tile: None | PlatformTile | Unset = UNSET
     show_in_form: bool | Unset = True
+    shareable: bool | Unset = True
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -100,6 +102,8 @@ class UIElementMetadataResponse:
 
         show_in_form = self.show_in_form
 
+        shareable = self.shareable
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
@@ -127,6 +131,8 @@ class UIElementMetadataResponse:
             field_dict["platform_tile"] = platform_tile
         if show_in_form is not UNSET:
             field_dict["show_in_form"] = show_in_form
+        if shareable is not UNSET:
+            field_dict["shareable"] = shareable
 
         return field_dict
 
@@ -198,6 +204,8 @@ class UIElementMetadataResponse:
 
         show_in_form = d.pop("show_in_form", UNSET)
 
+        shareable = d.pop("shareable", UNSET)
+
         ui_element_metadata_response = cls(
             ui_metadata=ui_metadata,
             plugin=plugin,
@@ -213,6 +221,7 @@ class UIElementMetadataResponse:
             parent_platform=parent_platform,
             platform_tile=platform_tile,
             show_in_form=show_in_form,
+            shareable=shareable,
         )
 
         ui_element_metadata_response.additional_properties = d

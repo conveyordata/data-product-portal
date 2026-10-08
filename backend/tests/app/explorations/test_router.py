@@ -8,7 +8,7 @@ from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.roles.schema import Scope
 from app.configuration.access_durations.enums import AccessDurationType
 from app.core.authz import Action
-from app.data_products.output_ports.enums import OutputPortAccessType
+from app.data_products.output_ports.enums import OutputPortAccessFunction
 from app.settings import settings
 from tests.factories import (
     AccessDurationFactory,
@@ -191,7 +191,7 @@ class TestExplorationRouter:
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         exploration = ExplorationFactory(owner=user)
         ds = OutputPortFactory(
-            access_type=OutputPortAccessType.RESTRICTED,
+            access_function=OutputPortAccessFunction.RESTRICTED,
             exploration_access_duration_type=AccessDurationType.TIME_BOUND,
         )
         AccessDurationFactory(

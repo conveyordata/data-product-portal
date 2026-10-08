@@ -4,7 +4,7 @@ from app.abstract_data_product.service import AbstractDataProductService
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.roles.schema import Scope
 from app.core.authz import Action
-from app.data_products.output_ports.enums import OutputPortAccessType
+from app.data_products.output_ports.enums import OutputPortAccessFunction
 from app.settings import settings
 from tests.factories import (
     DataProductFactory,
@@ -26,7 +26,9 @@ class TestAbstractDataProductService:
         session,
     ):
         actor = UserFactory()
-        output_port = OutputPortFactory(access_type=OutputPortAccessType.RESTRICTED)
+        output_port = OutputPortFactory(
+            access_function=OutputPortAccessFunction.RESTRICTED
+        )
         input_port = InputPortFactory(
             consuming_abstract_data_product=DataProductFactory(),
             output_port=output_port,
@@ -64,7 +66,9 @@ class TestAbstractDataProductService:
     ):
         actor = UserFactory()
         other_approver = UserFactory()
-        output_port = OutputPortFactory(access_type=OutputPortAccessType.RESTRICTED)
+        output_port = OutputPortFactory(
+            access_function=OutputPortAccessFunction.RESTRICTED
+        )
         input_port = InputPortFactory(
             consuming_abstract_data_product=DataProductFactory(),
             output_port=output_port,
@@ -100,7 +104,7 @@ class TestAbstractDataProductService:
 
     def test_get_input_ports__filters_private_for_not_owner(self, session):
         """A non-owner should not be able to see the input port, if we want to change functionality, we should at least redact it"""
-        op = OutputPortFactory(access_type=OutputPortAccessType.PRIVATE)
+        op = OutputPortFactory(access_function=OutputPortAccessFunction.PRIVATE)
         ip = InputPortFactory(output_port=op)
 
         with as_user(session, UserFactory().id):
@@ -110,7 +114,7 @@ class TestAbstractDataProductService:
         assert len(input_ports) == 0
 
     def test_get_input_ports__shows_private_for_owner(self, session):
-        op = OutputPortFactory(access_type=OutputPortAccessType.PRIVATE)
+        op = OutputPortFactory(access_function=OutputPortAccessFunction.PRIVATE)
         ip = InputPortFactory(output_port=op)
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
 

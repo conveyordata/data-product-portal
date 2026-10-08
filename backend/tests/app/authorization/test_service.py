@@ -54,7 +54,7 @@ class TestAuthorizationService:
             "database not cleared"
         )
 
-    def test_reload_enforcer_syncs_group_data_product_access(
+    def test_reload_enforcer__syncs_group_data_product_access(
         self, authorizer: Authorization, session
     ):
         user = UserFactory()
@@ -90,7 +90,7 @@ class TestAuthorizationService:
             resource_id=str(data_product.id),
         )
 
-    def test_reload_enforcer_syncs_group_global_access(
+    def test_reload_enforcer__syncs_group_global_access(
         self, authorizer: Authorization, session
     ):
         user = UserFactory()
@@ -116,7 +116,7 @@ class TestAuthorizationService:
             act=action,
         )
 
-    def test_reload_enforcer_revokes_access_after_membership_removal(
+    def test_reload_enforcer__revokes_access_after_membership_removal(
         self, authorizer: Authorization, session
     ):
         """

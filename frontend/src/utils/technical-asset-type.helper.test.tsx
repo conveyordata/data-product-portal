@@ -2,7 +2,7 @@ import { render } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
 import type { PlatformTile, UiElementMetadataResponse } from '@/store/api/services/generated/pluginsApi';
-import { getPlatformTileIcon, getTechnicalAssetIcon } from './technical-asset-type.helper';
+import { getPlatformTileIcon, getTechnicalAssetIcon, isTechnicalAssetShareable } from './technical-asset-type.helper';
 
 const DATA_URI = 'data:image/svg+xml;base64,PHN2Zy8+';
 
@@ -73,5 +73,20 @@ describe('getPlatformTileIcon', () => {
         expect(getPlatformTileIcon(tile({ icon_data_uri: DATA_URI }))).toBe(
             getPlatformTileIcon(tile({ icon_data_uri: DATA_URI })),
         );
+    });
+});
+
+describe('isTechnicalAssetShareable', () => {
+    it('is shareable when the plugin does not set the flag', () => {
+        expect(isTechnicalAssetShareable('SomePlugin', [plugin()])).toBe(true);
+    });
+
+    it('is not shareable when the plugin opts out', () => {
+        expect(isTechnicalAssetShareable('SomePlugin', [plugin({ shareable: false })])).toBe(false);
+    });
+
+    it('is shareable for an unknown plugin or before plugins load', () => {
+        expect(isTechnicalAssetShareable('NoSuchPlugin', [plugin({ shareable: false })])).toBe(true);
+        expect(isTechnicalAssetShareable('SomePlugin', undefined)).toBe(true);
     });
 });

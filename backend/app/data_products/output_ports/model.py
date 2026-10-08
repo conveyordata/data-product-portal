@@ -3,7 +3,17 @@ from typing import TYPE_CHECKING, Optional
 
 from fastapi import HTTPException, status
 from pgvector.sqlalchemy import Vector
-from sqlalchemy import Column, Enum, ForeignKey, String, event, func, or_, select
+from sqlalchemy import (
+    Column,
+    Enum,
+    ForeignKey,
+    ForeignKeyConstraint,
+    String,
+    event,
+    func,
+    or_,
+    select,
+)
 from sqlalchemy.dialects.postgresql import TSVECTOR, UUID
 from sqlalchemy.orm import (
     Mapped,
@@ -29,6 +39,9 @@ from app.authorization.role_assignments.output_port.model import (
 )
 from app.configuration.access_durations.enums import AccessDurationType
 from app.configuration.access_modes.model import AccessMode
+from app.configuration.output_port_access_types.model import (
+    OutputPortAccessType,
+)
 from app.configuration.tags.model import Tag, tag_output_port_table
 from app.core.auth.db_utils import (
     is_system_account,
@@ -41,7 +54,7 @@ from app.data_products.output_port_technical_assets_link.model import (
 from app.data_products.output_ports.data_quality.model import (  # noqa: TCH001
     DataQualitySummary,
 )
-from app.data_products.output_ports.enums import OutputPortAccessType
+from app.data_products.output_ports.enums import OutputPortAccessFunction
 from app.data_products.output_ports.status import OutputPortStatus
 from app.data_products.technical_assets.model import TechnicalAssetAccessMode
 from app.database.database import Base, ensure_exists
@@ -118,9 +131,9 @@ def _has_user_access_through_input_port(cls, user_id: uuid.UUID):
     )
 
 
-def _access_type_filter_for_user(user_id: uuid.UUID):
+def _access_function_filter_for_user(user_id: uuid.UUID):
     return or_(
-        OutputPort.access_type != OutputPortAccessType.PRIVATE,
+        OutputPort.access_function != OutputPortAccessFunction.PRIVATE,
         _has_user_access_to_private_output_port(OutputPort, user_id),
         _has_user_access_to_private_output_port_via_data_product(OutputPort, user_id),
         _has_user_access_through_input_port(OutputPort, user_id),
@@ -146,14 +159,27 @@ output_port_access_modes = (
 
 class OutputPort(Base, BaseORM, EventTrackedMixin):
     __tablename__ = "datasets"
+    __table_args__ = (
+        # access_function is a copy of access_type.access_function;
+        # the database keeps it in sync when an access type is remapped.
+        ForeignKeyConstraint(
+            ["access_type_id", "access_function"],
+            [
+                "output_port_access_types.id",
+                "output_port_access_types.access_function",
+            ],
+            name="datasets_access_type_fkey",
+            onupdate="CASCADE",
+        ),
+    )
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     namespace = Column(String)
     name = Column(String)
     description = Column(String)
     about = Column(String)
-    access_type = Column(
-        Enum(OutputPortAccessType), default=OutputPortAccessType.UNRESTRICTED
+    access_function = Column(
+        Enum(OutputPortAccessFunction, native_enum=False), nullable=False
     )
     status: OutputPortStatus = Column(
         Enum(OutputPortStatus), default=OutputPortStatus.ACTIVE
@@ -166,6 +192,9 @@ class OutputPort(Base, BaseORM, EventTrackedMixin):
         ForeignKey("data_product_lifecycles.id", ondelete="SET NULL")
     )
     data_product_id: Mapped[UUID] = mapped_column(ForeignKey("data_products.id"))
+    access_type_id: Mapped[UUID] = mapped_column(
+        UUID(as_uuid=True), nullable=False, index=True
+    )
 
     assignments: Mapped[list["DatasetRoleAssignment"]] = relationship(
         back_populates="output_port",
@@ -202,6 +231,7 @@ class OutputPort(Base, BaseORM, EventTrackedMixin):
     lifecycle: Mapped["DataProductLifecycle"] = relationship(
         back_populates="datasets", lazy="joined"
     )
+    access_type: Mapped[OutputPortAccessType] = relationship(lazy="joined")
     data_product: Mapped["DataProduct"] = relationship(
         back_populates="datasets", lazy="joined"
     )
@@ -299,7 +329,7 @@ def enforce_private_output_port_filter(execute_state):
     if not execute_state.is_select:
         return
 
-    if execute_state.execution_options.get("skip_output_port_access_type_filter"):
+    if execute_state.execution_options.get("skip_output_port_access_function_filter"):
         return
 
     # The current user is only set while serving a request. Everything else
@@ -312,7 +342,7 @@ def enforce_private_output_port_filter(execute_state):
     execute_state.statement = execute_state.statement.options(
         with_loader_criteria(
             OutputPort,
-            lambda cls: _access_type_filter_for_user(user_id),
+            lambda cls: _access_function_filter_for_user(user_id),
             include_aliases=True,
         )
     )

@@ -620,10 +620,6 @@ type AddGroupMembersNoContent struct{}
 
 func (*AddGroupMembersNoContent) addGroupMembersRes() {}
 
-type AddGroupMembersNotFoundApplicationJSON jx.Raw
-
-func (*AddGroupMembersNotFoundApplicationJSON) addGroupMembersRes() {}
-
 type AddOutputPortDataQualityRunNotFoundApplicationJSON jx.Raw
 
 func (*AddOutputPortDataQualityRunNotFoundApplicationJSON) addOutputPortDataQualityRunRes() {}
@@ -1234,9 +1230,22 @@ type CreateMachineUserBadRequestApplicationJSON jx.Raw
 
 func (*CreateMachineUserBadRequestApplicationJSON) createMachineUserRes() {}
 
-type CreateMachineUserNotFoundApplicationJSON jx.Raw
+// Ref: #/components/schemas/CreateOutputPortAccessTypeResponse
+type CreateOutputPortAccessTypeResponse struct {
+	ID uuid.UUID `json:"id"`
+}
 
-func (*CreateMachineUserNotFoundApplicationJSON) createMachineUserRes() {}
+// GetID returns the value of ID.
+func (s *CreateOutputPortAccessTypeResponse) GetID() uuid.UUID {
+	return s.ID
+}
+
+// SetID sets the value of ID.
+func (s *CreateOutputPortAccessTypeResponse) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+func (*CreateOutputPortAccessTypeResponse) createOutputPortAccessTypeRes() {}
 
 type CreateOutputPortNotFoundApplicationJSON jx.Raw
 
@@ -1244,16 +1253,16 @@ func (*CreateOutputPortNotFoundApplicationJSON) createOutputPortRes() {}
 
 // Ref: #/components/schemas/CreateOutputPortRequest
 type CreateOutputPortRequest struct {
-	Name                          string               `json:"name"`
-	Namespace                     string               `json:"namespace"`
-	Description                   string               `json:"description"`
-	AccessType                    OutputPortAccessType `json:"access_type"`
-	DataProductAccessDurationType AccessDurationType   `json:"data_product_access_duration_type"`
-	ExplorationAccessDurationType AccessDurationType   `json:"exploration_access_duration_type"`
-	About                         OptNilString         `json:"about"`
-	LifecycleID                   OptNilUUID           `json:"lifecycle_id"`
-	TagIds                        []uuid.UUID          `json:"tag_ids"`
-	Owners                        []uuid.UUID          `json:"owners"`
+	Name                          string             `json:"name"`
+	Namespace                     string             `json:"namespace"`
+	Description                   string             `json:"description"`
+	AccessTypeID                  uuid.UUID          `json:"access_type_id"`
+	DataProductAccessDurationType AccessDurationType `json:"data_product_access_duration_type"`
+	ExplorationAccessDurationType AccessDurationType `json:"exploration_access_duration_type"`
+	About                         OptNilString       `json:"about"`
+	LifecycleID                   OptNilUUID         `json:"lifecycle_id"`
+	TagIds                        []uuid.UUID        `json:"tag_ids"`
+	Owners                        []uuid.UUID        `json:"owners"`
 }
 
 // GetName returns the value of Name.
@@ -1271,9 +1280,9 @@ func (s *CreateOutputPortRequest) GetDescription() string {
 	return s.Description
 }
 
-// GetAccessType returns the value of AccessType.
-func (s *CreateOutputPortRequest) GetAccessType() OutputPortAccessType {
-	return s.AccessType
+// GetAccessTypeID returns the value of AccessTypeID.
+func (s *CreateOutputPortRequest) GetAccessTypeID() uuid.UUID {
+	return s.AccessTypeID
 }
 
 // GetDataProductAccessDurationType returns the value of DataProductAccessDurationType.
@@ -1321,9 +1330,9 @@ func (s *CreateOutputPortRequest) SetDescription(val string) {
 	s.Description = val
 }
 
-// SetAccessType sets the value of AccessType.
-func (s *CreateOutputPortRequest) SetAccessType(val OutputPortAccessType) {
-	s.AccessType = val
+// SetAccessTypeID sets the value of AccessTypeID.
+func (s *CreateOutputPortRequest) SetAccessTypeID(val uuid.UUID) {
+	s.AccessTypeID = val
 }
 
 // SetDataProductAccessDurationType sets the value of DataProductAccessDurationType.
@@ -4067,6 +4076,7 @@ const (
 	EventEntityTypeOutputPort     EventEntityType = "output_port"
 	EventEntityTypeTechnicalAsset EventEntityType = "technical_asset"
 	EventEntityTypeUser           EventEntityType = "user"
+	EventEntityTypeExploration    EventEntityType = "exploration"
 )
 
 // AllValues returns all EventEntityType values.
@@ -4076,6 +4086,7 @@ func (EventEntityType) AllValues() []EventEntityType {
 		EventEntityTypeOutputPort,
 		EventEntityTypeTechnicalAsset,
 		EventEntityTypeUser,
+		EventEntityTypeExploration,
 	}
 }
 
@@ -4089,6 +4100,8 @@ func (s EventEntityType) MarshalText() ([]byte, error) {
 	case EventEntityTypeTechnicalAsset:
 		return []byte(s), nil
 	case EventEntityTypeUser:
+		return []byte(s), nil
+	case EventEntityTypeExploration:
 		return []byte(s), nil
 	default:
 		return nil, errors.Errorf("invalid value: %q", s)
@@ -4109,6 +4122,9 @@ func (s *EventEntityType) UnmarshalText(data []byte) error {
 		return nil
 	case EventEntityTypeUser:
 		*s = EventEntityTypeUser
+		return nil
+	case EventEntityTypeExploration:
+		*s = EventEntityTypeExploration
 		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)
@@ -4896,6 +4912,7 @@ type GetEventHistoryResponseItem struct {
 	User                     OptNilUser            `json:"user"`
 	OutputPort               OptNilOutputPort      `json:"output_port"`
 	TechnicalAsset           OptNilTechnicalAsset  `json:"technical_asset"`
+	Exploration              OptNilExploration     `json:"exploration"`
 }
 
 // GetID returns the value of ID.
@@ -4973,6 +4990,11 @@ func (s *GetEventHistoryResponseItem) GetTechnicalAsset() OptNilTechnicalAsset {
 	return s.TechnicalAsset
 }
 
+// GetExploration returns the value of Exploration.
+func (s *GetEventHistoryResponseItem) GetExploration() OptNilExploration {
+	return s.Exploration
+}
+
 // SetID sets the value of ID.
 func (s *GetEventHistoryResponseItem) SetID(val uuid.UUID) {
 	s.ID = val
@@ -5046,6 +5068,11 @@ func (s *GetEventHistoryResponseItem) SetOutputPort(val OptNilOutputPort) {
 // SetTechnicalAsset sets the value of TechnicalAsset.
 func (s *GetEventHistoryResponseItem) SetTechnicalAsset(val OptNilTechnicalAsset) {
 	s.TechnicalAsset = val
+}
+
+// SetExploration sets the value of Exploration.
+func (s *GetEventHistoryResponseItem) SetExploration(val OptNilExploration) {
+	s.Exploration = val
 }
 
 // Ref: #/components/schemas/GetExplorationInputPortsResponse
@@ -5741,6 +5768,10 @@ func (s *GetTechnicalAssetsResponseItemConfigurationAdditional) init() GetTechni
 	return m
 }
 
+type GetUserGroupsNotFoundApplicationJSON jx.Raw
+
+func (*GetUserGroupsNotFoundApplicationJSON) getUserGroupsRes() {}
+
 // Ref: #/components/schemas/GetUserNotificationsResponse
 type GetUserNotificationsResponse struct {
 	Notifications []GetUserNotificationsResponseItem `json:"notifications"`
@@ -5928,29 +5959,70 @@ func (s *GlobalRoleAssignmentResponse) SetDecidedBy(val NilUser) {
 
 func (*GlobalRoleAssignmentResponse) decideGlobalRoleAssignmentRes() {}
 
+type GrantOutputPortAccessOKApplicationJSON jx.Raw
+
+func (*GrantOutputPortAccessOKApplicationJSON) grantOutputPortAccessRes() {}
+
+// Ref: #/components/schemas/GrantOutputPortAccessRequest
+type GrantOutputPortAccessRequest struct {
+	ConsumingAbstractDataProductID uuid.UUID  `json:"consuming_abstract_data_product_id"`
+	Justification                  string     `json:"justification"`
+	AccessModeID                   OptNilUUID `json:"access_mode_id"`
+}
+
+// GetConsumingAbstractDataProductID returns the value of ConsumingAbstractDataProductID.
+func (s *GrantOutputPortAccessRequest) GetConsumingAbstractDataProductID() uuid.UUID {
+	return s.ConsumingAbstractDataProductID
+}
+
+// GetJustification returns the value of Justification.
+func (s *GrantOutputPortAccessRequest) GetJustification() string {
+	return s.Justification
+}
+
+// GetAccessModeID returns the value of AccessModeID.
+func (s *GrantOutputPortAccessRequest) GetAccessModeID() OptNilUUID {
+	return s.AccessModeID
+}
+
+// SetConsumingAbstractDataProductID sets the value of ConsumingAbstractDataProductID.
+func (s *GrantOutputPortAccessRequest) SetConsumingAbstractDataProductID(val uuid.UUID) {
+	s.ConsumingAbstractDataProductID = val
+}
+
+// SetJustification sets the value of Justification.
+func (s *GrantOutputPortAccessRequest) SetJustification(val string) {
+	s.Justification = val
+}
+
+// SetAccessModeID sets the value of AccessModeID.
+func (s *GrantOutputPortAccessRequest) SetAccessModeID(val OptNilUUID) {
+	s.AccessModeID = val
+}
+
 // Ref: #/components/schemas/GroupCreate
 type GroupCreate struct {
-	ExternalID  string `json:"external_id"`
-	DisplayName string `json:"display_name"`
+	ExternalID  NonEmptyStr `json:"external_id"`
+	DisplayName NonEmptyStr `json:"display_name"`
 }
 
 // GetExternalID returns the value of ExternalID.
-func (s *GroupCreate) GetExternalID() string {
+func (s *GroupCreate) GetExternalID() NonEmptyStr {
 	return s.ExternalID
 }
 
 // GetDisplayName returns the value of DisplayName.
-func (s *GroupCreate) GetDisplayName() string {
+func (s *GroupCreate) GetDisplayName() NonEmptyStr {
 	return s.DisplayName
 }
 
 // SetExternalID sets the value of ExternalID.
-func (s *GroupCreate) SetExternalID(val string) {
+func (s *GroupCreate) SetExternalID(val NonEmptyStr) {
 	s.ExternalID = val
 }
 
 // SetDisplayName sets the value of DisplayName.
-func (s *GroupCreate) SetDisplayName(val string) {
+func (s *GroupCreate) SetDisplayName(val NonEmptyStr) {
 	s.DisplayName = val
 }
 
@@ -6148,16 +6220,16 @@ func (*GroupMembershipsGetResponse) getGroupMembersRes() {}
 
 // Ref: #/components/schemas/GroupUpdate
 type GroupUpdate struct {
-	DisplayName string `json:"display_name"`
+	DisplayName NonEmptyStr `json:"display_name"`
 }
 
 // GetDisplayName returns the value of DisplayName.
-func (s *GroupUpdate) GetDisplayName() string {
+func (s *GroupUpdate) GetDisplayName() NonEmptyStr {
 	return s.DisplayName
 }
 
 // SetDisplayName sets the value of DisplayName.
-func (s *GroupUpdate) SetDisplayName(val string) {
+func (s *GroupUpdate) SetDisplayName(val NonEmptyStr) {
 	s.DisplayName = val
 }
 
@@ -6193,7 +6265,9 @@ func (s *GroupsGetResponse) SetGroups(val []GroupGet) {
 	s.Groups = val
 }
 
-func (*GroupsGetResponse) getGroupsRes() {}
+func (*GroupsGetResponse) getCurrentUserGroupsRes() {}
+func (*GroupsGetResponse) getGroupsRes()            {}
+func (*GroupsGetResponse) getUserGroupsRes()        {}
 
 type HTTPBasic struct {
 	Username string
@@ -6266,6 +6340,7 @@ func (*HTTPValidationError) createDomainRes()                             {}
 func (*HTTPValidationError) createExplorationRes()                        {}
 func (*HTTPValidationError) createGroupRes()                              {}
 func (*HTTPValidationError) createMachineUserRes()                        {}
+func (*HTTPValidationError) createOutputPortAccessTypeRes()               {}
 func (*HTTPValidationError) createOutputPortRes()                         {}
 func (*HTTPValidationError) createOutputPortRoleAssignmentRes()           {}
 func (*HTTPValidationError) createRoleRes()                               {}
@@ -6289,6 +6364,7 @@ func (*HTTPValidationError) getAccessModesRes()                           {}
 func (*HTTPValidationError) getAllAccessDurationsRes()                    {}
 func (*HTTPValidationError) getAllPlatformServiceConfigurationsRes()      {}
 func (*HTTPValidationError) getAllPlatformsRes()                          {}
+func (*HTTPValidationError) getCurrentUserGroupsRes()                     {}
 func (*HTTPValidationError) getCurrentUserRes()                           {}
 func (*HTTPValidationError) getDataProductEventHistoryRes()               {}
 func (*HTTPValidationError) getDataProductInputPortsRes()                 {}
@@ -6320,6 +6396,7 @@ func (*HTTPValidationError) getLatestDataQualitySummaryForOutputPortRes() {}
 func (*HTTPValidationError) getMachineUserRes()                           {}
 func (*HTTPValidationError) getMachineUsersRes()                          {}
 func (*HTTPValidationError) getOutputPortAccessDurationsRes()             {}
+func (*HTTPValidationError) getOutputPortAccessTypesRes()                 {}
 func (*HTTPValidationError) getOutputPortCuratedQueriesRes()              {}
 func (*HTTPValidationError) getOutputPortQueryStatsRes()                  {}
 func (*HTTPValidationError) getOutputPortRes()                            {}
@@ -6337,8 +6414,10 @@ func (*HTTPValidationError) getTagsRes()                                  {}
 func (*HTTPValidationError) getTechnicalAssetEventHistoryRes()            {}
 func (*HTTPValidationError) getTechnicalAssetRes()                        {}
 func (*HTTPValidationError) getThemeSettingsRes()                         {}
+func (*HTTPValidationError) getUserGroupsRes()                            {}
 func (*HTTPValidationError) getUserNotificationsRes()                     {}
 func (*HTTPValidationError) getUsersRes()                                 {}
+func (*HTTPValidationError) grantOutputPortAccessRes()                    {}
 func (*HTTPValidationError) ingestOutputPortContractRes()                 {}
 func (*HTTPValidationError) ingestOutputPortContractYamlRes()             {}
 func (*HTTPValidationError) isAdminRes()                                  {}
@@ -6364,6 +6443,7 @@ func (*HTTPValidationError) removeExplorationRes()                        {}
 func (*HTTPValidationError) removeGroupMembersRes()                       {}
 func (*HTTPValidationError) removeInputPortForDataProductRes()            {}
 func (*HTTPValidationError) removeInputPortForExplorationRes()            {}
+func (*HTTPValidationError) removeOutputPortAccessTypeRes()               {}
 func (*HTTPValidationError) removeOutputPortAsInputPortRes()              {}
 func (*HTTPValidationError) removeOutputPortRes()                         {}
 func (*HTTPValidationError) removeRoleRes()                               {}
@@ -6404,6 +6484,7 @@ func (*HTTPValidationError) updateEnvironmentIsGlobalRes()                {}
 func (*HTTPValidationError) updateGroupRes()                              {}
 func (*HTTPValidationError) updateMachineUserRes()                        {}
 func (*HTTPValidationError) updateOutputPortAboutRes()                    {}
+func (*HTTPValidationError) updateOutputPortAccessTypeRes()               {}
 func (*HTTPValidationError) updateOutputPortQueryStatsRes()               {}
 func (*HTTPValidationError) updateOutputPortRes()                         {}
 func (*HTTPValidationError) updateOutputPortStatusRes()                   {}
@@ -6808,6 +6889,10 @@ func (s *IsAdminResponse) SetTime(val OptNilString) {
 
 func (*IsAdminResponse) isAdminRes() {}
 
+type LinkOutputPortToTechnicalAssetConflictApplicationJSON jx.Raw
+
+func (*LinkOutputPortToTechnicalAssetConflictApplicationJSON) linkOutputPortToTechnicalAssetRes() {}
+
 type LinkOutputPortToTechnicalAssetNotFoundApplicationJSON jx.Raw
 
 func (*LinkOutputPortToTechnicalAssetNotFoundApplicationJSON) linkOutputPortToTechnicalAssetRes() {}
@@ -6897,27 +6982,27 @@ func (*ListOutputPortRoleAssignmentsResponse) listOutputPortRoleAssignmentsRes()
 
 // Ref: #/components/schemas/MachineUserCreate
 type MachineUserCreate struct {
-	ExternalID  string `json:"external_id"`
-	DisplayName string `json:"display_name"`
+	ExternalID  NonEmptyStr `json:"external_id"`
+	DisplayName NonEmptyStr `json:"display_name"`
 }
 
 // GetExternalID returns the value of ExternalID.
-func (s *MachineUserCreate) GetExternalID() string {
+func (s *MachineUserCreate) GetExternalID() NonEmptyStr {
 	return s.ExternalID
 }
 
 // GetDisplayName returns the value of DisplayName.
-func (s *MachineUserCreate) GetDisplayName() string {
+func (s *MachineUserCreate) GetDisplayName() NonEmptyStr {
 	return s.DisplayName
 }
 
 // SetExternalID sets the value of ExternalID.
-func (s *MachineUserCreate) SetExternalID(val string) {
+func (s *MachineUserCreate) SetExternalID(val NonEmptyStr) {
 	s.ExternalID = val
 }
 
 // SetDisplayName sets the value of DisplayName.
-func (s *MachineUserCreate) SetDisplayName(val string) {
+func (s *MachineUserCreate) SetDisplayName(val NonEmptyStr) {
 	s.DisplayName = val
 }
 
@@ -6979,16 +7064,16 @@ func (*MachineUserGet) getMachineUserRes() {}
 
 // Ref: #/components/schemas/MachineUserUpdate
 type MachineUserUpdate struct {
-	DisplayName string `json:"display_name"`
+	DisplayName NonEmptyStr `json:"display_name"`
 }
 
 // GetDisplayName returns the value of DisplayName.
-func (s *MachineUserUpdate) GetDisplayName() string {
+func (s *MachineUserUpdate) GetDisplayName() NonEmptyStr {
 	return s.DisplayName
 }
 
 // SetDisplayName sets the value of DisplayName.
-func (s *MachineUserUpdate) SetDisplayName(val string) {
+func (s *MachineUserUpdate) SetDisplayName(val NonEmptyStr) {
 	s.DisplayName = val
 }
 
@@ -7427,6 +7512,8 @@ func (o NilUser) Or(d User) User {
 	}
 	return d
 }
+
+type NonEmptyStr string
 
 // OIDC token endpoint response.
 // Ref: #/components/schemas/OIDCTokenResponse
@@ -8258,6 +8345,74 @@ func (o OptNilEventEntityType) Get() (v EventEntityType, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptNilEventEntityType) Or(d EventEntityType) EventEntityType {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptNilExploration returns new OptNilExploration with value set to v.
+func NewOptNilExploration(v Exploration) OptNilExploration {
+	return OptNilExploration{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptNilExploration is optional nullable Exploration.
+type OptNilExploration struct {
+	Value Exploration
+	Set   bool
+	Null  bool
+}
+
+// IsSet returns true if OptNilExploration was set.
+func (o OptNilExploration) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptNilExploration) Reset() {
+	var v Exploration
+	o.Value = v
+	o.Set = false
+	o.Null = false
+}
+
+// SetTo sets value to v.
+func (o *OptNilExploration) SetTo(v Exploration) {
+	o.Set = true
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o OptNilExploration) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *OptNilExploration) SetToNull() {
+	o.Set = true
+	o.Null = true
+	var v Exploration
+	o.Value = v
+}
+
+// IsEmpty returns true if the field was omitted from the payload (not Set and not Null).
+func (o OptNilExploration) IsEmpty() bool {
+	return !o.Set && !o.Null
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptNilExploration) Get() (v Exploration, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptNilExploration) Or(d Exploration) Exploration {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -9906,32 +10061,32 @@ func (s *OutputPortAccessDuration) SetDays(val int) {
 	s.Days = val
 }
 
-// Ref: #/components/schemas/OutputPortAccessType
-type OutputPortAccessType string
+// Ref: #/components/schemas/OutputPortAccessFunction
+type OutputPortAccessFunction string
 
 const (
-	OutputPortAccessTypeRestricted   OutputPortAccessType = "restricted"
-	OutputPortAccessTypePrivate      OutputPortAccessType = "private"
-	OutputPortAccessTypeUnrestricted OutputPortAccessType = "unrestricted"
+	OutputPortAccessFunctionRestricted   OutputPortAccessFunction = "restricted"
+	OutputPortAccessFunctionPrivate      OutputPortAccessFunction = "private"
+	OutputPortAccessFunctionUnrestricted OutputPortAccessFunction = "unrestricted"
 )
 
-// AllValues returns all OutputPortAccessType values.
-func (OutputPortAccessType) AllValues() []OutputPortAccessType {
-	return []OutputPortAccessType{
-		OutputPortAccessTypeRestricted,
-		OutputPortAccessTypePrivate,
-		OutputPortAccessTypeUnrestricted,
+// AllValues returns all OutputPortAccessFunction values.
+func (OutputPortAccessFunction) AllValues() []OutputPortAccessFunction {
+	return []OutputPortAccessFunction{
+		OutputPortAccessFunctionRestricted,
+		OutputPortAccessFunctionPrivate,
+		OutputPortAccessFunctionUnrestricted,
 	}
 }
 
 // MarshalText implements encoding.TextMarshaler.
-func (s OutputPortAccessType) MarshalText() ([]byte, error) {
+func (s OutputPortAccessFunction) MarshalText() ([]byte, error) {
 	switch s {
-	case OutputPortAccessTypeRestricted:
+	case OutputPortAccessFunctionRestricted:
 		return []byte(s), nil
-	case OutputPortAccessTypePrivate:
+	case OutputPortAccessFunctionPrivate:
 		return []byte(s), nil
-	case OutputPortAccessTypeUnrestricted:
+	case OutputPortAccessFunctionUnrestricted:
 		return []byte(s), nil
 	default:
 		return nil, errors.Errorf("invalid value: %q", s)
@@ -9939,20 +10094,207 @@ func (s OutputPortAccessType) MarshalText() ([]byte, error) {
 }
 
 // UnmarshalText implements encoding.TextUnmarshaler.
-func (s *OutputPortAccessType) UnmarshalText(data []byte) error {
-	switch OutputPortAccessType(data) {
-	case OutputPortAccessTypeRestricted:
-		*s = OutputPortAccessTypeRestricted
+func (s *OutputPortAccessFunction) UnmarshalText(data []byte) error {
+	switch OutputPortAccessFunction(data) {
+	case OutputPortAccessFunctionRestricted:
+		*s = OutputPortAccessFunctionRestricted
 		return nil
-	case OutputPortAccessTypePrivate:
-		*s = OutputPortAccessTypePrivate
+	case OutputPortAccessFunctionPrivate:
+		*s = OutputPortAccessFunctionPrivate
 		return nil
-	case OutputPortAccessTypeUnrestricted:
-		*s = OutputPortAccessTypeUnrestricted
+	case OutputPortAccessFunctionUnrestricted:
+		*s = OutputPortAccessFunctionUnrestricted
 		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)
 	}
+}
+
+// Ref: #/components/schemas/OutputPortAccessType
+type OutputPortAccessType struct {
+	ID             uuid.UUID                `json:"id"`
+	Name           string                   `json:"name"`
+	AccessFunction OutputPortAccessFunction `json:"access_function"`
+}
+
+// GetID returns the value of ID.
+func (s *OutputPortAccessType) GetID() uuid.UUID {
+	return s.ID
+}
+
+// GetName returns the value of Name.
+func (s *OutputPortAccessType) GetName() string {
+	return s.Name
+}
+
+// GetAccessFunction returns the value of AccessFunction.
+func (s *OutputPortAccessType) GetAccessFunction() OutputPortAccessFunction {
+	return s.AccessFunction
+}
+
+// SetID sets the value of ID.
+func (s *OutputPortAccessType) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+// SetName sets the value of Name.
+func (s *OutputPortAccessType) SetName(val string) {
+	s.Name = val
+}
+
+// SetAccessFunction sets the value of AccessFunction.
+func (s *OutputPortAccessType) SetAccessFunction(val OutputPortAccessFunction) {
+	s.AccessFunction = val
+}
+
+// Ref: #/components/schemas/OutputPortAccessTypeCreate
+type OutputPortAccessTypeCreate struct {
+	Name           NonEmptyStr              `json:"name"`
+	Description    OptString                `json:"description"`
+	AccessFunction OutputPortAccessFunction `json:"access_function"`
+}
+
+// GetName returns the value of Name.
+func (s *OutputPortAccessTypeCreate) GetName() NonEmptyStr {
+	return s.Name
+}
+
+// GetDescription returns the value of Description.
+func (s *OutputPortAccessTypeCreate) GetDescription() OptString {
+	return s.Description
+}
+
+// GetAccessFunction returns the value of AccessFunction.
+func (s *OutputPortAccessTypeCreate) GetAccessFunction() OutputPortAccessFunction {
+	return s.AccessFunction
+}
+
+// SetName sets the value of Name.
+func (s *OutputPortAccessTypeCreate) SetName(val NonEmptyStr) {
+	s.Name = val
+}
+
+// SetDescription sets the value of Description.
+func (s *OutputPortAccessTypeCreate) SetDescription(val OptString) {
+	s.Description = val
+}
+
+// SetAccessFunction sets the value of AccessFunction.
+func (s *OutputPortAccessTypeCreate) SetAccessFunction(val OutputPortAccessFunction) {
+	s.AccessFunction = val
+}
+
+// Ref: #/components/schemas/OutputPortAccessTypeUpdate
+type OutputPortAccessTypeUpdate struct {
+	Name           NonEmptyStr              `json:"name"`
+	Description    OptString                `json:"description"`
+	AccessFunction OutputPortAccessFunction `json:"access_function"`
+}
+
+// GetName returns the value of Name.
+func (s *OutputPortAccessTypeUpdate) GetName() NonEmptyStr {
+	return s.Name
+}
+
+// GetDescription returns the value of Description.
+func (s *OutputPortAccessTypeUpdate) GetDescription() OptString {
+	return s.Description
+}
+
+// GetAccessFunction returns the value of AccessFunction.
+func (s *OutputPortAccessTypeUpdate) GetAccessFunction() OutputPortAccessFunction {
+	return s.AccessFunction
+}
+
+// SetName sets the value of Name.
+func (s *OutputPortAccessTypeUpdate) SetName(val NonEmptyStr) {
+	s.Name = val
+}
+
+// SetDescription sets the value of Description.
+func (s *OutputPortAccessTypeUpdate) SetDescription(val OptString) {
+	s.Description = val
+}
+
+// SetAccessFunction sets the value of AccessFunction.
+func (s *OutputPortAccessTypeUpdate) SetAccessFunction(val OutputPortAccessFunction) {
+	s.AccessFunction = val
+}
+
+// Ref: #/components/schemas/OutputPortAccessTypesGet
+type OutputPortAccessTypesGet struct {
+	OutputPortAccessTypes []OutputPortAccessTypesGetItem `json:"output_port_access_types"`
+}
+
+// GetOutputPortAccessTypes returns the value of OutputPortAccessTypes.
+func (s *OutputPortAccessTypesGet) GetOutputPortAccessTypes() []OutputPortAccessTypesGetItem {
+	return s.OutputPortAccessTypes
+}
+
+// SetOutputPortAccessTypes sets the value of OutputPortAccessTypes.
+func (s *OutputPortAccessTypesGet) SetOutputPortAccessTypes(val []OutputPortAccessTypesGetItem) {
+	s.OutputPortAccessTypes = val
+}
+
+func (*OutputPortAccessTypesGet) getOutputPortAccessTypesRes() {}
+
+// Ref: #/components/schemas/OutputPortAccessTypesGetItem
+type OutputPortAccessTypesGetItem struct {
+	ID              uuid.UUID                `json:"id"`
+	Name            string                   `json:"name"`
+	AccessFunction  OutputPortAccessFunction `json:"access_function"`
+	Description     string                   `json:"description"`
+	OutputPortCount OptNilInt                `json:"output_port_count"`
+}
+
+// GetID returns the value of ID.
+func (s *OutputPortAccessTypesGetItem) GetID() uuid.UUID {
+	return s.ID
+}
+
+// GetName returns the value of Name.
+func (s *OutputPortAccessTypesGetItem) GetName() string {
+	return s.Name
+}
+
+// GetAccessFunction returns the value of AccessFunction.
+func (s *OutputPortAccessTypesGetItem) GetAccessFunction() OutputPortAccessFunction {
+	return s.AccessFunction
+}
+
+// GetDescription returns the value of Description.
+func (s *OutputPortAccessTypesGetItem) GetDescription() string {
+	return s.Description
+}
+
+// GetOutputPortCount returns the value of OutputPortCount.
+func (s *OutputPortAccessTypesGetItem) GetOutputPortCount() OptNilInt {
+	return s.OutputPortCount
+}
+
+// SetID sets the value of ID.
+func (s *OutputPortAccessTypesGetItem) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+// SetName sets the value of Name.
+func (s *OutputPortAccessTypesGetItem) SetName(val string) {
+	s.Name = val
+}
+
+// SetAccessFunction sets the value of AccessFunction.
+func (s *OutputPortAccessTypesGetItem) SetAccessFunction(val OutputPortAccessFunction) {
+	s.AccessFunction = val
+}
+
+// SetDescription sets the value of Description.
+func (s *OutputPortAccessTypesGetItem) SetDescription(val string) {
+	s.Description = val
+}
+
+// SetOutputPortCount sets the value of OutputPortCount.
+func (s *OutputPortAccessTypesGetItem) SetOutputPortCount(val OptNilInt) {
+	s.OutputPortCount = val
 }
 
 // Ref: #/components/schemas/OutputPortCuratedQueries
@@ -10814,15 +11156,15 @@ func (s *OutputPortStatusUpdate) SetStatus(val OutputPortStatus) {
 
 // Ref: #/components/schemas/OutputPortUpdate
 type OutputPortUpdate struct {
-	Name                          string               `json:"name"`
-	Namespace                     string               `json:"namespace"`
-	Description                   string               `json:"description"`
-	AccessType                    OutputPortAccessType `json:"access_type"`
-	DataProductAccessDurationType AccessDurationType   `json:"data_product_access_duration_type"`
-	ExplorationAccessDurationType AccessDurationType   `json:"exploration_access_duration_type"`
-	About                         OptNilString         `json:"about"`
-	LifecycleID                   OptNilUUID           `json:"lifecycle_id"`
-	TagIds                        []uuid.UUID          `json:"tag_ids"`
+	Name                          string             `json:"name"`
+	Namespace                     string             `json:"namespace"`
+	Description                   string             `json:"description"`
+	AccessTypeID                  uuid.UUID          `json:"access_type_id"`
+	DataProductAccessDurationType AccessDurationType `json:"data_product_access_duration_type"`
+	ExplorationAccessDurationType AccessDurationType `json:"exploration_access_duration_type"`
+	About                         OptNilString       `json:"about"`
+	LifecycleID                   OptNilUUID         `json:"lifecycle_id"`
+	TagIds                        []uuid.UUID        `json:"tag_ids"`
 }
 
 // GetName returns the value of Name.
@@ -10840,9 +11182,9 @@ func (s *OutputPortUpdate) GetDescription() string {
 	return s.Description
 }
 
-// GetAccessType returns the value of AccessType.
-func (s *OutputPortUpdate) GetAccessType() OutputPortAccessType {
-	return s.AccessType
+// GetAccessTypeID returns the value of AccessTypeID.
+func (s *OutputPortUpdate) GetAccessTypeID() uuid.UUID {
+	return s.AccessTypeID
 }
 
 // GetDataProductAccessDurationType returns the value of DataProductAccessDurationType.
@@ -10885,9 +11227,9 @@ func (s *OutputPortUpdate) SetDescription(val string) {
 	s.Description = val
 }
 
-// SetAccessType sets the value of AccessType.
-func (s *OutputPortUpdate) SetAccessType(val OutputPortAccessType) {
-	s.AccessType = val
+// SetAccessTypeID sets the value of AccessTypeID.
+func (s *OutputPortUpdate) SetAccessTypeID(val uuid.UUID) {
+	s.AccessTypeID = val
 }
 
 // SetDataProductAccessDurationType sets the value of DataProductAccessDurationType.
@@ -11332,6 +11674,10 @@ func (*RemoveInputPortForDataProductOKApplicationJSON) removeInputPortForDataPro
 type RemoveInputPortForExplorationOKApplicationJSON jx.Raw
 
 func (*RemoveInputPortForExplorationOKApplicationJSON) removeInputPortForExplorationRes() {}
+
+type RemoveOutputPortAccessTypeOKApplicationJSON jx.Raw
+
+func (*RemoveOutputPortAccessTypeOKApplicationJSON) removeOutputPortAccessTypeRes() {}
 
 type RemoveOutputPortAsInputPortOKApplicationJSON jx.Raw
 
@@ -13642,6 +13988,7 @@ type UIElementMetadataResponse struct {
 	ParentPlatform  OptNilString        `json:"parent_platform"`
 	PlatformTile    OptNilPlatformTile  `json:"platform_tile"`
 	ShowInForm      OptBool             `json:"show_in_form"`
+	Shareable       OptBool             `json:"shareable"`
 	DetailedName    string              `json:"detailed_name"`
 }
 
@@ -13708,6 +14055,11 @@ func (s *UIElementMetadataResponse) GetPlatformTile() OptNilPlatformTile {
 // GetShowInForm returns the value of ShowInForm.
 func (s *UIElementMetadataResponse) GetShowInForm() OptBool {
 	return s.ShowInForm
+}
+
+// GetShareable returns the value of Shareable.
+func (s *UIElementMetadataResponse) GetShareable() OptBool {
+	return s.Shareable
 }
 
 // GetDetailedName returns the value of DetailedName.
@@ -13778,6 +14130,11 @@ func (s *UIElementMetadataResponse) SetPlatformTile(val OptNilPlatformTile) {
 // SetShowInForm sets the value of ShowInForm.
 func (s *UIElementMetadataResponse) SetShowInForm(val OptBool) {
 	s.ShowInForm = val
+}
+
+// SetShareable sets the value of Shareable.
+func (s *UIElementMetadataResponse) SetShareable(val OptBool) {
+	s.Shareable = val
 }
 
 // SetDetailedName sets the value of DetailedName.
@@ -14108,6 +14465,23 @@ func (*UpdateOutputPortAboutNotFoundApplicationJSON) updateOutputPortAboutRes() 
 type UpdateOutputPortAboutOKApplicationJSON jx.Raw
 
 func (*UpdateOutputPortAboutOKApplicationJSON) updateOutputPortAboutRes() {}
+
+// Ref: #/components/schemas/UpdateOutputPortAccessTypeResponse
+type UpdateOutputPortAccessTypeResponse struct {
+	ID uuid.UUID `json:"id"`
+}
+
+// GetID returns the value of ID.
+func (s *UpdateOutputPortAccessTypeResponse) GetID() uuid.UUID {
+	return s.ID
+}
+
+// SetID sets the value of ID.
+func (s *UpdateOutputPortAccessTypeResponse) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+func (*UpdateOutputPortAccessTypeResponse) updateOutputPortAccessTypeRes() {}
 
 type UpdateOutputPortNotFoundApplicationJSON jx.Raw
 

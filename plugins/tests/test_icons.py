@@ -14,6 +14,7 @@ def test_discovered__finds_every_first_party_plugin():
         "GitHubPlugin",
         "GlueTechnicalAssetConfiguration",
         "OSISemanticModelTechnicalAssetConfiguration",
+        "ParameterStoreTechnicalAssetConfiguration",
         "PostgreSQLTechnicalAssetConfiguration",
         "RedshiftTechnicalAssetConfiguration",
         "S3TechnicalAssetConfiguration",

@@ -1,9 +1,10 @@
 import { HolderOutlined } from '@ant-design/icons';
-import { Badge, Button, Card, Collapse, Flex, List, Popconfirm, Tooltip, Typography } from 'antd';
+import { Badge, Button, Card, Collapse, Flex, List, Popconfirm, Tooltip, Typography, theme } from 'antd';
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
+import { NotShareableTag } from '@/components/technical-assets/not-shareable-tag/not-shareable-tag.component.tsx';
 import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
 import {
     type GetTechnicalAssetsResponseItem,
@@ -16,7 +17,7 @@ import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import { createDataOutputIdPath } from '@/types/navigation';
 import { dispatchMessage } from '@/utils/feedback.ts';
 import { getDecisionStatusBadgeStatus } from '@/utils/status.helper';
-import { getTechnicalAssetIcon } from '@/utils/technical-asset-type.helper.ts';
+import { getTechnicalAssetIcon, isTechnicalAssetShareable } from '@/utils/technical-asset-type.helper.ts';
 import styles from './technical-asset-card.module.scss';
 
 type Props = {
@@ -28,6 +29,7 @@ type Props = {
 
 export function TechnicalAssetCard({ technicalAsset, dataProductId, onDragStart, onDragEnd }: Props) {
     const { t } = useTranslation();
+    const { token } = theme.useToken();
     const { data: { plugins } = {} } = useGetPluginsQuery();
     const { data: deleteAccess } = useCheckAccessQuery({
         resource: dataProductId,
@@ -75,6 +77,10 @@ export function TechnicalAssetCard({ technicalAsset, dataProductId, onDragStart,
     );
 
     const handleDragStart = (event: React.DragEvent) => {
+        if (!canDrag) {
+            event.preventDefault();
+            return;
+        }
         event.dataTransfer.setData(
             'text/plain',
             JSON.stringify({
@@ -101,6 +107,20 @@ export function TechnicalAssetCard({ technicalAsset, dataProductId, onDragStart,
 
     const canRemove = deleteAccess?.allowed ?? false;
     const isActive = technicalAsset.status === TechnicalAssetStatus.Active;
+    const isShareable = isTechnicalAssetShareable(technicalAsset.configuration.name, plugins);
+    const getDragDisabledReason = () => {
+        if (!isShareable) {
+            return t('Technical Assets of this type cannot be linked to an Output Port');
+        }
+        if (!isActive) {
+            return t(
+                'This Technical Asset is in pending state, please consult your platform administrator to activate it',
+            );
+        }
+        return undefined;
+    };
+    const dragDisabledReason = getDragDisabledReason();
+    const canDrag = plugins !== undefined && !dragDisabledReason;
 
     const getDeleteDescription = () => {
         if (technicalAsset.output_port_links && technicalAsset.output_port_links.length > 0) {
@@ -127,25 +147,21 @@ export function TechnicalAssetCard({ technicalAsset, dataProductId, onDragStart,
     return (
         <Card
             className={styles.card}
-            draggable={isActive}
+            draggable={canDrag}
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
             size="small"
         >
             <Flex gap="medium">
-                {isActive ? (
-                    <HolderOutlined />
-                ) : (
-                    <Tooltip
-                        title={t(
-                            'This Technical Asset is in pending state, please consult your platform administrator to activate it',
-                        )}
-                    >
-                        <HolderOutlined style={{ cursor: 'not-allowed', opacity: 0.5 }} />
-                    </Tooltip>
-                )}
+                <Tooltip title={dragDisabledReason}>
+                    <HolderOutlined
+                        style={
+                            dragDisabledReason ? { cursor: 'not-allowed', color: token.colorTextDisabled } : undefined
+                        }
+                    />
+                </Tooltip>
                 <Flex vertical flex={1} gap="medium">
-                    <Flex justify="space-between" align="flex-start">
+                    <Flex justify="space-between" align="center">
                         <Flex gap="medium" align="center">
                             <CustomSvgIconLoader
                                 iconComponent={getTechnicalAssetIcon(technicalAsset.configuration.name, plugins)}
@@ -164,6 +180,7 @@ export function TechnicalAssetCard({ technicalAsset, dataProductId, onDragStart,
                                     </Typography.Text>
                                 </Link>
                             </Flex>
+                            {!isShareable && <NotShareableTag />}
                         </Flex>
                         <Popconfirm
                             title={t('Remove Technical Asset')}

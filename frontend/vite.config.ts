@@ -11,6 +11,7 @@ export default defineConfig({
     test: {
         globals: true,
         environment: 'jsdom',
+        environmentOptions: { jsdom: { url: 'http://localhost:8080' } },
         setupFiles: ['./src/tests/setup.ts'],
         testTimeout: 10000,
     },

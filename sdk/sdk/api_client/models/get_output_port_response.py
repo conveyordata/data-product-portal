@@ -8,13 +8,13 @@ from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..models.access_duration_type import AccessDurationType
-from ..models.output_port_access_type import OutputPortAccessType
 from ..models.output_port_status import OutputPortStatus
 
 if TYPE_CHECKING:
     from ..models.access_mode import AccessMode
     from ..models.data_product_life_cycle import DataProductLifeCycle
     from ..models.domain import Domain
+    from ..models.output_port_access_type import OutputPortAccessType
     from ..models.output_port_setting_value import OutputPortSettingValue
     from ..models.tag import Tag
     from ..models.technical_asset_link import TechnicalAssetLink
@@ -83,7 +83,7 @@ class GetOutputPortResponse:
         usage: None | str
         usage = self.usage
 
-        access_type = self.access_type.value
+        access_type = self.access_type.to_dict()
 
         data_product_access_duration_type = self.data_product_access_duration_type.value
 
@@ -159,6 +159,7 @@ class GetOutputPortResponse:
         from ..models.access_mode import AccessMode
         from ..models.data_product_life_cycle import DataProductLifeCycle
         from ..models.domain import Domain
+        from ..models.output_port_access_type import OutputPortAccessType
         from ..models.output_port_setting_value import OutputPortSettingValue
         from ..models.tag import Tag
         from ..models.technical_asset_link import TechnicalAssetLink
@@ -181,7 +182,7 @@ class GetOutputPortResponse:
 
         usage = _parse_usage(d.pop("usage"))
 
-        access_type = OutputPortAccessType(d.pop("access_type"))
+        access_type = OutputPortAccessType.from_dict(d.pop("access_type"))
 
         data_product_access_duration_type = AccessDurationType(
             d.pop("data_product_access_duration_type")

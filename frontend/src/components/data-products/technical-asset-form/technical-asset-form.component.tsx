@@ -1,4 +1,4 @@
-import { Form, type FormInstance, type FormProps, Input, Radio, Select, Space } from 'antd';
+import { Alert, Form, type FormInstance, type FormProps, Input, Radio, Select, Space } from 'antd';
 import { type RefObject, useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDebouncedCallback } from 'use-debounce';
@@ -369,6 +369,15 @@ export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallback
             </Form.Item>
             {currentDataProduct && pluginMetadata && (
                 <>
+                    {pluginMetadata.shareable === false && (
+                        <Form.Item>
+                            <Alert
+                                type="warning"
+                                showIcon
+                                title={t('Technical Assets of this type cannot be linked to an Output Port')}
+                            />
+                        </Form.Item>
+                    )}
                     <TechnicalAssetConfigurationForm
                         form={form}
                         uiMetadataGroups={pluginMetadata.ui_metadata}

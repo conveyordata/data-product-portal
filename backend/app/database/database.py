@@ -15,6 +15,11 @@ from app.shared.schema import ORMModel
 
 OM = TypeVar("OM", bound=ORMModel)
 
+UNFILTERED = {
+    "skip_output_port_access_function_filter": True,
+    "skip_data_product_visibility_filter": True,
+}
+
 
 def ensure_exists(
     id_: UUID, db: Session, type_: Type[OM] | Mapper[Type[OM]], **kwargs

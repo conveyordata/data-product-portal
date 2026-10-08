@@ -38,7 +38,7 @@ beforeAll(() => {
     window.getComputedStyle = (elt) => getComputedStyle(elt);
 });
 
-beforeAll(() => server.listen({ onUnhandledRequest: 'warn' }));
+beforeAll(() => server.listen({ onUnhandledFrame: 'warn' }));
 afterEach(() => {
     server.resetHandlers();
     cleanup();

@@ -3,7 +3,12 @@ import type { ReactElement, ReactNode } from 'react';
 import { Trans } from 'react-i18next';
 import { EventEntityType, type GetEventHistoryResponseItem } from '@/store/api/services/generated/dataProductsApi.ts';
 import { EventType } from '@/types/events/event-types';
-import { createDataOutputIdPath, createDataProductIdPath, createMarketplaceOutputPortPath } from '@/types/navigation';
+import {
+    createDataOutputIdPath,
+    createDataProductIdPath,
+    createExplorationIdPath,
+    createMarketplaceOutputPortPath,
+} from '@/types/navigation';
 
 export function getTypeDisplayName(t: TFunction, type: EventEntityType | undefined | null): string {
     switch (type) {
@@ -15,6 +20,8 @@ export function getTypeDisplayName(t: TFunction, type: EventEntityType | undefin
             return t('Technical Asset');
         case EventEntityType.User:
             return t('User');
+        case EventEntityType.Exploration:
+            return t('Exploration');
         default:
             return t('Unknown');
     }
@@ -36,6 +43,8 @@ export function getSubjectDisplayLabel(record: GetEventHistoryResponseItem): str
             return record.technical_asset?.name || '';
         case EventEntityType.OutputPort:
             return record.output_port?.name || '';
+        case EventEntityType.Exploration:
+            return record.exploration?.name || '';
     }
 }
 
@@ -55,6 +64,8 @@ export function getTargetDisplayLabel(record: GetEventHistoryResponseItem): stri
             return record.technical_asset?.name || '';
         case EventEntityType.OutputPort:
             return record.output_port?.name || '';
+        case EventEntityType.Exploration:
+            return record.exploration?.name || '';
         default:
             return '';
     }
@@ -74,6 +85,8 @@ export function getEventReferenceEntityLinkPath(
             return dataProductId ? createDataOutputIdPath(id, dataProductId) : null;
         case EventEntityType.User:
             return null;
+        case EventEntityType.Exploration:
+            return createExplorationIdPath(id);
         default:
             return null;
     }

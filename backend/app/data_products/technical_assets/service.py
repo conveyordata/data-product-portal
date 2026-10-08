@@ -45,6 +45,7 @@ from app.data_products.technical_assets.schema_response import (
 from app.data_products.technical_assets.status import TechnicalAssetStatus
 from app.database.deps import get_db_session
 from app.graph.graph import Graph
+from app.plugins.registry import plugin_registry
 from app.resource_names.service import ResourceNameValidityType
 from app.users.schema import User
 
@@ -62,6 +63,17 @@ TECHNICAL_ASSET_NOT_ACTIVE_ERROR = HTTPException(
     status_code=status.HTTP_400_BAD_REQUEST,
     detail="Cannot link technical asset that is not active",
 )
+
+TECHNICAL_ASSET_NOT_SHAREABLE_ERROR = HTTPException(
+    status_code=status.HTTP_409_CONFLICT,
+    detail="Technical assets of this type are not shareable and cannot be linked to an Output Port",
+)
+
+
+def ensure_technical_asset_shareable(technical_asset: TechnicalAssetModel) -> None:
+    plugin = plugin_registry.get(technical_asset.configuration.configuration_type)
+    if not plugin.get_platform_metadata().shareable:
+        raise TECHNICAL_ASSET_NOT_SHAREABLE_ERROR
 
 
 class TechnicalAssetService:
@@ -272,6 +284,7 @@ class TechnicalAssetService:
         technical_asset = self.get_technical_asset(data_product_id, id)
         if technical_asset.status != TechnicalAssetStatus.ACTIVE:
             raise TECHNICAL_ASSET_NOT_ACTIVE_ERROR
+        ensure_technical_asset_shareable(technical_asset)
 
         if output_port.id in [
             link.output_port_id

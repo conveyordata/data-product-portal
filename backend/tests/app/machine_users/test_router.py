@@ -36,12 +36,12 @@ class TestMachineUsersRouter:
         self,
         client,
     ):
-        first = MachineUserFactory(
-            external_id="deployment-agent-a",
-            display_name="Deployment Agent",
-        )
         second = MachineUserFactory(
             external_id="deployment-agent-b",
+            display_name="Deployment Agent",
+        )
+        first = MachineUserFactory(
+            external_id="deployment-agent-a",
             display_name="Deployment Agent",
         )
         third = MachineUserFactory(

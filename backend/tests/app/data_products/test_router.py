@@ -12,7 +12,7 @@ from app.authorization.roles.schema import Scope
 from app.authorization.service import AuthorizationService
 from app.core.authz import Action
 from app.data_products.model import DataProductVisibility
-from app.data_products.output_ports.enums import OutputPortAccessType
+from app.data_products.output_ports.enums import OutputPortAccessFunction
 from app.resource_names.service import ResourceNameValidityType
 from app.settings import settings
 from tests.factories import (
@@ -86,6 +86,18 @@ class TestDataProductsRouter:
         created_data_product = self.create_data_product(client, payload)
         assert created_data_product.status_code == 200
         assert "id" in created_data_product.json()
+
+    def test_create_data_product__duplicate_name(
+        self, payload, client, user_with_create_data_product_rights
+    ):
+        DataProductFactory(name=payload["name"])
+
+        response = self.create_data_product(client, payload)
+
+        assert response.status_code == 400
+        assert response.json()["detail"] == (
+            "A data product with this name already exists."
+        )
 
     def test_create_data_product_generate_webhook_v2_event(
         self,
@@ -600,7 +612,7 @@ class TestDataProductsRouter:
     def test_get_data_product_graph_data_consumer_private_output_port(self, client):
         input_port = InputPortFactory(
             output_port=OutputPortFactory(
-                access_type=OutputPortAccessType.PRIVATE,
+                access_function=OutputPortAccessFunction.PRIVATE,
             )
         )
         response = client.get(
@@ -653,7 +665,7 @@ class TestDataProductsRouter:
     ):
         data_product = DataProductFactory()
         output_port = OutputPortFactory(
-            access_type=OutputPortAccessType.PRIVATE, data_product=data_product
+            access_function=OutputPortAccessFunction.PRIVATE, data_product=data_product
         )
         response = client.get(f"{ENDPOINT}/{data_product.id}/graph")
         assert response.status_code == 200, response.text
@@ -915,7 +927,7 @@ class TestDataProductsRouter:
         assert response.status_code == 200, f"Response failed with: {response.text}"
         assert len(response.json()["input_ports"]) == 1
 
-    def test_get_data_products_only_assigned_includes_group_assignments(self, client):
+    def test_get_data_products__only_assigned_includes_group_assignments(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         group = GroupFactory()
         GroupMembershipFactory(group=group, member=user)
@@ -946,7 +958,7 @@ class TestDataProductsRouter:
         }
         assert str(not_assigned.id) not in returned_ids
 
-    def test_get_data_products_includes_hidden_assigned_through_group(self, client):
+    def test_get_data__products_includes_hidden_assigned_through_group(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         group = GroupFactory()
         GroupMembershipFactory(group=group, member=user)
@@ -974,7 +986,9 @@ class TestDataProductsRouter:
         assert str(hidden_assigned_through_group.id) in returned_ids
         assert str(hidden_not_assigned.id) not in returned_ids
 
-    def test_get_hidden_data_product_assigned_through_group(self, client, session):
+    def test_get_data_product__returns_hidden_product_assigned_through_group(
+        self, client, session
+    ):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         group = GroupFactory()
         GroupMembershipFactory(group=group, member=user)
@@ -993,7 +1007,9 @@ class TestDataProductsRouter:
         assert response.status_code == 200, response.text
         assert response.json()["id"] == str(data_product.id)
 
-    def test_get_hidden_data_product_rejects_member_of_different_group(self, client):
+    def test_get_data_product__rejects_hidden_product_for_member_of_different_group(
+        self, client
+    ):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         users_group = GroupFactory()
         assigned_group = GroupFactory()
@@ -1009,7 +1025,7 @@ class TestDataProductsRouter:
         response = self.get_data_product(client, data_product.id)
         assert response.status_code == 403
 
-    def test_create_data_product_with_group_owner(
+    def test_create_data_product__accepts_group_owner(
         self,
         payload,
         client,
