@@ -75,7 +75,7 @@ jobs:
           node-version-file: frontend/package.json
       - name: Install frontend dependencies
         working-directory: frontend
-        run: npm ci --prefer-offline --no-audit --progress=false
+        run: npm ci --legacy-peer-deps --prefer-offline --no-audit --progress=false
       - name: Run Cypress end-to-end tests
         working-directory: frontend
         run: npx cypress run --config baseUrl=http://localhost:5050
