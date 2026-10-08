@@ -7,7 +7,6 @@ permissions:
   contents: read
   issues: read
   pull-requests: read
-  copilot-requests: write
 timeout-minutes: 60
 sandbox:
   agent:
@@ -15,6 +14,7 @@ sandbox:
 imports:
   - shared/background-agent.md
 safe-outputs:
+  report-failure-as-issue: false
   create-issue:
     title-prefix: "[bug] "
     labels: [background-agent, agent-bug, bug]

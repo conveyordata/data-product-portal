@@ -7,7 +7,6 @@ permissions:
   contents: read
   issues: read
   pull-requests: read
-  copilot-requests: write
 timeout-minutes: 90
 sandbox:
   agent:
@@ -20,6 +19,7 @@ network:
 tools:
   playwright:
 safe-outputs:
+  report-failure-as-issue: false
   create-issue:
     title-prefix: "[design consistency] "
     labels: [background-agent, agent-design-consistency]
@@ -48,7 +48,7 @@ The target is what the design guide prescribes and most equivalent screens alrea
 
 Start the portal locally with sample data so you can look at it:
 
-1. Backend: from `backend/`, with the values from `backend/.test.env`, `POSTGRES_SERVER=host.docker.internal` and `CORS_ALLOWED_ORIGINS=http://localhost:3000`, run `poetry run python -m app.db_tool init --force sample_data.sql`, then start the API on port 5050 in the background as `backend/README.md` describes.
+1. Backend: from `backend/`, with the values from `backend/.test.env`, `POSTGRES_SERVER=host.docker.internal` and `CORS_ALLOWED_ORIGINS=http://localhost:3000`, run `.venv/bin/python -m app.db_tool init --force sample_data.sql`, then start the API on port 5050 in the background as `backend/README.md` describes.
 2. Frontend: from `frontend/`, copy `config.docker.js` to `config.local.js`, then run `npm run dev` in the background.
 
 If the commands have changed, follow `backend/README.md` and `frontend/package.json` instead. Browse the pages with Playwright on `localhost`.
