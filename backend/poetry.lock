@@ -2563,14 +2563,14 @@ files = [
 
 [[package]]
 name = "locust"
-version = "2.46.6"
+version = "2.46.7"
 description = "Developer-friendly load testing framework"
 optional = false
 python-versions = ">=3.11"
 groups = ["dev"]
 files = [
-    {file = "locust-2.46.6-py3-none-any.whl", hash = "sha256:a029bf6973457a8567a163a891ca2e9491e4b45a3f52749c9b011a75246483c7"},
-    {file = "locust-2.46.6.tar.gz", hash = "sha256:424833db016bbfa3e0ee83f4966f4577a39ea9d2d311368ff1313ee88f76b968"},
+    {file = "locust-2.46.7-py3-none-any.whl", hash = "sha256:a737bcf8d6728d4f0efe9e460ef9c69d0084e1dd085734db6e4775ece453b7fe"},
+    {file = "locust-2.46.7.tar.gz", hash = "sha256:cf112214068abe59615d36769db31ffd1430b67c6e5f693b9a23b8510224442b"},
 ]
 
 [package.dependencies]
@@ -2587,7 +2587,7 @@ python-engineio = ">=4.12.2"
 python-socketio = {version = ">=5.13.0", extras = ["client"]}
 pywin32 = {version = "*", markers = "sys_platform == \"win32\""}
 pyzmq = ">=25.0.0"
-requests = ">=2.32.2"
+requests = ">=2.33.1"
 werkzeug = ">=2.0.0"
 
 [package.extras]
