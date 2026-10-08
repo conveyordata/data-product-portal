@@ -136,13 +136,7 @@ def decide_global_role_assignment(
     user: User = Depends(get_authenticated_user),
 ) -> GlobalRoleAssignmentResponse:
     service = RoleAssignmentService(db)
-    original = service.get_assignment(id)
-
-    if original.decision not in (DecisionStatus.PENDING, request.decision):
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="This assignment was already decided",
-        )
+    service.ensure_can_decide(id, request.decision)
 
     assignment = service.update_assignment(
         UpdateGlobalRoleAssignment(id=id, decision=request.decision), actor=user
