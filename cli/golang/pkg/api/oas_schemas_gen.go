@@ -4907,7 +4907,8 @@ type GetEventHistoryResponseItem struct {
 	CreatedOn                time.Time             `json:"created_on"`
 	DeletedSubjectIdentifier OptNilString          `json:"deleted_subject_identifier"`
 	DeletedTargetIdentifier  OptNilString          `json:"deleted_target_identifier"`
-	Actor                    User                  `json:"actor"`
+	DeletedActorIdentifier   OptNilString          `json:"deleted_actor_identifier"`
+	Actor                    OptNilUser            `json:"actor"`
 	DataProduct              OptNilDataProduct     `json:"data_product"`
 	User                     OptNilUser            `json:"user"`
 	OutputPort               OptNilOutputPort      `json:"output_port"`
@@ -4965,8 +4966,13 @@ func (s *GetEventHistoryResponseItem) GetDeletedTargetIdentifier() OptNilString 
 	return s.DeletedTargetIdentifier
 }
 
+// GetDeletedActorIdentifier returns the value of DeletedActorIdentifier.
+func (s *GetEventHistoryResponseItem) GetDeletedActorIdentifier() OptNilString {
+	return s.DeletedActorIdentifier
+}
+
 // GetActor returns the value of Actor.
-func (s *GetEventHistoryResponseItem) GetActor() User {
+func (s *GetEventHistoryResponseItem) GetActor() OptNilUser {
 	return s.Actor
 }
 
@@ -5045,8 +5051,13 @@ func (s *GetEventHistoryResponseItem) SetDeletedTargetIdentifier(val OptNilStrin
 	s.DeletedTargetIdentifier = val
 }
 
+// SetDeletedActorIdentifier sets the value of DeletedActorIdentifier.
+func (s *GetEventHistoryResponseItem) SetDeletedActorIdentifier(val OptNilString) {
+	s.DeletedActorIdentifier = val
+}
+
 // SetActor sets the value of Actor.
-func (s *GetEventHistoryResponseItem) SetActor(val User) {
+func (s *GetEventHistoryResponseItem) SetActor(val OptNilUser) {
 	s.Actor = val
 }
 

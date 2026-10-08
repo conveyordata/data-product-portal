@@ -28,7 +28,8 @@ export const getHistoryColumns = ({
         dataIndex: 'actor',
         key: 'actor',
         width: '25%',
-        render: (actor: { email: string }) => `${actor.email}`,
+        render: (actor: { email: string } | null | undefined, record: GetEventHistoryResponseItem) =>
+            actor?.email ?? record.deleted_actor_identifier ?? '',
     },
     {
         title: t('Timestamp'),

@@ -13569,8 +13569,26 @@
             ],
             "title": "Deleted Target Identifier"
           },
+          "deleted_actor_identifier": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deleted Actor Identifier"
+          },
           "actor": {
-            "$ref": "#/components/schemas/User"
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/User"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "data_product": {
             "anyOf": [
@@ -13630,8 +13648,7 @@
           "subject_id",
           "subject_type",
           "actor_id",
-          "created_on",
-          "actor"
+          "created_on"
         ],
         "title": "GetEventHistoryResponseItem"
       },

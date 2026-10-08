@@ -4,7 +4,7 @@ from fastapi.testclient import TestClient
 from app.authorization.roles import ADMIN_UUID
 from app.authorization.roles.schema import Role, Scope
 from app.core.authz.actions import AuthorizationAction
-from tests.factories import RoleFactory
+from tests.factories import RoleFactory, UserFactory
 
 ENDPOINT = "/api/v2/authz/roles"
 
@@ -159,6 +159,21 @@ class TestRolesRouter:
         assert data["id"] == str(ADMIN_UUID)
         assert data["scope"] == Scope.GLOBAL
         assert data["description"] == "admins can have a custom description"
+
+    @pytest.mark.usefixtures("admin")
+    def test_delete_role__clears_global_assignments(self, client, authorizer):
+        user = UserFactory()
+        role = RoleFactory(scope=Scope.GLOBAL)
+        other_role = RoleFactory(scope=Scope.GLOBAL)
+        role_id = role.id
+        authorizer.assign_global_role(user_id=user.id, role_id=role_id)
+        authorizer.assign_global_role(user_id=user.id, role_id=other_role.id)
+
+        response = client.delete(f"{ENDPOINT}/{role_id}")
+
+        assert response.status_code == 200, response.text
+        assert not authorizer.has_global_role(user_id=user.id, role_id=role_id)
+        assert authorizer.has_global_role(user_id=user.id, role_id=other_role.id)
 
     @pytest.mark.usefixtures("admin")
     def test_delete_role(self, client: TestClient):

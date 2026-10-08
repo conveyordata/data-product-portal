@@ -20,6 +20,11 @@ from app.users.model import User
 def _backup_user_name_on_delete(mapper, connection, target):
     connection.execute(
         update(EventModel.__table__)
+        .where(EventModel.actor_id == target.id)
+        .values(deleted_actor_identifier=target.email)
+    )
+    connection.execute(
+        update(EventModel.__table__)
         .where(
             and_(
                 EventModel.subject_id == target.id,

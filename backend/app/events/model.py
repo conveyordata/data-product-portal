@@ -1,7 +1,7 @@
 import uuid
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Column, Enum, ForeignKey, String
+from sqlalchemy import Column, Enum, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -30,8 +30,13 @@ class Event(Base, BaseORM):
     target_id = Column(UUID(as_uuid=True))
     subject_type = Column(Enum(EventReferenceEntity))
     target_type = Column(Enum(EventReferenceEntity))
-    actor_id = Column(UUID(as_uuid=True), ForeignKey("users.id"))
-    actor: Mapped["User"] = relationship("User")
+    deleted_actor_identifier: Mapped[str | None] = mapped_column(String)
+    actor_id = Column(UUID(as_uuid=True))
+    actor: Mapped["User | None"] = relationship(
+        "User",
+        primaryjoin="foreign(Event.actor_id) == User.id",
+        back_populates="events",
+    )
 
     notifications: Mapped[list[Notification]] = relationship(
         "Notification",

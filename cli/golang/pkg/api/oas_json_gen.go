@@ -14946,8 +14946,16 @@ func (s *GetEventHistoryResponseItem) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
-		e.FieldStart("actor")
-		s.Actor.Encode(e)
+		if s.DeletedActorIdentifier.Set {
+			e.FieldStart("deleted_actor_identifier")
+			s.DeletedActorIdentifier.Encode(e)
+		}
+	}
+	{
+		if s.Actor.Set {
+			e.FieldStart("actor")
+			s.Actor.Encode(e)
+		}
 	}
 	{
 		if s.DataProduct.Set {
@@ -14981,7 +14989,7 @@ func (s *GetEventHistoryResponseItem) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfGetEventHistoryResponseItem = [16]string{
+var jsonFieldsNameOfGetEventHistoryResponseItem = [17]string{
 	0:  "id",
 	1:  "name",
 	2:  "subject_id",
@@ -14992,12 +15000,13 @@ var jsonFieldsNameOfGetEventHistoryResponseItem = [16]string{
 	7:  "created_on",
 	8:  "deleted_subject_identifier",
 	9:  "deleted_target_identifier",
-	10: "actor",
-	11: "data_product",
-	12: "user",
-	13: "output_port",
-	14: "technical_asset",
-	15: "exploration",
+	10: "deleted_actor_identifier",
+	11: "actor",
+	12: "data_product",
+	13: "user",
+	14: "output_port",
+	15: "technical_asset",
+	16: "exploration",
 }
 
 // Decode decodes GetEventHistoryResponseItem from json.
@@ -15005,7 +15014,7 @@ func (s *GetEventHistoryResponseItem) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode GetEventHistoryResponseItem to nil")
 	}
-	var requiredBitSet [2]uint8
+	var requiredBitSet [3]uint8
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
@@ -15119,9 +15128,19 @@ func (s *GetEventHistoryResponseItem) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"deleted_target_identifier\"")
 			}
-		case "actor":
-			requiredBitSet[1] |= 1 << 2
+		case "deleted_actor_identifier":
 			if err := func() error {
+				s.DeletedActorIdentifier.Reset()
+				if err := s.DeletedActorIdentifier.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"deleted_actor_identifier\"")
+			}
+		case "actor":
+			if err := func() error {
+				s.Actor.Reset()
 				if err := s.Actor.Decode(d); err != nil {
 					return err
 				}
@@ -15188,9 +15207,10 @@ func (s *GetEventHistoryResponseItem) Decode(d *jx.Decoder) error {
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
-	for i, mask := range [2]uint8{
+	for i, mask := range [3]uint8{
 		0b11010111,
-		0b00000100,
+		0b00000000,
+		0b00000000,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

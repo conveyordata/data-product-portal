@@ -13,6 +13,9 @@ from app.authorization.roles.schema import Scope
 from app.core.authz import REDACTION_VALUE
 from app.core.authz.actions import AuthorizationAction
 from app.data_products.model import DataProductVisibility
+from app.events.enums import EventReferenceEntity
+from app.events.model import Event
+from app.events.schema_response import GetEventHistoryResponseItemOld
 from app.settings import settings
 from app.users.model import User
 from tests.app.data_products.output_port_technical_assets_link.test_router import (
@@ -22,10 +25,12 @@ from tests.factories import (
     DataProductFactory,
     DataProductRoleAssignmentFactory,
     DatasetRoleAssignmentFactory,
+    EventFactory,
     GlobalRoleAssignmentFactory,
     GroupFactory,
     GroupMembershipFactory,
     InputPortFactory,
+    NotificationFactory,
     OutputPortFactory,
     RoleFactory,
     TechnicalAssetFactory,
@@ -66,6 +71,150 @@ class TestUsersRouter:
         response = client.get(f"{ENDPOINT}")
         assert response.status_code == 200
         assert len(response.json()["users"]) == 1
+
+    @pytest.mark.usefixtures("admin")
+    def test_remove_user__preserves_event_references(self, client, session):
+        user = UserFactory()
+        other_user = UserFactory()
+        actor_event = EventFactory(actor=user)
+        subject_event = EventFactory(
+            actor=other_user,
+            subject_id=user.id,
+            subject_type=EventReferenceEntity.USER,
+            deleted_subject_identifier=None,
+        )
+        target_event = EventFactory(
+            actor=other_user,
+            target_id=user.id,
+            target_type=EventReferenceEntity.USER,
+        )
+        user_id, email = user.id, user.email
+        actor_event_id = actor_event.id
+        subject_event_id = subject_event.id
+        target_event_id = target_event.id
+
+        response = client.delete(f"{ENDPOINT}/{user_id}")
+
+        assert response.status_code == 200, response.text
+        session.expire_all()
+        assert session.get(User, user_id) is None
+        actor_event = session.get(Event, actor_event_id)
+        assert actor_event is not None
+        assert actor_event.actor_id == user_id
+        assert actor_event.actor is None
+        assert actor_event.deleted_actor_identifier == email
+        history = GetEventHistoryResponseItemOld.model_validate(actor_event).convert()
+        assert history.actor is None
+        assert history.deleted_actor_identifier == email
+        subject_event = session.get(Event, subject_event_id)
+        assert subject_event.deleted_subject_identifier == email
+        assert subject_event.user is None
+        target_event = session.get(Event, target_event_id)
+        assert target_event.deleted_target_identifier == email
+        assert target_event.user is None
+
+    @pytest.mark.usefixtures("admin")
+    @pytest.mark.parametrize(
+        "entity_type",
+        [
+            EventReferenceEntity.DATA_PRODUCT,
+            EventReferenceEntity.DATASET,
+            EventReferenceEntity.DATA_OUTPUT,
+        ],
+    )
+    def test_remove_user__event_endpoints_keep_deleted_actor(
+        self, client, admin, entity_type
+    ):
+        actor = UserFactory()
+        if entity_type == EventReferenceEntity.DATA_PRODUCT:
+            resource = DataProductFactory()
+            history_path = f"/api/v2/data_products/{resource.id}/history"
+        elif entity_type == EventReferenceEntity.DATASET:
+            resource = OutputPortFactory()
+            history_path = (
+                f"/api/v2/data_products/{resource.data_product_id}"
+                f"/output_ports/{resource.id}/history"
+            )
+        else:
+            resource = TechnicalAssetFactory()
+            history_path = (
+                f"/api/v2/data_products/{resource.owner_id}"
+                f"/technical_assets/{resource.id}/history"
+            )
+        event = EventFactory(
+            actor=actor, subject_id=resource.id, subject_type=entity_type
+        )
+        notification = NotificationFactory(event=event, user=admin)
+        actor_id, actor_email = actor.id, actor.email
+        event_id, notification_id = event.id, notification.id
+        notifications_path = "/api/v2/users/current/notifications"
+
+        history_before = client.get(history_path)
+        assert history_before.status_code == 200, history_before.text
+        assert history_before.json()["events"][0]["actor"]["email"] == actor_email
+        notifications_before = client.get(notifications_path)
+        assert notifications_before.status_code == 200, notifications_before.text
+        assert (
+            notifications_before.json()["notifications"][0]["event"]["actor"]["email"]
+            == actor_email
+        )
+
+        deletion = client.delete(f"{ENDPOINT}/{actor_id}")
+        assert deletion.status_code == 200, deletion.text
+
+        history_after = client.get(history_path)
+        assert history_after.status_code == 200, history_after.text
+        history_events = history_after.json()["events"]
+        assert len(history_events) == 1
+        notifications_after = client.get(notifications_path)
+        assert notifications_after.status_code == 200, notifications_after.text
+        notifications = notifications_after.json()["notifications"]
+        assert len(notifications) == 1
+        assert notifications[0]["id"] == str(notification_id)
+        for returned_event in (history_events[0], notifications[0]["event"]):
+            assert returned_event["id"] == str(event_id)
+            assert returned_event["actor_id"] == str(actor_id)
+            assert returned_event["actor"] is None
+            assert returned_event["deleted_actor_identifier"] == actor_email
+
+    @pytest.mark.usefixtures("admin")
+    def test_remove_user__clears_authorization(self, client, authorizer, session):
+        user = UserFactory()
+        other_user = UserFactory()
+        group = GroupFactory()
+        GroupMembershipFactory(group=group, member=user)
+        user_id = user.id
+        group_id = group.id
+        authorizer.assign_resource_role(
+            user_id=user_id, role_id="resource-role", resource_id="resource"
+        )
+        authorizer.assign_domain_role(
+            user_id=user_id, role_id="domain-role", domain_id="domain"
+        )
+        authorizer.assign_global_role(user_id=user_id, role_id="global-role")
+        authorizer.assign_resource_group_membership(
+            member_identity_id=user_id, group_id=group_id
+        )
+        authorizer.assign_global_group_membership(
+            member_identity_id=user_id, group_id=group_id
+        )
+        authorizer.assign_global_role(user_id=other_user.id, role_id="global-role")
+
+        response = client.delete(f"{ENDPOINT}/{user_id}")
+
+        assert response.status_code == 200, response.text
+        assert not authorizer.has_resource_role(
+            user_id=user_id, role_id="resource-role", resource_id="resource"
+        )
+        assert not authorizer.has_domain_role(
+            user_id=user_id, role_id="domain-role", domain_id="domain"
+        )
+        assert not authorizer.has_global_role(user_id=user_id, role_id="global-role")
+        assert not authorizer.has_resource_role(
+            user_id=user_id, role_id=group_id, resource_id="*"
+        )
+        assert not authorizer.has_global_role(user_id=user_id, role_id=group_id)
+        assert authorizer.has_global_role(user_id=other_user.id, role_id="global-role")
 
     @pytest.mark.usefixtures("admin")
     def test_remove_user__with_data_product_role(self, client, session):
