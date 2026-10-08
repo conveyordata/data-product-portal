@@ -306,6 +306,7 @@ from .renew_input_port_for_data_product_response import (
 from .renew_input_port_for_exploration_response import (
     RenewInputPortForExplorationResponse,
 )
+from .renew_output_port_as_input_port_request import RenewOutputPortAsInputPortRequest
 from .renewal_status import RenewalStatus
 from .request_data_product_role_assignment import RequestDataProductRoleAssignment
 from .request_input_ports_for_abstract_data_product_request_item import (
@@ -641,6 +642,7 @@ __all__ = (
     "RenewalStatus",
     "RenewInputPortForDataProductResponse",
     "RenewInputPortForExplorationResponse",
+    "RenewOutputPortAsInputPortRequest",
     "RequestDataProductRoleAssignment",
     "RequestInputPortsForAbstractDataProductRequestItem",
     "RequestInputPortsForDataProductRequest",

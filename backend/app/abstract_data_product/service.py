@@ -1,5 +1,5 @@
 from copy import deepcopy
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional, Sequence
 from uuid import UUID
 
@@ -35,7 +35,10 @@ from app.core.logging.posthog_analytics import (
 )
 from app.data_products import email
 from app.data_products.output_ports.enums import OutputPortAccessFunction
-from app.data_products.output_ports.input_ports.service import InputPortService
+from app.data_products.output_ports.input_ports.service import (
+    InputPortService,
+    RedactedInputPort,
+)
 from app.data_products.output_ports.model import OutputPort as OutputPortModel
 from app.data_products.output_ports.model import ensure_output_port_exists
 from app.data_products.status import AbstractDataProductStatus
@@ -373,6 +376,67 @@ class AbstractDataProductService:
         input_port = self._renew_single_input_port(adp, output_port_id, actor=actor)
         self.db.flush()
         return input_port
+
+    def renew_output_port_as_input_port(
+        self,
+        *,
+        data_product_id: UUID,
+        output_port_id: UUID,
+        consuming_data_product_id: UUID,
+        actor: User,
+    ) -> RedactedInputPort:
+        input_port_service = InputPortService(self.db)
+        current_link = input_port_service.get_link(
+            data_product_id,
+            output_port_id,
+            consuming_data_product_id,
+            execution_options={"skip_data_product_visibility_filter": True},
+        )
+        self._ensure_not_deleting(current_link.consuming_abstract_data_product)
+        self._ensure_not_deleting(current_link.output_port.data_product)
+        if current_link.pending_request is not None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="A request is already pending for this input port",
+            )
+        active_grant = current_link.active_grant
+        if active_grant is not None and active_grant.valid_until is None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="This input port already has permanent access; there is nothing to renew",
+            )
+
+        previous_request = current_link.latest_request
+        access_duration = self._resolve_access_duration(
+            current_link.consuming_abstract_data_product, current_link.output_port
+        )
+        now = datetime.now(timezone.utc)
+        request = InputPortRequestModel(
+            justification=previous_request.justification,
+            requested_by_id=previous_request.requested_by_id,
+            requested_on=now,
+            access_duration_type=access_duration.access_duration_type,
+            requested_duration_days=access_duration.days,
+            input_port=current_link,
+            access_mode_id=previous_request.access_mode_id,
+        )
+        self.db.add(request)
+        self.db.flush()
+        input_port_service.approve_request(request, now=now, decided_by=actor)
+
+        self.posthog.capture(
+            distinct_id=actor.id,
+            event="Input Port Approved",
+            properties={
+                "data_product_id": str(data_product_id),
+                "output_port_id": str(output_port_id),
+                "consuming_data_product_id": str(consuming_data_product_id),
+                "type": str(
+                    current_link.consuming_abstract_data_product.abstract_data_product_type.value
+                ),
+            },
+        )
+        return RedactedInputPort.of(current_link, previous_request.requested_by_id)
 
     def _get_input_port(self, id: UUID, output_port_id: UUID) -> InputPortModel:
         ensure_output_port_exists(output_port_id, self.db)

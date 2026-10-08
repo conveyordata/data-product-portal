@@ -1,9 +1,8 @@
-import { CloseCircleOutlined, EyeOutlined } from '@ant-design/icons';
 import { Badge, Button, Flex, Popconfirm, type TableColumnsType } from 'antd';
 import type { TFunction } from 'i18next';
 import AccessMode from '@/components/access-modes/access-mode.component.tsx';
 import EllipsisParagraph from '@/components/ellipsis-paragraph/ellipsis-paragraph.component.tsx';
-import { ExpiryDate, IsExpiringSoonTag, RenewalTag } from '@/components/input-port/access-status.tsx';
+import { canRenewAccess, ExpiryDate, IsExpiringSoonTag, RenewalTag } from '@/components/input-port/access-status.tsx';
 import { ConsumerColumn } from '@/components/input-port/consumer-column.tsx';
 import {
     InputPortStatus,
@@ -18,8 +17,10 @@ type Props = {
     t: TFunction;
     outputPortId: string;
     dataProductLinks: OutputPortInputPort[];
-    onRevokeDataProductDatasetLink: (name: string, consumingDataProductId: string) => void;
+    onRevokeInputPort: (name: string, consumingDataProductId: string) => void;
+    onRenewInputPort: (name: string, consumingDataProductId: string) => void;
     isLoading?: boolean;
+    expiringSoonThresholdDays: number;
     canApprove?: boolean;
     canRevoke?: boolean;
     setReviewingOutputPortInputPortId: (id: string) => void;
@@ -28,11 +29,13 @@ type Props = {
 export const getConsumerColumns = ({
     t,
     dataProductLinks,
-    onRevokeDataProductDatasetLink,
+    onRevokeInputPort,
+    onRenewInputPort,
     canApprove,
     canRevoke,
     setReviewingOutputPortInputPortId,
     isLoading,
+    expiringSoonThresholdDays,
 }: Props): TableColumnsType<OutputPortInputPort> => {
     const sorter = new Sorter<OutputPortInputPort>();
     return [
@@ -113,6 +116,7 @@ export const getConsumerColumns = ({
                     consuming_abstract_data_product_id: consuming_data_product_id,
                     status,
                     renewal_status,
+                    current_request,
                     id,
                 },
             ) => {
@@ -120,17 +124,39 @@ export const getConsumerColumns = ({
                     (status === InputPortStatus.Pending || renewal_status === RenewalStatus.Pending) &&
                     (canApprove || canRevoke);
                 const showRevoke = status === InputPortStatus.Approved;
+                const showRenew = canRenewAccess(
+                    status,
+                    current_request.valid_until,
+                    renewal_status,
+                    expiringSoonThresholdDays,
+                );
 
                 return (
                     <Flex gap="small" wrap>
                         {showReview && (
-                            <Button
-                                icon={<EyeOutlined />}
-                                type="link"
-                                onClick={() => setReviewingOutputPortInputPortId(id)}
-                            >
+                            <Button type="link" onClick={() => setReviewingOutputPortInputPortId(id)}>
                                 {t('Review Access Request')}
                             </Button>
+                        )}
+                        {showRenew && (
+                            <Popconfirm
+                                title={t('Renew Access')}
+                                description={t('Are you sure you want to renew access for {{name}}?', {
+                                    name: consuming_data_product.name,
+                                })}
+                                onConfirm={() =>
+                                    onRenewInputPort(consuming_data_product.name, consuming_data_product_id)
+                                }
+                                placement="leftTop"
+                                okText={t('Confirm')}
+                                cancelText={t('Cancel')}
+                                okButtonProps={{ loading: isLoading }}
+                                autoAdjustOverflow={true}
+                            >
+                                <Button type="link" loading={isLoading} disabled={isLoading || !canApprove}>
+                                    {t('Renew Access')}
+                                </Button>
+                            </Popconfirm>
                         )}
                         {showRevoke && (
                             <Popconfirm
@@ -139,10 +165,7 @@ export const getConsumerColumns = ({
                                     name: consuming_data_product.name,
                                 })}
                                 onConfirm={() =>
-                                    onRevokeDataProductDatasetLink(
-                                        consuming_data_product.name,
-                                        consuming_data_product_id,
-                                    )
+                                    onRevokeInputPort(consuming_data_product.name, consuming_data_product_id)
                                 }
                                 placement="leftTop"
                                 okText={t('Confirm')}
@@ -150,12 +173,7 @@ export const getConsumerColumns = ({
                                 okButtonProps={{ loading: isLoading }}
                                 autoAdjustOverflow={true}
                             >
-                                <Button
-                                    icon={<CloseCircleOutlined />}
-                                    type="link"
-                                    loading={isLoading}
-                                    disabled={isLoading || !canRevoke}
-                                >
+                                <Button type="link" loading={isLoading} disabled={isLoading || !canRevoke}>
                                     {t('Revoke Access')}
                                 </Button>
                             </Popconfirm>

@@ -536,6 +536,12 @@ type RenewInputPortForExplorationParams struct {
 	OutputPortID uuid.UUID
 }
 
+// RenewOutputPortAsInputPortParams is parameters of renew_output_port_as_input_port operation.
+type RenewOutputPortAsInputPortParams struct {
+	DataProductID uuid.UUID
+	OutputPortID  uuid.UUID
+}
+
 // ReplaceGroupMembersParams is parameters of replace_group_members operation.
 type ReplaceGroupMembersParams struct {
 	ID uuid.UUID

@@ -29,6 +29,7 @@ sidebar_position: 200
 - **[Database]**: `python -m app.db_tool migrate` now stops when technical assets exist whose plugin is not installed, instead of the portal failing every request that loads them. Reinstall the plugin, or delete those technical assets.
 - **[Auth]**: A `DEFAULT_USERNAME` without a dot before the `@` no longer fails when OIDC is disabled.
 - **[General]**: Fix translation file by adding more nested translations for Data Products, Output ports and Technical assets.
+- **[General]**: Output Port owners can renew access for consumers, following the same rules as the consumer-side renew (revoked, expired, denied, cancelled, expiring soon or declined renewal), while keeping the access history. Icons were removed from the access action buttons.
 
 
 ## 0.7.4

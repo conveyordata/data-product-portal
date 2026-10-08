@@ -39,6 +39,16 @@ const injectedRtkApi = api.injectEndpoints({
         body: queryArg.denyOutputPortAsInputPortRequest,
       }),
     }),
+    renewOutputPortAsInputPort: build.mutation<
+      RenewOutputPortAsInputPortApiResponse,
+      RenewOutputPortAsInputPortApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/data_products/${queryArg.dataProductId}/output_ports/${queryArg.outputPortId}/input_ports/renew`,
+        method: "POST",
+        body: queryArg.renewOutputPortAsInputPortRequest,
+      }),
+    }),
     revokeOutputPortAsInputPort: build.mutation<
       RevokeOutputPortAsInputPortApiResponse,
       RevokeOutputPortAsInputPortApiArg
@@ -89,6 +99,13 @@ export type DenyOutputPortAsInputPortApiArg = {
   dataProductId: string;
   outputPortId: string;
   denyOutputPortAsInputPortRequest: DenyOutputPortAsInputPortRequest;
+};
+export type RenewOutputPortAsInputPortApiResponse =
+  /** status 200 Successful Response */ any;
+export type RenewOutputPortAsInputPortApiArg = {
+  dataProductId: string;
+  outputPortId: string;
+  renewOutputPortAsInputPortRequest: RenewOutputPortAsInputPortRequest;
 };
 export type RevokeOutputPortAsInputPortApiResponse =
   /** status 200 Successful Response */ any;
@@ -176,6 +193,9 @@ export type DenyOutputPortAsInputPortRequest = {
   consuming_data_product_id: string;
   decision_note: string;
 };
+export type RenewOutputPortAsInputPortRequest = {
+  consuming_data_product_id: string;
+};
 export type RevokeOutputPortAsInputPortRequest = {
   consuming_data_product_id: string;
 };
@@ -215,6 +235,7 @@ export const {
   useLazyGetInputPortsForOutputPortQuery,
   useApproveOutputPortAsInputPortMutation,
   useDenyOutputPortAsInputPortMutation,
+  useRenewOutputPortAsInputPortMutation,
   useRevokeOutputPortAsInputPortMutation,
   useRemoveOutputPortAsInputPortMutation,
 } = injectedRtkApi;
