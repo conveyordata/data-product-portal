@@ -14,6 +14,7 @@ sandbox:
 imports:
   - shared/background-agent.md
 safe-outputs:
+  report-failure-as-issue: false
   create-issue:
     title-prefix: "[bug] "
     labels: [background-agent, agent-bug, bug]

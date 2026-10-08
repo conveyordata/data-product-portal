@@ -82,7 +82,7 @@ If the top candidate does not clearly pass every point above, or you cannot prod
 
 ### 5. Fix and verify
 
-Make the minimal change. Add the regression test or proof your role asks for. Run `pre-commit run --files <the files you changed>` and the test suites of every area you changed (see the AGENTS.md files for the commands). Everything must pass. The PostgreSQL service is reachable at `host.docker.internal:5432`; set `POSTGRES_SERVER=host.docker.internal` and pass `-o env_override_existing_values=0` to pytest when running backend tests, otherwise `backend/.test.env` resets it to `localhost`. If you cannot get the checks green, call `noop` instead.
+Make the minimal change. Add the regression test or proof your role asks for. Run `pre-commit run --files <the files you changed>` and the test suites of every area you changed (see the AGENTS.md files for the commands). Everything must pass. Poetry is not on your PATH: the backend dependencies are installed in `backend/.venv`, so wherever the docs say `poetry run python`, use `backend/.venv/bin/python` instead (for example `.venv/bin/python -m pytest` from `backend/`). The PostgreSQL service is reachable at `host.docker.internal:5432`; set `POSTGRES_SERVER=host.docker.internal` and pass `-o env_override_existing_values=0` to pytest when running backend tests, otherwise `backend/.test.env` resets it to `localhost`. If you cannot get the checks green, call `noop` instead.
 
 ### 6. Report
 
