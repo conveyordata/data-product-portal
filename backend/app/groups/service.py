@@ -119,7 +119,10 @@ class GroupService:
         # Remove assignments where the group itself is the subject.
         self.authorizer.clear_assignments_for_user(user_id=group.id)
         self.authorizer.revoke_group_memberships(
-            memberships=[(membership.member_identity_id, group.id) for membership in group.memberships]
+            memberships=[
+                (membership.member_identity_id, group.id)
+                for membership in group.memberships
+            ]
         )
         self.db.delete(group)
         self.db.flush()
@@ -260,12 +263,20 @@ class GroupService:
                 ),
             )
 
-    def _add_members_auth(self, group_id: UUID, member_identity_ids: Iterable[UUID]) -> None:
-        memberships = [(member_identity_id, group_id) for member_identity_id in member_identity_ids]
+    def _add_members_auth(
+        self, group_id: UUID, member_identity_ids: Iterable[UUID]
+    ) -> None:
+        memberships = [
+            (member_identity_id, group_id) for member_identity_id in member_identity_ids
+        ]
         self.authorizer.assign_group_memberships(memberships=memberships)
 
-    def _remove_members_auth(self, group_id: UUID, member_identity_ids: Iterable[UUID]) -> None:
-        memberships = [(member_identity_id, group_id) for member_identity_id in member_identity_ids]
+    def _remove_members_auth(
+        self, group_id: UUID, member_identity_ids: Iterable[UUID]
+    ) -> None:
+        memberships = [
+            (member_identity_id, group_id) for member_identity_id in member_identity_ids
+        ]
         self.authorizer.revoke_group_memberships(memberships=memberships)
 
     def _insert_member_ids(

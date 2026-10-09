@@ -468,9 +468,11 @@ class TestAuthorization:
         authorizer.sync_role_permissions(role_id=role, actions=[act])
         authorizer.assign_domain_role(user_id=user, role_id=role, domain_id=dom1)
         authorizer.assign_domain_role(user_id=user, role_id=role, domain_id=dom2)
-        assert authorizer.has_domain_role(user_id=user, role_id=role, domain_id=dom1)
-        assert authorizer.has_domain_role(user_id=user, role_id=role, domain_id=dom2)
 
+        authorizer.clear_assignments_for_domain(domain_id=dom1)
+        assert not authorizer.has_domain_role(
+            user_id=user, role_id=role, domain_id=dom1
+        )
         assert authorizer.has_domain_role(user_id=user, role_id=role, domain_id=dom2)
 
     def test_resource_role_inherited_from_group(self, authorizer: Authorization):
@@ -487,9 +489,7 @@ class TestAuthorization:
             role_id=role,
             resource_id=dp1,
         )
-        authorizer.assign_resource_group_membership(
-            member_identity_id=user, group_id=group
-        )
+        authorizer.assign_group_memberships(memberships=[(user, group)])
 
         assert authorizer.has_resource_role(
             user_id=user,
@@ -515,9 +515,7 @@ class TestAuthorization:
             act=action,
         )
 
-        authorizer.revoke_resource_group_membership(
-            member_identity_id=user, group_id=group
-        )
+        authorizer.revoke_group_memberships(memberships=[(user, group)])
         assert not authorizer.has_access(
             sub=user,
             dom=ANY,
@@ -538,10 +536,7 @@ class TestAuthorization:
         with everyone_role_permissions(permissions=[]):
             authorizer.sync_role_permissions(role_id=role, actions=[action])
             authorizer.assign_global_role(user_id=group, role_id=role)
-            authorizer.assign_global_group_membership(
-                member_identity_id=user,
-                group_id=group,
-            )
+            authorizer.assign_group_memberships(memberships=[(user, group)])
 
             assert authorizer.has_access(
                 sub=user,
@@ -550,10 +545,7 @@ class TestAuthorization:
                 act=action,
             )
 
-            authorizer.revoke_global_group_membership(
-                member_identity_id=user,
-                group_id=group,
-            )
+            authorizer.revoke_group_memberships(memberships=[(user, group)])
 
             assert not authorizer.has_access(
                 sub=user,
@@ -575,10 +567,7 @@ class TestAuthorization:
         authorizer.sync_role_permissions(role_id=role, actions=[action])
 
         # Membership exists before the group receives the role.
-        authorizer.assign_resource_group_membership(
-            member_identity_id=user,
-            group_id=group,
-        )
+        authorizer.assign_group_memberships(memberships=[(user, group)])
         assert not authorizer.has_access(
             sub=user,
             dom=ANY,
@@ -609,6 +598,83 @@ class TestAuthorization:
             obj=data_product,
             act=action,
         )
+
+    def test_assign_group_memberships__assigns_resource_and_global_memberships(
+        self, authorizer: Authorization
+    ):
+        memberships = [
+            ("first-user", "first-group"),
+            ("second-user", "second-group"),
+        ]
+
+        updated = authorizer.assign_group_memberships(memberships=memberships)
+
+        assert updated
+        for member_id, group_id in memberships:
+            assert authorizer.has_resource_role(
+                user_id=member_id, role_id=group_id, resource_id="*"
+            )
+            assert authorizer.has_global_role(user_id=member_id, role_id=group_id)
+
+    def test_assign_group_memberships__empty_list_does_nothing(
+        self, authorizer: Authorization
+    ):
+        assert not authorizer.assign_group_memberships(memberships=[])
+
+    def test_assign_group_memberships__existing_memberships_are_ignored(
+        self, authorizer: Authorization
+    ):
+        memberships = [("user", "group")]
+        authorizer.assign_group_memberships(memberships=memberships)
+
+        updated = authorizer.assign_group_memberships(memberships=memberships)
+
+        assert not updated
+        assert authorizer.has_resource_role(
+            user_id="user", role_id="group", resource_id="*"
+        )
+        assert authorizer.has_global_role(user_id="user", role_id="group")
+
+    def test_revoke_group_memberships__revokes_resource_and_global_memberships(
+        self, authorizer: Authorization
+    ):
+        memberships = [
+            ("first-user", "first-group"),
+            ("second-user", "second-group"),
+        ]
+        authorizer.assign_group_memberships(memberships=memberships)
+
+        updated = authorizer.revoke_group_memberships(memberships=memberships)
+
+        assert updated
+        for member_id, group_id in memberships:
+            assert not authorizer.has_resource_role(
+                user_id=member_id, role_id=group_id, resource_id="*"
+            )
+            assert not authorizer.has_global_role(user_id=member_id, role_id=group_id)
+
+    def test_revoke_group_memberships__does_not_remove_unrelated_memberships(
+        self, authorizer: Authorization
+    ):
+        removed = ("removed-user", "removed-group")
+        retained = ("retained-user", "retained-group")
+        authorizer.assign_group_memberships(memberships=[removed, retained])
+
+        authorizer.revoke_group_memberships(memberships=[removed])
+
+        assert not authorizer.has_resource_role(
+            user_id=removed[0], role_id=removed[1], resource_id="*"
+        )
+        assert not authorizer.has_global_role(user_id=removed[0], role_id=removed[1])
+        assert authorizer.has_resource_role(
+            user_id=retained[0], role_id=retained[1], resource_id="*"
+        )
+        assert authorizer.has_global_role(user_id=retained[0], role_id=retained[1])
+
+    def test_revoke_group_memberships__empty_list_does_nothing(
+        self, authorizer: Authorization
+    ):
+        assert not authorizer.revoke_group_memberships(memberships=[])
 
 
 class TestCrossWorkerStaleness:

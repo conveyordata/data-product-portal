@@ -488,38 +488,6 @@ class Authorization(metaclass=Singleton):
             case _:
                 assert_never(data_product.visibility)
 
-    def assign_resource_group_membership(
-        self, *, member_identity_id: ID, group_id: ID
-    ) -> bool:
-        """Creates a wildcard-scoped membership edge so the member inherits
-        the group's resource-specific roles."""
-        return self.assign_resource_role(
-            user_id=member_identity_id, role_id=group_id, resource_id="*"
-        )
-
-    def revoke_resource_group_membership(
-        self, *, member_identity_id: ID, group_id: ID
-    ) -> bool:
-        """Deletes a wildcard-scoped membership edge so the member no longer inherits
-        the group's resource-specific roles."""
-        return self.revoke_resource_role(
-            user_id=member_identity_id, role_id=group_id, resource_id="*"
-        )
-
-    def assign_global_group_membership(
-        self, *, member_identity_id: ID, group_id: ID
-    ) -> bool:
-        """Creates an entry in the casbin table,
-        assigning the group member the chosen global role via the group."""
-        return self.assign_global_role(user_id=member_identity_id, role_id=group_id)
-
-    def revoke_global_group_membership(
-        self, *, member_identity_id: ID, group_id: ID
-    ) -> bool:
-        """Deletes the entry in the casbin table,
-        revoking the global role for the chosen group member via the group."""
-        return self.revoke_global_role(user_id=member_identity_id, role_id=group_id)
-
     def assign_group_memberships(self, *, memberships: Sequence[tuple[ID, ID]]) -> bool:
         """Assign multiple member-to-group inheritance relationships."""
         if not memberships:
