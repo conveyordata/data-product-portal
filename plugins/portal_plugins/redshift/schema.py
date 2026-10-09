@@ -39,6 +39,7 @@ class RedshiftTechnicalAssetConfiguration(TechnicalAssetPlugin):
     access_granularity: AccessGranularity
 
     _platform_metadata = PlatformMetadata(
+        result_string_template="{database}__{schema}.{table}",
         display_name="Redshift",
         icon_name="aws-redshift-logo.svg",
         icon_package="portal_plugins.redshift",

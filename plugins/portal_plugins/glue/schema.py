@@ -45,6 +45,7 @@ class GlueTechnicalAssetConfiguration(TechnicalAssetPlugin):
     access_granularity: AccessGranularity
 
     _platform_metadata = PlatformMetadata(
+        result_string_template="{database}__{database_suffix}.{table}",
         display_name="Glue",
         icon_name="glue-logo.svg",
         icon_package="portal_plugins.glue",

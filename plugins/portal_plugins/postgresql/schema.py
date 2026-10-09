@@ -36,6 +36,7 @@ class PostgreSQLTechnicalAssetConfiguration(TechnicalAssetPlugin):
     access_granularity: AccessGranularity
 
     _platform_metadata = PlatformMetadata(
+        result_string_template="{database}.{schema}.{table}",
         display_name="PostgreSQL",
         icon_name="postgresql-logo.svg",
         icon_package="portal_plugins.postgresql",
