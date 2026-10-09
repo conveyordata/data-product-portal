@@ -115,6 +115,8 @@ class PlatformMetadata(ORMModel):
     detailed_name: str
     show_in_form: bool = True
     shareable: bool = True
+    result_string_template: Optional[str] = None
+    technical_info_template: Optional[str] = None
 
 
 class TechnicalAssetPlugin(ORMModel, ABC):
@@ -184,6 +186,7 @@ class TechnicalAssetPlugin(ORMModel, ABC):
                 display_name=class_name.replace("DataOutput", ""),
                 icon_name=f"{platform_key}-logo.svg",
                 platform_key=platform_key,
+                detailed_name=class_name,
             )
         return cls._platform_metadata
 

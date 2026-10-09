@@ -40,6 +40,8 @@ class ParameterStoreTechnicalAssetConfiguration(TechnicalAssetPlugin):
     parameter_name: str
 
     _platform_metadata = PlatformMetadata(
+        result_string_template="/{prefix}/{parameter_name}",
+        technical_info_template="/{environment}/{prefix}/{parameter_name}",
         display_name="Parameter Store",
         icon_name="parameter-store-logo.svg",
         icon_package="portal_plugins.parameter_store",

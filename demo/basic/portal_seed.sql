@@ -116,6 +116,9 @@ begin
     RETURNING id INTO admin_role_id;
 
     -- PLATFORMS
+    DELETE FROM public.platform_service_configs WHERE service_id IN (SELECT ps.id FROM public.platform_services AS ps WHERE lower(ps.name) IN ('s3', 'glue'));
+    DELETE FROM public.platform_services WHERE lower(name) IN ('postgresql', 'osi');
+    DELETE FROM public.platforms WHERE lower(name) IN ('postgresql', 'osi');
     INSERT INTO public.platforms (id, "name") VALUES ('99898d61-ba3b-4f30-a929-8356ccfe521f', 'PostgreSQL') returning id INTO postgresql_id;
     INSERT INTO public.platform_services (id, "name", platform_id, result_string_template, technical_info_template) VALUES ('242d7e16-edd5-41e1-9e25-775ecc29706e', 'PostgreSQL', postgresql_id, '{database}.{schema}.{table}', '{database}.{schema}.{table}') returning id INTO postgresql_service_id;
     INSERT INTO public.platform_service_configs (id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES('38c320c3-8b66-439f-abab-6b78d225ae27', postgresql_id, postgresql_service_id, '["dpp_demo"]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);

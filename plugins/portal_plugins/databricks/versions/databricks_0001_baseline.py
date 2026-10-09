@@ -9,7 +9,7 @@ from app.shared.model import utcnow
 revision: str = "databricks_0001_baseline"
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+depends_on: Union[str, Sequence[str], None] = "5477aa0d86f0"
 
 TABLE = "databricks_technical_asset_configurations"
 

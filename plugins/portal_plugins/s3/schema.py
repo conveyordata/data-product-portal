@@ -35,6 +35,8 @@ class S3TechnicalAssetConfiguration(TechnicalAssetPlugin):
     path: str
 
     _platform_metadata = PlatformMetadata(
+        result_string_template="{bucket}/{suffix}/{path}",
+        technical_info_template="{bucket_arn}/{suffix}/{path}/*",
         display_name="S3",
         icon_name="s3-logo.svg",
         icon_package="portal_plugins.s3",

@@ -167,6 +167,15 @@ INSERT INTO public.access_modes (id, name, technical_asset_types, description) V
 INSERT INTO public.access_modes (id, name, technical_asset_types, description) VALUES ('{{ access_mode_admin }}'::uuid, 'admin', ARRAY['RedshiftTechnicalAssetConfiguration'], 'Admin access, gives users full control over data and settings');
 
 -- ...existing platform configuration code...
+DELETE FROM public.platform_service_configs
+WHERE service_id IN (
+    SELECT ps.id FROM public.platform_services AS ps
+    WHERE lower(ps.name) IN ('s3', 'glue', 'azureblob')
+);
+DELETE FROM public.platform_services
+WHERE lower(name) IN ('snowflake', 'redshift', 'databricks', 'postgresql', 'osi');
+DELETE FROM public.platforms
+WHERE lower(name) IN ('snowflake', 'databricks', 'postgresql', 'osi');
 INSERT INTO public.platforms (id, name) VALUES ('{{ snowflake_id }}'::uuid, 'Snowflake');
 
 INSERT INTO public.platforms (id, name) VALUES ('6be7613c-42fb-4b93-952d-1874ed1ddf76', 'Conveyor');
@@ -308,14 +317,14 @@ INSERT INTO public.env_platform_service_configs (id, environment_id, platform_id
     SELECT p.id FROM public.platforms AS p
     WHERE p.name = 'AWS'), (
     SELECT ps.id FROM public.platform_services AS ps
-    WHERE ps.name = 'ParameterStore'
+    WHERE lower(ps.name) = 'parameterstore'
 ), '[]', timezone('utc'::text, current_timestamp), NULL, NULL);
 
 INSERT INTO public.env_platform_service_configs (id, environment_id, platform_id, service_id, config, created_on, updated_on, deleted_at) VALUES ('5c8f3da2-7e49-4026-b3d8-9fae2c4b6b71', '{{ returned_environment_id_prd }}'::uuid, (
     SELECT p.id FROM public.platforms AS p
     WHERE p.name = 'AWS'), (
     SELECT ps.id FROM public.platform_services AS ps
-    WHERE ps.name = 'ParameterStore'
+    WHERE lower(ps.name) = 'parameterstore'
 ), '[]', timezone('utc'::text, current_timestamp), NULL, NULL);
 
 INSERT INTO public.env_platform_service_configs (id, environment_id, platform_id, service_id, config, created_on, updated_on, deleted_at) VALUES ('93f4b677-5ae8-450d-91a6-e15196b2e774', '{{ returned_environment_id_dev }}'::uuid, (
@@ -535,7 +544,7 @@ INSERT INTO public.data_outputs (id, namespace, name, description, status, platf
     SELECT p.id FROM public.platforms AS p
     WHERE p.name = 'AWS'), (
     SELECT ps.id FROM public.platform_services AS ps
-    WHERE ps.name = 'ParameterStore'
+    WHERE lower(ps.name) = 'parameterstore'
 ), '{{ customer_segmentation_id }}'::uuid, NULL, '7a4c9e21-3b58-4f60-9d17-2e8b5c6a1f43', timezone('utc'::text, current_timestamp), NULL, NULL, 'default');
 
 INSERT INTO public.data_outputs_datasets (id, data_output_id, dataset_id, status, requested_by_id, requested_on, approved_by_id, approved_on, denied_by_id, denied_on, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), '{{ customer_segmentation_weekly_technical_asset_id }}'::uuid, '{{ customer_segmentation_weekly_output_port_id }}'::uuid, 'APPROVED', '{{ john_id }}'::uuid, '2025-10-28 16:36:36.784134', '{{ john_id }}'::uuid, '2025-10-28 16:36:36.936773', NULL, NULL, '2025-10-28 16:36:36.677803', '2025-10-28 16:36:36.838041', NULL);
