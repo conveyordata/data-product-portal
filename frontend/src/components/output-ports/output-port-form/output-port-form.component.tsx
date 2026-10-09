@@ -288,7 +288,7 @@ export function AccessTypeSection({
                 styles={hiddenDataProduct ? { popup: { root: { padding: 0, overflow: 'hidden' } } } : undefined}
                 popupRender={(menu) =>
                     hiddenDataProduct ? (
-                        <>
+                        <div data-cy="output-port-access-type-options">
                             <div style={{ padding: token.paddingXXS }}>{menu}</div>
                             <Flex
                                 gap="small"
@@ -303,9 +303,9 @@ export function AccessTypeSection({
                                     {t('Hidden Data Products can only have hidden Output Ports')}
                                 </Typography.Text>
                             </Flex>
-                        </>
+                        </div>
                     ) : (
-                        menu
+                        <div data-cy="output-port-access-type-options">{menu}</div>
                     )
                 }
             />
