@@ -268,6 +268,7 @@ export function AccessTypeSection({
     return (
         <Flex vertical gap="small">
             <Select
+                data-cy="output-port-access-type"
                 id={id}
                 value={value}
                 onChange={onChange}

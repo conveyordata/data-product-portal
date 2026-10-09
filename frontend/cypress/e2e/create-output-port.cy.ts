@@ -16,6 +16,10 @@ describe('Create Output port', () => {
 
         cy.selectAntOption('output-port-lifecycle', 'Draft');
 
+        // Scope to the dropdown because access type names also appear on the page behind the modal.
+        cy.selectAntOption('output-port-access-type', 'Unrestricted');
+        cy.get('[data-cy="output-port-access-type"]').should('contain.text', 'Unrestricted');
+
         cy.get('[data-cy="output-port-description"]').type('Created by the Cypress end-to-end test.');
 
         cy.intercept('POST', '**/output_ports').as('createOutputPort');
