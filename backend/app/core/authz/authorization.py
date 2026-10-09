@@ -380,6 +380,32 @@ class Authorization(metaclass=Singleton):
         self._after_update()
         return bool(resource_updates or domain_updates or global_updates)
 
+    def clear_assignments_for_identities(self, *, identity_ids: Sequence[ID]) -> bool:
+        """Removes all role assignments for multiple identities."""
+        values = {str(identity_id) for identity_id in identity_ids}
+        if not values:
+            return False
+
+        enforcer: SyncedEnforcer = self._enforcer
+        updated = False
+
+        for policy_type in ("g", "g2", "g3"):
+            policies = [
+                policy
+                for policy in enforcer.get_named_grouping_policy(policy_type)
+                if policy[0] in values
+            ]
+            if policies:
+                updated = (
+                    enforcer.remove_named_grouping_policies(policy_type, policies)
+                    or updated
+                )
+
+        if updated:
+            self._after_update()
+
+        return updated
+
     def clear_assignments_for_resource_role(self, *, role_id: ID) -> bool:
         """Removes all assignments of a resource role inside the casbin table.
         Should be called when a resource role is removed.
@@ -493,3 +519,49 @@ class Authorization(metaclass=Singleton):
         """Deletes the entry in the casbin table,
         revoking the global role for the chosen group member via the group."""
         return self.revoke_global_role(user_id=member_identity_id, role_id=group_id)
+
+    def assign_group_memberships(self, *, memberships: Sequence[tuple[ID, ID]]) -> bool:
+        """Assign multiple member-to-group inheritance relationships."""
+        if not memberships:
+            return False
+
+        enforcer: SyncedEnforcer = self._enforcer
+        resource_policies = []
+        global_policies = []
+
+        for member_id, group_id in memberships:
+            resource_policies.append([str(member_id), str(group_id), "*"])
+            global_policies.append([str(member_id), str(group_id)])
+
+        resource_updates = enforcer.add_named_grouping_policies("g", resource_policies)
+        global_updates = enforcer.add_named_grouping_policies("g3", global_policies)
+
+        updated = bool(resource_updates or global_updates)
+        if updated:
+            self._after_update()
+
+        return updated
+
+    def revoke_group_memberships(self, *, memberships: Sequence[tuple[ID, ID]]) -> bool:
+        """Revoke multiple member-to-group inheritance relationships."""
+        if not memberships:
+            return False
+
+        enforcer: SyncedEnforcer = self._enforcer
+        resource_policies = []
+        global_policies = []
+
+        for member_id, group_id in memberships:
+            resource_policies.append([str(member_id), str(group_id), "*"])
+            global_policies.append([str(member_id), str(group_id)])
+
+        resource_updates = enforcer.remove_named_grouping_policies(
+            "g", resource_policies
+        )
+        global_updates = enforcer.remove_named_grouping_policies("g3", global_policies)
+
+        updated = bool(resource_updates or global_updates)
+        if updated:
+            self._after_update()
+
+        return updated

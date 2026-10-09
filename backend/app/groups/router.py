@@ -23,6 +23,11 @@ from app.groups.schema_response import (
     GroupUpdateResponse,
 )
 from app.groups.service import GroupService
+from app.identities.schema_request import (
+    IdentityBatchCreateRequest,
+    IdentityBatchDeleteRequest,
+)
+from app.identities.schema_response import IdentityBatchCreateResponse
 
 router = APIRouter(tags=["Groups"], prefix="/v2/groups")
 _group_members_replace_locks: dict[UUID, asyncio.Lock] = {}
@@ -121,6 +126,33 @@ def update_group(
     db: Session = Depends(get_db_session, scope="function"),
 ) -> GroupUpdateResponse:
     return GroupService(db).update_group(id, group)
+
+
+@router.post(
+    "/batch",
+    dependencies=[
+        Depends(Authorization.enforce(Action.GLOBAL__CREATE_GROUP, EmptyResolver)),
+    ],
+)
+def create_groups_batch(
+    request: IdentityBatchCreateRequest,
+    db: Session = Depends(get_db_session, scope="function"),
+) -> IdentityBatchCreateResponse:
+    return GroupService(db).create_groups_batch(request.items)
+
+
+@router.delete(
+    "/batch",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[
+        Depends(Authorization.enforce(Action.GLOBAL__DELETE_GROUP, EmptyResolver)),
+    ],
+)
+def delete_groups_batch(
+    request: IdentityBatchDeleteRequest,
+    db: Session = Depends(get_db_session, scope="function"),
+) -> None:
+    GroupService(db).delete_groups_batch(request.ids)
 
 
 @router.delete(

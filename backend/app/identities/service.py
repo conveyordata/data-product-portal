@@ -23,6 +23,7 @@ def get_identity_display_name(identity: Identity) -> str:
 
     raise ValueError(f"Unsupported identity type: {identity.type}")
 
+
 def validate_batch_create_items(
     items: list[Any],
     schema: type[CreateSchema],
