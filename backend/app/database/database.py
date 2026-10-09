@@ -15,8 +15,10 @@ from app.shared.schema import ORMModel
 
 OM = TypeVar("OM", bound=ORMModel)
 
+SKIP_OUTPUT_PORT_ACCESS_FUNCTION_FILTER = "skip_output_port_access_function_filter"
+
 UNFILTERED = {
-    "skip_output_port_access_function_filter": True,
+    SKIP_OUTPUT_PORT_ACCESS_FUNCTION_FILTER: True,
     "skip_data_product_visibility_filter": True,
 }
 

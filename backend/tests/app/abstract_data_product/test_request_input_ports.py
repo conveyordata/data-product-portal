@@ -18,14 +18,18 @@ from app.abstract_data_product.service import AbstractDataProductService
 from app.abstract_data_product.type import AbstractDataProductType
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.configuration.access_durations.enums import AccessDurationType
+from app.data_products.model import DataProductVisibility
 from app.data_products.output_ports.enums import OutputPortAccessFunction
+from app.users.model import User
 from tests.factories import (
     AccessDurationFactory,
     AccessModeFactory,
     DataProductFactory,
+    DataProductRoleAssignmentFactory,
     ExplorationFactory,
     InputPortFactory,
     OutputPortFactory,
+    RoleFactory,
     TechnicalAssetFactory,
     TechnicalAssetOutputPortAssociationFactory,
     UserFactory,
@@ -347,6 +351,44 @@ class TestRequestInputPortsDuration:
         assert sum(r.decision == InputPortRequestDecision.PENDING for r in reqs) == 1
         session.refresh(link)
         assert link.status == InputPortStatus.APPROVED
+
+    def test_renew_input_port__consumer_of_private_output_port_of_hidden_data_product(
+        self, session
+    ):
+        actor = UserFactory()
+        dp = DataProductFactory()
+        DataProductRoleAssignmentFactory(
+            data_product_id=dp.id,
+            identity_id=actor.id,
+            role_id=RoleFactory.data_product_owner().id,
+        )
+        port = OutputPortFactory(
+            data_product=DataProductFactory(visibility=DataProductVisibility.HIDDEN),
+            access_function=OutputPortAccessFunction.PRIVATE,
+            data_product_access_duration_type=AccessDurationType.TIME_BOUND,
+        )
+        AccessDurationFactory(
+            abstract_data_product_type=AbstractDataProductType.DATA_PRODUCT,
+            access_duration_type=AccessDurationType.TIME_BOUND,
+            days=30,
+        )
+        link = InputPortFactory(
+            consuming_abstract_data_product=dp,
+            output_port=port,
+            status=DecisionStatus.APPROVED,
+            request__access_duration_type=AccessDurationType.TIME_BOUND,
+            request__requested_duration_days=30,
+            request__valid_until=date.today() + timedelta(days=10),
+        )
+        actor_id, dp_id, port_id, link_id = actor.id, dp.id, port.id, link.id
+        session.expunge_all()
+
+        with as_user(session, actor_id):
+            ip = AbstractDataProductService(session).renew_input_port(
+                dp_id, port_id, actor=session.get(User, actor_id)
+            )
+
+        assert ip.id == link_id
 
     def test_renew_input_port__reuses_previous_justification(self, session):
         actor = UserFactory()

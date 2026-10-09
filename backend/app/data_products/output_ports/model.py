@@ -57,7 +57,11 @@ from app.data_products.output_ports.data_quality.model import (  # noqa: TCH001
 from app.data_products.output_ports.enums import OutputPortAccessFunction
 from app.data_products.output_ports.status import OutputPortStatus
 from app.data_products.technical_assets.model import TechnicalAssetAccessMode
-from app.database.database import Base, ensure_exists
+from app.database.database import (
+    SKIP_OUTPUT_PORT_ACCESS_FUNCTION_FILTER,
+    Base,
+    ensure_exists,
+)
 from app.database.event_mixin import EventTrackedMixin
 from app.groups.model import GroupMembership
 from app.shared.model import BaseORM
@@ -131,14 +135,20 @@ def _has_user_access_through_input_port(cls, user_id: uuid.UUID):
     )
 
 
-def _access_function_filter_for_user(user_id: uuid.UUID):
+def access_function_filter_excluding_consumers(user_id: uuid.UUID):
     return or_(
         OutputPort.access_function != OutputPortAccessFunction.PRIVATE,
         _has_user_access_to_private_output_port(OutputPort, user_id),
         _has_user_access_to_private_output_port_via_data_product(OutputPort, user_id),
-        _has_user_access_through_input_port(OutputPort, user_id),
         is_user_admin(user_id),
         is_system_account(user_id),
+    )
+
+
+def _access_function_filter_for_user(user_id: uuid.UUID):
+    return or_(
+        access_function_filter_excluding_consumers(user_id),
+        _has_user_access_through_input_port(OutputPort, user_id),
     )
 
 
@@ -329,7 +339,7 @@ def enforce_private_output_port_filter(execute_state):
     if not execute_state.is_select:
         return
 
-    if execute_state.execution_options.get("skip_output_port_access_function_filter"):
+    if execute_state.execution_options.get(SKIP_OUTPUT_PORT_ACCESS_FUNCTION_FILTER):
         return
 
     # The current user is only set while serving a request. Everything else

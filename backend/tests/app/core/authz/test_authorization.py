@@ -34,26 +34,19 @@ class TestHasAccessThroughConsumerRole:
             action=str(AuthorizationAction.DATA_PRODUCT__UPDATE_PROPERTIES),
         )
 
-    def test_returns_true_when_role_exists_on_a_linked_consumer(
+    def test_returns_false_for_the_producer_data_product(
         self, authorizer: Authorization
     ):
         authorizer.add_input_port_link(
-            consumer_id="consumer_without_role",
+            consumer_id="consumer",
             producer_data_product_id="producer",
-            producer_output_port_id="output_port_a",
-        )
-        authorizer.add_input_port_link(
-            consumer_id="consumer_with_role",
-            producer_data_product_id="producer",
-            producer_output_port_id="output_port_b",
+            producer_output_port_id="output_port",
         )
         authorizer.assign_resource_role(
-            user_id="user",
-            role_id="owner",
-            resource_id="consumer_with_role",
+            user_id="user", role_id="owner", resource_id="consumer"
         )
 
-        assert _has_access_through_consumer_role(
+        assert not _has_access_through_consumer_role(
             authorizer._enforcer,
             sub="user",
             role="owner",
@@ -110,9 +103,9 @@ class TestHasAccessThroughConsumerRole:
             authorizer._enforcer,
             sub="user",
             role="owner",
-            resource="producer",
-            parent="*",
-            action=str(AuthorizationAction.HIDDEN__DATA_PRODUCT__READ),
+            resource="output_port",
+            parent="producer",
+            action=str(AuthorizationAction.HIDDEN__OUTPUT_PORT__READ),
         )
 
 
@@ -187,7 +180,7 @@ class TestAuthorization:
             producer_output_port_id="output_port",
         )
 
-        assert authorizer.has_access(sub=user, dom=ANY, obj=producer, act=allowed)
+        assert not authorizer.has_access(sub=user, dom=ANY, obj=producer, act=allowed)
         assert not authorizer.has_access(sub=user, dom=ANY, obj=producer, act=denied)
         assert authorizer.has_access(
             sub=user,
@@ -202,7 +195,13 @@ class TestAuthorization:
             producer_data_product_id=producer,
             producer_output_port_id="output_port",
         )
-        assert not authorizer.has_access(sub=user, dom=ANY, obj=producer, act=allowed)
+        assert not authorizer.has_access(
+            sub=user,
+            dom=ANY,
+            obj="output_port",
+            parent=producer,
+            act=output_port_allowed,
+        )
 
     def test_wildcard_resource_role(self, authorizer: Authorization):
         role = "public_reader"
