@@ -140,7 +140,7 @@ _platform_metadata = PlatformMetadata(
 
 `technical_info_template` is optional and falls back to `result_string_template`. The platform is named after `parent_platform`, or after `platform_key` when the plugin has no parent, and the platform service after `platform_key`. A plugin without `result_string_template` gets none of these rows, which is right for a plugin that only adds a link.
 
-What only the people running the portal know stays theirs to fill in, with SQL for now. The portal never overwrites it:
+Admins still fill in, with SQL for now, the settings only they know: for example which S3 buckets the form offers (`["datalake", "ingress"]`), or which AWS account and region each environment uses. The portal never overwrites these:
 
 | Table | What goes in it | Needed for a plugin with a form |
 |---|---|---|

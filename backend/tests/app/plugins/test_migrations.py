@@ -18,14 +18,12 @@ from sqlalchemy_utils.functions import (
 
 from app.plugins.migrations import (
     _CORE_VERSIONS_DIR,
-    RETIRED_PLUGIN_REVISIONS,
     VERSION_TABLE,
     _config,
     _configuration_table,
     _core_head,
     _owned_versions_dir,
     _version_locations,
-    _version_table,
     check_latest_migration_core,
     migrate_all,
     owns_a_table,
@@ -123,21 +121,6 @@ def test_migrate_all__still_checks_for_orphans_when_a_plugin_is_dropped():
     # regardless - installed() is the smallest list that can.
     with pytest.raises(ValueError, match="belonging to no installed plugin"):
         migrate_all(installed(), engine)
-
-
-@pytest.mark.parametrize("retired", sorted(RETIRED_PLUGIN_REVISIONS))
-def test_migrate_all__forgets_the_revision_of_a_plugin_the_portal_dropped(retired):
-    """A database that ran a plugin the portal has since deleted keeps that
-    plugin's row. Without reconciling it, the orphan check above would abort
-    every later migration, and no core revision could clean it up because the
-    check runs first."""
-    with engine.begin() as connection:
-        connection.execute(_version_table.insert().values(version_num=retired))
-    assert retired in _tracked_revisions()
-
-    migrate()
-
-    assert retired not in _tracked_revisions()
 
 
 def _set_configuration_type(configuration_id, configuration_type) -> None:
@@ -244,18 +227,17 @@ def test_migrate_all__rolls_back_core_when_a_plugin_migration_fails():
 
 
 def test_migrate_all__points_at_a_newer_portal_after_rolling_back_the_image():
-    newer_core = "ffffffffffff"
     with engine.begin() as connection:
-        connection.execute(_version_table.insert().values(version_num=newer_core))
+        connection.exec_driver_sql(
+            f"insert into {VERSION_TABLE} values ('ffffffffffff')"  # noqa: S608
+        )
     try:
         with pytest.raises(ValueError, match="newer portal version"):
             migrate()
     finally:
         with engine.begin() as connection:
-            connection.execute(
-                _version_table.delete().where(
-                    _version_table.c.version_num == newer_core
-                )
+            connection.exec_driver_sql(
+                f"delete from {VERSION_TABLE} where version_num = 'ffffffffffff'"  # noqa: S608
             )
 
 

@@ -24,16 +24,6 @@ _FILE_TEMPLATE = (
     "%%(year)d_%%(month).2d_%%(day).2d_%%(hour).2d%%(minute).2d-%%(rev)s_%%(slug)s"
 )
 
-RETIRED_PLUGIN_REVISIONS = frozenset(
-    {"rustfs_0001_baseline", "parameter_store_0002_service"}
-)
-
-_version_table = Table(
-    VERSION_TABLE,
-    MetaData(),
-    Column("version_num", String(32), primary_key=True),
-)
-
 _configuration_table = Table(
     "data_output_configurations",
     MetaData(),
@@ -86,21 +76,6 @@ def _current_heads(engine: Engine) -> tuple[str, ...]:
         return MigrationContext.configure(
             connection, opts={"version_table": VERSION_TABLE}
         ).get_current_heads()
-
-
-def _forget_retired_revisions(engine: Engine) -> None:
-    retired = sorted(RETIRED_PLUGIN_REVISIONS.intersection(_current_heads(engine)))
-    if not retired:
-        return
-
-    with engine.begin() as connection:
-        connection.execute(
-            _version_table.delete().where(_version_table.c.version_num.in_(retired))
-        )
-    logger.info(
-        "Dropped the migration history of plugin(s) the portal no longer ships: "
-        + ", ".join(retired)
-    )
 
 
 def _types_without_a_plugin(
@@ -161,8 +136,6 @@ def migrate_all(plugins: Sequence[type[TechnicalAssetPlugin]], engine: Engine) -
     plugin's baseline `depends_on` the core revision that created the table
     its own table points at, so one upgrade to every head keeps that order.
     """
-    _forget_retired_revisions(engine)
-
     plugins_owning_tables = [plugin for plugin in plugins if owns_a_table(plugin)]
     url = engine.url.render_as_string(hide_password=False)
 
