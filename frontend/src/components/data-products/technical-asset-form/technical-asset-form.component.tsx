@@ -1,5 +1,5 @@
 import { Alert, Form, type FormInstance, type FormProps, Input, Radio, Select, Space } from 'antd';
-import { type RefObject, useCallback, useEffect, useMemo, useState } from 'react';
+import { type RefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDebouncedCallback } from 'use-debounce';
 import { CardSelection } from '@/components/card-selection/card-selection.tsx';
@@ -231,7 +231,14 @@ export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallback
         [validateNamespace, dataProductId],
     );
 
+    const latestPreview = useRef(0);
     const setResultString = useDebouncedCallback((values: CreateTechnicalAssetRequest) => {
+        const preview = ++latestPreview.current;
+        const setResult = (result?: string) => {
+            if (preview === latestPreview.current) {
+                form.setFieldValue('result', result);
+            }
+        };
         if (!values.platform_id || !values.service_id) {
             form.setFieldValue('result', undefined);
             return;
@@ -246,8 +253,8 @@ export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallback
         };
         form.validateFields(['configuration'], { validateOnly: true, recursive: true })
             .then(() => fetchResultString(request).unwrap())
-            .then((result) => form.setFieldValue('result', result.technical_asset_access_path))
-            .catch(() => form.setFieldValue('result', undefined));
+            .then((result) => setResult(result.technical_asset_access_path))
+            .catch(() => setResult(undefined));
     }, debounce);
 
     useEffect(() => {

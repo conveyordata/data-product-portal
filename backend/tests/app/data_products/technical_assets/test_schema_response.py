@@ -1,9 +1,13 @@
-from typing import ClassVar, Optional
+from typing import ClassVar, Optional, Sequence
 from uuid import uuid4
 
 from app.configuration.data_product_types.enums import DataProductIconKey
 from app.configuration.data_product_types.schema import DataProductType
 from app.configuration.domains.schema import Domain
+from app.configuration.environments.platform_service_configurations.schema_response import (
+    EnvironmentConfigsGetItem,
+)
+from app.configuration.environments.schema_response import Environment
 from app.configuration.platforms.platform_services.schema import PlatformService
 from app.configuration.platforms.schema_response import Platform
 from app.data_products.schema import DataProduct
@@ -20,19 +24,26 @@ class PluginWithoutPlatform(TechnicalAssetPlugin):
 
     repository: str
 
+    def get_configuration(self, configs):
+        return None
 
-def _service(result_string_template: str) -> PlatformService:
+
+def _service(
+    result_string_template: str, technical_info_template: str = "{repository}"
+) -> PlatformService:
     return PlatformService(
         id=uuid4(),
         name="some-service",
         platform=Platform(id=uuid4(), name="some-platform"),
         result_string_template=result_string_template,
-        technical_info_template="{repository}",
+        technical_info_template=technical_info_template,
     )
 
 
 def _item(
-    configuration: TechnicalAssetPlugin, service: Optional[PlatformService]
+    configuration: TechnicalAssetPlugin,
+    service: Optional[PlatformService],
+    environment_configurations: Sequence[EnvironmentConfigsGetItem] = (),
 ) -> GetTechnicalAssetsResponseItem:
     return GetTechnicalAssetsResponseItem.model_construct(
         id=uuid4(),
@@ -54,7 +65,7 @@ def _item(
         domain=Domain(id=uuid4(), name="sales", description=""),
         configuration=configuration,
         service=service,
-        environment_configurations=[],
+        environment_configurations=list(environment_configurations),
     )
 
 
@@ -86,6 +97,24 @@ def test_result_string__is_empty_without_a_service():
     item = _item(configuration, None)
 
     assert item.result_string == ""
+
+
+def test_technical_info__can_use_the_plugin_context():
+    environment = Environment(id=uuid4(), name="development", acronym="dev", context="")
+
+    item = _item(
+        PluginWithoutPlatform(repository="some-repo"),
+        _service(
+            "{repository}",
+            "{environment}/{domain.name}/{data_product.namespace}/"
+            "{technical_asset.namespace}/{repository}",
+        ),
+        [EnvironmentConfigsGetItem.model_construct(config=[], environment=environment)],
+    )
+
+    assert [info.info for info in item.technical_info] == [
+        "dev/sales/customer360/orders/some-repo"
+    ]
 
 
 def test_technical_info__is_empty_without_a_platform_service():
