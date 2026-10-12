@@ -5,6 +5,7 @@ from typing import Any
 from fastapi import HTTPException, Request
 
 from sdk.api_client.models import (
+    CloudEventDataProductEnvironmentAddedEvent,
     CloudEventDataProductEvent,
     CloudEventDataProductRoleAssignmentEvent,
     CloudEventDataProductSettingValueEvent,
@@ -14,6 +15,7 @@ from sdk.api_client.models import (
     CloudEventOutputPortRoleAssignmentEvent,
     CloudEventOutputPortTechnicalAssetLinkEvent,
     CloudEventTechnicalAssetEvent,
+    DataProductEnvironmentAddedEvent,
     DataProductEvent,
     DataProductRoleAssignmentEvent,
     DataProductSettingValueEvent,
@@ -44,7 +46,10 @@ class AbstractEventHandler(ABC):
             raise HTTPException(status_code=400, detail="Missing 'type' field in payload")
 
         parsed_event: Any
-        if event_type == "data_product.event":
+        if event_type == "data_product.environment_added":
+            parsed_event = CloudEventDataProductEnvironmentAddedEvent.from_dict(payload)
+            return await self.on_data_product_environment_added(parsed_event.data)
+        elif event_type == "data_product.event":
             parsed_event = CloudEventDataProductEvent.from_dict(payload)
             return await self.on_data_product_event(parsed_event.data)
         elif event_type == "data_product_role_assignment.event":
@@ -74,6 +79,11 @@ class AbstractEventHandler(ABC):
         else:
             # Standard practice is to accept unhandled hooks with a 202/success to avoid webhook retries
             return {"status": "ignored", "reason": f"No handler implemented for '{event_type}'"}
+
+    @abstractmethod
+    async def on_data_product_environment_added(self, data: DataProductEnvironmentAddedEvent) -> Any:
+        """Handler for the parsed payload of 'data_product.environment_added'"""
+        pass
 
     @abstractmethod
     async def on_data_product_event(self, data: DataProductEvent) -> Any:
@@ -126,6 +136,9 @@ class EmptyEventHandler(AbstractEventHandler):
     An empty implementation of AbstractEventHandler for testing purposes.
     Inherit from this in your tests to avoid implementing every single abstract method.
     """
+
+    async def on_data_product_environment_added(self, data: DataProductEnvironmentAddedEvent) -> Any:
+        pass
 
     async def on_data_product_event(self, data: DataProductEvent) -> Any:
         pass
