@@ -1,5 +1,4 @@
-import { Button, Form, Input, Modal, Radio, Select } from 'antd';
-import { useState } from 'react';
+import { Button, Form, Input, Modal } from 'antd';
 import { useTranslation } from 'react-i18next';
 import {
     type DomainCreate,
@@ -7,9 +6,7 @@ import {
     useCreateDomainMutation,
     useUpdateDomainMutation,
 } from '@/store/api/services/generated/configurationDomainsApi.ts';
-import { useGetEnvironmentsQuery } from '@/store/api/services/generated/configurationEnvironmentsApi.ts';
 import { dispatchMessage } from '@/utils/feedback.ts';
-import { selectFilterOptionByLabel } from '@/utils/form.helper.ts';
 
 interface DomainFormText {
     title: string;
@@ -29,17 +26,6 @@ export function CreateDomainModal({ isOpen, onClose, mode, initial }: Props) {
     const [form] = Form.useForm();
     const [createDomain] = useCreateDomainMutation();
     const [editDomain] = useUpdateDomainMutation();
-    const { data: { environments: availableEnvironments = [] } = {} } = useGetEnvironmentsQuery();
-    const environmentSelectOptions = availableEnvironments.map((environment) => ({
-        label: environment.name,
-        value: environment.id,
-    }));
-    const globalEnvironmentIds = availableEnvironments
-        .filter((environment) => environment.is_global !== false)
-        .map((environment) => environment.id);
-    const [environmentMode, setEnvironmentMode] = useState<'global' | 'custom'>(
-        initial?.environments.length ? 'custom' : 'global',
-    );
 
     const createText: DomainFormText = {
         title: t('Create new Domain'),
@@ -58,17 +44,13 @@ export function CreateDomainModal({ isOpen, onClose, mode, initial }: Props) {
     const variableText = mode === 'create' ? createText : updateText;
 
     const handleFinish = async (values: DomainCreate) => {
-        const payload = {
-            ...values,
-            environment_ids: environmentMode === 'global' ? [] : (values.environment_ids ?? []),
-        };
         try {
             if (mode === 'create') {
-                await createDomain(payload).unwrap();
+                await createDomain(values).unwrap();
             } else {
                 await editDomain({
                     id: initial?.id as string,
-                    domainUpdate: payload,
+                    domainUpdate: values,
                 }).unwrap();
             }
 
@@ -112,7 +94,6 @@ export function CreateDomainModal({ isOpen, onClose, mode, initial }: Props) {
                 initialValues={{
                     name: initial?.name,
                     description: initial?.description,
-                    environment_ids: initial?.environments.map((environment) => environment.id),
                 }}
             >
                 <Form.Item
@@ -130,43 +111,6 @@ export function CreateDomainModal({ isOpen, onClose, mode, initial }: Props) {
                 >
                     <Input />
                 </Form.Item>
-
-                <Form.Item label={t('Environment Setting')}>
-                    <Radio.Group
-                        block
-                        optionType="button"
-                        buttonStyle="solid"
-                        value={environmentMode}
-                        onChange={(e) => setEnvironmentMode(e.target.value)}
-                        options={[
-                            { label: t('Use global list'), value: 'global' },
-                            { label: t('Use custom list'), value: 'custom' },
-                        ]}
-                    />
-                </Form.Item>
-
-                {environmentMode === 'global' ? (
-                    <Form.Item label={t('Selected Environments')}>
-                        <Select
-                            mode="multiple"
-                            value={globalEnvironmentIds}
-                            options={environmentSelectOptions}
-                            disabled
-                        />
-                    </Form.Item>
-                ) : (
-                    <Form.Item
-                        name="environment_ids"
-                        label={t('Selected Environments')}
-                        rules={[{ required: true, message: t('Please select at least one environment') }]}
-                    >
-                        <Select
-                            mode="multiple"
-                            options={environmentSelectOptions}
-                            showSearch={{ filterOption: selectFilterOptionByLabel }}
-                        />
-                    </Form.Item>
-                )}
             </Form>
         </Modal>
     );

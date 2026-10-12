@@ -60,7 +60,7 @@ describe('DataProductForm environments', () => {
     beforeEach(() => {
         allowAllAuth();
         mockGetEnvironments();
-        mockGetDomains([{ ...mock_domains[0], environments: [mockEnvironments[2]] }]);
+        mockGetDomains(mock_domains);
         mockGetDataProductTypes();
         mockDataProductLifecycles();
         mockUsersHttp(mockUsers);
@@ -78,7 +78,7 @@ describe('DataProductForm environments', () => {
         );
     });
 
-    it('prefills global defaults without inheriting Domain selections', async () => {
+    it('prefills global defaults independently of Domain changes', async () => {
         renderForm('create');
         const picker = await getEnvironmentPicker();
         expect(within(picker).getByText('Development')).toBeInTheDocument();

@@ -119,10 +119,11 @@ class TestDataProductsRouter:
             == product["environments"]
         )
 
-    def test_create_data_product__uses_selection_not_domain_defaults(
+    def test_create_data_product__uses_selection_not_global_defaults(
         self, payload, client, user_with_create_data_product_rights
     ):
-        domain = DomainFactory(environments=[EnvironmentFactory(is_global=True)])
+        EnvironmentFactory(is_global=True)
+        domain = DomainFactory()
         payload["domain_id"] = str(domain.id)
         response = self.create_data_product(client, payload)
         assert response.status_code == 200, response.text

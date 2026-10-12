@@ -12747,15 +12747,6 @@
           "description": {
             "type": "string",
             "title": "Description"
-          },
-          "environment_ids": {
-            "items": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "type": "array",
-            "title": "Environment Ids",
-            "default": []
           }
         },
         "type": "object",
@@ -12774,15 +12765,6 @@
           "description": {
             "type": "string",
             "title": "Description"
-          },
-          "environment_ids": {
-            "items": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "type": "array",
-            "title": "Environment Ids",
-            "default": []
           }
         },
         "type": "object",
@@ -13554,21 +13536,13 @@
           "description": {
             "type": "string",
             "title": "Description"
-          },
-          "environments": {
-            "items": {
-              "$ref": "#/components/schemas/EnvironmentGetItem"
-            },
-            "type": "array",
-            "title": "Environments"
           }
         },
         "type": "object",
         "required": [
           "id",
           "name",
-          "description",
-          "environments"
+          "description"
         ],
         "title": "GetDomainResponse"
       },
@@ -13587,13 +13561,6 @@
             "type": "string",
             "title": "Description"
           },
-          "environments": {
-            "items": {
-              "$ref": "#/components/schemas/EnvironmentGetItem"
-            },
-            "type": "array",
-            "title": "Environments"
-          },
           "abstract_data_product_count": {
             "type": "integer",
             "title": "Abstract Data Product Count"
@@ -13604,7 +13571,6 @@
           "id",
           "name",
           "description",
-          "environments",
           "abstract_data_product_count"
         ],
         "title": "GetDomainsItem"

@@ -269,4 +269,10 @@ begin
         0
     );
 
+    INSERT INTO public.data_product_environments (data_product_id, environment_id, creation_date)
+    VALUES
+        (sales_crm_customers_dp_id, environment_id_dev, timezone('utc'::text, CURRENT_TIMESTAMP)),
+        (sales_erp_orders_dp_id, environment_id_dev, timezone('utc'::text, CURRENT_TIMESTAMP)),
+        (logistics_wms_shipments_dp_id, environment_id_dev, timezone('utc'::text, CURRENT_TIMESTAMP));
+
 end $$;
