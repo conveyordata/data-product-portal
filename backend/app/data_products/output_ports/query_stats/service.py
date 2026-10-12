@@ -161,7 +161,9 @@ class OutputPortStatsService:
         if not values:
             return
 
-        stmt = insert(OutputPortQueryStatsDaily).values(list(values.values()))
+        stmt = insert(OutputPortQueryStatsDaily).values(
+            [values[key] for key in sorted(values)]
+        )
         stmt = stmt.on_conflict_do_update(
             index_elements=["date", "dataset_id", "consumer_data_product_id"],
             set_={"query_count": stmt.excluded.query_count},

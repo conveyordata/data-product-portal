@@ -16,7 +16,7 @@ class OutputPortQueryStatsDelete:
     """
     Attributes:
         date (datetime.date): Day to delete, in ISO 8601 format (YYYY-MM-DD)
-        consumer_data_product_id (UUID): ID of the consumer data product whose count to delete
+        consumer_data_product_id (UUID): ID of the consuming data product whose count to delete
     """
 
     date: datetime.date

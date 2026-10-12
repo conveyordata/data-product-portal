@@ -48,9 +48,9 @@ def get_output_port_query_stats(
 
 @router.patch(
     "",
-    description="Upsert daily query counts for this output port, one entry per day and consumer data product. "
-    "Existing counts for the same day and consumer are overwritten, so sending the same data twice is safe. "
-    "If a request contains the same day and consumer more than once, the last entry is used.",
+    description="Upsert daily query counts for this output port, one entry per day and consuming data product. "
+    "Existing counts for the same day and consuming data product are overwritten, so sending the same data twice is safe. "
+    "If a request contains the same day and consuming data product more than once, the last entry is used.",
     dependencies=[
         Depends(
             Authorization.enforce(
@@ -74,7 +74,7 @@ def update_output_port_query_stats(
 
 @router.delete(
     "",
-    description="Delete the query count of one consumer data product for one day.",
+    description="Delete the query count of one consuming data product for one day.",
     dependencies=[
         Depends(
             Authorization.enforce(

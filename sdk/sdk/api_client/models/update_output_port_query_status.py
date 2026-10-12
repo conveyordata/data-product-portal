@@ -17,7 +17,8 @@ T = TypeVar("T", bound="UpdateOutputPortQueryStatus")
 class UpdateOutputPortQueryStatus:
     """
     Attributes:
-        output_port_query_stats_updates (list[OutputPortQueryStatsUpdate]): Daily query counts per consumer data product
+        output_port_query_stats_updates (list[OutputPortQueryStatsUpdate]): Daily query counts per consuming data
+            product
     """
 
     output_port_query_stats_updates: list[OutputPortQueryStatsUpdate]

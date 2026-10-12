@@ -31,15 +31,15 @@ class OutputPortQueryStatsUpdate(ORMModel):
         strict=True,
         ge=0,
         le=2**31 - 1,
-        description="Number of queries the consumer data product ran against the output port on this day. "
-        "Overwrites any count previously sent for the same day and consumer.",
+        description="Number of queries the consuming data product ran against the output port on this day. "
+        "Overwrites any count previously sent for the same day and consuming data product.",
         examples=[42],
     )
 
 
 class UpdateOutputPortQueryStatus(ORMModel):
     output_port_query_stats_updates: list[OutputPortQueryStatsUpdate] = Field(
-        description="Daily query counts per consumer data product"
+        description="Daily query counts per consuming data product"
     )
 
 
@@ -49,5 +49,5 @@ class OutputPortQueryStatsDelete(ORMModel):
         examples=["2025-01-15"],
     )
     consumer_data_product_id: UUID = Field(
-        description="ID of the consumer data product whose count to delete"
+        description="ID of the consuming data product whose count to delete"
     )

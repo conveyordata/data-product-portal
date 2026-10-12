@@ -10781,7 +10781,7 @@ func (s *OutputPortLink) SetOutputPort(val OutputPort) {
 type OutputPortQueryStatsDelete struct {
 	// Day to delete, in ISO 8601 format (YYYY-MM-DD).
 	Date time.Time `json:"date"`
-	// ID of the consumer data product whose count to delete.
+	// ID of the consuming data product whose count to delete.
 	ConsumerDataProductID uuid.UUID `json:"consumer_data_product_id"`
 }
 
@@ -10876,8 +10876,8 @@ type OutputPortQueryStatsUpdate struct {
 	Date time.Time `json:"date"`
 	// ID of the data product that queried the output port.
 	ConsumerDataProductID uuid.UUID `json:"consumer_data_product_id"`
-	// Number of queries the consumer data product ran against the output port on this day. Overwrites any
-	// count previously sent for the same day and consumer.
+	// Number of queries the consuming data product ran against the output port on this day. Overwrites any
+	// count previously sent for the same day and consuming data product.
 	QueryCount int `json:"query_count"`
 }
 
@@ -14530,7 +14530,7 @@ func (*UpdateOutputPortQueryStatsOKApplicationJSON) updateOutputPortQueryStatsRe
 
 // Ref: #/components/schemas/UpdateOutputPortQueryStatus
 type UpdateOutputPortQueryStatus struct {
-	// Daily query counts per consumer data product.
+	// Daily query counts per consuming data product.
 	OutputPortQueryStatsUpdates []OutputPortQueryStatsUpdate `json:"output_port_query_stats_updates"`
 }
 
