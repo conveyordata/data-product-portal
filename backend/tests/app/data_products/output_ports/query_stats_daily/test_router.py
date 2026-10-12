@@ -71,6 +71,26 @@ class TestDatasetQueryStatsDailyRouter:
             stats = session.query(OutputPortQueryStatsDaily).all()
             assert len(stats) >= 2
 
+    def test_update_output_port_query_stats__invalid_entry(self, client):
+        output_port = OutputPortFactory()
+        _assign_update_role(output_port)
+        consumer = DataProductFactory()
+        endpoint = f"{DATA_PRODUCT_ENDPOINT}/{output_port.data_product.id}/output_ports/{output_port.id}/query_stats"
+
+        for entry in (
+            {"date": "2025-01-15", "query_count": -1},
+            {"date": "15/01/2025", "query_count": 1},
+        ):
+            response = client.patch(
+                endpoint,
+                json={
+                    "output_port_query_stats_updates": [
+                        {**entry, "consumer_data_product_id": str(consumer.id)}
+                    ]
+                },
+            )
+            assert response.status_code == 422, response.text
+
     def test_get_query_stats(self, client, session):
         """Test getting query stats for a dataset."""
         dataset = OutputPortFactory()

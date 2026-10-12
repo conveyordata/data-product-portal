@@ -1055,7 +1055,7 @@ type Invoker interface {
 	//
 	// Upsert daily query counts for this output port, one entry per day and consumer data product.
 	// Existing counts for the same day and consumer are overwritten, so sending the same data twice is
-	// safe.
+	// safe. If a request contains the same day and consumer more than once, the last entry is used.
 	//
 	// PATCH /api/v2/data_products/{data_product_id}/output_ports/{id}/query_stats
 	UpdateOutputPortQueryStats(ctx context.Context, request *UpdateOutputPortQueryStatus, params UpdateOutputPortQueryStatsParams) (UpdateOutputPortQueryStatsRes, error)
@@ -12320,7 +12320,7 @@ func (c *Client) sendUpdateOutputPortAccessType(ctx context.Context, request *Ou
 //
 // Upsert daily query counts for this output port, one entry per day and consumer data product.
 // Existing counts for the same day and consumer are overwritten, so sending the same data twice is
-// safe.
+// safe. If a request contains the same day and consumer more than once, the last entry is used.
 //
 // PATCH /api/v2/data_products/{data_product_id}/output_ports/{id}/query_stats
 func (c *Client) UpdateOutputPortQueryStats(ctx context.Context, request *UpdateOutputPortQueryStatus, params UpdateOutputPortQueryStatsParams) (UpdateOutputPortQueryStatsRes, error) {

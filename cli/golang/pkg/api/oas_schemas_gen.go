@@ -10780,13 +10780,13 @@ func (s *OutputPortLink) SetOutputPort(val OutputPort) {
 // Ref: #/components/schemas/OutputPortQueryStatsDelete
 type OutputPortQueryStatsDelete struct {
 	// Day to delete, in ISO 8601 format (YYYY-MM-DD).
-	Date string `json:"date"`
+	Date time.Time `json:"date"`
 	// ID of the consumer data product whose count to delete.
 	ConsumerDataProductID uuid.UUID `json:"consumer_data_product_id"`
 }
 
 // GetDate returns the value of Date.
-func (s *OutputPortQueryStatsDelete) GetDate() string {
+func (s *OutputPortQueryStatsDelete) GetDate() time.Time {
 	return s.Date
 }
 
@@ -10796,7 +10796,7 @@ func (s *OutputPortQueryStatsDelete) GetConsumerDataProductID() uuid.UUID {
 }
 
 // SetDate sets the value of Date.
-func (s *OutputPortQueryStatsDelete) SetDate(val string) {
+func (s *OutputPortQueryStatsDelete) SetDate(val time.Time) {
 	s.Date = val
 }
 
@@ -10873,7 +10873,7 @@ func (*OutputPortQueryStatsResponses) getOutputPortQueryStatsRes() {}
 // Ref: #/components/schemas/OutputPortQueryStatsUpdate
 type OutputPortQueryStatsUpdate struct {
 	// Day the queries were executed, in ISO 8601 format (YYYY-MM-DD).
-	Date string `json:"date"`
+	Date time.Time `json:"date"`
 	// ID of the data product that queried the output port.
 	ConsumerDataProductID uuid.UUID `json:"consumer_data_product_id"`
 	// Number of queries the consumer data product ran against the output port on this day. Overwrites any
@@ -10882,7 +10882,7 @@ type OutputPortQueryStatsUpdate struct {
 }
 
 // GetDate returns the value of Date.
-func (s *OutputPortQueryStatsUpdate) GetDate() string {
+func (s *OutputPortQueryStatsUpdate) GetDate() time.Time {
 	return s.Date
 }
 
@@ -10897,7 +10897,7 @@ func (s *OutputPortQueryStatsUpdate) GetQueryCount() int {
 }
 
 // SetDate sets the value of Date.
-func (s *OutputPortQueryStatsUpdate) SetDate(val string) {
+func (s *OutputPortQueryStatsUpdate) SetDate(val time.Time) {
 	s.Date = val
 }
 

@@ -76,7 +76,7 @@ def sync_detailed(
 
      Upsert daily query counts for this output port, one entry per day and consumer data product.
     Existing counts for the same day and consumer are overwritten, so sending the same data twice is
-    safe.
+    safe. If a request contains the same day and consumer more than once, the last entry is used.
 
     Args:
         data_product_id (UUID):
@@ -115,7 +115,7 @@ def sync(
 
      Upsert daily query counts for this output port, one entry per day and consumer data product.
     Existing counts for the same day and consumer are overwritten, so sending the same data twice is
-    safe.
+    safe. If a request contains the same day and consumer more than once, the last entry is used.
 
     Args:
         data_product_id (UUID):
@@ -149,7 +149,7 @@ async def asyncio_detailed(
 
      Upsert daily query counts for this output port, one entry per day and consumer data product.
     Existing counts for the same day and consumer are overwritten, so sending the same data twice is
-    safe.
+    safe. If a request contains the same day and consumer more than once, the last entry is used.
 
     Args:
         data_product_id (UUID):
@@ -186,7 +186,7 @@ async def asyncio(
 
      Upsert daily query counts for this output port, one entry per day and consumer data product.
     Existing counts for the same day and consumer are overwritten, so sending the same data twice is
-    safe.
+    safe. If a request contains the same day and consumer more than once, the last entry is used.
 
     Args:
         data_product_id (UUID):
