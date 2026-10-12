@@ -79,6 +79,7 @@ class TestDatasetQueryStatsDailyRouter:
 
         for entry in (
             {"date": "2025-01-15", "query_count": -1},
+            {"date": "2025-01-15", "query_count": 2**31},
             {"date": "15/01/2025", "query_count": 1},
         ):
             response = client.patch(

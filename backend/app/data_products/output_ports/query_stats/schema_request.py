@@ -16,6 +16,7 @@ class OutputPortQueryStatsUpdate(ORMModel):
     )
     query_count: int = Field(
         ge=0,
+        le=2**31 - 1,
         description="Number of queries the consumer data product ran against the output port on this day. "
         "Overwrites any count previously sent for the same day and consumer.",
         examples=[42],

@@ -15967,6 +15967,7 @@
           },
           "query_count": {
             "type": "integer",
+            "maximum": 2147483647.0,
             "minimum": 0.0,
             "title": "Query Count",
             "description": "Number of queries the consumer data product ran against the output port on this day. Overwrites any count previously sent for the same day and consumer.",
