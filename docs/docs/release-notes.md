@@ -9,7 +9,7 @@ sidebar_position: 200
 ### breaking changes
 
 - **[Helm]**: The blue and green themes and the `theme_configuration` value were removed. The portal always uses the Dataminded theme.
-- **[API]**: The query statistics `PATCH` and `DELETE` endpoints only accept `date` as a `YYYY-MM-DD` string and `query_count` as a JSON integer between 0 and 2147483647. Other values, including timestamps, datetimes, booleans and numeric strings, are rejected with a 422; malformed dates used to return a 400.
+- **[API]**: The query statistics `PATCH` and `DELETE` endpoints only accept `date` as a `YYYY-MM-DD` string and `query_count` as a JSON integer between 0 and 2147483647. Other values, including timestamps, datetimes, booleans and numeric strings, are rejected with a 422; malformed dates used to return a 400. The query statistics `GET` endpoint rejects a `day_range` above 3650 with a 422.
 - **[SDK]**: `OutputPortQueryStatsUpdate.date` and `OutputPortQueryStatsDelete.date` are now `datetime.date` instead of `str` in the Python SDK, and `time.Time` instead of `string` in the CLI's `pkg/api`. Pass a `datetime.date`, not a `datetime.datetime`: the SDK sends the time part along and the request is rejected.
 
 ### bugfixes

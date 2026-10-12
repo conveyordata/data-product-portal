@@ -238,6 +238,16 @@ class TestDatasetQueryStatsDailyRouter:
             assert "query_count" in stat
             assert "consumer_data_product_name" in stat
 
+    def test_get_output_port_query_stats__day_range_too_large(self, client):
+        output_port = OutputPortFactory()
+
+        response = client.get(
+            f"{DATA_PRODUCT_ENDPOINT}/{output_port.data_product.id}/output_ports/{output_port.id}/query_stats",
+            params={"day_range": 3651},
+        )
+
+        assert response.status_code == 422, response.text
+
     def test_delete_data_product_cascades_query_stats_daily(self, client, session):
         """Regression test: Verify that deleting a data product via API cascade deletes query stats."""
 

@@ -37,7 +37,7 @@ def get_output_port_query_stats(
     data_product_id: UUID,
     id: UUID,
     granularity: QueryStatsGranularity = Query(default=QueryStatsGranularity.WEEK),
-    day_range: int = Query(default=DEFAULT_DAY_RANGE, ge=1),
+    day_range: int = Query(default=DEFAULT_DAY_RANGE, ge=1, le=3650),
     db: Session = Depends(get_db_session, scope="function"),
 ) -> OutputPortQueryStatsResponses:
     ds = ensure_output_port_exists(id, db, data_product_id=data_product_id)
