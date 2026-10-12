@@ -146,12 +146,12 @@ class OutputPortStatsService:
         )
 
     def update_query_stats(
-        self, dataset_id: UUID, updates: Iterable[OutputPortQueryStatsUpdate]
+        self, output_port_id: UUID, updates: Iterable[OutputPortQueryStatsUpdate]
     ) -> None:
         values = {
             (update.date, update.consumer_data_product_id): {
                 "date": update.date,
-                "dataset_id": dataset_id,
+                "dataset_id": output_port_id,
                 "consumer_data_product_id": update.consumer_data_product_id,
                 "query_count": update.query_count,
             }
