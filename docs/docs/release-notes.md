@@ -12,6 +12,8 @@ sidebar_position: 200
 - **[API]**: A technical asset's `configuration` object identifies its plugin type with `name` instead of `configuration_type`. Existing clients sending or reading `configuration_type` need to switch to `name`.
 - **[API]**: Output Port create and update requests take `access_type_id` instead of `access_type`. Responses now return `access_type` as an object (`id`, `name`, `access_function`) instead of the former enum string. Look up Access Type ids with `GET /api/v2/configuration/output_port_access_types`.
 - **[SDK]**: Typed technical asset configurations such as `PostgreSQLTechnicalAssetConfiguration`, and `AccessGranularity`, moved from `sdk.api_client.models` to `sdk.plugins`. Provisioners need to update their imports.
+- **[API]**: The query statistics `PATCH` and `DELETE` endpoints only accept `date` as a `YYYY-MM-DD` string and `query_count` as a JSON integer between 0 and 2147483647. Other values, including timestamps, datetimes, booleans and numeric strings, are rejected with a 422; malformed dates used to return a 400. The query statistics `GET` endpoint rejects a `day_range` above 3650 with a 422.
+- **[SDK]**: `OutputPortQueryStatsUpdate.date` and `OutputPortQueryStatsDelete.date` are now `datetime.date` instead of `str` in the Python SDK, and `time.Time` instead of `string` in the CLI's `pkg/api`. Pass a `datetime.date`, not a `datetime.datetime`: the SDK sends the time part along and the request is rejected.
 - **[Database]**: Installations older than 0.7.3 must upgrade to 0.7.3 before upgrading further. The migrations that moved the Snowflake, Databricks, S3, Glue, Redshift and PostgreSQL technical asset tables out of core had their old data-migration logic removed.
 
 ### features
@@ -28,6 +30,7 @@ sidebar_position: 200
 - **[User Deletion]**: A bug caused user deletion to fail if the user was involved in an audit event.
 - **[Helm]**: Fix translation override file path
 - **[Database]**: `python -m app.db_tool migrate` now stops when technical assets exist whose plugin is not installed, instead of the portal failing every request that loads them. Reinstall the plugin, or delete those technical assets.
+- **[API]**: A query statistics `PATCH` that contains the same day and consuming data product more than once no longer fails with a 500; the last entry is used.
 - **[Auth]**: A `DEFAULT_USERNAME` without a dot before the `@` no longer fails when OIDC is disabled.
 - **[General]**: Fix translation file by adding more nested translations for Data Products, Output ports and Technical assets.
 - **[General]**: Output Port owners can renew access for consumers, following the same rules as the consumer-side renew (revoked, expired, denied, cancelled, expiring soon or declined renewal), while keeping the access history. Icons were removed from the access action buttons.

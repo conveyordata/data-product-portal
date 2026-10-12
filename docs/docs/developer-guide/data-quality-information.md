@@ -73,4 +73,4 @@ In order to display the data quality status of an output port, the data product 
 
 #### API endpoint
 
-- [`POST /api/v2/data_products/{data_product_id}/output_ports/{output_port_id}/data_quality_summary`](/docs/api/#tag/Output-Ports-Data-Quality/operation/add_output_port_data_quality_run)
+- [`POST /api/v2/data_products/{data_product_id}/output_ports/{id}/data_quality_summary`](/docs/api/#tag/Data-Products-Output-Ports-Data-Quality/operation/add_output_port_data_quality_run)

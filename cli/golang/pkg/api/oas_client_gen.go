@@ -236,7 +236,7 @@ type Invoker interface {
 	DeleteMachineUser(ctx context.Context, params DeleteMachineUserParams) (DeleteMachineUserRes, error)
 	// DeleteOutputPortQueryStat invokes delete_output_port_query_stat operation.
 	//
-	// Delete Output Port Query Stat.
+	// Delete the query count of one consuming data product for one day.
 	//
 	// DELETE /api/v2/data_products/{data_product_id}/output_ports/{id}/query_stats
 	DeleteOutputPortQueryStat(ctx context.Context, request *OutputPortQueryStatsDelete, params DeleteOutputPortQueryStatParams) (DeleteOutputPortQueryStatRes, error)
@@ -1053,7 +1053,10 @@ type Invoker interface {
 	UpdateOutputPortAccessType(ctx context.Context, request *OutputPortAccessTypeUpdate, params UpdateOutputPortAccessTypeParams) (UpdateOutputPortAccessTypeRes, error)
 	// UpdateOutputPortQueryStats invokes update_output_port_query_stats operation.
 	//
-	// Update Output Port Query Stats.
+	// Upsert daily query counts for this output port, one entry per day and consuming data product.
+	// Existing counts for the same day and consuming data product are overwritten, so sending the same
+	// data twice is safe. If a request contains the same day and consuming data product more than once,
+	// the last entry is used.
 	//
 	// PATCH /api/v2/data_products/{data_product_id}/output_ports/{id}/query_stats
 	UpdateOutputPortQueryStats(ctx context.Context, request *UpdateOutputPortQueryStatus, params UpdateOutputPortQueryStatsParams) (UpdateOutputPortQueryStatsRes, error)
@@ -3218,7 +3221,7 @@ func (c *Client) sendDeleteMachineUser(ctx context.Context, params DeleteMachine
 
 // DeleteOutputPortQueryStat invokes delete_output_port_query_stat operation.
 //
-// Delete Output Port Query Stat.
+// Delete the query count of one consuming data product for one day.
 //
 // DELETE /api/v2/data_products/{data_product_id}/output_ports/{id}/query_stats
 func (c *Client) DeleteOutputPortQueryStat(ctx context.Context, request *OutputPortQueryStatsDelete, params DeleteOutputPortQueryStatParams) (DeleteOutputPortQueryStatRes, error) {
@@ -12316,7 +12319,10 @@ func (c *Client) sendUpdateOutputPortAccessType(ctx context.Context, request *Ou
 
 // UpdateOutputPortQueryStats invokes update_output_port_query_stats operation.
 //
-// Update Output Port Query Stats.
+// Upsert daily query counts for this output port, one entry per day and consuming data product.
+// Existing counts for the same day and consuming data product are overwritten, so sending the same
+// data twice is safe. If a request contains the same day and consuming data product more than once,
+// the last entry is used.
 //
 // PATCH /api/v2/data_products/{data_product_id}/output_ports/{id}/query_stats
 func (c *Client) UpdateOutputPortQueryStats(ctx context.Context, request *UpdateOutputPortQueryStatus, params UpdateOutputPortQueryStatsParams) (UpdateOutputPortQueryStatsRes, error) {
