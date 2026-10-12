@@ -58,6 +58,7 @@ To remove an entry, send a `DELETE` request with this JSON body:
   "date": "2025-01-15",
   "consumer_data_product_id": "6f1c2a3b-4d5e-6f70-8192-a3b4c5d6e7f8"
 }
+```
 
 ### Curated queries
 
