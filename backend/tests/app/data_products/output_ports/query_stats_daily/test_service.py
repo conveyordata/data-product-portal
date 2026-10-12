@@ -173,6 +173,28 @@ class TestOutputPortQueryStatsDailyService:
         assert stats_consumer3 is not None
         assert stats_consumer3.query_count == 200
 
+    def test_update_query_stats__duplicate_entries_last_wins(self, session: Session):
+        output_port = OutputPortFactory()
+        consumer = DataProductFactory()
+        today = date.today()
+
+        updates = [
+            OutputPortQueryStatsUpdate(
+                date=today, consumer_data_product_id=consumer.id, query_count=3
+            ),
+            OutputPortQueryStatsUpdate(
+                date=today, consumer_data_product_id=consumer.id, query_count=5
+            ),
+        ]
+
+        with as_user(session, UserFactory().id):
+            OutputPortStatsService(session).update_query_stats(output_port.id, updates)
+
+        stats = self._fetch_stats(
+            session, output_port.id, consumer.id, today, multiple=True
+        )
+        assert [stat.query_count for stat in stats] == [5]
+
     def test_get_query_stats_daily(self, session: Session, dataset_with_daily_history):
         """Test getting query stats for a dataset."""
         dataset, today, yesterday, consumer1, consumer2 = dataset_with_daily_history

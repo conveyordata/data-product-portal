@@ -148,26 +148,21 @@ class OutputPortStatsService:
     def update_query_stats(
         self, dataset_id: UUID, updates: Iterable[OutputPortQueryStatsUpdate]
     ) -> None:
-        values = []
-        for update in updates:
-            try:
-                parsed_date = date.fromisoformat(update.date)
-            except ValueError as e:
-                raise ValueError(f"Invalid date format: {update.date}") from e
-
-            values.append(
-                {
-                    "date": parsed_date,
-                    "dataset_id": dataset_id,
-                    "consumer_data_product_id": update.consumer_data_product_id,
-                    "query_count": update.query_count,
-                }
-            )
+        # Postgres rejects an upsert that touches the same row twice; the last entry wins
+        values = {
+            (update.date, update.consumer_data_product_id): {
+                "date": update.date,
+                "dataset_id": dataset_id,
+                "consumer_data_product_id": update.consumer_data_product_id,
+                "query_count": update.query_count,
+            }
+            for update in updates
+        }
 
         if not values:
             return
 
-        stmt = insert(OutputPortQueryStatsDaily).values(values)
+        stmt = insert(OutputPortQueryStatsDaily).values(list(values.values()))
         stmt = stmt.on_conflict_do_update(
             index_elements=["date", "dataset_id", "consumer_data_product_id"],
             set_={"query_count": stmt.excluded.query_count},
@@ -178,16 +173,11 @@ class OutputPortStatsService:
     def delete_query_stats(
         self, output_port_id: UUID, delete_request: OutputPortQueryStatsDelete
     ) -> None:
-        try:
-            target_date = date.fromisoformat(delete_request.date)
-        except ValueError as e:
-            raise ValueError(f"Invalid date format: {delete_request.date}") from e
-
         stmt = delete(OutputPortQueryStatsDaily).where(
             OutputPortQueryStatsDaily.output_port_id == output_port_id,
             OutputPortQueryStatsDaily.consumer_data_product_id
             == delete_request.consumer_data_product_id,
-            OutputPortQueryStatsDaily.date == target_date,
+            OutputPortQueryStatsDaily.date == delete_request.date,
         )
         self.db.execute(stmt)
         self.db.flush()

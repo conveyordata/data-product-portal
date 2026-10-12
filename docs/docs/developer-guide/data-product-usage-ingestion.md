@@ -24,13 +24,17 @@ The dashboard above demonstrates how usage data is visualized, with filters for 
 ## API Endpoints
 
 Usage statistics are stored per output port. The `data_product_id` is the data product that owns the output port, `id` is the output port itself.
-Pushing statistics requires the "Insert query statistics" permission, which the owner roles have by default (see [RBAC](./rbac.md)).
+Pushing query statistics requires the "Insert query statistics" permission and replacing curated queries requires the "Manage general properties" permission.
+The owner roles have both by default (see [RBAC](./rbac.md)).
 
 ### Query statistics
 
 - [`PATCH /api/v2/data_products/{data_product_id}/output_ports/{id}/query_stats`](/docs/api/#tag/Data-Products-Output-ports/operation/update_output_port_query_stats) - Upsert daily query counts
 - [`DELETE /api/v2/data_products/{data_product_id}/output_ports/{id}/query_stats`](/docs/api/#tag/Data-Products-Output-ports/operation/delete_output_port_query_stat) - Delete the count of one consumer for one day
 - [`GET /api/v2/data_products/{data_product_id}/output_ports/{id}/query_stats`](/docs/api/#tag/Data-Products-Output-ports/operation/get_output_port_query_stats) - Read the aggregated statistics shown in the dashboard
+
+The `GET` endpoint returns what the dashboard shows, not the rows you pushed: counts are summed per week over the last 90 days by default (see the `granularity` and `day_range` parameters),
+consumers beyond the top 5 are merged into "Other" with ID `00000000-0000-0000-0000-000000000000`, and periods without data are filled with zeros.
 
 Send one entry per day and consumer data product. The consumer is the data product whose members or technical identities ran the queries,
 so you need to map the users or roles in your platform's query logs to the ID of the data product they act for.
@@ -49,9 +53,11 @@ so you need to map the users or roles in your platform's query logs to the ID of
 
 - `date`: the day the queries ran, as `YYYY-MM-DD`
 - `consumer_data_product_id`: the ID of the consuming data product
-- `query_count`: the number of queries on that day. It replaces any count sent earlier for the same day and consumer, so re-sending a day is safe
+- `query_count`: the number of queries on that day, zero or more. It replaces any count sent earlier for the same day and consumer, so re-sending a day is safe.
+  If one request contains the same day and consumer more than once, the last entry is used
 
-To remove an entry, send a `DELETE` request with this JSON body:
+To remove an entry, send a `DELETE` request with this JSON body.
+Some HTTP clients, proxies and API gateways drop the body of a `DELETE` request, so make sure yours sends it:
 
 ```json
 {
@@ -64,6 +70,8 @@ To remove an entry, send a `DELETE` request with this JSON body:
 
 - [`GET /api/v2/data_products/{data_product_id}/output_ports/{id}/curated_queries`](/docs/api/#tag/Data-Products-Output-ports/operation/get_output_port_curated_queries) - Get curated queries
 - [`PUT /api/v2/data_products/{data_product_id}/output_ports/{id}/curated_queries`](/docs/api/#tag/Data-Products-Output-ports/operation/replace_output_port_curated_queries) - Replace curated queries
+
+The `PUT` endpoint replaces the full list, so always send every curated query of the output port; queries you leave out are deleted.
 
 ```json
 {
