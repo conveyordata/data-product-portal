@@ -115,7 +115,7 @@ class TestOutputPortQueryStatsDailyService:
 
         updates = [
             OutputPortQueryStatsUpdate(
-                date=today.isoformat(),
+                date=today,
                 consumer_data_product_id=consumer.id,
                 query_count=100,
             )
@@ -141,12 +141,12 @@ class TestOutputPortQueryStatsDailyService:
         # Patch with 2 updates: one overlapping (consumer1) and one new (consumer3)
         updates = [
             OutputPortQueryStatsUpdate(
-                date=today.isoformat(),
+                date=today,
                 consumer_data_product_id=consumer1.id,
                 query_count=100,
             ),
             OutputPortQueryStatsUpdate(
-                date=today.isoformat(),
+                date=today,
                 consumer_data_product_id=consumer3.id,
                 query_count=200,
             ),
@@ -334,7 +334,7 @@ class TestOutputPortQueryStatsDailyService:
             OutputPortStatsService(session).delete_query_stats(
                 dataset.id,
                 OutputPortQueryStatsDelete(
-                    date=today.isoformat(),
+                    date=today,
                     consumer_data_product_id=consumer1.id,
                 ),
             )

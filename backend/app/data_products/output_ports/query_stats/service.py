@@ -148,7 +148,6 @@ class OutputPortStatsService:
     def update_query_stats(
         self, dataset_id: UUID, updates: Iterable[OutputPortQueryStatsUpdate]
     ) -> None:
-        # Postgres rejects an upsert that touches the same row twice; the last entry wins
         values = {
             (update.date, update.consumer_data_product_id): {
                 "date": update.date,

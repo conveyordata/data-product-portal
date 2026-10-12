@@ -4336,8 +4336,8 @@ func (s *OutputPortQueryStatsUpdate) Validate() error {
 		if err := (validate.Int{
 			MinSet:        true,
 			Min:           0,
-			MaxSet:        false,
-			Max:           0,
+			MaxSet:        true,
+			Max:           2147483647,
 			MinExclusive:  false,
 			MaxExclusive:  false,
 			MultipleOfSet: false,
