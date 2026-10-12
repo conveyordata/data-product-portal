@@ -212,6 +212,7 @@
             "required": false,
             "schema": {
               "type": "integer",
+              "maximum": 3650,
               "minimum": 1,
               "default": 90,
               "title": "Day Range"

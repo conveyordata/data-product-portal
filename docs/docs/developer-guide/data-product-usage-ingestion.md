@@ -90,7 +90,7 @@ The `PUT` endpoint replaces the full list, so always send every curated query of
 To ingest usage data, you need to:
 
 1. Extract usage data from your data platform's query logs or access history
-2. Aggregate the data by day and map each user or role to the ID of its consuming data product
+2. Aggregate the data by day and map each user or role to the ID of its consuming data product. Sum the counts of all users and roles that act for the same consuming data product, because the API stores one count per day and consuming data product
 3. Implement the HTTP client logic (authentication, request formatting, error handling, retries) to push the data to the API endpoint
 4. Schedule the ingestion process (e.g., daily batch jobs)
 
@@ -101,6 +101,8 @@ For organizations using Snowflake, we provide a sample SQL query that can be use
 **Note**: This query requires Snowflake Enterprise Edition or higher, as it uses the `ACCESS_HISTORY` view.
 
 We advise to use this query on a (daily) schedule.
+Views in `SNOWFLAKE.ACCOUNT_USAGE`, such as `ACCESS_HISTORY`, can lag a few hours behind, so also re-send the previous day or two on each run. Re-send whole days, with `start_ts` and `end_ts` at midnight, because a partial day overwrites the complete count stored earlier.
+Re-sending a day only overwrites the counts of the consuming data products in the request; use the `DELETE` endpoint to remove a count you no longer send.
 
 ```sql
 WITH AccessLogRaw AS (
