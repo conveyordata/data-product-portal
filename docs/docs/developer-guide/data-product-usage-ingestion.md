@@ -24,7 +24,7 @@ The dashboard above demonstrates how usage data is visualized, with filters for 
 ## API Endpoints
 
 Usage statistics are stored per output port. The `data_product_id` is the data product that owns the output port, `id` is the output port itself.
-Pushing statistics requires the update query stats permission, which the owner roles have by default (see [RBAC](./rbac.md)).
+Pushing statistics requires the "Insert query statistics" permission, which the owner roles have by default (see [RBAC](./rbac.md)).
 
 ### Query statistics
 
