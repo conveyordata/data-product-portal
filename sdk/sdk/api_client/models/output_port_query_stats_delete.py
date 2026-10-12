@@ -14,8 +14,8 @@ T = TypeVar("T", bound="OutputPortQueryStatsDelete")
 class OutputPortQueryStatsDelete:
     """
     Attributes:
-        date (str):
-        consumer_data_product_id (UUID):
+        date (str): Day to delete, in ISO 8601 format (YYYY-MM-DD)
+        consumer_data_product_id (UUID): ID of the consumer data product whose count to delete
     """
 
     date: str

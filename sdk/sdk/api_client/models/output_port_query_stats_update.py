@@ -14,9 +14,10 @@ T = TypeVar("T", bound="OutputPortQueryStatsUpdate")
 class OutputPortQueryStatsUpdate:
     """
     Attributes:
-        date (str):
-        consumer_data_product_id (UUID):
-        query_count (int):
+        date (str): Day the queries were executed, in ISO 8601 format (YYYY-MM-DD)
+        consumer_data_product_id (UUID): ID of the data product that queried the output port
+        query_count (int): Number of queries the consumer data product ran against the output port on this day.
+            Overwrites any count previously sent for the same day and consumer.
     """
 
     date: str

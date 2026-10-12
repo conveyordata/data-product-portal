@@ -21,30 +21,61 @@ A simple example is shown below:
 
 The dashboard above demonstrates how usage data is visualized, with filters for granularity (day, week, month) and time ranges (30 days, 90 days, 1 year).
 
-## API Endpoint
+## API Endpoints
 
-To ingest usage data, use the following REST API endpoint:
+Usage statistics are stored per output port. The `data_product_id` is the data product that owns the output port, `id` is the output port itself.
+Pushing statistics requires the update query stats permission, which the owner roles have by default (see [RBAC](./rbac.md)).
 
-### Endpoint
+### Query statistics
 
-#### query statistics
+- [`PATCH /api/v2/data_products/{data_product_id}/output_ports/{id}/query_stats`](/docs/api/#tag/Data-Products-Output-ports/operation/update_output_port_query_stats) - Upsert daily query counts
+- [`DELETE /api/v2/data_products/{data_product_id}/output_ports/{id}/query_stats`](/docs/api/#tag/Data-Products-Output-ports/operation/delete_output_port_query_stat) - Delete the count of one consumer for one day
+- [`GET /api/v2/data_products/{data_product_id}/output_ports/{id}/query_stats`](/docs/api/#tag/Data-Products-Output-ports/operation/get_output_port_query_stats) - Read the aggregated statistics shown in the dashboard
 
-- [`PATCH /api/datasets/{id}/query_stats`](/docs/api/#tag/datasets/operation/update_query_stats_api_datasets__id__query_stats_patch) - Update query statistics
-- [`DELETE /api/datasets/{id}/query_stats`](/docs/api/#tag/datasets/operation/delete_query_stat_api_datasets__id__query_stats_delete) - Delete query statistics
+Send one entry per day and consumer data product. The consumer is the data product whose members or technical identities ran the queries,
+so you need to map the users or roles in your platform's query logs to the ID of the data product they act for.
 
+```json
+{
+  "output_port_query_stats_updates": [
+    {
+      "date": "2025-01-15",
+      "consumer_data_product_id": "6f1c2a3b-4d5e-6f70-8192-a3b4c5d6e7f8",
+      "query_count": 42
+    }
+  ]
+}
+```
 
-#### curated queries
+- `date`: the day the queries ran, as `YYYY-MM-DD`
+- `consumer_data_product_id`: the ID of the consuming data product
+- `query_count`: the number of queries on that day. It replaces any count sent earlier for the same day and consumer, so re-sending a day is safe
 
-- [`GET /api/datasets/{id}/usage/curated_queries`](/docs/api/#tag/datasets/operation/get_dataset_curated_queries_api_datasets__id__usage_curated_queries_get) - Get curated queries
-- [`PUT /api/datasets/{id}/usage/curated_queries`](/docs/api/#tag/datasets/operation/replace_dataset_curated_queries_api_datasets__id__usage_curated_queries_put) - Replace curated queries
+To remove an entry, send a `DELETE` with the same `date` and `consumer_data_product_id`.
 
+### Curated queries
+
+- [`GET /api/v2/data_products/{data_product_id}/output_ports/{id}/curated_queries`](/docs/api/#tag/Data-Products-Output-ports/operation/get_output_port_curated_queries) - Get curated queries
+- [`PUT /api/v2/data_products/{data_product_id}/output_ports/{id}/curated_queries`](/docs/api/#tag/Data-Products-Output-ports/operation/replace_output_port_curated_queries) - Replace curated queries
+
+```json
+{
+  "curated_queries": [
+    {
+      "title": "Daily revenue",
+      "description": "Revenue per day for the last month",
+      "query_text": "SELECT day, SUM(amount) FROM sales GROUP BY day"
+    }
+  ]
+}
+```
 
 ## Implementation
 
 To ingest usage data, you need to:
 
 1. Extract usage data from your data platform's query logs or access history
-2. Aggregate the data by date and consumer
+2. Aggregate the data by day and map each consumer to its data product ID
 3. Implement the HTTP client logic (authentication, request formatting, error handling, retries) to push the data to the API endpoint
 4. Schedule the ingestion process (e.g., daily batch jobs)
 
