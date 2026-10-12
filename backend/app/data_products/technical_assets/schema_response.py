@@ -1,7 +1,7 @@
 from typing import Optional, Sequence
 from uuid import UUID
 
-from pydantic import Field, computed_field
+from pydantic import AliasPath, Field, computed_field
 
 from app.configuration.access_modes.schema_response import AccessMode
 from app.configuration.environments.platform_service_configurations.schema_response import (
@@ -14,6 +14,7 @@ from app.data_products.output_port_technical_assets_link.schema import (
 )
 from app.data_products.output_ports.schema import OutputPort
 from app.data_products.schema import DataProduct
+from app.data_products.schema_response import DataProductEnvironment
 from app.data_products.technical_assets.enums import TechnicalMapping
 from app.data_products.technical_assets.status import TechnicalAssetStatus
 from app.shared.schema import ORMModel
@@ -65,6 +66,9 @@ class GetTechnicalAssetsResponseItem(ORMModel):
 
     configuration: DataOutputConfiguration
     owner: DataProduct
+    environments: list[DataProductEnvironment] = Field(
+        validation_alias=AliasPath("owner", "environments")
+    )
 
     service: Optional[PlatformService] = Field(default=None, exclude=True)
     environment_configurations: list[EnvironmentConfigsGetItem] = Field(exclude=True)

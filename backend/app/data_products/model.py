@@ -1,8 +1,9 @@
 import enum
 import uuid
+from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Column, ForeignKey, String, event, func, or_, select
+from sqlalchemy import Column, DateTime, ForeignKey, String, event, func, or_, select
 from sqlalchemy import Enum as SAEnum
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import (
@@ -23,6 +24,7 @@ from app.authorization.role_assignments.data_product.model import (
 )
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.configuration.data_product_types.model import DataProductType
+from app.configuration.environments.model import Environment
 from app.configuration.tags.model import Tag, tag_data_product_table
 from app.core.auth.db_utils import (
     is_system_account,
@@ -35,9 +37,10 @@ from app.data_products.output_ports.model import (
     OutputPort,
 )
 from app.data_products.technical_assets.model import TechnicalAsset
-from app.database.database import ensure_exists
+from app.database.database import Base, ensure_exists
 from app.database.event_mixin import EventTrackedMixin
 from app.groups.model import GroupMembership
+from app.shared.model import utcnow
 
 if TYPE_CHECKING:
     from app.configuration.data_product_lifecycles.model import DataProductLifecycle
@@ -261,6 +264,11 @@ class DataProduct(
         cascade="all, delete-orphan",
         lazy="raise",
     )
+    environments: Mapped[list["DataProductEnvironment"]] = relationship(
+        cascade="all, delete-orphan",
+        order_by="DataProductEnvironment.creation_date, DataProductEnvironment.environment_id",
+        lazy="raise",
+    )
 
     user_count = column_property(
         select(func.count(DataProductRoleAssignment.id))
@@ -285,6 +293,21 @@ class DataProduct(
         return DataProductEvent(
             id=self.id,
         )
+
+
+class DataProductEnvironment(Base):
+    __tablename__ = "data_product_environments"
+
+    data_product_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("data_products.id", ondelete="CASCADE"), primary_key=True
+    )
+    environment_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("environments.id"), primary_key=True
+    )
+    creation_date: Mapped[datetime] = mapped_column(
+        DateTime(timezone=False), server_default=utcnow()
+    )
+    environment: Mapped[Environment] = relationship(lazy="joined")
 
 
 def ensure_data_product_exists(

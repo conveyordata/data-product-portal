@@ -20,6 +20,7 @@ import { server } from '@/tests/mocks/server.ts';
 export const mockDataProducts: GetDataProductsResponseItem[] = [
     {
         id: 'dp-1',
+        environments: [],
         name: 'Sales Analytics',
         description: 'Analytics data product for sales team',
         namespace: 'sales namespace',
@@ -42,6 +43,7 @@ export const mockDataProducts: GetDataProductsResponseItem[] = [
     },
     {
         id: 'dp-2',
+        environments: [],
         name: 'Customer Insights',
         finalizers: ['finalizer-1'],
         description: 'Customer behavior and insights',

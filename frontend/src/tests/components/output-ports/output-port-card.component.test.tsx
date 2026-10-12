@@ -45,6 +45,7 @@ const dataset: GetOutputPortResponse = {
     rolled_up_tags: [],
     data_product_settings: [],
     technical_asset_links: [],
+    environments: [],
 };
 
 const technicalAsset: GetTechnicalAssetsResponseItem = {
@@ -87,6 +88,7 @@ const technicalAsset: GetTechnicalAssetsResponseItem = {
     sourceAligned: false,
     result_string: 's3://bucket/orders',
     technical_info: [],
+    environments: [],
 };
 
 describe('OutputPortCard', () => {
