@@ -1,12 +1,13 @@
 import { HttpResponse, http } from 'msw';
 import { Link, Route, Routes } from 'react-router';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import Cart from '@/pages/cart/cart.page.tsx';
 import { ResourceNameValidityType } from '@/store/api/services/generated/resourceNamesApi.ts';
 import { allowAllAuth } from '@/tests/mocks/auth.ts';
 import { mockDataProductLifecycles } from '@/tests/mocks/configurationDataProductLifecycles.ts';
 import { mockGetDataProductTypes } from '@/tests/mocks/configurationDataProductTypes.ts';
 import { mockGetDomains } from '@/tests/mocks/configurationDomains.ts';
+import { mockGetEnvironments } from '@/tests/mocks/configurationEnvironments.ts';
 import { mockDataProductOutputPorts } from '@/tests/mocks/dataProductOutputPorts.ts';
 import { mockDataProductInputPorts, mockDataProducts, mockDataProductsHttp } from '@/tests/mocks/dataProducts.ts';
 import { mockExplorationInputPorts, mockExplorations, mockExplorationsHttp } from '@/tests/mocks/explorations.ts';
@@ -158,6 +159,8 @@ describe('Cart', () => {
     });
 
     describe('Cart should support creating a new data product', () => {
+        beforeEach(() => mockGetEnvironments());
+
         const createNewDataProduct = async () => {
             const existingChoice = await screen.findByText('Create a new Data Product');
             await userEvent.click(existingChoice);

@@ -119,6 +119,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                     type_id: values.type_id,
                     tag_ids: values.tag_ids ?? [],
                     domain_id: values.domain_id,
+                    environment_ids: values.environment_ids,
                     visibility: values.visibility,
                 };
                 const response = await createDataProduct(request).unwrap();
@@ -146,6 +147,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                     type_id: values.type_id,
                     lifecycle_id: values.lifecycle_id,
                     domain_id: values.domain_id,
+                    environment_ids: values.environment_ids,
                     tag_ids: values.tag_ids,
                 };
                 const response = await updateDataProduct({
@@ -206,6 +208,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
         type_id: currentDataProduct?.type.id,
         lifecycle_id: currentDataProduct?.lifecycle?.id,
         domain_id: currentDataProduct?.domain.id,
+        environment_ids: currentDataProduct?.environments.map((item) => item.environment_id),
         tag_ids: currentDataProduct?.tags.map((tag) => tag.id),
         owners: mode === 'edit' ? ownerIds : currentUser?.id ? [currentUser?.id] : [],
         visibility: currentDataProduct?.visibility,
