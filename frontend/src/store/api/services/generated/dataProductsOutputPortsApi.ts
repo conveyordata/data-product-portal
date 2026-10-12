@@ -379,15 +379,21 @@ export type HttpValidationError = {
   detail?: ValidationError[];
 };
 export type OutputPortQueryStatsUpdate = {
+  /** Day the queries were executed, in ISO 8601 format (YYYY-MM-DD) */
   date: string;
+  /** ID of the data product that queried the output port */
   consumer_data_product_id: string;
+  /** Number of queries the consumer data product ran against the output port on this day. Overwrites any count previously sent for the same day and consumer. */
   query_count: number;
 };
 export type UpdateOutputPortQueryStatus = {
+  /** Daily query counts per consumer data product */
   output_port_query_stats_updates: OutputPortQueryStatsUpdate[];
 };
 export type OutputPortQueryStatsDelete = {
+  /** Day to delete, in ISO 8601 format (YYYY-MM-DD) */
   date: string;
+  /** ID of the consumer data product whose count to delete */
   consumer_data_product_id: string;
 };
 export type OutputPortCuratedQuery = {

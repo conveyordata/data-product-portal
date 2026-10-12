@@ -74,6 +74,10 @@ def sync_detailed(
 ) -> Response[Any | HTTPValidationError]:
     """Update Output Port Query Stats
 
+     Upsert daily query counts for this output port, one entry per day and consumer data product.
+    Existing counts for the same day and consumer are overwritten, so sending the same data twice is
+    safe.
+
     Args:
         data_product_id (UUID):
         id (UUID):
@@ -109,6 +113,10 @@ def sync(
 ) -> Any | HTTPValidationError | None:
     """Update Output Port Query Stats
 
+     Upsert daily query counts for this output port, one entry per day and consumer data product.
+    Existing counts for the same day and consumer are overwritten, so sending the same data twice is
+    safe.
+
     Args:
         data_product_id (UUID):
         id (UUID):
@@ -138,6 +146,10 @@ async def asyncio_detailed(
     body: UpdateOutputPortQueryStatus,
 ) -> Response[Any | HTTPValidationError]:
     """Update Output Port Query Stats
+
+     Upsert daily query counts for this output port, one entry per day and consumer data product.
+    Existing counts for the same day and consumer are overwritten, so sending the same data twice is
+    safe.
 
     Args:
         data_product_id (UUID):
@@ -171,6 +183,10 @@ async def asyncio(
     body: UpdateOutputPortQueryStatus,
 ) -> Any | HTTPValidationError | None:
     """Update Output Port Query Stats
+
+     Upsert daily query counts for this output port, one entry per day and consumer data product.
+    Existing counts for the same day and consumer are overwritten, so sending the same data twice is
+    safe.
 
     Args:
         data_product_id (UUID):
