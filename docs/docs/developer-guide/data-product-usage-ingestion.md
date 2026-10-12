@@ -51,7 +51,14 @@ so you need to map the users or roles in your platform's query logs to the ID of
 - `consumer_data_product_id`: the ID of the consuming data product
 - `query_count`: the number of queries on that day. It replaces any count sent earlier for the same day and consumer, so re-sending a day is safe
 
-To remove an entry, send a `DELETE` with the same `date` and `consumer_data_product_id`.
+To remove an entry, send a `DELETE` request with this JSON body:
+
+~~~json
+{
+  "date": "2025-01-15",
+  "consumer_data_product_id": "6f1c2a3b-4d5e-6f70-8192-a3b4c5d6e7f8"
+}
+~~~
 
 ### Curated queries
 
