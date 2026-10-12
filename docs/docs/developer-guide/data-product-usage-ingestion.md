@@ -8,8 +8,8 @@ sidebar_position: 5
 # Data Product Usage Ingestion
 
 The Data Product Portal provides a **usage analytics** view that allows one to:
-- track how datasets are being consumed over time and by which data products
-- show some relevant queries for a given dataset
+- track how output ports are being consumed over time and by which data products
+- show some relevant queries for a given output port
 
 ## Overview
 
@@ -17,7 +17,7 @@ To enable the usage analytics, the usage related tables have to be populated wit
 
 A simple example is shown below:
 
-![Usage Dashboard showing queries over time and queries per consumer](./img/usage.png)
+![Usage Dashboard showing queries over time and queries per consuming data product](./img/usage.png)
 
 The dashboard above demonstrates how usage data is visualized, with filters for granularity (day, week, month) and time ranges (30 days, 90 days, 1 year).
 
@@ -30,13 +30,13 @@ The owner roles have both by default (see [RBAC](./rbac.md)).
 ### Query statistics
 
 - [`PATCH /api/v2/data_products/{data_product_id}/output_ports/{id}/query_stats`](/docs/api/#tag/Data-Products-Output-ports/operation/update_output_port_query_stats) - Upsert daily query counts
-- [`DELETE /api/v2/data_products/{data_product_id}/output_ports/{id}/query_stats`](/docs/api/#tag/Data-Products-Output-ports/operation/delete_output_port_query_stat) - Delete the count of one consumer for one day
+- [`DELETE /api/v2/data_products/{data_product_id}/output_ports/{id}/query_stats`](/docs/api/#tag/Data-Products-Output-ports/operation/delete_output_port_query_stat) - Delete the count of one consuming data product for one day
 - [`GET /api/v2/data_products/{data_product_id}/output_ports/{id}/query_stats`](/docs/api/#tag/Data-Products-Output-ports/operation/get_output_port_query_stats) - Read the aggregated statistics shown in the dashboard
 
 The `GET` endpoint returns what the dashboard shows, not the rows you pushed: counts are summed per week over the last 90 days by default (see the `granularity` and `day_range` parameters),
-consumers beyond the top 5 are merged into "Other" with ID `00000000-0000-0000-0000-000000000000`, and periods without data are filled with zeros.
+consuming data products beyond the top 5 are merged into "Other" with ID `00000000-0000-0000-0000-000000000000`, and periods without data are filled with zeros.
 
-Send one entry per day and consumer data product. The consumer is the data product whose members or technical identities ran the queries,
+Send one entry per day and consuming data product. The consuming data product is the one whose members or technical identities ran the queries,
 so you need to map the users or roles in your platform's query logs to the ID of the data product they act for.
 
 ```json
@@ -53,8 +53,8 @@ so you need to map the users or roles in your platform's query logs to the ID of
 
 - `date`: the day the queries ran, as `YYYY-MM-DD`
 - `consumer_data_product_id`: the ID of the consuming data product
-- `query_count`: the number of queries on that day, zero or more. It replaces any count sent earlier for the same day and consumer, so re-sending a day is safe.
-  If one request contains the same day and consumer more than once, the last entry is used
+- `query_count`: the number of queries on that day, zero or more. It replaces any count sent earlier for the same day and consuming data product, so re-sending a day is safe.
+  If one request contains the same day and consuming data product more than once, the last entry is used
 
 To remove an entry, send a `DELETE` request with this JSON body.
 Some HTTP clients, proxies and API gateways drop the body of a `DELETE` request, so make sure yours sends it:
@@ -90,13 +90,13 @@ The `PUT` endpoint replaces the full list, so always send every curated query of
 To ingest usage data, you need to:
 
 1. Extract usage data from your data platform's query logs or access history
-2. Aggregate the data by day and map each consumer to its data product ID
+2. Aggregate the data by day and map each user or role to the ID of its consuming data product
 3. Implement the HTTP client logic (authentication, request formatting, error handling, retries) to push the data to the API endpoint
 4. Schedule the ingestion process (e.g., daily batch jobs)
 
 ### Snowflake Example
 
-For organizations using Snowflake, we provide a sample SQL query that can be used as a starting point to extract usage statistics from Snowflake's `ACCESS_HISTORY` view. This query identifies which schemas were accessed by specific roles and aggregates query counts by consumer.
+For organizations using Snowflake, we provide a sample SQL query that can be used as a starting point to extract usage statistics from Snowflake's `ACCESS_HISTORY` view. This query counts the queries each user ran against each schema.
 
 **Note**: This query requires Snowflake Enterprise Edition or higher, as it uses the `ACCESS_HISTORY` view.
 
