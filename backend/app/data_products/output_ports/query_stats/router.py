@@ -66,9 +66,9 @@ def update_output_port_query_stats(
     input_data: UpdateOutputPortQueryStatus,
     db: Session = Depends(get_db_session, scope="function"),
 ) -> None:
-    ds = ensure_output_port_exists(id, db, data_product_id=data_product_id)
+    op = ensure_output_port_exists(id, db, data_product_id=data_product_id)
     OutputPortStatsService(db).update_query_stats(
-        dataset_id=ds.id, updates=input_data.output_port_query_stats_updates
+        output_port_id=op.id, updates=input_data.output_port_query_stats_updates
     )
 
 
