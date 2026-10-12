@@ -1,13 +1,26 @@
 import datetime
+import re
+from typing import Annotated
 from uuid import UUID
 
-from pydantic import Field
+from pydantic import BeforeValidator, Field
 
 from app.shared.schema import ORMModel
 
 
+def _require_iso_date(value: object) -> object:
+    if isinstance(value, datetime.date) and not isinstance(value, datetime.datetime):
+        return value
+    if isinstance(value, str) and re.fullmatch(r"\d{4}-\d{2}-\d{2}", value):
+        return value
+    raise ValueError("Input should be a date in YYYY-MM-DD format")
+
+
+IsoDate = Annotated[datetime.date, BeforeValidator(_require_iso_date)]
+
+
 class OutputPortQueryStatsUpdate(ORMModel):
-    date: datetime.date = Field(
+    date: IsoDate = Field(
         description="Day the queries were executed, in ISO 8601 format (YYYY-MM-DD)",
         examples=["2025-01-15"],
     )
@@ -15,6 +28,7 @@ class OutputPortQueryStatsUpdate(ORMModel):
         description="ID of the data product that queried the output port"
     )
     query_count: int = Field(
+        strict=True,
         ge=0,
         le=2**31 - 1,
         description="Number of queries the consumer data product ran against the output port on this day. "
@@ -30,7 +44,7 @@ class UpdateOutputPortQueryStatus(ORMModel):
 
 
 class OutputPortQueryStatsDelete(ORMModel):
-    date: datetime.date = Field(
+    date: IsoDate = Field(
         description="Day to delete, in ISO 8601 format (YYYY-MM-DD)",
         examples=["2025-01-15"],
     )

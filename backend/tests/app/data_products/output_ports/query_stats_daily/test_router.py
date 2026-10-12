@@ -81,6 +81,11 @@ class TestDatasetQueryStatsDailyRouter:
             {"date": "2025-01-15", "query_count": -1},
             {"date": "2025-01-15", "query_count": 2**31},
             {"date": "15/01/2025", "query_count": 1},
+            {"date": "2025-02-30", "query_count": 1},
+            {"date": 1736899200, "query_count": 1},
+            {"date": "2025-01-15T00:00:00Z", "query_count": 1},
+            {"date": "2025-01-15", "query_count": True},
+            {"date": "2025-01-15", "query_count": "42"},
         ):
             response = client.patch(
                 endpoint,
@@ -91,6 +96,21 @@ class TestDatasetQueryStatsDailyRouter:
                 },
             )
             assert response.status_code == 422, response.text
+
+    def test_delete_output_port_query_stat__invalid_date(self, client):
+        output_port = OutputPortFactory()
+        _assign_update_role(output_port)
+
+        response = client.request(
+            "DELETE",
+            f"{DATA_PRODUCT_ENDPOINT}/{output_port.data_product.id}/output_ports/{output_port.id}/query_stats",
+            json={
+                "date": "15/01/2025",
+                "consumer_data_product_id": str(DataProductFactory().id),
+            },
+        )
+
+        assert response.status_code == 422, response.text
 
     def test_get_query_stats(self, client, session):
         """Test getting query stats for a dataset."""
