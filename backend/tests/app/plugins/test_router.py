@@ -3,6 +3,7 @@ from fastapi.testclient import TestClient
 
 from app.authorization.roles.schema import Scope
 from app.core.authz.actions import AuthorizationAction as Action
+from app.data_products.technical_assets.enums import TechnicalMapping
 from app.settings import settings
 from app.technical_asset_configuration.schema_request import (
     RenderTechnicalAssetAccessPathRequest,
@@ -195,19 +196,59 @@ class TestPlatformTilesEndpoint:
         assert link_tile["has_environments"] is False
 
     def test_render_technical_asset_access_path(self, client: TestClient):
-        service = PlatformServiceFactory(result_string_template="{path}/{table}")
-        configuration = FakeTechnicalAssetConfiguration(path="path", table="table")
-        request = RenderTechnicalAssetAccessPathRequest(
-            platform_id=service.platform.id,
-            service_id=service.id,
-            configuration=configuration,
-        ).model_dump(mode="json")
+        service = PlatformServiceFactory(
+            result_string_template=(
+                "{domain.name}/{data_product.namespace}/"
+                "{technical_asset.namespace}/{path}/{table}"
+            )
+        )
+        data_product = DataProductFactory(namespace="customer360")
+        self._allow_creating_technical_assets(data_product)
 
         response = client.post(
-            f"{ENDPOINT}/render_technical_asset_access_path", json=request
+            f"{ENDPOINT}/render_technical_asset_access_path",
+            json=self._render_request(service, data_product),
         )
         assert response.status_code == 200, response.text
-        assert response.json()["technical_asset_access_path"] == "path/table"
+        assert (
+            response.json()["technical_asset_access_path"]
+            == f"{data_product.domain.name}/customer360/orders/path/table"
+        )
+
+    def test_render_technical_asset_access_path__forbidden_without_create_technical_asset(
+        self, client: TestClient
+    ):
+        service = PlatformServiceFactory(result_string_template="{path}")
+        data_product = DataProductFactory()
+        UserFactory(external_id=settings.DEFAULT_USERNAME)
+
+        response = client.post(
+            f"{ENDPOINT}/render_technical_asset_access_path",
+            json=self._render_request(service, data_product),
+        )
+        assert response.status_code == 403
+
+    @staticmethod
+    def _allow_creating_technical_assets(data_product) -> None:
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__CREATE_TECHNICAL_ASSET],
+        )
+        DataProductRoleAssignmentFactory(
+            identity_id=user.id, role_id=role.id, data_product_id=data_product.id
+        )
+
+    @staticmethod
+    def _render_request(service, data_product) -> dict:
+        return RenderTechnicalAssetAccessPathRequest(
+            platform_id=service.platform.id,
+            service_id=service.id,
+            data_product_id=data_product.id,
+            namespace="orders",
+            technical_mapping=TechnicalMapping.Default,
+            configuration=FakeTechnicalAssetConfiguration(path="path", table="table"),
+        ).model_dump(mode="json")
 
 
 class TestLinkPluginEndToEnd:

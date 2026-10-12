@@ -2,14 +2,11 @@ import logging
 from typing import ClassVar, Optional
 from uuid import UUID
 
-from sqlalchemy import select
-from sqlalchemy.orm import Session, selectinload
+from sqlalchemy.orm import Session
 
 from app.configuration.environments.platform_service_configurations.schemas import (
     AzureBlobConfig,
 )
-from app.data_products.model import DataProduct as DataProductModel
-from app.data_products.schema import DataProduct
 from portal_plugins.azure_blob.model import (
     NAME,
 )
@@ -17,6 +14,7 @@ from portal_plugins.azure_blob.model import (
     AzureBlobTechnicalAssetConfiguration as AzureBlobTechnicalAssetConfigurationModel,
 )
 from app.technical_asset_configuration.base_schema import (
+    PluginContext,
     PlatformMetadata,
     TechnicalAssetPlugin,
     UIElementMetadata,
@@ -52,19 +50,8 @@ class AzureBlobTechnicalAssetConfiguration(TechnicalAssetPlugin):
     class Meta:
         orm_model = AzureBlobTechnicalAssetConfigurationModel
 
-    def validate_configuration(self, data_product: DataProduct, db: Session):
-        result: DataProductModel = db.scalar(
-            select(DataProductModel)
-            .options(selectinload(DataProductModel.domain))
-            .where(DataProductModel.id == data_product.id)
-        )
-        logger.info(
-            f"queried data product in validate configuraiton with domain: {result.domain.name}"
-        )
-        self.domain = result.domain.name
-
-    def on_create(self):
-        pass
+    def validate_configuration(self, context: PluginContext, db: Session):
+        self.domain = context.domain.name
 
     @classmethod
     def get_url(

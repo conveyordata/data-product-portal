@@ -87,7 +87,7 @@ class GlueTechnicalAssetConfiguration(TechnicalAssetPlugin):
     def get_ui_metadata(cls, db):
         # describe the form: one UIElementMetadata per field
 
-    def validate_configuration(self, data_product, db):
+    def validate_configuration(self, context, db):
         # raise an error if the input isn't acceptable
 
     def get_configuration(self, configs):
@@ -119,7 +119,7 @@ Those are the only parts every plugin needs. A plugin that only has a name, a ti
 When a data product owner creates a Glue technical asset, they pick a database from a dropdown. That list has to come from somewhere, and the right AWS account for each environment too. The portal keeps this information in three places:
 
 - A platform is a technology vendor or cloud provider, such as AWS, Azure, Databricks or Snowflake.
-- A platform service is one service of a platform, such as S3 or Glue on AWS. It holds the list of options your form offers, for example `["datalake", "ingress", "egress"]`. It also holds `result_string_template`, which turns what the owner filled in into the name everyone sees, such as `{bucket}/{path}` for S3. The names between braces are your plugin's fields. `technical_info_template` does the same once per environment, and can also use `{environment}`, the environment's acronym.
+- A platform service is one service of a platform, such as S3 or Glue on AWS. It holds the list of options your form offers, for example `["datalake", "ingress", "egress"]`. It also holds `result_string_template`, which turns what the owner filled in into the name everyone sees, such as `{bucket}/{path}` for S3. The names between braces are your plugin's fields. A template can also use the technical asset, its data product and their domain, for example `{technical_asset.namespace}`, `{data_product.namespace}` or `{domain.name}`. When one of your fields has the same name, your field wins. `technical_info_template` does the same once per environment, and can also use `{environment}`, the environment's acronym.
 - An environment is a stage such as development or production. Per environment it contains the settings that differ, such as the AWS account and region, or which real bucket belongs to each option. They're linked to an option through its `identifier`.
 
 
@@ -168,7 +168,7 @@ UIElementMetadata(
 
 The Glue plugin also uses a text field, radio buttons and a field that only appears for one of those radio choices, so it's a good place to see the other types.
 
-`validate_configuration` runs when a technical asset with the default technical mapping is created. Raise an error there when the input isn't acceptable. It's optional: by default it accepts everything. Glue, for example, only accepts databases that start with the data product's namespace. You can also override `render_template` if the name built from `result_string_template` needs some cleaning up.
+`validate_configuration` runs when a technical asset with the default technical mapping is created. Raise an error there when the input isn't acceptable. It's optional: by default it accepts everything. Its `context` holds the technical asset (`id`, `namespace` and `technical_mapping`), the data product (`id`, `name`, `namespace`, `description`, `type`, `status`) and its `domain`. The technical asset's `id` is empty here and in the form preview, because the technical asset doesn't exist yet. Glue, for example, only accepts databases that start with `context.data_product.namespace`. You can also override `render_template` if the name built from `result_string_template` needs some cleaning up. It gets the same context as the keyword argument `plugin_context`, so pass it on to `super().render_template`.
 
 ### The database table
 

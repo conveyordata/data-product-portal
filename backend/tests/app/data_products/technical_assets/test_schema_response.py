@@ -1,8 +1,14 @@
 from typing import ClassVar, Optional
 from uuid import uuid4
 
+from app.configuration.data_product_types.enums import DataProductIconKey
+from app.configuration.data_product_types.schema import DataProductType
+from app.configuration.domains.schema import Domain
 from app.configuration.platforms.platform_services.schema import PlatformService
 from app.configuration.platforms.schema_response import Platform
+from app.data_products.schema import DataProduct
+from app.data_products.status import AbstractDataProductStatus
+from app.data_products.technical_assets.enums import TechnicalMapping
 from app.data_products.technical_assets.schema_response import (
     GetTechnicalAssetsResponseItem,
 )
@@ -29,6 +35,23 @@ def _item(
     configuration: TechnicalAssetPlugin, service: Optional[PlatformService]
 ) -> GetTechnicalAssetsResponseItem:
     return GetTechnicalAssetsResponseItem.model_construct(
+        id=uuid4(),
+        namespace="orders",
+        technical_mapping=TechnicalMapping.Default,
+        owner=DataProduct(
+            id=uuid4(),
+            name="Customer 360",
+            namespace="customer360",
+            description="",
+            status=AbstractDataProductStatus.ACTIVE,
+            type=DataProductType(
+                id=uuid4(),
+                name="some-type",
+                description="",
+                icon_key=DataProductIconKey.REPORTING,
+            ),
+        ),
+        domain=Domain(id=uuid4(), name="sales", description=""),
         configuration=configuration,
         service=service,
         environment_configurations=[],
@@ -41,6 +64,20 @@ def test_result_string__still_uses_the_platform_service_template():
     item = _item(configuration, _service("s3://bucket/{repository}"))
 
     assert item.result_string == "s3://bucket/some-repo"
+
+
+def test_result_string__can_use_the_plugin_context():
+    configuration = PluginWithoutPlatform(repository="some-repo")
+
+    item = _item(
+        configuration,
+        _service(
+            "{domain.name}/{data_product.namespace}/"
+            "{technical_asset.namespace}/{repository}"
+        ),
+    )
+
+    assert item.result_string == "sales/customer360/orders/some-repo"
 
 
 def test_result_string__is_empty_without_a_service():

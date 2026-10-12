@@ -16,6 +16,7 @@ import {
 } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
 import {
     type PlatformTile,
+    TechnicalMapping,
     useGetPlatformTilesQuery,
     useGetPluginsQuery,
     useRenderTechnicalAssetAccessPathMutation,
@@ -87,6 +88,7 @@ export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallback
 
     const [form] = Form.useForm();
     const technical_mapping = Form.useWatch('technical_mapping', form);
+    const namespace = Form.useWatch('namespace', form);
     const dataOutputNameValue = Form.useWatch('name', form);
 
     const [sanitizeResourceName, { data: sanitizedResourceName }] = useLazySanitizeResourceNameQuery();
@@ -237,6 +239,9 @@ export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallback
         const request = {
             platform_id: values.platform_id,
             service_id: values.service_id,
+            data_product_id: dataProductId,
+            namespace: values.namespace ?? '',
+            technical_mapping: values.technical_mapping ?? TechnicalMapping.Default,
             configuration: values.configuration,
         };
         form.validateFields(['configuration'], { validateOnly: true, recursive: true })
@@ -244,6 +249,10 @@ export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallback
             .then((result) => form.setFieldValue('result', result.technical_asset_access_path))
             .catch(() => form.setFieldValue('result', undefined));
     }, debounce);
+
+    useEffect(() => {
+        setResultString({ ...form.getFieldsValue(true), namespace, technical_mapping });
+    }, [form, namespace, technical_mapping, setResultString]);
 
     const onValuesChange: FormProps<CreateTechnicalAssetRequest>['onValuesChange'] = (
         changed,

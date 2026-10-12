@@ -16,7 +16,6 @@ from portal_plugins.glue.model import (
 from portal_plugins.glue.schema import (
     GlueTechnicalAssetConfiguration,
 )
-from sqlalchemy import select as sa_select
 from sqlalchemy.orm import Session
 
 from app.configuration.environments.platform_service_configurations.schema_response import (
@@ -28,7 +27,6 @@ from app.configuration.environments.platform_service_configurations.schemas impo
 from app.configuration.environments.service import EnvironmentService
 from app.core.auth.credentials import AWSCredentials
 from app.core.auth.service import AuthService
-from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.technical_assets.model import ensure_technical_asset_exists
 from app.data_products.technical_assets.schema_response import compute_technical_info
 from app.data_products.technical_assets.service import TechnicalAssetService
@@ -37,7 +35,9 @@ from app.mcp.deps import (
     get_mcp_authenticated_user,
     get_user_db_session,
 )
+from app.data_products.technical_assets.enums import TechnicalMapping
 from app.settings import settings
+from app.technical_asset_configuration.base_schema import PluginContext
 from app.users.schema import User
 
 if TYPE_CHECKING:
@@ -142,15 +142,17 @@ def register_tools(mcp: FastMCP) -> None:
                 "error": f"Technical asset {technical_asset_id} is not a Glue asset"
             }
 
-        data_product = db.scalar(
-            sa_select(DataProductModel).where(
-                DataProductModel.id == technical_asset.owner_id
-            )
+        plugin_context = PluginContext.build(
+            technical_asset.owner,
+            technical_asset.namespace,
+            TechnicalMapping(technical_asset.technical_mapping),
+            technical_asset.id,
         )
-        owner_namespace = data_product.namespace if data_product else ""
 
         # Use consuming data product namespace for workgroup if provided, otherwise use owner's
-        workgroup_namespace = data_product_namespace or owner_namespace
+        workgroup_namespace = (
+            data_product_namespace or plugin_context.data_product.namespace
+        )
 
         config_schema = GlueTechnicalAssetConfiguration.model_validate(
             configuration, from_attributes=True
@@ -163,7 +165,7 @@ def register_tools(mcp: FastMCP) -> None:
             if env_config.environment.name.lower() != environment.lower():
                 continue
             tech_infos = compute_technical_info(
-                config_schema, technical_asset.service, [env_config]
+                config_schema, technical_asset.service, [env_config], plugin_context
             )
             if not tech_infos or not tech_infos[0].info:
                 return {
@@ -185,6 +187,7 @@ def register_tools(mcp: FastMCP) -> None:
             workgroup = (
                 config_schema.render_template(
                     workgroup_template,
+                    plugin_context=plugin_context,
                     data_product_namespace=workgroup_namespace,
                     environment=environment,
                     environment_acronym=env_config.environment.acronym,

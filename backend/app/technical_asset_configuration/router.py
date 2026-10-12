@@ -72,7 +72,18 @@ def get_plugin_url(
     return URLResponse(url=plugin_service.get_url(plugin_name, id, actor, environment))
 
 
-@router.post("/render_technical_asset_access_path")
+@router.post(
+    "/render_technical_asset_access_path",
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                Action.DATA_PRODUCT__CREATE_TECHNICAL_ASSET,
+                DataProductResolver,
+                object_id="data_product_id",
+            )
+        ),
+    ],
+)
 def render_technical_asset_access_path(
     request: RenderTechnicalAssetAccessPathRequest,
     plugin_service: PluginService = Depends(PluginService),
