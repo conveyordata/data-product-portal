@@ -92,8 +92,8 @@ class DataProductService(AbstractDataProductService):
 
     def _sync_consumer_reader_grouping(self, data_product_id: UUID) -> None:
         """
-        Will sync consumer relations for data products and output ports.
-        This is made to ensure hidden data products and private output ports are only accessible to consumers that have been approved.
+        Will sync consumer relations for the output ports of a data product.
+        This is made to ensure private output ports are only accessible to consumers that have been approved.
         We sync it for every data product, since output ports can be changed from unrestricted to private.
         """
         active_input_ports = set(
@@ -293,8 +293,6 @@ class DataProductService(AbstractDataProductService):
         self.db.add(model)
         self.db.flush()
         self._sync_public_reader_grouping(model.id, model.visibility)
-        if model.visibility == DataProductVisibility.HIDDEN:
-            self._sync_consumer_reader_grouping(model.id)
         return model
 
     def remove_data_product(self, id: UUID) -> DataProductModel:
@@ -335,23 +333,13 @@ class DataProductService(AbstractDataProductService):
                 detail=f"Invalid namespace: {validity.value}",
             )
 
-        visibility_change = None
         for k, v in update_data_product.items():
             if k == "tag_ids":
                 new_tags = self._get_tags(v)
                 current_data_product.tags = new_tags
-            elif k == "visibility":
-                visibility_change = current_data_product.visibility
-                setattr(current_data_product, k, v)
             else:
                 setattr(current_data_product, k, v) if v else None
 
-        if visibility_change is not None:
-            self._sync_public_reader_grouping(
-                current_data_product.id, current_data_product.visibility
-            )
-            if current_data_product.visibility == DataProductVisibility.HIDDEN:
-                self._sync_consumer_reader_grouping(current_data_product.id)
         self.db.flush()
         return UpdateDataProductResponse(id=current_data_product.id)
 
