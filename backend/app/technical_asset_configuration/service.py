@@ -142,21 +142,22 @@ class PluginService:
             if plugin.get_platform_metadata().parent_platform == parent_platform
         ]
         not_implemented = getattr_static(TechnicalAssetPlugin, "get_url").__func__
-        implementations = {
-            getattr_static(child, "get_url").__func__: child for child in children
-        }
-        implementations.pop(not_implemented, None)
-        if len(implementations) > 1:
+        implementing = [
+            child
+            for child in children
+            if getattr_static(child, "get_url").__func__ is not not_implemented
+        ]
+        if len({getattr_static(c, "get_url").__func__ for c in implementing}) > 1:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=(
                     f"Plugins under platform '{parent_platform}' "
-                    f"({', '.join(sorted(c.name for c in implementations.values()))}) "
+                    f"({', '.join(sorted(c.name for c in implementing))}) "
                     "implement get_url differently. Children of one platform "
                     "share its tile, so they must share the same get_url."
                 ),
             )
-        return next(iter(implementations.values()), next(iter(children), None))
+        return next(iter(implementing), next(iter(children), None))
 
     def _build_tile_hierarchy(
         self, metadata_list: Sequence[UIElementMetadataResponse]
