@@ -283,54 +283,6 @@ class DataProductService(AbstractDataProductService):
     def _get_tags(self, tag_ids: list[UUID]) -> list[TagModel]:
         return [ensure_tag_exists(tag_id, self.db) for tag_id in tag_ids]
 
-    def _get_environments(
-        self, environment_ids: list[UUID] | None
-    ) -> list[EnvironmentModel]:
-        query = select(EnvironmentModel).order_by(EnvironmentModel.id)
-        if environment_ids is None:
-            query = query.where(EnvironmentModel.is_global.is_(True))
-        else:
-            if len(environment_ids) != len(set(environment_ids)):
-                raise HTTPException(
-                    status_code=400, detail="Duplicate environment ids provided"
-                )
-            query = query.where(EnvironmentModel.id.in_(environment_ids))
-        environments = list(self.db.scalars(query).all())
-        if environment_ids is not None and len(environments) != len(environment_ids):
-            raise HTTPException(
-                status_code=400, detail="Invalid environment ids provided"
-            )
-        if not environments:
-            raise HTTPException(
-                status_code=400,
-                detail="Select at least one environment for the Data Product",
-            )
-        return environments
-
-    def _add_environments(
-        self, data_product: DataProductModel, environments: list[EnvironmentModel]
-    ) -> None:
-        existing_ids = {item.environment_id for item in data_product.environments}
-        additions = [
-            DataProductEnvironment(
-                environment=environment, environment_id=environment.id
-            )
-            for environment in environments
-            if environment.id not in existing_ids
-        ]
-        data_product.environments.extend(additions)
-        self.db.flush()
-        context.queue_events(
-            [
-                DataProductEnvironmentAddedEvent(
-                    data_product_id=data_product.id,
-                    environment=item.environment.acronym,
-                    creation_date=item.creation_date,
-                )
-                for item in additions
-            ]
-        )
-
     def create_data_product(
         self,
         data_product: DataProductCreate,
@@ -345,7 +297,6 @@ class DataProductService(AbstractDataProductService):
                 detail=f"Invalid namespace: {validity.value}",
             )
 
-        environments = self._get_environments(data_product.environment_ids)
         data_product_schema = data_product.model_dump(
             exclude={"input_ports", "environment_ids"}
         )
@@ -353,8 +304,7 @@ class DataProductService(AbstractDataProductService):
         _ = data_product_schema.pop("owners", [])
         model = DataProductModel(**data_product_schema, tags=tags, environments=[])
         self.db.add(model)
-        self.db.flush()
-        self._add_environments(model, environments)
+        self._set_environments(model, data_product.environment_ids)
         self._sync_public_reader_grouping(model.id, model.visibility)
         return model
 
@@ -392,18 +342,6 @@ class DataProductService(AbstractDataProductService):
         update_data_product = data_product.model_dump(
             exclude_unset=True, exclude={"environment_ids"}
         )
-        environments = []
-        if data_product.environment_ids is not None:
-            environments = self._get_environments(data_product.environment_ids)
-            existing_ids = {
-                item.environment_id for item in current_data_product.environments
-            }
-            if not existing_ids.issubset(data_product.environment_ids):
-                raise HTTPException(
-                    status_code=400,
-                    detail="Environments cannot be removed from a Data Product",
-                )
-
         if (
             current_data_product.namespace != data_product.namespace
             and (
@@ -424,9 +362,62 @@ class DataProductService(AbstractDataProductService):
                 current_data_product.tags = new_tags
             else:
                 setattr(current_data_product, k, v) if v else None
-        self._add_environments(current_data_product, environments)
+        if data_product.environment_ids is not None:
+            self._set_environments(current_data_product, data_product.environment_ids)
         self.db.flush()
         return UpdateDataProductResponse(id=current_data_product.id)
+
+    def _set_environments(
+        self, data_product: DataProductModel, environment_ids: list[UUID] | None
+    ) -> None:
+        query = select(EnvironmentModel)
+        if environment_ids is None:
+            query = query.where(EnvironmentModel.is_global.is_(True))
+        else:
+            requested_ids = set(environment_ids)
+            if len(environment_ids) != len(requested_ids):
+                raise HTTPException(
+                    status_code=400, detail="Duplicate environment ids provided"
+                )
+            query = query.where(EnvironmentModel.id.in_(requested_ids))
+
+        environments = list(self.db.scalars(query).all())
+        resolved_ids = {environment.id for environment in environments}
+        if environment_ids is not None and resolved_ids != requested_ids:
+            raise HTTPException(
+                status_code=400, detail="Invalid environment ids provided"
+            )
+        if not environments:
+            raise HTTPException(
+                status_code=400,
+                detail="Select at least one environment for the Data Product",
+            )
+
+        existing_ids = {item.environment_id for item in data_product.environments}
+        if not existing_ids.issubset(resolved_ids):
+            raise HTTPException(
+                status_code=400,
+                detail="Environments cannot be removed from a Data Product",
+            )
+        additions = [
+            DataProductEnvironment(
+                environment=environment, environment_id=environment.id
+            )
+            for environment in environments
+            if environment.id not in existing_ids
+        ]
+        data_product.environments.extend(additions)
+        self.db.flush()
+        context.queue_events(
+            [
+                DataProductEnvironmentAddedEvent(
+                    data_product_id=data_product.id,
+                    environment=item.environment.acronym,
+                    creation_date=item.creation_date,
+                )
+                for item in additions
+            ]
+        )
 
     def update_data_product_about(
         self,
