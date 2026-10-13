@@ -703,9 +703,7 @@ class TestAuthorization:
             role_id="retained-role",
         )
 
-        updated = authorizer.clear_assignments_for_identities(
-            identity_ids=removed
-        )
+        updated = authorizer.clear_assignments_for_identities(identity_ids=removed)
 
         assert updated
         for user in removed:

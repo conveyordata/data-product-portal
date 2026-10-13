@@ -2,18 +2,16 @@ from uuid import uuid4
 
 import pytest
 from fastapi import HTTPException
+from sqlalchemy import select
 
+from app.core.authz import Authorization
+from app.users.model import User
 from app.users.service import UserService
 from tests.factories import (
     GroupFactory,
     GroupMembershipFactory,
     UserFactory,
 )
-
-from sqlalchemy import select
-
-from app.core.authz import Authorization
-from app.users.model import User
 
 
 class TestUserService:
@@ -57,7 +55,6 @@ class TestUserService:
             UserService(session).get_groups(uuid4())
 
         assert exc_info.value.status_code == 404
-
 
     def test_create_users_batch__creates_all_valid_users(self, session):
         result = UserService(session).create_users_batch(
@@ -111,9 +108,7 @@ class TestUserService:
         assert result.errors[0].item == invalid_item
         assert result.errors[0].errors
 
-    def test_create_users_batch__reports_existing_email_and_external_id(
-        self, session
-    ):
+    def test_create_users_batch__reports_existing_email_and_external_id(self, session):
         UserFactory(
             email="existing@example.com",
             external_id="existing-user",

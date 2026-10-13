@@ -77,8 +77,16 @@ type CreateGroupRes interface {
 	createGroupRes()
 }
 
+type CreateGroupsBatchRes interface {
+	createGroupsBatchRes()
+}
+
 type CreateMachineUserRes interface {
 	createMachineUserRes()
+}
+
+type CreateMachineUsersBatchRes interface {
+	createMachineUsersBatchRes()
 }
 
 type CreateOutputPortAccessTypeRes interface {
@@ -109,6 +117,10 @@ type CreateUserRes interface {
 	createUserRes()
 }
 
+type CreateUsersBatchRes interface {
+	createUsersBatchRes()
+}
+
 type DecideDataProductRoleAssignmentRes interface {
 	decideDataProductRoleAssignmentRes()
 }
@@ -137,8 +149,16 @@ type DeleteGroupRes interface {
 	deleteGroupRes()
 }
 
+type DeleteGroupsBatchRes interface {
+	deleteGroupsBatchRes()
+}
+
 type DeleteMachineUserRes interface {
 	deleteMachineUserRes()
+}
+
+type DeleteMachineUsersBatchRes interface {
+	deleteMachineUsersBatchRes()
 }
 
 type DeleteOutputPortQueryStatRes interface {
@@ -523,6 +543,10 @@ type RemoveUserNotificationRes interface {
 
 type RemoveUserRes interface {
 	removeUserRes()
+}
+
+type RemoveUsersBatchRes interface {
+	removeUsersBatchRes()
 }
 
 type RenderTechnicalAssetAccessPathRes interface {

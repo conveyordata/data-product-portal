@@ -204,6 +204,10 @@ from .group_update import GroupUpdate
 from .group_update_response import GroupUpdateResponse
 from .groups_get_response import GroupsGetResponse
 from .http_validation_error import HTTPValidationError
+from .identity_batch_create_error import IdentityBatchCreateError
+from .identity_batch_create_request import IdentityBatchCreateRequest
+from .identity_batch_create_response import IdentityBatchCreateResponse
+from .identity_batch_delete_request import IdentityBatchDeleteRequest
 from .identity_type import IdentityType
 from .ingest_output_port_contract_yaml_body import IngestOutputPortContractYamlBody
 from .input_port_event import InputPortEvent
@@ -563,6 +567,10 @@ __all__ = (
     "GroupUpdate",
     "GroupUpdateResponse",
     "HTTPValidationError",
+    "IdentityBatchCreateError",
+    "IdentityBatchCreateRequest",
+    "IdentityBatchCreateResponse",
+    "IdentityBatchDeleteRequest",
     "IdentityType",
     "IngestOutputPortContractYamlBody",
     "InputPortEvent",

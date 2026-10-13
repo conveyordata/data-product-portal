@@ -3,10 +3,9 @@ from uuid import uuid4
 
 import pytest
 
-from tests.factories import GroupFactory, MachineUserFactory
 from app.machine_users.model import MachineUser
 from app.settings import settings
-from tests.factories import UserFactory
+from tests.factories import GroupFactory, MachineUserFactory, UserFactory
 
 ENDPOINT = "/api/v2/machine-users"
 
@@ -366,9 +365,7 @@ class TestMachineUsersRouter:
             [{}] * (settings.MAX_ITEMS_PER_BATCH_REQUEST + 1),
         ],
     )
-    def test_create_machine_users_batch__rejects_invalid_list_size(
-        self, client, items
-    ):
+    def test_create_machine_users_batch__rejects_invalid_list_size(self, client, items):
         response = client.post(
             f"{ENDPOINT}/batch",
             json={"items": items},
@@ -377,9 +374,7 @@ class TestMachineUsersRouter:
         assert response.status_code == 422
 
     @pytest.mark.usefixtures("admin")
-    def test_delete_machine_users_batch__deletes_machine_users(
-        self, client, session
-    ):
+    def test_delete_machine_users_batch__deletes_machine_users(self, client, session):
         first = MachineUserFactory()
         second = MachineUserFactory()
 
@@ -438,15 +433,10 @@ class TestMachineUsersRouter:
             [],
             ["not-a-uuid"],
             ["00000000-0000-0000-0000-000000000001"] * 2,
-            [
-                str(uuid4())
-                for _ in range(settings.MAX_ITEMS_PER_BATCH_REQUEST + 1)
-            ],
+            [str(uuid4()) for _ in range(settings.MAX_ITEMS_PER_BATCH_REQUEST + 1)],
         ],
     )
-    def test_delete_machine_users_batch__rejects_invalid_request(
-        self, client, ids
-    ):
+    def test_delete_machine_users_batch__rejects_invalid_request(self, client, ids):
         response = client.request(
             "DELETE",
             f"{ENDPOINT}/batch",

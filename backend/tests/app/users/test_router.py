@@ -769,10 +769,7 @@ class TestUsersRouter:
             [],
             ["not-a-uuid"],
             ["00000000-0000-0000-0000-000000000001"] * 2,
-            [
-                str(uuid4())
-                for _ in range(settings.MAX_ITEMS_PER_BATCH_REQUEST + 1)
-            ],
+            [str(uuid4()) for _ in range(settings.MAX_ITEMS_PER_BATCH_REQUEST + 1)],
         ],
     )
     def test_remove_users_batch__rejects_invalid_request(self, client, ids):

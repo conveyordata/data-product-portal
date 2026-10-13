@@ -620,6 +620,10 @@ type AddGroupMembersNoContent struct{}
 
 func (*AddGroupMembersNoContent) addGroupMembersRes() {}
 
+type AddGroupMembersNotFoundApplicationJSON jx.Raw
+
+func (*AddGroupMembersNotFoundApplicationJSON) addGroupMembersRes() {}
+
 type AddOutputPortDataQualityRunNotFoundApplicationJSON jx.Raw
 
 func (*AddOutputPortDataQualityRunNotFoundApplicationJSON) addOutputPortDataQualityRunRes() {}
@@ -3509,6 +3513,11 @@ type DeleteGroupNotFoundApplicationJSON jx.Raw
 
 func (*DeleteGroupNotFoundApplicationJSON) deleteGroupRes() {}
 
+// DeleteGroupsBatchNoContent is response for DeleteGroupsBatch operation.
+type DeleteGroupsBatchNoContent struct{}
+
+func (*DeleteGroupsBatchNoContent) deleteGroupsBatchRes() {}
+
 // DeleteMachineUserNoContent is response for DeleteMachineUser operation.
 type DeleteMachineUserNoContent struct{}
 
@@ -3517,6 +3526,11 @@ func (*DeleteMachineUserNoContent) deleteMachineUserRes() {}
 type DeleteMachineUserNotFoundApplicationJSON jx.Raw
 
 func (*DeleteMachineUserNotFoundApplicationJSON) deleteMachineUserRes() {}
+
+// DeleteMachineUsersBatchNoContent is response for DeleteMachineUsersBatch operation.
+type DeleteMachineUsersBatchNoContent struct{}
+
+func (*DeleteMachineUsersBatchNoContent) deleteMachineUsersBatchRes() {}
 
 type DeleteOutputPortQueryStatOKApplicationJSON jx.Raw
 
@@ -6350,7 +6364,9 @@ func (*HTTPValidationError) createDataProductTypeRes()                    {}
 func (*HTTPValidationError) createDomainRes()                             {}
 func (*HTTPValidationError) createExplorationRes()                        {}
 func (*HTTPValidationError) createGroupRes()                              {}
+func (*HTTPValidationError) createGroupsBatchRes()                        {}
 func (*HTTPValidationError) createMachineUserRes()                        {}
+func (*HTTPValidationError) createMachineUsersBatchRes()                  {}
 func (*HTTPValidationError) createOutputPortAccessTypeRes()               {}
 func (*HTTPValidationError) createOutputPortRes()                         {}
 func (*HTTPValidationError) createOutputPortRoleAssignmentRes()           {}
@@ -6358,6 +6374,7 @@ func (*HTTPValidationError) createRoleRes()                               {}
 func (*HTTPValidationError) createTagRes()                                {}
 func (*HTTPValidationError) createTechnicalAssetRes()                     {}
 func (*HTTPValidationError) createUserRes()                               {}
+func (*HTTPValidationError) createUsersBatchRes()                         {}
 func (*HTTPValidationError) decideDataProductRoleAssignmentRes()          {}
 func (*HTTPValidationError) decideGlobalRoleAssignmentRes()               {}
 func (*HTTPValidationError) decideOutputPortRoleAssignmentRes()           {}
@@ -6365,7 +6382,9 @@ func (*HTTPValidationError) deleteAccessModeRes()                         {}
 func (*HTTPValidationError) deleteDataProductRoleAssignmentRes()          {}
 func (*HTTPValidationError) deleteGlobalRoleAssignmentRes()               {}
 func (*HTTPValidationError) deleteGroupRes()                              {}
+func (*HTTPValidationError) deleteGroupsBatchRes()                        {}
 func (*HTTPValidationError) deleteMachineUserRes()                        {}
+func (*HTTPValidationError) deleteMachineUsersBatchRes()                  {}
 func (*HTTPValidationError) deleteOutputPortQueryStatRes()                {}
 func (*HTTPValidationError) deleteOutputPortRoleAssignmentRes()           {}
 func (*HTTPValidationError) denyOutputPortAsInputPortRes()                {}
@@ -6462,6 +6481,7 @@ func (*HTTPValidationError) removeTagRes()                                {}
 func (*HTTPValidationError) removeTechnicalAssetRes()                     {}
 func (*HTTPValidationError) removeUserNotificationRes()                   {}
 func (*HTTPValidationError) removeUserRes()                               {}
+func (*HTTPValidationError) removeUsersBatchRes()                         {}
 func (*HTTPValidationError) renderTechnicalAssetAccessPathRes()           {}
 func (*HTTPValidationError) renewInputPortForDataProductRes()             {}
 func (*HTTPValidationError) renewInputPortForExplorationRes()             {}
@@ -6506,6 +6526,92 @@ func (*HTTPValidationError) updateTechnicalAssetRes()                     {}
 func (*HTTPValidationError) updateTechnicalAssetStatusRes()               {}
 func (*HTTPValidationError) updateThemeSettingsRes()                      {}
 func (*HTTPValidationError) validateResourceNameRes()                     {}
+
+// Ref: #/components/schemas/IdentityBatchCreateError
+type IdentityBatchCreateError struct {
+	Item   jx.Raw   `json:"item"`
+	Errors []string `json:"errors"`
+}
+
+// GetItem returns the value of Item.
+func (s *IdentityBatchCreateError) GetItem() jx.Raw {
+	return s.Item
+}
+
+// GetErrors returns the value of Errors.
+func (s *IdentityBatchCreateError) GetErrors() []string {
+	return s.Errors
+}
+
+// SetItem sets the value of Item.
+func (s *IdentityBatchCreateError) SetItem(val jx.Raw) {
+	s.Item = val
+}
+
+// SetErrors sets the value of Errors.
+func (s *IdentityBatchCreateError) SetErrors(val []string) {
+	s.Errors = val
+}
+
+// Ref: #/components/schemas/IdentityBatchCreateRequest
+type IdentityBatchCreateRequest struct {
+	Items []jx.Raw `json:"items"`
+}
+
+// GetItems returns the value of Items.
+func (s *IdentityBatchCreateRequest) GetItems() []jx.Raw {
+	return s.Items
+}
+
+// SetItems sets the value of Items.
+func (s *IdentityBatchCreateRequest) SetItems(val []jx.Raw) {
+	s.Items = val
+}
+
+// Ref: #/components/schemas/IdentityBatchCreateResponse
+type IdentityBatchCreateResponse struct {
+	Ids    []uuid.UUID                `json:"ids"`
+	Errors []IdentityBatchCreateError `json:"errors"`
+}
+
+// GetIds returns the value of Ids.
+func (s *IdentityBatchCreateResponse) GetIds() []uuid.UUID {
+	return s.Ids
+}
+
+// GetErrors returns the value of Errors.
+func (s *IdentityBatchCreateResponse) GetErrors() []IdentityBatchCreateError {
+	return s.Errors
+}
+
+// SetIds sets the value of Ids.
+func (s *IdentityBatchCreateResponse) SetIds(val []uuid.UUID) {
+	s.Ids = val
+}
+
+// SetErrors sets the value of Errors.
+func (s *IdentityBatchCreateResponse) SetErrors(val []IdentityBatchCreateError) {
+	s.Errors = val
+}
+
+func (*IdentityBatchCreateResponse) createGroupsBatchRes()       {}
+func (*IdentityBatchCreateResponse) createMachineUsersBatchRes() {}
+func (*IdentityBatchCreateResponse) createUsersBatchRes()        {}
+
+// Ref: #/components/schemas/IdentityBatchDeleteRequest
+type IdentityBatchDeleteRequest struct {
+	Ids []uuid.UUID `json:"ids"`
+}
+
+// GetIds returns the value of Ids.
+func (s *IdentityBatchDeleteRequest) GetIds() []uuid.UUID {
+	return s.Ids
+}
+
+// SetIds sets the value of Ids.
+func (s *IdentityBatchDeleteRequest) SetIds(val []uuid.UUID) {
+	s.Ids = val
+}
 
 // Ref: #/components/schemas/IdentityType
 type IdentityType string
@@ -11749,6 +11855,11 @@ func (*RemoveUserNotificationOKApplicationJSON) removeUserNotificationRes() {}
 type RemoveUserOKApplicationJSON jx.Raw
 
 func (*RemoveUserOKApplicationJSON) removeUserRes() {}
+
+// RemoveUsersBatchNoContent is response for RemoveUsersBatch operation.
+type RemoveUsersBatchNoContent struct{}
+
+func (*RemoveUsersBatchNoContent) removeUsersBatchRes() {}
 
 // Ref: #/components/schemas/RenderTechnicalAssetAccessPathRequest
 type RenderTechnicalAssetAccessPathRequest struct {

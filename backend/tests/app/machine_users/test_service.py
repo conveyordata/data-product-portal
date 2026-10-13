@@ -2,8 +2,11 @@ from uuid import uuid4
 
 import pytest
 from fastapi import HTTPException
+from sqlalchemy import select
 
+from app.core.authz import Authorization
 from app.groups.service import GroupService
+from app.machine_users.model import MachineUser
 from app.machine_users.schema_request import (
     MachineUserCreate,
     MachineUserUpdate,
@@ -12,14 +15,9 @@ from app.machine_users.service import MachineUserService
 from tests.factories import (
     GroupFactory,
     MachineUserFactory,
+    UserFactory,
 )
 from tests.groups_util import group_has_member
-
-from sqlalchemy import select
-
-from app.core.authz import Authorization
-from app.machine_users.model import MachineUser
-from tests.factories import UserFactory
 
 
 class TestMachineUserService:
@@ -225,9 +223,7 @@ class TestMachineUserService:
         assert created is not None
         assert created.external_id == "new-agent"
 
-    def test_create_machine_users_batch__rejects_later_request_duplicate(
-        self, session
-    ):
+    def test_create_machine_users_batch__rejects_later_request_duplicate(self, session):
         result = MachineUserService(session).create_machine_users_batch(
             [
                 {
@@ -251,16 +247,12 @@ class TestMachineUserService:
         assert created is not None
         assert created.display_name == "First"
 
-    def test_delete_machine_users_batch__deletes_matching_machine_users(
-        self, session
-    ):
+    def test_delete_machine_users_batch__deletes_matching_machine_users(self, session):
         first = MachineUserFactory()
         second = MachineUserFactory()
         retained = MachineUserFactory()
 
-        MachineUserService(session).delete_machine_users_batch(
-            [first.id, second.id]
-        )
+        MachineUserService(session).delete_machine_users_batch([first.id, second.id])
 
         assert session.get(MachineUser, first.id) is None
         assert session.get(MachineUser, second.id) is None
