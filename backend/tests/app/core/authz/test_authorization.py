@@ -676,6 +676,66 @@ class TestAuthorization:
     ):
         assert not authorizer.revoke_group_memberships(memberships=[])
 
+    def test_clear_assignments_for_identities__clears_all_assignment_types(
+        self,
+        authorizer: Authorization,
+    ):
+        removed = ["first-user", "second-user"]
+        retained = "retained-user"
+
+        for user in removed:
+            authorizer.assign_resource_role(
+                user_id=user,
+                role_id="resource-role",
+                resource_id="resource",
+            )
+            authorizer.assign_domain_role(
+                user_id=user,
+                role_id="domain-role",
+                domain_id="domain",
+            )
+            authorizer.assign_global_role(
+                user_id=user,
+                role_id="global-role",
+            )
+
+        authorizer.assign_global_role(
+            user_id=retained,
+            role_id="retained-role",
+        )
+
+        updated = authorizer.clear_assignments_for_identities(
+            identity_ids=removed
+        )
+
+        assert updated
+        for user in removed:
+            assert not authorizer.has_resource_role(
+                user_id=user,
+                role_id="resource-role",
+                resource_id="resource",
+            )
+            assert not authorizer.has_domain_role(
+                user_id=user,
+                role_id="domain-role",
+                domain_id="domain",
+            )
+            assert not authorizer.has_global_role(
+                user_id=user,
+                role_id="global-role",
+            )
+
+        assert authorizer.has_global_role(
+            user_id=retained,
+            role_id="retained-role",
+        )
+
+    def test_clear_assignments_for_identities__empty_list_does_nothing(
+        self,
+        authorizer: Authorization,
+    ):
+        assert not authorizer.clear_assignments_for_identities(identity_ids=[])
+
 
 class TestCrossWorkerStaleness:
     def test_auto_reload_resolves_stale_policy(self, authorizer: Authorization):
