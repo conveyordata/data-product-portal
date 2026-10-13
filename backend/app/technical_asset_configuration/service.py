@@ -1,3 +1,4 @@
+from inspect import getattr_static
 from typing import TYPE_CHECKING, Optional, Sequence
 from uuid import UUID
 
@@ -105,26 +106,18 @@ class PluginService:
         actor: "User",
         environment: Optional[str] = None,
     ) -> str:
-        # Every installed plugin, not only the enabled ones: an access tile URL is
-        # looked up for an asset that already exists.
-        discovered_plugins = plugin_registry.discovered()
+        enabled_plugins = plugin_registry.enabled()
         plugin_class = next(
             (
                 cls
-                for cls in discovered_plugins
+                for cls in enabled_plugins
                 if cls.get_platform_metadata().platform_key == plugin_name
             ),
             None,
         )
-        # If no direct match, check if it's a parent platform
         if not plugin_class:
-            plugin_class = next(
-                (
-                    cls
-                    for cls in discovered_plugins
-                    if cls.get_platform_metadata().parent_platform == plugin_name
-                ),
-                None,
+            plugin_class = self._parent_platform_url_plugin(
+                plugin_name, enabled_plugins
             )
         if not plugin_class:
             raise HTTPException(
@@ -138,6 +131,33 @@ class PluginService:
                 status_code=status.HTTP_501_NOT_IMPLEMENTED,
                 detail=f"Plugin '{plugin_name}' does not implement URL retrieval",
             )
+
+    @staticmethod
+    def _parent_platform_url_plugin(
+        parent_platform: str, plugins: Sequence[type[TechnicalAssetPlugin]]
+    ) -> Optional[type[TechnicalAssetPlugin]]:
+        children = [
+            plugin
+            for plugin in plugins
+            if plugin.get_platform_metadata().parent_platform == parent_platform
+        ]
+        not_implemented = getattr_static(TechnicalAssetPlugin, "get_url").__func__
+        implementing = [
+            child
+            for child in children
+            if getattr_static(child, "get_url").__func__ is not not_implemented
+        ]
+        if len({getattr_static(c, "get_url").__func__ for c in implementing}) > 1:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=(
+                    f"Plugins under platform '{parent_platform}' "
+                    f"({', '.join(sorted(c.name for c in implementing))}) "
+                    "implement get_url differently. Children of one platform "
+                    "share its tile, so they must share the same get_url."
+                ),
+            )
+        return next(iter(implementing), next(iter(children), None))
 
     def _build_tile_hierarchy(
         self, metadata_list: Sequence[UIElementMetadataResponse]
