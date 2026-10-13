@@ -192,11 +192,8 @@ class TestUsersRouter:
             user_id=user_id, role_id="domain-role", domain_id="domain"
         )
         authorizer.assign_global_role(user_id=user_id, role_id="global-role")
-        authorizer.assign_resource_group_membership(
-            member_identity_id=user_id, group_id=group_id
-        )
-        authorizer.assign_global_group_membership(
-            member_identity_id=user_id, group_id=group_id
+        authorizer.assign_group_memberships(
+            memberships=[(user_id, group_id)],
         )
         authorizer.assign_global_role(user_id=other_user.id, role_id="global-role")
 
