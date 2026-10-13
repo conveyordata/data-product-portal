@@ -53,18 +53,13 @@ def _has_access_through_consumer_role(
     parent: str,
     action: str,
 ) -> bool:
-    if action == str(AuthorizationAction.HIDDEN__DATA_PRODUCT__READ):
-        linked_resources = enforcer.get_filtered_named_grouping_policy(
-            "g4", 1, resource
-        )
-    elif action == str(AuthorizationAction.HIDDEN__OUTPUT_PORT__READ):
-        linked_resources = enforcer.get_filtered_named_grouping_policy(
-            "g4", 1, parent, resource
-        )
-    else:
+    if action != str(AuthorizationAction.HIDDEN__OUTPUT_PORT__READ):
         return False
+    linked_resources = enforcer.get_filtered_named_grouping_policy(
+        "g4", 1, parent, resource
+    )
 
-    # g4 identifies consumers of the requested product or exact output port;
+    # g4 identifies consumers of the exact output port;
     # g checks whether the subject has the evaluated role on one of them.
     return any(
         enforcer.get_role_manager().has_link(sub, role, consumer_id)

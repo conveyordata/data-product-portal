@@ -28,6 +28,7 @@ sidebar_position: 200
 - **[User Deletion]**: A bug caused user deletion to fail if the user was involved in an audit event.
 - **[Helm]**: Fix translation override file path
 - **[Database]**: `python -m app.db_tool migrate` now stops when technical assets exist whose plugin is not installed, instead of the portal failing every request that loads them. Reinstall the plugin, or delete those technical assets.
+- **[Auth]**: Users' first name is now taken from the OIDC `given_name` claim instead of `name`, which showed the last name twice (for example "Jane Doe Doe"). If the provider sends no `given_name`, `name` is used as before. Existing users are corrected on their next login.
 - **[Auth]**: A `DEFAULT_USERNAME` without a dot before the `@` no longer fails when OIDC is disabled.
 - **[General]**: Fix translation file by adding more nested translations for Data Products, Output ports and Technical assets.
 - **[General]**: Output Port owners can renew access for consumers, following the same rules as the consumer-side renew (revoked, expired, denied, cancelled, expiring soon or declined renewal), while keeping the access history. Icons were removed from the access action buttons.
