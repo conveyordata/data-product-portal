@@ -3273,3 +3273,26 @@ FROM link;
 
 INSERT INTO public.access_durations (id, abstract_data_product_type, access_duration_type, is_default, created_on)
 VALUES (gen_random_uuid(), 'explorations', 'permanent', FALSE, timezone('utc'::text, current_timestamp));
+
+INSERT INTO public.data_product_environments (data_product_id, environment_id, creation_date)
+SELECT
+    dp.id,
+    de.environment_id,
+    de.created_on
+FROM public.data_products AS dp
+INNER JOIN public.abstract_data_products AS adp ON dp.id = adp.id
+INNER JOIN public.domain_environments AS de ON adp.domain_id = de.domain_id
+UNION ALL
+SELECT
+    dp.id AS data_product_id,
+    env.id AS environment_id,
+    timezone('utc'::text, current_timestamp)
+FROM public.data_products AS dp
+INNER JOIN public.abstract_data_products AS adp ON dp.id = adp.id
+CROSS JOIN public.environments AS env
+WHERE
+    env.is_global = TRUE
+    AND NOT EXISTS (
+        SELECT 1 FROM public.domain_environments AS de
+        WHERE de.domain_id = adp.domain_id
+    );

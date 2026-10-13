@@ -38,6 +38,9 @@ from .cancel_input_port_for_data_product_response import (
 from .cancel_input_port_for_exploration_response import (
     CancelInputPortForExplorationResponse,
 )
+from .cloud_event_data_product_environment_added_event import (
+    CloudEventDataProductEnvironmentAddedEvent,
+)
 from .cloud_event_data_product_event import CloudEventDataProductEvent
 from .cloud_event_data_product_role_assignment_event import (
     CloudEventDataProductRoleAssignmentEvent,
@@ -80,6 +83,8 @@ from .create_technical_asset_response import CreateTechnicalAssetResponse
 from .data_product import DataProduct
 from .data_product_about_update import DataProductAboutUpdate
 from .data_product_create import DataProductCreate
+from .data_product_environment import DataProductEnvironment
+from .data_product_environment_added_event import DataProductEnvironmentAddedEvent
 from .data_product_event import DataProductEvent
 from .data_product_icon_key import DataProductIconKey
 from .data_product_life_cycle import DataProductLifeCycle
@@ -425,6 +430,7 @@ __all__ = (
     "CanBecomeAdminUpdate",
     "CancelInputPortForDataProductResponse",
     "CancelInputPortForExplorationResponse",
+    "CloudEventDataProductEnvironmentAddedEvent",
     "CloudEventDataProductEvent",
     "CloudEventDataProductRoleAssignmentEvent",
     "CloudEventDataProductSettingValueEvent",
@@ -458,6 +464,8 @@ __all__ = (
     "DataProduct",
     "DataProductAboutUpdate",
     "DataProductCreate",
+    "DataProductEnvironment",
+    "DataProductEnvironmentAddedEvent",
     "DataProductEvent",
     "DataProductIconKey",
     "DataProductLifeCycle",

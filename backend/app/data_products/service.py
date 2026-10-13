@@ -26,17 +26,24 @@ from app.configuration.data_product_lifecycles.model import (
     DataProductLifecycle as DataProductLifeCycleModel,
 )
 from app.configuration.data_product_settings.model import DataProductSettingValue
+from app.configuration.environments.model import Environment as EnvironmentModel
 from app.configuration.tags.model import Tag as TagModel
 from app.configuration.tags.model import ensure_tag_exists
 from app.configuration.tags.schema import Tag
+from app.core import context
 from app.core.authz import Authorization
 from app.core.aws.get_url import _get_data_product_role_arn
 from app.core.namespace.validation import (
     NamespaceValidator,
     TechnicalAssetNamespaceValidator,
 )
+from app.core.webhooks.events import DataProductEnvironmentAddedEvent
 from app.data_products.model import DataProduct as DataProductModel
-from app.data_products.model import DataProductVisibility, ensure_data_product_exists
+from app.data_products.model import (
+    DataProductEnvironment,
+    DataProductVisibility,
+    ensure_data_product_exists,
+)
 from app.data_products.output_port_technical_assets_link.model import (
     TechnicalAssetOutputPortAssociation,
 )
@@ -188,7 +195,10 @@ class DataProductService(AbstractDataProductService):
         data_product = self.db.scalar(
             select(DataProductModel)
             .where(DataProductModel.id == id)
-            .options(selectinload(DataProductModel.tags))
+            .options(
+                selectinload(DataProductModel.tags),
+                selectinload(DataProductModel.environments),
+            )
         )
         default_lifecycle = self.db.scalar(
             select(DataProductLifeCycleModel).filter(
@@ -217,6 +227,7 @@ class DataProductService(AbstractDataProductService):
         )
         query = select(DataProductModel).options(
             selectinload(DataProductModel.tags).raiseload("*"),
+            selectinload(DataProductModel.environments),
             undefer(DataProductModel.input_port_count),
         )
         match assignment_filter:
@@ -272,6 +283,54 @@ class DataProductService(AbstractDataProductService):
     def _get_tags(self, tag_ids: list[UUID]) -> list[TagModel]:
         return [ensure_tag_exists(tag_id, self.db) for tag_id in tag_ids]
 
+    def _get_environments(
+        self, environment_ids: list[UUID] | None
+    ) -> list[EnvironmentModel]:
+        query = select(EnvironmentModel).order_by(EnvironmentModel.id)
+        if environment_ids is None:
+            query = query.where(EnvironmentModel.is_global.is_(True))
+        else:
+            if len(environment_ids) != len(set(environment_ids)):
+                raise HTTPException(
+                    status_code=400, detail="Duplicate environment ids provided"
+                )
+            query = query.where(EnvironmentModel.id.in_(environment_ids))
+        environments = list(self.db.scalars(query).all())
+        if environment_ids is not None and len(environments) != len(environment_ids):
+            raise HTTPException(
+                status_code=400, detail="Invalid environment ids provided"
+            )
+        if not environments:
+            raise HTTPException(
+                status_code=400,
+                detail="Select at least one environment for the Data Product",
+            )
+        return environments
+
+    def _add_environments(
+        self, data_product: DataProductModel, environments: list[EnvironmentModel]
+    ) -> None:
+        existing_ids = {item.environment_id for item in data_product.environments}
+        additions = [
+            DataProductEnvironment(
+                environment=environment, environment_id=environment.id
+            )
+            for environment in environments
+            if environment.id not in existing_ids
+        ]
+        data_product.environments.extend(additions)
+        self.db.flush()
+        context.queue_events(
+            [
+                DataProductEnvironmentAddedEvent(
+                    data_product_id=data_product.id,
+                    environment=item.environment.acronym,
+                    creation_date=item.creation_date,
+                )
+                for item in additions
+            ]
+        )
+
     def create_data_product(
         self,
         data_product: DataProductCreate,
@@ -286,12 +345,16 @@ class DataProductService(AbstractDataProductService):
                 detail=f"Invalid namespace: {validity.value}",
             )
 
-        data_product_schema = data_product.model_dump(exclude={"input_ports"})
+        environments = self._get_environments(data_product.environment_ids)
+        data_product_schema = data_product.model_dump(
+            exclude={"input_ports", "environment_ids"}
+        )
         tags = self._get_tags(data_product_schema.pop("tag_ids", []))
         _ = data_product_schema.pop("owners", [])
-        model = DataProductModel(**data_product_schema, tags=tags)
+        model = DataProductModel(**data_product_schema, tags=tags, environments=[])
         self.db.add(model)
         self.db.flush()
+        self._add_environments(model, environments)
         self._sync_public_reader_grouping(model.id, model.visibility)
         return model
 
@@ -313,11 +376,33 @@ class DataProductService(AbstractDataProductService):
         id: UUID,
         data_product: DataProductUpdate,
     ) -> UpdateDataProductResponse:
-        current_data_product = ensure_data_product_exists(
-            id, self.db, options=[selectinload(DataProductModel.tags)]
+        current_data_product = self.db.scalar(
+            select(DataProductModel)
+            .where(DataProductModel.id == id)
+            .with_for_update(of=DataProductModel)
+            .execution_options(populate_existing=True)
+            .options(
+                selectinload(DataProductModel.tags),
+                selectinload(DataProductModel.environments),
+            )
         )
+        if current_data_product is None:
+            raise HTTPException(status_code=404, detail="Data Product not found")
         self._ensure_not_deleting(current_data_product)
-        update_data_product = data_product.model_dump(exclude_unset=True)
+        update_data_product = data_product.model_dump(
+            exclude_unset=True, exclude={"environment_ids"}
+        )
+        environments = []
+        if data_product.environment_ids is not None:
+            environments = self._get_environments(data_product.environment_ids)
+            existing_ids = {
+                item.environment_id for item in current_data_product.environments
+            }
+            if not existing_ids.issubset(data_product.environment_ids):
+                raise HTTPException(
+                    status_code=400,
+                    detail="Environments cannot be removed from a Data Product",
+                )
 
         if (
             current_data_product.namespace != data_product.namespace
@@ -339,7 +424,7 @@ class DataProductService(AbstractDataProductService):
                 current_data_product.tags = new_tags
             else:
                 setattr(current_data_product, k, v) if v else None
-
+        self._add_environments(current_data_product, environments)
         self.db.flush()
         return UpdateDataProductResponse(id=current_data_product.id)
 
