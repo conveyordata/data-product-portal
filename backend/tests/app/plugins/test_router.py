@@ -1,3 +1,4 @@
+import pytest
 from fastapi.testclient import TestClient
 
 from app.authorization.roles.schema import Scope
@@ -234,9 +235,8 @@ class TestLinkPluginEndToEnd:
         assert url_response.status_code == 200
         assert url_response.json()["url"] == f"https://example.com/{data_product.id}"
 
-    def test_get_plugin_url__parent_platform_skips_child_without_url(
-        self, client, monkeypatch
-    ):
+    @pytest.fixture
+    def link_plugin_under_cloud(self, monkeypatch):
         monkeypatch.setattr(
             FakeLinkPlugin,
             "_platform_metadata",
@@ -244,6 +244,17 @@ class TestLinkPluginEndToEnd:
                 update={"parent_platform": "cloud"}
             ),
         )
+
+    @pytest.fixture
+    def other_url_under_cloud(self, monkeypatch):
+        monkeypatch.setattr(
+            FakeTechnicalAssetConfiguration,
+            "get_url",
+            classmethod(lambda cls, id, db, actor, environment=None: "other"),
+        )
+
+    @staticmethod
+    def _readable_data_product():
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
         role = RoleFactory(
@@ -253,6 +264,32 @@ class TestLinkPluginEndToEnd:
         DataProductRoleAssignmentFactory(
             identity_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
+        return data_product
+
+    @pytest.mark.usefixtures("link_plugin_under_cloud")
+    def test_get_plugin_url__parent_platform_skips_child_without_url(self, client):
+        data_product = self._readable_data_product()
+
+        response = client.get(f"{ENDPOINT}/cloud/url?id={data_product.id}")
+
+        assert response.status_code == 200, response.text
+        assert response.json()["url"] == f"https://example.com/{data_product.id}"
+
+    @pytest.mark.usefixtures("link_plugin_under_cloud", "other_url_under_cloud")
+    def test_get_plugin_url__parent_platform_children_with_different_urls(self, client):
+        data_product = self._readable_data_product()
+
+        response = client.get(f"{ENDPOINT}/cloud/url?id={data_product.id}")
+
+        assert response.status_code == 500
+        assert "FakeLinkPlugin" in response.json()["detail"]
+
+    @pytest.mark.usefixtures("link_plugin_under_cloud", "other_url_under_cloud")
+    def test_get_plugin_url__parent_platform_ignores_disabled_child(
+        self, client, monkeypatch
+    ):
+        monkeypatch.setattr(settings, "ENABLED_PLUGINS", ["FakeLinkPlugin"])
+        data_product = self._readable_data_product()
 
         response = client.get(f"{ENDPOINT}/cloud/url?id={data_product.id}")
 
