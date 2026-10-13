@@ -537,6 +537,10 @@ type RenewInputPortForExplorationRes interface {
 	renewInputPortForExplorationRes()
 }
 
+type RenewOutputPortAsInputPortRes interface {
+	renewOutputPortAsInputPortRes()
+}
+
 type ReplaceGroupMembersRes interface {
 	replaceGroupMembersRes()
 }

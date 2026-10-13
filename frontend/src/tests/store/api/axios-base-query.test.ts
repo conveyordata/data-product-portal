@@ -1,29 +1,38 @@
 import type { BaseQueryApi } from '@reduxjs/toolkit/query';
-import axios from 'axios';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { HttpResponse, http } from 'msw';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { axiosBaseQuery } from '@/store/common/axios-base-query.ts';
-import { dispatchNotification } from '@/utils/feedback.ts';
+import { server } from '@/tests/mocks/server.ts';
+import { registerFeedbackApi, unregisterFeedbackApi } from '@/utils/feedback.ts';
 
-vi.mock('axios', () => {
-    const mockAxios = vi.fn();
+const baseUrl = window.location.origin;
+
+const notification = {
+    success: vi.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
+    warning: vi.fn(),
+    open: vi.fn(),
+    destroy: vi.fn(),
+};
+
+const message = {
+    info: vi.fn(),
+    success: vi.fn(),
+    error: vi.fn(),
+    warning: vi.fn(),
+    loading: vi.fn(),
+    open: vi.fn(),
+    destroy: vi.fn(),
+};
+
+function createBaseQueryApi(signal = new AbortController().signal): BaseQueryApi {
     return {
-        default: Object.assign(mockAxios, {
-            isAxiosError: vi.fn(),
-        }),
-    };
-});
-
-vi.mock('@/utils/feedback.ts', () => ({
-    dispatchNotification: vi.fn(),
-}));
-
-function createBaseQueryApi(endpoint = 'testEndpoint'): BaseQueryApi {
-    return {
-        signal: new AbortController().signal,
+        signal,
         abort: vi.fn(),
         dispatch: vi.fn(),
-        endpoint,
+        endpoint: 'testEndpoint',
         extra: undefined,
         forced: false,
         getState: vi.fn(),
@@ -34,120 +43,96 @@ function createBaseQueryApi(endpoint = 'testEndpoint'): BaseQueryApi {
 describe('axiosBaseQuery', () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        registerFeedbackApi({ message, notification });
+    });
+
+    afterEach(() => {
+        unregisterFeedbackApi();
     });
 
     it('passes the RTK Query abort signal to axios', async () => {
-        const query = axiosBaseQuery({ baseUrl: 'https://example.test' });
-        const api = createBaseQueryApi();
-        vi.mocked(axios).mockResolvedValueOnce({ data: { ok: true } });
+        const query = axiosBaseQuery({ baseUrl });
+        const controller = new AbortController();
+        const handler = vi.fn(() => HttpResponse.json({ ok: true }));
+        server.use(http.get(`${baseUrl}/resource`, handler));
+        controller.abort();
 
-        await query({ url: '/resource' }, api, {});
+        await query({ url: '/resource' }, createBaseQueryApi(controller.signal), {});
 
-        expect(axios).toHaveBeenCalledWith(
-            expect.objectContaining({
-                signal: api.signal,
-                url: 'https://example.test/resource',
-            }),
-        );
+        expect(handler).not.toHaveBeenCalled();
     });
 
     it('adds the active user header from localStorage when available', async () => {
-        const query = axiosBaseQuery({ baseUrl: 'https://example.test' });
-        const api = createBaseQueryApi();
-        vi.mocked(axios).mockResolvedValueOnce({ data: { ok: true } });
-        localStorage.setItem('activeUserHeader', 'user-123');
-
-        await query({ url: '/resource' }, api, {});
-
-        expect(axios).toHaveBeenCalledWith(
-            expect.objectContaining({
-                headers: expect.objectContaining({
-                    'X-user': 'user-123',
-                }),
+        const query = axiosBaseQuery({ baseUrl });
+        let activeUserHeader: string | null = null;
+        server.use(
+            http.get(`${baseUrl}/resource`, ({ request }) => {
+                activeUserHeader = request.headers.get('X-user');
+                return HttpResponse.json({ ok: true });
             }),
         );
+        localStorage.setItem('activeUserHeader', 'user-123');
+
+        await query({ url: '/resource' }, createBaseQueryApi(), {});
+
+        expect(activeUserHeader).toBe('user-123');
     });
 
     it('shows the error toast when extraOptions is undefined', async () => {
-        const query = axiosBaseQuery({ baseUrl: 'https://example.test' });
-        const api = createBaseQueryApi();
-        const error = new Error('boom');
+        const query = axiosBaseQuery({ baseUrl });
+        server.use(http.get(`${baseUrl}/resource`, () => HttpResponse.error()));
 
-        vi.mocked(axios).mockRejectedValueOnce(error);
-        vi.mocked(axios.isAxiosError).mockReturnValue(false);
+        await query({ url: '/resource' }, createBaseQueryApi(), undefined as never);
 
-        await query({ url: '/resource' }, api, undefined as never);
-
-        expect(dispatchNotification).toHaveBeenCalled();
+        expect(notification.error).toHaveBeenCalled();
     });
 
-    it('falls back cleanly for non-Axios errors', async () => {
-        const query = axiosBaseQuery({ baseUrl: 'https://example.test' });
-        const api = createBaseQueryApi();
-        const error = new Error('boom');
+    it('falls back cleanly for network errors', async () => {
+        const query = axiosBaseQuery({ baseUrl });
+        server.use(http.get(`${baseUrl}/resource`, () => HttpResponse.error()));
 
-        vi.mocked(axios).mockRejectedValueOnce(error);
-        vi.mocked(axios.isAxiosError).mockReturnValue(false);
-
-        await expect(query({ url: '/resource' }, api, {})).resolves.toEqual({
+        await expect(query({ url: '/resource' }, createBaseQueryApi(), {})).resolves.toEqual({
             error: {
                 correlation_id: 'NA',
                 detail: 'Please try again later',
             },
         });
-        expect(dispatchNotification).toHaveBeenCalledWith({
+        expect(notification.error).toHaveBeenCalledWith({
             title: 'Something went wrong',
             description: 'Please try again later',
-            type: 'error',
+            duration: false,
         });
     });
 
     it('suppresses the error toast when requested through extraOptions', async () => {
-        const query = axiosBaseQuery({ baseUrl: 'https://example.test' });
-        const api = createBaseQueryApi();
-        const response = {
-            data: {
-                correlation_id: 'corr-123',
-                detail: 'Request failed',
-            },
+        const query = axiosBaseQuery({ baseUrl });
+        const body = {
+            correlation_id: 'corr-123',
+            detail: 'Request failed',
         };
+        server.use(http.get(`${baseUrl}/resource`, () => HttpResponse.json(body, { status: 400 })));
 
-        vi.mocked(axios).mockRejectedValueOnce({ response });
-        vi.mocked(axios.isAxiosError).mockReturnValue(true);
-
-        await expect(query({ url: '/resource' }, api, { suppressErrorToast: true })).resolves.toEqual({
-            error: response.data,
+        await expect(query({ url: '/resource' }, createBaseQueryApi(), { suppressErrorToast: true })).resolves.toEqual({
+            error: body,
         });
-        expect(dispatchNotification).not.toHaveBeenCalled();
+        expect(notification.error).not.toHaveBeenCalled();
     });
 
     it('passes FormData bodies through unchanged', async () => {
-        const query = axiosBaseQuery({ baseUrl: 'https://example.test' });
-        const api = createBaseQueryApi();
-        const formData = new FormData();
-        const file = new Blob(['schema: []'], { type: 'application/yaml' });
-        formData.append('file', file);
-        vi.mocked(axios).mockResolvedValueOnce({ data: { ok: true } });
-
-        await query({ url: '/upload', method: 'POST', body: formData }, api, {});
-
-        expect(axios).toHaveBeenCalledWith(
-            expect.objectContaining({
-                data: expect.any(FormData),
+        const query = axiosBaseQuery({ baseUrl });
+        let uploadedText: string | null = null;
+        server.use(
+            http.post(`${baseUrl}/upload`, async ({ request }) => {
+                const uploadedFile = (await request.formData()).get('file');
+                uploadedText = uploadedFile && typeof uploadedFile !== 'string' ? await uploadedFile.text() : null;
+                return HttpResponse.json({ ok: true });
             }),
         );
+        const formData = new FormData();
+        formData.append('file', new Blob(['schema: []'], { type: 'application/yaml' }));
 
-        const call = vi.mocked(axios).mock.calls[0];
-        expect(call).toBeDefined();
-        if (!call) {
-            throw new Error('Expected axios to be called');
-        }
+        await query({ url: '/upload', method: 'POST', body: formData }, createBaseQueryApi(), {});
 
-        const request = call[0] as unknown as { data: FormData };
-        expect(request.data).toBeInstanceOf(FormData);
-
-        const uploadedFile = request.data.get('file');
-        expect(uploadedFile).toBeInstanceOf(File);
-        expect(await (uploadedFile as File).text()).toBe('schema: []');
+        expect(uploadedText).toBe('schema: []');
     });
 });

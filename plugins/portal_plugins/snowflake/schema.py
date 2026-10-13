@@ -44,6 +44,7 @@ class SnowflakeTechnicalAssetConfiguration(TechnicalAssetPlugin):
     access_granularity: AccessGranularity
 
     _platform_metadata = PlatformMetadata(
+        result_string_template="{database}.{schema}.{table}",
         display_name="Snowflake",
         icon_name="snowflake-logo.svg",
         icon_package="portal_plugins.snowflake",

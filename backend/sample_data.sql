@@ -56,13 +56,8 @@
 -- Platforms and environments
 {% set azure_environment_id_dev = "b3409a4c-21ef-4089-9426-dfcab69f034e" %}
 {% set azure_environment_id_prd = "89089d41-6bc6-434c-8880-cef0b805ae21" %}
-{% set databricks_id = "baa5c47b-805a-4cbb-ad8b-038c66e81b7e" %}
-{% set databricks_service_id = "ce208413-b629-44d2-9f98-e5b47a315a56" %}
-{% set redshift_service_id = "de328223-fd90-4170-a7a1-376e4ebe0594" %}
 {% set returned_environment_id_dev = "08695df2-5e67-402f-bcb1-c1996958f241" %}
 {% set returned_environment_id_prd = "77dc0645-d142-4b4a-bed4-f7002d334716" %}
-{% set snowflake_id = "9be7613c-42fb-4b93-952d-1874ed1ddf77" %}
-{% set snowflake_service_id = "a75189c1-fa42-4980-9497-4bea4c968a5b" %}
 
 -- Data output configurations
 {% set databricks_configuration_id = "cdd627e5-08b2-4dc8-add6-32ff569f543b" %}
@@ -167,8 +162,6 @@ INSERT INTO public.access_modes (id, name, technical_asset_types, description) V
 INSERT INTO public.access_modes (id, name, technical_asset_types, description) VALUES ('{{ access_mode_admin }}'::uuid, 'admin', ARRAY['RedshiftTechnicalAssetConfiguration'], 'Admin access, gives users full control over data and settings');
 
 -- ...existing platform configuration code...
-INSERT INTO public.platforms (id, name) VALUES ('{{ snowflake_id }}'::uuid, 'Snowflake');
-
 INSERT INTO public.platforms (id, name) VALUES ('6be7613c-42fb-4b93-952d-1874ed1ddf76', 'Conveyor');
 
 INSERT INTO public.platform_services (id, name, platform_id, result_string_template, technical_info_template) VALUES ('a75189c1-fa42-4980-9497-4bea4c968a5c', 'Conveyor', (
@@ -176,79 +169,41 @@ INSERT INTO public.platform_services (id, name, platform_id, result_string_templ
     WHERE p.name = 'Conveyor'
 ), '{database}.{schema}.{table}', '{database}.{schema}.{table}');
 
-INSERT INTO public.platform_services (id, name, platform_id, result_string_template, technical_info_template) VALUES ('{{ snowflake_service_id }}'::uuid, 'Snowflake', '{{ snowflake_id }}'::uuid, '{database}.{schema}.{table}', '{database}.{schema}.{table}');
-
-INSERT INTO public.platform_services (id, name, platform_id, result_string_template, technical_info_template) VALUES ('{{ redshift_service_id }}'::uuid, 'Redshift', (
-    SELECT p.id FROM public.platforms AS p
-    WHERE p.name = 'AWS'
-), '{database}__{schema}.{table}', '{database}__{schema}.{table}');
-
-INSERT INTO public.platforms (id, name) VALUES ('{{ databricks_id }}'::uuid, 'Databricks');
-
-INSERT INTO public.platform_services (id, name, platform_id, result_string_template, technical_info_template) VALUES ('{{ databricks_service_id }}'::uuid, 'Databricks', '{{ databricks_id }}'::uuid, '{catalog}.{schema}.{table}', '{catalog}.{schema}.{table}');
-
 INSERT INTO public.platform_service_configs (id, platform_id, service_id, config, created_on, updated_on, deleted_at) VALUES ('f4d3e8b1-5c6e-4f4a-0893-8f4e2c3d5b6a', (
     SELECT p.id FROM public.platforms AS p
     WHERE p.name = 'Conveyor'
 ), 'a75189c1-fa42-4980-9497-4bea4c968a5c', '["clean","master"]', timezone('utc'::text, current_timestamp
 ), NULL, NULL);
 
-INSERT INTO public.platform_service_configs (id, platform_id, service_id, config, created_on, updated_on, deleted_at) VALUES ('6bd82fd6-9a23-4517-a07c-9110d83ab38f', (
-    SELECT p.id FROM public.platforms AS p
-    WHERE p.name = 'AWS'), (
-    SELECT ps.id FROM public.platform_services AS ps
-    WHERE
-        ps.platform_id = (
-            SELECT p.id FROM public.platforms AS p
-            WHERE p.name = 'AWS'
-        ) AND ps.name = 'S3'
-), '["datalake","ingress","egress"]', timezone('utc'::text, current_timestamp
-), NULL, NULL);
+UPDATE public.platform_service_configs SET config = '["datalake","ingress","egress"]'
+WHERE service_id = (
+    SELECT id FROM public.platform_services
+    WHERE lower(name) = 's3'
+);
 
-INSERT INTO public.platform_service_configs (id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES ('1c9f5a2b-7e3d-4c6b-8f4a-2d5e9c1b3a4d', (
-    SELECT p.id FROM public.platforms AS p
-    WHERE p.name = 'AWS'
-), '{{ redshift_service_id }}', '[]', timezone('utc'::text, current_timestamp), NULL, NULL);
+UPDATE public.platform_service_configs SET config = '["clean","master"]'
+WHERE service_id = (
+    SELECT id FROM public.platform_services
+    WHERE lower(name) = 'glue'
+);
 
-INSERT INTO public.platform_service_configs (id, platform_id, service_id, config, created_on, updated_on, deleted_at) VALUES ('fa026b3a-7a17-4c32-b279-995af021f6c2', (
-    SELECT p.id FROM public.platforms AS p
-    WHERE p.name = 'AWS'), (
-    SELECT ps.id FROM public.platform_services AS ps
-    WHERE
-        ps.platform_id = (
-            SELECT p.id FROM public.platforms AS p
-            WHERE p.name = 'AWS'
-        ) AND ps.name = 'Glue'
-), '["clean","master"]', timezone('utc'::text, current_timestamp
-), NULL, NULL);
+UPDATE public.platform_service_configs SET config = '["clean","master"]'
+WHERE service_id = (
+    SELECT id FROM public.platform_services
+    WHERE lower(name) = 'databricks'
+);
 
-INSERT INTO public.platform_service_configs (id, platform_id, service_id, config, created_on, updated_on, deleted_at) VALUES ('0b9a0e7f-8fee-4fd3-97e0-830e1612b77a', '{{ databricks_id }}'::uuid, '{{ databricks_service_id }}'::uuid, '["clean","master"]', timezone('utc'::text, current_timestamp), NULL, NULL);
+UPDATE public.platform_service_configs SET config = '["clean","master"]'
+WHERE service_id = (
+    SELECT id FROM public.platform_services
+    WHERE lower(name) = 'snowflake'
+);
 
-INSERT INTO public.platform_service_configs (id, platform_id, service_id, config, created_on, updated_on, deleted_at) VALUES ('0b9a0e7f-8fee-4fd3-97e0-940e1612babc', (
-    SELECT p.id FROM public.platforms AS p
-    WHERE p.name = 'Azure'), (
-    SELECT ps.id FROM public.platform_services AS ps
-    WHERE
-        ps.platform_id = (
-            SELECT p.id FROM public.platforms AS p
-            WHERE p.name = 'Azure'
-        ) AND ps.name = 'azureblob'
-), '[]', timezone('utc'::text, current_timestamp
-), NULL, NULL);
-
-INSERT INTO public.platform_service_configs (id, platform_id, service_id, config, created_on, updated_on, deleted_at) VALUES ('7c1e4b90-2d63-4a18-9b5f-3e8d6a2c4f71', '{{ snowflake_id }}'::uuid, '{{ snowflake_service_id }}'::uuid, '["clean","master"]', timezone('utc'::text, current_timestamp), NULL, NULL);
-
-INSERT INTO public.platforms (id, name) VALUES ('9f2c7a41-6b58-4e3d-8c19-5d7a3b6e2f84', 'PostgreSQL');
-
-INSERT INTO public.platform_services (id, name, platform_id, result_string_template, technical_info_template) VALUES ('4a8d2f63-9c17-4b5e-a238-7e1b4c6d9f05', 'PostgreSQL', '9f2c7a41-6b58-4e3d-8c19-5d7a3b6e2f84'::uuid, '{database}.{schema}.{table}', '{database}.{schema}.{table}');
-
-INSERT INTO public.platform_service_configs (id, platform_id, service_id, config, created_on, updated_on, deleted_at) VALUES ('2e6b9d47-3f81-4c25-b7a6-8d4e1f9c3a52', '9f2c7a41-6b58-4e3d-8c19-5d7a3b6e2f84'::uuid, '4a8d2f63-9c17-4b5e-a238-7e1b4c6d9f05'::uuid, '["clean","master"]', timezone('utc'::text, current_timestamp), NULL, NULL);
-
-INSERT INTO public.platforms (id, name) VALUES ('6d3f8c25-7a94-4e61-b8d2-1c5a9e4b7f36', 'OSI');
-
-INSERT INTO public.platform_services (id, name, platform_id, result_string_template, technical_info_template) VALUES ('8b5a1e94-2c67-4d38-9f41-6a3e7b2d5c81', 'OSI', '6d3f8c25-7a94-4e61-b8d2-1c5a9e4b7f36'::uuid, '{model_name}', '{location}');
-
-INSERT INTO public.platform_service_configs (id, platform_id, service_id, config, created_on, updated_on, deleted_at) VALUES ('5c9e2b78-4d16-4a93-8e57-2f8b6c1d4a93', '6d3f8c25-7a94-4e61-b8d2-1c5a9e4b7f36'::uuid, '8b5a1e94-2c67-4d38-9f41-6a3e7b2d5c81'::uuid, '[]', timezone('utc'::text, current_timestamp), NULL, NULL);
+UPDATE public.platform_service_configs SET config = '["clean","master"]'
+WHERE service_id = (
+    SELECT id FROM public.platform_services
+    WHERE lower(name) = 'postgresql'
+);
 
 INSERT INTO public.data_product_types (id, name, description, icon_key, created_on, updated_on, deleted_at) VALUES ('{{ processing_type_id }}'::uuid, 'Processing', 'Data products that transform, clean, or enrich data to make it usable for other systems or analysis.', 'PROCESSING', timezone('utc'::text, current_timestamp), NULL, NULL);
 
@@ -308,14 +263,14 @@ INSERT INTO public.env_platform_service_configs (id, environment_id, platform_id
     SELECT p.id FROM public.platforms AS p
     WHERE p.name = 'AWS'), (
     SELECT ps.id FROM public.platform_services AS ps
-    WHERE ps.name = 'ParameterStore'
+    WHERE lower(ps.name) = 'parameterstore'
 ), '[]', timezone('utc'::text, current_timestamp), NULL, NULL);
 
 INSERT INTO public.env_platform_service_configs (id, environment_id, platform_id, service_id, config, created_on, updated_on, deleted_at) VALUES ('5c8f3da2-7e49-4026-b3d8-9fae2c4b6b71', '{{ returned_environment_id_prd }}'::uuid, (
     SELECT p.id FROM public.platforms AS p
     WHERE p.name = 'AWS'), (
     SELECT ps.id FROM public.platform_services AS ps
-    WHERE ps.name = 'ParameterStore'
+    WHERE lower(ps.name) = 'parameterstore'
 ), '[]', timezone('utc'::text, current_timestamp), NULL, NULL);
 
 INSERT INTO public.env_platform_service_configs (id, environment_id, platform_id, service_id, config, created_on, updated_on, deleted_at) VALUES ('93f4b677-5ae8-450d-91a6-e15196b2e774', '{{ returned_environment_id_dev }}'::uuid, (
@@ -399,13 +354,21 @@ INSERT INTO public.env_platform_service_configs (id, environment_id, platform_id
 VALUES ('2d63c1f6-a72b-4f9a-8b5e-1e2c3d4f5a6b', '{{ returned_environment_id_dev }}'::uuid, (
     SELECT p.id FROM public.platforms AS p
     WHERE p.name = 'AWS'
-), '{{ redshift_service_id }}', '[{"identifier":"dev","database_name":"database-dev","bucket_identifier":"datalake","s3_path":"redshift/dev"}]', timezone('utc'::text, current_timestamp), NULL, NULL);
+), (
+    SELECT id FROM public.platform_services
+    WHERE lower(name) = 'redshift'
+), '[{"identifier":"dev","database_name":"database-dev","bucket_identifier":"datalake","s3_path":"redshift/dev"}]', timezone('utc'::text, current_timestamp
+), NULL, NULL);
 
 INSERT INTO public.env_platform_service_configs (id, environment_id, platform_id, service_id, "config", created_on, updated_on, deleted_at)
 VALUES ('3e74d2d7-b83c-5f0b-9c6f-2f3d4e5f6b7c', '{{ returned_environment_id_prd }}'::uuid, (
     SELECT p.id FROM public.platforms AS p
     WHERE p.name = 'AWS'
-), '{{ redshift_service_id }}', '[{"identifier":"prd","database_name":"database-prd","bucket_identifier":"datalake","s3_path":"redshift/prd"}]', timezone('utc'::text, current_timestamp), NULL, NULL);
+), (
+    SELECT id FROM public.platform_services
+    WHERE lower(name) = 'redshift'
+), '[{"identifier":"prd","database_name":"database-prd","bucket_identifier":"datalake","s3_path":"redshift/prd"}]', timezone('utc'::text, current_timestamp
+), NULL, NULL);
 
 -- DOMAINS
 INSERT INTO public.domains (id, name, description, created_on, updated_on, deleted_at) VALUES ('{{ customer_domain_id }}'::uuid, 'Customer Insights', 'Contains data products that provide information about customer behavior, demographics and satisfaction.', timezone('utc'::text, current_timestamp), NULL, NULL);
@@ -535,7 +498,7 @@ INSERT INTO public.data_outputs (id, namespace, name, description, status, platf
     SELECT p.id FROM public.platforms AS p
     WHERE p.name = 'AWS'), (
     SELECT ps.id FROM public.platform_services AS ps
-    WHERE ps.name = 'ParameterStore'
+    WHERE lower(ps.name) = 'parameterstore'
 ), '{{ customer_segmentation_id }}'::uuid, NULL, '7a4c9e21-3b58-4f60-9d17-2e8b5c6a1f43', timezone('utc'::text, current_timestamp), NULL, NULL, 'default');
 
 INSERT INTO public.data_outputs_datasets (id, data_output_id, dataset_id, status, requested_by_id, requested_on, approved_by_id, approved_on, denied_by_id, denied_on, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), '{{ customer_segmentation_weekly_technical_asset_id }}'::uuid, '{{ customer_segmentation_weekly_output_port_id }}'::uuid, 'APPROVED', '{{ john_id }}'::uuid, '2025-10-28 16:36:36.784134', '{{ john_id }}'::uuid, '2025-10-28 16:36:36.936773', NULL, NULL, '2025-10-28 16:36:36.677803', '2025-10-28 16:36:36.838041', NULL);
@@ -825,10 +788,20 @@ INSERT INTO public.data_products (id, about, type_id, lifecycle_id, usage) VALUE
 INSERT INTO public.datasets (id, namespace, data_product_id, name, description, about, status, access_function, access_type_id, created_on, updated_on, lifecycle_id, deleted_at) VALUES ('{{ dei_insights_dashboard_ds }}'::uuid, 'dei_insights_dashboard', '{{ dei_insights_dashboard }}'::uuid, 'DEI Insights dashboard', 'Insights into DEI at the company', 'Provides insights into DEI at the company', 'ACTIVE', 'RESTRICTED', '{{ restricted_access_type_id }}'::uuid, timezone('utc'::text, current_timestamp), NULL, '{{ data_product_lifecycle_id }}'::uuid, NULL);
 
 INSERT INTO public.data_outputs (id, namespace, name, description, status, platform_id, service_id, owner_id, configuration, configuration_id, created_on, updated_on, deleted_at, technical_mapping)
-VALUES (gen_random_uuid(), 'workforce-demographics', 'Workforce Demographics', 'Records representation by gender, age, and level.', 'ACTIVE', 'baa5c47b-805a-4cbb-ad8b-038c66e81b7e', 'ce208413-b629-44d2-9f98-e5b47a315a56', '{{ dei_insights_dashboard }}'::uuid, NULL, '44daa0b4-a027-4e5b-b233-b8342da71c38', '2025-10-28 18:17:04.80167', NULL, NULL, 'default');
+VALUES (gen_random_uuid(), 'workforce-demographics', 'Workforce Demographics', 'Records representation by gender, age, and level.', 'ACTIVE', (
+    SELECT id FROM public.platforms
+    WHERE lower(name) = 'databricks'), (
+    SELECT id FROM public.platform_services
+    WHERE lower(name) = 'databricks'
+), '{{ dei_insights_dashboard }}'::uuid, NULL, '44daa0b4-a027-4e5b-b233-b8342da71c38', '2025-10-28 18:17:04.80167', NULL, NULL, 'default');
 
 INSERT INTO public.data_outputs (id, namespace, name, description, status, platform_id, service_id, owner_id, configuration, configuration_id, created_on, updated_on, deleted_at, technical_mapping)
-VALUES (gen_random_uuid(), 'compensation-equity-data', 'Compensation Equity Data', 'Captures pay and benefits information across roles.', 'ACTIVE', 'baa5c47b-805a-4cbb-ad8b-038c66e81b7e', 'ce208413-b629-44d2-9f98-e5b47a315a56', '{{ dei_insights_dashboard }}'::uuid, NULL, 'e0875fbb-f2ff-4804-a9ba-c9c3b006fca3', '2025-10-28 18:17:20.241114', NULL, NULL, 'default');
+VALUES (gen_random_uuid(), 'compensation-equity-data', 'Compensation Equity Data', 'Captures pay and benefits information across roles.', 'ACTIVE', (
+    SELECT id FROM public.platforms
+    WHERE lower(name) = 'databricks'), (
+    SELECT id FROM public.platform_services
+    WHERE lower(name) = 'databricks'
+), '{{ dei_insights_dashboard }}'::uuid, NULL, 'e0875fbb-f2ff-4804-a9ba-c9c3b006fca3', '2025-10-28 18:17:20.241114', NULL, NULL, 'default');
 
 INSERT INTO public.role_assignments_data_product (id, data_product_id, identity_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at)
 VALUES (gen_random_uuid(), '{{ dei_insights_dashboard }}'::uuid, '{{ john_id }}'::uuid, (
@@ -881,7 +854,7 @@ INSERT INTO public.data_outputs (id, namespace, name, description, status, platf
         ps.platform_id = (
             SELECT p.id FROM public.platforms AS p
             WHERE p.name = 'AWS'
-        ) AND ps.name = 'Redshift'
+        ) AND lower(ps.name) = 'redshift'
 ), '{{ access_modes_example }}'::uuid, NULL, '3e5b2eb0-2d78-4ef4-b73b-57df8d85be11', timezone('utc'::text, current_timestamp
 ), NULL, NULL, 'default');
 
@@ -907,7 +880,7 @@ INSERT INTO public.data_outputs (id, namespace, name, description, status, platf
         ps.platform_id = (
             SELECT p.id FROM public.platforms AS p
             WHERE p.name = 'AWS'
-        ) AND ps.name = 'Redshift'
+        ) AND lower(ps.name) = 'redshift'
 ), '{{ access_modes_example }}'::uuid, NULL, '6c8d4df0-a65a-4967-a40e-f0fffbf90231', timezone('utc'::text, current_timestamp
 ), NULL, NULL, 'default');
 
@@ -930,7 +903,7 @@ INSERT INTO public.data_outputs (id, namespace, name, description, status, platf
         ps.platform_id = (
             SELECT p.id FROM public.platforms AS p
             WHERE p.name = 'AWS'
-        ) AND ps.name = 'Redshift'
+        ) AND lower(ps.name) = 'redshift'
 ), '{{ access_modes_example }}'::uuid, NULL, '9e4d6227-7f74-467f-a6cd-6b1f0e9f6f3a', timezone('utc'::text, current_timestamp
 ), NULL, NULL, 'default');
 
@@ -1792,7 +1765,12 @@ INSERT INTO public.data_outputs (id, namespace, name, description, status, platf
         ) AND ps.name = 'Glue'
 ), '81815c4c-f323-4cf1-b25b-f43f231f510f', NULL, '12346cc6-f58d-4217-88d3-6443b01d5d0f', '2025-10-28 16:34:02.355842', NULL, NULL, 'default');
 
-INSERT INTO public.data_outputs (id, namespace, name, description, status, platform_id, service_id, owner_id, configuration, configuration_id, created_on, updated_on, deleted_at, technical_mapping) VALUES ('86d75ebd-8c3a-4c71-b5a5-33146b28b410', 'clinical-outcome-correlation', 'Clinical outcome correlation', 'Links omics samples to anonymized patient outcomes, enabling downstream hypothesis testing.', 'ACTIVE', 'baa5c47b-805a-4cbb-ad8b-038c66e81b7e', 'ce208413-b629-44d2-9f98-e5b47a315a56', '81815c4c-f323-4cf1-b25b-f43f231f510f', NULL, 'db8e84e9-e942-4ebb-ac78-ee0fa600db5d', '2025-10-28 16:34:31.5612', NULL, NULL, 'default');
+INSERT INTO public.data_outputs (id, namespace, name, description, status, platform_id, service_id, owner_id, configuration, configuration_id, created_on, updated_on, deleted_at, technical_mapping) VALUES ('86d75ebd-8c3a-4c71-b5a5-33146b28b410', 'clinical-outcome-correlation', 'Clinical outcome correlation', 'Links omics samples to anonymized patient outcomes, enabling downstream hypothesis testing.', 'ACTIVE', (
+    SELECT id FROM public.platforms
+    WHERE lower(name) = 'databricks'), (
+    SELECT id FROM public.platform_services
+    WHERE lower(name) = 'databricks'
+), '81815c4c-f323-4cf1-b25b-f43f231f510f', NULL, 'db8e84e9-e942-4ebb-ac78-ee0fa600db5d', '2025-10-28 16:34:31.5612', NULL, NULL, 'default');
 
 INSERT INTO public.data_outputs (id, namespace, name, description, status, platform_id, service_id, owner_id, configuration, configuration_id, created_on, updated_on, deleted_at, technical_mapping) VALUES ('904ccfd4-c5e5-4a0d-af0b-3a3c38b34696', 'trial-master-summary', 'Trial master summary', 'Central repository for study metadata and milestones.', 'ACTIVE', (
     SELECT p.id FROM public.platforms AS p
@@ -1916,13 +1894,33 @@ INSERT INTO public.data_outputs (id, namespace, name, description, status, platf
         ) AND ps.name = 'S3'
 ), '625b65b6-13d9-4c8c-a669-865e36fc3dfc', NULL, '7bb075e0-70c3-44c2-811e-cd7bba757927', '2025-10-28 18:07:33.673309', NULL, NULL, 'default');
 
-INSERT INTO public.data_outputs (id, namespace, name, description, status, platform_id, service_id, owner_id, configuration, configuration_id, created_on, updated_on, deleted_at, technical_mapping) VALUES ('d1092134-aac6-4501-88ba-464a9f0cedc8', 'customer-master-data', 'Customer master data', 'Maintains a golden record of HCPs and organizations.', 'ACTIVE', 'baa5c47b-805a-4cbb-ad8b-038c66e81b7e', 'ce208413-b629-44d2-9f98-e5b47a315a56', '22488fe0-c30a-4447-972e-3eb22a1bd266', NULL, 'dc1cc43b-698e-424c-af5b-27f68f0c0781', '2025-10-28 18:09:39.615998', NULL, NULL, 'default');
+INSERT INTO public.data_outputs (id, namespace, name, description, status, platform_id, service_id, owner_id, configuration, configuration_id, created_on, updated_on, deleted_at, technical_mapping) VALUES ('d1092134-aac6-4501-88ba-464a9f0cedc8', 'customer-master-data', 'Customer master data', 'Maintains a golden record of HCPs and organizations.', 'ACTIVE', (
+    SELECT id FROM public.platforms
+    WHERE lower(name) = 'databricks'), (
+    SELECT id FROM public.platform_services
+    WHERE lower(name) = 'databricks'
+), '22488fe0-c30a-4447-972e-3eb22a1bd266', NULL, 'dc1cc43b-698e-424c-af5b-27f68f0c0781', '2025-10-28 18:09:39.615998', NULL, NULL, 'default');
 
-INSERT INTO public.data_outputs (id, namespace, name, description, status, platform_id, service_id, owner_id, configuration, configuration_id, created_on, updated_on, deleted_at, technical_mapping) VALUES ('1e9030f0-6e6e-485e-8bd9-0ff76bfc371f', 'engagement-activity-log', 'Engagement Activity Log', 'Tracks calls, emails, and events with customers.', 'ACTIVE', 'baa5c47b-805a-4cbb-ad8b-038c66e81b7e', 'ce208413-b629-44d2-9f98-e5b47a315a56', '22488fe0-c30a-4447-972e-3eb22a1bd266', NULL, '8d18f556-ccd2-425e-8e48-f24c185a053e', '2025-10-28 18:10:04.633488', NULL, NULL, 'default');
+INSERT INTO public.data_outputs (id, namespace, name, description, status, platform_id, service_id, owner_id, configuration, configuration_id, created_on, updated_on, deleted_at, technical_mapping) VALUES ('1e9030f0-6e6e-485e-8bd9-0ff76bfc371f', 'engagement-activity-log', 'Engagement Activity Log', 'Tracks calls, emails, and events with customers.', 'ACTIVE', (
+    SELECT id FROM public.platforms
+    WHERE lower(name) = 'databricks'), (
+    SELECT id FROM public.platform_services
+    WHERE lower(name) = 'databricks'
+), '22488fe0-c30a-4447-972e-3eb22a1bd266', NULL, '8d18f556-ccd2-425e-8e48-f24c185a053e', '2025-10-28 18:10:04.633488', NULL, NULL, 'default');
 
-INSERT INTO public.data_outputs (id, namespace, name, description, status, platform_id, service_id, owner_id, configuration, configuration_id, created_on, updated_on, deleted_at, technical_mapping) VALUES ('07fe77b2-f06f-4692-a76b-acdd2c412db3', 'entity-registry', 'Entity Registry', 'Stores canonical identifiers and metadata for all business entities.', 'ACTIVE', 'baa5c47b-805a-4cbb-ad8b-038c66e81b7e', 'ce208413-b629-44d2-9f98-e5b47a315a56', '90e65438-a942-43e0-a4a9-ee406b92df65', NULL, 'da19237f-eaf6-4a0a-8090-a2b724189978', '2025-10-28 18:12:07.053708', NULL, NULL, 'default');
+INSERT INTO public.data_outputs (id, namespace, name, description, status, platform_id, service_id, owner_id, configuration, configuration_id, created_on, updated_on, deleted_at, technical_mapping) VALUES ('07fe77b2-f06f-4692-a76b-acdd2c412db3', 'entity-registry', 'Entity Registry', 'Stores canonical identifiers and metadata for all business entities.', 'ACTIVE', (
+    SELECT id FROM public.platforms
+    WHERE lower(name) = 'databricks'), (
+    SELECT id FROM public.platform_services
+    WHERE lower(name) = 'databricks'
+), '90e65438-a942-43e0-a4a9-ee406b92df65', NULL, 'da19237f-eaf6-4a0a-8090-a2b724189978', '2025-10-28 18:12:07.053708', NULL, NULL, 'default');
 
-INSERT INTO public.data_outputs (id, namespace, name, description, status, platform_id, service_id, owner_id, configuration, configuration_id, created_on, updated_on, deleted_at, technical_mapping) VALUES ('967ca866-d868-49b8-9a31-3d2e97ed63f3', 'relationship-graph', 'Relationship Graph', 'Maps inter-entity relationships across domains.', 'ACTIVE', 'baa5c47b-805a-4cbb-ad8b-038c66e81b7e', 'ce208413-b629-44d2-9f98-e5b47a315a56', '90e65438-a942-43e0-a4a9-ee406b92df65', NULL, '502d4484-e332-4854-a2d8-7c387906f459', '2025-10-28 18:12:22.129267', NULL, NULL, 'default');
+INSERT INTO public.data_outputs (id, namespace, name, description, status, platform_id, service_id, owner_id, configuration, configuration_id, created_on, updated_on, deleted_at, technical_mapping) VALUES ('967ca866-d868-49b8-9a31-3d2e97ed63f3', 'relationship-graph', 'Relationship Graph', 'Maps inter-entity relationships across domains.', 'ACTIVE', (
+    SELECT id FROM public.platforms
+    WHERE lower(name) = 'databricks'), (
+    SELECT id FROM public.platform_services
+    WHERE lower(name) = 'databricks'
+), '90e65438-a942-43e0-a4a9-ee406b92df65', NULL, '502d4484-e332-4854-a2d8-7c387906f459', '2025-10-28 18:12:22.129267', NULL, NULL, 'default');
 
 INSERT INTO public.data_outputs (id, namespace, name, description, status, platform_id, service_id, owner_id, configuration, configuration_id, created_on, updated_on, deleted_at, technical_mapping) VALUES ('e1024306-a524-4142-8673-b0219dfad76b', 'project-delivery-metrics', 'Project Delivery Metrics', 'Tracks timelines, milestones, and outcomes of internal projects.', 'ACTIVE', (
     SELECT p.id FROM public.platforms AS p

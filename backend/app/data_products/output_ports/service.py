@@ -49,7 +49,10 @@ from app.data_products.output_port_technical_assets_link.model import (
 )
 from app.data_products.output_ports.enums import OutputPortAccessFunction
 from app.data_products.output_ports.model import OutputPort as OutputPortModel
-from app.data_products.output_ports.model import ensure_output_port_exists
+from app.data_products.output_ports.model import (
+    access_function_filter_excluding_consumers,
+    ensure_output_port_exists,
+)
 from app.data_products.output_ports.schema import DatasetEmbedModel, OutputPort
 from app.data_products.output_ports.schema_request import (
     CreateOutputPortRequest,
@@ -185,7 +188,9 @@ class OutputPortService:
             query.options(
                 selectinload(OutputPortModel.technical_asset_links),
                 selectinload(OutputPortModel.data_product_settings),
-            )
+                selectinload(OutputPortModel.data_product),
+            ),
+            execution_options={"skip_data_product_visibility_filter": True},
         )
 
         if not output_port:
@@ -237,6 +242,8 @@ class OutputPortService:
             )
 
         stmt = select(OutputPortModel).order_by(ordered_by).limit(limit)
+        if (user_id := self.db.info.get("current_user_id")) is not None:
+            stmt = stmt.where(access_function_filter_excluding_consumers(user_id))
         match assignment_filter:
             case AssignmentFilter.ALL:
                 pass
@@ -622,7 +629,11 @@ class OutputPortService:
                 )
 
         # if no data outputs are linked yet, still show the owner data product
-        if level >= 2 and not output_port.technical_asset_links:
+        if (
+            level >= 2
+            and not output_port.technical_asset_links
+            and output_port.data_product is not None
+        ):
             nodes.append(
                 Node(
                     id=f"{output_port.data_product.id}_2",

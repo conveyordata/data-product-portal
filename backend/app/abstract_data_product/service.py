@@ -1,5 +1,5 @@
 from copy import deepcopy
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional, Sequence
 from uuid import UUID
 
@@ -34,11 +34,20 @@ from app.core.logging.posthog_analytics import (
     PosthogAnalyticsClient,
 )
 from app.data_products import email
+from app.data_products.model import DataProduct as DataProductModel
+from app.data_products.model import _has_user_access_to_hidden_data_product
 from app.data_products.output_ports.enums import OutputPortAccessFunction
-from app.data_products.output_ports.input_ports.service import InputPortService
+from app.data_products.output_ports.input_ports.service import (
+    InputPortService,
+    RedactedInputPort,
+)
 from app.data_products.output_ports.model import OutputPort as OutputPortModel
-from app.data_products.output_ports.model import ensure_output_port_exists
+from app.data_products.output_ports.model import (
+    access_function_filter_excluding_consumers,
+    ensure_output_port_exists,
+)
 from app.data_products.status import AbstractDataProductStatus
+from app.database.database import SKIP_OUTPUT_PORT_ACCESS_FUNCTION_FILTER, UNFILTERED
 from app.users.model import User
 
 
@@ -54,23 +63,43 @@ class AbstractDataProductService:
                 detail=f"{adp.abstract_data_product_type.value} '{adp.name}' is pending deletion and cannot be modified",
             )
 
+    def _is_data_product_member(self, data_product_id: UUID, user_id: UUID) -> bool:
+        return bool(
+            self.db.scalar(
+                select(
+                    _has_user_access_to_hidden_data_product(DataProductModel, user_id)
+                ).where(DataProductModel.id == data_product_id),
+                execution_options=UNFILTERED,
+            )
+        )
+
     def get_input_ports(self, data_product_id: UUID) -> Sequence[InputPortModel]:
         ensure_abstract_data_product_exists(data_product_id, self.db)
+        query = (
+            select(InputPortModel)
+            # Join (rather than selectinload) the output port so that the
+            # private output port visibility filter excludes the whole
+            # input port row when its output port isn't visible to the
+            # current user, instead of just nulling out the relationship.
+            .join(InputPortModel.output_port)
+            .options(
+                contains_eager(InputPortModel.output_port),
+                selectinload(InputPortModel.requests),
+            )
+            .filter(
+                InputPortModel.consuming_abstract_data_product_id == data_product_id
+            )
+        )
+        user_id = self.db.info.get("current_user_id")
+        is_member = user_id is not None and self._is_data_product_member(
+            data_product_id, user_id
+        )
+        if user_id is not None and not is_member:
+            query = query.where(access_function_filter_excluding_consumers(user_id))
         return (
             self.db.scalars(
-                select(InputPortModel)
-                # Join (rather than selectinload) the output port so that the
-                # private output port visibility filter excludes the whole
-                # input port row when its output port isn't visible to the
-                # current user, instead of just nulling out the relationship.
-                .join(InputPortModel.output_port)
-                .options(
-                    contains_eager(InputPortModel.output_port),
-                    selectinload(InputPortModel.requests),
-                )
-                .filter(
-                    InputPortModel.consuming_abstract_data_product_id == data_product_id
-                ),
+                query,
+                execution_options={SKIP_OUTPUT_PORT_ACCESS_FUNCTION_FILTER: is_member},
             )
             .unique()
             .all()
@@ -261,8 +290,10 @@ class AbstractDataProductService:
             options=[
                 selectinload(OutputPortModel.data_product_links)
                 .selectinload(InputPortModel.consuming_abstract_data_product)
-                .selectinload(AbstractDataProduct.input_ports)
+                .selectinload(AbstractDataProduct.input_ports),
+                selectinload(OutputPortModel.data_product),
             ],
+            execution_options=UNFILTERED,
         )
         self._ensure_not_deleting(adp)
         self._ensure_not_deleting(output_port.data_product)
@@ -305,11 +336,13 @@ class AbstractDataProductService:
             AbstractDataProduct,
             id,
             options=[
-                selectinload(AbstractDataProduct.input_ports).selectinload(
-                    InputPortModel.requests
-                )
+                selectinload(AbstractDataProduct.input_ports).options(
+                    selectinload(InputPortModel.requests),
+                    selectinload(InputPortModel.output_port),
+                ),
             ],
             populate_existing=True,
+            execution_options=UNFILTERED,
         )
         if not adp:
             raise HTTPException(
@@ -374,18 +407,70 @@ class AbstractDataProductService:
         self.db.flush()
         return input_port
 
-    def _get_input_port(self, id: UUID, output_port_id: UUID) -> InputPortModel:
-        ensure_output_port_exists(output_port_id, self.db)
-        adp = ensure_abstract_data_product_exists(
-            id,
-            self.db,
-            options=[
-                selectinload(AbstractDataProduct.input_ports).selectinload(
-                    InputPortModel.requests
-                )
-            ],
-            populate_existing=True,
+    def renew_output_port_as_input_port(
+        self,
+        *,
+        data_product_id: UUID,
+        output_port_id: UUID,
+        consuming_data_product_id: UUID,
+        actor: User,
+    ) -> RedactedInputPort:
+        input_port_service = InputPortService(self.db)
+        current_link = input_port_service.get_link(
+            data_product_id,
+            output_port_id,
+            consuming_data_product_id,
+            execution_options={"skip_data_product_visibility_filter": True},
         )
+        self._ensure_not_deleting(current_link.consuming_abstract_data_product)
+        self._ensure_not_deleting(current_link.output_port.data_product)
+        if current_link.pending_request is not None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="A request is already pending for this input port",
+            )
+        active_grant = current_link.active_grant
+        if active_grant is not None and active_grant.valid_until is None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="This input port already has permanent access; there is nothing to renew",
+            )
+
+        previous_request = current_link.latest_request
+        access_duration = self._resolve_access_duration(
+            current_link.consuming_abstract_data_product, current_link.output_port
+        )
+        now = datetime.now(timezone.utc)
+        request = InputPortRequestModel(
+            justification=previous_request.justification,
+            requested_by_id=previous_request.requested_by_id,
+            requested_on=now,
+            access_duration_type=access_duration.access_duration_type,
+            requested_duration_days=access_duration.days,
+            input_port=current_link,
+            access_mode_id=previous_request.access_mode_id,
+        )
+        self.db.add(request)
+        self.db.flush()
+        input_port_service.approve_request(request, now=now, decided_by=actor)
+
+        self.posthog.capture(
+            distinct_id=actor.id,
+            event="Input Port Approved",
+            properties={
+                "data_product_id": str(data_product_id),
+                "output_port_id": str(output_port_id),
+                "consuming_data_product_id": str(consuming_data_product_id),
+                "type": str(
+                    current_link.consuming_abstract_data_product.abstract_data_product_type.value
+                ),
+            },
+        )
+        return RedactedInputPort.of(current_link, previous_request.requested_by_id)
+
+    def _get_input_port(self, id: UUID, output_port_id: UUID) -> InputPortModel:
+        ensure_output_port_exists(output_port_id, self.db, execution_options=UNFILTERED)
+        adp = self._get_adp_with_input_ports(id)
         input_port = next(
             (
                 input_port

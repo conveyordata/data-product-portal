@@ -1,26 +1,38 @@
+import os
+import subprocess
+import sys
 from contextlib import suppress
+from typing import ClassVar
 from uuid import uuid4
 
 import pytest
 from alembic import command
-from sqlalchemy import inspect
+from alembic.script import ScriptDirectory
+from sqlalchemy import Engine, create_engine, inspect
+from sqlalchemy.exc import ProgrammingError
+from sqlalchemy_utils.functions import (
+    create_database,
+    database_exists,
+    drop_database,
+)
 
 from app.plugins.migrations import (
     _CORE_VERSIONS_DIR,
-    RETIRED_PLUGIN_REVISIONS,
     VERSION_TABLE,
     _config,
     _configuration_table,
     _core_head,
     _owned_versions_dir,
-    _version_table,
+    _version_locations,
     check_latest_migration_core,
     migrate_all,
     owns_a_table,
 )
 from app.plugins.registry import plugin_registry
+from app.technical_asset_configuration.base_schema import TechnicalAssetPlugin
 from tests import engine
 from tests.factories import TechnicalAssetFactory
+from tests.fixtures.broken_plugin import BrokenPlugin
 from tests.fixtures.example_plugin import ExamplePlugin
 from tests.fixtures.other_plugin import OtherPlugin
 
@@ -111,21 +123,6 @@ def test_migrate_all__still_checks_for_orphans_when_a_plugin_is_dropped():
         migrate_all(installed(), engine)
 
 
-def test_migrate_all__forgets_the_revision_of_a_plugin_the_portal_dropped():
-    """A database that ran a plugin the portal has since deleted keeps that
-    plugin's row. Without reconciling it, the orphan check above would abort
-    every later migration, and no core revision could clean it up because the
-    check runs first."""
-    retired = next(iter(RETIRED_PLUGIN_REVISIONS))
-    with engine.begin() as connection:
-        connection.execute(_version_table.insert().values(version_num=retired))
-    assert retired in _tracked_revisions()
-
-    migrate()
-
-    assert retired not in _tracked_revisions()
-
-
 def _set_configuration_type(configuration_id, configuration_type) -> None:
     with engine.begin() as connection:
         connection.execute(
@@ -197,10 +194,10 @@ def test_migrate_all__names_the_plugin_whose_row_it_cannot_resolve():
 
 
 def test_migrate_all__skips_plugins_without_a_table():
-    class NoTablePlugin:
-        name = "NoTablePlugin"
+    class NoTablePlugin(TechnicalAssetPlugin):
+        name: ClassVar[str] = "NoTablePlugin"
 
-    migrate(NoTablePlugin)  # type: ignore[arg-type]  # must not raise
+    migrate(NoTablePlugin)
 
 
 def test_check_latest_migration__round_trips_the_latest_core_revision():
@@ -212,14 +209,100 @@ def test_check_latest_migration__round_trips_the_latest_core_revision():
     assert head in _tracked_revisions()
 
 
-def test_migrate_all__upgrades_core_before_any_plugin(monkeypatch):
+def test_migrate_all__rolls_back_core_when_a_plugin_migration_fails():
     url = engine.url.render_as_string(hide_password=False)
-    targets: list[str] = []
-    monkeypatch.setattr(
-        "app.plugins.migrations.command.upgrade",
-        lambda config, target: targets.append(target),
+    config = _config(_version_locations([*installed(), BrokenPlugin]), url)
+    head = _core_head(installed(), url)
+    previous = ScriptDirectory.from_config(config).get_revision(head).down_revision
+    command.downgrade(config, previous)
+    try:
+        with pytest.raises(ProgrammingError, match="renamed_away"):
+            migrate(BrokenPlugin)
+
+        tracked = _tracked_revisions()
+        assert previous in tracked
+        assert head not in tracked
+    finally:
+        migrate()
+
+
+def test_migrate_all__points_at_a_newer_portal_after_rolling_back_the_image():
+    with engine.begin() as connection:
+        connection.exec_driver_sql(
+            f"insert into {VERSION_TABLE} values ('ffffffffffff')"  # noqa: S608
+        )
+    try:
+        with pytest.raises(ValueError, match="newer portal version"):
+            migrate()
+    finally:
+        with engine.begin() as connection:
+            connection.exec_driver_sql(
+                f"delete from {VERSION_TABLE} where version_num = 'ffffffffffff'"  # noqa: S608
+            )
+
+
+@pytest.fixture
+def scratch_engine():
+    url = engine.url.set(database=f"{engine.url.database}_concurrent")
+    if database_exists(url):
+        drop_database(url)
+    create_database(url)
+    scratch = create_engine(url)
+    yield scratch
+    scratch.dispose()
+    drop_database(url)
+
+
+def _migrate(target: Engine) -> subprocess.Popen:
+    return subprocess.Popen(
+        [sys.executable, "-m", "app.db_tool", "migrate"],
+        env={**os.environ, "POSTGRES_DB": str(target.url.database)},
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
     )
 
-    migrate(ExamplePlugin)
 
-    assert targets == [_core_head([*installed(), ExamplePlugin], url), "heads"]
+def _migrate_twice_at_once(target: Engine) -> list[int]:
+    runs = [_migrate(target), _migrate(target)]
+    return [run.wait(timeout=300) for run in runs]
+
+
+def _assert_migrated_once(target: Engine) -> None:
+    url = target.url.render_as_string(hide_password=False)
+    with target.connect() as connection:
+        tracked = {
+            row[0]
+            for row in connection.exec_driver_sql(
+                f"select version_num from {VERSION_TABLE}"  # noqa: S608
+            )
+        }
+        services = connection.exec_driver_sql(
+            "select count(*) from platform_services where lower(name) = 'parameterstore'"
+        ).scalar()
+    assert {_core_head(installed(), url), "parameter_store_0001_baseline"} <= tracked
+    assert services == 1
+
+
+def test_migrate_all__two_runs_at_once_on_an_empty_database(scratch_engine):
+    assert 0 in _migrate_twice_at_once(scratch_engine)
+
+    assert _migrate(scratch_engine).wait(timeout=300) == 0
+
+    _assert_migrated_once(scratch_engine)
+
+
+def test_migrate_all__two_runs_at_once_on_an_upgrade(scratch_engine):
+    assert _migrate(scratch_engine).wait(timeout=300) == 0
+    url = scratch_engine.url.render_as_string(hide_password=False)
+    config = _config(_version_locations(installed()), url)
+    head = _core_head(installed(), url)
+    command.downgrade(config, "parameter_store@base")
+    command.downgrade(
+        config, ScriptDirectory.from_config(config).get_revision(head).down_revision
+    )
+
+    assert 0 in _migrate_twice_at_once(scratch_engine)
+
+    assert _migrate(scratch_engine).wait(timeout=300) == 0
+
+    _assert_migrated_once(scratch_engine)

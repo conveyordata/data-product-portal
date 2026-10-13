@@ -37,6 +37,8 @@ class AzureBlobTechnicalAssetConfiguration(TechnicalAssetPlugin):
     container_name: str
 
     _platform_metadata = PlatformMetadata(
+        result_string_template="platform_provided_storage_account/{container_name}/{path}",
+        technical_info_template="https://{storage_account}.blob.core.windows.net/{container_name}/{path}",
         display_name="Blob",
         icon_name="azure-storage-account-logo.svg",
         icon_package="portal_plugins.azure_blob",

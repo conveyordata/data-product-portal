@@ -16,6 +16,7 @@ from app.data_products.output_ports.input_ports.schema_request import (
     DenyOutputPortAsInputPortRequest,
     GrantOutputPortAccessRequest,
     RemoveOutputPortAsInputPortRequest,
+    RenewOutputPortAsInputPortRequest,
     RevokeOutputPortAsInputPortRequest,
 )
 from app.data_products.output_ports.input_ports.schema_response import (
@@ -194,6 +195,49 @@ def deny_output_port_as_input_port(
             target_type=EventReferenceEntity.for_consumer(
                 input_port.consuming_abstract_data_product_type
             ),
+            actor_id=authenticated_user.id,
+        ),
+    )
+    NotificationService(db).create_dataset_notifications(
+        dataset_id=input_port.output_port_id,
+        event_id=event_id,
+        extra_receiver_ids=[input_port.requested_by_id],
+    )
+
+
+@router.post(
+    "/renew",
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                Action.OUTPUT_PORT__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
+                OutputPortResolver,
+                object_id="output_port_id",
+            )
+        ),
+    ],
+)
+def renew_output_port_as_input_port(
+    data_product_id: UUID,
+    output_port_id: UUID,
+    body: RenewOutputPortAsInputPortRequest,
+    db: Session = Depends(get_db_session, scope="function"),
+    authenticated_user: User = Depends(get_authenticated_user),
+) -> None:
+    input_port = AbstractDataProductService(db).renew_output_port_as_input_port(
+        data_product_id=data_product_id,
+        output_port_id=output_port_id,
+        consuming_data_product_id=body.consuming_data_product_id,
+        actor=authenticated_user,
+    )
+
+    event_id = EventService(db).create_event(
+        CreateEvent(
+            name=EventType.DATA_PRODUCT_DATASET_LINK_APPROVED,
+            subject_id=input_port.output_port_id,
+            subject_type=EventReferenceEntity.DATASET,
+            target_id=input_port.consuming_abstract_data_product_id,
+            target_type=EventReferenceEntity.DATA_PRODUCT,
             actor_id=authenticated_user.id,
         ),
     )

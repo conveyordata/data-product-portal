@@ -32,8 +32,16 @@ export function OutputPort() {
         { dataProductId, id: datasetId },
         { skip: !dataProductId || !datasetId },
     );
+    const { data: data_product_access, isLoading: isLoadingDataProductAccess } = useCheckAccessQuery(
+        {
+            resource: dataProductId,
+            domain: outputPort?.domain.id,
+            action: AuthorizationAction.HIDDEN__DATA_PRODUCT__READ,
+        },
+        { skip: !dataProductId || !outputPort },
+    );
     const { data: data_product, isLoading: isLoadingDataProduct } = useGetDataProductQuery(dataProductId, {
-        skip: !dataProductId,
+        skip: !data_product_access?.allowed,
     });
     const { data: edit_access } = useCheckAccessQuery(
         {
@@ -56,7 +64,9 @@ export function OutputPort() {
                     ),
                     path: ApplicationPaths.Studio,
                 },
-                { title: <>{data_product?.name}</>, path: createDataProductIdPath(dataProductId) },
+                ...(data_product
+                    ? [{ title: <>{data_product.name}</>, path: createDataProductIdPath(dataProductId) }]
+                    : []),
                 { title: <>{outputPort?.name}</> },
             ]);
         } else {
@@ -69,7 +79,9 @@ export function OutputPort() {
                     ),
                     path: ApplicationPaths.Marketplace,
                 },
-                { title: <>{data_product?.name}</>, path: createDataProductIdPath(dataProductId) },
+                ...(data_product
+                    ? [{ title: <>{data_product.name}</>, path: createDataProductIdPath(dataProductId) }]
+                    : []),
                 { title: <>{outputPort?.name}</> },
             ]);
         }
@@ -86,9 +98,9 @@ export function OutputPort() {
         );
     }
 
-    if (isLoading || isLoadingDataProduct) return <LoadingSpinner />;
+    if (isLoading || isLoadingDataProductAccess || isLoadingDataProduct) return <LoadingSpinner />;
 
-    if (!outputPort || !data_product) return null;
+    if (!outputPort) return null;
 
     return (
         <Flex className={styles.datasetContainer}>

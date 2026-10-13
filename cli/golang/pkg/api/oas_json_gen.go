@@ -14946,8 +14946,16 @@ func (s *GetEventHistoryResponseItem) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
-		e.FieldStart("actor")
-		s.Actor.Encode(e)
+		if s.DeletedActorIdentifier.Set {
+			e.FieldStart("deleted_actor_identifier")
+			s.DeletedActorIdentifier.Encode(e)
+		}
+	}
+	{
+		if s.Actor.Set {
+			e.FieldStart("actor")
+			s.Actor.Encode(e)
+		}
 	}
 	{
 		if s.DataProduct.Set {
@@ -14981,7 +14989,7 @@ func (s *GetEventHistoryResponseItem) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfGetEventHistoryResponseItem = [16]string{
+var jsonFieldsNameOfGetEventHistoryResponseItem = [17]string{
 	0:  "id",
 	1:  "name",
 	2:  "subject_id",
@@ -14992,12 +15000,13 @@ var jsonFieldsNameOfGetEventHistoryResponseItem = [16]string{
 	7:  "created_on",
 	8:  "deleted_subject_identifier",
 	9:  "deleted_target_identifier",
-	10: "actor",
-	11: "data_product",
-	12: "user",
-	13: "output_port",
-	14: "technical_asset",
-	15: "exploration",
+	10: "deleted_actor_identifier",
+	11: "actor",
+	12: "data_product",
+	13: "user",
+	14: "output_port",
+	15: "technical_asset",
+	16: "exploration",
 }
 
 // Decode decodes GetEventHistoryResponseItem from json.
@@ -15005,7 +15014,7 @@ func (s *GetEventHistoryResponseItem) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode GetEventHistoryResponseItem to nil")
 	}
-	var requiredBitSet [2]uint8
+	var requiredBitSet [3]uint8
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
@@ -15119,9 +15128,19 @@ func (s *GetEventHistoryResponseItem) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"deleted_target_identifier\"")
 			}
-		case "actor":
-			requiredBitSet[1] |= 1 << 2
+		case "deleted_actor_identifier":
 			if err := func() error {
+				s.DeletedActorIdentifier.Reset()
+				if err := s.DeletedActorIdentifier.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"deleted_actor_identifier\"")
+			}
+		case "actor":
+			if err := func() error {
+				s.Actor.Reset()
 				if err := s.Actor.Decode(d); err != nil {
 					return err
 				}
@@ -15188,9 +15207,10 @@ func (s *GetEventHistoryResponseItem) Decode(d *jx.Decoder) error {
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
-	for i, mask := range [2]uint8{
+	for i, mask := range [3]uint8{
 		0b11010111,
-		0b00000100,
+		0b00000000,
+		0b00000000,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -30838,6 +30858,144 @@ func (s *RenewInputPortForExplorationResponse) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *RenewInputPortForExplorationResponse) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes RenewOutputPortAsInputPortOKApplicationJSON as json.
+func (s RenewOutputPortAsInputPortOKApplicationJSON) Encode(e *jx.Encoder) {
+	unwrapped := jx.Raw(s)
+
+	if len(unwrapped) != 0 {
+		e.Raw(unwrapped)
+	}
+}
+
+// Decode decodes RenewOutputPortAsInputPortOKApplicationJSON from json.
+func (s *RenewOutputPortAsInputPortOKApplicationJSON) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode RenewOutputPortAsInputPortOKApplicationJSON to nil")
+	}
+	var unwrapped jx.Raw
+	if err := func() error {
+		v, err := d.RawAppend(nil)
+		unwrapped = jx.Raw(v)
+		if err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = RenewOutputPortAsInputPortOKApplicationJSON(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s RenewOutputPortAsInputPortOKApplicationJSON) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *RenewOutputPortAsInputPortOKApplicationJSON) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *RenewOutputPortAsInputPortRequest) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *RenewOutputPortAsInputPortRequest) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("consuming_data_product_id")
+		json.EncodeUUID(e, s.ConsumingDataProductID)
+	}
+}
+
+var jsonFieldsNameOfRenewOutputPortAsInputPortRequest = [1]string{
+	0: "consuming_data_product_id",
+}
+
+// Decode decodes RenewOutputPortAsInputPortRequest from json.
+func (s *RenewOutputPortAsInputPortRequest) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode RenewOutputPortAsInputPortRequest to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "consuming_data_product_id":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := json.DecodeUUID(d)
+				s.ConsumingDataProductID = v
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"consuming_data_product_id\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode RenewOutputPortAsInputPortRequest")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000001,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfRenewOutputPortAsInputPortRequest) {
+					name = jsonFieldsNameOfRenewOutputPortAsInputPortRequest[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *RenewOutputPortAsInputPortRequest) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *RenewOutputPortAsInputPortRequest) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

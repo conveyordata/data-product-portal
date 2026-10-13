@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from app.configuration.environments.platform_service_configurations.schema_response import (
     RedshiftConfig,
 )
+from app.core.aws.get_url import get_aws_plugin_url
 from app.data_products.schema import DataProduct
 from app.technical_asset_configuration.base_schema import (
     FieldDependency,
@@ -39,6 +40,7 @@ class RedshiftTechnicalAssetConfiguration(TechnicalAssetPlugin):
     access_granularity: AccessGranularity
 
     _platform_metadata = PlatformMetadata(
+        result_string_template="{database}__{schema}.{table}",
         display_name="Redshift",
         icon_name="aws-redshift-logo.svg",
         icon_package="portal_plugins.redshift",
@@ -85,6 +87,10 @@ class RedshiftTechnicalAssetConfiguration(TechnicalAssetPlugin):
         return next(
             (config for config in configs if config.identifier == self.database), None
         )
+
+    # Every AWS plugin shares the AWS tile on the data product page, so they all
+    # use the same get_url. The portal refuses a parent tile whose children differ.
+    get_url = classmethod(get_aws_plugin_url)
 
     @classmethod
     def get_ui_metadata(cls, db: Session) -> list[UIElementMetadata]:

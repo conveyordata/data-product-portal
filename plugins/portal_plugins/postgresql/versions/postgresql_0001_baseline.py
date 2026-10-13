@@ -9,7 +9,7 @@ from app.shared.model import utcnow
 revision: str = "postgresql_0001_baseline"
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+depends_on: Union[str, Sequence[str], None] = "5477aa0d86f0"
 
 TABLE = "postgresql_technical_asset_configurations"
 

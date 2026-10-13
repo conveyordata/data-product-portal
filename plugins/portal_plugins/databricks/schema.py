@@ -45,6 +45,7 @@ class DatabricksTechnicalAssetConfiguration(TechnicalAssetPlugin):
     access_granularity: AccessGranularity
 
     _platform_metadata = PlatformMetadata(
+        result_string_template="{catalog}.{schema}.{table}",
         display_name="Databricks",
         icon_name="databricks-logo.svg",
         icon_package="portal_plugins.databricks",

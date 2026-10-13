@@ -55,14 +55,18 @@ export function Notifications() {
             handleRemoveNotification: (id: string) => void,
             idx: number,
         ): ReactNode => {
+            const event = notification.event;
+
             return (
                 <Flex key={notification.id} justify="space-between" className={styles.width}>
                     <Flex vertical className={styles.width}>
                         {showActor && (
                             <Flex className={idx === 0 ? '' : styles.marginTop}>
                                 <Tag color="default">
-                                    {notification.event.actor.first_name} {notification.event.actor.last_name},{' '}
-                                    {formatDateToNowFromUTCString(notification.event.created_on)}:
+                                    {event.actor
+                                        ? `${event.actor.first_name} ${event.actor.last_name}`
+                                        : (event.deleted_actor_identifier ?? '')}
+                                    , {formatDateToNowFromUTCString(notification.event.created_on)}:
                                 </Tag>
                             </Flex>
                         )}
@@ -94,7 +98,7 @@ export function Notifications() {
 
         const slicedItems = notifications.slice(0, maxItems).map((notification, idx) => {
             const prev = notifications[idx - 1];
-            const sameActorAsPrevious = idx > 0 && prev.event.actor.id === notification.event.actor.id;
+            const sameActorAsPrevious = idx > 0 && prev.event.actor_id === notification.event.actor_id;
 
             return createNotificationItem(notification, !sameActorAsPrevious, handleRemoveNotification, idx);
         });
