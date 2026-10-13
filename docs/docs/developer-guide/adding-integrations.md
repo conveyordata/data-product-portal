@@ -104,7 +104,7 @@ The sections below go through this outline one part at a time, in the order you'
 
 - `display_name` is the label on the tile, such as "Glue".
 - `icon_name` and `icon_package` point to the tile's icon. Every plugin brings its own icon: put the SVG file in your plugin's folder, set `icon_name` to the file name, and set `icon_package` to the Python package that holds it, for example `my_portal_plugins.glue`. The portal reads the file from your package.
-- `parent_platform` groups the tile under another one. Glue appears under AWS.
+- `parent_platform` groups the tile under another one. Glue appears under AWS. A child platform has no tile of its own on the data product page: clicking the parent tile uses the `get_url` its children implement. All children of one parent that implement `get_url` must share the same function, as the AWS plugins do with `get_url = classmethod(get_aws_plugin_url)`. Otherwise the portal refuses to open the parent tile and names the plugins that differ.
 - `platform_key` links the plugin to its platform service, explained in [the platform and platform service](#the-platform-and-platform-service).
 - `has_environments` decides what happens when someone clicks the tile on the data product page. When it's on, they first pick an environment, such as development or production, and `get_url` receives it. When it's off, the tile opens the link straight away. It's on by default.
 - `show_in_form` decides whether the plugin appears in the form for creating a technical asset. It's on by default.

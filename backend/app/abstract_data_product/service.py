@@ -34,14 +34,20 @@ from app.core.logging.posthog_analytics import (
     PosthogAnalyticsClient,
 )
 from app.data_products import email
+from app.data_products.model import DataProduct as DataProductModel
+from app.data_products.model import _has_user_access_to_hidden_data_product
 from app.data_products.output_ports.enums import OutputPortAccessFunction
 from app.data_products.output_ports.input_ports.service import (
     InputPortService,
     RedactedInputPort,
 )
 from app.data_products.output_ports.model import OutputPort as OutputPortModel
-from app.data_products.output_ports.model import ensure_output_port_exists
+from app.data_products.output_ports.model import (
+    access_function_filter_excluding_consumers,
+    ensure_output_port_exists,
+)
 from app.data_products.status import AbstractDataProductStatus
+from app.database.database import SKIP_OUTPUT_PORT_ACCESS_FUNCTION_FILTER, UNFILTERED
 from app.users.model import User
 
 
@@ -57,23 +63,43 @@ class AbstractDataProductService:
                 detail=f"{adp.abstract_data_product_type.value} '{adp.name}' is pending deletion and cannot be modified",
             )
 
+    def _is_data_product_member(self, data_product_id: UUID, user_id: UUID) -> bool:
+        return bool(
+            self.db.scalar(
+                select(
+                    _has_user_access_to_hidden_data_product(DataProductModel, user_id)
+                ).where(DataProductModel.id == data_product_id),
+                execution_options=UNFILTERED,
+            )
+        )
+
     def get_input_ports(self, data_product_id: UUID) -> Sequence[InputPortModel]:
         ensure_abstract_data_product_exists(data_product_id, self.db)
+        query = (
+            select(InputPortModel)
+            # Join (rather than selectinload) the output port so that the
+            # private output port visibility filter excludes the whole
+            # input port row when its output port isn't visible to the
+            # current user, instead of just nulling out the relationship.
+            .join(InputPortModel.output_port)
+            .options(
+                contains_eager(InputPortModel.output_port),
+                selectinload(InputPortModel.requests),
+            )
+            .filter(
+                InputPortModel.consuming_abstract_data_product_id == data_product_id
+            )
+        )
+        user_id = self.db.info.get("current_user_id")
+        is_member = user_id is not None and self._is_data_product_member(
+            data_product_id, user_id
+        )
+        if user_id is not None and not is_member:
+            query = query.where(access_function_filter_excluding_consumers(user_id))
         return (
             self.db.scalars(
-                select(InputPortModel)
-                # Join (rather than selectinload) the output port so that the
-                # private output port visibility filter excludes the whole
-                # input port row when its output port isn't visible to the
-                # current user, instead of just nulling out the relationship.
-                .join(InputPortModel.output_port)
-                .options(
-                    contains_eager(InputPortModel.output_port),
-                    selectinload(InputPortModel.requests),
-                )
-                .filter(
-                    InputPortModel.consuming_abstract_data_product_id == data_product_id
-                ),
+                query,
+                execution_options={SKIP_OUTPUT_PORT_ACCESS_FUNCTION_FILTER: is_member},
             )
             .unique()
             .all()
@@ -264,8 +290,10 @@ class AbstractDataProductService:
             options=[
                 selectinload(OutputPortModel.data_product_links)
                 .selectinload(InputPortModel.consuming_abstract_data_product)
-                .selectinload(AbstractDataProduct.input_ports)
+                .selectinload(AbstractDataProduct.input_ports),
+                selectinload(OutputPortModel.data_product),
             ],
+            execution_options=UNFILTERED,
         )
         self._ensure_not_deleting(adp)
         self._ensure_not_deleting(output_port.data_product)
@@ -308,11 +336,13 @@ class AbstractDataProductService:
             AbstractDataProduct,
             id,
             options=[
-                selectinload(AbstractDataProduct.input_ports).selectinload(
-                    InputPortModel.requests
-                )
+                selectinload(AbstractDataProduct.input_ports).options(
+                    selectinload(InputPortModel.requests),
+                    selectinload(InputPortModel.output_port),
+                ),
             ],
             populate_existing=True,
+            execution_options=UNFILTERED,
         )
         if not adp:
             raise HTTPException(
@@ -439,17 +469,8 @@ class AbstractDataProductService:
         return RedactedInputPort.of(current_link, previous_request.requested_by_id)
 
     def _get_input_port(self, id: UUID, output_port_id: UUID) -> InputPortModel:
-        ensure_output_port_exists(output_port_id, self.db)
-        adp = ensure_abstract_data_product_exists(
-            id,
-            self.db,
-            options=[
-                selectinload(AbstractDataProduct.input_ports).selectinload(
-                    InputPortModel.requests
-                )
-            ],
-            populate_existing=True,
-        )
+        ensure_output_port_exists(output_port_id, self.db, execution_options=UNFILTERED)
+        adp = self._get_adp_with_input_ports(id)
         input_port = next(
             (
                 input_port

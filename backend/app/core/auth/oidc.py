@@ -54,6 +54,7 @@ class OIDCConfiguration:
 class OIDCIdentity(BaseModel):
     sub: str
     name: str
+    given_name: str
     family_name: str
     email: str
     username: Optional[str] = None
@@ -62,4 +63,5 @@ class OIDCIdentity(BaseModel):
     @model_validator(mode="before")
     def populate_username(cls, values):
         values["username"] = values.get("username") or values.get("preferred_username")
+        values["given_name"] = values.get("given_name") or values.get("name")
         return values

@@ -1,12 +1,10 @@
 import re
-from typing import ClassVar, Optional, Self
-from uuid import UUID
+from typing import ClassVar, Self
 
-from fastapi import HTTPException, status
 from pydantic import model_validator
 from sqlalchemy.orm import Session
 
-from app.core.aws.get_url import get_aws_url
+from app.core.aws.get_url import get_aws_plugin_url
 from app.technical_asset_configuration.base_schema import (
     PlatformMetadata,
     TechnicalAssetPlugin,
@@ -20,7 +18,6 @@ from portal_plugins.parameter_store.model import (
 from portal_plugins.parameter_store.model import (
     ParameterStoreTechnicalAssetConfiguration as ParameterStoreTechnicalAssetConfigurationModel,
 )
-from app.users.schema import User
 
 VALID_LEVEL = re.compile(r"[A-Za-z0-9_.-]+")
 MAX_LEVELS = 15
@@ -81,16 +78,9 @@ class ParameterStoreTechnicalAssetConfiguration(TechnicalAssetPlugin):
     def get_configuration(self, configs: list) -> None:
         return None
 
-    @classmethod
-    def get_url(
-        cls, id: UUID, db: Session, actor: User, environment: Optional[str] = None
-    ) -> str:
-        if environment is None:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Environment is required to get the URL for Parameter Store technical asset configurations",
-            )
-        return get_aws_url(id, db, actor, environment)
+    # Every AWS plugin shares the AWS tile on the data product page, so they all
+    # use the same get_url. The portal refuses a parent tile whose children differ.
+    get_url = classmethod(get_aws_plugin_url)
 
     @classmethod
     def get_ui_metadata(cls, db: Session) -> list[UIElementMetadata]:

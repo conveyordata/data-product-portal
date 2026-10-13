@@ -1,13 +1,11 @@
 from typing import ClassVar, Optional
-from uuid import UUID
 
-from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.configuration.environments.platform_service_configurations.schemas import (
     AWSS3Config,
 )
-from app.core.aws.get_url import get_aws_url
+from app.core.aws.get_url import get_aws_plugin_url
 from app.data_products.schema import DataProduct
 from app.technical_asset_configuration.base_schema import (
     PlatformMetadata,
@@ -23,7 +21,6 @@ from portal_plugins.s3.model import (
 from portal_plugins.s3.model import (
     S3TechnicalAssetConfiguration as S3TechnicalAssetConfigurationModel,
 )
-from app.users.schema import User
 
 
 class S3TechnicalAssetConfiguration(TechnicalAssetPlugin):
@@ -56,16 +53,9 @@ class S3TechnicalAssetConfiguration(TechnicalAssetPlugin):
     def on_create(self):
         pass
 
-    @classmethod
-    def get_url(
-        cls, id: UUID, db: Session, actor: User, environment: Optional[str] = None
-    ) -> str:
-        if environment is None:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Environment is required to get the URL for S3 technical asset configurations",
-            )
-        return get_aws_url(id, db, actor, environment)
+    # Every AWS plugin shares the AWS tile on the data product page, so they all
+    # use the same get_url. The portal refuses a parent tile whose children differ.
+    get_url = classmethod(get_aws_plugin_url)
 
     def render_template(self, template, **context):
         """
