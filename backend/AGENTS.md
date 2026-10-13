@@ -9,6 +9,7 @@ Extends the root [AGENTS.md](../AGENTS.md) — read that first.
 
 *   Adhere strictly to the separation of `router.py`, `service.py`, `model.py`, `schema_request.py`, and `schema_response.py`. Business logic belongs in `service.py`. `router.py` only wires requests/responses. `model.py` only defines persistence, don't add business logic there.
 *   Never import from the generated SDK/client package in backend code.
+*   Place private helper methods below the public methods that use them, so readers see the high-level flow before its implementation details.
 
 ## Schemas & Data
 

@@ -38,6 +38,8 @@ The API accepts `environment_ids` when creating or updating a Data Product. If o
 
 Existing Data Products are migrated using their Domain's selected environments, or the global environments when their Domain has no selection.
 
+Environments must be configured before creating a Data Product. During an upgrade, every existing Data Product must have at least one effective environment, either through its Domain or the global defaults. The migration stops with a configuration error otherwise. See [Environment setup](../developer-guide/adding-integrations.md#environment-setup) for installations that do not have environments configured yet.
+
 ## Example
 
 A "Sales Transactions" Data Product may expose:
