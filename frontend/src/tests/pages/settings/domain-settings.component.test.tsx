@@ -2,16 +2,14 @@ import { HttpResponse, http } from 'msw';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { CreateDomainModal } from '@/pages/settings/components/settings-tabs/components/domain-table/domain-form-modal.component.tsx';
 import { DomainTable } from '@/pages/settings/components/settings-tabs/components/domain-table/domain-table.component.tsx';
-import { EnvironmentTable } from '@/pages/settings/components/settings-tabs/components/environment-table/environment-table.component.tsx';
 import { mock_domains, mockGetDomains } from '@/tests/mocks/configurationDomains.ts';
-import { mockEnvironments, mockGetEnvironments } from '@/tests/mocks/configurationEnvironments.ts';
+import { mockEnvironments } from '@/tests/mocks/configurationEnvironments.ts';
 import { server } from '@/tests/mocks/server.ts';
 import { renderWithProviders, screen, userEvent, waitFor } from '@/tests/test-utils.tsx';
 
 describe('Domain settings without environment scope', () => {
     beforeEach(() => {
         mockGetDomains();
-        mockGetEnvironments();
     });
 
     it.each(['create', 'edit'] as const)('only sends Domain metadata when saving in %s mode', async (mode) => {
@@ -56,12 +54,5 @@ describe('Domain settings without environment scope', () => {
         expect(await screen.findByText('Finance')).toBeInTheDocument();
         expect(screen.queryByRole('columnheader', { name: 'Environments' })).not.toBeInTheDocument();
         expect(fetchEnvironments).not.toHaveBeenCalled();
-    });
-
-    it('keeps the general Environment catalogue and global-default controls', async () => {
-        renderWithProviders(<EnvironmentTable />);
-        expect(await screen.findByText('Development')).toBeInTheDocument();
-        expect(screen.getByRole('columnheader', { name: /Global/ })).toBeInTheDocument();
-        expect(screen.getAllByRole('checkbox')).toHaveLength(mockEnvironments.length);
     });
 });

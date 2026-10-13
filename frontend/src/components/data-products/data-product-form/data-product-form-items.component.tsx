@@ -1,4 +1,4 @@
-import { Alert, Form, Input, Radio, Select, Skeleton, Tag, Tooltip, Typography, theme } from 'antd';
+import { Alert, Form, Input, Radio, Select, Skeleton, Tooltip, Typography } from 'antd';
 import type { FormInstance } from 'antd/es/form/hooks/useForm';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -44,7 +44,6 @@ export const DataProductFormItems = <T extends DataProductCreate>({
 }: Props<T>) => {
     const form = formT as unknown as FormInstance<DataProductCreate>;
     const { t } = useTranslation();
-    const { token } = theme.useToken();
     const currentUser = useSelector(selectCurrentUser);
 
     const { data: lifecycles = undefined, isFetching: isFetchingLifecycles } = useGetDataProductsLifecyclesQuery();
@@ -272,23 +271,17 @@ export const DataProductFormItems = <T extends DataProductCreate>({
                         if (!open) setEnvironmentSearch('');
                     }}
                     allowClear={mode === 'create'}
-                    tagRender={({ label, value, closable, onClose }) => (
+                    labelRender={({ label, value }) => (
                         <Tooltip
                             title={
-                                savedEnvironmentIds.includes(value)
+                                typeof value === 'string' && savedEnvironmentIds.includes(value)
                                     ? t(
                                           'Declared environments cannot be removed because resources may already be provisioned in them.',
                                       )
                                     : undefined
                             }
                         >
-                            <Tag
-                                closable={closable && !savedEnvironmentIds.includes(value)}
-                                onClose={onClose}
-                                style={{ marginInlineEnd: token.marginXXS }}
-                            >
-                                {label}
-                            </Tag>
+                            <span>{label}</span>
                         </Tooltip>
                     )}
                     notFoundContent={
@@ -302,9 +295,9 @@ export const DataProductFormItems = <T extends DataProductCreate>({
                         <div data-cy="data-product-environments-options">
                             {menu}
                             {allEnvironmentsSelected && !environmentSearch.trim() && (
-                                <Typography.Paragraph type="secondary" style={{ margin: token.marginXXS }}>
+                                <Typography.Text type="secondary">
                                     {t('All available environments are already selected')}
-                                </Typography.Paragraph>
+                                </Typography.Text>
                             )}
                         </div>
                     )}

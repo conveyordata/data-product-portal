@@ -36,7 +36,7 @@ When creating a Data Product, the environment selector starts with the global de
 
 The API accepts `environment_ids` when creating or updating a Data Product. If omitted during creation, the current global environments are saved as defaults. Changing globals or moving the Data Product to another Domain does not change its saved environments. Updates can add environments, but cannot remove existing ones or save an empty selection.
 
-Domains do not configure environments. During the upgrade, legacy Domain selections (or global defaults when no selection existed) are copied into Data Product declarations before Domain environment settings are removed. Existing Data Product declarations are preserved.
+Earlier versions allowed environments to be configured per Domain. They are now declared on Data Products. The upgrade transfers legacy Domain selections to their Data Products, using the global defaults when a Domain had no selection. This transfer happens before the Domain settings are removed and leaves environments already declared on Data Products unchanged.
 
 Environments must be configured before creating a Data Product. During an upgrade, every existing Data Product must have at least one effective environment, either through its Domain or the global defaults. The migration stops with a configuration error otherwise. See [Environment setup](../developer-guide/adding-integrations.md#environment-setup) for installations that do not have environments configured yet.
 

@@ -55,9 +55,7 @@ class TestDomainsRouter:
             domain=domain,
             environments=[DataProductEnvironment(environment=environment)],
         )
-        before = client.get(f"/api/v2/data_products/{product.id}").json()[
-            "environments"
-        ]
+        before = self.get_data_product_environments(client, product.id)
         update_payload = {
             "name": "update",
             "description": "update",
@@ -65,10 +63,7 @@ class TestDomainsRouter:
         response = self.update_domain(client, update_payload, domain.id)
         assert response.status_code == 200
 
-        assert (
-            client.get(f"/api/v2/data_products/{product.id}").json()["environments"]
-            == before
-        )
+        assert self.get_data_product_environments(client, product.id) == before
 
     @pytest.mark.usefixtures("admin")
     def test_remove_domain(self, client):
@@ -92,20 +87,13 @@ class TestDomainsRouter:
             domain=domain,
             environments=[DataProductEnvironment(environment=environment)],
         )
-        before = client.get(f"/api/v2/data_products/{data_product.id}").json()[
-            "environments"
-        ]
+        before = self.get_data_product_environments(client, data_product.id)
         exploration = ExplorationFactory(domain=domain)
         response = self.migrate_domains(client, domain.id, new_domain.id)
         assert response.status_code == 200
         assert data_product.domain.id == new_domain.id
         assert exploration.domain.id == new_domain.id
-        assert (
-            client.get(f"/api/v2/data_products/{data_product.id}").json()[
-                "environments"
-            ]
-            == before
-        )
+        assert self.get_data_product_environments(client, data_product.id) == before
 
     def test_create_domain_admin_only(self, domain_payload, client):
         response = self.create_domain(client, domain_payload)
@@ -127,6 +115,12 @@ class TestDomainsRouter:
         new_domain = DomainFactory()
         response = self.migrate_domains(client, domain.id, new_domain.id)
         assert response.status_code == 403
+
+    @staticmethod
+    def get_data_product_environments(client, data_product_id):
+        response = client.get(f"/api/v2/data_products/{data_product_id}")
+        assert response.status_code == 200, response.text
+        return response.json()["environments"]
 
     @staticmethod
     def create_domain(client, payload):
