@@ -150,6 +150,21 @@ Admins still fill in, with SQL for now, the settings only they know: for example
 
 The demo seed file [`demo/basic/portal_seed.sql`](https://github.com/conveyordata/data-product-portal/blob/main/demo/basic/portal_seed.sql) has complete examples, including the settings per environment.
 
+### Environment setup
+
+Every Data Product needs at least one environment, even if its integrations do not use environment-specific configuration. Creating Environment catalogue entries currently requires SQL; the Environments settings table can mark existing entries as global defaults but cannot create them.
+
+For an installation without environments, create an entry before creating Data Products or upgrading existing ones:
+
+```sql
+INSERT INTO environments (id, name, acronym, context, is_default, is_global)
+VALUES (gen_random_uuid(), 'Development', 'dev', '', FALSE, TRUE);
+```
+
+This example sets `dev` as a global default for new Data Products. It does not create infrastructure or configure platform credentials; add any integration-specific settings described above separately. Data Product creation without `environment_ids` requires at least one global environment. Alternatively, callers can explicitly select existing Environment IDs.
+
+The upgrade copies each existing Data Product's Domain environments, or its global defaults when the Domain has no selection. It refuses to continue if any Data Product would have no declared environments. Configure a global default or a Domain selection before retrying the migration. Changing defaults after the upgrade does not change saved Data Product environments.
+
 ### The fields and the form
 
 The fields, `database` and `table` for Glue, are what a data product owner fills in for one technical asset. You pick them for your own tool.
