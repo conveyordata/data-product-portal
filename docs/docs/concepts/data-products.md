@@ -32,11 +32,13 @@ These technical aspects are also governed by the Data Product concept.
 
 Each Data Product stores its environments and the date each was declared. Technical Assets and Output Ports inherit that scope.
 
-When creating a Data Product, the environment selector starts with the global defaults. You can select one or more environments from the configured catalogue. When editing, saved environments are locked and you can add new ones. The detail pages of Data Products, Technical Assets, and Output Ports show the declared environments as read-only tags.
+When creating a Data Product, the environment selector starts with the global defaults. You can select one or more environments from the configured catalogue. Once a Data Product is created, its selected environments can no longer be removed; edits can only add new ones. The detail pages of Data Products, Technical Assets, and Output Ports show the declared environments as read-only tags.
 
 The API accepts `environment_ids` when creating or updating a Data Product. If omitted during creation, the current global environments are saved as defaults. Changing globals or moving the Data Product to another Domain does not change its saved environments. Updates can add environments, but cannot remove existing ones or save an empty selection.
 
 Domains do not configure environments. During the upgrade, legacy Domain selections (or global defaults when no selection existed) are copied into Data Product declarations before Domain environment settings are removed. Existing Data Product declarations are preserved.
+
+Environments must be configured before creating a Data Product. During an upgrade, every existing Data Product must have at least one effective environment, either through its Domain or the global defaults. The migration stops with a configuration error otherwise. See [Environment setup](../developer-guide/adding-integrations.md#environment-setup) for installations that do not have environments configured yet.
 
 ## Example
 
