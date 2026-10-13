@@ -28,13 +28,20 @@ def validate_batch_create_items(
     items: list[Any],
     schema: type[CreateSchema],
 ) -> tuple[list[CreateSchema], list[IdentityBatchCreateError]]:
+    """
+    Validates a batch of items against a provided schema and returns both the validated
+    items and a list of errors for invalid items.
+
+    "try`-`except`" ruff validation is suppressed because `ValidationError` is raised for each invalid item,
+    and we want to collect all errors without stopping the validation process.
+    """
     validated_items: list[CreateSchema] = []
     errors: list[IdentityBatchCreateError] = []
 
     for item in items:
         try:
             validated_items.append(schema.model_validate(item))
-        except ValidationError as exception:
+        except ValidationError as exception:  # noqa: PERF203
             errors.append(
                 IdentityBatchCreateError(
                     item=item,
