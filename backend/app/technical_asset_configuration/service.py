@@ -123,6 +123,8 @@ class PluginService:
                     cls
                     for cls in discovered_plugins
                     if cls.get_platform_metadata().parent_platform == plugin_name
+                    and cls.get_url.__qualname__
+                    != TechnicalAssetPlugin.get_url.__qualname__
                 ),
                 None,
             )

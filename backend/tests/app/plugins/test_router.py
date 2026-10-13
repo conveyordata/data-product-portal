@@ -13,7 +13,10 @@ from tests.factories import (
     UserFactory,
 )
 from tests.factories.platform_service import PlatformServiceFactory
-from tests.fixtures.fake_plugin.schema import FakeTechnicalAssetConfiguration
+from tests.fixtures.fake_plugin.schema import (
+    FakeLinkPlugin,
+    FakeTechnicalAssetConfiguration,
+)
 
 ENDPOINT = "/api/v2/plugins"
 
@@ -230,3 +233,28 @@ class TestLinkPluginEndToEnd:
         url_response = client.get(f"{ENDPOINT}/fake-link/url?id={data_product.id}")
         assert url_response.status_code == 200
         assert url_response.json()["url"] == f"https://example.com/{data_product.id}"
+
+    def test_get_plugin_url__parent_platform_skips_child_without_url(
+        self, client, monkeypatch
+    ):
+        monkeypatch.setattr(
+            FakeLinkPlugin,
+            "_platform_metadata",
+            FakeLinkPlugin.get_platform_metadata().model_copy(
+                update={"parent_platform": "cloud"}
+            ),
+        )
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        data_product = DataProductFactory()
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__READ_INTEGRATIONS],
+        )
+        DataProductRoleAssignmentFactory(
+            identity_id=user.id, role_id=role.id, data_product_id=data_product.id
+        )
+
+        response = client.get(f"{ENDPOINT}/cloud/url?id={data_product.id}")
+
+        assert response.status_code == 200, response.text
+        assert response.json()["url"] == f"https://example.com/{data_product.id}"
