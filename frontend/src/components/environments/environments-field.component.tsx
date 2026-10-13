@@ -6,7 +6,7 @@ type Props = {
     environments: DataProductEnvironment[];
 };
 
-export function EnvironmentsField({ environments = [] }: Props) {
+export function EnvironmentsField({ environments }: Props) {
     const { t } = useTranslation();
 
     return (
