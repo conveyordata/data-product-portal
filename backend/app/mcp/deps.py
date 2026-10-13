@@ -45,7 +45,7 @@ class PortalOIDCProxy(OIDCProxy):
                 claims = pyjwt.decode(raw, options={"verify_signature": False})
                 extracted = {
                     k: claims[k]
-                    for k in ("sub", "email", "name", "family_name")
+                    for k in ("sub", "email", "name", "given_name", "family_name")
                     if k in claims
                 }
                 if extracted.get("sub"):

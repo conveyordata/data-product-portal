@@ -89,7 +89,7 @@ Portal has been tested with AWS Cognito but should work with any OIDC provider.
 OIDC returns identity, refresh and access tokens.
 Providers may vary in the information they pass in tokens, and the application depends on this information, so integrating a new provider might require some code changes there as well.
 
-The claims our provider is required to pass are at least email, family_name and name.
+The claims our provider is required to pass are at least email, family_name and name. The given_name claim is used as the first name; if it is missing, name is used instead.
 
 ### Cognito setup
 
