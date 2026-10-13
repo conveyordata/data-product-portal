@@ -263,7 +263,10 @@ class TestDataProductsRouter:
         response = self.get_data_product(client, data_product.id)
         assert response.status_code == 200, response.text
 
-    def test_get_conveyor_ide_url(self, client):
+    def test_get_conveyor_ide_url(self, client, monkeypatch):
+        monkeypatch.setattr(
+            settings, "ENABLED_PLUGINS", [*settings.ENABLED_PLUGINS, "ConveyorPlugin"]
+        )
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         cvr = PlatformFactory(name="Conveyor")
         PlatformServiceFactory(platform=cvr)
@@ -694,7 +697,12 @@ class TestDataProductsRouter:
 
         assert output_port.id not in [node["id"] for node in response.json()["nodes"]]
 
-    def test_get_signin_url_not_implemented(self, client):
+    def test_get_signin_url_not_implemented(self, client, monkeypatch):
+        monkeypatch.setattr(
+            settings,
+            "ENABLED_PLUGINS",
+            [*settings.ENABLED_PLUGINS, "S3TechnicalAssetConfiguration"],
+        )
         EnvironmentFactory(name="production")
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
@@ -714,7 +722,12 @@ class TestDataProductsRouter:
         )
         assert response.status_code == 501 or response.status_code == 400
 
-    def test_get_databricks_url(self, client):
+    def test_get_databricks_url(self, client, monkeypatch):
+        monkeypatch.setattr(
+            settings,
+            "ENABLED_PLUGINS",
+            [*settings.ENABLED_PLUGINS, "DatabricksTechnicalAssetConfiguration"],
+        )
         env = EnvironmentFactory(name="production")
         platform = PlatformFactory(name="Databricks")
         PlatformServiceFactory(platform=platform)
@@ -742,7 +755,12 @@ class TestDataProductsRouter:
         assert response.status_code == 200
         assert response.json()["url"] == "test_1.com"
 
-    def test_get_snowflake_url(self, client):
+    def test_get_snowflake_url(self, client, monkeypatch):
+        monkeypatch.setattr(
+            settings,
+            "ENABLED_PLUGINS",
+            [*settings.ENABLED_PLUGINS, "SnowflakeTechnicalAssetConfiguration"],
+        )
         env = EnvironmentFactory(name="production")
         platform = PlatformFactory(name="Snowflake")
         PlatformServiceFactory(platform=platform)
