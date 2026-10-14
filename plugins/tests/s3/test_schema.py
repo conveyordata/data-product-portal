@@ -16,18 +16,20 @@ def make_s3_config(
 
 
 class TestRenderTemplate:
-    def test_resolves_s3_path_for_matching_bucket(self):
+    def test_resolves_s3_path_for_matching_bucket(self, plugin_context):
         config = make_s3_config(suffix="customer360", path="output", bucket="datalake")
         result = config.render_template(
+            plugin_context=plugin_context,
             template="{bucket_arn}/{suffix}/{path}/*",
             bucket_name="datalake",
             bucket_arn="datalakeartifacts",
         )
         assert result == "datalakeartifacts/customer360/output/*"
 
-    def test_fails_bucket_lookup(self):
+    def test_fails_bucket_lookup(self, plugin_context):
         config = make_s3_config(suffix="customer360", path="output", bucket="datalake")
         with pytest.raises(KeyError):
             config.render_template(
+                plugin_context=plugin_context,
                 template="{bucket_arn}/{suffix}/{path}/*",
             )

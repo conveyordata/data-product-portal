@@ -7,6 +7,8 @@ from uuid import UUID
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
+from ..models.technical_mapping import TechnicalMapping
+
 if TYPE_CHECKING:
     from ..models.render_technical_asset_access_path_request_configuration import (
         RenderTechnicalAssetAccessPathRequestConfiguration,
@@ -22,12 +24,18 @@ class RenderTechnicalAssetAccessPathRequest:
     Attributes:
         platform_id (UUID):
         service_id (UUID):
+        data_product_id (UUID):
+        namespace (str):
+        technical_mapping (TechnicalMapping):
         configuration (RenderTechnicalAssetAccessPathRequestConfiguration): Configuration of the technical asset. The
             available fields depend on `name`; retrieve them from /v2/plugins/{name}/form.
     """
 
     platform_id: UUID
     service_id: UUID
+    data_product_id: UUID
+    namespace: str
+    technical_mapping: TechnicalMapping
     configuration: RenderTechnicalAssetAccessPathRequestConfiguration
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
@@ -35,6 +43,12 @@ class RenderTechnicalAssetAccessPathRequest:
         platform_id = str(self.platform_id)
 
         service_id = str(self.service_id)
+
+        data_product_id = str(self.data_product_id)
+
+        namespace = self.namespace
+
+        technical_mapping = self.technical_mapping.value
 
         configuration = self.configuration.to_dict()
 
@@ -44,6 +58,9 @@ class RenderTechnicalAssetAccessPathRequest:
             {
                 "platform_id": platform_id,
                 "service_id": service_id,
+                "data_product_id": data_product_id,
+                "namespace": namespace,
+                "technical_mapping": technical_mapping,
                 "configuration": configuration,
             }
         )
@@ -61,6 +78,12 @@ class RenderTechnicalAssetAccessPathRequest:
 
         service_id = UUID(d.pop("service_id"))
 
+        data_product_id = UUID(d.pop("data_product_id"))
+
+        namespace = d.pop("namespace")
+
+        technical_mapping = TechnicalMapping(d.pop("technical_mapping"))
+
         configuration = RenderTechnicalAssetAccessPathRequestConfiguration.from_dict(
             d.pop("configuration")
         )
@@ -68,6 +91,9 @@ class RenderTechnicalAssetAccessPathRequest:
         render_technical_asset_access_path_request = cls(
             platform_id=platform_id,
             service_id=service_id,
+            data_product_id=data_product_id,
+            namespace=namespace,
+            technical_mapping=technical_mapping,
             configuration=configuration,
         )
 
