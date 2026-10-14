@@ -60,7 +60,7 @@
         "i18next": "^26.4.2",
         "i18next-http-backend": "^4.0.2",
         "js-sha256": "^1.0.0",
-        "nuqs": "^2.10.1",
+        "nuqs": "^2.10.2",
         "oidc-client-ts": "^3.5.0",
         "posthog-js": "^1.438.1",
         "react": "^19.3.0",
