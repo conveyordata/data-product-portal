@@ -1,6 +1,6 @@
 [project]
 name = "data-product-portal"
-version = "0.7.4"
+version = "0.8.0"
 description = "Data Product Portal core"
 
 [build-system]
@@ -9,7 +9,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "data-product-portal"
-version = "0.7.4"
+version = "0.8.0"
 description = "Data Product Portal core"
 authors = ["Stijn Janssens <stijn.janssens@dataminded.com>"]
 readme = "README.md"
