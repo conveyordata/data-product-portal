@@ -1,5 +1,9 @@
-name: Nightly Docker Compose Test & E2E
+name: Docker Compose Test & E2E
 on:
+  pull_request:
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/nightly-build.yml'
   schedule:
     - cron: '0 2 * * *'
 permissions:
@@ -49,6 +53,7 @@ jobs:
           retention-days: 7
 
   demo-basic:
+    if: github.event_name == 'schedule'
     runs-on: ubuntu-latest
     defaults:
       run:

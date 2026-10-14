@@ -16,6 +16,7 @@ from app.core.namespace.validation import (
     TechnicalAssetNamespaceValidator,
 )
 from app.data_products.model import DataProduct as DataProductModel
+from app.data_products.model import ensure_data_product_exists
 from app.data_products.output_port_technical_assets_link.model import (
     TechnicalAssetOutputPortAssociation,
 )
@@ -25,7 +26,6 @@ from app.data_products.output_port_technical_assets_link.model import (
 from app.data_products.output_ports.model import OutputPort as OutputPortModel
 from app.data_products.output_ports.model import ensure_output_port_exists
 from app.data_products.output_ports.service import OutputPortService
-from app.data_products.schema import DataProduct
 from app.data_products.service import DataProductService
 from app.data_products.technical_assets.enums import TechnicalMapping
 from app.data_products.technical_assets.model import (
@@ -45,6 +45,7 @@ from app.database.deps import get_db_session
 from app.graph.graph import Graph
 from app.plugins.registry import plugin_registry
 from app.resource_names.service import ResourceNameValidityType
+from app.technical_asset_configuration.base_schema import PluginContext
 from app.users.schema import User
 
 TECHNICAL_ASSET_ACCESS_MODES_INCOMPATIBLE_ERROR = HTTPException(
@@ -182,10 +183,14 @@ class TechnicalAssetService:
             )
 
         if technical_asset.technical_mapping == TechnicalMapping.Default:
-            data_product = DataProduct.model_validate(
-                self.db.get(DataProductModel, data_product_id)
+            technical_asset.configuration.validate_configuration(
+                PluginContext.build(
+                    ensure_data_product_exists(data_product_id, self.db),
+                    technical_asset.namespace,
+                    TechnicalMapping.Default,
+                ),
+                self.db,
             )
-            technical_asset.configuration.validate_configuration(data_product, self.db)
 
         technical_asset_schema = technical_asset.parse_pydantic_schema()
         tags = self._get_tags(technical_asset_schema.pop("tag_ids", []))
