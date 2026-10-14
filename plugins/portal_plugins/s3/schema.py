@@ -6,7 +6,6 @@ from app.configuration.environments.platform_service_configurations.schemas impo
     AWSS3Config,
 )
 from app.core.aws.get_url import get_aws_plugin_url
-from app.data_products.schema import DataProduct
 from app.technical_asset_configuration.base_schema import (
     PlatformMetadata,
     TechnicalAssetPlugin,
@@ -46,12 +45,6 @@ class S3TechnicalAssetConfiguration(TechnicalAssetPlugin):
 
     class Meta:
         orm_model = S3TechnicalAssetConfigurationModel
-
-    def validate_configuration(self, data_product: DataProduct, db: Session):
-        pass
-
-    def on_create(self):
-        pass
 
     # Every AWS plugin shares the AWS tile on the data product page, so they all
     # use the same get_url. The portal refuses a parent tile whose children differ.

@@ -7,8 +7,8 @@ from app.configuration.environments.platform_service_configurations.schemas impo
     AWSGlueConfig,
 )
 from app.core.aws.get_url import get_aws_plugin_url
-from app.data_products.schema import DataProduct
 from app.technical_asset_configuration.base_schema import (
+    PluginContext,
     FieldDependency,
     PlatformMetadata,
     SelectOption,
@@ -66,12 +66,9 @@ class GlueTechnicalAssetConfiguration(TechnicalAssetPlugin):
             self.table = "*"
         return self
 
-    def validate_configuration(self, data_product: DataProduct, db: Session):
-        if not self.database.startswith(data_product.namespace):
+    def validate_configuration(self, context: PluginContext, db: Session):
+        if not self.database.startswith(context.data_product.namespace):
             raise ValueError("Invalid database specified")
-
-    def on_create(self):
-        pass
 
     def render_template(self, template, **context):
         return ".".join(

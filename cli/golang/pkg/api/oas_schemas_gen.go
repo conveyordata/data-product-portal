@@ -11752,8 +11752,11 @@ func (*RemoveUserOKApplicationJSON) removeUserRes() {}
 
 // Ref: #/components/schemas/RenderTechnicalAssetAccessPathRequest
 type RenderTechnicalAssetAccessPathRequest struct {
-	PlatformID uuid.UUID `json:"platform_id"`
-	ServiceID  uuid.UUID `json:"service_id"`
+	PlatformID       uuid.UUID        `json:"platform_id"`
+	ServiceID        uuid.UUID        `json:"service_id"`
+	DataProductID    uuid.UUID        `json:"data_product_id"`
+	Namespace        string           `json:"namespace"`
+	TechnicalMapping TechnicalMapping `json:"technical_mapping"`
 	// Configuration of the technical asset. The available fields depend on `name`; retrieve them from
 	// /v2/plugins/{name}/form.
 	Configuration RenderTechnicalAssetAccessPathRequestConfiguration `json:"configuration"`
@@ -11769,6 +11772,21 @@ func (s *RenderTechnicalAssetAccessPathRequest) GetServiceID() uuid.UUID {
 	return s.ServiceID
 }
 
+// GetDataProductID returns the value of DataProductID.
+func (s *RenderTechnicalAssetAccessPathRequest) GetDataProductID() uuid.UUID {
+	return s.DataProductID
+}
+
+// GetNamespace returns the value of Namespace.
+func (s *RenderTechnicalAssetAccessPathRequest) GetNamespace() string {
+	return s.Namespace
+}
+
+// GetTechnicalMapping returns the value of TechnicalMapping.
+func (s *RenderTechnicalAssetAccessPathRequest) GetTechnicalMapping() TechnicalMapping {
+	return s.TechnicalMapping
+}
+
 // GetConfiguration returns the value of Configuration.
 func (s *RenderTechnicalAssetAccessPathRequest) GetConfiguration() RenderTechnicalAssetAccessPathRequestConfiguration {
 	return s.Configuration
@@ -11782,6 +11800,21 @@ func (s *RenderTechnicalAssetAccessPathRequest) SetPlatformID(val uuid.UUID) {
 // SetServiceID sets the value of ServiceID.
 func (s *RenderTechnicalAssetAccessPathRequest) SetServiceID(val uuid.UUID) {
 	s.ServiceID = val
+}
+
+// SetDataProductID sets the value of DataProductID.
+func (s *RenderTechnicalAssetAccessPathRequest) SetDataProductID(val uuid.UUID) {
+	s.DataProductID = val
+}
+
+// SetNamespace sets the value of Namespace.
+func (s *RenderTechnicalAssetAccessPathRequest) SetNamespace(val string) {
+	s.Namespace = val
+}
+
+// SetTechnicalMapping sets the value of TechnicalMapping.
+func (s *RenderTechnicalAssetAccessPathRequest) SetTechnicalMapping(val TechnicalMapping) {
+	s.TechnicalMapping = val
 }
 
 // SetConfiguration sets the value of Configuration.
