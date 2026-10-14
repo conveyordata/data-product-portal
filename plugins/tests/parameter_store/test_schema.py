@@ -9,29 +9,37 @@ RESULT_TEMPLATE = "/{prefix}/{parameter_name}"
 TECHNICAL_INFO_TEMPLATE = "/{environment}/{prefix}/{parameter_name}"
 
 
-def test_render_template__joins_prefix_and_parameter_name():
+def test_render_template__joins_prefix_and_parameter_name(plugin_context):
     config = ParameterStoreTechnicalAssetConfiguration(
         prefix="customer360", parameter_name="api-key"
     )
 
-    assert config.render_template(RESULT_TEMPLATE) == "/customer360/api-key"
+    assert (
+        config.render_template(RESULT_TEMPLATE, plugin_context=plugin_context)
+        == "/customer360/api-key"
+    )
 
 
-def test_render_template__skips_an_empty_prefix():
+def test_render_template__skips_an_empty_prefix(plugin_context):
     config = ParameterStoreTechnicalAssetConfiguration(
         prefix="", parameter_name="api-key"
     )
 
-    assert config.render_template(RESULT_TEMPLATE) == "/api-key"
+    assert (
+        config.render_template(RESULT_TEMPLATE, plugin_context=plugin_context)
+        == "/api-key"
+    )
 
 
-def test_render_template__starts_with_the_environment():
+def test_render_template__starts_with_the_environment(plugin_context):
     config = ParameterStoreTechnicalAssetConfiguration(
         prefix="customer_360", parameter_name="db/password"
     )
 
     assert (
-        config.render_template(TECHNICAL_INFO_TEMPLATE, environment="dev")
+        config.render_template(
+            TECHNICAL_INFO_TEMPLATE, plugin_context=plugin_context, environment="dev"
+        )
         == "/dev/customer_360/db/password"
     )
 

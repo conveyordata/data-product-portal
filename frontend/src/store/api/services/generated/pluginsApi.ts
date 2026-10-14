@@ -146,6 +146,9 @@ export type RenderTechnicalAssetAccessPathResponse = {
 export type RenderTechnicalAssetAccessPathRequest = {
   platform_id: string;
   service_id: string;
+  data_product_id: string;
+  namespace: string;
+  technical_mapping: TechnicalMapping;
   /** Configuration of the technical asset. The available fields depend on `name`; retrieve them from /v2/plugins/{name}/form. */
   configuration: {
     name: string;
@@ -157,6 +160,10 @@ export enum UIElementType {
   Select = "select",
   Checkbox = "checkbox",
   Radio = "radio",
+}
+export enum TechnicalMapping {
+  Default = "default",
+  Custom = "custom",
 }
 export const {
   useGetPlatformTilesQuery,

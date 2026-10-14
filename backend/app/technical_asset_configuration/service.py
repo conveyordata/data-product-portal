@@ -7,6 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.configuration.platforms.platform_services.model import PlatformService
+from app.data_products.model import ensure_data_product_exists
 from app.database.deps import get_db_session
 from app.technical_asset_configuration.schema_request import (
     RenderTechnicalAssetAccessPathRequest,
@@ -17,6 +18,7 @@ if TYPE_CHECKING:
 
 from app.plugins.registry import plugin_registry
 from app.technical_asset_configuration.base_schema import (
+    PluginContext,
     TechnicalAssetPlugin,
 )
 from app.technical_asset_configuration.schema_response import (
@@ -220,4 +222,11 @@ class PluginService:
                 detail="Template not found for the given platform and service",
             )
 
-        return request.configuration.render_template(template)
+        return request.configuration.render_template(
+            template,
+            plugin_context=PluginContext.build(
+                ensure_data_product_exists(request.data_product_id, self.db),
+                request.namespace,
+                request.technical_mapping,
+            ),
+        )
