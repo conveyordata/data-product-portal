@@ -192,11 +192,8 @@ class TestUsersRouter:
             user_id=user_id, role_id="domain-role", domain_id="domain"
         )
         authorizer.assign_global_role(user_id=user_id, role_id="global-role")
-        authorizer.assign_resource_group_membership(
-            member_identity_id=user_id, group_id=group_id
-        )
-        authorizer.assign_global_group_membership(
-            member_identity_id=user_id, group_id=group_id
+        authorizer.assign_group_memberships(
+            memberships=[(user_id, group_id)],
         )
         authorizer.assign_global_role(user_id=other_user.id, role_id="global-role")
 
@@ -644,3 +641,139 @@ class TestUsersRouter:
                 }
             ]
         }
+
+    @pytest.mark.usefixtures("admin")
+    def test_create_users_batch__creates_valid_items_and_returns_errors(
+        self, client, session
+    ):
+        invalid_item = {
+            "email": "not-an-email",
+            "external_id": "invalid-user",
+            "first_name": "Invalid",
+            "last_name": "User",
+        }
+
+        response = client.post(
+            f"{ENDPOINT}/batch",
+            json={
+                "items": [
+                    {
+                        "email": "valid@example.com",
+                        "external_id": "valid-user",
+                        "first_name": "Valid",
+                        "last_name": "User",
+                    },
+                    invalid_item,
+                ]
+            },
+        )
+
+        assert response.status_code == 200
+        body = response.json()
+        assert len(body["ids"]) == 1
+        assert len(body["errors"]) == 1
+        assert body["errors"][0]["item"] == invalid_item
+        assert body["errors"][0]["errors"]
+
+        created_user = session.get(User, body["ids"][0])
+        assert created_user is not None
+        assert created_user.external_id == "valid-user"
+
+    def test_create_users_batch__without_permission_returns_forbidden(self, client):
+        response = client.post(
+            f"{ENDPOINT}/batch",
+            json={
+                "items": [
+                    {
+                        "email": "user@example.com",
+                        "external_id": "user",
+                        "first_name": "Test",
+                        "last_name": "User",
+                    }
+                ]
+            },
+        )
+
+        assert response.status_code == 403
+
+    @pytest.mark.usefixtures("admin")
+    @pytest.mark.parametrize(
+        "items",
+        [
+            [],
+            [{}] * (settings.MAX_ITEMS_PER_BATCH_REQUEST + 1),
+        ],
+    )
+    def test_create_users_batch__rejects_invalid_list_size(self, client, items):
+        response = client.post(
+            f"{ENDPOINT}/batch",
+            json={"items": items},
+        )
+
+        assert response.status_code == 422
+
+    @pytest.mark.usefixtures("admin")
+    def test_remove_users_batch__removes_users(self, client, session):
+        first = UserFactory()
+        second = UserFactory()
+
+        response = client.request(
+            "DELETE",
+            f"{ENDPOINT}/batch",
+            json={"ids": [str(first.id), str(second.id)]},
+        )
+
+        assert response.status_code == 204
+        assert response.content == b""
+        assert session.get(User, first.id) is None
+        assert session.get(User, second.id) is None
+
+    @pytest.mark.usefixtures("admin")
+    def test_remove_users_batch__ignores_unknown_and_wrong_identity_type_ids(
+        self, client, session
+    ):
+        user = UserFactory()
+        group = GroupFactory()
+
+        response = client.request(
+            "DELETE",
+            f"{ENDPOINT}/batch",
+            json={"ids": [str(user.id), str(group.id), str(uuid4())]},
+        )
+
+        assert response.status_code == 204
+        assert session.get(User, user.id) is None
+        assert group in session
+
+    def test_remove_users_batch__without_permission_returns_forbidden(
+        self, client, session
+    ):
+        user = UserFactory()
+
+        response = client.request(
+            "DELETE",
+            f"{ENDPOINT}/batch",
+            json={"ids": [str(user.id)]},
+        )
+
+        assert response.status_code == 403
+        assert session.get(User, user.id) is not None
+
+    @pytest.mark.usefixtures("admin")
+    @pytest.mark.parametrize(
+        "ids",
+        [
+            [],
+            ["not-a-uuid"],
+            ["00000000-0000-0000-0000-000000000001"] * 2,
+            [str(uuid4()) for _ in range(settings.MAX_ITEMS_PER_BATCH_REQUEST + 1)],
+        ],
+    )
+    def test_remove_users_batch__rejects_invalid_request(self, client, ids):
+        response = client.request(
+            "DELETE",
+            f"{ENDPOINT}/batch",
+            json={"ids": ids},
+        )
+
+        assert response.status_code == 422

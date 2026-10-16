@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session
 
 from app.core.auth.auth import authorize_user, get_authenticated_user
@@ -8,6 +8,11 @@ from app.core.authz import Action, Authorization
 from app.core.authz.resolvers import EmptyResolver
 from app.database.deps import get_db_session
 from app.groups.schema_response import GroupsGetResponse
+from app.identities.schema_request import (
+    IdentityBatchCreateRequest,
+    IdentityBatchDeleteRequest,
+)
+from app.identities.schema_response import IdentityBatchCreateResponse
 from app.users.schema import User
 from app.users.schema_request import CanBecomeAdminUpdate, UserCreate
 from app.users.schema_response import (
@@ -19,6 +24,33 @@ from app.users.schema_response import (
 from app.users.service import UserService
 
 router = APIRouter(tags=["Users"], prefix="/v2/users")
+
+
+@router.post(
+    "/batch",
+    dependencies=[
+        Depends(Authorization.enforce(Action.GLOBAL__CREATE_USER, EmptyResolver)),
+    ],
+)
+def create_users_batch(
+    request: IdentityBatchCreateRequest,
+    db: Session = Depends(get_db_session, scope="function"),
+) -> IdentityBatchCreateResponse:
+    return UserService(db).create_users_batch(request.items)
+
+
+@router.delete(
+    "/batch",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[
+        Depends(Authorization.enforce(Action.GLOBAL__DELETE_USER, EmptyResolver)),
+    ],
+)
+def remove_users_batch(
+    request: IdentityBatchDeleteRequest,
+    db: Session = Depends(get_db_session, scope="function"),
+) -> None:
+    UserService(db).remove_users_batch(request.ids)
 
 
 @router.delete(

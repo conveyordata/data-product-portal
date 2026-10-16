@@ -1,3 +1,5 @@
+import asyncio
+from collections.abc import AsyncIterator
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, status
@@ -21,8 +23,25 @@ from app.groups.schema_response import (
     GroupUpdateResponse,
 )
 from app.groups.service import GroupService
+from app.identities.schema_request import (
+    IdentityBatchCreateRequest,
+    IdentityBatchDeleteRequest,
+)
+from app.identities.schema_response import IdentityBatchCreateResponse
 
 router = APIRouter(tags=["Groups"], prefix="/v2/groups")
+_group_members_replace_locks: dict[UUID, asyncio.Lock] = {}
+
+
+async def _serialize_group_members_replacement(
+    id: UUID,
+) -> AsyncIterator[None]:
+    """
+    Used to enforce locking on group members replacement.
+    """
+    lock = _group_members_replace_locks.setdefault(id, asyncio.Lock())
+    async with lock:
+        yield
 
 
 @router.get("")
@@ -109,6 +128,33 @@ def update_group(
     return GroupService(db).update_group(id, group)
 
 
+@router.post(
+    "/batch",
+    dependencies=[
+        Depends(Authorization.enforce(Action.GLOBAL__CREATE_GROUP, EmptyResolver)),
+    ],
+)
+def create_groups_batch(
+    request: IdentityBatchCreateRequest,
+    db: Session = Depends(get_db_session, scope="function"),
+) -> IdentityBatchCreateResponse:
+    return GroupService(db).create_groups_batch(request.items)
+
+
+@router.delete(
+    "/batch",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[
+        Depends(Authorization.enforce(Action.GLOBAL__DELETE_GROUP, EmptyResolver)),
+    ],
+)
+def delete_groups_batch(
+    request: IdentityBatchDeleteRequest,
+    db: Session = Depends(get_db_session, scope="function"),
+) -> None:
+    GroupService(db).delete_groups_batch(request.ids)
+
+
 @router.delete(
     "/{id}",
     status_code=status.HTTP_204_NO_CONTENT,
@@ -177,6 +223,14 @@ def get_group_members(
                 }
             },
         },
+        404: {
+            "description": "Group not found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Required group does not exist"}
+                }
+            },
+        },
     },
 )
 def add_group_members(
@@ -200,6 +254,7 @@ def add_group_members(
                 EmptyResolver,
             )
         ),
+        Depends(_serialize_group_members_replacement, scope="request"),
     ],
     responses={
         400: {

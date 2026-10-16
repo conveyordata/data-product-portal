@@ -1,8 +1,8 @@
 from itertools import chain
-from typing import Final, Sequence
+from typing import Any, Final, Sequence
 from uuid import UUID
 
-from sqlalchemy import asc, select
+from sqlalchemy import asc, or_, select
 from sqlalchemy.orm import Session, selectinload
 
 from app.authorization.role_assignments.data_product.service import (
@@ -15,6 +15,11 @@ from app.data_products.output_port_technical_assets_link.service import (
 from app.data_products.output_ports.input_ports.service import InputPortService
 from app.groups.model import Group, GroupMembership
 from app.groups.schema_response import GroupGet
+from app.identities.schema_response import (
+    IdentityBatchCreateError,
+    IdentityBatchCreateResponse,
+)
+from app.identities.service import validate_batch_create_items
 from app.users.model import User, ensure_user_exists
 from app.users.model import User as UserModel
 from app.users.schema_request import CanBecomeAdminUpdate, UserCreate
@@ -32,6 +37,7 @@ SYSTEM_ACCOUNT: Final[str] = "systemaccount@noreply.com"
 class UserService:
     def __init__(self, db: Session):
         self.db = db
+        self.authorizer = Authorization()
 
     def get_users(self) -> Sequence[UsersGet]:
         users = self.db.scalars(
@@ -46,17 +52,109 @@ class UserService:
         user = ensure_user_exists(
             id, self.db, options=[selectinload(User.data_product_roles)]
         )
+        self.authorizer.clear_assignments_for_user(user_id=user.id)
+        self._remove_user(user)
+        self.db.flush()
+
+    def remove_users_batch(self, ids: list[UUID]) -> None:
+        """
+        Marks for deletion all users with the given ids,
+        Preloads data_product_roles and dataset_roles to avoid N+1 queries.
+        """
+        users = self.db.scalars(
+            select(UserModel)
+            .where(UserModel.id.in_(ids))
+            .options(
+                selectinload(UserModel.data_product_roles),
+                selectinload(UserModel.dataset_roles),
+            )
+        ).all()
+
+        self.authorizer.clear_assignments_for_identities(
+            identity_ids=[user.id for user in users],
+        )
+
+        for user in users:
+            self._remove_user(user)
+
+        self.db.flush()
+
+    def _remove_user(self, user: UserModel) -> None:
         user.data_products = []
         user.datasets = []
-        Authorization().clear_assignments_for_user(user_id=id)
         self.db.delete(user)
-        self.db.flush()
 
     def create_user(self, user: UserCreate) -> UserCreateResponse:
         user = UserModel(**user.parse_pydantic_schema())
         self.db.add(user)
         self.db.flush()
         return UserCreateResponse(id=user.id)
+
+    def create_users_batch(
+        self,
+        items: list[Any],
+    ) -> IdentityBatchCreateResponse:
+        validated_users, errors = validate_batch_create_items(
+            items,
+            UserCreate,
+        )
+
+        emails: set[str] = set()
+        external_ids: set[str] = set()
+        for user in validated_users:
+            emails.add(user.email)
+            external_ids.add(user.external_id)
+
+        existing_users = (
+            self.db.execute(
+                select(UserModel.email, UserModel.external_id).where(
+                    or_(
+                        UserModel.email.in_(emails),
+                        UserModel.external_id.in_(external_ids),
+                    )
+                )
+            ).all()
+            if validated_users
+            else []
+        )
+
+        unavailable_emails: set[str] = set()
+        unavailable_external_ids: set[str] = set()
+        for email, external_id in existing_users:
+            unavailable_emails.add(email)
+            unavailable_external_ids.add(external_id)
+
+        users: list[UserModel] = []
+        for user in validated_users:
+            item_errors: list[str] = []
+
+            if user.email in unavailable_emails:
+                item_errors.append("A user with this email already exists.")
+
+            if user.external_id in unavailable_external_ids:
+                item_errors.append("A user with this external ID already exists.")
+
+            if item_errors:
+                errors.append(
+                    IdentityBatchCreateError(
+                        item=user,
+                        errors=item_errors,
+                    )
+                )
+                continue
+
+            # Reserve the ID's so later duplicates in this request are rejected.
+            unavailable_emails.add(user.email)
+            unavailable_external_ids.add(user.external_id)
+            users.append(UserModel(**user.parse_pydantic_schema()))
+
+        self.db.add_all(users)
+        self.db.flush()
+
+        return IdentityBatchCreateResponse(
+            ids=[user.id for user in users],
+            errors=errors,
+        )
 
     def mark_tour_as_seen(self, user_id: UUID) -> None:
         user = ensure_user_exists(user_id, self.db)

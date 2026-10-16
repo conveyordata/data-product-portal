@@ -1,6 +1,26 @@
 import { api } from "@/store/api/services/generated/authorizationRolesApi";
 const injectedRtkApi = api.injectEndpoints({
   endpoints: (build) => ({
+    createUsersBatch: build.mutation<
+      CreateUsersBatchApiResponse,
+      CreateUsersBatchApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/users/batch`,
+        method: "POST",
+        body: queryArg,
+      }),
+    }),
+    removeUsersBatch: build.mutation<
+      RemoveUsersBatchApiResponse,
+      RemoveUsersBatchApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/users/batch`,
+        method: "DELETE",
+        body: queryArg,
+      }),
+    }),
     removeUser: build.mutation<RemoveUserApiResponse, RemoveUserApiArg>({
       query: (queryArg) => ({
         url: `/api/v2/users/${queryArg}`,
@@ -69,6 +89,11 @@ const injectedRtkApi = api.injectEndpoints({
   overrideExisting: false,
 });
 export { injectedRtkApi as api };
+export type CreateUsersBatchApiResponse =
+  /** status 200 Successful Response */ IdentityBatchCreateResponse;
+export type CreateUsersBatchApiArg = IdentityBatchCreateRequest;
+export type RemoveUsersBatchApiResponse = unknown;
+export type RemoveUsersBatchApiArg = IdentityBatchDeleteRequest;
 export type RemoveUserApiResponse = /** status 200 Successful Response */ any;
 export type RemoveUserApiArg = string;
 export type GetUsersApiResponse =
@@ -99,6 +124,14 @@ export type GetUserRequestsApiArg =
 export type GetCurrentUserApiResponse =
   /** status 200 Successful Response */ User;
 export type GetCurrentUserApiArg = void;
+export type IdentityBatchCreateError = {
+  item: any;
+  errors: string[];
+};
+export type IdentityBatchCreateResponse = {
+  ids: string[];
+  errors: IdentityBatchCreateError[];
+};
 export type ValidationError = {
   loc: (string | number)[];
   msg: string;
@@ -108,6 +141,12 @@ export type ValidationError = {
 };
 export type HttpValidationError = {
   detail?: ValidationError[];
+};
+export type IdentityBatchCreateRequest = {
+  items: any[];
+};
+export type IdentityBatchDeleteRequest = {
+  ids: string[];
 };
 export type User = {
   id: string;
@@ -404,6 +443,8 @@ export type MyRequestsResponse = {
   )[];
 };
 export const {
+  useCreateUsersBatchMutation,
+  useRemoveUsersBatchMutation,
   useRemoveUserMutation,
   useGetUsersQuery,
   useLazyGetUsersQuery,
