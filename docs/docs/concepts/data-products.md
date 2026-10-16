@@ -28,6 +28,16 @@ These technical aspects are also governed by the Data Product concept.
 - Register **[Input Ports](./input-ports)** by requesting access to the **[Output Ports](./output-ports)** of other Data Products
 - Implement fine-grained access control, observability, and versioning on **[Output Ports](./output-ports)**
 
+## Environments
+
+Each Data Product stores its environments and the date each was declared. Technical Assets and Output Ports inherit that scope.
+
+The API accepts `environment_ids` when creating or updating a Data Product. If omitted during creation, the current global environments are saved as defaults. Changing globals or moving the Data Product to another Domain does not change its saved environments. Updates can add environments, but cannot remove existing ones or save an empty selection.
+
+Existing Data Products are migrated using their Domain's selected environments, or the global environments when their Domain has no selection.
+
+Environments must be configured before creating a Data Product. During an upgrade, every existing Data Product must have at least one effective environment, either through its Domain or the global defaults. The migration stops with a configuration error otherwise. See [Environment setup](../developer-guide/adding-integrations.md#environment-setup) for installations that do not have environments configured yet.
+
 ## Example
 
 A "Sales Transactions" Data Product may expose:

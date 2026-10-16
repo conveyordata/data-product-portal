@@ -20,6 +20,7 @@ from app.data_products.output_port_technical_assets_link.schema import (
 )
 from app.data_products.output_ports.schema import OutputPort
 from app.data_products.output_ports.status import OutputPortStatus
+from app.data_products.schema_response import DataProductEnvironment
 from app.data_products.technical_assets.schema import (
     TechnicalAsset,
 )
@@ -65,6 +66,9 @@ class BaseOutputPortGet(ORMModel):
 
 class GetOutputPortResponse(BaseOutputPortGet):
     about: Optional[str]
+    environments: list[DataProductEnvironment] = Field(
+        validation_alias=AliasPath("data_product", "environments")
+    )
 
     rolled_up_tags: set[Tag]
     data_product_settings: list[OutputPortSettingValue]
