@@ -12,8 +12,8 @@ from app.configuration.environments.platform_service_configurations.schemas impo
     DatabricksConfig,
 )
 from app.data_products.model import DataProduct as DataProductModel
-from app.data_products.schema import DataProduct
 from app.technical_asset_configuration.base_schema import (
+    PluginContext,
     FieldDependency,
     PlatformMetadata,
     SelectOption,
@@ -69,13 +69,10 @@ class DatabricksTechnicalAssetConfiguration(TechnicalAssetPlugin):
             self.table = "*"
         return self
 
-    def validate_configuration(self, data_product: DataProduct, db: Session):
+    def validate_configuration(self, context: PluginContext, db: Session):
         # If product aligned
-        if not self.catalog.startswith(data_product.namespace):
+        if not self.catalog.startswith(context.data_product.namespace):
             raise ValueError("Invalid catalog specified")
-
-    def on_create(self):
-        pass
 
     def get_configuration(
         self, configs: list[DatabricksConfig]

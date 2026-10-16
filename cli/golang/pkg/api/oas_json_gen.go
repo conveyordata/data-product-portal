@@ -30729,15 +30729,30 @@ func (s *RenderTechnicalAssetAccessPathRequest) encodeFields(e *jx.Encoder) {
 		json.EncodeUUID(e, s.ServiceID)
 	}
 	{
+		e.FieldStart("data_product_id")
+		json.EncodeUUID(e, s.DataProductID)
+	}
+	{
+		e.FieldStart("namespace")
+		e.Str(s.Namespace)
+	}
+	{
+		e.FieldStart("technical_mapping")
+		s.TechnicalMapping.Encode(e)
+	}
+	{
 		e.FieldStart("configuration")
 		s.Configuration.Encode(e)
 	}
 }
 
-var jsonFieldsNameOfRenderTechnicalAssetAccessPathRequest = [3]string{
+var jsonFieldsNameOfRenderTechnicalAssetAccessPathRequest = [6]string{
 	0: "platform_id",
 	1: "service_id",
-	2: "configuration",
+	2: "data_product_id",
+	3: "namespace",
+	4: "technical_mapping",
+	5: "configuration",
 }
 
 // Decode decodes RenderTechnicalAssetAccessPathRequest from json.
@@ -30773,8 +30788,42 @@ func (s *RenderTechnicalAssetAccessPathRequest) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"service_id\"")
 			}
-		case "configuration":
+		case "data_product_id":
 			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				v, err := json.DecodeUUID(d)
+				s.DataProductID = v
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"data_product_id\"")
+			}
+		case "namespace":
+			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				v, err := d.Str()
+				s.Namespace = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"namespace\"")
+			}
+		case "technical_mapping":
+			requiredBitSet[0] |= 1 << 4
+			if err := func() error {
+				if err := s.TechnicalMapping.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"technical_mapping\"")
+			}
+		case "configuration":
+			requiredBitSet[0] |= 1 << 5
 			if err := func() error {
 				if err := s.Configuration.Decode(d); err != nil {
 					return err
@@ -30793,7 +30842,7 @@ func (s *RenderTechnicalAssetAccessPathRequest) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00000111,
+		0b00111111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

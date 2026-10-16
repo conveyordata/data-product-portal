@@ -3,7 +3,7 @@
   "info": {
     "title": "Data product portal",
     "summary": "Backend API implementation for Data product portal",
-    "version": "0.7.4"
+    "version": "0.8.0"
   },
   "paths": {
     "/api/v2/authz/access/{action}": {
@@ -16962,6 +16962,18 @@
             "format": "uuid",
             "title": "Service Id"
           },
+          "data_product_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Data Product Id"
+          },
+          "namespace": {
+            "type": "string",
+            "title": "Namespace"
+          },
+          "technical_mapping": {
+            "$ref": "#/components/schemas/TechnicalMapping"
+          },
           "configuration": {
             "properties": {
               "name": {
@@ -16981,6 +16993,9 @@
         "required": [
           "platform_id",
           "service_id",
+          "data_product_id",
+          "namespace",
+          "technical_mapping",
           "configuration"
         ],
         "title": "RenderTechnicalAssetAccessPathRequest"
