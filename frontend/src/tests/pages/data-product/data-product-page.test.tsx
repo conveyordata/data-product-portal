@@ -71,7 +71,7 @@ describe('DataProduct Page', () => {
         mockDataProductDetailCalls(savedScopeProduct);
         mockGetPlatformTiles();
         const fetchDefaults = vi.fn(() => HttpResponse.json({ environments: mockEnvironments }));
-        const fetchDomain = vi.fn(() => HttpResponse.json({ environments: [mockEnvironments[0]] }));
+        const fetchDomain = vi.fn(() => HttpResponse.json({ id: 'domain-1', name: 'Finance', description: 'Finance' }));
         server.use(
             http.get('*/api/v2/configuration/environments', fetchDefaults),
             http.get('*/api/v2/configuration/domains/:id', fetchDomain),

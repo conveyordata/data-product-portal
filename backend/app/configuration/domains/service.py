@@ -15,7 +15,6 @@ from app.configuration.domains.schema_response import (
     GetDomainsItem,
     UpdateDomainResponse,
 )
-from app.configuration.environments.model import Environment as EnvironmentModel
 
 
 class DomainService:
@@ -37,30 +36,19 @@ class DomainService:
             ).all()
         )
 
-        domains = self.db.scalars(
-            select(DomainModel)
-            .order_by(DomainModel.name)
-            .options(selectinload(DomainModel.environments))
-        ).all()
+        domains = self.db.scalars(select(DomainModel).order_by(DomainModel.name)).all()
         return [
             GetDomainsItem(
                 id=domain.id,
                 name=domain.name,
                 description=domain.description,
-                environments=domain.environments,
                 abstract_data_product_count=counts.get(domain.id, 0),
             )
             for domain in domains
         ]
 
     def get_domain(self, id: UUID) -> GetDomainResponse:
-        domain = self.db.get(
-            DomainModel,
-            id,
-            options=[
-                selectinload(DomainModel.environments),
-            ],
-        )
+        domain = self.db.get(DomainModel, id)
 
         if not domain:
             raise HTTPException(
@@ -70,33 +58,15 @@ class DomainService:
 
         return domain
 
-    def _get_environments(self, environment_ids: list[UUID]) -> list[EnvironmentModel]:
-        environments = self.db.scalars(
-            select(EnvironmentModel).where(EnvironmentModel.id.in_(environment_ids))
-        ).all()
-        if len(environment_ids) != len(environments):
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Invalid environment ids provided",
-            )
-        return list(environments)
-
     def create_domain(self, domain_create: DomainCreate) -> CreateDomainResponse:
-        domain_schema = domain_create.model_dump(exclude={"environment_ids"})
-        environments = self._get_environments(domain_create.environment_ids)
-        domain = DomainModel(**domain_schema, environments=environments)
+        domain = DomainModel(**domain_create.model_dump())
         self.db.add(domain)
         self.db.flush()
         return CreateDomainResponse(id=domain.id)
 
     def update_domain(self, id: UUID, domain: DomainUpdate) -> UpdateDomainResponse:
-        current_domain = self.db.get(
-            DomainModel, id, options=[selectinload(DomainModel.environments)]
-        )
+        current_domain = self.db.get(DomainModel, id)
         updated_domain = domain.model_dump()
-
-        environment_ids = updated_domain.pop("environment_ids")
-        current_domain.environments = self._get_environments(environment_ids)
 
         for attr, value in updated_domain.items():
             setattr(current_domain, attr, value)

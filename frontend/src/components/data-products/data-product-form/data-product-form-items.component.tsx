@@ -1,4 +1,4 @@
-import { Alert, Form, Input, Radio, Select, Skeleton, Tag } from 'antd';
+import { Alert, Form, Input, Radio, Select, Skeleton, Tooltip, Typography } from 'antd';
 import type { FormInstance } from 'antd/es/form/hooks/useForm';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -80,6 +80,10 @@ export const DataProductFormItems = <T extends DataProductCreate>({
     const dataProductNameValue = Form.useWatch('name', form);
     const visibility = Form.useWatch('visibility', form);
     const savedEnvironmentIds = currentDataProduct?.environments.map((item) => item.environment_id) ?? [];
+    const selectedEnvironmentIds: string[] = Form.useWatch('environment_ids', form) ?? [];
+    const [environmentSearch, setEnvironmentSearch] = useState('');
+    const allEnvironmentsSelected =
+        !!environments?.length && environments.every((environment) => selectedEnvironmentIds.includes(environment.id));
 
     useEffect(() => {
         if (mode === 'create' && environments && form.getFieldValue('environment_ids') === undefined) {
@@ -261,14 +265,42 @@ export const DataProductFormItems = <T extends DataProductCreate>({
                         value: environment.id,
                         disabled: savedEnvironmentIds.includes(environment.id),
                     }))}
-                    showSearch={{ filterOption: selectFilterOptionByLabel }}
+                    showSearch={{ filterOption: selectFilterOptionByLabel, onSearch: setEnvironmentSearch }}
+                    onChange={() => setEnvironmentSearch('')}
+                    onOpenChange={(open) => {
+                        if (!open) setEnvironmentSearch('');
+                    }}
                     allowClear={mode === 'create'}
-                    tagRender={({ label, value, closable, onClose }) => (
-                        <Tag closable={closable && !savedEnvironmentIds.includes(value)} onClose={onClose}>
-                            {label}
-                        </Tag>
+                    labelRender={({ label, value }) => (
+                        <Tooltip
+                            title={
+                                typeof value === 'string' && savedEnvironmentIds.includes(value)
+                                    ? t(
+                                          'Declared environments cannot be removed because resources may already be provisioned in them.',
+                                      )
+                                    : undefined
+                            }
+                        >
+                            <span>{label}</span>
+                        </Tooltip>
                     )}
-                    popupRender={(menu) => <div data-cy="data-product-environments-options">{menu}</div>}
+                    notFoundContent={
+                        <Typography.Text type="secondary">
+                            {environmentSearch.trim()
+                                ? t('No matching environments')
+                                : t('No environments are configured')}
+                        </Typography.Text>
+                    }
+                    popupRender={(menu) => (
+                        <div data-cy="data-product-environments-options">
+                            {menu}
+                            {allEnvironmentsSelected && !environmentSearch.trim() && (
+                                <Typography.Text type="secondary">
+                                    {t('All available environments are already selected')}
+                                </Typography.Text>
+                            )}
+                        </div>
+                    )}
                 />
             </Form.Item>
             <Form.Item<DataProductCreate> name="tag_ids" label={t('Tags')}>
