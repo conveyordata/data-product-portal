@@ -27,6 +27,7 @@ safe-outputs:
   create-pull-request:
     title-prefix: "[design consistency] "
     labels: [background-agent, agent-design-consistency]
+    github-token-for-extra-empty-commit: none
   upload-asset:
     allowed-exts: [.png]
     max: 20

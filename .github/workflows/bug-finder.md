@@ -22,6 +22,7 @@ safe-outputs:
   create-pull-request:
     title-prefix: "[bug] "
     labels: [background-agent, agent-bug, bug]
+    github-token-for-extra-empty-commit: none
   noop:
     report-as-issue: false
 ---

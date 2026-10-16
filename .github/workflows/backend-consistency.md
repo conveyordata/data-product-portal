@@ -22,6 +22,7 @@ safe-outputs:
   create-pull-request:
     title-prefix: "[backend consistency] "
     labels: [background-agent, agent-backend-consistency]
+    github-token-for-extra-empty-commit: none
   noop:
     report-as-issue: false
 ---

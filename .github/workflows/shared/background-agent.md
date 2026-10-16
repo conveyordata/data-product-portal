@@ -30,6 +30,10 @@ services:
       --health-retries 25
     ports:
       - 5432:5432
+safe-outputs:
+  github-app:
+    client-id: ${{ vars.APP_ID }}
+    private-key: ${{ secrets.APP_PRIVATE_KEY }}
 steps:
   - name: Install Poetry
     uses: snok/install-poetry@a783c322200f0519c7926aa6faa857c4e23e9263 # v1.4.2
