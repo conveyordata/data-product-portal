@@ -142,7 +142,7 @@ export function DataProductActions({ dataProductId }: Props) {
                 <DataAccessTileGrid
                     canAccessData={canReadIntegrations}
                     dataPlatforms={dataPlatforms}
-                    domainId={dataProduct.domain.id}
+                    environments={dataProduct.environments.map(({ environment }) => environment)}
                     onDataPlatformClick={handleAccessToData}
                     onTileClick={handleTileClick}
                     isDisabled={isLoading || !canReadIntegrations}
