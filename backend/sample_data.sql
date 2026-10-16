@@ -2193,7 +2193,17 @@ INSERT INTO public.role_assignments_data_product (id, data_product_id, identity_
 ), 'APPROVED', '{{ john_id }}'::uuid, '2025-10-28 18:34:32.318606', '{{ john_id }}'::uuid, '2025-10-28 18:34:32.323823', '2025-10-28 18:34:32.316108', '2025-10-28 18:34:32.323078', NULL);
 
 -- Add systemaccount bot global role assignment
-INSERT INTO public.role_assignments_global (id, identity_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on) SELECT gen_random_uuid(), system_account.id, admin_role.id, 'APPROVED', system_account.id, timezone('utc'::text, current_timestamp), system_account.id, timezone('utc'::text, current_timestamp) FROM public.users AS system_account CROSS JOIN public.roles AS admin_role WHERE system_account.email = 'systemaccount@noreply.com' AND admin_role.scope = 'global' AND admin_role.prototype = 3;
+INSERT INTO public.role_assignments_global (id, identity_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on) SELECT
+    gen_random_uuid(),
+    system_account.id,
+    admin_role.id,
+    'APPROVED',
+    system_account.id,
+    timezone('utc'::text, current_timestamp),
+    system_account.id,
+    timezone('utc'::text, current_timestamp)
+FROM public.users AS system_account CROSS JOIN public.roles AS admin_role
+WHERE system_account.email = 'systemaccount@noreply.com' AND admin_role.scope = 'global' AND admin_role.prototype = 3;
 
 -- ------------------------------------------------------------------------------------------------
 -- START of Insert dynamic dataset query stats
