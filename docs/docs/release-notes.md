@@ -6,6 +6,8 @@ sidebar_position: 200
 
 ## Unreleased
 
+## 0.8.0
+
 ### breaking changes
 
 - **[API]**: A technical asset's `configuration` is now published as a generic object rather than a typed union, so the schema is identical regardless of which plugins are installed. Regenerated SDK, CLI and frontend clients will see the type change, and `AccessGranularity` no longer appears in generated code.
