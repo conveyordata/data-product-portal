@@ -634,6 +634,29 @@ class TestAuthorization:
         )
         assert authorizer.has_global_role(user_id="user", role_id="group")
 
+    def test_assign_group_memberships__adds_missing_policy_from_mixed_batch(
+            self, authorizer: Authorization
+    ):
+        existing = ("existing-user", "existing-group")
+        missing = ("missing-user", "missing-group")
+        authorizer.assign_group_memberships(memberships=[existing])
+
+        updated = authorizer.assign_group_memberships(
+            memberships=[existing, missing]
+        )
+
+        assert updated
+        for member_id, group_id in (existing, missing):
+            assert authorizer.has_resource_role(
+                user_id=member_id,
+                role_id=group_id,
+                resource_id="*",
+            )
+            assert authorizer.has_global_role(
+                user_id=member_id,
+                role_id=group_id,
+            )
+
     def test_revoke_group_memberships__revokes_resource_and_global_memberships(
         self, authorizer: Authorization
     ):
@@ -669,6 +692,28 @@ class TestAuthorization:
             user_id=retained[0], role_id=retained[1], resource_id="*"
         )
         assert authorizer.has_global_role(user_id=retained[0], role_id=retained[1])
+
+    def test_revoke_group_memberships__removes_present_policy_from_mixed_batch(
+            self, authorizer: Authorization
+    ):
+        existing = ("existing-user", "existing-group")
+        missing = ("missing-user", "missing-group")
+        authorizer.assign_group_memberships(memberships=[existing])
+
+        updated = authorizer.revoke_group_memberships(
+            memberships=[missing, existing]
+        )
+
+        assert updated
+        assert not authorizer.has_resource_role(
+            user_id=existing[0],
+            role_id=existing[1],
+            resource_id="*",
+        )
+        assert not authorizer.has_global_role(
+            user_id=existing[0],
+            role_id=existing[1],
+        )
 
     def test_revoke_group_memberships__empty_list_does_nothing(
         self, authorizer: Authorization

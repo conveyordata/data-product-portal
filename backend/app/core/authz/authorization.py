@@ -484,20 +484,40 @@ class Authorization(metaclass=Singleton):
                 assert_never(data_product.visibility)
 
     def assign_group_memberships(self, *, memberships: Sequence[tuple[ID, ID]]) -> bool:
-        """Assign multiple member-to-group inheritance relationships."""
+        """
+        Assign multiple member-to-group inheritance relationships.
+
+        Evaluates previously existing policies to avoid failures when adding duplicates,
+        as that will prevent the remaining policies from the batch to be added.
+        """
         if not memberships:
             return False
 
         enforcer: SyncedEnforcer = self._enforcer
+        enforcer.load_policy()
+
         resource_policies = []
         global_policies = []
 
         for member_id, group_id in memberships:
-            resource_policies.append([str(member_id), str(group_id), "*"])
-            global_policies.append([str(member_id), str(group_id)])
+            resource_policy = [str(member_id), str(group_id), "*"]
+            global_policy = [str(member_id), str(group_id)]
 
-        resource_updates = enforcer.add_named_grouping_policies("g", resource_policies)
-        global_updates = enforcer.add_named_grouping_policies("g3", global_policies)
+            if not enforcer.has_named_grouping_policy("g", *resource_policy):
+                resource_policies.append(resource_policy)
+            if not enforcer.has_named_grouping_policy("g3", *global_policy):
+                global_policies.append(global_policy)
+
+        resource_updates = (
+            enforcer.add_named_grouping_policies("g", resource_policies)
+            if resource_policies
+            else False
+        )
+        global_updates = (
+            enforcer.add_named_grouping_policies("g3", global_policies)
+            if global_policies
+            else False
+        )
 
         updated = bool(resource_updates or global_updates)
         if updated:
@@ -506,22 +526,40 @@ class Authorization(metaclass=Singleton):
         return updated
 
     def revoke_group_memberships(self, *, memberships: Sequence[tuple[ID, ID]]) -> bool:
-        """Revoke multiple member-to-group inheritance relationships."""
+        """
+        Revoke multiple member-to-group inheritance relationships.
+
+        Evaluates previously existing policies to avoid failures when removing non existing policies,
+        as that will prevent the remaining policies from the batch to be removed.
+        """
         if not memberships:
             return False
 
         enforcer: SyncedEnforcer = self._enforcer
+        enforcer.load_policy()
+
         resource_policies = []
         global_policies = []
 
         for member_id, group_id in memberships:
-            resource_policies.append([str(member_id), str(group_id), "*"])
-            global_policies.append([str(member_id), str(group_id)])
+            resource_policy = [str(member_id), str(group_id), "*"]
+            global_policy = [str(member_id), str(group_id)]
 
-        resource_updates = enforcer.remove_named_grouping_policies(
-            "g", resource_policies
+            if enforcer.has_named_grouping_policy("g", *resource_policy):
+                resource_policies.append(resource_policy)
+            if enforcer.has_named_grouping_policy("g3", *global_policy):
+                global_policies.append(global_policy)
+
+        resource_updates = (
+            enforcer.remove_named_grouping_policies("g", resource_policies)
+            if resource_policies
+            else False
         )
-        global_updates = enforcer.remove_named_grouping_policies("g3", global_policies)
+        global_updates = (
+            enforcer.remove_named_grouping_policies("g3", global_policies)
+            if global_policies
+            else False
+        )
 
         updated = bool(resource_updates or global_updates)
         if updated:
