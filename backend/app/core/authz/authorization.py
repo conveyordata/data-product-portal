@@ -17,7 +17,6 @@ from cachetools import Cache, TTLCache, cachedmethod
 from casbin import SyncedEnforcer, util
 from fastapi import Depends, HTTPException, Request, status
 from opentelemetry import trace
-from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user
@@ -70,23 +69,23 @@ def _has_access_through_consumer_role(
 
 class Authorization(metaclass=Singleton):
     def __init__(self) -> None:
-        self._enforcer: SyncedEnforcer = self._initialize()
+        self._adapter = sqlalchemy_adapter.Adapter(database.get_url())
+        self._enforcer: SyncedEnforcer = self._initialize(self._adapter)
         self._cache: Cache = TTLCache(
             maxsize=settings.AUTHORIZER_CACHE_SIZE,
             ttl=settings.AUTHORIZER_AUTOLOAD_INTERVAL,
         )
 
     @classmethod
-    def _initialize(cls) -> SyncedEnforcer:
+    def _initialize(cls, adapter: sqlalchemy_adapter.Adapter) -> SyncedEnforcer:
         model_location = Path(__file__).parent / "rbac_model.conf"
-        enforcer = cls._construct_enforcer(str(model_location))
+        enforcer = cls._construct_enforcer(str(model_location), adapter)
         enforcer.load_policy()
         return enforcer
 
     @staticmethod
-    def _construct_enforcer(model: str) -> SyncedEnforcer:
+    def _construct_enforcer(model: str, adapter: sqlalchemy_adapter.Adapter) -> SyncedEnforcer:
         """Initializes the casbin table in the DB and constructs the enforcer."""
-        adapter = sqlalchemy_adapter.Adapter(database.get_url())
         enforcer = SyncedEnforcer(model, adapter)
         # Used to allow g(user, group, *) rules so users inherit group permissions
         enforcer.add_named_domain_matching_func("g", util.key_match)
@@ -383,24 +382,19 @@ class Authorization(metaclass=Singleton):
             return False
 
         enforcer: SyncedEnforcer = self._enforcer
-        updated = False
 
         for policy_type in ("g", "g2", "g3"):
-            policies = [
-                policy
-                for policy in enforcer.get_named_grouping_policy(policy_type)
-                if policy[0] in values
-            ]
-            if policies:
-                updated = (
-                    enforcer.remove_named_grouping_policies(policy_type, policies)
-                    or updated
+            for value in values:
+                self._adapter.remove_filtered_policy(
+                    "g",
+                    policy_type,
+                    0,
+                    value,
                 )
 
-        if updated:
-            self._after_update()
-
-        return updated
+        enforcer.load_policy()
+        self._after_update()
+        return True
 
     def clear_assignments_for_resource_role(self, *, role_id: ID) -> bool:
         """Removes all assignments of a resource role inside the casbin table.
@@ -497,17 +491,25 @@ class Authorization(metaclass=Singleton):
         enforcer: SyncedEnforcer = self._enforcer
         enforcer.load_policy()
 
-        resource_policies = []
-        global_policies = []
+        resource_candidates = {
+            (str(member_id), str(group_id), "*")
+            for member_id, group_id in memberships
+        }
+        global_candidates = {
+            (str(member_id), str(group_id))
+            for member_id, group_id in memberships
+        }
 
-        for member_id, group_id in memberships:
-            resource_policy = [str(member_id), str(group_id), "*"]
-            global_policy = [str(member_id), str(group_id)]
-
-            if not enforcer.has_named_grouping_policy("g", *resource_policy):
-                resource_policies.append(resource_policy)
-            if not enforcer.has_named_grouping_policy("g3", *global_policy):
-                global_policies.append(global_policy)
+        resource_policies = [
+            list(policy)
+            for policy in resource_candidates
+            if not enforcer.has_named_grouping_policy("g", *policy)
+        ]
+        global_policies = [
+            list(policy)
+            for policy in global_candidates
+            if not enforcer.has_named_grouping_policy("g3", *policy)
+        ]
 
         resource_updates = (
             enforcer.add_named_grouping_policies("g", resource_policies)
@@ -520,50 +522,58 @@ class Authorization(metaclass=Singleton):
             else False
         )
 
-        updated = bool(resource_updates or global_updates)
-        if updated:
-            self._after_update()
-
-        return updated
+        # load_policy() may have changed local authorization state
+        self._after_update()
+        return bool(resource_updates or global_updates)
 
     def revoke_group_memberships(self, *, memberships: Sequence[tuple[ID, ID]]) -> bool:
-        """
-        Revoke multiple member-to-group inheritance relationships.
-
-        Evaluates previously existing policies to avoid failures when removing non existing policies,
-        as that will prevent the remaining policies from the batch to be removed.
-        """
+        """Revoke multiple member-to-group inheritance relationships."""
         if not memberships:
             return False
 
         enforcer: SyncedEnforcer = self._enforcer
-        enforcer.load_policy()
 
-        resource_policies = []
-        global_policies = []
+        resource_policies = {
+            (str(member_id), str(group_id), "*")
+            for member_id, group_id in memberships
+        }
+        global_policies = {
+            (str(member_id), str(group_id))
+            for member_id, group_id in memberships
+        }
 
-        for member_id, group_id in memberships:
-            resource_policy = [str(member_id), str(group_id), "*"]
-            global_policy = [str(member_id), str(group_id)]
+        # Capture locally known policies before deleting persistence. These are
+        # the policies whose local role links must also be removed.
+        local_resource_policies = [
+            list(policy)
+            for policy in resource_policies
+            if enforcer.has_named_grouping_policy("g", *policy)
+        ]
+        local_global_policies = [
+            list(policy)
+            for policy in global_policies
+            if enforcer.has_named_grouping_policy("g3", *policy)
+        ]
 
-            if enforcer.has_named_grouping_policy("g", *resource_policy):
-                resource_policies.append(resource_policy)
-            if enforcer.has_named_grouping_policy("g3", *global_policy):
-                global_policies.append(global_policy)
+        # Delete persistence independently of this worker's local snapshot.
+        for policy in resource_policies:
+            self._adapter.remove_policy("g", "g", list(policy))
+        for policy in global_policies:
+            self._adapter.remove_policy("g", "g3", list(policy))
 
-        resource_updates = (
-            enforcer.remove_named_grouping_policies("g", resource_policies)
-            if resource_policies
-            else False
-        )
-        global_updates = (
-            enforcer.remove_named_grouping_policies("g3", global_policies)
-            if global_policies
-            else False
-        )
+        # Update this worker's local policy model and role links. These calls may
+        # issue redundant persistence deletes for locally known policies, which
+        # are harmless.
+        if local_resource_policies:
+            enforcer.remove_named_grouping_policies(
+                "g",
+                local_resource_policies,
+            )
+        if local_global_policies:
+            enforcer.remove_named_grouping_policies(
+                "g3",
+                local_global_policies,
+            )
 
-        updated = bool(resource_updates or global_updates)
-        if updated:
-            self._after_update()
-
-        return updated
+        self._after_update()
+        return True

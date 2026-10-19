@@ -856,6 +856,68 @@ class TestAuthorization:
     ):
         assert not authorizer.clear_assignments_for_identities(identity_ids=[])
 
+    def test_clear_assignments_for_identities__removes_policy_from_another_worker(
+            self, authorizer: Authorization
+    ):
+        suffix = uuid4().hex
+        user = f"remote-user-{suffix}"
+        role = f"remote-role-{suffix}"
+        resource = f"remote-resource-{suffix}"
+
+        with engine.begin() as connection:
+            connection.execute(
+                text(
+                    """
+                    INSERT INTO casbin_rule (ptype, v0, v1, v2)
+                    VALUES ('g', :user, :role, :resource)
+                    """
+                ),
+                {
+                    "user": user,
+                    "role": role,
+                    "resource": resource,
+                },
+            )
+
+        # The policy was persisted by another worker and is absent locally.
+        assert not authorizer.has_resource_role(
+            user_id=user,
+            role_id=role,
+            resource_id=resource,
+        )
+
+        updated = authorizer.clear_assignments_for_identities(
+            identity_ids=[user]
+        )
+
+        assert updated
+        assert not authorizer.has_resource_role(
+            user_id=user,
+            role_id=role,
+            resource_id=resource,
+        )
+
+        with engine.connect() as connection:
+            remaining = connection.execute(
+                text(
+                    """
+                    SELECT COUNT(*)
+                    FROM casbin_rule
+                    WHERE ptype = 'g'
+                      AND v0 = :user
+                      AND v1 = :role
+                      AND v2 = :resource
+                    """
+                ),
+                {
+                    "user": user,
+                    "role": role,
+                    "resource": resource,
+                },
+            ).scalar_one()
+
+        assert remaining == 0
+
     def _persist_group_membership(self, member_id: str, group_id: str) -> None:
         """
         Simulate another Casbin worker persisting policies without updating this
