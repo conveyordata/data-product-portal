@@ -554,10 +554,10 @@ class Authorization(metaclass=Singleton):
         ]
 
         # Delete persistence independently of this worker's local snapshot.
-        for policy in resource_policies:
-            self._adapter.remove_policy("g", "g", list(policy))
-        for policy in global_policies:
-            self._adapter.remove_policy("g", "g3", list(policy))
+        for resource_policy in resource_policies:
+            self._adapter.remove_policy("g", "g", list(resource_policy))
+        for global_policy in global_policies:
+            self._adapter.remove_policy("g", "g3", list(global_policy))
 
         # Update this worker's local policy model and role links. These calls may
         # issue redundant persistence deletes for locally known policies, which
