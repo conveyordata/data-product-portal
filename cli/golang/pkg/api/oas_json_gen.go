@@ -16342,14 +16342,6 @@ func (s *GetOutputPortResponse) encodeFields(e *jx.Encoder) {
 		s.About.Encode(e)
 	}
 	{
-		e.FieldStart("environments")
-		e.ArrStart()
-		for _, elem := range s.Environments {
-			elem.Encode(e)
-		}
-		e.ArrEnd()
-	}
-	{
 		e.FieldStart("rolled_up_tags")
 		e.ArrStart()
 		for _, elem := range s.RolledUpTags {
@@ -16375,7 +16367,7 @@ func (s *GetOutputPortResponse) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfGetOutputPortResponse = [19]string{
+var jsonFieldsNameOfGetOutputPortResponse = [18]string{
 	0:  "id",
 	1:  "namespace",
 	2:  "name",
@@ -16391,10 +16383,9 @@ var jsonFieldsNameOfGetOutputPortResponse = [19]string{
 	12: "lifecycle",
 	13: "access_modes",
 	14: "about",
-	15: "environments",
-	16: "rolled_up_tags",
-	17: "data_product_settings",
-	18: "technical_asset_links",
+	15: "rolled_up_tags",
+	16: "data_product_settings",
+	17: "technical_asset_links",
 }
 
 // Decode decodes GetOutputPortResponse from json.
@@ -16582,26 +16573,8 @@ func (s *GetOutputPortResponse) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"about\"")
 			}
-		case "environments":
-			requiredBitSet[1] |= 1 << 7
-			if err := func() error {
-				s.Environments = make([]DataProductEnvironment, 0)
-				if err := d.Arr(func(d *jx.Decoder) error {
-					var elem DataProductEnvironment
-					if err := elem.Decode(d); err != nil {
-						return err
-					}
-					s.Environments = append(s.Environments, elem)
-					return nil
-				}); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"environments\"")
-			}
 		case "rolled_up_tags":
-			requiredBitSet[2] |= 1 << 0
+			requiredBitSet[1] |= 1 << 7
 			if err := func() error {
 				s.RolledUpTags = make([]Tag, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
@@ -16619,7 +16592,7 @@ func (s *GetOutputPortResponse) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"rolled_up_tags\"")
 			}
 		case "data_product_settings":
-			requiredBitSet[2] |= 1 << 1
+			requiredBitSet[2] |= 1 << 0
 			if err := func() error {
 				s.DataProductSettings = make([]OutputPortSettingValue, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
@@ -16637,7 +16610,7 @@ func (s *GetOutputPortResponse) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"data_product_settings\"")
 			}
 		case "technical_asset_links":
-			requiredBitSet[2] |= 1 << 2
+			requiredBitSet[2] |= 1 << 1
 			if err := func() error {
 				s.TechnicalAssetLinks = make([]TechnicalAssetLink, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
@@ -16666,7 +16639,7 @@ func (s *GetOutputPortResponse) Decode(d *jx.Decoder) error {
 	for i, mask := range [3]uint8{
 		0b11111111,
 		0b11111111,
-		0b00000111,
+		0b00000011,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

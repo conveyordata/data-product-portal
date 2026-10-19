@@ -371,7 +371,7 @@ async def test_event_handler_enqueues_data_product():
     assert reconciler.calls == [data_product_id]
 
 
-async def test_event_handler__environment_added_enqueues_data_product():
+async def test_event_handler_enqueues_data_product_on_environment_added():
     reconciler = RecordingReconciler()
     manager = ReconcileManager(
         {ResourceType.DATA_PRODUCT: reconciler}, default_delay=0.0, num_workers=1

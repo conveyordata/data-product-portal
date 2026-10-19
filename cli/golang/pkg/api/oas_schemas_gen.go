@@ -5380,7 +5380,6 @@ type GetOutputPortResponse struct {
 	Lifecycle                     NilDataProductLifeCycle  `json:"lifecycle"`
 	AccessModes                   []AccessMode             `json:"access_modes"`
 	About                         NilString                `json:"about"`
-	Environments                  []DataProductEnvironment `json:"environments"`
 	RolledUpTags                  []Tag                    `json:"rolled_up_tags"`
 	DataProductSettings           []OutputPortSettingValue `json:"data_product_settings"`
 	TechnicalAssetLinks           []TechnicalAssetLink     `json:"technical_asset_links"`
@@ -5459,11 +5458,6 @@ func (s *GetOutputPortResponse) GetAccessModes() []AccessMode {
 // GetAbout returns the value of About.
 func (s *GetOutputPortResponse) GetAbout() NilString {
 	return s.About
-}
-
-// GetEnvironments returns the value of Environments.
-func (s *GetOutputPortResponse) GetEnvironments() []DataProductEnvironment {
-	return s.Environments
 }
 
 // GetRolledUpTags returns the value of RolledUpTags.
@@ -5554,11 +5548,6 @@ func (s *GetOutputPortResponse) SetAccessModes(val []AccessMode) {
 // SetAbout sets the value of About.
 func (s *GetOutputPortResponse) SetAbout(val NilString) {
 	s.About = val
-}
-
-// SetEnvironments sets the value of Environments.
-func (s *GetOutputPortResponse) SetEnvironments(val []DataProductEnvironment) {
-	s.Environments = val
 }
 
 // SetRolledUpTags sets the value of RolledUpTags.
