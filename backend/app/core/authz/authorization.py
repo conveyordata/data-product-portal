@@ -488,7 +488,7 @@ class Authorization(metaclass=Singleton):
         Assign multiple member-to-group inheritance relationships.
 
         Evaluates previously existing policies to avoid failures when adding duplicates,
-        as that will prevent the remaining policies from the batch to be added.
+        as that will prevent the remaining policies from the batch to be added
         """
         if not memberships:
             return False
