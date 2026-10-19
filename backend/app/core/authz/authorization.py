@@ -84,7 +84,9 @@ class Authorization(metaclass=Singleton):
         return enforcer
 
     @staticmethod
-    def _construct_enforcer(model: str, adapter: sqlalchemy_adapter.Adapter) -> SyncedEnforcer:
+    def _construct_enforcer(
+        model: str, adapter: sqlalchemy_adapter.Adapter
+    ) -> SyncedEnforcer:
         """Initializes the casbin table in the DB and constructs the enforcer."""
         enforcer = SyncedEnforcer(model, adapter)
         # Used to allow g(user, group, *) rules so users inherit group permissions
@@ -492,12 +494,10 @@ class Authorization(metaclass=Singleton):
         enforcer.load_policy()
 
         resource_candidates = {
-            (str(member_id), str(group_id), "*")
-            for member_id, group_id in memberships
+            (str(member_id), str(group_id), "*") for member_id, group_id in memberships
         }
         global_candidates = {
-            (str(member_id), str(group_id))
-            for member_id, group_id in memberships
+            (str(member_id), str(group_id)) for member_id, group_id in memberships
         }
 
         resource_policies = [
@@ -534,12 +534,10 @@ class Authorization(metaclass=Singleton):
         enforcer: SyncedEnforcer = self._enforcer
 
         resource_policies = {
-            (str(member_id), str(group_id), "*")
-            for member_id, group_id in memberships
+            (str(member_id), str(group_id), "*") for member_id, group_id in memberships
         }
         global_policies = {
-            (str(member_id), str(group_id))
-            for member_id, group_id in memberships
+            (str(member_id), str(group_id)) for member_id, group_id in memberships
         }
 
         # Capture locally known policies before deleting persistence. These are

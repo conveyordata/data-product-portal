@@ -761,9 +761,7 @@ class TestGroupService:
             user_id=second_member.id, role_id=second_group.id, resource_id="*"
         )
 
-    def test_delete_group__works_when_group_memberships_are_unloaded(
-            self, session
-    ):
+    def test_delete_group__works_when_group_memberships_are_unloaded(self, session):
         group = GroupFactory()
         member = UserFactory()
         GroupMembershipFactory(group=group, member=member)

@@ -120,8 +120,7 @@ class GroupService:
         self.authorizer.clear_assignments_for_user(user_id=group.id)
         self.authorizer.revoke_group_memberships(
             memberships=[
-                (membership.member_identity_id, group.id)
-                for membership in memberships
+                (membership.member_identity_id, group.id) for membership in memberships
             ]
         )
         self.db.delete(group)

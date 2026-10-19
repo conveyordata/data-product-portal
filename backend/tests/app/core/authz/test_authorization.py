@@ -636,15 +636,13 @@ class TestAuthorization:
         assert authorizer.has_global_role(user_id="user", role_id="group")
 
     def test_assign_group_memberships__adds_missing_policy_from_mixed_batch(
-            self, authorizer: Authorization
+        self, authorizer: Authorization
     ):
         existing = ("existing-user", "existing-group")
         missing = ("missing-user", "missing-group")
         authorizer.assign_group_memberships(memberships=[existing])
 
-        updated = authorizer.assign_group_memberships(
-            memberships=[existing, missing]
-        )
+        updated = authorizer.assign_group_memberships(memberships=[existing, missing])
 
         assert updated
         for member_id, group_id in (existing, missing):
@@ -677,7 +675,7 @@ class TestAuthorization:
             assert not authorizer.has_global_role(user_id=member_id, role_id=group_id)
 
     def test_assign_group_memberships__reconciles_policies_from_another_worker(
-            self, authorizer: Authorization
+        self, authorizer: Authorization
     ):
         suffix = uuid4().hex
         persisted_elsewhere = (
@@ -733,15 +731,13 @@ class TestAuthorization:
         assert authorizer.has_global_role(user_id=retained[0], role_id=retained[1])
 
     def test_revoke_group_memberships__removes_present_policy_from_mixed_batch(
-            self, authorizer: Authorization
+        self, authorizer: Authorization
     ):
         existing = ("existing-user", "existing-group")
         missing = ("missing-user", "missing-group")
         authorizer.assign_group_memberships(memberships=[existing])
 
-        updated = authorizer.revoke_group_memberships(
-            memberships=[missing, existing]
-        )
+        updated = authorizer.revoke_group_memberships(memberships=[missing, existing])
 
         assert updated
         assert not authorizer.has_resource_role(
@@ -755,7 +751,7 @@ class TestAuthorization:
         )
 
     def test_revoke_group_memberships__reconciles_policies_from_another_worker(
-            self, authorizer: Authorization
+        self, authorizer: Authorization
     ):
         suffix = uuid4().hex
         locally_known = (
@@ -857,7 +853,7 @@ class TestAuthorization:
         assert not authorizer.clear_assignments_for_identities(identity_ids=[])
 
     def test_clear_assignments_for_identities__removes_policy_from_another_worker(
-            self, authorizer: Authorization
+        self, authorizer: Authorization
     ):
         suffix = uuid4().hex
         user = f"remote-user-{suffix}"
@@ -886,9 +882,7 @@ class TestAuthorization:
             resource_id=resource,
         )
 
-        updated = authorizer.clear_assignments_for_identities(
-            identity_ids=[user]
-        )
+        updated = authorizer.clear_assignments_for_identities(identity_ids=[user])
 
         assert updated
         assert not authorizer.has_resource_role(
@@ -986,14 +980,14 @@ class TestCrossWorkerStaleness:
         )
 
         # Another worker writes the assignment directly to DB, bypassing the enforcer
-        with engine.connect() as conn:
+        with engine.begin() as conn:
             conn.execute(
                 text(
-                    "INSERT INTO casbin_rule (ptype, v0, v1, v2) VALUES ('g', :u, :r, :obj)"
+                    "INSERT INTO casbin_rule (ptype, v0, v1, v2) "
+                    "VALUES ('g', :u, :r, :obj)"
                 ),
                 {"u": user, "r": role, "obj": resource},
             )
-            conn.commit()  # noqa: allow-commit
 
         # In-memory is stale: still denied despite the DB change
         assert (
@@ -1010,10 +1004,11 @@ class TestCrossWorkerStaleness:
         )
 
         # Cleanup
-        with engine.connect() as conn:
+        with engine.begin() as conn:
             conn.execute(
                 text(
-                    "DELETE FROM casbin_rule WHERE ptype='g' AND v0=:u AND v1=:r AND v2=:obj"
+                    "DELETE FROM casbin_rule "
+                    "WHERE ptype='g' AND v0=:u AND v1=:r AND v2=:obj"
                 ),
                 {"u": user, "r": role, "obj": resource},
             )

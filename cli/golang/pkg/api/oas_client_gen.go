@@ -890,8 +890,7 @@ type Invoker interface {
 	RenewOutputPortAsInputPort(ctx context.Context, request *RenewOutputPortAsInputPortRequest, params RenewOutputPortAsInputPortParams) (RenewOutputPortAsInputPortRes, error)
 	// ReplaceGroupMembers invokes replace_group_members operation.
 	//
-	// Because the service method performs add and remove operations internally, a lock is used to ensure
-	// that only one request is processed at a time.
+	// Replace Group Members.
 	//
 	// PUT /api/v2/groups/{id}/members
 	ReplaceGroupMembers(ctx context.Context, request *GroupMembersReplace, params ReplaceGroupMembersParams) (ReplaceGroupMembersRes, error)
@@ -10358,8 +10357,7 @@ func (c *Client) sendRenewOutputPortAsInputPort(ctx context.Context, request *Re
 
 // ReplaceGroupMembers invokes replace_group_members operation.
 //
-// Because the service method performs add and remove operations internally, a lock is used to ensure
-// that only one request is processed at a time.
+// Replace Group Members.
 //
 // PUT /api/v2/groups/{id}/members
 func (c *Client) ReplaceGroupMembers(ctx context.Context, request *GroupMembersReplace, params ReplaceGroupMembersParams) (ReplaceGroupMembersRes, error) {
