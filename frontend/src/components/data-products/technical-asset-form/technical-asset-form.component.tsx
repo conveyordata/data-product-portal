@@ -13,6 +13,7 @@ import { useGetDataProductQuery } from '@/store/api/services/generated/dataProdu
 import {
     type CreateTechnicalAssetRequest,
     useCreateTechnicalAssetMutation,
+    type ValidationError,
 } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
 import {
     type PlatformTile,
@@ -158,8 +159,19 @@ export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallback
             dispatchMessage({ content: t('Technical Asset created successfully'), type: 'success' });
             modalCallbackOnSubmit();
             form.resetFields();
-        } catch (_e) {
-            const errorMessage = 'Failed to create Technical Asset';
+        } catch (error) {
+            const detail = (error as { data?: { detail?: string | ValidationError[] } })?.data?.detail;
+            let errorMessage = t('Failed to create Technical Asset');
+
+            if (typeof detail === 'string' && detail.trim().length > 0) {
+                errorMessage = detail;
+            } else if (Array.isArray(detail) && detail.length > 0) {
+                const messages = detail.map((err) => err.msg).filter(Boolean);
+                if (messages.length > 0) {
+                    errorMessage = messages.join(', ');
+                }
+            }
+
             dispatchMessage({ content: errorMessage, type: 'error' });
         }
     };

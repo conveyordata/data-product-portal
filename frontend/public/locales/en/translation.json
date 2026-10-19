@@ -364,6 +364,7 @@
     "Failed to create Output Port": "Failed to create $t(Output Port)",
     "Failed to create Output Port setting": "Failed to create $t(Output Port) setting",
     "Failed to create tag": "Failed to create tag",
+    "Failed to create Technical Asset": "Failed to create Technical Asset",
     "Failed to create Type": "Failed to create Type",
     "Failed to delete Data Product, please try again later": "Failed to delete $t(Data Product), please try again later",
     "Failed to delete Exploration, please try again later": "Failed to delete Exploration, please try again later",
