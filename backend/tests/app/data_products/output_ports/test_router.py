@@ -9,7 +9,7 @@ from app.authorization.service import OUTPUT_PORT_READER_ROLE
 from app.configuration.access_durations.enums import AccessDurationType
 from app.core.authz import Authorization
 from app.core.authz.actions import AuthorizationAction
-from app.data_products.model import DataProductEnvironment, DataProductVisibility
+from app.data_products.model import DataProductVisibility
 from app.data_products.output_ports.enums import OutputPortAccessFunction
 from app.data_products.output_ports.model import OutputPort
 from app.events.enums import EventReferenceEntity
@@ -23,7 +23,6 @@ from tests.factories import (
     DataProductRoleAssignmentFactory,
     DataProductSettingFactory,
     DatasetRoleAssignmentFactory,
-    EnvironmentFactory,
     ExplorationFactory,
     GlobalRoleAssignmentFactory,
     InputPortFactory,
@@ -522,10 +521,7 @@ class TestOutputPortRouter:
         role = RoleFactory(
             scope=Scope.DATASET, permissions=[AuthorizationAction.OUTPUT_PORT__DELETE]
         )
-        environment = EnvironmentFactory()
-        data_product = DataProductFactory(
-            environments=[DataProductEnvironment(environment=environment)]
-        )
+        data_product = DataProductFactory()
         technical_asset = TechnicalAssetFactory(owner=data_product)
         ds = OutputPortFactory(data_product=data_product)
         TechnicalAssetOutputPortAssociationFactory(
@@ -536,10 +532,6 @@ class TestOutputPortRouter:
         )
         dataset = self.get_output_port(client, ds.id, ds.data_product.id)
         assert dataset.status_code == 200
-        assert dataset.json()["environments"][0]["environment_id"] == str(
-            environment.id
-        )
-        assert dataset.json()["environments"][0]["creation_date"]
 
     def test_get_output_port__deduplicates_access_modes(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
