@@ -17,6 +17,7 @@ from cachetools import Cache, TTLCache, cachedmethod
 from casbin import SyncedEnforcer, util
 from fastapi import Depends, HTTPException, Request, status
 from opentelemetry import trace
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.core.auth.auth import get_authenticated_user

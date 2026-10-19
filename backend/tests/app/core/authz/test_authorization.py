@@ -1,4 +1,5 @@
 from typing import cast
+from uuid import uuid4
 
 from sqlalchemy import text  # noqa: TID251
 
@@ -675,6 +676,44 @@ class TestAuthorization:
             )
             assert not authorizer.has_global_role(user_id=member_id, role_id=group_id)
 
+    def test_assign_group_memberships__reconciles_policies_from_another_worker(
+            self, authorizer: Authorization
+    ):
+        suffix = uuid4().hex
+        persisted_elsewhere = (
+            f"remote-user-{suffix}",
+            f"remote-group-{suffix}",
+        )
+        new_membership = (
+            f"new-user-{suffix}",
+            f"new-group-{suffix}",
+        )
+
+        self._persist_group_membership(*persisted_elsewhere)
+
+        assert not authorizer.has_resource_role(
+            user_id=persisted_elsewhere[0],
+            role_id=persisted_elsewhere[1],
+            resource_id="*",
+        )
+
+        updated = authorizer.assign_group_memberships(
+            memberships=[persisted_elsewhere, new_membership]
+        )
+
+        assert updated
+        for member_id, group_id in (persisted_elsewhere, new_membership):
+            assert self._count_group_membership_policies(member_id, group_id) == 2
+            assert authorizer.has_resource_role(
+                user_id=member_id,
+                role_id=group_id,
+                resource_id="*",
+            )
+            assert authorizer.has_global_role(
+                user_id=member_id,
+                role_id=group_id,
+            )
+
     def test_revoke_group_memberships__does_not_remove_unrelated_memberships(
         self, authorizer: Authorization
     ):
@@ -714,6 +753,45 @@ class TestAuthorization:
             user_id=existing[0],
             role_id=existing[1],
         )
+
+    def test_revoke_group_memberships__reconciles_policies_from_another_worker(
+            self, authorizer: Authorization
+    ):
+        suffix = uuid4().hex
+        locally_known = (
+            f"local-user-{suffix}",
+            f"local-group-{suffix}",
+        )
+        persisted_elsewhere = (
+            f"remote-user-{suffix}",
+            f"remote-group-{suffix}",
+        )
+
+        authorizer.assign_group_memberships(memberships=[locally_known])
+        self._persist_group_membership(*persisted_elsewhere)
+
+        assert not authorizer.has_resource_role(
+            user_id=persisted_elsewhere[0],
+            role_id=persisted_elsewhere[1],
+            resource_id="*",
+        )
+
+        updated = authorizer.revoke_group_memberships(
+            memberships=[persisted_elsewhere, locally_known]
+        )
+
+        assert updated
+        for member_id, group_id in (persisted_elsewhere, locally_known):
+            assert self._count_group_membership_policies(member_id, group_id) == 0
+            assert not authorizer.has_resource_role(
+                user_id=member_id,
+                role_id=group_id,
+                resource_id="*",
+            )
+            assert not authorizer.has_global_role(
+                user_id=member_id,
+                role_id=group_id,
+            )
 
     def test_revoke_group_memberships__empty_list_does_nothing(
         self, authorizer: Authorization
@@ -777,6 +855,58 @@ class TestAuthorization:
         authorizer: Authorization,
     ):
         assert not authorizer.clear_assignments_for_identities(identity_ids=[])
+
+    def _persist_group_membership(self, member_id: str, group_id: str) -> None:
+        """
+        Simulate another Casbin worker persisting policies without updating this
+        worker's in-memory state.
+        """
+        with engine.begin() as connection:
+            connection.execute(
+                text(
+                    """
+                    INSERT INTO casbin_rule (ptype, v0, v1, v2)
+                    VALUES ('g', :member_id, :group_id, '*')
+                    """
+                ),
+                {
+                    "member_id": member_id,
+                    "group_id": group_id,
+                },
+            )
+            connection.execute(
+                text(
+                    """
+                    INSERT INTO casbin_rule (ptype, v0, v1)
+                    VALUES ('g3', :member_id, :group_id)
+                    """
+                ),
+                {
+                    "member_id": member_id,
+                    "group_id": group_id,
+                },
+            )
+
+    def _count_group_membership_policies(self, member_id: str, group_id: str) -> int:
+        with engine.connect() as connection:
+            return connection.execute(
+                text(
+                    """
+                    SELECT COUNT(*)
+                    FROM casbin_rule
+                    WHERE v0 = :member_id
+                      AND v1 = :group_id
+                      AND (
+                        (ptype = 'g' AND v2 = '*')
+                            OR ptype = 'g3'
+                        )
+                    """
+                ),
+                {
+                    "member_id": member_id,
+                    "group_id": group_id,
+                },
+            ).scalar_one()
 
 
 class TestCrossWorkerStaleness:
