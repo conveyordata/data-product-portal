@@ -1,7 +1,7 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, status
+from fastapi import APIRouter, BackgroundTasks, Depends, Query, status
 from fastapi.responses import Response
 from pydantic.json_schema import SkipJsonSchema
 from sqlalchemy.orm import Session
@@ -111,12 +111,7 @@ def request_input_ports_for_exploration(
     exploration_service: ExplorationService = Depends(ExplorationService),
     authenticated_user: User = Depends(get_authenticated_user),
 ):
-    exp = exploration_service.get_exploration(id, authenticated_user)
-    if exp.owner_id != authenticated_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You are not the owner of this exploration",
-        )
+    exploration_service.ensure_owner(id, authenticated_user)
 
     return RequestInputPortsForExplorationResponse(
         input_port_ids=[
@@ -138,12 +133,7 @@ def renew_input_port_for_exploration(
     exploration_service: ExplorationService = Depends(ExplorationService),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> RenewInputPortForExplorationResponse:
-    exp = exploration_service.get_exploration(id, authenticated_user)
-    if exp.owner_id != authenticated_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You are not the owner of this exploration",
-        )
+    exploration_service.ensure_owner(id, authenticated_user)
 
     input_port = exploration_service.renew_input_port(
         id, output_port_id, actor=authenticated_user
@@ -158,12 +148,7 @@ def revoke_input_port_for_exploration(
     exploration_service: ExplorationService = Depends(ExplorationService),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> RevokeInputPortForExplorationResponse:
-    exp = exploration_service.get_exploration(id, authenticated_user)
-    if exp.owner_id != authenticated_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You are not the owner of this exploration",
-        )
+    exploration_service.ensure_owner(id, authenticated_user)
 
     input_port = exploration_service.revoke_input_port(
         id, output_port_id, actor=authenticated_user
@@ -178,12 +163,7 @@ def cancel_input_port_for_exploration(
     exploration_service: ExplorationService = Depends(ExplorationService),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> CancelInputPortForExplorationResponse:
-    exp = exploration_service.get_exploration(id, authenticated_user)
-    if exp.owner_id != authenticated_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You are not the owner of this exploration",
-        )
+    exploration_service.ensure_owner(id, authenticated_user)
     input_port = exploration_service.cancel_input_port_request(
         id, output_port_id, actor=authenticated_user
     )
@@ -199,12 +179,7 @@ def remove_input_port_for_exploration(
     exploration_service: ExplorationService = Depends(ExplorationService),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    exp = exploration_service.get_exploration(id, authenticated_user)
-    if exp.owner_id != authenticated_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You are not the owner of this exploration",
-        )
+    exploration_service.ensure_owner(id, authenticated_user)
     exploration_service.remove_input_port(id, output_port_id)
 
 
@@ -229,12 +204,7 @@ def remove_exploration(
     exploration_service: ExplorationService = Depends(ExplorationService),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    exp = exploration_service.get_exploration(id, authenticated_user)
-    if exp.owner_id != authenticated_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You are not the owner of this exploration",
-        )
+    exploration_service.ensure_owner(id, authenticated_user)
     can_delete = exploration_service.mark_for_deletion(id)
     if can_delete:
         exploration_service.remove_exploration(id)

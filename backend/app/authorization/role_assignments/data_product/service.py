@@ -169,7 +169,10 @@ class RoleAssignmentService:
         query = (
             select(func.count())
             .select_from(DataProductRoleAssignmentModel)
-            .where(DataProductRoleAssignmentModel.data_product_id == data_product_id)
+            .where(
+                DataProductRoleAssignmentModel.data_product_id == data_product_id,
+                DataProductRoleAssignmentModel.decision == DecisionStatus.APPROVED,
+            )
             .join(Role)
             .where(Role.prototype == Prototype.OWNER)
         )

@@ -413,6 +413,36 @@ class TestDatasetRoleAssignmentsRouter:
         response = client.delete(f"{ENDPOINT}/{assignment_2.id}")
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
+    def test_delete_last_approved_owner_assignment__other_owner_pending(
+        self, client: TestClient
+    ):
+        dataset: OutputPort = OutputPortFactory()
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        authz_role = RoleFactory(
+            scope=Scope.DATASET,
+            permissions=[Action.OUTPUT_PORT__DELETE_USER],
+        )
+        DatasetRoleAssignmentFactory(
+            user_id=user.id, role_id=authz_role.id, output_port_id=dataset.id
+        )
+
+        user_1, user_2 = UserFactory.create_batch(2)
+        role = RoleFactory.dataset_owner()
+        approved = DatasetRoleAssignmentFactory(
+            output_port_id=dataset.id,
+            user_id=user_1.id,
+            role_id=role.id,
+        )
+        DatasetRoleAssignmentFactory(
+            output_port_id=dataset.id,
+            user_id=user_2.id,
+            role_id=role.id,
+            decision=DecisionStatus.PENDING,
+        )
+
+        response = client.delete(f"{ENDPOINT}/{approved.id}")
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
     def test_history_event_created_on_dataset_role_assignment_requested(
         self, client: TestClient
     ):

@@ -44,7 +44,7 @@ class GetTechnicalAssetsResponse:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.get_technical_assets_response_item import (
-            GetTechnicalAssetsResponseItem,
+            GetTechnicalAssetsResponseItem,  # noqa: PLC0415
         )
 
         d = dict(src_dict)

@@ -42,7 +42,7 @@ class ListGlobalRoleAssignmentsResponse:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.global_role_assignment_response import (
-            GlobalRoleAssignmentResponse,
+            GlobalRoleAssignmentResponse,  # noqa: PLC0415
         )
 
         d = dict(src_dict)

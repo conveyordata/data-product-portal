@@ -44,7 +44,7 @@ class GetUserNotificationsResponse:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.get_user_notifications_response_item import (
-            GetUserNotificationsResponseItem,
+            GetUserNotificationsResponseItem,  # noqa: PLC0415
         )
 
         d = dict(src_dict)

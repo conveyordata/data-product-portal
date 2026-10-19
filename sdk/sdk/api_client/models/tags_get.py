@@ -41,7 +41,7 @@ class TagsGet:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.tags_get_item import TagsGetItem
+        from ..models.tags_get_item import TagsGetItem  # noqa: PLC0415
 
         d = dict(src_dict)
         tags = []

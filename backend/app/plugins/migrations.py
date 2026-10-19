@@ -54,9 +54,9 @@ def _owned_versions_dir(plugin: type[TechnicalAssetPlugin]) -> Path:
 
 
 def _version_locations(plugins: Sequence[type[TechnicalAssetPlugin]]) -> list[Path]:
-    return [_CORE_VERSIONS_DIR] + [
-        _owned_versions_dir(plugin) for plugin in plugins if owns_a_table(plugin)
-    ]
+    owned = [_owned_versions_dir(p) for p in plugins if owns_a_table(p)]
+    # Plugins defined in the same module share one versions folder.
+    return list(dict.fromkeys([_CORE_VERSIONS_DIR, *owned]))
 
 
 def _config(version_locations: Sequence[Path], url: str) -> Config:

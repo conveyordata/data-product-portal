@@ -41,7 +41,9 @@ class OutputPortCuratedQueriesUpdate:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.output_port_curated_query_input import OutputPortCuratedQueryInput
+        from ..models.output_port_curated_query_input import (
+            OutputPortCuratedQueryInput,  # noqa: PLC0415
+        )
 
         d = dict(src_dict)
         curated_queries = []

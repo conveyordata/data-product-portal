@@ -11,7 +11,6 @@ from ..models.abstract_data_product_status import AbstractDataProductStatus
 from ..models.data_product_visibility import DataProductVisibility
 
 if TYPE_CHECKING:
-    from ..models.data_product_environment import DataProductEnvironment
     from ..models.data_product_life_cycle import DataProductLifeCycle
     from ..models.data_product_type import DataProductType
     from ..models.domain import Domain
@@ -37,7 +36,6 @@ class GetDataProductResponse:
         type_ (DataProductType):
         lifecycle (DataProductLifeCycle | None):
         visibility (DataProductVisibility):
-        environments (list[DataProductEnvironment]):
         about (None | str):
     """
 
@@ -53,12 +51,13 @@ class GetDataProductResponse:
     type_: DataProductType
     lifecycle: DataProductLifeCycle | None
     visibility: DataProductVisibility
-    environments: list[DataProductEnvironment]
     about: None | str
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        from ..models.data_product_life_cycle import DataProductLifeCycle
+        from ..models.data_product_life_cycle import (
+            DataProductLifeCycle,  # noqa: PLC0415
+        )
 
         id = str(self.id)
 
@@ -92,11 +91,6 @@ class GetDataProductResponse:
 
         visibility = self.visibility.value
 
-        environments = []
-        for environments_item_data in self.environments:
-            environments_item = environments_item_data.to_dict()
-            environments.append(environments_item)
-
         about: None | str
         about = self.about
 
@@ -116,7 +110,6 @@ class GetDataProductResponse:
                 "type": type_,
                 "lifecycle": lifecycle,
                 "visibility": visibility,
-                "environments": environments,
                 "about": about,
             }
         )
@@ -125,11 +118,12 @@ class GetDataProductResponse:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.data_product_environment import DataProductEnvironment
-        from ..models.data_product_life_cycle import DataProductLifeCycle
-        from ..models.data_product_type import DataProductType
-        from ..models.domain import Domain
-        from ..models.tag import Tag
+        from ..models.data_product_life_cycle import (
+            DataProductLifeCycle,  # noqa: PLC0415
+        )
+        from ..models.data_product_type import DataProductType  # noqa: PLC0415
+        from ..models.domain import Domain  # noqa: PLC0415
+        from ..models.tag import Tag  # noqa: PLC0415
 
         d = dict(src_dict)
         id = UUID(d.pop("id"))
@@ -179,13 +173,6 @@ class GetDataProductResponse:
 
         visibility = DataProductVisibility(d.pop("visibility"))
 
-        environments = []
-        _environments = d.pop("environments")
-        for environments_item_data in _environments:
-            environments_item = DataProductEnvironment.from_dict(environments_item_data)
-
-            environments.append(environments_item)
-
         def _parse_about(data: object) -> None | str:
             if data is None:
                 return data
@@ -206,7 +193,6 @@ class GetDataProductResponse:
             type_=type_,
             lifecycle=lifecycle,
             visibility=visibility,
-            environments=environments,
             about=about,
         )
 
