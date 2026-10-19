@@ -86,11 +86,11 @@ If the top candidate does not clearly pass every point above, or you cannot prod
 
 ### 5. Fix and verify
 
-Make the minimal change. Add the regression test or proof your role asks for. Run `pre-commit run --files <the files you changed>` and the test suites of every area you changed (see the AGENTS.md files for the commands). Everything must pass. Poetry is not on your PATH: the backend dependencies are installed in `backend/.venv`, so wherever the docs say `poetry run python`, use `backend/.venv/bin/python` instead (for example `.venv/bin/python -m pytest` from `backend/`). The PostgreSQL service is reachable at `host.docker.internal:5432`; set `POSTGRES_SERVER=host.docker.internal` and pass `-o env_override_existing_values=0` to pytest when running backend tests, otherwise `backend/.test.env` resets it to `localhost`. If you cannot get the checks green, call `noop` instead.
+Make the minimal change. Add the regression test or proof your role asks for. Run `pre-commit run --files <the files you changed>` and the test suites of every area you changed (see the AGENTS.md files for the commands). Everything must pass. Poetry is not on your PATH: the backend dependencies are installed in `backend/.venv`, so wherever the docs say `poetry run python`, use `backend/.venv/bin/python` instead (for example `.venv/bin/python -m pytest` from `backend/`). The `regen-openapi-spec` hook calls `poetry` itself, so when you changed backend Python files run its export yourself from `backend/` with `set -a && source .test.env && set +a && .venv/bin/python -m app.open_api_export ../docs/static/openapi.json`, then run pre-commit with `SKIP=regen-openapi-spec` and include `docs/static/openapi.json` and any regenerated files in your change. The PostgreSQL service is reachable at `host.docker.internal:5432`; set `POSTGRES_SERVER=host.docker.internal` and pass `-o env_override_existing_values=0` to pytest when running backend tests, otherwise `backend/.test.env` resets it to `localhost`. If you cannot get the checks green, call `noop` instead.
 
 ### 6. Report
 
 Create exactly one issue and one draft pull request:
 
 - Issue: what is wrong, where, the evidence, and the impact. Use the domain language from `CONTEXT.md`.
-- Pull request: write the body following `.claude/skills/pr-description/SKILL.md` when it exists. Start the body with `Fixes #<temporary id of the issue>` and include the evidence and the test or proof output.
+- Pull request: read `.claude/skills/pr-description/SKILL.md` first and write the body with exactly its sections, in its order and with its headings. Start the body with `Fixes #<temporary id of the issue>` and put the evidence and the test or proof output under the matching sections.
