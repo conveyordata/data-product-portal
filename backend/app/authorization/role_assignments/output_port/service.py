@@ -5,7 +5,7 @@ from uuid import UUID
 
 from fastapi import HTTPException, status
 from sqlalchemy import func, select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.role_assignments.output_port.model import (
@@ -40,7 +40,13 @@ class RoleAssignmentService:
         role_id: Optional[UUID] = None,
         decision: Optional[DecisionStatus] = None,
     ) -> Sequence[RoleAssignmentOld]:
-        query = select(DatasetRoleAssignmentModel)
+        query = select(DatasetRoleAssignmentModel).options(
+            selectinload(DatasetRoleAssignmentModel.output_port),
+            selectinload(DatasetRoleAssignmentModel.user),
+            selectinload(DatasetRoleAssignmentModel.role),
+            selectinload(DatasetRoleAssignmentModel.requested_by),
+            selectinload(DatasetRoleAssignmentModel.decided_by),
+        )
         if dataset_id is not None:
             query = query.where(DatasetRoleAssignmentModel.output_port_id == dataset_id)
         if user_id is not None:
