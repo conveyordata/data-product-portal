@@ -14,6 +14,7 @@ from ..types import UNSET, Unset
 if TYPE_CHECKING:
     from ..models.access_mode import AccessMode
     from ..models.data_product import DataProduct
+    from ..models.data_product_environment import DataProductEnvironment
     from ..models.get_technical_assets_response_item_configuration import (
         GetTechnicalAssetsResponseItemConfiguration,
     )
@@ -40,6 +41,7 @@ class GetTechnicalAssetsResponseItem:
         configuration (GetTechnicalAssetsResponseItemConfiguration): Configuration of the technical asset. The available
             fields depend on `name`; retrieve them from /v2/plugins/{name}/form.
         owner (DataProduct):
+        environments (list[DataProductEnvironment]):
         output_port_links (list[OutputPortLink]):
         tags (list[Tag]):
         source_aligned (bool): DEPRECATED: Use 'technical_mapping' instead. This field will be removed in a future
@@ -60,6 +62,7 @@ class GetTechnicalAssetsResponseItem:
     access_modes: list[AccessMode]
     configuration: GetTechnicalAssetsResponseItemConfiguration
     owner: DataProduct
+    environments: list[DataProductEnvironment]
     output_port_links: list[OutputPortLink]
     tags: list[Tag]
     source_aligned: bool
@@ -92,6 +95,11 @@ class GetTechnicalAssetsResponseItem:
         configuration = self.configuration.to_dict()
 
         owner = self.owner.to_dict()
+
+        environments = []
+        for environments_item_data in self.environments:
+            environments_item = environments_item_data.to_dict()
+            environments.append(environments_item)
 
         output_port_links = []
         for output_port_links_item_data in self.output_port_links:
@@ -142,6 +150,7 @@ class GetTechnicalAssetsResponseItem:
                 "access_modes": access_modes,
                 "configuration": configuration,
                 "owner": owner,
+                "environments": environments,
                 "output_port_links": output_port_links,
                 "tags": tags,
                 "sourceAligned": source_aligned,
@@ -160,6 +169,9 @@ class GetTechnicalAssetsResponseItem:
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.access_mode import AccessMode  # noqa: PLC0415
         from ..models.data_product import DataProduct  # noqa: PLC0415
+        from ..models.data_product_environment import (
+            DataProductEnvironment,  # noqa: PLC0415
+        )
         from ..models.get_technical_assets_response_item_configuration import (
             GetTechnicalAssetsResponseItemConfiguration,  # noqa: PLC0415
         )
@@ -194,6 +206,13 @@ class GetTechnicalAssetsResponseItem:
         )
 
         owner = DataProduct.from_dict(d.pop("owner"))
+
+        environments = []
+        _environments = d.pop("environments")
+        for environments_item_data in _environments:
+            environments_item = DataProductEnvironment.from_dict(environments_item_data)
+
+            environments.append(environments_item)
 
         output_port_links = []
         _output_port_links = d.pop("output_port_links")
@@ -267,6 +286,7 @@ class GetTechnicalAssetsResponseItem:
             access_modes=access_modes,
             configuration=configuration,
             owner=owner,
+            environments=environments,
             output_port_links=output_port_links,
             tags=tags,
             source_aligned=source_aligned,
