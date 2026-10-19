@@ -139,7 +139,10 @@ class RoleAssignmentService:
         query = (
             select(func.count())
             .select_from(DatasetRoleAssignmentModel)
-            .where(DatasetRoleAssignmentModel.output_port_id == dataset_id)
+            .where(
+                DatasetRoleAssignmentModel.output_port_id == dataset_id,
+                DatasetRoleAssignmentModel.decision == DecisionStatus.APPROVED,
+            )
             .join(Role)
             .where(Role.prototype == Prototype.OWNER)
         )
