@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class DomainStatus(str, Enum):
+class DomainStatus(StrEnum):
     ACTIVE = "active"
     DELETING = "deleting"
 

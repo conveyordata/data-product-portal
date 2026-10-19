@@ -4,7 +4,7 @@ from starlette.testclient import TestClient
 
 from app.resource_names.router import validate_resource_name
 from app.resource_names.service import ResourceNameValidityType
-from tests.factories import ExplorationFactory
+from tests.factories import DomainFactory, ExplorationFactory
 
 
 class TestResourceNamesRouter:
@@ -26,6 +26,14 @@ class TestResourceNamesRouter:
         ExplorationFactory(namespace=namespace)
 
         response = self.validate_namespace(client, namespace, "exploration")
+        assert response.status_code == 200
+        assert response.json()["validity"] == ResourceNameValidityType.DUPLICATE
+
+    def test_validate_domain_duplicate_namespaces(self, client: TestClient):
+        namespace = "finance"
+        DomainFactory(namespace=namespace)
+
+        response = self.validate_namespace(client, namespace, "domain")
         assert response.status_code == 200
         assert response.json()["validity"] == ResourceNameValidityType.DUPLICATE
 
