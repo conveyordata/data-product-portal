@@ -69,6 +69,7 @@ def _has_access_through_consumer_role(
 
 class Authorization(metaclass=Singleton):
     def __init__(self) -> None:
+        self._reloading = False
         self._adapter = sqlalchemy_adapter.Adapter(database.get_url())
         self._enforcer: SyncedEnforcer = self._initialize(self._adapter)
         self._cache: Cache = TTLCache(
@@ -298,6 +299,7 @@ class Authorization(metaclass=Singleton):
         IT ALSO CLEARS ALL POLICIES FROM CASBIN.
         To be used when you want to recreate the casbin table.
         By pausing these it goes faster and avoids race conditions."""
+        self._reloading = True
         self._enforcer.stop_auto_load_policy()
         self._enforcer.enable_auto_save(False)
         self._enforcer.clear_policy()
@@ -311,6 +313,7 @@ class Authorization(metaclass=Singleton):
         if settings.AUTHORIZER_AUTOLOAD_ENABLED:
             self._enforcer.start_auto_load_policy(settings.AUTHORIZER_AUTOLOAD_INTERVAL)
         self._enforcer.enable_auto_save(True)
+        self._reloading = False
 
     def revoke_domain_role(self, *, user_id: ID, role_id: ID, domain_id: ID) -> bool:
         """Deletes the entry in the casbin table,
@@ -491,7 +494,8 @@ class Authorization(metaclass=Singleton):
             return False
 
         enforcer: SyncedEnforcer = self._enforcer
-        enforcer.load_policy()
+        if not self._reloading:
+            enforcer.load_policy()
 
         resource_candidates = {
             (str(member_id), str(group_id), "*") for member_id, group_id in memberships
