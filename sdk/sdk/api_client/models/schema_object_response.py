@@ -102,7 +102,9 @@ class SchemaObjectResponse:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.schema_property_response import SchemaPropertyResponse
+        from ..models.schema_property_response import (
+            SchemaPropertyResponse,  # noqa: PLC0415
+        )
 
         d = dict(src_dict)
         id = UUID(d.pop("id"))

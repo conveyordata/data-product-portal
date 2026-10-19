@@ -42,7 +42,7 @@ class PlatformTileResponse:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.platform_tile import PlatformTile
+        from ..models.platform_tile import PlatformTile  # noqa: PLC0415
 
         d = dict(src_dict)
         platform_tiles = []

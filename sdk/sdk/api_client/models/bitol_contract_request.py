@@ -45,7 +45,7 @@ class BitolContractRequest:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.schema_object_request import SchemaObjectRequest
+        from ..models.schema_object_request import SchemaObjectRequest  # noqa: PLC0415
 
         d = dict(src_dict)
         _schema = d.pop("schema", UNSET)

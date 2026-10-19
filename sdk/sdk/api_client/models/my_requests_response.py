@@ -34,9 +34,9 @@ class MyRequestsResponse:
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        from ..models.input_port_request import InputPortRequest
+        from ..models.input_port_request import InputPortRequest  # noqa: PLC0415
         from ..models.technical_asset_output_port_request import (
-            TechnicalAssetOutputPortRequest,
+            TechnicalAssetOutputPortRequest,  # noqa: PLC0415
         )
 
         my_requests = []
@@ -64,11 +64,11 @@ class MyRequestsResponse:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.data_product_role_assignment_request import (
-            DataProductRoleAssignmentRequest,
+            DataProductRoleAssignmentRequest,  # noqa: PLC0415
         )
-        from ..models.input_port_request import InputPortRequest
+        from ..models.input_port_request import InputPortRequest  # noqa: PLC0415
         from ..models.technical_asset_output_port_request import (
-            TechnicalAssetOutputPortRequest,
+            TechnicalAssetOutputPortRequest,  # noqa: PLC0415
         )
 
         d = dict(src_dict)

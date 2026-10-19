@@ -59,7 +59,9 @@ class GetDataProductsResponseItem:
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        from ..models.data_product_life_cycle import DataProductLifeCycle
+        from ..models.data_product_life_cycle import (
+            DataProductLifeCycle,  # noqa: PLC0415
+        )
 
         id = str(self.id)
 
@@ -125,10 +127,12 @@ class GetDataProductsResponseItem:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.data_product_life_cycle import DataProductLifeCycle
-        from ..models.data_product_type import DataProductType
-        from ..models.domain import Domain
-        from ..models.tag import Tag
+        from ..models.data_product_life_cycle import (
+            DataProductLifeCycle,  # noqa: PLC0415
+        )
+        from ..models.data_product_type import DataProductType  # noqa: PLC0415
+        from ..models.domain import Domain  # noqa: PLC0415
+        from ..models.tag import Tag  # noqa: PLC0415
 
         d = dict(src_dict)
         id = UUID(d.pop("id"))
