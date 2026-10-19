@@ -113,15 +113,15 @@ class GroupService:
         self._remove_members_auth(group_id, removed_ids)
 
     def delete_group(self, group_id: UUID) -> None:
-        group = ensure_group_exists(
-            group_id, self.db, options=[selectinload(Group.memberships)]
-        )
+        group = ensure_group_exists(group_id, self.db)
+        memberships = self.list_memberships(group.id)
+
         # Remove assignments where the group itself is the subject.
         self.authorizer.clear_assignments_for_user(user_id=group.id)
         self.authorizer.revoke_group_memberships(
             memberships=[
                 (membership.member_identity_id, group.id)
-                for membership in group.memberships
+                for membership in memberships
             ]
         )
         self.db.delete(group)

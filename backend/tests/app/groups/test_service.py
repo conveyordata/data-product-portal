@@ -760,3 +760,16 @@ class TestGroupService:
         assert not authorizer.has_resource_role(
             user_id=second_member.id, role_id=second_group.id, resource_id="*"
         )
+
+    def test_delete_group__works_when_group_memberships_are_unloaded(
+            self, session
+    ):
+        group = GroupFactory()
+        member = UserFactory()
+        GroupMembershipFactory(group=group, member=member)
+        session.flush()
+        session.expire(group, ["memberships"])
+
+        GroupService(session).delete_group(group.id)
+
+        assert session.get(Group, group.id) is None
