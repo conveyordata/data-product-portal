@@ -2653,17 +2653,6 @@ func (s *GetOutputPortResponse) Validate() error {
 		})
 	}
 	if err := func() error {
-		if s.Environments == nil {
-			return errors.New("nil is invalid value")
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "environments",
-			Error: err,
-		})
-	}
-	if err := func() error {
 		if s.RolledUpTags == nil {
 			return errors.New("nil is invalid value")
 		}

@@ -45,7 +45,6 @@ const dataset: GetOutputPortResponse = {
     rolled_up_tags: [],
     data_product_settings: [],
     technical_asset_links: [],
-    environments: [],
 };
 
 const technicalAsset: GetTechnicalAssetsResponseItem = {

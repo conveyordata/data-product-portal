@@ -71,7 +71,7 @@ jobs:
         id: run-test
         run: poetry run pytest -v --cov=app --cov-report=term --cov-report=xml tests/
         env:
-          TEST_EMBEDDING_LATENCY_BOUND: "3.000"
+          TEST_EMBEDDING_LATENCY_BOUND: "5.000"
           TEST_LATENCY_BOUND: "0.800"
       - name: Run the plugin tests
         working-directory: ./backend

@@ -71,7 +71,7 @@ class Exploration:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.domain import Domain
+        from ..models.domain import Domain  # noqa: PLC0415
 
         d = dict(src_dict)
         id = UUID(d.pop("id"))

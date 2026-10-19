@@ -59,7 +59,7 @@ class PlatformService:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.platform import Platform
+        from ..models.platform import Platform  # noqa: PLC0415
 
         d = dict(src_dict)
         id = UUID(d.pop("id"))

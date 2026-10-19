@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class DataProductSettingType(str, Enum):
+class DataProductSettingType(StrEnum):
     CHECKBOX = "checkbox"
     INPUT = "input"
     TAGS = "tags"

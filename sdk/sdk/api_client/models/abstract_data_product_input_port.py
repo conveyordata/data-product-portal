@@ -76,8 +76,10 @@ class AbstractDataProductInputPort:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.input_port_request_base import InputPortRequestBase
-        from ..models.output_port import OutputPort
+        from ..models.input_port_request_base import (
+            InputPortRequestBase,  # noqa: PLC0415
+        )
+        from ..models.output_port import OutputPort  # noqa: PLC0415
 
         d = dict(src_dict)
         id = UUID(d.pop("id"))

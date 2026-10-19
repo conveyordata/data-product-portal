@@ -61,6 +61,15 @@ class ExplorationService(AbstractDataProductService):
             options=[joinedload(ExplorationModel.owner)],
         )
 
+    def ensure_owner(self, id: UUID, authenticated_user: User) -> ExplorationModel:
+        exploration = self.get_exploration(id, authenticated_user)
+        if exploration.owner_id != authenticated_user.id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You are not the owner of this exploration",
+            )
+        return exploration
+
     def remove_exploration(self, id: UUID) -> ExplorationModel:
         exploration = self.db.get(ExplorationModel, id)
         if not exploration:

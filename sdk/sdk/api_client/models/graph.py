@@ -50,8 +50,8 @@ class Graph:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.edge import Edge
-        from ..models.node import Node
+        from ..models.edge import Edge  # noqa: PLC0415
+        from ..models.node import Node  # noqa: PLC0415
 
         d = dict(src_dict)
         edges = []

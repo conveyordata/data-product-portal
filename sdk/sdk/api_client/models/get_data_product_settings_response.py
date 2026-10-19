@@ -41,7 +41,9 @@ class GetDataProductSettingsResponse:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.data_product_setting_value import DataProductSettingValue
+        from ..models.data_product_setting_value import (
+            DataProductSettingValue,  # noqa: PLC0415
+        )
 
         d = dict(src_dict)
         data_product_settings = []

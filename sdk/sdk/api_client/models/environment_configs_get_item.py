@@ -51,12 +51,12 @@ class EnvironmentConfigsGetItem:
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        from ..models.aws_glue_config import AWSGlueConfig
-        from ..models.awss3_config import AWSS3Config
-        from ..models.databricks_config import DatabricksConfig
-        from ..models.postgre_sql_config import PostgreSQLConfig
-        from ..models.redshift_config import RedshiftConfig
-        from ..models.snowflake_config import SnowflakeConfig
+        from ..models.aws_glue_config import AWSGlueConfig  # noqa: PLC0415
+        from ..models.awss3_config import AWSS3Config  # noqa: PLC0415
+        from ..models.databricks_config import DatabricksConfig  # noqa: PLC0415
+        from ..models.postgre_sql_config import PostgreSQLConfig  # noqa: PLC0415
+        from ..models.redshift_config import RedshiftConfig  # noqa: PLC0415
+        from ..models.snowflake_config import SnowflakeConfig  # noqa: PLC0415
 
         config = []
         for config_item_data in self.config:
@@ -102,16 +102,16 @@ class EnvironmentConfigsGetItem:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.aws_glue_config import AWSGlueConfig
-        from ..models.awss3_config import AWSS3Config
-        from ..models.azure_blob_config import AzureBlobConfig
-        from ..models.databricks_config import DatabricksConfig
-        from ..models.environment import Environment
-        from ..models.platform import Platform
-        from ..models.platform_service import PlatformService
-        from ..models.postgre_sql_config import PostgreSQLConfig
-        from ..models.redshift_config import RedshiftConfig
-        from ..models.snowflake_config import SnowflakeConfig
+        from ..models.aws_glue_config import AWSGlueConfig  # noqa: PLC0415
+        from ..models.awss3_config import AWSS3Config  # noqa: PLC0415
+        from ..models.azure_blob_config import AzureBlobConfig  # noqa: PLC0415
+        from ..models.databricks_config import DatabricksConfig  # noqa: PLC0415
+        from ..models.environment import Environment  # noqa: PLC0415
+        from ..models.platform import Platform  # noqa: PLC0415
+        from ..models.platform_service import PlatformService  # noqa: PLC0415
+        from ..models.postgre_sql_config import PostgreSQLConfig  # noqa: PLC0415
+        from ..models.redshift_config import RedshiftConfig  # noqa: PLC0415
+        from ..models.snowflake_config import SnowflakeConfig  # noqa: PLC0415
 
         d = dict(src_dict)
         config = []

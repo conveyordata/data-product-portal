@@ -41,7 +41,7 @@ class GroupsGetResponse:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.group_get import GroupGet
+        from ..models.group_get import GroupGet  # noqa: PLC0415
 
         d = dict(src_dict)
         groups = []

@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class AssignmentFilter(str, Enum):
+class AssignmentFilter(StrEnum):
     ALL = "all"
     ONLY_ASSIGNED = "only_assigned"
 

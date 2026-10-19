@@ -548,19 +548,6 @@ export type DataProductLifeCycle = {
   color: string;
   is_default: boolean;
 };
-export type EnvironmentGetItem = {
-  id: string;
-  name: string;
-  acronym: string;
-  context: string;
-  is_default?: boolean;
-  is_global?: boolean;
-};
-export type DataProductEnvironment = {
-  environment_id: string;
-  environment: EnvironmentGetItem;
-  creation_date: string;
-};
 export type DataProductSetting = {
   id: string;
   category: string;
@@ -618,7 +605,6 @@ export type GetOutputPortResponse = {
   lifecycle: DataProductLifeCycle | null;
   access_modes: AccessMode[];
   about: string | null;
-  environments: DataProductEnvironment[];
   rolled_up_tags: Tag[];
   data_product_settings: OutputPortSettingValue[];
   technical_asset_links: TechnicalAssetLink[];
