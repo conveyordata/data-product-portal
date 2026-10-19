@@ -11,6 +11,11 @@ type AddDataProductFinalizerParams struct {
 	ID uuid.UUID
 }
 
+// AddDomainFinalizerParams is parameters of add_domain_finalizer operation.
+type AddDomainFinalizerParams struct {
+	ID uuid.UUID
+}
+
 // AddExplorationFinalizerParams is parameters of add_exploration_finalizer operation.
 type AddExplorationFinalizerParams struct {
 	ID uuid.UUID
@@ -451,6 +456,12 @@ type RemoveDataProductTypeParams struct {
 // RemoveDomainParams is parameters of remove_domain operation.
 type RemoveDomainParams struct {
 	ID uuid.UUID
+}
+
+// RemoveDomainFinalizerParams is parameters of remove_domain_finalizer operation.
+type RemoveDomainFinalizerParams struct {
+	ID        uuid.UUID
+	Finalizer string
 }
 
 // RemoveExplorationParams is parameters of remove_exploration operation.

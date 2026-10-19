@@ -1,8 +1,9 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Response, status
 from sqlalchemy.orm import Session
 
+from app.abstract_data_product.schema_request import FinalizerRequest
 from app.configuration.domains.schema_request import DomainCreate, DomainUpdate
 from app.configuration.domains.schema_response import (
     CreateDomainResponse,
@@ -58,6 +59,10 @@ def update_domain(
 
 @router.delete(
     "/{id}",
+    responses={
+        200: {"description": "Domain deleted"},
+        202: {"description": "Domain marked for deletion, waiting for finalizers"},
+    },
     dependencies=[
         Depends(
             Authorization.enforce(Action.GLOBAL__UPDATE_CONFIGURATION, EmptyResolver)
@@ -67,7 +72,40 @@ def update_domain(
 def remove_domain(
     id: UUID, db: Session = Depends(get_db_session, scope="function")
 ) -> None:
-    return DomainService(db).remove_domain(id)
+    service = DomainService(db)
+    if not service.mark_for_deletion(id):
+        return Response(status_code=status.HTTP_202_ACCEPTED)
+    service.remove_domain(id)
+
+
+@router.post(
+    "/{id}/finalizers",
+    dependencies=[
+        Depends(Authorization.enforce(Action.GLOBAL__MANAGE_FINALIZERS, EmptyResolver)),
+    ],
+)
+def add_domain_finalizer(
+    id: UUID,
+    request: FinalizerRequest,
+    db: Session = Depends(get_db_session, scope="function"),
+) -> None:
+    DomainService(db).add_finalizer(id, request.finalizer)
+
+
+@router.delete(
+    "/{id}/finalizers/{finalizer}",
+    dependencies=[
+        Depends(Authorization.enforce(Action.GLOBAL__MANAGE_FINALIZERS, EmptyResolver)),
+    ],
+)
+def remove_domain_finalizer(
+    id: UUID,
+    finalizer: str,
+    db: Session = Depends(get_db_session, scope="function"),
+) -> None:
+    service = DomainService(db)
+    if service.remove_finalizer(id, finalizer):
+        service.remove_domain(id)
 
 
 @router.put(

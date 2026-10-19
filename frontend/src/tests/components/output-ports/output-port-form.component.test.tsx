@@ -53,7 +53,7 @@ describe('OutputPortForm', () => {
             tags: [],
             about: '',
             usage: null,
-            domain: { id: 'domain-1', name: 'Sales', description: 'Sales domain' },
+            domain: { id: 'domain-1', name: 'Sales', namespace: 'sales', description: 'Sales domain' },
             type: {
                 id: 'type-1',
                 name: 'Reporting',

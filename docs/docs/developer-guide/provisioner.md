@@ -54,9 +54,10 @@ The abstract base class you implement. It exposes two methods:
 | `reconcile(resource_id)`  | Called for each resource that needs to be reconciled. Raise an exception to signal failure; the framework will retry with exponential backoff. |
 | `list_ids()` *(optional)* | Called once on startup, you should return all the existing ID's of resources in Portal for which you want to call the `reconcile(resource_id)`. |
 
-We currently support 2 resources:
+We currently support 3 resources:
 - Data Product: Your reconcile function will be triggered on changes to the Data Product itself, its Output Ports, Technical Assets, Technical Asset Output Port links, Input Ports, Role Assignments etc.
 - Exploration: Your reconcile function will be triggered on changes to the Exploration itself, and its Input Ports.
+- Domain: Your reconcile function will be triggered on changes to the Domain itself, including its Environments. See [Domain-scoped resources](#domain-scoped-resources).
 
 ### `ReconcileManager`
 
@@ -92,6 +93,24 @@ An enum of the portal resource types your provisioner can react to:
 
 - `ResourceType.EXPLORATION`
 - `ResourceType.DATA_PRODUCT`
+- `ResourceType.DOMAIN`
+
+### Domain-scoped resources
+
+Some infrastructure is shared by every Data Product in a Domain: a bucket or storage
+account, a VPC or VNet, Conveyor environments, a Databricks or Glue catalog. Register a
+`Reconciler` for `ResourceType.DOMAIN` to manage it.
+
+- Name domain resources after the Domain's `namespace`. Unlike its `name`, it never changes.
+- A Domain can only be deleted once no Data Products or Explorations are assigned to it,
+  so domain teardown always runs after their provisioners have released their finalizers.
+- Domain events are not fanned out to Data Products. A Data Product reconciler gets its
+  Domain's `id`, `name` and `namespace` in the Data Product response; it only needs
+  `get_domain` for the Domain's status, finalizers or environments.
+- When a Data Product moves to another Domain, only the Data Product is reconciled. Keep
+  track of the previous Domain in your provisioner's own state if you need to clean up there.
+
+The bundled example contains a `DomainProvisioner`.
 
 ---
 
@@ -221,6 +240,9 @@ your clean-up is complete. The pattern is:
    present in `response.finalizers` before acting; a previous reconcile run may have
    already cleaned up.
 
+Domains follow the same pattern with `add_domain_finalizer` and `remove_domain_finalizer`
+from `sdk.api_client.api.configuration_domains`, and the `DomainStatus.DELETING` status.
+
 #### 2.3 Startup resync
 
 `list_ids` is called once when the `ReconcileManager` starts. Return every resource ID
@@ -296,7 +318,7 @@ export WEBHOOK_V2_URL=http://localhost:8000/webhook
 ## Running the bundled example
 
 The `sdk/example/` directory contains a complete, runnable provisioner that writes
-per-exploration JSON manifests to disk (a stand-in for real infrastructure).
+per-exploration and per-domain JSON manifests to disk (a stand-in for real infrastructure).
 
 ```bash
 cd sdk
@@ -307,7 +329,7 @@ PROVISIONER_WORKSPACE="./.workspace" \
   poetry run uvicorn example.provisioner:app --reload
 ```
 
-Create, update, or delete an exploration in the portal and watch manifests appear and
+Create, update, or delete an exploration or a domain in the portal and watch manifests appear and
 disappear under `.workspace/`. Use this as a starting point for your own provisioner.
 
 ---

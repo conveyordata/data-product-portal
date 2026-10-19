@@ -1604,6 +1604,48 @@ func (s *AddDataProductFinalizerOKApplicationJSON) UnmarshalJSON(data []byte) er
 	return s.Decode(d)
 }
 
+// Encode encodes AddDomainFinalizerOKApplicationJSON as json.
+func (s AddDomainFinalizerOKApplicationJSON) Encode(e *jx.Encoder) {
+	unwrapped := jx.Raw(s)
+
+	if len(unwrapped) != 0 {
+		e.Raw(unwrapped)
+	}
+}
+
+// Decode decodes AddDomainFinalizerOKApplicationJSON from json.
+func (s *AddDomainFinalizerOKApplicationJSON) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode AddDomainFinalizerOKApplicationJSON to nil")
+	}
+	var unwrapped jx.Raw
+	if err := func() error {
+		v, err := d.RawAppend(nil)
+		unwrapped = jx.Raw(v)
+		if err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = AddDomainFinalizerOKApplicationJSON(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s AddDomainFinalizerOKApplicationJSON) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *AddDomainFinalizerOKApplicationJSON) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode encodes AddExplorationFinalizerOKApplicationJSON as json.
 func (s AddExplorationFinalizerOKApplicationJSON) Encode(e *jx.Encoder) {
 	unwrapped := jx.Raw(s)
@@ -11289,15 +11331,20 @@ func (s *Domain) encodeFields(e *jx.Encoder) {
 		e.Str(s.Name)
 	}
 	{
+		e.FieldStart("namespace")
+		e.Str(s.Namespace)
+	}
+	{
 		e.FieldStart("description")
 		e.Str(s.Description)
 	}
 }
 
-var jsonFieldsNameOfDomain = [3]string{
+var jsonFieldsNameOfDomain = [4]string{
 	0: "id",
 	1: "name",
-	2: "description",
+	2: "namespace",
+	3: "description",
 }
 
 // Decode decodes Domain from json.
@@ -11333,8 +11380,20 @@ func (s *Domain) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"name\"")
 			}
-		case "description":
+		case "namespace":
 			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				v, err := d.Str()
+				s.Namespace = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"namespace\"")
+			}
+		case "description":
+			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
 				v, err := d.Str()
 				s.Description = string(v)
@@ -11355,7 +11414,7 @@ func (s *Domain) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00000111,
+		0b00001111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -11418,11 +11477,28 @@ func (s *DomainCreate) encodeFields(e *jx.Encoder) {
 		e.FieldStart("description")
 		e.Str(s.Description)
 	}
+	{
+		if s.EnvironmentIds != nil {
+			e.FieldStart("environment_ids")
+			e.ArrStart()
+			for _, elem := range s.EnvironmentIds {
+				json.EncodeUUID(e, elem)
+			}
+			e.ArrEnd()
+		}
+	}
+	{
+		e.FieldStart("namespace")
+		e.Str(s.Namespace)
+	}
 }
 
 var jsonFieldsNameOfDomainCreate = [2]string{
+var jsonFieldsNameOfDomainCreate = [4]string{
 	0: "name",
 	1: "description",
+	2: "environment_ids",
+	3: "namespace",
 }
 
 // Decode decodes DomainCreate from json.
@@ -11458,6 +11534,37 @@ func (s *DomainCreate) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"description\"")
 			}
+		case "environment_ids":
+			if err := func() error {
+				s.EnvironmentIds = make([]uuid.UUID, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem uuid.UUID
+					v, err := json.DecodeUUID(d)
+					elem = v
+					if err != nil {
+						return err
+					}
+					s.EnvironmentIds = append(s.EnvironmentIds, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"environment_ids\"")
+			}
+		case "namespace":
+			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				v, err := d.Str()
+				s.Namespace = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"namespace\"")
+			}
 		default:
 			return d.Skip()
 		}
@@ -11468,7 +11575,7 @@ func (s *DomainCreate) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00000011,
+		0b00001011,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -11510,6 +11617,46 @@ func (s *DomainCreate) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *DomainCreate) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes DomainStatus as json.
+func (s DomainStatus) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes DomainStatus from json.
+func (s *DomainStatus) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode DomainStatus to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch DomainStatus(v) {
+	case DomainStatusActive:
+		*s = DomainStatusActive
+	case DomainStatusDeleting:
+		*s = DomainStatusDeleting
+	default:
+		*s = DomainStatus(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s DomainStatus) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *DomainStatus) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -14518,14 +14665,44 @@ func (s *GetDomainResponse) encodeFields(e *jx.Encoder) {
 		e.Str(s.Name)
 	}
 	{
+		e.FieldStart("namespace")
+		e.Str(s.Namespace)
+	}
+	{
 		e.FieldStart("description")
 		e.Str(s.Description)
 	}
+	{
+		e.FieldStart("status")
+		s.Status.Encode(e)
+	}
+	{
+		e.FieldStart("finalizers")
+		e.ArrStart()
+		for _, elem := range s.Finalizers {
+			e.Str(elem)
+		}
+		e.ArrEnd()
+	}
+	{
+		e.FieldStart("environments")
+		e.ArrStart()
+		for _, elem := range s.Environments {
+			elem.Encode(e)
+		}
+		e.ArrEnd()
+	}
 }
 
+var jsonFieldsNameOfGetDomainResponse = [7]string{
 var jsonFieldsNameOfGetDomainResponse = [3]string{
 	0: "id",
 	1: "name",
+	2: "namespace",
+	3: "description",
+	4: "status",
+	5: "finalizers",
+	6: "environments",
 	2: "description",
 }
 
@@ -14562,8 +14739,20 @@ func (s *GetDomainResponse) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"name\"")
 			}
-		case "description":
+		case "namespace":
 			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				v, err := d.Str()
+				s.Namespace = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"namespace\"")
+			}
+		case "description":
+			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
 				v, err := d.Str()
 				s.Description = string(v)
@@ -14573,6 +14762,54 @@ func (s *GetDomainResponse) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"description\"")
+			}
+		case "status":
+			requiredBitSet[0] |= 1 << 4
+			if err := func() error {
+				if err := s.Status.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"status\"")
+			}
+		case "finalizers":
+			requiredBitSet[0] |= 1 << 5
+			if err := func() error {
+				s.Finalizers = make([]string, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem string
+					v, err := d.Str()
+					elem = string(v)
+					if err != nil {
+						return err
+					}
+					s.Finalizers = append(s.Finalizers, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"finalizers\"")
+			}
+		case "environments":
+			requiredBitSet[0] |= 1 << 6
+			if err := func() error {
+				s.Environments = make([]EnvironmentGetItem, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem EnvironmentGetItem
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.Environments = append(s.Environments, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"environments\"")
 			}
 		default:
 			return d.Skip()
@@ -14584,6 +14821,7 @@ func (s *GetDomainResponse) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
+		0b01111111,
 		0b00000111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
@@ -14648,8 +14886,32 @@ func (s *GetDomainsItem) encodeFields(e *jx.Encoder) {
 		e.Str(s.Name)
 	}
 	{
+		e.FieldStart("namespace")
+		e.Str(s.Namespace)
+	}
+	{
 		e.FieldStart("description")
 		e.Str(s.Description)
+	}
+	{
+		e.FieldStart("status")
+		s.Status.Encode(e)
+	}
+	{
+		e.FieldStart("finalizers")
+		e.ArrStart()
+		for _, elem := range s.Finalizers {
+			e.Str(elem)
+		}
+		e.ArrEnd()
+	}
+	{
+		e.FieldStart("environments")
+		e.ArrStart()
+		for _, elem := range s.Environments {
+			elem.Encode(e)
+		}
+		e.ArrEnd()
 	}
 	{
 		e.FieldStart("abstract_data_product_count")
@@ -14657,9 +14919,16 @@ func (s *GetDomainsItem) encodeFields(e *jx.Encoder) {
 	}
 }
 
+var jsonFieldsNameOfGetDomainsItem = [8]string{
 var jsonFieldsNameOfGetDomainsItem = [4]string{
 	0: "id",
 	1: "name",
+	2: "namespace",
+	3: "description",
+	4: "status",
+	5: "finalizers",
+	6: "environments",
+	7: "abstract_data_product_count",
 	2: "description",
 	3: "abstract_data_product_count",
 }
@@ -14697,8 +14966,20 @@ func (s *GetDomainsItem) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"name\"")
 			}
-		case "description":
+		case "namespace":
 			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				v, err := d.Str()
+				s.Namespace = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"namespace\"")
+			}
+		case "description":
+			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
 				v, err := d.Str()
 				s.Description = string(v)
@@ -14709,8 +14990,57 @@ func (s *GetDomainsItem) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"description\"")
 			}
+		case "status":
+			requiredBitSet[0] |= 1 << 4
+			if err := func() error {
+				if err := s.Status.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"status\"")
+			}
+		case "finalizers":
+			requiredBitSet[0] |= 1 << 5
+			if err := func() error {
+				s.Finalizers = make([]string, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem string
+					v, err := d.Str()
+					elem = string(v)
+					if err != nil {
+						return err
+					}
+					s.Finalizers = append(s.Finalizers, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"finalizers\"")
+			}
+		case "environments":
+			requiredBitSet[0] |= 1 << 6
+			if err := func() error {
+				s.Environments = make([]EnvironmentGetItem, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem EnvironmentGetItem
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.Environments = append(s.Environments, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"environments\"")
+			}
 		case "abstract_data_product_count":
 			requiredBitSet[0] |= 1 << 3
+			requiredBitSet[0] |= 1 << 7
 			if err := func() error {
 				v, err := d.Int()
 				s.AbstractDataProductCount = int(v)
@@ -29398,6 +29728,48 @@ func (s RemoveDataProductTypeOKApplicationJSON) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *RemoveDataProductTypeOKApplicationJSON) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes RemoveDomainFinalizerOKApplicationJSON as json.
+func (s RemoveDomainFinalizerOKApplicationJSON) Encode(e *jx.Encoder) {
+	unwrapped := jx.Raw(s)
+
+	if len(unwrapped) != 0 {
+		e.Raw(unwrapped)
+	}
+}
+
+// Decode decodes RemoveDomainFinalizerOKApplicationJSON from json.
+func (s *RemoveDomainFinalizerOKApplicationJSON) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode RemoveDomainFinalizerOKApplicationJSON to nil")
+	}
+	var unwrapped jx.Raw
+	if err := func() error {
+		v, err := d.RawAppend(nil)
+		unwrapped = jx.Raw(v)
+		if err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = RemoveDomainFinalizerOKApplicationJSON(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s RemoveDomainFinalizerOKApplicationJSON) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *RemoveDomainFinalizerOKApplicationJSON) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

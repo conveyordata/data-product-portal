@@ -371,19 +371,19 @@ VALUES ('3e74d2d7-b83c-5f0b-9c6f-2f3d4e5f6b7c', '{{ returned_environment_id_prd 
 ), NULL, NULL);
 
 -- DOMAINS
-INSERT INTO public.domains (id, name, description, created_on, updated_on, deleted_at) VALUES ('{{ customer_domain_id }}'::uuid, 'Customer Insights', 'Contains data products that provide information about customer behavior, demographics and satisfaction.', timezone('utc'::text, current_timestamp), NULL, NULL);
+INSERT INTO public.domains (id, name, namespace, description, created_on, updated_on, deleted_at) VALUES ('{{ customer_domain_id }}'::uuid, 'Customer Insights', 'customer-insights', 'Contains data products that provide information about customer behavior, demographics and satisfaction.', timezone('utc'::text, current_timestamp), NULL, NULL);
 
-INSERT INTO public.domains (id, name, description, created_on, updated_on, deleted_at) VALUES ('{{ operations_and_logistics_domain_id }}'::uuid, 'Operations & Logistics', 'Data products that track internal operations, supply chain efficiency and resource utilization.', timezone('utc'::text, current_timestamp), NULL, NULL);
+INSERT INTO public.domains (id, name, namespace, description, created_on, updated_on, deleted_at) VALUES ('{{ operations_and_logistics_domain_id }}'::uuid, 'Operations & Logistics', 'operations-logistics', 'Data products that track internal operations, supply chain efficiency and resource utilization.', timezone('utc'::text, current_timestamp), NULL, NULL);
 
-INSERT INTO public.domains (id, name, description, created_on, updated_on, deleted_at) VALUES ('{{ financial_domain_id }}'::uuid, 'Financial Performance', 'Data products focused on revenue, expenses, profitability and other financial metrics.', timezone('utc'::text, current_timestamp), NULL, NULL);
+INSERT INTO public.domains (id, name, namespace, description, created_on, updated_on, deleted_at) VALUES ('{{ financial_domain_id }}'::uuid, 'Financial Performance', 'financial-performance', 'Data products focused on revenue, expenses, profitability and other financial metrics.', timezone('utc'::text, current_timestamp), NULL, NULL);
 
-INSERT INTO public.domains (id, name, description, created_on, updated_on, deleted_at) VALUES ('{{ product_development_domain_id }}'::uuid, 'Product Development', 'Data products that capture product usage, feature adoption and performance metrics.', timezone('utc'::text, current_timestamp), NULL, NULL);
+INSERT INTO public.domains (id, name, namespace, description, created_on, updated_on, deleted_at) VALUES ('{{ product_development_domain_id }}'::uuid, 'Product Development', 'product-development', 'Data products that capture product usage, feature adoption and performance metrics.', timezone('utc'::text, current_timestamp), NULL, NULL);
 
-INSERT INTO public.domains (id, name, description, created_on, updated_on, deleted_at) VALUES ('{{ risk_and_compliance_domain_id }}'::uuid, 'Risk & Compliance', 'Data products designed to monitor regulatory compliance, security and operational risks', '2025-10-28 16:30:24.123498', NULL, NULL);
+INSERT INTO public.domains (id, name, namespace, description, created_on, updated_on, deleted_at) VALUES ('{{ risk_and_compliance_domain_id }}'::uuid, 'Risk & Compliance', 'risk-compliance', 'Data products designed to monitor regulatory compliance, security and operational risks', '2025-10-28 16:30:24.123498', NULL, NULL);
 
-INSERT INTO public.domains (id, name, description, created_on, updated_on, deleted_at) VALUES ('{{ commercial_and_customer_relationship_mgt_domain_id }}'::uuid, 'Commercial and Customer Relationship Management', 'Commercial and CRM', '2025-10-28 16:30:41.743083', NULL, NULL);
+INSERT INTO public.domains (id, name, namespace, description, created_on, updated_on, deleted_at) VALUES ('{{ commercial_and_customer_relationship_mgt_domain_id }}'::uuid, 'Commercial and Customer Relationship Management', 'commercial-and-customer-relationship-management', 'Commercial and CRM', '2025-10-28 16:30:41.743083', NULL, NULL);
 
-INSERT INTO public.domains (id, name, description, created_on, updated_on, deleted_at) VALUES ('{{ environment_demo_domain_id }}'::uuid, 'Environment Demo', 'Data Product environment examples.', timezone('utc'::text, current_timestamp), NULL, NULL);
+INSERT INTO public.domains (id, name, namespace, description, created_on, updated_on, deleted_at) VALUES ('{{ environment_demo_domain_id }}'::uuid, 'Environment Demo', 'Data Product environment examples.', timezone('utc'::text, current_timestamp), NULL, NULL);
 
 -- DATA PRODUCT TYPES
 -- ...existing data product types code...

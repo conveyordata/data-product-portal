@@ -371,6 +371,22 @@ async def test_event_handler_enqueues_data_product():
     assert reconciler.calls == [data_product_id]
 
 
+async def test_event_handler_enqueues_domain():
+    reconciler = RecordingReconciler()
+    manager = ReconcileManager(
+        {ResourceType.DOMAIN: reconciler}, default_delay=0.0, num_workers=1
+    )
+    manager.start()
+    handler = ReconcileEventHandler(manager)
+    domain_id = uuid.uuid4()
+
+    await handler.dispatch_routing(_build_request(_envelope("domain.event", domain_id)))
+
+    await _drain(reconciler, expected=1)
+    await manager.stop()
+    assert reconciler.calls == [domain_id]
+
+
 async def test_event_handler_enqueues_data_product_on_environment_added():
     reconciler = RecordingReconciler()
     manager = ReconcileManager(

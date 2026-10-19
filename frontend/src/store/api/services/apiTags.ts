@@ -11,6 +11,8 @@ import { outputPortSearchTags } from '@/store/api/services/tags/outputPortsSearc
 import { usersNotificationsTags } from '@/store/api/services/tags/usersNotificationsTags.ts';
 import { usersTags } from '@/store/api/services/tags/usersTags.ts';
 
+const HTTP_ACCEPTED = 202;
+
 api.enhanceEndpoints({
     addTagTypes: Object.values(TagTypes),
 
@@ -274,6 +276,7 @@ api.enhanceEndpoints({
             ],
         },
         removeDomain: {
+            transformResponse: (_, meta) => meta?.status === HTTP_ACCEPTED,
             invalidatesTags: [{ type: TagTypes.Domain, id: STATIC_TAG_ID.LIST }],
         },
         migrateDomain: {

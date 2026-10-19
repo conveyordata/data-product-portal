@@ -34,5 +34,5 @@ def plugin_context() -> PluginContext:
                 icon_key=DataProductIconKey.REPORTING,
             ),
         ),
-        domain=Domain(id=uuid4(), name="finance", description=""),
+        domain=Domain(id=uuid4(), name="finance", namespace="finance", description=""),
     )

@@ -45,7 +45,8 @@ export const axiosBaseQuery =
         },
         unknown,
         unknown,
-        AxiosBaseQueryExtraOptions
+        AxiosBaseQueryExtraOptions,
+        { status: number }
     > =>
     async ({ url, method, data, body, params, headers }, api, extraOptions) => {
         try {
@@ -63,7 +64,7 @@ export const axiosBaseQuery =
                     ...(activeUserHeader && { 'X-user': activeUserHeader }),
                 },
             });
-            return { data: result.data };
+            return { data: result.data, meta: { status: result.status } };
         } catch (axiosError: unknown) {
             if (!extraOptions?.suppressErrorToast) {
                 showGenericErrorMessage(axiosError);

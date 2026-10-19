@@ -14,6 +14,7 @@ from sdk.api_client.models import (
     DataProductEvent,
     DataProductRoleAssignmentEvent,
     DataProductSettingValueEvent,
+    DomainEvent,
     ExplorationEvent,
     InputPortEvent,
     OutputPortEvent,
@@ -38,6 +39,7 @@ class ResourceType(str, Enum):
 
     EXPLORATION = "exploration"
     DATA_PRODUCT = "data_product"
+    DOMAIN = "domain"
 
 
 @dataclass(frozen=True)
@@ -258,6 +260,9 @@ class ReconcileEventHandler(AbstractEventHandler):
 
     async def on_exploration_event(self, data: ExplorationEvent):
         await self._enqueue(ResourceType.EXPLORATION, data.id)
+
+    async def on_domain_event(self, data: DomainEvent):
+        await self._enqueue(ResourceType.DOMAIN, data.id)
 
     async def on_input_port_event(self, data: InputPortEvent):
         match self._input_port_reconcile_target:

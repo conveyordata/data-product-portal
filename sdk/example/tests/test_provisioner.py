@@ -1,14 +1,22 @@
 import json
 import uuid
+from http import HTTPStatus
 from pathlib import Path
 
 import pytest
 
 from example import provisioner as prov_module
-from example.provisioner import FINALIZER_NAME, ExplorationProvisioner
+from example.provisioner import (
+    FINALIZER_NAME,
+    DomainProvisioner,
+    ExplorationProvisioner,
+)
 from sdk import Client
+from sdk.api_client.types import Response
 from sdk.api_client.models import (
     Domain,
+    DomainStatus,
+    GetDomainResponse,
     GetExplorationResponse,
     User,
 )
@@ -25,7 +33,9 @@ def _fake_exploration(
         name="my-exploration",
         namespace="my-ns",
         description="a description",
-        domain=Domain(name="my-domain", id=uuid.uuid4(), description="desc"),
+        domain=Domain(
+            name="my-domain", namespace="my-domain", id=uuid.uuid4(), description="desc"
+        ),
         owner=User(
             email="owner@example.com",
             id=uuid.uuid4(),
@@ -303,3 +313,122 @@ async def test_reconcile_deleting_without_our_finalizer_is_noop(
     assert result is None
     assert patch_remove_finalizer == []
     assert patch_add_finalizer == []
+
+
+def _fake_domain(
+    domain_id: uuid.UUID, status: DomainStatus, finalizers: list[str]
+) -> GetDomainResponse:
+    return GetDomainResponse(
+        id=domain_id,
+        name="Finance",
+        namespace="finance",
+        description="desc",
+        status=status,
+        finalizers=finalizers,
+        environments=[],
+    )
+
+
+@pytest.fixture
+def patch_domain_api(monkeypatch):
+    """Patch the domain endpoints; returns the state and recorded calls."""
+    calls: dict = {
+        "state": {},
+        "add_status": HTTPStatus.OK,
+        "remove_status": HTTPStatus.OK,
+        "added": [],
+        "removed": [],
+    }
+
+    async def fake_get(id, client):  # noqa: A002
+        return calls["state"].get(id)
+
+    async def fake_add(id, client, body):  # noqa: A002
+        calls["added"].append(id)
+        return Response(
+            status_code=calls["add_status"], content=b"", headers={}, parsed=None
+        )
+
+    async def fake_remove(id, finalizer, client):  # noqa: A002
+        calls["removed"].append(id)
+        return Response(
+            status_code=calls["remove_status"], content=b"", headers={}, parsed=None
+        )
+
+    monkeypatch.setattr(prov_module.get_domain, "asyncio", fake_get)
+    monkeypatch.setattr(prov_module.add_domain_finalizer, "asyncio_detailed", fake_add)
+    monkeypatch.setattr(
+        prov_module.remove_domain_finalizer, "asyncio_detailed", fake_remove
+    )
+    return calls
+
+
+async def test_domain_reconcile_provisions_then_deprovisions(
+    tmp_path: Path, fake_client, patch_domain_api
+):
+    did = uuid.uuid4()
+    state = patch_domain_api["state"]
+    added = patch_domain_api["added"]
+    removed = patch_domain_api["removed"]
+
+    def domain(status: DomainStatus, finalizers: list[str]) -> GetDomainResponse:
+        return _fake_domain(did, status, finalizers)
+
+    provisioner = DomainProvisioner(client=fake_client, workspace=tmp_path)
+    state[did] = domain(DomainStatus.ACTIVE, [])
+    await provisioner.reconcile(did)
+
+    manifest = tmp_path / "domains" / "finance" / "manifest.json"
+    assert json.loads(manifest.read_text())["namespace"] == "finance"
+    assert added == [did]
+
+    state[did] = domain(DomainStatus.DELETING, [FINALIZER_NAME])
+    await provisioner.reconcile(did)
+
+    assert not manifest.parent.exists()
+    assert removed == [did]
+
+
+async def test_domain_reconcile_does_not_provision_without_finalizer(
+    tmp_path: Path, fake_client, patch_domain_api
+):
+    did = uuid.uuid4()
+    patch_domain_api["state"][did] = _fake_domain(did, DomainStatus.ACTIVE, [])
+    patch_domain_api["add_status"] = HTTPStatus.CONFLICT
+    provisioner = DomainProvisioner(client=fake_client, workspace=tmp_path)
+
+    with pytest.raises(Exception, match="Could not add finalizer"):
+        await provisioner.reconcile(did)
+
+    assert not (tmp_path / "domains" / "finance").exists()
+
+
+async def test_domain_deprovision_tolerates_extra_files(
+    tmp_path: Path, fake_client, patch_domain_api
+):
+    did = uuid.uuid4()
+    domain_dir = tmp_path / "domains" / "finance"
+    domain_dir.mkdir(parents=True)
+    (domain_dir / "other.txt").write_text("keep")
+    patch_domain_api["state"][did] = _fake_domain(
+        did, DomainStatus.DELETING, [FINALIZER_NAME]
+    )
+    provisioner = DomainProvisioner(client=fake_client, workspace=tmp_path)
+
+    await provisioner.reconcile(did)
+
+    assert patch_domain_api["removed"] == [did]
+
+
+async def test_domain_reconcile_fails_when_finalizer_removal_fails(
+    tmp_path: Path, fake_client, patch_domain_api
+):
+    did = uuid.uuid4()
+    patch_domain_api["state"][did] = _fake_domain(
+        did, DomainStatus.DELETING, [FINALIZER_NAME]
+    )
+    patch_domain_api["remove_status"] = HTTPStatus.BAD_REQUEST
+    provisioner = DomainProvisioner(client=fake_client, workspace=tmp_path)
+
+    with pytest.raises(Exception, match="Could not remove finalizer"):
+        await provisioner.reconcile(did)

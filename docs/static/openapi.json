@@ -5080,12 +5080,15 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful Response",
+            "description": "Domain deleted",
             "content": {
               "application/json": {
                 "schema": {}
               }
             }
+          },
+          "202": {
+            "description": "Domain marked for deletion, waiting for finalizers"
           },
           "422": {
             "description": "Validation Error",
@@ -5125,6 +5128,107 @@
                 "schema": {
                   "$ref": "#/components/schemas/GetDomainResponse"
                 }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/configuration/domains/{id}/finalizers": {
+      "post": {
+        "tags": [
+          "Configuration - Domains"
+        ],
+        "summary": "Add Domain Finalizer",
+        "operationId": "add_domain_finalizer",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinalizerRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/configuration/domains/{id}/finalizers/{finalizer}": {
+      "delete": {
+        "tags": [
+          "Configuration - Domains"
+        ],
+        "summary": "Remove Domain Finalizer",
+        "operationId": "remove_domain_finalizer",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "finalizer",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Finalizer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
               }
             }
           },
@@ -9654,9 +9758,6 @@
                     "$ref": "#/components/schemas/CloudEvent_DataProductEvent"
                   },
                   {
-                    "$ref": "#/components/schemas/CloudEvent_DataProductEnvironmentAddedEvent"
-                  },
-                  {
                     "$ref": "#/components/schemas/CloudEvent_InputPortEvent"
                   },
                   {
@@ -9676,6 +9777,9 @@
                   },
                   {
                     "$ref": "#/components/schemas/CloudEvent_DataProductSettingValueEvent"
+                  },
+                  {
+                    "$ref": "#/components/schemas/CloudEvent_DomainEvent"
                   }
                 ],
                 "title": "Body",
@@ -9684,14 +9788,14 @@
                   "mapping": {
                     "exploration.event": "#/components/schemas/CloudEvent_ExplorationEvent",
                     "data_product.event": "#/components/schemas/CloudEvent_DataProductEvent",
-                    "data_product.environment_added": "#/components/schemas/CloudEvent_DataProductEnvironmentAddedEvent",
                     "input_port.event": "#/components/schemas/CloudEvent_InputPortEvent",
                     "data_product_role_assignment.event": "#/components/schemas/CloudEvent_DataProductRoleAssignmentEvent",
                     "output_port_role_assignment.event": "#/components/schemas/CloudEvent_OutputPortRoleAssignmentEvent",
                     "technical_asset.event": "#/components/schemas/CloudEvent_TechnicalAssetEvent",
                     "output_port.event": "#/components/schemas/CloudEvent_OutputPortEvent",
                     "output_port_technical_asset_link.event": "#/components/schemas/CloudEvent_OutputPortTechnicalAssetLinkEvent",
-                    "data_product_setting_value.event": "#/components/schemas/CloudEvent_DataProductSettingValueEvent"
+                    "data_product_setting_value.event": "#/components/schemas/CloudEvent_DataProductSettingValueEvent",
+                    "domain.event": "#/components/schemas/CloudEvent_DomainEvent"
                   }
                 }
               }
@@ -10355,50 +10459,6 @@
         ],
         "title": "CancelInputPortForExplorationResponse"
       },
-      "CloudEvent_DataProductEnvironmentAddedEvent": {
-        "properties": {
-          "specversion": {
-            "type": "string",
-            "title": "Specversion",
-            "description": "The CloudEvents specification version.",
-            "default": "1.0"
-          },
-          "id": {
-            "type": "string",
-            "title": "Id",
-            "description": "A unique UUID identifier for this specific event instance."
-          },
-          "source": {
-            "type": "string",
-            "title": "Source",
-            "description": "Identifies the context in which an event happened.",
-            "default": "data-product-portal"
-          },
-          "type": {
-            "type": "string",
-            "const": "data_product.environment_added",
-            "title": "Type",
-            "description": "The unique type string belonging to this event.",
-            "default": "data_product.environment_added"
-          },
-          "time": {
-            "type": "string",
-            "title": "Time",
-            "description": "Timestamp of when the event occurred in ISO 8601 UTC format."
-          },
-          "data": {
-            "$ref": "#/components/schemas/DataProductEnvironmentAddedEvent",
-            "description": "The specific data payload corresponding to this event type."
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "time",
-          "data"
-        ],
-        "title": "CloudEvent_DataProductEnvironmentAddedEvent"
-      },
       "CloudEvent_DataProductEvent": {
         "properties": {
           "specversion": {
@@ -10530,6 +10590,50 @@
           "data"
         ],
         "title": "CloudEvent_DataProductSettingValueEvent"
+      },
+      "CloudEvent_DomainEvent": {
+        "properties": {
+          "specversion": {
+            "type": "string",
+            "title": "Specversion",
+            "description": "The CloudEvents specification version.",
+            "default": "1.0"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "A unique UUID identifier for this specific event instance."
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "description": "Identifies the context in which an event happened.",
+            "default": "data-product-portal"
+          },
+          "type": {
+            "type": "string",
+            "const": "domain.event",
+            "title": "Type",
+            "description": "The unique type string belonging to this event.",
+            "default": "domain.event"
+          },
+          "time": {
+            "type": "string",
+            "title": "Time",
+            "description": "Timestamp of when the event occurred in ISO 8601 UTC format."
+          },
+          "data": {
+            "$ref": "#/components/schemas/DomainEvent",
+            "description": "The specific data payload corresponding to this event type."
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "time",
+          "data"
+        ],
+        "title": "CloudEvent_DomainEvent"
       },
       "CloudEvent_ExplorationEvent": {
         "properties": {
@@ -11396,22 +11500,6 @@
             "format": "uuid",
             "title": "Lifecycle Id"
           },
-          "environment_ids": {
-            "anyOf": [
-              {
-                "items": {
-                  "type": "string",
-                  "format": "uuid"
-                },
-                "type": "array",
-                "minItems": 1
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Environment Ids"
-          },
           "visibility": {
             "$ref": "#/components/schemas/DataProductVisibility",
             "default": "discoverable"
@@ -11447,55 +11535,6 @@
           "owners"
         ],
         "title": "DataProductCreate"
-      },
-      "DataProductEnvironment": {
-        "properties": {
-          "environment_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Environment Id"
-          },
-          "environment": {
-            "$ref": "#/components/schemas/EnvironmentGetItem"
-          },
-          "creation_date": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Creation Date"
-          }
-        },
-        "type": "object",
-        "required": [
-          "environment_id",
-          "environment",
-          "creation_date"
-        ],
-        "title": "DataProductEnvironment"
-      },
-      "DataProductEnvironmentAddedEvent": {
-        "properties": {
-          "data_product_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Data Product Id"
-          },
-          "environment": {
-            "type": "string",
-            "title": "Environment"
-          },
-          "creation_date": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Creation Date"
-          }
-        },
-        "type": "object",
-        "required": [
-          "data_product_id",
-          "environment",
-          "creation_date"
-        ],
-        "title": "DataProductEnvironmentAddedEvent"
       },
       "DataProductEvent": {
         "properties": {
@@ -12368,22 +12407,6 @@
             "type": "string",
             "format": "uuid",
             "title": "Lifecycle Id"
-          },
-          "environment_ids": {
-            "anyOf": [
-              {
-                "items": {
-                  "type": "string",
-                  "format": "uuid"
-                },
-                "type": "array",
-                "minItems": 1
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Environment Ids"
           }
         },
         "type": "object",
@@ -12728,6 +12751,10 @@
             "type": "string",
             "title": "Name"
           },
+          "namespace": {
+            "type": "string",
+            "title": "Namespace"
+          },
           "description": {
             "type": "string",
             "title": "Description"
@@ -12737,6 +12764,7 @@
         "required": [
           "id",
           "name",
+          "namespace",
           "description"
         ],
         "title": "Domain"
@@ -12750,14 +12778,50 @@
           "description": {
             "type": "string",
             "title": "Description"
+          },
+          "environment_ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Environment Ids",
+            "default": []
+          },
+          "namespace": {
+            "type": "string",
+            "title": "Namespace"
           }
         },
         "type": "object",
         "required": [
           "name",
-          "description"
+          "description",
+          "namespace"
         ],
         "title": "DomainCreate"
+      },
+      "DomainEvent": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "title": "DomainEvent"
+      },
+      "DomainStatus": {
+        "type": "string",
+        "enum": [
+          "active",
+          "deleting"
+        ],
+        "title": "DomainStatus"
       },
       "DomainUpdate": {
         "properties": {
@@ -12768,6 +12832,15 @@
           "description": {
             "type": "string",
             "title": "Description"
+          },
+          "environment_ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Environment Ids",
+            "default": []
           }
         },
         "type": "object",
@@ -13331,13 +13404,6 @@
           "visibility": {
             "$ref": "#/components/schemas/DataProductVisibility"
           },
-          "environments": {
-            "items": {
-              "$ref": "#/components/schemas/DataProductEnvironment"
-            },
-            "type": "array",
-            "title": "Environments"
-          },
           "about": {
             "anyOf": [
               {
@@ -13364,7 +13430,6 @@
           "type",
           "lifecycle",
           "visibility",
-          "environments",
           "about"
         ],
         "title": "GetDataProductResponse"
@@ -13484,13 +13549,6 @@
           "visibility": {
             "$ref": "#/components/schemas/DataProductVisibility"
           },
-          "environments": {
-            "items": {
-              "$ref": "#/components/schemas/DataProductEnvironment"
-            },
-            "type": "array",
-            "title": "Environments"
-          },
           "user_count": {
             "type": "integer",
             "title": "User Count"
@@ -13518,7 +13576,6 @@
           "type",
           "lifecycle",
           "visibility",
-          "environments",
           "user_count",
           "input_port_count",
           "technical_asset_count"
@@ -13536,16 +13593,41 @@
             "type": "string",
             "title": "Name"
           },
+          "namespace": {
+            "type": "string",
+            "title": "Namespace"
+          },
           "description": {
             "type": "string",
             "title": "Description"
+          },
+          "status": {
+            "$ref": "#/components/schemas/DomainStatus"
+          },
+          "finalizers": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Finalizers"
+          },
+          "environments": {
+            "items": {
+              "$ref": "#/components/schemas/EnvironmentGetItem"
+            },
+            "type": "array",
+            "title": "Environments"
           }
         },
         "type": "object",
         "required": [
           "id",
           "name",
-          "description"
+          "namespace",
+          "description",
+          "status",
+          "finalizers",
+          "environments"
         ],
         "title": "GetDomainResponse"
       },
@@ -13560,9 +13642,30 @@
             "type": "string",
             "title": "Name"
           },
+          "namespace": {
+            "type": "string",
+            "title": "Namespace"
+          },
           "description": {
             "type": "string",
             "title": "Description"
+          },
+          "status": {
+            "$ref": "#/components/schemas/DomainStatus"
+          },
+          "finalizers": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Finalizers"
+          },
+          "environments": {
+            "items": {
+              "$ref": "#/components/schemas/EnvironmentGetItem"
+            },
+            "type": "array",
+            "title": "Environments"
           },
           "abstract_data_product_count": {
             "type": "integer",
@@ -13573,7 +13676,11 @@
         "required": [
           "id",
           "name",
+          "namespace",
           "description",
+          "status",
+          "finalizers",
+          "environments",
           "abstract_data_product_count"
         ],
         "title": "GetDomainsItem"
@@ -14142,13 +14249,6 @@
           "owner": {
             "$ref": "#/components/schemas/DataProduct"
           },
-          "environments": {
-            "items": {
-              "$ref": "#/components/schemas/DataProductEnvironment"
-            },
-            "type": "array",
-            "title": "Environments"
-          },
           "output_port_links": {
             "items": {
               "$ref": "#/components/schemas/OutputPortLink"
@@ -14192,7 +14292,6 @@
           "access_modes",
           "configuration",
           "owner",
-          "environments",
           "output_port_links",
           "tags",
           "sourceAligned",
@@ -17069,7 +17168,8 @@
           "output_port",
           "data_product_setting",
           "output_port_setting",
-          "exploration"
+          "exploration",
+          "domain"
         ],
         "title": "ResourceNameModel"
       },

@@ -15,16 +15,18 @@ class DomainCreate:
     Attributes:
         name (str):
         description (str):
+        namespace (str):
     """
 
     name: str
     description: str
+    namespace: str
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         name = self.name
-
         description = self.description
+        namespace = self.namespace
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
@@ -32,6 +34,7 @@ class DomainCreate:
             {
                 "name": name,
                 "description": description,
+                "namespace": namespace,
             }
         )
 
@@ -41,12 +44,13 @@ class DomainCreate:
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
         name = d.pop("name")
-
         description = d.pop("description")
+        namespace = d.pop("namespace")
 
         domain_create = cls(
             name=name,
             description=description,
+            namespace=namespace,
         )
 
         domain_create.additional_properties = d

@@ -1,6 +1,7 @@
 import { Button, Form, Input, Modal, Select } from 'antd';
 import { useTranslation } from 'react-i18next';
 import {
+    DomainStatus,
     type GetDomainsItem,
     useGetDomainsQuery,
     useMigrateDomainMutation,
@@ -29,8 +30,15 @@ export function CreateDomainMigrateModal({ isOpen, onClose, migrateFrom }: Props
     const handleFinish = async (values: DomainMigrateFormValues) => {
         try {
             await migrateDomain({ fromId: migrateFrom.id, toId: values.toId }).unwrap();
-            await onRemoveDomain(migrateFrom.id).unwrap();
-            dispatchMessage({ content: t('Domain migrated and deleted successfully'), type: 'success' });
+            const deletionPending = await onRemoveDomain(migrateFrom.id).unwrap();
+            dispatchMessage(
+                deletionPending
+                    ? {
+                          content: t('Domain migrated and marked for deletion, waiting for provisioners to clean up'),
+                          type: 'info',
+                      }
+                    : { content: t('Domain migrated and deleted successfully'), type: 'success' },
+            );
             form.resetFields();
             onClose();
         } catch (_e) {
@@ -76,7 +84,7 @@ export function CreateDomainMigrateModal({ isOpen, onClose, migrateFrom }: Props
                 >
                     <Select>
                         {domains
-                            .filter((domain) => domain.id !== migrateFrom.id)
+                            .filter((domain) => domain.id !== migrateFrom.id && domain.status !== DomainStatus.Deleting)
                             .map((domain) => (
                                 <Option key={domain.id} value={domain.id}>
                                     {domain.name}

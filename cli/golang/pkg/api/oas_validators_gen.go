@@ -672,32 +672,6 @@ func (s *DataProductCreate) Validate() error {
 
 	var failures []validate.FieldError
 	if err := func() error {
-		if value, ok := s.EnvironmentIds.Get(); ok {
-			if err := func() error {
-				if value == nil {
-					return errors.New("nil is invalid value")
-				}
-				if err := (validate.Array{
-					MinLength:    1,
-					MinLengthSet: true,
-					MaxLength:    0,
-					MaxLengthSet: false,
-				}).ValidateLength(len(value)); err != nil {
-					return errors.Wrap(err, "array")
-				}
-				return nil
-			}(); err != nil {
-				return err
-			}
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "environment_ids",
-			Error: err,
-		})
-	}
-	if err := func() error {
 		if value, ok := s.Visibility.Get(); ok {
 			if err := func() error {
 				if err := value.Validate(); err != nil {
@@ -1330,44 +1304,6 @@ func (s *DataProductTypesGetItem) Validate() error {
 	return nil
 }
 
-func (s *DataProductUpdate) Validate() error {
-	if s == nil {
-		return validate.ErrNilPointer
-	}
-
-	var failures []validate.FieldError
-	if err := func() error {
-		if value, ok := s.EnvironmentIds.Get(); ok {
-			if err := func() error {
-				if value == nil {
-					return errors.New("nil is invalid value")
-				}
-				if err := (validate.Array{
-					MinLength:    1,
-					MinLengthSet: true,
-					MaxLength:    0,
-					MaxLengthSet: false,
-				}).ValidateLength(len(value)); err != nil {
-					return errors.Wrap(err, "array")
-				}
-				return nil
-			}(); err != nil {
-				return err
-			}
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "environment_ids",
-			Error: err,
-		})
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-	return nil
-}
-
 func (s DataProductVisibility) Validate() error {
 	switch s {
 	case "hidden":
@@ -1533,6 +1469,17 @@ func (s DeviceFlowStatus) Validate() error {
 	case "denied":
 		return nil
 	case "authorized":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
+func (s DomainStatus) Validate() error {
+	switch s {
+	case "active":
+		return nil
+	case "deleting":
 		return nil
 	default:
 		return errors.Errorf("invalid value: %v", s)
@@ -1897,17 +1844,6 @@ func (s *GetDataProductResponse) Validate() error {
 			Error: err,
 		})
 	}
-	if err := func() error {
-		if s.Environments == nil {
-			return errors.New("nil is invalid value")
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "environments",
-			Error: err,
-		})
-	}
 	if len(failures) > 0 {
 		return &validate.Error{Fields: failures}
 	}
@@ -2089,6 +2025,85 @@ func (s *GetDataProductsResponseItem) Validate() error {
 			Error: err,
 		})
 	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *GetDomainResponse) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.Status.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "status",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if s.Finalizers == nil {
+			return errors.New("nil is invalid value")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "finalizers",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if s.Environments == nil {
+			return errors.New("nil is invalid value")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "environments",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *GetDomainsItem) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.Status.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "status",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if s.Finalizers == nil {
+			return errors.New("nil is invalid value")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "finalizers",
+			Error: err,
+		})
+	}
 	if err := func() error {
 		if s.Environments == nil {
 			return errors.New("nil is invalid value")
@@ -2115,6 +2130,23 @@ func (s *GetDomainsResponse) Validate() error {
 	if err := func() error {
 		if s.Domains == nil {
 			return errors.New("nil is invalid value")
+		}
+		var failures []validate.FieldError
+		for i, elem := range s.Domains {
+			if err := func() error {
+				if err := elem.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				failures = append(failures, validate.FieldError{
+					Name:  fmt.Sprintf("[%d]", i),
+					Error: err,
+				})
+			}
+		}
+		if len(failures) > 0 {
+			return &validate.Error{Fields: failures}
 		}
 		return nil
 	}(); err != nil {
@@ -2823,17 +2855,6 @@ func (s *GetTechnicalAssetsResponseItem) Validate() error {
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
 			Name:  "owner",
-			Error: err,
-		})
-	}
-	if err := func() error {
-		if s.Environments == nil {
-			return errors.New("nil is invalid value")
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "environments",
 			Error: err,
 		})
 	}
@@ -4852,6 +4873,8 @@ func (s ResourceNameModel) Validate() error {
 	case "output_port_setting":
 		return nil
 	case "exploration":
+		return nil
+	case "domain":
 		return nil
 	default:
 		return errors.Errorf("invalid value: %v", s)

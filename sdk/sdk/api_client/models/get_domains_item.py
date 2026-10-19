@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import Any, TypeVar
+from typing import Any, TypeVar, cast
 from uuid import UUID
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
+
+from ..models.domain_status import DomainStatus
+
 
 T = TypeVar("T", bound="GetDomainsItem")
 
@@ -16,22 +19,29 @@ class GetDomainsItem:
     Attributes:
         id (UUID):
         name (str):
+        namespace (str):
         description (str):
+        status (DomainStatus):
+        finalizers (list[str]):
         abstract_data_product_count (int):
     """
 
     id: UUID
     name: str
+    namespace: str
     description: str
+    status: DomainStatus
+    finalizers: list[str]
     abstract_data_product_count: int
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         id = str(self.id)
-
         name = self.name
-
+        namespace = self.namespace
         description = self.description
+        status = self.status.value
+        finalizers = self.finalizers
 
         abstract_data_product_count = self.abstract_data_product_count
 
@@ -41,7 +51,10 @@ class GetDomainsItem:
             {
                 "id": id,
                 "name": name,
+                "namespace": namespace,
                 "description": description,
+                "status": status,
+                "finalizers": finalizers,
                 "abstract_data_product_count": abstract_data_product_count,
             }
         )
@@ -52,17 +65,21 @@ class GetDomainsItem:
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
         id = UUID(d.pop("id"))
-
         name = d.pop("name")
-
+        namespace = d.pop("namespace")
         description = d.pop("description")
+        status = DomainStatus(d.pop("status"))
+        finalizers = cast(list[str], d.pop("finalizers"))
 
         abstract_data_product_count = d.pop("abstract_data_product_count")
 
         get_domains_item = cls(
             id=id,
             name=name,
+            namespace=namespace,
             description=description,
+            status=status,
+            finalizers=finalizers,
             abstract_data_product_count=abstract_data_product_count,
         )
 

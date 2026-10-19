@@ -26,6 +26,7 @@ from app.configuration.data_product_lifecycles.model import (
     DataProductLifecycle as DataProductLifeCycleModel,
 )
 from app.configuration.data_product_settings.model import DataProductSettingValue
+from app.configuration.domains.service import DomainService
 from app.configuration.environments.model import Environment as EnvironmentModel
 from app.configuration.tags.model import Tag as TagModel
 from app.configuration.tags.model import ensure_tag_exists
@@ -297,6 +298,7 @@ class DataProductService(AbstractDataProductService):
                 detail=f"Invalid namespace: {validity.value}",
             )
 
+        DomainService(self.db).ensure_assignable(data_product.domain_id)
         data_product_schema = data_product.model_dump(
             exclude={"input_ports", "environment_ids"}
         )
@@ -339,9 +341,10 @@ class DataProductService(AbstractDataProductService):
         if current_data_product is None:
             raise HTTPException(status_code=404, detail="Data Product not found")
         self._ensure_not_deleting(current_data_product)
-        update_data_product = data_product.model_dump(
-            exclude_unset=True, exclude={"environment_ids"}
-        )
+        update_data_product = data_product.model_dump(exclude_unset=True)
+        if data_product.domain_id != current_data_product.domain_id:
+            DomainService(self.db).ensure_assignable(data_product.domain_id)
+
         if (
             current_data_product.namespace != data_product.namespace
             and (
