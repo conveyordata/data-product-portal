@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class AbstractDataProductStatus(str, Enum):
+class AbstractDataProductStatus(StrEnum):
     ACTIVE = "active"
     ARCHIVED = "archived"
     DELETING = "deleting"

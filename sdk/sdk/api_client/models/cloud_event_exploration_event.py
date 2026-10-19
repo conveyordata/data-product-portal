@@ -75,7 +75,7 @@ class CloudEventExplorationEvent:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.exploration_event import ExplorationEvent
+        from ..models.exploration_event import ExplorationEvent  # noqa: PLC0415
 
         d = dict(src_dict)
         id = d.pop("id")

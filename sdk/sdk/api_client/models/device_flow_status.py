@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class DeviceFlowStatus(str, Enum):
+class DeviceFlowStatus(StrEnum):
     AUTHORIZATION_PENDING = "authorization_pending"
     AUTHORIZED = "authorized"
     DENIED = "denied"

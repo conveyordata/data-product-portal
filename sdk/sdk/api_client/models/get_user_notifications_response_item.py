@@ -60,8 +60,10 @@ class GetUserNotificationsResponseItem:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.get_event_history_response_item import GetEventHistoryResponseItem
-        from ..models.user import User
+        from ..models.get_event_history_response_item import (
+            GetEventHistoryResponseItem,  # noqa: PLC0415
+        )
+        from ..models.user import User  # noqa: PLC0415
 
         d = dict(src_dict)
         id = UUID(d.pop("id"))

@@ -41,7 +41,7 @@ class GetExplorationsResponse:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.exploration import Exploration
+        from ..models.exploration import Exploration  # noqa: PLC0415
 
         d = dict(src_dict)
         explorations = []

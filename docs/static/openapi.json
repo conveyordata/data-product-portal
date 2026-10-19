@@ -13967,13 +13967,6 @@
             ],
             "title": "About"
           },
-          "environments": {
-            "items": {
-              "$ref": "#/components/schemas/DataProductEnvironment"
-            },
-            "type": "array",
-            "title": "Environments"
-          },
           "rolled_up_tags": {
             "items": {
               "$ref": "#/components/schemas/Tag"
@@ -14014,7 +14007,6 @@
           "lifecycle",
           "access_modes",
           "about",
-          "environments",
           "rolled_up_tags",
           "data_product_settings",
           "technical_asset_links"

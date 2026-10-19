@@ -63,7 +63,7 @@ class TechnicalAssetOutputPortRequest:
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        from ..models.user import User
+        from ..models.user import User  # noqa: PLC0415
 
         id = str(self.id)
 
@@ -132,9 +132,9 @@ class TechnicalAssetOutputPortRequest:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.output_port import OutputPort
-        from ..models.owned_technical_asset import OwnedTechnicalAsset
-        from ..models.user import User
+        from ..models.output_port import OutputPort  # noqa: PLC0415
+        from ..models.owned_technical_asset import OwnedTechnicalAsset  # noqa: PLC0415
+        from ..models.user import User  # noqa: PLC0415
 
         d = dict(src_dict)
         id = UUID(d.pop("id"))

@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class TechnicalAssetStatus(str, Enum):
+class TechnicalAssetStatus(StrEnum):
     ACTIVE = "active"
     ARCHIVED = "archived"
     PENDING = "pending"

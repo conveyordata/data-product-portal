@@ -80,7 +80,7 @@ class CloudEventDataProductEnvironmentAddedEvent:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.data_product_environment_added_event import (
-            DataProductEnvironmentAddedEvent,
+            DataProductEnvironmentAddedEvent,  # noqa: PLC0415
         )
 
         d = dict(src_dict)
