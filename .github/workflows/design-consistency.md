@@ -25,6 +25,7 @@ safe-outputs:
     labels: [background-agent, agent-design-consistency]
     expires: false
   create-pull-request:
+    draft: false
     title-prefix: "[design consistency] "
     labels: [background-agent, agent-design-consistency]
     github-token-for-extra-empty-commit: none

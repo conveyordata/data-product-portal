@@ -20,6 +20,7 @@ safe-outputs:
     labels: [background-agent, agent-performance]
     expires: false
   create-pull-request:
+    draft: false
     title-prefix: "[performance] "
     labels: [background-agent, agent-performance]
     github-token-for-extra-empty-commit: none

@@ -20,6 +20,7 @@ safe-outputs:
     labels: [background-agent, agent-bug, bug]
     expires: false
   create-pull-request:
+    draft: false
     title-prefix: "[bug] "
     labels: [background-agent, agent-bug, bug]
     github-token-for-extra-empty-commit: none

@@ -20,6 +20,7 @@ safe-outputs:
     labels: [background-agent, agent-backend-consistency]
     expires: false
   create-pull-request:
+    draft: false
     title-prefix: "[backend consistency] "
     labels: [background-agent, agent-backend-consistency]
     github-token-for-extra-empty-commit: none

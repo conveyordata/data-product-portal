@@ -90,7 +90,7 @@ Make the minimal change. Add the regression test or proof your role asks for. Ru
 
 ### 6. Report
 
-Create exactly one issue and one draft pull request:
+Create exactly one issue and one pull request:
 
 - Issue: what is wrong, where, the evidence, and the impact. Use the domain language from `CONTEXT.md`.
 - Pull request: read `.claude/skills/pr-description/SKILL.md` first and write the body with exactly its sections, in its order and with its headings. Start the body with `Fixes #<temporary id of the issue>` and put the evidence and the test or proof output under the matching sections.
