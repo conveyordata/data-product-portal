@@ -10,9 +10,8 @@ from app.data_products.output_ports.service import OutputPortService
 from app.database.database import engine
 from app.db_tool import seed_cmd
 from app.plugins.migrations import (
-    _CORE_VERSIONS_DIR,
     _config,
-    _owned_versions_dir,
+    _version_locations,
     migrate_all,
     owns_a_table,
 )
@@ -233,10 +232,7 @@ class TestOutputPortSearchRouter:
         # dropped in, since core's data still references it until then.
         url = engine.url.render_as_string(hide_password=False)
         owning_plugins = [p for p in plugin_registry.discovered() if owns_a_table(p)]
-        version_locations = [_CORE_VERSIONS_DIR] + [
-            _owned_versions_dir(p) for p in owning_plugins
-        ]
-        cfg = _config(version_locations, url)
+        cfg = _config(_version_locations(owning_plugins), url)
         command.downgrade(cfg, "base")
 
         migrate_all(owning_plugins, engine)

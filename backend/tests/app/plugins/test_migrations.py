@@ -17,12 +17,10 @@ from sqlalchemy_utils.functions import (
 )
 
 from app.plugins.migrations import (
-    _CORE_VERSIONS_DIR,
     VERSION_TABLE,
     _config,
     _configuration_table,
     _core_head,
-    _owned_versions_dir,
     _version_locations,
     check_latest_migration_core,
     migrate_all,
@@ -59,10 +57,7 @@ def _clean_fixture_plugins():
     # One config covering core and every fixture, not one per fixture: the
     # version table is shared, so a config that does not know one owner's
     # revisions cannot resolve its row and would fail before undoing anything.
-    version_locations = [_CORE_VERSIONS_DIR] + [
-        _owned_versions_dir(plugin) for plugin in [*installed(), *fixtures]
-    ]
-    config = _config(version_locations, url)
+    config = _config(_version_locations([*installed(), *fixtures]), url)
     for revision in ("example_0002_add_extra", "other_0001_create"):
         # Nothing to undo if that plugin never ran in this test.
         with suppress(Exception):

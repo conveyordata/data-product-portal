@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class IdentityType(str, Enum):
+class IdentityType(StrEnum):
     GROUP = "group"
     MACHINE_USER = "machine_user"
     USER = "user"
