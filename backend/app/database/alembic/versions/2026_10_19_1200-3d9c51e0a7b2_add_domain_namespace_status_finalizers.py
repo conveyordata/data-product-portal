@@ -23,7 +23,7 @@ depends_on: Union[str, Sequence[str], None] = None
 NAMESPACE_MAX_LENGTH = settings.NAMESPACE_MAX_LENGTH
 
 
-# Frozen copy of ResourceNameService._resource_name_from_name
+# Copy of ResourceNameService._resource_name_from_name as of this migration
 def _namespace_from_name(name: str) -> str:
     namespace = re.sub(
         r"[^a-z0-9+=,.@_-]", "", (name or "").lower().replace(" ", "-")

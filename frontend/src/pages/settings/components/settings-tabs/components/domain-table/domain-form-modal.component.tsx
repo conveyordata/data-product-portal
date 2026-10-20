@@ -52,8 +52,10 @@ export function CreateDomainModal({ isOpen, onClose, mode, initial }: Props) {
 
     const variableText = mode === 'create' ? createText : updateText;
 
-    const [sanitizeResourceName, { data: sanitizedResourceName, isSuccess: sanitizedResourceNameSuccess }] =
-        useLazySanitizeResourceNameQuery();
+    const [
+        sanitizeResourceName,
+        { data: sanitizedResourceName, isSuccess: sanitizedResourceNameSuccess, originalArgs: sanitizedName },
+    ] = useLazySanitizeResourceNameQuery();
     const [validateResourceName] = useLazyValidateResourceNameQuery();
     const { data: constraints } = useResourceNameConstraintsQuery();
     const [canEditResourceName, setCanEditResourceName] = useState<boolean>(false);
@@ -69,13 +71,21 @@ export function CreateDomainModal({ isOpen, onClose, mode, initial }: Props) {
 
     useEffect(() => {
         if (mode === 'create' && !canEditResourceName && sanitizedResourceNameSuccess && sanitizedResourceName) {
-            if (domainNameValue && !sanitizedResourceName.resource_name) {
+            if (domainNameValue && sanitizedName === domainNameValue && !sanitizedResourceName.resource_name) {
                 setCanEditResourceName(true);
             }
             form.setFieldValue('namespace', sanitizedResourceName.resource_name);
             form.validateFields(['namespace']);
         }
-    }, [form, mode, canEditResourceName, domainNameValue, sanitizedResourceName, sanitizedResourceNameSuccess]);
+    }, [
+        form,
+        mode,
+        canEditResourceName,
+        domainNameValue,
+        sanitizedName,
+        sanitizedResourceName,
+        sanitizedResourceNameSuccess,
+    ]);
 
     const resourceNameValidationCallback = useCallback(
         (resourceName: string) =>

@@ -778,6 +778,7 @@
     "The incompatible access mode details could not be loaded.": "The incompatible access mode details could not be loaded.",
     "The name of the Data Product Portal": "The name of the $t(Data Product Portal)",
     "The name of the Exploration is too long": "The name of the Exploration is too long",
+    "The name of the Exploration must contain a letter or a digit": "The name of the Exploration must contain a letter or a digit",
     "The name of your Data Product": "The name of your $t(Data Product)",
     "The name of your Exploration": "The name of your Exploration",
     "The name of your Output Port": "The name of your $t(Output Port)",

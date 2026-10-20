@@ -4,6 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError, OperationalError
 
 from app.configuration.domains.model import Domain as DomainModel
+from app.configuration.domains.model import domain_environment_table
 from app.configuration.domains.schema_request import DomainUpdate
 from app.configuration.domains.service import DomainService
 from app.configuration.domains.status import DomainStatus
@@ -19,7 +20,16 @@ def _remove_unknown_finalizer(service, id):
 def _update_unchanged(service, id):
     domain = service.db.get(DomainModel, id)
     service.update_domain(
-        id, DomainUpdate(name=domain.name, description=domain.description)
+        id,
+        DomainUpdate(
+            name=domain.name,
+            description=domain.description,
+            environment_ids=service.db.scalars(
+                select(domain_environment_table.c.environment_id).where(
+                    domain_environment_table.c.domain_id == id
+                )
+            ).all(),
+        ),
     )
 
 
@@ -59,11 +69,12 @@ def test_ensure_assignable__lets_other_assignments_through(session):
     DomainService(session).ensure_assignable(domain.id)
     try:
         with engine.connect() as other:
-            other.execute(
+            locked = other.scalar(
                 select(DomainModel.id)
                 .where(DomainModel.id == domain.id)
                 .with_for_update(read=True, nowait=True)
             )
+        assert locked == domain.id
     finally:
         session.rollback()
 

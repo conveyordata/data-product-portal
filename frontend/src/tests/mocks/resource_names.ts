@@ -13,12 +13,12 @@ export const mockGetResourceNamesConstraints = () => {
     );
 };
 
-export const mockResourceNamesSanitize = () => {
+export const mockResourceNamesSanitize = (resourceName?: string) => {
     server.use(
         http.get('*/api/v2/resource_names/sanitize', ({ request }) => {
             const url = new URL(request.url);
             const name = url.searchParams.get('name');
-            return HttpResponse.json({ resource_name: name });
+            return HttpResponse.json({ resource_name: resourceName ?? name });
         }),
     );
 };

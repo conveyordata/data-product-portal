@@ -74,7 +74,9 @@ class DomainService:
                 detail=f"Domain '{domain.name}' is pending deletion and cannot be used or modified",
             )
 
-    def _get_locked(self, id: UUID, read: bool = False, **kwargs) -> DomainModel:
+    def _get_locked(
+        self, id: UUID, read: bool = False, options: Sequence = ()
+    ) -> DomainModel:
         # Serializes assignments with deletion checks until the transaction commits;
         # a read lock still blocks deletion without serializing assignments
         return ensure_domain_exists(
@@ -82,7 +84,7 @@ class DomainService:
             self.db,
             with_for_update={"read": read},
             populate_existing=True,
-            **kwargs,
+            options=options,
         )
 
     def ensure_assignable(self, id: UUID) -> None:

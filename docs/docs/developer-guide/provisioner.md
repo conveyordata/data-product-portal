@@ -109,9 +109,10 @@ account, a VPC or VNet, Conveyor environments, a Databricks or Glue catalog. Reg
   for their provisioners. If a Data Product provisioner still needs the old Domain's
   infrastructure, for example to copy data to the new bucket, it should register its own
   finalizer on every Domain it uses and remove it once it no longer needs that Domain.
-- If a Domain turns out to still be in use when its last finalizer is removed, the portal
-  cancels the deletion and sets it back to `active`. Your reconciler then sees an active
-  Domain and provisions it again, so make sure provisioning is idempotent.
+- The portal never lets a Data Product or Exploration into a deleting Domain. Only a write
+  made directly in the database, outside the portal, could still leave one behind. If the
+  last finalizer is removed in that case, the portal cancels the deletion and sets the Domain
+  back to `active`, so your reconciler provisions it again. Keep provisioning idempotent.
 - Domain events are not fanned out to Data Products. A Data Product reconciler gets its
   Domain's `id`, `name` and `namespace` in the Data Product response; it only needs
   `get_domain` for the Domain's status, finalizers or environments.

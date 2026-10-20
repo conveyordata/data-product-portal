@@ -53,8 +53,10 @@ export const DataProductFormItems = <T extends DataProductCreate>({
         useGetDataProductsTypesQuery();
     const { data: { users: dataProductOwners = [] } = {}, isFetching: isFetchingUsers } = useGetUsersQuery();
     const { data: { tags: availableTags = [] } = {}, isFetching: isFetchingTags } = useGetTagsQuery();
-    const [sanitizeResourceName, { data: sanitizedResourceName, isSuccess: sanitizedResourceNameSuccess }] =
-        useLazySanitizeResourceNameQuery();
+    const [
+        sanitizeResourceName,
+        { data: sanitizedResourceName, isSuccess: sanitizedResourceNameSuccess, originalArgs: sanitizedName },
+    ] = useLazySanitizeResourceNameQuery();
     const [validateResourceName] = useLazyValidateResourceNameQuery();
     const { data: constraints } = useResourceNameConstraintsQuery();
     useEffect(() => {
@@ -126,10 +128,25 @@ export const DataProductFormItems = <T extends DataProductCreate>({
 
     useEffect(() => {
         if (mode === 'create' && !canEditResourceName && sanitizedResourceNameSuccess && sanitizedResourceName) {
+            if (
+                dataProductNameValue &&
+                sanitizedName === dataProductNameValue &&
+                !sanitizedResourceName.resource_name
+            ) {
+                setCanEditResourceName(true);
+            }
             form.setFieldValue('namespace', sanitizedResourceName.resource_name);
             form.validateFields(['namespace']);
         }
-    }, [form, mode, canEditResourceName, sanitizedResourceName, sanitizedResourceNameSuccess]);
+    }, [
+        form,
+        mode,
+        canEditResourceName,
+        dataProductNameValue,
+        sanitizedName,
+        sanitizedResourceName,
+        sanitizedResourceNameSuccess,
+    ]);
 
     const resourceNameValidationCallback = useCallback(
         (resourceName: string) =>

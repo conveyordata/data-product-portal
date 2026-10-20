@@ -67,6 +67,15 @@ export const NewExplorationForm = () => {
                     console.error('resource name should be fetched first');
                     return;
                 }
+                if (!sanitizedResourceName.resource_name) {
+                    form.setFields([
+                        {
+                            name: 'name',
+                            errors: [t('The name of the Exploration must contain a letter or a digit')],
+                        },
+                    ]);
+                    return;
+                }
                 const { justification, ...request } = values;
                 const response = await createExploration({
                     //For an Exploration we use the justification as description
@@ -102,6 +111,7 @@ export const NewExplorationForm = () => {
             navigate,
             sanitizedResourceNameSuccess,
             sanitizedResourceName,
+            form,
         ],
     );
     const initialValues = {
