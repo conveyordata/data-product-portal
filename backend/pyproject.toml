@@ -77,7 +77,7 @@ data-product-portal-sdk = { path = "../sdk", develop = true }
 optional = true
 
 [tool.poetry.group.dev.dependencies]
-poethepoet = "^0.48.0"
+poethepoet = ">=0.48,<0.50"
 mypy = ">=2.3.1"
 types-cachetools = "*"
 types-requests = "*"
