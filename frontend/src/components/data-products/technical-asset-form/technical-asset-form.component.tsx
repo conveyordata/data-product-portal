@@ -13,7 +13,6 @@ import { useGetDataProductQuery } from '@/store/api/services/generated/dataProdu
 import {
     type CreateTechnicalAssetRequest,
     useCreateTechnicalAssetMutation,
-    type ValidationError,
 } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
 import {
     type PlatformTile,
@@ -28,6 +27,7 @@ import {
     useLazyValidateResourceNameQuery,
     useResourceNameConstraintsQuery,
 } from '@/store/api/services/generated/resourceNamesApi.ts';
+import { getApiErrorDetail } from '@/store/common/errors.ts';
 import type { CustomDropdownItemProps } from '@/types/shared';
 import type { TechnicalAssetsCreateForm } from '@/types/technical-asset';
 import { dispatchMessage } from '@/utils/feedback.ts';
@@ -160,18 +160,7 @@ export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallback
             modalCallbackOnSubmit();
             form.resetFields();
         } catch (error) {
-            const detail = (error as { data?: { detail?: string | ValidationError[] } })?.data?.detail;
-            let errorMessage = t('Failed to create Technical Asset');
-
-            if (typeof detail === 'string' && detail.trim().length > 0) {
-                errorMessage = detail;
-            } else if (Array.isArray(detail) && detail.length > 0) {
-                const messages = detail.map((err) => err.msg).filter(Boolean);
-                if (messages.length > 0) {
-                    errorMessage = messages.join(', ');
-                }
-            }
-
+            const errorMessage = getApiErrorDetail(error) || t('Failed to create Technical Asset');
             dispatchMessage({ content: errorMessage, type: 'error' });
         }
     };
