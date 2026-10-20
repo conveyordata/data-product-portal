@@ -187,5 +187,3 @@ The identity provisioner is configured through the existing Portal administratio
 2. Add its OIDC binding.
 3. Create an approved Global role assignment targeting the machine-user identity.
 4. Give the role the required identity-management permissions.
-
-The OIDC binding proves which external principal is calling the API. The Global role determines what that principal is allowed to do. Removing or disabling the binding revokes authentication, while removing the Global role revokes its identity-management permissions.
