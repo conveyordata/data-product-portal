@@ -26799,7 +26799,7 @@ func (s *OutputPortQueryStatsDelete) Encode(e *jx.Encoder) {
 func (s *OutputPortQueryStatsDelete) encodeFields(e *jx.Encoder) {
 	{
 		e.FieldStart("date")
-		e.Str(s.Date)
+		json.EncodeDate(e, s.Date)
 	}
 	{
 		e.FieldStart("consumer_data_product_id")
@@ -26824,8 +26824,8 @@ func (s *OutputPortQueryStatsDelete) Decode(d *jx.Decoder) error {
 		case "date":
 			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				v, err := d.Str()
-				s.Date = string(v)
+				v, err := json.DecodeDate(d)
+				s.Date = v
 				if err != nil {
 					return err
 				}
@@ -27165,7 +27165,7 @@ func (s *OutputPortQueryStatsUpdate) Encode(e *jx.Encoder) {
 func (s *OutputPortQueryStatsUpdate) encodeFields(e *jx.Encoder) {
 	{
 		e.FieldStart("date")
-		e.Str(s.Date)
+		json.EncodeDate(e, s.Date)
 	}
 	{
 		e.FieldStart("consumer_data_product_id")
@@ -27195,8 +27195,8 @@ func (s *OutputPortQueryStatsUpdate) Decode(d *jx.Decoder) error {
 		case "date":
 			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				v, err := d.Str()
-				s.Date = string(v)
+				v, err := json.DecodeDate(d)
+				s.Date = v
 				if err != nil {
 					return err
 				}

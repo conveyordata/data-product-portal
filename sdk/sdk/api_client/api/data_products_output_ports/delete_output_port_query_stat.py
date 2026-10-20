@@ -74,6 +74,8 @@ def sync_detailed(
 ) -> Response[Any | HTTPValidationError]:
     """Delete Output Port Query Stat
 
+     Delete the query count of one consuming data product for one day.
+
     Args:
         data_product_id (UUID):
         id (UUID):
@@ -109,6 +111,8 @@ def sync(
 ) -> Any | HTTPValidationError | None:
     """Delete Output Port Query Stat
 
+     Delete the query count of one consuming data product for one day.
+
     Args:
         data_product_id (UUID):
         id (UUID):
@@ -138,6 +142,8 @@ async def asyncio_detailed(
     body: OutputPortQueryStatsDelete,
 ) -> Response[Any | HTTPValidationError]:
     """Delete Output Port Query Stat
+
+     Delete the query count of one consuming data product for one day.
 
     Args:
         data_product_id (UUID):
@@ -171,6 +177,8 @@ async def asyncio(
     body: OutputPortQueryStatsDelete,
 ) -> Any | HTTPValidationError | None:
     """Delete Output Port Query Stat
+
+     Delete the query count of one consuming data product for one day.
 
     Args:
         data_product_id (UUID):

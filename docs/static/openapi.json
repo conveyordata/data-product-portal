@@ -212,6 +212,7 @@
             "required": false,
             "schema": {
               "type": "integer",
+              "maximum": 3650,
               "minimum": 1,
               "default": 90,
               "title": "Day Range"
@@ -246,6 +247,7 @@
           "Data Products - Output ports"
         ],
         "summary": "Update Output Port Query Stats",
+        "description": "Upsert daily query counts for this output port, one entry per day and consuming data product. Existing counts for the same day and consuming data product are overwritten, so sending the same data twice is safe. If a request contains the same day and consuming data product more than once, the last entry is used.",
         "operationId": "update_output_port_query_stats",
         "parameters": [
           {
@@ -305,6 +307,7 @@
           "Data Products - Output ports"
         ],
         "summary": "Delete Output Port Query Stat",
+        "description": "Delete the query count of one consuming data product for one day.",
         "operationId": "delete_output_port_query_stat",
         "parameters": [
           {
@@ -15992,12 +15995,18 @@
         "properties": {
           "date": {
             "type": "string",
-            "title": "Date"
+            "format": "date",
+            "title": "Date",
+            "description": "Day to delete, in ISO 8601 format (YYYY-MM-DD)",
+            "examples": [
+              "2025-01-15"
+            ]
           },
           "consumer_data_product_id": {
             "type": "string",
             "format": "uuid",
-            "title": "Consumer Data Product Id"
+            "title": "Consumer Data Product Id",
+            "description": "ID of the consuming data product whose count to delete"
           }
         },
         "type": "object",
@@ -16063,16 +16072,28 @@
         "properties": {
           "date": {
             "type": "string",
-            "title": "Date"
+            "format": "date",
+            "title": "Date",
+            "description": "Day the queries were executed, in ISO 8601 format (YYYY-MM-DD)",
+            "examples": [
+              "2025-01-15"
+            ]
           },
           "consumer_data_product_id": {
             "type": "string",
             "format": "uuid",
-            "title": "Consumer Data Product Id"
+            "title": "Consumer Data Product Id",
+            "description": "ID of the data product that queried the output port"
           },
           "query_count": {
             "type": "integer",
-            "title": "Query Count"
+            "maximum": 2147483647.0,
+            "minimum": 0.0,
+            "title": "Query Count",
+            "description": "Number of queries the consuming data product ran against the output port on this day. Overwrites any count previously sent for the same day and consuming data product.",
+            "examples": [
+              42
+            ]
           }
         },
         "type": "object",
@@ -18657,7 +18678,8 @@
               "$ref": "#/components/schemas/OutputPortQueryStatsUpdate"
             },
             "type": "array",
-            "title": "Output Port Query Stats Updates"
+            "title": "Output Port Query Stats Updates",
+            "description": "Daily query counts per consuming data product"
           }
         },
         "type": "object",
