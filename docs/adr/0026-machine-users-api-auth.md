@@ -99,11 +99,11 @@ erDiagram
     identities {
         uuid id PK
         string type
+        string external_id
     }
 
     machine_users {
         uuid id PK, FK
-        string external_id
         string display_name
     }
 
