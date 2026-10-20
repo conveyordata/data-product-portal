@@ -409,6 +409,26 @@ async def test_event_handler_enqueues_data_product_on_environment_added():
     assert reconciler.calls == [data_product_id]
 
 
+async def test_event_handler_acknowledges_queued_and_ignored_events():
+    reconciler = RecordingReconciler()
+    manager = ReconcileManager(
+        {ResourceType.DOMAIN: reconciler}, default_delay=0.0, num_workers=1
+    )
+    manager.start()
+    handler = ReconcileEventHandler(manager)
+
+    queued = await handler.dispatch_routing(
+        _build_request(_envelope("domain.event", uuid.uuid4()))
+    )
+    ignored = await handler.dispatch_routing(
+        _build_request(_envelope("exploration.event", uuid.uuid4()))
+    )
+
+    await manager.stop()
+    assert queued == {"status": "queued"}
+    assert ignored["status"] == "ignored"
+
+
 async def test_event_handler_enqueues_input_port_target_producer():
     reconciler = RecordingReconciler()
     manager = ReconcileManager(
