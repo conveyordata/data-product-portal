@@ -7,7 +7,6 @@ permissions:
   contents: read
   issues: read
   pull-requests: read
-  copilot-requests: write
 timeout-minutes: 60
 sandbox:
   agent:
@@ -15,13 +14,16 @@ sandbox:
 imports:
   - shared/background-agent.md
 safe-outputs:
+  report-failure-as-issue: false
   create-issue:
     title-prefix: "[performance] "
     labels: [background-agent, agent-performance]
     expires: false
   create-pull-request:
+    draft: false
     title-prefix: "[performance] "
     labels: [background-agent, agent-performance]
+    github-token-for-extra-empty-commit: none
   noop:
     report-as-issue: false
 ---

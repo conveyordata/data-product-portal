@@ -7,7 +7,6 @@ permissions:
   contents: read
   issues: read
   pull-requests: read
-  copilot-requests: write
 timeout-minutes: 60
 sandbox:
   agent:
@@ -15,13 +14,16 @@ sandbox:
 imports:
   - shared/background-agent.md
 safe-outputs:
+  report-failure-as-issue: false
   create-issue:
     title-prefix: "[backend consistency] "
     labels: [background-agent, agent-backend-consistency]
     expires: false
   create-pull-request:
+    draft: false
     title-prefix: "[backend consistency] "
     labels: [background-agent, agent-backend-consistency]
+    github-token-for-extra-empty-commit: none
   noop:
     report-as-issue: false
 ---
