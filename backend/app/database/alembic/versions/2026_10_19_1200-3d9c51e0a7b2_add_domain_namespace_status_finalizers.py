@@ -70,7 +70,9 @@ def upgrade() -> None:
     op.add_column("domains", sa.Column("namespace", sa.String(), nullable=True))
     op.add_column(
         "domains",
-        sa.Column("status", sa.String(), nullable=False, server_default="active"),
+        sa.Column(
+            "status", sa.String(length=8), nullable=False, server_default="active"
+        ),
     )
     op.add_column(
         "domains",

@@ -256,7 +256,9 @@ class TestDomainsRouter:
         )
 
     @pytest.mark.usefixtures("admin")
-    def test_remove_finalizer__last_one_deletes_domain(self, client, capture_events):
+    def test_remove_finalizer__last_one_after_delete_request_deletes_domain(
+        self, client, capture_events
+    ):
         domain = DomainFactory(finalizers=["provisioner"])
         assert self.remove_domain(client, domain.id).status_code == 202
         response = self.remove_finalizer(client, domain.id, "provisioner")
@@ -265,7 +267,9 @@ class TestDomainsRouter:
         assert_event_in_queue("domain.event", capture_events)
 
     @pytest.mark.usefixtures("admin")
-    def test_remove_finalizer__last_one_deletes_deleting_domain(self, client):
+    def test_remove_finalizer__last_one_on_already_deleting_domain_deletes_it(
+        self, client
+    ):
         domain = DomainFactory(status=DomainStatus.DELETING, finalizers=["provisioner"])
         response = self.remove_finalizer(client, domain.id, "provisioner")
         assert response.status_code == 200

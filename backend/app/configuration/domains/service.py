@@ -142,15 +142,13 @@ class DomainService:
                 detail=f"Finalizer '{finalizer}' not found",
             )
         domain.finalizers = [f for f in domain.finalizers if f != finalizer]
-        if domain.status != DomainStatus.DELETING or domain.finalizers:
-            self.db.flush()
-            return False
-        if self._has_data_products(id):
+        should_delete = domain.status == DomainStatus.DELETING and not domain.finalizers
+        if should_delete and self._has_data_products(id):
             # Still in use, so cancel the deletion; provisioners reconcile it back
             domain.status = DomainStatus.ACTIVE
-            self.db.flush()
-            return False
-        return True
+            should_delete = False
+        self.db.flush()
+        return should_delete
 
     def _has_data_products(self, id: UUID) -> bool:
         return bool(
