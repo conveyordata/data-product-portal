@@ -272,7 +272,7 @@ describe('Cart', () => {
             mockUsersHttp(mockUsers);
             mockGetTags();
             mockGetResourceNamesConstraints();
-            mockResourceNamesSanitize();
+            mockResourceNamesSanitize(undefined, 300);
             mockResourceNamesValidate();
             mockGetDataProductTypes();
             mockDataProductLifecycles();

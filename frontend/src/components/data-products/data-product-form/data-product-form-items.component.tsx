@@ -55,7 +55,12 @@ export const DataProductFormItems = <T extends DataProductCreate>({
     const { data: { tags: availableTags = [] } = {}, isFetching: isFetchingTags } = useGetTagsQuery();
     const [
         sanitizeResourceName,
-        { data: sanitizedResourceName, isSuccess: sanitizedResourceNameSuccess, originalArgs: sanitizedName },
+        {
+            data: sanitizedResourceName,
+            isSuccess: sanitizedResourceNameSuccess,
+            isFetching: sanitizingResourceName,
+            originalArgs: sanitizedName,
+        },
     ] = useLazySanitizeResourceNameQuery();
     const [validateResourceName] = useLazyValidateResourceNameQuery();
     const { data: constraints } = useResourceNameConstraintsQuery();
@@ -126,27 +131,18 @@ export const DataProductFormItems = <T extends DataProductCreate>({
         }
     }, [form, mode, canEditResourceName, dataProductNameValue, fetchResourceNameDebounced]);
 
+    const namespaceIsCurrent =
+        sanitizedResourceNameSuccess && !sanitizingResourceName && sanitizedName === (dataProductNameValue ?? '');
+
     useEffect(() => {
-        if (mode === 'create' && !canEditResourceName && sanitizedResourceNameSuccess && sanitizedResourceName) {
-            if (
-                dataProductNameValue &&
-                sanitizedName === dataProductNameValue &&
-                !sanitizedResourceName.resource_name
-            ) {
+        if (mode === 'create' && !canEditResourceName && namespaceIsCurrent && sanitizedResourceName) {
+            if (dataProductNameValue && !sanitizedResourceName.resource_name) {
                 setCanEditResourceName(true);
             }
             form.setFieldValue('namespace', sanitizedResourceName.resource_name);
             form.validateFields(['namespace']);
         }
-    }, [
-        form,
-        mode,
-        canEditResourceName,
-        dataProductNameValue,
-        sanitizedName,
-        sanitizedResourceName,
-        sanitizedResourceNameSuccess,
-    ]);
+    }, [form, mode, canEditResourceName, dataProductNameValue, namespaceIsCurrent, sanitizedResourceName]);
 
     const resourceNameValidationCallback = useCallback(
         (resourceName: string) =>

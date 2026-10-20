@@ -28,7 +28,7 @@ describe('CreateDomainModal', () => {
     it('keeps suggesting the namespace when the user starts typing after the form settled', async () => {
         mockGetResourceNamesConstraints();
         mockResourceNamesValidate();
-        mockResourceNamesSanitize();
+        mockResourceNamesSanitize(undefined, 300);
         server.use(http.get('*/api/v2/configuration/environments', () => HttpResponse.json({ environments: [] })));
         const user = userEvent.setup();
         renderWithProviders(<CreateDomainModal isOpen onClose={vi.fn()} mode="create" />);
@@ -53,7 +53,9 @@ describe('CreateDomainModal', () => {
         await user.type(screen.getByLabelText('Name'), 'sales');
         expect(create).toBeDisabled();
 
-        await waitFor(() => expect(create).toBeEnabled());
-        expect(document.querySelector<HTMLInputElement>('[data-cy="namespace"]')?.value).toBe('sales');
+        await waitFor(() => {
+            expect(create).toBeEnabled();
+            expect(document.querySelector<HTMLInputElement>('[data-cy="namespace"]')?.value).toBe('sales');
+        });
     });
 });
