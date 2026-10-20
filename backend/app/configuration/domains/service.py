@@ -74,8 +74,14 @@ class DomainService:
                 detail=f"Domain '{domain.name}' is pending deletion and cannot be used or modified",
             )
 
+    def _get_locked(self, id: UUID) -> DomainModel:
+        # Serializes assignments with deletion checks until the transaction commits
+        return ensure_domain_exists(
+            id, self.db, with_for_update=True, populate_existing=True
+        )
+
     def ensure_assignable(self, id: UUID) -> None:
-        self._ensure_not_deleting(ensure_domain_exists(id, self.db))
+        self._ensure_not_deleting(self._get_locked(id))
 
     def create_domain(self, domain_create: DomainCreate) -> CreateDomainResponse:
         if (
@@ -107,7 +113,7 @@ class DomainService:
         return UpdateDomainResponse(id=id)
 
     def mark_for_deletion(self, id: UUID) -> bool:
-        domain = ensure_domain_exists(id, self.db)
+        domain = self._get_locked(id)
         self._ensure_no_data_products(id)
         if not domain.finalizers:
             return True
@@ -116,7 +122,7 @@ class DomainService:
         return False
 
     def add_finalizer(self, id: UUID, finalizer: str) -> None:
-        domain = ensure_domain_exists(id, self.db)
+        domain = self._get_locked(id)
         self._ensure_not_deleting(domain)
         if finalizer in domain.finalizers:
             return
@@ -124,7 +130,7 @@ class DomainService:
         self.db.flush()
 
     def remove_finalizer(self, id: UUID, finalizer: str) -> bool:
-        domain = ensure_domain_exists(id, self.db)
+        domain = self._get_locked(id)
         if finalizer not in domain.finalizers:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -160,10 +166,9 @@ class DomainService:
             ],
             execution_options=UNFILTERED,
         )
-        new_domain = ensure_domain_exists(to_id, self.db)
-        self._ensure_not_deleting(new_domain)
+        self.ensure_assignable(to_id)
 
         for data_product in domain.abstract_data_products:
-            data_product.domain_id = new_domain.id
+            data_product.domain_id = to_id
 
         self.db.flush()

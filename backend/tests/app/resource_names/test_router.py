@@ -37,6 +37,13 @@ class TestResourceNamesRouter:
         assert response.status_code == 200
         assert response.json()["validity"] == ResourceNameValidityType.DUPLICATE
 
+    @pytest.mark.parametrize("namespace", [".", "..", "..."])
+    def test_validate_domain__dots_only(self, client: TestClient, namespace):
+        response = self.validate_namespace(client, namespace, "domain")
+        assert response.json()["validity"] == (
+            ResourceNameValidityType.INVALID_CHARACTERS
+        )
+
     def test_validate_resource_name(self):
         """
         This test exists to ensure the case is tested where we have added a new model to the enum

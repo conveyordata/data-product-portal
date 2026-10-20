@@ -59,14 +59,25 @@ def fake_client() -> Client:
 @pytest.fixture
 def patch_get_exploration(monkeypatch):
     """Patch the portal lookup; returns a setter for the value reconcile will see."""
-    state: dict[uuid.UUID, GetExplorationResponse] = {}
+    state: dict[uuid.UUID, GetExplorationResponse | HTTPStatus | None] = {}
 
     async def fake_get(id, client):  # noqa: A002 - matches generated signature
-        return state.get(id)
+        value = state.get(id)
+        if isinstance(value, HTTPStatus):
+            return Response(status_code=value, content=b"", headers={}, parsed=None)
+        if value is None:
+            return Response(
+                status_code=HTTPStatus.NOT_FOUND, content=b"", headers={}, parsed=None
+            )
+        return Response(
+            status_code=HTTPStatus.OK, content=b"", headers={}, parsed=value
+        )
 
-    monkeypatch.setattr(prov_module.get_exploration, "asyncio", fake_get)
+    monkeypatch.setattr(prov_module.get_exploration, "asyncio_detailed", fake_get)
 
-    def set_exploration(exploration_id, value: GetExplorationResponse):
+    def set_exploration(
+        exploration_id, value: GetExplorationResponse | HTTPStatus | None
+    ):
         state[exploration_id] = value
 
     return set_exploration
@@ -74,26 +85,30 @@ def patch_get_exploration(monkeypatch):
 
 @pytest.fixture
 def patch_add_finalizer(monkeypatch):
-    """Capture calls to add_exploration_finalizer.asyncio."""
+    """Capture calls to add_exploration_finalizer.asyncio_detailed."""
     calls: list[dict] = []
 
     async def fake_add(id, client, body):  # noqa: A002
         calls.append({"id": id, "finalizer": body.finalizer})
+        return Response(status_code=HTTPStatus.OK, content=b"", headers={}, parsed=None)
 
-    monkeypatch.setattr(prov_module.add_exploration_finalizer, "asyncio", fake_add)
+    monkeypatch.setattr(
+        prov_module.add_exploration_finalizer, "asyncio_detailed", fake_add
+    )
     return calls
 
 
 @pytest.fixture
 def patch_remove_finalizer(monkeypatch):
-    """Capture calls to remove_exploration_finalizer.asyncio."""
+    """Capture calls to remove_exploration_finalizer.asyncio_detailed."""
     calls: list[dict] = []
 
     async def fake_remove(id, finalizer, client):  # noqa: A002
         calls.append({"id": id, "finalizer": finalizer})
+        return Response(status_code=HTTPStatus.OK, content=b"", headers={}, parsed=None)
 
     monkeypatch.setattr(
-        prov_module.remove_exploration_finalizer, "asyncio", fake_remove
+        prov_module.remove_exploration_finalizer, "asyncio_detailed", fake_remove
     )
     return calls
 
@@ -334,6 +349,7 @@ def patch_domain_api(monkeypatch):
     """Patch the domain endpoints; returns the state and recorded calls."""
     calls: dict = {
         "state": {},
+        "get_status": None,
         "add_status": HTTPStatus.OK,
         "remove_status": HTTPStatus.OK,
         "added": [],
@@ -341,7 +357,12 @@ def patch_domain_api(monkeypatch):
     }
 
     async def fake_get(id, client):  # noqa: A002
-        return calls["state"].get(id)
+        domain = calls["state"].get(id)
+        status = calls["get_status"] or (
+            HTTPStatus.OK if domain else HTTPStatus.NOT_FOUND
+        )
+        parsed = domain if status == HTTPStatus.OK else None
+        return Response(status_code=status, content=b"", headers={}, parsed=parsed)
 
     async def fake_add(id, client, body):  # noqa: A002
         calls["added"].append(id)
@@ -355,7 +376,7 @@ def patch_domain_api(monkeypatch):
             status_code=calls["remove_status"], content=b"", headers={}, parsed=None
         )
 
-    monkeypatch.setattr(prov_module.get_domain, "asyncio", fake_get)
+    monkeypatch.setattr(prov_module.get_domain, "asyncio_detailed", fake_get)
     monkeypatch.setattr(prov_module.add_domain_finalizer, "asyncio_detailed", fake_add)
     monkeypatch.setattr(
         prov_module.remove_domain_finalizer, "asyncio_detailed", fake_remove
@@ -432,3 +453,130 @@ async def test_domain_reconcile_fails_when_finalizer_removal_fails(
 
     with pytest.raises(Exception, match="Could not remove finalizer"):
         await provisioner.reconcile(did)
+
+
+async def test_domain_reconcile_deleted_domain_is_noop(
+    tmp_path: Path, fake_client, patch_domain_api
+):
+    provisioner = DomainProvisioner(client=fake_client, workspace=tmp_path)
+
+    await provisioner.reconcile(uuid.uuid4())
+
+    assert patch_domain_api["added"] == []
+    assert patch_domain_api["removed"] == []
+
+
+@pytest.mark.parametrize(
+    "status",
+    [
+        HTTPStatus.UNAUTHORIZED,
+        HTTPStatus.INTERNAL_SERVER_ERROR,
+        HTTPStatus.SERVICE_UNAVAILABLE,
+    ],
+)
+async def test_domain_reconcile_failed_fetch_retries(
+    tmp_path: Path, fake_client, patch_domain_api, status
+):
+    did = uuid.uuid4()
+    patch_domain_api["state"][did] = _fake_domain(
+        did, DomainStatus.DELETING, [FINALIZER_NAME]
+    )
+    patch_domain_api["get_status"] = status
+    provisioner = DomainProvisioner(client=fake_client, workspace=tmp_path)
+
+    with pytest.raises(Exception, match="Could not fetch domain"):
+        await provisioner.reconcile(did)
+
+    assert patch_domain_api["removed"] == []
+
+
+async def test_domain_list_ids_failed_listing_retries(
+    tmp_path: Path, fake_client, monkeypatch
+):
+    async def fake_list(client):
+        return None
+
+    monkeypatch.setattr(prov_module.get_domains, "asyncio", fake_list)
+    provisioner = DomainProvisioner(client=fake_client, workspace=tmp_path)
+
+    with pytest.raises(Exception, match="Could not list domains"):
+        await provisioner.list_ids()
+
+
+@pytest.mark.parametrize(
+    "status",
+    [
+        HTTPStatus.UNAUTHORIZED,
+        HTTPStatus.INTERNAL_SERVER_ERROR,
+        HTTPStatus.SERVICE_UNAVAILABLE,
+    ],
+)
+async def test_exploration_reconcile_failed_fetch_retries(
+    tmp_path: Path, fake_client, patch_get_exploration, patch_remove_finalizer, status
+):
+    eid = uuid.uuid4()
+    patch_get_exploration(eid, status)
+    provisioner = ExplorationProvisioner(client=fake_client, workspace=tmp_path)
+
+    with pytest.raises(Exception, match="Could not fetch exploration"):
+        await provisioner.reconcile(eid)
+
+    assert patch_remove_finalizer == []
+
+
+async def test_exploration_list_ids_failed_listing_retries(
+    tmp_path: Path, fake_client, monkeypatch
+):
+    async def fake_list(client):
+        return None
+
+    monkeypatch.setattr(prov_module.get_explorations, "asyncio", fake_list)
+    provisioner = ExplorationProvisioner(client=fake_client, workspace=tmp_path)
+
+    with pytest.raises(Exception, match="Could not list explorations"):
+        await provisioner.list_ids()
+
+
+async def test_exploration_reconcile_does_not_provision_without_finalizer(
+    tmp_path: Path, fake_client, patch_get_exploration, monkeypatch
+):
+    async def fake_add(id, client, body):  # noqa: A002
+        return Response(
+            status_code=HTTPStatus.CONFLICT, content=b"", headers={}, parsed=None
+        )
+
+    monkeypatch.setattr(
+        prov_module.add_exploration_finalizer, "asyncio_detailed", fake_add
+    )
+    eid = uuid.uuid4()
+    patch_get_exploration(eid, _fake_exploration(eid))
+    provisioner = ExplorationProvisioner(client=fake_client, workspace=tmp_path)
+
+    with pytest.raises(Exception, match="Could not add finalizer"):
+        await provisioner.reconcile(eid)
+
+    assert not (tmp_path / str(eid)).exists()
+
+
+async def test_exploration_reconcile_fails_when_finalizer_removal_fails(
+    tmp_path: Path, fake_client, patch_get_exploration, monkeypatch
+):
+    async def fake_remove(id, finalizer, client):  # noqa: A002
+        return Response(
+            status_code=HTTPStatus.BAD_REQUEST, content=b"", headers={}, parsed=None
+        )
+
+    monkeypatch.setattr(
+        prov_module.remove_exploration_finalizer, "asyncio_detailed", fake_remove
+    )
+    eid = uuid.uuid4()
+    patch_get_exploration(
+        eid,
+        _fake_exploration(
+            eid, status=AbstractDataProductStatus.DELETING, finalizers=[FINALIZER_NAME]
+        ),
+    )
+    provisioner = ExplorationProvisioner(client=fake_client, workspace=tmp_path)
+
+    with pytest.raises(Exception, match="Could not remove finalizer"):
+        await provisioner.reconcile(eid)

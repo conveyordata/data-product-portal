@@ -63,7 +63,6 @@ from sdk.api_client.models import (
     GetDomainsResponse,
     GetExplorationResponse,
     GetExplorationsResponse,
-    HTTPValidationError,
 )
 from sdk.api_client.models.abstract_data_product_status import AbstractDataProductStatus
 from sdk.api_client.models.finalizer_request import FinalizerRequest
@@ -111,16 +110,18 @@ class ExplorationProvisioner(Reconciler):
     async def reconcile(self, exploration_id: UUID):
         logger.info("Reconciling exploration %s", exploration_id)
 
-        response = await get_exploration.asyncio(id=exploration_id, client=self._client)
-        if response is None:
+        fetched = await get_exploration.asyncio_detailed(
+            id=exploration_id, client=self._client
+        )
+        if fetched.status_code == HTTPStatus.NOT_FOUND:
             # Exploration is fully gone from the portal. Because we always register
             # our finalizer before provisioning, the portal will only hard-delete
             # after we have already deprovisioned via the DELETING path. Nothing to do.
             return
-        if isinstance(response, HTTPValidationError):
-            raise Exception(response.detail)
-        if not isinstance(response, GetExplorationResponse):
-            raise Exception("Unexpected response")
+        if not isinstance(fetched.parsed, GetExplorationResponse):
+            # Any other failure (401, 500, ...) must be retried, not treated as deleted.
+            raise Exception(f"Could not fetch exploration: {fetched.status_code}")
+        response = fetched.parsed
 
         if response.status == AbstractDataProductStatus.DELETING:
             # Portal is waiting for us to finish clean-up before hard-deleting.
@@ -129,33 +130,34 @@ class ExplorationProvisioner(Reconciler):
             if FINALIZER_NAME not in (response.finalizers or []):
                 return
             self._deprovision(exploration_id)
-            await remove_exploration_finalizer.asyncio(
+            removed = await remove_exploration_finalizer.asyncio_detailed(
                 id=exploration_id,
                 finalizer=FINALIZER_NAME,
                 client=self._client,
             )
+            if removed.status_code != HTTPStatus.OK:
+                raise Exception(f"Could not remove finalizer: {removed.status_code}")
             return
 
         # Exploration is live (ACTIVE / PENDING / ARCHIVED).
         # Register the finalizer *before* provisioning so that even a partial
         # provision is cleaned up when the exploration is later deleted.
-        await add_exploration_finalizer.asyncio(
+        added = await add_exploration_finalizer.asyncio_detailed(
             id=exploration_id,
             client=self._client,
             body=FinalizerRequest(finalizer=FINALIZER_NAME),
         )
+        if added.status_code != HTTPStatus.OK:
+            raise Exception(f"Could not add finalizer: {added.status_code}")
         self._provision(exploration_id, response)
 
     async def list_ids(self) -> Iterable[UUID]:
         """List every exploration in the portal so each is reconciled on startup."""
         response = await get_explorations.asyncio(client=self._client)
-        if response is None:
-            return []
         if isinstance(response, GetExplorationsResponse):
             return [exploration.id for exploration in response.explorations]
-        if isinstance(response, HTTPValidationError):
-            raise Exception(response.detail)
-        raise Exception("Unexpected response")
+        # Raise so the startup sync retries instead of reconciling nothing.
+        raise Exception("Could not list explorations")
 
     def _provision(self, exploration_id: UUID, exploration: GetExplorationResponse):
         manifest = {
@@ -206,13 +208,12 @@ class DomainProvisioner(Reconciler):
     async def reconcile(self, domain_id: UUID):
         logger.info("Reconciling domain %s", domain_id)
 
-        response = await get_domain.asyncio(id=domain_id, client=self._client)
-        if response is None:
+        fetched = await get_domain.asyncio_detailed(id=domain_id, client=self._client)
+        if fetched.status_code == HTTPStatus.NOT_FOUND:
             return
-        if isinstance(response, HTTPValidationError):
-            raise Exception(response.detail)
-        if not isinstance(response, GetDomainResponse):
-            raise Exception("Unexpected response")
+        if not isinstance(fetched.parsed, GetDomainResponse):
+            raise Exception(f"Could not fetch domain: {fetched.status_code}")
+        response = fetched.parsed
 
         if response.status == DomainStatus.DELETING:
             if FINALIZER_NAME not in response.finalizers:
@@ -237,11 +238,9 @@ class DomainProvisioner(Reconciler):
 
     async def list_ids(self) -> Iterable[UUID]:
         response = await get_domains.asyncio(client=self._client)
-        if response is None:
-            return []
         if isinstance(response, GetDomainsResponse):
             return [domain.id for domain in response.domains]
-        raise Exception("Unexpected response")
+        raise Exception("Could not list domains")
 
     def _provision(self, domain: GetDomainResponse):
         manifest = {

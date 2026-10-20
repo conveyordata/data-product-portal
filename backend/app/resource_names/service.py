@@ -77,7 +77,7 @@ class ResourceNameService:
     ) -> ResourceNameValidation:
         if not (len(resource_name) <= self.max_length):
             validity = ResourceNameValidityType.INVALID_LENGTH
-        elif not re.match(r"^[a-z0-9+=,.@_-]+$", resource_name):
+        elif not re.match(r"^(?!\.+$)[a-z0-9+=,.@_-]+$", resource_name):
             validity = ResourceNameValidityType.INVALID_CHARACTERS
         elif not self._is_unique(resource_name, db, scope):
             validity = ResourceNameValidityType.DUPLICATE

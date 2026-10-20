@@ -22,7 +22,7 @@ def test_migration__backfills_unique_namespaces_from_names():
     command.downgrade(config, PREVIOUS)
     try:
         # One transaction per row so created_on, and thus suffix order, differs
-        for name in ["Risk & Compliance", "risk & compliance", "!!!", "Sales"]:
+        for name in ["Risk & Compliance", "risk & compliance", "!!!", "..", "Sales"]:
             with engine.begin() as connection:
                 connection.execute(
                     insert(table("domains", column("id"), column("name"))).values(
@@ -48,4 +48,5 @@ def test_migration__backfills_unique_namespaces_from_names():
     assert by_name["Risk & Compliance"][1] == "risk--compliance"
     assert by_name["risk & compliance"][1] == "risk--compliance-2"
     assert by_name["!!!"][1] == str(by_name["!!!"][0])
+    assert by_name[".."][1] == str(by_name[".."][0])
     assert by_name["Sales"][1:] == ("sales", "active", [])

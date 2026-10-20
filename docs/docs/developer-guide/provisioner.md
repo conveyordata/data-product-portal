@@ -102,8 +102,13 @@ account, a VPC or VNet, Conveyor environments, a Databricks or Glue catalog. Reg
 `Reconciler` for `ResourceType.DOMAIN` to manage it.
 
 - Name domain resources after the Domain's `namespace`. Unlike its `name`, it never changes.
-- A Domain can only be deleted once no Data Products or Explorations are assigned to it,
-  so domain teardown always runs after their provisioners have released their finalizers.
+- A Domain can only be deleted once no Data Products or Explorations are assigned to it.
+  When they are deleted, domain teardown runs after their provisioners have released their
+  finalizers. Migration is the exception: migrating moves Data Products and Explorations to
+  the new Domain at once, and the source Domain can be deleted right after, without waiting
+  for their provisioners. If a Data Product provisioner still needs the old Domain's
+  infrastructure, for example to copy data to the new bucket, it should register its own
+  finalizer on every Domain it uses and remove it once it no longer needs that Domain.
 - Domain events are not fanned out to Data Products. A Data Product reconciler gets its
   Domain's `id`, `name` and `namespace` in the Data Product response; it only needs
   `get_domain` for the Domain's status, finalizers or environments.
@@ -149,6 +154,7 @@ exploration with finalizers and a startup resync; the same pattern applies to
 
 ```python
 from collections.abc import Iterable
+from http import HTTPStatus
 from uuid import UUID
 
 from sdk import AuthenticatedClient, Client, Reconciler
@@ -170,40 +176,50 @@ class MyExplorationProvisioner(Reconciler):
         self._client = client
 
     async def reconcile(self, resource_id: UUID) -> None:
-        response = await get_exploration.asyncio(id=resource_id, client=self._client)
+        fetched = await get_exploration.asyncio_detailed(
+            id=resource_id, client=self._client
+        )
 
-        if response is None:
+        if fetched.status_code == HTTPStatus.NOT_FOUND:
             # Hard-deleted after we already removed our finalizer — nothing to do.
             return
 
-        if not isinstance(response, GetExplorationResponse):
-            raise Exception(f"Unexpected response: {response}")
+        if not isinstance(fetched.parsed, GetExplorationResponse):
+            # Any other failure (401, 500, ...) must be retried, not treated as deleted.
+            raise Exception(f"Could not fetch exploration: {fetched.status_code}")
+        response = fetched.parsed
 
         if response.status == AbstractDataProductStatus.DELETING:
             # Portal is waiting for us to clean up before hard-deleting.
             if FINALIZER_NAME not in (response.finalizers or []):
                 return  # another reconcile already deprovisioned
             self._deprovision(resource_id)
-            await remove_exploration_finalizer.asyncio(
+            removed = await remove_exploration_finalizer.asyncio_detailed(
                 id=resource_id, finalizer=FINALIZER_NAME, client=self._client
             )
+            if removed.status_code != HTTPStatus.OK:
+                raise Exception(f"Could not remove finalizer: {removed.status_code}")
             return
 
         # Exploration is live (ACTIVE / PENDING / ARCHIVED).
         # Register the finalizer *before* provisioning so even a partial
         # provision is cleaned up when the exploration is later deleted.
-        await add_exploration_finalizer.asyncio(
+        added = await add_exploration_finalizer.asyncio_detailed(
             id=resource_id,
             client=self._client,
             body=FinalizerRequest(finalizer=FINALIZER_NAME),
         )
+        if added.status_code != HTTPStatus.OK:
+            # Never provision without our finalizer, or deletion would skip cleanup.
+            raise Exception(f"Could not add finalizer: {added.status_code}")
         self._provision(resource_id, response)
 
     async def list_ids(self) -> Iterable[UUID]:
         response = await get_explorations.asyncio(client=self._client)
         if isinstance(response, GetExplorationsResponse):
             return [e.id for e in response.explorations]
-        return []
+        # Raise so the startup sync retries instead of reconciling nothing.
+        raise Exception("Could not list explorations")
 
     def _provision(self, resource_id: UUID, exploration: GetExplorationResponse) -> None:
         # Create or update your real infrastructure here.

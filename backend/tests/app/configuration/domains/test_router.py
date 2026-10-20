@@ -62,6 +62,12 @@ class TestDomainsRouter:
         assert response.status_code == 400
 
     @pytest.mark.usefixtures("admin")
+    def test_create_domain__dots_only_namespace(self, domain_payload, client):
+        domain_payload["namespace"] = ".."
+        response = self.create_domain(client, domain_payload)
+        assert response.status_code == 400
+
+    @pytest.mark.usefixtures("admin")
     def test_create_domain__invalid_namespace(self, domain_payload, client):
         domain_payload["namespace"] = "Invalid Namespace!"
         response = self.create_domain(client, domain_payload)

@@ -28,7 +28,8 @@ def _namespace_from_name(name: str) -> str:
     namespace = re.sub(
         r"[^a-z0-9+=,.@_-]", "", (name or "").lower().replace(" ", "-")
     ).strip("-")
-    return namespace[:NAMESPACE_MAX_LENGTH]
+    namespace = namespace[:NAMESPACE_MAX_LENGTH]
+    return "" if set(namespace) <= {"."} else namespace
 
 
 def _unique(base: str, taken: set[str]) -> str:

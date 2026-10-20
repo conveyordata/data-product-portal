@@ -63,7 +63,7 @@ class NamespaceValidator:
     ) -> NamespaceValidation:
         if not (len(namespace) <= self.max_length):
             validity = ResourceNameValidityType.INVALID_LENGTH
-        elif not re.match(r"^[a-z0-9+=,.@_-]+$", namespace):
+        elif not re.match(r"^(?!\.+$)[a-z0-9+=,.@_-]+$", namespace):
             validity = ResourceNameValidityType.INVALID_CHARACTERS
         elif not self._is_unique(namespace, db, scope):
             validity = ResourceNameValidityType.DUPLICATE
