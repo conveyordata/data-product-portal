@@ -6,6 +6,10 @@ sidebar_position: 200
 
 ## Unreleased
 
+### breaking changes
+
+- **[Helm]**: The blue and green themes and the `theme_configuration` value were removed. The portal always uses the Dataminded theme.
+
 ## 0.8.0
 
 ### breaking changes

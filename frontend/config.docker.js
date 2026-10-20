@@ -36,12 +36,6 @@ const config = (() => {
          */
         OIDC_POST_LOGOUT_REDIRECT_URI: '',
         /**
-         * The Theme configuration for your application.
-         * Pick one from blueThemeConfig, datamindedThemeConfig, greenThemeConfig.
-         * @description This is used to customize the appearance of your application.
-         */
-        THEME_CONFIGURATION: 'datamindedthemeconfig',
-        /**
          * The PostHog key and host for tracking events.
          * @description This is used to send events to PostHog for analytics.
          */

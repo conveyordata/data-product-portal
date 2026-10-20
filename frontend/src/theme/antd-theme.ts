@@ -4,14 +4,51 @@ const { getDesignToken } = theme;
 
 const token = getDesignToken();
 
+const spacingTokens = {
+    sizeUnit: 4,
+    sizeStep: 4,
+    marginSM: 16,
+    margin: 24,
+    marginMD: 24,
+    marginLG: 32,
+    marginXL: 32,
+    paddingSM: 16,
+    padding: 24,
+    paddingMD: 24,
+    paddingLG: 32,
+};
+
 const datamindedThemeConfig: ThemeConfig = {
     components: {
         Layout: {
             siderBg: '#080635',
+            bodyBg: '#FFF',
             headerBg: token.colorBgContainer,
         },
+        Button: {
+            borderRadius: 10,
+            primaryShadow: 'none',
+            dangerShadow: 'none', // Remove shadow from danger buttons to align with design
+        },
         Menu: {
+            colorPrimaryBg: '#543EDC',
             darkItemBg: '#080635',
+            itemBorderRadius: 10,
+            darkPopupBg: '#080635',
+            subMenuItemBorderRadius: 10,
+            itemMarginInline: 5,
+        },
+        Select: {
+            optionSelectedBg: 'transparent',
+        },
+        Table: {
+            headerBorderRadius: 8,
+        },
+        Input: {
+            activeShadow: 'none',
+        },
+        Badge: {
+            colorInfo: '#E6B14B',
         },
     },
     token: {
@@ -20,11 +57,42 @@ const datamindedThemeConfig: ThemeConfig = {
         // -------- Brand Colors ---------
         // Primary
         colorPrimary: '#543EDC',
+        // Success
+        colorSuccess: token.green6,
+        colorSuccessBg: token.green1,
+        colorSuccessBgHover: token.green2,
+        colorSuccessBorder: token.green3,
+        colorSuccessBorderHover: token.green4,
+        colorSuccessHover: token.green4,
+        colorSuccessActive: token.green7,
+        colorSuccessText: token.green6,
+        colorSuccessTextHover: token.green5,
+        colorSuccessTextActive: token.green7,
+        // Warning
+        colorWarning: token.gold6,
+        colorWarningBg: token.gold1,
+        colorWarningBgHover: token.gold2,
+        colorWarningBorder: token.gold3,
+        colorWarningBorderHover: token.gold4,
+        colorWarningHover: token.gold4,
+        colorWarningActive: token.gold7,
+        colorWarningText: token.gold6,
+        colorWarningTextHover: token.gold5,
+        colorWarningTextActive: token.gold7,
         // Info
         colorInfo: '#5B21B6',
-
+        colorInfoBg: '#F5F3FF',
+        colorInfoBgHover: token.colorPrimaryBgHover,
+        colorInfoBorder: '#DDD6FE',
+        colorInfoBorderHover: token.colorPrimaryBorderHover,
+        colorInfoHover: token.colorPrimaryHover,
+        colorInfoActive: token.colorPrimaryActive,
+        colorInfoText: '#5B21B6',
+        colorInfoTextHover: token.colorPrimaryTextHover,
+        colorInfoTextActive: token.colorPrimaryTextActive,
+        ...spacingTokens,
     },
+    cssVar: {},
 };
-
 
 export { datamindedThemeConfig };
