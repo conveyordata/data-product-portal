@@ -51,7 +51,7 @@ class DataProductCreate:
 
     def to_dict(self) -> dict[str, Any]:
         from ..models.request_input_ports_for_data_product_request import (
-            RequestInputPortsForDataProductRequest,
+            RequestInputPortsForDataProductRequest,  # noqa: PLC0415
         )
 
         name = self.name
@@ -123,7 +123,7 @@ class DataProductCreate:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.request_input_ports_for_data_product_request import (
-            RequestInputPortsForDataProductRequest,
+            RequestInputPortsForDataProductRequest,  # noqa: PLC0415
         )
 
         d = dict(src_dict)

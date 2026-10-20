@@ -59,7 +59,7 @@ class OutputPortSettingValue:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.data_product_setting import DataProductSetting
+        from ..models.data_product_setting import DataProductSetting  # noqa: PLC0415
 
         d = dict(src_dict)
         id = UUID(d.pop("id"))

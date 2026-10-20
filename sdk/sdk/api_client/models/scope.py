@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class Scope(str, Enum):
+class Scope(StrEnum):
     DATASET = "dataset"
     DATA_PRODUCT = "data_product"
     DOMAIN = "domain"

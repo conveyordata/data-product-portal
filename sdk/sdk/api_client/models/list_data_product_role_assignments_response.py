@@ -44,7 +44,7 @@ class ListDataProductRoleAssignmentsResponse:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.data_product_role_assignment_response import (
-            DataProductRoleAssignmentResponse,
+            DataProductRoleAssignmentResponse,  # noqa: PLC0415
         )
 
         d = dict(src_dict)
