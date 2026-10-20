@@ -54,7 +54,12 @@ export function CreateDomainModal({ isOpen, onClose, mode, initial }: Props) {
 
     const [
         sanitizeResourceName,
-        { data: sanitizedResourceName, isSuccess: sanitizedResourceNameSuccess, originalArgs: sanitizedName },
+        {
+            data: sanitizedResourceName,
+            isSuccess: sanitizedResourceNameSuccess,
+            isFetching: sanitizingResourceName,
+            originalArgs: sanitizedName,
+        },
     ] = useLazySanitizeResourceNameQuery();
     const [validateResourceName] = useLazyValidateResourceNameQuery();
     const { data: constraints } = useResourceNameConstraintsQuery();
@@ -69,23 +74,18 @@ export function CreateDomainModal({ isOpen, onClose, mode, initial }: Props) {
         }
     }, [form, mode, canEditResourceName, domainNameValue, fetchResourceNameDebounced]);
 
+    const namespaceIsCurrent =
+        sanitizedResourceNameSuccess && !sanitizingResourceName && sanitizedName === (domainNameValue ?? '');
+
     useEffect(() => {
-        if (mode === 'create' && !canEditResourceName && sanitizedResourceNameSuccess && sanitizedResourceName) {
-            if (domainNameValue && sanitizedName === domainNameValue && !sanitizedResourceName.resource_name) {
+        if (mode === 'create' && !canEditResourceName && namespaceIsCurrent && sanitizedResourceName) {
+            if (domainNameValue && !sanitizedResourceName.resource_name) {
                 setCanEditResourceName(true);
             }
             form.setFieldValue('namespace', sanitizedResourceName.resource_name);
             form.validateFields(['namespace']);
         }
-    }, [
-        form,
-        mode,
-        canEditResourceName,
-        domainNameValue,
-        sanitizedName,
-        sanitizedResourceName,
-        sanitizedResourceNameSuccess,
-    ]);
+    }, [form, mode, canEditResourceName, domainNameValue, namespaceIsCurrent, sanitizedResourceName]);
 
     const resourceNameValidationCallback = useCallback(
         (resourceName: string) =>
@@ -122,7 +122,12 @@ export function CreateDomainModal({ isOpen, onClose, mode, initial }: Props) {
                 onClose();
             }}
             footer={[
-                <Button key="submit" type="primary" onClick={() => form.submit()}>
+                <Button
+                    key="submit"
+                    type="primary"
+                    onClick={() => form.submit()}
+                    disabled={mode === 'create' && !canEditResourceName && !namespaceIsCurrent}
+                >
                     {variableText.submitButtonText}
                 </Button>,
                 <Button
@@ -171,7 +176,7 @@ export function CreateDomainModal({ isOpen, onClose, mode, initial }: Props) {
                     label={t('Description')}
                     rules={[{ required: true, message: t('Please provide a description') }]}
                 >
-                    <Input />
+                    <Input.TextArea rows={4} />
                 </Form.Item>
             </Form>
         </Modal>

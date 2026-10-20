@@ -597,6 +597,20 @@ class TestDataProductsRouter:
         )
         assert response.status_code == 200
 
+    def test_add_finalizer__rejects_slash(self, client):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        data_product = DataProductFactory()
+        role = RoleFactory(
+            scope=Scope.GLOBAL,
+            permissions=[Action.GLOBAL__MANAGE_FINALIZERS],
+        )
+        GlobalRoleAssignmentFactory(identity_id=user.id, role_id=role.id)
+        response = client.post(
+            f"{ENDPOINT}/{data_product.id}/finalizers",
+            json={"finalizer": "team/provisioner"},
+        )
+        assert response.status_code == 422
+
     def test_remove_finalizer_no_permission(self, client):
         data_product = DataProductFactory(finalizers=["my-system"])
         response = client.delete(

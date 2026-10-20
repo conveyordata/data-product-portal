@@ -33,6 +33,7 @@ from app.configuration.output_port_access_types.model import (
 from app.configuration.tags.model import Tag as TagModel
 from app.configuration.tags.model import ensure_tag_exists
 from app.core.authz import Authorization
+from app.core.context import discard_events
 from app.core.embed.model import get_text_embedding_model
 from app.core.namespace.validation import (
     NamespaceValidator,
@@ -320,26 +321,28 @@ class OutputPortService:
         dataset_ids = self.db.scalars(
             select(OutputPortModel.id).execution_options(**UNFILTERED)
         ).all()
-        # Process in batches to reduce load
-        for i in range(0, len(dataset_ids), batch_size):
-            batch_ids = dataset_ids[i : i + batch_size]
+        # Search index maintenance is not a domain change, so emit no webhook events
+        with discard_events():
+            # Process in batches to reduce load
+            for i in range(0, len(dataset_ids), batch_size):
+                batch_ids = dataset_ids[i : i + batch_size]
 
-            batch_datasets = (
-                self.db.scalars(
-                    select(OutputPortModel)
-                    .where(OutputPortModel.id.in_(batch_ids))
-                    .options(*self.recalculate_embeddings_load_options())
-                    .execution_options(**UNFILTERED),
+                batch_datasets = (
+                    self.db.scalars(
+                        select(OutputPortModel)
+                        .where(OutputPortModel.id.in_(batch_ids))
+                        .options(*self.recalculate_embeddings_load_options())
+                        .execution_options(**UNFILTERED),
+                    )
+                    .unique()
+                    .all()
                 )
-                .unique()
-                .all()
-            )
 
-            if batch_datasets:
-                self._recalculate_embeddings_and_search_vector(batch_datasets)
-                self.db.flush()
-        # Allow commit since this is a batch operation and we want to persist changes. Not used in routing
-        self.db.commit()  # noqa: allow-commit
+                if batch_datasets:
+                    self._recalculate_embeddings_and_search_vector(batch_datasets)
+                    self.db.flush()
+            # Allow commit since this is a batch operation and we want to persist changes. Not used in routing
+            self.db.commit()  # noqa: allow-commit
 
     def _fetch_tags(self, tag_ids: Iterable[UUID] = ()) -> list[TagModel]:
         tags = []

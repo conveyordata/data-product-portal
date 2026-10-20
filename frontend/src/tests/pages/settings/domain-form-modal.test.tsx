@@ -40,4 +40,20 @@ describe('CreateDomainModal', () => {
         await waitFor(() => expect(namespace()?.value).toBe('sales'));
         expect(namespace()).toBeDisabled();
     });
+
+    it('blocks creating until the namespace for the current name has been generated', async () => {
+        mockGetResourceNamesConstraints();
+        mockResourceNamesValidate();
+        mockResourceNamesSanitize();
+        server.use(http.get('*/api/v2/configuration/environments', () => HttpResponse.json({ environments: [] })));
+        const user = userEvent.setup();
+        renderWithProviders(<CreateDomainModal isOpen onClose={vi.fn()} mode="create" />);
+        const create = screen.getByRole('button', { name: 'Create' });
+
+        await user.type(screen.getByLabelText('Name'), 'sales');
+        expect(create).toBeDisabled();
+
+        await waitFor(() => expect(create).toBeEnabled());
+        expect(document.querySelector<HTMLInputElement>('[data-cy="namespace"]')?.value).toBe('sales');
+    });
 });

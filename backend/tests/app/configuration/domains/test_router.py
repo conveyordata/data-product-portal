@@ -307,6 +307,16 @@ class TestDomainsRouter:
         response = self.remove_finalizer(client, uuid4(), "provisioner")
         assert response.status_code == 404
 
+    @pytest.mark.parametrize("finalizer", ["", "   ", "team/provisioner"])
+    @pytest.mark.usefixtures("admin")
+    def test_add_finalizer__rejects_names_that_cannot_be_removed(
+        self, client, finalizer
+    ):
+        domain = DomainFactory()
+        response = self.add_finalizer(client, domain.id, finalizer)
+        assert response.status_code == 422
+        assert self.get_domain(client, domain.id).json()["finalizers"] == []
+
     @pytest.mark.usefixtures("admin")
     def test_add_finalizer__deleting(self, client):
         domain = DomainFactory(status=DomainStatus.DELETING, finalizers=["a"])
