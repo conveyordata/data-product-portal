@@ -188,7 +188,9 @@ class OutputPortService:
             query.options(
                 selectinload(OutputPortModel.technical_asset_links),
                 selectinload(OutputPortModel.data_product_settings),
-                selectinload(OutputPortModel.data_product),
+                joinedload(OutputPortModel.data_product).selectinload(
+                    DataProductModel.environments
+                ),
             ),
             execution_options={"skip_data_product_visibility_filter": True},
         )

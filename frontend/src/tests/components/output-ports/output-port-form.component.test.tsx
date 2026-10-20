@@ -49,6 +49,7 @@ describe('OutputPortForm', () => {
             namespace: 'hidden',
             status: AbstractDataProductStatus.Active,
             visibility: DataProductVisibility.Hidden,
+            environments: [],
             tags: [],
             about: '',
             usage: null,

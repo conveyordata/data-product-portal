@@ -9651,6 +9651,9 @@
                     "$ref": "#/components/schemas/CloudEvent_DataProductEvent"
                   },
                   {
+                    "$ref": "#/components/schemas/CloudEvent_DataProductEnvironmentAddedEvent"
+                  },
+                  {
                     "$ref": "#/components/schemas/CloudEvent_InputPortEvent"
                   },
                   {
@@ -9678,6 +9681,7 @@
                   "mapping": {
                     "exploration.event": "#/components/schemas/CloudEvent_ExplorationEvent",
                     "data_product.event": "#/components/schemas/CloudEvent_DataProductEvent",
+                    "data_product.environment_added": "#/components/schemas/CloudEvent_DataProductEnvironmentAddedEvent",
                     "input_port.event": "#/components/schemas/CloudEvent_InputPortEvent",
                     "data_product_role_assignment.event": "#/components/schemas/CloudEvent_DataProductRoleAssignmentEvent",
                     "output_port_role_assignment.event": "#/components/schemas/CloudEvent_OutputPortRoleAssignmentEvent",
@@ -10347,6 +10351,50 @@
           "input_port_id"
         ],
         "title": "CancelInputPortForExplorationResponse"
+      },
+      "CloudEvent_DataProductEnvironmentAddedEvent": {
+        "properties": {
+          "specversion": {
+            "type": "string",
+            "title": "Specversion",
+            "description": "The CloudEvents specification version.",
+            "default": "1.0"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "A unique UUID identifier for this specific event instance."
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "description": "Identifies the context in which an event happened.",
+            "default": "data-product-portal"
+          },
+          "type": {
+            "type": "string",
+            "const": "data_product.environment_added",
+            "title": "Type",
+            "description": "The unique type string belonging to this event.",
+            "default": "data_product.environment_added"
+          },
+          "time": {
+            "type": "string",
+            "title": "Time",
+            "description": "Timestamp of when the event occurred in ISO 8601 UTC format."
+          },
+          "data": {
+            "$ref": "#/components/schemas/DataProductEnvironmentAddedEvent",
+            "description": "The specific data payload corresponding to this event type."
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "time",
+          "data"
+        ],
+        "title": "CloudEvent_DataProductEnvironmentAddedEvent"
       },
       "CloudEvent_DataProductEvent": {
         "properties": {
@@ -11345,6 +11393,22 @@
             "format": "uuid",
             "title": "Lifecycle Id"
           },
+          "environment_ids": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "type": "array",
+                "minItems": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Environment Ids"
+          },
           "visibility": {
             "$ref": "#/components/schemas/DataProductVisibility",
             "default": "discoverable"
@@ -11380,6 +11444,55 @@
           "owners"
         ],
         "title": "DataProductCreate"
+      },
+      "DataProductEnvironment": {
+        "properties": {
+          "environment_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Environment Id"
+          },
+          "environment": {
+            "$ref": "#/components/schemas/EnvironmentGetItem"
+          },
+          "creation_date": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Creation Date"
+          }
+        },
+        "type": "object",
+        "required": [
+          "environment_id",
+          "environment",
+          "creation_date"
+        ],
+        "title": "DataProductEnvironment"
+      },
+      "DataProductEnvironmentAddedEvent": {
+        "properties": {
+          "data_product_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Data Product Id"
+          },
+          "environment": {
+            "type": "string",
+            "title": "Environment"
+          },
+          "creation_date": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Creation Date"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data_product_id",
+          "environment",
+          "creation_date"
+        ],
+        "title": "DataProductEnvironmentAddedEvent"
       },
       "DataProductEvent": {
         "properties": {
@@ -12252,6 +12365,22 @@
             "type": "string",
             "format": "uuid",
             "title": "Lifecycle Id"
+          },
+          "environment_ids": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "type": "array",
+                "minItems": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Environment Ids"
           }
         },
         "type": "object",
@@ -13217,6 +13346,13 @@
           "visibility": {
             "$ref": "#/components/schemas/DataProductVisibility"
           },
+          "environments": {
+            "items": {
+              "$ref": "#/components/schemas/DataProductEnvironment"
+            },
+            "type": "array",
+            "title": "Environments"
+          },
           "about": {
             "anyOf": [
               {
@@ -13243,6 +13379,7 @@
           "type",
           "lifecycle",
           "visibility",
+          "environments",
           "about"
         ],
         "title": "GetDataProductResponse"
@@ -13362,6 +13499,13 @@
           "visibility": {
             "$ref": "#/components/schemas/DataProductVisibility"
           },
+          "environments": {
+            "items": {
+              "$ref": "#/components/schemas/DataProductEnvironment"
+            },
+            "type": "array",
+            "title": "Environments"
+          },
           "user_count": {
             "type": "integer",
             "title": "User Count"
@@ -13389,6 +13533,7 @@
           "type",
           "lifecycle",
           "visibility",
+          "environments",
           "user_count",
           "input_port_count",
           "technical_asset_count"
@@ -14028,6 +14173,13 @@
           "owner": {
             "$ref": "#/components/schemas/DataProduct"
           },
+          "environments": {
+            "items": {
+              "$ref": "#/components/schemas/DataProductEnvironment"
+            },
+            "type": "array",
+            "title": "Environments"
+          },
           "output_port_links": {
             "items": {
               "$ref": "#/components/schemas/OutputPortLink"
@@ -14071,6 +14223,7 @@
           "access_modes",
           "configuration",
           "owner",
+          "environments",
           "output_port_links",
           "tags",
           "sourceAligned",
