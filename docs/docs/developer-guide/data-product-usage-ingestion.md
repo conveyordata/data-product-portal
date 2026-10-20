@@ -34,7 +34,7 @@ The owner roles have both by default (see [RBAC](./rbac.md)).
 - [`GET /api/v2/data_products/{data_product_id}/output_ports/{id}/query_stats`](/docs/api/#tag/Data-Products-Output-ports/operation/get_output_port_query_stats) - Read the aggregated statistics shown in the dashboard
 
 The `GET` endpoint returns what the dashboard shows, not the rows you pushed: counts are summed per week over the last 90 days by default (see the `granularity` and `day_range` parameters),
-consuming data products beyond the top 5 are merged into "Other" with ID `00000000-0000-0000-0000-000000000000`, and periods without data are filled with zeros. If the output port has no data at all in the range, the response is an empty list.
+consuming data products beyond the top 5 are merged into "Other" with ID `00000000-0000-0000-0000-000000000000`, and periods without data are filled with zeros. If the output port has no data at all in the range, the response is `{"output_port_query_stats_responses": []}`.
 
 Send one entry per day and consuming data product. The consuming data product is the one whose members or technical identities ran the queries,
 so you need to map the users or roles in your platform's query logs to the ID of the data product they act for.
