@@ -1632,13 +1632,13 @@ func (s *FinalizerRequest) Validate() error {
 	var failures []validate.FieldError
 	if err := func() error {
 		if err := (validate.String{
-			MinLength:     1,
-			MinLengthSet:  true,
+			MinLength:     0,
+			MinLengthSet:  false,
 			MaxLength:     0,
 			MaxLengthSet:  false,
 			Email:         false,
 			Hostname:      false,
-			Regex:         regexMap["^[^/]+$"],
+			Regex:         regexMap["^(?:[^/\\s][^/]*)?[^/\\s.](?:[^/]*[^/\\s])?$"],
 			MinNumeric:    0,
 			MinNumericSet: false,
 			MaxNumeric:    0,

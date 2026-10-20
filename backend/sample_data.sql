@@ -383,7 +383,7 @@ INSERT INTO public.domains (id, name, namespace, description, created_on, update
 
 INSERT INTO public.domains (id, name, namespace, description, created_on, updated_on, deleted_at) VALUES ('{{ commercial_and_customer_relationship_mgt_domain_id }}'::uuid, 'Commercial and Customer Relationship Management', 'commercial-and-customer-relationship-management', 'Commercial and CRM', '2025-10-28 16:30:41.743083', NULL, NULL);
 
-INSERT INTO public.domains (id, name, namespace, description, created_on, updated_on, deleted_at) VALUES ('{{ environment_demo_domain_id }}'::uuid, 'Environment Demo', 'Data Product environment examples.', timezone('utc'::text, current_timestamp), NULL, NULL);
+INSERT INTO public.domains (id, name, namespace, description, created_on, updated_on, deleted_at) VALUES ('{{ environment_demo_domain_id }}'::uuid, 'Environment Demo', 'environment-demo', 'Data Product environment examples.', timezone('utc'::text, current_timestamp), NULL, NULL);
 
 -- DATA PRODUCT TYPES
 -- ...existing data product types code...

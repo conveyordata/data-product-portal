@@ -10,7 +10,7 @@ import (
 )
 
 var regexMap = map[string]ogenregex.Regexp{
-	"^[^/]+$": ogenregex.MustCompile("^[^/]+$"),
+	"^(?:[^/\\s][^/]*)?[^/\\s.](?:[^/]*[^/\\s])?$": ogenregex.MustCompile("^(?:[^/\\s][^/]*)?[^/\\s.](?:[^/]*[^/\\s])?$"),
 }
 
 type (

@@ -12,7 +12,7 @@ from app.plugins.migrations import (
 from app.plugins.registry import plugin_registry
 from tests import engine
 
-PREVIOUS = "b71a5f3e29cd"
+PREVIOUS = "a82c9b3e7d41"
 
 
 def test_migration__backfills_unique_namespaces_from_names():

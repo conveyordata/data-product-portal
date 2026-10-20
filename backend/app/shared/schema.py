@@ -62,5 +62,5 @@ class IdNameSchema(ORMModel):
 class FinalizerRequest(ORMModel):
     # Removed via DELETE .../finalizers/{finalizer}, so it must be one path segment
     finalizer: Annotated[
-        str, StringConstraints(strip_whitespace=True, min_length=1, pattern=r"^[^/]+$")
+        str, StringConstraints(pattern=r"^(?:[^/\s][^/]*)?[^/\s.](?:[^/]*[^/\s])?$")
     ]

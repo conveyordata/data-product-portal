@@ -271,7 +271,9 @@ class TestDomainsRouter:
         response = self.remove_finalizer(client, uuid4(), "provisioner")
         assert response.status_code == 404
 
-    @pytest.mark.parametrize("finalizer", ["", "   ", "team/provisioner"])
+    @pytest.mark.parametrize(
+        "finalizer", ["", "   ", "team/provisioner", ".", "..", " cleanup", "cleanup "]
+    )
     @pytest.mark.usefixtures("admin")
     def test_add_finalizer__rejects_names_that_cannot_be_removed(
         self, client, finalizer

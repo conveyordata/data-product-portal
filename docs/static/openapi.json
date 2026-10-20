@@ -13344,8 +13344,7 @@
         "properties": {
           "finalizer": {
             "type": "string",
-            "minLength": 1,
-            "pattern": "^[^/]+$",
+            "pattern": "^(?:[^/\\s][^/]*)?[^/\\s.](?:[^/]*[^/\\s])?$",
             "title": "Finalizer"
           }
         },
