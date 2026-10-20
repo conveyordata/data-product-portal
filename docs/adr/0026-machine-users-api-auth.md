@@ -160,7 +160,7 @@ Creating or replacing a binding uses the following representation:
 }
 ```
 
-These operations require the existing permission for updating machine users. The issuer must be trusted by the Portal OIDC configuration; adding a binding does not allow introducing a new token issuer.
+These operations require specific permissions for managing machine users bindings. The issuer must be trusted by the Portal OIDC configuration; adding a binding does not allow introducing a new token issuer.
 
 The binding is managed separately so creating a machine user does not automatically allow it to authenticate.
 
