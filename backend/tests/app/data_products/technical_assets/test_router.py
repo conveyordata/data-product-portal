@@ -311,12 +311,12 @@ class TestTechnicalAssetsRouter:
         }
         assert environment_ids == {str(dev_env.id)}
 
-    def test_get_technical_asset__environment_info_ignores_domain_scope(
+    def test_get_technical_asset__environment_info_uses_data_product_scope(
         self, client: TestClient
     ):
         dev_env = EnvironmentFactory(name="dev", acronym="dev")
         prd_env = EnvironmentFactory(name="prd", acronym="prd")
-        domain = DomainFactory(environments=[prd_env])
+        domain = DomainFactory()
         data_product = DataProductFactory(
             domain=domain, environments=[DataProductEnvironment(environment=dev_env)]
         )
@@ -348,7 +348,7 @@ class TestTechnicalAssetsRouter:
             name="sandbox", acronym="sandbox", is_global=False
         )
         prd_env = EnvironmentFactory(name="prd", acronym="prd", is_global=True)
-        domain = DomainFactory(environments=[sandbox_env])
+        domain = DomainFactory()
         data_product = DataProductFactory(
             domain=domain,
             environments=[DataProductEnvironment(environment=sandbox_env)],

@@ -60,7 +60,7 @@ describe('DataProductForm environments', () => {
     beforeEach(() => {
         allowAllAuth();
         mockGetEnvironments();
-        mockGetDomains([{ ...mock_domains[0], environments: [mockEnvironments[2]] }]);
+        mockGetDomains(mock_domains);
         mockGetDataProductTypes();
         mockDataProductLifecycles();
         mockUsersHttp(mockUsers);
@@ -78,7 +78,7 @@ describe('DataProductForm environments', () => {
         );
     });
 
-    it('prefills global defaults without inheriting Domain selections', async () => {
+    it('prefills global defaults independently of Domain changes', async () => {
         renderForm('create');
         const picker = await getEnvironmentPicker();
         expect(within(picker).getByText('Development')).toBeInTheDocument();
@@ -156,5 +156,53 @@ describe('DataProductForm environments', () => {
                 }),
             ),
         );
+    });
+
+    it('explains why saved environments cannot be removed and keeps their options visible', async () => {
+        renderForm('edit');
+        const picker = await getEnvironmentPicker();
+        await userEvent.hover(within(picker).getByText('Development'));
+        expect(await screen.findByRole('tooltip')).toHaveTextContent(
+            'Declared environments cannot be removed because resources may already be provisioned in them.',
+        );
+        await userEvent.unhover(within(picker).getByText('Development'));
+        await userEvent.click(screen.getByRole('combobox', { name: /^Environments/ }));
+        const savedOption = screen
+            .getAllByText('Development')
+            .find((element) => element.closest('.ant-select-item-option'));
+        expect(savedOption?.closest('.ant-select-item-option')).toHaveClass('ant-select-item-option-disabled');
+    });
+
+    it('explains when every available environment has been selected without hiding them', async () => {
+        mockDataProductHttp(savedProduct.id, {
+            ...savedProduct,
+            environments: mockEnvironments.map((environment) => ({
+                environment_id: environment.id,
+                environment,
+                creation_date: '2026-10-12T10:00:00',
+            })),
+        });
+        renderForm('edit');
+        await getEnvironmentPicker();
+        await userEvent.click(screen.getByRole('combobox', { name: /^Environments/ }));
+        expect(await screen.findByText('All available environments are already selected')).toBeInTheDocument();
+        for (const environment of mockEnvironments) {
+            const option = screen
+                .getAllByText(environment.name)
+                .find((element) => element.closest('.ant-select-item-option'));
+            expect(option?.closest('.ant-select-item-option')).toHaveClass('ant-select-item-option-disabled');
+        }
+        expect(screen.queryByText('No matching environments')).not.toBeInTheDocument();
+        await userEvent.type(screen.getByRole('combobox', { name: /^Environments/ }), 'nonexistent');
+        expect(await screen.findByText('No matching environments')).toBeInTheDocument();
+        expect(screen.queryByText('All available environments are already selected')).not.toBeInTheDocument();
+    });
+
+    it('shows a plain no-match message when searching for an unconfigured environment', async () => {
+        renderForm('create');
+        await getEnvironmentPicker();
+        await userEvent.type(screen.getByRole('combobox', { name: /^Environments/ }), 'nonexistent');
+        expect(await screen.findByText('No matching environments')).toBeInTheDocument();
+        expect(screen.queryByText('No environments are configured')).not.toBeInTheDocument();
     });
 });

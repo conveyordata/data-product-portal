@@ -41,7 +41,7 @@
 {% set operations_and_logistics_domain_id = "bd09093e-14ff-41c1-b74d-7c2ce9821d1c" %}
 {% set product_development_domain_id = "623e6fbf-3a06-434e-995c-b0336e71806e" %}
 {% set risk_and_compliance_domain_id = "bec196cb-81df-4cfc-959f-b142c312861e" %}
-{% set demo_domain_environments_id = "10c0a1d9-448f-48f7-a8df-d79ab3f9a76b" %}
+{% set environment_demo_domain_id = "10c0a1d9-448f-48f7-a8df-d79ab3f9a76b" %}
 
 -- Data product types and roles
 {% set analytics_type_id = "3c289333-2d55-4aed-8bd5-85015a1567fe" %}
@@ -72,7 +72,7 @@
 {% set customer_churn_prediction = "0a883317-d6c0-44e1-93b2-ba531fa9eeab" %}
 {% set customer_feedback_analysis = "66563731-1be2-493c-b692-aef4cc29e493" %}
 {% set customer_lifetime_value = "9a78d3cc-0c0d-4d0b-a314-aeb99c8cecf3" %}
-{% set demo_domain_environments_dp_id = "54ed1144-5a02-46d1-96b4-5432a8e0919e" %}
+{% set demo_product_environments_dp_id = "54ed1144-5a02-46d1-96b4-5432a8e0919e" %}
 {% set customer_segmentation_id = "138d83af-7a12-4037-85e7-fab3383593f2" %}
 {% set customer_segmentation_weekly_output_port_id = "811cd818-3b0d-437a-96bd-f29cbb3449d2" %}
 {% set customer_segmentation_weekly_technical_asset_id = "5125ae37-5c20-4ad3-9774-54d7cd480bd5" %}
@@ -383,11 +383,7 @@ INSERT INTO public.domains (id, name, description, created_on, updated_on, delet
 
 INSERT INTO public.domains (id, name, description, created_on, updated_on, deleted_at) VALUES ('{{ commercial_and_customer_relationship_mgt_domain_id }}'::uuid, 'Commercial and Customer Relationship Management', 'Commercial and CRM', '2025-10-28 16:30:41.743083', NULL, NULL);
 
-INSERT INTO public.domains (id, name, description, created_on, updated_on, deleted_at) VALUES ('{{ demo_domain_environments_id }}'::uuid, 'Demo Domain Environments', 'Demo domain used to showcase a custom (non-global) environment list, scoped to development only.', timezone('utc'::text, current_timestamp), NULL, NULL);
-
--- DOMAIN ENVIRONMENTS
--- Demo Domain Environments uses a custom list containing only "development", instead of the global list.
-INSERT INTO public.domain_environments (domain_id, environment_id, created_on, updated_on) VALUES ('{{ demo_domain_environments_id }}'::uuid, '{{ returned_environment_id_dev }}'::uuid, timezone('utc'::text, current_timestamp), NULL);
+INSERT INTO public.domains (id, name, description, created_on, updated_on, deleted_at) VALUES ('{{ environment_demo_domain_id }}'::uuid, 'Environment Demo', 'Data Product environment examples.', timezone('utc'::text, current_timestamp), NULL, NULL);
 
 -- DATA PRODUCT TYPES
 -- ...existing data product types code...
@@ -459,14 +455,13 @@ INSERT INTO public.data_products (id, about, type_id, lifecycle_id, usage) VALUE
 
 INSERT INTO public.tags_data_products (data_product_id, tag_id) VALUES ('{{ customer_segmentation_id }}'::uuid, '{{ tag_sensitive_id }}'::uuid);
 
--- Demo Domain Environments data product
-INSERT INTO public.abstract_data_products (id, status, finalizers, name, namespace, abstract_data_product_type, description, domain_id, created_on, updated_on, deleted_at) VALUES ('{{ demo_domain_environments_dp_id }}'::uuid, 'active', '{}', 'Demo Domain Environments', 'demo_domain_environments', 'data_products', 'Demo data product used to showcase a domain with a custom (non-global) environment list.', '{{ demo_domain_environments_id }}'::uuid, timezone('utc'::text, current_timestamp), NULL, NULL);
+INSERT INTO public.abstract_data_products (id, status, finalizers, name, namespace, abstract_data_product_type, description, domain_id, created_on, updated_on, deleted_at) VALUES ('{{ demo_product_environments_dp_id }}'::uuid, 'active', '{}', 'Demo Data Product Environments', 'demo_data_product_environments', 'data_products', 'Demo Data Product with a development-only environment scope.', '{{ environment_demo_domain_id }}'::uuid, timezone('utc'::text, current_timestamp), NULL, NULL);
 
 INSERT INTO public.data_products (id, about, type_id, lifecycle_id, usage)
-VALUES ('{{ demo_domain_environments_dp_id }}'::uuid, '<h3>Value Proposition</h3><p>Demonstrates a domain configured with a custom environment list (development only) instead of the global environment list.</p>', '{{ analytics_type_id }}'::uuid, '{{ data_product_lifecycle_id }}'::uuid, NULL);
+VALUES ('{{ demo_product_environments_dp_id }}'::uuid, '<h3>Value Proposition</h3><p>Demonstrates a Data Product declaring development only, independently of the global defaults.</p>', '{{ analytics_type_id }}'::uuid, '{{ data_product_lifecycle_id }}'::uuid, NULL);
 
 INSERT INTO public.role_assignments_data_product (id, data_product_id, identity_id, role_id, decision, requested_by_id, requested_on, decided_by_id, decided_on, created_on, updated_on, deleted_at)
-VALUES (gen_random_uuid(), '{{ demo_domain_environments_dp_id }}'::uuid, '{{ john_id }}'::uuid, (
+VALUES (gen_random_uuid(), '{{ demo_product_environments_dp_id }}'::uuid, '{{ john_id }}'::uuid, (
     SELECT r.id FROM public.roles AS r
     WHERE r.scope = 'data_product' AND r.prototype = 2
 ), 'APPROVED', '{{ john_id }}'::uuid, timezone('utc'::text, current_timestamp
@@ -3275,24 +3270,15 @@ INSERT INTO public.access_durations (id, abstract_data_product_type, access_dura
 VALUES (gen_random_uuid(), 'explorations', 'permanent', FALSE, timezone('utc'::text, current_timestamp));
 
 INSERT INTO public.data_product_environments (data_product_id, environment_id, creation_date)
-SELECT
-    dp.id,
-    de.environment_id,
-    de.created_on
-FROM public.data_products AS dp
-INNER JOIN public.abstract_data_products AS adp ON dp.id = adp.id
-INNER JOIN public.domain_environments AS de ON adp.domain_id = de.domain_id
-UNION ALL
+VALUES ('{{ demo_product_environments_dp_id }}'::uuid, '{{ returned_environment_id_dev }}'::uuid, timezone('utc'::text, current_timestamp));
+
+INSERT INTO public.data_product_environments (data_product_id, environment_id, creation_date)
 SELECT
     dp.id AS data_product_id,
     env.id AS environment_id,
     timezone('utc'::text, current_timestamp)
 FROM public.data_products AS dp
-INNER JOIN public.abstract_data_products AS adp ON dp.id = adp.id
 CROSS JOIN public.environments AS env
 WHERE
     env.is_global = TRUE
-    AND NOT EXISTS (
-        SELECT 1 FROM public.domain_environments AS de
-        WHERE de.domain_id = adp.domain_id
-    );
+    AND dp.id <> '{{ demo_product_environments_dp_id }}'::uuid;
