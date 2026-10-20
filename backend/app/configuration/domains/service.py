@@ -137,17 +137,26 @@ class DomainService:
                 detail=f"Finalizer '{finalizer}' not found",
             )
         domain.finalizers = [f for f in domain.finalizers if f != finalizer]
-        self.db.flush()
-        should_delete = domain.status == DomainStatus.DELETING and not domain.finalizers
-        if should_delete:
-            self._ensure_no_data_products(id)
-        return should_delete
+        if domain.status != DomainStatus.DELETING or domain.finalizers:
+            self.db.flush()
+            return False
+        if self._has_data_products(id):
+            # Still in use, so cancel the deletion; provisioners reconcile it back
+            domain.status = DomainStatus.ACTIVE
+            self.db.flush()
+            return False
+        return True
+
+    def _has_data_products(self, id: UUID) -> bool:
+        return bool(
+            self.db.scalar(
+                select(exists().where(AbstractDataProduct.domain_id == id)),
+                execution_options=UNFILTERED,
+            )
+        )
 
     def _ensure_no_data_products(self, id: UUID) -> None:
-        if self.db.scalar(
-            select(exists().where(AbstractDataProduct.domain_id == id)),
-            execution_options=UNFILTERED,
-        ):
+        if self._has_data_products(id):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Cannot delete a domain that still has data products or explorations",

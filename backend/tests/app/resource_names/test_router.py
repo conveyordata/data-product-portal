@@ -29,7 +29,9 @@ class TestResourceNamesRouter:
         assert response.status_code == 200
         assert response.json()["validity"] == ResourceNameValidityType.DUPLICATE
 
-    def test_validate_domain_duplicate_namespaces(self, client: TestClient):
+    def test_validate_resource_name__duplicate_domain_namespace(
+        self, client: TestClient
+    ):
         namespace = "finance"
         DomainFactory(namespace=namespace)
 
@@ -38,11 +40,20 @@ class TestResourceNamesRouter:
         assert response.json()["validity"] == ResourceNameValidityType.DUPLICATE
 
     @pytest.mark.parametrize("namespace", [".", "..", "..."])
-    def test_validate_domain__dots_only(self, client: TestClient, namespace):
+    def test_validate_resource_name__dots_only_domain_namespace(
+        self, client: TestClient, namespace
+    ):
         response = self.validate_namespace(client, namespace, "domain")
         assert response.json()["validity"] == (
             ResourceNameValidityType.INVALID_CHARACTERS
         )
+
+    @pytest.mark.parametrize("name", ["...", "-..-"])
+    def test_sanitize_resource_name__dots_only_suggests_nothing(
+        self, client: TestClient, name
+    ):
+        response = client.get("api/v2/resource_names/sanitize", params={"name": name})
+        assert response.json()["resource_name"] == ""
 
     def test_validate_resource_name(self):
         """

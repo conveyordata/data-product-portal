@@ -57,3 +57,7 @@ class ORMModel(BaseModel):
 class IdNameSchema(ORMModel):
     id: UUID
     name: str
+
+
+class FinalizerRequest(ORMModel):
+    finalizer: str

@@ -36,8 +36,8 @@ class NamespaceValidator:
     def _namespace_from_name(cls, name: str) -> str:
         namespace = re.sub(
             r"[^a-z0-9+=,.@_-]", "", name.lower().replace(" ", "-")
-        ).strip("-")
-        return namespace[: cls.max_length]
+        ).strip("-")[: cls.max_length]
+        return "" if set(namespace) <= {"."} else namespace
 
     def _is_unique(
         self,

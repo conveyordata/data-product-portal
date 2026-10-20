@@ -1,3 +1,4 @@
+import { HttpStatus } from '@/constants/http.constants.ts';
 import { api } from '@/store/api/services/generated/completeServiceApi.ts';
 import { STATIC_TAG_ID, TagTypes } from '@/store/api/services/tag-types.ts';
 import { configurationAccessDurationsTags } from '@/store/api/services/tags/configurationAccessDurationsTags.ts';
@@ -10,8 +11,6 @@ import { explorationTags } from '@/store/api/services/tags/explorationTags.ts';
 import { outputPortSearchTags } from '@/store/api/services/tags/outputPortsSearchApi.ts';
 import { usersNotificationsTags } from '@/store/api/services/tags/usersNotificationsTags.ts';
 import { usersTags } from '@/store/api/services/tags/usersTags.ts';
-
-const HTTP_ACCEPTED = 202;
 
 api.enhanceEndpoints({
     addTagTypes: Object.values(TagTypes),
@@ -276,7 +275,7 @@ api.enhanceEndpoints({
             ],
         },
         removeDomain: {
-            transformResponse: (_, meta) => meta?.status === HTTP_ACCEPTED,
+            transformResponse: (_, meta) => meta?.status === HttpStatus.Accepted,
             invalidatesTags: [{ type: TagTypes.Domain, id: STATIC_TAG_ID.LIST }],
         },
         migrateDomain: {

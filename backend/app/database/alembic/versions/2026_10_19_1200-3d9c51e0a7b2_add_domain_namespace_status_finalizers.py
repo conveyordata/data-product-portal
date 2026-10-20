@@ -27,9 +27,34 @@ NAMESPACE_MAX_LENGTH = settings.NAMESPACE_MAX_LENGTH
 def _namespace_from_name(name: str) -> str:
     namespace = re.sub(
         r"[^a-z0-9+=,.@_-]", "", (name or "").lower().replace(" ", "-")
-    ).strip("-")
-    namespace = namespace[:NAMESPACE_MAX_LENGTH]
+    ).strip("-")[:NAMESPACE_MAX_LENGTH]
     return "" if set(namespace) <= {"."} else namespace
+
+
+# FOR SHARE conflicts with the FOR UPDATE lock DomainService takes before deleting,
+# so writes outside the API cannot slip a Data Product into a deleting Domain either
+REJECT_DELETING_DOMAIN = """
+CREATE FUNCTION reject_assignment_to_deleting_domain() RETURNS trigger AS $$
+DECLARE
+    domain_status text;
+BEGIN
+    IF TG_OP = 'INSERT' OR NEW.domain_id IS DISTINCT FROM OLD.domain_id THEN
+        SELECT status INTO domain_status FROM domains
+        WHERE id = NEW.domain_id
+        FOR SHARE;
+        IF domain_status = 'deleting' THEN
+            RAISE EXCEPTION 'Domain % is pending deletion', NEW.domain_id
+                USING ERRCODE = 'check_violation';
+        END IF;
+    END IF;
+    RETURN NEW;
+END
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER reject_assignment_to_deleting_domain
+BEFORE INSERT OR UPDATE OF domain_id ON abstract_data_products
+FOR EACH ROW EXECUTE FUNCTION reject_assignment_to_deleting_domain();
+"""
 
 
 def _unique(base: str, taken: set[str]) -> str:
@@ -71,9 +96,14 @@ def upgrade() -> None:
 
     op.alter_column("domains", "namespace", nullable=False)
     op.create_unique_constraint("uq_domains_namespace", "domains", ["namespace"])
+    op.execute(REJECT_DELETING_DOMAIN)
 
 
 def downgrade() -> None:
+    op.execute(
+        "DROP TRIGGER reject_assignment_to_deleting_domain ON abstract_data_products"
+    )
+    op.execute("DROP FUNCTION reject_assignment_to_deleting_domain()")
     op.drop_constraint("uq_domains_namespace", "domains", type_="unique")
     op.drop_column("domains", "finalizers")
     op.drop_column("domains", "status")

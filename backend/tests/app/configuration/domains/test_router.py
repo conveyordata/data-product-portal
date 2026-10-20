@@ -185,6 +185,13 @@ class TestDomainsRouter:
         assert response.status_code == 200
 
     @pytest.mark.usefixtures("admin")
+    def test_remove_domain__emits_event(self, client, capture_events):
+        domain = DomainFactory()
+        response = self.remove_domain(client, domain.id)
+        assert response.status_code == 200
+        assert_event_in_queue("domain.event", capture_events)
+
+    @pytest.mark.usefixtures("admin")
     def test_remove_domain_coupled_data_product(self, client):
         domain = DomainFactory()
         DataProductFactory(domain=domain)
@@ -263,16 +270,6 @@ class TestDomainsRouter:
         response = self.remove_finalizer(client, domain.id, "provisioner")
         assert response.status_code == 200
         assert self.get_domain(client, domain.id).status_code == 404
-
-    @pytest.mark.usefixtures("admin")
-    def test_remove_finalizer__last_one_with_data_product(self, client):
-        domain = DomainFactory(status=DomainStatus.DELETING, finalizers=["provisioner"])
-        DataProductFactory(domain=domain)
-        response = self.remove_finalizer(client, domain.id, "provisioner")
-        assert response.status_code == 400
-        assert self.get_domain(client, domain.id).json()["finalizers"] == [
-            "provisioner"
-        ]
 
     @pytest.mark.usefixtures("admin")
     def test_remove_finalizer__not_deleting_keeps_domain(self, client):

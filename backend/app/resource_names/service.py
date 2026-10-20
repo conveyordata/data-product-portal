@@ -46,8 +46,8 @@ class ResourceNameService:
     def _resource_name_from_name(cls, name: str) -> str:
         resource_name = re.sub(
             r"[^a-z0-9+=,.@_-]", "", name.lower().replace(" ", "-")
-        ).strip("-")
-        return resource_name[: cls.max_length]
+        ).strip("-")[: cls.max_length]
+        return "" if set(resource_name) <= {"."} else resource_name
 
     def _is_unique(
         self,

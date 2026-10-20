@@ -32,12 +32,6 @@ export const getDomainTableColumns = ({ t, handleRemove, handleEdit }: Props): T
             defaultSortOrder: 'ascend',
         },
         {
-            title: t('Namespace'),
-            dataIndex: 'namespace',
-            render: (namespace: string) => <TableCellItem text={namespace} tooltip={{ content: namespace }} />,
-            sorter: sorter.stringSorter((domain) => domain.namespace),
-        },
-        {
             title: t('Description'),
             dataIndex: 'description',
             render: (description: string) => <TableCellItem text={description} tooltip={{ content: description }} />,

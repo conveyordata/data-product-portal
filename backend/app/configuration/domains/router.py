@@ -3,7 +3,6 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Response, status
 from sqlalchemy.orm import Session
 
-from app.abstract_data_product.schema_request import FinalizerRequest
 from app.configuration.domains.schema_request import DomainCreate, DomainUpdate
 from app.configuration.domains.schema_response import (
     CreateDomainResponse,
@@ -15,6 +14,7 @@ from app.configuration.domains.service import DomainService
 from app.core.authz import Action, Authorization
 from app.core.authz.resolvers import EmptyResolver
 from app.database.deps import get_db_session
+from app.shared.schema import FinalizerRequest
 
 router = APIRouter(tags=["Configuration - Domains"], prefix="/v2/configuration/domains")
 

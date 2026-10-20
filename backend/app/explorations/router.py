@@ -6,7 +6,6 @@ from fastapi.responses import Response
 from pydantic.json_schema import SkipJsonSchema
 from sqlalchemy.orm import Session
 
-from app.abstract_data_product.schema_request import FinalizerRequest
 from app.abstract_data_product.schema_response import AbstractDataProductInputPort
 from app.core.auth.auth import get_authenticated_user
 from app.core.authz import Action, Authorization
@@ -28,6 +27,7 @@ from app.explorations.schema_response import (
     RevokeInputPortForExplorationResponse,
 )
 from app.explorations.service import ExplorationService
+from app.shared.schema import FinalizerRequest
 from app.users.model import User
 
 route = "/v2/explorations"
