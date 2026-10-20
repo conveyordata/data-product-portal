@@ -1,4 +1,4 @@
-import { HttpStatus } from '@/constants/http.constants.ts';
+import { HttpStatusCode } from 'axios';
 import { api } from '@/store/api/services/generated/completeServiceApi.ts';
 import { STATIC_TAG_ID, TagTypes } from '@/store/api/services/tag-types.ts';
 import { configurationAccessDurationsTags } from '@/store/api/services/tags/configurationAccessDurationsTags.ts';
@@ -275,7 +275,7 @@ api.enhanceEndpoints({
             ],
         },
         removeDomain: {
-            transformResponse: (_, meta) => meta?.status === HttpStatus.Accepted,
+            transformResponse: (_, meta) => meta?.status === HttpStatusCode.Accepted,
             invalidatesTags: [{ type: TagTypes.Domain, id: STATIC_TAG_ID.LIST }],
         },
         migrateDomain: {

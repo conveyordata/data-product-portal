@@ -69,10 +69,13 @@ export function CreateDomainModal({ isOpen, onClose, mode, initial }: Props) {
 
     useEffect(() => {
         if (mode === 'create' && !canEditResourceName && sanitizedResourceNameSuccess && sanitizedResourceName) {
+            if (domainNameValue && !sanitizedResourceName.resource_name) {
+                setCanEditResourceName(true);
+            }
             form.setFieldValue('namespace', sanitizedResourceName.resource_name);
             form.validateFields(['namespace']);
         }
-    }, [form, mode, canEditResourceName, sanitizedResourceName, sanitizedResourceNameSuccess]);
+    }, [form, mode, canEditResourceName, domainNameValue, sanitizedResourceName, sanitizedResourceNameSuccess]);
 
     const resourceNameValidationCallback = useCallback(
         (resourceName: string) =>

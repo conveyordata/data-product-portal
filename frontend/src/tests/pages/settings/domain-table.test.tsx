@@ -1,6 +1,6 @@
+import { HttpStatusCode } from 'axios';
 import { HttpResponse, http } from 'msw';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { HttpStatus } from '@/constants/http.constants.ts';
 import { DomainTable } from '@/pages/settings/components/settings-tabs/components/domain-table/domain-table.component.tsx';
 import { mock_domains, mockGetDomains } from '@/tests/mocks/configurationDomains.ts';
 import { server } from '@/tests/mocks/server.ts';
@@ -12,7 +12,7 @@ describe('DomainTable', () => {
         vi.restoreAllMocks();
     });
 
-    const removeDomain = async (deleteStatus: HttpStatus) => {
+    const removeDomain = async (deleteStatus: HttpStatusCode) => {
         mockGetDomains([{ ...mock_domains[0], abstract_data_product_count: 0 }]);
         server.use(
             http.get('*/api/v2/configuration/environments', () => HttpResponse.json({ environments: [] })),
@@ -28,7 +28,7 @@ describe('DomainTable', () => {
     };
 
     it('reports a pending deletion when the domain waits for finalizers', async () => {
-        const dispatchMessageSpy = await removeDomain(HttpStatus.Accepted);
+        const dispatchMessageSpy = await removeDomain(HttpStatusCode.Accepted);
 
         await waitFor(() => {
             expect(dispatchMessageSpy).toHaveBeenCalledWith(expect.objectContaining({ type: 'info' }));
@@ -36,7 +36,7 @@ describe('DomainTable', () => {
     });
 
     it('reports a removed domain when it is deleted immediately', async () => {
-        const dispatchMessageSpy = await removeDomain(HttpStatus.Ok);
+        const dispatchMessageSpy = await removeDomain(HttpStatusCode.Ok);
 
         await waitFor(() => {
             expect(dispatchMessageSpy).toHaveBeenCalledWith(expect.objectContaining({ type: 'success' }));

@@ -74,14 +74,19 @@ class DomainService:
                 detail=f"Domain '{domain.name}' is pending deletion and cannot be used or modified",
             )
 
-    def _get_locked(self, id: UUID) -> DomainModel:
-        # Serializes assignments with deletion checks until the transaction commits
+    def _get_locked(self, id: UUID, read: bool = False, **kwargs) -> DomainModel:
+        # Serializes assignments with deletion checks until the transaction commits;
+        # a read lock still blocks deletion without serializing assignments
         return ensure_domain_exists(
-            id, self.db, with_for_update=True, populate_existing=True
+            id,
+            self.db,
+            with_for_update={"read": read},
+            populate_existing=True,
+            **kwargs,
         )
 
     def ensure_assignable(self, id: UUID) -> None:
-        self._ensure_not_deleting(self._get_locked(id))
+        self._ensure_not_deleting(self._get_locked(id, read=True))
 
     def create_domain(self, domain_create: DomainCreate) -> CreateDomainResponse:
         if (
@@ -100,8 +105,8 @@ class DomainService:
         return CreateDomainResponse(id=domain.id)
 
     def update_domain(self, id: UUID, domain: DomainUpdate) -> UpdateDomainResponse:
-        current_domain = ensure_domain_exists(
-            id, self.db, options=[selectinload(DomainModel.environments)]
+        current_domain = self._get_locked(
+            id, options=[selectinload(DomainModel.environments)]
         )
         self._ensure_not_deleting(current_domain)
         updated_domain = domain.model_dump()
