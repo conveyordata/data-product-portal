@@ -53,6 +53,7 @@ from app.data_products.output_port_technical_assets_link.model import (
 )
 from app.data_products.output_ports.data_quality.model import (  # noqa: TCH001
     DataQualitySummary,
+    latest_data_quality_summary,
 )
 from app.data_products.output_ports.enums import OutputPortAccessFunction
 from app.data_products.output_ports.status import OutputPortStatus
@@ -246,23 +247,18 @@ class OutputPort(Base, BaseORM, EventTrackedMixin):
         back_populates="datasets", lazy="joined"
     )
     quality_summary: Mapped[Optional[DataQualitySummary]] = relationship(
-        foreign_keys=[DataQualitySummary.output_port_id],
-        lazy="joined",
+        latest_data_quality_summary,
+        primaryjoin=lambda: (
+            foreign(latest_data_quality_summary().output_port_id) == OutputPort.id
+        ),
+        lazy="selectin",
         uselist=False,
-        cascade="all, delete-orphan",
+        viewonly=True,
     )
 
-    quality_status = deferred(
-        column_property(
-            select(DataQualitySummary.overall_status)
-            .where(DataQualitySummary.output_port_id == id)
-            .order_by(DataQualitySummary.created_at.desc())
-            .limit(1)
-            .correlate_except(DataQualitySummary)
-            .scalar_subquery()
-        ),
-        raiseload=True,
-    )
+    @property
+    def quality_status(self) -> Optional[str]:
+        return self.quality_summary.overall_status if self.quality_summary else None
 
     @property
     def data_product_name(self) -> str:

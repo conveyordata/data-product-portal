@@ -8,6 +8,7 @@ from .data_product import fake as data_product_fake
 from .data_product_setting import DataProductSettingFactory
 from .data_product_setting_value import DataProductSettingValueFactory
 from .data_product_type import DataProductTypeFactory
+from .data_quality_summary import DataQualitySummaryFactory
 from .device_flow import DeviceFlowFactory
 from .domain import DomainFactory
 from .env_platform_config import EnvPlatformConfigFactory
@@ -71,6 +72,7 @@ factories = [
     DataProductSettingFactory,
     DataProductSettingValueFactory,
     DataProductTypeFactory,
+    DataQualitySummaryFactory,
     InputPortFactory,
     InputPortRequestFactory,
     DataProductRoleAssignmentFactory,
