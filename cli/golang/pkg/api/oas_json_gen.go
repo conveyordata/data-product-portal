@@ -11478,27 +11478,15 @@ func (s *DomainCreate) encodeFields(e *jx.Encoder) {
 		e.Str(s.Description)
 	}
 	{
-		if s.EnvironmentIds != nil {
-			e.FieldStart("environment_ids")
-			e.ArrStart()
-			for _, elem := range s.EnvironmentIds {
-				json.EncodeUUID(e, elem)
-			}
-			e.ArrEnd()
-		}
-	}
-	{
 		e.FieldStart("namespace")
 		e.Str(s.Namespace)
 	}
 }
 
-var jsonFieldsNameOfDomainCreate = [2]string{
-var jsonFieldsNameOfDomainCreate = [4]string{
+var jsonFieldsNameOfDomainCreate = [3]string{
 	0: "name",
 	1: "description",
-	2: "environment_ids",
-	3: "namespace",
+	2: "namespace",
 }
 
 // Decode decodes DomainCreate from json.
@@ -11534,27 +11522,8 @@ func (s *DomainCreate) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"description\"")
 			}
-		case "environment_ids":
-			if err := func() error {
-				s.EnvironmentIds = make([]uuid.UUID, 0)
-				if err := d.Arr(func(d *jx.Decoder) error {
-					var elem uuid.UUID
-					v, err := json.DecodeUUID(d)
-					elem = v
-					if err != nil {
-						return err
-					}
-					s.EnvironmentIds = append(s.EnvironmentIds, elem)
-					return nil
-				}); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"environment_ids\"")
-			}
 		case "namespace":
-			requiredBitSet[0] |= 1 << 3
+			requiredBitSet[0] |= 1 << 2
 			if err := func() error {
 				v, err := d.Str()
 				s.Namespace = string(v)
@@ -11575,7 +11544,7 @@ func (s *DomainCreate) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00001011,
+		0b00000111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -14684,26 +14653,15 @@ func (s *GetDomainResponse) encodeFields(e *jx.Encoder) {
 		}
 		e.ArrEnd()
 	}
-	{
-		e.FieldStart("environments")
-		e.ArrStart()
-		for _, elem := range s.Environments {
-			elem.Encode(e)
-		}
-		e.ArrEnd()
-	}
 }
 
-var jsonFieldsNameOfGetDomainResponse = [7]string{
-var jsonFieldsNameOfGetDomainResponse = [3]string{
+var jsonFieldsNameOfGetDomainResponse = [6]string{
 	0: "id",
 	1: "name",
 	2: "namespace",
 	3: "description",
 	4: "status",
 	5: "finalizers",
-	6: "environments",
-	2: "description",
 }
 
 // Decode decodes GetDomainResponse from json.
@@ -14793,24 +14751,6 @@ func (s *GetDomainResponse) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"finalizers\"")
 			}
-		case "environments":
-			requiredBitSet[0] |= 1 << 6
-			if err := func() error {
-				s.Environments = make([]EnvironmentGetItem, 0)
-				if err := d.Arr(func(d *jx.Decoder) error {
-					var elem EnvironmentGetItem
-					if err := elem.Decode(d); err != nil {
-						return err
-					}
-					s.Environments = append(s.Environments, elem)
-					return nil
-				}); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"environments\"")
-			}
 		default:
 			return d.Skip()
 		}
@@ -14821,8 +14761,7 @@ func (s *GetDomainResponse) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b01111111,
-		0b00000111,
+		0b00111111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -14906,31 +14845,19 @@ func (s *GetDomainsItem) encodeFields(e *jx.Encoder) {
 		e.ArrEnd()
 	}
 	{
-		e.FieldStart("environments")
-		e.ArrStart()
-		for _, elem := range s.Environments {
-			elem.Encode(e)
-		}
-		e.ArrEnd()
-	}
-	{
 		e.FieldStart("abstract_data_product_count")
 		e.Int(s.AbstractDataProductCount)
 	}
 }
 
-var jsonFieldsNameOfGetDomainsItem = [8]string{
-var jsonFieldsNameOfGetDomainsItem = [4]string{
+var jsonFieldsNameOfGetDomainsItem = [7]string{
 	0: "id",
 	1: "name",
 	2: "namespace",
 	3: "description",
 	4: "status",
 	5: "finalizers",
-	6: "environments",
-	7: "abstract_data_product_count",
-	2: "description",
-	3: "abstract_data_product_count",
+	6: "abstract_data_product_count",
 }
 
 // Decode decodes GetDomainsItem from json.
@@ -15020,27 +14947,8 @@ func (s *GetDomainsItem) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"finalizers\"")
 			}
-		case "environments":
-			requiredBitSet[0] |= 1 << 6
-			if err := func() error {
-				s.Environments = make([]EnvironmentGetItem, 0)
-				if err := d.Arr(func(d *jx.Decoder) error {
-					var elem EnvironmentGetItem
-					if err := elem.Decode(d); err != nil {
-						return err
-					}
-					s.Environments = append(s.Environments, elem)
-					return nil
-				}); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"environments\"")
-			}
 		case "abstract_data_product_count":
-			requiredBitSet[0] |= 1 << 3
-			requiredBitSet[0] |= 1 << 7
+			requiredBitSet[0] |= 1 << 6
 			if err := func() error {
 				v, err := d.Int()
 				s.AbstractDataProductCount = int(v)
@@ -15061,7 +14969,7 @@ func (s *GetDomainsItem) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00001111,
+		0b01111111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

@@ -57,7 +57,7 @@ The abstract base class you implement. It exposes two methods:
 We currently support 3 resources:
 - Data Product: Your reconcile function will be triggered on changes to the Data Product itself, its Output Ports, Technical Assets, Technical Asset Output Port links, Input Ports, Role Assignments etc.
 - Exploration: Your reconcile function will be triggered on changes to the Exploration itself, and its Input Ports.
-- Domain: Your reconcile function will be triggered on changes to the Domain itself, including its Environments. See [Domain-scoped resources](#domain-scoped-resources).
+- Domain: Your reconcile function will be triggered on changes to the Domain itself. See [Domain-scoped resources](#domain-scoped-resources).
 
 ### `ReconcileManager`
 
@@ -115,7 +115,7 @@ account, a VPC or VNet, Conveyor environments, a Databricks or Glue catalog. Reg
   back to `active`, so your reconciler provisions it again. Keep provisioning idempotent.
 - Domain events are not fanned out to Data Products. A Data Product reconciler gets its
   Domain's `id`, `name` and `namespace` in the Data Product response; it only needs
-  `get_domain` for the Domain's status, finalizers or environments.
+  `get_domain` for the Domain's status or finalizers.
 - When a Data Product moves to another Domain, only the Data Product is reconciled. Keep
   track of the previous Domain in your provisioner's own state if you need to clean up there.
 

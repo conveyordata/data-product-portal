@@ -25,7 +25,9 @@ class DomainCreate:
 
     def to_dict(self) -> dict[str, Any]:
         name = self.name
+
         description = self.description
+
         namespace = self.namespace
 
         field_dict: dict[str, Any] = {}
@@ -44,7 +46,9 @@ class DomainCreate:
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
         name = d.pop("name")
+
         description = d.pop("description")
+
         namespace = d.pop("namespace")
 
         domain_create = cls(

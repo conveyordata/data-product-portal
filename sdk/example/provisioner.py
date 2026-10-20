@@ -247,7 +247,6 @@ class DomainProvisioner(Reconciler):
             "id": str(domain.id),
             "name": domain.name,
             "namespace": domain.namespace,
-            "environments": [env.name for env in domain.environments],
         }
         path = self._path_for(domain.namespace)
         path.parent.mkdir(parents=True, exist_ok=True)

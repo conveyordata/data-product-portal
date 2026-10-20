@@ -341,7 +341,9 @@ class DataProductService(AbstractDataProductService):
         if current_data_product is None:
             raise HTTPException(status_code=404, detail="Data Product not found")
         self._ensure_not_deleting(current_data_product)
-        update_data_product = data_product.model_dump(exclude_unset=True)
+        update_data_product = data_product.model_dump(
+            exclude_unset=True, exclude={"environment_ids"}
+        )
         if data_product.domain_id != current_data_product.domain_id:
             DomainService(self.db).ensure_assignable(data_product.domain_id)
 

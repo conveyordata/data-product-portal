@@ -1,12 +1,13 @@
+from uuid import uuid4
+
 import pytest
 from sqlalchemy import select
 
-from app.data_products.model import DataProductEnvironment
 from app.authorization.roles.schema import Scope
 from app.configuration.domains.status import DomainStatus
 from app.core.authz import Action
 from app.data_products.model import DataProduct as DataProductModel
-from app.data_products.model import DataProductVisibility
+from app.data_products.model import DataProductEnvironment, DataProductVisibility
 from app.database.database import UNFILTERED
 from app.settings import settings
 from tests.factories import (
@@ -87,33 +88,9 @@ class TestDomainsRouter:
         response = self.get_domain(client, domain.id)
         assert response.status_code == 200
         assert response.json()["id"] == str(domain.id)
-        assert response.json()["environments"] == []
         assert response.json()["namespace"] == domain.namespace
         assert response.json()["status"] == DomainStatus.ACTIVE
         assert response.json()["finalizers"] == []
-
-    @pytest.mark.usefixtures("admin")
-    def test_create_domain__with_environments(self, client):
-        environment = EnvironmentFactory()
-        payload = {
-            "name": "Test Domain",
-            "namespace": "test-domain",
-            "description": "Test Description",
-            "environment_ids": [str(environment.id)],
-        }
-        response = self.create_domain(client, payload)
-        assert response.status_code == 200, response.text
-
-        domain_response = self.get_domain(client, response.json()["id"])
-        assert [env["id"] for env in domain_response.json()["environments"]] == [
-            str(environment.id)
-        ]
-
-    @pytest.mark.usefixtures("admin")
-    def test_create_domain__invalid_environment_id(self, client, domain_payload):
-        domain_payload["environment_ids"] = [str(uuid4())]
-        response = self.create_domain(client, domain_payload)
-        assert response.status_code == 400
         assert "environments" not in response.json()
 
     @pytest.mark.usefixtures("admin")
@@ -146,19 +123,6 @@ class TestDomainsRouter:
         update_payload = {"name": "update", "description": "update"}
         response = self.update_domain(client, update_payload, domain.id)
         assert response.status_code == 409
-
-    @pytest.mark.usefixtures("admin")
-    def test_update_domain__environments_emit_event(self, client, capture_events):
-        environment = EnvironmentFactory()
-        domain = DomainFactory(name="same", description="same")
-        update_payload = {
-            "name": "same",
-            "description": "same",
-            "environment_ids": [str(environment.id)],
-        }
-        response = self.update_domain(client, update_payload, domain.id)
-        assert response.status_code == 200
-        assert_event_in_queue("domain.event", capture_events)
 
     @pytest.mark.usefixtures("admin")
     def test_update_domain__preserves_data_product_environments(self, client):

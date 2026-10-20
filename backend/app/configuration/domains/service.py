@@ -74,9 +74,7 @@ class DomainService:
                 detail=f"Domain '{domain.name}' is pending deletion and cannot be used or modified",
             )
 
-    def _get_locked(
-        self, id: UUID, read: bool = False, options: Sequence = ()
-    ) -> DomainModel:
+    def _get_locked(self, id: UUID, read: bool = False) -> DomainModel:
         # Serializes assignments with deletion checks until the transaction commits;
         # a read lock still blocks deletion without serializing assignments
         return ensure_domain_exists(
@@ -84,7 +82,6 @@ class DomainService:
             self.db,
             with_for_update={"read": read},
             populate_existing=True,
-            options=options,
         )
 
     def ensure_assignable(self, id: UUID) -> None:
@@ -100,16 +97,13 @@ class DomainService:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Invalid namespace: {validity.value}",
             )
-        domain_schema = domain_create.model_dump(exclude={"environment_ids"})
-        domain = DomainModel(**domain_schema)
+        domain = DomainModel(**domain_create.model_dump())
         self.db.add(domain)
         self.db.flush()
         return CreateDomainResponse(id=domain.id)
 
     def update_domain(self, id: UUID, domain: DomainUpdate) -> UpdateDomainResponse:
-        current_domain = self._get_locked(
-            id, options=[selectinload(DomainModel.environments)]
-        )
+        current_domain = self._get_locked(id)
         self._ensure_not_deleting(current_domain)
         updated_domain = domain.model_dump()
 

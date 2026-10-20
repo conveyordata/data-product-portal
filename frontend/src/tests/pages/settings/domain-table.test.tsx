@@ -15,7 +15,6 @@ describe('DomainTable', () => {
     const removeDomain = async (deleteStatus: HttpStatusCode) => {
         mockGetDomains([{ ...mock_domains[0], abstract_data_product_count: 0 }]);
         server.use(
-            http.get('*/api/v2/configuration/environments', () => HttpResponse.json({ environments: [] })),
             http.delete('*/api/v2/configuration/domains/:id', () => new HttpResponse(null, { status: deleteStatus })),
         );
         const dispatchMessageSpy = vi.spyOn(feedback, 'dispatchMessage');

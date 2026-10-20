@@ -100,7 +100,7 @@ export function CreateDomainModal({ isOpen, onClose, mode, initial }: Props) {
             } else {
                 await editDomain({
                     id: initial?.id as string,
-                    domainUpdate: values,
+                    domainUpdate: { name: values.name, description: values.description },
                 }).unwrap();
             }
 

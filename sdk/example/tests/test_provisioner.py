@@ -340,7 +340,6 @@ def _fake_domain(
         description="desc",
         status=status,
         finalizers=finalizers,
-        environments=[],
     )
 
 

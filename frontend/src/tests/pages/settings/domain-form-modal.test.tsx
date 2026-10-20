@@ -1,4 +1,3 @@
-import { HttpResponse, http } from 'msw';
 import { describe, expect, it, vi } from 'vitest';
 import { CreateDomainModal } from '@/pages/settings/components/settings-tabs/components/domain-table/domain-form-modal.component.tsx';
 import {
@@ -6,7 +5,6 @@ import {
     mockResourceNamesSanitize,
     mockResourceNamesValidate,
 } from '@/tests/mocks/resource_names.ts';
-import { server } from '@/tests/mocks/server.ts';
 import { renderWithProviders, screen, userEvent, waitFor } from '@/tests/test-utils.tsx';
 
 describe('CreateDomainModal', () => {
@@ -14,7 +12,6 @@ describe('CreateDomainModal', () => {
         mockGetResourceNamesConstraints();
         mockResourceNamesValidate();
         mockResourceNamesSanitize('');
-        server.use(http.get('*/api/v2/configuration/environments', () => HttpResponse.json({ environments: [] })));
         const user = userEvent.setup();
         renderWithProviders(<CreateDomainModal isOpen onClose={vi.fn()} mode="create" />);
         const namespace = () => document.querySelector('[data-cy="namespace"]');
@@ -29,7 +26,6 @@ describe('CreateDomainModal', () => {
         mockGetResourceNamesConstraints();
         mockResourceNamesValidate();
         mockResourceNamesSanitize(undefined, 300);
-        server.use(http.get('*/api/v2/configuration/environments', () => HttpResponse.json({ environments: [] })));
         const user = userEvent.setup();
         renderWithProviders(<CreateDomainModal isOpen onClose={vi.fn()} mode="create" />);
         const namespace = () => document.querySelector<HTMLInputElement>('[data-cy="namespace"]');
@@ -45,7 +41,6 @@ describe('CreateDomainModal', () => {
         mockGetResourceNamesConstraints();
         mockResourceNamesValidate();
         mockResourceNamesSanitize();
-        server.use(http.get('*/api/v2/configuration/environments', () => HttpResponse.json({ environments: [] })));
         const user = userEvent.setup();
         renderWithProviders(<CreateDomainModal isOpen onClose={vi.fn()} mode="create" />);
         const create = screen.getByRole('button', { name: 'Create' });

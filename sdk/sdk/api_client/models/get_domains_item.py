@@ -9,7 +9,6 @@ from attrs import field as _attrs_field
 
 from ..models.domain_status import DomainStatus
 
-
 T = TypeVar("T", bound="GetDomainsItem")
 
 
@@ -37,10 +36,15 @@ class GetDomainsItem:
 
     def to_dict(self) -> dict[str, Any]:
         id = str(self.id)
+
         name = self.name
+
         namespace = self.namespace
+
         description = self.description
+
         status = self.status.value
+
         finalizers = self.finalizers
 
         abstract_data_product_count = self.abstract_data_product_count
@@ -65,10 +69,15 @@ class GetDomainsItem:
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
         id = UUID(d.pop("id"))
+
         name = d.pop("name")
+
         namespace = d.pop("namespace")
+
         description = d.pop("description")
+
         status = DomainStatus(d.pop("status"))
+
         finalizers = cast(list[str], d.pop("finalizers"))
 
         abstract_data_product_count = d.pop("abstract_data_product_count")

@@ -4,7 +4,6 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError, OperationalError
 
 from app.configuration.domains.model import Domain as DomainModel
-from app.configuration.domains.model import domain_environment_table
 from app.configuration.domains.schema_request import DomainUpdate
 from app.configuration.domains.service import DomainService
 from app.configuration.domains.status import DomainStatus
@@ -21,15 +20,7 @@ def _update_unchanged(service, id):
     domain = service.db.get(DomainModel, id)
     service.update_domain(
         id,
-        DomainUpdate(
-            name=domain.name,
-            description=domain.description,
-            environment_ids=service.db.scalars(
-                select(domain_environment_table.c.environment_id).where(
-                    domain_environment_table.c.domain_id == id
-                )
-            ).all(),
-        ),
+        DomainUpdate(name=domain.name, description=domain.description),
     )
 
 

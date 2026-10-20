@@ -1,7 +1,7 @@
 """add namespace, status and finalizers to domains
 
 Revision ID: 3d9c51e0a7b2
-Revises: b71a5f3e29cd
+Revises: a82c9b3e7d41
 Create Date: 2026-10-19 12:00:00.000000
 
 """
@@ -16,7 +16,7 @@ from sqlalchemy.dialects import postgresql
 from app.settings import settings
 
 revision: str = "3d9c51e0a7b2"
-down_revision: Union[str, None] = "b71a5f3e29cd"
+down_revision: Union[str, None] = "a82c9b3e7d41"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
