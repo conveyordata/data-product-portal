@@ -1,6 +1,7 @@
 import { Flex, Space, Tag, Typography, theme } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
+import { EnvironmentsField } from '@/components/environments/environments-field.component.tsx';
 import type { GetDataProductResponse } from '@/store/api/services/generated/dataProductsApi.ts';
 import type { DataProductLifeCycle } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
 import { createDataProductIdPath } from '@/types/navigation';
@@ -46,6 +47,8 @@ export function OutputPortDescription({ lifecycle, description, data_product, do
                     <Typography.Text>{namespace}</Typography.Text>
                 </Space>
             </Flex>
+
+            <EnvironmentsField environments={data_product?.environments || []} />
 
             {tags.length > 0 && (
                 <Space wrap>

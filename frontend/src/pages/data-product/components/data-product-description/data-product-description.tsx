@@ -1,6 +1,7 @@
 import { Flex, Space, Tag, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
-import type { DataProductLifeCycle } from '@/store/api/services/generated/dataProductsApi.ts';
+import { EnvironmentsField } from '@/components/environments/environments-field.component.tsx';
+import type { DataProductEnvironment, DataProductLifeCycle } from '@/store/api/services/generated/dataProductsApi.ts';
 import type { TagModel } from '@/types/tag';
 
 type Props = {
@@ -10,14 +11,15 @@ type Props = {
     domain: string;
     tags: TagModel[];
     namespace: string;
+    environments: DataProductEnvironment[];
 };
 
-export function DataProductDescription({ lifecycle, type, description, domain, tags, namespace }: Props) {
+export function DataProductDescription({ lifecycle, type, description, domain, tags, namespace, environments }: Props) {
     const { t } = useTranslation();
 
     return (
         <Flex vertical gap="middle">
-            <Space size="large">
+            <Space size="large" wrap>
                 <Flex gap="small">
                     <Typography.Text strong>{t('Status')}</Typography.Text>
                     <Tag color={lifecycle?.color ?? 'default'}>{lifecycle?.name ?? t('Unknown')}</Tag>
@@ -35,6 +37,7 @@ export function DataProductDescription({ lifecycle, type, description, domain, t
                     <Typography.Text>{type}</Typography.Text>
                 </Flex>
             </Space>
+            <EnvironmentsField environments={environments} />
             <Space size="small">
                 {tags.map((tag) => (
                     <Tag color={tag.rolled_up ? 'red' : 'success'} key={tag.id}>
