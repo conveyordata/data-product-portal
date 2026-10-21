@@ -10,6 +10,7 @@ from uuid import UUID
 
 from sdk.api_client.models import (
     AbstractDataProductType,
+    DataProductEnvironmentAddedEvent,
     DataProductEvent,
     DataProductRoleAssignmentEvent,
     DataProductSettingValueEvent,
@@ -249,6 +250,11 @@ class ReconcileEventHandler(AbstractEventHandler):
 
     async def on_data_product_event(self, data: DataProductEvent):
         await self._enqueue(ResourceType.DATA_PRODUCT, data.id)
+
+    async def on_data_product_environment_added(
+        self, data: DataProductEnvironmentAddedEvent
+    ):
+        await self._enqueue(ResourceType.DATA_PRODUCT, data.data_product_id)
 
     async def on_exploration_event(self, data: ExplorationEvent):
         await self._enqueue(ResourceType.EXPLORATION, data.id)

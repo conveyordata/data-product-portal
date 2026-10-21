@@ -5766,6 +5766,12 @@ func (s *DataProductCreate) encodeFields(e *jx.Encoder) {
 		json.EncodeUUID(e, s.LifecycleID)
 	}
 	{
+		if s.EnvironmentIds.Set {
+			e.FieldStart("environment_ids")
+			s.EnvironmentIds.Encode(e)
+		}
+	}
+	{
 		if s.Visibility.Set {
 			e.FieldStart("visibility")
 			s.Visibility.Encode(e)
@@ -5787,7 +5793,7 @@ func (s *DataProductCreate) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfDataProductCreate = [11]string{
+var jsonFieldsNameOfDataProductCreate = [12]string{
 	0:  "name",
 	1:  "namespace",
 	2:  "description",
@@ -5796,9 +5802,10 @@ var jsonFieldsNameOfDataProductCreate = [11]string{
 	5:  "domain_id",
 	6:  "tag_ids",
 	7:  "lifecycle_id",
-	8:  "visibility",
-	9:  "owners",
-	10: "input_ports",
+	8:  "environment_ids",
+	9:  "visibility",
+	10: "owners",
+	11: "input_ports",
 }
 
 // Decode decodes DataProductCreate from json.
@@ -5912,6 +5919,16 @@ func (s *DataProductCreate) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"lifecycle_id\"")
 			}
+		case "environment_ids":
+			if err := func() error {
+				s.EnvironmentIds.Reset()
+				if err := s.EnvironmentIds.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"environment_ids\"")
+			}
 		case "visibility":
 			if err := func() error {
 				s.Visibility.Reset()
@@ -5923,7 +5940,7 @@ func (s *DataProductCreate) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"visibility\"")
 			}
 		case "owners":
-			requiredBitSet[1] |= 1 << 1
+			requiredBitSet[1] |= 1 << 2
 			if err := func() error {
 				s.Owners = make([]uuid.UUID, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
@@ -5963,7 +5980,7 @@ func (s *DataProductCreate) Decode(d *jx.Decoder) error {
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
 		0b10101111,
-		0b00000010,
+		0b00000100,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -6005,6 +6022,134 @@ func (s *DataProductCreate) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *DataProductCreate) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *DataProductEnvironment) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *DataProductEnvironment) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("environment_id")
+		json.EncodeUUID(e, s.EnvironmentID)
+	}
+	{
+		e.FieldStart("environment")
+		s.Environment.Encode(e)
+	}
+	{
+		e.FieldStart("creation_date")
+		json.EncodeDateTime(e, s.CreationDate)
+	}
+}
+
+var jsonFieldsNameOfDataProductEnvironment = [3]string{
+	0: "environment_id",
+	1: "environment",
+	2: "creation_date",
+}
+
+// Decode decodes DataProductEnvironment from json.
+func (s *DataProductEnvironment) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode DataProductEnvironment to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "environment_id":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := json.DecodeUUID(d)
+				s.EnvironmentID = v
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"environment_id\"")
+			}
+		case "environment":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				if err := s.Environment.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"environment\"")
+			}
+		case "creation_date":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				v, err := json.DecodeDateTime(d)
+				s.CreationDate = v
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"creation_date\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode DataProductEnvironment")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000111,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfDataProductEnvironment) {
+					name = jsonFieldsNameOfDataProductEnvironment[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *DataProductEnvironment) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *DataProductEnvironment) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -9224,9 +9369,15 @@ func (s *DataProductUpdate) encodeFields(e *jx.Encoder) {
 		e.FieldStart("lifecycle_id")
 		json.EncodeUUID(e, s.LifecycleID)
 	}
+	{
+		if s.EnvironmentIds.Set {
+			e.FieldStart("environment_ids")
+			s.EnvironmentIds.Encode(e)
+		}
+	}
 }
 
-var jsonFieldsNameOfDataProductUpdate = [8]string{
+var jsonFieldsNameOfDataProductUpdate = [9]string{
 	0: "name",
 	1: "namespace",
 	2: "description",
@@ -9235,6 +9386,7 @@ var jsonFieldsNameOfDataProductUpdate = [8]string{
 	5: "domain_id",
 	6: "tag_ids",
 	7: "lifecycle_id",
+	8: "environment_ids",
 }
 
 // Decode decodes DataProductUpdate from json.
@@ -9242,7 +9394,7 @@ func (s *DataProductUpdate) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode DataProductUpdate to nil")
 	}
-	var requiredBitSet [1]uint8
+	var requiredBitSet [2]uint8
 	s.setDefaults()
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
@@ -9348,6 +9500,16 @@ func (s *DataProductUpdate) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"lifecycle_id\"")
 			}
+		case "environment_ids":
+			if err := func() error {
+				s.EnvironmentIds.Reset()
+				if err := s.EnvironmentIds.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"environment_ids\"")
+			}
 		default:
 			return d.Skip()
 		}
@@ -9357,8 +9519,9 @@ func (s *DataProductUpdate) Decode(d *jx.Decoder) error {
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
-	for i, mask := range [1]uint8{
+	for i, mask := range [2]uint8{
 		0b10101111,
+		0b00000000,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -11297,22 +11460,11 @@ func (s *DomainCreate) encodeFields(e *jx.Encoder) {
 		e.FieldStart("description")
 		e.Str(s.Description)
 	}
-	{
-		if s.EnvironmentIds != nil {
-			e.FieldStart("environment_ids")
-			e.ArrStart()
-			for _, elem := range s.EnvironmentIds {
-				json.EncodeUUID(e, elem)
-			}
-			e.ArrEnd()
-		}
-	}
 }
 
-var jsonFieldsNameOfDomainCreate = [3]string{
+var jsonFieldsNameOfDomainCreate = [2]string{
 	0: "name",
 	1: "description",
-	2: "environment_ids",
 }
 
 // Decode decodes DomainCreate from json.
@@ -11321,7 +11473,6 @@ func (s *DomainCreate) Decode(d *jx.Decoder) error {
 		return errors.New("invalid: unable to decode DomainCreate to nil")
 	}
 	var requiredBitSet [1]uint8
-	s.setDefaults()
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
@@ -11348,25 +11499,6 @@ func (s *DomainCreate) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"description\"")
-			}
-		case "environment_ids":
-			if err := func() error {
-				s.EnvironmentIds = make([]uuid.UUID, 0)
-				if err := d.Arr(func(d *jx.Decoder) error {
-					var elem uuid.UUID
-					v, err := json.DecodeUUID(d)
-					elem = v
-					if err != nil {
-						return err
-					}
-					s.EnvironmentIds = append(s.EnvironmentIds, elem)
-					return nil
-				}); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"environment_ids\"")
 			}
 		default:
 			return d.Skip()
@@ -11441,22 +11573,11 @@ func (s *DomainUpdate) encodeFields(e *jx.Encoder) {
 		e.FieldStart("description")
 		e.Str(s.Description)
 	}
-	{
-		if s.EnvironmentIds != nil {
-			e.FieldStart("environment_ids")
-			e.ArrStart()
-			for _, elem := range s.EnvironmentIds {
-				json.EncodeUUID(e, elem)
-			}
-			e.ArrEnd()
-		}
-	}
 }
 
-var jsonFieldsNameOfDomainUpdate = [3]string{
+var jsonFieldsNameOfDomainUpdate = [2]string{
 	0: "name",
 	1: "description",
-	2: "environment_ids",
 }
 
 // Decode decodes DomainUpdate from json.
@@ -11465,7 +11586,6 @@ func (s *DomainUpdate) Decode(d *jx.Decoder) error {
 		return errors.New("invalid: unable to decode DomainUpdate to nil")
 	}
 	var requiredBitSet [1]uint8
-	s.setDefaults()
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
@@ -11492,25 +11612,6 @@ func (s *DomainUpdate) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"description\"")
-			}
-		case "environment_ids":
-			if err := func() error {
-				s.EnvironmentIds = make([]uuid.UUID, 0)
-				if err := d.Arr(func(d *jx.Decoder) error {
-					var elem uuid.UUID
-					v, err := json.DecodeUUID(d)
-					elem = v
-					if err != nil {
-						return err
-					}
-					s.EnvironmentIds = append(s.EnvironmentIds, elem)
-					return nil
-				}); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"environment_ids\"")
 			}
 		default:
 			return d.Skip()
@@ -13479,12 +13580,20 @@ func (s *GetDataProductResponse) encodeFields(e *jx.Encoder) {
 		s.Visibility.Encode(e)
 	}
 	{
+		e.FieldStart("environments")
+		e.ArrStart()
+		for _, elem := range s.Environments {
+			elem.Encode(e)
+		}
+		e.ArrEnd()
+	}
+	{
 		e.FieldStart("about")
 		s.About.Encode(e)
 	}
 }
 
-var jsonFieldsNameOfGetDataProductResponse = [13]string{
+var jsonFieldsNameOfGetDataProductResponse = [14]string{
 	0:  "id",
 	1:  "name",
 	2:  "description",
@@ -13497,7 +13606,8 @@ var jsonFieldsNameOfGetDataProductResponse = [13]string{
 	9:  "type",
 	10: "lifecycle",
 	11: "visibility",
-	12: "about",
+	12: "environments",
+	13: "about",
 }
 
 // Decode decodes GetDataProductResponse from json.
@@ -13656,8 +13766,26 @@ func (s *GetDataProductResponse) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"visibility\"")
 			}
-		case "about":
+		case "environments":
 			requiredBitSet[1] |= 1 << 4
+			if err := func() error {
+				s.Environments = make([]DataProductEnvironment, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem DataProductEnvironment
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.Environments = append(s.Environments, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"environments\"")
+			}
+		case "about":
+			requiredBitSet[1] |= 1 << 5
 			if err := func() error {
 				if err := s.About.Decode(d); err != nil {
 					return err
@@ -13677,7 +13805,7 @@ func (s *GetDataProductResponse) Decode(d *jx.Decoder) error {
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
 		0b11111111,
-		0b00011111,
+		0b00111111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -14107,6 +14235,14 @@ func (s *GetDataProductsResponseItem) encodeFields(e *jx.Encoder) {
 		s.Visibility.Encode(e)
 	}
 	{
+		e.FieldStart("environments")
+		e.ArrStart()
+		for _, elem := range s.Environments {
+			elem.Encode(e)
+		}
+		e.ArrEnd()
+	}
+	{
 		e.FieldStart("user_count")
 		e.Int(s.UserCount)
 	}
@@ -14120,7 +14256,7 @@ func (s *GetDataProductsResponseItem) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfGetDataProductsResponseItem = [15]string{
+var jsonFieldsNameOfGetDataProductsResponseItem = [16]string{
 	0:  "id",
 	1:  "name",
 	2:  "description",
@@ -14133,9 +14269,10 @@ var jsonFieldsNameOfGetDataProductsResponseItem = [15]string{
 	9:  "type",
 	10: "lifecycle",
 	11: "visibility",
-	12: "user_count",
-	13: "input_port_count",
-	14: "technical_asset_count",
+	12: "environments",
+	13: "user_count",
+	14: "input_port_count",
+	15: "technical_asset_count",
 }
 
 // Decode decodes GetDataProductsResponseItem from json.
@@ -14294,8 +14431,26 @@ func (s *GetDataProductsResponseItem) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"visibility\"")
 			}
-		case "user_count":
+		case "environments":
 			requiredBitSet[1] |= 1 << 4
+			if err := func() error {
+				s.Environments = make([]DataProductEnvironment, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem DataProductEnvironment
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.Environments = append(s.Environments, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"environments\"")
+			}
+		case "user_count":
+			requiredBitSet[1] |= 1 << 5
 			if err := func() error {
 				v, err := d.Int()
 				s.UserCount = int(v)
@@ -14307,7 +14462,7 @@ func (s *GetDataProductsResponseItem) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"user_count\"")
 			}
 		case "input_port_count":
-			requiredBitSet[1] |= 1 << 5
+			requiredBitSet[1] |= 1 << 6
 			if err := func() error {
 				v, err := d.Int()
 				s.InputPortCount = int(v)
@@ -14319,7 +14474,7 @@ func (s *GetDataProductsResponseItem) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"input_port_count\"")
 			}
 		case "technical_asset_count":
-			requiredBitSet[1] |= 1 << 6
+			requiredBitSet[1] |= 1 << 7
 			if err := func() error {
 				v, err := d.Int()
 				s.TechnicalAssetCount = int(v)
@@ -14341,7 +14496,7 @@ func (s *GetDataProductsResponseItem) Decode(d *jx.Decoder) error {
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
 		0b11111111,
-		0b01111111,
+		0b11111111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -14408,21 +14563,12 @@ func (s *GetDomainResponse) encodeFields(e *jx.Encoder) {
 		e.FieldStart("description")
 		e.Str(s.Description)
 	}
-	{
-		e.FieldStart("environments")
-		e.ArrStart()
-		for _, elem := range s.Environments {
-			elem.Encode(e)
-		}
-		e.ArrEnd()
-	}
 }
 
-var jsonFieldsNameOfGetDomainResponse = [4]string{
+var jsonFieldsNameOfGetDomainResponse = [3]string{
 	0: "id",
 	1: "name",
 	2: "description",
-	3: "environments",
 }
 
 // Decode decodes GetDomainResponse from json.
@@ -14470,24 +14616,6 @@ func (s *GetDomainResponse) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"description\"")
 			}
-		case "environments":
-			requiredBitSet[0] |= 1 << 3
-			if err := func() error {
-				s.Environments = make([]EnvironmentGetItem, 0)
-				if err := d.Arr(func(d *jx.Decoder) error {
-					var elem EnvironmentGetItem
-					if err := elem.Decode(d); err != nil {
-						return err
-					}
-					s.Environments = append(s.Environments, elem)
-					return nil
-				}); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"environments\"")
-			}
 		default:
 			return d.Skip()
 		}
@@ -14498,7 +14626,7 @@ func (s *GetDomainResponse) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00001111,
+		0b00000111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -14566,25 +14694,16 @@ func (s *GetDomainsItem) encodeFields(e *jx.Encoder) {
 		e.Str(s.Description)
 	}
 	{
-		e.FieldStart("environments")
-		e.ArrStart()
-		for _, elem := range s.Environments {
-			elem.Encode(e)
-		}
-		e.ArrEnd()
-	}
-	{
 		e.FieldStart("abstract_data_product_count")
 		e.Int(s.AbstractDataProductCount)
 	}
 }
 
-var jsonFieldsNameOfGetDomainsItem = [5]string{
+var jsonFieldsNameOfGetDomainsItem = [4]string{
 	0: "id",
 	1: "name",
 	2: "description",
-	3: "environments",
-	4: "abstract_data_product_count",
+	3: "abstract_data_product_count",
 }
 
 // Decode decodes GetDomainsItem from json.
@@ -14632,26 +14751,8 @@ func (s *GetDomainsItem) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"description\"")
 			}
-		case "environments":
-			requiredBitSet[0] |= 1 << 3
-			if err := func() error {
-				s.Environments = make([]EnvironmentGetItem, 0)
-				if err := d.Arr(func(d *jx.Decoder) error {
-					var elem EnvironmentGetItem
-					if err := elem.Decode(d); err != nil {
-						return err
-					}
-					s.Environments = append(s.Environments, elem)
-					return nil
-				}); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"environments\"")
-			}
 		case "abstract_data_product_count":
-			requiredBitSet[0] |= 1 << 4
+			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
 				v, err := d.Int()
 				s.AbstractDataProductCount = int(v)
@@ -14672,7 +14773,7 @@ func (s *GetDomainsItem) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00011111,
+		0b00001111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -16978,6 +17079,14 @@ func (s *GetTechnicalAssetsResponseItem) encodeFields(e *jx.Encoder) {
 		s.Owner.Encode(e)
 	}
 	{
+		e.FieldStart("environments")
+		e.ArrStart()
+		for _, elem := range s.Environments {
+			elem.Encode(e)
+		}
+		e.ArrEnd()
+	}
+	{
 		e.FieldStart("output_port_links")
 		e.ArrStart()
 		for _, elem := range s.OutputPortLinks {
@@ -17011,7 +17120,7 @@ func (s *GetTechnicalAssetsResponseItem) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfGetTechnicalAssetsResponseItem = [17]string{
+var jsonFieldsNameOfGetTechnicalAssetsResponseItem = [18]string{
 	0:  "id",
 	1:  "name",
 	2:  "description",
@@ -17024,11 +17133,12 @@ var jsonFieldsNameOfGetTechnicalAssetsResponseItem = [17]string{
 	9:  "access_modes",
 	10: "configuration",
 	11: "owner",
-	12: "output_port_links",
-	13: "tags",
-	14: "sourceAligned",
-	15: "result_string",
-	16: "technical_info",
+	12: "environments",
+	13: "output_port_links",
+	14: "tags",
+	15: "sourceAligned",
+	16: "result_string",
+	17: "technical_info",
 }
 
 // Decode decodes GetTechnicalAssetsResponseItem from json.
@@ -17178,8 +17288,26 @@ func (s *GetTechnicalAssetsResponseItem) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"owner\"")
 			}
-		case "output_port_links":
+		case "environments":
 			requiredBitSet[1] |= 1 << 4
+			if err := func() error {
+				s.Environments = make([]DataProductEnvironment, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem DataProductEnvironment
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.Environments = append(s.Environments, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"environments\"")
+			}
+		case "output_port_links":
+			requiredBitSet[1] |= 1 << 5
 			if err := func() error {
 				s.OutputPortLinks = make([]OutputPortLink, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
@@ -17197,7 +17325,7 @@ func (s *GetTechnicalAssetsResponseItem) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"output_port_links\"")
 			}
 		case "tags":
-			requiredBitSet[1] |= 1 << 5
+			requiredBitSet[1] |= 1 << 6
 			if err := func() error {
 				s.Tags = make([]Tag, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
@@ -17215,7 +17343,7 @@ func (s *GetTechnicalAssetsResponseItem) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"tags\"")
 			}
 		case "sourceAligned":
-			requiredBitSet[1] |= 1 << 6
+			requiredBitSet[1] |= 1 << 7
 			if err := func() error {
 				v, err := d.Bool()
 				s.SourceAligned = bool(v)
@@ -17227,7 +17355,7 @@ func (s *GetTechnicalAssetsResponseItem) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"sourceAligned\"")
 			}
 		case "result_string":
-			requiredBitSet[1] |= 1 << 7
+			requiredBitSet[2] |= 1 << 0
 			if err := func() error {
 				v, err := d.Str()
 				s.ResultString = string(v)
@@ -17239,7 +17367,7 @@ func (s *GetTechnicalAssetsResponseItem) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"result_string\"")
 			}
 		case "technical_info":
-			requiredBitSet[2] |= 1 << 0
+			requiredBitSet[2] |= 1 << 1
 			if err := func() error {
 				s.TechnicalInfo = make([]TechnicalInfo, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
@@ -17268,7 +17396,7 @@ func (s *GetTechnicalAssetsResponseItem) Decode(d *jx.Decoder) error {
 	for i, mask := range [3]uint8{
 		0b10011111,
 		0b11111111,
-		0b00000001,
+		0b00000011,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -24496,6 +24624,69 @@ func (s *OptNilUUID) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
+// Encode encodes []uuid.UUID as json.
+func (o OptNilUUIDArray) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	if o.Null {
+		e.Null()
+		return
+	}
+	e.ArrStart()
+	for _, elem := range o.Value {
+		json.EncodeUUID(e, elem)
+	}
+	e.ArrEnd()
+}
+
+// Decode decodes []uuid.UUID from json.
+func (o *OptNilUUIDArray) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptNilUUIDArray to nil")
+	}
+	if d.Next() == jx.Null {
+		if err := d.Null(); err != nil {
+			return err
+		}
+
+		var v []uuid.UUID
+		o.Value = v
+		o.Set = true
+		o.Null = true
+		return nil
+	}
+	o.Set = true
+	o.Null = false
+	o.Value = make([]uuid.UUID, 0)
+	if err := d.Arr(func(d *jx.Decoder) error {
+		var elem uuid.UUID
+		v, err := json.DecodeUUID(d)
+		elem = v
+		if err != nil {
+			return err
+		}
+		o.Value = append(o.Value, elem)
+		return nil
+	}); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptNilUUIDArray) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptNilUUIDArray) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode encodes User as json.
 func (o OptNilUser) Encode(e *jx.Encoder) {
 	if !o.Set {
@@ -27130,7 +27321,7 @@ func (s *OutputPortQueryStatsDelete) Encode(e *jx.Encoder) {
 func (s *OutputPortQueryStatsDelete) encodeFields(e *jx.Encoder) {
 	{
 		e.FieldStart("date")
-		e.Str(s.Date)
+		json.EncodeDate(e, s.Date)
 	}
 	{
 		e.FieldStart("consumer_data_product_id")
@@ -27155,8 +27346,8 @@ func (s *OutputPortQueryStatsDelete) Decode(d *jx.Decoder) error {
 		case "date":
 			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				v, err := d.Str()
-				s.Date = string(v)
+				v, err := json.DecodeDate(d)
+				s.Date = v
 				if err != nil {
 					return err
 				}
@@ -27496,7 +27687,7 @@ func (s *OutputPortQueryStatsUpdate) Encode(e *jx.Encoder) {
 func (s *OutputPortQueryStatsUpdate) encodeFields(e *jx.Encoder) {
 	{
 		e.FieldStart("date")
-		e.Str(s.Date)
+		json.EncodeDate(e, s.Date)
 	}
 	{
 		e.FieldStart("consumer_data_product_id")
@@ -27526,8 +27717,8 @@ func (s *OutputPortQueryStatsUpdate) Decode(d *jx.Decoder) error {
 		case "date":
 			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				v, err := d.Str()
-				s.Date = string(v)
+				v, err := json.DecodeDate(d)
+				s.Date = v
 				if err != nil {
 					return err
 				}

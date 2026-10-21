@@ -43,9 +43,6 @@ database:
 infrastructure_lambda_arn: ""
 aws_session_duration: "!!string 900"
 
-# Pick from datamindedthemeconfig, bluethemeconfig, greenthemeconfig
-theme_configuration: "datamindedthemeconfig"
-
 posthog:
   key: phc_NDxOG0gXQtkPItPFJXLOAQhLmbZw7v0SbIQesSWO4gc
   host: https://eu.i.posthog.com

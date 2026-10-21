@@ -87,6 +87,7 @@ const technicalAsset: GetTechnicalAssetsResponseItem = {
     sourceAligned: false,
     result_string: 's3://bucket/orders',
     technical_info: [],
+    environments: [],
 };
 
 describe('OutputPortCard', () => {

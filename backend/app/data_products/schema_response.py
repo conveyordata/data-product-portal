@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Optional, Sequence
 from uuid import UUID
 from warnings import deprecated
@@ -7,10 +8,17 @@ from app.configuration.data_product_lifecycles.schema import DataProductLifeCycl
 from app.configuration.data_product_settings.schema import DataProductSettingValue
 from app.configuration.data_product_types.schema import DataProductType
 from app.configuration.domains.schema import Domain
+from app.configuration.environments.schema_response import EnvironmentGetItem
 from app.configuration.tags.schema import Tag
 from app.data_products.model import DataProductVisibility
 from app.data_products.status import AbstractDataProductStatus
 from app.shared.schema import ORMModel
+
+
+class DataProductEnvironment(ORMModel):
+    environment_id: UUID
+    environment: EnvironmentGetItem
+    creation_date: datetime
 
 
 class BaseDataProductGet(ORMModel):
@@ -27,6 +35,7 @@ class BaseDataProductGet(ORMModel):
     type: DataProductType
     lifecycle: Optional[DataProductLifeCycle]
     visibility: DataProductVisibility
+    environments: list[DataProductEnvironment]
 
 
 class GetDataProductResponse(BaseDataProductGet):

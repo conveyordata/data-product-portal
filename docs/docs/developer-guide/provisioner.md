@@ -77,6 +77,8 @@ of how many workers you run.
 A FastAPI-ready webhook handler. Pass it a `ReconcileManager` and call
 `handler.dispatch_routing(request)` from your `/webhook` endpoint. It parses the
 incoming CloudEvent, maps it to the right `ResourceType`, and enqueues a reconcile.
+Adding an environment emits `data_product.environment_added`, containing `data_product_id`, the environment acronym, and `creation_date`. The handler enqueues the owning Data Product. Existing environment declarations migrated from Domain or global settings do not emit addition events; startup reconciliation reads the saved scope.
+
 Events for resource types that have no registered reconciler are silently acknowledged. Key
 constructor parameters:
 

@@ -1,9 +1,11 @@
 import { Badge, Flex, Space, Tag, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { AccessModesField } from '@/components/access-modes/access-modes-field.component.tsx';
+import { EnvironmentsField } from '@/components/environments/environments-field.component.tsx';
 import { NotShareableTag } from '@/components/technical-assets/not-shareable-tag/not-shareable-tag.component.tsx';
 import type {
     AccessMode,
+    DataProductEnvironment,
     TechnicalAssetStatus,
 } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
 import { useGetPluginsQuery } from '@/store/api/services/generated/pluginsApi';
@@ -18,9 +20,18 @@ type Props = {
     tags: TagModel[];
     namespace: string;
     accessModes: AccessMode[];
+    environments: DataProductEnvironment[];
 };
 
-export function TechnicalAssetDescription({ status, type, description, tags, namespace, accessModes }: Props) {
+export function TechnicalAssetDescription({
+    status,
+    type,
+    description,
+    tags,
+    namespace,
+    accessModes,
+    environments,
+}: Props) {
     const { t } = useTranslation();
     const { data: { plugins } = {} } = useGetPluginsQuery();
 
@@ -42,6 +53,7 @@ export function TechnicalAssetDescription({ status, type, description, tags, nam
                 </Space>
                 <AccessModesField accessModes={accessModes} />
             </Flex>
+            <EnvironmentsField environments={environments} />
             <Space size="small">
                 {tags.map((tag) => (
                     <Tag color="success" key={tag.id}>

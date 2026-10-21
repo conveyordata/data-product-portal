@@ -1,5 +1,7 @@
 from datetime import date, timedelta
 
+import pytest
+
 from app.authorization.roles.schema import Scope
 from app.core.authz.actions import AuthorizationAction
 from app.data_products.output_ports.query_stats.model import (
@@ -70,6 +72,50 @@ class TestDatasetQueryStatsDailyRouter:
         with as_user(session, UserFactory().id):
             stats = session.query(OutputPortQueryStatsDaily).all()
             assert len(stats) >= 2
+
+    @pytest.mark.parametrize(
+        "entry",
+        [
+            {"date": "2025-01-15", "query_count": -1},
+            {"date": "2025-01-15", "query_count": 2**31},
+            {"date": "15/01/2025", "query_count": 1},
+            {"date": "2025-02-30", "query_count": 1},
+            {"date": 1736899200, "query_count": 1},
+            {"date": "2025-01-15T00:00:00Z", "query_count": 1},
+            {"date": "2025-01-15", "query_count": True},
+            {"date": "2025-01-15", "query_count": "42"},
+        ],
+    )
+    def test_update_output_port_query_stats__invalid_entry(self, client, entry):
+        output_port = OutputPortFactory()
+        _assign_update_role(output_port)
+        consumer = DataProductFactory()
+
+        response = client.patch(
+            f"{DATA_PRODUCT_ENDPOINT}/{output_port.data_product.id}/output_ports/{output_port.id}/query_stats",
+            json={
+                "output_port_query_stats_updates": [
+                    {**entry, "consumer_data_product_id": str(consumer.id)}
+                ]
+            },
+        )
+
+        assert response.status_code == 422, response.text
+
+    def test_delete_output_port_query_stat__invalid_date(self, client):
+        output_port = OutputPortFactory()
+        _assign_update_role(output_port)
+
+        response = client.request(
+            "DELETE",
+            f"{DATA_PRODUCT_ENDPOINT}/{output_port.data_product.id}/output_ports/{output_port.id}/query_stats",
+            json={
+                "date": "15/01/2025",
+                "consumer_data_product_id": str(DataProductFactory().id),
+            },
+        )
+
+        assert response.status_code == 422, response.text
 
     def test_get_query_stats(self, client, session):
         """Test getting query stats for a dataset."""
@@ -191,6 +237,16 @@ class TestDatasetQueryStatsDailyRouter:
             assert "consumer_data_product_id" in stat
             assert "query_count" in stat
             assert "consumer_data_product_name" in stat
+
+    def test_get_output_port_query_stats__day_range_too_large(self, client):
+        output_port = OutputPortFactory()
+
+        response = client.get(
+            f"{DATA_PRODUCT_ENDPOINT}/{output_port.data_product.id}/output_ports/{output_port.id}/query_stats",
+            params={"day_range": 3651},
+        )
+
+        assert response.status_code == 422, response.text
 
     def test_delete_data_product_cascades_query_stats_daily(self, client, session):
         """Regression test: Verify that deleting a data product via API cascade deletes query stats."""

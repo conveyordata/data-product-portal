@@ -1,7 +1,6 @@
 from typing import Sequence
 from uuid import UUID
 
-from app.configuration.environments.schema_response import EnvironmentGetItem
 from app.shared.schema import ORMModel
 
 
@@ -9,7 +8,6 @@ class BaseDomainGet(ORMModel):
     id: UUID
     name: str
     description: str
-    environments: Sequence[EnvironmentGetItem]
 
 
 class GetDomainResponse(BaseDomainGet):

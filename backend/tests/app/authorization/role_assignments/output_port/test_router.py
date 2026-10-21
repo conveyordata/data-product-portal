@@ -4,11 +4,13 @@ from unittest.mock import patch
 import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
+from sqlalchemy import event
 
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.roles.schema import Role, Scope
 from app.core.authz import Action
 from app.settings import settings
+from tests import engine
 from tests.factories import (
     DatasetRoleAssignmentFactory,
     GlobalRoleAssignmentFactory,
@@ -42,6 +44,40 @@ class TestDatasetRoleAssignmentsRouter:
         data = response.json()
         assert len(data["role_assignments"]) == 1
         assert data["role_assignments"][0]["id"] == str(assignment.id)
+
+    def test_list_assignments__query_count_is_constant(self, client: TestClient):
+        role: Role = RoleFactory(scope=Scope.DATASET)
+
+        def count_queries() -> int:
+            statements: list[str] = []
+
+            def record(conn, cursor, statement, *args):
+                statements.append(statement)
+
+            event.listen(engine, "before_cursor_execute", record)
+            try:
+                response = client.get(ENDPOINT)
+            finally:
+                event.remove(engine, "before_cursor_execute", record)
+            assert response.status_code == 200
+            return len(statements)
+
+        for _ in range(2):
+            DatasetRoleAssignmentFactory(
+                output_port_id=OutputPortFactory().id,
+                user_id=UserFactory().id,
+                role_id=role.id,
+            )
+        count_queries()
+        baseline = count_queries()
+        for _ in range(5):
+            DatasetRoleAssignmentFactory(
+                output_port_id=OutputPortFactory().id,
+                user_id=UserFactory().id,
+                role_id=role.id,
+            )
+
+        assert count_queries() == baseline
 
     @pytest.mark.parametrize(
         ("permissions", "should_update_casbin"),
