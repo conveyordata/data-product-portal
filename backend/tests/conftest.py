@@ -18,6 +18,7 @@ from app.core.auth.device_flows.service import verify_auth_header
 from app.core.authz import Action
 from app.core.authz.authorization import Authorization
 from app.core.context import _pending_events
+from app.core.logging import logger
 from app.core.webhooks.events import V2Event
 from app.data_products.output_ports.enums import OutputPortAccessFunction
 from app.database.database import Base, get_system_db_session
@@ -26,6 +27,7 @@ from app.settings import settings
 from tests.factories import reset_unique_fakers
 from tests.factories.role import RoleFactory
 from tests.factories.role_assignment_global import GlobalRoleAssignmentFactory
+from tests.fixtures.fake_plugin.schema import FakeTechnicalAssetConfiguration
 
 from . import TestingSessionLocal
 from .factories.data_product_type import DataProductTypeFactory
@@ -144,6 +146,18 @@ def default_data_product_payload() -> dict[str, Any]:
     }
 
 
+@pytest.fixture(scope="session", autouse=True)
+def drop_events_outside_request_warning() -> None:
+    # Factories and direct service calls write outside a request on purpose.
+    logger.addFilter(
+        lambda record: (
+            not record.getMessage().startswith(
+                "Events queued outside of a request context"
+            )
+        )
+    )
+
+
 @pytest.fixture(autouse=True)
 def clear_db(session: Session) -> None:
     """Clear database after each test."""
@@ -239,3 +253,14 @@ def capture_events() -> Iterator["CapturedEventsMock"]:
         webhook_v2_config(),
     ):
         yield mock
+
+
+@pytest.fixture
+def unshareable_fake_plugin(monkeypatch):
+    monkeypatch.setattr(
+        FakeTechnicalAssetConfiguration,
+        "_platform_metadata",
+        FakeTechnicalAssetConfiguration.get_platform_metadata().model_copy(
+            update={"shareable": False}
+        ),
+    )

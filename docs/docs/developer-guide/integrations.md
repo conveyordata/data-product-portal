@@ -27,7 +27,7 @@ This section describes how to integrate the portal with your platform of choice.
 
 ### Currently Supported Integrations
 
-- **AWS**: S3, Glue, Athena, Redshift
+- **AWS**: S3, Glue, Athena, Redshift, Parameter Store
 - **Conveyor**: A [self-service workflow manager](https://conveyor.dataminded.com/) for Data Products
 - **Agno**: [An agent platform](https://www.agno.com/)
 - **Azure**: Blob Storage

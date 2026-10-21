@@ -57,10 +57,12 @@ class TestDataProductService:
             producer=producer, consumer=consumer, user=user, input_port=input_port
         )
 
-    def test_sync_consumer_reader_grouping__consumer_has_access(self, session):
+    def test_sync_consumer_reader_grouping__consumer_has_no_access_to_producer(
+        self, session
+    ):
         result = self.setup_data_product_with_consumer()
         DataProductService(session)._sync_consumer_reader_grouping(result.producer.id)
-        assert Authorization().has_access(
+        assert not Authorization().has_access(
             act=AuthorizationAction.HIDDEN__DATA_PRODUCT__READ,
             dom=str(result.producer.domain.id),
             obj=str(result.producer.id),
@@ -98,20 +100,17 @@ class TestDataProductService:
         self, session
     ):
         result = self.setup_data_product_with_consumer()
+        output_port_read = {
+            "act": AuthorizationAction.HIDDEN__OUTPUT_PORT__READ,
+            "dom": str(result.producer.domain.id),
+            "obj": str(result.input_port.output_port_id),
+            "parent": str(result.producer.id),
+            "sub": str(result.user.id),
+        }
         DataProductService(session)._sync_consumer_reader_grouping(result.producer.id)
-        assert Authorization().has_access(
-            act=AuthorizationAction.HIDDEN__DATA_PRODUCT__READ,
-            dom=str(result.producer.domain.id),
-            obj=str(result.producer.id),
-            sub=str(result.user.id),
-        )
+        assert Authorization().has_access(**output_port_read)
 
         result.input_port.status = InputPortStatus.REVOKED
         session.flush()
         DataProductService(session)._sync_consumer_reader_grouping(result.producer.id)
-        assert not Authorization().has_access(
-            act=AuthorizationAction.HIDDEN__DATA_PRODUCT__READ,
-            dom=str(result.producer.domain.id),
-            obj=str(result.producer.id),
-            sub=str(result.user.id),
-        )
+        assert not Authorization().has_access(**output_port_read)

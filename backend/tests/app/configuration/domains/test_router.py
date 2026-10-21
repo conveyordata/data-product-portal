@@ -1,7 +1,6 @@
-from uuid import uuid4
-
 import pytest
 
+from app.data_products.model import DataProductEnvironment
 from tests.factories import (
     DataProductFactory,
     DomainFactory,
@@ -38,29 +37,7 @@ class TestDomainsRouter:
         response = self.get_domain(client, domain.id)
         assert response.status_code == 200
         assert response.json()["id"] == str(domain.id)
-        assert response.json()["environments"] == []
-
-    @pytest.mark.usefixtures("admin")
-    def test_create_domain__with_environments(self, client):
-        environment = EnvironmentFactory()
-        payload = {
-            "name": "Test Domain",
-            "description": "Test Description",
-            "environment_ids": [str(environment.id)],
-        }
-        response = self.create_domain(client, payload)
-        assert response.status_code == 200, response.text
-
-        domain_response = self.get_domain(client, response.json()["id"])
-        assert [env["id"] for env in domain_response.json()["environments"]] == [
-            str(environment.id)
-        ]
-
-    @pytest.mark.usefixtures("admin")
-    def test_create_domain__invalid_environment_id(self, client, domain_payload):
-        domain_payload["environment_ids"] = [str(uuid4())]
-        response = self.create_domain(client, domain_payload)
-        assert response.status_code == 400
+        assert "environments" not in response.json()
 
     @pytest.mark.usefixtures("admin")
     def test_update_domain(self, client):
@@ -71,36 +48,22 @@ class TestDomainsRouter:
         assert response.json()["id"] == str(domain.id)
 
     @pytest.mark.usefixtures("admin")
-    def test_update_domain__sets_custom_environments(self, client):
+    def test_update_domain__preserves_data_product_environments(self, client):
         environment = EnvironmentFactory()
         domain = DomainFactory()
+        product = DataProductFactory(
+            domain=domain,
+            environments=[DataProductEnvironment(environment=environment)],
+        )
+        before = self.get_data_product_environments(client, product.id)
         update_payload = {
             "name": "update",
             "description": "update",
-            "environment_ids": [str(environment.id)],
         }
         response = self.update_domain(client, update_payload, domain.id)
         assert response.status_code == 200
 
-        domain_response = self.get_domain(client, domain.id)
-        assert [env["id"] for env in domain_response.json()["environments"]] == [
-            str(environment.id)
-        ]
-
-    @pytest.mark.usefixtures("admin")
-    def test_update_domain__clearing_environments_reverts_to_global(self, client):
-        environment = EnvironmentFactory()
-        domain = DomainFactory(environments=[environment])
-        update_payload = {
-            "name": "update",
-            "description": "update",
-            "environment_ids": [],
-        }
-        response = self.update_domain(client, update_payload, domain.id)
-        assert response.status_code == 200
-
-        domain_response = self.get_domain(client, domain.id)
-        assert domain_response.json()["environments"] == []
+        assert self.get_data_product_environments(client, product.id) == before
 
     @pytest.mark.usefixtures("admin")
     def test_remove_domain(self, client):
@@ -119,12 +82,18 @@ class TestDomainsRouter:
     def test_migrate_domains(self, client):
         domain = DomainFactory()
         new_domain = DomainFactory()
-        data_product = DataProductFactory(domain=domain)
+        environment = EnvironmentFactory()
+        data_product = DataProductFactory(
+            domain=domain,
+            environments=[DataProductEnvironment(environment=environment)],
+        )
+        before = self.get_data_product_environments(client, data_product.id)
         exploration = ExplorationFactory(domain=domain)
         response = self.migrate_domains(client, domain.id, new_domain.id)
         assert response.status_code == 200
         assert data_product.domain.id == new_domain.id
         assert exploration.domain.id == new_domain.id
+        assert self.get_data_product_environments(client, data_product.id) == before
 
     def test_create_domain_admin_only(self, domain_payload, client):
         response = self.create_domain(client, domain_payload)
@@ -146,6 +115,12 @@ class TestDomainsRouter:
         new_domain = DomainFactory()
         response = self.migrate_domains(client, domain.id, new_domain.id)
         assert response.status_code == 403
+
+    @staticmethod
+    def get_data_product_environments(client, data_product_id):
+        response = client.get(f"/api/v2/data_products/{data_product_id}")
+        assert response.status_code == 200, response.text
+        return response.json()["environments"]
 
     @staticmethod
     def create_domain(client, payload):

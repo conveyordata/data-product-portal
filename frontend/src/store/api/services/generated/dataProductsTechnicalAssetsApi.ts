@@ -239,6 +239,19 @@ export type DataProduct = {
   status: AbstractDataProductStatus;
   type: DataProductType;
 };
+export type EnvironmentGetItem = {
+  id: string;
+  name: string;
+  acronym: string;
+  context: string;
+  is_default?: boolean;
+  is_global?: boolean;
+};
+export type DataProductEnvironment = {
+  environment_id: string;
+  environment: EnvironmentGetItem;
+  creation_date: string;
+};
 export type OutputPortAccessType = {
   id: string;
   name: string;
@@ -288,6 +301,7 @@ export type GetTechnicalAssetsResponseItem = {
     [key: string]: any;
   };
   owner: DataProduct;
+  environments: DataProductEnvironment[];
   output_port_links: OutputPortLink[];
   tags: Tag[];
   /** DEPRECATED: Use 'technical_mapping' instead. This field will be removed in a future version. */
@@ -352,6 +366,20 @@ export type TechnicalAsset = {
     [key: string]: any;
   };
 };
+export type Domain = {
+  id: string;
+  name: string;
+  description: string;
+};
+export type Exploration = {
+  id: string;
+  name: string;
+  namespace: string;
+  description: string;
+  domain: Domain;
+  status: AbstractDataProductStatus;
+  finalizers: string[];
+};
 export type GetEventHistoryResponseItem = {
   id: string;
   name: string;
@@ -363,11 +391,13 @@ export type GetEventHistoryResponseItem = {
   created_on: string;
   deleted_subject_identifier?: string | null;
   deleted_target_identifier?: string | null;
-  actor: User;
+  deleted_actor_identifier?: string | null;
+  actor?: User | null;
   data_product?: DataProduct | null;
   user?: User | null;
   output_port?: OutputPort | null;
   technical_asset?: TechnicalAsset | null;
+  exploration?: Exploration | null;
 };
 export type GetEventHistoryResponse = {
   events: GetEventHistoryResponseItem[];
@@ -446,6 +476,7 @@ export enum EventEntityType {
   OutputPort = "output_port",
   TechnicalAsset = "technical_asset",
   User = "user",
+  Exploration = "exploration",
 }
 export enum NodeType {
   DataProductNode = "dataProductNode",

@@ -40,3 +40,7 @@ export function getTechnicalAssetType(
 export function getPlatformTileIcon(tile: PlatformTile) {
     return tile.icon_data_uri ? getIconFromDataUri(tile.icon_data_uri) : getIcon(tile.icon_name);
 }
+
+export function isTechnicalAssetShareable(name: string | undefined, plugins: UiElementMetadataResponse[] | undefined) {
+    return plugins?.find((p) => p.plugin === name)?.shareable !== false;
+}

@@ -99,22 +99,6 @@ func (s *DeviceFlow) setDefaults() {
 }
 
 // setDefaults set default value of fields.
-func (s *DomainCreate) setDefaults() {
-	{
-		var defaultVal0 []uuid.UUID
-		s.EnvironmentIds = defaultVal0
-	}
-}
-
-// setDefaults set default value of fields.
-func (s *DomainUpdate) setDefaults() {
-	{
-		var defaultVal0 []uuid.UUID
-		s.EnvironmentIds = defaultVal0
-	}
-}
-
-// setDefaults set default value of fields.
 func (s *Environment) setDefaults() {
 	{
 		val := bool(false)
@@ -275,6 +259,10 @@ func (s *UIElementMetadataResponse) setDefaults() {
 	{
 		val := bool(true)
 		s.ShowInForm.SetTo(val)
+	}
+	{
+		val := bool(true)
+		s.Shareable.SetTo(val)
 	}
 }
 

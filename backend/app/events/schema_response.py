@@ -7,6 +7,7 @@ from app.data_products.output_ports.schema import OutputPort
 from app.data_products.schema import DataProduct
 from app.data_products.technical_assets.schema import TechnicalAsset
 from app.events.enums import EventEntityType
+from app.explorations.schema_response import Exploration
 from app.shared.schema import ORMModel
 from app.users.schema import User
 
@@ -22,11 +23,13 @@ class GetEventHistoryResponseItem(ORMModel):
     created_on: NaiveDatetime
     deleted_subject_identifier: Optional[str] = None
     deleted_target_identifier: Optional[str] = None
-    actor: User
+    deleted_actor_identifier: Optional[str] = None
+    actor: Optional[User] = None
     data_product: Optional[DataProduct] = None
     user: Optional[User] = None
     output_port: Optional[OutputPort] = None
     technical_asset: Optional[TechnicalAsset] = None
+    exploration: Optional[Exploration] = None
 
 
 class GetEventHistoryResponse(ORMModel):

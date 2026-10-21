@@ -38,7 +38,7 @@ class CreateExplorationRequestWithInputPorts:
 
     def to_dict(self) -> dict[str, Any]:
         from ..models.request_input_ports_for_exploration_request import (
-            RequestInputPortsForExplorationRequest,
+            RequestInputPortsForExplorationRequest,  # noqa: PLC0415
         )
 
         name = self.name
@@ -75,7 +75,7 @@ class CreateExplorationRequestWithInputPorts:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.request_input_ports_for_exploration_request import (
-            RequestInputPortsForExplorationRequest,
+            RequestInputPortsForExplorationRequest,  # noqa: PLC0415
         )
 
         d = dict(src_dict)

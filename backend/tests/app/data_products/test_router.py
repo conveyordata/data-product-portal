@@ -7,11 +7,12 @@ from uuid import UUID
 import pytest
 from fastapi.testclient import TestClient
 
+from app.abstract_data_product.input_ports.enums import InputPortStatus
 from app.authorization.role_assignments.enums import AssignmentFilter
 from app.authorization.roles.schema import Scope
 from app.authorization.service import AuthorizationService
 from app.core.authz import Action
-from app.data_products.model import DataProductVisibility
+from app.data_products.model import DataProductEnvironment, DataProductVisibility
 from app.data_products.output_ports.enums import OutputPortAccessFunction
 from app.resource_names.service import ResourceNameValidityType
 from app.settings import settings
@@ -65,6 +66,7 @@ def payload() -> dict[str, Any]:
     data_product_type = DataProductTypeFactory()
     user = UserFactory()
     tag = TagFactory()
+    environment = EnvironmentFactory(name="tst", is_global=False)
     return {
         "name": str(uuid.uuid4()),
         "description": "Updated Data Product Description",
@@ -74,11 +76,156 @@ def payload() -> dict[str, Any]:
         "owners": [str(user.id)],
         "lifecycle_id": str(lifecycle.id),
         "domain_id": str(domain.id),
+        "environment_ids": [str(environment.id)],
     }
 
 
 class TestDataProductsRouter:
     invalid_id = "00000000-0000-0000-0000-000000000000"
+
+    def test_create_data_product__persists_global_environments(
+        self,
+        payload,
+        client,
+        user_with_create_data_product_rights,
+        session,
+        capture_events,
+    ):
+        payload.pop("environment_ids")
+        environment = EnvironmentFactory(is_global=True)
+        EnvironmentFactory(name="prd", is_global=False)
+        response = self.create_data_product(client, payload)
+        assert response.status_code == 200, response.text
+        product = client.get(f"{ENDPOINT}/{response.json()['id']}").json()
+        assert [item["environment_id"] for item in product["environments"]] == [
+            str(environment.id)
+        ]
+        assert product["environments"][0]["creation_date"]
+        events = [
+            event
+            for event in capture_events.captured_events
+            if event.event_type() == "data_product.environment_added"
+        ]
+        assert len(events) == 1
+        assert str(events[0].data_product_id) == product["id"]
+        assert events[0].environment == environment.acronym
+        assert (
+            events[0].creation_date.isoformat()
+            == product["environments"][0]["creation_date"]
+        )
+        environment.is_global = False
+        session.flush()
+        assert (
+            client.get(f"{ENDPOINT}/{product['id']}").json()["environments"]
+            == product["environments"]
+        )
+
+    def test_create_data_product__uses_selection_not_global_defaults(
+        self, payload, client, user_with_create_data_product_rights
+    ):
+        EnvironmentFactory(is_global=True)
+        domain = DomainFactory()
+        payload["domain_id"] = str(domain.id)
+        response = self.create_data_product(client, payload)
+        assert response.status_code == 200, response.text
+        product = client.get(f"{ENDPOINT}/{response.json()['id']}").json()
+        assert [item["environment_id"] for item in product["environments"]] == payload[
+            "environment_ids"
+        ]
+
+    @pytest.mark.parametrize(
+        ("environment_ids", "expected_status"),
+        [([], 422), (None, 422), ([str(uuid.uuid4())], 400)],
+    )
+    def test_create_data_product__rejects_invalid_environments(
+        self,
+        payload,
+        client,
+        user_with_create_data_product_rights,
+        environment_ids,
+        expected_status,
+        capture_events,
+    ):
+        payload["environment_ids"] = environment_ids
+        response = self.create_data_product(client, payload)
+        assert response.status_code == expected_status, response.text
+        assert_event_not_in_queue("data_product.environment_added", capture_events)
+
+    def test_create_data_product__rejects_duplicate_environments(
+        self, payload, client, user_with_create_data_product_rights
+    ):
+        payload["environment_ids"] *= 2
+        response = self.create_data_product(client, payload)
+        assert response.status_code == 400
+        assert response.json()["detail"] == "Duplicate environment ids provided"
+
+    def test_create_data_product__requires_configured_defaults(
+        self, payload, client, user_with_create_data_product_rights
+    ):
+        payload.pop("environment_ids")
+        response = self.create_data_product(client, payload)
+        assert response.status_code == 400
+        assert (
+            response.json()["detail"]
+            == "Select at least one environment for the Data Product"
+        )
+
+    def test_update_data_product__adds_environment_once(
+        self, payload, client, admin, capture_events
+    ):
+        original = EnvironmentFactory(is_global=False)
+        data_product = DataProductFactory(
+            environments=[DataProductEnvironment(environment=original)]
+        )
+        before = client.get(f"{ENDPOINT}/{data_product.id}").json()["environments"]
+        payload["environment_ids"].append(str(original.id))
+        response = self.update_data_product(client, payload, data_product.id)
+        assert response.status_code == 200, response.text
+        after = client.get(f"{ENDPOINT}/{data_product.id}").json()["environments"]
+        assert len(after) == 2
+        assert (
+            next(item for item in after if item["environment_id"] == str(original.id))
+            == before[0]
+        )
+        assert (
+            len(
+                [
+                    event
+                    for event in capture_events.captured_events
+                    if event.event_type() == "data_product.environment_added"
+                ]
+            )
+            == 1
+        )
+        capture_events.captured_events.clear()
+        response = self.update_data_product(client, payload, data_product.id)
+        assert response.status_code == 200, response.text
+        assert (
+            client.get(f"{ENDPOINT}/{data_product.id}").json()["environments"] == after
+        )
+        assert_event_not_in_queue("data_product.environment_added", capture_events)
+        payload.pop("environment_ids")
+        payload["domain_id"] = str(DomainFactory().id)
+        response = self.update_data_product(client, payload, data_product.id)
+        assert response.status_code == 200, response.text
+        assert (
+            client.get(f"{ENDPOINT}/{data_product.id}").json()["environments"] == after
+        )
+
+    def test_update_data_product__rejects_removal(
+        self, payload, client, admin, capture_events
+    ):
+        original = EnvironmentFactory()
+        data_product = DataProductFactory(
+            environments=[DataProductEnvironment(environment=original)]
+        )
+        response = self.update_data_product(client, payload, data_product.id)
+        assert response.status_code == 400, response.text
+        assert (
+            response.json()["detail"]
+            == "Environments cannot be removed from a Data Product"
+        )
+        assert_event_not_in_queue("data_product.environment_added", capture_events)
 
     def test_create_data_product(
         self, payload, client, user_with_create_data_product_rights
@@ -262,7 +409,10 @@ class TestDataProductsRouter:
         response = self.get_data_product(client, data_product.id)
         assert response.status_code == 200, response.text
 
-    def test_get_conveyor_ide_url(self, client):
+    def test_get_conveyor_ide_url(self, client, monkeypatch):
+        monkeypatch.setattr(
+            settings, "ENABLED_PLUGINS", [*settings.ENABLED_PLUGINS, "ConveyorPlugin"]
+        )
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         cvr = PlatformFactory(name="Conveyor")
         PlatformServiceFactory(platform=cvr)
@@ -314,6 +464,26 @@ class TestDataProductsRouter:
 
         assert response.status_code == 200
         assert response.json()["id"] == str(data_product.id)
+
+    def test_update_data_product__ignores_visibility(self, payload, client, session):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        data_product = DataProductFactory()
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__UPDATE_PROPERTIES],
+        )
+        DataProductRoleAssignmentFactory(
+            identity_id=user.id,
+            role_id=role.id,
+            data_product_id=data_product.id,
+        )
+        update_payload = deepcopy(payload)
+        update_payload["visibility"] = DataProductVisibility.HIDDEN.value
+        response = self.update_data_product(client, update_payload, data_product.id)
+
+        assert response.status_code == 200
+        session.refresh(data_product)
+        assert data_product.visibility == DataProductVisibility.DISCOVERABLE
 
     def test_update_data_product_about_no_member(self, client):
         data_product = DataProductFactory()
@@ -673,7 +843,12 @@ class TestDataProductsRouter:
 
         assert output_port.id not in [node["id"] for node in response.json()["nodes"]]
 
-    def test_get_signin_url_not_implemented(self, client):
+    def test_get_signin_url_not_implemented(self, client, monkeypatch):
+        monkeypatch.setattr(
+            settings,
+            "ENABLED_PLUGINS",
+            [*settings.ENABLED_PLUGINS, "S3TechnicalAssetConfiguration"],
+        )
         EnvironmentFactory(name="production")
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
@@ -693,7 +868,12 @@ class TestDataProductsRouter:
         )
         assert response.status_code == 501 or response.status_code == 400
 
-    def test_get_databricks_url(self, client):
+    def test_get_databricks_url(self, client, monkeypatch):
+        monkeypatch.setattr(
+            settings,
+            "ENABLED_PLUGINS",
+            [*settings.ENABLED_PLUGINS, "DatabricksTechnicalAssetConfiguration"],
+        )
         env = EnvironmentFactory(name="production")
         platform = PlatformFactory(name="Databricks")
         PlatformServiceFactory(platform=platform)
@@ -721,7 +901,12 @@ class TestDataProductsRouter:
         assert response.status_code == 200
         assert response.json()["url"] == "test_1.com"
 
-    def test_get_snowflake_url(self, client):
+    def test_get_snowflake_url(self, client, monkeypatch):
+        monkeypatch.setattr(
+            settings,
+            "ENABLED_PLUGINS",
+            [*settings.ENABLED_PLUGINS, "SnowflakeTechnicalAssetConfiguration"],
+        )
         env = EnvironmentFactory(name="production")
         platform = PlatformFactory(name="Snowflake")
         PlatformServiceFactory(platform=platform)
@@ -1063,6 +1248,140 @@ class TestDataProductsRouter:
     @staticmethod
     def delete_data_product(client: TestClient, data_product_id):
         return client.delete(f"{ENDPOINT}/{data_product_id}")
+
+    @staticmethod
+    def setup_consumer_of_private_output_port(session):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        producer = DataProductFactory(visibility=DataProductVisibility.HIDDEN)
+        output_port = OutputPortFactory(
+            data_product=producer, access_function=OutputPortAccessFunction.PRIVATE
+        )
+        consumer = DataProductFactory()
+        DataProductRoleAssignmentFactory(
+            data_product_id=consumer.id,
+            identity_id=user.id,
+            role_id=RoleFactory.data_product_owner().id,
+        )
+        InputPortFactory(
+            output_port=output_port,
+            consuming_abstract_data_product=consumer,
+            status=InputPortStatus.APPROVED,
+            request__requested_by=user,
+        )
+        other_consumer = DataProductFactory()
+        InputPortFactory(
+            output_port=output_port,
+            consuming_abstract_data_product=other_consumer,
+            status=InputPortStatus.APPROVED,
+        )
+        AuthorizationService(session).reload_enforcer()
+        return producer, output_port, consumer, other_consumer
+
+    def test_get_data_product__hidden_producer_not_visible_to_consumer(
+        self, client, session
+    ):
+        producer, _, _, _ = self.setup_consumer_of_private_output_port(session)
+
+        assert self.get_data_product(client, producer.id).status_code == 403
+
+    def test_get_data_products__hidden_producer_not_listed_for_consumer(
+        self, client, session
+    ):
+        producer, _, _, _ = self.setup_consumer_of_private_output_port(session)
+
+        response = client.get(
+            ENDPOINT, params={"assignment_filter": AssignmentFilter.ALL.value}
+        )
+        assert str(producer.id) not in {
+            data_product["id"] for data_product in response.json()["data_products"]
+        }
+
+    def test_get_output_port__consumer_can_read_consumed_private_output_port(
+        self, client, session
+    ):
+        producer, output_port, _, _ = self.setup_consumer_of_private_output_port(
+            session
+        )
+
+        response = client.get(f"{ENDPOINT}/{producer.id}/output_ports/{output_port.id}")
+
+        assert response.status_code == 200, response.text
+        assert response.json()["id"] == str(output_port.id)
+
+    def test_get_output_port_graph_data__consumer_does_not_see_hidden_producer(
+        self, client, session
+    ):
+        producer, output_port, _, _ = self.setup_consumer_of_private_output_port(
+            session
+        )
+
+        response = client.get(
+            f"{ENDPOINT}/{producer.id}/output_ports/{output_port.id}/graph"
+        )
+
+        assert response.status_code == 200, response.text
+        assert str(producer.id) not in {
+            node["data"]["id"] for node in response.json()["nodes"]
+        }
+
+    def test_search_output_ports__consumed_private_output_port_not_listed_for_consumer(
+        self, client, session
+    ):
+        _, output_port, _, _ = self.setup_consumer_of_private_output_port(session)
+
+        response = client.get("/api/v2/search/output_ports")
+
+        assert response.status_code == 200, response.text
+        assert str(output_port.id) not in {
+            op["id"] for op in response.json()["output_ports"]
+        }
+
+    def test_get_input_ports__consumer_sees_own_private_input_port(
+        self, client, session
+    ):
+        _, output_port, consumer, _ = self.setup_consumer_of_private_output_port(
+            session
+        )
+
+        response = self.get_input_ports(client, consumer.id)
+
+        assert response.status_code == 200, response.text
+        assert [ip["output_port_id"] for ip in response.json()["input_ports"]] == [
+            str(output_port.id)
+        ]
+
+    def test_get_input_ports__consumer_does_not_see_private_input_port_of_other_data_product(
+        self, client, session
+    ):
+        _, _, _, other_consumer = self.setup_consumer_of_private_output_port(session)
+
+        response = self.get_input_ports(client, other_consumer.id)
+
+        assert response.status_code == 200, response.text
+        assert response.json()["input_ports"] == []
+
+    def test_revoke_input_port__consumer_can_revoke_private_input_port(
+        self, client, session
+    ):
+        _, output_port, consumer, _ = self.setup_consumer_of_private_output_port(
+            session
+        )
+
+        response = client.post(
+            f"{ENDPOINT}/{consumer.id}/input_ports/{output_port.id}/revoke"
+        )
+
+        assert response.status_code == 200, response.text
+
+    def test_get_user_requests__consumer_sees_own_private_input_port_request(
+        self, client, session
+    ):
+        _, output_port, _, _ = self.setup_consumer_of_private_output_port(session)
+
+        response = client.get("/api/v2/users/current/my_requests")
+
+        assert response.status_code == 200, response.text
+        assert str(output_port.id) in response.text
 
     @staticmethod
     def get_data_product(client: TestClient, data_product_id):

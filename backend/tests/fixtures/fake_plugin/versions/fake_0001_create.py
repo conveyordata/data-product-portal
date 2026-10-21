@@ -7,7 +7,7 @@ from app.shared.model import utcnow
 revision = "fake_0001_create"
 down_revision = None
 branch_labels = None
-depends_on = None
+depends_on = "5477aa0d86f0"
 
 TABLE = "fake_technical_asset_configurations"
 

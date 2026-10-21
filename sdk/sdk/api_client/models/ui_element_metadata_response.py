@@ -34,6 +34,7 @@ class UIElementMetadataResponse:
         parent_platform (None | str | Unset):
         platform_tile (None | PlatformTile | Unset):
         show_in_form (bool | Unset):  Default: True.
+        shareable (bool | Unset):  Default: True.
     """
 
     ui_metadata: list[UIElementMetadata]
@@ -50,10 +51,11 @@ class UIElementMetadataResponse:
     parent_platform: None | str | Unset = UNSET
     platform_tile: None | PlatformTile | Unset = UNSET
     show_in_form: bool | Unset = True
+    shareable: bool | Unset = True
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        from ..models.platform_tile import PlatformTile
+        from ..models.platform_tile import PlatformTile  # noqa: PLC0415
 
         ui_metadata = []
         for ui_metadata_item_data in self.ui_metadata:
@@ -100,6 +102,8 @@ class UIElementMetadataResponse:
 
         show_in_form = self.show_in_form
 
+        shareable = self.shareable
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
@@ -127,13 +131,15 @@ class UIElementMetadataResponse:
             field_dict["platform_tile"] = platform_tile
         if show_in_form is not UNSET:
             field_dict["show_in_form"] = show_in_form
+        if shareable is not UNSET:
+            field_dict["shareable"] = shareable
 
         return field_dict
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.platform_tile import PlatformTile
-        from ..models.ui_element_metadata import UIElementMetadata
+        from ..models.platform_tile import PlatformTile  # noqa: PLC0415
+        from ..models.ui_element_metadata import UIElementMetadata  # noqa: PLC0415
 
         d = dict(src_dict)
         ui_metadata = []
@@ -198,6 +204,8 @@ class UIElementMetadataResponse:
 
         show_in_form = d.pop("show_in_form", UNSET)
 
+        shareable = d.pop("shareable", UNSET)
+
         ui_element_metadata_response = cls(
             ui_metadata=ui_metadata,
             plugin=plugin,
@@ -213,6 +221,7 @@ class UIElementMetadataResponse:
             parent_platform=parent_platform,
             platform_tile=platform_tile,
             show_in_form=show_in_form,
+            shareable=shareable,
         )
 
         ui_element_metadata_response.additional_properties = d

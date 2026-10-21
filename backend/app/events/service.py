@@ -12,11 +12,17 @@ from app.data_products.technical_assets.model import TechnicalAsset
 from app.events.enums import EventEntityType
 from app.events.model import Event as EventModel
 from app.events.schema import CreateEvent
+from app.explorations.model import Exploration
 from app.users.model import User
 
 
 @sql_event.listens_for(User, "before_delete")
 def _backup_user_name_on_delete(mapper, connection, target):
+    connection.execute(
+        update(EventModel.__table__)
+        .where(EventModel.actor_id == target.id)
+        .values(deleted_actor_identifier=target.email)
+    )
     connection.execute(
         update(EventModel.__table__)
         .where(
@@ -105,6 +111,30 @@ def _backup_technical_asset_name_on_delete(mapper, connection, target):
             and_(
                 EventModel.target_id == target.id,
                 EventModel.target_type == EventEntityType.TECHNICAL_ASSET,
+            )
+        )
+        .values(deleted_target_identifier=target.name)
+    )
+
+
+@sql_event.listens_for(Exploration, "before_delete")
+def _backup_exploration_name_on_delete(mapper, connection, target):
+    connection.execute(
+        update(EventModel.__table__)
+        .where(
+            and_(
+                EventModel.subject_id == target.id,
+                EventModel.subject_type == EventEntityType.EXPLORATION,
+            )
+        )
+        .values(deleted_subject_identifier=target.name)
+    )
+    connection.execute(
+        update(EventModel.__table__)
+        .where(
+            and_(
+                EventModel.target_id == target.id,
+                EventModel.target_type == EventEntityType.EXPLORATION,
             )
         )
         .values(deleted_target_identifier=target.name)

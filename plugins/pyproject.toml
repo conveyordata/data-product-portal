@@ -1,10 +1,10 @@
 [project]
 name = "data-product-portal-plugins"
-version = "0.7.4"
+version = "0.8.0"
 description = "First-party technical asset plugins for Data Product Portal"
 requires-python = ">=3.13"
 dependencies = [
-    "data-product-portal>=0.7.4",
+    "data-product-portal>=0.8.0",
     "fastapi>=0.141.1",
     "pydantic>=2.13.5",
     "sqlalchemy>=2.0.52",
@@ -21,6 +21,7 @@ databricks = "portal_plugins.databricks.schema:DatabricksTechnicalAssetConfigura
 github = "portal_plugins.github.schema:GitHubPlugin"
 glue = "portal_plugins.glue.schema:GlueTechnicalAssetConfiguration"
 osi-semantic-model = "portal_plugins.osi_sem_model.schema:OSISemanticModelTechnicalAssetConfiguration"
+parameter-store = "portal_plugins.parameter_store.schema:ParameterStoreTechnicalAssetConfiguration"
 postgresql = "portal_plugins.postgresql.schema:PostgreSQLTechnicalAssetConfiguration"
 redshift = "portal_plugins.redshift.schema:RedshiftTechnicalAssetConfiguration"
 s3 = "portal_plugins.s3.schema:S3TechnicalAssetConfiguration"

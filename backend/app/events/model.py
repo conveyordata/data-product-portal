@@ -1,7 +1,7 @@
 import uuid
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Column, Enum, ForeignKey, String
+from sqlalchemy import Column, Enum, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -15,6 +15,7 @@ if TYPE_CHECKING:
     from app.data_products.model import DataProduct
     from app.data_products.output_ports.model import OutputPort
     from app.data_products.technical_assets.model import TechnicalAsset
+    from app.explorations.model import Exploration
     from app.users.model import User
 
 
@@ -29,8 +30,13 @@ class Event(Base, BaseORM):
     target_id = Column(UUID(as_uuid=True))
     subject_type = Column(Enum(EventEntityType, native_enum=False))
     target_type = Column(Enum(EventEntityType, native_enum=False))
-    actor_id = Column(UUID(as_uuid=True), ForeignKey("users.id"))
-    actor: Mapped["User"] = relationship("User")
+    deleted_actor_identifier: Mapped[str | None] = mapped_column(String)
+    actor_id = Column(UUID(as_uuid=True))
+    actor: Mapped["User | None"] = relationship(
+        "User",
+        primaryjoin="foreign(Event.actor_id) == User.id",
+        back_populates="events",
+    )
 
     notifications: Mapped[list[Notification]] = relationship(
         "Notification",
@@ -63,4 +69,10 @@ class Event(Base, BaseORM):
         "foreign(TechnicalAsset.id), Event.subject_type == 'TECHNICAL_ASSET'),"
         "and_(Event.target_id == foreign(TechnicalAsset.id),"
         " Event.target_type == 'TECHNICAL_ASSET'))",
+    )
+    exploration: Mapped["Exploration"] = relationship(
+        primaryjoin="or_(and_(Event.subject_id == "
+        "foreign(Exploration.id), Event.subject_type == 'EXPLORATION'), "
+        "and_(Event.target_id == foreign(Exploration.id), "
+        "Event.target_type == 'EXPLORATION'))",
     )

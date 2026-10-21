@@ -1,0 +1,42 @@
+"""add exploration event reference entity
+
+Revision ID: abd4229ea6af
+Revises: 3f1c2b7a9d4e
+Create Date: 2026-09-25 16:14:00.000000
+
+"""
+
+from typing import Sequence, Union
+
+import sqlalchemy as sa
+from alembic import op
+
+# revision identifiers, used by Alembic.
+revision: str = "abd4229ea6af"
+down_revision: Union[str, None] = "3f1c2b7a9d4e"
+branch_labels: Union[str, Sequence[str], None] = None
+depends_on: Union[str, Sequence[str], None] = None
+
+
+def upgrade() -> None:
+    op.bulk_insert(
+        sa.table("event_reference_entities", sa.column("key", sa.String)),
+        [{"key": "EXPLORATION"}],
+    )
+    op.execute(
+        "UPDATE events SET target_type = 'EXPLORATION' "
+        "WHERE target_type = 'DATA_PRODUCT' "
+        "AND target_id IN (SELECT id FROM explorations)"
+    )
+
+
+def downgrade() -> None:
+    op.execute(
+        "UPDATE events SET subject_type = 'DATA_PRODUCT' "
+        "WHERE subject_type = 'EXPLORATION'"
+    )
+    op.execute(
+        "UPDATE events SET target_type = 'DATA_PRODUCT' "
+        "WHERE target_type = 'EXPLORATION'"
+    )
+    op.execute("DELETE FROM event_reference_entities WHERE key = 'EXPLORATION'")

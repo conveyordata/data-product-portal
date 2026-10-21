@@ -16,6 +16,7 @@ import {
     useApproveOutputPortTechnicalAssetLinkMutation,
     useDenyOutputPortTechnicalAssetLinkMutation,
 } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
+import { isTechnicalAssetNotShareableError } from '@/store/common/api-errors.ts';
 import { DecisionStatus } from '@/types/roles';
 import { dispatchMessage } from '@/utils/feedback.ts';
 
@@ -88,9 +89,11 @@ export const usePendingActionHandlers = () => {
                     content: t('Output Port request has been successfully approved'),
                     type: 'success',
                 });
-            } catch (_error) {
+            } catch (error) {
                 dispatchMessage({
-                    content: t('Failed to approve Technical Asset Output Port link'),
+                    content: isTechnicalAssetNotShareableError(error)
+                        ? t("You can't approve this link because the Technical Asset type is not shareable")
+                        : t('Failed to approve Technical Asset Output Port link'),
                     type: 'error',
                 });
             }

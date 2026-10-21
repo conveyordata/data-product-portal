@@ -11,8 +11,8 @@ from app.configuration.environments.platform_configurations.service import (
 from app.configuration.environments.platform_service_configurations.schema_response import (
     SnowflakeConfig,
 )
-from app.data_products.schema import DataProduct
 from app.technical_asset_configuration.base_schema import (
+    PluginContext,
     FieldDependency,
     PlatformMetadata,
     SelectOption,
@@ -44,6 +44,7 @@ class SnowflakeTechnicalAssetConfiguration(TechnicalAssetPlugin):
     access_granularity: AccessGranularity
 
     _platform_metadata = PlatformMetadata(
+        result_string_template="{database}.{schema}.{table}",
         display_name="Snowflake",
         icon_name="snowflake-logo.svg",
         icon_package="portal_plugins.snowflake",
@@ -67,13 +68,10 @@ class SnowflakeTechnicalAssetConfiguration(TechnicalAssetPlugin):
             self.table = "*"
         return self
 
-    def validate_configuration(self, data_product: DataProduct, db: Session):
+    def validate_configuration(self, context: PluginContext, db: Session):
         # If product aligned
-        if not self.database.startswith(data_product.namespace):
+        if not self.database.startswith(context.data_product.namespace):
             raise ValueError("Invalid database specified")
-
-    def on_create(self):
-        pass
 
     @classmethod
     def get_url(cls, id, db, actor, environment=None) -> str:

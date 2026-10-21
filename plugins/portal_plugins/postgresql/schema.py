@@ -6,8 +6,8 @@ from sqlalchemy.orm import Session
 from app.configuration.environments.platform_service_configurations.schema_response import (
     PostgreSQLConfig,
 )
-from app.data_products.schema import DataProduct
 from app.technical_asset_configuration.base_schema import (
+    PluginContext,
     FieldDependency,
     PlatformMetadata,
     SelectOption,
@@ -36,6 +36,7 @@ class PostgreSQLTechnicalAssetConfiguration(TechnicalAssetPlugin):
     access_granularity: AccessGranularity
 
     _platform_metadata = PlatformMetadata(
+        result_string_template="{database}.{schema}.{table}",
         display_name="PostgreSQL",
         icon_name="postgresql-logo.svg",
         icon_package="portal_plugins.postgresql",
@@ -55,12 +56,9 @@ class PostgreSQLTechnicalAssetConfiguration(TechnicalAssetPlugin):
             self.table = "*"
         return self
 
-    def validate_configuration(self, data_product: DataProduct, db: Session):
-        if not self.database.startswith(data_product.namespace):
+    def validate_configuration(self, context: PluginContext, db: Session):
+        if not self.database.startswith(context.data_product.namespace):
             raise ValueError("Invalid database specified")
-
-    def on_create(self):
-        pass
 
     def render_template(self, template, **context):
         return ".".join(

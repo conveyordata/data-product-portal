@@ -113,6 +113,7 @@ export function TechnicalAsset() {
                             description={dataOutput.description}
                             tags={dataOutput.tags}
                             accessModes={dataOutput.access_modes}
+                            environments={dataOutput.environments}
                         />
                         <TechnicalAssetTabs
                             technicalAssetId={dataOutput.id}

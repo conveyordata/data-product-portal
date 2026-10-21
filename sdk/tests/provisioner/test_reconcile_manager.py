@@ -371,6 +371,28 @@ async def test_event_handler_enqueues_data_product():
     assert reconciler.calls == [data_product_id]
 
 
+async def test_event_handler_enqueues_data_product_on_environment_added():
+    reconciler = RecordingReconciler()
+    manager = ReconcileManager(
+        {ResourceType.DATA_PRODUCT: reconciler}, default_delay=0.0, num_workers=1
+    )
+    manager.start()
+    handler = ReconcileEventHandler(manager)
+    data_product_id = uuid.uuid4()
+    payload = _envelope("data_product.environment_added", data_product_id)
+    payload["data"] = {
+        "data_product_id": str(data_product_id),
+        "environment": "dev",
+        "creation_date": "2026-10-12T11:00:00",
+    }
+
+    await handler.dispatch_routing(_build_request(payload))
+
+    await _drain(reconciler, expected=1)
+    await manager.stop()
+    assert reconciler.calls == [data_product_id]
+
+
 async def test_event_handler_enqueues_input_port_target_producer():
     reconciler = RecordingReconciler()
     manager = ReconcileManager(

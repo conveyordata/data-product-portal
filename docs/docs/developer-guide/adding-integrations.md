@@ -87,7 +87,7 @@ class GlueTechnicalAssetConfiguration(TechnicalAssetPlugin):
     def get_ui_metadata(cls, db):
         # describe the form: one UIElementMetadata per field
 
-    def validate_configuration(self, data_product, db):
+    def validate_configuration(self, context, db):
         # raise an error if the input isn't acceptable
 
     def get_configuration(self, configs):
@@ -104,10 +104,11 @@ The sections below go through this outline one part at a time, in the order you'
 
 - `display_name` is the label on the tile, such as "Glue".
 - `icon_name` and `icon_package` point to the tile's icon. Every plugin brings its own icon: put the SVG file in your plugin's folder, set `icon_name` to the file name, and set `icon_package` to the Python package that holds it, for example `my_portal_plugins.glue`. The portal reads the file from your package.
-- `parent_platform` groups the tile under another one. Glue appears under AWS.
+- `parent_platform` groups the tile under another one. Glue appears under AWS. A child platform has no tile of its own on the data product page: clicking the parent tile uses the `get_url` its children implement. All children of one parent that implement `get_url` must share the same function, as the AWS plugins do with `get_url = classmethod(get_aws_plugin_url)`. Otherwise the portal refuses to open the parent tile and names the plugins that differ.
 - `platform_key` links the plugin to its platform service, explained in [the platform and platform service](#the-platform-and-platform-service).
 - `has_environments` decides what happens when someone clicks the tile on the data product page. When it's on, they first pick an environment, such as development or production, and `get_url` receives it. When it's off, the tile opens the link straight away. It's on by default.
 - `show_in_form` decides whether the plugin appears in the form for creating a technical asset. It's on by default.
+- `shareable` decides whether technical assets of this type can be linked to an Output Port. When it's off, the portal refuses new links and approvals of pending ones, and producers see that the type isn't shareable. Links that already exist stay. It's on by default.
 
 If you override `get_url`, the tile opens a link, for example to the resource in its own tool.
 
@@ -118,38 +119,51 @@ Those are the only parts every plugin needs. A plugin that only has a name, a ti
 When a data product owner creates a Glue technical asset, they pick a database from a dropdown. That list has to come from somewhere, and the right AWS account for each environment too. The portal keeps this information in three places:
 
 - A platform is a technology vendor or cloud provider, such as AWS, Azure, Databricks or Snowflake.
-- A platform service is one service of a platform, such as S3 or Glue on AWS. It holds the list of options your form offers, for example `["datalake", "ingress", "egress"]`. It also holds `result_string_template`, which turns what the owner filled in into the name everyone sees, such as `{bucket}/{path}` for S3. The names between braces are your plugin's fields.
+- A platform service is one service of a platform, such as S3 or Glue on AWS. It holds the list of options your form offers, for example `["datalake", "ingress", "egress"]`. It also holds `result_string_template`, which turns what the owner filled in into the name everyone sees, such as `{bucket}/{path}` for S3. The names between braces are your plugin's fields. The portal also passes three objects to every template: `technical_asset`, `data_product` and `domain`. A template reads them with a dot, for example `{technical_asset.namespace}`, `{data_product.namespace}` or `{domain.name}`. If your plugin has a field called `technical_asset`, `data_product` or `domain`, the template gets your field instead of the portal's object. The Azure Blob plugin has a `domain` field, so `{domain}` in its templates is that field, and `{domain.name}` doesn't work there. `technical_info_template` does the same once per environment, and can also use `{environment}`, the environment's acronym.
 - An environment is a stage such as development or production. Per environment it contains the settings that differ, such as the AWS account and region, or which real bucket belongs to each option. They're linked to an option through its `identifier`.
 
 
 Your plugin uses this in two places. `get_platform_options` reads the list of options, to fill a dropdown in your form. `get_configuration` gets the settings of the chosen environment, and returns the entry that belongs to this asset, usually the one whose `identifier` matches what the owner picked. The portal already knows the format of these environment settings for the platforms it supports, such as `AWSGlueConfig` for Glue. A plugin for another tool can reuse one of them, or do without environment settings: then skip `get_configuration` and the per-environment rows below.
 
-These rows live in the portal's database, and you add them with SQL (for now). A plugin that only adds a link needs none of them:
+You don't create the platform and platform service yourself. Declare the templates in `_platform_metadata`, and on every deploy the portal adds the platform, the platform service and an empty list of options, or updates the templates if they already exist:
+
+```python
+_platform_metadata = PlatformMetadata(
+    display_name="Glue",
+    platform_key="glue",
+    parent_platform="aws",
+    result_string_template="{database}__{database_suffix}.{table}",
+    technical_info_template="{database}__{database_suffix}.{table}",
+    ...
+)
+```
+
+`technical_info_template` is optional and falls back to `result_string_template`. The platform is named after `parent_platform`, or after `platform_key` when the plugin has no parent, and the platform service after `platform_key`. A plugin without `result_string_template` gets none of these rows, which is right for a plugin that only adds a link.
+
+Admins still fill in, with SQL for now, the settings only they know: for example which S3 buckets the form offers (`["datalake", "ingress"]`), or which AWS account and region each environment uses. The portal never overwrites these:
 
 | Table | What goes in it | Needed for a plugin with a form |
 |---|---|---|
-| `platforms` | The platform, such as AWS | Yes |
-| `platform_services` | The platform service, with its templates | Yes |
-| `platform_service_configs` | The list of options | Yes, use `'[]'` if there are none |
+| `platform_service_configs` | The list of options, such as `["datalake", "ingress"]` | The portal starts it as `'[]'` |
 | `env_platform_configs` | Platform settings per environment | Only if your plugin uses environment settings |
 | `env_platform_service_configs` | Platform service settings per environment | Only if your plugin uses environment settings |
 
-The portal finds these rows by name, so two names have to match your `_platform_metadata`, ignoring upper and lower case. If they don't, the form can't find your platform and creating a technical asset fails:
+The demo seed file [`demo/basic/portal_seed.sql`](https://github.com/conveyordata/data-product-portal/blob/main/demo/basic/portal_seed.sql) has complete examples, including the settings per environment.
 
-- The platform service's `name` has to equal `platform_key`.
-- The platform's `name` has to equal the tile it sits under: `parent_platform` if you set one, otherwise `display_name`.
+### Environment setup
 
-For Glue, which sits under AWS, that looks like this:
+Every Data Product needs at least one environment, even if its integrations do not use environment-specific configuration. Creating Environment catalogue entries currently requires SQL; the Environments settings table can mark existing entries as global defaults but cannot create them.
+
+For an installation without environments, create an entry before creating Data Products or upgrading existing ones:
 
 ```sql
-INSERT INTO platforms (name) VALUES ('AWS');                          -- matches parent_platform "aws"
-INSERT INTO platform_services (name, platform_id, result_string_template, technical_info_template)
-VALUES ('Glue', <aws_id>, '{database}.{table}', '...');                -- matches platform_key "glue"
-INSERT INTO platform_service_configs (platform_id, service_id, config)
-VALUES (<aws_id>, <glue_id>, '["datalake", "ingress"]');
+INSERT INTO environments (id, name, acronym, context, is_default, is_global)
+VALUES (gen_random_uuid(), 'Development', 'dev', '', FALSE, TRUE);
 ```
 
-The demo seed file [`demo/basic/portal_seed.sql`](https://github.com/conveyordata/data-product-portal/blob/main/demo/basic/portal_seed.sql) has complete examples, including the settings per environment.
+This example sets `dev` as a global default for new Data Products. It does not create infrastructure or configure platform credentials; add any integration-specific settings described above separately. Data Product creation without `environment_ids` requires at least one global environment. Alternatively, callers can explicitly select existing Environment IDs.
+
+The upgrade copies each existing Data Product's Domain environments, or its global defaults when the Domain has no selection. It refuses to continue if any Data Product would have no declared environments. Configure a global default or a Domain selection before retrying the migration. Changing defaults after the upgrade does not change saved Data Product environments.
 
 ### The fields and the form
 
@@ -169,7 +183,7 @@ UIElementMetadata(
 
 The Glue plugin also uses a text field, radio buttons and a field that only appears for one of those radio choices, so it's a good place to see the other types.
 
-`validate_configuration` runs when a technical asset with the default technical mapping is created. Raise an error there when the input isn't acceptable. It's optional: by default it accepts everything. Glue, for example, only accepts databases that start with the data product's namespace. You can also override `render_template` if the name built from `result_string_template` needs some cleaning up.
+`validate_configuration` runs when a technical asset with the default technical mapping is created. Raise an error there when the input isn't acceptable. It's optional: by default it accepts everything. Its `context` holds the technical asset (`id`, `namespace` and `technical_mapping`), the data product (`id`, `name`, `namespace`, `description`, `type`, `status`) and its `domain`. The technical asset's `id` is empty here and in the form preview, because the technical asset doesn't exist yet. Glue, for example, only accepts databases that start with `context.data_product.namespace`. You can also override `render_template` if the name built from `result_string_template` needs some cleaning up. It gets the same context as the keyword argument `plugin_context`, so pass it on to `super().render_template`.
 
 ### The database table
 
@@ -195,6 +209,7 @@ Put your migrations in a `versions/` folder next to the file with your plugin cl
 ```python
 revision = "glue_0001_baseline"
 down_revision = None
+depends_on = "5477aa0d86f0"
 
 def upgrade():
     op.create_table(
@@ -209,8 +224,10 @@ A few things to keep in mind:
 
 - The `id` column is mandatory and is linked to the technical asset table via `data_output_configurations.id`.
 - Start each revision id with your plugin's name, like `glue_0001_baseline`. The portal and all plugins share one list of applied migrations, so ids have to be unique across all of them.
-- The first migration has `down_revision = None`. Each later one points to the migration before it.
+- The first migration has `down_revision = None` and `depends_on = "5477aa0d86f0"`, the portal migration that created `data_output_configurations`, so your table is created after the table it points at. Each later migration points to the one before it.
 - When you add or change a field later, add a new migration to the same folder. It can also move or fill in existing data.
+- Only change your own tables. A migration is replayed on every new database against the portal's latest tables, so one that writes to a portal table, such as `platform_services`, breaks as soon as the portal changes that table. Your platform service comes from `_platform_metadata` instead, see [the platform and platform service](#the-platform-and-platform-service).
+- The one part of the portal your tables may point at is `data_output_configurations.id`, through the mandatory `id` column. The portal keeps that column stable for plugins.
 
 To try your migrations before you ship them, run `python -m app.db_tool migrate` against a local database. It brings the portal and every installed plugin up to date in one go.
 

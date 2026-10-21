@@ -8,8 +8,8 @@ sidebar_position: 5
 # Data Product Usage Ingestion
 
 The Data Product Portal provides a **usage analytics** view that allows one to:
-- track how datasets are being consumed over time and by which data products
-- show some relevant queries for a given dataset
+- track how output ports are being consumed over time and by which data products
+- show some relevant queries for a given output port
 
 ## Overview
 
@@ -17,44 +17,92 @@ To enable the usage analytics, the usage related tables have to be populated wit
 
 A simple example is shown below:
 
-![Usage Dashboard showing queries over time and queries per consumer](./img/usage.png)
+![Usage Dashboard showing queries over time and queries per consuming data product](./img/usage.png)
 
 The dashboard above demonstrates how usage data is visualized, with filters for granularity (day, week, month) and time ranges (30 days, 90 days, 1 year).
 
-## API Endpoint
+## API Endpoints
 
-To ingest usage data, use the following REST API endpoint:
+Usage statistics are stored per output port. The `data_product_id` is the data product that owns the output port, `id` is the output port itself.
+Pushing and deleting query statistics requires the "Insert query statistics" permission and replacing curated queries requires the "Manage general properties" permission.
+The owner roles have both by default (see [RBAC](./rbac.md)).
 
-### Endpoint
+### Query statistics
 
-#### query statistics
+- [`PATCH /api/v2/data_products/{data_product_id}/output_ports/{id}/query_stats`](/docs/api/#tag/Data-Products-Output-ports/operation/update_output_port_query_stats) - Upsert daily query counts
+- [`DELETE /api/v2/data_products/{data_product_id}/output_ports/{id}/query_stats`](/docs/api/#tag/Data-Products-Output-ports/operation/delete_output_port_query_stat) - Delete the count of one consuming data product for one day
+- [`GET /api/v2/data_products/{data_product_id}/output_ports/{id}/query_stats`](/docs/api/#tag/Data-Products-Output-ports/operation/get_output_port_query_stats) - Read the aggregated statistics shown in the dashboard
 
-- [`PATCH /api/datasets/{id}/query_stats`](/docs/api/#tag/datasets/operation/update_query_stats_api_datasets__id__query_stats_patch) - Update query statistics
-- [`DELETE /api/datasets/{id}/query_stats`](/docs/api/#tag/datasets/operation/delete_query_stat_api_datasets__id__query_stats_delete) - Delete query statistics
+The `GET` endpoint returns what the dashboard shows, not the rows you pushed: counts are summed per week over the last 90 days by default (see the `granularity` and `day_range` parameters),
+consuming data products beyond the top 5 are merged into "Other" with ID `00000000-0000-0000-0000-000000000000`, and periods without data are filled with zeros. If the output port has no data at all in the range, the response is `{"output_port_query_stats_responses": []}`.
 
+Send one entry per day and consuming data product. The consuming data product is the one whose members or technical identities ran the queries,
+so you need to map the users or roles in your platform's query logs to the ID of the data product they act for.
 
-#### curated queries
+```json
+{
+  "output_port_query_stats_updates": [
+    {
+      "date": "2025-01-15",
+      "consumer_data_product_id": "6f1c2a3b-4d5e-6f70-8192-a3b4c5d6e7f8",
+      "query_count": 42
+    }
+  ]
+}
+```
 
-- [`GET /api/datasets/{id}/usage/curated_queries`](/docs/api/#tag/datasets/operation/get_dataset_curated_queries_api_datasets__id__usage_curated_queries_get) - Get curated queries
-- [`PUT /api/datasets/{id}/usage/curated_queries`](/docs/api/#tag/datasets/operation/replace_dataset_curated_queries_api_datasets__id__usage_curated_queries_put) - Replace curated queries
+- `date`: the day the queries ran, as `YYYY-MM-DD`
+- `consumer_data_product_id`: the ID of the consuming data product
+- `query_count`: the number of queries on that day, zero or more. It replaces any count sent earlier for the same day and consuming data product, so re-sending a day is safe.
+  If one request contains the same day and consuming data product more than once, the last entry is used
 
+To remove an entry, send a `DELETE` request with this JSON body.
+Some HTTP clients, proxies and API gateways drop the body of a `DELETE` request, so make sure yours sends it:
+
+```json
+{
+  "date": "2025-01-15",
+  "consumer_data_product_id": "6f1c2a3b-4d5e-6f70-8192-a3b4c5d6e7f8"
+}
+```
+
+### Curated queries
+
+- [`GET /api/v2/data_products/{data_product_id}/output_ports/{id}/curated_queries`](/docs/api/#tag/Data-Products-Output-ports/operation/get_output_port_curated_queries) - Get curated queries
+- [`PUT /api/v2/data_products/{data_product_id}/output_ports/{id}/curated_queries`](/docs/api/#tag/Data-Products-Output-ports/operation/replace_output_port_curated_queries) - Replace curated queries
+
+The `PUT` endpoint replaces the full list, so always send every curated query of the output port; queries you leave out are deleted.
+
+```json
+{
+  "curated_queries": [
+    {
+      "title": "Daily revenue",
+      "description": "Revenue per day for the last month",
+      "query_text": "SELECT day, SUM(amount) FROM sales GROUP BY day"
+    }
+  ]
+}
+```
 
 ## Implementation
 
 To ingest usage data, you need to:
 
 1. Extract usage data from your data platform's query logs or access history
-2. Aggregate the data by date and consumer
+2. Aggregate the data by day and map each user or role to the ID of its consuming data product. Sum the counts of all users and roles that act for the same consuming data product, because the API stores one count per day and consuming data product
 3. Implement the HTTP client logic (authentication, request formatting, error handling, retries) to push the data to the API endpoint
 4. Schedule the ingestion process (e.g., daily batch jobs)
 
 ### Snowflake Example
 
-For organizations using Snowflake, we provide a sample SQL query that can be used as a starting point to extract usage statistics from Snowflake's `ACCESS_HISTORY` view. This query identifies which schemas were accessed by specific roles and aggregates query counts by consumer.
+For organizations using Snowflake, we provide a sample SQL query that can be used as a starting point to extract usage statistics from Snowflake's `ACCESS_HISTORY` view. This query counts the queries each user ran against each schema per day.
 
 **Note**: This query requires Snowflake Enterprise Edition or higher, as it uses the `ACCESS_HISTORY` view.
 
 We advise to use this query on a (daily) schedule.
+Views in `SNOWFLAKE.ACCOUNT_USAGE`, such as `ACCESS_HISTORY`, can lag a few hours behind, so also re-send the previous day or two on each run. Re-send whole days, with `start_ts` and `end_ts` at midnight, because a partial day overwrites the complete count stored earlier.
+Re-sending a day only overwrites the counts of the consuming data products in the request; use the `DELETE` endpoint to remove a count you no longer send.
 
 ```sql
 WITH AccessLogRaw AS (
@@ -82,12 +130,13 @@ WITH AccessLogRaw AS (
     WHERE UPPER(schema_name) NOT IN ('INFORMATION_SCHEMA', 'PUBLIC')
 )
 SELECT
+    DATE(QUERY_START_TIME) AS query_date,
     schema_name,
     user_name,
     COUNT(DISTINCT QUERY_ID) AS total_unique_queries
 FROM AccessLogFiltered
-GROUP BY 1, 2
-ORDER BY schema_name, total_unique_queries DESC
+GROUP BY 1, 2, 3
+ORDER BY query_date, schema_name, total_unique_queries DESC
 ```
 
 ### Query Parameters

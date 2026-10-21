@@ -38,6 +38,9 @@ from .cancel_input_port_for_data_product_response import (
 from .cancel_input_port_for_exploration_response import (
     CancelInputPortForExplorationResponse,
 )
+from .cloud_event_data_product_environment_added_event import (
+    CloudEventDataProductEnvironmentAddedEvent,
+)
 from .cloud_event_data_product_event import CloudEventDataProductEvent
 from .cloud_event_data_product_role_assignment_event import (
     CloudEventDataProductRoleAssignmentEvent,
@@ -80,6 +83,8 @@ from .create_technical_asset_response import CreateTechnicalAssetResponse
 from .data_product import DataProduct
 from .data_product_about_update import DataProductAboutUpdate
 from .data_product_create import DataProductCreate
+from .data_product_environment import DataProductEnvironment
+from .data_product_environment_added_event import DataProductEnvironmentAddedEvent
 from .data_product_event import DataProductEvent
 from .data_product_icon_key import DataProductIconKey
 from .data_product_life_cycle import DataProductLifeCycle
@@ -189,6 +194,7 @@ from .get_user_notifications_response import GetUserNotificationsResponse
 from .get_user_notifications_response_item import GetUserNotificationsResponseItem
 from .get_users_response import GetUsersResponse
 from .global_role_assignment_response import GlobalRoleAssignmentResponse
+from .grant_output_port_access_request import GrantOutputPortAccessRequest
 from .graph import Graph
 from .group_create import GroupCreate
 from .group_create_response import GroupCreateResponse
@@ -305,6 +311,7 @@ from .renew_input_port_for_data_product_response import (
 from .renew_input_port_for_exploration_response import (
     RenewInputPortForExplorationResponse,
 )
+from .renew_output_port_as_input_port_request import RenewOutputPortAsInputPortRequest
 from .renewal_status import RenewalStatus
 from .request_data_product_role_assignment import RequestDataProductRoleAssignment
 from .request_input_ports_for_abstract_data_product_request_item import (
@@ -423,6 +430,7 @@ __all__ = (
     "CanBecomeAdminUpdate",
     "CancelInputPortForDataProductResponse",
     "CancelInputPortForExplorationResponse",
+    "CloudEventDataProductEnvironmentAddedEvent",
     "CloudEventDataProductEvent",
     "CloudEventDataProductRoleAssignmentEvent",
     "CloudEventDataProductSettingValueEvent",
@@ -456,6 +464,8 @@ __all__ = (
     "DataProduct",
     "DataProductAboutUpdate",
     "DataProductCreate",
+    "DataProductEnvironment",
+    "DataProductEnvironmentAddedEvent",
     "DataProductEvent",
     "DataProductIconKey",
     "DataProductLifeCycle",
@@ -546,6 +556,7 @@ __all__ = (
     "GetUserNotificationsResponseItem",
     "GetUsersResponse",
     "GlobalRoleAssignmentResponse",
+    "GrantOutputPortAccessRequest",
     "Graph",
     "GroupCreate",
     "GroupCreateResponse",
@@ -639,6 +650,7 @@ __all__ = (
     "RenewalStatus",
     "RenewInputPortForDataProductResponse",
     "RenewInputPortForExplorationResponse",
+    "RenewOutputPortAsInputPortRequest",
     "RequestDataProductRoleAssignment",
     "RequestInputPortsForAbstractDataProductRequestItem",
     "RequestInputPortsForDataProductRequest",

@@ -9,7 +9,11 @@ from alembic.runtime.migration import MigrationContext
 from alembic.script import ScriptDirectory
 from sqlalchemy import Column, Engine, MetaData, String, Table, select
 from sqlalchemy import inspect as sa_inspect
+from sqlalchemy.orm import Session
 
+from app.configuration.platforms.platform_services.service import (
+    PlatformServiceService,
+)
 from app.core.logging import logger
 from app.technical_asset_configuration.base_schema import TechnicalAssetPlugin
 
@@ -18,14 +22,6 @@ _SCRIPT_LOCATION = Path(__file__).parent.parent / "database" / "alembic"
 _CORE_VERSIONS_DIR = _SCRIPT_LOCATION / "versions"
 _FILE_TEMPLATE = (
     "%%(year)d_%%(month).2d_%%(day).2d_%%(hour).2d%%(minute).2d-%%(rev)s_%%(slug)s"
-)
-
-RETIRED_PLUGIN_REVISIONS = frozenset({"rustfs_0001_baseline"})
-
-_version_table = Table(
-    VERSION_TABLE,
-    MetaData(),
-    Column("version_num", String(32), primary_key=True),
 )
 
 _configuration_table = Table(
@@ -58,9 +54,9 @@ def _owned_versions_dir(plugin: type[TechnicalAssetPlugin]) -> Path:
 
 
 def _version_locations(plugins: Sequence[type[TechnicalAssetPlugin]]) -> list[Path]:
-    return [_CORE_VERSIONS_DIR] + [
-        _owned_versions_dir(plugin) for plugin in plugins if owns_a_table(plugin)
-    ]
+    owned = [_owned_versions_dir(p) for p in plugins if owns_a_table(p)]
+    # Plugins defined in the same module share one versions folder.
+    return list(dict.fromkeys([_CORE_VERSIONS_DIR, *owned]))
 
 
 def _config(version_locations: Sequence[Path], url: str) -> Config:
@@ -80,21 +76,6 @@ def _current_heads(engine: Engine) -> tuple[str, ...]:
         return MigrationContext.configure(
             connection, opts={"version_table": VERSION_TABLE}
         ).get_current_heads()
-
-
-def _forget_retired_revisions(engine: Engine) -> None:
-    retired = sorted(RETIRED_PLUGIN_REVISIONS.intersection(_current_heads(engine)))
-    if not retired:
-        return
-
-    with engine.begin() as connection:
-        connection.execute(
-            _version_table.delete().where(_version_table.c.version_num.in_(retired))
-        )
-    logger.info(
-        "Dropped the migration history of plugin(s) the portal no longer ships: "
-        + ", ".join(retired)
-    )
 
 
 def _types_without_a_plugin(
@@ -117,19 +98,20 @@ def _types_without_a_plugin(
     return sorted(types - {None} - {plugin.name for plugin in plugins})
 
 
-def _own_revisions(plugin: type[TechnicalAssetPlugin], url: str) -> set[str]:
-    script = ScriptDirectory.from_config(_config([_owned_versions_dir(plugin)], url))
-    return {revision.revision for revision in script.walk_revisions()}
+def _revisions_in(script: ScriptDirectory, directory: Path) -> set[str]:
+    return {
+        revision.revision
+        for revision in script.walk_revisions()
+        if Path(revision.path).parent == directory
+    }
 
 
-def _own_head(plugin: type[TechnicalAssetPlugin], url: str) -> str:
-    script = ScriptDirectory.from_config(_config([_owned_versions_dir(plugin)], url))
-    head = script.get_current_head()
-    if head is None:
-        raise ValueError(
-            f"Plugin '{plugin.name}' has no migrations in its versions folder"
-        )
-    return head
+def _head_in(script: ScriptDirectory, directory: Path) -> str:
+    own = _revisions_in(script, directory)
+    heads = [head for head in script.get_heads() if head in own]
+    if len(heads) != 1:
+        raise ValueError(f"Expected exactly one head in {directory}, found {heads}")
+    return heads[0]
 
 
 def _core_head(plugins: Sequence[type[TechnicalAssetPlugin]], url: str) -> str:
@@ -141,26 +123,19 @@ def _core_head(plugins: Sequence[type[TechnicalAssetPlugin]], url: str) -> str:
     # core's own versions folder, works regardless of which plugins that
     # happens to include.
     script = ScriptDirectory.from_config(_config(_version_locations(plugins), url))
-    core_heads = [
-        head
-        for head in script.get_heads()
-        if str(_CORE_VERSIONS_DIR) in str(script.get_revision(head)._script_path)  # noqa: SLF001
-    ]
-    if len(core_heads) != 1:
-        raise ValueError(f"Expected exactly one core head, found {core_heads}")
-    return core_heads[0]
+    return _head_in(script, _CORE_VERSIONS_DIR)
 
 
 def migrate_all(plugins: Sequence[type[TechnicalAssetPlugin]], engine: Engine) -> None:
-    """Upgrade core and every plugin's own table to the latest revision.
+    """Upgrade core and every plugin's own table to the latest revision, then
+    add the platform services the plugins declare.
 
     Core and each plugin are independent Alembic branches sharing one
     version_locations config and one version table: core's history has no
-    down_revision on its own first revision, exactly like a plugin's, so
-    Alembic resolves and upgrades every branch's head with a single call.
+    down_revision on its own first revision, exactly like a plugin's. A
+    plugin's baseline `depends_on` the core revision that created the table
+    its own table points at, so one upgrade to every head keeps that order.
     """
-    _forget_retired_revisions(engine)
-
     plugins_owning_tables = [plugin for plugin in plugins if owns_a_table(plugin)]
     url = engine.url.render_as_string(hide_password=False)
 
@@ -178,7 +153,8 @@ def migrate_all(plugins: Sequence[type[TechnicalAssetPlugin]], engine: Engine) -
             f"{VERSION_TABLE} holds revisions belonging to no installed "
             f"plugin: {', '.join(sorted(orphans))}. Reinstall the plugin that "
             f"owns them, or delete those rows from {VERSION_TABLE} to "
-            "give up its migration history."
+            "give up its migration history. If a newer portal version "
+            "migrated this database, deploy that version again instead."
         )
 
     # SQLAlchemy cannot load a technical asset whose configuration_type no
@@ -193,10 +169,15 @@ def migrate_all(plugins: Sequence[type[TechnicalAssetPlugin]], engine: Engine) -
 
     before = set(_current_heads(engine))
     command.upgrade(config, "heads")
+    with Session(engine) as session, session.begin():
+        PlatformServiceService(session).ensure_for_plugins(plugins)
 
     for plugin in plugins_owning_tables:
-        head = _own_head(plugin, url)
-        previous = next((h for h in before if h in _own_revisions(plugin, url)), None)
+        versions_dir = _owned_versions_dir(plugin)
+        head = _head_in(script, versions_dir)
+        previous = next(
+            (h for h in before if h in _revisions_in(script, versions_dir)), None
+        )
         if previous == head:
             outcome = f"up to date at {head}"
         elif previous is None:

@@ -9,7 +9,7 @@ ARG PLATFORM=linux/amd64
 # ---------------------------------------------------------------------------
 # Stage 1 – build the React frontend
 # ---------------------------------------------------------------------------
-FROM --platform=${PLATFORM} node:26-alpine@sha256:0b36e8c136b94cd4fcf02188228e76c31ad5872eef3fec8cbd2eee500cfd9e80 AS frontend-build
+FROM --platform=${PLATFORM} node:26-alpine@sha256:6f08a523443ddedf52941874c203475b0ad503e859ad70cb26ab8be9a517dbd5 AS frontend-build
 
 WORKDIR /frontend
 COPY frontend/ ./
@@ -17,7 +17,7 @@ RUN --mount=type=cache,target=/app/node_modules npm ci && npm run build:prd
 # Vite outputs to /frontend/dist
 
 ARG PLATFORM=linux/amd64
-FROM --platform=${PLATFORM} python:3.13.16-slim-bookworm@sha256:5024f48ba9441d4b13a95d3945abc6365538e3a31109833367a1923523c6efed AS python-base-image
+FROM --platform=${PLATFORM} python:3.13.16-slim-bookworm@sha256:a1165e272e578941b84abc79e4ab38a0305cd12803a5c4247979ac7655f4d641 AS python-base-image
 
 # ---------------------------------------------------------------------------
 # Stage 2 – install Python dependencies (Poetry)

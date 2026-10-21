@@ -334,6 +334,7 @@ export type DataProductCreate = {
   domain_id: string;
   tag_ids?: string[];
   lifecycle_id: string;
+  environment_ids?: string[] | null;
   visibility?: DataProductVisibility;
   owners: string[];
   input_ports?: RequestInputPortsForDataProductRequest | null;
@@ -360,6 +361,19 @@ export type DataProductLifeCycle = {
   color: string;
   is_default: boolean;
 };
+export type EnvironmentGetItem = {
+  id: string;
+  name: string;
+  acronym: string;
+  context: string;
+  is_default?: boolean;
+  is_global?: boolean;
+};
+export type DataProductEnvironment = {
+  environment_id: string;
+  environment: EnvironmentGetItem;
+  creation_date: string;
+};
 export type GetDataProductsResponseItem = {
   id: string;
   name: string;
@@ -373,6 +387,7 @@ export type GetDataProductsResponseItem = {
   type: DataProductType;
   lifecycle: DataProductLifeCycle | null;
   visibility: DataProductVisibility;
+  environments: DataProductEnvironment[];
   user_count: number;
   input_port_count: number;
   technical_asset_count: number;
@@ -392,6 +407,7 @@ export type DataProductUpdate = {
   domain_id: string;
   tag_ids?: string[];
   lifecycle_id: string;
+  environment_ids?: string[] | null;
 };
 export type GetDataProductResponse = {
   id: string;
@@ -406,6 +422,7 @@ export type GetDataProductResponse = {
   type: DataProductType;
   lifecycle: DataProductLifeCycle | null;
   visibility: DataProductVisibility;
+  environments: DataProductEnvironment[];
   about: string | null;
 };
 export type FinalizerRequest = {
@@ -539,6 +556,15 @@ export type TechnicalAsset = {
     [key: string]: any;
   };
 };
+export type Exploration = {
+  id: string;
+  name: string;
+  namespace: string;
+  description: string;
+  domain: Domain;
+  status: AbstractDataProductStatus;
+  finalizers: string[];
+};
 export type GetEventHistoryResponseItem = {
   id: string;
   name: string;
@@ -550,11 +576,13 @@ export type GetEventHistoryResponseItem = {
   created_on: string;
   deleted_subject_identifier?: string | null;
   deleted_target_identifier?: string | null;
-  actor: User;
+  deleted_actor_identifier?: string | null;
+  actor?: User | null;
   data_product?: DataProduct | null;
   user?: User | null;
   output_port?: OutputPort | null;
   technical_asset?: TechnicalAsset | null;
+  exploration?: Exploration | null;
 };
 export type GetEventHistoryResponse = {
   events: GetEventHistoryResponseItem[];
@@ -652,6 +680,7 @@ export enum EventEntityType {
   OutputPort = "output_port",
   TechnicalAsset = "technical_asset",
   User = "user",
+  Exploration = "exploration",
 }
 export enum TechnicalAssetStatus {
   Pending = "pending",

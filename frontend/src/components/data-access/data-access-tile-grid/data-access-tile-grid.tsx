@@ -1,15 +1,14 @@
 import { Form, Space } from 'antd';
 
 import { AccessDataTile } from '@/components/data-access/data-access-tile/data-access-tile.component.tsx';
-import { useGetDomainQuery } from '@/store/api/services/generated/configurationDomainsApi.ts';
-import { useGetEnvironmentsQuery } from '@/store/api/services/generated/configurationEnvironmentsApi.ts';
+import type { Environment } from '@/store/api/services/generated/configurationEnvironmentsApi.ts';
 import type { CustomDropdownItemProps } from '@/types/shared';
 import styles from './data-access-tile-grid.module.scss';
 
 type Props = {
     canAccessData: boolean;
     dataPlatforms: CustomDropdownItemProps<string>[];
-    domainId?: string;
+    environments?: Environment[];
     onDataPlatformClick?: (environment: string, dataPlatform: string) => Promise<void>;
     onTileClick?: (dataPlatform: string) => void;
     isLoading?: boolean;
@@ -24,17 +23,12 @@ type AccessDataForm = {
 export function DataAccessTileGrid({
     canAccessData,
     dataPlatforms,
-    domainId,
+    environments = [],
     onDataPlatformClick,
     isLoading,
     isDisabled,
     onTileClick,
 }: Props) {
-    const { data: { environments: allEnvironments = [] } = {}, isLoading: isLoadingEnvironments } =
-        useGetEnvironmentsQuery();
-    const { data: domain, isLoading: isLoadingDomain } = useGetDomainQuery(domainId ?? '', { skip: !domainId });
-    const globalEnvironments = allEnvironments.filter((environment) => environment.is_global !== false);
-    const environments = domain?.environments.length ? domain.environments : globalEnvironments;
     const [accessDataForm] = Form.useForm<AccessDataForm>();
 
     if (dataPlatforms.length === 0) {
@@ -63,7 +57,7 @@ export function DataAccessTileGrid({
                             dataPlatform={dataPlatform}
                             environments={getEnvironment(dataPlatform) ?? []}
                             isDisabled={isDisabled || !canAccessData}
-                            isLoading={isLoading || isLoadingEnvironments || isLoadingDomain}
+                            isLoading={isLoading}
                             onMenuItemClick={onDataPlatformClick}
                             onTileClick={
                                 dataPlatform.hasEnvironments

@@ -9,7 +9,7 @@ from httpx import Response
 from app.authorization.roles.model import Role
 from app.authorization.roles.schema import Scope
 from app.core.authz import Action
-from app.data_products.model import DataProduct
+from app.data_products.model import DataProduct, DataProductEnvironment
 from app.settings import settings
 from tests.app.data_products.output_port_technical_assets_link.test_router import (
     TECHNICAL_ASSETS_OUTPUT_PORTS_ENDPOINT,
@@ -244,12 +244,19 @@ class TestTechnicalAssetsRouter:
         assert response.status_code == 200
         assert response.json()["id"] == str(technical_asset.id)
 
-    def test_get_technical_asset__environment_info_uses_global_list_by_default(
+    def test_get_technical_asset__environment_info_uses_saved_data_product_list(
         self, client: TestClient
     ):
         dev_env = EnvironmentFactory(name="dev", acronym="dev")
         prd_env = EnvironmentFactory(name="prd", acronym="prd")
-        technical_asset = TechnicalAssetFactory()
+        data_product = DataProductFactory(
+            id=uuid.uuid4(),
+            environments=[
+                DataProductEnvironment(environment=dev_env),
+                DataProductEnvironment(environment=prd_env),
+            ],
+        )
+        technical_asset = TechnicalAssetFactory(owner=data_product)
         EnvPlatformServiceConfigFactory(
             platform=technical_asset.platform,
             service=technical_asset.service,
@@ -269,15 +276,21 @@ class TestTechnicalAssetsRouter:
             info["environment_id"] for info in response.json()["technical_info"]
         }
         assert environment_ids == {str(dev_env.id), str(prd_env.id)}
+        assert {
+            item["environment_id"] for item in response.json()["environments"]
+        } == environment_ids
 
-    def test_get_technical_asset__environment_info_excludes_non_global_environments(
+    def test_get_technical_asset__environment_info_excludes_undeclared_environments(
         self, client: TestClient
     ):
         dev_env = EnvironmentFactory(name="dev", acronym="dev", is_global=True)
         sandbox_env = EnvironmentFactory(
             name="sandbox", acronym="sandbox", is_global=False
         )
-        technical_asset = TechnicalAssetFactory()
+        data_product = DataProductFactory(
+            environments=[DataProductEnvironment(environment=dev_env)]
+        )
+        technical_asset = TechnicalAssetFactory(owner=data_product)
         EnvPlatformServiceConfigFactory(
             platform=technical_asset.platform,
             service=technical_asset.service,
@@ -298,13 +311,15 @@ class TestTechnicalAssetsRouter:
         }
         assert environment_ids == {str(dev_env.id)}
 
-    def test_get_technical_asset__environment_info_filtered_by_domain_custom_list(
+    def test_get_technical_asset__environment_info_uses_data_product_scope(
         self, client: TestClient
     ):
         dev_env = EnvironmentFactory(name="dev", acronym="dev")
         prd_env = EnvironmentFactory(name="prd", acronym="prd")
-        domain = DomainFactory(environments=[dev_env])
-        data_product = DataProductFactory(domain=domain)
+        domain = DomainFactory()
+        data_product = DataProductFactory(
+            domain=domain, environments=[DataProductEnvironment(environment=dev_env)]
+        )
         technical_asset = TechnicalAssetFactory(owner=data_product)
         EnvPlatformServiceConfigFactory(
             platform=technical_asset.platform,
@@ -326,15 +341,18 @@ class TestTechnicalAssetsRouter:
         }
         assert environment_ids == {str(dev_env.id)}
 
-    def test_get_technical_asset__domain_custom_list_can_include_non_global_environment(
+    def test_get_technical_asset__data_product_can_include_non_global_environment(
         self, client: TestClient
     ):
         sandbox_env = EnvironmentFactory(
             name="sandbox", acronym="sandbox", is_global=False
         )
         prd_env = EnvironmentFactory(name="prd", acronym="prd", is_global=True)
-        domain = DomainFactory(environments=[sandbox_env])
-        data_product = DataProductFactory(domain=domain)
+        domain = DomainFactory()
+        data_product = DataProductFactory(
+            domain=domain,
+            environments=[DataProductEnvironment(environment=sandbox_env)],
+        )
         technical_asset = TechnicalAssetFactory(owner=data_product)
         EnvPlatformServiceConfigFactory(
             platform=technical_asset.platform,

@@ -1,8 +1,9 @@
 import enum
 import uuid
+from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Column, ForeignKey, String, event, func, or_, select
+from sqlalchemy import Column, DateTime, ForeignKey, String, event, func, or_, select
 from sqlalchemy import Enum as SAEnum
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import (
@@ -14,8 +15,6 @@ from sqlalchemy.orm import (
     with_loader_criteria,
 )
 
-from app.abstract_data_product.input_ports.enums import InputPortStatus
-from app.abstract_data_product.input_ports.model import InputPort
 from app.abstract_data_product.model import AbstractDataProduct
 from app.abstract_data_product.type import AbstractDataProductType
 from app.authorization.role_assignments.data_product.model import (
@@ -23,6 +22,7 @@ from app.authorization.role_assignments.data_product.model import (
 )
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.configuration.data_product_types.model import DataProductType
+from app.configuration.environments.model import Environment
 from app.configuration.tags.model import Tag, tag_data_product_table
 from app.core.auth.db_utils import (
     is_system_account,
@@ -31,17 +31,18 @@ from app.core.auth.db_utils import (
 from app.core.webhooks.events import (
     DataProductEvent,
 )
-from app.data_products.output_ports.model import (
-    OutputPort,
-)
 from app.data_products.technical_assets.model import TechnicalAsset
-from app.database.database import ensure_exists
+from app.database.database import Base, ensure_exists
 from app.database.event_mixin import EventTrackedMixin
 from app.groups.model import GroupMembership
+from app.shared.model import utcnow
 
 if TYPE_CHECKING:
     from app.configuration.data_product_lifecycles.model import DataProductLifecycle
     from app.configuration.data_product_settings.model import DataProductSettingValue
+    from app.data_products.output_ports.model import (
+        OutputPort,
+    )
 
 
 class DataProductVisibility(enum.Enum):
@@ -70,88 +71,10 @@ def _has_user_access_to_hidden_data_product(cls, user_id: uuid.UUID):
     )
 
 
-def _has_user_access_through_input_port(user_id: uuid.UUID):
-    input_ports = InputPort.__table__
-    output_ports = OutputPort.__table__
-    assignments = DataProductRoleAssignment.__table__
-    user_group_ids = (
-        select(GroupMembership.group_id)
-        .where(GroupMembership.member_identity_id == user_id)
-        .correlate_except(GroupMembership)
-    )
-
-    return (
-        select(assignments.c.id)
-        .where(
-            or_(
-                assignments.c.identity_id == user_id,
-                assignments.c.identity_id.in_(user_group_ids),
-            ),
-            assignments.c.decision == DecisionStatus.APPROVED,
-            assignments.c.data_product_id.in_(
-                select(input_ports.c.consuming_abstract_data_product_id)
-                .select_from(
-                    input_ports.join(
-                        output_ports,
-                        output_ports.c.id == input_ports.c.dataset_id,
-                    )
-                )
-                .where(
-                    output_ports.c.data_product_id == DataProduct.id,
-                    input_ports.c.status == InputPortStatus.APPROVED,
-                )
-                .correlate_except(input_ports, output_ports)
-            ),
-        )
-        .exists()
-    )
-
-
-def _has_user_access_through_input_port_for_abstract_data_product(
-    cls, user_id: uuid.UUID
-):
-    input_ports = InputPort.__table__
-    output_ports = OutputPort.__table__
-    assignments = DataProductRoleAssignment.__table__
-    user_group_ids = (
-        select(GroupMembership.group_id)
-        .where(GroupMembership.member_identity_id == user_id)
-        .correlate_except(GroupMembership)
-    )
-
-    return (
-        select(assignments.c.id)
-        .where(
-            or_(
-                assignments.c.identity_id == user_id,
-                assignments.c.identity_id.in_(user_group_ids),
-            ),
-            assignments.c.decision == DecisionStatus.APPROVED,
-            assignments.c.data_product_id.in_(
-                select(input_ports.c.consuming_abstract_data_product_id)
-                .select_from(
-                    input_ports.join(
-                        output_ports,
-                        output_ports.c.id == input_ports.c.dataset_id,
-                    )
-                )
-                .where(
-                    output_ports.c.data_product_id == cls.c.id,
-                    input_ports.c.status == InputPortStatus.APPROVED,
-                )
-                .correlate_except(input_ports, output_ports)
-            ),
-        )
-        .correlate_except(assignments)
-        .exists()
-    )
-
-
 def _visibility_filter_for_user(user_id: uuid.UUID):
     return or_(
         DataProduct.visibility != DataProductVisibility.HIDDEN,
         _has_user_access_to_hidden_data_product(DataProduct, user_id),
-        _has_user_access_through_input_port(user_id),
         is_user_admin(user_id),
         is_system_account(user_id),
     )
@@ -191,9 +114,6 @@ def _visibility_filter_for_abstract_data_product(cls, user_id: uuid.UUID):
                 .where(assignments.c.decision == DecisionStatus.APPROVED)
                 .correlate_except(assignments)
                 .exists(),
-                _has_user_access_through_input_port_for_abstract_data_product(
-                    data_products, user_id
-                ),
                 is_user_admin(user_id),
                 is_system_account(user_id),
             )
@@ -261,6 +181,11 @@ class DataProduct(
         cascade="all, delete-orphan",
         lazy="raise",
     )
+    environments: Mapped[list["DataProductEnvironment"]] = relationship(
+        cascade="all, delete-orphan",
+        order_by="DataProductEnvironment.creation_date, DataProductEnvironment.environment_id",
+        lazy="raise",
+    )
 
     user_count = column_property(
         select(func.count(DataProductRoleAssignment.id))
@@ -285,6 +210,21 @@ class DataProduct(
         return DataProductEvent(
             id=self.id,
         )
+
+
+class DataProductEnvironment(Base):
+    __tablename__ = "data_product_environments"
+
+    data_product_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("data_products.id", ondelete="CASCADE"), primary_key=True
+    )
+    environment_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("environments.id"), primary_key=True
+    )
+    creation_date: Mapped[datetime] = mapped_column(
+        DateTime(timezone=False), server_default=utcnow()
+    )
+    environment: Mapped[Environment] = relationship(lazy="joined")
 
 
 def ensure_data_product_exists(

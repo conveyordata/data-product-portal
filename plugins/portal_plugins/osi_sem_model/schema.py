@@ -3,7 +3,6 @@ from uuid import UUID
 
 from sqlalchemy.orm import Session
 
-from app.data_products.schema import DataProduct
 from app.technical_asset_configuration.base_schema import (
     PlatformMetadata,
     TechnicalAssetPlugin,
@@ -27,6 +26,8 @@ class OSISemanticModelTechnicalAssetConfiguration(TechnicalAssetPlugin):
     location: str = ""
 
     _platform_metadata = PlatformMetadata(
+        result_string_template="{model_name}",
+        technical_info_template="{location}",
         display_name="OSI",
         icon_name="osi-logo.svg",
         icon_package="portal_plugins.osi_sem_model",
@@ -38,12 +39,6 @@ class OSISemanticModelTechnicalAssetConfiguration(TechnicalAssetPlugin):
 
     class Meta:
         orm_model = OSISemanticModelTechnicalAssetConfigurationModel
-
-    def validate_configuration(self, data_product: DataProduct, db: Session):
-        pass
-
-    def on_create(self):
-        pass
 
     def get_configuration(self, configs: list) -> None:
         return None

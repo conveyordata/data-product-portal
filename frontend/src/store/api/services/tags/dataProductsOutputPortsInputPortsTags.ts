@@ -41,6 +41,10 @@ const invalidateOutputPortAsInputPort = (
         id: consumingDataProductId,
     },
     {
+        type: TagTypes.ExplorationInputPorts,
+        id: consumingDataProductId,
+    },
+    {
         type: TagTypes.PendingAction,
         id: STATIC_TAG_ID.LIST,
     },
@@ -51,6 +55,17 @@ const invalidateOutputPortAsInputPort = (
 ];
 
 export const dataProductsOutputPortsInputPortsTags = {
+    grantOutputPortAccess: {
+        invalidatesTags: (
+            _,
+            __,
+            {
+                dataProductId,
+                outputPortId,
+                grantOutputPortAccessRequest: { consuming_abstract_data_product_id: consumingAbstractDataProductId },
+            },
+        ) => invalidateOutputPortAsInputPort(dataProductId, outputPortId, consumingAbstractDataProductId),
+    },
     getInputPortsForOutputPort: {
         providesTags: (_, __, { outputPortId }) => [
             {
@@ -78,6 +93,17 @@ export const dataProductsOutputPortsInputPortsTags = {
                 dataProductId,
                 outputPortId,
                 denyOutputPortAsInputPortRequest: { consuming_data_product_id: consumingDataProductId },
+            },
+        ) => invalidateOutputPortAsInputPort(dataProductId, outputPortId, consumingDataProductId),
+    },
+    renewOutputPortAsInputPort: {
+        invalidatesTags: (
+            _,
+            __,
+            {
+                dataProductId,
+                outputPortId,
+                renewOutputPortAsInputPortRequest: { consuming_data_product_id: consumingDataProductId },
             },
         ) => invalidateOutputPortAsInputPort(dataProductId, outputPortId, consumingDataProductId),
     },

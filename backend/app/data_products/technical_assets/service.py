@@ -10,14 +10,13 @@ from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.configuration.access_modes.model import AccessMode as AccessModeModel
-from app.configuration.domains.model import Domain as DomainModel
-from app.configuration.environments.model import Environment as EnvironmentModel
 from app.configuration.tags.model import Tag as TagModel
 from app.configuration.tags.model import ensure_tag_exists
 from app.core.namespace.validation import (
     TechnicalAssetNamespaceValidator,
 )
 from app.data_products.model import DataProduct as DataProductModel
+from app.data_products.model import ensure_data_product_exists
 from app.data_products.output_port_technical_assets_link.model import (
     TechnicalAssetOutputPortAssociation,
 )
@@ -27,7 +26,6 @@ from app.data_products.output_port_technical_assets_link.model import (
 from app.data_products.output_ports.model import OutputPort as OutputPortModel
 from app.data_products.output_ports.model import ensure_output_port_exists
 from app.data_products.output_ports.service import OutputPortService
-from app.data_products.schema import DataProduct
 from app.data_products.service import DataProductService
 from app.data_products.technical_assets.enums import TechnicalMapping
 from app.data_products.technical_assets.model import (
@@ -45,7 +43,9 @@ from app.data_products.technical_assets.schema_response import (
 from app.data_products.technical_assets.status import TechnicalAssetStatus
 from app.database.deps import get_db_session
 from app.graph.graph import Graph
+from app.plugins.registry import plugin_registry
 from app.resource_names.service import ResourceNameValidityType
+from app.technical_asset_configuration.base_schema import PluginContext
 from app.users.schema import User
 
 TECHNICAL_ASSET_ACCESS_MODES_INCOMPATIBLE_ERROR = HTTPException(
@@ -62,6 +62,17 @@ TECHNICAL_ASSET_NOT_ACTIVE_ERROR = HTTPException(
     status_code=status.HTTP_400_BAD_REQUEST,
     detail="Cannot link technical asset that is not active",
 )
+
+TECHNICAL_ASSET_NOT_SHAREABLE_ERROR = HTTPException(
+    status_code=status.HTTP_409_CONFLICT,
+    detail="Technical assets of this type are not shareable and cannot be linked to an Output Port",
+)
+
+
+def ensure_technical_asset_shareable(technical_asset: TechnicalAssetModel) -> None:
+    plugin = plugin_registry.get(technical_asset.configuration.configuration_type)
+    if not plugin.get_platform_metadata().shareable:
+        raise TECHNICAL_ASSET_NOT_SHAREABLE_ERROR
 
 
 class TechnicalAssetService:
@@ -101,22 +112,14 @@ class TechnicalAssetService:
             return TechnicalAssetStatus.ACTIVE
         return TechnicalAssetStatus.PENDING
 
-    def _filter_environment_configurations_by_domain(
+    def _filter_environment_configurations_by_data_product(
         self, technical_assets: Sequence[TechnicalAssetModel]
     ) -> None:
-        global_environment_ids = {
-            environment.id
-            for environment in self.db.scalars(
-                select(EnvironmentModel).where(EnvironmentModel.is_global.is_(True))
-            ).all()
-        }
         for technical_asset in technical_assets:
-            domain_environments = technical_asset.owner.domain.environments
-            allowed_environment_ids = (
-                {environment.id for environment in domain_environments}
-                if domain_environments
-                else global_environment_ids
-            )
+            allowed_environment_ids = {
+                declaration.environment_id
+                for declaration in technical_asset.owner.environments
+            }
             technical_asset.environment_configurations = [
                 config
                 for config in technical_asset.environment_configurations
@@ -128,9 +131,9 @@ class TechnicalAssetService:
             self.db.scalars(
                 select(TechnicalAssetModel).options(
                     selectinload(TechnicalAssetModel.environment_configurations),
-                    joinedload(TechnicalAssetModel.owner)
-                    .joinedload(DataProductModel.domain)
-                    .selectinload(DomainModel.environments),
+                    joinedload(TechnicalAssetModel.owner).selectinload(
+                        DataProductModel.environments
+                    ),
                     selectinload(TechnicalAssetModel.output_port_links)
                     .selectinload(TechnicalAssetOutputPortAssociationModel.output_port)
                     .raiseload("*"),
@@ -139,7 +142,7 @@ class TechnicalAssetService:
             .unique()
             .all()
         )
-        self._filter_environment_configurations_by_domain(technical_assets)
+        self._filter_environment_configurations_by_data_product(technical_assets)
         return technical_assets
 
     def get_technical_asset(
@@ -153,9 +156,9 @@ class TechnicalAssetService:
             ).options(
                 selectinload(TechnicalAssetModel.output_port_links),
                 selectinload(TechnicalAssetModel.environment_configurations),
-                joinedload(TechnicalAssetModel.owner)
-                .joinedload(DataProductModel.domain)
-                .selectinload(DomainModel.environments),
+                joinedload(TechnicalAssetModel.owner).selectinload(
+                    DataProductModel.environments
+                ),
             )
         )
         if not technical_asset:
@@ -163,7 +166,7 @@ class TechnicalAssetService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Technical asset not found",
             )
-        self._filter_environment_configurations_by_domain([technical_asset])
+        self._filter_environment_configurations_by_data_product([technical_asset])
         return technical_asset
 
     def create_technical_asset(
@@ -180,10 +183,14 @@ class TechnicalAssetService:
             )
 
         if technical_asset.technical_mapping == TechnicalMapping.Default:
-            data_product = DataProduct.model_validate(
-                self.db.get(DataProductModel, data_product_id)
+            technical_asset.configuration.validate_configuration(
+                PluginContext.build(
+                    ensure_data_product_exists(data_product_id, self.db),
+                    technical_asset.namespace,
+                    TechnicalMapping.Default,
+                ),
+                self.db,
             )
-            technical_asset.configuration.validate_configuration(data_product, self.db)
 
         technical_asset_schema = technical_asset.parse_pydantic_schema()
         tags = self._get_tags(technical_asset_schema.pop("tag_ids", []))
@@ -272,6 +279,7 @@ class TechnicalAssetService:
         technical_asset = self.get_technical_asset(data_product_id, id)
         if technical_asset.status != TechnicalAssetStatus.ACTIVE:
             raise TECHNICAL_ASSET_NOT_ACTIVE_ERROR
+        ensure_technical_asset_shareable(technical_asset)
 
         if output_port.id in [
             link.output_port_id
@@ -362,9 +370,9 @@ class TechnicalAssetService:
                 select(TechnicalAssetModel)
                 .options(
                     selectinload(TechnicalAssetModel.environment_configurations),
-                    joinedload(TechnicalAssetModel.owner)
-                    .joinedload(DataProductModel.domain)
-                    .selectinload(DomainModel.environments),
+                    joinedload(TechnicalAssetModel.owner).selectinload(
+                        DataProductModel.environments
+                    ),
                     selectinload(TechnicalAssetModel.output_port_links)
                     .selectinload(TechnicalAssetOutputPortAssociation.output_port)
                     .selectinload(OutputPortModel.tags)
@@ -375,5 +383,5 @@ class TechnicalAssetService:
             .unique()
             .all()
         )
-        self._filter_environment_configurations_by_domain(technical_assets)
+        self._filter_environment_configurations_by_data_product(technical_assets)
         return technical_assets

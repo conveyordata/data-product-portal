@@ -8,10 +8,23 @@ sidebar_position: 200
 
 ### breaking changes
 
+- **[Helm]**: The blue and green themes and the `theme_configuration` value were removed. The portal always uses the Dataminded theme.
+- **[API]**: The query statistics `PATCH` and `DELETE` endpoints only accept `date` as a `YYYY-MM-DD` string and `query_count` as a JSON integer between 0 and 2147483647. Other values, including timestamps, datetimes, booleans and numeric strings, are rejected with a 422; malformed dates used to return a 400. The query statistics `GET` endpoint rejects a `day_range` above 3650 with a 422.
+- **[SDK]**: `OutputPortQueryStatsUpdate.date` and `OutputPortQueryStatsDelete.date` are now `datetime.date` instead of `str` in the Python SDK, and `time.Time` instead of `string` in the CLI's `pkg/api`. Pass a `datetime.date`, not a `datetime.datetime`: the SDK sends the time part along and the request is rejected.
+
+### bugfixes
+
+- **[API]**: A query statistics `PATCH` that contains the same day and consumer more than once no longer fails with a 500; the last entry is used.
+
+## 0.8.0
+
+### breaking changes
+
 - **[API]**: A technical asset's `configuration` is now published as a generic object rather than a typed union, so the schema is identical regardless of which plugins are installed. Regenerated SDK, CLI and frontend clients will see the type change, and `AccessGranularity` no longer appears in generated code.
 - **[API]**: A technical asset's `configuration` object identifies its plugin type with `name` instead of `configuration_type`. Existing clients sending or reading `configuration_type` need to switch to `name`.
 - **[API]**: Output Port create and update requests take `access_type_id` instead of `access_type`. Responses now return `access_type` as an object (`id`, `name`, `access_function`) instead of the former enum string. Look up Access Type ids with `GET /api/v2/configuration/output_port_access_types`.
 - **[SDK]**: Typed technical asset configurations such as `PostgreSQLTechnicalAssetConfiguration`, and `AccessGranularity`, moved from `sdk.api_client.models` to `sdk.plugins`. Provisioners need to update their imports.
+- **[API]**: `POST /api/v2/plugins/render_technical_asset_access_path` now requires `data_product_id`, `namespace` and `technical_mapping`, and the caller needs permission to create technical assets on that data product.
 - **[Database]**: Installations older than 0.7.3 must upgrade to 0.7.3 before upgrading further. The migrations that moved the Snowflake, Databricks, S3, Glue, Redshift and PostgreSQL technical asset tables out of core had their old data-migration logic removed.
 
 ### features
@@ -20,13 +33,19 @@ sidebar_position: 200
   This allows you to use Data Product Portal to also manage sensitive data products that should not be visible to everyone in the organization.
 - **[General]**: Added Output Port Access Types. Admins define their own Access Types in Settings and map each one to an Access Function (Auto-approve, Approval required or Invite only). Existing Output Ports are migrated to the preconfigured Unrestricted, Restricted and Private Access Types.
 - **[API]**: Added CRUD operations for new identities Groups and Machine Users alongside group membership management endpoints; the latter working in batch fashion.
+- **[Plugins]**: Plugins can mark their technical asset type as not shareable with `shareable=False` in their platform metadata. Technical assets of that type can't be linked to an Output Port, and producers see this in the UI.
+- **[Plugins]**: Plugins get the technical asset, its data product and their domain. `validate_configuration` receives them as `context`, and `render_template` as `plugin_context`, so result string and technical info templates can use `{technical_asset.namespace}`, `{data_product.namespace}` and `{domain.name}`.
+- **[Plugins]**: New AWS Parameter Store plugin (`ParameterStoreTechnicalAssetConfiguration`) for secrets. Its technical assets are not shareable. Parameters are named `/<environment>/<data product namespace>/<parameter name>`, and names AWS doesn't accept are refused.
 
 ### bugfixes
 
+- **[User Deletion]**: A bug caused user deletion to fail if the user was involved in an audit event.
 - **[Helm]**: Fix translation override file path
 - **[Database]**: `python -m app.db_tool migrate` now stops when technical assets exist whose plugin is not installed, instead of the portal failing every request that loads them. Reinstall the plugin, or delete those technical assets.
+- **[Auth]**: Users' first name is now taken from the OIDC `given_name` claim instead of `name`, which showed the last name twice (for example "Jane Doe Doe"). If the provider sends no `given_name`, `name` is used as before. Existing users are corrected on their next login.
 - **[Auth]**: A `DEFAULT_USERNAME` without a dot before the `@` no longer fails when OIDC is disabled.
 - **[General]**: Fix translation file by adding more nested translations for Data Products, Output ports and Technical assets.
+- **[General]**: Output Port owners can renew access for consumers, following the same rules as the consumer-side renew (revoked, expired, denied, cancelled, expiring soon or declined renewal), while keeping the access history. Icons were removed from the access action buttons.
 
 
 ## 0.7.4

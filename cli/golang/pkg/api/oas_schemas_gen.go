@@ -1745,17 +1745,18 @@ func (s *DataProductAboutUpdate) SetAbout(val string) {
 
 // Ref: #/components/schemas/DataProductCreate
 type DataProductCreate struct {
-	Name        string                                       `json:"name"`
-	Namespace   string                                       `json:"namespace"`
-	Description string                                       `json:"description"`
-	TypeID      uuid.UUID                                    `json:"type_id"`
-	About       OptNilString                                 `json:"about"`
-	DomainID    uuid.UUID                                    `json:"domain_id"`
-	TagIds      []uuid.UUID                                  `json:"tag_ids"`
-	LifecycleID uuid.UUID                                    `json:"lifecycle_id"`
-	Visibility  OptDataProductVisibility                     `json:"visibility"`
-	Owners      []uuid.UUID                                  `json:"owners"`
-	InputPorts  OptNilRequestInputPortsForDataProductRequest `json:"input_ports"`
+	Name           string                                       `json:"name"`
+	Namespace      string                                       `json:"namespace"`
+	Description    string                                       `json:"description"`
+	TypeID         uuid.UUID                                    `json:"type_id"`
+	About          OptNilString                                 `json:"about"`
+	DomainID       uuid.UUID                                    `json:"domain_id"`
+	TagIds         []uuid.UUID                                  `json:"tag_ids"`
+	LifecycleID    uuid.UUID                                    `json:"lifecycle_id"`
+	EnvironmentIds OptNilUUIDArray                              `json:"environment_ids"`
+	Visibility     OptDataProductVisibility                     `json:"visibility"`
+	Owners         []uuid.UUID                                  `json:"owners"`
+	InputPorts     OptNilRequestInputPortsForDataProductRequest `json:"input_ports"`
 }
 
 // GetName returns the value of Name.
@@ -1796,6 +1797,11 @@ func (s *DataProductCreate) GetTagIds() []uuid.UUID {
 // GetLifecycleID returns the value of LifecycleID.
 func (s *DataProductCreate) GetLifecycleID() uuid.UUID {
 	return s.LifecycleID
+}
+
+// GetEnvironmentIds returns the value of EnvironmentIds.
+func (s *DataProductCreate) GetEnvironmentIds() OptNilUUIDArray {
+	return s.EnvironmentIds
 }
 
 // GetVisibility returns the value of Visibility.
@@ -1853,6 +1859,11 @@ func (s *DataProductCreate) SetLifecycleID(val uuid.UUID) {
 	s.LifecycleID = val
 }
 
+// SetEnvironmentIds sets the value of EnvironmentIds.
+func (s *DataProductCreate) SetEnvironmentIds(val OptNilUUIDArray) {
+	s.EnvironmentIds = val
+}
+
 // SetVisibility sets the value of Visibility.
 func (s *DataProductCreate) SetVisibility(val OptDataProductVisibility) {
 	s.Visibility = val
@@ -1866,6 +1877,43 @@ func (s *DataProductCreate) SetOwners(val []uuid.UUID) {
 // SetInputPorts sets the value of InputPorts.
 func (s *DataProductCreate) SetInputPorts(val OptNilRequestInputPortsForDataProductRequest) {
 	s.InputPorts = val
+}
+
+// Ref: #/components/schemas/DataProductEnvironment
+type DataProductEnvironment struct {
+	EnvironmentID uuid.UUID          `json:"environment_id"`
+	Environment   EnvironmentGetItem `json:"environment"`
+	CreationDate  time.Time          `json:"creation_date"`
+}
+
+// GetEnvironmentID returns the value of EnvironmentID.
+func (s *DataProductEnvironment) GetEnvironmentID() uuid.UUID {
+	return s.EnvironmentID
+}
+
+// GetEnvironment returns the value of Environment.
+func (s *DataProductEnvironment) GetEnvironment() EnvironmentGetItem {
+	return s.Environment
+}
+
+// GetCreationDate returns the value of CreationDate.
+func (s *DataProductEnvironment) GetCreationDate() time.Time {
+	return s.CreationDate
+}
+
+// SetEnvironmentID sets the value of EnvironmentID.
+func (s *DataProductEnvironment) SetEnvironmentID(val uuid.UUID) {
+	s.EnvironmentID = val
+}
+
+// SetEnvironment sets the value of Environment.
+func (s *DataProductEnvironment) SetEnvironment(val EnvironmentGetItem) {
+	s.Environment = val
+}
+
+// SetCreationDate sets the value of CreationDate.
+func (s *DataProductEnvironment) SetCreationDate(val time.Time) {
+	s.CreationDate = val
 }
 
 // Ref: #/components/schemas/DataProductIconKey
@@ -3117,14 +3165,15 @@ func (s *DataProductTypesGetItem) SetDataProductCount(val int) {
 
 // Ref: #/components/schemas/DataProductUpdate
 type DataProductUpdate struct {
-	Name        string       `json:"name"`
-	Namespace   string       `json:"namespace"`
-	Description string       `json:"description"`
-	TypeID      uuid.UUID    `json:"type_id"`
-	About       OptNilString `json:"about"`
-	DomainID    uuid.UUID    `json:"domain_id"`
-	TagIds      []uuid.UUID  `json:"tag_ids"`
-	LifecycleID uuid.UUID    `json:"lifecycle_id"`
+	Name           string          `json:"name"`
+	Namespace      string          `json:"namespace"`
+	Description    string          `json:"description"`
+	TypeID         uuid.UUID       `json:"type_id"`
+	About          OptNilString    `json:"about"`
+	DomainID       uuid.UUID       `json:"domain_id"`
+	TagIds         []uuid.UUID     `json:"tag_ids"`
+	LifecycleID    uuid.UUID       `json:"lifecycle_id"`
+	EnvironmentIds OptNilUUIDArray `json:"environment_ids"`
 }
 
 // GetName returns the value of Name.
@@ -3167,6 +3216,11 @@ func (s *DataProductUpdate) GetLifecycleID() uuid.UUID {
 	return s.LifecycleID
 }
 
+// GetEnvironmentIds returns the value of EnvironmentIds.
+func (s *DataProductUpdate) GetEnvironmentIds() OptNilUUIDArray {
+	return s.EnvironmentIds
+}
+
 // SetName sets the value of Name.
 func (s *DataProductUpdate) SetName(val string) {
 	s.Name = val
@@ -3205,6 +3259,11 @@ func (s *DataProductUpdate) SetTagIds(val []uuid.UUID) {
 // SetLifecycleID sets the value of LifecycleID.
 func (s *DataProductUpdate) SetLifecycleID(val uuid.UUID) {
 	s.LifecycleID = val
+}
+
+// SetEnvironmentIds sets the value of EnvironmentIds.
+func (s *DataProductUpdate) SetEnvironmentIds(val OptNilUUIDArray) {
+	s.EnvironmentIds = val
 }
 
 // Ref: #/components/schemas/DataProductUsageUpdate
@@ -3821,9 +3880,8 @@ func (s *Domain) SetDescription(val string) {
 
 // Ref: #/components/schemas/DomainCreate
 type DomainCreate struct {
-	Name           string      `json:"name"`
-	Description    string      `json:"description"`
-	EnvironmentIds []uuid.UUID `json:"environment_ids"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
 }
 
 // GetName returns the value of Name.
@@ -3836,11 +3894,6 @@ func (s *DomainCreate) GetDescription() string {
 	return s.Description
 }
 
-// GetEnvironmentIds returns the value of EnvironmentIds.
-func (s *DomainCreate) GetEnvironmentIds() []uuid.UUID {
-	return s.EnvironmentIds
-}
-
 // SetName sets the value of Name.
 func (s *DomainCreate) SetName(val string) {
 	s.Name = val
@@ -3851,16 +3904,10 @@ func (s *DomainCreate) SetDescription(val string) {
 	s.Description = val
 }
 
-// SetEnvironmentIds sets the value of EnvironmentIds.
-func (s *DomainCreate) SetEnvironmentIds(val []uuid.UUID) {
-	s.EnvironmentIds = val
-}
-
 // Ref: #/components/schemas/DomainUpdate
 type DomainUpdate struct {
-	Name           string      `json:"name"`
-	Description    string      `json:"description"`
-	EnvironmentIds []uuid.UUID `json:"environment_ids"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
 }
 
 // GetName returns the value of Name.
@@ -3873,11 +3920,6 @@ func (s *DomainUpdate) GetDescription() string {
 	return s.Description
 }
 
-// GetEnvironmentIds returns the value of EnvironmentIds.
-func (s *DomainUpdate) GetEnvironmentIds() []uuid.UUID {
-	return s.EnvironmentIds
-}
-
 // SetName sets the value of Name.
 func (s *DomainUpdate) SetName(val string) {
 	s.Name = val
@@ -3886,11 +3928,6 @@ func (s *DomainUpdate) SetName(val string) {
 // SetDescription sets the value of Description.
 func (s *DomainUpdate) SetDescription(val string) {
 	s.Description = val
-}
-
-// SetEnvironmentIds sets the value of EnvironmentIds.
-func (s *DomainUpdate) SetEnvironmentIds(val []uuid.UUID) {
-	s.EnvironmentIds = val
 }
 
 // Ref: #/components/schemas/Environment
@@ -4076,6 +4113,7 @@ const (
 	EventEntityTypeOutputPort     EventEntityType = "output_port"
 	EventEntityTypeTechnicalAsset EventEntityType = "technical_asset"
 	EventEntityTypeUser           EventEntityType = "user"
+	EventEntityTypeExploration    EventEntityType = "exploration"
 )
 
 // AllValues returns all EventEntityType values.
@@ -4085,6 +4123,7 @@ func (EventEntityType) AllValues() []EventEntityType {
 		EventEntityTypeOutputPort,
 		EventEntityTypeTechnicalAsset,
 		EventEntityTypeUser,
+		EventEntityTypeExploration,
 	}
 }
 
@@ -4098,6 +4137,8 @@ func (s EventEntityType) MarshalText() ([]byte, error) {
 	case EventEntityTypeTechnicalAsset:
 		return []byte(s), nil
 	case EventEntityTypeUser:
+		return []byte(s), nil
+	case EventEntityTypeExploration:
 		return []byte(s), nil
 	default:
 		return nil, errors.Errorf("invalid value: %q", s)
@@ -4118,6 +4159,9 @@ func (s *EventEntityType) UnmarshalText(data []byte) error {
 		return nil
 	case EventEntityTypeUser:
 		*s = EventEntityTypeUser
+		return nil
+	case EventEntityTypeExploration:
+		*s = EventEntityTypeExploration
 		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)
@@ -4376,19 +4420,20 @@ func (*GetDataProductOutputPortsResponse) getDataProductOutputPortsRes() {}
 
 // Ref: #/components/schemas/GetDataProductResponse
 type GetDataProductResponse struct {
-	ID          uuid.UUID                 `json:"id"`
-	Name        string                    `json:"name"`
-	Description string                    `json:"description"`
-	Namespace   string                    `json:"namespace"`
-	Status      AbstractDataProductStatus `json:"status"`
-	Finalizers  []string                  `json:"finalizers"`
-	Tags        []Tag                     `json:"tags"`
-	Usage       NilString                 `json:"usage"`
-	Domain      Domain                    `json:"domain"`
-	Type        DataProductType           `json:"type"`
-	Lifecycle   NilDataProductLifeCycle   `json:"lifecycle"`
-	Visibility  DataProductVisibility     `json:"visibility"`
-	About       NilString                 `json:"about"`
+	ID           uuid.UUID                 `json:"id"`
+	Name         string                    `json:"name"`
+	Description  string                    `json:"description"`
+	Namespace    string                    `json:"namespace"`
+	Status       AbstractDataProductStatus `json:"status"`
+	Finalizers   []string                  `json:"finalizers"`
+	Tags         []Tag                     `json:"tags"`
+	Usage        NilString                 `json:"usage"`
+	Domain       Domain                    `json:"domain"`
+	Type         DataProductType           `json:"type"`
+	Lifecycle    NilDataProductLifeCycle   `json:"lifecycle"`
+	Visibility   DataProductVisibility     `json:"visibility"`
+	Environments []DataProductEnvironment  `json:"environments"`
+	About        NilString                 `json:"about"`
 }
 
 // GetID returns the value of ID.
@@ -4449,6 +4494,11 @@ func (s *GetDataProductResponse) GetLifecycle() NilDataProductLifeCycle {
 // GetVisibility returns the value of Visibility.
 func (s *GetDataProductResponse) GetVisibility() DataProductVisibility {
 	return s.Visibility
+}
+
+// GetEnvironments returns the value of Environments.
+func (s *GetDataProductResponse) GetEnvironments() []DataProductEnvironment {
+	return s.Environments
 }
 
 // GetAbout returns the value of About.
@@ -4514,6 +4564,11 @@ func (s *GetDataProductResponse) SetLifecycle(val NilDataProductLifeCycle) {
 // SetVisibility sets the value of Visibility.
 func (s *GetDataProductResponse) SetVisibility(val DataProductVisibility) {
 	s.Visibility = val
+}
+
+// SetEnvironments sets the value of Environments.
+func (s *GetDataProductResponse) SetEnvironments(val []DataProductEnvironment) {
+	s.Environments = val
 }
 
 // SetAbout sets the value of About.
@@ -4588,6 +4643,7 @@ type GetDataProductsResponseItem struct {
 	Type                DataProductType           `json:"type"`
 	Lifecycle           NilDataProductLifeCycle   `json:"lifecycle"`
 	Visibility          DataProductVisibility     `json:"visibility"`
+	Environments        []DataProductEnvironment  `json:"environments"`
 	UserCount           int                       `json:"user_count"`
 	InputPortCount      int                       `json:"input_port_count"`
 	TechnicalAssetCount int                       `json:"technical_asset_count"`
@@ -4651,6 +4707,11 @@ func (s *GetDataProductsResponseItem) GetLifecycle() NilDataProductLifeCycle {
 // GetVisibility returns the value of Visibility.
 func (s *GetDataProductsResponseItem) GetVisibility() DataProductVisibility {
 	return s.Visibility
+}
+
+// GetEnvironments returns the value of Environments.
+func (s *GetDataProductsResponseItem) GetEnvironments() []DataProductEnvironment {
+	return s.Environments
 }
 
 // GetUserCount returns the value of UserCount.
@@ -4728,6 +4789,11 @@ func (s *GetDataProductsResponseItem) SetVisibility(val DataProductVisibility) {
 	s.Visibility = val
 }
 
+// SetEnvironments sets the value of Environments.
+func (s *GetDataProductsResponseItem) SetEnvironments(val []DataProductEnvironment) {
+	s.Environments = val
+}
+
 // SetUserCount sets the value of UserCount.
 func (s *GetDataProductsResponseItem) SetUserCount(val int) {
 	s.UserCount = val
@@ -4745,10 +4811,9 @@ func (s *GetDataProductsResponseItem) SetTechnicalAssetCount(val int) {
 
 // Ref: #/components/schemas/GetDomainResponse
 type GetDomainResponse struct {
-	ID           uuid.UUID            `json:"id"`
-	Name         string               `json:"name"`
-	Description  string               `json:"description"`
-	Environments []EnvironmentGetItem `json:"environments"`
+	ID          uuid.UUID `json:"id"`
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
 }
 
 // GetID returns the value of ID.
@@ -4766,11 +4831,6 @@ func (s *GetDomainResponse) GetDescription() string {
 	return s.Description
 }
 
-// GetEnvironments returns the value of Environments.
-func (s *GetDomainResponse) GetEnvironments() []EnvironmentGetItem {
-	return s.Environments
-}
-
 // SetID sets the value of ID.
 func (s *GetDomainResponse) SetID(val uuid.UUID) {
 	s.ID = val
@@ -4786,20 +4846,14 @@ func (s *GetDomainResponse) SetDescription(val string) {
 	s.Description = val
 }
 
-// SetEnvironments sets the value of Environments.
-func (s *GetDomainResponse) SetEnvironments(val []EnvironmentGetItem) {
-	s.Environments = val
-}
-
 func (*GetDomainResponse) getDomainRes() {}
 
 // Ref: #/components/schemas/GetDomainsItem
 type GetDomainsItem struct {
-	ID                       uuid.UUID            `json:"id"`
-	Name                     string               `json:"name"`
-	Description              string               `json:"description"`
-	Environments             []EnvironmentGetItem `json:"environments"`
-	AbstractDataProductCount int                  `json:"abstract_data_product_count"`
+	ID                       uuid.UUID `json:"id"`
+	Name                     string    `json:"name"`
+	Description              string    `json:"description"`
+	AbstractDataProductCount int       `json:"abstract_data_product_count"`
 }
 
 // GetID returns the value of ID.
@@ -4815,11 +4869,6 @@ func (s *GetDomainsItem) GetName() string {
 // GetDescription returns the value of Description.
 func (s *GetDomainsItem) GetDescription() string {
 	return s.Description
-}
-
-// GetEnvironments returns the value of Environments.
-func (s *GetDomainsItem) GetEnvironments() []EnvironmentGetItem {
-	return s.Environments
 }
 
 // GetAbstractDataProductCount returns the value of AbstractDataProductCount.
@@ -4840,11 +4889,6 @@ func (s *GetDomainsItem) SetName(val string) {
 // SetDescription sets the value of Description.
 func (s *GetDomainsItem) SetDescription(val string) {
 	s.Description = val
-}
-
-// SetEnvironments sets the value of Environments.
-func (s *GetDomainsItem) SetEnvironments(val []EnvironmentGetItem) {
-	s.Environments = val
 }
 
 // SetAbstractDataProductCount sets the value of AbstractDataProductCount.
@@ -4900,11 +4944,13 @@ type GetEventHistoryResponseItem struct {
 	CreatedOn                time.Time             `json:"created_on"`
 	DeletedSubjectIdentifier OptNilString          `json:"deleted_subject_identifier"`
 	DeletedTargetIdentifier  OptNilString          `json:"deleted_target_identifier"`
-	Actor                    User                  `json:"actor"`
+	DeletedActorIdentifier   OptNilString          `json:"deleted_actor_identifier"`
+	Actor                    OptNilUser            `json:"actor"`
 	DataProduct              OptNilDataProduct     `json:"data_product"`
 	User                     OptNilUser            `json:"user"`
 	OutputPort               OptNilOutputPort      `json:"output_port"`
 	TechnicalAsset           OptNilTechnicalAsset  `json:"technical_asset"`
+	Exploration              OptNilExploration     `json:"exploration"`
 }
 
 // GetID returns the value of ID.
@@ -4957,8 +5003,13 @@ func (s *GetEventHistoryResponseItem) GetDeletedTargetIdentifier() OptNilString 
 	return s.DeletedTargetIdentifier
 }
 
+// GetDeletedActorIdentifier returns the value of DeletedActorIdentifier.
+func (s *GetEventHistoryResponseItem) GetDeletedActorIdentifier() OptNilString {
+	return s.DeletedActorIdentifier
+}
+
 // GetActor returns the value of Actor.
-func (s *GetEventHistoryResponseItem) GetActor() User {
+func (s *GetEventHistoryResponseItem) GetActor() OptNilUser {
 	return s.Actor
 }
 
@@ -4980,6 +5031,11 @@ func (s *GetEventHistoryResponseItem) GetOutputPort() OptNilOutputPort {
 // GetTechnicalAsset returns the value of TechnicalAsset.
 func (s *GetEventHistoryResponseItem) GetTechnicalAsset() OptNilTechnicalAsset {
 	return s.TechnicalAsset
+}
+
+// GetExploration returns the value of Exploration.
+func (s *GetEventHistoryResponseItem) GetExploration() OptNilExploration {
+	return s.Exploration
 }
 
 // SetID sets the value of ID.
@@ -5032,8 +5088,13 @@ func (s *GetEventHistoryResponseItem) SetDeletedTargetIdentifier(val OptNilStrin
 	s.DeletedTargetIdentifier = val
 }
 
+// SetDeletedActorIdentifier sets the value of DeletedActorIdentifier.
+func (s *GetEventHistoryResponseItem) SetDeletedActorIdentifier(val OptNilString) {
+	s.DeletedActorIdentifier = val
+}
+
 // SetActor sets the value of Actor.
-func (s *GetEventHistoryResponseItem) SetActor(val User) {
+func (s *GetEventHistoryResponseItem) SetActor(val OptNilUser) {
 	s.Actor = val
 }
 
@@ -5055,6 +5116,11 @@ func (s *GetEventHistoryResponseItem) SetOutputPort(val OptNilOutputPort) {
 // SetTechnicalAsset sets the value of TechnicalAsset.
 func (s *GetEventHistoryResponseItem) SetTechnicalAsset(val OptNilTechnicalAsset) {
 	s.TechnicalAsset = val
+}
+
+// SetExploration sets the value of Exploration.
+func (s *GetEventHistoryResponseItem) SetExploration(val OptNilExploration) {
+	s.Exploration = val
 }
 
 // Ref: #/components/schemas/GetExplorationInputPortsResponse
@@ -5532,6 +5598,7 @@ type GetTechnicalAssetsResponseItem struct {
 	// /v2/plugins/{name}/form.
 	Configuration   GetTechnicalAssetsResponseItemConfiguration `json:"configuration"`
 	Owner           DataProduct                                 `json:"owner"`
+	Environments    []DataProductEnvironment                    `json:"environments"`
 	OutputPortLinks []OutputPortLink                            `json:"output_port_links"`
 	Tags            []Tag                                       `json:"tags"`
 	// DEPRECATED: Use 'technical_mapping' instead. This field will be removed in a future version.
@@ -5598,6 +5665,11 @@ func (s *GetTechnicalAssetsResponseItem) GetConfiguration() GetTechnicalAssetsRe
 // GetOwner returns the value of Owner.
 func (s *GetTechnicalAssetsResponseItem) GetOwner() DataProduct {
 	return s.Owner
+}
+
+// GetEnvironments returns the value of Environments.
+func (s *GetTechnicalAssetsResponseItem) GetEnvironments() []DataProductEnvironment {
+	return s.Environments
 }
 
 // GetOutputPortLinks returns the value of OutputPortLinks.
@@ -5683,6 +5755,11 @@ func (s *GetTechnicalAssetsResponseItem) SetConfiguration(val GetTechnicalAssets
 // SetOwner sets the value of Owner.
 func (s *GetTechnicalAssetsResponseItem) SetOwner(val DataProduct) {
 	s.Owner = val
+}
+
+// SetEnvironments sets the value of Environments.
+func (s *GetTechnicalAssetsResponseItem) SetEnvironments(val []DataProductEnvironment) {
+	s.Environments = val
 }
 
 // SetOutputPortLinks sets the value of OutputPortLinks.
@@ -5940,6 +6017,47 @@ func (s *GlobalRoleAssignmentResponse) SetDecidedBy(val NilUser) {
 }
 
 func (*GlobalRoleAssignmentResponse) decideGlobalRoleAssignmentRes() {}
+
+type GrantOutputPortAccessOKApplicationJSON jx.Raw
+
+func (*GrantOutputPortAccessOKApplicationJSON) grantOutputPortAccessRes() {}
+
+// Ref: #/components/schemas/GrantOutputPortAccessRequest
+type GrantOutputPortAccessRequest struct {
+	ConsumingAbstractDataProductID uuid.UUID  `json:"consuming_abstract_data_product_id"`
+	Justification                  string     `json:"justification"`
+	AccessModeID                   OptNilUUID `json:"access_mode_id"`
+}
+
+// GetConsumingAbstractDataProductID returns the value of ConsumingAbstractDataProductID.
+func (s *GrantOutputPortAccessRequest) GetConsumingAbstractDataProductID() uuid.UUID {
+	return s.ConsumingAbstractDataProductID
+}
+
+// GetJustification returns the value of Justification.
+func (s *GrantOutputPortAccessRequest) GetJustification() string {
+	return s.Justification
+}
+
+// GetAccessModeID returns the value of AccessModeID.
+func (s *GrantOutputPortAccessRequest) GetAccessModeID() OptNilUUID {
+	return s.AccessModeID
+}
+
+// SetConsumingAbstractDataProductID sets the value of ConsumingAbstractDataProductID.
+func (s *GrantOutputPortAccessRequest) SetConsumingAbstractDataProductID(val uuid.UUID) {
+	s.ConsumingAbstractDataProductID = val
+}
+
+// SetJustification sets the value of Justification.
+func (s *GrantOutputPortAccessRequest) SetJustification(val string) {
+	s.Justification = val
+}
+
+// SetAccessModeID sets the value of AccessModeID.
+func (s *GrantOutputPortAccessRequest) SetAccessModeID(val OptNilUUID) {
+	s.AccessModeID = val
+}
 
 // Ref: #/components/schemas/GroupCreate
 type GroupCreate struct {
@@ -6358,6 +6476,7 @@ func (*HTTPValidationError) getThemeSettingsRes()                         {}
 func (*HTTPValidationError) getUserGroupsRes()                            {}
 func (*HTTPValidationError) getUserNotificationsRes()                     {}
 func (*HTTPValidationError) getUsersRes()                                 {}
+func (*HTTPValidationError) grantOutputPortAccessRes()                    {}
 func (*HTTPValidationError) ingestOutputPortContractRes()                 {}
 func (*HTTPValidationError) ingestOutputPortContractYamlRes()             {}
 func (*HTTPValidationError) isAdminRes()                                  {}
@@ -6394,6 +6513,7 @@ func (*HTTPValidationError) removeUserRes()                               {}
 func (*HTTPValidationError) renderTechnicalAssetAccessPathRes()           {}
 func (*HTTPValidationError) renewInputPortForDataProductRes()             {}
 func (*HTTPValidationError) renewInputPortForExplorationRes()             {}
+func (*HTTPValidationError) renewOutputPortAsInputPortRes()               {}
 func (*HTTPValidationError) replaceGroupMembersRes()                      {}
 func (*HTTPValidationError) replaceOutputPortCuratedQueriesRes()          {}
 func (*HTTPValidationError) requestDataProductRoleAssignmentRes()         {}
@@ -6828,6 +6948,10 @@ func (s *IsAdminResponse) SetTime(val OptNilString) {
 }
 
 func (*IsAdminResponse) isAdminRes() {}
+
+type LinkOutputPortToTechnicalAssetConflictApplicationJSON jx.Raw
+
+func (*LinkOutputPortToTechnicalAssetConflictApplicationJSON) linkOutputPortToTechnicalAssetRes() {}
 
 type LinkOutputPortToTechnicalAssetNotFoundApplicationJSON jx.Raw
 
@@ -8287,6 +8411,74 @@ func (o OptNilEventEntityType) Or(d EventEntityType) EventEntityType {
 	return d
 }
 
+// NewOptNilExploration returns new OptNilExploration with value set to v.
+func NewOptNilExploration(v Exploration) OptNilExploration {
+	return OptNilExploration{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptNilExploration is optional nullable Exploration.
+type OptNilExploration struct {
+	Value Exploration
+	Set   bool
+	Null  bool
+}
+
+// IsSet returns true if OptNilExploration was set.
+func (o OptNilExploration) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptNilExploration) Reset() {
+	var v Exploration
+	o.Value = v
+	o.Set = false
+	o.Null = false
+}
+
+// SetTo sets value to v.
+func (o *OptNilExploration) SetTo(v Exploration) {
+	o.Set = true
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o OptNilExploration) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *OptNilExploration) SetToNull() {
+	o.Set = true
+	o.Null = true
+	var v Exploration
+	o.Value = v
+}
+
+// IsEmpty returns true if the field was omitted from the payload (not Set and not Null).
+func (o OptNilExploration) IsEmpty() bool {
+	return !o.Set && !o.Null
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptNilExploration) Get() (v Exploration, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptNilExploration) Or(d Exploration) Exploration {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptNilFieldDependencyArray returns new OptNilFieldDependencyArray with value set to v.
 func NewOptNilFieldDependencyArray(v []FieldDependency) OptNilFieldDependencyArray {
 	return OptNilFieldDependencyArray{
@@ -9579,6 +9771,74 @@ func (o OptNilUUID) Or(d uuid.UUID) uuid.UUID {
 	return d
 }
 
+// NewOptNilUUIDArray returns new OptNilUUIDArray with value set to v.
+func NewOptNilUUIDArray(v []uuid.UUID) OptNilUUIDArray {
+	return OptNilUUIDArray{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptNilUUIDArray is optional nullable []uuid.UUID.
+type OptNilUUIDArray struct {
+	Value []uuid.UUID
+	Set   bool
+	Null  bool
+}
+
+// IsSet returns true if OptNilUUIDArray was set.
+func (o OptNilUUIDArray) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptNilUUIDArray) Reset() {
+	var v []uuid.UUID
+	o.Value = v
+	o.Set = false
+	o.Null = false
+}
+
+// SetTo sets value to v.
+func (o *OptNilUUIDArray) SetTo(v []uuid.UUID) {
+	o.Set = true
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o OptNilUUIDArray) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *OptNilUUIDArray) SetToNull() {
+	o.Set = true
+	o.Null = true
+	var v []uuid.UUID
+	o.Value = v
+}
+
+// IsEmpty returns true if the field was omitted from the payload (not Set and not Null).
+func (o OptNilUUIDArray) IsEmpty() bool {
+	return !o.Set && !o.Null
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptNilUUIDArray) Get() (v []uuid.UUID, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptNilUUIDArray) Or(d []uuid.UUID) []uuid.UUID {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptNilUser returns new OptNilUser with value set to v.
 func NewOptNilUser(v User) OptNilUser {
 	return OptNilUser{
@@ -10635,12 +10895,14 @@ func (s *OutputPortLink) SetOutputPort(val OutputPort) {
 
 // Ref: #/components/schemas/OutputPortQueryStatsDelete
 type OutputPortQueryStatsDelete struct {
-	Date                  string    `json:"date"`
+	// Day to delete, in ISO 8601 format (YYYY-MM-DD).
+	Date time.Time `json:"date"`
+	// ID of the consuming data product whose count to delete.
 	ConsumerDataProductID uuid.UUID `json:"consumer_data_product_id"`
 }
 
 // GetDate returns the value of Date.
-func (s *OutputPortQueryStatsDelete) GetDate() string {
+func (s *OutputPortQueryStatsDelete) GetDate() time.Time {
 	return s.Date
 }
 
@@ -10650,7 +10912,7 @@ func (s *OutputPortQueryStatsDelete) GetConsumerDataProductID() uuid.UUID {
 }
 
 // SetDate sets the value of Date.
-func (s *OutputPortQueryStatsDelete) SetDate(val string) {
+func (s *OutputPortQueryStatsDelete) SetDate(val time.Time) {
 	s.Date = val
 }
 
@@ -10726,13 +10988,17 @@ func (*OutputPortQueryStatsResponses) getOutputPortQueryStatsRes() {}
 
 // Ref: #/components/schemas/OutputPortQueryStatsUpdate
 type OutputPortQueryStatsUpdate struct {
-	Date                  string    `json:"date"`
+	// Day the queries were executed, in ISO 8601 format (YYYY-MM-DD).
+	Date time.Time `json:"date"`
+	// ID of the data product that queried the output port.
 	ConsumerDataProductID uuid.UUID `json:"consumer_data_product_id"`
-	QueryCount            int       `json:"query_count"`
+	// Number of queries the consuming data product ran against the output port on this day. Overwrites any
+	// count previously sent for the same day and consuming data product.
+	QueryCount int `json:"query_count"`
 }
 
 // GetDate returns the value of Date.
-func (s *OutputPortQueryStatsUpdate) GetDate() string {
+func (s *OutputPortQueryStatsUpdate) GetDate() time.Time {
 	return s.Date
 }
 
@@ -10747,7 +11013,7 @@ func (s *OutputPortQueryStatsUpdate) GetQueryCount() int {
 }
 
 // SetDate sets the value of Date.
-func (s *OutputPortQueryStatsUpdate) SetDate(val string) {
+func (s *OutputPortQueryStatsUpdate) SetDate(val time.Time) {
 	s.Date = val
 }
 
@@ -11608,8 +11874,11 @@ func (*RemoveUserOKApplicationJSON) removeUserRes() {}
 
 // Ref: #/components/schemas/RenderTechnicalAssetAccessPathRequest
 type RenderTechnicalAssetAccessPathRequest struct {
-	PlatformID uuid.UUID `json:"platform_id"`
-	ServiceID  uuid.UUID `json:"service_id"`
+	PlatformID       uuid.UUID        `json:"platform_id"`
+	ServiceID        uuid.UUID        `json:"service_id"`
+	DataProductID    uuid.UUID        `json:"data_product_id"`
+	Namespace        string           `json:"namespace"`
+	TechnicalMapping TechnicalMapping `json:"technical_mapping"`
 	// Configuration of the technical asset. The available fields depend on `name`; retrieve them from
 	// /v2/plugins/{name}/form.
 	Configuration RenderTechnicalAssetAccessPathRequestConfiguration `json:"configuration"`
@@ -11625,6 +11894,21 @@ func (s *RenderTechnicalAssetAccessPathRequest) GetServiceID() uuid.UUID {
 	return s.ServiceID
 }
 
+// GetDataProductID returns the value of DataProductID.
+func (s *RenderTechnicalAssetAccessPathRequest) GetDataProductID() uuid.UUID {
+	return s.DataProductID
+}
+
+// GetNamespace returns the value of Namespace.
+func (s *RenderTechnicalAssetAccessPathRequest) GetNamespace() string {
+	return s.Namespace
+}
+
+// GetTechnicalMapping returns the value of TechnicalMapping.
+func (s *RenderTechnicalAssetAccessPathRequest) GetTechnicalMapping() TechnicalMapping {
+	return s.TechnicalMapping
+}
+
 // GetConfiguration returns the value of Configuration.
 func (s *RenderTechnicalAssetAccessPathRequest) GetConfiguration() RenderTechnicalAssetAccessPathRequestConfiguration {
 	return s.Configuration
@@ -11638,6 +11922,21 @@ func (s *RenderTechnicalAssetAccessPathRequest) SetPlatformID(val uuid.UUID) {
 // SetServiceID sets the value of ServiceID.
 func (s *RenderTechnicalAssetAccessPathRequest) SetServiceID(val uuid.UUID) {
 	s.ServiceID = val
+}
+
+// SetDataProductID sets the value of DataProductID.
+func (s *RenderTechnicalAssetAccessPathRequest) SetDataProductID(val uuid.UUID) {
+	s.DataProductID = val
+}
+
+// SetNamespace sets the value of Namespace.
+func (s *RenderTechnicalAssetAccessPathRequest) SetNamespace(val string) {
+	s.Namespace = val
+}
+
+// SetTechnicalMapping sets the value of TechnicalMapping.
+func (s *RenderTechnicalAssetAccessPathRequest) SetTechnicalMapping(val TechnicalMapping) {
+	s.TechnicalMapping = val
 }
 
 // SetConfiguration sets the value of Configuration.
@@ -11741,6 +12040,25 @@ func (s *RenewInputPortForExplorationResponse) SetInputPortID(val uuid.UUID) {
 }
 
 func (*RenewInputPortForExplorationResponse) renewInputPortForExplorationRes() {}
+
+type RenewOutputPortAsInputPortOKApplicationJSON jx.Raw
+
+func (*RenewOutputPortAsInputPortOKApplicationJSON) renewOutputPortAsInputPortRes() {}
+
+// Ref: #/components/schemas/RenewOutputPortAsInputPortRequest
+type RenewOutputPortAsInputPortRequest struct {
+	ConsumingDataProductID uuid.UUID `json:"consuming_data_product_id"`
+}
+
+// GetConsumingDataProductID returns the value of ConsumingDataProductID.
+func (s *RenewOutputPortAsInputPortRequest) GetConsumingDataProductID() uuid.UUID {
+	return s.ConsumingDataProductID
+}
+
+// SetConsumingDataProductID sets the value of ConsumingDataProductID.
+func (s *RenewOutputPortAsInputPortRequest) SetConsumingDataProductID(val uuid.UUID) {
+	s.ConsumingDataProductID = val
+}
 
 // Ref: #/components/schemas/RenewalStatus
 type RenewalStatus string
@@ -13856,6 +14174,7 @@ type UIElementMetadataResponse struct {
 	ParentPlatform  OptNilString        `json:"parent_platform"`
 	PlatformTile    OptNilPlatformTile  `json:"platform_tile"`
 	ShowInForm      OptBool             `json:"show_in_form"`
+	Shareable       OptBool             `json:"shareable"`
 	DetailedName    string              `json:"detailed_name"`
 }
 
@@ -13922,6 +14241,11 @@ func (s *UIElementMetadataResponse) GetPlatformTile() OptNilPlatformTile {
 // GetShowInForm returns the value of ShowInForm.
 func (s *UIElementMetadataResponse) GetShowInForm() OptBool {
 	return s.ShowInForm
+}
+
+// GetShareable returns the value of Shareable.
+func (s *UIElementMetadataResponse) GetShareable() OptBool {
+	return s.Shareable
 }
 
 // GetDetailedName returns the value of DetailedName.
@@ -13992,6 +14316,11 @@ func (s *UIElementMetadataResponse) SetPlatformTile(val OptNilPlatformTile) {
 // SetShowInForm sets the value of ShowInForm.
 func (s *UIElementMetadataResponse) SetShowInForm(val OptBool) {
 	s.ShowInForm = val
+}
+
+// SetShareable sets the value of Shareable.
+func (s *UIElementMetadataResponse) SetShareable(val OptBool) {
+	s.Shareable = val
 }
 
 // SetDetailedName sets the value of DetailedName.
@@ -14350,6 +14679,7 @@ func (*UpdateOutputPortQueryStatsOKApplicationJSON) updateOutputPortQueryStatsRe
 
 // Ref: #/components/schemas/UpdateOutputPortQueryStatus
 type UpdateOutputPortQueryStatus struct {
+	// Daily query counts per consuming data product.
 	OutputPortQueryStatsUpdates []OutputPortQueryStatsUpdate `json:"output_port_query_stats_updates"`
 }
 

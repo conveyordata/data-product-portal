@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import datetime
 from collections.abc import Mapping
 from typing import Any, TypeVar
 from uuid import UUID
@@ -14,16 +15,16 @@ T = TypeVar("T", bound="OutputPortQueryStatsDelete")
 class OutputPortQueryStatsDelete:
     """
     Attributes:
-        date (str):
-        consumer_data_product_id (UUID):
+        date (datetime.date): Day to delete, in ISO 8601 format (YYYY-MM-DD)
+        consumer_data_product_id (UUID): ID of the consuming data product whose count to delete
     """
 
-    date: str
+    date: datetime.date
     consumer_data_product_id: UUID
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        date = self.date
+        date = self.date.isoformat()
 
         consumer_data_product_id = str(self.consumer_data_product_id)
 
@@ -41,7 +42,7 @@ class OutputPortQueryStatsDelete:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        date = d.pop("date")
+        date = datetime.date.fromisoformat(d.pop("date"))
 
         consumer_data_product_id = UUID(d.pop("consumer_data_product_id"))
 

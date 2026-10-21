@@ -22,6 +22,14 @@ class DataProductUpdate(ORMModel):
     domain_id: UUID
     tag_ids: list[UUID] = []
     lifecycle_id: UUID
+    environment_ids: Annotated[list[UUID], MinLen(1)] | None = None
+
+    @field_validator("environment_ids")
+    @classmethod
+    def validate_environment_ids(cls, value: list[UUID] | None) -> list[UUID]:
+        if value is None:
+            raise ValueError("Select at least one environment for the Data Product")
+        return value
 
 
 class RequestInputPortsForDataProductRequest(ORMModel):

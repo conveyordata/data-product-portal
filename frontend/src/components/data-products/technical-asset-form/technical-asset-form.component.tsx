@@ -1,5 +1,5 @@
-import { Form, type FormInstance, type FormProps, Input, Radio, Select, Space } from 'antd';
-import { type RefObject, useCallback, useEffect, useMemo, useState } from 'react';
+import { Alert, Form, type FormInstance, type FormProps, Input, Radio, Select, Space } from 'antd';
+import { type RefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDebouncedCallback } from 'use-debounce';
 import { CardSelection } from '@/components/card-selection/card-selection.tsx';
@@ -16,6 +16,7 @@ import {
 } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
 import {
     type PlatformTile,
+    TechnicalMapping,
     useGetPlatformTilesQuery,
     useGetPluginsQuery,
     useRenderTechnicalAssetAccessPathMutation,
@@ -87,6 +88,7 @@ export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallback
 
     const [form] = Form.useForm();
     const technical_mapping = Form.useWatch('technical_mapping', form);
+    const namespace = Form.useWatch('namespace', form);
     const dataOutputNameValue = Form.useWatch('name', form);
 
     const [sanitizeResourceName, { data: sanitizedResourceName }] = useLazySanitizeResourceNameQuery();
@@ -229,7 +231,14 @@ export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallback
         [validateNamespace, dataProductId],
     );
 
+    const latestPreview = useRef(0);
     const setResultString = useDebouncedCallback((values: CreateTechnicalAssetRequest) => {
+        const preview = ++latestPreview.current;
+        const setResult = (result?: string) => {
+            if (preview === latestPreview.current) {
+                form.setFieldValue('result', result);
+            }
+        };
         if (!values.platform_id || !values.service_id) {
             form.setFieldValue('result', undefined);
             return;
@@ -237,13 +246,20 @@ export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallback
         const request = {
             platform_id: values.platform_id,
             service_id: values.service_id,
+            data_product_id: dataProductId,
+            namespace: values.namespace ?? '',
+            technical_mapping: values.technical_mapping ?? TechnicalMapping.Default,
             configuration: values.configuration,
         };
         form.validateFields(['configuration'], { validateOnly: true, recursive: true })
             .then(() => fetchResultString(request).unwrap())
-            .then((result) => form.setFieldValue('result', result.technical_asset_access_path))
-            .catch(() => form.setFieldValue('result', undefined));
+            .then((result) => setResult(result.technical_asset_access_path))
+            .catch(() => setResult(undefined));
     }, debounce);
+
+    useEffect(() => {
+        setResultString({ ...form.getFieldsValue(true), namespace, technical_mapping });
+    }, [form, namespace, technical_mapping, setResultString]);
 
     const onValuesChange: FormProps<CreateTechnicalAssetRequest>['onValuesChange'] = (
         changed,
@@ -369,6 +385,15 @@ export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallback
             </Form.Item>
             {currentDataProduct && pluginMetadata && (
                 <>
+                    {pluginMetadata.shareable === false && (
+                        <Form.Item>
+                            <Alert
+                                type="warning"
+                                showIcon
+                                title={t('Technical Assets of this type cannot be linked to an Output Port')}
+                            />
+                        </Form.Item>
+                    )}
                     <TechnicalAssetConfigurationForm
                         form={form}
                         uiMetadataGroups={pluginMetadata.ui_metadata}

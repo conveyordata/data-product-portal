@@ -389,6 +389,10 @@ type GetUsersRes interface {
 	getUsersRes()
 }
 
+type GrantOutputPortAccessRes interface {
+	grantOutputPortAccessRes()
+}
+
 type IngestOutputPortContractRes interface {
 	ingestOutputPortContractRes()
 }
@@ -531,6 +535,10 @@ type RenewInputPortForDataProductRes interface {
 
 type RenewInputPortForExplorationRes interface {
 	renewInputPortForExplorationRes()
+}
+
+type RenewOutputPortAsInputPortRes interface {
+	renewOutputPortAsInputPortRes()
 }
 
 type ReplaceGroupMembersRes interface {

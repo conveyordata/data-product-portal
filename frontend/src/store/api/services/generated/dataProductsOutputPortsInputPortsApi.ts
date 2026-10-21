@@ -1,6 +1,16 @@
 import { api } from "@/store/api/services/generated/dataProductsOutputPortsApi";
 const injectedRtkApi = api.injectEndpoints({
   endpoints: (build) => ({
+    grantOutputPortAccess: build.mutation<
+      GrantOutputPortAccessApiResponse,
+      GrantOutputPortAccessApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/data_products/${queryArg.dataProductId}/output_ports/${queryArg.outputPortId}/input_ports/grant`,
+        method: "POST",
+        body: queryArg.grantOutputPortAccessRequest,
+      }),
+    }),
     getInputPortsForOutputPort: build.query<
       GetInputPortsForOutputPortApiResponse,
       GetInputPortsForOutputPortApiArg
@@ -29,6 +39,16 @@ const injectedRtkApi = api.injectEndpoints({
         body: queryArg.denyOutputPortAsInputPortRequest,
       }),
     }),
+    renewOutputPortAsInputPort: build.mutation<
+      RenewOutputPortAsInputPortApiResponse,
+      RenewOutputPortAsInputPortApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/data_products/${queryArg.dataProductId}/output_ports/${queryArg.outputPortId}/input_ports/renew`,
+        method: "POST",
+        body: queryArg.renewOutputPortAsInputPortRequest,
+      }),
+    }),
     revokeOutputPortAsInputPort: build.mutation<
       RevokeOutputPortAsInputPortApiResponse,
       RevokeOutputPortAsInputPortApiArg
@@ -53,6 +73,13 @@ const injectedRtkApi = api.injectEndpoints({
   overrideExisting: false,
 });
 export { injectedRtkApi as api };
+export type GrantOutputPortAccessApiResponse =
+  /** status 200 Successful Response */ any;
+export type GrantOutputPortAccessApiArg = {
+  dataProductId: string;
+  outputPortId: string;
+  grantOutputPortAccessRequest: GrantOutputPortAccessRequest;
+};
 export type GetInputPortsForOutputPortApiResponse =
   /** status 200 Successful Response */ GetInputPortsForOutputPortResponse;
 export type GetInputPortsForOutputPortApiArg = {
@@ -73,6 +100,13 @@ export type DenyOutputPortAsInputPortApiArg = {
   outputPortId: string;
   denyOutputPortAsInputPortRequest: DenyOutputPortAsInputPortRequest;
 };
+export type RenewOutputPortAsInputPortApiResponse =
+  /** status 200 Successful Response */ any;
+export type RenewOutputPortAsInputPortApiArg = {
+  dataProductId: string;
+  outputPortId: string;
+  renewOutputPortAsInputPortRequest: RenewOutputPortAsInputPortRequest;
+};
 export type RevokeOutputPortAsInputPortApiResponse =
   /** status 200 Successful Response */ any;
 export type RevokeOutputPortAsInputPortApiArg = {
@@ -86,6 +120,21 @@ export type RemoveOutputPortAsInputPortApiArg = {
   dataProductId: string;
   outputPortId: string;
   removeOutputPortAsInputPortRequest: RemoveOutputPortAsInputPortRequest;
+};
+export type ValidationError = {
+  loc: (string | number)[];
+  msg: string;
+  type: string;
+  input?: any;
+  ctx?: object;
+};
+export type HttpValidationError = {
+  detail?: ValidationError[];
+};
+export type GrantOutputPortAccessRequest = {
+  consuming_abstract_data_product_id: string;
+  justification: string;
+  access_mode_id?: string | null;
 };
 export type User = {
   id: string;
@@ -136,16 +185,6 @@ export type OutputPortInputPort = {
 export type GetInputPortsForOutputPortResponse = {
   input_ports: OutputPortInputPort[];
 };
-export type ValidationError = {
-  loc: (string | number)[];
-  msg: string;
-  type: string;
-  input?: any;
-  ctx?: object;
-};
-export type HttpValidationError = {
-  detail?: ValidationError[];
-};
 export type ApproveOutputPortAsInputPortRequest = {
   consuming_data_product_id: string;
   decision_note?: string | null;
@@ -153,6 +192,9 @@ export type ApproveOutputPortAsInputPortRequest = {
 export type DenyOutputPortAsInputPortRequest = {
   consuming_data_product_id: string;
   decision_note: string;
+};
+export type RenewOutputPortAsInputPortRequest = {
+  consuming_data_product_id: string;
 };
 export type RevokeOutputPortAsInputPortRequest = {
   consuming_data_product_id: string;
@@ -188,10 +230,12 @@ export enum AbstractDataProductType {
   Explorations = "explorations",
 }
 export const {
+  useGrantOutputPortAccessMutation,
   useGetInputPortsForOutputPortQuery,
   useLazyGetInputPortsForOutputPortQuery,
   useApproveOutputPortAsInputPortMutation,
   useDenyOutputPortAsInputPortMutation,
+  useRenewOutputPortAsInputPortMutation,
   useRevokeOutputPortAsInputPortMutation,
   useRemoveOutputPortAsInputPortMutation,
 } = injectedRtkApi;

@@ -672,6 +672,32 @@ func (s *DataProductCreate) Validate() error {
 
 	var failures []validate.FieldError
 	if err := func() error {
+		if value, ok := s.EnvironmentIds.Get(); ok {
+			if err := func() error {
+				if value == nil {
+					return errors.New("nil is invalid value")
+				}
+				if err := (validate.Array{
+					MinLength:    1,
+					MinLengthSet: true,
+					MaxLength:    0,
+					MaxLengthSet: false,
+				}).ValidateLength(len(value)); err != nil {
+					return errors.Wrap(err, "array")
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "environment_ids",
+			Error: err,
+		})
+	}
+	if err := func() error {
 		if value, ok := s.Visibility.Get(); ok {
 			if err := func() error {
 				if err := value.Validate(); err != nil {
@@ -1304,6 +1330,44 @@ func (s *DataProductTypesGetItem) Validate() error {
 	return nil
 }
 
+func (s *DataProductUpdate) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if value, ok := s.EnvironmentIds.Get(); ok {
+			if err := func() error {
+				if value == nil {
+					return errors.New("nil is invalid value")
+				}
+				if err := (validate.Array{
+					MinLength:    1,
+					MinLengthSet: true,
+					MaxLength:    0,
+					MaxLengthSet: false,
+				}).ValidateLength(len(value)); err != nil {
+					return errors.Wrap(err, "array")
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "environment_ids",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
 func (s DataProductVisibility) Validate() error {
 	switch s {
 	case "hidden":
@@ -1507,6 +1571,8 @@ func (s EventEntityType) Validate() error {
 	case "technical_asset":
 		return nil
 	case "user":
+		return nil
+	case "exploration":
 		return nil
 	default:
 		return errors.Errorf("invalid value: %v", s)
@@ -1831,6 +1897,17 @@ func (s *GetDataProductResponse) Validate() error {
 			Error: err,
 		})
 	}
+	if err := func() error {
+		if s.Environments == nil {
+			return errors.New("nil is invalid value")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "environments",
+			Error: err,
+		})
+	}
 	if len(failures) > 0 {
 		return &validate.Error{Fields: failures}
 	}
@@ -2012,41 +2089,6 @@ func (s *GetDataProductsResponseItem) Validate() error {
 			Error: err,
 		})
 	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-	return nil
-}
-
-func (s *GetDomainResponse) Validate() error {
-	if s == nil {
-		return validate.ErrNilPointer
-	}
-
-	var failures []validate.FieldError
-	if err := func() error {
-		if s.Environments == nil {
-			return errors.New("nil is invalid value")
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "environments",
-			Error: err,
-		})
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-	return nil
-}
-
-func (s *GetDomainsItem) Validate() error {
-	if s == nil {
-		return validate.ErrNilPointer
-	}
-
-	var failures []validate.FieldError
 	if err := func() error {
 		if s.Environments == nil {
 			return errors.New("nil is invalid value")
@@ -2073,23 +2115,6 @@ func (s *GetDomainsResponse) Validate() error {
 	if err := func() error {
 		if s.Domains == nil {
 			return errors.New("nil is invalid value")
-		}
-		var failures []validate.FieldError
-		for i, elem := range s.Domains {
-			if err := func() error {
-				if err := elem.Validate(); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				failures = append(failures, validate.FieldError{
-					Name:  fmt.Sprintf("[%d]", i),
-					Error: err,
-				})
-			}
-		}
-		if len(failures) > 0 {
-			return &validate.Error{Fields: failures}
 		}
 		return nil
 	}(); err != nil {
@@ -2180,8 +2205,15 @@ func (s *GetEventHistoryResponseItem) Validate() error {
 		})
 	}
 	if err := func() error {
-		if err := s.Actor.Validate(); err != nil {
-			return err
+		if value, ok := s.Actor.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
 		}
 		return nil
 	}(); err != nil {
@@ -2259,6 +2291,24 @@ func (s *GetEventHistoryResponseItem) Validate() error {
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
 			Name:  "technical_asset",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if value, ok := s.Exploration.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "exploration",
 			Error: err,
 		})
 	}
@@ -2773,6 +2823,17 @@ func (s *GetTechnicalAssetsResponseItem) Validate() error {
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
 			Name:  "owner",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if s.Environments == nil {
+			return errors.New("nil is invalid value")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "environments",
 			Error: err,
 		})
 	}
@@ -4265,6 +4326,39 @@ func (s *OutputPortQueryStatsResponses) Validate() error {
 	return nil
 }
 
+func (s *OutputPortQueryStatsUpdate) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := (validate.Int{
+			MinSet:        true,
+			Min:           0,
+			MaxSet:        true,
+			Max:           2147483647,
+			MinExclusive:  false,
+			MaxExclusive:  false,
+			MultipleOfSet: false,
+			MultipleOf:    0,
+			Pattern:       nil,
+		}).Validate(int64(s.QueryCount)); err != nil {
+			return errors.Wrap(err, "int")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "query_count",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
 func (s *OutputPortRoleAssignmentResponse) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer
@@ -4617,6 +4711,29 @@ func (s QueryStatsGranularity) Validate() error {
 	default:
 		return errors.Errorf("invalid value: %v", s)
 	}
+}
+
+func (s *RenderTechnicalAssetAccessPathRequest) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.TechnicalMapping.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "technical_mapping",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
 }
 
 func (s RenewalStatus) Validate() error {
@@ -5570,6 +5687,23 @@ func (s *UpdateOutputPortQueryStatus) Validate() error {
 	if err := func() error {
 		if s.OutputPortQueryStatsUpdates == nil {
 			return errors.New("nil is invalid value")
+		}
+		var failures []validate.FieldError
+		for i, elem := range s.OutputPortQueryStatsUpdates {
+			if err := func() error {
+				if err := elem.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				failures = append(failures, validate.FieldError{
+					Name:  fmt.Sprintf("[%d]", i),
+					Error: err,
+				})
+			}
+		}
+		if len(failures) > 0 {
+			return &validate.Error{Fields: failures}
 		}
 		return nil
 	}(); err != nil {

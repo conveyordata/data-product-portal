@@ -9,6 +9,7 @@ from pydantic import computed_field
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from app.configuration.domains.schema import Domain
 from app.configuration.environments.platform_service_configurations.schema_response import (
     ConfigType,
 )
@@ -22,12 +23,14 @@ from app.configuration.platforms.platform_services.model import (
     PlatformService as PlatformServiceModel,
 )
 from app.core.logging import logger
+from app.data_products.schema import DataProduct
+from app.data_products.technical_assets.enums import TechnicalMapping
 from app.shared.schema import ORMModel
 from app.technical_asset_configuration.enums import UIElementType
 from app.users.schema import User
 
 if TYPE_CHECKING:
-    from app.data_products.schema import DataProduct
+    from app.data_products.model import DataProduct as DataProductModel
 
 
 class FieldDependency(ORMModel):
@@ -114,6 +117,39 @@ class PlatformMetadata(ORMModel):
     result_tooltip: str = "The output you can access through this technical asset"
     detailed_name: str
     show_in_form: bool = True
+    shareable: bool = True
+    result_string_template: Optional[str] = None
+    technical_info_template: Optional[str] = None
+
+
+class TechnicalAssetContext(ORMModel):
+    id: Optional[UUID] = None
+    namespace: str
+    technical_mapping: TechnicalMapping
+
+
+class PluginContext(ORMModel):
+    technical_asset: TechnicalAssetContext
+    data_product: DataProduct
+    domain: Domain
+
+    @classmethod
+    def build(
+        cls,
+        data_product: "DataProductModel",
+        namespace: str,
+        technical_mapping: TechnicalMapping,
+        technical_asset_id: Optional[UUID] = None,
+    ) -> "PluginContext":
+        return cls(
+            technical_asset=TechnicalAssetContext(
+                id=technical_asset_id,
+                namespace=namespace,
+                technical_mapping=technical_mapping,
+            ),
+            data_product=DataProduct.model_validate(data_product),
+            domain=Domain.model_validate(data_product.domain),
+        )
 
 
 class TechnicalAssetPlugin(ORMModel, ABC):
@@ -127,13 +163,17 @@ class TechnicalAssetPlugin(ORMModel, ABC):
 
     _platform_metadata: ClassVar[Optional[PlatformMetadata]] = None
 
-    def render_template(self, template: str, **context: dict[str, Any]) -> str:
-        return template.format(**self.model_dump(), **context)
+    def render_template(
+        self, template: str, *, plugin_context: PluginContext, **context: Any
+    ) -> str:
+        return template.format(
+            **{**dict(plugin_context), **self.model_dump(), **context}
+        )
 
     def get_configuration(self, configs: list[ConfigType]) -> Optional[ConfigType]:
         raise NotImplementedError
 
-    def validate_configuration(self, data_product: "DataProduct", db: Session) -> None:
+    def validate_configuration(self, context: PluginContext, db: Session) -> None:
         """Raise when the configuration isn't acceptable, on create with the default technical mapping."""
 
     @classmethod
@@ -183,6 +223,7 @@ class TechnicalAssetPlugin(ORMModel, ABC):
                 display_name=class_name.replace("DataOutput", ""),
                 icon_name=f"{platform_key}-logo.svg",
                 platform_key=platform_key,
+                detailed_name=class_name,
             )
         return cls._platform_metadata
 

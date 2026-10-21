@@ -1,5 +1,7 @@
 from enum import UNIQUE, Enum, verify
 
+from app.abstract_data_product.type import AbstractDataProductType
+
 
 @verify(UNIQUE)
 class EventEntityType(str, Enum):
@@ -7,6 +9,15 @@ class EventEntityType(str, Enum):
     OUTPUT_PORT = "output_port"
     TECHNICAL_ASSET = "technical_asset"
     USER = "user"
+    EXPLORATION = "exploration"
+
+    @staticmethod
+    def for_consumer(
+        consumer_type: AbstractDataProductType,
+    ) -> "EventEntityType":
+        if consumer_type == AbstractDataProductType.EXPLORATION:
+            return EventEntityType.EXPLORATION
+        return EventEntityType.DATA_PRODUCT
 
 
 @verify(UNIQUE)

@@ -1,16 +1,14 @@
 from typing import ClassVar, Optional, Self
-from uuid import UUID
 
-from fastapi import HTTPException, status
 from pydantic import model_validator
 from sqlalchemy.orm import Session
 
 from app.configuration.environments.platform_service_configurations.schemas import (
     AWSGlueConfig,
 )
-from app.core.aws.get_url import get_aws_url
-from app.data_products.schema import DataProduct
+from app.core.aws.get_url import get_aws_plugin_url
 from app.technical_asset_configuration.base_schema import (
+    PluginContext,
     FieldDependency,
     PlatformMetadata,
     SelectOption,
@@ -28,7 +26,6 @@ from portal_plugins.glue.model import (
 from portal_plugins.glue.model import (
     GlueTechnicalAssetConfiguration as GlueTechnicalAssetConfigurationModel,
 )
-from app.users.schema import User
 
 
 class GlueTechnicalAssetConfiguration(TechnicalAssetPlugin):
@@ -45,6 +42,7 @@ class GlueTechnicalAssetConfiguration(TechnicalAssetPlugin):
     access_granularity: AccessGranularity
 
     _platform_metadata = PlatformMetadata(
+        result_string_template="{database}__{database_suffix}.{table}",
         display_name="Glue",
         icon_name="glue-logo.svg",
         icon_package="portal_plugins.glue",
@@ -68,12 +66,9 @@ class GlueTechnicalAssetConfiguration(TechnicalAssetPlugin):
             self.table = "*"
         return self
 
-    def validate_configuration(self, data_product: DataProduct, db: Session):
-        if not self.database.startswith(data_product.namespace):
+    def validate_configuration(self, context: PluginContext, db: Session):
+        if not self.database.startswith(context.data_product.namespace):
             raise ValueError("Invalid database specified")
-
-    def on_create(self):
-        pass
 
     def render_template(self, template, **context):
         return ".".join(
@@ -90,16 +85,9 @@ class GlueTechnicalAssetConfiguration(TechnicalAssetPlugin):
             (config for config in configs if config.identifier == self.database), None
         )
 
-    @classmethod
-    def get_url(
-        cls, id: UUID, db: Session, actor: User, environment: Optional[str] = None
-    ) -> str:
-        if environment is None:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Environment is required to get the URL for S3 technical asset configurations",
-            )
-        return get_aws_url(id, db, actor, environment)
+    # Every AWS plugin shares the AWS tile on the data product page, so they all
+    # use the same get_url. The portal refuses a parent tile whose children differ.
+    get_url = classmethod(get_aws_plugin_url)
 
     @classmethod
     def get_ui_metadata(cls, db: Session) -> list[UIElementMetadata]:

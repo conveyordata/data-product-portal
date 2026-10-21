@@ -4,11 +4,13 @@ from unittest.mock import patch
 import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
+from sqlalchemy import event
 
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.roles.schema import Role, Scope
 from app.core.authz import Action
 from app.settings import settings
+from tests import engine
 from tests.factories import (
     DatasetRoleAssignmentFactory,
     GlobalRoleAssignmentFactory,
@@ -42,6 +44,40 @@ class TestDatasetRoleAssignmentsRouter:
         data = response.json()
         assert len(data["role_assignments"]) == 1
         assert data["role_assignments"][0]["id"] == str(assignment.id)
+
+    def test_list_assignments__query_count_is_constant(self, client: TestClient):
+        role: Role = RoleFactory(scope=Scope.DATASET)
+
+        def count_queries() -> int:
+            statements: list[str] = []
+
+            def record(conn, cursor, statement, *args):
+                statements.append(statement)
+
+            event.listen(engine, "before_cursor_execute", record)
+            try:
+                response = client.get(ENDPOINT)
+            finally:
+                event.remove(engine, "before_cursor_execute", record)
+            assert response.status_code == 200
+            return len(statements)
+
+        for _ in range(2):
+            DatasetRoleAssignmentFactory(
+                output_port_id=OutputPortFactory().id,
+                user_id=UserFactory().id,
+                role_id=role.id,
+            )
+        count_queries()
+        baseline = count_queries()
+        for _ in range(5):
+            DatasetRoleAssignmentFactory(
+                output_port_id=OutputPortFactory().id,
+                user_id=UserFactory().id,
+                role_id=role.id,
+            )
+
+        assert count_queries() == baseline
 
     @pytest.mark.parametrize(
         ("permissions", "should_update_casbin"),
@@ -411,6 +447,36 @@ class TestDatasetRoleAssignmentsRouter:
         assert response.status_code == status.HTTP_200_OK
 
         response = client.delete(f"{ENDPOINT}/{assignment_2.id}")
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
+    def test_delete_last_approved_owner_assignment__other_owner_pending(
+        self, client: TestClient
+    ):
+        dataset: OutputPort = OutputPortFactory()
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        authz_role = RoleFactory(
+            scope=Scope.DATASET,
+            permissions=[Action.OUTPUT_PORT__DELETE_USER],
+        )
+        DatasetRoleAssignmentFactory(
+            user_id=user.id, role_id=authz_role.id, output_port_id=dataset.id
+        )
+
+        user_1, user_2 = UserFactory.create_batch(2)
+        role = RoleFactory.dataset_owner()
+        approved = DatasetRoleAssignmentFactory(
+            output_port_id=dataset.id,
+            user_id=user_1.id,
+            role_id=role.id,
+        )
+        DatasetRoleAssignmentFactory(
+            output_port_id=dataset.id,
+            user_id=user_2.id,
+            role_id=role.id,
+            decision=DecisionStatus.PENDING,
+        )
+
+        response = client.delete(f"{ENDPOINT}/{approved.id}")
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
     def test_history_event_created_on_dataset_role_assignment_requested(

@@ -236,7 +236,7 @@ type Invoker interface {
 	DeleteMachineUser(ctx context.Context, params DeleteMachineUserParams) (DeleteMachineUserRes, error)
 	// DeleteOutputPortQueryStat invokes delete_output_port_query_stat operation.
 	//
-	// Delete Output Port Query Stat.
+	// Delete the query count of one consuming data product for one day.
 	//
 	// DELETE /api/v2/data_products/{data_product_id}/output_ports/{id}/query_stats
 	DeleteOutputPortQueryStat(ctx context.Context, request *OutputPortQueryStatsDelete, params DeleteOutputPortQueryStatParams) (DeleteOutputPortQueryStatRes, error)
@@ -618,6 +618,12 @@ type Invoker interface {
 	//
 	// GET /api/v2/version
 	GetVersion(ctx context.Context) (jx.Raw, error)
+	// GrantOutputPortAccess invokes grant_output_port_access operation.
+	//
+	// Grant Output Port Access.
+	//
+	// POST /api/v2/data_products/{data_product_id}/output_ports/{output_port_id}/input_ports/grant
+	GrantOutputPortAccess(ctx context.Context, request *GrantOutputPortAccessRequest, params GrantOutputPortAccessParams) (GrantOutputPortAccessRes, error)
 	// IngestOutputPortContract invokes ingest_output_port_contract operation.
 	//
 	// Ingest Output Port Contract.
@@ -840,6 +846,12 @@ type Invoker interface {
 	//
 	// POST /api/v2/explorations/{id}/input_ports/{output_port_id}/renew
 	RenewInputPortForExploration(ctx context.Context, params RenewInputPortForExplorationParams) (RenewInputPortForExplorationRes, error)
+	// RenewOutputPortAsInputPort invokes renew_output_port_as_input_port operation.
+	//
+	// Renew Output Port As Input Port.
+	//
+	// POST /api/v2/data_products/{data_product_id}/output_ports/{output_port_id}/input_ports/renew
+	RenewOutputPortAsInputPort(ctx context.Context, request *RenewOutputPortAsInputPortRequest, params RenewOutputPortAsInputPortParams) (RenewOutputPortAsInputPortRes, error)
 	// ReplaceGroupMembers invokes replace_group_members operation.
 	//
 	// Because the service method performs add and remove operations internally, a lock is used to ensure
@@ -1041,7 +1053,10 @@ type Invoker interface {
 	UpdateOutputPortAccessType(ctx context.Context, request *OutputPortAccessTypeUpdate, params UpdateOutputPortAccessTypeParams) (UpdateOutputPortAccessTypeRes, error)
 	// UpdateOutputPortQueryStats invokes update_output_port_query_stats operation.
 	//
-	// Update Output Port Query Stats.
+	// Upsert daily query counts for this output port, one entry per day and consuming data product.
+	// Existing counts for the same day and consuming data product are overwritten, so sending the same
+	// data twice is safe. If a request contains the same day and consuming data product more than once,
+	// the last entry is used.
 	//
 	// PATCH /api/v2/data_products/{data_product_id}/output_ports/{id}/query_stats
 	UpdateOutputPortQueryStats(ctx context.Context, request *UpdateOutputPortQueryStatus, params UpdateOutputPortQueryStatsParams) (UpdateOutputPortQueryStatsRes, error)
@@ -3206,7 +3221,7 @@ func (c *Client) sendDeleteMachineUser(ctx context.Context, params DeleteMachine
 
 // DeleteOutputPortQueryStat invokes delete_output_port_query_stat operation.
 //
-// Delete Output Port Query Stat.
+// Delete the query count of one consuming data product for one day.
 //
 // DELETE /api/v2/data_products/{data_product_id}/output_ports/{id}/query_stats
 func (c *Client) DeleteOutputPortQueryStat(ctx context.Context, request *OutputPortQueryStatsDelete, params DeleteOutputPortQueryStatParams) (DeleteOutputPortQueryStatRes, error) {
@@ -7234,6 +7249,90 @@ func (c *Client) sendGetVersion(ctx context.Context) (res jx.Raw, err error) {
 	return result, nil
 }
 
+// GrantOutputPortAccess invokes grant_output_port_access operation.
+//
+// Grant Output Port Access.
+//
+// POST /api/v2/data_products/{data_product_id}/output_ports/{output_port_id}/input_ports/grant
+func (c *Client) GrantOutputPortAccess(ctx context.Context, request *GrantOutputPortAccessRequest, params GrantOutputPortAccessParams) (GrantOutputPortAccessRes, error) {
+	res, err := c.sendGrantOutputPortAccess(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendGrantOutputPortAccess(ctx context.Context, request *GrantOutputPortAccessRequest, params GrantOutputPortAccessParams) (res GrantOutputPortAccessRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/api/v2/data_products/"
+	{
+		// Encode "data_product_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "data_product_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.DataProductID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/output_ports/"
+	{
+		// Encode "output_port_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "output_port_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.OutputPortID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/input_ports/grant"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeGrantOutputPortAccessRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeGrantOutputPortAccessResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // IngestOutputPortContract invokes ingest_output_port_contract operation.
 //
 // Ingest Output Port Contract.
@@ -9864,6 +9963,90 @@ func (c *Client) sendRenewInputPortForExploration(ctx context.Context, params Re
 	return result, nil
 }
 
+// RenewOutputPortAsInputPort invokes renew_output_port_as_input_port operation.
+//
+// Renew Output Port As Input Port.
+//
+// POST /api/v2/data_products/{data_product_id}/output_ports/{output_port_id}/input_ports/renew
+func (c *Client) RenewOutputPortAsInputPort(ctx context.Context, request *RenewOutputPortAsInputPortRequest, params RenewOutputPortAsInputPortParams) (RenewOutputPortAsInputPortRes, error) {
+	res, err := c.sendRenewOutputPortAsInputPort(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendRenewOutputPortAsInputPort(ctx context.Context, request *RenewOutputPortAsInputPortRequest, params RenewOutputPortAsInputPortParams) (res RenewOutputPortAsInputPortRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/api/v2/data_products/"
+	{
+		// Encode "data_product_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "data_product_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.DataProductID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/output_ports/"
+	{
+		// Encode "output_port_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "output_port_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.OutputPortID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/input_ports/renew"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeRenewOutputPortAsInputPortRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeRenewOutputPortAsInputPortResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // ReplaceGroupMembers invokes replace_group_members operation.
 //
 // Because the service method performs add and remove operations internally, a lock is used to ensure
@@ -12136,7 +12319,10 @@ func (c *Client) sendUpdateOutputPortAccessType(ctx context.Context, request *Ou
 
 // UpdateOutputPortQueryStats invokes update_output_port_query_stats operation.
 //
-// Update Output Port Query Stats.
+// Upsert daily query counts for this output port, one entry per day and consuming data product.
+// Existing counts for the same day and consuming data product are overwritten, so sending the same
+// data twice is safe. If a request contains the same day and consuming data product more than once,
+// the last entry is used.
 //
 // PATCH /api/v2/data_products/{data_product_id}/output_ports/{id}/query_stats
 func (c *Client) UpdateOutputPortQueryStats(ctx context.Context, request *UpdateOutputPortQueryStatus, params UpdateOutputPortQueryStatsParams) (UpdateOutputPortQueryStatsRes, error) {
