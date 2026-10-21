@@ -301,13 +301,18 @@ class OutputPortService:
     def _recalculate_embeddings_and_search_vector(
         self, datasets: Sequence[OutputPortModel]
     ) -> None:
+        # Flush pending domain changes first so their events are not discarded below
+        self.db.flush()
         embeddings = self.embedding_model.embed(
             DatasetEmbedModel.model_validate(ds).model_dump_json() for ds in datasets
         )
-        for dataset, emb in zip(datasets, embeddings):
-            dataset.embeddings = emb.tolist()
-            self._recalculate_search_vector(dataset)
-            self.db.add(dataset)
+        # Search index maintenance is not a domain change, so emit no webhook events
+        with discard_events():
+            for dataset, emb in zip(datasets, embeddings):
+                dataset.embeddings = emb.tolist()
+                self._recalculate_search_vector(dataset)
+                self.db.add(dataset)
+            self.db.flush()
 
     @staticmethod
     def _recalculate_search_vector(output_port: OutputPortModel) -> None:
@@ -321,28 +326,25 @@ class OutputPortService:
         dataset_ids = self.db.scalars(
             select(OutputPortModel.id).execution_options(**UNFILTERED)
         ).all()
-        # Search index maintenance is not a domain change, so emit no webhook events
-        with discard_events():
-            # Process in batches to reduce load
-            for i in range(0, len(dataset_ids), batch_size):
-                batch_ids = dataset_ids[i : i + batch_size]
+        # Process in batches to reduce load
+        for i in range(0, len(dataset_ids), batch_size):
+            batch_ids = dataset_ids[i : i + batch_size]
 
-                batch_datasets = (
-                    self.db.scalars(
-                        select(OutputPortModel)
-                        .where(OutputPortModel.id.in_(batch_ids))
-                        .options(*self.recalculate_embeddings_load_options())
-                        .execution_options(**UNFILTERED),
-                    )
-                    .unique()
-                    .all()
+            batch_datasets = (
+                self.db.scalars(
+                    select(OutputPortModel)
+                    .where(OutputPortModel.id.in_(batch_ids))
+                    .options(*self.recalculate_embeddings_load_options())
+                    .execution_options(**UNFILTERED),
                 )
+                .unique()
+                .all()
+            )
 
-                if batch_datasets:
-                    self._recalculate_embeddings_and_search_vector(batch_datasets)
-                    self.db.flush()
-            # Allow commit since this is a batch operation and we want to persist changes. Not used in routing
-            self.db.commit()  # noqa: allow-commit
+            if batch_datasets:
+                self._recalculate_embeddings_and_search_vector(batch_datasets)
+        # Allow commit since this is a batch operation and we want to persist changes. Not used in routing
+        self.db.commit()  # noqa: allow-commit
 
     def _fetch_tags(self, tag_ids: Iterable[UUID] = ()) -> list[TagModel]:
         tags = []

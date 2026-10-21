@@ -1,6 +1,7 @@
 from sqlalchemy.orm import selectinload
 
 from app.authorization.role_assignments.enums import AssignmentFilter
+from app.core.context import close_event_context, open_event_context, pop_events
 from app.data_products.output_ports.enums import OutputPortAccessFunction
 from app.data_products.output_ports.model import OutputPort
 from app.data_products.output_ports.service import OutputPortService
@@ -20,6 +21,26 @@ class TestDatasetsService:
     def test_recalculate_search(self, session):
         ds = OutputPortFactory()
         OutputPortService(session).recalculate_search(ds.id)
+
+    def test_recalculate_search__queues_no_events(self, session):
+        ds = OutputPortFactory()
+        token = open_event_context()
+        try:
+            OutputPortService(session).recalculate_search(ds.id)
+            session.flush()
+            assert pop_events() == []
+        finally:
+            close_event_context(token)
+
+    def test_recalculate_search__keeps_events_of_pending_changes(self, session):
+        ds = OutputPortFactory()
+        token = open_event_context()
+        try:
+            ds.name = "Renamed"
+            OutputPortService(session).recalculate_search(ds.id)
+            assert len(pop_events()) == 1
+        finally:
+            close_event_context(token)
 
     def test_recalculate_search_with_technical_asset(self, session):
         ds = OutputPortFactory()
