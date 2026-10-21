@@ -46,13 +46,12 @@ class TestDatasetRoleAssignmentsRouter:
         assert data["role_assignments"][0]["id"] == str(assignment.id)
 
     def test_list_assignments__query_count_is_constant(self, client: TestClient):
-        role: Role = RoleFactory(scope=Scope.DATASET)
-
         def count_queries() -> int:
-            statements: list[str] = []
+            count = 0
 
-            def record(conn, cursor, statement, *args):
-                statements.append(statement)
+            def record(*_):
+                nonlocal count
+                count += 1
 
             event.listen(engine, "before_cursor_execute", record)
             try:
@@ -60,22 +59,22 @@ class TestDatasetRoleAssignmentsRouter:
             finally:
                 event.remove(engine, "before_cursor_execute", record)
             assert response.status_code == 200
-            return len(statements)
+            return count
 
-        for _ in range(2):
-            DatasetRoleAssignmentFactory(
-                output_port_id=OutputPortFactory().id,
-                user_id=UserFactory().id,
-                role_id=role.id,
-            )
+        def create_assignments(n: int) -> None:
+            for _ in range(n):
+                DatasetRoleAssignmentFactory(
+                    output_port_id=OutputPortFactory().id,
+                    user_id=UserFactory().id,
+                    role_id=RoleFactory(scope=Scope.DATASET).id,
+                    requested_by_id=UserFactory().id,
+                    decided_by_id=UserFactory().id,
+                )
+
+        create_assignments(2)
         count_queries()
         baseline = count_queries()
-        for _ in range(5):
-            DatasetRoleAssignmentFactory(
-                output_port_id=OutputPortFactory().id,
-                user_id=UserFactory().id,
-                role_id=role.id,
-            )
+        create_assignments(5)
 
         assert count_queries() == baseline
 
