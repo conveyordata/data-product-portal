@@ -5080,12 +5080,15 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful Response",
+            "description": "Domain deleted",
             "content": {
               "application/json": {
                 "schema": {}
               }
             }
+          },
+          "202": {
+            "description": "Domain marked for deletion, waiting for finalizers"
           },
           "422": {
             "description": "Validation Error",
@@ -5125,6 +5128,107 @@
                 "schema": {
                   "$ref": "#/components/schemas/GetDomainResponse"
                 }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/configuration/domains/{id}/finalizers": {
+      "post": {
+        "tags": [
+          "Configuration - Domains"
+        ],
+        "summary": "Add Domain Finalizer",
+        "operationId": "add_domain_finalizer",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinalizerRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/configuration/domains/{id}/finalizers/{finalizer}": {
+      "delete": {
+        "tags": [
+          "Configuration - Domains"
+        ],
+        "summary": "Remove Domain Finalizer",
+        "operationId": "remove_domain_finalizer",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "finalizer",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Finalizer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
               }
             }
           },
@@ -9676,6 +9780,9 @@
                   },
                   {
                     "$ref": "#/components/schemas/CloudEvent_DataProductSettingValueEvent"
+                  },
+                  {
+                    "$ref": "#/components/schemas/CloudEvent_DomainEvent"
                   }
                 ],
                 "title": "Body",
@@ -9691,7 +9798,8 @@
                     "technical_asset.event": "#/components/schemas/CloudEvent_TechnicalAssetEvent",
                     "output_port.event": "#/components/schemas/CloudEvent_OutputPortEvent",
                     "output_port_technical_asset_link.event": "#/components/schemas/CloudEvent_OutputPortTechnicalAssetLinkEvent",
-                    "data_product_setting_value.event": "#/components/schemas/CloudEvent_DataProductSettingValueEvent"
+                    "data_product_setting_value.event": "#/components/schemas/CloudEvent_DataProductSettingValueEvent",
+                    "domain.event": "#/components/schemas/CloudEvent_DomainEvent"
                   }
                 }
               }
@@ -10530,6 +10638,50 @@
           "data"
         ],
         "title": "CloudEvent_DataProductSettingValueEvent"
+      },
+      "CloudEvent_DomainEvent": {
+        "properties": {
+          "specversion": {
+            "type": "string",
+            "title": "Specversion",
+            "description": "The CloudEvents specification version.",
+            "default": "1.0"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "A unique UUID identifier for this specific event instance."
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "description": "Identifies the context in which an event happened.",
+            "default": "data-product-portal"
+          },
+          "type": {
+            "type": "string",
+            "const": "domain.event",
+            "title": "Type",
+            "description": "The unique type string belonging to this event.",
+            "default": "domain.event"
+          },
+          "time": {
+            "type": "string",
+            "title": "Time",
+            "description": "Timestamp of when the event occurred in ISO 8601 UTC format."
+          },
+          "data": {
+            "$ref": "#/components/schemas/DomainEvent",
+            "description": "The specific data payload corresponding to this event type."
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "time",
+          "data"
+        ],
+        "title": "CloudEvent_DomainEvent"
       },
       "CloudEvent_ExplorationEvent": {
         "properties": {
@@ -12728,6 +12880,10 @@
             "type": "string",
             "title": "Name"
           },
+          "namespace": {
+            "type": "string",
+            "title": "Namespace"
+          },
           "description": {
             "type": "string",
             "title": "Description"
@@ -12737,6 +12893,7 @@
         "required": [
           "id",
           "name",
+          "namespace",
           "description"
         ],
         "title": "Domain"
@@ -12750,14 +12907,41 @@
           "description": {
             "type": "string",
             "title": "Description"
+          },
+          "namespace": {
+            "type": "string",
+            "title": "Namespace"
           }
         },
         "type": "object",
         "required": [
           "name",
-          "description"
+          "description",
+          "namespace"
         ],
         "title": "DomainCreate"
+      },
+      "DomainEvent": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "title": "DomainEvent"
+      },
+      "DomainStatus": {
+        "type": "string",
+        "enum": [
+          "active",
+          "deleting"
+        ],
+        "title": "DomainStatus"
       },
       "DomainUpdate": {
         "properties": {
@@ -13160,6 +13344,7 @@
         "properties": {
           "finalizer": {
             "type": "string",
+            "pattern": "^(?:[^/\\s][^/]*)?[^/\\s.](?:[^/]*[^/\\s])?$",
             "title": "Finalizer"
           }
         },
@@ -13536,16 +13721,33 @@
             "type": "string",
             "title": "Name"
           },
+          "namespace": {
+            "type": "string",
+            "title": "Namespace"
+          },
           "description": {
             "type": "string",
             "title": "Description"
+          },
+          "status": {
+            "$ref": "#/components/schemas/DomainStatus"
+          },
+          "finalizers": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Finalizers"
           }
         },
         "type": "object",
         "required": [
           "id",
           "name",
-          "description"
+          "namespace",
+          "description",
+          "status",
+          "finalizers"
         ],
         "title": "GetDomainResponse"
       },
@@ -13560,9 +13762,23 @@
             "type": "string",
             "title": "Name"
           },
+          "namespace": {
+            "type": "string",
+            "title": "Namespace"
+          },
           "description": {
             "type": "string",
             "title": "Description"
+          },
+          "status": {
+            "$ref": "#/components/schemas/DomainStatus"
+          },
+          "finalizers": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Finalizers"
           },
           "abstract_data_product_count": {
             "type": "integer",
@@ -13573,7 +13789,10 @@
         "required": [
           "id",
           "name",
+          "namespace",
           "description",
+          "status",
+          "finalizers",
           "abstract_data_product_count"
         ],
         "title": "GetDomainsItem"
@@ -17069,7 +17288,8 @@
           "output_port",
           "data_product_setting",
           "output_port_setting",
-          "exploration"
+          "exploration",
+          "domain"
         ],
         "title": "ResourceNameModel"
       },

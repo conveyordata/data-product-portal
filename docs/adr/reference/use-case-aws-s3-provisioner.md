@@ -51,7 +51,7 @@ This document explores what a provisioner needs to do in response to Portal even
 
 ### Infrastructure Model
 
-- **Buckets**: Each domain has one S3 bucket. Naming by convention from the domain slug, e.g. `{domain-slug}`.
+- **Buckets**: Each domain has one S3 bucket. Named after the domain namespace, e.g. `{domain-namespace}`, which never changes.
 - **IAM roles**: Each data product has one AWS IAM role named `dpp-{namespace}`. Namespace is the stable, immutable identifier for a data product.
 - **S3 prefix**: Each data product's primary home is `s3://{domain-bucket}/{namespace}/`.
 - **Technical assets**: Each S3 location (subfolder or existing external location) is registered as a technical asset in the Portal.
@@ -90,7 +90,7 @@ A technical asset can be linked to an output port. Linking takes effect immediat
 
 The provisioner needs the data product's namespace, domain, type, and the list of initial team members (with their roles).
 
-1. Resolve the domain bucket name from the domain (by convention: `{domain-slug}`).
+1. Resolve the domain bucket name from the domain (by convention: `{domain-namespace}`).
 2. Create the IAM role `dpp-{namespace}`:
    - Trust policy: include all initial team members as principals immediately. Creation always includes at least one owner; do not wait for `team_member_added` events to populate the trust policy.
    - Permission policy: read/write access to `s3://{domain-bucket}/{namespace}/*`.

@@ -27,7 +27,7 @@ export const mockDataProducts: GetDataProductsResponseItem[] = [
         status: AbstractDataProductStatus.Active,
         tags: [{ id: 'tag-1', value: 'analytics-tag' }],
         usage: null,
-        domain: { id: 'domain-1', name: 'Sales-domain', description: 'Sales domain' },
+        domain: { id: 'domain-1', name: 'Sales-domain', namespace: 'sales-domain', description: 'Sales domain' },
         type: {
             id: 'type-1',
             name: 'Reporting',
@@ -51,7 +51,7 @@ export const mockDataProducts: GetDataProductsResponseItem[] = [
         status: AbstractDataProductStatus.Active,
         tags: [{ id: 'tag-2', value: 'insights' }],
         usage: null,
-        domain: { id: 'domain-2', name: 'Marketing', description: 'Marketing domain' },
+        domain: { id: 'domain-2', name: 'Marketing', namespace: 'marketing', description: 'Marketing domain' },
         type: {
             id: 'type-2',
             name: 'Exploration',

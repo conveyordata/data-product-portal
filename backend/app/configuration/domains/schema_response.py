@@ -1,13 +1,17 @@
 from typing import Sequence
 from uuid import UUID
 
+from app.configuration.domains.status import DomainStatus
 from app.shared.schema import ORMModel
 
 
 class BaseDomainGet(ORMModel):
     id: UUID
     name: str
+    namespace: str
     description: str
+    status: DomainStatus
+    finalizers: list[str]
 
 
 class GetDomainResponse(BaseDomainGet):

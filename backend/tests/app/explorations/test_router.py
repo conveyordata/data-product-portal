@@ -7,6 +7,7 @@ from app.abstract_data_product.type import AbstractDataProductType
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.roles.schema import Scope
 from app.configuration.access_durations.enums import AccessDurationType
+from app.configuration.domains.status import DomainStatus
 from app.core.authz import Action
 from app.data_products.output_ports.enums import OutputPortAccessFunction
 from app.settings import settings
@@ -48,6 +49,26 @@ class TestExplorationRouter:
             },
         )
         assert response.status_code == 200, response.text
+
+    def test_create_exploration__deleting_domain(self, client):
+        d = DomainFactory(status=DomainStatus.DELETING, finalizers=["x"])
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        role = RoleFactory(
+            scope=Scope.GLOBAL,
+            permissions=[Action.GLOBAL__CREATE_EXPLORATION],
+        )
+        GlobalRoleAssignmentFactory(identity_id=user.id, role_id=role.id)
+
+        response = client.post(
+            ROUTE,
+            json={
+                "name": str(uuid.uuid4()),
+                "namespace": str(uuid.uuid4()),
+                "domain_id": str(d.id),
+                "description": faker.Faker().text(),
+            },
+        )
+        assert response.status_code == 409
 
     def test_create_exploration_invalid_namespace(self, client):
         d = DomainFactory()

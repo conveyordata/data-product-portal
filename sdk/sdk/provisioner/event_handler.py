@@ -9,6 +9,7 @@ from sdk.api_client.models import (
     CloudEventDataProductEvent,
     CloudEventDataProductRoleAssignmentEvent,
     CloudEventDataProductSettingValueEvent,
+    CloudEventDomainEvent,
     CloudEventExplorationEvent,
     CloudEventInputPortEvent,
     CloudEventOutputPortEvent,
@@ -19,6 +20,7 @@ from sdk.api_client.models import (
     DataProductEvent,
     DataProductRoleAssignmentEvent,
     DataProductSettingValueEvent,
+    DomainEvent,
     ExplorationEvent,
     InputPortEvent,
     OutputPortEvent,
@@ -58,6 +60,9 @@ class AbstractEventHandler(ABC):
         elif event_type == "data_product_setting_value.event":
             parsed_event = CloudEventDataProductSettingValueEvent.from_dict(payload)
             return await self.on_data_product_setting_value_event(parsed_event.data)
+        elif event_type == "domain.event":
+            parsed_event = CloudEventDomainEvent.from_dict(payload)
+            return await self.on_domain_event(parsed_event.data)
         elif event_type == "exploration.event":
             parsed_event = CloudEventExplorationEvent.from_dict(payload)
             return await self.on_exploration_event(parsed_event.data)
@@ -98,6 +103,11 @@ class AbstractEventHandler(ABC):
     @abstractmethod
     async def on_data_product_setting_value_event(self, data: DataProductSettingValueEvent) -> Any:
         """Handler for the parsed payload of 'data_product_setting_value.event'"""
+        pass
+
+    @abstractmethod
+    async def on_domain_event(self, data: DomainEvent) -> Any:
+        """Handler for the parsed payload of 'domain.event'"""
         pass
 
     @abstractmethod
@@ -147,6 +157,9 @@ class EmptyEventHandler(AbstractEventHandler):
         pass
 
     async def on_data_product_setting_value_event(self, data: DataProductSettingValueEvent) -> Any:
+        pass
+
+    async def on_domain_event(self, data: DomainEvent) -> Any:
         pass
 
     async def on_exploration_event(self, data: ExplorationEvent) -> Any:

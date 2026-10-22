@@ -1,5 +1,6 @@
+from contextlib import contextmanager
 from contextvars import ContextVar, Token
-from typing import Sequence
+from typing import Iterator, Sequence
 
 from app.core.logging import logger
 from app.core.webhooks.events import V2Event
@@ -15,6 +16,15 @@ def open_event_context() -> Token:
 
 def close_event_context(token: Token) -> None:
     _pending_events.reset(token)
+
+
+@contextmanager
+def discard_events() -> Iterator[None]:
+    token = open_event_context()
+    try:
+        yield
+    finally:
+        close_event_context(token)
 
 
 def queue_events(events: Sequence[V2Event]) -> None:

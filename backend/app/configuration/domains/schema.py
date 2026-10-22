@@ -6,4 +6,5 @@ from app.shared.schema import ORMModel
 class Domain(ORMModel):
     id: UUID
     name: str
+    namespace: str
     description: str

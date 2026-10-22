@@ -2,7 +2,7 @@ from typing import Sequence
 from uuid import UUID
 
 from fastapi import HTTPException, status
-from sqlalchemy import func, select
+from sqlalchemy import exists, func, select
 from sqlalchemy.orm import Session, selectinload
 
 from app.abstract_data_product.model import AbstractDataProduct
@@ -15,11 +15,16 @@ from app.configuration.domains.schema_response import (
     GetDomainsItem,
     UpdateDomainResponse,
 )
+from app.configuration.domains.status import DomainStatus
+from app.core.namespace.validation import NamespaceValidator
+from app.database.database import UNFILTERED
+from app.resource_names.service import ResourceNameValidityType
 
 
 class DomainService:
     def __init__(self, db: Session):
         self.db = db
+        self.namespace_validator = NamespaceValidator(DomainModel)
 
     def get_domains(self) -> Sequence[GetDomainsItem]:
         counts = dict(
@@ -32,7 +37,8 @@ class DomainService:
                     AbstractDataProduct,
                     AbstractDataProduct.domain_id == DomainModel.id,
                 )
-                .group_by(DomainModel.id)
+                .group_by(DomainModel.id),
+                execution_options=UNFILTERED,
             ).all()
         )
 
@@ -41,7 +47,10 @@ class DomainService:
             GetDomainsItem(
                 id=domain.id,
                 name=domain.name,
+                namespace=domain.namespace,
                 description=domain.description,
+                status=domain.status,
+                finalizers=domain.finalizers,
                 abstract_data_product_count=counts.get(domain.id, 0),
             )
             for domain in domains
@@ -58,14 +67,44 @@ class DomainService:
 
         return domain
 
+    def _ensure_not_deleting(self, domain: DomainModel) -> None:
+        if domain.status == DomainStatus.DELETING:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"Domain '{domain.name}' is pending deletion and cannot be used or modified",
+            )
+
+    def _get_locked(self, id: UUID, read: bool = False) -> DomainModel:
+        # Serializes assignments with deletion checks until the transaction commits;
+        # a read lock still blocks deletion without serializing assignments
+        return ensure_domain_exists(
+            id,
+            self.db,
+            with_for_update={"read": read},
+            populate_existing=True,
+        )
+
+    def ensure_assignable(self, id: UUID) -> None:
+        self._ensure_not_deleting(self._get_locked(id, read=True))
+
     def create_domain(self, domain_create: DomainCreate) -> CreateDomainResponse:
+        if (
+            validity := self.namespace_validator.validate_namespace(
+                domain_create.namespace, self.db
+            ).validity
+        ) != ResourceNameValidityType.VALID:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid namespace: {validity.value}",
+            )
         domain = DomainModel(**domain_create.model_dump())
         self.db.add(domain)
         self.db.flush()
         return CreateDomainResponse(id=domain.id)
 
     def update_domain(self, id: UUID, domain: DomainUpdate) -> UpdateDomainResponse:
-        current_domain = self.db.get(DomainModel, id)
+        current_domain = self._get_locked(id)
+        self._ensure_not_deleting(current_domain)
         updated_domain = domain.model_dump()
 
         for attr, value in updated_domain.items():
@@ -74,30 +113,56 @@ class DomainService:
         self.db.flush()
         return UpdateDomainResponse(id=id)
 
-    def remove_domain(self, id: UUID) -> None:
-        domain = self.db.get(
-            DomainModel,
-            id,
-            options=[
-                selectinload(DomainModel.abstract_data_products),
-            ],
-        )
-        if not domain:
+    def mark_for_deletion(self, id: UUID) -> bool:
+        domain = self._get_locked(id)
+        self._ensure_no_data_products(id)
+        if not domain.finalizers:
+            return True
+        domain.status = DomainStatus.DELETING
+        self.db.flush()
+        return False
+
+    def add_finalizer(self, id: UUID, finalizer: str) -> None:
+        domain = self._get_locked(id)
+        self._ensure_not_deleting(domain)
+        if finalizer in domain.finalizers:
+            return
+        domain.finalizers = [*domain.finalizers, finalizer]
+        self.db.flush()
+
+    def remove_finalizer(self, id: UUID, finalizer: str) -> bool:
+        domain = self._get_locked(id)
+        if finalizer not in domain.finalizers:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Domain not found",
+                detail=f"Finalizer '{finalizer}' not found",
             )
+        domain.finalizers = [f for f in domain.finalizers if f != finalizer]
+        should_delete = domain.status == DomainStatus.DELETING and not domain.finalizers
+        if should_delete and self._has_data_products(id):
+            # Still in use, so cancel the deletion; provisioners reconcile it back
+            domain.status = DomainStatus.ACTIVE
+            should_delete = False
+        self.db.flush()
+        return should_delete
 
-        if domain.abstract_data_products:
+    def _has_data_products(self, id: UUID) -> bool:
+        return bool(
+            self.db.scalar(
+                select(exists().where(AbstractDataProduct.domain_id == id)),
+                execution_options=UNFILTERED,
+            )
+        )
+
+    def _ensure_no_data_products(self, id: UUID) -> None:
+        if self._has_data_products(id):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=(
-                    "Cannot delete a domain assigned to one or multiple "
-                    "data products or datasets"
-                ),
+                detail="Cannot delete a domain that still has data products or explorations",
             )
 
-        self.db.delete(domain)
+    def remove_domain(self, id: UUID) -> None:
+        self.db.delete(ensure_domain_exists(id, self.db))
         self.db.flush()
 
     def migrate_domain(self, from_id: UUID, to_id: UUID) -> None:
@@ -107,10 +172,11 @@ class DomainService:
             options=[
                 selectinload(DomainModel.abstract_data_products),
             ],
+            execution_options=UNFILTERED,
         )
-        new_domain = ensure_domain_exists(to_id, self.db)
+        self.ensure_assignable(to_id)
 
         for data_product in domain.abstract_data_products:
-            data_product.domain_id = new_domain.id
+            data_product.domain_id = to_id
 
         self.db.flush()

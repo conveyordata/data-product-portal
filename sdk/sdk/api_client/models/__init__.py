@@ -48,6 +48,7 @@ from .cloud_event_data_product_role_assignment_event import (
 from .cloud_event_data_product_setting_value_event import (
     CloudEventDataProductSettingValueEvent,
 )
+from .cloud_event_domain_event import CloudEventDomainEvent
 from .cloud_event_exploration_event import CloudEventExplorationEvent
 from .cloud_event_input_port_event import CloudEventInputPortEvent
 from .cloud_event_output_port_event import CloudEventOutputPortEvent
@@ -142,6 +143,8 @@ from .device_flow import DeviceFlow
 from .device_flow_status import DeviceFlowStatus
 from .domain import Domain
 from .domain_create import DomainCreate
+from .domain_event import DomainEvent
+from .domain_status import DomainStatus
 from .domain_update import DomainUpdate
 from .edge import Edge
 from .environment import Environment
@@ -434,6 +437,7 @@ __all__ = (
     "CloudEventDataProductEvent",
     "CloudEventDataProductRoleAssignmentEvent",
     "CloudEventDataProductSettingValueEvent",
+    "CloudEventDomainEvent",
     "CloudEventExplorationEvent",
     "CloudEventInputPortEvent",
     "CloudEventOutputPortEvent",
@@ -510,6 +514,8 @@ __all__ = (
     "DeviceFlowStatus",
     "Domain",
     "DomainCreate",
+    "DomainEvent",
+    "DomainStatus",
     "DomainUpdate",
     "Edge",
     "Environment",

@@ -607,6 +607,10 @@ type AddDataProductFinalizerOKApplicationJSON jx.Raw
 
 func (*AddDataProductFinalizerOKApplicationJSON) addDataProductFinalizerRes() {}
 
+type AddDomainFinalizerOKApplicationJSON jx.Raw
+
+func (*AddDomainFinalizerOKApplicationJSON) addDomainFinalizerRes() {}
+
 type AddExplorationFinalizerOKApplicationJSON jx.Raw
 
 func (*AddExplorationFinalizerOKApplicationJSON) addExplorationFinalizerRes() {}
@@ -3845,6 +3849,7 @@ func (s *DeviceFlowStatus) UnmarshalText(data []byte) error {
 type Domain struct {
 	ID          uuid.UUID `json:"id"`
 	Name        string    `json:"name"`
+	Namespace   string    `json:"namespace"`
 	Description string    `json:"description"`
 }
 
@@ -3856,6 +3861,11 @@ func (s *Domain) GetID() uuid.UUID {
 // GetName returns the value of Name.
 func (s *Domain) GetName() string {
 	return s.Name
+}
+
+// GetNamespace returns the value of Namespace.
+func (s *Domain) GetNamespace() string {
+	return s.Namespace
 }
 
 // GetDescription returns the value of Description.
@@ -3873,6 +3883,11 @@ func (s *Domain) SetName(val string) {
 	s.Name = val
 }
 
+// SetNamespace sets the value of Namespace.
+func (s *Domain) SetNamespace(val string) {
+	s.Namespace = val
+}
+
 // SetDescription sets the value of Description.
 func (s *Domain) SetDescription(val string) {
 	s.Description = val
@@ -3882,6 +3897,7 @@ func (s *Domain) SetDescription(val string) {
 type DomainCreate struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
+	Namespace   string `json:"namespace"`
 }
 
 // GetName returns the value of Name.
@@ -3894,6 +3910,11 @@ func (s *DomainCreate) GetDescription() string {
 	return s.Description
 }
 
+// GetNamespace returns the value of Namespace.
+func (s *DomainCreate) GetNamespace() string {
+	return s.Namespace
+}
+
 // SetName sets the value of Name.
 func (s *DomainCreate) SetName(val string) {
 	s.Name = val
@@ -3902,6 +3923,53 @@ func (s *DomainCreate) SetName(val string) {
 // SetDescription sets the value of Description.
 func (s *DomainCreate) SetDescription(val string) {
 	s.Description = val
+}
+
+// SetNamespace sets the value of Namespace.
+func (s *DomainCreate) SetNamespace(val string) {
+	s.Namespace = val
+}
+
+// Ref: #/components/schemas/DomainStatus
+type DomainStatus string
+
+const (
+	DomainStatusActive   DomainStatus = "active"
+	DomainStatusDeleting DomainStatus = "deleting"
+)
+
+// AllValues returns all DomainStatus values.
+func (DomainStatus) AllValues() []DomainStatus {
+	return []DomainStatus{
+		DomainStatusActive,
+		DomainStatusDeleting,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s DomainStatus) MarshalText() ([]byte, error) {
+	switch s {
+	case DomainStatusActive:
+		return []byte(s), nil
+	case DomainStatusDeleting:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *DomainStatus) UnmarshalText(data []byte) error {
+	switch DomainStatus(data) {
+	case DomainStatusActive:
+		*s = DomainStatusActive
+		return nil
+	case DomainStatusDeleting:
+		*s = DomainStatusDeleting
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
 }
 
 // Ref: #/components/schemas/DomainUpdate
@@ -4811,9 +4879,12 @@ func (s *GetDataProductsResponseItem) SetTechnicalAssetCount(val int) {
 
 // Ref: #/components/schemas/GetDomainResponse
 type GetDomainResponse struct {
-	ID          uuid.UUID `json:"id"`
-	Name        string    `json:"name"`
-	Description string    `json:"description"`
+	ID          uuid.UUID    `json:"id"`
+	Name        string       `json:"name"`
+	Namespace   string       `json:"namespace"`
+	Description string       `json:"description"`
+	Status      DomainStatus `json:"status"`
+	Finalizers  []string     `json:"finalizers"`
 }
 
 // GetID returns the value of ID.
@@ -4826,9 +4897,24 @@ func (s *GetDomainResponse) GetName() string {
 	return s.Name
 }
 
+// GetNamespace returns the value of Namespace.
+func (s *GetDomainResponse) GetNamespace() string {
+	return s.Namespace
+}
+
 // GetDescription returns the value of Description.
 func (s *GetDomainResponse) GetDescription() string {
 	return s.Description
+}
+
+// GetStatus returns the value of Status.
+func (s *GetDomainResponse) GetStatus() DomainStatus {
+	return s.Status
+}
+
+// GetFinalizers returns the value of Finalizers.
+func (s *GetDomainResponse) GetFinalizers() []string {
+	return s.Finalizers
 }
 
 // SetID sets the value of ID.
@@ -4841,19 +4927,37 @@ func (s *GetDomainResponse) SetName(val string) {
 	s.Name = val
 }
 
+// SetNamespace sets the value of Namespace.
+func (s *GetDomainResponse) SetNamespace(val string) {
+	s.Namespace = val
+}
+
 // SetDescription sets the value of Description.
 func (s *GetDomainResponse) SetDescription(val string) {
 	s.Description = val
+}
+
+// SetStatus sets the value of Status.
+func (s *GetDomainResponse) SetStatus(val DomainStatus) {
+	s.Status = val
+}
+
+// SetFinalizers sets the value of Finalizers.
+func (s *GetDomainResponse) SetFinalizers(val []string) {
+	s.Finalizers = val
 }
 
 func (*GetDomainResponse) getDomainRes() {}
 
 // Ref: #/components/schemas/GetDomainsItem
 type GetDomainsItem struct {
-	ID                       uuid.UUID `json:"id"`
-	Name                     string    `json:"name"`
-	Description              string    `json:"description"`
-	AbstractDataProductCount int       `json:"abstract_data_product_count"`
+	ID                       uuid.UUID    `json:"id"`
+	Name                     string       `json:"name"`
+	Namespace                string       `json:"namespace"`
+	Description              string       `json:"description"`
+	Status                   DomainStatus `json:"status"`
+	Finalizers               []string     `json:"finalizers"`
+	AbstractDataProductCount int          `json:"abstract_data_product_count"`
 }
 
 // GetID returns the value of ID.
@@ -4866,9 +4970,24 @@ func (s *GetDomainsItem) GetName() string {
 	return s.Name
 }
 
+// GetNamespace returns the value of Namespace.
+func (s *GetDomainsItem) GetNamespace() string {
+	return s.Namespace
+}
+
 // GetDescription returns the value of Description.
 func (s *GetDomainsItem) GetDescription() string {
 	return s.Description
+}
+
+// GetStatus returns the value of Status.
+func (s *GetDomainsItem) GetStatus() DomainStatus {
+	return s.Status
+}
+
+// GetFinalizers returns the value of Finalizers.
+func (s *GetDomainsItem) GetFinalizers() []string {
+	return s.Finalizers
 }
 
 // GetAbstractDataProductCount returns the value of AbstractDataProductCount.
@@ -4886,9 +5005,24 @@ func (s *GetDomainsItem) SetName(val string) {
 	s.Name = val
 }
 
+// SetNamespace sets the value of Namespace.
+func (s *GetDomainsItem) SetNamespace(val string) {
+	s.Namespace = val
+}
+
 // SetDescription sets the value of Description.
 func (s *GetDomainsItem) SetDescription(val string) {
 	s.Description = val
+}
+
+// SetStatus sets the value of Status.
+func (s *GetDomainsItem) SetStatus(val DomainStatus) {
+	s.Status = val
+}
+
+// SetFinalizers sets the value of Finalizers.
+func (s *GetDomainsItem) SetFinalizers(val []string) {
+	s.Finalizers = val
 }
 
 // SetAbstractDataProductCount sets the value of AbstractDataProductCount.
@@ -6380,6 +6514,7 @@ func (s *HTTPValidationError) SetDetail(val []ValidationError) {
 }
 
 func (*HTTPValidationError) addDataProductFinalizerRes()                  {}
+func (*HTTPValidationError) addDomainFinalizerRes()                       {}
 func (*HTTPValidationError) addExplorationFinalizerRes()                  {}
 func (*HTTPValidationError) addGroupMembersRes()                          {}
 func (*HTTPValidationError) addOutputPortDataQualityRunRes()              {}
@@ -6496,6 +6631,7 @@ func (*HTTPValidationError) removeDataProductLifecycleRes()               {}
 func (*HTTPValidationError) removeDataProductRes()                        {}
 func (*HTTPValidationError) removeDataProductSettingRes()                 {}
 func (*HTTPValidationError) removeDataProductTypeRes()                    {}
+func (*HTTPValidationError) removeDomainFinalizerRes()                    {}
 func (*HTTPValidationError) removeDomainRes()                             {}
 func (*HTTPValidationError) removeExplorationFinalizerRes()               {}
 func (*HTTPValidationError) removeExplorationRes()                        {}
@@ -11763,6 +11899,15 @@ type RemoveDataProductTypeOKApplicationJSON jx.Raw
 
 func (*RemoveDataProductTypeOKApplicationJSON) removeDataProductTypeRes() {}
 
+// RemoveDomainAccepted is response for RemoveDomain operation.
+type RemoveDomainAccepted struct{}
+
+func (*RemoveDomainAccepted) removeDomainRes() {}
+
+type RemoveDomainFinalizerOKApplicationJSON jx.Raw
+
+func (*RemoveDomainFinalizerOKApplicationJSON) removeDomainFinalizerRes() {}
+
 type RemoveDomainOKApplicationJSON jx.Raw
 
 func (*RemoveDomainOKApplicationJSON) removeDomainRes() {}
@@ -12339,6 +12484,7 @@ const (
 	ResourceNameModelDataProductSetting ResourceNameModel = "data_product_setting"
 	ResourceNameModelOutputPortSetting  ResourceNameModel = "output_port_setting"
 	ResourceNameModelExploration        ResourceNameModel = "exploration"
+	ResourceNameModelDomain             ResourceNameModel = "domain"
 )
 
 // AllValues returns all ResourceNameModel values.
@@ -12350,6 +12496,7 @@ func (ResourceNameModel) AllValues() []ResourceNameModel {
 		ResourceNameModelDataProductSetting,
 		ResourceNameModelOutputPortSetting,
 		ResourceNameModelExploration,
+		ResourceNameModelDomain,
 	}
 }
 
@@ -12367,6 +12514,8 @@ func (s ResourceNameModel) MarshalText() ([]byte, error) {
 	case ResourceNameModelOutputPortSetting:
 		return []byte(s), nil
 	case ResourceNameModelExploration:
+		return []byte(s), nil
+	case ResourceNameModelDomain:
 		return []byte(s), nil
 	default:
 		return nil, errors.Errorf("invalid value: %q", s)
@@ -12393,6 +12542,9 @@ func (s *ResourceNameModel) UnmarshalText(data []byte) error {
 		return nil
 	case ResourceNameModelExploration:
 		*s = ResourceNameModelExploration
+		return nil
+	case ResourceNameModelDomain:
+		*s = ResourceNameModelDomain
 		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)

@@ -11,6 +11,7 @@ from app.abstract_data_product.input_ports.enums import InputPortStatus
 from app.authorization.role_assignments.enums import AssignmentFilter
 from app.authorization.roles.schema import Scope
 from app.authorization.service import AuthorizationService
+from app.configuration.domains.status import DomainStatus
 from app.core.authz import Action
 from app.data_products.model import DataProductEnvironment, DataProductVisibility
 from app.data_products.output_ports.enums import OutputPortAccessFunction
@@ -465,6 +466,32 @@ class TestDataProductsRouter:
         assert response.status_code == 200
         assert response.json()["id"] == str(data_product.id)
 
+    def test_create_data_product__deleting_domain(
+        self, payload, client, user_with_create_data_product_rights
+    ):
+        domain = DomainFactory(status=DomainStatus.DELETING, finalizers=["x"])
+        payload["domain_id"] = str(domain.id)
+        response = self.create_data_product(client, payload)
+        assert response.status_code == 409
+
+    def test_update_data_product__deleting_domain(self, payload, client):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        data_product = DataProductFactory()
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__UPDATE_PROPERTIES],
+        )
+        DataProductRoleAssignmentFactory(
+            identity_id=user.id,
+            role_id=role.id,
+            data_product_id=data_product.id,
+        )
+        domain = DomainFactory(status=DomainStatus.DELETING, finalizers=["x"])
+        update_payload = deepcopy(payload)
+        update_payload["domain_id"] = str(domain.id)
+        response = self.update_data_product(client, update_payload, data_product.id)
+        assert response.status_code == 409
+
     def test_update_data_product__ignores_visibility(self, payload, client, session):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
@@ -569,6 +596,20 @@ class TestDataProductsRouter:
             json={"finalizer": "my-system"},
         )
         assert response.status_code == 200
+
+    def test_add_finalizer__rejects_slash(self, client):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        data_product = DataProductFactory()
+        role = RoleFactory(
+            scope=Scope.GLOBAL,
+            permissions=[Action.GLOBAL__MANAGE_FINALIZERS],
+        )
+        GlobalRoleAssignmentFactory(identity_id=user.id, role_id=role.id)
+        response = client.post(
+            f"{ENDPOINT}/{data_product.id}/finalizers",
+            json={"finalizer": "team/provisioner"},
+        )
+        assert response.status_code == 422
 
     def test_remove_finalizer_no_permission(self, client):
         data_product = DataProductFactory(finalizers=["my-system"])

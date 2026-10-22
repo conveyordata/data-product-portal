@@ -574,12 +574,21 @@ class AbstractDataProductService:
                         )
                     )
 
+    def _get_locked(self, id: UUID) -> AbstractDataProduct:
+        # Serializes finalizer and deletion updates until the transaction commits
+        return ensure_abstract_data_product_exists(
+            id,
+            self.db,
+            with_for_update={"of": AbstractDataProduct},
+            populate_existing=True,
+        )
+
     def add_finalizer(self, id: UUID, finalizer: str) -> AbstractDataProduct:
         """Add a finalizer to the abstract data product.
 
         Finalizers block deletion until they are all removed.
         """
-        adp = ensure_abstract_data_product_exists(id, self.db)
+        adp = self._get_locked(id)
         if adp.status == AbstractDataProductStatus.DELETING:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
@@ -597,7 +606,7 @@ class AbstractDataProductService:
         Returns True if deletion can proceed immediately (no finalizers),
         False if it has been marked as DELETING and must wait for finalizers.
         """
-        adp = ensure_abstract_data_product_exists(id, self.db)
+        adp = self._get_locked(id)
         if not adp.finalizers:
             return True
         adp.status = AbstractDataProductStatus.DELETING
@@ -610,7 +619,7 @@ class AbstractDataProductService:
         Returns True if the caller should now perform the actual deletion
         (i.e., deletion_status is DELETING and no finalizers remain).
         """
-        adp = ensure_abstract_data_product_exists(id, self.db)
+        adp = self._get_locked(id)
         current = list(adp.finalizers or [])
         if finalizer not in current:
             raise HTTPException(

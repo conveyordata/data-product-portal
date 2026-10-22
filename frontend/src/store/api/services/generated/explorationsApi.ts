@@ -174,6 +174,7 @@ export type RemoveExplorationFinalizerApiArg = {
 export type Domain = {
   id: string;
   name: string;
+  namespace: string;
   description: string;
 };
 export type Exploration = {

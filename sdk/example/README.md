@@ -47,6 +47,8 @@ check.
 
 - `provisioner.py`
   - `ExplorationProvisioner(Reconciler)` — the level-based `reconcile(exploration_id)`.
+  - `DomainProvisioner(Reconciler)` — the same pattern for domain-scoped resources,
+    written under `PROVISIONER_WORKSPACE/domains/`.
   - `lifespan` — builds the API client, starts a `ReconcileManager` with workers, and
     wires a `ReconcileEventHandler`.
   - `POST /webhook` — hands the request to `handler.dispatch_routing(...)`.

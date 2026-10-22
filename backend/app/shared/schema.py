@@ -57,3 +57,10 @@ class ORMModel(BaseModel):
 class IdNameSchema(ORMModel):
     id: UUID
     name: str
+
+
+class FinalizerRequest(ORMModel):
+    # Removed via DELETE .../finalizers/{finalizer}, so it must be one path segment
+    finalizer: Annotated[
+        str, StringConstraints(pattern=r"^(?:[^/\s][^/]*)?[^/\s.](?:[^/]*[^/\s])?$")
+    ]

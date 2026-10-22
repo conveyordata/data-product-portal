@@ -12,6 +12,8 @@ We will only implement 2 loops to get started:
 - Data Product Loop
 - Exploration Loop
 
+A third loop, the Domain Loop, was added later for infrastructure shared by every data product in a domain.
+
 # Advantages:
 
 Better Exception Handling: If the system goes down, it can easily recover by booting up,
@@ -53,6 +55,6 @@ We also need to implement some soft delete mechanism. When people use terraform 
 necessarily, but in all other cases we do need it. However even for the terraform apply case you might want to be cautious
 and verify if a data product or exploration is in a deletion scenario.
 
-For now we only need to support soft delete on Data Product and Exploration. We can implement this similar to k8s
+For now we only need to support soft delete on Data Product, Exploration and Domain. We can implement this similar to k8s
 where we have a list of finalizers (delete blockers), we can use a pending deletion status to ensure we block deletion
 until all finalizers are removed.
