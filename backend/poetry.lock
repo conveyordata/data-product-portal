@@ -3823,14 +3823,14 @@ poetry-plugin = ["poetry (>=1.2.0,<3.0.0) ; python_version < \"4.0\""]
 
 [[package]]
 name = "posthog"
-version = "7.71.0"
+version = "7.73.0"
 description = "Integrate PostHog into any python application."
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "posthog-7.71.0-py3-none-any.whl", hash = "sha256:52cb1320b7e178b36ef7594cf15b4a8c492c24d4d1c46700f5bee0089ba5c6ac"},
-    {file = "posthog-7.71.0.tar.gz", hash = "sha256:00950999edf7f613a90015126bacc431d3ab3964a70d91c2f792e6a0dc81f358"},
+    {file = "posthog-7.73.0-py3-none-any.whl", hash = "sha256:7954037a540d729d6120be67053c68f6fe8d2a237c277545968db9ff2e74fbe8"},
+    {file = "posthog-7.73.0.tar.gz", hash = "sha256:18734af7584522bc643b58df5df327871cb53781808659faa8c8138394fe876f"},
 ]
 
 [package.dependencies]
