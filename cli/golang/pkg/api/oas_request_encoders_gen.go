@@ -239,7 +239,7 @@ func encodeCreateGroupRequest(
 }
 
 func encodeCreateGroupsBatchRequest(
-	req *IdentityBatchCreateRequest,
+	req *IdentityBatchCreateRequestGroupCreate,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
@@ -267,7 +267,7 @@ func encodeCreateMachineUserRequest(
 }
 
 func encodeCreateMachineUsersBatchRequest(
-	req *IdentityBatchCreateRequest,
+	req *IdentityBatchCreateRequestMachineUserCreate,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
@@ -379,7 +379,7 @@ func encodeCreateUserRequest(
 }
 
 func encodeCreateUsersBatchRequest(
-	req *IdentityBatchCreateRequest,
+	req *IdentityBatchCreateRequestUserCreate,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"

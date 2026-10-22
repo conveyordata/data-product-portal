@@ -143,7 +143,7 @@ type Invoker interface {
 	// Create Groups Batch.
 	//
 	// POST /api/v2/groups/batch
-	CreateGroupsBatch(ctx context.Context, request *IdentityBatchCreateRequest) (CreateGroupsBatchRes, error)
+	CreateGroupsBatch(ctx context.Context, request *IdentityBatchCreateRequestGroupCreate) (CreateGroupsBatchRes, error)
 	// CreateMachineUser invokes create_machine_user operation.
 	//
 	// Create Machine User.
@@ -155,7 +155,7 @@ type Invoker interface {
 	// Create Machine Users Batch.
 	//
 	// POST /api/v2/machine-users/batch
-	CreateMachineUsersBatch(ctx context.Context, request *IdentityBatchCreateRequest) (CreateMachineUsersBatchRes, error)
+	CreateMachineUsersBatch(ctx context.Context, request *IdentityBatchCreateRequestMachineUserCreate) (CreateMachineUsersBatchRes, error)
 	// CreateOutputPort invokes create_output_port operation.
 	//
 	// Create Output Port.
@@ -203,7 +203,7 @@ type Invoker interface {
 	// Create Users Batch.
 	//
 	// POST /api/v2/users/batch
-	CreateUsersBatch(ctx context.Context, request *IdentityBatchCreateRequest) (CreateUsersBatchRes, error)
+	CreateUsersBatch(ctx context.Context, request *IdentityBatchCreateRequestUserCreate) (CreateUsersBatchRes, error)
 	// DecideDataProductRoleAssignment invokes decide_data_product_role_assignment operation.
 	//
 	// Decide Data Product Role Assignment.
@@ -2353,12 +2353,12 @@ func (c *Client) sendCreateGroup(ctx context.Context, request *GroupCreate) (res
 // Create Groups Batch.
 //
 // POST /api/v2/groups/batch
-func (c *Client) CreateGroupsBatch(ctx context.Context, request *IdentityBatchCreateRequest) (CreateGroupsBatchRes, error) {
+func (c *Client) CreateGroupsBatch(ctx context.Context, request *IdentityBatchCreateRequestGroupCreate) (CreateGroupsBatchRes, error) {
 	res, err := c.sendCreateGroupsBatch(ctx, request)
 	return res, err
 }
 
-func (c *Client) sendCreateGroupsBatch(ctx context.Context, request *IdentityBatchCreateRequest) (res CreateGroupsBatchRes, err error) {
+func (c *Client) sendCreateGroupsBatch(ctx context.Context, request *IdentityBatchCreateRequestGroupCreate) (res CreateGroupsBatchRes, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
@@ -2445,12 +2445,12 @@ func (c *Client) sendCreateMachineUser(ctx context.Context, request *MachineUser
 // Create Machine Users Batch.
 //
 // POST /api/v2/machine-users/batch
-func (c *Client) CreateMachineUsersBatch(ctx context.Context, request *IdentityBatchCreateRequest) (CreateMachineUsersBatchRes, error) {
+func (c *Client) CreateMachineUsersBatch(ctx context.Context, request *IdentityBatchCreateRequestMachineUserCreate) (CreateMachineUsersBatchRes, error) {
 	res, err := c.sendCreateMachineUsersBatch(ctx, request)
 	return res, err
 }
 
-func (c *Client) sendCreateMachineUsersBatch(ctx context.Context, request *IdentityBatchCreateRequest) (res CreateMachineUsersBatchRes, err error) {
+func (c *Client) sendCreateMachineUsersBatch(ctx context.Context, request *IdentityBatchCreateRequestMachineUserCreate) (res CreateMachineUsersBatchRes, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
@@ -2851,12 +2851,12 @@ func (c *Client) sendCreateUser(ctx context.Context, request *UserCreate) (res C
 // Create Users Batch.
 //
 // POST /api/v2/users/batch
-func (c *Client) CreateUsersBatch(ctx context.Context, request *IdentityBatchCreateRequest) (CreateUsersBatchRes, error) {
+func (c *Client) CreateUsersBatch(ctx context.Context, request *IdentityBatchCreateRequestUserCreate) (CreateUsersBatchRes, error) {
 	res, err := c.sendCreateUsersBatch(ctx, request)
 	return res, err
 }
 
-func (c *Client) sendCreateUsersBatch(ctx context.Context, request *IdentityBatchCreateRequest) (res CreateUsersBatchRes, err error) {
+func (c *Client) sendCreateUsersBatch(ctx context.Context, request *IdentityBatchCreateRequestUserCreate) (res CreateUsersBatchRes, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string

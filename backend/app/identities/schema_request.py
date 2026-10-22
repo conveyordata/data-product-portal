@@ -1,12 +1,13 @@
 from typing import Generic, TypeVar
 from uuid import UUID
 
-from pydantic import Field, field_validator, SkipValidation
+from pydantic import Field, SkipValidation, field_validator
 
 from app.settings import settings
 from app.shared.schema import ORMModel
 
 BatchItem = TypeVar("BatchItem", bound=ORMModel)
+
 
 class IdentityBatchCreateRequest(ORMModel, Generic[BatchItem]):
     """

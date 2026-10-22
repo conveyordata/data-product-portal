@@ -1,6 +1,16 @@
 import { api } from "@/store/api/services/generated/authorizationRolesApi";
 const injectedRtkApi = api.injectEndpoints({
   endpoints: (build) => ({
+    getUsers: build.query<GetUsersApiResponse, GetUsersApiArg>({
+      query: () => ({ url: `/api/v2/users` }),
+    }),
+    createUser: build.mutation<CreateUserApiResponse, CreateUserApiArg>({
+      query: (queryArg) => ({
+        url: `/api/v2/users`,
+        method: "POST",
+        body: queryArg,
+      }),
+    }),
     createUsersBatch: build.mutation<
       CreateUsersBatchApiResponse,
       CreateUsersBatchApiArg
@@ -21,22 +31,6 @@ const injectedRtkApi = api.injectEndpoints({
         body: queryArg,
       }),
     }),
-    removeUser: build.mutation<RemoveUserApiResponse, RemoveUserApiArg>({
-      query: (queryArg) => ({
-        url: `/api/v2/users/${queryArg}`,
-        method: "DELETE",
-      }),
-    }),
-    getUsers: build.query<GetUsersApiResponse, GetUsersApiArg>({
-      query: () => ({ url: `/api/v2/users` }),
-    }),
-    createUser: build.mutation<CreateUserApiResponse, CreateUserApiArg>({
-      query: (queryArg) => ({
-        url: `/api/v2/users`,
-        method: "POST",
-        body: queryArg,
-      }),
-    }),
     setCanBecomeAdmin: build.mutation<
       SetCanBecomeAdminApiResponse,
       SetCanBecomeAdminApiArg
@@ -47,26 +41,17 @@ const injectedRtkApi = api.injectEndpoints({
         body: queryArg,
       }),
     }),
+    getCurrentUser: build.query<
+      GetCurrentUserApiResponse,
+      GetCurrentUserApiArg
+    >({
+      query: () => ({ url: `/api/v2/users/current` }),
+    }),
     getCurrentUserGroups: build.query<
       GetCurrentUserGroupsApiResponse,
       GetCurrentUserGroupsApiArg
     >({
       query: () => ({ url: `/api/v2/users/current/groups` }),
-    }),
-    getUserGroups: build.query<GetUserGroupsApiResponse, GetUserGroupsApiArg>({
-      query: (queryArg) => ({ url: `/api/v2/users/${queryArg}/groups` }),
-    }),
-    markTourAsSeen: build.mutation<
-      MarkTourAsSeenApiResponse,
-      MarkTourAsSeenApiArg
-    >({
-      query: () => ({ url: `/api/v2/users/current/seen_tour`, method: "POST" }),
-    }),
-    getUserPendingActions: build.query<
-      GetUserPendingActionsApiResponse,
-      GetUserPendingActionsApiArg
-    >({
-      query: () => ({ url: `/api/v2/users/current/pending_actions` }),
     }),
     getUserRequests: build.query<
       GetUserRequestsApiResponse,
@@ -79,75 +64,66 @@ const injectedRtkApi = api.injectEndpoints({
         },
       }),
     }),
-    getCurrentUser: build.query<
-      GetCurrentUserApiResponse,
-      GetCurrentUserApiArg
+    getUserPendingActions: build.query<
+      GetUserPendingActionsApiResponse,
+      GetUserPendingActionsApiArg
     >({
-      query: () => ({ url: `/api/v2/users/current` }),
+      query: () => ({ url: `/api/v2/users/current/pending_actions` }),
+    }),
+    markTourAsSeen: build.mutation<
+      MarkTourAsSeenApiResponse,
+      MarkTourAsSeenApiArg
+    >({
+      query: () => ({ url: `/api/v2/users/current/seen_tour`, method: "POST" }),
+    }),
+    getUserGroups: build.query<GetUserGroupsApiResponse, GetUserGroupsApiArg>({
+      query: (queryArg) => ({ url: `/api/v2/users/${queryArg}/groups` }),
+    }),
+    removeUser: build.mutation<RemoveUserApiResponse, RemoveUserApiArg>({
+      query: (queryArg) => ({
+        url: `/api/v2/users/${queryArg}`,
+        method: "DELETE",
+      }),
     }),
   }),
   overrideExisting: false,
 });
 export { injectedRtkApi as api };
-export type CreateUsersBatchApiResponse =
-  /** status 200 Successful Response */ IdentityBatchCreateResponse;
-export type CreateUsersBatchApiArg = IdentityBatchCreateRequest;
-export type RemoveUsersBatchApiResponse = unknown;
-export type RemoveUsersBatchApiArg = IdentityBatchDeleteRequest;
-export type RemoveUserApiResponse = /** status 200 Successful Response */ any;
-export type RemoveUserApiArg = string;
 export type GetUsersApiResponse =
   /** status 200 Successful Response */ GetUsersResponse;
 export type GetUsersApiArg = void;
 export type CreateUserApiResponse =
   /** status 200 User successfully created */ UserCreateResponse;
 export type CreateUserApiArg = UserCreate;
+export type CreateUsersBatchApiResponse =
+  /** status 200 Successful Response */ IdentityBatchCreateResponse;
+export type CreateUsersBatchApiArg = IdentityBatchCreateRequestUserCreate;
+export type RemoveUsersBatchApiResponse = unknown;
+export type RemoveUsersBatchApiArg = IdentityBatchDeleteRequest;
 export type SetCanBecomeAdminApiResponse =
   /** status 200 Successful Response */ any;
 export type SetCanBecomeAdminApiArg = CanBecomeAdminUpdate;
+export type GetCurrentUserApiResponse =
+  /** status 200 Successful Response */ User;
+export type GetCurrentUserApiArg = void;
 export type GetCurrentUserGroupsApiResponse =
   /** status 200 Successful Response */ GroupsGetResponse;
 export type GetCurrentUserGroupsApiArg = void;
-export type GetUserGroupsApiResponse =
-  /** status 200 Successful Response */ GroupsGetResponse;
-export type GetUserGroupsApiArg = string;
-export type MarkTourAsSeenApiResponse =
-  /** status 200 Successful Response */ any;
-export type MarkTourAsSeenApiArg = void;
-export type GetUserPendingActionsApiResponse =
-  /** status 200 Successful Response */ PendingActionResponse;
-export type GetUserPendingActionsApiArg = void;
 export type GetUserRequestsApiResponse =
   /** status 200 Successful Response */ MyRequestsResponse;
 export type GetUserRequestsApiArg =
   /** Filter out inactive requests older than 30 days */ boolean | undefined;
-export type GetCurrentUserApiResponse =
-  /** status 200 Successful Response */ User;
-export type GetCurrentUserApiArg = void;
-export type IdentityBatchCreateError = {
-  item: any;
-  errors: string[];
-};
-export type IdentityBatchCreateResponse = {
-  ids: string[];
-  errors: IdentityBatchCreateError[];
-};
-export type ValidationError = {
-  loc: (string | number)[];
-  msg: string;
-  type: string;
-  input?: any;
-  ctx?: object;
-};
-export type HttpValidationError = {
-  detail?: ValidationError[];
-};
-export type IdentityBatchCreateRequest = {
-  items: any[];
-};
-export type IdentityBatchDeleteRequest = {
-  ids: string[];
-};
+export type GetUserPendingActionsApiResponse =
+  /** status 200 Successful Response */ PendingActionResponse;
+export type GetUserPendingActionsApiArg = void;
+export type MarkTourAsSeenApiResponse =
+  /** status 200 Successful Response */ any;
+export type MarkTourAsSeenApiArg = void;
+export type GetUserGroupsApiResponse =
+  /** status 200 Successful Response */ GroupsGetResponse;
+export type GetUserGroupsApiArg = string;
+export type RemoveUserApiResponse = /** status 200 Successful Response */ any;
+export type RemoveUserApiArg = string;
 export type User = {
   id: string;
   email: string;
@@ -242,6 +218,16 @@ export type UsersGet = {
 export type GetUsersResponse = {
   users: UsersGet[];
 };
+export type ValidationError = {
+  loc: (string | number)[];
+  msg: string;
+  type: string;
+  input?: any;
+  ctx?: object;
+};
+export type HttpValidationError = {
+  detail?: ValidationError[];
+};
 export type UserCreateResponse = {
   id: string;
 };
@@ -250,6 +236,25 @@ export type UserCreate = {
   external_id: string;
   first_name: string;
   last_name: string;
+};
+export type IdentityBatchCreateError = {
+  item: any;
+  errors: string[];
+};
+export type IdentityBatchCreateResponse = {
+  ids: string[];
+  errors: IdentityBatchCreateError[];
+};
+export type IdentityBatchCreateRequestUserCreate = {
+  items: {
+    email: string;
+    external_id: string;
+    first_name: string;
+    last_name: string;
+  }[];
+};
+export type IdentityBatchDeleteRequest = {
+  ids: string[];
 };
 export type CanBecomeAdminUpdate = {
   user_id: string;
@@ -428,13 +433,6 @@ export type DataProductRoleAssignmentRequest = {
   decided_by: User | null;
   request_type?: "DataProductRoleAssignment";
 };
-export type PendingActionResponse = {
-  pending_actions: (
-    | InputPortRequest
-    | TechnicalAssetOutputPortRequest
-    | DataProductRoleAssignmentRequest
-  )[];
-};
 export type MyRequestsResponse = {
   my_requests: (
     | InputPortRequest
@@ -442,23 +440,30 @@ export type MyRequestsResponse = {
     | DataProductRoleAssignmentRequest
   )[];
 };
+export type PendingActionResponse = {
+  pending_actions: (
+    | InputPortRequest
+    | TechnicalAssetOutputPortRequest
+    | DataProductRoleAssignmentRequest
+  )[];
+};
 export const {
-  useCreateUsersBatchMutation,
-  useRemoveUsersBatchMutation,
-  useRemoveUserMutation,
   useGetUsersQuery,
   useLazyGetUsersQuery,
   useCreateUserMutation,
+  useCreateUsersBatchMutation,
+  useRemoveUsersBatchMutation,
   useSetCanBecomeAdminMutation,
-  useGetCurrentUserGroupsQuery,
-  useLazyGetCurrentUserGroupsQuery,
-  useGetUserGroupsQuery,
-  useLazyGetUserGroupsQuery,
-  useMarkTourAsSeenMutation,
-  useGetUserPendingActionsQuery,
-  useLazyGetUserPendingActionsQuery,
-  useGetUserRequestsQuery,
-  useLazyGetUserRequestsQuery,
   useGetCurrentUserQuery,
   useLazyGetCurrentUserQuery,
+  useGetCurrentUserGroupsQuery,
+  useLazyGetCurrentUserGroupsQuery,
+  useGetUserRequestsQuery,
+  useLazyGetUserRequestsQuery,
+  useGetUserPendingActionsQuery,
+  useLazyGetUserPendingActionsQuery,
+  useMarkTourAsSeenMutation,
+  useGetUserGroupsQuery,
+  useLazyGetUserGroupsQuery,
+  useRemoveUserMutation,
 } = injectedRtkApi;

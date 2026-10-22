@@ -6601,19 +6601,146 @@ func (s *IdentityBatchCreateError) SetErrors(val []string) {
 	s.Errors = val
 }
 
-// Ref: #/components/schemas/IdentityBatchCreateRequest
-type IdentityBatchCreateRequest struct {
-	Items []jx.Raw `json:"items"`
+// Ref: #/components/schemas/IdentityBatchCreateRequest_GroupCreate_
+type IdentityBatchCreateRequestGroupCreate struct {
+	Items []IdentityBatchCreateRequestGroupCreateItemsItem `json:"items"`
 }
 
 // GetItems returns the value of Items.
-func (s *IdentityBatchCreateRequest) GetItems() []jx.Raw {
+func (s *IdentityBatchCreateRequestGroupCreate) GetItems() []IdentityBatchCreateRequestGroupCreateItemsItem {
 	return s.Items
 }
 
 // SetItems sets the value of Items.
-func (s *IdentityBatchCreateRequest) SetItems(val []jx.Raw) {
+func (s *IdentityBatchCreateRequestGroupCreate) SetItems(val []IdentityBatchCreateRequestGroupCreateItemsItem) {
 	s.Items = val
+}
+
+type IdentityBatchCreateRequestGroupCreateItemsItem struct {
+	ExternalID  NonEmptyStr `json:"external_id"`
+	DisplayName NonEmptyStr `json:"display_name"`
+}
+
+// GetExternalID returns the value of ExternalID.
+func (s *IdentityBatchCreateRequestGroupCreateItemsItem) GetExternalID() NonEmptyStr {
+	return s.ExternalID
+}
+
+// GetDisplayName returns the value of DisplayName.
+func (s *IdentityBatchCreateRequestGroupCreateItemsItem) GetDisplayName() NonEmptyStr {
+	return s.DisplayName
+}
+
+// SetExternalID sets the value of ExternalID.
+func (s *IdentityBatchCreateRequestGroupCreateItemsItem) SetExternalID(val NonEmptyStr) {
+	s.ExternalID = val
+}
+
+// SetDisplayName sets the value of DisplayName.
+func (s *IdentityBatchCreateRequestGroupCreateItemsItem) SetDisplayName(val NonEmptyStr) {
+	s.DisplayName = val
+}
+
+// Ref: #/components/schemas/IdentityBatchCreateRequest_MachineUserCreate_
+type IdentityBatchCreateRequestMachineUserCreate struct {
+	Items []IdentityBatchCreateRequestMachineUserCreateItemsItem `json:"items"`
+}
+
+// GetItems returns the value of Items.
+func (s *IdentityBatchCreateRequestMachineUserCreate) GetItems() []IdentityBatchCreateRequestMachineUserCreateItemsItem {
+	return s.Items
+}
+
+// SetItems sets the value of Items.
+func (s *IdentityBatchCreateRequestMachineUserCreate) SetItems(val []IdentityBatchCreateRequestMachineUserCreateItemsItem) {
+	s.Items = val
+}
+
+type IdentityBatchCreateRequestMachineUserCreateItemsItem struct {
+	ExternalID  NonEmptyStr `json:"external_id"`
+	DisplayName NonEmptyStr `json:"display_name"`
+}
+
+// GetExternalID returns the value of ExternalID.
+func (s *IdentityBatchCreateRequestMachineUserCreateItemsItem) GetExternalID() NonEmptyStr {
+	return s.ExternalID
+}
+
+// GetDisplayName returns the value of DisplayName.
+func (s *IdentityBatchCreateRequestMachineUserCreateItemsItem) GetDisplayName() NonEmptyStr {
+	return s.DisplayName
+}
+
+// SetExternalID sets the value of ExternalID.
+func (s *IdentityBatchCreateRequestMachineUserCreateItemsItem) SetExternalID(val NonEmptyStr) {
+	s.ExternalID = val
+}
+
+// SetDisplayName sets the value of DisplayName.
+func (s *IdentityBatchCreateRequestMachineUserCreateItemsItem) SetDisplayName(val NonEmptyStr) {
+	s.DisplayName = val
+}
+
+// Ref: #/components/schemas/IdentityBatchCreateRequest_UserCreate_
+type IdentityBatchCreateRequestUserCreate struct {
+	Items []IdentityBatchCreateRequestUserCreateItemsItem `json:"items"`
+}
+
+// GetItems returns the value of Items.
+func (s *IdentityBatchCreateRequestUserCreate) GetItems() []IdentityBatchCreateRequestUserCreateItemsItem {
+	return s.Items
+}
+
+// SetItems sets the value of Items.
+func (s *IdentityBatchCreateRequestUserCreate) SetItems(val []IdentityBatchCreateRequestUserCreateItemsItem) {
+	s.Items = val
+}
+
+type IdentityBatchCreateRequestUserCreateItemsItem struct {
+	Email      string `json:"email"`
+	ExternalID string `json:"external_id"`
+	FirstName  string `json:"first_name"`
+	LastName   string `json:"last_name"`
+}
+
+// GetEmail returns the value of Email.
+func (s *IdentityBatchCreateRequestUserCreateItemsItem) GetEmail() string {
+	return s.Email
+}
+
+// GetExternalID returns the value of ExternalID.
+func (s *IdentityBatchCreateRequestUserCreateItemsItem) GetExternalID() string {
+	return s.ExternalID
+}
+
+// GetFirstName returns the value of FirstName.
+func (s *IdentityBatchCreateRequestUserCreateItemsItem) GetFirstName() string {
+	return s.FirstName
+}
+
+// GetLastName returns the value of LastName.
+func (s *IdentityBatchCreateRequestUserCreateItemsItem) GetLastName() string {
+	return s.LastName
+}
+
+// SetEmail sets the value of Email.
+func (s *IdentityBatchCreateRequestUserCreateItemsItem) SetEmail(val string) {
+	s.Email = val
+}
+
+// SetExternalID sets the value of ExternalID.
+func (s *IdentityBatchCreateRequestUserCreateItemsItem) SetExternalID(val string) {
+	s.ExternalID = val
+}
+
+// SetFirstName sets the value of FirstName.
+func (s *IdentityBatchCreateRequestUserCreateItemsItem) SetFirstName(val string) {
+	s.FirstName = val
+}
+
+// SetLastName sets the value of LastName.
+func (s *IdentityBatchCreateRequestUserCreateItemsItem) SetLastName(val string) {
+	s.LastName = val
 }
 
 // Ref: #/components/schemas/IdentityBatchCreateResponse
