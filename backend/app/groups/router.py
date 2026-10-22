@@ -121,7 +121,7 @@ def update_group(
     ],
 )
 def create_groups_batch(
-    request: IdentityBatchCreateRequest,
+    request: IdentityBatchCreateRequest[GroupCreate],
     db: Session = Depends(get_db_session, scope="function"),
 ) -> IdentityBatchCreateResponse:
     return GroupService(db).create_groups_batch(request.items)

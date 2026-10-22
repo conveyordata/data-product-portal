@@ -1,14 +1,23 @@
-from typing import Any
+from typing import Generic, TypeVar
 from uuid import UUID
 
-from pydantic import Field, field_validator
+from pydantic import Field, field_validator, SkipValidation
 
 from app.settings import settings
 from app.shared.schema import ORMModel
 
+BatchItem = TypeVar("BatchItem", bound=ORMModel)
 
-class IdentityBatchCreateRequest(ORMModel):
-    items: list[Any] = Field(
+class IdentityBatchCreateRequest(ORMModel, Generic[BatchItem]):
+    """
+    Generic way to represent a batch item, then defined in the specific router.
+    This way the openapi spec will show a list of the required objects.
+
+    The item needs to be validated in the router before any action; this allows
+    for partial errors that doesn't interrupt the batch processing.
+    """
+
+    items: list[SkipValidation[BatchItem]] = Field(
         min_length=1,
         max_length=settings.MAX_ITEMS_PER_BATCH_REQUEST,
     )

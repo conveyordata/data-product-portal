@@ -33,7 +33,7 @@ router = APIRouter(tags=["Users"], prefix="/v2/users")
     ],
 )
 def create_users_batch(
-    request: IdentityBatchCreateRequest,
+    request: IdentityBatchCreateRequest[UserCreate],
     db: Session = Depends(get_db_session, scope="function"),
 ) -> IdentityBatchCreateResponse:
     return UserService(db).create_users_batch(request.items)
