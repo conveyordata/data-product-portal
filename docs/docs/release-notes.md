@@ -44,7 +44,7 @@ sidebar_position: 200
 - **[General]**: Added support for Hidden Data Products, they are only visible to people with direct access to them.
   This allows you to use Data Product Portal to also manage sensitive data products that should not be visible to everyone in the organization.
 - **[General]**: Added Output Port Access Types. Admins define their own Access Types in Settings and map each one to an Access Function (Auto-approve, Approval required or Invite only). Existing Output Ports are migrated to the preconfigured Unrestricted, Restricted and Private Access Types.
-- **[API]**: Added CRUD operations for new identities Groups and Machine Users alongside group membership management endpoints; the latter working in batch fashion.
+- **[API]**: Added CRUD operations for new identities Groups and Machine Users alongside group membership management endpoints. Every identity now offers also batch endpoints.
 - **[Plugins]**: Plugins can mark their technical asset type as not shareable with `shareable=False` in their platform metadata. Technical assets of that type can't be linked to an Output Port, and producers see this in the UI.
 - **[Plugins]**: Plugins get the technical asset, its data product and their domain. `validate_configuration` receives them as `context`, and `render_template` as `plugin_context`, so result string and technical info templates can use `{technical_asset.namespace}`, `{data_product.namespace}` and `{domain.name}`.
 - **[Plugins]**: New AWS Parameter Store plugin (`ParameterStoreTechnicalAssetConfiguration`) for secrets. Its technical assets are not shareable. Parameters are named `/<environment>/<data product namespace>/<parameter name>`, and names AWS doesn't accept are refused.

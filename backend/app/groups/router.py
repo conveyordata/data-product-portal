@@ -21,6 +21,11 @@ from app.groups.schema_response import (
     GroupUpdateResponse,
 )
 from app.groups.service import GroupService
+from app.identities.schema_request import (
+    IdentityBatchCreateRequest,
+    IdentityBatchDeleteRequest,
+)
+from app.identities.schema_response import IdentityBatchCreateResponse
 
 router = APIRouter(tags=["Groups"], prefix="/v2/groups")
 
@@ -109,6 +114,33 @@ def update_group(
     return GroupService(db).update_group(id, group)
 
 
+@router.post(
+    "/batch",
+    dependencies=[
+        Depends(Authorization.enforce(Action.GLOBAL__CREATE_GROUP, EmptyResolver)),
+    ],
+)
+def create_groups_batch(
+    request: IdentityBatchCreateRequest[GroupCreate],
+    db: Session = Depends(get_db_session, scope="function"),
+) -> IdentityBatchCreateResponse:
+    return GroupService(db).create_groups_batch(request.items)
+
+
+@router.delete(
+    "/batch",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[
+        Depends(Authorization.enforce(Action.GLOBAL__DELETE_GROUP, EmptyResolver)),
+    ],
+)
+def delete_groups_batch(
+    request: IdentityBatchDeleteRequest,
+    db: Session = Depends(get_db_session, scope="function"),
+) -> None:
+    GroupService(db).delete_groups_batch(request.ids)
+
+
 @router.delete(
     "/{id}",
     status_code=status.HTTP_204_NO_CONTENT,
@@ -177,6 +209,14 @@ def get_group_members(
                 }
             },
         },
+        404: {
+            "description": "Group not found",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Required group does not exist"}
+                }
+            },
+        },
     },
 )
 def add_group_members(
@@ -227,10 +267,6 @@ def replace_group_members(
     request: GroupMembersReplace,
     db: Session = Depends(get_db_session, scope="function"),
 ) -> None:
-    """
-    Because the service method performs add and remove operations internally,
-    a lock is used to ensure that only one request is processed at a time.
-    """
     GroupService(db).replace_members(
         group_id=id,
         member_identity_ids=request.member_identity_ids,

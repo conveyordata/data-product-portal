@@ -252,8 +252,36 @@ func encodeCreateGroupRequest(
 	return nil
 }
 
+func encodeCreateGroupsBatchRequest(
+	req *IdentityBatchCreateRequestGroupCreate,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
 func encodeCreateMachineUserRequest(
 	req *MachineUserCreate,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeCreateMachineUsersBatchRequest(
+	req *IdentityBatchCreateRequestMachineUserCreate,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
@@ -364,6 +392,20 @@ func encodeCreateUserRequest(
 	return nil
 }
 
+func encodeCreateUsersBatchRequest(
+	req *IdentityBatchCreateRequestUserCreate,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
 func encodeDecideDataProductRoleAssignmentRequest(
 	req *DecideDataProductRoleAssignment,
 	r *http.Request,
@@ -394,6 +436,34 @@ func encodeDecideGlobalRoleAssignmentRequest(
 
 func encodeDecideOutputPortRoleAssignmentRequest(
 	req *DecideOutputPortRoleAssignment,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeDeleteGroupsBatchRequest(
+	req *IdentityBatchDeleteRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeDeleteMachineUsersBatchRequest(
+	req *IdentityBatchDeleteRequest,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
@@ -569,6 +639,20 @@ func encodeRemoveGroupMembersRequest(
 
 func encodeRemoveOutputPortAsInputPortRequest(
 	req *RemoveOutputPortAsInputPortRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeRemoveUsersBatchRequest(
+	req *IdentityBatchDeleteRequest,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"

@@ -1,4 +1,5 @@
 from typing import cast
+from uuid import uuid4
 
 from sqlalchemy import text  # noqa: TID251
 
@@ -467,9 +468,11 @@ class TestAuthorization:
         authorizer.sync_role_permissions(role_id=role, actions=[act])
         authorizer.assign_domain_role(user_id=user, role_id=role, domain_id=dom1)
         authorizer.assign_domain_role(user_id=user, role_id=role, domain_id=dom2)
-        assert authorizer.has_domain_role(user_id=user, role_id=role, domain_id=dom1)
-        assert authorizer.has_domain_role(user_id=user, role_id=role, domain_id=dom2)
 
+        authorizer.clear_assignments_for_domain(domain_id=dom1)
+        assert not authorizer.has_domain_role(
+            user_id=user, role_id=role, domain_id=dom1
+        )
         assert authorizer.has_domain_role(user_id=user, role_id=role, domain_id=dom2)
 
     def test_resource_role_inherited_from_group(self, authorizer: Authorization):
@@ -486,9 +489,7 @@ class TestAuthorization:
             role_id=role,
             resource_id=dp1,
         )
-        authorizer.assign_resource_group_membership(
-            member_identity_id=user, group_id=group
-        )
+        authorizer.assign_group_memberships(memberships=[(user, group)])
 
         assert authorizer.has_resource_role(
             user_id=user,
@@ -514,9 +515,7 @@ class TestAuthorization:
             act=action,
         )
 
-        authorizer.revoke_resource_group_membership(
-            member_identity_id=user, group_id=group
-        )
+        authorizer.revoke_group_memberships(memberships=[(user, group)])
         assert not authorizer.has_access(
             sub=user,
             dom=ANY,
@@ -537,10 +536,7 @@ class TestAuthorization:
         with everyone_role_permissions(permissions=[]):
             authorizer.sync_role_permissions(role_id=role, actions=[action])
             authorizer.assign_global_role(user_id=group, role_id=role)
-            authorizer.assign_global_group_membership(
-                member_identity_id=user,
-                group_id=group,
-            )
+            authorizer.assign_group_memberships(memberships=[(user, group)])
 
             assert authorizer.has_access(
                 sub=user,
@@ -549,10 +545,7 @@ class TestAuthorization:
                 act=action,
             )
 
-            authorizer.revoke_global_group_membership(
-                member_identity_id=user,
-                group_id=group,
-            )
+            authorizer.revoke_group_memberships(memberships=[(user, group)])
 
             assert not authorizer.has_access(
                 sub=user,
@@ -574,10 +567,7 @@ class TestAuthorization:
         authorizer.sync_role_permissions(role_id=role, actions=[action])
 
         # Membership exists before the group receives the role.
-        authorizer.assign_resource_group_membership(
-            member_identity_id=user,
-            group_id=group,
-        )
+        authorizer.assign_group_memberships(memberships=[(user, group)])
         assert not authorizer.has_access(
             sub=user,
             dom=ANY,
@@ -609,6 +599,371 @@ class TestAuthorization:
             act=action,
         )
 
+    def test_assign_group_memberships__assigns_resource_and_global_memberships(
+        self, authorizer: Authorization
+    ):
+        memberships = [
+            ("first-user", "first-group"),
+            ("second-user", "second-group"),
+        ]
+
+        updated = authorizer.assign_group_memberships(memberships=memberships)
+
+        assert updated
+        for member_id, group_id in memberships:
+            assert authorizer.has_resource_role(
+                user_id=member_id, role_id=group_id, resource_id="*"
+            )
+            assert authorizer.has_global_role(user_id=member_id, role_id=group_id)
+
+    def test_assign_group_memberships__empty_list_does_nothing(
+        self, authorizer: Authorization
+    ):
+        assert not authorizer.assign_group_memberships(memberships=[])
+
+    def test_assign_group_memberships__existing_memberships_are_ignored(
+        self, authorizer: Authorization
+    ):
+        memberships = [("user", "group")]
+        authorizer.assign_group_memberships(memberships=memberships)
+
+        updated = authorizer.assign_group_memberships(memberships=memberships)
+
+        assert not updated
+        assert authorizer.has_resource_role(
+            user_id="user", role_id="group", resource_id="*"
+        )
+        assert authorizer.has_global_role(user_id="user", role_id="group")
+
+    def test_assign_group_memberships__adds_missing_policy_from_mixed_batch(
+        self, authorizer: Authorization
+    ):
+        existing = ("existing-user", "existing-group")
+        missing = ("missing-user", "missing-group")
+        authorizer.assign_group_memberships(memberships=[existing])
+
+        updated = authorizer.assign_group_memberships(memberships=[existing, missing])
+
+        assert updated
+        for member_id, group_id in (existing, missing):
+            assert authorizer.has_resource_role(
+                user_id=member_id,
+                role_id=group_id,
+                resource_id="*",
+            )
+            assert authorizer.has_global_role(
+                user_id=member_id,
+                role_id=group_id,
+            )
+
+    def test_revoke_group_memberships__revokes_resource_and_global_memberships(
+        self, authorizer: Authorization
+    ):
+        memberships = [
+            ("first-user", "first-group"),
+            ("second-user", "second-group"),
+        ]
+        authorizer.assign_group_memberships(memberships=memberships)
+
+        updated = authorizer.revoke_group_memberships(memberships=memberships)
+
+        assert updated
+        for member_id, group_id in memberships:
+            assert not authorizer.has_resource_role(
+                user_id=member_id, role_id=group_id, resource_id="*"
+            )
+            assert not authorizer.has_global_role(user_id=member_id, role_id=group_id)
+
+    def test_assign_group_memberships__reconciles_policies_from_another_worker(
+        self, authorizer: Authorization
+    ):
+        suffix = uuid4().hex
+        persisted_elsewhere = (
+            f"remote-user-{suffix}",
+            f"remote-group-{suffix}",
+        )
+        new_membership = (
+            f"new-user-{suffix}",
+            f"new-group-{suffix}",
+        )
+
+        self._persist_group_membership(*persisted_elsewhere)
+
+        assert not authorizer.has_resource_role(
+            user_id=persisted_elsewhere[0],
+            role_id=persisted_elsewhere[1],
+            resource_id="*",
+        )
+
+        updated = authorizer.assign_group_memberships(
+            memberships=[persisted_elsewhere, new_membership]
+        )
+
+        assert updated
+        for member_id, group_id in (persisted_elsewhere, new_membership):
+            assert self._count_group_membership_policies(member_id, group_id) == 2
+            assert authorizer.has_resource_role(
+                user_id=member_id,
+                role_id=group_id,
+                resource_id="*",
+            )
+            assert authorizer.has_global_role(
+                user_id=member_id,
+                role_id=group_id,
+            )
+
+    def test_revoke_group_memberships__does_not_remove_unrelated_memberships(
+        self, authorizer: Authorization
+    ):
+        removed = ("removed-user", "removed-group")
+        retained = ("retained-user", "retained-group")
+        authorizer.assign_group_memberships(memberships=[removed, retained])
+
+        authorizer.revoke_group_memberships(memberships=[removed])
+
+        assert not authorizer.has_resource_role(
+            user_id=removed[0], role_id=removed[1], resource_id="*"
+        )
+        assert not authorizer.has_global_role(user_id=removed[0], role_id=removed[1])
+        assert authorizer.has_resource_role(
+            user_id=retained[0], role_id=retained[1], resource_id="*"
+        )
+        assert authorizer.has_global_role(user_id=retained[0], role_id=retained[1])
+
+    def test_revoke_group_memberships__removes_present_policy_from_mixed_batch(
+        self, authorizer: Authorization
+    ):
+        existing = ("existing-user", "existing-group")
+        missing = ("missing-user", "missing-group")
+        authorizer.assign_group_memberships(memberships=[existing])
+
+        updated = authorizer.revoke_group_memberships(memberships=[missing, existing])
+
+        assert updated
+        assert not authorizer.has_resource_role(
+            user_id=existing[0],
+            role_id=existing[1],
+            resource_id="*",
+        )
+        assert not authorizer.has_global_role(
+            user_id=existing[0],
+            role_id=existing[1],
+        )
+
+    def test_revoke_group_memberships__reconciles_policies_from_another_worker(
+        self, authorizer: Authorization
+    ):
+        suffix = uuid4().hex
+        locally_known = (
+            f"local-user-{suffix}",
+            f"local-group-{suffix}",
+        )
+        persisted_elsewhere = (
+            f"remote-user-{suffix}",
+            f"remote-group-{suffix}",
+        )
+
+        authorizer.assign_group_memberships(memberships=[locally_known])
+        self._persist_group_membership(*persisted_elsewhere)
+
+        assert not authorizer.has_resource_role(
+            user_id=persisted_elsewhere[0],
+            role_id=persisted_elsewhere[1],
+            resource_id="*",
+        )
+
+        updated = authorizer.revoke_group_memberships(
+            memberships=[persisted_elsewhere, locally_known]
+        )
+
+        assert updated
+        for member_id, group_id in (persisted_elsewhere, locally_known):
+            assert self._count_group_membership_policies(member_id, group_id) == 0
+            assert not authorizer.has_resource_role(
+                user_id=member_id,
+                role_id=group_id,
+                resource_id="*",
+            )
+            assert not authorizer.has_global_role(
+                user_id=member_id,
+                role_id=group_id,
+            )
+
+    def test_revoke_group_memberships__empty_list_does_nothing(
+        self, authorizer: Authorization
+    ):
+        assert not authorizer.revoke_group_memberships(memberships=[])
+
+    def test_clear_assignments_for_identities__clears_all_assignment_types(
+        self,
+        authorizer: Authorization,
+    ):
+        removed = ["first-user", "second-user"]
+        retained = "retained-user"
+
+        for user in removed:
+            authorizer.assign_resource_role(
+                user_id=user,
+                role_id="resource-role",
+                resource_id="resource",
+            )
+            authorizer.assign_domain_role(
+                user_id=user,
+                role_id="domain-role",
+                domain_id="domain",
+            )
+            authorizer.assign_global_role(
+                user_id=user,
+                role_id="global-role",
+            )
+
+        authorizer.assign_global_role(
+            user_id=retained,
+            role_id="retained-role",
+        )
+
+        updated = authorizer.clear_assignments_for_identities(identity_ids=removed)
+
+        assert updated
+        for user in removed:
+            assert not authorizer.has_resource_role(
+                user_id=user,
+                role_id="resource-role",
+                resource_id="resource",
+            )
+            assert not authorizer.has_domain_role(
+                user_id=user,
+                role_id="domain-role",
+                domain_id="domain",
+            )
+            assert not authorizer.has_global_role(
+                user_id=user,
+                role_id="global-role",
+            )
+
+        assert authorizer.has_global_role(
+            user_id=retained,
+            role_id="retained-role",
+        )
+
+    def test_clear_assignments_for_identities__empty_list_does_nothing(
+        self,
+        authorizer: Authorization,
+    ):
+        assert not authorizer.clear_assignments_for_identities(identity_ids=[])
+
+    def test_clear_assignments_for_identities__removes_policy_from_another_worker(
+        self, authorizer: Authorization
+    ):
+        suffix = uuid4().hex
+        user = f"remote-user-{suffix}"
+        role = f"remote-role-{suffix}"
+        resource = f"remote-resource-{suffix}"
+
+        with engine.begin() as connection:
+            connection.execute(
+                text(
+                    """
+                    INSERT INTO casbin_rule (ptype, v0, v1, v2)
+                    VALUES ('g', :user, :role, :resource)
+                    """
+                ),
+                {
+                    "user": user,
+                    "role": role,
+                    "resource": resource,
+                },
+            )
+
+        # The policy was persisted by another worker and is absent locally.
+        assert not authorizer.has_resource_role(
+            user_id=user,
+            role_id=role,
+            resource_id=resource,
+        )
+
+        updated = authorizer.clear_assignments_for_identities(identity_ids=[user])
+
+        assert updated
+        assert not authorizer.has_resource_role(
+            user_id=user,
+            role_id=role,
+            resource_id=resource,
+        )
+
+        with engine.connect() as connection:
+            remaining = connection.execute(
+                text(
+                    """
+                    SELECT COUNT(*)
+                    FROM casbin_rule
+                    WHERE ptype = 'g'
+                      AND v0 = :user
+                      AND v1 = :role
+                      AND v2 = :resource
+                    """
+                ),
+                {
+                    "user": user,
+                    "role": role,
+                    "resource": resource,
+                },
+            ).scalar_one()
+
+        assert remaining == 0
+
+    def _persist_group_membership(self, member_id: str, group_id: str) -> None:
+        """
+        Simulate another Casbin worker persisting policies without updating this
+        worker's in-memory state.
+        """
+        with engine.begin() as connection:
+            connection.execute(
+                text(
+                    """
+                    INSERT INTO casbin_rule (ptype, v0, v1, v2)
+                    VALUES ('g', :member_id, :group_id, '*')
+                    """
+                ),
+                {
+                    "member_id": member_id,
+                    "group_id": group_id,
+                },
+            )
+            connection.execute(
+                text(
+                    """
+                    INSERT INTO casbin_rule (ptype, v0, v1)
+                    VALUES ('g3', :member_id, :group_id)
+                    """
+                ),
+                {
+                    "member_id": member_id,
+                    "group_id": group_id,
+                },
+            )
+
+    def _count_group_membership_policies(self, member_id: str, group_id: str) -> int:
+        with engine.connect() as connection:
+            return connection.execute(
+                text(
+                    """
+                    SELECT COUNT(*)
+                    FROM casbin_rule
+                    WHERE v0 = :member_id
+                      AND v1 = :group_id
+                      AND (
+                        (ptype = 'g' AND v2 = '*')
+                            OR ptype = 'g3'
+                        )
+                    """
+                ),
+                {
+                    "member_id": member_id,
+                    "group_id": group_id,
+                },
+            ).scalar_one()
+
 
 class TestCrossWorkerStaleness:
     def test_auto_reload_resolves_stale_policy(self, authorizer: Authorization):
@@ -625,14 +980,14 @@ class TestCrossWorkerStaleness:
         )
 
         # Another worker writes the assignment directly to DB, bypassing the enforcer
-        with engine.connect() as conn:
+        with engine.begin() as conn:
             conn.execute(
                 text(
-                    "INSERT INTO casbin_rule (ptype, v0, v1, v2) VALUES ('g', :u, :r, :obj)"
+                    "INSERT INTO casbin_rule (ptype, v0, v1, v2) "
+                    "VALUES ('g', :u, :r, :obj)"
                 ),
                 {"u": user, "r": role, "obj": resource},
             )
-            conn.commit()  # noqa: allow-commit
 
         # In-memory is stale: still denied despite the DB change
         assert (
@@ -649,10 +1004,11 @@ class TestCrossWorkerStaleness:
         )
 
         # Cleanup
-        with engine.connect() as conn:
+        with engine.begin() as conn:
             conn.execute(
                 text(
-                    "DELETE FROM casbin_rule WHERE ptype='g' AND v0=:u AND v1=:r AND v2=:obj"
+                    "DELETE FROM casbin_rule "
+                    "WHERE ptype='g' AND v0=:u AND v1=:r AND v2=:obj"
                 ),
                 {"u": user, "r": role, "obj": resource},
             )

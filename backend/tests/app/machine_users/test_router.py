@@ -3,7 +3,9 @@ from uuid import uuid4
 
 import pytest
 
-from tests.factories import GroupFactory, MachineUserFactory
+from app.machine_users.model import MachineUser
+from app.settings import settings
+from tests.factories import GroupFactory, MachineUserFactory, UserFactory
 
 ENDPOINT = "/api/v2/machine-users"
 
@@ -304,3 +306,141 @@ class TestMachineUsersRouter:
         response = client.delete(f"{ENDPOINT}/{uuid4()}")
 
         assert response.status_code == 404
+
+    @pytest.mark.usefixtures("admin")
+    def test_create_machine_users_batch__creates_valid_items_and_returns_errors(
+        self, client, session
+    ):
+        invalid_item = {
+            "external_id": "",
+            "display_name": "",
+        }
+
+        response = client.post(
+            f"{ENDPOINT}/batch",
+            json={
+                "items": [
+                    {
+                        "external_id": "deployment-agent",
+                        "display_name": "Deployment Agent",
+                    },
+                    invalid_item,
+                ]
+            },
+        )
+
+        assert response.status_code == 200
+        body = response.json()
+        assert len(body["ids"]) == 1
+        assert len(body["errors"]) == 1
+        assert body["errors"][0]["item"] == invalid_item
+        assert len(body["errors"][0]["errors"]) == 2
+
+        created = session.get(MachineUser, body["ids"][0])
+        assert created is not None
+        assert created.external_id == "deployment-agent"
+
+    def test_create_machine_users_batch__without_permission_returns_forbidden(
+        self, client
+    ):
+        response = client.post(
+            f"{ENDPOINT}/batch",
+            json={
+                "items": [
+                    {
+                        "external_id": "deployment-agent",
+                        "display_name": "Deployment Agent",
+                    }
+                ]
+            },
+        )
+
+        assert response.status_code == 403
+
+    @pytest.mark.usefixtures("admin")
+    @pytest.mark.parametrize(
+        "items",
+        [
+            [],
+            [{}] * (settings.MAX_ITEMS_PER_BATCH_REQUEST + 1),
+        ],
+    )
+    def test_create_machine_users_batch__rejects_invalid_list_size(self, client, items):
+        response = client.post(
+            f"{ENDPOINT}/batch",
+            json={"items": items},
+        )
+
+        assert response.status_code == 422
+
+    @pytest.mark.usefixtures("admin")
+    def test_delete_machine_users_batch__deletes_machine_users(self, client, session):
+        first = MachineUserFactory()
+        second = MachineUserFactory()
+
+        response = client.request(
+            "DELETE",
+            f"{ENDPOINT}/batch",
+            json={"ids": [str(first.id), str(second.id)]},
+        )
+
+        assert response.status_code == 204
+        assert response.content == b""
+        assert session.get(MachineUser, first.id) is None
+        assert session.get(MachineUser, second.id) is None
+
+    @pytest.mark.usefixtures("admin")
+    def test_delete_machine_users_batch__ignores_unknown_and_wrong_type_ids(
+        self, client, session
+    ):
+        machine_user = MachineUserFactory()
+        user = UserFactory()
+
+        response = client.request(
+            "DELETE",
+            f"{ENDPOINT}/batch",
+            json={
+                "ids": [
+                    str(machine_user.id),
+                    str(user.id),
+                    str(uuid4()),
+                ]
+            },
+        )
+
+        assert response.status_code == 204
+        assert session.get(MachineUser, machine_user.id) is None
+        assert user in session
+
+    def test_delete_machine_users_batch__without_permission_returns_forbidden(
+        self, client, session
+    ):
+        machine_user = MachineUserFactory()
+
+        response = client.request(
+            "DELETE",
+            f"{ENDPOINT}/batch",
+            json={"ids": [str(machine_user.id)]},
+        )
+
+        assert response.status_code == 403
+        assert session.get(MachineUser, machine_user.id) is not None
+
+    @pytest.mark.usefixtures("admin")
+    @pytest.mark.parametrize(
+        "ids",
+        [
+            [],
+            ["not-a-uuid"],
+            ["00000000-0000-0000-0000-000000000001"] * 2,
+            [str(uuid4()) for _ in range(settings.MAX_ITEMS_PER_BATCH_REQUEST + 1)],
+        ],
+    )
+    def test_delete_machine_users_batch__rejects_invalid_request(self, client, ids):
+        response = client.request(
+            "DELETE",
+            f"{ENDPOINT}/batch",
+            json={"ids": ids},
+        )
+
+        assert response.status_code == 422

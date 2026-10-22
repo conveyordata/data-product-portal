@@ -212,6 +212,27 @@ from .group_update import GroupUpdate
 from .group_update_response import GroupUpdateResponse
 from .groups_get_response import GroupsGetResponse
 from .http_validation_error import HTTPValidationError
+from .identity_batch_create_error import IdentityBatchCreateError
+from .identity_batch_create_request_group_create import (
+    IdentityBatchCreateRequestGroupCreate,
+)
+from .identity_batch_create_request_group_create_group_create import (
+    IdentityBatchCreateRequestGroupCreateGroupCreate,
+)
+from .identity_batch_create_request_machine_user_create import (
+    IdentityBatchCreateRequestMachineUserCreate,
+)
+from .identity_batch_create_request_machine_user_create_machine_user_create import (
+    IdentityBatchCreateRequestMachineUserCreateMachineUserCreate,
+)
+from .identity_batch_create_request_user_create import (
+    IdentityBatchCreateRequestUserCreate,
+)
+from .identity_batch_create_request_user_create_user_create import (
+    IdentityBatchCreateRequestUserCreateUserCreate,
+)
+from .identity_batch_create_response import IdentityBatchCreateResponse
+from .identity_batch_delete_request import IdentityBatchDeleteRequest
 from .identity_type import IdentityType
 from .ingest_output_port_contract_yaml_body import IngestOutputPortContractYamlBody
 from .input_port_event import InputPortEvent
@@ -577,6 +598,15 @@ __all__ = (
     "GroupUpdate",
     "GroupUpdateResponse",
     "HTTPValidationError",
+    "IdentityBatchCreateError",
+    "IdentityBatchCreateRequestGroupCreate",
+    "IdentityBatchCreateRequestGroupCreateGroupCreate",
+    "IdentityBatchCreateRequestMachineUserCreate",
+    "IdentityBatchCreateRequestMachineUserCreateMachineUserCreate",
+    "IdentityBatchCreateRequestUserCreate",
+    "IdentityBatchCreateRequestUserCreateUserCreate",
+    "IdentityBatchCreateResponse",
+    "IdentityBatchDeleteRequest",
     "IdentityType",
     "IngestOutputPortContractYamlBody",
     "InputPortEvent",
