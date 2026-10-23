@@ -21,10 +21,6 @@ type AddOutputPortDataQualityRunRes interface {
 	addOutputPortDataQualityRunRes()
 }
 
-type ApplyToolEnvironmentConfigurationRes interface {
-	applyToolEnvironmentConfigurationRes()
-}
-
 type ApproveOutputPortAsInputPortRes interface {
 	approveOutputPortAsInputPortRes()
 }

@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import {
     type OverridablePropertyConfiguration,
     type ToolEnvironmentConfiguration,
-    useApplyToolEnvironmentConfigurationMutation,
     useGetToolEnvironmentConfigurationQuery,
     useUpdateToolEnvironmentConfigurationMutation,
 } from '@/store/api/services/generated/dataProductsToolsApi.ts';
@@ -46,7 +45,6 @@ export function ConfigurationMatrix({ dataProductId, toolId, canEdit }: Props) {
         id: toolId,
     });
     const [updateConfiguration, { isLoading: isSaving }] = useUpdateToolEnvironmentConfigurationMutation();
-    const [applyConfiguration, { isLoading: isApplying }] = useApplyToolEnvironmentConfigurationMutation();
     const [draft, setDraft] = useState<Draft>({ base_values: {}, overrides: {} });
 
     useEffect(() => {
@@ -76,14 +74,6 @@ export function ConfigurationMatrix({ dataProductId, toolId, canEdit }: Props) {
         dispatchMessage({ content: t('Configuration saved'), type: 'success' });
     };
 
-    const onApply = async (environmentId: string, environmentName: string) => {
-        await applyConfiguration({ dataProductId, id: toolId, environmentId }).unwrap();
-        dispatchMessage({
-            content: t('Configuration applied to {{environment}}', { environment: environmentName }),
-            type: 'success',
-        });
-    };
-
     const columns: TableColumnsType<OverridablePropertyConfiguration> = [
         { title: t('Property'), dataIndex: 'label' },
         {
@@ -100,20 +90,7 @@ export function ConfigurationMatrix({ dataProductId, toolId, canEdit }: Props) {
         },
         ...environments.map((environment) => ({
             key: environment.id,
-            title: (
-                <Flex gap="small" align="center">
-                    {environment.name}
-                    {canEdit && (
-                        <Button
-                            size="small"
-                            disabled={isApplying}
-                            onClick={() => onApply(environment.id, environment.name)}
-                        >
-                            {t('Apply')}
-                        </Button>
-                    )}
-                </Flex>
-            ),
+            title: environment.name,
             render: (_: unknown, property: OverridablePropertyConfiguration) => {
                 const override = draft.overrides[environment.id]?.[property.name];
                 return (

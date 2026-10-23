@@ -51,9 +51,7 @@ from .cloud_event_output_port_technical_asset_link_event import (
     CloudEventOutputPortTechnicalAssetLinkEvent,
 )
 from .cloud_event_technical_asset_event import CloudEventTechnicalAssetEvent
-from .cloud_event_tool_environment_configuration_applied_event import (
-    CloudEventToolEnvironmentConfigurationAppliedEvent,
-)
+from .cloud_event_tool_event import CloudEventToolEvent
 from .create_data_product_life_cycle_response import CreateDataProductLifeCycleResponse
 from .create_data_product_response import CreateDataProductResponse
 from .create_data_product_role_assignment import CreateDataProductRoleAssignment
@@ -389,12 +387,7 @@ from .time_bound_access_enabled_response import TimeBoundAccessEnabledResponse
 from .tool import Tool
 from .tool_base_values import ToolBaseValues
 from .tool_environment_configuration import ToolEnvironmentConfiguration
-from .tool_environment_configuration_applied_event import (
-    ToolEnvironmentConfigurationAppliedEvent,
-)
-from .tool_environment_configuration_applied_event_configuration import (
-    ToolEnvironmentConfigurationAppliedEventConfiguration,
-)
+from .tool_event import ToolEvent
 from .ui_element_checkbox import UIElementCheckbox
 from .ui_element_metadata import UIElementMetadata
 from .ui_element_metadata_response import UIElementMetadataResponse
@@ -475,7 +468,7 @@ __all__ = (
     "CloudEventOutputPortRoleAssignmentEvent",
     "CloudEventOutputPortTechnicalAssetLinkEvent",
     "CloudEventTechnicalAssetEvent",
-    "CloudEventToolEnvironmentConfigurationAppliedEvent",
+    "CloudEventToolEvent",
     "CreateDataProductLifeCycleResponse",
     "CreateDataProductResponse",
     "CreateDataProductRoleAssignment",
@@ -745,8 +738,7 @@ __all__ = (
     "Tool",
     "ToolBaseValues",
     "ToolEnvironmentConfiguration",
-    "ToolEnvironmentConfigurationAppliedEvent",
-    "ToolEnvironmentConfigurationAppliedEventConfiguration",
+    "ToolEvent",
     "UIElementCheckbox",
     "UIElementMetadata",
     "UIElementMetadataResponse",

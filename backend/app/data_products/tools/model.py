@@ -6,7 +6,9 @@ from sqlalchemy import ForeignKey, String
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, Session, mapped_column, relationship
 
+from app.core.webhooks.events import ToolEvent
 from app.database.database import Base, ensure_exists
+from app.database.event_mixin import EventTrackedMixin
 from app.shared.model import BaseORM
 
 
@@ -22,7 +24,7 @@ class ToolEnvironmentOverride(Base, BaseORM):
     values: Mapped[dict[str, str]] = mapped_column(JSONB, nullable=False)
 
 
-class Tool(Base, BaseORM):
+class Tool(Base, BaseORM, EventTrackedMixin):
     __tablename__ = "tools"
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
@@ -38,6 +40,9 @@ class Tool(Base, BaseORM):
     overrides: Mapped[list[ToolEnvironmentOverride]] = relationship(
         cascade="all, delete-orphan", lazy="selectin"
     )
+
+    def to_event(self) -> ToolEvent:
+        return ToolEvent(id=self.id, data_product_id=self.data_product_id)
 
 
 def ensure_tool_exists(

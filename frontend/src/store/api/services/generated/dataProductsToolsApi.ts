@@ -43,15 +43,6 @@ const injectedRtkApi = api.injectEndpoints({
         body: queryArg.updateToolEnvironmentConfigurationRequest,
       }),
     }),
-    applyToolEnvironmentConfiguration: build.mutation<
-      ApplyToolEnvironmentConfigurationApiResponse,
-      ApplyToolEnvironmentConfigurationApiArg
-    >({
-      query: (queryArg) => ({
-        url: `/api/v2/data_products/${queryArg.dataProductId}/tools/${queryArg.id}/environments/${queryArg.environmentId}/apply`,
-        method: "POST",
-      }),
-    }),
   }),
   overrideExisting: false,
 });
@@ -87,13 +78,6 @@ export type UpdateToolEnvironmentConfigurationApiArg = {
   dataProductId: string;
   id: string;
   updateToolEnvironmentConfigurationRequest: UpdateToolEnvironmentConfigurationRequest;
-};
-export type ApplyToolEnvironmentConfigurationApiResponse =
-  /** status 200 Successful Response */ any;
-export type ApplyToolEnvironmentConfigurationApiArg = {
-  dataProductId: string;
-  id: string;
-  environmentId: string;
 };
 export type Tool = {
   id: string;
@@ -169,5 +153,4 @@ export const {
   useGetToolEnvironmentConfigurationQuery,
   useLazyGetToolEnvironmentConfigurationQuery,
   useUpdateToolEnvironmentConfigurationMutation,
-  useApplyToolEnvironmentConfigurationMutation,
 } = injectedRtkApi;

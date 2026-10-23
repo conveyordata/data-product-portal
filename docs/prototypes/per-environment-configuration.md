@@ -33,9 +33,8 @@ Values are strings.
 ### API
 
 - `GET .../environment-configuration` returns, per overridable property: name, label, allowed values, default, base value, and per environment of the Data Product (id, name, acronym): the override (or null) and the effective value.
-- `PUT .../environment-configuration` replaces the base values and the full override set in one request. Saving only records the desired state. It doesn't trigger provisioning.
-- `POST .../environments/{environment_id}/apply` queues one webhook event for that environment only. Payload: `id`, `data_product_id`, `environment` (acronym) and `configuration` (property name → effective value for that environment). The event type is `<entity>.environment_configuration_applied`.
-- No applied state is stored and there is no pending diff. The Portal sends the event; keeping infrastructure in sync is the provisioner's job.
+- `PUT .../environment-configuration` replaces the base values and the full override set in one request.
+- Saving queues the entity's normal id-only event, like any other change. The provisioner fetches the configuration and converges every environment itself. There is no apply step, no applied state and no pending diff: rolling out dev first means saving a dev override first.
 - Authorization: the same action that guards updating the entity.
 
 ### UI
@@ -45,11 +44,10 @@ On the instance's detail page, a "Configuration" tab holds a matrix:
 - Rows are the overridable properties. Columns are "Base" and one column per environment of the Data Product.
 - Every cell is a select over the allowed values. Environment cells also offer "Inherit", the default, which shows the inherited base value greyed out. A cell with an override is visibly marked.
 - One "Save" button saves the whole matrix.
-- Each environment column has an "Apply" button that calls the apply endpoint and shows a success message naming the environment.
 
 ## Not in scope
 
-Approval flows, promote-to-prd, scheduling, applied-state tracking, tests, production-grade error handling.
+Approval flows, promote-to-prd, scheduling, apply per environment, applied-state tracking, tests, production-grade error handling.
 
 ## This branch: Tools, platforms from plugins
 
@@ -62,15 +60,14 @@ Approval flows, promote-to-prd, scheduling, applied-state tracking, tests, produ
 - Form dropdown options are the identifiers found in that list across all environments. Templates come straight from the asset type's `PlatformMetadata`. Technical info per environment renders against the settings of each environment the Data Product runs in.
 - A Tool (`backend/app/data_products/tools/`) belongs to one Data Product and stores the platform key, the Tool type name and the base values. Overrides live in `tool_environment_overrides`, one row per tool and environment. A Tool is never linkable to an Output Port: there is no link table.
 - Tool types are offered when their name is in `ENABLED_PLUGINS`, like asset types. The PostgreSQL platform contributes `PostgreSQLInstance` with the spec's three properties.
-- Authorization: Tool writes (create, delete, PUT environment-configuration, apply) use `DATA_PRODUCT__UPDATE_TECHNICAL_ASSET`, the action that guards Technical Asset writes. Reads use `HIDDEN__DATA_PRODUCT__READ`. The platform settings endpoints use `GLOBAL__UPDATE_CONFIGURATION`.
-- Apply queues `tool.environment_configuration_applied` with `context.queue_event`, delivered by the existing webhook dispatcher.
+- Authorization: Tool writes (create, delete, PUT environment-configuration) use `DATA_PRODUCT__UPDATE_TECHNICAL_ASSET`, the action that guards Technical Asset writes. Reads use `HIDDEN__DATA_PRODUCT__READ`. The platform settings endpoints use `GLOBAL__UPDATE_CONFIGURATION`.
+- Tool is event-tracked like Technical Asset: creating, deleting and saving a Tool queues the id-only `tool.event` (`id`, `data_product_id`) through `EventTrackedMixin`, which calls `context.queue_event`. Saving the configuration always marks the Tool row as changed, so a save that only touches overrides still queues exactly one event. No configuration values travel in the event; the provisioner reads them from `GET .../environment-configuration`.
 
 ### API
 
 - `GET/PUT /api/v2/configuration/platforms/{platform_key}/environments/{environment_id}/settings`, `GET /api/v2/configuration/platforms`.
 - `GET/POST /api/v2/data_products/{data_product_id}/tools`, `GET/DELETE .../tools/{id}`.
 - `GET/PUT .../tools/{id}/environment-configuration`: `{"properties": [{name, label, allowed_values, default, base_value, environments: [{id, name, acronym, override, effective_value}]}]}`. PUT takes `{"base_values": {...}, "overrides": {environment_id: {...}}}`; base values left out keep their value, environments left out lose their overrides.
-- `POST .../tools/{id}/environments/{environment_id}/apply`.
 
 ### File map
 
@@ -81,7 +78,7 @@ Backend core:
 - `backend/app/technical_asset_configuration/base_schema.py`, `service.py`: options from settings, tiles and URLs per platform.
 - `backend/app/data_products/technical_assets/`: no platform or service ids, technical info from platform settings.
 - `backend/app/data_products/tools/`: model, router, service, request and response schemas.
-- `backend/app/core/webhooks/events.py`: `ToolEnvironmentConfigurationAppliedEvent`.
+- `backend/app/core/webhooks/events.py`: `ToolEvent`.
 - Migrations `5b1e7c2d9a40` (settings table, best-effort data move, drops the old tables) and `8c4d2f6a1b93` (tools).
 
 Plugin package:

@@ -93,15 +93,3 @@ def update_tool_environment_configuration(
     return ToolService(db).update_environment_configuration(
         data_product_id, id, request
     )
-
-
-@router.post(
-    "/{id}/environments/{environment_id}/apply", dependencies=[write_dependency]
-)
-def apply_tool_environment_configuration(
-    data_product_id: UUID,
-    id: UUID,
-    environment_id: UUID,
-    db: Session = Depends(get_db_session, scope="function"),
-) -> None:
-    ToolService(db).apply_environment_configuration(data_product_id, id, environment_id)

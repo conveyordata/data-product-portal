@@ -632,10 +632,6 @@ type AddOutputPortDataQualityRunNotFoundApplicationJSON jx.Raw
 
 func (*AddOutputPortDataQualityRunNotFoundApplicationJSON) addOutputPortDataQualityRunRes() {}
 
-type ApplyToolEnvironmentConfigurationOKApplicationJSON jx.Raw
-
-func (*ApplyToolEnvironmentConfigurationOKApplicationJSON) applyToolEnvironmentConfigurationRes() {}
-
 // Ref: #/components/schemas/ApproveLinkBetweenTechnicalAssetAndOutputPortRequest
 type ApproveLinkBetweenTechnicalAssetAndOutputPortRequest struct {
 	TechnicalAssetID uuid.UUID `json:"technical_asset_id"`
@@ -6621,7 +6617,6 @@ func (*HTTPValidationError) addDomainFinalizerRes()                       {}
 func (*HTTPValidationError) addExplorationFinalizerRes()                  {}
 func (*HTTPValidationError) addGroupMembersRes()                          {}
 func (*HTTPValidationError) addOutputPortDataQualityRunRes()              {}
-func (*HTTPValidationError) applyToolEnvironmentConfigurationRes()        {}
 func (*HTTPValidationError) approveOutputPortAsInputPortRes()             {}
 func (*HTTPValidationError) approveOutputPortTechnicalAssetLinkRes()      {}
 func (*HTTPValidationError) becomeAdminRes()                              {}

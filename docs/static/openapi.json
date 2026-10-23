@@ -5245,67 +5245,6 @@
         }
       }
     },
-    "/api/v2/data_products/{data_product_id}/tools/{id}/environments/{environment_id}/apply": {
-      "post": {
-        "tags": [
-          "Data Products - Tools"
-        ],
-        "summary": "Apply Tool Environment Configuration",
-        "operationId": "apply_tool_environment_configuration",
-        "parameters": [
-          {
-            "name": "data_product_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Data Product Id"
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Id"
-            }
-          },
-          {
-            "name": "environment_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Environment Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/v2/configuration/domains": {
       "get": {
         "tags": [
@@ -10038,7 +9977,7 @@
                     "$ref": "#/components/schemas/CloudEvent_DataProductEnvironmentAddedEvent"
                   },
                   {
-                    "$ref": "#/components/schemas/CloudEvent_ToolEnvironmentConfigurationAppliedEvent"
+                    "$ref": "#/components/schemas/CloudEvent_ToolEvent"
                   },
                   {
                     "$ref": "#/components/schemas/CloudEvent_InputPortEvent"
@@ -10072,7 +10011,7 @@
                     "exploration.event": "#/components/schemas/CloudEvent_ExplorationEvent",
                     "data_product.event": "#/components/schemas/CloudEvent_DataProductEvent",
                     "data_product.environment_added": "#/components/schemas/CloudEvent_DataProductEnvironmentAddedEvent",
-                    "tool.environment_configuration_applied": "#/components/schemas/CloudEvent_ToolEnvironmentConfigurationAppliedEvent",
+                    "tool.event": "#/components/schemas/CloudEvent_ToolEvent",
                     "input_port.event": "#/components/schemas/CloudEvent_InputPortEvent",
                     "data_product_role_assignment.event": "#/components/schemas/CloudEvent_DataProductRoleAssignmentEvent",
                     "output_port_role_assignment.event": "#/components/schemas/CloudEvent_OutputPortRoleAssignmentEvent",
@@ -11092,7 +11031,7 @@
         ],
         "title": "CloudEvent_TechnicalAssetEvent"
       },
-      "CloudEvent_ToolEnvironmentConfigurationAppliedEvent": {
+      "CloudEvent_ToolEvent": {
         "properties": {
           "specversion": {
             "type": "string",
@@ -11113,10 +11052,10 @@
           },
           "type": {
             "type": "string",
-            "const": "tool.environment_configuration_applied",
+            "const": "tool.event",
             "title": "Type",
             "description": "The unique type string belonging to this event.",
-            "default": "tool.environment_configuration_applied"
+            "default": "tool.event"
           },
           "time": {
             "type": "string",
@@ -11124,7 +11063,7 @@
             "description": "Timestamp of when the event occurred in ISO 8601 UTC format."
           },
           "data": {
-            "$ref": "#/components/schemas/ToolEnvironmentConfigurationAppliedEvent",
+            "$ref": "#/components/schemas/ToolEvent",
             "description": "The specific data payload corresponding to this event type."
           }
         },
@@ -11134,7 +11073,7 @@
           "time",
           "data"
         ],
-        "title": "CloudEvent_ToolEnvironmentConfigurationAppliedEvent"
+        "title": "CloudEvent_ToolEvent"
       },
       "CreateDataProductLifeCycleResponse": {
         "properties": {
@@ -18711,7 +18650,7 @@
         ],
         "title": "ToolEnvironmentConfiguration"
       },
-      "ToolEnvironmentConfigurationAppliedEvent": {
+      "ToolEvent": {
         "properties": {
           "id": {
             "type": "string",
@@ -18722,27 +18661,14 @@
             "type": "string",
             "format": "uuid",
             "title": "Data Product Id"
-          },
-          "environment": {
-            "type": "string",
-            "title": "Environment"
-          },
-          "configuration": {
-            "additionalProperties": {
-              "type": "string"
-            },
-            "type": "object",
-            "title": "Configuration"
           }
         },
         "type": "object",
         "required": [
           "id",
-          "data_product_id",
-          "environment",
-          "configuration"
+          "data_product_id"
         ],
-        "title": "ToolEnvironmentConfigurationAppliedEvent"
+        "title": "ToolEvent"
       },
       "UIElementCheckbox": {
         "properties": {

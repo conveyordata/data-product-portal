@@ -4,9 +4,8 @@ from uuid import UUID
 from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
+from sqlalchemy.orm.attributes import flag_modified
 
-from app.core import context
-from app.core.webhooks.events import ToolEnvironmentConfigurationAppliedEvent
 from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.model import ensure_data_product_exists
 from app.data_products.tools.model import Tool as ToolModel
@@ -123,34 +122,9 @@ class ToolService:
             for environment_id, values in request.overrides.items()
             if values
         ]
+        flag_modified(tool, "base_values")
         self.db.flush()
         return self.get_environment_configuration(data_product_id, id)
-
-    def apply_environment_configuration(
-        self, data_product_id: UUID, id: UUID, environment_id: UUID
-    ) -> None:
-        environments = {
-            declaration.environment_id: declaration.environment
-            for declaration in self._data_product(data_product_id).environments
-        }
-        self._ensure_runs_in(environment_id, set(environments))
-        environment = environments[environment_id]
-        configuration = self.get_environment_configuration(data_product_id, id)
-        context.queue_event(
-            ToolEnvironmentConfigurationAppliedEvent(
-                id=id,
-                data_product_id=data_product_id,
-                environment=environment.acronym,
-                configuration={
-                    prop.name: next(
-                        value.effective_value
-                        for value in prop.environments
-                        if value.id == environment_id
-                    )
-                    for prop in configuration.properties
-                },
-            )
-        )
 
     def _data_product(self, data_product_id: UUID) -> DataProductModel:
         return ensure_data_product_exists(

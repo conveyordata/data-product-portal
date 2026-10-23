@@ -11,7 +11,6 @@ const (
 	AddExplorationFinalizerOperation                  OperationName = "AddExplorationFinalizer"
 	AddGroupMembersOperation                          OperationName = "AddGroupMembers"
 	AddOutputPortDataQualityRunOperation              OperationName = "AddOutputPortDataQualityRun"
-	ApplyToolEnvironmentConfigurationOperation        OperationName = "ApplyToolEnvironmentConfiguration"
 	ApproveOutputPortAsInputPortOperation             OperationName = "ApproveOutputPortAsInputPort"
 	ApproveOutputPortTechnicalAssetLinkOperation      OperationName = "ApproveOutputPortTechnicalAssetLink"
 	BecomeAdminOperation                              OperationName = "BecomeAdmin"

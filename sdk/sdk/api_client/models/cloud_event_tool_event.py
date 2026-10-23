@@ -15,35 +15,30 @@ from attrs import field as _attrs_field
 from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
-    from ..models.tool_environment_configuration_applied_event import (
-        ToolEnvironmentConfigurationAppliedEvent,
-    )
+    from ..models.tool_event import ToolEvent
 
 
-T = TypeVar("T", bound="CloudEventToolEnvironmentConfigurationAppliedEvent")
+T = TypeVar("T", bound="CloudEventToolEvent")
 
 
 @_attrs_define
-class CloudEventToolEnvironmentConfigurationAppliedEvent:
+class CloudEventToolEvent:
     """
     Attributes:
         id (str): A unique UUID identifier for this specific event instance.
         time (str): Timestamp of when the event occurred in ISO 8601 UTC format.
-        data (ToolEnvironmentConfigurationAppliedEvent):
+        data (ToolEvent):
         specversion (str | Unset): The CloudEvents specification version. Default: '1.0'.
         source (str | Unset): Identifies the context in which an event happened. Default: 'data-product-portal'.
-        type_ (Literal['tool.environment_configuration_applied'] | Unset): The unique type string belonging to this
-            event. Default: 'tool.environment_configuration_applied'.
+        type_ (Literal['tool.event'] | Unset): The unique type string belonging to this event. Default: 'tool.event'.
     """
 
     id: str
     time: str
-    data: ToolEnvironmentConfigurationAppliedEvent
+    data: ToolEvent
     specversion: str | Unset = "1.0"
     source: str | Unset = "data-product-portal"
-    type_: Literal["tool.environment_configuration_applied"] | Unset = (
-        "tool.environment_configuration_applied"
-    )
+    type_: Literal["tool.event"] | Unset = "tool.event"
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -79,33 +74,24 @@ class CloudEventToolEnvironmentConfigurationAppliedEvent:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.tool_environment_configuration_applied_event import (
-            ToolEnvironmentConfigurationAppliedEvent,  # noqa: PLC0415
-        )
+        from ..models.tool_event import ToolEvent  # noqa: PLC0415
 
         d = dict(src_dict)
         id = d.pop("id")
 
         time = d.pop("time")
 
-        data = ToolEnvironmentConfigurationAppliedEvent.from_dict(d.pop("data"))
+        data = ToolEvent.from_dict(d.pop("data"))
 
         specversion = d.pop("specversion", UNSET)
 
         source = d.pop("source", UNSET)
 
-        type_ = cast(
-            Literal["tool.environment_configuration_applied"] | Unset,
-            d.pop("type", UNSET),
-        )
-        if type_ != "tool.environment_configuration_applied" and not isinstance(
-            type_, Unset
-        ):
-            raise ValueError(
-                f"type must match const 'tool.environment_configuration_applied', got '{type_}'"
-            )
+        type_ = cast(Literal["tool.event"] | Unset, d.pop("type", UNSET))
+        if type_ != "tool.event" and not isinstance(type_, Unset):
+            raise ValueError(f"type must match const 'tool.event', got '{type_}'")
 
-        cloud_event_tool_environment_configuration_applied_event = cls(
+        cloud_event_tool_event = cls(
             id=id,
             time=time,
             data=data,
@@ -114,8 +100,8 @@ class CloudEventToolEnvironmentConfigurationAppliedEvent:
             type_=type_,
         )
 
-        cloud_event_tool_environment_configuration_applied_event.additional_properties = d
-        return cloud_event_tool_environment_configuration_applied_event
+        cloud_event_tool_event.additional_properties = d
+        return cloud_event_tool_event
 
     @property
     def additional_keys(self) -> list[str]:

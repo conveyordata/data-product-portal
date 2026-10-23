@@ -32,13 +32,6 @@ type AddOutputPortDataQualityRunParams struct {
 	ID            uuid.UUID
 }
 
-// ApplyToolEnvironmentConfigurationParams is parameters of apply_tool_environment_configuration operation.
-type ApplyToolEnvironmentConfigurationParams struct {
-	DataProductID uuid.UUID
-	ID            uuid.UUID
-	EnvironmentID uuid.UUID
-}
-
 // ApproveOutputPortAsInputPortParams is parameters of approve_output_port_as_input_port operation.
 type ApproveOutputPortAsInputPortParams struct {
 	DataProductID uuid.UUID

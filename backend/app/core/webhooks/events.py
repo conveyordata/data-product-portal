@@ -58,15 +58,13 @@ class DataProductEnvironmentAddedEvent(V2Event):
         return "data_product.environment_added"
 
 
-class ToolEnvironmentConfigurationAppliedEvent(V2Event):
+class ToolEvent(V2Event):
     id: UUID
     data_product_id: UUID
-    environment: str
-    configuration: dict[str, str]
 
     @classmethod
     def event_type(cls) -> str:
-        return "tool.environment_configuration_applied"
+        return "tool.event"
 
 
 class InputPortEvent(V2Event):
