@@ -163,7 +163,7 @@ VALUES (gen_random_uuid(), 'Development', 'dev', '', FALSE, TRUE);
 
 This example sets `dev` as a global default for new Data Products. It does not create infrastructure or configure platform credentials; add any integration-specific settings described above separately. Data Product creation without `environment_ids` requires at least one global environment. Alternatively, callers can explicitly select existing Environment IDs.
 
-The upgrade copies each existing Data Product's Domain environments, or its global defaults when the Domain has no selection. It refuses to continue if any Data Product would have no declared environments. Configure a global default or a Domain selection before retrying the migration. Changing defaults after the upgrade does not change saved Data Product environments.
+The upgrade copies each existing Data Product's legacy Domain environment selection, or the global defaults when its Domain had no selection. It refuses to continue if any Data Product would have no declared environments. Before retrying the migration, configure a global default or a legacy Domain selection. Changing defaults after the upgrade does not change saved Data Product environments.
 
 ### The fields and the form
 
