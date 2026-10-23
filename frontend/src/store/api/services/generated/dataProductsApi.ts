@@ -346,6 +346,7 @@ export type Tag = {
 export type Domain = {
   id: string;
   name: string;
+  namespace: string;
   description: string;
 };
 export type DataProductType = {

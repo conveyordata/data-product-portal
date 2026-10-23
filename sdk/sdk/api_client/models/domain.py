@@ -16,11 +16,13 @@ class Domain:
     Attributes:
         id (UUID):
         name (str):
+        namespace (str):
         description (str):
     """
 
     id: UUID
     name: str
+    namespace: str
     description: str
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
@@ -28,6 +30,8 @@ class Domain:
         id = str(self.id)
 
         name = self.name
+
+        namespace = self.namespace
 
         description = self.description
 
@@ -37,6 +41,7 @@ class Domain:
             {
                 "id": id,
                 "name": name,
+                "namespace": namespace,
                 "description": description,
             }
         )
@@ -50,11 +55,14 @@ class Domain:
 
         name = d.pop("name")
 
+        namespace = d.pop("namespace")
+
         description = d.pop("description")
 
         domain = cls(
             id=id,
             name=name,
+            namespace=namespace,
             description=description,
         )
 

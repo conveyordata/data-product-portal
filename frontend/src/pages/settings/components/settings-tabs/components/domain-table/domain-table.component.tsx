@@ -46,8 +46,15 @@ export function DomainTable() {
                 setMigrateFrom(domain);
                 handleOpenMigrate();
             } else {
-                await onRemoveDomain(domain.id).unwrap();
-                dispatchMessage({ content: t('Domain removed successfully'), type: 'success' });
+                const deletionPending = await onRemoveDomain(domain.id).unwrap();
+                dispatchMessage(
+                    deletionPending
+                        ? {
+                              content: t('Domain marked for deletion, waiting for provisioners to clean up'),
+                              type: 'info',
+                          }
+                        : { content: t('Domain removed successfully'), type: 'success' },
+                );
             }
         } catch (_error) {
             dispatchMessage({ content: t('Could not remove Domain'), type: 'error' });

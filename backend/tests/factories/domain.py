@@ -9,4 +9,5 @@ class DomainFactory(factory.alchemy.SQLAlchemyModelFactory):
 
     id = factory.Faker("uuid4")
     name = factory.Faker("word")
+    namespace = factory.Sequence(lambda n: f"domain-{n}")
     description = factory.Faker("text", max_nb_chars=20)

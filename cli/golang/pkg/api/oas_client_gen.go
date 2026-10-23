@@ -29,6 +29,12 @@ type Invoker interface {
 	//
 	// POST /api/v2/data_products/{id}/finalizers
 	AddDataProductFinalizer(ctx context.Context, request *FinalizerRequest, params AddDataProductFinalizerParams) (AddDataProductFinalizerRes, error)
+	// AddDomainFinalizer invokes add_domain_finalizer operation.
+	//
+	// Add Domain Finalizer.
+	//
+	// POST /api/v2/configuration/domains/{id}/finalizers
+	AddDomainFinalizer(ctx context.Context, request *FinalizerRequest, params AddDomainFinalizerParams) (AddDomainFinalizerRes, error)
 	// AddExplorationFinalizer invokes add_exploration_finalizer operation.
 	//
 	// Add Exploration Finalizer.
@@ -138,12 +144,24 @@ type Invoker interface {
 	//
 	// POST /api/v2/groups
 	CreateGroup(ctx context.Context, request *GroupCreate) (CreateGroupRes, error)
+	// CreateGroupsBatch invokes create_groups_batch operation.
+	//
+	// Create Groups Batch.
+	//
+	// POST /api/v2/groups/batch
+	CreateGroupsBatch(ctx context.Context, request *IdentityBatchCreateRequestGroupCreate) (CreateGroupsBatchRes, error)
 	// CreateMachineUser invokes create_machine_user operation.
 	//
 	// Create Machine User.
 	//
 	// POST /api/v2/machine-users
 	CreateMachineUser(ctx context.Context, request *MachineUserCreate) (CreateMachineUserRes, error)
+	// CreateMachineUsersBatch invokes create_machine_users_batch operation.
+	//
+	// Create Machine Users Batch.
+	//
+	// POST /api/v2/machine-users/batch
+	CreateMachineUsersBatch(ctx context.Context, request *IdentityBatchCreateRequestMachineUserCreate) (CreateMachineUsersBatchRes, error)
 	// CreateOutputPort invokes create_output_port operation.
 	//
 	// Create Output Port.
@@ -186,6 +204,12 @@ type Invoker interface {
 	//
 	// POST /api/v2/users
 	CreateUser(ctx context.Context, request *UserCreate) (CreateUserRes, error)
+	// CreateUsersBatch invokes create_users_batch operation.
+	//
+	// Create Users Batch.
+	//
+	// POST /api/v2/users/batch
+	CreateUsersBatch(ctx context.Context, request *IdentityBatchCreateRequestUserCreate) (CreateUsersBatchRes, error)
 	// DecideDataProductRoleAssignment invokes decide_data_product_role_assignment operation.
 	//
 	// Decide Data Product Role Assignment.
@@ -228,12 +252,24 @@ type Invoker interface {
 	//
 	// DELETE /api/v2/groups/{id}
 	DeleteGroup(ctx context.Context, params DeleteGroupParams) (DeleteGroupRes, error)
+	// DeleteGroupsBatch invokes delete_groups_batch operation.
+	//
+	// Delete Groups Batch.
+	//
+	// DELETE /api/v2/groups/batch
+	DeleteGroupsBatch(ctx context.Context, request *IdentityBatchDeleteRequest) (DeleteGroupsBatchRes, error)
 	// DeleteMachineUser invokes delete_machine_user operation.
 	//
 	// Delete Machine User.
 	//
 	// DELETE /api/v2/machine-users/{id}
 	DeleteMachineUser(ctx context.Context, params DeleteMachineUserParams) (DeleteMachineUserRes, error)
+	// DeleteMachineUsersBatch invokes delete_machine_users_batch operation.
+	//
+	// Delete Machine Users Batch.
+	//
+	// DELETE /api/v2/machine-users/batch
+	DeleteMachineUsersBatch(ctx context.Context, request *IdentityBatchDeleteRequest) (DeleteMachineUsersBatchRes, error)
 	// DeleteOutputPortQueryStat invokes delete_output_port_query_stat operation.
 	//
 	// Delete the query count of one consuming data product for one day.
@@ -750,6 +786,12 @@ type Invoker interface {
 	//
 	// DELETE /api/v2/configuration/domains/{id}
 	RemoveDomain(ctx context.Context, params RemoveDomainParams) (RemoveDomainRes, error)
+	// RemoveDomainFinalizer invokes remove_domain_finalizer operation.
+	//
+	// Remove Domain Finalizer.
+	//
+	// DELETE /api/v2/configuration/domains/{id}/finalizers/{finalizer}
+	RemoveDomainFinalizer(ctx context.Context, params RemoveDomainFinalizerParams) (RemoveDomainFinalizerRes, error)
 	// RemoveExploration invokes remove_exploration operation.
 	//
 	// Remove Exploration.
@@ -828,6 +870,12 @@ type Invoker interface {
 	//
 	// DELETE /api/v2/users/current/notifications/{id}
 	RemoveUserNotification(ctx context.Context, params RemoveUserNotificationParams) (RemoveUserNotificationRes, error)
+	// RemoveUsersBatch invokes remove_users_batch operation.
+	//
+	// Remove Users Batch.
+	//
+	// DELETE /api/v2/users/batch
+	RemoveUsersBatch(ctx context.Context, request *IdentityBatchDeleteRequest) (RemoveUsersBatchRes, error)
 	// RenderTechnicalAssetAccessPath invokes render_technical_asset_access_path operation.
 	//
 	// Render Technical Asset Access Path.
@@ -854,8 +902,7 @@ type Invoker interface {
 	RenewOutputPortAsInputPort(ctx context.Context, request *RenewOutputPortAsInputPortRequest, params RenewOutputPortAsInputPortParams) (RenewOutputPortAsInputPortRes, error)
 	// ReplaceGroupMembers invokes replace_group_members operation.
 	//
-	// Because the service method performs add and remove operations internally, a lock is used to ensure
-	// that only one request is processed at a time.
+	// Replace Group Members.
 	//
 	// PUT /api/v2/groups/{id}/members
 	ReplaceGroupMembers(ctx context.Context, request *GroupMembersReplace, params ReplaceGroupMembersParams) (ReplaceGroupMembersRes, error)
@@ -1203,6 +1250,71 @@ func (c *Client) sendAddDataProductFinalizer(ctx context.Context, request *Final
 	}()
 
 	result, err := decodeAddDataProductFinalizerResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// AddDomainFinalizer invokes add_domain_finalizer operation.
+//
+// Add Domain Finalizer.
+//
+// POST /api/v2/configuration/domains/{id}/finalizers
+func (c *Client) AddDomainFinalizer(ctx context.Context, request *FinalizerRequest, params AddDomainFinalizerParams) (AddDomainFinalizerRes, error) {
+	res, err := c.sendAddDomainFinalizer(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendAddDomainFinalizer(ctx context.Context, request *FinalizerRequest, params AddDomainFinalizerParams) (res AddDomainFinalizerRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/api/v2/configuration/domains/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/finalizers"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeAddDomainFinalizerRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeAddDomainFinalizerResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -2313,6 +2425,52 @@ func (c *Client) sendCreateGroup(ctx context.Context, request *GroupCreate) (res
 	return result, nil
 }
 
+// CreateGroupsBatch invokes create_groups_batch operation.
+//
+// Create Groups Batch.
+//
+// POST /api/v2/groups/batch
+func (c *Client) CreateGroupsBatch(ctx context.Context, request *IdentityBatchCreateRequestGroupCreate) (CreateGroupsBatchRes, error) {
+	res, err := c.sendCreateGroupsBatch(ctx, request)
+	return res, err
+}
+
+func (c *Client) sendCreateGroupsBatch(ctx context.Context, request *IdentityBatchCreateRequestGroupCreate) (res CreateGroupsBatchRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/api/v2/groups/batch"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeCreateGroupsBatchRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeCreateGroupsBatchResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // CreateMachineUser invokes create_machine_user operation.
 //
 // Create Machine User.
@@ -2352,6 +2510,52 @@ func (c *Client) sendCreateMachineUser(ctx context.Context, request *MachineUser
 	}()
 
 	result, err := decodeCreateMachineUserResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// CreateMachineUsersBatch invokes create_machine_users_batch operation.
+//
+// Create Machine Users Batch.
+//
+// POST /api/v2/machine-users/batch
+func (c *Client) CreateMachineUsersBatch(ctx context.Context, request *IdentityBatchCreateRequestMachineUserCreate) (CreateMachineUsersBatchRes, error) {
+	res, err := c.sendCreateMachineUsersBatch(ctx, request)
+	return res, err
+}
+
+func (c *Client) sendCreateMachineUsersBatch(ctx context.Context, request *IdentityBatchCreateRequestMachineUserCreate) (res CreateMachineUsersBatchRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/api/v2/machine-users/batch"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeCreateMachineUsersBatchRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeCreateMachineUsersBatchResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -2712,6 +2916,52 @@ func (c *Client) sendCreateUser(ctx context.Context, request *UserCreate) (res C
 	}()
 
 	result, err := decodeCreateUserResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// CreateUsersBatch invokes create_users_batch operation.
+//
+// Create Users Batch.
+//
+// POST /api/v2/users/batch
+func (c *Client) CreateUsersBatch(ctx context.Context, request *IdentityBatchCreateRequestUserCreate) (CreateUsersBatchRes, error) {
+	res, err := c.sendCreateUsersBatch(ctx, request)
+	return res, err
+}
+
+func (c *Client) sendCreateUsersBatch(ctx context.Context, request *IdentityBatchCreateRequestUserCreate) (res CreateUsersBatchRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/api/v2/users/batch"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeCreateUsersBatchRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeCreateUsersBatchResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -3158,6 +3408,52 @@ func (c *Client) sendDeleteGroup(ctx context.Context, params DeleteGroupParams) 
 	return result, nil
 }
 
+// DeleteGroupsBatch invokes delete_groups_batch operation.
+//
+// Delete Groups Batch.
+//
+// DELETE /api/v2/groups/batch
+func (c *Client) DeleteGroupsBatch(ctx context.Context, request *IdentityBatchDeleteRequest) (DeleteGroupsBatchRes, error) {
+	res, err := c.sendDeleteGroupsBatch(ctx, request)
+	return res, err
+}
+
+func (c *Client) sendDeleteGroupsBatch(ctx context.Context, request *IdentityBatchDeleteRequest) (res DeleteGroupsBatchRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/api/v2/groups/batch"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "DELETE", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeDeleteGroupsBatchRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeDeleteGroupsBatchResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // DeleteMachineUser invokes delete_machine_user operation.
 //
 // Delete Machine User.
@@ -3212,6 +3508,52 @@ func (c *Client) sendDeleteMachineUser(ctx context.Context, params DeleteMachine
 	}()
 
 	result, err := decodeDeleteMachineUserResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// DeleteMachineUsersBatch invokes delete_machine_users_batch operation.
+//
+// Delete Machine Users Batch.
+//
+// DELETE /api/v2/machine-users/batch
+func (c *Client) DeleteMachineUsersBatch(ctx context.Context, request *IdentityBatchDeleteRequest) (DeleteMachineUsersBatchRes, error) {
+	res, err := c.sendDeleteMachineUsersBatch(ctx, request)
+	return res, err
+}
+
+func (c *Client) sendDeleteMachineUsersBatch(ctx context.Context, request *IdentityBatchDeleteRequest) (res DeleteMachineUsersBatchRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/api/v2/machine-users/batch"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "DELETE", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeDeleteMachineUsersBatchRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeDeleteMachineUsersBatchResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -8840,6 +9182,86 @@ func (c *Client) sendRemoveDomain(ctx context.Context, params RemoveDomainParams
 	return result, nil
 }
 
+// RemoveDomainFinalizer invokes remove_domain_finalizer operation.
+//
+// Remove Domain Finalizer.
+//
+// DELETE /api/v2/configuration/domains/{id}/finalizers/{finalizer}
+func (c *Client) RemoveDomainFinalizer(ctx context.Context, params RemoveDomainFinalizerParams) (RemoveDomainFinalizerRes, error) {
+	res, err := c.sendRemoveDomainFinalizer(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendRemoveDomainFinalizer(ctx context.Context, params RemoveDomainFinalizerParams) (res RemoveDomainFinalizerRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [4]string
+	pathParts[0] = "/api/v2/configuration/domains/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/finalizers/"
+	{
+		// Encode "finalizer" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "finalizer",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Finalizer))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "DELETE", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeRemoveDomainFinalizerResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // RemoveExploration invokes remove_exploration operation.
 //
 // Remove Exploration.
@@ -9755,6 +10177,52 @@ func (c *Client) sendRemoveUserNotification(ctx context.Context, params RemoveUs
 	return result, nil
 }
 
+// RemoveUsersBatch invokes remove_users_batch operation.
+//
+// Remove Users Batch.
+//
+// DELETE /api/v2/users/batch
+func (c *Client) RemoveUsersBatch(ctx context.Context, request *IdentityBatchDeleteRequest) (RemoveUsersBatchRes, error) {
+	res, err := c.sendRemoveUsersBatch(ctx, request)
+	return res, err
+}
+
+func (c *Client) sendRemoveUsersBatch(ctx context.Context, request *IdentityBatchDeleteRequest) (res RemoveUsersBatchRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/api/v2/users/batch"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "DELETE", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeRemoveUsersBatchRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeRemoveUsersBatchResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // RenderTechnicalAssetAccessPath invokes render_technical_asset_access_path operation.
 //
 // Render Technical Asset Access Path.
@@ -10049,8 +10517,7 @@ func (c *Client) sendRenewOutputPortAsInputPort(ctx context.Context, request *Re
 
 // ReplaceGroupMembers invokes replace_group_members operation.
 //
-// Because the service method performs add and remove operations internally, a lock is used to ensure
-// that only one request is processed at a time.
+// Replace Group Members.
 //
 // PUT /api/v2/groups/{id}/members
 func (c *Client) ReplaceGroupMembers(ctx context.Context, request *GroupMembersReplace, params ReplaceGroupMembersParams) (ReplaceGroupMembersRes, error) {

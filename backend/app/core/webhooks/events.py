@@ -130,3 +130,11 @@ class DataProductSettingValueEvent(V2Event):
     @classmethod
     def event_type(cls) -> str:
         return "data_product_setting_value.event"
+
+
+class DomainEvent(V2Event):
+    id: UUID
+
+    @classmethod
+    def event_type(cls) -> str:
+        return "domain.event"

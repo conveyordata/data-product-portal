@@ -5080,12 +5080,15 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful Response",
+            "description": "Domain deleted",
             "content": {
               "application/json": {
                 "schema": {}
               }
             }
+          },
+          "202": {
+            "description": "Domain marked for deletion, waiting for finalizers"
           },
           "422": {
             "description": "Validation Error",
@@ -5125,6 +5128,107 @@
                 "schema": {
                   "$ref": "#/components/schemas/GetDomainResponse"
                 }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/configuration/domains/{id}/finalizers": {
+      "post": {
+        "tags": [
+          "Configuration - Domains"
+        ],
+        "summary": "Add Domain Finalizer",
+        "operationId": "add_domain_finalizer",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinalizerRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/configuration/domains/{id}/finalizers/{finalizer}": {
+      "delete": {
+        "tags": [
+          "Configuration - Domains"
+        ],
+        "summary": "Remove Domain Finalizer",
+        "operationId": "remove_domain_finalizer",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "finalizer",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Finalizer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
               }
             }
           },
@@ -5946,57 +6050,6 @@
         }
       }
     },
-    "/api/v2/users/{id}": {
-      "delete": {
-        "tags": [
-          "Users"
-        ],
-        "summary": "Remove User",
-        "operationId": "remove_user",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "404": {
-            "description": "User not found",
-            "content": {
-              "application/json": {
-                "example": {
-                  "detail": "User not found"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/v2/users": {
       "get": {
         "tags": [
@@ -6070,6 +6123,79 @@
         }
       }
     },
+    "/api/v2/users/batch": {
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Create Users Batch",
+        "operationId": "create_users_batch",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IdentityBatchCreateRequest_UserCreate_"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdentityBatchCreateResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Remove Users Batch",
+        "operationId": "remove_users_batch",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IdentityBatchDeleteRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v2/users/set_can_become_admin": {
       "put": {
         "tags": [
@@ -6109,6 +6235,37 @@
         }
       }
     },
+    "/api/v2/users/current": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Get Current User",
+        "operationId": "get_current_user",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v2/users/current/groups": {
       "get": {
         "tags": [
@@ -6124,6 +6281,111 @@
                 "schema": {
                   "$ref": "#/components/schemas/GroupsGetResponse"
                 }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/users/current/my_requests": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Get User Requests",
+        "operationId": "get_user_requests",
+        "parameters": [
+          {
+            "name": "hide_old_inactive",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Filter out inactive requests older than 30 days",
+              "default": true,
+              "title": "Hide Old Inactive"
+            },
+            "description": "Filter out inactive requests older than 30 days"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyRequestsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/users/current/pending_actions": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Get User Pending Actions",
+        "operationId": "get_user_pending_actions",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PendingActionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/users/current/seen_tour": {
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Mark Tour As Seen",
+        "operationId": "mark_tour_as_seen",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
               }
             }
           },
@@ -6193,13 +6455,25 @@
         }
       }
     },
-    "/api/v2/users/current/seen_tour": {
-      "post": {
+    "/api/v2/users/{id}": {
+      "delete": {
         "tags": [
           "Users"
         ],
-        "summary": "Mark Tour As Seen",
-        "operationId": "mark_tour_as_seen",
+        "summary": "Remove User",
+        "operationId": "remove_user",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -6209,109 +6483,12 @@
               }
             }
           },
-          "422": {
-            "description": "Validation Error",
+          "404": {
+            "description": "User not found",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v2/users/current/pending_actions": {
-      "get": {
-        "tags": [
-          "Users"
-        ],
-        "summary": "Get User Pending Actions",
-        "operationId": "get_user_pending_actions",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PendingActionResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v2/users/current/my_requests": {
-      "get": {
-        "tags": [
-          "Users"
-        ],
-        "summary": "Get User Requests",
-        "operationId": "get_user_requests",
-        "parameters": [
-          {
-            "name": "hide_old_inactive",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "boolean",
-              "description": "Filter out inactive requests older than 30 days",
-              "default": true,
-              "title": "Hide Old Inactive"
-            },
-            "description": "Filter out inactive requests older than 30 days"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MyRequestsResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v2/users/current": {
-      "get": {
-        "tags": [
-          "Users"
-        ],
-        "summary": "Get Current User",
-        "operationId": "get_current_user",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/User"
+                "example": {
+                  "detail": "User not found"
                 }
               }
             }
@@ -8973,6 +9150,79 @@
         }
       }
     },
+    "/api/v2/groups/batch": {
+      "post": {
+        "tags": [
+          "Groups"
+        ],
+        "summary": "Create Groups Batch",
+        "operationId": "create_groups_batch",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IdentityBatchCreateRequest_GroupCreate_"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdentityBatchCreateResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Groups"
+        ],
+        "summary": "Delete Groups Batch",
+        "operationId": "delete_groups_batch",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IdentityBatchDeleteRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v2/groups/{id}/members": {
       "get": {
         "tags": [
@@ -9067,6 +9317,16 @@
               }
             }
           },
+          "404": {
+            "description": "Group not found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "detail": "Required group does not exist"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Validation Error",
             "content": {
@@ -9084,7 +9344,6 @@
           "Groups"
         ],
         "summary": "Replace Group Members",
-        "description": "Because the service method performs add and remove operations internally,\na lock is used to ensure that only one request is processed at a time.",
         "operationId": "replace_group_members",
         "parameters": [
           {
@@ -9437,6 +9696,79 @@
         }
       }
     },
+    "/api/v2/machine-users/batch": {
+      "post": {
+        "tags": [
+          "Machine Users"
+        ],
+        "summary": "Create Machine Users Batch",
+        "operationId": "create_machine_users_batch",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IdentityBatchCreateRequest_MachineUserCreate_"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IdentityBatchCreateResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Machine Users"
+        ],
+        "summary": "Delete Machine Users Batch",
+        "operationId": "delete_machine_users_batch",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IdentityBatchDeleteRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v2/authn/device/device_token": {
       "post": {
         "tags": [
@@ -9676,6 +10008,9 @@
                   },
                   {
                     "$ref": "#/components/schemas/CloudEvent_DataProductSettingValueEvent"
+                  },
+                  {
+                    "$ref": "#/components/schemas/CloudEvent_DomainEvent"
                   }
                 ],
                 "title": "Body",
@@ -9691,7 +10026,8 @@
                     "technical_asset.event": "#/components/schemas/CloudEvent_TechnicalAssetEvent",
                     "output_port.event": "#/components/schemas/CloudEvent_OutputPortEvent",
                     "output_port_technical_asset_link.event": "#/components/schemas/CloudEvent_OutputPortTechnicalAssetLinkEvent",
-                    "data_product_setting_value.event": "#/components/schemas/CloudEvent_DataProductSettingValueEvent"
+                    "data_product_setting_value.event": "#/components/schemas/CloudEvent_DataProductSettingValueEvent",
+                    "domain.event": "#/components/schemas/CloudEvent_DomainEvent"
                   }
                 }
               }
@@ -10530,6 +10866,50 @@
           "data"
         ],
         "title": "CloudEvent_DataProductSettingValueEvent"
+      },
+      "CloudEvent_DomainEvent": {
+        "properties": {
+          "specversion": {
+            "type": "string",
+            "title": "Specversion",
+            "description": "The CloudEvents specification version.",
+            "default": "1.0"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "A unique UUID identifier for this specific event instance."
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "description": "Identifies the context in which an event happened.",
+            "default": "data-product-portal"
+          },
+          "type": {
+            "type": "string",
+            "const": "domain.event",
+            "title": "Type",
+            "description": "The unique type string belonging to this event.",
+            "default": "domain.event"
+          },
+          "time": {
+            "type": "string",
+            "title": "Time",
+            "description": "Timestamp of when the event occurred in ISO 8601 UTC format."
+          },
+          "data": {
+            "$ref": "#/components/schemas/DomainEvent",
+            "description": "The specific data payload corresponding to this event type."
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "time",
+          "data"
+        ],
+        "title": "CloudEvent_DomainEvent"
       },
       "CloudEvent_ExplorationEvent": {
         "properties": {
@@ -12728,6 +13108,10 @@
             "type": "string",
             "title": "Name"
           },
+          "namespace": {
+            "type": "string",
+            "title": "Namespace"
+          },
           "description": {
             "type": "string",
             "title": "Description"
@@ -12737,6 +13121,7 @@
         "required": [
           "id",
           "name",
+          "namespace",
           "description"
         ],
         "title": "Domain"
@@ -12750,14 +13135,41 @@
           "description": {
             "type": "string",
             "title": "Description"
+          },
+          "namespace": {
+            "type": "string",
+            "title": "Namespace"
           }
         },
         "type": "object",
         "required": [
           "name",
-          "description"
+          "description",
+          "namespace"
         ],
         "title": "DomainCreate"
+      },
+      "DomainEvent": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "title": "DomainEvent"
+      },
+      "DomainStatus": {
+        "type": "string",
+        "enum": [
+          "active",
+          "deleting"
+        ],
+        "title": "DomainStatus"
       },
       "DomainUpdate": {
         "properties": {
@@ -13160,6 +13572,7 @@
         "properties": {
           "finalizer": {
             "type": "string",
+            "pattern": "^(?:[^/\\s][^/]*)?[^/\\s.](?:[^/]*[^/\\s])?$",
             "title": "Finalizer"
           }
         },
@@ -13536,16 +13949,33 @@
             "type": "string",
             "title": "Name"
           },
+          "namespace": {
+            "type": "string",
+            "title": "Namespace"
+          },
           "description": {
             "type": "string",
             "title": "Description"
+          },
+          "status": {
+            "$ref": "#/components/schemas/DomainStatus"
+          },
+          "finalizers": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Finalizers"
           }
         },
         "type": "object",
         "required": [
           "id",
           "name",
-          "description"
+          "namespace",
+          "description",
+          "status",
+          "finalizers"
         ],
         "title": "GetDomainResponse"
       },
@@ -13560,9 +13990,23 @@
             "type": "string",
             "title": "Name"
           },
+          "namespace": {
+            "type": "string",
+            "title": "Namespace"
+          },
           "description": {
             "type": "string",
             "title": "Description"
+          },
+          "status": {
+            "$ref": "#/components/schemas/DomainStatus"
+          },
+          "finalizers": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Finalizers"
           },
           "abstract_data_product_count": {
             "type": "integer",
@@ -13573,7 +14017,10 @@
         "required": [
           "id",
           "name",
+          "namespace",
           "description",
+          "status",
+          "finalizers",
           "abstract_data_product_count"
         ],
         "title": "GetDomainsItem"
@@ -14627,6 +15074,176 @@
         },
         "type": "object",
         "title": "HTTPValidationError"
+      },
+      "IdentityBatchCreateError": {
+        "properties": {
+          "item": {
+            "title": "Item"
+          },
+          "errors": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Errors"
+          }
+        },
+        "type": "object",
+        "required": [
+          "item",
+          "errors"
+        ],
+        "title": "IdentityBatchCreateError"
+      },
+      "IdentityBatchCreateRequest_GroupCreate_": {
+        "properties": {
+          "items": {
+            "items": {
+              "properties": {
+                "external_id": {
+                  "$ref": "#/components/schemas/NonEmptyStr"
+                },
+                "display_name": {
+                  "$ref": "#/components/schemas/NonEmptyStr"
+                }
+              },
+              "type": "object",
+              "required": [
+                "external_id",
+                "display_name"
+              ],
+              "title": "GroupCreate"
+            },
+            "type": "array",
+            "maxItems": 50,
+            "minItems": 1,
+            "title": "Items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "title": "IdentityBatchCreateRequest_GroupCreate_"
+      },
+      "IdentityBatchCreateRequest_MachineUserCreate_": {
+        "properties": {
+          "items": {
+            "items": {
+              "properties": {
+                "external_id": {
+                  "$ref": "#/components/schemas/NonEmptyStr"
+                },
+                "display_name": {
+                  "$ref": "#/components/schemas/NonEmptyStr"
+                }
+              },
+              "type": "object",
+              "required": [
+                "external_id",
+                "display_name"
+              ],
+              "title": "MachineUserCreate"
+            },
+            "type": "array",
+            "maxItems": 50,
+            "minItems": 1,
+            "title": "Items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "title": "IdentityBatchCreateRequest_MachineUserCreate_"
+      },
+      "IdentityBatchCreateRequest_UserCreate_": {
+        "properties": {
+          "items": {
+            "items": {
+              "properties": {
+                "email": {
+                  "type": "string",
+                  "format": "email",
+                  "title": "Email"
+                },
+                "external_id": {
+                  "type": "string",
+                  "title": "External Id"
+                },
+                "first_name": {
+                  "type": "string",
+                  "title": "First Name"
+                },
+                "last_name": {
+                  "type": "string",
+                  "title": "Last Name"
+                }
+              },
+              "type": "object",
+              "required": [
+                "email",
+                "external_id",
+                "first_name",
+                "last_name"
+              ],
+              "title": "UserCreate"
+            },
+            "type": "array",
+            "maxItems": 50,
+            "minItems": 1,
+            "title": "Items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "title": "IdentityBatchCreateRequest_UserCreate_"
+      },
+      "IdentityBatchCreateResponse": {
+        "properties": {
+          "ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Ids"
+          },
+          "errors": {
+            "items": {
+              "$ref": "#/components/schemas/IdentityBatchCreateError"
+            },
+            "type": "array",
+            "title": "Errors"
+          }
+        },
+        "type": "object",
+        "required": [
+          "ids",
+          "errors"
+        ],
+        "title": "IdentityBatchCreateResponse"
+      },
+      "IdentityBatchDeleteRequest": {
+        "properties": {
+          "ids": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "maxItems": 50,
+            "minItems": 1,
+            "title": "Ids"
+          }
+        },
+        "type": "object",
+        "required": [
+          "ids"
+        ],
+        "title": "IdentityBatchDeleteRequest"
       },
       "IdentityType": {
         "type": "string",
@@ -17069,7 +17686,8 @@
           "output_port",
           "data_product_setting",
           "output_port_setting",
-          "exploration"
+          "exploration",
+          "domain"
         ],
         "title": "ResourceNameModel"
       },
@@ -17697,6 +18315,16 @@
           "data_product_name": {
             "type": "string",
             "title": "Data Product Name"
+          },
+          "quality_status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DataQualityStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",

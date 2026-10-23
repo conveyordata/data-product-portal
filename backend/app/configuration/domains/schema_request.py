@@ -2,7 +2,7 @@ from app.configuration.domains.model import Domain as DomainModel
 from app.shared.schema import ORMModel
 
 
-class DomainCreate(ORMModel):
+class DomainUpdate(ORMModel):
     name: str
     description: str
 
@@ -10,5 +10,5 @@ class DomainCreate(ORMModel):
         orm_model = DomainModel
 
 
-class DomainUpdate(DomainCreate):
-    pass
+class DomainCreate(DomainUpdate):
+    namespace: str

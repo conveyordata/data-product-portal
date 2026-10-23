@@ -7,6 +7,7 @@ from sqlalchemy import asc, select
 from sqlalchemy.orm import Session, joinedload
 
 from app.abstract_data_product.service import AbstractDataProductService
+from app.configuration.domains.service import DomainService
 from app.core.namespace.validation import NamespaceValidator
 from app.database.deps import get_db_session
 from app.resource_names.service import ResourceNameService, ResourceNameValidityType
@@ -36,6 +37,7 @@ class ExplorationService(AbstractDataProductService):
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Invalid namespace: {validity.value}",
             )
+        DomainService(self.db).ensure_assignable(exploration.domain_id)
         model = ExplorationModel(
             **exploration.parse_pydantic_schema(), owner_id=authenticated_user.id
         )

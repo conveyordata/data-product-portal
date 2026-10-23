@@ -1,4 +1,4 @@
-import { HttpResponse, http } from 'msw';
+import { delay, HttpResponse, http } from 'msw';
 import {
     ResourceNameValidityType,
     type ValidateResourceNameApiResponse,
@@ -13,12 +13,13 @@ export const mockGetResourceNamesConstraints = () => {
     );
 };
 
-export const mockResourceNamesSanitize = () => {
+export const mockResourceNamesSanitize = (resourceName?: string, latencyMs = 0) => {
     server.use(
-        http.get('*/api/v2/resource_names/sanitize', ({ request }) => {
+        http.get('*/api/v2/resource_names/sanitize', async ({ request }) => {
+            await delay(latencyMs);
             const url = new URL(request.url);
             const name = url.searchParams.get('name');
-            return HttpResponse.json({ resource_name: name });
+            return HttpResponse.json({ resource_name: resourceName ?? name });
         }),
     );
 };

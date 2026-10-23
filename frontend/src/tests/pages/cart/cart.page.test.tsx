@@ -236,6 +236,65 @@ describe('Cart', () => {
             });
         });
 
+        it('lets the user type a namespace when the name has no usable characters', async () => {
+            allowAllAuth();
+
+            mockOutputPortsSearch();
+            mockUsersHttp(mockUsers);
+            mockGetTags();
+            mockGetResourceNamesConstraints();
+            mockResourceNamesSanitize('');
+            mockResourceNamesValidate();
+            mockGetDataProductTypes();
+            mockDataProductLifecycles();
+            mockGetDomains();
+
+            renderWithProviders(<Cart />, {
+                routerProps: { initialEntries: ['/cart'] },
+                preloadedState: { cart: { DatasetIds: ['op-1'] } },
+                currentUser: mockUsers[0],
+            });
+
+            await selectDataProducts();
+            await createNewDataProduct();
+            const namespace = () => document.querySelector('[data-cy="namespace"]');
+            expect(namespace()).toBeDisabled();
+
+            await userEvent.type(await screen.findByRole('textbox', { name: /name/i }), '!!!');
+
+            await waitFor(() => expect(namespace()).toBeEnabled());
+        });
+
+        it('keeps suggesting the namespace when the user starts typing after the form settled', async () => {
+            allowAllAuth();
+
+            mockOutputPortsSearch();
+            mockUsersHttp(mockUsers);
+            mockGetTags();
+            mockGetResourceNamesConstraints();
+            mockResourceNamesSanitize(undefined, 300);
+            mockResourceNamesValidate();
+            mockGetDataProductTypes();
+            mockDataProductLifecycles();
+            mockGetDomains();
+
+            renderWithProviders(<Cart />, {
+                routerProps: { initialEntries: ['/cart'] },
+                preloadedState: { cart: { DatasetIds: ['op-1'] } },
+                currentUser: mockUsers[0],
+            });
+
+            await selectDataProducts();
+            await createNewDataProduct();
+            const namespace = () => document.querySelector<HTMLInputElement>('[data-cy="namespace"]');
+
+            await new Promise((resolve) => setTimeout(resolve, 700));
+            await userEvent.type(await screen.findByRole('textbox', { name: /name/i }), 'sales');
+
+            await waitFor(() => expect(namespace()?.value).toBe('sales'));
+            expect(namespace()).toBeDisabled();
+        });
+
         it('should warn before creating a hidden data product', async () => {
             allowAllAuth();
 
@@ -360,6 +419,47 @@ describe('Cart', () => {
             await waitFor(() => {
                 expect(screen.getByText('An Exploration with this name already exists')).toBeTruthy();
             });
+        });
+    });
+
+    describe('Cart should reject an exploration name without usable characters', () => {
+        it('shows an error and does not create the exploration', async () => {
+            allowAllAuth();
+
+            mockOutputPortsSearch();
+            mockUsersHttp(mockUsers);
+            mockGetResourceNamesConstraints();
+            mockResourceNamesSanitize('');
+            mockResourceNamesValidate();
+            mockGetDomains();
+
+            const createHandler = vi.fn(() => HttpResponse.json({ id: 'id-1' }));
+            server.use(http.post('*/api/v2/explorations', createHandler));
+
+            renderWithProviders(<Cart />, {
+                routerProps: { initialEntries: ['/cart'] },
+                preloadedState: { cart: { DatasetIds: ['op-1'] } },
+                currentUser: mockUsers[0],
+            });
+
+            await selectExplorations();
+            await createNewExploration();
+            await userEvent.type(await screen.findByRole('textbox', { name: /name/i }), '!!!');
+            await userEvent.click(screen.getByRole('combobox', { name: /domain/i }));
+            await userEvent.click(await screen.findByText('Finance'));
+            await userEvent.type(
+                await screen.findByPlaceholderText('Explain why you need access to these Output Ports'),
+                'I need this data for my analysis.',
+            );
+
+            const submitButton = await screen.findByRole('button', { name: 'Create' });
+            await waitFor(() => expect(submitButton).not.toBeDisabled());
+            await userEvent.click(submitButton);
+
+            expect(
+                await screen.findByText('The name of the Exploration must contain a letter or a digit'),
+            ).toBeTruthy();
+            expect(createHandler).not.toHaveBeenCalled();
         });
     });
 

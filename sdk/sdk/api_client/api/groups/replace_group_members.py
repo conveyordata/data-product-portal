@@ -79,9 +79,6 @@ def sync_detailed(
 ) -> Response[Any | HTTPValidationError]:
     """Replace Group Members
 
-     Because the service method performs add and remove operations internally,
-    a lock is used to ensure that only one request is processed at a time.
-
     Args:
         id (UUID):
         body (GroupMembersReplace):
@@ -114,9 +111,6 @@ def sync(
 ) -> Any | HTTPValidationError | None:
     """Replace Group Members
 
-     Because the service method performs add and remove operations internally,
-    a lock is used to ensure that only one request is processed at a time.
-
     Args:
         id (UUID):
         body (GroupMembersReplace):
@@ -143,9 +137,6 @@ async def asyncio_detailed(
     body: GroupMembersReplace,
 ) -> Response[Any | HTTPValidationError]:
     """Replace Group Members
-
-     Because the service method performs add and remove operations internally,
-    a lock is used to ensure that only one request is processed at a time.
 
     Args:
         id (UUID):
@@ -176,9 +167,6 @@ async def asyncio(
     body: GroupMembersReplace,
 ) -> Any | HTTPValidationError | None:
     """Replace Group Members
-
-     Because the service method performs add and remove operations internally,
-    a lock is used to ensure that only one request is processed at a time.
 
     Args:
         id (UUID):

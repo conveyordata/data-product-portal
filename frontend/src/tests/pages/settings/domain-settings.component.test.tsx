@@ -4,12 +4,20 @@ import { CreateDomainModal } from '@/pages/settings/components/settings-tabs/com
 import { DomainTable } from '@/pages/settings/components/settings-tabs/components/domain-table/domain-table.component.tsx';
 import { mock_domains, mockGetDomains } from '@/tests/mocks/configurationDomains.ts';
 import { mockEnvironments } from '@/tests/mocks/configurationEnvironments.ts';
+import {
+    mockGetResourceNamesConstraints,
+    mockResourceNamesSanitize,
+    mockResourceNamesValidate,
+} from '@/tests/mocks/resource_names.ts';
 import { server } from '@/tests/mocks/server.ts';
 import { renderWithProviders, screen, userEvent, waitFor } from '@/tests/test-utils.tsx';
 
 describe('Domain settings without environment scope', () => {
     beforeEach(() => {
         mockGetDomains();
+        mockGetResourceNamesConstraints();
+        mockResourceNamesValidate();
+        mockResourceNamesSanitize();
     });
 
     it.each(['create', 'edit'] as const)('only sends Domain metadata when saving in %s mode', async (mode) => {
@@ -42,8 +50,13 @@ describe('Domain settings without environment scope', () => {
         await userEvent.type(name, 'Research');
         await userEvent.clear(description);
         await userEvent.type(description, 'Research domain');
-        await userEvent.click(screen.getByRole('button', { name: mode === 'edit' ? 'Update' : 'Create' }));
-        await waitFor(() => expect(save).toHaveBeenCalledWith({ name: 'Research', description: 'Research domain' }));
+        const submit = screen.getByRole('button', { name: mode === 'edit' ? 'Update' : 'Create' });
+        await waitFor(() => expect(submit).toBeEnabled());
+        await userEvent.click(submit);
+        const metadata = { name: 'Research', description: 'Research domain' };
+        await waitFor(() =>
+            expect(save).toHaveBeenCalledWith(mode === 'create' ? { ...metadata, namespace: 'Research' } : metadata),
+        );
         expect(fetchEnvironments).not.toHaveBeenCalled();
     });
 

@@ -37,6 +37,7 @@ export type Tag = {
 export type Domain = {
   id: string;
   name: string;
+  namespace: string;
   description: string;
 };
 export type DataProductLifeCycle = {
@@ -69,6 +70,7 @@ export type SearchOutputPortsResponseItem = {
   abstract_data_product_count: number;
   technical_assets_count: number;
   data_product_name: string;
+  quality_status?: DataQualityStatus | null;
 };
 export type SearchOutputPortsResponse = {
   output_ports: SearchOutputPortsResponseItem[];
@@ -96,6 +98,13 @@ export enum OutputPortAccessFunction {
 export enum AccessDurationType {
   Permanent = "permanent",
   TimeBound = "time_bound",
+}
+export enum DataQualityStatus {
+  Success = "success",
+  Failure = "failure",
+  Warning = "warning",
+  Error = "error",
+  Unknown = "unknown",
 }
 export enum AssignmentFilter {
   All = "all",

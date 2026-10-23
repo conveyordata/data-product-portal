@@ -10,7 +10,7 @@ import { MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
 import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
 import { useGetDataProductsLifecyclesQuery } from '@/store/api/services/generated/configurationDataProductLifecyclesApi.ts';
 import { useGetDataProductsTypesQuery } from '@/store/api/services/generated/configurationDataProductTypesApi.ts';
-import { useGetDomainsQuery } from '@/store/api/services/generated/configurationDomainsApi.ts';
+import { DomainStatus, useGetDomainsQuery } from '@/store/api/services/generated/configurationDomainsApi.ts';
 import { useGetEnvironmentsQuery } from '@/store/api/services/generated/configurationEnvironmentsApi.ts';
 import { useGetTagsQuery } from '@/store/api/services/generated/configurationTagsApi.ts';
 import {
@@ -53,8 +53,15 @@ export const DataProductFormItems = <T extends DataProductCreate>({
         useGetDataProductsTypesQuery();
     const { data: { users: dataProductOwners = [] } = {}, isFetching: isFetchingUsers } = useGetUsersQuery();
     const { data: { tags: availableTags = [] } = {}, isFetching: isFetchingTags } = useGetTagsQuery();
-    const [sanitizeResourceName, { data: sanitizedResourceName, isSuccess: sanitizedResourceNameSuccess }] =
-        useLazySanitizeResourceNameQuery();
+    const [
+        sanitizeResourceName,
+        {
+            data: sanitizedResourceName,
+            isSuccess: sanitizedResourceNameSuccess,
+            isFetching: sanitizingResourceName,
+            originalArgs: sanitizedName,
+        },
+    ] = useLazySanitizeResourceNameQuery();
     const [validateResourceName] = useLazyValidateResourceNameQuery();
     const { data: constraints } = useResourceNameConstraintsQuery();
     useEffect(() => {
@@ -124,12 +131,18 @@ export const DataProductFormItems = <T extends DataProductCreate>({
         }
     }, [form, mode, canEditResourceName, dataProductNameValue, fetchResourceNameDebounced]);
 
+    const namespaceIsCurrent =
+        sanitizedResourceNameSuccess && !sanitizingResourceName && sanitizedName === (dataProductNameValue ?? '');
+
     useEffect(() => {
-        if (mode === 'create' && !canEditResourceName && sanitizedResourceNameSuccess && sanitizedResourceName) {
+        if (mode === 'create' && !canEditResourceName && namespaceIsCurrent && sanitizedResourceName) {
+            if (dataProductNameValue && !sanitizedResourceName.resource_name) {
+                setCanEditResourceName(true);
+            }
             form.setFieldValue('namespace', sanitizedResourceName.resource_name);
             form.validateFields(['namespace']);
         }
-    }, [form, mode, canEditResourceName, sanitizedResourceName, sanitizedResourceNameSuccess]);
+    }, [form, mode, canEditResourceName, dataProductNameValue, namespaceIsCurrent, sanitizedResourceName]);
 
     const resourceNameValidationCallback = useCallback(
         (resourceName: string) =>
@@ -243,7 +256,9 @@ export const DataProductFormItems = <T extends DataProductCreate>({
                 <Select
                     data-cy="data-product-domain"
                     loading={isFetchingDomains}
-                    options={domains.map((domain) => ({ label: domain.name, value: domain.id }))}
+                    options={domains
+                        .filter((domain) => domain.status !== DomainStatus.Deleting)
+                        .map((domain) => ({ label: domain.name, value: domain.id }))}
                     showSearch={{ filterOption: selectFilterOptionByLabelAndValue }}
                     allowClear
                     popupRender={(menu) => <div data-cy="data-product-domain-options">{menu}</div>}

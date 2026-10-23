@@ -56,9 +56,9 @@ begin
     INSERT INTO data_product_lifecycles (id, name, "value", color, is_default, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), 'Ready', 1, 'green', false, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO ready;
 
     -- DOMAINS
-    INSERT INTO public.domains (id, "name", description, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), 'Sales', 'Responsible for all activities related to sales, customer relationships, and order management.', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO sales_id;
-    INSERT INTO public.domains (id, "name", description, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), 'Marketing', 'Focused on customer outreach, promotions, and analyzing customer behavior to drive sales.', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO marketing_id;
-    INSERT INTO public.domains (id, "name", description, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), 'Logistics', 'Manages inventory, warehousing, and the entire order fulfillment and shipping process.', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO logistics_id;
+    INSERT INTO public.domains (id, "name", namespace, description, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), 'Sales', 'sales', 'Responsible for all activities related to sales, customer relationships, and order management.', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO sales_id;
+    INSERT INTO public.domains (id, "name", namespace, description, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), 'Marketing', 'marketing', 'Focused on customer outreach, promotions, and analyzing customer behavior to drive sales.', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO marketing_id;
+    INSERT INTO public.domains (id, "name", namespace, description, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), 'Logistics', 'logistics', 'Manages inventory, warehousing, and the entire order fulfillment and shipping process.', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO logistics_id;
 
     -- DATA PRODUCT TYPES
     INSERT INTO public.data_product_types (id, "name", description, icon_key, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), 'source aligned', 'Data product aligned with a source system', 'INGESTION', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO source_aligned_type_id;

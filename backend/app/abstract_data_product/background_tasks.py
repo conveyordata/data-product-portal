@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 
 from sqlalchemy import select
 
+from app.configuration.domains.status import DomainStatus
 from app.core.logging import logger
 from app.data_products.status import AbstractDataProductStatus
 from app.database.database import SessionLocal
@@ -13,6 +14,7 @@ STUCK_THRESHOLD_SECONDS = 3600  # warn after 1 hour in DELETING
 
 async def check_stuck_deletions() -> None:
     from app.abstract_data_product.model import AbstractDataProduct
+    from app.configuration.domains.model import Domain
 
     while True:
         try:
@@ -28,9 +30,16 @@ async def check_stuck_deletions() -> None:
                     .scalars()
                     .all()
                 )
+                stuck_domains = db.scalars(
+                    select(Domain).where(Domain.status == DomainStatus.DELETING)
+                ).all()
                 now = datetime.now(tz=timezone.utc)
-                for adp in stuck:
-                    last_updated = adp.updated_on
+                stuck_items = [
+                    *((adp.abstract_data_product_type.value, adp) for adp in stuck),
+                    *(("domain", domain) for domain in stuck_domains),
+                ]
+                for label, resource in stuck_items:
+                    last_updated = resource.updated_on
                     if last_updated is None:
                         continue
                     # updated_on is stored without timezone; treat as UTC
@@ -40,10 +49,10 @@ async def check_stuck_deletions() -> None:
                     age_seconds = (now - last_updated).total_seconds()
                     if age_seconds >= STUCK_THRESHOLD_SECONDS:
                         logger.warning(
-                            f"[Finalizers] {adp.abstract_data_product_type.value} '{adp.name}' "
-                            f"(id={adp.id}) has been stuck in DELETING for "
+                            f"[Finalizers] {label} '{resource.name}' "
+                            f"(id={resource.id}) has been stuck in DELETING for "
                             f"{int(age_seconds // 60)} minutes. "
-                            f"Remaining finalizers: {adp.finalizers}"
+                            f"Remaining finalizers: {resource.finalizers}"
                         )
         except Exception as e:
             logger.warning(f"[Finalizers] Stuck deletion check failed: {e}")

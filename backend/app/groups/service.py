@@ -1,10 +1,10 @@
-from typing import Iterable, Sequence
+from typing import Any, Iterable, Sequence
 from uuid import UUID
 
 from fastapi import HTTPException, status
 from sqlalchemy import asc, delete, func, select
 from sqlalchemy.dialects.postgresql import insert
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from app.core.authz import Authorization
 from app.groups.model import Group, GroupMembership, ensure_group_exists
@@ -15,6 +15,11 @@ from app.groups.schema_response import (
     GroupUpdateResponse,
 )
 from app.identities.model import Identity
+from app.identities.schema_response import (
+    IdentityBatchCreateError,
+    IdentityBatchCreateResponse,
+)
+from app.identities.service import validate_batch_create_items
 from app.identities.type import IdentityType
 
 
@@ -107,21 +112,41 @@ class GroupService:
         self._add_members_auth(group_id, inserted_ids)
         self._remove_members_auth(group_id, removed_ids)
 
-    def delete_group(self, *, group_id: UUID) -> None:
+    def delete_group(self, group_id: UUID) -> None:
         group = ensure_group_exists(group_id, self.db)
+        memberships = self.list_memberships(group.id)
 
-        # Removes assignments for users against this group
-        self._remove_members_auth(
-            group_id,
-            (
-                membership.member_identity_id
-                for membership in self.list_memberships(group_id)
-            ),
-        )
         # Remove assignments where the group itself is the subject.
-        self.authorizer.clear_assignments_for_user(user_id=group_id)
-
+        self.authorizer.clear_assignments_for_user(user_id=group.id)
+        self.authorizer.revoke_group_memberships(
+            memberships=[
+                (membership.member_identity_id, group.id) for membership in memberships
+            ]
+        )
         self.db.delete(group)
+        self.db.flush()
+
+    def delete_groups_batch(self, ids: list[UUID]) -> None:
+        groups = self.db.scalars(
+            select(Group)
+            .where(Group.id.in_(ids))
+            .options(selectinload(Group.memberships))
+        ).all()
+
+        self.authorizer.clear_assignments_for_identities(
+            identity_ids=[group.id for group in groups],
+        )
+        self.authorizer.revoke_group_memberships(
+            memberships=[
+                (membership.member_identity_id, group.id)
+                for group in groups
+                for membership in group.memberships
+            ]
+        )
+
+        for group in groups:
+            self.db.delete(group)
+
         self.db.flush()
 
     def get_groups_ids_identity_is_member_of(self, identity_id: UUID) -> list[UUID]:
@@ -148,6 +173,50 @@ class GroupService:
         self.db.flush()
 
         return GroupCreateResponse(id=group_model.id)
+
+    def create_groups_batch(
+        self,
+        items: list[Any],
+    ) -> IdentityBatchCreateResponse:
+        validated_groups, errors = validate_batch_create_items(
+            items,
+            GroupCreate,
+        )
+
+        external_ids = {group.external_id for group in validated_groups}
+
+        unavailable_external_ids: set[str] = (
+            set(
+                self.db.scalars(
+                    select(Group.external_id).where(Group.external_id.in_(external_ids))
+                ).all()
+            )
+            if external_ids
+            else set()
+        )
+
+        groups: list[Group] = []
+        for group in validated_groups:
+            if group.external_id in unavailable_external_ids:
+                errors.append(
+                    IdentityBatchCreateError(
+                        item=group,
+                        errors=["A group with this external ID already exists."],
+                    )
+                )
+                continue
+
+            # Reserve the ID so later duplicates in this request are rejected.
+            unavailable_external_ids.add(group.external_id)
+            groups.append(Group(**group.parse_pydantic_schema()))
+
+        self.db.add_all(groups)
+        self.db.flush()
+
+        return IdentityBatchCreateResponse(
+            ids=[group.id for group in groups],
+            errors=errors,
+        )
 
     def update_group(self, group_id: UUID, group: GroupUpdate) -> GroupUpdateResponse:
         current_group = ensure_group_exists(group_id, self.db)
@@ -196,28 +265,18 @@ class GroupService:
     def _add_members_auth(
         self, group_id: UUID, member_identity_ids: Iterable[UUID]
     ) -> None:
-        for member_identity_id in member_identity_ids:
-            self.authorizer.assign_global_group_membership(
-                member_identity_id=member_identity_id,
-                group_id=group_id,
-            )
-            self.authorizer.assign_resource_group_membership(
-                member_identity_id=member_identity_id,
-                group_id=group_id,
-            )
+        memberships = [
+            (member_identity_id, group_id) for member_identity_id in member_identity_ids
+        ]
+        self.authorizer.assign_group_memberships(memberships=memberships)
 
     def _remove_members_auth(
         self, group_id: UUID, member_identity_ids: Iterable[UUID]
     ) -> None:
-        for member_identity_id in member_identity_ids:
-            self.authorizer.revoke_global_group_membership(
-                member_identity_id=member_identity_id,
-                group_id=group_id,
-            )
-            self.authorizer.revoke_resource_group_membership(
-                member_identity_id=member_identity_id,
-                group_id=group_id,
-            )
+        memberships = [
+            (member_identity_id, group_id) for member_identity_id in member_identity_ids
+        ]
+        self.authorizer.revoke_group_memberships(memberships=memberships)
 
     def _insert_member_ids(
         self, group_id: UUID, member_identity_ids: set[UUID]

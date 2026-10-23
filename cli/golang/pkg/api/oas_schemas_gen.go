@@ -607,6 +607,10 @@ type AddDataProductFinalizerOKApplicationJSON jx.Raw
 
 func (*AddDataProductFinalizerOKApplicationJSON) addDataProductFinalizerRes() {}
 
+type AddDomainFinalizerOKApplicationJSON jx.Raw
+
+func (*AddDomainFinalizerOKApplicationJSON) addDomainFinalizerRes() {}
+
 type AddExplorationFinalizerOKApplicationJSON jx.Raw
 
 func (*AddExplorationFinalizerOKApplicationJSON) addExplorationFinalizerRes() {}
@@ -619,6 +623,10 @@ func (*AddGroupMembersBadRequestApplicationJSON) addGroupMembersRes() {}
 type AddGroupMembersNoContent struct{}
 
 func (*AddGroupMembersNoContent) addGroupMembersRes() {}
+
+type AddGroupMembersNotFoundApplicationJSON jx.Raw
+
+func (*AddGroupMembersNotFoundApplicationJSON) addGroupMembersRes() {}
 
 type AddOutputPortDataQualityRunNotFoundApplicationJSON jx.Raw
 
@@ -3568,6 +3576,11 @@ type DeleteGroupNotFoundApplicationJSON jx.Raw
 
 func (*DeleteGroupNotFoundApplicationJSON) deleteGroupRes() {}
 
+// DeleteGroupsBatchNoContent is response for DeleteGroupsBatch operation.
+type DeleteGroupsBatchNoContent struct{}
+
+func (*DeleteGroupsBatchNoContent) deleteGroupsBatchRes() {}
+
 // DeleteMachineUserNoContent is response for DeleteMachineUser operation.
 type DeleteMachineUserNoContent struct{}
 
@@ -3576,6 +3589,11 @@ func (*DeleteMachineUserNoContent) deleteMachineUserRes() {}
 type DeleteMachineUserNotFoundApplicationJSON jx.Raw
 
 func (*DeleteMachineUserNotFoundApplicationJSON) deleteMachineUserRes() {}
+
+// DeleteMachineUsersBatchNoContent is response for DeleteMachineUsersBatch operation.
+type DeleteMachineUsersBatchNoContent struct{}
+
+func (*DeleteMachineUsersBatchNoContent) deleteMachineUsersBatchRes() {}
 
 type DeleteOutputPortQueryStatOKApplicationJSON jx.Raw
 
@@ -3845,6 +3863,7 @@ func (s *DeviceFlowStatus) UnmarshalText(data []byte) error {
 type Domain struct {
 	ID          uuid.UUID `json:"id"`
 	Name        string    `json:"name"`
+	Namespace   string    `json:"namespace"`
 	Description string    `json:"description"`
 }
 
@@ -3856,6 +3875,11 @@ func (s *Domain) GetID() uuid.UUID {
 // GetName returns the value of Name.
 func (s *Domain) GetName() string {
 	return s.Name
+}
+
+// GetNamespace returns the value of Namespace.
+func (s *Domain) GetNamespace() string {
+	return s.Namespace
 }
 
 // GetDescription returns the value of Description.
@@ -3873,6 +3897,11 @@ func (s *Domain) SetName(val string) {
 	s.Name = val
 }
 
+// SetNamespace sets the value of Namespace.
+func (s *Domain) SetNamespace(val string) {
+	s.Namespace = val
+}
+
 // SetDescription sets the value of Description.
 func (s *Domain) SetDescription(val string) {
 	s.Description = val
@@ -3882,6 +3911,7 @@ func (s *Domain) SetDescription(val string) {
 type DomainCreate struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
+	Namespace   string `json:"namespace"`
 }
 
 // GetName returns the value of Name.
@@ -3894,6 +3924,11 @@ func (s *DomainCreate) GetDescription() string {
 	return s.Description
 }
 
+// GetNamespace returns the value of Namespace.
+func (s *DomainCreate) GetNamespace() string {
+	return s.Namespace
+}
+
 // SetName sets the value of Name.
 func (s *DomainCreate) SetName(val string) {
 	s.Name = val
@@ -3902,6 +3937,53 @@ func (s *DomainCreate) SetName(val string) {
 // SetDescription sets the value of Description.
 func (s *DomainCreate) SetDescription(val string) {
 	s.Description = val
+}
+
+// SetNamespace sets the value of Namespace.
+func (s *DomainCreate) SetNamespace(val string) {
+	s.Namespace = val
+}
+
+// Ref: #/components/schemas/DomainStatus
+type DomainStatus string
+
+const (
+	DomainStatusActive   DomainStatus = "active"
+	DomainStatusDeleting DomainStatus = "deleting"
+)
+
+// AllValues returns all DomainStatus values.
+func (DomainStatus) AllValues() []DomainStatus {
+	return []DomainStatus{
+		DomainStatusActive,
+		DomainStatusDeleting,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s DomainStatus) MarshalText() ([]byte, error) {
+	switch s {
+	case DomainStatusActive:
+		return []byte(s), nil
+	case DomainStatusDeleting:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *DomainStatus) UnmarshalText(data []byte) error {
+	switch DomainStatus(data) {
+	case DomainStatusActive:
+		*s = DomainStatusActive
+		return nil
+	case DomainStatusDeleting:
+		*s = DomainStatusDeleting
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
 }
 
 // Ref: #/components/schemas/DomainUpdate
@@ -4811,9 +4893,12 @@ func (s *GetDataProductsResponseItem) SetTechnicalAssetCount(val int) {
 
 // Ref: #/components/schemas/GetDomainResponse
 type GetDomainResponse struct {
-	ID          uuid.UUID `json:"id"`
-	Name        string    `json:"name"`
-	Description string    `json:"description"`
+	ID          uuid.UUID    `json:"id"`
+	Name        string       `json:"name"`
+	Namespace   string       `json:"namespace"`
+	Description string       `json:"description"`
+	Status      DomainStatus `json:"status"`
+	Finalizers  []string     `json:"finalizers"`
 }
 
 // GetID returns the value of ID.
@@ -4826,9 +4911,24 @@ func (s *GetDomainResponse) GetName() string {
 	return s.Name
 }
 
+// GetNamespace returns the value of Namespace.
+func (s *GetDomainResponse) GetNamespace() string {
+	return s.Namespace
+}
+
 // GetDescription returns the value of Description.
 func (s *GetDomainResponse) GetDescription() string {
 	return s.Description
+}
+
+// GetStatus returns the value of Status.
+func (s *GetDomainResponse) GetStatus() DomainStatus {
+	return s.Status
+}
+
+// GetFinalizers returns the value of Finalizers.
+func (s *GetDomainResponse) GetFinalizers() []string {
+	return s.Finalizers
 }
 
 // SetID sets the value of ID.
@@ -4841,19 +4941,37 @@ func (s *GetDomainResponse) SetName(val string) {
 	s.Name = val
 }
 
+// SetNamespace sets the value of Namespace.
+func (s *GetDomainResponse) SetNamespace(val string) {
+	s.Namespace = val
+}
+
 // SetDescription sets the value of Description.
 func (s *GetDomainResponse) SetDescription(val string) {
 	s.Description = val
+}
+
+// SetStatus sets the value of Status.
+func (s *GetDomainResponse) SetStatus(val DomainStatus) {
+	s.Status = val
+}
+
+// SetFinalizers sets the value of Finalizers.
+func (s *GetDomainResponse) SetFinalizers(val []string) {
+	s.Finalizers = val
 }
 
 func (*GetDomainResponse) getDomainRes() {}
 
 // Ref: #/components/schemas/GetDomainsItem
 type GetDomainsItem struct {
-	ID                       uuid.UUID `json:"id"`
-	Name                     string    `json:"name"`
-	Description              string    `json:"description"`
-	AbstractDataProductCount int       `json:"abstract_data_product_count"`
+	ID                       uuid.UUID    `json:"id"`
+	Name                     string       `json:"name"`
+	Namespace                string       `json:"namespace"`
+	Description              string       `json:"description"`
+	Status                   DomainStatus `json:"status"`
+	Finalizers               []string     `json:"finalizers"`
+	AbstractDataProductCount int          `json:"abstract_data_product_count"`
 }
 
 // GetID returns the value of ID.
@@ -4866,9 +4984,24 @@ func (s *GetDomainsItem) GetName() string {
 	return s.Name
 }
 
+// GetNamespace returns the value of Namespace.
+func (s *GetDomainsItem) GetNamespace() string {
+	return s.Namespace
+}
+
 // GetDescription returns the value of Description.
 func (s *GetDomainsItem) GetDescription() string {
 	return s.Description
+}
+
+// GetStatus returns the value of Status.
+func (s *GetDomainsItem) GetStatus() DomainStatus {
+	return s.Status
+}
+
+// GetFinalizers returns the value of Finalizers.
+func (s *GetDomainsItem) GetFinalizers() []string {
+	return s.Finalizers
 }
 
 // GetAbstractDataProductCount returns the value of AbstractDataProductCount.
@@ -4886,9 +5019,24 @@ func (s *GetDomainsItem) SetName(val string) {
 	s.Name = val
 }
 
+// SetNamespace sets the value of Namespace.
+func (s *GetDomainsItem) SetNamespace(val string) {
+	s.Namespace = val
+}
+
 // SetDescription sets the value of Description.
 func (s *GetDomainsItem) SetDescription(val string) {
 	s.Description = val
+}
+
+// SetStatus sets the value of Status.
+func (s *GetDomainsItem) SetStatus(val DomainStatus) {
+	s.Status = val
+}
+
+// SetFinalizers sets the value of Finalizers.
+func (s *GetDomainsItem) SetFinalizers(val []string) {
+	s.Finalizers = val
 }
 
 // SetAbstractDataProductCount sets the value of AbstractDataProductCount.
@@ -6380,6 +6528,7 @@ func (s *HTTPValidationError) SetDetail(val []ValidationError) {
 }
 
 func (*HTTPValidationError) addDataProductFinalizerRes()                  {}
+func (*HTTPValidationError) addDomainFinalizerRes()                       {}
 func (*HTTPValidationError) addExplorationFinalizerRes()                  {}
 func (*HTTPValidationError) addGroupMembersRes()                          {}
 func (*HTTPValidationError) addOutputPortDataQualityRunRes()              {}
@@ -6398,7 +6547,9 @@ func (*HTTPValidationError) createDataProductTypeRes()                    {}
 func (*HTTPValidationError) createDomainRes()                             {}
 func (*HTTPValidationError) createExplorationRes()                        {}
 func (*HTTPValidationError) createGroupRes()                              {}
+func (*HTTPValidationError) createGroupsBatchRes()                        {}
 func (*HTTPValidationError) createMachineUserRes()                        {}
+func (*HTTPValidationError) createMachineUsersBatchRes()                  {}
 func (*HTTPValidationError) createOutputPortAccessTypeRes()               {}
 func (*HTTPValidationError) createOutputPortRes()                         {}
 func (*HTTPValidationError) createOutputPortRoleAssignmentRes()           {}
@@ -6406,6 +6557,7 @@ func (*HTTPValidationError) createRoleRes()                               {}
 func (*HTTPValidationError) createTagRes()                                {}
 func (*HTTPValidationError) createTechnicalAssetRes()                     {}
 func (*HTTPValidationError) createUserRes()                               {}
+func (*HTTPValidationError) createUsersBatchRes()                         {}
 func (*HTTPValidationError) decideDataProductRoleAssignmentRes()          {}
 func (*HTTPValidationError) decideGlobalRoleAssignmentRes()               {}
 func (*HTTPValidationError) decideOutputPortRoleAssignmentRes()           {}
@@ -6413,7 +6565,9 @@ func (*HTTPValidationError) deleteAccessModeRes()                         {}
 func (*HTTPValidationError) deleteDataProductRoleAssignmentRes()          {}
 func (*HTTPValidationError) deleteGlobalRoleAssignmentRes()               {}
 func (*HTTPValidationError) deleteGroupRes()                              {}
+func (*HTTPValidationError) deleteGroupsBatchRes()                        {}
 func (*HTTPValidationError) deleteMachineUserRes()                        {}
+func (*HTTPValidationError) deleteMachineUsersBatchRes()                  {}
 func (*HTTPValidationError) deleteOutputPortQueryStatRes()                {}
 func (*HTTPValidationError) deleteOutputPortRoleAssignmentRes()           {}
 func (*HTTPValidationError) denyOutputPortAsInputPortRes()                {}
@@ -6496,6 +6650,7 @@ func (*HTTPValidationError) removeDataProductLifecycleRes()               {}
 func (*HTTPValidationError) removeDataProductRes()                        {}
 func (*HTTPValidationError) removeDataProductSettingRes()                 {}
 func (*HTTPValidationError) removeDataProductTypeRes()                    {}
+func (*HTTPValidationError) removeDomainFinalizerRes()                    {}
 func (*HTTPValidationError) removeDomainRes()                             {}
 func (*HTTPValidationError) removeExplorationFinalizerRes()               {}
 func (*HTTPValidationError) removeExplorationRes()                        {}
@@ -6510,6 +6665,7 @@ func (*HTTPValidationError) removeTagRes()                                {}
 func (*HTTPValidationError) removeTechnicalAssetRes()                     {}
 func (*HTTPValidationError) removeUserNotificationRes()                   {}
 func (*HTTPValidationError) removeUserRes()                               {}
+func (*HTTPValidationError) removeUsersBatchRes()                         {}
 func (*HTTPValidationError) renderTechnicalAssetAccessPathRes()           {}
 func (*HTTPValidationError) renewInputPortForDataProductRes()             {}
 func (*HTTPValidationError) renewInputPortForExplorationRes()             {}
@@ -6554,6 +6710,219 @@ func (*HTTPValidationError) updateTechnicalAssetRes()                     {}
 func (*HTTPValidationError) updateTechnicalAssetStatusRes()               {}
 func (*HTTPValidationError) updateThemeSettingsRes()                      {}
 func (*HTTPValidationError) validateResourceNameRes()                     {}
+
+// Ref: #/components/schemas/IdentityBatchCreateError
+type IdentityBatchCreateError struct {
+	Item   jx.Raw   `json:"item"`
+	Errors []string `json:"errors"`
+}
+
+// GetItem returns the value of Item.
+func (s *IdentityBatchCreateError) GetItem() jx.Raw {
+	return s.Item
+}
+
+// GetErrors returns the value of Errors.
+func (s *IdentityBatchCreateError) GetErrors() []string {
+	return s.Errors
+}
+
+// SetItem sets the value of Item.
+func (s *IdentityBatchCreateError) SetItem(val jx.Raw) {
+	s.Item = val
+}
+
+// SetErrors sets the value of Errors.
+func (s *IdentityBatchCreateError) SetErrors(val []string) {
+	s.Errors = val
+}
+
+// Ref: #/components/schemas/IdentityBatchCreateRequest_GroupCreate_
+type IdentityBatchCreateRequestGroupCreate struct {
+	Items []IdentityBatchCreateRequestGroupCreateItemsItem `json:"items"`
+}
+
+// GetItems returns the value of Items.
+func (s *IdentityBatchCreateRequestGroupCreate) GetItems() []IdentityBatchCreateRequestGroupCreateItemsItem {
+	return s.Items
+}
+
+// SetItems sets the value of Items.
+func (s *IdentityBatchCreateRequestGroupCreate) SetItems(val []IdentityBatchCreateRequestGroupCreateItemsItem) {
+	s.Items = val
+}
+
+type IdentityBatchCreateRequestGroupCreateItemsItem struct {
+	ExternalID  NonEmptyStr `json:"external_id"`
+	DisplayName NonEmptyStr `json:"display_name"`
+}
+
+// GetExternalID returns the value of ExternalID.
+func (s *IdentityBatchCreateRequestGroupCreateItemsItem) GetExternalID() NonEmptyStr {
+	return s.ExternalID
+}
+
+// GetDisplayName returns the value of DisplayName.
+func (s *IdentityBatchCreateRequestGroupCreateItemsItem) GetDisplayName() NonEmptyStr {
+	return s.DisplayName
+}
+
+// SetExternalID sets the value of ExternalID.
+func (s *IdentityBatchCreateRequestGroupCreateItemsItem) SetExternalID(val NonEmptyStr) {
+	s.ExternalID = val
+}
+
+// SetDisplayName sets the value of DisplayName.
+func (s *IdentityBatchCreateRequestGroupCreateItemsItem) SetDisplayName(val NonEmptyStr) {
+	s.DisplayName = val
+}
+
+// Ref: #/components/schemas/IdentityBatchCreateRequest_MachineUserCreate_
+type IdentityBatchCreateRequestMachineUserCreate struct {
+	Items []IdentityBatchCreateRequestMachineUserCreateItemsItem `json:"items"`
+}
+
+// GetItems returns the value of Items.
+func (s *IdentityBatchCreateRequestMachineUserCreate) GetItems() []IdentityBatchCreateRequestMachineUserCreateItemsItem {
+	return s.Items
+}
+
+// SetItems sets the value of Items.
+func (s *IdentityBatchCreateRequestMachineUserCreate) SetItems(val []IdentityBatchCreateRequestMachineUserCreateItemsItem) {
+	s.Items = val
+}
+
+type IdentityBatchCreateRequestMachineUserCreateItemsItem struct {
+	ExternalID  NonEmptyStr `json:"external_id"`
+	DisplayName NonEmptyStr `json:"display_name"`
+}
+
+// GetExternalID returns the value of ExternalID.
+func (s *IdentityBatchCreateRequestMachineUserCreateItemsItem) GetExternalID() NonEmptyStr {
+	return s.ExternalID
+}
+
+// GetDisplayName returns the value of DisplayName.
+func (s *IdentityBatchCreateRequestMachineUserCreateItemsItem) GetDisplayName() NonEmptyStr {
+	return s.DisplayName
+}
+
+// SetExternalID sets the value of ExternalID.
+func (s *IdentityBatchCreateRequestMachineUserCreateItemsItem) SetExternalID(val NonEmptyStr) {
+	s.ExternalID = val
+}
+
+// SetDisplayName sets the value of DisplayName.
+func (s *IdentityBatchCreateRequestMachineUserCreateItemsItem) SetDisplayName(val NonEmptyStr) {
+	s.DisplayName = val
+}
+
+// Ref: #/components/schemas/IdentityBatchCreateRequest_UserCreate_
+type IdentityBatchCreateRequestUserCreate struct {
+	Items []IdentityBatchCreateRequestUserCreateItemsItem `json:"items"`
+}
+
+// GetItems returns the value of Items.
+func (s *IdentityBatchCreateRequestUserCreate) GetItems() []IdentityBatchCreateRequestUserCreateItemsItem {
+	return s.Items
+}
+
+// SetItems sets the value of Items.
+func (s *IdentityBatchCreateRequestUserCreate) SetItems(val []IdentityBatchCreateRequestUserCreateItemsItem) {
+	s.Items = val
+}
+
+type IdentityBatchCreateRequestUserCreateItemsItem struct {
+	Email      string `json:"email"`
+	ExternalID string `json:"external_id"`
+	FirstName  string `json:"first_name"`
+	LastName   string `json:"last_name"`
+}
+
+// GetEmail returns the value of Email.
+func (s *IdentityBatchCreateRequestUserCreateItemsItem) GetEmail() string {
+	return s.Email
+}
+
+// GetExternalID returns the value of ExternalID.
+func (s *IdentityBatchCreateRequestUserCreateItemsItem) GetExternalID() string {
+	return s.ExternalID
+}
+
+// GetFirstName returns the value of FirstName.
+func (s *IdentityBatchCreateRequestUserCreateItemsItem) GetFirstName() string {
+	return s.FirstName
+}
+
+// GetLastName returns the value of LastName.
+func (s *IdentityBatchCreateRequestUserCreateItemsItem) GetLastName() string {
+	return s.LastName
+}
+
+// SetEmail sets the value of Email.
+func (s *IdentityBatchCreateRequestUserCreateItemsItem) SetEmail(val string) {
+	s.Email = val
+}
+
+// SetExternalID sets the value of ExternalID.
+func (s *IdentityBatchCreateRequestUserCreateItemsItem) SetExternalID(val string) {
+	s.ExternalID = val
+}
+
+// SetFirstName sets the value of FirstName.
+func (s *IdentityBatchCreateRequestUserCreateItemsItem) SetFirstName(val string) {
+	s.FirstName = val
+}
+
+// SetLastName sets the value of LastName.
+func (s *IdentityBatchCreateRequestUserCreateItemsItem) SetLastName(val string) {
+	s.LastName = val
+}
+
+// Ref: #/components/schemas/IdentityBatchCreateResponse
+type IdentityBatchCreateResponse struct {
+	Ids    []uuid.UUID                `json:"ids"`
+	Errors []IdentityBatchCreateError `json:"errors"`
+}
+
+// GetIds returns the value of Ids.
+func (s *IdentityBatchCreateResponse) GetIds() []uuid.UUID {
+	return s.Ids
+}
+
+// GetErrors returns the value of Errors.
+func (s *IdentityBatchCreateResponse) GetErrors() []IdentityBatchCreateError {
+	return s.Errors
+}
+
+// SetIds sets the value of Ids.
+func (s *IdentityBatchCreateResponse) SetIds(val []uuid.UUID) {
+	s.Ids = val
+}
+
+// SetErrors sets the value of Errors.
+func (s *IdentityBatchCreateResponse) SetErrors(val []IdentityBatchCreateError) {
+	s.Errors = val
+}
+
+func (*IdentityBatchCreateResponse) createGroupsBatchRes()       {}
+func (*IdentityBatchCreateResponse) createMachineUsersBatchRes() {}
+func (*IdentityBatchCreateResponse) createUsersBatchRes()        {}
+
+// Ref: #/components/schemas/IdentityBatchDeleteRequest
+type IdentityBatchDeleteRequest struct {
+	Ids []uuid.UUID `json:"ids"`
+}
+
+// GetIds returns the value of Ids.
+func (s *IdentityBatchDeleteRequest) GetIds() []uuid.UUID {
+	return s.Ids
+}
+
+// SetIds sets the value of Ids.
+func (s *IdentityBatchDeleteRequest) SetIds(val []uuid.UUID) {
+	s.Ids = val
+}
 
 // Ref: #/components/schemas/IdentityType
 type IdentityType string
@@ -8201,6 +8570,74 @@ func (o OptNilDataProduct) Get() (v DataProduct, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptNilDataProduct) Or(d DataProduct) DataProduct {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptNilDataQualityStatus returns new OptNilDataQualityStatus with value set to v.
+func NewOptNilDataQualityStatus(v DataQualityStatus) OptNilDataQualityStatus {
+	return OptNilDataQualityStatus{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptNilDataQualityStatus is optional nullable DataQualityStatus.
+type OptNilDataQualityStatus struct {
+	Value DataQualityStatus
+	Set   bool
+	Null  bool
+}
+
+// IsSet returns true if OptNilDataQualityStatus was set.
+func (o OptNilDataQualityStatus) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptNilDataQualityStatus) Reset() {
+	var v DataQualityStatus
+	o.Value = v
+	o.Set = false
+	o.Null = false
+}
+
+// SetTo sets value to v.
+func (o *OptNilDataQualityStatus) SetTo(v DataQualityStatus) {
+	o.Set = true
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o OptNilDataQualityStatus) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *OptNilDataQualityStatus) SetToNull() {
+	o.Set = true
+	o.Null = true
+	var v DataQualityStatus
+	o.Value = v
+}
+
+// IsEmpty returns true if the field was omitted from the payload (not Set and not Null).
+func (o OptNilDataQualityStatus) IsEmpty() bool {
+	return !o.Set && !o.Null
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptNilDataQualityStatus) Get() (v DataQualityStatus, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptNilDataQualityStatus) Or(d DataQualityStatus) DataQualityStatus {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -11763,6 +12200,15 @@ type RemoveDataProductTypeOKApplicationJSON jx.Raw
 
 func (*RemoveDataProductTypeOKApplicationJSON) removeDataProductTypeRes() {}
 
+// RemoveDomainAccepted is response for RemoveDomain operation.
+type RemoveDomainAccepted struct{}
+
+func (*RemoveDomainAccepted) removeDomainRes() {}
+
+type RemoveDomainFinalizerOKApplicationJSON jx.Raw
+
+func (*RemoveDomainFinalizerOKApplicationJSON) removeDomainFinalizerRes() {}
+
 type RemoveDomainOKApplicationJSON jx.Raw
 
 func (*RemoveDomainOKApplicationJSON) removeDomainRes() {}
@@ -11871,6 +12317,11 @@ func (*RemoveUserNotificationOKApplicationJSON) removeUserNotificationRes() {}
 type RemoveUserOKApplicationJSON jx.Raw
 
 func (*RemoveUserOKApplicationJSON) removeUserRes() {}
+
+// RemoveUsersBatchNoContent is response for RemoveUsersBatch operation.
+type RemoveUsersBatchNoContent struct{}
+
+func (*RemoveUsersBatchNoContent) removeUsersBatchRes() {}
 
 // Ref: #/components/schemas/RenderTechnicalAssetAccessPathRequest
 type RenderTechnicalAssetAccessPathRequest struct {
@@ -12339,6 +12790,7 @@ const (
 	ResourceNameModelDataProductSetting ResourceNameModel = "data_product_setting"
 	ResourceNameModelOutputPortSetting  ResourceNameModel = "output_port_setting"
 	ResourceNameModelExploration        ResourceNameModel = "exploration"
+	ResourceNameModelDomain             ResourceNameModel = "domain"
 )
 
 // AllValues returns all ResourceNameModel values.
@@ -12350,6 +12802,7 @@ func (ResourceNameModel) AllValues() []ResourceNameModel {
 		ResourceNameModelDataProductSetting,
 		ResourceNameModelOutputPortSetting,
 		ResourceNameModelExploration,
+		ResourceNameModelDomain,
 	}
 }
 
@@ -12367,6 +12820,8 @@ func (s ResourceNameModel) MarshalText() ([]byte, error) {
 	case ResourceNameModelOutputPortSetting:
 		return []byte(s), nil
 	case ResourceNameModelExploration:
+		return []byte(s), nil
+	case ResourceNameModelDomain:
 		return []byte(s), nil
 	default:
 		return nil, errors.Errorf("invalid value: %q", s)
@@ -12393,6 +12848,9 @@ func (s *ResourceNameModel) UnmarshalText(data []byte) error {
 		return nil
 	case ResourceNameModelExploration:
 		*s = ResourceNameModelExploration
+		return nil
+	case ResourceNameModelDomain:
+		*s = ResourceNameModelDomain
 		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)
@@ -13197,6 +13655,7 @@ type SearchOutputPortsResponseItem struct {
 	AbstractDataProductCount      int                     `json:"abstract_data_product_count"`
 	TechnicalAssetsCount          int                     `json:"technical_assets_count"`
 	DataProductName               string                  `json:"data_product_name"`
+	QualityStatus                 OptNilDataQualityStatus `json:"quality_status"`
 }
 
 // GetID returns the value of ID.
@@ -13284,6 +13743,11 @@ func (s *SearchOutputPortsResponseItem) GetDataProductName() string {
 	return s.DataProductName
 }
 
+// GetQualityStatus returns the value of QualityStatus.
+func (s *SearchOutputPortsResponseItem) GetQualityStatus() OptNilDataQualityStatus {
+	return s.QualityStatus
+}
+
 // SetID sets the value of ID.
 func (s *SearchOutputPortsResponseItem) SetID(val uuid.UUID) {
 	s.ID = val
@@ -13367,6 +13831,11 @@ func (s *SearchOutputPortsResponseItem) SetTechnicalAssetsCount(val int) {
 // SetDataProductName sets the value of DataProductName.
 func (s *SearchOutputPortsResponseItem) SetDataProductName(val string) {
 	s.DataProductName = val
+}
+
+// SetQualityStatus sets the value of QualityStatus.
+func (s *SearchOutputPortsResponseItem) SetQualityStatus(val OptNilDataQualityStatus) {
+	s.QualityStatus = val
 }
 
 // Option for select UI elements.

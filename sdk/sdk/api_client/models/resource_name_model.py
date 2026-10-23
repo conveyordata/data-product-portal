@@ -4,6 +4,7 @@ from enum import StrEnum
 class ResourceNameModel(StrEnum):
     DATA_PRODUCT = "data_product"
     DATA_PRODUCT_SETTING = "data_product_setting"
+    DOMAIN = "domain"
     EXPLORATION = "exploration"
     OUTPUT_PORT = "output_port"
     OUTPUT_PORT_SETTING = "output_port_setting"

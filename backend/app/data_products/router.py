@@ -12,7 +12,6 @@ from sqlalchemy.orm import Session
 
 from app.abstract_data_product.input_ports.enums import InputPortStatus
 from app.abstract_data_product.input_ports.model import InputPort
-from app.abstract_data_product.schema_request import FinalizerRequest
 from app.abstract_data_product.schema_response import AbstractDataProductInputPort
 from app.authorization.role_assignments.data_product.auth import (
     DataProductAuthAssignment,
@@ -63,6 +62,7 @@ from app.events.schema_response import (
 )
 from app.events.service import EventService
 from app.graph.graph import Graph
+from app.shared.schema import FinalizerRequest
 from app.users.notifications.service import NotificationService
 from app.users.schema import User
 

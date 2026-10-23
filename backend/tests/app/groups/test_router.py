@@ -638,3 +638,121 @@ class TestGroupMembershipRouter:
         )
 
         assert response.status_code == 422
+
+    @pytest.mark.usefixtures("admin")
+    def test_create_groups_batch__creates_valid_items_and_returns_item_errors(
+        self, client
+    ):
+        response = client.post(
+            f"{ENDPOINT}/batch",
+            json={
+                "items": [
+                    {"external_id": "engineering", "display_name": "Engineering"},
+                    {"external_id": "", "display_name": ""},
+                ]
+            },
+        )
+
+        assert response.status_code == 200
+        body = response.json()
+        assert len(body["ids"]) == 1
+        assert len(body["errors"]) == 1
+        assert body["errors"][0]["item"] == {"external_id": "", "display_name": ""}
+        assert len(body["errors"][0]["errors"]) == 2
+
+        group_response = client.get(f"{ENDPOINT}/{body['ids'][0]}")
+        assert group_response.status_code == 200
+        assert group_response.json()["external_id"] == "engineering"
+
+    @pytest.mark.usefixtures("admin")
+    def test_create_groups_batch__always_returns_errors_list(self, client):
+        response = client.post(
+            f"{ENDPOINT}/batch",
+            json={
+                "items": [{"external_id": "engineering", "display_name": "Engineering"}]
+            },
+        )
+
+        assert response.status_code == 200
+        assert len(response.json()["ids"]) == 1
+        assert response.json()["errors"] == []
+
+    def test_create_groups_batch__without_permission_returns_forbidden(self, client):
+        response = client.post(
+            f"{ENDPOINT}/batch",
+            json={
+                "items": [{"external_id": "engineering", "display_name": "Engineering"}]
+            },
+        )
+
+        assert response.status_code == 403
+
+    @pytest.mark.usefixtures("admin")
+    @pytest.mark.parametrize(
+        "items", [[], [{}] * (settings.MAX_ITEMS_PER_BATCH_REQUEST + 1)]
+    )
+    def test_create_groups_batch__rejects_invalid_list_size(self, client, items):
+        response = client.post(f"{ENDPOINT}/batch", json={"items": items})
+
+        assert response.status_code == 422
+
+    @pytest.mark.usefixtures("admin")
+    def test_delete_groups_batch__deletes_groups(self, client):
+        first = GroupFactory()
+        second = GroupFactory()
+
+        response = client.request(
+            "DELETE",
+            f"{ENDPOINT}/batch",
+            json={"ids": [str(first.id), str(second.id)]},
+        )
+
+        assert response.status_code == 204
+        assert response.content == b""
+        assert client.get(f"{ENDPOINT}/{first.id}").status_code == 404
+        assert client.get(f"{ENDPOINT}/{second.id}").status_code == 404
+
+    @pytest.mark.usefixtures("admin")
+    def test_delete_groups_batch__ignores_unknown_and_wrong_identity_type_ids(
+        self, client
+    ):
+        group = GroupFactory()
+        user = UserFactory()
+
+        response = client.request(
+            "DELETE",
+            f"{ENDPOINT}/batch",
+            json={"ids": [str(group.id), str(user.id), str(uuid4())]},
+        )
+
+        assert response.status_code == 204
+        assert response.content == b""
+        assert client.get(f"{ENDPOINT}/{group.id}").status_code == 404
+
+    def test_delete_groups_batch__without_permission_returns_forbidden(self, client):
+        group = GroupFactory()
+
+        response = client.request(
+            "DELETE", f"{ENDPOINT}/batch", json={"ids": [str(group.id)]}
+        )
+
+        assert response.status_code == 403
+        assert client.get(f"{ENDPOINT}/{group.id}").status_code == 200
+
+    @pytest.mark.usefixtures("admin")
+    @pytest.mark.parametrize(
+        "ids",
+        [
+            [],
+            ["not-a-uuid"],
+            [str(uuid4()), str(uuid4())],
+            [str(uuid4()) for _ in range(settings.MAX_ITEMS_PER_BATCH_REQUEST + 1)],
+        ],
+    )
+    def test_delete_groups_batch__rejects_invalid_request(self, client, ids):
+        if len(ids) == 2:
+            ids[1] = ids[0]
+
+        response = client.request("DELETE", f"{ENDPOINT}/batch", json={"ids": ids})
+
+        assert response.status_code == 422

@@ -14,6 +14,7 @@ from sdk.api_client.models import (
     DataProductEvent,
     DataProductRoleAssignmentEvent,
     DataProductSettingValueEvent,
+    DomainEvent,
     ExplorationEvent,
     InputPortEvent,
     OutputPortEvent,
@@ -38,6 +39,7 @@ class ResourceType(str, Enum):
 
     EXPLORATION = "exploration"
     DATA_PRODUCT = "data_product"
+    DOMAIN = "domain"
 
 
 @dataclass(frozen=True)
@@ -242,22 +244,31 @@ class ReconcileEventHandler(AbstractEventHandler):
     def manager(self) -> ReconcileManager:
         return self._manager
 
-    async def _enqueue(self, resource_type: ResourceType, resource_id: UUID):
+    async def _enqueue(
+        self, resource_type: ResourceType, resource_id: UUID
+    ) -> dict[str, str]:
         if not self._manager.has_reconciler(resource_type):
             logger.debug(f"No reconciler registered for '{resource_type.value}'")
-            return
+            return {
+                "status": "ignored",
+                "reason": f"No reconciler for '{resource_type.value}'",
+            }
         await self._manager.enqueue(resource_type, resource_id)
+        return {"status": "queued"}
 
     async def on_data_product_event(self, data: DataProductEvent):
-        await self._enqueue(ResourceType.DATA_PRODUCT, data.id)
+        return await self._enqueue(ResourceType.DATA_PRODUCT, data.id)
 
     async def on_data_product_environment_added(
         self, data: DataProductEnvironmentAddedEvent
     ):
-        await self._enqueue(ResourceType.DATA_PRODUCT, data.data_product_id)
+        return await self._enqueue(ResourceType.DATA_PRODUCT, data.data_product_id)
 
     async def on_exploration_event(self, data: ExplorationEvent):
-        await self._enqueue(ResourceType.EXPLORATION, data.id)
+        return await self._enqueue(ResourceType.EXPLORATION, data.id)
+
+    async def on_domain_event(self, data: DomainEvent):
+        return await self._enqueue(ResourceType.DOMAIN, data.id)
 
     async def on_input_port_event(self, data: InputPortEvent):
         match self._input_port_reconcile_target:
@@ -277,12 +288,12 @@ class ReconcileEventHandler(AbstractEventHandler):
                             ResourceType.DATA_PRODUCT,
                             data.consuming_abstract_data_product_id,
                         )
-        return None
+        return {"status": "ignored", "reason": "Input port has no reconcile target"}
 
     async def on_data_product_role_assignment_event(
         self, data: DataProductRoleAssignmentEvent
     ):
-        await self._enqueue(ResourceType.DATA_PRODUCT, data.data_product_id)
+        return await self._enqueue(ResourceType.DATA_PRODUCT, data.data_product_id)
 
     async def on_output_port_role_assignment_event(
         self, data: OutputPortRoleAssignmentEvent
@@ -291,20 +302,20 @@ class ReconcileEventHandler(AbstractEventHandler):
         # The provisioner fetches current state of the data product (including
         # its output ports and their members) on every reconcile, so triggering
         # a data-product reconcile is the correct level of granularity here.
-        await self._enqueue(ResourceType.DATA_PRODUCT, data.data_product_id)
+        return await self._enqueue(ResourceType.DATA_PRODUCT, data.data_product_id)
 
     async def on_output_port_event(self, data: OutputPortEvent):
-        await self._enqueue(ResourceType.DATA_PRODUCT, data.data_product_id)
+        return await self._enqueue(ResourceType.DATA_PRODUCT, data.data_product_id)
 
     async def on_technical_asset_event(self, data: TechnicalAssetEvent):
-        await self._enqueue(ResourceType.DATA_PRODUCT, data.data_product_id)
+        return await self._enqueue(ResourceType.DATA_PRODUCT, data.data_product_id)
 
     async def on_output_port_technical_asset_link_event(
         self, data: OutputPortTechnicalAssetLinkEvent
     ):
-        await self._enqueue(ResourceType.DATA_PRODUCT, data.data_product_id)
+        return await self._enqueue(ResourceType.DATA_PRODUCT, data.data_product_id)
 
     async def on_data_product_setting_value_event(
         self, data: DataProductSettingValueEvent
     ):
-        await self._enqueue(ResourceType.DATA_PRODUCT, data.data_product_id)
+        return await self._enqueue(ResourceType.DATA_PRODUCT, data.data_product_id)

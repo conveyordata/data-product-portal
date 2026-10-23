@@ -5,6 +5,10 @@ type AddDataProductFinalizerRes interface {
 	addDataProductFinalizerRes()
 }
 
+type AddDomainFinalizerRes interface {
+	addDomainFinalizerRes()
+}
+
 type AddExplorationFinalizerRes interface {
 	addExplorationFinalizerRes()
 }
@@ -77,8 +81,16 @@ type CreateGroupRes interface {
 	createGroupRes()
 }
 
+type CreateGroupsBatchRes interface {
+	createGroupsBatchRes()
+}
+
 type CreateMachineUserRes interface {
 	createMachineUserRes()
+}
+
+type CreateMachineUsersBatchRes interface {
+	createMachineUsersBatchRes()
 }
 
 type CreateOutputPortAccessTypeRes interface {
@@ -109,6 +121,10 @@ type CreateUserRes interface {
 	createUserRes()
 }
 
+type CreateUsersBatchRes interface {
+	createUsersBatchRes()
+}
+
 type DecideDataProductRoleAssignmentRes interface {
 	decideDataProductRoleAssignmentRes()
 }
@@ -137,8 +153,16 @@ type DeleteGroupRes interface {
 	deleteGroupRes()
 }
 
+type DeleteGroupsBatchRes interface {
+	deleteGroupsBatchRes()
+}
+
 type DeleteMachineUserRes interface {
 	deleteMachineUserRes()
+}
+
+type DeleteMachineUsersBatchRes interface {
+	deleteMachineUsersBatchRes()
 }
 
 type DeleteOutputPortQueryStatRes interface {
@@ -469,6 +493,10 @@ type RemoveDataProductTypeRes interface {
 	removeDataProductTypeRes()
 }
 
+type RemoveDomainFinalizerRes interface {
+	removeDomainFinalizerRes()
+}
+
 type RemoveDomainRes interface {
 	removeDomainRes()
 }
@@ -523,6 +551,10 @@ type RemoveUserNotificationRes interface {
 
 type RemoveUserRes interface {
 	removeUserRes()
+}
+
+type RemoveUsersBatchRes interface {
+	removeUsersBatchRes()
 }
 
 type RenderTechnicalAssetAccessPathRes interface {

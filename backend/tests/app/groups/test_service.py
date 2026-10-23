@@ -533,3 +533,241 @@ class TestGroupService:
             )
 
             assert locked_group_id == group.id
+
+    def test_add_members__assigns_membership_policies_in_batch(
+        self, authorizer: Authorization, session
+    ):
+        group = GroupFactory()
+        first = UserFactory()
+        second = MachineUserFactory()
+
+        GroupService(session).add_members(
+            group_id=group.id, member_identity_ids=[first.id, second.id]
+        )
+
+        for member in (first, second):
+            assert authorizer.has_resource_role(
+                user_id=member.id, role_id=group.id, resource_id="*"
+            )
+            assert authorizer.has_global_role(user_id=member.id, role_id=group.id)
+
+    def test_remove_members__revokes_only_removed_membership_policies(
+        self, authorizer: Authorization, session
+    ):
+        group = GroupFactory()
+        removed = UserFactory()
+        retained = UserFactory()
+        service = GroupService(session)
+        service.add_members(
+            group_id=group.id, member_identity_ids=[removed.id, retained.id]
+        )
+
+        service.remove_members(group_id=group.id, member_identity_ids=[removed.id])
+
+        assert not authorizer.has_resource_role(
+            user_id=removed.id, role_id=group.id, resource_id="*"
+        )
+        assert not authorizer.has_global_role(user_id=removed.id, role_id=group.id)
+        assert authorizer.has_resource_role(
+            user_id=retained.id, role_id=group.id, resource_id="*"
+        )
+        assert authorizer.has_global_role(user_id=retained.id, role_id=group.id)
+
+    def test_replace_members__updates_membership_policies(
+        self, authorizer: Authorization, session
+    ):
+        group = GroupFactory()
+        removed = UserFactory()
+        retained = UserFactory()
+        added = UserFactory()
+        service = GroupService(session)
+        service.add_members(
+            group_id=group.id, member_identity_ids=[removed.id, retained.id]
+        )
+
+        service.replace_members(
+            group_id=group.id, member_identity_ids=[retained.id, added.id]
+        )
+
+        assert not authorizer.has_resource_role(
+            user_id=removed.id, role_id=group.id, resource_id="*"
+        )
+        assert not authorizer.has_global_role(user_id=removed.id, role_id=group.id)
+
+        for member in (retained, added):
+            assert authorizer.has_resource_role(
+                user_id=member.id, role_id=group.id, resource_id="*"
+            )
+            assert authorizer.has_global_role(user_id=member.id, role_id=group.id)
+
+    def test_create_groups_batch__creates_all_valid_groups(self, session):
+        result = GroupService(session).create_groups_batch(
+            [
+                {"external_id": "engineering", "display_name": "Engineering"},
+                {"external_id": "finance", "display_name": "Finance"},
+            ]
+        )
+
+        groups = session.scalars(select(Group).where(Group.id.in_(result.ids))).all()
+
+        assert len(result.ids) == 2
+        assert result.errors == []
+        assert {group.external_id for group in groups} == {"engineering", "finance"}
+
+    def test_create_groups_batch__skips_schema_invalid_items(self, session):
+        result = GroupService(session).create_groups_batch(
+            [
+                {"external_id": "engineering", "display_name": "Engineering"},
+                {"external_id": "", "display_name": ""},
+            ]
+        )
+
+        assert len(result.ids) == 1
+        assert len(result.errors) == 1
+        assert result.errors[0].item == {"external_id": "", "display_name": ""}
+        assert len(result.errors[0].errors) == 2
+
+    def test_create_groups_batch__skips_existing_external_ids(self, session):
+        GroupFactory(external_id="existing")
+
+        result = GroupService(session).create_groups_batch(
+            [
+                {"external_id": "existing", "display_name": "Existing"},
+                {"external_id": "new", "display_name": "New"},
+            ]
+        )
+
+        assert len(result.ids) == 1
+        assert len(result.errors) == 1
+        assert result.errors[0].errors == [
+            "A group with this external ID already exists."
+        ]
+        assert (
+            session.scalar(select(Group).where(Group.id == result.ids[0])).external_id
+            == "new"
+        )
+
+    def test_create_groups_batch__skips_later_request_duplicate(self, session):
+        result = GroupService(session).create_groups_batch(
+            [
+                {"external_id": "duplicate", "display_name": "First"},
+                {"external_id": "duplicate", "display_name": "Second"},
+            ]
+        )
+
+        assert len(result.ids) == 1
+        assert len(result.errors) == 1
+        assert result.errors[0].errors == [
+            "A group with this external ID already exists."
+        ]
+
+        group = session.scalar(select(Group).where(Group.id == result.ids[0]))
+        assert group.display_name == "First"
+
+    def test_create_groups_batch__returns_all_item_errors(self, session):
+        GroupFactory(external_id="existing")
+
+        result = GroupService(session).create_groups_batch(
+            [
+                {"external_id": "", "display_name": ""},
+                {"external_id": "existing", "display_name": "Existing"},
+            ]
+        )
+
+        assert result.ids == []
+        assert len(result.errors) == 2
+
+    def test_delete_groups_batch__deletes_matching_groups(self, session):
+        first = GroupFactory()
+        second = GroupFactory()
+        retained = GroupFactory()
+
+        GroupService(session).delete_groups_batch([first.id, second.id])
+
+        assert session.get(Group, first.id) is None
+        assert session.get(Group, second.id) is None
+        assert session.get(Group, retained.id) is not None
+
+    def test_delete_groups_batch__ignores_unknown_and_wrong_identity_type_ids(
+        self, session
+    ):
+        group = GroupFactory()
+        user = UserFactory()
+
+        GroupService(session).delete_groups_batch([group.id, user.id, uuid4()])
+
+        assert session.get(Group, group.id) is None
+        assert user in session
+
+    def test_delete_groups_batch__deletes_memberships_but_retains_members(
+        self, session
+    ):
+        first_group = GroupFactory()
+        second_group = GroupFactory()
+        first_member = UserFactory()
+        second_member = MachineUserFactory()
+        service = GroupService(session)
+        service.add_members(
+            group_id=first_group.id, member_identity_ids=[first_member.id]
+        )
+        service.add_members(
+            group_id=second_group.id, member_identity_ids=[second_member.id]
+        )
+
+        service.delete_groups_batch([first_group.id, second_group.id])
+
+        assert not group_has_member(session, first_group.id, first_member.id)
+        assert not group_has_member(session, second_group.id, second_member.id)
+        assert first_member in session
+        assert second_member in session
+
+    def test_delete_groups_batch__clears_subject_and_membership_policies(
+        self, authorizer: Authorization, session
+    ):
+        first_group = GroupFactory()
+        second_group = GroupFactory()
+        first_member = UserFactory()
+        second_member = MachineUserFactory()
+        service = GroupService(session)
+        service.add_members(
+            group_id=first_group.id, member_identity_ids=[first_member.id]
+        )
+        service.add_members(
+            group_id=second_group.id, member_identity_ids=[second_member.id]
+        )
+        authorizer.assign_global_role(user_id=first_group.id, role_id="first-role")
+        authorizer.assign_resource_role(
+            user_id=second_group.id, role_id="second-role", resource_id="resource"
+        )
+
+        service.delete_groups_batch([first_group.id, second_group.id])
+
+        assert not authorizer.has_global_role(
+            user_id=first_group.id, role_id="first-role"
+        )
+        assert not authorizer.has_resource_role(
+            user_id=second_group.id, role_id="second-role", resource_id="resource"
+        )
+        assert not authorizer.has_global_role(
+            user_id=first_member.id, role_id=first_group.id
+        )
+        assert not authorizer.has_resource_role(
+            user_id=first_member.id, role_id=first_group.id, resource_id="*"
+        )
+        assert not authorizer.has_global_role(
+            user_id=second_member.id, role_id=second_group.id
+        )
+        assert not authorizer.has_resource_role(
+            user_id=second_member.id, role_id=second_group.id, resource_id="*"
+        )
+
+    def test_delete_group__works_when_group_memberships_are_unloaded(self, session):
+        group = GroupFactory()
+        member = UserFactory()
+        GroupMembershipFactory(group=group, member=member)
+        session.flush()
+        session.expire(group, ["memberships"])
+
+        GroupService(session).delete_group(group.id)
+
+        assert session.get(Group, group.id) is None

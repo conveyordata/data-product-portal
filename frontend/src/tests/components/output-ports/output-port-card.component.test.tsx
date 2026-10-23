@@ -37,6 +37,7 @@ const dataset: GetOutputPortResponse = {
     domain: {
         id: 'domain-1',
         name: 'Sales',
+        namespace: 'sales',
         description: 'Sales domain',
     },
     lifecycle: null,

@@ -4,7 +4,7 @@ go 1.26
 
 require (
 	github.com/aws/aws-sdk-go-v2 v1.47.3
-	github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider v1.75.3
+	github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider v1.75.4
 	github.com/briandowns/spinner v1.23.2
 	github.com/fatih/color v1.19.0
 	github.com/go-faster/errors v0.8.0
