@@ -63,7 +63,11 @@ class PluginService:
         try:
             platform_meta = plugin_class.get_platform_metadata()
             return UIElementMetadataResponse(
-                ui_metadata=plugin_class.get_ui_metadata(self.db),
+                ui_metadata=[
+                    *plugin_class.get_ui_metadata(self.db),
+                    *plugin_class.get_overridable_ui_metadata(),
+                ],
+                overridable_properties=plugin_class.overridable_properties,
                 plugin=plugin_class.name,
                 icon_data_uri=plugin_class.get_icon_data_uri(),
                 platform=platform_meta.platform_key,
@@ -81,6 +85,7 @@ class PluginService:
             return UIElementMetadataResponse(
                 not_configured=True,
                 ui_metadata=[],
+                overridable_properties=plugin_class.overridable_properties,
                 plugin=plugin_class.name,
                 icon_data_uri=plugin_class.get_icon_data_uri(),
                 platform=platform_meta.platform_key,

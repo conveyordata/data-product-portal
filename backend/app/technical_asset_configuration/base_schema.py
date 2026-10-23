@@ -92,7 +92,6 @@ class UIElementMetadata(ORMModel):
     use_namespace_when_not_source_aligned: Optional[bool] = (
         None  # Whether to use the data product namespace as default value when the data product is not source aligned
     )
-    environment_overridable: Optional[bool] = None
 
     def __init__(self, **data: Any):
         super().__init__(**data)
@@ -154,9 +153,17 @@ class PluginContext(ORMModel):
         )
 
 
+class OverridableProperty(ORMModel):
+    name: str
+    label: str
+    allowed_values: list[str]
+    default: str
+
+
 class TechnicalAssetPlugin(ORMModel, ABC):
     version: ClassVar[str] = "1.0"
     mcp_instructions: ClassVar[str] = ""
+    overridable_properties: ClassVar[list[OverridableProperty]] = []
 
     @computed_field  # type: ignore[prop-decorator]
     @property
@@ -215,9 +222,22 @@ class TechnicalAssetPlugin(ORMModel, ABC):
         return []
 
     @classmethod
-    def get_environment_overridable_fields(cls, db: Session) -> list[UIElementMetadata]:
+    def get_overridable_ui_metadata(cls) -> list[UIElementMetadata]:
         return [
-            field for field in cls.get_ui_metadata(db) if field.environment_overridable
+            UIElementMetadata(
+                name=prop.name,
+                label=prop.label,
+                type=UIElementType.Select,
+                required=True,
+                select=UIElementSelect(
+                    initial_value=prop.default,
+                    options=[
+                        SelectOption(label=value, value=value)
+                        for value in prop.allowed_values
+                    ],
+                ),
+            )
+            for prop in cls.overridable_properties
         ]
 
     @classmethod

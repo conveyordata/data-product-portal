@@ -17342,6 +17342,37 @@
         ],
         "title": "OutputPortUpdate"
       },
+      "OverridableProperty": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "allowed_values": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Allowed Values"
+          },
+          "default": {
+            "type": "string",
+            "title": "Default"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "label",
+          "allowed_values",
+          "default"
+        ],
+        "title": "OverridableProperty"
+      },
       "OwnedTechnicalAsset": {
         "properties": {
           "id": {
@@ -19312,17 +19343,6 @@
               }
             ],
             "title": "Use Namespace When Not Source Aligned"
-          },
-          "environment_overridable": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Environment Overridable"
           }
         },
         "type": "object",
@@ -19347,6 +19367,14 @@
             },
             "type": "array",
             "title": "Ui Metadata"
+          },
+          "overridable_properties": {
+            "items": {
+              "$ref": "#/components/schemas/OverridableProperty"
+            },
+            "type": "array",
+            "title": "Overridable Properties",
+            "default": []
           },
           "plugin": {
             "type": "string",

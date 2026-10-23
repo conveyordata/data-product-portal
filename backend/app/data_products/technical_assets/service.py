@@ -58,8 +58,8 @@ from app.graph.graph import Graph
 from app.plugins.registry import plugin_registry
 from app.resource_names.service import ResourceNameValidityType
 from app.technical_asset_configuration.base_schema import (
+    OverridableProperty,
     PluginContext,
-    UIElementMetadata,
 )
 from app.users.schema import User
 
@@ -379,13 +379,13 @@ class TechnicalAssetService:
         request: UpdateTechnicalAssetEnvironmentConfigurationRequest,
     ) -> GetTechnicalAssetEnvironmentConfigurationResponse:
         technical_asset = self.get_technical_asset(data_product_id, id)
-        fields = {
-            field.name: field for field in self._overridable_fields(technical_asset)
+        overridable = {
+            prop.name: prop for prop in self._overridable_properties(technical_asset)
         }
-        self._validate_values(fields, request.base_values)
+        self._validate_values(overridable, request.base_values)
         for environment_id, values in request.overrides.items():
             self._ensure_data_product_environment(technical_asset, environment_id)
-            self._validate_values(fields, values)
+            self._validate_values(overridable, values)
 
         for name, value in request.base_values.items():
             setattr(technical_asset.configuration, name, value)
@@ -445,15 +445,16 @@ class TechnicalAssetService:
             )
         }
         properties = []
-        for field in self._overridable_fields(technical_asset):
-            allowed_values, default = _allowed_values_and_default(field)
-            base_value = getattr(technical_asset.configuration, field.name) or default
+        for prop in self._overridable_properties(technical_asset):
+            base_value = (
+                getattr(technical_asset.configuration, prop.name) or prop.default
+            )
             properties.append(
                 EnvironmentConfigurationProperty(
-                    name=field.name,
-                    label=field.label,
-                    allowed_values=allowed_values,
-                    default=default,
+                    name=prop.name,
+                    label=prop.label,
+                    allowed_values=prop.allowed_values,
+                    default=prop.default,
                     base_value=base_value,
                     environments=[
                         EnvironmentConfigurationValue(
@@ -462,7 +463,7 @@ class TechnicalAssetService:
                             acronym=item.environment.acronym,
                             override=(
                                 override := overrides.get(
-                                    (item.environment_id, field.name)
+                                    (item.environment_id, prop.name)
                                 )
                             ),
                             effective_value=override or base_value,
@@ -473,12 +474,13 @@ class TechnicalAssetService:
             )
         return GetTechnicalAssetEnvironmentConfigurationResponse(properties=properties)
 
-    def _overridable_fields(
-        self, technical_asset: TechnicalAssetModel
-    ) -> list[UIElementMetadata]:
+    @staticmethod
+    def _overridable_properties(
+        technical_asset: TechnicalAssetModel,
+    ) -> list[OverridableProperty]:
         return plugin_registry.get(
             technical_asset.configuration.configuration_type
-        ).get_environment_overridable_fields(self.db)
+        ).overridable_properties
 
     @staticmethod
     def _ensure_data_product_environment(
@@ -501,15 +503,15 @@ class TechnicalAssetService:
 
     @staticmethod
     def _validate_values(
-        fields: dict[str, UIElementMetadata], values: dict[str, str]
+        overridable: dict[str, OverridableProperty], values: dict[str, str]
     ) -> None:
         for name, value in values.items():
-            if name not in fields:
+            if name not in overridable:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail=f"Property '{name}' is not overridable per environment",
                 )
-            allowed_values, _ = _allowed_values_and_default(fields[name])
+            allowed_values = overridable[name].allowed_values
             if value not in allowed_values:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
@@ -551,13 +553,3 @@ class TechnicalAssetService:
         )
         self._filter_environment_configurations_by_data_product(technical_assets)
         return technical_assets
-
-
-def _allowed_values_and_default(field: UIElementMetadata) -> tuple[list[str], str]:
-    if not (field.select and field.select.options and field.select.initial_value):
-        raise ValueError(
-            f"Overridable field '{field.name}' needs select options and an initial value"
-        )
-    return [
-        str(option.value) for option in field.select.options
-    ], field.select.initial_value

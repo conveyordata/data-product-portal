@@ -117,11 +117,17 @@ export type UiElementMetadata = {
   depends_on?: FieldDependency[] | null;
   disabled?: boolean | null;
   use_namespace_when_not_source_aligned?: boolean | null;
-  environment_overridable?: boolean | null;
+};
+export type OverridableProperty = {
+  name: string;
+  label: string;
+  allowed_values: string[];
+  default: string;
 };
 export type UiElementMetadataResponse = {
   not_configured?: boolean;
   ui_metadata: UiElementMetadata[];
+  overridable_properties?: OverridableProperty[];
   plugin: string;
   has_environments: boolean;
   result_label?: string;

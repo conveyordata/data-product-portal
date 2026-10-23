@@ -120,9 +120,8 @@ export function TechnicalAsset() {
                             dataProductId={dataProductId}
                             isLoading={isLoading}
                             hasEnvironmentConfiguration={
-                                plugins
-                                    ?.find((plugin) => plugin.plugin === dataOutput.configuration.name)
-                                    ?.ui_metadata.some((field) => field.environment_overridable) ?? false
+                                (plugins?.find((plugin) => plugin.plugin === dataOutput.configuration.name)
+                                    ?.overridable_properties?.length ?? 0) > 0
                             }
                         />
                     </Flex>

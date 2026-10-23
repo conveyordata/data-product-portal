@@ -30060,6 +30060,165 @@ func (s *OutputPortUpdate) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
+// Encode implements json.Marshaler.
+func (s *OverridableProperty) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *OverridableProperty) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("name")
+		e.Str(s.Name)
+	}
+	{
+		e.FieldStart("label")
+		e.Str(s.Label)
+	}
+	{
+		e.FieldStart("allowed_values")
+		e.ArrStart()
+		for _, elem := range s.AllowedValues {
+			e.Str(elem)
+		}
+		e.ArrEnd()
+	}
+	{
+		e.FieldStart("default")
+		e.Str(s.Default)
+	}
+}
+
+var jsonFieldsNameOfOverridableProperty = [4]string{
+	0: "name",
+	1: "label",
+	2: "allowed_values",
+	3: "default",
+}
+
+// Decode decodes OverridableProperty from json.
+func (s *OverridableProperty) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode OverridableProperty to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "name":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Str()
+				s.Name = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"name\"")
+			}
+		case "label":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Str()
+				s.Label = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"label\"")
+			}
+		case "allowed_values":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				s.AllowedValues = make([]string, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem string
+					v, err := d.Str()
+					elem = string(v)
+					if err != nil {
+						return err
+					}
+					s.AllowedValues = append(s.AllowedValues, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"allowed_values\"")
+			}
+		case "default":
+			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				v, err := d.Str()
+				s.Default = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"default\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode OverridableProperty")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00001111,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfOverridableProperty) {
+					name = jsonFieldsNameOfOverridableProperty[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *OverridableProperty) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OverridableProperty) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode encodes OverwriteOutputPortDataQualitySummaryNotFoundApplicationJSON as json.
 func (s OverwriteOutputPortDataQualitySummaryNotFoundApplicationJSON) Encode(e *jx.Encoder) {
 	unwrapped := jx.Raw(s)
@@ -39015,15 +39174,9 @@ func (s *UIElementMetadata) encodeFields(e *jx.Encoder) {
 			s.UseNamespaceWhenNotSourceAligned.Encode(e)
 		}
 	}
-	{
-		if s.EnvironmentOverridable.Set {
-			e.FieldStart("environment_overridable")
-			s.EnvironmentOverridable.Encode(e)
-		}
-	}
 }
 
-var jsonFieldsNameOfUIElementMetadata = [14]string{
+var jsonFieldsNameOfUIElementMetadata = [13]string{
 	0:  "label",
 	1:  "type",
 	2:  "required",
@@ -39037,7 +39190,6 @@ var jsonFieldsNameOfUIElementMetadata = [14]string{
 	10: "depends_on",
 	11: "disabled",
 	12: "use_namespace_when_not_source_aligned",
-	13: "environment_overridable",
 }
 
 // Decode decodes UIElementMetadata from json.
@@ -39185,16 +39337,6 @@ func (s *UIElementMetadata) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"use_namespace_when_not_source_aligned\"")
 			}
-		case "environment_overridable":
-			if err := func() error {
-				s.EnvironmentOverridable.Reset()
-				if err := s.EnvironmentOverridable.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"environment_overridable\"")
-			}
 		default:
 			return d.Skip()
 		}
@@ -39276,6 +39418,16 @@ func (s *UIElementMetadataResponse) encodeFields(e *jx.Encoder) {
 		e.ArrEnd()
 	}
 	{
+		if s.OverridableProperties != nil {
+			e.FieldStart("overridable_properties")
+			e.ArrStart()
+			for _, elem := range s.OverridableProperties {
+				elem.Encode(e)
+			}
+			e.ArrEnd()
+		}
+	}
+	{
 		e.FieldStart("plugin")
 		e.Str(s.Plugin)
 	}
@@ -39343,22 +39495,23 @@ func (s *UIElementMetadataResponse) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfUIElementMetadataResponse = [15]string{
+var jsonFieldsNameOfUIElementMetadataResponse = [16]string{
 	0:  "not_configured",
 	1:  "ui_metadata",
-	2:  "plugin",
-	3:  "has_environments",
-	4:  "result_label",
-	5:  "result_tooltip",
-	6:  "platform",
-	7:  "display_name",
-	8:  "icon_name",
-	9:  "icon_data_uri",
-	10: "parent_platform",
-	11: "platform_tile",
-	12: "show_in_form",
-	13: "shareable",
-	14: "detailed_name",
+	2:  "overridable_properties",
+	3:  "plugin",
+	4:  "has_environments",
+	5:  "result_label",
+	6:  "result_tooltip",
+	7:  "platform",
+	8:  "display_name",
+	9:  "icon_name",
+	10: "icon_data_uri",
+	11: "parent_platform",
+	12: "platform_tile",
+	13: "show_in_form",
+	14: "shareable",
+	15: "detailed_name",
 }
 
 // Decode decodes UIElementMetadataResponse from json.
@@ -39399,8 +39552,25 @@ func (s *UIElementMetadataResponse) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"ui_metadata\"")
 			}
+		case "overridable_properties":
+			if err := func() error {
+				s.OverridableProperties = make([]OverridableProperty, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem OverridableProperty
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.OverridableProperties = append(s.OverridableProperties, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"overridable_properties\"")
+			}
 		case "plugin":
-			requiredBitSet[0] |= 1 << 2
+			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
 				v, err := d.Str()
 				s.Plugin = string(v)
@@ -39412,7 +39582,7 @@ func (s *UIElementMetadataResponse) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"plugin\"")
 			}
 		case "has_environments":
-			requiredBitSet[0] |= 1 << 3
+			requiredBitSet[0] |= 1 << 4
 			if err := func() error {
 				v, err := d.Bool()
 				s.HasEnvironments = bool(v)
@@ -39444,7 +39614,7 @@ func (s *UIElementMetadataResponse) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"result_tooltip\"")
 			}
 		case "platform":
-			requiredBitSet[0] |= 1 << 6
+			requiredBitSet[0] |= 1 << 7
 			if err := func() error {
 				v, err := d.Str()
 				s.Platform = string(v)
@@ -39456,7 +39626,7 @@ func (s *UIElementMetadataResponse) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"platform\"")
 			}
 		case "display_name":
-			requiredBitSet[0] |= 1 << 7
+			requiredBitSet[1] |= 1 << 0
 			if err := func() error {
 				v, err := d.Str()
 				s.DisplayName = string(v)
@@ -39468,7 +39638,7 @@ func (s *UIElementMetadataResponse) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"display_name\"")
 			}
 		case "icon_name":
-			requiredBitSet[1] |= 1 << 0
+			requiredBitSet[1] |= 1 << 1
 			if err := func() error {
 				v, err := d.Str()
 				s.IconName = string(v)
@@ -39530,7 +39700,7 @@ func (s *UIElementMetadataResponse) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"shareable\"")
 			}
 		case "detailed_name":
-			requiredBitSet[1] |= 1 << 6
+			requiredBitSet[1] |= 1 << 7
 			if err := func() error {
 				v, err := d.Str()
 				s.DetailedName = string(v)
@@ -39551,8 +39721,8 @@ func (s *UIElementMetadataResponse) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
-		0b11001110,
-		0b01000001,
+		0b10011010,
+		0b10000011,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

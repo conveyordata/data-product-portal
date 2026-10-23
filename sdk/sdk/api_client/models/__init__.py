@@ -314,6 +314,7 @@ from .output_port_status import OutputPortStatus
 from .output_port_status_update import OutputPortStatusUpdate
 from .output_port_technical_asset_link_event import OutputPortTechnicalAssetLinkEvent
 from .output_port_update import OutputPortUpdate
+from .overridable_property import OverridableProperty
 from .owned_technical_asset import OwnedTechnicalAsset
 from .owned_technical_asset_configuration import OwnedTechnicalAssetConfiguration
 from .pending_action_response import PendingActionResponse
@@ -696,6 +697,7 @@ __all__ = (
     "OutputPortStatusUpdate",
     "OutputPortTechnicalAssetLinkEvent",
     "OutputPortUpdate",
+    "OverridableProperty",
     "OwnedTechnicalAsset",
     "OwnedTechnicalAssetConfiguration",
     "PendingActionResponse",

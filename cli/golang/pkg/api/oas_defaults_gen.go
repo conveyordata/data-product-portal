@@ -249,6 +249,10 @@ func (s *UIElementMetadataResponse) setDefaults() {
 		s.NotConfigured.SetTo(val)
 	}
 	{
+		var defaultVal0 []OverridableProperty
+		s.OverridableProperties = defaultVal0
+	}
+	{
 		val := string("Resulting path")
 		s.ResultLabel.SetTo(val)
 	}

@@ -1,7 +1,10 @@
 from typing import Optional, Sequence
 
 from app.shared.schema import ORMModel
-from app.technical_asset_configuration.base_schema import UIElementMetadata
+from app.technical_asset_configuration.base_schema import (
+    OverridableProperty,
+    UIElementMetadata,
+)
 
 
 class PlatformTile(ORMModel):
@@ -20,6 +23,7 @@ class PlatformTile(ORMModel):
 class UIElementMetadataResponse(ORMModel):
     not_configured: bool = False
     ui_metadata: Sequence[UIElementMetadata]
+    overridable_properties: Sequence[OverridableProperty] = []
     plugin: str
     has_environments: bool
     result_label: str = "Resulting path"

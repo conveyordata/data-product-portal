@@ -9,6 +9,7 @@ from app.configuration.environments.platform_service_configurations.schema_respo
 from app.technical_asset_configuration.base_schema import (
     PluginContext,
     FieldDependency,
+    OverridableProperty,
     PlatformMetadata,
     SelectOption,
     TechnicalAssetPlugin,
@@ -29,6 +30,26 @@ from portal_plugins.postgresql.model import (
 class PostgreSQLTechnicalAssetConfiguration(TechnicalAssetPlugin):
     name: ClassVar[str] = NAME
     version: ClassVar[str] = "1.0"
+    overridable_properties: ClassVar[list[OverridableProperty]] = [
+        OverridableProperty(
+            name="engine_version",
+            label="Engine version",
+            allowed_values=["15", "16", "17"],
+            default="16",
+        ),
+        OverridableProperty(
+            name="size",
+            label="Size",
+            allowed_values=["small", "medium", "large"],
+            default="small",
+        ),
+        OverridableProperty(
+            name="storage_gb",
+            label="Storage (GB)",
+            allowed_values=["20", "50", "100"],
+            default="20",
+        ),
+    ]
 
     database: str
     schema: str = ""
@@ -135,28 +156,5 @@ class PostgreSQLTechnicalAssetConfiguration(TechnicalAssetPlugin):
                     )
                 ],
             ),
-            _overridable_select(
-                "engine_version", "Engine version", ["15", "16", "17"], "16"
-            ),
-            _overridable_select("size", "Size", ["small", "medium", "large"], "small"),
-            _overridable_select(
-                "storage_gb", "Storage (GB)", ["20", "50", "100"], "20"
-            ),
         ]
         return base_metadata
-
-
-def _overridable_select(
-    name: str, label: str, values: list[str], default: str
-) -> UIElementMetadata:
-    return UIElementMetadata(
-        name=name,
-        label=label,
-        type=UIElementType.Select,
-        required=True,
-        environment_overridable=True,
-        select=UIElementSelect(
-            initial_value=default,
-            options=[SelectOption(label=value, value=value) for value in values],
-        ),
-    )

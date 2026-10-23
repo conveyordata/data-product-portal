@@ -11985,6 +11985,54 @@ func (s *OutputPortUpdate) SetTagIds(val []uuid.UUID) {
 	s.TagIds = val
 }
 
+// Ref: #/components/schemas/OverridableProperty
+type OverridableProperty struct {
+	Name          string   `json:"name"`
+	Label         string   `json:"label"`
+	AllowedValues []string `json:"allowed_values"`
+	Default       string   `json:"default"`
+}
+
+// GetName returns the value of Name.
+func (s *OverridableProperty) GetName() string {
+	return s.Name
+}
+
+// GetLabel returns the value of Label.
+func (s *OverridableProperty) GetLabel() string {
+	return s.Label
+}
+
+// GetAllowedValues returns the value of AllowedValues.
+func (s *OverridableProperty) GetAllowedValues() []string {
+	return s.AllowedValues
+}
+
+// GetDefault returns the value of Default.
+func (s *OverridableProperty) GetDefault() string {
+	return s.Default
+}
+
+// SetName sets the value of Name.
+func (s *OverridableProperty) SetName(val string) {
+	s.Name = val
+}
+
+// SetLabel sets the value of Label.
+func (s *OverridableProperty) SetLabel(val string) {
+	s.Label = val
+}
+
+// SetAllowedValues sets the value of AllowedValues.
+func (s *OverridableProperty) SetAllowedValues(val []string) {
+	s.AllowedValues = val
+}
+
+// SetDefault sets the value of Default.
+func (s *OverridableProperty) SetDefault(val string) {
+	s.Default = val
+}
+
 type OverwriteOutputPortDataQualitySummaryNotFoundApplicationJSON jx.Raw
 
 func (*OverwriteOutputPortDataQualitySummaryNotFoundApplicationJSON) overwriteOutputPortDataQualitySummaryRes() {
@@ -14653,7 +14701,6 @@ type UIElementMetadata struct {
 	DependsOn                        OptNilFieldDependencyArray `json:"depends_on"`
 	Disabled                         OptNilBool                 `json:"disabled"`
 	UseNamespaceWhenNotSourceAligned OptNilBool                 `json:"use_namespace_when_not_source_aligned"`
-	EnvironmentOverridable           OptNilBool                 `json:"environment_overridable"`
 }
 
 // GetLabel returns the value of Label.
@@ -14721,11 +14768,6 @@ func (s *UIElementMetadata) GetUseNamespaceWhenNotSourceAligned() OptNilBool {
 	return s.UseNamespaceWhenNotSourceAligned
 }
 
-// GetEnvironmentOverridable returns the value of EnvironmentOverridable.
-func (s *UIElementMetadata) GetEnvironmentOverridable() OptNilBool {
-	return s.EnvironmentOverridable
-}
-
 // SetLabel sets the value of Label.
 func (s *UIElementMetadata) SetLabel(val string) {
 	s.Label = val
@@ -14791,28 +14833,24 @@ func (s *UIElementMetadata) SetUseNamespaceWhenNotSourceAligned(val OptNilBool) 
 	s.UseNamespaceWhenNotSourceAligned = val
 }
 
-// SetEnvironmentOverridable sets the value of EnvironmentOverridable.
-func (s *UIElementMetadata) SetEnvironmentOverridable(val OptNilBool) {
-	s.EnvironmentOverridable = val
-}
-
 // Ref: #/components/schemas/UIElementMetadataResponse
 type UIElementMetadataResponse struct {
-	NotConfigured   OptBool             `json:"not_configured"`
-	UIMetadata      []UIElementMetadata `json:"ui_metadata"`
-	Plugin          string              `json:"plugin"`
-	HasEnvironments bool                `json:"has_environments"`
-	ResultLabel     OptString           `json:"result_label"`
-	ResultTooltip   OptString           `json:"result_tooltip"`
-	Platform        string              `json:"platform"`
-	DisplayName     string              `json:"display_name"`
-	IconName        string              `json:"icon_name"`
-	IconDataURI     OptNilString        `json:"icon_data_uri"`
-	ParentPlatform  OptNilString        `json:"parent_platform"`
-	PlatformTile    OptNilPlatformTile  `json:"platform_tile"`
-	ShowInForm      OptBool             `json:"show_in_form"`
-	Shareable       OptBool             `json:"shareable"`
-	DetailedName    string              `json:"detailed_name"`
+	NotConfigured         OptBool               `json:"not_configured"`
+	UIMetadata            []UIElementMetadata   `json:"ui_metadata"`
+	OverridableProperties []OverridableProperty `json:"overridable_properties"`
+	Plugin                string                `json:"plugin"`
+	HasEnvironments       bool                  `json:"has_environments"`
+	ResultLabel           OptString             `json:"result_label"`
+	ResultTooltip         OptString             `json:"result_tooltip"`
+	Platform              string                `json:"platform"`
+	DisplayName           string                `json:"display_name"`
+	IconName              string                `json:"icon_name"`
+	IconDataURI           OptNilString          `json:"icon_data_uri"`
+	ParentPlatform        OptNilString          `json:"parent_platform"`
+	PlatformTile          OptNilPlatformTile    `json:"platform_tile"`
+	ShowInForm            OptBool               `json:"show_in_form"`
+	Shareable             OptBool               `json:"shareable"`
+	DetailedName          string                `json:"detailed_name"`
 }
 
 // GetNotConfigured returns the value of NotConfigured.
@@ -14823,6 +14861,11 @@ func (s *UIElementMetadataResponse) GetNotConfigured() OptBool {
 // GetUIMetadata returns the value of UIMetadata.
 func (s *UIElementMetadataResponse) GetUIMetadata() []UIElementMetadata {
 	return s.UIMetadata
+}
+
+// GetOverridableProperties returns the value of OverridableProperties.
+func (s *UIElementMetadataResponse) GetOverridableProperties() []OverridableProperty {
+	return s.OverridableProperties
 }
 
 // GetPlugin returns the value of Plugin.
@@ -14898,6 +14941,11 @@ func (s *UIElementMetadataResponse) SetNotConfigured(val OptBool) {
 // SetUIMetadata sets the value of UIMetadata.
 func (s *UIElementMetadataResponse) SetUIMetadata(val []UIElementMetadata) {
 	s.UIMetadata = val
+}
+
+// SetOverridableProperties sets the value of OverridableProperties.
+func (s *UIElementMetadataResponse) SetOverridableProperties(val []OverridableProperty) {
+	s.OverridableProperties = val
 }
 
 // SetPlugin sets the value of Plugin.
