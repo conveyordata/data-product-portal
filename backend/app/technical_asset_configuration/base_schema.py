@@ -153,7 +153,7 @@ class PluginContext(ORMModel):
         )
 
 
-class OverridableProperty(ORMModel):
+class EnvOverridableProperty(ORMModel):
     name: str
     label: str
     allowed_values: list[str]
@@ -163,7 +163,7 @@ class OverridableProperty(ORMModel):
 class TechnicalAssetPlugin(ORMModel, ABC):
     version: ClassVar[str] = "1.0"
     mcp_instructions: ClassVar[str] = ""
-    overridable_properties: ClassVar[list[OverridableProperty]] = []
+    env_overridable_properties: ClassVar[list[EnvOverridableProperty]] = []
 
     @computed_field  # type: ignore[prop-decorator]
     @property
@@ -222,7 +222,7 @@ class TechnicalAssetPlugin(ORMModel, ABC):
         return []
 
     @classmethod
-    def get_overridable_ui_metadata(cls) -> list[UIElementMetadata]:
+    def get_env_overridable_ui_metadata(cls) -> list[UIElementMetadata]:
         return [
             UIElementMetadata(
                 name=prop.name,
@@ -237,7 +237,7 @@ class TechnicalAssetPlugin(ORMModel, ABC):
                     ],
                 ),
             )
-            for prop in cls.overridable_properties
+            for prop in cls.env_overridable_properties
         ]
 
     @classmethod

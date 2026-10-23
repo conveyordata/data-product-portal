@@ -58,7 +58,7 @@ from app.graph.graph import Graph
 from app.plugins.registry import plugin_registry
 from app.resource_names.service import ResourceNameValidityType
 from app.technical_asset_configuration.base_schema import (
-    OverridableProperty,
+    EnvOverridableProperty,
     PluginContext,
 )
 from app.users.schema import User
@@ -380,7 +380,8 @@ class TechnicalAssetService:
     ) -> GetTechnicalAssetEnvironmentConfigurationResponse:
         technical_asset = self.get_technical_asset(data_product_id, id)
         overridable = {
-            prop.name: prop for prop in self._overridable_properties(technical_asset)
+            prop.name: prop
+            for prop in self._env_overridable_properties(technical_asset)
         }
         self._validate_values(overridable, request.base_values)
         for environment_id, values in request.overrides.items():
@@ -445,7 +446,7 @@ class TechnicalAssetService:
             )
         }
         properties = []
-        for prop in self._overridable_properties(technical_asset):
+        for prop in self._env_overridable_properties(technical_asset):
             base_value = (
                 getattr(technical_asset.configuration, prop.name) or prop.default
             )
@@ -475,12 +476,12 @@ class TechnicalAssetService:
         return GetTechnicalAssetEnvironmentConfigurationResponse(properties=properties)
 
     @staticmethod
-    def _overridable_properties(
+    def _env_overridable_properties(
         technical_asset: TechnicalAssetModel,
-    ) -> list[OverridableProperty]:
+    ) -> list[EnvOverridableProperty]:
         return plugin_registry.get(
             technical_asset.configuration.configuration_type
-        ).overridable_properties
+        ).env_overridable_properties
 
     @staticmethod
     def _ensure_data_product_environment(
@@ -503,7 +504,7 @@ class TechnicalAssetService:
 
     @staticmethod
     def _validate_values(
-        overridable: dict[str, OverridableProperty], values: dict[str, str]
+        overridable: dict[str, EnvOverridableProperty], values: dict[str, str]
     ) -> None:
         for name, value in values.items():
             if name not in overridable:

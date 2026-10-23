@@ -118,7 +118,7 @@ export type UiElementMetadata = {
   disabled?: boolean | null;
   use_namespace_when_not_source_aligned?: boolean | null;
 };
-export type OverridableProperty = {
+export type EnvOverridableProperty = {
   name: string;
   label: string;
   allowed_values: string[];
@@ -127,7 +127,7 @@ export type OverridableProperty = {
 export type UiElementMetadataResponse = {
   not_configured?: boolean;
   ui_metadata: UiElementMetadata[];
-  overridable_properties?: OverridableProperty[];
+  env_overridable_properties?: EnvOverridableProperty[];
   plugin: string;
   has_environments: boolean;
   result_label?: string;

@@ -9,7 +9,7 @@ from attrs import field as _attrs_field
 from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
-    from ..models.overridable_property import OverridableProperty
+    from ..models.env_overridable_property import EnvOverridableProperty
     from ..models.platform_tile import PlatformTile
     from ..models.ui_element_metadata import UIElementMetadata
 
@@ -29,7 +29,7 @@ class UIElementMetadataResponse:
         icon_name (str):
         detailed_name (str):
         not_configured (bool | Unset):  Default: False.
-        overridable_properties (list[OverridableProperty] | Unset):
+        env_overridable_properties (list[EnvOverridableProperty] | Unset):
         result_label (str | Unset):  Default: 'Resulting path'.
         result_tooltip (str | Unset):  Default: 'The path you can access through this technical asset'.
         icon_data_uri (None | str | Unset):
@@ -47,7 +47,7 @@ class UIElementMetadataResponse:
     icon_name: str
     detailed_name: str
     not_configured: bool | Unset = False
-    overridable_properties: list[OverridableProperty] | Unset = UNSET
+    env_overridable_properties: list[EnvOverridableProperty] | Unset = UNSET
     result_label: str | Unset = "Resulting path"
     result_tooltip: str | Unset = "The path you can access through this technical asset"
     icon_data_uri: None | str | Unset = UNSET
@@ -79,12 +79,14 @@ class UIElementMetadataResponse:
 
         not_configured = self.not_configured
 
-        overridable_properties: list[dict[str, Any]] | Unset = UNSET
-        if not isinstance(self.overridable_properties, Unset):
-            overridable_properties = []
-            for overridable_properties_item_data in self.overridable_properties:
-                overridable_properties_item = overridable_properties_item_data.to_dict()
-                overridable_properties.append(overridable_properties_item)
+        env_overridable_properties: list[dict[str, Any]] | Unset = UNSET
+        if not isinstance(self.env_overridable_properties, Unset):
+            env_overridable_properties = []
+            for env_overridable_properties_item_data in self.env_overridable_properties:
+                env_overridable_properties_item = (
+                    env_overridable_properties_item_data.to_dict()
+                )
+                env_overridable_properties.append(env_overridable_properties_item)
 
         result_label = self.result_label
 
@@ -129,8 +131,8 @@ class UIElementMetadataResponse:
         )
         if not_configured is not UNSET:
             field_dict["not_configured"] = not_configured
-        if overridable_properties is not UNSET:
-            field_dict["overridable_properties"] = overridable_properties
+        if env_overridable_properties is not UNSET:
+            field_dict["env_overridable_properties"] = env_overridable_properties
         if result_label is not UNSET:
             field_dict["result_label"] = result_label
         if result_tooltip is not UNSET:
@@ -150,7 +152,9 @@ class UIElementMetadataResponse:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.overridable_property import OverridableProperty  # noqa: PLC0415
+        from ..models.env_overridable_property import (
+            EnvOverridableProperty,  # noqa: PLC0415
+        )
         from ..models.platform_tile import PlatformTile  # noqa: PLC0415
         from ..models.ui_element_metadata import UIElementMetadata  # noqa: PLC0415
 
@@ -176,16 +180,16 @@ class UIElementMetadataResponse:
 
         not_configured = d.pop("not_configured", UNSET)
 
-        _overridable_properties = d.pop("overridable_properties", UNSET)
-        overridable_properties: list[OverridableProperty] | Unset = UNSET
-        if _overridable_properties is not UNSET:
-            overridable_properties = []
-            for overridable_properties_item_data in _overridable_properties:
-                overridable_properties_item = OverridableProperty.from_dict(
-                    overridable_properties_item_data
+        _env_overridable_properties = d.pop("env_overridable_properties", UNSET)
+        env_overridable_properties: list[EnvOverridableProperty] | Unset = UNSET
+        if _env_overridable_properties is not UNSET:
+            env_overridable_properties = []
+            for env_overridable_properties_item_data in _env_overridable_properties:
+                env_overridable_properties_item = EnvOverridableProperty.from_dict(
+                    env_overridable_properties_item_data
                 )
 
-                overridable_properties.append(overridable_properties_item)
+                env_overridable_properties.append(env_overridable_properties_item)
 
         result_label = d.pop("result_label", UNSET)
 
@@ -239,7 +243,7 @@ class UIElementMetadataResponse:
             icon_name=icon_name,
             detailed_name=detailed_name,
             not_configured=not_configured,
-            overridable_properties=overridable_properties,
+            env_overridable_properties=env_overridable_properties,
             result_label=result_label,
             result_tooltip=result_tooltip,
             icon_data_uri=icon_data_uri,

@@ -150,6 +150,7 @@ from .domain_event import DomainEvent
 from .domain_status import DomainStatus
 from .domain_update import DomainUpdate
 from .edge import Edge
+from .env_overridable_property import EnvOverridableProperty
 from .environment import Environment
 from .environment_configs_get import EnvironmentConfigsGet
 from .environment_configs_get_item import EnvironmentConfigsGetItem
@@ -314,7 +315,6 @@ from .output_port_status import OutputPortStatus
 from .output_port_status_update import OutputPortStatusUpdate
 from .output_port_technical_asset_link_event import OutputPortTechnicalAssetLinkEvent
 from .output_port_update import OutputPortUpdate
-from .overridable_property import OverridableProperty
 from .owned_technical_asset import OwnedTechnicalAsset
 from .owned_technical_asset_configuration import OwnedTechnicalAssetConfiguration
 from .pending_action_response import PendingActionResponse
@@ -576,6 +576,7 @@ __all__ = (
     "EnvironmentPlatformConfigGet",
     "EnvironmentsGet",
     "EnvironmentUpdateGlobal",
+    "EnvOverridableProperty",
     "EventEntityType",
     "ExpiringSoonThresholdResponse",
     "Exploration",
@@ -697,7 +698,6 @@ __all__ = (
     "OutputPortStatusUpdate",
     "OutputPortTechnicalAssetLinkEvent",
     "OutputPortUpdate",
-    "OverridableProperty",
     "OwnedTechnicalAsset",
     "OwnedTechnicalAssetConfiguration",
     "PendingActionResponse",

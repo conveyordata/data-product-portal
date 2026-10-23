@@ -6,11 +6,11 @@ from typing import Any, TypeVar, cast
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-T = TypeVar("T", bound="OverridableProperty")
+T = TypeVar("T", bound="EnvOverridableProperty")
 
 
 @_attrs_define
-class OverridableProperty:
+class EnvOverridableProperty:
     """
     Attributes:
         name (str):
@@ -58,15 +58,15 @@ class OverridableProperty:
 
         default = d.pop("default")
 
-        overridable_property = cls(
+        env_overridable_property = cls(
             name=name,
             label=label,
             allowed_values=allowed_values,
             default=default,
         )
 
-        overridable_property.additional_properties = d
-        return overridable_property
+        env_overridable_property.additional_properties = d
+        return env_overridable_property
 
     @property
     def additional_keys(self) -> list[str]:

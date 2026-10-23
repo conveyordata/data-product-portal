@@ -121,7 +121,7 @@ export function TechnicalAsset() {
                             isLoading={isLoading}
                             hasEnvironmentConfiguration={
                                 (plugins?.find((plugin) => plugin.plugin === dataOutput.configuration.name)
-                                    ?.overridable_properties?.length ?? 0) > 0
+                                    ?.env_overridable_properties?.length ?? 0) > 0
                             }
                         />
                     </Flex>

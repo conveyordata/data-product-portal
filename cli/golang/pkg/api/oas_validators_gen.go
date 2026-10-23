@@ -1550,6 +1550,29 @@ func (s DomainStatus) Validate() error {
 	}
 }
 
+func (s *EnvOverridableProperty) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if s.AllowedValues == nil {
+			return errors.New("nil is invalid value")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "allowed_values",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
 func (s *EnvironmentConfigurationProperty) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer
@@ -5156,29 +5179,6 @@ func (s *OutputPortUpdate) Validate() error {
 	return nil
 }
 
-func (s *OverridableProperty) Validate() error {
-	if s == nil {
-		return validate.ErrNilPointer
-	}
-
-	var failures []validate.FieldError
-	if err := func() error {
-		if s.AllowedValues == nil {
-			return errors.New("nil is invalid value")
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "allowed_values",
-			Error: err,
-		})
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-	return nil
-}
-
 func (s *PlatformServiceConfiguration) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer
@@ -6159,7 +6159,7 @@ func (s *UIElementMetadataResponse) Validate() error {
 	}
 	if err := func() error {
 		var failures []validate.FieldError
-		for i, elem := range s.OverridableProperties {
+		for i, elem := range s.EnvOverridableProperties {
 			if err := func() error {
 				if err := elem.Validate(); err != nil {
 					return err
@@ -6178,7 +6178,7 @@ func (s *UIElementMetadataResponse) Validate() error {
 		return nil
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
-			Name:  "overridable_properties",
+			Name:  "env_overridable_properties",
 			Error: err,
 		})
 	}

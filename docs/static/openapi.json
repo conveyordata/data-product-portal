@@ -13474,6 +13474,37 @@
         ],
         "title": "Edge"
       },
+      "EnvOverridableProperty": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "allowed_values": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Allowed Values"
+          },
+          "default": {
+            "type": "string",
+            "title": "Default"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "label",
+          "allowed_values",
+          "default"
+        ],
+        "title": "EnvOverridableProperty"
+      },
       "Environment": {
         "properties": {
           "id": {
@@ -17342,37 +17373,6 @@
         ],
         "title": "OutputPortUpdate"
       },
-      "OverridableProperty": {
-        "properties": {
-          "name": {
-            "type": "string",
-            "title": "Name"
-          },
-          "label": {
-            "type": "string",
-            "title": "Label"
-          },
-          "allowed_values": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array",
-            "title": "Allowed Values"
-          },
-          "default": {
-            "type": "string",
-            "title": "Default"
-          }
-        },
-        "type": "object",
-        "required": [
-          "name",
-          "label",
-          "allowed_values",
-          "default"
-        ],
-        "title": "OverridableProperty"
-      },
       "OwnedTechnicalAsset": {
         "properties": {
           "id": {
@@ -19368,12 +19368,12 @@
             "type": "array",
             "title": "Ui Metadata"
           },
-          "overridable_properties": {
+          "env_overridable_properties": {
             "items": {
-              "$ref": "#/components/schemas/OverridableProperty"
+              "$ref": "#/components/schemas/EnvOverridableProperty"
             },
             "type": "array",
-            "title": "Overridable Properties",
+            "title": "Env Overridable Properties",
             "default": []
           },
           "plugin": {

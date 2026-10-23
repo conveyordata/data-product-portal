@@ -9,7 +9,7 @@ from app.configuration.environments.platform_service_configurations.schema_respo
 from app.technical_asset_configuration.base_schema import (
     PluginContext,
     FieldDependency,
-    OverridableProperty,
+    EnvOverridableProperty,
     PlatformMetadata,
     SelectOption,
     TechnicalAssetPlugin,
@@ -30,20 +30,20 @@ from portal_plugins.postgresql.model import (
 class PostgreSQLTechnicalAssetConfiguration(TechnicalAssetPlugin):
     name: ClassVar[str] = NAME
     version: ClassVar[str] = "1.0"
-    overridable_properties: ClassVar[list[OverridableProperty]] = [
-        OverridableProperty(
+    env_overridable_properties: ClassVar[list[EnvOverridableProperty]] = [
+        EnvOverridableProperty(
             name="engine_version",
             label="Engine version",
             allowed_values=["15", "16", "17"],
             default="16",
         ),
-        OverridableProperty(
+        EnvOverridableProperty(
             name="size",
             label="Size",
             allowed_values=["small", "medium", "large"],
             default="small",
         ),
-        OverridableProperty(
+        EnvOverridableProperty(
             name="storage_gb",
             label="Storage (GB)",
             allowed_values=["20", "50", "100"],
