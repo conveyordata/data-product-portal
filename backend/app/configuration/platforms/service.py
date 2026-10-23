@@ -38,11 +38,12 @@ class PlatformSettingsService:
                         name=asset_type.name,
                         display_name=asset_type.get_platform_metadata().display_name,
                     )
-                    for asset_type in platform.asset_types
+                    for asset_type in plugin_registry.enabled()
+                    if asset_type.platform is platform
                 ]
                 + [
                     PlatformType(kind=PlatformTypeKind.Tool, **tool_type.model_dump())
-                    for tool_type in platform.tool_types
+                    for tool_type in plugin_registry.enabled_tool_types(platform)
                 ],
             )
             for platform in plugin_registry.platforms()

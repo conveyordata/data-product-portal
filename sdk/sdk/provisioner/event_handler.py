@@ -16,6 +16,7 @@ from sdk.api_client.models import (
     CloudEventOutputPortRoleAssignmentEvent,
     CloudEventOutputPortTechnicalAssetLinkEvent,
     CloudEventTechnicalAssetEvent,
+    CloudEventToolEnvironmentConfigurationAppliedEvent,
     DataProductEnvironmentAddedEvent,
     DataProductEvent,
     DataProductRoleAssignmentEvent,
@@ -27,6 +28,7 @@ from sdk.api_client.models import (
     OutputPortRoleAssignmentEvent,
     OutputPortTechnicalAssetLinkEvent,
     TechnicalAssetEvent,
+    ToolEnvironmentConfigurationAppliedEvent,
 )
 
 
@@ -81,6 +83,9 @@ class AbstractEventHandler(ABC):
         elif event_type == "technical_asset.event":
             parsed_event = CloudEventTechnicalAssetEvent.from_dict(payload)
             return await self.on_technical_asset_event(parsed_event.data)
+        elif event_type == "tool.environment_configuration_applied":
+            parsed_event = CloudEventToolEnvironmentConfigurationAppliedEvent.from_dict(payload)
+            return await self.on_tool_environment_configuration_applied(parsed_event.data)
         else:
             # Standard practice is to accept unhandled hooks with a 202/success to avoid webhook retries
             return {"status": "ignored", "reason": f"No handler implemented for '{event_type}'"}
@@ -140,6 +145,11 @@ class AbstractEventHandler(ABC):
         """Handler for the parsed payload of 'technical_asset.event'"""
         pass
 
+    @abstractmethod
+    async def on_tool_environment_configuration_applied(self, data: ToolEnvironmentConfigurationAppliedEvent) -> Any:
+        """Handler for the parsed payload of 'tool.environment_configuration_applied'"""
+        pass
+
 
 class EmptyEventHandler(AbstractEventHandler):
     """
@@ -178,4 +188,7 @@ class EmptyEventHandler(AbstractEventHandler):
         pass
 
     async def on_technical_asset_event(self, data: TechnicalAssetEvent) -> Any:
+        pass
+
+    async def on_tool_environment_configuration_applied(self, data: ToolEnvironmentConfigurationAppliedEvent) -> Any:
         pass

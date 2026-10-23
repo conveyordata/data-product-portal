@@ -53,6 +53,12 @@ type Invoker interface {
 	//
 	// POST /api/v2/data_products/{data_product_id}/output_ports/{id}/data_quality_summary
 	AddOutputPortDataQualityRun(ctx context.Context, request *OutputPortDataQualitySummary, params AddOutputPortDataQualityRunParams) (AddOutputPortDataQualityRunRes, error)
+	// ApplyToolEnvironmentConfiguration invokes apply_tool_environment_configuration operation.
+	//
+	// Apply Tool Environment Configuration.
+	//
+	// POST /api/v2/data_products/{data_product_id}/tools/{id}/environments/{environment_id}/apply
+	ApplyToolEnvironmentConfiguration(ctx context.Context, params ApplyToolEnvironmentConfigurationParams) (ApplyToolEnvironmentConfigurationRes, error)
 	// ApproveOutputPortAsInputPort invokes approve_output_port_as_input_port operation.
 	//
 	// Approve Output Port As Input Port.
@@ -198,6 +204,12 @@ type Invoker interface {
 	//
 	// POST /api/v2/data_products/{data_product_id}/technical_assets/
 	CreateTechnicalAsset(ctx context.Context, request *CreateTechnicalAssetRequest, params CreateTechnicalAssetParams) (CreateTechnicalAssetRes, error)
+	// CreateTool invokes create_tool operation.
+	//
+	// Create Tool.
+	//
+	// POST /api/v2/data_products/{data_product_id}/tools
+	CreateTool(ctx context.Context, request *CreateToolRequest, params CreateToolParams) (CreateToolRes, error)
 	// CreateUser invokes create_user operation.
 	//
 	// Create User.
@@ -282,6 +294,12 @@ type Invoker interface {
 	//
 	// DELETE /api/v2/authz/role_assignments/output_port/{id}
 	DeleteOutputPortRoleAssignment(ctx context.Context, params DeleteOutputPortRoleAssignmentParams) (DeleteOutputPortRoleAssignmentRes, error)
+	// DeleteTool invokes delete_tool operation.
+	//
+	// Delete Tool.
+	//
+	// DELETE /api/v2/data_products/{data_product_id}/tools/{id}
+	DeleteTool(ctx context.Context, params DeleteToolParams) (DeleteToolRes, error)
 	// DenyOutputPortAsInputPort invokes deny_output_port_as_input_port operation.
 	//
 	// Deny Output Port As Input Port.
@@ -372,6 +390,12 @@ type Invoker interface {
 	//
 	// GET /api/v2/data_products/{data_product_id}/technical_assets/
 	GetDataProductTechnicalAssets(ctx context.Context, params GetDataProductTechnicalAssetsParams) (GetDataProductTechnicalAssetsRes, error)
+	// GetDataProductTools invokes get_data_product_tools operation.
+	//
+	// Get Data Product Tools.
+	//
+	// GET /api/v2/data_products/{data_product_id}/tools
+	GetDataProductTools(ctx context.Context, params GetDataProductToolsParams) (GetDataProductToolsRes, error)
 	// GetDataProductType invokes get_data_product_type operation.
 	//
 	// Get Data Product Type.
@@ -612,6 +636,18 @@ type Invoker interface {
 	//
 	// GET /api/v2/configuration/theme_settings
 	GetThemeSettings(ctx context.Context) (GetThemeSettingsRes, error)
+	// GetTool invokes get_tool operation.
+	//
+	// Get Tool.
+	//
+	// GET /api/v2/data_products/{data_product_id}/tools/{id}
+	GetTool(ctx context.Context, params GetToolParams) (GetToolRes, error)
+	// GetToolEnvironmentConfiguration invokes get_tool_environment_configuration operation.
+	//
+	// Get Tool Environment Configuration.
+	//
+	// GET /api/v2/data_products/{data_product_id}/tools/{id}/environment-configuration
+	GetToolEnvironmentConfiguration(ctx context.Context, params GetToolEnvironmentConfigurationParams) (GetToolEnvironmentConfigurationRes, error)
 	// GetUserGroups invokes get_user_groups operation.
 	//
 	// Get User Groups.
@@ -1131,6 +1167,12 @@ type Invoker interface {
 	//
 	// PUT /api/v2/configuration/theme_settings
 	UpdateThemeSettings(ctx context.Context, request *ThemeSettings) (UpdateThemeSettingsRes, error)
+	// UpdateToolEnvironmentConfiguration invokes update_tool_environment_configuration operation.
+	//
+	// Update Tool Environment Configuration.
+	//
+	// PUT /api/v2/data_products/{data_product_id}/tools/{id}/environment-configuration
+	UpdateToolEnvironmentConfiguration(ctx context.Context, request *UpdateToolEnvironmentConfigurationRequest, params UpdateToolEnvironmentConfigurationParams) (UpdateToolEnvironmentConfigurationRes, error)
 	// ValidateResourceName invokes validate_resource_name operation.
 	//
 	// Validate Resource Name.
@@ -1517,6 +1559,106 @@ func (c *Client) sendAddOutputPortDataQualityRun(ctx context.Context, request *O
 	}()
 
 	result, err := decodeAddOutputPortDataQualityRunResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// ApplyToolEnvironmentConfiguration invokes apply_tool_environment_configuration operation.
+//
+// Apply Tool Environment Configuration.
+//
+// POST /api/v2/data_products/{data_product_id}/tools/{id}/environments/{environment_id}/apply
+func (c *Client) ApplyToolEnvironmentConfiguration(ctx context.Context, params ApplyToolEnvironmentConfigurationParams) (ApplyToolEnvironmentConfigurationRes, error) {
+	res, err := c.sendApplyToolEnvironmentConfiguration(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendApplyToolEnvironmentConfiguration(ctx context.Context, params ApplyToolEnvironmentConfigurationParams) (res ApplyToolEnvironmentConfigurationRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [7]string
+	pathParts[0] = "/api/v2/data_products/"
+	{
+		// Encode "data_product_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "data_product_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.DataProductID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/tools/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/environments/"
+	{
+		// Encode "environment_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "environment_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.EnvironmentID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[5] = encoded
+	}
+	pathParts[6] = "/apply"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeApplyToolEnvironmentConfigurationResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -2865,6 +3007,71 @@ func (c *Client) sendCreateTechnicalAsset(ctx context.Context, request *CreateTe
 	return result, nil
 }
 
+// CreateTool invokes create_tool operation.
+//
+// Create Tool.
+//
+// POST /api/v2/data_products/{data_product_id}/tools
+func (c *Client) CreateTool(ctx context.Context, request *CreateToolRequest, params CreateToolParams) (CreateToolRes, error) {
+	res, err := c.sendCreateTool(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendCreateTool(ctx context.Context, request *CreateToolRequest, params CreateToolParams) (res CreateToolRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/api/v2/data_products/"
+	{
+		// Encode "data_product_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "data_product_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.DataProductID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/tools"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeCreateToolRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeCreateToolResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // CreateUser invokes create_user operation.
 //
 // Create User.
@@ -3687,6 +3894,86 @@ func (c *Client) sendDeleteOutputPortRoleAssignment(ctx context.Context, params 
 	}()
 
 	result, err := decodeDeleteOutputPortRoleAssignmentResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// DeleteTool invokes delete_tool operation.
+//
+// Delete Tool.
+//
+// DELETE /api/v2/data_products/{data_product_id}/tools/{id}
+func (c *Client) DeleteTool(ctx context.Context, params DeleteToolParams) (DeleteToolRes, error) {
+	res, err := c.sendDeleteTool(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendDeleteTool(ctx context.Context, params DeleteToolParams) (res DeleteToolRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [4]string
+	pathParts[0] = "/api/v2/data_products/"
+	{
+		// Encode "data_product_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "data_product_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.DataProductID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/tools/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "DELETE", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeDeleteToolResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -4577,6 +4864,68 @@ func (c *Client) sendGetDataProductTechnicalAssets(ctx context.Context, params G
 	}()
 
 	result, err := decodeGetDataProductTechnicalAssetsResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetDataProductTools invokes get_data_product_tools operation.
+//
+// Get Data Product Tools.
+//
+// GET /api/v2/data_products/{data_product_id}/tools
+func (c *Client) GetDataProductTools(ctx context.Context, params GetDataProductToolsParams) (GetDataProductToolsRes, error) {
+	res, err := c.sendGetDataProductTools(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendGetDataProductTools(ctx context.Context, params GetDataProductToolsParams) (res GetDataProductToolsRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/api/v2/data_products/"
+	{
+		// Encode "data_product_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "data_product_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.DataProductID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/tools"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeGetDataProductToolsResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -7216,6 +7565,167 @@ func (c *Client) sendGetThemeSettings(ctx context.Context) (res GetThemeSettings
 	}()
 
 	result, err := decodeGetThemeSettingsResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetTool invokes get_tool operation.
+//
+// Get Tool.
+//
+// GET /api/v2/data_products/{data_product_id}/tools/{id}
+func (c *Client) GetTool(ctx context.Context, params GetToolParams) (GetToolRes, error) {
+	res, err := c.sendGetTool(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendGetTool(ctx context.Context, params GetToolParams) (res GetToolRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [4]string
+	pathParts[0] = "/api/v2/data_products/"
+	{
+		// Encode "data_product_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "data_product_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.DataProductID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/tools/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeGetToolResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetToolEnvironmentConfiguration invokes get_tool_environment_configuration operation.
+//
+// Get Tool Environment Configuration.
+//
+// GET /api/v2/data_products/{data_product_id}/tools/{id}/environment-configuration
+func (c *Client) GetToolEnvironmentConfiguration(ctx context.Context, params GetToolEnvironmentConfigurationParams) (GetToolEnvironmentConfigurationRes, error) {
+	res, err := c.sendGetToolEnvironmentConfiguration(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendGetToolEnvironmentConfiguration(ctx context.Context, params GetToolEnvironmentConfigurationParams) (res GetToolEnvironmentConfigurationRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/api/v2/data_products/"
+	{
+		// Encode "data_product_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "data_product_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.DataProductID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/tools/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/environment-configuration"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeGetToolEnvironmentConfigurationResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -13196,6 +13706,90 @@ func (c *Client) sendUpdateThemeSettings(ctx context.Context, request *ThemeSett
 	}()
 
 	result, err := decodeUpdateThemeSettingsResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// UpdateToolEnvironmentConfiguration invokes update_tool_environment_configuration operation.
+//
+// Update Tool Environment Configuration.
+//
+// PUT /api/v2/data_products/{data_product_id}/tools/{id}/environment-configuration
+func (c *Client) UpdateToolEnvironmentConfiguration(ctx context.Context, request *UpdateToolEnvironmentConfigurationRequest, params UpdateToolEnvironmentConfigurationParams) (UpdateToolEnvironmentConfigurationRes, error) {
+	res, err := c.sendUpdateToolEnvironmentConfiguration(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendUpdateToolEnvironmentConfiguration(ctx context.Context, request *UpdateToolEnvironmentConfigurationRequest, params UpdateToolEnvironmentConfigurationParams) (res UpdateToolEnvironmentConfigurationRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/api/v2/data_products/"
+	{
+		// Encode "data_product_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "data_product_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.DataProductID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/tools/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/environment-configuration"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "PUT", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeUpdateToolEnvironmentConfigurationRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeUpdateToolEnvironmentConfigurationResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

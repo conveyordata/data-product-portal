@@ -23,6 +23,14 @@ func (s *CreateTechnicalAssetRequest) setDefaults() {
 }
 
 // setDefaults set default value of fields.
+func (s *CreateToolRequest) setDefaults() {
+	{
+		val := string("")
+		s.Description.SetTo(val)
+	}
+}
+
+// setDefaults set default value of fields.
 func (s *DataProductCreate) setDefaults() {
 	{
 		var defaultVal0 []uuid.UUID

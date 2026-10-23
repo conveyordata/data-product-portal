@@ -33,6 +33,7 @@ from app.data_products.output_ports.input_ports.router import (
 from app.data_products.output_ports.router import router as dataset
 from app.data_products.router import router as data_product
 from app.data_products.technical_assets.router import router as technical_assets
+from app.data_products.tools.router import router as tools
 from app.explorations.router import router as exploration
 from app.graph.router import router as graph
 from app.groups.router import router as group
@@ -61,6 +62,7 @@ router.include_router(access_modes)
 router.include_router(data_product_dataset)
 router.include_router(technical_asset_output_port)
 router.include_router(technical_assets)
+router.include_router(tools)
 router.include_router(domain)
 router.include_router(environment)
 router.include_router(platform)

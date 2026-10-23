@@ -632,6 +632,10 @@ type AddOutputPortDataQualityRunNotFoundApplicationJSON jx.Raw
 
 func (*AddOutputPortDataQualityRunNotFoundApplicationJSON) addOutputPortDataQualityRunRes() {}
 
+type ApplyToolEnvironmentConfigurationOKApplicationJSON jx.Raw
+
+func (*ApplyToolEnvironmentConfigurationOKApplicationJSON) applyToolEnvironmentConfigurationRes() {}
+
 // Ref: #/components/schemas/ApproveLinkBetweenTechnicalAssetAndOutputPortRequest
 type ApproveLinkBetweenTechnicalAssetAndOutputPortRequest struct {
 	TechnicalAssetID uuid.UUID `json:"technical_asset_id"`
@@ -1643,6 +1647,93 @@ func (s *CreateTechnicalAssetResponse) SetID(val uuid.UUID) {
 }
 
 func (*CreateTechnicalAssetResponse) createTechnicalAssetRes() {}
+
+// Ref: #/components/schemas/CreateToolRequest
+type CreateToolRequest struct {
+	Name        string                         `json:"name"`
+	Description OptString                      `json:"description"`
+	PlatformKey string                         `json:"platform_key"`
+	ToolType    string                         `json:"tool_type"`
+	BaseValues  OptCreateToolRequestBaseValues `json:"base_values"`
+}
+
+// GetName returns the value of Name.
+func (s *CreateToolRequest) GetName() string {
+	return s.Name
+}
+
+// GetDescription returns the value of Description.
+func (s *CreateToolRequest) GetDescription() OptString {
+	return s.Description
+}
+
+// GetPlatformKey returns the value of PlatformKey.
+func (s *CreateToolRequest) GetPlatformKey() string {
+	return s.PlatformKey
+}
+
+// GetToolType returns the value of ToolType.
+func (s *CreateToolRequest) GetToolType() string {
+	return s.ToolType
+}
+
+// GetBaseValues returns the value of BaseValues.
+func (s *CreateToolRequest) GetBaseValues() OptCreateToolRequestBaseValues {
+	return s.BaseValues
+}
+
+// SetName sets the value of Name.
+func (s *CreateToolRequest) SetName(val string) {
+	s.Name = val
+}
+
+// SetDescription sets the value of Description.
+func (s *CreateToolRequest) SetDescription(val OptString) {
+	s.Description = val
+}
+
+// SetPlatformKey sets the value of PlatformKey.
+func (s *CreateToolRequest) SetPlatformKey(val string) {
+	s.PlatformKey = val
+}
+
+// SetToolType sets the value of ToolType.
+func (s *CreateToolRequest) SetToolType(val string) {
+	s.ToolType = val
+}
+
+// SetBaseValues sets the value of BaseValues.
+func (s *CreateToolRequest) SetBaseValues(val OptCreateToolRequestBaseValues) {
+	s.BaseValues = val
+}
+
+type CreateToolRequestBaseValues map[string]string
+
+func (s *CreateToolRequestBaseValues) init() CreateToolRequestBaseValues {
+	m := *s
+	if m == nil {
+		m = map[string]string{}
+		*s = m
+	}
+	return m
+}
+
+// Ref: #/components/schemas/CreateToolResponse
+type CreateToolResponse struct {
+	ID uuid.UUID `json:"id"`
+}
+
+// GetID returns the value of ID.
+func (s *CreateToolResponse) GetID() uuid.UUID {
+	return s.ID
+}
+
+// SetID sets the value of ID.
+func (s *CreateToolResponse) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+func (*CreateToolResponse) createToolRes() {}
 
 // Ref: #/components/schemas/DataProduct
 type DataProduct struct {
@@ -3605,6 +3696,10 @@ func (s *DeleteOutputPortRoleAssignmentResponse) SetOutputPortID(val uuid.UUID) 
 
 func (*DeleteOutputPortRoleAssignmentResponse) deleteOutputPortRoleAssignmentRes() {}
 
+type DeleteToolOKApplicationJSON jx.Raw
+
+func (*DeleteToolOKApplicationJSON) deleteToolRes() {}
+
 // Ref: #/components/schemas/DenyLinkBetweenTechnicalAssetAndOutputPortRequest
 type DenyLinkBetweenTechnicalAssetAndOutputPortRequest struct {
 	TechnicalAssetID uuid.UUID `json:"technical_asset_id"`
@@ -4131,6 +4226,65 @@ func (s *EnvironmentGetItem) SetIsDefault(val OptBool) {
 // SetIsGlobal sets the value of IsGlobal.
 func (s *EnvironmentGetItem) SetIsGlobal(val OptBool) {
 	s.IsGlobal = val
+}
+
+// Ref: #/components/schemas/EnvironmentPropertyValue
+type EnvironmentPropertyValue struct {
+	ID             uuid.UUID `json:"id"`
+	Name           string    `json:"name"`
+	Acronym        string    `json:"acronym"`
+	Override       NilString `json:"override"`
+	EffectiveValue string    `json:"effective_value"`
+}
+
+// GetID returns the value of ID.
+func (s *EnvironmentPropertyValue) GetID() uuid.UUID {
+	return s.ID
+}
+
+// GetName returns the value of Name.
+func (s *EnvironmentPropertyValue) GetName() string {
+	return s.Name
+}
+
+// GetAcronym returns the value of Acronym.
+func (s *EnvironmentPropertyValue) GetAcronym() string {
+	return s.Acronym
+}
+
+// GetOverride returns the value of Override.
+func (s *EnvironmentPropertyValue) GetOverride() NilString {
+	return s.Override
+}
+
+// GetEffectiveValue returns the value of EffectiveValue.
+func (s *EnvironmentPropertyValue) GetEffectiveValue() string {
+	return s.EffectiveValue
+}
+
+// SetID sets the value of ID.
+func (s *EnvironmentPropertyValue) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+// SetName sets the value of Name.
+func (s *EnvironmentPropertyValue) SetName(val string) {
+	s.Name = val
+}
+
+// SetAcronym sets the value of Acronym.
+func (s *EnvironmentPropertyValue) SetAcronym(val string) {
+	s.Acronym = val
+}
+
+// SetOverride sets the value of Override.
+func (s *EnvironmentPropertyValue) SetOverride(val NilString) {
+	s.Override = val
+}
+
+// SetEffectiveValue sets the value of EffectiveValue.
+func (s *EnvironmentPropertyValue) SetEffectiveValue(val string) {
+	s.EffectiveValue = val
 }
 
 // Ref: #/components/schemas/EnvironmentUpdateGlobal
@@ -5893,6 +6047,23 @@ func (s *GetTechnicalAssetsResponseItemConfigurationAdditional) init() GetTechni
 	return m
 }
 
+// Ref: #/components/schemas/GetToolsResponse
+type GetToolsResponse struct {
+	Tools []Tool `json:"tools"`
+}
+
+// GetTools returns the value of Tools.
+func (s *GetToolsResponse) GetTools() []Tool {
+	return s.Tools
+}
+
+// SetTools sets the value of Tools.
+func (s *GetToolsResponse) SetTools(val []Tool) {
+	s.Tools = val
+}
+
+func (*GetToolsResponse) getDataProductToolsRes() {}
+
 type GetUserGroupsNotFoundApplicationJSON jx.Raw
 
 func (*GetUserGroupsNotFoundApplicationJSON) getUserGroupsRes() {}
@@ -6450,6 +6621,7 @@ func (*HTTPValidationError) addDomainFinalizerRes()                       {}
 func (*HTTPValidationError) addExplorationFinalizerRes()                  {}
 func (*HTTPValidationError) addGroupMembersRes()                          {}
 func (*HTTPValidationError) addOutputPortDataQualityRunRes()              {}
+func (*HTTPValidationError) applyToolEnvironmentConfigurationRes()        {}
 func (*HTTPValidationError) approveOutputPortAsInputPortRes()             {}
 func (*HTTPValidationError) approveOutputPortTechnicalAssetLinkRes()      {}
 func (*HTTPValidationError) becomeAdminRes()                              {}
@@ -6474,6 +6646,7 @@ func (*HTTPValidationError) createOutputPortRoleAssignmentRes()           {}
 func (*HTTPValidationError) createRoleRes()                               {}
 func (*HTTPValidationError) createTagRes()                                {}
 func (*HTTPValidationError) createTechnicalAssetRes()                     {}
+func (*HTTPValidationError) createToolRes()                               {}
 func (*HTTPValidationError) createUserRes()                               {}
 func (*HTTPValidationError) createUsersBatchRes()                         {}
 func (*HTTPValidationError) decideDataProductRoleAssignmentRes()          {}
@@ -6488,6 +6661,7 @@ func (*HTTPValidationError) deleteMachineUserRes()                        {}
 func (*HTTPValidationError) deleteMachineUsersBatchRes()                  {}
 func (*HTTPValidationError) deleteOutputPortQueryStatRes()                {}
 func (*HTTPValidationError) deleteOutputPortRoleAssignmentRes()           {}
+func (*HTTPValidationError) deleteToolRes()                               {}
 func (*HTTPValidationError) denyOutputPortAsInputPortRes()                {}
 func (*HTTPValidationError) denyOutputPortTechnicalAssetLinkRes()         {}
 func (*HTTPValidationError) getAWSCredentialsRes()                        {}
@@ -6503,6 +6677,7 @@ func (*HTTPValidationError) getDataProductRes()                           {}
 func (*HTTPValidationError) getDataProductRolledUpTagsRes()               {}
 func (*HTTPValidationError) getDataProductSettingsRes()                   {}
 func (*HTTPValidationError) getDataProductTechnicalAssetsRes()            {}
+func (*HTTPValidationError) getDataProductToolsRes()                      {}
 func (*HTTPValidationError) getDataProductTypeRes()                       {}
 func (*HTTPValidationError) getDataProductsLifecyclesRes()                {}
 func (*HTTPValidationError) getDataProductsRes()                          {}
@@ -6542,6 +6717,8 @@ func (*HTTPValidationError) getTagsRes()                                  {}
 func (*HTTPValidationError) getTechnicalAssetEventHistoryRes()            {}
 func (*HTTPValidationError) getTechnicalAssetRes()                        {}
 func (*HTTPValidationError) getThemeSettingsRes()                         {}
+func (*HTTPValidationError) getToolEnvironmentConfigurationRes()          {}
+func (*HTTPValidationError) getToolRes()                                  {}
 func (*HTTPValidationError) getUserGroupsRes()                            {}
 func (*HTTPValidationError) getUserNotificationsRes()                     {}
 func (*HTTPValidationError) getUsersRes()                                 {}
@@ -6625,6 +6802,7 @@ func (*HTTPValidationError) updateTagRes()                                {}
 func (*HTTPValidationError) updateTechnicalAssetRes()                     {}
 func (*HTTPValidationError) updateTechnicalAssetStatusRes()               {}
 func (*HTTPValidationError) updateThemeSettingsRes()                      {}
+func (*HTTPValidationError) updateToolEnvironmentConfigurationRes()       {}
 func (*HTTPValidationError) validateResourceNameRes()                     {}
 
 // Ref: #/components/schemas/IdentityBatchCreateError
@@ -8008,6 +8186,52 @@ func (o OptBool) Get() (v bool, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptBool) Or(d bool) bool {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptCreateToolRequestBaseValues returns new OptCreateToolRequestBaseValues with value set to v.
+func NewOptCreateToolRequestBaseValues(v CreateToolRequestBaseValues) OptCreateToolRequestBaseValues {
+	return OptCreateToolRequestBaseValues{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptCreateToolRequestBaseValues is optional CreateToolRequestBaseValues.
+type OptCreateToolRequestBaseValues struct {
+	Value CreateToolRequestBaseValues
+	Set   bool
+}
+
+// IsSet returns true if OptCreateToolRequestBaseValues was set.
+func (o OptCreateToolRequestBaseValues) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptCreateToolRequestBaseValues) Reset() {
+	var v CreateToolRequestBaseValues
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptCreateToolRequestBaseValues) SetTo(v CreateToolRequestBaseValues) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptCreateToolRequestBaseValues) Get() (v CreateToolRequestBaseValues, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptCreateToolRequestBaseValues) Or(d CreateToolRequestBaseValues) CreateToolRequestBaseValues {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -10398,6 +10622,98 @@ func (o OptUUID) Or(d uuid.UUID) uuid.UUID {
 	return d
 }
 
+// NewOptUpdateToolEnvironmentConfigurationRequestBaseValues returns new OptUpdateToolEnvironmentConfigurationRequestBaseValues with value set to v.
+func NewOptUpdateToolEnvironmentConfigurationRequestBaseValues(v UpdateToolEnvironmentConfigurationRequestBaseValues) OptUpdateToolEnvironmentConfigurationRequestBaseValues {
+	return OptUpdateToolEnvironmentConfigurationRequestBaseValues{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptUpdateToolEnvironmentConfigurationRequestBaseValues is optional UpdateToolEnvironmentConfigurationRequestBaseValues.
+type OptUpdateToolEnvironmentConfigurationRequestBaseValues struct {
+	Value UpdateToolEnvironmentConfigurationRequestBaseValues
+	Set   bool
+}
+
+// IsSet returns true if OptUpdateToolEnvironmentConfigurationRequestBaseValues was set.
+func (o OptUpdateToolEnvironmentConfigurationRequestBaseValues) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptUpdateToolEnvironmentConfigurationRequestBaseValues) Reset() {
+	var v UpdateToolEnvironmentConfigurationRequestBaseValues
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptUpdateToolEnvironmentConfigurationRequestBaseValues) SetTo(v UpdateToolEnvironmentConfigurationRequestBaseValues) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptUpdateToolEnvironmentConfigurationRequestBaseValues) Get() (v UpdateToolEnvironmentConfigurationRequestBaseValues, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptUpdateToolEnvironmentConfigurationRequestBaseValues) Or(d UpdateToolEnvironmentConfigurationRequestBaseValues) UpdateToolEnvironmentConfigurationRequestBaseValues {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptUpdateToolEnvironmentConfigurationRequestOverrides returns new OptUpdateToolEnvironmentConfigurationRequestOverrides with value set to v.
+func NewOptUpdateToolEnvironmentConfigurationRequestOverrides(v UpdateToolEnvironmentConfigurationRequestOverrides) OptUpdateToolEnvironmentConfigurationRequestOverrides {
+	return OptUpdateToolEnvironmentConfigurationRequestOverrides{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptUpdateToolEnvironmentConfigurationRequestOverrides is optional UpdateToolEnvironmentConfigurationRequestOverrides.
+type OptUpdateToolEnvironmentConfigurationRequestOverrides struct {
+	Value UpdateToolEnvironmentConfigurationRequestOverrides
+	Set   bool
+}
+
+// IsSet returns true if OptUpdateToolEnvironmentConfigurationRequestOverrides was set.
+func (o OptUpdateToolEnvironmentConfigurationRequestOverrides) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptUpdateToolEnvironmentConfigurationRequestOverrides) Reset() {
+	var v UpdateToolEnvironmentConfigurationRequestOverrides
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptUpdateToolEnvironmentConfigurationRequestOverrides) SetTo(v UpdateToolEnvironmentConfigurationRequestOverrides) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptUpdateToolEnvironmentConfigurationRequestOverrides) Get() (v UpdateToolEnvironmentConfigurationRequestOverrides, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptUpdateToolEnvironmentConfigurationRequestOverrides) Or(d UpdateToolEnvironmentConfigurationRequestOverrides) UpdateToolEnvironmentConfigurationRequestOverrides {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // Ref: #/components/schemas/OutputPort
 type OutputPort struct {
 	ID            uuid.UUID            `json:"id"`
@@ -11790,6 +12106,76 @@ func (s *OverridableProperty) SetAllowedValues(val []string) {
 // SetDefault sets the value of Default.
 func (s *OverridableProperty) SetDefault(val string) {
 	s.Default = val
+}
+
+// Ref: #/components/schemas/OverridablePropertyConfiguration
+type OverridablePropertyConfiguration struct {
+	Name          string                     `json:"name"`
+	Label         string                     `json:"label"`
+	AllowedValues []string                   `json:"allowed_values"`
+	Default       string                     `json:"default"`
+	BaseValue     string                     `json:"base_value"`
+	Environments  []EnvironmentPropertyValue `json:"environments"`
+}
+
+// GetName returns the value of Name.
+func (s *OverridablePropertyConfiguration) GetName() string {
+	return s.Name
+}
+
+// GetLabel returns the value of Label.
+func (s *OverridablePropertyConfiguration) GetLabel() string {
+	return s.Label
+}
+
+// GetAllowedValues returns the value of AllowedValues.
+func (s *OverridablePropertyConfiguration) GetAllowedValues() []string {
+	return s.AllowedValues
+}
+
+// GetDefault returns the value of Default.
+func (s *OverridablePropertyConfiguration) GetDefault() string {
+	return s.Default
+}
+
+// GetBaseValue returns the value of BaseValue.
+func (s *OverridablePropertyConfiguration) GetBaseValue() string {
+	return s.BaseValue
+}
+
+// GetEnvironments returns the value of Environments.
+func (s *OverridablePropertyConfiguration) GetEnvironments() []EnvironmentPropertyValue {
+	return s.Environments
+}
+
+// SetName sets the value of Name.
+func (s *OverridablePropertyConfiguration) SetName(val string) {
+	s.Name = val
+}
+
+// SetLabel sets the value of Label.
+func (s *OverridablePropertyConfiguration) SetLabel(val string) {
+	s.Label = val
+}
+
+// SetAllowedValues sets the value of AllowedValues.
+func (s *OverridablePropertyConfiguration) SetAllowedValues(val []string) {
+	s.AllowedValues = val
+}
+
+// SetDefault sets the value of Default.
+func (s *OverridablePropertyConfiguration) SetDefault(val string) {
+	s.Default = val
+}
+
+// SetBaseValue sets the value of BaseValue.
+func (s *OverridablePropertyConfiguration) SetBaseValue(val string) {
+	s.BaseValue = val
+}
+
+// SetEnvironments sets the value of Environments.
+func (s *OverridablePropertyConfiguration) SetEnvironments(val []EnvironmentPropertyValue) {
+	s.Environments = val
 }
 
 type OverwriteOutputPortDataQualitySummaryNotFoundApplicationJSON jx.Raw
@@ -14483,6 +14869,118 @@ func (s *TimeBoundAccessEnabledResponse) SetEnabled(val bool) {
 	s.Enabled = val
 }
 
+// Ref: #/components/schemas/Tool
+type Tool struct {
+	ID            uuid.UUID      `json:"id"`
+	Name          string         `json:"name"`
+	Description   string         `json:"description"`
+	DataProductID uuid.UUID      `json:"data_product_id"`
+	PlatformKey   string         `json:"platform_key"`
+	ToolType      string         `json:"tool_type"`
+	BaseValues    ToolBaseValues `json:"base_values"`
+}
+
+// GetID returns the value of ID.
+func (s *Tool) GetID() uuid.UUID {
+	return s.ID
+}
+
+// GetName returns the value of Name.
+func (s *Tool) GetName() string {
+	return s.Name
+}
+
+// GetDescription returns the value of Description.
+func (s *Tool) GetDescription() string {
+	return s.Description
+}
+
+// GetDataProductID returns the value of DataProductID.
+func (s *Tool) GetDataProductID() uuid.UUID {
+	return s.DataProductID
+}
+
+// GetPlatformKey returns the value of PlatformKey.
+func (s *Tool) GetPlatformKey() string {
+	return s.PlatformKey
+}
+
+// GetToolType returns the value of ToolType.
+func (s *Tool) GetToolType() string {
+	return s.ToolType
+}
+
+// GetBaseValues returns the value of BaseValues.
+func (s *Tool) GetBaseValues() ToolBaseValues {
+	return s.BaseValues
+}
+
+// SetID sets the value of ID.
+func (s *Tool) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+// SetName sets the value of Name.
+func (s *Tool) SetName(val string) {
+	s.Name = val
+}
+
+// SetDescription sets the value of Description.
+func (s *Tool) SetDescription(val string) {
+	s.Description = val
+}
+
+// SetDataProductID sets the value of DataProductID.
+func (s *Tool) SetDataProductID(val uuid.UUID) {
+	s.DataProductID = val
+}
+
+// SetPlatformKey sets the value of PlatformKey.
+func (s *Tool) SetPlatformKey(val string) {
+	s.PlatformKey = val
+}
+
+// SetToolType sets the value of ToolType.
+func (s *Tool) SetToolType(val string) {
+	s.ToolType = val
+}
+
+// SetBaseValues sets the value of BaseValues.
+func (s *Tool) SetBaseValues(val ToolBaseValues) {
+	s.BaseValues = val
+}
+
+func (*Tool) getToolRes() {}
+
+type ToolBaseValues map[string]string
+
+func (s *ToolBaseValues) init() ToolBaseValues {
+	m := *s
+	if m == nil {
+		m = map[string]string{}
+		*s = m
+	}
+	return m
+}
+
+// Ref: #/components/schemas/ToolEnvironmentConfiguration
+type ToolEnvironmentConfiguration struct {
+	Properties []OverridablePropertyConfiguration `json:"properties"`
+}
+
+// GetProperties returns the value of Properties.
+func (s *ToolEnvironmentConfiguration) GetProperties() []OverridablePropertyConfiguration {
+	return s.Properties
+}
+
+// SetProperties sets the value of Properties.
+func (s *ToolEnvironmentConfiguration) SetProperties(val []OverridablePropertyConfiguration) {
+	s.Properties = val
+}
+
+func (*ToolEnvironmentConfiguration) getToolEnvironmentConfigurationRes()    {}
+func (*ToolEnvironmentConfiguration) updateToolEnvironmentConfigurationRes() {}
+
 // Ref: #/components/schemas/UIElementCheckbox
 type UIElementCheckbox struct {
 	InitialValue OptNilBool `json:"initial_value"`
@@ -15257,6 +15755,65 @@ func (*UpdateTechnicalAssetStatusOKApplicationJSON) updateTechnicalAssetStatusRe
 type UpdateThemeSettingsOKApplicationJSON jx.Raw
 
 func (*UpdateThemeSettingsOKApplicationJSON) updateThemeSettingsRes() {}
+
+// Ref: #/components/schemas/UpdateToolEnvironmentConfigurationRequest
+type UpdateToolEnvironmentConfigurationRequest struct {
+	BaseValues OptUpdateToolEnvironmentConfigurationRequestBaseValues `json:"base_values"`
+	Overrides  OptUpdateToolEnvironmentConfigurationRequestOverrides  `json:"overrides"`
+}
+
+// GetBaseValues returns the value of BaseValues.
+func (s *UpdateToolEnvironmentConfigurationRequest) GetBaseValues() OptUpdateToolEnvironmentConfigurationRequestBaseValues {
+	return s.BaseValues
+}
+
+// GetOverrides returns the value of Overrides.
+func (s *UpdateToolEnvironmentConfigurationRequest) GetOverrides() OptUpdateToolEnvironmentConfigurationRequestOverrides {
+	return s.Overrides
+}
+
+// SetBaseValues sets the value of BaseValues.
+func (s *UpdateToolEnvironmentConfigurationRequest) SetBaseValues(val OptUpdateToolEnvironmentConfigurationRequestBaseValues) {
+	s.BaseValues = val
+}
+
+// SetOverrides sets the value of Overrides.
+func (s *UpdateToolEnvironmentConfigurationRequest) SetOverrides(val OptUpdateToolEnvironmentConfigurationRequestOverrides) {
+	s.Overrides = val
+}
+
+type UpdateToolEnvironmentConfigurationRequestBaseValues map[string]string
+
+func (s *UpdateToolEnvironmentConfigurationRequestBaseValues) init() UpdateToolEnvironmentConfigurationRequestBaseValues {
+	m := *s
+	if m == nil {
+		m = map[string]string{}
+		*s = m
+	}
+	return m
+}
+
+type UpdateToolEnvironmentConfigurationRequestOverrides map[string]UpdateToolEnvironmentConfigurationRequestOverridesItem
+
+func (s *UpdateToolEnvironmentConfigurationRequestOverrides) init() UpdateToolEnvironmentConfigurationRequestOverrides {
+	m := *s
+	if m == nil {
+		m = map[string]UpdateToolEnvironmentConfigurationRequestOverridesItem{}
+		*s = m
+	}
+	return m
+}
+
+type UpdateToolEnvironmentConfigurationRequestOverridesItem map[string]string
+
+func (s *UpdateToolEnvironmentConfigurationRequestOverridesItem) init() UpdateToolEnvironmentConfigurationRequestOverridesItem {
+	m := *s
+	if m == nil {
+		m = map[string]string{}
+		*s = m
+	}
+	return m
+}
 
 // Ref: #/components/schemas/User
 type User struct {

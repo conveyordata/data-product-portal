@@ -21,6 +21,10 @@ type AddOutputPortDataQualityRunRes interface {
 	addOutputPortDataQualityRunRes()
 }
 
+type ApplyToolEnvironmentConfigurationRes interface {
+	applyToolEnvironmentConfigurationRes()
+}
+
 type ApproveOutputPortAsInputPortRes interface {
 	approveOutputPortAsInputPortRes()
 }
@@ -117,6 +121,10 @@ type CreateTechnicalAssetRes interface {
 	createTechnicalAssetRes()
 }
 
+type CreateToolRes interface {
+	createToolRes()
+}
+
 type CreateUserRes interface {
 	createUserRes()
 }
@@ -171,6 +179,10 @@ type DeleteOutputPortQueryStatRes interface {
 
 type DeleteOutputPortRoleAssignmentRes interface {
 	deleteOutputPortRoleAssignmentRes()
+}
+
+type DeleteToolRes interface {
+	deleteToolRes()
 }
 
 type DenyOutputPortAsInputPortRes interface {
@@ -231,6 +243,10 @@ type GetDataProductSettingsRes interface {
 
 type GetDataProductTechnicalAssetsRes interface {
 	getDataProductTechnicalAssetsRes()
+}
+
+type GetDataProductToolsRes interface {
+	getDataProductToolsRes()
 }
 
 type GetDataProductTypeRes interface {
@@ -387,6 +403,14 @@ type GetTechnicalAssetRes interface {
 
 type GetThemeSettingsRes interface {
 	getThemeSettingsRes()
+}
+
+type GetToolEnvironmentConfigurationRes interface {
+	getToolEnvironmentConfigurationRes()
+}
+
+type GetToolRes interface {
+	getToolRes()
 }
 
 type GetUserGroupsRes interface {
@@ -719,6 +743,10 @@ type UpdateTechnicalAssetStatusRes interface {
 
 type UpdateThemeSettingsRes interface {
 	updateThemeSettingsRes()
+}
+
+type UpdateToolEnvironmentConfigurationRes interface {
+	updateToolEnvironmentConfigurationRes()
 }
 
 type ValidateResourceNameRes interface {

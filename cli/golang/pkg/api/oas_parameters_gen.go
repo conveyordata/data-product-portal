@@ -32,6 +32,13 @@ type AddOutputPortDataQualityRunParams struct {
 	ID            uuid.UUID
 }
 
+// ApplyToolEnvironmentConfigurationParams is parameters of apply_tool_environment_configuration operation.
+type ApplyToolEnvironmentConfigurationParams struct {
+	DataProductID uuid.UUID
+	ID            uuid.UUID
+	EnvironmentID uuid.UUID
+}
+
 // ApproveOutputPortAsInputPortParams is parameters of approve_output_port_as_input_port operation.
 type ApproveOutputPortAsInputPortParams struct {
 	DataProductID uuid.UUID
@@ -70,6 +77,11 @@ type CreateOutputPortParams struct {
 
 // CreateTechnicalAssetParams is parameters of create_technical_asset operation.
 type CreateTechnicalAssetParams struct {
+	DataProductID uuid.UUID
+}
+
+// CreateToolParams is parameters of create_tool operation.
+type CreateToolParams struct {
 	DataProductID uuid.UUID
 }
 
@@ -124,6 +136,12 @@ type DeleteOutputPortRoleAssignmentParams struct {
 	ID uuid.UUID
 }
 
+// DeleteToolParams is parameters of delete_tool operation.
+type DeleteToolParams struct {
+	DataProductID uuid.UUID
+	ID            uuid.UUID
+}
+
 // DenyOutputPortAsInputPortParams is parameters of deny_output_port_as_input_port operation.
 type DenyOutputPortAsInputPortParams struct {
 	DataProductID uuid.UUID
@@ -174,6 +192,11 @@ type GetDataProductSettingsParams struct {
 
 // GetDataProductTechnicalAssetsParams is parameters of get_data_product_technical_assets operation.
 type GetDataProductTechnicalAssetsParams struct {
+	DataProductID uuid.UUID
+}
+
+// GetDataProductToolsParams is parameters of get_data_product_tools operation.
+type GetDataProductToolsParams struct {
 	DataProductID uuid.UUID
 }
 
@@ -333,6 +356,18 @@ type GetTechnicalAssetParams struct {
 
 // GetTechnicalAssetEventHistoryParams is parameters of get_technical_asset_event_history operation.
 type GetTechnicalAssetEventHistoryParams struct {
+	DataProductID uuid.UUID
+	ID            uuid.UUID
+}
+
+// GetToolParams is parameters of get_tool operation.
+type GetToolParams struct {
+	DataProductID uuid.UUID
+	ID            uuid.UUID
+}
+
+// GetToolEnvironmentConfigurationParams is parameters of get_tool_environment_configuration operation.
+type GetToolEnvironmentConfigurationParams struct {
 	DataProductID uuid.UUID
 	ID            uuid.UUID
 }
@@ -733,6 +768,12 @@ type UpdateTechnicalAssetParams struct {
 
 // UpdateTechnicalAssetStatusParams is parameters of update_technical_asset_status operation.
 type UpdateTechnicalAssetStatusParams struct {
+	DataProductID uuid.UUID
+	ID            uuid.UUID
+}
+
+// UpdateToolEnvironmentConfigurationParams is parameters of update_tool_environment_configuration operation.
+type UpdateToolEnvironmentConfigurationParams struct {
 	DataProductID uuid.UUID
 	ID            uuid.UUID
 }

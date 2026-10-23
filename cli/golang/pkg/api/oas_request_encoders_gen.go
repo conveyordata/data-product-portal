@@ -378,6 +378,20 @@ func encodeCreateTechnicalAssetRequest(
 	return nil
 }
 
+func encodeCreateToolRequest(
+	req *CreateToolRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
 func encodeCreateUserRequest(
 	req *UserCreate,
 	r *http.Request,
@@ -1143,6 +1157,20 @@ func encodeUpdateTechnicalAssetStatusRequest(
 
 func encodeUpdateThemeSettingsRequest(
 	req *ThemeSettings,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeUpdateToolEnvironmentConfigurationRequest(
+	req *UpdateToolEnvironmentConfigurationRequest,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"

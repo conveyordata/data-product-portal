@@ -4935,6 +4935,377 @@
         }
       }
     },
+    "/api/v2/data_products/{data_product_id}/tools": {
+      "get": {
+        "tags": [
+          "Data Products - Tools"
+        ],
+        "summary": "Get Data Product Tools",
+        "operationId": "get_data_product_tools",
+        "parameters": [
+          {
+            "name": "data_product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Data Product Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetToolsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Data Products - Tools"
+        ],
+        "summary": "Create Tool",
+        "operationId": "create_tool",
+        "parameters": [
+          {
+            "name": "data_product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Data Product Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateToolRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateToolResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/data_products/{data_product_id}/tools/{id}": {
+      "get": {
+        "tags": [
+          "Data Products - Tools"
+        ],
+        "summary": "Get Tool",
+        "operationId": "get_tool",
+        "parameters": [
+          {
+            "name": "data_product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Data Product Id"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Tool"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Data Products - Tools"
+        ],
+        "summary": "Delete Tool",
+        "operationId": "delete_tool",
+        "parameters": [
+          {
+            "name": "data_product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Data Product Id"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/data_products/{data_product_id}/tools/{id}/environment-configuration": {
+      "get": {
+        "tags": [
+          "Data Products - Tools"
+        ],
+        "summary": "Get Tool Environment Configuration",
+        "operationId": "get_tool_environment_configuration",
+        "parameters": [
+          {
+            "name": "data_product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Data Product Id"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ToolEnvironmentConfiguration"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Data Products - Tools"
+        ],
+        "summary": "Update Tool Environment Configuration",
+        "operationId": "update_tool_environment_configuration",
+        "parameters": [
+          {
+            "name": "data_product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Data Product Id"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateToolEnvironmentConfigurationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ToolEnvironmentConfiguration"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v2/data_products/{data_product_id}/tools/{id}/environments/{environment_id}/apply": {
+      "post": {
+        "tags": [
+          "Data Products - Tools"
+        ],
+        "summary": "Apply Tool Environment Configuration",
+        "operationId": "apply_tool_environment_configuration",
+        "parameters": [
+          {
+            "name": "data_product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Data Product Id"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "environment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Environment Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v2/configuration/domains": {
       "get": {
         "tags": [
@@ -9667,6 +10038,9 @@
                     "$ref": "#/components/schemas/CloudEvent_DataProductEnvironmentAddedEvent"
                   },
                   {
+                    "$ref": "#/components/schemas/CloudEvent_ToolEnvironmentConfigurationAppliedEvent"
+                  },
+                  {
                     "$ref": "#/components/schemas/CloudEvent_InputPortEvent"
                   },
                   {
@@ -9698,6 +10072,7 @@
                     "exploration.event": "#/components/schemas/CloudEvent_ExplorationEvent",
                     "data_product.event": "#/components/schemas/CloudEvent_DataProductEvent",
                     "data_product.environment_added": "#/components/schemas/CloudEvent_DataProductEnvironmentAddedEvent",
+                    "tool.environment_configuration_applied": "#/components/schemas/CloudEvent_ToolEnvironmentConfigurationAppliedEvent",
                     "input_port.event": "#/components/schemas/CloudEvent_InputPortEvent",
                     "data_product_role_assignment.event": "#/components/schemas/CloudEvent_DataProductRoleAssignmentEvent",
                     "output_port_role_assignment.event": "#/components/schemas/CloudEvent_OutputPortRoleAssignmentEvent",
@@ -10717,6 +11092,50 @@
         ],
         "title": "CloudEvent_TechnicalAssetEvent"
       },
+      "CloudEvent_ToolEnvironmentConfigurationAppliedEvent": {
+        "properties": {
+          "specversion": {
+            "type": "string",
+            "title": "Specversion",
+            "description": "The CloudEvents specification version.",
+            "default": "1.0"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "A unique UUID identifier for this specific event instance."
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "description": "Identifies the context in which an event happened.",
+            "default": "data-product-portal"
+          },
+          "type": {
+            "type": "string",
+            "const": "tool.environment_configuration_applied",
+            "title": "Type",
+            "description": "The unique type string belonging to this event.",
+            "default": "tool.environment_configuration_applied"
+          },
+          "time": {
+            "type": "string",
+            "title": "Time",
+            "description": "Timestamp of when the event occurred in ISO 8601 UTC format."
+          },
+          "data": {
+            "$ref": "#/components/schemas/ToolEnvironmentConfigurationAppliedEvent",
+            "description": "The specific data payload corresponding to this event type."
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "time",
+          "data"
+        ],
+        "title": "CloudEvent_ToolEnvironmentConfigurationAppliedEvent"
+      },
       "CreateDataProductLifeCycleResponse": {
         "properties": {
           "id": {
@@ -11194,6 +11613,56 @@
           "id"
         ],
         "title": "CreateTechnicalAssetResponse"
+      },
+      "CreateToolRequest": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "default": ""
+          },
+          "platform_key": {
+            "type": "string",
+            "title": "Platform Key"
+          },
+          "tool_type": {
+            "type": "string",
+            "title": "Tool Type"
+          },
+          "base_values": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Base Values",
+            "default": {}
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "platform_key",
+          "tool_type"
+        ],
+        "title": "CreateToolRequest"
+      },
+      "CreateToolResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "title": "CreateToolResponse"
       },
       "DataProduct": {
         "properties": {
@@ -12802,6 +13271,47 @@
         ],
         "title": "EnvironmentGetItem"
       },
+      "EnvironmentPropertyValue": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "acronym": {
+            "type": "string",
+            "title": "Acronym"
+          },
+          "override": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Override"
+          },
+          "effective_value": {
+            "type": "string",
+            "title": "Effective Value"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "acronym",
+          "override",
+          "effective_value"
+        ],
+        "title": "EnvironmentPropertyValue"
+      },
       "EnvironmentUpdateGlobal": {
         "properties": {
           "is_global": {
@@ -13955,6 +14465,22 @@
           "technical_info"
         ],
         "title": "GetTechnicalAssetsResponseItem"
+      },
+      "GetToolsResponse": {
+        "properties": {
+          "tools": {
+            "items": {
+              "$ref": "#/components/schemas/Tool"
+            },
+            "type": "array",
+            "title": "Tools"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tools"
+        ],
+        "title": "GetToolsResponse"
       },
       "GetUserNotificationsResponse": {
         "properties": {
@@ -16357,6 +16883,50 @@
         ],
         "title": "OverridableProperty"
       },
+      "OverridablePropertyConfiguration": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "allowed_values": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Allowed Values"
+          },
+          "default": {
+            "type": "string",
+            "title": "Default"
+          },
+          "base_value": {
+            "type": "string",
+            "title": "Base Value"
+          },
+          "environments": {
+            "items": {
+              "$ref": "#/components/schemas/EnvironmentPropertyValue"
+            },
+            "type": "array",
+            "title": "Environments"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "label",
+          "allowed_values",
+          "default",
+          "base_value",
+          "environments"
+        ],
+        "title": "OverridablePropertyConfiguration"
+      },
       "OwnedTechnicalAsset": {
         "properties": {
           "id": {
@@ -18077,6 +18647,103 @@
         ],
         "title": "TimeBoundAccessEnabledResponse"
       },
+      "Tool": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "data_product_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Data Product Id"
+          },
+          "platform_key": {
+            "type": "string",
+            "title": "Platform Key"
+          },
+          "tool_type": {
+            "type": "string",
+            "title": "Tool Type"
+          },
+          "base_values": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Base Values"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "description",
+          "data_product_id",
+          "platform_key",
+          "tool_type",
+          "base_values"
+        ],
+        "title": "Tool"
+      },
+      "ToolEnvironmentConfiguration": {
+        "properties": {
+          "properties": {
+            "items": {
+              "$ref": "#/components/schemas/OverridablePropertyConfiguration"
+            },
+            "type": "array",
+            "title": "Properties"
+          }
+        },
+        "type": "object",
+        "required": [
+          "properties"
+        ],
+        "title": "ToolEnvironmentConfiguration"
+      },
+      "ToolEnvironmentConfigurationAppliedEvent": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "data_product_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Data Product Id"
+          },
+          "environment": {
+            "type": "string",
+            "title": "Environment"
+          },
+          "configuration": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Configuration"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "data_product_id",
+          "environment",
+          "configuration"
+        ],
+        "title": "ToolEnvironmentConfigurationAppliedEvent"
+      },
       "UIElementCheckbox": {
         "properties": {
           "initial_value": {
@@ -18626,6 +19293,34 @@
           "id"
         ],
         "title": "UpdateTechnicalAssetResponse"
+      },
+      "UpdateToolEnvironmentConfigurationRequest": {
+        "properties": {
+          "base_values": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Base Values",
+            "default": {}
+          },
+          "overrides": {
+            "additionalProperties": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            "propertyNames": {
+              "format": "uuid"
+            },
+            "type": "object",
+            "title": "Overrides",
+            "default": {}
+          }
+        },
+        "type": "object",
+        "title": "UpdateToolEnvironmentConfigurationRequest"
       },
       "User": {
         "properties": {

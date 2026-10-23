@@ -8,7 +8,7 @@ from app.configuration.platforms.service import PlatformSettingsService
 from app.core.aws.get_url import get_aws_url
 from app.core.conveyor.notebook_builder import CONVEYOR_SERVICE
 from app.data_products.model import DataProduct as DataProductModel
-from app.plugins.platform import Platform, ToolType
+from app.plugins.platform import OverridableProperty, Platform, ToolType
 from app.settings import settings
 from app.users.schema import User
 from portal_plugins.azure_blob.schema import AzureBlobTechnicalAssetConfiguration
@@ -125,6 +125,32 @@ class PostgreSQLPlatform(Platform):
     icon_package = "portal_plugins.postgresql"
     settings_model = PostgreSQLSettings
     asset_types = [PostgreSQLTechnicalAssetConfiguration]
+    tool_types = [
+        ToolType(
+            name="PostgreSQLInstance",
+            display_name="PostgreSQL instance",
+            overridable_properties=[
+                OverridableProperty(
+                    name="engine_version",
+                    label="Engine version",
+                    allowed_values=["15", "16", "17"],
+                    default="16",
+                ),
+                OverridableProperty(
+                    name="size",
+                    label="Size",
+                    allowed_values=["small", "medium", "large"],
+                    default="small",
+                ),
+                OverridableProperty(
+                    name="storage_gb",
+                    label="Storage (GB)",
+                    allowed_values=["20", "50", "100"],
+                    default="20",
+                ),
+            ],
+        )
+    ]
 
     @classmethod
     def get_url(

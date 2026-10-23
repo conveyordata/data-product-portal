@@ -68,6 +68,22 @@ class PluginRegistry:
             if tool_type.name in settings.ENABLED_PLUGINS
         ]
 
+    def tool_type(self, platform_key: str, name: str) -> ToolType:
+        tool_type = next(
+            (
+                t
+                for t in self.enabled_tool_types(self.platform(platform_key))
+                if t.name == name
+            ),
+            None,
+        )
+        if tool_type is None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Tool type '{name}' is not available on platform '{platform_key}'",
+            )
+        return tool_type
+
     def get(self, name: str) -> type[TechnicalAssetPlugin]:
         plugin = next((p for p in self.discovered() if p.name == name), None)
         if plugin is None:

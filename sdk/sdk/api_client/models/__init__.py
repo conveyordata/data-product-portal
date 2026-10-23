@@ -51,6 +51,9 @@ from .cloud_event_output_port_technical_asset_link_event import (
     CloudEventOutputPortTechnicalAssetLinkEvent,
 )
 from .cloud_event_technical_asset_event import CloudEventTechnicalAssetEvent
+from .cloud_event_tool_environment_configuration_applied_event import (
+    CloudEventToolEnvironmentConfigurationAppliedEvent,
+)
 from .create_data_product_life_cycle_response import CreateDataProductLifeCycleResponse
 from .create_data_product_response import CreateDataProductResponse
 from .create_data_product_role_assignment import CreateDataProductRoleAssignment
@@ -73,6 +76,9 @@ from .create_technical_asset_request_configuration import (
     CreateTechnicalAssetRequestConfiguration,
 )
 from .create_technical_asset_response import CreateTechnicalAssetResponse
+from .create_tool_request import CreateToolRequest
+from .create_tool_request_base_values import CreateToolRequestBaseValues
+from .create_tool_response import CreateToolResponse
 from .data_product import DataProduct
 from .data_product_about_update import DataProductAboutUpdate
 from .data_product_create import DataProductCreate
@@ -134,6 +140,7 @@ from .domain_update import DomainUpdate
 from .edge import Edge
 from .environment import Environment
 from .environment_get_item import EnvironmentGetItem
+from .environment_property_value import EnvironmentPropertyValue
 from .environment_update_global import EnvironmentUpdateGlobal
 from .environments_get import EnvironmentsGet
 from .event_entity_type import EventEntityType
@@ -171,6 +178,7 @@ from .get_technical_assets_response_item import GetTechnicalAssetsResponseItem
 from .get_technical_assets_response_item_configuration import (
     GetTechnicalAssetsResponseItemConfiguration,
 )
+from .get_tools_response import GetToolsResponse
 from .get_user_notifications_response import GetUserNotificationsResponse
 from .get_user_notifications_response_item import GetUserNotificationsResponseItem
 from .get_users_response import GetUsersResponse
@@ -285,6 +293,7 @@ from .output_port_status_update import OutputPortStatusUpdate
 from .output_port_technical_asset_link_event import OutputPortTechnicalAssetLinkEvent
 from .output_port_update import OutputPortUpdate
 from .overridable_property import OverridableProperty
+from .overridable_property_configuration import OverridablePropertyConfiguration
 from .owned_technical_asset import OwnedTechnicalAsset
 from .owned_technical_asset_configuration import OwnedTechnicalAssetConfiguration
 from .pending_action_response import PendingActionResponse
@@ -377,6 +386,15 @@ from .technical_info import TechnicalInfo
 from .technical_mapping import TechnicalMapping
 from .theme_settings import ThemeSettings
 from .time_bound_access_enabled_response import TimeBoundAccessEnabledResponse
+from .tool import Tool
+from .tool_base_values import ToolBaseValues
+from .tool_environment_configuration import ToolEnvironmentConfiguration
+from .tool_environment_configuration_applied_event import (
+    ToolEnvironmentConfigurationAppliedEvent,
+)
+from .tool_environment_configuration_applied_event_configuration import (
+    ToolEnvironmentConfigurationAppliedEventConfiguration,
+)
 from .ui_element_checkbox import UIElementCheckbox
 from .ui_element_metadata import UIElementMetadata
 from .ui_element_metadata_response import UIElementMetadataResponse
@@ -402,6 +420,18 @@ from .update_platform_environment_settings_settings import (
 from .update_role import UpdateRole
 from .update_tag_response import UpdateTagResponse
 from .update_technical_asset_response import UpdateTechnicalAssetResponse
+from .update_tool_environment_configuration_request import (
+    UpdateToolEnvironmentConfigurationRequest,
+)
+from .update_tool_environment_configuration_request_base_values import (
+    UpdateToolEnvironmentConfigurationRequestBaseValues,
+)
+from .update_tool_environment_configuration_request_overrides import (
+    UpdateToolEnvironmentConfigurationRequestOverrides,
+)
+from .update_tool_environment_configuration_request_overrides_additional_property import (
+    UpdateToolEnvironmentConfigurationRequestOverridesAdditionalProperty,
+)
 from .url_response import URLResponse
 from .user import User
 from .user_create import UserCreate
@@ -445,6 +475,7 @@ __all__ = (
     "CloudEventOutputPortRoleAssignmentEvent",
     "CloudEventOutputPortTechnicalAssetLinkEvent",
     "CloudEventTechnicalAssetEvent",
+    "CloudEventToolEnvironmentConfigurationAppliedEvent",
     "CreateDataProductLifeCycleResponse",
     "CreateDataProductResponse",
     "CreateDataProductRoleAssignment",
@@ -463,6 +494,9 @@ __all__ = (
     "CreateTechnicalAssetRequest",
     "CreateTechnicalAssetRequestConfiguration",
     "CreateTechnicalAssetResponse",
+    "CreateToolRequest",
+    "CreateToolRequestBaseValues",
+    "CreateToolResponse",
     "DataProduct",
     "DataProductAboutUpdate",
     "DataProductCreate",
@@ -518,6 +552,7 @@ __all__ = (
     "Edge",
     "Environment",
     "EnvironmentGetItem",
+    "EnvironmentPropertyValue",
     "EnvironmentsGet",
     "EnvironmentUpdateGlobal",
     "EventEntityType",
@@ -551,6 +586,7 @@ __all__ = (
     "GetTechnicalAssetsResponse",
     "GetTechnicalAssetsResponseItem",
     "GetTechnicalAssetsResponseItemConfiguration",
+    "GetToolsResponse",
     "GetUserNotificationsResponse",
     "GetUserNotificationsResponseItem",
     "GetUsersResponse",
@@ -639,6 +675,7 @@ __all__ = (
     "OutputPortTechnicalAssetLinkEvent",
     "OutputPortUpdate",
     "OverridableProperty",
+    "OverridablePropertyConfiguration",
     "OwnedTechnicalAsset",
     "OwnedTechnicalAssetConfiguration",
     "PendingActionResponse",
@@ -705,6 +742,11 @@ __all__ = (
     "TechnicalMapping",
     "ThemeSettings",
     "TimeBoundAccessEnabledResponse",
+    "Tool",
+    "ToolBaseValues",
+    "ToolEnvironmentConfiguration",
+    "ToolEnvironmentConfigurationAppliedEvent",
+    "ToolEnvironmentConfigurationAppliedEventConfiguration",
     "UIElementCheckbox",
     "UIElementMetadata",
     "UIElementMetadataResponse",
@@ -726,6 +768,10 @@ __all__ = (
     "UpdateRole",
     "UpdateTagResponse",
     "UpdateTechnicalAssetResponse",
+    "UpdateToolEnvironmentConfigurationRequest",
+    "UpdateToolEnvironmentConfigurationRequestBaseValues",
+    "UpdateToolEnvironmentConfigurationRequestOverrides",
+    "UpdateToolEnvironmentConfigurationRequestOverridesAdditionalProperty",
     "URLResponse",
     "User",
     "UserCreate",
