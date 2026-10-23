@@ -108,6 +108,9 @@ export const dataProductTechnicalAssetsTags = {
         ],
     },
     createTechnicalAsset: {
+        extraOptions: {
+            suppressErrorToast: true,
+        },
         invalidatesTags: (_, __, { dataProductId }) => [
             {
                 type: TagTypes.DataProductTechnicalAssets,
@@ -127,6 +130,9 @@ export const dataProductTechnicalAssetsTags = {
         invalidatesTags: invalidateTagsTechnicalAsset,
     },
     updateTechnicalAsset: {
+        extraOptions: {
+            suppressErrorToast: true,
+        },
         invalidatesTags: invalidateTagsTechnicalAsset,
     },
     getTechnicalAssetEventHistory: {
