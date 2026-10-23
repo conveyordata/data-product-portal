@@ -129,7 +129,7 @@ def update_machine_user(
     ],
 )
 def create_machine_users_batch(
-    request: IdentityBatchCreateRequest,
+    request: IdentityBatchCreateRequest[MachineUserCreate],
     db: Session = Depends(get_db_session, scope="function"),
 ) -> IdentityBatchCreateResponse:
     return MachineUserService(db).create_machine_users_batch(request.items)

@@ -17,7 +17,8 @@ T = TypeVar("T", bound="UpdateOutputPortQueryStatus")
 class UpdateOutputPortQueryStatus:
     """
     Attributes:
-        output_port_query_stats_updates (list[OutputPortQueryStatsUpdate]):
+        output_port_query_stats_updates (list[OutputPortQueryStatsUpdate]): Daily query counts per consuming data
+            product
     """
 
     output_port_query_stats_updates: list[OutputPortQueryStatsUpdate]
@@ -45,7 +46,9 @@ class UpdateOutputPortQueryStatus:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.output_port_query_stats_update import OutputPortQueryStatsUpdate
+        from ..models.output_port_query_stats_update import (
+            OutputPortQueryStatsUpdate,  # noqa: PLC0415
+        )
 
         d = dict(src_dict)
         output_port_query_stats_updates = []

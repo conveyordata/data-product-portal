@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class AccessDurationType(str, Enum):
+class AccessDurationType(StrEnum):
     PERMANENT = "permanent"
     TIME_BOUND = "time_bound"
 

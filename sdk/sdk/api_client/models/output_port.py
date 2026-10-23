@@ -89,9 +89,11 @@ class OutputPort:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.access_mode import AccessMode
-        from ..models.output_port_access_type import OutputPortAccessType
-        from ..models.tag import Tag
+        from ..models.access_mode import AccessMode  # noqa: PLC0415
+        from ..models.output_port_access_type import (
+            OutputPortAccessType,  # noqa: PLC0415
+        )
+        from ..models.tag import Tag  # noqa: PLC0415
 
         d = dict(src_dict)
         id = UUID(d.pop("id"))

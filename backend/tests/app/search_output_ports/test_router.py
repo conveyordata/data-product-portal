@@ -1,18 +1,20 @@
 import os
 import time
+from datetime import UTC, datetime, timedelta
 from typing import Final
 
+import pytest
 from alembic import command
 
 from app.authorization.role_assignments.enums import AssignmentFilter, DecisionStatus
+from app.data_products.output_ports.data_quality.enums import DataQualityStatus
 from app.data_products.output_ports.model import OutputPort
 from app.data_products.output_ports.service import OutputPortService
 from app.database.database import engine
 from app.db_tool import seed_cmd
 from app.plugins.migrations import (
-    _CORE_VERSIONS_DIR,
     _config,
-    _owned_versions_dir,
+    _version_locations,
     migrate_all,
     owns_a_table,
 )
@@ -22,6 +24,7 @@ from app.search_output_ports.schema_response import (
 )
 from app.settings import settings
 from tests.factories import (
+    DataQualitySummaryFactory,
     DatasetRoleAssignmentFactory,
     OutputPortFactory,
     RoleFactory,
@@ -38,6 +41,44 @@ RECALL_BOUND: Final[float] = 0.8
 
 
 class TestOutputPortSearchRouter:
+    @pytest.mark.parametrize("quality_status", [None, *DataQualityStatus])
+    def test_search_output_ports__quality_status(self, client, quality_status):
+        output_port = OutputPortFactory()
+        if quality_status is not None:
+            DataQualitySummaryFactory(
+                output_port_id=output_port.id, overall_status=quality_status
+            )
+
+        response = client.get("/api/v2/search/output_ports")
+        assert response.status_code == 200, response.text
+        assert response.json()["output_ports"][0]["quality_status"] == quality_status
+
+    def test_search_output_ports__matches_latest_quality_summary(self, client):
+        output_port = OutputPortFactory()
+        now = datetime.now(UTC)
+        for quality_status, created_at in [
+            (DataQualityStatus.FAILURE, now - timedelta(days=1)),
+            (DataQualityStatus.SUCCESS, now),
+            (DataQualityStatus.WARNING, now),
+            (DataQualityStatus.ERROR, now - timedelta(days=2)),
+        ]:
+            DataQualitySummaryFactory(
+                output_port_id=output_port.id,
+                overall_status=quality_status,
+                created_at=created_at,
+            )
+
+        response = client.get("/api/v2/search/output_ports")
+        assert response.status_code == 200, response.text
+        quality_status = response.json()["output_ports"][0]["quality_status"]
+        assert quality_status in (DataQualityStatus.SUCCESS, DataQualityStatus.WARNING)
+
+        summary_response = client.get(
+            f"/api/v2/data_products/{output_port.data_product_id}/output_ports/{output_port.id}/data_quality_summary"
+        )
+        assert summary_response.status_code == 200, summary_response.text
+        assert quality_status == summary_response.json()["overall_status"]
+
     def test_search_output_ports(self, session, client):
         ds_1, ds_2, ds_3 = self.setup(session)
 
@@ -233,10 +274,7 @@ class TestOutputPortSearchRouter:
         # dropped in, since core's data still references it until then.
         url = engine.url.render_as_string(hide_password=False)
         owning_plugins = [p for p in plugin_registry.discovered() if owns_a_table(p)]
-        version_locations = [_CORE_VERSIONS_DIR] + [
-            _owned_versions_dir(p) for p in owning_plugins
-        ]
-        cfg = _config(version_locations, url)
+        cfg = _config(_version_locations(owning_plugins), url)
         command.downgrade(cfg, "base")
 
         migrate_all(owning_plugins, engine)

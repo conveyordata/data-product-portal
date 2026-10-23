@@ -1,5 +1,6 @@
 """Typed Pydantic models for each v2 webhook event payload."""
 
+from datetime import datetime
 from typing import Any, ClassVar
 from uuid import UUID
 
@@ -45,6 +46,16 @@ class DataProductEvent(V2Event):
     @classmethod
     def event_type(cls) -> str:
         return "data_product.event"
+
+
+class DataProductEnvironmentAddedEvent(V2Event):
+    data_product_id: UUID
+    environment: str
+    creation_date: datetime
+
+    @classmethod
+    def event_type(cls) -> str:
+        return "data_product.environment_added"
 
 
 class InputPortEvent(V2Event):
@@ -119,3 +130,11 @@ class DataProductSettingValueEvent(V2Event):
     @classmethod
     def event_type(cls) -> str:
         return "data_product_setting_value.event"
+
+
+class DomainEvent(V2Event):
+    id: UUID
+
+    @classmethod
+    def event_type(cls) -> str:
+        return "domain.event"

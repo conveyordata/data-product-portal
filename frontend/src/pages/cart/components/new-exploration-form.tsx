@@ -11,7 +11,7 @@ import { useFormPersist } from '@/hooks/use-form-persist.tsx';
 import { JustificationFormItem } from '@/pages/cart/components/form-item-justification.tsx';
 import { useAppDispatch } from '@/store';
 import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
-import { useGetDomainsQuery } from '@/store/api/services/generated/configurationDomainsApi.ts';
+import { DomainStatus, useGetDomainsQuery } from '@/store/api/services/generated/configurationDomainsApi.ts';
 import type { DataProductCreate } from '@/store/api/services/generated/dataProductsApi.ts';
 import { useCreateExplorationMutation } from '@/store/api/services/generated/explorationsApi.ts';
 import {
@@ -67,6 +67,15 @@ export const NewExplorationForm = () => {
                     console.error('resource name should be fetched first');
                     return;
                 }
+                if (!sanitizedResourceName.resource_name) {
+                    form.setFields([
+                        {
+                            name: 'name',
+                            errors: [t('The name of the Exploration must contain a letter or a digit')],
+                        },
+                    ]);
+                    return;
+                }
                 const { justification, ...request } = values;
                 const response = await createExploration({
                     //For an Exploration we use the justification as description
@@ -102,6 +111,7 @@ export const NewExplorationForm = () => {
             navigate,
             sanitizedResourceNameSuccess,
             sanitizedResourceName,
+            form,
         ],
     );
     const initialValues = {
@@ -173,7 +183,9 @@ export const NewExplorationForm = () => {
                 <Select
                     placeholder={t('Search domains')}
                     loading={isFetchingDomains}
-                    options={domains.map((domain) => ({ label: domain.name, value: domain.id }))}
+                    options={domains
+                        .filter((domain) => domain.status !== DomainStatus.Deleting)
+                        .map((domain) => ({ label: domain.name, value: domain.id }))}
                     showSearch={{ filterOption: selectFilterOptionByLabelAndValue }}
                     allowClear
                 />

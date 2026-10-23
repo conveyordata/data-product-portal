@@ -37,6 +37,7 @@ const dataset: GetOutputPortResponse = {
     domain: {
         id: 'domain-1',
         name: 'Sales',
+        namespace: 'sales',
         description: 'Sales domain',
     },
     lifecycle: null,
@@ -87,6 +88,7 @@ const technicalAsset: GetTechnicalAssetsResponseItem = {
     sourceAligned: false,
     result_string: 's3://bucket/orders',
     technical_info: [],
+    environments: [],
 };
 
 describe('OutputPortCard', () => {

@@ -5,6 +5,10 @@ type AddDataProductFinalizerRes interface {
 	addDataProductFinalizerRes()
 }
 
+type AddDomainFinalizerRes interface {
+	addDomainFinalizerRes()
+}
+
 type AddExplorationFinalizerRes interface {
 	addExplorationFinalizerRes()
 }
@@ -487,6 +491,10 @@ type RemoveDataProductSettingRes interface {
 
 type RemoveDataProductTypeRes interface {
 	removeDataProductTypeRes()
+}
+
+type RemoveDomainFinalizerRes interface {
+	removeDomainFinalizerRes()
 }
 
 type RemoveDomainRes interface {

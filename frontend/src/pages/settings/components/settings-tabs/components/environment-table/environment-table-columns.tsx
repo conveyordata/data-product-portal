@@ -32,7 +32,7 @@ export const getEnvironmentTableColumns = ({ t, onToggleGlobal }: Props): TableC
             title: (
                 <QuestionTooltip
                     title={t(
-                        'Domains that have not customized their own environment list automatically show all environments marked as global.',
+                        'Environments marked as global are selected by default for new Data Products. Existing Data Products keep their declared environments.',
                     )}
                 >
                     {t('Global')}
@@ -51,7 +51,7 @@ export const getEnvironmentTableColumns = ({ t, onToggleGlobal }: Props): TableC
                     <Popconfirm
                         title={t('Remove from global list')}
                         description={t(
-                            'This environment will no longer show up for any domain that has not customized its own environment list. Continue?',
+                            'This environment will no longer be selected by default for new Data Products. Existing Data Products are not affected. Continue?',
                         )}
                         onConfirm={() => onToggleGlobal(environment, false)}
                         okText={t('Confirm')}

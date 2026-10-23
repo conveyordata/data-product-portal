@@ -5,18 +5,22 @@ from typing import Any
 from fastapi import HTTPException, Request
 
 from sdk.api_client.models import (
+    CloudEventDataProductEnvironmentAddedEvent,
     CloudEventDataProductEvent,
     CloudEventDataProductRoleAssignmentEvent,
     CloudEventDataProductSettingValueEvent,
+    CloudEventDomainEvent,
     CloudEventExplorationEvent,
     CloudEventInputPortEvent,
     CloudEventOutputPortEvent,
     CloudEventOutputPortRoleAssignmentEvent,
     CloudEventOutputPortTechnicalAssetLinkEvent,
     CloudEventTechnicalAssetEvent,
+    DataProductEnvironmentAddedEvent,
     DataProductEvent,
     DataProductRoleAssignmentEvent,
     DataProductSettingValueEvent,
+    DomainEvent,
     ExplorationEvent,
     InputPortEvent,
     OutputPortEvent,
@@ -44,7 +48,10 @@ class AbstractEventHandler(ABC):
             raise HTTPException(status_code=400, detail="Missing 'type' field in payload")
 
         parsed_event: Any
-        if event_type == "data_product.event":
+        if event_type == "data_product.environment_added":
+            parsed_event = CloudEventDataProductEnvironmentAddedEvent.from_dict(payload)
+            return await self.on_data_product_environment_added(parsed_event.data)
+        elif event_type == "data_product.event":
             parsed_event = CloudEventDataProductEvent.from_dict(payload)
             return await self.on_data_product_event(parsed_event.data)
         elif event_type == "data_product_role_assignment.event":
@@ -53,6 +60,9 @@ class AbstractEventHandler(ABC):
         elif event_type == "data_product_setting_value.event":
             parsed_event = CloudEventDataProductSettingValueEvent.from_dict(payload)
             return await self.on_data_product_setting_value_event(parsed_event.data)
+        elif event_type == "domain.event":
+            parsed_event = CloudEventDomainEvent.from_dict(payload)
+            return await self.on_domain_event(parsed_event.data)
         elif event_type == "exploration.event":
             parsed_event = CloudEventExplorationEvent.from_dict(payload)
             return await self.on_exploration_event(parsed_event.data)
@@ -76,6 +86,11 @@ class AbstractEventHandler(ABC):
             return {"status": "ignored", "reason": f"No handler implemented for '{event_type}'"}
 
     @abstractmethod
+    async def on_data_product_environment_added(self, data: DataProductEnvironmentAddedEvent) -> Any:
+        """Handler for the parsed payload of 'data_product.environment_added'"""
+        pass
+
+    @abstractmethod
     async def on_data_product_event(self, data: DataProductEvent) -> Any:
         """Handler for the parsed payload of 'data_product.event'"""
         pass
@@ -88,6 +103,11 @@ class AbstractEventHandler(ABC):
     @abstractmethod
     async def on_data_product_setting_value_event(self, data: DataProductSettingValueEvent) -> Any:
         """Handler for the parsed payload of 'data_product_setting_value.event'"""
+        pass
+
+    @abstractmethod
+    async def on_domain_event(self, data: DomainEvent) -> Any:
+        """Handler for the parsed payload of 'domain.event'"""
         pass
 
     @abstractmethod
@@ -127,6 +147,9 @@ class EmptyEventHandler(AbstractEventHandler):
     Inherit from this in your tests to avoid implementing every single abstract method.
     """
 
+    async def on_data_product_environment_added(self, data: DataProductEnvironmentAddedEvent) -> Any:
+        pass
+
     async def on_data_product_event(self, data: DataProductEvent) -> Any:
         pass
 
@@ -134,6 +157,9 @@ class EmptyEventHandler(AbstractEventHandler):
         pass
 
     async def on_data_product_setting_value_event(self, data: DataProductSettingValueEvent) -> Any:
+        pass
+
+    async def on_domain_event(self, data: DomainEvent) -> Any:
         pass
 
     async def on_exploration_event(self, data: ExplorationEvent) -> Any:

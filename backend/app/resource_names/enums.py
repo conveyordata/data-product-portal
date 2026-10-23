@@ -8,3 +8,4 @@ class ResourceNameModel(str, Enum):
     DATA_PRODUCT_SETTING = "data_product_setting"
     OUTPUT_PORT_SETTING = "output_port_setting"
     EXPLORATION = "exploration"
+    DOMAIN = "domain"

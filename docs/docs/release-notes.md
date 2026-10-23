@@ -6,6 +6,32 @@ sidebar_position: 200
 
 ## Unreleased
 
+### breaking changes
+
+- **[Helm]**: The blue and green themes and the `theme_configuration` value were removed. The portal always uses the Dataminded theme.
+- **[API]**: The query statistics `PATCH` and `DELETE` endpoints only accept `date` as a `YYYY-MM-DD` string and `query_count` as a JSON integer between 0 and 2147483647. Other values, including timestamps, datetimes, booleans and numeric strings, are rejected with a 422; malformed dates used to return a 400. The query statistics `GET` endpoint rejects a `day_range` above 3650 with a 422.
+- **[API]**: Creating a Domain requires a `namespace`. It must be unique among Domains and cannot be changed afterwards. Existing Domains get a namespace derived from their name; a numeric suffix is added when two names collide, and a Domain whose name has no usable characters gets its id as namespace.
+- **[API]**: Deleting a Domain that has finalizers returns `202` and marks it as `deleting` until every finalizer is removed. A `deleting` Domain cannot be updated or assigned to Data Products or Explorations; the database enforces the assignment rule too. If a write made directly in the database still leaves the Domain in use when its last finalizer is removed, the deletion is cancelled and the Domain is active again.
+- **[API]**: Namespaces made only of dots (`.`, `..`) are rejected for every resource, so they can never resolve to a parent path when used to name infrastructure. Existing namespaces are not changed.
+- **[SDK]**: `AbstractEventHandler` has a new abstract method `on_domain_event`. Handlers that subclass it directly, instead of `ReconcileEventHandler`, must implement it.
+- **[SDK]**: `OutputPortQueryStatsUpdate.date` and `OutputPortQueryStatsDelete.date` are now `datetime.date` instead of `str` in the Python SDK, and `time.Time` instead of `string` in the CLI's `pkg/api`. Pass a `datetime.date`, not a `datetime.datetime`: the SDK sends the time part along and the request is rejected.
+
+### features
+
+- **[Provisioner]**: Domains can be provisioned. The portal sends a `domain.event` webhook when a Domain is created, updated or deleted, Domains support finalizers (`POST /api/v2/configuration/domains/{id}/finalizers` and `DELETE /api/v2/configuration/domains/{id}/finalizers/{finalizer}`), and the SDK has a `ResourceType.DOMAIN` reconciler.
+- **[API]**: Every response that embeds a Domain, such as Data Products, Explorations and Output Ports, now includes its `namespace`.
+- **[Plugins]**: Templates and `validate_configuration` can use the Domain's namespace, e.g. `{domain.namespace}`.
+
+### bugfixes
+
+- **[SDK]**: `ReconcileEventHandler` now returns `{"status": "queued"}` or `{"status": "ignored", ...}` for every event. Webhook endpoints typed to return a dict, like the example provisioner's, no longer answer 500, which made the portal log every webhook as failed.
+- **[General]**: Creating a Data Product, Exploration or Domain whose name has no letters or digits (for example `!!!`) no longer fails with a generic error. Data Products and Domains ask for a namespace instead, and Explorations show a validation error on the name.
+- **[API]**: A query statistics `PATCH` that contains the same day and consumer more than once no longer fails with a 500; the last entry is used.
+
+### bugfixes
+
+- **[UI]**: Output Port tables now show the same quality status as the Output Port detail page.
+
 ## 0.8.0
 
 ### breaking changes

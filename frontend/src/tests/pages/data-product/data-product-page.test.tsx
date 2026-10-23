@@ -1,12 +1,22 @@
 import { HttpResponse, http } from 'msw';
 import { Route, Routes } from 'react-router';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { DataProduct } from '@/pages/data-product/data-product.page.tsx';
 import { allowAllAuth } from '@/tests/mocks/auth.ts';
-import { mockDataProductDetailCalls } from '@/tests/mocks/dataProducts.ts';
+import { mockEnvironments } from '@/tests/mocks/configurationEnvironments.ts';
+import { mockDataProductDetailCalls, mockDataProducts } from '@/tests/mocks/dataProducts.ts';
+import { mockGetPlatformTiles } from '@/tests/mocks/plugins.ts';
 import { server } from '@/tests/mocks/server.ts';
 import { mockUsers } from '@/tests/mocks/users.ts';
-import { renderWithProviders, screen, waitFor, within } from '@/tests/test-utils.tsx';
+import { renderWithProviders, screen, userEvent, waitFor, within } from '@/tests/test-utils.tsx';
+
+const savedScopeProduct = {
+    ...mockDataProducts[0],
+    about: '',
+    environments: [
+        { environment_id: 'env-tst', environment: mockEnvironments[2], creation_date: '2026-10-12T10:00:00' },
+    ],
+};
 
 function mockUserCalls() {
     server.use(
@@ -48,6 +58,37 @@ function renderDataProductPage(dataProductId = 'dp-1') {
 }
 
 describe('DataProduct Page', () => {
+    it('shows the persisted environment scope', async () => {
+        setupDefaultMocks();
+        mockDataProductDetailCalls(savedScopeProduct);
+        renderDataProductPage();
+        expect(await screen.findByText('Environments')).toBeInTheDocument();
+        expect(screen.getByText('Test')).toBeInTheDocument();
+    });
+
+    it('offers only declared environments in integration menus without fetching defaults', async () => {
+        setupDefaultMocks();
+        mockDataProductDetailCalls(savedScopeProduct);
+        mockGetPlatformTiles();
+        const fetchDefaults = vi.fn(() => HttpResponse.json({ environments: mockEnvironments }));
+        const fetchDomain = vi.fn(() => HttpResponse.json({ id: 'domain-1', name: 'Finance', description: 'Finance' }));
+        server.use(
+            http.get('*/api/v2/configuration/environments', fetchDefaults),
+            http.get('*/api/v2/configuration/domains/:id', fetchDomain),
+        );
+        renderDataProductPage();
+        const tile = (await screen.findByText('AWS')).parentElement as HTMLElement;
+        const radio = within(tile).getByRole('radio');
+        await waitFor(() => expect(radio).toBeEnabled());
+        await userEvent.hover(radio.closest('label') as HTMLElement);
+        const menu = await screen.findByRole('menu');
+        expect(within(menu).getByText('Test')).toBeInTheDocument();
+        expect(within(menu).queryByText('Development')).not.toBeInTheDocument();
+        expect(within(menu).queryByText('Production')).not.toBeInTheDocument();
+        expect(fetchDefaults).not.toHaveBeenCalled();
+        expect(fetchDomain).not.toHaveBeenCalled();
+    });
+
     it('shows loading spinner while fetching', () => {
         setupDefaultMocks();
         server.use(

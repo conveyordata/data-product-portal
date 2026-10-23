@@ -1,25 +1,18 @@
-import { Button, Flex, Popconfirm, type TableColumnsType, Tooltip } from 'antd';
+import { Button, Flex, Popconfirm, type TableColumnsType, Tag } from 'antd';
 import type { TFunction } from 'i18next';
 
 import { TableCellItem } from '@/components/list/table-cell-item/table-cell-item.component.tsx';
-import type { EnvironmentGetItem, GetDomainsItem } from '@/store/api/services/generated/configurationDomainsApi.ts';
+import { DomainStatus, type GetDomainsItem } from '@/store/api/services/generated/configurationDomainsApi.ts';
 import { Sorter } from '@/utils/table-sorter.helper';
 
 type Props = {
     t: TFunction;
     handleRemove: (domain: GetDomainsItem) => void;
     handleEdit: (domain: GetDomainsItem) => () => void;
-    availableEnvironments: EnvironmentGetItem[];
 };
 
-export const getDomainTableColumns = ({
-    t,
-    handleRemove,
-    handleEdit,
-    availableEnvironments,
-}: Props): TableColumnsType<GetDomainsItem> => {
+export const getDomainTableColumns = ({ t, handleRemove, handleEdit }: Props): TableColumnsType<GetDomainsItem> => {
     const sorter = new Sorter<GetDomainsItem>();
-    const globalEnvironments = availableEnvironments.filter((environment) => environment.is_global !== false);
     return [
         {
             title: t('Id'),
@@ -29,7 +22,12 @@ export const getDomainTableColumns = ({
         {
             title: t('Name'),
             dataIndex: 'name',
-            render: (name: string) => <TableCellItem text={name} tooltip={{ content: name }} />,
+            render: (name: string, domain) => (
+                <Flex gap="small" align="center">
+                    <TableCellItem text={name} tooltip={{ content: name }} />
+                    {domain.status === DomainStatus.Deleting && <Tag color="error">{t('Deleting')}</Tag>}
+                </Flex>
+            ),
             sorter: sorter.stringSorter((domain) => domain.name),
             defaultSortOrder: 'ascend',
         },
@@ -40,27 +38,14 @@ export const getDomainTableColumns = ({
             sorter: sorter.stringSorter((domain) => domain.description),
         },
         {
-            title: t('Environments'),
-            dataIndex: 'environments',
-            render: (environments: GetDomainsItem['environments']) => {
-                const effectiveEnvironments = environments.length ? environments : globalEnvironments;
-                const names = effectiveEnvironments.map((environment) => environment.name);
-                const visibleText = names.length > 2 ? `${names.slice(0, 2).join(', ')}, ...` : names.join(', ');
-                return (
-                    <Tooltip title={names.join(', ')}>
-                        <span>{visibleText}</span>
-                    </Tooltip>
-                );
-            },
-        },
-        {
             title: t('Actions'),
             key: 'action',
             width: '10%',
-            render: (record) => {
+            render: (record: GetDomainsItem) => {
+                const isDeleting = record.status === DomainStatus.Deleting;
                 return (
                     <Flex>
-                        <Button type="link" onClick={handleEdit(record)}>
+                        <Button type="link" onClick={handleEdit(record)} disabled={isDeleting}>
                             {t('Edit')}
                         </Button>
                         <Popconfirm
@@ -72,7 +57,9 @@ export const getDomainTableColumns = ({
                             cancelText={t('Cancel')}
                             autoAdjustOverflow={true}
                         >
-                            <Button type="link">{t('Remove')}</Button>
+                            <Button type="link" disabled={isDeleting}>
+                                {t('Remove')}
+                            </Button>
                         </Popconfirm>
                     </Flex>
                 );

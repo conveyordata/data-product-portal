@@ -25,6 +25,7 @@ export const mockOutputPorts: SearchOutputPortsResponseItem[] = [
         domain: {
             id: 'dom-1',
             name: 'dom1',
+            namespace: 'dom1',
             description: 'domain 1',
         },
         lifecycle: null,

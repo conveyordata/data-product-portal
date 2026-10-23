@@ -41,7 +41,7 @@ class GetDomainsResponse:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.get_domains_item import GetDomainsItem
+        from ..models.get_domains_item import GetDomainsItem  # noqa: PLC0415
 
         d = dict(src_dict)
         domains = []

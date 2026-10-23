@@ -6,14 +6,16 @@ import httpx
 from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.http_validation_error import HTTPValidationError
-from ...models.identity_batch_create_request import IdentityBatchCreateRequest
+from ...models.identity_batch_create_request_group_create import (
+    IdentityBatchCreateRequestGroupCreate,
+)
 from ...models.identity_batch_create_response import IdentityBatchCreateResponse
 from ...types import Response
 
 
 def _get_kwargs(
     *,
-    body: IdentityBatchCreateRequest,
+    body: IdentityBatchCreateRequestGroupCreate,
 ) -> dict[str, Any]:
     headers: dict[str, Any] = {}
 
@@ -63,12 +65,12 @@ def _build_response(
 def sync_detailed(
     *,
     client: AuthenticatedClient | Client,
-    body: IdentityBatchCreateRequest,
+    body: IdentityBatchCreateRequestGroupCreate,
 ) -> Response[HTTPValidationError | IdentityBatchCreateResponse]:
     """Create Groups Batch
 
     Args:
-        body (IdentityBatchCreateRequest):
+        body (IdentityBatchCreateRequestGroupCreate):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -92,12 +94,12 @@ def sync_detailed(
 def sync(
     *,
     client: AuthenticatedClient | Client,
-    body: IdentityBatchCreateRequest,
+    body: IdentityBatchCreateRequestGroupCreate,
 ) -> HTTPValidationError | IdentityBatchCreateResponse | None:
     """Create Groups Batch
 
     Args:
-        body (IdentityBatchCreateRequest):
+        body (IdentityBatchCreateRequestGroupCreate):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -116,12 +118,12 @@ def sync(
 async def asyncio_detailed(
     *,
     client: AuthenticatedClient | Client,
-    body: IdentityBatchCreateRequest,
+    body: IdentityBatchCreateRequestGroupCreate,
 ) -> Response[HTTPValidationError | IdentityBatchCreateResponse]:
     """Create Groups Batch
 
     Args:
-        body (IdentityBatchCreateRequest):
+        body (IdentityBatchCreateRequestGroupCreate):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -143,12 +145,12 @@ async def asyncio_detailed(
 async def asyncio(
     *,
     client: AuthenticatedClient | Client,
-    body: IdentityBatchCreateRequest,
+    body: IdentityBatchCreateRequestGroupCreate,
 ) -> HTTPValidationError | IdentityBatchCreateResponse | None:
     """Create Groups Batch
 
     Args:
-        body (IdentityBatchCreateRequest):
+        body (IdentityBatchCreateRequestGroupCreate):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.

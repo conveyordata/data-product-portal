@@ -1,17 +1,20 @@
 import uuid
 from datetime import datetime
+from functools import cache
 from typing import Optional
 
 from sqlalchemy import (
     Column,
     DateTime,
     ForeignKey,
+    Index,
     SmallInteger,
     String,
     Text,
+    select,
 )
 from sqlalchemy.dialects.postgresql import JSONB, UUID
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, aliased, mapped_column, relationship
 
 from app.database.database import Base
 from app.shared.model import utcnow
@@ -72,4 +75,27 @@ class DataQualitySummary(Base):
         lazy="raise",
         cascade="all, delete-orphan",
         back_populates="data_quality_summary",  # We need all summary info when querying
+    )
+
+
+Index(
+    "ix_output_port_data_quality_summaries_latest",
+    DataQualitySummary.output_port_id,
+    DataQualitySummary.created_at.desc(),
+    DataQualitySummary.id.desc(),
+)
+
+
+@cache
+def latest_data_quality_summary() -> type[DataQualitySummary]:
+    return aliased(
+        DataQualitySummary,
+        select(DataQualitySummary)
+        .distinct(DataQualitySummary.output_port_id)
+        .order_by(
+            DataQualitySummary.output_port_id,
+            DataQualitySummary.created_at.desc(),
+            DataQualitySummary.id.desc(),
+        )
+        .subquery(),
     )

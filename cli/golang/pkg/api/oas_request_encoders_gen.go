@@ -28,6 +28,20 @@ func encodeAddDataProductFinalizerRequest(
 	return nil
 }
 
+func encodeAddDomainFinalizerRequest(
+	req *FinalizerRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
 func encodeAddExplorationFinalizerRequest(
 	req *FinalizerRequest,
 	r *http.Request,
@@ -239,7 +253,7 @@ func encodeCreateGroupRequest(
 }
 
 func encodeCreateGroupsBatchRequest(
-	req *IdentityBatchCreateRequest,
+	req *IdentityBatchCreateRequestGroupCreate,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
@@ -267,7 +281,7 @@ func encodeCreateMachineUserRequest(
 }
 
 func encodeCreateMachineUsersBatchRequest(
-	req *IdentityBatchCreateRequest,
+	req *IdentityBatchCreateRequestMachineUserCreate,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
@@ -379,7 +393,7 @@ func encodeCreateUserRequest(
 }
 
 func encodeCreateUsersBatchRequest(
-	req *IdentityBatchCreateRequest,
+	req *IdentityBatchCreateRequestUserCreate,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"

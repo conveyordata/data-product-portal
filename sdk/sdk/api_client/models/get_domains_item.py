@@ -1,15 +1,13 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Any, TypeVar
+from typing import Any, TypeVar, cast
 from uuid import UUID
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-if TYPE_CHECKING:
-    from ..models.environment_get_item import EnvironmentGetItem
-
+from ..models.domain_status import DomainStatus
 
 T = TypeVar("T", bound="GetDomainsItem")
 
@@ -20,15 +18,19 @@ class GetDomainsItem:
     Attributes:
         id (UUID):
         name (str):
+        namespace (str):
         description (str):
-        environments (list[EnvironmentGetItem]):
+        status (DomainStatus):
+        finalizers (list[str]):
         abstract_data_product_count (int):
     """
 
     id: UUID
     name: str
+    namespace: str
     description: str
-    environments: list[EnvironmentGetItem]
+    status: DomainStatus
+    finalizers: list[str]
     abstract_data_product_count: int
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
@@ -37,12 +39,13 @@ class GetDomainsItem:
 
         name = self.name
 
+        namespace = self.namespace
+
         description = self.description
 
-        environments = []
-        for environments_item_data in self.environments:
-            environments_item = environments_item_data.to_dict()
-            environments.append(environments_item)
+        status = self.status.value
+
+        finalizers = self.finalizers
 
         abstract_data_product_count = self.abstract_data_product_count
 
@@ -52,8 +55,10 @@ class GetDomainsItem:
             {
                 "id": id,
                 "name": name,
+                "namespace": namespace,
                 "description": description,
-                "environments": environments,
+                "status": status,
+                "finalizers": finalizers,
                 "abstract_data_product_count": abstract_data_product_count,
             }
         )
@@ -62,29 +67,28 @@ class GetDomainsItem:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.environment_get_item import EnvironmentGetItem
-
         d = dict(src_dict)
         id = UUID(d.pop("id"))
 
         name = d.pop("name")
 
+        namespace = d.pop("namespace")
+
         description = d.pop("description")
 
-        environments = []
-        _environments = d.pop("environments")
-        for environments_item_data in _environments:
-            environments_item = EnvironmentGetItem.from_dict(environments_item_data)
+        status = DomainStatus(d.pop("status"))
 
-            environments.append(environments_item)
+        finalizers = cast(list[str], d.pop("finalizers"))
 
         abstract_data_product_count = d.pop("abstract_data_product_count")
 
         get_domains_item = cls(
             id=id,
             name=name,
+            namespace=namespace,
             description=description,
-            environments=environments,
+            status=status,
+            finalizers=finalizers,
             abstract_data_product_count=abstract_data_product_count,
         )
 

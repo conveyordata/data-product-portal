@@ -7,6 +7,7 @@ type OperationName = string
 
 const (
 	AddDataProductFinalizerOperation                  OperationName = "AddDataProductFinalizer"
+	AddDomainFinalizerOperation                       OperationName = "AddDomainFinalizer"
 	AddExplorationFinalizerOperation                  OperationName = "AddExplorationFinalizer"
 	AddGroupMembersOperation                          OperationName = "AddGroupMembers"
 	AddOutputPortDataQualityRunOperation              OperationName = "AddOutputPortDataQualityRun"
@@ -132,6 +133,7 @@ const (
 	RemoveDataProductSettingOperation                 OperationName = "RemoveDataProductSetting"
 	RemoveDataProductTypeOperation                    OperationName = "RemoveDataProductType"
 	RemoveDomainOperation                             OperationName = "RemoveDomain"
+	RemoveDomainFinalizerOperation                    OperationName = "RemoveDomainFinalizer"
 	RemoveExplorationOperation                        OperationName = "RemoveExploration"
 	RemoveExplorationFinalizerOperation               OperationName = "RemoveExplorationFinalizer"
 	RemoveGroupMembersOperation                       OperationName = "RemoveGroupMembers"

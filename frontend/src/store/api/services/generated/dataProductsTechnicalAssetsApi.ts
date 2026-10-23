@@ -239,6 +239,19 @@ export type DataProduct = {
   status: AbstractDataProductStatus;
   type: DataProductType;
 };
+export type EnvironmentGetItem = {
+  id: string;
+  name: string;
+  acronym: string;
+  context: string;
+  is_default?: boolean;
+  is_global?: boolean;
+};
+export type DataProductEnvironment = {
+  environment_id: string;
+  environment: EnvironmentGetItem;
+  creation_date: string;
+};
 export type OutputPortAccessType = {
   id: string;
   name: string;
@@ -288,6 +301,7 @@ export type GetTechnicalAssetsResponseItem = {
     [key: string]: any;
   };
   owner: DataProduct;
+  environments: DataProductEnvironment[];
   output_port_links: OutputPortLink[];
   tags: Tag[];
   /** DEPRECATED: Use 'technical_mapping' instead. This field will be removed in a future version. */
@@ -355,6 +369,7 @@ export type TechnicalAsset = {
 export type Domain = {
   id: string;
   name: string;
+  namespace: string;
   description: string;
 };
 export type Exploration = {

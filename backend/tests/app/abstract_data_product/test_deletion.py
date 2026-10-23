@@ -1,11 +1,15 @@
 import pytest
 from fastapi import HTTPException
+from sqlalchemy import select
+from sqlalchemy.exc import OperationalError
 
+from app.abstract_data_product.model import AbstractDataProduct
 from app.abstract_data_product.schema_request import (
     RequestInputPortsForAbstractDataProductRequestItem,
 )
 from app.abstract_data_product.service import AbstractDataProductService
 from app.data_products.status import AbstractDataProductStatus
+from tests import engine
 from tests.factories import (
     DataProductFactory,
     ExplorationFactory,
@@ -233,3 +237,33 @@ class TestEnsureNotDeleting:
 
         assert exc_info.value.status_code == 409
         assert provider.name in exc_info.value.detail
+
+
+def _remove_unknown_finalizer(service, id):
+    with pytest.raises(HTTPException):
+        service.remove_finalizer(id, "unknown")
+
+
+@pytest.mark.parametrize(
+    ("finalizers", "call"),
+    [
+        (["existing"], lambda service, id: service.add_finalizer(id, "existing")),
+        ([], lambda service, id: service.mark_for_deletion(id)),
+        (["existing"], _remove_unknown_finalizer),
+    ],
+    ids=["add_finalizer", "mark_for_deletion", "remove_finalizer"],
+)
+def test_finalizer_checks__lock_the_abstract_data_product_until_commit(
+    session, finalizers, call
+):
+    dp = DataProductFactory(finalizers=finalizers)
+    call(AbstractDataProductService(db=session), dp.id)
+    try:
+        with engine.connect() as other, pytest.raises(OperationalError):
+            other.execute(
+                select(AbstractDataProduct.id)
+                .where(AbstractDataProduct.id == dp.id)
+                .with_for_update(nowait=True)
+            )
+    finally:
+        session.rollback()

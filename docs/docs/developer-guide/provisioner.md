@@ -54,9 +54,10 @@ The abstract base class you implement. It exposes two methods:
 | `reconcile(resource_id)`  | Called for each resource that needs to be reconciled. Raise an exception to signal failure; the framework will retry with exponential backoff. |
 | `list_ids()` *(optional)* | Called once on startup, you should return all the existing ID's of resources in Portal for which you want to call the `reconcile(resource_id)`. |
 
-We currently support 2 resources:
+We currently support 3 resources:
 - Data Product: Your reconcile function will be triggered on changes to the Data Product itself, its Output Ports, Technical Assets, Technical Asset Output Port links, Input Ports, Role Assignments etc.
 - Exploration: Your reconcile function will be triggered on changes to the Exploration itself, and its Input Ports.
+- Domain: Your reconcile function will be triggered on changes to the Domain itself. See [Domain-scoped resources](#domain-scoped-resources).
 
 ### `ReconcileManager`
 
@@ -77,6 +78,8 @@ of how many workers you run.
 A FastAPI-ready webhook handler. Pass it a `ReconcileManager` and call
 `handler.dispatch_routing(request)` from your `/webhook` endpoint. It parses the
 incoming CloudEvent, maps it to the right `ResourceType`, and enqueues a reconcile.
+Adding an environment emits `data_product.environment_added`, containing `data_product_id`, the environment acronym, and `creation_date`. The handler enqueues the owning Data Product. Existing environment declarations migrated from Domain or global settings do not emit addition events; startup reconciliation reads the saved scope.
+
 Events for resource types that have no registered reconciler are silently acknowledged. Key
 constructor parameters:
 
@@ -90,6 +93,33 @@ An enum of the portal resource types your provisioner can react to:
 
 - `ResourceType.EXPLORATION`
 - `ResourceType.DATA_PRODUCT`
+- `ResourceType.DOMAIN`
+
+### Domain-scoped resources
+
+Some infrastructure is shared by every Data Product in a Domain: a bucket or storage
+account, a VPC or VNet, Conveyor environments, a Databricks or Glue catalog. Register a
+`Reconciler` for `ResourceType.DOMAIN` to manage it.
+
+- Name domain resources after the Domain's `namespace`. Unlike its `name`, it never changes.
+- A Domain can only be deleted once no Data Products or Explorations are assigned to it.
+  When they are deleted, domain teardown runs after their provisioners have released their
+  finalizers. Migration is the exception: migrating moves Data Products and Explorations to
+  the new Domain at once, and the source Domain can be deleted right after, without waiting
+  for their provisioners. If a Data Product provisioner still needs the old Domain's
+  infrastructure, for example to copy data to the new bucket, it should register its own
+  finalizer on every Domain it uses and remove it once it no longer needs that Domain.
+- The portal never lets a Data Product or Exploration into a deleting Domain. Only a write
+  made directly in the database, outside the portal, could still leave one behind. If the
+  last finalizer is removed in that case, the portal cancels the deletion and sets the Domain
+  back to `active`, so your reconciler provisions it again. Keep provisioning idempotent.
+- Domain events are not fanned out to Data Products. A Data Product reconciler gets its
+  Domain's `id`, `name` and `namespace` in the Data Product response; it only needs
+  `get_domain` for the Domain's status or finalizers.
+- When a Data Product moves to another Domain, only the Data Product is reconciled. Keep
+  track of the previous Domain in your provisioner's own state if you need to clean up there.
+
+The bundled example contains a `DomainProvisioner`.
 
 ---
 
@@ -128,6 +158,7 @@ exploration with finalizers and a startup resync; the same pattern applies to
 
 ```python
 from collections.abc import Iterable
+from http import HTTPStatus
 from uuid import UUID
 
 from sdk import AuthenticatedClient, Client, Reconciler
@@ -149,40 +180,50 @@ class MyExplorationProvisioner(Reconciler):
         self._client = client
 
     async def reconcile(self, resource_id: UUID) -> None:
-        response = await get_exploration.asyncio(id=resource_id, client=self._client)
+        fetched = await get_exploration.asyncio_detailed(
+            id=resource_id, client=self._client
+        )
 
-        if response is None:
+        if fetched.status_code == HTTPStatus.NOT_FOUND:
             # Hard-deleted after we already removed our finalizer — nothing to do.
             return
 
-        if not isinstance(response, GetExplorationResponse):
-            raise Exception(f"Unexpected response: {response}")
+        if not isinstance(fetched.parsed, GetExplorationResponse):
+            # Any other failure (401, 500, ...) must be retried, not treated as deleted.
+            raise Exception(f"Could not fetch exploration: {fetched.status_code}")
+        response = fetched.parsed
 
         if response.status == AbstractDataProductStatus.DELETING:
             # Portal is waiting for us to clean up before hard-deleting.
             if FINALIZER_NAME not in (response.finalizers or []):
                 return  # another reconcile already deprovisioned
             self._deprovision(resource_id)
-            await remove_exploration_finalizer.asyncio(
+            removed = await remove_exploration_finalizer.asyncio_detailed(
                 id=resource_id, finalizer=FINALIZER_NAME, client=self._client
             )
+            if removed.status_code != HTTPStatus.OK:
+                raise Exception(f"Could not remove finalizer: {removed.status_code}")
             return
 
         # Exploration is live (ACTIVE / PENDING / ARCHIVED).
         # Register the finalizer *before* provisioning so even a partial
         # provision is cleaned up when the exploration is later deleted.
-        await add_exploration_finalizer.asyncio(
+        added = await add_exploration_finalizer.asyncio_detailed(
             id=resource_id,
             client=self._client,
             body=FinalizerRequest(finalizer=FINALIZER_NAME),
         )
+        if added.status_code != HTTPStatus.OK:
+            # Never provision without our finalizer, or deletion would skip cleanup.
+            raise Exception(f"Could not add finalizer: {added.status_code}")
         self._provision(resource_id, response)
 
     async def list_ids(self) -> Iterable[UUID]:
         response = await get_explorations.asyncio(client=self._client)
         if isinstance(response, GetExplorationsResponse):
             return [e.id for e in response.explorations]
-        return []
+        # Raise so the startup sync retries instead of reconciling nothing.
+        raise Exception("Could not list explorations")
 
     def _provision(self, resource_id: UUID, exploration: GetExplorationResponse) -> None:
         # Create or update your real infrastructure here.
@@ -218,6 +259,9 @@ your clean-up is complete. The pattern is:
 3. **Guard against double-deprovision** — check that your finalizer name is still
    present in `response.finalizers` before acting; a previous reconcile run may have
    already cleaned up.
+
+Domains follow the same pattern with `add_domain_finalizer` and `remove_domain_finalizer`
+from `sdk.api_client.api.configuration_domains`, and the `DomainStatus.DELETING` status.
 
 #### 2.3 Startup resync
 
@@ -294,7 +338,7 @@ export WEBHOOK_V2_URL=http://localhost:8000/webhook
 ## Running the bundled example
 
 The `sdk/example/` directory contains a complete, runnable provisioner that writes
-per-exploration JSON manifests to disk (a stand-in for real infrastructure).
+per-exploration and per-domain JSON manifests to disk (a stand-in for real infrastructure).
 
 ```bash
 cd sdk
@@ -305,7 +349,7 @@ PROVISIONER_WORKSPACE="./.workspace" \
   poetry run uvicorn example.provisioner:app --reload
 ```
 
-Create, update, or delete an exploration in the portal and watch manifests appear and
+Create, update, or delete an exploration or a domain in the portal and watch manifests appear and
 disappear under `.workspace/`. Use this as a starting point for your own provisioner.
 
 ---

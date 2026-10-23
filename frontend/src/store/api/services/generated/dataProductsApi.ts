@@ -334,6 +334,7 @@ export type DataProductCreate = {
   domain_id: string;
   tag_ids?: string[];
   lifecycle_id: string;
+  environment_ids?: string[] | null;
   visibility?: DataProductVisibility;
   owners: string[];
   input_ports?: RequestInputPortsForDataProductRequest | null;
@@ -345,6 +346,7 @@ export type Tag = {
 export type Domain = {
   id: string;
   name: string;
+  namespace: string;
   description: string;
 };
 export type DataProductType = {
@@ -360,6 +362,19 @@ export type DataProductLifeCycle = {
   color: string;
   is_default: boolean;
 };
+export type EnvironmentGetItem = {
+  id: string;
+  name: string;
+  acronym: string;
+  context: string;
+  is_default?: boolean;
+  is_global?: boolean;
+};
+export type DataProductEnvironment = {
+  environment_id: string;
+  environment: EnvironmentGetItem;
+  creation_date: string;
+};
 export type GetDataProductsResponseItem = {
   id: string;
   name: string;
@@ -373,6 +388,7 @@ export type GetDataProductsResponseItem = {
   type: DataProductType;
   lifecycle: DataProductLifeCycle | null;
   visibility: DataProductVisibility;
+  environments: DataProductEnvironment[];
   user_count: number;
   input_port_count: number;
   technical_asset_count: number;
@@ -392,6 +408,7 @@ export type DataProductUpdate = {
   domain_id: string;
   tag_ids?: string[];
   lifecycle_id: string;
+  environment_ids?: string[] | null;
 };
 export type GetDataProductResponse = {
   id: string;
@@ -406,6 +423,7 @@ export type GetDataProductResponse = {
   type: DataProductType;
   lifecycle: DataProductLifeCycle | null;
   visibility: DataProductVisibility;
+  environments: DataProductEnvironment[];
   about: string | null;
 };
 export type FinalizerRequest = {

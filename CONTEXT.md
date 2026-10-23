@@ -4,7 +4,10 @@ The portal where teams publish Data Products, expose data through Output Ports, 
 
 ## Language
 
-### Products and ports
+### Domains, products and ports
+
+**Domain**:
+A business area that groups Data Products and Explorations. Its namespace never changes, so it can name infrastructure shared by everything in the Domain.
 
 **Data Product**:
 A team-owned unit of data work that consumes data through Input Ports and exposes data through Output Ports.
@@ -35,9 +38,19 @@ _Avoid_: private, public
 An admin-defined label on an Output Port (e.g. "Need to know") that maps to exactly one Access Function. Many Access Types may map to the same Access Function; only the name differs.
 _Avoid_: Classification, sensitivity label
 
+### Provisioning
+
+**Provisioner**:
+An external service that reacts to portal events and converges infrastructure towards the state of a Data Product, Exploration or Domain.
+
+**Finalizer**:
+A name a Provisioner registers on a Data Product, Exploration or Domain to block its deletion until that Provisioner has cleaned up.
+
 ## Relationships
 
 - An **Output Port** has exactly one **Access Type**; its **Access Function** is the Access Type's.
 - An **Output Port** of a **Hidden** **Data Product** must have an Access Type mapped to **Invite only**.
 - At least one **Access Type** is always mapped to **Invite only**.
 - Members of a **Consuming Data Product** may read an **Invite only** **Output Port** it consumes; nobody else outside the owning Data Product sees it.
+- A **Domain** that still has **Data Products** or **Explorations** cannot be deleted.
+- A **Domain** with **Finalizers** stays in deleting until every **Provisioner** has removed its own.

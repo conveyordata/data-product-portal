@@ -4,7 +4,7 @@ from starlette.testclient import TestClient
 
 from app.resource_names.router import validate_resource_name
 from app.resource_names.service import ResourceNameValidityType
-from tests.factories import ExplorationFactory
+from tests.factories import DomainFactory, ExplorationFactory
 
 
 class TestResourceNamesRouter:
@@ -28,6 +28,32 @@ class TestResourceNamesRouter:
         response = self.validate_namespace(client, namespace, "exploration")
         assert response.status_code == 200
         assert response.json()["validity"] == ResourceNameValidityType.DUPLICATE
+
+    def test_validate_resource_name__duplicate_domain_namespace(
+        self, client: TestClient
+    ):
+        namespace = "finance"
+        DomainFactory(namespace=namespace)
+
+        response = self.validate_namespace(client, namespace, "domain")
+        assert response.status_code == 200
+        assert response.json()["validity"] == ResourceNameValidityType.DUPLICATE
+
+    @pytest.mark.parametrize("namespace", [".", "..", "..."])
+    def test_validate_resource_name__dots_only_domain_namespace(
+        self, client: TestClient, namespace
+    ):
+        response = self.validate_namespace(client, namespace, "domain")
+        assert response.json()["validity"] == (
+            ResourceNameValidityType.INVALID_CHARACTERS
+        )
+
+    @pytest.mark.parametrize("name", ["...", "-..-"])
+    def test_sanitize_resource_name__dots_only_suggests_nothing(
+        self, client: TestClient, name
+    ):
+        response = client.get("api/v2/resource_names/sanitize", params={"name": name})
+        assert response.json()["resource_name"] == ""
 
     def test_validate_resource_name(self):
         """

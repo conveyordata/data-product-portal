@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class OutputPortAccessFunction(str, Enum):
+class OutputPortAccessFunction(StrEnum):
     PRIVATE = "private"
     RESTRICTED = "restricted"
     UNRESTRICTED = "unrestricted"

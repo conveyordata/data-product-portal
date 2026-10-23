@@ -1,4 +1,4 @@
-import { Alert, Form, Input, Radio, Select, Skeleton } from 'antd';
+import { Alert, Form, Input, Radio, Select, Skeleton, Tooltip, Typography } from 'antd';
 import type { FormInstance } from 'antd/es/form/hooks/useForm';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -10,7 +10,8 @@ import { MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
 import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
 import { useGetDataProductsLifecyclesQuery } from '@/store/api/services/generated/configurationDataProductLifecyclesApi.ts';
 import { useGetDataProductsTypesQuery } from '@/store/api/services/generated/configurationDataProductTypesApi.ts';
-import { useGetDomainsQuery } from '@/store/api/services/generated/configurationDomainsApi.ts';
+import { DomainStatus, useGetDomainsQuery } from '@/store/api/services/generated/configurationDomainsApi.ts';
+import { useGetEnvironmentsQuery } from '@/store/api/services/generated/configurationEnvironmentsApi.ts';
 import { useGetTagsQuery } from '@/store/api/services/generated/configurationTagsApi.ts';
 import {
     type DataProductCreate,
@@ -47,12 +48,20 @@ export const DataProductFormItems = <T extends DataProductCreate>({
 
     const { data: lifecycles = undefined, isFetching: isFetchingLifecycles } = useGetDataProductsLifecyclesQuery();
     const { data: { domains = [] } = {}, isFetching: isFetchingDomains } = useGetDomainsQuery();
+    const { data: { environments } = {}, isFetching: isFetchingEnvironments } = useGetEnvironmentsQuery();
     const { data: dataProductTypes = undefined, isFetching: isFetchingDataProductTypes } =
         useGetDataProductsTypesQuery();
     const { data: { users: dataProductOwners = [] } = {}, isFetching: isFetchingUsers } = useGetUsersQuery();
     const { data: { tags: availableTags = [] } = {}, isFetching: isFetchingTags } = useGetTagsQuery();
-    const [sanitizeResourceName, { data: sanitizedResourceName, isSuccess: sanitizedResourceNameSuccess }] =
-        useLazySanitizeResourceNameQuery();
+    const [
+        sanitizeResourceName,
+        {
+            data: sanitizedResourceName,
+            isSuccess: sanitizedResourceNameSuccess,
+            isFetching: sanitizingResourceName,
+            originalArgs: sanitizedName,
+        },
+    ] = useLazySanitizeResourceNameQuery();
     const [validateResourceName] = useLazyValidateResourceNameQuery();
     const { data: constraints } = useResourceNameConstraintsQuery();
     useEffect(() => {
@@ -61,6 +70,7 @@ export const DataProductFormItems = <T extends DataProductCreate>({
                 isFetchingUsers ||
                 isFetchingDataProductTypes ||
                 isFetchingDomains ||
+                isFetchingEnvironments ||
                 isFetchingLifecycles) ??
                 true,
         );
@@ -69,12 +79,29 @@ export const DataProductFormItems = <T extends DataProductCreate>({
         isFetchingUsers,
         isFetchingDataProductTypes,
         isFetchingDomains,
+        isFetchingEnvironments,
         isFetchingLifecycles,
         setAreFormItemsLoading,
     ]);
 
     const dataProductNameValue = Form.useWatch('name', form);
     const visibility = Form.useWatch('visibility', form);
+    const savedEnvironmentIds = currentDataProduct?.environments.map((item) => item.environment_id) ?? [];
+    const selectedEnvironmentIds: string[] = Form.useWatch('environment_ids', form) ?? [];
+    const [environmentSearch, setEnvironmentSearch] = useState('');
+    const allEnvironmentsSelected =
+        !!environments?.length && environments.every((environment) => selectedEnvironmentIds.includes(environment.id));
+
+    useEffect(() => {
+        if (mode === 'create' && environments && form.getFieldValue('environment_ids') === undefined) {
+            form.setFieldValue(
+                'environment_ids',
+                environments
+                    .filter((environment) => environment.is_global !== false)
+                    .map((environment) => environment.id),
+            );
+        }
+    }, [environments, form, mode]);
 
     const [canEditResourceName, setCanEditResourceName] = useState<boolean>(false);
 
@@ -104,12 +131,18 @@ export const DataProductFormItems = <T extends DataProductCreate>({
         }
     }, [form, mode, canEditResourceName, dataProductNameValue, fetchResourceNameDebounced]);
 
+    const namespaceIsCurrent =
+        sanitizedResourceNameSuccess && !sanitizingResourceName && sanitizedName === (dataProductNameValue ?? '');
+
     useEffect(() => {
-        if (mode === 'create' && !canEditResourceName && sanitizedResourceNameSuccess && sanitizedResourceName) {
+        if (mode === 'create' && !canEditResourceName && namespaceIsCurrent && sanitizedResourceName) {
+            if (dataProductNameValue && !sanitizedResourceName.resource_name) {
+                setCanEditResourceName(true);
+            }
             form.setFieldValue('namespace', sanitizedResourceName.resource_name);
             form.validateFields(['namespace']);
         }
-    }, [form, mode, canEditResourceName, sanitizedResourceName, sanitizedResourceNameSuccess]);
+    }, [form, mode, canEditResourceName, dataProductNameValue, namespaceIsCurrent, sanitizedResourceName]);
 
     const resourceNameValidationCallback = useCallback(
         (resourceName: string) =>
@@ -223,10 +256,66 @@ export const DataProductFormItems = <T extends DataProductCreate>({
                 <Select
                     data-cy="data-product-domain"
                     loading={isFetchingDomains}
-                    options={domains.map((domain) => ({ label: domain.name, value: domain.id }))}
+                    options={domains
+                        .filter((domain) => domain.status !== DomainStatus.Deleting)
+                        .map((domain) => ({ label: domain.name, value: domain.id }))}
                     showSearch={{ filterOption: selectFilterOptionByLabelAndValue }}
                     allowClear
                     popupRender={(menu) => <div data-cy="data-product-domain-options">{menu}</div>}
+                />
+            </Form.Item>
+            <Form.Item<DataProductCreate>
+                name="environment_ids"
+                label={t('Environments')}
+                tooltip={t('Environments apply to all Technical Assets and Output Ports in this Data Product')}
+                rules={[{ required: true, message: t('Please select at least one environment') }]}
+                getValueFromEvent={(selected: string[]) => [...new Set([...savedEnvironmentIds, ...selected])]}
+            >
+                <Select
+                    data-cy="data-product-environments"
+                    mode="multiple"
+                    loading={isFetchingEnvironments}
+                    options={environments?.map((environment) => ({
+                        label: environment.name,
+                        value: environment.id,
+                        disabled: savedEnvironmentIds.includes(environment.id),
+                    }))}
+                    showSearch={{ filterOption: selectFilterOptionByLabel, onSearch: setEnvironmentSearch }}
+                    onChange={() => setEnvironmentSearch('')}
+                    onOpenChange={(open) => {
+                        if (!open) setEnvironmentSearch('');
+                    }}
+                    allowClear={mode === 'create'}
+                    labelRender={({ label, value }) => (
+                        <Tooltip
+                            title={
+                                typeof value === 'string' && savedEnvironmentIds.includes(value)
+                                    ? t(
+                                          'Declared environments cannot be removed because resources may already be provisioned in them.',
+                                      )
+                                    : undefined
+                            }
+                        >
+                            <span>{label}</span>
+                        </Tooltip>
+                    )}
+                    notFoundContent={
+                        <Typography.Text type="secondary">
+                            {environmentSearch.trim()
+                                ? t('No matching environments')
+                                : t('No environments are configured')}
+                        </Typography.Text>
+                    }
+                    popupRender={(menu) => (
+                        <div data-cy="data-product-environments-options">
+                            {menu}
+                            {allEnvironmentsSelected && !environmentSearch.trim() && (
+                                <Typography.Text type="secondary">
+                                    {t('All available environments are already selected')}
+                                </Typography.Text>
+                            )}
+                        </div>
+                    )}
                 />
             </Form.Item>
             <Form.Item<DataProductCreate> name="tag_ids" label={t('Tags')}>

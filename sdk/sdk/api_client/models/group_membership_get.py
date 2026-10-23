@@ -49,7 +49,9 @@ class GroupMembershipGet:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.group_member_identity_get import GroupMemberIdentityGet
+        from ..models.group_member_identity_get import (
+            GroupMemberIdentityGet,  # noqa: PLC0415
+        )
 
         d = dict(src_dict)
         group_id = UUID(d.pop("group_id"))

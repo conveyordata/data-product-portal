@@ -18,6 +18,7 @@ from app.core.auth.device_flows.service import verify_auth_header
 from app.core.authz import Action
 from app.core.authz.authorization import Authorization
 from app.core.context import _pending_events
+from app.core.logging import logger
 from app.core.webhooks.events import V2Event
 from app.data_products.output_ports.enums import OutputPortAccessFunction
 from app.database.database import Base, get_system_db_session
@@ -143,6 +144,18 @@ def default_data_product_payload() -> dict[str, Any]:
         "owners": [str(user.id)],
         "domain_id": str(domain.id),
     }
+
+
+@pytest.fixture(scope="session", autouse=True)
+def drop_events_outside_request_warning() -> None:
+    # Factories and direct service calls write outside a request on purpose.
+    logger.addFilter(
+        lambda record: (
+            not record.getMessage().startswith(
+                "Events queued outside of a request context"
+            )
+        )
+    )
 
 
 @pytest.fixture(autouse=True)

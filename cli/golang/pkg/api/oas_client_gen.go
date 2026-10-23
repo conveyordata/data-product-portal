@@ -29,6 +29,12 @@ type Invoker interface {
 	//
 	// POST /api/v2/data_products/{id}/finalizers
 	AddDataProductFinalizer(ctx context.Context, request *FinalizerRequest, params AddDataProductFinalizerParams) (AddDataProductFinalizerRes, error)
+	// AddDomainFinalizer invokes add_domain_finalizer operation.
+	//
+	// Add Domain Finalizer.
+	//
+	// POST /api/v2/configuration/domains/{id}/finalizers
+	AddDomainFinalizer(ctx context.Context, request *FinalizerRequest, params AddDomainFinalizerParams) (AddDomainFinalizerRes, error)
 	// AddExplorationFinalizer invokes add_exploration_finalizer operation.
 	//
 	// Add Exploration Finalizer.
@@ -143,7 +149,7 @@ type Invoker interface {
 	// Create Groups Batch.
 	//
 	// POST /api/v2/groups/batch
-	CreateGroupsBatch(ctx context.Context, request *IdentityBatchCreateRequest) (CreateGroupsBatchRes, error)
+	CreateGroupsBatch(ctx context.Context, request *IdentityBatchCreateRequestGroupCreate) (CreateGroupsBatchRes, error)
 	// CreateMachineUser invokes create_machine_user operation.
 	//
 	// Create Machine User.
@@ -155,7 +161,7 @@ type Invoker interface {
 	// Create Machine Users Batch.
 	//
 	// POST /api/v2/machine-users/batch
-	CreateMachineUsersBatch(ctx context.Context, request *IdentityBatchCreateRequest) (CreateMachineUsersBatchRes, error)
+	CreateMachineUsersBatch(ctx context.Context, request *IdentityBatchCreateRequestMachineUserCreate) (CreateMachineUsersBatchRes, error)
 	// CreateOutputPort invokes create_output_port operation.
 	//
 	// Create Output Port.
@@ -203,7 +209,7 @@ type Invoker interface {
 	// Create Users Batch.
 	//
 	// POST /api/v2/users/batch
-	CreateUsersBatch(ctx context.Context, request *IdentityBatchCreateRequest) (CreateUsersBatchRes, error)
+	CreateUsersBatch(ctx context.Context, request *IdentityBatchCreateRequestUserCreate) (CreateUsersBatchRes, error)
 	// DecideDataProductRoleAssignment invokes decide_data_product_role_assignment operation.
 	//
 	// Decide Data Product Role Assignment.
@@ -266,7 +272,7 @@ type Invoker interface {
 	DeleteMachineUsersBatch(ctx context.Context, request *IdentityBatchDeleteRequest) (DeleteMachineUsersBatchRes, error)
 	// DeleteOutputPortQueryStat invokes delete_output_port_query_stat operation.
 	//
-	// Delete Output Port Query Stat.
+	// Delete the query count of one consuming data product for one day.
 	//
 	// DELETE /api/v2/data_products/{data_product_id}/output_ports/{id}/query_stats
 	DeleteOutputPortQueryStat(ctx context.Context, request *OutputPortQueryStatsDelete, params DeleteOutputPortQueryStatParams) (DeleteOutputPortQueryStatRes, error)
@@ -780,6 +786,12 @@ type Invoker interface {
 	//
 	// DELETE /api/v2/configuration/domains/{id}
 	RemoveDomain(ctx context.Context, params RemoveDomainParams) (RemoveDomainRes, error)
+	// RemoveDomainFinalizer invokes remove_domain_finalizer operation.
+	//
+	// Remove Domain Finalizer.
+	//
+	// DELETE /api/v2/configuration/domains/{id}/finalizers/{finalizer}
+	RemoveDomainFinalizer(ctx context.Context, params RemoveDomainFinalizerParams) (RemoveDomainFinalizerRes, error)
 	// RemoveExploration invokes remove_exploration operation.
 	//
 	// Remove Exploration.
@@ -1088,7 +1100,10 @@ type Invoker interface {
 	UpdateOutputPortAccessType(ctx context.Context, request *OutputPortAccessTypeUpdate, params UpdateOutputPortAccessTypeParams) (UpdateOutputPortAccessTypeRes, error)
 	// UpdateOutputPortQueryStats invokes update_output_port_query_stats operation.
 	//
-	// Update Output Port Query Stats.
+	// Upsert daily query counts for this output port, one entry per day and consuming data product.
+	// Existing counts for the same day and consuming data product are overwritten, so sending the same
+	// data twice is safe. If a request contains the same day and consuming data product more than once,
+	// the last entry is used.
 	//
 	// PATCH /api/v2/data_products/{data_product_id}/output_ports/{id}/query_stats
 	UpdateOutputPortQueryStats(ctx context.Context, request *UpdateOutputPortQueryStatus, params UpdateOutputPortQueryStatsParams) (UpdateOutputPortQueryStatsRes, error)
@@ -1235,6 +1250,71 @@ func (c *Client) sendAddDataProductFinalizer(ctx context.Context, request *Final
 	}()
 
 	result, err := decodeAddDataProductFinalizerResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// AddDomainFinalizer invokes add_domain_finalizer operation.
+//
+// Add Domain Finalizer.
+//
+// POST /api/v2/configuration/domains/{id}/finalizers
+func (c *Client) AddDomainFinalizer(ctx context.Context, request *FinalizerRequest, params AddDomainFinalizerParams) (AddDomainFinalizerRes, error) {
+	res, err := c.sendAddDomainFinalizer(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendAddDomainFinalizer(ctx context.Context, request *FinalizerRequest, params AddDomainFinalizerParams) (res AddDomainFinalizerRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/api/v2/configuration/domains/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/finalizers"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeAddDomainFinalizerRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeAddDomainFinalizerResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -2350,12 +2430,12 @@ func (c *Client) sendCreateGroup(ctx context.Context, request *GroupCreate) (res
 // Create Groups Batch.
 //
 // POST /api/v2/groups/batch
-func (c *Client) CreateGroupsBatch(ctx context.Context, request *IdentityBatchCreateRequest) (CreateGroupsBatchRes, error) {
+func (c *Client) CreateGroupsBatch(ctx context.Context, request *IdentityBatchCreateRequestGroupCreate) (CreateGroupsBatchRes, error) {
 	res, err := c.sendCreateGroupsBatch(ctx, request)
 	return res, err
 }
 
-func (c *Client) sendCreateGroupsBatch(ctx context.Context, request *IdentityBatchCreateRequest) (res CreateGroupsBatchRes, err error) {
+func (c *Client) sendCreateGroupsBatch(ctx context.Context, request *IdentityBatchCreateRequestGroupCreate) (res CreateGroupsBatchRes, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
@@ -2442,12 +2522,12 @@ func (c *Client) sendCreateMachineUser(ctx context.Context, request *MachineUser
 // Create Machine Users Batch.
 //
 // POST /api/v2/machine-users/batch
-func (c *Client) CreateMachineUsersBatch(ctx context.Context, request *IdentityBatchCreateRequest) (CreateMachineUsersBatchRes, error) {
+func (c *Client) CreateMachineUsersBatch(ctx context.Context, request *IdentityBatchCreateRequestMachineUserCreate) (CreateMachineUsersBatchRes, error) {
 	res, err := c.sendCreateMachineUsersBatch(ctx, request)
 	return res, err
 }
 
-func (c *Client) sendCreateMachineUsersBatch(ctx context.Context, request *IdentityBatchCreateRequest) (res CreateMachineUsersBatchRes, err error) {
+func (c *Client) sendCreateMachineUsersBatch(ctx context.Context, request *IdentityBatchCreateRequestMachineUserCreate) (res CreateMachineUsersBatchRes, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
@@ -2848,12 +2928,12 @@ func (c *Client) sendCreateUser(ctx context.Context, request *UserCreate) (res C
 // Create Users Batch.
 //
 // POST /api/v2/users/batch
-func (c *Client) CreateUsersBatch(ctx context.Context, request *IdentityBatchCreateRequest) (CreateUsersBatchRes, error) {
+func (c *Client) CreateUsersBatch(ctx context.Context, request *IdentityBatchCreateRequestUserCreate) (CreateUsersBatchRes, error) {
 	res, err := c.sendCreateUsersBatch(ctx, request)
 	return res, err
 }
 
-func (c *Client) sendCreateUsersBatch(ctx context.Context, request *IdentityBatchCreateRequest) (res CreateUsersBatchRes, err error) {
+func (c *Client) sendCreateUsersBatch(ctx context.Context, request *IdentityBatchCreateRequestUserCreate) (res CreateUsersBatchRes, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
@@ -3483,7 +3563,7 @@ func (c *Client) sendDeleteMachineUsersBatch(ctx context.Context, request *Ident
 
 // DeleteOutputPortQueryStat invokes delete_output_port_query_stat operation.
 //
-// Delete Output Port Query Stat.
+// Delete the query count of one consuming data product for one day.
 //
 // DELETE /api/v2/data_products/{data_product_id}/output_ports/{id}/query_stats
 func (c *Client) DeleteOutputPortQueryStat(ctx context.Context, request *OutputPortQueryStatsDelete, params DeleteOutputPortQueryStatParams) (DeleteOutputPortQueryStatRes, error) {
@@ -9102,6 +9182,86 @@ func (c *Client) sendRemoveDomain(ctx context.Context, params RemoveDomainParams
 	return result, nil
 }
 
+// RemoveDomainFinalizer invokes remove_domain_finalizer operation.
+//
+// Remove Domain Finalizer.
+//
+// DELETE /api/v2/configuration/domains/{id}/finalizers/{finalizer}
+func (c *Client) RemoveDomainFinalizer(ctx context.Context, params RemoveDomainFinalizerParams) (RemoveDomainFinalizerRes, error) {
+	res, err := c.sendRemoveDomainFinalizer(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendRemoveDomainFinalizer(ctx context.Context, params RemoveDomainFinalizerParams) (res RemoveDomainFinalizerRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [4]string
+	pathParts[0] = "/api/v2/configuration/domains/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/finalizers/"
+	{
+		// Encode "finalizer" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "finalizer",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.Finalizer))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "DELETE", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeRemoveDomainFinalizerResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // RemoveExploration invokes remove_exploration operation.
 //
 // Remove Exploration.
@@ -12626,7 +12786,10 @@ func (c *Client) sendUpdateOutputPortAccessType(ctx context.Context, request *Ou
 
 // UpdateOutputPortQueryStats invokes update_output_port_query_stats operation.
 //
-// Update Output Port Query Stats.
+// Upsert daily query counts for this output port, one entry per day and consuming data product.
+// Existing counts for the same day and consuming data product are overwritten, so sending the same
+// data twice is safe. If a request contains the same day and consuming data product more than once,
+// the last entry is used.
 //
 // PATCH /api/v2/data_products/{data_product_id}/output_ports/{id}/query_stats
 func (c *Client) UpdateOutputPortQueryStats(ctx context.Context, request *UpdateOutputPortQueryStatus, params UpdateOutputPortQueryStatsParams) (UpdateOutputPortQueryStatsRes, error) {

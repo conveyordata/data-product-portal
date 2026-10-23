@@ -8,7 +8,6 @@ import {
     useGetDomainsQuery,
     useRemoveDomainMutation,
 } from '@/store/api/services/generated/configurationDomainsApi.ts';
-import { useGetEnvironmentsQuery } from '@/store/api/services/generated/configurationEnvironmentsApi.ts';
 import { dispatchMessage } from '@/utils/feedback.ts';
 import { CreateDomainModal } from './domain-form-modal.component';
 import { CreateDomainMigrateModal } from './domain-migrate-modal.component';
@@ -18,7 +17,6 @@ import { getDomainTableColumns } from './domain-table-columns';
 export function DomainTable() {
     const { t } = useTranslation();
     const { data: { domains = [] } = {}, isFetching } = useGetDomainsQuery();
-    const { data: { environments: availableEnvironments = [] } = {} } = useGetEnvironmentsQuery();
     const { isVisible, handleOpen, handleClose } = useModal();
     const {
         isVisible: migrateModalVisible,
@@ -48,15 +46,22 @@ export function DomainTable() {
                 setMigrateFrom(domain);
                 handleOpenMigrate();
             } else {
-                await onRemoveDomain(domain.id).unwrap();
-                dispatchMessage({ content: t('Domain removed successfully'), type: 'success' });
+                const deletionPending = await onRemoveDomain(domain.id).unwrap();
+                dispatchMessage(
+                    deletionPending
+                        ? {
+                              content: t('Domain marked for deletion, waiting for provisioners to clean up'),
+                              type: 'info',
+                          }
+                        : { content: t('Domain removed successfully'), type: 'success' },
+                );
             }
         } catch (_error) {
             dispatchMessage({ content: t('Could not remove Domain'), type: 'error' });
         }
     };
 
-    const columns = getDomainTableColumns({ t, handleRemove, handleEdit, availableEnvironments });
+    const columns = getDomainTableColumns({ t, handleRemove, handleEdit });
 
     return (
         <Flex vertical gap="large">

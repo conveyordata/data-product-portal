@@ -10,7 +10,7 @@ from sqlalchemy import Column, String, create_engine
 from sqlalchemy.dialects.sqlite import TEXT as SQLITE_TEXT
 from sqlalchemy.orm import DeclarativeBase, Session
 
-from app.core.context import _pending_events, pop_events
+from app.core.context import _pending_events, discard_events, pop_events
 from app.database.event_mixin import EventTrackedMixin
 
 
@@ -110,3 +110,11 @@ def test_no_queue_outside_context(db):
 
     with pytest.raises(RuntimeError, match="No event context is open"):
         pop_events()
+
+
+def test_discard_events__restores_outer_context(db):
+    with discard_events():
+        db.add(_Item(id=str(uuid.uuid4()), name="discarded"))
+        db.flush()
+
+    assert pop_events() == []

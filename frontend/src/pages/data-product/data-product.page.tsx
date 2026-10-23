@@ -126,6 +126,7 @@ export function DataProduct() {
                         description={dataProduct.description}
                         domain={dataProduct.domain.name}
                         namespace={dataProduct.namespace}
+                        environments={dataProduct.environments}
                         tags={[...dataProduct.tags, ...rolledUpTags.map((tag) => ({ rolled_up: true, ...tag }))]}
                     />
                     <DataProductTabs dataProductId={dataProduct.id} />

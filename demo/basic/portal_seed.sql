@@ -83,9 +83,9 @@ begin
     SELECT id INTO restricted_access_type_id FROM public.output_port_access_types WHERE name = 'Restricted';
 
     -- DOMAINS
-    INSERT INTO public.domains (id, "name", description, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), 'Sales', 'Responsible for all activities related to sales, customer relationships, and order management.', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO sales_id;
-    INSERT INTO public.domains (id, "name", description, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), 'Marketing', 'Focused on customer outreach, promotions, and analyzing customer behavior to drive sales.', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO marketing_id;
-    INSERT INTO public.domains (id, "name", description, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), 'Logistics', 'Manages inventory, warehousing, and the entire order fulfillment and shipping process.', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO logistics_id;
+    INSERT INTO public.domains (id, "name", namespace, description, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), 'Sales', 'sales', 'Responsible for all activities related to sales, customer relationships, and order management.', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO sales_id;
+    INSERT INTO public.domains (id, "name", namespace, description, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), 'Marketing', 'marketing', 'Focused on customer outreach, promotions, and analyzing customer behavior to drive sales.', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO marketing_id;
+    INSERT INTO public.domains (id, "name", namespace, description, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), 'Logistics', 'logistics', 'Manages inventory, warehousing, and the entire order fulfillment and shipping process.', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO logistics_id;
 
     -- DATA PRODUCT TYPES
     INSERT INTO public.data_product_types (id, "name", description, icon_key, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), 'source aligned', 'Data product aligned with a source system', 'INGESTION', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO source_aligned_type_id;
@@ -268,5 +268,11 @@ begin
          ORDER BY name ASC;',
         0
     );
+
+    INSERT INTO public.data_product_environments (data_product_id, environment_id, creation_date)
+    VALUES
+        (sales_crm_customers_dp_id, environment_id_dev, timezone('utc'::text, CURRENT_TIMESTAMP)),
+        (sales_erp_orders_dp_id, environment_id_dev, timezone('utc'::text, CURRENT_TIMESTAMP)),
+        (logistics_wms_shipments_dp_id, environment_id_dev, timezone('utc'::text, CURRENT_TIMESTAMP));
 
 end $$;

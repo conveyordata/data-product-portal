@@ -62,7 +62,7 @@ def _item(
                 icon_key=DataProductIconKey.REPORTING,
             ),
         ),
-        domain=Domain(id=uuid4(), name="sales", description=""),
+        domain=Domain(id=uuid4(), name="sales", namespace="sales", description=""),
         configuration=configuration,
         service=service,
         environment_configurations=list(environment_configurations),

@@ -1,17 +1,14 @@
-from uuid import UUID
-
 from app.configuration.domains.model import Domain as DomainModel
 from app.shared.schema import ORMModel
 
 
-class DomainCreate(ORMModel):
+class DomainUpdate(ORMModel):
     name: str
     description: str
-    environment_ids: list[UUID] = []
 
     class Meta:
         orm_model = DomainModel
 
 
-class DomainUpdate(DomainCreate):
-    pass
+class DomainCreate(DomainUpdate):
+    namespace: str

@@ -29,6 +29,25 @@ const injectedRtkApi = api.injectEndpoints({
         url: `/api/v2/configuration/domains/${queryArg}`,
       }),
     }),
+    addDomainFinalizer: build.mutation<
+      AddDomainFinalizerApiResponse,
+      AddDomainFinalizerApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/configuration/domains/${queryArg.id}/finalizers`,
+        method: "POST",
+        body: queryArg.finalizerRequest,
+      }),
+    }),
+    removeDomainFinalizer: build.mutation<
+      RemoveDomainFinalizerApiResponse,
+      RemoveDomainFinalizerApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/configuration/domains/${queryArg.id}/finalizers/${queryArg.finalizer}`,
+        method: "DELETE",
+      }),
+    }),
     migrateDomain: build.mutation<
       MigrateDomainApiResponse,
       MigrateDomainApiArg
@@ -54,30 +73,36 @@ export type UpdateDomainApiArg = {
   id: string;
   domainUpdate: DomainUpdate;
 };
-export type RemoveDomainApiResponse = /** status 200 Successful Response */ any;
+export type RemoveDomainApiResponse = /** status 200 Domain deleted */ any;
 export type RemoveDomainApiArg = string;
 export type GetDomainApiResponse =
   /** status 200 Successful Response */ GetDomainResponse;
 export type GetDomainApiArg = string;
+export type AddDomainFinalizerApiResponse =
+  /** status 200 Successful Response */ any;
+export type AddDomainFinalizerApiArg = {
+  id: string;
+  finalizerRequest: FinalizerRequest;
+};
+export type RemoveDomainFinalizerApiResponse =
+  /** status 200 Successful Response */ any;
+export type RemoveDomainFinalizerApiArg = {
+  id: string;
+  finalizer: string;
+};
 export type MigrateDomainApiResponse =
   /** status 200 Successful Response */ any;
 export type MigrateDomainApiArg = {
   fromId: string;
   toId: string;
 };
-export type EnvironmentGetItem = {
-  id: string;
-  name: string;
-  acronym: string;
-  context: string;
-  is_default?: boolean;
-  is_global?: boolean;
-};
 export type GetDomainsItem = {
   id: string;
   name: string;
+  namespace: string;
   description: string;
-  environments: EnvironmentGetItem[];
+  status: DomainStatus;
+  finalizers: string[];
   abstract_data_product_count: number;
 };
 export type GetDomainsResponse = {
@@ -99,7 +124,7 @@ export type CreateDomainResponse = {
 export type DomainCreate = {
   name: string;
   description: string;
-  environment_ids?: string[];
+  namespace: string;
 };
 export type UpdateDomainResponse = {
   id: string;
@@ -107,14 +132,22 @@ export type UpdateDomainResponse = {
 export type DomainUpdate = {
   name: string;
   description: string;
-  environment_ids?: string[];
 };
 export type GetDomainResponse = {
   id: string;
   name: string;
+  namespace: string;
   description: string;
-  environments: EnvironmentGetItem[];
+  status: DomainStatus;
+  finalizers: string[];
 };
+export type FinalizerRequest = {
+  finalizer: string;
+};
+export enum DomainStatus {
+  Active = "active",
+  Deleting = "deleting",
+}
 export const {
   useGetDomainsQuery,
   useLazyGetDomainsQuery,
@@ -123,5 +156,7 @@ export const {
   useRemoveDomainMutation,
   useGetDomainQuery,
   useLazyGetDomainQuery,
+  useAddDomainFinalizerMutation,
+  useRemoveDomainFinalizerMutation,
   useMigrateDomainMutation,
 } = injectedRtkApi;

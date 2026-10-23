@@ -20,13 +20,14 @@ import { server } from '@/tests/mocks/server.ts';
 export const mockDataProducts: GetDataProductsResponseItem[] = [
     {
         id: 'dp-1',
+        environments: [],
         name: 'Sales Analytics',
         description: 'Analytics data product for sales team',
         namespace: 'sales namespace',
         status: AbstractDataProductStatus.Active,
         tags: [{ id: 'tag-1', value: 'analytics-tag' }],
         usage: null,
-        domain: { id: 'domain-1', name: 'Sales-domain', description: 'Sales domain' },
+        domain: { id: 'domain-1', name: 'Sales-domain', namespace: 'sales-domain', description: 'Sales domain' },
         type: {
             id: 'type-1',
             name: 'Reporting',
@@ -42,6 +43,7 @@ export const mockDataProducts: GetDataProductsResponseItem[] = [
     },
     {
         id: 'dp-2',
+        environments: [],
         name: 'Customer Insights',
         finalizers: ['finalizer-1'],
         description: 'Customer behavior and insights',
@@ -49,7 +51,7 @@ export const mockDataProducts: GetDataProductsResponseItem[] = [
         status: AbstractDataProductStatus.Active,
         tags: [{ id: 'tag-2', value: 'insights' }],
         usage: null,
-        domain: { id: 'domain-2', name: 'Marketing', description: 'Marketing domain' },
+        domain: { id: 'domain-2', name: 'Marketing', namespace: 'marketing', description: 'Marketing domain' },
         type: {
             id: 'type-2',
             name: 'Exploration',

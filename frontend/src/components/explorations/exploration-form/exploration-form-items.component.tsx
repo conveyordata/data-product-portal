@@ -1,7 +1,7 @@
 import { Form, Input, Select } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
-import { useGetDomainsQuery } from '@/store/api/services/generated/configurationDomainsApi.ts';
+import { DomainStatus, useGetDomainsQuery } from '@/store/api/services/generated/configurationDomainsApi.ts';
 import type { Exploration } from '@/store/api/services/generated/explorationsApi.ts';
 import { selectFilterOptionByLabelAndValue } from '@/utils/form.helper.ts';
 
@@ -53,7 +53,9 @@ export const ExplorationFormItems = () => {
             >
                 <Select
                     loading={isFetchingDomains}
-                    options={domains.map((domain) => ({ label: domain.name, value: domain.id }))}
+                    options={domains
+                        .filter((domain) => domain.status !== DomainStatus.Deleting)
+                        .map((domain) => ({ label: domain.name, value: domain.id }))}
                     showSearch={{ filterOption: selectFilterOptionByLabelAndValue }}
                     allowClear
                 />

@@ -74,6 +74,11 @@ def sync_detailed(
 ) -> Response[Any | HTTPValidationError]:
     """Update Output Port Query Stats
 
+     Upsert daily query counts for this output port, one entry per day and consuming data product.
+    Existing counts for the same day and consuming data product are overwritten, so sending the same
+    data twice is safe. If a request contains the same day and consuming data product more than once,
+    the last entry is used.
+
     Args:
         data_product_id (UUID):
         id (UUID):
@@ -109,6 +114,11 @@ def sync(
 ) -> Any | HTTPValidationError | None:
     """Update Output Port Query Stats
 
+     Upsert daily query counts for this output port, one entry per day and consuming data product.
+    Existing counts for the same day and consuming data product are overwritten, so sending the same
+    data twice is safe. If a request contains the same day and consuming data product more than once,
+    the last entry is used.
+
     Args:
         data_product_id (UUID):
         id (UUID):
@@ -138,6 +148,11 @@ async def asyncio_detailed(
     body: UpdateOutputPortQueryStatus,
 ) -> Response[Any | HTTPValidationError]:
     """Update Output Port Query Stats
+
+     Upsert daily query counts for this output port, one entry per day and consuming data product.
+    Existing counts for the same day and consuming data product are overwritten, so sending the same
+    data twice is safe. If a request contains the same day and consuming data product more than once,
+    the last entry is used.
 
     Args:
         data_product_id (UUID):
@@ -171,6 +186,11 @@ async def asyncio(
     body: UpdateOutputPortQueryStatus,
 ) -> Any | HTTPValidationError | None:
     """Update Output Port Query Stats
+
+     Upsert daily query counts for this output port, one entry per day and consuming data product.
+    Existing counts for the same day and consuming data product are overwritten, so sending the same
+    data twice is safe. If a request contains the same day and consuming data product more than once,
+    the last entry is used.
 
     Args:
         data_product_id (UUID):

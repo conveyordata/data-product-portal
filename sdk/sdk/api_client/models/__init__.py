@@ -38,6 +38,9 @@ from .cancel_input_port_for_data_product_response import (
 from .cancel_input_port_for_exploration_response import (
     CancelInputPortForExplorationResponse,
 )
+from .cloud_event_data_product_environment_added_event import (
+    CloudEventDataProductEnvironmentAddedEvent,
+)
 from .cloud_event_data_product_event import CloudEventDataProductEvent
 from .cloud_event_data_product_role_assignment_event import (
     CloudEventDataProductRoleAssignmentEvent,
@@ -45,6 +48,7 @@ from .cloud_event_data_product_role_assignment_event import (
 from .cloud_event_data_product_setting_value_event import (
     CloudEventDataProductSettingValueEvent,
 )
+from .cloud_event_domain_event import CloudEventDomainEvent
 from .cloud_event_exploration_event import CloudEventExplorationEvent
 from .cloud_event_input_port_event import CloudEventInputPortEvent
 from .cloud_event_output_port_event import CloudEventOutputPortEvent
@@ -80,6 +84,8 @@ from .create_technical_asset_response import CreateTechnicalAssetResponse
 from .data_product import DataProduct
 from .data_product_about_update import DataProductAboutUpdate
 from .data_product_create import DataProductCreate
+from .data_product_environment import DataProductEnvironment
+from .data_product_environment_added_event import DataProductEnvironmentAddedEvent
 from .data_product_event import DataProductEvent
 from .data_product_icon_key import DataProductIconKey
 from .data_product_life_cycle import DataProductLifeCycle
@@ -137,6 +143,8 @@ from .device_flow import DeviceFlow
 from .device_flow_status import DeviceFlowStatus
 from .domain import Domain
 from .domain_create import DomainCreate
+from .domain_event import DomainEvent
+from .domain_status import DomainStatus
 from .domain_update import DomainUpdate
 from .edge import Edge
 from .environment import Environment
@@ -205,7 +213,24 @@ from .group_update_response import GroupUpdateResponse
 from .groups_get_response import GroupsGetResponse
 from .http_validation_error import HTTPValidationError
 from .identity_batch_create_error import IdentityBatchCreateError
-from .identity_batch_create_request import IdentityBatchCreateRequest
+from .identity_batch_create_request_group_create import (
+    IdentityBatchCreateRequestGroupCreate,
+)
+from .identity_batch_create_request_group_create_group_create import (
+    IdentityBatchCreateRequestGroupCreateGroupCreate,
+)
+from .identity_batch_create_request_machine_user_create import (
+    IdentityBatchCreateRequestMachineUserCreate,
+)
+from .identity_batch_create_request_machine_user_create_machine_user_create import (
+    IdentityBatchCreateRequestMachineUserCreateMachineUserCreate,
+)
+from .identity_batch_create_request_user_create import (
+    IdentityBatchCreateRequestUserCreate,
+)
+from .identity_batch_create_request_user_create_user_create import (
+    IdentityBatchCreateRequestUserCreateUserCreate,
+)
 from .identity_batch_create_response import IdentityBatchCreateResponse
 from .identity_batch_delete_request import IdentityBatchDeleteRequest
 from .identity_type import IdentityType
@@ -429,9 +454,11 @@ __all__ = (
     "CanBecomeAdminUpdate",
     "CancelInputPortForDataProductResponse",
     "CancelInputPortForExplorationResponse",
+    "CloudEventDataProductEnvironmentAddedEvent",
     "CloudEventDataProductEvent",
     "CloudEventDataProductRoleAssignmentEvent",
     "CloudEventDataProductSettingValueEvent",
+    "CloudEventDomainEvent",
     "CloudEventExplorationEvent",
     "CloudEventInputPortEvent",
     "CloudEventOutputPortEvent",
@@ -462,6 +489,8 @@ __all__ = (
     "DataProduct",
     "DataProductAboutUpdate",
     "DataProductCreate",
+    "DataProductEnvironment",
+    "DataProductEnvironmentAddedEvent",
     "DataProductEvent",
     "DataProductIconKey",
     "DataProductLifeCycle",
@@ -506,6 +535,8 @@ __all__ = (
     "DeviceFlowStatus",
     "Domain",
     "DomainCreate",
+    "DomainEvent",
+    "DomainStatus",
     "DomainUpdate",
     "Edge",
     "Environment",
@@ -568,7 +599,12 @@ __all__ = (
     "GroupUpdateResponse",
     "HTTPValidationError",
     "IdentityBatchCreateError",
-    "IdentityBatchCreateRequest",
+    "IdentityBatchCreateRequestGroupCreate",
+    "IdentityBatchCreateRequestGroupCreateGroupCreate",
+    "IdentityBatchCreateRequestMachineUserCreate",
+    "IdentityBatchCreateRequestMachineUserCreateMachineUserCreate",
+    "IdentityBatchCreateRequestUserCreate",
+    "IdentityBatchCreateRequestUserCreateUserCreate",
     "IdentityBatchCreateResponse",
     "IdentityBatchDeleteRequest",
     "IdentityType",

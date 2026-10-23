@@ -49,7 +49,7 @@ class RequestInputPortsForExplorationRequest:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.request_input_ports_for_abstract_data_product_request_item import (
-            RequestInputPortsForAbstractDataProductRequestItem,
+            RequestInputPortsForAbstractDataProductRequestItem,  # noqa: PLC0415
         )
 
         d = dict(src_dict)
