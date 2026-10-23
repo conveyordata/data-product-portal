@@ -29,7 +29,6 @@ type Tab = {
     key: TabKeys;
     icon?: ReactNode;
     children: ReactNode;
-    hidden?: boolean;
 };
 
 export function SettingsTabs() {
@@ -67,7 +66,6 @@ export function SettingsTabs() {
                 key: TabKeys.Platform,
                 children: <PlatformTab />,
                 icon: <Icon component={chipIcon} />,
-                hidden: true,
             },
             {
                 label: t('Roles'),
@@ -88,16 +86,14 @@ export function SettingsTabs() {
         <Tabs
             activeKey={activeTab}
             onChange={onTabChange}
-            items={tabs
-                .filter((tab) => !tab.hidden)
-                .map(({ key, label, icon, children }) => {
-                    return {
-                        label,
-                        key,
-                        children,
-                        icon,
-                    };
-                })}
+            items={tabs.map(({ key, label, icon, children }) => {
+                return {
+                    label,
+                    key,
+                    children,
+                    icon,
+                };
+            })}
             size="middle"
         />
     );
