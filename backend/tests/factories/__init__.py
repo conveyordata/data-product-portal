@@ -11,8 +11,6 @@ from .data_product_type import DataProductTypeFactory
 from .data_quality_summary import DataQualitySummaryFactory
 from .device_flow import DeviceFlowFactory
 from .domain import DomainFactory
-from .env_platform_config import EnvPlatformConfigFactory
-from .env_platform_service_config import EnvPlatformServiceConfigFactory
 from .environment import EnvironmentFactory
 from .environment import fake as environment_fake
 from .event import EventFactory
@@ -27,10 +25,7 @@ from .output_port import OutputPortFactory
 from .output_port import fake as dataset_fake
 from .output_port_access_type import OutputPortAccessTypeFactory
 from .output_port_query_stats_daily import OutputPortQueryStatsFactory
-from .platform import PlatformFactory
 from .platform import fake as platform_fake
-from .platform_service import PlatformServiceFactory
-from .platform_service_config import PlatformServiceConfigFactory
 from .role import RoleFactory
 from .role_assignment_data_product import DataProductRoleAssignmentFactory
 from .role_assignment_dataset import DatasetRoleAssignmentFactory
@@ -81,15 +76,10 @@ factories = [
     OutputPortQueryStatsFactory,
     DatasetRoleAssignmentFactory,
     DomainFactory,
-    EnvPlatformConfigFactory,
-    EnvPlatformServiceConfigFactory,
     EnvironmentFactory,
     EventFactory,
     GlobalRoleAssignmentFactory,
     LifecycleFactory,
-    PlatformFactory,
-    PlatformServiceFactory,
-    PlatformServiceConfigFactory,
     RoleFactory,
     TechnicalAssetConfigurationFactory,
     TagFactory,

@@ -18,10 +18,8 @@ class PlatformTile(ORMModel):
 
 
 class UIElementMetadataResponse(ORMModel):
-    not_configured: bool = False
     ui_metadata: Sequence[UIElementMetadata]
     plugin: str
-    has_environments: bool
     result_label: str = "Resulting path"
     result_tooltip: str = "The path you can access through this technical asset"
     platform: str
@@ -30,9 +28,7 @@ class UIElementMetadataResponse(ORMModel):
     icon_data_uri: Optional[str] = (
         None  # Set by plugins that ship their own icon. In-tree types leave it unset and the frontend resolves icon_name from its own assets.
     )
-    parent_platform: Optional[str] = None
     platform_tile: Optional[PlatformTile] = None
-    show_in_form: bool = True
     shareable: bool = True
     detailed_name: str
 

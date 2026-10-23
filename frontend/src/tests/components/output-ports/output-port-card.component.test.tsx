@@ -54,8 +54,6 @@ const technicalAsset: GetTechnicalAssetsResponseItem = {
     description: 'Orders technical asset',
     namespace: 'sales.orders.asset',
     owner_id: 'dp-1',
-    platform_id: 'platform-1',
-    service_id: 'service-1',
     status: TechnicalAssetStatus.Active,
     technical_mapping: TechnicalMapping.Default,
     access_modes: [

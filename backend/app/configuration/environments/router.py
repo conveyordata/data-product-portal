@@ -3,19 +3,6 @@ from uuid import UUID
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.configuration.environments.platform_configurations.schema_response import (
-    EnvironmentPlatformConfigGet,
-)
-from app.configuration.environments.platform_configurations.service import (
-    EnvironmentPlatformConfigurationService,
-)
-from app.configuration.environments.platform_service_configurations.schema_response import (
-    EnvironmentConfigsGet,
-    EnvironmentConfigsGetItem,
-)
-from app.configuration.environments.platform_service_configurations.service import (
-    EnvironmentPlatformServiceConfigurationService,
-)
 from app.configuration.environments.schema_request import EnvironmentUpdateGlobal
 from app.configuration.environments.schema_response import (
     Environment,
@@ -36,60 +23,6 @@ def get_environment(
     id: UUID, db: Session = Depends(get_db_session, scope="function")
 ) -> Environment:
     return EnvironmentService(db).get_environment(id)
-
-
-@router.get(
-    "/configs/{config_id}",
-    dependencies=[
-        Depends(
-            Authorization.enforce(Action.GLOBAL__UPDATE_CONFIGURATION, EmptyResolver)
-        ),
-    ],
-)
-def get_environment_configs_by_id(
-    config_id: UUID,
-    db: Session = Depends(get_db_session, scope="function"),
-) -> EnvironmentConfigsGetItem:
-    return EnvironmentPlatformServiceConfigurationService(
-        db
-    ).get_environment_platform_service_config_by_id(config_id)
-
-
-@router.get(
-    "/{id}/platforms/{platform_id}/services/{service_id}/config",
-    dependencies=[
-        Depends(
-            Authorization.enforce(Action.GLOBAL__UPDATE_CONFIGURATION, EmptyResolver)
-        ),
-    ],
-)
-def get_environment_platform_service_config(
-    id: UUID,
-    platform_id: UUID,
-    service_id: UUID,
-    db: Session = Depends(get_db_session, scope="function"),
-) -> EnvironmentConfigsGetItem:
-    return EnvironmentPlatformServiceConfigurationService(
-        db
-    ).get_environment_platform_service_config(id, platform_id, service_id)
-
-
-@router.get(
-    "/{id}/platforms/{platform_id}/config",
-    dependencies=[
-        Depends(
-            Authorization.enforce(Action.GLOBAL__UPDATE_CONFIGURATION, EmptyResolver)
-        ),
-    ],
-)
-def get_environment_platform_config(
-    id: UUID,
-    platform_id: UUID,
-    db: Session = Depends(get_db_session, scope="function"),
-) -> EnvironmentPlatformConfigGet:
-    return EnvironmentPlatformConfigurationService(db).get_environment_platform_config(
-        id, platform_id
-    )
 
 
 @router.get("")
@@ -113,28 +46,3 @@ def update_environment_is_global(
     db: Session = Depends(get_db_session, scope="function"),
 ) -> Environment:
     return EnvironmentService(db).update_is_global(id, environment_update.is_global)
-
-
-@router.get("/{id}/configs")
-def get_environment_configs(
-    id: UUID,
-    db: Session = Depends(get_db_session, scope="function"),
-) -> EnvironmentConfigsGet:
-    return EnvironmentConfigsGet(
-        environment_configs=EnvironmentPlatformServiceConfigurationService(
-            db
-        ).get_environment_platform_service_configs(id)
-    )
-
-
-@router.get(
-    "/platforms/{platform_id}/services/{service_id}/config",
-)
-def get_environment_platform_service_config_for_all_envs(
-    platform_id: UUID,
-    service_id: UUID,
-    db: Session = Depends(get_db_session, scope="function"),
-) -> EnvironmentConfigsGet:
-    return EnvironmentPlatformServiceConfigurationService(
-        db
-    ).get_all_platform_service_configs(platform_id, service_id)

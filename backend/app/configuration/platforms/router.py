@@ -1,96 +1,62 @@
+from typing import Any
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Body, Depends
+from sqlalchemy.orm import Session
 
-from app.configuration.platform_service_configurations.schema import (
-    GetAllPlatformServiceConfigurationsResponse,
-    PlatformServiceConfiguration,
-)
-from app.configuration.platform_service_configurations.service import (
-    PlatformServiceConfigurationService,
-)
-from app.configuration.platforms.platform_services.service import PlatformServiceService
 from app.configuration.platforms.schema_response import (
     GetAllPlatformsResponse,
+    PlatformEnvironmentSettings,
 )
-
-from .platform_services.schema_response import GetPlatformServicesResponse
-from .service import PlatformService as PlatformsService
+from app.configuration.platforms.service import PlatformSettingsService
+from app.core.authz import Action, Authorization
+from app.core.authz.resolvers import EmptyResolver
+from app.database.deps import get_db_session
 
 router = APIRouter(
     tags=["Configuration - Platforms"], prefix="/v2/configuration/platforms"
 )
 
 
-@router.get(
-    "/{id}/services/{service_id}",
-    description="Get Platform Service config",
-    responses={
-        404: {
-            "description": "Platform service configuration not found",
-            "content": {
-                "application/json": {
-                    "example": {"detail": "Platform service configuration not found"}
-                }
-            },
-        }
-    },
-)
-def get_platform_service_config(
-    id: UUID,
-    service_id: UUID,
-    platform_service_configuration_service: PlatformServiceConfigurationService = Depends(
-        PlatformServiceConfigurationService
-    ),
-) -> PlatformServiceConfiguration:
-    if not (
-        service_config
-        := platform_service_configuration_service.get_platform_service_configuration(
-            id, service_id
-        )
-    ):
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Platform service configuration not found",
-        )
-    return service_config
-
-
-@router.get("/configs/{config_id}")
-def get_single_platform_service_configuration(
-    config_id: UUID,
-    platform_service_configuration_service: PlatformServiceConfigurationService = Depends(
-        PlatformServiceConfigurationService
-    ),
-) -> PlatformServiceConfiguration:
-    return platform_service_configuration_service.get_single_platform_service_configuration(
-        config_id
-    )
-
-
-@router.get("/configs")
-def get_all_platform_service_configurations(
-    platform_service_configuration_service: PlatformServiceConfigurationService = Depends(
-        PlatformServiceConfigurationService
-    ),
-) -> GetAllPlatformServiceConfigurationsResponse:
-    return GetAllPlatformServiceConfigurationsResponse(
-        platform_service_configurations=platform_service_configuration_service.get_all_platform_service_configurations()
-    )
-
-
 @router.get("")
 def get_all_platforms(
-    platform_service: PlatformsService = Depends(PlatformsService),
+    db: Session = Depends(get_db_session, scope="function"),
 ) -> GetAllPlatformsResponse:
-    return GetAllPlatformsResponse(platforms=platform_service.get_all_platforms())
+    return GetAllPlatformsResponse(
+        platforms=PlatformSettingsService(db).get_platforms()
+    )
 
 
-@router.get("/{id}/services")
-def get_platform_services(
-    id: UUID,
-    platform_service_service: PlatformServiceService = Depends(PlatformServiceService),
-) -> GetPlatformServicesResponse:
-    return GetPlatformServicesResponse(
-        platform_services=platform_service_service.get_platform_services(id)
+@router.get(
+    "/{platform_key}/environments/{environment_id}/settings",
+    dependencies=[
+        Depends(
+            Authorization.enforce(Action.GLOBAL__UPDATE_CONFIGURATION, EmptyResolver)
+        ),
+    ],
+)
+def get_platform_environment_settings(
+    platform_key: str,
+    environment_id: UUID,
+    db: Session = Depends(get_db_session, scope="function"),
+) -> PlatformEnvironmentSettings:
+    return PlatformSettingsService(db).get_settings(platform_key, environment_id)
+
+
+@router.put(
+    "/{platform_key}/environments/{environment_id}/settings",
+    dependencies=[
+        Depends(
+            Authorization.enforce(Action.GLOBAL__UPDATE_CONFIGURATION, EmptyResolver)
+        ),
+    ],
+)
+def update_platform_environment_settings(
+    platform_key: str,
+    environment_id: UUID,
+    settings: dict[str, Any] = Body(...),
+    db: Session = Depends(get_db_session, scope="function"),
+) -> PlatformEnvironmentSettings:
+    return PlatformSettingsService(db).update_settings(
+        platform_key, environment_id, settings
     )

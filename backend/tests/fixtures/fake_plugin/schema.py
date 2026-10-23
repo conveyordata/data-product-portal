@@ -3,10 +3,8 @@ from uuid import UUID
 
 from sqlalchemy.orm import Session
 
-from app.configuration.environments.platform_service_configurations.schema_response import (
-    ConfigType,
-)
 from app.data_products.schema import DataProduct
+from app.plugins.platform import Platform, ToolType
 from app.technical_asset_configuration.base_schema import (
     FieldDependency,
     PlatformMetadata,
@@ -35,7 +33,6 @@ class FakeTechnicalAssetConfiguration(TechnicalAssetPlugin):
         icon_name="icon.svg",
         icon_package=ICON_PACKAGE,
         platform_key="fake",
-        parent_platform="cloud",
         detailed_name="Path",
     )
 
@@ -48,7 +45,7 @@ class FakeTechnicalAssetConfiguration(TechnicalAssetPlugin):
     def on_create(self):
         pass
 
-    def get_configuration(self, configs: list[ConfigType]) -> Optional[ConfigType]:
+    def get_configuration(self, configs: list) -> Optional[dict]:
         return next(iter(configs), None)
 
     @classmethod
@@ -73,17 +70,21 @@ class FakeTechnicalAssetConfiguration(TechnicalAssetPlugin):
         ]
 
 
-class FakeLinkPlugin(TechnicalAssetPlugin):
-    name: ClassVar[str] = "FakeLinkPlugin"
+class FakeCloudPlatform(Platform):
+    key = "cloud"
+    display_name = "Cloud"
+    icon_name = "icon.svg"
+    icon_package = ICON_PACKAGE
+    asset_types = [FakeTechnicalAssetConfiguration]
 
-    _platform_metadata = PlatformMetadata(
-        display_name="Fake link",
-        icon_name="icon.svg",
-        icon_package=ICON_PACKAGE,
-        platform_key="fake-link",
-        has_environments=False,
-        detailed_name="Link",
-    )
+
+class FakeLinkPlatform(Platform):
+    key = "fake-link"
+    display_name = "Fake link"
+    icon_name = "icon.svg"
+    icon_package = ICON_PACKAGE
+    has_environments = False
+    tool_types = [ToolType(name="FakeLinkPlugin", display_name="Link")]
 
     @classmethod
     def get_url(

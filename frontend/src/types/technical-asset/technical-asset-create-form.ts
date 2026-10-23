@@ -10,8 +10,6 @@ export type TechnicalAssetsCreateForm = {
     name: string;
     namespace: string;
     tag_ids: string[];
-    platform_id: string;
-    service_id: string;
     status: TechnicalAssetStatus;
     description: string;
     configuration: TechnicalAssetConfiguration;

@@ -1,12 +1,9 @@
 import logging
 from typing import ClassVar, Optional
-from uuid import UUID
 
 from sqlalchemy.orm import Session
 
-from app.configuration.environments.platform_service_configurations.schemas import (
-    AzureBlobConfig,
-)
+from portal_plugins.settings import AzureBlobSettings
 from portal_plugins.azure_blob.model import (
     NAME,
 )
@@ -21,7 +18,6 @@ from app.technical_asset_configuration.base_schema import (
     UIElementString,
 )
 from app.technical_asset_configuration.enums import UIElementType
-from app.users.schema import User
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +37,6 @@ class AzureBlobTechnicalAssetConfiguration(TechnicalAssetPlugin):
         icon_name="azure-storage-account-logo.svg",
         icon_package="portal_plugins.azure_blob",
         platform_key="azureblob",
-        parent_platform="azure",
         result_label="Resulting path",
         result_tooltip="The path you can access through this technical asset",
         detailed_name="Path",
@@ -53,15 +48,9 @@ class AzureBlobTechnicalAssetConfiguration(TechnicalAssetPlugin):
     def validate_configuration(self, context: PluginContext, db: Session):
         self.domain = context.domain.name
 
-    @classmethod
-    def get_url(
-        cls, id: UUID, db: Session, actor: User, environment: Optional[str] = None
-    ) -> str:
-        return "https://portal.azure.com/"
-
     def get_configuration(
-        self, configs: list[AzureBlobConfig]
-    ) -> Optional[AzureBlobConfig]:
+        self, configs: list[AzureBlobSettings]
+    ) -> Optional[AzureBlobSettings]:
         """
         No filtering on blob configuration as there should only be 1 map per environment to translate domain -> storage account
         """

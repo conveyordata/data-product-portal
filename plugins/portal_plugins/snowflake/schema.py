@@ -1,16 +1,9 @@
-import json
 from typing import ClassVar, Optional, Self
 
-from fastapi import HTTPException, status
 from pydantic import model_validator
 from sqlalchemy.orm import Session
 
-from app.configuration.environments.platform_configurations.service import (
-    EnvironmentPlatformConfigurationService,
-)
-from app.configuration.environments.platform_service_configurations.schema_response import (
-    SnowflakeConfig,
-)
+from portal_plugins.settings import SnowflakeDatabaseSettings
 from app.technical_asset_configuration.base_schema import (
     PluginContext,
     FieldDependency,
@@ -49,7 +42,6 @@ class SnowflakeTechnicalAssetConfiguration(TechnicalAssetPlugin):
         icon_name="snowflake-logo.svg",
         icon_package="portal_plugins.snowflake",
         platform_key="snowflake",
-        parent_platform=None,
         result_label="Resulting table",
         result_tooltip="The table you can access through this technical asset",
         detailed_name="Schema",
@@ -73,26 +65,12 @@ class SnowflakeTechnicalAssetConfiguration(TechnicalAssetPlugin):
         if not self.database.startswith(context.data_product.namespace):
             raise ValueError("Invalid database specified")
 
-    @classmethod
-    def get_url(cls, id, db, actor, environment=None) -> str:
-        config = json.loads(
-            EnvironmentPlatformConfigurationService(db).get_env_platform_config(
-                environment, "Snowflake"
-            )
-        )
-        if "login_url" not in config:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="login_url missing from Snowflake configuration",
-            )
-        return config["login_url"]
-
     def render_template(self, template, **context) -> str:
         return super().render_template(template, **context).replace("-", "_")
 
     def get_configuration(
-        self, configs: list[SnowflakeConfig]
-    ) -> Optional[SnowflakeConfig]:
+        self, configs: list[SnowflakeDatabaseSettings]
+    ) -> Optional[SnowflakeDatabaseSettings]:
         return next(
             (config for config in configs if config.identifier == self.database), None
         )

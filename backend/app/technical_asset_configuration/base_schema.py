@@ -6,31 +6,32 @@ from typing import TYPE_CHECKING, Any, ClassVar, Optional
 from uuid import UUID
 
 from pydantic import computed_field
-from sqlalchemy import func, select
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.configuration.domains.schema import Domain
-from app.configuration.environments.platform_service_configurations.schema_response import (
-    ConfigType,
-)
-from app.configuration.platform_service_configurations.model import (
-    PlatformServiceConfiguration as PlatformServiceConfigurationModel,
-)
-from app.configuration.platform_service_configurations.schema import (
-    PlatformServiceConfiguration,
-)
-from app.configuration.platforms.platform_services.model import (
-    PlatformService as PlatformServiceModel,
-)
+from app.configuration.platforms.model import PlatformEnvironmentSettings
 from app.core.logging import logger
 from app.data_products.schema import DataProduct
 from app.data_products.technical_assets.enums import TechnicalMapping
 from app.shared.schema import ORMModel
 from app.technical_asset_configuration.enums import UIElementType
-from app.users.schema import User
 
 if TYPE_CHECKING:
     from app.data_products.model import DataProduct as DataProductModel
+    from app.plugins.platform import Platform
+
+
+@cache
+def icon_data_uri(package: Optional[str], name: str) -> Optional[str]:
+    if not package:
+        return None
+    try:
+        icon = resources.files(package).joinpath(name).read_bytes()
+    except Exception:
+        logger.exception(f"No readable icon at {package}/{name}")
+        return None
+    return f"data:image/svg+xml;base64,{b64encode(icon).decode()}"
 
 
 class FieldDependency(ORMModel):
@@ -111,12 +112,9 @@ class PlatformMetadata(ORMModel):
     icon_name: str
     icon_package: Optional[str] = None
     platform_key: str
-    has_environments: bool = True
-    parent_platform: Optional[str] = None
     result_label: str = "Resulting output"
     result_tooltip: str = "The output you can access through this technical asset"
     detailed_name: str
-    show_in_form: bool = True
     shareable: bool = True
     result_string_template: Optional[str] = None
     technical_info_template: Optional[str] = None
@@ -162,6 +160,7 @@ class TechnicalAssetPlugin(ORMModel, ABC):
         raise NotImplementedError
 
     _platform_metadata: ClassVar[Optional[PlatformMetadata]] = None
+    platform: ClassVar[type["Platform"]]
 
     def render_template(
         self, template: str, *, plugin_context: PluginContext, **context: Any
@@ -170,41 +169,30 @@ class TechnicalAssetPlugin(ORMModel, ABC):
             **{**dict(plugin_context), **self.model_dump(), **context}
         )
 
-    def get_configuration(self, configs: list[ConfigType]) -> Optional[ConfigType]:
+    def get_configuration(self, configs: list[Any]) -> Optional[Any]:
         raise NotImplementedError
 
     def validate_configuration(self, context: PluginContext, db: Session) -> None:
         """Raise when the configuration isn't acceptable, on create with the default technical mapping."""
 
     @classmethod
-    def get_url(
-        cls, id: UUID, db: Session, actor: User, environment: Optional[str] = None
-    ) -> str:
-        """Get the URL to the access tiles."""
-        raise NotImplementedError
+    def settings_field(cls) -> str:
+        return cls.get_platform_metadata().platform_key.replace("-", "_")
 
     @classmethod
     def get_platform_options(cls, db: Session) -> list[SelectOption]:
-        """Get platform specific options from the database if needed"""
-        if not cls._platform_metadata:
-            raise NotImplementedError("Platform metadata not defined for this plugin")
-
-        service = db.scalar(
-            select(PlatformServiceModel).where(
-                func.lower(PlatformServiceModel.name)
-                == cls._platform_metadata.platform_key
+        identifiers = {
+            entry["identifier"]
+            for settings in db.scalars(
+                select(PlatformEnvironmentSettings.settings).filter_by(
+                    platform_key=cls.platform.key
+                )
             )
-        )
-        if not service:
-            raise NotImplementedError("No platform service found")
-        config = db.scalar(
-            select(PlatformServiceConfigurationModel).filter_by(service_id=service.id)
-        )
-        if not config:
-            raise NotImplementedError("No platform service configuration found")
+            for entry in settings.get(cls.settings_field(), [])
+        }
         return [
-            SelectOption(label=option, value=option)
-            for option in PlatformServiceConfiguration.model_validate(config).config
+            SelectOption(label=identifier, value=identifier)
+            for identifier in sorted(identifiers)
         ]
 
     @classmethod
@@ -228,24 +216,9 @@ class TechnicalAssetPlugin(ORMModel, ABC):
         return cls._platform_metadata
 
     @classmethod
-    @cache
     def get_icon_data_uri(cls) -> Optional[str]:
         platform_meta = cls.get_platform_metadata()
-        if not platform_meta.icon_package:
-            return None
-        try:
-            icon = (
-                resources.files(platform_meta.icon_package)
-                .joinpath(platform_meta.icon_name)
-                .read_bytes()
-            )
-        except Exception:
-            logger.exception(
-                f"Plugin '{cls.name}' has no readable icon at "
-                f"{platform_meta.icon_package}/{platform_meta.icon_name}"
-            )
-            return None
-        return f"data:image/svg+xml;base64,{b64encode(icon).decode()}"
+        return icon_data_uri(platform_meta.icon_package, platform_meta.icon_name)
 
     @classmethod
     def get_logo(cls) -> str:

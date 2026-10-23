@@ -3,10 +3,7 @@ from typing import ClassVar, Optional, Self
 from pydantic import model_validator
 from sqlalchemy.orm import Session
 
-from app.configuration.environments.platform_service_configurations.schemas import (
-    AWSGlueConfig,
-)
-from app.core.aws.get_url import get_aws_plugin_url
+from portal_plugins.settings import GlueDatabaseSettings
 from app.technical_asset_configuration.base_schema import (
     PluginContext,
     FieldDependency,
@@ -47,7 +44,6 @@ class GlueTechnicalAssetConfiguration(TechnicalAssetPlugin):
         icon_name="glue-logo.svg",
         icon_package="portal_plugins.glue",
         platform_key="glue",
-        parent_platform="aws",
         result_label="Resulting table",
         result_tooltip="The table you can access through this technical asset",
         detailed_name="Database",
@@ -79,15 +75,11 @@ class GlueTechnicalAssetConfiguration(TechnicalAssetPlugin):
         )
 
     def get_configuration(
-        self, configs: list[AWSGlueConfig]
-    ) -> Optional[AWSGlueConfig]:
+        self, configs: list[GlueDatabaseSettings]
+    ) -> Optional[GlueDatabaseSettings]:
         return next(
             (config for config in configs if config.identifier == self.database), None
         )
-
-    # Every AWS plugin shares the AWS tile on the data product page, so they all
-    # use the same get_url. The portal refuses a parent tile whose children differ.
-    get_url = classmethod(get_aws_plugin_url)
 
     @classmethod
     def get_ui_metadata(cls, db: Session) -> list[UIElementMetadata]:
@@ -141,10 +133,6 @@ class GlueTechnicalAssetConfiguration(TechnicalAssetPlugin):
             ),
         ]
         return base_metadata
-
-    @classmethod
-    def get_parent_platform(cls) -> Optional[str]:
-        return "aws"
 
     @classmethod
     def register_mcp_tools(cls, mcp: object) -> None:

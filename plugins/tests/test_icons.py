@@ -7,11 +7,8 @@ PLUGINS = plugin_registry.discovered()
 
 def test_discovered__finds_every_first_party_plugin():
     assert {plugin.name for plugin in PLUGINS} == {
-        "AgnoPlugin",
         "AzureBlobTechnicalAssetConfiguration",
-        "ConveyorPlugin",
         "DatabricksTechnicalAssetConfiguration",
-        "GitHubPlugin",
         "GlueTechnicalAssetConfiguration",
         "OSISemanticModelTechnicalAssetConfiguration",
         "ParameterStoreTechnicalAssetConfiguration",

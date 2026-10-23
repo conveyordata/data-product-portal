@@ -18,17 +18,15 @@ from portal_plugins.glue.schema import (
 )
 from sqlalchemy.orm import Session
 
-from app.configuration.environments.platform_service_configurations.schema_response import (
-    EnvironmentConfigsGetItem,
-)
-from app.configuration.environments.platform_service_configurations.schemas import (
-    AWSGlueConfig,
-)
+from portal_plugins.settings import AWSSettings
 from app.configuration.environments.service import EnvironmentService
 from app.core.auth.credentials import AWSCredentials
 from app.core.auth.service import AuthService
 from app.data_products.technical_assets.model import ensure_technical_asset_exists
-from app.data_products.technical_assets.schema_response import compute_technical_info
+from app.data_products.technical_assets.schema_response import (
+    PlatformSettingsForEnvironment,
+    compute_technical_info,
+)
 from app.data_products.technical_assets.service import TechnicalAssetService
 from app.mcp.deps import (
     authorize_data_product_read_integrations,
@@ -157,30 +155,29 @@ def register_tools(mcp: FastMCP) -> None:
         config_schema = GlueTechnicalAssetConfiguration.model_validate(
             configuration, from_attributes=True
         )
-        env_configs = [
-            EnvironmentConfigsGetItem.model_validate(e)
-            for e in technical_asset.environment_configurations
+        platform_settings = [
+            PlatformSettingsForEnvironment.model_validate(e)
+            for e in technical_asset.platform_settings
         ]
-        for env_config in env_configs:
-            if env_config.environment.name.lower() != environment.lower():
+        for env_settings in platform_settings:
+            if env_settings.environment.name.lower() != environment.lower():
                 continue
             tech_infos = compute_technical_info(
-                config_schema, technical_asset.service, [env_config], plugin_context
+                config_schema, [env_settings], plugin_context
             )
             if not tech_infos or not tech_infos[0].info:
                 return {
                     "error": f"No Glue info rendered for environment '{environment}'"
                 }
             database = tech_infos[0].info.split(".")[0]
-            glue_config = config_schema.get_configuration(env_config.config)
+            glue_configs = AWSSettings.model_validate(env_settings.settings).glue
+            glue_config = config_schema.get_configuration(glue_configs)
 
             # athena_workgroup_template is a service-level setting — the same value
             # appears on every entry. Fall back to the first available Glue config
             # if there is no entry whose identifier matches the technical asset's
             # database field (e.g. demo / sample data scenarios).
-            any_glue_config = glue_config or next(
-                (c for c in env_config.config if isinstance(c, AWSGlueConfig)), None
-            )
+            any_glue_config = glue_config or next(iter(glue_configs), None)
             workgroup_template = (
                 any_glue_config.athena_workgroup_template if any_glue_config else ""
             )
@@ -190,7 +187,7 @@ def register_tools(mcp: FastMCP) -> None:
                     plugin_context=plugin_context,
                     data_product_namespace=workgroup_namespace,
                     environment=environment,
-                    environment_acronym=env_config.environment.acronym,
+                    environment_acronym=env_settings.environment.acronym,
                 )
                 if workgroup_template
                 else ""

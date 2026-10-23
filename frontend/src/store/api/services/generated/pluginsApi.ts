@@ -118,19 +118,15 @@ export type UiElementMetadata = {
   use_namespace_when_not_source_aligned?: boolean | null;
 };
 export type UiElementMetadataResponse = {
-  not_configured?: boolean;
   ui_metadata: UiElementMetadata[];
   plugin: string;
-  has_environments: boolean;
   result_label?: string;
   result_tooltip?: string;
   platform: string;
   display_name: string;
   icon_name: string;
   icon_data_uri?: string | null;
-  parent_platform?: string | null;
   platform_tile?: PlatformTile | null;
-  show_in_form?: boolean;
   shareable?: boolean;
   detailed_name: string;
 };
@@ -144,8 +140,6 @@ export type RenderTechnicalAssetAccessPathResponse = {
   technical_asset_access_path: string;
 };
 export type RenderTechnicalAssetAccessPathRequest = {
-  platform_id: string;
-  service_id: string;
   data_product_id: string;
   namespace: string;
   technical_mapping: TechnicalMapping;

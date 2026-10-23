@@ -9,7 +9,7 @@ from httpx import Response
 from app.authorization.roles.model import Role
 from app.authorization.roles.schema import Scope
 from app.core.authz import Action
-from app.data_products.model import DataProduct, DataProductEnvironment
+from app.data_products.model import DataProduct
 from app.settings import settings
 from tests.app.data_products.output_port_technical_assets_link.test_router import (
     TECHNICAL_ASSETS_OUTPUT_PORTS_ENDPOINT,
@@ -19,11 +19,7 @@ from tests.factories import (
     DataProductFactory,
     DataProductRoleAssignmentFactory,
     DatasetRoleAssignmentFactory,
-    DomainFactory,
-    EnvironmentFactory,
-    EnvPlatformServiceConfigFactory,
     OutputPortFactory,
-    PlatformServiceFactory,
     RoleFactory,
     TagFactory,
     TechnicalAssetFactory,
@@ -38,7 +34,6 @@ ENDPOINT = "/api/v2/data_products/{}/technical_assets"
 def technical_asset_payload():
     user = UserFactory(external_id=settings.DEFAULT_USERNAME)
     data_product = DataProductFactory()
-    service = PlatformServiceFactory()
     tag = TagFactory()
 
     return {
@@ -51,8 +46,6 @@ def technical_asset_payload():
             "name": "FakeTechnicalAssetConfiguration",
         },
         "owner_id": str(data_product.id),
-        "platform_id": str(service.platform.id),
-        "service_id": str(service.id),
         "status": "pending",
         "tag_ids": [str(tag.id)],
         "user_id": str(user.id),
@@ -84,40 +77,6 @@ class TestTechnicalAssetsRouter:
         )
         assert created_technical_asset.status_code == 200, created_technical_asset.text
         assert "id" in created_technical_asset.json()
-
-    def test_create_technical_asset__with_platform_and_service_omitted(
-        self, technical_asset_payload, data_product_role_assignment, client
-    ):
-        technical_asset_payload.pop("platform_id")
-        technical_asset_payload.pop("service_id")
-
-        created_technical_asset = self.create_technical_asset(
-            client, technical_asset_payload
-        )
-        assert created_technical_asset.status_code == 200, created_technical_asset.text
-
-        technical_asset = self.get_technical_asset(
-            client,
-            technical_asset_payload["owner_id"],
-            created_technical_asset.json()["id"],
-        )
-        assert technical_asset.status_code == 200, technical_asset.text
-        body = technical_asset.json()
-        assert body["platform_id"] is None
-        assert body["service_id"] is None
-        assert body["result_string"] == ""
-        assert body["technical_info"] == []
-
-    def test_create_technical_asset__rejects_only_one_of_platform_id_or_service_id(
-        self, technical_asset_payload, data_product_role_assignment, client
-    ):
-        technical_asset_payload["service_id"] = None
-
-        created_technical_asset = self.create_technical_asset(
-            client, technical_asset_payload
-        )
-
-        assert created_technical_asset.status_code == 422, created_technical_asset.text
 
     def test_create_technical_asset__with_access_modes(
         self, technical_asset_payload, data_product_role_assignment, client
@@ -243,136 +202,6 @@ class TestTechnicalAssetsRouter:
         )
         assert response.status_code == 200
         assert response.json()["id"] == str(technical_asset.id)
-
-    def test_get_technical_asset__environment_info_uses_saved_data_product_list(
-        self, client: TestClient
-    ):
-        dev_env = EnvironmentFactory(name="dev", acronym="dev")
-        prd_env = EnvironmentFactory(name="prd", acronym="prd")
-        data_product = DataProductFactory(
-            id=uuid.uuid4(),
-            environments=[
-                DataProductEnvironment(environment=dev_env),
-                DataProductEnvironment(environment=prd_env),
-            ],
-        )
-        technical_asset = TechnicalAssetFactory(owner=data_product)
-        EnvPlatformServiceConfigFactory(
-            platform=technical_asset.platform,
-            service=technical_asset.service,
-            environment=dev_env,
-        )
-        EnvPlatformServiceConfigFactory(
-            platform=technical_asset.platform,
-            service=technical_asset.service,
-            environment=prd_env,
-        )
-
-        response = self.get_technical_asset(
-            client, technical_asset.owner.id, technical_asset.id
-        )
-        assert response.status_code == 200
-        environment_ids = {
-            info["environment_id"] for info in response.json()["technical_info"]
-        }
-        assert environment_ids == {str(dev_env.id), str(prd_env.id)}
-        assert {
-            item["environment_id"] for item in response.json()["environments"]
-        } == environment_ids
-
-    def test_get_technical_asset__environment_info_excludes_undeclared_environments(
-        self, client: TestClient
-    ):
-        dev_env = EnvironmentFactory(name="dev", acronym="dev", is_global=True)
-        sandbox_env = EnvironmentFactory(
-            name="sandbox", acronym="sandbox", is_global=False
-        )
-        data_product = DataProductFactory(
-            environments=[DataProductEnvironment(environment=dev_env)]
-        )
-        technical_asset = TechnicalAssetFactory(owner=data_product)
-        EnvPlatformServiceConfigFactory(
-            platform=technical_asset.platform,
-            service=technical_asset.service,
-            environment=dev_env,
-        )
-        EnvPlatformServiceConfigFactory(
-            platform=technical_asset.platform,
-            service=technical_asset.service,
-            environment=sandbox_env,
-        )
-
-        response = self.get_technical_asset(
-            client, technical_asset.owner.id, technical_asset.id
-        )
-        assert response.status_code == 200
-        environment_ids = {
-            info["environment_id"] for info in response.json()["technical_info"]
-        }
-        assert environment_ids == {str(dev_env.id)}
-
-    def test_get_technical_asset__environment_info_uses_data_product_scope(
-        self, client: TestClient
-    ):
-        dev_env = EnvironmentFactory(name="dev", acronym="dev")
-        prd_env = EnvironmentFactory(name="prd", acronym="prd")
-        domain = DomainFactory()
-        data_product = DataProductFactory(
-            domain=domain, environments=[DataProductEnvironment(environment=dev_env)]
-        )
-        technical_asset = TechnicalAssetFactory(owner=data_product)
-        EnvPlatformServiceConfigFactory(
-            platform=technical_asset.platform,
-            service=technical_asset.service,
-            environment=dev_env,
-        )
-        EnvPlatformServiceConfigFactory(
-            platform=technical_asset.platform,
-            service=technical_asset.service,
-            environment=prd_env,
-        )
-
-        response = self.get_technical_asset(
-            client, technical_asset.owner.id, technical_asset.id
-        )
-        assert response.status_code == 200
-        environment_ids = {
-            info["environment_id"] for info in response.json()["technical_info"]
-        }
-        assert environment_ids == {str(dev_env.id)}
-
-    def test_get_technical_asset__data_product_can_include_non_global_environment(
-        self, client: TestClient
-    ):
-        sandbox_env = EnvironmentFactory(
-            name="sandbox", acronym="sandbox", is_global=False
-        )
-        prd_env = EnvironmentFactory(name="prd", acronym="prd", is_global=True)
-        domain = DomainFactory()
-        data_product = DataProductFactory(
-            domain=domain,
-            environments=[DataProductEnvironment(environment=sandbox_env)],
-        )
-        technical_asset = TechnicalAssetFactory(owner=data_product)
-        EnvPlatformServiceConfigFactory(
-            platform=technical_asset.platform,
-            service=technical_asset.service,
-            environment=sandbox_env,
-        )
-        EnvPlatformServiceConfigFactory(
-            platform=technical_asset.platform,
-            service=technical_asset.service,
-            environment=prd_env,
-        )
-
-        response = self.get_technical_asset(
-            client, technical_asset.owner.id, technical_asset.id
-        )
-        assert response.status_code == 200
-        environment_ids = {
-            info["environment_id"] for info in response.json()["technical_info"]
-        }
-        assert environment_ids == {str(sandbox_env.id)}
 
     def test_get_technical_asset_by_id_not_found(self, client: TestClient):
         technical_asset = TechnicalAssetFactory()
@@ -897,7 +726,6 @@ class TestTechnicalAssetsRouter:
 
 @pytest.fixture
 def ta_event_payload():
-    service = PlatformServiceFactory()
     tag = TagFactory()
     return {
         "name": "Test Asset",
@@ -908,8 +736,6 @@ def ta_event_payload():
             "path": "test",
             "name": "FakeTechnicalAssetConfiguration",
         },
-        "platform_id": str(service.platform.id),
-        "service_id": str(service.id),
         "tag_ids": [str(tag.id)],
     }
 

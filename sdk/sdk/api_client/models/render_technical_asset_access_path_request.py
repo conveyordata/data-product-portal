@@ -22,8 +22,6 @@ T = TypeVar("T", bound="RenderTechnicalAssetAccessPathRequest")
 class RenderTechnicalAssetAccessPathRequest:
     """
     Attributes:
-        platform_id (UUID):
-        service_id (UUID):
         data_product_id (UUID):
         namespace (str):
         technical_mapping (TechnicalMapping):
@@ -31,8 +29,6 @@ class RenderTechnicalAssetAccessPathRequest:
             available fields depend on `name`; retrieve them from /v2/plugins/{name}/form.
     """
 
-    platform_id: UUID
-    service_id: UUID
     data_product_id: UUID
     namespace: str
     technical_mapping: TechnicalMapping
@@ -40,10 +36,6 @@ class RenderTechnicalAssetAccessPathRequest:
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        platform_id = str(self.platform_id)
-
-        service_id = str(self.service_id)
-
         data_product_id = str(self.data_product_id)
 
         namespace = self.namespace
@@ -56,8 +48,6 @@ class RenderTechnicalAssetAccessPathRequest:
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
-                "platform_id": platform_id,
-                "service_id": service_id,
                 "data_product_id": data_product_id,
                 "namespace": namespace,
                 "technical_mapping": technical_mapping,
@@ -74,10 +64,6 @@ class RenderTechnicalAssetAccessPathRequest:
         )
 
         d = dict(src_dict)
-        platform_id = UUID(d.pop("platform_id"))
-
-        service_id = UUID(d.pop("service_id"))
-
         data_product_id = UUID(d.pop("data_product_id"))
 
         namespace = d.pop("namespace")
@@ -89,8 +75,6 @@ class RenderTechnicalAssetAccessPathRequest:
         )
 
         render_technical_asset_access_path_request = cls(
-            platform_id=platform_id,
-            service_id=service_id,
             data_product_id=data_product_id,
             namespace=namespace,
             technical_mapping=technical_mapping,

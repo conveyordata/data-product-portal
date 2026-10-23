@@ -9,11 +9,7 @@ from alembic.runtime.migration import MigrationContext
 from alembic.script import ScriptDirectory
 from sqlalchemy import Column, Engine, MetaData, String, Table, select
 from sqlalchemy import inspect as sa_inspect
-from sqlalchemy.orm import Session
 
-from app.configuration.platforms.platform_services.service import (
-    PlatformServiceService,
-)
 from app.core.logging import logger
 from app.technical_asset_configuration.base_schema import TechnicalAssetPlugin
 
@@ -127,8 +123,7 @@ def _core_head(plugins: Sequence[type[TechnicalAssetPlugin]], url: str) -> str:
 
 
 def migrate_all(plugins: Sequence[type[TechnicalAssetPlugin]], engine: Engine) -> None:
-    """Upgrade core and every plugin's own table to the latest revision, then
-    add the platform services the plugins declare.
+    """Upgrade core and every plugin's own table to the latest revision.
 
     Core and each plugin are independent Alembic branches sharing one
     version_locations config and one version table: core's history has no
@@ -169,8 +164,6 @@ def migrate_all(plugins: Sequence[type[TechnicalAssetPlugin]], engine: Engine) -
 
     before = set(_current_heads(engine))
     command.upgrade(config, "heads")
-    with Session(engine) as session, session.begin():
-        PlatformServiceService(session).ensure_for_plugins(plugins)
 
     for plugin in plugins_owning_tables:
         versions_dir = _owned_versions_dir(plugin)

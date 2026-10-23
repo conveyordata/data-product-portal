@@ -5,7 +5,6 @@ from app.data_products.technical_assets.status import TechnicalAssetStatus
 from tests import test_session
 from tests.factories import (
     DataProductFactory,
-    PlatformServiceFactory,
     TagFactory,
 )
 from tests.factories.technical_asset_configuration import (
@@ -22,12 +21,6 @@ class TechnicalAssetFactory(factory.alchemy.SQLAlchemyModelFactory):
     namespace = factory.Faker("word")
     description = factory.Faker("text", max_nb_chars=20)
     status = TechnicalAssetStatus.ACTIVE.value
-
-    service = factory.SubFactory(PlatformServiceFactory)
-
-    @factory.post_generation
-    def platform_id(self, create, extracted, **kwargs):
-        self.platform_id = self.service.platform_id
 
     owner = factory.SubFactory(DataProductFactory)
 

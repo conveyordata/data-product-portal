@@ -312,12 +312,6 @@ type Invoker interface {
 	//
 	// GET /api/v2/configuration/access_durations
 	GetAllAccessDurations(ctx context.Context) (GetAllAccessDurationsRes, error)
-	// GetAllPlatformServiceConfigurations invokes get_all_platform_service_configurations operation.
-	//
-	// Get All Platform Service Configurations.
-	//
-	// GET /api/v2/configuration/platforms/configs
-	GetAllPlatformServiceConfigurations(ctx context.Context) (GetAllPlatformServiceConfigurationsRes, error)
 	// GetAllPlatforms invokes get_all_platforms operation.
 	//
 	// Get All Platforms.
@@ -558,18 +552,12 @@ type Invoker interface {
 	//
 	// GET /api/v2/data_products/{data_product_id}/output_ports/{id}/history
 	GetOutputPortsEventHistory(ctx context.Context, params GetOutputPortsEventHistoryParams) (GetOutputPortsEventHistoryRes, error)
-	// GetPlatformServiceConfig invokes get_platform_service_config operation.
+	// GetPlatformEnvironmentSettings invokes get_platform_environment_settings operation.
 	//
-	// Get Platform Service config.
+	// Get Platform Environment Settings.
 	//
-	// GET /api/v2/configuration/platforms/{id}/services/{service_id}
-	GetPlatformServiceConfig(ctx context.Context, params GetPlatformServiceConfigParams) (GetPlatformServiceConfigRes, error)
-	// GetPlatformServices invokes get_platform_services operation.
-	//
-	// Get Platform Services.
-	//
-	// GET /api/v2/configuration/platforms/{id}/services
-	GetPlatformServices(ctx context.Context, params GetPlatformServicesParams) (GetPlatformServicesRes, error)
+	// GET /api/v2/configuration/platforms/{platform_key}/environments/{environment_id}/settings
+	GetPlatformEnvironmentSettings(ctx context.Context, params GetPlatformEnvironmentSettingsParams) (GetPlatformEnvironmentSettingsRes, error)
 	// GetPlatformTiles invokes get_platform_tiles operation.
 	//
 	// Get Platform Tiles.
@@ -600,12 +588,6 @@ type Invoker interface {
 	//
 	// GET /api/v2/authz/roles/{scope}
 	GetRoles(ctx context.Context, params GetRolesParams) (GetRolesRes, error)
-	// GetSinglePlatformServiceConfiguration invokes get_single_platform_service_configuration operation.
-	//
-	// Get Single Platform Service Configuration.
-	//
-	// GET /api/v2/configuration/platforms/configs/{config_id}
-	GetSinglePlatformServiceConfiguration(ctx context.Context, params GetSinglePlatformServiceConfigurationParams) (GetSinglePlatformServiceConfigurationRes, error)
 	// GetTags invokes get_tags operation.
 	//
 	// Get Tags.
@@ -1113,6 +1095,12 @@ type Invoker interface {
 	//
 	// PUT /api/v2/data_products/{data_product_id}/output_ports/{id}/status
 	UpdateOutputPortStatus(ctx context.Context, request *OutputPortStatusUpdate, params UpdateOutputPortStatusParams) (UpdateOutputPortStatusRes, error)
+	// UpdatePlatformEnvironmentSettings invokes update_platform_environment_settings operation.
+	//
+	// Update Platform Environment Settings.
+	//
+	// PUT /api/v2/configuration/platforms/{platform_key}/environments/{environment_id}/settings
+	UpdatePlatformEnvironmentSettings(ctx context.Context, request UpdatePlatformEnvironmentSettingsReq, params UpdatePlatformEnvironmentSettingsParams) (UpdatePlatformEnvironmentSettingsRes, error)
 	// UpdateRole invokes update_role operation.
 	//
 	// Update Role.
@@ -4034,49 +4022,6 @@ func (c *Client) sendGetAllAccessDurations(ctx context.Context) (res GetAllAcces
 	return result, nil
 }
 
-// GetAllPlatformServiceConfigurations invokes get_all_platform_service_configurations operation.
-//
-// Get All Platform Service Configurations.
-//
-// GET /api/v2/configuration/platforms/configs
-func (c *Client) GetAllPlatformServiceConfigurations(ctx context.Context) (GetAllPlatformServiceConfigurationsRes, error) {
-	res, err := c.sendGetAllPlatformServiceConfigurations(ctx)
-	return res, err
-}
-
-func (c *Client) sendGetAllPlatformServiceConfigurations(ctx context.Context) (res GetAllPlatformServiceConfigurationsRes, err error) {
-
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [1]string
-	pathParts[0] = "/api/v2/configuration/platforms/configs"
-	uri.AddPathParts(u, pathParts[:]...)
-
-	r, err := ht.NewRequest(ctx, "GET", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	body := resp.Body
-	defer func() {
-		// Drain the body to EOF before closing, so the underlying
-		// connection can be reused by the Transport regardless of the
-		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
-		_, _ = io.Copy(io.Discard, body)
-		_ = body.Close()
-	}()
-
-	result, err := decodeGetAllPlatformServiceConfigurationsResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
 // GetAllPlatforms invokes get_all_platforms operation.
 //
 // Get All Platforms.
@@ -6645,30 +6590,30 @@ func (c *Client) sendGetOutputPortsEventHistory(ctx context.Context, params GetO
 	return result, nil
 }
 
-// GetPlatformServiceConfig invokes get_platform_service_config operation.
+// GetPlatformEnvironmentSettings invokes get_platform_environment_settings operation.
 //
-// Get Platform Service config.
+// Get Platform Environment Settings.
 //
-// GET /api/v2/configuration/platforms/{id}/services/{service_id}
-func (c *Client) GetPlatformServiceConfig(ctx context.Context, params GetPlatformServiceConfigParams) (GetPlatformServiceConfigRes, error) {
-	res, err := c.sendGetPlatformServiceConfig(ctx, params)
+// GET /api/v2/configuration/platforms/{platform_key}/environments/{environment_id}/settings
+func (c *Client) GetPlatformEnvironmentSettings(ctx context.Context, params GetPlatformEnvironmentSettingsParams) (GetPlatformEnvironmentSettingsRes, error) {
+	res, err := c.sendGetPlatformEnvironmentSettings(ctx, params)
 	return res, err
 }
 
-func (c *Client) sendGetPlatformServiceConfig(ctx context.Context, params GetPlatformServiceConfigParams) (res GetPlatformServiceConfigRes, err error) {
+func (c *Client) sendGetPlatformEnvironmentSettings(ctx context.Context, params GetPlatformEnvironmentSettingsParams) (res GetPlatformEnvironmentSettingsRes, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [4]string
+	var pathParts [5]string
 	pathParts[0] = "/api/v2/configuration/platforms/"
 	{
-		// Encode "id" parameter.
+		// Encode "platform_key" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "id",
+			Param:   "platform_key",
 			Style:   uri.PathStyleSimple,
 			Explode: false,
 		})
 		if err := func() error {
-			return e.EncodeValue(conv.UUIDToString(params.ID))
+			return e.EncodeValue(conv.StringToString(params.PlatformKey))
 		}(); err != nil {
 			return res, errors.Wrap(err, "encode path")
 		}
@@ -6678,16 +6623,16 @@ func (c *Client) sendGetPlatformServiceConfig(ctx context.Context, params GetPla
 		}
 		pathParts[1] = encoded
 	}
-	pathParts[2] = "/services/"
+	pathParts[2] = "/environments/"
 	{
-		// Encode "service_id" parameter.
+		// Encode "environment_id" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "service_id",
+			Param:   "environment_id",
 			Style:   uri.PathStyleSimple,
 			Explode: false,
 		})
 		if err := func() error {
-			return e.EncodeValue(conv.UUIDToString(params.ServiceID))
+			return e.EncodeValue(conv.UUIDToString(params.EnvironmentID))
 		}(); err != nil {
 			return res, errors.Wrap(err, "encode path")
 		}
@@ -6697,6 +6642,7 @@ func (c *Client) sendGetPlatformServiceConfig(ctx context.Context, params GetPla
 		}
 		pathParts[3] = encoded
 	}
+	pathParts[4] = "/settings"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	r, err := ht.NewRequest(ctx, "GET", u)
@@ -6717,69 +6663,7 @@ func (c *Client) sendGetPlatformServiceConfig(ctx context.Context, params GetPla
 		_ = body.Close()
 	}()
 
-	result, err := decodeGetPlatformServiceConfigResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
-// GetPlatformServices invokes get_platform_services operation.
-//
-// Get Platform Services.
-//
-// GET /api/v2/configuration/platforms/{id}/services
-func (c *Client) GetPlatformServices(ctx context.Context, params GetPlatformServicesParams) (GetPlatformServicesRes, error) {
-	res, err := c.sendGetPlatformServices(ctx, params)
-	return res, err
-}
-
-func (c *Client) sendGetPlatformServices(ctx context.Context, params GetPlatformServicesParams) (res GetPlatformServicesRes, err error) {
-
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [3]string
-	pathParts[0] = "/api/v2/configuration/platforms/"
-	{
-		// Encode "id" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "id",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			return e.EncodeValue(conv.UUIDToString(params.ID))
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		encoded, err := e.Result()
-		if err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		pathParts[1] = encoded
-	}
-	pathParts[2] = "/services"
-	uri.AddPathParts(u, pathParts[:]...)
-
-	r, err := ht.NewRequest(ctx, "GET", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	body := resp.Body
-	defer func() {
-		// Drain the body to EOF before closing, so the underlying
-		// connection can be reused by the Transport regardless of the
-		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
-		_, _ = io.Copy(io.Discard, body)
-		_ = body.Close()
-	}()
-
-	result, err := decodeGetPlatformServicesResponse(resp)
+	result, err := decodeGetPlatformEnvironmentSettingsResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -7085,67 +6969,6 @@ func (c *Client) sendGetRoles(ctx context.Context, params GetRolesParams) (res G
 	}()
 
 	result, err := decodeGetRolesResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
-// GetSinglePlatformServiceConfiguration invokes get_single_platform_service_configuration operation.
-//
-// Get Single Platform Service Configuration.
-//
-// GET /api/v2/configuration/platforms/configs/{config_id}
-func (c *Client) GetSinglePlatformServiceConfiguration(ctx context.Context, params GetSinglePlatformServiceConfigurationParams) (GetSinglePlatformServiceConfigurationRes, error) {
-	res, err := c.sendGetSinglePlatformServiceConfiguration(ctx, params)
-	return res, err
-}
-
-func (c *Client) sendGetSinglePlatformServiceConfiguration(ctx context.Context, params GetSinglePlatformServiceConfigurationParams) (res GetSinglePlatformServiceConfigurationRes, err error) {
-
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [2]string
-	pathParts[0] = "/api/v2/configuration/platforms/configs/"
-	{
-		// Encode "config_id" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "config_id",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			return e.EncodeValue(conv.UUIDToString(params.ConfigID))
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		encoded, err := e.Result()
-		if err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		pathParts[1] = encoded
-	}
-	uri.AddPathParts(u, pathParts[:]...)
-
-	r, err := ht.NewRequest(ctx, "GET", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	body := resp.Body
-	defer func() {
-		// Drain the body to EOF before closing, so the underlying
-		// connection can be reused by the Transport regardless of the
-		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
-		_, _ = io.Copy(io.Discard, body)
-		_ = body.Close()
-	}()
-
-	result, err := decodeGetSinglePlatformServiceConfigurationResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -12948,6 +12771,90 @@ func (c *Client) sendUpdateOutputPortStatus(ctx context.Context, request *Output
 	}()
 
 	result, err := decodeUpdateOutputPortStatusResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// UpdatePlatformEnvironmentSettings invokes update_platform_environment_settings operation.
+//
+// Update Platform Environment Settings.
+//
+// PUT /api/v2/configuration/platforms/{platform_key}/environments/{environment_id}/settings
+func (c *Client) UpdatePlatformEnvironmentSettings(ctx context.Context, request UpdatePlatformEnvironmentSettingsReq, params UpdatePlatformEnvironmentSettingsParams) (UpdatePlatformEnvironmentSettingsRes, error) {
+	res, err := c.sendUpdatePlatformEnvironmentSettings(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendUpdatePlatformEnvironmentSettings(ctx context.Context, request UpdatePlatformEnvironmentSettingsReq, params UpdatePlatformEnvironmentSettingsParams) (res UpdatePlatformEnvironmentSettingsRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/api/v2/configuration/platforms/"
+	{
+		// Encode "platform_key" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "platform_key",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.PlatformKey))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/environments/"
+	{
+		// Encode "environment_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "environment_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.EnvironmentID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/settings"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "PUT", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeUpdatePlatformEnvironmentSettingsRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeUpdatePlatformEnvironmentSettingsResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

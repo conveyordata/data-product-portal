@@ -100,12 +100,10 @@ export default function AccessModesModal({ editAccessMode, onClose }: Props) {
                     <Select
                         loading={isFetchingPlugins}
                         onChange={() => form.setFields([{ name: 'technical_asset_types', errors: [] }])}
-                        options={plugins
-                            .filter((plugin) => plugin.show_in_form)
-                            .map((plugin) => ({
-                                label: t(plugin.display_name),
-                                value: plugin.plugin,
-                            }))}
+                        options={plugins.map((plugin) => ({
+                            label: t(plugin.display_name),
+                            value: plugin.plugin,
+                        }))}
                         mode="multiple"
                     />
                 </Form.Item>

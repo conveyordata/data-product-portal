@@ -41,7 +41,7 @@ class AccessModeService:
 
     def create_access_mode(self, access_mode: AccessModeCreate) -> "AccessMode":
         plugins = self.plugin_service.get_all_technical_assets_ui_metadata()
-        plugin_names = [plugin.plugin for plugin in plugins if plugin.show_in_form]
+        plugin_names = [plugin.plugin for plugin in plugins]
         for technical_asset_type in access_mode.technical_asset_types:
             if technical_asset_type not in plugin_names:
                 raise HTTPException(

@@ -29,8 +29,6 @@ class CreateTechnicalAssetRequest:
         configuration (CreateTechnicalAssetRequestConfiguration): Configuration of the technical asset. The available
             fields depend on `name`; retrieve them from /v2/plugins/{name}/form.
         tag_ids (list[UUID]):
-        platform_id (None | Unset | UUID):
-        service_id (None | Unset | UUID):
         source_aligned (bool | None | Unset): DEPRECATED: Use 'technical_mapping' instead. This field will be removed in
             a future version.
         technical_mapping (None | TechnicalMapping | Unset):
@@ -42,8 +40,6 @@ class CreateTechnicalAssetRequest:
     namespace: str
     configuration: CreateTechnicalAssetRequestConfiguration
     tag_ids: list[UUID]
-    platform_id: None | Unset | UUID = UNSET
-    service_id: None | Unset | UUID = UNSET
     source_aligned: bool | None | Unset = UNSET
     technical_mapping: None | TechnicalMapping | Unset = UNSET
     access_mode_ids: list[UUID] | Unset = UNSET
@@ -62,22 +58,6 @@ class CreateTechnicalAssetRequest:
         for tag_ids_item_data in self.tag_ids:
             tag_ids_item = str(tag_ids_item_data)
             tag_ids.append(tag_ids_item)
-
-        platform_id: None | str | Unset
-        if isinstance(self.platform_id, Unset):
-            platform_id = UNSET
-        elif isinstance(self.platform_id, UUID):
-            platform_id = str(self.platform_id)
-        else:
-            platform_id = self.platform_id
-
-        service_id: None | str | Unset
-        if isinstance(self.service_id, Unset):
-            service_id = UNSET
-        elif isinstance(self.service_id, UUID):
-            service_id = str(self.service_id)
-        else:
-            service_id = self.service_id
 
         source_aligned: bool | None | Unset
         if isinstance(self.source_aligned, Unset):
@@ -111,10 +91,6 @@ class CreateTechnicalAssetRequest:
                 "tag_ids": tag_ids,
             }
         )
-        if platform_id is not UNSET:
-            field_dict["platform_id"] = platform_id
-        if service_id is not UNSET:
-            field_dict["service_id"] = service_id
         if source_aligned is not UNSET:
             field_dict["sourceAligned"] = source_aligned
         if technical_mapping is not UNSET:
@@ -147,40 +123,6 @@ class CreateTechnicalAssetRequest:
             tag_ids_item = UUID(tag_ids_item_data)
 
             tag_ids.append(tag_ids_item)
-
-        def _parse_platform_id(data: object) -> None | Unset | UUID:
-            if data is None:
-                return data
-            if isinstance(data, Unset):
-                return data
-            try:
-                if not isinstance(data, str):
-                    raise TypeError()
-                platform_id_type_0 = UUID(data)
-
-                return platform_id_type_0
-            except (TypeError, ValueError, AttributeError, KeyError):
-                pass
-            return cast(None | Unset | UUID, data)
-
-        platform_id = _parse_platform_id(d.pop("platform_id", UNSET))
-
-        def _parse_service_id(data: object) -> None | Unset | UUID:
-            if data is None:
-                return data
-            if isinstance(data, Unset):
-                return data
-            try:
-                if not isinstance(data, str):
-                    raise TypeError()
-                service_id_type_0 = UUID(data)
-
-                return service_id_type_0
-            except (TypeError, ValueError, AttributeError, KeyError):
-                pass
-            return cast(None | Unset | UUID, data)
-
-        service_id = _parse_service_id(d.pop("service_id", UNSET))
 
         def _parse_source_aligned(data: object) -> bool | None | Unset:
             if data is None:
@@ -223,8 +165,6 @@ class CreateTechnicalAssetRequest:
             namespace=namespace,
             configuration=configuration,
             tag_ids=tag_ids,
-            platform_id=platform_id,
-            service_id=service_id,
             source_aligned=source_aligned,
             technical_mapping=technical_mapping,
             access_mode_ids=access_mode_ids,

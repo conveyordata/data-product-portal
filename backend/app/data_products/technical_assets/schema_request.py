@@ -1,4 +1,3 @@
-from typing import Optional
 from uuid import UUID
 from warnings import deprecated, warn
 
@@ -14,8 +13,6 @@ class CreateTechnicalAssetRequest(ORMModel):
     name: str
     description: str
     namespace: str
-    platform_id: Optional[UUID] = None
-    service_id: Optional[UUID] = None
     configuration: DataOutputConfiguration
     sourceAligned: bool | None = Field(
         default=None,
@@ -57,12 +54,6 @@ class CreateTechnicalAssetRequest(ORMModel):
         if self.technical_mapping is None:
             self.technical_mapping = TechnicalMapping.Default
 
-        return self
-
-    @model_validator(mode="after")
-    def validate_platform_and_service(self):
-        if (self.platform_id is None) != (self.service_id is None):
-            raise ValueError("platform_id and service_id must be set together")
         return self
 
 

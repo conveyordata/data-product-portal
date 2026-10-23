@@ -1,80 +1,77 @@
 import { api } from "@/store/api/services/generated/configurationEnvironmentsApi";
 const injectedRtkApi = api.injectEndpoints({
   endpoints: (build) => ({
-    getPlatformServiceConfig: build.query<
-      GetPlatformServiceConfigApiResponse,
-      GetPlatformServiceConfigApiArg
-    >({
-      query: (queryArg) => ({
-        url: `/api/v2/configuration/platforms/${queryArg.id}/services/${queryArg.serviceId}`,
-      }),
-    }),
-    getSinglePlatformServiceConfiguration: build.query<
-      GetSinglePlatformServiceConfigurationApiResponse,
-      GetSinglePlatformServiceConfigurationApiArg
-    >({
-      query: (queryArg) => ({
-        url: `/api/v2/configuration/platforms/configs/${queryArg}`,
-      }),
-    }),
-    getAllPlatformServiceConfigurations: build.query<
-      GetAllPlatformServiceConfigurationsApiResponse,
-      GetAllPlatformServiceConfigurationsApiArg
-    >({
-      query: () => ({ url: `/api/v2/configuration/platforms/configs` }),
-    }),
     getAllPlatforms: build.query<
       GetAllPlatformsApiResponse,
       GetAllPlatformsApiArg
     >({
       query: () => ({ url: `/api/v2/configuration/platforms` }),
     }),
-    getPlatformServices: build.query<
-      GetPlatformServicesApiResponse,
-      GetPlatformServicesApiArg
+    getPlatformEnvironmentSettings: build.query<
+      GetPlatformEnvironmentSettingsApiResponse,
+      GetPlatformEnvironmentSettingsApiArg
     >({
       query: (queryArg) => ({
-        url: `/api/v2/configuration/platforms/${queryArg}/services`,
+        url: `/api/v2/configuration/platforms/${queryArg.platformKey}/environments/${queryArg.environmentId}/settings`,
+      }),
+    }),
+    updatePlatformEnvironmentSettings: build.mutation<
+      UpdatePlatformEnvironmentSettingsApiResponse,
+      UpdatePlatformEnvironmentSettingsApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/configuration/platforms/${queryArg.platformKey}/environments/${queryArg.environmentId}/settings`,
+        method: "PUT",
+        body: queryArg.settings,
       }),
     }),
   }),
   overrideExisting: false,
 });
 export { injectedRtkApi as api };
-export type GetPlatformServiceConfigApiResponse =
-  /** status 200 Successful Response */ PlatformServiceConfiguration;
-export type GetPlatformServiceConfigApiArg = {
-  id: string;
-  serviceId: string;
-};
-export type GetSinglePlatformServiceConfigurationApiResponse =
-  /** status 200 Successful Response */ PlatformServiceConfiguration;
-export type GetSinglePlatformServiceConfigurationApiArg = string;
-export type GetAllPlatformServiceConfigurationsApiResponse =
-  /** status 200 Successful Response */ GetAllPlatformServiceConfigurationsResponse;
-export type GetAllPlatformServiceConfigurationsApiArg = void;
 export type GetAllPlatformsApiResponse =
   /** status 200 Successful Response */ GetAllPlatformsResponse;
 export type GetAllPlatformsApiArg = void;
-export type GetPlatformServicesApiResponse =
-  /** status 200 Successful Response */ GetPlatformServicesResponse;
-export type GetPlatformServicesApiArg = string;
+export type GetPlatformEnvironmentSettingsApiResponse =
+  /** status 200 Successful Response */ PlatformEnvironmentSettings;
+export type GetPlatformEnvironmentSettingsApiArg = {
+  platformKey: string;
+  environmentId: string;
+};
+export type UpdatePlatformEnvironmentSettingsApiResponse =
+  /** status 200 Successful Response */ PlatformEnvironmentSettings;
+export type UpdatePlatformEnvironmentSettingsApiArg = {
+  platformKey: string;
+  environmentId: string;
+  settings: {
+    [key: string]: any;
+  };
+};
+export type OverridableProperty = {
+  name: string;
+  label: string;
+  allowed_values: string[];
+  default: string;
+};
+export type PlatformType = {
+  kind: PlatformTypeKind;
+  name: string;
+  display_name: string;
+  overridable_properties?: OverridableProperty[];
+};
 export type Platform = {
-  id: string;
-  name: string;
+  key: string;
+  display_name: string;
+  icon_name: string;
+  icon_data_uri: string | null;
+  has_environments: boolean;
+  settings_schema: {
+    [key: string]: any;
+  };
+  types: PlatformType[];
 };
-export type PlatformService = {
-  id: string;
-  name: string;
-  platform: Platform;
-  result_string_template: string;
-  technical_info_template: string;
-};
-export type PlatformServiceConfiguration = {
-  id: string;
-  platform: Platform;
-  service: PlatformService;
-  config: string[];
+export type GetAllPlatformsResponse = {
+  platforms: Platform[];
 };
 export type ValidationError = {
   loc: (string | number)[];
@@ -86,24 +83,21 @@ export type ValidationError = {
 export type HttpValidationError = {
   detail?: ValidationError[];
 };
-export type GetAllPlatformServiceConfigurationsResponse = {
-  platform_service_configurations: PlatformServiceConfiguration[];
+export type PlatformEnvironmentSettings = {
+  platform_key: string;
+  environment_id: string;
+  settings: {
+    [key: string]: any;
+  };
 };
-export type GetAllPlatformsResponse = {
-  platforms: Platform[];
-};
-export type GetPlatformServicesResponse = {
-  platform_services: PlatformService[];
-};
+export enum PlatformTypeKind {
+  Asset = "asset",
+  Tool = "tool",
+}
 export const {
-  useGetPlatformServiceConfigQuery,
-  useLazyGetPlatformServiceConfigQuery,
-  useGetSinglePlatformServiceConfigurationQuery,
-  useLazyGetSinglePlatformServiceConfigurationQuery,
-  useGetAllPlatformServiceConfigurationsQuery,
-  useLazyGetAllPlatformServiceConfigurationsQuery,
   useGetAllPlatformsQuery,
   useLazyGetAllPlatformsQuery,
-  useGetPlatformServicesQuery,
-  useLazyGetPlatformServicesQuery,
+  useGetPlatformEnvironmentSettingsQuery,
+  useLazyGetPlatformEnvironmentSettingsQuery,
+  useUpdatePlatformEnvironmentSettingsMutation,
 } = injectedRtkApi;

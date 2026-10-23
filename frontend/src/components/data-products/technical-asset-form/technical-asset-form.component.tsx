@@ -7,7 +7,6 @@ import { ResourceNameFormItem } from '@/components/resource-name/resource-name-f
 import { TechnicalAssetPlatformTile } from '@/components/technical-assets/technical-asset-platform-tile/technical-asset-platform-tile.component';
 import { MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants';
 import { useGetAccessModesQuery } from '@/store/api/services/generated/configurationAccessModesApi.ts';
-import { useGetAllPlatformServiceConfigurationsQuery } from '@/store/api/services/generated/configurationPlatformsApi.ts';
 import { useGetTagsQuery } from '@/store/api/services/generated/configurationTagsApi.ts';
 import { useGetDataProductQuery } from '@/store/api/services/generated/dataProductsApi.ts';
 import {
@@ -45,12 +44,6 @@ type Props = {
     debounce?: number;
 };
 
-type ServiceConfig = {
-    platform_id: string;
-    service_id: string;
-    configuration: string[];
-};
-
 type AccessModeType = 'single' | 'multiple';
 
 export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallbackOnSubmit, debounce = 500 }: Props) {
@@ -61,8 +54,6 @@ export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallback
     const { data: { tags: availableTags = [] } = {}, isFetching: isFetchingTags } = useGetTagsQuery();
     const { data: { access_modes: accessModes = [] } = {}, isFetching: isFetchingAccessModes } =
         useGetAccessModesQuery();
-    const { data: { platform_service_configurations: platformConfig = [] } = {}, isLoading: platformsLoading } =
-        useGetAllPlatformServiceConfigurationsQuery();
 
     const [createTechnicalAsset, { isLoading: isCreating }] = useCreateTechnicalAssetMutation();
 
@@ -100,12 +91,7 @@ export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallback
     const [fetchResultString, { isLoading: isFetchingResultString }] = useRenderTechnicalAssetAccessPathMutation();
 
     const isLoading =
-        platformsLoading ||
-        isLoadingMetadata ||
-        isCreating ||
-        isFetchingInitialValues ||
-        isFetchingTags ||
-        isFetchingAccessModes;
+        isLoadingMetadata || isCreating || isFetchingInitialValues || isFetchingTags || isFetchingAccessModes;
 
     const tagSelectOptions = availableTags.map((tag) => ({ label: tag.value, value: tag.id }));
     const { data: { platform_tiles: platformTilesDataUnfiltered } = {} } = useGetPlatformTilesQuery();
@@ -130,27 +116,6 @@ export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallback
 
         return platformTilesData.map(transformTile);
     }, [platformTilesData, t]);
-
-    const platformServiceConfigMap = useMemo(() => {
-        const map = new Map<string, ServiceConfig>();
-
-        if (!platformConfig) {
-            return map;
-        }
-        for (const config of platformConfig) {
-            const platform = (
-                config.platform.name === config.service.name ? config.platform.name : config.service.name
-            ).toLocaleLowerCase();
-
-            map.set(platform, {
-                platform_id: config.platform.id,
-                service_id: config.service.id,
-                configuration: config.config,
-            });
-        }
-
-        return map;
-    }, [platformConfig]);
 
     const onSubmit: FormProps<CreateTechnicalAssetRequest>['onFinish'] = async (values) => {
         try {
@@ -177,7 +142,6 @@ export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallback
 
             if (dropdown.children?.length === 0) {
                 setSelectedConfiguration(dropdown);
-                form.setFieldValue('service_id', platformServiceConfigMap.get(dropdown.value)?.service_id);
             } else {
                 setSelectedConfiguration(undefined);
             }
@@ -185,11 +149,9 @@ export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallback
     };
 
     const onConfigurationClick = (dropdown: CustomDropdownItemProps<string>) => {
-        if (!platformsLoading) {
-            if (selectedConfiguration !== dropdown) {
-                form.setFieldsValue({ configuration: undefined, result: undefined });
-                setSelectedConfiguration(dropdown);
-            }
+        if (selectedConfiguration !== dropdown) {
+            form.setFieldsValue({ configuration: undefined, result: undefined });
+            setSelectedConfiguration(dropdown);
         }
     };
 
@@ -239,13 +201,11 @@ export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallback
                 form.setFieldValue('result', result);
             }
         };
-        if (!values.platform_id || !values.service_id) {
+        if (!values.configuration) {
             form.setFieldValue('result', undefined);
             return;
         }
         const request = {
-            platform_id: values.platform_id,
-            service_id: values.service_id,
             data_product_id: dataProductId,
             namespace: values.namespace ?? '',
             technical_mapping: values.technical_mapping ?? TechnicalMapping.Default,
@@ -344,7 +304,7 @@ export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallback
                 <Select allowClear={false} options={options} />
             </Form.Item>
 
-            <Form.Item name="platform_id">
+            <Form.Item>
                 <Radio.Group>
                     <Space wrap>
                         {dataPlatforms.map((dataPlatform) => (
@@ -354,18 +314,13 @@ export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallback
                                 isDisabled={isLoading || isFetchingResultString}
                                 isSelected={dataPlatform === selectedDataPlatform}
                                 onTileClick={onDataPlatformClick}
-                                value={
-                                    platformConfig?.find(
-                                        (config) =>
-                                            config.platform.name.toLowerCase() === dataPlatform.label.toLowerCase(),
-                                    )?.platform.id ?? dataPlatform.value
-                                }
+                                value={dataPlatform.value}
                             />
                         ))}
                     </Space>
                 </Radio.Group>
             </Form.Item>
-            <Form.Item name="service_id" hidden={selectedDataPlatform?.children?.length === 0}>
+            <Form.Item hidden={selectedDataPlatform?.children?.length === 0}>
                 <Radio.Group>
                     <Space wrap>
                         {selectedDataPlatform?.children?.map((dataPlatform) => (
@@ -375,9 +330,7 @@ export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallback
                                 isDisabled={isLoading || isFetchingResultString}
                                 isSelected={dataPlatform === selectedConfiguration}
                                 onTileClick={onConfigurationClick}
-                                value={
-                                    platformServiceConfigMap.get(dataPlatform.value)?.service_id ?? dataPlatform.value
-                                }
+                                value={dataPlatform.value}
                             />
                         ))}
                     </Space>

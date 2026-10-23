@@ -13,19 +13,16 @@ dependencies = [
     "fastmcp>=3.4.7",
 ]
 
-[project.entry-points."data_product_portal.plugins"]
-agno = "portal_plugins.agno.schema:AgnoPlugin"
-azure-blob = "portal_plugins.azure_blob.schema:AzureBlobTechnicalAssetConfiguration"
-conveyor = "portal_plugins.conveyor.schema:ConveyorPlugin"
-databricks = "portal_plugins.databricks.schema:DatabricksTechnicalAssetConfiguration"
-github = "portal_plugins.github.schema:GitHubPlugin"
-glue = "portal_plugins.glue.schema:GlueTechnicalAssetConfiguration"
-osi-semantic-model = "portal_plugins.osi_sem_model.schema:OSISemanticModelTechnicalAssetConfiguration"
-parameter-store = "portal_plugins.parameter_store.schema:ParameterStoreTechnicalAssetConfiguration"
-postgresql = "portal_plugins.postgresql.schema:PostgreSQLTechnicalAssetConfiguration"
-redshift = "portal_plugins.redshift.schema:RedshiftTechnicalAssetConfiguration"
-s3 = "portal_plugins.s3.schema:S3TechnicalAssetConfiguration"
-snowflake = "portal_plugins.snowflake.schema:SnowflakeTechnicalAssetConfiguration"
+[project.entry-points."data_product_portal.platforms"]
+agno = "portal_plugins.platforms:AgnoPlatform"
+aws = "portal_plugins.platforms:AWSPlatform"
+azure = "portal_plugins.platforms:AzurePlatform"
+conveyor = "portal_plugins.platforms:ConveyorPlatform"
+databricks = "portal_plugins.platforms:DatabricksPlatform"
+github = "portal_plugins.platforms:GitHubPlatform"
+osi = "portal_plugins.platforms:OSIPlatform"
+postgresql = "portal_plugins.platforms:PostgreSQLPlatform"
+snowflake = "portal_plugins.platforms:SnowflakePlatform"
 
 [tool.poetry]
 packages = [{ include = "portal_plugins", from = "." }]

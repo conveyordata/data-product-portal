@@ -2,10 +2,7 @@ from typing import ClassVar, Optional
 
 from sqlalchemy.orm import Session
 
-from app.configuration.environments.platform_service_configurations.schemas import (
-    AWSS3Config,
-)
-from app.core.aws.get_url import get_aws_plugin_url
+from portal_plugins.settings import S3BucketSettings
 from app.technical_asset_configuration.base_schema import (
     PlatformMetadata,
     TechnicalAssetPlugin,
@@ -37,7 +34,6 @@ class S3TechnicalAssetConfiguration(TechnicalAssetPlugin):
         icon_name="s3-logo.svg",
         icon_package="portal_plugins.s3",
         platform_key="s3",
-        parent_platform="aws",
         result_label="Resulting path",
         result_tooltip="The path you can access through this technical asset",
         detailed_name="Path",
@@ -45,10 +41,6 @@ class S3TechnicalAssetConfiguration(TechnicalAssetPlugin):
 
     class Meta:
         orm_model = S3TechnicalAssetConfigurationModel
-
-    # Every AWS plugin shares the AWS tile on the data product page, so they all
-    # use the same get_url. The portal refuses a parent tile whose children differ.
-    get_url = classmethod(get_aws_plugin_url)
 
     def render_template(self, template, **context):
         """
@@ -64,7 +56,9 @@ class S3TechnicalAssetConfiguration(TechnicalAssetPlugin):
             ]
         )
 
-    def get_configuration(self, configs: list[AWSS3Config]) -> Optional[AWSS3Config]:
+    def get_configuration(
+        self, configs: list[S3BucketSettings]
+    ) -> Optional[S3BucketSettings]:
         """
         Filter the configuration based on the bucket
         """

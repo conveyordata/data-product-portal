@@ -8,9 +8,6 @@ from cookiecutter.main import cookiecutter
 from sdk.api_client.api.configuration_data_product_lifecycles import (
     get_data_products_lifecycles,
 )
-from sdk.api_client.api.configuration_platforms import (
-    get_all_platform_service_configurations,
-)
 from sdk.api_client.api.data_products import (
     add_data_product_finalizer,
     get_data_product,
@@ -34,7 +31,6 @@ from sdk.api_client.models import (
     GetDataProductsResponse,
     GetTechnicalAssetsResponse,
     HTTPValidationError,
-    PlatformServiceConfiguration,
 )
 from sdk.plugins import (
     AccessGranularity,
@@ -84,17 +80,6 @@ class DataProductReconciler(sdk.Reconciler):
             raise Exception("Failed to fetch lifecycles")
 
         return result.data_product_life_cycles
-
-    async def _get_platform_service_configurations(
-        self,
-    ) -> list[PlatformServiceConfiguration]:
-        logging.info("Fetching platform service configurations from portal API")
-        result = await get_all_platform_service_configurations.asyncio(
-            client=self._client
-        )
-        if result is None or isinstance(result, HTTPValidationError):
-            raise Exception("Failed to fetch platform service configurations")
-        return result.platform_service_configurations
 
     @staticmethod
     def dbt_project_path(namespace: str) -> str:
@@ -245,13 +230,6 @@ class DataProductReconciler(sdk.Reconciler):
             )
             return
 
-        configs = await self._get_platform_service_configurations()
-        postgres_config = next(
-            (c for c in configs if c.service.name == "PostgreSQL"), None
-        )
-        if not postgres_config:
-            raise Exception("Configuration error: 'PostgreSQL' service not found.")
-
         configuration = PostgreSQLTechnicalAssetConfiguration(
             database=database,
             schema=schema_name,
@@ -265,8 +243,6 @@ class DataProductReconciler(sdk.Reconciler):
             description=data_product_details.description,
             tag_ids=[],
             technical_mapping=TechnicalMapping.CUSTOM,
-            platform_id=postgres_config.platform.id,
-            service_id=postgres_config.service.id,
             configuration=configuration,
         )
 

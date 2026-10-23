@@ -193,10 +193,6 @@ type GetAllAccessDurationsRes interface {
 	getAllAccessDurationsRes()
 }
 
-type GetAllPlatformServiceConfigurationsRes interface {
-	getAllPlatformServiceConfigurationsRes()
-}
-
 type GetAllPlatformsRes interface {
 	getAllPlatformsRes()
 }
@@ -353,12 +349,8 @@ type GetOutputPortsEventHistoryRes interface {
 	getOutputPortsEventHistoryRes()
 }
 
-type GetPlatformServiceConfigRes interface {
-	getPlatformServiceConfigRes()
-}
-
-type GetPlatformServicesRes interface {
-	getPlatformServicesRes()
+type GetPlatformEnvironmentSettingsRes interface {
+	getPlatformEnvironmentSettingsRes()
 }
 
 type GetPlatformTilesRes interface {
@@ -379,10 +371,6 @@ type GetPluginsRes interface {
 
 type GetRolesRes interface {
 	getRolesRes()
-}
-
-type GetSinglePlatformServiceConfigurationRes interface {
-	getSinglePlatformServiceConfigurationRes()
 }
 
 type GetTagsRes interface {
@@ -707,6 +695,10 @@ type UpdateOutputPortRes interface {
 
 type UpdateOutputPortStatusRes interface {
 	updateOutputPortStatusRes()
+}
+
+type UpdatePlatformEnvironmentSettingsRes interface {
+	updatePlatformEnvironmentSettingsRes()
 }
 
 type UpdateRoleRes interface {

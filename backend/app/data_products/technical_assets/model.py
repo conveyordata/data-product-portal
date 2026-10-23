@@ -2,21 +2,17 @@ import uuid
 from typing import TYPE_CHECKING, Optional
 
 from fastapi import HTTPException, status
-from sqlalchemy import Column, Enum, ForeignKey, String, and_
+from sqlalchemy import Column, Enum, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, Session, foreign, relationship
+from sqlalchemy.orm import Mapped, Session, relationship
 
-from app.configuration.environments.platform_service_configurations.model import (
-    EnvironmentPlatformServiceConfiguration,
-)
 from app.core.webhooks.events import TechnicalAssetEvent
 from app.data_products.technical_assets.status import TechnicalAssetStatus
 from app.database.event_mixin import EventTrackedMixin
 
 if TYPE_CHECKING:
     from app.configuration.access_modes.model import AccessMode
-    from app.configuration.platforms.model import Platform
-    from app.configuration.platforms.platform_services.model import PlatformService
+    from app.configuration.platforms.model import PlatformEnvironmentSettings
     from app.data_products.model import DataProduct
     from app.data_products.output_port_technical_assets_link.model import (
         TechnicalAssetOutputPortAssociation,
@@ -49,13 +45,9 @@ class TechnicalAsset(Base, BaseORM, EventTrackedMixin):
     status: TechnicalAssetStatus = Column(Enum(TechnicalAssetStatus))
     technical_mapping = Column(String)
 
-    platform_id: Mapped[Optional[UUID]] = Column(ForeignKey("platforms.id"))
-    service_id: Mapped[Optional[UUID]] = Column(ForeignKey("platform_services.id"))
     owner_id: Mapped[UUID] = Column(ForeignKey("data_products.id"))
     configuration_id: Mapped[UUID] = Column(ForeignKey("data_output_configurations.id"))
 
-    platform: Mapped[Optional["Platform"]] = relationship(lazy="joined")
-    service: Mapped[Optional["PlatformService"]] = relationship(lazy="joined")
     owner: Mapped["DataProduct"] = relationship(
         back_populates="technical_assets", lazy="joined"
     )
@@ -76,16 +68,7 @@ class TechnicalAsset(Base, BaseORM, EventTrackedMixin):
         lazy="selectin",
     )
 
-    environment_configurations: Mapped[
-        list["EnvironmentPlatformServiceConfiguration"]
-    ] = relationship(
-        primaryjoin=and_(
-            platform_id == foreign(EnvironmentPlatformServiceConfiguration.platform_id),
-            service_id == foreign(EnvironmentPlatformServiceConfiguration.service_id),
-        ),
-        lazy="raise",
-        viewonly=True,
-    )
+    platform_settings: list["PlatformEnvironmentSettings"] = []
     access_modes: Mapped[list["AccessMode"]] = relationship(
         "AccessMode",
         secondary="technical_asset_access_modes",

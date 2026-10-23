@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.configuration.access_modes.model import AccessMode as AccessModeModel
+from app.configuration.platforms.service import PlatformSettingsService
 from app.configuration.tags.model import Tag as TagModel
 from app.configuration.tags.model import ensure_tag_exists
 from app.core.namespace.validation import (
@@ -112,25 +113,29 @@ class TechnicalAssetService:
             return TechnicalAssetStatus.ACTIVE
         return TechnicalAssetStatus.PENDING
 
-    def _filter_environment_configurations_by_data_product(
+    def _attach_platform_settings(
         self, technical_assets: Sequence[TechnicalAssetModel]
     ) -> None:
+        all_settings = PlatformSettingsService(self.db).get_all()
         for technical_asset in technical_assets:
-            allowed_environment_ids = {
+            platform_key = plugin_registry.get(
+                technical_asset.configuration.configuration_type
+            ).platform.key
+            environment_ids = {
                 declaration.environment_id
                 for declaration in technical_asset.owner.environments
             }
-            technical_asset.environment_configurations = [
-                config
-                for config in technical_asset.environment_configurations
-                if config.environment_id in allowed_environment_ids
+            technical_asset.platform_settings = [
+                settings
+                for settings in all_settings
+                if settings.platform_key == platform_key
+                and settings.environment_id in environment_ids
             ]
 
     def get_technical_assets(self) -> Sequence[TechnicalAssetModel]:
         technical_assets = (
             self.db.scalars(
                 select(TechnicalAssetModel).options(
-                    selectinload(TechnicalAssetModel.environment_configurations),
                     joinedload(TechnicalAssetModel.owner).selectinload(
                         DataProductModel.environments
                     ),
@@ -142,7 +147,7 @@ class TechnicalAssetService:
             .unique()
             .all()
         )
-        self._filter_environment_configurations_by_data_product(technical_assets)
+        self._attach_platform_settings(technical_assets)
         return technical_assets
 
     def get_technical_asset(
@@ -155,7 +160,6 @@ class TechnicalAssetService:
                 .where(TechnicalAssetModel.owner_id == data_product_id)
             ).options(
                 selectinload(TechnicalAssetModel.output_port_links),
-                selectinload(TechnicalAssetModel.environment_configurations),
                 joinedload(TechnicalAssetModel.owner).selectinload(
                     DataProductModel.environments
                 ),
@@ -166,7 +170,7 @@ class TechnicalAssetService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Technical asset not found",
             )
-        self._filter_environment_configurations_by_data_product([technical_asset])
+        self._attach_platform_settings([technical_asset])
         return technical_asset
 
     def create_technical_asset(
@@ -369,7 +373,6 @@ class TechnicalAssetService:
             self.db.scalars(
                 select(TechnicalAssetModel)
                 .options(
-                    selectinload(TechnicalAssetModel.environment_configurations),
                     joinedload(TechnicalAssetModel.owner).selectinload(
                         DataProductModel.environments
                     ),
@@ -383,5 +386,5 @@ class TechnicalAssetService:
             .unique()
             .all()
         )
-        self._filter_environment_configurations_by_data_product(technical_assets)
+        self._attach_platform_settings(technical_assets)
         return technical_assets

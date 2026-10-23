@@ -3,7 +3,6 @@ import { delay, HttpResponse, http } from 'msw';
 import { AddTechnicalAssetPopup } from '@/pages/data-product/components/data-product-tabs/technical-asset-tab/components/add-technical-asset-popup/add-technical-asset-popup.tsx';
 import { allowAllAuth } from '@/tests/mocks/auth.ts';
 import { mockAccessModesHttp } from '@/tests/mocks/configurationAccessModes.ts';
-import { mockGetPlatformConfigs } from '@/tests/mocks/configurationPlatforms.ts';
 import { mockDataProductHttp, mockDataProducts } from '@/tests/mocks/dataProducts.ts';
 import { mockGetPlatformTiles, mockGetPlugins, mockRenderTechnicalAssetAccessPath } from '@/tests/mocks/plugins.ts';
 import {
@@ -22,7 +21,6 @@ const defaultMocks = () => {
     mockGetPlugins();
     mockGetTags();
     mockGetPlatformTiles();
-    mockGetPlatformConfigs();
     mockGetResourceNamesConstraints();
     mockResourceNamesSanitize();
     mockResourceNamesValidate();
@@ -38,11 +36,6 @@ describe('TechnicalAssetPopup', async () => {
 
         await user.click(screen.getAllByText('datalake')[1]);
         await user.type(screen.getAllByRole('textbox', { name: /path/i })[0], 's3_path');
-    };
-
-    const fillInGitHub = async (user: UserEvent) => {
-        await user.click(screen.getByLabelText(/github/i));
-        await user.type(screen.getByLabelText(/^repository$/i), 'my-org/my-repo');
     };
 
     const fillInNameAndDescription = async (user: UserEvent) => {
@@ -131,28 +124,6 @@ describe('TechnicalAssetPopup', async () => {
             expect(screen.queryByText('Single access mode')).not.toBeInTheDocument();
             expect(screen.queryByText('Configure access modes')).not.toBeInTheDocument();
         });
-    }, 15000);
-
-    it('should clear the result and skip rendering the access path for a plugin without a platform', async () => {
-        defaultMocks();
-        const renderSpy = vi.fn();
-        server.use(
-            http.post('*/api/v2/plugins/render_technical_asset_access_path', () => {
-                renderSpy();
-                return HttpResponse.json({ technical_asset_access_path: 'should-not-be-used' });
-            }),
-        );
-
-        const user = userEvent.setup({ delay: null, pointerEventsCheck: 0 });
-        renderWithProviders(
-            <AddTechnicalAssetPopup onClose={vi.fn()} isOpen dataProductId={mockDataProducts[0].id} debounce={0} />,
-        );
-
-        await fillInNameAndDescription(user);
-        await fillInGitHub(user);
-
-        await waitFor(() => expect(screen.getByLabelText(/repository link/i)).toHaveValue(''));
-        expect(renderSpy).not.toHaveBeenCalled();
     }, 15000);
 
     it('should block switching platforms while a render request is in flight', async () => {

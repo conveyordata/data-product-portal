@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import TYPE_CHECKING, Any, TypeVar, cast
+from typing import TYPE_CHECKING, Any, TypeVar
 from uuid import UUID
 
 from attrs import define as _attrs_define
@@ -9,7 +9,6 @@ from attrs import field as _attrs_field
 
 from ..models.technical_asset_status import TechnicalAssetStatus
 from ..models.technical_mapping import TechnicalMapping
-from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
     from ..models.data_product import DataProduct
@@ -35,8 +34,6 @@ class OwnedTechnicalAsset:
         configuration (OwnedTechnicalAssetConfiguration): Configuration of the technical asset. The available fields
             depend on `name`; retrieve them from /v2/plugins/{name}/form.
         owner (DataProduct):
-        platform_id (None | Unset | UUID):
-        service_id (None | Unset | UUID):
     """
 
     id: UUID
@@ -48,8 +45,6 @@ class OwnedTechnicalAsset:
     owner_id: UUID
     configuration: OwnedTechnicalAssetConfiguration
     owner: DataProduct
-    platform_id: None | Unset | UUID = UNSET
-    service_id: None | Unset | UUID = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -71,22 +66,6 @@ class OwnedTechnicalAsset:
 
         owner = self.owner.to_dict()
 
-        platform_id: None | str | Unset
-        if isinstance(self.platform_id, Unset):
-            platform_id = UNSET
-        elif isinstance(self.platform_id, UUID):
-            platform_id = str(self.platform_id)
-        else:
-            platform_id = self.platform_id
-
-        service_id: None | str | Unset
-        if isinstance(self.service_id, Unset):
-            service_id = UNSET
-        elif isinstance(self.service_id, UUID):
-            service_id = str(self.service_id)
-        else:
-            service_id = self.service_id
-
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
@@ -102,10 +81,6 @@ class OwnedTechnicalAsset:
                 "owner": owner,
             }
         )
-        if platform_id is not UNSET:
-            field_dict["platform_id"] = platform_id
-        if service_id is not UNSET:
-            field_dict["service_id"] = service_id
 
         return field_dict
 
@@ -137,40 +112,6 @@ class OwnedTechnicalAsset:
 
         owner = DataProduct.from_dict(d.pop("owner"))
 
-        def _parse_platform_id(data: object) -> None | Unset | UUID:
-            if data is None:
-                return data
-            if isinstance(data, Unset):
-                return data
-            try:
-                if not isinstance(data, str):
-                    raise TypeError()
-                platform_id_type_0 = UUID(data)
-
-                return platform_id_type_0
-            except (TypeError, ValueError, AttributeError, KeyError):
-                pass
-            return cast(None | Unset | UUID, data)
-
-        platform_id = _parse_platform_id(d.pop("platform_id", UNSET))
-
-        def _parse_service_id(data: object) -> None | Unset | UUID:
-            if data is None:
-                return data
-            if isinstance(data, Unset):
-                return data
-            try:
-                if not isinstance(data, str):
-                    raise TypeError()
-                service_id_type_0 = UUID(data)
-
-                return service_id_type_0
-            except (TypeError, ValueError, AttributeError, KeyError):
-                pass
-            return cast(None | Unset | UUID, data)
-
-        service_id = _parse_service_id(d.pop("service_id", UNSET))
-
         owned_technical_asset = cls(
             id=id,
             name=name,
@@ -181,8 +122,6 @@ class OwnedTechnicalAsset:
             owner_id=owner_id,
             configuration=configuration,
             owner=owner,
-            platform_id=platform_id,
-            service_id=service_id,
         )
 
         owned_technical_asset.additional_properties = d

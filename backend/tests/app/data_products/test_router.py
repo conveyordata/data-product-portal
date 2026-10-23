@@ -1,4 +1,3 @@
-import json
 import uuid
 from copy import deepcopy
 from typing import Any
@@ -24,7 +23,6 @@ from tests.factories import (
     DataProductTypeFactory,
     DomainFactory,
     EnvironmentFactory,
-    EnvPlatformConfigFactory,
     ExplorationFactory,
     GlobalRoleAssignmentFactory,
     GroupFactory,
@@ -32,7 +30,6 @@ from tests.factories import (
     InputPortFactory,
     LifecycleFactory,
     OutputPortFactory,
-    PlatformFactory,
     RoleFactory,
     TagFactory,
     TechnicalAssetFactory,
@@ -40,7 +37,6 @@ from tests.factories import (
     UserFactory,
 )
 from tests.factories.data_product_setting_value import DataProductSettingValueFactory
-from tests.factories.platform_service import PlatformServiceFactory
 from tests.webhook_util import assert_event_in_queue, assert_event_not_in_queue
 
 ENDPOINT = "/api/v2/data_products"
@@ -409,27 +405,6 @@ class TestDataProductsRouter:
 
         response = self.get_data_product(client, data_product.id)
         assert response.status_code == 200, response.text
-
-    def test_get_conveyor_ide_url(self, client, monkeypatch):
-        monkeypatch.setattr(
-            settings, "ENABLED_PLUGINS", [*settings.ENABLED_PLUGINS, "ConveyorPlugin"]
-        )
-        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        cvr = PlatformFactory(name="Conveyor")
-        PlatformServiceFactory(platform=cvr)
-        data_product = DataProductFactory()
-        role = RoleFactory(
-            scope=Scope.DATA_PRODUCT,
-            permissions=[Action.DATA_PRODUCT__READ_INTEGRATIONS],
-        )
-        DataProductRoleAssignmentFactory(
-            identity_id=user.id,
-            role_id=role.id,
-            data_product_id=data_product.id,
-        )
-
-        response = self.get_conveyor_ide_url(client, data_product.id)
-        assert response.status_code == 501
 
     def test_get_technical_assets(self, client):
         data_product = DataProductFactory()
@@ -883,95 +858,6 @@ class TestDataProductsRouter:
         assert response.json()["edges"] == []
 
         assert output_port.id not in [node["id"] for node in response.json()["nodes"]]
-
-    def test_get_signin_url_not_implemented(self, client, monkeypatch):
-        monkeypatch.setattr(
-            settings,
-            "ENABLED_PLUGINS",
-            [*settings.ENABLED_PLUGINS, "S3TechnicalAssetConfiguration"],
-        )
-        EnvironmentFactory(name="production")
-        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        data_product = DataProductFactory()
-        platform = PlatformFactory(name="s3")
-        PlatformServiceFactory(platform=platform)
-        role = RoleFactory(
-            scope=Scope.DATA_PRODUCT,
-            permissions=[Action.DATA_PRODUCT__READ_INTEGRATIONS],
-        )
-        DataProductRoleAssignmentFactory(
-            identity_id=user.id,
-            role_id=role.id,
-            data_product_id=data_product.id,
-        )
-        response = client.get(
-            f"/api/v2/plugins/aws/url?id={data_product.id}&environment=production"
-        )
-        assert response.status_code == 501 or response.status_code == 400
-
-    def test_get_databricks_url(self, client, monkeypatch):
-        monkeypatch.setattr(
-            settings,
-            "ENABLED_PLUGINS",
-            [*settings.ENABLED_PLUGINS, "DatabricksTechnicalAssetConfiguration"],
-        )
-        env = EnvironmentFactory(name="production")
-        platform = PlatformFactory(name="Databricks")
-        PlatformServiceFactory(platform=platform)
-        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        data_product = DataProductFactory()
-        role = RoleFactory(
-            scope=Scope.DATA_PRODUCT,
-            permissions=[Action.DATA_PRODUCT__READ_INTEGRATIONS],
-        )
-        DataProductRoleAssignmentFactory(
-            identity_id=user.id,
-            role_id=role.id,
-            data_product_id=data_product.id,
-        )
-        EnvPlatformConfigFactory(
-            environment=env,
-            platform=platform,
-            config=json.dumps(
-                {"workspace_urls": {str(data_product.domain.id): "test_1.com"}}
-            ),
-        )
-        response = client.get(
-            f"/api/v2/plugins/databricks/url?id={data_product.id}&environment=production"
-        )
-        assert response.status_code == 200
-        assert response.json()["url"] == "test_1.com"
-
-    def test_get_snowflake_url(self, client, monkeypatch):
-        monkeypatch.setattr(
-            settings,
-            "ENABLED_PLUGINS",
-            [*settings.ENABLED_PLUGINS, "SnowflakeTechnicalAssetConfiguration"],
-        )
-        env = EnvironmentFactory(name="production")
-        platform = PlatformFactory(name="Snowflake")
-        PlatformServiceFactory(platform=platform)
-        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        data_product = DataProductFactory()
-        role = RoleFactory(
-            scope=Scope.DATA_PRODUCT,
-            permissions=[Action.DATA_PRODUCT__READ_INTEGRATIONS],
-        )
-        DataProductRoleAssignmentFactory(
-            identity_id=user.id,
-            role_id=role.id,
-            data_product_id=data_product.id,
-        )
-        EnvPlatformConfigFactory(
-            environment=env,
-            platform=platform,
-            config=json.dumps({"login_url": "test_1.com"}),
-        )
-        response = client.get(
-            f"/api/v2/plugins/snowflake/url?id={data_product.id}&environment=production"
-        )
-        assert response.status_code == 200
-        assert response.json()["url"] == "test_1.com"
 
     def test_validate_namespace(self, client):
         namespace = "test"

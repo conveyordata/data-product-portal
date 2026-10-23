@@ -1,23 +1,13 @@
-import pytest
 from fastapi.testclient import TestClient
 
 from app.authorization.roles.schema import Scope
 from app.core.authz.actions import AuthorizationAction as Action
-from app.data_products.technical_assets.enums import TechnicalMapping
 from app.settings import settings
-from app.technical_asset_configuration.schema_request import (
-    RenderTechnicalAssetAccessPathRequest,
-)
 from tests.factories import (
     DataProductFactory,
     DataProductRoleAssignmentFactory,
     RoleFactory,
     UserFactory,
-)
-from tests.factories.platform_service import PlatformServiceFactory
-from tests.fixtures.fake_plugin.schema import (
-    FakeLinkPlugin,
-    FakeTechnicalAssetConfiguration,
 )
 
 ENDPOINT = "/api/v2/plugins"
@@ -195,61 +185,6 @@ class TestPlatformTilesEndpoint:
         link_tile = next(t for t in tiles if t["value"] == "fake-link")
         assert link_tile["has_environments"] is False
 
-    def test_render_technical_asset_access_path(self, client: TestClient):
-        service = PlatformServiceFactory(
-            result_string_template=(
-                "{domain.name}/{data_product.namespace}/"
-                "{technical_asset.namespace}/{path}/{table}"
-            )
-        )
-        data_product = DataProductFactory(namespace="customer360")
-        self._allow_creating_technical_assets(data_product)
-
-        response = client.post(
-            f"{ENDPOINT}/render_technical_asset_access_path",
-            json=self._render_request(service, data_product),
-        )
-        assert response.status_code == 200, response.text
-        assert (
-            response.json()["technical_asset_access_path"]
-            == f"{data_product.domain.name}/customer360/orders/path/table"
-        )
-
-    def test_render_technical_asset_access_path__forbidden_without_create_technical_asset(
-        self, client: TestClient
-    ):
-        service = PlatformServiceFactory(result_string_template="{path}")
-        data_product = DataProductFactory()
-        UserFactory(external_id=settings.DEFAULT_USERNAME)
-
-        response = client.post(
-            f"{ENDPOINT}/render_technical_asset_access_path",
-            json=self._render_request(service, data_product),
-        )
-        assert response.status_code == 403
-
-    @staticmethod
-    def _allow_creating_technical_assets(data_product) -> None:
-        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        role = RoleFactory(
-            scope=Scope.DATA_PRODUCT,
-            permissions=[Action.DATA_PRODUCT__CREATE_TECHNICAL_ASSET],
-        )
-        DataProductRoleAssignmentFactory(
-            identity_id=user.id, role_id=role.id, data_product_id=data_product.id
-        )
-
-    @staticmethod
-    def _render_request(service, data_product) -> dict:
-        return RenderTechnicalAssetAccessPathRequest(
-            platform_id=service.platform.id,
-            service_id=service.id,
-            data_product_id=data_product.id,
-            namespace="orders",
-            technical_mapping=TechnicalMapping.Default,
-            configuration=FakeTechnicalAssetConfiguration(path="path", table="table"),
-        ).model_dump(mode="json")
-
 
 class TestLinkPluginEndToEnd:
     def test_link_tile_and_url_via_existing_endpoints(self, client):
@@ -275,64 +210,3 @@ class TestLinkPluginEndToEnd:
         url_response = client.get(f"{ENDPOINT}/fake-link/url?id={data_product.id}")
         assert url_response.status_code == 200
         assert url_response.json()["url"] == f"https://example.com/{data_product.id}"
-
-    @pytest.fixture
-    def link_plugin_under_cloud(self, monkeypatch):
-        monkeypatch.setattr(
-            FakeLinkPlugin,
-            "_platform_metadata",
-            FakeLinkPlugin.get_platform_metadata().model_copy(
-                update={"parent_platform": "cloud"}
-            ),
-        )
-
-    @pytest.fixture
-    def other_url_under_cloud(self, monkeypatch):
-        monkeypatch.setattr(
-            FakeTechnicalAssetConfiguration,
-            "get_url",
-            classmethod(lambda cls, id, db, actor, environment=None: "other"),
-        )
-
-    @staticmethod
-    def _readable_data_product():
-        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        data_product = DataProductFactory()
-        role = RoleFactory(
-            scope=Scope.DATA_PRODUCT,
-            permissions=[Action.DATA_PRODUCT__READ_INTEGRATIONS],
-        )
-        DataProductRoleAssignmentFactory(
-            identity_id=user.id, role_id=role.id, data_product_id=data_product.id
-        )
-        return data_product
-
-    @pytest.mark.usefixtures("link_plugin_under_cloud")
-    def test_get_plugin_url__parent_platform_skips_child_without_url(self, client):
-        data_product = self._readable_data_product()
-
-        response = client.get(f"{ENDPOINT}/cloud/url?id={data_product.id}")
-
-        assert response.status_code == 200, response.text
-        assert response.json()["url"] == f"https://example.com/{data_product.id}"
-
-    @pytest.mark.usefixtures("link_plugin_under_cloud", "other_url_under_cloud")
-    def test_get_plugin_url__parent_platform_children_with_different_urls(self, client):
-        data_product = self._readable_data_product()
-
-        response = client.get(f"{ENDPOINT}/cloud/url?id={data_product.id}")
-
-        assert response.status_code == 500
-        assert "FakeLinkPlugin" in response.json()["detail"]
-
-    @pytest.mark.usefixtures("link_plugin_under_cloud", "other_url_under_cloud")
-    def test_get_plugin_url__parent_platform_ignores_disabled_child(
-        self, client, monkeypatch
-    ):
-        monkeypatch.setattr(settings, "ENABLED_PLUGINS", ["FakeLinkPlugin"])
-        data_product = self._readable_data_product()
-
-        response = client.get(f"{ENDPOINT}/cloud/url?id={data_product.id}")
-
-        assert response.status_code == 200, response.text
-        assert response.json()["url"] == f"https://example.com/{data_product.id}"

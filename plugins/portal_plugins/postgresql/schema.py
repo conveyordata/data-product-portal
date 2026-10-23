@@ -3,9 +3,7 @@ from typing import ClassVar, Optional, Self
 from pydantic import model_validator
 from sqlalchemy.orm import Session
 
-from app.configuration.environments.platform_service_configurations.schema_response import (
-    PostgreSQLConfig,
-)
+from portal_plugins.settings import PostgreSQLDatabaseSettings
 from app.technical_asset_configuration.base_schema import (
     PluginContext,
     FieldDependency,
@@ -41,7 +39,6 @@ class PostgreSQLTechnicalAssetConfiguration(TechnicalAssetPlugin):
         icon_name="postgresql-logo.svg",
         icon_package="portal_plugins.postgresql",
         platform_key="postgresql",
-        parent_platform=None,
         result_label="Resulting table",
         result_tooltip="The table you can access through this technical asset",
         detailed_name="Schema",
@@ -69,17 +66,12 @@ class PostgreSQLTechnicalAssetConfiguration(TechnicalAssetPlugin):
         )
 
     def get_configuration(
-        self, configs: list[PostgreSQLConfig]
-    ) -> Optional[PostgreSQLConfig]:
+        self, configs: list[PostgreSQLDatabaseSettings]
+    ) -> Optional[PostgreSQLDatabaseSettings]:
         # Implementation depends on the exact PostgreSQL config type added
         return next(
             (config for config in configs if config.identifier == self.database), None
         )
-
-    @classmethod
-    def get_url(cls, id, db, actor, environment=None) -> str:
-        # Implementation for PostgreSQL URL
-        return ""
 
     @classmethod
     def get_ui_metadata(cls, db: Session) -> list[UIElementMetadata]:

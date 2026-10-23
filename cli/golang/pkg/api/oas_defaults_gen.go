@@ -183,6 +183,14 @@ func (s *PlatformTile) setDefaults() {
 }
 
 // setDefaults set default value of fields.
+func (s *PlatformType) setDefaults() {
+	{
+		var defaultVal0 []OverridableProperty
+		s.OverridableProperties = defaultVal0
+	}
+}
+
+// setDefaults set default value of fields.
 func (s *SchemaObjectRequest) setDefaults() {
 	{
 		var defaultVal0 []SchemaPropertyRequest
@@ -245,20 +253,12 @@ func (s *SchemaPropertyResponse) setDefaults() {
 // setDefaults set default value of fields.
 func (s *UIElementMetadataResponse) setDefaults() {
 	{
-		val := bool(false)
-		s.NotConfigured.SetTo(val)
-	}
-	{
 		val := string("Resulting path")
 		s.ResultLabel.SetTo(val)
 	}
 	{
 		val := string("The path you can access through this technical asset")
 		s.ResultTooltip.SetTo(val)
-	}
-	{
-		val := bool(true)
-		s.ShowInForm.SetTo(val)
 	}
 	{
 		val := bool(true)

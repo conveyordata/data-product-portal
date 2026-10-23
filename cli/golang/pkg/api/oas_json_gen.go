@@ -4964,18 +4964,6 @@ func (s *CreateTechnicalAssetRequest) encodeFields(e *jx.Encoder) {
 		e.Str(s.Namespace)
 	}
 	{
-		if s.PlatformID.Set {
-			e.FieldStart("platform_id")
-			s.PlatformID.Encode(e)
-		}
-	}
-	{
-		if s.ServiceID.Set {
-			e.FieldStart("service_id")
-			s.ServiceID.Encode(e)
-		}
-	}
-	{
 		e.FieldStart("configuration")
 		s.Configuration.Encode(e)
 	}
@@ -5011,17 +4999,15 @@ func (s *CreateTechnicalAssetRequest) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfCreateTechnicalAssetRequest = [10]string{
+var jsonFieldsNameOfCreateTechnicalAssetRequest = [8]string{
 	0: "name",
 	1: "description",
 	2: "namespace",
-	3: "platform_id",
-	4: "service_id",
-	5: "configuration",
-	6: "sourceAligned",
-	7: "technical_mapping",
-	8: "access_mode_ids",
-	9: "tag_ids",
+	3: "configuration",
+	4: "sourceAligned",
+	5: "technical_mapping",
+	6: "access_mode_ids",
+	7: "tag_ids",
 }
 
 // Decode decodes CreateTechnicalAssetRequest from json.
@@ -5029,7 +5015,7 @@ func (s *CreateTechnicalAssetRequest) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode CreateTechnicalAssetRequest to nil")
 	}
-	var requiredBitSet [2]uint8
+	var requiredBitSet [1]uint8
 	s.setDefaults()
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
@@ -5070,28 +5056,8 @@ func (s *CreateTechnicalAssetRequest) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"namespace\"")
 			}
-		case "platform_id":
-			if err := func() error {
-				s.PlatformID.Reset()
-				if err := s.PlatformID.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"platform_id\"")
-			}
-		case "service_id":
-			if err := func() error {
-				s.ServiceID.Reset()
-				if err := s.ServiceID.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"service_id\"")
-			}
 		case "configuration":
-			requiredBitSet[0] |= 1 << 5
+			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
 				if err := s.Configuration.Decode(d); err != nil {
 					return err
@@ -5140,7 +5106,7 @@ func (s *CreateTechnicalAssetRequest) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"access_mode_ids\"")
 			}
 		case "tag_ids":
-			requiredBitSet[1] |= 1 << 1
+			requiredBitSet[0] |= 1 << 7
 			if err := func() error {
 				s.TagIds = make([]uuid.UUID, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
@@ -5168,9 +5134,8 @@ func (s *CreateTechnicalAssetRequest) Decode(d *jx.Decoder) error {
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
-	for i, mask := range [2]uint8{
-		0b00100111,
-		0b00000010,
+	for i, mask := range [1]uint8{
+		0b10001111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -13207,112 +13172,6 @@ func (s *GetAccessModesNotFoundApplicationJSON) UnmarshalJSON(data []byte) error
 }
 
 // Encode implements json.Marshaler.
-func (s *GetAllPlatformServiceConfigurationsResponse) Encode(e *jx.Encoder) {
-	e.ObjStart()
-	s.encodeFields(e)
-	e.ObjEnd()
-}
-
-// encodeFields encodes fields.
-func (s *GetAllPlatformServiceConfigurationsResponse) encodeFields(e *jx.Encoder) {
-	{
-		e.FieldStart("platform_service_configurations")
-		e.ArrStart()
-		for _, elem := range s.PlatformServiceConfigurations {
-			elem.Encode(e)
-		}
-		e.ArrEnd()
-	}
-}
-
-var jsonFieldsNameOfGetAllPlatformServiceConfigurationsResponse = [1]string{
-	0: "platform_service_configurations",
-}
-
-// Decode decodes GetAllPlatformServiceConfigurationsResponse from json.
-func (s *GetAllPlatformServiceConfigurationsResponse) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode GetAllPlatformServiceConfigurationsResponse to nil")
-	}
-	var requiredBitSet [1]uint8
-
-	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		switch string(k) {
-		case "platform_service_configurations":
-			requiredBitSet[0] |= 1 << 0
-			if err := func() error {
-				s.PlatformServiceConfigurations = make([]PlatformServiceConfiguration, 0)
-				if err := d.Arr(func(d *jx.Decoder) error {
-					var elem PlatformServiceConfiguration
-					if err := elem.Decode(d); err != nil {
-						return err
-					}
-					s.PlatformServiceConfigurations = append(s.PlatformServiceConfigurations, elem)
-					return nil
-				}); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"platform_service_configurations\"")
-			}
-		default:
-			return d.Skip()
-		}
-		return nil
-	}); err != nil {
-		return errors.Wrap(err, "decode GetAllPlatformServiceConfigurationsResponse")
-	}
-	// Validate required fields.
-	var failures []validate.FieldError
-	for i, mask := range [1]uint8{
-		0b00000001,
-	} {
-		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
-			// Mask only required fields and check equality to mask using XOR.
-			//
-			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
-			// Bits of fields which would be set are actually bits of missed fields.
-			missed := bits.OnesCount8(result)
-			for bitN := 0; bitN < missed; bitN++ {
-				bitIdx := bits.TrailingZeros8(result)
-				fieldIdx := i*8 + bitIdx
-				var name string
-				if fieldIdx < len(jsonFieldsNameOfGetAllPlatformServiceConfigurationsResponse) {
-					name = jsonFieldsNameOfGetAllPlatformServiceConfigurationsResponse[fieldIdx]
-				} else {
-					name = strconv.Itoa(fieldIdx)
-				}
-				failures = append(failures, validate.FieldError{
-					Name:  name,
-					Error: validate.ErrFieldRequired,
-				})
-				// Reset bit.
-				result &^= 1 << bitIdx
-			}
-		}
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s *GetAllPlatformServiceConfigurationsResponse) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *GetAllPlatformServiceConfigurationsResponse) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode implements json.Marshaler.
 func (s *GetAllPlatformsResponse) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
@@ -16891,154 +16750,6 @@ func (s *GetOutputPortSchemaNotFoundApplicationJSON) UnmarshalJSON(data []byte) 
 	return s.Decode(d)
 }
 
-// Encode encodes GetPlatformServiceConfigNotFoundApplicationJSON as json.
-func (s GetPlatformServiceConfigNotFoundApplicationJSON) Encode(e *jx.Encoder) {
-	unwrapped := jx.Raw(s)
-
-	if len(unwrapped) != 0 {
-		e.Raw(unwrapped)
-	}
-}
-
-// Decode decodes GetPlatformServiceConfigNotFoundApplicationJSON from json.
-func (s *GetPlatformServiceConfigNotFoundApplicationJSON) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode GetPlatformServiceConfigNotFoundApplicationJSON to nil")
-	}
-	var unwrapped jx.Raw
-	if err := func() error {
-		v, err := d.RawAppend(nil)
-		unwrapped = jx.Raw(v)
-		if err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		return errors.Wrap(err, "alias")
-	}
-	*s = GetPlatformServiceConfigNotFoundApplicationJSON(unwrapped)
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s GetPlatformServiceConfigNotFoundApplicationJSON) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *GetPlatformServiceConfigNotFoundApplicationJSON) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode implements json.Marshaler.
-func (s *GetPlatformServicesResponse) Encode(e *jx.Encoder) {
-	e.ObjStart()
-	s.encodeFields(e)
-	e.ObjEnd()
-}
-
-// encodeFields encodes fields.
-func (s *GetPlatformServicesResponse) encodeFields(e *jx.Encoder) {
-	{
-		e.FieldStart("platform_services")
-		e.ArrStart()
-		for _, elem := range s.PlatformServices {
-			elem.Encode(e)
-		}
-		e.ArrEnd()
-	}
-}
-
-var jsonFieldsNameOfGetPlatformServicesResponse = [1]string{
-	0: "platform_services",
-}
-
-// Decode decodes GetPlatformServicesResponse from json.
-func (s *GetPlatformServicesResponse) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode GetPlatformServicesResponse to nil")
-	}
-	var requiredBitSet [1]uint8
-
-	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		switch string(k) {
-		case "platform_services":
-			requiredBitSet[0] |= 1 << 0
-			if err := func() error {
-				s.PlatformServices = make([]PlatformService, 0)
-				if err := d.Arr(func(d *jx.Decoder) error {
-					var elem PlatformService
-					if err := elem.Decode(d); err != nil {
-						return err
-					}
-					s.PlatformServices = append(s.PlatformServices, elem)
-					return nil
-				}); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"platform_services\"")
-			}
-		default:
-			return d.Skip()
-		}
-		return nil
-	}); err != nil {
-		return errors.Wrap(err, "decode GetPlatformServicesResponse")
-	}
-	// Validate required fields.
-	var failures []validate.FieldError
-	for i, mask := range [1]uint8{
-		0b00000001,
-	} {
-		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
-			// Mask only required fields and check equality to mask using XOR.
-			//
-			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
-			// Bits of fields which would be set are actually bits of missed fields.
-			missed := bits.OnesCount8(result)
-			for bitN := 0; bitN < missed; bitN++ {
-				bitIdx := bits.TrailingZeros8(result)
-				fieldIdx := i*8 + bitIdx
-				var name string
-				if fieldIdx < len(jsonFieldsNameOfGetPlatformServicesResponse) {
-					name = jsonFieldsNameOfGetPlatformServicesResponse[fieldIdx]
-				} else {
-					name = strconv.Itoa(fieldIdx)
-				}
-				failures = append(failures, validate.FieldError{
-					Name:  name,
-					Error: validate.ErrFieldRequired,
-				})
-				// Reset bit.
-				result &^= 1 << bitIdx
-			}
-		}
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s *GetPlatformServicesResponse) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *GetPlatformServicesResponse) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
 // Encode implements json.Marshaler.
 func (s *GetRolesResponse) Encode(e *jx.Encoder) {
 	e.ObjStart()
@@ -17281,18 +16992,6 @@ func (s *GetTechnicalAssetsResponseItem) encodeFields(e *jx.Encoder) {
 		json.EncodeUUID(e, s.OwnerID)
 	}
 	{
-		if s.PlatformID.Set {
-			e.FieldStart("platform_id")
-			s.PlatformID.Encode(e)
-		}
-	}
-	{
-		if s.ServiceID.Set {
-			e.FieldStart("service_id")
-			s.ServiceID.Encode(e)
-		}
-	}
-	{
 		e.FieldStart("status")
 		s.Status.Encode(e)
 	}
@@ -17358,25 +17057,23 @@ func (s *GetTechnicalAssetsResponseItem) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfGetTechnicalAssetsResponseItem = [18]string{
+var jsonFieldsNameOfGetTechnicalAssetsResponseItem = [16]string{
 	0:  "id",
 	1:  "name",
 	2:  "description",
 	3:  "namespace",
 	4:  "owner_id",
-	5:  "platform_id",
-	6:  "service_id",
-	7:  "status",
-	8:  "technical_mapping",
-	9:  "access_modes",
-	10: "configuration",
-	11: "owner",
-	12: "environments",
-	13: "output_port_links",
-	14: "tags",
-	15: "sourceAligned",
-	16: "result_string",
-	17: "technical_info",
+	5:  "status",
+	6:  "technical_mapping",
+	7:  "access_modes",
+	8:  "configuration",
+	9:  "owner",
+	10: "environments",
+	11: "output_port_links",
+	12: "tags",
+	13: "sourceAligned",
+	14: "result_string",
+	15: "technical_info",
 }
 
 // Decode decodes GetTechnicalAssetsResponseItem from json.
@@ -17384,7 +17081,7 @@ func (s *GetTechnicalAssetsResponseItem) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode GetTechnicalAssetsResponseItem to nil")
 	}
-	var requiredBitSet [3]uint8
+	var requiredBitSet [2]uint8
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
@@ -17448,28 +17145,8 @@ func (s *GetTechnicalAssetsResponseItem) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"owner_id\"")
 			}
-		case "platform_id":
-			if err := func() error {
-				s.PlatformID.Reset()
-				if err := s.PlatformID.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"platform_id\"")
-			}
-		case "service_id":
-			if err := func() error {
-				s.ServiceID.Reset()
-				if err := s.ServiceID.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"service_id\"")
-			}
 		case "status":
-			requiredBitSet[0] |= 1 << 7
+			requiredBitSet[0] |= 1 << 5
 			if err := func() error {
 				if err := s.Status.Decode(d); err != nil {
 					return err
@@ -17479,7 +17156,7 @@ func (s *GetTechnicalAssetsResponseItem) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"status\"")
 			}
 		case "technical_mapping":
-			requiredBitSet[1] |= 1 << 0
+			requiredBitSet[0] |= 1 << 6
 			if err := func() error {
 				if err := s.TechnicalMapping.Decode(d); err != nil {
 					return err
@@ -17489,7 +17166,7 @@ func (s *GetTechnicalAssetsResponseItem) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"technical_mapping\"")
 			}
 		case "access_modes":
-			requiredBitSet[1] |= 1 << 1
+			requiredBitSet[0] |= 1 << 7
 			if err := func() error {
 				s.AccessModes = make([]AccessMode, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
@@ -17507,7 +17184,7 @@ func (s *GetTechnicalAssetsResponseItem) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"access_modes\"")
 			}
 		case "configuration":
-			requiredBitSet[1] |= 1 << 2
+			requiredBitSet[1] |= 1 << 0
 			if err := func() error {
 				if err := s.Configuration.Decode(d); err != nil {
 					return err
@@ -17517,7 +17194,7 @@ func (s *GetTechnicalAssetsResponseItem) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"configuration\"")
 			}
 		case "owner":
-			requiredBitSet[1] |= 1 << 3
+			requiredBitSet[1] |= 1 << 1
 			if err := func() error {
 				if err := s.Owner.Decode(d); err != nil {
 					return err
@@ -17527,7 +17204,7 @@ func (s *GetTechnicalAssetsResponseItem) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"owner\"")
 			}
 		case "environments":
-			requiredBitSet[1] |= 1 << 4
+			requiredBitSet[1] |= 1 << 2
 			if err := func() error {
 				s.Environments = make([]DataProductEnvironment, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
@@ -17545,7 +17222,7 @@ func (s *GetTechnicalAssetsResponseItem) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"environments\"")
 			}
 		case "output_port_links":
-			requiredBitSet[1] |= 1 << 5
+			requiredBitSet[1] |= 1 << 3
 			if err := func() error {
 				s.OutputPortLinks = make([]OutputPortLink, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
@@ -17563,7 +17240,7 @@ func (s *GetTechnicalAssetsResponseItem) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"output_port_links\"")
 			}
 		case "tags":
-			requiredBitSet[1] |= 1 << 6
+			requiredBitSet[1] |= 1 << 4
 			if err := func() error {
 				s.Tags = make([]Tag, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
@@ -17581,7 +17258,7 @@ func (s *GetTechnicalAssetsResponseItem) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"tags\"")
 			}
 		case "sourceAligned":
-			requiredBitSet[1] |= 1 << 7
+			requiredBitSet[1] |= 1 << 5
 			if err := func() error {
 				v, err := d.Bool()
 				s.SourceAligned = bool(v)
@@ -17593,7 +17270,7 @@ func (s *GetTechnicalAssetsResponseItem) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"sourceAligned\"")
 			}
 		case "result_string":
-			requiredBitSet[2] |= 1 << 0
+			requiredBitSet[1] |= 1 << 6
 			if err := func() error {
 				v, err := d.Str()
 				s.ResultString = string(v)
@@ -17605,7 +17282,7 @@ func (s *GetTechnicalAssetsResponseItem) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"result_string\"")
 			}
 		case "technical_info":
-			requiredBitSet[2] |= 1 << 1
+			requiredBitSet[1] |= 1 << 7
 			if err := func() error {
 				s.TechnicalInfo = make([]TechnicalInfo, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
@@ -17631,10 +17308,9 @@ func (s *GetTechnicalAssetsResponseItem) Decode(d *jx.Decoder) error {
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
-	for i, mask := range [3]uint8{
-		0b10011111,
+	for i, mask := range [2]uint8{
 		0b11111111,
-		0b00000011,
+		0b11111111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -29547,6 +29223,165 @@ func (s *OutputPortUpdate) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
+// Encode implements json.Marshaler.
+func (s *OverridableProperty) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *OverridableProperty) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("name")
+		e.Str(s.Name)
+	}
+	{
+		e.FieldStart("label")
+		e.Str(s.Label)
+	}
+	{
+		e.FieldStart("allowed_values")
+		e.ArrStart()
+		for _, elem := range s.AllowedValues {
+			e.Str(elem)
+		}
+		e.ArrEnd()
+	}
+	{
+		e.FieldStart("default")
+		e.Str(s.Default)
+	}
+}
+
+var jsonFieldsNameOfOverridableProperty = [4]string{
+	0: "name",
+	1: "label",
+	2: "allowed_values",
+	3: "default",
+}
+
+// Decode decodes OverridableProperty from json.
+func (s *OverridableProperty) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode OverridableProperty to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "name":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Str()
+				s.Name = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"name\"")
+			}
+		case "label":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Str()
+				s.Label = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"label\"")
+			}
+		case "allowed_values":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				s.AllowedValues = make([]string, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem string
+					v, err := d.Str()
+					elem = string(v)
+					if err != nil {
+						return err
+					}
+					s.AllowedValues = append(s.AllowedValues, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"allowed_values\"")
+			}
+		case "default":
+			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				v, err := d.Str()
+				s.Default = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"default\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode OverridableProperty")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00001111,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfOverridableProperty) {
+					name = jsonFieldsNameOfOverridableProperty[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *OverridableProperty) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OverridableProperty) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode encodes OverwriteOutputPortDataQualitySummaryNotFoundApplicationJSON as json.
 func (s OverwriteOutputPortDataQualitySummaryNotFoundApplicationJSON) Encode(e *jx.Encoder) {
 	unwrapped := jx.Raw(s)
@@ -29599,18 +29434,47 @@ func (s *Platform) Encode(e *jx.Encoder) {
 // encodeFields encodes fields.
 func (s *Platform) encodeFields(e *jx.Encoder) {
 	{
-		e.FieldStart("id")
-		json.EncodeUUID(e, s.ID)
+		e.FieldStart("key")
+		e.Str(s.Key)
 	}
 	{
-		e.FieldStart("name")
-		e.Str(s.Name)
+		e.FieldStart("display_name")
+		e.Str(s.DisplayName)
+	}
+	{
+		e.FieldStart("icon_name")
+		e.Str(s.IconName)
+	}
+	{
+		e.FieldStart("icon_data_uri")
+		s.IconDataURI.Encode(e)
+	}
+	{
+		e.FieldStart("has_environments")
+		e.Bool(s.HasEnvironments)
+	}
+	{
+		e.FieldStart("settings_schema")
+		s.SettingsSchema.Encode(e)
+	}
+	{
+		e.FieldStart("types")
+		e.ArrStart()
+		for _, elem := range s.Types {
+			elem.Encode(e)
+		}
+		e.ArrEnd()
 	}
 }
 
-var jsonFieldsNameOfPlatform = [2]string{
-	0: "id",
-	1: "name",
+var jsonFieldsNameOfPlatform = [7]string{
+	0: "key",
+	1: "display_name",
+	2: "icon_name",
+	3: "icon_data_uri",
+	4: "has_environments",
+	5: "settings_schema",
+	6: "types",
 }
 
 // Decode decodes Platform from json.
@@ -29622,29 +29486,91 @@ func (s *Platform) Decode(d *jx.Decoder) error {
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
-		case "id":
+		case "key":
 			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				v, err := json.DecodeUUID(d)
-				s.ID = v
+				v, err := d.Str()
+				s.Key = string(v)
 				if err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"id\"")
+				return errors.Wrap(err, "decode field \"key\"")
 			}
-		case "name":
+		case "display_name":
 			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
 				v, err := d.Str()
-				s.Name = string(v)
+				s.DisplayName = string(v)
 				if err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"name\"")
+				return errors.Wrap(err, "decode field \"display_name\"")
+			}
+		case "icon_name":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				v, err := d.Str()
+				s.IconName = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"icon_name\"")
+			}
+		case "icon_data_uri":
+			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				if err := s.IconDataURI.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"icon_data_uri\"")
+			}
+		case "has_environments":
+			requiredBitSet[0] |= 1 << 4
+			if err := func() error {
+				v, err := d.Bool()
+				s.HasEnvironments = bool(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"has_environments\"")
+			}
+		case "settings_schema":
+			requiredBitSet[0] |= 1 << 5
+			if err := func() error {
+				if err := s.SettingsSchema.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"settings_schema\"")
+			}
+		case "types":
+			requiredBitSet[0] |= 1 << 6
+			if err := func() error {
+				s.Types = make([]PlatformType, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem PlatformType
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.Types = append(s.Types, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"types\"")
 			}
 		default:
 			return d.Skip()
@@ -29656,7 +29582,7 @@ func (s *Platform) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00000011,
+		0b01111111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -29703,122 +29629,88 @@ func (s *Platform) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
-func (s *PlatformService) Encode(e *jx.Encoder) {
+func (s *PlatformEnvironmentSettings) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
 // encodeFields encodes fields.
-func (s *PlatformService) encodeFields(e *jx.Encoder) {
+func (s *PlatformEnvironmentSettings) encodeFields(e *jx.Encoder) {
 	{
-		e.FieldStart("id")
-		json.EncodeUUID(e, s.ID)
+		e.FieldStart("platform_key")
+		e.Str(s.PlatformKey)
 	}
 	{
-		e.FieldStart("name")
-		e.Str(s.Name)
+		e.FieldStart("environment_id")
+		json.EncodeUUID(e, s.EnvironmentID)
 	}
 	{
-		e.FieldStart("platform")
-		s.Platform.Encode(e)
-	}
-	{
-		e.FieldStart("result_string_template")
-		e.Str(s.ResultStringTemplate)
-	}
-	{
-		e.FieldStart("technical_info_template")
-		e.Str(s.TechnicalInfoTemplate)
+		e.FieldStart("settings")
+		s.Settings.Encode(e)
 	}
 }
 
-var jsonFieldsNameOfPlatformService = [5]string{
-	0: "id",
-	1: "name",
-	2: "platform",
-	3: "result_string_template",
-	4: "technical_info_template",
+var jsonFieldsNameOfPlatformEnvironmentSettings = [3]string{
+	0: "platform_key",
+	1: "environment_id",
+	2: "settings",
 }
 
-// Decode decodes PlatformService from json.
-func (s *PlatformService) Decode(d *jx.Decoder) error {
+// Decode decodes PlatformEnvironmentSettings from json.
+func (s *PlatformEnvironmentSettings) Decode(d *jx.Decoder) error {
 	if s == nil {
-		return errors.New("invalid: unable to decode PlatformService to nil")
+		return errors.New("invalid: unable to decode PlatformEnvironmentSettings to nil")
 	}
 	var requiredBitSet [1]uint8
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
-		case "id":
+		case "platform_key":
 			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				v, err := json.DecodeUUID(d)
-				s.ID = v
+				v, err := d.Str()
+				s.PlatformKey = string(v)
 				if err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"id\"")
+				return errors.Wrap(err, "decode field \"platform_key\"")
 			}
-		case "name":
+		case "environment_id":
 			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
-				v, err := d.Str()
-				s.Name = string(v)
+				v, err := json.DecodeUUID(d)
+				s.EnvironmentID = v
 				if err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"name\"")
+				return errors.Wrap(err, "decode field \"environment_id\"")
 			}
-		case "platform":
+		case "settings":
 			requiredBitSet[0] |= 1 << 2
 			if err := func() error {
-				if err := s.Platform.Decode(d); err != nil {
+				if err := s.Settings.Decode(d); err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"platform\"")
-			}
-		case "result_string_template":
-			requiredBitSet[0] |= 1 << 3
-			if err := func() error {
-				v, err := d.Str()
-				s.ResultStringTemplate = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"result_string_template\"")
-			}
-		case "technical_info_template":
-			requiredBitSet[0] |= 1 << 4
-			if err := func() error {
-				v, err := d.Str()
-				s.TechnicalInfoTemplate = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"technical_info_template\"")
+				return errors.Wrap(err, "decode field \"settings\"")
 			}
 		default:
 			return d.Skip()
 		}
 		return nil
 	}); err != nil {
-		return errors.Wrap(err, "decode PlatformService")
+		return errors.Wrap(err, "decode PlatformEnvironmentSettings")
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00011111,
+		0b00000111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -29830,8 +29722,8 @@ func (s *PlatformService) Decode(d *jx.Decoder) error {
 				bitIdx := bits.TrailingZeros8(result)
 				fieldIdx := i*8 + bitIdx
 				var name string
-				if fieldIdx < len(jsonFieldsNameOfPlatformService) {
-					name = jsonFieldsNameOfPlatformService[fieldIdx]
+				if fieldIdx < len(jsonFieldsNameOfPlatformEnvironmentSettings) {
+					name = jsonFieldsNameOfPlatformEnvironmentSettings[fieldIdx]
 				} else {
 					name = strconv.Itoa(fieldIdx)
 				}
@@ -29852,169 +29744,130 @@ func (s *PlatformService) Decode(d *jx.Decoder) error {
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s *PlatformService) MarshalJSON() ([]byte, error) {
+func (s *PlatformEnvironmentSettings) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *PlatformService) UnmarshalJSON(data []byte) error {
+func (s *PlatformEnvironmentSettings) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
 
 // Encode implements json.Marshaler.
-func (s *PlatformServiceConfiguration) Encode(e *jx.Encoder) {
+func (s PlatformEnvironmentSettingsSettings) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
-// encodeFields encodes fields.
-func (s *PlatformServiceConfiguration) encodeFields(e *jx.Encoder) {
-	{
-		e.FieldStart("id")
-		json.EncodeUUID(e, s.ID)
-	}
-	{
-		e.FieldStart("platform")
-		s.Platform.Encode(e)
-	}
-	{
-		e.FieldStart("service")
-		s.Service.Encode(e)
-	}
-	{
-		e.FieldStart("config")
-		e.ArrStart()
-		for _, elem := range s.Config {
-			e.Str(elem)
+// encodeFields implements json.Marshaler.
+func (s PlatformEnvironmentSettingsSettings) encodeFields(e *jx.Encoder) {
+	for k, elem := range s {
+		e.FieldStart(k)
+
+		if len(elem) != 0 {
+			e.Raw(elem)
 		}
-		e.ArrEnd()
 	}
 }
 
-var jsonFieldsNameOfPlatformServiceConfiguration = [4]string{
-	0: "id",
-	1: "platform",
-	2: "service",
-	3: "config",
-}
-
-// Decode decodes PlatformServiceConfiguration from json.
-func (s *PlatformServiceConfiguration) Decode(d *jx.Decoder) error {
+// Decode decodes PlatformEnvironmentSettingsSettings from json.
+func (s *PlatformEnvironmentSettingsSettings) Decode(d *jx.Decoder) error {
 	if s == nil {
-		return errors.New("invalid: unable to decode PlatformServiceConfiguration to nil")
+		return errors.New("invalid: unable to decode PlatformEnvironmentSettingsSettings to nil")
 	}
-	var requiredBitSet [1]uint8
-
+	m := s.init()
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		switch string(k) {
-		case "id":
-			requiredBitSet[0] |= 1 << 0
-			if err := func() error {
-				v, err := json.DecodeUUID(d)
-				s.ID = v
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"id\"")
+		var elem jx.Raw
+		if err := func() error {
+			v, err := d.RawAppend(nil)
+			elem = jx.Raw(v)
+			if err != nil {
+				return err
 			}
-		case "platform":
-			requiredBitSet[0] |= 1 << 1
-			if err := func() error {
-				if err := s.Platform.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"platform\"")
-			}
-		case "service":
-			requiredBitSet[0] |= 1 << 2
-			if err := func() error {
-				if err := s.Service.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"service\"")
-			}
-		case "config":
-			requiredBitSet[0] |= 1 << 3
-			if err := func() error {
-				s.Config = make([]string, 0)
-				if err := d.Arr(func(d *jx.Decoder) error {
-					var elem string
-					v, err := d.Str()
-					elem = string(v)
-					if err != nil {
-						return err
-					}
-					s.Config = append(s.Config, elem)
-					return nil
-				}); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"config\"")
-			}
-		default:
-			return d.Skip()
+			return nil
+		}(); err != nil {
+			return errors.Wrapf(err, "decode field %q", k)
 		}
+		m[string(k)] = elem
 		return nil
 	}); err != nil {
-		return errors.Wrap(err, "decode PlatformServiceConfiguration")
-	}
-	// Validate required fields.
-	var failures []validate.FieldError
-	for i, mask := range [1]uint8{
-		0b00001111,
-	} {
-		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
-			// Mask only required fields and check equality to mask using XOR.
-			//
-			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
-			// Bits of fields which would be set are actually bits of missed fields.
-			missed := bits.OnesCount8(result)
-			for bitN := 0; bitN < missed; bitN++ {
-				bitIdx := bits.TrailingZeros8(result)
-				fieldIdx := i*8 + bitIdx
-				var name string
-				if fieldIdx < len(jsonFieldsNameOfPlatformServiceConfiguration) {
-					name = jsonFieldsNameOfPlatformServiceConfiguration[fieldIdx]
-				} else {
-					name = strconv.Itoa(fieldIdx)
-				}
-				failures = append(failures, validate.FieldError{
-					Name:  name,
-					Error: validate.ErrFieldRequired,
-				})
-				// Reset bit.
-				result &^= 1 << bitIdx
-			}
-		}
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
+		return errors.Wrap(err, "decode PlatformEnvironmentSettingsSettings")
 	}
 
 	return nil
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s *PlatformServiceConfiguration) MarshalJSON() ([]byte, error) {
+func (s PlatformEnvironmentSettingsSettings) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *PlatformServiceConfiguration) UnmarshalJSON(data []byte) error {
+func (s *PlatformEnvironmentSettingsSettings) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s PlatformSettingsSchema) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields implements json.Marshaler.
+func (s PlatformSettingsSchema) encodeFields(e *jx.Encoder) {
+	for k, elem := range s {
+		e.FieldStart(k)
+
+		if len(elem) != 0 {
+			e.Raw(elem)
+		}
+	}
+}
+
+// Decode decodes PlatformSettingsSchema from json.
+func (s *PlatformSettingsSchema) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode PlatformSettingsSchema to nil")
+	}
+	m := s.init()
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		var elem jx.Raw
+		if err := func() error {
+			v, err := d.RawAppend(nil)
+			elem = jx.Raw(v)
+			if err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			return errors.Wrapf(err, "decode field %q", k)
+		}
+		m[string(k)] = elem
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode PlatformSettingsSchema")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s PlatformSettingsSchema) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *PlatformSettingsSchema) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -30348,6 +30201,203 @@ func (s *PlatformTileResponse) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *PlatformTileResponse) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *PlatformType) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *PlatformType) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("kind")
+		s.Kind.Encode(e)
+	}
+	{
+		e.FieldStart("name")
+		e.Str(s.Name)
+	}
+	{
+		e.FieldStart("display_name")
+		e.Str(s.DisplayName)
+	}
+	{
+		if s.OverridableProperties != nil {
+			e.FieldStart("overridable_properties")
+			e.ArrStart()
+			for _, elem := range s.OverridableProperties {
+				elem.Encode(e)
+			}
+			e.ArrEnd()
+		}
+	}
+}
+
+var jsonFieldsNameOfPlatformType = [4]string{
+	0: "kind",
+	1: "name",
+	2: "display_name",
+	3: "overridable_properties",
+}
+
+// Decode decodes PlatformType from json.
+func (s *PlatformType) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode PlatformType to nil")
+	}
+	var requiredBitSet [1]uint8
+	s.setDefaults()
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "kind":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				if err := s.Kind.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"kind\"")
+			}
+		case "name":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Str()
+				s.Name = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"name\"")
+			}
+		case "display_name":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				v, err := d.Str()
+				s.DisplayName = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"display_name\"")
+			}
+		case "overridable_properties":
+			if err := func() error {
+				s.OverridableProperties = make([]OverridableProperty, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem OverridableProperty
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.OverridableProperties = append(s.OverridableProperties, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"overridable_properties\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode PlatformType")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000111,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfPlatformType) {
+					name = jsonFieldsNameOfPlatformType[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *PlatformType) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *PlatformType) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes PlatformTypeKind as json.
+func (s PlatformTypeKind) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes PlatformTypeKind from json.
+func (s *PlatformTypeKind) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode PlatformTypeKind to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch PlatformTypeKind(v) {
+	case PlatformTypeKindAsset:
+		*s = PlatformTypeKindAsset
+	case PlatformTypeKindTool:
+		*s = PlatformTypeKindTool
+	default:
+		*s = PlatformTypeKind(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s PlatformTypeKind) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *PlatformTypeKind) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -31814,14 +31864,6 @@ func (s *RenderTechnicalAssetAccessPathRequest) Encode(e *jx.Encoder) {
 // encodeFields encodes fields.
 func (s *RenderTechnicalAssetAccessPathRequest) encodeFields(e *jx.Encoder) {
 	{
-		e.FieldStart("platform_id")
-		json.EncodeUUID(e, s.PlatformID)
-	}
-	{
-		e.FieldStart("service_id")
-		json.EncodeUUID(e, s.ServiceID)
-	}
-	{
 		e.FieldStart("data_product_id")
 		json.EncodeUUID(e, s.DataProductID)
 	}
@@ -31839,13 +31881,11 @@ func (s *RenderTechnicalAssetAccessPathRequest) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfRenderTechnicalAssetAccessPathRequest = [6]string{
-	0: "platform_id",
-	1: "service_id",
-	2: "data_product_id",
-	3: "namespace",
-	4: "technical_mapping",
-	5: "configuration",
+var jsonFieldsNameOfRenderTechnicalAssetAccessPathRequest = [4]string{
+	0: "data_product_id",
+	1: "namespace",
+	2: "technical_mapping",
+	3: "configuration",
 }
 
 // Decode decodes RenderTechnicalAssetAccessPathRequest from json.
@@ -31857,32 +31897,8 @@ func (s *RenderTechnicalAssetAccessPathRequest) Decode(d *jx.Decoder) error {
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
-		case "platform_id":
-			requiredBitSet[0] |= 1 << 0
-			if err := func() error {
-				v, err := json.DecodeUUID(d)
-				s.PlatformID = v
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"platform_id\"")
-			}
-		case "service_id":
-			requiredBitSet[0] |= 1 << 1
-			if err := func() error {
-				v, err := json.DecodeUUID(d)
-				s.ServiceID = v
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"service_id\"")
-			}
 		case "data_product_id":
-			requiredBitSet[0] |= 1 << 2
+			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
 				v, err := json.DecodeUUID(d)
 				s.DataProductID = v
@@ -31894,7 +31910,7 @@ func (s *RenderTechnicalAssetAccessPathRequest) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"data_product_id\"")
 			}
 		case "namespace":
-			requiredBitSet[0] |= 1 << 3
+			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
 				v, err := d.Str()
 				s.Namespace = string(v)
@@ -31906,7 +31922,7 @@ func (s *RenderTechnicalAssetAccessPathRequest) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"namespace\"")
 			}
 		case "technical_mapping":
-			requiredBitSet[0] |= 1 << 4
+			requiredBitSet[0] |= 1 << 2
 			if err := func() error {
 				if err := s.TechnicalMapping.Decode(d); err != nil {
 					return err
@@ -31916,7 +31932,7 @@ func (s *RenderTechnicalAssetAccessPathRequest) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"technical_mapping\"")
 			}
 		case "configuration":
-			requiredBitSet[0] |= 1 << 5
+			requiredBitSet[0] |= 1 << 3
 			if err := func() error {
 				if err := s.Configuration.Decode(d); err != nil {
 					return err
@@ -31935,7 +31951,7 @@ func (s *RenderTechnicalAssetAccessPathRequest) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00111111,
+		0b00001111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -37183,24 +37199,12 @@ func (s *TechnicalAsset) encodeFields(e *jx.Encoder) {
 		json.EncodeUUID(e, s.OwnerID)
 	}
 	{
-		if s.PlatformID.Set {
-			e.FieldStart("platform_id")
-			s.PlatformID.Encode(e)
-		}
-	}
-	{
-		if s.ServiceID.Set {
-			e.FieldStart("service_id")
-			s.ServiceID.Encode(e)
-		}
-	}
-	{
 		e.FieldStart("configuration")
 		s.Configuration.Encode(e)
 	}
 }
 
-var jsonFieldsNameOfTechnicalAsset = [10]string{
+var jsonFieldsNameOfTechnicalAsset = [8]string{
 	0: "id",
 	1: "name",
 	2: "namespace",
@@ -37208,9 +37212,7 @@ var jsonFieldsNameOfTechnicalAsset = [10]string{
 	4: "status",
 	5: "technical_mapping",
 	6: "owner_id",
-	7: "platform_id",
-	8: "service_id",
-	9: "configuration",
+	7: "configuration",
 }
 
 // Decode decodes TechnicalAsset from json.
@@ -37218,7 +37220,7 @@ func (s *TechnicalAsset) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode TechnicalAsset to nil")
 	}
-	var requiredBitSet [2]uint8
+	var requiredBitSet [1]uint8
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
@@ -37302,28 +37304,8 @@ func (s *TechnicalAsset) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"owner_id\"")
 			}
-		case "platform_id":
-			if err := func() error {
-				s.PlatformID.Reset()
-				if err := s.PlatformID.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"platform_id\"")
-			}
-		case "service_id":
-			if err := func() error {
-				s.ServiceID.Reset()
-				if err := s.ServiceID.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"service_id\"")
-			}
 		case "configuration":
-			requiredBitSet[1] |= 1 << 1
+			requiredBitSet[0] |= 1 << 7
 			if err := func() error {
 				if err := s.Configuration.Decode(d); err != nil {
 					return err
@@ -37341,9 +37323,8 @@ func (s *TechnicalAsset) Decode(d *jx.Decoder) error {
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
-	for i, mask := range [2]uint8{
-		0b01111111,
-		0b00000010,
+	for i, mask := range [1]uint8{
+		0b11111111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -38732,12 +38713,6 @@ func (s *UIElementMetadataResponse) Encode(e *jx.Encoder) {
 // encodeFields encodes fields.
 func (s *UIElementMetadataResponse) encodeFields(e *jx.Encoder) {
 	{
-		if s.NotConfigured.Set {
-			e.FieldStart("not_configured")
-			s.NotConfigured.Encode(e)
-		}
-	}
-	{
 		e.FieldStart("ui_metadata")
 		e.ArrStart()
 		for _, elem := range s.UIMetadata {
@@ -38748,10 +38723,6 @@ func (s *UIElementMetadataResponse) encodeFields(e *jx.Encoder) {
 	{
 		e.FieldStart("plugin")
 		e.Str(s.Plugin)
-	}
-	{
-		e.FieldStart("has_environments")
-		e.Bool(s.HasEnvironments)
 	}
 	{
 		if s.ResultLabel.Set {
@@ -38784,21 +38755,9 @@ func (s *UIElementMetadataResponse) encodeFields(e *jx.Encoder) {
 		}
 	}
 	{
-		if s.ParentPlatform.Set {
-			e.FieldStart("parent_platform")
-			s.ParentPlatform.Encode(e)
-		}
-	}
-	{
 		if s.PlatformTile.Set {
 			e.FieldStart("platform_tile")
 			s.PlatformTile.Encode(e)
-		}
-	}
-	{
-		if s.ShowInForm.Set {
-			e.FieldStart("show_in_form")
-			s.ShowInForm.Encode(e)
 		}
 	}
 	{
@@ -38813,22 +38772,18 @@ func (s *UIElementMetadataResponse) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfUIElementMetadataResponse = [15]string{
-	0:  "not_configured",
-	1:  "ui_metadata",
-	2:  "plugin",
-	3:  "has_environments",
-	4:  "result_label",
-	5:  "result_tooltip",
-	6:  "platform",
-	7:  "display_name",
-	8:  "icon_name",
-	9:  "icon_data_uri",
-	10: "parent_platform",
-	11: "platform_tile",
-	12: "show_in_form",
-	13: "shareable",
-	14: "detailed_name",
+var jsonFieldsNameOfUIElementMetadataResponse = [11]string{
+	0:  "ui_metadata",
+	1:  "plugin",
+	2:  "result_label",
+	3:  "result_tooltip",
+	4:  "platform",
+	5:  "display_name",
+	6:  "icon_name",
+	7:  "icon_data_uri",
+	8:  "platform_tile",
+	9:  "shareable",
+	10: "detailed_name",
 }
 
 // Decode decodes UIElementMetadataResponse from json.
@@ -38841,18 +38796,8 @@ func (s *UIElementMetadataResponse) Decode(d *jx.Decoder) error {
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
-		case "not_configured":
-			if err := func() error {
-				s.NotConfigured.Reset()
-				if err := s.NotConfigured.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"not_configured\"")
-			}
 		case "ui_metadata":
-			requiredBitSet[0] |= 1 << 1
+			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
 				s.UIMetadata = make([]UIElementMetadata, 0)
 				if err := d.Arr(func(d *jx.Decoder) error {
@@ -38870,7 +38815,7 @@ func (s *UIElementMetadataResponse) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"ui_metadata\"")
 			}
 		case "plugin":
-			requiredBitSet[0] |= 1 << 2
+			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
 				v, err := d.Str()
 				s.Plugin = string(v)
@@ -38880,18 +38825,6 @@ func (s *UIElementMetadataResponse) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"plugin\"")
-			}
-		case "has_environments":
-			requiredBitSet[0] |= 1 << 3
-			if err := func() error {
-				v, err := d.Bool()
-				s.HasEnvironments = bool(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"has_environments\"")
 			}
 		case "result_label":
 			if err := func() error {
@@ -38914,7 +38847,7 @@ func (s *UIElementMetadataResponse) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"result_tooltip\"")
 			}
 		case "platform":
-			requiredBitSet[0] |= 1 << 6
+			requiredBitSet[0] |= 1 << 4
 			if err := func() error {
 				v, err := d.Str()
 				s.Platform = string(v)
@@ -38926,7 +38859,7 @@ func (s *UIElementMetadataResponse) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"platform\"")
 			}
 		case "display_name":
-			requiredBitSet[0] |= 1 << 7
+			requiredBitSet[0] |= 1 << 5
 			if err := func() error {
 				v, err := d.Str()
 				s.DisplayName = string(v)
@@ -38938,7 +38871,7 @@ func (s *UIElementMetadataResponse) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"display_name\"")
 			}
 		case "icon_name":
-			requiredBitSet[1] |= 1 << 0
+			requiredBitSet[0] |= 1 << 6
 			if err := func() error {
 				v, err := d.Str()
 				s.IconName = string(v)
@@ -38959,16 +38892,6 @@ func (s *UIElementMetadataResponse) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"icon_data_uri\"")
 			}
-		case "parent_platform":
-			if err := func() error {
-				s.ParentPlatform.Reset()
-				if err := s.ParentPlatform.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"parent_platform\"")
-			}
 		case "platform_tile":
 			if err := func() error {
 				s.PlatformTile.Reset()
@@ -38978,16 +38901,6 @@ func (s *UIElementMetadataResponse) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"platform_tile\"")
-			}
-		case "show_in_form":
-			if err := func() error {
-				s.ShowInForm.Reset()
-				if err := s.ShowInForm.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"show_in_form\"")
 			}
 		case "shareable":
 			if err := func() error {
@@ -39000,7 +38913,7 @@ func (s *UIElementMetadataResponse) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"shareable\"")
 			}
 		case "detailed_name":
-			requiredBitSet[1] |= 1 << 6
+			requiredBitSet[1] |= 1 << 2
 			if err := func() error {
 				v, err := d.Str()
 				s.DetailedName = string(v)
@@ -39021,8 +38934,8 @@ func (s *UIElementMetadataResponse) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
-		0b11001110,
-		0b01000001,
+		0b01110011,
+		0b00000100,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -41140,6 +41053,64 @@ func (s UpdateOutputPortStatusOKApplicationJSON) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *UpdateOutputPortStatusOKApplicationJSON) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s UpdatePlatformEnvironmentSettingsReq) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields implements json.Marshaler.
+func (s UpdatePlatformEnvironmentSettingsReq) encodeFields(e *jx.Encoder) {
+	for k, elem := range s {
+		e.FieldStart(k)
+
+		if len(elem) != 0 {
+			e.Raw(elem)
+		}
+	}
+}
+
+// Decode decodes UpdatePlatformEnvironmentSettingsReq from json.
+func (s *UpdatePlatformEnvironmentSettingsReq) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode UpdatePlatformEnvironmentSettingsReq to nil")
+	}
+	m := s.init()
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		var elem jx.Raw
+		if err := func() error {
+			v, err := d.RawAppend(nil)
+			elem = jx.Raw(v)
+			if err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			return errors.Wrapf(err, "decode field %q", k)
+		}
+		m[string(k)] = elem
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode UpdatePlatformEnvironmentSettingsReq")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s UpdatePlatformEnvironmentSettingsReq) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *UpdatePlatformEnvironmentSettingsReq) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

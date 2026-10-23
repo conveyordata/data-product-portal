@@ -1,5 +1,4 @@
-from typing import ClassVar, Optional
-from uuid import UUID
+from typing import ClassVar
 
 from sqlalchemy.orm import Session
 
@@ -15,7 +14,6 @@ from portal_plugins.osi_sem_model.model import (
 from portal_plugins.osi_sem_model.model import (
     OSISemanticModelTechnicalAssetConfiguration as OSISemanticModelTechnicalAssetConfigurationModel,
 )
-from app.users.schema import User
 
 
 class OSISemanticModelTechnicalAssetConfiguration(TechnicalAssetPlugin):
@@ -42,12 +40,6 @@ class OSISemanticModelTechnicalAssetConfiguration(TechnicalAssetPlugin):
 
     def get_configuration(self, configs: list) -> None:
         return None
-
-    @classmethod
-    def get_url(
-        cls, id: UUID, db: Session, actor: User, environment: Optional[str] = None
-    ) -> str:
-        return ""
 
     @classmethod
     def get_ui_metadata(cls, db: Session) -> list[UIElementMetadata]:

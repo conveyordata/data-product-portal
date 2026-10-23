@@ -19,12 +19,8 @@ declare
     -- ROLES
     admin_role_id uuid;
 
-    -- PLATFORMS
-    postgresql_id uuid;
-    postgresql_service_id uuid;
+    -- ENVIRONMENTS
     environment_id_dev uuid;
-    semantic_model_id uuid;
-    osi_sem_model_service_id uuid;
 
     -- LIFECYLE
     draft uuid;
@@ -83,19 +79,9 @@ begin
         ('00000000-0000-0000-0000-000000000000', 'Admin', 'global', 3, 'Global admin role', ARRAY[]::integer[], timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL)
     RETURNING id INTO admin_role_id;
 
-    -- PLATFORMS
-    SELECT id FROM public.platforms WHERE lower(name) = 'postgresql' INTO postgresql_id;
-    SELECT id FROM public.platform_services WHERE lower(name) = 'postgresql' INTO postgresql_service_id;
-    UPDATE public.platform_service_configs SET "config" = '["dpp_demo"]' WHERE service_id = postgresql_service_id;
-
-    SELECT id FROM public.platforms WHERE lower(name) = 'osi' INTO semantic_model_id;
-    SELECT id FROM public.platform_services WHERE lower(name) = 'osi' INTO osi_sem_model_service_id;
-
-    INSERT INTO public.platforms (id, "name") VALUES (gen_random_uuid(), 'Agno');
-
     -- ENVIRONMENTS
     INSERT INTO public.environments ("name", context, acronym, is_default, created_on, updated_on, deleted_at) VALUES ('development', '', 'dev', true, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO environment_id_dev;
-    INSERT INTO public.env_platform_service_configs (id, environment_id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES ('daa8e3e8-1485-4eb2-8b4b-575e8d10a570', environment_id_dev, postgresql_id, postgresql_service_id, '[{"identifier":"database", "host": "postgresql-demo", "port": "5432", "admin_user": "postgres", "admin_pwd": "abc123"}]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+    INSERT INTO public.platform_environment_settings (platform_key, environment_id, settings) VALUES ('postgresql', environment_id_dev, '{"postgresql": [{"identifier": "dpp_demo", "host": "data-product-portal-postgresql-demo", "port": "5432", "admin_user": "postgres", "admin_pwd": "abc123"}]}');
 
     -- GLOBAL ROLE ASSIGNMENTS
     -- Make john.scientist an admin

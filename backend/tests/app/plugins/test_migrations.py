@@ -271,11 +271,7 @@ def _assert_migrated_once(target: Engine) -> None:
                 f"select version_num from {VERSION_TABLE}"  # noqa: S608
             )
         }
-        services = connection.exec_driver_sql(
-            "select count(*) from platform_services where lower(name) = 'parameterstore'"
-        ).scalar()
     assert {_core_head(installed(), url), "parameter_store_0001_baseline"} <= tracked
-    assert services == 1
 
 
 def test_migrate_all__two_runs_at_once_on_an_empty_database(scratch_engine):

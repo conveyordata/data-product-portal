@@ -302,15 +302,10 @@ type GetOutputPortsEventHistoryParams struct {
 	ID            uuid.UUID
 }
 
-// GetPlatformServiceConfigParams is parameters of get_platform_service_config operation.
-type GetPlatformServiceConfigParams struct {
-	ID        uuid.UUID
-	ServiceID uuid.UUID
-}
-
-// GetPlatformServicesParams is parameters of get_platform_services operation.
-type GetPlatformServicesParams struct {
-	ID uuid.UUID
+// GetPlatformEnvironmentSettingsParams is parameters of get_platform_environment_settings operation.
+type GetPlatformEnvironmentSettingsParams struct {
+	PlatformKey   string
+	EnvironmentID uuid.UUID
 }
 
 // GetPluginFormParams is parameters of get_plugin_form operation.
@@ -328,11 +323,6 @@ type GetPluginURLParams struct {
 // GetRolesParams is parameters of get_roles operation.
 type GetRolesParams struct {
 	Scope Scope
-}
-
-// GetSinglePlatformServiceConfigurationParams is parameters of get_single_platform_service_configuration operation.
-type GetSinglePlatformServiceConfigurationParams struct {
-	ConfigID uuid.UUID
 }
 
 // GetTechnicalAssetParams is parameters of get_technical_asset operation.
@@ -717,6 +707,12 @@ type UpdateOutputPortQueryStatsParams struct {
 type UpdateOutputPortStatusParams struct {
 	DataProductID uuid.UUID
 	ID            uuid.UUID
+}
+
+// UpdatePlatformEnvironmentSettingsParams is parameters of update_platform_environment_settings operation.
+type UpdatePlatformEnvironmentSettingsParams struct {
+	PlatformKey   string
+	EnvironmentID uuid.UUID
 }
 
 // UpdateRoleParams is parameters of update_role operation.

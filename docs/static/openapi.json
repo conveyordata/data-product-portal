@@ -5390,165 +5390,6 @@
         }
       }
     },
-    "/api/v2/configuration/environments/configs/{config_id}": {
-      "get": {
-        "tags": [
-          "Configuration - Environments"
-        ],
-        "summary": "Get Environment Configs By Id",
-        "operationId": "get_environment_configs_by_id",
-        "parameters": [
-          {
-            "name": "config_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Config Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/EnvironmentConfigsGetItem"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v2/configuration/environments/{id}/platforms/{platform_id}/services/{service_id}/config": {
-      "get": {
-        "tags": [
-          "Configuration - Environments"
-        ],
-        "summary": "Get Environment Platform Service Config",
-        "operationId": "get_environment_platform_service_config",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Id"
-            }
-          },
-          {
-            "name": "platform_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Platform Id"
-            }
-          },
-          {
-            "name": "service_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Service Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/EnvironmentConfigsGetItem"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v2/configuration/environments/{id}/platforms/{platform_id}/config": {
-      "get": {
-        "tags": [
-          "Configuration - Environments"
-        ],
-        "summary": "Get Environment Platform Config",
-        "operationId": "get_environment_platform_config",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Id"
-            }
-          },
-          {
-            "name": "platform_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Platform Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/EnvironmentPlatformConfigGet"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/v2/configuration/environments": {
       "get": {
         "tags": [
@@ -5563,240 +5404,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/EnvironmentsGet"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v2/configuration/environments/{id}/configs": {
-      "get": {
-        "tags": [
-          "Configuration - Environments"
-        ],
-        "summary": "Get Environment Configs",
-        "operationId": "get_environment_configs",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/EnvironmentConfigsGet"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v2/configuration/environments/platforms/{platform_id}/services/{service_id}/config": {
-      "get": {
-        "tags": [
-          "Configuration - Environments"
-        ],
-        "summary": "Get Environment Platform Service Config For All Envs",
-        "operationId": "get_environment_platform_service_config_for_all_envs",
-        "parameters": [
-          {
-            "name": "platform_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Platform Id"
-            }
-          },
-          {
-            "name": "service_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Service Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/EnvironmentConfigsGet"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v2/configuration/platforms/{id}/services/{service_id}": {
-      "get": {
-        "tags": [
-          "Configuration - Platforms"
-        ],
-        "summary": "Get Platform Service Config",
-        "description": "Get Platform Service config",
-        "operationId": "get_platform_service_config",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Id"
-            }
-          },
-          {
-            "name": "service_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Service Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PlatformServiceConfiguration"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Platform service configuration not found",
-            "content": {
-              "application/json": {
-                "example": {
-                  "detail": "Platform service configuration not found"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v2/configuration/platforms/configs/{config_id}": {
-      "get": {
-        "tags": [
-          "Configuration - Platforms"
-        ],
-        "summary": "Get Single Platform Service Configuration",
-        "operationId": "get_single_platform_service_configuration",
-        "parameters": [
-          {
-            "name": "config_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Config Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PlatformServiceConfiguration"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v2/configuration/platforms/configs": {
-      "get": {
-        "tags": [
-          "Configuration - Platforms"
-        ],
-        "summary": "Get All Platform Service Configurations",
-        "operationId": "get_all_platform_service_configurations",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetAllPlatformServiceConfigurationsResponse"
                 }
               }
             }
@@ -5845,22 +5452,31 @@
         }
       }
     },
-    "/api/v2/configuration/platforms/{id}/services": {
+    "/api/v2/configuration/platforms/{platform_key}/environments/{environment_id}/settings": {
       "get": {
         "tags": [
           "Configuration - Platforms"
         ],
-        "summary": "Get Platform Services",
-        "operationId": "get_platform_services",
+        "summary": "Get Platform Environment Settings",
+        "operationId": "get_platform_environment_settings",
         "parameters": [
           {
-            "name": "id",
+            "name": "platform_key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Platform Key"
+            }
+          },
+          {
+            "name": "environment_id",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
               "format": "uuid",
-              "title": "Id"
+              "title": "Environment Id"
             }
           }
         ],
@@ -5870,7 +5486,69 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetPlatformServicesResponse"
+                  "$ref": "#/components/schemas/PlatformEnvironmentSettings"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Configuration - Platforms"
+        ],
+        "summary": "Update Platform Environment Settings",
+        "operationId": "update_platform_environment_settings",
+        "parameters": [
+          {
+            "name": "platform_key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Platform Key"
+            }
+          },
+          {
+            "name": "environment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Environment Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true,
+                "title": "Settings"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformEnvironmentSettings"
                 }
               }
             }
@@ -10089,98 +9767,6 @@
         ],
         "title": "AWSCredentials"
       },
-      "AWSEnvironmentPlatformConfiguration": {
-        "properties": {
-          "account_id": {
-            "type": "string",
-            "title": "Account Id"
-          },
-          "region": {
-            "type": "string",
-            "title": "Region"
-          },
-          "can_read_from": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array",
-            "title": "Can Read From"
-          }
-        },
-        "type": "object",
-        "required": [
-          "account_id",
-          "region",
-          "can_read_from"
-        ],
-        "title": "AWSEnvironmentPlatformConfiguration"
-      },
-      "AWSGlueConfig": {
-        "properties": {
-          "identifier": {
-            "type": "string",
-            "title": "Identifier"
-          },
-          "database_name": {
-            "type": "string",
-            "title": "Database Name"
-          },
-          "bucket_identifier": {
-            "type": "string",
-            "title": "Bucket Identifier"
-          },
-          "s3_path": {
-            "type": "string",
-            "title": "S3 Path"
-          },
-          "athena_workgroup_template": {
-            "type": "string",
-            "title": "Athena Workgroup Template",
-            "default": ""
-          }
-        },
-        "type": "object",
-        "required": [
-          "identifier",
-          "database_name",
-          "bucket_identifier",
-          "s3_path"
-        ],
-        "title": "AWSGlueConfig"
-      },
-      "AWSS3Config": {
-        "properties": {
-          "identifier": {
-            "type": "string",
-            "title": "Identifier"
-          },
-          "bucket_name": {
-            "type": "string",
-            "title": "Bucket Name"
-          },
-          "bucket_arn": {
-            "type": "string",
-            "title": "Bucket Arn"
-          },
-          "kms_key_arn": {
-            "type": "string",
-            "title": "Kms Key Arn"
-          },
-          "is_default": {
-            "type": "boolean",
-            "title": "Is Default"
-          }
-        },
-        "type": "object",
-        "required": [
-          "identifier",
-          "bucket_name",
-          "bucket_arn",
-          "kms_key_arn",
-          "is_default"
-        ],
-        "title": "AWSS3Config"
-      },
       "AbstractDataProductInfo": {
         "properties": {
           "name": {
@@ -10572,50 +10158,6 @@
         ],
         "title": "AuthorizationAction",
         "description": "The integer values for the authorization actions are stored directly in the DB.\nThis means you can change the name of the actions, but not their integer values.\nThe values for the actions are spaced on purpose, to make it easier to extend.\nThis has no technical benefit, but it makes it easier to read for developers."
-      },
-      "AzureBlobConfig": {
-        "properties": {
-          "identifier": {
-            "type": "string",
-            "title": "Identifier"
-          },
-          "storage_account_names": {
-            "additionalProperties": {
-              "type": "string"
-            },
-            "type": "object",
-            "title": "Storage Account Names"
-          }
-        },
-        "type": "object",
-        "required": [
-          "identifier",
-          "storage_account_names"
-        ],
-        "title": "AzureBlobConfig"
-      },
-      "AzureEnvironmentPlatformConfiguration": {
-        "properties": {
-          "tenant_id": {
-            "type": "string",
-            "title": "Tenant Id"
-          },
-          "subscription_id": {
-            "type": "string",
-            "title": "Subscription Id"
-          },
-          "region": {
-            "type": "string",
-            "title": "Region"
-          }
-        },
-        "type": "object",
-        "required": [
-          "tenant_id",
-          "subscription_id",
-          "region"
-        ],
-        "title": "AzureEnvironmentPlatformConfiguration"
       },
       "BecomeAdmin": {
         "properties": {
@@ -11573,30 +11115,6 @@
           "namespace": {
             "type": "string",
             "title": "Namespace"
-          },
-          "platform_id": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Platform Id"
-          },
-          "service_id": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Service Id"
           },
           "configuration": {
             "properties": {
@@ -12826,51 +12344,6 @@
         ],
         "title": "DataQualityTechnicalAsset"
       },
-      "DatabricksConfig": {
-        "properties": {
-          "identifier": {
-            "type": "string",
-            "title": "Identifier"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "identifier"
-        ],
-        "title": "DatabricksConfig"
-      },
-      "DatabricksEnvironmentPlatformConfiguration": {
-        "properties": {
-          "workspace_urls": {
-            "additionalProperties": {
-              "type": "string"
-            },
-            "type": "object",
-            "title": "Workspace Urls"
-          },
-          "account_id": {
-            "type": "string",
-            "title": "Account Id"
-          },
-          "metastore_id": {
-            "type": "string",
-            "title": "Metastore Id"
-          },
-          "credential_name": {
-            "type": "string",
-            "title": "Credential Name"
-          }
-        },
-        "type": "object",
-        "required": [
-          "workspace_urls",
-          "account_id",
-          "metastore_id",
-          "credential_name"
-        ],
-        "title": "DatabricksEnvironmentPlatformConfiguration"
-      },
       "DecideDataProductRoleAssignment": {
         "properties": {
           "decision": {
@@ -13290,78 +12763,6 @@
         ],
         "title": "Environment"
       },
-      "EnvironmentConfigsGet": {
-        "properties": {
-          "environment_configs": {
-            "items": {
-              "$ref": "#/components/schemas/EnvironmentConfigsGetItem"
-            },
-            "type": "array",
-            "title": "Environment Configs"
-          }
-        },
-        "type": "object",
-        "required": [
-          "environment_configs"
-        ],
-        "title": "EnvironmentConfigsGet"
-      },
-      "EnvironmentConfigsGetItem": {
-        "properties": {
-          "config": {
-            "items": {
-              "anyOf": [
-                {
-                  "$ref": "#/components/schemas/AWSS3Config"
-                },
-                {
-                  "$ref": "#/components/schemas/AWSGlueConfig"
-                },
-                {
-                  "$ref": "#/components/schemas/DatabricksConfig"
-                },
-                {
-                  "$ref": "#/components/schemas/SnowflakeConfig"
-                },
-                {
-                  "$ref": "#/components/schemas/RedshiftConfig"
-                },
-                {
-                  "$ref": "#/components/schemas/PostgreSQLConfig"
-                },
-                {
-                  "$ref": "#/components/schemas/AzureBlobConfig"
-                }
-              ]
-            },
-            "type": "array",
-            "title": "Config"
-          },
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "platform": {
-            "$ref": "#/components/schemas/Platform"
-          },
-          "environment": {
-            "$ref": "#/components/schemas/Environment"
-          },
-          "service": {
-            "$ref": "#/components/schemas/PlatformService"
-          }
-        },
-        "type": "object",
-        "required": [
-          "config",
-          "id",
-          "platform",
-          "environment",
-          "service"
-        ],
-        "title": "EnvironmentConfigsGetItem"
-      },
       "EnvironmentGetItem": {
         "properties": {
           "id": {
@@ -13400,43 +12801,6 @@
           "context"
         ],
         "title": "EnvironmentGetItem"
-      },
-      "EnvironmentPlatformConfigGet": {
-        "properties": {
-          "config": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/AWSEnvironmentPlatformConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/DatabricksEnvironmentPlatformConfiguration"
-              },
-              {
-                "$ref": "#/components/schemas/AzureEnvironmentPlatformConfiguration"
-              }
-            ],
-            "title": "Config"
-          },
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "environment": {
-            "$ref": "#/components/schemas/Environment"
-          },
-          "platform": {
-            "$ref": "#/components/schemas/Platform"
-          }
-        },
-        "type": "object",
-        "required": [
-          "config",
-          "id",
-          "environment",
-          "platform"
-        ],
-        "title": "EnvironmentPlatformConfigGet"
       },
       "EnvironmentUpdateGlobal": {
         "properties": {
@@ -13613,22 +12977,6 @@
           "access_modes"
         ],
         "title": "GetAccessModes"
-      },
-      "GetAllPlatformServiceConfigurationsResponse": {
-        "properties": {
-          "platform_service_configurations": {
-            "items": {
-              "$ref": "#/components/schemas/PlatformServiceConfiguration"
-            },
-            "type": "array",
-            "title": "Platform Service Configurations"
-          }
-        },
-        "type": "object",
-        "required": [
-          "platform_service_configurations"
-        ],
-        "title": "GetAllPlatformServiceConfigurationsResponse"
       },
       "GetAllPlatformsResponse": {
         "properties": {
@@ -14463,22 +13811,6 @@
         ],
         "title": "GetOutputPortResponse"
       },
-      "GetPlatformServicesResponse": {
-        "properties": {
-          "platform_services": {
-            "items": {
-              "$ref": "#/components/schemas/PlatformService"
-            },
-            "type": "array",
-            "title": "Platform Services"
-          }
-        },
-        "type": "object",
-        "required": [
-          "platform_services"
-        ],
-        "title": "GetPlatformServicesResponse"
-      },
       "GetRolesResponse": {
         "properties": {
           "roles": {
@@ -14534,30 +13866,6 @@
             "type": "string",
             "format": "uuid",
             "title": "Owner Id"
-          },
-          "platform_id": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Platform Id"
-          },
-          "service_id": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Service Id"
           },
           "status": {
             "$ref": "#/components/schemas/TechnicalAssetStatus"
@@ -17018,6 +16326,37 @@
         ],
         "title": "OutputPortUpdate"
       },
+      "OverridableProperty": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "allowed_values": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Allowed Values"
+          },
+          "default": {
+            "type": "string",
+            "title": "Default"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "label",
+          "allowed_values",
+          "default"
+        ],
+        "title": "OverridableProperty"
+      },
       "OwnedTechnicalAsset": {
         "properties": {
           "id": {
@@ -17047,30 +16386,6 @@
             "type": "string",
             "format": "uuid",
             "title": "Owner Id"
-          },
-          "platform_id": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Platform Id"
-          },
-          "service_id": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Service Id"
           },
           "configuration": {
             "properties": {
@@ -17132,85 +16447,100 @@
       },
       "Platform": {
         "properties": {
-          "id": {
+          "key": {
             "type": "string",
-            "format": "uuid",
-            "title": "Id"
+            "title": "Key"
           },
-          "name": {
+          "display_name": {
             "type": "string",
-            "title": "Name"
+            "title": "Display Name"
+          },
+          "icon_name": {
+            "type": "string",
+            "title": "Icon Name"
+          },
+          "icon_data_uri": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Icon Data Uri"
+          },
+          "has_environments": {
+            "type": "boolean",
+            "title": "Has Environments"
+          },
+          "settings_schema": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Settings Schema"
+          },
+          "types": {
+            "items": {
+              "$ref": "#/components/schemas/PlatformType"
+            },
+            "type": "array",
+            "title": "Types"
           }
         },
         "type": "object",
         "required": [
-          "id",
-          "name"
+          "key",
+          "display_name",
+          "icon_name",
+          "icon_data_uri",
+          "has_environments",
+          "settings_schema",
+          "types"
         ],
         "title": "Platform"
       },
-      "PlatformService": {
+      "PlatformEnvironmentSettings": {
         "properties": {
-          "id": {
+          "platform_key": {
+            "type": "string",
+            "title": "Platform Key"
+          },
+          "environment_id": {
             "type": "string",
             "format": "uuid",
-            "title": "Id"
+            "title": "Environment Id"
           },
-          "name": {
-            "type": "string",
-            "title": "Name"
-          },
-          "platform": {
-            "$ref": "#/components/schemas/Platform"
-          },
-          "result_string_template": {
-            "type": "string",
-            "title": "Result String Template"
-          },
-          "technical_info_template": {
-            "type": "string",
-            "title": "Technical Info Template"
+          "settings": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Settings"
           }
         },
         "type": "object",
         "required": [
-          "id",
-          "name",
-          "platform",
-          "result_string_template",
-          "technical_info_template"
+          "platform_key",
+          "environment_id",
+          "settings"
         ],
-        "title": "PlatformService"
+        "title": "PlatformEnvironmentSettings"
       },
-      "PlatformServiceConfiguration": {
+      "PlatformSettingsForEnvironment": {
         "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
+          "environment": {
+            "$ref": "#/components/schemas/Environment"
           },
-          "platform": {
-            "$ref": "#/components/schemas/Platform"
-          },
-          "service": {
-            "$ref": "#/components/schemas/PlatformService"
-          },
-          "config": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array",
-            "title": "Config"
+          "settings": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Settings"
           }
         },
         "type": "object",
         "required": [
-          "id",
-          "platform",
-          "service",
-          "config"
+          "environment",
+          "settings"
         ],
-        "title": "PlatformServiceConfiguration"
+        "title": "PlatformSettingsForEnvironment"
       },
       "PlatformTile": {
         "properties": {
@@ -17287,6 +16617,44 @@
         "title": "PlatformTileResponse",
         "description": "Response model for platform tiles"
       },
+      "PlatformType": {
+        "properties": {
+          "kind": {
+            "$ref": "#/components/schemas/PlatformTypeKind"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "display_name": {
+            "type": "string",
+            "title": "Display Name"
+          },
+          "overridable_properties": {
+            "items": {
+              "$ref": "#/components/schemas/OverridableProperty"
+            },
+            "type": "array",
+            "title": "Overridable Properties",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "kind",
+          "name",
+          "display_name"
+        ],
+        "title": "PlatformType"
+      },
+      "PlatformTypeKind": {
+        "type": "string",
+        "enum": [
+          "asset",
+          "tool"
+        ],
+        "title": "PlatformTypeKind"
+      },
       "PluginResponse": {
         "properties": {
           "plugins": {
@@ -17303,39 +16671,6 @@
         ],
         "title": "PluginResponse",
         "description": "Response model for listing available plugins"
-      },
-      "PostgreSQLConfig": {
-        "properties": {
-          "identifier": {
-            "type": "string",
-            "title": "Identifier"
-          },
-          "host": {
-            "type": "string",
-            "title": "Host"
-          },
-          "port": {
-            "type": "string",
-            "title": "Port"
-          },
-          "admin_user": {
-            "type": "string",
-            "title": "Admin User"
-          },
-          "admin_pwd": {
-            "type": "string",
-            "title": "Admin Pwd"
-          }
-        },
-        "type": "object",
-        "required": [
-          "identifier",
-          "host",
-          "port",
-          "admin_user",
-          "admin_pwd"
-        ],
-        "title": "PostgreSQLConfig"
       },
       "Prototype": {
         "type": "integer",
@@ -17356,34 +16691,6 @@
         ],
         "title": "QueryStatsGranularity"
       },
-      "RedshiftConfig": {
-        "properties": {
-          "identifier": {
-            "type": "string",
-            "title": "Identifier"
-          },
-          "database_name": {
-            "type": "string",
-            "title": "Database Name"
-          },
-          "bucket_identifier": {
-            "type": "string",
-            "title": "Bucket Identifier"
-          },
-          "s3_path": {
-            "type": "string",
-            "title": "S3 Path"
-          }
-        },
-        "type": "object",
-        "required": [
-          "identifier",
-          "database_name",
-          "bucket_identifier",
-          "s3_path"
-        ],
-        "title": "RedshiftConfig"
-      },
       "RemoveOutputPortAsInputPortRequest": {
         "properties": {
           "consuming_data_product_id": {
@@ -17400,16 +16707,6 @@
       },
       "RenderTechnicalAssetAccessPathRequest": {
         "properties": {
-          "platform_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Platform Id"
-          },
-          "service_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Service Id"
-          },
           "data_product_id": {
             "type": "string",
             "format": "uuid",
@@ -17439,8 +16736,6 @@
         },
         "type": "object",
         "required": [
-          "platform_id",
-          "service_id",
           "data_product_id",
           "namespace",
           "technical_mapping",
@@ -18375,24 +17670,6 @@
         "title": "SelectOption",
         "description": "Option for select UI elements"
       },
-      "SnowflakeConfig": {
-        "properties": {
-          "identifier": {
-            "type": "string",
-            "title": "Identifier"
-          },
-          "database_name": {
-            "type": "string",
-            "title": "Database Name"
-          }
-        },
-        "type": "object",
-        "required": [
-          "identifier",
-          "database_name"
-        ],
-        "title": "SnowflakeConfig"
-      },
       "Tag": {
         "properties": {
           "id": {
@@ -18502,30 +17779,6 @@
             "type": "string",
             "format": "uuid",
             "title": "Owner Id"
-          },
-          "platform_id": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Platform Id"
-          },
-          "service_id": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "uuid"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Service Id"
           },
           "configuration": {
             "properties": {
@@ -18968,11 +18221,6 @@
       },
       "UIElementMetadataResponse": {
         "properties": {
-          "not_configured": {
-            "type": "boolean",
-            "title": "Not Configured",
-            "default": false
-          },
           "ui_metadata": {
             "items": {
               "$ref": "#/components/schemas/UIElementMetadata"
@@ -18983,10 +18231,6 @@
           "plugin": {
             "type": "string",
             "title": "Plugin"
-          },
-          "has_environments": {
-            "type": "boolean",
-            "title": "Has Environments"
           },
           "result_label": {
             "type": "string",
@@ -19021,17 +18265,6 @@
             ],
             "title": "Icon Data Uri"
           },
-          "parent_platform": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Parent Platform"
-          },
           "platform_tile": {
             "anyOf": [
               {
@@ -19041,11 +18274,6 @@
                 "type": "null"
               }
             ]
-          },
-          "show_in_form": {
-            "type": "boolean",
-            "title": "Show In Form",
-            "default": true
           },
           "shareable": {
             "type": "boolean",
@@ -19061,7 +18289,6 @@
         "required": [
           "ui_metadata",
           "plugin",
-          "has_environments",
           "platform",
           "display_name",
           "icon_name",

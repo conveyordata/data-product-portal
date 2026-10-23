@@ -1,9 +1,5 @@
 import random
 
-from sqlalchemy import select
-
-from app.configuration.platforms.platform_services.model import PlatformService
-from tests import test_session
 from tests.factories import (
     DataProductFactory,
     InputPortFactory,
@@ -23,17 +19,12 @@ def add_random_data(
     data_products = []
     technical_assets = []
 
-    # Get the S3 service from the database for data output creation
-    service = test_session.scalar(
-        select(PlatformService).where(PlatformService.name == "S3")
-    )
-
     # Create data products and data outputs and associate them with each other
     for _ in range(nr_of_data_products):
         data_product = DataProductFactory()
 
         for _ in range(random.randint(0, 3)):
-            technical_asset = TechnicalAssetFactory(owner=data_product, service=service)
+            technical_asset = TechnicalAssetFactory(owner=data_product)
             technical_assets.append(technical_asset)
 
         data_products.append(data_product)

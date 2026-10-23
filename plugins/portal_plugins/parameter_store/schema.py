@@ -4,7 +4,6 @@ from typing import ClassVar, Self
 from pydantic import model_validator
 from sqlalchemy.orm import Session
 
-from app.core.aws.get_url import get_aws_plugin_url
 from app.technical_asset_configuration.base_schema import (
     PlatformMetadata,
     TechnicalAssetPlugin,
@@ -43,7 +42,6 @@ class ParameterStoreTechnicalAssetConfiguration(TechnicalAssetPlugin):
         icon_name="parameter-store-logo.svg",
         icon_package="portal_plugins.parameter_store",
         platform_key="parameterstore",
-        parent_platform="aws",
         result_label="Resulting parameter",
         result_tooltip="The parameter you can access through this technical asset",
         detailed_name="Parameter",
@@ -77,10 +75,6 @@ class ParameterStoreTechnicalAssetConfiguration(TechnicalAssetPlugin):
 
     def get_configuration(self, configs: list) -> None:
         return None
-
-    # Every AWS plugin shares the AWS tile on the data product page, so they all
-    # use the same get_url. The portal refuses a parent tile whose children differ.
-    get_url = classmethod(get_aws_plugin_url)
 
     @classmethod
     def get_ui_metadata(cls, db: Session) -> list[UIElementMetadata]:

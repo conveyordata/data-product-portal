@@ -13,9 +13,6 @@ from sdk import AuthenticatedClient, Client, Reconciler
 from sdk.api_client.api.configuration_data_product_lifecycles import (
     get_data_products_lifecycles,
 )
-from sdk.api_client.api.configuration_platforms import (
-    get_all_platform_service_configurations,
-)
 from sdk.api_client.api.data_products import (
     add_data_product_finalizer,
     get_data_product,
@@ -40,7 +37,6 @@ from sdk.api_client.models import (
     GetDataProductResponse,
     GetDataProductsResponse,
     HTTPValidationError,
-    PlatformServiceConfiguration,
     GetDataProductInputPortsResponse,
     GetTechnicalAssetsResponse,
 )
@@ -71,7 +67,6 @@ class DataProductReconciler(Reconciler):
     def __init__(self, client: Client | AuthenticatedClient) -> None:
         self._client = client
         self._lifecycle_cache: list[DataProductLifeCyclesGetItem] = []
-        self._platform_config_cache: list[PlatformServiceConfiguration] = []
 
     async def list_ids(self) -> Iterable[UUID]:
         """Startup resync: Fetch all existing Data Product IDs via SDK."""
@@ -218,7 +213,6 @@ class DataProductReconciler(Reconciler):
             if isinstance(assets_response, GetTechnicalAssetsResponse)
             else []
         )
-        configs = await self._get_platform_configs()
 
         if not any(
             OSISemanticModelTechnicalAssetConfiguration.from_configuration(
@@ -226,37 +220,30 @@ class DataProductReconciler(Reconciler):
             )
             for a in existing_assets
         ):
-            osi_cfg = next((c for c in configs if c.service.name == "OSI"), None)
-            if osi_cfg:
-                configuration = OSISemanticModelTechnicalAssetConfiguration(
-                    model_name=f"{name} Semantic Model",
-                    location=f"/products/{namespace}/osi.yml",
-                )
-                await self._create_technical_asset(
-                    resource_id, dp, osi_cfg, configuration, f"{namespace}-semantic"
-                )
+            configuration = OSISemanticModelTechnicalAssetConfiguration(
+                model_name=f"{name} Semantic Model",
+                location=f"/products/{namespace}/osi.yml",
+            )
+            await self._create_technical_asset(
+                resource_id, dp, configuration, f"{namespace}-semantic"
+            )
 
         if not any(
             PostgreSQLTechnicalAssetConfiguration.from_configuration(a.configuration)
             for a in existing_assets
         ):
-            pg_cfg = next((c for c in configs if c.service.name == "PostgreSQL"), None)
-            if pg_cfg:
-                configuration = PostgreSQLTechnicalAssetConfiguration(
-                    database=demo_db_name,
-                    schema=schema_name,
-                    access_granularity=AccessGranularity.Schema,
-                    table="*",
-                )
-                await self._create_technical_asset(
-                    resource_id, dp, pg_cfg, configuration
-                )
+            configuration = PostgreSQLTechnicalAssetConfiguration(
+                database=demo_db_name,
+                schema=schema_name,
+                access_granularity=AccessGranularity.Schema,
+                table="*",
+            )
+            await self._create_technical_asset(resource_id, dp, configuration)
 
     async def _create_technical_asset(
         self,
         resource_id: UUID,
         dp: GetDataProductResponse,
-        config: PlatformServiceConfiguration,
         payload_config: Any,
         custom_namespace: str | None = None,
     ):
@@ -266,8 +253,6 @@ class DataProductReconciler(Reconciler):
             description=dp.description,
             tag_ids=[t.id for t in dp.tags],
             technical_mapping=TechnicalMapping.CUSTOM,
-            platform_id=config.platform.id,
-            service_id=config.service.id,
             configuration=payload_config,
         )
 
@@ -373,12 +358,3 @@ class DataProductReconciler(Reconciler):
             if resp is not None and not isinstance(resp, HTTPValidationError):
                 self._lifecycle_cache = resp.data_product_life_cycles
         return self._lifecycle_cache
-
-    async def _get_platform_configs(self) -> list[PlatformServiceConfiguration]:
-        if not self._platform_config_cache:
-            resp = await get_all_platform_service_configurations.asyncio(
-                client=self._client
-            )
-            if resp is not None and not isinstance(resp, HTTPValidationError):
-                self._platform_config_cache = resp.platform_service_configurations
-        return self._platform_config_cache

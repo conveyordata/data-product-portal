@@ -22,35 +22,27 @@ class UIElementMetadataResponse:
     Attributes:
         ui_metadata (list[UIElementMetadata]):
         plugin (str):
-        has_environments (bool):
         platform (str):
         display_name (str):
         icon_name (str):
         detailed_name (str):
-        not_configured (bool | Unset):  Default: False.
         result_label (str | Unset):  Default: 'Resulting path'.
         result_tooltip (str | Unset):  Default: 'The path you can access through this technical asset'.
         icon_data_uri (None | str | Unset):
-        parent_platform (None | str | Unset):
         platform_tile (None | PlatformTile | Unset):
-        show_in_form (bool | Unset):  Default: True.
         shareable (bool | Unset):  Default: True.
     """
 
     ui_metadata: list[UIElementMetadata]
     plugin: str
-    has_environments: bool
     platform: str
     display_name: str
     icon_name: str
     detailed_name: str
-    not_configured: bool | Unset = False
     result_label: str | Unset = "Resulting path"
     result_tooltip: str | Unset = "The path you can access through this technical asset"
     icon_data_uri: None | str | Unset = UNSET
-    parent_platform: None | str | Unset = UNSET
     platform_tile: None | PlatformTile | Unset = UNSET
-    show_in_form: bool | Unset = True
     shareable: bool | Unset = True
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
@@ -64,8 +56,6 @@ class UIElementMetadataResponse:
 
         plugin = self.plugin
 
-        has_environments = self.has_environments
-
         platform = self.platform
 
         display_name = self.display_name
@@ -73,8 +63,6 @@ class UIElementMetadataResponse:
         icon_name = self.icon_name
 
         detailed_name = self.detailed_name
-
-        not_configured = self.not_configured
 
         result_label = self.result_label
 
@@ -86,12 +74,6 @@ class UIElementMetadataResponse:
         else:
             icon_data_uri = self.icon_data_uri
 
-        parent_platform: None | str | Unset
-        if isinstance(self.parent_platform, Unset):
-            parent_platform = UNSET
-        else:
-            parent_platform = self.parent_platform
-
         platform_tile: dict[str, Any] | None | Unset
         if isinstance(self.platform_tile, Unset):
             platform_tile = UNSET
@@ -99,8 +81,6 @@ class UIElementMetadataResponse:
             platform_tile = self.platform_tile.to_dict()
         else:
             platform_tile = self.platform_tile
-
-        show_in_form = self.show_in_form
 
         shareable = self.shareable
 
@@ -110,27 +90,20 @@ class UIElementMetadataResponse:
             {
                 "ui_metadata": ui_metadata,
                 "plugin": plugin,
-                "has_environments": has_environments,
                 "platform": platform,
                 "display_name": display_name,
                 "icon_name": icon_name,
                 "detailed_name": detailed_name,
             }
         )
-        if not_configured is not UNSET:
-            field_dict["not_configured"] = not_configured
         if result_label is not UNSET:
             field_dict["result_label"] = result_label
         if result_tooltip is not UNSET:
             field_dict["result_tooltip"] = result_tooltip
         if icon_data_uri is not UNSET:
             field_dict["icon_data_uri"] = icon_data_uri
-        if parent_platform is not UNSET:
-            field_dict["parent_platform"] = parent_platform
         if platform_tile is not UNSET:
             field_dict["platform_tile"] = platform_tile
-        if show_in_form is not UNSET:
-            field_dict["show_in_form"] = show_in_form
         if shareable is not UNSET:
             field_dict["shareable"] = shareable
 
@@ -151,8 +124,6 @@ class UIElementMetadataResponse:
 
         plugin = d.pop("plugin")
 
-        has_environments = d.pop("has_environments")
-
         platform = d.pop("platform")
 
         display_name = d.pop("display_name")
@@ -160,8 +131,6 @@ class UIElementMetadataResponse:
         icon_name = d.pop("icon_name")
 
         detailed_name = d.pop("detailed_name")
-
-        not_configured = d.pop("not_configured", UNSET)
 
         result_label = d.pop("result_label", UNSET)
 
@@ -175,15 +144,6 @@ class UIElementMetadataResponse:
             return cast(None | str | Unset, data)
 
         icon_data_uri = _parse_icon_data_uri(d.pop("icon_data_uri", UNSET))
-
-        def _parse_parent_platform(data: object) -> None | str | Unset:
-            if data is None:
-                return data
-            if isinstance(data, Unset):
-                return data
-            return cast(None | str | Unset, data)
-
-        parent_platform = _parse_parent_platform(d.pop("parent_platform", UNSET))
 
         def _parse_platform_tile(data: object) -> None | PlatformTile | Unset:
             if data is None:
@@ -202,25 +162,19 @@ class UIElementMetadataResponse:
 
         platform_tile = _parse_platform_tile(d.pop("platform_tile", UNSET))
 
-        show_in_form = d.pop("show_in_form", UNSET)
-
         shareable = d.pop("shareable", UNSET)
 
         ui_element_metadata_response = cls(
             ui_metadata=ui_metadata,
             plugin=plugin,
-            has_environments=has_environments,
             platform=platform,
             display_name=display_name,
             icon_name=icon_name,
             detailed_name=detailed_name,
-            not_configured=not_configured,
             result_label=result_label,
             result_tooltip=result_tooltip,
             icon_data_uri=icon_data_uri,
-            parent_platform=parent_platform,
             platform_tile=platform_tile,
-            show_in_form=show_in_form,
             shareable=shareable,
         )
 

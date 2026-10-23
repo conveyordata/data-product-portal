@@ -1494,11 +1494,9 @@ func (*CreateTagResponse) createTagRes() {}
 
 // Ref: #/components/schemas/CreateTechnicalAssetRequest
 type CreateTechnicalAssetRequest struct {
-	Name        string     `json:"name"`
-	Description string     `json:"description"`
-	Namespace   string     `json:"namespace"`
-	PlatformID  OptNilUUID `json:"platform_id"`
-	ServiceID   OptNilUUID `json:"service_id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Namespace   string `json:"namespace"`
 	// Configuration of the technical asset. The available fields depend on `name`; retrieve them from
 	// /v2/plugins/{name}/form.
 	Configuration CreateTechnicalAssetRequestConfiguration `json:"configuration"`
@@ -1524,16 +1522,6 @@ func (s *CreateTechnicalAssetRequest) GetDescription() string {
 // GetNamespace returns the value of Namespace.
 func (s *CreateTechnicalAssetRequest) GetNamespace() string {
 	return s.Namespace
-}
-
-// GetPlatformID returns the value of PlatformID.
-func (s *CreateTechnicalAssetRequest) GetPlatformID() OptNilUUID {
-	return s.PlatformID
-}
-
-// GetServiceID returns the value of ServiceID.
-func (s *CreateTechnicalAssetRequest) GetServiceID() OptNilUUID {
-	return s.ServiceID
 }
 
 // GetConfiguration returns the value of Configuration.
@@ -1574,16 +1562,6 @@ func (s *CreateTechnicalAssetRequest) SetDescription(val string) {
 // SetNamespace sets the value of Namespace.
 func (s *CreateTechnicalAssetRequest) SetNamespace(val string) {
 	s.Namespace = val
-}
-
-// SetPlatformID sets the value of PlatformID.
-func (s *CreateTechnicalAssetRequest) SetPlatformID(val OptNilUUID) {
-	s.PlatformID = val
-}
-
-// SetServiceID sets the value of ServiceID.
-func (s *CreateTechnicalAssetRequest) SetServiceID(val OptNilUUID) {
-	s.ServiceID = val
 }
 
 // SetConfiguration sets the value of Configuration.
@@ -4432,23 +4410,6 @@ type GetAccessModesNotFoundApplicationJSON jx.Raw
 
 func (*GetAccessModesNotFoundApplicationJSON) getAccessModesRes() {}
 
-// Ref: #/components/schemas/GetAllPlatformServiceConfigurationsResponse
-type GetAllPlatformServiceConfigurationsResponse struct {
-	PlatformServiceConfigurations []PlatformServiceConfiguration `json:"platform_service_configurations"`
-}
-
-// GetPlatformServiceConfigurations returns the value of PlatformServiceConfigurations.
-func (s *GetAllPlatformServiceConfigurationsResponse) GetPlatformServiceConfigurations() []PlatformServiceConfiguration {
-	return s.PlatformServiceConfigurations
-}
-
-// SetPlatformServiceConfigurations sets the value of PlatformServiceConfigurations.
-func (s *GetAllPlatformServiceConfigurationsResponse) SetPlatformServiceConfigurations(val []PlatformServiceConfiguration) {
-	s.PlatformServiceConfigurations = val
-}
-
-func (*GetAllPlatformServiceConfigurationsResponse) getAllPlatformServiceConfigurationsRes() {}
-
 // Ref: #/components/schemas/GetAllPlatformsResponse
 type GetAllPlatformsResponse struct {
 	Platforms []Platform `json:"platforms"`
@@ -5675,27 +5636,6 @@ type GetOutputPortSchemaNotFoundApplicationJSON jx.Raw
 
 func (*GetOutputPortSchemaNotFoundApplicationJSON) getOutputPortSchemaRes() {}
 
-type GetPlatformServiceConfigNotFoundApplicationJSON jx.Raw
-
-func (*GetPlatformServiceConfigNotFoundApplicationJSON) getPlatformServiceConfigRes() {}
-
-// Ref: #/components/schemas/GetPlatformServicesResponse
-type GetPlatformServicesResponse struct {
-	PlatformServices []PlatformService `json:"platform_services"`
-}
-
-// GetPlatformServices returns the value of PlatformServices.
-func (s *GetPlatformServicesResponse) GetPlatformServices() []PlatformService {
-	return s.PlatformServices
-}
-
-// SetPlatformServices sets the value of PlatformServices.
-func (s *GetPlatformServicesResponse) SetPlatformServices(val []PlatformService) {
-	s.PlatformServices = val
-}
-
-func (*GetPlatformServicesResponse) getPlatformServicesRes() {}
-
 // Ref: #/components/schemas/GetRolesResponse
 type GetRolesResponse struct {
 	Roles []Role `json:"roles"`
@@ -5737,8 +5677,6 @@ type GetTechnicalAssetsResponseItem struct {
 	Description      string               `json:"description"`
 	Namespace        string               `json:"namespace"`
 	OwnerID          uuid.UUID            `json:"owner_id"`
-	PlatformID       OptNilUUID           `json:"platform_id"`
-	ServiceID        OptNilUUID           `json:"service_id"`
 	Status           TechnicalAssetStatus `json:"status"`
 	TechnicalMapping TechnicalMapping     `json:"technical_mapping"`
 	AccessModes      []AccessMode         `json:"access_modes"`
@@ -5778,16 +5716,6 @@ func (s *GetTechnicalAssetsResponseItem) GetNamespace() string {
 // GetOwnerID returns the value of OwnerID.
 func (s *GetTechnicalAssetsResponseItem) GetOwnerID() uuid.UUID {
 	return s.OwnerID
-}
-
-// GetPlatformID returns the value of PlatformID.
-func (s *GetTechnicalAssetsResponseItem) GetPlatformID() OptNilUUID {
-	return s.PlatformID
-}
-
-// GetServiceID returns the value of ServiceID.
-func (s *GetTechnicalAssetsResponseItem) GetServiceID() OptNilUUID {
-	return s.ServiceID
 }
 
 // GetStatus returns the value of Status.
@@ -5868,16 +5796,6 @@ func (s *GetTechnicalAssetsResponseItem) SetNamespace(val string) {
 // SetOwnerID sets the value of OwnerID.
 func (s *GetTechnicalAssetsResponseItem) SetOwnerID(val uuid.UUID) {
 	s.OwnerID = val
-}
-
-// SetPlatformID sets the value of PlatformID.
-func (s *GetTechnicalAssetsResponseItem) SetPlatformID(val OptNilUUID) {
-	s.PlatformID = val
-}
-
-// SetServiceID sets the value of ServiceID.
-func (s *GetTechnicalAssetsResponseItem) SetServiceID(val OptNilUUID) {
-	s.ServiceID = val
 }
 
 // SetStatus sets the value of Status.
@@ -6575,7 +6493,6 @@ func (*HTTPValidationError) denyOutputPortTechnicalAssetLinkRes()         {}
 func (*HTTPValidationError) getAWSCredentialsRes()                        {}
 func (*HTTPValidationError) getAccessModesRes()                           {}
 func (*HTTPValidationError) getAllAccessDurationsRes()                    {}
-func (*HTTPValidationError) getAllPlatformServiceConfigurationsRes()      {}
 func (*HTTPValidationError) getAllPlatformsRes()                          {}
 func (*HTTPValidationError) getCurrentUserGroupsRes()                     {}
 func (*HTTPValidationError) getCurrentUserRes()                           {}
@@ -6615,14 +6532,12 @@ func (*HTTPValidationError) getOutputPortQueryStatsRes()                  {}
 func (*HTTPValidationError) getOutputPortRes()                            {}
 func (*HTTPValidationError) getOutputPortSchemaRes()                      {}
 func (*HTTPValidationError) getOutputPortsEventHistoryRes()               {}
-func (*HTTPValidationError) getPlatformServiceConfigRes()                 {}
-func (*HTTPValidationError) getPlatformServicesRes()                      {}
+func (*HTTPValidationError) getPlatformEnvironmentSettingsRes()           {}
 func (*HTTPValidationError) getPlatformTilesRes()                         {}
 func (*HTTPValidationError) getPluginFormRes()                            {}
 func (*HTTPValidationError) getPluginURLRes()                             {}
 func (*HTTPValidationError) getPluginsRes()                               {}
 func (*HTTPValidationError) getRolesRes()                                 {}
-func (*HTTPValidationError) getSinglePlatformServiceConfigurationRes()    {}
 func (*HTTPValidationError) getTagsRes()                                  {}
 func (*HTTPValidationError) getTechnicalAssetEventHistoryRes()            {}
 func (*HTTPValidationError) getTechnicalAssetRes()                        {}
@@ -6704,6 +6619,7 @@ func (*HTTPValidationError) updateOutputPortAccessTypeRes()               {}
 func (*HTTPValidationError) updateOutputPortQueryStatsRes()               {}
 func (*HTTPValidationError) updateOutputPortRes()                         {}
 func (*HTTPValidationError) updateOutputPortStatusRes()                   {}
+func (*HTTPValidationError) updatePlatformEnvironmentSettingsRes()        {}
 func (*HTTPValidationError) updateRoleRes()                               {}
 func (*HTTPValidationError) updateTagRes()                                {}
 func (*HTTPValidationError) updateTechnicalAssetRes()                     {}
@@ -11828,6 +11744,54 @@ func (s *OutputPortUpdate) SetTagIds(val []uuid.UUID) {
 	s.TagIds = val
 }
 
+// Ref: #/components/schemas/OverridableProperty
+type OverridableProperty struct {
+	Name          string   `json:"name"`
+	Label         string   `json:"label"`
+	AllowedValues []string `json:"allowed_values"`
+	Default       string   `json:"default"`
+}
+
+// GetName returns the value of Name.
+func (s *OverridableProperty) GetName() string {
+	return s.Name
+}
+
+// GetLabel returns the value of Label.
+func (s *OverridableProperty) GetLabel() string {
+	return s.Label
+}
+
+// GetAllowedValues returns the value of AllowedValues.
+func (s *OverridableProperty) GetAllowedValues() []string {
+	return s.AllowedValues
+}
+
+// GetDefault returns the value of Default.
+func (s *OverridableProperty) GetDefault() string {
+	return s.Default
+}
+
+// SetName sets the value of Name.
+func (s *OverridableProperty) SetName(val string) {
+	s.Name = val
+}
+
+// SetLabel sets the value of Label.
+func (s *OverridableProperty) SetLabel(val string) {
+	s.Label = val
+}
+
+// SetAllowedValues sets the value of AllowedValues.
+func (s *OverridableProperty) SetAllowedValues(val []string) {
+	s.AllowedValues = val
+}
+
+// SetDefault sets the value of Default.
+func (s *OverridableProperty) SetDefault(val string) {
+	s.Default = val
+}
+
 type OverwriteOutputPortDataQualitySummaryNotFoundApplicationJSON jx.Raw
 
 func (*OverwriteOutputPortDataQualitySummaryNotFoundApplicationJSON) overwriteOutputPortDataQualitySummaryRes() {
@@ -11835,139 +11799,146 @@ func (*OverwriteOutputPortDataQualitySummaryNotFoundApplicationJSON) overwriteOu
 
 // Ref: #/components/schemas/Platform
 type Platform struct {
-	ID   uuid.UUID `json:"id"`
-	Name string    `json:"name"`
+	Key             string                 `json:"key"`
+	DisplayName     string                 `json:"display_name"`
+	IconName        string                 `json:"icon_name"`
+	IconDataURI     NilString              `json:"icon_data_uri"`
+	HasEnvironments bool                   `json:"has_environments"`
+	SettingsSchema  PlatformSettingsSchema `json:"settings_schema"`
+	Types           []PlatformType         `json:"types"`
 }
 
-// GetID returns the value of ID.
-func (s *Platform) GetID() uuid.UUID {
-	return s.ID
+// GetKey returns the value of Key.
+func (s *Platform) GetKey() string {
+	return s.Key
 }
 
-// GetName returns the value of Name.
-func (s *Platform) GetName() string {
-	return s.Name
+// GetDisplayName returns the value of DisplayName.
+func (s *Platform) GetDisplayName() string {
+	return s.DisplayName
 }
 
-// SetID sets the value of ID.
-func (s *Platform) SetID(val uuid.UUID) {
-	s.ID = val
+// GetIconName returns the value of IconName.
+func (s *Platform) GetIconName() string {
+	return s.IconName
 }
 
-// SetName sets the value of Name.
-func (s *Platform) SetName(val string) {
-	s.Name = val
+// GetIconDataURI returns the value of IconDataURI.
+func (s *Platform) GetIconDataURI() NilString {
+	return s.IconDataURI
 }
 
-// Ref: #/components/schemas/PlatformService
-type PlatformService struct {
-	ID                    uuid.UUID `json:"id"`
-	Name                  string    `json:"name"`
-	Platform              Platform  `json:"platform"`
-	ResultStringTemplate  string    `json:"result_string_template"`
-	TechnicalInfoTemplate string    `json:"technical_info_template"`
+// GetHasEnvironments returns the value of HasEnvironments.
+func (s *Platform) GetHasEnvironments() bool {
+	return s.HasEnvironments
 }
 
-// GetID returns the value of ID.
-func (s *PlatformService) GetID() uuid.UUID {
-	return s.ID
+// GetSettingsSchema returns the value of SettingsSchema.
+func (s *Platform) GetSettingsSchema() PlatformSettingsSchema {
+	return s.SettingsSchema
 }
 
-// GetName returns the value of Name.
-func (s *PlatformService) GetName() string {
-	return s.Name
+// GetTypes returns the value of Types.
+func (s *Platform) GetTypes() []PlatformType {
+	return s.Types
 }
 
-// GetPlatform returns the value of Platform.
-func (s *PlatformService) GetPlatform() Platform {
-	return s.Platform
+// SetKey sets the value of Key.
+func (s *Platform) SetKey(val string) {
+	s.Key = val
 }
 
-// GetResultStringTemplate returns the value of ResultStringTemplate.
-func (s *PlatformService) GetResultStringTemplate() string {
-	return s.ResultStringTemplate
+// SetDisplayName sets the value of DisplayName.
+func (s *Platform) SetDisplayName(val string) {
+	s.DisplayName = val
 }
 
-// GetTechnicalInfoTemplate returns the value of TechnicalInfoTemplate.
-func (s *PlatformService) GetTechnicalInfoTemplate() string {
-	return s.TechnicalInfoTemplate
+// SetIconName sets the value of IconName.
+func (s *Platform) SetIconName(val string) {
+	s.IconName = val
 }
 
-// SetID sets the value of ID.
-func (s *PlatformService) SetID(val uuid.UUID) {
-	s.ID = val
+// SetIconDataURI sets the value of IconDataURI.
+func (s *Platform) SetIconDataURI(val NilString) {
+	s.IconDataURI = val
 }
 
-// SetName sets the value of Name.
-func (s *PlatformService) SetName(val string) {
-	s.Name = val
+// SetHasEnvironments sets the value of HasEnvironments.
+func (s *Platform) SetHasEnvironments(val bool) {
+	s.HasEnvironments = val
 }
 
-// SetPlatform sets the value of Platform.
-func (s *PlatformService) SetPlatform(val Platform) {
-	s.Platform = val
+// SetSettingsSchema sets the value of SettingsSchema.
+func (s *Platform) SetSettingsSchema(val PlatformSettingsSchema) {
+	s.SettingsSchema = val
 }
 
-// SetResultStringTemplate sets the value of ResultStringTemplate.
-func (s *PlatformService) SetResultStringTemplate(val string) {
-	s.ResultStringTemplate = val
+// SetTypes sets the value of Types.
+func (s *Platform) SetTypes(val []PlatformType) {
+	s.Types = val
 }
 
-// SetTechnicalInfoTemplate sets the value of TechnicalInfoTemplate.
-func (s *PlatformService) SetTechnicalInfoTemplate(val string) {
-	s.TechnicalInfoTemplate = val
+// Ref: #/components/schemas/PlatformEnvironmentSettings
+type PlatformEnvironmentSettings struct {
+	PlatformKey   string                              `json:"platform_key"`
+	EnvironmentID uuid.UUID                           `json:"environment_id"`
+	Settings      PlatformEnvironmentSettingsSettings `json:"settings"`
 }
 
-// Ref: #/components/schemas/PlatformServiceConfiguration
-type PlatformServiceConfiguration struct {
-	ID       uuid.UUID       `json:"id"`
-	Platform Platform        `json:"platform"`
-	Service  PlatformService `json:"service"`
-	Config   []string        `json:"config"`
+// GetPlatformKey returns the value of PlatformKey.
+func (s *PlatformEnvironmentSettings) GetPlatformKey() string {
+	return s.PlatformKey
 }
 
-// GetID returns the value of ID.
-func (s *PlatformServiceConfiguration) GetID() uuid.UUID {
-	return s.ID
+// GetEnvironmentID returns the value of EnvironmentID.
+func (s *PlatformEnvironmentSettings) GetEnvironmentID() uuid.UUID {
+	return s.EnvironmentID
 }
 
-// GetPlatform returns the value of Platform.
-func (s *PlatformServiceConfiguration) GetPlatform() Platform {
-	return s.Platform
+// GetSettings returns the value of Settings.
+func (s *PlatformEnvironmentSettings) GetSettings() PlatformEnvironmentSettingsSettings {
+	return s.Settings
 }
 
-// GetService returns the value of Service.
-func (s *PlatformServiceConfiguration) GetService() PlatformService {
-	return s.Service
+// SetPlatformKey sets the value of PlatformKey.
+func (s *PlatformEnvironmentSettings) SetPlatformKey(val string) {
+	s.PlatformKey = val
 }
 
-// GetConfig returns the value of Config.
-func (s *PlatformServiceConfiguration) GetConfig() []string {
-	return s.Config
+// SetEnvironmentID sets the value of EnvironmentID.
+func (s *PlatformEnvironmentSettings) SetEnvironmentID(val uuid.UUID) {
+	s.EnvironmentID = val
 }
 
-// SetID sets the value of ID.
-func (s *PlatformServiceConfiguration) SetID(val uuid.UUID) {
-	s.ID = val
+// SetSettings sets the value of Settings.
+func (s *PlatformEnvironmentSettings) SetSettings(val PlatformEnvironmentSettingsSettings) {
+	s.Settings = val
 }
 
-// SetPlatform sets the value of Platform.
-func (s *PlatformServiceConfiguration) SetPlatform(val Platform) {
-	s.Platform = val
+func (*PlatformEnvironmentSettings) getPlatformEnvironmentSettingsRes()    {}
+func (*PlatformEnvironmentSettings) updatePlatformEnvironmentSettingsRes() {}
+
+type PlatformEnvironmentSettingsSettings map[string]jx.Raw
+
+func (s *PlatformEnvironmentSettingsSettings) init() PlatformEnvironmentSettingsSettings {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
 }
 
-// SetService sets the value of Service.
-func (s *PlatformServiceConfiguration) SetService(val PlatformService) {
-	s.Service = val
-}
+type PlatformSettingsSchema map[string]jx.Raw
 
-// SetConfig sets the value of Config.
-func (s *PlatformServiceConfiguration) SetConfig(val []string) {
-	s.Config = val
+func (s *PlatformSettingsSchema) init() PlatformSettingsSchema {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
 }
-
-func (*PlatformServiceConfiguration) getPlatformServiceConfigRes()              {}
-func (*PlatformServiceConfiguration) getSinglePlatformServiceConfigurationRes() {}
 
 // Represents a platform tile in the UI.
 // Ref: #/components/schemas/PlatformTile
@@ -12079,6 +12050,96 @@ func (s *PlatformTileResponse) SetPlatformTiles(val []PlatformTile) {
 }
 
 func (*PlatformTileResponse) getPlatformTilesRes() {}
+
+// Ref: #/components/schemas/PlatformType
+type PlatformType struct {
+	Kind                  PlatformTypeKind      `json:"kind"`
+	Name                  string                `json:"name"`
+	DisplayName           string                `json:"display_name"`
+	OverridableProperties []OverridableProperty `json:"overridable_properties"`
+}
+
+// GetKind returns the value of Kind.
+func (s *PlatformType) GetKind() PlatformTypeKind {
+	return s.Kind
+}
+
+// GetName returns the value of Name.
+func (s *PlatformType) GetName() string {
+	return s.Name
+}
+
+// GetDisplayName returns the value of DisplayName.
+func (s *PlatformType) GetDisplayName() string {
+	return s.DisplayName
+}
+
+// GetOverridableProperties returns the value of OverridableProperties.
+func (s *PlatformType) GetOverridableProperties() []OverridableProperty {
+	return s.OverridableProperties
+}
+
+// SetKind sets the value of Kind.
+func (s *PlatformType) SetKind(val PlatformTypeKind) {
+	s.Kind = val
+}
+
+// SetName sets the value of Name.
+func (s *PlatformType) SetName(val string) {
+	s.Name = val
+}
+
+// SetDisplayName sets the value of DisplayName.
+func (s *PlatformType) SetDisplayName(val string) {
+	s.DisplayName = val
+}
+
+// SetOverridableProperties sets the value of OverridableProperties.
+func (s *PlatformType) SetOverridableProperties(val []OverridableProperty) {
+	s.OverridableProperties = val
+}
+
+// Ref: #/components/schemas/PlatformTypeKind
+type PlatformTypeKind string
+
+const (
+	PlatformTypeKindAsset PlatformTypeKind = "asset"
+	PlatformTypeKindTool  PlatformTypeKind = "tool"
+)
+
+// AllValues returns all PlatformTypeKind values.
+func (PlatformTypeKind) AllValues() []PlatformTypeKind {
+	return []PlatformTypeKind{
+		PlatformTypeKindAsset,
+		PlatformTypeKindTool,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s PlatformTypeKind) MarshalText() ([]byte, error) {
+	switch s {
+	case PlatformTypeKindAsset:
+		return []byte(s), nil
+	case PlatformTypeKindTool:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *PlatformTypeKind) UnmarshalText(data []byte) error {
+	switch PlatformTypeKind(data) {
+	case PlatformTypeKindAsset:
+		*s = PlatformTypeKindAsset
+		return nil
+	case PlatformTypeKindTool:
+		*s = PlatformTypeKindTool
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
 
 // Response model for listing available plugins.
 // Ref: #/components/schemas/PluginResponse
@@ -12325,24 +12386,12 @@ func (*RemoveUsersBatchNoContent) removeUsersBatchRes() {}
 
 // Ref: #/components/schemas/RenderTechnicalAssetAccessPathRequest
 type RenderTechnicalAssetAccessPathRequest struct {
-	PlatformID       uuid.UUID        `json:"platform_id"`
-	ServiceID        uuid.UUID        `json:"service_id"`
 	DataProductID    uuid.UUID        `json:"data_product_id"`
 	Namespace        string           `json:"namespace"`
 	TechnicalMapping TechnicalMapping `json:"technical_mapping"`
 	// Configuration of the technical asset. The available fields depend on `name`; retrieve them from
 	// /v2/plugins/{name}/form.
 	Configuration RenderTechnicalAssetAccessPathRequestConfiguration `json:"configuration"`
-}
-
-// GetPlatformID returns the value of PlatformID.
-func (s *RenderTechnicalAssetAccessPathRequest) GetPlatformID() uuid.UUID {
-	return s.PlatformID
-}
-
-// GetServiceID returns the value of ServiceID.
-func (s *RenderTechnicalAssetAccessPathRequest) GetServiceID() uuid.UUID {
-	return s.ServiceID
 }
 
 // GetDataProductID returns the value of DataProductID.
@@ -12363,16 +12412,6 @@ func (s *RenderTechnicalAssetAccessPathRequest) GetTechnicalMapping() TechnicalM
 // GetConfiguration returns the value of Configuration.
 func (s *RenderTechnicalAssetAccessPathRequest) GetConfiguration() RenderTechnicalAssetAccessPathRequestConfiguration {
 	return s.Configuration
-}
-
-// SetPlatformID sets the value of PlatformID.
-func (s *RenderTechnicalAssetAccessPathRequest) SetPlatformID(val uuid.UUID) {
-	s.PlatformID = val
-}
-
-// SetServiceID sets the value of ServiceID.
-func (s *RenderTechnicalAssetAccessPathRequest) SetServiceID(val uuid.UUID) {
-	s.ServiceID = val
 }
 
 // SetDataProductID sets the value of DataProductID.
@@ -14050,8 +14089,6 @@ type TechnicalAsset struct {
 	Status           TechnicalAssetStatus `json:"status"`
 	TechnicalMapping TechnicalMapping     `json:"technical_mapping"`
 	OwnerID          uuid.UUID            `json:"owner_id"`
-	PlatformID       OptNilUUID           `json:"platform_id"`
-	ServiceID        OptNilUUID           `json:"service_id"`
 	// Configuration of the technical asset. The available fields depend on `name`; retrieve them from
 	// /v2/plugins/{name}/form.
 	Configuration TechnicalAssetConfiguration `json:"configuration"`
@@ -14092,16 +14129,6 @@ func (s *TechnicalAsset) GetOwnerID() uuid.UUID {
 	return s.OwnerID
 }
 
-// GetPlatformID returns the value of PlatformID.
-func (s *TechnicalAsset) GetPlatformID() OptNilUUID {
-	return s.PlatformID
-}
-
-// GetServiceID returns the value of ServiceID.
-func (s *TechnicalAsset) GetServiceID() OptNilUUID {
-	return s.ServiceID
-}
-
 // GetConfiguration returns the value of Configuration.
 func (s *TechnicalAsset) GetConfiguration() TechnicalAssetConfiguration {
 	return s.Configuration
@@ -14140,16 +14167,6 @@ func (s *TechnicalAsset) SetTechnicalMapping(val TechnicalMapping) {
 // SetOwnerID sets the value of OwnerID.
 func (s *TechnicalAsset) SetOwnerID(val uuid.UUID) {
 	s.OwnerID = val
-}
-
-// SetPlatformID sets the value of PlatformID.
-func (s *TechnicalAsset) SetPlatformID(val OptNilUUID) {
-	s.PlatformID = val
-}
-
-// SetServiceID sets the value of ServiceID.
-func (s *TechnicalAsset) SetServiceID(val OptNilUUID) {
-	s.ServiceID = val
 }
 
 // SetConfiguration sets the value of Configuration.
@@ -14630,26 +14647,17 @@ func (s *UIElementMetadata) SetUseNamespaceWhenNotSourceAligned(val OptNilBool) 
 
 // Ref: #/components/schemas/UIElementMetadataResponse
 type UIElementMetadataResponse struct {
-	NotConfigured   OptBool             `json:"not_configured"`
-	UIMetadata      []UIElementMetadata `json:"ui_metadata"`
-	Plugin          string              `json:"plugin"`
-	HasEnvironments bool                `json:"has_environments"`
-	ResultLabel     OptString           `json:"result_label"`
-	ResultTooltip   OptString           `json:"result_tooltip"`
-	Platform        string              `json:"platform"`
-	DisplayName     string              `json:"display_name"`
-	IconName        string              `json:"icon_name"`
-	IconDataURI     OptNilString        `json:"icon_data_uri"`
-	ParentPlatform  OptNilString        `json:"parent_platform"`
-	PlatformTile    OptNilPlatformTile  `json:"platform_tile"`
-	ShowInForm      OptBool             `json:"show_in_form"`
-	Shareable       OptBool             `json:"shareable"`
-	DetailedName    string              `json:"detailed_name"`
-}
-
-// GetNotConfigured returns the value of NotConfigured.
-func (s *UIElementMetadataResponse) GetNotConfigured() OptBool {
-	return s.NotConfigured
+	UIMetadata    []UIElementMetadata `json:"ui_metadata"`
+	Plugin        string              `json:"plugin"`
+	ResultLabel   OptString           `json:"result_label"`
+	ResultTooltip OptString           `json:"result_tooltip"`
+	Platform      string              `json:"platform"`
+	DisplayName   string              `json:"display_name"`
+	IconName      string              `json:"icon_name"`
+	IconDataURI   OptNilString        `json:"icon_data_uri"`
+	PlatformTile  OptNilPlatformTile  `json:"platform_tile"`
+	Shareable     OptBool             `json:"shareable"`
+	DetailedName  string              `json:"detailed_name"`
 }
 
 // GetUIMetadata returns the value of UIMetadata.
@@ -14660,11 +14668,6 @@ func (s *UIElementMetadataResponse) GetUIMetadata() []UIElementMetadata {
 // GetPlugin returns the value of Plugin.
 func (s *UIElementMetadataResponse) GetPlugin() string {
 	return s.Plugin
-}
-
-// GetHasEnvironments returns the value of HasEnvironments.
-func (s *UIElementMetadataResponse) GetHasEnvironments() bool {
-	return s.HasEnvironments
 }
 
 // GetResultLabel returns the value of ResultLabel.
@@ -14697,19 +14700,9 @@ func (s *UIElementMetadataResponse) GetIconDataURI() OptNilString {
 	return s.IconDataURI
 }
 
-// GetParentPlatform returns the value of ParentPlatform.
-func (s *UIElementMetadataResponse) GetParentPlatform() OptNilString {
-	return s.ParentPlatform
-}
-
 // GetPlatformTile returns the value of PlatformTile.
 func (s *UIElementMetadataResponse) GetPlatformTile() OptNilPlatformTile {
 	return s.PlatformTile
-}
-
-// GetShowInForm returns the value of ShowInForm.
-func (s *UIElementMetadataResponse) GetShowInForm() OptBool {
-	return s.ShowInForm
 }
 
 // GetShareable returns the value of Shareable.
@@ -14722,11 +14715,6 @@ func (s *UIElementMetadataResponse) GetDetailedName() string {
 	return s.DetailedName
 }
 
-// SetNotConfigured sets the value of NotConfigured.
-func (s *UIElementMetadataResponse) SetNotConfigured(val OptBool) {
-	s.NotConfigured = val
-}
-
 // SetUIMetadata sets the value of UIMetadata.
 func (s *UIElementMetadataResponse) SetUIMetadata(val []UIElementMetadata) {
 	s.UIMetadata = val
@@ -14735,11 +14723,6 @@ func (s *UIElementMetadataResponse) SetUIMetadata(val []UIElementMetadata) {
 // SetPlugin sets the value of Plugin.
 func (s *UIElementMetadataResponse) SetPlugin(val string) {
 	s.Plugin = val
-}
-
-// SetHasEnvironments sets the value of HasEnvironments.
-func (s *UIElementMetadataResponse) SetHasEnvironments(val bool) {
-	s.HasEnvironments = val
 }
 
 // SetResultLabel sets the value of ResultLabel.
@@ -14772,19 +14755,9 @@ func (s *UIElementMetadataResponse) SetIconDataURI(val OptNilString) {
 	s.IconDataURI = val
 }
 
-// SetParentPlatform sets the value of ParentPlatform.
-func (s *UIElementMetadataResponse) SetParentPlatform(val OptNilString) {
-	s.ParentPlatform = val
-}
-
 // SetPlatformTile sets the value of PlatformTile.
 func (s *UIElementMetadataResponse) SetPlatformTile(val OptNilPlatformTile) {
 	s.PlatformTile = val
-}
-
-// SetShowInForm sets the value of ShowInForm.
-func (s *UIElementMetadataResponse) SetShowInForm(val OptBool) {
-	s.ShowInForm = val
 }
 
 // SetShareable sets the value of Shareable.
@@ -15186,6 +15159,17 @@ func (*UpdateOutputPortStatusNotFoundApplicationJSON) updateOutputPortStatusRes(
 type UpdateOutputPortStatusOKApplicationJSON jx.Raw
 
 func (*UpdateOutputPortStatusOKApplicationJSON) updateOutputPortStatusRes() {}
+
+type UpdatePlatformEnvironmentSettingsReq map[string]jx.Raw
+
+func (s *UpdatePlatformEnvironmentSettingsReq) init() UpdatePlatformEnvironmentSettingsReq {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
+	}
+	return m
+}
 
 // Ref: #/components/schemas/UpdateRole
 type UpdateRole struct {

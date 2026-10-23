@@ -6,8 +6,6 @@ from app.technical_asset_configuration.schema_union import DataOutputConfigurati
 
 
 class RenderTechnicalAssetAccessPathRequest(ORMModel):
-    platform_id: UUID
-    service_id: UUID
     data_product_id: UUID
     namespace: str
     technical_mapping: TechnicalMapping

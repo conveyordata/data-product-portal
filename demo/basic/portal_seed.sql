@@ -19,15 +19,8 @@ declare
     -- ROLES
     admin_role_id uuid;
 
-    -- PLATFORMS
-    postgresql_id uuid;
-    postgresql_service_id uuid;
+    -- ENVIRONMENTS
     environment_id_dev uuid;
-    aws_id uuid;
-    s3_service_id uuid;
-    glue_service_id uuid;
-    semantic_model_id uuid;
-    osi_sem_model_service_id uuid;
 
     -- DATA PRODUCTS
     sales_crm_customers_dp_id uuid;
@@ -115,24 +108,10 @@ begin
         ('00000000-0000-0000-0000-000000000000', 'Admin', 'global', 3, 'Global admin role', ARRAY[]::integer[], timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL)
     RETURNING id INTO admin_role_id;
 
-    -- PLATFORMS
-    SELECT id FROM public.platforms WHERE lower(name) = 'postgresql' INTO postgresql_id;
-    SELECT id FROM public.platform_services WHERE lower(name) = 'postgresql' INTO postgresql_service_id;
-    UPDATE public.platform_service_configs SET "config" = '["dpp_demo"]' WHERE service_id = postgresql_service_id;
-
-    SELECT id FROM public.platforms WHERE lower(name) = 'osi' INTO semantic_model_id;
-    SELECT id FROM public.platform_services WHERE lower(name) = 'osi' INTO osi_sem_model_service_id;
-
-    SELECT id FROM public.platforms WHERE name = 'AWS' INTO aws_id;
-    SELECT id FROM public.platform_services WHERE platform_id = aws_id AND name = 'S3' INTO s3_service_id;
-    SELECT id FROM public.platform_services WHERE platform_id = aws_id AND name = 'Glue' INTO glue_service_id;
-    UPDATE public.platform_service_configs SET "config" = '["datalake","ingress","egress"]' WHERE service_id = s3_service_id;
-    UPDATE public.platform_service_configs SET "config" = '["clean","master"]' WHERE service_id = glue_service_id;
-
     -- ENVIRONMENTS
     INSERT INTO public.environments ("name", context, acronym, is_default, created_on, updated_on, deleted_at) VALUES ('development', '', 'dev', true, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO environment_id_dev;
-    INSERT INTO public.env_platform_service_configs (id, environment_id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), environment_id_dev, aws_id, (SELECT id FROM public.platform_services WHERE platform_id = aws_id AND lower(name) = 'parameterstore'), '[]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
-    INSERT INTO public.env_platform_service_configs (id, environment_id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES ('daa8e3e8-1485-4eb2-8b4b-575e8d10a570', environment_id_dev, postgresql_id, postgresql_service_id, '[{"identifier":"database", "host": "data-product-portal-postgresql-demo", "port": "5432", "admin_user": "postgres", "admin_pwd": "abc123"}]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+    INSERT INTO public.platform_environment_settings (platform_key, environment_id, settings) VALUES ('postgresql', environment_id_dev, '{"postgresql": [{"identifier": "dpp_demo", "host": "data-product-portal-postgresql-demo", "port": "5432", "admin_user": "postgres", "admin_pwd": "abc123"}]}');
+    INSERT INTO public.platform_environment_settings (platform_key, environment_id, settings) VALUES ('aws', environment_id_dev, '{"s3": [{"identifier": "datalake", "bucket_name": "datalake", "bucket_arn": "arn:aws:s3:::datalake", "kms_key_arn": "", "is_default": true}, {"identifier": "ingress", "bucket_name": "ingress", "bucket_arn": "arn:aws:s3:::ingress", "kms_key_arn": "", "is_default": false}, {"identifier": "egress", "bucket_name": "egress", "bucket_arn": "arn:aws:s3:::egress", "kms_key_arn": "", "is_default": false}], "glue": [{"identifier": "clean", "database_name": "clean", "bucket_identifier": "datalake", "s3_path": "clean"}, {"identifier": "master", "database_name": "master", "bucket_identifier": "datalake", "s3_path": "master"}]}');
 
     -- GLOBAL ROLE ASSIGNMENTS
     -- Make john.scientist an admin
@@ -213,9 +192,9 @@ begin
     INSERT INTO public.postgresql_technical_asset_configurations (id, "database", "schema", "table", access_granularity, created_on, updated_on, deleted_at) VALUES (logistics_wms_shipments_do_config_id, 'dpp_demo', 'logistics_wms_shipments', '*', 'schema', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
 
     -- DATA OUTPUTS
-    INSERT INTO public.data_outputs (id, namespace, name, description, status, platform_id, service_id, owner_id, configuration, configuration_id, created_on, updated_on, deleted_at, "technical_mapping") VALUES (gen_random_uuid(), 'sales-crm-customers', 'Sales CRM Customers', 'Customer account information', 'ACTIVE', postgresql_id, postgresql_service_id, sales_crm_customers_dp_id, NULL, sales_crm_customers_do_config_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, 'default') returning id INTO sales_crm_customers_do_id;
-    INSERT INTO public.data_outputs (id, namespace, name, description, status, platform_id, service_id, owner_id, configuration, configuration_id, created_on, updated_on, deleted_at, "technical_mapping") VALUES (gen_random_uuid(), 'sales-erp-orders', 'Sales ERP Orders', 'Order data', 'ACTIVE', postgresql_id, postgresql_service_id, sales_erp_orders_dp_id, NULL, sales_erp_orders_do_config_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, 'default') returning id INTO sales_erp_orders_do_id;
-    INSERT INTO public.data_outputs (id, namespace, name, description, status, platform_id, service_id, owner_id, configuration, configuration_id, created_on, updated_on, deleted_at, "technical_mapping") VALUES (gen_random_uuid(), 'logistics-wms-shipments', 'Logistics WMS Shipments', 'Shipment and delivery status', 'ACTIVE', postgresql_id, postgresql_service_id, logistics_wms_shipments_dp_id, NULL, logistics_wms_shipments_do_config_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, 'default') returning id INTO logistics_wms_shipments_do_id;
+    INSERT INTO public.data_outputs (id, namespace, name, description, status, owner_id, configuration, configuration_id, created_on, updated_on, deleted_at, "technical_mapping") VALUES (gen_random_uuid(), 'sales-crm-customers', 'Sales CRM Customers', 'Customer account information', 'ACTIVE', sales_crm_customers_dp_id, NULL, sales_crm_customers_do_config_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, 'default') returning id INTO sales_crm_customers_do_id;
+    INSERT INTO public.data_outputs (id, namespace, name, description, status, owner_id, configuration, configuration_id, created_on, updated_on, deleted_at, "technical_mapping") VALUES (gen_random_uuid(), 'sales-erp-orders', 'Sales ERP Orders', 'Order data', 'ACTIVE', sales_erp_orders_dp_id, NULL, sales_erp_orders_do_config_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, 'default') returning id INTO sales_erp_orders_do_id;
+    INSERT INTO public.data_outputs (id, namespace, name, description, status, owner_id, configuration, configuration_id, created_on, updated_on, deleted_at, "technical_mapping") VALUES (gen_random_uuid(), 'logistics-wms-shipments', 'Logistics WMS Shipments', 'Shipment and delivery status', 'ACTIVE', logistics_wms_shipments_dp_id, NULL, logistics_wms_shipments_do_config_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, 'default') returning id INTO logistics_wms_shipments_do_id;
 
     -- DATASETS
     INSERT INTO public.datasets (id, namespace, data_product_id, "name", description, about, status, access_function, access_type_id, created_on, updated_on, deleted_at, lifecycle_id) VALUES (gen_random_uuid(), 'customers', sales_crm_customers_dp_id, 'Customers', 'Customer account information from the CRM', '<p><strong>Version:</strong> 1.0.0 &nbsp;|&nbsp; <strong>Freshness:</strong> Daily (Morning sync)</p><p>This dataset contains curated customer information from the Sales CRM, providing a single source of truth for customer identity and contact details.</p><br><h3>How to Use</h3><p>Use this dataset to enrich sales data with customer demographic information or for marketing campaign targeting. Join with the <code>Orders</code> dataset on <code>customer_id</code>.</p><br><h3>Table Schema</h3><table><thead><tr><th>Column Name</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td>id</td><td>Integer</td><td>Unique identifier for the customer.</td></tr><tr><td>first_name</td><td>String</td><td>Customer''s first name.</td></tr><tr><td>last_name</td><td>String</td><td>Customer''s last name.</td></tr><tr><td>email</td><td>String</td><td>Primary contact email address.</td></tr><tr><td>signup_date</td><td>Timestamp</td><td>Timestamp when the customer registered.</td></tr></tbody></table>', 'ACTIVE', 'RESTRICTED', restricted_access_type_id, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL, ready) returning id INTO sales_crm_customers_ds_id;

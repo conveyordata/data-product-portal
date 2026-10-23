@@ -1,5 +1,4 @@
 import json
-from typing import Optional
 from uuid import UUID
 
 import httpx
@@ -78,18 +77,3 @@ def get_aws_url(id: UUID, db: Session, actor: User, environment: str) -> str:
     )
 
     return str(request.url)
-
-
-def get_aws_plugin_url(
-    cls: type[object],
-    id: UUID,
-    db: Session,
-    actor: User,
-    environment: Optional[str] = None,
-) -> str:
-    if environment is None:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Environment is required to get the AWS URL",
-        )
-    return get_aws_url(id, db, actor, environment)

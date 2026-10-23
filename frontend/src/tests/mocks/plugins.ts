@@ -10,7 +10,6 @@ import { server } from '@/tests/mocks/server.ts';
 
 export const mock_plugins: UiElementMetadataResponse[] = [
     {
-        not_configured: false,
         ui_metadata: [
             {
                 label: 'Bucket',
@@ -79,19 +78,15 @@ export const mock_plugins: UiElementMetadataResponse[] = [
             },
         ],
         plugin: 'S3TechnicalAssetConfiguration',
-        has_environments: true,
         result_label: 'Resulting path',
         result_tooltip: 'The path you can access through this technical asset',
         platform: 's3',
         display_name: 'S3',
         icon_name: 's3-logo.svg',
-        parent_platform: 'aws',
         platform_tile: null,
-        show_in_form: true,
         detailed_name: 'Path',
     },
     {
-        not_configured: false,
         ui_metadata: [
             {
                 label: 'Repository',
@@ -112,15 +107,12 @@ export const mock_plugins: UiElementMetadataResponse[] = [
             },
         ],
         plugin: 'GitHubPlugin',
-        has_environments: false,
         result_label: 'Repository link',
         result_tooltip: 'The repository this technical asset points to',
         platform: 'github',
         display_name: 'GitHub',
         icon_name: 'github-logo.svg',
-        parent_platform: null,
         platform_tile: null,
-        show_in_form: true,
         detailed_name: 'Repository',
     },
 ];

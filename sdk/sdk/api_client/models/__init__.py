@@ -21,14 +21,6 @@ from .approve_output_port_as_input_port_request import (
 from .assignment_filter import AssignmentFilter
 from .authorization_action import AuthorizationAction
 from .aws_credentials import AWSCredentials
-from .aws_environment_platform_configuration import AWSEnvironmentPlatformConfiguration
-from .aws_glue_config import AWSGlueConfig
-from .awss3_config import AWSS3Config
-from .azure_blob_config import AzureBlobConfig
-from .azure_blob_config_storage_account_names import AzureBlobConfigStorageAccountNames
-from .azure_environment_platform_configuration import (
-    AzureEnvironmentPlatformConfiguration,
-)
 from .become_admin import BecomeAdmin
 from .bitol_contract_request import BitolContractRequest
 from .can_become_admin_update import CanBecomeAdminUpdate
@@ -117,13 +109,6 @@ from .data_product_usage_update import DataProductUsageUpdate
 from .data_product_visibility import DataProductVisibility
 from .data_quality_status import DataQualityStatus
 from .data_quality_technical_asset import DataQualityTechnicalAsset
-from .databricks_config import DatabricksConfig
-from .databricks_environment_platform_configuration import (
-    DatabricksEnvironmentPlatformConfiguration,
-)
-from .databricks_environment_platform_configuration_workspace_urls import (
-    DatabricksEnvironmentPlatformConfigurationWorkspaceUrls,
-)
 from .decide_data_product_role_assignment import DecideDataProductRoleAssignment
 from .decide_global_role_assignment import DecideGlobalRoleAssignment
 from .decide_output_port_role_assignment import DecideOutputPortRoleAssignment
@@ -148,10 +133,7 @@ from .domain_status import DomainStatus
 from .domain_update import DomainUpdate
 from .edge import Edge
 from .environment import Environment
-from .environment_configs_get import EnvironmentConfigsGet
-from .environment_configs_get_item import EnvironmentConfigsGetItem
 from .environment_get_item import EnvironmentGetItem
-from .environment_platform_config_get import EnvironmentPlatformConfigGet
 from .environment_update_global import EnvironmentUpdateGlobal
 from .environments_get import EnvironmentsGet
 from .event_entity_type import EventEntityType
@@ -162,9 +144,6 @@ from .field_dependency import FieldDependency
 from .finalizer_request import FinalizerRequest
 from .get_access_duration_response import GetAccessDurationResponse
 from .get_access_modes import GetAccessModes
-from .get_all_platform_service_configurations_response import (
-    GetAllPlatformServiceConfigurationsResponse,
-)
 from .get_all_platforms_response import GetAllPlatformsResponse
 from .get_data_product_input_ports_response import GetDataProductInputPortsResponse
 from .get_data_product_output_ports_response import GetDataProductOutputPortsResponse
@@ -186,7 +165,6 @@ from .get_output_port_access_durations_response import (
     GetOutputPortAccessDurationsResponse,
 )
 from .get_output_port_response import GetOutputPortResponse
-from .get_platform_services_response import GetPlatformServicesResponse
 from .get_roles_response import GetRolesResponse
 from .get_technical_assets_response import GetTechnicalAssetsResponse
 from .get_technical_assets_response_item import GetTechnicalAssetsResponseItem
@@ -306,19 +284,25 @@ from .output_port_status import OutputPortStatus
 from .output_port_status_update import OutputPortStatusUpdate
 from .output_port_technical_asset_link_event import OutputPortTechnicalAssetLinkEvent
 from .output_port_update import OutputPortUpdate
+from .overridable_property import OverridableProperty
 from .owned_technical_asset import OwnedTechnicalAsset
 from .owned_technical_asset_configuration import OwnedTechnicalAssetConfiguration
 from .pending_action_response import PendingActionResponse
 from .platform import Platform
-from .platform_service import PlatformService
-from .platform_service_configuration import PlatformServiceConfiguration
+from .platform_environment_settings import PlatformEnvironmentSettings
+from .platform_environment_settings_settings import PlatformEnvironmentSettingsSettings
+from .platform_settings_for_environment import PlatformSettingsForEnvironment
+from .platform_settings_for_environment_settings import (
+    PlatformSettingsForEnvironmentSettings,
+)
+from .platform_settings_schema import PlatformSettingsSchema
 from .platform_tile import PlatformTile
 from .platform_tile_response import PlatformTileResponse
+from .platform_type import PlatformType
+from .platform_type_kind import PlatformTypeKind
 from .plugin_response import PluginResponse
-from .postgre_sql_config import PostgreSQLConfig
 from .prototype import Prototype
 from .query_stats_granularity import QueryStatsGranularity
-from .redshift_config import RedshiftConfig
 from .remove_output_port_as_input_port_request import RemoveOutputPortAsInputPortRequest
 from .render_technical_asset_access_path_request import (
     RenderTechnicalAssetAccessPathRequest,
@@ -375,7 +359,6 @@ from .scope import Scope
 from .search_output_ports_response import SearchOutputPortsResponse
 from .search_output_ports_response_item import SearchOutputPortsResponseItem
 from .select_option import SelectOption
-from .snowflake_config import SnowflakeConfig
 from .tag import Tag
 from .tag_create import TagCreate
 from .tag_update import TagUpdate
@@ -413,6 +396,9 @@ from .update_domain_response import UpdateDomainResponse
 from .update_output_port_access_type_response import UpdateOutputPortAccessTypeResponse
 from .update_output_port_query_status import UpdateOutputPortQueryStatus
 from .update_output_port_response import UpdateOutputPortResponse
+from .update_platform_environment_settings_settings import (
+    UpdatePlatformEnvironmentSettingsSettings,
+)
 from .update_role import UpdateRole
 from .update_tag_response import UpdateTagResponse
 from .update_technical_asset_response import UpdateTechnicalAssetResponse
@@ -443,12 +429,6 @@ __all__ = (
     "AssignmentFilter",
     "AuthorizationAction",
     "AWSCredentials",
-    "AWSEnvironmentPlatformConfiguration",
-    "AWSGlueConfig",
-    "AWSS3Config",
-    "AzureBlobConfig",
-    "AzureBlobConfigStorageAccountNames",
-    "AzureEnvironmentPlatformConfiguration",
     "BecomeAdmin",
     "BitolContractRequest",
     "CanBecomeAdminUpdate",
@@ -483,9 +463,6 @@ __all__ = (
     "CreateTechnicalAssetRequest",
     "CreateTechnicalAssetRequestConfiguration",
     "CreateTechnicalAssetResponse",
-    "DatabricksConfig",
-    "DatabricksEnvironmentPlatformConfiguration",
-    "DatabricksEnvironmentPlatformConfigurationWorkspaceUrls",
     "DataProduct",
     "DataProductAboutUpdate",
     "DataProductCreate",
@@ -540,10 +517,7 @@ __all__ = (
     "DomainUpdate",
     "Edge",
     "Environment",
-    "EnvironmentConfigsGet",
-    "EnvironmentConfigsGetItem",
     "EnvironmentGetItem",
-    "EnvironmentPlatformConfigGet",
     "EnvironmentsGet",
     "EnvironmentUpdateGlobal",
     "EventEntityType",
@@ -554,7 +528,6 @@ __all__ = (
     "FinalizerRequest",
     "GetAccessDurationResponse",
     "GetAccessModes",
-    "GetAllPlatformServiceConfigurationsResponse",
     "GetAllPlatformsResponse",
     "GetDataProductInputPortsResponse",
     "GetDataProductOutputPortsResponse",
@@ -574,7 +547,6 @@ __all__ = (
     "GetInputPortsForOutputPortResponse",
     "GetOutputPortAccessDurationsResponse",
     "GetOutputPortResponse",
-    "GetPlatformServicesResponse",
     "GetRolesResponse",
     "GetTechnicalAssetsResponse",
     "GetTechnicalAssetsResponseItem",
@@ -666,19 +638,23 @@ __all__ = (
     "OutputPortStatusUpdate",
     "OutputPortTechnicalAssetLinkEvent",
     "OutputPortUpdate",
+    "OverridableProperty",
     "OwnedTechnicalAsset",
     "OwnedTechnicalAssetConfiguration",
     "PendingActionResponse",
     "Platform",
-    "PlatformService",
-    "PlatformServiceConfiguration",
+    "PlatformEnvironmentSettings",
+    "PlatformEnvironmentSettingsSettings",
+    "PlatformSettingsForEnvironment",
+    "PlatformSettingsForEnvironmentSettings",
+    "PlatformSettingsSchema",
     "PlatformTile",
     "PlatformTileResponse",
+    "PlatformType",
+    "PlatformTypeKind",
     "PluginResponse",
-    "PostgreSQLConfig",
     "Prototype",
     "QueryStatsGranularity",
-    "RedshiftConfig",
     "RemoveOutputPortAsInputPortRequest",
     "RenderTechnicalAssetAccessPathRequest",
     "RenderTechnicalAssetAccessPathRequestConfiguration",
@@ -711,7 +687,6 @@ __all__ = (
     "SearchOutputPortsResponse",
     "SearchOutputPortsResponseItem",
     "SelectOption",
-    "SnowflakeConfig",
     "Tag",
     "TagCreate",
     "TagsGet",
@@ -747,6 +722,7 @@ __all__ = (
     "UpdateOutputPortAccessTypeResponse",
     "UpdateOutputPortQueryStatus",
     "UpdateOutputPortResponse",
+    "UpdatePlatformEnvironmentSettingsSettings",
     "UpdateRole",
     "UpdateTagResponse",
     "UpdateTechnicalAssetResponse",

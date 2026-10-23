@@ -1,17 +1,9 @@
-import json
 from typing import ClassVar, Optional, Self
 
-from fastapi import HTTPException, status
 from pydantic import model_validator
 from sqlalchemy.orm import Session
 
-from app.configuration.environments.platform_configurations.service import (
-    EnvironmentPlatformConfigurationService,
-)
-from app.configuration.environments.platform_service_configurations.schemas import (
-    DatabricksConfig,
-)
-from app.data_products.model import DataProduct as DataProductModel
+from portal_plugins.settings import DatabricksCatalogSettings
 from app.technical_asset_configuration.base_schema import (
     PluginContext,
     FieldDependency,
@@ -50,7 +42,6 @@ class DatabricksTechnicalAssetConfiguration(TechnicalAssetPlugin):
         icon_name="databricks-logo.svg",
         icon_package="portal_plugins.databricks",
         platform_key="databricks",
-        parent_platform=None,
         result_label="Resulting table",
         result_tooltip="The table you can access through this technical asset",
         detailed_name="Schema",
@@ -75,27 +66,11 @@ class DatabricksTechnicalAssetConfiguration(TechnicalAssetPlugin):
             raise ValueError("Invalid catalog specified")
 
     def get_configuration(
-        self, configs: list[DatabricksConfig]
-    ) -> Optional[DatabricksConfig]:
+        self, configs: list[DatabricksCatalogSettings]
+    ) -> Optional[DatabricksCatalogSettings]:
         return next(
             (config for config in configs if config.identifier == self.catalog), None
         )
-
-    @classmethod
-    def get_url(cls, id, db, actor, environment=None) -> str:
-        platform_config = EnvironmentPlatformConfigurationService(
-            db
-        ).get_env_platform_config(environment, "Databricks")
-        data_product = db.get(DataProductModel, id)
-        config = json.loads(platform_config)["workspace_urls"]
-        if str(data_product.domain_id) not in config:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=(
-                    f"Workspace not configured for domain {data_product.domain.name}"
-                ),
-            )
-        return config[str(data_product.domain_id)]
 
     @classmethod
     def get_ui_metadata(cls, db: Session) -> list[UIElementMetadata]:
