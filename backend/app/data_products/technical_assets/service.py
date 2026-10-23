@@ -481,7 +481,7 @@ class TechnicalAssetService:
     ) -> list[EnvOverridableProperty]:
         return plugin_registry.get(
             technical_asset.configuration.configuration_type
-        ).env_overridable_properties
+        ).get_env_overridable_properties()
 
     @staticmethod
     def _ensure_data_product_environment(

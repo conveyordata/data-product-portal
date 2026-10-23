@@ -1,4 +1,4 @@
-from typing import ClassVar, Optional, Self
+from typing import Annotated, ClassVar, Optional, Self
 
 from pydantic import model_validator
 from sqlalchemy.orm import Session
@@ -9,7 +9,7 @@ from app.configuration.environments.platform_service_configurations.schema_respo
 from app.technical_asset_configuration.base_schema import (
     PluginContext,
     FieldDependency,
-    EnvOverridableProperty,
+    EnvOverridable,
     PlatformMetadata,
     SelectOption,
     TechnicalAssetPlugin,
@@ -30,34 +30,20 @@ from portal_plugins.postgresql.model import (
 class PostgreSQLTechnicalAssetConfiguration(TechnicalAssetPlugin):
     name: ClassVar[str] = NAME
     version: ClassVar[str] = "1.0"
-    env_overridable_properties: ClassVar[list[EnvOverridableProperty]] = [
-        EnvOverridableProperty(
-            name="engine_version",
-            label="Engine version",
-            allowed_values=["15", "16", "17"],
-            default="16",
-        ),
-        EnvOverridableProperty(
-            name="size",
-            label="Size",
-            allowed_values=["small", "medium", "large"],
-            default="small",
-        ),
-        EnvOverridableProperty(
-            name="storage_gb",
-            label="Storage (GB)",
-            allowed_values=["20", "50", "100"],
-            default="20",
-        ),
-    ]
 
     database: str
     schema: str = ""
     table: str = "*"
     access_granularity: AccessGranularity
-    engine_version: str = "16"
-    size: str = "small"
-    storage_gb: str = "20"
+    engine_version: Annotated[
+        str, EnvOverridable(label="Engine version", allowed_values=("15", "16", "17"))
+    ] = "16"
+    size: Annotated[
+        str, EnvOverridable(label="Size", allowed_values=("small", "medium", "large"))
+    ] = "small"
+    storage_gb: Annotated[
+        str, EnvOverridable(label="Storage (GB)", allowed_values=("20", "50", "100"))
+    ] = "20"
 
     _platform_metadata = PlatformMetadata(
         result_string_template="{database}.{schema}.{table}",

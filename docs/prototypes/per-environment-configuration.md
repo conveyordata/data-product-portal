@@ -56,7 +56,7 @@ Approval flows, promote-to-prd, scheduling, applied-state tracking, tests, produ
 ### Domain choices
 
 - The instance is a Technical Asset. The type is its plugin.
-- A plugin declares `env_overridable_properties: ClassVar[list[EnvOverridableProperty]]` on its class: name, label, allowed values and default. The create form gets a select per property, derived from that list, and `GET /api/v2/plugins/` returns the list as `env_overridable_properties`, so a client can see what a type allows without a Data Product. Any plugin can opt in; only PostgreSQL does.
+- A plugin marks a configuration field as overridable on the field itself: `engine_version: Annotated[str, EnvOverridable(label=..., allowed_values=(...))] = "16"`. The name comes from the field and the default from its default value, so each setting is declared once. `get_env_overridable_properties()` derives the list from the fields. The create form gets a select per property from that list, and `GET /api/v2/plugins/` returns it as `env_overridable_properties`, so a client can see what a type allows without a Data Product. The SDK generator strips the `Annotated` marker. Any plugin can opt in; only PostgreSQL does.
 - Base values are ordinary columns of the plugin's configuration (`engine_version`, `size`, `storage_gb` on `postgresql_technical_asset_configurations`), so the create form sets them and they are part of the Technical Asset's `configuration` in every API response.
 - Overrides live in one core table, `technical_asset_environment_overrides`, one row per (Technical Asset, environment, property) with a string value. Deleting the Technical Asset or the environment cascades.
 - Environments are the Data Product's `environments`, never a hard-coded list.
@@ -86,12 +86,10 @@ What was easy:
 What was awkward:
 
 - A base value lives in a plugin-owned table while its overrides live in a core table. A plugin that wants overridable fields needs a plugin migration for the columns, and the two halves of one setting are stored in two places.
-- The default is written twice: in the `EnvOverridableProperty` declaration and as the pydantic field default on the plugin configuration.
 - Plugin configurations aren't in the OpenAPI spec, so the frontend can't type the base fields. The matrix only works through the dedicated endpoint.
 - Settings that really belong to the platform per environment (engine version for all PostgreSQL databases in prd, say) would have to be repeated on every Technical Asset. This shape only fits settings that differ per asset.
 - Alembic's version table limits revision ids to 32 characters, which a descriptive plugin revision name easily exceeds.
 
 What I'd change:
 
-- Derive the pydantic default from the `EnvOverridableProperty` declaration too.
 - Store base values in the same override table under a null environment, so the plugin needs no migration and one row type holds the whole setting.

@@ -1,5 +1,6 @@
 from abc import ABC
 from base64 import b64encode
+from dataclasses import dataclass
 from functools import cache
 from importlib import resources
 from typing import TYPE_CHECKING, Any, ClassVar, Optional
@@ -153,6 +154,12 @@ class PluginContext(ORMModel):
         )
 
 
+@dataclass(frozen=True)
+class EnvOverridable:
+    label: str
+    allowed_values: tuple[str, ...]
+
+
 class EnvOverridableProperty(ORMModel):
     name: str
     label: str
@@ -163,7 +170,6 @@ class EnvOverridableProperty(ORMModel):
 class TechnicalAssetPlugin(ORMModel, ABC):
     version: ClassVar[str] = "1.0"
     mcp_instructions: ClassVar[str] = ""
-    env_overridable_properties: ClassVar[list[EnvOverridableProperty]] = []
 
     @computed_field  # type: ignore[prop-decorator]
     @property
@@ -237,7 +243,21 @@ class TechnicalAssetPlugin(ORMModel, ABC):
                     ],
                 ),
             )
-            for prop in cls.env_overridable_properties
+            for prop in cls.get_env_overridable_properties()
+        ]
+
+    @classmethod
+    def get_env_overridable_properties(cls) -> list[EnvOverridableProperty]:
+        return [
+            EnvOverridableProperty(
+                name=name,
+                label=marker.label,
+                allowed_values=list(marker.allowed_values),
+                default=field.default,
+            )
+            for name, field in cls.model_fields.items()
+            for marker in field.metadata
+            if isinstance(marker, EnvOverridable)
         ]
 
     @classmethod

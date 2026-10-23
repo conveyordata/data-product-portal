@@ -63,19 +63,35 @@ def _field_lines(plugin_class: ast.ClassDef, source: str) -> list[str]:
     for node in plugin_class.body:
         if not isinstance(node, ast.AnnAssign) or not isinstance(node.target, ast.Name):
             continue
-        if node.target.id.startswith("_") or _is_class_var(node.annotation):
+        if node.target.id.startswith("_") or _is_subscript_of(
+            node.annotation, "ClassVar"
+        ):
+            continue
+        if _is_subscript_of(node.annotation, "Annotated"):
+            fields.append(_without_annotated(node, source))
             continue
         assert node.end_lineno is not None
         fields.append("\n".join(source_lines[node.lineno - 1 : node.end_lineno]))
     return fields
 
 
-def _is_class_var(annotation: ast.expr) -> bool:
+def _is_subscript_of(annotation: ast.expr, name: str) -> bool:
     return (
         isinstance(annotation, ast.Subscript)
         and isinstance(annotation.value, ast.Name)
-        and annotation.value.id == "ClassVar"
+        and annotation.value.id == name
     )
+
+
+def _without_annotated(node: ast.AnnAssign, source: str) -> str:
+    assert isinstance(node.annotation, ast.Subscript)
+    assert isinstance(node.annotation.slice, ast.Tuple)
+    assert isinstance(node.target, ast.Name)
+    field_type = ast.get_source_segment(source, node.annotation.slice.elts[0])
+    line = f"    {node.target.id}: {field_type}"
+    if node.value is None:
+        return line
+    return f"{line} = {ast.get_source_segment(source, node.value)}"
 
 
 def build_plugin_module(plugin_dir: Path) -> tuple[str, str, str, set[str]] | None:
