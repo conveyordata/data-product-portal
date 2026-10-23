@@ -1,4 +1,11 @@
-import { CompassOutlined, HistoryOutlined, InfoCircleOutlined, SettingOutlined, TeamOutlined } from '@ant-design/icons';
+import {
+    CompassOutlined,
+    HistoryOutlined,
+    InfoCircleOutlined,
+    SettingOutlined,
+    TeamOutlined,
+    ToolOutlined,
+} from '@ant-design/icons';
 import { usePostHog } from '@posthog/react';
 import type { TourProps } from 'antd';
 import { Tabs, Tour, Typography } from 'antd';
@@ -15,6 +22,7 @@ import { TabKeys } from '@/pages/data-product/components/data-product-tabs/data-
 import { DataProductInputPorts } from '@/pages/data-product/components/data-product-tabs/input-ports/input-port-tab.tsx';
 import { TeamTab } from '@/pages/data-product/components/data-product-tabs/team-tab/team-tab.tsx';
 import { TechnicalAssetTab } from '@/pages/data-product/components/data-product-tabs/technical-asset-tab/technical-asset-tab.tsx';
+import { ToolsTab } from '@/pages/data-product/components/data-product-tabs/tools-tab/tools-tab.tsx';
 import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
 import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
 import { useGetDataProductEventHistoryQuery } from '@/store/api/services/generated/dataProductsApi.ts';
@@ -93,6 +101,12 @@ export function DataProductTabs({ dataProductId }: Props) {
                 key: TabKeys.OutputPorts,
                 icon: <TechnicalAssetOutlined />,
                 children: <TechnicalAssetTab dataProductId={dataProductId} />,
+            },
+            {
+                label: t('Tools'),
+                key: TabKeys.Tools,
+                icon: <ToolOutlined />,
+                children: <ToolsTab dataProductId={dataProductId} />,
             },
             {
                 label: t('Explorer'),

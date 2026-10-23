@@ -22,6 +22,7 @@ export enum ApplicationPaths {
     OutputPortEdit = '/studio/:dataProductId/output-port/:datasetId/edit',
     DataOutput = '/studio/:dataProductId/:dataOutputId',
     DataOutputEdit = '/studio/:dataProductId/:dataOutputId/edit',
+    Tool = '/studio/:dataProductId/tools/:toolId',
     Explorer = '/explorer',
     Logout = '/logout',
     Settings = '/settings',
@@ -50,6 +51,13 @@ export function createAbstractDataProductIdPath(id: string, type: AbstractDataPr
         return createExplorationIdPath(id);
     }
     throw new Error(`Unknown AbstractDataProductType: ${type}`);
+}
+
+export function createToolIdPath(toolId: string, dataProductId: string): string {
+    return ApplicationPaths.Tool.replace(':dataProductId', encodeURIComponent(dataProductId)).replace(
+        ':toolId',
+        encodeURIComponent(toolId),
+    );
 }
 
 export function createDataOutputIdPath(

@@ -1,4 +1,4 @@
-import { api } from "@/store/api/services/generated/dataProductsTechnicalAssetsApi";
+import { api } from "@/store/api/services/generated/dataProductsToolsApi";
 const injectedRtkApi = api.injectEndpoints({
   endpoints: (build) => ({
     getOutputPortQueryStats: build.query<

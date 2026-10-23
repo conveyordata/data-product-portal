@@ -6,6 +6,7 @@ import { configurationAccessModesTags } from '@/store/api/services/tags/configur
 import { dataProductsOutputPortsInputPortsTags } from '@/store/api/services/tags/dataProductsOutputPortsInputPortsTags.ts';
 import { dataProductOutputPortTags } from '@/store/api/services/tags/dataProductsOutputPortsTags.ts';
 import { dataProductTechnicalAssetsTags } from '@/store/api/services/tags/dataProductsTechicalAssetsTags.ts';
+import { dataProductsToolsTags } from '@/store/api/services/tags/dataProductsToolsTags.ts';
 import { dataProductTags } from '@/store/api/services/tags/dataProductTags.ts';
 import { explorationTags } from '@/store/api/services/tags/explorationTags.ts';
 import { outputPortSearchTags } from '@/store/api/services/tags/outputPortsSearchApi.ts';
@@ -320,6 +321,7 @@ api.enhanceEndpoints({
 
         ...dataProductOutputPortTags,
         ...dataProductTechnicalAssetsTags,
+        ...dataProductsToolsTags,
         ...dataProductTags,
         ...usersNotificationsTags,
         ...usersTags,

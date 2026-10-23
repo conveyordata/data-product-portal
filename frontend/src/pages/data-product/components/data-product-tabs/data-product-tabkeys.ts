@@ -3,6 +3,7 @@ export enum TabKeys {
     Usage = 'usage',
     InputPorts = 'inputs',
     OutputPorts = 'outputs',
+    Tools = 'tools',
     Explorer = 'explorer',
     Team = 'team',
     Settings = 'settings',

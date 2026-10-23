@@ -21,6 +21,7 @@ const services = [
     { name: 'Plugins', file: 'plugins' },
     { name: 'Data Products', file: 'dataProducts' },
     { name: 'Data Products - Technical assets', file: 'dataProductsTechnicalAssets' },
+    { name: 'Data Products - Tools', file: 'dataProductsTools' },
     { name: 'Data Products - Output ports', file: 'dataProductsOutputPorts' },
     { name: 'Data Products - Output ports - Input ports', file: 'dataProductsOutputPortsInputPorts' },
     { name: 'Data Products - Output Ports - Data Quality', file: 'dataProductsOutputPortsDataQuality' },

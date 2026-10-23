@@ -23,6 +23,7 @@ import ProtectedRoute from './components/layout/protected/protected.layout.tsx';
 import { Settings } from './pages/settings/settings.page.tsx';
 import { TechnicalAsset } from './pages/technical-asset/technical-asset.page.tsx';
 import { TechnicalAssetEdit } from './pages/technical-asset-edit/technical-asset-edit.page.tsx';
+import { ToolPage } from './pages/tool/tool.page.tsx';
 
 function DataProductsRedirect() {
     const params = useParams();
@@ -75,6 +76,10 @@ const router = createBrowserRouter([
                             {
                                 path: ApplicationPaths.DataOutputEdit,
                                 element: <TechnicalAssetEdit />,
+                            },
+                            {
+                                path: ApplicationPaths.Tool,
+                                element: <ToolPage />,
                             },
                             {
                                 path: ApplicationPaths.DataProductNew,
