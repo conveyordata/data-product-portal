@@ -18315,6 +18315,16 @@
           "data_product_name": {
             "type": "string",
             "title": "Data Product Name"
+          },
+          "quality_status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DataQualityStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",

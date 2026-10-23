@@ -28,6 +28,10 @@ sidebar_position: 200
 - **[General]**: Creating a Data Product, Exploration or Domain whose name has no letters or digits (for example `!!!`) no longer fails with a generic error. Data Products and Domains ask for a namespace instead, and Explorations show a validation error on the name.
 - **[API]**: A query statistics `PATCH` that contains the same day and consumer more than once no longer fails with a 500; the last entry is used.
 
+### bugfixes
+
+- **[UI]**: Output Port tables now show the same quality status as the Output Port detail page.
+
 ## 0.8.0
 
 ### breaking changes
