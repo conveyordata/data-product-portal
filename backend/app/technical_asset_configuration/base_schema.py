@@ -62,6 +62,7 @@ class UIElementRadio(ORMModel):
 
 class UIElementSelect(ORMModel):
     max_count: Optional[int] = 1
+    initial_value: Optional[str] = None
     options: Optional[list[SelectOption]] = None  # Additional options for select fields
 
 
@@ -91,6 +92,7 @@ class UIElementMetadata(ORMModel):
     use_namespace_when_not_source_aligned: Optional[bool] = (
         None  # Whether to use the data product namespace as default value when the data product is not source aligned
     )
+    environment_overridable: Optional[bool] = None
 
     def __init__(self, **data: Any):
         super().__init__(**data)
@@ -211,6 +213,12 @@ class TechnicalAssetPlugin(ORMModel, ABC):
     def get_ui_metadata(cls, db: Session) -> list[UIElementMetadata]:
         """Returns the UI metadata for form generation"""
         return []
+
+    @classmethod
+    def get_environment_overridable_fields(cls, db: Session) -> list[UIElementMetadata]:
+        return [
+            field for field in cls.get_ui_metadata(db) if field.environment_overridable
+        ]
 
     @classmethod
     def get_platform_metadata(cls) -> PlatformMetadata:

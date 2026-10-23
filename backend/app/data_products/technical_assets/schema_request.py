@@ -79,3 +79,8 @@ class TechnicalAssetUpdate(ORMModel):
 
 class TechnicalAssetStatusUpdate(ORMModel):
     status: TechnicalAssetStatus
+
+
+class UpdateTechnicalAssetEnvironmentConfigurationRequest(ORMModel):
+    base_values: dict[str, str]
+    overrides: dict[UUID, dict[str, str]]

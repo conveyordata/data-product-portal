@@ -58,6 +58,9 @@ from .cloud_event_output_port_role_assignment_event import (
 from .cloud_event_output_port_technical_asset_link_event import (
     CloudEventOutputPortTechnicalAssetLinkEvent,
 )
+from .cloud_event_technical_asset_environment_configuration_applied_event import (
+    CloudEventTechnicalAssetEnvironmentConfigurationAppliedEvent,
+)
 from .cloud_event_technical_asset_event import CloudEventTechnicalAssetEvent
 from .create_data_product_life_cycle_response import CreateDataProductLifeCycleResponse
 from .create_data_product_response import CreateDataProductResponse
@@ -150,6 +153,8 @@ from .edge import Edge
 from .environment import Environment
 from .environment_configs_get import EnvironmentConfigsGet
 from .environment_configs_get_item import EnvironmentConfigsGetItem
+from .environment_configuration_property import EnvironmentConfigurationProperty
+from .environment_configuration_value import EnvironmentConfigurationValue
 from .environment_get_item import EnvironmentGetItem
 from .environment_platform_config_get import EnvironmentPlatformConfigGet
 from .environment_update_global import EnvironmentUpdateGlobal
@@ -188,6 +193,9 @@ from .get_output_port_access_durations_response import (
 from .get_output_port_response import GetOutputPortResponse
 from .get_platform_services_response import GetPlatformServicesResponse
 from .get_roles_response import GetRolesResponse
+from .get_technical_asset_environment_configuration_response import (
+    GetTechnicalAssetEnvironmentConfigurationResponse,
+)
 from .get_technical_assets_response import GetTechnicalAssetsResponse
 from .get_technical_assets_response_item import GetTechnicalAssetsResponseItem
 from .get_technical_assets_response_item_configuration import (
@@ -383,6 +391,12 @@ from .tags_get import TagsGet
 from .tags_get_item import TagsGetItem
 from .technical_asset import TechnicalAsset
 from .technical_asset_configuration import TechnicalAssetConfiguration
+from .technical_asset_environment_configuration_applied_event import (
+    TechnicalAssetEnvironmentConfigurationAppliedEvent,
+)
+from .technical_asset_environment_configuration_applied_event_configuration import (
+    TechnicalAssetEnvironmentConfigurationAppliedEventConfiguration,
+)
 from .technical_asset_event import TechnicalAssetEvent
 from .technical_asset_link import TechnicalAssetLink
 from .technical_asset_output_port_request import TechnicalAssetOutputPortRequest
@@ -415,6 +429,18 @@ from .update_output_port_query_status import UpdateOutputPortQueryStatus
 from .update_output_port_response import UpdateOutputPortResponse
 from .update_role import UpdateRole
 from .update_tag_response import UpdateTagResponse
+from .update_technical_asset_environment_configuration_request import (
+    UpdateTechnicalAssetEnvironmentConfigurationRequest,
+)
+from .update_technical_asset_environment_configuration_request_base_values import (
+    UpdateTechnicalAssetEnvironmentConfigurationRequestBaseValues,
+)
+from .update_technical_asset_environment_configuration_request_overrides import (
+    UpdateTechnicalAssetEnvironmentConfigurationRequestOverrides,
+)
+from .update_technical_asset_environment_configuration_request_overrides_additional_property import (
+    UpdateTechnicalAssetEnvironmentConfigurationRequestOverridesAdditionalProperty,
+)
 from .update_technical_asset_response import UpdateTechnicalAssetResponse
 from .url_response import URLResponse
 from .user import User
@@ -464,6 +490,7 @@ __all__ = (
     "CloudEventOutputPortEvent",
     "CloudEventOutputPortRoleAssignmentEvent",
     "CloudEventOutputPortTechnicalAssetLinkEvent",
+    "CloudEventTechnicalAssetEnvironmentConfigurationAppliedEvent",
     "CloudEventTechnicalAssetEvent",
     "CreateDataProductLifeCycleResponse",
     "CreateDataProductResponse",
@@ -542,6 +569,8 @@ __all__ = (
     "Environment",
     "EnvironmentConfigsGet",
     "EnvironmentConfigsGetItem",
+    "EnvironmentConfigurationProperty",
+    "EnvironmentConfigurationValue",
     "EnvironmentGetItem",
     "EnvironmentPlatformConfigGet",
     "EnvironmentsGet",
@@ -576,6 +605,7 @@ __all__ = (
     "GetOutputPortResponse",
     "GetPlatformServicesResponse",
     "GetRolesResponse",
+    "GetTechnicalAssetEnvironmentConfigurationResponse",
     "GetTechnicalAssetsResponse",
     "GetTechnicalAssetsResponseItem",
     "GetTechnicalAssetsResponseItemConfiguration",
@@ -719,6 +749,8 @@ __all__ = (
     "TagUpdate",
     "TechnicalAsset",
     "TechnicalAssetConfiguration",
+    "TechnicalAssetEnvironmentConfigurationAppliedEvent",
+    "TechnicalAssetEnvironmentConfigurationAppliedEventConfiguration",
     "TechnicalAssetEvent",
     "TechnicalAssetLink",
     "TechnicalAssetOutputPortRequest",
@@ -749,6 +781,10 @@ __all__ = (
     "UpdateOutputPortResponse",
     "UpdateRole",
     "UpdateTagResponse",
+    "UpdateTechnicalAssetEnvironmentConfigurationRequest",
+    "UpdateTechnicalAssetEnvironmentConfigurationRequestBaseValues",
+    "UpdateTechnicalAssetEnvironmentConfigurationRequestOverrides",
+    "UpdateTechnicalAssetEnvironmentConfigurationRequestOverridesAdditionalProperty",
     "UpdateTechnicalAssetResponse",
     "URLResponse",
     "User",

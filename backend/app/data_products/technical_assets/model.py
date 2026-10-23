@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Optional
 from fastapi import HTTPException, status
 from sqlalchemy import Column, Enum, ForeignKey, String, and_
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, Session, foreign, relationship
+from sqlalchemy.orm import Mapped, Session, foreign, mapped_column, relationship
 
 from app.configuration.environments.platform_service_configurations.model import (
     EnvironmentPlatformServiceConfiguration,
@@ -26,6 +26,19 @@ if TYPE_CHECKING:
 from app.configuration.tags.model import Tag, tag_technical_asset_table
 from app.database.database import Base, ensure_exists
 from app.shared.model import BaseORM
+
+
+class TechnicalAssetEnvironmentOverride(Base):
+    __tablename__ = "technical_asset_environment_overrides"
+
+    technical_asset_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("data_outputs.id", ondelete="CASCADE"), primary_key=True
+    )
+    environment_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("environments.id", ondelete="CASCADE"), primary_key=True
+    )
+    property: Mapped[str] = mapped_column(String, primary_key=True)
+    value: Mapped[str] = mapped_column(String)
 
 
 class TechnicalAssetAccessMode(Base, BaseORM):

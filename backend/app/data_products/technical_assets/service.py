@@ -5,15 +5,20 @@ from uuid import UUID
 
 import pytz
 from fastapi import Depends, HTTPException, status
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.configuration.access_modes.model import AccessMode as AccessModeModel
+from app.configuration.environments.model import Environment as EnvironmentModel
 from app.configuration.tags.model import Tag as TagModel
 from app.configuration.tags.model import ensure_tag_exists
+from app.core import context
 from app.core.namespace.validation import (
     TechnicalAssetNamespaceValidator,
+)
+from app.core.webhooks.events import (
+    TechnicalAssetEnvironmentConfigurationAppliedEvent,
 )
 from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.model import ensure_data_product_exists
@@ -31,13 +36,20 @@ from app.data_products.technical_assets.enums import TechnicalMapping
 from app.data_products.technical_assets.model import (
     TechnicalAsset as TechnicalAssetModel,
 )
-from app.data_products.technical_assets.model import ensure_technical_asset_exists
+from app.data_products.technical_assets.model import (
+    TechnicalAssetEnvironmentOverride,
+    ensure_technical_asset_exists,
+)
 from app.data_products.technical_assets.schema_request import (
     CreateTechnicalAssetRequest,
     TechnicalAssetStatusUpdate,
     TechnicalAssetUpdate,
+    UpdateTechnicalAssetEnvironmentConfigurationRequest,
 )
 from app.data_products.technical_assets.schema_response import (
+    EnvironmentConfigurationProperty,
+    EnvironmentConfigurationValue,
+    GetTechnicalAssetEnvironmentConfigurationResponse,
     UpdateTechnicalAssetResponse,
 )
 from app.data_products.technical_assets.status import TechnicalAssetStatus
@@ -45,7 +57,10 @@ from app.database.deps import get_db_session
 from app.graph.graph import Graph
 from app.plugins.registry import plugin_registry
 from app.resource_names.service import ResourceNameValidityType
-from app.technical_asset_configuration.base_schema import PluginContext
+from app.technical_asset_configuration.base_schema import (
+    PluginContext,
+    UIElementMetadata,
+)
 from app.users.schema import User
 
 TECHNICAL_ASSET_ACCESS_MODES_INCOMPATIBLE_ERROR = HTTPException(
@@ -350,6 +365,157 @@ class TechnicalAssetService:
         self.db.flush()
         return UpdateTechnicalAssetResponse(id=current_technical_asset.id)
 
+    def get_environment_configuration(
+        self, data_product_id: UUID, id: UUID
+    ) -> GetTechnicalAssetEnvironmentConfigurationResponse:
+        return self._environment_configuration(
+            self.get_technical_asset(data_product_id, id)
+        )
+
+    def update_environment_configuration(
+        self,
+        data_product_id: UUID,
+        id: UUID,
+        request: UpdateTechnicalAssetEnvironmentConfigurationRequest,
+    ) -> GetTechnicalAssetEnvironmentConfigurationResponse:
+        technical_asset = self.get_technical_asset(data_product_id, id)
+        fields = {
+            field.name: field for field in self._overridable_fields(technical_asset)
+        }
+        self._validate_values(fields, request.base_values)
+        for environment_id, values in request.overrides.items():
+            self._ensure_data_product_environment(technical_asset, environment_id)
+            self._validate_values(fields, values)
+
+        for name, value in request.base_values.items():
+            setattr(technical_asset.configuration, name, value)
+        self.db.execute(
+            delete(TechnicalAssetEnvironmentOverride).where(
+                TechnicalAssetEnvironmentOverride.technical_asset_id == id
+            )
+        )
+        self.db.add_all(
+            [
+                TechnicalAssetEnvironmentOverride(
+                    technical_asset_id=id,
+                    environment_id=environment_id,
+                    property=name,
+                    value=value,
+                )
+                for environment_id, values in request.overrides.items()
+                for name, value in values.items()
+            ]
+        )
+        self.db.flush()
+        return self._environment_configuration(technical_asset)
+
+    def apply_environment_configuration(
+        self, data_product_id: UUID, id: UUID, environment_id: UUID
+    ) -> None:
+        technical_asset = self.get_technical_asset(data_product_id, id)
+        environment = self._ensure_data_product_environment(
+            technical_asset, environment_id
+        )
+        context.queue_event(
+            TechnicalAssetEnvironmentConfigurationAppliedEvent(
+                id=id,
+                data_product_id=data_product_id,
+                environment=environment.acronym,
+                configuration={
+                    prop.name: value.effective_value
+                    for prop in self._environment_configuration(
+                        technical_asset
+                    ).properties
+                    for value in prop.environments
+                    if value.environment_id == environment_id
+                },
+            )
+        )
+
+    def _environment_configuration(
+        self, technical_asset: TechnicalAssetModel
+    ) -> GetTechnicalAssetEnvironmentConfigurationResponse:
+        overrides = {
+            (override.environment_id, override.property): override.value
+            for override in self.db.scalars(
+                select(TechnicalAssetEnvironmentOverride).where(
+                    TechnicalAssetEnvironmentOverride.technical_asset_id
+                    == technical_asset.id
+                )
+            )
+        }
+        properties = []
+        for field in self._overridable_fields(technical_asset):
+            allowed_values, default = _allowed_values_and_default(field)
+            base_value = getattr(technical_asset.configuration, field.name) or default
+            properties.append(
+                EnvironmentConfigurationProperty(
+                    name=field.name,
+                    label=field.label,
+                    allowed_values=allowed_values,
+                    default=default,
+                    base_value=base_value,
+                    environments=[
+                        EnvironmentConfigurationValue(
+                            environment_id=item.environment_id,
+                            name=item.environment.name,
+                            acronym=item.environment.acronym,
+                            override=(
+                                override := overrides.get(
+                                    (item.environment_id, field.name)
+                                )
+                            ),
+                            effective_value=override or base_value,
+                        )
+                        for item in technical_asset.owner.environments
+                    ],
+                )
+            )
+        return GetTechnicalAssetEnvironmentConfigurationResponse(properties=properties)
+
+    def _overridable_fields(
+        self, technical_asset: TechnicalAssetModel
+    ) -> list[UIElementMetadata]:
+        return plugin_registry.get(
+            technical_asset.configuration.configuration_type
+        ).get_environment_overridable_fields(self.db)
+
+    @staticmethod
+    def _ensure_data_product_environment(
+        technical_asset: TechnicalAssetModel, environment_id: UUID
+    ) -> EnvironmentModel:
+        environment = next(
+            (
+                item.environment
+                for item in technical_asset.owner.environments
+                if item.environment_id == environment_id
+            ),
+            None,
+        )
+        if environment is None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Environment {environment_id} is not an environment of the Data Product",
+            )
+        return environment
+
+    @staticmethod
+    def _validate_values(
+        fields: dict[str, UIElementMetadata], values: dict[str, str]
+    ) -> None:
+        for name, value in values.items():
+            if name not in fields:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Property '{name}' is not overridable per environment",
+                )
+            allowed_values, _ = _allowed_values_and_default(fields[name])
+            if value not in allowed_values:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Value '{value}' is not allowed for '{name}', allowed values: {', '.join(allowed_values)}",
+                )
+
     def get_graph_data(self, data_product_id: UUID, id: UUID, level: int) -> Graph:
         ensure_technical_asset_exists(id, self.db, data_product_id=data_product_id)
         graph = DataProductService(self.db).get_graph_data(data_product_id, level)
@@ -385,3 +551,13 @@ class TechnicalAssetService:
         )
         self._filter_environment_configurations_by_data_product(technical_assets)
         return technical_assets
+
+
+def _allowed_values_and_default(field: UIElementMetadata) -> tuple[list[str], str]:
+    if not (field.select and field.select.options and field.select.initial_value):
+        raise ValueError(
+            f"Overridable field '{field.name}' needs select options and an initial value"
+        )
+    return [
+        str(option.value) for option in field.select.options
+    ], field.select.initial_value

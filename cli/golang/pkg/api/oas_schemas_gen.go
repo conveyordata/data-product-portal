@@ -632,6 +632,11 @@ type AddOutputPortDataQualityRunNotFoundApplicationJSON jx.Raw
 
 func (*AddOutputPortDataQualityRunNotFoundApplicationJSON) addOutputPortDataQualityRunRes() {}
 
+type ApplyTechnicalAssetEnvironmentConfigurationOKApplicationJSON jx.Raw
+
+func (*ApplyTechnicalAssetEnvironmentConfigurationOKApplicationJSON) applyTechnicalAssetEnvironmentConfigurationRes() {
+}
+
 // Ref: #/components/schemas/ApproveLinkBetweenTechnicalAssetAndOutputPortRequest
 type ApproveLinkBetweenTechnicalAssetAndOutputPortRequest struct {
 	TechnicalAssetID uuid.UUID `json:"technical_asset_id"`
@@ -4085,6 +4090,135 @@ func (s *Environment) SetIsGlobal(val OptBool) {
 func (*Environment) getEnvironmentRes()            {}
 func (*Environment) updateEnvironmentIsGlobalRes() {}
 
+// Ref: #/components/schemas/EnvironmentConfigurationProperty
+type EnvironmentConfigurationProperty struct {
+	Name          string                          `json:"name"`
+	Label         string                          `json:"label"`
+	AllowedValues []string                        `json:"allowed_values"`
+	Default       string                          `json:"default"`
+	BaseValue     string                          `json:"base_value"`
+	Environments  []EnvironmentConfigurationValue `json:"environments"`
+}
+
+// GetName returns the value of Name.
+func (s *EnvironmentConfigurationProperty) GetName() string {
+	return s.Name
+}
+
+// GetLabel returns the value of Label.
+func (s *EnvironmentConfigurationProperty) GetLabel() string {
+	return s.Label
+}
+
+// GetAllowedValues returns the value of AllowedValues.
+func (s *EnvironmentConfigurationProperty) GetAllowedValues() []string {
+	return s.AllowedValues
+}
+
+// GetDefault returns the value of Default.
+func (s *EnvironmentConfigurationProperty) GetDefault() string {
+	return s.Default
+}
+
+// GetBaseValue returns the value of BaseValue.
+func (s *EnvironmentConfigurationProperty) GetBaseValue() string {
+	return s.BaseValue
+}
+
+// GetEnvironments returns the value of Environments.
+func (s *EnvironmentConfigurationProperty) GetEnvironments() []EnvironmentConfigurationValue {
+	return s.Environments
+}
+
+// SetName sets the value of Name.
+func (s *EnvironmentConfigurationProperty) SetName(val string) {
+	s.Name = val
+}
+
+// SetLabel sets the value of Label.
+func (s *EnvironmentConfigurationProperty) SetLabel(val string) {
+	s.Label = val
+}
+
+// SetAllowedValues sets the value of AllowedValues.
+func (s *EnvironmentConfigurationProperty) SetAllowedValues(val []string) {
+	s.AllowedValues = val
+}
+
+// SetDefault sets the value of Default.
+func (s *EnvironmentConfigurationProperty) SetDefault(val string) {
+	s.Default = val
+}
+
+// SetBaseValue sets the value of BaseValue.
+func (s *EnvironmentConfigurationProperty) SetBaseValue(val string) {
+	s.BaseValue = val
+}
+
+// SetEnvironments sets the value of Environments.
+func (s *EnvironmentConfigurationProperty) SetEnvironments(val []EnvironmentConfigurationValue) {
+	s.Environments = val
+}
+
+// Ref: #/components/schemas/EnvironmentConfigurationValue
+type EnvironmentConfigurationValue struct {
+	EnvironmentID  uuid.UUID `json:"environment_id"`
+	Name           string    `json:"name"`
+	Acronym        string    `json:"acronym"`
+	Override       NilString `json:"override"`
+	EffectiveValue string    `json:"effective_value"`
+}
+
+// GetEnvironmentID returns the value of EnvironmentID.
+func (s *EnvironmentConfigurationValue) GetEnvironmentID() uuid.UUID {
+	return s.EnvironmentID
+}
+
+// GetName returns the value of Name.
+func (s *EnvironmentConfigurationValue) GetName() string {
+	return s.Name
+}
+
+// GetAcronym returns the value of Acronym.
+func (s *EnvironmentConfigurationValue) GetAcronym() string {
+	return s.Acronym
+}
+
+// GetOverride returns the value of Override.
+func (s *EnvironmentConfigurationValue) GetOverride() NilString {
+	return s.Override
+}
+
+// GetEffectiveValue returns the value of EffectiveValue.
+func (s *EnvironmentConfigurationValue) GetEffectiveValue() string {
+	return s.EffectiveValue
+}
+
+// SetEnvironmentID sets the value of EnvironmentID.
+func (s *EnvironmentConfigurationValue) SetEnvironmentID(val uuid.UUID) {
+	s.EnvironmentID = val
+}
+
+// SetName sets the value of Name.
+func (s *EnvironmentConfigurationValue) SetName(val string) {
+	s.Name = val
+}
+
+// SetAcronym sets the value of Acronym.
+func (s *EnvironmentConfigurationValue) SetAcronym(val string) {
+	s.Acronym = val
+}
+
+// SetOverride sets the value of Override.
+func (s *EnvironmentConfigurationValue) SetOverride(val NilString) {
+	s.Override = val
+}
+
+// SetEffectiveValue sets the value of EffectiveValue.
+func (s *EnvironmentConfigurationValue) SetEffectiveValue(val string) {
+	s.EffectiveValue = val
+}
+
 // Ref: #/components/schemas/EnvironmentGetItem
 type EnvironmentGetItem struct {
 	ID        uuid.UUID `json:"id"`
@@ -5713,6 +5847,26 @@ func (s *GetRolesResponse) SetRoles(val []Role) {
 
 func (*GetRolesResponse) getRolesRes() {}
 
+// Ref: #/components/schemas/GetTechnicalAssetEnvironmentConfigurationResponse
+type GetTechnicalAssetEnvironmentConfigurationResponse struct {
+	Properties []EnvironmentConfigurationProperty `json:"properties"`
+}
+
+// GetProperties returns the value of Properties.
+func (s *GetTechnicalAssetEnvironmentConfigurationResponse) GetProperties() []EnvironmentConfigurationProperty {
+	return s.Properties
+}
+
+// SetProperties sets the value of Properties.
+func (s *GetTechnicalAssetEnvironmentConfigurationResponse) SetProperties(val []EnvironmentConfigurationProperty) {
+	s.Properties = val
+}
+
+func (*GetTechnicalAssetEnvironmentConfigurationResponse) getTechnicalAssetEnvironmentConfigurationRes() {
+}
+func (*GetTechnicalAssetEnvironmentConfigurationResponse) updateTechnicalAssetEnvironmentConfigurationRes() {
+}
+
 // Ref: #/components/schemas/GetTechnicalAssetsResponse
 type GetTechnicalAssetsResponse struct {
 	TechnicalAssets []GetTechnicalAssetsResponseItem `json:"technical_assets"`
@@ -6527,189 +6681,192 @@ func (s *HTTPValidationError) SetDetail(val []ValidationError) {
 	s.Detail = val
 }
 
-func (*HTTPValidationError) addDataProductFinalizerRes()                  {}
-func (*HTTPValidationError) addDomainFinalizerRes()                       {}
-func (*HTTPValidationError) addExplorationFinalizerRes()                  {}
-func (*HTTPValidationError) addGroupMembersRes()                          {}
-func (*HTTPValidationError) addOutputPortDataQualityRunRes()              {}
-func (*HTTPValidationError) approveOutputPortAsInputPortRes()             {}
-func (*HTTPValidationError) approveOutputPortTechnicalAssetLinkRes()      {}
-func (*HTTPValidationError) becomeAdminRes()                              {}
-func (*HTTPValidationError) cancelInputPortForDataProductRes()            {}
-func (*HTTPValidationError) cancelInputPortForExplorationRes()            {}
-func (*HTTPValidationError) checkAccessRes()                              {}
-func (*HTTPValidationError) createAccessModeRes()                         {}
-func (*HTTPValidationError) createDataProductLifecycleRes()               {}
-func (*HTTPValidationError) createDataProductRes()                        {}
-func (*HTTPValidationError) createDataProductRoleAssignmentRes()          {}
-func (*HTTPValidationError) createDataProductSettingRes()                 {}
-func (*HTTPValidationError) createDataProductTypeRes()                    {}
-func (*HTTPValidationError) createDomainRes()                             {}
-func (*HTTPValidationError) createExplorationRes()                        {}
-func (*HTTPValidationError) createGroupRes()                              {}
-func (*HTTPValidationError) createGroupsBatchRes()                        {}
-func (*HTTPValidationError) createMachineUserRes()                        {}
-func (*HTTPValidationError) createMachineUsersBatchRes()                  {}
-func (*HTTPValidationError) createOutputPortAccessTypeRes()               {}
-func (*HTTPValidationError) createOutputPortRes()                         {}
-func (*HTTPValidationError) createOutputPortRoleAssignmentRes()           {}
-func (*HTTPValidationError) createRoleRes()                               {}
-func (*HTTPValidationError) createTagRes()                                {}
-func (*HTTPValidationError) createTechnicalAssetRes()                     {}
-func (*HTTPValidationError) createUserRes()                               {}
-func (*HTTPValidationError) createUsersBatchRes()                         {}
-func (*HTTPValidationError) decideDataProductRoleAssignmentRes()          {}
-func (*HTTPValidationError) decideGlobalRoleAssignmentRes()               {}
-func (*HTTPValidationError) decideOutputPortRoleAssignmentRes()           {}
-func (*HTTPValidationError) deleteAccessModeRes()                         {}
-func (*HTTPValidationError) deleteDataProductRoleAssignmentRes()          {}
-func (*HTTPValidationError) deleteGlobalRoleAssignmentRes()               {}
-func (*HTTPValidationError) deleteGroupRes()                              {}
-func (*HTTPValidationError) deleteGroupsBatchRes()                        {}
-func (*HTTPValidationError) deleteMachineUserRes()                        {}
-func (*HTTPValidationError) deleteMachineUsersBatchRes()                  {}
-func (*HTTPValidationError) deleteOutputPortQueryStatRes()                {}
-func (*HTTPValidationError) deleteOutputPortRoleAssignmentRes()           {}
-func (*HTTPValidationError) denyOutputPortAsInputPortRes()                {}
-func (*HTTPValidationError) denyOutputPortTechnicalAssetLinkRes()         {}
-func (*HTTPValidationError) getAWSCredentialsRes()                        {}
-func (*HTTPValidationError) getAccessModesRes()                           {}
-func (*HTTPValidationError) getAllAccessDurationsRes()                    {}
-func (*HTTPValidationError) getAllPlatformServiceConfigurationsRes()      {}
-func (*HTTPValidationError) getAllPlatformsRes()                          {}
-func (*HTTPValidationError) getCurrentUserGroupsRes()                     {}
-func (*HTTPValidationError) getCurrentUserRes()                           {}
-func (*HTTPValidationError) getDataProductEventHistoryRes()               {}
-func (*HTTPValidationError) getDataProductInputPortsRes()                 {}
-func (*HTTPValidationError) getDataProductOutputPortsRes()                {}
-func (*HTTPValidationError) getDataProductRes()                           {}
-func (*HTTPValidationError) getDataProductRolledUpTagsRes()               {}
-func (*HTTPValidationError) getDataProductSettingsRes()                   {}
-func (*HTTPValidationError) getDataProductTechnicalAssetsRes()            {}
-func (*HTTPValidationError) getDataProductTypeRes()                       {}
-func (*HTTPValidationError) getDataProductsLifecyclesRes()                {}
-func (*HTTPValidationError) getDataProductsRes()                          {}
-func (*HTTPValidationError) getDataProductsSettingsRes()                  {}
-func (*HTTPValidationError) getDataProductsTypesRes()                     {}
-func (*HTTPValidationError) getDefaultAccessDurationRes()                 {}
-func (*HTTPValidationError) getDeviceTokenRes()                           {}
-func (*HTTPValidationError) getDomainRes()                                {}
-func (*HTTPValidationError) getDomainsRes()                               {}
-func (*HTTPValidationError) getEnvironmentRes()                           {}
-func (*HTTPValidationError) getEnvironmentsRes()                          {}
-func (*HTTPValidationError) getExplorationInputPortsRes()                 {}
-func (*HTTPValidationError) getExplorationRes()                           {}
-func (*HTTPValidationError) getExplorationsRes()                          {}
-func (*HTTPValidationError) getGroupMembersRes()                          {}
-func (*HTTPValidationError) getGroupRes()                                 {}
-func (*HTTPValidationError) getGroupsRes()                                {}
-func (*HTTPValidationError) getInputPortsForOutputPortRes()               {}
-func (*HTTPValidationError) getJwtTokenRes()                              {}
-func (*HTTPValidationError) getLatestDataQualitySummaryForOutputPortRes() {}
-func (*HTTPValidationError) getMachineUserRes()                           {}
-func (*HTTPValidationError) getMachineUsersRes()                          {}
-func (*HTTPValidationError) getOutputPortAccessDurationsRes()             {}
-func (*HTTPValidationError) getOutputPortAccessTypesRes()                 {}
-func (*HTTPValidationError) getOutputPortCuratedQueriesRes()              {}
-func (*HTTPValidationError) getOutputPortQueryStatsRes()                  {}
-func (*HTTPValidationError) getOutputPortRes()                            {}
-func (*HTTPValidationError) getOutputPortSchemaRes()                      {}
-func (*HTTPValidationError) getOutputPortsEventHistoryRes()               {}
-func (*HTTPValidationError) getPlatformServiceConfigRes()                 {}
-func (*HTTPValidationError) getPlatformServicesRes()                      {}
-func (*HTTPValidationError) getPlatformTilesRes()                         {}
-func (*HTTPValidationError) getPluginFormRes()                            {}
-func (*HTTPValidationError) getPluginURLRes()                             {}
-func (*HTTPValidationError) getPluginsRes()                               {}
-func (*HTTPValidationError) getRolesRes()                                 {}
-func (*HTTPValidationError) getSinglePlatformServiceConfigurationRes()    {}
-func (*HTTPValidationError) getTagsRes()                                  {}
-func (*HTTPValidationError) getTechnicalAssetEventHistoryRes()            {}
-func (*HTTPValidationError) getTechnicalAssetRes()                        {}
-func (*HTTPValidationError) getThemeSettingsRes()                         {}
-func (*HTTPValidationError) getUserGroupsRes()                            {}
-func (*HTTPValidationError) getUserNotificationsRes()                     {}
-func (*HTTPValidationError) getUsersRes()                                 {}
-func (*HTTPValidationError) grantOutputPortAccessRes()                    {}
-func (*HTTPValidationError) ingestOutputPortContractRes()                 {}
-func (*HTTPValidationError) ingestOutputPortContractYamlRes()             {}
-func (*HTTPValidationError) isAdminRes()                                  {}
-func (*HTTPValidationError) linkOutputPortToTechnicalAssetRes()           {}
-func (*HTTPValidationError) listDataProductRoleAssignmentsRes()           {}
-func (*HTTPValidationError) listGlobalRoleAssignmentsRes()                {}
-func (*HTTPValidationError) listOutputPortRoleAssignmentsRes()            {}
-func (*HTTPValidationError) markTourAsSeenRes()                           {}
-func (*HTTPValidationError) migrateDataProductTypeRes()                   {}
-func (*HTTPValidationError) migrateDomainRes()                            {}
-func (*HTTPValidationError) modifyDataProductRoleAssignmentRes()          {}
-func (*HTTPValidationError) modifyOutputPortRoleAssignmentRes()           {}
-func (*HTTPValidationError) overwriteOutputPortDataQualitySummaryRes()    {}
-func (*HTTPValidationError) removeAllUserNotificationsRes()               {}
-func (*HTTPValidationError) removeDataProductFinalizerRes()               {}
-func (*HTTPValidationError) removeDataProductLifecycleRes()               {}
-func (*HTTPValidationError) removeDataProductRes()                        {}
-func (*HTTPValidationError) removeDataProductSettingRes()                 {}
-func (*HTTPValidationError) removeDataProductTypeRes()                    {}
-func (*HTTPValidationError) removeDomainFinalizerRes()                    {}
-func (*HTTPValidationError) removeDomainRes()                             {}
-func (*HTTPValidationError) removeExplorationFinalizerRes()               {}
-func (*HTTPValidationError) removeExplorationRes()                        {}
-func (*HTTPValidationError) removeGroupMembersRes()                       {}
-func (*HTTPValidationError) removeInputPortForDataProductRes()            {}
-func (*HTTPValidationError) removeInputPortForExplorationRes()            {}
-func (*HTTPValidationError) removeOutputPortAccessTypeRes()               {}
-func (*HTTPValidationError) removeOutputPortAsInputPortRes()              {}
-func (*HTTPValidationError) removeOutputPortRes()                         {}
-func (*HTTPValidationError) removeRoleRes()                               {}
-func (*HTTPValidationError) removeTagRes()                                {}
-func (*HTTPValidationError) removeTechnicalAssetRes()                     {}
-func (*HTTPValidationError) removeUserNotificationRes()                   {}
-func (*HTTPValidationError) removeUserRes()                               {}
-func (*HTTPValidationError) removeUsersBatchRes()                         {}
-func (*HTTPValidationError) renderTechnicalAssetAccessPathRes()           {}
-func (*HTTPValidationError) renewInputPortForDataProductRes()             {}
-func (*HTTPValidationError) renewInputPortForExplorationRes()             {}
-func (*HTTPValidationError) renewOutputPortAsInputPortRes()               {}
-func (*HTTPValidationError) replaceGroupMembersRes()                      {}
-func (*HTTPValidationError) replaceOutputPortCuratedQueriesRes()          {}
-func (*HTTPValidationError) requestDataProductRoleAssignmentRes()         {}
-func (*HTTPValidationError) requestInputPortsForDataProductRes()          {}
-func (*HTTPValidationError) requestInputPortsForExplorationRes()          {}
-func (*HTTPValidationError) requestOutputPortRoleAssignmentRes()          {}
-func (*HTTPValidationError) revokeAdminRes()                              {}
-func (*HTTPValidationError) revokeInputPortForDataProductRes()            {}
-func (*HTTPValidationError) revokeInputPortForExplorationRes()            {}
-func (*HTTPValidationError) revokeOutputPortAsInputPortRes()              {}
-func (*HTTPValidationError) sanitizeResourceNameRes()                     {}
-func (*HTTPValidationError) searchOutputPortsRes()                        {}
-func (*HTTPValidationError) setCanBecomeAdminRes()                        {}
-func (*HTTPValidationError) setValueForDataProductRes()                   {}
-func (*HTTPValidationError) setValueForOutputPortRes()                    {}
-func (*HTTPValidationError) unlinkOutputPortFromTechnicalAssetRes()       {}
-func (*HTTPValidationError) updateAccessDurationRes()                     {}
-func (*HTTPValidationError) updateAccessModeRes()                         {}
-func (*HTTPValidationError) updateDataProductAboutRes()                   {}
-func (*HTTPValidationError) updateDataProductLifecycleRes()               {}
-func (*HTTPValidationError) updateDataProductRes()                        {}
-func (*HTTPValidationError) updateDataProductSettingRes()                 {}
-func (*HTTPValidationError) updateDataProductStatusRes()                  {}
-func (*HTTPValidationError) updateDataProductTypeRes()                    {}
-func (*HTTPValidationError) updateDataProductUsageRes()                   {}
-func (*HTTPValidationError) updateDomainRes()                             {}
-func (*HTTPValidationError) updateEnvironmentIsGlobalRes()                {}
-func (*HTTPValidationError) updateGroupRes()                              {}
-func (*HTTPValidationError) updateMachineUserRes()                        {}
-func (*HTTPValidationError) updateOutputPortAboutRes()                    {}
-func (*HTTPValidationError) updateOutputPortAccessTypeRes()               {}
-func (*HTTPValidationError) updateOutputPortQueryStatsRes()               {}
-func (*HTTPValidationError) updateOutputPortRes()                         {}
-func (*HTTPValidationError) updateOutputPortStatusRes()                   {}
-func (*HTTPValidationError) updateRoleRes()                               {}
-func (*HTTPValidationError) updateTagRes()                                {}
-func (*HTTPValidationError) updateTechnicalAssetRes()                     {}
-func (*HTTPValidationError) updateTechnicalAssetStatusRes()               {}
-func (*HTTPValidationError) updateThemeSettingsRes()                      {}
-func (*HTTPValidationError) validateResourceNameRes()                     {}
+func (*HTTPValidationError) addDataProductFinalizerRes()                      {}
+func (*HTTPValidationError) addDomainFinalizerRes()                           {}
+func (*HTTPValidationError) addExplorationFinalizerRes()                      {}
+func (*HTTPValidationError) addGroupMembersRes()                              {}
+func (*HTTPValidationError) addOutputPortDataQualityRunRes()                  {}
+func (*HTTPValidationError) applyTechnicalAssetEnvironmentConfigurationRes()  {}
+func (*HTTPValidationError) approveOutputPortAsInputPortRes()                 {}
+func (*HTTPValidationError) approveOutputPortTechnicalAssetLinkRes()          {}
+func (*HTTPValidationError) becomeAdminRes()                                  {}
+func (*HTTPValidationError) cancelInputPortForDataProductRes()                {}
+func (*HTTPValidationError) cancelInputPortForExplorationRes()                {}
+func (*HTTPValidationError) checkAccessRes()                                  {}
+func (*HTTPValidationError) createAccessModeRes()                             {}
+func (*HTTPValidationError) createDataProductLifecycleRes()                   {}
+func (*HTTPValidationError) createDataProductRes()                            {}
+func (*HTTPValidationError) createDataProductRoleAssignmentRes()              {}
+func (*HTTPValidationError) createDataProductSettingRes()                     {}
+func (*HTTPValidationError) createDataProductTypeRes()                        {}
+func (*HTTPValidationError) createDomainRes()                                 {}
+func (*HTTPValidationError) createExplorationRes()                            {}
+func (*HTTPValidationError) createGroupRes()                                  {}
+func (*HTTPValidationError) createGroupsBatchRes()                            {}
+func (*HTTPValidationError) createMachineUserRes()                            {}
+func (*HTTPValidationError) createMachineUsersBatchRes()                      {}
+func (*HTTPValidationError) createOutputPortAccessTypeRes()                   {}
+func (*HTTPValidationError) createOutputPortRes()                             {}
+func (*HTTPValidationError) createOutputPortRoleAssignmentRes()               {}
+func (*HTTPValidationError) createRoleRes()                                   {}
+func (*HTTPValidationError) createTagRes()                                    {}
+func (*HTTPValidationError) createTechnicalAssetRes()                         {}
+func (*HTTPValidationError) createUserRes()                                   {}
+func (*HTTPValidationError) createUsersBatchRes()                             {}
+func (*HTTPValidationError) decideDataProductRoleAssignmentRes()              {}
+func (*HTTPValidationError) decideGlobalRoleAssignmentRes()                   {}
+func (*HTTPValidationError) decideOutputPortRoleAssignmentRes()               {}
+func (*HTTPValidationError) deleteAccessModeRes()                             {}
+func (*HTTPValidationError) deleteDataProductRoleAssignmentRes()              {}
+func (*HTTPValidationError) deleteGlobalRoleAssignmentRes()                   {}
+func (*HTTPValidationError) deleteGroupRes()                                  {}
+func (*HTTPValidationError) deleteGroupsBatchRes()                            {}
+func (*HTTPValidationError) deleteMachineUserRes()                            {}
+func (*HTTPValidationError) deleteMachineUsersBatchRes()                      {}
+func (*HTTPValidationError) deleteOutputPortQueryStatRes()                    {}
+func (*HTTPValidationError) deleteOutputPortRoleAssignmentRes()               {}
+func (*HTTPValidationError) denyOutputPortAsInputPortRes()                    {}
+func (*HTTPValidationError) denyOutputPortTechnicalAssetLinkRes()             {}
+func (*HTTPValidationError) getAWSCredentialsRes()                            {}
+func (*HTTPValidationError) getAccessModesRes()                               {}
+func (*HTTPValidationError) getAllAccessDurationsRes()                        {}
+func (*HTTPValidationError) getAllPlatformServiceConfigurationsRes()          {}
+func (*HTTPValidationError) getAllPlatformsRes()                              {}
+func (*HTTPValidationError) getCurrentUserGroupsRes()                         {}
+func (*HTTPValidationError) getCurrentUserRes()                               {}
+func (*HTTPValidationError) getDataProductEventHistoryRes()                   {}
+func (*HTTPValidationError) getDataProductInputPortsRes()                     {}
+func (*HTTPValidationError) getDataProductOutputPortsRes()                    {}
+func (*HTTPValidationError) getDataProductRes()                               {}
+func (*HTTPValidationError) getDataProductRolledUpTagsRes()                   {}
+func (*HTTPValidationError) getDataProductSettingsRes()                       {}
+func (*HTTPValidationError) getDataProductTechnicalAssetsRes()                {}
+func (*HTTPValidationError) getDataProductTypeRes()                           {}
+func (*HTTPValidationError) getDataProductsLifecyclesRes()                    {}
+func (*HTTPValidationError) getDataProductsRes()                              {}
+func (*HTTPValidationError) getDataProductsSettingsRes()                      {}
+func (*HTTPValidationError) getDataProductsTypesRes()                         {}
+func (*HTTPValidationError) getDefaultAccessDurationRes()                     {}
+func (*HTTPValidationError) getDeviceTokenRes()                               {}
+func (*HTTPValidationError) getDomainRes()                                    {}
+func (*HTTPValidationError) getDomainsRes()                                   {}
+func (*HTTPValidationError) getEnvironmentRes()                               {}
+func (*HTTPValidationError) getEnvironmentsRes()                              {}
+func (*HTTPValidationError) getExplorationInputPortsRes()                     {}
+func (*HTTPValidationError) getExplorationRes()                               {}
+func (*HTTPValidationError) getExplorationsRes()                              {}
+func (*HTTPValidationError) getGroupMembersRes()                              {}
+func (*HTTPValidationError) getGroupRes()                                     {}
+func (*HTTPValidationError) getGroupsRes()                                    {}
+func (*HTTPValidationError) getInputPortsForOutputPortRes()                   {}
+func (*HTTPValidationError) getJwtTokenRes()                                  {}
+func (*HTTPValidationError) getLatestDataQualitySummaryForOutputPortRes()     {}
+func (*HTTPValidationError) getMachineUserRes()                               {}
+func (*HTTPValidationError) getMachineUsersRes()                              {}
+func (*HTTPValidationError) getOutputPortAccessDurationsRes()                 {}
+func (*HTTPValidationError) getOutputPortAccessTypesRes()                     {}
+func (*HTTPValidationError) getOutputPortCuratedQueriesRes()                  {}
+func (*HTTPValidationError) getOutputPortQueryStatsRes()                      {}
+func (*HTTPValidationError) getOutputPortRes()                                {}
+func (*HTTPValidationError) getOutputPortSchemaRes()                          {}
+func (*HTTPValidationError) getOutputPortsEventHistoryRes()                   {}
+func (*HTTPValidationError) getPlatformServiceConfigRes()                     {}
+func (*HTTPValidationError) getPlatformServicesRes()                          {}
+func (*HTTPValidationError) getPlatformTilesRes()                             {}
+func (*HTTPValidationError) getPluginFormRes()                                {}
+func (*HTTPValidationError) getPluginURLRes()                                 {}
+func (*HTTPValidationError) getPluginsRes()                                   {}
+func (*HTTPValidationError) getRolesRes()                                     {}
+func (*HTTPValidationError) getSinglePlatformServiceConfigurationRes()        {}
+func (*HTTPValidationError) getTagsRes()                                      {}
+func (*HTTPValidationError) getTechnicalAssetEnvironmentConfigurationRes()    {}
+func (*HTTPValidationError) getTechnicalAssetEventHistoryRes()                {}
+func (*HTTPValidationError) getTechnicalAssetRes()                            {}
+func (*HTTPValidationError) getThemeSettingsRes()                             {}
+func (*HTTPValidationError) getUserGroupsRes()                                {}
+func (*HTTPValidationError) getUserNotificationsRes()                         {}
+func (*HTTPValidationError) getUsersRes()                                     {}
+func (*HTTPValidationError) grantOutputPortAccessRes()                        {}
+func (*HTTPValidationError) ingestOutputPortContractRes()                     {}
+func (*HTTPValidationError) ingestOutputPortContractYamlRes()                 {}
+func (*HTTPValidationError) isAdminRes()                                      {}
+func (*HTTPValidationError) linkOutputPortToTechnicalAssetRes()               {}
+func (*HTTPValidationError) listDataProductRoleAssignmentsRes()               {}
+func (*HTTPValidationError) listGlobalRoleAssignmentsRes()                    {}
+func (*HTTPValidationError) listOutputPortRoleAssignmentsRes()                {}
+func (*HTTPValidationError) markTourAsSeenRes()                               {}
+func (*HTTPValidationError) migrateDataProductTypeRes()                       {}
+func (*HTTPValidationError) migrateDomainRes()                                {}
+func (*HTTPValidationError) modifyDataProductRoleAssignmentRes()              {}
+func (*HTTPValidationError) modifyOutputPortRoleAssignmentRes()               {}
+func (*HTTPValidationError) overwriteOutputPortDataQualitySummaryRes()        {}
+func (*HTTPValidationError) removeAllUserNotificationsRes()                   {}
+func (*HTTPValidationError) removeDataProductFinalizerRes()                   {}
+func (*HTTPValidationError) removeDataProductLifecycleRes()                   {}
+func (*HTTPValidationError) removeDataProductRes()                            {}
+func (*HTTPValidationError) removeDataProductSettingRes()                     {}
+func (*HTTPValidationError) removeDataProductTypeRes()                        {}
+func (*HTTPValidationError) removeDomainFinalizerRes()                        {}
+func (*HTTPValidationError) removeDomainRes()                                 {}
+func (*HTTPValidationError) removeExplorationFinalizerRes()                   {}
+func (*HTTPValidationError) removeExplorationRes()                            {}
+func (*HTTPValidationError) removeGroupMembersRes()                           {}
+func (*HTTPValidationError) removeInputPortForDataProductRes()                {}
+func (*HTTPValidationError) removeInputPortForExplorationRes()                {}
+func (*HTTPValidationError) removeOutputPortAccessTypeRes()                   {}
+func (*HTTPValidationError) removeOutputPortAsInputPortRes()                  {}
+func (*HTTPValidationError) removeOutputPortRes()                             {}
+func (*HTTPValidationError) removeRoleRes()                                   {}
+func (*HTTPValidationError) removeTagRes()                                    {}
+func (*HTTPValidationError) removeTechnicalAssetRes()                         {}
+func (*HTTPValidationError) removeUserNotificationRes()                       {}
+func (*HTTPValidationError) removeUserRes()                                   {}
+func (*HTTPValidationError) removeUsersBatchRes()                             {}
+func (*HTTPValidationError) renderTechnicalAssetAccessPathRes()               {}
+func (*HTTPValidationError) renewInputPortForDataProductRes()                 {}
+func (*HTTPValidationError) renewInputPortForExplorationRes()                 {}
+func (*HTTPValidationError) renewOutputPortAsInputPortRes()                   {}
+func (*HTTPValidationError) replaceGroupMembersRes()                          {}
+func (*HTTPValidationError) replaceOutputPortCuratedQueriesRes()              {}
+func (*HTTPValidationError) requestDataProductRoleAssignmentRes()             {}
+func (*HTTPValidationError) requestInputPortsForDataProductRes()              {}
+func (*HTTPValidationError) requestInputPortsForExplorationRes()              {}
+func (*HTTPValidationError) requestOutputPortRoleAssignmentRes()              {}
+func (*HTTPValidationError) revokeAdminRes()                                  {}
+func (*HTTPValidationError) revokeInputPortForDataProductRes()                {}
+func (*HTTPValidationError) revokeInputPortForExplorationRes()                {}
+func (*HTTPValidationError) revokeOutputPortAsInputPortRes()                  {}
+func (*HTTPValidationError) sanitizeResourceNameRes()                         {}
+func (*HTTPValidationError) searchOutputPortsRes()                            {}
+func (*HTTPValidationError) setCanBecomeAdminRes()                            {}
+func (*HTTPValidationError) setValueForDataProductRes()                       {}
+func (*HTTPValidationError) setValueForOutputPortRes()                        {}
+func (*HTTPValidationError) unlinkOutputPortFromTechnicalAssetRes()           {}
+func (*HTTPValidationError) updateAccessDurationRes()                         {}
+func (*HTTPValidationError) updateAccessModeRes()                             {}
+func (*HTTPValidationError) updateDataProductAboutRes()                       {}
+func (*HTTPValidationError) updateDataProductLifecycleRes()                   {}
+func (*HTTPValidationError) updateDataProductRes()                            {}
+func (*HTTPValidationError) updateDataProductSettingRes()                     {}
+func (*HTTPValidationError) updateDataProductStatusRes()                      {}
+func (*HTTPValidationError) updateDataProductTypeRes()                        {}
+func (*HTTPValidationError) updateDataProductUsageRes()                       {}
+func (*HTTPValidationError) updateDomainRes()                                 {}
+func (*HTTPValidationError) updateEnvironmentIsGlobalRes()                    {}
+func (*HTTPValidationError) updateGroupRes()                                  {}
+func (*HTTPValidationError) updateMachineUserRes()                            {}
+func (*HTTPValidationError) updateOutputPortAboutRes()                        {}
+func (*HTTPValidationError) updateOutputPortAccessTypeRes()                   {}
+func (*HTTPValidationError) updateOutputPortQueryStatsRes()                   {}
+func (*HTTPValidationError) updateOutputPortRes()                             {}
+func (*HTTPValidationError) updateOutputPortStatusRes()                       {}
+func (*HTTPValidationError) updateRoleRes()                                   {}
+func (*HTTPValidationError) updateTagRes()                                    {}
+func (*HTTPValidationError) updateTechnicalAssetEnvironmentConfigurationRes() {}
+func (*HTTPValidationError) updateTechnicalAssetRes()                         {}
+func (*HTTPValidationError) updateTechnicalAssetStatusRes()                   {}
+func (*HTTPValidationError) updateThemeSettingsRes()                          {}
+func (*HTTPValidationError) validateResourceNameRes()                         {}
 
 // Ref: #/components/schemas/IdentityBatchCreateError
 type IdentityBatchCreateError struct {
@@ -14496,6 +14653,7 @@ type UIElementMetadata struct {
 	DependsOn                        OptNilFieldDependencyArray `json:"depends_on"`
 	Disabled                         OptNilBool                 `json:"disabled"`
 	UseNamespaceWhenNotSourceAligned OptNilBool                 `json:"use_namespace_when_not_source_aligned"`
+	EnvironmentOverridable           OptNilBool                 `json:"environment_overridable"`
 }
 
 // GetLabel returns the value of Label.
@@ -14563,6 +14721,11 @@ func (s *UIElementMetadata) GetUseNamespaceWhenNotSourceAligned() OptNilBool {
 	return s.UseNamespaceWhenNotSourceAligned
 }
 
+// GetEnvironmentOverridable returns the value of EnvironmentOverridable.
+func (s *UIElementMetadata) GetEnvironmentOverridable() OptNilBool {
+	return s.EnvironmentOverridable
+}
+
 // SetLabel sets the value of Label.
 func (s *UIElementMetadata) SetLabel(val string) {
 	s.Label = val
@@ -14626,6 +14789,11 @@ func (s *UIElementMetadata) SetDisabled(val OptNilBool) {
 // SetUseNamespaceWhenNotSourceAligned sets the value of UseNamespaceWhenNotSourceAligned.
 func (s *UIElementMetadata) SetUseNamespaceWhenNotSourceAligned(val OptNilBool) {
 	s.UseNamespaceWhenNotSourceAligned = val
+}
+
+// SetEnvironmentOverridable sets the value of EnvironmentOverridable.
+func (s *UIElementMetadata) SetEnvironmentOverridable(val OptNilBool) {
+	s.EnvironmentOverridable = val
 }
 
 // Ref: #/components/schemas/UIElementMetadataResponse
@@ -14838,13 +15006,19 @@ func (s *UIElementRadio) SetOptions(val OptNilSelectOptionArray) {
 
 // Ref: #/components/schemas/UIElementSelect
 type UIElementSelect struct {
-	MaxCount OptNilInt               `json:"max_count"`
-	Options  OptNilSelectOptionArray `json:"options"`
+	MaxCount     OptNilInt               `json:"max_count"`
+	InitialValue OptNilString            `json:"initial_value"`
+	Options      OptNilSelectOptionArray `json:"options"`
 }
 
 // GetMaxCount returns the value of MaxCount.
 func (s *UIElementSelect) GetMaxCount() OptNilInt {
 	return s.MaxCount
+}
+
+// GetInitialValue returns the value of InitialValue.
+func (s *UIElementSelect) GetInitialValue() OptNilString {
+	return s.InitialValue
 }
 
 // GetOptions returns the value of Options.
@@ -14855,6 +15029,11 @@ func (s *UIElementSelect) GetOptions() OptNilSelectOptionArray {
 // SetMaxCount sets the value of MaxCount.
 func (s *UIElementSelect) SetMaxCount(val OptNilInt) {
 	s.MaxCount = val
+}
+
+// SetInitialValue sets the value of InitialValue.
+func (s *UIElementSelect) SetInitialValue(val OptNilString) {
+	s.InitialValue = val
 }
 
 // SetOptions sets the value of Options.
@@ -15240,6 +15419,65 @@ func (s *UpdateTagResponse) SetID(val uuid.UUID) {
 }
 
 func (*UpdateTagResponse) updateTagRes() {}
+
+// Ref: #/components/schemas/UpdateTechnicalAssetEnvironmentConfigurationRequest
+type UpdateTechnicalAssetEnvironmentConfigurationRequest struct {
+	BaseValues UpdateTechnicalAssetEnvironmentConfigurationRequestBaseValues `json:"base_values"`
+	Overrides  UpdateTechnicalAssetEnvironmentConfigurationRequestOverrides  `json:"overrides"`
+}
+
+// GetBaseValues returns the value of BaseValues.
+func (s *UpdateTechnicalAssetEnvironmentConfigurationRequest) GetBaseValues() UpdateTechnicalAssetEnvironmentConfigurationRequestBaseValues {
+	return s.BaseValues
+}
+
+// GetOverrides returns the value of Overrides.
+func (s *UpdateTechnicalAssetEnvironmentConfigurationRequest) GetOverrides() UpdateTechnicalAssetEnvironmentConfigurationRequestOverrides {
+	return s.Overrides
+}
+
+// SetBaseValues sets the value of BaseValues.
+func (s *UpdateTechnicalAssetEnvironmentConfigurationRequest) SetBaseValues(val UpdateTechnicalAssetEnvironmentConfigurationRequestBaseValues) {
+	s.BaseValues = val
+}
+
+// SetOverrides sets the value of Overrides.
+func (s *UpdateTechnicalAssetEnvironmentConfigurationRequest) SetOverrides(val UpdateTechnicalAssetEnvironmentConfigurationRequestOverrides) {
+	s.Overrides = val
+}
+
+type UpdateTechnicalAssetEnvironmentConfigurationRequestBaseValues map[string]string
+
+func (s *UpdateTechnicalAssetEnvironmentConfigurationRequestBaseValues) init() UpdateTechnicalAssetEnvironmentConfigurationRequestBaseValues {
+	m := *s
+	if m == nil {
+		m = map[string]string{}
+		*s = m
+	}
+	return m
+}
+
+type UpdateTechnicalAssetEnvironmentConfigurationRequestOverrides map[string]UpdateTechnicalAssetEnvironmentConfigurationRequestOverridesItem
+
+func (s *UpdateTechnicalAssetEnvironmentConfigurationRequestOverrides) init() UpdateTechnicalAssetEnvironmentConfigurationRequestOverrides {
+	m := *s
+	if m == nil {
+		m = map[string]UpdateTechnicalAssetEnvironmentConfigurationRequestOverridesItem{}
+		*s = m
+	}
+	return m
+}
+
+type UpdateTechnicalAssetEnvironmentConfigurationRequestOverridesItem map[string]string
+
+func (s *UpdateTechnicalAssetEnvironmentConfigurationRequestOverridesItem) init() UpdateTechnicalAssetEnvironmentConfigurationRequestOverridesItem {
+	m := *s
+	if m == nil {
+		m = map[string]string{}
+		*s = m
+	}
+	return m
+}
 
 type UpdateTechnicalAssetNotFoundApplicationJSON jx.Raw
 

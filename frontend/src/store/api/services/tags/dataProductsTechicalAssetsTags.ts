@@ -141,4 +141,15 @@ export const dataProductTechnicalAssetsTags = {
         invalidatesTags: invalidateTagsTechnicalAsset,
     },
     getTechnicalAssetGraphData: {},
+    getTechnicalAssetEnvironmentConfiguration: {
+        providesTags: (_, __, { id }) => [
+            {
+                type: TagTypes.TechnicalAsset,
+                id,
+            },
+        ],
+    },
+    updateTechnicalAssetEnvironmentConfiguration: {
+        invalidatesTags: invalidateTagsTechnicalAsset,
+    },
 } satisfies EndpointDefinitions;

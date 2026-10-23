@@ -160,7 +160,9 @@ export function TechnicalAssetConfigurationForm({
                           ? checkbox?.initial_value
                           : type === 'radio'
                             ? radio?.initial_value
-                            : undefined
+                            : type === 'select'
+                              ? select?.initial_value
+                              : undefined
                 }
                 required={type !== 'checkbox' && required && !isHidden}
             >

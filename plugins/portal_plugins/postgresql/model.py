@@ -13,6 +13,9 @@ class PostgreSQLTechnicalAssetConfiguration(BaseTechnicalAssetConfiguration):
     schema: Mapped[str] = mapped_column(String, nullable=True)
     table: Mapped[str] = mapped_column(String, nullable=True)
     access_granularity: Mapped[str] = mapped_column(String, nullable=True)
+    engine_version: Mapped[str] = mapped_column(String, nullable=True)
+    size: Mapped[str] = mapped_column(String, nullable=True)
+    storage_gb: Mapped[str] = mapped_column(String, nullable=True)
 
     __mapper_args__ = {
         "polymorphic_identity": NAME,

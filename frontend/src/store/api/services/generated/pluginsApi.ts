@@ -88,6 +88,7 @@ export type SelectOption = {
 };
 export type UiElementSelect = {
   max_count?: number | null;
+  initial_value?: string | null;
   options?: SelectOption[] | null;
 };
 export type UiElementString = {
@@ -116,6 +117,7 @@ export type UiElementMetadata = {
   depends_on?: FieldDependency[] | null;
   disabled?: boolean | null;
   use_namespace_when_not_source_aligned?: boolean | null;
+  environment_overridable?: boolean | null;
 };
 export type UiElementMetadataResponse = {
   not_configured?: boolean;

@@ -21,6 +21,10 @@ type AddOutputPortDataQualityRunRes interface {
 	addOutputPortDataQualityRunRes()
 }
 
+type ApplyTechnicalAssetEnvironmentConfigurationRes interface {
+	applyTechnicalAssetEnvironmentConfigurationRes()
+}
+
 type ApproveOutputPortAsInputPortRes interface {
 	approveOutputPortAsInputPortRes()
 }
@@ -389,6 +393,10 @@ type GetTagsRes interface {
 	getTagsRes()
 }
 
+type GetTechnicalAssetEnvironmentConfigurationRes interface {
+	getTechnicalAssetEnvironmentConfigurationRes()
+}
+
 type GetTechnicalAssetEventHistoryRes interface {
 	getTechnicalAssetEventHistoryRes()
 }
@@ -715,6 +723,10 @@ type UpdateRoleRes interface {
 
 type UpdateTagRes interface {
 	updateTagRes()
+}
+
+type UpdateTechnicalAssetEnvironmentConfigurationRes interface {
+	updateTechnicalAssetEnvironmentConfigurationRes()
 }
 
 type UpdateTechnicalAssetRes interface {

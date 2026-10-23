@@ -32,6 +32,13 @@ type AddOutputPortDataQualityRunParams struct {
 	ID            uuid.UUID
 }
 
+// ApplyTechnicalAssetEnvironmentConfigurationParams is parameters of apply_technical_asset_environment_configuration operation.
+type ApplyTechnicalAssetEnvironmentConfigurationParams struct {
+	DataProductID uuid.UUID
+	ID            uuid.UUID
+	EnvironmentID uuid.UUID
+}
+
 // ApproveOutputPortAsInputPortParams is parameters of approve_output_port_as_input_port operation.
 type ApproveOutputPortAsInputPortParams struct {
 	DataProductID uuid.UUID
@@ -337,6 +344,12 @@ type GetSinglePlatformServiceConfigurationParams struct {
 
 // GetTechnicalAssetParams is parameters of get_technical_asset operation.
 type GetTechnicalAssetParams struct {
+	DataProductID uuid.UUID
+	ID            uuid.UUID
+}
+
+// GetTechnicalAssetEnvironmentConfigurationParams is parameters of get_technical_asset_environment_configuration operation.
+type GetTechnicalAssetEnvironmentConfigurationParams struct {
 	DataProductID uuid.UUID
 	ID            uuid.UUID
 }
@@ -731,6 +744,12 @@ type UpdateTagParams struct {
 
 // UpdateTechnicalAssetParams is parameters of update_technical_asset operation.
 type UpdateTechnicalAssetParams struct {
+	DataProductID uuid.UUID
+	ID            uuid.UUID
+}
+
+// UpdateTechnicalAssetEnvironmentConfigurationParams is parameters of update_technical_asset_environment_configuration operation.
+type UpdateTechnicalAssetEnvironmentConfigurationParams struct {
 	DataProductID uuid.UUID
 	ID            uuid.UUID
 }

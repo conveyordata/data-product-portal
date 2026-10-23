@@ -53,6 +53,12 @@ type Invoker interface {
 	//
 	// POST /api/v2/data_products/{data_product_id}/output_ports/{id}/data_quality_summary
 	AddOutputPortDataQualityRun(ctx context.Context, request *OutputPortDataQualitySummary, params AddOutputPortDataQualityRunParams) (AddOutputPortDataQualityRunRes, error)
+	// ApplyTechnicalAssetEnvironmentConfiguration invokes apply_technical_asset_environment_configuration operation.
+	//
+	// Apply Technical Asset Environment Configuration.
+	//
+	// POST /api/v2/data_products/{data_product_id}/technical_assets/{id}/environments/{environment_id}/apply
+	ApplyTechnicalAssetEnvironmentConfiguration(ctx context.Context, params ApplyTechnicalAssetEnvironmentConfigurationParams) (ApplyTechnicalAssetEnvironmentConfigurationRes, error)
 	// ApproveOutputPortAsInputPort invokes approve_output_port_as_input_port operation.
 	//
 	// Approve Output Port As Input Port.
@@ -618,6 +624,12 @@ type Invoker interface {
 	//
 	// GET /api/v2/data_products/{data_product_id}/technical_assets/{id}
 	GetTechnicalAsset(ctx context.Context, params GetTechnicalAssetParams) (GetTechnicalAssetRes, error)
+	// GetTechnicalAssetEnvironmentConfiguration invokes get_technical_asset_environment_configuration operation.
+	//
+	// Get Technical Asset Environment Configuration.
+	//
+	// GET /api/v2/data_products/{data_product_id}/technical_assets/{id}/environment-configuration
+	GetTechnicalAssetEnvironmentConfiguration(ctx context.Context, params GetTechnicalAssetEnvironmentConfigurationParams) (GetTechnicalAssetEnvironmentConfigurationRes, error)
 	// GetTechnicalAssetEventHistory invokes get_technical_asset_event_history operation.
 	//
 	// Get Technical Asset Event History.
@@ -1131,6 +1143,12 @@ type Invoker interface {
 	//
 	// PUT /api/v2/data_products/{data_product_id}/technical_assets/{id}
 	UpdateTechnicalAsset(ctx context.Context, request *TechnicalAssetUpdate, params UpdateTechnicalAssetParams) (UpdateTechnicalAssetRes, error)
+	// UpdateTechnicalAssetEnvironmentConfiguration invokes update_technical_asset_environment_configuration operation.
+	//
+	// Update Technical Asset Environment Configuration.
+	//
+	// PUT /api/v2/data_products/{data_product_id}/technical_assets/{id}/environment-configuration
+	UpdateTechnicalAssetEnvironmentConfiguration(ctx context.Context, request *UpdateTechnicalAssetEnvironmentConfigurationRequest, params UpdateTechnicalAssetEnvironmentConfigurationParams) (UpdateTechnicalAssetEnvironmentConfigurationRes, error)
 	// UpdateTechnicalAssetStatus invokes update_technical_asset_status operation.
 	//
 	// Update Technical Asset Status.
@@ -1529,6 +1547,106 @@ func (c *Client) sendAddOutputPortDataQualityRun(ctx context.Context, request *O
 	}()
 
 	result, err := decodeAddOutputPortDataQualityRunResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// ApplyTechnicalAssetEnvironmentConfiguration invokes apply_technical_asset_environment_configuration operation.
+//
+// Apply Technical Asset Environment Configuration.
+//
+// POST /api/v2/data_products/{data_product_id}/technical_assets/{id}/environments/{environment_id}/apply
+func (c *Client) ApplyTechnicalAssetEnvironmentConfiguration(ctx context.Context, params ApplyTechnicalAssetEnvironmentConfigurationParams) (ApplyTechnicalAssetEnvironmentConfigurationRes, error) {
+	res, err := c.sendApplyTechnicalAssetEnvironmentConfiguration(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendApplyTechnicalAssetEnvironmentConfiguration(ctx context.Context, params ApplyTechnicalAssetEnvironmentConfigurationParams) (res ApplyTechnicalAssetEnvironmentConfigurationRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [7]string
+	pathParts[0] = "/api/v2/data_products/"
+	{
+		// Encode "data_product_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "data_product_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.DataProductID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/technical_assets/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/environments/"
+	{
+		// Encode "environment_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "environment_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.EnvironmentID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[5] = encoded
+	}
+	pathParts[6] = "/apply"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeApplyTechnicalAssetEnvironmentConfigurationResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -7269,6 +7387,87 @@ func (c *Client) sendGetTechnicalAsset(ctx context.Context, params GetTechnicalA
 	}()
 
 	result, err := decodeGetTechnicalAssetResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetTechnicalAssetEnvironmentConfiguration invokes get_technical_asset_environment_configuration operation.
+//
+// Get Technical Asset Environment Configuration.
+//
+// GET /api/v2/data_products/{data_product_id}/technical_assets/{id}/environment-configuration
+func (c *Client) GetTechnicalAssetEnvironmentConfiguration(ctx context.Context, params GetTechnicalAssetEnvironmentConfigurationParams) (GetTechnicalAssetEnvironmentConfigurationRes, error) {
+	res, err := c.sendGetTechnicalAssetEnvironmentConfiguration(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendGetTechnicalAssetEnvironmentConfiguration(ctx context.Context, params GetTechnicalAssetEnvironmentConfigurationParams) (res GetTechnicalAssetEnvironmentConfigurationRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/api/v2/data_products/"
+	{
+		// Encode "data_product_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "data_product_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.DataProductID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/technical_assets/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/environment-configuration"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeGetTechnicalAssetEnvironmentConfigurationResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -13159,6 +13358,90 @@ func (c *Client) sendUpdateTechnicalAsset(ctx context.Context, request *Technica
 	}()
 
 	result, err := decodeUpdateTechnicalAssetResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// UpdateTechnicalAssetEnvironmentConfiguration invokes update_technical_asset_environment_configuration operation.
+//
+// Update Technical Asset Environment Configuration.
+//
+// PUT /api/v2/data_products/{data_product_id}/technical_assets/{id}/environment-configuration
+func (c *Client) UpdateTechnicalAssetEnvironmentConfiguration(ctx context.Context, request *UpdateTechnicalAssetEnvironmentConfigurationRequest, params UpdateTechnicalAssetEnvironmentConfigurationParams) (UpdateTechnicalAssetEnvironmentConfigurationRes, error) {
+	res, err := c.sendUpdateTechnicalAssetEnvironmentConfiguration(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendUpdateTechnicalAssetEnvironmentConfiguration(ctx context.Context, request *UpdateTechnicalAssetEnvironmentConfigurationRequest, params UpdateTechnicalAssetEnvironmentConfigurationParams) (res UpdateTechnicalAssetEnvironmentConfigurationRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [5]string
+	pathParts[0] = "/api/v2/data_products/"
+	{
+		// Encode "data_product_id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "data_product_id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.DataProductID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/technical_assets/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.UUIDToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	pathParts[4] = "/environment-configuration"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "PUT", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeUpdateTechnicalAssetEnvironmentConfigurationRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeUpdateTechnicalAssetEnvironmentConfigurationResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

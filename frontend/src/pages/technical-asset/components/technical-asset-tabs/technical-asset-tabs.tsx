@@ -1,4 +1,4 @@
-import { CodeOutlined, CompassOutlined, HistoryOutlined } from '@ant-design/icons';
+import { CodeOutlined, CompassOutlined, ControlOutlined, HistoryOutlined } from '@ant-design/icons';
 import { Tabs } from 'antd';
 import { type ReactNode, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -12,6 +12,7 @@ import { OutputPortTab } from '@/pages/technical-asset/components/technical-asse
 import { TabKeys } from '@/pages/technical-asset/components/technical-asset-tabs/technical-asset-tabkeys.ts';
 import { useGetTechnicalAssetEventHistoryQuery } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
 import { EventReferenceEntity } from '@/types/events/event-reference-entity';
+import { ConfigurationTab } from './configuration-tab/configuration-tab';
 import styles from './technical-asset-tabs.module.scss';
 import { TechnologiesTab } from './technologies-tab/technologies-tab';
 
@@ -19,6 +20,7 @@ type Props = {
     technicalAssetId: string;
     dataProductId: string;
     isLoading: boolean;
+    hasEnvironmentConfiguration: boolean;
 };
 
 type Tab = {
@@ -28,7 +30,7 @@ type Tab = {
     children: ReactNode;
 };
 
-export function TechnicalAssetTabs({ technicalAssetId, dataProductId, isLoading }: Props) {
+export function TechnicalAssetTabs({ technicalAssetId, dataProductId, isLoading, hasEnvironmentConfiguration }: Props) {
     const { t } = useTranslation();
 
     const location = useLocation();
@@ -68,6 +70,18 @@ export function TechnicalAssetTabs({ technicalAssetId, dataProductId, isLoading 
                 icon: <CodeOutlined />,
                 children: <TechnologiesTab technicalAssetId={technicalAssetId} dataProductId={dataProductId} />,
             },
+            ...(hasEnvironmentConfiguration
+                ? [
+                      {
+                          label: t('Configuration'),
+                          key: TabKeys.Configuration,
+                          icon: <ControlOutlined />,
+                          children: (
+                              <ConfigurationTab technicalAssetId={technicalAssetId} dataProductId={dataProductId} />
+                          ),
+                      },
+                  ]
+                : []),
             {
                 label: t('History'),
                 key: TabKeys.History,
@@ -82,7 +96,14 @@ export function TechnicalAssetTabs({ technicalAssetId, dataProductId, isLoading 
                 ),
             },
         ];
-    }, [technicalAssetId, t, dataOutputHistoryData, isFetchingDataOutputHistory, dataProductId]);
+    }, [
+        technicalAssetId,
+        t,
+        dataOutputHistoryData,
+        isFetchingDataOutputHistory,
+        dataProductId,
+        hasEnvironmentConfiguration,
+    ]);
 
     if (isLoading) {
         return <LoadingSpinner />;

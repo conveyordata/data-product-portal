@@ -133,3 +133,24 @@ class UpdateTechnicalAssetResponse(ORMModel):
 
 class CreateTechnicalAssetResponse(ORMModel):
     id: UUID
+
+
+class EnvironmentConfigurationValue(ORMModel):
+    environment_id: UUID
+    name: str
+    acronym: str
+    override: Optional[str]
+    effective_value: str
+
+
+class EnvironmentConfigurationProperty(ORMModel):
+    name: str
+    label: str
+    allowed_values: list[str]
+    default: str
+    base_value: str
+    environments: list[EnvironmentConfigurationValue]
+
+
+class GetTechnicalAssetEnvironmentConfigurationResponse(ORMModel):
+    properties: list[EnvironmentConfigurationProperty]

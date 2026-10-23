@@ -37,6 +37,7 @@ class UIElementMetadata:
         depends_on (list[FieldDependency] | None | Unset):
         disabled (bool | None | Unset):
         use_namespace_when_not_source_aligned (bool | None | Unset):
+        environment_overridable (bool | None | Unset):
     """
 
     label: str
@@ -52,6 +53,7 @@ class UIElementMetadata:
     depends_on: list[FieldDependency] | None | Unset = UNSET
     disabled: bool | None | Unset = UNSET
     use_namespace_when_not_source_aligned: bool | None | Unset = UNSET
+    environment_overridable: bool | None | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -138,6 +140,12 @@ class UIElementMetadata:
                 self.use_namespace_when_not_source_aligned
             )
 
+        environment_overridable: bool | None | Unset
+        if isinstance(self.environment_overridable, Unset):
+            environment_overridable = UNSET
+        else:
+            environment_overridable = self.environment_overridable
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
@@ -168,6 +176,8 @@ class UIElementMetadata:
             field_dict["use_namespace_when_not_source_aligned"] = (
                 use_namespace_when_not_source_aligned
             )
+        if environment_overridable is not UNSET:
+            field_dict["environment_overridable"] = environment_overridable
 
         return field_dict
 
@@ -322,6 +332,17 @@ class UIElementMetadata:
             )
         )
 
+        def _parse_environment_overridable(data: object) -> bool | None | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(bool | None | Unset, data)
+
+        environment_overridable = _parse_environment_overridable(
+            d.pop("environment_overridable", UNSET)
+        )
+
         ui_element_metadata = cls(
             label=label,
             type_=type_,
@@ -336,6 +357,7 @@ class UIElementMetadata:
             depends_on=depends_on,
             disabled=disabled,
             use_namespace_when_not_source_aligned=use_namespace_when_not_source_aligned,
+            environment_overridable=environment_overridable,
         )
 
         ui_element_metadata.additional_properties = d

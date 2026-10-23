@@ -15,6 +15,7 @@ from sdk.api_client.models import (
     CloudEventOutputPortEvent,
     CloudEventOutputPortRoleAssignmentEvent,
     CloudEventOutputPortTechnicalAssetLinkEvent,
+    CloudEventTechnicalAssetEnvironmentConfigurationAppliedEvent,
     CloudEventTechnicalAssetEvent,
     DataProductEnvironmentAddedEvent,
     DataProductEvent,
@@ -26,6 +27,7 @@ from sdk.api_client.models import (
     OutputPortEvent,
     OutputPortRoleAssignmentEvent,
     OutputPortTechnicalAssetLinkEvent,
+    TechnicalAssetEnvironmentConfigurationAppliedEvent,
     TechnicalAssetEvent,
 )
 
@@ -78,6 +80,9 @@ class AbstractEventHandler(ABC):
         elif event_type == "output_port_technical_asset_link.event":
             parsed_event = CloudEventOutputPortTechnicalAssetLinkEvent.from_dict(payload)
             return await self.on_output_port_technical_asset_link_event(parsed_event.data)
+        elif event_type == "technical_asset.environment_configuration_applied":
+            parsed_event = CloudEventTechnicalAssetEnvironmentConfigurationAppliedEvent.from_dict(payload)
+            return await self.on_technical_asset_environment_configuration_applied(parsed_event.data)
         elif event_type == "technical_asset.event":
             parsed_event = CloudEventTechnicalAssetEvent.from_dict(payload)
             return await self.on_technical_asset_event(parsed_event.data)
@@ -136,6 +141,11 @@ class AbstractEventHandler(ABC):
         pass
 
     @abstractmethod
+    async def on_technical_asset_environment_configuration_applied(self, data: TechnicalAssetEnvironmentConfigurationAppliedEvent) -> Any:
+        """Handler for the parsed payload of 'technical_asset.environment_configuration_applied'"""
+        pass
+
+    @abstractmethod
     async def on_technical_asset_event(self, data: TechnicalAssetEvent) -> Any:
         """Handler for the parsed payload of 'technical_asset.event'"""
         pass
@@ -175,6 +185,9 @@ class EmptyEventHandler(AbstractEventHandler):
         pass
 
     async def on_output_port_technical_asset_link_event(self, data: OutputPortTechnicalAssetLinkEvent) -> Any:
+        pass
+
+    async def on_technical_asset_environment_configuration_applied(self, data: TechnicalAssetEnvironmentConfigurationAppliedEvent) -> Any:
         pass
 
     async def on_technical_asset_event(self, data: TechnicalAssetEvent) -> Any:

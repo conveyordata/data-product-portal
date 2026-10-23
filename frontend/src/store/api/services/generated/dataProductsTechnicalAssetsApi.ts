@@ -115,6 +115,33 @@ const injectedRtkApi = api.injectEndpoints({
         },
       }),
     }),
+    getTechnicalAssetEnvironmentConfiguration: build.query<
+      GetTechnicalAssetEnvironmentConfigurationApiResponse,
+      GetTechnicalAssetEnvironmentConfigurationApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/data_products/${queryArg.dataProductId}/technical_assets/${queryArg.id}/environment-configuration`,
+      }),
+    }),
+    updateTechnicalAssetEnvironmentConfiguration: build.mutation<
+      UpdateTechnicalAssetEnvironmentConfigurationApiResponse,
+      UpdateTechnicalAssetEnvironmentConfigurationApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/data_products/${queryArg.dataProductId}/technical_assets/${queryArg.id}/environment-configuration`,
+        method: "PUT",
+        body: queryArg.updateTechnicalAssetEnvironmentConfigurationRequest,
+      }),
+    }),
+    applyTechnicalAssetEnvironmentConfiguration: build.mutation<
+      ApplyTechnicalAssetEnvironmentConfigurationApiResponse,
+      ApplyTechnicalAssetEnvironmentConfigurationApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/data_products/${queryArg.dataProductId}/technical_assets/${queryArg.id}/environments/${queryArg.environmentId}/apply`,
+        method: "POST",
+      }),
+    }),
   }),
   overrideExisting: false,
 });
@@ -194,6 +221,26 @@ export type GetTechnicalAssetGraphDataApiArg = {
   dataProductId: string;
   id: string;
   level?: number;
+};
+export type GetTechnicalAssetEnvironmentConfigurationApiResponse =
+  /** status 200 Successful Response */ GetTechnicalAssetEnvironmentConfigurationResponse;
+export type GetTechnicalAssetEnvironmentConfigurationApiArg = {
+  dataProductId: string;
+  id: string;
+};
+export type UpdateTechnicalAssetEnvironmentConfigurationApiResponse =
+  /** status 200 Successful Response */ GetTechnicalAssetEnvironmentConfigurationResponse;
+export type UpdateTechnicalAssetEnvironmentConfigurationApiArg = {
+  dataProductId: string;
+  id: string;
+  updateTechnicalAssetEnvironmentConfigurationRequest: UpdateTechnicalAssetEnvironmentConfigurationRequest;
+};
+export type ApplyTechnicalAssetEnvironmentConfigurationApiResponse =
+  /** status 200 Successful Response */ any;
+export type ApplyTechnicalAssetEnvironmentConfigurationApiArg = {
+  dataProductId: string;
+  id: string;
+  environmentId: string;
 };
 export type ValidationError = {
   loc: (string | number)[];
@@ -433,6 +480,34 @@ export type Graph = {
   edges: Edge[];
   nodes: Node[];
 };
+export type EnvironmentConfigurationValue = {
+  environment_id: string;
+  name: string;
+  acronym: string;
+  override: string | null;
+  effective_value: string;
+};
+export type EnvironmentConfigurationProperty = {
+  name: string;
+  label: string;
+  allowed_values: string[];
+  default: string;
+  base_value: string;
+  environments: EnvironmentConfigurationValue[];
+};
+export type GetTechnicalAssetEnvironmentConfigurationResponse = {
+  properties: EnvironmentConfigurationProperty[];
+};
+export type UpdateTechnicalAssetEnvironmentConfigurationRequest = {
+  base_values: {
+    [key: string]: string;
+  };
+  overrides: {
+    [key: string]: {
+      [key: string]: string;
+    };
+  };
+};
 export enum TechnicalAssetStatus {
   Pending = "pending",
   Active = "active",
@@ -502,4 +577,8 @@ export const {
   useUpdateTechnicalAssetStatusMutation,
   useGetTechnicalAssetGraphDataQuery,
   useLazyGetTechnicalAssetGraphDataQuery,
+  useGetTechnicalAssetEnvironmentConfigurationQuery,
+  useLazyGetTechnicalAssetEnvironmentConfigurationQuery,
+  useUpdateTechnicalAssetEnvironmentConfigurationMutation,
+  useApplyTechnicalAssetEnvironmentConfigurationMutation,
 } = injectedRtkApi;

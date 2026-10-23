@@ -103,6 +103,17 @@ class TechnicalAssetEvent(V2Event):
         return "technical_asset.event"
 
 
+class TechnicalAssetEnvironmentConfigurationAppliedEvent(V2Event):
+    id: UUID
+    data_product_id: UUID
+    environment: str
+    configuration: dict[str, str]
+
+    @classmethod
+    def event_type(cls) -> str:
+        return "technical_asset.environment_configuration_applied"
+
+
 class OutputPortEvent(V2Event):
     id: UUID
     data_product_id: UUID

@@ -15,9 +15,11 @@ from app.data_products.technical_assets.schema_request import (
     CreateTechnicalAssetRequest,
     TechnicalAssetStatusUpdate,
     TechnicalAssetUpdate,
+    UpdateTechnicalAssetEnvironmentConfigurationRequest,
 )
 from app.data_products.technical_assets.schema_response import (
     CreateTechnicalAssetResponse,
+    GetTechnicalAssetEnvironmentConfigurationResponse,
     GetTechnicalAssetsResponse,
     GetTechnicalAssetsResponseItem,
     UpdateTechnicalAssetResponse,
@@ -310,3 +312,67 @@ def create_technical_asset(
         data_product_id=technical_asset.owner_id, event_id=event_id
     )
     return CreateTechnicalAssetResponse(id=technical_asset.id)
+
+
+@router.get(
+    "/{id}/environment-configuration",
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                Action.HIDDEN__DATA_PRODUCT__READ,
+                DataProductResolver,
+                object_id="data_product_id",
+            )
+        )
+    ],
+)
+def get_technical_asset_environment_configuration(
+    data_product_id: UUID,
+    id: UUID,
+    db: Session = Depends(get_db_session, scope="function"),
+) -> GetTechnicalAssetEnvironmentConfigurationResponse:
+    return TechnicalAssetService(db).get_environment_configuration(data_product_id, id)
+
+
+@router.put(
+    "/{id}/environment-configuration",
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                Action.DATA_PRODUCT__UPDATE_TECHNICAL_ASSET,
+                TechnicalAssetResolver,
+            )
+        ),
+    ],
+)
+def update_technical_asset_environment_configuration(
+    data_product_id: UUID,
+    id: UUID,
+    request: UpdateTechnicalAssetEnvironmentConfigurationRequest,
+    db: Session = Depends(get_db_session, scope="function"),
+) -> GetTechnicalAssetEnvironmentConfigurationResponse:
+    return TechnicalAssetService(db).update_environment_configuration(
+        data_product_id, id, request
+    )
+
+
+@router.post(
+    "/{id}/environments/{environment_id}/apply",
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                Action.DATA_PRODUCT__UPDATE_TECHNICAL_ASSET,
+                TechnicalAssetResolver,
+            )
+        ),
+    ],
+)
+def apply_technical_asset_environment_configuration(
+    data_product_id: UUID,
+    id: UUID,
+    environment_id: UUID,
+    db: Session = Depends(get_db_session, scope="function"),
+) -> None:
+    TechnicalAssetService(db).apply_environment_configuration(
+        data_product_id, id, environment_id
+    )

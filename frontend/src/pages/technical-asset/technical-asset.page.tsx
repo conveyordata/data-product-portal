@@ -119,6 +119,11 @@ export function TechnicalAsset() {
                             technicalAssetId={dataOutput.id}
                             dataProductId={dataProductId}
                             isLoading={isLoading}
+                            hasEnvironmentConfiguration={
+                                plugins
+                                    ?.find((plugin) => plugin.plugin === dataOutput.configuration.name)
+                                    ?.ui_metadata.some((field) => field.environment_overridable) ?? false
+                            }
                         />
                     </Flex>
                 </Flex>

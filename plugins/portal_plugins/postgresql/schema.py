@@ -34,6 +34,9 @@ class PostgreSQLTechnicalAssetConfiguration(TechnicalAssetPlugin):
     schema: str = ""
     table: str = "*"
     access_granularity: AccessGranularity
+    engine_version: str = "16"
+    size: str = "small"
+    storage_gb: str = "20"
 
     _platform_metadata = PlatformMetadata(
         result_string_template="{database}.{schema}.{table}",
@@ -132,5 +135,28 @@ class PostgreSQLTechnicalAssetConfiguration(TechnicalAssetPlugin):
                     )
                 ],
             ),
+            _overridable_select(
+                "engine_version", "Engine version", ["15", "16", "17"], "16"
+            ),
+            _overridable_select("size", "Size", ["small", "medium", "large"], "small"),
+            _overridable_select(
+                "storage_gb", "Storage (GB)", ["20", "50", "100"], "20"
+            ),
         ]
         return base_metadata
+
+
+def _overridable_select(
+    name: str, label: str, values: list[str], default: str
+) -> UIElementMetadata:
+    return UIElementMetadata(
+        name=name,
+        label=label,
+        type=UIElementType.Select,
+        required=True,
+        environment_overridable=True,
+        select=UIElementSelect(
+            initial_value=default,
+            options=[SelectOption(label=value, value=value) for value in values],
+        ),
+    )

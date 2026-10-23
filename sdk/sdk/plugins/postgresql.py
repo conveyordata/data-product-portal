@@ -12,3 +12,6 @@ class PostgreSQLTechnicalAssetConfiguration(TechnicalAssetConfiguration):
     schema: str = ""
     table: str = "*"
     access_granularity: AccessGranularity
+    engine_version: str = "16"
+    size: str = "small"
+    storage_gb: str = "20"
