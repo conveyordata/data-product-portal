@@ -1,41 +1,15 @@
-from enum import UNIQUE, Enum, verify
 from typing import Optional, Sequence
 from uuid import UUID
-from warnings import deprecated
 
 from pydantic import NaiveDatetime
 
 from app.data_products.output_ports.schema import OutputPort
 from app.data_products.schema import DataProduct
 from app.data_products.technical_assets.schema import TechnicalAsset
+from app.events.enums import EventEntityType
 from app.explorations.schema_response import Exploration
 from app.shared.schema import ORMModel
 from app.users.schema import User
-
-from .enums import EventReferenceEntity as EventReferenceEntityOld
-
-
-@verify(UNIQUE)
-class EventEntityType(str, Enum):
-    DATA_PRODUCT = "data_product"
-    OUTPUT_PORT = "output_port"
-    TECHNICAL_ASSET = "technical_asset"
-    USER = "user"
-    EXPLORATION = "exploration"
-
-    @staticmethod
-    def from_old(old: EventReferenceEntityOld) -> "EventEntityType":
-        match old:
-            case EventReferenceEntityOld.DATA_PRODUCT:
-                return EventEntityType.DATA_PRODUCT
-            case EventReferenceEntityOld.DATASET:
-                return EventEntityType.OUTPUT_PORT
-            case EventReferenceEntityOld.DATA_OUTPUT:
-                return EventEntityType.TECHNICAL_ASSET
-            case EventReferenceEntityOld.USER:
-                return EventEntityType.USER
-            case EventReferenceEntityOld.EXPLORATION:
-                return EventEntityType.EXPLORATION
 
 
 class GetEventHistoryResponseItem(ORMModel):
@@ -56,36 +30,6 @@ class GetEventHistoryResponseItem(ORMModel):
     output_port: Optional[OutputPort] = None
     technical_asset: Optional[TechnicalAsset] = None
     exploration: Optional[Exploration] = None
-
-
-@deprecated("Use GetEventHistoryResponseItem instead")
-class GetEventHistoryResponseItemOld(ORMModel):
-    id: UUID
-    name: str
-    subject_id: UUID
-    target_id: Optional[UUID] = None
-    subject_type: EventReferenceEntityOld
-    target_type: Optional[EventReferenceEntityOld] = None
-    actor_id: UUID
-    created_on: NaiveDatetime
-    deleted_subject_identifier: Optional[str] = None
-    deleted_target_identifier: Optional[str] = None
-    deleted_actor_identifier: Optional[str] = None
-    actor: Optional[User] = None
-    data_product: Optional[DataProduct] = None
-    user: Optional[User] = None
-    output_port: Optional[OutputPort]
-    technical_asset: Optional[TechnicalAsset] = None
-    exploration: Optional[Exploration] = None
-
-    def convert(self) -> GetEventHistoryResponseItem:
-        return GetEventHistoryResponseItem(
-            **self.model_dump(exclude={"subject_type", "target_type"}),
-            subject_type=EventEntityType.from_old(self.subject_type),
-            target_type=EventEntityType.from_old(self.target_type)
-            if self.target_type is not None
-            else None,
-        )
 
 
 class GetEventHistoryResponse(ORMModel):

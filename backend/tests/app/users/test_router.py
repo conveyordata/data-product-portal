@@ -13,9 +13,9 @@ from app.authorization.roles.schema import Scope
 from app.core.authz import REDACTION_VALUE
 from app.core.authz.actions import AuthorizationAction
 from app.data_products.model import DataProductVisibility
-from app.events.enums import EventReferenceEntity
+from app.events.enums import EventEntityType
 from app.events.model import Event
-from app.events.schema_response import GetEventHistoryResponseItemOld
+from app.events.schema_response import GetEventHistoryResponseItem
 from app.settings import settings
 from app.users.model import User
 from tests.app.data_products.output_port_technical_assets_link.test_router import (
@@ -80,13 +80,13 @@ class TestUsersRouter:
         subject_event = EventFactory(
             actor=other_user,
             subject_id=user.id,
-            subject_type=EventReferenceEntity.USER,
+            subject_type=EventEntityType.USER,
             deleted_subject_identifier=None,
         )
         target_event = EventFactory(
             actor=other_user,
             target_id=user.id,
-            target_type=EventReferenceEntity.USER,
+            target_type=EventEntityType.USER,
         )
         user_id, email = user.id, user.email
         actor_event_id = actor_event.id
@@ -103,7 +103,7 @@ class TestUsersRouter:
         assert actor_event.actor_id == user_id
         assert actor_event.actor is None
         assert actor_event.deleted_actor_identifier == email
-        history = GetEventHistoryResponseItemOld.model_validate(actor_event).convert()
+        history = GetEventHistoryResponseItem.model_validate(actor_event)
         assert history.actor is None
         assert history.deleted_actor_identifier == email
         subject_event = session.get(Event, subject_event_id)
@@ -117,19 +117,19 @@ class TestUsersRouter:
     @pytest.mark.parametrize(
         "entity_type",
         [
-            EventReferenceEntity.DATA_PRODUCT,
-            EventReferenceEntity.DATASET,
-            EventReferenceEntity.DATA_OUTPUT,
+            EventEntityType.DATA_PRODUCT,
+            EventEntityType.OUTPUT_PORT,
+            EventEntityType.TECHNICAL_ASSET,
         ],
     )
     def test_remove_user__event_endpoints_keep_deleted_actor(
         self, client, admin, entity_type
     ):
         actor = UserFactory()
-        if entity_type == EventReferenceEntity.DATA_PRODUCT:
+        if entity_type == EventEntityType.DATA_PRODUCT:
             resource = DataProductFactory()
             history_path = f"/api/v2/data_products/{resource.id}/history"
-        elif entity_type == EventReferenceEntity.DATASET:
+        elif entity_type == EventEntityType.OUTPUT_PORT:
             resource = OutputPortFactory()
             history_path = (
                 f"/api/v2/data_products/{resource.data_product_id}"

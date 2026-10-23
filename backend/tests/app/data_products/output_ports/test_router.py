@@ -12,7 +12,7 @@ from app.core.authz.actions import AuthorizationAction
 from app.data_products.model import DataProductVisibility
 from app.data_products.output_ports.enums import OutputPortAccessFunction
 from app.data_products.output_ports.model import OutputPort
-from app.events.enums import EventReferenceEntity
+from app.events.enums import EventEntityType
 from app.events.service import EventService
 from app.resource_names.service import ResourceNameValidityType
 from app.settings import settings
@@ -995,7 +995,7 @@ class TestOutputPortRouter:
         assert history.status_code == 404
 
         events = EventService(db=session).get_history(
-            ds.data_product_id, EventReferenceEntity.DATA_PRODUCT
+            ds.data_product_id, EventEntityType.DATA_PRODUCT
         )
         assert len(events) == 1
         assert events[0].deleted_subject_identifier == ds.name
@@ -1016,7 +1016,7 @@ class TestOutputPortRouter:
         assert response.status_code == 200
 
         events = EventService(db=session).get_history(
-            dataset_id, EventReferenceEntity.DATASET
+            dataset_id, EventEntityType.OUTPUT_PORT
         )
         assert len(events) == 1
         assert events[0].deleted_subject_identifier == dataset_name
