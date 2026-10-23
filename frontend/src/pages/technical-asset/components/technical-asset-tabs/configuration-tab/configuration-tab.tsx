@@ -5,7 +5,6 @@ import { useTranslation } from 'react-i18next';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
 import {
     type EnvironmentConfigurationProperty,
-    useApplyTechnicalAssetEnvironmentConfigurationMutation,
     useGetTechnicalAssetEnvironmentConfigurationQuery,
     useUpdateTechnicalAssetEnvironmentConfigurationMutation,
 } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
@@ -41,7 +40,6 @@ function ConfigurationMatrix({
 }: Props & { properties: EnvironmentConfigurationProperty[] }) {
     const { t } = useTranslation();
     const [save, { isLoading: isSaving }] = useUpdateTechnicalAssetEnvironmentConfigurationMutation();
-    const [apply, { isLoading: isApplying }] = useApplyTechnicalAssetEnvironmentConfigurationMutation();
     const [baseValues, setBaseValues] = useState<Record<string, string>>(() =>
         Object.fromEntries(properties.map((property) => [property.name, property.base_value])),
     );
@@ -76,14 +74,6 @@ function ConfigurationMatrix({
         dispatchMessage({ content: t('Configuration saved'), type: 'success' });
     }
 
-    async function handleApply(environmentId: string, environmentName: string) {
-        await apply({ dataProductId, id: technicalAssetId, environmentId }).unwrap();
-        dispatchMessage({
-            content: t('Configuration applied to {{environment}}', { environment: environmentName }),
-            type: 'success',
-        });
-    }
-
     const toOptions = (property: EnvironmentConfigurationProperty) =>
         property.allowed_values.map((value) => ({ label: value, value }));
 
@@ -102,18 +92,7 @@ function ConfigurationMatrix({
         },
         ...environments.map((environment) => ({
             key: environment.environment_id,
-            title: (
-                <Flex justify="space-between" align="center" gap="small">
-                    {environment.name}
-                    <Button
-                        size="small"
-                        disabled={isApplying}
-                        onClick={() => handleApply(environment.environment_id, environment.name)}
-                    >
-                        {t('Apply')}
-                    </Button>
-                </Flex>
-            ),
+            title: environment.name,
             render: (_: unknown, property: EnvironmentConfigurationProperty) => {
                 const override = overrides[environment.environment_id]?.[property.name];
                 return (

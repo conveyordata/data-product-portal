@@ -133,15 +133,6 @@ const injectedRtkApi = api.injectEndpoints({
         body: queryArg.updateTechnicalAssetEnvironmentConfigurationRequest,
       }),
     }),
-    applyTechnicalAssetEnvironmentConfiguration: build.mutation<
-      ApplyTechnicalAssetEnvironmentConfigurationApiResponse,
-      ApplyTechnicalAssetEnvironmentConfigurationApiArg
-    >({
-      query: (queryArg) => ({
-        url: `/api/v2/data_products/${queryArg.dataProductId}/technical_assets/${queryArg.id}/environments/${queryArg.environmentId}/apply`,
-        method: "POST",
-      }),
-    }),
   }),
   overrideExisting: false,
 });
@@ -234,13 +225,6 @@ export type UpdateTechnicalAssetEnvironmentConfigurationApiArg = {
   dataProductId: string;
   id: string;
   updateTechnicalAssetEnvironmentConfigurationRequest: UpdateTechnicalAssetEnvironmentConfigurationRequest;
-};
-export type ApplyTechnicalAssetEnvironmentConfigurationApiResponse =
-  /** status 200 Successful Response */ any;
-export type ApplyTechnicalAssetEnvironmentConfigurationApiArg = {
-  dataProductId: string;
-  id: string;
-  environmentId: string;
 };
 export type ValidationError = {
   loc: (string | number)[];
@@ -580,5 +564,4 @@ export const {
   useGetTechnicalAssetEnvironmentConfigurationQuery,
   useLazyGetTechnicalAssetEnvironmentConfigurationQuery,
   useUpdateTechnicalAssetEnvironmentConfigurationMutation,
-  useApplyTechnicalAssetEnvironmentConfigurationMutation,
 } = injectedRtkApi;

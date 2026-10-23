@@ -21,10 +21,6 @@ type AddOutputPortDataQualityRunRes interface {
 	addOutputPortDataQualityRunRes()
 }
 
-type ApplyTechnicalAssetEnvironmentConfigurationRes interface {
-	applyTechnicalAssetEnvironmentConfigurationRes()
-}
-
 type ApproveOutputPortAsInputPortRes interface {
 	approveOutputPortAsInputPortRes()
 }

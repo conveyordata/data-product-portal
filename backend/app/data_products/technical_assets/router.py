@@ -354,25 +354,3 @@ def update_technical_asset_environment_configuration(
     return TechnicalAssetService(db).update_environment_configuration(
         data_product_id, id, request
     )
-
-
-@router.post(
-    "/{id}/environments/{environment_id}/apply",
-    dependencies=[
-        Depends(
-            Authorization.enforce(
-                Action.DATA_PRODUCT__UPDATE_TECHNICAL_ASSET,
-                TechnicalAssetResolver,
-            )
-        ),
-    ],
-)
-def apply_technical_asset_environment_configuration(
-    data_product_id: UUID,
-    id: UUID,
-    environment_id: UUID,
-    db: Session = Depends(get_db_session, scope="function"),
-) -> None:
-    TechnicalAssetService(db).apply_environment_configuration(
-        data_product_id, id, environment_id
-    )

@@ -58,9 +58,6 @@ from .cloud_event_output_port_role_assignment_event import (
 from .cloud_event_output_port_technical_asset_link_event import (
     CloudEventOutputPortTechnicalAssetLinkEvent,
 )
-from .cloud_event_technical_asset_environment_configuration_applied_event import (
-    CloudEventTechnicalAssetEnvironmentConfigurationAppliedEvent,
-)
 from .cloud_event_technical_asset_event import CloudEventTechnicalAssetEvent
 from .create_data_product_life_cycle_response import CreateDataProductLifeCycleResponse
 from .create_data_product_response import CreateDataProductResponse
@@ -392,12 +389,6 @@ from .tags_get import TagsGet
 from .tags_get_item import TagsGetItem
 from .technical_asset import TechnicalAsset
 from .technical_asset_configuration import TechnicalAssetConfiguration
-from .technical_asset_environment_configuration_applied_event import (
-    TechnicalAssetEnvironmentConfigurationAppliedEvent,
-)
-from .technical_asset_environment_configuration_applied_event_configuration import (
-    TechnicalAssetEnvironmentConfigurationAppliedEventConfiguration,
-)
 from .technical_asset_event import TechnicalAssetEvent
 from .technical_asset_link import TechnicalAssetLink
 from .technical_asset_output_port_request import TechnicalAssetOutputPortRequest
@@ -491,7 +482,6 @@ __all__ = (
     "CloudEventOutputPortEvent",
     "CloudEventOutputPortRoleAssignmentEvent",
     "CloudEventOutputPortTechnicalAssetLinkEvent",
-    "CloudEventTechnicalAssetEnvironmentConfigurationAppliedEvent",
     "CloudEventTechnicalAssetEvent",
     "CreateDataProductLifeCycleResponse",
     "CreateDataProductResponse",
@@ -751,8 +741,6 @@ __all__ = (
     "TagUpdate",
     "TechnicalAsset",
     "TechnicalAssetConfiguration",
-    "TechnicalAssetEnvironmentConfigurationAppliedEvent",
-    "TechnicalAssetEnvironmentConfigurationAppliedEventConfiguration",
     "TechnicalAssetEvent",
     "TechnicalAssetLink",
     "TechnicalAssetOutputPortRequest",

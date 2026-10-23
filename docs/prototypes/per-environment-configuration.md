@@ -33,9 +33,8 @@ Values are strings.
 ### API
 
 - `GET .../environment-configuration` returns, per overridable property: name, label, allowed values, default, base value, and per environment of the Data Product (id, name, acronym): the override (or null) and the effective value.
-- `PUT .../environment-configuration` replaces the base values and the full override set in one request. Saving only records the desired state. It doesn't trigger provisioning.
-- `POST .../environments/{environment_id}/apply` queues one webhook event for that environment only. Payload: `id`, `data_product_id`, `environment` (acronym) and `configuration` (property name → effective value for that environment). The event type is `<entity>.environment_configuration_applied`.
-- No applied state is stored and there is no pending diff. The Portal sends the event; keeping infrastructure in sync is the provisioner's job.
+- `PUT .../environment-configuration` replaces the base values and the full override set in one request.
+- Saving queues the entity's normal id-only event, like any other change. The provisioner fetches the configuration and converges every environment itself. There is no apply step, no applied state and no pending diff: rolling out dev first means saving a dev override first.
 - Authorization: the same action that guards updating the entity.
 
 ### UI
@@ -45,11 +44,10 @@ On the instance's detail page, a "Configuration" tab holds a matrix:
 - Rows are the overridable properties. Columns are "Base" and one column per environment of the Data Product.
 - Every cell is a select over the allowed values. Environment cells also offer "Inherit", the default, which shows the inherited base value greyed out. A cell with an override is visibly marked.
 - One "Save" button saves the whole matrix.
-- Each environment column has an "Apply" button that calls the apply endpoint and shows a success message naming the environment.
 
 ## Not in scope
 
-Approval flows, promote-to-prd, scheduling, applied-state tracking, tests, production-grade error handling.
+Apply per environment, approval flows, promote-to-prd, scheduling, applied-state tracking, tests, production-grade error handling.
 
 ## This branch: overrides on Technical Assets
 
@@ -61,8 +59,7 @@ Approval flows, promote-to-prd, scheduling, applied-state tracking, tests, produ
 - Overrides live in one core table, `technical_asset_environment_overrides`, one row per (Technical Asset, environment, property) with a string value. Deleting the Technical Asset or the environment cascades.
 - Environments are the Data Product's `environments`, never a hard-coded list.
 - `GET` wraps the list as `{"properties": [...]}`. `PUT` takes `{"base_values": {name: value}, "overrides": {environment_id: {name: value}}}` and returns the same shape as `GET`. Base values that are left out of `base_values` keep their current value. An environment absent from `overrides` loses all its overrides.
-- `POST .../apply` also answers 400 for an environment the Data Product doesn't run in. It uses the saved state, not unsaved edits in the UI.
-- Event: `technical_asset.environment_configuration_applied` with `id`, `data_product_id`, `environment` and `configuration`.
+- Saving queues `technical_asset.event` (`id`, `data_product_id`), the same event as any other Technical Asset change.
 - The Configuration tab only shows when the asset's plugin metadata (from `/api/v2/plugins`) has an overridable field.
 
 ### File map
@@ -71,7 +68,6 @@ Approval flows, promote-to-prd, scheduling, applied-state tracking, tests, produ
 - PostgreSQL showcase: `plugins/portal_plugins/postgresql/{model,schema}.py`, `plugins/portal_plugins/postgresql/versions/postgresql_0002_overridable.py`
 - Override table: `backend/app/data_products/technical_assets/model.py`, `backend/app/database/alembic/versions/2026_10_23_1200-8b1e4f2c9a37_technical_asset_environment_overrides.py`
 - API: `backend/app/data_products/technical_assets/{router,service,schema_request,schema_response}.py`
-- Event: `backend/app/core/webhooks/events.py`
 - UI: `frontend/src/pages/technical-asset/components/technical-asset-tabs/configuration-tab/configuration-tab.tsx`, `technical-asset-tabs.tsx`, `technical-asset.page.tsx`, the select default in `frontend/src/components/data-products/technical-asset-form/technical-asset-configuration-form.component.tsx`, cache tags in `frontend/src/store/api/services/tags/dataProductsTechicalAssetsTags.ts`
 
 ### Impact
@@ -81,7 +77,7 @@ What was easy:
 - Everything fits the existing Technical Asset module: three endpoints, three service methods, one table. No new concept, no new router, no new permission.
 - Plugins already describe their form through `UIElementMetadata`, so one flag plus a select default was enough to declare overridable fields generically.
 - The base value comes for free: it is a normal configuration column, set by the create form and returned with the asset.
-- Webhook plumbing (`V2Event`, `context.queue_events`, SDK and CLI regeneration) needed no changes beyond the new event class.
+- Events needed no new type: saving queues the existing `technical_asset.event`.
 
 What was awkward:
 

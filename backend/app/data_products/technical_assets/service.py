@@ -17,9 +17,6 @@ from app.core import context
 from app.core.namespace.validation import (
     TechnicalAssetNamespaceValidator,
 )
-from app.core.webhooks.events import (
-    TechnicalAssetEnvironmentConfigurationAppliedEvent,
-)
 from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.model import ensure_data_product_exists
 from app.data_products.output_port_technical_assets_link.model import (
@@ -408,30 +405,8 @@ class TechnicalAssetService:
             ]
         )
         self.db.flush()
+        context.queue_event(technical_asset.to_event())
         return self._environment_configuration(technical_asset)
-
-    def apply_environment_configuration(
-        self, data_product_id: UUID, id: UUID, environment_id: UUID
-    ) -> None:
-        technical_asset = self.get_technical_asset(data_product_id, id)
-        environment = self._ensure_data_product_environment(
-            technical_asset, environment_id
-        )
-        context.queue_event(
-            TechnicalAssetEnvironmentConfigurationAppliedEvent(
-                id=id,
-                data_product_id=data_product_id,
-                environment=environment.acronym,
-                configuration={
-                    prop.name: value.effective_value
-                    for prop in self._environment_configuration(
-                        technical_asset
-                    ).properties
-                    for value in prop.environments
-                    if value.environment_id == environment_id
-                },
-            )
-        )
 
     def _environment_configuration(
         self, technical_asset: TechnicalAssetModel

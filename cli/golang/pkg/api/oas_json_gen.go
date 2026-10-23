@@ -1814,48 +1814,6 @@ func (s *AddOutputPortDataQualityRunNotFoundApplicationJSON) UnmarshalJSON(data 
 	return s.Decode(d)
 }
 
-// Encode encodes ApplyTechnicalAssetEnvironmentConfigurationOKApplicationJSON as json.
-func (s ApplyTechnicalAssetEnvironmentConfigurationOKApplicationJSON) Encode(e *jx.Encoder) {
-	unwrapped := jx.Raw(s)
-
-	if len(unwrapped) != 0 {
-		e.Raw(unwrapped)
-	}
-}
-
-// Decode decodes ApplyTechnicalAssetEnvironmentConfigurationOKApplicationJSON from json.
-func (s *ApplyTechnicalAssetEnvironmentConfigurationOKApplicationJSON) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode ApplyTechnicalAssetEnvironmentConfigurationOKApplicationJSON to nil")
-	}
-	var unwrapped jx.Raw
-	if err := func() error {
-		v, err := d.RawAppend(nil)
-		unwrapped = jx.Raw(v)
-		if err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		return errors.Wrap(err, "alias")
-	}
-	*s = ApplyTechnicalAssetEnvironmentConfigurationOKApplicationJSON(unwrapped)
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s ApplyTechnicalAssetEnvironmentConfigurationOKApplicationJSON) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *ApplyTechnicalAssetEnvironmentConfigurationOKApplicationJSON) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
 // Encode implements json.Marshaler.
 func (s *ApproveLinkBetweenTechnicalAssetAndOutputPortRequest) Encode(e *jx.Encoder) {
 	e.ObjStart()

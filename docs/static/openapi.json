@@ -5049,67 +5049,6 @@
         }
       }
     },
-    "/api/v2/data_products/{data_product_id}/technical_assets/{id}/environments/{environment_id}/apply": {
-      "post": {
-        "tags": [
-          "Data Products - Technical assets"
-        ],
-        "summary": "Apply Technical Asset Environment Configuration",
-        "operationId": "apply_technical_asset_environment_configuration",
-        "parameters": [
-          {
-            "name": "data_product_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Data Product Id"
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Id"
-            }
-          },
-          {
-            "name": "environment_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid",
-              "title": "Environment Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/v2/configuration/domains": {
       "get": {
         "tags": [
@@ -10176,9 +10115,6 @@
                     "$ref": "#/components/schemas/CloudEvent_TechnicalAssetEvent"
                   },
                   {
-                    "$ref": "#/components/schemas/CloudEvent_TechnicalAssetEnvironmentConfigurationAppliedEvent"
-                  },
-                  {
                     "$ref": "#/components/schemas/CloudEvent_OutputPortEvent"
                   },
                   {
@@ -10202,7 +10138,6 @@
                     "data_product_role_assignment.event": "#/components/schemas/CloudEvent_DataProductRoleAssignmentEvent",
                     "output_port_role_assignment.event": "#/components/schemas/CloudEvent_OutputPortRoleAssignmentEvent",
                     "technical_asset.event": "#/components/schemas/CloudEvent_TechnicalAssetEvent",
-                    "technical_asset.environment_configuration_applied": "#/components/schemas/CloudEvent_TechnicalAssetEnvironmentConfigurationAppliedEvent",
                     "output_port.event": "#/components/schemas/CloudEvent_OutputPortEvent",
                     "output_port_technical_asset_link.event": "#/components/schemas/CloudEvent_OutputPortTechnicalAssetLinkEvent",
                     "data_product_setting_value.event": "#/components/schemas/CloudEvent_DataProductSettingValueEvent",
@@ -11309,50 +11244,6 @@
           "data"
         ],
         "title": "CloudEvent_OutputPortTechnicalAssetLinkEvent"
-      },
-      "CloudEvent_TechnicalAssetEnvironmentConfigurationAppliedEvent": {
-        "properties": {
-          "specversion": {
-            "type": "string",
-            "title": "Specversion",
-            "description": "The CloudEvents specification version.",
-            "default": "1.0"
-          },
-          "id": {
-            "type": "string",
-            "title": "Id",
-            "description": "A unique UUID identifier for this specific event instance."
-          },
-          "source": {
-            "type": "string",
-            "title": "Source",
-            "description": "Identifies the context in which an event happened.",
-            "default": "data-product-portal"
-          },
-          "type": {
-            "type": "string",
-            "const": "technical_asset.environment_configuration_applied",
-            "title": "Type",
-            "description": "The unique type string belonging to this event.",
-            "default": "technical_asset.environment_configuration_applied"
-          },
-          "time": {
-            "type": "string",
-            "title": "Time",
-            "description": "Timestamp of when the event occurred in ISO 8601 UTC format."
-          },
-          "data": {
-            "$ref": "#/components/schemas/TechnicalAssetEnvironmentConfigurationAppliedEvent",
-            "description": "The specific data payload corresponding to this event type."
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "time",
-          "data"
-        ],
-        "title": "CloudEvent_TechnicalAssetEnvironmentConfigurationAppliedEvent"
       },
       "CloudEvent_TechnicalAssetEvent": {
         "properties": {
@@ -18909,39 +18800,6 @@
           "configuration"
         ],
         "title": "TechnicalAsset"
-      },
-      "TechnicalAssetEnvironmentConfigurationAppliedEvent": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "data_product_id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Data Product Id"
-          },
-          "environment": {
-            "type": "string",
-            "title": "Environment"
-          },
-          "configuration": {
-            "additionalProperties": {
-              "type": "string"
-            },
-            "type": "object",
-            "title": "Configuration"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "data_product_id",
-          "environment",
-          "configuration"
-        ],
-        "title": "TechnicalAssetEnvironmentConfigurationAppliedEvent"
       },
       "TechnicalAssetEvent": {
         "properties": {
