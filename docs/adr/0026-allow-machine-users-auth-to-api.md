@@ -173,7 +173,7 @@ a machine user cannot establish an interactive Portal session.
 
 ### Pre-provisioning flow
 
-The identity provisioner is configured through the existing Portal administration model:
+The example external provisioner is configured through the existing Portal administration model:
 
 1. Create the machine user.
 2. Enable OIDC authentication through the dedicated operation.
