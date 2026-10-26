@@ -5,6 +5,7 @@ import {
     EmptyState,
     emptyStateQueryProps,
     hasFailed,
+    isAwaitingData,
     searchFilter,
 } from '@/components/empty-state/empty-state.component.tsx';
 import { TechnicalAssetOutlined } from '@/components/icons';
@@ -41,16 +42,17 @@ export function TechnicalAssetLinkModal({ onClose, dataProductId, datasetId, dat
     const [approveLink] = useApproveOutputPortTechnicalAssetLinkMutation();
 
     const technicalAssetsQuery = useGetDataProductTechnicalAssetsQuery(dataProductId, { skip: !dataProductId });
-    const { data: { technical_assets: technicalAssets = [] } = {}, isLoading } = technicalAssetsQuery;
+    const { data: { technical_assets: technicalAssets = [] } = {} } = technicalAssetsQuery;
+    const loadFailed = hasFailed(technicalAssetsQuery);
 
     const existingLinkIds = useMemo(() => {
         return new Set(existingLinks.map((link) => link.technical_asset_id));
     }, [existingLinks]);
 
     const availableDataOutputs = useMemo(() => {
-        if (hasFailed(technicalAssetsQuery)) return [];
+        if (loadFailed) return [];
         return technicalAssets.filter((output) => !existingLinkIds.has(output.id));
-    }, [technicalAssets, existingLinkIds, technicalAssetsQuery]);
+    }, [technicalAssets, existingLinkIds, loadFailed]);
 
     const filteredDataOutputs = useMemo(() => {
         if (!searchTerm) return availableDataOutputs;
@@ -177,7 +179,7 @@ export function TechnicalAssetLinkModal({ onClose, dataProductId, datasetId, dat
             <List
                 style={{ width: '100%' }}
                 dataSource={filteredDataOutputs}
-                loading={isLoading}
+                loading={isAwaitingData(technicalAssetsQuery)}
                 pagination={{
                     ...pagination,
                     size: 'small',

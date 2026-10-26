@@ -1,7 +1,7 @@
 import { Alert, Col, Flex, Radio, type RadioChangeEvent, Row, Typography } from 'antd';
 import { lazy, Suspense, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { hasFailed } from '@/components/empty-state/empty-state.component.tsx';
+import { hasFailed, isAwaitingData } from '@/components/empty-state/empty-state.component.tsx';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
 import {
     QueryStatsGranularity,
@@ -52,6 +52,10 @@ export function UsageTab({ outputPortId, dataProductId }: Props) {
 
     const hasUsageData = Boolean(responses.length);
     const hasCuratedQueries = Boolean(curatedQueries.length);
+    const showNoUsageHint =
+        !hasUsageData &&
+        !hasCuratedQueries &&
+        [statsQuery, curatedQueriesQuery].every((query) => !hasFailed(query) && !isAwaitingData(query));
     const unknownLabel = t('Unknown');
 
     const chartData = useMemo(() => {
@@ -86,7 +90,7 @@ export function UsageTab({ outputPortId, dataProductId }: Props) {
                 </Flex>
             </Col>
 
-            {!hasUsageData && !hasCuratedQueries && !hasFailed(statsQuery) && !hasFailed(curatedQueriesQuery) && (
+            {showNoUsageHint && (
                 <Col span={24}>
                     <Alert
                         title={

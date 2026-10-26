@@ -4,6 +4,7 @@ import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router';
+import { searchFilter } from '@/components/empty-state/empty-state.component.tsx';
 import { ExplorationOutlined } from '@/components/icons';
 import { ListTable } from '@/components/list-table/list-table.component.tsx';
 import { getExplorationTableColumns } from '@/pages/product-studio/components/explorations-tab/explorations-table-columns.tsx';
@@ -85,14 +86,7 @@ export function ExplorationsTab() {
                         </Link>
                     ),
                 }}
-                filter={{
-                    hasOtherFilters: !showAll,
-                    searchTerm,
-                    onClear: () => {
-                        setSearchTerm(null);
-                        setShowAll(true);
-                    },
-                }}
+                filter={searchFilter(searchTerm, setSearchTerm)}
                 onRow={(record) => ({
                     onClick: () => navigateToExploration(record.id),
                 })}

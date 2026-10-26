@@ -107,7 +107,13 @@ export function EmptyState({
     }
 
     return (
-        <Flex vertical align="center" gap="small" role="status" className={clsx(styles.container, styles[size])}>
+        <Flex
+            vertical
+            align="center"
+            gap="small"
+            role={error ? 'alert' : 'status'}
+            className={clsx(styles.container, styles[size])}
+        >
             <div className={styles.tile} style={content.tileColors} aria-hidden>
                 {content.icon}
             </div>

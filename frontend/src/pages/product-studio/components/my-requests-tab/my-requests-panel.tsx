@@ -3,6 +3,7 @@ import { Flex, Input, Radio, Tooltip } from 'antd';
 import { parseAsBoolean, parseAsString, useQueryState } from 'nuqs';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { searchFilter } from '@/components/empty-state/empty-state.component.tsx';
 import { ListTable } from '@/components/list-table/list-table.component.tsx';
 import { useTablePagination } from '@/hooks/use-table-pagination.tsx';
 import { useTableColumns } from '@/pages/product-studio/components/my-requests-tab/use-table-columns.tsx';
@@ -66,14 +67,7 @@ export function MyRequestsTab() {
                         'Access you request to Output Ports appears here, together with the decision on it.',
                     ),
                 }}
-                filter={{
-                    hasOtherFilters: filterOutOldInactiveRequests,
-                    searchTerm,
-                    onClear: () => {
-                        setSearchTerm(null);
-                        setFilterOutOldInactiveRequests(false);
-                    },
-                }}
+                filter={searchFilter(searchTerm, setSearchTerm)}
                 size="small"
                 pagination={{
                     ...pagination,

@@ -45,18 +45,12 @@ describe('DataProductsTab', () => {
         expect(screen.getByText('Customer Insights')).toBeInTheDocument();
     });
 
-    it('treats an empty "My Data Products" view as filtered, and clearing it shows all', async () => {
+    it('shows the "yet" empty state for an empty default "My Data Products" view', async () => {
         setupMocks([]);
         renderWithProviders(<DataProductsTab />, {
             routerProps: { initialEntries: ['/studio'] },
             currentUser,
         });
-
-        await waitFor(() => {
-            expect(screen.getByText('No Data Products match the current filters')).toBeInTheDocument();
-        });
-
-        fireEvent.click(screen.getByRole('button', { name: 'Clear filters' }));
 
         await waitFor(() => {
             expect(screen.getByText('No Data Products yet')).toBeInTheDocument();

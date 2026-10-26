@@ -95,11 +95,10 @@ export function DataProductsTab() {
         setSelectedRoles([]);
     };
 
-    const hasOtherFilters = assignmentFilter === AssignmentFilter.OnlyAssigned || selectedProductIds.length > 0;
+    const hasOtherFilters = selectedProductIds.length > 0;
     const isFiltered = Boolean(searchTerm) || hasOtherFilters;
     const clearFilters = () => {
         setSearchTerm(null);
-        setAssignmentFilter(AssignmentFilter.All);
         setSelectedProductIds([]);
         setSelectedRoles([]);
     };

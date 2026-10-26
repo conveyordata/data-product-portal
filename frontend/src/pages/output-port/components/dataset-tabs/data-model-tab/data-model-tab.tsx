@@ -5,7 +5,12 @@ import { Button, Flex, Space, Table, Tabs, Tag, Typography, Upload } from 'antd'
 import type { TFunction } from 'i18next';
 import { useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { EmptyState, emptyStateQueryProps, hasFailed } from '@/components/empty-state/empty-state.component.tsx';
+import {
+    EmptyState,
+    emptyStateQueryProps,
+    hasFailed,
+    isAwaitingData,
+} from '@/components/empty-state/empty-state.component.tsx';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
 import { PosthogEvents } from '@/constants/posthog.constants.ts';
 import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
@@ -154,7 +159,7 @@ export function DataModelTab({ datasetId, dataProductId }: Props) {
         </Upload>
     ) : null;
 
-    if (isLoading) {
+    if (isAwaitingData(schemaQuery)) {
         return <LoadingSpinner />;
     }
 

@@ -60,6 +60,10 @@ export function Marketplace() {
     const { data: { output_ports: outputPorts = [] } = {}, isFetching } = outputPortsQuery;
 
     const page = Math.max(1, Math.min(currentPage, Math.ceil(outputPorts.length / pageSize)));
+    const hasResults = outputPortsQuery.currentData !== undefined;
+    useEffect(() => {
+        if (hasResults && page !== currentPage) setCurrentPage(page);
+    }, [hasResults, page, currentPage, setCurrentPage]);
     const paginatedOutputPorts = useMemo(() => {
         const startIndex = (page - 1) * pageSize;
         const endIndex = startIndex + pageSize;

@@ -129,7 +129,6 @@ export function OutputPortsTab() {
 
     const clearFilters = () => {
         setSearchTerm(null);
-        setAssignmentFilter(AssignmentFilter.All);
         setSelectedPortIds([]);
         setSelectedRoles([]);
     };
@@ -185,7 +184,7 @@ export function OutputPortsTab() {
                     action: createDataProductButton,
                 }}
                 filter={{
-                    hasOtherFilters: assignmentFilter === AssignmentFilter.OnlyAssigned || selectedPortIds.length > 0,
+                    hasOtherFilters: selectedPortIds.length > 0,
                     searchTerm,
                     onClear: clearFilters,
                 }}
