@@ -4,20 +4,20 @@ from app.abstract_data_product.type import AbstractDataProductType
 
 
 @verify(UNIQUE)
-class EventReferenceEntity(str, Enum):
+class EventEntityType(str, Enum):
     DATA_PRODUCT = "data_product"
-    DATASET = "dataset"
-    DATA_OUTPUT = "data_output"
+    OUTPUT_PORT = "output_port"
+    TECHNICAL_ASSET = "technical_asset"
     USER = "user"
     EXPLORATION = "exploration"
 
     @staticmethod
     def for_consumer(
         consumer_type: AbstractDataProductType,
-    ) -> "EventReferenceEntity":
+    ) -> "EventEntityType":
         if consumer_type == AbstractDataProductType.EXPLORATION:
-            return EventReferenceEntity.EXPLORATION
-        return EventReferenceEntity.DATA_PRODUCT
+            return EventEntityType.EXPLORATION
+        return EventEntityType.DATA_PRODUCT
 
 
 @verify(UNIQUE)

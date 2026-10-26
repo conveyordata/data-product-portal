@@ -27,7 +27,7 @@ from app.core.authz.resolvers import (
     OutputPortRoleAssignmentResolver,
 )
 from app.database.deps import get_db_session
-from app.events.enums import EventReferenceEntity, EventType
+from app.events.enums import EventEntityType, EventType
 from app.events.schema import CreateEvent
 from app.events.service import EventService
 from app.users.notifications.service import NotificationService
@@ -60,9 +60,9 @@ def delete_output_port_role_assignment(
         CreateEvent(
             name=EventType.DATASET_ROLE_ASSIGNMENT_REMOVED,
             subject_id=assignment.output_port_id,
-            subject_type=EventReferenceEntity.DATASET,
+            subject_type=EventEntityType.OUTPUT_PORT,
             target_id=assignment.user_id,
-            target_type=EventReferenceEntity.USER,
+            target_type=EventEntityType.USER,
             actor_id=authenticated_user.id,
         ),
     )
@@ -142,9 +142,9 @@ def request_output_port_role_assignment(
         CreateEvent(
             name=EventType.DATASET_ROLE_ASSIGNMENT_REQUESTED,
             subject_id=assignment.output_port_id,
-            subject_type=EventReferenceEntity.DATASET,
+            subject_type=EventEntityType.OUTPUT_PORT,
             target_id=assignment.user_id,
-            target_type=EventReferenceEntity.USER,
+            target_type=EventEntityType.USER,
             actor_id=authenticated_user.id,
         )
     )
@@ -180,9 +180,9 @@ def create_output_port_role_assignment(
         CreateEvent(
             name=EventType.DATASET_ROLE_ASSIGNMENT_CREATED,
             subject_id=role_assignment.output_port_id,
-            subject_type=EventReferenceEntity.DATASET,
+            subject_type=EventEntityType.OUTPUT_PORT,
             target_id=role_assignment.user_id,
-            target_type=EventReferenceEntity.USER,
+            target_type=EventEntityType.USER,
             actor_id=authenticated_user.id,
         )
     )
@@ -255,9 +255,9 @@ def decide_output_port_role_assignment(
                 else EventType.DATASET_ROLE_ASSIGNMENT_DENIED
             ),
             subject_id=assignment.output_port_id,
-            subject_type=EventReferenceEntity.DATASET,
+            subject_type=EventEntityType.OUTPUT_PORT,
             target_id=assignment.user_id,
-            target_type=EventReferenceEntity.USER,
+            target_type=EventEntityType.USER,
             actor_id=user.id,
         ),
     )
@@ -304,9 +304,9 @@ def modify_output_port_role_assignment(
         CreateEvent(
             name=EventType.DATASET_ROLE_ASSIGNMENT_UPDATED,
             subject_id=assignment.output_port_id,
-            subject_type=EventReferenceEntity.DATASET,
+            subject_type=EventEntityType.OUTPUT_PORT,
             target_id=assignment.user_id,
-            target_type=EventReferenceEntity.USER,
+            target_type=EventEntityType.USER,
             actor_id=user.id,
         ),
     )

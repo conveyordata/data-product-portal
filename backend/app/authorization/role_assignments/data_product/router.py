@@ -39,7 +39,7 @@ from app.core.authz.resolvers import (
     EmptyResolver,
 )
 from app.database.deps import get_db_session
-from app.events.enums import EventReferenceEntity, EventType
+from app.events.enums import EventEntityType, EventType
 from app.events.schema import CreateEvent
 from app.events.service import EventService
 from app.identities.service import get_identity_display_name
@@ -74,9 +74,9 @@ def delete_data_product_role_assignment(
         CreateEvent(
             name=EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_REMOVED,
             subject_id=assignment.data_product_id,
-            subject_type=EventReferenceEntity.DATA_PRODUCT,
+            subject_type=EventEntityType.DATA_PRODUCT,
             target_id=assignment.identity_id,
-            target_type=EventReferenceEntity.USER,
+            target_type=EventEntityType.USER,
             actor_id=user.id,
         ),
     )
@@ -138,9 +138,9 @@ def request_data_product_role_assignment(
         CreateEvent(
             name=EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_REQUESTED,
             subject_id=role_assignment.data_product_id,
-            subject_type=EventReferenceEntity.DATA_PRODUCT,
+            subject_type=EventEntityType.DATA_PRODUCT,
             target_id=role_assignment.identity_id,
-            target_type=EventReferenceEntity.USER,
+            target_type=EventEntityType.USER,
             actor_id=user.id,
         )
     )
@@ -190,9 +190,9 @@ def create_data_product_role_assignment(
         CreateEvent(
             name=EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_CREATED,
             subject_id=role_assignment.data_product_id,
-            subject_type=EventReferenceEntity.DATA_PRODUCT,
+            subject_type=EventEntityType.DATA_PRODUCT,
             target_id=role_assignment.identity_id,
-            target_type=EventReferenceEntity.USER,
+            target_type=EventEntityType.USER,
             actor_id=user.id,
         )
     )
@@ -269,9 +269,9 @@ def decide_data_product_role_assignment(
                 else EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_DENIED
             ),
             subject_id=assignment.data_product_id,
-            subject_type=EventReferenceEntity.DATA_PRODUCT,
+            subject_type=EventEntityType.DATA_PRODUCT,
             target_id=assignment.identity_id,
-            target_type=EventReferenceEntity.USER,
+            target_type=EventEntityType.USER,
             actor_id=user.id,
         ),
     )
@@ -316,9 +316,9 @@ def modify_data_product_role_assignment(
         CreateEvent(
             name=EventType.DATA_PRODUCT_ROLE_ASSIGNMENT_UPDATED,
             subject_id=assignment.data_product_id,
-            subject_type=EventReferenceEntity.DATA_PRODUCT,
+            subject_type=EventEntityType.DATA_PRODUCT,
             target_id=assignment.identity_id,
-            target_type=EventReferenceEntity.USER,
+            target_type=EventEntityType.USER,
             actor_id=user.id,
         ),
     )

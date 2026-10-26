@@ -24,11 +24,11 @@ from app.data_products.technical_assets.schema_response import (
 )
 from app.data_products.technical_assets.service import TechnicalAssetService
 from app.database.deps import get_db_session
-from app.events.enums import EventReferenceEntity, EventType
+from app.events.enums import EventEntityType, EventType
 from app.events.schema import CreateEvent
 from app.events.schema_response import (
     GetEventHistoryResponse,
-    GetEventHistoryResponseItemOld,
+    GetEventHistoryResponseItem,
 )
 from app.events.service import EventService
 from app.graph.graph import Graph
@@ -108,9 +108,9 @@ def get_technical_asset_event_history(
     ensure_technical_asset_exists(id, db, data_product_id=data_product_id)
     return GetEventHistoryResponse(
         events=[
-            GetEventHistoryResponseItemOld.model_validate(event).convert()
+            GetEventHistoryResponseItem.model_validate(event)
             for event in EventService(db).get_history(
-                id, EventReferenceEntity.DATA_OUTPUT
+                id, EventEntityType.TECHNICAL_ASSET
             )
         ]
     )
@@ -151,10 +151,10 @@ def remove_technical_asset(
             name=EventType.DATA_OUTPUT_REMOVED,
             actor_id=authenticated_user.id,
             subject_id=id,
-            subject_type=EventReferenceEntity.DATA_OUTPUT,
+            subject_type=EventEntityType.TECHNICAL_ASSET,
             deleted_subject_identifier=technical_asset.name,
             target_id=technical_asset.owner_id,
-            target_type=EventReferenceEntity.DATA_PRODUCT,
+            target_type=EventEntityType.DATA_PRODUCT,
             deleted_target_identifier=technical_asset.owner.name,
         ),
     )
@@ -198,7 +198,7 @@ def update_technical_asset(
         CreateEvent(
             name=EventType.DATA_OUTPUT_UPDATED,
             subject_id=id,
-            subject_type=EventReferenceEntity.DATA_OUTPUT,
+            subject_type=EventEntityType.TECHNICAL_ASSET,
             actor_id=authenticated_user.id,
         )
     )
@@ -238,7 +238,7 @@ def update_technical_asset_status(
         CreateEvent(
             name=EventType.DATA_OUTPUT_UPDATED,
             subject_id=id,
-            subject_type=EventReferenceEntity.DATA_OUTPUT,
+            subject_type=EventEntityType.TECHNICAL_ASSET,
             actor_id=authenticated_user.id,
         )
     )
@@ -300,9 +300,9 @@ def create_technical_asset(
         CreateEvent(
             name=EventType.DATA_OUTPUT_CREATED,
             subject_id=technical_asset.id,
-            subject_type=EventReferenceEntity.DATA_OUTPUT,
+            subject_type=EventEntityType.TECHNICAL_ASSET,
             target_id=technical_asset.owner_id,
-            target_type=EventReferenceEntity.DATA_PRODUCT,
+            target_type=EventEntityType.DATA_PRODUCT,
             actor_id=authenticated_user.id,
         ),
     )

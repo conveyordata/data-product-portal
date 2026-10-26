@@ -41,7 +41,7 @@ from app.data_products.output_ports.schema_response import (
     output_port_not_found_exception,
 )
 from app.database.database import UNFILTERED
-from app.events.enums import EventReferenceEntity, EventType
+from app.events.enums import EventEntityType, EventType
 from app.events.model import Event as EventModel
 from app.events.schema import CreateEvent
 from app.events.service import EventService
@@ -318,9 +318,9 @@ class InputPortService:
             CreateEvent(
                 name=EventType.INPUT_PORT_EXPIRING_SOON,
                 subject_id=input_port.output_port_id,
-                subject_type=EventReferenceEntity.DATASET,
+                subject_type=EventEntityType.OUTPUT_PORT,
                 target_id=input_port.consuming_abstract_data_product_id,
-                target_type=EventReferenceEntity.for_consumer(
+                target_type=EventEntityType.for_consumer(
                     input_port.consuming_abstract_data_product.abstract_data_product_type
                 ),
                 actor_id=system_actor_id,

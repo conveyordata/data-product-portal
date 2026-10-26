@@ -24,7 +24,7 @@ from app.core.authz import REDACTION_VALUE, Action, Authorization
 from app.data_products.model import DataProductVisibility
 from app.data_products.output_ports.enums import OutputPortAccessFunction
 from app.data_products.status import AbstractDataProductStatus
-from app.events.enums import EventReferenceEntity, EventType
+from app.events.enums import EventEntityType, EventType
 from app.events.model import Event
 from app.settings import settings
 from app.users.notifications.model import Notification
@@ -925,7 +925,7 @@ class TestInputPortsRouter:
                 Event.name == EventType.DATA_PRODUCT_DATASET_LINK_REVOKED
             )
         )
-        assert event.target_type == EventReferenceEntity.EXPLORATION
+        assert event.target_type == EventEntityType.EXPLORATION
         assert session.scalar(
             select(Notification).where(Notification.user_id == exploration.owner_id)
         )
