@@ -27,6 +27,7 @@ import {
     useLazyValidateResourceNameQuery,
     useResourceNameConstraintsQuery,
 } from '@/store/api/services/generated/resourceNamesApi.ts';
+import { getApiErrorDetail } from '@/store/common/errors.ts';
 import type { CustomDropdownItemProps } from '@/types/shared';
 import type { TechnicalAssetsCreateForm } from '@/types/technical-asset';
 import { dispatchMessage } from '@/utils/feedback.ts';
@@ -158,8 +159,8 @@ export function TechnicalAssetForm({ mode, formRef, dataProductId, modalCallback
             dispatchMessage({ content: t('Technical Asset created successfully'), type: 'success' });
             modalCallbackOnSubmit();
             form.resetFields();
-        } catch (_e) {
-            const errorMessage = 'Failed to create Technical Asset';
+        } catch (error) {
+            const errorMessage = getApiErrorDetail(error) || t('Failed to create Technical Asset');
             dispatchMessage({ content: errorMessage, type: 'error' });
         }
     };

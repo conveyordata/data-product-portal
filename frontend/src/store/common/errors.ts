@@ -7,9 +7,32 @@ export function getApiErrorDetail(error: unknown): string | undefined {
         return undefined;
     }
 
-    const mutationError = error as ApiError & { data?: ApiError };
+    const mutationError = error as ApiError & { data?: ApiError; detail?: unknown };
+    // Checks both nested data.detail and top-level detail
     const detail = mutationError.data?.detail ?? mutationError.detail;
-    return typeof detail === 'string' ? detail : undefined;
+
+    if (typeof detail === 'string') {
+        return detail;
+    }
+
+    if (Array.isArray(detail)) {
+        const messages = detail
+            .map((err) => {
+                const msg = err?.msg;
+                if (typeof msg === 'string') {
+                    // Strip "Value error, " prefix from pydantic validation messages
+                    return msg.replace(/^Value error,\s*/i, '');
+                }
+                return null;
+            })
+            .filter(Boolean);
+
+        if (messages.length > 0) {
+            return messages.join(', ');
+        }
+    }
+
+    return undefined;
 }
 
 export const defaultErrorMessage: NotificationOptions = {

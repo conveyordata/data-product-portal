@@ -25,6 +25,18 @@ describe('getApiErrorDetail', () => {
         expect(getApiErrorDetail({ detail: { message: 'x' } })).toBeUndefined();
         expect(getApiErrorDetail({ data: { detail: ['x'] } })).toBeUndefined();
     });
+
+    it('returns joined messages and strips "Value error, " prefixes for validation error arrays', () => {
+        const error = {
+            detail: [
+                { msg: 'Value error, Parameter names can only contain alphanumeric characters' },
+                { msg: 'Another standard error' },
+            ],
+        };
+        expect(getApiErrorDetail(error)).toBe(
+            'Parameter names can only contain alphanumeric characters, Another standard error',
+        );
+    });
 });
 
 describe('isIncompatibleAccessModesError', () => {
