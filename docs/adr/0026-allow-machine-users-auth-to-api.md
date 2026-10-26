@@ -4,14 +4,14 @@
 
 ## Context and Problem Statement
 
-Portal currently supports users as the only identity type that can authenticate. 
+Portal currently supports users as the only identity type that can authenticate.
 Machine users can receive Global and Data Product roles, but they cannot use those permissions to operate the API.
 
-For example, an external identity provisioner needs to create, retrieve and remove identities through the Portal API. 
-Using the shared API key maps the provisioner to the system account and grants broader access than required. 
+For example, an external identity provisioner needs to create, retrieve and remove identities through the Portal API.
+Using the shared API key maps the provisioner to the system account and grants broader access than required.
 Representing the provisioner as a user would mix interactive users with non-human API clients.
 
-Portal needs a way to enable OIDC authentication for a pre-provisioned machine user and authorize it through the existing Global role model. 
+Portal needs a way to enable OIDC authentication for a pre-provisioned machine user and authorize it through the existing Global role model.
 The machine user must only be able to operate API endpoints and must not be accepted as an UI Portal user.
 
 ## Decision Drivers
@@ -34,10 +34,10 @@ The machine user must only be able to operate API endpoints and must not be acce
 
 **Chosen option:** *Option 2: Machine user with OIDC authentication enabled*.
 
-A machine user can optionally be enabled for OIDC authentication. 
+A machine user can optionally be enabled for OIDC authentication.
 When Portal receives a valid token, it uses the token subject to resolve either a user or a pre-provisioned machine user by its `external_id`.
 
-The machine user receives a Global role containing the required identity-management permissions. 
+The machine user receives a Global role containing the required identity-management permissions.
 It can use these permissions through the API, while operations that require an interactive user continue to reject machine users.
 
 Machine users without OIDC authentication enabled remain non-authenticating identities.
@@ -131,12 +131,12 @@ The machine user's `external_id` corresponds to the subject of the validated OID
 external_id ← sub
 ```
 
-The `oidc_auth_enabled` field allows authentication to be enabled or suspended without deleting the machine user or its role assignments. 
+The `oidc_auth_enabled` field allows authentication to be enabled or suspended without deleting the machine user or its role assignments.
 Its default value of `false` ensures that existing and newly created machine users cannot authenticate unless this is explicitly enabled.
 
 ### Machine-user authentication API
 
-The existing machine-user create and update operations do not allow changing `oidc_auth_enabled`. 
+The existing machine-user create and update operations do not allow changing `oidc_auth_enabled`.
 New machine users therefore keep the default value of `false`, including when created by another machine user.
 
 OIDC authentication is enabled or disabled through a dedicated operation:
@@ -153,11 +153,11 @@ The operation accepts the intended authentication state:
 }
 ```
 
-This operation requires a new `GLOBAL__MANAGE_MACHINE_USER_OIDC_AUTH` permission. 
+This operation requires a new `GLOBAL__MANAGE_MACHINE_USER_OIDC_AUTH` permission.
 
 ### API and interactive operations
 
-API Endpoints accept an authenticated user or machine user. 
+API Endpoints accept an authenticated user or machine user.
 Operations representing the current interactive user continue to require a user. This includes:
 
 ```text
@@ -167,11 +167,11 @@ Operations representing the current interactive user continue to require a user.
 /api/v2/users/current/my_requests
 ```
 
-A machine-user token calling one of these operations is rejected. 
-Since the frontend resolves the current user before loading Portal, 
+A machine-user token calling one of these operations is rejected.
+Since the frontend resolves the current user before loading Portal,
 a machine user cannot establish an interactive Portal session.
 
-The frontend will require handling the error returned by the API when a machine user attempts to access 
+The frontend will require handling the error returned by the API when a machine user attempts to access
 the Portal UI, as that is not happening in the current implementation.
 
 ### Pre-provisioning flow
