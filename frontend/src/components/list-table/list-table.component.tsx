@@ -1,7 +1,7 @@
 import { Table, type TableColumnsType, type TableProps } from 'antd';
 import type { AnyObject } from 'antd/es/_util/type';
 import type { FilterValue } from 'antd/es/table/interface';
-import { type ComponentProps, useState } from 'react';
+import { type ComponentProps, useMemo, useState } from 'react';
 import {
     EmptyState,
     type EmptyStateFilter,
@@ -45,16 +45,21 @@ export function ListTable<T extends AnyObject>({
     const [filteredInfo, setFilteredInfo] = useState<FilteredInfo>({});
     const hasColumnFilters = Object.values(filteredInfo).some((value) => value?.length);
     const isLoading = loading || isAwaitingData(query);
+    const controlledColumns = useMemo(
+        () =>
+            columns.map((column) =>
+                'filters' in column && column.filters
+                    ? { ...column, filteredValue: filteredInfo[columnKey(column)] ?? null }
+                    : column,
+            ),
+        [columns, filteredInfo],
+    );
 
     return (
         <Table<T>
             {...tableProps}
             dataSource={hasFailed(query) ? [] : dataSource}
-            columns={columns.map((column) =>
-                'filters' in column && column.filters
-                    ? { ...column, filteredValue: filteredInfo[columnKey(column)] ?? null }
-                    : column,
-            )}
+            columns={controlledColumns}
             loading={isLoading}
             onChange={(pagination, filters, sorter, extra) => {
                 setFilteredInfo(filters);

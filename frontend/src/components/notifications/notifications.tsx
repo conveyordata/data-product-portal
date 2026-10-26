@@ -2,7 +2,8 @@ import { BellOutlined, CheckOutlined } from '@ant-design/icons';
 import { Badge, Button, Flex, Popover, Tag, Typography, theme } from 'antd';
 import { type ReactNode, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { EmptyState, emptyStateQueryProps } from '@/components/empty-state/empty-state.component.tsx';
+import { EmptyState, emptyStateQueryProps, isAwaitingData } from '@/components/empty-state/empty-state.component.tsx';
+import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
 import {
     type GetUserNotificationsResponseItem,
     useGetUserNotificationsQuery,
@@ -138,6 +139,8 @@ export function Notifications() {
                 </Flex>
             );
         }
+
+        if (isAwaitingData(notificationsQuery)) return <LoadingSpinner />;
 
         return (
             <EmptyState
