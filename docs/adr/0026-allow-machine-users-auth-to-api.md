@@ -20,6 +20,7 @@ The machine user must only be able to operate API endpoints and must not be acce
 * Reuse machine users and the existing Global role-assignment model.
 * Grant only the identity-management permissions required by the provisioner.
 * Require explicit pre-provisioning before a machine user can authenticate.
+* Restrict who can enable OIDC authentication independently from normal machine-user management.
 * Keep interactive Portal operations restricted to users.
 * Avoid using the shared administrator API key for this integration.
 
@@ -83,6 +84,7 @@ flowchart TD
 * **Good, because** the provisioner is represented by the correct Portal identity type.
 * **Good, because** existing Global roles can provide least-privilege access.
 * **Good, because** authentication must be explicitly enabled for each machine user.
+* **Good, because** enabling authentication is authorized independently from managing machine users.
 * **Good, because** API and interactive access remain separated.
 * **Bad, because** authentication and authorization can no longer assume every authenticated principal is a user.
 
@@ -132,11 +134,26 @@ external_id ← sub
 The `oidc_auth_enabled` field allows authentication to be enabled or suspended without deleting the machine user or its role assignments. 
 Its default value of `false` ensures that existing and newly created machine users cannot authenticate unless this is explicitly enabled.
 
-### Machine-user API
+### Machine-user authentication API
 
-The existing machine-user create and update operations expose `oidc_auth_enabled` as part of the machine-user representation.
+The existing machine-user create and update operations do not allow changing `oidc_auth_enabled`. 
+New machine users therefore keep the default value of `false`, including when created by another machine user.
 
-Enabling or disabling OIDC authentication requires the existing permission for updating machine users.
+OIDC authentication is enabled or disabled through a dedicated operation:
+
+```text
+PUT /api/v2/machine-users/{id}/oidc-authentication
+```
+
+The operation accepts the intended authentication state:
+
+```json
+{
+  "enabled": true
+}
+```
+
+This operation requires a new `GLOBAL__MANAGE_MACHINE_USER_OIDC_AUTH` permission. 
 
 ### API and interactive operations
 
@@ -160,5 +177,5 @@ Since the frontend resolves the current user before loading Portal, a machine us
 The identity provisioner is configured through the existing Portal administration model:
 
 1. Create the machine user.
-2. Enable OIDC authentication for the machine user (can be done in the same request as 1).
+2. Enable OIDC authentication through the dedicated operation.
 3. Create an approved Global role assignment targeting the machine-user identity.
