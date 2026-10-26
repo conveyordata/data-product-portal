@@ -42,6 +42,7 @@ describe('GrantOutputPortAccessModal', () => {
             />,
         );
 
+        await waitFor(() => expect(screen.getByRole('radio', { name: 'Data Product' })).toBeEnabled());
         await user.click(await screen.findByRole('combobox'));
         await user.click(await screen.findByText('Consumer'));
         await user.type(screen.getByLabelText('Business justification'), 'Required for reporting');
@@ -97,7 +98,8 @@ describe('GrantOutputPortAccessModal', () => {
             />,
         );
 
-        await user.click(await screen.findByText('Exploration'));
+        await waitFor(() => expect(screen.getByRole('radio', { name: 'Data Product' })).toBeEnabled());
+        await user.click(screen.getByText('Exploration'));
         await user.click(await screen.findByRole('combobox'));
 
         expect(await screen.findByText('My exploration')).toBeInTheDocument();
@@ -120,7 +122,7 @@ describe('GrantOutputPortAccessModal', () => {
             />,
         );
 
-        await waitFor(() => expect(screen.getByRole('radio', { name: 'Exploration' })).toBeDisabled());
-        expect(screen.getByRole('radio', { name: 'Data Product' })).toBeEnabled();
+        await waitFor(() => expect(screen.getByRole('radio', { name: 'Data Product' })).toBeEnabled());
+        expect(screen.getByRole('radio', { name: 'Exploration' })).toBeDisabled();
     });
 });
