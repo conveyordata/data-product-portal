@@ -7,7 +7,7 @@
 Portal currently supports users as the only identity type that can authenticate. 
 Machine users can receive Global and Data Product roles, but they cannot use those permissions to operate the API.
 
-An external identity provisioner needs to create, retrieve and remove identities through the Portal API. 
+For example, an external identity provisioner needs to create, retrieve and remove identities through the Portal API. 
 Using the shared API key maps the provisioner to the system account and grants broader access than required. 
 Representing the provisioner as a user would mix interactive users with non-human API clients.
 
@@ -16,9 +16,9 @@ The machine user must only be able to operate API endpoints and must not be acce
 
 ## Decision Drivers
 
-* Allow an identity provisioner to authenticate without representing it as a user.
-* Reuse machine users and the existing Global role-assignment model.
-* Grant only the identity-management permissions required by the provisioner.
+* Allow a machine user to authenticate without representing it as a user.
+* Reuse the existing Global role-assignment model.
+* Grant only the specified permissions required by an external provisioner.
 * Require explicit pre-provisioning before a machine user can authenticate.
 * Restrict who can enable OIDC authentication independently from normal machine-user management.
 * Keep interactive Portal operations restricted to users.
