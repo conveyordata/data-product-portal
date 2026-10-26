@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import {
     EmptyState,
     emptyStateQueryProps,
-    hasFailed,
     isAwaitingData,
     searchFilter,
 } from '@/components/empty-state/empty-state.component.tsx';
@@ -42,17 +41,15 @@ export function TechnicalAssetLinkModal({ onClose, dataProductId, datasetId, dat
     const [approveLink] = useApproveOutputPortTechnicalAssetLinkMutation();
 
     const technicalAssetsQuery = useGetDataProductTechnicalAssetsQuery(dataProductId, { skip: !dataProductId });
-    const { data: { technical_assets: technicalAssets = [] } = {} } = technicalAssetsQuery;
-    const loadFailed = hasFailed(technicalAssetsQuery);
+    const { currentData: { technical_assets: technicalAssets = [] } = {} } = technicalAssetsQuery;
 
     const existingLinkIds = useMemo(() => {
         return new Set(existingLinks.map((link) => link.technical_asset_id));
     }, [existingLinks]);
 
     const availableDataOutputs = useMemo(() => {
-        if (loadFailed) return [];
         return technicalAssets.filter((output) => !existingLinkIds.has(output.id));
-    }, [technicalAssets, existingLinkIds, loadFailed]);
+    }, [technicalAssets, existingLinkIds]);
 
     const filteredDataOutputs = useMemo(() => {
         if (!searchTerm) return availableDataOutputs;

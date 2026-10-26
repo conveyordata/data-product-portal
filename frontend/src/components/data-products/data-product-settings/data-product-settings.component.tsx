@@ -255,7 +255,7 @@ export function DataProductSettings({ id, scope, dataProductId }: Props) {
         return (
             <EmptyState
                 icon={<SettingOutlined />}
-                title={t('No custom settings yet')}
+                title={t('No Custom Settings yet')}
                 description={
                     scope === 'dataproduct'
                         ? t('Settings your administrator defines for Data Products appear here.')

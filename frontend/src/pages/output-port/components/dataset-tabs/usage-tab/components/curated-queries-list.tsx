@@ -6,7 +6,6 @@ import {
     EmptyState,
     type EmptyStateQuery,
     emptyStateQueryProps,
-    hasFailed,
     isAwaitingData,
 } from '@/components/empty-state/empty-state.component.tsx';
 import type { OutputPortCuratedQuery } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
@@ -45,7 +44,7 @@ export function CuratedQueriesList({ queries, query }: CuratedQueriesListProps) 
             <List
                 loading={isAwaitingData(query)}
                 itemLayout="vertical"
-                dataSource={hasFailed(query) ? [] : queriesList}
+                dataSource={queriesList}
                 locale={{
                     emptyText: (
                         <EmptyState

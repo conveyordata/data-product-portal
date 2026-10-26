@@ -166,13 +166,11 @@ export function ConsumersTable({ outputPortId, dataProductId, dataProducts, quer
                 query={query}
                 dataSource={dataProducts}
                 columns={columns}
-                subject={t('consumers')}
+                subject={t('Consuming Data Products')}
                 emptyState={{
                     icon: <DataProductOutlined />,
-                    title: t('No consumers yet'),
-                    description: t(
-                        'Data Products and Explorations that are granted access to this Output Port appear here.',
-                    ),
+                    title: t('No Consuming Data Products yet'),
+                    description: t('Data Products that are granted access to this Output Port appear here.'),
                 }}
                 onChange={onChange}
                 filter={filter}

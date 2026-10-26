@@ -71,10 +71,10 @@ export function DataProductTypeTable() {
                 query={typesQuery}
                 dataSource={data?.data_product_types ?? []}
                 columns={columns}
-                subject={t('Data Product types')}
+                subject={t('Data Product Types')}
                 emptyState={{
                     icon: <AppstoreOutlined />,
-                    title: t('No Data Product types yet'),
+                    title: t('No Data Product Types yet'),
                     description: t(
                         'Types describe the shape of a Data Product, such as source aligned or consumer aligned.',
                     ),

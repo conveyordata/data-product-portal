@@ -4,7 +4,7 @@ import { Alert, Col, Flex, Input, Pagination, Row, Typography, theme } from 'ant
 import { parseAsInteger, parseAsString, useQueryState } from 'nuqs';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { EmptyState, emptyStateQueryProps, hasFailed } from '@/components/empty-state/empty-state.component.tsx';
+import { EmptyState, emptyStateQueryProps } from '@/components/empty-state/empty-state.component.tsx';
 import { OutputPortOutlined } from '@/components/icons';
 import { useBreadcrumbs } from '@/components/layout/navbar/breadcrumbs/breadcrumb.context.tsx';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
@@ -57,7 +57,7 @@ export function Marketplace() {
 
     const effectiveSearch = searchTerm.length >= 3 ? searchTerm : undefined;
     const outputPortsQuery = useSearchOutputPortsQuery({ query: effectiveSearch });
-    const { data: { output_ports: outputPorts = [] } = {}, isFetching } = outputPortsQuery;
+    const { currentData: { output_ports: outputPorts = [] } = {}, isFetching } = outputPortsQuery;
 
     const page = Math.max(1, Math.min(currentPage, Math.ceil(outputPorts.length / pageSize)));
     const hasResults = outputPortsQuery.currentData !== undefined;
@@ -119,7 +119,7 @@ export function Marketplace() {
                 )}
                 {isFetching ? (
                     <LoadingSpinner spinProps={{ style: { height: '200px' } }} />
-                ) : !hasFailed(outputPortsQuery) && outputPorts.length > 0 ? (
+                ) : outputPorts.length > 0 ? (
                     // Cards use CSS subgrid on these rows so their sections align across each visual row
                     <div
                         style={{
@@ -143,7 +143,7 @@ export function Marketplace() {
                     />
                 )}
 
-                {!isFetching && !hasFailed(outputPortsQuery) && outputPorts.length > pageSize && (
+                {!isFetching && outputPorts.length > pageSize && (
                     <Flex
                         key="pagination-container"
                         justify="flex-end"

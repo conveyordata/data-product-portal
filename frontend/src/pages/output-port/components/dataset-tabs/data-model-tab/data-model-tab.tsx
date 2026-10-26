@@ -5,12 +5,7 @@ import { Button, Flex, Space, Table, Tabs, Tag, Typography, Upload } from 'antd'
 import type { TFunction } from 'i18next';
 import { useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-    EmptyState,
-    emptyStateQueryProps,
-    hasFailed,
-    isAwaitingData,
-} from '@/components/empty-state/empty-state.component.tsx';
+import { EmptyState, emptyStateQueryProps, isAwaitingData } from '@/components/empty-state/empty-state.component.tsx';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
 import { PosthogEvents } from '@/constants/posthog.constants.ts';
 import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
@@ -107,7 +102,7 @@ export function DataModelTab({ datasetId, dataProductId }: Props) {
         { skip: !datasetId },
     );
     const canUpload = access?.allowed || false;
-    const schemaObjects = hasFailed(schemaQuery) ? [] : (data?.schema_objects ?? []);
+    const schemaObjects = schemaQuery.currentData?.schema_objects ?? [];
 
     useEffect(() => {
         if (!isLoading && data !== undefined) {

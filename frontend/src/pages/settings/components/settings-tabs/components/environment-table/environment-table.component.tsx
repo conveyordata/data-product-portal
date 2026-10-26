@@ -35,10 +35,10 @@ export function EnvironmentTable() {
                 query={environmentsQuery}
                 dataSource={data?.environments ?? []}
                 columns={columns}
-                subject={t('environments')}
+                subject={t('Environments')}
                 emptyState={{
                     icon: <CloudServerOutlined />,
-                    title: t('No environments yet'),
+                    title: t('No Environments yet'),
                     description: t('Environments are the places data lands, such as development and production.'),
                 }}
                 loading={isUpdating}

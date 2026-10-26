@@ -82,10 +82,10 @@ export function DataProductSettingsTable({ scope }: Props) {
                 query={settingsQuery}
                 dataSource={filteredSettings}
                 columns={columns}
-                subject={t('custom settings')}
+                subject={t('Custom Settings')}
                 emptyState={{
                     icon: <SettingOutlined />,
-                    title: t('No custom settings yet'),
+                    title: t('No Custom Settings yet'),
                     description: t('Custom settings add your own fields to Data Products and Output Ports.'),
                 }}
                 rowKey={(record) => record.id}

@@ -52,10 +52,10 @@ export function TagsTable() {
                 query={tagsQuery}
                 dataSource={tags?.tags ?? []}
                 columns={columns}
-                subject={t('tags')}
+                subject={t('Tags')}
                 emptyState={{
                     icon: <TagsOutlined />,
-                    title: t('No tags yet'),
+                    title: t('No Tags yet'),
                     description: t('Tags help people find related Data Products and Output Ports.'),
                 }}
                 loading={isRemoving}
