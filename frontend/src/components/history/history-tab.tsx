@@ -1,6 +1,5 @@
 import { HistoryOutlined } from '@ant-design/icons';
-import { Flex, Input, type TableProps } from 'antd';
-import type { ColumnsType } from 'antd/es/table';
+import { Flex, Input, type TableColumnsType, type TableProps } from 'antd';
 import type { TFunction } from 'i18next';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -66,7 +65,7 @@ export function HistoryTab({ id, type, history = [], query }: Props) {
     const columns = useMemo(
         () => getHistoryColumns({ t, resourceId: id, type }),
         [t, id, type],
-    ) as ColumnsType<GetEventHistoryResponseItem>;
+    ) as TableColumnsType<GetEventHistoryResponseItem>;
 
     return (
         <Flex vertical gap="middle">

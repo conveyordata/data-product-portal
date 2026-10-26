@@ -1,6 +1,4 @@
-import { Table, type TableColumnsType, type TableProps } from 'antd';
-import type { AnyObject } from 'antd/es/_util/type';
-import type { FilterValue } from 'antd/es/table/interface';
+import { Table, type TableColumnsType, type TableColumnType, type TableProps } from 'antd';
 import { type ComponentProps, useMemo, useState } from 'react';
 import {
     EmptyState,
@@ -10,7 +8,7 @@ import {
     isAwaitingData,
 } from '@/components/empty-state/empty-state.component.tsx';
 
-type FilteredInfo = Record<string, FilterValue | null>;
+type FilteredInfo = Record<string, TableColumnType['filteredValue']>;
 
 type Props<T> = Omit<TableProps<T>, 'dataSource' | 'columns' | 'loading' | 'locale'> & {
     query: EmptyStateQuery;
@@ -31,7 +29,7 @@ function columnKey<T>(column: TableColumnsType<T>[number]) {
     return Array.isArray(dataIndex) ? dataIndex.join('.') : String(dataIndex);
 }
 
-export function ListTable<T extends AnyObject>({
+export function ListTable<T extends object>({
     query,
     dataSource,
     columns,
