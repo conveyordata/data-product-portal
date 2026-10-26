@@ -8,8 +8,9 @@ cannot receive these roles.
 Portal wants to extend its authorization model so a Global or Data Product role can be assigned to a user, group or machine user. If a group receives a role,
 every user belonging to that group must inherit the related permissions and visibility as if the assignment had been made directly to the user.
 
-Only users can authenticate and operate Portal. Groups and machine users are non-interactive identities that can receive role assignments, while users and
-machine users can be members of groups.
+Only users can operate Portal interactively. Machine users can optionally authenticate against the API when explicitly enabled, as defined in
+[ADR-0026](./0026-allow-machine-users-auth-to-api.md). Groups and machine users remain non-interactive identities that can receive role assignments, while users
+and machine users can be members of groups.
 
 Explorations currently use a user-specific ownership model and can therefore only be owned and operated by users. Extending Explorations to support the common
 Identity model requires a separate refactoring and is outside the scope of this decision.
@@ -19,7 +20,7 @@ Portal needs also a way to introduce these identities from an external identity 
 ## Decision Drivers
 
 * Allow users, groups and machine users to receive Global and Data Product roles through the same assignment model.
-* Keep users as the only identity type that can authenticate and operate Portal.
+* Keep users as the only identity type that can operate Portal interactively.
 * Grant users permissions and Data Product visibility inherited from their groups.
 * Use a standard protocol for synchronizing users, groups and memberships.
 * Support machine users even when they are not available through SCIM.
@@ -45,8 +46,8 @@ For synchronization:
 **Chosen options:** *Option 1: Common Identity with separate subtype tables* and *Option B: Extend Portal API + SCIM interface*.
 
 A common Identity provides one target for Global and Data Product role assignments while keeping the attributes and behaviour of users, groups and machine users
-separated. Only users can authenticate, request or approve changes and act inside Portal, while every identity type can receive roles and both users and machine
-users can belong to groups.
+separated. Only users can request or approve changes and act interactively inside Portal. Machine users can optionally authenticate against the API when
+explicitly enabled, while every identity type can receive roles and both users and machine users can belong to groups.
 
 Portal will implement a SCIM interface for users, groups and group memberships. Machine users and their memberships will be created and updated through Portal
 API operations until they can be synchronized through SCIM. Both entry points will use the same internal identity services and persistence model.
@@ -71,7 +72,7 @@ API operations until they can be synchronized through SCIM. Both entry points wi
 
 * **Good, because** it provides one consistent target for Global and Data Product role assignments.
 * **Good, because** type-specific attributes and relationships remain in separate tables.
-* **Good, because** users remain separated from identities that cannot authenticate.
+* **Good, because** users remain separated from non-interactive identities.
 * **Good, because** Casbin group inheritance can be used to enforce access control policies.
 * **Neutral, because** reading a complete identity requires joining its common and type-specific tables.
 * **Bad, because** parent and subtype rows must be managed in the same transaction.
