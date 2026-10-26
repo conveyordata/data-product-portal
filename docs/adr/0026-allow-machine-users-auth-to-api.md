@@ -171,6 +171,9 @@ A machine-user token calling one of these operations is rejected.
 Since the frontend resolves the current user before loading Portal, 
 a machine user cannot establish an interactive Portal session.
 
+The frontend will require handling the error returned by the API when a machine user attempts to access 
+the Portal UI, as that is not happening in the current implementation.
+
 ### Pre-provisioning flow
 
 The example external provisioner is configured through the existing Portal administration model:
