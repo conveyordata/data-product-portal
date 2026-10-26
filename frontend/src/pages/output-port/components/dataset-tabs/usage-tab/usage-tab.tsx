@@ -45,9 +45,9 @@ export function UsageTab({ outputPortId, dataProductId }: Props) {
         granularity,
         dayRange,
     });
-    const curatedQueriesQuery = useGetOutputPortCuratedQueriesQuery({ id: outputPortId, dataProductId });
     const { data: { output_port_query_stats_responses: responses = [] } = {} } = statsQuery;
 
+    const curatedQueriesQuery = useGetOutputPortCuratedQueriesQuery({ id: outputPortId, dataProductId });
     const { data: { output_port_curated_queries: curatedQueries = [] } = {} } = curatedQueriesQuery;
 
     const hasUsageData = Boolean(responses.length);

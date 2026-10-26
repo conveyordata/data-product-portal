@@ -44,7 +44,7 @@ export function ListTable<T extends AnyObject>({
 }: Props<T>) {
     const [filteredInfo, setFilteredInfo] = useState<FilteredInfo>({});
     const hasColumnFilters = Object.values(filteredInfo).some((value) => value?.length);
-    const isLoading = Boolean(loading) || isAwaitingData(query);
+    const isLoading = loading || isAwaitingData(query);
 
     return (
         <Table<T>
@@ -69,7 +69,7 @@ export function ListTable<T extends AnyObject>({
                             ...filter,
                             hasOtherFilters: filter?.hasOtherFilters || hasColumnFilters,
                             onClear: () => {
-                                filter?.onClear?.();
+                                filter?.onClear();
                                 setFilteredInfo({});
                             },
                         }}

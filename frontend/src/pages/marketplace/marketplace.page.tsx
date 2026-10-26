@@ -55,7 +55,7 @@ export function Marketplace() {
     const [searchInput, setSearchInput] = useState(searchTerm);
     useEffect(() => setSearchInput(searchTerm), [searchTerm]);
 
-    const effectiveSearch = searchTerm?.length >= 3 ? searchTerm : undefined;
+    const effectiveSearch = searchTerm.length >= 3 ? searchTerm : undefined;
     const outputPortsQuery = useSearchOutputPortsQuery({ query: effectiveSearch });
     const { data: { output_ports: outputPorts = [] } = {}, isFetching } = outputPortsQuery;
 

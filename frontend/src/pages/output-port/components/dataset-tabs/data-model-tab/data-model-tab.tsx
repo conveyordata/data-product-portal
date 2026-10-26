@@ -162,7 +162,6 @@ export function DataModelTab({ datasetId, dataProductId }: Props) {
         return (
             <EmptyState
                 icon={<DatabaseOutlined />}
-                {...emptyStateQueryProps(schemaQuery)}
                 title={t('No Data Model published yet')}
                 description={
                     canUpload
@@ -185,6 +184,7 @@ export function DataModelTab({ datasetId, dataProductId }: Props) {
                         </Flex>
                     )
                 }
+                {...emptyStateQueryProps(schemaQuery)}
             />
         );
     }
