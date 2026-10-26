@@ -157,9 +157,7 @@ This operation requires a new `GLOBAL__MANAGE_MACHINE_USER_OIDC_AUTH` permission
 
 ### API and interactive operations
 
-Endpoints that support automated identity management accept an authenticated user or machine user. 
-This includes the existing API operations for users, groups, memberships and machine users.
-
+API Endpoints accept an authenticated user or machine user. 
 Operations representing the current interactive user continue to require a user. This includes:
 
 ```text
@@ -170,7 +168,8 @@ Operations representing the current interactive user continue to require a user.
 ```
 
 A machine-user token calling one of these operations is rejected. 
-Since the frontend resolves the current user before loading Portal, a machine user cannot establish an interactive Portal session.
+Since the frontend resolves the current user before loading Portal, 
+a machine user cannot establish an interactive Portal session.
 
 ### Pre-provisioning flow
 
