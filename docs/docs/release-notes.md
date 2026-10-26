@@ -21,6 +21,7 @@ sidebar_position: 200
 - **[Provisioner]**: Domains can be provisioned. The portal sends a `domain.event` webhook when a Domain is created, updated or deleted, Domains support finalizers (`POST /api/v2/configuration/domains/{id}/finalizers` and `DELETE /api/v2/configuration/domains/{id}/finalizers/{finalizer}`), and the SDK has a `ResourceType.DOMAIN` reconciler.
 - **[API]**: Every response that embeds a Domain, such as Data Products, Explorations and Output Ports, now includes its `namespace`.
 - **[Plugins]**: Templates and `validate_configuration` can use the Domain's namespace, e.g. `{domain.namespace}`.
+- **[UI]**: Empty lists and tables now say why they are empty in a consistent way.
 
 ### bugfixes
 

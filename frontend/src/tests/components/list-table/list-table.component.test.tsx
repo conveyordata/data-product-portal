@@ -65,6 +65,12 @@ describe('ListTable', () => {
         expect(screen.getByText('Sales')).toBeInTheDocument();
     });
 
+    it('hides rows from earlier arguments while data for the new ones loads', () => {
+        renderTable({ isFetching: true, currentData: undefined });
+
+        expect(screen.queryByText('Sales')).not.toBeInTheDocument();
+    });
+
     it('spins only while there is no data for the current arguments, or while extra work runs', () => {
         expect(
             renderTable({ isFetching: true, currentData: undefined }).container.querySelector('.ant-spin-spinning'),

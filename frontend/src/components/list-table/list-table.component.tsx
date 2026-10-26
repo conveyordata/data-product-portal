@@ -42,7 +42,8 @@ export function ListTable<T extends object>({
 }: Props<T>) {
     const [filteredInfo, setFilteredInfo] = useState<FilteredInfo>({});
     const hasColumnFilters = Object.values(filteredInfo).some((value) => value?.length);
-    const isLoading = loading || isAwaitingData(query);
+    const isAwaiting = isAwaitingData(query);
+    const isLoading = loading || isAwaiting;
     const controlledColumns = useMemo(
         () =>
             columns.map((column) =>
@@ -56,7 +57,7 @@ export function ListTable<T extends object>({
     return (
         <Table<T>
             {...tableProps}
-            dataSource={hasFailed(query) ? [] : dataSource}
+            dataSource={hasFailed(query) || isAwaiting ? [] : dataSource}
             columns={controlledColumns}
             loading={isLoading}
             onChange={(pagination, filters, sorter, extra) => {
