@@ -1,11 +1,11 @@
-import { ToolOutlined } from '@ant-design/icons';
-import { Button, Empty, Flex, Input, Radio, Table } from 'antd';
-import Paragraph from 'antd/es/typography/Paragraph';
+import { Button, Flex, Input, Radio } from 'antd';
 import { parseAsBoolean, parseAsString, useQueryState } from 'nuqs';
 import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router';
+import { ExplorationOutlined } from '@/components/icons';
+import { ListTable } from '@/components/list-table/list-table.component.tsx';
 import { getExplorationTableColumns } from '@/pages/product-studio/components/explorations-tab/explorations-table-columns.tsx';
 import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
 import { type Exploration, useGetExplorationsQuery } from '@/store/api/services/generated/explorationsApi.ts';
@@ -27,9 +27,8 @@ export function ExplorationsTab() {
     const [searchTerm, setSearchTerm] = useQueryState('search', parseAsString.withDefault(''));
     const [showAll, setShowAll] = useQueryState('showAll', parseAsBoolean.withDefault(false));
 
-    const { data: { explorations = [] } = {}, isFetching } = useGetExplorationsQuery(
-        showAll ? undefined : currentUser?.id,
-    );
+    const explorationsQuery = useGetExplorationsQuery(showAll ? undefined : currentUser?.id);
+    const { data: { explorations = [] } = {} } = explorationsQuery;
 
     const onSearch = useCallback(
         (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -69,13 +68,35 @@ export function ExplorationsTab() {
                     <Radio.Button value={true}>{t('All Explorations')}</Radio.Button>
                 </Radio.Group>
             </Flex>
-            <Table<Exploration>
+            <ListTable<Exploration>
+                query={explorationsQuery}
+                dataSource={filteredExplorations}
+                columns={columns}
+                subject={t('Explorations')}
+                emptyState={{
+                    icon: <ExplorationOutlined />,
+                    title: t('No Explorations yet'),
+                    description: t(
+                        'An Exploration is your own workspace on data you have access to. Find an Output Port in the Marketplace to start one.',
+                    ),
+                    action: (
+                        <Link to={ApplicationPaths.Marketplace}>
+                            <Button type="primary">{t('Browse Marketplace')}</Button>
+                        </Link>
+                    ),
+                }}
+                filter={{
+                    hasOtherFilters: !showAll,
+                    searchTerm,
+                    onClear: () => {
+                        setSearchTerm(null);
+                        setShowAll(true);
+                    },
+                }}
                 onRow={(record) => ({
                     onClick: () => navigateToExploration(record.id),
                 })}
                 rowClassName={styles.row}
-                columns={columns}
-                dataSource={filteredExplorations}
                 pagination={{
                     size: 'small',
                     showTotal: (total, range) =>
@@ -86,32 +107,8 @@ export function ExplorationsTab() {
                         }),
                 }}
                 rowKey={(record) => record.id}
-                loading={isFetching}
                 rowHoverable
                 size="small"
-                locale={{
-                    emptyText: (
-                        <Empty
-                            styles={{ image: { height: 50 } }}
-                            image={<ToolOutlined style={{ fontSize: 50 }} />}
-                            description={
-                                <>
-                                    <Paragraph style={{ marginTop: 0, opacity: 0.45 }}>
-                                        {t('Ready to Explore data?')}
-                                    </Paragraph>
-                                    <Paragraph style={{ opacity: 0.45 }}>
-                                        {t(
-                                            "It looks like you don't have any Explorations yet. Go to marketplace to shop and create one.",
-                                        )}
-                                    </Paragraph>
-                                    <Link to={ApplicationPaths.Marketplace}>
-                                        <Button type="primary">{t('Marketplace')}</Button>
-                                    </Link>
-                                </>
-                            }
-                        />
-                    ),
-                }}
             />
         </Flex>
     );

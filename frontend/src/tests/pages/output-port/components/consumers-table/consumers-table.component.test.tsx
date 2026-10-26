@@ -70,9 +70,17 @@ function mockApi() {
 
 function renderTable(link: OutputPortInputPort) {
     mockApi();
-    renderWithProviders(<ConsumersTable dataProductId="dp-1" outputPortId="op-1" dataProducts={[link]} />, {
-        routerProps: {},
-    });
+    renderWithProviders(
+        <ConsumersTable
+            dataProductId="dp-1"
+            outputPortId="op-1"
+            dataProducts={[link]}
+            query={{ isFetching: false, isUninitialized: false, isError: false, refetch: () => undefined }}
+        />,
+        {
+            routerProps: {},
+        },
+    );
 }
 
 type Buttons = {

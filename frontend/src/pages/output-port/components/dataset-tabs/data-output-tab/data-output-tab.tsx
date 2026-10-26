@@ -1,6 +1,7 @@
 import { Flex, Input } from 'antd';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { searchFilter } from '@/components/empty-state/empty-state.component.tsx';
 
 import { DataOutputTable } from '@/pages/output-port/components/dataset-tabs/data-output-tab/components/data-output-table/data-output-table.component';
 import {
@@ -24,7 +25,8 @@ type Props = {
 };
 export function DataOutputTab({ datasetId, dataProductId }: Props) {
     const { t } = useTranslation();
-    const { data: dataset, isLoading } = useGetOutputPortQuery({ id: datasetId, dataProductId });
+    const outputPortQuery = useGetOutputPortQuery({ id: datasetId, dataProductId });
+    const { data: dataset } = outputPortQuery;
     const [searchTerm, setSearchTerm] = useState<string>('');
     const filteredDataOutputs = useMemo(() => {
         return filterDataOutputs(dataset?.technical_asset_links || [], searchTerm);
@@ -35,13 +37,15 @@ export function DataOutputTab({ datasetId, dataProductId }: Props) {
             <Input.Search
                 placeholder={t('Search Technical Assets by name')}
                 allowClear
+                value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
             />
             <DataOutputTable
                 dataOutputs={filteredDataOutputs}
-                isLoading={isLoading}
+                query={outputPortQuery}
                 datasetId={datasetId}
                 dataProductId={dataProductId}
+                filter={searchFilter(searchTerm, setSearchTerm)}
             />
         </Flex>
     );

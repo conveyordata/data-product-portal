@@ -1,7 +1,10 @@
 import { Button, Flex, Input, Typography } from 'antd';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { searchFilter } from '@/components/empty-state/empty-state.component.tsx';
+import { OutputPortOutlined } from '@/components/icons';
 import { OutputPortCard } from '@/components/output-ports/output-port-card/output-port-card.component.tsx';
+import { QueryList } from '@/components/query-list/query-list.component.tsx';
 import { useModal } from '@/hooks/use-modal';
 import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
 import { useGetDataProductQuery } from '@/store/api/services/generated/dataProductsApi.ts';
@@ -16,7 +19,8 @@ type Props = {
 
 export function OutputPortsTable({ dataProductId, draggedDataOutputId }: Props) {
     const { t } = useTranslation();
-    const { data: { output_ports: outputPorts = [] } = {} } = useGetDataProductOutputPortsQuery(dataProductId);
+    const outputPortsQuery = useGetDataProductOutputPortsQuery(dataProductId);
+    const { data: { output_ports: outputPorts = [] } = {} } = outputPortsQuery;
     const { isVisible, handleOpen, handleClose } = useModal();
     const { data: dataProduct, isLoading: isLoadingDataProduct } = useGetDataProductQuery(dataProductId);
 
@@ -35,7 +39,7 @@ export function OutputPortsTable({ dataProductId, draggedDataOutputId }: Props) 
         },
         { skip: !dataProductId },
     );
-    const [searchTerm, setSearchTerm] = useState<string | undefined>(undefined);
+    const [searchTerm, setSearchTerm] = useState('');
     const filteredDatasets = useMemo(() => {
         if (!searchTerm) return outputPorts;
         return outputPorts.filter(
@@ -69,24 +73,29 @@ export function OutputPortsTable({ dataProductId, draggedDataOutputId }: Props) 
                 <Input.Search
                     placeholder={t('Search Output Ports by name or description')}
                     allowClear
+                    value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                 />
             </Flex>
-            {filteredDatasets.map((dataset) => (
-                <OutputPortCard
-                    key={dataset.id}
-                    dataProductId={dataProductId}
-                    outputPortId={dataset.id}
-                    draggedDataOutputId={draggedDataOutputId}
-                />
-            ))}
-            {filteredDatasets.length === 0 && (
-                <Flex justify="center">
-                    <Typography.Text type="secondary">
-                        {searchTerm ? t('No Output Ports found matching your search') : t('No Output Ports found')}
-                    </Typography.Text>
-                </Flex>
-            )}
+            <QueryList
+                query={outputPortsQuery}
+                items={filteredDatasets}
+                renderItem={(dataset) => (
+                    <OutputPortCard
+                        key={dataset.id}
+                        dataProductId={dataProductId}
+                        outputPortId={dataset.id}
+                        draggedDataOutputId={draggedDataOutputId}
+                    />
+                )}
+                subject={t('Output Ports')}
+                emptyState={{
+                    icon: <OutputPortOutlined />,
+                    title: t('No Output Ports yet'),
+                    description: t('Add an Output Port to share part of this Data Product with others.'),
+                }}
+                filter={searchFilter(searchTerm, setSearchTerm)}
+            />
             {isVisible && <AddOutputPortPopup onClose={handleClose} isOpen={isVisible} dataProductId={dataProductId} />}
         </Flex>
     );

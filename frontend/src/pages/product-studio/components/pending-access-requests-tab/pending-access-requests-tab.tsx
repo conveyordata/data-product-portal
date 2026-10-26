@@ -1,7 +1,10 @@
-import { Flex, Input, Table } from 'antd';
+import { InboxOutlined } from '@ant-design/icons';
+import { Flex, Input } from 'antd';
 import { parseAsString, useQueryState } from 'nuqs';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { searchFilter } from '@/components/empty-state/empty-state.component.tsx';
+import { ListTable } from '@/components/list-table/list-table.component.tsx';
 import { acceptRequest, rejectRequest } from '@/components/pending-access-requests-modal/request-handlers.ts';
 import { ReviewRequestModal } from '@/components/pending-access-requests-modal/review-request-modal.tsx';
 import { useTablePagination } from '@/hooks/use-table-pagination.tsx';
@@ -16,7 +19,8 @@ export function PendingAccessRequestsTab() {
     const { t } = useTranslation();
     const [searchTerm, setSearchTerm] = useQueryState('search', parseAsString.withDefault(''));
 
-    const { data: { pending_actions: pendingRequests = [] } = {} } = useGetUserPendingActionsQuery();
+    const pendingRequestsQuery = useGetUserPendingActionsQuery();
+    const { data: { pending_actions: pendingRequests = [] } = {} } = pendingRequestsQuery;
     const [reviewingAction, setReviewingAction] = useState<Request | null>(null);
     const { pagination, handlePaginationChange } = useTablePagination([]);
     const handlers = usePendingActionHandlers();
@@ -41,9 +45,19 @@ export function PendingAccessRequestsTab() {
                 style={{ maxWidth: 400 }}
                 allowClear
             />
-            <Table
-                columns={columns}
+            <ListTable
+                query={pendingRequestsQuery}
                 dataSource={tableData}
+                columns={columns}
+                subject={t('pending requests')}
+                emptyState={{
+                    icon: <InboxOutlined />,
+                    title: t('Nothing to review'),
+                    description: t(
+                        'When someone requests access to a Data Product or Output Port you own, it appears here for you to approve or deny.',
+                    ),
+                }}
+                filter={searchFilter(searchTerm, setSearchTerm)}
                 size="small"
                 onRow={() => ({ 'data-cy': 'pending-request-row' }) as React.HTMLAttributes<HTMLElement>}
                 pagination={{
@@ -51,9 +65,6 @@ export function PendingAccessRequestsTab() {
                     onChange: (page, pageSize) => {
                         handlePaginationChange({ current: page, pageSize });
                     },
-                }}
-                locale={{
-                    emptyText: t('No pending requests.'),
                 }}
             />
             <ReviewRequestModal

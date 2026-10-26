@@ -13,8 +13,8 @@ type Props = {
     dataProductId: string;
 };
 export const DataProductInputPorts = ({ dataProductId }: Props) => {
-    const { data: { input_ports: inputPorts = [] } = {}, isFetching: loadingInputPorts } =
-        useGetDataProductInputPortsQuery(dataProductId);
+    const inputPortsQuery = useGetDataProductInputPortsQuery(dataProductId);
+    const { data: { input_ports: inputPorts = [] } = {} } = inputPortsQuery;
     const { data: canRequestAccess } = useCheckAccessQuery(
         {
             resource: dataProductId,
@@ -57,7 +57,7 @@ export const DataProductInputPorts = ({ dataProductId }: Props) => {
 
     return (
         <InputPortTab
-            loadingInputPorts={loadingInputPorts}
+            query={inputPortsQuery}
             canRequestAccess={canRequestAccess?.allowed ?? false}
             canRemoveAccess={canRevokeAccess?.allowed ?? false}
             inputPorts={inputPorts}

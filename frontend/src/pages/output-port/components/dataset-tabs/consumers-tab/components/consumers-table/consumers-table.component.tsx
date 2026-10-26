@@ -1,7 +1,10 @@
-import { Table, type TableColumnsType, type TableProps } from 'antd';
+import type { TableColumnsType, TableProps } from 'antd';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import type { EmptyStateFilter, EmptyStateQuery } from '@/components/empty-state/empty-state.component.tsx';
+import { DataProductOutlined } from '@/components/icons';
 import { DEFAULT_EXPIRING_SOON_THRESHOLD_DAYS } from '@/components/input-port/access-status.tsx';
+import { ListTable } from '@/components/list-table/list-table.component.tsx';
 import { acceptRequest, rejectRequest } from '@/components/pending-access-requests-modal/request-handlers.ts';
 import { ReviewRequestModal } from '@/components/pending-access-requests-modal/review-request-modal.tsx';
 import { DEFAULT_TABLE_PAGINATION } from '@/constants/table.constants.ts';
@@ -24,10 +27,11 @@ type Props = {
     dataProductId: string;
     outputPortId: string;
     dataProducts: OutputPortInputPort[];
-    isLoading?: boolean;
+    query: EmptyStateQuery;
+    filter?: EmptyStateFilter;
 };
 
-export function ConsumersTable({ outputPortId, dataProductId, dataProducts, isLoading }: Props) {
+export function ConsumersTable({ outputPortId, dataProductId, dataProducts, query, filter }: Props) {
     const { t } = useTranslation();
     const [revokeOutputPortAsInputPort, { isLoading: isRevokingOutputPortAsInputPort }] =
         useRevokeOutputPortAsInputPortMutation();
@@ -158,12 +162,21 @@ export function ConsumersTable({ outputPortId, dataProductId, dataProducts, isLo
 
     return (
         <>
-            <Table<OutputPortInputPort>
-                loading={isLoading}
-                columns={columns}
+            <ListTable<OutputPortInputPort>
+                query={query}
                 dataSource={dataProducts}
-                rowKey={({ id }) => id}
+                columns={columns}
+                subject={t('consumers')}
+                emptyState={{
+                    icon: <DataProductOutlined />,
+                    title: t('No consumers yet'),
+                    description: t(
+                        'Data Products and Explorations that are granted access to this Output Port appear here.',
+                    ),
+                }}
                 onChange={onChange}
+                filter={filter}
+                rowKey={({ id }) => id}
                 pagination={{
                     ...pagination,
                     placement: ['topEnd'],

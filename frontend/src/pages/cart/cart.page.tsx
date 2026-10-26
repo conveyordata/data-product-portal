@@ -1,5 +1,5 @@
 import { PlusOutlined, ShopOutlined, ShoppingCartOutlined, UnorderedListOutlined } from '@ant-design/icons';
-import { Button, Col, Empty, Flex, Row, Typography } from 'antd';
+import { Button, Col, Flex, Row } from 'antd';
 import posthog from 'posthog-js';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -7,6 +7,7 @@ import { useSelector } from 'react-redux';
 import { Link } from 'react-router';
 import ExplorationBorderIcon from '@/assets/icons/border-icons/exploration-border-icon.svg?react';
 import { CardSelection } from '@/components/card-selection/card-selection.tsx';
+import { EmptyState } from '@/components/empty-state/empty-state.component.tsx';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
 import { useBreadcrumbs } from '@/components/layout/navbar/breadcrumbs/breadcrumb.context.tsx';
 import { PosthogEvents } from '@/constants/posthog.constants.ts';
@@ -130,17 +131,16 @@ function ExplorationsCart() {
     }, [dataProductTypeChoice, existingOrNewChoice]);
     if (cartOutputPortIds?.length === 0) {
         return (
-            <Empty
-                description={
-                    <Typography.Text>
-                        {t('Your cart is currently empty. Explore the marketplace to add items.')}
-                    </Typography.Text>
+            <EmptyState
+                icon={<ShoppingCartOutlined />}
+                title={t('Your cart is empty')}
+                description={t('Add Output Ports from the Marketplace, then request access to them together.')}
+                action={
+                    <Link to={ApplicationPaths.Marketplace}>
+                        <Button type="primary">{t('Browse Marketplace')}</Button>
+                    </Link>
                 }
-            >
-                <Link to={ApplicationPaths.Marketplace}>
-                    <Button type="primary">{t('Marketplace')}</Button>
-                </Link>
-            </Empty>
+            />
         );
     }
     return (

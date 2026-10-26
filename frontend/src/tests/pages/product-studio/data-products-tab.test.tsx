@@ -45,7 +45,7 @@ describe('DataProductsTab', () => {
         expect(screen.getByText('Customer Insights')).toBeInTheDocument();
     });
 
-    it('shows empty state when there are no data products', async () => {
+    it('treats an empty "My Data Products" view as filtered, and clearing it shows all', async () => {
         setupMocks([]);
         renderWithProviders(<DataProductsTab />, {
             routerProps: { initialEntries: ['/studio'] },
@@ -53,7 +53,13 @@ describe('DataProductsTab', () => {
         });
 
         await waitFor(() => {
-            expect(screen.getByText('Ready to build your first Data Product?')).toBeInTheDocument();
+            expect(screen.getByText('No Data Products match the current filters')).toBeInTheDocument();
+        });
+
+        fireEvent.click(screen.getByRole('button', { name: 'Clear filters' }));
+
+        await waitFor(() => {
+            expect(screen.getByText('No Data Products yet')).toBeInTheDocument();
         });
     });
 

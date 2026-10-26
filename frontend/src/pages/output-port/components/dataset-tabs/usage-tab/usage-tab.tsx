@@ -1,6 +1,7 @@
 import { Alert, Col, Flex, Radio, type RadioChangeEvent, Row, Typography } from 'antd';
 import { lazy, Suspense, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
+import { hasFailed } from '@/components/empty-state/empty-state.component.tsx';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
 import {
     QueryStatsGranularity,
@@ -38,23 +39,19 @@ export function UsageTab({ outputPortId, dataProductId }: Props) {
     const [dayRange, setDayRange] = useState<number>(yearDayRange);
     const granularity = useMemo(() => getGranularityFromDayRange(dayRange), [dayRange]);
 
-    const {
-        data: { output_port_query_stats_responses: responses = [] } = {},
-        isLoading,
-        isFetching,
-    } = useGetOutputPortQueryStatsQuery({
+    const statsQuery = useGetOutputPortQueryStatsQuery({
         dataProductId,
         id: outputPortId,
         granularity,
         dayRange,
     });
+    const curatedQueriesQuery = useGetOutputPortCuratedQueriesQuery({ id: outputPortId, dataProductId });
+    const { data: { output_port_query_stats_responses: responses = [] } = {} } = statsQuery;
 
-    const { data: { output_port_curated_queries: curatedQueries = [] } = {}, isLoading: areCuratedQueriesLoading } =
-        useGetOutputPortCuratedQueriesQuery({ id: outputPortId, dataProductId });
+    const { data: { output_port_curated_queries: curatedQueries = [] } = {} } = curatedQueriesQuery;
 
-    const isLoadingState = isLoading || isFetching;
     const hasUsageData = Boolean(responses.length);
-    const hasCuratedQueries = Boolean(!areCuratedQueriesLoading && curatedQueries?.length);
+    const hasCuratedQueries = Boolean(curatedQueries.length);
     const unknownLabel = t('Unknown');
 
     const chartData = useMemo(() => {
@@ -89,7 +86,7 @@ export function UsageTab({ outputPortId, dataProductId }: Props) {
                 </Flex>
             </Col>
 
-            {!hasUsageData && !hasCuratedQueries && (
+            {!hasUsageData && !hasCuratedQueries && !hasFailed(statsQuery) && !hasFailed(curatedQueriesQuery) && (
                 <Col span={24}>
                     <Alert
                         title={
@@ -114,7 +111,7 @@ export function UsageTab({ outputPortId, dataProductId }: Props) {
                 <Suspense fallback={<LoadingSpinner />}>
                     <QueriesOverTimeChart
                         data={chartData}
-                        isLoading={isLoadingState}
+                        query={statsQuery}
                         hasData={hasUsageData}
                         colorScaleConfig={colorScaleConfig}
                     />
@@ -124,14 +121,14 @@ export function UsageTab({ outputPortId, dataProductId }: Props) {
                 <Suspense fallback={<LoadingSpinner />}>
                     <QueriesPerConsumerChart
                         data={consumerTotals}
-                        isLoading={isLoadingState}
+                        query={statsQuery}
                         hasData={hasUsageData}
                         colorScaleConfig={colorScaleConfig}
                     />
                 </Suspense>
             </Col>
             <Col span={24}>
-                <CuratedQueriesList queries={curatedQueries} isLoading={areCuratedQueriesLoading} />
+                <CuratedQueriesList queries={curatedQueries} query={curatedQueriesQuery} />
             </Col>
         </Row>
     );

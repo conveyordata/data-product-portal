@@ -4,7 +4,7 @@ import { PeoplePage } from '@/pages/people/people-table.component';
 import { allowAllAuth } from '@/tests/mocks/auth.ts';
 import { mockUsers, mockUsersHttp } from '@/tests/mocks/users';
 import { server } from '../../mocks/server';
-import { renderWithProviders, screen, userEvent, waitFor } from '../../test-utils';
+import { renderWithProviders, screen, userEvent, waitFor, within } from '../../test-utils';
 
 describe('PeoplePage', () => {
     it('shows loading state while fetching', () => {
@@ -30,9 +30,7 @@ describe('PeoplePage', () => {
             expect(screen.getByText('People')).toBeInTheDocument();
         });
 
-        const table = screen.getByTestId('people-table');
-        const description = table.querySelector('.ant-empty-description');
-        expect(description).toHaveTextContent('No data');
+        expect(await within(screen.getByTestId('people-table')).findByText('No people yet')).toBeInTheDocument();
     });
 
     it('displays users returned by the API', async () => {

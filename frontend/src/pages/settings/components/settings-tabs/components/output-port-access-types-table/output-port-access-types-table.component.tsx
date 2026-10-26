@@ -1,6 +1,8 @@
-import { Button, Flex, Table } from 'antd';
+import { LockOutlined } from '@ant-design/icons';
+import { Button, Flex } from 'antd';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { ListTable } from '@/components/list-table/list-table.component.tsx';
 import { useModal } from '@/hooks/use-modal.tsx';
 import { SettingsSectionHeader } from '@/pages/settings/components/settings-tabs/components/settings-section-header/settings-section-header.component.tsx';
 import {
@@ -15,7 +17,8 @@ import { getOutputPortAccessTypesTableColumns } from './output-port-access-types
 
 export function OutputPortAccessTypesTable() {
     const { t } = useTranslation();
-    const { data, isFetching } = useGetOutputPortAccessTypesQuery(true);
+    const accessTypesQuery = useGetOutputPortAccessTypesQuery(true);
+    const { data } = accessTypesQuery;
     const { isVisible, handleOpen, handleClose } = useModal();
     const [initial, setInitial] = useState<OutputPortAccessTypesGetItem>();
     const [removeAccessType, { isLoading: isRemoving }] = useRemoveOutputPortAccessTypeMutation();
@@ -63,11 +66,19 @@ export function OutputPortAccessTypesTable() {
                     </Button>
                 }
             />
-            <Table<OutputPortAccessTypesGetItem>
+            <ListTable<OutputPortAccessTypesGetItem>
+                query={accessTypesQuery}
                 dataSource={data?.output_port_access_types}
                 columns={columns}
+                subject={t('Access Types')}
+                emptyState={{
+                    icon: <LockOutlined />,
+                    title: t('No Access Types yet'),
+                    description: t(
+                        'Access Types set how openly an Output Port is shared and whether access needs approval.',
+                    ),
+                }}
                 rowKey={(record) => record.id}
-                loading={isFetching}
                 pagination={{ hideOnSinglePage: true }}
                 rowHoverable
                 size="small"

@@ -1,13 +1,13 @@
-import { DeploymentUnitOutlined } from '@ant-design/icons';
 import { usePostHog } from '@posthog/react';
-import { Button, Empty, Flex, Input, Radio, type RadioChangeEvent, Table } from 'antd';
-import Paragraph from 'antd/es/typography/Paragraph';
+import { Button, Flex, Input, Radio, type RadioChangeEvent } from 'antd';
 import { parseAsString, parseAsStringEnum, useQueryState } from 'nuqs';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router';
 import { RoleFilter } from '@/components/filters/role-filter.component.tsx';
+import { OutputPortOutlined } from '@/components/icons';
+import { ListTable } from '@/components/list-table/list-table.component.tsx';
 import { PosthogEvents } from '@/constants/posthog.constants';
 import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
 import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
@@ -86,10 +86,11 @@ export function OutputPortsTab() {
         setIsInitialized(true);
     }, [userDatasetRoles, isInitialized]);
 
-    const { data: { output_ports: outputPorts = [] } = {}, isFetching } = useSearchOutputPortsQuery({
+    const outputPortsQuery = useSearchOutputPortsQuery({
         assignmentFilter,
         limit: 1000,
     });
+    const { data: { output_ports: outputPorts = [] } = {} } = outputPortsQuery;
 
     const onSearch = useCallback(
         (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -125,13 +126,21 @@ export function OutputPortsTab() {
         setSelectedPortIds([]);
         setSelectedRoles([]);
     };
+
+    const clearFilters = () => {
+        setSearchTerm(null);
+        setAssignmentFilter(AssignmentFilter.All);
+        setSelectedPortIds([]);
+        setSelectedRoles([]);
+    };
+
     const createDataProductButton = (
         <Link
             to={ApplicationPaths.DataProductNew}
             onClick={() => posthog.capture(PosthogEvents.CREATE_DATA_PRODUCT_STARTED)}
         >
             <Button type="primary" disabled={!canCreateDataProduct}>
-                {t('Create a Data Product first')}
+                {t('Create Data Product')}
             </Button>
         </Link>
     );
@@ -162,12 +171,27 @@ export function OutputPortsTab() {
             {/* TODO: Add pending requests specific to Output Ports */}
 
             {/* Table */}
-            <Table
+            <ListTable
+                query={outputPortsQuery}
+                dataSource={filteredOutputPorts}
+                columns={columns}
+                subject={t('Output Ports')}
+                emptyState={{
+                    icon: <OutputPortOutlined />,
+                    title: t('No Output Ports yet'),
+                    description: t(
+                        'An Output Port is how others get access to part of your Data Product. Add one from a Data Product you own, or create a Data Product to get started.',
+                    ),
+                    action: createDataProductButton,
+                }}
+                filter={{
+                    hasOtherFilters: assignmentFilter === AssignmentFilter.OnlyAssigned || selectedPortIds.length > 0,
+                    searchTerm,
+                    onClear: clearFilters,
+                }}
                 onRow={(record) => ({
                     onClick: () => navigateToOutputPort(record.data_product_id, record.id),
                 })}
-                columns={columns}
-                dataSource={filteredOutputPorts}
                 pagination={{
                     size: 'small',
                     showTotal: (total, range) =>
@@ -178,31 +202,9 @@ export function OutputPortsTab() {
                         }),
                 }}
                 rowKey={(record) => record.id}
-                loading={isFetching}
                 rowHoverable
                 rowClassName={styles.row}
                 size="small"
-                locale={{
-                    emptyText: (
-                        <Empty
-                            styles={{ image: { height: 50 } }}
-                            image={<DeploymentUnitOutlined style={{ fontSize: 50 }} />}
-                            description={
-                                <>
-                                    <Paragraph style={{ marginTop: 0, opacity: 0.45 }}>
-                                        {t('Share your data with the organisation')}
-                                    </Paragraph>
-                                    <Paragraph style={{ opacity: 0.45 }}>
-                                        {t(
-                                            'Output Ports are a way for others to access a flavour of your Data Product. You can select an existing Data Product to add a new flavour to it or create a new Data Product to get started.',
-                                        )}
-                                    </Paragraph>
-                                    {createDataProductButton}
-                                </>
-                            }
-                        />
-                    ),
-                }}
             />
         </Flex>
     );

@@ -1,9 +1,11 @@
 import { TeamOutlined } from '@ant-design/icons';
-import { Col, Input, Row, Table, Typography } from 'antd';
+import { Col, Input, Row, Typography } from 'antd';
 import { parseAsString, useQueryState } from 'nuqs';
 import { useCallback, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { searchFilter } from '@/components/empty-state/empty-state.component.tsx';
 import { useBreadcrumbs } from '@/components/layout/navbar/breadcrumbs/breadcrumb.context.tsx';
+import { ListTable } from '@/components/list-table/list-table.component.tsx';
 import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
 import {
     type GlobalRoleAssignmentResponse,
@@ -47,7 +49,8 @@ export function PeoplePage() {
         ]);
     }, [setBreadcrumbs, t]);
 
-    const { data: { users = [] } = {}, isFetching } = useGetUsersQuery();
+    const usersQuery = useGetUsersQuery();
+    const { data: { users = [] } = {} } = usersQuery;
     const { data: { roles = [] } = {} } = useGetRolesQuery(Scope.GLOBAL);
     const { data: access } = useCheckAccessQuery({ action: AuthorizationAction.GLOBAL__CREATE_USER });
     const canAssignGlobalRole = access?.allowed ?? false;
@@ -158,14 +161,23 @@ export function PeoplePage() {
                 <Input.Search
                     placeholder={t('Search people by name')}
                     allowClear
+                    value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                 />
             </Col>
             <Col span={14} />
             <Col span={24}>
-                <Table<UsersGet>
-                    columns={columns}
+                <ListTable<UsersGet>
+                    query={usersQuery}
                     dataSource={filteredUsers}
+                    columns={columns}
+                    subject={t('people')}
+                    emptyState={{
+                        icon: <TeamOutlined />,
+                        title: t('No people yet'),
+                        description: t('Everyone with access to the portal appears here.'),
+                    }}
+                    filter={searchFilter(searchTerm, setSearchTerm)}
                     pagination={{
                         showTotal: (total, range) =>
                             t('Showing {{range0}}-{{range1}} of {{count}} people', {
@@ -175,7 +187,6 @@ export function PeoplePage() {
                             }),
                     }}
                     rowKey={(record) => record.id}
-                    loading={isFetching}
                     rowHoverable
                     rowClassName={styles.row}
                     size="small"

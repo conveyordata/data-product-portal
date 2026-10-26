@@ -3,6 +3,7 @@ import { Button, Flex, Input, Tooltip } from 'antd';
 import { isBefore, parseISO, startOfToday } from 'date-fns';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { searchFilter } from '@/components/empty-state/empty-state.component.tsx';
 import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
 import {
     InputPortStatus,
@@ -39,10 +40,11 @@ export function hasAccessOrPendingRequest({ status, renewal_status, current_requ
 
 export function ConsumersTab({ outputPortId, dataProductId }: Props) {
     const { t } = useTranslation();
-    const { data: { input_ports: inputPorts = [] } = {}, isLoading } = useGetInputPortsForOutputPortQuery({
+    const inputPortsQuery = useGetInputPortsForOutputPortQuery({
         outputPortId: outputPortId,
         dataProductId,
     });
+    const { data: { input_ports: inputPorts = [] } = {} } = inputPortsQuery;
     const [searchTerm, setSearchTerm] = useState<string>('');
     const [isGrantModalOpen, setIsGrantModalOpen] = useState(false);
     const { data: { allowed: canApproveAccess } = {} } = useCheckAccessQuery({
@@ -59,6 +61,7 @@ export function ConsumersTab({ outputPortId, dataProductId }: Props) {
                 <Input.Search
                     placeholder={t('Search consumers by name')}
                     allowClear
+                    value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                 />
                 {canApproveAccess && (
@@ -77,7 +80,8 @@ export function ConsumersTab({ outputPortId, dataProductId }: Props) {
                 outputPortId={outputPortId}
                 dataProductId={dataProductId}
                 dataProducts={filteredDataProducts}
-                isLoading={isLoading}
+                query={inputPortsQuery}
+                filter={searchFilter(searchTerm, setSearchTerm)}
             />
             {isGrantModalOpen && (
                 <GrantOutputPortAccessModal

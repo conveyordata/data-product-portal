@@ -50,7 +50,7 @@ describe('Deleted event actors', () => {
                         deleted_actor_identifier: null,
                     },
                 ]}
-                isFetching={false}
+                query={{ isFetching: false, isUninitialized: false, isError: false, refetch: () => undefined }}
             />,
             { routerProps: { initialEntries: ['/'] } },
         );

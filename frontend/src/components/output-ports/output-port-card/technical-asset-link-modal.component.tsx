@@ -1,6 +1,13 @@
 import { Button, Checkbox, Flex, Input, List, Modal, Typography } from 'antd';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import {
+    EmptyState,
+    emptyStateQueryProps,
+    hasFailed,
+    searchFilter,
+} from '@/components/empty-state/empty-state.component.tsx';
+import { TechnicalAssetOutlined } from '@/components/icons';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component';
 import { NotShareableTag } from '@/components/technical-assets/not-shareable-tag/not-shareable-tag.component.tsx';
 import { DATA_OUTPUTS_TABLE_PAGINATION } from '@/constants/table.constants';
@@ -28,23 +35,22 @@ export function TechnicalAssetLinkModal({ onClose, dataProductId, datasetId, dat
     const { t } = useTranslation();
     const [selectedOutputs, setSelectedOutputs] = useState<Set<string>>(new Set());
 
-    const [searchTerm, setSearchTerm] = useState<string | undefined>(undefined);
+    const [searchTerm, setSearchTerm] = useState('');
     const { data: { plugins } = {} } = useGetPluginsQuery();
     const [linkDatasets, { isLoading: isLinking }] = useLinkOutputPortToTechnicalAssetMutation();
     const [approveLink] = useApproveOutputPortTechnicalAssetLinkMutation();
 
-    const { data: { technical_assets: technicalAssets = [] } = {} } = useGetDataProductTechnicalAssetsQuery(
-        dataProductId,
-        { skip: !dataProductId },
-    );
+    const technicalAssetsQuery = useGetDataProductTechnicalAssetsQuery(dataProductId, { skip: !dataProductId });
+    const { data: { technical_assets: technicalAssets = [] } = {}, isLoading } = technicalAssetsQuery;
 
     const existingLinkIds = useMemo(() => {
         return new Set(existingLinks.map((link) => link.technical_asset_id));
     }, [existingLinks]);
 
     const availableDataOutputs = useMemo(() => {
+        if (hasFailed(technicalAssetsQuery)) return [];
         return technicalAssets.filter((output) => !existingLinkIds.has(output.id));
-    }, [technicalAssets, existingLinkIds]);
+    }, [technicalAssets, existingLinkIds, technicalAssetsQuery]);
 
     const filteredDataOutputs = useMemo(() => {
         if (!searchTerm) return availableDataOutputs;
@@ -154,6 +160,7 @@ export function TechnicalAssetLinkModal({ onClose, dataProductId, datasetId, dat
             <Input.Search
                 placeholder={t('Search Technical Assets')}
                 allowClear
+                value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
             />
 
@@ -170,6 +177,7 @@ export function TechnicalAssetLinkModal({ onClose, dataProductId, datasetId, dat
             <List
                 style={{ width: '100%' }}
                 dataSource={filteredDataOutputs}
+                loading={isLoading}
                 pagination={{
                     ...pagination,
                     size: 'small',
@@ -182,7 +190,21 @@ export function TechnicalAssetLinkModal({ onClose, dataProductId, datasetId, dat
                         }),
                     onChange: handleCurrentPageChange,
                 }}
-                locale={{ emptyText: t('No Technical Assets available') }}
+                locale={{
+                    emptyText: (
+                        <EmptyState
+                            size="small"
+                            icon={<TechnicalAssetOutlined />}
+                            title={t('No Technical Assets to link')}
+                            description={t(
+                                'Every Technical Asset on this Data Product is already linked, or none exist yet.',
+                            )}
+                            subject={t('Technical Assets')}
+                            filter={searchFilter(searchTerm, setSearchTerm)}
+                            {...emptyStateQueryProps(technicalAssetsQuery)}
+                        />
+                    ),
+                }}
                 renderItem={(output) => {
                     const shareable = isTechnicalAssetShareable(output.configuration.name, plugins);
                     return (
