@@ -18,7 +18,11 @@ type Props = {
 
 export function AboutTab({ dataProductId }: Props) {
     const { t } = useTranslation();
-    const { data: dataProduct, isFetching } = useGetDataProductQuery(dataProductId, { skip: !dataProductId });
+    const {
+        data: dataProduct,
+        isLoading: isLoadingDataProduct,
+        isFetching,
+    } = useGetDataProductQuery(dataProductId, { skip: !dataProductId });
     const currentUser = useSelector(selectCurrentUser);
     const [updateDataProductAbout, { isLoading }] = useUpdateDataProductAboutMutation();
 
@@ -31,7 +35,7 @@ export function AboutTab({ dataProductId }: Props) {
     );
     const canEdit = edit_access?.allowed ?? false;
 
-    if (isFetching) {
+    if (isLoadingDataProduct) {
         return <LoadingSpinner />;
     }
     if (!dataProduct || !currentUser) {
@@ -39,18 +43,19 @@ export function AboutTab({ dataProductId }: Props) {
     }
 
     async function handleSubmit(content: string) {
-        if (canEdit) {
-            try {
-                await updateDataProductAbout({
-                    id: dataProductId,
-                    dataProductAboutUpdate: { about: content },
-                }).unwrap();
-                dispatchMessage({ content: t('About section successfully updated'), type: 'success' });
-            } catch (_error) {
-                dispatchMessage({ content: t('Could not update about section'), type: 'error' });
-            }
-        } else {
+        if (!canEdit) {
             dispatchMessage({ content: t('You do not have permission to edit this about section'), type: 'error' });
+            throw new Error('Not allowed to edit the about section');
+        }
+        try {
+            await updateDataProductAbout({
+                id: dataProductId,
+                dataProductAboutUpdate: { about: content },
+            }).unwrap();
+            dispatchMessage({ content: t('About section successfully updated'), type: 'success' });
+        } catch (error) {
+            dispatchMessage({ content: t('Could not update about section'), type: 'error' });
+            throw error;
         }
     }
 

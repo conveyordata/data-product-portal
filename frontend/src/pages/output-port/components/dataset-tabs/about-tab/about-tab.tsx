@@ -19,7 +19,11 @@ type Props = {
 
 export function AboutTab({ datasetId, dataProductId }: Props) {
     const { t } = useTranslation();
-    const { data: dataset, isFetching } = useGetOutputPortQuery({ id: datasetId, dataProductId });
+    const {
+        data: dataset,
+        isLoading: isLoadingDataset,
+        isFetching,
+    } = useGetOutputPortQuery({ id: datasetId, dataProductId });
     const currentUser = useSelector(selectCurrentUser);
     const [updateDatasetAbout, { isLoading }] = useUpdateOutputPortAboutMutation();
 
@@ -32,7 +36,7 @@ export function AboutTab({ datasetId, dataProductId }: Props) {
     );
     const canEdit = edit_access?.allowed || false;
 
-    if (isFetching) {
+    if (isLoadingDataset) {
         return <LoadingSpinner />;
     }
 
@@ -41,19 +45,20 @@ export function AboutTab({ datasetId, dataProductId }: Props) {
     }
 
     async function handleSubmit(content: string) {
-        if (canEdit) {
-            try {
-                await updateDatasetAbout({
-                    id: datasetId,
-                    dataProductId,
-                    outputPortAboutUpdate: { about: content },
-                }).unwrap();
-                dispatchMessage({ content: t('About section successfully updated'), type: 'success' });
-            } catch (_error) {
-                dispatchMessage({ content: t('Could not update about section'), type: 'error' });
-            }
-        } else {
+        if (!canEdit) {
             dispatchMessage({ content: t('You do not have permission to edit this about section'), type: 'error' });
+            throw new Error('Not allowed to edit the about section');
+        }
+        try {
+            await updateDatasetAbout({
+                id: datasetId,
+                dataProductId,
+                outputPortAboutUpdate: { about: content },
+            }).unwrap();
+            dispatchMessage({ content: t('About section successfully updated'), type: 'success' });
+        } catch (error) {
+            dispatchMessage({ content: t('Could not update about section'), type: 'error' });
+            throw error;
         }
     }
 

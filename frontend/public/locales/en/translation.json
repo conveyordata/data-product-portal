@@ -296,6 +296,9 @@
     "Description": "Description",
     "Description must be less than {{length}} characters": "Description must be less than {{length}} characters",
     "Deselect All": "Deselect All",
+    "Discard": "Discard",
+    "Discard changes": "Discard changes",
+    "Discard changes?": "Discard changes?",
     "Discover Data Products": "Discover $t(Data Products)",
     "Discoverable": "Discoverable",
     "Do we have a forecast of our company expenses for next month?": "Do we have a forecast of our company expenses for next month?",
@@ -475,6 +478,7 @@
     "Is Default": "Is Default",
     "Italic": "Italic",
     "Join Team": "Join Team",
+    "Keep editing": "Keep editing",
     "Last 30 days": "Last 30 days",
     "Last 90 days": "Last 90 days",
     "Last year": "Last year",
@@ -984,5 +988,6 @@
     "Your cart is empty": "Your cart is empty",
     "Your Exploration has been created.": "Your Exploration has been created.",
     "Your first Data Product!": "Your first $t(Data Product)!",
-    "Your requests have successfully been created.": "Your requests have successfully been created."
+    "Your requests have successfully been created.": "Your requests have successfully been created.",
+    "Your unsaved changes will be lost.": "Your unsaved changes will be lost."
 }

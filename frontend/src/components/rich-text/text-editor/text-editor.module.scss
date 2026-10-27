@@ -10,21 +10,24 @@
 
 .editorContent {
     flex: 1;
+    display: flex;
     overflow-y: auto;
 }
 
-.submitButton {
-    align-self: flex-end;
+.actions {
     margin-top: auto;
-    border-radius: 50%;
+    padding-top: globals.$spacing-m;
 }
 
 .editor {
-    height: 100%;
+    flex: 1;
     border: 1px solid transparent;
     border-radius: globals.$border-radius;
     padding: globals.$spacing-s globals.$spacing-m;
-    overflow-y: auto;
+
+    &[contenteditable="true"] {
+        border-color: globals.$border-color;
+    }
 
     &:focus {
         outline: none;
@@ -62,5 +65,6 @@
 }
 
 .content {
-    height: 100%;
+    flex: 1;
+    display: flex;
 }
