@@ -12,12 +12,12 @@ interface Props {
 
 export function DatasetQuality({ dataProductId, datasetId }: Props) {
     const { t } = useTranslation();
-    const { data: summary, isLoading } = useGetLatestDataQualitySummaryForOutputPortQuery({
-        dataProductId,
-        id: datasetId,
-    });
+    const { currentData: summary, isFetching } = useGetLatestDataQualitySummaryForOutputPortQuery(
+        { dataProductId, id: datasetId },
+        { skip: !dataProductId },
+    );
 
-    if (isLoading) return null;
+    if (!dataProductId || isFetching) return null;
 
     return (
         <Flex vertical gap="small">
