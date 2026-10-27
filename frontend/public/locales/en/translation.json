@@ -523,6 +523,7 @@
     "No {{subject}} match \"{{searchTerm}}\"": "No {{subject}} match \"{{searchTerm}}\"",
     "No {{subject}} match \"{{searchTerm}}\" with the current filters": "No {{subject}} match \"{{searchTerm}}\" with the current filters",
     "No {{subject}} match the current filters": "No {{subject}} match the current filters",
+    "No About available": "No About available",
     "No Access Modes yet": "No Access Modes yet",
     "No Access Types yet": "No $t(Access Types) yet",
     "No assignments found for the {{ name }} role.": "No assignments found for the {{ name }} role.",

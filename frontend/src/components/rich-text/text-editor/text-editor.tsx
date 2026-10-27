@@ -29,8 +29,8 @@ export const TextEditor = ({
     initialContent,
     onSubmit,
     isDisabled,
-    isLoading = false,
     isSubmitting = false,
+    isLoading = false,
 }: Props) => {
     const { t } = useTranslation();
     const [content, setContent] = useState(initialContent);
@@ -123,7 +123,7 @@ export const TextEditor = ({
                                 aria-label={t('Save changes')}
                                 onClick={handleSubmit}
                                 icon={<SaveOutlined />}
-                                disabled={isDisabled || isLoading || isSubmitting}
+                                disabled={isDisabled || !isDirty || isLoading || isSubmitting}
                                 loading={isSubmitting}
                             />
                         </Tooltip>
