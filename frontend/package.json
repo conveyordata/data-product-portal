@@ -62,7 +62,6 @@
         "js-sha256": "^1.0.0",
         "nuqs": "^2.10.2",
         "oidc-client-ts": "^3.5.0",
-        "posthog-js": "^1.438.13",
         "react": "^19.3.1",
         "react-dom": "^19.3.1",
         "react-i18next": "^17.1.0",
