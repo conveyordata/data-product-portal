@@ -49,8 +49,7 @@ const invalidateOutputPortAsInputPort = (
         id: STATIC_TAG_ID.LIST,
     },
     {
-        type: TagTypes.OutputPortInputPorts,
-        outputPortId,
+        type: TagTypes.Graph,
     },
 ];
 
@@ -70,7 +69,7 @@ export const dataProductsOutputPortsInputPortsTags = {
         providesTags: (_, __, { outputPortId }) => [
             {
                 type: TagTypes.OutputPortInputPorts,
-                outputPortId,
+                id: outputPortId,
             },
         ],
     },

@@ -31,6 +31,10 @@ api.enhanceEndpoints({
             ],
         },
 
+        getGraphData: {
+            providesTags: [{ type: TagTypes.Graph, id: STATIC_TAG_ID.LIST }],
+        },
+
         getRoles: {
             providesTags: [{ type: TagTypes.Role, id: STATIC_TAG_ID.LIST }],
         },

@@ -50,6 +50,10 @@ const invalidateDeletedOutputPort = (
         id: id,
     },
     accessTypeListTag,
+    {
+        type: TagTypes.Graph as const,
+        id: STATIC_TAG_ID.LIST,
+    },
 ];
 
 export const dataProductOutputPortTags = {
@@ -83,6 +87,7 @@ export const dataProductOutputPortTags = {
                 id: STATIC_TAG_ID.LIST,
             },
             accessTypeListTag,
+            { type: TagTypes.Graph },
         ],
     },
     getOutputPort: {
@@ -100,6 +105,7 @@ export const dataProductOutputPortTags = {
         invalidatesTags: (_: unknown, __: unknown, arg: { dataProductId: string; id: string }) => [
             ...invalidateOutputPort(_, __, arg),
             accessTypeListTag,
+            { type: TagTypes.Graph },
         ],
     },
     getOutputPortsEventHistory: {
@@ -118,5 +124,8 @@ export const dataProductOutputPortTags = {
     },
     setValueForOutputPort: {
         invalidatesTags: invalidateOutputPort,
+    },
+    getOutputPortGraphData: {
+        providesTags: (_, __, { id }) => [{ type: TagTypes.Graph, id }],
     },
 } satisfies EndpointDefinitions;
