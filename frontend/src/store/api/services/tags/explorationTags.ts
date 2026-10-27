@@ -1,10 +1,10 @@
 import type { api } from '@/store/api/services/generated/completeServiceApi.ts';
 import { STATIC_TAG_ID, TagTypes } from '@/store/api/services/tag-types.ts';
+import { requestListTags } from '@/store/api/services/tags/requestTags.ts';
 
 type EndpointDefinitions = Parameters<typeof api.enhanceEndpoints>[0]['endpoints'];
 
 export const explorationTags = {
-    //Explorations api
     getExplorations: {
         providesTags: [{ type: TagTypes.Exploration, id: STATIC_TAG_ID.LIST }],
     },
@@ -12,17 +12,22 @@ export const explorationTags = {
         providesTags: (response) => (response?.id ? [{ type: TagTypes.Exploration, id: response?.id }] : []),
     },
     createExploration: {
-        invalidatesTags: [{ type: TagTypes.Exploration, id: STATIC_TAG_ID.LIST }, { type: TagTypes.MyRequests }],
+        invalidatesTags: (_, __, arg) => [
+            { type: TagTypes.Exploration, id: STATIC_TAG_ID.LIST },
+            ...(arg.input_ports?.output_ports?.map((op) => ({
+                type: TagTypes.OutputPort,
+                id: op.output_port_id,
+            })) ?? []),
+            ...(arg.input_ports?.output_ports?.map((op) => ({ type: TagTypes.History, id: op.output_port_id })) ?? []),
+            ...requestListTags,
+        ],
     },
     removeExploration: {
-        invalidatesTags: (_, __, id) => [
-            { type: TagTypes.Exploration, id: STATIC_TAG_ID.LIST },
-            { type: TagTypes.Exploration, id },
-        ],
+        invalidatesTags: [{ type: TagTypes.Exploration, id: STATIC_TAG_ID.LIST }],
     },
     requestInputPortsForExploration: {
         invalidatesTags: (_, __, arg) => [
-            { type: TagTypes.DataProduct, id: arg.id },
+            { type: TagTypes.Exploration, id: arg.id },
             ...arg.requestInputPortsForExplorationRequest.output_ports.map((op) => ({
                 type: TagTypes.OutputPort,
                 id: op.output_port_id,
@@ -36,8 +41,7 @@ export const explorationTags = {
                 id: op.output_port_id,
             })),
             { type: TagTypes.ExplorationInputPorts, id: arg.id },
-            { type: TagTypes.MyRequests },
-            { type: TagTypes.PendingAction, id: STATIC_TAG_ID.LIST },
+            ...requestListTags,
         ],
     },
     getExplorationInputPorts: {
@@ -48,9 +52,8 @@ export const explorationTags = {
             { type: TagTypes.OutputPort, id: arg.outputPortId },
             { type: TagTypes.History, id: arg.outputPortId },
             { type: TagTypes.ExplorationInputPorts, id: arg.id },
-            { type: TagTypes.MyRequests },
-            { type: TagTypes.PendingAction, id: STATIC_TAG_ID.LIST },
             { type: TagTypes.OutputPortInputPorts, id: arg.outputPortId },
+            ...requestListTags,
         ],
     },
     revokeInputPortForExploration: {
@@ -59,6 +62,7 @@ export const explorationTags = {
             { type: TagTypes.History, id: arg.outputPortId },
             { type: TagTypes.ExplorationInputPorts, id: arg.id },
             { type: TagTypes.OutputPortInputPorts, id: arg.outputPortId },
+            ...requestListTags,
         ],
     },
     cancelInputPortForExploration: {
@@ -66,8 +70,8 @@ export const explorationTags = {
             { type: TagTypes.OutputPort, id: arg.outputPortId },
             { type: TagTypes.History, id: arg.outputPortId },
             { type: TagTypes.ExplorationInputPorts, id: arg.id },
-            { type: TagTypes.PendingAction, id: STATIC_TAG_ID.LIST },
             { type: TagTypes.OutputPortInputPorts, id: arg.outputPortId },
+            ...requestListTags,
         ],
     },
 } satisfies EndpointDefinitions;

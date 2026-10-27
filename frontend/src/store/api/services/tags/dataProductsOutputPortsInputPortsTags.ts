@@ -1,5 +1,6 @@
 import type { api } from '@/store/api/services/generated/completeServiceApi.ts';
 import { STATIC_TAG_ID, TagTypes } from '@/store/api/services/tag-types.ts';
+import { requestListTags } from '@/store/api/services/tags/requestTags.ts';
 
 type EndpointDefinitions = Parameters<typeof api.enhanceEndpoints>[0]['endpoints'];
 
@@ -44,10 +45,7 @@ const invalidateOutputPortAsInputPort = (
         type: TagTypes.ExplorationInputPorts,
         id: consumingDataProductId,
     },
-    {
-        type: TagTypes.PendingAction,
-        id: STATIC_TAG_ID.LIST,
-    },
+    ...requestListTags,
 ];
 
 export const dataProductsOutputPortsInputPortsTags = {
