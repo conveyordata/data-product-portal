@@ -39,7 +39,6 @@ export const TextEditor = ({
     const isDirty = content !== savedContent;
     const editor = useEditor({
         extensions,
-        // Compare against the editor's own HTML: it normalises the stored content, e.g. a blank page to <p></p>.
         onCreate: ({ editor }) => {
             setContent(editor.getHTML());
             setSavedContent(editor.getHTML());
@@ -63,17 +62,23 @@ export const TextEditor = ({
         }
         try {
             await onSubmit(html);
-            setSavedContent(html);
-            setIsEditMode(false);
         } catch {
-            // The caller reports the failure; staying in edit mode keeps the text.
+            return;
         }
+        setSavedContent(html);
+        setIsEditMode(false);
     }
 
     function handleDiscard() {
         editor?.commands.setContent(savedContent ?? '');
         setContent(savedContent);
         setIsEditMode(false);
+    }
+
+    function discardIfUnchanged() {
+        if (!isDirty) {
+            handleDiscard();
+        }
     }
 
     useEffect(() => {
@@ -105,7 +110,7 @@ export const TextEditor = ({
                                 <Button
                                     shape="circle"
                                     aria-label={t('Discard changes')}
-                                    onClick={isDirty ? undefined : handleDiscard}
+                                    onClick={discardIfUnchanged}
                                     icon={<CloseOutlined />}
                                     disabled={isLoading || isSubmitting}
                                 />

@@ -980,7 +980,6 @@
     "You can't link {{name}} to an Output Port because its Technical Asset type is not shareable": "You can't link {{name}} to an $t(Output Port) because its $t(Technical Asset) type is not shareable",
     "You can't link these Technical Assets to an Output Port because one of their types is not shareable": "You can't link these $t(Technical Assets) to an $t(Output Port) because one of their types is not shareable",
     "You cannot remove Technical Asset types that are still used by Technical Assets": "You cannot remove $t(Technical Asset) types that are still used by $t(Technical Assets)",
-    "You do not have permission to edit this about section": "You do not have permission to edit this about section",
     "You have <2>{{ count }} pending requests</2> waiting for you in the Product Studio_one": "You have <2>{{ count }} pending request</2> waiting for you in the Product Studio",
     "You have <2>{{ count }} pending requests</2> waiting for you in the Product Studio_other": "You have <2>{{ count }} pending requests</2> waiting for you in the Product Studio",
     "You have finished the tour!": "You have finished the tour!",

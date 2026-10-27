@@ -47,7 +47,6 @@ describe('TextEditor', () => {
         await userEvent.click(await screen.findByRole('button', { name: 'Edit content' }));
         const paragraph = container.querySelector('[contenteditable="true"] p');
         if (!paragraph?.firstChild) throw new Error('editor is not editable');
-        // jsdom lacks the layout APIs userEvent.type needs here; ProseMirror picks up DOM edits itself.
         paragraph.firstChild.textContent = 'Saved about and edited';
 
         await userEvent.click(screen.getByRole('button', { name: 'Discard changes' }));

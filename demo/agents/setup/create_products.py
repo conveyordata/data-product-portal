@@ -94,7 +94,6 @@ def get_access_type_id(name: str) -> str:
 
 
 def get_default_access_durations() -> dict[str, str]:
-    """An Output Port must store a duration that is configured for each type."""
     response = requests.get(f"{PORTAL_URL}/api/v2/configuration/access_durations")
     response.raise_for_status()
     defaults = {
@@ -214,7 +213,6 @@ def set_curated_queries(dp_id: str, op_id: str, queries: list[dict]):
 
 
 def publish_data_model(dp_id: str, op_id: str, schema_objects: list[dict]):
-    """Publish the schema as a BitOL contract so the Data Model tab is filled in."""
     url = (
         f"{PORTAL_URL}/api/v2/data_products/{dp_id}/output_ports/{op_id}/data_contract"
     )
@@ -224,7 +222,6 @@ def publish_data_model(dp_id: str, op_id: str, schema_objects: list[dict]):
 
 
 def publish_data_quality(dp_id: str, op_id: str, summary: dict[str, Any]):
-    """Publish a data quality summary so the quality badge has something to show."""
     url = f"{PORTAL_URL}/api/v2/data_products/{dp_id}/output_ports/{op_id}/data_quality_summary"
     payload = {
         **summary,
@@ -252,25 +249,6 @@ OUTPUT_PORTS: dict[str, Any] = {
             "<tr><td>Database</td><td>dpp_demo</td></tr>"
             "<tr><td>Schema</td><td>inventory_snapshot</td></tr>"
             "<tr><td>Access</td><td>Public — no approval required. A read-only user scoped to this schema is provided upon request.</td></tr>"
-            "</tbody></table>"
-            "<p></p>"
-            "<h3>Tables</h3>"
-            "<p></p>"
-            "<h4>inventory_latest</h4>"
-            "<p>Current daily snapshot of warehouse stock. Use this table for all current-stock questions.</p>"
-            "<table><thead><tr><th>Column</th><th>Type</th><th>Description</th></tr></thead><tbody>"
-            "<tr><td>sku</td><td>text</td><td>Stock Keeping Unit. Camping products follow <code>CAMP-*</code> prefix convention.</td></tr>"
-            "<tr><td>qty_oh</td><td>integer</td><td>Quantity on hand — current units available in the warehouse.</td></tr>"
-            "<tr><td>warehouse_id</td><td>integer</td><td>Warehouse location identifier.</td></tr>"
-            "</tbody></table>"
-            "<p></p>"
-            "<h4>stock_levels</h4>"
-            "<p>Historical log of stock-level snapshots over time. Includes retired items — always filter them out for sellable counts.</p>"
-            "<table><thead><tr><th>Column</th><th>Type</th><th>Description</th></tr></thead><tbody>"
-            "<tr><td>sku</td><td>text</td><td>Stock Keeping Unit.</td></tr>"
-            "<tr><td>qty_oh</td><td>integer</td><td>Quantity on hand at snapshot time.</td></tr>"
-            "<tr><td>is_retired</td><td>boolean</td><td>True if this item is no longer for sale. Always filter <code>WHERE is_retired = false</code> for sellable inventory.</td></tr>"
-            "<tr><td>captured_at</td><td>timestamp</td><td>When this snapshot was recorded.</td></tr>"
             "</tbody></table>"
             "<p></p>"
             "<h3>Semantic Model Highlights</h3>"
@@ -351,39 +329,6 @@ OUTPUT_PORTS: dict[str, Any] = {
             "<tr><td>Access</td><td>Restricted — request access through the portal. You will receive a dedicated read-only user scoped to this schema.</td></tr>"
             "</tbody></table>"
             "<p></p>"
-            "<h3>Tables</h3>"
-            "<p></p>"
-            "<h4>orders</h4>"
-            "<p>Order headers — one row per customer order.</p>"
-            "<table><thead><tr><th>Column</th><th>Type</th><th>Description</th></tr></thead><tbody>"
-            "<tr><td>order_id</td><td>uuid</td><td>Primary key.</td></tr>"
-            "<tr><td>customer_id</td><td>uuid</td><td>FK to <code>customer_demographic_master.customers.id</code>.</td></tr>"
-            "<tr><td>total_amount</td><td>integer</td><td>Order total <strong>in cents</strong>. Use <code>total_amount / 100.0</code> for dollars. Never use <code>calculated_total</code> — it contains legacy errors.</td></tr>"
-            "<tr><td>status</td><td>text</td><td>Order status. A NULL status with a non-null <code>created_at</code> indicates an order in processing.</td></tr>"
-            "<tr><td>created_at</td><td>timestamp</td><td>Order creation time.</td></tr>"
-            "<tr><td>shipped_at</td><td>timestamp</td><td>Shipment timestamp (nullable).</td></tr>"
-            "</tbody></table>"
-            "<p></p>"
-            "<h4>order_items</h4>"
-            "<p>Line items — one row per SKU per order.</p>"
-            "<table><thead><tr><th>Column</th><th>Type</th><th>Description</th></tr></thead><tbody>"
-            "<tr><td>item_id</td><td>uuid</td><td>Primary key.</td></tr>"
-            "<tr><td>order_id</td><td>uuid</td><td>FK to <code>orders.order_id</code>.</td></tr>"
-            "<tr><td>sku</td><td>text</td><td>Product identifier (matches <code>inventory_snapshot.inventory_latest.sku</code>).</td></tr>"
-            "<tr><td>price_cents</td><td>integer</td><td>Unit price in cents. Use <code>price_cents / 100.0</code> for dollars.</td></tr>"
-            "<tr><td>quantity</td><td>integer</td><td>Units purchased.</td></tr>"
-            "</tbody></table>"
-            "<p></p>"
-            "<h4>recurring_revenue</h4>"
-            "<p>Subscription records — one row per subscription lifecycle.</p>"
-            "<table><thead><tr><th>Column</th><th>Type</th><th>Description</th></tr></thead><tbody>"
-            "<tr><td>subscription_id</td><td>uuid</td><td>Primary key.</td></tr>"
-            "<tr><td>mrr</td><td>integer</td><td>Monthly recurring revenue in cents. Use <code>COALESCE(mrr, 0) / 100.0</code>.</td></tr>"
-            "<tr><td>status</td><td>text</td><td>ACTIVE, TRIAL, or CANCELED.</td></tr>"
-            "<tr><td>started_at</td><td>timestamp</td><td>Subscription start date. Renewal: <code>started_at + INTERVAL '1 year'</code>.</td></tr>"
-            "<tr><td>ended_at</td><td>timestamp</td><td>Cancellation date (nullable).</td></tr>"
-            "</tbody></table>"
-            "<p></p>"
             "<h3>Semantic Model Highlights</h3>"
             "<ul>"
             "<li><strong>All monetary values are stored in cents.</strong> Always divide by 100.0 for dollar amounts.</li>"
@@ -462,27 +407,6 @@ OUTPUT_PORTS: dict[str, Any] = {
             "<tr><td>Access</td><td>Restricted — contains PII. Request access through the portal. You will receive a read-only user scoped to this schema.</td></tr>"
             "</tbody></table>"
             "<p></p>"
-            "<h3>Tables</h3>"
-            "<p></p>"
-            "<h4>customers</h4>"
-            "<p>Master customer records — one row per registered SwiftGear customer.</p>"
-            "<table><thead><tr><th>Column</th><th>Type</th><th>Description</th></tr></thead><tbody>"
-            "<tr><td>id</td><td>uuid</td><td>Primary key. Matches <code>customer_id</code> in <code>sales_transaction_ledger.orders</code> for cross-domain joins.</td></tr>"
-            "<tr><td>full_name</td><td>text</td><td>Customer full name (PII).</td></tr>"
-            "<tr><td>email</td><td>text</td><td>Customer email address (PII).</td></tr>"
-            "<tr><td>acquired_by</td><td>integer</td><td>Internal admin ID of the staff member who acquired this customer. <strong>Do not join this to <code>customers.id</code></strong> — it is not a customer reference.</td></tr>"
-            "<tr><td>signup_date</td><td>date</td><td>Date the customer registered.</td></tr>"
-            "</tbody></table>"
-            "<p></p>"
-            "<h4>web_sessions</h4>"
-            "<p>Anonymous web traffic logs. Cannot be directly joined to customer records.</p>"
-            "<table><thead><tr><th>Column</th><th>Type</th><th>Description</th></tr></thead><tbody>"
-            "<tr><td>session_id</td><td>uuid</td><td>Primary key.</td></tr>"
-            "<tr><td>user_id</td><td>uuid</td><td>Anonymous session UUID — <strong>not</strong> a customer ID. Cannot be joined to <code>customers.id</code> without a session-identity mapping table (not available in this product).</td></tr>"
-            "<tr><td>page_path</td><td>text</td><td>URL path viewed during the session.</td></tr>"
-            "<tr><td>viewed_at</td><td>timestamp</td><td>Session timestamp.</td></tr>"
-            "</tbody></table>"
-            "<p></p>"
             "<h3>Semantic Model Highlights</h3>"
             "<ul>"
             "<li><code>acquired_by</code> is an internal admin ID — never join it to <code>customers.id</code> or any customer-facing key.</li>"
@@ -550,10 +474,6 @@ OUTPUT_PORTS: dict[str, Any] = {
 
 # ---------------------------------------------------------------------------
 # Data models per output port
-#
-# Published as BitOL data contracts so the Data Model tab is populated. The
-# quirks this demo relies on (cents, abbreviations, implicit filters, the stale
-# calculated_total) are documented here as well as in the About page.
 # ---------------------------------------------------------------------------
 
 DATA_MODELS: dict[str, Any] = {
@@ -948,8 +868,6 @@ DATA_MODELS: dict[str, Any] = {
 
 # ---------------------------------------------------------------------------
 # Data quality per output port
-#
-# Statuses deliberately differ so the badge shows something during a demo.
 # ---------------------------------------------------------------------------
 
 DATA_QUALITY: dict[str, Any] = {

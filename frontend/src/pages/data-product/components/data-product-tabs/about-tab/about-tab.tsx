@@ -10,7 +10,7 @@ import {
     useUpdateDataProductAboutMutation,
 } from '@/store/api/services/generated/dataProductsApi.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
-import { dispatchMessage } from '@/utils/feedback.ts';
+import { saveAbout } from '@/utils/about.helper.ts';
 
 type Props = {
     dataProductId: string;
@@ -42,22 +42,8 @@ export function AboutTab({ dataProductId }: Props) {
         return <Empty />;
     }
 
-    async function handleSubmit(content: string) {
-        if (!canEdit) {
-            dispatchMessage({ content: t('You do not have permission to edit this about section'), type: 'error' });
-            throw new Error('Not allowed to edit the about section');
-        }
-        try {
-            await updateDataProductAbout({
-                id: dataProductId,
-                dataProductAboutUpdate: { about: content },
-            }).unwrap();
-            dispatchMessage({ content: t('About section successfully updated'), type: 'success' });
-        } catch (error) {
-            dispatchMessage({ content: t('Could not update about section'), type: 'error' });
-            throw error;
-        }
-    }
+    const handleSubmit = (about: string) =>
+        saveAbout(updateDataProductAbout({ id: dataProductId, dataProductAboutUpdate: { about } }).unwrap(), t);
 
     return (
         <TextEditor

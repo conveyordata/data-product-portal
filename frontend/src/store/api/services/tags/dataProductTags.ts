@@ -20,7 +20,6 @@ export const dataProductTags = {
             })) ?? []),
             ...(arg.input_ports?.output_ports?.map((op) => ({ type: TagTypes.History, id: op.output_port_id })) ?? []),
             { type: TagTypes.MyRequests },
-            { type: TagTypes.Graph },
         ],
     },
     removeDataProduct: {
@@ -28,7 +27,6 @@ export const dataProductTags = {
             { type: TagTypes.DataProduct, id: STATIC_TAG_ID.LIST },
             { type: TagTypes.DataProduct, id },
             { type: TagTypes.DataProductOutputPorts, id },
-            { type: TagTypes.Graph, id: STATIC_TAG_ID.LIST },
         ],
     },
     updateDataProduct: {
@@ -38,9 +36,8 @@ export const dataProductTags = {
                       { type: TagTypes.DataProduct, id: STATIC_TAG_ID.LIST },
                       { type: TagTypes.DataProduct, id: resp?.id },
                       { type: TagTypes.DataProductRolledUpTags, id: resp?.id },
-                      { type: TagTypes.Graph },
                   ]
-                : [{ type: TagTypes.DataProduct, id: STATIC_TAG_ID.LIST }, { type: TagTypes.Graph }],
+                : [{ type: TagTypes.DataProduct, id: STATIC_TAG_ID.LIST }],
     },
     updateDataProductAbout: {
         invalidatesTags: (resp) =>
@@ -91,7 +88,6 @@ export const dataProductTags = {
             { type: TagTypes.DataProductInputPorts, id: arg.id },
             { type: TagTypes.MyRequests },
             { type: TagTypes.PendingAction, id: STATIC_TAG_ID.LIST },
-            { type: TagTypes.Graph },
         ],
     },
     revokeInputPortForDataProduct: {
@@ -102,7 +98,6 @@ export const dataProductTags = {
             { type: TagTypes.History, id: arg.id },
             { type: TagTypes.DataProductInputPorts, id: arg.id },
             { type: TagTypes.OutputPortInputPorts, id: arg.outputPortId },
-            { type: TagTypes.Graph },
         ],
     },
     cancelInputPortForDataProduct: {
@@ -114,7 +109,6 @@ export const dataProductTags = {
             { type: TagTypes.DataProductInputPorts, id: arg.id },
             { type: TagTypes.PendingAction, id: STATIC_TAG_ID.LIST },
             { type: TagTypes.OutputPortInputPorts, id: arg.outputPortId },
-            { type: TagTypes.Graph },
         ],
     },
     renewInputPortForDataProduct: {
@@ -140,8 +134,5 @@ export const dataProductTags = {
     },
     setValueForDataProduct: {
         invalidatesTags: (_, __, arg) => [{ type: TagTypes.DataProductSettings, id: arg.id }],
-    },
-    getDataProductGraphData: {
-        providesTags: (_, __, { id }) => [{ type: TagTypes.Graph, id }],
     },
 } satisfies EndpointDefinitions;

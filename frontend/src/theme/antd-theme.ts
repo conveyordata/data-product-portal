@@ -8,7 +8,8 @@ const token = getDesignToken();
 
 const colorPrimary = '#543EDC';
 const primaryPalette = generate(colorPrimary);
-const primaryTint = (alpha: number) => new FastColor(colorPrimary).setA(alpha).onBackground('#FFF').toHexString();
+const primaryTint = (alpha: number) =>
+    new FastColor(colorPrimary).setA(alpha).onBackground(token.colorBgContainer).toHexString();
 
 const spacingTokens = {
     sizeUnit: 4,

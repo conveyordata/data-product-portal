@@ -48,9 +48,6 @@ const invalidateOutputPortAsInputPort = (
         type: TagTypes.PendingAction,
         id: STATIC_TAG_ID.LIST,
     },
-    {
-        type: TagTypes.Graph,
-    },
 ];
 
 export const dataProductsOutputPortsInputPortsTags = {

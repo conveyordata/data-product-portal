@@ -69,7 +69,6 @@ export const dataProductTechnicalAssetsTags = {
             ...invalidateTechnicalAssetOutputPort(dataProductId, outputPortId),
             ...invalidateTechnicalAsset(dataProductId, technical_asset_id),
             { type: TagTypes.PendingAction, id: STATIC_TAG_ID.LIST },
-            { type: TagTypes.Graph },
         ],
     },
     denyOutputPortTechnicalAssetLink: {
@@ -81,7 +80,6 @@ export const dataProductTechnicalAssetsTags = {
             ...invalidateTechnicalAssetOutputPort(dataProductId, outputPortId),
             ...invalidateTechnicalAsset(dataProductId, technical_asset_id),
             { type: TagTypes.PendingAction, id: STATIC_TAG_ID.LIST },
-            { type: TagTypes.Graph },
         ],
     },
     linkOutputPortToTechnicalAsset: {
@@ -96,7 +94,6 @@ export const dataProductTechnicalAssetsTags = {
             ...invalidateTechnicalAssetOutputPort(dataProductId, outputPortId),
             ...invalidateTechnicalAsset(dataProductId, technical_asset_id),
             { type: TagTypes.PendingAction, id: STATIC_TAG_ID.LIST },
-            { type: TagTypes.Graph },
         ],
     },
     unlinkOutputPortFromTechnicalAsset: {
@@ -108,7 +105,6 @@ export const dataProductTechnicalAssetsTags = {
             ...invalidateTechnicalAssetOutputPort(dataProductId, outputPortId),
             ...invalidateTechnicalAsset(dataProductId, technical_asset_id),
             { type: TagTypes.PendingAction, id: STATIC_TAG_ID.LIST },
-            { type: TagTypes.Graph },
         ],
     },
     createTechnicalAsset: {
@@ -117,7 +113,6 @@ export const dataProductTechnicalAssetsTags = {
                 type: TagTypes.DataProductTechnicalAssets,
                 id: dataProductId,
             },
-            { type: TagTypes.Graph },
         ],
     },
     getTechnicalAsset: {
@@ -129,13 +124,10 @@ export const dataProductTechnicalAssetsTags = {
         ],
     },
     removeTechnicalAsset: {
-        invalidatesTags: (_, __, arg) => [
-            ...invalidateTagsTechnicalAsset(_, __, arg),
-            { type: TagTypes.Graph, id: STATIC_TAG_ID.LIST },
-        ],
+        invalidatesTags: invalidateTagsTechnicalAsset,
     },
     updateTechnicalAsset: {
-        invalidatesTags: (_, __, arg) => [...invalidateTagsTechnicalAsset(_, __, arg), { type: TagTypes.Graph }],
+        invalidatesTags: invalidateTagsTechnicalAsset,
     },
     getTechnicalAssetEventHistory: {
         providesTags: (_, __, { id }) => [
@@ -147,8 +139,5 @@ export const dataProductTechnicalAssetsTags = {
     },
     updateTechnicalAssetStatus: {
         invalidatesTags: invalidateTagsTechnicalAsset,
-    },
-    getTechnicalAssetGraphData: {
-        providesTags: (_, __, { id }) => [{ type: TagTypes.Graph, id }],
     },
 } satisfies EndpointDefinitions;

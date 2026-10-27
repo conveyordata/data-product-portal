@@ -10,61 +10,49 @@ import {
     useUpdateOutputPortAboutMutation,
 } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
-import { dispatchMessage } from '@/utils/feedback.ts';
+import { saveAbout } from '@/utils/about.helper.ts';
 
 type Props = {
-    datasetId: string;
+    outputPortId: string;
     dataProductId: string;
 };
 
-export function AboutTab({ datasetId, dataProductId }: Props) {
+export function AboutTab({ outputPortId, dataProductId }: Props) {
     const { t } = useTranslation();
     const {
-        data: dataset,
-        isLoading: isLoadingDataset,
+        data: outputPort,
+        isLoading: isLoadingOutputPort,
         isFetching,
-    } = useGetOutputPortQuery({ id: datasetId, dataProductId });
+    } = useGetOutputPortQuery({ id: outputPortId, dataProductId });
     const currentUser = useSelector(selectCurrentUser);
-    const [updateDatasetAbout, { isLoading }] = useUpdateOutputPortAboutMutation();
+    const [updateOutputPortAbout, { isLoading }] = useUpdateOutputPortAboutMutation();
 
     const { data: edit_access } = useCheckAccessQuery(
         {
-            resource: datasetId,
+            resource: outputPortId,
             action: AuthorizationAction.OUTPUT_PORT__UPDATE_PROPERTIES,
         },
-        { skip: !datasetId },
+        { skip: !outputPortId },
     );
     const canEdit = edit_access?.allowed || false;
 
-    if (isLoadingDataset) {
+    if (isLoadingOutputPort) {
         return <LoadingSpinner />;
     }
 
-    if (!dataset || !currentUser) {
+    if (!outputPort || !currentUser) {
         return <Empty />;
     }
 
-    async function handleSubmit(content: string) {
-        if (!canEdit) {
-            dispatchMessage({ content: t('You do not have permission to edit this about section'), type: 'error' });
-            throw new Error('Not allowed to edit the about section');
-        }
-        try {
-            await updateDatasetAbout({
-                id: datasetId,
-                dataProductId,
-                outputPortAboutUpdate: { about: content },
-            }).unwrap();
-            dispatchMessage({ content: t('About section successfully updated'), type: 'success' });
-        } catch (error) {
-            dispatchMessage({ content: t('Could not update about section'), type: 'error' });
-            throw error;
-        }
-    }
+    const handleSubmit = (about: string) =>
+        saveAbout(
+            updateOutputPortAbout({ id: outputPortId, dataProductId, outputPortAboutUpdate: { about } }).unwrap(),
+            t,
+        );
 
     return (
         <TextEditor
-            initialContent={dataset.about}
+            initialContent={outputPort.about}
             onSubmit={handleSubmit}
             isLoading={isFetching}
             isSubmitting={isLoading}

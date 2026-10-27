@@ -8,6 +8,7 @@ import { dataProductOutputPortTags } from '@/store/api/services/tags/dataProduct
 import { dataProductTechnicalAssetsTags } from '@/store/api/services/tags/dataProductsTechicalAssetsTags.ts';
 import { dataProductTags } from '@/store/api/services/tags/dataProductTags.ts';
 import { explorationTags } from '@/store/api/services/tags/explorationTags.ts';
+import { graphTags } from '@/store/api/services/tags/graphTags.ts';
 import { outputPortSearchTags } from '@/store/api/services/tags/outputPortsSearchApi.ts';
 import { usersNotificationsTags } from '@/store/api/services/tags/usersNotificationsTags.ts';
 import { usersTags } from '@/store/api/services/tags/usersTags.ts';
@@ -29,10 +30,6 @@ api.enhanceEndpoints({
                 { type: TagTypes.GlobalRoleAssignments, id: STATIC_TAG_ID.LIST },
                 { type: TagTypes.CurrentUser },
             ],
-        },
-
-        getGraphData: {
-            providesTags: [{ type: TagTypes.Graph, id: STATIC_TAG_ID.LIST }],
         },
 
         getRoles: {
@@ -334,4 +331,4 @@ api.enhanceEndpoints({
         ...configurationAccessModesTags,
         ...outputPortSearchTags,
     },
-});
+}).enhanceEndpoints({ endpoints: graphTags });
