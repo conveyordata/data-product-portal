@@ -56,7 +56,7 @@
         "dayjs": "^1.11.23",
         "elkjs": "^0.12.0",
         "esbuild-runner": "^2.2.2",
-        "framer-motion": "^14.4.0",
+        "framer-motion": "^14.6.0",
         "i18next": "^26.5.3",
         "i18next-http-backend": "^4.0.4",
         "js-sha256": "^1.0.0",
