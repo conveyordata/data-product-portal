@@ -63,8 +63,8 @@ export function DataProductTabs({ dataProductId }: Props) {
     }, [openTour, dataProductId, posthog]);
 
     const [setSeenTour] = useMarkTourAsSeenMutation();
-    const { data: { events: dataProductHistoryData = [] } = {}, isLoading: isFetchingDataProductHistory } =
-        useGetDataProductEventHistoryQuery(dataProductId, { skip: !dataProductId });
+    const historyQuery = useGetDataProductEventHistoryQuery(dataProductId, { skip: !dataProductId });
+    const { data: { events: dataProductHistoryData = [] } = {} } = historyQuery;
 
     const { activeTab, onTabChange } = useTabParam(TabKeys.About, Object.values(TabKeys));
 
@@ -121,12 +121,12 @@ export function DataProductTabs({ dataProductId }: Props) {
                         id={dataProductId}
                         type={EventReferenceEntity.DataProduct}
                         history={dataProductHistoryData}
-                        isFetching={isFetchingDataProductHistory}
+                        query={historyQuery}
                     />
                 ),
             },
         ];
-    }, [dataProductId, t, dataProductHistoryData, isFetchingDataProductHistory]);
+    }, [dataProductId, t, dataProductHistoryData, historyQuery]);
 
     const steps: TourProps['steps'] = useMemo(() => {
         return [

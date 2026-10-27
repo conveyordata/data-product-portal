@@ -34,8 +34,11 @@ export function TechnicalAssetTabs({ technicalAssetId, dataProductId, isLoading 
     const location = useLocation();
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState(location.hash.slice(1) || TabKeys.OutputPorts);
-    const { data: { events: dataOutputHistoryData = [] } = {}, isLoading: isFetchingDataOutputHistory } =
-        useGetTechnicalAssetEventHistoryQuery({ id: technicalAssetId, dataProductId }, { skip: !technicalAssetId });
+    const historyQuery = useGetTechnicalAssetEventHistoryQuery(
+        { id: technicalAssetId, dataProductId },
+        { skip: !technicalAssetId },
+    );
+    const { data: { events: dataOutputHistoryData = [] } = {} } = historyQuery;
 
     useEffect(() => {
         const hash = location.hash.slice(1);
@@ -77,12 +80,12 @@ export function TechnicalAssetTabs({ technicalAssetId, dataProductId, isLoading 
                         id={technicalAssetId}
                         type={EventReferenceEntity.DataOutput}
                         history={dataOutputHistoryData}
-                        isFetching={isFetchingDataOutputHistory}
+                        query={historyQuery}
                     />
                 ),
             },
         ];
-    }, [technicalAssetId, t, dataOutputHistoryData, isFetchingDataOutputHistory, dataProductId]);
+    }, [technicalAssetId, t, dataOutputHistoryData, historyQuery, dataProductId]);
 
     if (isLoading) {
         return <LoadingSpinner />;

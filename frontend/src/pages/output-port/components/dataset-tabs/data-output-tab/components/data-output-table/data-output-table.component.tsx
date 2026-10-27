@@ -1,7 +1,9 @@
-import { Flex, Table, type TableColumnsType, type TableProps } from 'antd';
+import { Flex, type TableColumnsType, type TableProps } from 'antd';
 import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-
+import type { EmptyStateFilter, EmptyStateQuery } from '@/components/empty-state/empty-state.component.tsx';
+import { TechnicalAssetOutlined } from '@/components/icons';
+import { ListTable } from '@/components/list-table/list-table.component.tsx';
 import { TABLE_SUBSECTION_PAGINATION } from '@/constants/table.constants.ts';
 import { useTablePagination } from '@/hooks/use-table-pagination.tsx';
 import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
@@ -18,10 +20,11 @@ type Props = {
     dataProductId: string;
     datasetId: string;
     dataOutputs: TechnicalAssetLink[];
-    isLoading?: boolean;
+    query: EmptyStateQuery;
+    filter?: EmptyStateFilter;
 };
 
-export function DataOutputTable({ dataProductId, datasetId, dataOutputs, isLoading }: Props) {
+export function DataOutputTable({ dataProductId, datasetId, dataOutputs, query, filter }: Props) {
     const { t } = useTranslation();
     const { data: { plugins } = { plugins: [] } } = useGetPluginsQuery();
     const {
@@ -106,13 +109,20 @@ export function DataOutputTable({ dataProductId, datasetId, dataOutputs, isLoadi
 
     return (
         <Flex className={styles.datasetListContainer}>
-            <Table<TechnicalAssetLink>
-                loading={isLoading}
-                className={styles.datasetListTable}
-                columns={columns}
+            <ListTable<TechnicalAssetLink>
+                query={query}
                 dataSource={dataOutputs}
-                rowKey={({ id }) => id}
+                columns={columns}
+                subject={t('Technical Assets')}
+                emptyState={{
+                    icon: <TechnicalAssetOutlined />,
+                    title: t('No Technical Assets yet'),
+                    description: t('Link a Technical Asset to expose the data behind this Output Port.'),
+                }}
                 onChange={onChange}
+                filter={filter}
+                className={styles.datasetListTable}
+                rowKey={({ id }) => id}
                 pagination={{
                     ...pagination,
                     placement: ['topEnd'],

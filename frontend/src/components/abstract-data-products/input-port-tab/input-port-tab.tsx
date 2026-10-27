@@ -3,13 +3,14 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { InputPortTable } from '@/components/abstract-data-products/input-port-tab/components/input-port-table/input-port-table.component.tsx';
+import { type EmptyStateQuery, searchFilter } from '@/components/empty-state/empty-state.component.tsx';
 import type { AbstractDataProductInputPort as InputPort } from '@/store/api/services/generated/dataProductsApi.ts';
 import { ApplicationPaths } from '@/types/navigation.ts';
 
 type Props = {
     canRequestAccess: boolean;
     canRemoveAccess: boolean;
-    loadingInputPorts: boolean;
+    query: EmptyStateQuery;
     handleCancel: (outputPortId: string) => Promise<void>;
     handleRevoke: (outputPortId: string) => Promise<void>;
     handleRenew: (outputPortId: string) => Promise<void>;
@@ -27,7 +28,7 @@ function filterInputPorts(input_ports: InputPort[], searchTerm: string) {
 }
 
 export function InputPortTab({
-    loadingInputPorts,
+    query,
     inputPorts,
     canRequestAccess,
     handleCancel,
@@ -47,6 +48,7 @@ export function InputPortTab({
                 <Input.Search
                     placeholder={t('Filter by name')}
                     allowClear
+                    value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                 />
                 <Link to={ApplicationPaths.Marketplace}>
@@ -56,13 +58,14 @@ export function InputPortTab({
                 </Link>
             </Flex>
             <InputPortTable
-                loadingInputPorts={loadingInputPorts}
+                query={query}
                 inputPorts={filteredDatasets}
                 handleCancel={handleCancel}
                 handleRevoke={handleRevoke}
                 handleRenew={handleRenew}
                 canRemoveAccess={canRemoveAccess}
                 canRequestAccess={canRequestAccess}
+                filter={searchFilter(searchTerm, setSearchTerm)}
             />
         </Flex>
     );

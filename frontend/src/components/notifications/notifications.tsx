@@ -2,6 +2,8 @@ import { BellOutlined, CheckOutlined } from '@ant-design/icons';
 import { Badge, Button, Flex, Popover, Tag, Typography, theme } from 'antd';
 import { type ReactNode, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { EmptyState, emptyStateQueryProps, isAwaitingData } from '@/components/empty-state/empty-state.component.tsx';
+import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
 import {
     type GetUserNotificationsResponseItem,
     useGetUserNotificationsQuery,
@@ -21,7 +23,8 @@ export function Notifications() {
     } = theme.useToken();
     const { t } = useTranslation();
 
-    const { data: { notifications = [] } = {} } = useGetUserNotificationsQuery();
+    const notificationsQuery = useGetUserNotificationsQuery();
+    const { data: { notifications = [] } = {} } = notificationsQuery;
 
     const [removeNotification] = useRemoveUserNotificationMutation();
     const [removeAllNotifications] = useRemoveAllUserNotificationsMutation();
@@ -137,10 +140,18 @@ export function Notifications() {
             );
         }
 
+        if (isAwaitingData(notificationsQuery)) return <LoadingSpinner />;
+
         return (
-            <Typography.Text className={styles.emptyLabel}>{t('You currently have no notifications')}</Typography.Text>
+            <EmptyState
+                size="small"
+                icon={<BellOutlined />}
+                title={t('No notifications')}
+                description={t('Updates about your requests and the things you own appear here.')}
+                {...emptyStateQueryProps(notificationsQuery)}
+            />
         );
-    }, [notificationItems?.length, t, handleRemoveAllNotifications]);
+    }, [notificationItems?.length, t, handleRemoveAllNotifications, notificationsQuery]);
 
     return (
         <Flex>

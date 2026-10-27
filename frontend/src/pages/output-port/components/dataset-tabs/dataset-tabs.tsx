@@ -45,8 +45,8 @@ type Props = {
 export function DatasetTabs({ datasetId, dataProductId, isLoading }: Props) {
     const { t } = useTranslation();
     const posthog = usePostHog();
-    const { data: { events: datasetHistoryData = [] } = {}, isLoading: isFetchingDatasetHistory } =
-        useGetOutputPortsEventHistoryQuery({ id: datasetId, dataProductId }, { skip: !datasetId });
+    const historyQuery = useGetOutputPortsEventHistoryQuery({ id: datasetId, dataProductId }, { skip: !datasetId });
+    const { data: { events: datasetHistoryData = [] } = {} } = historyQuery;
     const { activeTab, onTabChange } = useTabParam(TabKeys.About, Object.values(TabKeys), (tab) =>
         posthog.capture(PosthogEvents.OUTPUT_PORT_TAB, { tab }),
     );
@@ -117,12 +117,12 @@ export function DatasetTabs({ datasetId, dataProductId, isLoading }: Props) {
                         id={datasetId}
                         type={EventReferenceEntity.Dataset}
                         history={datasetHistoryData}
-                        isFetching={isFetchingDatasetHistory}
+                        query={historyQuery}
                     />
                 ),
             },
         ];
-    }, [datasetId, t, datasetHistoryData, isFetchingDatasetHistory, dataProductId]);
+    }, [datasetId, t, datasetHistoryData, historyQuery, dataProductId]);
 
     if (isLoading) {
         return <LoadingSpinner />;

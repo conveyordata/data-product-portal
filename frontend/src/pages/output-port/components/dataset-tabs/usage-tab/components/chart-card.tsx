@@ -1,25 +1,37 @@
-import { Card, Empty, Flex } from 'antd';
+import { BarChartOutlined } from '@ant-design/icons';
+import { Card } from 'antd';
 import type { ReactNode } from 'react';
-
+import { useTranslation } from 'react-i18next';
+import {
+    EmptyState,
+    type EmptyStateQuery,
+    emptyStateQueryProps,
+    hasFailed,
+    isAwaitingData,
+} from '@/components/empty-state/empty-state.component.tsx';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
 
 type ChartCardProps = {
     title: string;
-    isLoading: boolean;
+    query: EmptyStateQuery;
     hasData: boolean;
-    emptyDescription: string;
     children: ReactNode;
 };
 
-export function ChartCard({ title, isLoading, hasData, emptyDescription, children }: ChartCardProps) {
+export function ChartCard({ title, query, hasData, children }: ChartCardProps) {
+    const { t } = useTranslation();
     return (
         <Card title={title}>
-            {isLoading ? (
+            {isAwaitingData(query) ? (
                 <LoadingSpinner />
-            ) : !hasData ? (
-                <Flex align="center" justify="center">
-                    <Empty description={emptyDescription} />
-                </Flex>
+            ) : hasFailed(query) || !hasData ? (
+                <EmptyState
+                    size="small"
+                    icon={<BarChartOutlined />}
+                    title={t('No usage recorded')}
+                    description={t('Queries against this Output Port in the selected period appear here.')}
+                    {...emptyStateQueryProps(query)}
+                />
             ) : (
                 children
             )}

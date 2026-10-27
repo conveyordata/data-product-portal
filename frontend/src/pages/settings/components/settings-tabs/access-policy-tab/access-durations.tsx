@@ -61,7 +61,7 @@ const AUTO_SAVE_DELAY = 3000; // 3 seconds
 
 export default function AccessDurations() {
     const { t } = useTranslation();
-    const { data: { access_durations: accessDurations } = {} } = useGetAllAccessDurationsQuery();
+    const { data: { access_durations: accessDurations } = {}, isLoading } = useGetAllAccessDurationsQuery();
     const [policies, setPolicies] = useState<ConsumerPolicy[]>([]);
     const [updateAccessDuration] = useUpdateAccessDurationMutation();
 
@@ -222,6 +222,7 @@ export default function AccessDurations() {
                 rowKey="key"
                 pagination={false}
                 tableLayout="fixed"
+                loading={isLoading}
                 size="small"
             />
         </Flex>

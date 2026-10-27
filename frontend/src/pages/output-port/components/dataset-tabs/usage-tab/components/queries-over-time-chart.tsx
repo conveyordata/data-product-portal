@@ -2,22 +2,18 @@ import { Area } from '@ant-design/charts';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import type { EmptyStateQuery } from '@/components/empty-state/empty-state.component.tsx';
 import { ChartCard } from './chart-card';
 import type { ChartDataPoint, ColorScaleConfig } from './chart-data.utils';
 
 type QueriesOverTimeChartProps = {
     data: ChartDataPoint[];
-    isLoading: boolean;
+    query: EmptyStateQuery;
     hasData: boolean;
     colorScaleConfig: ColorScaleConfig;
 };
 
-export default function QueriesOverTimeChart({
-    data,
-    isLoading,
-    hasData,
-    colorScaleConfig,
-}: QueriesOverTimeChartProps) {
+export default function QueriesOverTimeChart({ data, query, hasData, colorScaleConfig }: QueriesOverTimeChartProps) {
     const { t } = useTranslation();
 
     const config = useMemo(() => {
@@ -53,12 +49,7 @@ export default function QueriesOverTimeChart({
     }, [data, t, colorScaleConfig]);
 
     return (
-        <ChartCard
-            title={t('Queries over time')}
-            isLoading={isLoading}
-            hasData={hasData}
-            emptyDescription={t('No usage data available for this time range')}
-        >
+        <ChartCard title={t('Queries over time')} query={query} hasData={hasData}>
             <Area {...config} />
         </ChartCard>
     );

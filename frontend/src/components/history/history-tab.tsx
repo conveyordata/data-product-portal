@@ -1,8 +1,10 @@
-import { Flex, Input, Table, type TableProps } from 'antd';
-import type { ColumnsType } from 'antd/es/table';
+import { HistoryOutlined } from '@ant-design/icons';
+import { Flex, Input, type TableColumnsType, type TableProps } from 'antd';
 import type { TFunction } from 'i18next';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { type EmptyStateQuery, searchFilter } from '@/components/empty-state/empty-state.component.tsx';
+import { ListTable } from '@/components/list-table/list-table.component.tsx';
 import { HISTORY_PAGINATION } from '@/constants/table.constants';
 import { useTablePagination } from '@/hooks/use-table-pagination';
 import type { GetEventHistoryResponseItem } from '@/store/api/services/generated/dataProductsApi.ts';
@@ -42,9 +44,9 @@ type Props = {
     id: string;
     type: EventReferenceEntity;
     history?: GetEventHistoryResponseItem[];
-    isFetching: boolean;
+    query: EmptyStateQuery;
 };
-export function HistoryTab({ id, type, history = [], isFetching }: Props) {
+export function HistoryTab({ id, type, history = [], query }: Props) {
     const { t } = useTranslation();
     const [searchTerm, setSearchTerm] = useState<string>('');
 
@@ -63,20 +65,28 @@ export function HistoryTab({ id, type, history = [], isFetching }: Props) {
     const columns = useMemo(
         () => getHistoryColumns({ t, resourceId: id, type }),
         [t, id, type],
-    ) as ColumnsType<GetEventHistoryResponseItem>;
+    ) as TableColumnsType<GetEventHistoryResponseItem>;
 
     return (
         <Flex vertical gap="middle">
             <Input.Search
                 placeholder={t('Search event history')}
                 allowClear
+                value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
             />
-            <Table<GetEventHistoryResponseItem>
-                loading={isFetching}
+            <ListTable<GetEventHistoryResponseItem>
+                query={query}
                 dataSource={filteredHistory}
                 columns={columns}
+                subject={t('events')}
+                emptyState={{
+                    icon: <HistoryOutlined />,
+                    title: t('No history yet'),
+                    description: t('This tab lists every change made here.'),
+                }}
                 onChange={onChange}
+                filter={searchFilter(searchTerm, setSearchTerm)}
                 size="small"
                 pagination={{
                     ...pagination,

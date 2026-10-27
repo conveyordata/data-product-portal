@@ -1,6 +1,8 @@
-import { Button, Flex, Table, Typography } from 'antd';
+import { SettingOutlined } from '@ant-design/icons';
+import { Button, Flex, Typography } from 'antd';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { ListTable } from '@/components/list-table/list-table.component.tsx';
 
 import { useModal } from '@/hooks/use-modal.tsx';
 import {
@@ -20,7 +22,8 @@ type Props = {
 
 export function DataProductSettingsTable({ scope }: Props) {
     const { t } = useTranslation();
-    const { data: dataProductSettings = undefined, isFetching } = useGetDataProductsSettingsQuery();
+    const settingsQuery = useGetDataProductsSettingsQuery();
+    const { data: dataProductSettings = undefined } = settingsQuery;
 
     const filteredSettings = useMemo(() => {
         return dataProductSettings?.data_product_settings.filter((setting) => setting.scope === scope) ?? [];
@@ -75,11 +78,17 @@ export function DataProductSettingsTable({ scope }: Props) {
                     {t('Add custom setting')}
                 </Button>
             </Flex>
-            <Table<DataProductSettingsGetItem>
+            <ListTable<DataProductSettingsGetItem>
+                query={settingsQuery}
                 dataSource={filteredSettings}
                 columns={columns}
+                subject={t('Custom Settings')}
+                emptyState={{
+                    icon: <SettingOutlined />,
+                    title: t('No Custom Settings yet'),
+                    description: t('Custom settings add your own fields to Data Products and Output Ports.'),
+                }}
                 rowKey={(record) => record.id}
-                loading={isFetching}
                 rowHoverable
                 size="small"
             />

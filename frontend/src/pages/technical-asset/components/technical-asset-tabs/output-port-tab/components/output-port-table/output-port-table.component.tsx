@@ -1,7 +1,9 @@
-import { Flex, Skeleton, Table, type TableColumnsType, type TableProps } from 'antd';
+import { Flex, Skeleton, type TableColumnsType, type TableProps } from 'antd';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-
+import { type EmptyStateFilter, hasFailed } from '@/components/empty-state/empty-state.component.tsx';
+import { OutputPortOutlined } from '@/components/icons';
+import { ListTable } from '@/components/list-table/list-table.component.tsx';
 import { TABLE_SUBSECTION_PAGINATION } from '@/constants/table.constants.ts';
 import { useTablePagination } from '@/hooks/use-table-pagination.tsx';
 import {
@@ -15,13 +17,15 @@ type Props = {
     dataProductId: string;
     dataOutputId: string;
     datasets: OutputPortLink[];
+    filter?: EmptyStateFilter;
 };
-export function DatasetTable({ dataProductId, dataOutputId, datasets }: Props) {
+export function DatasetTable({ dataProductId, dataOutputId, datasets, filter }: Props) {
     const { t } = useTranslation();
-    const { data: dataOutput, isLoading: isLoadingDataOutput } = useGetTechnicalAssetQuery({
+    const technicalAssetQuery = useGetTechnicalAssetQuery({
         id: dataOutputId,
         dataProductId,
     });
+    const { data: dataOutput } = technicalAssetQuery;
 
     const { pagination, handlePaginationChange } = useTablePagination(datasets, {
         initialPagination: TABLE_SUBSECTION_PAGINATION,
@@ -38,17 +42,24 @@ export function DatasetTable({ dataProductId, dataOutputId, datasets }: Props) {
         });
     }, [dataProductId, t]);
 
-    if (!dataOutput) return <Skeleton />;
+    if (!dataOutput && !hasFailed(technicalAssetQuery)) return <Skeleton />;
 
     return (
         <Flex className={styles.datasetListContainer}>
-            <Table<OutputPortLink>
-                loading={isLoadingDataOutput}
-                className={styles.datasetListTable}
-                columns={columns}
+            <ListTable<OutputPortLink>
+                query={technicalAssetQuery}
                 dataSource={datasets}
-                rowKey={({ id }) => id}
+                columns={columns}
+                subject={t('Output Ports')}
+                emptyState={{
+                    icon: <OutputPortOutlined />,
+                    title: t('No Output Ports yet'),
+                    description: t('Link this Technical Asset to an Output Port to share its data.'),
+                }}
                 onChange={onChange}
+                filter={filter}
+                className={styles.datasetListTable}
+                rowKey={({ id }) => id}
                 pagination={{
                     ...pagination,
                     placement: ['topEnd'],

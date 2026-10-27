@@ -1,6 +1,8 @@
-import { Button, Flex, Space, Table, Typography } from 'antd';
+import { TagsOutlined } from '@ant-design/icons';
+import { Button, Flex, Space, Typography } from 'antd';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { ListTable } from '@/components/list-table/list-table.component.tsx';
 
 import { useModal } from '@/hooks/use-modal';
 import {
@@ -15,7 +17,8 @@ import { getTagsTableColumns } from './tags-table-columns';
 
 export function TagsTable() {
     const { t } = useTranslation();
-    const { data: tags, isFetching } = useGetTagsQuery();
+    const tagsQuery = useGetTagsQuery();
+    const { data: tags } = tagsQuery;
     const { isVisible, handleOpen, handleClose } = useModal();
     const [onRemoveTag, { isLoading: isRemoving }] = useRemoveTagMutation();
     const [mode, setMode] = useState<'create' | 'edit'>('create');
@@ -45,11 +48,18 @@ export function TagsTable() {
                     </Button>
                 </Space>
             </Flex>
-            <Table<TagsGetItem>
+            <ListTable<TagsGetItem>
+                query={tagsQuery}
                 dataSource={tags?.tags ?? []}
                 columns={columns}
+                subject={t('Tags')}
+                emptyState={{
+                    icon: <TagsOutlined />,
+                    title: t('No Tags yet'),
+                    description: t('Tags help people find related Data Products and Output Ports.'),
+                }}
+                loading={isRemoving}
                 rowKey={(record) => record.id}
-                loading={isFetching || isRemoving}
                 rowHoverable
                 size="small"
             />

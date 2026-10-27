@@ -1,6 +1,8 @@
-import { Button, Flex, Table, Typography } from 'antd';
+import { ApartmentOutlined } from '@ant-design/icons';
+import { Button, Flex, Typography } from 'antd';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { ListTable } from '@/components/list-table/list-table.component.tsx';
 
 import { useModal } from '@/hooks/use-modal';
 import {
@@ -16,7 +18,8 @@ import { getDomainTableColumns } from './domain-table-columns';
 
 export function DomainTable() {
     const { t } = useTranslation();
-    const { data: { domains = [] } = {}, isFetching } = useGetDomainsQuery();
+    const domainsQuery = useGetDomainsQuery();
+    const { data: { domains = [] } = {} } = domainsQuery;
     const { isVisible, handleOpen, handleClose } = useModal();
     const {
         isVisible: migrateModalVisible,
@@ -71,11 +74,17 @@ export function DomainTable() {
                     {t('Add Domain')}
                 </Button>
             </Flex>
-            <Table<GetDomainsItem>
+            <ListTable<GetDomainsItem>
+                query={domainsQuery}
                 dataSource={domains}
                 columns={columns}
+                subject={t('Domains')}
+                emptyState={{
+                    icon: <ApartmentOutlined />,
+                    title: t('No Domains yet'),
+                    description: t('Domains group Data Products by the part of the business that owns them.'),
+                }}
                 rowKey={(record) => record.id}
-                loading={isFetching}
                 rowHoverable
                 rowClassName={() => 'editable-row'}
                 size="small"

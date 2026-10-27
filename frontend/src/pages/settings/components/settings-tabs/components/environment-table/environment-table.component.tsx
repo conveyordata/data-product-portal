@@ -1,5 +1,7 @@
-import { Flex, Table, Typography } from 'antd';
+import { CloudServerOutlined } from '@ant-design/icons';
+import { Flex, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
+import { ListTable } from '@/components/list-table/list-table.component.tsx';
 
 import {
     type EnvironmentGetItem,
@@ -11,7 +13,8 @@ import { getEnvironmentTableColumns } from './environment-table-columns';
 
 export function EnvironmentTable() {
     const { t } = useTranslation();
-    const { data, isFetching, refetch } = useGetEnvironmentsQuery();
+    const environmentsQuery = useGetEnvironmentsQuery();
+    const { data, refetch } = environmentsQuery;
     const [updateIsGlobal, { isLoading: isUpdating }] = useUpdateEnvironmentIsGlobalMutation();
 
     const handleToggleGlobal = async (environment: EnvironmentGetItem, isGlobal: boolean) => {
@@ -28,11 +31,18 @@ export function EnvironmentTable() {
     return (
         <Flex vertical gap="large">
             <Typography.Title level={3}>{t('Environments')}</Typography.Title>
-            <Table<EnvironmentGetItem>
+            <ListTable<EnvironmentGetItem>
+                query={environmentsQuery}
                 dataSource={data?.environments ?? []}
                 columns={columns}
+                subject={t('Environments')}
+                emptyState={{
+                    icon: <CloudServerOutlined />,
+                    title: t('No Environments yet'),
+                    description: t('Environments are the places data lands, such as development and production.'),
+                }}
+                loading={isUpdating}
                 rowKey={(record) => record.id}
-                loading={isFetching || isUpdating}
                 rowHoverable
                 size="small"
             />

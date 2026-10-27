@@ -1,8 +1,7 @@
-import { QuestionCircleOutlined } from '@ant-design/icons';
+import { QuestionCircleOutlined, SettingOutlined } from '@ant-design/icons';
 import {
     Descriptions,
     type DescriptionsProps,
-    Empty,
     Flex,
     Form,
     type FormProps,
@@ -15,7 +14,7 @@ import {
 } from 'antd';
 import { type ReactElement, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-
+import { EmptyState, hasFailed } from '@/components/empty-state/empty-state.component.tsx';
 import { DESCRIPTIONS_LABEL_WIDTH, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants';
 import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
 import {
@@ -51,17 +50,20 @@ interface DataProductSettingValueForm {
 export function DataProductSettings({ id, scope, dataProductId }: Props) {
     const { t } = useTranslation();
     const { token } = theme.useToken();
+    const dataProductValuesQuery = useGetDataProductSettingsQuery(id || '', {
+        skip: scope !== 'dataproduct',
+    });
     const { data: { data_product_settings: dataProductSettings = [] } = {}, isFetching: isFetchingDP } =
-        useGetDataProductSettingsQuery(id || '', {
-            skip: scope !== 'dataproduct',
-        });
-    const { data: outputPort, isFetching: isFetchingDS } = useGetOutputPortQuery(
+        dataProductValuesQuery;
+    const outputPortQuery = useGetOutputPortQuery(
         { id: id, dataProductId: dataProductId ?? '' },
         {
             skip: scope !== 'dataset' || !dataProductId,
         },
     );
-    const { data: settings, isFetching } = useGetDataProductsSettingsQuery();
+    const { data: outputPort, isFetching: isFetchingDS } = outputPortQuery;
+    const settingsQuery = useGetDataProductsSettingsQuery();
+    const { data: settings, isFetching } = settingsQuery;
     const filteredSettings = useMemo(() => {
         return settings?.data_product_settings.filter((setting) => setting.scope === scope);
     }, [scope, settings]);
@@ -245,7 +247,27 @@ export function DataProductSettings({ id, scope, dataProductId }: Props) {
         );
     }, [updatedSettings, t, token]);
     const isLoading = isFetching || isFetchingDP || isFetchingDS;
-    if (!isLoading && updatedSettings.length === 0) return <Empty description="No settings to show" />;
+    // Without the stored values the form would present each setting's default as if it were saved.
+    const failedQueries = [settingsQuery, scope === 'dataproduct' ? dataProductValuesQuery : outputPortQuery].filter(
+        hasFailed,
+    );
+    if (failedQueries.length > 0 || (!isLoading && updatedSettings.length === 0)) {
+        return (
+            <EmptyState
+                icon={<SettingOutlined />}
+                title={t('No Custom Settings yet')}
+                description={
+                    scope === 'dataproduct'
+                        ? t('Settings your administrator defines for Data Products appear here.')
+                        : t('Settings your administrator defines for Output Ports appear here.')
+                }
+                error={failedQueries.length > 0}
+                onRetry={() => {
+                    for (const query of failedQueries) query.refetch();
+                }}
+            />
+        );
+    }
 
     return (
         <Form
