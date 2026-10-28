@@ -1,5 +1,5 @@
 from itertools import chain
-from typing import Sequence
+from typing import Iterable, Sequence
 from uuid import UUID
 
 from fastapi import HTTPException, status
@@ -19,6 +19,7 @@ from app.core.authz.authorization import Authorization
 from app.data_products.output_ports.announcements.model import (
     Announcement as AnnouncementModel,
 )
+from app.data_products.output_ports.model import OutputPort as OutputPortModel
 from app.events.enums import EventEntityType
 from app.events.model import Event as EventModel
 from app.explorations.model import Exploration
@@ -33,7 +34,7 @@ class NotificationService:
         self.db = db
 
     def get_user_notifications(self, user: User) -> Sequence[NotificationModel]:
-        return self.db.scalars(
+        notifications = self.db.scalars(
             select(NotificationModel)
             .options(
                 joinedload(NotificationModel.user),
@@ -51,6 +52,12 @@ class NotificationService:
             )
             .order_by(desc(NotificationModel.created_on))
         ).all()
+        return [
+            notification
+            for notification in notifications
+            if notification.event.target_type != EventEntityType.ANNOUNCEMENT
+            or notification.event.output_port is not None
+        ]
 
     def remove_notification(self, id: UUID, user: User) -> None:
         notification = self.db.get(
@@ -118,46 +125,12 @@ class NotificationService:
 
         `extra_receiver_ids` paraam is also filtered out to allow only users.
         """
-        direct_user_ids = (
-            select(UserModel.id)
-            .join(
-                DataProductRoleAssignment,
-                DataProductRoleAssignment.identity_id == UserModel.id,
-            )
-            .where(
-                DataProductRoleAssignment.data_product_id == data_product_id,
-                DataProductRoleAssignment.decision == DecisionStatus.APPROVED,
-            )
-        )
-
-        group_member_user_ids = (
-            select(UserModel.id)
-            .join(
-                GroupMembership,
-                GroupMembership.member_identity_id == UserModel.id,
-            )
-            .join(
-                DataProductRoleAssignment,
-                DataProductRoleAssignment.identity_id == GroupMembership.group_id,
-            )
-            .where(
-                DataProductRoleAssignment.data_product_id == data_product_id,
-                DataProductRoleAssignment.decision == DecisionStatus.APPROVED,
-            )
-        )
-
-        extra_user_ids = select(UserModel.id).where(
-            UserModel.id.in_(extra_receiver_ids)
-        )
-
-        receivers = set(
+        extra_user_ids = set(
             self.db.scalars(
-                direct_user_ids.union(
-                    group_member_user_ids,
-                    extra_user_ids,
-                )
-            ).all()
+                select(UserModel.id).where(UserModel.id.in_(extra_receiver_ids))
+            )
         )
+        receivers = self._data_product_member_ids([data_product_id]) | extra_user_ids
 
         self._notify(receivers, event_id)
 
@@ -183,16 +156,39 @@ class NotificationService:
     def create_announcement_notifications(
         self, *, output_port_id: UUID, event_id: UUID
     ) -> None:
-        consumer_ids = self.db.scalars(
-            select(InputPort.consuming_abstract_data_product_id).where(
-                InputPort.output_port_id == output_port_id,
-                InputPort.status == InputPortStatus.APPROVED,
+        consumer_ids = set(
+            self.db.scalars(
+                select(InputPort.consuming_abstract_data_product_id).where(
+                    InputPort.output_port_id == output_port_id,
+                    InputPort.status == InputPortStatus.APPROVED,
+                )
+            )
+        )
+        explorations = self.db.execute(
+            select(Exploration.id, Exploration.owner_id).where(
+                Exploration.id.in_(consumer_ids)
             )
         ).all()
-        for consumer_id in consumer_ids:
-            self.create_consumer_notifications(
-                consumer_id=consumer_id, event_id=event_id
+        consuming_data_product_ids = consumer_ids - {id for id, _ in explorations}
+        producing_data_product_id = self.db.scalar(
+            select(OutputPortModel.data_product_id).where(
+                OutputPortModel.id == output_port_id
             )
+        )
+        producing_team = self._data_product_member_ids(
+            [producing_data_product_id]
+        ) | set(
+            self.db.scalars(
+                select(DatasetRoleAssignment.user_id).where(
+                    DatasetRoleAssignment.output_port_id == output_port_id,
+                    DatasetRoleAssignment.decision == DecisionStatus.APPROVED,
+                )
+            )
+        )
+        receivers = {owner_id for _, owner_id in explorations} | (
+            self._data_product_member_ids(consuming_data_product_ids)
+        )
+        self._notify(receivers - producing_team, event_id)
 
     def remove_announcement_notifications(self, announcement_id: UUID) -> None:
         self.db.execute(
@@ -219,3 +215,32 @@ class NotificationService:
         )
         for receiver in receivers - already_notified - {event.actor_id}:
             self.db.add(NotificationModel(user_id=receiver, event_id=event_id))
+
+    def _data_product_member_ids(self, data_product_ids: Iterable[UUID]) -> set[UUID]:
+        direct_user_ids = (
+            select(UserModel.id)
+            .join(
+                DataProductRoleAssignment,
+                DataProductRoleAssignment.identity_id == UserModel.id,
+            )
+            .where(
+                DataProductRoleAssignment.data_product_id.in_(data_product_ids),
+                DataProductRoleAssignment.decision == DecisionStatus.APPROVED,
+            )
+        )
+        group_member_user_ids = (
+            select(UserModel.id)
+            .join(
+                GroupMembership,
+                GroupMembership.member_identity_id == UserModel.id,
+            )
+            .join(
+                DataProductRoleAssignment,
+                DataProductRoleAssignment.identity_id == GroupMembership.group_id,
+            )
+            .where(
+                DataProductRoleAssignment.data_product_id.in_(data_product_ids),
+                DataProductRoleAssignment.decision == DecisionStatus.APPROVED,
+            )
+        )
+        return set(self.db.scalars(direct_user_ids.union(group_member_user_ids)))

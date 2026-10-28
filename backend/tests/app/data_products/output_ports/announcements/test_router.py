@@ -132,6 +132,27 @@ class TestAnnouncementsRouter:
             exploration.owner_id,
         }
 
+    def test_create_output_port_announcement__skips_producer_who_also_consumes(
+        self, client, session
+    ):
+        output_port = OutputPortFactory()
+        _producer(output_port)
+        producer_member = UserFactory()
+        DataProductRoleAssignmentFactory(
+            data_product_id=output_port.data_product_id,
+            identity_id=producer_member.id,
+            role_id=RoleFactory(scope=Scope.DATA_PRODUCT, permissions=[]).id,
+        )
+        consumer_member = UserFactory()
+        _consuming_data_product(output_port, producer_member, consumer_member)
+
+        response = client.post(_url(output_port), json=PAYLOAD)
+
+        assert response.status_code == 200, response.text
+        assert _notified_user_ids(session, response.json()["id"]) == {
+            consumer_member.id
+        }
+
     def test_create_output_port_announcement__notifies_member_of_two_consumers_once(
         self, client, session
     ):
