@@ -70,6 +70,8 @@ export function getTargetDisplayLabel(record: GetEventHistoryResponseItem): stri
             return record.output_port?.name || '';
         case EventEntityType.Exploration:
             return record.exploration?.name || '';
+        case EventEntityType.Announcement:
+            return record.announcement?.title || '';
         default:
             return '';
     }
@@ -380,7 +382,15 @@ export function getEventTypeDisplayName(
         case EventType.DATASET_SETTING_UPDATED:
             return <Trans t={t} i18nKey="EventDatasetSettingUpdated" defaults="Dataset setting updated" />;
         case EventType.ANNOUNCEMENT_CREATED:
-            return <Trans t={t} i18nKey="EventAnnouncementCreated" defaults="Announcement posted" />;
+            return (
+                <Trans
+                    t={t}
+                    i18nKey="EventAnnouncementCreated"
+                    defaults="Announcement posted: <element>{{entity}}</element>"
+                    values={{ entity }}
+                    components={{ element }}
+                />
+            );
         case EventType.ANNOUNCEMENT_REMOVED:
             return (
                 <Trans

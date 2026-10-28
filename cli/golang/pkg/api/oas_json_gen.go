@@ -16089,9 +16089,15 @@ func (s *GetEventHistoryResponseItem) encodeFields(e *jx.Encoder) {
 			s.Exploration.Encode(e)
 		}
 	}
+	{
+		if s.Announcement.Set {
+			e.FieldStart("announcement")
+			s.Announcement.Encode(e)
+		}
+	}
 }
 
-var jsonFieldsNameOfGetEventHistoryResponseItem = [17]string{
+var jsonFieldsNameOfGetEventHistoryResponseItem = [18]string{
 	0:  "id",
 	1:  "name",
 	2:  "subject_id",
@@ -16109,6 +16115,7 @@ var jsonFieldsNameOfGetEventHistoryResponseItem = [17]string{
 	14: "output_port",
 	15: "technical_asset",
 	16: "exploration",
+	17: "announcement",
 }
 
 // Decode decodes GetEventHistoryResponseItem from json.
@@ -16299,6 +16306,16 @@ func (s *GetEventHistoryResponseItem) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"exploration\"")
+			}
+		case "announcement":
+			if err := func() error {
+				s.Announcement.Reset()
+				if err := s.Announcement.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"announcement\"")
 			}
 		default:
 			return d.Skip()
@@ -24711,6 +24728,55 @@ func (s OptNilAccessMode) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *OptNilAccessMode) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes Announcement as json.
+func (o OptNilAnnouncement) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	if o.Null {
+		e.Null()
+		return
+	}
+	o.Value.Encode(e)
+}
+
+// Decode decodes Announcement from json.
+func (o *OptNilAnnouncement) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptNilAnnouncement to nil")
+	}
+	if d.Next() == jx.Null {
+		if err := d.Null(); err != nil {
+			return err
+		}
+
+		var v Announcement
+		o.Value = v
+		o.Set = true
+		o.Null = true
+		return nil
+	}
+	o.Set = true
+	o.Null = false
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptNilAnnouncement) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptNilAnnouncement) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

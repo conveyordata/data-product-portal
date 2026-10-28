@@ -3,9 +3,11 @@ from typing import Sequence
 from uuid import UUID
 
 from fastapi import HTTPException, status
-from sqlalchemy import delete, desc, select
+from sqlalchemy import delete, desc, or_, select
 from sqlalchemy.orm import Session, joinedload
 
+from app.abstract_data_product.input_ports.enums import InputPortStatus
+from app.abstract_data_product.input_ports.model import InputPort
 from app.authorization.role_assignments.data_product.model import (
     DataProductRoleAssignment,
 )
@@ -14,6 +16,10 @@ from app.authorization.role_assignments.output_port.model import (
     DatasetRoleAssignment,
 )
 from app.core.authz.authorization import Authorization
+from app.data_products.output_ports.announcements.model import (
+    Announcement as AnnouncementModel,
+)
+from app.events.enums import EventEntityType
 from app.events.model import Event as EventModel
 from app.explorations.model import Exploration
 from app.groups.model import GroupMembership
@@ -33,7 +39,16 @@ class NotificationService:
                 joinedload(NotificationModel.user),
                 joinedload(NotificationModel.event),
             )
-            .where(NotificationModel.user_id == user.id)
+            .join(EventModel, EventModel.id == NotificationModel.event_id)
+            .outerjoin(AnnouncementModel, AnnouncementModel.id == EventModel.target_id)
+            .where(
+                NotificationModel.user_id == user.id,
+                or_(
+                    EventModel.target_type != EventEntityType.ANNOUNCEMENT,
+                    EventModel.target_type.is_(None),
+                    AnnouncementModel.id.is_not(None),
+                ),
+            )
             .order_by(desc(NotificationModel.created_on))
         ).all()
 
@@ -164,6 +179,33 @@ class NotificationService:
                 event_id=event_id,
                 extra_receiver_ids=extra_receiver_ids,
             )
+
+    def create_announcement_notifications(
+        self, *, output_port_id: UUID, event_id: UUID
+    ) -> None:
+        consumer_ids = self.db.scalars(
+            select(InputPort.consuming_abstract_data_product_id).where(
+                InputPort.output_port_id == output_port_id,
+                InputPort.status == InputPortStatus.APPROVED,
+            )
+        ).all()
+        for consumer_id in consumer_ids:
+            self.create_consumer_notifications(
+                consumer_id=consumer_id, event_id=event_id
+            )
+
+    def remove_announcement_notifications(self, announcement_id: UUID) -> None:
+        self.db.execute(
+            delete(NotificationModel).where(
+                NotificationModel.event_id.in_(
+                    select(EventModel.id).where(
+                        EventModel.target_id == announcement_id,
+                        EventModel.target_type == EventEntityType.ANNOUNCEMENT,
+                    )
+                )
+            )
+        )
+        self.db.flush()
 
     def _notify(self, receivers: set[UUID], event_id: UUID) -> None:
         self.db.flush()

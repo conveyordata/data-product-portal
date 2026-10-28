@@ -14514,6 +14514,16 @@
                 "type": "null"
               }
             ]
+          },
+          "announcement": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Announcement"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",

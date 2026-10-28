@@ -630,6 +630,11 @@ INSERT INTO public.datasets (id, namespace, data_product_id, name, description, 
 
 INSERT INTO public.datasets (id, namespace, data_product_id, name, description, about, status, access_function, access_type_id, created_on, updated_on, lifecycle_id, deleted_at) VALUES ('393cf08a-d05c-442a-8982-d7d2cced4ad2', 'revenue_by_segment', '{{ revenue_dashboard }}'::uuid, 'Revenue By Segment', 'Revenue broken down by customer segments', 'Enables analysis of profitability per segment. Key objectives: - Inform marketing targeting - Support strategic planning - Monitor high-value customers', 'ACTIVE', 'RESTRICTED', '{{ restricted_access_type_id }}'::uuid, timezone('utc'::text, current_timestamp), NULL, '{{ data_product_lifecycle_id }}'::uuid, NULL);
 
+-- DEMO: an Announcement on Revenue By Segment, which John receives through DEI Insights Dashboard
+INSERT INTO public.output_port_announcements (id, output_port_id, type, title, message, link, author_id, created_at) VALUES ('a7e5b0c2-1d3f-4e6a-9b8c-0d1e2f3a4b5c', '393cf08a-d05c-442a-8982-d7d2cced4ad2', 'issue', 'Segment revenue for October is incomplete', 'The October load missed the Benelux stores. A reload runs tonight; until then, segment totals are about 8% too low.', 'https://status.example.com/incidents/revenue-load', '{{ alice_id }}'::uuid, timezone('utc'::text, current_timestamp - interval '1 hour'));
+INSERT INTO public.events (id, name, subject_id, subject_type, target_id, target_type, actor_id, created_on) VALUES ('b8f6c1d3-2e4a-4f7b-8c9d-1e2f3a4b5c6d', 'announcement_created', '393cf08a-d05c-442a-8982-d7d2cced4ad2', 'OUTPUT_PORT', 'a7e5b0c2-1d3f-4e6a-9b8c-0d1e2f3a4b5c', 'ANNOUNCEMENT', '{{ alice_id }}'::uuid, timezone('utc'::text, current_timestamp - interval '1 hour'));
+INSERT INTO public.notifications (id, user_id, event_id, created_on) VALUES (gen_random_uuid(), '{{ john_id }}'::uuid, 'b8f6c1d3-2e4a-4f7b-8c9d-1e2f3a4b5c6d', timezone('utc'::text, current_timestamp - interval '1 hour'));
+
 -- Revenue dashboard - input ports
 WITH link AS (
     INSERT INTO public.input_ports (id, consuming_abstract_data_product_id, dataset_id, status, created_on, updated_on, deleted_at)
