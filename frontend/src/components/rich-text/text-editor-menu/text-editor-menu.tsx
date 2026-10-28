@@ -12,7 +12,7 @@ import {
 import type { Level } from '@tiptap/extension-heading';
 import { type ChainedCommands, type Editor, useEditorState } from '@tiptap/react';
 import { Button, Divider, Flex, Select, Tooltip } from 'antd';
-import type { ReactNode } from 'react';
+import { Fragment, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import styles from './text-editor-menu.module.scss';
@@ -127,10 +127,10 @@ export const TextEditorMenu = ({ editor, isDisabled }: Props) => {
                 />
             </Tooltip>
             {formatting.map((buttons) => (
-                <Flex key={buttons[0].label} align="center">
+                <Fragment key={buttons[0].label}>
                     <Divider orientation="vertical" />
                     {renderButtons(buttons)}
-                </Flex>
+                </Fragment>
             ))}
         </Flex>
     );
