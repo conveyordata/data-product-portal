@@ -1,4 +1,4 @@
-import { HttpResponse, http } from 'msw';
+import { delay, HttpResponse, http } from 'msw';
 import { describe, expect, it } from 'vitest';
 import { HomeNotifications } from '@/pages/home/components/home-notifications/home-notifications.tsx';
 import { AnnouncementType } from '@/store/api/services/generated/usersNotificationsApi.ts';
@@ -47,6 +47,20 @@ describe('HomeNotifications', () => {
 
         expect(await screen.findByText('Spend figures are being restated')).toBeInTheDocument();
         expect(screen.queryByText("You're all caught up")).not.toBeInTheDocument();
+    });
+
+    it('shows announcements while requests are still loading', async () => {
+        server.use(
+            http.get('*/api/v2/users/current/pending_actions', async () => {
+                await delay('infinite');
+                return HttpResponse.json({ pending_actions: [] });
+            }),
+        );
+        mockUserNotifications([announcementNotification('a1', 'op-1', 'Spend figures are being restated')]);
+
+        renderBlock();
+
+        expect(await screen.findByText('Spend figures are being restated')).toBeInTheDocument();
     });
 
     it('orders announcements by urgency, then newest first', async () => {
