@@ -16,6 +16,9 @@ from app.configuration.data_product_settings.service import DataProductSettingSe
 from app.core.auth.auth import get_authenticated_user
 from app.core.authz import Action, Authorization, OutputPortResolver
 from app.core.authz.resolvers import DataProductResolver, EmptyResolver
+from app.data_products.output_ports.announcements.router import (
+    router as announcements_router,
+)
 from app.data_products.output_ports.contract.router import (
     router as contract_router,
 )
@@ -97,6 +100,7 @@ router.include_router(query_stats_router)
 router.include_router(curated_queries_router)
 router.include_router(data_quality_router)
 router.include_router(contract_router)
+router.include_router(announcements_router)
 
 
 @router.get(

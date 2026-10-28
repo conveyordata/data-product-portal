@@ -56,6 +56,10 @@ class Role(Base, BaseORM):
                         *permissions,
                         int(AuthorizationAction.HIDDEN__OUTPUT_PORT__READ),
                     ]
+                permissions = [
+                    *permissions,
+                    int(AuthorizationAction.HIDDEN__OUTPUT_PORT__READ_ANNOUNCEMENTS),
+                ]
             case Scope.DATASET:
                 if (
                     int(AuthorizationAction.HIDDEN__OUTPUT_PORT__READ)
@@ -65,6 +69,10 @@ class Role(Base, BaseORM):
                         *permissions,
                         int(AuthorizationAction.HIDDEN__OUTPUT_PORT__READ),
                     ]
+                permissions = [
+                    *permissions,
+                    int(AuthorizationAction.HIDDEN__OUTPUT_PORT__READ_ANNOUNCEMENTS),
+                ]
             case _:
                 pass
         return sorted(set(permissions))

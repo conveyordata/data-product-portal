@@ -3,6 +3,7 @@
 package api
 
 import (
+	"net/url"
 	"time"
 
 	"github.com/go-faster/errors"
@@ -632,6 +633,161 @@ type AddOutputPortDataQualityRunNotFoundApplicationJSON jx.Raw
 
 func (*AddOutputPortDataQualityRunNotFoundApplicationJSON) addOutputPortDataQualityRunRes() {}
 
+// Ref: #/components/schemas/Announcement
+type Announcement struct {
+	ID           uuid.UUID        `json:"id"`
+	OutputPortID uuid.UUID        `json:"output_port_id"`
+	Type         AnnouncementType `json:"type"`
+	Title        string           `json:"title"`
+	Message      string           `json:"message"`
+	Link         NilString        `json:"link"`
+	Author       NilUser          `json:"author"`
+	CreatedAt    time.Time        `json:"created_at"`
+}
+
+// GetID returns the value of ID.
+func (s *Announcement) GetID() uuid.UUID {
+	return s.ID
+}
+
+// GetOutputPortID returns the value of OutputPortID.
+func (s *Announcement) GetOutputPortID() uuid.UUID {
+	return s.OutputPortID
+}
+
+// GetType returns the value of Type.
+func (s *Announcement) GetType() AnnouncementType {
+	return s.Type
+}
+
+// GetTitle returns the value of Title.
+func (s *Announcement) GetTitle() string {
+	return s.Title
+}
+
+// GetMessage returns the value of Message.
+func (s *Announcement) GetMessage() string {
+	return s.Message
+}
+
+// GetLink returns the value of Link.
+func (s *Announcement) GetLink() NilString {
+	return s.Link
+}
+
+// GetAuthor returns the value of Author.
+func (s *Announcement) GetAuthor() NilUser {
+	return s.Author
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *Announcement) GetCreatedAt() time.Time {
+	return s.CreatedAt
+}
+
+// SetID sets the value of ID.
+func (s *Announcement) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+// SetOutputPortID sets the value of OutputPortID.
+func (s *Announcement) SetOutputPortID(val uuid.UUID) {
+	s.OutputPortID = val
+}
+
+// SetType sets the value of Type.
+func (s *Announcement) SetType(val AnnouncementType) {
+	s.Type = val
+}
+
+// SetTitle sets the value of Title.
+func (s *Announcement) SetTitle(val string) {
+	s.Title = val
+}
+
+// SetMessage sets the value of Message.
+func (s *Announcement) SetMessage(val string) {
+	s.Message = val
+}
+
+// SetLink sets the value of Link.
+func (s *Announcement) SetLink(val NilString) {
+	s.Link = val
+}
+
+// SetAuthor sets the value of Author.
+func (s *Announcement) SetAuthor(val NilUser) {
+	s.Author = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *Announcement) SetCreatedAt(val time.Time) {
+	s.CreatedAt = val
+}
+
+// Ref: #/components/schemas/AnnouncementType
+type AnnouncementType string
+
+const (
+	AnnouncementTypeIssue              AnnouncementType = "issue"
+	AnnouncementTypeActionNeeded       AnnouncementType = "action_needed"
+	AnnouncementTypePlannedMaintenance AnnouncementType = "planned_maintenance"
+	AnnouncementTypeNewVersion         AnnouncementType = "new_version"
+	AnnouncementTypeInfo               AnnouncementType = "info"
+)
+
+// AllValues returns all AnnouncementType values.
+func (AnnouncementType) AllValues() []AnnouncementType {
+	return []AnnouncementType{
+		AnnouncementTypeIssue,
+		AnnouncementTypeActionNeeded,
+		AnnouncementTypePlannedMaintenance,
+		AnnouncementTypeNewVersion,
+		AnnouncementTypeInfo,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s AnnouncementType) MarshalText() ([]byte, error) {
+	switch s {
+	case AnnouncementTypeIssue:
+		return []byte(s), nil
+	case AnnouncementTypeActionNeeded:
+		return []byte(s), nil
+	case AnnouncementTypePlannedMaintenance:
+		return []byte(s), nil
+	case AnnouncementTypeNewVersion:
+		return []byte(s), nil
+	case AnnouncementTypeInfo:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *AnnouncementType) UnmarshalText(data []byte) error {
+	switch AnnouncementType(data) {
+	case AnnouncementTypeIssue:
+		*s = AnnouncementTypeIssue
+		return nil
+	case AnnouncementTypeActionNeeded:
+		*s = AnnouncementTypeActionNeeded
+		return nil
+	case AnnouncementTypePlannedMaintenance:
+		*s = AnnouncementTypePlannedMaintenance
+		return nil
+	case AnnouncementTypeNewVersion:
+		*s = AnnouncementTypeNewVersion
+		return nil
+	case AnnouncementTypeInfo:
+		*s = AnnouncementTypeInfo
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
 // Ref: #/components/schemas/ApproveLinkBetweenTechnicalAssetAndOutputPortRequest
 type ApproveLinkBetweenTechnicalAssetAndOutputPortRequest struct {
 	TechnicalAssetID uuid.UUID `json:"technical_asset_id"`
@@ -790,6 +946,7 @@ const (
 	AuthorizationAction416 AuthorizationAction = 416
 	AuthorizationAction901 AuthorizationAction = 901
 	AuthorizationAction902 AuthorizationAction = 902
+	AuthorizationAction903 AuthorizationAction = 903
 )
 
 // AllValues returns all AuthorizationAction values.
@@ -843,6 +1000,7 @@ func (AuthorizationAction) AllValues() []AuthorizationAction {
 		AuthorizationAction416,
 		AuthorizationAction901,
 		AuthorizationAction902,
+		AuthorizationAction903,
 	}
 }
 
@@ -949,6 +1107,71 @@ func (s *CancelInputPortForExplorationResponse) SetInputPortID(val uuid.UUID) {
 }
 
 func (*CancelInputPortForExplorationResponse) cancelInputPortForExplorationRes() {}
+
+// Ref: #/components/schemas/CreateAnnouncement
+type CreateAnnouncement struct {
+	Type    AnnouncementType `json:"type"`
+	Title   string           `json:"title"`
+	Message string           `json:"message"`
+	Link    OptNilURI        `json:"link"`
+}
+
+// GetType returns the value of Type.
+func (s *CreateAnnouncement) GetType() AnnouncementType {
+	return s.Type
+}
+
+// GetTitle returns the value of Title.
+func (s *CreateAnnouncement) GetTitle() string {
+	return s.Title
+}
+
+// GetMessage returns the value of Message.
+func (s *CreateAnnouncement) GetMessage() string {
+	return s.Message
+}
+
+// GetLink returns the value of Link.
+func (s *CreateAnnouncement) GetLink() OptNilURI {
+	return s.Link
+}
+
+// SetType sets the value of Type.
+func (s *CreateAnnouncement) SetType(val AnnouncementType) {
+	s.Type = val
+}
+
+// SetTitle sets the value of Title.
+func (s *CreateAnnouncement) SetTitle(val string) {
+	s.Title = val
+}
+
+// SetMessage sets the value of Message.
+func (s *CreateAnnouncement) SetMessage(val string) {
+	s.Message = val
+}
+
+// SetLink sets the value of Link.
+func (s *CreateAnnouncement) SetLink(val OptNilURI) {
+	s.Link = val
+}
+
+// Ref: #/components/schemas/CreateAnnouncementResponse
+type CreateAnnouncementResponse struct {
+	ID uuid.UUID `json:"id"`
+}
+
+// GetID returns the value of ID.
+func (s *CreateAnnouncementResponse) GetID() uuid.UUID {
+	return s.ID
+}
+
+// SetID sets the value of ID.
+func (s *CreateAnnouncementResponse) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+func (*CreateAnnouncementResponse) createOutputPortAnnouncementRes() {}
 
 // Ref: #/components/schemas/CreateDataProductLifeCycleResponse
 type CreateDataProductLifeCycleResponse struct {
@@ -4196,6 +4419,7 @@ const (
 	EventEntityTypeTechnicalAsset EventEntityType = "technical_asset"
 	EventEntityTypeUser           EventEntityType = "user"
 	EventEntityTypeExploration    EventEntityType = "exploration"
+	EventEntityTypeAnnouncement   EventEntityType = "announcement"
 )
 
 // AllValues returns all EventEntityType values.
@@ -4206,6 +4430,7 @@ func (EventEntityType) AllValues() []EventEntityType {
 		EventEntityTypeTechnicalAsset,
 		EventEntityTypeUser,
 		EventEntityTypeExploration,
+		EventEntityTypeAnnouncement,
 	}
 }
 
@@ -4221,6 +4446,8 @@ func (s EventEntityType) MarshalText() ([]byte, error) {
 	case EventEntityTypeUser:
 		return []byte(s), nil
 	case EventEntityTypeExploration:
+		return []byte(s), nil
+	case EventEntityTypeAnnouncement:
 		return []byte(s), nil
 	default:
 		return nil, errors.Errorf("invalid value: %q", s)
@@ -4244,6 +4471,9 @@ func (s *EventEntityType) UnmarshalText(data []byte) error {
 		return nil
 	case EventEntityTypeExploration:
 		*s = EventEntityTypeExploration
+		return nil
+	case EventEntityTypeAnnouncement:
+		*s = EventEntityTypeAnnouncement
 		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)
@@ -4465,6 +4695,23 @@ func (s *GetAllPlatformsResponse) SetPlatforms(val []Platform) {
 }
 
 func (*GetAllPlatformsResponse) getAllPlatformsRes() {}
+
+// Ref: #/components/schemas/GetAnnouncementsResponse
+type GetAnnouncementsResponse struct {
+	Announcements []Announcement `json:"announcements"`
+}
+
+// GetAnnouncements returns the value of Announcements.
+func (s *GetAnnouncementsResponse) GetAnnouncements() []Announcement {
+	return s.Announcements
+}
+
+// SetAnnouncements sets the value of Announcements.
+func (s *GetAnnouncementsResponse) SetAnnouncements(val []Announcement) {
+	s.Announcements = val
+}
+
+func (*GetAnnouncementsResponse) getOutputPortAnnouncementsRes() {}
 
 // Ref: #/components/schemas/GetDataProductInputPortsResponse
 type GetDataProductInputPortsResponse struct {
@@ -6551,6 +6798,7 @@ func (*HTTPValidationError) createGroupsBatchRes()                        {}
 func (*HTTPValidationError) createMachineUserRes()                        {}
 func (*HTTPValidationError) createMachineUsersBatchRes()                  {}
 func (*HTTPValidationError) createOutputPortAccessTypeRes()               {}
+func (*HTTPValidationError) createOutputPortAnnouncementRes()             {}
 func (*HTTPValidationError) createOutputPortRes()                         {}
 func (*HTTPValidationError) createOutputPortRoleAssignmentRes()           {}
 func (*HTTPValidationError) createRoleRes()                               {}
@@ -6610,6 +6858,7 @@ func (*HTTPValidationError) getMachineUserRes()                           {}
 func (*HTTPValidationError) getMachineUsersRes()                          {}
 func (*HTTPValidationError) getOutputPortAccessDurationsRes()             {}
 func (*HTTPValidationError) getOutputPortAccessTypesRes()                 {}
+func (*HTTPValidationError) getOutputPortAnnouncementsRes()               {}
 func (*HTTPValidationError) getOutputPortCuratedQueriesRes()              {}
 func (*HTTPValidationError) getOutputPortQueryStatsRes()                  {}
 func (*HTTPValidationError) getOutputPortRes()                            {}
@@ -6658,6 +6907,7 @@ func (*HTTPValidationError) removeGroupMembersRes()                       {}
 func (*HTTPValidationError) removeInputPortForDataProductRes()            {}
 func (*HTTPValidationError) removeInputPortForExplorationRes()            {}
 func (*HTTPValidationError) removeOutputPortAccessTypeRes()               {}
+func (*HTTPValidationError) removeOutputPortAnnouncementRes()             {}
 func (*HTTPValidationError) removeOutputPortAsInputPortRes()              {}
 func (*HTTPValidationError) removeOutputPortRes()                         {}
 func (*HTTPValidationError) removeRoleRes()                               {}
@@ -10140,6 +10390,74 @@ func (o OptNilUIElementString) Or(d UIElementString) UIElementString {
 	return d
 }
 
+// NewOptNilURI returns new OptNilURI with value set to v.
+func NewOptNilURI(v url.URL) OptNilURI {
+	return OptNilURI{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptNilURI is optional nullable url.URL.
+type OptNilURI struct {
+	Value url.URL
+	Set   bool
+	Null  bool
+}
+
+// IsSet returns true if OptNilURI was set.
+func (o OptNilURI) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptNilURI) Reset() {
+	var v url.URL
+	o.Value = v
+	o.Set = false
+	o.Null = false
+}
+
+// SetTo sets value to v.
+func (o *OptNilURI) SetTo(v url.URL) {
+	o.Set = true
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o OptNilURI) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *OptNilURI) SetToNull() {
+	o.Set = true
+	o.Null = true
+	var v url.URL
+	o.Value = v
+}
+
+// IsEmpty returns true if the field was omitted from the payload (not Set and not Null).
+func (o OptNilURI) IsEmpty() bool {
+	return !o.Set && !o.Null
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptNilURI) Get() (v url.URL, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptNilURI) Or(d url.URL) url.URL {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptNilUUID returns new OptNilUUID with value set to v.
 func NewOptNilUUID(v uuid.UUID) OptNilUUID {
 	return OptNilUUID{
@@ -12258,6 +12576,10 @@ func (*RemoveInputPortForExplorationOKApplicationJSON) removeInputPortForExplora
 type RemoveOutputPortAccessTypeOKApplicationJSON jx.Raw
 
 func (*RemoveOutputPortAccessTypeOKApplicationJSON) removeOutputPortAccessTypeRes() {}
+
+type RemoveOutputPortAnnouncementOKApplicationJSON jx.Raw
+
+func (*RemoveOutputPortAnnouncementOKApplicationJSON) removeOutputPortAnnouncementRes() {}
 
 type RemoveOutputPortAsInputPortOKApplicationJSON jx.Raw
 

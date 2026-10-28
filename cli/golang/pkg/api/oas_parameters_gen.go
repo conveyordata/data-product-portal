@@ -68,6 +68,12 @@ type CreateOutputPortParams struct {
 	DataProductID uuid.UUID
 }
 
+// CreateOutputPortAnnouncementParams is parameters of create_output_port_announcement operation.
+type CreateOutputPortAnnouncementParams struct {
+	DataProductID uuid.UUID
+	ID            uuid.UUID
+}
+
 // CreateTechnicalAssetParams is parameters of create_technical_asset operation.
 type CreateTechnicalAssetParams struct {
 	DataProductID uuid.UUID
@@ -274,6 +280,12 @@ type GetOutputPortAccessDurationsParams struct {
 // GetOutputPortAccessTypesParams is parameters of get_output_port_access_types operation.
 type GetOutputPortAccessTypesParams struct {
 	IncludeOutputPortCount OptBool `json:",omitempty,omitzero"`
+}
+
+// GetOutputPortAnnouncementsParams is parameters of get_output_port_announcements operation.
+type GetOutputPortAnnouncementsParams struct {
+	DataProductID uuid.UUID
+	ID            uuid.UUID
 }
 
 // GetOutputPortCuratedQueriesParams is parameters of get_output_port_curated_queries operation.
@@ -501,6 +513,13 @@ type RemoveOutputPortParams struct {
 // RemoveOutputPortAccessTypeParams is parameters of remove_output_port_access_type operation.
 type RemoveOutputPortAccessTypeParams struct {
 	ID uuid.UUID
+}
+
+// RemoveOutputPortAnnouncementParams is parameters of remove_output_port_announcement operation.
+type RemoveOutputPortAnnouncementParams struct {
+	DataProductID  uuid.UUID
+	ID             uuid.UUID
+	AnnouncementID uuid.UUID
 }
 
 // RemoveOutputPortAsInputPortParams is parameters of remove_output_port_as_input_port operation.
