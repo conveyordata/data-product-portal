@@ -30,8 +30,8 @@ data:
   {{- if .Values.email_button_color }}
   EMAIL_BUTTON_COLOR: {{ .Values.email_button_color }}
   {{- end }}
-  {{- if .Values.webhook.url }}
-  WEBHOOK_URL: {{ .Values.webhook.url }}
+  {{- if .Values.webhook_v2_url }}
+  WEBHOOK_V2_URL: {{ .Values.webhook_v2_url }}
   {{- end }}
   NAMESPACE_MAX_LENGTH: {{ .Values.namespace_max_length }}
   {{- if .Values.posthog.enabled }}

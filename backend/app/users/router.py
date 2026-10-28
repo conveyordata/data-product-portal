@@ -1,38 +1,36 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session
 
 from app.core.auth.auth import authorize_user, get_authenticated_user
 from app.core.authz import Action, Authorization
 from app.core.authz.resolvers import EmptyResolver
-from app.database.database import get_db_session
-from app.pending_actions.schema_response import PendingActionResponse
-from app.pending_actions.service import PendingActionsService
+from app.database.deps import get_db_session
+from app.groups.schema_response import GroupsGetResponse
+from app.identities.schema_request import (
+    IdentityBatchCreateRequest,
+    IdentityBatchDeleteRequest,
+)
+from app.identities.schema_response import IdentityBatchCreateResponse
 from app.users.schema import User
 from app.users.schema_request import CanBecomeAdminUpdate, UserCreate
-from app.users.schema_response import GetUsersResponse, UserCreateResponse
+from app.users.schema_response import (
+    GetUsersResponse,
+    MyRequestsResponse,
+    PendingActionResponse,
+    UserCreateResponse,
+)
 from app.users.service import UserService
 
 router = APIRouter(tags=["Users"], prefix="/v2/users")
 
 
-@router.delete(
-    "/{id}",
-    responses={
-        404: {
-            "description": "User not found",
-            "content": {
-                "application/json": {"example": {"detail": "User email not found"}}
-            },
-        }
-    },
-    dependencies=[
-        Depends(Authorization.enforce(Action.GLOBAL__DELETE_USER, EmptyResolver)),
-    ],
-)
-def remove_user(id: UUID, db: Session = Depends(get_db_session)) -> None:
-    return UserService(db).remove_user(id)
+@router.get("")
+def get_users(
+    db: Session = Depends(get_db_session, scope="function"),
+) -> GetUsersResponse:
+    return GetUsersResponse(users=UserService(db).get_users())
 
 
 @router.post(
@@ -50,9 +48,36 @@ def remove_user(id: UUID, db: Session = Depends(get_db_session)) -> None:
     ],
 )
 def create_user(
-    user: UserCreate, db: Session = Depends(get_db_session)
+    user: UserCreate, db: Session = Depends(get_db_session, scope="function")
 ) -> UserCreateResponse:
     return UserService(db).create_user(user)
+
+
+@router.post(
+    "/batch",
+    dependencies=[
+        Depends(Authorization.enforce(Action.GLOBAL__CREATE_USER, EmptyResolver)),
+    ],
+)
+def create_users_batch(
+    request: IdentityBatchCreateRequest[UserCreate],
+    db: Session = Depends(get_db_session, scope="function"),
+) -> IdentityBatchCreateResponse:
+    return UserService(db).create_users_batch(request.items)
+
+
+@router.delete(
+    "/batch",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[
+        Depends(Authorization.enforce(Action.GLOBAL__DELETE_USER, EmptyResolver)),
+    ],
+)
+def remove_users_batch(
+    request: IdentityBatchDeleteRequest,
+    db: Session = Depends(get_db_session, scope="function"),
+) -> None:
+    UserService(db).remove_users_batch(request.ids)
 
 
 @router.put(
@@ -63,32 +88,80 @@ def create_user(
 )
 def set_can_become_admin(
     request: CanBecomeAdminUpdate,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
 ) -> None:
     UserService(db).set_can_become_admin(request)
-
-
-@router.get("")
-def get_users(db: Session = Depends(get_db_session)) -> GetUsersResponse:
-    return GetUsersResponse(users=UserService(db).get_users())
-
-
-@router.post("/current/seen_tour")
-def mark_tour_as_seen(
-    db: Session = Depends(get_db_session),
-    user: User = Depends(get_authenticated_user),
-) -> None:
-    UserService(db).mark_tour_as_seen(user.id)
-
-
-@router.get("/current/pending_actions")
-def get_user_pending_actions(
-    db: Session = Depends(get_db_session),
-    authenticated_user: User = Depends(get_authenticated_user),
-) -> PendingActionResponse:
-    return PendingActionsService(db).get_user_pending_actions(authenticated_user)
 
 
 @router.get("/current")
 def get_current_user(authorized_user: User = Depends(authorize_user)) -> User:
     return authorized_user
+
+
+@router.get("/current/groups")
+def get_current_user_groups(
+    db: Session = Depends(get_db_session, scope="function"),
+    authenticated_user: User = Depends(get_authenticated_user),
+) -> GroupsGetResponse:
+    return GroupsGetResponse(groups=UserService(db).get_groups(authenticated_user.id))
+
+
+@router.get("/current/my_requests")
+def get_user_requests(
+    db: Session = Depends(get_db_session, scope="function"),
+    authenticated_user: User = Depends(get_authenticated_user),
+    hide_old_inactive: bool = Query(
+        default=True, description="Filter out inactive requests older than 30 days"
+    ),
+) -> MyRequestsResponse:
+    return UserService(db).get_user_requests(authenticated_user, hide_old_inactive)
+
+
+@router.get("/current/pending_actions")
+def get_user_pending_actions(
+    db: Session = Depends(get_db_session, scope="function"),
+    authenticated_user: User = Depends(get_authenticated_user),
+) -> PendingActionResponse:
+    return UserService(db).get_user_pending_actions(authenticated_user)
+
+
+@router.post("/current/seen_tour")
+def mark_tour_as_seen(
+    db: Session = Depends(get_db_session, scope="function"),
+    user: User = Depends(get_authenticated_user),
+) -> None:
+    UserService(db).mark_tour_as_seen(user.id)
+
+
+@router.get(
+    "/{id}/groups",
+    responses={
+        404: {
+            "description": "User not found",
+            "content": {"application/json": {"example": {"detail": "User not found"}}},
+        }
+    },
+)
+def get_user_groups(
+    id: UUID,
+    db: Session = Depends(get_db_session, scope="function"),
+) -> GroupsGetResponse:
+    return GroupsGetResponse(groups=UserService(db).get_groups(id))
+
+
+@router.delete(
+    "/{id}",
+    responses={
+        404: {
+            "description": "User not found",
+            "content": {"application/json": {"example": {"detail": "User not found"}}},
+        }
+    },
+    dependencies=[
+        Depends(Authorization.enforce(Action.GLOBAL__DELETE_USER, EmptyResolver)),
+    ],
+)
+def remove_user(
+    id: UUID, db: Session = Depends(get_db_session, scope="function")
+) -> None:
+    return UserService(db).remove_user(id)

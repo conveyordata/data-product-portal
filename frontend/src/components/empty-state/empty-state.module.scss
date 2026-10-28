@@ -1,0 +1,31 @@
+@use "@/styles/globals";
+
+.container {
+    padding: globals.$spacing-xl globals.$spacing-regular;
+    text-align: center;
+    overflow-wrap: anywhere;
+}
+
+.tile {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: globals.$icon-size-ml;
+    height: globals.$icon-size-ml;
+    border-radius: globals.$border-radius-lg;
+    font-size: globals.$icon-size-small;
+}
+
+.description {
+    max-width: 46ch;
+}
+
+.small {
+    padding: globals.$spacing-regular globals.$spacing-s;
+
+    .tile {
+        width: globals.$icon-size-regular;
+        height: globals.$icon-size-regular;
+        font-size: globals.$icon-size-extra-small;
+    }
+}

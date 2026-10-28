@@ -83,6 +83,9 @@ export const dataProductTechnicalAssetsTags = {
         ],
     },
     linkOutputPortToTechnicalAsset: {
+        extraOptions: {
+            suppressErrorToast: true,
+        },
         invalidatesTags: (
             _,
             __,

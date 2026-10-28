@@ -22,4 +22,4 @@ tasks:
       - poetry run python generation/build_event_handler.py
     generates:
       - sdk/api_client/**
-      - sdk/event_handler.py
+      - sdk/provisioner/event_handler.py

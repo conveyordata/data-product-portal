@@ -4,10 +4,14 @@ package api
 
 import (
 	"bytes"
+	"mime"
+	"mime/multipart"
 	"net/http"
 
+	"github.com/go-faster/errors"
 	"github.com/go-faster/jx"
 	ht "github.com/ogen-go/ogen/http"
+	"github.com/ogen-go/ogen/uri"
 )
 
 func encodeAddDataProductFinalizerRequest(
@@ -24,8 +28,36 @@ func encodeAddDataProductFinalizerRequest(
 	return nil
 }
 
+func encodeAddDomainFinalizerRequest(
+	req *FinalizerRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
 func encodeAddExplorationFinalizerRequest(
 	req *FinalizerRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeAddGroupMembersRequest(
+	req *GroupMembersAdd,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
@@ -82,6 +114,20 @@ func encodeApproveOutputPortTechnicalAssetLinkRequest(
 
 func encodeBecomeAdminRequest(
 	req *BecomeAdmin,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeCreateAccessModeRequest(
+	req *AccessModeCreate,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
@@ -192,8 +238,78 @@ func encodeCreateExplorationRequest(
 	return nil
 }
 
+func encodeCreateGroupRequest(
+	req *GroupCreate,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeCreateGroupsBatchRequest(
+	req *IdentityBatchCreateRequestGroupCreate,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeCreateMachineUserRequest(
+	req *MachineUserCreate,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeCreateMachineUsersBatchRequest(
+	req *IdentityBatchCreateRequestMachineUserCreate,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
 func encodeCreateOutputPortRequest(
 	req *CreateOutputPortRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeCreateOutputPortAccessTypeRequest(
+	req *OutputPortAccessTypeCreate,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
@@ -276,6 +392,20 @@ func encodeCreateUserRequest(
 	return nil
 }
 
+func encodeCreateUsersBatchRequest(
+	req *IdentityBatchCreateRequestUserCreate,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
 func encodeDecideDataProductRoleAssignmentRequest(
 	req *DecideDataProductRoleAssignment,
 	r *http.Request,
@@ -306,6 +436,34 @@ func encodeDecideGlobalRoleAssignmentRequest(
 
 func encodeDecideOutputPortRoleAssignmentRequest(
 	req *DecideOutputPortRoleAssignment,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeDeleteGroupsBatchRequest(
+	req *IdentityBatchDeleteRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeDeleteMachineUsersBatchRequest(
+	req *IdentityBatchDeleteRequest,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
@@ -360,6 +518,20 @@ func encodeDenyOutputPortTechnicalAssetLinkRequest(
 	return nil
 }
 
+func encodeGrantOutputPortAccessRequest(
+	req *GrantOutputPortAccessRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
 func encodeIngestOutputPortContractRequest(
 	req *BitolContractRequest,
 	r *http.Request,
@@ -374,17 +546,24 @@ func encodeIngestOutputPortContractRequest(
 	return nil
 }
 
-func encodeLinkInputPortsToDataProductRequest(
-	req *LinkInputPortsToDataProduct,
+func encodeIngestOutputPortContractYamlRequest(
+	req *IngestOutputPortContractYamlReq,
 	r *http.Request,
 ) error {
-	const contentType = "application/json"
-	e := new(jx.Encoder)
-	{
-		req.Encode(e)
-	}
-	encoded := e.Bytes()
-	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	const contentType = "multipart/form-data"
+	request := req
+
+	q := uri.NewFormEncoder(map[string]string{})
+	body, boundary := ht.CreateMultipartBody(func(w *multipart.Writer) error {
+		if err := request.File.WriteMultipart("file", w); err != nil {
+			return errors.Wrap(err, "write \"file\"")
+		}
+		if err := q.WriteMultipart(w); err != nil {
+			return errors.Wrap(err, "write multipart")
+		}
+		return nil
+	})
+	ht.SetCloserBody(r, body, mime.FormatMediaType(contentType, map[string]string{"boundary": boundary}))
 	return nil
 }
 
@@ -444,6 +623,20 @@ func encodeOverwriteOutputPortDataQualitySummaryRequest(
 	return nil
 }
 
+func encodeRemoveGroupMembersRequest(
+	req *GroupMembersRemove,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
 func encodeRemoveOutputPortAsInputPortRequest(
 	req *RemoveOutputPortAsInputPortRequest,
 	r *http.Request,
@@ -458,8 +651,50 @@ func encodeRemoveOutputPortAsInputPortRequest(
 	return nil
 }
 
+func encodeRemoveUsersBatchRequest(
+	req *IdentityBatchDeleteRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
 func encodeRenderTechnicalAssetAccessPathRequest(
 	req *RenderTechnicalAssetAccessPathRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeRenewOutputPortAsInputPortRequest(
+	req *RenewOutputPortAsInputPortRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeReplaceGroupMembersRequest(
+	req *GroupMembersReplace,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
@@ -542,6 +777,20 @@ func encodeRequestOutputPortRoleAssignmentRequest(
 	return nil
 }
 
+func encodeRevokeOutputPortAsInputPortRequest(
+	req *RevokeOutputPortAsInputPortRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
 func encodeSetCanBecomeAdminRequest(
 	req *CanBecomeAdminUpdate,
 	r *http.Request,
@@ -558,6 +807,34 @@ func encodeSetCanBecomeAdminRequest(
 
 func encodeUnlinkOutputPortFromTechnicalAssetRequest(
 	req *UnLinkTechnicalAssetToOutputPortRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeUpdateAccessDurationRequest(
+	req *AccessDurationUpdate,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeUpdateAccessModeRequest(
+	req *AccessModeUpdate,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
@@ -682,8 +959,50 @@ func encodeUpdateDomainRequest(
 	return nil
 }
 
+func encodeUpdateEnvironmentIsGlobalRequest(
+	req *EnvironmentUpdateGlobal,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeUpdateGroupRequest(
+	req *GroupUpdate,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeUpdateMachineUserRequest(
+	req *MachineUserUpdate,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
 func encodeUpdateOutputPortRequest(
-	req *DatasetUpdate,
+	req *OutputPortUpdate,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
@@ -697,7 +1016,21 @@ func encodeUpdateOutputPortRequest(
 }
 
 func encodeUpdateOutputPortAboutRequest(
-	req *DatasetAboutUpdate,
+	req *OutputPortAboutUpdate,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeUpdateOutputPortAccessTypeRequest(
+	req *OutputPortAccessTypeUpdate,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
@@ -725,7 +1058,7 @@ func encodeUpdateOutputPortQueryStatsRequest(
 }
 
 func encodeUpdateOutputPortStatusRequest(
-	req *DatasetStatusUpdate,
+	req *OutputPortStatusUpdate,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
@@ -767,7 +1100,7 @@ func encodeUpdateTagRequest(
 }
 
 func encodeUpdateTechnicalAssetRequest(
-	req *DataOutputUpdate,
+	req *TechnicalAssetUpdate,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
@@ -781,7 +1114,7 @@ func encodeUpdateTechnicalAssetRequest(
 }
 
 func encodeUpdateTechnicalAssetStatusRequest(
-	req *DataOutputStatusUpdate,
+	req *TechnicalAssetStatusUpdate,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"

@@ -8,7 +8,7 @@ export default function QuestionTooltip(props: PropsWithChildren<TooltipProps>):
     const { children, ...tooltipProps } = props;
 
     return (
-        <Row align={'middle'}>
+        <Row align="middle">
             {children}
             <Tooltip {...tooltipProps}>
                 <QuestionCircleOutlined className={styles.questionTooltip} />

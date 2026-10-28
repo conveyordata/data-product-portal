@@ -1,6 +1,7 @@
 from typing import Any, Optional
 
-from pydantic import BaseModel, Field
+from fastapi.encoders import jsonable_encoder
+from pydantic import BaseModel, Field, field_validator
 
 
 # Took relevant properties from: https://github.com/bitol-io/open-data-contract-standard/blob/main/docs/schema.md
@@ -20,6 +21,15 @@ class SchemaPropertyRequest(BaseModel):
     properties: list["SchemaPropertyRequest"] = []
 
     model_config = {"populate_by_name": True}
+
+    @field_validator("examples")
+    @classmethod
+    def ensure_examples_are_json_serializable(
+        cls, value: Optional[list[Any]]
+    ) -> Optional[list[Any]]:
+        if value is None:
+            return None
+        return jsonable_encoder(value)
 
 
 SchemaPropertyRequest.model_rebuild()

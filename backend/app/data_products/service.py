@@ -1,39 +1,54 @@
 import copy
-from typing import Optional, Sequence
+from operator import and_
+from typing import Sequence, assert_never
 from uuid import UUID
 from warnings import deprecated
 
 from fastapi import HTTPException, status
-from sqlalchemy import asc, select
+from sqlalchemy import asc, or_, select
 from sqlalchemy.orm import Session, joinedload, selectinload, undefer
 
 from app.abstract_data_product.graph_utils import (
     get_graph_data_from_abstract_data_product,
 )
+from app.abstract_data_product.input_ports.enums import InputPortStatus
 from app.abstract_data_product.input_ports.model import (
     InputPort as InputPortModel,
 )
 from app.abstract_data_product.service import AbstractDataProductService
-from app.authorization.role_assignments.enums import DecisionStatus
+from app.authorization.role_assignments.data_product.model import (
+    DataProductRoleAssignment,
+)
+from app.authorization.role_assignments.enums import AssignmentFilter, DecisionStatus
 from app.authorization.roles.schema import Prototype
+from app.authorization.service import DATA_PRODUCT_READER_ROLE
 from app.configuration.data_product_lifecycles.model import (
     DataProductLifecycle as DataProductLifeCycleModel,
 )
 from app.configuration.data_product_settings.model import DataProductSettingValue
+from app.configuration.domains.service import DomainService
+from app.configuration.environments.model import Environment as EnvironmentModel
 from app.configuration.tags.model import Tag as TagModel
 from app.configuration.tags.model import ensure_tag_exists
 from app.configuration.tags.schema import Tag
+from app.core import context
+from app.core.authz import Authorization
 from app.core.aws.get_url import _get_data_product_role_arn
 from app.core.namespace.validation import (
     NamespaceValidator,
     TechnicalAssetNamespaceValidator,
 )
+from app.core.webhooks.events import DataProductEnvironmentAddedEvent
 from app.data_products.model import DataProduct as DataProductModel
-from app.data_products.model import ensure_data_product_exists
-from app.data_products.output_port_technical_assets_link.model import (
-    DataOutputDatasetAssociation,
+from app.data_products.model import (
+    DataProductEnvironment,
+    DataProductVisibility,
+    ensure_data_product_exists,
 )
-from app.data_products.output_ports.model import Dataset as DatasetModel
+from app.data_products.output_port_technical_assets_link.model import (
+    TechnicalAssetOutputPortAssociation,
+)
+from app.data_products.output_ports.model import OutputPort as OutputPortModel
 from app.data_products.schema_request import (
     DataProductAboutUpdate,
     DataProductCreate,
@@ -51,6 +66,7 @@ from app.data_products.technical_assets.model import (
 from app.graph.edge import Edge
 from app.graph.graph import Graph
 from app.graph.node import Node, NodeData, NodeType
+from app.groups.service import GroupService
 from app.resource_names.service import ResourceNameService, ResourceNameValidityType
 from app.users.model import User as UserModel
 from app.users.schema import User
@@ -61,6 +77,88 @@ class DataProductService(AbstractDataProductService):
         super().__init__(db)
         self.namespace_validator = NamespaceValidator(DataProductModel)
         self.technical_asset_namespace_validator = TechnicalAssetNamespaceValidator()
+
+    @staticmethod
+    def _sync_public_reader_grouping(
+        data_product_id: UUID, visibility: DataProductVisibility
+    ) -> None:
+        match visibility:
+            case DataProductVisibility.DISCOVERABLE:
+                Authorization().assign_resource_role(
+                    user_id="*",
+                    role_id=DATA_PRODUCT_READER_ROLE,
+                    resource_id=str(data_product_id),
+                )
+            case DataProductVisibility.HIDDEN:
+                Authorization().revoke_resource_role(
+                    user_id="*",
+                    role_id=DATA_PRODUCT_READER_ROLE,
+                    resource_id=str(data_product_id),
+                )
+            case _:
+                assert_never(visibility)
+
+    def _sync_consumer_reader_grouping(self, data_product_id: UUID) -> None:
+        """
+        Will sync consumer relations for the output ports of a data product.
+        This is made to ensure private output ports are only accessible to consumers that have been approved.
+        We sync it for every data product, since output ports can be changed from unrestricted to private.
+        """
+        active_input_ports = set(
+            self.db.execute(
+                select(
+                    InputPortModel.consuming_abstract_data_product_id,
+                    InputPortModel.output_port_id,
+                )
+                .join(
+                    OutputPortModel,
+                    OutputPortModel.id == InputPortModel.output_port_id,
+                )
+                .where(
+                    OutputPortModel.data_product_id == data_product_id,
+                    InputPortModel.status == InputPortStatus.APPROVED,
+                )
+                .distinct()
+            ).tuples()
+        )
+
+        authorizer = Authorization()
+        current_input_port_links = {
+            (str(link.consumer_id), str(link.producer_output_port_id))
+            for link in authorizer.get_input_port_link(
+                producer_data_product_id=data_product_id
+            )
+        }
+        desired_input_port_links = {
+            (str(consumer_id), str(output_port_id))
+            for consumer_id, output_port_id in active_input_ports
+        }
+
+        for consumer_id, output_port_id in sorted(
+            current_input_port_links - desired_input_port_links
+        ):
+            authorizer.remove_input_port_link(
+                consumer_id=consumer_id,
+                producer_data_product_id=data_product_id,
+                producer_output_port_id=output_port_id,
+            )
+
+        for consumer_id, output_port_id in sorted(
+            desired_input_port_links - current_input_port_links
+        ):
+            authorizer.add_input_port_link(
+                consumer_id=consumer_id,
+                producer_data_product_id=data_product_id,
+                producer_output_port_id=output_port_id,
+            )
+
+    def sync_data_product_consumer_access(self) -> None:
+        data_product_ids = self.db.scalars(
+            select(DataProductModel.id),
+            execution_options={"skip_data_product_visibility_filter": True},
+        ).all()
+        for data_product_id in data_product_ids:
+            self._sync_consumer_reader_grouping(data_product_id)
 
     def get_data_product_settings(
         self, data_product_id: UUID
@@ -78,8 +176,8 @@ class DataProductService(AbstractDataProductService):
 
         output_port_tags = self.db.scalars(
             select(TagModel)
-            .join(DatasetModel.tags)
-            .where(DatasetModel.data_product_id == data_product_id)
+            .join(OutputPortModel.tags)
+            .where(OutputPortModel.data_product_id == data_product_id)
         ).all()
         rolled_up_tags.update(output_port_tags)
 
@@ -98,7 +196,10 @@ class DataProductService(AbstractDataProductService):
         data_product = self.db.scalar(
             select(DataProductModel)
             .where(DataProductModel.id == id)
-            .options(selectinload(DataProductModel.tags))
+            .options(
+                selectinload(DataProductModel.tags),
+                selectinload(DataProductModel.environments),
+            )
         )
         default_lifecycle = self.db.scalar(
             select(DataProductLifeCycleModel).filter(
@@ -116,7 +217,9 @@ class DataProductService(AbstractDataProductService):
 
     def get_data_products(
         self,
-        filter_to_user_with_assigment: Optional[UUID] = None,
+        *,
+        current_user: User,
+        assignment_filter: AssignmentFilter,
     ) -> Sequence[DataProductModel]:
         default_lifecycle = self.db.scalar(
             select(DataProductLifeCycleModel).filter(
@@ -125,15 +228,33 @@ class DataProductService(AbstractDataProductService):
         )
         query = select(DataProductModel).options(
             selectinload(DataProductModel.tags).raiseload("*"),
+            selectinload(DataProductModel.environments),
             undefer(DataProductModel.input_port_count),
         )
-        if filter_to_user_with_assigment:
-            query = query.filter(
-                DataProductModel.assignments.any(
-                    user_id=filter_to_user_with_assigment,
-                    decision=DecisionStatus.APPROVED,
+        match assignment_filter:
+            case AssignmentFilter.ALL:
+                pass
+            case AssignmentFilter.ONLY_ASSIGNED:
+                user_group_ids = GroupService(
+                    self.db
+                ).get_groups_ids_identity_is_member_of(current_user.id)
+                query = query.where(
+                    DataProductModel.assignments.any(
+                        and_(
+                            DataProductRoleAssignment.decision
+                            == DecisionStatus.APPROVED,
+                            or_(
+                                DataProductRoleAssignment.identity_id
+                                == current_user.id,
+                                DataProductRoleAssignment.identity_id.in_(
+                                    user_group_ids
+                                ),
+                            ),
+                        )
+                    )
                 )
-            )
+            case _:
+                assert_never(assignment_filter)
         query = query.order_by(asc(DataProductModel.name))
 
         dps = self.db.scalars(query).unique().all()
@@ -151,13 +272,13 @@ class DataProductService(AbstractDataProductService):
             options=[selectinload(DataProductModel.assignments)],
             populate_existing=True,
         )
-        user_ids = [
-            assignment.user_id
+        identity_ids = [
+            assignment.identity_id
             for assignment in data_product.assignments
             if assignment.role.prototype == Prototype.OWNER
         ]
         return self.db.scalars(
-            select(UserModel).filter(UserModel.id.in_(user_ids))
+            select(UserModel).filter(UserModel.id.in_(identity_ids))
         ).all()
 
     def _get_tags(self, tag_ids: list[UUID]) -> list[TagModel]:
@@ -177,12 +298,16 @@ class DataProductService(AbstractDataProductService):
                 detail=f"Invalid namespace: {validity.value}",
             )
 
-        data_product_schema = data_product.model_dump(exclude={"input_ports"})
+        DomainService(self.db).ensure_assignable(data_product.domain_id)
+        data_product_schema = data_product.model_dump(
+            exclude={"input_ports", "environment_ids"}
+        )
         tags = self._get_tags(data_product_schema.pop("tag_ids", []))
         _ = data_product_schema.pop("owners", [])
-        model = DataProductModel(**data_product_schema, tags=tags)
+        model = DataProductModel(**data_product_schema, tags=tags, environments=[])
         self.db.add(model)
-        self.db.commit()
+        self._set_environments(model, data_product.environment_ids)
+        self._sync_public_reader_grouping(model.id, model.visibility)
         return model
 
     def remove_data_product(self, id: UUID) -> DataProductModel:
@@ -195,7 +320,7 @@ class DataProductService(AbstractDataProductService):
 
         result = copy.deepcopy(data_product)
         self.db.delete(data_product)
-        self.db.commit()
+        self.db.flush()
         return result
 
     def update_data_product(
@@ -203,11 +328,24 @@ class DataProductService(AbstractDataProductService):
         id: UUID,
         data_product: DataProductUpdate,
     ) -> UpdateDataProductResponse:
-        current_data_product = ensure_data_product_exists(
-            id, self.db, options=[selectinload(DataProductModel.tags)]
+        current_data_product = self.db.scalar(
+            select(DataProductModel)
+            .where(DataProductModel.id == id)
+            .with_for_update(of=DataProductModel)
+            .execution_options(populate_existing=True)
+            .options(
+                selectinload(DataProductModel.tags),
+                selectinload(DataProductModel.environments),
+            )
         )
+        if current_data_product is None:
+            raise HTTPException(status_code=404, detail="Data Product not found")
         self._ensure_not_deleting(current_data_product)
-        update_data_product = data_product.model_dump(exclude_unset=True)
+        update_data_product = data_product.model_dump(
+            exclude_unset=True, exclude={"environment_ids"}
+        )
+        if data_product.domain_id != current_data_product.domain_id:
+            DomainService(self.db).ensure_assignable(data_product.domain_id)
 
         if (
             current_data_product.namespace != data_product.namespace
@@ -229,9 +367,62 @@ class DataProductService(AbstractDataProductService):
                 current_data_product.tags = new_tags
             else:
                 setattr(current_data_product, k, v) if v else None
-
-        self.db.commit()
+        if data_product.environment_ids is not None:
+            self._set_environments(current_data_product, data_product.environment_ids)
+        self.db.flush()
         return UpdateDataProductResponse(id=current_data_product.id)
+
+    def _set_environments(
+        self, data_product: DataProductModel, environment_ids: list[UUID] | None
+    ) -> None:
+        query = select(EnvironmentModel)
+        if environment_ids is None:
+            query = query.where(EnvironmentModel.is_global.is_(True))
+        else:
+            requested_ids = set(environment_ids)
+            if len(environment_ids) != len(requested_ids):
+                raise HTTPException(
+                    status_code=400, detail="Duplicate environment ids provided"
+                )
+            query = query.where(EnvironmentModel.id.in_(requested_ids))
+
+        environments = list(self.db.scalars(query).all())
+        resolved_ids = {environment.id for environment in environments}
+        if environment_ids is not None and resolved_ids != requested_ids:
+            raise HTTPException(
+                status_code=400, detail="Invalid environment ids provided"
+            )
+        if not environments:
+            raise HTTPException(
+                status_code=400,
+                detail="Select at least one environment for the Data Product",
+            )
+
+        existing_ids = {item.environment_id for item in data_product.environments}
+        if not existing_ids.issubset(resolved_ids):
+            raise HTTPException(
+                status_code=400,
+                detail="Environments cannot be removed from a Data Product",
+            )
+        additions = [
+            DataProductEnvironment(
+                environment=environment, environment_id=environment.id
+            )
+            for environment in environments
+            if environment.id not in existing_ids
+        ]
+        data_product.environments.extend(additions)
+        self.db.flush()
+        context.queue_events(
+            [
+                DataProductEnvironmentAddedEvent(
+                    data_product_id=data_product.id,
+                    environment=item.environment.acronym,
+                    creation_date=item.creation_date,
+                )
+                for item in additions
+            ]
+        )
 
     def update_data_product_about(
         self,
@@ -241,7 +432,7 @@ class DataProductService(AbstractDataProductService):
         current_data_product = ensure_data_product_exists(id, self.db)
         self._ensure_not_deleting(current_data_product)
         current_data_product.about = data_product.about
-        self.db.commit()
+        self.db.flush()
         return current_data_product
 
     def update_data_product_status(
@@ -252,7 +443,7 @@ class DataProductService(AbstractDataProductService):
         current_data_product = ensure_data_product_exists(id, self.db)
         self._ensure_not_deleting(current_data_product)
         current_data_product.status = data_product.status
-        self.db.commit()
+        self.db.flush()
         return current_data_product
 
     def update_data_product_usage(
@@ -263,7 +454,7 @@ class DataProductService(AbstractDataProductService):
         current_data_product = ensure_data_product_exists(id, self.db)
         self._ensure_not_deleting(current_data_product)
         current_data_product.usage = usage.usage
-        self.db.commit()
+        self.db.flush()
         return current_data_product
 
     @deprecated("Should use generate_signin_url instead")
@@ -294,13 +485,13 @@ class DataProductService(AbstractDataProductService):
             .unique()
             .all()
         )
-        data_outputs = (
+        technical_assets = (
             self.db.scalars(
                 select(TechnicalAssetModel)
                 .options(
-                    joinedload(TechnicalAssetModel.dataset_links)
-                    .selectinload(DataOutputDatasetAssociation.dataset)
-                    .selectinload(DatasetModel.data_product_links)
+                    joinedload(TechnicalAssetModel.output_port_links)
+                    .selectinload(TechnicalAssetOutputPortAssociation.output_port)
+                    .selectinload(OutputPortModel.data_product_links)
                 )
                 .filter_by(owner_id=id)
                 .execution_options(populate_existing=True)
@@ -310,13 +501,16 @@ class DataProductService(AbstractDataProductService):
         )
 
         for upstream_datasets in input_ports:
+            # Skip private output ports with no access they show up as None
+            if upstream_datasets.output_port is None:
+                continue
             nodes.append(
                 Node(
                     id=upstream_datasets.id,
                     data=NodeData(
-                        id=upstream_datasets.dataset_id,
-                        name=upstream_datasets.dataset.name,
-                        link_to_id=upstream_datasets.dataset.data_product_id,
+                        id=upstream_datasets.output_port_id,
+                        name=upstream_datasets.output_port.name,
+                        link_to_id=upstream_datasets.output_port.data_product_id,
                     ),
                     type=NodeType.outputPortNode,
                 )
@@ -330,45 +524,45 @@ class DataProductService(AbstractDataProductService):
                 )
             )
 
-        for data_output in data_outputs:
+        for technical_asset in technical_assets:
             nodes.append(
                 Node(
-                    id=data_output.id,
+                    id=technical_asset.id,
                     data=NodeData(
-                        id=data_output.id,
-                        icon_key=data_output.configuration.configuration_type,
-                        name=data_output.name,
-                        link_to_id=data_output.owner_id,
+                        id=technical_asset.id,
+                        icon_key=technical_asset.configuration.configuration_type,
+                        name=technical_asset.name,
+                        link_to_id=technical_asset.owner_id,
                     ),
                     type=NodeType.technicalAssetNode,
                 )
             )
             edges.append(
                 Edge(
-                    id=f"{data_output.id}-{product.id}",
+                    id=f"{technical_asset.id}-{product.id}",
                     source=product.id,
-                    target=data_output.id,
+                    target=technical_asset.id,
                     animated=True,
                 )
             )
             if level >= 2:
-                for downstream_datasets in data_output.dataset_links:
+                for downstream_datasets in technical_asset.output_port_links:
                     nodes.append(
                         Node(
-                            id=f"{downstream_datasets.dataset_id}_2",
+                            id=f"{downstream_datasets.output_port_id}_2",
                             data=NodeData(
-                                id=f"{downstream_datasets.dataset_id}",
-                                name=downstream_datasets.dataset.name,
-                                link_to_id=downstream_datasets.dataset.data_product_id,
+                                id=f"{downstream_datasets.output_port_id}",
+                                name=downstream_datasets.output_port.name,
+                                link_to_id=downstream_datasets.output_port.data_product_id,
                             ),
                             type=NodeType.outputPortNode,
                         )
                     )
                     edges.append(
                         Edge(
-                            id=f"{downstream_datasets.dataset_id}-{data_output.id}-2",
-                            target=f"{downstream_datasets.dataset_id}_2",
-                            source=data_output.id,
+                            id=f"{downstream_datasets.output_port_id}-{technical_asset.id}-2",
+                            target=f"{downstream_datasets.output_port_id}_2",
+                            source=technical_asset.id,
                             animated=downstream_datasets.status
                             == DecisionStatus.APPROVED,
                         )
@@ -376,7 +570,10 @@ class DataProductService(AbstractDataProductService):
                     if level >= 3:
                         for (
                             downstream_dps
-                        ) in downstream_datasets.dataset.data_product_links:
+                        ) in downstream_datasets.output_port.data_product_links:
+                            # A hidden data product will result in None, filter it out
+                            if downstream_dps.consuming_abstract_data_product is None:
+                                continue
                             node_id = f"{downstream_dps.id}_3"
                             nodes.append(
                                 get_graph_data_from_abstract_data_product(
@@ -388,17 +585,17 @@ class DataProductService(AbstractDataProductService):
                                 Edge(
                                     id=(
                                         f"{downstream_dps.id}-"
-                                        f"{downstream_datasets.dataset.id}-3"
+                                        f"{downstream_datasets.output_port.id}-3"
                                     ),
                                     target=node_id,
-                                    source=f"{downstream_datasets.dataset.id}_2",
+                                    source=f"{downstream_datasets.output_port.id}_2",
                                     animated=downstream_dps.status
                                     == DecisionStatus.APPROVED,
                                 )
                             )
 
         # if no data outputs are present, still show the children datasets
-        if not data_outputs:
+        if not technical_assets:
             for downstream_dataset in product.datasets:
                 nodes.append(
                     Node(
@@ -421,3 +618,13 @@ class DataProductService(AbstractDataProductService):
                 )
 
         return Graph(nodes=set(nodes), edges=set(edges))
+
+    def sync_discoverable_data_products(self):
+        visible_data_product_ids = self.db.scalars(
+            select(DataProductModel.id).where(
+                DataProductModel.visibility == DataProductVisibility.DISCOVERABLE
+            ),
+            execution_options={"skip_data_product_visibility_filter": True},
+        ).all()
+        for id in visible_data_product_ids:
+            self._sync_public_reader_grouping(id, DataProductVisibility.DISCOVERABLE)

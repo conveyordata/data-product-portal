@@ -1,0 +1,98 @@
+import { UserAddOutlined } from '@ant-design/icons';
+import { Button, Flex, Input, Tooltip } from 'antd';
+import { isBefore, parseISO, startOfToday } from 'date-fns';
+import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { searchFilter } from '@/components/empty-state/empty-state.component.tsx';
+import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
+import {
+    InputPortStatus,
+    type OutputPortInputPort,
+    RenewalStatus,
+    useGetInputPortsForOutputPortQuery,
+} from '@/store/api/services/generated/dataProductsOutputPortsInputPortsApi.ts';
+import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
+import { ConsumersTable } from './components/consumers-table/consumers-table.component';
+import { GrantOutputPortAccessModal } from './components/grant-output-port-access-modal.tsx';
+
+type Props = {
+    outputPortId: string;
+    dataProductId: string;
+};
+
+function filterDataProducts(dataProductLinks: OutputPortInputPort[], searchTerm: string) {
+    return (
+        dataProductLinks.filter((item) =>
+            item?.consuming_abstract_data_product.name?.toLowerCase()?.includes(searchTerm?.toLowerCase()),
+        ) ?? []
+    );
+}
+
+export function hasAccessOrPendingRequest({ status, renewal_status, current_request }: OutputPortInputPort) {
+    const { valid_until: validUntil } = current_request;
+    const isExpired = validUntil !== null && isBefore(parseISO(validUntil), startOfToday());
+    return (
+        (status === InputPortStatus.Approved && !isExpired) ||
+        status === InputPortStatus.Pending ||
+        renewal_status === RenewalStatus.Pending
+    );
+}
+
+export function ConsumersTab({ outputPortId, dataProductId }: Props) {
+    const { t } = useTranslation();
+    const inputPortsQuery = useGetInputPortsForOutputPortQuery({
+        outputPortId: outputPortId,
+        dataProductId,
+    });
+    const { data: { input_ports: inputPorts = [] } = {} } = inputPortsQuery;
+    const [searchTerm, setSearchTerm] = useState<string>('');
+    const [isGrantModalOpen, setIsGrantModalOpen] = useState(false);
+    const { data: { allowed: canApproveAccess } = {} } = useCheckAccessQuery({
+        resource: outputPortId,
+        action: AuthorizationAction.OUTPUT_PORT__APPROVE_DATAPRODUCT_ACCESS_REQUEST,
+    });
+    const filteredDataProducts = useMemo(() => {
+        return filterDataProducts(inputPorts, searchTerm);
+    }, [inputPorts, searchTerm]);
+
+    return (
+        <Flex vertical gap="middle">
+            <Flex gap="middle">
+                <Input.Search
+                    placeholder={t('Search consumers by name')}
+                    allowClear
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                />
+                {canApproveAccess && (
+                    <Tooltip
+                        title={t(
+                            'You can use this to directly add a new consumer to this Output Port, this is the only way to add consumers to Invite only Output Ports.',
+                        )}
+                    >
+                        <Button type="primary" icon={<UserAddOutlined />} onClick={() => setIsGrantModalOpen(true)}>
+                            {t('Add consumer')}
+                        </Button>
+                    </Tooltip>
+                )}
+            </Flex>
+            <ConsumersTable
+                outputPortId={outputPortId}
+                dataProductId={dataProductId}
+                dataProducts={filteredDataProducts}
+                query={inputPortsQuery}
+                filter={searchFilter(searchTerm, setSearchTerm)}
+            />
+            {isGrantModalOpen && (
+                <GrantOutputPortAccessModal
+                    dataProductId={dataProductId}
+                    outputPortId={outputPortId}
+                    existingConsumerIds={inputPorts
+                        .filter(hasAccessOrPendingRequest)
+                        .map(({ consuming_abstract_data_product_id }) => consuming_abstract_data_product_id)}
+                    onClose={() => setIsGrantModalOpen(false)}
+                />
+            )}
+        </Flex>
+    );
+}

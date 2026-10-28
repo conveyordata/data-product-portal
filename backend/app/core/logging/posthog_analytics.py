@@ -1,5 +1,6 @@
 import asyncio
 from datetime import datetime, timedelta
+from functools import cache
 from typing import Any, Optional
 
 import pytz
@@ -14,39 +15,43 @@ from app.database.database import SessionLocal
 from app.settings import settings
 
 
-class PortalPosthog:
-    """Thin wrapper around the Posthog client that injects portal-level
-    context (e.g. Host) into every capture call automatically."""
+@cache
+def get_posthog_client() -> Optional[Posthog]:
+    if settings.POSTHOG_ENABLED:
+        return Posthog(
+            project_api_key=settings.POSTHOG_API_KEY,
+            host=settings.POSTHOG_HOST,
+            super_properties={"host": settings.HOST},
+        )
+    return None
 
-    def __init__(self, client: Posthog, host: str) -> None:
-        self._client = client
-        self._host = host
+
+class PosthogAnalyticsClient:
+    """Wraps an optional Posthog client so callers don't need to check for
+    None or guard against capture() failures (e.g. non-serializable
+    properties, network errors) themselves.
+    """
+
+    def __init__(self) -> None:
+        self._client = get_posthog_client()
 
     def capture(
         self,
+        *,
         distinct_id: Any,
         event: str,
         properties: Optional[dict[str, Any]] = None,
-        **kwargs: Any,
     ) -> None:
-        merged = {"host": self._host, **(properties or {})}
-        self._client.capture(
-            distinct_id=distinct_id, event=event, properties=merged, **kwargs
-        )
-
-
-posthog_client: Optional[PortalPosthog] = None
-if settings.POSTHOG_ENABLED:
-    posthog_client = PortalPosthog(
-        client=Posthog(
-            project_api_key=settings.POSTHOG_API_KEY, host=settings.POSTHOG_HOST
-        ),
-        host=settings.HOST,
-    )
-
-
-def get_posthog_client() -> Optional[PortalPosthog]:
-    return posthog_client
+        if not self._client:
+            return
+        try:
+            self._client.capture(
+                distinct_id=str(distinct_id),
+                event=event,
+                properties=properties,
+            )
+        except Exception:
+            logger.warning(f"Failed to send posthog event '{event}'", exc_info=True)
 
 
 def _seconds_until_next_midnight_utc() -> float:
@@ -57,55 +62,93 @@ def _seconds_until_next_midnight_utc() -> float:
     return (next_midnight - now).total_seconds()
 
 
-async def report_consumption_metrics_task() -> None:
-    """
-    Daily background task that reports the total number of approved input ports
-    to PostHog as a consumption metric, broken down by ADP type. Fires once at
-    midnight UTC regardless of how many times the app restarts during the day.
+def consumption_metrics() -> dict[str, Any]:
+    with SessionLocal() as db:
+        rows = db.execute(
+            select(
+                AbstractDataProduct.abstract_data_product_type,
+                func.count(InputPortModel.id),
+            )
+            .join(
+                AbstractDataProduct,
+                InputPortModel.consuming_abstract_data_product_id
+                == AbstractDataProduct.id,
+            )
+            .where(InputPortModel.status == DecisionStatus.APPROVED)
+            .group_by(AbstractDataProduct.abstract_data_product_type),
+            execution_options={"skip_data_product_visibility_filter": True},
+        ).all()
 
-    Consumption (approved input ports) is a key success metric for the portal —
-    it measures how actively data products are being used by other teams.
+    counts_by_type = {adp_type.value: count for adp_type, count in rows}
+    total = sum(counts_by_type.values())
+    return {
+        "total_approved_input_ports": total,
+        **{
+            f"approved_input_ports_{adp_type}": count
+            for adp_type, count in counts_by_type.items()
+        },
+    }
+
+
+def provisioning_metrics() -> dict[str, Any]:
+    with SessionLocal() as db:
+        rows = db.execute(
+            select(
+                AbstractDataProduct.abstract_data_product_type,
+                func.count(AbstractDataProduct.id),
+                func.count(AbstractDataProduct.id).filter(
+                    func.cardinality(AbstractDataProduct.finalizers) > 0
+                ),
+            ).group_by(AbstractDataProduct.abstract_data_product_type),
+            execution_options={"skip_data_product_visibility_filter": True},
+        ).all()
+
+    counts_by_type = {
+        adp_type.value: {
+            "total": total_count,
+            "with_finalizers": with_finalizers_count,
+        }
+        for adp_type, total_count, with_finalizers_count in rows
+    }
+
+    return {
+        **{
+            f"provisioned_{adp_type}": counts["with_finalizers"]
+            for adp_type, counts in counts_by_type.items()
+        },
+        **{
+            f"total_{adp_type}": counts["total"]
+            for adp_type, counts in counts_by_type.items()
+        },
+    }
+
+
+def _do_report_daily_metrics(posthog: Posthog) -> None:
+    consumption = consumption_metrics()
+    provisioning = provisioning_metrics()
+    properties = {
+        **consumption,
+        **provisioning,
+    }
+    logger.info(f"Reporting metrics to posthog: {properties}")
+    posthog.capture(
+        distinct_id="system",
+        event="Daily Consumption Metrics",
+        properties=properties,
+    )
+
+
+async def report_daily_metrics() -> None:
     """
+    Daily background task that reports metrics to the Data Product Portal team.
+    """
+    posthog = get_posthog_client()
+    if not posthog:
+        return
     while True:
         await asyncio.sleep(_seconds_until_next_midnight_utc())
         try:
-            posthog = get_posthog_client()
-            if not posthog:
-                return
-
-            with SessionLocal() as db:
-                rows = db.execute(
-                    select(
-                        AbstractDataProduct.abstract_data_product_type,
-                        func.count(InputPortModel.id),
-                    )
-                    .join(
-                        AbstractDataProduct,
-                        InputPortModel.consuming_abstract_data_product_id
-                        == AbstractDataProduct.id,
-                    )
-                    .where(InputPortModel.status == DecisionStatus.APPROVED)
-                    .group_by(AbstractDataProduct.abstract_data_product_type)
-                ).all()
-
-            counts_by_type = {adp_type.value: count for adp_type, count in rows}
-            total = sum(counts_by_type.values())
-
-            logger.info(
-                f"Reporting daily consumption metric: {total} approved input ports"
-                f" ({counts_by_type})"
-            )
-            posthog.capture(
-                distinct_id="system",
-                event="Daily Consumption Metrics",
-                properties={
-                    "total_approved_input_ports": total,
-                    **{
-                        f"approved_input_ports_{adp_type}": count
-                        for adp_type, count in counts_by_type.items()
-                    },
-                },
-            )
+            await asyncio.to_thread(_do_report_daily_metrics, posthog)
         except Exception as e:
-            logger.warning(f"Failed to report daily consumption metrics: {e}")
+            logger.warning(f"Failed to report daily metrics: {e}")
         await asyncio.sleep(1)

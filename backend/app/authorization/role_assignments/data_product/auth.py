@@ -2,7 +2,8 @@ from dataclasses import dataclass
 from typing import Optional
 from uuid import UUID
 
-from ..auth import ResourceAuthAssignment
+from app.authorization.role_assignments.auth import ResourceAuthAssignment
+
 from .schema import DataProductRoleAssignment
 
 
@@ -18,7 +19,7 @@ class DataProductAuthAssignment(ResourceAuthAssignment):
 
         super().__init__(
             role_id=role_id,
-            user_id=assignment.user_id,
+            user_id=assignment.identity_id,
             resource_id=assignment.data_product_id,
             previous_role_id=previous_role_id,
         )

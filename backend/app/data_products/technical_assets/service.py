@@ -4,24 +4,26 @@ from typing import Sequence
 from uuid import UUID
 
 import pytz
-from fastapi import HTTPException, status
+from fastapi import Depends, HTTPException, status
 from sqlalchemy import select
-from sqlalchemy.orm import Session, selectinload
+from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app.authorization.role_assignments.enums import DecisionStatus
+from app.configuration.access_modes.model import AccessMode as AccessModeModel
 from app.configuration.tags.model import Tag as TagModel
 from app.configuration.tags.model import ensure_tag_exists
 from app.core.namespace.validation import (
     TechnicalAssetNamespaceValidator,
 )
 from app.data_products.model import DataProduct as DataProductModel
+from app.data_products.model import ensure_data_product_exists
 from app.data_products.output_port_technical_assets_link.model import (
-    DataOutputDatasetAssociation,
+    TechnicalAssetOutputPortAssociation,
 )
 from app.data_products.output_port_technical_assets_link.model import (
-    DataOutputDatasetAssociation as DataOutputDatasetAssociationModel,
+    TechnicalAssetOutputPortAssociation as TechnicalAssetOutputPortAssociationModel,
 )
-from app.data_products.output_ports.model import Dataset as DatasetModel
+from app.data_products.output_ports.model import OutputPort as OutputPortModel
 from app.data_products.output_ports.model import ensure_output_port_exists
 from app.data_products.output_ports.service import OutputPortService
 from app.data_products.service import DataProductService
@@ -32,20 +34,49 @@ from app.data_products.technical_assets.model import (
 from app.data_products.technical_assets.model import ensure_technical_asset_exists
 from app.data_products.technical_assets.schema_request import (
     CreateTechnicalAssetRequest,
-    DataOutputStatusUpdate,
-    DataOutputUpdate,
+    TechnicalAssetStatusUpdate,
+    TechnicalAssetUpdate,
 )
 from app.data_products.technical_assets.schema_response import (
     UpdateTechnicalAssetResponse,
 )
 from app.data_products.technical_assets.status import TechnicalAssetStatus
+from app.database.deps import get_db_session
 from app.graph.graph import Graph
+from app.plugins.registry import plugin_registry
 from app.resource_names.service import ResourceNameValidityType
+from app.technical_asset_configuration.base_schema import PluginContext
 from app.users.schema import User
 
+TECHNICAL_ASSET_ACCESS_MODES_INCOMPATIBLE_ERROR = HTTPException(
+    status_code=status.HTTP_409_CONFLICT,
+    detail="Access modes of technical asset are incompatible with access modes of output port",
+)
 
-class DataOutputService:
-    def __init__(self, db: Session):
+TECHNICAL_ASSET_ALREADY_LINKED_ERROR = HTTPException(
+    status_code=status.HTTP_400_BAD_REQUEST,
+    detail="Technical Asset already exists in output port",
+)
+
+TECHNICAL_ASSET_NOT_ACTIVE_ERROR = HTTPException(
+    status_code=status.HTTP_400_BAD_REQUEST,
+    detail="Cannot link technical asset that is not active",
+)
+
+TECHNICAL_ASSET_NOT_SHAREABLE_ERROR = HTTPException(
+    status_code=status.HTTP_409_CONFLICT,
+    detail="Technical assets of this type are not shareable and cannot be linked to an Output Port",
+)
+
+
+def ensure_technical_asset_shareable(technical_asset: TechnicalAssetModel) -> None:
+    plugin = plugin_registry.get(technical_asset.configuration.configuration_type)
+    if not plugin.get_platform_metadata().shareable:
+        raise TECHNICAL_ASSET_NOT_SHAREABLE_ERROR
+
+
+class TechnicalAssetService:
+    def __init__(self, db: Session = Depends(get_db_session, scope="function")):
         self.db = db
         self.namespace_validator = TechnicalAssetNamespaceValidator()
 
@@ -56,50 +87,94 @@ class DataOutputService:
             tags.append(tag)
         return tags
 
+    def _get_access_modes(
+        self, access_mode_ids: list[UUID], technical_asset_type
+    ) -> list[AccessModeModel]:
+        access_modes = self.db.scalars(
+            select(AccessModeModel).where(AccessModeModel.id.in_(access_mode_ids))
+        ).all()
+        if len(access_mode_ids) != len(access_modes):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid access modes provided",
+            )
+        for access_mode in access_modes:
+            if technical_asset_type not in access_mode.technical_asset_types:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Access mode {access_mode.name} is not compatible with technical asset type {technical_asset_type}",
+                )
+        return access_modes
+
     @staticmethod
     def get_status_for(technical_mapping: TechnicalMapping):
         if technical_mapping == TechnicalMapping.Default:
             return TechnicalAssetStatus.ACTIVE
         return TechnicalAssetStatus.PENDING
 
-    def get_data_outputs(self) -> Sequence[TechnicalAssetModel]:
-        return (
+    def _filter_environment_configurations_by_data_product(
+        self, technical_assets: Sequence[TechnicalAssetModel]
+    ) -> None:
+        for technical_asset in technical_assets:
+            allowed_environment_ids = {
+                declaration.environment_id
+                for declaration in technical_asset.owner.environments
+            }
+            technical_asset.environment_configurations = [
+                config
+                for config in technical_asset.environment_configurations
+                if config.environment_id in allowed_environment_ids
+            ]
+
+    def get_technical_assets(self) -> Sequence[TechnicalAssetModel]:
+        technical_assets = (
             self.db.scalars(
                 select(TechnicalAssetModel).options(
                     selectinload(TechnicalAssetModel.environment_configurations),
-                    selectinload(TechnicalAssetModel.dataset_links)
-                    .selectinload(DataOutputDatasetAssociationModel.dataset)
+                    joinedload(TechnicalAssetModel.owner).selectinload(
+                        DataProductModel.environments
+                    ),
+                    selectinload(TechnicalAssetModel.output_port_links)
+                    .selectinload(TechnicalAssetOutputPortAssociationModel.output_port)
                     .raiseload("*"),
                 )
             )
             .unique()
             .all()
         )
+        self._filter_environment_configurations_by_data_product(technical_assets)
+        return technical_assets
 
-    def get_data_output(self, data_product_id: UUID, id: UUID) -> TechnicalAssetModel:
-        data_output = self.db.scalar(
+    def get_technical_asset(
+        self, data_product_id: UUID, id: UUID
+    ) -> TechnicalAssetModel:
+        technical_asset = self.db.scalar(
             (
                 select(TechnicalAssetModel)
                 .where(TechnicalAssetModel.id == id)
                 .where(TechnicalAssetModel.owner_id == data_product_id)
             ).options(
-                selectinload(TechnicalAssetModel.dataset_links),
+                selectinload(TechnicalAssetModel.output_port_links),
                 selectinload(TechnicalAssetModel.environment_configurations),
+                joinedload(TechnicalAssetModel.owner).selectinload(
+                    DataProductModel.environments
+                ),
             )
         )
-        if not data_output:
+        if not technical_asset:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Technical asset not found",
             )
-        return data_output
+        self._filter_environment_configurations_by_data_product([technical_asset])
+        return technical_asset
 
-    def create_data_output(
-        self, id: UUID, data_output: CreateTechnicalAssetRequest
+    def create_technical_asset(
+        self, data_product_id: UUID, technical_asset: CreateTechnicalAssetRequest
     ) -> TechnicalAssetModel:
         if (
             validity := self.namespace_validator.validate_namespace(
-                data_output.namespace, self.db, id
+                technical_asset.namespace, self.db, data_product_id
             ).validity
         ) != ResourceNameValidityType.VALID:
             raise HTTPException(
@@ -107,158 +182,173 @@ class DataOutputService:
                 detail=f"Invalid namespace: {validity.value}",
             )
 
-        if data_output.technical_mapping == TechnicalMapping.Default:
-            data_product = self.db.get(DataProductModel, id)
-            data_output.configuration.validate_configuration(data_product, self.db)
+        if technical_asset.technical_mapping == TechnicalMapping.Default:
+            technical_asset.configuration.validate_configuration(
+                PluginContext.build(
+                    ensure_data_product_exists(data_product_id, self.db),
+                    technical_asset.namespace,
+                    TechnicalMapping.Default,
+                ),
+                self.db,
+            )
 
-        data_output_schema = data_output.parse_pydantic_schema()
-        tags = self._get_tags(data_output_schema.pop("tag_ids", []))
-        data_output_schema.pop("sourceAligned")  # Remove deprecated field
+        technical_asset_schema = technical_asset.parse_pydantic_schema()
+        tags = self._get_tags(technical_asset_schema.pop("tag_ids", []))
+        access_modes = self._get_access_modes(
+            technical_asset_schema.pop("access_mode_ids", []),
+            technical_asset.configuration.name,
+        )
+        technical_asset_schema.pop("sourceAligned")  # Remove deprecated field
 
-        technical_asset_status = self.get_status_for(data_output.technical_mapping)  # type: ignore[arg-type]
+        technical_asset_status = self.get_status_for(technical_asset.technical_mapping)  # type: ignore[arg-type]
         model = TechnicalAssetModel(
-            **data_output_schema,
+            **technical_asset_schema,
             tags=tags,
-            owner_id=id,
+            access_modes=access_modes,
+            owner_id=data_product_id,
             status=technical_asset_status,
         )
         self.db.add(model)
-        self.db.commit()
+        self.db.flush()
         return model
 
-    def remove_data_output(
+    def remove_technical_asset(
         self, data_product_id: UUID, id: UUID
     ) -> TechnicalAssetModel:
-        data_output = self.get_data_output_with_links(data_product_id, id)
+        technical_asset = self.get_technical_asset_with_links(data_product_id, id)
 
-        result = copy.deepcopy(data_output)
-        self.db.delete(data_output)
+        result = copy.deepcopy(technical_asset)
+        self.db.delete(technical_asset)
         self.db.flush()
 
         self.update_search_for_associated_datasets(result)
-        self.db.commit()
+        self.db.flush()
         return result
 
-    def get_data_output_with_links(
+    def get_technical_asset_with_links(
         self, data_product_id: UUID, id: UUID
     ) -> TechnicalAssetModel:
-        data_output: TechnicalAssetModel | None = self.get_data_output(
+        technical_asset: TechnicalAssetModel | None = self.get_technical_asset(
             data_product_id, id
         )
-        if not data_output:
+        if not technical_asset:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Required data output with {id} does not exist",
+                detail=f"Required technical asset with {id} does not exist",
             )
-        return data_output
+        return technical_asset
 
     def update_search_for_associated_datasets(self, result: TechnicalAssetModel):
         dataset_service = OutputPortService(self.db)
-        for dataset_link in result.dataset_links:
-            dataset_service.recalculate_search(dataset_link.dataset_id)
+        for dataset_link in result.output_port_links:
+            dataset_service.recalculate_search(dataset_link.output_port_id)
 
-    def update_data_output_status(
+    def update_technical_asset_status(
         self,
         data_product_id: UUID,
         id: UUID,
-        data_output: DataOutputStatusUpdate,
+        technical_asset_update: TechnicalAssetStatusUpdate,
         *,
         actor: User,
     ) -> None:
-        current_data_output = self.get_data_output_with_links(data_product_id, id)
-        current_data_output.status = data_output.status
+        current_technical_asset = self.get_technical_asset_with_links(
+            data_product_id, id
+        )
+        current_technical_asset.status = technical_asset_update.status
         self.db.flush()
 
-        self.update_search_for_associated_datasets(current_data_output)
-        self.db.commit()
+        self.update_search_for_associated_datasets(current_technical_asset)
+        self.db.flush()
 
-    def link_dataset_to_data_output(
+    def link_output_port_to_technical_asset(
         self,
         data_product_id: UUID,
         id: UUID,
-        dataset_id: UUID,
+        output_port_id: UUID,
         *,
         actor: User,
-    ) -> DataOutputDatasetAssociationModel:
-        dataset = ensure_output_port_exists(
-            dataset_id,
+    ) -> TechnicalAssetOutputPortAssociationModel:
+        output_port = ensure_output_port_exists(
+            output_port_id,
             self.db,
             data_product_id=data_product_id,
-            options=[selectinload(DatasetModel.data_product_links)],
+            options=[
+                selectinload(OutputPortModel.data_product_links),
+            ],
         )
-        data_output = self.get_data_output(data_product_id, id)
-        if data_output.status != TechnicalAssetStatus.ACTIVE:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Cannot link technical asset that is not active",
-            )
+        technical_asset = self.get_technical_asset(data_product_id, id)
+        if technical_asset.status != TechnicalAssetStatus.ACTIVE:
+            raise TECHNICAL_ASSET_NOT_ACTIVE_ERROR
+        ensure_technical_asset_shareable(technical_asset)
 
-        if dataset.id in [
-            link.dataset_id
-            for link in data_output.dataset_links
+        if output_port.id in [
+            link.output_port_id
+            for link in technical_asset.output_port_links
             if link.status != DecisionStatus.DENIED
         ]:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Dataset {dataset_id} already exists in data product {id}",
-            )
+            raise TECHNICAL_ASSET_ALREADY_LINKED_ERROR
+        if (
+            technical_asset.access_modes
+            and output_port.access_modes
+            and set(output_port.access_modes) != set(technical_asset.access_modes)
+        ):
+            raise TECHNICAL_ASSET_ACCESS_MODES_INCOMPATIBLE_ERROR
 
         # Data output requests always need to be approved
-        dataset_link = DataOutputDatasetAssociationModel(
-            dataset_id=dataset_id,
+        output_port_link = TechnicalAssetOutputPortAssociationModel(
+            output_port_id=output_port_id,
             status=DecisionStatus.PENDING,
             requested_by=actor,
             requested_on=datetime.now(tz=pytz.utc),
         )
-        data_output.dataset_links.append(dataset_link)
+        technical_asset.output_port_links.append(output_port_link)
         self.db.flush()
-        OutputPortService(self.db).recalculate_search(dataset_id)
-        self.db.commit()
-        return dataset_link
+        OutputPortService(self.db).recalculate_search(output_port_id)
+        return output_port_link
 
-    def unlink_dataset_from_data_output(
-        self, data_product_id: UUID, id: UUID, dataset_id: UUID
+    def unlink_output_port_from_technical_asset(
+        self, data_product_id: UUID, id: UUID, output_port_id: UUID
     ) -> TechnicalAssetModel:
-        ensure_output_port_exists(dataset_id, self.db)
-        data_output = self.get_data_output(data_product_id, id)
+        ensure_output_port_exists(output_port_id, self.db)
+        technical_asset = self.get_technical_asset(data_product_id, id)
 
-        data_output_dataset = next(
+        link = next(
             (
                 dataset
-                for dataset in data_output.dataset_links
-                if dataset.dataset_id == dataset_id
+                for dataset in technical_asset.output_port_links
+                if dataset.output_port_id == output_port_id
             ),
             None,
         )
-        if not data_output_dataset:
+        if not link:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Data product dataset for data output {id} not found",
+                detail=f"Data product output port for technical asset {id} not found",
             )
 
-        data_output.dataset_links.remove(data_output_dataset)
+        technical_asset.output_port_links.remove(link)
         self.db.flush()
-        OutputPortService(self.db).recalculate_search(dataset_id)
-        self.db.commit()
-        return data_output
+        OutputPortService(self.db).recalculate_search(output_port_id)
+        self.db.flush()
+        return technical_asset
 
-    def update_data_output(
-        self, data_product_id: UUID, id: UUID, data_output: DataOutputUpdate
+    def update_technical_asset(
+        self, data_product_id: UUID, id: UUID, technical_asset: TechnicalAssetUpdate
     ) -> UpdateTechnicalAssetResponse:
-        current_data_output = ensure_technical_asset_exists(
+        current_technical_asset = ensure_technical_asset_exists(
             id, self.db, data_product_id=data_product_id
         )
-        update_data_output = data_output.model_dump(exclude_unset=True)
+        update_technical_asset = technical_asset.model_dump(exclude_unset=True)
 
-        for k, v in update_data_output.items():
+        for k, v in update_technical_asset.items():
             if k == "tag_ids":
                 new_tags = self._get_tags(v)
-                current_data_output.tags = new_tags
+                current_technical_asset.tags = new_tags
             else:
-                setattr(current_data_output, k, v) if v else None
+                setattr(current_technical_asset, k, v) if v else None
 
-        self.db.commit()
-        return UpdateTechnicalAssetResponse(id=current_data_output.id)
+        self.db.flush()
+        return UpdateTechnicalAssetResponse(id=current_technical_asset.id)
 
     def get_graph_data(self, data_product_id: UUID, id: UUID, level: int) -> Graph:
         ensure_technical_asset_exists(id, self.db, data_product_id=data_product_id)
@@ -272,17 +362,20 @@ class DataOutputService:
 
         return graph
 
-    def get_data_outputs_for_data_product(
+    def get_technical_assets_for_data_product(
         self, data_product_id: UUID
     ) -> Sequence[TechnicalAssetModel]:
-        return (
+        technical_assets = (
             self.db.scalars(
                 select(TechnicalAssetModel)
                 .options(
                     selectinload(TechnicalAssetModel.environment_configurations),
-                    selectinload(TechnicalAssetModel.dataset_links)
-                    .selectinload(DataOutputDatasetAssociation.dataset)
-                    .selectinload(DatasetModel.tags)
+                    joinedload(TechnicalAssetModel.owner).selectinload(
+                        DataProductModel.environments
+                    ),
+                    selectinload(TechnicalAssetModel.output_port_links)
+                    .selectinload(TechnicalAssetOutputPortAssociation.output_port)
+                    .selectinload(OutputPortModel.tags)
                     .raiseload("*"),
                 )
                 .filter(TechnicalAssetModel.owner_id == data_product_id)
@@ -290,3 +383,5 @@ class DataOutputService:
             .unique()
             .all()
         )
+        self._filter_environment_configurations_by_data_product(technical_assets)
+        return technical_assets

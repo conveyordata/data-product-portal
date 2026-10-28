@@ -44,9 +44,7 @@ export function TableCellItem({
                     {...textProps}
                     ellipsis={{
                         onEllipsis: () => {
-                            if (tooltip) {
-                                setHasEllipsis(true);
-                            }
+                            if (tooltip) setHasEllipsis(true);
                         },
                     }}
                     className={styles.text}

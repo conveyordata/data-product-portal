@@ -9,8 +9,8 @@ import {
     useGetDataProductQuery,
     useUpdateDataProductAboutMutation,
 } from '@/store/api/services/generated/dataProductsApi.ts';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
+import { dispatchMessage } from '@/utils/feedback.ts';
 
 type Props = {
     dataProductId: string;

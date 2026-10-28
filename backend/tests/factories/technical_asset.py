@@ -3,10 +3,14 @@ import factory
 from app.data_products.technical_assets.model import TechnicalAsset
 from app.data_products.technical_assets.status import TechnicalAssetStatus
 from tests import test_session
-from tests.factories.data_product import DataProductFactory
-from tests.factories.platform_service import PlatformServiceFactory
-from tests.factories.s3_data_output import S3DataOutputFactory
-from tests.factories.tags import TagFactory
+from tests.factories import (
+    DataProductFactory,
+    PlatformServiceFactory,
+    TagFactory,
+)
+from tests.factories.technical_asset_configuration import (
+    TechnicalAssetConfigurationFactory,
+)
 
 
 class TechnicalAssetFactory(factory.alchemy.SQLAlchemyModelFactory):
@@ -24,12 +28,11 @@ class TechnicalAssetFactory(factory.alchemy.SQLAlchemyModelFactory):
     @factory.post_generation
     def platform_id(self, create, extracted, **kwargs):
         self.platform_id = self.service.platform_id
-        test_session.commit()
 
     owner = factory.SubFactory(DataProductFactory)
 
     technical_mapping = "default"
-    configuration = factory.SubFactory(S3DataOutputFactory)
+    configuration = factory.SubFactory(TechnicalAssetConfigurationFactory)
 
     @factory.post_generation
     def tags(self, create, extracted, **kwargs):
@@ -44,4 +47,5 @@ class TechnicalAssetFactory(factory.alchemy.SQLAlchemyModelFactory):
         else:
             # If called without arguments, create a default tag
             self.tags.append(TagFactory())
-        test_session.commit()
+        # This is broken somehow without an explicit commit
+        test_session.commit()  # noqa: allow-commit

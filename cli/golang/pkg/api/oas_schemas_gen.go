@@ -8,6 +8,7 @@ import (
 	"github.com/go-faster/errors"
 	"github.com/go-faster/jx"
 	"github.com/google/uuid"
+	ht "github.com/ogen-go/ogen/http"
 )
 
 // Ref: #/components/schemas/AWSCredentials
@@ -65,6 +66,7 @@ type AbstractDataProductInfo struct {
 	Name                    string                  `json:"name"`
 	Namespace               string                  `json:"namespace"`
 	AbstractDataProductType AbstractDataProductType `json:"abstract_data_product_type"`
+	IsRedacted              bool                    `json:"is_redacted"`
 }
 
 // GetName returns the value of Name.
@@ -82,6 +84,11 @@ func (s *AbstractDataProductInfo) GetAbstractDataProductType() AbstractDataProdu
 	return s.AbstractDataProductType
 }
 
+// GetIsRedacted returns the value of IsRedacted.
+func (s *AbstractDataProductInfo) GetIsRedacted() bool {
+	return s.IsRedacted
+}
+
 // SetName sets the value of Name.
 func (s *AbstractDataProductInfo) SetName(val string) {
 	s.Name = val
@@ -95,6 +102,81 @@ func (s *AbstractDataProductInfo) SetNamespace(val string) {
 // SetAbstractDataProductType sets the value of AbstractDataProductType.
 func (s *AbstractDataProductInfo) SetAbstractDataProductType(val AbstractDataProductType) {
 	s.AbstractDataProductType = val
+}
+
+// SetIsRedacted sets the value of IsRedacted.
+func (s *AbstractDataProductInfo) SetIsRedacted(val bool) {
+	s.IsRedacted = val
+}
+
+// Ref: #/components/schemas/AbstractDataProductInputPort
+type AbstractDataProductInputPort struct {
+	ID             uuid.UUID            `json:"id"`
+	Status         InputPortStatus      `json:"status"`
+	CurrentRequest InputPortRequestBase `json:"current_request"`
+	RenewalStatus  OptNilRenewalStatus  `json:"renewal_status"`
+	OutputPortID   uuid.UUID            `json:"output_port_id"`
+	OutputPort     OutputPort           `json:"output_port"`
+}
+
+// GetID returns the value of ID.
+func (s *AbstractDataProductInputPort) GetID() uuid.UUID {
+	return s.ID
+}
+
+// GetStatus returns the value of Status.
+func (s *AbstractDataProductInputPort) GetStatus() InputPortStatus {
+	return s.Status
+}
+
+// GetCurrentRequest returns the value of CurrentRequest.
+func (s *AbstractDataProductInputPort) GetCurrentRequest() InputPortRequestBase {
+	return s.CurrentRequest
+}
+
+// GetRenewalStatus returns the value of RenewalStatus.
+func (s *AbstractDataProductInputPort) GetRenewalStatus() OptNilRenewalStatus {
+	return s.RenewalStatus
+}
+
+// GetOutputPortID returns the value of OutputPortID.
+func (s *AbstractDataProductInputPort) GetOutputPortID() uuid.UUID {
+	return s.OutputPortID
+}
+
+// GetOutputPort returns the value of OutputPort.
+func (s *AbstractDataProductInputPort) GetOutputPort() OutputPort {
+	return s.OutputPort
+}
+
+// SetID sets the value of ID.
+func (s *AbstractDataProductInputPort) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+// SetStatus sets the value of Status.
+func (s *AbstractDataProductInputPort) SetStatus(val InputPortStatus) {
+	s.Status = val
+}
+
+// SetCurrentRequest sets the value of CurrentRequest.
+func (s *AbstractDataProductInputPort) SetCurrentRequest(val InputPortRequestBase) {
+	s.CurrentRequest = val
+}
+
+// SetRenewalStatus sets the value of RenewalStatus.
+func (s *AbstractDataProductInputPort) SetRenewalStatus(val OptNilRenewalStatus) {
+	s.RenewalStatus = val
+}
+
+// SetOutputPortID sets the value of OutputPortID.
+func (s *AbstractDataProductInputPort) SetOutputPortID(val uuid.UUID) {
+	s.OutputPortID = val
+}
+
+// SetOutputPort sets the value of OutputPort.
+func (s *AbstractDataProductInputPort) SetOutputPort(val OutputPort) {
+	s.OutputPort = val
 }
 
 // Ref: #/components/schemas/AbstractDataProductStatus
@@ -202,28 +284,89 @@ func (s *AbstractDataProductType) UnmarshalText(data []byte) error {
 	}
 }
 
-// Ref: #/components/schemas/AccessGranularity
-type AccessGranularity string
+// Ref: #/components/schemas/AccessDuration
+type AccessDuration struct {
+	ID                      uuid.UUID               `json:"id"`
+	AbstractDataProductType AbstractDataProductType `json:"abstract_data_product_type"`
+	AccessDurationType      AccessDurationType      `json:"access_duration_type"`
+	Days                    NilInt                  `json:"days"`
+	IsDefault               bool                    `json:"is_default"`
+}
+
+// GetID returns the value of ID.
+func (s *AccessDuration) GetID() uuid.UUID {
+	return s.ID
+}
+
+// GetAbstractDataProductType returns the value of AbstractDataProductType.
+func (s *AccessDuration) GetAbstractDataProductType() AbstractDataProductType {
+	return s.AbstractDataProductType
+}
+
+// GetAccessDurationType returns the value of AccessDurationType.
+func (s *AccessDuration) GetAccessDurationType() AccessDurationType {
+	return s.AccessDurationType
+}
+
+// GetDays returns the value of Days.
+func (s *AccessDuration) GetDays() NilInt {
+	return s.Days
+}
+
+// GetIsDefault returns the value of IsDefault.
+func (s *AccessDuration) GetIsDefault() bool {
+	return s.IsDefault
+}
+
+// SetID sets the value of ID.
+func (s *AccessDuration) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+// SetAbstractDataProductType sets the value of AbstractDataProductType.
+func (s *AccessDuration) SetAbstractDataProductType(val AbstractDataProductType) {
+	s.AbstractDataProductType = val
+}
+
+// SetAccessDurationType sets the value of AccessDurationType.
+func (s *AccessDuration) SetAccessDurationType(val AccessDurationType) {
+	s.AccessDurationType = val
+}
+
+// SetDays sets the value of Days.
+func (s *AccessDuration) SetDays(val NilInt) {
+	s.Days = val
+}
+
+// SetIsDefault sets the value of IsDefault.
+func (s *AccessDuration) SetIsDefault(val bool) {
+	s.IsDefault = val
+}
+
+func (*AccessDuration) getDefaultAccessDurationRes() {}
+
+// Ref: #/components/schemas/AccessDurationType
+type AccessDurationType string
 
 const (
-	AccessGranularitySchema AccessGranularity = "schema"
-	AccessGranularityTable  AccessGranularity = "table"
+	AccessDurationTypePermanent AccessDurationType = "permanent"
+	AccessDurationTypeTimeBound AccessDurationType = "time_bound"
 )
 
-// AllValues returns all AccessGranularity values.
-func (AccessGranularity) AllValues() []AccessGranularity {
-	return []AccessGranularity{
-		AccessGranularitySchema,
-		AccessGranularityTable,
+// AllValues returns all AccessDurationType values.
+func (AccessDurationType) AllValues() []AccessDurationType {
+	return []AccessDurationType{
+		AccessDurationTypePermanent,
+		AccessDurationTypeTimeBound,
 	}
 }
 
 // MarshalText implements encoding.TextMarshaler.
-func (s AccessGranularity) MarshalText() ([]byte, error) {
+func (s AccessDurationType) MarshalText() ([]byte, error) {
 	switch s {
-	case AccessGranularitySchema:
+	case AccessDurationTypePermanent:
 		return []byte(s), nil
-	case AccessGranularityTable:
+	case AccessDurationTypeTimeBound:
 		return []byte(s), nil
 	default:
 		return nil, errors.Errorf("invalid value: %q", s)
@@ -231,17 +374,216 @@ func (s AccessGranularity) MarshalText() ([]byte, error) {
 }
 
 // UnmarshalText implements encoding.TextUnmarshaler.
-func (s *AccessGranularity) UnmarshalText(data []byte) error {
-	switch AccessGranularity(data) {
-	case AccessGranularitySchema:
-		*s = AccessGranularitySchema
+func (s *AccessDurationType) UnmarshalText(data []byte) error {
+	switch AccessDurationType(data) {
+	case AccessDurationTypePermanent:
+		*s = AccessDurationTypePermanent
 		return nil
-	case AccessGranularityTable:
-		*s = AccessGranularityTable
+	case AccessDurationTypeTimeBound:
+		*s = AccessDurationTypeTimeBound
 		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)
 	}
+}
+
+// Ref: #/components/schemas/AccessDurationUpdate
+type AccessDurationUpdate struct {
+	AccessDurationType AccessDurationType `json:"access_duration_type"`
+	Days               OptNilInt          `json:"days"`
+	AlternativeAllowed bool               `json:"alternative_allowed"`
+	AlternativeDays    OptNilInt          `json:"alternative_days"`
+}
+
+// GetAccessDurationType returns the value of AccessDurationType.
+func (s *AccessDurationUpdate) GetAccessDurationType() AccessDurationType {
+	return s.AccessDurationType
+}
+
+// GetDays returns the value of Days.
+func (s *AccessDurationUpdate) GetDays() OptNilInt {
+	return s.Days
+}
+
+// GetAlternativeAllowed returns the value of AlternativeAllowed.
+func (s *AccessDurationUpdate) GetAlternativeAllowed() bool {
+	return s.AlternativeAllowed
+}
+
+// GetAlternativeDays returns the value of AlternativeDays.
+func (s *AccessDurationUpdate) GetAlternativeDays() OptNilInt {
+	return s.AlternativeDays
+}
+
+// SetAccessDurationType sets the value of AccessDurationType.
+func (s *AccessDurationUpdate) SetAccessDurationType(val AccessDurationType) {
+	s.AccessDurationType = val
+}
+
+// SetDays sets the value of Days.
+func (s *AccessDurationUpdate) SetDays(val OptNilInt) {
+	s.Days = val
+}
+
+// SetAlternativeAllowed sets the value of AlternativeAllowed.
+func (s *AccessDurationUpdate) SetAlternativeAllowed(val bool) {
+	s.AlternativeAllowed = val
+}
+
+// SetAlternativeDays sets the value of AlternativeDays.
+func (s *AccessDurationUpdate) SetAlternativeDays(val OptNilInt) {
+	s.AlternativeDays = val
+}
+
+// Ref: #/components/schemas/AccessMode
+type AccessMode struct {
+	ID          uuid.UUID `json:"id"`
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
+}
+
+// GetID returns the value of ID.
+func (s *AccessMode) GetID() uuid.UUID {
+	return s.ID
+}
+
+// GetName returns the value of Name.
+func (s *AccessMode) GetName() string {
+	return s.Name
+}
+
+// GetDescription returns the value of Description.
+func (s *AccessMode) GetDescription() string {
+	return s.Description
+}
+
+// SetID sets the value of ID.
+func (s *AccessMode) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+// SetName sets the value of Name.
+func (s *AccessMode) SetName(val string) {
+	s.Name = val
+}
+
+// SetDescription sets the value of Description.
+func (s *AccessMode) SetDescription(val string) {
+	s.Description = val
+}
+
+func (*AccessMode) createAccessModeRes() {}
+func (*AccessMode) updateAccessModeRes() {}
+
+// Ref: #/components/schemas/AccessModeCreate
+type AccessModeCreate struct {
+	Name                string   `json:"name"`
+	Description         string   `json:"description"`
+	TechnicalAssetTypes []string `json:"technical_asset_types"`
+}
+
+// GetName returns the value of Name.
+func (s *AccessModeCreate) GetName() string {
+	return s.Name
+}
+
+// GetDescription returns the value of Description.
+func (s *AccessModeCreate) GetDescription() string {
+	return s.Description
+}
+
+// GetTechnicalAssetTypes returns the value of TechnicalAssetTypes.
+func (s *AccessModeCreate) GetTechnicalAssetTypes() []string {
+	return s.TechnicalAssetTypes
+}
+
+// SetName sets the value of Name.
+func (s *AccessModeCreate) SetName(val string) {
+	s.Name = val
+}
+
+// SetDescription sets the value of Description.
+func (s *AccessModeCreate) SetDescription(val string) {
+	s.Description = val
+}
+
+// SetTechnicalAssetTypes sets the value of TechnicalAssetTypes.
+func (s *AccessModeCreate) SetTechnicalAssetTypes(val []string) {
+	s.TechnicalAssetTypes = val
+}
+
+// Ref: #/components/schemas/AccessModeUpdate
+type AccessModeUpdate struct {
+	Description         string   `json:"description"`
+	TechnicalAssetTypes []string `json:"technical_asset_types"`
+}
+
+// GetDescription returns the value of Description.
+func (s *AccessModeUpdate) GetDescription() string {
+	return s.Description
+}
+
+// GetTechnicalAssetTypes returns the value of TechnicalAssetTypes.
+func (s *AccessModeUpdate) GetTechnicalAssetTypes() []string {
+	return s.TechnicalAssetTypes
+}
+
+// SetDescription sets the value of Description.
+func (s *AccessModeUpdate) SetDescription(val string) {
+	s.Description = val
+}
+
+// SetTechnicalAssetTypes sets the value of TechnicalAssetTypes.
+func (s *AccessModeUpdate) SetTechnicalAssetTypes(val []string) {
+	s.TechnicalAssetTypes = val
+}
+
+// Ref: #/components/schemas/AccessModeWithType
+type AccessModeWithType struct {
+	ID                  uuid.UUID `json:"id"`
+	Name                string    `json:"name"`
+	Description         string    `json:"description"`
+	TechnicalAssetTypes []string  `json:"technical_asset_types"`
+}
+
+// GetID returns the value of ID.
+func (s *AccessModeWithType) GetID() uuid.UUID {
+	return s.ID
+}
+
+// GetName returns the value of Name.
+func (s *AccessModeWithType) GetName() string {
+	return s.Name
+}
+
+// GetDescription returns the value of Description.
+func (s *AccessModeWithType) GetDescription() string {
+	return s.Description
+}
+
+// GetTechnicalAssetTypes returns the value of TechnicalAssetTypes.
+func (s *AccessModeWithType) GetTechnicalAssetTypes() []string {
+	return s.TechnicalAssetTypes
+}
+
+// SetID sets the value of ID.
+func (s *AccessModeWithType) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+// SetName sets the value of Name.
+func (s *AccessModeWithType) SetName(val string) {
+	s.Name = val
+}
+
+// SetDescription sets the value of Description.
+func (s *AccessModeWithType) SetDescription(val string) {
+	s.Description = val
+}
+
+// SetTechnicalAssetTypes sets the value of TechnicalAssetTypes.
+func (s *AccessModeWithType) SetTechnicalAssetTypes(val []string) {
+	s.TechnicalAssetTypes = val
 }
 
 // Ref: #/components/schemas/AccessResponse
@@ -265,9 +607,26 @@ type AddDataProductFinalizerOKApplicationJSON jx.Raw
 
 func (*AddDataProductFinalizerOKApplicationJSON) addDataProductFinalizerRes() {}
 
+type AddDomainFinalizerOKApplicationJSON jx.Raw
+
+func (*AddDomainFinalizerOKApplicationJSON) addDomainFinalizerRes() {}
+
 type AddExplorationFinalizerOKApplicationJSON jx.Raw
 
 func (*AddExplorationFinalizerOKApplicationJSON) addExplorationFinalizerRes() {}
+
+type AddGroupMembersBadRequestApplicationJSON jx.Raw
+
+func (*AddGroupMembersBadRequestApplicationJSON) addGroupMembersRes() {}
+
+// AddGroupMembersNoContent is response for AddGroupMembers operation.
+type AddGroupMembersNoContent struct{}
+
+func (*AddGroupMembersNoContent) addGroupMembersRes() {}
+
+type AddGroupMembersNotFoundApplicationJSON jx.Raw
+
+func (*AddGroupMembersNotFoundApplicationJSON) addGroupMembersRes() {}
 
 type AddOutputPortDataQualityRunNotFoundApplicationJSON jx.Raw
 
@@ -294,7 +653,8 @@ func (*ApproveOutputPortAsInputPortOKApplicationJSON) approveOutputPortAsInputPo
 
 // Ref: #/components/schemas/ApproveOutputPortAsInputPortRequest
 type ApproveOutputPortAsInputPortRequest struct {
-	ConsumingDataProductID uuid.UUID `json:"consuming_data_product_id"`
+	ConsumingDataProductID uuid.UUID    `json:"consuming_data_product_id"`
+	DecisionNote           OptNilString `json:"decision_note"`
 }
 
 // GetConsumingDataProductID returns the value of ConsumingDataProductID.
@@ -302,14 +662,76 @@ func (s *ApproveOutputPortAsInputPortRequest) GetConsumingDataProductID() uuid.U
 	return s.ConsumingDataProductID
 }
 
+// GetDecisionNote returns the value of DecisionNote.
+func (s *ApproveOutputPortAsInputPortRequest) GetDecisionNote() OptNilString {
+	return s.DecisionNote
+}
+
 // SetConsumingDataProductID sets the value of ConsumingDataProductID.
 func (s *ApproveOutputPortAsInputPortRequest) SetConsumingDataProductID(val uuid.UUID) {
 	s.ConsumingDataProductID = val
 }
 
+// SetDecisionNote sets the value of DecisionNote.
+func (s *ApproveOutputPortAsInputPortRequest) SetDecisionNote(val OptNilString) {
+	s.DecisionNote = val
+}
+
+type ApproveOutputPortTechnicalAssetLinkBadRequestApplicationJSON jx.Raw
+
+func (*ApproveOutputPortTechnicalAssetLinkBadRequestApplicationJSON) approveOutputPortTechnicalAssetLinkRes() {
+}
+
+type ApproveOutputPortTechnicalAssetLinkConflictApplicationJSON jx.Raw
+
+func (*ApproveOutputPortTechnicalAssetLinkConflictApplicationJSON) approveOutputPortTechnicalAssetLinkRes() {
+}
+
 type ApproveOutputPortTechnicalAssetLinkOKApplicationJSON jx.Raw
 
 func (*ApproveOutputPortTechnicalAssetLinkOKApplicationJSON) approveOutputPortTechnicalAssetLinkRes() {
+}
+
+// Ref: #/components/schemas/AssignmentFilter
+type AssignmentFilter string
+
+const (
+	AssignmentFilterAll          AssignmentFilter = "all"
+	AssignmentFilterOnlyAssigned AssignmentFilter = "only_assigned"
+)
+
+// AllValues returns all AssignmentFilter values.
+func (AssignmentFilter) AllValues() []AssignmentFilter {
+	return []AssignmentFilter{
+		AssignmentFilterAll,
+		AssignmentFilterOnlyAssigned,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s AssignmentFilter) MarshalText() ([]byte, error) {
+	switch s {
+	case AssignmentFilterAll:
+		return []byte(s), nil
+	case AssignmentFilterOnlyAssigned:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *AssignmentFilter) UnmarshalText(data []byte) error {
+	switch AssignmentFilter(data) {
+	case AssignmentFilterAll:
+		*s = AssignmentFilterAll
+		return nil
+	case AssignmentFilterOnlyAssigned:
+		*s = AssignmentFilterOnlyAssigned
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
 }
 
 // The integer values for the authorization actions are stored directly in the DB. This means you can
@@ -328,6 +750,13 @@ const (
 	AuthorizationAction106 AuthorizationAction = 106
 	AuthorizationAction107 AuthorizationAction = 107
 	AuthorizationAction108 AuthorizationAction = 108
+	AuthorizationAction109 AuthorizationAction = 109
+	AuthorizationAction110 AuthorizationAction = 110
+	AuthorizationAction111 AuthorizationAction = 111
+	AuthorizationAction112 AuthorizationAction = 112
+	AuthorizationAction113 AuthorizationAction = 113
+	AuthorizationAction114 AuthorizationAction = 114
+	AuthorizationAction115 AuthorizationAction = 115
 	AuthorizationAction301 AuthorizationAction = 301
 	AuthorizationAction302 AuthorizationAction = 302
 	AuthorizationAction303 AuthorizationAction = 303
@@ -358,6 +787,9 @@ const (
 	AuthorizationAction413 AuthorizationAction = 413
 	AuthorizationAction414 AuthorizationAction = 414
 	AuthorizationAction415 AuthorizationAction = 415
+	AuthorizationAction416 AuthorizationAction = 416
+	AuthorizationAction901 AuthorizationAction = 901
+	AuthorizationAction902 AuthorizationAction = 902
 )
 
 // AllValues returns all AuthorizationAction values.
@@ -371,6 +803,13 @@ func (AuthorizationAction) AllValues() []AuthorizationAction {
 		AuthorizationAction106,
 		AuthorizationAction107,
 		AuthorizationAction108,
+		AuthorizationAction109,
+		AuthorizationAction110,
+		AuthorizationAction111,
+		AuthorizationAction112,
+		AuthorizationAction113,
+		AuthorizationAction114,
+		AuthorizationAction115,
 		AuthorizationAction301,
 		AuthorizationAction302,
 		AuthorizationAction303,
@@ -401,55 +840,10 @@ func (AuthorizationAction) AllValues() []AuthorizationAction {
 		AuthorizationAction413,
 		AuthorizationAction414,
 		AuthorizationAction415,
+		AuthorizationAction416,
+		AuthorizationAction901,
+		AuthorizationAction902,
 	}
-}
-
-// Ref: #/components/schemas/AzureBlobTechnicalAssetConfiguration
-type AzureBlobTechnicalAssetConfiguration struct {
-	ConfigurationType string    `json:"configuration_type"`
-	Domain            OptString `json:"domain"`
-	Path              OptString `json:"path"`
-	ContainerName     string    `json:"container_name"`
-}
-
-// GetConfigurationType returns the value of ConfigurationType.
-func (s *AzureBlobTechnicalAssetConfiguration) GetConfigurationType() string {
-	return s.ConfigurationType
-}
-
-// GetDomain returns the value of Domain.
-func (s *AzureBlobTechnicalAssetConfiguration) GetDomain() OptString {
-	return s.Domain
-}
-
-// GetPath returns the value of Path.
-func (s *AzureBlobTechnicalAssetConfiguration) GetPath() OptString {
-	return s.Path
-}
-
-// GetContainerName returns the value of ContainerName.
-func (s *AzureBlobTechnicalAssetConfiguration) GetContainerName() string {
-	return s.ContainerName
-}
-
-// SetConfigurationType sets the value of ConfigurationType.
-func (s *AzureBlobTechnicalAssetConfiguration) SetConfigurationType(val string) {
-	s.ConfigurationType = val
-}
-
-// SetDomain sets the value of Domain.
-func (s *AzureBlobTechnicalAssetConfiguration) SetDomain(val OptString) {
-	s.Domain = val
-}
-
-// SetPath sets the value of Path.
-func (s *AzureBlobTechnicalAssetConfiguration) SetPath(val OptString) {
-	s.Path = val
-}
-
-// SetContainerName sets the value of ContainerName.
-func (s *AzureBlobTechnicalAssetConfiguration) SetContainerName(val string) {
-	s.ContainerName = val
 }
 
 // Ref: #/components/schemas/BecomeAdmin
@@ -513,6 +907,48 @@ func (s *CanBecomeAdminUpdate) SetUserID(val string) {
 func (s *CanBecomeAdminUpdate) SetCanBecomeAdmin(val bool) {
 	s.CanBecomeAdmin = val
 }
+
+type CancelInputPortForDataProductBadRequestApplicationJSON jx.Raw
+
+func (*CancelInputPortForDataProductBadRequestApplicationJSON) cancelInputPortForDataProductRes() {}
+
+type CancelInputPortForDataProductNotFoundApplicationJSON jx.Raw
+
+func (*CancelInputPortForDataProductNotFoundApplicationJSON) cancelInputPortForDataProductRes() {}
+
+// Ref: #/components/schemas/CancelInputPortForDataProductResponse
+type CancelInputPortForDataProductResponse struct {
+	InputPortLink uuid.UUID `json:"input_port_link"`
+}
+
+// GetInputPortLink returns the value of InputPortLink.
+func (s *CancelInputPortForDataProductResponse) GetInputPortLink() uuid.UUID {
+	return s.InputPortLink
+}
+
+// SetInputPortLink sets the value of InputPortLink.
+func (s *CancelInputPortForDataProductResponse) SetInputPortLink(val uuid.UUID) {
+	s.InputPortLink = val
+}
+
+func (*CancelInputPortForDataProductResponse) cancelInputPortForDataProductRes() {}
+
+// Ref: #/components/schemas/CancelInputPortForExplorationResponse
+type CancelInputPortForExplorationResponse struct {
+	InputPortID uuid.UUID `json:"input_port_id"`
+}
+
+// GetInputPortID returns the value of InputPortID.
+func (s *CancelInputPortForExplorationResponse) GetInputPortID() uuid.UUID {
+	return s.InputPortID
+}
+
+// SetInputPortID sets the value of InputPortID.
+func (s *CancelInputPortForExplorationResponse) SetInputPortID(val uuid.UUID) {
+	s.InputPortID = val
+}
+
+func (*CancelInputPortForExplorationResponse) cancelInputPortForExplorationRes() {}
 
 // Ref: #/components/schemas/CreateDataProductLifeCycleResponse
 type CreateDataProductLifeCycleResponse struct {
@@ -790,20 +1226,51 @@ func (s *CreateExplorationResponse) SetFinalizers(val []string) {
 
 func (*CreateExplorationResponse) createExplorationRes() {}
 
+type CreateGroupBadRequestApplicationJSON jx.Raw
+
+func (*CreateGroupBadRequestApplicationJSON) createGroupRes() {}
+
+type CreateGroupNotFoundApplicationJSON jx.Raw
+
+func (*CreateGroupNotFoundApplicationJSON) createGroupRes() {}
+
+type CreateMachineUserBadRequestApplicationJSON jx.Raw
+
+func (*CreateMachineUserBadRequestApplicationJSON) createMachineUserRes() {}
+
+// Ref: #/components/schemas/CreateOutputPortAccessTypeResponse
+type CreateOutputPortAccessTypeResponse struct {
+	ID uuid.UUID `json:"id"`
+}
+
+// GetID returns the value of ID.
+func (s *CreateOutputPortAccessTypeResponse) GetID() uuid.UUID {
+	return s.ID
+}
+
+// SetID sets the value of ID.
+func (s *CreateOutputPortAccessTypeResponse) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+func (*CreateOutputPortAccessTypeResponse) createOutputPortAccessTypeRes() {}
+
 type CreateOutputPortNotFoundApplicationJSON jx.Raw
 
 func (*CreateOutputPortNotFoundApplicationJSON) createOutputPortRes() {}
 
 // Ref: #/components/schemas/CreateOutputPortRequest
 type CreateOutputPortRequest struct {
-	Name        string               `json:"name"`
-	Namespace   string               `json:"namespace"`
-	Description string               `json:"description"`
-	AccessType  OutputPortAccessType `json:"access_type"`
-	About       OptNilString         `json:"about"`
-	LifecycleID OptNilUUID           `json:"lifecycle_id"`
-	TagIds      []uuid.UUID          `json:"tag_ids"`
-	Owners      []uuid.UUID          `json:"owners"`
+	Name                          string             `json:"name"`
+	Namespace                     string             `json:"namespace"`
+	Description                   string             `json:"description"`
+	AccessTypeID                  uuid.UUID          `json:"access_type_id"`
+	DataProductAccessDurationType AccessDurationType `json:"data_product_access_duration_type"`
+	ExplorationAccessDurationType AccessDurationType `json:"exploration_access_duration_type"`
+	About                         OptNilString       `json:"about"`
+	LifecycleID                   OptNilUUID         `json:"lifecycle_id"`
+	TagIds                        []uuid.UUID        `json:"tag_ids"`
+	Owners                        []uuid.UUID        `json:"owners"`
 }
 
 // GetName returns the value of Name.
@@ -821,9 +1288,19 @@ func (s *CreateOutputPortRequest) GetDescription() string {
 	return s.Description
 }
 
-// GetAccessType returns the value of AccessType.
-func (s *CreateOutputPortRequest) GetAccessType() OutputPortAccessType {
-	return s.AccessType
+// GetAccessTypeID returns the value of AccessTypeID.
+func (s *CreateOutputPortRequest) GetAccessTypeID() uuid.UUID {
+	return s.AccessTypeID
+}
+
+// GetDataProductAccessDurationType returns the value of DataProductAccessDurationType.
+func (s *CreateOutputPortRequest) GetDataProductAccessDurationType() AccessDurationType {
+	return s.DataProductAccessDurationType
+}
+
+// GetExplorationAccessDurationType returns the value of ExplorationAccessDurationType.
+func (s *CreateOutputPortRequest) GetExplorationAccessDurationType() AccessDurationType {
+	return s.ExplorationAccessDurationType
 }
 
 // GetAbout returns the value of About.
@@ -861,9 +1338,19 @@ func (s *CreateOutputPortRequest) SetDescription(val string) {
 	s.Description = val
 }
 
-// SetAccessType sets the value of AccessType.
-func (s *CreateOutputPortRequest) SetAccessType(val OutputPortAccessType) {
-	s.AccessType = val
+// SetAccessTypeID sets the value of AccessTypeID.
+func (s *CreateOutputPortRequest) SetAccessTypeID(val uuid.UUID) {
+	s.AccessTypeID = val
+}
+
+// SetDataProductAccessDurationType sets the value of DataProductAccessDurationType.
+func (s *CreateOutputPortRequest) SetDataProductAccessDurationType(val AccessDurationType) {
+	s.DataProductAccessDurationType = val
+}
+
+// SetExplorationAccessDurationType sets the value of ExplorationAccessDurationType.
+func (s *CreateOutputPortRequest) SetExplorationAccessDurationType(val AccessDurationType) {
+	s.ExplorationAccessDurationType = val
 }
 
 // SetAbout sets the value of About.
@@ -1007,17 +1494,20 @@ func (*CreateTagResponse) createTagRes() {}
 
 // Ref: #/components/schemas/CreateTechnicalAssetRequest
 type CreateTechnicalAssetRequest struct {
-	Name          string                                   `json:"name"`
-	Description   string                                   `json:"description"`
-	Namespace     string                                   `json:"namespace"`
-	PlatformID    uuid.UUID                                `json:"platform_id"`
-	ServiceID     uuid.UUID                                `json:"service_id"`
+	Name        string     `json:"name"`
+	Description string     `json:"description"`
+	Namespace   string     `json:"namespace"`
+	PlatformID  OptNilUUID `json:"platform_id"`
+	ServiceID   OptNilUUID `json:"service_id"`
+	// Configuration of the technical asset. The available fields depend on `name`; retrieve them from
+	// /v2/plugins/{name}/form.
 	Configuration CreateTechnicalAssetRequestConfiguration `json:"configuration"`
 	// DEPRECATED: Use 'technical_mapping' instead. This field will be removed in a future version.
 	//
 	// Deprecated: schema marks this property as deprecated.
 	SourceAligned    OptNilBool             `json:"sourceAligned"`
 	TechnicalMapping OptNilTechnicalMapping `json:"technical_mapping"`
+	AccessModeIds    []uuid.UUID            `json:"access_mode_ids"`
 	TagIds           []uuid.UUID            `json:"tag_ids"`
 }
 
@@ -1037,12 +1527,12 @@ func (s *CreateTechnicalAssetRequest) GetNamespace() string {
 }
 
 // GetPlatformID returns the value of PlatformID.
-func (s *CreateTechnicalAssetRequest) GetPlatformID() uuid.UUID {
+func (s *CreateTechnicalAssetRequest) GetPlatformID() OptNilUUID {
 	return s.PlatformID
 }
 
 // GetServiceID returns the value of ServiceID.
-func (s *CreateTechnicalAssetRequest) GetServiceID() uuid.UUID {
+func (s *CreateTechnicalAssetRequest) GetServiceID() OptNilUUID {
 	return s.ServiceID
 }
 
@@ -1059,6 +1549,11 @@ func (s *CreateTechnicalAssetRequest) GetSourceAligned() OptNilBool {
 // GetTechnicalMapping returns the value of TechnicalMapping.
 func (s *CreateTechnicalAssetRequest) GetTechnicalMapping() OptNilTechnicalMapping {
 	return s.TechnicalMapping
+}
+
+// GetAccessModeIds returns the value of AccessModeIds.
+func (s *CreateTechnicalAssetRequest) GetAccessModeIds() []uuid.UUID {
+	return s.AccessModeIds
 }
 
 // GetTagIds returns the value of TagIds.
@@ -1082,12 +1577,12 @@ func (s *CreateTechnicalAssetRequest) SetNamespace(val string) {
 }
 
 // SetPlatformID sets the value of PlatformID.
-func (s *CreateTechnicalAssetRequest) SetPlatformID(val uuid.UUID) {
+func (s *CreateTechnicalAssetRequest) SetPlatformID(val OptNilUUID) {
 	s.PlatformID = val
 }
 
 // SetServiceID sets the value of ServiceID.
-func (s *CreateTechnicalAssetRequest) SetServiceID(val uuid.UUID) {
+func (s *CreateTechnicalAssetRequest) SetServiceID(val OptNilUUID) {
 	s.ServiceID = val
 }
 
@@ -1106,246 +1601,52 @@ func (s *CreateTechnicalAssetRequest) SetTechnicalMapping(val OptNilTechnicalMap
 	s.TechnicalMapping = val
 }
 
+// SetAccessModeIds sets the value of AccessModeIds.
+func (s *CreateTechnicalAssetRequest) SetAccessModeIds(val []uuid.UUID) {
+	s.AccessModeIds = val
+}
+
 // SetTagIds sets the value of TagIds.
 func (s *CreateTechnicalAssetRequest) SetTagIds(val []uuid.UUID) {
 	s.TagIds = val
 }
 
-// CreateTechnicalAssetRequestConfiguration represents sum type.
+// Configuration of the technical asset. The available fields depend on `name`; retrieve them from
+// /v2/plugins/{name}/form.
 type CreateTechnicalAssetRequestConfiguration struct {
-	// Type selects the active sum variant, switch on this field.
-	Type                                        CreateTechnicalAssetRequestConfigurationType
-	S3TechnicalAssetConfiguration               S3TechnicalAssetConfiguration
-	GlueTechnicalAssetConfiguration             GlueTechnicalAssetConfiguration
-	DatabricksTechnicalAssetConfiguration       DatabricksTechnicalAssetConfiguration
-	SnowflakeTechnicalAssetConfiguration        SnowflakeTechnicalAssetConfiguration
-	RedshiftTechnicalAssetConfiguration         RedshiftTechnicalAssetConfiguration
-	PostgreSQLTechnicalAssetConfiguration       PostgreSQLTechnicalAssetConfiguration
-	OSISemanticModelTechnicalAssetConfiguration OSISemanticModelTechnicalAssetConfiguration
-	AzureBlobTechnicalAssetConfiguration        AzureBlobTechnicalAssetConfiguration
+	Name            string `json:"name"`
+	AdditionalProps CreateTechnicalAssetRequestConfigurationAdditional
 }
 
-// CreateTechnicalAssetRequestConfigurationType is oneOf type of CreateTechnicalAssetRequestConfiguration.
-type CreateTechnicalAssetRequestConfigurationType string
-
-// Possible values for CreateTechnicalAssetRequestConfigurationType.
-const (
-	S3TechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration               CreateTechnicalAssetRequestConfigurationType = "S3TechnicalAssetConfiguration"
-	GlueTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration             CreateTechnicalAssetRequestConfigurationType = "GlueTechnicalAssetConfiguration"
-	DatabricksTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration       CreateTechnicalAssetRequestConfigurationType = "DatabricksTechnicalAssetConfiguration"
-	SnowflakeTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration        CreateTechnicalAssetRequestConfigurationType = "SnowflakeTechnicalAssetConfiguration"
-	RedshiftTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration         CreateTechnicalAssetRequestConfigurationType = "RedshiftTechnicalAssetConfiguration"
-	PostgreSQLTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration       CreateTechnicalAssetRequestConfigurationType = "PostgreSQLTechnicalAssetConfiguration"
-	OSISemanticModelTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration CreateTechnicalAssetRequestConfigurationType = "OSISemanticModelTechnicalAssetConfiguration"
-	AzureBlobTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration        CreateTechnicalAssetRequestConfigurationType = "AzureBlobTechnicalAssetConfiguration"
-)
-
-// IsS3TechnicalAssetConfiguration reports whether CreateTechnicalAssetRequestConfiguration is S3TechnicalAssetConfiguration.
-func (s CreateTechnicalAssetRequestConfiguration) IsS3TechnicalAssetConfiguration() bool {
-	return s.Type == S3TechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration
+// GetName returns the value of Name.
+func (s *CreateTechnicalAssetRequestConfiguration) GetName() string {
+	return s.Name
 }
 
-// IsGlueTechnicalAssetConfiguration reports whether CreateTechnicalAssetRequestConfiguration is GlueTechnicalAssetConfiguration.
-func (s CreateTechnicalAssetRequestConfiguration) IsGlueTechnicalAssetConfiguration() bool {
-	return s.Type == GlueTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration
+// GetAdditionalProps returns the value of AdditionalProps.
+func (s *CreateTechnicalAssetRequestConfiguration) GetAdditionalProps() CreateTechnicalAssetRequestConfigurationAdditional {
+	return s.AdditionalProps
 }
 
-// IsDatabricksTechnicalAssetConfiguration reports whether CreateTechnicalAssetRequestConfiguration is DatabricksTechnicalAssetConfiguration.
-func (s CreateTechnicalAssetRequestConfiguration) IsDatabricksTechnicalAssetConfiguration() bool {
-	return s.Type == DatabricksTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration
+// SetName sets the value of Name.
+func (s *CreateTechnicalAssetRequestConfiguration) SetName(val string) {
+	s.Name = val
 }
 
-// IsSnowflakeTechnicalAssetConfiguration reports whether CreateTechnicalAssetRequestConfiguration is SnowflakeTechnicalAssetConfiguration.
-func (s CreateTechnicalAssetRequestConfiguration) IsSnowflakeTechnicalAssetConfiguration() bool {
-	return s.Type == SnowflakeTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration
+// SetAdditionalProps sets the value of AdditionalProps.
+func (s *CreateTechnicalAssetRequestConfiguration) SetAdditionalProps(val CreateTechnicalAssetRequestConfigurationAdditional) {
+	s.AdditionalProps = val
 }
 
-// IsRedshiftTechnicalAssetConfiguration reports whether CreateTechnicalAssetRequestConfiguration is RedshiftTechnicalAssetConfiguration.
-func (s CreateTechnicalAssetRequestConfiguration) IsRedshiftTechnicalAssetConfiguration() bool {
-	return s.Type == RedshiftTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration
-}
+type CreateTechnicalAssetRequestConfigurationAdditional map[string]jx.Raw
 
-// IsPostgreSQLTechnicalAssetConfiguration reports whether CreateTechnicalAssetRequestConfiguration is PostgreSQLTechnicalAssetConfiguration.
-func (s CreateTechnicalAssetRequestConfiguration) IsPostgreSQLTechnicalAssetConfiguration() bool {
-	return s.Type == PostgreSQLTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration
-}
-
-// IsOSISemanticModelTechnicalAssetConfiguration reports whether CreateTechnicalAssetRequestConfiguration is OSISemanticModelTechnicalAssetConfiguration.
-func (s CreateTechnicalAssetRequestConfiguration) IsOSISemanticModelTechnicalAssetConfiguration() bool {
-	return s.Type == OSISemanticModelTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration
-}
-
-// IsAzureBlobTechnicalAssetConfiguration reports whether CreateTechnicalAssetRequestConfiguration is AzureBlobTechnicalAssetConfiguration.
-func (s CreateTechnicalAssetRequestConfiguration) IsAzureBlobTechnicalAssetConfiguration() bool {
-	return s.Type == AzureBlobTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration
-}
-
-// SetS3TechnicalAssetConfiguration sets CreateTechnicalAssetRequestConfiguration to S3TechnicalAssetConfiguration.
-func (s *CreateTechnicalAssetRequestConfiguration) SetS3TechnicalAssetConfiguration(v S3TechnicalAssetConfiguration) {
-	s.Type = S3TechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration
-	s.S3TechnicalAssetConfiguration = v
-}
-
-// GetS3TechnicalAssetConfiguration returns S3TechnicalAssetConfiguration and true boolean if CreateTechnicalAssetRequestConfiguration is S3TechnicalAssetConfiguration.
-func (s CreateTechnicalAssetRequestConfiguration) GetS3TechnicalAssetConfiguration() (v S3TechnicalAssetConfiguration, ok bool) {
-	if !s.IsS3TechnicalAssetConfiguration() {
-		return v, false
+func (s *CreateTechnicalAssetRequestConfigurationAdditional) init() CreateTechnicalAssetRequestConfigurationAdditional {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
 	}
-	return s.S3TechnicalAssetConfiguration, true
-}
-
-// NewS3TechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration returns new CreateTechnicalAssetRequestConfiguration from S3TechnicalAssetConfiguration.
-func NewS3TechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration(v S3TechnicalAssetConfiguration) CreateTechnicalAssetRequestConfiguration {
-	var s CreateTechnicalAssetRequestConfiguration
-	s.SetS3TechnicalAssetConfiguration(v)
-	return s
-}
-
-// SetGlueTechnicalAssetConfiguration sets CreateTechnicalAssetRequestConfiguration to GlueTechnicalAssetConfiguration.
-func (s *CreateTechnicalAssetRequestConfiguration) SetGlueTechnicalAssetConfiguration(v GlueTechnicalAssetConfiguration) {
-	s.Type = GlueTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration
-	s.GlueTechnicalAssetConfiguration = v
-}
-
-// GetGlueTechnicalAssetConfiguration returns GlueTechnicalAssetConfiguration and true boolean if CreateTechnicalAssetRequestConfiguration is GlueTechnicalAssetConfiguration.
-func (s CreateTechnicalAssetRequestConfiguration) GetGlueTechnicalAssetConfiguration() (v GlueTechnicalAssetConfiguration, ok bool) {
-	if !s.IsGlueTechnicalAssetConfiguration() {
-		return v, false
-	}
-	return s.GlueTechnicalAssetConfiguration, true
-}
-
-// NewGlueTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration returns new CreateTechnicalAssetRequestConfiguration from GlueTechnicalAssetConfiguration.
-func NewGlueTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration(v GlueTechnicalAssetConfiguration) CreateTechnicalAssetRequestConfiguration {
-	var s CreateTechnicalAssetRequestConfiguration
-	s.SetGlueTechnicalAssetConfiguration(v)
-	return s
-}
-
-// SetDatabricksTechnicalAssetConfiguration sets CreateTechnicalAssetRequestConfiguration to DatabricksTechnicalAssetConfiguration.
-func (s *CreateTechnicalAssetRequestConfiguration) SetDatabricksTechnicalAssetConfiguration(v DatabricksTechnicalAssetConfiguration) {
-	s.Type = DatabricksTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration
-	s.DatabricksTechnicalAssetConfiguration = v
-}
-
-// GetDatabricksTechnicalAssetConfiguration returns DatabricksTechnicalAssetConfiguration and true boolean if CreateTechnicalAssetRequestConfiguration is DatabricksTechnicalAssetConfiguration.
-func (s CreateTechnicalAssetRequestConfiguration) GetDatabricksTechnicalAssetConfiguration() (v DatabricksTechnicalAssetConfiguration, ok bool) {
-	if !s.IsDatabricksTechnicalAssetConfiguration() {
-		return v, false
-	}
-	return s.DatabricksTechnicalAssetConfiguration, true
-}
-
-// NewDatabricksTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration returns new CreateTechnicalAssetRequestConfiguration from DatabricksTechnicalAssetConfiguration.
-func NewDatabricksTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration(v DatabricksTechnicalAssetConfiguration) CreateTechnicalAssetRequestConfiguration {
-	var s CreateTechnicalAssetRequestConfiguration
-	s.SetDatabricksTechnicalAssetConfiguration(v)
-	return s
-}
-
-// SetSnowflakeTechnicalAssetConfiguration sets CreateTechnicalAssetRequestConfiguration to SnowflakeTechnicalAssetConfiguration.
-func (s *CreateTechnicalAssetRequestConfiguration) SetSnowflakeTechnicalAssetConfiguration(v SnowflakeTechnicalAssetConfiguration) {
-	s.Type = SnowflakeTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration
-	s.SnowflakeTechnicalAssetConfiguration = v
-}
-
-// GetSnowflakeTechnicalAssetConfiguration returns SnowflakeTechnicalAssetConfiguration and true boolean if CreateTechnicalAssetRequestConfiguration is SnowflakeTechnicalAssetConfiguration.
-func (s CreateTechnicalAssetRequestConfiguration) GetSnowflakeTechnicalAssetConfiguration() (v SnowflakeTechnicalAssetConfiguration, ok bool) {
-	if !s.IsSnowflakeTechnicalAssetConfiguration() {
-		return v, false
-	}
-	return s.SnowflakeTechnicalAssetConfiguration, true
-}
-
-// NewSnowflakeTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration returns new CreateTechnicalAssetRequestConfiguration from SnowflakeTechnicalAssetConfiguration.
-func NewSnowflakeTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration(v SnowflakeTechnicalAssetConfiguration) CreateTechnicalAssetRequestConfiguration {
-	var s CreateTechnicalAssetRequestConfiguration
-	s.SetSnowflakeTechnicalAssetConfiguration(v)
-	return s
-}
-
-// SetRedshiftTechnicalAssetConfiguration sets CreateTechnicalAssetRequestConfiguration to RedshiftTechnicalAssetConfiguration.
-func (s *CreateTechnicalAssetRequestConfiguration) SetRedshiftTechnicalAssetConfiguration(v RedshiftTechnicalAssetConfiguration) {
-	s.Type = RedshiftTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration
-	s.RedshiftTechnicalAssetConfiguration = v
-}
-
-// GetRedshiftTechnicalAssetConfiguration returns RedshiftTechnicalAssetConfiguration and true boolean if CreateTechnicalAssetRequestConfiguration is RedshiftTechnicalAssetConfiguration.
-func (s CreateTechnicalAssetRequestConfiguration) GetRedshiftTechnicalAssetConfiguration() (v RedshiftTechnicalAssetConfiguration, ok bool) {
-	if !s.IsRedshiftTechnicalAssetConfiguration() {
-		return v, false
-	}
-	return s.RedshiftTechnicalAssetConfiguration, true
-}
-
-// NewRedshiftTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration returns new CreateTechnicalAssetRequestConfiguration from RedshiftTechnicalAssetConfiguration.
-func NewRedshiftTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration(v RedshiftTechnicalAssetConfiguration) CreateTechnicalAssetRequestConfiguration {
-	var s CreateTechnicalAssetRequestConfiguration
-	s.SetRedshiftTechnicalAssetConfiguration(v)
-	return s
-}
-
-// SetPostgreSQLTechnicalAssetConfiguration sets CreateTechnicalAssetRequestConfiguration to PostgreSQLTechnicalAssetConfiguration.
-func (s *CreateTechnicalAssetRequestConfiguration) SetPostgreSQLTechnicalAssetConfiguration(v PostgreSQLTechnicalAssetConfiguration) {
-	s.Type = PostgreSQLTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration
-	s.PostgreSQLTechnicalAssetConfiguration = v
-}
-
-// GetPostgreSQLTechnicalAssetConfiguration returns PostgreSQLTechnicalAssetConfiguration and true boolean if CreateTechnicalAssetRequestConfiguration is PostgreSQLTechnicalAssetConfiguration.
-func (s CreateTechnicalAssetRequestConfiguration) GetPostgreSQLTechnicalAssetConfiguration() (v PostgreSQLTechnicalAssetConfiguration, ok bool) {
-	if !s.IsPostgreSQLTechnicalAssetConfiguration() {
-		return v, false
-	}
-	return s.PostgreSQLTechnicalAssetConfiguration, true
-}
-
-// NewPostgreSQLTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration returns new CreateTechnicalAssetRequestConfiguration from PostgreSQLTechnicalAssetConfiguration.
-func NewPostgreSQLTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration(v PostgreSQLTechnicalAssetConfiguration) CreateTechnicalAssetRequestConfiguration {
-	var s CreateTechnicalAssetRequestConfiguration
-	s.SetPostgreSQLTechnicalAssetConfiguration(v)
-	return s
-}
-
-// SetOSISemanticModelTechnicalAssetConfiguration sets CreateTechnicalAssetRequestConfiguration to OSISemanticModelTechnicalAssetConfiguration.
-func (s *CreateTechnicalAssetRequestConfiguration) SetOSISemanticModelTechnicalAssetConfiguration(v OSISemanticModelTechnicalAssetConfiguration) {
-	s.Type = OSISemanticModelTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration
-	s.OSISemanticModelTechnicalAssetConfiguration = v
-}
-
-// GetOSISemanticModelTechnicalAssetConfiguration returns OSISemanticModelTechnicalAssetConfiguration and true boolean if CreateTechnicalAssetRequestConfiguration is OSISemanticModelTechnicalAssetConfiguration.
-func (s CreateTechnicalAssetRequestConfiguration) GetOSISemanticModelTechnicalAssetConfiguration() (v OSISemanticModelTechnicalAssetConfiguration, ok bool) {
-	if !s.IsOSISemanticModelTechnicalAssetConfiguration() {
-		return v, false
-	}
-	return s.OSISemanticModelTechnicalAssetConfiguration, true
-}
-
-// NewOSISemanticModelTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration returns new CreateTechnicalAssetRequestConfiguration from OSISemanticModelTechnicalAssetConfiguration.
-func NewOSISemanticModelTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration(v OSISemanticModelTechnicalAssetConfiguration) CreateTechnicalAssetRequestConfiguration {
-	var s CreateTechnicalAssetRequestConfiguration
-	s.SetOSISemanticModelTechnicalAssetConfiguration(v)
-	return s
-}
-
-// SetAzureBlobTechnicalAssetConfiguration sets CreateTechnicalAssetRequestConfiguration to AzureBlobTechnicalAssetConfiguration.
-func (s *CreateTechnicalAssetRequestConfiguration) SetAzureBlobTechnicalAssetConfiguration(v AzureBlobTechnicalAssetConfiguration) {
-	s.Type = AzureBlobTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration
-	s.AzureBlobTechnicalAssetConfiguration = v
-}
-
-// GetAzureBlobTechnicalAssetConfiguration returns AzureBlobTechnicalAssetConfiguration and true boolean if CreateTechnicalAssetRequestConfiguration is AzureBlobTechnicalAssetConfiguration.
-func (s CreateTechnicalAssetRequestConfiguration) GetAzureBlobTechnicalAssetConfiguration() (v AzureBlobTechnicalAssetConfiguration, ok bool) {
-	if !s.IsAzureBlobTechnicalAssetConfiguration() {
-		return v, false
-	}
-	return s.AzureBlobTechnicalAssetConfiguration, true
-}
-
-// NewAzureBlobTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration returns new CreateTechnicalAssetRequestConfiguration from AzureBlobTechnicalAssetConfiguration.
-func NewAzureBlobTechnicalAssetConfigurationCreateTechnicalAssetRequestConfiguration(v AzureBlobTechnicalAssetConfiguration) CreateTechnicalAssetRequestConfiguration {
-	var s CreateTechnicalAssetRequestConfiguration
-	s.SetAzureBlobTechnicalAssetConfiguration(v)
-	return s
+	return m
 }
 
 // Ref: #/components/schemas/CreateTechnicalAssetResponse
@@ -1364,58 +1665,6 @@ func (s *CreateTechnicalAssetResponse) SetID(val uuid.UUID) {
 }
 
 func (*CreateTechnicalAssetResponse) createTechnicalAssetRes() {}
-
-// Ref: #/components/schemas/DataOutputStatusUpdate
-type DataOutputStatusUpdate struct {
-	Status TechnicalAssetStatus `json:"status"`
-}
-
-// GetStatus returns the value of Status.
-func (s *DataOutputStatusUpdate) GetStatus() TechnicalAssetStatus {
-	return s.Status
-}
-
-// SetStatus sets the value of Status.
-func (s *DataOutputStatusUpdate) SetStatus(val TechnicalAssetStatus) {
-	s.Status = val
-}
-
-// Ref: #/components/schemas/DataOutputUpdate
-type DataOutputUpdate struct {
-	Name        string      `json:"name"`
-	Description string      `json:"description"`
-	TagIds      []uuid.UUID `json:"tag_ids"`
-}
-
-// GetName returns the value of Name.
-func (s *DataOutputUpdate) GetName() string {
-	return s.Name
-}
-
-// GetDescription returns the value of Description.
-func (s *DataOutputUpdate) GetDescription() string {
-	return s.Description
-}
-
-// GetTagIds returns the value of TagIds.
-func (s *DataOutputUpdate) GetTagIds() []uuid.UUID {
-	return s.TagIds
-}
-
-// SetName sets the value of Name.
-func (s *DataOutputUpdate) SetName(val string) {
-	s.Name = val
-}
-
-// SetDescription sets the value of Description.
-func (s *DataOutputUpdate) SetDescription(val string) {
-	s.Description = val
-}
-
-// SetTagIds sets the value of TagIds.
-func (s *DataOutputUpdate) SetTagIds(val []uuid.UUID) {
-	s.TagIds = val
-}
 
 // Ref: #/components/schemas/DataProduct
 type DataProduct struct {
@@ -1504,16 +1753,18 @@ func (s *DataProductAboutUpdate) SetAbout(val string) {
 
 // Ref: #/components/schemas/DataProductCreate
 type DataProductCreate struct {
-	Name        string                                       `json:"name"`
-	Namespace   string                                       `json:"namespace"`
-	Description string                                       `json:"description"`
-	TypeID      uuid.UUID                                    `json:"type_id"`
-	About       OptNilString                                 `json:"about"`
-	DomainID    uuid.UUID                                    `json:"domain_id"`
-	TagIds      []uuid.UUID                                  `json:"tag_ids"`
-	LifecycleID uuid.UUID                                    `json:"lifecycle_id"`
-	Owners      []uuid.UUID                                  `json:"owners"`
-	InputPorts  OptNilRequestInputPortsForDataProductRequest `json:"input_ports"`
+	Name           string                                       `json:"name"`
+	Namespace      string                                       `json:"namespace"`
+	Description    string                                       `json:"description"`
+	TypeID         uuid.UUID                                    `json:"type_id"`
+	About          OptNilString                                 `json:"about"`
+	DomainID       uuid.UUID                                    `json:"domain_id"`
+	TagIds         []uuid.UUID                                  `json:"tag_ids"`
+	LifecycleID    uuid.UUID                                    `json:"lifecycle_id"`
+	EnvironmentIds OptNilUUIDArray                              `json:"environment_ids"`
+	Visibility     OptDataProductVisibility                     `json:"visibility"`
+	Owners         []uuid.UUID                                  `json:"owners"`
+	InputPorts     OptNilRequestInputPortsForDataProductRequest `json:"input_ports"`
 }
 
 // GetName returns the value of Name.
@@ -1554,6 +1805,16 @@ func (s *DataProductCreate) GetTagIds() []uuid.UUID {
 // GetLifecycleID returns the value of LifecycleID.
 func (s *DataProductCreate) GetLifecycleID() uuid.UUID {
 	return s.LifecycleID
+}
+
+// GetEnvironmentIds returns the value of EnvironmentIds.
+func (s *DataProductCreate) GetEnvironmentIds() OptNilUUIDArray {
+	return s.EnvironmentIds
+}
+
+// GetVisibility returns the value of Visibility.
+func (s *DataProductCreate) GetVisibility() OptDataProductVisibility {
+	return s.Visibility
 }
 
 // GetOwners returns the value of Owners.
@@ -1606,6 +1867,16 @@ func (s *DataProductCreate) SetLifecycleID(val uuid.UUID) {
 	s.LifecycleID = val
 }
 
+// SetEnvironmentIds sets the value of EnvironmentIds.
+func (s *DataProductCreate) SetEnvironmentIds(val OptNilUUIDArray) {
+	s.EnvironmentIds = val
+}
+
+// SetVisibility sets the value of Visibility.
+func (s *DataProductCreate) SetVisibility(val OptDataProductVisibility) {
+	s.Visibility = val
+}
+
 // SetOwners sets the value of Owners.
 func (s *DataProductCreate) SetOwners(val []uuid.UUID) {
 	s.Owners = val
@@ -1614,6 +1885,43 @@ func (s *DataProductCreate) SetOwners(val []uuid.UUID) {
 // SetInputPorts sets the value of InputPorts.
 func (s *DataProductCreate) SetInputPorts(val OptNilRequestInputPortsForDataProductRequest) {
 	s.InputPorts = val
+}
+
+// Ref: #/components/schemas/DataProductEnvironment
+type DataProductEnvironment struct {
+	EnvironmentID uuid.UUID          `json:"environment_id"`
+	Environment   EnvironmentGetItem `json:"environment"`
+	CreationDate  time.Time          `json:"creation_date"`
+}
+
+// GetEnvironmentID returns the value of EnvironmentID.
+func (s *DataProductEnvironment) GetEnvironmentID() uuid.UUID {
+	return s.EnvironmentID
+}
+
+// GetEnvironment returns the value of Environment.
+func (s *DataProductEnvironment) GetEnvironment() EnvironmentGetItem {
+	return s.Environment
+}
+
+// GetCreationDate returns the value of CreationDate.
+func (s *DataProductEnvironment) GetCreationDate() time.Time {
+	return s.CreationDate
+}
+
+// SetEnvironmentID sets the value of EnvironmentID.
+func (s *DataProductEnvironment) SetEnvironmentID(val uuid.UUID) {
+	s.EnvironmentID = val
+}
+
+// SetEnvironment sets the value of Environment.
+func (s *DataProductEnvironment) SetEnvironment(val EnvironmentGetItem) {
+	s.Environment = val
+}
+
+// SetCreationDate sets the value of CreationDate.
+func (s *DataProductEnvironment) SetCreationDate(val time.Time) {
+	s.CreationDate = val
 }
 
 // Ref: #/components/schemas/DataProductIconKey
@@ -1862,6 +2170,8 @@ func (s *DataProductLifeCyclesGet) GetDataProductLifeCycles() []DataProductLifeC
 func (s *DataProductLifeCyclesGet) SetDataProductLifeCycles(val []DataProductLifeCyclesGetItem) {
 	s.DataProductLifeCycles = val
 }
+
+func (*DataProductLifeCyclesGet) getDataProductsLifecyclesRes() {}
 
 // Ref: #/components/schemas/DataProductLifeCyclesGetItem
 type DataProductLifeCyclesGetItem struct {
@@ -2482,6 +2792,8 @@ func (s *DataProductSettingsGet) SetDataProductSettings(val []DataProductSetting
 	s.DataProductSettings = val
 }
 
+func (*DataProductSettingsGet) getDataProductsSettingsRes() {}
+
 // Ref: #/components/schemas/DataProductSettingsGetItem
 type DataProductSettingsGetItem struct {
 	ID        uuid.UUID               `json:"id"`
@@ -2798,6 +3110,8 @@ func (s *DataProductTypesGet) SetDataProductTypes(val []DataProductTypesGetItem)
 	s.DataProductTypes = val
 }
 
+func (*DataProductTypesGet) getDataProductsTypesRes() {}
+
 // Ref: #/components/schemas/DataProductTypesGetItem
 type DataProductTypesGetItem struct {
 	ID               uuid.UUID          `json:"id"`
@@ -2859,14 +3173,15 @@ func (s *DataProductTypesGetItem) SetDataProductCount(val int) {
 
 // Ref: #/components/schemas/DataProductUpdate
 type DataProductUpdate struct {
-	Name        string       `json:"name"`
-	Namespace   string       `json:"namespace"`
-	Description string       `json:"description"`
-	TypeID      uuid.UUID    `json:"type_id"`
-	About       OptNilString `json:"about"`
-	DomainID    uuid.UUID    `json:"domain_id"`
-	TagIds      []uuid.UUID  `json:"tag_ids"`
-	LifecycleID uuid.UUID    `json:"lifecycle_id"`
+	Name           string          `json:"name"`
+	Namespace      string          `json:"namespace"`
+	Description    string          `json:"description"`
+	TypeID         uuid.UUID       `json:"type_id"`
+	About          OptNilString    `json:"about"`
+	DomainID       uuid.UUID       `json:"domain_id"`
+	TagIds         []uuid.UUID     `json:"tag_ids"`
+	LifecycleID    uuid.UUID       `json:"lifecycle_id"`
+	EnvironmentIds OptNilUUIDArray `json:"environment_ids"`
 }
 
 // GetName returns the value of Name.
@@ -2909,6 +3224,11 @@ func (s *DataProductUpdate) GetLifecycleID() uuid.UUID {
 	return s.LifecycleID
 }
 
+// GetEnvironmentIds returns the value of EnvironmentIds.
+func (s *DataProductUpdate) GetEnvironmentIds() OptNilUUIDArray {
+	return s.EnvironmentIds
+}
+
 // SetName sets the value of Name.
 func (s *DataProductUpdate) SetName(val string) {
 	s.Name = val
@@ -2949,6 +3269,11 @@ func (s *DataProductUpdate) SetLifecycleID(val uuid.UUID) {
 	s.LifecycleID = val
 }
 
+// SetEnvironmentIds sets the value of EnvironmentIds.
+func (s *DataProductUpdate) SetEnvironmentIds(val OptNilUUIDArray) {
+	s.EnvironmentIds = val
+}
+
 // Ref: #/components/schemas/DataProductUsageUpdate
 type DataProductUsageUpdate struct {
 	Usage string `json:"usage"`
@@ -2962,6 +3287,48 @@ func (s *DataProductUsageUpdate) GetUsage() string {
 // SetUsage sets the value of Usage.
 func (s *DataProductUsageUpdate) SetUsage(val string) {
 	s.Usage = val
+}
+
+// Ref: #/components/schemas/DataProductVisibility
+type DataProductVisibility string
+
+const (
+	DataProductVisibilityHidden       DataProductVisibility = "hidden"
+	DataProductVisibilityDiscoverable DataProductVisibility = "discoverable"
+)
+
+// AllValues returns all DataProductVisibility values.
+func (DataProductVisibility) AllValues() []DataProductVisibility {
+	return []DataProductVisibility{
+		DataProductVisibilityHidden,
+		DataProductVisibilityDiscoverable,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s DataProductVisibility) MarshalText() ([]byte, error) {
+	switch s {
+	case DataProductVisibilityHidden:
+		return []byte(s), nil
+	case DataProductVisibilityDiscoverable:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *DataProductVisibility) UnmarshalText(data []byte) error {
+	switch DataProductVisibility(data) {
+	case DataProductVisibilityHidden:
+		*s = DataProductVisibilityHidden
+		return nil
+	case DataProductVisibilityDiscoverable:
+		*s = DataProductVisibilityDiscoverable
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
 }
 
 // Ref: #/components/schemas/DataQualityStatus
@@ -3051,209 +3418,6 @@ func (s *DataQualityTechnicalAsset) SetName(val string) {
 // SetStatus sets the value of Status.
 func (s *DataQualityTechnicalAsset) SetStatus(val DataQualityStatus) {
 	s.Status = val
-}
-
-// Ref: #/components/schemas/DatabricksTechnicalAssetConfiguration
-type DatabricksTechnicalAssetConfiguration struct {
-	ConfigurationType string            `json:"configuration_type"`
-	Catalog           string            `json:"catalog"`
-	Schema            OptString         `json:"schema"`
-	Table             OptString         `json:"table"`
-	BucketIdentifier  OptString         `json:"bucket_identifier"`
-	CatalogPath       OptString         `json:"catalog_path"`
-	TablePath         OptString         `json:"table_path"`
-	AccessGranularity AccessGranularity `json:"access_granularity"`
-}
-
-// GetConfigurationType returns the value of ConfigurationType.
-func (s *DatabricksTechnicalAssetConfiguration) GetConfigurationType() string {
-	return s.ConfigurationType
-}
-
-// GetCatalog returns the value of Catalog.
-func (s *DatabricksTechnicalAssetConfiguration) GetCatalog() string {
-	return s.Catalog
-}
-
-// GetSchema returns the value of Schema.
-func (s *DatabricksTechnicalAssetConfiguration) GetSchema() OptString {
-	return s.Schema
-}
-
-// GetTable returns the value of Table.
-func (s *DatabricksTechnicalAssetConfiguration) GetTable() OptString {
-	return s.Table
-}
-
-// GetBucketIdentifier returns the value of BucketIdentifier.
-func (s *DatabricksTechnicalAssetConfiguration) GetBucketIdentifier() OptString {
-	return s.BucketIdentifier
-}
-
-// GetCatalogPath returns the value of CatalogPath.
-func (s *DatabricksTechnicalAssetConfiguration) GetCatalogPath() OptString {
-	return s.CatalogPath
-}
-
-// GetTablePath returns the value of TablePath.
-func (s *DatabricksTechnicalAssetConfiguration) GetTablePath() OptString {
-	return s.TablePath
-}
-
-// GetAccessGranularity returns the value of AccessGranularity.
-func (s *DatabricksTechnicalAssetConfiguration) GetAccessGranularity() AccessGranularity {
-	return s.AccessGranularity
-}
-
-// SetConfigurationType sets the value of ConfigurationType.
-func (s *DatabricksTechnicalAssetConfiguration) SetConfigurationType(val string) {
-	s.ConfigurationType = val
-}
-
-// SetCatalog sets the value of Catalog.
-func (s *DatabricksTechnicalAssetConfiguration) SetCatalog(val string) {
-	s.Catalog = val
-}
-
-// SetSchema sets the value of Schema.
-func (s *DatabricksTechnicalAssetConfiguration) SetSchema(val OptString) {
-	s.Schema = val
-}
-
-// SetTable sets the value of Table.
-func (s *DatabricksTechnicalAssetConfiguration) SetTable(val OptString) {
-	s.Table = val
-}
-
-// SetBucketIdentifier sets the value of BucketIdentifier.
-func (s *DatabricksTechnicalAssetConfiguration) SetBucketIdentifier(val OptString) {
-	s.BucketIdentifier = val
-}
-
-// SetCatalogPath sets the value of CatalogPath.
-func (s *DatabricksTechnicalAssetConfiguration) SetCatalogPath(val OptString) {
-	s.CatalogPath = val
-}
-
-// SetTablePath sets the value of TablePath.
-func (s *DatabricksTechnicalAssetConfiguration) SetTablePath(val OptString) {
-	s.TablePath = val
-}
-
-// SetAccessGranularity sets the value of AccessGranularity.
-func (s *DatabricksTechnicalAssetConfiguration) SetAccessGranularity(val AccessGranularity) {
-	s.AccessGranularity = val
-}
-
-// Ref: #/components/schemas/DatasetAboutUpdate
-type DatasetAboutUpdate struct {
-	About string `json:"about"`
-}
-
-// GetAbout returns the value of About.
-func (s *DatasetAboutUpdate) GetAbout() string {
-	return s.About
-}
-
-// SetAbout sets the value of About.
-func (s *DatasetAboutUpdate) SetAbout(val string) {
-	s.About = val
-}
-
-// Ref: #/components/schemas/DatasetStatusUpdate
-type DatasetStatusUpdate struct {
-	Status OutputPortStatus `json:"status"`
-}
-
-// GetStatus returns the value of Status.
-func (s *DatasetStatusUpdate) GetStatus() OutputPortStatus {
-	return s.Status
-}
-
-// SetStatus sets the value of Status.
-func (s *DatasetStatusUpdate) SetStatus(val OutputPortStatus) {
-	s.Status = val
-}
-
-// Ref: #/components/schemas/DatasetUpdate
-type DatasetUpdate struct {
-	Name        string               `json:"name"`
-	Namespace   string               `json:"namespace"`
-	Description string               `json:"description"`
-	AccessType  OutputPortAccessType `json:"access_type"`
-	About       OptNilString         `json:"about"`
-	LifecycleID OptNilUUID           `json:"lifecycle_id"`
-	TagIds      []uuid.UUID          `json:"tag_ids"`
-}
-
-// GetName returns the value of Name.
-func (s *DatasetUpdate) GetName() string {
-	return s.Name
-}
-
-// GetNamespace returns the value of Namespace.
-func (s *DatasetUpdate) GetNamespace() string {
-	return s.Namespace
-}
-
-// GetDescription returns the value of Description.
-func (s *DatasetUpdate) GetDescription() string {
-	return s.Description
-}
-
-// GetAccessType returns the value of AccessType.
-func (s *DatasetUpdate) GetAccessType() OutputPortAccessType {
-	return s.AccessType
-}
-
-// GetAbout returns the value of About.
-func (s *DatasetUpdate) GetAbout() OptNilString {
-	return s.About
-}
-
-// GetLifecycleID returns the value of LifecycleID.
-func (s *DatasetUpdate) GetLifecycleID() OptNilUUID {
-	return s.LifecycleID
-}
-
-// GetTagIds returns the value of TagIds.
-func (s *DatasetUpdate) GetTagIds() []uuid.UUID {
-	return s.TagIds
-}
-
-// SetName sets the value of Name.
-func (s *DatasetUpdate) SetName(val string) {
-	s.Name = val
-}
-
-// SetNamespace sets the value of Namespace.
-func (s *DatasetUpdate) SetNamespace(val string) {
-	s.Namespace = val
-}
-
-// SetDescription sets the value of Description.
-func (s *DatasetUpdate) SetDescription(val string) {
-	s.Description = val
-}
-
-// SetAccessType sets the value of AccessType.
-func (s *DatasetUpdate) SetAccessType(val OutputPortAccessType) {
-	s.AccessType = val
-}
-
-// SetAbout sets the value of About.
-func (s *DatasetUpdate) SetAbout(val OptNilString) {
-	s.About = val
-}
-
-// SetLifecycleID sets the value of LifecycleID.
-func (s *DatasetUpdate) SetLifecycleID(val OptNilUUID) {
-	s.LifecycleID = val
-}
-
-// SetTagIds sets the value of TagIds.
-func (s *DatasetUpdate) SetTagIds(val []uuid.UUID) {
-	s.TagIds = val
 }
 
 // Ref: #/components/schemas/DecideDataProductRoleAssignment
@@ -3350,6 +3514,14 @@ func (s *DecisionStatus) UnmarshalText(data []byte) error {
 	}
 }
 
+type DeleteAccessModeBadRequestApplicationJSON jx.Raw
+
+func (*DeleteAccessModeBadRequestApplicationJSON) deleteAccessModeRes() {}
+
+type DeleteAccessModeOKApplicationJSON jx.Raw
+
+func (*DeleteAccessModeOKApplicationJSON) deleteAccessModeRes() {}
+
 // Ref: #/components/schemas/DeleteDataProductRoleAssignmentResponse
 type DeleteDataProductRoleAssignmentResponse struct {
 	ID            uuid.UUID `json:"id"`
@@ -3394,6 +3566,34 @@ func (s *DeleteGlobalRoleAssignmentResponse) SetID(val uuid.UUID) {
 }
 
 func (*DeleteGlobalRoleAssignmentResponse) deleteGlobalRoleAssignmentRes() {}
+
+// DeleteGroupNoContent is response for DeleteGroup operation.
+type DeleteGroupNoContent struct{}
+
+func (*DeleteGroupNoContent) deleteGroupRes() {}
+
+type DeleteGroupNotFoundApplicationJSON jx.Raw
+
+func (*DeleteGroupNotFoundApplicationJSON) deleteGroupRes() {}
+
+// DeleteGroupsBatchNoContent is response for DeleteGroupsBatch operation.
+type DeleteGroupsBatchNoContent struct{}
+
+func (*DeleteGroupsBatchNoContent) deleteGroupsBatchRes() {}
+
+// DeleteMachineUserNoContent is response for DeleteMachineUser operation.
+type DeleteMachineUserNoContent struct{}
+
+func (*DeleteMachineUserNoContent) deleteMachineUserRes() {}
+
+type DeleteMachineUserNotFoundApplicationJSON jx.Raw
+
+func (*DeleteMachineUserNotFoundApplicationJSON) deleteMachineUserRes() {}
+
+// DeleteMachineUsersBatchNoContent is response for DeleteMachineUsersBatch operation.
+type DeleteMachineUsersBatchNoContent struct{}
+
+func (*DeleteMachineUsersBatchNoContent) deleteMachineUsersBatchRes() {}
 
 type DeleteOutputPortQueryStatOKApplicationJSON jx.Raw
 
@@ -3449,6 +3649,7 @@ func (*DenyOutputPortAsInputPortOKApplicationJSON) denyOutputPortAsInputPortRes(
 // Ref: #/components/schemas/DenyOutputPortAsInputPortRequest
 type DenyOutputPortAsInputPortRequest struct {
 	ConsumingDataProductID uuid.UUID `json:"consuming_data_product_id"`
+	DecisionNote           string    `json:"decision_note"`
 }
 
 // GetConsumingDataProductID returns the value of ConsumingDataProductID.
@@ -3456,9 +3657,19 @@ func (s *DenyOutputPortAsInputPortRequest) GetConsumingDataProductID() uuid.UUID
 	return s.ConsumingDataProductID
 }
 
+// GetDecisionNote returns the value of DecisionNote.
+func (s *DenyOutputPortAsInputPortRequest) GetDecisionNote() string {
+	return s.DecisionNote
+}
+
 // SetConsumingDataProductID sets the value of ConsumingDataProductID.
 func (s *DenyOutputPortAsInputPortRequest) SetConsumingDataProductID(val uuid.UUID) {
 	s.ConsumingDataProductID = val
+}
+
+// SetDecisionNote sets the value of DecisionNote.
+func (s *DenyOutputPortAsInputPortRequest) SetDecisionNote(val string) {
+	s.DecisionNote = val
 }
 
 type DenyOutputPortTechnicalAssetLinkOKApplicationJSON jx.Raw
@@ -3477,7 +3688,7 @@ type DeviceFlow struct {
 	AuthzCode               NilString        `json:"authz_code"`
 	AuthzState              NilString        `json:"authz_state"`
 	AuthzVerif              NilString        `json:"authz_verif"`
-	VerificationURIComplete string           `json:"verification_uri_complete"`
+	VerificationURIComplete OptString        `json:"verification_uri_complete"`
 }
 
 // GetDeviceCode returns the value of DeviceCode.
@@ -3531,7 +3742,7 @@ func (s *DeviceFlow) GetAuthzVerif() NilString {
 }
 
 // GetVerificationURIComplete returns the value of VerificationURIComplete.
-func (s *DeviceFlow) GetVerificationURIComplete() string {
+func (s *DeviceFlow) GetVerificationURIComplete() OptString {
 	return s.VerificationURIComplete
 }
 
@@ -3586,7 +3797,7 @@ func (s *DeviceFlow) SetAuthzVerif(val NilString) {
 }
 
 // SetVerificationURIComplete sets the value of VerificationURIComplete.
-func (s *DeviceFlow) SetVerificationURIComplete(val string) {
+func (s *DeviceFlow) SetVerificationURIComplete(val OptString) {
 	s.VerificationURIComplete = val
 }
 
@@ -3652,6 +3863,7 @@ func (s *DeviceFlowStatus) UnmarshalText(data []byte) error {
 type Domain struct {
 	ID          uuid.UUID `json:"id"`
 	Name        string    `json:"name"`
+	Namespace   string    `json:"namespace"`
 	Description string    `json:"description"`
 }
 
@@ -3663,6 +3875,11 @@ func (s *Domain) GetID() uuid.UUID {
 // GetName returns the value of Name.
 func (s *Domain) GetName() string {
 	return s.Name
+}
+
+// GetNamespace returns the value of Namespace.
+func (s *Domain) GetNamespace() string {
+	return s.Namespace
 }
 
 // GetDescription returns the value of Description.
@@ -3680,6 +3897,11 @@ func (s *Domain) SetName(val string) {
 	s.Name = val
 }
 
+// SetNamespace sets the value of Namespace.
+func (s *Domain) SetNamespace(val string) {
+	s.Namespace = val
+}
+
 // SetDescription sets the value of Description.
 func (s *Domain) SetDescription(val string) {
 	s.Description = val
@@ -3689,6 +3911,7 @@ func (s *Domain) SetDescription(val string) {
 type DomainCreate struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
+	Namespace   string `json:"namespace"`
 }
 
 // GetName returns the value of Name.
@@ -3701,6 +3924,11 @@ func (s *DomainCreate) GetDescription() string {
 	return s.Description
 }
 
+// GetNamespace returns the value of Namespace.
+func (s *DomainCreate) GetNamespace() string {
+	return s.Namespace
+}
+
 // SetName sets the value of Name.
 func (s *DomainCreate) SetName(val string) {
 	s.Name = val
@@ -3709,6 +3937,53 @@ func (s *DomainCreate) SetName(val string) {
 // SetDescription sets the value of Description.
 func (s *DomainCreate) SetDescription(val string) {
 	s.Description = val
+}
+
+// SetNamespace sets the value of Namespace.
+func (s *DomainCreate) SetNamespace(val string) {
+	s.Namespace = val
+}
+
+// Ref: #/components/schemas/DomainStatus
+type DomainStatus string
+
+const (
+	DomainStatusActive   DomainStatus = "active"
+	DomainStatusDeleting DomainStatus = "deleting"
+)
+
+// AllValues returns all DomainStatus values.
+func (DomainStatus) AllValues() []DomainStatus {
+	return []DomainStatus{
+		DomainStatusActive,
+		DomainStatusDeleting,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s DomainStatus) MarshalText() ([]byte, error) {
+	switch s {
+	case DomainStatusActive:
+		return []byte(s), nil
+	case DomainStatusDeleting:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *DomainStatus) UnmarshalText(data []byte) error {
+	switch DomainStatus(data) {
+	case DomainStatusActive:
+		*s = DomainStatusActive
+		return nil
+	case DomainStatusDeleting:
+		*s = DomainStatusDeleting
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
 }
 
 // Ref: #/components/schemas/DomainUpdate
@@ -3744,6 +4019,7 @@ type Environment struct {
 	Acronym   string    `json:"acronym"`
 	Context   string    `json:"context"`
 	IsDefault OptBool   `json:"is_default"`
+	IsGlobal  OptBool   `json:"is_global"`
 }
 
 // GetID returns the value of ID.
@@ -3771,6 +4047,11 @@ func (s *Environment) GetIsDefault() OptBool {
 	return s.IsDefault
 }
 
+// GetIsGlobal returns the value of IsGlobal.
+func (s *Environment) GetIsGlobal() OptBool {
+	return s.IsGlobal
+}
+
 // SetID sets the value of ID.
 func (s *Environment) SetID(val uuid.UUID) {
 	s.ID = val
@@ -3796,7 +4077,13 @@ func (s *Environment) SetIsDefault(val OptBool) {
 	s.IsDefault = val
 }
 
-func (*Environment) getEnvironmentRes() {}
+// SetIsGlobal sets the value of IsGlobal.
+func (s *Environment) SetIsGlobal(val OptBool) {
+	s.IsGlobal = val
+}
+
+func (*Environment) getEnvironmentRes()            {}
+func (*Environment) updateEnvironmentIsGlobalRes() {}
 
 // Ref: #/components/schemas/EnvironmentGetItem
 type EnvironmentGetItem struct {
@@ -3805,6 +4092,7 @@ type EnvironmentGetItem struct {
 	Acronym   string    `json:"acronym"`
 	Context   string    `json:"context"`
 	IsDefault OptBool   `json:"is_default"`
+	IsGlobal  OptBool   `json:"is_global"`
 }
 
 // GetID returns the value of ID.
@@ -3832,6 +4120,11 @@ func (s *EnvironmentGetItem) GetIsDefault() OptBool {
 	return s.IsDefault
 }
 
+// GetIsGlobal returns the value of IsGlobal.
+func (s *EnvironmentGetItem) GetIsGlobal() OptBool {
+	return s.IsGlobal
+}
+
 // SetID sets the value of ID.
 func (s *EnvironmentGetItem) SetID(val uuid.UUID) {
 	s.ID = val
@@ -3857,6 +4150,26 @@ func (s *EnvironmentGetItem) SetIsDefault(val OptBool) {
 	s.IsDefault = val
 }
 
+// SetIsGlobal sets the value of IsGlobal.
+func (s *EnvironmentGetItem) SetIsGlobal(val OptBool) {
+	s.IsGlobal = val
+}
+
+// Ref: #/components/schemas/EnvironmentUpdateGlobal
+type EnvironmentUpdateGlobal struct {
+	IsGlobal bool `json:"is_global"`
+}
+
+// GetIsGlobal returns the value of IsGlobal.
+func (s *EnvironmentUpdateGlobal) GetIsGlobal() bool {
+	return s.IsGlobal
+}
+
+// SetIsGlobal sets the value of IsGlobal.
+func (s *EnvironmentUpdateGlobal) SetIsGlobal(val bool) {
+	s.IsGlobal = val
+}
+
 // Ref: #/components/schemas/EnvironmentsGet
 type EnvironmentsGet struct {
 	Environments []EnvironmentGetItem `json:"environments"`
@@ -3872,6 +4185,8 @@ func (s *EnvironmentsGet) SetEnvironments(val []EnvironmentGetItem) {
 	s.Environments = val
 }
 
+func (*EnvironmentsGet) getEnvironmentsRes() {}
+
 // Ref: #/components/schemas/EventEntityType
 type EventEntityType string
 
@@ -3880,6 +4195,7 @@ const (
 	EventEntityTypeOutputPort     EventEntityType = "output_port"
 	EventEntityTypeTechnicalAsset EventEntityType = "technical_asset"
 	EventEntityTypeUser           EventEntityType = "user"
+	EventEntityTypeExploration    EventEntityType = "exploration"
 )
 
 // AllValues returns all EventEntityType values.
@@ -3889,6 +4205,7 @@ func (EventEntityType) AllValues() []EventEntityType {
 		EventEntityTypeOutputPort,
 		EventEntityTypeTechnicalAsset,
 		EventEntityTypeUser,
+		EventEntityTypeExploration,
 	}
 }
 
@@ -3902,6 +4219,8 @@ func (s EventEntityType) MarshalText() ([]byte, error) {
 	case EventEntityTypeTechnicalAsset:
 		return []byte(s), nil
 	case EventEntityTypeUser:
+		return []byte(s), nil
+	case EventEntityTypeExploration:
 		return []byte(s), nil
 	default:
 		return nil, errors.Errorf("invalid value: %q", s)
@@ -3923,9 +4242,27 @@ func (s *EventEntityType) UnmarshalText(data []byte) error {
 	case EventEntityTypeUser:
 		*s = EventEntityTypeUser
 		return nil
+	case EventEntityTypeExploration:
+		*s = EventEntityTypeExploration
+		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)
 	}
+}
+
+// Ref: #/components/schemas/ExpiringSoonThresholdResponse
+type ExpiringSoonThresholdResponse struct {
+	Days int `json:"days"`
+}
+
+// GetDays returns the value of Days.
+func (s *ExpiringSoonThresholdResponse) GetDays() int {
+	return s.Days
+}
+
+// SetDays sets the value of Days.
+func (s *ExpiringSoonThresholdResponse) SetDays(val int) {
+	s.Days = val
 }
 
 // Ref: #/components/schemas/Exploration
@@ -4053,6 +4390,48 @@ func (s *FinalizerRequest) SetFinalizer(val string) {
 	s.Finalizer = val
 }
 
+// Ref: #/components/schemas/GetAccessDurationResponse
+type GetAccessDurationResponse struct {
+	AccessDurations []AccessDuration `json:"access_durations"`
+}
+
+// GetAccessDurations returns the value of AccessDurations.
+func (s *GetAccessDurationResponse) GetAccessDurations() []AccessDuration {
+	return s.AccessDurations
+}
+
+// SetAccessDurations sets the value of AccessDurations.
+func (s *GetAccessDurationResponse) SetAccessDurations(val []AccessDuration) {
+	s.AccessDurations = val
+}
+
+func (*GetAccessDurationResponse) getAllAccessDurationsRes() {}
+
+// Ref: #/components/schemas/GetAccessModes
+type GetAccessModes struct {
+	AccessModes []AccessModeWithType `json:"access_modes"`
+}
+
+// GetAccessModes returns the value of AccessModes.
+func (s *GetAccessModes) GetAccessModes() []AccessModeWithType {
+	return s.AccessModes
+}
+
+// SetAccessModes sets the value of AccessModes.
+func (s *GetAccessModes) SetAccessModes(val []AccessModeWithType) {
+	s.AccessModes = val
+}
+
+func (*GetAccessModes) getAccessModesRes() {}
+
+type GetAccessModesBadRequestApplicationJSON jx.Raw
+
+func (*GetAccessModesBadRequestApplicationJSON) getAccessModesRes() {}
+
+type GetAccessModesNotFoundApplicationJSON jx.Raw
+
+func (*GetAccessModesNotFoundApplicationJSON) getAccessModesRes() {}
+
 // Ref: #/components/schemas/GetAllPlatformServiceConfigurationsResponse
 type GetAllPlatformServiceConfigurationsResponse struct {
 	PlatformServiceConfigurations []PlatformServiceConfiguration `json:"platform_service_configurations"`
@@ -4067,6 +4446,8 @@ func (s *GetAllPlatformServiceConfigurationsResponse) GetPlatformServiceConfigur
 func (s *GetAllPlatformServiceConfigurationsResponse) SetPlatformServiceConfigurations(val []PlatformServiceConfiguration) {
 	s.PlatformServiceConfigurations = val
 }
+
+func (*GetAllPlatformServiceConfigurationsResponse) getAllPlatformServiceConfigurationsRes() {}
 
 // Ref: #/components/schemas/GetAllPlatformsResponse
 type GetAllPlatformsResponse struct {
@@ -4083,18 +4464,20 @@ func (s *GetAllPlatformsResponse) SetPlatforms(val []Platform) {
 	s.Platforms = val
 }
 
+func (*GetAllPlatformsResponse) getAllPlatformsRes() {}
+
 // Ref: #/components/schemas/GetDataProductInputPortsResponse
 type GetDataProductInputPortsResponse struct {
-	InputPorts []InputPort `json:"input_ports"`
+	InputPorts []AbstractDataProductInputPort `json:"input_ports"`
 }
 
 // GetInputPorts returns the value of InputPorts.
-func (s *GetDataProductInputPortsResponse) GetInputPorts() []InputPort {
+func (s *GetDataProductInputPortsResponse) GetInputPorts() []AbstractDataProductInputPort {
 	return s.InputPorts
 }
 
 // SetInputPorts sets the value of InputPorts.
-func (s *GetDataProductInputPortsResponse) SetInputPorts(val []InputPort) {
+func (s *GetDataProductInputPortsResponse) SetInputPorts(val []AbstractDataProductInputPort) {
 	s.InputPorts = val
 }
 
@@ -4119,18 +4502,20 @@ func (*GetDataProductOutputPortsResponse) getDataProductOutputPortsRes() {}
 
 // Ref: #/components/schemas/GetDataProductResponse
 type GetDataProductResponse struct {
-	ID          uuid.UUID                 `json:"id"`
-	Name        string                    `json:"name"`
-	Description string                    `json:"description"`
-	Namespace   string                    `json:"namespace"`
-	Status      AbstractDataProductStatus `json:"status"`
-	Finalizers  []string                  `json:"finalizers"`
-	Tags        []Tag                     `json:"tags"`
-	Usage       NilString                 `json:"usage"`
-	Domain      Domain                    `json:"domain"`
-	Type        DataProductType           `json:"type"`
-	Lifecycle   NilDataProductLifeCycle   `json:"lifecycle"`
-	About       NilString                 `json:"about"`
+	ID           uuid.UUID                 `json:"id"`
+	Name         string                    `json:"name"`
+	Description  string                    `json:"description"`
+	Namespace    string                    `json:"namespace"`
+	Status       AbstractDataProductStatus `json:"status"`
+	Finalizers   []string                  `json:"finalizers"`
+	Tags         []Tag                     `json:"tags"`
+	Usage        NilString                 `json:"usage"`
+	Domain       Domain                    `json:"domain"`
+	Type         DataProductType           `json:"type"`
+	Lifecycle    NilDataProductLifeCycle   `json:"lifecycle"`
+	Visibility   DataProductVisibility     `json:"visibility"`
+	Environments []DataProductEnvironment  `json:"environments"`
+	About        NilString                 `json:"about"`
 }
 
 // GetID returns the value of ID.
@@ -4186,6 +4571,16 @@ func (s *GetDataProductResponse) GetType() DataProductType {
 // GetLifecycle returns the value of Lifecycle.
 func (s *GetDataProductResponse) GetLifecycle() NilDataProductLifeCycle {
 	return s.Lifecycle
+}
+
+// GetVisibility returns the value of Visibility.
+func (s *GetDataProductResponse) GetVisibility() DataProductVisibility {
+	return s.Visibility
+}
+
+// GetEnvironments returns the value of Environments.
+func (s *GetDataProductResponse) GetEnvironments() []DataProductEnvironment {
+	return s.Environments
 }
 
 // GetAbout returns the value of About.
@@ -4246,6 +4641,16 @@ func (s *GetDataProductResponse) SetType(val DataProductType) {
 // SetLifecycle sets the value of Lifecycle.
 func (s *GetDataProductResponse) SetLifecycle(val NilDataProductLifeCycle) {
 	s.Lifecycle = val
+}
+
+// SetVisibility sets the value of Visibility.
+func (s *GetDataProductResponse) SetVisibility(val DataProductVisibility) {
+	s.Visibility = val
+}
+
+// SetEnvironments sets the value of Environments.
+func (s *GetDataProductResponse) SetEnvironments(val []DataProductEnvironment) {
+	s.Environments = val
 }
 
 // SetAbout sets the value of About.
@@ -4319,6 +4724,8 @@ type GetDataProductsResponseItem struct {
 	Domain              Domain                    `json:"domain"`
 	Type                DataProductType           `json:"type"`
 	Lifecycle           NilDataProductLifeCycle   `json:"lifecycle"`
+	Visibility          DataProductVisibility     `json:"visibility"`
+	Environments        []DataProductEnvironment  `json:"environments"`
 	UserCount           int                       `json:"user_count"`
 	InputPortCount      int                       `json:"input_port_count"`
 	TechnicalAssetCount int                       `json:"technical_asset_count"`
@@ -4377,6 +4784,16 @@ func (s *GetDataProductsResponseItem) GetType() DataProductType {
 // GetLifecycle returns the value of Lifecycle.
 func (s *GetDataProductsResponseItem) GetLifecycle() NilDataProductLifeCycle {
 	return s.Lifecycle
+}
+
+// GetVisibility returns the value of Visibility.
+func (s *GetDataProductsResponseItem) GetVisibility() DataProductVisibility {
+	return s.Visibility
+}
+
+// GetEnvironments returns the value of Environments.
+func (s *GetDataProductsResponseItem) GetEnvironments() []DataProductEnvironment {
+	return s.Environments
 }
 
 // GetUserCount returns the value of UserCount.
@@ -4449,6 +4866,16 @@ func (s *GetDataProductsResponseItem) SetLifecycle(val NilDataProductLifeCycle) 
 	s.Lifecycle = val
 }
 
+// SetVisibility sets the value of Visibility.
+func (s *GetDataProductsResponseItem) SetVisibility(val DataProductVisibility) {
+	s.Visibility = val
+}
+
+// SetEnvironments sets the value of Environments.
+func (s *GetDataProductsResponseItem) SetEnvironments(val []DataProductEnvironment) {
+	s.Environments = val
+}
+
 // SetUserCount sets the value of UserCount.
 func (s *GetDataProductsResponseItem) SetUserCount(val int) {
 	s.UserCount = val
@@ -4466,9 +4893,12 @@ func (s *GetDataProductsResponseItem) SetTechnicalAssetCount(val int) {
 
 // Ref: #/components/schemas/GetDomainResponse
 type GetDomainResponse struct {
-	ID          uuid.UUID `json:"id"`
-	Name        string    `json:"name"`
-	Description string    `json:"description"`
+	ID          uuid.UUID    `json:"id"`
+	Name        string       `json:"name"`
+	Namespace   string       `json:"namespace"`
+	Description string       `json:"description"`
+	Status      DomainStatus `json:"status"`
+	Finalizers  []string     `json:"finalizers"`
 }
 
 // GetID returns the value of ID.
@@ -4481,9 +4911,24 @@ func (s *GetDomainResponse) GetName() string {
 	return s.Name
 }
 
+// GetNamespace returns the value of Namespace.
+func (s *GetDomainResponse) GetNamespace() string {
+	return s.Namespace
+}
+
 // GetDescription returns the value of Description.
 func (s *GetDomainResponse) GetDescription() string {
 	return s.Description
+}
+
+// GetStatus returns the value of Status.
+func (s *GetDomainResponse) GetStatus() DomainStatus {
+	return s.Status
+}
+
+// GetFinalizers returns the value of Finalizers.
+func (s *GetDomainResponse) GetFinalizers() []string {
+	return s.Finalizers
 }
 
 // SetID sets the value of ID.
@@ -4496,19 +4941,37 @@ func (s *GetDomainResponse) SetName(val string) {
 	s.Name = val
 }
 
+// SetNamespace sets the value of Namespace.
+func (s *GetDomainResponse) SetNamespace(val string) {
+	s.Namespace = val
+}
+
 // SetDescription sets the value of Description.
 func (s *GetDomainResponse) SetDescription(val string) {
 	s.Description = val
+}
+
+// SetStatus sets the value of Status.
+func (s *GetDomainResponse) SetStatus(val DomainStatus) {
+	s.Status = val
+}
+
+// SetFinalizers sets the value of Finalizers.
+func (s *GetDomainResponse) SetFinalizers(val []string) {
+	s.Finalizers = val
 }
 
 func (*GetDomainResponse) getDomainRes() {}
 
 // Ref: #/components/schemas/GetDomainsItem
 type GetDomainsItem struct {
-	ID                       uuid.UUID `json:"id"`
-	Name                     string    `json:"name"`
-	Description              string    `json:"description"`
-	AbstractDataProductCount int       `json:"abstract_data_product_count"`
+	ID                       uuid.UUID    `json:"id"`
+	Name                     string       `json:"name"`
+	Namespace                string       `json:"namespace"`
+	Description              string       `json:"description"`
+	Status                   DomainStatus `json:"status"`
+	Finalizers               []string     `json:"finalizers"`
+	AbstractDataProductCount int          `json:"abstract_data_product_count"`
 }
 
 // GetID returns the value of ID.
@@ -4521,9 +4984,24 @@ func (s *GetDomainsItem) GetName() string {
 	return s.Name
 }
 
+// GetNamespace returns the value of Namespace.
+func (s *GetDomainsItem) GetNamespace() string {
+	return s.Namespace
+}
+
 // GetDescription returns the value of Description.
 func (s *GetDomainsItem) GetDescription() string {
 	return s.Description
+}
+
+// GetStatus returns the value of Status.
+func (s *GetDomainsItem) GetStatus() DomainStatus {
+	return s.Status
+}
+
+// GetFinalizers returns the value of Finalizers.
+func (s *GetDomainsItem) GetFinalizers() []string {
+	return s.Finalizers
 }
 
 // GetAbstractDataProductCount returns the value of AbstractDataProductCount.
@@ -4541,9 +5019,24 @@ func (s *GetDomainsItem) SetName(val string) {
 	s.Name = val
 }
 
+// SetNamespace sets the value of Namespace.
+func (s *GetDomainsItem) SetNamespace(val string) {
+	s.Namespace = val
+}
+
 // SetDescription sets the value of Description.
 func (s *GetDomainsItem) SetDescription(val string) {
 	s.Description = val
+}
+
+// SetStatus sets the value of Status.
+func (s *GetDomainsItem) SetStatus(val DomainStatus) {
+	s.Status = val
+}
+
+// SetFinalizers sets the value of Finalizers.
+func (s *GetDomainsItem) SetFinalizers(val []string) {
+	s.Finalizers = val
 }
 
 // SetAbstractDataProductCount sets the value of AbstractDataProductCount.
@@ -4565,6 +5058,8 @@ func (s *GetDomainsResponse) GetDomains() []GetDomainsItem {
 func (s *GetDomainsResponse) SetDomains(val []GetDomainsItem) {
 	s.Domains = val
 }
+
+func (*GetDomainsResponse) getDomainsRes() {}
 
 // Ref: #/components/schemas/GetEventHistoryResponse
 type GetEventHistoryResponse struct {
@@ -4597,11 +5092,13 @@ type GetEventHistoryResponseItem struct {
 	CreatedOn                time.Time             `json:"created_on"`
 	DeletedSubjectIdentifier OptNilString          `json:"deleted_subject_identifier"`
 	DeletedTargetIdentifier  OptNilString          `json:"deleted_target_identifier"`
-	Actor                    User                  `json:"actor"`
+	DeletedActorIdentifier   OptNilString          `json:"deleted_actor_identifier"`
+	Actor                    OptNilUser            `json:"actor"`
 	DataProduct              OptNilDataProduct     `json:"data_product"`
 	User                     OptNilUser            `json:"user"`
 	OutputPort               OptNilOutputPort      `json:"output_port"`
 	TechnicalAsset           OptNilTechnicalAsset  `json:"technical_asset"`
+	Exploration              OptNilExploration     `json:"exploration"`
 }
 
 // GetID returns the value of ID.
@@ -4654,8 +5151,13 @@ func (s *GetEventHistoryResponseItem) GetDeletedTargetIdentifier() OptNilString 
 	return s.DeletedTargetIdentifier
 }
 
+// GetDeletedActorIdentifier returns the value of DeletedActorIdentifier.
+func (s *GetEventHistoryResponseItem) GetDeletedActorIdentifier() OptNilString {
+	return s.DeletedActorIdentifier
+}
+
 // GetActor returns the value of Actor.
-func (s *GetEventHistoryResponseItem) GetActor() User {
+func (s *GetEventHistoryResponseItem) GetActor() OptNilUser {
 	return s.Actor
 }
 
@@ -4677,6 +5179,11 @@ func (s *GetEventHistoryResponseItem) GetOutputPort() OptNilOutputPort {
 // GetTechnicalAsset returns the value of TechnicalAsset.
 func (s *GetEventHistoryResponseItem) GetTechnicalAsset() OptNilTechnicalAsset {
 	return s.TechnicalAsset
+}
+
+// GetExploration returns the value of Exploration.
+func (s *GetEventHistoryResponseItem) GetExploration() OptNilExploration {
+	return s.Exploration
 }
 
 // SetID sets the value of ID.
@@ -4729,8 +5236,13 @@ func (s *GetEventHistoryResponseItem) SetDeletedTargetIdentifier(val OptNilStrin
 	s.DeletedTargetIdentifier = val
 }
 
+// SetDeletedActorIdentifier sets the value of DeletedActorIdentifier.
+func (s *GetEventHistoryResponseItem) SetDeletedActorIdentifier(val OptNilString) {
+	s.DeletedActorIdentifier = val
+}
+
 // SetActor sets the value of Actor.
-func (s *GetEventHistoryResponseItem) SetActor(val User) {
+func (s *GetEventHistoryResponseItem) SetActor(val OptNilUser) {
 	s.Actor = val
 }
 
@@ -4754,18 +5266,23 @@ func (s *GetEventHistoryResponseItem) SetTechnicalAsset(val OptNilTechnicalAsset
 	s.TechnicalAsset = val
 }
 
+// SetExploration sets the value of Exploration.
+func (s *GetEventHistoryResponseItem) SetExploration(val OptNilExploration) {
+	s.Exploration = val
+}
+
 // Ref: #/components/schemas/GetExplorationInputPortsResponse
 type GetExplorationInputPortsResponse struct {
-	InputPorts []InputPort `json:"input_ports"`
+	InputPorts []AbstractDataProductInputPort `json:"input_ports"`
 }
 
 // GetInputPorts returns the value of InputPorts.
-func (s *GetExplorationInputPortsResponse) GetInputPorts() []InputPort {
+func (s *GetExplorationInputPortsResponse) GetInputPorts() []AbstractDataProductInputPort {
 	return s.InputPorts
 }
 
 // SetInputPorts sets the value of InputPorts.
-func (s *GetExplorationInputPortsResponse) SetInputPorts(val []InputPort) {
+func (s *GetExplorationInputPortsResponse) SetInputPorts(val []AbstractDataProductInputPort) {
 	s.InputPorts = val
 }
 
@@ -4882,6 +5399,14 @@ func (s *GetExplorationsResponse) SetExplorations(val []Exploration) {
 
 func (*GetExplorationsResponse) getExplorationsRes() {}
 
+type GetGroupMembersNotFoundApplicationJSON jx.Raw
+
+func (*GetGroupMembersNotFoundApplicationJSON) getGroupMembersRes() {}
+
+type GetGroupNotFoundApplicationJSON jx.Raw
+
+func (*GetGroupNotFoundApplicationJSON) getGroupRes() {}
+
 // Ref: #/components/schemas/GetInputPortsForOutputPortResponse
 type GetInputPortsForOutputPortResponse struct {
 	InputPorts []OutputPortInputPort `json:"input_ports"`
@@ -4899,23 +5424,69 @@ func (s *GetInputPortsForOutputPortResponse) SetInputPorts(val []OutputPortInput
 
 func (*GetInputPortsForOutputPortResponse) getInputPortsForOutputPortRes() {}
 
+type GetMachineUserNotFoundApplicationJSON jx.Raw
+
+func (*GetMachineUserNotFoundApplicationJSON) getMachineUserRes() {}
+
+// Ref: #/components/schemas/GetOutputPortAccessDurationsResponse
+type GetOutputPortAccessDurationsResponse struct {
+	ID                        uuid.UUID                `json:"id"`
+	DataProductAccessDuration OutputPortAccessDuration `json:"data_product_access_duration"`
+	ExplorationAccessDuration OutputPortAccessDuration `json:"exploration_access_duration"`
+}
+
+// GetID returns the value of ID.
+func (s *GetOutputPortAccessDurationsResponse) GetID() uuid.UUID {
+	return s.ID
+}
+
+// GetDataProductAccessDuration returns the value of DataProductAccessDuration.
+func (s *GetOutputPortAccessDurationsResponse) GetDataProductAccessDuration() OutputPortAccessDuration {
+	return s.DataProductAccessDuration
+}
+
+// GetExplorationAccessDuration returns the value of ExplorationAccessDuration.
+func (s *GetOutputPortAccessDurationsResponse) GetExplorationAccessDuration() OutputPortAccessDuration {
+	return s.ExplorationAccessDuration
+}
+
+// SetID sets the value of ID.
+func (s *GetOutputPortAccessDurationsResponse) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+// SetDataProductAccessDuration sets the value of DataProductAccessDuration.
+func (s *GetOutputPortAccessDurationsResponse) SetDataProductAccessDuration(val OutputPortAccessDuration) {
+	s.DataProductAccessDuration = val
+}
+
+// SetExplorationAccessDuration sets the value of ExplorationAccessDuration.
+func (s *GetOutputPortAccessDurationsResponse) SetExplorationAccessDuration(val OutputPortAccessDuration) {
+	s.ExplorationAccessDuration = val
+}
+
+func (*GetOutputPortAccessDurationsResponse) getOutputPortAccessDurationsRes() {}
+
 // Ref: #/components/schemas/GetOutputPortResponse
 type GetOutputPortResponse struct {
-	ID                  uuid.UUID                `json:"id"`
-	Namespace           string                   `json:"namespace"`
-	Name                string                   `json:"name"`
-	Description         string                   `json:"description"`
-	Status              OutputPortStatus         `json:"status"`
-	Usage               NilString                `json:"usage"`
-	AccessType          OutputPortAccessType     `json:"access_type"`
-	DataProductID       uuid.UUID                `json:"data_product_id"`
-	Tags                []Tag                    `json:"tags"`
-	Domain              Domain                   `json:"domain"`
-	Lifecycle           NilDataProductLifeCycle  `json:"lifecycle"`
-	About               NilString                `json:"about"`
-	RolledUpTags        []Tag                    `json:"rolled_up_tags"`
-	DataProductSettings []OutputPortSettingValue `json:"data_product_settings"`
-	TechnicalAssetLinks []TechnicalAssetLink     `json:"technical_asset_links"`
+	ID                            uuid.UUID                `json:"id"`
+	Namespace                     string                   `json:"namespace"`
+	Name                          string                   `json:"name"`
+	Description                   string                   `json:"description"`
+	Status                        OutputPortStatus         `json:"status"`
+	Usage                         NilString                `json:"usage"`
+	AccessType                    OutputPortAccessType     `json:"access_type"`
+	DataProductAccessDurationType AccessDurationType       `json:"data_product_access_duration_type"`
+	ExplorationAccessDurationType AccessDurationType       `json:"exploration_access_duration_type"`
+	DataProductID                 uuid.UUID                `json:"data_product_id"`
+	Tags                          []Tag                    `json:"tags"`
+	Domain                        Domain                   `json:"domain"`
+	Lifecycle                     NilDataProductLifeCycle  `json:"lifecycle"`
+	AccessModes                   []AccessMode             `json:"access_modes"`
+	About                         NilString                `json:"about"`
+	RolledUpTags                  []Tag                    `json:"rolled_up_tags"`
+	DataProductSettings           []OutputPortSettingValue `json:"data_product_settings"`
+	TechnicalAssetLinks           []TechnicalAssetLink     `json:"technical_asset_links"`
 }
 
 // GetID returns the value of ID.
@@ -4953,6 +5524,16 @@ func (s *GetOutputPortResponse) GetAccessType() OutputPortAccessType {
 	return s.AccessType
 }
 
+// GetDataProductAccessDurationType returns the value of DataProductAccessDurationType.
+func (s *GetOutputPortResponse) GetDataProductAccessDurationType() AccessDurationType {
+	return s.DataProductAccessDurationType
+}
+
+// GetExplorationAccessDurationType returns the value of ExplorationAccessDurationType.
+func (s *GetOutputPortResponse) GetExplorationAccessDurationType() AccessDurationType {
+	return s.ExplorationAccessDurationType
+}
+
 // GetDataProductID returns the value of DataProductID.
 func (s *GetOutputPortResponse) GetDataProductID() uuid.UUID {
 	return s.DataProductID
@@ -4971,6 +5552,11 @@ func (s *GetOutputPortResponse) GetDomain() Domain {
 // GetLifecycle returns the value of Lifecycle.
 func (s *GetOutputPortResponse) GetLifecycle() NilDataProductLifeCycle {
 	return s.Lifecycle
+}
+
+// GetAccessModes returns the value of AccessModes.
+func (s *GetOutputPortResponse) GetAccessModes() []AccessMode {
+	return s.AccessModes
 }
 
 // GetAbout returns the value of About.
@@ -5028,6 +5614,16 @@ func (s *GetOutputPortResponse) SetAccessType(val OutputPortAccessType) {
 	s.AccessType = val
 }
 
+// SetDataProductAccessDurationType sets the value of DataProductAccessDurationType.
+func (s *GetOutputPortResponse) SetDataProductAccessDurationType(val AccessDurationType) {
+	s.DataProductAccessDurationType = val
+}
+
+// SetExplorationAccessDurationType sets the value of ExplorationAccessDurationType.
+func (s *GetOutputPortResponse) SetExplorationAccessDurationType(val AccessDurationType) {
+	s.ExplorationAccessDurationType = val
+}
+
 // SetDataProductID sets the value of DataProductID.
 func (s *GetOutputPortResponse) SetDataProductID(val uuid.UUID) {
 	s.DataProductID = val
@@ -5046,6 +5642,11 @@ func (s *GetOutputPortResponse) SetDomain(val Domain) {
 // SetLifecycle sets the value of Lifecycle.
 func (s *GetOutputPortResponse) SetLifecycle(val NilDataProductLifeCycle) {
 	s.Lifecycle = val
+}
+
+// SetAccessModes sets the value of AccessModes.
+func (s *GetOutputPortResponse) SetAccessModes(val []AccessMode) {
+	s.AccessModes = val
 }
 
 // SetAbout sets the value of About.
@@ -5131,19 +5732,23 @@ func (*GetTechnicalAssetsResponse) getDataProductTechnicalAssetsRes() {}
 
 // Ref: #/components/schemas/GetTechnicalAssetsResponseItem
 type GetTechnicalAssetsResponseItem struct {
-	ID               uuid.UUID                                   `json:"id"`
-	Name             string                                      `json:"name"`
-	Description      string                                      `json:"description"`
-	Namespace        string                                      `json:"namespace"`
-	OwnerID          uuid.UUID                                   `json:"owner_id"`
-	PlatformID       uuid.UUID                                   `json:"platform_id"`
-	ServiceID        uuid.UUID                                   `json:"service_id"`
-	Status           TechnicalAssetStatus                        `json:"status"`
-	TechnicalMapping TechnicalMapping                            `json:"technical_mapping"`
-	Configuration    GetTechnicalAssetsResponseItemConfiguration `json:"configuration"`
-	Owner            DataProduct                                 `json:"owner"`
-	OutputPortLinks  []OutputPortLink                            `json:"output_port_links"`
-	Tags             []Tag                                       `json:"tags"`
+	ID               uuid.UUID            `json:"id"`
+	Name             string               `json:"name"`
+	Description      string               `json:"description"`
+	Namespace        string               `json:"namespace"`
+	OwnerID          uuid.UUID            `json:"owner_id"`
+	PlatformID       OptNilUUID           `json:"platform_id"`
+	ServiceID        OptNilUUID           `json:"service_id"`
+	Status           TechnicalAssetStatus `json:"status"`
+	TechnicalMapping TechnicalMapping     `json:"technical_mapping"`
+	AccessModes      []AccessMode         `json:"access_modes"`
+	// Configuration of the technical asset. The available fields depend on `name`; retrieve them from
+	// /v2/plugins/{name}/form.
+	Configuration   GetTechnicalAssetsResponseItemConfiguration `json:"configuration"`
+	Owner           DataProduct                                 `json:"owner"`
+	Environments    []DataProductEnvironment                    `json:"environments"`
+	OutputPortLinks []OutputPortLink                            `json:"output_port_links"`
+	Tags            []Tag                                       `json:"tags"`
 	// DEPRECATED: Use 'technical_mapping' instead. This field will be removed in a future version.
 	SourceAligned bool            `json:"sourceAligned"`
 	ResultString  string          `json:"result_string"`
@@ -5176,12 +5781,12 @@ func (s *GetTechnicalAssetsResponseItem) GetOwnerID() uuid.UUID {
 }
 
 // GetPlatformID returns the value of PlatformID.
-func (s *GetTechnicalAssetsResponseItem) GetPlatformID() uuid.UUID {
+func (s *GetTechnicalAssetsResponseItem) GetPlatformID() OptNilUUID {
 	return s.PlatformID
 }
 
 // GetServiceID returns the value of ServiceID.
-func (s *GetTechnicalAssetsResponseItem) GetServiceID() uuid.UUID {
+func (s *GetTechnicalAssetsResponseItem) GetServiceID() OptNilUUID {
 	return s.ServiceID
 }
 
@@ -5195,6 +5800,11 @@ func (s *GetTechnicalAssetsResponseItem) GetTechnicalMapping() TechnicalMapping 
 	return s.TechnicalMapping
 }
 
+// GetAccessModes returns the value of AccessModes.
+func (s *GetTechnicalAssetsResponseItem) GetAccessModes() []AccessMode {
+	return s.AccessModes
+}
+
 // GetConfiguration returns the value of Configuration.
 func (s *GetTechnicalAssetsResponseItem) GetConfiguration() GetTechnicalAssetsResponseItemConfiguration {
 	return s.Configuration
@@ -5203,6 +5813,11 @@ func (s *GetTechnicalAssetsResponseItem) GetConfiguration() GetTechnicalAssetsRe
 // GetOwner returns the value of Owner.
 func (s *GetTechnicalAssetsResponseItem) GetOwner() DataProduct {
 	return s.Owner
+}
+
+// GetEnvironments returns the value of Environments.
+func (s *GetTechnicalAssetsResponseItem) GetEnvironments() []DataProductEnvironment {
+	return s.Environments
 }
 
 // GetOutputPortLinks returns the value of OutputPortLinks.
@@ -5256,12 +5871,12 @@ func (s *GetTechnicalAssetsResponseItem) SetOwnerID(val uuid.UUID) {
 }
 
 // SetPlatformID sets the value of PlatformID.
-func (s *GetTechnicalAssetsResponseItem) SetPlatformID(val uuid.UUID) {
+func (s *GetTechnicalAssetsResponseItem) SetPlatformID(val OptNilUUID) {
 	s.PlatformID = val
 }
 
 // SetServiceID sets the value of ServiceID.
-func (s *GetTechnicalAssetsResponseItem) SetServiceID(val uuid.UUID) {
+func (s *GetTechnicalAssetsResponseItem) SetServiceID(val OptNilUUID) {
 	s.ServiceID = val
 }
 
@@ -5275,6 +5890,11 @@ func (s *GetTechnicalAssetsResponseItem) SetTechnicalMapping(val TechnicalMappin
 	s.TechnicalMapping = val
 }
 
+// SetAccessModes sets the value of AccessModes.
+func (s *GetTechnicalAssetsResponseItem) SetAccessModes(val []AccessMode) {
+	s.AccessModes = val
+}
+
 // SetConfiguration sets the value of Configuration.
 func (s *GetTechnicalAssetsResponseItem) SetConfiguration(val GetTechnicalAssetsResponseItemConfiguration) {
 	s.Configuration = val
@@ -5283,6 +5903,11 @@ func (s *GetTechnicalAssetsResponseItem) SetConfiguration(val GetTechnicalAssets
 // SetOwner sets the value of Owner.
 func (s *GetTechnicalAssetsResponseItem) SetOwner(val DataProduct) {
 	s.Owner = val
+}
+
+// SetEnvironments sets the value of Environments.
+func (s *GetTechnicalAssetsResponseItem) SetEnvironments(val []DataProductEnvironment) {
+	s.Environments = val
 }
 
 // SetOutputPortLinks sets the value of OutputPortLinks.
@@ -5312,242 +5937,47 @@ func (s *GetTechnicalAssetsResponseItem) SetTechnicalInfo(val []TechnicalInfo) {
 
 func (*GetTechnicalAssetsResponseItem) getTechnicalAssetRes() {}
 
-// GetTechnicalAssetsResponseItemConfiguration represents sum type.
+// Configuration of the technical asset. The available fields depend on `name`; retrieve them from
+// /v2/plugins/{name}/form.
 type GetTechnicalAssetsResponseItemConfiguration struct {
-	// Type selects the active sum variant, switch on this field.
-	Type                                        GetTechnicalAssetsResponseItemConfigurationType
-	S3TechnicalAssetConfiguration               S3TechnicalAssetConfiguration
-	GlueTechnicalAssetConfiguration             GlueTechnicalAssetConfiguration
-	DatabricksTechnicalAssetConfiguration       DatabricksTechnicalAssetConfiguration
-	SnowflakeTechnicalAssetConfiguration        SnowflakeTechnicalAssetConfiguration
-	RedshiftTechnicalAssetConfiguration         RedshiftTechnicalAssetConfiguration
-	PostgreSQLTechnicalAssetConfiguration       PostgreSQLTechnicalAssetConfiguration
-	OSISemanticModelTechnicalAssetConfiguration OSISemanticModelTechnicalAssetConfiguration
-	AzureBlobTechnicalAssetConfiguration        AzureBlobTechnicalAssetConfiguration
+	Name            string `json:"name"`
+	AdditionalProps GetTechnicalAssetsResponseItemConfigurationAdditional
 }
 
-// GetTechnicalAssetsResponseItemConfigurationType is oneOf type of GetTechnicalAssetsResponseItemConfiguration.
-type GetTechnicalAssetsResponseItemConfigurationType string
-
-// Possible values for GetTechnicalAssetsResponseItemConfigurationType.
-const (
-	S3TechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration               GetTechnicalAssetsResponseItemConfigurationType = "S3TechnicalAssetConfiguration"
-	GlueTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration             GetTechnicalAssetsResponseItemConfigurationType = "GlueTechnicalAssetConfiguration"
-	DatabricksTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration       GetTechnicalAssetsResponseItemConfigurationType = "DatabricksTechnicalAssetConfiguration"
-	SnowflakeTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration        GetTechnicalAssetsResponseItemConfigurationType = "SnowflakeTechnicalAssetConfiguration"
-	RedshiftTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration         GetTechnicalAssetsResponseItemConfigurationType = "RedshiftTechnicalAssetConfiguration"
-	PostgreSQLTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration       GetTechnicalAssetsResponseItemConfigurationType = "PostgreSQLTechnicalAssetConfiguration"
-	OSISemanticModelTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration GetTechnicalAssetsResponseItemConfigurationType = "OSISemanticModelTechnicalAssetConfiguration"
-	AzureBlobTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration        GetTechnicalAssetsResponseItemConfigurationType = "AzureBlobTechnicalAssetConfiguration"
-)
-
-// IsS3TechnicalAssetConfiguration reports whether GetTechnicalAssetsResponseItemConfiguration is S3TechnicalAssetConfiguration.
-func (s GetTechnicalAssetsResponseItemConfiguration) IsS3TechnicalAssetConfiguration() bool {
-	return s.Type == S3TechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration
+// GetName returns the value of Name.
+func (s *GetTechnicalAssetsResponseItemConfiguration) GetName() string {
+	return s.Name
 }
 
-// IsGlueTechnicalAssetConfiguration reports whether GetTechnicalAssetsResponseItemConfiguration is GlueTechnicalAssetConfiguration.
-func (s GetTechnicalAssetsResponseItemConfiguration) IsGlueTechnicalAssetConfiguration() bool {
-	return s.Type == GlueTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration
+// GetAdditionalProps returns the value of AdditionalProps.
+func (s *GetTechnicalAssetsResponseItemConfiguration) GetAdditionalProps() GetTechnicalAssetsResponseItemConfigurationAdditional {
+	return s.AdditionalProps
 }
 
-// IsDatabricksTechnicalAssetConfiguration reports whether GetTechnicalAssetsResponseItemConfiguration is DatabricksTechnicalAssetConfiguration.
-func (s GetTechnicalAssetsResponseItemConfiguration) IsDatabricksTechnicalAssetConfiguration() bool {
-	return s.Type == DatabricksTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration
+// SetName sets the value of Name.
+func (s *GetTechnicalAssetsResponseItemConfiguration) SetName(val string) {
+	s.Name = val
 }
 
-// IsSnowflakeTechnicalAssetConfiguration reports whether GetTechnicalAssetsResponseItemConfiguration is SnowflakeTechnicalAssetConfiguration.
-func (s GetTechnicalAssetsResponseItemConfiguration) IsSnowflakeTechnicalAssetConfiguration() bool {
-	return s.Type == SnowflakeTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration
+// SetAdditionalProps sets the value of AdditionalProps.
+func (s *GetTechnicalAssetsResponseItemConfiguration) SetAdditionalProps(val GetTechnicalAssetsResponseItemConfigurationAdditional) {
+	s.AdditionalProps = val
 }
 
-// IsRedshiftTechnicalAssetConfiguration reports whether GetTechnicalAssetsResponseItemConfiguration is RedshiftTechnicalAssetConfiguration.
-func (s GetTechnicalAssetsResponseItemConfiguration) IsRedshiftTechnicalAssetConfiguration() bool {
-	return s.Type == RedshiftTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration
-}
+type GetTechnicalAssetsResponseItemConfigurationAdditional map[string]jx.Raw
 
-// IsPostgreSQLTechnicalAssetConfiguration reports whether GetTechnicalAssetsResponseItemConfiguration is PostgreSQLTechnicalAssetConfiguration.
-func (s GetTechnicalAssetsResponseItemConfiguration) IsPostgreSQLTechnicalAssetConfiguration() bool {
-	return s.Type == PostgreSQLTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration
-}
-
-// IsOSISemanticModelTechnicalAssetConfiguration reports whether GetTechnicalAssetsResponseItemConfiguration is OSISemanticModelTechnicalAssetConfiguration.
-func (s GetTechnicalAssetsResponseItemConfiguration) IsOSISemanticModelTechnicalAssetConfiguration() bool {
-	return s.Type == OSISemanticModelTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration
-}
-
-// IsAzureBlobTechnicalAssetConfiguration reports whether GetTechnicalAssetsResponseItemConfiguration is AzureBlobTechnicalAssetConfiguration.
-func (s GetTechnicalAssetsResponseItemConfiguration) IsAzureBlobTechnicalAssetConfiguration() bool {
-	return s.Type == AzureBlobTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration
-}
-
-// SetS3TechnicalAssetConfiguration sets GetTechnicalAssetsResponseItemConfiguration to S3TechnicalAssetConfiguration.
-func (s *GetTechnicalAssetsResponseItemConfiguration) SetS3TechnicalAssetConfiguration(v S3TechnicalAssetConfiguration) {
-	s.Type = S3TechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration
-	s.S3TechnicalAssetConfiguration = v
-}
-
-// GetS3TechnicalAssetConfiguration returns S3TechnicalAssetConfiguration and true boolean if GetTechnicalAssetsResponseItemConfiguration is S3TechnicalAssetConfiguration.
-func (s GetTechnicalAssetsResponseItemConfiguration) GetS3TechnicalAssetConfiguration() (v S3TechnicalAssetConfiguration, ok bool) {
-	if !s.IsS3TechnicalAssetConfiguration() {
-		return v, false
+func (s *GetTechnicalAssetsResponseItemConfigurationAdditional) init() GetTechnicalAssetsResponseItemConfigurationAdditional {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
 	}
-	return s.S3TechnicalAssetConfiguration, true
+	return m
 }
 
-// NewS3TechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration returns new GetTechnicalAssetsResponseItemConfiguration from S3TechnicalAssetConfiguration.
-func NewS3TechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration(v S3TechnicalAssetConfiguration) GetTechnicalAssetsResponseItemConfiguration {
-	var s GetTechnicalAssetsResponseItemConfiguration
-	s.SetS3TechnicalAssetConfiguration(v)
-	return s
-}
+type GetUserGroupsNotFoundApplicationJSON jx.Raw
 
-// SetGlueTechnicalAssetConfiguration sets GetTechnicalAssetsResponseItemConfiguration to GlueTechnicalAssetConfiguration.
-func (s *GetTechnicalAssetsResponseItemConfiguration) SetGlueTechnicalAssetConfiguration(v GlueTechnicalAssetConfiguration) {
-	s.Type = GlueTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration
-	s.GlueTechnicalAssetConfiguration = v
-}
-
-// GetGlueTechnicalAssetConfiguration returns GlueTechnicalAssetConfiguration and true boolean if GetTechnicalAssetsResponseItemConfiguration is GlueTechnicalAssetConfiguration.
-func (s GetTechnicalAssetsResponseItemConfiguration) GetGlueTechnicalAssetConfiguration() (v GlueTechnicalAssetConfiguration, ok bool) {
-	if !s.IsGlueTechnicalAssetConfiguration() {
-		return v, false
-	}
-	return s.GlueTechnicalAssetConfiguration, true
-}
-
-// NewGlueTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration returns new GetTechnicalAssetsResponseItemConfiguration from GlueTechnicalAssetConfiguration.
-func NewGlueTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration(v GlueTechnicalAssetConfiguration) GetTechnicalAssetsResponseItemConfiguration {
-	var s GetTechnicalAssetsResponseItemConfiguration
-	s.SetGlueTechnicalAssetConfiguration(v)
-	return s
-}
-
-// SetDatabricksTechnicalAssetConfiguration sets GetTechnicalAssetsResponseItemConfiguration to DatabricksTechnicalAssetConfiguration.
-func (s *GetTechnicalAssetsResponseItemConfiguration) SetDatabricksTechnicalAssetConfiguration(v DatabricksTechnicalAssetConfiguration) {
-	s.Type = DatabricksTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration
-	s.DatabricksTechnicalAssetConfiguration = v
-}
-
-// GetDatabricksTechnicalAssetConfiguration returns DatabricksTechnicalAssetConfiguration and true boolean if GetTechnicalAssetsResponseItemConfiguration is DatabricksTechnicalAssetConfiguration.
-func (s GetTechnicalAssetsResponseItemConfiguration) GetDatabricksTechnicalAssetConfiguration() (v DatabricksTechnicalAssetConfiguration, ok bool) {
-	if !s.IsDatabricksTechnicalAssetConfiguration() {
-		return v, false
-	}
-	return s.DatabricksTechnicalAssetConfiguration, true
-}
-
-// NewDatabricksTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration returns new GetTechnicalAssetsResponseItemConfiguration from DatabricksTechnicalAssetConfiguration.
-func NewDatabricksTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration(v DatabricksTechnicalAssetConfiguration) GetTechnicalAssetsResponseItemConfiguration {
-	var s GetTechnicalAssetsResponseItemConfiguration
-	s.SetDatabricksTechnicalAssetConfiguration(v)
-	return s
-}
-
-// SetSnowflakeTechnicalAssetConfiguration sets GetTechnicalAssetsResponseItemConfiguration to SnowflakeTechnicalAssetConfiguration.
-func (s *GetTechnicalAssetsResponseItemConfiguration) SetSnowflakeTechnicalAssetConfiguration(v SnowflakeTechnicalAssetConfiguration) {
-	s.Type = SnowflakeTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration
-	s.SnowflakeTechnicalAssetConfiguration = v
-}
-
-// GetSnowflakeTechnicalAssetConfiguration returns SnowflakeTechnicalAssetConfiguration and true boolean if GetTechnicalAssetsResponseItemConfiguration is SnowflakeTechnicalAssetConfiguration.
-func (s GetTechnicalAssetsResponseItemConfiguration) GetSnowflakeTechnicalAssetConfiguration() (v SnowflakeTechnicalAssetConfiguration, ok bool) {
-	if !s.IsSnowflakeTechnicalAssetConfiguration() {
-		return v, false
-	}
-	return s.SnowflakeTechnicalAssetConfiguration, true
-}
-
-// NewSnowflakeTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration returns new GetTechnicalAssetsResponseItemConfiguration from SnowflakeTechnicalAssetConfiguration.
-func NewSnowflakeTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration(v SnowflakeTechnicalAssetConfiguration) GetTechnicalAssetsResponseItemConfiguration {
-	var s GetTechnicalAssetsResponseItemConfiguration
-	s.SetSnowflakeTechnicalAssetConfiguration(v)
-	return s
-}
-
-// SetRedshiftTechnicalAssetConfiguration sets GetTechnicalAssetsResponseItemConfiguration to RedshiftTechnicalAssetConfiguration.
-func (s *GetTechnicalAssetsResponseItemConfiguration) SetRedshiftTechnicalAssetConfiguration(v RedshiftTechnicalAssetConfiguration) {
-	s.Type = RedshiftTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration
-	s.RedshiftTechnicalAssetConfiguration = v
-}
-
-// GetRedshiftTechnicalAssetConfiguration returns RedshiftTechnicalAssetConfiguration and true boolean if GetTechnicalAssetsResponseItemConfiguration is RedshiftTechnicalAssetConfiguration.
-func (s GetTechnicalAssetsResponseItemConfiguration) GetRedshiftTechnicalAssetConfiguration() (v RedshiftTechnicalAssetConfiguration, ok bool) {
-	if !s.IsRedshiftTechnicalAssetConfiguration() {
-		return v, false
-	}
-	return s.RedshiftTechnicalAssetConfiguration, true
-}
-
-// NewRedshiftTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration returns new GetTechnicalAssetsResponseItemConfiguration from RedshiftTechnicalAssetConfiguration.
-func NewRedshiftTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration(v RedshiftTechnicalAssetConfiguration) GetTechnicalAssetsResponseItemConfiguration {
-	var s GetTechnicalAssetsResponseItemConfiguration
-	s.SetRedshiftTechnicalAssetConfiguration(v)
-	return s
-}
-
-// SetPostgreSQLTechnicalAssetConfiguration sets GetTechnicalAssetsResponseItemConfiguration to PostgreSQLTechnicalAssetConfiguration.
-func (s *GetTechnicalAssetsResponseItemConfiguration) SetPostgreSQLTechnicalAssetConfiguration(v PostgreSQLTechnicalAssetConfiguration) {
-	s.Type = PostgreSQLTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration
-	s.PostgreSQLTechnicalAssetConfiguration = v
-}
-
-// GetPostgreSQLTechnicalAssetConfiguration returns PostgreSQLTechnicalAssetConfiguration and true boolean if GetTechnicalAssetsResponseItemConfiguration is PostgreSQLTechnicalAssetConfiguration.
-func (s GetTechnicalAssetsResponseItemConfiguration) GetPostgreSQLTechnicalAssetConfiguration() (v PostgreSQLTechnicalAssetConfiguration, ok bool) {
-	if !s.IsPostgreSQLTechnicalAssetConfiguration() {
-		return v, false
-	}
-	return s.PostgreSQLTechnicalAssetConfiguration, true
-}
-
-// NewPostgreSQLTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration returns new GetTechnicalAssetsResponseItemConfiguration from PostgreSQLTechnicalAssetConfiguration.
-func NewPostgreSQLTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration(v PostgreSQLTechnicalAssetConfiguration) GetTechnicalAssetsResponseItemConfiguration {
-	var s GetTechnicalAssetsResponseItemConfiguration
-	s.SetPostgreSQLTechnicalAssetConfiguration(v)
-	return s
-}
-
-// SetOSISemanticModelTechnicalAssetConfiguration sets GetTechnicalAssetsResponseItemConfiguration to OSISemanticModelTechnicalAssetConfiguration.
-func (s *GetTechnicalAssetsResponseItemConfiguration) SetOSISemanticModelTechnicalAssetConfiguration(v OSISemanticModelTechnicalAssetConfiguration) {
-	s.Type = OSISemanticModelTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration
-	s.OSISemanticModelTechnicalAssetConfiguration = v
-}
-
-// GetOSISemanticModelTechnicalAssetConfiguration returns OSISemanticModelTechnicalAssetConfiguration and true boolean if GetTechnicalAssetsResponseItemConfiguration is OSISemanticModelTechnicalAssetConfiguration.
-func (s GetTechnicalAssetsResponseItemConfiguration) GetOSISemanticModelTechnicalAssetConfiguration() (v OSISemanticModelTechnicalAssetConfiguration, ok bool) {
-	if !s.IsOSISemanticModelTechnicalAssetConfiguration() {
-		return v, false
-	}
-	return s.OSISemanticModelTechnicalAssetConfiguration, true
-}
-
-// NewOSISemanticModelTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration returns new GetTechnicalAssetsResponseItemConfiguration from OSISemanticModelTechnicalAssetConfiguration.
-func NewOSISemanticModelTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration(v OSISemanticModelTechnicalAssetConfiguration) GetTechnicalAssetsResponseItemConfiguration {
-	var s GetTechnicalAssetsResponseItemConfiguration
-	s.SetOSISemanticModelTechnicalAssetConfiguration(v)
-	return s
-}
-
-// SetAzureBlobTechnicalAssetConfiguration sets GetTechnicalAssetsResponseItemConfiguration to AzureBlobTechnicalAssetConfiguration.
-func (s *GetTechnicalAssetsResponseItemConfiguration) SetAzureBlobTechnicalAssetConfiguration(v AzureBlobTechnicalAssetConfiguration) {
-	s.Type = AzureBlobTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration
-	s.AzureBlobTechnicalAssetConfiguration = v
-}
-
-// GetAzureBlobTechnicalAssetConfiguration returns AzureBlobTechnicalAssetConfiguration and true boolean if GetTechnicalAssetsResponseItemConfiguration is AzureBlobTechnicalAssetConfiguration.
-func (s GetTechnicalAssetsResponseItemConfiguration) GetAzureBlobTechnicalAssetConfiguration() (v AzureBlobTechnicalAssetConfiguration, ok bool) {
-	if !s.IsAzureBlobTechnicalAssetConfiguration() {
-		return v, false
-	}
-	return s.AzureBlobTechnicalAssetConfiguration, true
-}
-
-// NewAzureBlobTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration returns new GetTechnicalAssetsResponseItemConfiguration from AzureBlobTechnicalAssetConfiguration.
-func NewAzureBlobTechnicalAssetConfigurationGetTechnicalAssetsResponseItemConfiguration(v AzureBlobTechnicalAssetConfiguration) GetTechnicalAssetsResponseItemConfiguration {
-	var s GetTechnicalAssetsResponseItemConfiguration
-	s.SetAzureBlobTechnicalAssetConfiguration(v)
-	return s
-}
+func (*GetUserGroupsNotFoundApplicationJSON) getUserGroupsRes() {}
 
 // Ref: #/components/schemas/GetUserNotificationsResponse
 type GetUserNotificationsResponse struct {
@@ -5563,6 +5993,8 @@ func (s *GetUserNotificationsResponse) GetNotifications() []GetUserNotifications
 func (s *GetUserNotificationsResponse) SetNotifications(val []GetUserNotificationsResponseItem) {
 	s.Notifications = val
 }
+
+func (*GetUserNotificationsResponse) getUserNotificationsRes() {}
 
 // Ref: #/components/schemas/GetUserNotificationsResponseItem
 type GetUserNotificationsResponseItem struct {
@@ -5637,6 +6069,8 @@ func (s *GetUsersResponse) GetUsers() []UsersGet {
 func (s *GetUsersResponse) SetUsers(val []UsersGet) {
 	s.Users = val
 }
+
+func (*GetUsersResponse) getUsersRes() {}
 
 // Ref: #/components/schemas/GlobalRoleAssignmentResponse
 type GlobalRoleAssignmentResponse struct {
@@ -5732,97 +6166,315 @@ func (s *GlobalRoleAssignmentResponse) SetDecidedBy(val NilUser) {
 
 func (*GlobalRoleAssignmentResponse) decideGlobalRoleAssignmentRes() {}
 
-// Ref: #/components/schemas/GlueTechnicalAssetConfiguration
-type GlueTechnicalAssetConfiguration struct {
-	ConfigurationType string            `json:"configuration_type"`
-	Database          string            `json:"database"`
-	DatabaseSuffix    OptString         `json:"database_suffix"`
-	Table             OptString         `json:"table"`
-	BucketIdentifier  OptString         `json:"bucket_identifier"`
-	DatabasePath      OptString         `json:"database_path"`
-	TablePath         OptString         `json:"table_path"`
-	AccessGranularity AccessGranularity `json:"access_granularity"`
+type GrantOutputPortAccessOKApplicationJSON jx.Raw
+
+func (*GrantOutputPortAccessOKApplicationJSON) grantOutputPortAccessRes() {}
+
+// Ref: #/components/schemas/GrantOutputPortAccessRequest
+type GrantOutputPortAccessRequest struct {
+	ConsumingAbstractDataProductID uuid.UUID  `json:"consuming_abstract_data_product_id"`
+	Justification                  string     `json:"justification"`
+	AccessModeID                   OptNilUUID `json:"access_mode_id"`
 }
 
-// GetConfigurationType returns the value of ConfigurationType.
-func (s *GlueTechnicalAssetConfiguration) GetConfigurationType() string {
-	return s.ConfigurationType
+// GetConsumingAbstractDataProductID returns the value of ConsumingAbstractDataProductID.
+func (s *GrantOutputPortAccessRequest) GetConsumingAbstractDataProductID() uuid.UUID {
+	return s.ConsumingAbstractDataProductID
 }
 
-// GetDatabase returns the value of Database.
-func (s *GlueTechnicalAssetConfiguration) GetDatabase() string {
-	return s.Database
+// GetJustification returns the value of Justification.
+func (s *GrantOutputPortAccessRequest) GetJustification() string {
+	return s.Justification
 }
 
-// GetDatabaseSuffix returns the value of DatabaseSuffix.
-func (s *GlueTechnicalAssetConfiguration) GetDatabaseSuffix() OptString {
-	return s.DatabaseSuffix
+// GetAccessModeID returns the value of AccessModeID.
+func (s *GrantOutputPortAccessRequest) GetAccessModeID() OptNilUUID {
+	return s.AccessModeID
 }
 
-// GetTable returns the value of Table.
-func (s *GlueTechnicalAssetConfiguration) GetTable() OptString {
-	return s.Table
+// SetConsumingAbstractDataProductID sets the value of ConsumingAbstractDataProductID.
+func (s *GrantOutputPortAccessRequest) SetConsumingAbstractDataProductID(val uuid.UUID) {
+	s.ConsumingAbstractDataProductID = val
 }
 
-// GetBucketIdentifier returns the value of BucketIdentifier.
-func (s *GlueTechnicalAssetConfiguration) GetBucketIdentifier() OptString {
-	return s.BucketIdentifier
+// SetJustification sets the value of Justification.
+func (s *GrantOutputPortAccessRequest) SetJustification(val string) {
+	s.Justification = val
 }
 
-// GetDatabasePath returns the value of DatabasePath.
-func (s *GlueTechnicalAssetConfiguration) GetDatabasePath() OptString {
-	return s.DatabasePath
+// SetAccessModeID sets the value of AccessModeID.
+func (s *GrantOutputPortAccessRequest) SetAccessModeID(val OptNilUUID) {
+	s.AccessModeID = val
 }
 
-// GetTablePath returns the value of TablePath.
-func (s *GlueTechnicalAssetConfiguration) GetTablePath() OptString {
-	return s.TablePath
+// Ref: #/components/schemas/GroupCreate
+type GroupCreate struct {
+	ExternalID  NonEmptyStr `json:"external_id"`
+	DisplayName NonEmptyStr `json:"display_name"`
 }
 
-// GetAccessGranularity returns the value of AccessGranularity.
-func (s *GlueTechnicalAssetConfiguration) GetAccessGranularity() AccessGranularity {
-	return s.AccessGranularity
+// GetExternalID returns the value of ExternalID.
+func (s *GroupCreate) GetExternalID() NonEmptyStr {
+	return s.ExternalID
 }
 
-// SetConfigurationType sets the value of ConfigurationType.
-func (s *GlueTechnicalAssetConfiguration) SetConfigurationType(val string) {
-	s.ConfigurationType = val
+// GetDisplayName returns the value of DisplayName.
+func (s *GroupCreate) GetDisplayName() NonEmptyStr {
+	return s.DisplayName
 }
 
-// SetDatabase sets the value of Database.
-func (s *GlueTechnicalAssetConfiguration) SetDatabase(val string) {
-	s.Database = val
+// SetExternalID sets the value of ExternalID.
+func (s *GroupCreate) SetExternalID(val NonEmptyStr) {
+	s.ExternalID = val
 }
 
-// SetDatabaseSuffix sets the value of DatabaseSuffix.
-func (s *GlueTechnicalAssetConfiguration) SetDatabaseSuffix(val OptString) {
-	s.DatabaseSuffix = val
+// SetDisplayName sets the value of DisplayName.
+func (s *GroupCreate) SetDisplayName(val NonEmptyStr) {
+	s.DisplayName = val
 }
 
-// SetTable sets the value of Table.
-func (s *GlueTechnicalAssetConfiguration) SetTable(val OptString) {
-	s.Table = val
+// Ref: #/components/schemas/GroupCreateResponse
+type GroupCreateResponse struct {
+	ID uuid.UUID `json:"id"`
 }
 
-// SetBucketIdentifier sets the value of BucketIdentifier.
-func (s *GlueTechnicalAssetConfiguration) SetBucketIdentifier(val OptString) {
-	s.BucketIdentifier = val
+// GetID returns the value of ID.
+func (s *GroupCreateResponse) GetID() uuid.UUID {
+	return s.ID
 }
 
-// SetDatabasePath sets the value of DatabasePath.
-func (s *GlueTechnicalAssetConfiguration) SetDatabasePath(val OptString) {
-	s.DatabasePath = val
+// SetID sets the value of ID.
+func (s *GroupCreateResponse) SetID(val uuid.UUID) {
+	s.ID = val
 }
 
-// SetTablePath sets the value of TablePath.
-func (s *GlueTechnicalAssetConfiguration) SetTablePath(val OptString) {
-	s.TablePath = val
+func (*GroupCreateResponse) createGroupRes() {}
+
+// Ref: #/components/schemas/GroupGet
+type GroupGet struct {
+	ID          uuid.UUID `json:"id"`
+	ExternalID  string    `json:"external_id"`
+	DisplayName string    `json:"display_name"`
 }
 
-// SetAccessGranularity sets the value of AccessGranularity.
-func (s *GlueTechnicalAssetConfiguration) SetAccessGranularity(val AccessGranularity) {
-	s.AccessGranularity = val
+// GetID returns the value of ID.
+func (s *GroupGet) GetID() uuid.UUID {
+	return s.ID
 }
+
+// GetExternalID returns the value of ExternalID.
+func (s *GroupGet) GetExternalID() string {
+	return s.ExternalID
+}
+
+// GetDisplayName returns the value of DisplayName.
+func (s *GroupGet) GetDisplayName() string {
+	return s.DisplayName
+}
+
+// SetID sets the value of ID.
+func (s *GroupGet) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+// SetExternalID sets the value of ExternalID.
+func (s *GroupGet) SetExternalID(val string) {
+	s.ExternalID = val
+}
+
+// SetDisplayName sets the value of DisplayName.
+func (s *GroupGet) SetDisplayName(val string) {
+	s.DisplayName = val
+}
+
+func (*GroupGet) getGroupRes() {}
+
+// Ref: #/components/schemas/GroupMemberIdentityGet
+type GroupMemberIdentityGet struct {
+	ID         uuid.UUID    `json:"id"`
+	Type       IdentityType `json:"type"`
+	ExternalID string       `json:"external_id"`
+}
+
+// GetID returns the value of ID.
+func (s *GroupMemberIdentityGet) GetID() uuid.UUID {
+	return s.ID
+}
+
+// GetType returns the value of Type.
+func (s *GroupMemberIdentityGet) GetType() IdentityType {
+	return s.Type
+}
+
+// GetExternalID returns the value of ExternalID.
+func (s *GroupMemberIdentityGet) GetExternalID() string {
+	return s.ExternalID
+}
+
+// SetID sets the value of ID.
+func (s *GroupMemberIdentityGet) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+// SetType sets the value of Type.
+func (s *GroupMemberIdentityGet) SetType(val IdentityType) {
+	s.Type = val
+}
+
+// SetExternalID sets the value of ExternalID.
+func (s *GroupMemberIdentityGet) SetExternalID(val string) {
+	s.ExternalID = val
+}
+
+// Ref: #/components/schemas/GroupMembersAdd
+type GroupMembersAdd struct {
+	MemberIdentityIds []uuid.UUID `json:"member_identity_ids"`
+}
+
+// GetMemberIdentityIds returns the value of MemberIdentityIds.
+func (s *GroupMembersAdd) GetMemberIdentityIds() []uuid.UUID {
+	return s.MemberIdentityIds
+}
+
+// SetMemberIdentityIds sets the value of MemberIdentityIds.
+func (s *GroupMembersAdd) SetMemberIdentityIds(val []uuid.UUID) {
+	s.MemberIdentityIds = val
+}
+
+// Ref: #/components/schemas/GroupMembersRemove
+type GroupMembersRemove struct {
+	MemberIdentityIds []uuid.UUID `json:"member_identity_ids"`
+}
+
+// GetMemberIdentityIds returns the value of MemberIdentityIds.
+func (s *GroupMembersRemove) GetMemberIdentityIds() []uuid.UUID {
+	return s.MemberIdentityIds
+}
+
+// SetMemberIdentityIds sets the value of MemberIdentityIds.
+func (s *GroupMembersRemove) SetMemberIdentityIds(val []uuid.UUID) {
+	s.MemberIdentityIds = val
+}
+
+// Ref: #/components/schemas/GroupMembersReplace
+type GroupMembersReplace struct {
+	MemberIdentityIds []uuid.UUID `json:"member_identity_ids"`
+}
+
+// GetMemberIdentityIds returns the value of MemberIdentityIds.
+func (s *GroupMembersReplace) GetMemberIdentityIds() []uuid.UUID {
+	return s.MemberIdentityIds
+}
+
+// SetMemberIdentityIds sets the value of MemberIdentityIds.
+func (s *GroupMembersReplace) SetMemberIdentityIds(val []uuid.UUID) {
+	s.MemberIdentityIds = val
+}
+
+// Ref: #/components/schemas/GroupMembershipGet
+type GroupMembershipGet struct {
+	GroupID          uuid.UUID              `json:"group_id"`
+	MemberIdentityID uuid.UUID              `json:"member_identity_id"`
+	Member           GroupMemberIdentityGet `json:"member"`
+}
+
+// GetGroupID returns the value of GroupID.
+func (s *GroupMembershipGet) GetGroupID() uuid.UUID {
+	return s.GroupID
+}
+
+// GetMemberIdentityID returns the value of MemberIdentityID.
+func (s *GroupMembershipGet) GetMemberIdentityID() uuid.UUID {
+	return s.MemberIdentityID
+}
+
+// GetMember returns the value of Member.
+func (s *GroupMembershipGet) GetMember() GroupMemberIdentityGet {
+	return s.Member
+}
+
+// SetGroupID sets the value of GroupID.
+func (s *GroupMembershipGet) SetGroupID(val uuid.UUID) {
+	s.GroupID = val
+}
+
+// SetMemberIdentityID sets the value of MemberIdentityID.
+func (s *GroupMembershipGet) SetMemberIdentityID(val uuid.UUID) {
+	s.MemberIdentityID = val
+}
+
+// SetMember sets the value of Member.
+func (s *GroupMembershipGet) SetMember(val GroupMemberIdentityGet) {
+	s.Member = val
+}
+
+// Ref: #/components/schemas/GroupMembershipsGetResponse
+type GroupMembershipsGetResponse struct {
+	Members []GroupMembershipGet `json:"members"`
+}
+
+// GetMembers returns the value of Members.
+func (s *GroupMembershipsGetResponse) GetMembers() []GroupMembershipGet {
+	return s.Members
+}
+
+// SetMembers sets the value of Members.
+func (s *GroupMembershipsGetResponse) SetMembers(val []GroupMembershipGet) {
+	s.Members = val
+}
+
+func (*GroupMembershipsGetResponse) getGroupMembersRes() {}
+
+// Ref: #/components/schemas/GroupUpdate
+type GroupUpdate struct {
+	DisplayName NonEmptyStr `json:"display_name"`
+}
+
+// GetDisplayName returns the value of DisplayName.
+func (s *GroupUpdate) GetDisplayName() NonEmptyStr {
+	return s.DisplayName
+}
+
+// SetDisplayName sets the value of DisplayName.
+func (s *GroupUpdate) SetDisplayName(val NonEmptyStr) {
+	s.DisplayName = val
+}
+
+// Ref: #/components/schemas/GroupUpdateResponse
+type GroupUpdateResponse struct {
+	ID uuid.UUID `json:"id"`
+}
+
+// GetID returns the value of ID.
+func (s *GroupUpdateResponse) GetID() uuid.UUID {
+	return s.ID
+}
+
+// SetID sets the value of ID.
+func (s *GroupUpdateResponse) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+func (*GroupUpdateResponse) updateGroupRes() {}
+
+// Ref: #/components/schemas/GroupsGetResponse
+type GroupsGetResponse struct {
+	Groups []GroupGet `json:"groups"`
+}
+
+// GetGroups returns the value of Groups.
+func (s *GroupsGetResponse) GetGroups() []GroupGet {
+	return s.Groups
+}
+
+// SetGroups sets the value of Groups.
+func (s *GroupsGetResponse) SetGroups(val []GroupGet) {
+	s.Groups = val
+}
+
+func (*GroupsGetResponse) getCurrentUserGroupsRes() {}
+func (*GroupsGetResponse) getGroupsRes()            {}
+func (*GroupsGetResponse) getUserGroupsRes()        {}
 
 type HTTPBasic struct {
 	Username string
@@ -5876,12 +6528,17 @@ func (s *HTTPValidationError) SetDetail(val []ValidationError) {
 }
 
 func (*HTTPValidationError) addDataProductFinalizerRes()                  {}
+func (*HTTPValidationError) addDomainFinalizerRes()                       {}
 func (*HTTPValidationError) addExplorationFinalizerRes()                  {}
+func (*HTTPValidationError) addGroupMembersRes()                          {}
 func (*HTTPValidationError) addOutputPortDataQualityRunRes()              {}
 func (*HTTPValidationError) approveOutputPortAsInputPortRes()             {}
 func (*HTTPValidationError) approveOutputPortTechnicalAssetLinkRes()      {}
 func (*HTTPValidationError) becomeAdminRes()                              {}
+func (*HTTPValidationError) cancelInputPortForDataProductRes()            {}
+func (*HTTPValidationError) cancelInputPortForExplorationRes()            {}
 func (*HTTPValidationError) checkAccessRes()                              {}
+func (*HTTPValidationError) createAccessModeRes()                         {}
 func (*HTTPValidationError) createDataProductLifecycleRes()               {}
 func (*HTTPValidationError) createDataProductRes()                        {}
 func (*HTTPValidationError) createDataProductRoleAssignmentRes()          {}
@@ -5889,22 +6546,39 @@ func (*HTTPValidationError) createDataProductSettingRes()                 {}
 func (*HTTPValidationError) createDataProductTypeRes()                    {}
 func (*HTTPValidationError) createDomainRes()                             {}
 func (*HTTPValidationError) createExplorationRes()                        {}
+func (*HTTPValidationError) createGroupRes()                              {}
+func (*HTTPValidationError) createGroupsBatchRes()                        {}
+func (*HTTPValidationError) createMachineUserRes()                        {}
+func (*HTTPValidationError) createMachineUsersBatchRes()                  {}
+func (*HTTPValidationError) createOutputPortAccessTypeRes()               {}
 func (*HTTPValidationError) createOutputPortRes()                         {}
 func (*HTTPValidationError) createOutputPortRoleAssignmentRes()           {}
 func (*HTTPValidationError) createRoleRes()                               {}
 func (*HTTPValidationError) createTagRes()                                {}
 func (*HTTPValidationError) createTechnicalAssetRes()                     {}
 func (*HTTPValidationError) createUserRes()                               {}
+func (*HTTPValidationError) createUsersBatchRes()                         {}
 func (*HTTPValidationError) decideDataProductRoleAssignmentRes()          {}
 func (*HTTPValidationError) decideGlobalRoleAssignmentRes()               {}
 func (*HTTPValidationError) decideOutputPortRoleAssignmentRes()           {}
+func (*HTTPValidationError) deleteAccessModeRes()                         {}
 func (*HTTPValidationError) deleteDataProductRoleAssignmentRes()          {}
 func (*HTTPValidationError) deleteGlobalRoleAssignmentRes()               {}
+func (*HTTPValidationError) deleteGroupRes()                              {}
+func (*HTTPValidationError) deleteGroupsBatchRes()                        {}
+func (*HTTPValidationError) deleteMachineUserRes()                        {}
+func (*HTTPValidationError) deleteMachineUsersBatchRes()                  {}
 func (*HTTPValidationError) deleteOutputPortQueryStatRes()                {}
 func (*HTTPValidationError) deleteOutputPortRoleAssignmentRes()           {}
 func (*HTTPValidationError) denyOutputPortAsInputPortRes()                {}
 func (*HTTPValidationError) denyOutputPortTechnicalAssetLinkRes()         {}
 func (*HTTPValidationError) getAWSCredentialsRes()                        {}
+func (*HTTPValidationError) getAccessModesRes()                           {}
+func (*HTTPValidationError) getAllAccessDurationsRes()                    {}
+func (*HTTPValidationError) getAllPlatformServiceConfigurationsRes()      {}
+func (*HTTPValidationError) getAllPlatformsRes()                          {}
+func (*HTTPValidationError) getCurrentUserGroupsRes()                     {}
+func (*HTTPValidationError) getCurrentUserRes()                           {}
 func (*HTTPValidationError) getDataProductEventHistoryRes()               {}
 func (*HTTPValidationError) getDataProductInputPortsRes()                 {}
 func (*HTTPValidationError) getDataProductOutputPortsRes()                {}
@@ -5913,16 +6587,29 @@ func (*HTTPValidationError) getDataProductRolledUpTagsRes()               {}
 func (*HTTPValidationError) getDataProductSettingsRes()                   {}
 func (*HTTPValidationError) getDataProductTechnicalAssetsRes()            {}
 func (*HTTPValidationError) getDataProductTypeRes()                       {}
+func (*HTTPValidationError) getDataProductsLifecyclesRes()                {}
 func (*HTTPValidationError) getDataProductsRes()                          {}
+func (*HTTPValidationError) getDataProductsSettingsRes()                  {}
+func (*HTTPValidationError) getDataProductsTypesRes()                     {}
+func (*HTTPValidationError) getDefaultAccessDurationRes()                 {}
 func (*HTTPValidationError) getDeviceTokenRes()                           {}
 func (*HTTPValidationError) getDomainRes()                                {}
+func (*HTTPValidationError) getDomainsRes()                               {}
 func (*HTTPValidationError) getEnvironmentRes()                           {}
+func (*HTTPValidationError) getEnvironmentsRes()                          {}
 func (*HTTPValidationError) getExplorationInputPortsRes()                 {}
 func (*HTTPValidationError) getExplorationRes()                           {}
 func (*HTTPValidationError) getExplorationsRes()                          {}
+func (*HTTPValidationError) getGroupMembersRes()                          {}
+func (*HTTPValidationError) getGroupRes()                                 {}
+func (*HTTPValidationError) getGroupsRes()                                {}
 func (*HTTPValidationError) getInputPortsForOutputPortRes()               {}
 func (*HTTPValidationError) getJwtTokenRes()                              {}
 func (*HTTPValidationError) getLatestDataQualitySummaryForOutputPortRes() {}
+func (*HTTPValidationError) getMachineUserRes()                           {}
+func (*HTTPValidationError) getMachineUsersRes()                          {}
+func (*HTTPValidationError) getOutputPortAccessDurationsRes()             {}
+func (*HTTPValidationError) getOutputPortAccessTypesRes()                 {}
 func (*HTTPValidationError) getOutputPortCuratedQueriesRes()              {}
 func (*HTTPValidationError) getOutputPortQueryStatsRes()                  {}
 func (*HTTPValidationError) getOutputPortRes()                            {}
@@ -5930,32 +6617,47 @@ func (*HTTPValidationError) getOutputPortSchemaRes()                      {}
 func (*HTTPValidationError) getOutputPortsEventHistoryRes()               {}
 func (*HTTPValidationError) getPlatformServiceConfigRes()                 {}
 func (*HTTPValidationError) getPlatformServicesRes()                      {}
+func (*HTTPValidationError) getPlatformTilesRes()                         {}
 func (*HTTPValidationError) getPluginFormRes()                            {}
 func (*HTTPValidationError) getPluginURLRes()                             {}
+func (*HTTPValidationError) getPluginsRes()                               {}
 func (*HTTPValidationError) getRolesRes()                                 {}
 func (*HTTPValidationError) getSinglePlatformServiceConfigurationRes()    {}
+func (*HTTPValidationError) getTagsRes()                                  {}
 func (*HTTPValidationError) getTechnicalAssetEventHistoryRes()            {}
 func (*HTTPValidationError) getTechnicalAssetRes()                        {}
+func (*HTTPValidationError) getThemeSettingsRes()                         {}
+func (*HTTPValidationError) getUserGroupsRes()                            {}
+func (*HTTPValidationError) getUserNotificationsRes()                     {}
+func (*HTTPValidationError) getUsersRes()                                 {}
+func (*HTTPValidationError) grantOutputPortAccessRes()                    {}
 func (*HTTPValidationError) ingestOutputPortContractRes()                 {}
-func (*HTTPValidationError) linkInputPortsToDataProductRes()              {}
+func (*HTTPValidationError) ingestOutputPortContractYamlRes()             {}
+func (*HTTPValidationError) isAdminRes()                                  {}
 func (*HTTPValidationError) linkOutputPortToTechnicalAssetRes()           {}
 func (*HTTPValidationError) listDataProductRoleAssignmentsRes()           {}
 func (*HTTPValidationError) listGlobalRoleAssignmentsRes()                {}
 func (*HTTPValidationError) listOutputPortRoleAssignmentsRes()            {}
+func (*HTTPValidationError) markTourAsSeenRes()                           {}
 func (*HTTPValidationError) migrateDataProductTypeRes()                   {}
 func (*HTTPValidationError) migrateDomainRes()                            {}
 func (*HTTPValidationError) modifyDataProductRoleAssignmentRes()          {}
 func (*HTTPValidationError) modifyOutputPortRoleAssignmentRes()           {}
 func (*HTTPValidationError) overwriteOutputPortDataQualitySummaryRes()    {}
+func (*HTTPValidationError) removeAllUserNotificationsRes()               {}
 func (*HTTPValidationError) removeDataProductFinalizerRes()               {}
 func (*HTTPValidationError) removeDataProductLifecycleRes()               {}
 func (*HTTPValidationError) removeDataProductRes()                        {}
 func (*HTTPValidationError) removeDataProductSettingRes()                 {}
 func (*HTTPValidationError) removeDataProductTypeRes()                    {}
+func (*HTTPValidationError) removeDomainFinalizerRes()                    {}
 func (*HTTPValidationError) removeDomainRes()                             {}
 func (*HTTPValidationError) removeExplorationFinalizerRes()               {}
 func (*HTTPValidationError) removeExplorationRes()                        {}
-func (*HTTPValidationError) removeInputPortFromExplorationRes()           {}
+func (*HTTPValidationError) removeGroupMembersRes()                       {}
+func (*HTTPValidationError) removeInputPortForDataProductRes()            {}
+func (*HTTPValidationError) removeInputPortForExplorationRes()            {}
+func (*HTTPValidationError) removeOutputPortAccessTypeRes()               {}
 func (*HTTPValidationError) removeOutputPortAsInputPortRes()              {}
 func (*HTTPValidationError) removeOutputPortRes()                         {}
 func (*HTTPValidationError) removeRoleRes()                               {}
@@ -5963,19 +6665,29 @@ func (*HTTPValidationError) removeTagRes()                                {}
 func (*HTTPValidationError) removeTechnicalAssetRes()                     {}
 func (*HTTPValidationError) removeUserNotificationRes()                   {}
 func (*HTTPValidationError) removeUserRes()                               {}
+func (*HTTPValidationError) removeUsersBatchRes()                         {}
 func (*HTTPValidationError) renderTechnicalAssetAccessPathRes()           {}
+func (*HTTPValidationError) renewInputPortForDataProductRes()             {}
+func (*HTTPValidationError) renewInputPortForExplorationRes()             {}
+func (*HTTPValidationError) renewOutputPortAsInputPortRes()               {}
+func (*HTTPValidationError) replaceGroupMembersRes()                      {}
 func (*HTTPValidationError) replaceOutputPortCuratedQueriesRes()          {}
 func (*HTTPValidationError) requestDataProductRoleAssignmentRes()         {}
 func (*HTTPValidationError) requestInputPortsForDataProductRes()          {}
 func (*HTTPValidationError) requestInputPortsForExplorationRes()          {}
 func (*HTTPValidationError) requestOutputPortRoleAssignmentRes()          {}
+func (*HTTPValidationError) revokeAdminRes()                              {}
+func (*HTTPValidationError) revokeInputPortForDataProductRes()            {}
+func (*HTTPValidationError) revokeInputPortForExplorationRes()            {}
+func (*HTTPValidationError) revokeOutputPortAsInputPortRes()              {}
 func (*HTTPValidationError) sanitizeResourceNameRes()                     {}
 func (*HTTPValidationError) searchOutputPortsRes()                        {}
 func (*HTTPValidationError) setCanBecomeAdminRes()                        {}
 func (*HTTPValidationError) setValueForDataProductRes()                   {}
 func (*HTTPValidationError) setValueForOutputPortRes()                    {}
-func (*HTTPValidationError) unlinkInputPortFromDataProductRes()           {}
 func (*HTTPValidationError) unlinkOutputPortFromTechnicalAssetRes()       {}
+func (*HTTPValidationError) updateAccessDurationRes()                     {}
+func (*HTTPValidationError) updateAccessModeRes()                         {}
 func (*HTTPValidationError) updateDataProductAboutRes()                   {}
 func (*HTTPValidationError) updateDataProductLifecycleRes()               {}
 func (*HTTPValidationError) updateDataProductRes()                        {}
@@ -5984,7 +6696,11 @@ func (*HTTPValidationError) updateDataProductStatusRes()                  {}
 func (*HTTPValidationError) updateDataProductTypeRes()                    {}
 func (*HTTPValidationError) updateDataProductUsageRes()                   {}
 func (*HTTPValidationError) updateDomainRes()                             {}
+func (*HTTPValidationError) updateEnvironmentIsGlobalRes()                {}
+func (*HTTPValidationError) updateGroupRes()                              {}
+func (*HTTPValidationError) updateMachineUserRes()                        {}
 func (*HTTPValidationError) updateOutputPortAboutRes()                    {}
+func (*HTTPValidationError) updateOutputPortAccessTypeRes()               {}
 func (*HTTPValidationError) updateOutputPortQueryStatsRes()               {}
 func (*HTTPValidationError) updateOutputPortRes()                         {}
 func (*HTTPValidationError) updateOutputPortStatusRes()                   {}
@@ -5995,67 +6711,583 @@ func (*HTTPValidationError) updateTechnicalAssetStatusRes()               {}
 func (*HTTPValidationError) updateThemeSettingsRes()                      {}
 func (*HTTPValidationError) validateResourceNameRes()                     {}
 
+// Ref: #/components/schemas/IdentityBatchCreateError
+type IdentityBatchCreateError struct {
+	Item   jx.Raw   `json:"item"`
+	Errors []string `json:"errors"`
+}
+
+// GetItem returns the value of Item.
+func (s *IdentityBatchCreateError) GetItem() jx.Raw {
+	return s.Item
+}
+
+// GetErrors returns the value of Errors.
+func (s *IdentityBatchCreateError) GetErrors() []string {
+	return s.Errors
+}
+
+// SetItem sets the value of Item.
+func (s *IdentityBatchCreateError) SetItem(val jx.Raw) {
+	s.Item = val
+}
+
+// SetErrors sets the value of Errors.
+func (s *IdentityBatchCreateError) SetErrors(val []string) {
+	s.Errors = val
+}
+
+// Ref: #/components/schemas/IdentityBatchCreateRequest_GroupCreate_
+type IdentityBatchCreateRequestGroupCreate struct {
+	Items []IdentityBatchCreateRequestGroupCreateItemsItem `json:"items"`
+}
+
+// GetItems returns the value of Items.
+func (s *IdentityBatchCreateRequestGroupCreate) GetItems() []IdentityBatchCreateRequestGroupCreateItemsItem {
+	return s.Items
+}
+
+// SetItems sets the value of Items.
+func (s *IdentityBatchCreateRequestGroupCreate) SetItems(val []IdentityBatchCreateRequestGroupCreateItemsItem) {
+	s.Items = val
+}
+
+type IdentityBatchCreateRequestGroupCreateItemsItem struct {
+	ExternalID  NonEmptyStr `json:"external_id"`
+	DisplayName NonEmptyStr `json:"display_name"`
+}
+
+// GetExternalID returns the value of ExternalID.
+func (s *IdentityBatchCreateRequestGroupCreateItemsItem) GetExternalID() NonEmptyStr {
+	return s.ExternalID
+}
+
+// GetDisplayName returns the value of DisplayName.
+func (s *IdentityBatchCreateRequestGroupCreateItemsItem) GetDisplayName() NonEmptyStr {
+	return s.DisplayName
+}
+
+// SetExternalID sets the value of ExternalID.
+func (s *IdentityBatchCreateRequestGroupCreateItemsItem) SetExternalID(val NonEmptyStr) {
+	s.ExternalID = val
+}
+
+// SetDisplayName sets the value of DisplayName.
+func (s *IdentityBatchCreateRequestGroupCreateItemsItem) SetDisplayName(val NonEmptyStr) {
+	s.DisplayName = val
+}
+
+// Ref: #/components/schemas/IdentityBatchCreateRequest_MachineUserCreate_
+type IdentityBatchCreateRequestMachineUserCreate struct {
+	Items []IdentityBatchCreateRequestMachineUserCreateItemsItem `json:"items"`
+}
+
+// GetItems returns the value of Items.
+func (s *IdentityBatchCreateRequestMachineUserCreate) GetItems() []IdentityBatchCreateRequestMachineUserCreateItemsItem {
+	return s.Items
+}
+
+// SetItems sets the value of Items.
+func (s *IdentityBatchCreateRequestMachineUserCreate) SetItems(val []IdentityBatchCreateRequestMachineUserCreateItemsItem) {
+	s.Items = val
+}
+
+type IdentityBatchCreateRequestMachineUserCreateItemsItem struct {
+	ExternalID  NonEmptyStr `json:"external_id"`
+	DisplayName NonEmptyStr `json:"display_name"`
+}
+
+// GetExternalID returns the value of ExternalID.
+func (s *IdentityBatchCreateRequestMachineUserCreateItemsItem) GetExternalID() NonEmptyStr {
+	return s.ExternalID
+}
+
+// GetDisplayName returns the value of DisplayName.
+func (s *IdentityBatchCreateRequestMachineUserCreateItemsItem) GetDisplayName() NonEmptyStr {
+	return s.DisplayName
+}
+
+// SetExternalID sets the value of ExternalID.
+func (s *IdentityBatchCreateRequestMachineUserCreateItemsItem) SetExternalID(val NonEmptyStr) {
+	s.ExternalID = val
+}
+
+// SetDisplayName sets the value of DisplayName.
+func (s *IdentityBatchCreateRequestMachineUserCreateItemsItem) SetDisplayName(val NonEmptyStr) {
+	s.DisplayName = val
+}
+
+// Ref: #/components/schemas/IdentityBatchCreateRequest_UserCreate_
+type IdentityBatchCreateRequestUserCreate struct {
+	Items []IdentityBatchCreateRequestUserCreateItemsItem `json:"items"`
+}
+
+// GetItems returns the value of Items.
+func (s *IdentityBatchCreateRequestUserCreate) GetItems() []IdentityBatchCreateRequestUserCreateItemsItem {
+	return s.Items
+}
+
+// SetItems sets the value of Items.
+func (s *IdentityBatchCreateRequestUserCreate) SetItems(val []IdentityBatchCreateRequestUserCreateItemsItem) {
+	s.Items = val
+}
+
+type IdentityBatchCreateRequestUserCreateItemsItem struct {
+	Email      string `json:"email"`
+	ExternalID string `json:"external_id"`
+	FirstName  string `json:"first_name"`
+	LastName   string `json:"last_name"`
+}
+
+// GetEmail returns the value of Email.
+func (s *IdentityBatchCreateRequestUserCreateItemsItem) GetEmail() string {
+	return s.Email
+}
+
+// GetExternalID returns the value of ExternalID.
+func (s *IdentityBatchCreateRequestUserCreateItemsItem) GetExternalID() string {
+	return s.ExternalID
+}
+
+// GetFirstName returns the value of FirstName.
+func (s *IdentityBatchCreateRequestUserCreateItemsItem) GetFirstName() string {
+	return s.FirstName
+}
+
+// GetLastName returns the value of LastName.
+func (s *IdentityBatchCreateRequestUserCreateItemsItem) GetLastName() string {
+	return s.LastName
+}
+
+// SetEmail sets the value of Email.
+func (s *IdentityBatchCreateRequestUserCreateItemsItem) SetEmail(val string) {
+	s.Email = val
+}
+
+// SetExternalID sets the value of ExternalID.
+func (s *IdentityBatchCreateRequestUserCreateItemsItem) SetExternalID(val string) {
+	s.ExternalID = val
+}
+
+// SetFirstName sets the value of FirstName.
+func (s *IdentityBatchCreateRequestUserCreateItemsItem) SetFirstName(val string) {
+	s.FirstName = val
+}
+
+// SetLastName sets the value of LastName.
+func (s *IdentityBatchCreateRequestUserCreateItemsItem) SetLastName(val string) {
+	s.LastName = val
+}
+
+// Ref: #/components/schemas/IdentityBatchCreateResponse
+type IdentityBatchCreateResponse struct {
+	Ids    []uuid.UUID                `json:"ids"`
+	Errors []IdentityBatchCreateError `json:"errors"`
+}
+
+// GetIds returns the value of Ids.
+func (s *IdentityBatchCreateResponse) GetIds() []uuid.UUID {
+	return s.Ids
+}
+
+// GetErrors returns the value of Errors.
+func (s *IdentityBatchCreateResponse) GetErrors() []IdentityBatchCreateError {
+	return s.Errors
+}
+
+// SetIds sets the value of Ids.
+func (s *IdentityBatchCreateResponse) SetIds(val []uuid.UUID) {
+	s.Ids = val
+}
+
+// SetErrors sets the value of Errors.
+func (s *IdentityBatchCreateResponse) SetErrors(val []IdentityBatchCreateError) {
+	s.Errors = val
+}
+
+func (*IdentityBatchCreateResponse) createGroupsBatchRes()       {}
+func (*IdentityBatchCreateResponse) createMachineUsersBatchRes() {}
+func (*IdentityBatchCreateResponse) createUsersBatchRes()        {}
+
+// Ref: #/components/schemas/IdentityBatchDeleteRequest
+type IdentityBatchDeleteRequest struct {
+	Ids []uuid.UUID `json:"ids"`
+}
+
+// GetIds returns the value of Ids.
+func (s *IdentityBatchDeleteRequest) GetIds() []uuid.UUID {
+	return s.Ids
+}
+
+// SetIds sets the value of Ids.
+func (s *IdentityBatchDeleteRequest) SetIds(val []uuid.UUID) {
+	s.Ids = val
+}
+
+// Ref: #/components/schemas/IdentityType
+type IdentityType string
+
+const (
+	IdentityTypeUser        IdentityType = "user"
+	IdentityTypeGroup       IdentityType = "group"
+	IdentityTypeMachineUser IdentityType = "machine_user"
+)
+
+// AllValues returns all IdentityType values.
+func (IdentityType) AllValues() []IdentityType {
+	return []IdentityType{
+		IdentityTypeUser,
+		IdentityTypeGroup,
+		IdentityTypeMachineUser,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s IdentityType) MarshalText() ([]byte, error) {
+	switch s {
+	case IdentityTypeUser:
+		return []byte(s), nil
+	case IdentityTypeGroup:
+		return []byte(s), nil
+	case IdentityTypeMachineUser:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *IdentityType) UnmarshalText(data []byte) error {
+	switch IdentityType(data) {
+	case IdentityTypeUser:
+		*s = IdentityTypeUser
+		return nil
+	case IdentityTypeGroup:
+		*s = IdentityTypeGroup
+		return nil
+	case IdentityTypeMachineUser:
+		*s = IdentityTypeMachineUser
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
 type IngestOutputPortContractNotFoundApplicationJSON jx.Raw
 
 func (*IngestOutputPortContractNotFoundApplicationJSON) ingestOutputPortContractRes() {}
 
-// Ref: #/components/schemas/InputPort
-type InputPort struct {
-	ID            uuid.UUID      `json:"id"`
-	Justification string         `json:"justification"`
-	Status        DecisionStatus `json:"status"`
-	OutputPortID  uuid.UUID      `json:"output_port_id"`
-	OutputPort    OutputPort     `json:"output_port"`
+type IngestOutputPortContractYamlNotFoundApplicationJSON jx.Raw
+
+func (*IngestOutputPortContractYamlNotFoundApplicationJSON) ingestOutputPortContractYamlRes() {}
+
+type IngestOutputPortContractYamlReq struct {
+	File ht.MultipartFile `json:"file"`
+}
+
+// GetFile returns the value of File.
+func (s *IngestOutputPortContractYamlReq) GetFile() ht.MultipartFile {
+	return s.File
+}
+
+// SetFile sets the value of File.
+func (s *IngestOutputPortContractYamlReq) SetFile(val ht.MultipartFile) {
+	s.File = val
+}
+
+// Ref: #/components/schemas/InputPortRequestBase
+type InputPortRequestBase struct {
+	ID                    uuid.UUID                `json:"id"`
+	Justification         string                   `json:"justification"`
+	DecisionNote          OptNilString             `json:"decision_note"`
+	ValidFrom             OptNilDate               `json:"valid_from"`
+	ValidUntil            NilDate                  `json:"valid_until"`
+	AccessDurationType    AccessDurationType       `json:"access_duration_type"`
+	RequestedDurationDays OptNilInt                `json:"requested_duration_days"`
+	RequestedBy           User                     `json:"requested_by"`
+	DecidedBy             OptNilUser               `json:"decided_by"`
+	Decision              InputPortRequestDecision `json:"decision"`
+	RevokedAt             OptNilDateTime           `json:"revoked_at"`
+	RevokedBy             OptNilUser               `json:"revoked_by"`
+	CreatedOn             time.Time                `json:"created_on"`
+	RequestedOn           time.Time                `json:"requested_on"`
+	AccessMode            OptNilAccessMode         `json:"access_mode"`
 }
 
 // GetID returns the value of ID.
-func (s *InputPort) GetID() uuid.UUID {
+func (s *InputPortRequestBase) GetID() uuid.UUID {
 	return s.ID
 }
 
 // GetJustification returns the value of Justification.
-func (s *InputPort) GetJustification() string {
+func (s *InputPortRequestBase) GetJustification() string {
 	return s.Justification
 }
 
-// GetStatus returns the value of Status.
-func (s *InputPort) GetStatus() DecisionStatus {
-	return s.Status
+// GetDecisionNote returns the value of DecisionNote.
+func (s *InputPortRequestBase) GetDecisionNote() OptNilString {
+	return s.DecisionNote
 }
 
-// GetOutputPortID returns the value of OutputPortID.
-func (s *InputPort) GetOutputPortID() uuid.UUID {
-	return s.OutputPortID
+// GetValidFrom returns the value of ValidFrom.
+func (s *InputPortRequestBase) GetValidFrom() OptNilDate {
+	return s.ValidFrom
 }
 
-// GetOutputPort returns the value of OutputPort.
-func (s *InputPort) GetOutputPort() OutputPort {
-	return s.OutputPort
+// GetValidUntil returns the value of ValidUntil.
+func (s *InputPortRequestBase) GetValidUntil() NilDate {
+	return s.ValidUntil
+}
+
+// GetAccessDurationType returns the value of AccessDurationType.
+func (s *InputPortRequestBase) GetAccessDurationType() AccessDurationType {
+	return s.AccessDurationType
+}
+
+// GetRequestedDurationDays returns the value of RequestedDurationDays.
+func (s *InputPortRequestBase) GetRequestedDurationDays() OptNilInt {
+	return s.RequestedDurationDays
+}
+
+// GetRequestedBy returns the value of RequestedBy.
+func (s *InputPortRequestBase) GetRequestedBy() User {
+	return s.RequestedBy
+}
+
+// GetDecidedBy returns the value of DecidedBy.
+func (s *InputPortRequestBase) GetDecidedBy() OptNilUser {
+	return s.DecidedBy
+}
+
+// GetDecision returns the value of Decision.
+func (s *InputPortRequestBase) GetDecision() InputPortRequestDecision {
+	return s.Decision
+}
+
+// GetRevokedAt returns the value of RevokedAt.
+func (s *InputPortRequestBase) GetRevokedAt() OptNilDateTime {
+	return s.RevokedAt
+}
+
+// GetRevokedBy returns the value of RevokedBy.
+func (s *InputPortRequestBase) GetRevokedBy() OptNilUser {
+	return s.RevokedBy
+}
+
+// GetCreatedOn returns the value of CreatedOn.
+func (s *InputPortRequestBase) GetCreatedOn() time.Time {
+	return s.CreatedOn
+}
+
+// GetRequestedOn returns the value of RequestedOn.
+func (s *InputPortRequestBase) GetRequestedOn() time.Time {
+	return s.RequestedOn
+}
+
+// GetAccessMode returns the value of AccessMode.
+func (s *InputPortRequestBase) GetAccessMode() OptNilAccessMode {
+	return s.AccessMode
 }
 
 // SetID sets the value of ID.
-func (s *InputPort) SetID(val uuid.UUID) {
+func (s *InputPortRequestBase) SetID(val uuid.UUID) {
 	s.ID = val
 }
 
 // SetJustification sets the value of Justification.
-func (s *InputPort) SetJustification(val string) {
+func (s *InputPortRequestBase) SetJustification(val string) {
 	s.Justification = val
 }
 
-// SetStatus sets the value of Status.
-func (s *InputPort) SetStatus(val DecisionStatus) {
-	s.Status = val
+// SetDecisionNote sets the value of DecisionNote.
+func (s *InputPortRequestBase) SetDecisionNote(val OptNilString) {
+	s.DecisionNote = val
 }
 
-// SetOutputPortID sets the value of OutputPortID.
-func (s *InputPort) SetOutputPortID(val uuid.UUID) {
-	s.OutputPortID = val
+// SetValidFrom sets the value of ValidFrom.
+func (s *InputPortRequestBase) SetValidFrom(val OptNilDate) {
+	s.ValidFrom = val
 }
 
-// SetOutputPort sets the value of OutputPort.
-func (s *InputPort) SetOutputPort(val OutputPort) {
-	s.OutputPort = val
+// SetValidUntil sets the value of ValidUntil.
+func (s *InputPortRequestBase) SetValidUntil(val NilDate) {
+	s.ValidUntil = val
+}
+
+// SetAccessDurationType sets the value of AccessDurationType.
+func (s *InputPortRequestBase) SetAccessDurationType(val AccessDurationType) {
+	s.AccessDurationType = val
+}
+
+// SetRequestedDurationDays sets the value of RequestedDurationDays.
+func (s *InputPortRequestBase) SetRequestedDurationDays(val OptNilInt) {
+	s.RequestedDurationDays = val
+}
+
+// SetRequestedBy sets the value of RequestedBy.
+func (s *InputPortRequestBase) SetRequestedBy(val User) {
+	s.RequestedBy = val
+}
+
+// SetDecidedBy sets the value of DecidedBy.
+func (s *InputPortRequestBase) SetDecidedBy(val OptNilUser) {
+	s.DecidedBy = val
+}
+
+// SetDecision sets the value of Decision.
+func (s *InputPortRequestBase) SetDecision(val InputPortRequestDecision) {
+	s.Decision = val
+}
+
+// SetRevokedAt sets the value of RevokedAt.
+func (s *InputPortRequestBase) SetRevokedAt(val OptNilDateTime) {
+	s.RevokedAt = val
+}
+
+// SetRevokedBy sets the value of RevokedBy.
+func (s *InputPortRequestBase) SetRevokedBy(val OptNilUser) {
+	s.RevokedBy = val
+}
+
+// SetCreatedOn sets the value of CreatedOn.
+func (s *InputPortRequestBase) SetCreatedOn(val time.Time) {
+	s.CreatedOn = val
+}
+
+// SetRequestedOn sets the value of RequestedOn.
+func (s *InputPortRequestBase) SetRequestedOn(val time.Time) {
+	s.RequestedOn = val
+}
+
+// SetAccessMode sets the value of AccessMode.
+func (s *InputPortRequestBase) SetAccessMode(val OptNilAccessMode) {
+	s.AccessMode = val
+}
+
+// Ref: #/components/schemas/InputPortRequestDecision
+type InputPortRequestDecision string
+
+const (
+	InputPortRequestDecisionPending   InputPortRequestDecision = "pending"
+	InputPortRequestDecisionApproved  InputPortRequestDecision = "approved"
+	InputPortRequestDecisionDenied    InputPortRequestDecision = "denied"
+	InputPortRequestDecisionCancelled InputPortRequestDecision = "cancelled"
+)
+
+// AllValues returns all InputPortRequestDecision values.
+func (InputPortRequestDecision) AllValues() []InputPortRequestDecision {
+	return []InputPortRequestDecision{
+		InputPortRequestDecisionPending,
+		InputPortRequestDecisionApproved,
+		InputPortRequestDecisionDenied,
+		InputPortRequestDecisionCancelled,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s InputPortRequestDecision) MarshalText() ([]byte, error) {
+	switch s {
+	case InputPortRequestDecisionPending:
+		return []byte(s), nil
+	case InputPortRequestDecisionApproved:
+		return []byte(s), nil
+	case InputPortRequestDecisionDenied:
+		return []byte(s), nil
+	case InputPortRequestDecisionCancelled:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *InputPortRequestDecision) UnmarshalText(data []byte) error {
+	switch InputPortRequestDecision(data) {
+	case InputPortRequestDecisionPending:
+		*s = InputPortRequestDecisionPending
+		return nil
+	case InputPortRequestDecisionApproved:
+		*s = InputPortRequestDecisionApproved
+		return nil
+	case InputPortRequestDecisionDenied:
+		*s = InputPortRequestDecisionDenied
+		return nil
+	case InputPortRequestDecisionCancelled:
+		*s = InputPortRequestDecisionCancelled
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/components/schemas/InputPortStatus
+type InputPortStatus string
+
+const (
+	InputPortStatusPending   InputPortStatus = "pending"
+	InputPortStatusApproved  InputPortStatus = "approved"
+	InputPortStatusDenied    InputPortStatus = "denied"
+	InputPortStatusExpired   InputPortStatus = "expired"
+	InputPortStatusRevoked   InputPortStatus = "revoked"
+	InputPortStatusCancelled InputPortStatus = "cancelled"
+)
+
+// AllValues returns all InputPortStatus values.
+func (InputPortStatus) AllValues() []InputPortStatus {
+	return []InputPortStatus{
+		InputPortStatusPending,
+		InputPortStatusApproved,
+		InputPortStatusDenied,
+		InputPortStatusExpired,
+		InputPortStatusRevoked,
+		InputPortStatusCancelled,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s InputPortStatus) MarshalText() ([]byte, error) {
+	switch s {
+	case InputPortStatusPending:
+		return []byte(s), nil
+	case InputPortStatusApproved:
+		return []byte(s), nil
+	case InputPortStatusDenied:
+		return []byte(s), nil
+	case InputPortStatusExpired:
+		return []byte(s), nil
+	case InputPortStatusRevoked:
+		return []byte(s), nil
+	case InputPortStatusCancelled:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *InputPortStatus) UnmarshalText(data []byte) error {
+	switch InputPortStatus(data) {
+	case InputPortStatusPending:
+		*s = InputPortStatusPending
+		return nil
+	case InputPortStatusApproved:
+		*s = InputPortStatusApproved
+		return nil
+	case InputPortStatusDenied:
+		*s = InputPortStatusDenied
+		return nil
+	case InputPortStatusExpired:
+		*s = InputPortStatusExpired
+		return nil
+	case InputPortStatusRevoked:
+		*s = InputPortStatusRevoked
+		return nil
+	case InputPortStatusCancelled:
+		*s = InputPortStatusCancelled
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
 }
 
 // Ref: #/components/schemas/IsAdminResponse
@@ -6084,56 +7316,11 @@ func (s *IsAdminResponse) SetTime(val OptNilString) {
 	s.Time = val
 }
 
-// Ref: #/components/schemas/LinkInputPortsToDataProduct
-type LinkInputPortsToDataProduct struct {
-	InputPorts    []uuid.UUID `json:"input_ports"`
-	Justification string      `json:"justification"`
-}
+func (*IsAdminResponse) isAdminRes() {}
 
-// GetInputPorts returns the value of InputPorts.
-func (s *LinkInputPortsToDataProduct) GetInputPorts() []uuid.UUID {
-	return s.InputPorts
-}
+type LinkOutputPortToTechnicalAssetConflictApplicationJSON jx.Raw
 
-// GetJustification returns the value of Justification.
-func (s *LinkInputPortsToDataProduct) GetJustification() string {
-	return s.Justification
-}
-
-// SetInputPorts sets the value of InputPorts.
-func (s *LinkInputPortsToDataProduct) SetInputPorts(val []uuid.UUID) {
-	s.InputPorts = val
-}
-
-// SetJustification sets the value of Justification.
-func (s *LinkInputPortsToDataProduct) SetJustification(val string) {
-	s.Justification = val
-}
-
-type LinkInputPortsToDataProductBadRequestApplicationJSON jx.Raw
-
-func (*LinkInputPortsToDataProductBadRequestApplicationJSON) linkInputPortsToDataProductRes() {}
-
-type LinkInputPortsToDataProductNotFoundApplicationJSON jx.Raw
-
-func (*LinkInputPortsToDataProductNotFoundApplicationJSON) linkInputPortsToDataProductRes() {}
-
-// Ref: #/components/schemas/LinkInputPortsToDataProductPost
-type LinkInputPortsToDataProductPost struct {
-	InputPortLinks []uuid.UUID `json:"input_port_links"`
-}
-
-// GetInputPortLinks returns the value of InputPortLinks.
-func (s *LinkInputPortsToDataProductPost) GetInputPortLinks() []uuid.UUID {
-	return s.InputPortLinks
-}
-
-// SetInputPortLinks sets the value of InputPortLinks.
-func (s *LinkInputPortsToDataProductPost) SetInputPortLinks(val []uuid.UUID) {
-	s.InputPortLinks = val
-}
-
-func (*LinkInputPortsToDataProductPost) linkInputPortsToDataProductRes() {}
+func (*LinkOutputPortToTechnicalAssetConflictApplicationJSON) linkOutputPortToTechnicalAssetRes() {}
 
 type LinkOutputPortToTechnicalAssetNotFoundApplicationJSON jx.Raw
 
@@ -6222,6 +7409,141 @@ func (s *ListOutputPortRoleAssignmentsResponse) SetRoleAssignments(val []OutputP
 
 func (*ListOutputPortRoleAssignmentsResponse) listOutputPortRoleAssignmentsRes() {}
 
+// Ref: #/components/schemas/MachineUserCreate
+type MachineUserCreate struct {
+	ExternalID  NonEmptyStr `json:"external_id"`
+	DisplayName NonEmptyStr `json:"display_name"`
+}
+
+// GetExternalID returns the value of ExternalID.
+func (s *MachineUserCreate) GetExternalID() NonEmptyStr {
+	return s.ExternalID
+}
+
+// GetDisplayName returns the value of DisplayName.
+func (s *MachineUserCreate) GetDisplayName() NonEmptyStr {
+	return s.DisplayName
+}
+
+// SetExternalID sets the value of ExternalID.
+func (s *MachineUserCreate) SetExternalID(val NonEmptyStr) {
+	s.ExternalID = val
+}
+
+// SetDisplayName sets the value of DisplayName.
+func (s *MachineUserCreate) SetDisplayName(val NonEmptyStr) {
+	s.DisplayName = val
+}
+
+// Ref: #/components/schemas/MachineUserCreateResponse
+type MachineUserCreateResponse struct {
+	ID uuid.UUID `json:"id"`
+}
+
+// GetID returns the value of ID.
+func (s *MachineUserCreateResponse) GetID() uuid.UUID {
+	return s.ID
+}
+
+// SetID sets the value of ID.
+func (s *MachineUserCreateResponse) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+func (*MachineUserCreateResponse) createMachineUserRes() {}
+
+// Ref: #/components/schemas/MachineUserGet
+type MachineUserGet struct {
+	ID          uuid.UUID `json:"id"`
+	ExternalID  string    `json:"external_id"`
+	DisplayName string    `json:"display_name"`
+}
+
+// GetID returns the value of ID.
+func (s *MachineUserGet) GetID() uuid.UUID {
+	return s.ID
+}
+
+// GetExternalID returns the value of ExternalID.
+func (s *MachineUserGet) GetExternalID() string {
+	return s.ExternalID
+}
+
+// GetDisplayName returns the value of DisplayName.
+func (s *MachineUserGet) GetDisplayName() string {
+	return s.DisplayName
+}
+
+// SetID sets the value of ID.
+func (s *MachineUserGet) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+// SetExternalID sets the value of ExternalID.
+func (s *MachineUserGet) SetExternalID(val string) {
+	s.ExternalID = val
+}
+
+// SetDisplayName sets the value of DisplayName.
+func (s *MachineUserGet) SetDisplayName(val string) {
+	s.DisplayName = val
+}
+
+func (*MachineUserGet) getMachineUserRes() {}
+
+// Ref: #/components/schemas/MachineUserUpdate
+type MachineUserUpdate struct {
+	DisplayName NonEmptyStr `json:"display_name"`
+}
+
+// GetDisplayName returns the value of DisplayName.
+func (s *MachineUserUpdate) GetDisplayName() NonEmptyStr {
+	return s.DisplayName
+}
+
+// SetDisplayName sets the value of DisplayName.
+func (s *MachineUserUpdate) SetDisplayName(val NonEmptyStr) {
+	s.DisplayName = val
+}
+
+// Ref: #/components/schemas/MachineUserUpdateResponse
+type MachineUserUpdateResponse struct {
+	ID uuid.UUID `json:"id"`
+}
+
+// GetID returns the value of ID.
+func (s *MachineUserUpdateResponse) GetID() uuid.UUID {
+	return s.ID
+}
+
+// SetID sets the value of ID.
+func (s *MachineUserUpdateResponse) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+func (*MachineUserUpdateResponse) updateMachineUserRes() {}
+
+// Ref: #/components/schemas/MachineUsersGetResponse
+type MachineUsersGetResponse struct {
+	MachineUsers []MachineUserGet `json:"machine_users"`
+}
+
+// GetMachineUsers returns the value of MachineUsers.
+func (s *MachineUsersGetResponse) GetMachineUsers() []MachineUserGet {
+	return s.MachineUsers
+}
+
+// SetMachineUsers sets the value of MachineUsers.
+func (s *MachineUsersGetResponse) SetMachineUsers(val []MachineUserGet) {
+	s.MachineUsers = val
+}
+
+func (*MachineUsersGetResponse) getMachineUsersRes() {}
+
+type MarkTourAsSeenOKApplicationJSON jx.Raw
+
+func (*MarkTourAsSeenOKApplicationJSON) markTourAsSeenRes() {}
+
 type MigrateDataProductTypeOKApplicationJSON jx.Raw
 
 func (*MigrateDataProductTypeOKApplicationJSON) migrateDataProductTypeRes() {}
@@ -6305,37 +7627,37 @@ func (o NilDataProductLifeCycle) Or(d DataProductLifeCycle) DataProductLifeCycle
 	return d
 }
 
-// NewNilDataQualityStatus returns new NilDataQualityStatus with value set to v.
-func NewNilDataQualityStatus(v DataQualityStatus) NilDataQualityStatus {
-	return NilDataQualityStatus{
+// NewNilDate returns new NilDate with value set to v.
+func NewNilDate(v time.Time) NilDate {
+	return NilDate{
 		Value: v,
 	}
 }
 
-// NilDataQualityStatus is nullable DataQualityStatus.
-type NilDataQualityStatus struct {
-	Value DataQualityStatus
+// NilDate is nullable time.Time.
+type NilDate struct {
+	Value time.Time
 	Null  bool
 }
 
 // SetTo sets value to v.
-func (o *NilDataQualityStatus) SetTo(v DataQualityStatus) {
+func (o *NilDate) SetTo(v time.Time) {
 	o.Null = false
 	o.Value = v
 }
 
 // IsNull returns true if value is Null.
-func (o NilDataQualityStatus) IsNull() bool { return o.Null }
+func (o NilDate) IsNull() bool { return o.Null }
 
 // SetToNull sets value to null.
-func (o *NilDataQualityStatus) SetToNull() {
+func (o *NilDate) SetToNull() {
 	o.Null = true
-	var v DataQualityStatus
+	var v time.Time
 	o.Value = v
 }
 
 // Get returns value and boolean that denotes whether value was set.
-func (o NilDataQualityStatus) Get() (v DataQualityStatus, ok bool) {
+func (o NilDate) Get() (v time.Time, ok bool) {
 	if o.Null {
 		return v, false
 	}
@@ -6343,7 +7665,7 @@ func (o NilDataQualityStatus) Get() (v DataQualityStatus, ok bool) {
 }
 
 // Or returns value if set, or given parameter if does not.
-func (o NilDataQualityStatus) Or(d DataQualityStatus) DataQualityStatus {
+func (o NilDate) Or(d time.Time) time.Time {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -6434,6 +7756,51 @@ func (o NilGlobalRoleAssignmentResponse) Get() (v GlobalRoleAssignmentResponse, 
 
 // Or returns value if set, or given parameter if does not.
 func (o NilGlobalRoleAssignmentResponse) Or(d GlobalRoleAssignmentResponse) GlobalRoleAssignmentResponse {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewNilInt returns new NilInt with value set to v.
+func NewNilInt(v int) NilInt {
+	return NilInt{
+		Value: v,
+	}
+}
+
+// NilInt is nullable int.
+type NilInt struct {
+	Value int
+	Null  bool
+}
+
+// SetTo sets value to v.
+func (o *NilInt) SetTo(v int) {
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o NilInt) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *NilInt) SetToNull() {
+	o.Null = true
+	var v int
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o NilInt) Get() (v int, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o NilInt) Or(d int) int {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -6575,6 +7942,8 @@ func (o NilUser) Or(d User) User {
 	return d
 }
 
+type NonEmptyStr string
+
 // OIDC token endpoint response.
 // Ref: #/components/schemas/OIDCTokenResponse
 type OIDCTokenResponse struct {
@@ -6637,41 +8006,50 @@ func (s *OIDCTokenResponse) SetRefreshToken(val OptNilString) {
 
 func (*OIDCTokenResponse) getJwtTokenRes() {}
 
-// Ref: #/components/schemas/OSISemanticModelTechnicalAssetConfiguration
-type OSISemanticModelTechnicalAssetConfiguration struct {
-	ConfigurationType string    `json:"configuration_type"`
-	ModelName         OptString `json:"model_name"`
-	Location          OptString `json:"location"`
+// NewOptAssignmentFilter returns new OptAssignmentFilter with value set to v.
+func NewOptAssignmentFilter(v AssignmentFilter) OptAssignmentFilter {
+	return OptAssignmentFilter{
+		Value: v,
+		Set:   true,
+	}
 }
 
-// GetConfigurationType returns the value of ConfigurationType.
-func (s *OSISemanticModelTechnicalAssetConfiguration) GetConfigurationType() string {
-	return s.ConfigurationType
+// OptAssignmentFilter is optional AssignmentFilter.
+type OptAssignmentFilter struct {
+	Value AssignmentFilter
+	Set   bool
 }
 
-// GetModelName returns the value of ModelName.
-func (s *OSISemanticModelTechnicalAssetConfiguration) GetModelName() OptString {
-	return s.ModelName
+// IsSet returns true if OptAssignmentFilter was set.
+func (o OptAssignmentFilter) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptAssignmentFilter) Reset() {
+	var v AssignmentFilter
+	o.Value = v
+	o.Set = false
 }
 
-// GetLocation returns the value of Location.
-func (s *OSISemanticModelTechnicalAssetConfiguration) GetLocation() OptString {
-	return s.Location
+// SetTo sets value to v.
+func (o *OptAssignmentFilter) SetTo(v AssignmentFilter) {
+	o.Set = true
+	o.Value = v
 }
 
-// SetConfigurationType sets the value of ConfigurationType.
-func (s *OSISemanticModelTechnicalAssetConfiguration) SetConfigurationType(val string) {
-	s.ConfigurationType = val
+// Get returns value and boolean that denotes whether value was set.
+func (o OptAssignmentFilter) Get() (v AssignmentFilter, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
 }
 
-// SetModelName sets the value of ModelName.
-func (s *OSISemanticModelTechnicalAssetConfiguration) SetModelName(val OptString) {
-	s.ModelName = val
-}
-
-// SetLocation sets the value of Location.
-func (s *OSISemanticModelTechnicalAssetConfiguration) SetLocation(val OptString) {
-	s.Location = val
+// Or returns value if set, or given parameter if does not.
+func (o OptAssignmentFilter) Or(d AssignmentFilter) AssignmentFilter {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
 }
 
 // NewOptBool returns new OptBool with value set to v.
@@ -6714,6 +8092,52 @@ func (o OptBool) Get() (v bool, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptBool) Or(d bool) bool {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptDataProductVisibility returns new OptDataProductVisibility with value set to v.
+func NewOptDataProductVisibility(v DataProductVisibility) OptDataProductVisibility {
+	return OptDataProductVisibility{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptDataProductVisibility is optional DataProductVisibility.
+type OptDataProductVisibility struct {
+	Value DataProductVisibility
+	Set   bool
+}
+
+// IsSet returns true if OptDataProductVisibility was set.
+func (o OptDataProductVisibility) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptDataProductVisibility) Reset() {
+	var v DataProductVisibility
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptDataProductVisibility) SetTo(v DataProductVisibility) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptDataProductVisibility) Get() (v DataProductVisibility, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptDataProductVisibility) Or(d DataProductVisibility) DataProductVisibility {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -6806,6 +8230,74 @@ func (o OptInt) Get() (v int, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptInt) Or(d int) int {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptNilAccessMode returns new OptNilAccessMode with value set to v.
+func NewOptNilAccessMode(v AccessMode) OptNilAccessMode {
+	return OptNilAccessMode{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptNilAccessMode is optional nullable AccessMode.
+type OptNilAccessMode struct {
+	Value AccessMode
+	Set   bool
+	Null  bool
+}
+
+// IsSet returns true if OptNilAccessMode was set.
+func (o OptNilAccessMode) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptNilAccessMode) Reset() {
+	var v AccessMode
+	o.Value = v
+	o.Set = false
+	o.Null = false
+}
+
+// SetTo sets value to v.
+func (o *OptNilAccessMode) SetTo(v AccessMode) {
+	o.Set = true
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o OptNilAccessMode) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *OptNilAccessMode) SetToNull() {
+	o.Set = true
+	o.Null = true
+	var v AccessMode
+	o.Value = v
+}
+
+// IsEmpty returns true if the field was omitted from the payload (not Set and not Null).
+func (o OptNilAccessMode) IsEmpty() bool {
+	return !o.Set && !o.Null
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptNilAccessMode) Get() (v AccessMode, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptNilAccessMode) Or(d AccessMode) AccessMode {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -7084,6 +8576,142 @@ func (o OptNilDataProduct) Or(d DataProduct) DataProduct {
 	return d
 }
 
+// NewOptNilDataQualityStatus returns new OptNilDataQualityStatus with value set to v.
+func NewOptNilDataQualityStatus(v DataQualityStatus) OptNilDataQualityStatus {
+	return OptNilDataQualityStatus{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptNilDataQualityStatus is optional nullable DataQualityStatus.
+type OptNilDataQualityStatus struct {
+	Value DataQualityStatus
+	Set   bool
+	Null  bool
+}
+
+// IsSet returns true if OptNilDataQualityStatus was set.
+func (o OptNilDataQualityStatus) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptNilDataQualityStatus) Reset() {
+	var v DataQualityStatus
+	o.Value = v
+	o.Set = false
+	o.Null = false
+}
+
+// SetTo sets value to v.
+func (o *OptNilDataQualityStatus) SetTo(v DataQualityStatus) {
+	o.Set = true
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o OptNilDataQualityStatus) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *OptNilDataQualityStatus) SetToNull() {
+	o.Set = true
+	o.Null = true
+	var v DataQualityStatus
+	o.Value = v
+}
+
+// IsEmpty returns true if the field was omitted from the payload (not Set and not Null).
+func (o OptNilDataQualityStatus) IsEmpty() bool {
+	return !o.Set && !o.Null
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptNilDataQualityStatus) Get() (v DataQualityStatus, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptNilDataQualityStatus) Or(d DataQualityStatus) DataQualityStatus {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptNilDate returns new OptNilDate with value set to v.
+func NewOptNilDate(v time.Time) OptNilDate {
+	return OptNilDate{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptNilDate is optional nullable time.Time.
+type OptNilDate struct {
+	Value time.Time
+	Set   bool
+	Null  bool
+}
+
+// IsSet returns true if OptNilDate was set.
+func (o OptNilDate) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptNilDate) Reset() {
+	var v time.Time
+	o.Value = v
+	o.Set = false
+	o.Null = false
+}
+
+// SetTo sets value to v.
+func (o *OptNilDate) SetTo(v time.Time) {
+	o.Set = true
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o OptNilDate) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *OptNilDate) SetToNull() {
+	o.Set = true
+	o.Null = true
+	var v time.Time
+	o.Value = v
+}
+
+// IsEmpty returns true if the field was omitted from the payload (not Set and not Null).
+func (o OptNilDate) IsEmpty() bool {
+	return !o.Set && !o.Null
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptNilDate) Get() (v time.Time, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptNilDate) Or(d time.Time) time.Time {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptNilDateTime returns new OptNilDateTime with value set to v.
 func NewOptNilDateTime(v time.Time) OptNilDateTime {
 	return OptNilDateTime{
@@ -7214,6 +8842,74 @@ func (o OptNilEventEntityType) Get() (v EventEntityType, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptNilEventEntityType) Or(d EventEntityType) EventEntityType {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptNilExploration returns new OptNilExploration with value set to v.
+func NewOptNilExploration(v Exploration) OptNilExploration {
+	return OptNilExploration{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptNilExploration is optional nullable Exploration.
+type OptNilExploration struct {
+	Value Exploration
+	Set   bool
+	Null  bool
+}
+
+// IsSet returns true if OptNilExploration was set.
+func (o OptNilExploration) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptNilExploration) Reset() {
+	var v Exploration
+	o.Value = v
+	o.Set = false
+	o.Null = false
+}
+
+// SetTo sets value to v.
+func (o *OptNilExploration) SetTo(v Exploration) {
+	o.Set = true
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o OptNilExploration) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *OptNilExploration) SetToNull() {
+	o.Set = true
+	o.Null = true
+	var v Exploration
+	o.Value = v
+}
+
+// IsEmpty returns true if the field was omitted from the payload (not Set and not Null).
+func (o OptNilExploration) IsEmpty() bool {
+	return !o.Set && !o.Null
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptNilExploration) Get() (v Exploration, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptNilExploration) Or(d Exploration) Exploration {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -7622,6 +9318,74 @@ func (o OptNilPlatformTile) Get() (v PlatformTile, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptNilPlatformTile) Or(d PlatformTile) PlatformTile {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptNilRenewalStatus returns new OptNilRenewalStatus with value set to v.
+func NewOptNilRenewalStatus(v RenewalStatus) OptNilRenewalStatus {
+	return OptNilRenewalStatus{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptNilRenewalStatus is optional nullable RenewalStatus.
+type OptNilRenewalStatus struct {
+	Value RenewalStatus
+	Set   bool
+	Null  bool
+}
+
+// IsSet returns true if OptNilRenewalStatus was set.
+func (o OptNilRenewalStatus) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptNilRenewalStatus) Reset() {
+	var v RenewalStatus
+	o.Value = v
+	o.Set = false
+	o.Null = false
+}
+
+// SetTo sets value to v.
+func (o *OptNilRenewalStatus) SetTo(v RenewalStatus) {
+	o.Set = true
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o OptNilRenewalStatus) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *OptNilRenewalStatus) SetToNull() {
+	o.Set = true
+	o.Null = true
+	var v RenewalStatus
+	o.Value = v
+}
+
+// IsEmpty returns true if the field was omitted from the payload (not Set and not Null).
+func (o OptNilRenewalStatus) IsEmpty() bool {
+	return !o.Set && !o.Null
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptNilRenewalStatus) Get() (v RenewalStatus, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptNilRenewalStatus) Or(d RenewalStatus) RenewalStatus {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -8444,6 +10208,74 @@ func (o OptNilUUID) Or(d uuid.UUID) uuid.UUID {
 	return d
 }
 
+// NewOptNilUUIDArray returns new OptNilUUIDArray with value set to v.
+func NewOptNilUUIDArray(v []uuid.UUID) OptNilUUIDArray {
+	return OptNilUUIDArray{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptNilUUIDArray is optional nullable []uuid.UUID.
+type OptNilUUIDArray struct {
+	Value []uuid.UUID
+	Set   bool
+	Null  bool
+}
+
+// IsSet returns true if OptNilUUIDArray was set.
+func (o OptNilUUIDArray) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptNilUUIDArray) Reset() {
+	var v []uuid.UUID
+	o.Value = v
+	o.Set = false
+	o.Null = false
+}
+
+// SetTo sets value to v.
+func (o *OptNilUUIDArray) SetTo(v []uuid.UUID) {
+	o.Set = true
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o OptNilUUIDArray) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *OptNilUUIDArray) SetToNull() {
+	o.Set = true
+	o.Null = true
+	var v []uuid.UUID
+	o.Value = v
+}
+
+// IsEmpty returns true if the field was omitted from the payload (not Set and not Null).
+func (o OptNilUUIDArray) IsEmpty() bool {
+	return !o.Set && !o.Null
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptNilUUIDArray) Get() (v []uuid.UUID, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptNilUUIDArray) Or(d []uuid.UUID) []uuid.UUID {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptNilUser returns new OptNilUser with value set to v.
 func NewOptNilUser(v User) OptNilUser {
 	return OptNilUser{
@@ -8660,6 +10492,7 @@ type OutputPort struct {
 	AccessType    OutputPortAccessType `json:"access_type"`
 	DataProductID uuid.UUID            `json:"data_product_id"`
 	Tags          []Tag                `json:"tags"`
+	AccessModes   []AccessMode         `json:"access_modes"`
 }
 
 // GetID returns the value of ID.
@@ -8702,6 +10535,11 @@ func (s *OutputPort) GetTags() []Tag {
 	return s.Tags
 }
 
+// GetAccessModes returns the value of AccessModes.
+func (s *OutputPort) GetAccessModes() []AccessMode {
+	return s.AccessModes
+}
+
 // SetID sets the value of ID.
 func (s *OutputPort) SetID(val uuid.UUID) {
 	s.ID = val
@@ -8742,36 +10580,78 @@ func (s *OutputPort) SetTags(val []Tag) {
 	s.Tags = val
 }
 
-// Ref: #/components/schemas/OutputPortAccessType
-type OutputPortAccessType string
+// SetAccessModes sets the value of AccessModes.
+func (s *OutputPort) SetAccessModes(val []AccessMode) {
+	s.AccessModes = val
+}
+
+// Ref: #/components/schemas/OutputPortAboutUpdate
+type OutputPortAboutUpdate struct {
+	About string `json:"about"`
+}
+
+// GetAbout returns the value of About.
+func (s *OutputPortAboutUpdate) GetAbout() string {
+	return s.About
+}
+
+// SetAbout sets the value of About.
+func (s *OutputPortAboutUpdate) SetAbout(val string) {
+	s.About = val
+}
+
+// Ref: #/components/schemas/OutputPortAccessDuration
+type OutputPortAccessDuration struct {
+	AccessDurationType AccessDurationType `json:"access_duration_type"`
+	Days               int                `json:"days"`
+}
+
+// GetAccessDurationType returns the value of AccessDurationType.
+func (s *OutputPortAccessDuration) GetAccessDurationType() AccessDurationType {
+	return s.AccessDurationType
+}
+
+// GetDays returns the value of Days.
+func (s *OutputPortAccessDuration) GetDays() int {
+	return s.Days
+}
+
+// SetAccessDurationType sets the value of AccessDurationType.
+func (s *OutputPortAccessDuration) SetAccessDurationType(val AccessDurationType) {
+	s.AccessDurationType = val
+}
+
+// SetDays sets the value of Days.
+func (s *OutputPortAccessDuration) SetDays(val int) {
+	s.Days = val
+}
+
+// Ref: #/components/schemas/OutputPortAccessFunction
+type OutputPortAccessFunction string
 
 const (
-	OutputPortAccessTypePublic       OutputPortAccessType = "public"
-	OutputPortAccessTypeRestricted   OutputPortAccessType = "restricted"
-	OutputPortAccessTypePrivate      OutputPortAccessType = "private"
-	OutputPortAccessTypeUnrestricted OutputPortAccessType = "unrestricted"
+	OutputPortAccessFunctionRestricted   OutputPortAccessFunction = "restricted"
+	OutputPortAccessFunctionPrivate      OutputPortAccessFunction = "private"
+	OutputPortAccessFunctionUnrestricted OutputPortAccessFunction = "unrestricted"
 )
 
-// AllValues returns all OutputPortAccessType values.
-func (OutputPortAccessType) AllValues() []OutputPortAccessType {
-	return []OutputPortAccessType{
-		OutputPortAccessTypePublic,
-		OutputPortAccessTypeRestricted,
-		OutputPortAccessTypePrivate,
-		OutputPortAccessTypeUnrestricted,
+// AllValues returns all OutputPortAccessFunction values.
+func (OutputPortAccessFunction) AllValues() []OutputPortAccessFunction {
+	return []OutputPortAccessFunction{
+		OutputPortAccessFunctionRestricted,
+		OutputPortAccessFunctionPrivate,
+		OutputPortAccessFunctionUnrestricted,
 	}
 }
 
 // MarshalText implements encoding.TextMarshaler.
-func (s OutputPortAccessType) MarshalText() ([]byte, error) {
+func (s OutputPortAccessFunction) MarshalText() ([]byte, error) {
 	switch s {
-	case OutputPortAccessTypePublic:
+	case OutputPortAccessFunctionRestricted:
 		return []byte(s), nil
-	case OutputPortAccessTypeRestricted:
+	case OutputPortAccessFunctionPrivate:
 		return []byte(s), nil
-	case OutputPortAccessTypePrivate:
-		return []byte(s), nil
-	case OutputPortAccessTypeUnrestricted:
+	case OutputPortAccessFunctionUnrestricted:
 		return []byte(s), nil
 	default:
 		return nil, errors.Errorf("invalid value: %q", s)
@@ -8779,23 +10659,207 @@ func (s OutputPortAccessType) MarshalText() ([]byte, error) {
 }
 
 // UnmarshalText implements encoding.TextUnmarshaler.
-func (s *OutputPortAccessType) UnmarshalText(data []byte) error {
-	switch OutputPortAccessType(data) {
-	case OutputPortAccessTypePublic:
-		*s = OutputPortAccessTypePublic
+func (s *OutputPortAccessFunction) UnmarshalText(data []byte) error {
+	switch OutputPortAccessFunction(data) {
+	case OutputPortAccessFunctionRestricted:
+		*s = OutputPortAccessFunctionRestricted
 		return nil
-	case OutputPortAccessTypeRestricted:
-		*s = OutputPortAccessTypeRestricted
+	case OutputPortAccessFunctionPrivate:
+		*s = OutputPortAccessFunctionPrivate
 		return nil
-	case OutputPortAccessTypePrivate:
-		*s = OutputPortAccessTypePrivate
-		return nil
-	case OutputPortAccessTypeUnrestricted:
-		*s = OutputPortAccessTypeUnrestricted
+	case OutputPortAccessFunctionUnrestricted:
+		*s = OutputPortAccessFunctionUnrestricted
 		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)
 	}
+}
+
+// Ref: #/components/schemas/OutputPortAccessType
+type OutputPortAccessType struct {
+	ID             uuid.UUID                `json:"id"`
+	Name           string                   `json:"name"`
+	AccessFunction OutputPortAccessFunction `json:"access_function"`
+}
+
+// GetID returns the value of ID.
+func (s *OutputPortAccessType) GetID() uuid.UUID {
+	return s.ID
+}
+
+// GetName returns the value of Name.
+func (s *OutputPortAccessType) GetName() string {
+	return s.Name
+}
+
+// GetAccessFunction returns the value of AccessFunction.
+func (s *OutputPortAccessType) GetAccessFunction() OutputPortAccessFunction {
+	return s.AccessFunction
+}
+
+// SetID sets the value of ID.
+func (s *OutputPortAccessType) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+// SetName sets the value of Name.
+func (s *OutputPortAccessType) SetName(val string) {
+	s.Name = val
+}
+
+// SetAccessFunction sets the value of AccessFunction.
+func (s *OutputPortAccessType) SetAccessFunction(val OutputPortAccessFunction) {
+	s.AccessFunction = val
+}
+
+// Ref: #/components/schemas/OutputPortAccessTypeCreate
+type OutputPortAccessTypeCreate struct {
+	Name           NonEmptyStr              `json:"name"`
+	Description    OptString                `json:"description"`
+	AccessFunction OutputPortAccessFunction `json:"access_function"`
+}
+
+// GetName returns the value of Name.
+func (s *OutputPortAccessTypeCreate) GetName() NonEmptyStr {
+	return s.Name
+}
+
+// GetDescription returns the value of Description.
+func (s *OutputPortAccessTypeCreate) GetDescription() OptString {
+	return s.Description
+}
+
+// GetAccessFunction returns the value of AccessFunction.
+func (s *OutputPortAccessTypeCreate) GetAccessFunction() OutputPortAccessFunction {
+	return s.AccessFunction
+}
+
+// SetName sets the value of Name.
+func (s *OutputPortAccessTypeCreate) SetName(val NonEmptyStr) {
+	s.Name = val
+}
+
+// SetDescription sets the value of Description.
+func (s *OutputPortAccessTypeCreate) SetDescription(val OptString) {
+	s.Description = val
+}
+
+// SetAccessFunction sets the value of AccessFunction.
+func (s *OutputPortAccessTypeCreate) SetAccessFunction(val OutputPortAccessFunction) {
+	s.AccessFunction = val
+}
+
+// Ref: #/components/schemas/OutputPortAccessTypeUpdate
+type OutputPortAccessTypeUpdate struct {
+	Name           NonEmptyStr              `json:"name"`
+	Description    OptString                `json:"description"`
+	AccessFunction OutputPortAccessFunction `json:"access_function"`
+}
+
+// GetName returns the value of Name.
+func (s *OutputPortAccessTypeUpdate) GetName() NonEmptyStr {
+	return s.Name
+}
+
+// GetDescription returns the value of Description.
+func (s *OutputPortAccessTypeUpdate) GetDescription() OptString {
+	return s.Description
+}
+
+// GetAccessFunction returns the value of AccessFunction.
+func (s *OutputPortAccessTypeUpdate) GetAccessFunction() OutputPortAccessFunction {
+	return s.AccessFunction
+}
+
+// SetName sets the value of Name.
+func (s *OutputPortAccessTypeUpdate) SetName(val NonEmptyStr) {
+	s.Name = val
+}
+
+// SetDescription sets the value of Description.
+func (s *OutputPortAccessTypeUpdate) SetDescription(val OptString) {
+	s.Description = val
+}
+
+// SetAccessFunction sets the value of AccessFunction.
+func (s *OutputPortAccessTypeUpdate) SetAccessFunction(val OutputPortAccessFunction) {
+	s.AccessFunction = val
+}
+
+// Ref: #/components/schemas/OutputPortAccessTypesGet
+type OutputPortAccessTypesGet struct {
+	OutputPortAccessTypes []OutputPortAccessTypesGetItem `json:"output_port_access_types"`
+}
+
+// GetOutputPortAccessTypes returns the value of OutputPortAccessTypes.
+func (s *OutputPortAccessTypesGet) GetOutputPortAccessTypes() []OutputPortAccessTypesGetItem {
+	return s.OutputPortAccessTypes
+}
+
+// SetOutputPortAccessTypes sets the value of OutputPortAccessTypes.
+func (s *OutputPortAccessTypesGet) SetOutputPortAccessTypes(val []OutputPortAccessTypesGetItem) {
+	s.OutputPortAccessTypes = val
+}
+
+func (*OutputPortAccessTypesGet) getOutputPortAccessTypesRes() {}
+
+// Ref: #/components/schemas/OutputPortAccessTypesGetItem
+type OutputPortAccessTypesGetItem struct {
+	ID              uuid.UUID                `json:"id"`
+	Name            string                   `json:"name"`
+	AccessFunction  OutputPortAccessFunction `json:"access_function"`
+	Description     string                   `json:"description"`
+	OutputPortCount OptNilInt                `json:"output_port_count"`
+}
+
+// GetID returns the value of ID.
+func (s *OutputPortAccessTypesGetItem) GetID() uuid.UUID {
+	return s.ID
+}
+
+// GetName returns the value of Name.
+func (s *OutputPortAccessTypesGetItem) GetName() string {
+	return s.Name
+}
+
+// GetAccessFunction returns the value of AccessFunction.
+func (s *OutputPortAccessTypesGetItem) GetAccessFunction() OutputPortAccessFunction {
+	return s.AccessFunction
+}
+
+// GetDescription returns the value of Description.
+func (s *OutputPortAccessTypesGetItem) GetDescription() string {
+	return s.Description
+}
+
+// GetOutputPortCount returns the value of OutputPortCount.
+func (s *OutputPortAccessTypesGetItem) GetOutputPortCount() OptNilInt {
+	return s.OutputPortCount
+}
+
+// SetID sets the value of ID.
+func (s *OutputPortAccessTypesGetItem) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+// SetName sets the value of Name.
+func (s *OutputPortAccessTypesGetItem) SetName(val string) {
+	s.Name = val
+}
+
+// SetAccessFunction sets the value of AccessFunction.
+func (s *OutputPortAccessTypesGetItem) SetAccessFunction(val OutputPortAccessFunction) {
+	s.AccessFunction = val
+}
+
+// SetDescription sets the value of Description.
+func (s *OutputPortAccessTypesGetItem) SetDescription(val string) {
+	s.Description = val
+}
+
+// SetOutputPortCount sets the value of OutputPortCount.
+func (s *OutputPortAccessTypesGetItem) SetOutputPortCount(val OptNilInt) {
+	s.OutputPortCount = val
 }
 
 // Ref: #/components/schemas/OutputPortCuratedQueries
@@ -9140,8 +11204,9 @@ func (s *OutputPortDataQualitySummaryResponseDimensions) init() OutputPortDataQu
 // Ref: #/components/schemas/OutputPortInputPort
 type OutputPortInputPort struct {
 	ID                             uuid.UUID               `json:"id"`
-	Justification                  string                  `json:"justification"`
-	Status                         DecisionStatus          `json:"status"`
+	Status                         InputPortStatus         `json:"status"`
+	CurrentRequest                 InputPortRequestBase    `json:"current_request"`
+	RenewalStatus                  OptNilRenewalStatus     `json:"renewal_status"`
 	ConsumingAbstractDataProductID uuid.UUID               `json:"consuming_abstract_data_product_id"`
 	ConsumingAbstractDataProduct   AbstractDataProductInfo `json:"consuming_abstract_data_product"`
 }
@@ -9151,14 +11216,19 @@ func (s *OutputPortInputPort) GetID() uuid.UUID {
 	return s.ID
 }
 
-// GetJustification returns the value of Justification.
-func (s *OutputPortInputPort) GetJustification() string {
-	return s.Justification
+// GetStatus returns the value of Status.
+func (s *OutputPortInputPort) GetStatus() InputPortStatus {
+	return s.Status
 }
 
-// GetStatus returns the value of Status.
-func (s *OutputPortInputPort) GetStatus() DecisionStatus {
-	return s.Status
+// GetCurrentRequest returns the value of CurrentRequest.
+func (s *OutputPortInputPort) GetCurrentRequest() InputPortRequestBase {
+	return s.CurrentRequest
+}
+
+// GetRenewalStatus returns the value of RenewalStatus.
+func (s *OutputPortInputPort) GetRenewalStatus() OptNilRenewalStatus {
+	return s.RenewalStatus
 }
 
 // GetConsumingAbstractDataProductID returns the value of ConsumingAbstractDataProductID.
@@ -9176,14 +11246,19 @@ func (s *OutputPortInputPort) SetID(val uuid.UUID) {
 	s.ID = val
 }
 
-// SetJustification sets the value of Justification.
-func (s *OutputPortInputPort) SetJustification(val string) {
-	s.Justification = val
+// SetStatus sets the value of Status.
+func (s *OutputPortInputPort) SetStatus(val InputPortStatus) {
+	s.Status = val
 }
 
-// SetStatus sets the value of Status.
-func (s *OutputPortInputPort) SetStatus(val DecisionStatus) {
-	s.Status = val
+// SetCurrentRequest sets the value of CurrentRequest.
+func (s *OutputPortInputPort) SetCurrentRequest(val InputPortRequestBase) {
+	s.CurrentRequest = val
+}
+
+// SetRenewalStatus sets the value of RenewalStatus.
+func (s *OutputPortInputPort) SetRenewalStatus(val OptNilRenewalStatus) {
+	s.RenewalStatus = val
 }
 
 // SetConsumingAbstractDataProductID sets the value of ConsumingAbstractDataProductID.
@@ -9257,12 +11332,14 @@ func (s *OutputPortLink) SetOutputPort(val OutputPort) {
 
 // Ref: #/components/schemas/OutputPortQueryStatsDelete
 type OutputPortQueryStatsDelete struct {
-	Date                  string    `json:"date"`
+	// Day to delete, in ISO 8601 format (YYYY-MM-DD).
+	Date time.Time `json:"date"`
+	// ID of the consuming data product whose count to delete.
 	ConsumerDataProductID uuid.UUID `json:"consumer_data_product_id"`
 }
 
 // GetDate returns the value of Date.
-func (s *OutputPortQueryStatsDelete) GetDate() string {
+func (s *OutputPortQueryStatsDelete) GetDate() time.Time {
 	return s.Date
 }
 
@@ -9272,7 +11349,7 @@ func (s *OutputPortQueryStatsDelete) GetConsumerDataProductID() uuid.UUID {
 }
 
 // SetDate sets the value of Date.
-func (s *OutputPortQueryStatsDelete) SetDate(val string) {
+func (s *OutputPortQueryStatsDelete) SetDate(val time.Time) {
 	s.Date = val
 }
 
@@ -9348,13 +11425,17 @@ func (*OutputPortQueryStatsResponses) getOutputPortQueryStatsRes() {}
 
 // Ref: #/components/schemas/OutputPortQueryStatsUpdate
 type OutputPortQueryStatsUpdate struct {
-	Date                  string    `json:"date"`
+	// Day the queries were executed, in ISO 8601 format (YYYY-MM-DD).
+	Date time.Time `json:"date"`
+	// ID of the data product that queried the output port.
 	ConsumerDataProductID uuid.UUID `json:"consumer_data_product_id"`
-	QueryCount            int       `json:"query_count"`
+	// Number of queries the consuming data product ran against the output port on this day. Overwrites any
+	// count previously sent for the same day and consuming data product.
+	QueryCount int `json:"query_count"`
 }
 
 // GetDate returns the value of Date.
-func (s *OutputPortQueryStatsUpdate) GetDate() string {
+func (s *OutputPortQueryStatsUpdate) GetDate() time.Time {
 	return s.Date
 }
 
@@ -9369,7 +11450,7 @@ func (s *OutputPortQueryStatsUpdate) GetQueryCount() int {
 }
 
 // SetDate sets the value of Date.
-func (s *OutputPortQueryStatsUpdate) SetDate(val string) {
+func (s *OutputPortQueryStatsUpdate) SetDate(val time.Time) {
 	s.Date = val
 }
 
@@ -9517,8 +11598,9 @@ func (s *OutputPortSchemaResponse) SetSchemaObjects(val []SchemaObjectResponse) 
 	s.SchemaObjects = val
 }
 
-func (*OutputPortSchemaResponse) getOutputPortSchemaRes()      {}
-func (*OutputPortSchemaResponse) ingestOutputPortContractRes() {}
+func (*OutputPortSchemaResponse) getOutputPortSchemaRes()          {}
+func (*OutputPortSchemaResponse) ingestOutputPortContractRes()     {}
+func (*OutputPortSchemaResponse) ingestOutputPortContractYamlRes() {}
 
 // Ref: #/components/schemas/OutputPortSettingValue
 type OutputPortSettingValue struct {
@@ -9626,6 +11708,124 @@ func (s *OutputPortStatus) UnmarshalText(data []byte) error {
 	default:
 		return errors.Errorf("invalid value: %q", data)
 	}
+}
+
+// Ref: #/components/schemas/OutputPortStatusUpdate
+type OutputPortStatusUpdate struct {
+	Status OutputPortStatus `json:"status"`
+}
+
+// GetStatus returns the value of Status.
+func (s *OutputPortStatusUpdate) GetStatus() OutputPortStatus {
+	return s.Status
+}
+
+// SetStatus sets the value of Status.
+func (s *OutputPortStatusUpdate) SetStatus(val OutputPortStatus) {
+	s.Status = val
+}
+
+// Ref: #/components/schemas/OutputPortUpdate
+type OutputPortUpdate struct {
+	Name                          string             `json:"name"`
+	Namespace                     string             `json:"namespace"`
+	Description                   string             `json:"description"`
+	AccessTypeID                  uuid.UUID          `json:"access_type_id"`
+	DataProductAccessDurationType AccessDurationType `json:"data_product_access_duration_type"`
+	ExplorationAccessDurationType AccessDurationType `json:"exploration_access_duration_type"`
+	About                         OptNilString       `json:"about"`
+	LifecycleID                   OptNilUUID         `json:"lifecycle_id"`
+	TagIds                        []uuid.UUID        `json:"tag_ids"`
+}
+
+// GetName returns the value of Name.
+func (s *OutputPortUpdate) GetName() string {
+	return s.Name
+}
+
+// GetNamespace returns the value of Namespace.
+func (s *OutputPortUpdate) GetNamespace() string {
+	return s.Namespace
+}
+
+// GetDescription returns the value of Description.
+func (s *OutputPortUpdate) GetDescription() string {
+	return s.Description
+}
+
+// GetAccessTypeID returns the value of AccessTypeID.
+func (s *OutputPortUpdate) GetAccessTypeID() uuid.UUID {
+	return s.AccessTypeID
+}
+
+// GetDataProductAccessDurationType returns the value of DataProductAccessDurationType.
+func (s *OutputPortUpdate) GetDataProductAccessDurationType() AccessDurationType {
+	return s.DataProductAccessDurationType
+}
+
+// GetExplorationAccessDurationType returns the value of ExplorationAccessDurationType.
+func (s *OutputPortUpdate) GetExplorationAccessDurationType() AccessDurationType {
+	return s.ExplorationAccessDurationType
+}
+
+// GetAbout returns the value of About.
+func (s *OutputPortUpdate) GetAbout() OptNilString {
+	return s.About
+}
+
+// GetLifecycleID returns the value of LifecycleID.
+func (s *OutputPortUpdate) GetLifecycleID() OptNilUUID {
+	return s.LifecycleID
+}
+
+// GetTagIds returns the value of TagIds.
+func (s *OutputPortUpdate) GetTagIds() []uuid.UUID {
+	return s.TagIds
+}
+
+// SetName sets the value of Name.
+func (s *OutputPortUpdate) SetName(val string) {
+	s.Name = val
+}
+
+// SetNamespace sets the value of Namespace.
+func (s *OutputPortUpdate) SetNamespace(val string) {
+	s.Namespace = val
+}
+
+// SetDescription sets the value of Description.
+func (s *OutputPortUpdate) SetDescription(val string) {
+	s.Description = val
+}
+
+// SetAccessTypeID sets the value of AccessTypeID.
+func (s *OutputPortUpdate) SetAccessTypeID(val uuid.UUID) {
+	s.AccessTypeID = val
+}
+
+// SetDataProductAccessDurationType sets the value of DataProductAccessDurationType.
+func (s *OutputPortUpdate) SetDataProductAccessDurationType(val AccessDurationType) {
+	s.DataProductAccessDurationType = val
+}
+
+// SetExplorationAccessDurationType sets the value of ExplorationAccessDurationType.
+func (s *OutputPortUpdate) SetExplorationAccessDurationType(val AccessDurationType) {
+	s.ExplorationAccessDurationType = val
+}
+
+// SetAbout sets the value of About.
+func (s *OutputPortUpdate) SetAbout(val OptNilString) {
+	s.About = val
+}
+
+// SetLifecycleID sets the value of LifecycleID.
+func (s *OutputPortUpdate) SetLifecycleID(val OptNilUUID) {
+	s.LifecycleID = val
+}
+
+// SetTagIds sets the value of TagIds.
+func (s *OutputPortUpdate) SetTagIds(val []uuid.UUID) {
+	s.TagIds = val
 }
 
 type OverwriteOutputPortDataQualitySummaryNotFoundApplicationJSON jx.Raw
@@ -9775,6 +11975,7 @@ type PlatformTile struct {
 	Label           string         `json:"label"`
 	Value           string         `json:"value"`
 	IconName        string         `json:"icon_name"`
+	IconDataURI     OptNilString   `json:"icon_data_uri"`
 	HasEnvironments OptBool        `json:"has_environments"`
 	HasConfig       OptBool        `json:"has_config"`
 	Children        []PlatformTile `json:"children"`
@@ -9794,6 +11995,11 @@ func (s *PlatformTile) GetValue() string {
 // GetIconName returns the value of IconName.
 func (s *PlatformTile) GetIconName() string {
 	return s.IconName
+}
+
+// GetIconDataURI returns the value of IconDataURI.
+func (s *PlatformTile) GetIconDataURI() OptNilString {
+	return s.IconDataURI
 }
 
 // GetHasEnvironments returns the value of HasEnvironments.
@@ -9829,6 +12035,11 @@ func (s *PlatformTile) SetValue(val string) {
 // SetIconName sets the value of IconName.
 func (s *PlatformTile) SetIconName(val string) {
 	s.IconName = val
+}
+
+// SetIconDataURI sets the value of IconDataURI.
+func (s *PlatformTile) SetIconDataURI(val OptNilString) {
+	s.IconDataURI = val
 }
 
 // SetHasEnvironments sets the value of HasEnvironments.
@@ -9867,6 +12078,8 @@ func (s *PlatformTileResponse) SetPlatformTiles(val []PlatformTile) {
 	s.PlatformTiles = val
 }
 
+func (*PlatformTileResponse) getPlatformTilesRes() {}
+
 // Response model for listing available plugins.
 // Ref: #/components/schemas/PluginResponse
 type PluginResponse struct {
@@ -9883,64 +12096,7 @@ func (s *PluginResponse) SetPlugins(val []UIElementMetadataResponse) {
 	s.Plugins = val
 }
 
-// Ref: #/components/schemas/PostgreSQLTechnicalAssetConfiguration
-type PostgreSQLTechnicalAssetConfiguration struct {
-	ConfigurationType string            `json:"configuration_type"`
-	Database          string            `json:"database"`
-	Schema            OptString         `json:"schema"`
-	Table             OptString         `json:"table"`
-	AccessGranularity AccessGranularity `json:"access_granularity"`
-}
-
-// GetConfigurationType returns the value of ConfigurationType.
-func (s *PostgreSQLTechnicalAssetConfiguration) GetConfigurationType() string {
-	return s.ConfigurationType
-}
-
-// GetDatabase returns the value of Database.
-func (s *PostgreSQLTechnicalAssetConfiguration) GetDatabase() string {
-	return s.Database
-}
-
-// GetSchema returns the value of Schema.
-func (s *PostgreSQLTechnicalAssetConfiguration) GetSchema() OptString {
-	return s.Schema
-}
-
-// GetTable returns the value of Table.
-func (s *PostgreSQLTechnicalAssetConfiguration) GetTable() OptString {
-	return s.Table
-}
-
-// GetAccessGranularity returns the value of AccessGranularity.
-func (s *PostgreSQLTechnicalAssetConfiguration) GetAccessGranularity() AccessGranularity {
-	return s.AccessGranularity
-}
-
-// SetConfigurationType sets the value of ConfigurationType.
-func (s *PostgreSQLTechnicalAssetConfiguration) SetConfigurationType(val string) {
-	s.ConfigurationType = val
-}
-
-// SetDatabase sets the value of Database.
-func (s *PostgreSQLTechnicalAssetConfiguration) SetDatabase(val string) {
-	s.Database = val
-}
-
-// SetSchema sets the value of Schema.
-func (s *PostgreSQLTechnicalAssetConfiguration) SetSchema(val OptString) {
-	s.Schema = val
-}
-
-// SetTable sets the value of Table.
-func (s *PostgreSQLTechnicalAssetConfiguration) SetTable(val OptString) {
-	s.Table = val
-}
-
-// SetAccessGranularity sets the value of AccessGranularity.
-func (s *PostgreSQLTechnicalAssetConfiguration) SetAccessGranularity(val AccessGranularity) {
-	s.AccessGranularity = val
-}
+func (*PluginResponse) getPluginsRes() {}
 
 // Ref: #/components/schemas/Prototype
 type Prototype int
@@ -10011,97 +12167,9 @@ func (s *QueryStatsGranularity) UnmarshalText(data []byte) error {
 	}
 }
 
-// Ref: #/components/schemas/RedshiftTechnicalAssetConfiguration
-type RedshiftTechnicalAssetConfiguration struct {
-	ConfigurationType string            `json:"configuration_type"`
-	Database          string            `json:"database"`
-	Schema            OptString         `json:"schema"`
-	Table             OptString         `json:"table"`
-	BucketIdentifier  OptString         `json:"bucket_identifier"`
-	DatabasePath      OptString         `json:"database_path"`
-	TablePath         OptString         `json:"table_path"`
-	AccessGranularity AccessGranularity `json:"access_granularity"`
-}
+type RemoveAllUserNotificationsOKApplicationJSON jx.Raw
 
-// GetConfigurationType returns the value of ConfigurationType.
-func (s *RedshiftTechnicalAssetConfiguration) GetConfigurationType() string {
-	return s.ConfigurationType
-}
-
-// GetDatabase returns the value of Database.
-func (s *RedshiftTechnicalAssetConfiguration) GetDatabase() string {
-	return s.Database
-}
-
-// GetSchema returns the value of Schema.
-func (s *RedshiftTechnicalAssetConfiguration) GetSchema() OptString {
-	return s.Schema
-}
-
-// GetTable returns the value of Table.
-func (s *RedshiftTechnicalAssetConfiguration) GetTable() OptString {
-	return s.Table
-}
-
-// GetBucketIdentifier returns the value of BucketIdentifier.
-func (s *RedshiftTechnicalAssetConfiguration) GetBucketIdentifier() OptString {
-	return s.BucketIdentifier
-}
-
-// GetDatabasePath returns the value of DatabasePath.
-func (s *RedshiftTechnicalAssetConfiguration) GetDatabasePath() OptString {
-	return s.DatabasePath
-}
-
-// GetTablePath returns the value of TablePath.
-func (s *RedshiftTechnicalAssetConfiguration) GetTablePath() OptString {
-	return s.TablePath
-}
-
-// GetAccessGranularity returns the value of AccessGranularity.
-func (s *RedshiftTechnicalAssetConfiguration) GetAccessGranularity() AccessGranularity {
-	return s.AccessGranularity
-}
-
-// SetConfigurationType sets the value of ConfigurationType.
-func (s *RedshiftTechnicalAssetConfiguration) SetConfigurationType(val string) {
-	s.ConfigurationType = val
-}
-
-// SetDatabase sets the value of Database.
-func (s *RedshiftTechnicalAssetConfiguration) SetDatabase(val string) {
-	s.Database = val
-}
-
-// SetSchema sets the value of Schema.
-func (s *RedshiftTechnicalAssetConfiguration) SetSchema(val OptString) {
-	s.Schema = val
-}
-
-// SetTable sets the value of Table.
-func (s *RedshiftTechnicalAssetConfiguration) SetTable(val OptString) {
-	s.Table = val
-}
-
-// SetBucketIdentifier sets the value of BucketIdentifier.
-func (s *RedshiftTechnicalAssetConfiguration) SetBucketIdentifier(val OptString) {
-	s.BucketIdentifier = val
-}
-
-// SetDatabasePath sets the value of DatabasePath.
-func (s *RedshiftTechnicalAssetConfiguration) SetDatabasePath(val OptString) {
-	s.DatabasePath = val
-}
-
-// SetTablePath sets the value of TablePath.
-func (s *RedshiftTechnicalAssetConfiguration) SetTablePath(val OptString) {
-	s.TablePath = val
-}
-
-// SetAccessGranularity sets the value of AccessGranularity.
-func (s *RedshiftTechnicalAssetConfiguration) SetAccessGranularity(val AccessGranularity) {
-	s.AccessGranularity = val
-}
+func (*RemoveAllUserNotificationsOKApplicationJSON) removeAllUserNotificationsRes() {}
 
 // RemoveDataProductAccepted is response for RemoveDataProduct operation.
 type RemoveDataProductAccepted struct{}
@@ -10132,6 +12200,15 @@ type RemoveDataProductTypeOKApplicationJSON jx.Raw
 
 func (*RemoveDataProductTypeOKApplicationJSON) removeDataProductTypeRes() {}
 
+// RemoveDomainAccepted is response for RemoveDomain operation.
+type RemoveDomainAccepted struct{}
+
+func (*RemoveDomainAccepted) removeDomainRes() {}
+
+type RemoveDomainFinalizerOKApplicationJSON jx.Raw
+
+func (*RemoveDomainFinalizerOKApplicationJSON) removeDomainFinalizerRes() {}
+
 type RemoveDomainOKApplicationJSON jx.Raw
 
 func (*RemoveDomainOKApplicationJSON) removeDomainRes() {}
@@ -10153,9 +12230,34 @@ type RemoveExplorationOKApplicationJSON jx.Raw
 
 func (*RemoveExplorationOKApplicationJSON) removeExplorationRes() {}
 
-type RemoveInputPortFromExplorationOKApplicationJSON jx.Raw
+// RemoveGroupMembersNoContent is response for RemoveGroupMembers operation.
+type RemoveGroupMembersNoContent struct{}
 
-func (*RemoveInputPortFromExplorationOKApplicationJSON) removeInputPortFromExplorationRes() {}
+func (*RemoveGroupMembersNoContent) removeGroupMembersRes() {}
+
+type RemoveGroupMembersNotFoundApplicationJSON jx.Raw
+
+func (*RemoveGroupMembersNotFoundApplicationJSON) removeGroupMembersRes() {}
+
+type RemoveInputPortForDataProductBadRequestApplicationJSON jx.Raw
+
+func (*RemoveInputPortForDataProductBadRequestApplicationJSON) removeInputPortForDataProductRes() {}
+
+type RemoveInputPortForDataProductNotFoundApplicationJSON jx.Raw
+
+func (*RemoveInputPortForDataProductNotFoundApplicationJSON) removeInputPortForDataProductRes() {}
+
+type RemoveInputPortForDataProductOKApplicationJSON jx.Raw
+
+func (*RemoveInputPortForDataProductOKApplicationJSON) removeInputPortForDataProductRes() {}
+
+type RemoveInputPortForExplorationOKApplicationJSON jx.Raw
+
+func (*RemoveInputPortForExplorationOKApplicationJSON) removeInputPortForExplorationRes() {}
+
+type RemoveOutputPortAccessTypeOKApplicationJSON jx.Raw
+
+func (*RemoveOutputPortAccessTypeOKApplicationJSON) removeOutputPortAccessTypeRes() {}
 
 type RemoveOutputPortAsInputPortOKApplicationJSON jx.Raw
 
@@ -10216,10 +12318,20 @@ type RemoveUserOKApplicationJSON jx.Raw
 
 func (*RemoveUserOKApplicationJSON) removeUserRes() {}
 
+// RemoveUsersBatchNoContent is response for RemoveUsersBatch operation.
+type RemoveUsersBatchNoContent struct{}
+
+func (*RemoveUsersBatchNoContent) removeUsersBatchRes() {}
+
 // Ref: #/components/schemas/RenderTechnicalAssetAccessPathRequest
 type RenderTechnicalAssetAccessPathRequest struct {
-	PlatformID    uuid.UUID                                          `json:"platform_id"`
-	ServiceID     uuid.UUID                                          `json:"service_id"`
+	PlatformID       uuid.UUID        `json:"platform_id"`
+	ServiceID        uuid.UUID        `json:"service_id"`
+	DataProductID    uuid.UUID        `json:"data_product_id"`
+	Namespace        string           `json:"namespace"`
+	TechnicalMapping TechnicalMapping `json:"technical_mapping"`
+	// Configuration of the technical asset. The available fields depend on `name`; retrieve them from
+	// /v2/plugins/{name}/form.
 	Configuration RenderTechnicalAssetAccessPathRequestConfiguration `json:"configuration"`
 }
 
@@ -10231,6 +12343,21 @@ func (s *RenderTechnicalAssetAccessPathRequest) GetPlatformID() uuid.UUID {
 // GetServiceID returns the value of ServiceID.
 func (s *RenderTechnicalAssetAccessPathRequest) GetServiceID() uuid.UUID {
 	return s.ServiceID
+}
+
+// GetDataProductID returns the value of DataProductID.
+func (s *RenderTechnicalAssetAccessPathRequest) GetDataProductID() uuid.UUID {
+	return s.DataProductID
+}
+
+// GetNamespace returns the value of Namespace.
+func (s *RenderTechnicalAssetAccessPathRequest) GetNamespace() string {
+	return s.Namespace
+}
+
+// GetTechnicalMapping returns the value of TechnicalMapping.
+func (s *RenderTechnicalAssetAccessPathRequest) GetTechnicalMapping() TechnicalMapping {
+	return s.TechnicalMapping
 }
 
 // GetConfiguration returns the value of Configuration.
@@ -10248,246 +12375,62 @@ func (s *RenderTechnicalAssetAccessPathRequest) SetServiceID(val uuid.UUID) {
 	s.ServiceID = val
 }
 
+// SetDataProductID sets the value of DataProductID.
+func (s *RenderTechnicalAssetAccessPathRequest) SetDataProductID(val uuid.UUID) {
+	s.DataProductID = val
+}
+
+// SetNamespace sets the value of Namespace.
+func (s *RenderTechnicalAssetAccessPathRequest) SetNamespace(val string) {
+	s.Namespace = val
+}
+
+// SetTechnicalMapping sets the value of TechnicalMapping.
+func (s *RenderTechnicalAssetAccessPathRequest) SetTechnicalMapping(val TechnicalMapping) {
+	s.TechnicalMapping = val
+}
+
 // SetConfiguration sets the value of Configuration.
 func (s *RenderTechnicalAssetAccessPathRequest) SetConfiguration(val RenderTechnicalAssetAccessPathRequestConfiguration) {
 	s.Configuration = val
 }
 
-// RenderTechnicalAssetAccessPathRequestConfiguration represents sum type.
+// Configuration of the technical asset. The available fields depend on `name`; retrieve them from
+// /v2/plugins/{name}/form.
 type RenderTechnicalAssetAccessPathRequestConfiguration struct {
-	// Type selects the active sum variant, switch on this field.
-	Type                                        RenderTechnicalAssetAccessPathRequestConfigurationType
-	S3TechnicalAssetConfiguration               S3TechnicalAssetConfiguration
-	GlueTechnicalAssetConfiguration             GlueTechnicalAssetConfiguration
-	DatabricksTechnicalAssetConfiguration       DatabricksTechnicalAssetConfiguration
-	SnowflakeTechnicalAssetConfiguration        SnowflakeTechnicalAssetConfiguration
-	RedshiftTechnicalAssetConfiguration         RedshiftTechnicalAssetConfiguration
-	PostgreSQLTechnicalAssetConfiguration       PostgreSQLTechnicalAssetConfiguration
-	OSISemanticModelTechnicalAssetConfiguration OSISemanticModelTechnicalAssetConfiguration
-	AzureBlobTechnicalAssetConfiguration        AzureBlobTechnicalAssetConfiguration
+	Name            string `json:"name"`
+	AdditionalProps RenderTechnicalAssetAccessPathRequestConfigurationAdditional
 }
 
-// RenderTechnicalAssetAccessPathRequestConfigurationType is oneOf type of RenderTechnicalAssetAccessPathRequestConfiguration.
-type RenderTechnicalAssetAccessPathRequestConfigurationType string
-
-// Possible values for RenderTechnicalAssetAccessPathRequestConfigurationType.
-const (
-	S3TechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration               RenderTechnicalAssetAccessPathRequestConfigurationType = "S3TechnicalAssetConfiguration"
-	GlueTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration             RenderTechnicalAssetAccessPathRequestConfigurationType = "GlueTechnicalAssetConfiguration"
-	DatabricksTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration       RenderTechnicalAssetAccessPathRequestConfigurationType = "DatabricksTechnicalAssetConfiguration"
-	SnowflakeTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration        RenderTechnicalAssetAccessPathRequestConfigurationType = "SnowflakeTechnicalAssetConfiguration"
-	RedshiftTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration         RenderTechnicalAssetAccessPathRequestConfigurationType = "RedshiftTechnicalAssetConfiguration"
-	PostgreSQLTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration       RenderTechnicalAssetAccessPathRequestConfigurationType = "PostgreSQLTechnicalAssetConfiguration"
-	OSISemanticModelTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration RenderTechnicalAssetAccessPathRequestConfigurationType = "OSISemanticModelTechnicalAssetConfiguration"
-	AzureBlobTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration        RenderTechnicalAssetAccessPathRequestConfigurationType = "AzureBlobTechnicalAssetConfiguration"
-)
-
-// IsS3TechnicalAssetConfiguration reports whether RenderTechnicalAssetAccessPathRequestConfiguration is S3TechnicalAssetConfiguration.
-func (s RenderTechnicalAssetAccessPathRequestConfiguration) IsS3TechnicalAssetConfiguration() bool {
-	return s.Type == S3TechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration
+// GetName returns the value of Name.
+func (s *RenderTechnicalAssetAccessPathRequestConfiguration) GetName() string {
+	return s.Name
 }
 
-// IsGlueTechnicalAssetConfiguration reports whether RenderTechnicalAssetAccessPathRequestConfiguration is GlueTechnicalAssetConfiguration.
-func (s RenderTechnicalAssetAccessPathRequestConfiguration) IsGlueTechnicalAssetConfiguration() bool {
-	return s.Type == GlueTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration
+// GetAdditionalProps returns the value of AdditionalProps.
+func (s *RenderTechnicalAssetAccessPathRequestConfiguration) GetAdditionalProps() RenderTechnicalAssetAccessPathRequestConfigurationAdditional {
+	return s.AdditionalProps
 }
 
-// IsDatabricksTechnicalAssetConfiguration reports whether RenderTechnicalAssetAccessPathRequestConfiguration is DatabricksTechnicalAssetConfiguration.
-func (s RenderTechnicalAssetAccessPathRequestConfiguration) IsDatabricksTechnicalAssetConfiguration() bool {
-	return s.Type == DatabricksTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration
+// SetName sets the value of Name.
+func (s *RenderTechnicalAssetAccessPathRequestConfiguration) SetName(val string) {
+	s.Name = val
 }
 
-// IsSnowflakeTechnicalAssetConfiguration reports whether RenderTechnicalAssetAccessPathRequestConfiguration is SnowflakeTechnicalAssetConfiguration.
-func (s RenderTechnicalAssetAccessPathRequestConfiguration) IsSnowflakeTechnicalAssetConfiguration() bool {
-	return s.Type == SnowflakeTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration
+// SetAdditionalProps sets the value of AdditionalProps.
+func (s *RenderTechnicalAssetAccessPathRequestConfiguration) SetAdditionalProps(val RenderTechnicalAssetAccessPathRequestConfigurationAdditional) {
+	s.AdditionalProps = val
 }
 
-// IsRedshiftTechnicalAssetConfiguration reports whether RenderTechnicalAssetAccessPathRequestConfiguration is RedshiftTechnicalAssetConfiguration.
-func (s RenderTechnicalAssetAccessPathRequestConfiguration) IsRedshiftTechnicalAssetConfiguration() bool {
-	return s.Type == RedshiftTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration
-}
+type RenderTechnicalAssetAccessPathRequestConfigurationAdditional map[string]jx.Raw
 
-// IsPostgreSQLTechnicalAssetConfiguration reports whether RenderTechnicalAssetAccessPathRequestConfiguration is PostgreSQLTechnicalAssetConfiguration.
-func (s RenderTechnicalAssetAccessPathRequestConfiguration) IsPostgreSQLTechnicalAssetConfiguration() bool {
-	return s.Type == PostgreSQLTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration
-}
-
-// IsOSISemanticModelTechnicalAssetConfiguration reports whether RenderTechnicalAssetAccessPathRequestConfiguration is OSISemanticModelTechnicalAssetConfiguration.
-func (s RenderTechnicalAssetAccessPathRequestConfiguration) IsOSISemanticModelTechnicalAssetConfiguration() bool {
-	return s.Type == OSISemanticModelTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration
-}
-
-// IsAzureBlobTechnicalAssetConfiguration reports whether RenderTechnicalAssetAccessPathRequestConfiguration is AzureBlobTechnicalAssetConfiguration.
-func (s RenderTechnicalAssetAccessPathRequestConfiguration) IsAzureBlobTechnicalAssetConfiguration() bool {
-	return s.Type == AzureBlobTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration
-}
-
-// SetS3TechnicalAssetConfiguration sets RenderTechnicalAssetAccessPathRequestConfiguration to S3TechnicalAssetConfiguration.
-func (s *RenderTechnicalAssetAccessPathRequestConfiguration) SetS3TechnicalAssetConfiguration(v S3TechnicalAssetConfiguration) {
-	s.Type = S3TechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration
-	s.S3TechnicalAssetConfiguration = v
-}
-
-// GetS3TechnicalAssetConfiguration returns S3TechnicalAssetConfiguration and true boolean if RenderTechnicalAssetAccessPathRequestConfiguration is S3TechnicalAssetConfiguration.
-func (s RenderTechnicalAssetAccessPathRequestConfiguration) GetS3TechnicalAssetConfiguration() (v S3TechnicalAssetConfiguration, ok bool) {
-	if !s.IsS3TechnicalAssetConfiguration() {
-		return v, false
+func (s *RenderTechnicalAssetAccessPathRequestConfigurationAdditional) init() RenderTechnicalAssetAccessPathRequestConfigurationAdditional {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
 	}
-	return s.S3TechnicalAssetConfiguration, true
-}
-
-// NewS3TechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration returns new RenderTechnicalAssetAccessPathRequestConfiguration from S3TechnicalAssetConfiguration.
-func NewS3TechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration(v S3TechnicalAssetConfiguration) RenderTechnicalAssetAccessPathRequestConfiguration {
-	var s RenderTechnicalAssetAccessPathRequestConfiguration
-	s.SetS3TechnicalAssetConfiguration(v)
-	return s
-}
-
-// SetGlueTechnicalAssetConfiguration sets RenderTechnicalAssetAccessPathRequestConfiguration to GlueTechnicalAssetConfiguration.
-func (s *RenderTechnicalAssetAccessPathRequestConfiguration) SetGlueTechnicalAssetConfiguration(v GlueTechnicalAssetConfiguration) {
-	s.Type = GlueTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration
-	s.GlueTechnicalAssetConfiguration = v
-}
-
-// GetGlueTechnicalAssetConfiguration returns GlueTechnicalAssetConfiguration and true boolean if RenderTechnicalAssetAccessPathRequestConfiguration is GlueTechnicalAssetConfiguration.
-func (s RenderTechnicalAssetAccessPathRequestConfiguration) GetGlueTechnicalAssetConfiguration() (v GlueTechnicalAssetConfiguration, ok bool) {
-	if !s.IsGlueTechnicalAssetConfiguration() {
-		return v, false
-	}
-	return s.GlueTechnicalAssetConfiguration, true
-}
-
-// NewGlueTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration returns new RenderTechnicalAssetAccessPathRequestConfiguration from GlueTechnicalAssetConfiguration.
-func NewGlueTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration(v GlueTechnicalAssetConfiguration) RenderTechnicalAssetAccessPathRequestConfiguration {
-	var s RenderTechnicalAssetAccessPathRequestConfiguration
-	s.SetGlueTechnicalAssetConfiguration(v)
-	return s
-}
-
-// SetDatabricksTechnicalAssetConfiguration sets RenderTechnicalAssetAccessPathRequestConfiguration to DatabricksTechnicalAssetConfiguration.
-func (s *RenderTechnicalAssetAccessPathRequestConfiguration) SetDatabricksTechnicalAssetConfiguration(v DatabricksTechnicalAssetConfiguration) {
-	s.Type = DatabricksTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration
-	s.DatabricksTechnicalAssetConfiguration = v
-}
-
-// GetDatabricksTechnicalAssetConfiguration returns DatabricksTechnicalAssetConfiguration and true boolean if RenderTechnicalAssetAccessPathRequestConfiguration is DatabricksTechnicalAssetConfiguration.
-func (s RenderTechnicalAssetAccessPathRequestConfiguration) GetDatabricksTechnicalAssetConfiguration() (v DatabricksTechnicalAssetConfiguration, ok bool) {
-	if !s.IsDatabricksTechnicalAssetConfiguration() {
-		return v, false
-	}
-	return s.DatabricksTechnicalAssetConfiguration, true
-}
-
-// NewDatabricksTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration returns new RenderTechnicalAssetAccessPathRequestConfiguration from DatabricksTechnicalAssetConfiguration.
-func NewDatabricksTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration(v DatabricksTechnicalAssetConfiguration) RenderTechnicalAssetAccessPathRequestConfiguration {
-	var s RenderTechnicalAssetAccessPathRequestConfiguration
-	s.SetDatabricksTechnicalAssetConfiguration(v)
-	return s
-}
-
-// SetSnowflakeTechnicalAssetConfiguration sets RenderTechnicalAssetAccessPathRequestConfiguration to SnowflakeTechnicalAssetConfiguration.
-func (s *RenderTechnicalAssetAccessPathRequestConfiguration) SetSnowflakeTechnicalAssetConfiguration(v SnowflakeTechnicalAssetConfiguration) {
-	s.Type = SnowflakeTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration
-	s.SnowflakeTechnicalAssetConfiguration = v
-}
-
-// GetSnowflakeTechnicalAssetConfiguration returns SnowflakeTechnicalAssetConfiguration and true boolean if RenderTechnicalAssetAccessPathRequestConfiguration is SnowflakeTechnicalAssetConfiguration.
-func (s RenderTechnicalAssetAccessPathRequestConfiguration) GetSnowflakeTechnicalAssetConfiguration() (v SnowflakeTechnicalAssetConfiguration, ok bool) {
-	if !s.IsSnowflakeTechnicalAssetConfiguration() {
-		return v, false
-	}
-	return s.SnowflakeTechnicalAssetConfiguration, true
-}
-
-// NewSnowflakeTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration returns new RenderTechnicalAssetAccessPathRequestConfiguration from SnowflakeTechnicalAssetConfiguration.
-func NewSnowflakeTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration(v SnowflakeTechnicalAssetConfiguration) RenderTechnicalAssetAccessPathRequestConfiguration {
-	var s RenderTechnicalAssetAccessPathRequestConfiguration
-	s.SetSnowflakeTechnicalAssetConfiguration(v)
-	return s
-}
-
-// SetRedshiftTechnicalAssetConfiguration sets RenderTechnicalAssetAccessPathRequestConfiguration to RedshiftTechnicalAssetConfiguration.
-func (s *RenderTechnicalAssetAccessPathRequestConfiguration) SetRedshiftTechnicalAssetConfiguration(v RedshiftTechnicalAssetConfiguration) {
-	s.Type = RedshiftTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration
-	s.RedshiftTechnicalAssetConfiguration = v
-}
-
-// GetRedshiftTechnicalAssetConfiguration returns RedshiftTechnicalAssetConfiguration and true boolean if RenderTechnicalAssetAccessPathRequestConfiguration is RedshiftTechnicalAssetConfiguration.
-func (s RenderTechnicalAssetAccessPathRequestConfiguration) GetRedshiftTechnicalAssetConfiguration() (v RedshiftTechnicalAssetConfiguration, ok bool) {
-	if !s.IsRedshiftTechnicalAssetConfiguration() {
-		return v, false
-	}
-	return s.RedshiftTechnicalAssetConfiguration, true
-}
-
-// NewRedshiftTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration returns new RenderTechnicalAssetAccessPathRequestConfiguration from RedshiftTechnicalAssetConfiguration.
-func NewRedshiftTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration(v RedshiftTechnicalAssetConfiguration) RenderTechnicalAssetAccessPathRequestConfiguration {
-	var s RenderTechnicalAssetAccessPathRequestConfiguration
-	s.SetRedshiftTechnicalAssetConfiguration(v)
-	return s
-}
-
-// SetPostgreSQLTechnicalAssetConfiguration sets RenderTechnicalAssetAccessPathRequestConfiguration to PostgreSQLTechnicalAssetConfiguration.
-func (s *RenderTechnicalAssetAccessPathRequestConfiguration) SetPostgreSQLTechnicalAssetConfiguration(v PostgreSQLTechnicalAssetConfiguration) {
-	s.Type = PostgreSQLTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration
-	s.PostgreSQLTechnicalAssetConfiguration = v
-}
-
-// GetPostgreSQLTechnicalAssetConfiguration returns PostgreSQLTechnicalAssetConfiguration and true boolean if RenderTechnicalAssetAccessPathRequestConfiguration is PostgreSQLTechnicalAssetConfiguration.
-func (s RenderTechnicalAssetAccessPathRequestConfiguration) GetPostgreSQLTechnicalAssetConfiguration() (v PostgreSQLTechnicalAssetConfiguration, ok bool) {
-	if !s.IsPostgreSQLTechnicalAssetConfiguration() {
-		return v, false
-	}
-	return s.PostgreSQLTechnicalAssetConfiguration, true
-}
-
-// NewPostgreSQLTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration returns new RenderTechnicalAssetAccessPathRequestConfiguration from PostgreSQLTechnicalAssetConfiguration.
-func NewPostgreSQLTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration(v PostgreSQLTechnicalAssetConfiguration) RenderTechnicalAssetAccessPathRequestConfiguration {
-	var s RenderTechnicalAssetAccessPathRequestConfiguration
-	s.SetPostgreSQLTechnicalAssetConfiguration(v)
-	return s
-}
-
-// SetOSISemanticModelTechnicalAssetConfiguration sets RenderTechnicalAssetAccessPathRequestConfiguration to OSISemanticModelTechnicalAssetConfiguration.
-func (s *RenderTechnicalAssetAccessPathRequestConfiguration) SetOSISemanticModelTechnicalAssetConfiguration(v OSISemanticModelTechnicalAssetConfiguration) {
-	s.Type = OSISemanticModelTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration
-	s.OSISemanticModelTechnicalAssetConfiguration = v
-}
-
-// GetOSISemanticModelTechnicalAssetConfiguration returns OSISemanticModelTechnicalAssetConfiguration and true boolean if RenderTechnicalAssetAccessPathRequestConfiguration is OSISemanticModelTechnicalAssetConfiguration.
-func (s RenderTechnicalAssetAccessPathRequestConfiguration) GetOSISemanticModelTechnicalAssetConfiguration() (v OSISemanticModelTechnicalAssetConfiguration, ok bool) {
-	if !s.IsOSISemanticModelTechnicalAssetConfiguration() {
-		return v, false
-	}
-	return s.OSISemanticModelTechnicalAssetConfiguration, true
-}
-
-// NewOSISemanticModelTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration returns new RenderTechnicalAssetAccessPathRequestConfiguration from OSISemanticModelTechnicalAssetConfiguration.
-func NewOSISemanticModelTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration(v OSISemanticModelTechnicalAssetConfiguration) RenderTechnicalAssetAccessPathRequestConfiguration {
-	var s RenderTechnicalAssetAccessPathRequestConfiguration
-	s.SetOSISemanticModelTechnicalAssetConfiguration(v)
-	return s
-}
-
-// SetAzureBlobTechnicalAssetConfiguration sets RenderTechnicalAssetAccessPathRequestConfiguration to AzureBlobTechnicalAssetConfiguration.
-func (s *RenderTechnicalAssetAccessPathRequestConfiguration) SetAzureBlobTechnicalAssetConfiguration(v AzureBlobTechnicalAssetConfiguration) {
-	s.Type = AzureBlobTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration
-	s.AzureBlobTechnicalAssetConfiguration = v
-}
-
-// GetAzureBlobTechnicalAssetConfiguration returns AzureBlobTechnicalAssetConfiguration and true boolean if RenderTechnicalAssetAccessPathRequestConfiguration is AzureBlobTechnicalAssetConfiguration.
-func (s RenderTechnicalAssetAccessPathRequestConfiguration) GetAzureBlobTechnicalAssetConfiguration() (v AzureBlobTechnicalAssetConfiguration, ok bool) {
-	if !s.IsAzureBlobTechnicalAssetConfiguration() {
-		return v, false
-	}
-	return s.AzureBlobTechnicalAssetConfiguration, true
-}
-
-// NewAzureBlobTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration returns new RenderTechnicalAssetAccessPathRequestConfiguration from AzureBlobTechnicalAssetConfiguration.
-func NewAzureBlobTechnicalAssetConfigurationRenderTechnicalAssetAccessPathRequestConfiguration(v AzureBlobTechnicalAssetConfiguration) RenderTechnicalAssetAccessPathRequestConfiguration {
-	var s RenderTechnicalAssetAccessPathRequestConfiguration
-	s.SetAzureBlobTechnicalAssetConfiguration(v)
-	return s
+	return m
 }
 
 // Ref: #/components/schemas/RenderTechnicalAssetAccessPathResponse
@@ -10506,6 +12449,122 @@ func (s *RenderTechnicalAssetAccessPathResponse) SetTechnicalAssetAccessPath(val
 }
 
 func (*RenderTechnicalAssetAccessPathResponse) renderTechnicalAssetAccessPathRes() {}
+
+type RenewInputPortForDataProductBadRequestApplicationJSON jx.Raw
+
+func (*RenewInputPortForDataProductBadRequestApplicationJSON) renewInputPortForDataProductRes() {}
+
+type RenewInputPortForDataProductNotFoundApplicationJSON jx.Raw
+
+func (*RenewInputPortForDataProductNotFoundApplicationJSON) renewInputPortForDataProductRes() {}
+
+// Ref: #/components/schemas/RenewInputPortForDataProductResponse
+type RenewInputPortForDataProductResponse struct {
+	InputPortLink uuid.UUID `json:"input_port_link"`
+}
+
+// GetInputPortLink returns the value of InputPortLink.
+func (s *RenewInputPortForDataProductResponse) GetInputPortLink() uuid.UUID {
+	return s.InputPortLink
+}
+
+// SetInputPortLink sets the value of InputPortLink.
+func (s *RenewInputPortForDataProductResponse) SetInputPortLink(val uuid.UUID) {
+	s.InputPortLink = val
+}
+
+func (*RenewInputPortForDataProductResponse) renewInputPortForDataProductRes() {}
+
+// Ref: #/components/schemas/RenewInputPortForExplorationResponse
+type RenewInputPortForExplorationResponse struct {
+	InputPortID uuid.UUID `json:"input_port_id"`
+}
+
+// GetInputPortID returns the value of InputPortID.
+func (s *RenewInputPortForExplorationResponse) GetInputPortID() uuid.UUID {
+	return s.InputPortID
+}
+
+// SetInputPortID sets the value of InputPortID.
+func (s *RenewInputPortForExplorationResponse) SetInputPortID(val uuid.UUID) {
+	s.InputPortID = val
+}
+
+func (*RenewInputPortForExplorationResponse) renewInputPortForExplorationRes() {}
+
+type RenewOutputPortAsInputPortOKApplicationJSON jx.Raw
+
+func (*RenewOutputPortAsInputPortOKApplicationJSON) renewOutputPortAsInputPortRes() {}
+
+// Ref: #/components/schemas/RenewOutputPortAsInputPortRequest
+type RenewOutputPortAsInputPortRequest struct {
+	ConsumingDataProductID uuid.UUID `json:"consuming_data_product_id"`
+}
+
+// GetConsumingDataProductID returns the value of ConsumingDataProductID.
+func (s *RenewOutputPortAsInputPortRequest) GetConsumingDataProductID() uuid.UUID {
+	return s.ConsumingDataProductID
+}
+
+// SetConsumingDataProductID sets the value of ConsumingDataProductID.
+func (s *RenewOutputPortAsInputPortRequest) SetConsumingDataProductID(val uuid.UUID) {
+	s.ConsumingDataProductID = val
+}
+
+// Ref: #/components/schemas/RenewalStatus
+type RenewalStatus string
+
+const (
+	RenewalStatusPending RenewalStatus = "pending"
+	RenewalStatusDenied  RenewalStatus = "denied"
+)
+
+// AllValues returns all RenewalStatus values.
+func (RenewalStatus) AllValues() []RenewalStatus {
+	return []RenewalStatus{
+		RenewalStatusPending,
+		RenewalStatusDenied,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s RenewalStatus) MarshalText() ([]byte, error) {
+	switch s {
+	case RenewalStatusPending:
+		return []byte(s), nil
+	case RenewalStatusDenied:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *RenewalStatus) UnmarshalText(data []byte) error {
+	switch RenewalStatus(data) {
+	case RenewalStatusPending:
+		*s = RenewalStatusPending
+		return nil
+	case RenewalStatusDenied:
+		*s = RenewalStatusDenied
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type ReplaceGroupMembersBadRequestApplicationJSON jx.Raw
+
+func (*ReplaceGroupMembersBadRequestApplicationJSON) replaceGroupMembersRes() {}
+
+// ReplaceGroupMembersNoContent is response for ReplaceGroupMembers operation.
+type ReplaceGroupMembersNoContent struct{}
+
+func (*ReplaceGroupMembersNoContent) replaceGroupMembersRes() {}
+
+type ReplaceGroupMembersNotFoundApplicationJSON jx.Raw
+
+func (*ReplaceGroupMembersNotFoundApplicationJSON) replaceGroupMembersRes() {}
 
 type ReplaceOutputPortCuratedQueriesNotFoundApplicationJSON jx.Raw
 
@@ -10548,6 +12607,32 @@ func (s *RequestDataProductRoleAssignment) SetDataProductID(val uuid.UUID) {
 	s.DataProductID = val
 }
 
+// Ref: #/components/schemas/RequestInputPortsForAbstractDataProductRequestItem
+type RequestInputPortsForAbstractDataProductRequestItem struct {
+	OutputPortID uuid.UUID  `json:"output_port_id"`
+	AccessModeID OptNilUUID `json:"access_mode_id"`
+}
+
+// GetOutputPortID returns the value of OutputPortID.
+func (s *RequestInputPortsForAbstractDataProductRequestItem) GetOutputPortID() uuid.UUID {
+	return s.OutputPortID
+}
+
+// GetAccessModeID returns the value of AccessModeID.
+func (s *RequestInputPortsForAbstractDataProductRequestItem) GetAccessModeID() OptNilUUID {
+	return s.AccessModeID
+}
+
+// SetOutputPortID sets the value of OutputPortID.
+func (s *RequestInputPortsForAbstractDataProductRequestItem) SetOutputPortID(val uuid.UUID) {
+	s.OutputPortID = val
+}
+
+// SetAccessModeID sets the value of AccessModeID.
+func (s *RequestInputPortsForAbstractDataProductRequestItem) SetAccessModeID(val OptNilUUID) {
+	s.AccessModeID = val
+}
+
 type RequestInputPortsForDataProductBadRequestApplicationJSON jx.Raw
 
 func (*RequestInputPortsForDataProductBadRequestApplicationJSON) requestInputPortsForDataProductRes() {
@@ -10559,12 +12644,12 @@ func (*RequestInputPortsForDataProductNotFoundApplicationJSON) requestInputPorts
 
 // Ref: #/components/schemas/RequestInputPortsForDataProductRequest
 type RequestInputPortsForDataProductRequest struct {
-	OutputPorts   []uuid.UUID `json:"output_ports"`
-	Justification string      `json:"justification"`
+	OutputPorts   []RequestInputPortsForAbstractDataProductRequestItem `json:"output_ports"`
+	Justification string                                               `json:"justification"`
 }
 
 // GetOutputPorts returns the value of OutputPorts.
-func (s *RequestInputPortsForDataProductRequest) GetOutputPorts() []uuid.UUID {
+func (s *RequestInputPortsForDataProductRequest) GetOutputPorts() []RequestInputPortsForAbstractDataProductRequestItem {
 	return s.OutputPorts
 }
 
@@ -10574,7 +12659,7 @@ func (s *RequestInputPortsForDataProductRequest) GetJustification() string {
 }
 
 // SetOutputPorts sets the value of OutputPorts.
-func (s *RequestInputPortsForDataProductRequest) SetOutputPorts(val []uuid.UUID) {
+func (s *RequestInputPortsForDataProductRequest) SetOutputPorts(val []RequestInputPortsForAbstractDataProductRequestItem) {
 	s.OutputPorts = val
 }
 
@@ -10602,12 +12687,12 @@ func (*RequestInputPortsForDataProductResponse) requestInputPortsForDataProductR
 
 // Ref: #/components/schemas/RequestInputPortsForExplorationRequest
 type RequestInputPortsForExplorationRequest struct {
-	OutputPorts   []uuid.UUID `json:"output_ports"`
-	Justification string      `json:"justification"`
+	OutputPorts   []RequestInputPortsForAbstractDataProductRequestItem `json:"output_ports"`
+	Justification string                                               `json:"justification"`
 }
 
 // GetOutputPorts returns the value of OutputPorts.
-func (s *RequestInputPortsForExplorationRequest) GetOutputPorts() []uuid.UUID {
+func (s *RequestInputPortsForExplorationRequest) GetOutputPorts() []RequestInputPortsForAbstractDataProductRequestItem {
 	return s.OutputPorts
 }
 
@@ -10617,7 +12702,7 @@ func (s *RequestInputPortsForExplorationRequest) GetJustification() string {
 }
 
 // SetOutputPorts sets the value of OutputPorts.
-func (s *RequestInputPortsForExplorationRequest) SetOutputPorts(val []uuid.UUID) {
+func (s *RequestInputPortsForExplorationRequest) SetOutputPorts(val []RequestInputPortsForAbstractDataProductRequestItem) {
 	s.OutputPorts = val
 }
 
@@ -10705,6 +12790,7 @@ const (
 	ResourceNameModelDataProductSetting ResourceNameModel = "data_product_setting"
 	ResourceNameModelOutputPortSetting  ResourceNameModel = "output_port_setting"
 	ResourceNameModelExploration        ResourceNameModel = "exploration"
+	ResourceNameModelDomain             ResourceNameModel = "domain"
 )
 
 // AllValues returns all ResourceNameModel values.
@@ -10716,6 +12802,7 @@ func (ResourceNameModel) AllValues() []ResourceNameModel {
 		ResourceNameModelDataProductSetting,
 		ResourceNameModelOutputPortSetting,
 		ResourceNameModelExploration,
+		ResourceNameModelDomain,
 	}
 }
 
@@ -10733,6 +12820,8 @@ func (s ResourceNameModel) MarshalText() ([]byte, error) {
 	case ResourceNameModelOutputPortSetting:
 		return []byte(s), nil
 	case ResourceNameModelExploration:
+		return []byte(s), nil
+	case ResourceNameModelDomain:
 		return []byte(s), nil
 	default:
 		return nil, errors.Errorf("invalid value: %q", s)
@@ -10759,6 +12848,9 @@ func (s *ResourceNameModel) UnmarshalText(data []byte) error {
 		return nil
 	case ResourceNameModelExploration:
 		*s = ResourceNameModelExploration
+		return nil
+	case ResourceNameModelDomain:
+		*s = ResourceNameModelDomain
 		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)
@@ -10855,6 +12947,71 @@ func (s *ResourceNameValidityType) UnmarshalText(data []byte) error {
 	}
 }
 
+type RevokeAdminOKApplicationJSON jx.Raw
+
+func (*RevokeAdminOKApplicationJSON) revokeAdminRes() {}
+
+type RevokeInputPortForDataProductBadRequestApplicationJSON jx.Raw
+
+func (*RevokeInputPortForDataProductBadRequestApplicationJSON) revokeInputPortForDataProductRes() {}
+
+type RevokeInputPortForDataProductNotFoundApplicationJSON jx.Raw
+
+func (*RevokeInputPortForDataProductNotFoundApplicationJSON) revokeInputPortForDataProductRes() {}
+
+// Ref: #/components/schemas/RevokeInputPortForDataProductResponse
+type RevokeInputPortForDataProductResponse struct {
+	InputPortLink uuid.UUID `json:"input_port_link"`
+}
+
+// GetInputPortLink returns the value of InputPortLink.
+func (s *RevokeInputPortForDataProductResponse) GetInputPortLink() uuid.UUID {
+	return s.InputPortLink
+}
+
+// SetInputPortLink sets the value of InputPortLink.
+func (s *RevokeInputPortForDataProductResponse) SetInputPortLink(val uuid.UUID) {
+	s.InputPortLink = val
+}
+
+func (*RevokeInputPortForDataProductResponse) revokeInputPortForDataProductRes() {}
+
+// Ref: #/components/schemas/RevokeInputPortForExplorationResponse
+type RevokeInputPortForExplorationResponse struct {
+	InputPortID uuid.UUID `json:"input_port_id"`
+}
+
+// GetInputPortID returns the value of InputPortID.
+func (s *RevokeInputPortForExplorationResponse) GetInputPortID() uuid.UUID {
+	return s.InputPortID
+}
+
+// SetInputPortID sets the value of InputPortID.
+func (s *RevokeInputPortForExplorationResponse) SetInputPortID(val uuid.UUID) {
+	s.InputPortID = val
+}
+
+func (*RevokeInputPortForExplorationResponse) revokeInputPortForExplorationRes() {}
+
+type RevokeOutputPortAsInputPortOKApplicationJSON jx.Raw
+
+func (*RevokeOutputPortAsInputPortOKApplicationJSON) revokeOutputPortAsInputPortRes() {}
+
+// Ref: #/components/schemas/RevokeOutputPortAsInputPortRequest
+type RevokeOutputPortAsInputPortRequest struct {
+	ConsumingDataProductID uuid.UUID `json:"consuming_data_product_id"`
+}
+
+// GetConsumingDataProductID returns the value of ConsumingDataProductID.
+func (s *RevokeOutputPortAsInputPortRequest) GetConsumingDataProductID() uuid.UUID {
+	return s.ConsumingDataProductID
+}
+
+// SetConsumingDataProductID sets the value of ConsumingDataProductID.
+func (s *RevokeOutputPortAsInputPortRequest) SetConsumingDataProductID(val uuid.UUID) {
+	s.ConsumingDataProductID = val
+}
+
 // Ref: #/components/schemas/Role
 type Role struct {
 	Name        string                `json:"name"`
@@ -10927,54 +13084,6 @@ func (s *Role) SetPrototype(val Prototype) {
 
 func (*Role) createRoleRes() {}
 func (*Role) updateRoleRes() {}
-
-// Ref: #/components/schemas/S3TechnicalAssetConfiguration
-type S3TechnicalAssetConfiguration struct {
-	ConfigurationType string    `json:"configuration_type"`
-	Bucket            string    `json:"bucket"`
-	Suffix            OptString `json:"suffix"`
-	Path              string    `json:"path"`
-}
-
-// GetConfigurationType returns the value of ConfigurationType.
-func (s *S3TechnicalAssetConfiguration) GetConfigurationType() string {
-	return s.ConfigurationType
-}
-
-// GetBucket returns the value of Bucket.
-func (s *S3TechnicalAssetConfiguration) GetBucket() string {
-	return s.Bucket
-}
-
-// GetSuffix returns the value of Suffix.
-func (s *S3TechnicalAssetConfiguration) GetSuffix() OptString {
-	return s.Suffix
-}
-
-// GetPath returns the value of Path.
-func (s *S3TechnicalAssetConfiguration) GetPath() string {
-	return s.Path
-}
-
-// SetConfigurationType sets the value of ConfigurationType.
-func (s *S3TechnicalAssetConfiguration) SetConfigurationType(val string) {
-	s.ConfigurationType = val
-}
-
-// SetBucket sets the value of Bucket.
-func (s *S3TechnicalAssetConfiguration) SetBucket(val string) {
-	s.Bucket = val
-}
-
-// SetSuffix sets the value of Suffix.
-func (s *S3TechnicalAssetConfiguration) SetSuffix(val OptString) {
-	s.Suffix = val
-}
-
-// SetPath sets the value of Path.
-func (s *S3TechnicalAssetConfiguration) SetPath(val string) {
-	s.Path = val
-}
 
 // Ref: #/components/schemas/SchemaObjectRequest
 type SchemaObjectRequest struct {
@@ -11529,21 +13638,24 @@ func (*SearchOutputPortsResponse) searchOutputPortsRes() {}
 
 // Ref: #/components/schemas/SearchOutputPortsResponseItem
 type SearchOutputPortsResponseItem struct {
-	ID                       uuid.UUID               `json:"id"`
-	Namespace                string                  `json:"namespace"`
-	Name                     string                  `json:"name"`
-	Description              string                  `json:"description"`
-	Status                   OutputPortStatus        `json:"status"`
-	Usage                    NilString               `json:"usage"`
-	AccessType               OutputPortAccessType    `json:"access_type"`
-	DataProductID            uuid.UUID               `json:"data_product_id"`
-	Tags                     []Tag                   `json:"tags"`
-	Domain                   Domain                  `json:"domain"`
-	Lifecycle                NilDataProductLifeCycle `json:"lifecycle"`
-	AbstractDataProductCount int                     `json:"abstract_data_product_count"`
-	TechnicalAssetsCount     int                     `json:"technical_assets_count"`
-	DataProductName          string                  `json:"data_product_name"`
-	QualityStatus            NilDataQualityStatus    `json:"quality_status"`
+	ID                            uuid.UUID               `json:"id"`
+	Namespace                     string                  `json:"namespace"`
+	Name                          string                  `json:"name"`
+	Description                   string                  `json:"description"`
+	Status                        OutputPortStatus        `json:"status"`
+	Usage                         NilString               `json:"usage"`
+	AccessType                    OutputPortAccessType    `json:"access_type"`
+	DataProductAccessDurationType AccessDurationType      `json:"data_product_access_duration_type"`
+	ExplorationAccessDurationType AccessDurationType      `json:"exploration_access_duration_type"`
+	DataProductID                 uuid.UUID               `json:"data_product_id"`
+	Tags                          []Tag                   `json:"tags"`
+	Domain                        Domain                  `json:"domain"`
+	Lifecycle                     NilDataProductLifeCycle `json:"lifecycle"`
+	AccessModes                   []AccessMode            `json:"access_modes"`
+	AbstractDataProductCount      int                     `json:"abstract_data_product_count"`
+	TechnicalAssetsCount          int                     `json:"technical_assets_count"`
+	DataProductName               string                  `json:"data_product_name"`
+	QualityStatus                 OptNilDataQualityStatus `json:"quality_status"`
 }
 
 // GetID returns the value of ID.
@@ -11581,6 +13693,16 @@ func (s *SearchOutputPortsResponseItem) GetAccessType() OutputPortAccessType {
 	return s.AccessType
 }
 
+// GetDataProductAccessDurationType returns the value of DataProductAccessDurationType.
+func (s *SearchOutputPortsResponseItem) GetDataProductAccessDurationType() AccessDurationType {
+	return s.DataProductAccessDurationType
+}
+
+// GetExplorationAccessDurationType returns the value of ExplorationAccessDurationType.
+func (s *SearchOutputPortsResponseItem) GetExplorationAccessDurationType() AccessDurationType {
+	return s.ExplorationAccessDurationType
+}
+
 // GetDataProductID returns the value of DataProductID.
 func (s *SearchOutputPortsResponseItem) GetDataProductID() uuid.UUID {
 	return s.DataProductID
@@ -11601,6 +13723,11 @@ func (s *SearchOutputPortsResponseItem) GetLifecycle() NilDataProductLifeCycle {
 	return s.Lifecycle
 }
 
+// GetAccessModes returns the value of AccessModes.
+func (s *SearchOutputPortsResponseItem) GetAccessModes() []AccessMode {
+	return s.AccessModes
+}
+
 // GetAbstractDataProductCount returns the value of AbstractDataProductCount.
 func (s *SearchOutputPortsResponseItem) GetAbstractDataProductCount() int {
 	return s.AbstractDataProductCount
@@ -11617,7 +13744,7 @@ func (s *SearchOutputPortsResponseItem) GetDataProductName() string {
 }
 
 // GetQualityStatus returns the value of QualityStatus.
-func (s *SearchOutputPortsResponseItem) GetQualityStatus() NilDataQualityStatus {
+func (s *SearchOutputPortsResponseItem) GetQualityStatus() OptNilDataQualityStatus {
 	return s.QualityStatus
 }
 
@@ -11656,6 +13783,16 @@ func (s *SearchOutputPortsResponseItem) SetAccessType(val OutputPortAccessType) 
 	s.AccessType = val
 }
 
+// SetDataProductAccessDurationType sets the value of DataProductAccessDurationType.
+func (s *SearchOutputPortsResponseItem) SetDataProductAccessDurationType(val AccessDurationType) {
+	s.DataProductAccessDurationType = val
+}
+
+// SetExplorationAccessDurationType sets the value of ExplorationAccessDurationType.
+func (s *SearchOutputPortsResponseItem) SetExplorationAccessDurationType(val AccessDurationType) {
+	s.ExplorationAccessDurationType = val
+}
+
 // SetDataProductID sets the value of DataProductID.
 func (s *SearchOutputPortsResponseItem) SetDataProductID(val uuid.UUID) {
 	s.DataProductID = val
@@ -11676,6 +13813,11 @@ func (s *SearchOutputPortsResponseItem) SetLifecycle(val NilDataProductLifeCycle
 	s.Lifecycle = val
 }
 
+// SetAccessModes sets the value of AccessModes.
+func (s *SearchOutputPortsResponseItem) SetAccessModes(val []AccessMode) {
+	s.AccessModes = val
+}
+
 // SetAbstractDataProductCount sets the value of AbstractDataProductCount.
 func (s *SearchOutputPortsResponseItem) SetAbstractDataProductCount(val int) {
 	s.AbstractDataProductCount = val
@@ -11692,7 +13834,7 @@ func (s *SearchOutputPortsResponseItem) SetDataProductName(val string) {
 }
 
 // SetQualityStatus sets the value of QualityStatus.
-func (s *SearchOutputPortsResponseItem) SetQualityStatus(val NilDataQualityStatus) {
+func (s *SearchOutputPortsResponseItem) SetQualityStatus(val OptNilDataQualityStatus) {
 	s.QualityStatus = val
 }
 
@@ -11800,98 +13942,6 @@ type SetValueForOutputPortOKApplicationJSON jx.Raw
 
 func (*SetValueForOutputPortOKApplicationJSON) setValueForOutputPortRes() {}
 
-// Ref: #/components/schemas/SnowflakeTechnicalAssetConfiguration
-type SnowflakeTechnicalAssetConfiguration struct {
-	ConfigurationType string            `json:"configuration_type"`
-	Database          string            `json:"database"`
-	Schema            OptString         `json:"schema"`
-	Table             OptString         `json:"table"`
-	BucketIdentifier  OptString         `json:"bucket_identifier"`
-	DatabasePath      OptString         `json:"database_path"`
-	TablePath         OptString         `json:"table_path"`
-	AccessGranularity AccessGranularity `json:"access_granularity"`
-}
-
-// GetConfigurationType returns the value of ConfigurationType.
-func (s *SnowflakeTechnicalAssetConfiguration) GetConfigurationType() string {
-	return s.ConfigurationType
-}
-
-// GetDatabase returns the value of Database.
-func (s *SnowflakeTechnicalAssetConfiguration) GetDatabase() string {
-	return s.Database
-}
-
-// GetSchema returns the value of Schema.
-func (s *SnowflakeTechnicalAssetConfiguration) GetSchema() OptString {
-	return s.Schema
-}
-
-// GetTable returns the value of Table.
-func (s *SnowflakeTechnicalAssetConfiguration) GetTable() OptString {
-	return s.Table
-}
-
-// GetBucketIdentifier returns the value of BucketIdentifier.
-func (s *SnowflakeTechnicalAssetConfiguration) GetBucketIdentifier() OptString {
-	return s.BucketIdentifier
-}
-
-// GetDatabasePath returns the value of DatabasePath.
-func (s *SnowflakeTechnicalAssetConfiguration) GetDatabasePath() OptString {
-	return s.DatabasePath
-}
-
-// GetTablePath returns the value of TablePath.
-func (s *SnowflakeTechnicalAssetConfiguration) GetTablePath() OptString {
-	return s.TablePath
-}
-
-// GetAccessGranularity returns the value of AccessGranularity.
-func (s *SnowflakeTechnicalAssetConfiguration) GetAccessGranularity() AccessGranularity {
-	return s.AccessGranularity
-}
-
-// SetConfigurationType sets the value of ConfigurationType.
-func (s *SnowflakeTechnicalAssetConfiguration) SetConfigurationType(val string) {
-	s.ConfigurationType = val
-}
-
-// SetDatabase sets the value of Database.
-func (s *SnowflakeTechnicalAssetConfiguration) SetDatabase(val string) {
-	s.Database = val
-}
-
-// SetSchema sets the value of Schema.
-func (s *SnowflakeTechnicalAssetConfiguration) SetSchema(val OptString) {
-	s.Schema = val
-}
-
-// SetTable sets the value of Table.
-func (s *SnowflakeTechnicalAssetConfiguration) SetTable(val OptString) {
-	s.Table = val
-}
-
-// SetBucketIdentifier sets the value of BucketIdentifier.
-func (s *SnowflakeTechnicalAssetConfiguration) SetBucketIdentifier(val OptString) {
-	s.BucketIdentifier = val
-}
-
-// SetDatabasePath sets the value of DatabasePath.
-func (s *SnowflakeTechnicalAssetConfiguration) SetDatabasePath(val OptString) {
-	s.DatabasePath = val
-}
-
-// SetTablePath sets the value of TablePath.
-func (s *SnowflakeTechnicalAssetConfiguration) SetTablePath(val OptString) {
-	s.TablePath = val
-}
-
-// SetAccessGranularity sets the value of AccessGranularity.
-func (s *SnowflakeTechnicalAssetConfiguration) SetAccessGranularity(val AccessGranularity) {
-	s.AccessGranularity = val
-}
-
 // Ref: #/components/schemas/Tag
 type Tag struct {
 	ID    uuid.UUID `json:"id"`
@@ -11963,6 +14013,8 @@ func (s *TagsGet) SetTags(val []TagsGetItem) {
 	s.Tags = val
 }
 
+func (*TagsGet) getTagsRes() {}
+
 // Ref: #/components/schemas/TagsGetItem
 type TagsGetItem struct {
 	ID    uuid.UUID `json:"id"`
@@ -11991,16 +14043,18 @@ func (s *TagsGetItem) SetValue(val string) {
 
 // Ref: #/components/schemas/TechnicalAsset
 type TechnicalAsset struct {
-	ID               uuid.UUID                   `json:"id"`
-	Name             string                      `json:"name"`
-	Namespace        string                      `json:"namespace"`
-	Description      string                      `json:"description"`
-	Status           TechnicalAssetStatus        `json:"status"`
-	TechnicalMapping TechnicalMapping            `json:"technical_mapping"`
-	OwnerID          uuid.UUID                   `json:"owner_id"`
-	PlatformID       uuid.UUID                   `json:"platform_id"`
-	ServiceID        uuid.UUID                   `json:"service_id"`
-	Configuration    TechnicalAssetConfiguration `json:"configuration"`
+	ID               uuid.UUID            `json:"id"`
+	Name             string               `json:"name"`
+	Namespace        string               `json:"namespace"`
+	Description      string               `json:"description"`
+	Status           TechnicalAssetStatus `json:"status"`
+	TechnicalMapping TechnicalMapping     `json:"technical_mapping"`
+	OwnerID          uuid.UUID            `json:"owner_id"`
+	PlatformID       OptNilUUID           `json:"platform_id"`
+	ServiceID        OptNilUUID           `json:"service_id"`
+	// Configuration of the technical asset. The available fields depend on `name`; retrieve them from
+	// /v2/plugins/{name}/form.
+	Configuration TechnicalAssetConfiguration `json:"configuration"`
 }
 
 // GetID returns the value of ID.
@@ -12039,12 +14093,12 @@ func (s *TechnicalAsset) GetOwnerID() uuid.UUID {
 }
 
 // GetPlatformID returns the value of PlatformID.
-func (s *TechnicalAsset) GetPlatformID() uuid.UUID {
+func (s *TechnicalAsset) GetPlatformID() OptNilUUID {
 	return s.PlatformID
 }
 
 // GetServiceID returns the value of ServiceID.
-func (s *TechnicalAsset) GetServiceID() uuid.UUID {
+func (s *TechnicalAsset) GetServiceID() OptNilUUID {
 	return s.ServiceID
 }
 
@@ -12089,12 +14143,12 @@ func (s *TechnicalAsset) SetOwnerID(val uuid.UUID) {
 }
 
 // SetPlatformID sets the value of PlatformID.
-func (s *TechnicalAsset) SetPlatformID(val uuid.UUID) {
+func (s *TechnicalAsset) SetPlatformID(val OptNilUUID) {
 	s.PlatformID = val
 }
 
 // SetServiceID sets the value of ServiceID.
-func (s *TechnicalAsset) SetServiceID(val uuid.UUID) {
+func (s *TechnicalAsset) SetServiceID(val OptNilUUID) {
 	s.ServiceID = val
 }
 
@@ -12103,241 +14157,42 @@ func (s *TechnicalAsset) SetConfiguration(val TechnicalAssetConfiguration) {
 	s.Configuration = val
 }
 
-// TechnicalAssetConfiguration represents sum type.
+// Configuration of the technical asset. The available fields depend on `name`; retrieve them from
+// /v2/plugins/{name}/form.
 type TechnicalAssetConfiguration struct {
-	// Type selects the active sum variant, switch on this field.
-	Type                                        TechnicalAssetConfigurationType
-	S3TechnicalAssetConfiguration               S3TechnicalAssetConfiguration
-	GlueTechnicalAssetConfiguration             GlueTechnicalAssetConfiguration
-	DatabricksTechnicalAssetConfiguration       DatabricksTechnicalAssetConfiguration
-	SnowflakeTechnicalAssetConfiguration        SnowflakeTechnicalAssetConfiguration
-	RedshiftTechnicalAssetConfiguration         RedshiftTechnicalAssetConfiguration
-	PostgreSQLTechnicalAssetConfiguration       PostgreSQLTechnicalAssetConfiguration
-	OSISemanticModelTechnicalAssetConfiguration OSISemanticModelTechnicalAssetConfiguration
-	AzureBlobTechnicalAssetConfiguration        AzureBlobTechnicalAssetConfiguration
+	Name            string `json:"name"`
+	AdditionalProps TechnicalAssetConfigurationAdditional
 }
 
-// TechnicalAssetConfigurationType is oneOf type of TechnicalAssetConfiguration.
-type TechnicalAssetConfigurationType string
-
-// Possible values for TechnicalAssetConfigurationType.
-const (
-	S3TechnicalAssetConfigurationTechnicalAssetConfiguration               TechnicalAssetConfigurationType = "S3TechnicalAssetConfiguration"
-	GlueTechnicalAssetConfigurationTechnicalAssetConfiguration             TechnicalAssetConfigurationType = "GlueTechnicalAssetConfiguration"
-	DatabricksTechnicalAssetConfigurationTechnicalAssetConfiguration       TechnicalAssetConfigurationType = "DatabricksTechnicalAssetConfiguration"
-	SnowflakeTechnicalAssetConfigurationTechnicalAssetConfiguration        TechnicalAssetConfigurationType = "SnowflakeTechnicalAssetConfiguration"
-	RedshiftTechnicalAssetConfigurationTechnicalAssetConfiguration         TechnicalAssetConfigurationType = "RedshiftTechnicalAssetConfiguration"
-	PostgreSQLTechnicalAssetConfigurationTechnicalAssetConfiguration       TechnicalAssetConfigurationType = "PostgreSQLTechnicalAssetConfiguration"
-	OSISemanticModelTechnicalAssetConfigurationTechnicalAssetConfiguration TechnicalAssetConfigurationType = "OSISemanticModelTechnicalAssetConfiguration"
-	AzureBlobTechnicalAssetConfigurationTechnicalAssetConfiguration        TechnicalAssetConfigurationType = "AzureBlobTechnicalAssetConfiguration"
-)
-
-// IsS3TechnicalAssetConfiguration reports whether TechnicalAssetConfiguration is S3TechnicalAssetConfiguration.
-func (s TechnicalAssetConfiguration) IsS3TechnicalAssetConfiguration() bool {
-	return s.Type == S3TechnicalAssetConfigurationTechnicalAssetConfiguration
+// GetName returns the value of Name.
+func (s *TechnicalAssetConfiguration) GetName() string {
+	return s.Name
 }
 
-// IsGlueTechnicalAssetConfiguration reports whether TechnicalAssetConfiguration is GlueTechnicalAssetConfiguration.
-func (s TechnicalAssetConfiguration) IsGlueTechnicalAssetConfiguration() bool {
-	return s.Type == GlueTechnicalAssetConfigurationTechnicalAssetConfiguration
+// GetAdditionalProps returns the value of AdditionalProps.
+func (s *TechnicalAssetConfiguration) GetAdditionalProps() TechnicalAssetConfigurationAdditional {
+	return s.AdditionalProps
 }
 
-// IsDatabricksTechnicalAssetConfiguration reports whether TechnicalAssetConfiguration is DatabricksTechnicalAssetConfiguration.
-func (s TechnicalAssetConfiguration) IsDatabricksTechnicalAssetConfiguration() bool {
-	return s.Type == DatabricksTechnicalAssetConfigurationTechnicalAssetConfiguration
+// SetName sets the value of Name.
+func (s *TechnicalAssetConfiguration) SetName(val string) {
+	s.Name = val
 }
 
-// IsSnowflakeTechnicalAssetConfiguration reports whether TechnicalAssetConfiguration is SnowflakeTechnicalAssetConfiguration.
-func (s TechnicalAssetConfiguration) IsSnowflakeTechnicalAssetConfiguration() bool {
-	return s.Type == SnowflakeTechnicalAssetConfigurationTechnicalAssetConfiguration
+// SetAdditionalProps sets the value of AdditionalProps.
+func (s *TechnicalAssetConfiguration) SetAdditionalProps(val TechnicalAssetConfigurationAdditional) {
+	s.AdditionalProps = val
 }
 
-// IsRedshiftTechnicalAssetConfiguration reports whether TechnicalAssetConfiguration is RedshiftTechnicalAssetConfiguration.
-func (s TechnicalAssetConfiguration) IsRedshiftTechnicalAssetConfiguration() bool {
-	return s.Type == RedshiftTechnicalAssetConfigurationTechnicalAssetConfiguration
-}
+type TechnicalAssetConfigurationAdditional map[string]jx.Raw
 
-// IsPostgreSQLTechnicalAssetConfiguration reports whether TechnicalAssetConfiguration is PostgreSQLTechnicalAssetConfiguration.
-func (s TechnicalAssetConfiguration) IsPostgreSQLTechnicalAssetConfiguration() bool {
-	return s.Type == PostgreSQLTechnicalAssetConfigurationTechnicalAssetConfiguration
-}
-
-// IsOSISemanticModelTechnicalAssetConfiguration reports whether TechnicalAssetConfiguration is OSISemanticModelTechnicalAssetConfiguration.
-func (s TechnicalAssetConfiguration) IsOSISemanticModelTechnicalAssetConfiguration() bool {
-	return s.Type == OSISemanticModelTechnicalAssetConfigurationTechnicalAssetConfiguration
-}
-
-// IsAzureBlobTechnicalAssetConfiguration reports whether TechnicalAssetConfiguration is AzureBlobTechnicalAssetConfiguration.
-func (s TechnicalAssetConfiguration) IsAzureBlobTechnicalAssetConfiguration() bool {
-	return s.Type == AzureBlobTechnicalAssetConfigurationTechnicalAssetConfiguration
-}
-
-// SetS3TechnicalAssetConfiguration sets TechnicalAssetConfiguration to S3TechnicalAssetConfiguration.
-func (s *TechnicalAssetConfiguration) SetS3TechnicalAssetConfiguration(v S3TechnicalAssetConfiguration) {
-	s.Type = S3TechnicalAssetConfigurationTechnicalAssetConfiguration
-	s.S3TechnicalAssetConfiguration = v
-}
-
-// GetS3TechnicalAssetConfiguration returns S3TechnicalAssetConfiguration and true boolean if TechnicalAssetConfiguration is S3TechnicalAssetConfiguration.
-func (s TechnicalAssetConfiguration) GetS3TechnicalAssetConfiguration() (v S3TechnicalAssetConfiguration, ok bool) {
-	if !s.IsS3TechnicalAssetConfiguration() {
-		return v, false
+func (s *TechnicalAssetConfigurationAdditional) init() TechnicalAssetConfigurationAdditional {
+	m := *s
+	if m == nil {
+		m = map[string]jx.Raw{}
+		*s = m
 	}
-	return s.S3TechnicalAssetConfiguration, true
-}
-
-// NewS3TechnicalAssetConfigurationTechnicalAssetConfiguration returns new TechnicalAssetConfiguration from S3TechnicalAssetConfiguration.
-func NewS3TechnicalAssetConfigurationTechnicalAssetConfiguration(v S3TechnicalAssetConfiguration) TechnicalAssetConfiguration {
-	var s TechnicalAssetConfiguration
-	s.SetS3TechnicalAssetConfiguration(v)
-	return s
-}
-
-// SetGlueTechnicalAssetConfiguration sets TechnicalAssetConfiguration to GlueTechnicalAssetConfiguration.
-func (s *TechnicalAssetConfiguration) SetGlueTechnicalAssetConfiguration(v GlueTechnicalAssetConfiguration) {
-	s.Type = GlueTechnicalAssetConfigurationTechnicalAssetConfiguration
-	s.GlueTechnicalAssetConfiguration = v
-}
-
-// GetGlueTechnicalAssetConfiguration returns GlueTechnicalAssetConfiguration and true boolean if TechnicalAssetConfiguration is GlueTechnicalAssetConfiguration.
-func (s TechnicalAssetConfiguration) GetGlueTechnicalAssetConfiguration() (v GlueTechnicalAssetConfiguration, ok bool) {
-	if !s.IsGlueTechnicalAssetConfiguration() {
-		return v, false
-	}
-	return s.GlueTechnicalAssetConfiguration, true
-}
-
-// NewGlueTechnicalAssetConfigurationTechnicalAssetConfiguration returns new TechnicalAssetConfiguration from GlueTechnicalAssetConfiguration.
-func NewGlueTechnicalAssetConfigurationTechnicalAssetConfiguration(v GlueTechnicalAssetConfiguration) TechnicalAssetConfiguration {
-	var s TechnicalAssetConfiguration
-	s.SetGlueTechnicalAssetConfiguration(v)
-	return s
-}
-
-// SetDatabricksTechnicalAssetConfiguration sets TechnicalAssetConfiguration to DatabricksTechnicalAssetConfiguration.
-func (s *TechnicalAssetConfiguration) SetDatabricksTechnicalAssetConfiguration(v DatabricksTechnicalAssetConfiguration) {
-	s.Type = DatabricksTechnicalAssetConfigurationTechnicalAssetConfiguration
-	s.DatabricksTechnicalAssetConfiguration = v
-}
-
-// GetDatabricksTechnicalAssetConfiguration returns DatabricksTechnicalAssetConfiguration and true boolean if TechnicalAssetConfiguration is DatabricksTechnicalAssetConfiguration.
-func (s TechnicalAssetConfiguration) GetDatabricksTechnicalAssetConfiguration() (v DatabricksTechnicalAssetConfiguration, ok bool) {
-	if !s.IsDatabricksTechnicalAssetConfiguration() {
-		return v, false
-	}
-	return s.DatabricksTechnicalAssetConfiguration, true
-}
-
-// NewDatabricksTechnicalAssetConfigurationTechnicalAssetConfiguration returns new TechnicalAssetConfiguration from DatabricksTechnicalAssetConfiguration.
-func NewDatabricksTechnicalAssetConfigurationTechnicalAssetConfiguration(v DatabricksTechnicalAssetConfiguration) TechnicalAssetConfiguration {
-	var s TechnicalAssetConfiguration
-	s.SetDatabricksTechnicalAssetConfiguration(v)
-	return s
-}
-
-// SetSnowflakeTechnicalAssetConfiguration sets TechnicalAssetConfiguration to SnowflakeTechnicalAssetConfiguration.
-func (s *TechnicalAssetConfiguration) SetSnowflakeTechnicalAssetConfiguration(v SnowflakeTechnicalAssetConfiguration) {
-	s.Type = SnowflakeTechnicalAssetConfigurationTechnicalAssetConfiguration
-	s.SnowflakeTechnicalAssetConfiguration = v
-}
-
-// GetSnowflakeTechnicalAssetConfiguration returns SnowflakeTechnicalAssetConfiguration and true boolean if TechnicalAssetConfiguration is SnowflakeTechnicalAssetConfiguration.
-func (s TechnicalAssetConfiguration) GetSnowflakeTechnicalAssetConfiguration() (v SnowflakeTechnicalAssetConfiguration, ok bool) {
-	if !s.IsSnowflakeTechnicalAssetConfiguration() {
-		return v, false
-	}
-	return s.SnowflakeTechnicalAssetConfiguration, true
-}
-
-// NewSnowflakeTechnicalAssetConfigurationTechnicalAssetConfiguration returns new TechnicalAssetConfiguration from SnowflakeTechnicalAssetConfiguration.
-func NewSnowflakeTechnicalAssetConfigurationTechnicalAssetConfiguration(v SnowflakeTechnicalAssetConfiguration) TechnicalAssetConfiguration {
-	var s TechnicalAssetConfiguration
-	s.SetSnowflakeTechnicalAssetConfiguration(v)
-	return s
-}
-
-// SetRedshiftTechnicalAssetConfiguration sets TechnicalAssetConfiguration to RedshiftTechnicalAssetConfiguration.
-func (s *TechnicalAssetConfiguration) SetRedshiftTechnicalAssetConfiguration(v RedshiftTechnicalAssetConfiguration) {
-	s.Type = RedshiftTechnicalAssetConfigurationTechnicalAssetConfiguration
-	s.RedshiftTechnicalAssetConfiguration = v
-}
-
-// GetRedshiftTechnicalAssetConfiguration returns RedshiftTechnicalAssetConfiguration and true boolean if TechnicalAssetConfiguration is RedshiftTechnicalAssetConfiguration.
-func (s TechnicalAssetConfiguration) GetRedshiftTechnicalAssetConfiguration() (v RedshiftTechnicalAssetConfiguration, ok bool) {
-	if !s.IsRedshiftTechnicalAssetConfiguration() {
-		return v, false
-	}
-	return s.RedshiftTechnicalAssetConfiguration, true
-}
-
-// NewRedshiftTechnicalAssetConfigurationTechnicalAssetConfiguration returns new TechnicalAssetConfiguration from RedshiftTechnicalAssetConfiguration.
-func NewRedshiftTechnicalAssetConfigurationTechnicalAssetConfiguration(v RedshiftTechnicalAssetConfiguration) TechnicalAssetConfiguration {
-	var s TechnicalAssetConfiguration
-	s.SetRedshiftTechnicalAssetConfiguration(v)
-	return s
-}
-
-// SetPostgreSQLTechnicalAssetConfiguration sets TechnicalAssetConfiguration to PostgreSQLTechnicalAssetConfiguration.
-func (s *TechnicalAssetConfiguration) SetPostgreSQLTechnicalAssetConfiguration(v PostgreSQLTechnicalAssetConfiguration) {
-	s.Type = PostgreSQLTechnicalAssetConfigurationTechnicalAssetConfiguration
-	s.PostgreSQLTechnicalAssetConfiguration = v
-}
-
-// GetPostgreSQLTechnicalAssetConfiguration returns PostgreSQLTechnicalAssetConfiguration and true boolean if TechnicalAssetConfiguration is PostgreSQLTechnicalAssetConfiguration.
-func (s TechnicalAssetConfiguration) GetPostgreSQLTechnicalAssetConfiguration() (v PostgreSQLTechnicalAssetConfiguration, ok bool) {
-	if !s.IsPostgreSQLTechnicalAssetConfiguration() {
-		return v, false
-	}
-	return s.PostgreSQLTechnicalAssetConfiguration, true
-}
-
-// NewPostgreSQLTechnicalAssetConfigurationTechnicalAssetConfiguration returns new TechnicalAssetConfiguration from PostgreSQLTechnicalAssetConfiguration.
-func NewPostgreSQLTechnicalAssetConfigurationTechnicalAssetConfiguration(v PostgreSQLTechnicalAssetConfiguration) TechnicalAssetConfiguration {
-	var s TechnicalAssetConfiguration
-	s.SetPostgreSQLTechnicalAssetConfiguration(v)
-	return s
-}
-
-// SetOSISemanticModelTechnicalAssetConfiguration sets TechnicalAssetConfiguration to OSISemanticModelTechnicalAssetConfiguration.
-func (s *TechnicalAssetConfiguration) SetOSISemanticModelTechnicalAssetConfiguration(v OSISemanticModelTechnicalAssetConfiguration) {
-	s.Type = OSISemanticModelTechnicalAssetConfigurationTechnicalAssetConfiguration
-	s.OSISemanticModelTechnicalAssetConfiguration = v
-}
-
-// GetOSISemanticModelTechnicalAssetConfiguration returns OSISemanticModelTechnicalAssetConfiguration and true boolean if TechnicalAssetConfiguration is OSISemanticModelTechnicalAssetConfiguration.
-func (s TechnicalAssetConfiguration) GetOSISemanticModelTechnicalAssetConfiguration() (v OSISemanticModelTechnicalAssetConfiguration, ok bool) {
-	if !s.IsOSISemanticModelTechnicalAssetConfiguration() {
-		return v, false
-	}
-	return s.OSISemanticModelTechnicalAssetConfiguration, true
-}
-
-// NewOSISemanticModelTechnicalAssetConfigurationTechnicalAssetConfiguration returns new TechnicalAssetConfiguration from OSISemanticModelTechnicalAssetConfiguration.
-func NewOSISemanticModelTechnicalAssetConfigurationTechnicalAssetConfiguration(v OSISemanticModelTechnicalAssetConfiguration) TechnicalAssetConfiguration {
-	var s TechnicalAssetConfiguration
-	s.SetOSISemanticModelTechnicalAssetConfiguration(v)
-	return s
-}
-
-// SetAzureBlobTechnicalAssetConfiguration sets TechnicalAssetConfiguration to AzureBlobTechnicalAssetConfiguration.
-func (s *TechnicalAssetConfiguration) SetAzureBlobTechnicalAssetConfiguration(v AzureBlobTechnicalAssetConfiguration) {
-	s.Type = AzureBlobTechnicalAssetConfigurationTechnicalAssetConfiguration
-	s.AzureBlobTechnicalAssetConfiguration = v
-}
-
-// GetAzureBlobTechnicalAssetConfiguration returns AzureBlobTechnicalAssetConfiguration and true boolean if TechnicalAssetConfiguration is AzureBlobTechnicalAssetConfiguration.
-func (s TechnicalAssetConfiguration) GetAzureBlobTechnicalAssetConfiguration() (v AzureBlobTechnicalAssetConfiguration, ok bool) {
-	if !s.IsAzureBlobTechnicalAssetConfiguration() {
-		return v, false
-	}
-	return s.AzureBlobTechnicalAssetConfiguration, true
-}
-
-// NewAzureBlobTechnicalAssetConfigurationTechnicalAssetConfiguration returns new TechnicalAssetConfiguration from AzureBlobTechnicalAssetConfiguration.
-func NewAzureBlobTechnicalAssetConfigurationTechnicalAssetConfiguration(v AzureBlobTechnicalAssetConfiguration) TechnicalAssetConfiguration {
-	var s TechnicalAssetConfiguration
-	s.SetAzureBlobTechnicalAssetConfiguration(v)
-	return s
+	return m
 }
 
 // Ref: #/components/schemas/TechnicalAssetLink
@@ -12448,6 +14303,58 @@ func (s *TechnicalAssetStatus) UnmarshalText(data []byte) error {
 	}
 }
 
+// Ref: #/components/schemas/TechnicalAssetStatusUpdate
+type TechnicalAssetStatusUpdate struct {
+	Status TechnicalAssetStatus `json:"status"`
+}
+
+// GetStatus returns the value of Status.
+func (s *TechnicalAssetStatusUpdate) GetStatus() TechnicalAssetStatus {
+	return s.Status
+}
+
+// SetStatus sets the value of Status.
+func (s *TechnicalAssetStatusUpdate) SetStatus(val TechnicalAssetStatus) {
+	s.Status = val
+}
+
+// Ref: #/components/schemas/TechnicalAssetUpdate
+type TechnicalAssetUpdate struct {
+	Name        string      `json:"name"`
+	Description string      `json:"description"`
+	TagIds      []uuid.UUID `json:"tag_ids"`
+}
+
+// GetName returns the value of Name.
+func (s *TechnicalAssetUpdate) GetName() string {
+	return s.Name
+}
+
+// GetDescription returns the value of Description.
+func (s *TechnicalAssetUpdate) GetDescription() string {
+	return s.Description
+}
+
+// GetTagIds returns the value of TagIds.
+func (s *TechnicalAssetUpdate) GetTagIds() []uuid.UUID {
+	return s.TagIds
+}
+
+// SetName sets the value of Name.
+func (s *TechnicalAssetUpdate) SetName(val string) {
+	s.Name = val
+}
+
+// SetDescription sets the value of Description.
+func (s *TechnicalAssetUpdate) SetDescription(val string) {
+	s.Description = val
+}
+
+// SetTagIds sets the value of TagIds.
+func (s *TechnicalAssetUpdate) SetTagIds(val []uuid.UUID) {
+	s.TagIds = val
+}
+
 // Ref: #/components/schemas/TechnicalInfo
 type TechnicalInfo struct {
 	EnvironmentID uuid.UUID `json:"environment_id"`
@@ -12540,6 +14447,23 @@ func (s *ThemeSettings) GetPortalName() string {
 // SetPortalName sets the value of PortalName.
 func (s *ThemeSettings) SetPortalName(val string) {
 	s.PortalName = val
+}
+
+func (*ThemeSettings) getThemeSettingsRes() {}
+
+// Ref: #/components/schemas/TimeBoundAccessEnabledResponse
+type TimeBoundAccessEnabledResponse struct {
+	Enabled bool `json:"enabled"`
+}
+
+// GetEnabled returns the value of Enabled.
+func (s *TimeBoundAccessEnabledResponse) GetEnabled() bool {
+	return s.Enabled
+}
+
+// SetEnabled sets the value of Enabled.
+func (s *TimeBoundAccessEnabledResponse) SetEnabled(val bool) {
+	s.Enabled = val
 }
 
 // Ref: #/components/schemas/UIElementCheckbox
@@ -12715,9 +14639,11 @@ type UIElementMetadataResponse struct {
 	Platform        string              `json:"platform"`
 	DisplayName     string              `json:"display_name"`
 	IconName        string              `json:"icon_name"`
+	IconDataURI     OptNilString        `json:"icon_data_uri"`
 	ParentPlatform  OptNilString        `json:"parent_platform"`
 	PlatformTile    OptNilPlatformTile  `json:"platform_tile"`
 	ShowInForm      OptBool             `json:"show_in_form"`
+	Shareable       OptBool             `json:"shareable"`
 	DetailedName    string              `json:"detailed_name"`
 }
 
@@ -12766,6 +14692,11 @@ func (s *UIElementMetadataResponse) GetIconName() string {
 	return s.IconName
 }
 
+// GetIconDataURI returns the value of IconDataURI.
+func (s *UIElementMetadataResponse) GetIconDataURI() OptNilString {
+	return s.IconDataURI
+}
+
 // GetParentPlatform returns the value of ParentPlatform.
 func (s *UIElementMetadataResponse) GetParentPlatform() OptNilString {
 	return s.ParentPlatform
@@ -12779,6 +14710,11 @@ func (s *UIElementMetadataResponse) GetPlatformTile() OptNilPlatformTile {
 // GetShowInForm returns the value of ShowInForm.
 func (s *UIElementMetadataResponse) GetShowInForm() OptBool {
 	return s.ShowInForm
+}
+
+// GetShareable returns the value of Shareable.
+func (s *UIElementMetadataResponse) GetShareable() OptBool {
+	return s.Shareable
 }
 
 // GetDetailedName returns the value of DetailedName.
@@ -12831,6 +14767,11 @@ func (s *UIElementMetadataResponse) SetIconName(val string) {
 	s.IconName = val
 }
 
+// SetIconDataURI sets the value of IconDataURI.
+func (s *UIElementMetadataResponse) SetIconDataURI(val OptNilString) {
+	s.IconDataURI = val
+}
+
 // SetParentPlatform sets the value of ParentPlatform.
 func (s *UIElementMetadataResponse) SetParentPlatform(val OptNilString) {
 	s.ParentPlatform = val
@@ -12844,6 +14785,11 @@ func (s *UIElementMetadataResponse) SetPlatformTile(val OptNilPlatformTile) {
 // SetShowInForm sets the value of ShowInForm.
 func (s *UIElementMetadataResponse) SetShowInForm(val OptBool) {
 	s.ShowInForm = val
+}
+
+// SetShareable sets the value of Shareable.
+func (s *UIElementMetadataResponse) SetShareable(val OptBool) {
+	s.Shareable = val
 }
 
 // SetDetailedName sets the value of DetailedName.
@@ -13020,18 +14966,6 @@ func (s *UnLinkTechnicalAssetToOutputPortRequest) SetTechnicalAssetID(val uuid.U
 	s.TechnicalAssetID = val
 }
 
-type UnlinkInputPortFromDataProductBadRequestApplicationJSON jx.Raw
-
-func (*UnlinkInputPortFromDataProductBadRequestApplicationJSON) unlinkInputPortFromDataProductRes() {}
-
-type UnlinkInputPortFromDataProductNotFoundApplicationJSON jx.Raw
-
-func (*UnlinkInputPortFromDataProductNotFoundApplicationJSON) unlinkInputPortFromDataProductRes() {}
-
-type UnlinkInputPortFromDataProductOKApplicationJSON jx.Raw
-
-func (*UnlinkInputPortFromDataProductOKApplicationJSON) unlinkInputPortFromDataProductRes() {}
-
 type UnlinkOutputPortFromTechnicalAssetNotFoundApplicationJSON jx.Raw
 
 func (*UnlinkOutputPortFromTechnicalAssetNotFoundApplicationJSON) unlinkOutputPortFromTechnicalAssetRes() {
@@ -13040,6 +14974,23 @@ func (*UnlinkOutputPortFromTechnicalAssetNotFoundApplicationJSON) unlinkOutputPo
 type UnlinkOutputPortFromTechnicalAssetOKApplicationJSON jx.Raw
 
 func (*UnlinkOutputPortFromTechnicalAssetOKApplicationJSON) unlinkOutputPortFromTechnicalAssetRes() {}
+
+// Ref: #/components/schemas/UpdateAccessDurationResponse
+type UpdateAccessDurationResponse struct {
+	AccessDurations []AccessDuration `json:"access_durations"`
+}
+
+// GetAccessDurations returns the value of AccessDurations.
+func (s *UpdateAccessDurationResponse) GetAccessDurations() []AccessDuration {
+	return s.AccessDurations
+}
+
+// SetAccessDurations sets the value of AccessDurations.
+func (s *UpdateAccessDurationResponse) SetAccessDurations(val []AccessDuration) {
+	s.AccessDurations = val
+}
+
+func (*UpdateAccessDurationResponse) updateAccessDurationRes() {}
 
 type UpdateDataProductAboutNotFoundApplicationJSON jx.Raw
 
@@ -13154,6 +15105,14 @@ func (s *UpdateDomainResponse) SetID(val uuid.UUID) {
 
 func (*UpdateDomainResponse) updateDomainRes() {}
 
+type UpdateGroupNotFoundApplicationJSON jx.Raw
+
+func (*UpdateGroupNotFoundApplicationJSON) updateGroupRes() {}
+
+type UpdateMachineUserNotFoundApplicationJSON jx.Raw
+
+func (*UpdateMachineUserNotFoundApplicationJSON) updateMachineUserRes() {}
+
 type UpdateOutputPortAboutNotFoundApplicationJSON jx.Raw
 
 func (*UpdateOutputPortAboutNotFoundApplicationJSON) updateOutputPortAboutRes() {}
@@ -13161,6 +15120,23 @@ func (*UpdateOutputPortAboutNotFoundApplicationJSON) updateOutputPortAboutRes() 
 type UpdateOutputPortAboutOKApplicationJSON jx.Raw
 
 func (*UpdateOutputPortAboutOKApplicationJSON) updateOutputPortAboutRes() {}
+
+// Ref: #/components/schemas/UpdateOutputPortAccessTypeResponse
+type UpdateOutputPortAccessTypeResponse struct {
+	ID uuid.UUID `json:"id"`
+}
+
+// GetID returns the value of ID.
+func (s *UpdateOutputPortAccessTypeResponse) GetID() uuid.UUID {
+	return s.ID
+}
+
+// SetID sets the value of ID.
+func (s *UpdateOutputPortAccessTypeResponse) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+func (*UpdateOutputPortAccessTypeResponse) updateOutputPortAccessTypeRes() {}
 
 type UpdateOutputPortNotFoundApplicationJSON jx.Raw
 
@@ -13172,6 +15148,7 @@ func (*UpdateOutputPortQueryStatsOKApplicationJSON) updateOutputPortQueryStatsRe
 
 // Ref: #/components/schemas/UpdateOutputPortQueryStatus
 type UpdateOutputPortQueryStatus struct {
+	// Daily query counts per consuming data product.
 	OutputPortQueryStatsUpdates []OutputPortQueryStatsUpdate `json:"output_port_query_stats_updates"`
 }
 
@@ -13388,6 +15365,8 @@ func (s *User) SetCanBecomeAdmin(val bool) {
 func (s *User) SetAdminExpiry(val OptNilDateTime) {
 	s.AdminExpiry = val
 }
+
+func (*User) getCurrentUserRes() {}
 
 // Ref: #/components/schemas/UserCreate
 type UserCreate struct {

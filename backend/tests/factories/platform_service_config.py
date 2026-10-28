@@ -4,7 +4,6 @@ from app.configuration.platform_service_configurations.model import (
     PlatformServiceConfiguration,
 )
 
-from .platform import PlatformFactory
 from .platform_service import PlatformServiceFactory
 
 
@@ -15,5 +14,5 @@ class PlatformServiceConfigFactory(factory.alchemy.SQLAlchemyModelFactory):
     id = factory.Faker("uuid4")
     config = '["identifier_1"]'
 
-    platform = factory.SubFactory(PlatformFactory)
     service = factory.SubFactory(PlatformServiceFactory)
+    platform = factory.SelfAttribute("service.platform")

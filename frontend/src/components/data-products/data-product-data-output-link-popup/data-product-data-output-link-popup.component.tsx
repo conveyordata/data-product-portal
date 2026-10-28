@@ -1,8 +1,7 @@
-import { Button, type FormInstance, Space } from 'antd';
+import { Button, type FormInstance, Modal, Space } from 'antd';
 import type { ReactNode, RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { FormModal } from '@/components/modal/form-modal/form-modal.component.tsx';
 import styles from './data-product-data-output-link-popup.module.scss';
 
 type Props = {
@@ -13,20 +12,21 @@ type Props = {
     formRef: RefObject<FormInstance | null>;
 };
 
-export function DataProductDataOutputLinkPopup({ onClose, isOpen, title, formRef, children }: Props) {
+export function DataProductLinkPopup({ onClose, isOpen, title, formRef, children }: Props) {
     const { t } = useTranslation();
 
     return (
-        <FormModal
+        <Modal
             title={title}
-            onClose={onClose}
-            isOpen={isOpen}
+            onCancel={onClose}
+            open={isOpen}
+            width={800}
             footer={() => (
                 <Space>
                     <Button
                         className={styles.formButton}
                         type="primary"
-                        htmlType={'submit'}
+                        htmlType="submit"
                         onClick={() => formRef.current?.submit()}
                     >
                         {t('Create')}
@@ -36,8 +36,10 @@ export function DataProductDataOutputLinkPopup({ onClose, isOpen, title, formRef
                     </Button>
                 </Space>
             )}
+            centered
+            styles={{ body: { maxHeight: '80vh', overflowY: 'auto' } }}
         >
             {children}
-        </FormModal>
+        </Modal>
     );
 }

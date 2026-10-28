@@ -1,0 +1,39 @@
+import { Form, type FormInstance, Input } from 'antd';
+import type React from 'react';
+import { useEffect } from 'react';
+
+import { dispatchMessage } from '@/utils/feedback.ts';
+
+import { configurationFieldName } from './configuration-field-name';
+import { ConfigurationFormItem } from './output-configuration-form-item';
+
+type Props = {
+    form: FormInstance;
+    configurationType: string;
+    resultLabel: string;
+    resultTooltip: string;
+    children: React.ReactNode;
+};
+
+export function ConfigurationSubForm({ form, configurationType, resultLabel, resultTooltip, children }: Props) {
+    if (!configurationType) {
+        const errorMessage = 'Technical Asset not configured correctly';
+        dispatchMessage({ content: errorMessage, type: 'error' });
+    }
+
+    useEffect(() => {
+        form.setFieldValue(configurationFieldName('name'), configurationType);
+    }, [form, configurationType]);
+
+    return (
+        <div>
+            <ConfigurationFormItem name="name" hidden required>
+                <Input />
+            </ConfigurationFormItem>
+            {children}
+            <Form.Item name="result" label={resultLabel} tooltip={resultTooltip}>
+                <Input disabled />
+            </Form.Item>
+        </div>
+    );
+}

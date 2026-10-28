@@ -1,15 +1,22 @@
 import uuid
+from datetime import date, timedelta
 
 import faker
 
+from app.abstract_data_product.type import AbstractDataProductType
+from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.roles.schema import Scope
+from app.configuration.access_durations.enums import AccessDurationType
+from app.configuration.domains.status import DomainStatus
 from app.core.authz import Action
+from app.data_products.output_ports.enums import OutputPortAccessFunction
 from app.settings import settings
 from tests.factories import (
-    DatasetFactory,
+    AccessDurationFactory,
     DomainFactory,
     GlobalRoleAssignmentFactory,
     InputPortFactory,
+    OutputPortFactory,
     RoleFactory,
     UserFactory,
 )
@@ -28,7 +35,7 @@ class TestExplorationRouter:
             permissions=[Action.GLOBAL__CREATE_EXPLORATION],
         )
         GlobalRoleAssignmentFactory(
-            user_id=user.id,
+            identity_id=user.id,
             role_id=role.id,
         )
 
@@ -43,6 +50,26 @@ class TestExplorationRouter:
         )
         assert response.status_code == 200, response.text
 
+    def test_create_exploration__deleting_domain(self, client):
+        d = DomainFactory(status=DomainStatus.DELETING, finalizers=["x"])
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        role = RoleFactory(
+            scope=Scope.GLOBAL,
+            permissions=[Action.GLOBAL__CREATE_EXPLORATION],
+        )
+        GlobalRoleAssignmentFactory(identity_id=user.id, role_id=role.id)
+
+        response = client.post(
+            ROUTE,
+            json={
+                "name": str(uuid.uuid4()),
+                "namespace": str(uuid.uuid4()),
+                "domain_id": str(d.id),
+                "description": faker.Faker().text(),
+            },
+        )
+        assert response.status_code == 409
+
     def test_create_exploration_invalid_namespace(self, client):
         d = DomainFactory()
         namespace = str(uuid.uuid4())
@@ -54,7 +81,7 @@ class TestExplorationRouter:
             permissions=[Action.GLOBAL__CREATE_EXPLORATION],
         )
         GlobalRoleAssignmentFactory(
-            user_id=user.id,
+            identity_id=user.id,
             role_id=role.id,
         )
 
@@ -77,7 +104,7 @@ class TestExplorationRouter:
             permissions=[Action.GLOBAL__CREATE_EXPLORATION],
         )
         GlobalRoleAssignmentFactory(
-            user_id=user.id,
+            identity_id=user.id,
             role_id=role.id,
         )
 
@@ -89,7 +116,7 @@ class TestExplorationRouter:
                 "domain_id": str(d.id),
                 "description": faker.Faker().text(),
                 "input_ports": {
-                    "output_ports": [str(DatasetFactory().id)],
+                    "output_ports": [{"output_port_id": str(OutputPortFactory().id)}],
                     "justification": "I am your king!",
                 },
             },
@@ -139,32 +166,32 @@ class TestExplorationRouter:
         response = client.post(
             f"{ROUTE}/{exploration.id}/input_ports",
             json={
-                "output_ports": [str(DatasetFactory().id)],
+                "output_ports": [{"output_port_id": str(OutputPortFactory().id)}],
                 "justification": "I am your king!",
             },
         )
         assert response.status_code == 200, response.text
         assert len(response.json()["input_port_ids"]) == 1
 
-    def test_request_input_ports_for_exploration_event(self, mock_webhook, client):
+    def test_request_input_ports_for_exploration_event(self, capture_events, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         exploration = ExplorationFactory(owner=user)
         response = client.post(
             f"{ROUTE}/{exploration.id}/input_ports",
             json={
-                "output_ports": [str(DatasetFactory().id)],
+                "output_ports": [{"output_port_id": str(OutputPortFactory().id)}],
                 "justification": "I am your king!",
             },
         )
         assert response.status_code == 200, response.text
         assert len(response.json()["input_port_ids"]) == 1
-        assert_event_in_queue("input_port.event", mock_webhook)
+        assert_event_in_queue("input_port.event", capture_events)
 
     def test_request_input_ports_for_exploration_does_not_exist(self, client):
         response = client.post(
             f"{ROUTE}/{uuid.uuid4()}/input_ports",
             json={
-                "output_ports": [str(DatasetFactory().id)],
+                "output_ports": [{"output_port_id": str(OutputPortFactory().id)}],
                 "justification": "I am your king!",
             },
         )
@@ -175,26 +202,119 @@ class TestExplorationRouter:
         response = client.post(
             f"{ROUTE}/{exploration.id}/input_ports",
             json={
-                "output_ports": [str(DatasetFactory().id)],
+                "output_ports": [{"output_port_id": str(OutputPortFactory().id)}],
                 "justification": "I am your king!",
             },
         )
         assert response.status_code == 403, response.text
 
-    def test_remove_input_port_from_exploration(self, client):
+    def test_renew_input_port_for_exploration(self, client):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        exploration = ExplorationFactory(owner=user)
+        ds = OutputPortFactory(
+            access_function=OutputPortAccessFunction.RESTRICTED,
+            exploration_access_duration_type=AccessDurationType.TIME_BOUND,
+        )
+        AccessDurationFactory(
+            abstract_data_product_type=AbstractDataProductType.EXPLORATION,
+            access_duration_type=AccessDurationType.TIME_BOUND,
+            days=15,
+        )
+        input_port = InputPortFactory(
+            consuming_abstract_data_product=exploration,
+            output_port=ds,
+            status=DecisionStatus.APPROVED,
+            request__access_duration_type=AccessDurationType.TIME_BOUND,
+            request__valid_until=date.today() + timedelta(days=10),
+        )
+
+        response = client.post(
+            f"{ROUTE}/{exploration.id}/input_ports/{ds.id}/renew",
+        )
+        assert response.status_code == 200, response.text
+        assert response.json()["input_port_id"] == str(input_port.id)
+
+    def test_renew_input_port_for_exploration__not_owner(self, client):
+        exploration = ExplorationFactory()
+        input_port = InputPortFactory(consuming_abstract_data_product=exploration)
+        response = client.post(
+            f"{ROUTE}/{exploration.id}/input_ports/{input_port.output_port.id}/renew",
+        )
+        assert response.status_code == 403, response.text
+
+    def test_renew_input_port_for_exploration__no_existing_link(self, client):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        exploration = ExplorationFactory(owner=user)
+        response = client.post(
+            f"{ROUTE}/{exploration.id}/input_ports/{OutputPortFactory().id}/renew",
+        )
+        assert response.status_code == 404, response.text
+
+    def test_revoke_input_port_for_exploration(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         exploration = ExplorationFactory(owner=user)
         input_port = InputPortFactory(consuming_abstract_data_product=exploration)
-        response = client.delete(
-            f"{ROUTE}/{exploration.id}/input_ports/{input_port.dataset.id}",
+        response = client.post(
+            f"{ROUTE}/{exploration.id}/input_ports/{input_port.output_port.id}/revoke",
         )
         assert response.status_code == 200, response.text
 
-    def test_remove_input_port_from_exploration_not_owner(self, client):
+    def test_revoke_input_port_for_exploration__not_owner(self, client):
         exploration = ExplorationFactory()
         input_port = InputPortFactory(consuming_abstract_data_product=exploration)
+        response = client.post(
+            f"{ROUTE}/{exploration.id}/input_ports/{input_port.output_port.id}/revoke",
+        )
+        assert response.status_code == 403, response.text
+
+    def test_cancel_input_port_for_exploration(self, client):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        exploration = ExplorationFactory(owner=user)
+        input_port = InputPortFactory(
+            consuming_abstract_data_product=exploration,
+            status=DecisionStatus.PENDING,
+        )
+        response = client.post(
+            f"{ROUTE}/{exploration.id}/input_ports/{input_port.output_port.id}/cancel",
+        )
+        assert response.status_code == 200, response.text
+
+    def test_cancel_input_port_for_exploration__not_owner(self, client):
+        exploration = ExplorationFactory()
+        input_port = InputPortFactory(
+            consuming_abstract_data_product=exploration,
+            status=DecisionStatus.PENDING,
+        )
+        response = client.post(
+            f"{ROUTE}/{exploration.id}/input_ports/{input_port.output_port.id}/cancel",
+        )
+        assert response.status_code == 403, response.text
+
+    def test_remove_input_port_for_exploration_hard_deletes_regardless_of_status(
+        self, client
+    ):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        exploration = ExplorationFactory(owner=user)
+        input_port = InputPortFactory(
+            consuming_abstract_data_product=exploration,
+            status=DecisionStatus.APPROVED,
+        )
         response = client.delete(
-            f"{ROUTE}/{exploration.id}/input_ports/{input_port.dataset.id}",
+            f"{ROUTE}/{exploration.id}/input_ports/{input_port.output_port.id}",
+        )
+        assert response.status_code == 200, response.text
+
+        get_response = client.get(f"{ROUTE}/{exploration.id}/input_ports")
+        assert get_response.json()["input_ports"] == []
+
+    def test_remove_input_port_for_exploration__not_owner(self, client):
+        exploration = ExplorationFactory()
+        input_port = InputPortFactory(
+            consuming_abstract_data_product=exploration,
+            status=DecisionStatus.APPROVED,
+        )
+        response = client.delete(
+            f"{ROUTE}/{exploration.id}/input_ports/{input_port.output_port.id}",
         )
         assert response.status_code == 403, response.text
 
@@ -205,7 +325,7 @@ class TestExplorationRouter:
             scope=Scope.GLOBAL,
             permissions=[Action.GLOBAL__CREATE_EXPLORATION],
         )
-        GlobalRoleAssignmentFactory(user_id=user.id, role_id=role.id)
+        GlobalRoleAssignmentFactory(identity_id=user.id, role_id=role.id)
         response = client.delete(f"{ROUTE}/{exploration.id}")
         assert response.status_code == 200, response.text
 
@@ -217,7 +337,7 @@ class TestExplorationRouter:
             scope=Scope.GLOBAL,
             permissions=[Action.GLOBAL__CREATE_EXPLORATION],
         )
-        GlobalRoleAssignmentFactory(user_id=user.id, role_id=role.id)
+        GlobalRoleAssignmentFactory(identity_id=user.id, role_id=role.id)
         response = client.delete(f"{ROUTE}/{exploration.id}")
         assert response.status_code == 403, response.text
 
@@ -228,7 +348,7 @@ class TestExplorationRouter:
             scope=Scope.GLOBAL,
             permissions=[Action.GLOBAL__CREATE_EXPLORATION],
         )
-        GlobalRoleAssignmentFactory(user_id=user.id, role_id=role.id)
+        GlobalRoleAssignmentFactory(identity_id=user.id, role_id=role.id)
         response = client.delete(f"{ROUTE}/{exploration.id}")
         assert response.status_code == 202, response.text
 
@@ -237,9 +357,12 @@ class TestExplorationRouter:
         exploration = ExplorationFactory(owner=user)
         role = RoleFactory(
             scope=Scope.GLOBAL,
-            permissions=[Action.GLOBAL__CREATE_EXPLORATION],
+            permissions=[Action.GLOBAL__MANAGE_FINALIZERS],
         )
-        GlobalRoleAssignmentFactory(user_id=user.id, role_id=role.id)
+        GlobalRoleAssignmentFactory(
+            identity_id=user.id,
+            role_id=role.id,
+        )
         response = client.post(
             f"{ROUTE}/{exploration.id}/finalizers",
             json={"finalizer": "my-system"},
@@ -254,7 +377,7 @@ class TestExplorationRouter:
             scope=Scope.GLOBAL,
             permissions=[Action.GLOBAL__CREATE_EXPLORATION],
         )
-        GlobalRoleAssignmentFactory(user_id=user.id, role_id=role.id)
+        GlobalRoleAssignmentFactory(identity_id=user.id, role_id=role.id)
         response = client.post(
             f"{ROUTE}/{exploration.id}/finalizers",
             json={"finalizer": "my-system"},
@@ -273,9 +396,12 @@ class TestExplorationRouter:
         )
         role = RoleFactory(
             scope=Scope.GLOBAL,
-            permissions=[Action.GLOBAL__CREATE_EXPLORATION],
+            permissions=[Action.GLOBAL__MANAGE_FINALIZERS],
         )
-        GlobalRoleAssignmentFactory(user_id=user.id, role_id=role.id)
+        GlobalRoleAssignmentFactory(
+            identity_id=user.id,
+            role_id=role.id,
+        )
         response = client.delete(f"{ROUTE}/{exploration.id}/finalizers/last-one")
         assert response.status_code == 200, response.text
         assert client.get(f"{ROUTE}/{exploration.id}").status_code == 404
@@ -292,9 +418,12 @@ class TestExplorationRouter:
         )
         role = RoleFactory(
             scope=Scope.GLOBAL,
-            permissions=[Action.GLOBAL__CREATE_EXPLORATION],
+            permissions=[Action.GLOBAL__MANAGE_FINALIZERS],
         )
-        GlobalRoleAssignmentFactory(user_id=user.id, role_id=role.id)
+        GlobalRoleAssignmentFactory(
+            identity_id=user.id,
+            role_id=role.id,
+        )
         response = client.delete(f"{ROUTE}/{exploration.id}/finalizers/a")
         assert response.status_code == 200, response.text
         assert client.get(f"{ROUTE}/{exploration.id}").status_code == 200
@@ -307,6 +436,6 @@ class TestExplorationRouter:
             scope=Scope.GLOBAL,
             permissions=[Action.GLOBAL__CREATE_EXPLORATION],
         )
-        GlobalRoleAssignmentFactory(user_id=user.id, role_id=role.id)
+        GlobalRoleAssignmentFactory(identity_id=user.id, role_id=role.id)
         response = client.delete(f"{ROUTE}/{exploration.id}/finalizers/my-system")
         assert response.status_code == 403, response.text

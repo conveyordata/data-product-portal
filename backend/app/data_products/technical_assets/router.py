@@ -7,15 +7,14 @@ from app.core.auth.auth import get_authenticated_user
 from app.core.authz import (
     Action,
     Authorization,
-    DataOutputResolver,
     DataProductResolver,
+    TechnicalAssetResolver,
 )
-from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
 from app.data_products.technical_assets.model import ensure_technical_asset_exists
 from app.data_products.technical_assets.schema_request import (
     CreateTechnicalAssetRequest,
-    DataOutputStatusUpdate,
-    DataOutputUpdate,
+    TechnicalAssetStatusUpdate,
+    TechnicalAssetUpdate,
 )
 from app.data_products.technical_assets.schema_response import (
     CreateTechnicalAssetResponse,
@@ -23,64 +22,102 @@ from app.data_products.technical_assets.schema_response import (
     GetTechnicalAssetsResponseItem,
     UpdateTechnicalAssetResponse,
 )
-from app.data_products.technical_assets.service import DataOutputService
-from app.database.database import get_db_session
-from app.events.enums import EventReferenceEntity, EventType
+from app.data_products.technical_assets.service import TechnicalAssetService
+from app.database.deps import get_db_session
+from app.events.enums import EventEntityType, EventType
 from app.events.schema import CreateEvent
 from app.events.schema_response import (
     GetEventHistoryResponse,
-    GetEventHistoryResponseItemOld,
+    GetEventHistoryResponseItem,
 )
 from app.events.service import EventService
 from app.graph.graph import Graph
 from app.users.notifications.service import NotificationService
 from app.users.schema import User
 
-route = "/v2/data_products/{data_product_id}/technical_assets"
+router = APIRouter(
+    tags=["Data Products - Technical assets"],
+    prefix="/v2/data_products/{data_product_id}/technical_assets",
+)
 
-router = APIRouter(tags=["Data Products - Technical assets"])
 
-
-@router.get(route)
+@router.get(
+    "/",
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                Action.HIDDEN__DATA_PRODUCT__READ,
+                DataProductResolver,
+                object_id="data_product_id",
+            )
+        )
+    ],
+)
 def get_data_product_technical_assets(
-    data_product_id: UUID, db: Session = Depends(get_db_session)
+    data_product_id: UUID, db: Session = Depends(get_db_session, scope="function")
 ) -> GetTechnicalAssetsResponse:
     return GetTechnicalAssetsResponse(
         technical_assets=[
             GetTechnicalAssetsResponseItem.model_validate(do)
-            for do in DataOutputService(db).get_data_outputs_for_data_product(
+            for do in TechnicalAssetService(db).get_technical_assets_for_data_product(
                 data_product_id
             )
         ]
     )
 
 
-@router.get(f"{route}/{{id}}")
+@router.get(
+    "/{id}",
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                Action.HIDDEN__DATA_PRODUCT__READ,
+                DataProductResolver,
+                object_id="data_product_id",
+            )
+        )
+    ],
+)
 def get_technical_asset(
-    data_product_id: UUID, id: UUID, db: Session = Depends(get_db_session)
+    data_product_id: UUID,
+    id: UUID,
+    db: Session = Depends(get_db_session, scope="function"),
 ) -> GetTechnicalAssetsResponseItem:
     return GetTechnicalAssetsResponseItem.model_validate(
-        DataOutputService(db).get_data_output(data_product_id, id)
+        TechnicalAssetService(db).get_technical_asset(data_product_id, id)
     )
 
 
-@router.get(f"{route}/{{id}}/history")
+@router.get(
+    "/{id}/history",
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                Action.HIDDEN__DATA_PRODUCT__READ,
+                DataProductResolver,
+                object_id="data_product_id",
+            )
+        )
+    ],
+)
 def get_technical_asset_event_history(
-    data_product_id: UUID, id: UUID, db: Session = Depends(get_db_session)
+    data_product_id: UUID,
+    id: UUID,
+    db: Session = Depends(get_db_session, scope="function"),
 ) -> GetEventHistoryResponse:
     ensure_technical_asset_exists(id, db, data_product_id=data_product_id)
     return GetEventHistoryResponse(
         events=[
-            GetEventHistoryResponseItemOld.model_validate(event).convert()
+            GetEventHistoryResponseItem.model_validate(event)
             for event in EventService(db).get_history(
-                id, EventReferenceEntity.DATA_OUTPUT
+                id, EventEntityType.TECHNICAL_ASSET
             )
         ]
     )
 
 
 @router.delete(
-    f"{route}/{{id}}",
+    "/{id}",
     responses={
         404: {
             "description": "Technical asset not found",
@@ -95,7 +132,7 @@ def get_technical_asset_event_history(
         Depends(
             Authorization.enforce(
                 Action.DATA_PRODUCT__DELETE_TECHNICAL_ASSET,
-                DataOutputResolver,
+                TechnicalAssetResolver,
             )
         ),
     ],
@@ -103,30 +140,31 @@ def get_technical_asset_event_history(
 def remove_technical_asset(
     data_product_id: UUID,
     id: UUID,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    data_output = DataOutputService(db).remove_data_output(data_product_id, id)
+    technical_asset = TechnicalAssetService(db).remove_technical_asset(
+        data_product_id, id
+    )
     event_id = EventService(db).create_event(
         CreateEvent(
             name=EventType.DATA_OUTPUT_REMOVED,
             actor_id=authenticated_user.id,
             subject_id=id,
-            subject_type=EventReferenceEntity.DATA_OUTPUT,
-            deleted_subject_identifier=data_output.name,
-            target_id=data_output.owner_id,
-            target_type=EventReferenceEntity.DATA_PRODUCT,
-            deleted_target_identifier=data_output.owner.name,
+            subject_type=EventEntityType.TECHNICAL_ASSET,
+            deleted_subject_identifier=technical_asset.name,
+            target_id=technical_asset.owner_id,
+            target_type=EventEntityType.DATA_PRODUCT,
+            deleted_target_identifier=technical_asset.owner.name,
         ),
     )
     NotificationService(db).create_data_product_notifications(
-        data_product_id=data_output.owner_id, event_id=event_id
+        data_product_id=technical_asset.owner_id, event_id=event_id
     )
-    RefreshInfrastructureLambda().trigger()
 
 
 @router.put(
-    f"{route}/{{id}}",
+    "/{id}",
     responses={
         404: {
             "description": "Technical asset not found",
@@ -141,7 +179,7 @@ def remove_technical_asset(
         Depends(
             Authorization.enforce(
                 Action.DATA_PRODUCT__UPDATE_TECHNICAL_ASSET,
-                DataOutputResolver,
+                TechnicalAssetResolver,
             )
         ),
     ],
@@ -149,25 +187,26 @@ def remove_technical_asset(
 def update_technical_asset(
     data_product_id: UUID,
     id: UUID,
-    data_output: DataOutputUpdate,
-    db: Session = Depends(get_db_session),
+    technical_asset: TechnicalAssetUpdate,
+    db: Session = Depends(get_db_session, scope="function"),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> UpdateTechnicalAssetResponse:
-    result = DataOutputService(db).update_data_output(data_product_id, id, data_output)
+    result = TechnicalAssetService(db).update_technical_asset(
+        data_product_id, id, technical_asset
+    )
     EventService(db).create_event(
         CreateEvent(
             name=EventType.DATA_OUTPUT_UPDATED,
             subject_id=id,
-            subject_type=EventReferenceEntity.DATA_OUTPUT,
+            subject_type=EventEntityType.TECHNICAL_ASSET,
             actor_id=authenticated_user.id,
         )
     )
-    RefreshInfrastructureLambda().trigger()
     return result
 
 
 @router.put(
-    f"{route}/{{id}}/status",
+    "/{id}/status",
     responses={
         404: {
             "description": "Data Output not found",
@@ -180,7 +219,7 @@ def update_technical_asset(
         Depends(
             Authorization.enforce(
                 Action.DATA_PRODUCT__UPDATE_TECHNICAL_ASSET,
-                DataOutputResolver,
+                TechnicalAssetResolver,
             )
         ),
     ],
@@ -188,35 +227,46 @@ def update_technical_asset(
 def update_technical_asset_status(
     data_product_id: UUID,
     id: UUID,
-    data_output: DataOutputStatusUpdate,
-    db: Session = Depends(get_db_session),
+    technical_asset: TechnicalAssetStatusUpdate,
+    db: Session = Depends(get_db_session, scope="function"),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> None:
-    DataOutputService(db).update_data_output_status(
-        data_product_id, id, data_output, actor=authenticated_user
+    TechnicalAssetService(db).update_technical_asset_status(
+        data_product_id, id, technical_asset, actor=authenticated_user
     )
     EventService(db).create_event(
         CreateEvent(
             name=EventType.DATA_OUTPUT_UPDATED,
             subject_id=id,
-            subject_type=EventReferenceEntity.DATA_OUTPUT,
+            subject_type=EventEntityType.TECHNICAL_ASSET,
             actor_id=authenticated_user.id,
         )
     )
 
 
-@router.get(f"{route}/{{id}}/graph")
+@router.get(
+    "/{id}/graph",
+    dependencies=[
+        Depends(
+            Authorization.enforce(
+                Action.HIDDEN__DATA_PRODUCT__READ,
+                DataProductResolver,
+                object_id="data_product_id",
+            )
+        )
+    ],
+)
 def get_technical_asset_graph_data(
     data_product_id: UUID,
     id: UUID,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
     level: int = 3,
 ) -> Graph:
-    return DataOutputService(db).get_graph_data(data_product_id, id, level)
+    return TechnicalAssetService(db).get_graph_data(data_product_id, id, level)
 
 
 @router.post(
-    route,
+    "/",
     responses={
         200: {
             "description": "Technical asset successfully created",
@@ -240,24 +290,23 @@ def get_technical_asset_graph_data(
 def create_technical_asset(
     data_product_id: UUID,
     technical_asset: CreateTechnicalAssetRequest,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> CreateTechnicalAssetResponse:
-    technical_asset = DataOutputService(db).create_data_output(
+    technical_asset = TechnicalAssetService(db).create_technical_asset(
         data_product_id, technical_asset
     )
     event_id = EventService(db).create_event(
         CreateEvent(
             name=EventType.DATA_OUTPUT_CREATED,
             subject_id=technical_asset.id,
-            subject_type=EventReferenceEntity.DATA_OUTPUT,
+            subject_type=EventEntityType.TECHNICAL_ASSET,
             target_id=technical_asset.owner_id,
-            target_type=EventReferenceEntity.DATA_PRODUCT,
+            target_type=EventEntityType.DATA_PRODUCT,
             actor_id=authenticated_user.id,
         ),
     )
     NotificationService(db).create_data_product_notifications(
         data_product_id=technical_asset.owner_id, event_id=event_id
     )
-    RefreshInfrastructureLambda().trigger()
     return CreateTechnicalAssetResponse(id=technical_asset.id)

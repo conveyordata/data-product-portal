@@ -15,7 +15,7 @@ from app.configuration.data_product_settings.schema_response import (
 from app.configuration.data_product_settings.service import DataProductSettingService
 from app.core.authz import Action, Authorization
 from app.core.authz.resolvers import EmptyResolver
-from app.database.database import get_db_session
+from app.database.deps import get_db_session
 
 router = APIRouter(
     tags=["Configuration - Data Product settings"],
@@ -33,7 +33,7 @@ router = APIRouter(
 )
 def create_data_product_setting(
     setting: DataProductSettingCreate,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
 ) -> CreateDataProductSettingResponse:
     return DataProductSettingService(db).create_data_product_setting(setting)
 
@@ -49,7 +49,7 @@ def create_data_product_setting(
 def update_data_product_setting(
     id: UUID,
     setting: DataProductSettingUpdate,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
 ) -> UpdateDataProductSettingResponse:
     return DataProductSettingService(db).update_data_product_setting(id, setting)
 
@@ -64,14 +64,14 @@ def update_data_product_setting(
 )
 def remove_data_product_setting(
     id: UUID,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
 ) -> None:
     return DataProductSettingService(db).delete_data_product_setting(id)
 
 
 @router.get("")
 def get_data_products_settings(
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
 ) -> DataProductSettingsGet:
     return DataProductSettingsGet(
         data_product_settings=DataProductSettingService(db).get_data_product_settings()

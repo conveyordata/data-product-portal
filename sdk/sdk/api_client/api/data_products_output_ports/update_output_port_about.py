@@ -7,8 +7,8 @@ import httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
-from ...models.dataset_about_update import DatasetAboutUpdate
 from ...models.http_validation_error import HTTPValidationError
+from ...models.output_port_about_update import OutputPortAboutUpdate
 from ...types import Response
 
 
@@ -16,7 +16,7 @@ def _get_kwargs(
     data_product_id: UUID,
     id: UUID,
     *,
-    body: DatasetAboutUpdate,
+    body: OutputPortAboutUpdate,
 ) -> dict[str, Any]:
     headers: dict[str, Any] = {}
 
@@ -74,14 +74,14 @@ def sync_detailed(
     id: UUID,
     *,
     client: AuthenticatedClient | Client,
-    body: DatasetAboutUpdate,
+    body: OutputPortAboutUpdate,
 ) -> Response[Any | HTTPValidationError]:
     """Update Output Port About
 
     Args:
         data_product_id (UUID):
         id (UUID):
-        body (DatasetAboutUpdate):
+        body (OutputPortAboutUpdate):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -109,14 +109,14 @@ def sync(
     id: UUID,
     *,
     client: AuthenticatedClient | Client,
-    body: DatasetAboutUpdate,
+    body: OutputPortAboutUpdate,
 ) -> Any | HTTPValidationError | None:
     """Update Output Port About
 
     Args:
         data_product_id (UUID):
         id (UUID):
-        body (DatasetAboutUpdate):
+        body (OutputPortAboutUpdate):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -139,14 +139,14 @@ async def asyncio_detailed(
     id: UUID,
     *,
     client: AuthenticatedClient | Client,
-    body: DatasetAboutUpdate,
+    body: OutputPortAboutUpdate,
 ) -> Response[Any | HTTPValidationError]:
     """Update Output Port About
 
     Args:
         data_product_id (UUID):
         id (UUID):
-        body (DatasetAboutUpdate):
+        body (OutputPortAboutUpdate):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -172,14 +172,14 @@ async def asyncio(
     id: UUID,
     *,
     client: AuthenticatedClient | Client,
-    body: DatasetAboutUpdate,
+    body: OutputPortAboutUpdate,
 ) -> Any | HTTPValidationError | None:
     """Update Output Port About
 
     Args:
         data_product_id (UUID):
         id (UUID):
-        body (DatasetAboutUpdate):
+        body (OutputPortAboutUpdate):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.

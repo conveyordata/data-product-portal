@@ -1,0 +1,43 @@
+[project]
+name = "data-product-portal-plugins"
+version = "0.8.0"
+description = "First-party technical asset plugins for Data Product Portal"
+requires-python = ">=3.13"
+dependencies = [
+    "data-product-portal>=0.8.0",
+    "fastapi>=0.141.1",
+    "pydantic>=2.13.5",
+    "sqlalchemy>=2.0.52",
+    "alembic>=1.20.0",
+    "boto3>=1.43.93",
+    "fastmcp>=3.4.7",
+]
+
+[project.entry-points."data_product_portal.plugins"]
+agno = "portal_plugins.agno.schema:AgnoPlugin"
+azure-blob = "portal_plugins.azure_blob.schema:AzureBlobTechnicalAssetConfiguration"
+conveyor = "portal_plugins.conveyor.schema:ConveyorPlugin"
+databricks = "portal_plugins.databricks.schema:DatabricksTechnicalAssetConfiguration"
+github = "portal_plugins.github.schema:GitHubPlugin"
+glue = "portal_plugins.glue.schema:GlueTechnicalAssetConfiguration"
+osi-semantic-model = "portal_plugins.osi_sem_model.schema:OSISemanticModelTechnicalAssetConfiguration"
+parameter-store = "portal_plugins.parameter_store.schema:ParameterStoreTechnicalAssetConfiguration"
+postgresql = "portal_plugins.postgresql.schema:PostgreSQLTechnicalAssetConfiguration"
+redshift = "portal_plugins.redshift.schema:RedshiftTechnicalAssetConfiguration"
+s3 = "portal_plugins.s3.schema:S3TechnicalAssetConfiguration"
+snowflake = "portal_plugins.snowflake.schema:SnowflakeTechnicalAssetConfiguration"
+
+[tool.poetry]
+packages = [{ include = "portal_plugins", from = "." }]
+
+[tool.poetry.dependencies]
+python = "^3.13"
+
+[tool.mypy]
+ignore_missing_imports = true
+explicit_package_bases = true
+mypy_path = "$MYPY_CONFIG_FILE_DIR:$MYPY_CONFIG_FILE_DIR/../backend"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"

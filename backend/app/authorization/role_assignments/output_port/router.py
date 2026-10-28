@@ -1,7 +1,7 @@
 from typing import Annotated, Sequence
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, Query
 from pydantic.json_schema import SkipJsonSchema
 from sqlalchemy.orm import Session
 
@@ -22,12 +22,12 @@ from app.authorization.role_assignments.output_port.service import RoleAssignmen
 from app.core.auth.auth import get_authenticated_user
 from app.core.authz import Action, Authorization
 from app.core.authz.resolvers import (
-    DatasetResolver,
-    DatasetRoleAssignmentResolver,
     EmptyResolver,
+    OutputPortResolver,
+    OutputPortRoleAssignmentResolver,
 )
-from app.database.database import get_db_session
-from app.events.enums import EventReferenceEntity, EventType
+from app.database.deps import get_db_session
+from app.events.enums import EventEntityType, EventType
 from app.events.schema import CreateEvent
 from app.events.service import EventService
 from app.users.notifications.service import NotificationService
@@ -42,14 +42,14 @@ router = APIRouter(prefix="/v2/authz/role_assignments/output_port")
         Depends(
             Authorization.enforce(
                 Action.OUTPUT_PORT__DELETE_USER,
-                resolver=DatasetRoleAssignmentResolver,
+                resolver=OutputPortRoleAssignmentResolver,
             )
         )
     ],
 )
 def delete_output_port_role_assignment(
     id: UUID,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> DeleteOutputPortRoleAssignmentResponse:
     assignment = RoleAssignmentService(db).delete_assignment(id)
@@ -59,15 +59,15 @@ def delete_output_port_role_assignment(
     event_id = EventService(db).create_event(
         CreateEvent(
             name=EventType.DATASET_ROLE_ASSIGNMENT_REMOVED,
-            subject_id=assignment.dataset_id,
-            subject_type=EventReferenceEntity.DATASET,
+            subject_id=assignment.output_port_id,
+            subject_type=EventEntityType.OUTPUT_PORT,
             target_id=assignment.user_id,
-            target_type=EventReferenceEntity.USER,
+            target_type=EventEntityType.USER,
             actor_id=authenticated_user.id,
         ),
     )
     NotificationService(db).create_dataset_notifications(
-        dataset_id=assignment.dataset_id,
+        dataset_id=assignment.output_port_id,
         event_id=event_id,
         extra_receiver_ids=(
             [requester] if (requester := assignment.requested_by_id) is not None else []
@@ -75,7 +75,7 @@ def delete_output_port_role_assignment(
     )
     return DeleteOutputPortRoleAssignmentResponse(
         id=assignment.id,
-        output_port_id=assignment.dataset_id,
+        output_port_id=assignment.output_port_id,
     )
 
 
@@ -84,7 +84,7 @@ def convert_to_role_assignment(
 ) -> OutputPortRoleAssignmentResponse:
     return OutputPortRoleAssignmentResponse(
         id=assignment.id,
-        output_port=assignment.dataset,
+        output_port=assignment.output_port,
         user=assignment.user,
         role=assignment.role,
         decision=assignment.decision,
@@ -101,7 +101,7 @@ def list_output_port_role_assignments(
     user_id: Annotated[UUID | SkipJsonSchema[None], Query()] = None,
     role_id: Annotated[UUID | SkipJsonSchema[None], Query()] = None,
     decision: Annotated[DecisionStatus | SkipJsonSchema[None], Query()] = None,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
 ) -> ListOutputPortRoleAssignmentsResponse:
     return ListOutputPortRoleAssignmentsResponse(
         role_assignments=[
@@ -128,7 +128,7 @@ def list_output_port_role_assignments(
 )
 def request_output_port_role_assignment(
     request: RequestOutputPortRoleAssignment,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> OutputPortRoleAssignmentResponse:
     assignment = RoleAssignmentService(db).create_assignment(
@@ -141,10 +141,10 @@ def request_output_port_role_assignment(
     EventService(db).create_event(
         CreateEvent(
             name=EventType.DATASET_ROLE_ASSIGNMENT_REQUESTED,
-            subject_id=assignment.dataset_id,
-            subject_type=EventReferenceEntity.DATASET,
+            subject_id=assignment.output_port_id,
+            subject_type=EventEntityType.OUTPUT_PORT,
             target_id=assignment.user_id,
-            target_type=EventReferenceEntity.USER,
+            target_type=EventEntityType.USER,
             actor_id=authenticated_user.id,
         )
     )
@@ -157,7 +157,7 @@ def request_output_port_role_assignment(
         Depends(
             Authorization.enforce(
                 Action.OUTPUT_PORT__CREATE_USER,
-                resolver=DatasetResolver,
+                resolver=OutputPortResolver,
                 object_id="output_port_id",
             )
         )
@@ -165,7 +165,7 @@ def request_output_port_role_assignment(
 )
 def create_output_port_role_assignment(
     request: CreateOutputPortRoleAssignment,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
     authenticated_user: User = Depends(get_authenticated_user),
 ) -> OutputPortRoleAssignmentResponse:
     service = RoleAssignmentService(db)
@@ -179,10 +179,10 @@ def create_output_port_role_assignment(
     EventService(db).create_event(
         CreateEvent(
             name=EventType.DATASET_ROLE_ASSIGNMENT_CREATED,
-            subject_id=role_assignment.dataset_id,
-            subject_type=EventReferenceEntity.DATASET,
+            subject_id=role_assignment.output_port_id,
+            subject_type=EventEntityType.OUTPUT_PORT,
             target_id=role_assignment.user_id,
-            target_type=EventReferenceEntity.USER,
+            target_type=EventEntityType.USER,
             actor_id=authenticated_user.id,
         )
     )
@@ -192,7 +192,7 @@ def create_output_port_role_assignment(
         is_admin := Authorization().has_admin_role(user_id=str(authenticated_user.id))
     ):
         approvers = service.users_with_authz_action(
-            dataset_id=role_assignment.dataset_id,
+            dataset_id=role_assignment.output_port_id,
             action=Action.OUTPUT_PORT__APPROVE_USER_REQUEST,
         )
 
@@ -216,7 +216,7 @@ def create_output_port_role_assignment(
         Depends(
             Authorization.enforce(
                 Action.OUTPUT_PORT__APPROVE_USER_REQUEST,
-                resolver=DatasetRoleAssignmentResolver,
+                resolver=OutputPortRoleAssignmentResolver,
             )
         )
     ],
@@ -224,22 +224,11 @@ def create_output_port_role_assignment(
 def decide_output_port_role_assignment(
     id: UUID,
     request: DecideOutputPortRoleAssignment,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
     user: User = Depends(get_authenticated_user),
 ) -> OutputPortRoleAssignmentResponse:
     service = RoleAssignmentService(db)
-    original = service.get_assignment(id)
-
-    if original.decision not in (DecisionStatus.PENDING, request.decision):
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="This assignment was already decided",
-        )
-    if request.decision is DecisionStatus.APPROVED and original.role_id is None:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="Cannot approve a request that does not have a role assignment",
-        )
+    service.ensure_can_decide(id, request.decision)
 
     assignment = service.update_assignment(
         UpdateOutputPortRoleAssignment(id=id, decision=request.decision), actor=user
@@ -254,15 +243,15 @@ def decide_output_port_role_assignment(
                 if assignment.decision == DecisionStatus.APPROVED
                 else EventType.DATASET_ROLE_ASSIGNMENT_DENIED
             ),
-            subject_id=assignment.dataset_id,
-            subject_type=EventReferenceEntity.DATASET,
+            subject_id=assignment.output_port_id,
+            subject_type=EventEntityType.OUTPUT_PORT,
             target_id=assignment.user_id,
-            target_type=EventReferenceEntity.USER,
+            target_type=EventEntityType.USER,
             actor_id=user.id,
         ),
     )
     NotificationService(db).create_dataset_notifications(
-        dataset_id=assignment.dataset_id,
+        dataset_id=assignment.output_port_id,
         event_id=event_id,
         extra_receiver_ids=(
             [assignment.requested_by_id]
@@ -280,7 +269,7 @@ def decide_output_port_role_assignment(
         Depends(
             Authorization.enforce(
                 Action.OUTPUT_PORT__UPDATE_USER,
-                resolver=DatasetRoleAssignmentResolver,
+                resolver=OutputPortRoleAssignmentResolver,
             )
         )
     ],
@@ -288,7 +277,7 @@ def decide_output_port_role_assignment(
 def modify_output_port_role_assignment(
     id: UUID,
     request: ModifyOutputPortRoleAssignment,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
     user: User = Depends(get_authenticated_user),
 ) -> OutputPortRoleAssignmentResponse:
     service = RoleAssignmentService(db)
@@ -303,15 +292,15 @@ def modify_output_port_role_assignment(
     event_id = EventService(db).create_event(
         CreateEvent(
             name=EventType.DATASET_ROLE_ASSIGNMENT_UPDATED,
-            subject_id=assignment.dataset_id,
-            subject_type=EventReferenceEntity.DATASET,
+            subject_id=assignment.output_port_id,
+            subject_type=EventEntityType.OUTPUT_PORT,
             target_id=assignment.user_id,
-            target_type=EventReferenceEntity.USER,
+            target_type=EventEntityType.USER,
             actor_id=user.id,
         ),
     )
     NotificationService(db).create_dataset_notifications(
-        dataset_id=assignment.dataset_id,
+        dataset_id=assignment.output_port_id,
         event_id=event_id,
         extra_receiver_ids=(
             [requester] if (requester := assignment.requested_by_id) is not None else []

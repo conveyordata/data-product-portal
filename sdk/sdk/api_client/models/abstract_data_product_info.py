@@ -18,11 +18,13 @@ class AbstractDataProductInfo:
         name (str):
         namespace (str):
         abstract_data_product_type (AbstractDataProductType):
+        is_redacted (bool):
     """
 
     name: str
     namespace: str
     abstract_data_product_type: AbstractDataProductType
+    is_redacted: bool
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -32,6 +34,8 @@ class AbstractDataProductInfo:
 
         abstract_data_product_type = self.abstract_data_product_type.value
 
+        is_redacted = self.is_redacted
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
@@ -39,6 +43,7 @@ class AbstractDataProductInfo:
                 "name": name,
                 "namespace": namespace,
                 "abstract_data_product_type": abstract_data_product_type,
+                "is_redacted": is_redacted,
             }
         )
 
@@ -55,10 +60,13 @@ class AbstractDataProductInfo:
             d.pop("abstract_data_product_type")
         )
 
+        is_redacted = d.pop("is_redacted")
+
         abstract_data_product_info = cls(
             name=name,
             namespace=namespace,
             abstract_data_product_type=abstract_data_product_type,
+            is_redacted=is_redacted,
         )
 
         abstract_data_product_info.additional_properties = d

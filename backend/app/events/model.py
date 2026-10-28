@@ -1,7 +1,7 @@
 import uuid
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Column, Enum, ForeignKey, String
+from sqlalchemy import Column, Enum, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -9,12 +9,13 @@ from app.database.database import Base
 from app.shared.model import BaseORM
 from app.users.notifications.model import Notification
 
-from .enums import EventReferenceEntity
+from .enums import EventEntityType
 
 if TYPE_CHECKING:
     from app.data_products.model import DataProduct
-    from app.data_products.output_ports.model import Dataset
+    from app.data_products.output_ports.model import OutputPort
     from app.data_products.technical_assets.model import TechnicalAsset
+    from app.explorations.model import Exploration
     from app.users.model import User
 
 
@@ -27,10 +28,15 @@ class Event(Base, BaseORM):
     subject_id = Column(UUID(as_uuid=True))
     deleted_target_identifier: Mapped[str] = mapped_column(nullable=True)
     target_id = Column(UUID(as_uuid=True))
-    subject_type = Column(Enum(EventReferenceEntity))
-    target_type = Column(Enum(EventReferenceEntity))
-    actor_id = Column(UUID(as_uuid=True), ForeignKey("users.id"))
-    actor: Mapped["User"] = relationship("User")
+    subject_type = Column(Enum(EventEntityType, native_enum=False))
+    target_type = Column(Enum(EventEntityType, native_enum=False))
+    deleted_actor_identifier: Mapped[str | None] = mapped_column(String)
+    actor_id = Column(UUID(as_uuid=True))
+    actor: Mapped["User | None"] = relationship(
+        "User",
+        primaryjoin="foreign(Event.actor_id) == User.id",
+        back_populates="events",
+    )
 
     notifications: Mapped[list[Notification]] = relationship(
         "Notification",
@@ -52,15 +58,21 @@ class Event(Base, BaseORM):
         ",and_(Event.target_id == foreign(User.id), "
         "Event.target_type == 'USER'))",
     )
-    dataset: Mapped["Dataset"] = relationship(
-        primaryjoin="or_(and_(Event.subject_id == foreign(Dataset.id),"
-        " Event.subject_type == 'DATASET'),"
-        "and_(Event.target_id == foreign(Dataset.id),"
-        " Event.target_type == 'DATASET'))",
+    output_port: Mapped["OutputPort"] = relationship(
+        primaryjoin="or_(and_(Event.subject_id == foreign(OutputPort.id),"
+        " Event.subject_type == 'OUTPUT_PORT'),"
+        "and_(Event.target_id == foreign(OutputPort.id),"
+        " Event.target_type == 'OUTPUT_PORT'))",
     )
-    data_output: Mapped["TechnicalAsset"] = relationship(
+    technical_asset: Mapped["TechnicalAsset"] = relationship(
         primaryjoin="or_(and_(Event.subject_id == "
-        "foreign(TechnicalAsset.id), Event.subject_type == 'DATA_OUTPUT'),"
+        "foreign(TechnicalAsset.id), Event.subject_type == 'TECHNICAL_ASSET'),"
         "and_(Event.target_id == foreign(TechnicalAsset.id),"
-        " Event.target_type == 'DATA_OUTPUT'))",
+        " Event.target_type == 'TECHNICAL_ASSET'))",
+    )
+    exploration: Mapped["Exploration"] = relationship(
+        primaryjoin="or_(and_(Event.subject_id == "
+        "foreign(Exploration.id), Event.subject_type == 'EXPLORATION'), "
+        "and_(Event.target_id == foreign(Exploration.id), "
+        "Event.target_type == 'EXPLORATION'))",
     )

@@ -22,10 +22,10 @@ from app.configuration.data_product_settings.schema_response import (
     DataProductSettingsGetItem,
     UpdateDataProductSettingResponse,
 )
-from app.core.aws.refresh_infrastructure_lambda import RefreshInfrastructureLambda
 from app.core.namespace.validation import (
     DataProductSettingNamespaceValidator,
 )
+from app.data_products.output_ports.model import ensure_output_port_exists
 from app.resource_names.service import ResourceNameValidityType
 
 
@@ -48,6 +48,7 @@ class DataProductSettingService:
         value: str,
     ) -> None:
         scope = self.db.get(DataProductSettingModel, setting_id).scope
+        output_port_data_product_id = None
         if scope == DataProductSettingScope.DATAPRODUCT:
             setting = self.db.scalars(
                 select(DataProductSettingValueModel).filter_by(
@@ -55,9 +56,11 @@ class DataProductSettingService:
                 )
             ).first()
         elif scope == DataProductSettingScope.DATASET:
+            output_port = ensure_output_port_exists(product_id, self.db)
+            output_port_data_product_id = output_port.data_product_id
             setting = self.db.scalars(
                 select(DataProductSettingValueModel).filter_by(
-                    dataset_id=product_id, data_product_setting_id=setting_id
+                    output_port_id=product_id, data_product_setting_id=setting_id
                 )
             ).first()
         else:
@@ -65,6 +68,12 @@ class DataProductSettingService:
 
         if setting:
             setting.value = value
+            if (
+                scope == DataProductSettingScope.DATASET
+                and setting.data_product_id is None
+                and output_port_data_product_id is not None
+            ):
+                setting.data_product_id = output_port_data_product_id
         else:
             if scope == DataProductSettingScope.DATAPRODUCT:
                 new_setting = DataProductSettingValueCreate(
@@ -74,15 +83,15 @@ class DataProductSettingService:
                 )
             elif scope == DataProductSettingScope.DATASET:
                 new_setting = DataProductSettingValueCreate(
-                    dataset_id=product_id,
+                    data_product_id=output_port_data_product_id,
+                    output_port_id=product_id,
                     data_product_setting_id=setting_id,
                     value=value,
                 )
             self.db.add(
                 DataProductSettingValueModel(**new_setting.parse_pydantic_schema())
             )
-        self.db.commit()
-        RefreshInfrastructureLambda().trigger()
+        self.db.flush()
 
     def create_data_product_setting(
         self, setting: DataProductSettingCreate
@@ -99,7 +108,7 @@ class DataProductSettingService:
 
         setting = DataProductSettingModel(**setting.parse_pydantic_schema())
         self.db.add(setting)
-        self.db.commit()
+        self.db.flush()
         return CreateDataProductSettingResponse(id=setting.id)
 
     def update_data_product_setting(
@@ -125,7 +134,7 @@ class DataProductSettingService:
         for k, v in update_setting.items():
             setattr(current_setting, k, v)
 
-        self.db.commit()
+        self.db.flush()
         return UpdateDataProductSettingResponse(id=id)
 
     def delete_data_product_setting(self, setting_id: UUID) -> None:
@@ -134,4 +143,4 @@ class DataProductSettingService:
             setting_id,
         )
         self.db.delete(data_product_setting)
-        self.db.commit()
+        self.db.flush()

@@ -83,11 +83,15 @@ For more information about output ports, take a look at the concept page describ
 
 ### Access Types
 
-There are currently 3 possible access types.
+Each Output Port has an access type. Administrators define the access types of the organisation in **Settings > Access Policy**,
+and map each of them to one of three access functions:
 
-- Public: All access requests are immediately approved. Any Data Product can use your dataset as input.
-- Restricted: Access requests are delivered to the dataset owners. These owners are in control over which Data Products can use the data downstream.
-- Private: Private datasets don't show up in the overview. It is only possible to link to a private dataset if you are an owner of both the Dataset and the requesting Data Product.
+- Auto-approve: All access requests are immediately approved. Any Data Product can use your Output Port as input.
+- Approval required: Access requests are delivered to the Output Port owners. These owners are in control over which Data Products can use the data downstream.
+- Invite only (hidden): The Output Port is hidden except from members of its owning Data Product, users with direct access, and members of approved Consuming Data Products; access requests require approval.
+
+Out of the box, Portal provides the access types Unrestricted, Restricted and Private, mapped to these functions in that order.
+Output Ports of hidden Data Products can only use access types mapped to Invite only, so at least one access type always stays mapped to it.
 
 ![Creating an output port](./img/output-port-modal.png)
 
@@ -116,6 +120,16 @@ For more information about input ports, take a look at the concept page describi
    You can only use them after your request has been approved by the owners of the Output Port.
 
 ![Linking an Output port to an Input port](./img/linking-output-input-port.png)
+
+## Managing access over time
+
+Once an Input Port is approved, access may be **permanent** or **time-bound**, depending on the Output Port owner's [Access Duration Policy](../concepts/output-ports.md#access-duration-policy).
+
+- **Expiring soon**: When a time-bound grant is nearing its end, the Input Port shows an **Expiring soon** tag and a **Renew Access** button. Renewing submits a fresh request without losing the history of the current grant.
+- **Cancel Request**: Withdraws a request you made that is still pending a decision.
+- **Revoke Access**: Ends an active grant immediately. Either you (the consumer) or the Output Port owner can revoke access at any time.
+
+If a time-bound grant lapses without being renewed, access ends automatically and you'll need to request or renew it to continue consuming the data.
 
 ## Conclusion
 

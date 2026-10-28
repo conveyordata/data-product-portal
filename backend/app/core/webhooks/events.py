@@ -1,5 +1,6 @@
 """Typed Pydantic models for each v2 webhook event payload."""
 
+from datetime import datetime
 from typing import Any, ClassVar
 from uuid import UUID
 
@@ -23,7 +24,7 @@ class V2Event(BaseModel):
         if "event_type" not in cls.__dict__:
             raise TypeError(f"{cls.__name__} must define an event_type() classmethod")
         if cls.event_type() in cls.events:
-            raise Exception("Duplicated event type detected")
+            raise Exception(f"Duplicated event type detected, {cls.event_type()}")
         cls.events.append(cls.event_type())
 
     @classmethod
@@ -47,10 +48,21 @@ class DataProductEvent(V2Event):
         return "data_product.event"
 
 
+class DataProductEnvironmentAddedEvent(V2Event):
+    data_product_id: UUID
+    environment: str
+    creation_date: datetime
+
+    @classmethod
+    def event_type(cls) -> str:
+        return "data_product.environment_added"
+
+
 class InputPortEvent(V2Event):
     id: UUID
     consuming_abstract_data_product_id: UUID
     consuming_abstract_data_product_type: AbstractDataProductType
+    producing_data_product_id: UUID
 
     @classmethod
     def event_type(cls) -> str:
@@ -109,3 +121,20 @@ class OutputPortTechnicalAssetLinkEvent(V2Event):
     @classmethod
     def event_type(cls) -> str:
         return "output_port_technical_asset_link.event"
+
+
+class DataProductSettingValueEvent(V2Event):
+    id: UUID
+    data_product_id: UUID
+
+    @classmethod
+    def event_type(cls) -> str:
+        return "data_product_setting_value.event"
+
+
+class DomainEvent(V2Event):
+    id: UUID
+
+    @classmethod
+    def event_type(cls) -> str:
+        return "domain.event"

@@ -8,6 +8,7 @@ export enum TagTypes {
     DataProductType = 'DataProductType',
     Tags = 'Tags',
     DataProductLifecycle = 'DataProductLifecycle',
+    OutputPortAccessType = 'OutputPortAccessType',
     DataProductSetting = 'DataProductSetting',
     CurrentUser = 'CurrentUser',
     User = 'User',
@@ -35,6 +36,9 @@ export enum TagTypes {
     History = 'History',
     Notifications = 'Notifications',
     PendingAction = 'PendingAction',
+    MyRequests = 'MyRequests',
+    AccessDuration = 'AccessDuration',
+    AccessMode = 'AccessMode',
 }
 
 export const STATIC_TAG_ID = {

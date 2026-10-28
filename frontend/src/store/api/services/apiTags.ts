@@ -1,10 +1,14 @@
+import { HttpStatusCode } from 'axios';
 import { api } from '@/store/api/services/generated/completeServiceApi.ts';
 import { STATIC_TAG_ID, TagTypes } from '@/store/api/services/tag-types.ts';
+import { configurationAccessDurationsTags } from '@/store/api/services/tags/configurationAccessDurationsTags.ts';
+import { configurationAccessModesTags } from '@/store/api/services/tags/configurationAccessModesTags.ts';
 import { dataProductsOutputPortsInputPortsTags } from '@/store/api/services/tags/dataProductsOutputPortsInputPortsTags.ts';
 import { dataProductOutputPortTags } from '@/store/api/services/tags/dataProductsOutputPortsTags.ts';
 import { dataProductTechnicalAssetsTags } from '@/store/api/services/tags/dataProductsTechicalAssetsTags.ts';
 import { dataProductTags } from '@/store/api/services/tags/dataProductTags.ts';
 import { explorationTags } from '@/store/api/services/tags/explorationTags.ts';
+import { outputPortSearchTags } from '@/store/api/services/tags/outputPortsSearchApi.ts';
 import { usersNotificationsTags } from '@/store/api/services/tags/usersNotificationsTags.ts';
 import { usersTags } from '@/store/api/services/tags/usersTags.ts';
 
@@ -193,6 +197,28 @@ api.enhanceEndpoints({
             invalidatesTags: [{ type: TagTypes.DataProductLifecycle, id: STATIC_TAG_ID.LIST }],
         },
 
+        getOutputPortAccessTypes: {
+            providesTags: [{ type: TagTypes.OutputPortAccessType, id: STATIC_TAG_ID.LIST }],
+        },
+        createOutputPortAccessType: {
+            invalidatesTags: [{ type: TagTypes.OutputPortAccessType, id: STATIC_TAG_ID.LIST }],
+        },
+        removeOutputPortAccessType: {
+            invalidatesTags: [{ type: TagTypes.OutputPortAccessType, id: STATIC_TAG_ID.LIST }],
+        },
+        updateOutputPortAccessType: {
+            invalidatesTags: [
+                { type: TagTypes.OutputPortAccessType, id: STATIC_TAG_ID.LIST },
+                { type: TagTypes.OutputPort },
+                { type: TagTypes.TechnicalAsset },
+                { type: TagTypes.DataProductTechnicalAssets },
+                { type: TagTypes.DataProductOutputPorts },
+                { type: TagTypes.DataProductInputPorts },
+                { type: TagTypes.ExplorationInputPorts },
+                { type: TagTypes.UserOutputPorts },
+            ],
+        },
+
         getDataProductsSettings: {
             providesTags: [{ type: TagTypes.DataProductSetting, id: STATIC_TAG_ID.LIST }],
         },
@@ -249,6 +275,7 @@ api.enhanceEndpoints({
             ],
         },
         removeDomain: {
+            transformResponse: (_, meta) => meta?.status === HttpStatusCode.Accepted,
             invalidatesTags: [{ type: TagTypes.Domain, id: STATIC_TAG_ID.LIST }],
         },
         migrateDomain: {
@@ -298,5 +325,9 @@ api.enhanceEndpoints({
         ...usersTags,
         ...dataProductsOutputPortsInputPortsTags,
         ...explorationTags,
+        ...configurationAccessDurationsTags,
+        ...configurationAccessModesTags,
+        ...configurationAccessModesTags,
+        ...outputPortSearchTags,
     },
 });

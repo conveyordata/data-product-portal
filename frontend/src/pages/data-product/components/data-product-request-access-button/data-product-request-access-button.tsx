@@ -7,8 +7,8 @@ import { useModal } from '@/hooks/use-modal';
 import { useRequestDataProductRoleAssignmentMutation } from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
 import { useGetRolesQuery } from '@/store/api/services/generated/authorizationRolesApi.ts';
 import { type UsersGet, useGetUsersQuery } from '@/store/api/services/generated/usersApi.ts';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { Scope } from '@/types/roles';
+import { dispatchMessage } from '@/utils/feedback.ts';
 import styles from './data-product-request-access-button.module.scss';
 
 type Props = {

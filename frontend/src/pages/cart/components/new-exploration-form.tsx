@@ -1,6 +1,5 @@
 import { usePostHog } from '@posthog/react';
 import { Button, Flex, Form, type FormProps, Input, Select } from 'antd';
-import { useForm } from 'antd/es/form/Form';
 import { t } from 'i18next';
 import { useCallback, useEffect } from 'react';
 import { useSelector } from 'react-redux';
@@ -12,24 +11,19 @@ import { useFormPersist } from '@/hooks/use-form-persist.tsx';
 import { JustificationFormItem } from '@/pages/cart/components/form-item-justification.tsx';
 import { useAppDispatch } from '@/store';
 import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
-import { useGetDomainsQuery } from '@/store/api/services/generated/configurationDomainsApi.ts';
+import { DomainStatus, useGetDomainsQuery } from '@/store/api/services/generated/configurationDomainsApi.ts';
 import type { DataProductCreate } from '@/store/api/services/generated/dataProductsApi.ts';
 import { useCreateExplorationMutation } from '@/store/api/services/generated/explorationsApi.ts';
-import type { SearchOutputPortsResponseItem } from '@/store/api/services/generated/outputPortsSearchApi.ts';
 import {
     ResourceNameModel,
     ResourceNameValidityType,
     useLazySanitizeResourceNameQuery,
     useLazyValidateResourceNameQuery,
 } from '@/store/api/services/generated/resourceNamesApi.ts';
-import { clearCart } from '@/store/features/cart/cart-slice.ts';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import { clearCart, selectCartOutputPorts } from '@/store/features/cart/cart-slice.ts';
 import { createExplorationIdPath } from '@/types/navigation.ts';
+import { dispatchMessage } from '@/utils/feedback.ts';
 import { selectFilterOptionByLabelAndValue } from '@/utils/form.helper.ts';
-
-type Props = {
-    cartOutputPorts?: SearchOutputPortsResponseItem[];
-};
 
 type CreateExplorationRequestForm = {
     name: string;
@@ -37,11 +31,12 @@ type CreateExplorationRequestForm = {
     justification: string;
 };
 
-export const NewExplorationForm = ({ cartOutputPorts }: Props) => {
+export const NewExplorationForm = () => {
+    const cartOutputPorts = useSelector(selectCartOutputPorts);
     const dispatch = useAppDispatch();
     const posthog = usePostHog();
     const navigate = useNavigate();
-    const [form] = useForm<CreateExplorationRequestForm>();
+    const [form] = Form.useForm<CreateExplorationRequestForm>();
     const { data: { domains = [] } = {}, isFetching: isFetchingDomains } = useGetDomainsQuery();
     const currentUser = useSelector(selectCurrentUser);
 
@@ -72,6 +67,15 @@ export const NewExplorationForm = ({ cartOutputPorts }: Props) => {
                     console.error('resource name should be fetched first');
                     return;
                 }
+                if (!sanitizedResourceName.resource_name) {
+                    form.setFields([
+                        {
+                            name: 'name',
+                            errors: [t('The name of the Exploration must contain a letter or a digit')],
+                        },
+                    ]);
+                    return;
+                }
                 const { justification, ...request } = values;
                 const response = await createExploration({
                     //For an Exploration we use the justification as description
@@ -79,7 +83,10 @@ export const NewExplorationForm = ({ cartOutputPorts }: Props) => {
                     description: justification,
                     namespace: sanitizedResourceName.resource_name,
                     input_ports: {
-                        output_ports: cartOutputPorts?.map((dataset) => dataset.id),
+                        output_ports: cartOutputPorts?.map((dataset) => ({
+                            output_port_id: dataset.outputPortId,
+                            access_mode_id: dataset.accessModeId,
+                        })),
                         justification,
                     },
                     ...request,
@@ -104,6 +111,7 @@ export const NewExplorationForm = ({ cartOutputPorts }: Props) => {
             navigate,
             sanitizedResourceNameSuccess,
             sanitizedResourceName,
+            form,
         ],
     );
     const initialValues = {
@@ -144,13 +152,13 @@ export const NewExplorationForm = ({ cartOutputPorts }: Props) => {
         <Form<CreateExplorationRequestForm>
             form={form}
             onFinish={onFinish}
-            layout={'vertical'}
+            layout="vertical"
             onValuesChange={onValuesChange}
-            autoComplete={'off'}
+            autoComplete="off"
             initialValues={initialValues}
         >
             <Form.Item<DataProductCreate>
-                name={'name'}
+                name="name"
                 label={t('Name')}
                 tooltip={t('The name of your Exploration')}
                 rules={[
@@ -163,7 +171,7 @@ export const NewExplorationForm = ({ cartOutputPorts }: Props) => {
                 <Input />
             </Form.Item>
             <Form.Item<CreateExplorationRequestForm>
-                name={'domain_id'}
+                name="domain_id"
                 label={t('Domain')}
                 rules={[
                     {
@@ -173,8 +181,11 @@ export const NewExplorationForm = ({ cartOutputPorts }: Props) => {
                 ]}
             >
                 <Select
+                    placeholder={t('Search domains')}
                     loading={isFetchingDomains}
-                    options={domains.map((domain) => ({ label: domain.name, value: domain.id }))}
+                    options={domains
+                        .filter((domain) => domain.status !== DomainStatus.Deleting)
+                        .map((domain) => ({ label: domain.name, value: domain.id }))}
                     showSearch={{ filterOption: selectFilterOptionByLabelAndValue }}
                     allowClear
                 />
@@ -185,7 +196,7 @@ export const NewExplorationForm = ({ cartOutputPorts }: Props) => {
                     <Button
                         className={styles.formButton}
                         type="primary"
-                        htmlType={'submit'}
+                        htmlType="submit"
                         loading={isCreatingExploration}
                         disabled={
                             isFetchingDomains ||

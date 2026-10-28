@@ -70,9 +70,9 @@ export const DownloadCLIButton = () => {
     };
 
     return (
-        <Popover content={t('Download CLI executable')} trigger={'hover'} placement="bottom">
-            <Dropdown menu={menuProps} trigger={['click']} placement={'bottom'} disabled={!version}>
-                <Button shape={'circle'} className={styles.iconButton} icon={<CodeOutlined />} />
+        <Popover content={t('Download CLI executable')} trigger="hover" placement="bottom">
+            <Dropdown menu={menuProps} trigger={['click']} placement="bottom" disabled={!version}>
+                <Button shape="circle" className={styles.iconButton} icon={<CodeOutlined />} />
             </Dropdown>
         </Popover>
     );

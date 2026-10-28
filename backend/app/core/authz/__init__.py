@@ -1,19 +1,22 @@
 from .actions import AuthorizationAction as Action
 from .authorization import Authorization
 from .resolvers import (
-    DataOutputDatasetAssociationResolver,
-    DataOutputResolver,
-    DataProductDatasetAssociationResolver,
+    DataProductOutputPortAssociationResolver,
     DataProductResolver,
-    DatasetResolver,
+    OutputPortResolver,
+    TechnicalAssetOutputPortAssociationResolver,
+    TechnicalAssetResolver,
 )
+
+REDACTION_VALUE = "Redacted"
 
 __all__ = (
     "Action",
     "Authorization",
-    "DataOutputDatasetAssociationResolver",
-    "DataOutputResolver",
-    "DataProductDatasetAssociationResolver",
+    "TechnicalAssetOutputPortAssociationResolver",
+    "TechnicalAssetResolver",
+    "DataProductOutputPortAssociationResolver",
     "DataProductResolver",
-    "DatasetResolver",
+    "OutputPortResolver",
+    "REDACTION_VALUE",
 )

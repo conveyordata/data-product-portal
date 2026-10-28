@@ -15,3 +15,4 @@ class Environment(Base, BaseORM):
     acronym = Column(String, unique=True)
     context = Column(String)
     is_default = Column(Boolean, default=False)
+    is_global = Column(Boolean, default=True, nullable=False)

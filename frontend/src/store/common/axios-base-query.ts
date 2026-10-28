@@ -1,15 +1,17 @@
-import type { BaseQueryApi, BaseQueryFn } from '@reduxjs/toolkit/query';
-import type { AxiosError, AxiosRequestConfig } from 'axios';
-import axios, { type AxiosResponse } from 'axios';
+import type { BaseQueryFn } from '@reduxjs/toolkit/query';
+import type { AxiosRequestConfig } from 'axios';
+import axios from 'axios';
 import { User } from 'oidc-client-ts';
 
 import { AppConfig } from '@/config/app-config.ts';
-import { type NotificationState, showNotification } from '@/store/features/feedback/feedback-slice.ts';
-import type { ApiError } from '@/types/api-result.ts';
+import type { ApiError } from '@/store/common/api-result.ts';
+import { defaultErrorMessage, showGenericErrorMessage } from '@/store/common/errors.ts';
 
-interface CustomAxiosError extends AxiosError {
-    response?: AxiosResponse<ApiError>;
-}
+type AxiosBaseQueryExtraOptions = {
+    suppressErrorToast?: boolean;
+};
+
+const ACTIVE_USER_HEADER_STORAGE_KEY = 'activeUserHeader';
 
 function getUser() {
     const skipAuth = !AppConfig.isOidcEnabled();
@@ -25,34 +27,8 @@ function getUser() {
     return User.fromStorageString(oidcStorage);
 }
 
-const defaultErrorMessage: NotificationState = {
-    message: 'Something went wrong',
-    description: 'Please try again later',
-    type: 'error',
-};
-
-function showErrorMessageToast(err: AxiosResponse<ApiError>, api: BaseQueryApi) {
-    const { correlation_id: correlationId = defaultErrorMessage.message, detail = defaultErrorMessage.description } =
-        err.data;
-
-    const message = typeof detail === 'string' ? detail : defaultErrorMessage.message;
-
-    api.dispatch(
-        showNotification({
-            message,
-            description: correlationId,
-            type: 'error',
-        }),
-    );
-}
-
-function shouldShowErrorToast(status: number, url: string) {
-    if (status === 404) {
-        if (url.includes('data_quality_summary')) {
-            return false;
-        }
-    }
-    return true;
+function getActiveUserHeader() {
+    return localStorage.getItem(ACTIVE_USER_HEADER_STORAGE_KEY);
 }
 
 export const axiosBaseQuery =
@@ -68,33 +44,34 @@ export const axiosBaseQuery =
             headers?: { [key: string]: string | number };
         },
         unknown,
-        unknown
+        unknown,
+        AxiosBaseQueryExtraOptions,
+        { status: number }
     > =>
-    async ({ url, method, data, body, params, headers }, api) => {
+    async ({ url, method, data, body, params, headers }, api, extraOptions) => {
         try {
             const user = getUser();
+            const activeUserHeader = getActiveUserHeader();
             const result = await axios({
                 url: baseUrl + url,
                 method,
                 data: data ?? body,
                 params,
+                signal: api.signal,
                 headers: {
                     ...headers,
                     ...(user?.access_token && { Authorization: `${user.token_type} ${user.access_token}` }),
+                    ...(activeUserHeader && { 'X-user': activeUserHeader }),
                 },
             });
-            return { data: result.data };
+            return { data: result.data, meta: { status: result.status } };
         } catch (axiosError: unknown) {
-            const err = axiosError as CustomAxiosError;
-
-            if (err.response) {
-                if (shouldShowErrorToast(err.response.status, url)) {
-                    showErrorMessageToast(err.response, api);
-                }
-            } else {
-                api.dispatch(showNotification(defaultErrorMessage));
+            if (!extraOptions?.suppressErrorToast) {
+                showGenericErrorMessage(axiosError);
             }
-
+            if (axios.isAxiosError<ApiError>(axiosError) && axiosError.response) {
+                return { error: axiosError.response.data };
+            }
             return { error: { correlation_id: 'NA', detail: defaultErrorMessage.description } };
         }
     };

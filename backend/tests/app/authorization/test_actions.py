@@ -8,7 +8,7 @@ class TestAction:
     def test_authorization_actions_equivalence(self):
         """
         Test to ensure that the AuthorizationAction enum in the TypeScript file
-        matches the AuthorizationAction class in the Python file.
+        matches the Python enum.
         """
         # Path to the TypeScript file
 

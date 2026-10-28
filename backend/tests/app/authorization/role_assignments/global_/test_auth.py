@@ -19,7 +19,7 @@ class TestAuth:
             user_id=str(user.id), role_id=str(role.id)
         )
         GlobalRoleAssignmentFactory(
-            user_id=user.id,
+            identity_id=user.id,
             role_id=role.id,
             decision=DecisionStatus.APPROVED,
         )
@@ -31,7 +31,7 @@ class TestAuth:
         admin = RoleFactory.admin()
         assert not authorizer.has_admin_role(user_id=str(user.id))
         GlobalRoleAssignmentFactory(
-            user_id=user.id,
+            identity_id=user.id,
             role_id=admin.id,
             decision=DecisionStatus.APPROVED,
         )
@@ -44,7 +44,7 @@ class TestAuth:
             user_id=str(user.id), role_id=str(role.id)
         )
         assignment: GlobalRoleAssignment = GlobalRoleAssignmentFactory(
-            user_id=user.id,
+            identity_id=user.id,
             role_id=role.id,
             decision=DecisionStatus.APPROVED,
         )
@@ -60,7 +60,7 @@ class TestAuth:
         admin = RoleFactory.admin()
         assert not authorizer.has_admin_role(user_id=str(user.id))
         assignment: GlobalRoleAssignment = GlobalRoleAssignmentFactory(
-            user_id=user.id,
+            identity_id=user.id,
             role_id=admin.id,
             decision=DecisionStatus.APPROVED,
         )
@@ -74,7 +74,7 @@ class TestAuth:
         role: Role = RoleFactory(scope=Scope.GLOBAL)
 
         assignment: GlobalRoleAssignment = GlobalRoleAssignmentFactory(
-            user_id=user.id,
+            identity_id=user.id,
             role_id=role.id,
             decision=DecisionStatus.APPROVED,
         )

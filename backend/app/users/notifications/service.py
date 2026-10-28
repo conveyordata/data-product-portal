@@ -15,8 +15,10 @@ from app.authorization.role_assignments.output_port.model import (
 )
 from app.core.authz.authorization import Authorization
 from app.events.model import Event as EventModel
+from app.explorations.model import Exploration
+from app.groups.model import GroupMembership
+from app.users.model import User as UserModel
 from app.users.notifications.model import Notification as NotificationModel
-from app.users.notifications.schema_response import NotificationGet
 from app.users.schema import User
 
 
@@ -24,7 +26,7 @@ class NotificationService:
     def __init__(self, db: Session):
         self.db = db
 
-    def get_user_notifications(self, user: User) -> Sequence[NotificationGet]:
+    def get_user_notifications(self, user: User) -> Sequence[NotificationModel]:
         return self.db.scalars(
             select(NotificationModel)
             .options(
@@ -55,13 +57,13 @@ class NotificationService:
             )
 
         self.db.delete(notification)
-        self.db.commit()
+        self.db.flush()
 
     def remove_all_notifications(self, user: User) -> None:
         self.db.execute(
             delete(NotificationModel).where(NotificationModel.user_id == user.id)
         )
-        self.db.commit()
+        self.db.flush()
 
     def create_dataset_notifications(
         self,
@@ -72,7 +74,7 @@ class NotificationService:
     ) -> None:
         assignments = self.db.scalars(
             select(DatasetRoleAssignment).where(
-                DatasetRoleAssignment.dataset_id == dataset_id,
+                DatasetRoleAssignment.output_port_id == dataset_id,
                 DatasetRoleAssignment.decision == DecisionStatus.APPROVED,
             )
         ).all()
@@ -84,11 +86,7 @@ class NotificationService:
             )
         )
 
-        event = self.db.get(EventModel, event_id)
-        for receiver in receivers:
-            if receiver != event.actor_id:
-                notification = NotificationModel(user_id=receiver, event_id=event_id)
-                self.db.add(notification)
+        self._notify(receivers, event_id)
 
     def create_data_product_notifications(
         self,
@@ -97,22 +95,85 @@ class NotificationService:
         event_id: UUID,
         extra_receiver_ids: Sequence[UUID] = (),
     ) -> None:
-        assignments = self.db.scalars(
-            select(DataProductRoleAssignment).where(
+        """
+        Creates notifications for users related to a data product event.
+
+        As approved Data Product assignments can target machine users and groups,
+        those need to be excluded while including group members when the target is a group.
+
+        `extra_receiver_ids` paraam is also filtered out to allow only users.
+        """
+        direct_user_ids = (
+            select(UserModel.id)
+            .join(
+                DataProductRoleAssignment,
+                DataProductRoleAssignment.identity_id == UserModel.id,
+            )
+            .where(
                 DataProductRoleAssignment.data_product_id == data_product_id,
                 DataProductRoleAssignment.decision == DecisionStatus.APPROVED,
             )
-        ).all()
+        )
 
-        receivers = set(
-            chain(
-                (assignment.user_id for assignment in assignments),
-                extra_receiver_ids,
+        group_member_user_ids = (
+            select(UserModel.id)
+            .join(
+                GroupMembership,
+                GroupMembership.member_identity_id == UserModel.id,
+            )
+            .join(
+                DataProductRoleAssignment,
+                DataProductRoleAssignment.identity_id == GroupMembership.group_id,
+            )
+            .where(
+                DataProductRoleAssignment.data_product_id == data_product_id,
+                DataProductRoleAssignment.decision == DecisionStatus.APPROVED,
             )
         )
 
+        extra_user_ids = select(UserModel.id).where(
+            UserModel.id.in_(extra_receiver_ids)
+        )
+
+        receivers = set(
+            self.db.scalars(
+                direct_user_ids.union(
+                    group_member_user_ids,
+                    extra_user_ids,
+                )
+            ).all()
+        )
+
+        self._notify(receivers, event_id)
+
+    def create_consumer_notifications(
+        self,
+        *,
+        consumer_id: UUID,
+        event_id: UUID,
+        extra_receiver_ids: Sequence[UUID] = (),
+    ) -> None:
+        exploration_owner_id = self.db.scalar(
+            select(Exploration.owner_id).where(Exploration.id == consumer_id)
+        )
+        if exploration_owner_id:
+            self._notify({exploration_owner_id, *extra_receiver_ids}, event_id)
+        else:
+            self.create_data_product_notifications(
+                data_product_id=consumer_id,
+                event_id=event_id,
+                extra_receiver_ids=extra_receiver_ids,
+            )
+
+    def _notify(self, receivers: set[UUID], event_id: UUID) -> None:
+        self.db.flush()
         event = self.db.get(EventModel, event_id)
-        for receiver in receivers:
-            if receiver != event.actor_id:
-                notification = NotificationModel(user_id=receiver, event_id=event_id)
-                self.db.add(notification)
+        already_notified = set(
+            self.db.scalars(
+                select(NotificationModel.user_id).where(
+                    NotificationModel.event_id == event_id
+                )
+            )
+        )
+        for receiver in receivers - already_notified - {event.actor_id}:
+            self.db.add(NotificationModel(user_id=receiver, event_id=event_id))

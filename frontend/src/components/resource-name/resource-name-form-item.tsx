@@ -38,7 +38,7 @@ export function ResourceNameFormItem({
     const validationRules: Rule[] = [
         {
             required: canEditResourceName,
-            message: t('Please input a namespace'),
+            message: t('Please provide a namespace'),
         },
         {
             validator: async (_, value) => {
@@ -68,7 +68,7 @@ export function ResourceNameFormItem({
         <Form.Item label={t('Namespace')} tooltip={tooltip} required>
             <Space.Compact orientation="horizontal" className={styles.resourceNameFormField}>
                 <Form.Item
-                    name={'namespace'}
+                    name="namespace"
                     noStyle
                     hasFeedback
                     validateFirst
@@ -76,6 +76,7 @@ export function ResourceNameFormItem({
                     rules={validationRequired ? validationRules : []}
                 >
                     <Input
+                        data-cy="namespace"
                         disabled={!canEditResourceName}
                         showCount
                         maxLength={max_length}

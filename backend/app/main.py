@@ -1,32 +1,39 @@
 import asyncio
 import re
-import time
-from collections.abc import Awaitable, Callable
-from contextlib import asynccontextmanager
+import urllib.parse
+from collections.abc import Coroutine
+from contextlib import asynccontextmanager, suppress
 from pathlib import Path
+from typing import Any
 
 from asgi_correlation_id import CorrelationIdMiddleware
-from fastapi import FastAPI, Request, Response
-from fastapi.concurrency import iterate_in_threadpool
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 from fastapi.routing import APIRoute
 from fastmcp.utilities.lifespan import combine_lifespans
-from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.abstract_data_product.background_tasks import check_stuck_deletions
+from app.abstract_data_product.input_ports.background_tasks import (
+    expire_input_ports_task,
+)
 from app.authorization.service import AuthorizationService
 from app.core.auth.device_flows.background_tasks import cleanup_device_flow_table_task
 from app.core.auth.jwt import get_oidc
 from app.core.auth.router import router as auth
 from app.core.authz.background_tasks import check_expired_admins
-from app.core.context import close_event_context, open_event_context, pop_events
+from app.core.embed.model import warm_text_embedding_model
 from app.core.errors.error_handling import add_exception_handlers
 from app.core.logging import logger
-from app.core.logging.posthog_analytics import report_consumption_metrics_task
+from app.core.logging.middleware import RequestLoggingMiddleware
+from app.core.logging.posthog_analytics import get_posthog_client, report_daily_metrics
 from app.core.logging.scarf_analytics import backend_analytics
-from app.core.webhooks.v2 import call_v2_webhook
-from app.core.webhooks.webhook import call_webhook, register_webhooks
+from app.core.webhooks.middleware import (
+    DispatchQueuedEventsMiddleware,
+    start_event_dispatcher,
+    stop_event_dispatcher,
+)
+from app.core.webhooks.webhook import register_webhooks
 from app.database import database
 from app.mcp.mcp import mcp
 from app.mcp.middleware import LoggingMiddleware
@@ -54,42 +61,75 @@ oidc_kwargs = (
 )
 
 
-async def log_middleware(request: Request, call_next):
-    start = time.time()
-    response: Response = await call_next(request)
-    process_time = time.time() - start
-    log_dict = {
-        "url": request.url.path,
-        "method": request.method,
-        "status": response.status_code,
-        "process_time": process_time,
-    }
-    if request.url.path != "/":  # ignore health checks on root path
-        logger.info(log_dict)
-    return response
+def _log_background_task_result(task: asyncio.Task[None]) -> None:
+    if task.cancelled():
+        return
+    if exc := task.exception():
+        logger.exception(
+            "Background task '%s' failed",
+            task.get_name(),
+            exc_info=exc,
+        )
+
+
+def _create_supervised_task(
+    coro: Coroutine[Any, Any, None], *, name: str
+) -> asyncio.Task[None]:
+    task: asyncio.Task[None] = asyncio.create_task(coro, name=name)
+    task.add_done_callback(_log_background_task_result)
+    return task
+
+
+async def _cancel_tasks(tasks: list[asyncio.Task[None]]) -> None:
+    for task in tasks:
+        task.cancel()
+    for task in tasks:
+        with suppress(asyncio.CancelledError):
+            await task
 
 
 @asynccontextmanager
-async def lifespan(_: FastAPI):
-    with database.SessionLocal() as db:
-        if settings.AUTHORIZER_STARTUP_SYNC:
+async def lifespan(app: FastAPI):
+    if settings.AUTHORIZER_STARTUP_SYNC:
+        with database.SessionLocal() as db:
             AuthorizationService(db).reload_enforcer()
-        db.commit()
+            db.commit()
+
+    warm_text_embedding_model()
 
     backend_analytics(API_VERSION)
-    admin_task = asyncio.create_task(check_expired_admins())
-    device_flow_cleanup_task = asyncio.create_task(cleanup_device_flow_table_task())
-    consumption_metrics_task = asyncio.create_task(report_consumption_metrics_task())
-    stuck_deletion_task = asyncio.create_task(check_stuck_deletions())
+    background_tasks = [
+        _create_supervised_task(check_expired_admins(), name="check_expired_admins"),
+        _create_supervised_task(
+            cleanup_device_flow_table_task(),
+            name="cleanup_device_flow_table_task",
+        ),
+        _create_supervised_task(
+            report_daily_metrics(),
+            name="report_north_star_metrics",
+        ),
+        _create_supervised_task(check_stuck_deletions(), name="check_stuck_deletions"),
+        _create_supervised_task(
+            expire_input_ports_task(),
+            name="expire_input_ports_task",
+        ),
+    ]
+    start_event_dispatcher(app)
     yield
-    admin_task.cancel()
-    device_flow_cleanup_task.cancel()
-    consumption_metrics_task.cancel()
-    stuck_deletion_task.cancel()
+    await _cancel_tasks(background_tasks)
+    await stop_event_dispatcher(app)
+    if posthog := get_posthog_client():
+        posthog.shutdown()
 
 
 mcp.add_middleware(LoggingMiddleware())
-mcp_app = mcp.http_app("/")
+_mcp_host = settings.MCP_BASE_URL or settings.HOST
+_mcp_allowed_hosts = [urllib.parse.urlparse(_mcp_host).hostname] if _mcp_host else []
+mcp_app = mcp.http_app(
+    "/",
+    allowed_hosts=_mcp_allowed_hosts or None,
+    stateless_http=settings.MCP_STATELESS_HTTP,
+)
 
 
 def route_as_operation_id(route: APIRoute) -> str:
@@ -139,7 +179,8 @@ app.include_router(auth, prefix="/api")
 add_exception_handlers(app)
 register_webhooks(app)
 
-app.add_middleware(BaseHTTPMiddleware, dispatch=log_middleware)
+app.add_middleware(RequestLoggingMiddleware)
+app.add_middleware(DispatchQueuedEventsMiddleware, fastapi_app=app)
 app.add_middleware(
     CorrelationIdMiddleware,
     header_name="X-Request-ID",
@@ -154,58 +195,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
-@app.middleware("http")
-async def send_response_to_webhook(
-    request: Request, call_next: Callable[[Request], Awaitable[Response]]
-) -> Response:
-    response = await call_next(request)
-    # Gets are not logged
-    if (
-        settings.WEBHOOK_URL
-        and request.method in ["POST", "PUT", "DELETE"]
-        and not (
-            request.url.path.startswith("/api/auth/")
-            or request.url.path.startswith("/api/v2/authn/")
-        )
-    ):
-        body = ""
-        if request.method == "POST":
-            response_body = [chunk async for chunk in response.body_iterator]
-            response.body_iterator = iterate_in_threadpool(iter(response_body))
-            body = (b"".join(response_body)).decode()
-        asyncio.create_task(
-            call_webhook(
-                content=body,
-                method=request.method,
-                url=request.url.path,
-                query=request.url.query,
-                status_code=response.status_code,
-            )
-        )
-    return response
-
-
-@app.middleware("http")
-async def dispatch_queued_events(request: Request, call_next):
-    token = open_event_context()
-    try:
-        response = await call_next(request)
-    finally:
-        events = pop_events()
-        close_event_context(token)
-    if response.status_code < 400 and settings.WEBHOOK_V2_URL and events:
-        asyncio.create_task(_emit_all_events(events))
-    return response
-
-
-async def _emit_all_events(events: list) -> None:
-    # This is a sequential loop.
-    # Good for keeping sequential order, bad for speed, maybe also good for not DoSing the receiver.
-    # To be checked if we ever run into issues with this.
-    for event in events:
-        await call_v2_webhook(type(event).event_type(), event.model_dump(mode="json"))
 
 
 class VersionResponse(ORMModel):

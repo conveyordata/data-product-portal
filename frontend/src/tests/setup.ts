@@ -6,7 +6,6 @@ import { server } from './mocks/server';
 (globalThis as Record<string, unknown>).config = {
     API_BASE_URL: 'http://localhost:8080',
     OIDC_ENABLED: false,
-    THEME_CONFIGURATION: 'bluethemeconfig',
     POSTHOG_ENABLED: false,
 };
 
@@ -38,7 +37,7 @@ beforeAll(() => {
     window.getComputedStyle = (elt) => getComputedStyle(elt);
 });
 
-beforeAll(() => server.listen({ onUnhandledRequest: 'warn' }));
+beforeAll(() => server.listen({ onUnhandledFrame: 'warn' }));
 afterEach(() => {
     server.resetHandlers();
     cleanup();

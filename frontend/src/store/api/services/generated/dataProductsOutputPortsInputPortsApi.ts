@@ -1,12 +1,22 @@
 import { api } from "@/store/api/services/generated/dataProductsOutputPortsApi";
 const injectedRtkApi = api.injectEndpoints({
   endpoints: (build) => ({
+    grantOutputPortAccess: build.mutation<
+      GrantOutputPortAccessApiResponse,
+      GrantOutputPortAccessApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/data_products/${queryArg.dataProductId}/output_ports/${queryArg.outputPortId}/input_ports/grant`,
+        method: "POST",
+        body: queryArg.grantOutputPortAccessRequest,
+      }),
+    }),
     getInputPortsForOutputPort: build.query<
       GetInputPortsForOutputPortApiResponse,
       GetInputPortsForOutputPortApiArg
     >({
       query: (queryArg) => ({
-        url: `/api/v2/data_products/${queryArg.dataProductId}/output_ports/${queryArg.outputPortId}/input_ports`,
+        url: `/api/v2/data_products/${queryArg.dataProductId}/output_ports/${queryArg.outputPortId}/input_ports/`,
       }),
     }),
     approveOutputPortAsInputPort: build.mutation<
@@ -29,6 +39,26 @@ const injectedRtkApi = api.injectEndpoints({
         body: queryArg.denyOutputPortAsInputPortRequest,
       }),
     }),
+    renewOutputPortAsInputPort: build.mutation<
+      RenewOutputPortAsInputPortApiResponse,
+      RenewOutputPortAsInputPortApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/data_products/${queryArg.dataProductId}/output_ports/${queryArg.outputPortId}/input_ports/renew`,
+        method: "POST",
+        body: queryArg.renewOutputPortAsInputPortRequest,
+      }),
+    }),
+    revokeOutputPortAsInputPort: build.mutation<
+      RevokeOutputPortAsInputPortApiResponse,
+      RevokeOutputPortAsInputPortApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/data_products/${queryArg.dataProductId}/output_ports/${queryArg.outputPortId}/input_ports/revoke`,
+        method: "POST",
+        body: queryArg.revokeOutputPortAsInputPortRequest,
+      }),
+    }),
     removeOutputPortAsInputPort: build.mutation<
       RemoveOutputPortAsInputPortApiResponse,
       RemoveOutputPortAsInputPortApiArg
@@ -43,6 +73,13 @@ const injectedRtkApi = api.injectEndpoints({
   overrideExisting: false,
 });
 export { injectedRtkApi as api };
+export type GrantOutputPortAccessApiResponse =
+  /** status 200 Successful Response */ any;
+export type GrantOutputPortAccessApiArg = {
+  dataProductId: string;
+  outputPortId: string;
+  grantOutputPortAccessRequest: GrantOutputPortAccessRequest;
+};
 export type GetInputPortsForOutputPortApiResponse =
   /** status 200 Successful Response */ GetInputPortsForOutputPortResponse;
 export type GetInputPortsForOutputPortApiArg = {
@@ -63,27 +100,26 @@ export type DenyOutputPortAsInputPortApiArg = {
   outputPortId: string;
   denyOutputPortAsInputPortRequest: DenyOutputPortAsInputPortRequest;
 };
+export type RenewOutputPortAsInputPortApiResponse =
+  /** status 200 Successful Response */ any;
+export type RenewOutputPortAsInputPortApiArg = {
+  dataProductId: string;
+  outputPortId: string;
+  renewOutputPortAsInputPortRequest: RenewOutputPortAsInputPortRequest;
+};
+export type RevokeOutputPortAsInputPortApiResponse =
+  /** status 200 Successful Response */ any;
+export type RevokeOutputPortAsInputPortApiArg = {
+  dataProductId: string;
+  outputPortId: string;
+  revokeOutputPortAsInputPortRequest: RevokeOutputPortAsInputPortRequest;
+};
 export type RemoveOutputPortAsInputPortApiResponse =
   /** status 200 Successful Response */ any;
 export type RemoveOutputPortAsInputPortApiArg = {
   dataProductId: string;
   outputPortId: string;
   removeOutputPortAsInputPortRequest: RemoveOutputPortAsInputPortRequest;
-};
-export type AbstractDataProductInfo = {
-  name: string;
-  namespace: string;
-  abstract_data_product_type: AbstractDataProductType;
-};
-export type OutputPortInputPort = {
-  id: string;
-  justification: string;
-  status: DecisionStatus;
-  consuming_abstract_data_product_id: string;
-  consuming_abstract_data_product: AbstractDataProductInfo;
-};
-export type GetInputPortsForOutputPortResponse = {
-  input_ports: OutputPortInputPort[];
 };
 export type ValidationError = {
   loc: (string | number)[];
@@ -95,17 +131,96 @@ export type ValidationError = {
 export type HttpValidationError = {
   detail?: ValidationError[];
 };
+export type GrantOutputPortAccessRequest = {
+  consuming_abstract_data_product_id: string;
+  justification: string;
+  access_mode_id?: string | null;
+};
+export type User = {
+  id: string;
+  email: string;
+  external_id: string;
+  first_name: string;
+  last_name: string;
+  has_seen_tour: boolean;
+  can_become_admin: boolean;
+  admin_expiry?: string | null;
+};
+export type AccessMode = {
+  id: string;
+  name: string;
+  description: string;
+};
+export type InputPortRequestBase = {
+  id: string;
+  justification: string;
+  decision_note?: string | null;
+  valid_from?: string | null;
+  valid_until: string | null;
+  access_duration_type: AccessDurationType;
+  requested_duration_days?: number | null;
+  requested_by: User;
+  decided_by?: User | null;
+  decision: InputPortRequestDecision;
+  revoked_at?: string | null;
+  revoked_by?: User | null;
+  created_on: string;
+  requested_on: string;
+  access_mode?: AccessMode | null;
+};
+export type AbstractDataProductInfo = {
+  name: string;
+  namespace: string;
+  abstract_data_product_type: AbstractDataProductType;
+  is_redacted: boolean;
+};
+export type OutputPortInputPort = {
+  id: string;
+  status: InputPortStatus;
+  current_request: InputPortRequestBase;
+  renewal_status?: RenewalStatus | null;
+  consuming_abstract_data_product_id: string;
+  consuming_abstract_data_product: AbstractDataProductInfo;
+};
+export type GetInputPortsForOutputPortResponse = {
+  input_ports: OutputPortInputPort[];
+};
 export type ApproveOutputPortAsInputPortRequest = {
   consuming_data_product_id: string;
+  decision_note?: string | null;
 };
 export type DenyOutputPortAsInputPortRequest = {
+  consuming_data_product_id: string;
+  decision_note: string;
+};
+export type RenewOutputPortAsInputPortRequest = {
+  consuming_data_product_id: string;
+};
+export type RevokeOutputPortAsInputPortRequest = {
   consuming_data_product_id: string;
 };
 export type RemoveOutputPortAsInputPortRequest = {
   consuming_data_product_id: string;
 };
-export enum DecisionStatus {
+export enum InputPortStatus {
+  Pending = "pending",
   Approved = "approved",
+  Denied = "denied",
+  Expired = "expired",
+  Revoked = "revoked",
+  Cancelled = "cancelled",
+}
+export enum AccessDurationType {
+  Permanent = "permanent",
+  TimeBound = "time_bound",
+}
+export enum InputPortRequestDecision {
+  Pending = "pending",
+  Approved = "approved",
+  Denied = "denied",
+  Cancelled = "cancelled",
+}
+export enum RenewalStatus {
   Pending = "pending",
   Denied = "denied",
 }
@@ -115,9 +230,12 @@ export enum AbstractDataProductType {
   Explorations = "explorations",
 }
 export const {
+  useGrantOutputPortAccessMutation,
   useGetInputPortsForOutputPortQuery,
   useLazyGetInputPortsForOutputPortQuery,
   useApproveOutputPortAsInputPortMutation,
   useDenyOutputPortAsInputPortMutation,
+  useRenewOutputPortAsInputPortMutation,
+  useRevokeOutputPortAsInputPortMutation,
   useRemoveOutputPortAsInputPortMutation,
 } = injectedRtkApi;

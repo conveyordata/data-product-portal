@@ -3,54 +3,194 @@ from typing import TYPE_CHECKING, Optional
 
 from fastapi import HTTPException, status
 from pgvector.sqlalchemy import Vector
-from sqlalchemy import Column, Enum, ForeignKey, String, func, select
+from sqlalchemy import (
+    Column,
+    Enum,
+    ForeignKey,
+    ForeignKeyConstraint,
+    String,
+    event,
+    func,
+    or_,
+    select,
+)
 from sqlalchemy.dialects.postgresql import TSVECTOR, UUID
 from sqlalchemy.orm import (
     Mapped,
     Session,
     column_property,
     deferred,
+    foreign,
     mapped_column,
     relationship,
+    with_loader_criteria,
 )
 
+from app.abstract_data_product.input_ports.enums import InputPortStatus
 from app.abstract_data_product.input_ports.model import (
     InputPort,
 )
+from app.authorization.role_assignments.data_product.model import (
+    DataProductRoleAssignment,
+)
 from app.authorization.role_assignments.enums import DecisionStatus
-from app.configuration.tags.model import Tag, tag_dataset_table
+from app.authorization.role_assignments.output_port.model import (
+    DatasetRoleAssignment,
+)
+from app.configuration.access_durations.enums import AccessDurationType
+from app.configuration.access_modes.model import AccessMode
+from app.configuration.output_port_access_types.model import (
+    OutputPortAccessType,
+)
+from app.configuration.tags.model import Tag, tag_output_port_table
+from app.core.auth.db_utils import (
+    is_system_account,
+    is_user_admin,
+)
 from app.core.webhooks.events import OutputPortEvent
 from app.data_products.output_port_technical_assets_link.model import (
-    DataOutputDatasetAssociation,
+    TechnicalAssetOutputPortAssociation,
 )
 from app.data_products.output_ports.data_quality.model import (  # noqa: TCH001
     DataQualitySummary,
+    latest_data_quality_summary,
 )
-from app.data_products.output_ports.enums import OutputPortAccessType
+from app.data_products.output_ports.enums import OutputPortAccessFunction
 from app.data_products.output_ports.status import OutputPortStatus
-from app.database.database import Base, ensure_exists
+from app.data_products.technical_assets.model import TechnicalAssetAccessMode
+from app.database.database import (
+    SKIP_OUTPUT_PORT_ACCESS_FUNCTION_FILTER,
+    Base,
+    ensure_exists,
+)
 from app.database.event_mixin import EventTrackedMixin
+from app.groups.model import GroupMembership
 from app.shared.model import BaseORM
 
 if TYPE_CHECKING:
-    from app.authorization.role_assignments.output_port.model import (
-        DatasetRoleAssignment,
-    )
     from app.configuration.data_product_lifecycles.model import DataProductLifecycle
     from app.configuration.data_product_settings.model import DataProductSettingValue
-    from app.data_products.model import DataProduct
+    from app.data_products.model import (
+        DataProduct,
+    )
 
 
-class Dataset(Base, BaseORM, EventTrackedMixin):
+def _has_user_access_to_private_output_port(cls, user_id: uuid.UUID):
+    return (
+        select(DatasetRoleAssignment.id)
+        .where(DatasetRoleAssignment.output_port_id == cls.id)
+        .where(DatasetRoleAssignment.user_id == user_id)
+        .where(DatasetRoleAssignment.decision == DecisionStatus.APPROVED)
+        .exists()
+    )
+
+
+def _has_user_access_to_private_output_port_via_data_product(cls, user_id: uuid.UUID):
+    user_group_ids = (
+        select(GroupMembership.group_id)
+        .where(GroupMembership.member_identity_id == user_id)
+        .correlate_except(GroupMembership)
+    )
+
+    return (
+        select(DataProductRoleAssignment.id)
+        .where(DataProductRoleAssignment.data_product_id == cls.data_product_id)
+        .where(
+            or_(
+                DataProductRoleAssignment.identity_id == user_id,
+                DataProductRoleAssignment.identity_id.in_(user_group_ids),
+            )
+        )
+        .where(DataProductRoleAssignment.decision == DecisionStatus.APPROVED)
+        .exists()
+    )
+
+
+def _has_user_access_through_input_port(cls, user_id: uuid.UUID):
+    input_ports = InputPort.__table__
+    assignments = DataProductRoleAssignment.__table__
+    user_group_ids = (
+        select(GroupMembership.group_id)
+        .where(GroupMembership.member_identity_id == user_id)
+        .correlate_except(GroupMembership)
+    )
+    return (
+        select(assignments.c.id)
+        .where(
+            or_(
+                assignments.c.identity_id == user_id,
+                assignments.c.identity_id.in_(user_group_ids),
+            ),
+            assignments.c.decision == DecisionStatus.APPROVED,
+            assignments.c.data_product_id.in_(
+                select(input_ports.c.consuming_abstract_data_product_id)
+                .where(
+                    input_ports.c.dataset_id == cls.id,
+                    input_ports.c.status == InputPortStatus.APPROVED,
+                )
+                .correlate_except(input_ports)
+            ),
+        )
+        .correlate_except(assignments)
+        .exists()
+    )
+
+
+def access_function_filter_excluding_consumers(user_id: uuid.UUID):
+    return or_(
+        OutputPort.access_function != OutputPortAccessFunction.PRIVATE,
+        _has_user_access_to_private_output_port(OutputPort, user_id),
+        _has_user_access_to_private_output_port_via_data_product(OutputPort, user_id),
+        is_user_admin(user_id),
+        is_system_account(user_id),
+    )
+
+
+def _access_function_filter_for_user(user_id: uuid.UUID):
+    return or_(
+        access_function_filter_excluding_consumers(user_id),
+        _has_user_access_through_input_port(OutputPort, user_id),
+    )
+
+
+output_port_access_modes = (
+    select(
+        TechnicalAssetOutputPortAssociation.output_port_id.label("output_port_id"),
+        TechnicalAssetAccessMode.access_mode_id.label("access_mode_id"),
+    )
+    .join(
+        TechnicalAssetAccessMode,
+        TechnicalAssetOutputPortAssociation.technical_asset_id
+        == TechnicalAssetAccessMode.technical_asset_id,
+    )
+    .distinct()
+    .subquery()
+)
+
+
+class OutputPort(Base, BaseORM, EventTrackedMixin):
     __tablename__ = "datasets"
+    __table_args__ = (
+        # access_function is a copy of access_type.access_function;
+        # the database keeps it in sync when an access type is remapped.
+        ForeignKeyConstraint(
+            ["access_type_id", "access_function"],
+            [
+                "output_port_access_types.id",
+                "output_port_access_types.access_function",
+            ],
+            name="datasets_access_type_fkey",
+            onupdate="CASCADE",
+        ),
+    )
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     namespace = Column(String)
     name = Column(String)
     description = Column(String)
     about = Column(String)
-    access_type = Column(
-        Enum(OutputPortAccessType), default=OutputPortAccessType.UNRESTRICTED
+    access_function = Column(
+        Enum(OutputPortAccessFunction, native_enum=False), nullable=False
     )
     status: OutputPortStatus = Column(
         Enum(OutputPortStatus), default=OutputPortStatus.ACTIVE
@@ -59,69 +199,86 @@ class Dataset(Base, BaseORM, EventTrackedMixin):
     search_vector = Column(TSVECTOR)
     embeddings = deferred(Column(Vector(384)))
 
-    # Foreign keys
     lifecycle_id: Mapped[UUID] = mapped_column(
         ForeignKey("data_product_lifecycles.id", ondelete="SET NULL")
     )
     data_product_id: Mapped[UUID] = mapped_column(ForeignKey("data_products.id"))
+    access_type_id: Mapped[UUID] = mapped_column(
+        UUID(as_uuid=True), nullable=False, index=True
+    )
 
-    # Relationships
     assignments: Mapped[list["DatasetRoleAssignment"]] = relationship(
-        back_populates="dataset",
+        back_populates="output_port",
         cascade="all, delete-orphan",
         order_by="DatasetRoleAssignment.decision, DatasetRoleAssignment.requested_on",
         lazy="raise",
     )
     data_product_links: Mapped[list["InputPort"]] = relationship(
         "InputPort",
-        back_populates="dataset",
+        back_populates="output_port",
         order_by="InputPort.status.desc()",
         cascade="all, delete-orphan",
         lazy="raise",
     )
-    data_output_links: Mapped[list["DataOutputDatasetAssociation"]] = relationship(
-        "DataOutputDatasetAssociation",
-        back_populates="dataset",
-        order_by="DataOutputDatasetAssociation.status.desc()",
-        cascade="all, delete-orphan",
-        lazy="raise",
+    technical_asset_links: Mapped[list["TechnicalAssetOutputPortAssociation"]] = (
+        relationship(
+            "TechnicalAssetOutputPortAssociation",
+            back_populates="output_port",
+            order_by="TechnicalAssetOutputPortAssociation.status.desc()",
+            cascade="all, delete-orphan",
+            lazy="raise",
+        )
     )
     tags: Mapped[list[Tag]] = relationship(
-        secondary=tag_dataset_table, back_populates="datasets", lazy="joined"
+        secondary=tag_output_port_table, back_populates="output_ports", lazy="selectin"
     )
     data_product_settings: Mapped[list["DataProductSettingValue"]] = relationship(
         "DataProductSettingValue",
-        back_populates="dataset",
+        back_populates="output_port",
         cascade="all, delete-orphan",
-        order_by="DataProductSettingValue.dataset_id",
+        order_by="DataProductSettingValue.output_port_id",
         lazy="raise",
     )
     lifecycle: Mapped["DataProductLifecycle"] = relationship(
         back_populates="datasets", lazy="joined"
     )
+    access_type: Mapped[OutputPortAccessType] = relationship(lazy="joined")
     data_product: Mapped["DataProduct"] = relationship(
         back_populates="datasets", lazy="joined"
     )
     quality_summary: Mapped[Optional[DataQualitySummary]] = relationship(
-        foreign_keys=[DataQualitySummary.output_port_id],
-        lazy="joined",
+        latest_data_quality_summary,
+        primaryjoin=lambda: (
+            foreign(latest_data_quality_summary().output_port_id) == OutputPort.id
+        ),
+        lazy="selectin",
         uselist=False,
-        cascade="all, delete-orphan",
+        viewonly=True,
     )
 
     @property
     def quality_status(self) -> Optional[str]:
-        """Returns the overall_status from the quality_summary if it exists."""
         return self.quality_summary.overall_status if self.quality_summary else None
 
     @property
     def data_product_name(self) -> str:
         return self.data_product.name
 
+    access_modes: Mapped[list["AccessMode"]] = relationship(
+        AccessMode,
+        secondary=output_port_access_modes,
+        primaryjoin=id == foreign(output_port_access_modes.c.output_port_id),
+        secondaryjoin=AccessMode.id
+        == foreign(output_port_access_modes.c.access_mode_id),
+        order_by="AccessMode.name",
+        viewonly=True,
+        lazy="selectin",
+    )
+
     abstract_data_product_count = deferred(
         column_property(
             select(func.count(InputPort.id))
-            .where(InputPort.dataset_id == id)
+            .where(InputPort.output_port_id == id)
             .where(InputPort.status == DecisionStatus.APPROVED)
             .correlate_except(InputPort)
             .scalar_subquery()
@@ -130,12 +287,32 @@ class Dataset(Base, BaseORM, EventTrackedMixin):
     )
     technical_assets_count = deferred(
         column_property(
-            select(func.count(DataOutputDatasetAssociation.id))
-            .where(DataOutputDatasetAssociation.dataset_id == id)
-            .correlate_except(DataOutputDatasetAssociation)
+            select(func.count(TechnicalAssetOutputPortAssociation.id))
+            .where(TechnicalAssetOutputPortAssociation.output_port_id == id)
+            .correlate_except(TechnicalAssetOutputPortAssociation)
             .scalar_subquery()
         ),
         raiseload=True,
+    )
+
+    data_product_access_duration_type: Mapped[AccessDurationType] = mapped_column(
+        Enum(
+            AccessDurationType,
+            values_callable=lambda enum: [e.value for e in enum],
+            native_enum=False,
+            validate_strings=True,
+        ),
+        nullable=False,
+    )
+
+    exploration_access_duration_type: Mapped[AccessDurationType] = mapped_column(
+        Enum(
+            AccessDurationType,
+            values_callable=lambda enum: [e.value for e in enum],
+            native_enum=False,
+            validate_strings=True,
+        ),
+        nullable=False,
     )
 
     def to_event(self) -> OutputPortEvent:
@@ -146,15 +323,39 @@ class Dataset(Base, BaseORM, EventTrackedMixin):
 
 
 def ensure_output_port_exists(
-    dataset_id: UUID,
+    output_port_id: UUID,
     db: Session,
     data_product_id: Optional[UUID] = None,
     **kwargs,
-) -> Dataset:
-    dataset: Dataset = ensure_exists(dataset_id, db, Dataset, **kwargs)
-    if data_product_id is not None and dataset.data_product_id != data_product_id:
+) -> OutputPort:
+    output_port: OutputPort = ensure_exists(output_port_id, db, OutputPort, **kwargs)
+    if data_product_id is not None and output_port.data_product_id != data_product_id:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Required item {dataset_id} does not exist",
+            detail=f"Required item {output_port_id} does not exist",
         )
-    return dataset
+    return output_port
+
+
+@event.listens_for(Session, "do_orm_execute")
+def enforce_private_output_port_filter(execute_state):
+    if not execute_state.is_select:
+        return
+
+    if execute_state.execution_options.get(SKIP_OUTPUT_PORT_ACCESS_FUNCTION_FILTER):
+        return
+
+    # The current user is only set while serving a request. Everything else
+    # (migrations, casbin, startup sync) is a system level operation that is not
+    # performed on behalf of a user and therefore has nothing to filter against.
+    user_id = execute_state.session.info.get("current_user_id")
+    if user_id is None:
+        return
+
+    execute_state.statement = execute_state.statement.options(
+        with_loader_criteria(
+            OutputPort,
+            lambda cls: _access_function_filter_for_user(user_id),
+            include_aliases=True,
+        )
+    )

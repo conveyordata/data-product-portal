@@ -14,7 +14,7 @@ import { NodeType, useGetDataProductGraphDataQuery } from '@/store/api/services/
 import { useGetOutputPortGraphDataQuery } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
 import { useGetTechnicalAssetGraphDataQuery } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
 import { type UiElementMetadataResponse, useGetPluginsQuery } from '@/store/api/services/generated/pluginsApi.ts';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import { dispatchMessage } from '@/utils/feedback.ts';
 import { parseRegularNode } from '@/utils/node-parser.helper.ts';
 import { LinkToDataOutputNode, LinkToDataProductNode, LinkToDatasetNode, LinkToExplorationNode } from './common.tsx';
 import styles from './explorer.module.scss';

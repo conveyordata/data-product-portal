@@ -13,13 +13,13 @@ import { TabKeys as DataProductTabKeys } from '@/pages/data-product/components/d
 import { useAppDispatch } from '@/store';
 import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
 import {
+    AssignmentFilter,
     useGetDataProductsQuery,
     useRequestInputPortsForDataProductMutation,
 } from '@/store/api/services/generated/dataProductsApi.ts';
-import type { SearchOutputPortsResponseItem } from '@/store/api/services/generated/outputPortsSearchApi.ts';
-import { clearCart } from '@/store/features/cart/cart-slice.ts';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import { clearCart, selectCartOutputPorts } from '@/store/features/cart/cart-slice.ts';
 import { createDataProductIdPath } from '@/types/navigation.ts';
+import { dispatchMessage } from '@/utils/feedback.ts';
 
 type CartFormData = {
     dataProductId?: string;
@@ -27,11 +27,11 @@ type CartFormData = {
 };
 
 type Props = {
-    cartOutputPorts?: SearchOutputPortsResponseItem[];
     setSelectedDataProductId: (id?: string) => void;
 };
 
-export const ExistingDataProductForm = ({ cartOutputPorts, setSelectedDataProductId }: Props) => {
+export const ExistingDataProductForm = ({ setSelectedDataProductId }: Props) => {
+    const cartOutputPorts = useSelector(selectCartOutputPorts);
     const dispatch = useAppDispatch();
     const posthog = usePostHog();
     const navigate = useNavigate();
@@ -106,14 +106,17 @@ export const ExistingDataProductForm = ({ cartOutputPorts, setSelectedDataProduc
         requestInputPortsForDataProduct({
             id: values.dataProductId,
             requestInputPortsForDataProductRequest: {
-                output_ports: cartOutputPorts?.map((dataset) => dataset.id),
+                output_ports: cartOutputPorts.map((cartOutputPort) => ({
+                    output_port_id: cartOutputPort.outputPortId,
+                    access_mode_id: cartOutputPort.accessModeId,
+                })),
                 justification: values.justification,
             },
         });
     };
     const currentUser = useSelector(selectCurrentUser);
     const { data: { data_products: userDataProducts = [] } = {}, isFetching: isFetchingUserDataProducts } =
-        useGetDataProductsQuery(currentUser?.id, {
+        useGetDataProductsQuery(AssignmentFilter.OnlyAssigned, {
             skip: currentUser === null || !currentUser?.id,
         });
     const options = userDataProducts.map((dp) => ({
@@ -122,7 +125,7 @@ export const ExistingDataProductForm = ({ cartOutputPorts, setSelectedDataProduc
         description: dp.description,
     }));
     return (
-        <Form<CartFormData> layout={'vertical'} form={form} onFinish={onFinish} onValuesChange={onValuesChange}>
+        <Form<CartFormData> layout="vertical" form={form} onFinish={onFinish} onValuesChange={onValuesChange}>
             <Form.Item<CartFormData>
                 name="dataProductId"
                 label={t('Data Product')}

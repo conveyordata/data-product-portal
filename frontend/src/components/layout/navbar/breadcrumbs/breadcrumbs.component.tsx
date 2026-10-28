@@ -34,7 +34,7 @@ export const Breadcrumbs = () => {
                 },
                 ...items,
             ]}
-            separator={'/'}
+            separator="/"
         />
     );
 };

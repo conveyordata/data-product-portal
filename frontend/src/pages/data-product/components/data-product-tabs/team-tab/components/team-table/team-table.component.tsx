@@ -1,7 +1,9 @@
-import { Flex, Table, type TableColumnsType, type TableProps } from 'antd';
+import { TeamOutlined } from '@ant-design/icons';
+import { Flex, type TableColumnsType, type TableProps } from 'antd';
 import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-
+import type { EmptyStateFilter, EmptyStateQuery } from '@/components/empty-state/empty-state.component.tsx';
+import { ListTable } from '@/components/list-table/list-table.component.tsx';
 import { TABLE_SUBSECTION_PAGINATION } from '@/constants/table.constants';
 import { useTablePagination } from '@/hooks/use-table-pagination';
 import { getDataProductUsersTableColumns } from '@/pages/data-product/components/data-product-tabs/team-tab/components/team-table/team-table-columns';
@@ -13,16 +15,18 @@ import {
 } from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
 import type { Role } from '@/store/api/services/generated/authorizationRolesApi.ts';
 import { useGetDataProductQuery } from '@/store/api/services/generated/dataProductsApi.ts';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
+import { dispatchMessage } from '@/utils/feedback.ts';
 import { usePendingActionHandlers } from '@/utils/pending-request.helper';
 import styles from './team-table.module.scss';
 
 type Props = {
     dataProductId: string;
     dataProductUsers: DataProductRoleAssignmentResponse[];
+    roleAssignmentsQuery: EmptyStateQuery;
+    filter?: EmptyStateFilter;
 };
-export function TeamTable({ dataProductId, dataProductUsers }: Props) {
+export function TeamTable({ dataProductId, dataProductUsers, roleAssignmentsQuery, filter }: Props) {
     const { t } = useTranslation();
     const { data: dataProduct, isLoading: isLoadingDataProduct } = useGetDataProductQuery(dataProductId);
     const [deleteRoleAssignment, { isLoading: isRemovingUserFromDataProduct }] =
@@ -146,13 +150,21 @@ export function TeamTable({ dataProductId, dataProductUsers }: Props) {
 
     return (
         <Flex className={styles.teamListContainer}>
-            <Table<DataProductRoleAssignmentResponse>
-                loading={isLoadingDataProduct}
-                className={styles.teamListTable}
-                columns={columns}
+            <ListTable<DataProductRoleAssignmentResponse>
+                query={roleAssignmentsQuery}
                 dataSource={dataProductUsers}
-                rowKey={({ user }) => user.id}
+                columns={columns}
+                subject={t('team members')}
+                emptyState={{
+                    icon: <TeamOutlined />,
+                    title: t('No team members yet'),
+                    description: t('Add people to share ownership of this Data Product with them.'),
+                }}
+                loading={isLoadingDataProduct}
                 onChange={onChange}
+                filter={filter}
+                className={styles.teamListTable}
+                rowKey={({ user }) => user.id}
                 pagination={{
                     ...pagination,
                     placement: ['topEnd'],
@@ -166,7 +178,7 @@ export function TeamTable({ dataProductId, dataProductUsers }: Props) {
                     className: styles.pagination,
                 }}
                 rowClassName={styles.tableRow}
-                size={'small'}
+                size="small"
             />
         </Flex>
     );

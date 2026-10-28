@@ -1,0 +1,143 @@
+import { Flex, type TableColumnsType, type TableProps } from 'antd';
+import { useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+import type { EmptyStateFilter, EmptyStateQuery } from '@/components/empty-state/empty-state.component.tsx';
+import { TechnicalAssetOutlined } from '@/components/icons';
+import { ListTable } from '@/components/list-table/list-table.component.tsx';
+import { TABLE_SUBSECTION_PAGINATION } from '@/constants/table.constants.ts';
+import { useTablePagination } from '@/hooks/use-table-pagination.tsx';
+import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
+import type { TechnicalAssetLink } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
+import { useUnlinkOutputPortFromTechnicalAssetMutation } from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
+import { useGetPluginsQuery } from '@/store/api/services/generated/pluginsApi.ts';
+import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
+import { dispatchMessage } from '@/utils/feedback.ts';
+import { usePendingActionHandlers } from '@/utils/pending-request.helper.ts';
+import styles from './data-output-table.module.scss';
+import { getDatasetDataProductsColumns } from './data-output-table-columns.tsx';
+
+type Props = {
+    dataProductId: string;
+    datasetId: string;
+    dataOutputs: TechnicalAssetLink[];
+    query: EmptyStateQuery;
+    filter?: EmptyStateFilter;
+};
+
+export function DataOutputTable({ dataProductId, datasetId, dataOutputs, query, filter }: Props) {
+    const { t } = useTranslation();
+    const { data: { plugins } = { plugins: [] } } = useGetPluginsQuery();
+    const {
+        handleAcceptDataOutputDatasetLink,
+        handleRejectDataOutputDatasetLink,
+        isApprovingDataOutputLink,
+        isRejectingDataOutputLink,
+    } = usePendingActionHandlers();
+    const [removeDatasetFromDataOutput, { isLoading: isRemovingDatasetFromDataProduct }] =
+        useUnlinkOutputPortFromTechnicalAssetMutation();
+
+    const { data: accept_access } = useCheckAccessQuery(
+        {
+            resource: datasetId,
+            action: AuthorizationAction.OUTPUT_PORT__APPROVE_TECHNICAL_ASSET_LINK_REQUEST,
+        },
+        { skip: !datasetId },
+    );
+    const { data: revoke_access } = useCheckAccessQuery(
+        {
+            resource: datasetId,
+            action: AuthorizationAction.OUTPUT_PORT__REVOKE_TECHNICAL_ASSET_LINK,
+        },
+        { skip: !datasetId },
+    );
+    const canAccept = accept_access?.allowed || false;
+    const canRevoke = revoke_access?.allowed || false;
+
+    const { pagination, handlePaginationChange } = useTablePagination(dataOutputs, {
+        initialPagination: TABLE_SUBSECTION_PAGINATION,
+    });
+
+    const onChange: TableProps<TechnicalAssetLink>['onChange'] = (pagination) => {
+        handlePaginationChange(pagination);
+    };
+
+    const handleRemoveDatasetFromDataOutput = useCallback(
+        async (dataOutputId: string, name: string) => {
+            try {
+                await removeDatasetFromDataOutput({
+                    outputPortId: datasetId,
+                    dataProductId,
+                    unLinkTechnicalAssetToOutputPortRequest: { technical_asset_id: dataOutputId },
+                }).unwrap();
+                dispatchMessage({
+                    content: t('Output Port {{name}} has been removed from Technical Asset', { name }),
+                    type: 'success',
+                });
+            } catch (_error) {
+                dispatchMessage({
+                    content: t('Failed to remove Output Port from Technical Asset'),
+                    type: 'error',
+                });
+            }
+        },
+        [datasetId, removeDatasetFromDataOutput, t, dataProductId],
+    );
+
+    const columns: TableColumnsType<TechnicalAssetLink> = useMemo(() => {
+        return getDatasetDataProductsColumns({
+            t,
+            plugins,
+            onAcceptDataOutputDatasetLink: handleAcceptDataOutputDatasetLink,
+            onRejectDataOutputDatasetLink: handleRejectDataOutputDatasetLink,
+            onRemoveDataOutputDatasetLink: handleRemoveDatasetFromDataOutput,
+            isLoading: isRemovingDatasetFromDataProduct || isRejectingDataOutputLink || isApprovingDataOutputLink,
+            canAccept: canAccept,
+            canRevoke: canRevoke,
+        });
+    }, [
+        t,
+        handleAcceptDataOutputDatasetLink,
+        handleRejectDataOutputDatasetLink,
+        handleRemoveDatasetFromDataOutput,
+        isRemovingDatasetFromDataProduct,
+        isRejectingDataOutputLink,
+        isApprovingDataOutputLink,
+        canAccept,
+        canRevoke,
+        plugins,
+    ]);
+
+    return (
+        <Flex className={styles.datasetListContainer}>
+            <ListTable<TechnicalAssetLink>
+                query={query}
+                dataSource={dataOutputs}
+                columns={columns}
+                subject={t('Technical Assets')}
+                emptyState={{
+                    icon: <TechnicalAssetOutlined />,
+                    title: t('No Technical Assets yet'),
+                    description: t('Link a Technical Asset to expose the data behind this Output Port.'),
+                }}
+                onChange={onChange}
+                filter={filter}
+                className={styles.datasetListTable}
+                rowKey={({ id }) => id}
+                pagination={{
+                    ...pagination,
+                    placement: ['topEnd'],
+                    size: 'small',
+                    showTotal: (total, range) =>
+                        t('Showing {{range0}}-{{range1}} of {{count}} Technical Assets', {
+                            range0: range[0],
+                            range1: range[1],
+                            count: total,
+                        }),
+                    className: styles.pagination,
+                }}
+                rowClassName={styles.tableRow}
+                size="small"
+            />
+        </Flex>
+    );
+}

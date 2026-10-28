@@ -157,7 +157,7 @@ export function RolesTable({ scope }: RolesTableProps) {
                 );
             }
 
-            return <Flex justify={'center'}>{checkbox}</Flex>;
+            return <Flex justify="center">{checkbox}</Flex>;
         }
     };
 
@@ -172,16 +172,16 @@ export function RolesTable({ scope }: RolesTableProps) {
 
         return {
             title: (
-                <Space align={'center'} size={0}>
+                <Space align="center" size={0}>
                     <QuestionTooltip title={description}>
                         <Text>{title}</Text>
                     </QuestionTooltip>
                     <Popover
-                        placement={'bottom'}
+                        placement="bottom"
                         align={{ offset: alignToQuestionTooltip }}
                         content={<RoleDetailsMenu role={role} />}
                     >
-                        <Button icon={<MoreOutlined />} type={'text'} style={overlapPadding} />
+                        <Button icon={<MoreOutlined />} type="text" style={overlapPadding} />
                     </Popover>
                 </Space>
             ),
@@ -213,7 +213,7 @@ export function RolesTable({ scope }: RolesTableProps) {
                 loading={isFetching || isLoading}
                 dataSource={permissions}
                 pagination={false}
-                rowKey={'id'}
+                rowKey="id"
                 scroll={{ x: 'max-content' }}
             />
         </Flex>
@@ -293,6 +293,52 @@ function determinePermissionsForScope(scope: Scope, roles: Role[], t: TFunction)
                     id: AuthorizationAction.GLOBAL__DELETE_USER,
                     name: 'Delete User',
                     description: t('Allows the deletion of a user'),
+                },
+                {
+                    type: 'Group',
+                    id: 'Manage Groups',
+                    name: t('Manage Groups'),
+                },
+                {
+                    type: 'Instance',
+                    id: AuthorizationAction.GLOBAL__CREATE_GROUP,
+                    name: t('Create Group'),
+                    description: t('Allows the creation of a new group'),
+                },
+                {
+                    type: 'Instance',
+                    id: AuthorizationAction.GLOBAL__UPDATE_GROUP,
+                    name: t('Update Group'),
+                    description: t('Allows updating fields and members of a group'),
+                },
+                {
+                    type: 'Instance',
+                    id: AuthorizationAction.GLOBAL__DELETE_GROUP,
+                    name: t('Delete Group'),
+                    description: t('Allows deleting a group'),
+                },
+                {
+                    type: 'Group',
+                    id: 'Manage Machine Users',
+                    name: t('Manage Machine Users'),
+                },
+                {
+                    type: 'Instance',
+                    id: AuthorizationAction.GLOBAL__CREATE_MACHINE_USER,
+                    name: t('Create Machine User'),
+                    description: t('Allows the creation of a new machine user'),
+                },
+                {
+                    type: 'Instance',
+                    id: AuthorizationAction.GLOBAL__UPDATE_MACHINE_USER,
+                    name: t('Update Machine User'),
+                    description: t('Allows updating a machine user'),
+                },
+                {
+                    type: 'Instance',
+                    id: AuthorizationAction.GLOBAL__DELETE_MACHINE_USER,
+                    name: t('Delete Machine User'),
+                    description: t('Allows deleting a machine user'),
                 },
             ];
             break;
@@ -530,8 +576,33 @@ function determinePermissionsForScope(scope: Scope, roles: Role[], t: TFunction)
                     name: 'Insert data quality results',
                     description: t('Allows inserting data quality results for an Output Port'),
                 },
+                {
+                    type: 'Instance',
+                    id: AuthorizationAction.OUTPUT_PORT__UPDATE_CONTRACT,
+                    name: 'Manage data contract',
+                    description: t('Allows modifying the data contract of an Output Port'),
+                },
+                {
+                    type: 'Instance',
+                    id: AuthorizationAction.OUTPUT_PORT__UPDATE_QUERY_STATS,
+                    name: 'Insert query statistics',
+                    description: t('Allows inserting query statistics for an Output Port'),
+                },
             ];
             break;
+    }
+
+    if (scope === Scope.DATA_PRODUCT) {
+        permissions.push(
+            {
+                type: 'Group',
+                id: 'Manage Output Ports',
+                name: 'Manage Output Ports',
+            },
+            ...determinePermissionsForScope(Scope.DATASET, roles, t).filter(
+                (permission): permission is PermissionInstance => permission.type === 'Instance',
+            ),
+        );
     }
 
     const determineAccess = (permission: AuthorizationAction) => {

@@ -1,48 +1,39 @@
+import pytest
 from fastapi.testclient import TestClient
 
-from app.data_output_configuration.data_output_types import DataOutputTypes
-from app.data_output_configuration.s3.schema import S3TechnicalAssetConfiguration
-from app.data_output_configuration.schema_request import (
+from app.authorization.roles.schema import Scope
+from app.core.authz.actions import AuthorizationAction as Action
+from app.data_products.technical_assets.enums import TechnicalMapping
+from app.settings import settings
+from app.technical_asset_configuration.schema_request import (
     RenderTechnicalAssetAccessPathRequest,
 )
-from tests.factories import PlatformFactory
+from tests.factories import (
+    DataProductFactory,
+    DataProductRoleAssignmentFactory,
+    RoleFactory,
+    UserFactory,
+)
 from tests.factories.platform_service import PlatformServiceFactory
-from tests.factories.platform_service_config import PlatformServiceConfigFactory
+from tests.fixtures.fake_plugin.schema import (
+    FakeLinkPlugin,
+    FakeTechnicalAssetConfiguration,
+)
 
 ENDPOINT = "/api/v2/plugins"
 
 
 class TestPluginEndpoints:
-    def test_list_plugins_returns_no_results_when_no_service_config(
-        self, client: TestClient
-    ):
-        """Test GET /v2/plugins returns empty list when no service configs exist"""
+    def test_list_plugins(self, client: TestClient):
         response = client.get(ENDPOINT)
 
         assert response.status_code == 200
         data = response.json()
 
-        # Verify response structure
         assert "plugins" in data
         assert isinstance(data["plugins"], list)
-        assert len(data["plugins"]) == 3
+        assert len(data["plugins"]) == 2
 
-    def test_list_plugins_returns_all_available_plugins(self, client: TestClient):
-        """Test GET /v2/plugins returns list of all available plugins"""
-        aws = PlatformFactory(name="AWS")
-        s3 = PlatformServiceFactory(name="S3")
-        PlatformServiceConfigFactory(service=s3, platform=aws)
-        response = client.get(ENDPOINT)
-
-        assert response.status_code == 200
-        data = response.json()
-
-        # Verify response structure
-        assert "plugins" in data
-        assert isinstance(data["plugins"], list)
-        assert len(data["plugins"]) > 0
-
-        # Verify each plugin has required fields
         for plugin in data["plugins"]:
             assert "plugin" in plugin
             assert "platform" in plugin
@@ -53,105 +44,58 @@ class TestPluginEndpoints:
             assert "result_tooltip" in plugin
             assert isinstance(plugin["ui_metadata"], list)
 
+    def test_list_plugins__shareable_flag(
+        self, client: TestClient, unshareable_fake_plugin
+    ):
+        response = client.get(ENDPOINT)
+
+        assert response.status_code == 200
+        shareable = {p["plugin"]: p["shareable"] for p in response.json()["plugins"]}
+        assert shareable == {
+            "FakeTechnicalAssetConfiguration": False,
+            "FakeLinkPlugin": True,
+        }
+
     def test_list_plugins_includes_expected_platforms(self, client: TestClient):
         """Test that all expected plugins are in the list"""
-        aws = PlatformFactory(name="AWS")
-        s3 = PlatformServiceFactory(name="S3")
-        glue = PlatformServiceFactory(name="Glue")
-        PlatformServiceConfigFactory(service=s3, platform=aws)
-        PlatformServiceConfigFactory(service=glue, platform=aws)
         response = client.get(ENDPOINT)
 
         assert response.status_code == 200
         data = response.json()
 
         plugin_names = {p["plugin"] for p in data["plugins"]}
-
-        # Verify all expected plugins are present
-        expected_plugins = {
-            "S3TechnicalAssetConfiguration",
-            "GlueTechnicalAssetConfiguration",
-        }
-        assert expected_plugins.issubset(plugin_names)
-        # not configured = true
-        assert (
-            next(p for p in data["plugins"] if p["plugin"] == "ConveyorPlugin").get(
-                "show_in_form", True
-            )
-            is False
-        )
-
-    def test_list_plugins_includes_all_platforms(self, client: TestClient):
-        """Test that all expected plugins are in the list"""
-        aws = PlatformFactory(name="AWS")
-        dwh = PlatformFactory(name="DWH")
-        s3 = PlatformServiceFactory(name="S3")
-        glue = PlatformServiceFactory(name="Glue")
-        redshift = PlatformServiceFactory(name="Redshift")
-        snowflake = PlatformServiceFactory(name="Snowflake")
-        databricks = PlatformServiceFactory(name="Databricks")
-        PlatformServiceConfigFactory(service=s3, platform=aws)
-        PlatformServiceConfigFactory(service=glue, platform=aws)
-        PlatformServiceConfigFactory(service=redshift, platform=aws)
-        PlatformServiceConfigFactory(service=snowflake, platform=dwh)
-        PlatformServiceConfigFactory(service=databricks, platform=dwh)
-
-        response = client.get(ENDPOINT)
-
-        assert response.status_code == 200
-        data = response.json()
-
-        plugin_names = {p["plugin"] for p in data["plugins"]}
-
-        # Verify all expected plugins are present
-        expected_plugins = {
-            "S3TechnicalAssetConfiguration",
-            "GlueTechnicalAssetConfiguration",
-        }
-        assert expected_plugins.issubset(plugin_names)
+        assert plugin_names == {"FakeTechnicalAssetConfiguration", "FakeLinkPlugin"}
 
     def test_get_plugin_form_by_name_returns_correct_plugin(self, client: TestClient):
         """Test GET /v2/plugins/{plugin_name}/form returns specific plugin"""
-        aws = PlatformFactory(name="AWS")
-        s3 = PlatformServiceFactory(name="S3")
-        PlatformServiceConfigFactory(service=s3, platform=aws)
-        response = client.get(f"{ENDPOINT}/S3TechnicalAssetConfiguration/form")
+        response = client.get(f"{ENDPOINT}/FakeTechnicalAssetConfiguration/form")
 
         assert response.status_code == 200
         data = response.json()
 
-        # Verify it's the correct plugin
-        assert data["plugin"] == "S3TechnicalAssetConfiguration"
-        assert data["platform"] == "s3"
-        assert data["display_name"] == "S3"
-        assert data["icon_name"] == "s3-logo.svg"
+        assert data["plugin"] == "FakeTechnicalAssetConfiguration"
+        assert data["platform"] == "fake"
+        assert data["display_name"] == "Fake"
+        assert data["icon_name"] == "icon.svg"
         assert "ui_metadata" in data
         assert isinstance(data["ui_metadata"], list)
 
     def test_get_plugin_form_includes_all_fields(self, client: TestClient):
         """Test that plugin form includes all expected fields"""
-        aws = PlatformFactory(name="AWS")
-        glue = PlatformServiceFactory(name="Glue")
-        PlatformServiceConfigFactory(service=glue, platform=aws)
-        response = client.get(f"{ENDPOINT}/GlueTechnicalAssetConfiguration/form")
-
+        response = client.get(f"{ENDPOINT}/FakeTechnicalAssetConfiguration/form")
         assert response.status_code == 200
+
         data = response.json()
+        assert data["plugin"] == "FakeTechnicalAssetConfiguration"
 
-        assert data["plugin"] == "GlueTechnicalAssetConfiguration"
-
-        # Get field names
         field_names = {field["name"] for field in data["ui_metadata"]}
-
-        # Verify expected fields are present
-        expected_fields = {"database", "database_suffix", "access_granularity", "table"}
-        assert expected_fields.issubset(field_names)
+        assert field_names == {"path", "granular", "table"}
 
     def test_get_plugin_form_with_invalid_name_returns_404(self, client: TestClient):
         """Test GET /v2/plugins/{plugin_name}/form with invalid name returns 404"""
         response = client.get(f"{ENDPOINT}/NonExistentPlugin/form")
-
         assert response.status_code == 404
+
         data = response.json()
         assert "detail" in data
         assert "NonExistentPlugin" in data["detail"]
@@ -159,15 +103,11 @@ class TestPluginEndpoints:
 
     def test_get_plugin_form_for_each_available_plugin(self, client: TestClient):
         """Test that each plugin from list can be retrieved individually"""
-        # Get all plugins
-        aws = PlatformFactory(name="AWS")
-        s3 = PlatformServiceFactory(name="S3")
-        PlatformServiceConfigFactory(service=s3, platform=aws)
         list_response = client.get(ENDPOINT)
         assert list_response.status_code == 200
-        plugins = list_response.json()["plugins"]
 
         # Test each plugin can be retrieved
+        plugins = list_response.json()["plugins"]
         for plugin in plugins:
             plugin_name = plugin["plugin"]
             form_response = client.get(f"{ENDPOINT}/{plugin_name}/form")
@@ -180,26 +120,21 @@ class TestPluginEndpoints:
 
     def test_plugin_form_has_field_dependencies(self, client: TestClient):
         """Test that plugin forms with dependencies include them correctly"""
-        aws = PlatformFactory(name="AWS")
-        glue = PlatformServiceFactory(name="Glue")
-        PlatformServiceConfigFactory(service=glue, platform=aws)
-        response = client.get(f"{ENDPOINT}/GlueTechnicalAssetConfiguration/form")
-
+        response = client.get(f"{ENDPOINT}/FakeTechnicalAssetConfiguration/form")
         assert response.status_code == 200
-        data = response.json()
 
-        # Find the table field which depends on access_granularity
+        # Find the table field which depends on granular
+        data = response.json()
         table_field = next(
             (f for f in data["ui_metadata"] if f["name"] == "table"), None
         )
         assert table_field is not None
 
-        # Verify dependency structure
         assert "depends_on" in table_field
         if table_field["depends_on"] is not None:
             assert "field_name" in table_field["depends_on"][0]
             assert "value" in table_field["depends_on"][0]
-            assert table_field["depends_on"][0]["field_name"] == "access_granularity"
+            assert table_field["depends_on"][0]["field_name"] == "granular"
 
 
 class TestPlatformTilesEndpoint:
@@ -207,36 +142,19 @@ class TestPlatformTilesEndpoint:
 
     def test_get_platform_tiles_returns_correct_structure(self, client: TestClient):
         """Test GET /v2/technical_assets/platform-tiles returns correct structure"""
-        # Create platform services for testing
-        aws = PlatformFactory(name="AWS")
-        s3 = PlatformServiceFactory(name="S3")
-        glue = PlatformServiceFactory(name="Glue")
-        redshift = PlatformServiceFactory(name="Redshift")
-        PlatformServiceConfigFactory(service=s3, platform=aws)
-        PlatformServiceConfigFactory(service=glue, platform=aws)
-        PlatformServiceConfigFactory(service=redshift, platform=aws)
-
         response = client.get(f"{ENDPOINT}/platform-tiles")
-
         assert response.status_code == 200
-        data = response.json()
 
-        # Verify response structure
+        data = response.json()
         assert "platform_tiles" in data
         assert isinstance(data["platform_tiles"], list)
 
     def test_get_platform_tiles_includes_configured_platforms(self, client: TestClient):
         """Test that only configured platforms are included in tiles"""
-        # Create some platform services
-        aws = PlatformFactory(name="AWS")
-        s3_service = PlatformServiceFactory(name="S3")
-        PlatformServiceConfigFactory(service=s3_service, platform=aws)
-
         response = client.get(f"{ENDPOINT}/platform-tiles")
-
         assert response.status_code == 200
-        data = response.json()
 
+        data = response.json()
         tiles = data["platform_tiles"]
         assert len(tiles) > 0
 
@@ -251,65 +169,170 @@ class TestPlatformTilesEndpoint:
 
     def test_get_platform_tiles_organizes_hierarchy(self, client: TestClient):
         """Test that platform tiles are organized in parent-child hierarchy"""
-        # Create AWS services
         response = client.get(f"{ENDPOINT}/platform-tiles")
-
         assert response.status_code == 200
-        data = response.json()
 
+        data = response.json()
         tiles = data["platform_tiles"]
 
-        # Find AWS parent tile
-        aws_tile = next((t for t in tiles if t["value"] == "aws"), None)
-
-        if aws_tile:
-            # AWS should have children
-            assert "children" in aws_tile
-            if aws_tile["children"]:
-                assert isinstance(aws_tile["children"], list)
-                # Check that children have proper structure
-                for child in aws_tile["children"]:
-                    assert "label" in child
-                    assert "value" in child
-                    assert "icon_name" in child
+        cloud_tile = next(t for t in tiles if t["value"] == "cloud")
+        assert [child["value"] for child in cloud_tile["children"]] == ["fake"]
+        for child in cloud_tile["children"]:
+            assert "label" in child
+            assert "value" in child
+            assert "icon_name" in child
 
     def test_get_platform_tiles_has_environments_flag(self, client: TestClient):
         """Test that tiles have has_environments flag for parent platforms"""
-        # Create AWS services
         response = client.get(f"{ENDPOINT}/platform-tiles")
-
         assert response.status_code == 200
-        data = response.json()
 
+        data = response.json()
         tiles = data["platform_tiles"]
 
-        # Find AWS tile
-        aws_tile = next((t for t in tiles if t["value"] == "aws"), None)
-
-        if aws_tile:
-            assert "has_environments" in aws_tile
-            # AWS has multiple children, so should have environments
-            if aws_tile.get("children") and len(aws_tile["children"]) > 1:
-                assert aws_tile["has_environments"] is True
+        cloud_tile = next(t for t in tiles if t["value"] == "cloud")
+        assert cloud_tile["has_environments"] is True
+        link_tile = next(t for t in tiles if t["value"] == "fake-link")
+        assert link_tile["has_environments"] is False
 
     def test_render_technical_asset_access_path(self, client: TestClient):
         service = PlatformServiceFactory(
-            result_string_template="{bucket}/{suffix}/{path}"
+            result_string_template=(
+                "{domain.name}/{data_product.namespace}/"
+                "{technical_asset.namespace}/{path}/{table}"
+            )
         )
-        configuration = S3TechnicalAssetConfiguration(
-            bucket="bucket",
-            suffix="suffix",
-            path="path",
-            configuration_type=DataOutputTypes.S3TechnicalAssetConfiguration,
-        )
-        request = RenderTechnicalAssetAccessPathRequest(
-            platform_id=service.platform.id,
-            service_id=service.id,
-            configuration=configuration,
-        ).model_dump(mode="json")
+        data_product = DataProductFactory(namespace="customer360")
+        self._allow_creating_technical_assets(data_product)
 
         response = client.post(
-            f"{ENDPOINT}/render_technical_asset_access_path", json=request
+            f"{ENDPOINT}/render_technical_asset_access_path",
+            json=self._render_request(service, data_product),
         )
         assert response.status_code == 200, response.text
-        assert response.json()["technical_asset_access_path"] == "bucket/suffix/path"
+        assert (
+            response.json()["technical_asset_access_path"]
+            == f"{data_product.domain.name}/customer360/orders/path/table"
+        )
+
+    def test_render_technical_asset_access_path__forbidden_without_create_technical_asset(
+        self, client: TestClient
+    ):
+        service = PlatformServiceFactory(result_string_template="{path}")
+        data_product = DataProductFactory()
+        UserFactory(external_id=settings.DEFAULT_USERNAME)
+
+        response = client.post(
+            f"{ENDPOINT}/render_technical_asset_access_path",
+            json=self._render_request(service, data_product),
+        )
+        assert response.status_code == 403
+
+    @staticmethod
+    def _allow_creating_technical_assets(data_product) -> None:
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__CREATE_TECHNICAL_ASSET],
+        )
+        DataProductRoleAssignmentFactory(
+            identity_id=user.id, role_id=role.id, data_product_id=data_product.id
+        )
+
+    @staticmethod
+    def _render_request(service, data_product) -> dict:
+        return RenderTechnicalAssetAccessPathRequest(
+            platform_id=service.platform.id,
+            service_id=service.id,
+            data_product_id=data_product.id,
+            namespace="orders",
+            technical_mapping=TechnicalMapping.Default,
+            configuration=FakeTechnicalAssetConfiguration(path="path", table="table"),
+        ).model_dump(mode="json")
+
+
+class TestLinkPluginEndToEnd:
+    def test_link_tile_and_url_via_existing_endpoints(self, client):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        data_product = DataProductFactory()
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__READ_INTEGRATIONS],
+        )
+        DataProductRoleAssignmentFactory(
+            identity_id=user.id, role_id=role.id, data_product_id=data_product.id
+        )
+
+        tiles_response = client.get(f"{ENDPOINT}/platform-tiles")
+        assert tiles_response.status_code == 200
+        tile = next(
+            t
+            for t in tiles_response.json()["platform_tiles"]
+            if t["value"] == "fake-link"
+        )
+        assert tile["icon_data_uri"].startswith("data:image/svg+xml;base64,")
+
+        url_response = client.get(f"{ENDPOINT}/fake-link/url?id={data_product.id}")
+        assert url_response.status_code == 200
+        assert url_response.json()["url"] == f"https://example.com/{data_product.id}"
+
+    @pytest.fixture
+    def link_plugin_under_cloud(self, monkeypatch):
+        monkeypatch.setattr(
+            FakeLinkPlugin,
+            "_platform_metadata",
+            FakeLinkPlugin.get_platform_metadata().model_copy(
+                update={"parent_platform": "cloud"}
+            ),
+        )
+
+    @pytest.fixture
+    def other_url_under_cloud(self, monkeypatch):
+        monkeypatch.setattr(
+            FakeTechnicalAssetConfiguration,
+            "get_url",
+            classmethod(lambda cls, id, db, actor, environment=None: "other"),
+        )
+
+    @staticmethod
+    def _readable_data_product():
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        data_product = DataProductFactory()
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__READ_INTEGRATIONS],
+        )
+        DataProductRoleAssignmentFactory(
+            identity_id=user.id, role_id=role.id, data_product_id=data_product.id
+        )
+        return data_product
+
+    @pytest.mark.usefixtures("link_plugin_under_cloud")
+    def test_get_plugin_url__parent_platform_skips_child_without_url(self, client):
+        data_product = self._readable_data_product()
+
+        response = client.get(f"{ENDPOINT}/cloud/url?id={data_product.id}")
+
+        assert response.status_code == 200, response.text
+        assert response.json()["url"] == f"https://example.com/{data_product.id}"
+
+    @pytest.mark.usefixtures("link_plugin_under_cloud", "other_url_under_cloud")
+    def test_get_plugin_url__parent_platform_children_with_different_urls(self, client):
+        data_product = self._readable_data_product()
+
+        response = client.get(f"{ENDPOINT}/cloud/url?id={data_product.id}")
+
+        assert response.status_code == 500
+        assert "FakeLinkPlugin" in response.json()["detail"]
+
+    @pytest.mark.usefixtures("link_plugin_under_cloud", "other_url_under_cloud")
+    def test_get_plugin_url__parent_platform_ignores_disabled_child(
+        self, client, monkeypatch
+    ):
+        monkeypatch.setattr(settings, "ENABLED_PLUGINS", ["FakeLinkPlugin"])
+        data_product = self._readable_data_product()
+
+        response = client.get(f"{ENDPOINT}/cloud/url?id={data_product.id}")
+
+        assert response.status_code == 200, response.text
+        assert response.json()["url"] == f"https://example.com/{data_product.id}"

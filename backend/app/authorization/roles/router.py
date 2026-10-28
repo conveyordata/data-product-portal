@@ -14,7 +14,7 @@ from app.authorization.roles.schema import (
 from app.authorization.roles.service import RoleService
 from app.core.authz import Action, Authorization
 from app.core.authz.resolvers import EmptyResolver
-from app.database.database import get_db_session
+from app.database.deps import get_db_session
 
 router = APIRouter(tags=["Authorization - Roles"], prefix="/v2/authz/roles")
 
@@ -37,7 +37,7 @@ router = APIRouter(tags=["Authorization - Roles"], prefix="/v2/authz/roles")
 )
 def create_role(
     request: CreateRole,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
 ) -> Role:
     role: Role = RoleService(db).create_role(request)
     AuthRole(role).sync()
@@ -58,7 +58,9 @@ def create_role(
         ),
     ],
 )
-def remove_role(id: UUID, db: Session = Depends(get_db_session)) -> None:
+def remove_role(
+    id: UUID, db: Session = Depends(get_db_session, scope="function")
+) -> None:
     role: Role = RoleService(db).delete_role(id)
     AuthRole(role).remove()
 
@@ -82,7 +84,7 @@ def remove_role(id: UUID, db: Session = Depends(get_db_session)) -> None:
 def update_role(
     id: UUID,
     request: UpdateRole,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
 ) -> Role:
     role: Role = RoleService(db).update_role(id, request)
     AuthRole(role).sync()
@@ -90,5 +92,7 @@ def update_role(
 
 
 @router.get("/{scope}")
-def get_roles(scope: Scope, db: Session = Depends(get_db_session)) -> GetRolesResponse:
+def get_roles(
+    scope: Scope, db: Session = Depends(get_db_session, scope="function")
+) -> GetRolesResponse:
     return GetRolesResponse(roles=RoleService(db).get_roles(scope))

@@ -7,6 +7,7 @@ from uuid import UUID
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
+from ..models.data_product_visibility import DataProductVisibility
 from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
@@ -31,6 +32,8 @@ class DataProductCreate:
         owners (list[UUID]):
         about (None | str | Unset):
         tag_ids (list[UUID] | Unset):
+        environment_ids (list[UUID] | None | Unset):
+        visibility (DataProductVisibility | Unset):
         input_ports (None | RequestInputPortsForDataProductRequest | Unset):
     """
 
@@ -43,12 +46,14 @@ class DataProductCreate:
     owners: list[UUID]
     about: None | str | Unset = UNSET
     tag_ids: list[UUID] | Unset = UNSET
+    environment_ids: list[UUID] | None | Unset = UNSET
+    visibility: DataProductVisibility | Unset = UNSET
     input_ports: None | RequestInputPortsForDataProductRequest | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         from ..models.request_input_ports_for_data_product_request import (
-            RequestInputPortsForDataProductRequest,
+            RequestInputPortsForDataProductRequest,  # noqa: PLC0415
         )
 
         name = self.name
@@ -81,6 +86,22 @@ class DataProductCreate:
                 tag_ids_item = str(tag_ids_item_data)
                 tag_ids.append(tag_ids_item)
 
+        environment_ids: list[str] | None | Unset
+        if isinstance(self.environment_ids, Unset):
+            environment_ids = UNSET
+        elif isinstance(self.environment_ids, list):
+            environment_ids = []
+            for environment_ids_type_0_item_data in self.environment_ids:
+                environment_ids_type_0_item = str(environment_ids_type_0_item_data)
+                environment_ids.append(environment_ids_type_0_item)
+
+        else:
+            environment_ids = self.environment_ids
+
+        visibility: str | Unset = UNSET
+        if not isinstance(self.visibility, Unset):
+            visibility = self.visibility.value
+
         input_ports: dict[str, Any] | None | Unset
         if isinstance(self.input_ports, Unset):
             input_ports = UNSET
@@ -106,6 +127,10 @@ class DataProductCreate:
             field_dict["about"] = about
         if tag_ids is not UNSET:
             field_dict["tag_ids"] = tag_ids
+        if environment_ids is not UNSET:
+            field_dict["environment_ids"] = environment_ids
+        if visibility is not UNSET:
+            field_dict["visibility"] = visibility
         if input_ports is not UNSET:
             field_dict["input_ports"] = input_ports
 
@@ -114,7 +139,7 @@ class DataProductCreate:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         from ..models.request_input_ports_for_data_product_request import (
-            RequestInputPortsForDataProductRequest,
+            RequestInputPortsForDataProductRequest,  # noqa: PLC0415
         )
 
         d = dict(src_dict)
@@ -155,6 +180,35 @@ class DataProductCreate:
 
                 tag_ids.append(tag_ids_item)
 
+        def _parse_environment_ids(data: object) -> list[UUID] | None | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, list):
+                    raise TypeError()
+                environment_ids_type_0 = []
+                _environment_ids_type_0 = data
+                for environment_ids_type_0_item_data in _environment_ids_type_0:
+                    environment_ids_type_0_item = UUID(environment_ids_type_0_item_data)
+
+                    environment_ids_type_0.append(environment_ids_type_0_item)
+
+                return environment_ids_type_0
+            except (TypeError, ValueError, AttributeError, KeyError):
+                pass
+            return cast(list[UUID] | None | Unset, data)
+
+        environment_ids = _parse_environment_ids(d.pop("environment_ids", UNSET))
+
+        _visibility = d.pop("visibility", UNSET)
+        visibility: DataProductVisibility | Unset
+        if isinstance(_visibility, Unset):
+            visibility = UNSET
+        else:
+            visibility = DataProductVisibility(_visibility)
+
         def _parse_input_ports(
             data: object,
         ) -> None | RequestInputPortsForDataProductRequest | Unset:
@@ -186,6 +240,8 @@ class DataProductCreate:
             owners=owners,
             about=about,
             tag_ids=tag_ids,
+            environment_ids=environment_ids,
+            visibility=visibility,
             input_ports=input_ports,
         )
 

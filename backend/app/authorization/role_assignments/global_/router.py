@@ -1,7 +1,7 @@
 from typing import Annotated, Literal, Union, cast
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, Query
 from pydantic.json_schema import SkipJsonSchema
 from sqlalchemy.orm import Session
 
@@ -23,7 +23,7 @@ from app.authorization.roles import ADMIN_UUID
 from app.core.auth.auth import get_authenticated_user
 from app.core.authz import Action, Authorization
 from app.core.authz.resolvers import EmptyResolver
-from app.database.database import get_db_session
+from app.database.deps import get_db_session
 from app.users.model import ensure_user_exists
 from app.users.schema import User
 
@@ -35,15 +35,11 @@ router = APIRouter(prefix="/v2/authz/role_assignments/global")
 )
 def become_admin(
     request: BecomeAdmin,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
     user: User = Depends(get_authenticated_user),
 ):
     user = ensure_user_exists(user.id, db)
-    if not user.can_become_admin:
-        raise HTTPException(
-            status.HTTP_403_FORBIDDEN,
-            detail="User is not allowed to elevate to admin",
-        )
+    RoleAssignmentService(db).ensure_can_become_admin(user)
     user.admin_expiry = request.expiry
     authorizer = Authorization()
     authorizer.assign_admin_role(user_id=str(user.id))
@@ -53,7 +49,7 @@ def become_admin(
     "/revoke_admin",
 )
 def revoke_admin(
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
     user: User = Depends(get_authenticated_user),
 ):
     user = ensure_user_exists(user.id, db)
@@ -71,12 +67,12 @@ def revoke_admin(
 )
 def create_global_role_assignment(
     request: CreateGlobalRoleAssignment,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
     user: User = Depends(get_authenticated_user),
 ) -> GlobalRoleAssignmentResponse:
     role_id = _resolve_role_id(request.role_id)
     return RoleAssignmentService(db).create_assignment(
-        RoleAssignmentRequest(user_id=request.user_id, role_id=role_id),
+        RoleAssignmentRequest(identity_id=request.user_id, role_id=role_id),
         actor=user,
     )
 
@@ -91,7 +87,7 @@ def create_global_role_assignment(
 )
 def delete_global_role_assignment(
     id: UUID,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
 ) -> DeleteGlobalRoleAssignmentResponse:
     assignment = RoleAssignmentService(db).delete_assignment(id)
 
@@ -110,11 +106,13 @@ def _resolve_role_id(role_id: Union[UUID, Literal["admin"]]) -> UUID:
 def list_global_role_assignments(
     user_id: Annotated[UUID | SkipJsonSchema[None], Query()] = None,
     role_id: Annotated[UUID | SkipJsonSchema[None], Query()] = None,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
 ) -> ListGlobalRoleAssignmentsResponse:
     return ListGlobalRoleAssignmentsResponse(
         role_assignments=RoleAssignmentService(db).list_assignments(
-            user_id=user_id, role_id=role_id
+            identity_id=user_id,
+            role_id=role_id,
+            users_only=True,
         )
     )
 
@@ -130,17 +128,11 @@ def list_global_role_assignments(
 def decide_global_role_assignment(
     id: UUID,
     request: DecideGlobalRoleAssignment,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
     user: User = Depends(get_authenticated_user),
 ) -> GlobalRoleAssignmentResponse:
     service = RoleAssignmentService(db)
-    original = service.get_assignment(id)
-
-    if original.decision not in (DecisionStatus.PENDING, request.decision):
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="This assignment was already decided",
-        )
+    service.ensure_can_decide(id, request.decision)
 
     assignment = service.update_assignment(
         UpdateGlobalRoleAssignment(id=id, decision=request.decision), actor=user
@@ -163,7 +155,7 @@ def decide_global_role_assignment(
 def modify_global_role_assignment(
     id: UUID,
     request: ModifyGlobalRoleAssignment,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
     user: User = Depends(get_authenticated_user),
 ) -> GlobalRoleAssignmentResponse:
     service = RoleAssignmentService(db)

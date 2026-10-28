@@ -3,17 +3,10 @@ from datetime import UTC, datetime, timedelta
 from app.authorization.roles.schema import Scope
 from app.core.authz.actions import AuthorizationAction
 from app.data_products.output_ports.data_quality.enums import DataQualityStatus
-from app.data_products.output_ports.data_quality.schema_request import (
-    DataQualityTechnicalAsset,
-    OutputPortDataQualitySummary,
-)
-from app.data_products.output_ports.data_quality.service import (
-    OutputPortDataQualityService,
-)
 from app.settings import settings
 from tests.factories import (
-    DatasetFactory,
     DatasetRoleAssignmentFactory,
+    OutputPortFactory,
     RoleFactory,
     UserFactory,
 )
@@ -21,7 +14,7 @@ from tests.factories import (
 ENDPOINT = "/api/v2/data_products"
 
 
-def _assign_update_role(session, dataset):
+def _assign_update_role(output_port):
     user = UserFactory(external_id=settings.DEFAULT_USERNAME)
     role = RoleFactory(
         scope=Scope.DATASET,
@@ -31,15 +24,22 @@ def _assign_update_role(session, dataset):
         ],
     )
     DatasetRoleAssignmentFactory(
-        user_id=user.id, role_id=role.id, dataset_id=dataset.id
+        user_id=user.id, role_id=role.id, output_port_id=output_port.id
     )
     return user
 
 
 class TestDataQualityRouter:
+    @staticmethod
+    def _post_summary(client, dataset, payload):
+        return client.post(
+            f"{ENDPOINT}/{dataset.data_product.id}/output_ports/{dataset.id}/data_quality_summary",
+            json=payload,
+        )
+
     def test_post_data_quality(self, client, session):
-        dataset = DatasetFactory()
-        _assign_update_role(session, dataset)
+        dataset = OutputPortFactory()
+        _assign_update_role(dataset)
 
         payload = {
             "overall_status": "success",
@@ -62,7 +62,7 @@ class TestDataQualityRouter:
         assert body["details_url"] == payload["details_url"]
 
     def test_post_data_quality_no_permissions(self, client):
-        dataset = DatasetFactory()
+        dataset = OutputPortFactory()
 
         payload = {
             "overall_status": "success",
@@ -81,8 +81,8 @@ class TestDataQualityRouter:
         assert post_response.status_code == 403
 
     def test_post_data_quality_with_dimensions(self, client, session):
-        dataset = DatasetFactory()
-        _assign_update_role(session, dataset)
+        dataset = OutputPortFactory()
+        _assign_update_role(dataset)
 
         payload = {
             "overall_status": "success",
@@ -104,8 +104,8 @@ class TestDataQualityRouter:
         assert body["dimensions"]["completeness"] == "success"
 
     def test_get_latest_data_quality_result_no_results(self, client, session):
-        dataset = DatasetFactory()
-        _assign_update_role(session, dataset)
+        dataset = OutputPortFactory()
+        _assign_update_role(dataset)
 
         get_response = client.get(
             f"{ENDPOINT}/{dataset.data_product.id}/output_ports/{dataset.id}/data_quality_summary"
@@ -115,49 +115,53 @@ class TestDataQualityRouter:
         assert "No data quality summary found for output port" in data["detail"]
 
     def test_delete_output_port_data_quality_summary(self, client, session):
-        dataset = DatasetFactory()
-        _assign_update_role(session, dataset)
+        dataset = OutputPortFactory()
+        _assign_update_role(dataset)
 
-        service = OutputPortDataQualityService(session)
-        service.save_data_quality_summary(
-            dataset.id,
-            OutputPortDataQualitySummary(
-                created_at=datetime.now(UTC) - timedelta(days=1),
-                overall_status=DataQualityStatus.FAILURE,
-                technical_assets=[],
-            ),
+        post_response = self._post_summary(
+            client,
+            dataset,
+            {
+                "created_at": (datetime.now(UTC) - timedelta(days=1)).isoformat(),
+                "overall_status": "failure",
+                "technical_assets": [],
+            },
         )
+        assert post_response.status_code == 200, post_response.text
+
         response = client.delete(
             f"{ENDPOINT}/{dataset.data_product.id}/output_ports/{dataset.id}"
         )
         assert response.status_code == 200
 
     def test_get_latest_data_quality_result(self, client, session):
-        dataset = DatasetFactory()
-        _assign_update_role(session, dataset)
+        dataset = OutputPortFactory()
+        _assign_update_role(dataset)
 
-        service = OutputPortDataQualityService(session)
-        service.save_data_quality_summary(
-            dataset.id,
-            OutputPortDataQualitySummary(
-                created_at=datetime.now(UTC) - timedelta(days=1),
-                overall_status=DataQualityStatus.FAILURE,
-                technical_assets=[],
-            ),
+        first_response = self._post_summary(
+            client,
+            dataset,
+            {
+                "created_at": (datetime.now(UTC) - timedelta(days=1)).isoformat(),
+                "overall_status": "failure",
+                "technical_assets": [],
+            },
         )
+        assert first_response.status_code == 200, first_response.text
 
-        summary_last = service.save_data_quality_summary(
-            dataset.id,
-            OutputPortDataQualitySummary(
-                created_at=datetime.now(UTC),
-                overall_status=DataQualityStatus.SUCCESS,
-                technical_assets=[],
-                dimensions={
-                    "validity": DataQualityStatus.FAILURE,
-                    "completeness": DataQualityStatus.SUCCESS,
-                },
-            ),
-        )
+        second_payload = {
+            "created_at": datetime.now(UTC).isoformat(),
+            "overall_status": "success",
+            "technical_assets": [],
+            "dimensions": {
+                "validity": "failure",
+                "completeness": "success",
+            },
+        }
+        summary_last = self._post_summary(client, dataset, second_payload)
+        assert summary_last.status_code == 200, summary_last.text
+
+        latest_summary = summary_last.json()
 
         get_response = client.get(
             f"{ENDPOINT}/{dataset.data_product.id}/output_ports/{dataset.id}/data_quality_summary"
@@ -165,29 +169,27 @@ class TestDataQualityRouter:
         assert get_response.status_code == 200
         data = get_response.json()
         assert data["overall_status"] == DataQualityStatus.SUCCESS
-        assert data["created_at"] == summary_last.created_at.isoformat().replace(
-            "+00:00", "Z"
-        )
+        assert data["created_at"] == latest_summary["created_at"]
         assert data["dimensions"]["validity"] == DataQualityStatus.FAILURE
         assert data["dimensions"]["completeness"] == DataQualityStatus.SUCCESS
 
     def test_update_data_quality_summary(self, client, session):
-        dataset = DatasetFactory()
-        _assign_update_role(session, dataset)
+        dataset = OutputPortFactory()
+        _assign_update_role(dataset)
 
-        service = OutputPortDataQualityService(session)
-        saved_result = service.save_data_quality_summary(
-            dataset.id,
-            OutputPortDataQualitySummary(
-                created_at=datetime.now(UTC) - timedelta(days=1),
-                overall_status=DataQualityStatus.FAILURE,
-                technical_assets=[
-                    DataQualityTechnicalAsset(
-                        name="table1", status=DataQualityStatus.SUCCESS
-                    )
+        create_response = self._post_summary(
+            client,
+            dataset,
+            {
+                "created_at": (datetime.now(UTC) - timedelta(days=1)).isoformat(),
+                "overall_status": "failure",
+                "technical_assets": [
+                    {"name": "table1", "status": "success"},
                 ],
-            ),
+            },
         )
+        assert create_response.status_code == 200, create_response.text
+        saved_result = create_response.json()
 
         updated_ts = datetime.now(UTC).isoformat()
         update_payload = {
@@ -199,7 +201,7 @@ class TestDataQualityRouter:
         }
 
         put_response = client.put(
-            f"{ENDPOINT}/{dataset.data_product.id}/output_ports/{dataset.id}/data_quality_summary/{saved_result.id}",
+            f"{ENDPOINT}/{dataset.data_product.id}/output_ports/{dataset.id}/data_quality_summary/{saved_result['id']}",
             json=update_payload,
         )
         assert put_response.status_code == 200

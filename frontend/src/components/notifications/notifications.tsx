@@ -2,14 +2,16 @@ import { BellOutlined, CheckOutlined } from '@ant-design/icons';
 import { Badge, Button, Flex, Popover, Tag, Typography, theme } from 'antd';
 import { type ReactNode, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { EmptyState, emptyStateQueryProps, isAwaitingData } from '@/components/empty-state/empty-state.component.tsx';
+import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
 import {
     type GetUserNotificationsResponseItem,
     useGetUserNotificationsQuery,
     useRemoveAllUserNotificationsMutation,
     useRemoveUserNotificationMutation,
 } from '@/store/api/services/generated/usersNotificationsApi.ts';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import { formatDateToNowFromUTCString } from '@/utils/date.helper';
+import { dispatchMessage } from '@/utils/feedback.ts';
 import { NotificationDescription } from './notification-description';
 import styles from './notifications.module.scss';
 
@@ -21,7 +23,8 @@ export function Notifications() {
     } = theme.useToken();
     const { t } = useTranslation();
 
-    const { data: { notifications = [] } = {} } = useGetUserNotificationsQuery();
+    const notificationsQuery = useGetUserNotificationsQuery();
+    const { data: { notifications = [] } = {} } = notificationsQuery;
 
     const [removeNotification] = useRemoveUserNotificationMutation();
     const [removeAllNotifications] = useRemoveAllUserNotificationsMutation();
@@ -55,14 +58,18 @@ export function Notifications() {
             handleRemoveNotification: (id: string) => void,
             idx: number,
         ): ReactNode => {
+            const event = notification.event;
+
             return (
                 <Flex key={notification.id} justify="space-between" className={styles.width}>
                     <Flex vertical className={styles.width}>
                         {showActor && (
                             <Flex className={idx === 0 ? '' : styles.marginTop}>
                                 <Tag color="default">
-                                    {notification.event.actor.first_name} {notification.event.actor.last_name},{' '}
-                                    {formatDateToNowFromUTCString(notification.event.created_on)}:
+                                    {event.actor
+                                        ? `${event.actor.first_name} ${event.actor.last_name}`
+                                        : (event.deleted_actor_identifier ?? '')}
+                                    , {formatDateToNowFromUTCString(notification.event.created_on)}:
                                 </Tag>
                             </Flex>
                         )}
@@ -94,7 +101,7 @@ export function Notifications() {
 
         const slicedItems = notifications.slice(0, maxItems).map((notification, idx) => {
             const prev = notifications[idx - 1];
-            const sameActorAsPrevious = idx > 0 && prev.event.actor.id === notification.event.actor.id;
+            const sameActorAsPrevious = idx > 0 && prev.event.actor_id === notification.event.actor_id;
 
             return createNotificationItem(notification, !sameActorAsPrevious, handleRemoveNotification, idx);
         });
@@ -103,7 +110,7 @@ export function Notifications() {
 
         if (excessLength > 0) {
             slicedItems.push(
-                <Flex key={'show-more-indicator'} className={styles.notificationItem}>
+                <Flex key="show-more-indicator" className={styles.notificationItem}>
                     <Button
                         className={styles.closeButton}
                         type="link"
@@ -133,10 +140,18 @@ export function Notifications() {
             );
         }
 
+        if (isAwaitingData(notificationsQuery)) return <LoadingSpinner />;
+
         return (
-            <Typography.Text className={styles.emptyLabel}>{t('You currently have no notifications')}</Typography.Text>
+            <EmptyState
+                size="small"
+                icon={<BellOutlined />}
+                title={t('No notifications')}
+                description={t('Updates about your requests and the things you own appear here.')}
+                {...emptyStateQueryProps(notificationsQuery)}
+            />
         );
-    }, [notificationItems?.length, t, handleRemoveAllNotifications]);
+    }, [notificationItems?.length, t, handleRemoveAllNotifications, notificationsQuery]);
 
     return (
         <Flex>
@@ -160,7 +175,7 @@ export function Notifications() {
                     trigger="hover"
                     placement="bottom"
                 >
-                    <Button shape={'circle'} className={styles.iconButton} icon={<BellOutlined />} />
+                    <Button shape="circle" className={styles.iconButton} icon={<BellOutlined />} />
                 </Popover>
             </Badge>
         </Flex>

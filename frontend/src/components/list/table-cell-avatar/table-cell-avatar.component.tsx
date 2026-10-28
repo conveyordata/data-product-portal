@@ -6,7 +6,7 @@ import styles from './table-cell-avatar.module.scss';
 
 type Props = {
     title: ReactNode | string;
-    subtitle: ReactNode | string;
+    subtitle?: ReactNode | string;
     icon: ReactNode;
     popover?: PopoverProps;
     linkTo?: string;
@@ -40,7 +40,7 @@ export const TableCellAvatar = ({ title, subtitle, icon, popover, linkTo }: Prop
 
     if (popover) {
         component = (
-            <PopoverComponent placement={'topLeft'} classNames={{ root: styles.popoverContent }} {...popover}>
+            <PopoverComponent placement="topLeft" classNames={{ root: styles.popoverContent }} {...popover}>
                 {component}
             </PopoverComponent>
         );

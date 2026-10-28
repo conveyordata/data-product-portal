@@ -54,9 +54,10 @@ The abstract base class you implement. It exposes two methods:
 | `reconcile(resource_id)`  | Called for each resource that needs to be reconciled. Raise an exception to signal failure; the framework will retry with exponential backoff. |
 | `list_ids()` *(optional)* | Called once on startup, you should return all the existing ID's of resources in Portal for which you want to call the `reconcile(resource_id)`. |
 
-We currently support 2 resources:
+We currently support 3 resources:
 - Data Product: Your reconcile function will be triggered on changes to the Data Product itself, its Output Ports, Technical Assets, Technical Asset Output Port links, Input Ports, Role Assignments etc.
 - Exploration: Your reconcile function will be triggered on changes to the Exploration itself, and its Input Ports.
+- Domain: Your reconcile function will be triggered on changes to the Domain itself. See [Domain-scoped resources](#domain-scoped-resources).
 
 ### `ReconcileManager`
 
@@ -77,7 +78,14 @@ of how many workers you run.
 A FastAPI-ready webhook handler. Pass it a `ReconcileManager` and call
 `handler.dispatch_routing(request)` from your `/webhook` endpoint. It parses the
 incoming CloudEvent, maps it to the right `ResourceType`, and enqueues a reconcile.
-Events for resource types that have no registered reconciler are silently acknowledged.
+Adding an environment emits `data_product.environment_added`, containing `data_product_id`, the environment acronym, and `creation_date`. The handler enqueues the owning Data Product. Existing environment declarations migrated from Domain or global settings do not emit addition events; startup reconciliation reads the saved scope.
+
+Events for resource types that have no registered reconciler are silently acknowledged. Key
+constructor parameters:
+
+| Parameter                     | Default                              | Description                                                                               |
+|-------------------------------|--------------------------------------|-------------------------------------------------------------------------------------------|
+| `input_port_reconcile_target` | `InputPortReconcilerTarget.CONSUMER` | Determines whether the reconciler should target the producer or consumer of an input port |
 
 ### `ResourceType`
 
@@ -85,6 +93,33 @@ An enum of the portal resource types your provisioner can react to:
 
 - `ResourceType.EXPLORATION`
 - `ResourceType.DATA_PRODUCT`
+- `ResourceType.DOMAIN`
+
+### Domain-scoped resources
+
+Some infrastructure is shared by every Data Product in a Domain: a bucket or storage
+account, a VPC or VNet, Conveyor environments, a Databricks or Glue catalog. Register a
+`Reconciler` for `ResourceType.DOMAIN` to manage it.
+
+- Name domain resources after the Domain's `namespace`. Unlike its `name`, it never changes.
+- A Domain can only be deleted once no Data Products or Explorations are assigned to it.
+  When they are deleted, domain teardown runs after their provisioners have released their
+  finalizers. Migration is the exception: migrating moves Data Products and Explorations to
+  the new Domain at once, and the source Domain can be deleted right after, without waiting
+  for their provisioners. If a Data Product provisioner still needs the old Domain's
+  infrastructure, for example to copy data to the new bucket, it should register its own
+  finalizer on every Domain it uses and remove it once it no longer needs that Domain.
+- The portal never lets a Data Product or Exploration into a deleting Domain. Only a write
+  made directly in the database, outside the portal, could still leave one behind. If the
+  last finalizer is removed in that case, the portal cancels the deletion and sets the Domain
+  back to `active`, so your reconciler provisions it again. Keep provisioning idempotent.
+- Domain events are not fanned out to Data Products. A Data Product reconciler gets its
+  Domain's `id`, `name` and `namespace` in the Data Product response; it only needs
+  `get_domain` for the Domain's status or finalizers.
+- When a Data Product moves to another Domain, only the Data Product is reconciled. Keep
+  track of the previous Domain in your provisioner's own state if you need to clean up there.
+
+The bundled example contains a `DomainProvisioner`.
 
 ---
 
@@ -123,6 +158,7 @@ exploration with finalizers and a startup resync; the same pattern applies to
 
 ```python
 from collections.abc import Iterable
+from http import HTTPStatus
 from uuid import UUID
 
 from sdk import AuthenticatedClient, Client, Reconciler
@@ -144,40 +180,50 @@ class MyExplorationProvisioner(Reconciler):
         self._client = client
 
     async def reconcile(self, resource_id: UUID) -> None:
-        response = await get_exploration.asyncio(id=resource_id, client=self._client)
+        fetched = await get_exploration.asyncio_detailed(
+            id=resource_id, client=self._client
+        )
 
-        if response is None:
+        if fetched.status_code == HTTPStatus.NOT_FOUND:
             # Hard-deleted after we already removed our finalizer — nothing to do.
             return
 
-        if not isinstance(response, GetExplorationResponse):
-            raise Exception(f"Unexpected response: {response}")
+        if not isinstance(fetched.parsed, GetExplorationResponse):
+            # Any other failure (401, 500, ...) must be retried, not treated as deleted.
+            raise Exception(f"Could not fetch exploration: {fetched.status_code}")
+        response = fetched.parsed
 
         if response.status == AbstractDataProductStatus.DELETING:
             # Portal is waiting for us to clean up before hard-deleting.
             if FINALIZER_NAME not in (response.finalizers or []):
                 return  # another reconcile already deprovisioned
             self._deprovision(resource_id)
-            await remove_exploration_finalizer.asyncio(
+            removed = await remove_exploration_finalizer.asyncio_detailed(
                 id=resource_id, finalizer=FINALIZER_NAME, client=self._client
             )
+            if removed.status_code != HTTPStatus.OK:
+                raise Exception(f"Could not remove finalizer: {removed.status_code}")
             return
 
         # Exploration is live (ACTIVE / PENDING / ARCHIVED).
         # Register the finalizer *before* provisioning so even a partial
         # provision is cleaned up when the exploration is later deleted.
-        await add_exploration_finalizer.asyncio(
+        added = await add_exploration_finalizer.asyncio_detailed(
             id=resource_id,
             client=self._client,
             body=FinalizerRequest(finalizer=FINALIZER_NAME),
         )
+        if added.status_code != HTTPStatus.OK:
+            # Never provision without our finalizer, or deletion would skip cleanup.
+            raise Exception(f"Could not add finalizer: {added.status_code}")
         self._provision(resource_id, response)
 
     async def list_ids(self) -> Iterable[UUID]:
         response = await get_explorations.asyncio(client=self._client)
         if isinstance(response, GetExplorationsResponse):
             return [e.id for e in response.explorations]
-        return []
+        # Raise so the startup sync retries instead of reconciling nothing.
+        raise Exception("Could not list explorations")
 
     def _provision(self, resource_id: UUID, exploration: GetExplorationResponse) -> None:
         # Create or update your real infrastructure here.
@@ -213,6 +259,9 @@ your clean-up is complete. The pattern is:
 3. **Guard against double-deprovision** — check that your finalizer name is still
    present in `response.finalizers` before acting; a previous reconcile run may have
    already cleaned up.
+
+Domains follow the same pattern with `add_domain_finalizer` and `remove_domain_finalizer`
+from `sdk.api_client.api.configuration_domains`, and the `DomainStatus.DELETING` status.
 
 #### 2.3 Startup resync
 
@@ -281,7 +330,7 @@ PORTAL_BASE_URL="http://localhost:5050" \
 Then configure the portal's webhook URL to point at your running provisioner:
 
 ```
-http://localhost:8000/webhook
+export WEBHOOK_V2_URL=http://localhost:8000/webhook
 ```
 
 ---
@@ -289,7 +338,7 @@ http://localhost:8000/webhook
 ## Running the bundled example
 
 The `sdk/example/` directory contains a complete, runnable provisioner that writes
-per-exploration JSON manifests to disk (a stand-in for real infrastructure).
+per-exploration and per-domain JSON manifests to disk (a stand-in for real infrastructure).
 
 ```bash
 cd sdk
@@ -300,7 +349,7 @@ PROVISIONER_WORKSPACE="./.workspace" \
   poetry run uvicorn example.provisioner:app --reload
 ```
 
-Create, update, or delete an exploration in the portal and watch manifests appear and
+Create, update, or delete an exploration or a domain in the portal and watch manifests appear and
 disappear under `.workspace/`. Use this as a starting point for your own provisioner.
 
 ---
@@ -323,8 +372,11 @@ We generally recommend the following pattern:
 - **Input Port removed / rejected** — revoke the role assignment from the consumer's
   principal.
 
+Depending on how your reconciler works either `input_port_reconcile_target` can be set to `InputPortReconcilerTarget.CONSUMER`
+(default) or `InputPortReconcilerTarget.PRODUCER`. The default is usually the right choice, but if your provisioner
+needs to manage the connection via the producer instead of the consumer's, you can set it to `PRODUCER`.
 
-### When a technical assets is added or removed from an output port, I want every consumer to be reconciled.
+### When a technical asset is added or removed from an output port, I want every consumer to be reconciled.
 
 We generally recommend against this pattern, see the recommended pattern in the [FAQ above](#how-should-i-handle-input-port-and-technical-asset-changes).
 However sometimes it's necessary, or you need it during a migration. In this case you can add the following setting to your Portal installation:
@@ -335,3 +387,29 @@ WEBHOOK_V2_TECHNICAL_ASSET_OUTPUT_PORT_LINKS_TRIGGER_INPUT_PORT_EVENTS=True
 
 This will trigger a reconcile for every consumer when a Technical Asset is added or removed from an Output Port.
 However this results in a lot of reconciles and can be slow, we generally recommend against this pattern.
+
+### What happens if my provisioner is down for multiple hours?
+
+When your provisioner is down for a long time, webhook events will not be delivered. When you restart it, the `ReconcileManager` performs a startup resync by calling your optional `list_ids()` implementation and enqueuing a reconcile for every returned resource ID.
+
+### Can I write my provisioner with OpenTofu or Terraform?
+
+Yes. Use the same pattern as in the example provisioner:
+
+- On each event, fetch the resource via the SDK.
+- If the resource is in the `DELETING` state, run `tofu destroy` / `terraform destroy` and then remove the finalizer.
+- Otherwise, add the finalizer as needed and run `tofu apply` / `terraform apply` to provision the resource.
+
+You can pass variables to OpenTofu/Terraform using the resource data you get from the SDK.
+
+### I need to provision on external requests or triggers, not just portal events. How can I do that?
+
+You can do this by calling `enqueue` on the reconcile manager with the resource id you want to reconcile. For example:
+
+```python
+manager.enqueue(ResourceType.DATA_PRODUCT, resource_id)
+```
+
+The trigger for this enqueue depends on your use case, you could for example have a separate FastAPI endpoint that
+receives the external request and calls `enqueue` with the resource id you want to reconcile.
+Or you can respond to a message on a message queue, or a cron job, or any other trigger you want.

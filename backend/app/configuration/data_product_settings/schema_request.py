@@ -1,6 +1,8 @@
 from typing import Optional
 from uuid import UUID
 
+from pydantic import AliasChoices, Field
+
 from app.configuration.data_product_settings.enums import (
     DataProductSettingScope,
     DataProductSettingType,
@@ -34,7 +36,9 @@ class DataProductSettingUpdate(DataProductSettingCreate):
 
 class DataProductSettingValueCreate(ORMModel):
     data_product_id: Optional[UUID] = None
-    dataset_id: Optional[UUID] = None
+    output_port_id: Optional[UUID] = Field(
+        default=None, validation_alias=AliasChoices("output_port_id", "dataset_id")
+    )
     data_product_setting_id: UUID
     value: str
 

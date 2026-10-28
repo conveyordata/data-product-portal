@@ -2,5 +2,5 @@
 
 To create a new migration run:
 ```bash
-poetry run alembic revision -m "<message>"
+python -m app.db_tool revision "<message>"
 ```

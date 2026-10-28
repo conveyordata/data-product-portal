@@ -23,6 +23,8 @@ export const EventType = {
     DATA_PRODUCT_DATASET_LINK_APPROVED: 'data_product_dataset_link_approved',
     DATA_PRODUCT_DATASET_LINK_DENIED: 'data_product_dataset_link_denied',
     DATA_PRODUCT_DATASET_LINK_REMOVED: 'data_product_dataset_link_removed',
+    DATA_PRODUCT_DATASET_LINK_REVOKED: 'data_product_dataset_link_revoked',
+    DATA_PRODUCT_DATASET_LINK_CANCELLED: 'data_product_dataset_link_cancelled',
 
     DATASET_CREATED: 'dataset_created',
     DATASET_UPDATED: 'dataset_updated',
@@ -34,6 +36,8 @@ export const EventType = {
     DATASET_ROLE_ASSIGNMENT_REQUESTED: 'dataset_role_assignment_requested',
     DATASET_ROLE_ASSIGNMENT_APPROVED: 'dataset_role_assignment_approved',
     DATASET_ROLE_ASSIGNMENT_DENIED: 'dataset_role_assignment_denied',
+
+    INPUT_PORT_EXPIRING_SOON: 'input_port_expiring_soon',
 } as const;
 
 export function parseEventType(value?: string): EventType {

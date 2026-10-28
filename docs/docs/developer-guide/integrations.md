@@ -27,7 +27,7 @@ This section describes how to integrate the portal with your platform of choice.
 
 ### Currently Supported Integrations
 
-- **AWS**: S3, Glue, Athena, Redshift
+- **AWS**: S3, Glue, Athena, Redshift, Parameter Store
 - **Conveyor**: A [self-service workflow manager](https://conveyor.dataminded.com/) for Data Products
 - **Agno**: [An agent platform](https://www.agno.com/)
 - **Azure**: Blob Storage
@@ -36,7 +36,7 @@ This section describes how to integrate the portal with your platform of choice.
 - **OSI**: [Open Semantic Interchange](https://open-semantic-interchange.org/) which registers your semantic layers
 - **Snowflake**: You can register schemas, databases, tables etc
 
-If there's a platform you want us to support, let us know — or better yet, open a PR!
+You can build an integration yourself without changing the portal. You define and install plugins as a Python package to add integrations to your portal image. See [Adding Integrations](./adding-integrations.md) for how to build one.
 
 ## Automatically provisioning infra when Portal changes
 

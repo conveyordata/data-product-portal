@@ -1,0 +1,251 @@
+import pytest
+
+from app.abstract_data_product.type import AbstractDataProductType
+from app.configuration.access_durations.enums import AccessDurationType
+from tests.factories import AccessDurationFactory, OutputPortFactory
+
+ENDPOINT = "/api/v2/configuration/access_durations"
+
+PERMANENT_PAYLOAD = {
+    "access_duration_type": "permanent",
+    "days": None,
+    "alternative_allowed": False,
+    "alternative_days": None,
+}
+
+TIME_BOUND_PAYLOAD = {
+    "access_duration_type": "time_bound",
+    "days": 30,
+    "alternative_allowed": False,
+    "alternative_days": None,
+}
+
+
+class TestAccessDurationsRouter:
+    def test_get_all_returns_all_durations(self, client):
+        AccessDurationFactory(
+            abstract_data_product_type=AbstractDataProductType.DATA_PRODUCT,
+            access_duration_type=AccessDurationType.PERMANENT,
+            is_default=True,
+        )
+        AccessDurationFactory(
+            abstract_data_product_type=AbstractDataProductType.EXPLORATION,
+            access_duration_type=AccessDurationType.TIME_BOUND,
+            days=30,
+            is_default=True,
+        )
+        response = client.get(ENDPOINT)
+        assert response.status_code == 200
+        assert len(response.json()["access_durations"]) == 2
+
+    def test_get_default_returns_default_row(self, client):
+        AccessDurationFactory(
+            abstract_data_product_type=AbstractDataProductType.DATA_PRODUCT,
+            access_duration_type=AccessDurationType.TIME_BOUND,
+            days=14,
+            is_default=True,
+        )
+        response = client.get(f"{ENDPOINT}/data_products/default")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["access_duration_type"] == "time_bound"
+        assert data["days"] == 14
+        assert data["is_default"] is True
+
+    def test_get_default_not_found(self, client):
+        response = client.get(f"{ENDPOINT}/data_products/default")
+        assert response.status_code == 404
+
+    def test_update_requires_admin(self, client):
+        response = client.put(f"{ENDPOINT}/data_products", json=PERMANENT_PAYLOAD)
+        assert response.status_code == 403
+
+    @pytest.mark.usefixtures("admin")
+    def test_update_sets_permanent_default(self, client):
+        response = client.put(f"{ENDPOINT}/data_products", json=PERMANENT_PAYLOAD)
+        assert response.status_code == 200
+        rows = response.json()["access_durations"]
+        assert len(rows) == 1
+        assert rows[0]["access_duration_type"] == "permanent"
+        assert rows[0]["days"] is None
+        assert rows[0]["is_default"] is True
+
+    @pytest.mark.usefixtures("admin")
+    def test_update_sets_time_bound_default_with_days(self, client):
+        response = client.put(f"{ENDPOINT}/data_products", json=TIME_BOUND_PAYLOAD)
+        assert response.status_code == 200
+        rows = response.json()["access_durations"]
+        assert len(rows) == 1
+        assert rows[0]["access_duration_type"] == "time_bound"
+        assert rows[0]["days"] == 30
+        assert rows[0]["is_default"] is True
+
+    @pytest.mark.usefixtures("admin")
+    def test_update_time_bound_without_days_returns_422(self, client):
+        response = client.put(
+            f"{ENDPOINT}/data_products",
+            json={
+                "access_duration_type": "time_bound",
+                "days": None,
+                "alternative_allowed": False,
+            },
+        )
+        assert response.status_code == 422
+
+    @pytest.mark.usefixtures("admin")
+    def test_update_with_alternative_creates_two_rows(self, client):
+        payload = {
+            "access_duration_type": "time_bound",
+            "days": 30,
+            "alternative_allowed": True,
+            "alternative_days": None,
+        }
+        response = client.put(f"{ENDPOINT}/data_products", json=payload)
+        assert response.status_code == 200
+        rows = response.json()["access_durations"]
+        assert len(rows) == 2
+        defaults = [r for r in rows if r["is_default"]]
+        alternatives = [r for r in rows if not r["is_default"]]
+        assert len(defaults) == 1
+        assert defaults[0]["access_duration_type"] == "time_bound"
+        assert len(alternatives) == 1
+        assert alternatives[0]["access_duration_type"] == "permanent"
+        assert alternatives[0]["days"] is None
+
+    @pytest.mark.usefixtures("admin")
+    def test_update_permanent_with_time_bound_alternative(self, client):
+        payload = {
+            "access_duration_type": "permanent",
+            "days": None,
+            "alternative_allowed": True,
+            "alternative_days": 14,
+        }
+        response = client.put(f"{ENDPOINT}/data_products", json=payload)
+        assert response.status_code == 200
+        rows = response.json()["access_durations"]
+        assert len(rows) == 2
+        alt = next(r for r in rows if not r["is_default"])
+        assert alt["access_duration_type"] == "time_bound"
+        assert alt["days"] == 14
+
+    @pytest.mark.usefixtures("admin")
+    def test_update_removing_alternative_leaves_one_row(self, client):
+        # Seed with two rows
+        AccessDurationFactory(
+            abstract_data_product_type=AbstractDataProductType.DATA_PRODUCT,
+            access_duration_type=AccessDurationType.TIME_BOUND,
+            days=30,
+            is_default=True,
+        )
+        AccessDurationFactory(
+            abstract_data_product_type=AbstractDataProductType.DATA_PRODUCT,
+            access_duration_type=AccessDurationType.PERMANENT,
+            days=None,
+            is_default=False,
+        )
+        response = client.put(f"{ENDPOINT}/data_products", json=TIME_BOUND_PAYLOAD)
+        assert response.status_code == 200
+        assert len(response.json()) == 1
+
+    @pytest.mark.usefixtures("admin")
+    def test_update_only_affects_given_product_type(self, client):
+        AccessDurationFactory(
+            abstract_data_product_type=AbstractDataProductType.EXPLORATION,
+            access_duration_type=AccessDurationType.PERMANENT,
+            is_default=True,
+        )
+        client.put(f"{ENDPOINT}/data_products", json=TIME_BOUND_PAYLOAD)
+        # Exploration row must be untouched
+        response = client.get(f"{ENDPOINT}/explorations/default")
+        assert response.status_code == 200
+        assert response.json()["access_duration_type"] == "permanent"
+
+    def test_is_time_bound_access_enabled_endpoint(self, client):
+        response = client.get(f"{ENDPOINT}/enabled")
+        assert response.status_code == 200
+        data = response.json()
+        assert "enabled" in data
+        assert isinstance(data["enabled"], bool)
+
+    def test_get_expiring_soon_threshold_endpoint(self, client):
+        response = client.get(f"{ENDPOINT}/expiring_soon_threshold")
+        assert response.status_code == 200
+        data = response.json()
+        assert "days" in data
+        assert isinstance(data["days"], int)
+
+    @pytest.mark.usefixtures("admin")
+    def test_update_cascades_dropped_type_to_data_product_output_ports(
+        self,
+        client,
+        session,
+    ):
+        AccessDurationFactory(
+            abstract_data_product_type=AbstractDataProductType.DATA_PRODUCT,
+            access_duration_type=AccessDurationType.TIME_BOUND,
+            days=30,
+            is_default=True,
+        )
+        ds = OutputPortFactory(
+            data_product_access_duration_type=AccessDurationType.TIME_BOUND,
+            exploration_access_duration_type=AccessDurationType.PERMANENT,
+        )
+
+        response = client.put(f"{ENDPOINT}/data_products", json=PERMANENT_PAYLOAD)
+
+        assert response.status_code == 200
+        session.refresh(ds)
+        assert ds.data_product_access_duration_type == AccessDurationType.PERMANENT
+        assert ds.exploration_access_duration_type == AccessDurationType.PERMANENT
+
+    @pytest.mark.usefixtures("admin")
+    def test_update_leaves_output_ports_on_still_allowed_type(
+        self,
+        client,
+        session,
+    ):
+        AccessDurationFactory(
+            abstract_data_product_type=AbstractDataProductType.DATA_PRODUCT,
+            access_duration_type=AccessDurationType.PERMANENT,
+            is_default=True,
+        )
+        ds = OutputPortFactory(
+            data_product_access_duration_type=AccessDurationType.PERMANENT,
+            exploration_access_duration_type=AccessDurationType.PERMANENT,
+        )
+
+        payload = {
+            "access_duration_type": "time_bound",
+            "days": 30,
+            "alternative_allowed": True,
+            "alternative_days": None,
+        }
+        response = client.put(f"{ENDPOINT}/data_products", json=payload)
+
+        assert response.status_code == 200
+        session.refresh(ds)
+        assert ds.data_product_access_duration_type == AccessDurationType.PERMANENT
+
+    @pytest.mark.usefixtures("admin")
+    def test_update_only_cascades_matching_abstract_type(
+        self,
+        client,
+        session,
+    ):
+        AccessDurationFactory(
+            abstract_data_product_type=AbstractDataProductType.DATA_PRODUCT,
+            access_duration_type=AccessDurationType.TIME_BOUND,
+            days=30,
+            is_default=True,
+        )
+        ds = OutputPortFactory(
+            data_product_access_duration_type=AccessDurationType.PERMANENT,
+            exploration_access_duration_type=AccessDurationType.TIME_BOUND,
+        )
+
+        response = client.put(f"{ENDPOINT}/data_products", json=PERMANENT_PAYLOAD)
+
+        assert response.status_code == 200
+        session.refresh(ds)
+        assert ds.data_product_access_duration_type == AccessDurationType.PERMANENT
+        assert ds.exploration_access_duration_type == AccessDurationType.TIME_BOUND

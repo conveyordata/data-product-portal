@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.core.authz import Action, Authorization
 from app.core.authz.resolvers import EmptyResolver
-from app.database.database import get_db_session
+from app.database.deps import get_db_session
 
 from .schema_response import ThemeSettings
 from .service import ThemeSettingsService
@@ -14,7 +14,9 @@ router = APIRouter(
 
 
 @router.get("")
-def get_theme_settings(db: Session = Depends(get_db_session)) -> ThemeSettings:
+def get_theme_settings(
+    db: Session = Depends(get_db_session, scope="function"),
+) -> ThemeSettings:
     return ThemeSettingsService(db).get_theme_settings()
 
 
@@ -27,6 +29,6 @@ def get_theme_settings(db: Session = Depends(get_db_session)) -> ThemeSettings:
     ],
 )
 def update_theme_settings(
-    new_settings: ThemeSettings, db: Session = Depends(get_db_session)
+    new_settings: ThemeSettings, db: Session = Depends(get_db_session, scope="function")
 ):
     return ThemeSettingsService(db).update_theme_settings(new_settings)

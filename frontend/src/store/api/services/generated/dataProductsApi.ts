@@ -18,7 +18,7 @@ const injectedRtkApi = api.injectEndpoints({
       query: (queryArg) => ({
         url: `/api/v2/data_products`,
         params: {
-          filter_to_user_with_assigment: queryArg,
+          assignment_filter: queryArg,
         },
       }),
     }),
@@ -119,16 +119,6 @@ const injectedRtkApi = api.injectEndpoints({
         },
       }),
     }),
-    linkInputPortsToDataProduct: build.mutation<
-      LinkInputPortsToDataProductApiResponse,
-      LinkInputPortsToDataProductApiArg
-    >({
-      query: (queryArg) => ({
-        url: `/api/v2/data_products/${queryArg.id}/link_input_ports`,
-        method: "POST",
-        body: queryArg.linkInputPortsToDataProduct,
-      }),
-    }),
     requestInputPortsForDataProduct: build.mutation<
       RequestInputPortsForDataProductApiResponse,
       RequestInputPortsForDataProductApiArg
@@ -147,6 +137,24 @@ const injectedRtkApi = api.injectEndpoints({
         url: `/api/v2/data_products/${queryArg}/input_ports`,
       }),
     }),
+    renewInputPortForDataProduct: build.mutation<
+      RenewInputPortForDataProductApiResponse,
+      RenewInputPortForDataProductApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/data_products/${queryArg.id}/input_ports/${queryArg.outputPortId}/renew`,
+        method: "POST",
+      }),
+    }),
+    revokeInputPortForDataProduct: build.mutation<
+      RevokeInputPortForDataProductApiResponse,
+      RevokeInputPortForDataProductApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/data_products/${queryArg.id}/input_ports/${queryArg.outputPortId}/revoke`,
+        method: "POST",
+      }),
+    }),
     getDataProductEventHistory: build.query<
       GetDataProductEventHistoryApiResponse,
       GetDataProductEventHistoryApiArg
@@ -163,9 +171,18 @@ const injectedRtkApi = api.injectEndpoints({
         url: `/api/v2/data_products/${queryArg}/rolled_up_tags`,
       }),
     }),
-    unlinkInputPortFromDataProduct: build.mutation<
-      UnlinkInputPortFromDataProductApiResponse,
-      UnlinkInputPortFromDataProductApiArg
+    cancelInputPortForDataProduct: build.mutation<
+      CancelInputPortForDataProductApiResponse,
+      CancelInputPortForDataProductApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/data_products/${queryArg.id}/input_ports/${queryArg.outputPortId}/cancel`,
+        method: "POST",
+      }),
+    }),
+    removeInputPortForDataProduct: build.mutation<
+      RemoveInputPortForDataProductApiResponse,
+      RemoveInputPortForDataProductApiArg
     >({
       query: (queryArg) => ({
         url: `/api/v2/data_products/${queryArg.id}/input_ports/${queryArg.outputPortId}`,
@@ -185,11 +202,11 @@ const injectedRtkApi = api.injectEndpoints({
 });
 export { injectedRtkApi as api };
 export type CreateDataProductApiResponse =
-  /** status 200 Data Product successfully created */ CreateDataProductResponse;
+  /** status 200 Successful Response */ CreateDataProductResponse;
 export type CreateDataProductApiArg = DataProductCreate;
 export type GetDataProductsApiResponse =
   /** status 200 Successful Response */ GetDataProductsResponse;
-export type GetDataProductsApiArg = string | undefined;
+export type GetDataProductsApiArg = AssignmentFilter | undefined;
 export type RemoveDataProductApiResponse =
   /** status 200 Data Product deleted */ any;
 export type RemoveDataProductApiArg = string;
@@ -245,12 +262,6 @@ export type SetValueForDataProductApiArg = {
   settingId: string;
   value: string;
 };
-export type LinkInputPortsToDataProductApiResponse =
-  /** status 200 Successful Response */ LinkInputPortsToDataProductPost;
-export type LinkInputPortsToDataProductApiArg = {
-  id: string;
-  linkInputPortsToDataProduct: LinkInputPortsToDataProduct;
-};
 export type RequestInputPortsForDataProductApiResponse =
   /** status 200 Successful Response */ RequestInputPortsForDataProductResponse;
 export type RequestInputPortsForDataProductApiArg = {
@@ -260,15 +271,33 @@ export type RequestInputPortsForDataProductApiArg = {
 export type GetDataProductInputPortsApiResponse =
   /** status 200 Successful Response */ GetDataProductInputPortsResponse;
 export type GetDataProductInputPortsApiArg = string;
+export type RenewInputPortForDataProductApiResponse =
+  /** status 200 Successful Response */ RenewInputPortForDataProductResponse;
+export type RenewInputPortForDataProductApiArg = {
+  id: string;
+  outputPortId: string;
+};
+export type RevokeInputPortForDataProductApiResponse =
+  /** status 200 Successful Response */ RevokeInputPortForDataProductResponse;
+export type RevokeInputPortForDataProductApiArg = {
+  id: string;
+  outputPortId: string;
+};
 export type GetDataProductEventHistoryApiResponse =
   /** status 200 Successful Response */ GetEventHistoryResponse;
 export type GetDataProductEventHistoryApiArg = string;
 export type GetDataProductRolledUpTagsApiResponse =
   /** status 200 Successful Response */ GetDataProductRolledUpTagsResponse;
 export type GetDataProductRolledUpTagsApiArg = string;
-export type UnlinkInputPortFromDataProductApiResponse =
+export type CancelInputPortForDataProductApiResponse =
+  /** status 200 Successful Response */ CancelInputPortForDataProductResponse;
+export type CancelInputPortForDataProductApiArg = {
+  id: string;
+  outputPortId: string;
+};
+export type RemoveInputPortForDataProductApiResponse =
   /** status 200 Successful Response */ any;
-export type UnlinkInputPortFromDataProductApiArg = {
+export type RemoveInputPortForDataProductApiArg = {
   id: string;
   outputPortId: string;
 };
@@ -288,8 +317,12 @@ export type ValidationError = {
 export type HttpValidationError = {
   detail?: ValidationError[];
 };
+export type RequestInputPortsForAbstractDataProductRequestItem = {
+  output_port_id: string;
+  access_mode_id?: string | null;
+};
 export type RequestInputPortsForDataProductRequest = {
-  output_ports: string[];
+  output_ports: RequestInputPortsForAbstractDataProductRequestItem[];
   justification: string;
 };
 export type DataProductCreate = {
@@ -301,6 +334,8 @@ export type DataProductCreate = {
   domain_id: string;
   tag_ids?: string[];
   lifecycle_id: string;
+  environment_ids?: string[] | null;
+  visibility?: DataProductVisibility;
   owners: string[];
   input_ports?: RequestInputPortsForDataProductRequest | null;
 };
@@ -311,6 +346,7 @@ export type Tag = {
 export type Domain = {
   id: string;
   name: string;
+  namespace: string;
   description: string;
 };
 export type DataProductType = {
@@ -326,6 +362,19 @@ export type DataProductLifeCycle = {
   color: string;
   is_default: boolean;
 };
+export type EnvironmentGetItem = {
+  id: string;
+  name: string;
+  acronym: string;
+  context: string;
+  is_default?: boolean;
+  is_global?: boolean;
+};
+export type DataProductEnvironment = {
+  environment_id: string;
+  environment: EnvironmentGetItem;
+  creation_date: string;
+};
 export type GetDataProductsResponseItem = {
   id: string;
   name: string;
@@ -338,6 +387,8 @@ export type GetDataProductsResponseItem = {
   domain: Domain;
   type: DataProductType;
   lifecycle: DataProductLifeCycle | null;
+  visibility: DataProductVisibility;
+  environments: DataProductEnvironment[];
   user_count: number;
   input_port_count: number;
   technical_asset_count: number;
@@ -357,6 +408,7 @@ export type DataProductUpdate = {
   domain_id: string;
   tag_ids?: string[];
   lifecycle_id: string;
+  environment_ids?: string[] | null;
 };
 export type GetDataProductResponse = {
   id: string;
@@ -370,6 +422,8 @@ export type GetDataProductResponse = {
   domain: Domain;
   type: DataProductType;
   lifecycle: DataProductLifeCycle | null;
+  visibility: DataProductVisibility;
+  environments: DataProductEnvironment[];
   about: string | null;
 };
 export type FinalizerRequest = {
@@ -411,35 +465,8 @@ export type Graph = {
   edges: Edge[];
   nodes: Node[];
 };
-export type LinkInputPortsToDataProductPost = {
-  input_port_links: string[];
-};
-export type LinkInputPortsToDataProduct = {
-  input_ports: string[];
-  justification: string;
-};
 export type RequestInputPortsForDataProductResponse = {
   input_port_links: string[];
-};
-export type OutputPort = {
-  id: string;
-  name: string;
-  namespace: string;
-  description: string;
-  status: OutputPortStatus;
-  access_type: OutputPortAccessType;
-  data_product_id: string;
-  tags: Tag[];
-};
-export type InputPort = {
-  id: string;
-  justification: string;
-  status: DecisionStatus;
-  output_port_id: string;
-  output_port: OutputPort;
-};
-export type GetDataProductInputPortsResponse = {
-  input_ports: InputPort[];
 };
 export type User = {
   id: string;
@@ -451,6 +478,61 @@ export type User = {
   can_become_admin: boolean;
   admin_expiry?: string | null;
 };
+export type AccessMode = {
+  id: string;
+  name: string;
+  description: string;
+};
+export type InputPortRequestBase = {
+  id: string;
+  justification: string;
+  decision_note?: string | null;
+  valid_from?: string | null;
+  valid_until: string | null;
+  access_duration_type: AccessDurationType;
+  requested_duration_days?: number | null;
+  requested_by: User;
+  decided_by?: User | null;
+  decision: InputPortRequestDecision;
+  revoked_at?: string | null;
+  revoked_by?: User | null;
+  created_on: string;
+  requested_on: string;
+  access_mode?: AccessMode | null;
+};
+export type OutputPortAccessType = {
+  id: string;
+  name: string;
+  access_function: OutputPortAccessFunction;
+};
+export type OutputPort = {
+  id: string;
+  name: string;
+  namespace: string;
+  description: string;
+  status: OutputPortStatus;
+  access_type: OutputPortAccessType;
+  data_product_id: string;
+  tags: Tag[];
+  access_modes: AccessMode[];
+};
+export type AbstractDataProductInputPort = {
+  id: string;
+  status: InputPortStatus;
+  current_request: InputPortRequestBase;
+  renewal_status?: RenewalStatus | null;
+  output_port_id: string;
+  output_port: OutputPort;
+};
+export type GetDataProductInputPortsResponse = {
+  input_ports: AbstractDataProductInputPort[];
+};
+export type RenewInputPortForDataProductResponse = {
+  input_port_link: string;
+};
+export type RevokeInputPortForDataProductResponse = {
+  input_port_link: string;
+};
 export type DataProduct = {
   id: string;
   name: string;
@@ -458,70 +540,6 @@ export type DataProduct = {
   description: string;
   status: AbstractDataProductStatus;
   type: DataProductType;
-};
-export type AzureBlobTechnicalAssetConfiguration = {
-  configuration_type: "AzureBlobTechnicalAssetConfiguration";
-  domain?: string;
-  path?: string;
-  container_name: string;
-};
-export type DatabricksTechnicalAssetConfiguration = {
-  configuration_type: "DatabricksTechnicalAssetConfiguration";
-  catalog: string;
-  schema?: string;
-  table?: string;
-  bucket_identifier?: string;
-  catalog_path?: string;
-  table_path?: string;
-  access_granularity: AccessGranularity;
-};
-export type GlueTechnicalAssetConfiguration = {
-  configuration_type: "GlueTechnicalAssetConfiguration";
-  database: string;
-  database_suffix?: string;
-  table?: string;
-  bucket_identifier?: string;
-  database_path?: string;
-  table_path?: string;
-  access_granularity: AccessGranularity;
-};
-export type OsiSemanticModelTechnicalAssetConfiguration = {
-  configuration_type: "OSISemanticModelTechnicalAssetConfiguration";
-  model_name?: string;
-  location?: string;
-};
-export type PostgreSqlTechnicalAssetConfiguration = {
-  configuration_type: "PostgreSQLTechnicalAssetConfiguration";
-  database: string;
-  schema?: string;
-  table?: string;
-  access_granularity: AccessGranularity;
-};
-export type RedshiftTechnicalAssetConfiguration = {
-  configuration_type: "RedshiftTechnicalAssetConfiguration";
-  database: string;
-  schema?: string;
-  table?: string;
-  bucket_identifier?: string;
-  database_path?: string;
-  table_path?: string;
-  access_granularity: AccessGranularity;
-};
-export type S3TechnicalAssetConfiguration = {
-  configuration_type: "S3TechnicalAssetConfiguration";
-  bucket: string;
-  suffix?: string;
-  path: string;
-};
-export type SnowflakeTechnicalAssetConfiguration = {
-  configuration_type: "SnowflakeTechnicalAssetConfiguration";
-  database: string;
-  schema?: string;
-  table?: string;
-  bucket_identifier?: string;
-  database_path?: string;
-  table_path?: string;
-  access_granularity: AccessGranularity;
 };
 export type TechnicalAsset = {
   id: string;
@@ -531,33 +549,22 @@ export type TechnicalAsset = {
   status: TechnicalAssetStatus;
   technical_mapping: TechnicalMapping;
   owner_id: string;
-  platform_id: string;
-  service_id: string;
-  configuration:
-    | ({
-        configuration_type: "AzureBlobTechnicalAssetConfiguration";
-      } & AzureBlobTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "DatabricksTechnicalAssetConfiguration";
-      } & DatabricksTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "GlueTechnicalAssetConfiguration";
-      } & GlueTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "OSISemanticModelTechnicalAssetConfiguration";
-      } & OsiSemanticModelTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "PostgreSQLTechnicalAssetConfiguration";
-      } & PostgreSqlTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "RedshiftTechnicalAssetConfiguration";
-      } & RedshiftTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "S3TechnicalAssetConfiguration";
-      } & S3TechnicalAssetConfiguration)
-    | ({
-        configuration_type: "SnowflakeTechnicalAssetConfiguration";
-      } & SnowflakeTechnicalAssetConfiguration);
+  platform_id?: string | null;
+  service_id?: string | null;
+  /** Configuration of the technical asset. The available fields depend on `name`; retrieve them from /v2/plugins/{name}/form. */
+  configuration: {
+    name: string;
+    [key: string]: any;
+  };
+};
+export type Exploration = {
+  id: string;
+  name: string;
+  namespace: string;
+  description: string;
+  domain: Domain;
+  status: AbstractDataProductStatus;
+  finalizers: string[];
 };
 export type GetEventHistoryResponseItem = {
   id: string;
@@ -570,17 +577,22 @@ export type GetEventHistoryResponseItem = {
   created_on: string;
   deleted_subject_identifier?: string | null;
   deleted_target_identifier?: string | null;
-  actor: User;
+  deleted_actor_identifier?: string | null;
+  actor?: User | null;
   data_product?: DataProduct | null;
   user?: User | null;
   output_port?: OutputPort | null;
   technical_asset?: TechnicalAsset | null;
+  exploration?: Exploration | null;
 };
 export type GetEventHistoryResponse = {
   events: GetEventHistoryResponseItem[];
 };
 export type GetDataProductRolledUpTagsResponse = {
   rolled_up_tags: Tag[];
+};
+export type CancelInputPortForDataProductResponse = {
+  input_port_link: string;
 };
 export type DataProductSetting = {
   id: string;
@@ -603,6 +615,10 @@ export type DataProductSettingValue = {
 export type GetDataProductSettingsResponse = {
   data_product_settings: DataProductSettingValue[];
 };
+export enum DataProductVisibility {
+  Hidden = "hidden",
+  Discoverable = "discoverable",
+}
 export enum AbstractDataProductStatus {
   Pending = "pending",
   Active = "active",
@@ -618,14 +634,35 @@ export enum DataProductIconKey {
   Analytics = "analytics",
   Default = "default",
 }
+export enum AssignmentFilter {
+  All = "all",
+  OnlyAssigned = "only_assigned",
+}
 export enum NodeType {
   DataProductNode = "dataProductNode",
   ExplorationNode = "explorationNode",
   TechnicalAssetNode = "technicalAssetNode",
   OutputPortNode = "outputPortNode",
 }
-export enum DecisionStatus {
+export enum InputPortStatus {
+  Pending = "pending",
   Approved = "approved",
+  Denied = "denied",
+  Expired = "expired",
+  Revoked = "revoked",
+  Cancelled = "cancelled",
+}
+export enum AccessDurationType {
+  Permanent = "permanent",
+  TimeBound = "time_bound",
+}
+export enum InputPortRequestDecision {
+  Pending = "pending",
+  Approved = "approved",
+  Denied = "denied",
+  Cancelled = "cancelled",
+}
+export enum RenewalStatus {
   Pending = "pending",
   Denied = "denied",
 }
@@ -634,8 +671,7 @@ export enum OutputPortStatus {
   Active = "active",
   Archived = "archived",
 }
-export enum OutputPortAccessType {
-  Public = "public",
+export enum OutputPortAccessFunction {
   Restricted = "restricted",
   Private = "private",
   Unrestricted = "unrestricted",
@@ -645,6 +681,7 @@ export enum EventEntityType {
   OutputPort = "output_port",
   TechnicalAsset = "technical_asset",
   User = "user",
+  Exploration = "exploration",
 }
 export enum TechnicalAssetStatus {
   Pending = "pending",
@@ -654,10 +691,6 @@ export enum TechnicalAssetStatus {
 export enum TechnicalMapping {
   Default = "default",
   Custom = "custom",
-}
-export enum AccessGranularity {
-  Schema = "schema",
-  Table = "table",
 }
 export enum DataProductSettingType {
   Checkbox = "checkbox",
@@ -684,15 +717,17 @@ export const {
   useGetDataProductGraphDataQuery,
   useLazyGetDataProductGraphDataQuery,
   useSetValueForDataProductMutation,
-  useLinkInputPortsToDataProductMutation,
   useRequestInputPortsForDataProductMutation,
   useGetDataProductInputPortsQuery,
   useLazyGetDataProductInputPortsQuery,
+  useRenewInputPortForDataProductMutation,
+  useRevokeInputPortForDataProductMutation,
   useGetDataProductEventHistoryQuery,
   useLazyGetDataProductEventHistoryQuery,
   useGetDataProductRolledUpTagsQuery,
   useLazyGetDataProductRolledUpTagsQuery,
-  useUnlinkInputPortFromDataProductMutation,
+  useCancelInputPortForDataProductMutation,
+  useRemoveInputPortForDataProductMutation,
   useGetDataProductSettingsQuery,
   useLazyGetDataProductSettingsQuery,
 } = injectedRtkApi;

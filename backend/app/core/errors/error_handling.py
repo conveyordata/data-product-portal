@@ -120,11 +120,16 @@ async def value_error_exception_handler(_: Request, exc: ValueError):
     return ErrorHandler().raise_bad_request_exception(exc)
 
 
+UNIQUE_CONSTRAINT_MESSAGES = {
+    "uq_abstract_data_products_name": "A data product with this name already exists.",
+    "uq_output_port_access_type_name": "An access type with this name already exists.",
+}
+
+
 async def integrity_error_exception_handler(
     _: Request, exc: IntegrityError
 ) -> JSONResponse:
-    if "uq_data_product_name" in str(exc.orig):
-        ErrorHandler().raise_bad_request_exception(
-            exc, "A data product with this name already exists."
-        )
-    return ErrorHandler().raise_bad_request_exception(exc)
+    constraint = getattr(getattr(exc.orig, "diag", None), "constraint_name", None)
+    return ErrorHandler().raise_bad_request_exception(
+        exc, UNIQUE_CONSTRAINT_MESSAGES.get(constraint or "")
+    )

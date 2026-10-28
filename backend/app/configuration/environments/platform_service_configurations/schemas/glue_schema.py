@@ -5,3 +5,4 @@ class AWSGlueConfig(BaseEnvironmentPlatformServiceConfigurationDetail):
     database_name: str
     bucket_identifier: str
     s3_path: str
+    athena_workgroup_template: str = ""

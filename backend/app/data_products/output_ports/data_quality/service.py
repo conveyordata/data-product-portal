@@ -1,11 +1,12 @@
 from fastapi import HTTPException, status
-from sqlalchemy import UUID, desc
+from sqlalchemy import UUID
 from sqlalchemy.orm import Session, selectinload
 
 from app.data_products.output_ports.data_quality.enums import DataQualityStatus
 from app.data_products.output_ports.data_quality.model import (
     DataQualitySummary,
     DataQualityTechnicalAsset,
+    latest_data_quality_summary,
 )
 from app.data_products.output_ports.data_quality.schema_response import (
     OutputPortDataQualitySummary,
@@ -31,10 +32,9 @@ class OutputPortDataQualityService:
         ensure_output_port_exists(output_port_id, self.db)
 
         data_quality_summary = (
-            self.db.query(DataQualitySummary)
-            .filter(DataQualitySummary.output_port_id == output_port_id)
-            .order_by(desc(DataQualitySummary.created_at))
-            .options(selectinload(DataQualitySummary.technical_assets))
+            self.db.query(latest := latest_data_quality_summary())
+            .filter(latest.output_port_id == output_port_id)
+            .options(selectinload(latest.technical_assets))
             .first()
         )
 
@@ -68,7 +68,7 @@ class OutputPortDataQualityService:
         )
 
         merged_summary = self.db.merge(db_summary)
-        self.db.commit()
+        self.db.flush()
         self.db.refresh(merged_summary, ["technical_assets"])
         return merged_summary
 
@@ -97,7 +97,7 @@ class OutputPortDataQualityService:
         # Replace collection; delete-orphan will remove old rows
         existing_summary.technical_assets = technical_assets
 
-        self.db.commit()
+        self.db.flush()
         self.db.refresh(existing_summary, ["technical_assets"])
         return existing_summary
 

@@ -16,10 +16,9 @@ import {
     useGetExplorationsQuery,
     useRequestInputPortsForExplorationMutation,
 } from '@/store/api/services/generated/explorationsApi.ts';
-import type { SearchOutputPortsResponseItem } from '@/store/api/services/generated/outputPortsSearchApi.ts';
-import { clearCart } from '@/store/features/cart/cart-slice.ts';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import { clearCart, selectCartOutputPorts } from '@/store/features/cart/cart-slice.ts';
 import { createExplorationIdPath } from '@/types/navigation.ts';
+import { dispatchMessage } from '@/utils/feedback.ts';
 
 type CartFormData = {
     explorationId?: string;
@@ -27,11 +26,11 @@ type CartFormData = {
 };
 
 type Props = {
-    cartOutputPorts?: SearchOutputPortsResponseItem[];
     setSelectedExplorationId: (id?: string) => void;
 };
 
-export const ExistingExplorationForm = ({ cartOutputPorts, setSelectedExplorationId }: Props) => {
+export const ExistingExplorationForm = ({ setSelectedExplorationId }: Props) => {
+    const cartOutputPorts = useSelector(selectCartOutputPorts);
     const dispatch = useAppDispatch();
     const posthog = usePostHog();
     const navigate = useNavigate();
@@ -115,13 +114,16 @@ export const ExistingExplorationForm = ({ cartOutputPorts, setSelectedExploratio
         requestInputPortsForExploration({
             id: values.explorationId,
             requestInputPortsForExplorationRequest: {
-                output_ports: cartOutputPorts?.map((dataset) => dataset.id),
+                output_ports: cartOutputPorts?.map((dataset) => ({
+                    output_port_id: dataset.outputPortId,
+                    access_mode_id: dataset.accessModeId,
+                })),
                 justification: values.justification,
             },
         });
     };
     return (
-        <Form<CartFormData> layout={'vertical'} form={form} onFinish={onFinish} onValuesChange={onValuesChange}>
+        <Form<CartFormData> layout="vertical" form={form} onFinish={onFinish} onValuesChange={onValuesChange}>
             <Form.Item<CartFormData>
                 name="explorationId"
                 label={t('Exploration')}

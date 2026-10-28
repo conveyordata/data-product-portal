@@ -46,7 +46,7 @@ const injectedRtkApi = api.injectEndpoints({
       GetDataProductTechnicalAssetsApiArg
     >({
       query: (queryArg) => ({
-        url: `/api/v2/data_products/${queryArg}/technical_assets`,
+        url: `/api/v2/data_products/${queryArg}/technical_assets/`,
       }),
     }),
     createTechnicalAsset: build.mutation<
@@ -54,7 +54,7 @@ const injectedRtkApi = api.injectEndpoints({
       CreateTechnicalAssetApiArg
     >({
       query: (queryArg) => ({
-        url: `/api/v2/data_products/${queryArg.dataProductId}/technical_assets`,
+        url: `/api/v2/data_products/${queryArg.dataProductId}/technical_assets/`,
         method: "POST",
         body: queryArg.createTechnicalAssetRequest,
       }),
@@ -83,7 +83,7 @@ const injectedRtkApi = api.injectEndpoints({
       query: (queryArg) => ({
         url: `/api/v2/data_products/${queryArg.dataProductId}/technical_assets/${queryArg.id}`,
         method: "PUT",
-        body: queryArg.dataOutputUpdate,
+        body: queryArg.technicalAssetUpdate,
       }),
     }),
     getTechnicalAssetEventHistory: build.query<
@@ -101,7 +101,7 @@ const injectedRtkApi = api.injectEndpoints({
       query: (queryArg) => ({
         url: `/api/v2/data_products/${queryArg.dataProductId}/technical_assets/${queryArg.id}/status`,
         method: "PUT",
-        body: queryArg.dataOutputStatusUpdate,
+        body: queryArg.technicalAssetStatusUpdate,
       }),
     }),
     getTechnicalAssetGraphData: build.query<
@@ -173,7 +173,7 @@ export type UpdateTechnicalAssetApiResponse =
 export type UpdateTechnicalAssetApiArg = {
   dataProductId: string;
   id: string;
-  dataOutputUpdate: DataOutputUpdate;
+  technicalAssetUpdate: TechnicalAssetUpdate;
 };
 export type GetTechnicalAssetEventHistoryApiResponse =
   /** status 200 Successful Response */ GetEventHistoryResponse;
@@ -186,7 +186,7 @@ export type UpdateTechnicalAssetStatusApiResponse =
 export type UpdateTechnicalAssetStatusApiArg = {
   dataProductId: string;
   id: string;
-  dataOutputStatusUpdate: DataOutputStatusUpdate;
+  technicalAssetStatusUpdate: TechnicalAssetStatusUpdate;
 };
 export type GetTechnicalAssetGraphDataApiResponse =
   /** status 200 Successful Response */ Graph;
@@ -220,69 +220,10 @@ export type LinkTechnicalAssetToOutputPortRequest = {
 export type UnLinkTechnicalAssetToOutputPortRequest = {
   technical_asset_id: string;
 };
-export type AzureBlobTechnicalAssetConfiguration = {
-  configuration_type: "AzureBlobTechnicalAssetConfiguration";
-  domain?: string;
-  path?: string;
-  container_name: string;
-};
-export type DatabricksTechnicalAssetConfiguration = {
-  configuration_type: "DatabricksTechnicalAssetConfiguration";
-  catalog: string;
-  schema?: string;
-  table?: string;
-  bucket_identifier?: string;
-  catalog_path?: string;
-  table_path?: string;
-  access_granularity: AccessGranularity;
-};
-export type GlueTechnicalAssetConfiguration = {
-  configuration_type: "GlueTechnicalAssetConfiguration";
-  database: string;
-  database_suffix?: string;
-  table?: string;
-  bucket_identifier?: string;
-  database_path?: string;
-  table_path?: string;
-  access_granularity: AccessGranularity;
-};
-export type OsiSemanticModelTechnicalAssetConfiguration = {
-  configuration_type: "OSISemanticModelTechnicalAssetConfiguration";
-  model_name?: string;
-  location?: string;
-};
-export type PostgreSqlTechnicalAssetConfiguration = {
-  configuration_type: "PostgreSQLTechnicalAssetConfiguration";
-  database: string;
-  schema?: string;
-  table?: string;
-  access_granularity: AccessGranularity;
-};
-export type RedshiftTechnicalAssetConfiguration = {
-  configuration_type: "RedshiftTechnicalAssetConfiguration";
-  database: string;
-  schema?: string;
-  table?: string;
-  bucket_identifier?: string;
-  database_path?: string;
-  table_path?: string;
-  access_granularity: AccessGranularity;
-};
-export type S3TechnicalAssetConfiguration = {
-  configuration_type: "S3TechnicalAssetConfiguration";
-  bucket: string;
-  suffix?: string;
-  path: string;
-};
-export type SnowflakeTechnicalAssetConfiguration = {
-  configuration_type: "SnowflakeTechnicalAssetConfiguration";
-  database: string;
-  schema?: string;
-  table?: string;
-  bucket_identifier?: string;
-  database_path?: string;
-  table_path?: string;
-  access_granularity: AccessGranularity;
+export type AccessMode = {
+  id: string;
+  name: string;
+  description: string;
 };
 export type DataProductType = {
   id: string;
@@ -298,6 +239,24 @@ export type DataProduct = {
   status: AbstractDataProductStatus;
   type: DataProductType;
 };
+export type EnvironmentGetItem = {
+  id: string;
+  name: string;
+  acronym: string;
+  context: string;
+  is_default?: boolean;
+  is_global?: boolean;
+};
+export type DataProductEnvironment = {
+  environment_id: string;
+  environment: EnvironmentGetItem;
+  creation_date: string;
+};
+export type OutputPortAccessType = {
+  id: string;
+  name: string;
+  access_function: OutputPortAccessFunction;
+};
 export type Tag = {
   id: string;
   value: string;
@@ -311,6 +270,7 @@ export type OutputPort = {
   access_type: OutputPortAccessType;
   data_product_id: string;
   tags: Tag[];
+  access_modes: AccessMode[];
 };
 export type OutputPortLink = {
   id: string;
@@ -330,36 +290,18 @@ export type GetTechnicalAssetsResponseItem = {
   description: string;
   namespace: string;
   owner_id: string;
-  platform_id: string;
-  service_id: string;
+  platform_id?: string | null;
+  service_id?: string | null;
   status: TechnicalAssetStatus;
   technical_mapping: TechnicalMapping;
-  configuration:
-    | ({
-        configuration_type: "AzureBlobTechnicalAssetConfiguration";
-      } & AzureBlobTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "DatabricksTechnicalAssetConfiguration";
-      } & DatabricksTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "GlueTechnicalAssetConfiguration";
-      } & GlueTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "OSISemanticModelTechnicalAssetConfiguration";
-      } & OsiSemanticModelTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "PostgreSQLTechnicalAssetConfiguration";
-      } & PostgreSqlTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "RedshiftTechnicalAssetConfiguration";
-      } & RedshiftTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "S3TechnicalAssetConfiguration";
-      } & S3TechnicalAssetConfiguration)
-    | ({
-        configuration_type: "SnowflakeTechnicalAssetConfiguration";
-      } & SnowflakeTechnicalAssetConfiguration);
+  access_modes: AccessMode[];
+  /** Configuration of the technical asset. The available fields depend on `name`; retrieve them from /v2/plugins/{name}/form. */
+  configuration: {
+    name: string;
+    [key: string]: any;
+  };
   owner: DataProduct;
+  environments: DataProductEnvironment[];
   output_port_links: OutputPortLink[];
   tags: Tag[];
   /** DEPRECATED: Use 'technical_mapping' instead. This field will be removed in a future version. */
@@ -377,42 +319,23 @@ export type CreateTechnicalAssetRequest = {
   name: string;
   description: string;
   namespace: string;
-  platform_id: string;
-  service_id: string;
-  configuration:
-    | ({
-        configuration_type: "AzureBlobTechnicalAssetConfiguration";
-      } & AzureBlobTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "DatabricksTechnicalAssetConfiguration";
-      } & DatabricksTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "GlueTechnicalAssetConfiguration";
-      } & GlueTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "OSISemanticModelTechnicalAssetConfiguration";
-      } & OsiSemanticModelTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "PostgreSQLTechnicalAssetConfiguration";
-      } & PostgreSqlTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "RedshiftTechnicalAssetConfiguration";
-      } & RedshiftTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "S3TechnicalAssetConfiguration";
-      } & S3TechnicalAssetConfiguration)
-    | ({
-        configuration_type: "SnowflakeTechnicalAssetConfiguration";
-      } & SnowflakeTechnicalAssetConfiguration);
+  platform_id?: string | null;
+  service_id?: string | null;
+  /** Configuration of the technical asset. The available fields depend on `name`; retrieve them from /v2/plugins/{name}/form. */
+  configuration: {
+    name: string;
+    [key: string]: any;
+  };
   /** DEPRECATED: Use 'technical_mapping' instead. This field will be removed in a future version. */
   sourceAligned?: boolean | null;
   technical_mapping?: TechnicalMapping | null;
+  access_mode_ids?: string[];
   tag_ids: string[];
 };
 export type UpdateTechnicalAssetResponse = {
   id: string;
 };
-export type DataOutputUpdate = {
+export type TechnicalAssetUpdate = {
   name: string;
   description: string;
   tag_ids: string[];
@@ -435,33 +358,28 @@ export type TechnicalAsset = {
   status: TechnicalAssetStatus;
   technical_mapping: TechnicalMapping;
   owner_id: string;
-  platform_id: string;
-  service_id: string;
-  configuration:
-    | ({
-        configuration_type: "AzureBlobTechnicalAssetConfiguration";
-      } & AzureBlobTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "DatabricksTechnicalAssetConfiguration";
-      } & DatabricksTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "GlueTechnicalAssetConfiguration";
-      } & GlueTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "OSISemanticModelTechnicalAssetConfiguration";
-      } & OsiSemanticModelTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "PostgreSQLTechnicalAssetConfiguration";
-      } & PostgreSqlTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "RedshiftTechnicalAssetConfiguration";
-      } & RedshiftTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "S3TechnicalAssetConfiguration";
-      } & S3TechnicalAssetConfiguration)
-    | ({
-        configuration_type: "SnowflakeTechnicalAssetConfiguration";
-      } & SnowflakeTechnicalAssetConfiguration);
+  platform_id?: string | null;
+  service_id?: string | null;
+  /** Configuration of the technical asset. The available fields depend on `name`; retrieve them from /v2/plugins/{name}/form. */
+  configuration: {
+    name: string;
+    [key: string]: any;
+  };
+};
+export type Domain = {
+  id: string;
+  name: string;
+  namespace: string;
+  description: string;
+};
+export type Exploration = {
+  id: string;
+  name: string;
+  namespace: string;
+  description: string;
+  domain: Domain;
+  status: AbstractDataProductStatus;
+  finalizers: string[];
 };
 export type GetEventHistoryResponseItem = {
   id: string;
@@ -474,16 +392,18 @@ export type GetEventHistoryResponseItem = {
   created_on: string;
   deleted_subject_identifier?: string | null;
   deleted_target_identifier?: string | null;
-  actor: User;
+  deleted_actor_identifier?: string | null;
+  actor?: User | null;
   data_product?: DataProduct | null;
   user?: User | null;
   output_port?: OutputPort | null;
   technical_asset?: TechnicalAsset | null;
+  exploration?: Exploration | null;
 };
 export type GetEventHistoryResponse = {
   events: GetEventHistoryResponseItem[];
 };
-export type DataOutputStatusUpdate = {
+export type TechnicalAssetStatusUpdate = {
   status: TechnicalAssetStatus;
 };
 export type Edge = {
@@ -522,10 +442,6 @@ export enum TechnicalMapping {
   Default = "default",
   Custom = "custom",
 }
-export enum AccessGranularity {
-  Schema = "schema",
-  Table = "table",
-}
 export enum AbstractDataProductStatus {
   Pending = "pending",
   Active = "active",
@@ -551,8 +467,7 @@ export enum OutputPortStatus {
   Active = "active",
   Archived = "archived",
 }
-export enum OutputPortAccessType {
-  Public = "public",
+export enum OutputPortAccessFunction {
   Restricted = "restricted",
   Private = "private",
   Unrestricted = "unrestricted",
@@ -562,6 +477,7 @@ export enum EventEntityType {
   OutputPort = "output_port",
   TechnicalAsset = "technical_asset",
   User = "user",
+  Exploration = "exploration",
 }
 export enum NodeType {
   DataProductNode = "dataProductNode",

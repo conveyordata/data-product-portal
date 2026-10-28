@@ -1,6 +1,7 @@
 import time
 from contextlib import contextmanager
-from typing import Any, Type, TypeVar
+from typing import Any, Generator, Type, TypeVar
+from urllib.parse import quote_plus
 from uuid import UUID
 
 from fastapi import HTTPException, status
@@ -13,6 +14,13 @@ from app.shared.model import BaseORM
 from app.shared.schema import ORMModel
 
 OM = TypeVar("OM", bound=ORMModel)
+
+SKIP_OUTPUT_PORT_ACCESS_FUNCTION_FILTER = "skip_output_port_access_function_filter"
+
+UNFILTERED = {
+    SKIP_OUTPUT_PORT_ACCESS_FUNCTION_FILTER: True,
+    "skip_data_product_visibility_filter": True,
+}
 
 
 def ensure_exists(
@@ -28,14 +36,25 @@ def ensure_exists(
 
 
 def get_url(async_: bool = False) -> str:
+    user = quote_plus(settings.POSTGRES_USER)
+    password = quote_plus(settings.POSTGRES_PASSWORD)
     return (
-        f"postgresql{'+asyncpg' if async_ else ''}://{settings.POSTGRES_USER}:"
-        f"{settings.POSTGRES_PASSWORD}@{settings.POSTGRES_SERVER}:"
+        f"postgresql{'+asyncpg' if async_ else ''}://{user}:"
+        f"{password}@{settings.POSTGRES_SERVER}:"
         f"{settings.POSTGRES_PORT}/{settings.POSTGRES_DB}"
     )
 
 
-engine = create_engine(get_url(), connect_args={})
+engine = create_engine(
+    get_url(),
+    connect_args={"connect_timeout": settings.DB_CONNECT_TIMEOUT_SECONDS},
+    pool_size=settings.DB_POOL_SIZE,
+    max_overflow=settings.DB_MAX_OVERFLOW,
+    pool_timeout=settings.DB_POOL_TIMEOUT_SECONDS,
+    pool_recycle=settings.DB_POOL_RECYCLE_SECONDS,
+    pool_pre_ping=settings.DB_POOL_PRE_PING,
+    pool_use_lifo=True,
+)
 if settings.OPENTELEMETRY_TRACES_ENABLED:
     from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
 
@@ -88,7 +107,14 @@ SessionLocal = sessionmaker(
 Base = declarative_base()
 
 
-def get_db_session():
+@contextmanager
+def db_session() -> Generator[Session]:
+    """
+    Should not be used directly, use get_db_session instead or get_system_db_session.
+    This is a context manager that will commit or rollback the session depending on whether an exception was raised.
+    :return:
+    """
+
     db = SessionLocal()
     try:
         yield db
@@ -100,4 +126,13 @@ def get_db_session():
         db.close()
 
 
-get_db_context = contextmanager(get_db_session)
+def get_system_db_session() -> Generator[Session]:
+    """
+    In routing always use this as a dependency with `scope='function'` to ensure the commit or rollback happens before
+    the response is sent.
+    This session should only be used with caution! Without this the data product visilibity filter will fail.
+    So only use it when no user is available. For example in migrations or when running background tasks that are not user specific.
+    :return:
+    """
+    with db_session() as db:
+        yield db

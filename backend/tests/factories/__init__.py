@@ -1,37 +1,57 @@
-from .. import test_session
-from .data_outputs_datasets import DataOutputDatasetAssociationFactory
+from tests import test_session
+
+from .access_duration import AccessDurationFactory
+from .access_mode import AccessModeFactory
+from .access_mode import fake as access_mode_fake
 from .data_product import DataProductFactory
 from .data_product import fake as data_product_fake
 from .data_product_setting import DataProductSettingFactory
 from .data_product_setting_value import DataProductSettingValueFactory
 from .data_product_type import DataProductTypeFactory
-from .dataset import DatasetFactory
-from .dataset import fake as dataset_fake
-from .dataset_query_stats_daily import DatasetQueryStatsFactory
+from .data_quality_summary import DataQualitySummaryFactory
+from .device_flow import DeviceFlowFactory
 from .domain import DomainFactory
 from .env_platform_config import EnvPlatformConfigFactory
 from .env_platform_service_config import EnvPlatformServiceConfigFactory
 from .environment import EnvironmentFactory
+from .environment import fake as environment_fake
 from .event import EventFactory
 from .exploration import ExplorationFactory
-from .exploration import fake as exploration_fake
+from .group import GroupFactory, GroupMembershipFactory
 from .input_port import InputPortFactory
+from .input_port_request import InputPortRequestFactory
 from .lifecycle import LifecycleFactory
+from .machine_user import MachineUserFactory
 from .notification import NotificationFactory
+from .output_port import OutputPortFactory
+from .output_port import fake as dataset_fake
+from .output_port_access_type import OutputPortAccessTypeFactory
+from .output_port_query_stats_daily import OutputPortQueryStatsFactory
 from .platform import PlatformFactory
+from .platform import fake as platform_fake
 from .platform_service import PlatformServiceFactory
 from .platform_service_config import PlatformServiceConfigFactory
 from .role import RoleFactory
 from .role_assignment_data_product import DataProductRoleAssignmentFactory
 from .role_assignment_dataset import DatasetRoleAssignmentFactory
 from .role_assignment_global import GlobalRoleAssignmentFactory
-from .s3_data_output import S3DataOutputFactory
 from .tags import TagFactory
 from .technical_asset import TechnicalAssetFactory
+from .technical_asset_access_mode import TechnicalAssetAccessModeFactory
+from .technical_asset_configuration import TechnicalAssetConfigurationFactory
+from .technical_asset_output_ports import TechnicalAssetOutputPortAssociationFactory
 from .theme_settings import ThemeSettingsFactory
 from .user import UserFactory
+from .user import fake as user_fake
 
-_fakes_with_unique = [data_product_fake, dataset_fake, exploration_fake]
+_fakes_with_unique = [
+    access_mode_fake,
+    data_product_fake,
+    dataset_fake,
+    environment_fake,
+    platform_fake,
+    user_fake,
+]
 
 
 def reset_unique_fakers() -> None:
@@ -45,15 +65,20 @@ def reset_unique_fakers() -> None:
 
 
 factories = [
-    DataOutputDatasetAssociationFactory,
+    AccessModeFactory,
+    AccessDurationFactory,
+    TechnicalAssetOutputPortAssociationFactory,
     DataProductFactory,
     DataProductSettingFactory,
     DataProductSettingValueFactory,
     DataProductTypeFactory,
+    DataQualitySummaryFactory,
     InputPortFactory,
+    InputPortRequestFactory,
     DataProductRoleAssignmentFactory,
-    DatasetFactory,
-    DatasetQueryStatsFactory,
+    OutputPortFactory,
+    OutputPortAccessTypeFactory,
+    OutputPortQueryStatsFactory,
     DatasetRoleAssignmentFactory,
     DomainFactory,
     EnvPlatformConfigFactory,
@@ -66,13 +91,18 @@ factories = [
     PlatformServiceFactory,
     PlatformServiceConfigFactory,
     RoleFactory,
-    S3DataOutputFactory,
+    TechnicalAssetConfigurationFactory,
     TagFactory,
     UserFactory,
     TechnicalAssetFactory,
     ThemeSettingsFactory,
     NotificationFactory,
     ExplorationFactory,
+    TechnicalAssetAccessModeFactory,
+    DeviceFlowFactory,
+    GroupFactory,
+    GroupMembershipFactory,
+    MachineUserFactory,
 ]
 
 for factory_model in factories:

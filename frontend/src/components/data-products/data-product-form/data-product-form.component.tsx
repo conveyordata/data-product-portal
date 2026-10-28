@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router';
 import { DataProductFormItems } from '@/components/data-products/data-product-form/data-product-form-items.component.tsx';
+import { HiddenWarningText } from '@/components/data-products/data-product-form/hidden-warning.tsx';
 import { useBreadcrumbs } from '@/components/layout/navbar/breadcrumbs/breadcrumb.context.tsx';
 import { FORM_GRID_WRAPPER_COLS } from '@/constants/form.constants.ts';
 import { PosthogEvents } from '@/constants/posthog.constants';
@@ -15,15 +16,16 @@ import { useCheckAccessQuery } from '@/store/api/services/generated/authorizatio
 import {
     type DataProductCreate,
     type DataProductUpdate,
+    DataProductVisibility,
     useCreateDataProductMutation,
     useGetDataProductQuery,
     useRemoveDataProductMutation,
     useUpdateDataProductMutation,
 } from '@/store/api/services/generated/dataProductsApi.ts';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import { ApplicationPaths, createDataProductIdPath } from '@/types/navigation.ts';
 import { useGetDataProductOwnerIds } from '@/utils/data-product-user-role.helper.ts';
+import { dispatchMessage } from '@/utils/feedback.ts';
 import styles from './data-product-form.module.scss';
 
 type Props = {
@@ -48,6 +50,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
     const [updateDataProduct, { isLoading: isUpdating }] = useUpdateDataProductMutation();
 
     const [form] = Form.useForm<DataProductCreate>();
+    const visibility = Form.useWatch('visibility', form);
 
     const { data: create_access } = useCheckAccessQuery({ action: AuthorizationAction.GLOBAL__CREATE_DATAPRODUCT });
     const { data: update_access } = useCheckAccessQuery(
@@ -85,7 +88,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                     ),
                     path: ApplicationPaths.Studio,
                 },
-                { title: <>{currentDataProduct?.name}</>, path: createDataProductIdPath(dataProductId ?? '') },
+                { title: currentDataProduct?.name, path: createDataProductIdPath(dataProductId ?? '') },
                 { title: t('Edit') },
             ]);
         }
@@ -116,6 +119,8 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                     type_id: values.type_id,
                     tag_ids: values.tag_ids ?? [],
                     domain_id: values.domain_id,
+                    environment_ids: values.environment_ids,
+                    visibility: values.visibility,
                 };
                 const response = await createDataProduct(request).unwrap();
                 dispatchMessage({ content: t('Data Product created successfully'), type: 'success' });
@@ -142,6 +147,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                     type_id: values.type_id,
                     lifecycle_id: values.lifecycle_id,
                     domain_id: values.domain_id,
+                    environment_ids: values.environment_ids,
                     tag_ids: values.tag_ids,
                 };
                 const response = await updateDataProduct({
@@ -177,7 +183,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
     const handleDeleteDataProduct = async () => {
         if (canDelete && currentDataProduct) {
             try {
-                await deleteDataProduct(currentDataProduct?.id).unwrap();
+                await deleteDataProduct(currentDataProduct.id).unwrap();
                 dispatchMessage({ content: t('Data Product deleted successfully'), type: 'success' });
                 navigate(ApplicationPaths.Studio);
             } catch (_error) {
@@ -202,17 +208,15 @@ export function DataProductForm({ mode, dataProductId }: Props) {
         type_id: currentDataProduct?.type.id,
         lifecycle_id: currentDataProduct?.lifecycle?.id,
         domain_id: currentDataProduct?.domain.id,
+        environment_ids: currentDataProduct?.environments.map((item) => item.environment_id),
         tag_ids: currentDataProduct?.tags.map((tag) => tag.id),
         owners: mode === 'edit' ? ownerIds : currentUser?.id ? [currentUser?.id] : [],
+        visibility: currentDataProduct?.visibility,
     };
 
     return (
         <>
-            {mode === 'edit' && (
-                <Typography.Title level={3} className={styles.title}>
-                    {currentDataProduct?.name}
-                </Typography.Title>
-            )}
+            {mode === 'edit' && <Typography.Title level={3}>{currentDataProduct?.name}</Typography.Title>}
             {mode === 'create' && <Typography.Title level={3}>{t('New Data Product')}</Typography.Title>}
             <Form<DataProductCreate>
                 form={form}
@@ -222,7 +226,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                 layout="vertical"
                 onFinish={onFinish}
                 onFinishFailed={onFinishFailed}
-                autoComplete={'off'}
+                autoComplete="off"
                 disabled={isLoading || !canSubmit}
                 initialValues={initialValues}
             >
@@ -240,7 +244,7 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                                     title={t('Are you sure you want to delete this Data Product?')}
                                     onConfirm={handleDeleteDataProduct}
                                     okText={t('Yes')}
-                                    cancelText={t('No')}
+                                    showCancel={false}
                                 >
                                     <Button
                                         className={styles.formButton}
@@ -266,15 +270,28 @@ export function DataProductForm({ mode, dataProductId }: Props) {
                                 >
                                     {t('Cancel')}
                                 </Button>
-                                <Button
-                                    className={styles.formButton}
-                                    type="primary"
-                                    htmlType={'submit'}
-                                    loading={isCreating || isUpdating}
-                                    disabled={isLoading || !canSubmit}
+                                <Popconfirm
+                                    title={<HiddenWarningText />}
+                                    onConfirm={() => form.submit()}
+                                    okText={t('Create')}
+                                    cancelText={t('Cancel')}
+                                    styles={{ root: { maxWidth: '30vw' } }}
+                                    disabled={mode === 'edit' || visibility !== DataProductVisibility.Hidden}
                                 >
-                                    {mode === 'edit' ? t('Save') : t('Create')}
-                                </Button>
+                                    <Button
+                                        className={styles.formButton}
+                                        type="primary"
+                                        htmlType={
+                                            mode === 'create' && visibility === DataProductVisibility.Hidden
+                                                ? 'button'
+                                                : 'submit'
+                                        }
+                                        loading={isCreating || isUpdating}
+                                        disabled={isLoading || !canSubmit}
+                                    >
+                                        {mode === 'edit' ? t('Save') : t('Create')}
+                                    </Button>
+                                </Popconfirm>
                             </Space>
                         </Col>
                     </Row>

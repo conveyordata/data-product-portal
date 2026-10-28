@@ -1,12 +1,12 @@
 import { usePostHog } from '@posthog/react';
-import { Button, Flex, Form, type FormProps } from 'antd';
-import { useForm } from 'antd/es/form/Form';
+import { Button, Flex, Form, type FormProps, Popconfirm } from 'antd';
 import { t } from 'i18next';
 import { useCallback, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router';
 import styles from '@/components/data-products/data-product-form/data-product-form.module.scss';
 import { DataProductFormItems } from '@/components/data-products/data-product-form/data-product-form-items.component.tsx';
+import { HiddenWarningText } from '@/components/data-products/data-product-form/hidden-warning.tsx';
 import { PosthogEvents } from '@/constants/posthog.constants.ts';
 import { useFormPersist } from '@/hooks/use-form-persist.tsx';
 import { JustificationFormItem } from '@/pages/cart/components/form-item-justification.tsx';
@@ -15,30 +15,29 @@ import { useAppDispatch } from '@/store';
 import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
 import {
     type DataProductCreate,
+    DataProductVisibility,
     useCreateDataProductMutation,
 } from '@/store/api/services/generated/dataProductsApi.ts';
-import type { SearchOutputPortsResponseItem } from '@/store/api/services/generated/outputPortsSearchApi.ts';
-import { clearCart } from '@/store/features/cart/cart-slice.ts';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import { clearCart, selectCartOutputPorts } from '@/store/features/cart/cart-slice.ts';
 import { createDataProductIdPath } from '@/types/navigation.ts';
+import { dispatchMessage } from '@/utils/feedback.ts';
 
 type NewDataProductCartFormData = DataProductCreate & {
     justification: string;
 };
-type Props = {
-    cartOutputPorts?: SearchOutputPortsResponseItem[];
-};
 
-export const NewDataProductForm = ({ cartOutputPorts }: Props) => {
+export const NewDataProductForm = () => {
+    const cartOutputPorts = useSelector(selectCartOutputPorts);
     const dispatch = useAppDispatch();
     const posthog = usePostHog();
     const navigate = useNavigate();
-    const [form] = useForm<NewDataProductCartFormData>();
+    const [form] = Form.useForm<NewDataProductCartFormData>();
     const [areFormItemsLoading, setAreFormItemsLoading] = useState(true);
     const currentUser = useSelector(selectCurrentUser);
 
     const [createDataProduct] = useCreateDataProductMutation();
     const [submitting, setSubmitting] = useState(false);
+    const visibility = Form.useWatch('visibility', form);
     const { onValuesChange, clearStorage } = useFormPersist<NewDataProductCartFormData>(
         form,
         'cart-new-data-product-form',
@@ -55,7 +54,10 @@ export const NewDataProductForm = ({ cartOutputPorts }: Props) => {
                     ...request,
                     input_ports: {
                         justification,
-                        output_ports: cartOutputPorts?.map((dataset) => dataset.id),
+                        output_ports: cartOutputPorts?.map((dataset) => ({
+                            output_port_id: dataset.outputPortId,
+                            access_mode_id: dataset.accessModeId,
+                        })),
                     },
                 }).unwrap();
                 dispatch(clearCart());
@@ -80,24 +82,33 @@ export const NewDataProductForm = ({ cartOutputPorts }: Props) => {
         <Form<NewDataProductCartFormData>
             form={form}
             onFinish={onFinish}
-            layout={'vertical'}
-            autoComplete={'off'}
+            layout="vertical"
+            autoComplete="off"
             onValuesChange={onValuesChange}
             initialValues={initialValues}
         >
-            <DataProductFormItems form={form} mode={'create'} setAreFormItemsLoading={setAreFormItemsLoading} />
+            <DataProductFormItems form={form} mode="create" setAreFormItemsLoading={setAreFormItemsLoading} />
             <JustificationFormItem />
             <Form.Item>
                 <Flex justify="end">
-                    <Button
-                        className={styles.formButton}
-                        type="primary"
-                        htmlType={'submit'}
-                        loading={submitting}
-                        disabled={areFormItemsLoading}
+                    <Popconfirm
+                        title={<HiddenWarningText />}
+                        onConfirm={() => form.submit()}
+                        okText={t('Create')}
+                        cancelText={t('Cancel')}
+                        styles={{ root: { maxWidth: '30vw' } }}
+                        disabled={visibility !== DataProductVisibility.Hidden}
                     >
-                        {t('Create')}
-                    </Button>
+                        <Button
+                            className={styles.formButton}
+                            type="primary"
+                            htmlType={visibility === DataProductVisibility.Hidden ? 'button' : 'submit'}
+                            loading={submitting}
+                            disabled={areFormItemsLoading}
+                        >
+                            {t('Create')}
+                        </Button>
+                    </Popconfirm>
                 </Flex>
             </Form.Item>
         </Form>

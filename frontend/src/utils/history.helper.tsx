@@ -3,7 +3,12 @@ import type { ReactElement, ReactNode } from 'react';
 import { Trans } from 'react-i18next';
 import { EventEntityType, type GetEventHistoryResponseItem } from '@/store/api/services/generated/dataProductsApi.ts';
 import { EventType } from '@/types/events/event-types';
-import { createDataOutputIdPath, createDataProductIdPath, createMarketplaceOutputPortPath } from '@/types/navigation';
+import {
+    createDataOutputIdPath,
+    createDataProductIdPath,
+    createExplorationIdPath,
+    createMarketplaceOutputPortPath,
+} from '@/types/navigation';
 
 export function getTypeDisplayName(t: TFunction, type: EventEntityType | undefined | null): string {
     switch (type) {
@@ -15,6 +20,8 @@ export function getTypeDisplayName(t: TFunction, type: EventEntityType | undefin
             return t('Technical Asset');
         case EventEntityType.User:
             return t('User');
+        case EventEntityType.Exploration:
+            return t('Exploration');
         default:
             return t('Unknown');
     }
@@ -36,6 +43,8 @@ export function getSubjectDisplayLabel(record: GetEventHistoryResponseItem): str
             return record.technical_asset?.name || '';
         case EventEntityType.OutputPort:
             return record.output_port?.name || '';
+        case EventEntityType.Exploration:
+            return record.exploration?.name || '';
     }
 }
 
@@ -55,6 +64,8 @@ export function getTargetDisplayLabel(record: GetEventHistoryResponseItem): stri
             return record.technical_asset?.name || '';
         case EventEntityType.OutputPort:
             return record.output_port?.name || '';
+        case EventEntityType.Exploration:
+            return record.exploration?.name || '';
         default:
             return '';
     }
@@ -74,6 +85,8 @@ export function getEventReferenceEntityLinkPath(
             return dataProductId ? createDataOutputIdPath(id, dataProductId) : null;
         case EventEntityType.User:
             return null;
+        case EventEntityType.Exploration:
+            return createExplorationIdPath(id);
         default:
             return null;
     }
@@ -262,6 +275,36 @@ export function getEventTypeDisplayName(
                     components={{ element }}
                 />
             );
+        case EventType.DATA_PRODUCT_DATASET_LINK_REVOKED:
+            return (
+                <Trans
+                    t={t}
+                    i18nKey="EventDataProductDatasetLinkRevoked"
+                    defaults="Revoked consuming link with the <element>{{entity}}</element> {{entity_type}}"
+                    values={{ entity, entity_type }}
+                    components={{ element }}
+                />
+            );
+        case EventType.DATA_PRODUCT_DATASET_LINK_CANCELLED:
+            return (
+                <Trans
+                    t={t}
+                    i18nKey="EventDataProductDatasetLinkCancelled"
+                    defaults="Cancelled request to link with the <element>{{entity}}</element> {{entity_type}}"
+                    values={{ entity, entity_type }}
+                    components={{ element }}
+                />
+            );
+        case EventType.INPUT_PORT_EXPIRING_SOON:
+            return (
+                <Trans
+                    t={t}
+                    i18nKey="EventInputPortExpiringSoon"
+                    defaults="Consuming link with the <element>{{entity}}</element> {{entity_type}} is expiring soon"
+                    values={{ entity, entity_type }}
+                    components={{ element }}
+                />
+            );
 
         case EventType.DATASET_ROLE_ASSIGNMENT_CREATED:
             return (
@@ -406,6 +449,28 @@ export function getNotificationDisplayName(
                     t={t}
                     i18nKey="NotificationDataOutputLinkRemoved"
                     defaults="<subject>{{subject_entity}}</subject> {{subject_entity_type}} has been unlinked from the <target>{{target_entity}}</target> {{target_entity_type}}"
+                    values={{ subject_entity, subject_entity_type, target_entity, target_entity_type }}
+                    components={{ subject, target }}
+                />
+            );
+        case EventType.DATA_PRODUCT_DATASET_LINK_REVOKED:
+            return (
+                <Trans
+                    t={t}
+                    i18nKey="NotificationDataProductLinkRevoked"
+                    defaults="<subject>{{subject_entity}}</subject> {{subject_entity_type}} access has been revoked for the <target>{{target_entity}}</target> {{target_entity_type}}"
+                    values={{ subject_entity, subject_entity_type, target_entity, target_entity_type }}
+                    components={{ subject, target }}
+                />
+            );
+        case EventType.DATA_PRODUCT_DATASET_LINK_CANCELLED:
+            return;
+        case EventType.INPUT_PORT_EXPIRING_SOON:
+            return (
+                <Trans
+                    t={t}
+                    i18nKey="NotificationInputPortExpiringSoon"
+                    defaults="<subject>{{subject_entity}}</subject> {{subject_entity_type}} access for the <target>{{target_entity}}</target> {{target_entity_type}} is expiring soon"
                     values={{ subject_entity, subject_entity_type, target_entity, target_entity_type }}
                     components={{ subject, target }}
                 />
@@ -563,6 +628,12 @@ function getEventTypeDisplayTranslation(
             return t('EventDataProductDatasetLinkDenied', { entity, entity_type });
         case EventType.DATA_PRODUCT_DATASET_LINK_REMOVED:
             return t('EventDataProductDatasetLinkRemoved', { entity, entity_type });
+        case EventType.DATA_PRODUCT_DATASET_LINK_REVOKED:
+            return t('EventDataProductDatasetLinkRevoked', { entity, entity_type });
+        case EventType.DATA_PRODUCT_DATASET_LINK_CANCELLED:
+            return t('EventDataProductDatasetLinkCancelled', { entity, entity_type });
+        case EventType.INPUT_PORT_EXPIRING_SOON:
+            return t('EventInputPortExpiringSoon', { entity, entity_type });
 
         case EventType.DATASET_ROLE_ASSIGNMENT_CREATED:
             return t('EventDatasetRoleAssignmentCreated', { entity });

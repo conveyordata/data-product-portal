@@ -1,7 +1,5 @@
-from typing import TYPE_CHECKING
-
-from casbin_sqlalchemy_adapter import Adapter, CasbinRule
-from sqlalchemy import delete, func, select
+from casbin_sqlalchemy_adapter import CasbinRule
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.authorization.role_assignments.data_product.auth import (
@@ -22,10 +20,12 @@ from app.authorization.role_assignments.output_port.service import (
 from app.authorization.roles.auth import AuthRole
 from app.authorization.roles.service import RoleService
 from app.core.authz import Authorization
+from app.core.authz.actions import AuthorizationAction
 from app.core.logging import logger
+from app.groups.model import GroupMembership
 
-if TYPE_CHECKING:
-    from casbin import Enforcer
+DATA_PRODUCT_READER_ROLE = "/role/data-product-reader"
+OUTPUT_PORT_READER_ROLE = "/role/output-port-reader"
 
 
 class AuthorizationService:
@@ -34,8 +34,7 @@ class AuthorizationService:
         self.authorizer = Authorization()
 
     def reload_enforcer(self) -> None:
-        removed = self._clear_casbin_table()
-        logger.info(f"Removed {removed} rows from the casbin table")
+        self.authorizer.pause_enforcer_for_reload()
 
         changed_roles, total_roles = self._sync_roles()
         logger.info(f"Synced {changed_roles}/{total_roles} roles to the casbin table")
@@ -58,25 +57,26 @@ class AuthorizationService:
             " global assignments to the casbin table"
         )
 
+        self._sync_data_products_reader_role()
+        logger.info("Synced data products reader role permissions")
+
+        from app.data_products.service import DataProductService
+
+        DataProductService(self.db).sync_data_product_consumer_access()
+        logger.info("Synced data product consumer access")
+
+        self._sync_output_ports_reader_role()
+        logger.info("Synced output ports reader role permissions")
+
+        self._sync_group_memberships()
+        logger.info("Synced group membership edges to the casbin table")
+
+        self.authorizer.start_enforcer_after_reload()
+
         logger.info(
             "Authorization reload done - the casbin table"
             f" now contains {self._casbin_row_count(self.db)} rows"
         )
-
-    @classmethod
-    def _clear_casbin_table(cls) -> int:
-        """Clears the database table used by casbin. Use with caution!
-        This means the casbin table will be out of sync with the role assignments.
-        """
-        authorizer = Authorization()
-        enforcer: Enforcer = authorizer._enforcer
-        adapter: Adapter = enforcer.adapter
-
-        enforcer.clear_policy()
-        with adapter._session_scope() as session:
-            count = cls._casbin_row_count(session)
-            session.execute(delete(CasbinRule))
-        return count
 
     @staticmethod
     def _casbin_row_count(session: Session) -> int:
@@ -95,7 +95,7 @@ class AuthorizationService:
     def _sync_product_assignments(self) -> tuple[int, int]:
         service = DataProductRoleAssignmentService(self.db)
         product_assignments = service.list_assignments(
-            data_product_id=None, user_id=None, decision=DecisionStatus.APPROVED
+            data_product_id=None, identity_id=None, decision=DecisionStatus.APPROVED
         )
 
         changes = 0
@@ -119,7 +119,7 @@ class AuthorizationService:
     def _sync_global_assignments(self) -> tuple[int, int]:
         service = GlobalRoleAssignmentService(self.db)
         global_assignments = service.list_assignments(
-            user_id=None, decision=DecisionStatus.APPROVED
+            identity_id=None, decision=DecisionStatus.APPROVED
         )
 
         changes = 0
@@ -127,3 +127,34 @@ class AuthorizationService:
             if GlobalAuthAssignment(assignment).add():
                 changes += 1
         return changes, len(global_assignments)
+
+    def _sync_data_products_reader_role(self):
+        from app.data_products.service import DataProductService
+
+        self.authorizer.sync_role_permissions(
+            role_id=DATA_PRODUCT_READER_ROLE,
+            actions=[AuthorizationAction.HIDDEN__DATA_PRODUCT__READ],
+        )
+        DataProductService(self.db).sync_discoverable_data_products()
+
+    def _sync_output_ports_reader_role(self):
+        from app.data_products.output_ports.service import OutputPortService
+
+        self.authorizer.sync_role_permissions(
+            role_id=OUTPUT_PORT_READER_ROLE,
+            actions=[AuthorizationAction.HIDDEN__OUTPUT_PORT__READ],
+        )
+        OutputPortService(self.db).sync_read_rights_output_ports()
+
+    def _sync_group_memberships(self) -> None:
+        """Synchronize all group membership authorization policies."""
+        memberships = [
+            (member_identity_id, group_id)
+            for group_id, member_identity_id in self.db.execute(
+                select(
+                    GroupMembership.group_id,
+                    GroupMembership.member_identity_id,
+                )
+            )
+        ]
+        self.authorizer.assign_group_memberships(memberships=memberships)

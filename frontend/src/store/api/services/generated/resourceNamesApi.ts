@@ -80,6 +80,7 @@ export enum ResourceNameModel {
   DataProductSetting = "data_product_setting",
   OutputPortSetting = "output_port_setting",
   Exploration = "exploration",
+  Domain = "domain",
 }
 export const {
   useSanitizeResourceNameQuery,

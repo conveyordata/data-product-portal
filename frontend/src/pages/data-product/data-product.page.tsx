@@ -7,6 +7,7 @@ import { useNavigate, useParams } from 'react-router';
 
 import { CircleIconButton } from '@/components/buttons/circle-icon-button/circle-icon-button.tsx';
 import { UserAccessOverview } from '@/components/data-access/user-access-overview/user-access-overview.component.tsx';
+import { DataProductVisibilityIcon } from '@/components/data-products/data-product-visibility-icon.tsx';
 import { useBreadcrumbs } from '@/components/layout/navbar/breadcrumbs/breadcrumb.context.tsx';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
 import { DataProductActions } from '@/pages/data-product/components/data-product-actions/data-product-actions.component.tsx';
@@ -21,7 +22,6 @@ import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { ApplicationPaths, DynamicPathParams } from '@/types/navigation.ts';
 import { getDataProductTypeIcon } from '@/utils/data-product-type-icon.helper.ts';
 import { useGetDataProductOwners } from '@/utils/data-product-user-role.helper.ts';
-import { LocalStorageKeys, setItemToLocalStorage } from '@/utils/local-storage.helper.ts';
 import { getDynamicRoutePath } from '@/utils/routes.helper.ts';
 import styles from './data-product.module.scss';
 
@@ -46,7 +46,7 @@ export function DataProduct() {
                 ),
                 path: ApplicationPaths.Studio,
             },
-            { title: <>{dataProduct?.name}</> },
+            { title: dataProduct?.name },
         ]);
     }, [setBreadcrumbs, dataProduct, t]);
     const { data: { rolled_up_tags: rolledUpTags = [] } = {} } = useGetDataProductRolledUpTagsQuery(dataProductId, {
@@ -68,21 +68,14 @@ export function DataProduct() {
 
     const dataProductOwners = useGetDataProductOwners(dataProduct?.id);
 
-    function navigateToEditPage() {
+    const navigateToEditPage = () => {
         const destination = getDynamicRoutePath(
             ApplicationPaths.DataProductEdit,
             DynamicPathParams.DataProductId,
             dataProductId,
         );
         return navigate(destination);
-    }
-
-    useEffect(() => {
-        setItemToLocalStorage(LocalStorageKeys.LastVisitedDataProducts, {
-            id: dataProductId,
-            timestamp: Date.now(),
-        });
-    }, [dataProductId]);
+    };
 
     //Only show the spinner when we have no data product to show, if we have one, we want to continue
     //Otherwise updating the settings for examples updates the whole page to a spinner, which is very weird
@@ -95,10 +88,10 @@ export function DataProduct() {
 
     return (
         <Splitter className={styles.invisibleSplitter}>
-            <Splitter.Panel size={sidebarCollapsed ? '100%' : '80%'} resizable={false} className={styles.container}>
-                <Flex vertical gap={'middle'} className={styles.mainPanel}>
-                    <Flex justify={'space-between'}>
-                        <Flex gap={'middle'} align={'center'} justify={'center'}>
+            <Splitter.Panel size={sidebarCollapsed ? '100%' : '80%'} resizable={false}>
+                <Flex vertical gap="middle">
+                    <Flex justify="space-between">
+                        <Flex gap="middle" align="center" justify="center">
                             <Icon
                                 component={dataProductTypeIcon}
                                 className={clsx([styles.defaultIcon, styles.iconBorder])}
@@ -110,6 +103,7 @@ export function DataProduct() {
                             >
                                 {dataProduct?.name}
                             </Typography.Title>
+                            <DataProductVisibilityIcon visibility={dataProduct?.visibility} />
                         </Flex>
                         <Space>
                             {canEdit && (
@@ -132,6 +126,7 @@ export function DataProduct() {
                         description={dataProduct.description}
                         domain={dataProduct.domain.name}
                         namespace={dataProduct.namespace}
+                        environments={dataProduct.environments}
                         tags={[...dataProduct.tags, ...rolledUpTags.map((tag) => ({ rolled_up: true, ...tag }))]}
                     />
                     <DataProductTabs dataProductId={dataProduct.id} />

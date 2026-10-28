@@ -1,12 +1,15 @@
 WITH customers AS (
     SELECT * FROM {{ source('sales_crm_customers', 'customers') }}
 ),
+
 orders AS (
     SELECT * FROM {{ source('sales_erp_orders', 'orders') }}
 ),
+
 shipments AS (
     SELECT * FROM {{ source('logistics_wms_shipments', 'shipments') }}
 )
+
 SELECT
     c.id AS customer_id,
     c.first_name,
@@ -18,6 +21,6 @@ SELECT
     s.shipment_id,
     s.shipped_date,
     s.delivery_status AS shipment_status
-FROM customers c
-LEFT JOIN orders o ON c.id = o.customer_id
-LEFT JOIN shipments s ON o.order_id = s.order_ref
+FROM customers AS c
+LEFT JOIN orders AS o ON c.id = o.customer_id
+LEFT JOIN shipments AS s ON o.order_id = s.order_ref

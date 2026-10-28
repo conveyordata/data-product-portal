@@ -50,7 +50,7 @@ class OutputPortContractService:
             for prop in self._flatten_properties(obj_req.properties, obj_id, None):
                 self.db.add(prop)
 
-        self.db.commit()
+        self.db.flush()
         return self.get_schema(output_port_id)
 
     def get_schema(self, output_port_id: UUID) -> OutputPortSchemaResponse:

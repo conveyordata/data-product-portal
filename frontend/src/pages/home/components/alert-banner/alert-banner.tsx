@@ -21,7 +21,7 @@ export function AlertBanner() {
     const navigateToRequests = useCallback(() => {
         navigate({
             pathname: ApplicationPaths.Studio,
-            hash: TabKeys.Requests,
+            search: `?tab=${TabKeys.PendingRequests}`,
         });
     }, [navigate]);
 

@@ -1,15 +1,9 @@
 from app.authorization.roles.schema import Scope
 from app.core.authz.actions import AuthorizationAction
-from app.data_products.output_ports.curated_queries.schema_request import (
-    OutputPortCuratedQueryInput,
-)
-from app.data_products.output_ports.curated_queries.service import (
-    DatasetCuratedQueryService,
-)
 from app.settings import settings
 from tests.factories import (
-    DatasetFactory,
     DatasetRoleAssignmentFactory,
+    OutputPortFactory,
     RoleFactory,
     UserFactory,
 )
@@ -27,7 +21,7 @@ def _assign_update_role(session, dataset):
         ],
     )
     DatasetRoleAssignmentFactory(
-        user_id=user.id, role_id=role.id, dataset_id=dataset.id
+        user_id=user.id, role_id=role.id, output_port_id=dataset.id
     )
     return user
 
@@ -51,34 +45,37 @@ class TestCuratedQueriesRouter:
         }
 
     def test_curated_queries_put(self, client, session):
-        dataset = DatasetFactory()
+        dataset = OutputPortFactory()
         _assign_update_role(session, dataset)
 
         put_response = client.put(
             f"{ENDPOINT}/{dataset.data_product.id}/output_ports/{dataset.id}/curated_queries",
             json=self.curate_queries_payload(),
         )
-        assert put_response.status_code == 200
+        assert put_response.status_code == 200, put_response.text
         body = put_response.json()
         assert len(body["output_port_curated_queries"]) == 2
         assert body["output_port_curated_queries"][0]["title"] == "Top enrolling sites"
         assert body["output_port_curated_queries"][1]["title"] == "New deviations"
 
     def test_delete_output_port_curated_query(self, client, session):
-        dataset = DatasetFactory()
+        dataset = OutputPortFactory()
         _assign_update_role(session, dataset)
 
-        service = DatasetCuratedQueryService(session)
-        service.replace_curated_queries(
-            dataset.id,
-            [
-                OutputPortCuratedQueryInput(
-                    title="Existing query",
-                    description="Stored during setup",
-                    query_text="SELECT 1",
-                )
-            ],
+        put_response = client.put(
+            f"{ENDPOINT}/{dataset.data_product.id}/output_ports/{dataset.id}/curated_queries",
+            json={
+                "curated_queries": [
+                    {
+                        "title": "Existing query",
+                        "description": "Stored during setup",
+                        "query_text": "SELECT 1",
+                    }
+                ]
+            },
         )
+        assert put_response.status_code == 200, put_response.text
+
         response = client.delete(
             f"{ENDPOINT}/{dataset.data_product.id}/output_ports/{dataset.id}"
         )
@@ -86,20 +83,22 @@ class TestCuratedQueriesRouter:
         assert response.status_code == 200
 
     def test_curated_queries_get(self, client, session):
-        dataset = DatasetFactory()
+        dataset = OutputPortFactory()
         _assign_update_role(session, dataset)
 
-        service = DatasetCuratedQueryService(session)
-        service.replace_curated_queries(
-            dataset.id,
-            [
-                OutputPortCuratedQueryInput(
-                    title="Existing query",
-                    description="Stored during setup",
-                    query_text="SELECT 1",
-                )
-            ],
+        put_response = client.put(
+            f"{ENDPOINT}/{dataset.data_product.id}/output_ports/{dataset.id}/curated_queries",
+            json={
+                "curated_queries": [
+                    {
+                        "title": "Existing query",
+                        "description": "Stored during setup",
+                        "query_text": "SELECT 1",
+                    }
+                ]
+            },
         )
+        assert put_response.status_code == 200, put_response.text
 
         get_response = client.get(
             f"{ENDPOINT}/{dataset.data_product.id}/output_ports/{dataset.id}/curated_queries"

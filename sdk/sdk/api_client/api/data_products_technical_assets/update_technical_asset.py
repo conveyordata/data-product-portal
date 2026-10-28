@@ -7,8 +7,8 @@ import httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
-from ...models.data_output_update import DataOutputUpdate
 from ...models.http_validation_error import HTTPValidationError
+from ...models.technical_asset_update import TechnicalAssetUpdate
 from ...models.update_technical_asset_response import UpdateTechnicalAssetResponse
 from ...types import Response
 
@@ -17,7 +17,7 @@ def _get_kwargs(
     data_product_id: UUID,
     id: UUID,
     *,
-    body: DataOutputUpdate,
+    body: TechnicalAssetUpdate,
 ) -> dict[str, Any]:
     headers: dict[str, Any] = {}
 
@@ -76,14 +76,14 @@ def sync_detailed(
     id: UUID,
     *,
     client: AuthenticatedClient | Client,
-    body: DataOutputUpdate,
+    body: TechnicalAssetUpdate,
 ) -> Response[Any | HTTPValidationError | UpdateTechnicalAssetResponse]:
     """Update Technical Asset
 
     Args:
         data_product_id (UUID):
         id (UUID):
-        body (DataOutputUpdate):
+        body (TechnicalAssetUpdate):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -111,14 +111,14 @@ def sync(
     id: UUID,
     *,
     client: AuthenticatedClient | Client,
-    body: DataOutputUpdate,
+    body: TechnicalAssetUpdate,
 ) -> Any | HTTPValidationError | UpdateTechnicalAssetResponse | None:
     """Update Technical Asset
 
     Args:
         data_product_id (UUID):
         id (UUID):
-        body (DataOutputUpdate):
+        body (TechnicalAssetUpdate):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -141,14 +141,14 @@ async def asyncio_detailed(
     id: UUID,
     *,
     client: AuthenticatedClient | Client,
-    body: DataOutputUpdate,
+    body: TechnicalAssetUpdate,
 ) -> Response[Any | HTTPValidationError | UpdateTechnicalAssetResponse]:
     """Update Technical Asset
 
     Args:
         data_product_id (UUID):
         id (UUID):
-        body (DataOutputUpdate):
+        body (TechnicalAssetUpdate):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -174,14 +174,14 @@ async def asyncio(
     id: UUID,
     *,
     client: AuthenticatedClient | Client,
-    body: DataOutputUpdate,
+    body: TechnicalAssetUpdate,
 ) -> Any | HTTPValidationError | UpdateTechnicalAssetResponse | None:
     """Update Technical Asset
 
     Args:
         data_product_id (UUID):
         id (UUID):
-        body (DataOutputUpdate):
+        body (TechnicalAssetUpdate):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.

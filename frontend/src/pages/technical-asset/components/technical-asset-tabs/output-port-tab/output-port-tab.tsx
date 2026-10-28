@@ -1,0 +1,51 @@
+import { Flex, Input } from 'antd';
+import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { searchFilter } from '@/components/empty-state/empty-state.component.tsx';
+
+import {
+    type OutputPortLink,
+    useGetTechnicalAssetQuery,
+} from '@/store/api/services/generated/dataProductsTechnicalAssetsApi.ts';
+import { DatasetTable } from './components/output-port-table/output-port-table.component.tsx';
+
+function filterDatasets(outputPortLinks: OutputPortLink[], searchTerm: string) {
+    return (
+        outputPortLinks.filter(
+            (outputPortLink) =>
+                outputPortLink?.output_port?.name?.toLowerCase()?.includes(searchTerm?.toLowerCase()) ||
+                outputPortLink?.output_port?.description?.toLowerCase()?.includes(searchTerm?.toLowerCase()),
+        ) ?? []
+    );
+}
+
+type Props = {
+    technicalAssetId: string;
+    dataProductId: string;
+};
+export function OutputPortTab({ technicalAssetId, dataProductId }: Props) {
+    const { t } = useTranslation();
+
+    const { data: technicalAsset } = useGetTechnicalAssetQuery({ id: technicalAssetId, dataProductId });
+    const [searchTerm, setSearchTerm] = useState<string>('');
+    const filteredDatasets = useMemo(() => {
+        return filterDatasets(technicalAsset?.output_port_links ?? [], searchTerm);
+    }, [technicalAsset?.output_port_links, searchTerm]);
+
+    return (
+        <Flex vertical gap="middle">
+            <Input.Search
+                placeholder={t('Search Output Ports by name')}
+                allowClear
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <DatasetTable
+                dataProductId={dataProductId}
+                dataOutputId={technicalAssetId}
+                datasets={filteredDatasets}
+                filter={searchFilter(searchTerm, setSearchTerm)}
+            />
+        </Flex>
+    );
+}

@@ -1,6 +1,6 @@
 import { LogoutOutlined, UserOutlined } from '@ant-design/icons';
 import { Badge, Dropdown, Flex, type MenuProps, Typography, theme } from 'antd';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from 'react-oidc-context';
 import { useSelector } from 'react-redux';
@@ -9,12 +9,12 @@ import { AdminButton } from '@/components/buttons/admin-button.tsx';
 import { CartButton } from '@/components/cart/cart-button.component.tsx';
 import { Notifications } from '@/components/notifications/notifications';
 import { UserAvatar } from '@/components/user-avatar/user-avatar.component';
-import ToggleWizard from '@/components/wizard/wizard-button.tsx';
 import { AppConfig } from '@/config/app-config.ts';
 import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
 import { useIsAdminQuery } from '@/store/api/services/generated/authorizationApi.ts';
 import { useRevokeAdminMutation } from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
 import { DownloadCLIButton } from '../cli-download/cli-download-button.component';
+import { SwitchUserModal } from './switch-user-modal.component';
 
 const cognitoLogoutParams = AppConfig.getOidcCognitoLogoutParams();
 const isAuthDisabled = !AppConfig.isOidcEnabled();
@@ -29,8 +29,8 @@ export function UserMenu() {
         token: { colorErrorBorder, colorPrimary },
     } = theme.useToken();
     const [revokeAdmin] = useRevokeAdminMutation();
-
     const { data: isAdmin } = useIsAdminQuery();
+    const [isSwitchUserOpen, setIsSwitchUserOpen] = useState(false);
 
     useEffect(() => {
         if (!isAdmin?.is_admin || !isAdmin?.time) {
@@ -38,7 +38,7 @@ export function UserMenu() {
         }
 
         const reload_when_admin_expires = async () => {
-            const expiry = new Date(`${isAdmin.time}Z`).getTime(); // UTC → epoch ms
+            const expiry = new Date(`${isAdmin.time}Z`).getTime();
             const now = Date.now();
             const diff = expiry - now;
 
@@ -46,7 +46,7 @@ export function UserMenu() {
                 if (user) {
                     await revokeAdmin().unwrap();
                 }
-                window.location.reload(); // Refetch to update admin status
+                window.location.reload();
                 return;
             }
         };
@@ -64,7 +64,6 @@ export function UserMenu() {
 
         try {
             await signoutRedirect({
-                // For Cognito logout we need to pass extra query params otherwise the redirect will always fail
                 extraQueryParams: {
                     ...cognitoLogoutParams,
                 },
@@ -93,6 +92,15 @@ export function UserMenu() {
         ),
     });
 
+    const switchUserItem: MenuItem | undefined = isAuthDisabled
+        ? {
+              key: 'SwitchUser',
+              icon: <UserOutlined />,
+              label: t('Switch user'),
+              onClick: () => setIsSwitchUserOpen(true),
+          }
+        : undefined;
+
     const signOutItem: MenuItem = {
         key: 'SignOut',
         icon: <LogoutOutlined />,
@@ -102,20 +110,20 @@ export function UserMenu() {
 
     const items = [
         userItem(),
+        switchUserItem,
         AdminButton({ onAdminAction: () => window.location.reload(), isAdmin: isAdmin?.is_admin }),
-        ToggleWizard(t),
         signOutItem,
-    ];
+    ].filter(Boolean) as MenuItem[];
 
     return (
-        <Flex gap={'middle'} align={'center'}>
+        <Flex gap="middle" align="center">
             <Notifications />
             <CartButton />
             <DownloadCLIButton />
-            <Flex align={'center'} gap={'small'}>
+            <Flex align="center" gap="small">
                 <Dropdown
                     menu={{ items }}
-                    placement={'bottomRight'}
+                    placement="bottomRight"
                     arrow={{ pointAtCenter: true }}
                     mouseLeaveDelay={0.3}
                 >
@@ -141,6 +149,11 @@ export function UserMenu() {
                     }
                 </Dropdown>
             </Flex>
+            <SwitchUserModal
+                isOpen={isSwitchUserOpen}
+                onClose={() => setIsSwitchUserOpen(false)}
+                onSelect={() => setIsSwitchUserOpen(false)}
+            />
         </Flex>
     );
 }

@@ -56,9 +56,9 @@ begin
     INSERT INTO data_product_lifecycles (id, name, "value", color, is_default, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), 'Ready', 1, 'green', false, timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO ready;
 
     -- DOMAINS
-    INSERT INTO public.domains (id, "name", description, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), 'Sales', 'Responsible for all activities related to sales, customer relationships, and order management.', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO sales_id;
-    INSERT INTO public.domains (id, "name", description, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), 'Marketing', 'Focused on customer outreach, promotions, and analyzing customer behavior to drive sales.', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO marketing_id;
-    INSERT INTO public.domains (id, "name", description, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), 'Logistics', 'Manages inventory, warehousing, and the entire order fulfillment and shipping process.', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO logistics_id;
+    INSERT INTO public.domains (id, "name", namespace, description, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), 'Sales', 'sales', 'Responsible for all activities related to sales, customer relationships, and order management.', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO sales_id;
+    INSERT INTO public.domains (id, "name", namespace, description, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), 'Marketing', 'marketing', 'Focused on customer outreach, promotions, and analyzing customer behavior to drive sales.', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO marketing_id;
+    INSERT INTO public.domains (id, "name", namespace, description, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), 'Logistics', 'logistics', 'Manages inventory, warehousing, and the entire order fulfillment and shipping process.', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO logistics_id;
 
     -- DATA PRODUCT TYPES
     INSERT INTO public.data_product_types (id, "name", description, icon_key, created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), 'source aligned', 'Data product aligned with a source system', 'INGESTION', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL) returning id INTO source_aligned_type_id;
@@ -84,13 +84,12 @@ begin
     RETURNING id INTO admin_role_id;
 
     -- PLATFORMS
-    INSERT INTO public.platforms (id, "name") VALUES ('99898d61-ba3b-4f30-a929-8356ccfe521f', 'PostgreSQL') returning id INTO postgresql_id;
-    INSERT INTO public.platform_services (id, "name", platform_id, result_string_template, technical_info_template) VALUES ('242d7e16-edd5-41e1-9e25-775ecc29706e', 'PostgreSQL', postgresql_id, '{database}.{schema}.{table}', '{database}.{schema}.{table}') returning id INTO postgresql_service_id;
-    INSERT INTO public.platform_service_configs (id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES('38c320c3-8b66-439f-abab-6b78d225ae27', postgresql_id, postgresql_service_id, '["dpp_demo"]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+    SELECT id FROM public.platforms WHERE lower(name) = 'postgresql' INTO postgresql_id;
+    SELECT id FROM public.platform_services WHERE lower(name) = 'postgresql' INTO postgresql_service_id;
+    UPDATE public.platform_service_configs SET "config" = '["dpp_demo"]' WHERE service_id = postgresql_service_id;
 
-    INSERT INTO public.platforms (id, "name") VALUES (gen_random_uuid(), 'OSI') returning id INTO semantic_model_id;
-    INSERT INTO public.platform_services (id, "name", platform_id, result_string_template, technical_info_template) VALUES (gen_random_uuid(), 'OSI', semantic_model_id, '{model_name}', '{file_path}') returning id INTO osi_sem_model_service_id;
-    INSERT INTO public.platform_service_configs (id, platform_id, service_id, "config", created_on, updated_on, deleted_at) VALUES (gen_random_uuid(), semantic_model_id, osi_sem_model_service_id, '[]', timezone('utc'::text, CURRENT_TIMESTAMP), NULL, NULL);
+    SELECT id FROM public.platforms WHERE lower(name) = 'osi' INTO semantic_model_id;
+    SELECT id FROM public.platform_services WHERE lower(name) = 'osi' INTO osi_sem_model_service_id;
 
     INSERT INTO public.platforms (id, "name") VALUES (gen_random_uuid(), 'Agno');
 

@@ -1,8 +1,19 @@
+import enum
+import uuid
+from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Column, ForeignKey, String, func, select
+from sqlalchemy import Column, DateTime, ForeignKey, String, event, func, or_, select
+from sqlalchemy import Enum as SAEnum
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, Session, column_property, mapped_column, relationship
+from sqlalchemy.orm import (
+    Mapped,
+    Session,
+    column_property,
+    mapped_column,
+    relationship,
+    with_loader_criteria,
+)
 
 from app.abstract_data_product.model import AbstractDataProduct
 from app.abstract_data_product.type import AbstractDataProductType
@@ -11,19 +22,104 @@ from app.authorization.role_assignments.data_product.model import (
 )
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.configuration.data_product_types.model import DataProductType
+from app.configuration.environments.model import Environment
 from app.configuration.tags.model import Tag, tag_data_product_table
+from app.core.auth.db_utils import (
+    is_system_account,
+    is_user_admin,
+)
 from app.core.webhooks.events import (
     DataProductEvent,
 )
 from app.data_products.technical_assets.model import TechnicalAsset
-from app.database.database import ensure_exists
+from app.database.database import Base, ensure_exists
 from app.database.event_mixin import EventTrackedMixin
+from app.groups.model import GroupMembership
+from app.shared.model import utcnow
 
 if TYPE_CHECKING:
     from app.configuration.data_product_lifecycles.model import DataProductLifecycle
     from app.configuration.data_product_settings.model import DataProductSettingValue
     from app.data_products.output_ports.model import (
-        Dataset,
+        OutputPort,
+    )
+
+
+class DataProductVisibility(enum.Enum):
+    HIDDEN = "hidden"
+    DISCOVERABLE = "discoverable"
+
+
+def _has_user_access_to_hidden_data_product(cls, user_id: uuid.UUID):
+    user_group_ids = (
+        select(GroupMembership.group_id)
+        .where(GroupMembership.member_identity_id == user_id)
+        .correlate_except(GroupMembership)
+    )
+    return (
+        select(DataProductRoleAssignment.id)
+        .where(DataProductRoleAssignment.data_product_id == cls.id)
+        .where(
+            or_(
+                DataProductRoleAssignment.identity_id == user_id,
+                DataProductRoleAssignment.identity_id.in_(user_group_ids),
+            )
+        )
+        .where(DataProductRoleAssignment.decision == DecisionStatus.APPROVED)
+        .correlate_except(DataProductRoleAssignment)
+        .exists()
+    )
+
+
+def _visibility_filter_for_user(user_id: uuid.UUID):
+    return or_(
+        DataProduct.visibility != DataProductVisibility.HIDDEN,
+        _has_user_access_to_hidden_data_product(DataProduct, user_id),
+        is_user_admin(user_id),
+        is_system_account(user_id),
+    )
+
+
+def _visibility_filter_for_abstract_data_product(cls, user_id: uuid.UUID):
+    # This filter is nested inside a subquery, so it must be expressed purely in
+    # terms of Core tables. The ORM variant above refers to DataProduct, whose id
+    # is shared with abstract_data_products through joined table inheritance, and
+    # alias adaptation would rewrite it to the outer alias and turn the EXISTS
+    # into an always true cross join.
+    data_products = DataProduct.__table__
+    assignments = DataProductRoleAssignment.__table__
+    memberships = GroupMembership.__table__
+
+    user_group_ids = (
+        select(memberships.c.group_id)
+        .where(memberships.c.member_identity_id == user_id)
+        .correlate_except(memberships)
+    )
+
+    return or_(
+        cls.abstract_data_product_type != AbstractDataProductType.DATA_PRODUCT,
+        select(data_products.c.id)
+        .where(data_products.c.id == cls.id)
+        .where(
+            or_(
+                data_products.c.visibility != DataProductVisibility.HIDDEN,
+                select(assignments.c.id)
+                .where(assignments.c.data_product_id == data_products.c.id)
+                .where(
+                    or_(
+                        assignments.c.identity_id == user_id,
+                        assignments.c.identity_id.in_(user_group_ids),
+                    )
+                )
+                .where(assignments.c.decision == DecisionStatus.APPROVED)
+                .correlate_except(assignments)
+                .exists(),
+                is_user_admin(user_id),
+                is_system_account(user_id),
+            )
+        )
+        .correlate_except(data_products)
+        .exists(),
     )
 
 
@@ -38,14 +134,22 @@ class DataProduct(
     )
     about = Column(String)
     usage = Column(String, nullable=True)
+    visibility = mapped_column(
+        SAEnum(
+            DataProductVisibility,
+            values_callable=lambda enum: [e.value for e in enum],
+            native_enum=False,
+            validate_strings=True,
+        ),
+        nullable=False,
+        default=DataProductVisibility.DISCOVERABLE,
+    )
 
-    # Foreign keys
     type_id: Mapped[UUID] = mapped_column(ForeignKey("data_product_types.id"))
     lifecycle_id: Mapped[UUID] = mapped_column(
         ForeignKey("data_product_lifecycles.id", ondelete="SET NULL")
     )
 
-    # Relationships
     type: Mapped[DataProductType] = relationship(
         back_populates="data_products", lazy="joined"
     )
@@ -58,7 +162,7 @@ class DataProduct(
         order_by="DataProductRoleAssignment.decision, DataProductRoleAssignment.requested_on",
         lazy="raise",
     )
-    datasets: Mapped[list["Dataset"]] = relationship(
+    datasets: Mapped[list["OutputPort"]] = relationship(
         back_populates="data_product",
         cascade="all, delete-orphan",
         lazy="raise",
@@ -72,9 +176,14 @@ class DataProduct(
         order_by="DataProductSettingValue.data_product_id",
         lazy="raise",
     )
-    data_outputs: Mapped[list["TechnicalAsset"]] = relationship(
+    technical_assets: Mapped[list["TechnicalAsset"]] = relationship(
         back_populates="owner",
         cascade="all, delete-orphan",
+        lazy="raise",
+    )
+    environments: Mapped[list["DataProductEnvironment"]] = relationship(
+        cascade="all, delete-orphan",
+        order_by="DataProductEnvironment.creation_date, DataProductEnvironment.environment_id",
         lazy="raise",
     )
 
@@ -86,7 +195,7 @@ class DataProduct(
         .scalar_subquery()
     )
 
-    data_outputs_count = column_property(
+    technical_asset_count = column_property(
         select(func.count(TechnicalAsset.id))
         .where(TechnicalAsset.owner_id == id)
         .correlate_except(TechnicalAsset)
@@ -103,7 +212,51 @@ class DataProduct(
         )
 
 
+class DataProductEnvironment(Base):
+    __tablename__ = "data_product_environments"
+
+    data_product_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("data_products.id", ondelete="CASCADE"), primary_key=True
+    )
+    environment_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("environments.id"), primary_key=True
+    )
+    creation_date: Mapped[datetime] = mapped_column(
+        DateTime(timezone=False), server_default=utcnow()
+    )
+    environment: Mapped[Environment] = relationship(lazy="joined")
+
+
 def ensure_data_product_exists(
     data_product_id: UUID, db: Session, **kwargs
 ) -> DataProduct:
     return ensure_exists(data_product_id, db, DataProduct, **kwargs)
+
+
+@event.listens_for(Session, "do_orm_execute")
+def enforce_hidden_data_product_filter(execute_state):
+    if not execute_state.is_select:
+        return
+
+    if execute_state.execution_options.get("skip_data_product_visibility_filter"):
+        return
+
+    # The current user is only set while serving a request. Everything else
+    # (migrations, casbin, startup sync) is a system level operation that is not
+    # performed on behalf of a user and therefore has nothing to filter against.
+    user_id = execute_state.session.info.get("current_user_id")
+    if user_id is None:
+        return
+
+    execute_state.statement = execute_state.statement.options(
+        with_loader_criteria(
+            DataProduct,
+            lambda cls: _visibility_filter_for_user(user_id),
+            include_aliases=True,
+        ),
+        with_loader_criteria(
+            AbstractDataProduct,
+            lambda cls: _visibility_filter_for_abstract_data_product(cls, user_id),
+            include_aliases=True,
+        ),
+    )

@@ -2,8 +2,8 @@ from app.authorization.role_assignments.output_port.service import RoleAssignmen
 from app.authorization.roles.schema import Scope
 from app.core.authz import Action
 from tests.factories import (
-    DatasetFactory,
     DatasetRoleAssignmentFactory,
+    OutputPortFactory,
     RoleFactory,
     UserFactory,
 )
@@ -12,7 +12,7 @@ from tests.factories import (
 class TestDatasetRoleAssignmentsService:
     def test_user_has_permission(self, session):
         service = RoleAssignmentService(db=session)
-        dataset = DatasetFactory()
+        dataset = OutputPortFactory()
         action = Action.OUTPUT_PORT__READ_INTEGRATIONS
 
         authorized_users = service.users_with_authz_action(
@@ -24,7 +24,7 @@ class TestDatasetRoleAssignmentsService:
         user = UserFactory()
         role = RoleFactory(scope=Scope.DATASET, permissions=[action])
         DatasetRoleAssignmentFactory(
-            dataset_id=dataset.id, user_id=user.id, role_id=role.id
+            output_port_id=dataset.id, user_id=user.id, role_id=role.id
         )
 
         authorized_users = service.users_with_authz_action(

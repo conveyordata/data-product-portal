@@ -5,6 +5,10 @@ from warnings import deprecated
 from annotated_types import MinLen
 from pydantic import field_validator
 
+from app.abstract_data_product.schema_request import (
+    RequestInputPortsForAbstractDataProductRequestItem,
+)
+from app.data_products.model import DataProductVisibility
 from app.data_products.status import AbstractDataProductStatus
 from app.shared.schema import ORMModel
 
@@ -18,14 +22,23 @@ class DataProductUpdate(ORMModel):
     domain_id: UUID
     tag_ids: list[UUID] = []
     lifecycle_id: UUID
+    environment_ids: Annotated[list[UUID], MinLen(1)] | None = None
+
+    @field_validator("environment_ids")
+    @classmethod
+    def validate_environment_ids(cls, value: list[UUID] | None) -> list[UUID]:
+        if value is None:
+            raise ValueError("Select at least one environment for the Data Product")
+        return value
 
 
 class RequestInputPortsForDataProductRequest(ORMModel):
-    output_ports: list[UUID]
+    output_ports: list[RequestInputPortsForAbstractDataProductRequestItem]
     justification: str
 
 
 class DataProductCreate(DataProductUpdate):
+    visibility: DataProductVisibility = DataProductVisibility.DISCOVERABLE
     owners: Annotated[list[UUID], MinLen(1)]
 
     input_ports: Optional[RequestInputPortsForDataProductRequest] = None

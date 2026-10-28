@@ -10,6 +10,13 @@ class AuthorizationAction(IntEnum):
     VALUE_106 = 106
     VALUE_107 = 107
     VALUE_108 = 108
+    VALUE_109 = 109
+    VALUE_110 = 110
+    VALUE_111 = 111
+    VALUE_112 = 112
+    VALUE_113 = 113
+    VALUE_114 = 114
+    VALUE_115 = 115
     VALUE_301 = 301
     VALUE_302 = 302
     VALUE_303 = 303
@@ -40,6 +47,9 @@ class AuthorizationAction(IntEnum):
     VALUE_413 = 413
     VALUE_414 = 414
     VALUE_415 = 415
+    VALUE_416 = 416
+    VALUE_901 = 901
+    VALUE_902 = 902
 
     def __str__(self) -> str:
         return str(self.value)

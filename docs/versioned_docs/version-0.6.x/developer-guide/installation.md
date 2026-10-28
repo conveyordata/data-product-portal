@@ -26,7 +26,7 @@ Both are available as Docker images and can be deployed in Kubernetes via our He
 A code of the Helm chart is available [here](https://github.com/conveyordata/data-product-portal/tree/main/helm) and the chart is hosted at:
 
 ```bash
-public.ecr.aws/conveyordata/data-product-portal
+public.ecr.aws/conveyordata/data-product-portal/helm
 ```
 
 Update your `values.yaml` to match your environment. By default, images will use the appropriate tag for the chart version — **do not override unless necessary**.

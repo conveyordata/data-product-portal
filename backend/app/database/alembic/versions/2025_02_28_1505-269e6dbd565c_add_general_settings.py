@@ -10,9 +10,8 @@ from typing import Sequence, Union
 
 import sqlalchemy as sa
 from alembic import op
-from sqlalchemy import orm
 
-from app.configuration.theme_settings.model import SETTINGS_ID, ThemeSettings
+from app.configuration.theme_settings.model import SETTINGS_ID
 
 # revision identifiers, used by Alembic.
 revision: str = "269e6dbd565c"
@@ -28,13 +27,14 @@ def upgrade() -> None:
         sa.Column("portal_name", sa.String),
     )
 
-    # Adding initial data
-    bind = op.get_bind()
-    session = orm.Session(bind=bind)
-
-    settings = ThemeSettings(id=SETTINGS_ID, portal_name="Data Product Portal")
-    session.add(settings)
-    session.commit()
+    op.bulk_insert(
+        sa.table(
+            "theme_settings",
+            sa.column("id", sa.Integer),
+            sa.column("portal_name", sa.String),
+        ),
+        [{"id": SETTINGS_ID, "portal_name": "Data Product Portal"}],
+    )
 
 
 def downgrade() -> None:

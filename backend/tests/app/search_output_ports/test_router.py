@@ -1,24 +1,36 @@
 import os
 import time
+from datetime import UTC, datetime, timedelta
 from typing import Final
 
+import pytest
 from alembic import command
-from alembic.config import Config
 
-from app.authorization.role_assignments.enums import DecisionStatus
-from app.data_products.output_ports.model import Dataset
-from app.data_products.output_ports.schema_response import (
-    GetDataProductOutputPortsResponse,
-)
+from app.authorization.role_assignments.enums import AssignmentFilter, DecisionStatus
+from app.data_products.output_ports.data_quality.enums import DataQualityStatus
+from app.data_products.output_ports.model import OutputPort
 from app.data_products.output_ports.service import OutputPortService
+from app.database.database import engine
 from app.db_tool import seed_cmd
+from app.plugins.migrations import (
+    _config,
+    _version_locations,
+    migrate_all,
+    owns_a_table,
+)
+from app.plugins.registry import plugin_registry
+from app.search_output_ports.schema_response import (
+    SearchOutputPortsResponse,
+)
 from app.settings import settings
 from tests.factories import (
-    DatasetFactory,
+    DataQualitySummaryFactory,
     DatasetRoleAssignmentFactory,
+    OutputPortFactory,
     RoleFactory,
     UserFactory,
 )
+from tests.session_util import as_user
 
 EMBEDDING_LATENCY_BOUND: Final[float] = float(
     os.getenv("TEST_EMBEDDING_LATENCY_BOUND", 1.100)
@@ -29,12 +41,50 @@ RECALL_BOUND: Final[float] = 0.8
 
 
 class TestOutputPortSearchRouter:
+    @pytest.mark.parametrize("quality_status", [None, *DataQualityStatus])
+    def test_search_output_ports__quality_status(self, client, quality_status):
+        output_port = OutputPortFactory()
+        if quality_status is not None:
+            DataQualitySummaryFactory(
+                output_port_id=output_port.id, overall_status=quality_status
+            )
+
+        response = client.get("/api/v2/search/output_ports")
+        assert response.status_code == 200, response.text
+        assert response.json()["output_ports"][0]["quality_status"] == quality_status
+
+    def test_search_output_ports__matches_latest_quality_summary(self, client):
+        output_port = OutputPortFactory()
+        now = datetime.now(UTC)
+        for quality_status, created_at in [
+            (DataQualityStatus.FAILURE, now - timedelta(days=1)),
+            (DataQualityStatus.SUCCESS, now),
+            (DataQualityStatus.WARNING, now),
+            (DataQualityStatus.ERROR, now - timedelta(days=2)),
+        ]:
+            DataQualitySummaryFactory(
+                output_port_id=output_port.id,
+                overall_status=quality_status,
+                created_at=created_at,
+            )
+
+        response = client.get("/api/v2/search/output_ports")
+        assert response.status_code == 200, response.text
+        quality_status = response.json()["output_ports"][0]["quality_status"]
+        assert quality_status in (DataQualityStatus.SUCCESS, DataQualityStatus.WARNING)
+
+        summary_response = client.get(
+            f"/api/v2/data_products/{output_port.data_product_id}/output_ports/{output_port.id}/data_quality_summary"
+        )
+        assert summary_response.status_code == 200, summary_response.text
+        assert quality_status == summary_response.json()["overall_status"]
+
     def test_search_output_ports(self, session, client):
         ds_1, ds_2, ds_3 = self.setup(session)
 
         response = client.get("/api/v2/search/output_ports", params={"query": "Data"})
         assert response.status_code == 200, response.text
-        output = GetDataProductOutputPortsResponse.model_validate(response.json())
+        output = SearchOutputPortsResponse.model_validate(response.json())
         assert len(output.output_ports) >= 2
         returned_ops = {port.name for port in output.output_ports}
         expected_ops = {ds_1.name, ds_2.name}
@@ -48,17 +98,18 @@ class TestOutputPortSearchRouter:
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         role = RoleFactory.dataset_owner()
         DatasetRoleAssignmentFactory(
-            dataset=ds_1,
+            output_port=ds_1,
             user_id=user.id,
             role_id=role.id,
             decision=DecisionStatus.APPROVED,
         )
 
         response = client.get(
-            "/api/v2/search/output_ports", params={"current_user_assigned": True}
+            "/api/v2/search/output_ports",
+            params={"assignment_filter": AssignmentFilter.ONLY_ASSIGNED.value},
         )
         assert response.status_code == 200, response.text
-        output = GetDataProductOutputPortsResponse.model_validate(response.json())
+        output = SearchOutputPortsResponse.model_validate(response.json())
         assert len(output.output_ports) == 1
 
     def test_search_output_ports_no_query(self, session, client):
@@ -66,7 +117,7 @@ class TestOutputPortSearchRouter:
 
         response = client.get("/api/v2/search/output_ports")
         assert response.status_code == 200, response.text
-        output = GetDataProductOutputPortsResponse.model_validate(response.json())
+        output = SearchOutputPortsResponse.model_validate(response.json())
         assert len(output.output_ports) == len(output_ports)
 
     def test_benchmark_output_ports(self, session, client):
@@ -131,10 +182,11 @@ class TestOutputPortSearchRouter:
         ]
 
         user = UserFactory()
-        valid_output_ports = {
-            port.name
-            for port in OutputPortService(session).get_output_ports(None, user)
-        }
+        with as_user(session, UserFactory().id):
+            valid_output_ports = {
+                port.name
+                for port in OutputPortService(session).get_output_ports(None, user)
+            }
         for config in configuration:
             for value in config["expected"]:
                 assert value in valid_output_ports, (
@@ -184,7 +236,7 @@ class TestOutputPortSearchRouter:
             f"Output Port search took longer than {latency_bound * 1000} ms"
         )
 
-        output = GetDataProductOutputPortsResponse.model_validate(response.json())
+        output = SearchOutputPortsResponse.model_validate(response.json())
         assert len(output.output_ports) <= limit, "Query limit exceeded"
 
         positives = {port.name for port in output.output_ports}
@@ -202,20 +254,30 @@ class TestOutputPortSearchRouter:
         return precision_at_k, recall_at_k
 
     @staticmethod
-    def setup(session) -> tuple[Dataset, Dataset, Dataset]:
-        ds_1 = DatasetFactory(name="Customer Data")
-        ds_2 = DatasetFactory(name="Sales Data")
-        ds_3 = DatasetFactory(name="Internal Metrics")
+    def setup(session) -> tuple[OutputPort, OutputPort, OutputPort]:
+        ds_1 = OutputPortFactory(name="Customer Data")
+        ds_2 = OutputPortFactory(name="Sales Data")
+        ds_3 = OutputPortFactory(name="Internal Metrics")
         OutputPortService(db=session).recalculate_search_for_all_output_ports()
         return ds_1, ds_2, ds_3
 
     @staticmethod
     def reseed(session) -> None:
-        cfg = Config(
-            os.path.join(os.path.dirname(os.path.abspath("__file__")), "alembic.ini")
-        )
+        # A bare alembic.ini Config only knows core's own versions folder, but
+        # the shared version table also holds every plugin's tracked revision
+        # by this point in the suite - build the same all-branches config
+        # migrate_all does. Several of core's own migrations `depends_on` a
+        # plugin's baseline (see migrations.py), and Alembic enforces that
+        # ordering on the way down too, so a single downgrade to "base" is
+        # safe: dependents (core) always go before their dependency (the
+        # plugin), which is also the order a plugin's table can actually be
+        # dropped in, since core's data still references it until then.
+        url = engine.url.render_as_string(hide_password=False)
+        owning_plugins = [p for p in plugin_registry.discovered() if owns_a_table(p)]
+        cfg = _config(_version_locations(owning_plugins), url)
         command.downgrade(cfg, "base")
-        command.upgrade(cfg, "heads")
+
+        migrate_all(owning_plugins, engine)
 
         seed_cmd(path="./sample_data.sql")
 

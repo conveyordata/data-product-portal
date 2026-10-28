@@ -1,22 +1,40 @@
+from uuid import uuid4
+
 import pytest
 
+from app.authorization.role_assignments.data_product.model import (
+    DataProductRoleAssignment,
+)
 from app.authorization.role_assignments.enums import DecisionStatus
+from app.authorization.role_assignments.output_port.model import (
+    DatasetRoleAssignment,
+)
 from app.authorization.roles.schema import Scope
+from app.core.authz import REDACTION_VALUE
 from app.core.authz.actions import AuthorizationAction
+from app.data_products.model import DataProductVisibility
+from app.events.enums import EventEntityType
+from app.events.model import Event
+from app.events.schema_response import GetEventHistoryResponseItem
 from app.settings import settings
+from app.users.model import User
 from tests.app.data_products.output_port_technical_assets_link.test_router import (
-    DATA_OUTPUTS_DATASETS_ENDPOINT,
+    TECHNICAL_ASSETS_OUTPUT_PORTS_ENDPOINT,
 )
 from tests.factories import (
-    DataOutputDatasetAssociationFactory,
     DataProductFactory,
     DataProductRoleAssignmentFactory,
-    DatasetFactory,
     DatasetRoleAssignmentFactory,
+    EventFactory,
     GlobalRoleAssignmentFactory,
+    GroupFactory,
+    GroupMembershipFactory,
     InputPortFactory,
+    NotificationFactory,
+    OutputPortFactory,
     RoleFactory,
     TechnicalAssetFactory,
+    TechnicalAssetOutputPortAssociationFactory,
     UserFactory,
 )
 
@@ -31,14 +49,6 @@ class TestUsersRouter:
         assert response.status_code == 200
         data = response.json()
         assert len(data) == 1
-
-    def test_get_users_v2(self, client):
-        UserFactory()
-
-        response = client.get("/api/v2/users")
-        assert response.status_code == 200
-        data = response.json()
-        assert len(data["users"]) == 1
 
     def test_remove_user_not_admin(self, client):
         user = UserFactory()
@@ -61,6 +71,223 @@ class TestUsersRouter:
         response = client.get(f"{ENDPOINT}")
         assert response.status_code == 200
         assert len(response.json()["users"]) == 1
+
+    @pytest.mark.usefixtures("admin")
+    def test_remove_user__preserves_event_references(self, client, session):
+        user = UserFactory()
+        other_user = UserFactory()
+        actor_event = EventFactory(actor=user)
+        subject_event = EventFactory(
+            actor=other_user,
+            subject_id=user.id,
+            subject_type=EventEntityType.USER,
+            deleted_subject_identifier=None,
+        )
+        target_event = EventFactory(
+            actor=other_user,
+            target_id=user.id,
+            target_type=EventEntityType.USER,
+        )
+        user_id, email = user.id, user.email
+        actor_event_id = actor_event.id
+        subject_event_id = subject_event.id
+        target_event_id = target_event.id
+
+        response = client.delete(f"{ENDPOINT}/{user_id}")
+
+        assert response.status_code == 200, response.text
+        session.expire_all()
+        assert session.get(User, user_id) is None
+        actor_event = session.get(Event, actor_event_id)
+        assert actor_event is not None
+        assert actor_event.actor_id == user_id
+        assert actor_event.actor is None
+        assert actor_event.deleted_actor_identifier == email
+        history = GetEventHistoryResponseItem.model_validate(actor_event)
+        assert history.actor is None
+        assert history.deleted_actor_identifier == email
+        subject_event = session.get(Event, subject_event_id)
+        assert subject_event.deleted_subject_identifier == email
+        assert subject_event.user is None
+        target_event = session.get(Event, target_event_id)
+        assert target_event.deleted_target_identifier == email
+        assert target_event.user is None
+
+    @pytest.mark.usefixtures("admin")
+    @pytest.mark.parametrize(
+        "entity_type",
+        [
+            EventEntityType.DATA_PRODUCT,
+            EventEntityType.OUTPUT_PORT,
+            EventEntityType.TECHNICAL_ASSET,
+        ],
+    )
+    def test_remove_user__event_endpoints_keep_deleted_actor(
+        self, client, admin, entity_type
+    ):
+        actor = UserFactory()
+        if entity_type == EventEntityType.DATA_PRODUCT:
+            resource = DataProductFactory()
+            history_path = f"/api/v2/data_products/{resource.id}/history"
+        elif entity_type == EventEntityType.OUTPUT_PORT:
+            resource = OutputPortFactory()
+            history_path = (
+                f"/api/v2/data_products/{resource.data_product_id}"
+                f"/output_ports/{resource.id}/history"
+            )
+        else:
+            resource = TechnicalAssetFactory()
+            history_path = (
+                f"/api/v2/data_products/{resource.owner_id}"
+                f"/technical_assets/{resource.id}/history"
+            )
+        event = EventFactory(
+            actor=actor, subject_id=resource.id, subject_type=entity_type
+        )
+        notification = NotificationFactory(event=event, user=admin)
+        actor_id, actor_email = actor.id, actor.email
+        event_id, notification_id = event.id, notification.id
+        notifications_path = "/api/v2/users/current/notifications"
+
+        history_before = client.get(history_path)
+        assert history_before.status_code == 200, history_before.text
+        assert history_before.json()["events"][0]["actor"]["email"] == actor_email
+        notifications_before = client.get(notifications_path)
+        assert notifications_before.status_code == 200, notifications_before.text
+        assert (
+            notifications_before.json()["notifications"][0]["event"]["actor"]["email"]
+            == actor_email
+        )
+
+        deletion = client.delete(f"{ENDPOINT}/{actor_id}")
+        assert deletion.status_code == 200, deletion.text
+
+        history_after = client.get(history_path)
+        assert history_after.status_code == 200, history_after.text
+        history_events = history_after.json()["events"]
+        assert len(history_events) == 1
+        notifications_after = client.get(notifications_path)
+        assert notifications_after.status_code == 200, notifications_after.text
+        notifications = notifications_after.json()["notifications"]
+        assert len(notifications) == 1
+        assert notifications[0]["id"] == str(notification_id)
+        for returned_event in (history_events[0], notifications[0]["event"]):
+            assert returned_event["id"] == str(event_id)
+            assert returned_event["actor_id"] == str(actor_id)
+            assert returned_event["actor"] is None
+            assert returned_event["deleted_actor_identifier"] == actor_email
+
+    @pytest.mark.usefixtures("admin")
+    def test_remove_user__clears_authorization(self, client, authorizer, session):
+        user = UserFactory()
+        other_user = UserFactory()
+        group = GroupFactory()
+        GroupMembershipFactory(group=group, member=user)
+        user_id = user.id
+        group_id = group.id
+        authorizer.assign_resource_role(
+            user_id=user_id, role_id="resource-role", resource_id="resource"
+        )
+        authorizer.assign_domain_role(
+            user_id=user_id, role_id="domain-role", domain_id="domain"
+        )
+        authorizer.assign_global_role(user_id=user_id, role_id="global-role")
+        authorizer.assign_group_memberships(
+            memberships=[(user_id, group_id)],
+        )
+        authorizer.assign_global_role(user_id=other_user.id, role_id="global-role")
+
+        response = client.delete(f"{ENDPOINT}/{user_id}")
+
+        assert response.status_code == 200, response.text
+        assert not authorizer.has_resource_role(
+            user_id=user_id, role_id="resource-role", resource_id="resource"
+        )
+        assert not authorizer.has_domain_role(
+            user_id=user_id, role_id="domain-role", domain_id="domain"
+        )
+        assert not authorizer.has_global_role(user_id=user_id, role_id="global-role")
+        assert not authorizer.has_resource_role(
+            user_id=user_id, role_id=group_id, resource_id="*"
+        )
+        assert not authorizer.has_global_role(user_id=user_id, role_id=group_id)
+        assert authorizer.has_global_role(user_id=other_user.id, role_id="global-role")
+
+    @pytest.mark.usefixtures("admin")
+    def test_remove_user__with_data_product_role(self, client, session):
+        user = UserFactory()
+        data_product = DataProductFactory()
+        role = RoleFactory(scope=Scope.DATA_PRODUCT, permissions=[])
+        assignment = DataProductRoleAssignmentFactory(
+            identity_id=user.id,
+            data_product_id=data_product.id,
+            role_id=role.id,
+        )
+
+        # stored for later comparison
+        user_id = user.id
+        assignment_id = assignment.id
+        response = client.delete(f"{ENDPOINT}/{user_id}")
+
+        assert response.status_code == 200, response.text
+        session.expire_all()
+        assert session.get(User, user_id) is None
+        assert session.get(DataProductRoleAssignment, assignment_id) is None
+
+    @pytest.mark.usefixtures("admin")
+    def test_remove_user__with_dataset_role(self, client, session):
+        user = UserFactory()
+        output_port = OutputPortFactory()
+        role = RoleFactory(scope=Scope.DATASET, permissions=[])
+        assignment = DatasetRoleAssignmentFactory(
+            user_id=user.id,
+            output_port=output_port,
+            role_id=role.id,
+        )
+
+        # stored for later comparison
+        user_id = user.id
+        assignment_id = assignment.id
+        response = client.delete(f"{ENDPOINT}/{user_id}")
+
+        assert response.status_code == 200, response.text
+        session.expire_all()
+        assert session.get(User, user_id) is None
+        assert session.get(DatasetRoleAssignment, assignment_id) is None
+
+    @pytest.mark.usefixtures("admin")
+    def test_remove_user__with_data_product_and_dataset_roles(self, client, session):
+        user = UserFactory()
+
+        data_product = DataProductFactory()
+        data_product_role = RoleFactory(scope=Scope.DATA_PRODUCT, permissions=[])
+        data_product_assignment = DataProductRoleAssignmentFactory(
+            identity_id=user.id,
+            data_product_id=data_product.id,
+            role_id=data_product_role.id,
+        )
+
+        output_port = OutputPortFactory()
+        dataset_role = RoleFactory(scope=Scope.DATASET, permissions=[])
+        dataset_assignment = DatasetRoleAssignmentFactory(
+            user_id=user.id,
+            output_port=output_port,
+            role_id=dataset_role.id,
+        )
+
+        # stored for later comparison
+        user_id = user.id
+        data_product_assignment_id = data_product_assignment.id
+        dataset_assignment_id = dataset_assignment.id
+        response = client.delete(f"{ENDPOINT}/{user_id}")
+
+        assert response.status_code == 200, response.text
+        session.expire_all()
+        assert session.get(User, user_id) is None
+        assert (
+            session.get(DataProductRoleAssignment, data_product_assignment_id) is None
+        )
+        assert session.get(DatasetRoleAssignment, dataset_assignment_id) is None
 
     def test_post_user_not_admin(self, client):
         response = client.post(f"{ENDPOINT}")
@@ -146,7 +373,7 @@ class TestUsersRouter:
             scope=Scope.GLOBAL, permissions=[AuthorizationAction.GLOBAL__CREATE_USER]
         )
         GlobalRoleAssignmentFactory(
-            user_id=user.id,
+            identity_id=user.id,
             role_id=role.id,
         )
         response = client.put(
@@ -169,7 +396,7 @@ class TestUsersRouter:
             scope=Scope.GLOBAL, permissions=[AuthorizationAction.GLOBAL__CREATE_USER]
         )
         GlobalRoleAssignmentFactory(
-            user_id=user.id,
+            identity_id=user.id,
             role_id=role.id,
         )
         response = client.put(
@@ -194,7 +421,7 @@ class TestUsersRouter:
             scope=Scope.GLOBAL, permissions=[AuthorizationAction.GLOBAL__CREATE_USER]
         )
         GlobalRoleAssignmentFactory(
-            user_id=user.id,
+            identity_id=user.id,
             role_id=role.id,
         )
         response = client.put(
@@ -213,8 +440,8 @@ class TestUsersRouter:
                 assert user_data["can_become_admin"] is True
 
     def test_get_pending_actions_no_action(self, client):
-        ds = DatasetFactory()
-        DataOutputDatasetAssociationFactory(dataset=ds)
+        ds = OutputPortFactory()
+        TechnicalAssetOutputPortAssociationFactory(output_port=ds)
         response = client.get("/api/v2/users/current/pending_actions")
         assert response.json() == {"pending_actions": []}
 
@@ -228,17 +455,57 @@ class TestUsersRouter:
             ],
         )
         DatasetRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id, dataset_id=input_port.dataset.id
+            user_id=user.id, role_id=role.id, output_port_id=input_port.output_port.id
         )
 
         response = client.get("/api/v2/users/current/pending_actions")
         assert response.status_code == 200, response.text
         assert len(response.json()["pending_actions"]) == 1
+        assert not response.json()["pending_actions"][0]["input_port"][
+            "consuming_abstract_data_product"
+        ]["is_redacted"]
+        assert (
+            response.json()["pending_actions"][0]["input_port"][
+                "consuming_abstract_data_product"
+            ]["name"]
+            != REDACTION_VALUE
+        )
+
+    def test_get_pending_actions_input_port_redacted(self, client):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        input_port = InputPortFactory(
+            status=DecisionStatus.PENDING,
+            consuming_abstract_data_product=DataProductFactory(
+                visibility=DataProductVisibility.HIDDEN
+            ),
+        )
+        role = RoleFactory(
+            scope=Scope.DATASET,
+            permissions=[
+                AuthorizationAction.OUTPUT_PORT__APPROVE_DATAPRODUCT_ACCESS_REQUEST
+            ],
+        )
+        DatasetRoleAssignmentFactory(
+            user_id=user.id, role_id=role.id, output_port_id=input_port.output_port.id
+        )
+
+        response = client.get("/api/v2/users/current/pending_actions")
+        assert response.status_code == 200, response.text
+        assert len(response.json()["pending_actions"]) == 1
+        assert response.json()["pending_actions"][0]["input_port"][
+            "consuming_abstract_data_product"
+        ]["is_redacted"]
+        assert (
+            response.json()["pending_actions"][0]["input_port"][
+                "consuming_abstract_data_product"
+            ]["name"]
+            == REDACTION_VALUE
+        )
 
     def test_get_pending_actions(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
-        data_output = TechnicalAssetFactory(owner=data_product)
+        technical_asset = TechnicalAssetFactory(owner=data_product)
         role = RoleFactory(
             scope=Scope.DATA_PRODUCT,
             permissions=[
@@ -246,26 +513,28 @@ class TestUsersRouter:
             ],
         )
         DataProductRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id, data_product_id=data_product.id
+            identity_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
 
-        ds = DatasetFactory(data_product=data_product)
+        ds = OutputPortFactory(data_product=data_product)
         role = RoleFactory(
             scope=Scope.DATASET,
             permissions=[
                 AuthorizationAction.OUTPUT_PORT__APPROVE_TECHNICAL_ASSET_LINK_REQUEST
             ],
         )
-        DatasetRoleAssignmentFactory(user_id=user.id, role_id=role.id, dataset_id=ds.id)
+        DatasetRoleAssignmentFactory(
+            user_id=user.id, role_id=role.id, output_port_id=ds.id
+        )
 
         response = client.post(
-            f"{DATA_OUTPUTS_DATASETS_ENDPOINT.format(data_product.id, ds.id)}/add",
-            json={"technical_asset_id": f"{data_output.id}"},
+            f"{TECHNICAL_ASSETS_OUTPUT_PORTS_ENDPOINT.format(data_product.id, ds.id)}/add",
+            json={"technical_asset_id": f"{technical_asset.id}"},
         )
         assert response.status_code == 200
         response = client.get("/api/v2/users/current/pending_actions")
         assert response.json()["pending_actions"][0]["technical_asset_id"] == str(
-            data_output.id
+            technical_asset.id
         )
         assert response.json()["pending_actions"][0]["status"] == "pending"
 
@@ -274,3 +543,237 @@ class TestUsersRouter:
         response = client.get("/api/v2/users/current")
         assert response.status_code == 200, response.text
         assert response.json()["id"] == str(user.id)
+
+    def test_get_current_user_my_requests(self, client):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        InputPortFactory(request__requested_by=user)
+        response = client.get("/api/v2/users/current/my_requests")
+        assert response.status_code == 200, response.text
+        assert len(response.json()["my_requests"]) == 1
+
+    def test_get_current_user_my_requests_redacted(self, client):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        InputPortFactory(
+            request__requested_by=user,
+            consuming_abstract_data_product=DataProductFactory(
+                visibility=DataProductVisibility.HIDDEN
+            ),
+        )
+        response = client.get("/api/v2/users/current/my_requests")
+        assert response.status_code == 200, response.text
+        assert len(response.json()["my_requests"]) == 1
+        assert (
+            response.json()["my_requests"][0]["input_port"][
+                "consuming_abstract_data_product"
+            ]["name"]
+            == REDACTION_VALUE
+        )
+
+    def test_get_user_groups__returns_groups(self, client):
+        user = UserFactory()
+        first = GroupFactory(
+            external_id="engineering",
+            display_name="Engineering",
+        )
+        second = GroupFactory(
+            external_id="finance",
+            display_name="Finance",
+        )
+        unrelated = GroupFactory()
+
+        GroupMembershipFactory(group=second, member=user)
+        GroupMembershipFactory(group=first, member=user)
+
+        response = client.get(f"{ENDPOINT}/{user.id}/groups")
+
+        assert response.status_code == 200
+        assert response.json() == {
+            "groups": [
+                {
+                    "id": str(first.id),
+                    "external_id": first.external_id,
+                    "display_name": first.display_name,
+                },
+                {
+                    "id": str(second.id),
+                    "external_id": second.external_id,
+                    "display_name": second.display_name,
+                },
+            ]
+        }
+        assert str(unrelated.id) not in response.text
+
+    def test_get_user_groups__user_without_groups_returns_empty_list(self, client):
+        user = UserFactory()
+
+        response = client.get(f"{ENDPOINT}/{user.id}/groups")
+
+        assert response.status_code == 200
+        assert response.json() == {"groups": []}
+
+    def test_get_user_groups__unknown_user_returns_not_found(self, client):
+        response = client.get(f"{ENDPOINT}/{uuid4()}/groups")
+
+        assert response.status_code == 404
+
+    def test_get_current_user_groups__returns_authenticated_users_groups(self, client):
+        authenticated_user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        other_user = UserFactory()
+
+        expected_group = GroupFactory(
+            external_id="engineering",
+            display_name="Engineering",
+        )
+        other_group = GroupFactory()
+
+        GroupMembershipFactory(group=expected_group, member=authenticated_user)
+        GroupMembershipFactory(group=other_group, member=other_user)
+
+        response = client.get(f"{ENDPOINT}/current/groups")
+
+        assert response.status_code == 200
+        assert response.json() == {
+            "groups": [
+                {
+                    "id": str(expected_group.id),
+                    "external_id": expected_group.external_id,
+                    "display_name": expected_group.display_name,
+                }
+            ]
+        }
+
+    @pytest.mark.usefixtures("admin")
+    def test_create_users_batch__creates_valid_items_and_returns_errors(
+        self, client, session
+    ):
+        invalid_item = {
+            "email": "not-an-email",
+            "external_id": "invalid-user",
+            "first_name": "Invalid",
+            "last_name": "User",
+        }
+
+        response = client.post(
+            f"{ENDPOINT}/batch",
+            json={
+                "items": [
+                    {
+                        "email": "valid@example.com",
+                        "external_id": "valid-user",
+                        "first_name": "Valid",
+                        "last_name": "User",
+                    },
+                    invalid_item,
+                ]
+            },
+        )
+
+        assert response.status_code == 200
+        body = response.json()
+        assert len(body["ids"]) == 1
+        assert len(body["errors"]) == 1
+        assert body["errors"][0]["item"] == invalid_item
+        assert body["errors"][0]["errors"]
+
+        created_user = session.get(User, body["ids"][0])
+        assert created_user is not None
+        assert created_user.external_id == "valid-user"
+
+    def test_create_users_batch__without_permission_returns_forbidden(self, client):
+        response = client.post(
+            f"{ENDPOINT}/batch",
+            json={
+                "items": [
+                    {
+                        "email": "user@example.com",
+                        "external_id": "user",
+                        "first_name": "Test",
+                        "last_name": "User",
+                    }
+                ]
+            },
+        )
+
+        assert response.status_code == 403
+
+    @pytest.mark.usefixtures("admin")
+    @pytest.mark.parametrize(
+        "items",
+        [
+            [],
+            [{}] * (settings.MAX_ITEMS_PER_BATCH_REQUEST + 1),
+        ],
+    )
+    def test_create_users_batch__rejects_invalid_list_size(self, client, items):
+        response = client.post(
+            f"{ENDPOINT}/batch",
+            json={"items": items},
+        )
+
+        assert response.status_code == 422
+
+    @pytest.mark.usefixtures("admin")
+    def test_remove_users_batch__removes_users(self, client, session):
+        first = UserFactory()
+        second = UserFactory()
+
+        response = client.request(
+            "DELETE",
+            f"{ENDPOINT}/batch",
+            json={"ids": [str(first.id), str(second.id)]},
+        )
+
+        assert response.status_code == 204
+        assert response.content == b""
+        assert session.get(User, first.id) is None
+        assert session.get(User, second.id) is None
+
+    @pytest.mark.usefixtures("admin")
+    def test_remove_users_batch__ignores_unknown_and_wrong_identity_type_ids(
+        self, client, session
+    ):
+        user = UserFactory()
+        group = GroupFactory()
+
+        response = client.request(
+            "DELETE",
+            f"{ENDPOINT}/batch",
+            json={"ids": [str(user.id), str(group.id), str(uuid4())]},
+        )
+
+        assert response.status_code == 204
+        assert session.get(User, user.id) is None
+        assert group in session
+
+    def test_remove_users_batch__without_permission_returns_forbidden(
+        self, client, session
+    ):
+        user = UserFactory()
+
+        response = client.request(
+            "DELETE",
+            f"{ENDPOINT}/batch",
+            json={"ids": [str(user.id)]},
+        )
+
+        assert response.status_code == 403
+        assert session.get(User, user.id) is not None
+
+    @pytest.mark.usefixtures("admin")
+    @pytest.mark.parametrize(
+        "ids",
+        [
+            [],
+            ["not-a-uuid"],
+            ["00000000-0000-0000-0000-000000000001"] * 2,
+            [str(uuid4()) for _ in range(settings.MAX_ITEMS_PER_BATCH_REQUEST + 1)],
+        ],
+    )
+    def test_remove_users_batch__rejects_invalid_request(self, client, ids):
+        response = client.request(
+            "DELETE",
+            f"{ENDPOINT}/batch",
+            json={"ids": ids},
+        )
+
+        assert response.status_code == 422

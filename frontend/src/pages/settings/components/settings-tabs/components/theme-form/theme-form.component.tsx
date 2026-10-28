@@ -7,7 +7,7 @@ import {
     useGetThemeSettingsQuery,
     useUpdateThemeSettingsMutation,
 } from '@/store/api/services/generated/configurationThemeSettingsApi.ts';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import { dispatchMessage } from '@/utils/feedback.ts';
 import styles from './theme-form.module.scss';
 
 export function ThemeSettingsForm() {
@@ -82,13 +82,13 @@ export function ThemeSettingsForm() {
                 layout="vertical"
                 onFinish={onSubmit}
                 onFinishFailed={onSubmitFailed}
-                autoComplete={'off'}
+                autoComplete="off"
                 labelWrap
                 disabled={isLoading || !canEditForm}
                 initialValues={data}
             >
                 <Form.Item
-                    name={'portal_name'}
+                    name="portal_name"
                     label={t('Portal Name')}
                     tooltip={t('The name of the Data Product Portal')}
                     rules={[

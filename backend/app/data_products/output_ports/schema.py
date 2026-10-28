@@ -3,8 +3,11 @@ from warnings import deprecated
 
 from pydantic import Field, field_validator
 
+from app.configuration.access_modes.schema_response import AccessMode
+from app.configuration.output_port_access_types.schema import (
+    OutputPortAccessType,
+)
 from app.configuration.tags.schema import Tag
-from app.data_products.output_ports.enums import OutputPortAccessType
 from app.data_products.output_ports.status import OutputPortStatus
 from app.shared.schema import ORMModel
 
@@ -18,6 +21,7 @@ class OutputPort(ORMModel):
     access_type: OutputPortAccessType
     data_product_id: UUID
     tags: list[Tag]
+    access_modes: list[AccessMode]
 
 
 @deprecated("use OutputPort instead")
@@ -42,10 +46,10 @@ class DatasetEmbedModel(ORMModel):
     description: str
     data_product: DataProductEmbed
     technical_assets: list[TechnicalAssetEmbed] = Field(
-        validation_alias="data_output_links"
+        validation_alias="technical_asset_links"
     )
 
     @field_validator("technical_assets", mode="before")
     @classmethod
     def map_technical_assets(cls, v):
-        return [link.data_output for link in v]
+        return [link.technical_asset for link in v]

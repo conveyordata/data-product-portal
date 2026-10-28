@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import { useGetDataProductInputPortsQuery } from '@/store/api/services/generated/dataProductsApi.ts';
 import { useGetDataProductOutputPortsQuery } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
 import { useGetExplorationInputPortsQuery } from '@/store/api/services/generated/explorationsApi.ts';
-import { selectCartDatasetIds } from '@/store/features/cart/cart-slice.ts';
+import { selectCartOutputPortIds } from '@/store/features/cart/cart-slice.ts';
 
 export type CartOverlapCheckResult = {
     overlappingOutputPortIds: string[];
@@ -17,7 +17,7 @@ export function useCartOverlapCheck({
     selectedDataProductId?: string;
     selectedExplorationId?: string;
 }): CartOverlapCheckResult {
-    const cartDatasetIds = useSelector(selectCartDatasetIds);
+    const cartDatasetIds = useSelector(selectCartOutputPortIds);
 
     const { data: { output_ports: selectedDataProductOutputPorts = [] } = {} } = useGetDataProductOutputPortsQuery(
         selectedDataProductId ?? '',

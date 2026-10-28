@@ -1,6 +1,7 @@
 services:
   mailhog:
     image: mailhog/mailhog
+    platform: linux/amd64
     ports:
       - "8025:8025"
       - "1025:1025"
@@ -27,6 +28,7 @@ services:
       - COLLECTOR_OTLP_ENABLED=true
 
   portal:
+    platform: linux/amd64
     build:
       context: .
       dockerfile: Dockerfile

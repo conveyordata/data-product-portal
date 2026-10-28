@@ -34,9 +34,8 @@ class RoleService:
     ) -> Role:
         model = RoleModel(**role.parse_pydantic_schema())
         model.prototype = prototype
-        model.permissions = self._canonical_permissions(model.permissions)
         self.db.add(model)
-        self.db.commit()
+        self.db.flush()
         return model
 
     def update_role(self, id: UUID, request: UpdateRole) -> Role:
@@ -53,11 +52,9 @@ class RoleService:
                 detail="You cannot change the permissions of the admin role",
             )
         for k, v in update.items():
-            if k == "permissions":
-                v = self._canonical_permissions(v)
             setattr(role, k, v)
 
-        self.db.commit()
+        self.db.flush()
         return role
 
     def delete_role(self, id_: UUID) -> Role:
@@ -69,14 +66,8 @@ class RoleService:
             )
 
         self.db.delete(role)
-        self.db.commit()
+        self.db.flush()
         return role
-
-    @staticmethod
-    def _canonical_permissions(permissions: list[int]) -> list[int]:
-        result = list(set(permissions))
-        result.sort()
-        return result
 
     def find_prototype(self, scope: Scope, prototype: Prototype) -> Role:
         return self.db.scalars(

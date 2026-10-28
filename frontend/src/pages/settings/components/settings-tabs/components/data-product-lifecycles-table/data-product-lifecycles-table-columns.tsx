@@ -70,7 +70,7 @@ export const getDataProductTableColumns = ({
             render: (_, record) => {
                 return (
                     <Flex>
-                        <Button type={'link'} onClick={handleEdit(record)}>
+                        <Button type="link" onClick={handleEdit(record)}>
                             {t('Edit')}
                         </Button>
                         {!record.is_default && (
@@ -80,13 +80,13 @@ export const getDataProductTableColumns = ({
                                     'Are you sure you want to delete the lifecycle? This will remove the lifecycle from all the Data Products and Output Ports and return them to default',
                                 )}
                                 onConfirm={() => handleRemove(record)}
-                                placement={'leftTop'}
+                                placement="leftTop"
                                 okText={t('Confirm')}
                                 cancelText={t('Cancel')}
                                 okButtonProps={{ loading: isLoading }}
                                 autoAdjustOverflow={true}
                             >
-                                <Button loading={isLoading} disabled={isLoading || isDisabled} type={'link'}>
+                                <Button loading={isLoading} disabled={isLoading || isDisabled} type="link">
                                     {t('Remove')}
                                 </Button>
                             </Popconfirm>

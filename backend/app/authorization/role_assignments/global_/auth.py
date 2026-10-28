@@ -2,10 +2,10 @@ from dataclasses import dataclass
 from typing import Optional
 from uuid import UUID
 
+from app.authorization.role_assignments.auth import AuthAssignment
 from app.authorization.roles import ADMIN_UUID
 from app.core.authz.authorization import Authorization
 
-from ..auth import AuthAssignment
 from .schema import GlobalRoleAssignment
 
 
@@ -26,7 +26,7 @@ class GlobalAuthAssignment(_GlobalAuthAssignment):
         previous_role_id: Optional[UUID] = None,
     ) -> None:
         super().__init__(
-            user_id=assignment.user_id,
+            user_id=assignment.identity_id,
             role_id=assignment.role_id,
             previous_role_id=previous_role_id,
         )

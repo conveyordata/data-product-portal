@@ -318,6 +318,13 @@ export type AuthorizationAction =
   | 106
   | 107
   | 108
+  | 109
+  | 110
+  | 111
+  | 112
+  | 113
+  | 114
+  | 115
   | 301
   | 302
   | 303
@@ -347,7 +354,10 @@ export type AuthorizationAction =
   | 412
   | 413
   | 414
-  | 415;
+  | 415
+  | 416
+  | 901
+  | 902;
 export type Prototype = 0 | 1 | 2 | 3;
 export type Role = {
   name: string;
@@ -450,14 +460,23 @@ export type DeleteOutputPortRoleAssignmentResponse = {
   output_port_id: string;
 };
 export type OutputPortStatus = "pending" | "active" | "archived";
-export type OutputPortAccessType =
-  | "public"
+export type OutputPortAccessFunction =
   | "restricted"
   | "private"
   | "unrestricted";
+export type OutputPortAccessType = {
+  id: string;
+  name: string;
+  access_function: OutputPortAccessFunction;
+};
 export type Tag = {
   id: string;
   value: string;
+};
+export type AccessMode = {
+  id: string;
+  name: string;
+  description: string;
 };
 export type OutputPort = {
   id: string;
@@ -468,6 +487,7 @@ export type OutputPort = {
   access_type: OutputPortAccessType;
   data_product_id: string;
   tags: Tag[];
+  access_modes: AccessMode[];
 };
 export type OutputPortRoleAssignmentResponse = {
   id: string;

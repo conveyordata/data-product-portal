@@ -1,32 +1,40 @@
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from typing import Sequence
 from uuid import UUID
 
 import pytz
 from fastapi import HTTPException, status
-from sqlalchemy import asc, select
+from sqlalchemy import asc, or_, select
 from sqlalchemy.orm import Session
 
+from app.authorization.role_assignments.data_product.model import (
+    DataProductRoleAssignment as DataProductRoleAssignmentModel,
+)
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.role_assignments.output_port.model import (
     DatasetRoleAssignment as DatasetRoleAssignmentModel,
 )
 from app.core.authz import Action, Authorization
+from app.data_products.model import DataProduct as DataProductModel
 from app.data_products.output_port_technical_assets_link.model import (
-    DataOutputDatasetAssociation as DataOutputDatasetAssociationModel,
+    TechnicalAssetOutputPortAssociation as TechnicalAssetOutputPortAssociationModel,
 )
-from app.data_products.output_ports.model import Dataset
-from app.data_products.output_ports.model import Dataset as DatasetModel
-from app.pending_actions.schema import DataOutputDatasetPendingAction
+from app.data_products.output_ports.model import OutputPort
+from app.data_products.output_ports.model import OutputPort as OutputPortModel
+from app.data_products.technical_assets.service import ensure_technical_asset_shareable
+from app.groups.service import GroupService
 from app.users.schema import User
+from app.users.schema_response import (
+    TechnicalAssetOutputPortRequest,
+)
 
 
-class DataOutputDatasetService:
+class TechnicalAssetOutputPortService:
     def __init__(self, db: Session):
         self.db = db
 
-    def get_link_by_id(self, id: UUID) -> DataOutputDatasetAssociationModel:
-        current_link = self.db.get(DataOutputDatasetAssociationModel, id)
+    def get_link_by_id(self, id: UUID) -> TechnicalAssetOutputPortAssociationModel:
+        current_link = self.db.get(TechnicalAssetOutputPortAssociationModel, id)
         if not current_link:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -36,19 +44,22 @@ class DataOutputDatasetService:
 
     def get_link(
         self, *, data_product_id: UUID, technical_asset_id: UUID, output_port_id: UUID
-    ) -> DataOutputDatasetAssociationModel:
+    ) -> TechnicalAssetOutputPortAssociationModel:
         current_link = self.db.scalar(
-            select(DataOutputDatasetAssociationModel)
+            select(TechnicalAssetOutputPortAssociationModel)
             .where(
-                DataOutputDatasetAssociationModel.data_output_id == technical_asset_id,
-                DataOutputDatasetAssociationModel.dataset_id == output_port_id,
+                TechnicalAssetOutputPortAssociationModel.technical_asset_id
+                == technical_asset_id,
+                TechnicalAssetOutputPortAssociationModel.output_port_id
+                == output_port_id,
             )
             .join(
-                Dataset,
-                Dataset.id == DataOutputDatasetAssociationModel.dataset_id,
+                OutputPort,
+                OutputPort.id
+                == TechnicalAssetOutputPortAssociationModel.output_port_id,
             )
             .where(
-                Dataset.data_product_id == data_product_id,
+                OutputPort.data_product_id == data_product_id,
             )
         )
         if not current_link:
@@ -58,14 +69,14 @@ class DataOutputDatasetService:
             )
         return current_link
 
-    def approve_data_output_link(
+    def approve_technical_asset_link(
         self,
         *,
         data_product_id: UUID,
         technical_asset_id: UUID,
         output_port_id: UUID,
         actor: User,
-    ) -> DataOutputDatasetAssociationModel:
+    ) -> TechnicalAssetOutputPortAssociationModel:
         current_link = self.get_link(
             data_product_id=data_product_id,
             technical_asset_id=technical_asset_id,
@@ -76,21 +87,22 @@ class DataOutputDatasetService:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Request can not be already approved or denied",
             )
+        ensure_technical_asset_shareable(current_link.technical_asset)
 
         current_link.status = DecisionStatus.APPROVED
         current_link.approved_by = actor
         current_link.approved_on = datetime.now(tz=pytz.utc)
-        self.db.commit()
+        self.db.flush()
         return current_link
 
-    def deny_data_output_link(
+    def deny_technical_asset_link(
         self,
         *,
         data_product_id: UUID,
         technical_asset_id: UUID,
         output_port_id: UUID,
         actor: User,
-    ) -> DataOutputDatasetAssociationModel:
+    ) -> TechnicalAssetOutputPortAssociationModel:
         current_link = self.get_link(
             data_product_id=data_product_id,
             technical_asset_id=technical_asset_id,
@@ -99,43 +111,89 @@ class DataOutputDatasetService:
         current_link.status = DecisionStatus.DENIED
         current_link.denied_by = actor
         current_link.denied_on = datetime.now(tz=pytz.utc)
-        self.db.commit()
+        self.db.flush()
         return current_link
 
-    def remove_data_output_link(
+    def remove_technical_asset_link(
         self,
         data_product_id: UUID,
         technical_asset_id: UUID,
         output_port_id: UUID,
         *,
         actor: User,
-    ) -> DataOutputDatasetAssociationModel:
+    ) -> TechnicalAssetOutputPortAssociationModel:
         current_link = self.get_link(
             data_product_id=data_product_id,
             technical_asset_id=technical_asset_id,
             output_port_id=output_port_id,
         )
         self.db.delete(current_link)
-        self.db.commit()
+        self.db.flush()
         return current_link
+
+    def get_user_requests(self, user: User, hide_old_inactive: bool):
+        query = (
+            select(TechnicalAssetOutputPortAssociationModel)
+            .where(
+                TechnicalAssetOutputPortAssociationModel.requested_by_id == user.id,
+            )
+            .order_by(asc(TechnicalAssetOutputPortAssociationModel.requested_on))
+        )
+
+        if hide_old_inactive:
+            thirty_days_ago = datetime.now(timezone.utc) - timedelta(days=30)
+            query = query.where(
+                or_(
+                    TechnicalAssetOutputPortAssociationModel.status
+                    == DecisionStatus.PENDING,
+                    TechnicalAssetOutputPortAssociationModel.requested_on
+                    >= thirty_days_ago,
+                )
+            )
+
+        requested_associations = self.db.scalars(query).unique().all()
+
+        return [
+            TechnicalAssetOutputPortRequest.model_validate(a)
+            for a in requested_associations
+        ]
 
     def get_user_pending_actions(
         self, user: User
-    ) -> Sequence[DataOutputDatasetPendingAction]:
+    ) -> Sequence[TechnicalAssetOutputPortRequest]:
+        user_group_ids = GroupService(self.db).get_groups_ids_identity_is_member_of(
+            user.id
+        )
         requested_associations = (
             self.db.scalars(
-                select(DataOutputDatasetAssociationModel)
+                select(TechnicalAssetOutputPortAssociationModel)
                 .where(
-                    DataOutputDatasetAssociationModel.status == DecisionStatus.PENDING,
+                    TechnicalAssetOutputPortAssociationModel.status
+                    == DecisionStatus.PENDING,
                 )
                 .where(
-                    DataOutputDatasetAssociationModel.dataset.has(
-                        DatasetModel.assignments.any(
-                            DatasetRoleAssignmentModel.user_id == user.id
-                        )
+                    or_(
+                        TechnicalAssetOutputPortAssociationModel.output_port.has(
+                            OutputPortModel.assignments.any(
+                                DatasetRoleAssignmentModel.user_id == user.id
+                            )
+                        ),
+                        TechnicalAssetOutputPortAssociationModel.output_port.has(
+                            OutputPortModel.data_product.has(
+                                DataProductModel.assignments.any(
+                                    or_(
+                                        DataProductRoleAssignmentModel.identity_id
+                                        == user.id,
+                                        DataProductRoleAssignmentModel.identity_id.in_(
+                                            user_group_ids
+                                        ),
+                                    )
+                                )
+                            )
+                        ),
                     )
                 )
-                .order_by(asc(DataOutputDatasetAssociationModel.requested_on))
+                .order_by(asc(TechnicalAssetOutputPortAssociationModel.requested_on))
             )
             .unique()
             .all()
@@ -143,12 +201,13 @@ class DataOutputDatasetService:
 
         authorizer = Authorization()
         return [
-            DataOutputDatasetPendingAction.model_validate(a)
+            TechnicalAssetOutputPortRequest.model_validate(a)
             for a in requested_associations
             if authorizer.has_access(
                 sub=str(user.id),
-                dom=str(a.dataset.data_product.domain),
-                obj=str(a.dataset_id),
+                dom=str(a.output_port.data_product.domain.id),
+                obj=str(a.output_port_id),
+                parent=str(a.output_port.data_product_id),
                 act=Action.OUTPUT_PORT__APPROVE_TECHNICAL_ASSET_LINK_REQUEST,
             )
         ]

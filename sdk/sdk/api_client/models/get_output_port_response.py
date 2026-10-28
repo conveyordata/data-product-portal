@@ -7,12 +7,14 @@ from uuid import UUID
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-from ..models.output_port_access_type import OutputPortAccessType
+from ..models.access_duration_type import AccessDurationType
 from ..models.output_port_status import OutputPortStatus
 
 if TYPE_CHECKING:
+    from ..models.access_mode import AccessMode
     from ..models.data_product_life_cycle import DataProductLifeCycle
     from ..models.domain import Domain
+    from ..models.output_port_access_type import OutputPortAccessType
     from ..models.output_port_setting_value import OutputPortSettingValue
     from ..models.tag import Tag
     from ..models.technical_asset_link import TechnicalAssetLink
@@ -32,10 +34,13 @@ class GetOutputPortResponse:
         status (OutputPortStatus):
         usage (None | str):
         access_type (OutputPortAccessType):
+        data_product_access_duration_type (AccessDurationType):
+        exploration_access_duration_type (AccessDurationType):
         data_product_id (UUID):
         tags (list[Tag]):
         domain (Domain):
         lifecycle (DataProductLifeCycle | None):
+        access_modes (list[AccessMode]):
         about (None | str):
         rolled_up_tags (list[Tag]):
         data_product_settings (list[OutputPortSettingValue]):
@@ -49,10 +54,13 @@ class GetOutputPortResponse:
     status: OutputPortStatus
     usage: None | str
     access_type: OutputPortAccessType
+    data_product_access_duration_type: AccessDurationType
+    exploration_access_duration_type: AccessDurationType
     data_product_id: UUID
     tags: list[Tag]
     domain: Domain
     lifecycle: DataProductLifeCycle | None
+    access_modes: list[AccessMode]
     about: None | str
     rolled_up_tags: list[Tag]
     data_product_settings: list[OutputPortSettingValue]
@@ -60,7 +68,9 @@ class GetOutputPortResponse:
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        from ..models.data_product_life_cycle import DataProductLifeCycle
+        from ..models.data_product_life_cycle import (
+            DataProductLifeCycle,  # noqa: PLC0415
+        )
 
         id = str(self.id)
 
@@ -75,7 +85,11 @@ class GetOutputPortResponse:
         usage: None | str
         usage = self.usage
 
-        access_type = self.access_type.value
+        access_type = self.access_type.to_dict()
+
+        data_product_access_duration_type = self.data_product_access_duration_type.value
+
+        exploration_access_duration_type = self.exploration_access_duration_type.value
 
         data_product_id = str(self.data_product_id)
 
@@ -91,6 +105,11 @@ class GetOutputPortResponse:
             lifecycle = self.lifecycle.to_dict()
         else:
             lifecycle = self.lifecycle
+
+        access_modes = []
+        for access_modes_item_data in self.access_modes:
+            access_modes_item = access_modes_item_data.to_dict()
+            access_modes.append(access_modes_item)
 
         about: None | str
         about = self.about
@@ -121,10 +140,13 @@ class GetOutputPortResponse:
                 "status": status,
                 "usage": usage,
                 "access_type": access_type,
+                "data_product_access_duration_type": data_product_access_duration_type,
+                "exploration_access_duration_type": exploration_access_duration_type,
                 "data_product_id": data_product_id,
                 "tags": tags,
                 "domain": domain,
                 "lifecycle": lifecycle,
+                "access_modes": access_modes,
                 "about": about,
                 "rolled_up_tags": rolled_up_tags,
                 "data_product_settings": data_product_settings,
@@ -136,11 +158,19 @@ class GetOutputPortResponse:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.data_product_life_cycle import DataProductLifeCycle
-        from ..models.domain import Domain
-        from ..models.output_port_setting_value import OutputPortSettingValue
-        from ..models.tag import Tag
-        from ..models.technical_asset_link import TechnicalAssetLink
+        from ..models.access_mode import AccessMode  # noqa: PLC0415
+        from ..models.data_product_life_cycle import (
+            DataProductLifeCycle,  # noqa: PLC0415
+        )
+        from ..models.domain import Domain  # noqa: PLC0415
+        from ..models.output_port_access_type import (
+            OutputPortAccessType,  # noqa: PLC0415
+        )
+        from ..models.output_port_setting_value import (
+            OutputPortSettingValue,  # noqa: PLC0415
+        )
+        from ..models.tag import Tag  # noqa: PLC0415
+        from ..models.technical_asset_link import TechnicalAssetLink  # noqa: PLC0415
 
         d = dict(src_dict)
         id = UUID(d.pop("id"))
@@ -160,7 +190,15 @@ class GetOutputPortResponse:
 
         usage = _parse_usage(d.pop("usage"))
 
-        access_type = OutputPortAccessType(d.pop("access_type"))
+        access_type = OutputPortAccessType.from_dict(d.pop("access_type"))
+
+        data_product_access_duration_type = AccessDurationType(
+            d.pop("data_product_access_duration_type")
+        )
+
+        exploration_access_duration_type = AccessDurationType(
+            d.pop("exploration_access_duration_type")
+        )
 
         data_product_id = UUID(d.pop("data_product_id"))
 
@@ -187,6 +225,13 @@ class GetOutputPortResponse:
             return cast(DataProductLifeCycle | None, data)
 
         lifecycle = _parse_lifecycle(d.pop("lifecycle"))
+
+        access_modes = []
+        _access_modes = d.pop("access_modes")
+        for access_modes_item_data in _access_modes:
+            access_modes_item = AccessMode.from_dict(access_modes_item_data)
+
+            access_modes.append(access_modes_item)
 
         def _parse_about(data: object) -> None | str:
             if data is None:
@@ -228,10 +273,13 @@ class GetOutputPortResponse:
             status=status,
             usage=usage,
             access_type=access_type,
+            data_product_access_duration_type=data_product_access_duration_type,
+            exploration_access_duration_type=exploration_access_duration_type,
             data_product_id=data_product_id,
             tags=tags,
             domain=domain,
             lifecycle=lifecycle,
+            access_modes=access_modes,
             about=about,
             rolled_up_tags=rolled_up_tags,
             data_product_settings=data_product_settings,

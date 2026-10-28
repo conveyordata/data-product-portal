@@ -10,7 +10,7 @@ from app.shared.model import BaseORM, utcnow
 
 if TYPE_CHECKING:
     from app.data_products.model import DataProduct
-    from app.data_products.output_ports.model import Dataset
+    from app.data_products.output_ports.model import OutputPort
     from app.data_products.technical_assets.model import TechnicalAsset
 
 
@@ -23,7 +23,7 @@ tag_data_product_table = Table(
     Column("updated_on", DateTime(timezone=False), onupdate=utcnow()),
 )
 
-tag_dataset_table = Table(
+tag_output_port_table = Table(
     "tags_datasets",
     Base.metadata,
     Column("dataset_id", ForeignKey("datasets.id")),
@@ -32,7 +32,7 @@ tag_dataset_table = Table(
     Column("updated_on", DateTime(timezone=False), onupdate=utcnow()),
 )
 
-tag_data_output_table = Table(
+tag_technical_asset_table = Table(
     "tags_data_outputs",
     Base.metadata,
     Column("data_output_id", ForeignKey("data_outputs.id")),
@@ -49,14 +49,14 @@ class Tag(Base, BaseORM):
     value = Column(String)
 
     # Relationships
-    datasets: Mapped[list["Dataset"]] = relationship(
-        secondary=tag_dataset_table, lazy="raise", back_populates="tags"
+    output_ports: Mapped[list["OutputPort"]] = relationship(
+        secondary=tag_output_port_table, lazy="raise", back_populates="tags"
     )
     data_products: Mapped[list["DataProduct"]] = relationship(
         secondary=tag_data_product_table, lazy="raise", back_populates="tags"
     )
-    data_outputs: Mapped[list["TechnicalAsset"]] = relationship(
-        secondary=tag_data_output_table, lazy="raise", back_populates="tags"
+    technical_assets: Mapped[list["TechnicalAsset"]] = relationship(
+        secondary=tag_technical_asset_table, lazy="raise", back_populates="tags"
     )
 
 

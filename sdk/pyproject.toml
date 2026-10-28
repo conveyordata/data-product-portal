@@ -1,6 +1,6 @@
 [project]
 name = "data-product-portal-sdk"
-version = "0.6.0"
+version = "0.8.0"
 description = "SDK for Data Product Portal"
 authors = [
     {name = "Dataminded"}
@@ -14,6 +14,8 @@ dependencies = [
     # Used by generated api_client models for datetime parsing
     "python-dateutil>=2.8.0",
     "fastapi>=0.137.1",
+    # Typed technical asset configurations in sdk/plugins
+    "pydantic>=2.0",
 ]
 
 [tool.poetry]
@@ -24,7 +26,7 @@ python = "^3.13"
 
 [tool.poetry.group.dev.dependencies]
 # Used to regenerate sdk/sdk/api_client/ from the OpenAPI spec
-openapi-python-client = ">=0.29.0"
+openapi-python-client = ">=0.29.1"
 mypy = ">=1.0"
 pytest = ">=8.0"
 pytest-asyncio = ">=0.24"
@@ -45,7 +47,7 @@ ignore_errors = true
 
 [tool.ruff]
 exclude = [
-    "sdk/event_handler.py"
+    "sdk/provisioner/event_handler.py"
 ]
 
 [build-system]

@@ -1,23 +1,20 @@
 from sqlalchemy.orm import selectinload
 
-from app.authorization.roles.schema import Scope
-from app.data_products.output_ports.enums import OutputPortAccessType
-from app.data_products.output_ports.model import Dataset
+from app.authorization.role_assignments.enums import AssignmentFilter
+from app.core.context import close_event_context, open_event_context, pop_events
+from app.data_products.output_ports.enums import OutputPortAccessFunction
+from app.data_products.output_ports.model import OutputPort
 from app.data_products.output_ports.service import OutputPortService
 from app.settings import settings
-from tests import test_session
 from tests.factories import (
-    DataOutputDatasetAssociationFactory,
-    DataProductFactory,
-    DataProductRoleAssignmentFactory,
-    DatasetFactory,
     DatasetRoleAssignmentFactory,
-    GlobalRoleAssignmentFactory,
-    InputPortFactory,
+    OutputPortFactory,
     RoleFactory,
     TechnicalAssetFactory,
+    TechnicalAssetOutputPortAssociationFactory,
     UserFactory,
 )
+from tests.session_util import as_user
 
 SEARCH_EMBEDDING = [1.0, *([0.0] * 383)]
 
@@ -28,92 +25,86 @@ class StaticEmbeddingModel:
 
 
 class TestDatasetsService:
-    def test_private_dataset_not_visible(self):
-        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        ds = DatasetFactory(access_type=OutputPortAccessType.PRIVATE)
-        ds = self.get_dataset(ds)
-        assert OutputPortService(test_session).is_visible_to_user(ds, user) is False
+    def test_recalculate_search(self, session):
+        ds = OutputPortFactory()
+        OutputPortService(session).recalculate_search(ds.id)
 
-    def test_get_private_dataset_by_owner(self):
-        owner = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        role = RoleFactory.dataset_owner()
-        ds = DatasetFactory(access_type=OutputPortAccessType.PRIVATE)
-        DatasetRoleAssignmentFactory(
-            role_id=role.id, dataset_id=ds.id, user_id=owner.id
+    def test_recalculate_search__queues_no_events(self, session):
+        ds = OutputPortFactory()
+        token = open_event_context()
+        try:
+            OutputPortService(session).recalculate_search(ds.id)
+            session.flush()
+            assert pop_events() == []
+        finally:
+            close_event_context(token)
+
+    def test_recalculate_search__keeps_events_of_pending_changes(self, session):
+        ds = OutputPortFactory()
+        token = open_event_context()
+        try:
+            ds.name = "Renamed"
+            OutputPortService(session).recalculate_search(ds.id)
+            assert len(pop_events()) == 1
+        finally:
+            close_event_context(token)
+
+    def test_recalculate_search_with_technical_asset(self, session):
+        ds = OutputPortFactory()
+        technical_asset = TechnicalAssetFactory(owner=ds.data_product)
+        TechnicalAssetOutputPortAssociationFactory(
+            technical_asset=technical_asset, output_port=ds
         )
-        ds = self.get_dataset(ds)
-        assert OutputPortService(test_session).is_visible_to_user(ds, owner) is True
+        OutputPortService(session).recalculate_search(ds.id)
 
-    def test_get_private_dataset_by_admin(self):
-        admin = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        role = RoleFactory.admin()
-        GlobalRoleAssignmentFactory(role_id=role.id, user_id=admin.id)
-        ds = DatasetFactory(access_type=OutputPortAccessType.PRIVATE)
-        ds = self.get_dataset(ds)
-        assert OutputPortService(test_session).is_visible_to_user(ds, admin) is True
-
-    def test_get_private_dataset_by_member_of_consuming_data_product(self):
-        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        ds = DatasetFactory(access_type=OutputPortAccessType.PRIVATE)
-        dp = DataProductFactory()
-        role = RoleFactory(scope=Scope.DATA_PRODUCT)
-        DataProductRoleAssignmentFactory(
-            role_id=role.id, data_product_id=dp.id, user_id=user.id
-        )
-        InputPortFactory(consuming_abstract_data_product=dp, dataset=ds)
-        ds = self.get_dataset(ds)
-        assert OutputPortService(test_session).is_visible_to_user(ds, user) is True
-
-    def test_recalculate_search(self):
-        ds = DatasetFactory()
-        OutputPortService(test_session).recalculate_search(ds.id)
-
-    def test_recalculate_search_with_technical_asset(self):
-        ds = DatasetFactory()
-        data_output = TechnicalAssetFactory(owner=ds.data_product)
-        DataOutputDatasetAssociationFactory(data_output=data_output, dataset=ds)
-        OutputPortService(test_session).recalculate_search(ds.id)
-
-    def test_recalculate_search_for_all_output_ports(self):
+    def test_recalculate_search_for_all_output_ports(self, session):
         for i in range(51):  # Ensure we load 2 batches
-            DatasetFactory()
-        OutputPortService(test_session).recalculate_search_for_all_output_ports()
+            OutputPortFactory()
+        OutputPortService(session).recalculate_search_for_all_output_ports()
 
-    def test_search_output_ports_excludes_private_datasets(self):
+    def test_search_output_ports_excludes_private_datasets(self, session):
         """Test that private output ports are not visible in search results to unauthorized users"""
         # Create a regular user without special permissions
         regular_user = UserFactory(external_id=settings.DEFAULT_USERNAME)
 
         # Create a unrestricted output port that should be visible
-        unrestricted_dataset = DatasetFactory(
+        unrestricted_dataset = OutputPortFactory(
             name="Public Analytics Dataset",
-            access_type=OutputPortAccessType.UNRESTRICTED,
+            access_function=OutputPortAccessFunction.UNRESTRICTED,
         )
 
         # Create a private output port that should NOT be visible
-        private_dataset = DatasetFactory(
-            name="Private Sensitive Dataset", access_type=OutputPortAccessType.PRIVATE
+        private_dataset = OutputPortFactory(
+            name="Private Sensitive Dataset",
+            access_function=OutputPortAccessFunction.PRIVATE,
         )
 
         # Create another private output port owned by a different user
         owner = UserFactory()
         owner_role = RoleFactory.dataset_owner()
-        owned_private_dataset = DatasetFactory(
-            name="Owner Private Dataset", access_type=OutputPortAccessType.PRIVATE
+        owned_private_dataset = OutputPortFactory(
+            name="Owner Private Dataset",
+            access_function=OutputPortAccessFunction.PRIVATE,
         )
         DatasetRoleAssignmentFactory(
-            role_id=owner_role.id, dataset_id=owned_private_dataset.id, user_id=owner.id
+            role_id=owner_role.id,
+            output_port_id=owned_private_dataset.id,
+            user_id=owner.id,
         )
 
         # Recalculate search embeddings for all datasets
-        OutputPortService(test_session).recalculate_search(unrestricted_dataset.id)
-        OutputPortService(test_session).recalculate_search(private_dataset.id)
-        OutputPortService(test_session).recalculate_search(owned_private_dataset.id)
+        OutputPortService(session).recalculate_search(unrestricted_dataset.id)
+        OutputPortService(session).recalculate_search(private_dataset.id)
+        OutputPortService(session).recalculate_search(owned_private_dataset.id)
 
         # Search as the regular user
-        search_results = OutputPortService(test_session).search_output_ports(
-            query=None, limit=100, user=regular_user, current_user_assigned=False
-        )
+        with as_user(session, regular_user.id):
+            search_results = OutputPortService(session).search_output_ports(
+                query=None,
+                limit=100,
+                user=regular_user,
+                assignment_filter=AssignmentFilter.ALL,
+            )
 
         # Extract dataset IDs from results
         result_ids = [ds.id for ds in search_results]
@@ -131,33 +122,37 @@ class TestDatasetsService:
             "Owner's private dataset should not be visible to other users"
         )
 
-    def test_search_output_ports_owner_can_see_own_private_datasets(self):
+    def test_search_output_ports_owner_can_see_own_private_datasets(self, session):
         """Test that owners can see their own private output ports in search results"""
         # Create a user who will own a private dataset
         owner = UserFactory(external_id=settings.DEFAULT_USERNAME)
         owner_role = RoleFactory.dataset_owner()
 
         # Create a private output port owned by this user
-        private_dataset = DatasetFactory(
-            name="My Private Dataset", access_type=OutputPortAccessType.PRIVATE
+        private_dataset = OutputPortFactory(
+            name="My Private Dataset", access_function=OutputPortAccessFunction.PRIVATE
         )
         DatasetRoleAssignmentFactory(
-            role_id=owner_role.id, dataset_id=private_dataset.id, user_id=owner.id
+            role_id=owner_role.id, output_port_id=private_dataset.id, user_id=owner.id
         )
 
         # Create a unrestricted dataset for comparison
-        unrestricted_dataset = DatasetFactory(
-            name="Unrestricted Dataset", access_type=OutputPortAccessType.UNRESTRICTED
+        unrestricted_dataset = OutputPortFactory(
+            name="Unrestricted Dataset",
+            access_function=OutputPortAccessFunction.UNRESTRICTED,
         )
-
         # Recalculate search embeddings
-        OutputPortService(test_session).recalculate_search(private_dataset.id)
-        OutputPortService(test_session).recalculate_search(unrestricted_dataset.id)
+        OutputPortService(session).recalculate_search(private_dataset.id)
+        OutputPortService(session).recalculate_search(unrestricted_dataset.id)
 
-        # Search as the owner
-        search_results = OutputPortService(test_session).search_output_ports(
-            query=None, limit=100, user=owner, current_user_assigned=False
-        )
+        with as_user(session, owner.id):
+            # Search as the owner
+            search_results = OutputPortService(session).search_output_ports(
+                query=None,
+                limit=100,
+                user=owner,
+                assignment_filter=AssignmentFilter.ALL,
+            )
 
         # Extract dataset IDs from results
         result_ids = [ds.id for ds in search_results]
@@ -170,114 +165,138 @@ class TestDatasetsService:
             "Owner should also see public datasets"
         )
 
-    def test_search_output_ports_matches_partial_prefix(self):
+    def test_search_output_ports__matches_partial_prefix(self, session):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        wind_dataset = DatasetFactory(
+        wind_output_port = OutputPortFactory(
             name="Wind Turbine Output", description="Renewable generation metrics"
         )
-        unrelated_dataset = DatasetFactory(
+        unrelated_output_port = OutputPortFactory(
             name="Finance Budget", description="Quarterly accounting metrics"
         )
-        self.set_search_state(wind_dataset, unrelated_dataset)
+        self.set_search_state(session, wind_output_port, unrelated_output_port)
 
-        partial_results = self.search_with_static_embeddings("win", user, limit=1)
-        full_word_results = self.search_with_static_embeddings("wind", user, limit=1)
+        partial_results = self.search_with_static_embeddings(
+            session, "win", user, limit=1
+        )
+        full_word_results = self.search_with_static_embeddings(
+            session, "wind", user, limit=1
+        )
 
-        assert [result.id for result in partial_results] == [wind_dataset.id]
-        assert [result.id for result in full_word_results] == [wind_dataset.id]
+        assert [result.id for result in partial_results] == [wind_output_port.id]
+        assert [result.id for result in full_word_results] == [wind_output_port.id]
 
-    def test_search_output_ports_matches_multi_word_partial_prefix_case_insensitive(
-        self,
+    def test_search_output_ports__matches_multi_word_partial_prefix_case_insensitive(
+        self, session
     ):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        clinical_dataset = DatasetFactory(
+        clinical_output_port = OutputPortFactory(
             name="Clinical Dataset", description="Patient outcome measures"
         )
-        unrelated_dataset = DatasetFactory(
+        unrelated_output_port = OutputPortFactory(
             name="Marketing Metrics", description="Campaign performance"
         )
-        self.set_search_state(clinical_dataset, unrelated_dataset)
+        self.set_search_state(session, clinical_output_port, unrelated_output_port)
 
-        results = self.search_with_static_embeddings("CLIN DATA", user, limit=1)
+        results = self.search_with_static_embeddings(
+            session, "CLIN DATA", user, limit=1
+        )
 
-        assert [result.id for result in results] == [clinical_dataset.id]
+        assert [result.id for result in results] == [clinical_output_port.id]
 
-    def test_search_output_ports_preserves_or_operator(self):
+    def test_search_output_ports__preserves_or_operator(self, session):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        finance_dataset = DatasetFactory(
+        finance_output_port = OutputPortFactory(
             name="Finance Ledger", description="Accounting metrics"
         )
-        budget_dataset = DatasetFactory(
+        budget_output_port = OutputPortFactory(
             name="Budget Forecast", description="Planning metrics"
         )
-        unrelated_dataset = DatasetFactory(
+        unrelated_output_port = OutputPortFactory(
             name="Telemetry Events", description="Device metrics"
         )
-        self.set_search_state(finance_dataset, budget_dataset, unrelated_dataset)
+        self.set_search_state(
+            session, finance_output_port, budget_output_port, unrelated_output_port
+        )
 
-        results = self.search_with_static_embeddings("finance OR budget", user, limit=2)
+        results = self.search_with_static_embeddings(
+            session, "finance OR budget", user, limit=2
+        )
 
         assert {result.id for result in results} == {
-            finance_dataset.id,
-            budget_dataset.id,
+            finance_output_port.id,
+            budget_output_port.id,
         }
 
-    def test_search_output_ports_preserves_exclusion_operator(self):
+    def test_search_output_ports__preserves_exclusion_operator(self, session):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        excluded_dataset = DatasetFactory(
+        excluded_output_port = OutputPortFactory(
             name="Finance Budget", description="Restricted budget planning"
         )
-        matching_dataset = DatasetFactory(
+        matching_output_port = OutputPortFactory(
             name="Finance Forecast", description="Revenue planning"
         )
-        unrelated_dataset = DatasetFactory(
+        unrelated_output_port = OutputPortFactory(
             name="Marketing Leads", description="Pipeline metrics"
         )
-        self.set_search_state(excluded_dataset, matching_dataset, unrelated_dataset)
+        self.set_search_state(
+            session, excluded_output_port, matching_output_port, unrelated_output_port
+        )
 
-        results = self.search_with_static_embeddings("finance -budget", user, limit=1)
+        results = self.search_with_static_embeddings(
+            session, "finance -budget", user, limit=1
+        )
 
-        assert [result.id for result in results] == [matching_dataset.id]
+        assert [result.id for result in results] == [matching_output_port.id]
 
-    def test_search_output_ports_preserves_quoted_phrase_operator(self):
+    def test_search_output_ports__preserves_quoted_phrase_operator(self, session):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        reversed_dataset = DatasetFactory(
+        reversed_output_port = OutputPortFactory(
             name="Alpha Data Customer", description="Reversed word order"
         )
-        phrase_dataset = DatasetFactory(
+        phrase_output_port = OutputPortFactory(
             name="Zulu Customer Data", description="Customer data mart"
         )
-        self.set_search_state(reversed_dataset, phrase_dataset)
+        self.set_search_state(session, reversed_output_port, phrase_output_port)
 
-        results = self.search_with_static_embeddings('"customer data"', user, limit=1)
+        results = self.search_with_static_embeddings(
+            session, '"customer data"', user, limit=1
+        )
 
-        assert [result.id for result in results] == [phrase_dataset.id]
+        assert [result.id for result in results] == [phrase_output_port.id]
 
-    def test_search_output_ports_preserves_accented_unicode_terms(self):
+    def test_search_output_ports__preserves_accented_unicode_terms(self, session):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        unrelated_dataset = DatasetFactory(
+        unrelated_output_port = OutputPortFactory(
             name="Aachen Mobility", description="Regional transport metrics"
         )
-        unicode_dataset = DatasetFactory(
+        unicode_output_port = OutputPortFactory(
             name="München Mobility", description="Regional transport metrics"
         )
-        self.set_search_state(unrelated_dataset, unicode_dataset)
+        self.set_search_state(session, unrelated_output_port, unicode_output_port)
 
-        results = self.search_with_static_embeddings("München", user, limit=1)
+        results = self.search_with_static_embeddings(session, "München", user, limit=1)
 
-        assert [result.id for result in results] == [unicode_dataset.id]
+        assert [result.id for result in results] == [unicode_output_port.id]
 
-    def test_search_output_ports_handles_empty_punctuation_and_stop_word_queries(self):
+    def test_search_output_ports__handles_empty_punctuation_and_stop_word_queries(
+        self, session
+    ):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        alpha_dataset = DatasetFactory(name="Alpha Dataset")
-        zulu_dataset = DatasetFactory(name="Zulu Dataset")
-        self.set_search_state(alpha_dataset, zulu_dataset)
+        alpha_output_port = OutputPortFactory(name="Alpha Dataset")
+        zulu_output_port = OutputPortFactory(name="Zulu Dataset")
+        self.set_search_state(session, alpha_output_port, zulu_output_port)
 
-        whitespace_results = self.search_with_static_embeddings("   ", user, limit=2)
-        punctuation_results = self.search_with_static_embeddings("?!...", user, limit=2)
-        stop_word_results = self.search_with_static_embeddings("the and", user, limit=2)
+        whitespace_results = self.search_with_static_embeddings(
+            session, "   ", user, limit=2
+        )
+        punctuation_results = self.search_with_static_embeddings(
+            session, "?!...", user, limit=2
+        )
+        stop_word_results = self.search_with_static_embeddings(
+            session, "the and", user, limit=2
+        )
 
-        expected_default_order = [alpha_dataset.id, zulu_dataset.id]
+        expected_default_order = [alpha_output_port.id, zulu_output_port.id]
         assert [result.id for result in whitespace_results] == expected_default_order
         assert [result.id for result in punctuation_results] == expected_default_order
         assert {result.id for result in stop_word_results} == set(
@@ -285,26 +304,29 @@ class TestDatasetsService:
         )
 
     @staticmethod
-    def get_dataset(dataset: Dataset) -> Dataset:
-        return test_session.get(
-            Dataset,
-            dataset.id,
-            options=[selectinload(Dataset.data_product_links)],
+    def get_output_port(output_port: OutputPort, session) -> OutputPort:
+        return session.get(
+            OutputPort,
+            output_port.id,
+            options=[selectinload(OutputPort.data_product_links)],
             populate_existing=True,
         )
 
     @staticmethod
-    def set_search_state(*datasets: Dataset) -> None:
-        for dataset in datasets:
-            dataset.embeddings = SEARCH_EMBEDDING
-            OutputPortService._recalculate_search_vector(dataset)
-            test_session.add(dataset)
-        test_session.commit()
+    def set_search_state(session, *output_ports: OutputPort) -> None:
+        for output_port in output_ports:
+            output_port.embeddings = SEARCH_EMBEDDING
+            OutputPortService._recalculate_search_vector(output_port)
+            session.add(output_port)
+        session.flush()
 
     @staticmethod
-    def search_with_static_embeddings(query: str, user, limit: int):
-        service = OutputPortService(test_session)
+    def search_with_static_embeddings(session, query: str, user, limit: int):
+        service = OutputPortService(session)
         service.embedding_model = StaticEmbeddingModel()
         return service.search_output_ports(
-            query=query, limit=limit, user=user, current_user_assigned=False
+            query=query,
+            limit=limit,
+            user=user,
+            assignment_filter=AssignmentFilter.ALL,
         )

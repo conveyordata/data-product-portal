@@ -30,7 +30,7 @@ export function CreateRoleButton({ scope }: RolesButtonProps) {
         <>
             <Button
                 className={styles.formButton}
-                type={'primary'}
+                type="primary"
                 onClick={() => {
                     setModalOpen(true);
                 }}

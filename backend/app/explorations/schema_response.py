@@ -1,7 +1,7 @@
 from typing import Sequence
 from uuid import UUID
 
-from app.abstract_data_product.schema_response import InputPort
+from app.abstract_data_product.schema_response import AbstractDataProductInputPort
 from app.configuration.domains.schema import Domain
 from app.data_products.status import AbstractDataProductStatus
 from app.shared.schema import ORMModel
@@ -31,8 +31,20 @@ class GetExplorationsResponse(ORMModel):
 
 
 class GetExplorationInputPortsResponse(ORMModel):
-    input_ports: Sequence[InputPort]
+    input_ports: Sequence[AbstractDataProductInputPort]
 
 
 class RequestInputPortsForExplorationResponse(ORMModel):
     input_port_ids: list[UUID]
+
+
+class RenewInputPortForExplorationResponse(ORMModel):
+    input_port_id: UUID
+
+
+class RevokeInputPortForExplorationResponse(ORMModel):
+    input_port_id: UUID
+
+
+class CancelInputPortForExplorationResponse(ORMModel):
+    input_port_id: UUID

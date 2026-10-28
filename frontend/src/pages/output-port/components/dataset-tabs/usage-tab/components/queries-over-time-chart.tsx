@@ -1,0 +1,56 @@
+import { Area } from '@ant-design/charts';
+import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+
+import type { EmptyStateQuery } from '@/components/empty-state/empty-state.component.tsx';
+import { ChartCard } from './chart-card';
+import type { ChartDataPoint, ColorScaleConfig } from './chart-data.utils';
+
+type QueriesOverTimeChartProps = {
+    data: ChartDataPoint[];
+    query: EmptyStateQuery;
+    hasData: boolean;
+    colorScaleConfig: ColorScaleConfig;
+};
+
+export default function QueriesOverTimeChart({ data, query, hasData, colorScaleConfig }: QueriesOverTimeChartProps) {
+    const { t } = useTranslation();
+
+    const config = useMemo(() => {
+        return {
+            data,
+            xField: 'date',
+            yField: 'queryCount',
+            seriesField: 'consumer',
+            colorField: 'consumer',
+            smooth: true,
+            stack: true,
+            ...colorScaleConfig,
+            animation: {
+                appear: {
+                    animation: 'path-in',
+                    duration: 1000,
+                },
+            },
+            axis: {
+                x: {
+                    title: t('Date'),
+                    labelFontSize: 13,
+                },
+                y: {
+                    title: t('Query Count'),
+                    labelFontSize: 13,
+                },
+            },
+            legend: {
+                position: 'top-right' as const,
+            },
+        };
+    }, [data, t, colorScaleConfig]);
+
+    return (
+        <ChartCard title={t('Queries over time')} query={query} hasData={hasData}>
+            <Area {...config} />
+        </ChartCard>
+    );
+}

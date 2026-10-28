@@ -1,0 +1,62 @@
+import { Space, theme } from 'antd';
+import type { ColumnsType } from 'antd/es/table';
+import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+import { ReviewButton } from '@/components/pending-access-requests-modal/review-button.tsx';
+import { UserAvatarWithEmail } from '@/components/user-avatar/user-avatar-with-email.component.tsx';
+import type { TableRow } from '@/pages/product-studio/components/requests/request-utils.ts';
+import type { Request } from '@/types/request-types/request-types.tsx';
+import { formatDate } from '@/utils/date.helper.ts';
+
+type UseTableColumnsParams = {
+    onReview: (action: Request) => void;
+};
+
+export function useTableColumns({ onReview }: UseTableColumnsParams): ColumnsType<TableRow> {
+    const { t } = useTranslation();
+    const { useToken } = theme;
+    const { token } = useToken();
+
+    const secondaryColor = token.colorPrimary;
+
+    return useMemo(
+        () => [
+            {
+                title: t('Requested by'),
+                dataIndex: 'requestedBy',
+                key: 'requestedBy',
+                sorter: (a, b) => a.requestedBy?.email.localeCompare(b.requestedBy?.email || '') || 0,
+                render: (requestedBy) => {
+                    return (
+                        <Space size="small">
+                            <UserAvatarWithEmail user={requestedBy} color={secondaryColor} />
+                        </Space>
+                    );
+                },
+            },
+            {
+                title: t('Access Requested'),
+                dataIndex: 'description',
+                key: 'description',
+                sorter: (a, b) => a.description.localeCompare(b.description),
+                render: (_: string, record: TableRow) => record.description,
+            },
+            {
+                title: t('Date'),
+                dataIndex: 'date',
+                key: 'date',
+                sorter: (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+                defaultSortOrder: 'descend',
+                render: (date: string) => formatDate(date),
+            },
+            {
+                title: t('Actions'),
+                key: 'actions',
+                render: (_: unknown, record: TableRow) => (
+                    <ReviewButton action={record.pendingAction} onReview={onReview} />
+                ),
+            },
+        ],
+        [t, onReview, secondaryColor],
+    );
+}

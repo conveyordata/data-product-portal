@@ -6,9 +6,10 @@ from pydantic.json_schema import SkipJsonSchema
 from sqlalchemy.orm import Session
 
 from app.configuration.data_product_settings.enums import DataProductSettingScope
+from app.configuration.domains.model import Domain
 from app.data_products.model import DataProduct
-from app.data_products.output_ports.model import Dataset
-from app.database.database import get_db_session
+from app.data_products.output_ports.model import OutputPort
+from app.database.deps import get_db_session
 from app.explorations.model import Exploration
 from app.resource_names.enums import ResourceNameModel
 from app.resource_names.service import (
@@ -33,7 +34,7 @@ def validate_resource_name(
     resource_name: str,
     model: ResourceNameModel,
     data_product_id: Annotated[UUID | SkipJsonSchema[None], Query()] = None,
-    db: Session = Depends(get_db_session),
+    db: Session = Depends(get_db_session, scope="function"),
 ) -> ResourceNameValidation:
     match model:
         case ResourceNameModel.DATA_PRODUCT:
@@ -45,7 +46,7 @@ def validate_resource_name(
                 resource_name, db, scope=data_product_id
             )
         case ResourceNameModel.OUTPUT_PORT:
-            return ResourceNameService(model=Dataset).validate_resource_name(
+            return ResourceNameService(model=OutputPort).validate_resource_name(
                 resource_name, db
             )
         case ResourceNameModel.DATA_PRODUCT_SETTING:
@@ -58,6 +59,10 @@ def validate_resource_name(
             )
         case ResourceNameModel.EXPLORATION:
             return ResourceNameService(model=Exploration).validate_resource_name(
+                resource_name, db
+            )
+        case ResourceNameModel.DOMAIN:
+            return ResourceNameService(model=Domain).validate_resource_name(
                 resource_name, db
             )
     raise HTTPException(  # noqa: unreachable

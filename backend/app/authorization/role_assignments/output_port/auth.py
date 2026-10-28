@@ -1,7 +1,8 @@
 from typing import Optional
 from uuid import UUID
 
-from ..auth import ResourceAuthAssignment
+from app.authorization.role_assignments.auth import ResourceAuthAssignment
+
 from .schema import OutputPortRoleAssignment
 
 
@@ -17,6 +18,6 @@ class DatasetAuthAssignment(ResourceAuthAssignment):
         super().__init__(
             role_id=role_id,
             user_id=assignment.user_id,
-            resource_id=assignment.dataset_id,
+            resource_id=assignment.output_port_id,
             previous_role_id=previous_role_id,
         )

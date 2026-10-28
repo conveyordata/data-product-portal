@@ -15,11 +15,11 @@ import {
     useGetPlatformTilesQuery,
     useLazyGetPluginUrlQuery,
 } from '@/store/api/services/generated/pluginsApi.ts';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { DecisionStatus } from '@/types/roles';
 import type { CustomDropdownItemProps } from '@/types/shared';
-import { getIcon } from '@/utils/icon-loader';
+import { dispatchMessage } from '@/utils/feedback.ts';
+import { getPlatformTileIcon } from '@/utils/technical-asset-type.helper';
 import styles from './data-product-actions.module.scss';
 
 type Props = {
@@ -62,7 +62,7 @@ export function DataProductActions({ dataProductId }: Props) {
         const transformTile = (tile: PlatformTile): CustomDropdownItemProps<string> => ({
             label: t(tile.label),
             value: tile.value,
-            icon: getIcon(tile.icon_name),
+            icon: getPlatformTileIcon(tile),
             hasEnvironments: tile.has_environments,
             hasConfig: tile.has_config,
             children: tile.children?.map(transformTile) || [],
@@ -142,6 +142,7 @@ export function DataProductActions({ dataProductId }: Props) {
                 <DataAccessTileGrid
                     canAccessData={canReadIntegrations}
                     dataPlatforms={dataPlatforms}
+                    environments={dataProduct.environments.map(({ environment }) => environment)}
                     onDataPlatformClick={handleAccessToData}
                     onTileClick={handleTileClick}
                     isDisabled={isLoading || !canReadIntegrations}

@@ -1,6 +1,7 @@
 import { HttpResponse, http } from 'msw';
 import {
-    OutputPortAccessType,
+    AccessDurationType,
+    OutputPortAccessFunction,
     OutputPortStatus,
     type SearchOutputPortsResponseItem,
 } from '@/store/api/services/generated/outputPortsSearchApi.ts';
@@ -14,19 +15,26 @@ export const mockOutputPorts: SearchOutputPortsResponseItem[] = [
         description: '',
         status: OutputPortStatus.Pending,
         usage: null,
-        access_type: OutputPortAccessType.Public,
+        access_type: {
+            id: 'access-type-1',
+            name: 'Unrestricted',
+            access_function: OutputPortAccessFunction.Unrestricted,
+        },
         data_product_id: 'dp-1',
         tags: [],
         domain: {
             id: 'dom-1',
             name: 'dom1',
+            namespace: 'dom1',
             description: 'domain 1',
         },
         lifecycle: null,
         abstract_data_product_count: 1,
         technical_assets_count: 1,
         data_product_name: 'dp-1',
-        quality_status: null,
+        access_modes: [],
+        data_product_access_duration_type: AccessDurationType.Permanent,
+        exploration_access_duration_type: AccessDurationType.Permanent,
     },
 ];
 

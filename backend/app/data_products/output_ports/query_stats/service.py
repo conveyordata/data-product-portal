@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 
 from app.data_products.model import DataProduct
 from app.data_products.output_ports.query_stats.model import (
-    DatasetQueryStatsDaily,
+    OutputPortQueryStatsDaily,
 )
 from app.data_products.output_ports.query_stats.schema_request import (
     OutputPortQueryStatsDelete,
@@ -72,7 +72,7 @@ class OutputPortStatsService:
 
     def get_query_stats(
         self,
-        dataset_id: UUID,
+        output_port_id: UUID,
         granularity: QueryStatsGranularity = DEFAULT_GRANULARITY,
         day_range: int = DEFAULT_DAY_RANGE,
     ) -> OutputPortQueryStatsResponses:
@@ -82,12 +82,12 @@ class OutputPortStatsService:
         if granularity == QueryStatsGranularity.DAY:
             # No aggregation needed, fetch raw data
             query = (
-                select(DatasetQueryStatsDaily)
+                select(OutputPortQueryStatsDaily)
                 .where(
-                    DatasetQueryStatsDaily.dataset_id == dataset_id,
-                    DatasetQueryStatsDaily.date >= start_date,
+                    OutputPortQueryStatsDaily.output_port_id == output_port_id,
+                    OutputPortQueryStatsDaily.date >= start_date,
                 )
-                .order_by(DatasetQueryStatsDaily.date.asc())
+                .order_by(OutputPortQueryStatsDaily.date.asc())
             )
             stats = self.db.execute(query).scalars().all()
             response_stats = [
@@ -99,31 +99,34 @@ class OutputPortStatsService:
 
             # Build aggregated query with database-level aggregation
             # Cast date_trunc result to date for cleaner handling
-            truncated_date = func.date_trunc(trunc_unit, DatasetQueryStatsDaily.date)
+            truncated_date = func.date_trunc(trunc_unit, OutputPortQueryStatsDaily.date)
             aggregated_query = (
                 select(
                     func.cast(truncated_date, Date).label("date"),
-                    DatasetQueryStatsDaily.consumer_data_product_id,
-                    func.sum(DatasetQueryStatsDaily.query_count).label("query_count"),
+                    OutputPortQueryStatsDaily.consumer_data_product_id,
+                    func.sum(OutputPortQueryStatsDaily.query_count).label(
+                        "query_count"
+                    ),
                     DataProduct.name.label("consumer_data_product_name"),
                 )
                 .join(
                     DataProduct,
-                    DataProduct.id == DatasetQueryStatsDaily.consumer_data_product_id,
+                    DataProduct.id
+                    == OutputPortQueryStatsDaily.consumer_data_product_id,
                 )
                 .where(
-                    DatasetQueryStatsDaily.dataset_id == dataset_id,
-                    DatasetQueryStatsDaily.date >= start_date,
+                    OutputPortQueryStatsDaily.output_port_id == output_port_id,
+                    OutputPortQueryStatsDaily.date >= start_date,
                 )
                 .group_by(
                     truncated_date,
-                    DatasetQueryStatsDaily.consumer_data_product_id,
+                    OutputPortQueryStatsDaily.consumer_data_product_id,
                     DataProduct.name,
                 )
                 .order_by(
                     truncated_date.asc(),
                     DataProduct.name.asc(),
-                    DatasetQueryStatsDaily.consumer_data_product_id.asc(),
+                    OutputPortQueryStatsDaily.consumer_data_product_id.asc(),
                 )
             )
 
@@ -143,51 +146,42 @@ class OutputPortStatsService:
         )
 
     def update_query_stats(
-        self, dataset_id: UUID, updates: Iterable[OutputPortQueryStatsUpdate]
+        self, output_port_id: UUID, updates: Iterable[OutputPortQueryStatsUpdate]
     ) -> None:
-        values = []
-        for update in updates:
-            try:
-                parsed_date = date.fromisoformat(update.date)
-            except ValueError as e:
-                raise ValueError(f"Invalid date format: {update.date}") from e
-
-            values.append(
-                {
-                    "date": parsed_date,
-                    "dataset_id": dataset_id,
-                    "consumer_data_product_id": update.consumer_data_product_id,
-                    "query_count": update.query_count,
-                }
-            )
+        values = {
+            (update.date, update.consumer_data_product_id): {
+                "date": update.date,
+                "dataset_id": output_port_id,
+                "consumer_data_product_id": update.consumer_data_product_id,
+                "query_count": update.query_count,
+            }
+            for update in updates
+        }
 
         if not values:
             return
 
-        stmt = insert(DatasetQueryStatsDaily).values(values)
+        stmt = insert(OutputPortQueryStatsDaily).values(
+            [values[key] for key in sorted(values)]
+        )
         stmt = stmt.on_conflict_do_update(
             index_elements=["date", "dataset_id", "consumer_data_product_id"],
             set_={"query_count": stmt.excluded.query_count},
         )
         self.db.execute(stmt)
-        self.db.commit()
+        self.db.flush()
 
     def delete_query_stats(
-        self, dataset_id: UUID, delete_request: OutputPortQueryStatsDelete
+        self, output_port_id: UUID, delete_request: OutputPortQueryStatsDelete
     ) -> None:
-        try:
-            target_date = date.fromisoformat(delete_request.date)
-        except ValueError as e:
-            raise ValueError(f"Invalid date format: {delete_request.date}") from e
-
-        stmt = delete(DatasetQueryStatsDaily).where(
-            DatasetQueryStatsDaily.dataset_id == dataset_id,
-            DatasetQueryStatsDaily.consumer_data_product_id
+        stmt = delete(OutputPortQueryStatsDaily).where(
+            OutputPortQueryStatsDaily.output_port_id == output_port_id,
+            OutputPortQueryStatsDaily.consumer_data_product_id
             == delete_request.consumer_data_product_id,
-            DatasetQueryStatsDaily.date == target_date,
+            OutputPortQueryStatsDaily.date == delete_request.date,
         )
         self.db.execute(stmt)
-        self.db.commit()
+        self.db.flush()
 
     def _group_low_volume_consumers(
         self,

@@ -17,7 +17,11 @@ tasks:
         cp {{.VERSION_FILE}} {{.BACKEND_VERSION_FILE}}
         sed -i "s/^version:.*/version: {{.CLI_ARGS}}/" {{.HELM_CHART}}
         sed -i "s/^  tag:.*/  tag: {{.CLI_ARGS}}/" {{.HELM_VALUES}}
-        cd sdk && poetry version {{.CLI_ARGS}}
+        (cd sdk && poetry version {{.CLI_ARGS}})
+        (cd backend && poetry version {{.CLI_ARGS}})
+        (cd plugins && poetry version {{.CLI_ARGS}})
+        sed -i "s/\"data-product-portal>=[^\"]*\"/\"data-product-portal>={{.CLI_ARGS}}\"/" plugins/pyproject.toml
+        (cd backend && poetry lock)
 
   bump:release-notes:
     desc: "Update release notes with new version and date"
@@ -124,9 +128,9 @@ tasks:
     dir: backend
     cmds:
       - poetry install --with test
-      - docker compose --file test-compose.yaml up -d
+      - docker compose up -d postgresql
       - poetry run pytest -v
-      - docker compose --file test-compose.yaml kill
+      - docker compose kill
 
   test:frontend:
     desc: "Run the tests for the frontend"
@@ -146,3 +150,21 @@ tasks:
     dir: backend
     cmds:
       - poetry install
+
+  setup:backend:
+    desc: "Install backend dependencies, including the test group"
+    dir: backend
+    cmds:
+      - poetry install --all-groups
+
+  setup:sdk:
+    desc: "Install SDK dependencies"
+    dir: sdk
+    cmds:
+      - poetry install --all-groups
+
+  setup:frontend:
+    desc: "Install frontend dependencies"
+    dir: frontend
+    cmds:
+      - npm ci --legacy-peer-deps --prefer-offline --no-audit --progress=false

@@ -33,19 +33,19 @@ export const getTagsTableColumns = ({ t, onRemoveTag, handleEdit }: Props): Tabl
             render: (record, { id }) => {
                 return (
                     <Flex>
-                        <Button type={'link'} onClick={handleEdit(record)}>
+                        <Button type="link" onClick={handleEdit(record)}>
                             {t('Edit')}
                         </Button>
                         <Popconfirm
                             title={t('Remove')}
                             description={t('Are you sure you want to delete the tag?')}
                             onConfirm={() => onRemoveTag(id)}
-                            placement={'leftTop'}
+                            placement="leftTop"
                             okText={t('Confirm')}
                             cancelText={t('Cancel')}
                             autoAdjustOverflow={true}
                         >
-                            <Button type={'link'}>{t('Remove')}</Button>
+                            <Button type="link">{t('Remove')}</Button>
                         </Popconfirm>
                     </Flex>
                 );

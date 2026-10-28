@@ -1,22 +1,29 @@
 from typing import Optional, Sequence
 from uuid import UUID
 
-from pydantic import Field, computed_field
+from pydantic import AliasPath, Field, computed_field
 
+from app.configuration.access_modes.schema_response import AccessMode
+from app.configuration.domains.schema import Domain
 from app.configuration.environments.platform_service_configurations.schema_response import (
     EnvironmentConfigsGetItem,
 )
 from app.configuration.platforms.platform_services.schema import PlatformService
 from app.configuration.tags.schema import Tag
-from app.data_output_configuration.schema_union import DataOutputConfiguration
 from app.data_products.output_port_technical_assets_link.schema import (
     TechnicalAssetOutputPortAssociation,
 )
 from app.data_products.output_ports.schema import OutputPort
 from app.data_products.schema import DataProduct
+from app.data_products.schema_response import DataProductEnvironment
 from app.data_products.technical_assets.enums import TechnicalMapping
 from app.data_products.technical_assets.status import TechnicalAssetStatus
 from app.shared.schema import ORMModel
+from app.technical_asset_configuration.base_schema import (
+    PluginContext,
+    TechnicalAssetContext,
+)
+from app.technical_asset_configuration.schema_union import DataOutputConfiguration
 
 
 class TechnicalInfo(ORMModel):
@@ -25,24 +32,62 @@ class TechnicalInfo(ORMModel):
     info: Optional[str]
 
 
-class BaseTechnicalAssetGet(ORMModel):
+def compute_technical_info(
+    configuration: DataOutputConfiguration,
+    service: PlatformService,
+    environment_configurations: list[EnvironmentConfigsGetItem],
+    plugin_context: PluginContext,
+) -> list[TechnicalInfo]:
+    result = []
+    for env_config in environment_configurations:
+        plugin_config = configuration.get_configuration(env_config.config)
+        context = plugin_config.model_dump() if plugin_config else {}
+        context["environment"] = env_config.environment.acronym
+        info = configuration.render_template(
+            service.technical_info_template, plugin_context=plugin_context, **context
+        )
+        result.append(
+            TechnicalInfo(
+                environment_id=env_config.environment.id,
+                environment=env_config.environment.name,
+                info=info,
+            )
+        )
+    return result
+
+
+class OutputPortLink(TechnicalAssetOutputPortAssociation):
+    output_port: OutputPort
+
+
+class GetTechnicalAssetsResponseItem(ORMModel):
     id: UUID
     name: str
     description: str
     namespace: str
     owner_id: UUID
-    platform_id: UUID
-    service_id: UUID
+    platform_id: Optional[UUID] = None
+    service_id: Optional[UUID] = None
     status: TechnicalAssetStatus
     technical_mapping: TechnicalMapping
+    access_modes: list[AccessMode]
 
-    # Nested schemas
     configuration: DataOutputConfiguration
     owner: DataProduct
+    environments: list[DataProductEnvironment] = Field(
+        validation_alias=AliasPath("owner", "environments")
+    )
 
-    # Excluded
-    service: PlatformService = Field(exclude=True)
+    service: Optional[PlatformService] = Field(default=None, exclude=True)
     environment_configurations: list[EnvironmentConfigsGetItem] = Field(exclude=True)
+    domain: Domain = Field(validation_alias=AliasPath("owner", "domain"), exclude=True)
+
+    def plugin_context(self) -> PluginContext:
+        return PluginContext(
+            technical_asset=TechnicalAssetContext.model_validate(self),
+            data_product=self.owner,
+            domain=self.domain,
+        )
 
     @computed_field(
         description="DEPRECATED: Use 'technical_mapping' instead. "
@@ -54,38 +99,27 @@ class BaseTechnicalAssetGet(ORMModel):
 
     @computed_field
     def result_string(self) -> str:
-        return self.configuration.render_template(self.service.result_string_template)
+        if self.service is None:
+            return ""
+        return self.configuration.render_template(
+            self.service.result_string_template,
+            plugin_context=self.plugin_context(),
+        )
 
     @computed_field
     def technical_info(self) -> list[TechnicalInfo]:
-        technical_info_list = []
-        for environment_configuration in self.environment_configurations:
-            configuration = self.configuration.get_configuration(
-                environment_configuration.config
-            )
-            context = configuration.model_dump() if configuration else {}
-            context["environment"] = environment_configuration.environment.acronym
+        if self.service is None:
+            # Technical info is per environment platform configuration, and there
+            # is no platform here to have one.
+            return []
+        return compute_technical_info(
+            self.configuration,
+            self.service,
+            self.environment_configurations,
+            self.plugin_context(),
+        )
 
-            info = self.configuration.render_template(
-                self.service.technical_info_template, **context
-            )
-            technical_info_list.append(
-                TechnicalInfo(
-                    environment_id=environment_configuration.environment.id,
-                    environment=environment_configuration.environment.name,
-                    info=info,
-                )
-            )
-        return technical_info_list
-
-
-class OutputPortLink(TechnicalAssetOutputPortAssociation):
-    output_port: OutputPort = Field(validation_alias="dataset")
-
-
-class GetTechnicalAssetsResponseItem(BaseTechnicalAssetGet):
-    # Nested schemas
-    output_port_links: list[OutputPortLink] = Field(validation_alias="dataset_links")
+    output_port_links: list[OutputPortLink]
     tags: list[Tag]
 
 

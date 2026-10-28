@@ -1,0 +1,230 @@
+import { InfoCircleOutlined } from '@ant-design/icons';
+import { Checkbox, Flex, InputNumber, Select, Table, type TableColumnsType, Tooltip, Typography } from 'antd';
+import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useDebouncedCallback } from 'use-debounce';
+import { AbstractProductIcon } from '@/components/icons/index.tsx';
+import { SettingsSectionHeader } from '@/pages/settings/components/settings-tabs/components/settings-section-header/settings-section-header.component.tsx';
+import {
+    AbstractDataProductType,
+    type AccessDuration,
+    AccessDurationType,
+    useGetAllAccessDurationsQuery,
+    useUpdateAccessDurationMutation,
+} from '@/store/api/services/generated/configurationAccessDurationsApi';
+import { dispatchMessage } from '@/utils/feedback.ts';
+
+type ConsumerPolicy = {
+    key: AbstractDataProductType;
+    durationType: AccessDurationType;
+    defaultDays: number | null;
+    alternativeAllowed: boolean;
+    alternativeDays?: number;
+    defaultId: string;
+    alternativeId?: string;
+};
+
+const PRODUCT_TYPE_LABELS: Record<string, string> = {
+    [AbstractDataProductType.DataProducts]: 'Data Products',
+    [AbstractDataProductType.Explorations]: 'Explorations',
+};
+
+function toPolicies(durations: AccessDuration[]): ConsumerPolicy[] {
+    const byType = durations.reduce<Partial<Record<AbstractDataProductType, AccessDuration[]>>>((acc, d) => {
+        const existing = acc[d.abstract_data_product_type];
+        acc[d.abstract_data_product_type] = existing ? [...existing, d] : [d];
+        return acc;
+    }, {});
+
+    return (Object.entries(byType) as [AbstractDataProductType, AccessDuration[]][])
+        .map(([type, rows]) => {
+            const defaultRow = rows.find((r) => r.is_default) ?? rows[0];
+            const alternativeRow = rows.find((r) => !r.is_default);
+            return {
+                key: type,
+                durationType: defaultRow.access_duration_type,
+                defaultDays: defaultRow.days,
+                alternativeAllowed: !!alternativeRow,
+                alternativeDays: alternativeRow?.days ?? undefined,
+                defaultId: defaultRow.id,
+                alternativeId: alternativeRow?.id,
+            };
+        })
+        .sort((a, b) => a.key.localeCompare(b.key));
+}
+
+function getPoliciesSignature(policies: ConsumerPolicy[]) {
+    return JSON.stringify(policies);
+}
+
+const AUTO_SAVE_DELAY = 3000; // 3 seconds
+
+export default function AccessDurations() {
+    const { t } = useTranslation();
+    const { data: { access_durations: accessDurations } = {}, isLoading } = useGetAllAccessDurationsQuery();
+    const [policies, setPolicies] = useState<ConsumerPolicy[]>([]);
+    const [updateAccessDuration] = useUpdateAccessDurationMutation();
+
+    useEffect(() => {
+        if (accessDurations) {
+            setPolicies(toPolicies(accessDurations));
+        }
+    }, [accessDurations]);
+
+    const policiesSignature = useMemo(() => getPoliciesSignature(policies), [policies]);
+    const savedPoliciesSignature = useMemo(
+        () => getPoliciesSignature(accessDurations ? toPolicies(accessDurations) : []),
+        [accessDurations],
+    );
+    const hasChanges = policiesSignature !== savedPoliciesSignature;
+
+    const updatePolicy = (key: AbstractDataProductType, patch: Partial<ConsumerPolicy>) => {
+        setPolicies((prev) => prev.map((p) => (p.key === key ? { ...p, ...patch } : p)));
+    };
+
+    const handleSave = useDebouncedCallback(async () => {
+        if (!hasChanges) {
+            return;
+        }
+
+        try {
+            await Promise.all(
+                policies.map((policy) =>
+                    updateAccessDuration({
+                        abstractDataProductType: policy.key,
+                        accessDurationUpdate: {
+                            access_duration_type: policy.durationType,
+                            days: policy.defaultDays,
+                            alternative_allowed: policy.alternativeAllowed,
+                            alternative_days: policy.alternativeDays ?? null,
+                        },
+                    }).unwrap(),
+                ),
+            );
+        } catch (_e) {
+            dispatchMessage({ content: t('Failed to edit access duration settings'), type: 'error' });
+        }
+    }, AUTO_SAVE_DELAY);
+
+    useEffect(() => {
+        if (!hasChanges) {
+            return;
+        }
+
+        handleSave();
+        return () => handleSave.cancel();
+    }, [hasChanges, handleSave]);
+
+    const columns: TableColumnsType<ConsumerPolicy> = [
+        {
+            title: t('Consumer type'),
+            key: 'consumer_type',
+            width: 200,
+            render: (_, record) => (
+                <Flex align="center" gap="small">
+                    <AbstractProductIcon type={record.key} />
+                    <Typography.Text strong>{t(PRODUCT_TYPE_LABELS[record.key] ?? record.key)}</Typography.Text>
+                </Flex>
+            ),
+        },
+        {
+            title: (
+                <Flex align="center" gap="small">
+                    {t('Default duration')}
+                    <Tooltip title={t('The default access duration assigned when a request is approved.')}>
+                        <InfoCircleOutlined style={{ color: 'var(--ant-color-text-secondary)', cursor: 'help' }} />
+                    </Tooltip>
+                </Flex>
+            ),
+            key: 'duration',
+            width: 320,
+            render: (_, record) => (
+                <Flex align="center" gap="small">
+                    <Select
+                        value={record.durationType}
+                        onChange={(val: AccessDurationType) =>
+                            updatePolicy(record.key, {
+                                durationType: val,
+                                defaultDays: val === AccessDurationType.TimeBound ? (record.defaultDays ?? 30) : null,
+                            })
+                        }
+                        options={[
+                            { label: t('Permanent'), value: AccessDurationType.Permanent },
+                            { label: t('Time-bound'), value: AccessDurationType.TimeBound },
+                        ]}
+                    />
+                    {record.durationType === AccessDurationType.TimeBound && (
+                        <InputNumber
+                            min={1}
+                            value={record.defaultDays ?? undefined}
+                            onChange={(val) => updatePolicy(record.key, { defaultDays: val ?? 1 })}
+                            addonAfter={t('days')}
+                        />
+                    )}
+                </Flex>
+            ),
+        },
+        {
+            title: (
+                <Flex align="center" gap="small">
+                    {t('Alternative allowed')}
+                    <Tooltip
+                        title={t(
+                            'Whether requesters can ask for an alternative duration (e.g. permanent when default is time-bound, or vice versa).',
+                        )}
+                    >
+                        <InfoCircleOutlined style={{ color: 'var(--ant-color-text-secondary)', cursor: 'help' }} />
+                    </Tooltip>
+                </Flex>
+            ),
+            key: 'alternative',
+            width: 360,
+            render: (_, record) => {
+                const isTimeBound = record.durationType === AccessDurationType.TimeBound;
+                const label = isTimeBound ? t('Permanent allowed') : t('Time-bound allowed');
+
+                return (
+                    <Flex align="center" gap="small">
+                        <Checkbox
+                            checked={record.alternativeAllowed}
+                            onChange={(e) => {
+                                const checked = e.target.checked;
+                                const alternativeIsTimeBound = record.durationType === AccessDurationType.Permanent;
+                                const alternativeDays =
+                                    checked && alternativeIsTimeBound ? (record.alternativeDays ?? 30) : undefined;
+                                updatePolicy(record.key, { alternativeAllowed: checked, alternativeDays });
+                            }}
+                        />
+                        <Typography.Text>{label}</Typography.Text>
+                        {!isTimeBound && record.alternativeAllowed && (
+                            <InputNumber
+                                min={1}
+                                value={record.alternativeDays}
+                                onChange={(val) => updatePolicy(record.key, { alternativeDays: val ?? 1 })}
+                                addonAfter={t('days')}
+                            />
+                        )}
+                    </Flex>
+                );
+            },
+        },
+    ];
+
+    return (
+        <Flex vertical gap="middle">
+            <SettingsSectionHeader
+                title={t('Access Durations')}
+                description={t('Configure default access durations for Input Ports.')}
+            />
+            <Table<ConsumerPolicy>
+                columns={columns}
+                dataSource={policies}
+                rowKey="key"
+                pagination={false}
+                tableLayout="fixed"
+                loading={isLoading}
+                size="small"
+            />
+        </Flex>
+    );
+}

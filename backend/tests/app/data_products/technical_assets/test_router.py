@@ -6,30 +6,36 @@ import pytest
 from fastapi.testclient import TestClient
 from httpx import Response
 
+from app.authorization.roles.model import Role
 from app.authorization.roles.schema import Scope
 from app.core.authz import Action
+from app.data_products.model import DataProduct, DataProductEnvironment
 from app.settings import settings
 from tests.app.data_products.output_port_technical_assets_link.test_router import (
-    DATA_OUTPUTS_DATASETS_ENDPOINT,
+    TECHNICAL_ASSETS_OUTPUT_PORTS_ENDPOINT,
 )
 from tests.factories import (
+    AccessModeFactory,
     DataProductFactory,
     DataProductRoleAssignmentFactory,
-    DatasetFactory,
+    DatasetRoleAssignmentFactory,
+    DomainFactory,
+    EnvironmentFactory,
+    EnvPlatformServiceConfigFactory,
+    OutputPortFactory,
     PlatformServiceFactory,
     RoleFactory,
     TagFactory,
     TechnicalAssetFactory,
     UserFactory,
 )
-from tests.factories.role_assignment_dataset import DatasetRoleAssignmentFactory
 from tests.webhook_util import assert_event_in_queue
 
 ENDPOINT = "/api/v2/data_products/{}/technical_assets"
 
 
 @pytest.fixture
-def data_output_payload():
+def technical_asset_payload():
     user = UserFactory(external_id=settings.DEFAULT_USERNAME)
     data_product = DataProductFactory()
     service = PlatformServiceFactory()
@@ -41,9 +47,8 @@ def data_output_payload():
         "namespace": "namespace-updated",
         "technical_mapping": "custom",
         "configuration": {
-            "bucket": "test",
             "path": "test",
-            "configuration_type": "S3TechnicalAssetConfiguration",
+            "name": "FakeTechnicalAssetConfiguration",
         },
         "owner_id": str(data_product.id),
         "platform_id": str(service.platform.id),
@@ -55,149 +60,325 @@ def data_output_payload():
 
 
 @pytest.fixture
-def data_output_payload_not_owner():
-    data_product = DataProductFactory()
-    service = PlatformServiceFactory()
-    tag = TagFactory()
-
-    return {
-        "name": "Data Output Name",
-        "description": "Updated Data Output Description",
-        "namespace": "namespace",
-        "technical_mapping": "custom",
-        "configuration": {
-            "bucket": "test",
-            "path": "test",
-            "configuration_type": "S3TechnicalAssetConfiguration",
-        },
-        "owner_id": str(data_product.id),
-        "platform_id": str(service.platform.id),
-        "service_id": str(service.id),
-        "status": "pending",
-        "tag_ids": [str(tag.id)],
-    }
+def data_product_role_assignment(technical_asset_payload) -> Role:
+    role = RoleFactory(
+        scope=Scope.DATA_PRODUCT,
+        permissions=[Action.DATA_PRODUCT__CREATE_TECHNICAL_ASSET],
+    )
+    DataProductRoleAssignmentFactory(
+        identity_id=technical_asset_payload["user_id"],
+        role_id=role.id,
+        data_product_id=technical_asset_payload["owner_id"],
+    )
+    return role
 
 
 class TestTechnicalAssetsRouter:
     invalid_id = "00000000-0000-0000-0000-000000000000"
 
-    def test_create_data_output_source_aligned(
-        self, data_output_payload, client: TestClient
+    def test_create_technical_asset(
+        self, technical_asset_payload, data_product_role_assignment, client: TestClient
     ):
-        role = RoleFactory(
-            scope=Scope.DATA_PRODUCT,
-            permissions=[Action.DATA_PRODUCT__CREATE_TECHNICAL_ASSET],
+        created_technical_asset = self.create_technical_asset(
+            client, technical_asset_payload
         )
-        DataProductRoleAssignmentFactory(
-            user_id=data_output_payload["user_id"],
-            role_id=role.id,
-            data_product_id=data_output_payload["owner_id"],
-        )
-        created_data_output = self.create_technical_asset(client, data_output_payload)
-        assert created_data_output.status_code == 200
-        assert "id" in created_data_output.json()
+        assert created_technical_asset.status_code == 200, created_technical_asset.text
+        assert "id" in created_technical_asset.json()
 
-    def test_create_technical_assert_generates_webhook_v2_event(
+    def test_create_technical_asset__with_platform_and_service_omitted(
+        self, technical_asset_payload, data_product_role_assignment, client
+    ):
+        technical_asset_payload.pop("platform_id")
+        technical_asset_payload.pop("service_id")
+
+        created_technical_asset = self.create_technical_asset(
+            client, technical_asset_payload
+        )
+        assert created_technical_asset.status_code == 200, created_technical_asset.text
+
+        technical_asset = self.get_technical_asset(
+            client,
+            technical_asset_payload["owner_id"],
+            created_technical_asset.json()["id"],
+        )
+        assert technical_asset.status_code == 200, technical_asset.text
+        body = technical_asset.json()
+        assert body["platform_id"] is None
+        assert body["service_id"] is None
+        assert body["result_string"] == ""
+        assert body["technical_info"] == []
+
+    def test_create_technical_asset__rejects_only_one_of_platform_id_or_service_id(
+        self, technical_asset_payload, data_product_role_assignment, client
+    ):
+        technical_asset_payload["service_id"] = None
+
+        created_technical_asset = self.create_technical_asset(
+            client, technical_asset_payload
+        )
+
+        assert created_technical_asset.status_code == 422, created_technical_asset.text
+
+    def test_create_technical_asset__with_access_modes(
+        self, technical_asset_payload, data_product_role_assignment, client
+    ):
+        access_mode = AccessModeFactory(
+            technical_asset_types=[technical_asset_payload["configuration"]["name"]]
+        )
+        technical_asset_payload["access_mode_ids"] = [
+            str(access_mode.id),
+        ]
+
+        created_technical_asset = self.create_technical_asset(
+            client, technical_asset_payload
+        )
+        assert created_technical_asset.status_code == 200
+
+        technical_asset = self.get_technical_asset(
+            client,
+            technical_asset_payload["owner_id"],
+            created_technical_asset.json()["id"],
+        )
+        assert technical_asset.status_code == 200, technical_asset.text
+        assert len(technical_asset.json()["access_modes"]) == 1
+        assert technical_asset.json()["access_modes"][0]["name"] == access_mode.name
+
+    def test_create_technical_asset__incorrect_access_modes(
+        self, technical_asset_payload, data_product_role_assignment, client
+    ):
+        access_mode = AccessModeFactory()
+        technical_asset_payload["access_mode_ids"] = [
+            str(access_mode.id),
+        ]
+
+        created_technical_asset = self.create_technical_asset(
+            client, technical_asset_payload
+        )
+        assert created_technical_asset.status_code == 400
+
+    def test_create_technical_asset__access_mode_doest_not_exist(
+        self, technical_asset_payload, data_product_role_assignment, client
+    ):
+        technical_asset_payload["access_mode_ids"] = [
+            str(uuid.uuid4()),
+        ]
+        created_technical_asset = self.create_technical_asset(
+            client, technical_asset_payload
+        )
+        assert created_technical_asset.status_code == 400
+
+    def test_create_technical_asset_generates_webhook_v2_event(
         self,
-        data_output_payload,
+        technical_asset_payload,
+        data_product_role_assignment,
         client: TestClient,
-        mock_webhook,
+        capture_events,
     ):
-        self.test_create_data_output_source_aligned(data_output_payload, client)
-        assert_event_in_queue("technical_asset.event", mock_webhook)
+        self.test_create_technical_asset(
+            technical_asset_payload, data_product_role_assignment, client
+        )
+        assert_event_in_queue("technical_asset.event", capture_events)
 
-    def test_create_data_output_product_aligned(
-        self, data_output_payload, client: TestClient
+    def test_create_technical_asset_product_aligned(
+        self, technical_asset_payload, data_product_role_assignment, client: TestClient
     ):
-        role = RoleFactory(
-            scope=Scope.DATA_PRODUCT,
-            permissions=[Action.DATA_PRODUCT__CREATE_TECHNICAL_ASSET],
-        )
-        DataProductRoleAssignmentFactory(
-            user_id=data_output_payload["user_id"],
-            role_id=role.id,
-            data_product_id=data_output_payload["owner_id"],
-        )
-        payload = deepcopy(data_output_payload)
+        payload = deepcopy(technical_asset_payload)
         payload["technical_mapping"] = "default"
 
-        created_data_output = self.create_technical_asset(client, payload)
-        assert created_data_output.status_code == 200
-        assert "id" in created_data_output.json()
+        created_technical_asset = self.create_technical_asset(client, payload)
+        assert created_technical_asset.status_code == 200
+        assert "id" in created_technical_asset.json()
 
     def test_create_technical_asset_product_aligned_new(
-        self, data_output_payload, client: TestClient
+        self, technical_asset_payload, data_product_role_assignment, client: TestClient
     ):
-        role = RoleFactory(
-            scope=Scope.DATA_PRODUCT,
-            permissions=[Action.DATA_PRODUCT__CREATE_TECHNICAL_ASSET],
-        )
-        DataProductRoleAssignmentFactory(
-            user_id=data_output_payload["user_id"],
-            role_id=role.id,
-            data_product_id=data_output_payload["owner_id"],
-        )
-        payload = deepcopy(data_output_payload)
+        payload = deepcopy(technical_asset_payload)
         payload["technical_mapping"] = "default"
 
-        created_data_output = self.create_technical_asset(client, payload)
-        assert created_data_output.status_code == 200
-        assert "id" in created_data_output.json()
+        created_technical_asset = self.create_technical_asset(client, payload)
+        assert created_technical_asset.status_code == 200
+        assert "id" in created_technical_asset.json()
 
-    def test_deprecated_source_aligned(self, data_output_payload, client: TestClient):
-        role = RoleFactory(
-            scope=Scope.DATA_PRODUCT,
-            permissions=[Action.DATA_PRODUCT__CREATE_TECHNICAL_ASSET],
-        )
-        DataProductRoleAssignmentFactory(
-            user_id=data_output_payload["user_id"],
-            role_id=role.id,
-            data_product_id=data_output_payload["owner_id"],
-        )
-        payload = deepcopy(data_output_payload)
+    def test_deprecated_source_aligned(
+        self, technical_asset_payload, data_product_role_assignment, client: TestClient
+    ):
+        payload = deepcopy(technical_asset_payload)
         payload.pop("technical_mapping")
         payload["sourceAligned"] = True
 
-        created_data_output = self.create_technical_asset(client, payload)
-        assert created_data_output.status_code == 200
-        assert "id" in created_data_output.json()
+        created_technical_asset = self.create_technical_asset(client, payload)
+        assert created_technical_asset.status_code == 200
+        assert "id" in created_technical_asset.json()
         assert (
             self.get_technical_asset(
                 client,
-                data_output_payload["owner_id"],
-                created_data_output.json().get("id"),
+                technical_asset_payload["owner_id"],
+                created_technical_asset.json().get("id"),
             ).json()["technical_mapping"]
             == "custom"
         )
 
-    def test_create_data_output_not_product_owner(
-        self, data_output_payload_not_owner, client: TestClient
+    def test_create_technical_asset_not_product_owner(
+        self, technical_asset_payload, client: TestClient
     ):
-        created_data_output = self.create_technical_asset(
-            client, data_output_payload_not_owner
+        technical_asset_payload.pop("user_id")
+        created_technical_asset = self.create_technical_asset(
+            client, technical_asset_payload
         )
-        assert created_data_output.status_code == 403
+        assert created_technical_asset.status_code == 403
 
-    def test_get_data_outputs(self, client):
-        data_output = TechnicalAssetFactory()
-        response = client.get(ENDPOINT.format(data_output.owner.id))
-        assert response.status_code == 200
+    def test_get_technical_assets(self, client):
+        technical_asset = TechnicalAssetFactory()
+        response = client.get(ENDPOINT.format(technical_asset.owner.id))
+        assert response.status_code == 200, response.text
         data = response.json()
         assert len(data) == 1
-        assert data["technical_assets"][0]["id"] == str(data_output.id)
+        assert data["technical_assets"][0]["id"] == str(technical_asset.id)
 
     def test_get_technical_asset(self, client: TestClient):
-        data_output = TechnicalAssetFactory()
+        technical_asset = TechnicalAssetFactory()
 
         response = self.get_technical_asset(
-            client, data_output.owner.id, data_output.id
+            client, technical_asset.owner.id, technical_asset.id
         )
         assert response.status_code == 200
-        assert response.json()["id"] == str(data_output.id)
+        assert response.json()["id"] == str(technical_asset.id)
 
-    def test_get_data_output_by_id_not_found(self, client: TestClient):
-        data_output = TechnicalAssetFactory()
-        response = self.get_technical_asset(client, data_output.owner.id, uuid.uuid4())
+    def test_get_technical_asset__environment_info_uses_saved_data_product_list(
+        self, client: TestClient
+    ):
+        dev_env = EnvironmentFactory(name="dev", acronym="dev")
+        prd_env = EnvironmentFactory(name="prd", acronym="prd")
+        data_product = DataProductFactory(
+            id=uuid.uuid4(),
+            environments=[
+                DataProductEnvironment(environment=dev_env),
+                DataProductEnvironment(environment=prd_env),
+            ],
+        )
+        technical_asset = TechnicalAssetFactory(owner=data_product)
+        EnvPlatformServiceConfigFactory(
+            platform=technical_asset.platform,
+            service=technical_asset.service,
+            environment=dev_env,
+        )
+        EnvPlatformServiceConfigFactory(
+            platform=technical_asset.platform,
+            service=technical_asset.service,
+            environment=prd_env,
+        )
+
+        response = self.get_technical_asset(
+            client, technical_asset.owner.id, technical_asset.id
+        )
+        assert response.status_code == 200
+        environment_ids = {
+            info["environment_id"] for info in response.json()["technical_info"]
+        }
+        assert environment_ids == {str(dev_env.id), str(prd_env.id)}
+        assert {
+            item["environment_id"] for item in response.json()["environments"]
+        } == environment_ids
+
+    def test_get_technical_asset__environment_info_excludes_undeclared_environments(
+        self, client: TestClient
+    ):
+        dev_env = EnvironmentFactory(name="dev", acronym="dev", is_global=True)
+        sandbox_env = EnvironmentFactory(
+            name="sandbox", acronym="sandbox", is_global=False
+        )
+        data_product = DataProductFactory(
+            environments=[DataProductEnvironment(environment=dev_env)]
+        )
+        technical_asset = TechnicalAssetFactory(owner=data_product)
+        EnvPlatformServiceConfigFactory(
+            platform=technical_asset.platform,
+            service=technical_asset.service,
+            environment=dev_env,
+        )
+        EnvPlatformServiceConfigFactory(
+            platform=technical_asset.platform,
+            service=technical_asset.service,
+            environment=sandbox_env,
+        )
+
+        response = self.get_technical_asset(
+            client, technical_asset.owner.id, technical_asset.id
+        )
+        assert response.status_code == 200
+        environment_ids = {
+            info["environment_id"] for info in response.json()["technical_info"]
+        }
+        assert environment_ids == {str(dev_env.id)}
+
+    def test_get_technical_asset__environment_info_uses_data_product_scope(
+        self, client: TestClient
+    ):
+        dev_env = EnvironmentFactory(name="dev", acronym="dev")
+        prd_env = EnvironmentFactory(name="prd", acronym="prd")
+        domain = DomainFactory()
+        data_product = DataProductFactory(
+            domain=domain, environments=[DataProductEnvironment(environment=dev_env)]
+        )
+        technical_asset = TechnicalAssetFactory(owner=data_product)
+        EnvPlatformServiceConfigFactory(
+            platform=technical_asset.platform,
+            service=technical_asset.service,
+            environment=dev_env,
+        )
+        EnvPlatformServiceConfigFactory(
+            platform=technical_asset.platform,
+            service=technical_asset.service,
+            environment=prd_env,
+        )
+
+        response = self.get_technical_asset(
+            client, technical_asset.owner.id, technical_asset.id
+        )
+        assert response.status_code == 200
+        environment_ids = {
+            info["environment_id"] for info in response.json()["technical_info"]
+        }
+        assert environment_ids == {str(dev_env.id)}
+
+    def test_get_technical_asset__data_product_can_include_non_global_environment(
+        self, client: TestClient
+    ):
+        sandbox_env = EnvironmentFactory(
+            name="sandbox", acronym="sandbox", is_global=False
+        )
+        prd_env = EnvironmentFactory(name="prd", acronym="prd", is_global=True)
+        domain = DomainFactory()
+        data_product = DataProductFactory(
+            domain=domain,
+            environments=[DataProductEnvironment(environment=sandbox_env)],
+        )
+        technical_asset = TechnicalAssetFactory(owner=data_product)
+        EnvPlatformServiceConfigFactory(
+            platform=technical_asset.platform,
+            service=technical_asset.service,
+            environment=sandbox_env,
+        )
+        EnvPlatformServiceConfigFactory(
+            platform=technical_asset.platform,
+            service=technical_asset.service,
+            environment=prd_env,
+        )
+
+        response = self.get_technical_asset(
+            client, technical_asset.owner.id, technical_asset.id
+        )
+        assert response.status_code == 200
+        environment_ids = {
+            info["environment_id"] for info in response.json()["technical_info"]
+        }
+        assert environment_ids == {str(sandbox_env.id)}
+
+    def test_get_technical_asset_by_id_not_found(self, client: TestClient):
+        technical_asset = TechnicalAssetFactory()
+        response = self.get_technical_asset(
+            client, technical_asset.owner.id, uuid.uuid4()
+        )
         assert response.status_code == 404
 
     def test_update_technical_asset(self, client: TestClient):
@@ -208,7 +389,7 @@ class TestTechnicalAssetsRouter:
             permissions=[Action.DATA_PRODUCT__UPDATE_TECHNICAL_ASSET],
         )
         DataProductRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id, data_product_id=data_product.id
+            identity_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
         tag = TagFactory()
         technical_asset = TechnicalAssetFactory(owner=data_product)
@@ -225,23 +406,23 @@ class TestTechnicalAssetsRouter:
         assert response.json()["id"] == str(technical_asset.id)
 
     def test_update_data_product_no_member(self, client: TestClient):
-        data_output = TechnicalAssetFactory()
+        technical_asset = TechnicalAssetFactory()
         response = self.update_technical_asset(
             client,
             {"name": "update", "description": "update"},
-            data_output.owner.id,
-            data_output.id,
+            technical_asset.owner.id,
+            technical_asset.id,
         )
         assert response.status_code == 403
 
-    def test_remove_data_output_no_access(self, client: TestClient):
-        data_output = TechnicalAssetFactory()
+    def test_remove_technical_asset_no_access(self, client: TestClient):
+        technical_asset = TechnicalAssetFactory()
         response = self.delete_technical_asset(
-            client, data_output.owner.id, data_output.id
+            client, technical_asset.owner.id, technical_asset.id
         )
         assert response.status_code == 403
 
-    def test_remove_data_output(self, client: TestClient):
+    def test_remove_technical_asset(self, client: TestClient):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
         role = RoleFactory(
@@ -249,15 +430,15 @@ class TestTechnicalAssetsRouter:
             permissions=[Action.DATA_PRODUCT__DELETE_TECHNICAL_ASSET],
         )
         DataProductRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id, data_product_id=data_product.id
+            identity_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
-        data_output = TechnicalAssetFactory(owner=data_product)
+        technical_asset = TechnicalAssetFactory(owner=data_product)
         response = self.delete_technical_asset(
-            client, data_output.owner.id, data_output.id
+            client, technical_asset.owner.id, technical_asset.id
         )
         assert response.status_code == 200
 
-    def test_remove_data_output_with_tags(self, client: TestClient):
+    def test_remove_technical_asset_with_tags(self, client: TestClient):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
         role = RoleFactory(
@@ -265,11 +446,11 @@ class TestTechnicalAssetsRouter:
             permissions=[Action.DATA_PRODUCT__DELETE_TECHNICAL_ASSET],
         )
         DataProductRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id, data_product_id=data_product.id
+            identity_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
-        data_output = TechnicalAssetFactory(owner=data_product, tags=[TagFactory()])
+        technical_asset = TechnicalAssetFactory(owner=data_product, tags=[TagFactory()])
         response = self.delete_technical_asset(
-            client, data_output.owner.id, data_output.id
+            client, technical_asset.owner.id, technical_asset.id
         )
         assert response.status_code == 200
 
@@ -288,18 +469,18 @@ class TestTechnicalAssetsRouter:
             permissions=[Action.DATA_PRODUCT__UPDATE_TECHNICAL_ASSET],
         )
         DataProductRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id, data_product_id=data_product.id
+            identity_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
-        data_output = TechnicalAssetFactory(owner=data_product)
+        technical_asset = TechnicalAssetFactory(owner=data_product)
         response = self.get_technical_asset(
-            client, data_output.owner.id, data_output.id
+            client, technical_asset.owner.id, technical_asset.id
         )
         assert response.json()["status"] == "active"
         _ = self.update_technical_asset_status(
-            client, {"status": "pending"}, data_output.owner.id, data_output.id
+            client, {"status": "pending"}, technical_asset.owner.id, technical_asset.id
         )
         response = self.get_technical_asset(
-            client, data_output.owner.id, data_output.id
+            client, technical_asset.owner.id, technical_asset.id
         )
         assert response.json()["status"] == "pending"
 
@@ -311,7 +492,7 @@ class TestTechnicalAssetsRouter:
             permissions=[Action.DATA_PRODUCT__UPDATE_TECHNICAL_ASSET],
         )
         DataProductRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id, data_product_id=data_product.id
+            identity_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
         technical_asset = TechnicalAssetFactory(owner=data_product)
         response = self.get_technical_asset(
@@ -327,16 +508,16 @@ class TestTechnicalAssetsRouter:
         assert response.json()["status"] == "pending"
 
     def test_get_graph_data(self, client: TestClient):
-        data_output = TechnicalAssetFactory()
+        technical_asset = TechnicalAssetFactory()
         response = client.get(
-            f"{ENDPOINT.format(data_output.owner.id)}/{data_output.id}/graph"
+            f"{ENDPOINT.format(technical_asset.owner.id)}/{technical_asset.id}/graph"
         )
         assert response.json()["edges"] == [
             {
                 "animated": True,
-                "id": f"{str(data_output.id)}-{str(data_output.owner.id)}",
-                "source": str(data_output.owner.id),
-                "target": str(data_output.id),
+                "id": f"{str(technical_asset.id)}-{str(technical_asset.owner.id)}",
+                "source": str(technical_asset.owner.id),
+                "target": str(technical_asset.id),
                 "sourceHandle": "right_s",
                 "targetHandle": "left_t",
             }
@@ -345,15 +526,15 @@ class TestTechnicalAssetsRouter:
             if node["type"] == "technicalAssetNode":
                 assert node == {
                     "data": {
-                        "icon_key": "S3TechnicalAssetConfiguration",
-                        "id": str(data_output.id),
-                        "link_to_id": str(data_output.owner.id),
-                        "name": data_output.name,
+                        "icon_key": "FakeTechnicalAssetConfiguration",
+                        "id": str(technical_asset.id),
+                        "link_to_id": str(technical_asset.owner.id),
+                        "name": technical_asset.name,
                         "domain": None,
                         "domain_id": None,
                         "description": None,
                     },
-                    "id": str(data_output.id),
+                    "id": str(technical_asset.id),
                     "isMain": True,
                     "type": "technicalAssetNode",
                 }
@@ -361,14 +542,14 @@ class TestTechnicalAssetsRouter:
                 assert node == {
                     "data": {
                         "icon_key": "default",
-                        "id": str(data_output.owner.id),
+                        "id": str(technical_asset.owner.id),
                         "link_to_id": None,
-                        "name": data_output.owner.name,
+                        "name": technical_asset.owner.name,
                         "domain": None,
                         "domain_id": None,
                         "description": None,
                     },
-                    "id": str(data_output.owner.id),
+                    "id": str(technical_asset.owner.id),
                     "isMain": False,
                     "type": "dataProductNode",
                 }
@@ -397,112 +578,76 @@ class TestTechnicalAssetsRouter:
         assert response.status_code == 200
         assert body["validity"] == "VALID"
 
-    def test_create_data_output_duplicate_namespace(
-        self, data_output_payload, client: TestClient
+    def test_create_technical_asset_duplicate_namespace(
+        self,
+        technical_asset_payload,
+        data_product_role_assignment,
+        client: TestClient,
+        session,
     ):
-        role = RoleFactory(
-            scope=Scope.DATA_PRODUCT,
-            permissions=[Action.DATA_PRODUCT__CREATE_TECHNICAL_ASSET],
-        )
-        owner = DataProductFactory()
-        DataProductRoleAssignmentFactory(
-            user_id=data_output_payload["user_id"],
-            role_id=role.id,
-            data_product_id=owner.id,
+        data_product = session.get(
+            DataProduct,
+            str(technical_asset_payload["owner_id"]),
+            execution_options={"skip_data_product_visibility_filter": True},
         )
         TechnicalAssetFactory(
-            namespace=data_output_payload["namespace"],
-            owner=owner,
+            namespace=technical_asset_payload["namespace"], owner=data_product
         )
-
-        create_payload = deepcopy(data_output_payload)
-        create_payload["owner_id"] = str(owner.id)
-
-        response = self.create_technical_asset(client, create_payload)
+        response = self.create_technical_asset(client, technical_asset_payload)
         assert response.status_code == 400
 
-    def test_create_data_output_invalid_characters_namespace(
-        self, data_output_payload, client: TestClient
+    def test_create_technical_asset_invalid_characters_namespace(
+        self, technical_asset_payload, data_product_role_assignment, client: TestClient
     ):
-        role = RoleFactory(
-            scope=Scope.DATA_PRODUCT,
-            permissions=[Action.DATA_PRODUCT__CREATE_TECHNICAL_ASSET],
-        )
-        DataProductRoleAssignmentFactory(
-            user_id=data_output_payload["user_id"],
-            role_id=role.id,
-            data_product_id=data_output_payload["owner_id"],
-        )
-        create_payload = deepcopy(data_output_payload)
+        create_payload = deepcopy(technical_asset_payload)
         create_payload["namespace"] = "!"
 
         response = self.create_technical_asset(client, create_payload)
         assert response.status_code == 400
 
-    def test_create_data_output_invalid_length_namespace(
-        self, data_output_payload, client: TestClient
+    def test_create_technical_asset_invalid_length_namespace(
+        self, technical_asset_payload, data_product_role_assignment, client: TestClient
     ):
-        role = RoleFactory(
-            scope=Scope.DATA_PRODUCT,
-            permissions=[Action.DATA_PRODUCT__CREATE_TECHNICAL_ASSET],
-        )
-        DataProductRoleAssignmentFactory(
-            user_id=data_output_payload["user_id"],
-            role_id=role.id,
-            data_product_id=data_output_payload["owner_id"],
-        )
-        create_payload = deepcopy(data_output_payload)
+        create_payload = deepcopy(technical_asset_payload)
         create_payload["namespace"] = "a" * 256
 
         response = self.create_technical_asset(client, create_payload)
         assert response.status_code == 400
 
-    def test_history_event_created_on_data_output_creation(
-        self, data_output_payload, client
+    def test_history_event_created_on_technical_asset_creation(
+        self, technical_asset_payload, data_product_role_assignment, client
     ):
-        role = RoleFactory(
-            scope=Scope.DATA_PRODUCT,
-            permissions=[Action.DATA_PRODUCT__CREATE_TECHNICAL_ASSET],
+        created_technical_asset = self.create_technical_asset(
+            client, technical_asset_payload
         )
-        DataProductRoleAssignmentFactory(
-            user_id=data_output_payload["user_id"],
-            role_id=role.id,
-            data_product_id=data_output_payload["owner_id"],
-        )
-        created_data_output = self.create_technical_asset(client, data_output_payload)
-        assert created_data_output.status_code == 200
-        assert "id" in created_data_output.json()
+        assert created_technical_asset.status_code == 200
+        assert "id" in created_technical_asset.json()
 
         history = self.get_technical_asset_history(
             client,
-            data_output_payload["owner_id"],
-            created_data_output.json().get("id"),
+            technical_asset_payload["owner_id"],
+            created_technical_asset.json().get("id"),
         ).json()
         assert len(history["events"]) == 1
 
-    def test_get_technical_asset_history(self, data_output_payload, client):
-        role = RoleFactory(
-            scope=Scope.DATA_PRODUCT,
-            permissions=[Action.DATA_PRODUCT__CREATE_TECHNICAL_ASSET],
+    def test_get_technical_asset_history(
+        self, technical_asset_payload, data_product_role_assignment, client
+    ):
+        created_technical_asset = self.create_technical_asset(
+            client, technical_asset_payload
         )
-        DataProductRoleAssignmentFactory(
-            user_id=data_output_payload["user_id"],
-            role_id=role.id,
-            data_product_id=data_output_payload["owner_id"],
-        )
-        created_data_output = self.create_technical_asset(client, data_output_payload)
-        assert created_data_output.status_code == 200
-        assert "id" in created_data_output.json()
+        assert created_technical_asset.status_code == 200
+        assert "id" in created_technical_asset.json()
 
         history = self.get_technical_asset_history(
             client,
-            data_output_payload["owner_id"],
-            created_data_output.json().get("id"),
+            technical_asset_payload["owner_id"],
+            created_technical_asset.json().get("id"),
         )
         assert history.status_code == 200, history.text
         assert len(history.json()["events"]) == 1
 
-    def test_history_event_created_on_data_output_status_update(self, client):
+    def test_history_event_created_on_technical_asset_status_update(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
         role = RoleFactory(
@@ -510,23 +655,24 @@ class TestTechnicalAssetsRouter:
             permissions=[Action.DATA_PRODUCT__UPDATE_TECHNICAL_ASSET],
         )
         DataProductRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id, data_product_id=data_product.id
+            identity_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
-        data_output = TechnicalAssetFactory(owner=data_product)
+        technical_asset = TechnicalAssetFactory(owner=data_product)
         response = self.update_technical_asset_status(
-            client, {"status": "pending"}, data_output.owner.id, data_output.id
+            client, {"status": "pending"}, technical_asset.owner.id, technical_asset.id
         )
+        assert response.status_code == 200, response.text
         response = self.get_technical_asset(
-            client, data_output.owner.id, data_output.id
+            client, technical_asset.owner.id, technical_asset.id
         )
-        assert response.status_code == 200
+        assert response.status_code == 200, response.text
 
         history = self.get_technical_asset_history(
-            client, data_output.owner.id, data_output.id
+            client, technical_asset.owner.id, technical_asset.id
         ).json()
         assert len(history["events"]) == 1
 
-    def test_history_event_created_on_data_output_update(self, client):
+    def test_history_event_created_on_technical_asset_update(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
         role = RoleFactory(
@@ -534,26 +680,26 @@ class TestTechnicalAssetsRouter:
             permissions=[Action.DATA_PRODUCT__UPDATE_TECHNICAL_ASSET],
         )
         DataProductRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id, data_product_id=data_product.id
+            identity_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
         tag = TagFactory()
-        data_output = TechnicalAssetFactory(owner=data_product)
+        technical_asset = TechnicalAssetFactory(owner=data_product)
         update_payload = {
             "name": "update",
             "description": "update",
             "tag_ids": [str(tag.id)],
         }
         response = self.update_technical_asset(
-            client, update_payload, data_output.owner.id, data_output.id
+            client, update_payload, technical_asset.owner.id, technical_asset.id
         )
         assert response.status_code == 200
 
         history = self.get_technical_asset_history(
-            client, data_output.owner.id, data_output.id
+            client, technical_asset.owner.id, technical_asset.id
         ).json()
         assert len(history["events"]) == 1
 
-    def test_history_event_created_on_data_output_deletion(self, client):
+    def test_history_event_created_on_technical_asset_deletion(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
         role = RoleFactory(
@@ -561,25 +707,25 @@ class TestTechnicalAssetsRouter:
             permissions=[Action.DATA_PRODUCT__DELETE_TECHNICAL_ASSET],
         )
         DataProductRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id, data_product_id=data_product.id
+            identity_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
-        data_output = TechnicalAssetFactory(owner=data_product)
+        technical_asset = TechnicalAssetFactory(owner=data_product)
         response = self.delete_technical_asset(
-            client, data_output.owner.id, data_output.id
+            client, technical_asset.owner.id, technical_asset.id
         )
         assert response.status_code == 200
 
         # get_data_product_history should return 1
-        history = self.get_data_product_history(client, data_output.owner.id).json()
+        history = self.get_data_product_history(client, technical_asset.owner.id).json()
         assert len(history["events"]) == 1
 
-        # get_data_output_history should fail
+        # get_technical_asset_history should fail
         response = self.get_technical_asset_history(
-            client, data_output.owner.id, data_output.id
+            client, technical_asset.owner.id, technical_asset.id
         )
         assert response.status_code == 404
 
-    def test_retain_deleted_data_output_name_in_history(self, client):
+    def test_retain_deleted_technical_asset_name_in_history(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
         role = RoleFactory(
@@ -587,32 +733,32 @@ class TestTechnicalAssetsRouter:
             permissions=[Action.DATA_PRODUCT__DELETE_TECHNICAL_ASSET],
         )
         DataProductRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id, data_product_id=data_product.id
+            identity_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
-        data_output = TechnicalAssetFactory(owner=data_product)
-        data_output_name = data_output.name
+        technical_asset = TechnicalAssetFactory(owner=data_product)
+        technical_asset_name = technical_asset.name
 
         response = self.delete_technical_asset(
-            client, data_output.owner.id, data_output.id
+            client, technical_asset.owner.id, technical_asset.id
         )
         assert response.status_code == 200
 
-        response = self.get_data_product_history(client, data_output.owner.id)
+        response = self.get_data_product_history(client, technical_asset.owner.id)
         assert len(response.json()["events"]) == 1
         assert (
             response.json()["events"][0]["deleted_subject_identifier"]
-            == data_output_name
+            == technical_asset_name
         )
 
-    @patch("app.data_products.technical_assets.email.send_link_dataset_email")
+    @patch("app.data_products.technical_assets.email.send_link_output_port_email")
     def test_dataset_link_auto_approval_no_email_sent(
         self, mock_send_email, client: TestClient
     ):
         """Test that no email is sent when dataset link request is auto-approved"""
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory()
-        dataset = DatasetFactory(data_product=data_product)
-        data_output = TechnicalAssetFactory(owner=data_product)
+        dataset = OutputPortFactory(data_product=data_product)
+        technical_asset = TechnicalAssetFactory(owner=data_product)
 
         # Create role that allows linking datasets
         role = RoleFactory(
@@ -621,26 +767,26 @@ class TestTechnicalAssetsRouter:
         )
 
         DataProductRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id, data_product_id=data_product.id
+            identity_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
         ds_role = RoleFactory(
             scope=Scope.DATASET,
             permissions=[Action.OUTPUT_PORT__APPROVE_TECHNICAL_ASSET_LINK_REQUEST],
         )
         DatasetRoleAssignmentFactory(
-            user_id=user.id, role_id=ds_role.id, dataset_id=dataset.id
+            user_id=user.id, role_id=ds_role.id, output_port_id=dataset.id
         )
         # Mock auto-approval scenario (same data product owner)
         response = client.post(
-            f"{DATA_OUTPUTS_DATASETS_ENDPOINT.format(data_product.id, dataset.id)}/add",
-            json={"technical_asset_id": f"{data_output.id}"},
+            f"{TECHNICAL_ASSETS_OUTPUT_PORTS_ENDPOINT.format(data_product.id, dataset.id)}/add",
+            json={"technical_asset_id": f"{technical_asset.id}"},
         )
 
         assert response.status_code == 200
         # Verify no email was sent for auto-approved request
         mock_send_email.assert_not_called()
 
-    @patch("app.data_products.technical_assets.email.send_link_dataset_email")
+    @patch("app.data_products.technical_assets.email.send_link_output_port_email")
     def test_dataset_link_manual_approval_email_sent(
         self, mock_send_email, client: TestClient
     ):
@@ -648,8 +794,8 @@ class TestTechnicalAssetsRouter:
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         other_approver = UserFactory()
         data_product = DataProductFactory()
-        dataset = DatasetFactory(data_product=data_product)  # Different owner
-        data_output = TechnicalAssetFactory(owner=data_product)
+        dataset = OutputPortFactory(data_product=data_product)  # Different owner
+        technical_asset = TechnicalAssetFactory(owner=data_product)
 
         # Create role that allows linking datasets
         role = RoleFactory(
@@ -657,7 +803,7 @@ class TestTechnicalAssetsRouter:
             permissions=[Action.DATA_PRODUCT__REQUEST_TECHNICAL_ASSET_LINK],
         )
         DataProductRoleAssignmentFactory(
-            user_id=user.id, role_id=role.id, data_product_id=data_product.id
+            identity_id=user.id, role_id=role.id, data_product_id=data_product.id
         )
         approver_role = RoleFactory(
             scope=Scope.DATASET,
@@ -666,13 +812,13 @@ class TestTechnicalAssetsRouter:
         DatasetRoleAssignmentFactory(
             user_id=other_approver.id,
             role_id=approver_role.id,
-            dataset_id=dataset.id,
+            output_port_id=dataset.id,
         )
 
         # Mock manual approval scenario (different data product owner)
         response = client.post(
-            f"{DATA_OUTPUTS_DATASETS_ENDPOINT.format(data_product.id, dataset.id)}/add",
-            json={"technical_asset_id": f"{data_output.id}"},
+            f"{TECHNICAL_ASSETS_OUTPUT_PORTS_ENDPOINT.format(data_product.id, dataset.id)}/add",
+            json={"technical_asset_id": f"{technical_asset.id}"},
         )
 
         assert response.status_code == 200
@@ -687,11 +833,11 @@ class TestTechnicalAssetsRouter:
 
     @staticmethod
     def create_technical_asset(
-        client: TestClient, default_data_output_payload
+        client: TestClient, default_technical_asset_payload
     ) -> Response:
         return client.post(
-            f"/api/v2/data_products/{default_data_output_payload.get('owner_id')}/technical_assets",
-            json=default_data_output_payload,
+            f"/api/v2/data_products/{default_technical_asset_payload.get('owner_id')}/technical_assets",
+            json=default_technical_asset_payload,
         )
 
     @staticmethod
@@ -739,9 +885,9 @@ class TestTechnicalAssetsRouter:
         return client.get("/api/v2/resource_names/constraints")
 
     @staticmethod
-    def get_technical_asset_history(client, data_product_id, data_output_id):
+    def get_technical_asset_history(client, data_product_id, technical_asset_id):
         return client.get(
-            f"{ENDPOINT.format(data_product_id)}/{data_output_id}/history"
+            f"{ENDPOINT.format(data_product_id)}/{technical_asset_id}/history"
         )
 
     @staticmethod
@@ -759,9 +905,8 @@ def ta_event_payload():
         "namespace": "test-ta-event-ns",
         "technical_mapping": "default",
         "configuration": {
-            "bucket": "test",
             "path": "test",
-            "configuration_type": "S3TechnicalAssetConfiguration",
+            "name": "FakeTechnicalAssetConfiguration",
         },
         "platform_id": str(service.platform.id),
         "service_id": str(service.id),

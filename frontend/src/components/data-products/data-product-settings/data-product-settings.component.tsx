@@ -1,9 +1,21 @@
-import { Flex, Form, type FormProps, Select, Switch, Typography } from 'antd';
-import TextArea from 'antd/es/input/TextArea';
+import { QuestionCircleOutlined, SettingOutlined } from '@ant-design/icons';
+import {
+    Descriptions,
+    type DescriptionsProps,
+    Flex,
+    Form,
+    type FormProps,
+    Input,
+    Select,
+    Switch,
+    Tooltip,
+    Typography,
+    theme,
+} from 'antd';
 import { type ReactElement, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-
-import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants';
+import { EmptyState, hasFailed } from '@/components/empty-state/empty-state.component.tsx';
+import { DESCRIPTIONS_LABEL_WIDTH, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants';
 import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
 import {
     type DataProductSettingsGetItem,
@@ -19,9 +31,10 @@ import {
     useGetOutputPortQuery,
     useSetValueForOutputPortMutation,
 } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
-import styles from './data-product-settings.module.scss';
+import { dispatchMessage } from '@/utils/feedback.ts';
+
+const { TextArea } = Input;
 
 type Timeout = ReturnType<typeof setTimeout>; // Defines the type for timeouts
 type Props = {
@@ -36,17 +49,21 @@ interface DataProductSettingValueForm {
 
 export function DataProductSettings({ id, scope, dataProductId }: Props) {
     const { t } = useTranslation();
+    const { token } = theme.useToken();
+    const dataProductValuesQuery = useGetDataProductSettingsQuery(id || '', {
+        skip: scope !== 'dataproduct',
+    });
     const { data: { data_product_settings: dataProductSettings = [] } = {}, isFetching: isFetchingDP } =
-        useGetDataProductSettingsQuery(id || '', {
-            skip: scope !== 'dataproduct',
-        });
-    const { data: outputPort, isFetching: isFetchingDS } = useGetOutputPortQuery(
+        dataProductValuesQuery;
+    const outputPortQuery = useGetOutputPortQuery(
         { id: id, dataProductId: dataProductId ?? '' },
         {
             skip: scope !== 'dataset' || !dataProductId,
         },
     );
-    const { data: settings, isFetching } = useGetDataProductsSettingsQuery();
+    const { data: outputPort, isFetching: isFetchingDS } = outputPortQuery;
+    const settingsQuery = useGetDataProductsSettingsQuery();
+    const { data: settings, isFetching } = settingsQuery;
     const filteredSettings = useMemo(() => {
         return settings?.data_product_settings.filter((setting) => setting.scope === scope);
     }, [scope, settings]);
@@ -156,27 +173,13 @@ export function DataProductSettings({ id, scope, dataProductId }: Props) {
     }, [form, updatedSettings]);
 
     const formContent = useMemo(() => {
-        // Group settings by divider
-        const groupedSettings = updatedSettings.reduce(
-            (groups, setting) => {
-                const category = setting.category; // Use 'Default' for settings without a divider
-                if (!groups[category]) {
-                    groups[category] = [];
-                }
-                groups[category].push(setting);
-                return groups;
-            },
-            {} as Record<string, typeof updatedSettings>,
-        );
-
-        const renderSetting = (setting: DataProductSettingsGetItem): ReactElement | null => {
+        const renderControl = (setting: DataProductSettingsGetItem): ReactElement | null => {
             switch (setting.type) {
                 case 'checkbox':
                     return (
                         <Form.Item<DataProductSettingValueForm>
                             name={`value_${setting.id}`}
-                            label={setting.name}
-                            tooltip={setting.tooltip}
+                            style={{ margin: 0 }}
                             rules={[
                                 {
                                     required: true,
@@ -189,21 +192,13 @@ export function DataProductSettings({ id, scope, dataProductId }: Props) {
                     );
                 case 'tags':
                     return (
-                        <Form.Item<DataProductSettingValueForm>
-                            name={`value_${setting.id}`}
-                            label={setting.name}
-                            tooltip={setting.tooltip}
-                        >
+                        <Form.Item<DataProductSettingValueForm> name={`value_${setting.id}`} style={{ margin: 0 }}>
                             <Select allowClear={false} defaultActiveFirstOption mode="tags" />
                         </Form.Item>
                     );
                 case 'input':
                     return (
-                        <Form.Item<DataProductSettingValueForm>
-                            name={`value_${setting.id}`}
-                            label={setting.name}
-                            tooltip={setting.tooltip}
-                        >
+                        <Form.Item<DataProductSettingValueForm> name={`value_${setting.id}`}>
                             <TextArea rows={3} count={{ show: true, max: MAX_DESCRIPTION_INPUT_LENGTH }} />
                         </Form.Item>
                     );
@@ -212,58 +207,87 @@ export function DataProductSettings({ id, scope, dataProductId }: Props) {
             }
         };
 
-        // Render grouped settings
-        return Object.entries(groupedSettings).map(([divider, settings]) => (
-            <Flex key={divider} vertical>
-                <Typography.Title>{divider}</Typography.Title>
-                {settings.map((setting) => (
-                    <Flex key={setting.id} vertical>
-                        {/* Hidden Input for ID */}
-                        <Form.Item<DataProductSettingValueForm>
-                            name={`data_product_settings_id_${setting.id}`}
-                            initialValue={setting.id}
-                            hidden
-                        />
-                        {renderSetting(setting)}
+        const items: DescriptionsProps['items'] = updatedSettings.map((setting) => ({
+            key: setting.id,
+            label: (
+                <Flex vertical gap={0}>
+                    <Flex align="center" gap="small">
+                        <span>{setting.name}</span>
+                        {setting.tooltip ? (
+                            <Tooltip title={setting.tooltip}>
+                                <QuestionCircleOutlined style={{ color: token.colorTextTertiary }} />
+                            </Tooltip>
+                        ) : null}
                     </Flex>
-                ))}
-            </Flex>
-        ));
-    }, [updatedSettings, t]);
+                    <Typography.Text type="secondary" style={{ fontSize: token.fontSizeSM }}>
+                        {t('Category')}: {setting.category}
+                    </Typography.Text>
+                </Flex>
+            ),
+            children: (
+                <>
+                    <Form.Item<DataProductSettingValueForm>
+                        name={`data_product_settings_id_${setting.id}`}
+                        initialValue={setting.id}
+                        hidden
+                    />
+                    {renderControl(setting)}
+                </>
+            ),
+        }));
+
+        return (
+            <Descriptions
+                column={1}
+                size="small"
+                bordered
+                items={items}
+                styles={{ label: { color: token.colorTextSecondary, width: DESCRIPTIONS_LABEL_WIDTH } }}
+            />
+        );
+    }, [updatedSettings, t, token]);
+    const isLoading = isFetching || isFetchingDP || isFetchingDS;
+    // Without the stored values the form would present each setting's default as if it were saved.
+    const failedQueries = [settingsQuery, scope === 'dataproduct' ? dataProductValuesQuery : outputPortQuery].filter(
+        hasFailed,
+    );
+    if (failedQueries.length > 0 || (!isLoading && updatedSettings.length === 0)) {
+        return (
+            <EmptyState
+                icon={<SettingOutlined />}
+                title={t('No Custom Settings yet')}
+                description={
+                    scope === 'dataproduct'
+                        ? t('Settings your administrator defines for Data Products appear here.')
+                        : t('Settings your administrator defines for Output Ports appear here.')
+                }
+                error={failedQueries.length > 0}
+                onRetry={() => {
+                    for (const query of failedQueries) query.refetch();
+                }}
+            />
+        );
+    }
 
     return (
-        <Flex vertical>
-            <Form
-                form={form}
-                labelCol={FORM_GRID_WRAPPER_COLS}
-                wrapperCol={FORM_GRID_WRAPPER_COLS}
-                layout="horizontal"
-                onFinish={onSubmit}
-                onFinishFailed={onSubmitFailed}
-                autoComplete={'off'}
-                labelWrap
-                labelAlign={'left'}
-                disabled={
-                    isFetching ||
-                    isFetchingDP ||
-                    isFetchingDS ||
-                    !canUpdateProductSettings ||
-                    !canUpdateOutputPortSetting
+        <Form
+            form={form}
+            onFinish={onSubmit}
+            onFinishFailed={onSubmitFailed}
+            autoComplete="off"
+            disabled={isLoading || !canUpdateProductSettings || !canUpdateOutputPortSetting}
+            onValuesChange={(_, allValues) => {
+                // Trigger form submission after 0.5 seconds of unchanged input values
+                if (timeoutRef.current) {
+                    clearTimeout(timeoutRef.current);
                 }
-                className={styles.form}
-                onValuesChange={(_, allValues) => {
-                    // Trigger form submission after 0.5 seconds of unchanged input values
-                    if (timeoutRef.current) {
-                        clearTimeout(timeoutRef.current);
-                    }
 
-                    timeoutRef.current = setTimeout(() => {
-                        onSubmit(allValues); // Trigger the onSubmit function
-                    }, 500);
-                }}
-            >
-                {formContent}
-            </Form>
-        </Flex>
+                timeoutRef.current = setTimeout(() => {
+                    onSubmit(allValues); // Trigger the onSubmit function
+                }, 500);
+            }}
+        >
+            {formContent}
+        </Form>
     );
 }

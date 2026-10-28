@@ -11,13 +11,14 @@ export default defineConfig({
     test: {
         globals: true,
         environment: 'jsdom',
+        environmentOptions: { jsdom: { url: 'http://localhost:8080' } },
         setupFiles: ['./src/tests/setup.ts'],
         testTimeout: 10000,
     },
     resolve: {
         alias: {
-            '@': path.resolve(__dirname, './src/'),
-            '~@': path.resolve(__dirname, './src/'),
+            '@': path.resolve(import.meta.dirname, './src/'),
+            '~@': path.resolve(import.meta.dirname, './src/'),
         },
     },
     plugins: [

@@ -11,10 +11,10 @@ import { OutputPortOutlined, TechnicalAssetOutlined } from '@/components/icons';
 import { PosthogEvents } from '@/constants/posthog.constants';
 import { useTabParam } from '@/hooks/use-tab-param.tsx';
 import { AboutTab } from '@/pages/data-product/components/data-product-tabs/about-tab/about-tab.tsx';
-import { DataOutputTab } from '@/pages/data-product/components/data-product-tabs/data-output-tab/data-output-tab.tsx';
 import { TabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys.ts';
 import { DataProductInputPorts } from '@/pages/data-product/components/data-product-tabs/input-ports/input-port-tab.tsx';
 import { TeamTab } from '@/pages/data-product/components/data-product-tabs/team-tab/team-tab.tsx';
+import { TechnicalAssetTab } from '@/pages/data-product/components/data-product-tabs/technical-asset-tab/technical-asset-tab.tsx';
 import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
 import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
 import { useGetDataProductEventHistoryQuery } from '@/store/api/services/generated/dataProductsApi.ts';
@@ -63,8 +63,8 @@ export function DataProductTabs({ dataProductId }: Props) {
     }, [openTour, dataProductId, posthog]);
 
     const [setSeenTour] = useMarkTourAsSeenMutation();
-    const { data: { events: dataProductHistoryData = [] } = {}, isLoading: isFetchingDataProductHistory } =
-        useGetDataProductEventHistoryQuery(dataProductId, { skip: !dataProductId });
+    const historyQuery = useGetDataProductEventHistoryQuery(dataProductId, { skip: !dataProductId });
+    const { data: { events: dataProductHistoryData = [] } = {} } = historyQuery;
 
     const { activeTab, onTabChange } = useTabParam(TabKeys.About, Object.values(TabKeys));
 
@@ -92,13 +92,13 @@ export function DataProductTabs({ dataProductId }: Props) {
                 label: <Typography.Text ref={outputPortRef}>{t('Output Ports')}</Typography.Text>,
                 key: TabKeys.OutputPorts,
                 icon: <TechnicalAssetOutlined />,
-                children: <DataOutputTab dataProductId={dataProductId} />,
+                children: <TechnicalAssetTab dataProductId={dataProductId} />,
             },
             {
                 label: t('Explorer'),
                 key: TabKeys.Explorer,
                 icon: <CompassOutlined />,
-                children: <Explorer id={dataProductId} type={'dataproduct'} />,
+                children: <Explorer id={dataProductId} type="dataproduct" />,
             },
             {
                 label: <Typography.Text ref={teamRef}>{t('Team')}</Typography.Text>,
@@ -121,12 +121,12 @@ export function DataProductTabs({ dataProductId }: Props) {
                         id={dataProductId}
                         type={EventReferenceEntity.DataProduct}
                         history={dataProductHistoryData}
-                        isFetching={isFetchingDataProductHistory}
+                        query={historyQuery}
                     />
                 ),
             },
         ];
-    }, [dataProductId, t, dataProductHistoryData, isFetchingDataProductHistory]);
+    }, [dataProductId, t, dataProductHistoryData, historyQuery]);
 
     const steps: TourProps['steps'] = useMemo(() => {
         return [
@@ -217,7 +217,7 @@ export function DataProductTabs({ dataProductId }: Props) {
                         className: styles.tabPane,
                     };
                 })}
-                size={'middle'}
+                size="middle"
                 className={styles.container}
             />
             <Tour

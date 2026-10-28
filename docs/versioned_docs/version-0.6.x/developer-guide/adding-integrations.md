@@ -361,7 +361,7 @@ Understanding the underlying data model helps when debugging integration issues 
 | `env_platform_configs` | Environment-specific details at the platform level (e.g. AWS account details, Snowflake credentials). |
 | `env_platform_service_configs` | Environment-specific connection details for a platform/service combination. Typically used alongside `platform_service_configs` — the entries here are matched by `"identifier"` in JSON to the options listed there. The correct config is looked up in each plugin's `technical_info` method. |
 | `data_output_configurations` | Polymorphic base table for technical asset configurations. Each plugin has its own child table joined on `id`. |
-| `data_outputs` | The technical asset record itself — links a data product to a `platform`, `service`, and `data_output_configurations` row |
+| `technical_assets` | The technical asset record itself — links a data product to a `platform`, `service`, and `data_output_configurations` row |
 
 ### How Templates Work
 

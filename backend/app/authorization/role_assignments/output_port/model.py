@@ -4,16 +4,15 @@ from uuid import uuid4
 from sqlalchemy import UUID, Column, DateTime, Enum, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from app.authorization.role_assignments.enums import DecisionStatus
 from app.core.webhooks.events import OutputPortRoleAssignmentEvent
 from app.database.database import Base
 from app.database.event_mixin import EventTrackedMixin
 from app.shared.model import BaseORM, utcnow
 
-from ..enums import DecisionStatus
-
 if TYPE_CHECKING:
     from app.authorization.roles.model import Role
-    from app.data_products.output_ports.model import Dataset
+    from app.data_products.output_ports.model import OutputPort
     from app.users.model import User
 
 
@@ -24,28 +23,36 @@ class DatasetRoleAssignment(Base, BaseORM, EventTrackedMixin):
     )
 
     id = Column(UUID, primary_key=True, default=uuid4)
-    dataset_id: Mapped[UUID] = mapped_column("dataset_id", ForeignKey("datasets.id"))
-    dataset: Mapped["Dataset"] = relationship("Dataset", foreign_keys=[dataset_id])
+    output_port_id: Mapped[UUID] = mapped_column(
+        "dataset_id", ForeignKey("datasets.id")
+    )
+    output_port: Mapped["OutputPort"] = relationship(
+        "OutputPort", foreign_keys=[output_port_id], lazy="selectin"
+    )
     data_product_id: Mapped[UUID] = mapped_column(ForeignKey("data_products.id"))
     user_id: Mapped[UUID] = mapped_column("user_id", ForeignKey("users.id"))
-    user: Mapped["User"] = relationship("User", foreign_keys=[user_id])
+    user: Mapped["User"] = relationship("User", foreign_keys=[user_id], lazy="joined")
     role_id: Mapped[UUID] = mapped_column("role_id", ForeignKey("roles.id"))
-    role: Mapped["Role"] = relationship("Role", foreign_keys=[role_id])
+    role: Mapped["Role"] = relationship("Role", foreign_keys=[role_id], lazy="joined")
     decision: Mapped[DecisionStatus] = mapped_column(
         Enum(DecisionStatus), default=DecisionStatus.PENDING
     )
 
     requested_on = Column(DateTime(timezone=False), server_default=utcnow())
     requested_by_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"))
-    requested_by: Mapped["User"] = relationship(foreign_keys=[requested_by_id])
+    requested_by: Mapped["User"] = relationship(
+        foreign_keys=[requested_by_id], lazy="joined"
+    )
     decided_on = Column(DateTime(timezone=False))
     decided_by_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"))
-    decided_by: Mapped["User"] = relationship(foreign_keys=[decided_by_id])
+    decided_by: Mapped["User"] = relationship(
+        foreign_keys=[decided_by_id], lazy="joined"
+    )
 
     def to_event(self) -> OutputPortRoleAssignmentEvent:
         return OutputPortRoleAssignmentEvent(
             id=self.id,
-            output_port_id=self.dataset_id,
+            output_port_id=self.output_port_id,
             data_product_id=self.data_product_id,
             user_id=self.user_id,
         )

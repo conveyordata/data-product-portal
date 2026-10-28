@@ -13,6 +13,12 @@ class Settings(BaseSettings):
     POSTGRES_PORT: int = 5432
     POSTGRES_USER: str
     POSTGRES_SERVER: str
+    DB_POOL_SIZE: int = 20
+    DB_MAX_OVERFLOW: int = 20
+    DB_POOL_TIMEOUT_SECONDS: int = 5
+    DB_POOL_RECYCLE_SECONDS: int = 1800
+    DB_POOL_PRE_PING: bool = True
+    DB_CONNECT_TIMEOUT_SECONDS: int = 5
 
     HOST: str
 
@@ -30,20 +36,19 @@ class Settings(BaseSettings):
     OIDC_REDIRECT_URI: Optional[str] = None
     OIDC_AUDIENCE: Optional[str] = None
 
+    MCP_BASE_URL: Optional[str] = None
     MCP_AUTH_REDIRECT_URIS: list[str] = []
+    MCP_STATELESS_HTTP: bool = True
 
     # Default username when oidc is disabled
-    DEFAULT_USERNAME: str = "john.doe@pharma.com"
+    DEFAULT_USERNAME: str = "john.scientist@pharma.com"
 
     # Conveyor
     CONVEYOR_API_KEY: Optional[str] = None
     CONVEYOR_SECRET: Optional[str] = None
 
     # Infrastructure
-    INFRASTRUCTURE_LAMBDA_ARN: Optional[str] = None
-    WEBHOOK_URL: Optional[str] = None
     ENVIRONMENT_CONTEXT: Optional[str] = None
-    WEBHOOK_SECRET: Optional[str] = None
     WEBHOOK_V2_URL: Optional[str] = None
     # This setting enables extra events to be triggered when a Technical Asset is added or removed from an Output Port
     # This can be used when migrating infra, or when roles are not properly supported by your infrastructure
@@ -63,6 +68,8 @@ class Settings(BaseSettings):
     # Authorizer
     AUTHORIZER_CACHE_SIZE: int = 128
     AUTHORIZER_STARTUP_SYNC: bool = True
+    AUTHORIZER_AUTOLOAD_ENABLED: bool = True
+    AUTHORIZER_AUTOLOAD_INTERVAL: int = 30  # seconds
 
     # Namespace validation
     NAMESPACE_MAX_LENGTH: int = 64
@@ -87,13 +94,22 @@ class Settings(BaseSettings):
         "ConveyorPlugin",
         "GlueTechnicalAssetConfiguration",
         "S3TechnicalAssetConfiguration",
+        "DatabricksTechnicalAssetConfiguration",
+        "RedshiftTechnicalAssetConfiguration",
     ]
+
+    GITHUB_ORG: str = ""
 
     AWS_SESSION_DURATION: int = 900
 
     # Frontend hosting
     SERVE_FRONTEND: bool = False
     FRONTEND_DIST_DIR: str = ""
+
+    TIME_BOUND_ACCESS_ENABLED: bool = True
+    EXPIRING_SOON_THRESHOLD_DAYS: int = 14
+
+    MAX_ITEMS_PER_BATCH_REQUEST: int = 50
 
 
 class LogLevel(str, Enum):

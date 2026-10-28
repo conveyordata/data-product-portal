@@ -2,13 +2,14 @@ import copy
 from typing import Optional, Sequence
 from uuid import UUID
 
-from fastapi import HTTPException
+from fastapi import Depends, HTTPException, status
 from sqlalchemy import asc, select
 from sqlalchemy.orm import Session, joinedload
-from starlette import status
 
 from app.abstract_data_product.service import AbstractDataProductService
+from app.configuration.domains.service import DomainService
 from app.core.namespace.validation import NamespaceValidator
+from app.database.deps import get_db_session
 from app.resource_names.service import ResourceNameService, ResourceNameValidityType
 from app.users.model import User
 
@@ -18,7 +19,7 @@ from .schema_request import CreateExplorationRequest
 
 
 class ExplorationService(AbstractDataProductService):
-    def __init__(self, db: Session):
+    def __init__(self, db: Session = Depends(get_db_session, scope="function")):
         super().__init__(db)
         self.namespace_validator = NamespaceValidator(ExplorationModel)
 
@@ -36,6 +37,7 @@ class ExplorationService(AbstractDataProductService):
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Invalid namespace: {validity.value}",
             )
+        DomainService(self.db).ensure_assignable(exploration.domain_id)
         model = ExplorationModel(
             **exploration.parse_pydantic_schema(), owner_id=authenticated_user.id
         )
@@ -61,6 +63,15 @@ class ExplorationService(AbstractDataProductService):
             options=[joinedload(ExplorationModel.owner)],
         )
 
+    def ensure_owner(self, id: UUID, authenticated_user: User) -> ExplorationModel:
+        exploration = self.get_exploration(id, authenticated_user)
+        if exploration.owner_id != authenticated_user.id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You are not the owner of this exploration",
+            )
+        return exploration
+
     def remove_exploration(self, id: UUID) -> ExplorationModel:
         exploration = self.db.get(ExplorationModel, id)
         if not exploration:
@@ -70,5 +81,5 @@ class ExplorationService(AbstractDataProductService):
             )
         result = copy.deepcopy(exploration)
         self.db.delete(exploration)
-        self.db.commit()
+        self.db.flush()
         return result

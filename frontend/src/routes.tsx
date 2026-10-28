@@ -8,20 +8,21 @@ import Cart from '@/pages/cart/cart.page.tsx';
 import { DataProduct } from '@/pages/data-product/data-product.page.tsx';
 import { DataProductCreate } from '@/pages/data-product-create/data-product-create.page.tsx';
 import { DataProductEdit } from '@/pages/data-product-edit/data-product-edit.page.tsx';
-import { Dataset } from '@/pages/dataset/dataset.page.tsx';
-import { DatasetEdit } from '@/pages/dataset-edit/dataset-edit.page.tsx';
 import { ErrorRootElement } from '@/pages/error/error-root-element.page.tsx';
 import { ExplorationPage } from '@/pages/exploration/exploration.page.tsx';
+import { ExplorationEdit } from '@/pages/exploration-edit/exploration-edit.page.tsx';
 import { ExplorerPage } from '@/pages/explorer/explorer.page.tsx';
 import { Home } from '@/pages/home/home.page.tsx';
 import { Marketplace } from '@/pages/marketplace/marketplace.page.tsx';
+import { OutputPort } from '@/pages/output-port/output-port.page.tsx';
+import { OutputPortEdit } from '@/pages/output-port-edit/output-port-edit.page.tsx';
 import { PeoplePage } from '@/pages/people/people-table.component.tsx';
 import { ProductStudio } from '@/pages/product-studio/product-studio.page.tsx';
 import { ApplicationPaths } from '@/types/navigation';
 import ProtectedRoute from './components/layout/protected/protected.layout.tsx';
-import { DataOutput } from './pages/data-output/data-output.page.tsx';
-import { DataOutputEdit } from './pages/data-output-edit/data-output-edit.page.tsx';
 import { Settings } from './pages/settings/settings.page.tsx';
+import { TechnicalAsset } from './pages/technical-asset/technical-asset.page.tsx';
+import { TechnicalAssetEdit } from './pages/technical-asset-edit/technical-asset-edit.page.tsx';
 
 function DataProductsRedirect() {
     const params = useParams();
@@ -64,12 +65,16 @@ const router = createBrowserRouter([
                                 element: <ExplorationPage />,
                             },
                             {
+                                path: ApplicationPaths.ExplorationEdit,
+                                element: <ExplorationEdit />,
+                            },
+                            {
                                 path: ApplicationPaths.DataOutput,
-                                element: <DataOutput />,
+                                element: <TechnicalAsset />,
                             },
                             {
                                 path: ApplicationPaths.DataOutputEdit,
-                                element: <DataOutputEdit />,
+                                element: <TechnicalAssetEdit />,
                             },
                             {
                                 path: ApplicationPaths.DataProductNew,
@@ -81,11 +86,11 @@ const router = createBrowserRouter([
                             },
                             {
                                 path: ApplicationPaths.OutputPort,
-                                element: <Dataset />,
+                                element: <OutputPort />,
                             },
                             {
                                 path: ApplicationPaths.OutputPortEdit,
-                                element: <DatasetEdit />,
+                                element: <OutputPortEdit />,
                             },
                         ],
                     },
@@ -116,11 +121,11 @@ const router = createBrowserRouter([
 
                             {
                                 path: ApplicationPaths.MarketPlaceOutputPort,
-                                element: <Dataset />,
+                                element: <OutputPort />,
                             },
                             {
                                 path: ApplicationPaths.MarketPlaceOutputPortEdit,
-                                element: <DatasetEdit />,
+                                element: <OutputPortEdit />,
                             },
                         ],
                     },

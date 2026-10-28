@@ -9,15 +9,17 @@ from app.configuration.data_product_settings.enums import (
     DataProductSettingScope,
     DataProductSettingType,
 )
+from app.core.webhooks.events import DataProductSettingValueEvent
 from app.database.database import Base
+from app.database.event_mixin import EventTrackedMixin
 from app.shared.model import BaseORM
 
 if TYPE_CHECKING:
     from app.data_products.model import DataProduct
-    from app.data_products.output_ports.model import Dataset
+    from app.data_products.output_ports.model import OutputPort
 
 
-class DataProductSettingValue(Base, BaseORM):
+class DataProductSettingValue(Base, BaseORM, EventTrackedMixin):
     __tablename__ = "data_products_settings_values"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
@@ -30,7 +32,9 @@ class DataProductSettingValue(Base, BaseORM):
     data_product_id: Mapped[UUID] = mapped_column(
         ForeignKey("data_products.id"), nullable=True
     )
-    dataset_id: Mapped[UUID] = mapped_column(ForeignKey("datasets.id"), nullable=True)
+    output_port_id: Mapped[UUID] = mapped_column(
+        "dataset_id", ForeignKey("datasets.id"), nullable=True
+    )
 
     # Relationships
     data_product_setting: Mapped["DataProductSetting"] = relationship(
@@ -43,11 +47,22 @@ class DataProductSettingValue(Base, BaseORM):
         order_by="DataProduct.name",
         lazy="raise",
     )
-    dataset: Mapped["Dataset"] = relationship(
+    output_port: Mapped["OutputPort"] = relationship(
         back_populates="data_product_settings",
-        order_by="Dataset.name",
+        order_by="OutputPort.name",
         lazy="raise",
     )
+
+    def to_event(self) -> DataProductSettingValueEvent:
+        event_id = self.data_product_id
+        if not event_id:
+            raise ValueError(
+                "Missing data_product_id for data product setting value event"
+            )
+        return DataProductSettingValueEvent(
+            id=self.id,
+            data_product_id=event_id,
+        )
 
 
 class DataProductSetting(Base, BaseORM):

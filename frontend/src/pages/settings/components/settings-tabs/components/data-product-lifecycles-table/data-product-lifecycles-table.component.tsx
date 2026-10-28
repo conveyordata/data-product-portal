@@ -1,6 +1,8 @@
-import { Button, Flex, Table, Typography } from 'antd';
+import { FlagOutlined } from '@ant-design/icons';
+import { Button, Flex, Typography } from 'antd';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { ListTable } from '@/components/list-table/list-table.component.tsx';
 
 import { useModal } from '@/hooks/use-modal.tsx';
 import {
@@ -8,14 +10,15 @@ import {
     useGetDataProductsLifecyclesQuery,
     useRemoveDataProductLifecycleMutation,
 } from '@/store/api/services/generated/configurationDataProductLifecyclesApi.ts';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import { dispatchMessage } from '@/utils/feedback.ts';
 import styles from './data-product-lifecycles-table.module.scss';
 import { getDataProductTableColumns } from './data-product-lifecycles-table-columns.tsx';
 import { CreateLifecycleModal } from './new-data-product-lifecycles-modal.component.tsx';
 
 export function DataProductLifecyclesTable() {
     const { t } = useTranslation();
-    const { data: dataProductLifecycles = undefined, isFetching } = useGetDataProductsLifecyclesQuery();
+    const lifecyclesQuery = useGetDataProductsLifecyclesQuery();
+    const { data: dataProductLifecycles = undefined } = lifecyclesQuery;
     const { isVisible, handleOpen, handleClose } = useModal();
     const [mode, setMode] = useState<'create' | 'edit'>('create');
     const [initial, setInitial] = useState<DataProductLifeCyclesGetItem | undefined>(undefined);
@@ -54,20 +57,26 @@ export function DataProductLifecyclesTable() {
     );
 
     return (
-        <Flex vertical gap={'large'}>
-            <Flex justify={'space-between'} align={'center'}>
+        <Flex vertical gap="large">
+            <Flex justify="space-between" align="center">
                 <Typography.Title level={3}>{t('Lifecycles')}</Typography.Title>
-                <Button className={styles.formButton} type={'primary'} onClick={handleAdd}>
+                <Button className={styles.formButton} type="primary" onClick={handleAdd}>
                     {t('Add Lifecycle')}
                 </Button>
             </Flex>
-            <Table<DataProductLifeCyclesGetItem>
+            <ListTable<DataProductLifeCyclesGetItem>
+                query={lifecyclesQuery}
                 dataSource={dataProductLifecycles?.data_product_life_cycles}
                 columns={columns}
+                subject={t('Lifecycles')}
+                emptyState={{
+                    icon: <FlagOutlined />,
+                    title: t('No Lifecycles yet'),
+                    description: t('Lifecycles show how far along a Data Product is, from draft to ready.'),
+                }}
                 rowKey={(record) => record.id}
-                loading={isFetching}
                 rowHoverable
-                size={'small'}
+                size="small"
             />
             {isVisible && (mode === 'create' || initial) && (
                 <CreateLifecycleModal onClose={handleClose} t={t} isOpen={isVisible} mode={mode} initial={initial} />

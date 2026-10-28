@@ -28,12 +28,12 @@ export function SearchSuggestions({ suggestions }: Props) {
                 },
             }}
         >
-            <Card size="small" variant={'borderless'}>
+            <Card size="small" variant="borderless">
                 <Space>
                     <Text type="secondary" style={{ whiteSpace: 'nowrap' }}>
                         {t('Try searching for:')}
                     </Text>
-                    <Carousel autoplay dots={false} dotPlacement={'start'} initialSlide={initialSuggestion}>
+                    <Carousel autoplay dots={false} dotPlacement="start" initialSlide={initialSuggestion}>
                         {suggestions.map((item) => (
                             <Text strong key={item}>
                                 {item}

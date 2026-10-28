@@ -30,9 +30,11 @@ class UIElementMetadataResponse:
         not_configured (bool | Unset):  Default: False.
         result_label (str | Unset):  Default: 'Resulting path'.
         result_tooltip (str | Unset):  Default: 'The path you can access through this technical asset'.
+        icon_data_uri (None | str | Unset):
         parent_platform (None | str | Unset):
         platform_tile (None | PlatformTile | Unset):
         show_in_form (bool | Unset):  Default: True.
+        shareable (bool | Unset):  Default: True.
     """
 
     ui_metadata: list[UIElementMetadata]
@@ -45,13 +47,15 @@ class UIElementMetadataResponse:
     not_configured: bool | Unset = False
     result_label: str | Unset = "Resulting path"
     result_tooltip: str | Unset = "The path you can access through this technical asset"
+    icon_data_uri: None | str | Unset = UNSET
     parent_platform: None | str | Unset = UNSET
     platform_tile: None | PlatformTile | Unset = UNSET
     show_in_form: bool | Unset = True
+    shareable: bool | Unset = True
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        from ..models.platform_tile import PlatformTile
+        from ..models.platform_tile import PlatformTile  # noqa: PLC0415
 
         ui_metadata = []
         for ui_metadata_item_data in self.ui_metadata:
@@ -76,6 +80,12 @@ class UIElementMetadataResponse:
 
         result_tooltip = self.result_tooltip
 
+        icon_data_uri: None | str | Unset
+        if isinstance(self.icon_data_uri, Unset):
+            icon_data_uri = UNSET
+        else:
+            icon_data_uri = self.icon_data_uri
+
         parent_platform: None | str | Unset
         if isinstance(self.parent_platform, Unset):
             parent_platform = UNSET
@@ -91,6 +101,8 @@ class UIElementMetadataResponse:
             platform_tile = self.platform_tile
 
         show_in_form = self.show_in_form
+
+        shareable = self.shareable
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
@@ -111,19 +123,23 @@ class UIElementMetadataResponse:
             field_dict["result_label"] = result_label
         if result_tooltip is not UNSET:
             field_dict["result_tooltip"] = result_tooltip
+        if icon_data_uri is not UNSET:
+            field_dict["icon_data_uri"] = icon_data_uri
         if parent_platform is not UNSET:
             field_dict["parent_platform"] = parent_platform
         if platform_tile is not UNSET:
             field_dict["platform_tile"] = platform_tile
         if show_in_form is not UNSET:
             field_dict["show_in_form"] = show_in_form
+        if shareable is not UNSET:
+            field_dict["shareable"] = shareable
 
         return field_dict
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.platform_tile import PlatformTile
-        from ..models.ui_element_metadata import UIElementMetadata
+        from ..models.platform_tile import PlatformTile  # noqa: PLC0415
+        from ..models.ui_element_metadata import UIElementMetadata  # noqa: PLC0415
 
         d = dict(src_dict)
         ui_metadata = []
@@ -150,6 +166,15 @@ class UIElementMetadataResponse:
         result_label = d.pop("result_label", UNSET)
 
         result_tooltip = d.pop("result_tooltip", UNSET)
+
+        def _parse_icon_data_uri(data: object) -> None | str | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(None | str | Unset, data)
+
+        icon_data_uri = _parse_icon_data_uri(d.pop("icon_data_uri", UNSET))
 
         def _parse_parent_platform(data: object) -> None | str | Unset:
             if data is None:
@@ -179,6 +204,8 @@ class UIElementMetadataResponse:
 
         show_in_form = d.pop("show_in_form", UNSET)
 
+        shareable = d.pop("shareable", UNSET)
+
         ui_element_metadata_response = cls(
             ui_metadata=ui_metadata,
             plugin=plugin,
@@ -190,9 +217,11 @@ class UIElementMetadataResponse:
             not_configured=not_configured,
             result_label=result_label,
             result_tooltip=result_tooltip,
+            icon_data_uri=icon_data_uri,
             parent_platform=parent_platform,
             platform_tile=platform_tile,
             show_in_form=show_in_form,
+            shareable=shareable,
         )
 
         ui_element_metadata_response.additional_properties = d

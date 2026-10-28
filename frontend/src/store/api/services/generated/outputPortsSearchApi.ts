@@ -10,7 +10,7 @@ const injectedRtkApi = api.injectEndpoints({
         params: {
           query: queryArg.query,
           limit: queryArg.limit,
-          current_user_assigned: queryArg.currentUserAssigned,
+          assignment_filter: queryArg.assignmentFilter,
         },
       }),
     }),
@@ -23,7 +23,12 @@ export type SearchOutputPortsApiResponse =
 export type SearchOutputPortsApiArg = {
   query?: string;
   limit?: number;
-  currentUserAssigned?: boolean;
+  assignmentFilter?: AssignmentFilter;
+};
+export type OutputPortAccessType = {
+  id: string;
+  name: string;
+  access_function: OutputPortAccessFunction;
 };
 export type Tag = {
   id: string;
@@ -32,6 +37,7 @@ export type Tag = {
 export type Domain = {
   id: string;
   name: string;
+  namespace: string;
   description: string;
 };
 export type DataProductLifeCycle = {
@@ -41,6 +47,11 @@ export type DataProductLifeCycle = {
   color: string;
   is_default: boolean;
 };
+export type AccessMode = {
+  id: string;
+  name: string;
+  description: string;
+};
 export type SearchOutputPortsResponseItem = {
   id: string;
   namespace: string;
@@ -49,14 +60,17 @@ export type SearchOutputPortsResponseItem = {
   status: OutputPortStatus;
   usage: string | null;
   access_type: OutputPortAccessType;
+  data_product_access_duration_type: AccessDurationType;
+  exploration_access_duration_type: AccessDurationType;
   data_product_id: string;
   tags: Tag[];
   domain: Domain;
   lifecycle: DataProductLifeCycle | null;
+  access_modes: AccessMode[];
   abstract_data_product_count: number;
   technical_assets_count: number;
   data_product_name: string;
-  quality_status: DataQualityStatus | null;
+  quality_status?: DataQualityStatus | null;
 };
 export type SearchOutputPortsResponse = {
   output_ports: SearchOutputPortsResponseItem[];
@@ -76,11 +90,14 @@ export enum OutputPortStatus {
   Active = "active",
   Archived = "archived",
 }
-export enum OutputPortAccessType {
-  Public = "public",
+export enum OutputPortAccessFunction {
   Restricted = "restricted",
   Private = "private",
   Unrestricted = "unrestricted",
+}
+export enum AccessDurationType {
+  Permanent = "permanent",
+  TimeBound = "time_bound",
 }
 export enum DataQualityStatus {
   Success = "success",
@@ -88,6 +105,10 @@ export enum DataQualityStatus {
   Warning = "warning",
   Error = "error",
   Unknown = "unknown",
+}
+export enum AssignmentFilter {
+  All = "all",
+  OnlyAssigned = "only_assigned",
 }
 export const { useSearchOutputPortsQuery, useLazySearchOutputPortsQuery } =
   injectedRtkApi;

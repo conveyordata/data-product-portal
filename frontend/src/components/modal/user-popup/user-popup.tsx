@@ -1,8 +1,9 @@
-import { Input, List, Select, Typography } from 'antd';
+import { TeamOutlined } from '@ant-design/icons';
+import { Input, List, Modal, Select, Typography } from 'antd';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { EmptyState, emptyStateQueryProps, searchFilter } from '@/components/empty-state/empty-state.component.tsx';
 
-import { FormModal } from '@/components/modal/form-modal/form-modal.component.tsx';
 import type { Role } from '@/store/api/services/generated/authorizationRolesApi.ts';
 import { type UsersGet, useGetUsersQuery } from '@/store/api/services/generated/usersApi.ts';
 import styles from './user-popup.module.scss';
@@ -30,7 +31,8 @@ const handleUserListFilter = (users: UsersGet[], searchTerm: string) => {
 
 export function UserPopup({ onClose, isOpen, roles, item, isLoading, userIdsToHide }: Props) {
     const { t } = useTranslation();
-    const { data: { users = [] } = {}, isFetching: isFetchingUsers } = useGetUsersQuery();
+    const usersQuery = useGetUsersQuery();
+    const { data: { users = [] } = {}, isFetching: isFetchingUsers } = usersQuery;
 
     const [searchTerm, setSearchTerm] = useState<string>('');
 
@@ -40,22 +42,42 @@ export function UserPopup({ onClose, isOpen, roles, item, isLoading, userIdsToHi
     }, [userIdsToHide, users, searchTerm]);
 
     return (
-        <FormModal title={t('Add User')} onClose={onClose} isOpen={isOpen} footer={(_, { CancelBtn }) => <CancelBtn />}>
+        <Modal
+            title={t('Add User')}
+            onCancel={onClose}
+            open={isOpen}
+            footer={(_, { CancelBtn }) => <CancelBtn />}
+            centered
+        >
             <Input.Search
+                data-cy="user-popup-search"
                 placeholder={t('Search users by email or name')}
                 allowClear
+                value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
             />
             <div className={styles.userList}>
                 <List
                     loading={isLoading || isFetchingUsers}
-                    size={'large'}
-                    locale={{ emptyText: t('No users found') }}
+                    size="large"
+                    locale={{
+                        emptyText: (
+                            <EmptyState
+                                size="small"
+                                icon={<TeamOutlined />}
+                                title={t('No users to add')}
+                                description={t('Everyone who can be added here already has a role.')}
+                                subject={t('users')}
+                                filter={searchFilter(searchTerm, setSearchTerm)}
+                                {...emptyStateQueryProps(usersQuery)}
+                            />
+                        ),
+                    }}
                     rowKey={(user) => user.id}
                     dataSource={filteredUsers}
                     renderItem={(user) => {
                         return (
-                            <List.Item key={user.id}>
+                            <List.Item key={user.id} data-cy="user-popup-item">
                                 <List.Item.Meta
                                     title={
                                         <Typography.Text
@@ -83,6 +105,6 @@ export function UserPopup({ onClose, isOpen, roles, item, isLoading, userIdsToHi
                     }}
                 />
             </div>
-        </FormModal>
+        </Modal>
     );
 }

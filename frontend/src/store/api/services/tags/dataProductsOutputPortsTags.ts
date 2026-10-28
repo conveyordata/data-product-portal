@@ -3,6 +3,8 @@ import { STATIC_TAG_ID, TagTypes } from '@/store/api/services/tag-types.ts';
 
 type EndpointDefinitions = Parameters<typeof api.enhanceEndpoints>[0]['endpoints'];
 
+const accessTypeListTag = { type: TagTypes.OutputPortAccessType as const, id: STATIC_TAG_ID.LIST };
+
 const invalidateOutputPort = (
     _: unknown,
     __: unknown,
@@ -26,6 +28,30 @@ const invalidateOutputPort = (
     },
 ];
 
+// Delete deliberately omits the per-id { OutputPort, id } tag: a still-mounted
+// getOutputPort subscription provides that exact tag, so invalidating it would
+// trigger an eager refetch of the just-deleted port and return a 404. The LIST
+// and parent tags still refresh so the deleted row disappears from listings.
+const invalidateDeletedOutputPort = (
+    _: unknown,
+    __: unknown,
+    { dataProductId, id }: { dataProductId: string; id: string },
+) => [
+    {
+        type: TagTypes.OutputPort as const,
+        id: STATIC_TAG_ID.LIST,
+    },
+    {
+        type: TagTypes.DataProductOutputPorts as const,
+        id: dataProductId,
+    },
+    {
+        type: TagTypes.History as const,
+        id: id,
+    },
+    accessTypeListTag,
+];
+
 export const dataProductOutputPortTags = {
     getDataProductOutputPorts: {
         providesTags: (_, __, id) => [
@@ -39,7 +65,11 @@ export const dataProductOutputPortTags = {
     deleteOutputPortQueryStat: {},
     updateOutputPortQueryStats: {},
     getOutputPortCuratedQueries: {},
-    getLatestDataQualitySummaryForOutputPort: {},
+    getLatestDataQualitySummaryForOutputPort: {
+        extraOptions: {
+            suppressErrorToast: true,
+        },
+    },
     addOutputPortDataQualityRun: {},
     overwriteOutputPortDataQualitySummary: {},
     createOutputPort: {
@@ -48,6 +78,11 @@ export const dataProductOutputPortTags = {
                 type: TagTypes.DataProductOutputPorts,
                 id: dataProductId,
             },
+            {
+                type: TagTypes.OutputPort,
+                id: STATIC_TAG_ID.LIST,
+            },
+            accessTypeListTag,
         ],
     },
     getOutputPort: {
@@ -59,10 +94,13 @@ export const dataProductOutputPortTags = {
         ],
     },
     removeOutputPort: {
-        invalidatesTags: invalidateOutputPort,
+        invalidatesTags: invalidateDeletedOutputPort,
     },
     updateOutputPort: {
-        invalidatesTags: invalidateOutputPort,
+        invalidatesTags: (_: unknown, __: unknown, arg: { dataProductId: string; id: string }) => [
+            ...invalidateOutputPort(_, __, arg),
+            accessTypeListTag,
+        ],
     },
     getOutputPortsEventHistory: {
         providesTags: (_, __, { id }) => [

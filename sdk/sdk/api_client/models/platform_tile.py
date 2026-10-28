@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from typing import Any, TypeVar
+from typing import Any, TypeVar, cast
 
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
@@ -19,6 +19,7 @@ class PlatformTile:
         label (str):
         value (str):
         icon_name (str):
+        icon_data_uri (None | str | Unset):
         has_environments (bool | Unset):  Default: True.
         has_config (bool | Unset):  Default: True.
         children (list[PlatformTile] | Unset):
@@ -28,6 +29,7 @@ class PlatformTile:
     label: str
     value: str
     icon_name: str
+    icon_data_uri: None | str | Unset = UNSET
     has_environments: bool | Unset = True
     has_config: bool | Unset = True
     children: list[PlatformTile] | Unset = UNSET
@@ -40,6 +42,12 @@ class PlatformTile:
         value = self.value
 
         icon_name = self.icon_name
+
+        icon_data_uri: None | str | Unset
+        if isinstance(self.icon_data_uri, Unset):
+            icon_data_uri = UNSET
+        else:
+            icon_data_uri = self.icon_data_uri
 
         has_environments = self.has_environments
 
@@ -63,6 +71,8 @@ class PlatformTile:
                 "icon_name": icon_name,
             }
         )
+        if icon_data_uri is not UNSET:
+            field_dict["icon_data_uri"] = icon_data_uri
         if has_environments is not UNSET:
             field_dict["has_environments"] = has_environments
         if has_config is not UNSET:
@@ -83,6 +93,15 @@ class PlatformTile:
 
         icon_name = d.pop("icon_name")
 
+        def _parse_icon_data_uri(data: object) -> None | str | Unset:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(None | str | Unset, data)
+
+        icon_data_uri = _parse_icon_data_uri(d.pop("icon_data_uri", UNSET))
+
         has_environments = d.pop("has_environments", UNSET)
 
         has_config = d.pop("has_config", UNSET)
@@ -102,6 +121,7 @@ class PlatformTile:
             label=label,
             value=value,
             icon_name=icon_name,
+            icon_data_uri=icon_data_uri,
             has_environments=has_environments,
             has_config=has_config,
             children=children,

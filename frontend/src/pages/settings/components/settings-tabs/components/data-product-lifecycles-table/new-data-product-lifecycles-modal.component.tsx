@@ -1,14 +1,13 @@
-import { Button, Checkbox, ColorPicker, Form, Input, InputNumber } from 'antd';
+import { Button, Checkbox, ColorPicker, Form, Input, InputNumber, Modal } from 'antd';
 import type { TFunction } from 'i18next';
 import type React from 'react';
 
-import { FormModal } from '@/components/modal/form-modal/form-modal.component';
 import {
     useCreateDataProductLifecycleMutation,
     useUpdateDataProductLifecycleMutation,
 } from '@/store/api/services/generated/configurationDataProductLifecyclesApi.ts';
 import type { DataProductLifeCycle } from '@/store/api/services/generated/dataProductsApi.ts';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback';
+import { dispatchMessage } from '@/utils/feedback.ts';
 import styles from './data-product-lifecycles-table.module.scss';
 
 interface CreateLifecycleModalProps {
@@ -70,13 +69,9 @@ export const CreateLifecycleModal: React.FC<CreateLifecycleModalProps> = ({ isOp
     };
 
     return (
-        <FormModal
-            isOpen={isOpen}
+        <Modal
+            open={isOpen}
             title={variableText.title}
-            onClose={() => {
-                form.resetFields();
-                onClose();
-            }}
             onCancel={() => {
                 form.resetFields();
                 onClose();
@@ -95,6 +90,7 @@ export const CreateLifecycleModal: React.FC<CreateLifecycleModalProps> = ({ isOp
                     {t('Cancel')}
                 </Button>,
             ]}
+            centered
         >
             <Form
                 form={form}
@@ -102,7 +98,7 @@ export const CreateLifecycleModal: React.FC<CreateLifecycleModalProps> = ({ isOp
                 onFinish={handleFinish}
                 initialValues={initial || { is_default: false }}
             >
-                <Form.Item name={'id'} hidden />
+                <Form.Item name="id" hidden />
                 <Form.Item
                     name="name"
                     label={t('Name')}
@@ -140,6 +136,6 @@ export const CreateLifecycleModal: React.FC<CreateLifecycleModalProps> = ({ isOp
                     <Checkbox disabled />
                 </Form.Item>
             </Form>
-        </FormModal>
+        </Modal>
     );
 };

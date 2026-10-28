@@ -1,37 +1,39 @@
-from typing import Optional
+from typing import Annotated, Optional
 
 import httpx
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, Header, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.auth.api_key import secured_api_key
 from app.core.auth.jwt import JWTToken, JWTTokenValid, PyJWTError
 from app.core.auth.oidc import OIDCIdentity
-from app.database.database import get_db_session
+from app.database.database import get_system_db_session
 from app.settings import settings
 from app.users.model import User as UserModel
 from app.users.schema import User
 from app.users.schema_request import UserCreate
+
+SYSTEM_ACCOUNT_BOT_EXTERNAL_ID = "systemaccount_bot"
 
 
 def update_db_user(oidc_user: OIDCIdentity, token: JWTToken, db: Session) -> User:
     db_user = db.scalar(select(UserModel).where(UserModel.external_id == token.sub))
     if db_user:
         db_user.email = oidc_user.email
-        db_user.first_name = oidc_user.name
+        db_user.first_name = oidc_user.given_name
         db_user.last_name = oidc_user.family_name
     else:
         db_user = db.scalar(select(UserModel).where(UserModel.email == oidc_user.email))
         if db_user:
             db_user.external_id = oidc_user.sub
-            db_user.first_name = oidc_user.name
+            db_user.first_name = oidc_user.given_name
             db_user.last_name = oidc_user.family_name
         else:
             created_user = UserCreate(
                 email=oidc_user.email,
                 external_id=oidc_user.sub,
-                first_name=oidc_user.name,
+                first_name=oidc_user.given_name,
                 last_name=oidc_user.family_name,
             )
             db_user = UserModel(**created_user.model_dump())
@@ -56,7 +58,8 @@ if settings.OIDC_ENABLED:
         return JWTToken(sub=jwt.valid_jwt_token.get("sub"), token=token)
 
     def authorize_user(
-        token: JWTToken = Depends(secured_call), db: Session = Depends(get_db_session)
+        token: JWTToken = Depends(secured_call),
+        db: Session = Depends(get_system_db_session),
     ) -> User:
         response = httpx.post(
             url=oidc.userinfo_endpoint, headers={"Authorization": token.token}
@@ -74,11 +77,11 @@ if settings.OIDC_ENABLED:
         if not api_key:
             return secured_call(jwt_token)
         else:
-            return JWTToken(sub="systemaccount_bot", token="")
+            return JWTToken(sub=SYSTEM_ACCOUNT_BOT_EXTERNAL_ID, token="")
 
     def get_authenticated_user(
         token: JWTToken = Depends(api_key_authenticated),
-        db: Session = Depends(get_db_session),
+        db: Session = Depends(get_system_db_session, scope="function"),
     ) -> User:
         result = db.scalars(
             select(UserModel).where(UserModel.external_id == token.sub)
@@ -92,36 +95,45 @@ else:
     def unvalidated_token(token: str = "") -> str:
         return token
 
-    def dummy_token() -> str:
-        return ""
+    def user(
+        user: Annotated[
+            Optional[str], Header(alias="X-User", include_in_schema=False)
+        ] = None,
+    ) -> str:
+        if user:
+            return user
+        return settings.DEFAULT_USERNAME
 
-    # The dummy_token dependency ensure no token query parameter is added to every route
-    def secured_call(token: str = Depends(dummy_token)) -> JWTToken:
-        return generate_default_jwt_token()
+    # The token dependency is replaced by the user we want to use in this mode
+    def secured_call(
+        token: str = Depends(user),
+    ) -> JWTToken:
+        return generate_default_jwt_token(user=token)
 
     def generate_default_jwt_token(
-        default_username=settings.DEFAULT_USERNAME,
+        user: str,
     ) -> JWTToken:
-        return JWTToken(sub=default_username, token="")
+        return JWTToken(sub=user, token="")
 
     def authorize_user(
         token: JWTToken = Depends(secured_call),
-        db: Session = Depends(get_db_session),
+        db: Session = Depends(get_system_db_session, scope="function"),
     ) -> User:
-        default_username = settings.DEFAULT_USERNAME
-        if "@" not in default_username:
+        if "@" not in token.sub:
             raise Exception("Default username must be an email address")
+        name, _, family_name = token.sub.split("@")[0].partition(".")
         oidc_user = OIDCIdentity(
-            sub=default_username,
-            name=default_username.split(".")[0],
-            family_name=default_username.split("@")[0].split(".")[1],
-            email=default_username,
-            username=default_username,
+            sub=token.sub,
+            name=name,
+            family_name=family_name,
+            email=token.sub,
+            username=token.sub,
         )
         return update_db_user(oidc_user, token, db)
 
     def get_authenticated_user(
-        token: JWTToken = Depends(secured_call), db: Session = Depends(get_db_session)
+        token: JWTToken = Depends(secured_call),
+        db: Session = Depends(get_system_db_session, scope="function"),
     ) -> User:
         user: Optional[User] = db.scalars(
             select(UserModel).where(UserModel.external_id == token.sub)

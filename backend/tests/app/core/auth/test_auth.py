@@ -4,6 +4,7 @@ from unittest.mock import patch
 import pytest
 from fastapi import HTTPException, status
 
+from app.core.auth.auth import SYSTEM_ACCOUNT_BOT_EXTERNAL_ID
 from app.settings import settings
 
 
@@ -63,7 +64,7 @@ class TestCoreAuthentication:
 
         result = api_key_authenticated(api_key=mock_api_key, jwt_token=None)
 
-        assert result.sub == "systemaccount_bot"
+        assert result.sub == SYSTEM_ACCOUNT_BOT_EXTERNAL_ID
         assert result.token == ""
 
     def test_api_key_authenticated_with_both_api_key_and_jwt_prefers_api_key(
@@ -77,7 +78,7 @@ class TestCoreAuthentication:
 
         result = api_key_authenticated(api_key=mock_api_key, jwt_token=mock_jwt_token)
 
-        assert result.sub == "systemaccount_bot"
+        assert result.sub == SYSTEM_ACCOUNT_BOT_EXTERNAL_ID
         assert result.token == ""
 
     def test_api_key_authenticated_empty_string_api_key_with_jwt(

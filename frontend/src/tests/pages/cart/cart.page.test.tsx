@@ -1,12 +1,13 @@
 import { HttpResponse, http } from 'msw';
 import { Link, Route, Routes } from 'react-router';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import Cart from '@/pages/cart/cart.page.tsx';
 import { ResourceNameValidityType } from '@/store/api/services/generated/resourceNamesApi.ts';
 import { allowAllAuth } from '@/tests/mocks/auth.ts';
 import { mockDataProductLifecycles } from '@/tests/mocks/configurationDataProductLifecycles.ts';
 import { mockGetDataProductTypes } from '@/tests/mocks/configurationDataProductTypes.ts';
 import { mockGetDomains } from '@/tests/mocks/configurationDomains.ts';
+import { mockGetEnvironments } from '@/tests/mocks/configurationEnvironments.ts';
 import { mockDataProductOutputPorts } from '@/tests/mocks/dataProductOutputPorts.ts';
 import { mockDataProductInputPorts, mockDataProducts, mockDataProductsHttp } from '@/tests/mocks/dataProducts.ts';
 import { mockExplorationInputPorts, mockExplorations, mockExplorationsHttp } from '@/tests/mocks/explorations.ts';
@@ -24,6 +25,11 @@ import { renderWithProviders, screen, userEvent, waitFor } from '@/tests/test-ut
 afterEach(() => {
     localStorage.clear();
 });
+
+const createNewExploration = async () => {
+    const existingChoice = await screen.findByText('Create a new Exploration');
+    await userEvent.click(existingChoice);
+};
 
 describe('Cart', () => {
     const selectDataProducts = async () => {
@@ -45,7 +51,7 @@ describe('Cart', () => {
                 currentUser: mockUsers[0],
             });
 
-            await screen.findByText(/Your cart is currently empty/);
+            await screen.findByText(/Your cart is empty/);
         });
     });
     describe('Cart should support existing data products', () => {
@@ -153,14 +159,49 @@ describe('Cart', () => {
     });
 
     describe('Cart should support creating a new data product', () => {
+        beforeEach(() => mockGetEnvironments());
+
         const createNewDataProduct = async () => {
             const existingChoice = await screen.findByText('Create a new Data Product');
             await userEvent.click(existingChoice);
         };
+
+        const fillRequiredDataProductFields = async ({
+            name = 'My New Data Product',
+            description = 'A detailed description of the data product.',
+            hidden = false,
+            justification = 'I need this data for my analysis.',
+        } = {}) => {
+            const nameInput = await screen.findByRole('textbox', { name: /name/i });
+            await userEvent.type(nameInput, name);
+
+            if (hidden) {
+                await userEvent.click(screen.getByText('Hidden'));
+                await waitFor(() => {
+                    expect(screen.getByText(/Only use a hidden Data Product when it's really required/i)).toBeTruthy();
+                });
+            }
+
+            await userEvent.click(screen.getByRole('combobox', { name: /type/i }));
+            await userEvent.click(await screen.findByText('Reporting'));
+
+            await userEvent.click(screen.getByRole('combobox', { name: /status/i }));
+            await userEvent.click(await screen.findByText('Draft'));
+
+            await userEvent.click(screen.getByRole('combobox', { name: /domain/i }));
+            await userEvent.click(await screen.findByText('Finance'));
+
+            await userEvent.type(screen.getByRole('textbox', { name: /description/i }), description);
+
+            const justificationTextArea = await screen.findByPlaceholderText(
+                'Explain why you need access to these Output Ports',
+            );
+            await userEvent.type(justificationTextArea, justification);
+        };
+
         it('Should succeed when filling in the form completely', async () => {
             allowAllAuth();
 
-            // Mock the output ports search (cart items)
             const cartOutputPortId = 'op-1';
 
             mockOutputPortsSearch();
@@ -185,37 +226,115 @@ describe('Cart', () => {
 
             await selectDataProducts();
             await createNewDataProduct();
-
-            const nameInput = await screen.findByRole('textbox', { name: /name/i });
-            await userEvent.type(nameInput, 'My New Data Product');
-
-            const typeSelect = screen.getByRole('combobox', { name: /type/i });
-            await userEvent.click(typeSelect);
-            const typeOption = await screen.findByText('Reporting');
-            await userEvent.click(typeOption);
-
-            const statusSelect = screen.getByRole('combobox', { name: /status/i });
-            await userEvent.click(statusSelect);
-            const statusOption = await screen.findByText('Draft');
-            await userEvent.click(statusOption);
-
-            const domainSelect = screen.getByRole('combobox', { name: /domain/i });
-            await userEvent.click(domainSelect);
-            const domainOption = await screen.findByText('Finance');
-            await userEvent.click(domainOption);
-
-            const descriptionTextArea = screen.getByRole('textbox', { name: /description/i });
-            await userEvent.type(descriptionTextArea, 'A detailed description of the data product.');
-
-            const justificationTextArea = await screen.findByPlaceholderText(
-                'Explain why you need access to these Output Ports',
-            );
-            await userEvent.type(justificationTextArea, 'I need this data for my analysis.');
+            await fillRequiredDataProductFields();
 
             const submitButton = await screen.findByText('Create');
             await userEvent.click(submitButton);
 
-            // Assert the create and link APIs were called
+            await waitFor(() => {
+                expect(createHandler).toHaveBeenCalled();
+            });
+        });
+
+        it('lets the user type a namespace when the name has no usable characters', async () => {
+            allowAllAuth();
+
+            mockOutputPortsSearch();
+            mockUsersHttp(mockUsers);
+            mockGetTags();
+            mockGetResourceNamesConstraints();
+            mockResourceNamesSanitize('');
+            mockResourceNamesValidate();
+            mockGetDataProductTypes();
+            mockDataProductLifecycles();
+            mockGetDomains();
+
+            renderWithProviders(<Cart />, {
+                routerProps: { initialEntries: ['/cart'] },
+                preloadedState: { cart: { DatasetIds: ['op-1'] } },
+                currentUser: mockUsers[0],
+            });
+
+            await selectDataProducts();
+            await createNewDataProduct();
+            const namespace = () => document.querySelector('[data-cy="namespace"]');
+            expect(namespace()).toBeDisabled();
+
+            await userEvent.type(await screen.findByRole('textbox', { name: /name/i }), '!!!');
+
+            await waitFor(() => expect(namespace()).toBeEnabled());
+        });
+
+        it('keeps suggesting the namespace when the user starts typing after the form settled', async () => {
+            allowAllAuth();
+
+            mockOutputPortsSearch();
+            mockUsersHttp(mockUsers);
+            mockGetTags();
+            mockGetResourceNamesConstraints();
+            mockResourceNamesSanitize(undefined, 300);
+            mockResourceNamesValidate();
+            mockGetDataProductTypes();
+            mockDataProductLifecycles();
+            mockGetDomains();
+
+            renderWithProviders(<Cart />, {
+                routerProps: { initialEntries: ['/cart'] },
+                preloadedState: { cart: { DatasetIds: ['op-1'] } },
+                currentUser: mockUsers[0],
+            });
+
+            await selectDataProducts();
+            await createNewDataProduct();
+            const namespace = () => document.querySelector<HTMLInputElement>('[data-cy="namespace"]');
+
+            await new Promise((resolve) => setTimeout(resolve, 700));
+            await userEvent.type(await screen.findByRole('textbox', { name: /name/i }), 'sales');
+
+            await waitFor(() => expect(namespace()?.value).toBe('sales'));
+            expect(namespace()).toBeDisabled();
+        });
+
+        it('should warn before creating a hidden data product', async () => {
+            allowAllAuth();
+
+            const cartOutputPortId = 'op-1';
+
+            mockOutputPortsSearch();
+            mockUsersHttp(mockUsers);
+            mockGetTags();
+            mockGetResourceNamesConstraints();
+            mockResourceNamesSanitize();
+            mockResourceNamesValidate();
+            mockGetDataProductTypes();
+            mockDataProductLifecycles();
+            mockGetDomains();
+
+            const createHandler = vi.fn(() => HttpResponse.json({ id: 'new-hidden-dp-id' }));
+            server.use(http.post('*/api/v2/data_products', createHandler));
+
+            renderWithProviders(<Cart />, {
+                routerProps: { initialEntries: ['/cart'] },
+                preloadedState: { cart: { DatasetIds: [cartOutputPortId] } },
+                currentUser: mockUsers[0],
+            });
+
+            await selectDataProducts();
+            await createNewDataProduct();
+            await fillRequiredDataProductFields({
+                name: 'My Hidden Data Product',
+                description: 'Secret product details',
+                hidden: true,
+            });
+
+            await userEvent.click(screen.getByRole('button', { name: 'Create' }));
+            await waitFor(() => {
+                expect(screen.getAllByRole('button', { name: 'Create' }).length).toBeGreaterThan(1);
+            });
+
+            const confirmButtons = screen.getAllByRole('button', { name: 'Create' });
+            await userEvent.click(confirmButtons[confirmButtons.length - 1]);
+
             await waitFor(() => {
                 expect(createHandler).toHaveBeenCalled();
             });
@@ -223,11 +342,6 @@ describe('Cart', () => {
     }, 20000);
 
     describe('Cart should support creating a new exploration', () => {
-        const createNewExploration = async () => {
-            const existingChoice = await screen.findByText('Create a new Exploration');
-            await userEvent.click(existingChoice);
-        };
-
         it('Should succeed when filling in the form completely', async () => {
             allowAllAuth();
 
@@ -305,6 +419,47 @@ describe('Cart', () => {
             await waitFor(() => {
                 expect(screen.getByText('An Exploration with this name already exists')).toBeTruthy();
             });
+        });
+    });
+
+    describe('Cart should reject an exploration name without usable characters', () => {
+        it('shows an error and does not create the exploration', async () => {
+            allowAllAuth();
+
+            mockOutputPortsSearch();
+            mockUsersHttp(mockUsers);
+            mockGetResourceNamesConstraints();
+            mockResourceNamesSanitize('');
+            mockResourceNamesValidate();
+            mockGetDomains();
+
+            const createHandler = vi.fn(() => HttpResponse.json({ id: 'id-1' }));
+            server.use(http.post('*/api/v2/explorations', createHandler));
+
+            renderWithProviders(<Cart />, {
+                routerProps: { initialEntries: ['/cart'] },
+                preloadedState: { cart: { DatasetIds: ['op-1'] } },
+                currentUser: mockUsers[0],
+            });
+
+            await selectExplorations();
+            await createNewExploration();
+            await userEvent.type(await screen.findByRole('textbox', { name: /name/i }), '!!!');
+            await userEvent.click(screen.getByRole('combobox', { name: /domain/i }));
+            await userEvent.click(await screen.findByText('Finance'));
+            await userEvent.type(
+                await screen.findByPlaceholderText('Explain why you need access to these Output Ports'),
+                'I need this data for my analysis.',
+            );
+
+            const submitButton = await screen.findByRole('button', { name: 'Create' });
+            await waitFor(() => expect(submitButton).not.toBeDisabled());
+            await userEvent.click(submitButton);
+
+            expect(
+                await screen.findByText('The name of the Exploration must contain a letter or a digit'),
+            ).toBeTruthy();
+            expect(createHandler).not.toHaveBeenCalled();
         });
     });
 
@@ -390,6 +545,44 @@ describe('Cart', () => {
                 ).toBeTruthy();
             });
         });
+
+        it('should clear stale overlap warnings when switching from existing to new exploration', async () => {
+            allowAllAuth();
+
+            const cartOutputPortId = 'op-1';
+
+            mockOutputPortsSearch();
+            mockExplorationsHttp();
+            mockExplorationInputPorts(mockExplorations[0].id);
+
+            renderWithProviders(<Cart />, {
+                routerProps: { initialEntries: ['/cart'] },
+                preloadedState: { cart: { DatasetIds: [cartOutputPortId] } },
+                currentUser: mockUsers[0],
+            });
+
+            await selectExplorations();
+            await selectExistingExplorations();
+
+            const selectExploration1 = await screen.findByText(mockExplorations[0].name);
+            await userEvent.click(selectExploration1);
+
+            await waitFor(() => {
+                expect(
+                    screen.getByText(/Output Ports in the cart, for which the selected Exploration already has access/),
+                ).toBeTruthy();
+            });
+
+            await createNewExploration();
+
+            await waitFor(() => {
+                expect(
+                    screen.queryByText(
+                        /Output Ports in the cart, for which the selected Exploration already has access/,
+                    ),
+                ).toBeNull();
+            });
+        });
     });
 
     describe('Cart should persist selection choices across navigation', () => {
@@ -401,7 +594,7 @@ describe('Cart', () => {
             mockExplorationsHttp();
             mockExplorationInputPorts(mockExplorations[0].id, []);
 
-            const CartWithRoutes = () => (
+            const cartWithRoutes = (
                 <Routes>
                     <Route
                         path="/cart"
@@ -416,7 +609,7 @@ describe('Cart', () => {
                 </Routes>
             );
 
-            renderWithProviders(<CartWithRoutes />, {
+            renderWithProviders(cartWithRoutes, {
                 routerProps: { initialEntries: ['/cart'] },
                 preloadedState: { cart: { DatasetIds: [cartOutputPortId] } },
                 currentUser: mockUsers[0],

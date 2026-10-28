@@ -4,15 +4,17 @@ from unittest.mock import patch
 import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
+from sqlalchemy import event
 
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.roles.schema import Role, Scope
 from app.core.authz import Action
 from app.settings import settings
+from tests import engine
 from tests.factories import (
-    DatasetFactory,
     DatasetRoleAssignmentFactory,
     GlobalRoleAssignmentFactory,
+    OutputPortFactory,
     RoleFactory,
     UserFactory,
 )
@@ -22,7 +24,7 @@ if TYPE_CHECKING:
     from app.authorization.role_assignments.output_port.schema import (
         OutputPortRoleAssignment,
     )
-    from app.data_products.output_ports.model import Dataset
+    from app.data_products.output_ports.model import OutputPort
     from app.users.schema import User
 
 ENDPOINT = "/api/v2/authz/role_assignments/output_port"
@@ -30,11 +32,11 @@ ENDPOINT = "/api/v2/authz/role_assignments/output_port"
 
 class TestDatasetRoleAssignmentsRouter:
     def test_list_assignments(self, client: TestClient):
-        dataset: Dataset = DatasetFactory()
+        dataset: OutputPort = OutputPortFactory()
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATASET)
         assignment: OutputPortRoleAssignment = DatasetRoleAssignmentFactory(
-            dataset_id=dataset.id, user_id=user.id, role_id=role.id
+            output_port_id=dataset.id, user_id=user.id, role_id=role.id
         )
         response = client.get(ENDPOINT)
 
@@ -42,6 +44,39 @@ class TestDatasetRoleAssignmentsRouter:
         data = response.json()
         assert len(data["role_assignments"]) == 1
         assert data["role_assignments"][0]["id"] == str(assignment.id)
+
+    def test_list_assignments__query_count_is_constant(self, client: TestClient):
+        def count_queries() -> int:
+            count = 0
+
+            def record(*_):
+                nonlocal count
+                count += 1
+
+            event.listen(engine, "before_cursor_execute", record)
+            try:
+                response = client.get(ENDPOINT)
+            finally:
+                event.remove(engine, "before_cursor_execute", record)
+            assert response.status_code == 200
+            return count
+
+        def create_assignments(n: int) -> None:
+            for _ in range(n):
+                DatasetRoleAssignmentFactory(
+                    output_port_id=OutputPortFactory().id,
+                    user_id=UserFactory().id,
+                    role_id=RoleFactory(scope=Scope.DATASET).id,
+                    requested_by_id=UserFactory().id,
+                    decided_by_id=UserFactory().id,
+                )
+
+        create_assignments(2)
+        count_queries()
+        baseline = count_queries()
+        create_assignments(5)
+
+        assert count_queries() == baseline
 
     @pytest.mark.parametrize(
         ("permissions", "should_update_casbin"),
@@ -66,14 +101,14 @@ class TestDatasetRoleAssignmentsRouter:
         should_update_casbin: bool,
         client: TestClient,
     ):
-        dataset: Dataset = DatasetFactory()
+        dataset: OutputPort = OutputPortFactory()
         me = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
             scope=Scope.DATASET,
             permissions=permissions,
         )
         DatasetRoleAssignmentFactory(
-            user_id=me.id, role_id=authz_role.id, dataset_id=dataset.id
+            user_id=me.id, role_id=authz_role.id, output_port_id=dataset.id
         )
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATASET)
@@ -104,16 +139,16 @@ class TestDatasetRoleAssignmentsRouter:
         "app.authorization.role_assignments.output_port.router.DatasetAuthAssignment"
     )
     def test_create_assignment_generates_webhook_v2_event(
-        self, mock_auth, client, mock_webhook
+        self, mock_auth, client, capture_events
     ):
-        dataset: Dataset = DatasetFactory()
+        dataset: OutputPort = OutputPortFactory()
         me = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
             scope=Scope.DATASET,
             permissions=[Action.OUTPUT_PORT__CREATE_USER],
         )
         DatasetRoleAssignmentFactory(
-            user_id=me.id, role_id=authz_role.id, dataset_id=dataset.id
+            user_id=me.id, role_id=authz_role.id, output_port_id=dataset.id
         )
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATASET)
@@ -127,16 +162,16 @@ class TestDatasetRoleAssignmentsRouter:
             },
         )
         assert response.status_code == 200
-        assert_event_in_queue("output_port_role_assignment.event", mock_webhook)
+        assert_event_in_queue("output_port_role_assignment.event", capture_events)
 
     def test_request_assignment(self, client: TestClient):
-        dataset: Dataset = DatasetFactory()
+        dataset: OutputPort = OutputPortFactory()
         me = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
             scope=Scope.GLOBAL,
             permissions=[Action.GLOBAL__REQUEST_OUTPUT_PORT_ACCESS],
         )
-        GlobalRoleAssignmentFactory(user_id=me.id, role_id=authz_role.id)
+        GlobalRoleAssignmentFactory(identity_id=me.id, role_id=authz_role.id)
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATASET)
 
@@ -155,41 +190,46 @@ class TestDatasetRoleAssignmentsRouter:
         assert data["user"]["id"] == str(user.id)
         assert data["role"]["id"] == str(role.id)
 
-    def test_request_assignment_generates_webhook_v2_event(self, client, mock_webhook):
+    def test_request_assignment_generates_webhook_v2_event(
+        self, client, capture_events
+    ):
         self.test_request_assignment(client)
-        assert_event_in_queue("output_port_role_assignment.event", mock_webhook)
+        assert_event_in_queue("output_port_role_assignment.event", capture_events)
 
-    def test_request_assignment_no_right(self, client: TestClient):
-        dataset: Dataset = DatasetFactory()
+    def test_request_assignment_no_right(
+        self, client: TestClient, everyone_role_permissions
+    ):
+        dataset: OutputPort = OutputPortFactory()
         UserFactory(external_id=settings.DEFAULT_USERNAME)
 
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATASET)
 
-        response = client.post(
-            f"{ENDPOINT}/request",
-            json={
-                "output_port_id": str(dataset.id),
-                "user_id": str(user.id),
-                "role_id": str(role.id),
-            },
-        )
+        with everyone_role_permissions(permissions=[]):
+            response = client.post(
+                f"{ENDPOINT}/request",
+                json={
+                    "output_port_id": str(dataset.id),
+                    "user_id": str(user.id),
+                    "role_id": str(role.id),
+                },
+            )
         assert response.status_code == 403
 
     def test_delete_assignment(self, client: TestClient):
-        dataset: Dataset = DatasetFactory()
+        dataset: OutputPort = OutputPortFactory()
         me = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
             scope=Scope.DATASET,
             permissions=[Action.OUTPUT_PORT__DELETE_USER],
         )
         DatasetRoleAssignmentFactory(
-            user_id=me.id, role_id=authz_role.id, dataset_id=dataset.id
+            user_id=me.id, role_id=authz_role.id, output_port_id=dataset.id
         )
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATASET)
         assignment: OutputPortRoleAssignment = DatasetRoleAssignmentFactory(
-            dataset_id=dataset.id,
+            output_port_id=dataset.id,
             user_id=user.id,
             role_id=role.id,
             decision=DecisionStatus.APPROVED,
@@ -206,24 +246,24 @@ class TestDatasetRoleAssignmentsRouter:
         assert response.status_code == 200
         assert len(response.json()["role_assignments"]) == 1
 
-    def test_delete_assignment_generates_webhook_v2_event(self, client, mock_webhook):
+    def test_delete_assignment_generates_webhook_v2_event(self, client, capture_events):
         self.test_delete_assignment(client)
-        assert_event_in_queue("output_port_role_assignment.event", mock_webhook)
+        assert_event_in_queue("output_port_role_assignment.event", capture_events)
 
     def test_decide_assignment(self, client: TestClient):
-        dataset: Dataset = DatasetFactory()
+        dataset: OutputPort = OutputPortFactory()
         me = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
             scope=Scope.DATASET,
             permissions=[Action.OUTPUT_PORT__APPROVE_USER_REQUEST],
         )
         DatasetRoleAssignmentFactory(
-            user_id=me.id, role_id=authz_role.id, dataset_id=dataset.id
+            user_id=me.id, role_id=authz_role.id, output_port_id=dataset.id
         )
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATASET)
         assignment: OutputPortRoleAssignment = DatasetRoleAssignmentFactory(
-            dataset_id=dataset.id,
+            output_port_id=dataset.id,
             user_id=user.id,
             role_id=role.id,
             decision=DecisionStatus.PENDING,
@@ -239,24 +279,24 @@ class TestDatasetRoleAssignmentsRouter:
         assert data["id"] == str(assignment.id)
         assert data["decision"] == DecisionStatus.APPROVED
 
-    def test_decide_assignment_generates_webhook_v2_event(self, client, mock_webhook):
+    def test_decide_assignment_generates_webhook_v2_event(self, client, capture_events):
         self.test_decide_assignment(client)
-        assert_event_in_queue("output_port_role_assignment.event", mock_webhook)
+        assert_event_in_queue("output_port_role_assignment.event", capture_events)
 
     def test_decide_assignment_already_decided(self, client: TestClient):
-        dataset: Dataset = DatasetFactory()
+        dataset: OutputPort = OutputPortFactory()
         me = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
             scope=Scope.DATASET,
             permissions=[Action.OUTPUT_PORT__APPROVE_USER_REQUEST],
         )
         DatasetRoleAssignmentFactory(
-            user_id=me.id, role_id=authz_role.id, dataset_id=dataset.id
+            user_id=me.id, role_id=authz_role.id, output_port_id=dataset.id
         )
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATASET)
         assignment: OutputPortRoleAssignment = DatasetRoleAssignmentFactory(
-            dataset_id=dataset.id,
+            output_port_id=dataset.id,
             user_id=user.id,
             role_id=role.id,
             decision=DecisionStatus.DENIED,
@@ -271,19 +311,19 @@ class TestDatasetRoleAssignmentsRouter:
         assert "already decided" in response.json()["detail"]
 
     def test_decide_assignment_idempotency(self, client: TestClient):
-        dataset: Dataset = DatasetFactory()
+        dataset: OutputPort = OutputPortFactory()
         me = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
             scope=Scope.DATASET,
             permissions=[Action.OUTPUT_PORT__APPROVE_USER_REQUEST],
         )
         DatasetRoleAssignmentFactory(
-            user_id=me.id, role_id=authz_role.id, dataset_id=dataset.id
+            user_id=me.id, role_id=authz_role.id, output_port_id=dataset.id
         )
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATASET)
         assignment: OutputPortRoleAssignment = DatasetRoleAssignmentFactory(
-            dataset_id=dataset.id,
+            output_port_id=dataset.id,
             user_id=user.id,
             role_id=role.id,
             decision=DecisionStatus.DENIED,
@@ -296,18 +336,18 @@ class TestDatasetRoleAssignmentsRouter:
         assert response.status_code == 200
 
     def test_decide_assignment_no_role(self, client: TestClient):
-        dataset: Dataset = DatasetFactory()
+        dataset: OutputPort = OutputPortFactory()
         me = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
             scope=Scope.DATASET,
             permissions=[Action.OUTPUT_PORT__APPROVE_USER_REQUEST],
         )
         DatasetRoleAssignmentFactory(
-            user_id=me.id, role_id=authz_role.id, dataset_id=dataset.id
+            user_id=me.id, role_id=authz_role.id, output_port_id=dataset.id
         )
         user: User = UserFactory()
         assignment: OutputPortRoleAssignment = DatasetRoleAssignmentFactory(
-            dataset_id=dataset.id,
+            output_port_id=dataset.id,
             user_id=user.id,
             role_id=None,
         )
@@ -321,21 +361,21 @@ class TestDatasetRoleAssignmentsRouter:
         assert "does not have a role assignment" in response.json()["detail"]
 
     def test_modify_assigned_role(self, client: TestClient):
-        dataset: Dataset = DatasetFactory()
+        dataset: OutputPort = OutputPortFactory()
         me = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
             scope=Scope.DATASET,
             permissions=[Action.OUTPUT_PORT__UPDATE_USER],
         )
         DatasetRoleAssignmentFactory(
-            user_id=me.id, role_id=authz_role.id, dataset_id=dataset.id
+            user_id=me.id, role_id=authz_role.id, output_port_id=dataset.id
         )
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATASET)
         new_role: Role = RoleFactory(scope=Scope.DATASET)
 
         assignment: OutputPortRoleAssignment = DatasetRoleAssignmentFactory(
-            dataset_id=dataset.id,
+            output_port_id=dataset.id,
             user_id=user.id,
             role_id=role.id,
         )
@@ -348,19 +388,19 @@ class TestDatasetRoleAssignmentsRouter:
         assert data["role"]["id"] == str(new_role.id)
 
     def test_modify_assigned_role_generates_webhook_v2_event(
-        self, client, mock_webhook
+        self, client, capture_events
     ):
         self.test_modify_assigned_role(client)
-        assert_event_in_queue("output_port_role_assignment.event", mock_webhook)
+        assert_event_in_queue("output_port_role_assignment.event", capture_events)
 
     def test_delete_dataset_with_role_assignment(self, client: TestClient):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-        dataset: Dataset = DatasetFactory()
+        dataset: OutputPort = OutputPortFactory()
         role: Role = RoleFactory(
             scope=Scope.DATASET, permissions=[Action.OUTPUT_PORT__DELETE]
         )
         DatasetRoleAssignmentFactory(
-            dataset_id=dataset.id,
+            output_port_id=dataset.id,
             user_id=user.id,
             role_id=role.id,
         )
@@ -379,25 +419,25 @@ class TestDatasetRoleAssignmentsRouter:
         assert len(data["role_assignments"]) == 0
 
     def test_delete_last_owner_assignment(self, client: TestClient):
-        dataset: Dataset = DatasetFactory()
+        dataset: OutputPort = OutputPortFactory()
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
             scope=Scope.DATASET,
             permissions=[Action.OUTPUT_PORT__DELETE_USER],
         )
         DatasetRoleAssignmentFactory(
-            user_id=user.id, role_id=authz_role.id, dataset_id=dataset.id
+            user_id=user.id, role_id=authz_role.id, output_port_id=dataset.id
         )
 
         user_1, user_2 = UserFactory.create_batch(2)
         role = RoleFactory.dataset_owner()
         assignment_1 = DatasetRoleAssignmentFactory(
-            dataset_id=dataset.id,
+            output_port_id=dataset.id,
             user_id=user_1.id,
             role_id=role.id,
         )
         assignment_2 = DatasetRoleAssignmentFactory(
-            dataset_id=dataset.id,
+            output_port_id=dataset.id,
             user_id=user_2.id,
             role_id=role.id,
         )
@@ -408,23 +448,53 @@ class TestDatasetRoleAssignmentsRouter:
         response = client.delete(f"{ENDPOINT}/{assignment_2.id}")
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
+    def test_delete_last_approved_owner_assignment__other_owner_pending(
+        self, client: TestClient
+    ):
+        dataset: OutputPort = OutputPortFactory()
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        authz_role = RoleFactory(
+            scope=Scope.DATASET,
+            permissions=[Action.OUTPUT_PORT__DELETE_USER],
+        )
+        DatasetRoleAssignmentFactory(
+            user_id=user.id, role_id=authz_role.id, output_port_id=dataset.id
+        )
+
+        user_1, user_2 = UserFactory.create_batch(2)
+        role = RoleFactory.dataset_owner()
+        approved = DatasetRoleAssignmentFactory(
+            output_port_id=dataset.id,
+            user_id=user_1.id,
+            role_id=role.id,
+        )
+        DatasetRoleAssignmentFactory(
+            output_port_id=dataset.id,
+            user_id=user_2.id,
+            role_id=role.id,
+            decision=DecisionStatus.PENDING,
+        )
+
+        response = client.delete(f"{ENDPOINT}/{approved.id}")
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+
     def test_history_event_created_on_dataset_role_assignment_requested(
         self, client: TestClient
     ):
-        dataset: Dataset = DatasetFactory()
+        output_port: OutputPort = OutputPortFactory()
         me = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
             scope=Scope.GLOBAL,
             permissions=[Action.GLOBAL__REQUEST_OUTPUT_PORT_ACCESS],
         )
-        GlobalRoleAssignmentFactory(user_id=me.id, role_id=authz_role.id)
+        GlobalRoleAssignmentFactory(identity_id=me.id, role_id=authz_role.id)
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATASET)
 
         response = client.post(
             f"{ENDPOINT}/request",
             json={
-                "output_port_id": str(dataset.id),
+                "output_port_id": str(output_port.id),
                 "user_id": str(user.id),
                 "role_id": str(role.id),
             },
@@ -432,26 +502,27 @@ class TestDatasetRoleAssignmentsRouter:
         assert response.status_code == 200
 
         history = self.get_dataset_history(
-            client, dataset.data_product_id, dataset.id
-        ).json()
-        assert len(history["events"]) == 1
+            client, output_port.data_product_id, output_port.id
+        )
+        assert history.status_code == 200, history.text
+        assert len(history.json()["events"]) == 1
 
     def test_history_event_created_on_dataset_role_assignment_approved(
         self, client: TestClient
     ):
-        dataset: Dataset = DatasetFactory()
+        dataset: OutputPort = OutputPortFactory()
         me = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
             scope=Scope.DATASET,
             permissions=[Action.OUTPUT_PORT__APPROVE_USER_REQUEST],
         )
         DatasetRoleAssignmentFactory(
-            user_id=me.id, role_id=authz_role.id, dataset_id=dataset.id
+            user_id=me.id, role_id=authz_role.id, output_port_id=dataset.id
         )
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATASET)
         assignment: OutputPortRoleAssignment = DatasetRoleAssignmentFactory(
-            dataset_id=dataset.id,
+            output_port_id=dataset.id,
             user_id=user.id,
             role_id=role.id,
             decision=DecisionStatus.PENDING,
@@ -470,21 +541,21 @@ class TestDatasetRoleAssignmentsRouter:
     def test_history_event_created_on_dataset_role_assignment_modified(
         self, client: TestClient
     ):
-        dataset: Dataset = DatasetFactory()
+        dataset: OutputPort = OutputPortFactory()
         me = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
             scope=Scope.DATASET,
             permissions=[Action.OUTPUT_PORT__UPDATE_USER],
         )
         DatasetRoleAssignmentFactory(
-            user_id=me.id, role_id=authz_role.id, dataset_id=dataset.id
+            user_id=me.id, role_id=authz_role.id, output_port_id=dataset.id
         )
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATASET)
         new_role: Role = RoleFactory(scope=Scope.DATASET)
 
         assignment: OutputPortRoleAssignment = DatasetRoleAssignmentFactory(
-            dataset_id=dataset.id,
+            output_port_id=dataset.id,
             user_id=user.id,
             role_id=role.id,
             decision=DecisionStatus.APPROVED,
@@ -503,19 +574,19 @@ class TestDatasetRoleAssignmentsRouter:
     def test_history_event_created_on_dataset_role_assignment_removed(
         self, client: TestClient
     ):
-        dataset: Dataset = DatasetFactory()
+        dataset: OutputPort = OutputPortFactory()
         me = UserFactory(external_id=settings.DEFAULT_USERNAME)
         authz_role = RoleFactory(
             scope=Scope.DATASET,
             permissions=[Action.OUTPUT_PORT__DELETE_USER],
         )
         DatasetRoleAssignmentFactory(
-            user_id=me.id, role_id=authz_role.id, dataset_id=dataset.id
+            user_id=me.id, role_id=authz_role.id, output_port_id=dataset.id
         )
         user: User = UserFactory()
         role: Role = RoleFactory(scope=Scope.DATASET)
         assignment: OutputPortRoleAssignment = DatasetRoleAssignmentFactory(
-            dataset_id=dataset.id,
+            output_port_id=dataset.id,
             user_id=user.id,
             role_id=role.id,
             decision=DecisionStatus.APPROVED,

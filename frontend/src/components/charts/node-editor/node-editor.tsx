@@ -65,11 +65,11 @@ export function NodeEditor({
             edgeTypes={edgeTypes}
             elevateNodesOnSelect
             nodesFocusable
-            attributionPosition={'bottom-left'}
+            attributionPosition="bottom-left"
             {...editorProps}
         >
             <Background />
-            <Controls position={'top-right'} showInteractive={false} fitViewOptions={defaultFitViewOptions} />
+            <Controls position="top-right" showInteractive={false} fitViewOptions={defaultFitViewOptions} />
         </ReactFlow>
     );
 }

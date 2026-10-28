@@ -10,5 +10,5 @@ export function DefaultEdge({ id, sourceX, sourceY, targetX, targetY, style }: E
         targetPosition: Position.Left,
     });
 
-    return <BaseEdge id={id} path={edgePath} style={style} />;
+    return <BaseEdge id={id} path={edgePath} style={style} data-cy="graph-edge" />;
 }

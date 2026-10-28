@@ -1,0 +1,39 @@
+name: Delivery metrics
+on:
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: delivery-metrics
+
+jobs:
+  update:
+    name: Update metrics issue
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+      REPO: ${{ github.repository }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Compute metrics
+        run: scripts/delivery_metrics.sh > metrics.md
+
+      - name: Update metrics issue
+        run: |
+          number=$(gh issue list -R "$REPO" --label delivery-metrics --state open --json number --jq '.[0].number')
+          if [ -n "$number" ]; then
+            gh issue edit "$number" -R "$REPO" --body-file metrics.md
+          else
+            gh label create delivery-metrics -R "$REPO" --force
+            gh issue create -R "$REPO" --title "Delivery metrics" --label delivery-metrics --body-file metrics.md
+          fi

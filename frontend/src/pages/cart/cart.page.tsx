@@ -1,15 +1,16 @@
 import { PlusOutlined, ShopOutlined, ShoppingCartOutlined, UnorderedListOutlined } from '@ant-design/icons';
-import { Button, Col, Empty, Flex, Row, Typography } from 'antd';
+import { Button, Col, Flex, Row } from 'antd';
 import posthog from 'posthog-js';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router';
 import ExplorationBorderIcon from '@/assets/icons/border-icons/exploration-border-icon.svg?react';
+import { CardSelection } from '@/components/card-selection/card-selection.tsx';
+import { EmptyState } from '@/components/empty-state/empty-state.component.tsx';
 import { CustomSvgIconLoader } from '@/components/icons/custom-svg-icon-loader/custom-svg-icon-loader.component.tsx';
 import { useBreadcrumbs } from '@/components/layout/navbar/breadcrumbs/breadcrumb.context.tsx';
 import { PosthogEvents } from '@/constants/posthog.constants.ts';
-import { CardSelection } from '@/pages/cart/components/card-selection.tsx';
 import { CartOverview } from '@/pages/cart/components/cart-overview.component.tsx';
 import { ExistingDataProductForm } from '@/pages/cart/components/existing-data-product-form.tsx';
 import { ExistingExplorationForm } from '@/pages/cart/components/existing-exploration-form.tsx';
@@ -20,9 +21,10 @@ import { useSearchOutputPortsQuery } from '@/store/api/services/generated/output
 import {
     DataProductChoiceOptions,
     ExistingOrNew,
+    removeOutputPortFromCart,
     selectCartDataProductTypeChoice,
-    selectCartDatasetIds,
     selectCartExistingOrNewChoice,
+    selectCartOutputPortIds,
     setCartExplorationChoices,
 } from '@/store/features/cart/cart-slice.ts';
 import { ApplicationPaths } from '@/types/navigation.ts';
@@ -33,20 +35,26 @@ function ExplorationsCart() {
     const dispatch = useAppDispatch();
     const dataProductTypeChoice = useSelector(selectCartDataProductTypeChoice);
     const existingOrNewChoice = useSelector(selectCartExistingOrNewChoice);
+    const clearSelectedIds = useCallback(() => {
+        setSelectedDataProductId(undefined);
+        setSelectedExplorationId(undefined);
+    }, []);
 
     const setDataProductTypeChoice = useCallback(
         (choice: DataProductChoiceOptions | null) => {
+            clearSelectedIds();
             posthog.capture(PosthogEvents.CART_DATA_PRODUCT_OR_EXPLORATION_CHOICE, { choice });
             dispatch(setCartExplorationChoices({ dataProductTypeChoice: choice, existingOrNewChoice: null }));
         },
-        [dispatch],
+        [clearSelectedIds, dispatch],
     );
     const setExistingOrNewChoice = useCallback(
         (choice: ExistingOrNew | null) => {
+            clearSelectedIds();
             posthog.capture(PosthogEvents.CART_EXISTING_OR_NEW_CHOICE, { choice });
             dispatch(setCartExplorationChoices({ dataProductTypeChoice, existingOrNewChoice: choice }));
         },
-        [dispatch, dataProductTypeChoice],
+        [clearSelectedIds, dispatch, dataProductTypeChoice],
     );
     const [selectedDataProductId, setSelectedDataProductId] = useState<string | undefined>(undefined);
     const [selectedExplorationId, setSelectedExplorationId] = useState<string | undefined>(undefined);
@@ -71,75 +79,84 @@ function ExplorationsCart() {
         ]);
     }, [setBreadcrumbs, t]);
 
-    const { data: { output_ports: outputPorts = [] } = {}, isFetching: fetchingOutputPorts } =
-        useSearchOutputPortsQuery({ limit: 1000 });
-    const cartDatasetIds = useSelector(selectCartDatasetIds);
+    const {
+        data: { output_ports: outputPorts = [] } = {},
+        isFetching: fetchingOutputPorts,
+        isSuccess,
+    } = useSearchOutputPortsQuery({ limit: 1000 });
+    const cartOutputPortIds = useSelector(selectCartOutputPortIds);
+
+    useEffect(() => {
+        if (!isSuccess || cartOutputPortIds.length === 0) {
+            return;
+        }
+
+        const availableOutputPortIds = new Set(outputPorts.map((outputPort) => outputPort.id));
+        const staleCartOutputPortIds = cartOutputPortIds.filter(
+            (outputPortId) => !availableOutputPortIds.has(outputPortId),
+        );
+
+        staleCartOutputPortIds.forEach((outputPortId) => {
+            dispatch(removeOutputPortFromCart({ outputPortId }));
+        });
+    }, [cartOutputPortIds, dispatch, isSuccess, outputPorts]);
+
     const cartOutputPorts = useMemo(() => {
-        if (cartDatasetIds.length === 0) {
+        if (cartOutputPortIds.length === 0) {
             return [];
         }
-        return outputPorts?.filter((dataset) => cartDatasetIds.includes(dataset.id));
-    }, [outputPorts, cartDatasetIds]);
+        return outputPorts?.filter((outputPort) => cartOutputPortIds.includes(outputPort.id));
+    }, [outputPorts, cartOutputPortIds]);
     const form = useMemo(() => {
         if (!dataProductTypeChoice || !existingOrNewChoice) {
             return null;
         }
         if (dataProductTypeChoice === DataProductChoiceOptions.data_product) {
             if (existingOrNewChoice === ExistingOrNew.existing) {
-                return (
-                    <ExistingDataProductForm
-                        cartOutputPorts={cartOutputPorts}
-                        setSelectedDataProductId={setSelectedDataProductId}
-                    />
-                );
+                return <ExistingDataProductForm setSelectedDataProductId={setSelectedDataProductId} />;
             }
             if (existingOrNewChoice === ExistingOrNew.new) {
-                return <NewDataProductForm cartOutputPorts={cartOutputPorts} />;
+                return <NewDataProductForm />;
             }
         }
         if (dataProductTypeChoice === DataProductChoiceOptions.exploration) {
             if (existingOrNewChoice === ExistingOrNew.new) {
-                return <NewExplorationForm cartOutputPorts={cartOutputPorts} />;
+                return <NewExplorationForm />;
             }
             if (existingOrNewChoice === ExistingOrNew.existing) {
-                return (
-                    <ExistingExplorationForm
-                        cartOutputPorts={cartOutputPorts}
-                        setSelectedExplorationId={setSelectedExplorationId}
-                    />
-                );
+                return <ExistingExplorationForm setSelectedExplorationId={setSelectedExplorationId} />;
             }
         }
         return null;
-    }, [dataProductTypeChoice, existingOrNewChoice, cartOutputPorts]);
-    if (cartDatasetIds?.length === 0) {
+    }, [dataProductTypeChoice, existingOrNewChoice]);
+    if (cartOutputPortIds?.length === 0) {
         return (
-            <Empty
-                description={
-                    <Typography.Text>
-                        {t('Your cart is currently empty. Explore the marketplace to add items.')}
-                    </Typography.Text>
+            <EmptyState
+                icon={<ShoppingCartOutlined />}
+                title={t('Your cart is empty')}
+                description={t('Add Output Ports from the Marketplace, then request access to them together.')}
+                action={
+                    <Link to={ApplicationPaths.Marketplace}>
+                        <Button type="primary">{t('Browse Marketplace')}</Button>
+                    </Link>
                 }
-            >
-                <Link to={ApplicationPaths.Marketplace}>
-                    <Button type="primary">{t('Marketplace')}</Button>
-                </Link>
-            </Empty>
+            />
         );
     }
     return (
         <Row gutter={16}>
             <Col span={16}>
-                <Flex vertical gap={'middle'}>
+                <Flex vertical gap="middle">
                     <CardSelection
-                        selectedChoice={dataProductTypeChoice}
-                        setSelectedChoice={setDataProductTypeChoice}
+                        value={dataProductTypeChoice}
+                        onChange={setDataProductTypeChoice}
                         options={[
                             {
                                 title: t('I want to explore this data'),
                                 description: t('I need a one-time answer or personal sandbox'),
                                 icon: <ExplorationBorderIcon />,
                                 value: DataProductChoiceOptions.exploration,
+                                dataCy: 'checkout-explore-data',
                             },
                             {
                                 title: t('I want to build Data Products'),
@@ -156,13 +173,14 @@ function ExplorationsCart() {
                                     />
                                 ),
                                 value: DataProductChoiceOptions.data_product,
+                                dataCy: 'checkout-build-data-products',
                             },
                         ]}
                     />
                     {dataProductTypeChoice && (
                         <CardSelection
-                            selectedChoice={existingOrNewChoice}
-                            setSelectedChoice={setExistingOrNewChoice}
+                            value={existingOrNewChoice}
+                            onChange={setExistingOrNewChoice}
                             options={[
                                 {
                                     title: t('Create a new {{dataProductChoice}}', {
@@ -173,6 +191,7 @@ function ExplorationsCart() {
                                     }),
                                     icon: <PlusOutlined />,
                                     value: ExistingOrNew.new,
+                                    dataCy: 'checkout-create-new',
                                 },
                                 {
                                     title: t('Select an existing {{dataProductChoice}}', {
@@ -183,6 +202,7 @@ function ExplorationsCart() {
                                     }),
                                     icon: <UnorderedListOutlined />,
                                     value: ExistingOrNew.existing,
+                                    dataCy: 'checkout-select-existing',
                                 },
                             ]}
                         />
@@ -196,6 +216,7 @@ function ExplorationsCart() {
                     cartOutputPorts={cartOutputPorts}
                     selectedDataProductId={selectedDataProductId}
                     selectedExplorationId={selectedExplorationId}
+                    dataProductTypeChoice={dataProductTypeChoice}
                 />
             </Col>
         </Row>

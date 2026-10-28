@@ -9,7 +9,7 @@ ARG PLATFORM=linux/amd64
 # ---------------------------------------------------------------------------
 # Stage 1 – build the React frontend
 # ---------------------------------------------------------------------------
-FROM --platform=${PLATFORM} node:26-alpine@sha256:725aeba2364a9b16beae49e180d83bd597dbd0b15c47f1f28875c290bfd255b9 AS frontend-build
+FROM --platform=${PLATFORM} node:26-alpine@sha256:40cd011b55415bc894e45b02fdd5a5dfde056921b7d23a64c74f80497af48797 AS frontend-build
 
 WORKDIR /frontend
 COPY frontend/ ./
@@ -17,7 +17,7 @@ RUN --mount=type=cache,target=/app/node_modules npm ci && npm run build:prd
 # Vite outputs to /frontend/dist
 
 ARG PLATFORM=linux/amd64
-FROM --platform=${PLATFORM} python:3.13.14-slim-bookworm@sha256:fcbd8dfc2605ba7c2eca646846c5e892b2931e41f6227985154a596f26ab8ed7 AS python-base-image
+FROM --platform=${PLATFORM} python:3.13.16-slim-bookworm@sha256:a1165e272e578941b84abc79e4ab38a0305cd12803a5c4247979ac7655f4d641 AS python-base-image
 
 # ---------------------------------------------------------------------------
 # Stage 2 – install Python dependencies (Poetry)
@@ -41,7 +41,15 @@ COPY backend/requirements-poetry.txt .
 RUN pip install -r requirements-poetry.txt --require-hashes
 
 COPY backend/poetry.lock backend/pyproject.toml backend/alembic.ini backend/sample_data.sql /
+COPY plugins /plugins
+COPY sdk /sdk
 RUN poetry install --no-root
+
+# pyproject declares readme = "README.md", so poetry-core reads it while
+# building the package metadata.
+COPY backend/README.md /README.md
+COPY backend/app /app
+RUN pip install --no-deps --no-build-isolation /
 
 # ---------------------------------------------------------------------------
 # Stage 3 – final runtime image
@@ -52,6 +60,10 @@ RUN apt-get update && apt-get upgrade -y && apt-get install -y curl
 
 # Copy installed Python packages and tools from build stage
 COPY --from=python-build /usr/local /usr/local
+
+# portal_plugins is installed editable (path dependency), so the interpreter
+# resolves it from this path at import time, not from site-packages.
+COPY --from=python-build /plugins /plugins
 
 # Copy backend application
 COPY backend/app ./app

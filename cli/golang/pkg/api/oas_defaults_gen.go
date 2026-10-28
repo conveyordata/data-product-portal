@@ -2,15 +2,35 @@
 
 package api
 
+import (
+	"github.com/google/uuid"
+)
+
 // setDefaults set default value of fields.
-func (s *AzureBlobTechnicalAssetConfiguration) setDefaults() {
+func (s *BitolContractRequest) setDefaults() {
 	{
-		val := string("")
-		s.Domain.SetTo(val)
+		var defaultVal0 []SchemaObjectRequest
+		s.Schema = defaultVal0
+	}
+}
+
+// setDefaults set default value of fields.
+func (s *CreateTechnicalAssetRequest) setDefaults() {
+	{
+		var defaultVal0 []uuid.UUID
+		s.AccessModeIds = defaultVal0
+	}
+}
+
+// setDefaults set default value of fields.
+func (s *DataProductCreate) setDefaults() {
+	{
+		var defaultVal0 []uuid.UUID
+		s.TagIds = defaultVal0
 	}
 	{
-		val := string("")
-		s.Path.SetTo(val)
+		val := DataProductVisibility("discoverable")
+		s.Visibility.SetTo(val)
 	}
 }
 
@@ -63,26 +83,18 @@ func (s *DataProductSettingsGetItem) setDefaults() {
 }
 
 // setDefaults set default value of fields.
-func (s *DatabricksTechnicalAssetConfiguration) setDefaults() {
+func (s *DataProductUpdate) setDefaults() {
+	{
+		var defaultVal0 []uuid.UUID
+		s.TagIds = defaultVal0
+	}
+}
+
+// setDefaults set default value of fields.
+func (s *DeviceFlow) setDefaults() {
 	{
 		val := string("")
-		s.Schema.SetTo(val)
-	}
-	{
-		val := string("*")
-		s.Table.SetTo(val)
-	}
-	{
-		val := string("")
-		s.BucketIdentifier.SetTo(val)
-	}
-	{
-		val := string("")
-		s.CatalogPath.SetTo(val)
-	}
-	{
-		val := string("")
-		s.TablePath.SetTo(val)
+		s.VerificationURIComplete.SetTo(val)
 	}
 }
 
@@ -92,6 +104,10 @@ func (s *Environment) setDefaults() {
 		val := bool(false)
 		s.IsDefault.SetTo(val)
 	}
+	{
+		val := bool(true)
+		s.IsGlobal.SetTo(val)
+	}
 }
 
 // setDefaults set default value of fields.
@@ -100,41 +116,49 @@ func (s *EnvironmentGetItem) setDefaults() {
 		val := bool(false)
 		s.IsDefault.SetTo(val)
 	}
-}
-
-// setDefaults set default value of fields.
-func (s *GlueTechnicalAssetConfiguration) setDefaults() {
 	{
-		val := string("")
-		s.DatabaseSuffix.SetTo(val)
-	}
-	{
-		val := string("*")
-		s.Table.SetTo(val)
-	}
-	{
-		val := string("")
-		s.BucketIdentifier.SetTo(val)
-	}
-	{
-		val := string("")
-		s.DatabasePath.SetTo(val)
-	}
-	{
-		val := string("")
-		s.TablePath.SetTo(val)
+		val := bool(true)
+		s.IsGlobal.SetTo(val)
 	}
 }
 
 // setDefaults set default value of fields.
-func (s *OSISemanticModelTechnicalAssetConfiguration) setDefaults() {
+func (s *GetDataProductResponse) setDefaults() {
 	{
-		val := string("")
-		s.ModelName.SetTo(val)
+		val := DataProductVisibility("discoverable")
+		s.Visibility = val
 	}
+}
+
+// setDefaults set default value of fields.
+func (s *GetDataProductsResponseItem) setDefaults() {
+	{
+		val := DataProductVisibility("discoverable")
+		s.Visibility = val
+	}
+}
+
+// setDefaults set default value of fields.
+func (s *OutputPortAccessTypeCreate) setDefaults() {
 	{
 		val := string("")
-		s.Location.SetTo(val)
+		s.Description.SetTo(val)
+	}
+}
+
+// setDefaults set default value of fields.
+func (s *OutputPortAccessTypeUpdate) setDefaults() {
+	{
+		val := string("")
+		s.Description.SetTo(val)
+	}
+}
+
+// setDefaults set default value of fields.
+func (s *OutputPortSchemaResponse) setDefaults() {
+	{
+		var defaultVal0 []SchemaObjectResponse
+		s.SchemaObjects = defaultVal0
 	}
 }
 
@@ -149,52 +173,28 @@ func (s *PlatformTile) setDefaults() {
 		s.HasConfig.SetTo(val)
 	}
 	{
+		var defaultVal0 []PlatformTile
+		s.Children = defaultVal0
+	}
+	{
 		val := bool(true)
 		s.ShowInForm.SetTo(val)
 	}
 }
 
 // setDefaults set default value of fields.
-func (s *PostgreSQLTechnicalAssetConfiguration) setDefaults() {
+func (s *SchemaObjectRequest) setDefaults() {
 	{
-		val := string("")
-		s.Schema.SetTo(val)
-	}
-	{
-		val := string("*")
-		s.Table.SetTo(val)
+		var defaultVal0 []SchemaPropertyRequest
+		s.Properties = defaultVal0
 	}
 }
 
 // setDefaults set default value of fields.
-func (s *RedshiftTechnicalAssetConfiguration) setDefaults() {
+func (s *SchemaObjectResponse) setDefaults() {
 	{
-		val := string("")
-		s.Schema.SetTo(val)
-	}
-	{
-		val := string("*")
-		s.Table.SetTo(val)
-	}
-	{
-		val := string("")
-		s.BucketIdentifier.SetTo(val)
-	}
-	{
-		val := string("")
-		s.DatabasePath.SetTo(val)
-	}
-	{
-		val := string("")
-		s.TablePath.SetTo(val)
-	}
-}
-
-// setDefaults set default value of fields.
-func (s *S3TechnicalAssetConfiguration) setDefaults() {
-	{
-		val := string("")
-		s.Suffix.SetTo(val)
+		var defaultVal0 []SchemaPropertyResponse
+		s.Properties = defaultVal0
 	}
 }
 
@@ -215,6 +215,10 @@ func (s *SchemaPropertyRequest) setDefaults() {
 	{
 		val := bool(false)
 		s.Partitioned.SetTo(val)
+	}
+	{
+		var defaultVal0 []SchemaPropertyRequest
+		s.Properties = defaultVal0
 	}
 }
 
@@ -239,30 +243,6 @@ func (s *SchemaPropertyResponse) setDefaults() {
 }
 
 // setDefaults set default value of fields.
-func (s *SnowflakeTechnicalAssetConfiguration) setDefaults() {
-	{
-		val := string("")
-		s.Schema.SetTo(val)
-	}
-	{
-		val := string("*")
-		s.Table.SetTo(val)
-	}
-	{
-		val := string("")
-		s.BucketIdentifier.SetTo(val)
-	}
-	{
-		val := string("")
-		s.DatabasePath.SetTo(val)
-	}
-	{
-		val := string("")
-		s.TablePath.SetTo(val)
-	}
-}
-
-// setDefaults set default value of fields.
 func (s *UIElementMetadataResponse) setDefaults() {
 	{
 		val := bool(false)
@@ -279,6 +259,10 @@ func (s *UIElementMetadataResponse) setDefaults() {
 	{
 		val := bool(true)
 		s.ShowInForm.SetTo(val)
+	}
+	{
+		val := bool(true)
+		s.Shareable.SetTo(val)
 	}
 }
 

@@ -14,17 +14,29 @@ from app.data_products.technical_assets.status import TechnicalAssetStatus
 from app.database.event_mixin import EventTrackedMixin
 
 if TYPE_CHECKING:
+    from app.configuration.access_modes.model import AccessMode
     from app.configuration.platforms.model import Platform
     from app.configuration.platforms.platform_services.model import PlatformService
-    from app.data_output_configuration.base_model import TechnicalAssetConfiguration
     from app.data_products.model import DataProduct
     from app.data_products.output_port_technical_assets_link.model import (
-        DataOutputDatasetAssociation,
+        TechnicalAssetOutputPortAssociation,
     )
+    from app.technical_asset_configuration.base_model import TechnicalAssetConfiguration
 
-from app.configuration.tags.model import Tag, tag_data_output_table
+from app.configuration.tags.model import Tag, tag_technical_asset_table
 from app.database.database import Base, ensure_exists
 from app.shared.model import BaseORM
+
+
+class TechnicalAssetAccessMode(Base, BaseORM):
+    __tablename__ = "technical_asset_access_modes"
+
+    technical_asset_id = Column(
+        UUID(as_uuid=True), ForeignKey("data_outputs.id"), primary_key=True
+    )
+    access_mode_id = Column(
+        UUID(as_uuid=True), ForeignKey("access_modes.id"), primary_key=True
+    )
 
 
 class TechnicalAsset(Base, BaseORM, EventTrackedMixin):
@@ -37,29 +49,31 @@ class TechnicalAsset(Base, BaseORM, EventTrackedMixin):
     status: TechnicalAssetStatus = Column(Enum(TechnicalAssetStatus))
     technical_mapping = Column(String)
 
-    # Foreign keys
-    platform_id: Mapped[UUID] = Column(ForeignKey("platforms.id"))
-    service_id: Mapped[UUID] = Column(ForeignKey("platform_services.id"))
+    platform_id: Mapped[Optional[UUID]] = Column(ForeignKey("platforms.id"))
+    service_id: Mapped[Optional[UUID]] = Column(ForeignKey("platform_services.id"))
     owner_id: Mapped[UUID] = Column(ForeignKey("data_products.id"))
     configuration_id: Mapped[UUID] = Column(ForeignKey("data_output_configurations.id"))
 
-    # Relationships
-    platform: Mapped["Platform"] = relationship(lazy="joined")
-    service: Mapped["PlatformService"] = relationship(lazy="joined")
+    platform: Mapped[Optional["Platform"]] = relationship(lazy="joined")
+    service: Mapped[Optional["PlatformService"]] = relationship(lazy="joined")
     owner: Mapped["DataProduct"] = relationship(
-        back_populates="data_outputs", lazy="joined"
+        back_populates="technical_assets", lazy="joined"
     )
     configuration: Mapped["TechnicalAssetConfiguration"] = relationship(lazy="joined")
 
-    dataset_links: Mapped[list["DataOutputDatasetAssociation"]] = relationship(
-        "DataOutputDatasetAssociation",
-        back_populates="data_output",
-        cascade="all, delete-orphan",
-        order_by="DataOutputDatasetAssociation.status.desc()",
-        lazy="raise",
+    output_port_links: Mapped[list["TechnicalAssetOutputPortAssociation"]] = (
+        relationship(
+            "TechnicalAssetOutputPortAssociation",
+            back_populates="technical_asset",
+            cascade="all, delete-orphan",
+            order_by="TechnicalAssetOutputPortAssociation.status.desc()",
+            lazy="raise",
+        )
     )
     tags: Mapped[list[Tag]] = relationship(
-        secondary=tag_data_output_table, back_populates="data_outputs", lazy="joined"
+        secondary=tag_technical_asset_table,
+        back_populates="technical_assets",
+        lazy="selectin",
     )
 
     environment_configurations: Mapped[
@@ -71,6 +85,12 @@ class TechnicalAsset(Base, BaseORM, EventTrackedMixin):
         ),
         lazy="raise",
         viewonly=True,
+    )
+    access_modes: Mapped[list["AccessMode"]] = relationship(
+        "AccessMode",
+        secondary="technical_asset_access_modes",
+        order_by="AccessMode.name",
+        lazy="selectin",
     )
 
     def to_event(self) -> TechnicalAssetEvent:

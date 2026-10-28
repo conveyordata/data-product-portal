@@ -1,15 +1,18 @@
 import { HttpResponse, http } from 'msw';
 import {
     AbstractDataProductStatus,
-    type DataProduct,
+    AccessDurationType,
     DataProductIconKey,
-    DecisionStatus,
+    DataProductVisibility,
     type GetDataProductInputPortsResponse,
+    type GetDataProductResponse,
     type GetDataProductRolledUpTagsResponse,
     type GetDataProductsResponse,
     type GetDataProductsResponseItem,
-    type InputPort,
-    OutputPortAccessType,
+    type AbstractDataProductInputPort as InputPort,
+    InputPortRequestDecision,
+    InputPortStatus,
+    OutputPortAccessFunction,
     OutputPortStatus,
 } from '@/store/api/services/generated/dataProductsApi';
 import { server } from '@/tests/mocks/server.ts';
@@ -17,19 +20,21 @@ import { server } from '@/tests/mocks/server.ts';
 export const mockDataProducts: GetDataProductsResponseItem[] = [
     {
         id: 'dp-1',
+        environments: [],
         name: 'Sales Analytics',
         description: 'Analytics data product for sales team',
         namespace: 'sales namespace',
         status: AbstractDataProductStatus.Active,
         tags: [{ id: 'tag-1', value: 'analytics-tag' }],
         usage: null,
-        domain: { id: 'domain-1', name: 'Sales-domain', description: 'Sales domain' },
+        domain: { id: 'domain-1', name: 'Sales-domain', namespace: 'sales-domain', description: 'Sales domain' },
         type: {
             id: 'type-1',
             name: 'Reporting',
             description: 'Reporting type',
             icon_key: DataProductIconKey.Reporting,
         },
+        visibility: DataProductVisibility.Discoverable,
         finalizers: [],
         lifecycle: { id: 'lc-1', name: 'Draft', value: 3, color: 'green', is_default: false },
         user_count: 5,
@@ -38,6 +43,7 @@ export const mockDataProducts: GetDataProductsResponseItem[] = [
     },
     {
         id: 'dp-2',
+        environments: [],
         name: 'Customer Insights',
         finalizers: ['finalizer-1'],
         description: 'Customer behavior and insights',
@@ -45,13 +51,14 @@ export const mockDataProducts: GetDataProductsResponseItem[] = [
         status: AbstractDataProductStatus.Active,
         tags: [{ id: 'tag-2', value: 'insights' }],
         usage: null,
-        domain: { id: 'domain-2', name: 'Marketing', description: 'Marketing domain' },
+        domain: { id: 'domain-2', name: 'Marketing', namespace: 'marketing', description: 'Marketing domain' },
         type: {
             id: 'type-2',
             name: 'Exploration',
             description: 'Exploration type',
             icon_key: DataProductIconKey.Exploration,
         },
+        visibility: DataProductVisibility.Discoverable,
         lifecycle: { id: 'lc-2', name: 'Production', value: 1, color: 'blue', is_default: true },
         user_count: 3,
         input_port_count: 1,
@@ -69,7 +76,7 @@ export const mockDataProductsHttp = (dataProducts: GetDataProductsResponseItem[]
 
 export const mockDataProductHttp = (
     data_product_id: string = mockDataProducts[0].id,
-    data_product: DataProduct = mockDataProducts[0],
+    data_product: GetDataProductResponse = { ...mockDataProducts[0], about: '' },
 ) => {
     server.use(
         http.get(`*/api/v2/data_products/${data_product_id}`, () => {
@@ -81,18 +88,40 @@ export const mockDataProductHttp = (
 const mockInputPorts: InputPort[] = [
     {
         id: 'id-1',
-        justification: 'I need access!',
         output_port_id: 'op-1',
-        status: DecisionStatus.Approved,
+        status: InputPortStatus.Approved,
+        current_request: {
+            id: 'request-1',
+            justification: 'I need access!',
+            valid_until: null,
+            access_duration_type: AccessDurationType.Permanent,
+            decision: InputPortRequestDecision.Approved,
+            created_on: '2024-03-15T10:00:00Z',
+            requested_on: '2024-03-15T10:00:00Z',
+            requested_by: {
+                id: 'user-1',
+                email: 'alice@example.com',
+                external_id: 'ext-1',
+                first_name: 'Alice',
+                last_name: 'Smith',
+                has_seen_tour: true,
+                can_become_admin: false,
+            },
+        },
         output_port: {
             id: 'op-1',
             name: 'op-1',
             namespace: 'op1',
             description: 'My op1',
             status: OutputPortStatus.Pending,
-            access_type: OutputPortAccessType.Public,
+            access_type: {
+                id: 'access-type-1',
+                name: 'Unrestricted',
+                access_function: OutputPortAccessFunction.Unrestricted,
+            },
             data_product_id: mockDataProducts[1].id,
             tags: [],
+            access_modes: [],
         },
     },
 ];
@@ -108,7 +137,9 @@ export const mockDataProductInputPorts = (
     );
 };
 
-export const mockDataProductDetailCalls = (dataProduct: GetDataProductsResponseItem) => {
+export const mockDataProductDetailCalls = (
+    dataProduct: GetDataProductResponse = { ...mockDataProducts[0], about: '' },
+) => {
     mockDataProductHttp(dataProduct.id, dataProduct);
     server.use(
         http.get(`*/api/v2/data_products/${dataProduct.id}/rolled_up_tags`, () => {

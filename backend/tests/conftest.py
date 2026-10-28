@@ -1,28 +1,38 @@
 # ruff: noqa: S311, S105
 from collections.abc import Iterator
 from contextlib import contextmanager
+from datetime import datetime, timedelta
 from typing import Any, Generator
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy.orm import Session, scoped_session
+from sqlalchemy import select, text  # noqa: TID251
+from sqlalchemy.orm import Session
 from starlette.routing import _DefaultLifespan
 
+from app.authorization.roles.model import Role
+from app.authorization.roles.schema import Prototype, Scope
 from app.authorization.service import AuthorizationService
 from app.core.auth.device_flows.service import verify_auth_header
+from app.core.authz import Action
 from app.core.authz.authorization import Authorization
-from app.data_products.output_ports.enums import OutputPortAccessType
-from app.database.database import Base, get_db_session
+from app.core.context import _pending_events
+from app.core.logging import logger
+from app.core.webhooks.events import V2Event
+from app.data_products.output_ports.enums import OutputPortAccessFunction
+from app.database.database import Base, get_system_db_session
 from app.main import app
 from app.settings import settings
 from tests.factories import reset_unique_fakers
 from tests.factories.role import RoleFactory
 from tests.factories.role_assignment_global import GlobalRoleAssignmentFactory
+from tests.fixtures.fake_plugin.schema import FakeTechnicalAssetConfiguration
 
 from . import TestingSessionLocal
 from .factories.data_product_type import DataProductTypeFactory
 from .factories.domain import DomainFactory
+from .factories.output_port_access_type import OutputPortAccessTypeFactory
 from .factories.user import UserFactory
 
 
@@ -30,22 +40,31 @@ from .factories.user import UserFactory
 def setup_and_teardown_database():
     from app.db_tool import init  # noqa: E402
 
+    settings.AUTHORIZER_AUTOLOAD_ENABLED = False
     init(force=True, seed_path=None)
     return
 
 
-def override_get_db():
+def override_unauthenticated_get_db():
     test_db = None
     try:
         test_db = TestingSessionLocal()
+        # Tests share this scoped session with the factories, so anything they
+        # created is still in the cache of SQL Alchemy. We need to expire it,
+        # otherwise a request reuses those objects instead of loading them
+        # through the filters that the application applies:
+        # - enforce_private_output_port_filter
+        # - enforce_hidden_data_product_filter
+        test_db.flush()
+        test_db.expire_all()
         yield test_db
-        test_db.commit()
+        test_db.commit()  # noqa: allow-commit
     finally:
         if test_db:
             test_db.close()
 
 
-session = pytest.fixture(override_get_db)
+session = pytest.fixture(override_unauthenticated_get_db)
 
 from app.core.auth import jwt  # noqa: E402
 
@@ -69,12 +88,46 @@ def client() -> Generator[TestClient, None, None]:
     # Disable lifespan for testing
     app.router.lifespan_context = _DefaultLifespan(app.router)
 
-    app.dependency_overrides[get_db_session] = override_get_db
+    app.dependency_overrides[get_system_db_session] = override_unauthenticated_get_db
     app.dependency_overrides[verify_auth_header] = lambda: "test"
 
     with TestClient(app) as test_client:
         yield test_client
         app.dependency_overrides.clear()
+
+
+@pytest.fixture
+def everyone_role_permissions(session: Session):
+    def everyone_role() -> Role:
+        role = session.scalar(
+            select(Role)
+            .where(Role.prototype == Prototype.EVERYONE)
+            .where(Role.scope == Scope.GLOBAL)
+        )
+        assert role is not None, "Failed to find the global 'everyone' role"
+        return role
+
+    @contextmanager
+    def _change_permissions(*, permissions: list[Action] | None = None):
+        role = everyone_role()
+        if permissions is None:
+            raise Exception("Permissions must be provided")
+
+        original_permissions = list(role.permissions or [])
+        next_permissions = [int(action) for action in permissions]
+
+        role.permissions = next_permissions
+        Authorization().sync_everyone_role_permissions(actions=permissions)
+
+        try:
+            yield
+        finally:
+            role = everyone_role()
+            assert role is not None, "Failed to find the global 'everyone' role"
+            role.permissions = original_permissions
+            Authorization().sync_everyone_role_permissions(actions=original_permissions)
+
+    return _change_permissions
 
 
 @pytest.fixture
@@ -93,39 +146,49 @@ def default_data_product_payload() -> dict[str, Any]:
     }
 
 
-@pytest.fixture
-def default_dataset_payload() -> dict[str, Any]:
-    user = UserFactory()
-    domain = DomainFactory()
-    return {
-        "name": "Test Dataset",
-        "description": "Test Description",
-        "namespace": "test-dataset",
-        "tags": [],
-        "owners": [str(user.id)],
-        "access_type": OutputPortAccessType.RESTRICTED,
-        "domain_id": str(domain.id),
-    }
+@pytest.fixture(scope="session", autouse=True)
+def drop_events_outside_request_warning() -> None:
+    # Factories and direct service calls write outside a request on purpose.
+    logger.addFilter(
+        lambda record: (
+            not record.getMessage().startswith(
+                "Events queued outside of a request context"
+            )
+        )
+    )
 
 
 @pytest.fixture(autouse=True)
-def clear_db(session: scoped_session[Session]) -> None:
+def clear_db(session: Session) -> None:
     """Clear database after each test."""
-    for table in reversed(Base.metadata.sorted_tables):
-        if table.name == "roles":
-            session.execute(table.delete().where(table.c.prototype == 0))
-        else:
-            session.execute(table.delete())
-    session.commit()
-    AuthorizationService._clear_casbin_table()
+    truncate_tables = [
+        table
+        for table in Base.metadata.tables
+        if table not in {"casbin_rule", "roles", "alembic_version"}
+    ]
+    session.execute(text(f"TRUNCATE TABLE {', '.join(truncate_tables)}"))
+    roles_table = Base.metadata.tables.get("roles")
+    if roles_table is not None:
+        session.execute(roles_table.delete().where(roles_table.c.prototype == 0))
+    AuthorizationService(session).reload_enforcer()
+    session.commit()  # noqa: allow-commit
     reset_unique_fakers()
+
+
+@pytest.fixture(autouse=True)
+def default_output_port_access_types(clear_db: None) -> None:
+    for access_function in OutputPortAccessFunction:
+        OutputPortAccessTypeFactory(access_function=access_function)
 
 
 @pytest.fixture
 def admin() -> UserFactory:
     role = RoleFactory.admin()
-    user = UserFactory(external_id=settings.DEFAULT_USERNAME)
-    GlobalRoleAssignmentFactory(user_id=user.id, role_id=role.id)
+    user = UserFactory(
+        external_id=settings.DEFAULT_USERNAME,
+        admin_expiry=datetime.now() + timedelta(days=1),
+    )
+    GlobalRoleAssignmentFactory(identity_id=user.id, role_id=role.id)
     return user
 
 
@@ -160,10 +223,44 @@ def webhook_v2_input_port_events_from_technical_asset_output_port_link(
         settings.WEBHOOK_V2_TECHNICAL_ASSET_OUTPUT_PORT_LINKS_TRIGGER_INPUT_PORT_EVENTS = original
 
 
+class CapturedEventsMock:
+    def __init__(self) -> None:
+        self.captured_events: list[V2Event] = []
+
+    def record(self, event: V2Event) -> None:
+        self.captured_events.append(event)
+
+
 @pytest.fixture
-def mock_webhook() -> Iterator[AsyncMock]:
+def capture_events() -> Iterator["CapturedEventsMock"]:
+    mock = CapturedEventsMock()
+
+    def _queue_event(event: V2Event) -> None:
+        if _pending_events.get() is None or not settings.WEBHOOK_V2_URL:
+            return
+        mock.record(event)
+
+    def _queue_events(events: list[V2Event]) -> None:
+        if _pending_events.get() is None or not settings.WEBHOOK_V2_URL:
+            return
+        for event in events:
+            mock.record(event)
+
     with (
-        patch("app.main.call_v2_webhook", new_callable=AsyncMock) as mock,
+        patch("app.core.context.queue_event", side_effect=_queue_event),
+        patch("app.core.context.queue_events", side_effect=_queue_events),
+        patch("app.database.event_mixin.queue_events", side_effect=_queue_events),
         webhook_v2_config(),
     ):
         yield mock
+
+
+@pytest.fixture
+def unshareable_fake_plugin(monkeypatch):
+    monkeypatch.setattr(
+        FakeTechnicalAssetConfiguration,
+        "_platform_metadata",
+        FakeTechnicalAssetConfiguration.get_platform_metadata().model_copy(
+            update={"shareable": False}
+        ),
+    )

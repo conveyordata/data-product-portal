@@ -28,6 +28,18 @@ These technical aspects are also governed by the Data Product concept.
 - Register **[Input Ports](./input-ports)** by requesting access to the **[Output Ports](./output-ports)** of other Data Products
 - Implement fine-grained access control, observability, and versioning on **[Output Ports](./output-ports)**
 
+## Environments
+
+Each Data Product stores its environments and the date each was declared. Technical Assets and Output Ports inherit that scope.
+
+When creating a Data Product, the environment selector starts with the global defaults. You can select one or more environments from the configured catalogue. Once a Data Product is created, its selected environments can no longer be removed; edits can only add new ones. The detail pages of Data Products, Technical Assets, and Output Ports show the declared environments as read-only tags.
+
+The API accepts `environment_ids` when creating or updating a Data Product. If omitted during creation, the current global environments are saved as defaults. Changing globals or moving the Data Product to another Domain does not change its saved environments. Updates can add environments, but cannot remove existing ones or save an empty selection.
+
+Earlier versions allowed environments to be configured per Domain. They are now declared on Data Products. The upgrade transfers legacy Domain selections to their Data Products, using the global defaults when a Domain had no selection. This transfer happens before the Domain settings are removed and leaves environments already declared on Data Products unchanged.
+
+Environments must be configured before creating a Data Product. During an upgrade, every existing Data Product must have at least one effective environment, either through its Domain's legacy selection or the global defaults. The migration stops with a configuration error otherwise. See [Environment setup](../developer-guide/adding-integrations.md#environment-setup) for installations that do not have environments configured yet.
+
 ## Example
 
 A "Sales Transactions" Data Product may expose:

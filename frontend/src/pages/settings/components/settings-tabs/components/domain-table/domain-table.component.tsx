@@ -1,6 +1,8 @@
-import { Button, Flex, Table, Typography } from 'antd';
+import { ApartmentOutlined } from '@ant-design/icons';
+import { Button, Flex, Typography } from 'antd';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { ListTable } from '@/components/list-table/list-table.component.tsx';
 
 import { useModal } from '@/hooks/use-modal';
 import {
@@ -8,7 +10,7 @@ import {
     useGetDomainsQuery,
     useRemoveDomainMutation,
 } from '@/store/api/services/generated/configurationDomainsApi.ts';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import { dispatchMessage } from '@/utils/feedback.ts';
 import { CreateDomainModal } from './domain-form-modal.component';
 import { CreateDomainMigrateModal } from './domain-migrate-modal.component';
 import styles from './domain-table.module.scss';
@@ -16,7 +18,8 @@ import { getDomainTableColumns } from './domain-table-columns';
 
 export function DomainTable() {
     const { t } = useTranslation();
-    const { data: { domains = [] } = {}, isFetching } = useGetDomainsQuery();
+    const domainsQuery = useGetDomainsQuery();
+    const { data: { domains = [] } = {} } = domainsQuery;
     const { isVisible, handleOpen, handleClose } = useModal();
     const {
         isVisible: migrateModalVisible,
@@ -46,8 +49,15 @@ export function DomainTable() {
                 setMigrateFrom(domain);
                 handleOpenMigrate();
             } else {
-                await onRemoveDomain(domain.id).unwrap();
-                dispatchMessage({ content: t('Domain removed successfully'), type: 'success' });
+                const deletionPending = await onRemoveDomain(domain.id).unwrap();
+                dispatchMessage(
+                    deletionPending
+                        ? {
+                              content: t('Domain marked for deletion, waiting for provisioners to clean up'),
+                              type: 'info',
+                          }
+                        : { content: t('Domain removed successfully'), type: 'success' },
+                );
             }
         } catch (_error) {
             dispatchMessage({ content: t('Could not remove Domain'), type: 'error' });
@@ -57,21 +67,27 @@ export function DomainTable() {
     const columns = getDomainTableColumns({ t, handleRemove, handleEdit });
 
     return (
-        <Flex vertical gap={'large'}>
-            <Flex justify={'space-between'} align={'center'}>
+        <Flex vertical gap="large">
+            <Flex justify="space-between" align="center">
                 <Typography.Title level={3}>{t('Domains')}</Typography.Title>
-                <Button className={styles.formButton} type={'primary'} onClick={handleAdd}>
+                <Button className={styles.formButton} type="primary" onClick={handleAdd}>
                     {t('Add Domain')}
                 </Button>
             </Flex>
-            <Table<GetDomainsItem>
+            <ListTable<GetDomainsItem>
+                query={domainsQuery}
                 dataSource={domains}
                 columns={columns}
+                subject={t('Domains')}
+                emptyState={{
+                    icon: <ApartmentOutlined />,
+                    title: t('No Domains yet'),
+                    description: t('Domains group Data Products by the part of the business that owns them.'),
+                }}
                 rowKey={(record) => record.id}
-                loading={isFetching}
                 rowHoverable
                 rowClassName={() => 'editable-row'}
-                size={'small'}
+                size="small"
             />
             {isVisible && (mode === 'create' || initial) && (
                 <CreateDomainModal isOpen={isVisible} onClose={handleClose} mode={mode} initial={initial} />

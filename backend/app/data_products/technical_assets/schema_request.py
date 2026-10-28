@@ -1,20 +1,21 @@
+from typing import Optional
 from uuid import UUID
 from warnings import deprecated, warn
 
 from pydantic import Field, model_validator
 
-from app.data_output_configuration.schema_union import DataOutputConfiguration
 from app.data_products.technical_assets.enums import TechnicalMapping
 from app.data_products.technical_assets.status import TechnicalAssetStatus
 from app.shared.schema import ORMModel
+from app.technical_asset_configuration.schema_union import DataOutputConfiguration
 
 
 class CreateTechnicalAssetRequest(ORMModel):
     name: str
     description: str
     namespace: str
-    platform_id: UUID
-    service_id: UUID
+    platform_id: Optional[UUID] = None
+    service_id: Optional[UUID] = None
     configuration: DataOutputConfiguration
     sourceAligned: bool | None = Field(
         default=None,
@@ -25,6 +26,7 @@ class CreateTechnicalAssetRequest(ORMModel):
     technical_mapping: TechnicalMapping | None = Field(
         default=None,
     )
+    access_mode_ids: list[UUID] = Field(default=[])
     tag_ids: list[UUID]
 
     @model_validator(mode="after")
@@ -57,23 +59,23 @@ class CreateTechnicalAssetRequest(ORMModel):
 
         return self
 
+    @model_validator(mode="after")
+    def validate_platform_and_service(self):
+        if (self.platform_id is None) != (self.service_id is None):
+            raise ValueError("platform_id and service_id must be set together")
+        return self
+
 
 @deprecated("Use CreateTechnicalAssetRequest instead")
 class DataOutputCreate(CreateTechnicalAssetRequest):
     pass
 
 
-class DataOutputUpdate(ORMModel):
+class TechnicalAssetUpdate(ORMModel):
     name: str
     description: str
     tag_ids: list[UUID]
 
 
-class DataOutputStatusUpdate(ORMModel):
+class TechnicalAssetStatusUpdate(ORMModel):
     status: TechnicalAssetStatus
-
-
-class DataOutputResultStringRequest(ORMModel):
-    platform_id: UUID
-    service_id: UUID
-    configuration: DataOutputConfiguration

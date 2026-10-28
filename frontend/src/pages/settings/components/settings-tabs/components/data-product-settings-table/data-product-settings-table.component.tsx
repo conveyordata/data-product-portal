@@ -1,6 +1,8 @@
-import { Button, Flex, Table, Typography } from 'antd';
+import { SettingOutlined } from '@ant-design/icons';
+import { Button, Flex, Typography } from 'antd';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { ListTable } from '@/components/list-table/list-table.component.tsx';
 
 import { useModal } from '@/hooks/use-modal.tsx';
 import {
@@ -9,7 +11,7 @@ import {
     useGetDataProductsSettingsQuery,
     useRemoveDataProductSettingMutation,
 } from '@/store/api/services/generated/configurationDataProductSettingsApi.ts';
-import { dispatchMessage } from '@/store/features/feedback/utils/dispatch-feedback.ts';
+import { dispatchMessage } from '@/utils/feedback.ts';
 import styles from './data-product-settings-table.module.scss';
 import { getDataProductSettingsTableColumns } from './data-product-settings-table-columns.tsx';
 import { CreateSettingModal } from './new-data-product-setting-modal.component.tsx';
@@ -20,7 +22,8 @@ type Props = {
 
 export function DataProductSettingsTable({ scope }: Props) {
     const { t } = useTranslation();
-    const { data: dataProductSettings = undefined, isFetching } = useGetDataProductsSettingsQuery();
+    const settingsQuery = useGetDataProductsSettingsQuery();
+    const { data: dataProductSettings = undefined } = settingsQuery;
 
     const filteredSettings = useMemo(() => {
         return dataProductSettings?.data_product_settings.filter((setting) => setting.scope === scope) ?? [];
@@ -68,20 +71,26 @@ export function DataProductSettingsTable({ scope }: Props) {
     );
 
     return (
-        <Flex vertical gap={'large'}>
-            <Flex justify={'space-between'} align={'center'}>
+        <Flex vertical gap="large">
+            <Flex justify="space-between" align="center">
                 <Typography.Title level={3}>{t('Custom Settings')}</Typography.Title>
-                <Button className={styles.formButton} type={'primary'} onClick={handleAdd}>
+                <Button className={styles.formButton} type="primary" onClick={handleAdd}>
                     {t('Add custom setting')}
                 </Button>
             </Flex>
-            <Table<DataProductSettingsGetItem>
+            <ListTable<DataProductSettingsGetItem>
+                query={settingsQuery}
                 dataSource={filteredSettings}
                 columns={columns}
+                subject={t('Custom Settings')}
+                emptyState={{
+                    icon: <SettingOutlined />,
+                    title: t('No Custom Settings yet'),
+                    description: t('Custom settings add your own fields to Data Products and Output Ports.'),
+                }}
                 rowKey={(record) => record.id}
-                loading={isFetching}
                 rowHoverable
-                size={'small'}
+                size="small"
             />
             {isVisible && (mode === 'create' || initial) && (
                 <CreateSettingModal scope={scope} onClose={onClose} isOpen={isVisible} mode={mode} initial={initial} />

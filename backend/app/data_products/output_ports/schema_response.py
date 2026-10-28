@@ -1,30 +1,51 @@
 from typing import Optional, Sequence
 from uuid import UUID
 
-from pydantic import Field
+from fastapi import HTTPException, status
+from pydantic import AliasPath, ConfigDict, Field
 
+from app.configuration.access_durations.enums import AccessDurationType
+from app.configuration.access_modes.schema_response import AccessMode
 from app.configuration.data_product_lifecycles.schema import DataProductLifeCycle
 from app.configuration.data_product_settings.schema import (
     OutputPortSettingValue,
 )
 from app.configuration.domains.schema import Domain
+from app.configuration.output_port_access_types.schema import (
+    OutputPortAccessType,
+)
 from app.configuration.tags.schema import Tag
 from app.data_products.output_port_technical_assets_link.schema import (
     TechnicalAssetOutputPortAssociation,
 )
-from app.data_products.output_ports.data_quality.enums import DataQualityStatus
-from app.data_products.output_ports.enums import OutputPortAccessType
 from app.data_products.output_ports.schema import OutputPort
 from app.data_products.output_ports.status import OutputPortStatus
-from app.data_products.technical_assets.schema import TechnicalAsset
+from app.data_products.technical_assets.schema import (
+    TechnicalAsset,
+)
 from app.shared.schema import ORMModel
 
 
 class TechnicalAssetLink(TechnicalAssetOutputPortAssociation):
-    technical_asset: TechnicalAsset = Field(validation_alias="data_output")
+    technical_asset: TechnicalAsset
+
+
+class OutputPortAccessDuration(ORMModel):
+    access_duration_type: AccessDurationType
+    days: int
+
+
+class GetOutputPortAccessDurationsResponse(ORMModel):
+    id: UUID
+    data_product_access_duration: OutputPortAccessDuration
+    exploration_access_duration: OutputPortAccessDuration
 
 
 class BaseOutputPortGet(ORMModel):
+    model_config = ConfigDict(
+        from_attributes=True, validate_by_name=True, validate_by_alias=True
+    )
+
     id: UUID
     namespace: str
     name: str
@@ -32,12 +53,14 @@ class BaseOutputPortGet(ORMModel):
     status: OutputPortStatus
     usage: Optional[str]
     access_type: OutputPortAccessType
+    data_product_access_duration_type: AccessDurationType
+    exploration_access_duration_type: AccessDurationType
     data_product_id: UUID
 
-    # Nested schemas
     tags: list[Tag]
-    domain: Domain
+    domain: Domain = Field(validation_alias=AliasPath("data_product", "domain"))
     lifecycle: Optional[DataProductLifeCycle]
+    access_modes: list[AccessMode]
 
 
 class GetOutputPortResponse(BaseOutputPortGet):
@@ -45,16 +68,7 @@ class GetOutputPortResponse(BaseOutputPortGet):
 
     rolled_up_tags: set[Tag]
     data_product_settings: list[OutputPortSettingValue]
-    technical_asset_links: list[TechnicalAssetLink] = Field(
-        validation_alias="data_output_links"
-    )
-
-
-class OutputPortsGet(BaseOutputPortGet):
-    abstract_data_product_count: int
-    technical_assets_count: int
-    data_product_name: str
-    quality_status: Optional[DataQualityStatus]
+    technical_asset_links: list[TechnicalAssetLink]
 
 
 class GetDataProductOutputPortsResponse(ORMModel):
@@ -67,3 +81,10 @@ class CreateOutputPortResponse(ORMModel):
 
 class UpdateOutputPortResponse(ORMModel):
     id: UUID
+
+
+def output_port_not_found_exception(output_port_id: UUID) -> HTTPException:
+    return HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail=f"Output port {output_port_id} not found",
+    )

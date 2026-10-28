@@ -3,14 +3,17 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { InputPortTable } from '@/components/abstract-data-products/input-port-tab/components/input-port-table/input-port-table.component.tsx';
-import type { InputPort } from '@/store/api/services/generated/dataProductsApi.ts';
+import { type EmptyStateQuery, searchFilter } from '@/components/empty-state/empty-state.component.tsx';
+import type { AbstractDataProductInputPort as InputPort } from '@/store/api/services/generated/dataProductsApi.ts';
 import { ApplicationPaths } from '@/types/navigation.ts';
 
 type Props = {
     canRequestAccess: boolean;
     canRemoveAccess: boolean;
-    loadingInputPorts: boolean;
-    handleRemove: (outputPortId: string) => Promise<void>;
+    query: EmptyStateQuery;
+    handleCancel: (outputPortId: string) => Promise<void>;
+    handleRevoke: (outputPortId: string) => Promise<void>;
+    handleRenew: (outputPortId: string) => Promise<void>;
     inputPorts: InputPort[];
 };
 
@@ -25,10 +28,12 @@ function filterInputPorts(input_ports: InputPort[], searchTerm: string) {
 }
 
 export function InputPortTab({
-    loadingInputPorts,
+    query,
     inputPorts,
     canRequestAccess,
-    handleRemove,
+    handleCancel,
+    handleRevoke,
+    handleRenew,
     canRemoveAccess,
 }: Props) {
     const { t } = useTranslation();
@@ -38,24 +43,29 @@ export function InputPortTab({
     }, [inputPorts, searchTerm]);
 
     return (
-        <Flex vertical gap={'middle'}>
-            <Flex gap={'small'}>
+        <Flex vertical gap="middle">
+            <Flex gap="small">
                 <Input.Search
                     placeholder={t('Filter by name')}
                     allowClear
+                    value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                 />
                 <Link to={ApplicationPaths.Marketplace}>
-                    <Button disabled={!canRequestAccess} type={'primary'}>
+                    <Button disabled={!canRequestAccess} type="primary">
                         {t('Shop for new data')}
                     </Button>
                 </Link>
             </Flex>
             <InputPortTable
-                loadingInputPorts={loadingInputPorts}
+                query={query}
                 inputPorts={filteredDatasets}
-                handleRemove={handleRemove}
+                handleCancel={handleCancel}
+                handleRevoke={handleRevoke}
+                handleRenew={handleRenew}
                 canRemoveAccess={canRemoveAccess}
+                canRequestAccess={canRequestAccess}
+                filter={searchFilter(searchTerm, setSearchTerm)}
             />
         </Flex>
     );

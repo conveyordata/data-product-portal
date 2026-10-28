@@ -55,9 +55,36 @@ const injectedRtkApi = api.injectEndpoints({
         body: queryArg.requestInputPortsForExplorationRequest,
       }),
     }),
-    removeInputPortFromExploration: build.mutation<
-      RemoveInputPortFromExplorationApiResponse,
-      RemoveInputPortFromExplorationApiArg
+    renewInputPortForExploration: build.mutation<
+      RenewInputPortForExplorationApiResponse,
+      RenewInputPortForExplorationApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/explorations/${queryArg.id}/input_ports/${queryArg.outputPortId}/renew`,
+        method: "POST",
+      }),
+    }),
+    revokeInputPortForExploration: build.mutation<
+      RevokeInputPortForExplorationApiResponse,
+      RevokeInputPortForExplorationApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/explorations/${queryArg.id}/input_ports/${queryArg.outputPortId}/revoke`,
+        method: "POST",
+      }),
+    }),
+    cancelInputPortForExploration: build.mutation<
+      CancelInputPortForExplorationApiResponse,
+      CancelInputPortForExplorationApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/explorations/${queryArg.id}/input_ports/${queryArg.outputPortId}/cancel`,
+        method: "POST",
+      }),
+    }),
+    removeInputPortForExploration: build.mutation<
+      RemoveInputPortForExplorationApiResponse,
+      RemoveInputPortForExplorationApiArg
     >({
       query: (queryArg) => ({
         url: `/api/v2/explorations/${queryArg.id}/input_ports/${queryArg.outputPortId}`,
@@ -108,9 +135,27 @@ export type RequestInputPortsForExplorationApiArg = {
   id: string;
   requestInputPortsForExplorationRequest: RequestInputPortsForExplorationRequest;
 };
-export type RemoveInputPortFromExplorationApiResponse =
+export type RenewInputPortForExplorationApiResponse =
+  /** status 200 Successful Response */ RenewInputPortForExplorationResponse;
+export type RenewInputPortForExplorationApiArg = {
+  id: string;
+  outputPortId: string;
+};
+export type RevokeInputPortForExplorationApiResponse =
+  /** status 200 Successful Response */ RevokeInputPortForExplorationResponse;
+export type RevokeInputPortForExplorationApiArg = {
+  id: string;
+  outputPortId: string;
+};
+export type CancelInputPortForExplorationApiResponse =
+  /** status 200 Successful Response */ CancelInputPortForExplorationResponse;
+export type CancelInputPortForExplorationApiArg = {
+  id: string;
+  outputPortId: string;
+};
+export type RemoveInputPortForExplorationApiResponse =
   /** status 200 Successful Response */ any;
-export type RemoveInputPortFromExplorationApiArg = {
+export type RemoveInputPortForExplorationApiArg = {
   id: string;
   outputPortId: string;
 };
@@ -129,6 +174,7 @@ export type RemoveExplorationFinalizerApiArg = {
 export type Domain = {
   id: string;
   name: string;
+  namespace: string;
   description: string;
 };
 export type Exploration = {
@@ -162,8 +208,12 @@ export type CreateExplorationResponse = {
   status: AbstractDataProductStatus;
   finalizers: string[];
 };
+export type RequestInputPortsForAbstractDataProductRequestItem = {
+  output_port_id: string;
+  access_mode_id?: string | null;
+};
 export type RequestInputPortsForExplorationRequest = {
-  output_ports: string[];
+  output_ports: RequestInputPortsForAbstractDataProductRequestItem[];
   justification: string;
 };
 export type CreateExplorationRequestWithInputPorts = {
@@ -193,6 +243,33 @@ export type GetExplorationResponse = {
   finalizers: string[];
   owner: User;
 };
+export type AccessMode = {
+  id: string;
+  name: string;
+  description: string;
+};
+export type InputPortRequestBase = {
+  id: string;
+  justification: string;
+  decision_note?: string | null;
+  valid_from?: string | null;
+  valid_until: string | null;
+  access_duration_type: AccessDurationType;
+  requested_duration_days?: number | null;
+  requested_by: User;
+  decided_by?: User | null;
+  decision: InputPortRequestDecision;
+  revoked_at?: string | null;
+  revoked_by?: User | null;
+  created_on: string;
+  requested_on: string;
+  access_mode?: AccessMode | null;
+};
+export type OutputPortAccessType = {
+  id: string;
+  name: string;
+  access_function: OutputPortAccessFunction;
+};
 export type Tag = {
   id: string;
   value: string;
@@ -206,19 +283,30 @@ export type OutputPort = {
   access_type: OutputPortAccessType;
   data_product_id: string;
   tags: Tag[];
+  access_modes: AccessMode[];
 };
-export type InputPort = {
+export type AbstractDataProductInputPort = {
   id: string;
-  justification: string;
-  status: DecisionStatus;
+  status: InputPortStatus;
+  current_request: InputPortRequestBase;
+  renewal_status?: RenewalStatus | null;
   output_port_id: string;
   output_port: OutputPort;
 };
 export type GetExplorationInputPortsResponse = {
-  input_ports: InputPort[];
+  input_ports: AbstractDataProductInputPort[];
 };
 export type RequestInputPortsForExplorationResponse = {
   input_port_ids: string[];
+};
+export type RenewInputPortForExplorationResponse = {
+  input_port_id: string;
+};
+export type RevokeInputPortForExplorationResponse = {
+  input_port_id: string;
+};
+export type CancelInputPortForExplorationResponse = {
+  input_port_id: string;
 };
 export type FinalizerRequest = {
   finalizer: string;
@@ -229,8 +317,25 @@ export enum AbstractDataProductStatus {
   Archived = "archived",
   Deleting = "deleting",
 }
-export enum DecisionStatus {
+export enum InputPortStatus {
+  Pending = "pending",
   Approved = "approved",
+  Denied = "denied",
+  Expired = "expired",
+  Revoked = "revoked",
+  Cancelled = "cancelled",
+}
+export enum AccessDurationType {
+  Permanent = "permanent",
+  TimeBound = "time_bound",
+}
+export enum InputPortRequestDecision {
+  Pending = "pending",
+  Approved = "approved",
+  Denied = "denied",
+  Cancelled = "cancelled",
+}
+export enum RenewalStatus {
   Pending = "pending",
   Denied = "denied",
 }
@@ -239,8 +344,7 @@ export enum OutputPortStatus {
   Active = "active",
   Archived = "archived",
 }
-export enum OutputPortAccessType {
-  Public = "public",
+export enum OutputPortAccessFunction {
   Restricted = "restricted",
   Private = "private",
   Unrestricted = "unrestricted",
@@ -255,7 +359,10 @@ export const {
   useGetExplorationInputPortsQuery,
   useLazyGetExplorationInputPortsQuery,
   useRequestInputPortsForExplorationMutation,
-  useRemoveInputPortFromExplorationMutation,
+  useRenewInputPortForExplorationMutation,
+  useRevokeInputPortForExplorationMutation,
+  useCancelInputPortForExplorationMutation,
+  useRemoveInputPortForExplorationMutation,
   useAddExplorationFinalizerMutation,
   useRemoveExplorationFinalizerMutation,
 } = injectedRtkApi;

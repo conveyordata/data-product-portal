@@ -1,0 +1,29 @@
+from uuid import UUID
+
+from app.abstract_data_product.type import AbstractDataProductType
+from app.configuration.access_durations.enums import AccessDurationType
+from app.shared.schema import ORMModel
+
+
+class AccessDuration(ORMModel):
+    id: UUID
+    abstract_data_product_type: AbstractDataProductType
+    access_duration_type: AccessDurationType
+    days: int | None
+    is_default: bool
+
+
+class TimeBoundAccessEnabledResponse(ORMModel):
+    enabled: bool
+
+
+class ExpiringSoonThresholdResponse(ORMModel):
+    days: int
+
+
+class GetAccessDurationResponse(ORMModel):
+    access_durations: list[AccessDuration]
+
+
+class UpdateAccessDurationResponse(ORMModel):
+    access_durations: list[AccessDuration]

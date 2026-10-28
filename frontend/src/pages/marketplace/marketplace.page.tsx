@@ -1,9 +1,11 @@
 import { ShopOutlined } from '@ant-design/icons';
 import { usePostHog } from '@posthog/react';
-import { Alert, Col, Empty, Flex, Input, Pagination, Row, Typography } from 'antd';
+import { Alert, Col, Flex, Input, Pagination, Row, Typography, theme } from 'antd';
 import { parseAsInteger, parseAsString, useQueryState } from 'nuqs';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { EmptyState, emptyStateQueryProps } from '@/components/empty-state/empty-state.component.tsx';
+import { OutputPortOutlined } from '@/components/icons';
 import { useBreadcrumbs } from '@/components/layout/navbar/breadcrumbs/breadcrumb.context.tsx';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner.tsx';
 import { PosthogEvents } from '@/constants/posthog.constants';
@@ -13,6 +15,7 @@ import { OutputPortMarketplaceCard } from './output-port-marketplace-card/output
 
 export function Marketplace() {
     const { t } = useTranslation();
+    const { token } = theme.useToken();
     const posthog = usePostHog();
     const { setBreadcrumbs } = useBreadcrumbs();
     useEffect(() => {
@@ -49,16 +52,28 @@ export function Marketplace() {
     const pageSize = 12;
     const [currentPage, setCurrentPage] = useQueryState('page', parseAsInteger.withDefault(1));
     const [searchTerm, setSearchTerm] = useQueryState('search', parseAsString.withDefault(''));
+    const [searchInput, setSearchInput] = useState(searchTerm);
+    useEffect(() => setSearchInput(searchTerm), [searchTerm]);
 
-    const { data: { output_ports: outputPorts = [] } = {}, isFetching } = useSearchOutputPortsQuery({
-        query: searchTerm?.length >= 3 ? searchTerm : undefined,
-    });
+    const effectiveSearch = searchTerm.length >= 3 ? searchTerm : undefined;
+    const outputPortsQuery = useSearchOutputPortsQuery({ query: effectiveSearch });
+    const { currentData: { output_ports: outputPorts = [] } = {}, isFetching } = outputPortsQuery;
 
+    const page = Math.max(1, Math.min(currentPage, Math.ceil(outputPorts.length / pageSize)));
+    const hasResults = outputPortsQuery.currentData !== undefined;
+    useEffect(() => {
+        if (hasResults && page !== currentPage) setCurrentPage(page);
+    }, [hasResults, page, currentPage, setCurrentPage]);
     const paginatedOutputPorts = useMemo(() => {
-        const startIndex = (currentPage - 1) * pageSize;
+        const startIndex = (page - 1) * pageSize;
         const endIndex = startIndex + pageSize;
         return outputPorts.slice(startIndex, endIndex);
-    }, [outputPorts, currentPage]);
+    }, [outputPorts, page]);
+
+    const clearSearch = () => {
+        setSearchTerm(null);
+        setCurrentPage(1);
+    };
 
     const handlePageChange = (page: number) => {
         setCurrentPage(page);
@@ -77,13 +92,15 @@ export function Marketplace() {
             </Col>
             <Col span={10}>
                 <Input.Search
+                    data-cy="marketplace-search"
                     placeholder={t('Ask a business question to find the relevant data')}
                     allowClear
                     onSearch={(e) => {
                         setSearchTerm(e);
                         setCurrentPage(1);
                     }}
-                    defaultValue={searchTerm}
+                    value={searchInput}
+                    onChange={(e) => setSearchInput(e.target.value)}
                     loading={isFetching}
                 />
             </Col>
@@ -94,38 +111,48 @@ export function Marketplace() {
             <Col span={14} />
             <Col span={24}>
                 {searchTerm && searchTerm.length < 3 && (
-                    <>
-                        <Alert
-                            title={t('Search only works when providing at least 3 characters as a search term')}
-                            type="warning"
-                        />
-                        <br />
-                    </>
+                    <Alert
+                        title={t('Search only works when providing at least 3 characters as a search term')}
+                        type="warning"
+                        style={{ marginBottom: token.paddingSM }}
+                    />
                 )}
                 {isFetching ? (
                     <LoadingSpinner spinProps={{ style: { height: '200px' } }} />
-                ) : paginatedOutputPorts?.length > 0 ? (
-                    <Flex wrap="wrap" gap={'small'}>
+                ) : outputPorts.length > 0 ? (
+                    // Cards use CSS subgrid on these rows so their sections align across each visual row
+                    <div
+                        style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))',
+                            gap: token.paddingSM,
+                        }}
+                    >
                         {paginatedOutputPorts.map((outputPort) => (
-                            <OutputPortMarketplaceCard key={outputPort.id} dataset={outputPort} />
+                            <OutputPortMarketplaceCard key={outputPort.id} outputPort={outputPort} />
                         ))}
-                    </Flex>
+                    </div>
                 ) : (
-                    <Flex justify={'center'}>
-                        <Empty description={t('No results match you search')} />
-                    </Flex>
+                    <EmptyState
+                        icon={<OutputPortOutlined />}
+                        title={t('No Output Ports published yet')}
+                        description={t('Output Ports shared with the organisation show up here, ready to request.')}
+                        subject={t('Output Ports')}
+                        filter={{ searchTerm: effectiveSearch, onClear: clearSearch }}
+                        {...emptyStateQueryProps(outputPortsQuery)}
+                    />
                 )}
 
                 {!isFetching && outputPorts.length > pageSize && (
                     <Flex
                         key="pagination-container"
-                        justify={'flex-end'}
+                        justify="flex-end"
                         style={{
                             marginTop: 12,
                         }}
                     >
                         <Pagination
-                            current={currentPage}
+                            current={page}
                             pageSize={pageSize}
                             total={outputPorts.length}
                             onChange={handlePageChange}

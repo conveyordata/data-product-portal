@@ -1,0 +1,701 @@
+import { InfoCircleOutlined } from '@ant-design/icons';
+import {
+    Alert,
+    Button,
+    Col,
+    Flex,
+    Form,
+    type FormInstance,
+    type FormProps,
+    Input,
+    Popconfirm,
+    Radio,
+    Row,
+    Select,
+    Skeleton,
+    Space,
+    Tooltip,
+    Typography,
+    theme,
+} from 'antd';
+import { type Ref, useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router';
+import { useDebouncedCallback } from 'use-debounce';
+import { ResourceNameFormItem } from '@/components/resource-name/resource-name-form-item.tsx';
+import { FORM_GRID_WRAPPER_COLS, MAX_DESCRIPTION_INPUT_LENGTH } from '@/constants/form.constants.ts';
+import { TabKeys } from '@/pages/data-product/components/data-product-tabs/data-product-tabkeys';
+import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
+import {
+    AbstractDataProductType,
+    type AccessDuration,
+    AccessDurationType,
+    useGetAllAccessDurationsQuery,
+    useIsTimeBoundAccessEnabledQuery,
+} from '@/store/api/services/generated/configurationAccessDurationsApi.ts';
+import { useGetDataProductsLifecyclesQuery } from '@/store/api/services/generated/configurationDataProductLifecyclesApi.ts';
+import { useGetOutputPortAccessTypesQuery } from '@/store/api/services/generated/configurationOutputPortAccessTypesApi.ts';
+import { useGetTagsQuery } from '@/store/api/services/generated/configurationTagsApi.ts';
+import { DataProductVisibility, useGetDataProductQuery } from '@/store/api/services/generated/dataProductsApi.ts';
+import {
+    type CreateOutputPortRequest,
+    type OutputPortUpdate,
+    useCreateOutputPortMutation,
+    useGetOutputPortQuery,
+    useRemoveOutputPortMutation,
+    useUpdateOutputPortMutation,
+} from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
+import {
+    ResourceNameModel,
+    useLazySanitizeResourceNameQuery,
+    useLazyValidateResourceNameQuery,
+    useResourceNameConstraintsQuery,
+} from '@/store/api/services/generated/resourceNamesApi.ts';
+import { useGetUsersQuery } from '@/store/api/services/generated/usersApi.ts';
+import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
+import {
+    ApplicationPaths,
+    createDataProductIdPath,
+    createMarketplaceOutputPortPath,
+    createOutputPortPath,
+} from '@/types/navigation.ts';
+import { compareAccessFunctions, fitsDataProductVisibility } from '@/utils/access-function.helper.tsx';
+import { useGetDataProductOwnerIds } from '@/utils/data-product-user-role.helper';
+import { useGetDatasetOwnerIds } from '@/utils/dataset-user-role.helper.ts';
+import { dispatchMessage } from '@/utils/feedback.ts';
+import { selectFilterOptionByLabel, selectFilterOptionByLabelAndValue } from '@/utils/form.helper.ts';
+import styles from './output-port-form.module.scss';
+
+const PRODUCT_TYPE_LABELS: Record<string, string> = {
+    [AbstractDataProductType.DataProducts]: 'Data Products',
+    [AbstractDataProductType.Explorations]: 'Explorations',
+};
+
+const FIELD_NAMES: Partial<
+    Record<AbstractDataProductType, 'data_product_access_duration_type' | 'exploration_access_duration_type'>
+> = {
+    [AbstractDataProductType.DataProducts]: 'data_product_access_duration_type',
+    [AbstractDataProductType.Explorations]: 'exploration_access_duration_type',
+};
+
+export function AccessDurationSection({
+    abstractDataProductType,
+    accessDurations,
+    value,
+    onChange,
+    block = true,
+}: {
+    abstractDataProductType: AbstractDataProductType;
+    accessDurations: AccessDuration[];
+    value?: AccessDurationType;
+    onChange?: (value: AccessDurationType) => void;
+    block?: boolean;
+}) {
+    const { t } = useTranslation();
+    const selected = value ?? AccessDurationType.Permanent;
+
+    const timeBoundEnabled = accessDurations.some((r) => r.access_duration_type === AccessDurationType.TimeBound);
+    const hasPermanent = accessDurations.some((r) => r.access_duration_type === AccessDurationType.Permanent);
+    const timeBoundDays = accessDurations.find((r) => r.access_duration_type === AccessDurationType.TimeBound)?.days;
+    const daysLabel = timeBoundDays ? t('{{days}} days', { days: timeBoundDays }) : '';
+
+    const timeBoundLabel = `${t('Time Bound')} ${daysLabel}`;
+    const permanentLabel = t('Permanent');
+
+    const options = [
+        {
+            label: (
+                <Tooltip title={timeBoundEnabled ? null : t('Not allowed by Admin.')}>
+                    <span>{timeBoundLabel}</span>
+                </Tooltip>
+            ),
+            value: AccessDurationType.TimeBound,
+            disabled: !timeBoundEnabled,
+        },
+        {
+            label: (
+                <Tooltip title={hasPermanent ? null : t('Not allowed by admin')}>
+                    <span>{permanentLabel}</span>
+                </Tooltip>
+            ),
+            value: AccessDurationType.Permanent,
+            disabled: !hasPermanent,
+        },
+    ];
+
+    return (
+        <Radio.Group
+            value={selected}
+            options={options}
+            optionType="button"
+            block={block}
+            onChange={(e) => onChange?.(e.target.value)}
+            key={`${abstractDataProductType}-access-duration`}
+        />
+    );
+}
+
+function AccessDurationInfo({ mode }: { mode: 'create' | 'edit' }) {
+    const { t } = useTranslation();
+    const { data: { access_durations: allDurations = [] } = {} } = useGetAllAccessDurationsQuery();
+    const { data: enabledState } = useIsTimeBoundAccessEnabledQuery();
+    const enabled = enabledState?.enabled ?? true;
+
+    const productTypes = [AbstractDataProductType.DataProducts, AbstractDataProductType.Explorations] as const;
+
+    const sections = productTypes
+        .map((abstractDataProductType) => {
+            const accessDurations = allDurations.filter(
+                (d) => d.abstract_data_product_type === abstractDataProductType,
+            );
+            const defaultRow = accessDurations.find((r) => r.is_default);
+            return {
+                abstractDataProductType,
+                accessDurations,
+                initialValue: defaultRow?.access_duration_type ?? AccessDurationType.Permanent,
+            };
+        })
+        .filter(({ accessDurations }) => accessDurations.length > 0);
+
+    if (!enabled) {
+        return (
+            <Form.Item>
+                <Alert
+                    type="warning"
+                    showIcon
+                    title={t('Access duration enforcement is currently disabled by the administrator.')}
+                />
+            </Form.Item>
+        );
+    }
+
+    return (
+        <>
+            {sections.map(({ abstractDataProductType, accessDurations, initialValue }) => (
+                <Form.Item
+                    key={abstractDataProductType}
+                    name={FIELD_NAMES[abstractDataProductType as keyof typeof FIELD_NAMES]}
+                    initialValue={initialValue}
+                    required
+                    label={t('{{type}} Access Duration', { type: PRODUCT_TYPE_LABELS[abstractDataProductType] })}
+                    tooltip={t(
+                        'Access duration policy configured by the administrator. This applies when someone requests access to this Output Port.',
+                    )}
+                >
+                    <AccessDurationSection
+                        abstractDataProductType={abstractDataProductType}
+                        accessDurations={accessDurations}
+                    />
+                </Form.Item>
+            ))}
+            {mode === 'edit' && (
+                <Form.Item>
+                    <Alert
+                        type="warning"
+                        showIcon
+                        title={
+                            <Flex vertical gap="small">
+                                <Typography.Text>
+                                    {t(
+                                        'Only future approved access requests will be affected by changes to the access duration policy.',
+                                    )}
+                                </Typography.Text>
+                                <Typography.Text>
+                                    {t(
+                                        'Currently active grants continue under their original terms and are not affected by policy changes.',
+                                    )}
+                                </Typography.Text>
+                            </Flex>
+                        }
+                    />
+                </Form.Item>
+            )}
+        </>
+    );
+}
+
+type Props = {
+    mode: 'create' | 'edit';
+    outputPortId?: string;
+    dataProductId?: string;
+    modalCallbackOnSubmit?: () => void;
+    formRef?: Ref<FormInstance<CreateOutputPortRequest>>;
+};
+
+const { TextArea } = Input;
+
+const DEBOUNCE = 500;
+
+export function AccessTypeSection({
+    id,
+    value,
+    onChange,
+    hiddenDataProduct = false,
+}: {
+    id?: string;
+    value?: string;
+    onChange?: (value?: string) => void;
+    hiddenDataProduct: boolean;
+}) {
+    const { t } = useTranslation();
+    const { token } = theme.useToken();
+    const { data: { output_port_access_types: accessTypes = [] } = {}, isFetching } =
+        useGetOutputPortAccessTypesQuery(undefined);
+
+    useEffect(() => {
+        if (isFetching || value !== undefined) return;
+        const selectable = accessTypes.filter((accessType) =>
+            fitsDataProductVisibility(accessType.access_function, hiddenDataProduct),
+        );
+        if (selectable.length === 1) onChange?.(selectable[0].id);
+    }, [isFetching, value, accessTypes, hiddenDataProduct, onChange]);
+
+    const options = accessTypes
+        .map((accessType) => ({
+            label: accessType.name,
+            value: accessType.id,
+            description: accessType.description,
+            accessFunction: accessType.access_function,
+            disabled: !fitsDataProductVisibility(accessType.access_function, hiddenDataProduct),
+        }))
+        .sort(
+            (a, b) =>
+                Number(a.disabled) - Number(b.disabled) || compareAccessFunctions(a.accessFunction, b.accessFunction),
+        );
+
+    const selectedDescription = options.find((option) => option.value === value)?.description;
+
+    return (
+        <Flex vertical gap="small">
+            <Select
+                data-cy="output-port-access-type"
+                id={id}
+                value={value}
+                onChange={onChange}
+                options={options}
+                showSearch={{ optionFilterProp: 'label' }}
+                placeholder={t('Select an access type')}
+                optionRender={({ label, data: { description, disabled } }) => (
+                    <Flex vertical>
+                        {label}
+                        {description && (
+                            <Typography.Text type="secondary" disabled={disabled}>
+                                {description}
+                            </Typography.Text>
+                        )}
+                    </Flex>
+                )}
+                styles={hiddenDataProduct ? { popup: { root: { padding: 0, overflow: 'hidden' } } } : undefined}
+                popupRender={(menu) =>
+                    hiddenDataProduct ? (
+                        <div data-cy="output-port-access-type-options">
+                            <div style={{ padding: token.paddingXXS }}>{menu}</div>
+                            <Flex
+                                gap="small"
+                                style={{
+                                    padding: `${token.paddingXS}px ${token.paddingXXS + token.controlPaddingHorizontal}px`,
+                                    borderTop: `${token.lineWidth}px solid ${token.colorSplit}`,
+                                    background: token.colorPrimaryBg,
+                                }}
+                            >
+                                <InfoCircleOutlined style={{ color: token.colorPrimary }} />
+                                <Typography.Text>
+                                    {t('Hidden Data Products can only have hidden Output Ports')}
+                                </Typography.Text>
+                            </Flex>
+                        </div>
+                    ) : (
+                        <div data-cy="output-port-access-type-options">{menu}</div>
+                    )
+                }
+            />
+            {selectedDescription && <Typography.Text type="secondary">{selectedDescription}</Typography.Text>}
+        </Flex>
+    );
+}
+
+export function OutputPortForm({ mode, modalCallbackOnSubmit, formRef, outputPortId, dataProductId }: Props) {
+    const { t } = useTranslation();
+    const navigate = useNavigate();
+
+    const { data: currentOutputPort, isFetching: isFetchingInitialValues } = useGetOutputPortQuery(
+        { id: outputPortId || '', dataProductId: dataProductId || '' },
+        {
+            skip: mode === 'create' || !outputPortId || !dataProductId,
+        },
+    );
+    const { data: dataProduct, isFetching: isFetchingDataProduct } = useGetDataProductQuery(dataProductId || '');
+    const { data: lifecycles = undefined, isFetching: isFetchingLifecycles } = useGetDataProductsLifecyclesQuery();
+    const { data: { users = [] } = {}, isFetching: isFetchingUsers } = useGetUsersQuery();
+    const { data: { tags: availableTags = [] } = {}, isFetching: isFetchingTags } = useGetTagsQuery();
+    const [createDataset, { isLoading: isCreating }] = useCreateOutputPortMutation();
+    const [updateDataset, { isLoading: isUpdating }] = useUpdateOutputPortMutation();
+    const [deleteDataset, { isLoading: isArchiving }] = useRemoveOutputPortMutation();
+    const [sanitizeResourceName, { data: sanitizedResourceName }] = useLazySanitizeResourceNameQuery();
+    const [validateResourceName] = useLazyValidateResourceNameQuery();
+    const { data: constraints } = useResourceNameConstraintsQuery();
+
+    const [form] = Form.useForm<CreateOutputPortRequest>();
+    const datasetNameValue = Form.useWatch('name', form);
+
+    const [canEditNamespace, setCanEditNamespace] = useState<boolean>(false);
+
+    const { data: create_access } = useCheckAccessQuery({ action: AuthorizationAction.GLOBAL__CREATE_OUTPUT_PORT });
+    const { data: update_access } = useCheckAccessQuery(
+        {
+            resource: outputPortId,
+            action: AuthorizationAction.OUTPUT_PORT__UPDATE_PROPERTIES,
+        },
+        { skip: !outputPortId },
+    );
+    const { data: delete_access } = useCheckAccessQuery(
+        {
+            resource: outputPortId,
+            action: AuthorizationAction.OUTPUT_PORT__DELETE,
+        },
+        { skip: !outputPortId },
+    );
+
+    const canCreate = mode === 'create' && (create_access?.allowed ?? false);
+    const canEdit = mode === 'edit' && (update_access?.allowed ?? false);
+    const canDelete = mode === 'edit' && (delete_access?.allowed ?? false);
+    const canSubmit = canCreate || canEdit;
+
+    const isLoading =
+        isCreating ||
+        isUpdating ||
+        isCreating ||
+        isUpdating ||
+        isFetchingDataProduct ||
+        isFetchingInitialValues ||
+        isFetchingTags;
+
+    const userSelectOptions = users.map((owner) => ({
+        label: `${owner.first_name} ${owner.last_name} (${owner.email})`,
+        value: owner.id,
+    }));
+    const tagSelectOptions = availableTags.map((tag) => ({ label: tag.value, value: tag.id }));
+
+    const onFinish: FormProps<CreateOutputPortRequest>['onFinish'] = async (values) => {
+        try {
+            if (mode === 'create' && dataProduct) {
+                const request: CreateOutputPortRequest = {
+                    name: values.name,
+                    namespace: values.namespace,
+                    description: values.description,
+                    owners: values.owners,
+                    tag_ids: values.tag_ids ?? [],
+                    lifecycle_id: values.lifecycle_id,
+                    access_type_id: values.access_type_id,
+                    data_product_access_duration_type: values.data_product_access_duration_type,
+                    exploration_access_duration_type: values.exploration_access_duration_type,
+                };
+                const response = await createDataset({
+                    dataProductId: dataProduct.id,
+                    createOutputPortRequest: request,
+                }).unwrap();
+
+                modalCallbackOnSubmit?.();
+                dispatchMessage({ content: t('Output Port created successfully'), type: 'success' });
+                // If dataProductId was provided, navigate back to the Data Product page
+                if (dataProductId && !outputPortId) {
+                    navigate(createDataProductIdPath(dataProductId, TabKeys.OutputPorts));
+                } else {
+                    navigate(createOutputPortPath(dataProductId || '', response.id));
+                }
+            } else if (mode === 'edit' && outputPortId && currentOutputPort) {
+                if (!canEdit) {
+                    dispatchMessage({ content: t('You are not allowed to edit this Output Port'), type: 'error' });
+                    return;
+                }
+
+                const request: OutputPortUpdate = {
+                    name: values.name,
+                    namespace: values.namespace,
+                    description: values.description,
+                    tag_ids: values.tag_ids,
+                    lifecycle_id: values.lifecycle_id,
+                    access_type_id: values.access_type_id,
+                    data_product_access_duration_type: values.data_product_access_duration_type,
+                    exploration_access_duration_type: values.exploration_access_duration_type,
+                };
+
+                const response = await updateDataset({
+                    outputPortUpdate: request,
+                    id: outputPortId,
+                    dataProductId: currentOutputPort.data_product_id,
+                }).unwrap();
+                dispatchMessage({ content: t('Output Port updated successfully'), type: 'success' });
+
+                navigate(createOutputPortPath(currentOutputPort.data_product_id, response.id));
+            }
+            form.resetFields();
+        } catch (_e) {
+            const errorMessage =
+                mode === 'edit' ? t('Failed to update Output Port') : t('Failed to create Output Port');
+            dispatchMessage({ content: errorMessage, type: 'error' });
+        }
+    };
+
+    const onCancel = () => {
+        form.resetFields();
+        if (mode === 'edit' && outputPortId && dataProductId) {
+            navigate(createMarketplaceOutputPortPath(outputPortId, dataProductId));
+        } else {
+            navigate(ApplicationPaths.Marketplace);
+        }
+    };
+
+    const onFinishFailed: FormProps<CreateOutputPortRequest>['onFinishFailed'] = () => {
+        dispatchMessage({ content: t('Please check for invalid form fields'), type: 'info' });
+    };
+
+    const handleDeleteDataset = async () => {
+        if (canDelete && currentOutputPort) {
+            try {
+                await deleteDataset({
+                    dataProductId: currentOutputPort.data_product_id,
+                    id: currentOutputPort.id,
+                }).unwrap();
+                dispatchMessage({ content: t('Output Port deleted successfully'), type: 'success' });
+                navigate(ApplicationPaths.Marketplace);
+            } catch (_error) {
+                dispatchMessage({
+                    content: t('Failed to delete Output Port, please try again later'),
+                    type: 'error',
+                });
+            }
+        }
+    };
+
+    const fetchNamespaceDebounced = useDebouncedCallback((name: string) => sanitizeResourceName(name), DEBOUNCE);
+
+    useEffect(() => {
+        if (mode === 'create' && !canEditNamespace) {
+            form.setFields([
+                {
+                    name: 'namespace',
+                    validating: true,
+                    errors: [],
+                },
+            ]);
+            fetchNamespaceDebounced(datasetNameValue ?? '');
+        }
+    }, [mode, form, canEditNamespace, datasetNameValue, fetchNamespaceDebounced]);
+
+    useEffect(() => {
+        if (mode === 'create' && !canEditNamespace) {
+            form.setFieldValue('namespace', sanitizedResourceName?.resource_name);
+            form.validateFields(['namespace']);
+        }
+    }, [form, mode, canEditNamespace, sanitizedResourceName]);
+
+    const validateResourceNameCallback = useCallback(
+        (resourceName: string) =>
+            validateResourceName({ resourceName: resourceName, model: ResourceNameModel.OutputPort }).unwrap(),
+        [validateResourceName],
+    );
+    const datasetOwners = useGetDatasetOwnerIds(currentOutputPort?.id);
+    const dataProductOwners = useGetDataProductOwnerIds(dataProduct?.id);
+    const ownerIds = mode === 'edit' ? datasetOwners : dataProductOwners;
+    const isHiddenDataProduct = dataProduct?.visibility === DataProductVisibility.Hidden;
+
+    useEffect(() => {
+        if (mode === 'create' && dataProductOwners && form.getFieldValue('owners') === undefined) {
+            form.setFieldValue('owners', dataProductOwners);
+        }
+    }, [mode, dataProductOwners, form]);
+
+    if (mode === 'edit' && (!currentOutputPort || ownerIds === undefined)) {
+        return <Skeleton active />;
+    }
+
+    const initialValues = {
+        name: currentOutputPort?.name,
+        namespace: currentOutputPort?.namespace,
+        description: currentOutputPort?.description,
+        access_type_id: currentOutputPort?.access_type.id,
+        lifecycle_id: currentOutputPort?.lifecycle?.id,
+        tag_ids: currentOutputPort?.tags.map((tag) => tag.id),
+        owners: ownerIds,
+        data_product_access_duration_type: currentOutputPort?.data_product_access_duration_type,
+        exploration_access_duration_type: currentOutputPort?.exploration_access_duration_type,
+    };
+
+    return (
+        <Form<CreateOutputPortRequest>
+            form={form}
+            ref={formRef}
+            labelWrap
+            labelCol={mode === 'edit' ? FORM_GRID_WRAPPER_COLS : undefined}
+            wrapperCol={mode === 'edit' ? FORM_GRID_WRAPPER_COLS : undefined}
+            layout="vertical"
+            onFinish={onFinish}
+            onFinishFailed={onFinishFailed}
+            autoComplete="off"
+            disabled={isLoading || !canSubmit}
+            initialValues={initialValues}
+        >
+            <Form.Item<CreateOutputPortRequest>
+                name="name"
+                label={t('Name')}
+                tooltip={t('The name of your Output Port')}
+                rules={[
+                    {
+                        required: true,
+                        message: t('Please provide the name of the Output Port'),
+                    },
+                ]}
+            >
+                <Input data-cy="output-port-name" />
+            </Form.Item>
+            <ResourceNameFormItem
+                form={form}
+                tooltip={t('The namespace of the Output Port')}
+                max_length={constraints?.max_length}
+                editToggleDisabled={mode === 'edit'}
+                canEditResourceName={canEditNamespace}
+                toggleCanEditResourceName={() => setCanEditNamespace((prev) => !prev)}
+                validationRequired={mode === 'create'}
+                validateResourceName={validateResourceNameCallback}
+            />
+            {mode === 'create' && (
+                <Form.Item<CreateOutputPortRequest>
+                    name="owners"
+                    label={t('Owners')}
+                    tooltip={t('The owners of the Output Port')}
+                    rules={[
+                        {
+                            required: true,
+                            message: t('Please select at least one owner for the Output Port'),
+                        },
+                    ]}
+                >
+                    <Select
+                        loading={isFetchingUsers}
+                        mode="multiple"
+                        options={userSelectOptions}
+                        showSearch={{ filterOption: selectFilterOptionByLabelAndValue }}
+                        tokenSeparators={[',']}
+                        allowClear
+                    />
+                </Form.Item>
+            )}
+            <Form.Item<CreateOutputPortRequest>
+                name="lifecycle_id"
+                label={t('Status')}
+                rules={[
+                    {
+                        required: true,
+                        message: t('Please select the status of the Output Port'),
+                    },
+                ]}
+            >
+                <Select
+                    data-cy="output-port-lifecycle"
+                    loading={isFetchingLifecycles}
+                    allowClear
+                    showSearch={{ filterOption: selectFilterOptionByLabelAndValue }}
+                    options={lifecycles?.data_product_life_cycles.map((lifecycle) => ({
+                        value: lifecycle.id,
+                        label: lifecycle.name,
+                    }))}
+                    popupRender={(menu) => <div data-cy="output-port-lifecycle-options">{menu}</div>}
+                />
+            </Form.Item>
+            <Form.Item<CreateOutputPortRequest>
+                name="access_type_id"
+                label={t('Access Type')}
+                tooltip={t('The access type of the Output Port, which determines who can see and access it')}
+                rules={[
+                    {
+                        required: true,
+                        message: t('Please select the access type of the Output Port'),
+                    },
+                ]}
+            >
+                <AccessTypeSection hiddenDataProduct={isHiddenDataProduct} />
+            </Form.Item>
+            <AccessDurationInfo mode={mode} />
+            <Form.Item<CreateOutputPortRequest> name="tag_ids" label={t('Tags')}>
+                <Select
+                    tokenSeparators={[',']}
+                    placeholder={t('Select Output Port tags')}
+                    mode="multiple"
+                    options={tagSelectOptions}
+                    showSearch={{ filterOption: selectFilterOptionByLabel }}
+                />
+            </Form.Item>
+            <Form.Item<CreateOutputPortRequest>
+                name="description"
+                label={t('Description')}
+                tooltip={t('A description for the Output Port')}
+                rules={[
+                    {
+                        required: true,
+                        message: t('Please provide a description for the Output Port'),
+                    },
+                    {
+                        max: MAX_DESCRIPTION_INPUT_LENGTH,
+                        message: t('Description must be less than {{length}} characters', {
+                            length: MAX_DESCRIPTION_INPUT_LENGTH,
+                        }),
+                    },
+                ]}
+            >
+                <TextArea
+                    data-cy="output-port-description"
+                    rows={4}
+                    count={{ show: true, max: MAX_DESCRIPTION_INPUT_LENGTH }}
+                />
+            </Form.Item>
+            {mode !== 'create' && (
+                <Form.Item>
+                    <Row>
+                        <Col>
+                            <Popconfirm
+                                title={t('Are you sure you want to delete this Output Port?')}
+                                onConfirm={handleDeleteDataset}
+                                okText={t('Yes')}
+                                cancelText={t('No')}
+                            >
+                                <Button
+                                    className={styles.formButton}
+                                    type="default"
+                                    danger
+                                    loading={isArchiving}
+                                    disabled={isLoading || !canDelete}
+                                >
+                                    {t('Delete')}
+                                </Button>
+                            </Popconfirm>
+                        </Col>
+                        <Col flex="auto" />
+                        <Col>
+                            <Space>
+                                <Button
+                                    className={styles.formButton}
+                                    type="default"
+                                    onClick={onCancel}
+                                    loading={isCreating || isUpdating}
+                                    disabled={isLoading}
+                                >
+                                    {t('Cancel')}
+                                </Button>
+                                <Button
+                                    className={styles.formButton}
+                                    type="primary"
+                                    htmlType="submit"
+                                    loading={isCreating || isUpdating}
+                                    disabled={isLoading || !canSubmit}
+                                >
+                                    {t('Save')}
+                                </Button>
+                            </Space>
+                        </Col>
+                    </Row>
+                </Form.Item>
+            )}
+        </Form>
+    );
+}

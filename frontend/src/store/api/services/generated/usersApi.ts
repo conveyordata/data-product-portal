@@ -1,12 +1,6 @@
 import { api } from "@/store/api/services/generated/authorizationRolesApi";
 const injectedRtkApi = api.injectEndpoints({
   endpoints: (build) => ({
-    removeUser: build.mutation<RemoveUserApiResponse, RemoveUserApiArg>({
-      query: (queryArg) => ({
-        url: `/api/v2/users/${queryArg}`,
-        method: "DELETE",
-      }),
-    }),
     getUsers: build.query<GetUsersApiResponse, GetUsersApiArg>({
       query: () => ({ url: `/api/v2/users` }),
     }),
@@ -14,6 +8,26 @@ const injectedRtkApi = api.injectEndpoints({
       query: (queryArg) => ({
         url: `/api/v2/users`,
         method: "POST",
+        body: queryArg,
+      }),
+    }),
+    createUsersBatch: build.mutation<
+      CreateUsersBatchApiResponse,
+      CreateUsersBatchApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/users/batch`,
+        method: "POST",
+        body: queryArg,
+      }),
+    }),
+    removeUsersBatch: build.mutation<
+      RemoveUsersBatchApiResponse,
+      RemoveUsersBatchApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/users/batch`,
+        method: "DELETE",
         body: queryArg,
       }),
     }),
@@ -27,11 +41,28 @@ const injectedRtkApi = api.injectEndpoints({
         body: queryArg,
       }),
     }),
-    markTourAsSeen: build.mutation<
-      MarkTourAsSeenApiResponse,
-      MarkTourAsSeenApiArg
+    getCurrentUser: build.query<
+      GetCurrentUserApiResponse,
+      GetCurrentUserApiArg
     >({
-      query: () => ({ url: `/api/v2/users/current/seen_tour`, method: "POST" }),
+      query: () => ({ url: `/api/v2/users/current` }),
+    }),
+    getCurrentUserGroups: build.query<
+      GetCurrentUserGroupsApiResponse,
+      GetCurrentUserGroupsApiArg
+    >({
+      query: () => ({ url: `/api/v2/users/current/groups` }),
+    }),
+    getUserRequests: build.query<
+      GetUserRequestsApiResponse,
+      GetUserRequestsApiArg
+    >({
+      query: (queryArg) => ({
+        url: `/api/v2/users/current/my_requests`,
+        params: {
+          hide_old_inactive: queryArg,
+        },
+      }),
     }),
     getUserPendingActions: build.query<
       GetUserPendingActionsApiResponse,
@@ -39,46 +70,60 @@ const injectedRtkApi = api.injectEndpoints({
     >({
       query: () => ({ url: `/api/v2/users/current/pending_actions` }),
     }),
-    getCurrentUser: build.query<
-      GetCurrentUserApiResponse,
-      GetCurrentUserApiArg
+    markTourAsSeen: build.mutation<
+      MarkTourAsSeenApiResponse,
+      MarkTourAsSeenApiArg
     >({
-      query: () => ({ url: `/api/v2/users/current` }),
+      query: () => ({ url: `/api/v2/users/current/seen_tour`, method: "POST" }),
+    }),
+    getUserGroups: build.query<GetUserGroupsApiResponse, GetUserGroupsApiArg>({
+      query: (queryArg) => ({ url: `/api/v2/users/${queryArg}/groups` }),
+    }),
+    removeUser: build.mutation<RemoveUserApiResponse, RemoveUserApiArg>({
+      query: (queryArg) => ({
+        url: `/api/v2/users/${queryArg}`,
+        method: "DELETE",
+      }),
     }),
   }),
   overrideExisting: false,
 });
 export { injectedRtkApi as api };
-export type RemoveUserApiResponse = /** status 200 Successful Response */ any;
-export type RemoveUserApiArg = string;
 export type GetUsersApiResponse =
   /** status 200 Successful Response */ GetUsersResponse;
 export type GetUsersApiArg = void;
 export type CreateUserApiResponse =
   /** status 200 User successfully created */ UserCreateResponse;
 export type CreateUserApiArg = UserCreate;
+export type CreateUsersBatchApiResponse =
+  /** status 200 Successful Response */ IdentityBatchCreateResponse;
+export type CreateUsersBatchApiArg = IdentityBatchCreateRequestUserCreate;
+export type RemoveUsersBatchApiResponse = unknown;
+export type RemoveUsersBatchApiArg = IdentityBatchDeleteRequest;
 export type SetCanBecomeAdminApiResponse =
   /** status 200 Successful Response */ any;
 export type SetCanBecomeAdminApiArg = CanBecomeAdminUpdate;
-export type MarkTourAsSeenApiResponse =
-  /** status 200 Successful Response */ any;
-export type MarkTourAsSeenApiArg = void;
-export type GetUserPendingActionsApiResponse =
-  /** status 200 Successful Response */ PendingActionResponse;
-export type GetUserPendingActionsApiArg = void;
 export type GetCurrentUserApiResponse =
   /** status 200 Successful Response */ User;
 export type GetCurrentUserApiArg = void;
-export type ValidationError = {
-  loc: (string | number)[];
-  msg: string;
-  type: string;
-  input?: any;
-  ctx?: object;
-};
-export type HttpValidationError = {
-  detail?: ValidationError[];
-};
+export type GetCurrentUserGroupsApiResponse =
+  /** status 200 Successful Response */ GroupsGetResponse;
+export type GetCurrentUserGroupsApiArg = void;
+export type GetUserRequestsApiResponse =
+  /** status 200 Successful Response */ MyRequestsResponse;
+export type GetUserRequestsApiArg =
+  /** Filter out inactive requests older than 30 days */ boolean | undefined;
+export type GetUserPendingActionsApiResponse =
+  /** status 200 Successful Response */ PendingActionResponse;
+export type GetUserPendingActionsApiArg = void;
+export type MarkTourAsSeenApiResponse =
+  /** status 200 Successful Response */ any;
+export type MarkTourAsSeenApiArg = void;
+export type GetUserGroupsApiResponse =
+  /** status 200 Successful Response */ GroupsGetResponse;
+export type GetUserGroupsApiArg = string;
+export type RemoveUserApiResponse = /** status 200 Successful Response */ any;
+export type RemoveUserApiArg = string;
 export type User = {
   id: string;
   email: string;
@@ -99,6 +144,13 @@ export type AuthorizationAction =
   | 106
   | 107
   | 108
+  | 109
+  | 110
+  | 111
+  | 112
+  | 113
+  | 114
+  | 115
   | 301
   | 302
   | 303
@@ -128,7 +180,10 @@ export type AuthorizationAction =
   | 412
   | 413
   | 414
-  | 415;
+  | 415
+  | 416
+  | 901
+  | 902;
 export type Prototype = 0 | 1 | 2 | 3;
 export type Role = {
   name: string;
@@ -163,6 +218,16 @@ export type UsersGet = {
 export type GetUsersResponse = {
   users: UsersGet[];
 };
+export type ValidationError = {
+  loc: (string | number)[];
+  msg: string;
+  type: string;
+  input?: any;
+  ctx?: object;
+};
+export type HttpValidationError = {
+  detail?: ValidationError[];
+};
 export type UserCreateResponse = {
   id: string;
 };
@@ -172,16 +237,68 @@ export type UserCreate = {
   first_name: string;
   last_name: string;
 };
+export type IdentityBatchCreateError = {
+  item: any;
+  errors: string[];
+};
+export type IdentityBatchCreateResponse = {
+  ids: string[];
+  errors: IdentityBatchCreateError[];
+};
+export type IdentityBatchCreateRequestUserCreate = {
+  items: {
+    email: string;
+    external_id: string;
+    first_name: string;
+    last_name: string;
+  }[];
+};
+export type IdentityBatchDeleteRequest = {
+  ids: string[];
+};
 export type CanBecomeAdminUpdate = {
   user_id: string;
   can_become_admin: boolean;
 };
+export type GroupGet = {
+  id: string;
+  external_id: string;
+  display_name: string;
+};
+export type GroupsGetResponse = {
+  groups: GroupGet[];
+};
+export type AccessDurationType = "permanent" | "time_bound";
+export type InputPortRequestDecision =
+  | "pending"
+  | "approved"
+  | "denied"
+  | "cancelled";
+export type AccessMode = {
+  id: string;
+  name: string;
+  description: string;
+};
+export type AbstractDataProductType =
+  | "unknown"
+  | "data_products"
+  | "explorations";
+export type AbstractDataProductInfo = {
+  name: string;
+  namespace: string;
+  abstract_data_product_type: AbstractDataProductType;
+  is_redacted: boolean;
+};
 export type OutputPortStatus = "pending" | "active" | "archived";
-export type OutputPortAccessType =
-  | "public"
+export type OutputPortAccessFunction =
   | "restricted"
   | "private"
   | "unrestricted";
+export type OutputPortAccessType = {
+  id: string;
+  name: string;
+  access_function: OutputPortAccessFunction;
+};
 export type Tag = {
   id: string;
   value: string;
@@ -195,97 +312,56 @@ export type OutputPort = {
   access_type: OutputPortAccessType;
   data_product_id: string;
   tags: Tag[];
+  access_modes: AccessMode[];
 };
-export type AbstractDataProductType =
-  | "unknown"
-  | "data_products"
-  | "explorations";
-export type AbstractDataProductInfo = {
-  name: string;
-  namespace: string;
-  abstract_data_product_type: AbstractDataProductType;
-};
-export type DataProductOutputPortPendingAction = {
+export type RenewalStatus = "pending" | "denied";
+export type InputPortRequestBase = {
   id: string;
   justification: string;
-  consuming_abstract_data_product_id: string;
-  output_port_id: string;
-  status: DecisionStatus;
-  requested_on: string;
-  output_port: OutputPort;
-  consuming_abstract_data_product: AbstractDataProductInfo;
+  decision_note?: string | null;
+  valid_from?: string | null;
+  valid_until: string | null;
+  access_duration_type: AccessDurationType;
+  requested_duration_days?: number | null;
   requested_by: User;
-  denied_by: User | null;
-  approved_by: User | null;
-  pending_action_type?: "InputPort";
+  decided_by?: User | null;
+  decision: InputPortRequestDecision;
+  revoked_at?: string | null;
+  revoked_by?: User | null;
+  created_on: string;
+  requested_on: string;
+  access_mode?: AccessMode | null;
+};
+export type UserInputPort = {
+  id: string;
+  consuming_abstract_data_product_id: string;
+  consuming_abstract_data_product: AbstractDataProductInfo;
+  output_port_id: string;
+  output_port: OutputPort;
+  renewal_status?: RenewalStatus | null;
+  current_request: InputPortRequestBase;
+};
+export type InputPortRequest = {
+  id: string;
+  justification: string;
+  decision_note?: string | null;
+  valid_from?: string | null;
+  valid_until: string | null;
+  access_duration_type: AccessDurationType;
+  requested_duration_days?: number | null;
+  requested_by: User;
+  decided_by?: User | null;
+  decision: InputPortRequestDecision;
+  revoked_at?: string | null;
+  revoked_by?: User | null;
+  created_on: string;
+  requested_on: string;
+  access_mode?: AccessMode | null;
+  request_type?: "InputPort";
+  input_port: UserInputPort;
 };
 export type TechnicalAssetStatus = "pending" | "active" | "archived";
 export type TechnicalMapping = "default" | "custom";
-export type AzureBlobTechnicalAssetConfiguration = {
-  configuration_type: "AzureBlobTechnicalAssetConfiguration";
-  domain?: string;
-  path?: string;
-  container_name: string;
-};
-export type AccessGranularity = "schema" | "table";
-export type DatabricksTechnicalAssetConfiguration = {
-  configuration_type: "DatabricksTechnicalAssetConfiguration";
-  catalog: string;
-  schema?: string;
-  table?: string;
-  bucket_identifier?: string;
-  catalog_path?: string;
-  table_path?: string;
-  access_granularity: AccessGranularity;
-};
-export type GlueTechnicalAssetConfiguration = {
-  configuration_type: "GlueTechnicalAssetConfiguration";
-  database: string;
-  database_suffix?: string;
-  table?: string;
-  bucket_identifier?: string;
-  database_path?: string;
-  table_path?: string;
-  access_granularity: AccessGranularity;
-};
-export type OsiSemanticModelTechnicalAssetConfiguration = {
-  configuration_type: "OSISemanticModelTechnicalAssetConfiguration";
-  model_name?: string;
-  location?: string;
-};
-export type PostgreSqlTechnicalAssetConfiguration = {
-  configuration_type: "PostgreSQLTechnicalAssetConfiguration";
-  database: string;
-  schema?: string;
-  table?: string;
-  access_granularity: AccessGranularity;
-};
-export type RedshiftTechnicalAssetConfiguration = {
-  configuration_type: "RedshiftTechnicalAssetConfiguration";
-  database: string;
-  schema?: string;
-  table?: string;
-  bucket_identifier?: string;
-  database_path?: string;
-  table_path?: string;
-  access_granularity: AccessGranularity;
-};
-export type S3TechnicalAssetConfiguration = {
-  configuration_type: "S3TechnicalAssetConfiguration";
-  bucket: string;
-  suffix?: string;
-  path: string;
-};
-export type SnowflakeTechnicalAssetConfiguration = {
-  configuration_type: "SnowflakeTechnicalAssetConfiguration";
-  database: string;
-  schema?: string;
-  table?: string;
-  bucket_identifier?: string;
-  database_path?: string;
-  table_path?: string;
-  access_granularity: AccessGranularity;
-};
 export type AbstractDataProductStatus =
   | "pending"
   | "active"
@@ -321,36 +397,16 @@ export type OwnedTechnicalAsset = {
   status: TechnicalAssetStatus;
   technical_mapping: TechnicalMapping;
   owner_id: string;
-  platform_id: string;
-  service_id: string;
-  configuration:
-    | ({
-        configuration_type: "AzureBlobTechnicalAssetConfiguration";
-      } & AzureBlobTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "DatabricksTechnicalAssetConfiguration";
-      } & DatabricksTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "GlueTechnicalAssetConfiguration";
-      } & GlueTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "OSISemanticModelTechnicalAssetConfiguration";
-      } & OsiSemanticModelTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "PostgreSQLTechnicalAssetConfiguration";
-      } & PostgreSqlTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "RedshiftTechnicalAssetConfiguration";
-      } & RedshiftTechnicalAssetConfiguration)
-    | ({
-        configuration_type: "S3TechnicalAssetConfiguration";
-      } & S3TechnicalAssetConfiguration)
-    | ({
-        configuration_type: "SnowflakeTechnicalAssetConfiguration";
-      } & SnowflakeTechnicalAssetConfiguration);
+  platform_id?: string | null;
+  service_id?: string | null;
+  /** Configuration of the technical asset. The available fields depend on `name`; retrieve them from /v2/plugins/{name}/form. */
+  configuration: {
+    name: string;
+    [key: string]: any;
+  };
   owner: DataProduct;
 };
-export type TechnicalAssetOutputPortPendingAction = {
+export type TechnicalAssetOutputPortRequest = {
   id: string;
   output_port_id: string;
   output_port: OutputPort;
@@ -363,9 +419,9 @@ export type TechnicalAssetOutputPortPendingAction = {
   requested_by: User;
   denied_by: User | null;
   approved_by: User | null;
-  pending_action_type?: "TechnicalAssetOutputPort";
+  request_type?: "TechnicalAssetOutputPort";
 };
-export type DataProductRoleAssignmentPendingAction = {
+export type DataProductRoleAssignmentRequest = {
   id: string;
   data_product: DataProduct;
   user: User;
@@ -375,24 +431,39 @@ export type DataProductRoleAssignmentPendingAction = {
   requested_by: User | null;
   decided_on: string | null;
   decided_by: User | null;
-  pending_action_type?: "DataProductRoleAssignment";
+  request_type?: "DataProductRoleAssignment";
+};
+export type MyRequestsResponse = {
+  my_requests: (
+    | InputPortRequest
+    | TechnicalAssetOutputPortRequest
+    | DataProductRoleAssignmentRequest
+  )[];
 };
 export type PendingActionResponse = {
   pending_actions: (
-    | DataProductOutputPortPendingAction
-    | TechnicalAssetOutputPortPendingAction
-    | DataProductRoleAssignmentPendingAction
+    | InputPortRequest
+    | TechnicalAssetOutputPortRequest
+    | DataProductRoleAssignmentRequest
   )[];
 };
 export const {
-  useRemoveUserMutation,
   useGetUsersQuery,
   useLazyGetUsersQuery,
   useCreateUserMutation,
+  useCreateUsersBatchMutation,
+  useRemoveUsersBatchMutation,
   useSetCanBecomeAdminMutation,
-  useMarkTourAsSeenMutation,
-  useGetUserPendingActionsQuery,
-  useLazyGetUserPendingActionsQuery,
   useGetCurrentUserQuery,
   useLazyGetCurrentUserQuery,
+  useGetCurrentUserGroupsQuery,
+  useLazyGetCurrentUserGroupsQuery,
+  useGetUserRequestsQuery,
+  useLazyGetUserRequestsQuery,
+  useGetUserPendingActionsQuery,
+  useLazyGetUserPendingActionsQuery,
+  useMarkTourAsSeenMutation,
+  useGetUserGroupsQuery,
+  useLazyGetUserGroupsQuery,
+  useRemoveUserMutation,
 } = injectedRtkApi;

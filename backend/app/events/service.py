@@ -7,12 +7,12 @@ from sqlalchemy import event as sql_event
 from sqlalchemy.orm import Session
 
 from app.data_products.model import DataProduct
-from app.data_products.output_ports.model import Dataset
+from app.data_products.output_ports.model import OutputPort
 from app.data_products.technical_assets.model import TechnicalAsset
-from app.events.enums import EventReferenceEntity
+from app.events.enums import EventEntityType
 from app.events.model import Event as EventModel
 from app.events.schema import CreateEvent
-from app.events.schema_response import GetEventHistoryResponseItemOld
+from app.explorations.model import Exploration
 from app.users.model import User
 
 
@@ -20,10 +20,15 @@ from app.users.model import User
 def _backup_user_name_on_delete(mapper, connection, target):
     connection.execute(
         update(EventModel.__table__)
+        .where(EventModel.actor_id == target.id)
+        .values(deleted_actor_identifier=target.email)
+    )
+    connection.execute(
+        update(EventModel.__table__)
         .where(
             and_(
                 EventModel.subject_id == target.id,
-                EventModel.subject_type == EventReferenceEntity.USER,
+                EventModel.subject_type == EventEntityType.USER,
             )
         )
         .values(deleted_subject_identifier=target.email)
@@ -33,21 +38,21 @@ def _backup_user_name_on_delete(mapper, connection, target):
         .where(
             and_(
                 EventModel.target_id == target.id,
-                EventModel.target_type == EventReferenceEntity.USER,
+                EventModel.target_type == EventEntityType.USER,
             )
         )
         .values(deleted_target_identifier=target.email)
     )
 
 
-@sql_event.listens_for(Dataset, "before_delete")
+@sql_event.listens_for(OutputPort, "before_delete")
 def _backup_dataset_name_on_delete(mapper, connection, target):
     connection.execute(
         update(EventModel.__table__)
         .where(
             and_(
                 EventModel.subject_id == target.id,
-                EventModel.subject_type == EventReferenceEntity.DATASET,
+                EventModel.subject_type == EventEntityType.OUTPUT_PORT,
             )
         )
         .values(deleted_subject_identifier=target.name)
@@ -57,7 +62,7 @@ def _backup_dataset_name_on_delete(mapper, connection, target):
         .where(
             and_(
                 EventModel.target_id == target.id,
-                EventModel.target_type == EventReferenceEntity.DATASET,
+                EventModel.target_type == EventEntityType.OUTPUT_PORT,
             )
         )
         .values(deleted_target_identifier=target.name)
@@ -71,7 +76,7 @@ def _backup_data_product_name_on_delete(mapper, connection, target):
         .where(
             and_(
                 EventModel.subject_id == target.id,
-                EventModel.subject_type == EventReferenceEntity.DATA_PRODUCT,
+                EventModel.subject_type == EventEntityType.DATA_PRODUCT,
             )
         )
         .values(deleted_subject_identifier=target.name)
@@ -81,7 +86,7 @@ def _backup_data_product_name_on_delete(mapper, connection, target):
         .where(
             and_(
                 EventModel.target_id == target.id,
-                EventModel.target_type == EventReferenceEntity.DATA_PRODUCT,
+                EventModel.target_type == EventEntityType.DATA_PRODUCT,
             )
         )
         .values(deleted_target_identifier=target.name)
@@ -89,13 +94,13 @@ def _backup_data_product_name_on_delete(mapper, connection, target):
 
 
 @sql_event.listens_for(TechnicalAsset, "before_delete")
-def _backup_data_output_name_on_delete(mapper, connection, target):
+def _backup_technical_asset_name_on_delete(mapper, connection, target):
     connection.execute(
         update(EventModel.__table__)
         .where(
             and_(
                 EventModel.subject_id == target.id,
-                EventModel.subject_type == EventReferenceEntity.DATA_OUTPUT,
+                EventModel.subject_type == EventEntityType.TECHNICAL_ASSET,
             )
         )
         .values(deleted_subject_identifier=target.name)
@@ -105,7 +110,31 @@ def _backup_data_output_name_on_delete(mapper, connection, target):
         .where(
             and_(
                 EventModel.target_id == target.id,
-                EventModel.target_type == EventReferenceEntity.DATA_OUTPUT,
+                EventModel.target_type == EventEntityType.TECHNICAL_ASSET,
+            )
+        )
+        .values(deleted_target_identifier=target.name)
+    )
+
+
+@sql_event.listens_for(Exploration, "before_delete")
+def _backup_exploration_name_on_delete(mapper, connection, target):
+    connection.execute(
+        update(EventModel.__table__)
+        .where(
+            and_(
+                EventModel.subject_id == target.id,
+                EventModel.subject_type == EventEntityType.EXPLORATION,
+            )
+        )
+        .values(deleted_subject_identifier=target.name)
+    )
+    connection.execute(
+        update(EventModel.__table__)
+        .where(
+            and_(
+                EventModel.target_id == target.id,
+                EventModel.target_type == EventEntityType.EXPLORATION,
             )
         )
         .values(deleted_target_identifier=target.name)
@@ -128,9 +157,7 @@ class EventService:
         self.db.flush()
         return [event.id for event in created_events]
 
-    def get_history(
-        self, id: UUID, type: EventReferenceEntity
-    ) -> Sequence[GetEventHistoryResponseItemOld]:
+    def get_history(self, id: UUID, type: EventEntityType) -> Sequence[EventModel]:
         return self.db.scalars(
             select(EventModel)
             .where(

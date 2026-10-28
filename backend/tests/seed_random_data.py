@@ -4,11 +4,13 @@ from sqlalchemy import select
 
 from app.configuration.platforms.platform_services.model import PlatformService
 from tests import test_session
-from tests.factories.data_output import DataOutputFactory
-from tests.factories.data_outputs_datasets import DataOutputDatasetAssociationFactory
-from tests.factories.data_product import DataProductFactory
-from tests.factories.data_products_datasets import InputPortFactory
-from tests.factories.dataset import DatasetFactory
+from tests.factories import (
+    DataProductFactory,
+    InputPortFactory,
+    OutputPortFactory,
+    TechnicalAssetFactory,
+    TechnicalAssetOutputPortAssociationFactory,
+)
 
 
 def add_random_data(
@@ -19,7 +21,7 @@ def add_random_data(
     Add random data products and datasets to the database.
     """
     data_products = []
-    data_outputs = []
+    technical_assets = []
 
     # Get the S3 service from the database for data output creation
     service = test_session.scalar(
@@ -31,22 +33,22 @@ def add_random_data(
         data_product = DataProductFactory()
 
         for _ in range(random.randint(0, 3)):
-            data_output = DataOutputFactory(owner=data_product, service=service)
-            data_outputs.append(data_output)
+            technical_asset = TechnicalAssetFactory(owner=data_product, service=service)
+            technical_assets.append(technical_asset)
 
         data_products.append(data_product)
 
     # Create datasets and associate them with random data products and data outputs
     for _ in range(nr_of_datasets):
-        dataset = DatasetFactory()
+        dataset = OutputPortFactory()
 
         # Add data outputs to the dataset
         for _ in range(random.randint(0, 3)):
-            data_output = random.choice(data_outputs)
+            technical_asset = random.choice(technical_assets)
 
-            DataOutputDatasetAssociationFactory(
-                data_output=data_output,
-                dataset=dataset,
+            TechnicalAssetOutputPortAssociationFactory(
+                technical_asset=technical_asset,
+                output_port=dataset,
             )
 
         # Add data products to the dataset
@@ -55,7 +57,7 @@ def add_random_data(
 
             InputPortFactory(
                 consuming_abstract_data_product=data_product,
-                dataset=dataset,
+                output_port=dataset,
             )
 
 

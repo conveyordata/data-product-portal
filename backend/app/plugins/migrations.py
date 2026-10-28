@@ -1,0 +1,241 @@
+import inspect
+import os
+from pathlib import Path
+from typing import Optional, Sequence
+
+from alembic import command
+from alembic.config import Config
+from alembic.runtime.migration import MigrationContext
+from alembic.script import ScriptDirectory
+from sqlalchemy import Column, Engine, MetaData, String, Table, select
+from sqlalchemy import inspect as sa_inspect
+from sqlalchemy.orm import Session
+
+from app.configuration.platforms.platform_services.service import (
+    PlatformServiceService,
+)
+from app.core.logging import logger
+from app.technical_asset_configuration.base_schema import TechnicalAssetPlugin
+
+VERSION_TABLE = "alembic_version"
+_SCRIPT_LOCATION = Path(__file__).parent.parent / "database" / "alembic"
+_CORE_VERSIONS_DIR = _SCRIPT_LOCATION / "versions"
+_FILE_TEMPLATE = (
+    "%%(year)d_%%(month).2d_%%(day).2d_%%(hour).2d%%(minute).2d-%%(rev)s_%%(slug)s"
+)
+
+_configuration_table = Table(
+    "data_output_configurations",
+    MetaData(),
+    Column("id", String),
+    Column("configuration_type", String),
+)
+_technical_asset_table = Table(
+    "data_outputs",
+    MetaData(),
+    Column("configuration_id", String),
+)
+
+
+def _versions_dir(plugin: type[TechnicalAssetPlugin]) -> Optional[Path]:
+    candidate = Path(inspect.getfile(plugin)).parent / "versions"
+    return candidate if candidate.is_dir() else None
+
+
+def owns_a_table(plugin: type[TechnicalAssetPlugin]) -> bool:
+    return _versions_dir(plugin) is not None
+
+
+def _owned_versions_dir(plugin: type[TechnicalAssetPlugin]) -> Path:
+    versions_dir = _versions_dir(plugin)
+    if versions_dir is None:
+        raise ValueError(f"Plugin '{plugin.name}' has no versions folder")
+    return versions_dir
+
+
+def _version_locations(plugins: Sequence[type[TechnicalAssetPlugin]]) -> list[Path]:
+    owned = [_owned_versions_dir(p) for p in plugins if owns_a_table(p)]
+    # Plugins defined in the same module share one versions folder.
+    return list(dict.fromkeys([_CORE_VERSIONS_DIR, *owned]))
+
+
+def _config(version_locations: Sequence[Path], url: str) -> Config:
+    config = Config()
+    config.set_main_option("script_location", str(_SCRIPT_LOCATION))
+    config.set_main_option("version_path_separator", "os")
+    config.set_main_option(
+        "version_locations", os.pathsep.join(str(d) for d in version_locations)
+    )
+    config.set_main_option("sqlalchemy.url", url.replace("%", "%%"))
+    config.attributes["version_table"] = VERSION_TABLE
+    return config
+
+
+def _current_heads(engine: Engine) -> tuple[str, ...]:
+    with engine.connect() as connection:
+        return MigrationContext.configure(
+            connection, opts={"version_table": VERSION_TABLE}
+        ).get_current_heads()
+
+
+def _types_without_a_plugin(
+    plugins: Sequence[type[TechnicalAssetPlugin]], engine: Engine
+) -> list[str]:
+    if not sa_inspect(engine).has_table(_technical_asset_table.name):
+        return []
+    with engine.connect() as connection:
+        types = set(
+            connection.scalars(
+                select(_configuration_table.c.configuration_type)
+                .join(
+                    _technical_asset_table,
+                    _technical_asset_table.c.configuration_id
+                    == _configuration_table.c.id,
+                )
+                .distinct()
+            )
+        )
+    return sorted(types - {None} - {plugin.name for plugin in plugins})
+
+
+def _revisions_in(script: ScriptDirectory, directory: Path) -> set[str]:
+    return {
+        revision.revision
+        for revision in script.walk_revisions()
+        if Path(revision.path).parent == directory
+    }
+
+
+def _head_in(script: ScriptDirectory, directory: Path) -> str:
+    own = _revisions_in(script, directory)
+    heads = [head for head in script.get_heads() if head in own]
+    if len(heads) != 1:
+        raise ValueError(f"Expected exactly one head in {directory}, found {heads}")
+    return heads[0]
+
+
+def _core_head(plugins: Sequence[type[TechnicalAssetPlugin]], url: str) -> str:
+    # A few core migrations `depends_on` a plugin's baseline (see those files
+    # for why), so resolving core's own revisions requires every such
+    # plugin's directory to be present too - a core-only config raises
+    # `KeyError` on that dependency. Building the same full config
+    # migrate_all uses, then picking out the head whose file lives under
+    # core's own versions folder, works regardless of which plugins that
+    # happens to include.
+    script = ScriptDirectory.from_config(_config(_version_locations(plugins), url))
+    return _head_in(script, _CORE_VERSIONS_DIR)
+
+
+def migrate_all(plugins: Sequence[type[TechnicalAssetPlugin]], engine: Engine) -> None:
+    """Upgrade core and every plugin's own table to the latest revision, then
+    add the platform services the plugins declare.
+
+    Core and each plugin are independent Alembic branches sharing one
+    version_locations config and one version table: core's history has no
+    down_revision on its own first revision, exactly like a plugin's. A
+    plugin's baseline `depends_on` the core revision that created the table
+    its own table points at, so one upgrade to every head keeps that order.
+    """
+    plugins_owning_tables = [plugin for plugin in plugins if owns_a_table(plugin)]
+    url = engine.url.render_as_string(hide_password=False)
+
+    config = _config(_version_locations(plugins), url)
+    script = ScriptDirectory.from_config(config)
+    known_revisions = {revision.revision for revision in script.walk_revisions()}
+
+    # The version table is shared, so Alembic resolves every row in it
+    # against the revisions this config knows about. A row left behind by a
+    # plugin that is no longer installed, or that failed to import, would
+    # otherwise fail here as an unreadable "Can't locate revision".
+    orphans = [head for head in _current_heads(engine) if head not in known_revisions]
+    if orphans:
+        raise ValueError(
+            f"{VERSION_TABLE} holds revisions belonging to no installed "
+            f"plugin: {', '.join(sorted(orphans))}. Reinstall the plugin that "
+            f"owns them, or delete those rows from {VERSION_TABLE} to "
+            "give up its migration history. If a newer portal version "
+            "migrated this database, deploy that version again instead."
+        )
+
+    # SQLAlchemy cannot load a technical asset whose configuration_type no
+    # mapped plugin claims, so every request touching one would fail.
+    missing = _types_without_a_plugin(plugins, engine)
+    if missing:
+        raise ValueError(
+            f"Technical assets use configuration types no installed plugin "
+            f"provides: {', '.join(missing)}. Install the plugin that provides "
+            "them, or delete those technical assets."
+        )
+
+    before = set(_current_heads(engine))
+    command.upgrade(config, "heads")
+    with Session(engine) as session, session.begin():
+        PlatformServiceService(session).ensure_for_plugins(plugins)
+
+    for plugin in plugins_owning_tables:
+        versions_dir = _owned_versions_dir(plugin)
+        head = _head_in(script, versions_dir)
+        previous = next(
+            (h for h in before if h in _revisions_in(script, versions_dir)), None
+        )
+        if previous == head:
+            outcome = f"up to date at {head}"
+        elif previous is None:
+            outcome = f"installed at {head}"
+        else:
+            outcome = f"upgraded {previous} to {head}"
+        logger.info(f"Reconciled plugin '{plugin.name}': {outcome}")
+
+
+def check_latest_migration_core(
+    plugins: Sequence[type[TechnicalAssetPlugin]], engine: Engine
+) -> str:
+    """ONLY USE IN TESTINGS: Downgrade core's latest migration by one step, then reapply it.
+
+    A bare `alembic downgrade -1` can't be used for this once any plugin has
+    migrated: it only knows core's own script location, not the shared
+    version table's plugin rows, and fails to resolve them. This targets
+    core's own previous revision through the same shared config migrate_all
+    uses, then calls migrate_all to bring everything back.
+    """
+    url = engine.url.render_as_string(hide_password=False)
+
+    config = _config(_version_locations(plugins), url)
+    script = ScriptDirectory.from_config(config)
+
+    head = _core_head(plugins, url)
+    down_revision = script.get_revision(head).down_revision
+    if down_revision is not None and not isinstance(down_revision, str):
+        raise ValueError(f"Core's latest revision {head} has multiple parents")
+
+    command.downgrade(config, down_revision or "base")
+    migrate_all(plugins, engine)
+    return head
+
+
+def create_core_revision(
+    plugins: Sequence[type[TechnicalAssetPlugin]], engine: Engine, message: str
+) -> str:
+    """Create a new empty core migration on top of core's own head.
+
+    A bare `alembic revision` can't be used for this: its config only knows
+    core's script location, so the core migrations that `depends_on` a
+    plugin baseline fail to resolve. This builds the same shared config
+    migrate_all uses and pins the new revision to core's branch.
+    """
+    url = engine.url.render_as_string(hide_password=False)
+
+    config = _config(_version_locations(plugins), url)
+    config.set_main_option("file_template", _FILE_TEMPLATE)
+
+    script = command.revision(
+        config,
+        message=message,
+        head=_core_head(plugins, url),
+        version_path=str(_CORE_VERSIONS_DIR),
+    )
+    if isinstance(script, list):
+        script = script[0]
+    if script is None:
+        raise ValueError("Alembic did not generate a revision")
+    return str(script.path)

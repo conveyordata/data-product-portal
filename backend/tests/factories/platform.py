@@ -1,6 +1,9 @@
 import factory
+from faker import Faker
 
 from app.configuration.platforms.model import Platform
+
+fake = Faker()
 
 
 class PlatformFactory(factory.alchemy.SQLAlchemyModelFactory):
@@ -8,4 +11,4 @@ class PlatformFactory(factory.alchemy.SQLAlchemyModelFactory):
         model = Platform
 
     id = factory.Faker("uuid4")
-    name = factory.Faker("word")
+    name = factory.Sequence(lambda _: fake.unique.word())

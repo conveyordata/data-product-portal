@@ -7,13 +7,16 @@ from uuid import UUID
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
+from ..models.access_duration_type import AccessDurationType
 from ..models.data_quality_status import DataQualityStatus
-from ..models.output_port_access_type import OutputPortAccessType
 from ..models.output_port_status import OutputPortStatus
+from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
+    from ..models.access_mode import AccessMode
     from ..models.data_product_life_cycle import DataProductLifeCycle
     from ..models.domain import Domain
+    from ..models.output_port_access_type import OutputPortAccessType
     from ..models.tag import Tag
 
 
@@ -31,14 +34,17 @@ class SearchOutputPortsResponseItem:
         status (OutputPortStatus):
         usage (None | str):
         access_type (OutputPortAccessType):
+        data_product_access_duration_type (AccessDurationType):
+        exploration_access_duration_type (AccessDurationType):
         data_product_id (UUID):
         tags (list[Tag]):
         domain (Domain):
         lifecycle (DataProductLifeCycle | None):
+        access_modes (list[AccessMode]):
         abstract_data_product_count (int):
         technical_assets_count (int):
         data_product_name (str):
-        quality_status (DataQualityStatus | None):
+        quality_status (DataQualityStatus | None | Unset):
     """
 
     id: UUID
@@ -48,18 +54,23 @@ class SearchOutputPortsResponseItem:
     status: OutputPortStatus
     usage: None | str
     access_type: OutputPortAccessType
+    data_product_access_duration_type: AccessDurationType
+    exploration_access_duration_type: AccessDurationType
     data_product_id: UUID
     tags: list[Tag]
     domain: Domain
     lifecycle: DataProductLifeCycle | None
+    access_modes: list[AccessMode]
     abstract_data_product_count: int
     technical_assets_count: int
     data_product_name: str
-    quality_status: DataQualityStatus | None
+    quality_status: DataQualityStatus | None | Unset = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        from ..models.data_product_life_cycle import DataProductLifeCycle
+        from ..models.data_product_life_cycle import (
+            DataProductLifeCycle,  # noqa: PLC0415
+        )
 
         id = str(self.id)
 
@@ -74,7 +85,11 @@ class SearchOutputPortsResponseItem:
         usage: None | str
         usage = self.usage
 
-        access_type = self.access_type.value
+        access_type = self.access_type.to_dict()
+
+        data_product_access_duration_type = self.data_product_access_duration_type.value
+
+        exploration_access_duration_type = self.exploration_access_duration_type.value
 
         data_product_id = str(self.data_product_id)
 
@@ -91,14 +106,21 @@ class SearchOutputPortsResponseItem:
         else:
             lifecycle = self.lifecycle
 
+        access_modes = []
+        for access_modes_item_data in self.access_modes:
+            access_modes_item = access_modes_item_data.to_dict()
+            access_modes.append(access_modes_item)
+
         abstract_data_product_count = self.abstract_data_product_count
 
         technical_assets_count = self.technical_assets_count
 
         data_product_name = self.data_product_name
 
-        quality_status: None | str
-        if isinstance(self.quality_status, DataQualityStatus):
+        quality_status: None | str | Unset
+        if isinstance(self.quality_status, Unset):
+            quality_status = UNSET
+        elif isinstance(self.quality_status, DataQualityStatus):
             quality_status = self.quality_status.value
         else:
             quality_status = self.quality_status
@@ -114,24 +136,34 @@ class SearchOutputPortsResponseItem:
                 "status": status,
                 "usage": usage,
                 "access_type": access_type,
+                "data_product_access_duration_type": data_product_access_duration_type,
+                "exploration_access_duration_type": exploration_access_duration_type,
                 "data_product_id": data_product_id,
                 "tags": tags,
                 "domain": domain,
                 "lifecycle": lifecycle,
+                "access_modes": access_modes,
                 "abstract_data_product_count": abstract_data_product_count,
                 "technical_assets_count": technical_assets_count,
                 "data_product_name": data_product_name,
-                "quality_status": quality_status,
             }
         )
+        if quality_status is not UNSET:
+            field_dict["quality_status"] = quality_status
 
         return field_dict
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.data_product_life_cycle import DataProductLifeCycle
-        from ..models.domain import Domain
-        from ..models.tag import Tag
+        from ..models.access_mode import AccessMode  # noqa: PLC0415
+        from ..models.data_product_life_cycle import (
+            DataProductLifeCycle,  # noqa: PLC0415
+        )
+        from ..models.domain import Domain  # noqa: PLC0415
+        from ..models.output_port_access_type import (
+            OutputPortAccessType,  # noqa: PLC0415
+        )
+        from ..models.tag import Tag  # noqa: PLC0415
 
         d = dict(src_dict)
         id = UUID(d.pop("id"))
@@ -151,7 +183,15 @@ class SearchOutputPortsResponseItem:
 
         usage = _parse_usage(d.pop("usage"))
 
-        access_type = OutputPortAccessType(d.pop("access_type"))
+        access_type = OutputPortAccessType.from_dict(d.pop("access_type"))
+
+        data_product_access_duration_type = AccessDurationType(
+            d.pop("data_product_access_duration_type")
+        )
+
+        exploration_access_duration_type = AccessDurationType(
+            d.pop("exploration_access_duration_type")
+        )
 
         data_product_id = UUID(d.pop("data_product_id"))
 
@@ -179,14 +219,23 @@ class SearchOutputPortsResponseItem:
 
         lifecycle = _parse_lifecycle(d.pop("lifecycle"))
 
+        access_modes = []
+        _access_modes = d.pop("access_modes")
+        for access_modes_item_data in _access_modes:
+            access_modes_item = AccessMode.from_dict(access_modes_item_data)
+
+            access_modes.append(access_modes_item)
+
         abstract_data_product_count = d.pop("abstract_data_product_count")
 
         technical_assets_count = d.pop("technical_assets_count")
 
         data_product_name = d.pop("data_product_name")
 
-        def _parse_quality_status(data: object) -> DataQualityStatus | None:
+        def _parse_quality_status(data: object) -> DataQualityStatus | None | Unset:
             if data is None:
+                return data
+            if isinstance(data, Unset):
                 return data
             try:
                 if not isinstance(data, str):
@@ -196,9 +245,9 @@ class SearchOutputPortsResponseItem:
                 return quality_status_type_0
             except (TypeError, ValueError, AttributeError, KeyError):
                 pass
-            return cast(DataQualityStatus | None, data)
+            return cast(DataQualityStatus | None | Unset, data)
 
-        quality_status = _parse_quality_status(d.pop("quality_status"))
+        quality_status = _parse_quality_status(d.pop("quality_status", UNSET))
 
         search_output_ports_response_item = cls(
             id=id,
@@ -208,10 +257,13 @@ class SearchOutputPortsResponseItem:
             status=status,
             usage=usage,
             access_type=access_type,
+            data_product_access_duration_type=data_product_access_duration_type,
+            exploration_access_duration_type=exploration_access_duration_type,
             data_product_id=data_product_id,
             tags=tags,
             domain=domain,
             lifecycle=lifecycle,
+            access_modes=access_modes,
             abstract_data_product_count=abstract_data_product_count,
             technical_assets_count=technical_assets_count,
             data_product_name=data_product_name,

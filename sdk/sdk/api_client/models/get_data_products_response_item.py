@@ -8,8 +8,10 @@ from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
 from ..models.abstract_data_product_status import AbstractDataProductStatus
+from ..models.data_product_visibility import DataProductVisibility
 
 if TYPE_CHECKING:
+    from ..models.data_product_environment import DataProductEnvironment
     from ..models.data_product_life_cycle import DataProductLifeCycle
     from ..models.data_product_type import DataProductType
     from ..models.domain import Domain
@@ -34,6 +36,8 @@ class GetDataProductsResponseItem:
         domain (Domain):
         type_ (DataProductType):
         lifecycle (DataProductLifeCycle | None):
+        visibility (DataProductVisibility):
+        environments (list[DataProductEnvironment]):
         user_count (int):
         input_port_count (int):
         technical_asset_count (int):
@@ -50,13 +54,17 @@ class GetDataProductsResponseItem:
     domain: Domain
     type_: DataProductType
     lifecycle: DataProductLifeCycle | None
+    visibility: DataProductVisibility
+    environments: list[DataProductEnvironment]
     user_count: int
     input_port_count: int
     technical_asset_count: int
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        from ..models.data_product_life_cycle import DataProductLifeCycle
+        from ..models.data_product_life_cycle import (
+            DataProductLifeCycle,  # noqa: PLC0415
+        )
 
         id = str(self.id)
 
@@ -88,6 +96,13 @@ class GetDataProductsResponseItem:
         else:
             lifecycle = self.lifecycle
 
+        visibility = self.visibility.value
+
+        environments = []
+        for environments_item_data in self.environments:
+            environments_item = environments_item_data.to_dict()
+            environments.append(environments_item)
+
         user_count = self.user_count
 
         input_port_count = self.input_port_count
@@ -109,6 +124,8 @@ class GetDataProductsResponseItem:
                 "domain": domain,
                 "type": type_,
                 "lifecycle": lifecycle,
+                "visibility": visibility,
+                "environments": environments,
                 "user_count": user_count,
                 "input_port_count": input_port_count,
                 "technical_asset_count": technical_asset_count,
@@ -119,10 +136,15 @@ class GetDataProductsResponseItem:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.data_product_life_cycle import DataProductLifeCycle
-        from ..models.data_product_type import DataProductType
-        from ..models.domain import Domain
-        from ..models.tag import Tag
+        from ..models.data_product_environment import (
+            DataProductEnvironment,  # noqa: PLC0415
+        )
+        from ..models.data_product_life_cycle import (
+            DataProductLifeCycle,  # noqa: PLC0415
+        )
+        from ..models.data_product_type import DataProductType  # noqa: PLC0415
+        from ..models.domain import Domain  # noqa: PLC0415
+        from ..models.tag import Tag  # noqa: PLC0415
 
         d = dict(src_dict)
         id = UUID(d.pop("id"))
@@ -170,6 +192,15 @@ class GetDataProductsResponseItem:
 
         lifecycle = _parse_lifecycle(d.pop("lifecycle"))
 
+        visibility = DataProductVisibility(d.pop("visibility"))
+
+        environments = []
+        _environments = d.pop("environments")
+        for environments_item_data in _environments:
+            environments_item = DataProductEnvironment.from_dict(environments_item_data)
+
+            environments.append(environments_item)
+
         user_count = d.pop("user_count")
 
         input_port_count = d.pop("input_port_count")
@@ -188,6 +219,8 @@ class GetDataProductsResponseItem:
             domain=domain,
             type_=type_,
             lifecycle=lifecycle,
+            visibility=visibility,
+            environments=environments,
             user_count=user_count,
             input_port_count=input_port_count,
             technical_asset_count=technical_asset_count,

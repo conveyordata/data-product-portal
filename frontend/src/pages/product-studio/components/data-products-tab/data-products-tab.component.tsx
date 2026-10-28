@@ -1,18 +1,20 @@
-import { ToolOutlined } from '@ant-design/icons';
 import { usePostHog } from '@posthog/react';
-import { Button, Empty, Flex, Input, Radio, type RadioChangeEvent, Table } from 'antd';
-import Paragraph from 'antd/es/typography/Paragraph';
-import { parseAsBoolean, parseAsString, useQueryState } from 'nuqs';
+import { Button, Flex, Input, Radio, type RadioChangeEvent } from 'antd';
+import { parseAsString, parseAsStringEnum, useQueryState } from 'nuqs';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router';
+import { hasFailed } from '@/components/empty-state/empty-state.component.tsx';
 import { RoleFilter } from '@/components/filters/role-filter.component.tsx';
+import { DataProductOutlined } from '@/components/icons';
+import { ListTable } from '@/components/list-table/list-table.component.tsx';
 import { PosthogEvents } from '@/constants/posthog.constants.ts';
 import { getDataProductTableColumns } from '@/pages/product-studio/components/data-products-tab/data-products-table-columns.tsx';
 import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
 import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
 import {
+    AssignmentFilter,
     type GetDataProductsResponseItem,
     useGetDataProductsQuery,
 } from '@/store/api/services/generated/dataProductsApi.ts';
@@ -44,14 +46,17 @@ export function DataProductsTab() {
     const currentUser = useSelector(selectCurrentUser);
 
     const [searchTerm, setSearchTerm] = useQueryState('dp-search', parseAsString.withDefault(''));
-    const [showAllProducts, setShowAllProducts] = useQueryState('dp-showAll', parseAsBoolean.withDefault(false));
+    const [assignmentFilter, setAssignmentFilter] = useQueryState(
+        'dp-assignmentFilter',
+        parseAsStringEnum<AssignmentFilter>(Object.values(AssignmentFilter)).withDefault(AssignmentFilter.OnlyAssigned),
+    );
     const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
     const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
 
-    const { data: { data_products: dataProducts = [] } = {}, isFetching } = useGetDataProductsQuery(
-        showAllProducts ? undefined : (currentUser?.id ?? ''),
-        { skip: !currentUser },
-    );
+    const dataProductsQuery = useGetDataProductsQuery(assignmentFilter, {
+        skip: !currentUser,
+    });
+    const { data: { data_products: dataProducts = [] } = {} } = dataProductsQuery;
 
     const { data: access } = useCheckAccessQuery({ action: AuthorizationAction.GLOBAL__CREATE_DATAPRODUCT });
     const canCreateDataProduct = access?.allowed ?? false;
@@ -84,17 +89,26 @@ export function DataProductsTab() {
     };
 
     const handleShowAllChange = (e: RadioChangeEvent) => {
-        setShowAllProducts(e.target.value || null);
+        setAssignmentFilter(e.target.value);
         // Reset role filter when switching between views
         setSelectedProductIds([]);
         setSelectedRoles([]);
     };
+
+    const hasOtherFilters = selectedProductIds.length > 0;
+    const isFiltered = Boolean(searchTerm) || hasOtherFilters;
+    const clearFilters = () => {
+        setSearchTerm(null);
+        setSelectedProductIds([]);
+        setSelectedRoles([]);
+    };
+
     const createButton = (
         <Link
             to={ApplicationPaths.DataProductNew}
             onClick={() => posthog.capture(PosthogEvents.CREATE_DATA_PRODUCT_STARTED)}
         >
-            <Button type={'primary'} disabled={!canCreateDataProduct}>
+            <Button type="primary" disabled={!canCreateDataProduct}>
                 {t('Create Data Product')}
             </Button>
         </Link>
@@ -112,29 +126,40 @@ export function DataProductsTab() {
                         allowClear
                         style={{ maxWidth: 400 }}
                     />
-                    <Radio.Group value={showAllProducts} onChange={handleShowAllChange} optionType="button">
-                        <Radio.Button value={false}>{t('My Data Products')}</Radio.Button>
-                        <Radio.Button value={true}>{t('All Data Products')}</Radio.Button>
+                    <Radio.Group value={assignmentFilter} onChange={handleShowAllChange} optionType="button">
+                        <Radio.Button value={AssignmentFilter.OnlyAssigned}>{t('My Data Products')}</Radio.Button>
+                        <Radio.Button value={AssignmentFilter.All}>{t('All Data Products')}</Radio.Button>
                     </Radio.Group>
-                    {!showAllProducts && (
+                    {assignmentFilter === AssignmentFilter.OnlyAssigned && (
                         <RoleFilter
-                            mode={'data_products'}
+                            mode="data_products"
                             selectedRoles={selectedRoles}
                             onRoleChange={handleRoleChange}
                         />
                     )}
                 </Flex>
-                {filteredDataProducts.length > 0 && createButton}
+                {(filteredDataProducts.length > 0 || isFiltered || hasFailed(dataProductsQuery)) && createButton}
             </Flex>
 
             {/* Table */}
-            <Table<GetDataProductsResponseItem>
+            <ListTable<GetDataProductsResponseItem>
+                query={dataProductsQuery}
+                dataSource={filteredDataProducts}
+                columns={columns}
+                subject={t('Data Products')}
+                emptyState={{
+                    icon: <DataProductOutlined />,
+                    title: t('No Data Products yet'),
+                    description: t(
+                        'Create a Data Product to start publishing data your organisation can find and use.',
+                    ),
+                    action: createButton,
+                }}
+                filter={{ hasOtherFilters, searchTerm, onClear: clearFilters }}
                 onRow={(record) => ({
                     onClick: () => navigateToDataProduct(record.id),
                 })}
                 rowClassName={styles.row}
-                columns={columns}
-                dataSource={filteredDataProducts}
                 pagination={{
                     size: 'small',
                     showTotal: (total, range) =>
@@ -145,30 +170,8 @@ export function DataProductsTab() {
                         }),
                 }}
                 rowKey={(record) => record.id}
-                loading={isFetching}
                 rowHoverable
-                size={'small'}
-                locale={{
-                    emptyText: (
-                        <Empty
-                            styles={{ image: { height: 50 } }}
-                            image={<ToolOutlined style={{ fontSize: 50 }} />}
-                            description={
-                                <>
-                                    <Paragraph style={{ marginTop: 0, opacity: 0.45 }}>
-                                        {t('Ready to build your first Data Product?')}
-                                    </Paragraph>
-                                    <Paragraph style={{ opacity: 0.45 }}>
-                                        {t(
-                                            "It looks like you don't have any Data Products yet. Create one to start managing your data assets.",
-                                        )}
-                                    </Paragraph>
-                                    {createButton}
-                                </>
-                            }
-                        />
-                    ),
-                }}
+                size="small"
             />
         </Flex>
     );

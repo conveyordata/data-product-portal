@@ -6,9 +6,136 @@ sidebar_position: 200
 
 ## Unreleased
 
+### breaking changes
+
+- **[Helm]**: The blue and green themes and the `theme_configuration` value were removed. The portal always uses the Dataminded theme.
+- **[API/UI]**: Domain environments are no longer supported. Environments are now declared on each Data Product; the upgrade transfers existing Domain selections to their Data Products, using global defaults when a Domain had no selection. Environments already declared on Data Products are unchanged, and their selections cannot be removed.
+- **[API]**: The query statistics `PATCH` and `DELETE` endpoints only accept `date` as a `YYYY-MM-DD` string and `query_count` as a JSON integer between 0 and 2147483647. Other values, including timestamps, datetimes, booleans and numeric strings, are rejected with a 422; malformed dates used to return a 400. The query statistics `GET` endpoint rejects a `day_range` above 3650 with a 422.
+- **[API]**: Creating a Domain requires a `namespace`. It must be unique among Domains and cannot be changed afterwards. Existing Domains get a namespace derived from their name; a numeric suffix is added when two names collide, and a Domain whose name has no usable characters gets its id as namespace.
+- **[API]**: Deleting a Domain that has finalizers returns `202` and marks it as `deleting` until every finalizer is removed. A `deleting` Domain cannot be updated or assigned to Data Products or Explorations; the database enforces the assignment rule too. If a write made directly in the database still leaves the Domain in use when its last finalizer is removed, the deletion is cancelled and the Domain is active again.
+- **[API]**: Namespaces made only of dots (`.`, `..`) are rejected for every resource, so they can never resolve to a parent path when used to name infrastructure. Existing namespaces are not changed.
+- **[SDK]**: `AbstractEventHandler` has a new abstract method `on_domain_event`. Handlers that subclass it directly, instead of `ReconcileEventHandler`, must implement it.
+- **[SDK]**: `OutputPortQueryStatsUpdate.date` and `OutputPortQueryStatsDelete.date` are now `datetime.date` instead of `str` in the Python SDK, and `time.Time` instead of `string` in the CLI's `pkg/api`. Pass a `datetime.date`, not a `datetime.datetime`: the SDK sends the time part along and the request is rejected.
+
 ### features
 
+- **[Provisioner]**: Domains can be provisioned. The portal sends a `domain.event` webhook when a Domain is created, updated or deleted, Domains support finalizers (`POST /api/v2/configuration/domains/{id}/finalizers` and `DELETE /api/v2/configuration/domains/{id}/finalizers/{finalizer}`), and the SDK has a `ResourceType.DOMAIN` reconciler.
+- **[API]**: Every response that embeds a Domain, such as Data Products, Explorations and Output Ports, now includes its `namespace`.
+- **[Plugins]**: Templates and `validate_configuration` can use the Domain's namespace, e.g. `{domain.namespace}`.
+- **[UI]**: Empty lists and tables now say why they are empty in a consistent way.
+
+### bugfixes
+
+- **[SDK]**: `ReconcileEventHandler` now returns `{"status": "queued"}` or `{"status": "ignored", ...}` for every event. Webhook endpoints typed to return a dict, like the example provisioner's, no longer answer 500, which made the portal log every webhook as failed.
+- **[General]**: Creating a Data Product, Exploration or Domain whose name has no letters or digits (for example `!!!`) no longer fails with a generic error. Data Products and Domains ask for a namespace instead, and Explorations show a validation error on the name.
+- **[API]**: A query statistics `PATCH` that contains the same day and consumer more than once no longer fails with a 500; the last entry is used.
+
+### bugfixes
+
+- **[UI]**: Output Port tables now show the same quality status as the Output Port detail page.
+
+## 0.8.0
+
+### breaking changes
+
+- **[API]**: A technical asset's `configuration` is now published as a generic object rather than a typed union, so the schema is identical regardless of which plugins are installed. Regenerated SDK, CLI and frontend clients will see the type change, and `AccessGranularity` no longer appears in generated code.
+- **[API]**: A technical asset's `configuration` object identifies its plugin type with `name` instead of `configuration_type`. Existing clients sending or reading `configuration_type` need to switch to `name`.
+- **[API]**: Output Port create and update requests take `access_type_id` instead of `access_type`. Responses now return `access_type` as an object (`id`, `name`, `access_function`) instead of the former enum string. Look up Access Type ids with `GET /api/v2/configuration/output_port_access_types`.
+- **[SDK]**: Typed technical asset configurations such as `PostgreSQLTechnicalAssetConfiguration`, and `AccessGranularity`, moved from `sdk.api_client.models` to `sdk.plugins`. Provisioners need to update their imports.
+- **[API]**: `POST /api/v2/plugins/render_technical_asset_access_path` now requires `data_product_id`, `namespace` and `technical_mapping`, and the caller needs permission to create technical assets on that data product.
+- **[Database]**: Installations older than 0.7.3 must upgrade to 0.7.3 before upgrading further. The migrations that moved the Snowflake, Databricks, S3, Glue, Redshift and PostgreSQL technical asset tables out of core had their old data-migration logic removed.
+
+### features
+
+- **[General]**: Added support for Hidden Data Products, they are only visible to people with direct access to them.
+  This allows you to use Data Product Portal to also manage sensitive data products that should not be visible to everyone in the organization.
+- **[General]**: Added Output Port Access Types. Admins define their own Access Types in Settings and map each one to an Access Function (Auto-approve, Approval required or Invite only). Existing Output Ports are migrated to the preconfigured Unrestricted, Restricted and Private Access Types.
+- **[API]**: Added CRUD operations for new identities Groups and Machine Users alongside group membership management endpoints. Every identity now offers also batch endpoints.
+- **[Plugins]**: Plugins can mark their technical asset type as not shareable with `shareable=False` in their platform metadata. Technical assets of that type can't be linked to an Output Port, and producers see this in the UI.
+- **[Plugins]**: Plugins get the technical asset, its data product and their domain. `validate_configuration` receives them as `context`, and `render_template` as `plugin_context`, so result string and technical info templates can use `{technical_asset.namespace}`, `{data_product.namespace}` and `{domain.name}`.
+- **[Plugins]**: New AWS Parameter Store plugin (`ParameterStoreTechnicalAssetConfiguration`) for secrets. Its technical assets are not shareable. Parameters are named `/<environment>/<data product namespace>/<parameter name>`, and names AWS doesn't accept are refused.
+
+### bugfixes
+
+- **[User Deletion]**: A bug caused user deletion to fail if the user was involved in an audit event.
+- **[Helm]**: Fix translation override file path
+- **[Database]**: `python -m app.db_tool migrate` now stops when technical assets exist whose plugin is not installed, instead of the portal failing every request that loads them. Reinstall the plugin, or delete those technical assets.
+- **[Auth]**: Users' first name is now taken from the OIDC `given_name` claim instead of `name`, which showed the last name twice (for example "Jane Doe Doe"). If the provider sends no `given_name`, `name` is used as before. Existing users are corrected on their next login.
+- **[Auth]**: A `DEFAULT_USERNAME` without a dot before the `@` no longer fails when OIDC is disabled.
+- **[General]**: Fix translation file by adding more nested translations for Data Products, Output ports and Technical assets.
+- **[General]**: Output Port owners can renew access for consumers, following the same rules as the consumer-side renew (revoked, expired, denied, cancelled, expiring soon or declined renewal), while keeping the access history. Icons were removed from the access action buttons.
+
+
+## 0.7.4
+
+### bugfixes
+
+- **[MCP]**: Fix MCP tool calls
+
+## 0.7.3
+
+### bugfixes
+
+- **[Device Flow]**: Issue in device flow caused failure during login
+
+## 0.7.2
+
+### bugfixes
+
+- **[Explorations]**: Fixed a bug where requesting an output port as an exploration input port could fail with a 500 error due to a misconfigured access duration.
+- **[Explorer]**: Fixed a bug where explorer returned empty results if hidden products were returned.
+
+## 0.7.1
+
+### breaking changes
+
+- **[API]**: Access durations configuration switched URL path from /v2/access_durations to /v2/configuration/access_durations. Please update your API calls accordingly.
+- **[API]**: Remove deprecated `/v2/data_products/{id}/link_input_ports`
+- **[API]**: Modified the body of the following routes to enable selection of access modes:
+  - Create data product: `/v2/data_products`
+  - Request input ports for data product: `/v2/data_products/{id}/input_ports`
+  - Create exploration: `/v2/explorations`
+  - Request input ports for exploration: `/v2/explorations/{id}/input_ports`
+- **[API]**: Changed the way to filter data product and output ports to only show those the current user is assigned to. The new filter is called `assignmentFilter` and can be set to either `only_assigned` or `all`. This makes both consistent
+- **[Webhook v1]**: Removed webhook v1 support, use the [provisioner SDK](./developer-guide/provisioner.md) to handle webhook events instead.
+
+### features
+
+- **[General]**: Added support for access modes on Technical Assets, Output Ports and Input Ports
+- **[General]**: Made improvements to application shut down, shut down now wait for all backgrounds tacks to finish and ensure all v2 webhook events are sent before the application is shut down.
+- **[General]**: Performance improvements for all output port endpoints, since we now cache the Embedding models used in output port search
+- **[General]**: We now allow changing DB pool settings, this allows you to tweak this for your specific environment. We set the default to a pool of 20 and a max overflow of 20, which should be sufficient for most installations.
+- **[Data model]**: Allow uploading the data model of an output port through the UI
+- **[Data Product Roles]**: Data product roles can now also give rights to all output ports under a data product, instead of only the data product itself. By default a Data Product owner, can do all actions on all Output Ports under that Data Product.
+- **[General]**: Introduced settings that allow domains to specify their own set of enabled environments or use the global default.
+
+### bugfixes
+
+- **[Provisioner]**: Access to the finalizer endpoint of exploration and data product is now only possible as an admin. The provisioner should always run with admin credentials.
+
+## 0.7.0
+
+### breaking changes
+
+- **[Infrastructure Lambda]**: With the introduction of the new provisioner and reconciler the infrastructure lambda is no longer supported. The `INFRASTRUCTURE_LAMBDA_ARN` setting is no longer used and no lambda will be triggered on certain calls.
+
+### features
+
+- **[Input port]**: Input ports now contain a decision note, which can be used by the reviewer of an access request to show why they denied or approved access
+- **[Product studio]**: A My Requests page has been added to Product Studio, which shows all access requests you have made and their status. This allows you to track your access requests in one place.
+- **[General]**: [Timebound access](./concepts/input-ports.md) has been added to the product studio for both data products and explorations.
+
+### bugfixes
+
+- **[Temporary Admin]**: Fixed a bug where temporary admin rights were expired directly after it was set due to timezone differences in the backend.
+
+## 0.6.1
+
+### features
+
+- **[MCP]**: Extended the MCP server with tools to fetch AWS credentials and use those credentials to query Glue and Athena. This allows the MCP server to fully execute "Talk to your data" requests if configured correctly.
 - **[SDK]**: Added support for [Infra provisioners](./developer-guide/provisioner) to the SDK. This allows for a robust way to provision infra based on changes in Portal.
+- **[UI]**: Allow deletion of an Exploration you own
 
 ## 0.6.0
 

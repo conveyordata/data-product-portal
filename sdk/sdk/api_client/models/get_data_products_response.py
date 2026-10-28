@@ -41,7 +41,9 @@ class GetDataProductsResponse:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.get_data_products_response_item import GetDataProductsResponseItem
+        from ..models.get_data_products_response_item import (
+            GetDataProductsResponseItem,  # noqa: PLC0415
+        )
 
         d = dict(src_dict)
         data_products = []

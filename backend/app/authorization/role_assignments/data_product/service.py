@@ -1,11 +1,11 @@
 import copy
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from typing import Optional, Sequence
 from uuid import UUID
 
 from fastapi import HTTPException, status
-from sqlalchemy import asc, func, select
-from sqlalchemy.orm import Session
+from sqlalchemy import asc, func, or_, select
+from sqlalchemy.orm import Session, contains_eager
 
 from app.authorization.role_assignments.data_product.model import (
     DataProductRoleAssignment as DataProductRoleAssignmentModel,
@@ -21,9 +21,13 @@ from app.core.authz import Action
 from app.data_products.model import ensure_data_product_exists
 from app.data_products.status import AbstractDataProductStatus
 from app.database.database import ensure_exists
-from app.pending_actions.schema import DataProductRoleAssignmentPendingActionOld
+from app.groups.model import GroupMembership
+from app.groups.service import GroupService
 from app.users.model import User as UserModel
 from app.users.schema import User
+from app.users.schema_response import (
+    DataProductRoleAssignmentRequest,
+)
 
 
 class RoleAssignmentService:
@@ -37,26 +41,44 @@ class RoleAssignmentService:
         self,
         *,
         data_product_id: Optional[UUID] = None,
-        user_id: Optional[UUID] = None,
+        identity_id: Optional[UUID] = None,
         role_id: Optional[UUID] = None,
         decision: Optional[DecisionStatus] = None,
+        users_only: bool = False,
     ) -> Sequence[DataProductRoleAssignment]:
-        query = select(DataProductRoleAssignmentModel)
+        """
+        Lists assignments for a given data product, identity, or role.
+        Joins to exclude assignments whose data product is hidden from the current user,
+        so the Pydantic validation doesn't fail down the line.
+        Uses `contains_eager` to avoid a 2nd query caused by lazy loading that will be executed anyway.
+        """
+        query = (
+            select(DataProductRoleAssignmentModel)
+            .join(DataProductRoleAssignmentModel.data_product)
+            .options(contains_eager(DataProductRoleAssignmentModel.data_product))
+        )
+
         if data_product_id is not None:
             query = query.where(
                 DataProductRoleAssignmentModel.data_product_id == data_product_id
             )
-        if user_id is not None:
-            query = query.where(DataProductRoleAssignmentModel.user_id == user_id)
+        if identity_id is not None:
+            query = query.where(
+                DataProductRoleAssignmentModel.identity_id == identity_id
+            )
         if role_id is not None:
             query = query.where(DataProductRoleAssignmentModel.role_id == role_id)
         if decision is not None:
             query = query.where(DataProductRoleAssignmentModel.decision == decision)
+        if users_only:
+            query = query.join(
+                UserModel, UserModel.id == DataProductRoleAssignmentModel.identity_id
+            )
 
         return self.db.scalars(query).all()
 
     def create_assignment(
-        self, data_product_id: UUID, role_id: UUID, user_id: UUID, *, actor: User
+        self, data_product_id: UUID, role_id: UUID, identity_id: UUID, *, actor: User
     ) -> DataProductRoleAssignment:
         self.ensure_is_data_product_scope(role_id)
         dp = ensure_data_product_exists(data_product_id, self.db)
@@ -67,7 +89,7 @@ class RoleAssignmentService:
             )
         existing_assignment = self.db.scalar(
             select(DataProductRoleAssignmentModel).where(
-                DataProductRoleAssignmentModel.user_id == user_id,
+                DataProductRoleAssignmentModel.identity_id == identity_id,
                 DataProductRoleAssignmentModel.data_product_id == data_product_id,
             )
         )
@@ -84,14 +106,14 @@ class RoleAssignmentService:
                 )
 
         role_assignment = DataProductRoleAssignmentModel(
-            user_id=user_id,
+            identity_id=identity_id,
             role_id=role_id,
             data_product_id=data_product_id,
             requested_on=datetime.now(),
             requested_by_id=actor.id,
         )
         self.db.add(role_assignment)
-        self.db.commit()
+        self.db.flush()
         return role_assignment
 
     def delete_assignment(self, id_: UUID) -> DataProductRoleAssignment:
@@ -100,7 +122,7 @@ class RoleAssignmentService:
 
         result = copy.deepcopy(assignment)
         self.db.delete(assignment)
-        self.db.commit()
+        self.db.flush()
         return result
 
     def update_assignment(
@@ -117,8 +139,22 @@ class RoleAssignmentService:
             assignment.decided_on = datetime.now()
             assignment.decided_by_id = actor.id
 
-        self.db.commit()
+        self.db.flush()
+        self.db.refresh(assignment)
         return assignment
+
+    def ensure_can_decide(self, id_: UUID, decision: DecisionStatus) -> None:
+        original = self.get_assignment(id_)
+        if original.decision not in (DecisionStatus.PENDING, decision):
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="This assignment was already decided",
+            )
+        if decision is DecisionStatus.APPROVED and original.role_id is None:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Cannot approve a request that does not have a role assignment",
+            )
 
     def ensure_is_data_product_scope(self, role_id: UUID) -> None:
         role = self.db.get(Role, role_id)
@@ -146,20 +182,56 @@ class RoleAssignmentService:
         query = (
             select(func.count())
             .select_from(DataProductRoleAssignmentModel)
-            .where(DataProductRoleAssignmentModel.data_product_id == data_product_id)
+            .where(
+                DataProductRoleAssignmentModel.data_product_id == data_product_id,
+                DataProductRoleAssignmentModel.decision == DecisionStatus.APPROVED,
+            )
             .join(Role)
             .where(Role.prototype == Prototype.OWNER)
         )
         return self.db.scalar(query)
 
+    def get_user_requests(
+        self,
+        user: User,
+        hide_old_inactive: bool,
+    ) -> Sequence[DataProductRoleAssignmentRequest]:
+        query = (
+            select(DataProductRoleAssignmentModel)
+            .filter(
+                DataProductRoleAssignmentModel.identity_id == user.id,
+            )
+            .order_by(asc(DataProductRoleAssignmentModel.requested_on))
+        )
+        if hide_old_inactive:
+            thirty_days_ago = datetime.now(timezone.utc) - timedelta(days=30)
+            query = query.where(
+                or_(
+                    DataProductRoleAssignmentModel.decision == DecisionStatus.PENDING,
+                    DataProductRoleAssignmentModel.requested_on >= thirty_days_ago,
+                )
+            )
+        actions = self.db.scalars(query).unique().all()
+        return [
+            DataProductRoleAssignmentRequest.model_validate(action)
+            for action in actions
+        ]
+
     def get_pending_data_product_role_assignments(
         self, user: User
-    ) -> Sequence[DataProductRoleAssignmentPendingActionOld]:
+    ) -> Sequence[DataProductRoleAssignmentRequest]:
+        user_group_ids = GroupService(self.db).get_groups_ids_identity_is_member_of(
+            user.id
+        )
+
         data_product_ids = (
             select(DataProductRoleAssignmentModel.data_product_id)
-            .join(DataProductRoleAssignmentModel.role)
+            .join(Role, DataProductRoleAssignmentModel.role_id == Role.id)
             .where(
-                DataProductRoleAssignmentModel.user_id == user.id,
+                or_(
+                    DataProductRoleAssignmentModel.identity_id == user.id,
+                    DataProductRoleAssignmentModel.identity_id.in_(user_group_ids),
+                ),
                 DataProductRoleAssignmentModel.decision == DecisionStatus.APPROVED,
                 Role.permissions.contains(
                     [Action.DATA_PRODUCT__APPROVE_USER_REQUEST.value]
@@ -182,24 +254,57 @@ class RoleAssignmentService:
             .unique()
             .all()
         )
-        return actions
+        return [
+            DataProductRoleAssignmentRequest.model_validate(action)
+            for action in actions
+        ]
 
     def users_with_authz_action(
         self, data_product_id: UUID, action: Action
     ) -> Sequence[User]:
+        direct_user_ids = (
+            select(UserModel.id)
+            .join(
+                DataProductRoleAssignmentModel,
+                DataProductRoleAssignmentModel.identity_id == UserModel.id,
+            )
+            .join(
+                Role,
+                DataProductRoleAssignmentModel.role_id == Role.id,
+            )
+            .where(
+                DataProductRoleAssignmentModel.data_product_id == data_product_id,
+                DataProductRoleAssignmentModel.decision == DecisionStatus.APPROVED,
+                Role.permissions.contains([action]),
+            )
+        )
+
+        group_member_user_ids = (
+            select(UserModel.id)
+            .join(
+                GroupMembership,
+                GroupMembership.member_identity_id == UserModel.id,
+            )
+            .join(
+                DataProductRoleAssignmentModel,
+                DataProductRoleAssignmentModel.identity_id == GroupMembership.group_id,
+            )
+            .join(
+                Role,
+                DataProductRoleAssignmentModel.role_id == Role.id,
+            )
+            .where(
+                DataProductRoleAssignmentModel.data_product_id == data_product_id,
+                DataProductRoleAssignmentModel.decision == DecisionStatus.APPROVED,
+                Role.permissions.contains([action]),
+            )
+        )
+
+        authorized_user_ids = direct_user_ids.union(group_member_user_ids)
+
         return (
             self.db.scalars(
-                select(UserModel)
-                .join(
-                    DataProductRoleAssignmentModel,
-                    DataProductRoleAssignmentModel.user_id == UserModel.id,
-                )
-                .join(Role, DataProductRoleAssignmentModel.role_id == Role.id)
-                .where(
-                    DataProductRoleAssignmentModel.data_product_id == data_product_id,
-                    DataProductRoleAssignmentModel.decision == DecisionStatus.APPROVED,
-                    Role.permissions.contains([action]),
-                )
+                select(UserModel).where(UserModel.id.in_(authorized_user_ids))
             )
             .unique()
             .all()

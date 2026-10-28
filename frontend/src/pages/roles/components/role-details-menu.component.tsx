@@ -19,16 +19,16 @@ export function RoleDetailsMenu({ role }: Props) {
 
     return (
         <>
-            <Flex vertical align={'flex-start'}>
-                <Button type={'text'} icon={<EditOutlined />} onClick={() => setModifyModalOpen(true)}>
+            <Flex vertical align="flex-start">
+                <Button type="text" icon={<EditOutlined />} onClick={() => setModifyModalOpen(true)}>
                     {t('Modify')}
                 </Button>
                 <Tooltip
                     title={disabled ? t('This role is mandatory and cannot be deleted.') : undefined}
-                    placement={'bottom'}
+                    placement="bottom"
                 >
                     <Button
-                        type={'text'}
+                        type="text"
                         icon={<DeleteOutlined />}
                         onClick={() => setDeleteModalOpen(true)}
                         disabled={disabled}

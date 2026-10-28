@@ -45,14 +45,14 @@ export function BaseNode<T extends BaseNodeProps>({
         <>
             <Flex className={styles.nodeContainer} onClick={onClick}>
                 <DefaultHandle
-                    id={'left_t'}
-                    type={'target'}
+                    id="left_t"
+                    type="target"
                     position={centeredHandles ? Position.Top : Position.Left}
                     isConnectable={false}
                 />
                 <DefaultHandle
-                    id={'left_s'}
-                    type={'source'}
+                    id="left_s"
+                    type="source"
                     position={centeredHandles ? Position.Top : Position.Left}
                     isConnectable={false}
                 />
@@ -61,20 +61,20 @@ export function BaseNode<T extends BaseNodeProps>({
                         iconComponent={icon}
                         hasRoundBorder={borderType === 'round'}
                         hasSquareBorder={borderType === 'square'}
-                        size={'large'}
+                        size="large"
                         inverted={isMainNode}
                         color={isActive ? 'primary' : 'light'}
                     />
                 </Flex>
                 <DefaultHandle
-                    id={'right_t'}
-                    type={'target'}
+                    id="right_t"
+                    type="target"
                     position={centeredHandles ? Position.Top : Position.Right}
                     isConnectable={false}
                 />
                 <DefaultHandle
-                    id={'right_s'}
-                    type={'source'}
+                    id="right_s"
+                    type="source"
                     position={centeredHandles ? Position.Top : Position.Right}
                     isConnectable={false}
                 />
