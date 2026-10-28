@@ -9,7 +9,6 @@ import { useTablePagination } from '@/hooks/use-table-pagination';
 import { getDataProductUsersTableColumns } from '@/pages/data-product/components/data-product-tabs/team-tab/components/team-table/team-table-columns';
 import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
 import {
-    type DataProductRoleAssignmentResponse,
     useDeleteDataProductRoleAssignmentMutation,
     useModifyDataProductRoleAssignmentMutation,
 } from '@/store/api/services/generated/authorizationRoleAssignmentsApi.ts';
@@ -17,12 +16,13 @@ import type { Role } from '@/store/api/services/generated/authorizationRolesApi.
 import { useGetDataProductQuery } from '@/store/api/services/generated/dataProductsApi.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { dispatchMessage } from '@/utils/feedback.ts';
+import type { UserDataProductRoleAssignment } from '@/utils/identity.ts';
 import { usePendingActionHandlers } from '@/utils/pending-request.helper';
 import styles from './team-table.module.scss';
 
 type Props = {
     dataProductId: string;
-    dataProductUsers: DataProductRoleAssignmentResponse[];
+    dataProductUsers: UserDataProductRoleAssignment[];
     roleAssignmentsQuery: EmptyStateQuery;
     filter?: EmptyStateFilter;
 };
@@ -65,7 +65,7 @@ export function TeamTable({ dataProductId, dataProductUsers, roleAssignmentsQuer
         initialPagination: TABLE_SUBSECTION_PAGINATION,
     });
 
-    const onChange: TableProps<DataProductRoleAssignmentResponse>['onChange'] = (pagination) => {
+    const onChange: TableProps<UserDataProductRoleAssignment>['onChange'] = (pagination) => {
         handlePaginationChange(pagination);
     };
 
@@ -118,7 +118,7 @@ export function TeamTable({ dataProductId, dataProductUsers, roleAssignmentsQuer
         [dataProduct, handleDenyAccessToDataProduct],
     );
 
-    const columns: TableColumnsType<DataProductRoleAssignmentResponse> = useMemo(() => {
+    const columns: TableColumnsType<UserDataProductRoleAssignment> = useMemo(() => {
         return getDataProductUsersTableColumns({
             t,
             dataProductUsers: dataProductUsers,
@@ -150,7 +150,7 @@ export function TeamTable({ dataProductId, dataProductUsers, roleAssignmentsQuer
 
     return (
         <Flex className={styles.teamListContainer}>
-            <ListTable<DataProductRoleAssignmentResponse>
+            <ListTable<UserDataProductRoleAssignment>
                 query={roleAssignmentsQuery}
                 dataSource={dataProductUsers}
                 columns={columns}
@@ -164,7 +164,7 @@ export function TeamTable({ dataProductId, dataProductUsers, roleAssignmentsQuer
                 onChange={onChange}
                 filter={filter}
                 className={styles.teamListTable}
-                rowKey={({ user }) => user.id}
+                rowKey={({ id }) => id}
                 pagination={{
                     ...pagination,
                     placement: ['topEnd'],

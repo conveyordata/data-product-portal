@@ -381,6 +381,39 @@ export type Exploration = {
   status: AbstractDataProductStatus;
   finalizers: string[];
 };
+export type GroupIdentity = {
+  id: string;
+  external_id: string;
+  display_name: string;
+  type: "group";
+};
+export type MachineUserIdentity = {
+  id: string;
+  external_id: string;
+  display_name: string;
+  type: "machine_user";
+};
+export type UserIdentity = {
+  id: string;
+  email: string;
+  external_id: string;
+  first_name: string;
+  last_name: string;
+  has_seen_tour: boolean;
+  can_become_admin: boolean;
+  admin_expiry?: string | null;
+  type: "user";
+};
+export type Identity =
+  | ({
+      type: "group";
+    } & GroupIdentity)
+  | ({
+      type: "machine_user";
+    } & MachineUserIdentity)
+  | ({
+      type: "user";
+    } & UserIdentity);
 export type GetEventHistoryResponseItem = {
   id: string;
   name: string;
@@ -399,6 +432,7 @@ export type GetEventHistoryResponseItem = {
   output_port?: OutputPort | null;
   technical_asset?: TechnicalAsset | null;
   exploration?: Exploration | null;
+  identity?: Identity | null;
 };
 export type GetEventHistoryResponse = {
   events: GetEventHistoryResponseItem[];
@@ -477,6 +511,7 @@ export enum EventEntityType {
   OutputPort = "output_port",
   TechnicalAsset = "technical_asset",
   User = "user",
+  Identity = "identity",
   Exploration = "exploration",
 }
 export enum NodeType {

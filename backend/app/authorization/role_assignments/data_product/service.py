@@ -43,7 +43,7 @@ class RoleAssignmentService:
         data_product_id: Optional[UUID] = None,
         identity_id: Optional[UUID] = None,
         role_id: Optional[UUID] = None,
-        decision: Optional[DecisionStatus] = None
+        decision: Optional[DecisionStatus] = None,
     ) -> Sequence[DataProductRoleAssignment]:
         """
         Lists assignments for a given data product, identity, or role.

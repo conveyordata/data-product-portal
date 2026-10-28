@@ -8049,15 +8049,15 @@ func (c *Client) sendListDataProductRoleAssignments(ctx context.Context, params 
 		}
 	}
 	{
-		// Encode "user_id" parameter.
+		// Encode "identity_id" parameter.
 		cfg := uri.QueryParameterEncodingConfig{
-			Name:    "user_id",
+			Name:    "identity_id",
 			Style:   uri.QueryStyleForm,
 			Explode: true,
 		}
 
 		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
-			if val, ok := params.UserID.Get(); ok {
+			if val, ok := params.IdentityID.Get(); ok {
 				return e.EncodeValue(conv.UUIDToString(val))
 			}
 			return nil
@@ -8146,15 +8146,15 @@ func (c *Client) sendListGlobalRoleAssignments(ctx context.Context, params ListG
 
 	q := uri.NewQueryEncoder()
 	{
-		// Encode "user_id" parameter.
+		// Encode "identity_id" parameter.
 		cfg := uri.QueryParameterEncodingConfig{
-			Name:    "user_id",
+			Name:    "identity_id",
 			Style:   uri.QueryStyleForm,
 			Explode: true,
 		}
 
 		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
-			if val, ok := params.UserID.Get(); ok {
+			if val, ok := params.IdentityID.Get(); ok {
 				return e.EncodeValue(conv.UUIDToString(val))
 			}
 			return nil

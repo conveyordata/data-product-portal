@@ -64,7 +64,7 @@ export function PeoplePage() {
     const [canBecomeAdmin] = useSetCanBecomeAdminMutation();
 
     const onChangeGlobalRole = useCallback(
-        (user_id: string, value: string, original: GlobalRoleAssignment | null) => {
+        (identity_id: string, value: string, original: GlobalRoleAssignment | null) => {
             if (original?.role.id === value) {
                 return;
             }
@@ -101,7 +101,7 @@ export function PeoplePage() {
             }
             if (original === null && value) {
                 createGlobalRoleAssignment({
-                    user_id,
+                    identity_id,
                     role_id: value,
                 })
                     .unwrap()

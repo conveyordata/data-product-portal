@@ -61,9 +61,9 @@ class Event(Base, BaseORM):
     )
     identity: Mapped["Identity"] = relationship(
         primaryjoin="or_(and_(Event.subject_id == "
-                    "foreign(Identity.id), Event.subject_type == 'IDENTITY'), "
-                    "and_(Event.target_id == foreign(Identity.id), "
-                    "Event.target_type == 'IDENTITY'))",
+        "foreign(Identity.id), Event.subject_type == 'IDENTITY'), "
+        "and_(Event.target_id == foreign(Identity.id), "
+        "Event.target_type == 'IDENTITY'))",
     )
     output_port: Mapped["OutputPort"] = relationship(
         primaryjoin="or_(and_(Event.subject_id == foreign(OutputPort.id),"

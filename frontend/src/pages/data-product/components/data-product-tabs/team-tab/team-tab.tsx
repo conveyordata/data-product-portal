@@ -20,16 +20,19 @@ import type { UsersGet } from '@/store/api/services/generated/usersApi.ts';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 import { Scope } from '@/types/roles';
 import { dispatchMessage } from '@/utils/feedback.ts';
+import { isUserDataProductRoleAssignment, type UserDataProductRoleAssignment } from '@/utils/identity.ts';
 import { searchMatchesUser } from '@/utils/search.ts';
 import styles from './team-tab.module.scss';
 
 function filterUsers(
-    users: DataProductRoleAssignmentResponse[],
+    assignments: DataProductRoleAssignmentResponse[],
     searchTerm: string,
-): DataProductRoleAssignmentResponse[] {
-    if (!searchTerm) return users;
+): UserDataProductRoleAssignment[] {
+    const userAssignments = assignments.filter(isUserDataProductRoleAssignment);
 
-    return users.filter((assignment) => searchMatchesUser(searchTerm, assignment?.user));
+    if (!searchTerm) return userAssignments;
+
+    return userAssignments.filter((assignment) => searchMatchesUser(searchTerm, assignment.identity));
 }
 
 type Props = {
@@ -52,8 +55,10 @@ export function TeamTab({ dataProductId }: Props) {
     const filteredUsers = useMemo(() => {
         return filterUsers(roleAssignments?.role_assignments ?? [], searchTerm);
     }, [searchTerm, roleAssignments]);
-    const dataProductUserIds = useMemo(() => filteredUsers.map((user) => user.user.id), [filteredUsers]);
-
+    const dataProductUserIds = useMemo(
+        () => filteredUsers.map((assignment) => assignment.identity.id),
+        [filteredUsers],
+    );
     const { data: access } = useCheckAccessQuery(
         {
             resource: dataProductId,
@@ -69,7 +74,7 @@ export function TeamTab({ dataProductId }: Props) {
             try {
                 await addUserToDataProduct({
                     data_product_id: dataProductId,
-                    user_id: user.id,
+                    identity_id: user.id,
                     role_id: role_id,
                 }).unwrap();
                 dispatchMessage({ content: t('User has been granted access to the Data Product'), type: 'success' });

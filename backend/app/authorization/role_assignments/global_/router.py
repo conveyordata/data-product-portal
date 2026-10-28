@@ -116,7 +116,6 @@ def list_global_role_assignments(
         role_assignments=RoleAssignmentService(db).list_assignments(
             identity_id=identity_id,
             role_id=role_id,
-            users_only=True,
         )
     )
 

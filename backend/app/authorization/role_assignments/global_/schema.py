@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Literal, Optional, Sequence, Union
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from app.authorization.role_assignments.enums import DecisionStatus
 from app.authorization.role_assignments.global_.model import (

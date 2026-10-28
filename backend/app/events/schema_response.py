@@ -8,9 +8,9 @@ from app.data_products.schema import DataProduct
 from app.data_products.technical_assets.schema import TechnicalAsset
 from app.events.enums import EventEntityType
 from app.explorations.schema_response import Exploration
+from app.identities.schema import Identity
 from app.shared.schema import ORMModel
 from app.users.schema import User
-from app.identities.schema import Identity
 
 
 class GetEventHistoryResponseItem(ORMModel):
