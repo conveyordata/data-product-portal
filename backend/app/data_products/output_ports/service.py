@@ -79,7 +79,7 @@ from app.resource_names.service import ResourceNameValidityType
 from app.users.model import User as UserModel
 from app.users.schema import User
 
-TSQUERY_POSITIVE_LEXEME_PATTERN = r"(^|[^!])'([^']+)'"
+TSQUERY_POSITIVE_LEXEME_PATTERN = r"(^|[ (])'((?:[^']|'')*)'(?![^()]*\))"
 TSQUERY_POSITIVE_LEXEME_PREFIX_REPLACEMENT = r"\1'\2':*"
 
 

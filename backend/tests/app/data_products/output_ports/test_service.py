@@ -248,6 +248,43 @@ class TestDatasetsService:
 
         assert [result.id for result in results] == [matching_output_port.id]
 
+    def test_search_output_ports__prefixes_terms_after_leading_exclusion(self, session):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        excluded_output_port = OutputPortFactory(
+            name="Finance Budget", description="Restricted budget planning"
+        )
+        matching_output_port = OutputPortFactory(
+            name="Finance Forecast", description="Revenue planning"
+        )
+        self.set_search_state(session, excluded_output_port, matching_output_port)
+
+        results = self.search_with_static_embeddings(
+            session, "-budget fin", user, limit=1
+        )
+
+        assert [result.id for result in results] == [matching_output_port.id]
+
+    def test_search_output_ports__does_not_prefix_excluded_quoted_phrase(self, session):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        excluded_output_port = OutputPortFactory(
+            name="Finance Budget Plan", description="Yearly figures"
+        )
+        matching_output_port = OutputPortFactory(
+            name="Finance Budget Planner", description="Yearly figures"
+        )
+        unrelated_output_port = OutputPortFactory(
+            name="Marketing Leads", description="Pipeline metrics"
+        )
+        self.set_search_state(
+            session, excluded_output_port, matching_output_port, unrelated_output_port
+        )
+
+        results = self.search_with_static_embeddings(
+            session, 'fin -"budget plan"', user, limit=1
+        )
+
+        assert [result.id for result in results] == [matching_output_port.id]
+
     def test_search_output_ports__preserves_quoted_phrase_operator(self, session):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         reversed_output_port = OutputPortFactory(
