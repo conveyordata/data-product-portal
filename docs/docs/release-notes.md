@@ -23,6 +23,7 @@ sidebar_position: 200
 - **[API]**: Every response that embeds a Domain, such as Data Products, Explorations and Output Ports, now includes its `namespace`.
 - **[Plugins]**: Templates and `validate_configuration` can use the Domain's namespace, e.g. `{domain.namespace}`.
 - **[UI]**: Empty lists and tables now say why they are empty in a consistent way.
+- **[API/UI]**: Producing teams can post [Announcements](./concepts/announcements.md) on an Output Port. Members of its Consuming Data Products and owners of its consuming Explorations are notified, and the Home page shows a Notifications block with their pending requests and Announcements.
 
 ### bugfixes
 

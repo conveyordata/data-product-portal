@@ -8,14 +8,13 @@ import {
     type GetUserNotificationsResponseItem,
     useGetUserNotificationsQuery,
     useRemoveAllUserNotificationsMutation,
-    useRemoveUserNotificationMutation,
 } from '@/store/api/services/generated/usersNotificationsApi.ts';
-import { EventType } from '@/types/events/event-types.ts';
 import { formatDateToNowFromUTCString } from '@/utils/date.helper';
 import { dispatchMessage } from '@/utils/feedback.ts';
 import { AnnouncementNotification } from './announcement-notification';
 import { NotificationDescription } from './notification-description';
 import styles from './notifications.module.scss';
+import { isAnnouncementNotification, useAcknowledgeNotification } from './use-acknowledge-notification';
 
 const MAX_ITEMS_DEFAULT = 10;
 
@@ -28,22 +27,9 @@ export function Notifications() {
     const notificationsQuery = useGetUserNotificationsQuery();
     const { data: { notifications = [] } = {} } = notificationsQuery;
 
-    const [removeNotification, { isLoading: isAcknowledging, originalArgs: acknowledgingId }] =
-        useRemoveUserNotificationMutation();
+    const { acknowledge: handleRemoveNotification, acknowledgingId } = useAcknowledgeNotification();
     const [removeAllNotifications] = useRemoveAllUserNotificationsMutation();
     const [maxItems, setMaxItems] = useState(MAX_ITEMS_DEFAULT);
-
-    const handleRemoveNotification = useCallback(
-        async (notificationId: string) => {
-            try {
-                await removeNotification(notificationId).unwrap();
-                dispatchMessage({ content: t('Notification has been acknowledged'), type: 'success' });
-            } catch (_error) {
-                dispatchMessage({ content: t('Failed to acknowledge notification'), type: 'error' });
-            }
-        },
-        [removeNotification, t],
-    );
 
     const handleRemoveAllNotifications = useCallback(async () => {
         try {
@@ -99,11 +85,13 @@ export function Notifications() {
         setMaxItems((prev) => prev + MAX_ITEMS_DEFAULT);
     }, []);
 
-    const [announcementNotifications, requestNotifications] = useMemo(() => {
-        const isAnnouncement = (notification: GetUserNotificationsResponseItem) =>
-            notification.event.name === EventType.ANNOUNCEMENT_CREATED;
-        return [notifications.filter(isAnnouncement), notifications.filter((n) => !isAnnouncement(n))];
-    }, [notifications]);
+    const [announcementNotifications, requestNotifications] = useMemo(
+        () => [
+            notifications.filter(isAnnouncementNotification),
+            notifications.filter((n) => !isAnnouncementNotification(n)),
+        ],
+        [notifications],
+    );
 
     const createShowMoreItem = useCallback(
         (excessLength: number) => (
@@ -147,7 +135,7 @@ export function Notifications() {
                     key={notification.id}
                     notification={notification}
                     onAcknowledge={handleRemoveNotification}
-                    isAcknowledging={isAcknowledging && acknowledgingId === notification.id}
+                    isAcknowledging={acknowledgingId === notification.id}
                 />
             ));
 
@@ -155,14 +143,7 @@ export function Notifications() {
         if (excessLength > 0) slicedItems.push(createShowMoreItem(excessLength));
 
         return slicedItems;
-    }, [
-        announcementNotifications,
-        handleRemoveNotification,
-        maxItems,
-        createShowMoreItem,
-        isAcknowledging,
-        acknowledgingId,
-    ]);
+    }, [announcementNotifications, handleRemoveNotification, maxItems, createShowMoreItem, acknowledgingId]);
 
     const notificationItems = [
         { key: 'requests', title: t('Requests'), items: requestItems },
