@@ -28,7 +28,8 @@ export function Notifications() {
     const notificationsQuery = useGetUserNotificationsQuery();
     const { data: { notifications = [] } = {} } = notificationsQuery;
 
-    const [removeNotification] = useRemoveUserNotificationMutation();
+    const [removeNotification, { isLoading: isAcknowledging, originalArgs: acknowledgingId }] =
+        useRemoveUserNotificationMutation();
     const [removeAllNotifications] = useRemoveAllUserNotificationsMutation();
     const [maxItems, setMaxItems] = useState(MAX_ITEMS_DEFAULT);
 
@@ -146,6 +147,7 @@ export function Notifications() {
                     key={notification.id}
                     notification={notification}
                     onAcknowledge={handleRemoveNotification}
+                    isAcknowledging={isAcknowledging && acknowledgingId === notification.id}
                 />
             ));
 
@@ -153,7 +155,14 @@ export function Notifications() {
         if (excessLength > 0) slicedItems.push(createShowMoreItem(excessLength));
 
         return slicedItems;
-    }, [announcementNotifications, handleRemoveNotification, maxItems, createShowMoreItem]);
+    }, [
+        announcementNotifications,
+        handleRemoveNotification,
+        maxItems,
+        createShowMoreItem,
+        isAcknowledging,
+        acknowledgingId,
+    ]);
 
     const notificationItems = [
         { key: 'requests', title: t('Requests'), items: requestItems },

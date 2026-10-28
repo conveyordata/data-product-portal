@@ -11,9 +11,10 @@ import { formatDateToNowFromUTCString } from '@/utils/date.helper';
 type Props = {
     notification: GetUserNotificationsResponseItem;
     onAcknowledge: (id: string) => void;
+    isAcknowledging?: boolean;
 };
 
-export function AnnouncementNotification({ notification, onAcknowledge }: Props) {
+export function AnnouncementNotification({ notification, onAcknowledge, isAcknowledging = false }: Props) {
     const { t } = useTranslation();
     const { announcement, output_port, created_on } = notification.event;
     if (!announcement || !output_port) return null;
@@ -40,6 +41,8 @@ export function AnnouncementNotification({ notification, onAcknowledge }: Props)
                 type="text"
                 aria-label={t('Acknowledge')}
                 icon={<CheckOutlined />}
+                loading={isAcknowledging}
+                disabled={isAcknowledging}
                 onClick={(e) => {
                     e.stopPropagation();
                     onAcknowledge(notification.id);

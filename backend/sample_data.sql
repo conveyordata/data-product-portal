@@ -579,7 +579,6 @@ INSERT INTO public.data_products (id, about, type_id, lifecycle_id, usage) VALUE
 
 INSERT INTO public.datasets (id, namespace, data_product_id, name, description, about, status, access_function, access_type_id, created_on, updated_on, lifecycle_id, deleted_at) VALUES ('{{ production_planning_insights_forecast }}'::uuid, 'production_planning_forecast', '{{ production_planning_insights }}'::uuid, 'Production Planning Forecast', 'Forecast of production requirements', 'Provides projections to optimize scheduling and capacity. Key objectives: - Reduce downtime - Optimize resource allocation - Support operational planning', 'ACTIVE', 'RESTRICTED', '{{ restricted_access_type_id }}'::uuid, timezone('utc'::text, current_timestamp), NULL, '{{ data_product_lifecycle_id }}'::uuid, NULL);
 
-
 INSERT INTO public.datasets (id, namespace, data_product_id, name, description, about, status, access_function, access_type_id, created_on, updated_on, lifecycle_id, deleted_at) VALUES ('bc7b3d51-1941-4312-ba83-4594c331cf05', 'production_variance_report', '{{ production_planning_insights }}'::uuid, 'Production Variance Report', 'Difference between planned and actual production', 'Provides insights into production deviations. Key objectives: - Identify inefficiencies - Improve planning accuracy - Support operations', 'ACTIVE', 'RESTRICTED', '{{ restricted_access_type_id }}'::uuid, timezone('utc'::text, current_timestamp), NULL, '{{ data_product_lifecycle_id }}'::uuid, NULL);
 
 -- Sales performance model

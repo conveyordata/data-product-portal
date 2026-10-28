@@ -1,6 +1,7 @@
 import pytest
 from fastapi.testclient import TestClient
 
+from app.data_products.output_ports.enums import OutputPortAccessFunction
 from app.events.enums import EventEntityType, EventType
 from app.settings import settings
 from tests.factories import (
@@ -49,6 +50,29 @@ class TestNotificationsRouter:
         assert event_json["output_port"]["data_product_id"] == str(
             output_port.data_product_id
         )
+
+    def test_get_notifications__skips_announcement_of_unreadable_output_port(
+        self, client: TestClient
+    ):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        output_port = OutputPortFactory(
+            access_function=OutputPortAccessFunction.PRIVATE
+        )
+        announcement = AnnouncementFactory(output_port_id=output_port.id)
+        event = EventFactory(
+            name=EventType.ANNOUNCEMENT_CREATED,
+            subject_id=output_port.id,
+            subject_type=EventEntityType.OUTPUT_PORT,
+            target_id=announcement.id,
+            target_type=EventEntityType.ANNOUNCEMENT,
+        )
+        NotificationFactory(user=user, event=event)
+        other = NotificationFactory(user=user)
+
+        response = client.get(ENDPOINT)
+
+        assert response.status_code == 200, response.text
+        assert [n["id"] for n in response.json()["notifications"]] == [str(other.id)]
 
     def test_get_notifications__skips_announcement_of_deleted_output_port(
         self, client: TestClient, admin
