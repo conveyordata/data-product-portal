@@ -946,7 +946,6 @@ const (
 	AuthorizationAction416 AuthorizationAction = 416
 	AuthorizationAction901 AuthorizationAction = 901
 	AuthorizationAction902 AuthorizationAction = 902
-	AuthorizationAction903 AuthorizationAction = 903
 )
 
 // AllValues returns all AuthorizationAction values.
@@ -1000,7 +999,6 @@ func (AuthorizationAction) AllValues() []AuthorizationAction {
 		AuthorizationAction416,
 		AuthorizationAction901,
 		AuthorizationAction902,
-		AuthorizationAction903,
 	}
 }
 

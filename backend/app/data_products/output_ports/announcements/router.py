@@ -27,9 +27,7 @@ router = APIRouter(prefix="/{id}/announcements")
     "",
     dependencies=[
         Depends(
-            Authorization.enforce(
-                Action.HIDDEN__OUTPUT_PORT__READ_ANNOUNCEMENTS, OutputPortResolver
-            )
+            Authorization.enforce(Action.HIDDEN__OUTPUT_PORT__READ, OutputPortResolver)
         )
     ],
 )

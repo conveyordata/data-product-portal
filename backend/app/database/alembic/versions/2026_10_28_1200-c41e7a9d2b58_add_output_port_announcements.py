@@ -56,34 +56,8 @@ def upgrade() -> None:
     entities = sa.table("event_reference_entities", sa.column("key", sa.String))
     op.bulk_insert(entities, [{"key": "ANNOUNCEMENT"}])
 
-    op.execute(
-        sa.text(
-            """
-            UPDATE roles
-            SET permissions = COALESCE(permissions, ARRAY[]::int[]) || :read_action
-            WHERE scope = ANY(:scopes)
-              AND NOT (:read_action = ANY(COALESCE(permissions, ARRAY[]::int[])))
-            """
-        ).bindparams(
-            read_action=int(903),  # HIDDEN__OUTPUT_PORT__READ_ANNOUNCEMENTS
-            scopes=["dataset", "data_product"],  # Scope.DATASET and Scope.DATA_PRODUCT
-        )
-    )
-
 
 def downgrade() -> None:
-    op.execute(
-        sa.text(
-            """
-            UPDATE roles
-            SET permissions = array_remove(permissions, :read_action)
-            WHERE scope = ANY(:scopes)
-            """
-        ).bindparams(
-            read_action=int(903),  # HIDDEN__OUTPUT_PORT__READ_ANNOUNCEMENTS
-            scopes=["dataset", "data_product"],  # Scope.DATASET and Scope.DATA_PRODUCT
-        )
-    )
 
     events = sa.table(
         "events",

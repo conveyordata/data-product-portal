@@ -4,6 +4,7 @@ from app.authorization.roles.schema import Scope
 from app.core.authz.actions import AuthorizationAction
 from app.core.authz.authorization import Authorization
 from app.data_products.output_ports.announcements.model import Announcement
+from app.data_products.output_ports.enums import OutputPortAccessFunction
 from app.events.enums import EventEntityType, EventType
 from app.events.model import Event
 from app.settings import settings
@@ -150,10 +151,22 @@ class TestAnnouncementsRouter:
         assert response.status_code == 200, response.text
         assert len(response.json()["announcements"]) == 1
 
-    def test_get_output_port_announcements__as_unrelated_user_forbidden(
+    def test_get_output_port_announcements__as_unrelated_user(self, client, session):
+        output_port = OutputPortFactory()
+        AnnouncementFactory(output_port_id=output_port.id)
+        UserFactory(external_id=settings.DEFAULT_USERNAME)
+
+        response = client.get(_url(output_port))
+
+        assert response.status_code == 200, response.text
+        assert len(response.json()["announcements"]) == 1
+
+    def test_get_output_port_announcements__of_private_port_as_unrelated_user_forbidden(
         self, client, session
     ):
-        output_port = OutputPortFactory()
+        output_port = OutputPortFactory(
+            access_function=OutputPortAccessFunction.PRIVATE
+        )
         UserFactory(external_id=settings.DEFAULT_USERNAME)
 
         response = client.get(_url(output_port))

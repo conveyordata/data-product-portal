@@ -53,10 +53,7 @@ def _has_access_through_consumer_role(
     parent: str,
     action: str,
 ) -> bool:
-    if action not in (
-        str(AuthorizationAction.HIDDEN__OUTPUT_PORT__READ),
-        str(AuthorizationAction.HIDDEN__OUTPUT_PORT__READ_ANNOUNCEMENTS),
-    ):
+    if action != str(AuthorizationAction.HIDDEN__OUTPUT_PORT__READ):
         return False
     linked_resources = enforcer.get_filtered_named_grouping_policy(
         "g4", 1, parent, resource

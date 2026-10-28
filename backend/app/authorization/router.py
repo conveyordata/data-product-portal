@@ -46,9 +46,7 @@ def check_access(
     dom = "*" if domain is None else str(domain)
     obj = "*" if resource is None else str(resource)
     parent = "*"
-    if resource is not None and action.name.removeprefix("HIDDEN__").startswith(
-        "OUTPUT_PORT__"
-    ):
+    if resource is not None and action.name.startswith("OUTPUT_PORT__"):
         data_product_id = db.scalar(
             select(OutputPort.data_product_id).where(OutputPort.id == resource)
         )

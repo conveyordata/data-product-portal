@@ -883,7 +883,7 @@
     "The owners of the Data Product": "The owners of the $t(Data Product)",
     "The owners of the Output Port": "The owners of the $t(Output Port)",
     "The selected Data Product already has access, or an access request open for this Output Port": "The selected $t(Data Product) already has access, or an access request open for this $t(Output Port)",
-    "The team that owns this Output Port hasn't posted any updates. When they do, you get a notification.": "The team that owns this Output Port hasn't posted any updates. When they do, you get a notification.",
+    "The team that owns this Output Port hasn't posted any updates. When they do, Consuming Data Products get a notification.": "The team that owns this Output Port hasn't posted any updates. When they do, Consuming Data Products get a notification.",
     "The visibility of the Data Product, this cannot be changed after creation": "The visibility of the $t(Data Product), this cannot be changed after creation",
     "Theme Customisation": "Theme Customisation",
     "There are currently {{count}} Output Ports in the cart, for which the selected Data Product already has access, or has an access request. Please remove them from the cart before proceeding._one": "There are currently {{count}} $t(Output Ports) in the cart, for which the selected $t(Data Product) already has access, or has an access request. Please remove them from the cart before proceeding.",

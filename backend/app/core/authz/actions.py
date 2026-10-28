@@ -64,4 +64,3 @@ class AuthorizationAction(IntEnum):
     # Discoverable Data Products or public, restricted Output Ports ensure that everyone has this permission on their Data Product without any role.
     HIDDEN__DATA_PRODUCT__READ = 901
     HIDDEN__OUTPUT_PORT__READ = 902
-    HIDDEN__OUTPUT_PORT__READ_ANNOUNCEMENTS = 903
