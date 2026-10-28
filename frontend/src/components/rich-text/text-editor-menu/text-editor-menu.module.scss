@@ -3,20 +3,7 @@
 $text-type-dropdown-width: 120px;
 
 .menuBar {
-    width: 100%;
     margin-bottom: globals.$spacing-m;
-
-    .actions-container {
-        justify-content: flex-start;
-        align-items: center;
-    }
-}
-
-.menuButton {
-    &.active {
-        background-color: globals.$primary-color;
-        color: globals.$blue-1;
-    }
 }
 
 .text-type-dropdown {
