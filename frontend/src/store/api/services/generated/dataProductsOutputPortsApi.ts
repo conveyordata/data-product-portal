@@ -572,10 +572,12 @@ export type GetAnnouncementsResponse = {
 export type CreateAnnouncementResponse = {
   id: string;
 };
+export type AppSharedSchemaNonEmptyStr1 = string;
+export type AppSharedSchemaNonEmptyStr2 = string;
 export type CreateAnnouncement = {
   type: AnnouncementType;
-  title: string;
-  message: string;
+  title: AppSharedSchemaNonEmptyStr1;
+  message: AppSharedSchemaNonEmptyStr2;
   link?: string | null;
 };
 export type OutputPortAccessType = {

@@ -11430,16 +11430,10 @@
             "$ref": "#/components/schemas/AnnouncementType"
           },
           "title": {
-            "type": "string",
-            "maxLength": 100,
-            "minLength": 1,
-            "title": "Title"
+            "$ref": "#/components/schemas/app__shared__schema__NonEmptyStr__1"
           },
           "message": {
-            "type": "string",
-            "maxLength": 2000,
-            "minLength": 1,
-            "title": "Message"
+            "$ref": "#/components/schemas/app__shared__schema__NonEmptyStr__2"
           },
           "link": {
             "anyOf": [
@@ -15168,10 +15162,10 @@
       "GroupCreate": {
         "properties": {
           "external_id": {
-            "$ref": "#/components/schemas/NonEmptyStr"
+            "$ref": "#/components/schemas/app__shared__schema__NonEmptyStr__3"
           },
           "display_name": {
-            "$ref": "#/components/schemas/NonEmptyStr"
+            "$ref": "#/components/schemas/app__shared__schema__NonEmptyStr__3"
           }
         },
         "type": "object",
@@ -15342,7 +15336,7 @@
       "GroupUpdate": {
         "properties": {
           "display_name": {
-            "$ref": "#/components/schemas/NonEmptyStr"
+            "$ref": "#/components/schemas/app__shared__schema__NonEmptyStr__3"
           }
         },
         "additionalProperties": false,
@@ -15421,10 +15415,10 @@
             "items": {
               "properties": {
                 "external_id": {
-                  "$ref": "#/components/schemas/NonEmptyStr"
+                  "$ref": "#/components/schemas/app__shared__schema__NonEmptyStr__3"
                 },
                 "display_name": {
-                  "$ref": "#/components/schemas/NonEmptyStr"
+                  "$ref": "#/components/schemas/app__shared__schema__NonEmptyStr__3"
                 }
               },
               "type": "object",
@@ -15452,10 +15446,10 @@
             "items": {
               "properties": {
                 "external_id": {
-                  "$ref": "#/components/schemas/NonEmptyStr"
+                  "$ref": "#/components/schemas/app__shared__schema__NonEmptyStr__3"
                 },
                 "display_name": {
-                  "$ref": "#/components/schemas/NonEmptyStr"
+                  "$ref": "#/components/schemas/app__shared__schema__NonEmptyStr__3"
                 }
               },
               "type": "object",
@@ -16003,10 +15997,10 @@
       "MachineUserCreate": {
         "properties": {
           "external_id": {
-            "$ref": "#/components/schemas/NonEmptyStr"
+            "$ref": "#/components/schemas/app__shared__schema__NonEmptyStr__3"
           },
           "display_name": {
-            "$ref": "#/components/schemas/NonEmptyStr"
+            "$ref": "#/components/schemas/app__shared__schema__NonEmptyStr__3"
           }
         },
         "type": "object",
@@ -16057,7 +16051,7 @@
       "MachineUserUpdate": {
         "properties": {
           "display_name": {
-            "$ref": "#/components/schemas/NonEmptyStr"
+            "$ref": "#/components/schemas/app__shared__schema__NonEmptyStr__3"
           }
         },
         "additionalProperties": false,
@@ -16306,11 +16300,6 @@
         ],
         "title": "NodeType"
       },
-      "NonEmptyStr": {
-        "type": "string",
-        "minLength": 1,
-        "title": "NonEmptyStr"
-      },
       "OIDCTokenResponse": {
         "properties": {
           "access_token": {
@@ -16481,7 +16470,7 @@
       "OutputPortAccessTypeCreate": {
         "properties": {
           "name": {
-            "$ref": "#/components/schemas/NonEmptyStr"
+            "$ref": "#/components/schemas/app__shared__schema__NonEmptyStr__3"
           },
           "description": {
             "type": "string",
@@ -16502,7 +16491,7 @@
       "OutputPortAccessTypeUpdate": {
         "properties": {
           "name": {
-            "$ref": "#/components/schemas/NonEmptyStr"
+            "$ref": "#/components/schemas/app__shared__schema__NonEmptyStr__3"
           },
           "description": {
             "type": "string",
@@ -19975,6 +19964,23 @@
           "type"
         ],
         "title": "ValidationError"
+      },
+      "app__shared__schema__NonEmptyStr__1": {
+        "type": "string",
+        "maxLength": 100,
+        "minLength": 1,
+        "title": "app__shared__schema__NonEmptyStr__1"
+      },
+      "app__shared__schema__NonEmptyStr__2": {
+        "type": "string",
+        "maxLength": 2000,
+        "minLength": 1,
+        "title": "app__shared__schema__NonEmptyStr__2"
+      },
+      "app__shared__schema__NonEmptyStr__3": {
+        "type": "string",
+        "minLength": 1,
+        "title": "app__shared__schema__NonEmptyStr__3"
       },
       "TechnicalAssetPlugin": {
         "properties": {

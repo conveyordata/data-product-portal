@@ -67,7 +67,7 @@ export function AnnouncementsTab({ outputPortId, dataProductId }: Props) {
                                 t={t}
                                 i18nKey="AnnouncementsEmptyProducer"
                                 count={consumerCount}
-                                defaults="Post one to tell every Consuming Data Product about an issue, a change they need to make, planned maintenance or a new version. <link>{{count}} Data Products</link> consume this Output Port today."
+                                defaults="Post one to tell every Consuming Data Product about an issue, a change they need to make, planned maintenance or a new version. <link>{{count}} consumers</link> use this Output Port today."
                                 components={{ link: <Link to={{ search: `?tab=${TabKeys.Consumers}` }} /> }}
                             />
                         ) : (

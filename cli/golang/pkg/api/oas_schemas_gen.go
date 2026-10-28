@@ -788,6 +788,12 @@ func (s *AnnouncementType) UnmarshalText(data []byte) error {
 	}
 }
 
+type AppSharedSchemaNonEmptyStr1 string
+
+type AppSharedSchemaNonEmptyStr2 string
+
+type AppSharedSchemaNonEmptyStr3 string
+
 // Ref: #/components/schemas/ApproveLinkBetweenTechnicalAssetAndOutputPortRequest
 type ApproveLinkBetweenTechnicalAssetAndOutputPortRequest struct {
 	TechnicalAssetID uuid.UUID `json:"technical_asset_id"`
@@ -1108,10 +1114,10 @@ func (*CancelInputPortForExplorationResponse) cancelInputPortForExplorationRes()
 
 // Ref: #/components/schemas/CreateAnnouncement
 type CreateAnnouncement struct {
-	Type    AnnouncementType `json:"type"`
-	Title   string           `json:"title"`
-	Message string           `json:"message"`
-	Link    OptNilURI        `json:"link"`
+	Type    AnnouncementType            `json:"type"`
+	Title   AppSharedSchemaNonEmptyStr1 `json:"title"`
+	Message AppSharedSchemaNonEmptyStr2 `json:"message"`
+	Link    OptNilURI                   `json:"link"`
 }
 
 // GetType returns the value of Type.
@@ -1120,12 +1126,12 @@ func (s *CreateAnnouncement) GetType() AnnouncementType {
 }
 
 // GetTitle returns the value of Title.
-func (s *CreateAnnouncement) GetTitle() string {
+func (s *CreateAnnouncement) GetTitle() AppSharedSchemaNonEmptyStr1 {
 	return s.Title
 }
 
 // GetMessage returns the value of Message.
-func (s *CreateAnnouncement) GetMessage() string {
+func (s *CreateAnnouncement) GetMessage() AppSharedSchemaNonEmptyStr2 {
 	return s.Message
 }
 
@@ -1140,12 +1146,12 @@ func (s *CreateAnnouncement) SetType(val AnnouncementType) {
 }
 
 // SetTitle sets the value of Title.
-func (s *CreateAnnouncement) SetTitle(val string) {
+func (s *CreateAnnouncement) SetTitle(val AppSharedSchemaNonEmptyStr1) {
 	s.Title = val
 }
 
 // SetMessage sets the value of Message.
-func (s *CreateAnnouncement) SetMessage(val string) {
+func (s *CreateAnnouncement) SetMessage(val AppSharedSchemaNonEmptyStr2) {
 	s.Message = val
 }
 
@@ -6454,27 +6460,27 @@ func (s *GrantOutputPortAccessRequest) SetAccessModeID(val OptNilUUID) {
 
 // Ref: #/components/schemas/GroupCreate
 type GroupCreate struct {
-	ExternalID  NonEmptyStr `json:"external_id"`
-	DisplayName NonEmptyStr `json:"display_name"`
+	ExternalID  AppSharedSchemaNonEmptyStr3 `json:"external_id"`
+	DisplayName AppSharedSchemaNonEmptyStr3 `json:"display_name"`
 }
 
 // GetExternalID returns the value of ExternalID.
-func (s *GroupCreate) GetExternalID() NonEmptyStr {
+func (s *GroupCreate) GetExternalID() AppSharedSchemaNonEmptyStr3 {
 	return s.ExternalID
 }
 
 // GetDisplayName returns the value of DisplayName.
-func (s *GroupCreate) GetDisplayName() NonEmptyStr {
+func (s *GroupCreate) GetDisplayName() AppSharedSchemaNonEmptyStr3 {
 	return s.DisplayName
 }
 
 // SetExternalID sets the value of ExternalID.
-func (s *GroupCreate) SetExternalID(val NonEmptyStr) {
+func (s *GroupCreate) SetExternalID(val AppSharedSchemaNonEmptyStr3) {
 	s.ExternalID = val
 }
 
 // SetDisplayName sets the value of DisplayName.
-func (s *GroupCreate) SetDisplayName(val NonEmptyStr) {
+func (s *GroupCreate) SetDisplayName(val AppSharedSchemaNonEmptyStr3) {
 	s.DisplayName = val
 }
 
@@ -6672,16 +6678,16 @@ func (*GroupMembershipsGetResponse) getGroupMembersRes() {}
 
 // Ref: #/components/schemas/GroupUpdate
 type GroupUpdate struct {
-	DisplayName NonEmptyStr `json:"display_name"`
+	DisplayName AppSharedSchemaNonEmptyStr3 `json:"display_name"`
 }
 
 // GetDisplayName returns the value of DisplayName.
-func (s *GroupUpdate) GetDisplayName() NonEmptyStr {
+func (s *GroupUpdate) GetDisplayName() AppSharedSchemaNonEmptyStr3 {
 	return s.DisplayName
 }
 
 // SetDisplayName sets the value of DisplayName.
-func (s *GroupUpdate) SetDisplayName(val NonEmptyStr) {
+func (s *GroupUpdate) SetDisplayName(val AppSharedSchemaNonEmptyStr3) {
 	s.DisplayName = val
 }
 
@@ -7001,27 +7007,27 @@ func (s *IdentityBatchCreateRequestGroupCreate) SetItems(val []IdentityBatchCrea
 }
 
 type IdentityBatchCreateRequestGroupCreateItemsItem struct {
-	ExternalID  NonEmptyStr `json:"external_id"`
-	DisplayName NonEmptyStr `json:"display_name"`
+	ExternalID  AppSharedSchemaNonEmptyStr3 `json:"external_id"`
+	DisplayName AppSharedSchemaNonEmptyStr3 `json:"display_name"`
 }
 
 // GetExternalID returns the value of ExternalID.
-func (s *IdentityBatchCreateRequestGroupCreateItemsItem) GetExternalID() NonEmptyStr {
+func (s *IdentityBatchCreateRequestGroupCreateItemsItem) GetExternalID() AppSharedSchemaNonEmptyStr3 {
 	return s.ExternalID
 }
 
 // GetDisplayName returns the value of DisplayName.
-func (s *IdentityBatchCreateRequestGroupCreateItemsItem) GetDisplayName() NonEmptyStr {
+func (s *IdentityBatchCreateRequestGroupCreateItemsItem) GetDisplayName() AppSharedSchemaNonEmptyStr3 {
 	return s.DisplayName
 }
 
 // SetExternalID sets the value of ExternalID.
-func (s *IdentityBatchCreateRequestGroupCreateItemsItem) SetExternalID(val NonEmptyStr) {
+func (s *IdentityBatchCreateRequestGroupCreateItemsItem) SetExternalID(val AppSharedSchemaNonEmptyStr3) {
 	s.ExternalID = val
 }
 
 // SetDisplayName sets the value of DisplayName.
-func (s *IdentityBatchCreateRequestGroupCreateItemsItem) SetDisplayName(val NonEmptyStr) {
+func (s *IdentityBatchCreateRequestGroupCreateItemsItem) SetDisplayName(val AppSharedSchemaNonEmptyStr3) {
 	s.DisplayName = val
 }
 
@@ -7041,27 +7047,27 @@ func (s *IdentityBatchCreateRequestMachineUserCreate) SetItems(val []IdentityBat
 }
 
 type IdentityBatchCreateRequestMachineUserCreateItemsItem struct {
-	ExternalID  NonEmptyStr `json:"external_id"`
-	DisplayName NonEmptyStr `json:"display_name"`
+	ExternalID  AppSharedSchemaNonEmptyStr3 `json:"external_id"`
+	DisplayName AppSharedSchemaNonEmptyStr3 `json:"display_name"`
 }
 
 // GetExternalID returns the value of ExternalID.
-func (s *IdentityBatchCreateRequestMachineUserCreateItemsItem) GetExternalID() NonEmptyStr {
+func (s *IdentityBatchCreateRequestMachineUserCreateItemsItem) GetExternalID() AppSharedSchemaNonEmptyStr3 {
 	return s.ExternalID
 }
 
 // GetDisplayName returns the value of DisplayName.
-func (s *IdentityBatchCreateRequestMachineUserCreateItemsItem) GetDisplayName() NonEmptyStr {
+func (s *IdentityBatchCreateRequestMachineUserCreateItemsItem) GetDisplayName() AppSharedSchemaNonEmptyStr3 {
 	return s.DisplayName
 }
 
 // SetExternalID sets the value of ExternalID.
-func (s *IdentityBatchCreateRequestMachineUserCreateItemsItem) SetExternalID(val NonEmptyStr) {
+func (s *IdentityBatchCreateRequestMachineUserCreateItemsItem) SetExternalID(val AppSharedSchemaNonEmptyStr3) {
 	s.ExternalID = val
 }
 
 // SetDisplayName sets the value of DisplayName.
-func (s *IdentityBatchCreateRequestMachineUserCreateItemsItem) SetDisplayName(val NonEmptyStr) {
+func (s *IdentityBatchCreateRequestMachineUserCreateItemsItem) SetDisplayName(val AppSharedSchemaNonEmptyStr3) {
 	s.DisplayName = val
 }
 
@@ -7659,27 +7665,27 @@ func (*ListOutputPortRoleAssignmentsResponse) listOutputPortRoleAssignmentsRes()
 
 // Ref: #/components/schemas/MachineUserCreate
 type MachineUserCreate struct {
-	ExternalID  NonEmptyStr `json:"external_id"`
-	DisplayName NonEmptyStr `json:"display_name"`
+	ExternalID  AppSharedSchemaNonEmptyStr3 `json:"external_id"`
+	DisplayName AppSharedSchemaNonEmptyStr3 `json:"display_name"`
 }
 
 // GetExternalID returns the value of ExternalID.
-func (s *MachineUserCreate) GetExternalID() NonEmptyStr {
+func (s *MachineUserCreate) GetExternalID() AppSharedSchemaNonEmptyStr3 {
 	return s.ExternalID
 }
 
 // GetDisplayName returns the value of DisplayName.
-func (s *MachineUserCreate) GetDisplayName() NonEmptyStr {
+func (s *MachineUserCreate) GetDisplayName() AppSharedSchemaNonEmptyStr3 {
 	return s.DisplayName
 }
 
 // SetExternalID sets the value of ExternalID.
-func (s *MachineUserCreate) SetExternalID(val NonEmptyStr) {
+func (s *MachineUserCreate) SetExternalID(val AppSharedSchemaNonEmptyStr3) {
 	s.ExternalID = val
 }
 
 // SetDisplayName sets the value of DisplayName.
-func (s *MachineUserCreate) SetDisplayName(val NonEmptyStr) {
+func (s *MachineUserCreate) SetDisplayName(val AppSharedSchemaNonEmptyStr3) {
 	s.DisplayName = val
 }
 
@@ -7741,16 +7747,16 @@ func (*MachineUserGet) getMachineUserRes() {}
 
 // Ref: #/components/schemas/MachineUserUpdate
 type MachineUserUpdate struct {
-	DisplayName NonEmptyStr `json:"display_name"`
+	DisplayName AppSharedSchemaNonEmptyStr3 `json:"display_name"`
 }
 
 // GetDisplayName returns the value of DisplayName.
-func (s *MachineUserUpdate) GetDisplayName() NonEmptyStr {
+func (s *MachineUserUpdate) GetDisplayName() AppSharedSchemaNonEmptyStr3 {
 	return s.DisplayName
 }
 
 // SetDisplayName sets the value of DisplayName.
-func (s *MachineUserUpdate) SetDisplayName(val NonEmptyStr) {
+func (s *MachineUserUpdate) SetDisplayName(val AppSharedSchemaNonEmptyStr3) {
 	s.DisplayName = val
 }
 
@@ -8189,8 +8195,6 @@ func (o NilUser) Or(d User) User {
 	}
 	return d
 }
-
-type NonEmptyStr string
 
 // OIDC token endpoint response.
 // Ref: #/components/schemas/OIDCTokenResponse
@@ -11030,13 +11034,13 @@ func (s *OutputPortAccessType) SetAccessFunction(val OutputPortAccessFunction) {
 
 // Ref: #/components/schemas/OutputPortAccessTypeCreate
 type OutputPortAccessTypeCreate struct {
-	Name           NonEmptyStr              `json:"name"`
-	Description    OptString                `json:"description"`
-	AccessFunction OutputPortAccessFunction `json:"access_function"`
+	Name           AppSharedSchemaNonEmptyStr3 `json:"name"`
+	Description    OptString                   `json:"description"`
+	AccessFunction OutputPortAccessFunction    `json:"access_function"`
 }
 
 // GetName returns the value of Name.
-func (s *OutputPortAccessTypeCreate) GetName() NonEmptyStr {
+func (s *OutputPortAccessTypeCreate) GetName() AppSharedSchemaNonEmptyStr3 {
 	return s.Name
 }
 
@@ -11051,7 +11055,7 @@ func (s *OutputPortAccessTypeCreate) GetAccessFunction() OutputPortAccessFunctio
 }
 
 // SetName sets the value of Name.
-func (s *OutputPortAccessTypeCreate) SetName(val NonEmptyStr) {
+func (s *OutputPortAccessTypeCreate) SetName(val AppSharedSchemaNonEmptyStr3) {
 	s.Name = val
 }
 
@@ -11067,13 +11071,13 @@ func (s *OutputPortAccessTypeCreate) SetAccessFunction(val OutputPortAccessFunct
 
 // Ref: #/components/schemas/OutputPortAccessTypeUpdate
 type OutputPortAccessTypeUpdate struct {
-	Name           NonEmptyStr              `json:"name"`
-	Description    OptString                `json:"description"`
-	AccessFunction OutputPortAccessFunction `json:"access_function"`
+	Name           AppSharedSchemaNonEmptyStr3 `json:"name"`
+	Description    OptString                   `json:"description"`
+	AccessFunction OutputPortAccessFunction    `json:"access_function"`
 }
 
 // GetName returns the value of Name.
-func (s *OutputPortAccessTypeUpdate) GetName() NonEmptyStr {
+func (s *OutputPortAccessTypeUpdate) GetName() AppSharedSchemaNonEmptyStr3 {
 	return s.Name
 }
 
@@ -11088,7 +11092,7 @@ func (s *OutputPortAccessTypeUpdate) GetAccessFunction() OutputPortAccessFunctio
 }
 
 // SetName sets the value of Name.
-func (s *OutputPortAccessTypeUpdate) SetName(val NonEmptyStr) {
+func (s *OutputPortAccessTypeUpdate) SetName(val AppSharedSchemaNonEmptyStr3) {
 	s.Name = val
 }
 

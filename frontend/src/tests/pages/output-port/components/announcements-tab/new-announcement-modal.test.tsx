@@ -13,13 +13,14 @@ describe('NewAnnouncementModal', () => {
             />,
         );
 
-        expect(screen.getByText('This will notify 4 Consuming Data Products.')).toBeInTheDocument();
+        expect(screen.getByText('This will notify 4 consumers.')).toBeInTheDocument();
         await userEvent.click(screen.getByRole('button', { name: 'Publish' }));
 
         expect(await screen.findByText('Please provide a title')).toBeInTheDocument();
         expect(screen.getByText('Please provide a message')).toBeInTheDocument();
 
-        await userEvent.type(screen.getByPlaceholderText('e.g. Version 2 is now available'), 'New columns');
+        expect(screen.getByLabelText('Message')).toBeInTheDocument();
+        await userEvent.type(screen.getByLabelText('Title'), 'New columns');
         expect(screen.getByText('11 / 100')).toBeInTheDocument();
     });
 });

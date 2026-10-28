@@ -84,6 +84,7 @@ export function NewAnnouncementModal({ dataProductId, outputPortId, consumerCoun
                     </Form.Item>
                     <Form.Item<CreateAnnouncement>
                         label={t('Title')}
+                        htmlFor="title"
                         required
                         extra={<CharacterCount length={title.length} max={TITLE_MAX_LENGTH} />}
                     >
@@ -97,6 +98,7 @@ export function NewAnnouncementModal({ dataProductId, outputPortId, consumerCoun
                     </Form.Item>
                     <Form.Item<CreateAnnouncement>
                         label={t('Message')}
+                        htmlFor="message"
                         required
                         tooltip={t(
                             'Plain text. Say what happens, who is affected and what consumers need to do. Write any deadline or maintenance window here.',
@@ -128,11 +130,7 @@ export function NewAnnouncementModal({ dataProductId, outputPortId, consumerCoun
                     </Form.Item>
                 </Form>
             </ConfigProvider>
-            <Alert
-                type="info"
-                showIcon
-                title={t('This will notify {{count}} Consuming Data Products.', { count: consumerCount })}
-            />
+            <Alert type="info" showIcon title={t('This will notify {{count}} consumers.', { count: consumerCount })} />
         </Modal>
     );
 }
