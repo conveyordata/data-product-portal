@@ -1,5 +1,4 @@
-import { Alert, Form, Input, Radio, Select, Skeleton, Tooltip, Typography } from 'antd';
-import type { FormInstance } from 'antd/es/form/hooks/useForm';
+import { Alert, Form, Input, Radio, Select, Tooltip, Typography } from 'antd';import type { FormInstance } from 'antd/es/form/hooks/useForm';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -25,7 +24,6 @@ import {
     useResourceNameConstraintsQuery,
 } from '@/store/api/services/generated/resourceNamesApi.ts';
 import { useGetUsersQuery } from '@/store/api/services/generated/usersApi.ts';
-import { useGetDataProductOwnerIds } from '@/utils/data-product-user-role.helper.ts';
 import { selectFilterOptionByLabel, selectFilterOptionByLabelAndValue } from '@/utils/form.helper.ts';
 
 const { TextArea } = Input;
@@ -149,12 +147,6 @@ export const DataProductFormItems = <T extends DataProductCreate>({
             validateResourceName({ resourceName: resourceName, model: ResourceNameModel.DataProduct }).unwrap(),
         [validateResourceName],
     );
-
-    const ownerIds = useGetDataProductOwnerIds(currentDataProduct?.id);
-
-    if (mode === 'edit' && (!currentDataProduct || ownerIds === undefined)) {
-        return <Skeleton active />;
-    }
 
     return (
         <>

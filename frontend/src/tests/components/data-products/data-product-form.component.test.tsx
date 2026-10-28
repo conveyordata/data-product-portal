@@ -72,7 +72,15 @@ describe('DataProductForm environments', () => {
         server.use(
             http.get('*/api/v2/authz/role_assignments/data_product', () =>
                 HttpResponse.json({
-                    role_assignments: [{ role: { prototype: Prototype.OWNER }, user: mockUsers[0] }],
+                    role_assignments: [
+                        {
+                            role: { prototype: Prototype.OWNER },
+                            identity: {
+                                ...mockUsers[0],
+                                type: 'user',
+                            },
+                        },
+                    ],
                 }),
             ),
         );

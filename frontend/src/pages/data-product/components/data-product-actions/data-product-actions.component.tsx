@@ -73,15 +73,15 @@ export function DataProductActions({ dataProductId }: Props) {
 
     const { data: roleAssignments, isFetching: isFetchingRoleAssignments } = useListDataProductRoleAssignmentsQuery({
         dataProductId: dataProductId,
-        userId: user?.id,
+        identityId: user?.id,
     });
 
     const allowRequesting = useMemo(() => {
         if (!user?.id || isFetchingRoleAssignments || !roleAssignments) return false;
 
-        return !roleAssignments?.role_assignments?.some(
-            ({ user: u, decision }) =>
-                u.id === user.id && (decision === DecisionStatus.Pending || decision === DecisionStatus.Approved),
+        return !roleAssignments.role_assignments.some(
+            ({ identity, decision }) =>
+                identity.id === user.id && (decision === DecisionStatus.Pending || decision === DecisionStatus.Approved),
         );
     }, [user?.id, isFetchingRoleAssignments, roleAssignments]);
 
