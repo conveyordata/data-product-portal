@@ -218,13 +218,13 @@ INSERT INTO public.data_product_types (id, name, description, icon_key, created_
 INSERT INTO public.data_product_types (id, name, description, icon_key, created_on, updated_on, deleted_at) VALUES ('{{ analytics_type_id }}'::uuid, 'Analytics', 'Data products that provide analysis, metrics, or aggregated insights to support business decisions.', 'ANALYTICS', timezone('utc'::text, current_timestamp), NULL, NULL);
 
 -- ...existing platform service configs...
-INSERT INTO public.roles (id, name, scope, prototype, description, permissions, created_on, updated_on, deleted_at) VALUES ('18e67286-92aa-449a-ba46-ac26eb0de21d', 'Solution Architect', 'data_product', 0, 'The Solution Architect for a Data Product', ARRAY[303, 309, 310, 311, 312, 313, 314, 903], timezone('utc'::text, current_timestamp + interval '1 seconds'), NULL, NULL);
+INSERT INTO public.roles (id, name, scope, prototype, description, permissions, created_on, updated_on, deleted_at) VALUES ('18e67286-92aa-449a-ba46-ac26eb0de21d', 'Solution Architect', 'data_product', 0, 'The Solution Architect for a Data Product', ARRAY[303, 309, 310, 311, 312, 313, 314], timezone('utc'::text, current_timestamp + interval '1 seconds'), NULL, NULL);
 
-INSERT INTO public.roles (id, name, scope, prototype, description, permissions, created_on, updated_on, deleted_at) VALUES ('{{ product_member_id }}'::uuid, 'Member', 'data_product', 0, 'A regular team member of a Data Product', ARRAY[313, 314, 315, 903], timezone('utc'::text, current_timestamp + interval '2 seconds'), NULL, NULL);
+INSERT INTO public.roles (id, name, scope, prototype, description, permissions, created_on, updated_on, deleted_at) VALUES ('{{ product_member_id }}'::uuid, 'Member', 'data_product', 0, 'A regular team member of a Data Product', ARRAY[313, 314, 315], timezone('utc'::text, current_timestamp + interval '2 seconds'), NULL, NULL);
 
-INSERT INTO public.roles (id, name, scope, prototype, description, permissions, created_on, updated_on, deleted_at) VALUES ('2ae1b4e3-5b13-491a-912b-984e2e90b858', 'Solution Architect', 'dataset', 0, 'The Solution Architect for a Dataset', ARRAY[403, 409, 410, 903], timezone('utc'::text, current_timestamp + interval '1 seconds'), NULL, NULL);
+INSERT INTO public.roles (id, name, scope, prototype, description, permissions, created_on, updated_on, deleted_at) VALUES ('2ae1b4e3-5b13-491a-912b-984e2e90b858', 'Solution Architect', 'dataset', 0, 'The Solution Architect for a Dataset', ARRAY[403, 409, 410], timezone('utc'::text, current_timestamp + interval '1 seconds'), NULL, NULL);
 
-INSERT INTO public.roles (id, name, scope, prototype, description, permissions, created_on, updated_on, deleted_at) VALUES ('db8d7a76-c50b-4e95-8549-8da86f48e7c2', 'Member', 'dataset', 0, 'A regular team member of a Dataset', ARRAY[413, 903], timezone('utc'::text, current_timestamp + interval '2 seconds'), NULL, NULL);
+INSERT INTO public.roles (id, name, scope, prototype, description, permissions, created_on, updated_on, deleted_at) VALUES ('db8d7a76-c50b-4e95-8549-8da86f48e7c2', 'Member', 'dataset', 0, 'A regular team member of a Dataset', ARRAY[413], timezone('utc'::text, current_timestamp + interval '2 seconds'), NULL, NULL);
 
 -- ENVIRONMENTS
 INSERT INTO public.environments (id, name, context, acronym, is_default, created_on, updated_on, deleted_at) VALUES ('{{ returned_environment_id_dev }}'::uuid, 'development', 'arn:aws:iam::{{ AWS_ACCOUNT_ID }}:role/{{ AWS_ROLE_WITH_CONTEXT_TEMPLATE_DEV }}', 'dev', TRUE, timezone('utc'::text, current_timestamp), NULL, NULL);

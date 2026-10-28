@@ -72,7 +72,7 @@ export function AnnouncementsTab({ outputPortId, dataProductId }: Props) {
                             />
                         ) : (
                             t(
-                                "The team that owns this Output Port hasn't posted any updates. When they do, you get a notification.",
+                                "The team that owns this Output Port hasn't posted any updates. When they do, Consuming Data Products get a notification.",
                             )
                         )
                     }

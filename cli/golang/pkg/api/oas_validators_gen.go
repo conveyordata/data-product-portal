@@ -427,8 +427,6 @@ func (s AuthorizationAction) Validate() error {
 		return nil
 	case 902:
 		return nil
-	case 903:
-		return nil
 	default:
 		return errors.Errorf("invalid value: %v", s)
 	}
