@@ -43,8 +43,7 @@ class RoleAssignmentService:
         data_product_id: Optional[UUID] = None,
         identity_id: Optional[UUID] = None,
         role_id: Optional[UUID] = None,
-        decision: Optional[DecisionStatus] = None,
-        users_only: bool = False,
+        decision: Optional[DecisionStatus] = None
     ) -> Sequence[DataProductRoleAssignment]:
         """
         Lists assignments for a given data product, identity, or role.
@@ -70,10 +69,6 @@ class RoleAssignmentService:
             query = query.where(DataProductRoleAssignmentModel.role_id == role_id)
         if decision is not None:
             query = query.where(DataProductRoleAssignmentModel.decision == decision)
-        if users_only:
-            query = query.join(
-                UserModel, UserModel.id == DataProductRoleAssignmentModel.identity_id
-            )
 
         return self.db.scalars(query).all()
 
@@ -101,7 +96,7 @@ class RoleAssignmentService:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail=(
-                        "Role assignment already exists for this user and data product."
+                        "Role assignment already exists for this identity and data product."
                     ),
                 )
 
@@ -162,7 +157,7 @@ class RoleAssignmentService:
         ):
             raise HTTPException(
                 status.HTTP_403_FORBIDDEN,
-                "A data product must always be owned by at least one user",
+                "A data product must always be owned by at least one identity",
             )
 
     def _count_owners(self, data_product_id: UUID) -> int:

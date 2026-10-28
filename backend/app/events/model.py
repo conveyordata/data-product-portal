@@ -16,6 +16,7 @@ if TYPE_CHECKING:
     from app.data_products.output_ports.model import OutputPort
     from app.data_products.technical_assets.model import TechnicalAsset
     from app.explorations.model import Exploration
+    from app.identities.model import Identity
     from app.users.model import User
 
 
@@ -57,6 +58,12 @@ class Event(Base, BaseORM):
         "foreign(User.id), Event.subject_type == 'USER')"
         ",and_(Event.target_id == foreign(User.id), "
         "Event.target_type == 'USER'))",
+    )
+    identity: Mapped["Identity"] = relationship(
+        primaryjoin="or_(and_(Event.subject_id == "
+                    "foreign(Identity.id), Event.subject_type == 'IDENTITY'), "
+                    "and_(Event.target_id == foreign(Identity.id), "
+                    "Event.target_type == 'IDENTITY'))",
     )
     output_port: Mapped["OutputPort"] = relationship(
         primaryjoin="or_(and_(Event.subject_id == foreign(OutputPort.id),"

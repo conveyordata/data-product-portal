@@ -10,6 +10,7 @@ from app.events.enums import EventEntityType
 from app.explorations.schema_response import Exploration
 from app.shared.schema import ORMModel
 from app.users.schema import User
+from app.identities.schema import Identity
 
 
 class GetEventHistoryResponseItem(ORMModel):
@@ -30,6 +31,7 @@ class GetEventHistoryResponseItem(ORMModel):
     output_port: Optional[OutputPort] = None
     technical_asset: Optional[TechnicalAsset] = None
     exploration: Optional[Exploration] = None
+    identity: Optional[Identity] = None
 
 
 class GetEventHistoryResponse(ORMModel):
