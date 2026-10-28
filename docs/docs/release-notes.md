@@ -16,7 +16,7 @@ sidebar_position: 200
 - **[API]**: Namespaces made only of dots (`.`, `..`) are rejected for every resource, so they can never resolve to a parent path when used to name infrastructure. Existing namespaces are not changed.
 - **[SDK]**: `AbstractEventHandler` has a new abstract method `on_domain_event`. Handlers that subclass it directly, instead of `ReconcileEventHandler`, must implement it.
 - **[SDK]**: `OutputPortQueryStatsUpdate.date` and `OutputPortQueryStatsDelete.date` are now `datetime.date` instead of `str` in the Python SDK, and `time.Time` instead of `string` in the CLI's `pkg/api`. Pass a `datetime.date`, not a `datetime.datetime`: the SDK sends the time part along and the request is rejected.
-- **[API]**: Role assignments for Data Products and Global Roles API endpoints now accept any kind of identity, not just users.
+- **[API/SDK]**: Data Product and Global Role assignments now accept users, groups and machine users. Replace `user_id` with `identity_id` in request bodies and list filters, and read `identity` instead of `user` in assignment responses. The `data_product_role_assignment.event` webhook payload also replaces `user_id` with `identity_id`.
 
 ### features
 
