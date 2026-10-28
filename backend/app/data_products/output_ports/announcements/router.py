@@ -19,6 +19,7 @@ from app.events.enums import EventEntityType, EventType
 from app.events.schema import CreateEvent
 from app.events.service import EventService
 from app.users.model import User
+from app.users.notifications.service import NotificationService
 
 router = APIRouter(prefix="/{id}/announcements")
 
@@ -63,7 +64,7 @@ def create_output_port_announcement(
     announcement = AnnouncementService(db).create_announcement(
         ds.id, request, authenticated_user
     )
-    EventService(db).create_event(
+    event_id = EventService(db).create_event(
         CreateEvent(
             name=EventType.ANNOUNCEMENT_CREATED,
             subject_id=ds.id,
@@ -72,6 +73,9 @@ def create_output_port_announcement(
             target_type=EventEntityType.ANNOUNCEMENT,
             actor_id=authenticated_user.id,
         )
+    )
+    NotificationService(db).create_announcement_notifications(
+        output_port_id=ds.id, event_id=event_id
     )
     return CreateAnnouncementResponse(id=announcement.id)
 
@@ -95,6 +99,7 @@ def remove_output_port_announcement(
 ) -> None:
     ds = ensure_output_port_exists(id, db, data_product_id=data_product_id)
     announcement = AnnouncementService(db).remove_announcement(announcement_id, ds.id)
+    NotificationService(db).remove_announcement_notifications(announcement.id)
     EventService(db).create_event(
         CreateEvent(
             name=EventType.ANNOUNCEMENT_REMOVED,

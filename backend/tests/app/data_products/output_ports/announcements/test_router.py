@@ -1,5 +1,6 @@
 from sqlalchemy import select
 
+from app.abstract_data_product.input_ports.enums import InputPortStatus
 from app.authorization.roles.schema import Scope
 from app.core.authz.actions import AuthorizationAction
 from app.core.authz.authorization import Authorization
@@ -8,12 +9,18 @@ from app.data_products.output_ports.enums import OutputPortAccessFunction
 from app.events.enums import EventEntityType, EventType
 from app.events.model import Event
 from app.settings import settings
+from app.users.notifications.model import Notification
 from tests.factories import (
     AnnouncementFactory,
     DataProductFactory,
     DataProductRoleAssignmentFactory,
     DatasetRoleAssignmentFactory,
+    ExplorationFactory,
+    GroupFactory,
+    GroupMembershipFactory,
     InputPortFactory,
+    MachineUserFactory,
+    NotificationFactory,
     OutputPortFactory,
     RoleFactory,
     UserFactory,
@@ -61,6 +68,29 @@ def _consumer(output_port):
     return user
 
 
+def _consuming_data_product(output_port, *identities, status=InputPortStatus.APPROVED):
+    consumer = DataProductFactory()
+    InputPortFactory(
+        consuming_abstract_data_product=consumer, output_port=output_port, status=status
+    )
+    role = RoleFactory(scope=Scope.DATA_PRODUCT, permissions=[])
+    for identity in identities:
+        DataProductRoleAssignmentFactory(
+            data_product_id=consumer.id, identity_id=identity.id, role_id=role.id
+        )
+    return consumer
+
+
+def _notified_user_ids(session, announcement_id):
+    return set(
+        session.scalars(
+            select(Notification.user_id)
+            .join(Event, Event.id == Notification.event_id)
+            .where(Event.target_id == announcement_id)
+        ).all()
+    )
+
+
 class TestAnnouncementsRouter:
     def test_create_output_port_announcement__as_producer(self, client, session):
         output_port = OutputPortFactory()
@@ -77,6 +107,72 @@ class TestAnnouncementsRouter:
         assert event.name == EventType.ANNOUNCEMENT_CREATED
         assert event.subject_id == output_port.id
         assert event.target_type == EventEntityType.ANNOUNCEMENT
+
+    def test_create_output_port_announcement__notifies_consumers(self, client, session):
+        output_port = OutputPortFactory()
+        author = _producer(output_port)
+        member = UserFactory()
+        group_member = UserFactory()
+        group = GroupFactory()
+        GroupMembershipFactory(group=group, member=group_member)
+        _consuming_data_product(
+            output_port, member, group, MachineUserFactory(), author
+        )
+        exploration = ExplorationFactory()
+        InputPortFactory(
+            consuming_abstract_data_product=exploration, output_port=output_port
+        )
+
+        response = client.post(_url(output_port), json=PAYLOAD)
+
+        assert response.status_code == 200, response.text
+        assert _notified_user_ids(session, response.json()["id"]) == {
+            member.id,
+            group_member.id,
+            exploration.owner_id,
+        }
+
+    def test_create_output_port_announcement__notifies_member_of_two_consumers_once(
+        self, client, session
+    ):
+        output_port = OutputPortFactory()
+        _producer(output_port)
+        member = UserFactory()
+        _consuming_data_product(output_port, member)
+        _consuming_data_product(output_port, member)
+
+        response = client.post(_url(output_port), json=PAYLOAD)
+
+        assert response.status_code == 200, response.text
+        notifications = session.scalars(
+            select(Notification)
+            .join(Event, Event.id == Notification.event_id)
+            .where(Event.target_id == response.json()["id"])
+        ).all()
+        assert [n.user_id for n in notifications] == [member.id]
+
+    def test_create_output_port_announcement__skips_producer_and_unapproved_consumers(
+        self, client, session
+    ):
+        output_port = OutputPortFactory()
+        _producer(output_port)
+        producer_member = UserFactory()
+        DataProductRoleAssignmentFactory(
+            data_product_id=output_port.data_product_id,
+            identity_id=producer_member.id,
+            role_id=RoleFactory(scope=Scope.DATA_PRODUCT, permissions=[]).id,
+        )
+        _consuming_data_product(
+            output_port, UserFactory(), status=InputPortStatus.PENDING
+        )
+        _consuming_data_product(
+            output_port, UserFactory(), status=InputPortStatus.REVOKED
+        )
+
+        response = client.post(_url(output_port), json=PAYLOAD)
+
+        assert response.status_code == 200, response.text
+        assert _notified_user_ids(session, response.json()["id"]) == set()
 
     def test_create_output_port_announcement__without_link(self, client, session):
         output_port = OutputPortFactory()
@@ -227,6 +323,21 @@ class TestAnnouncementsRouter:
         )
         session.refresh(created)
         assert created.deleted_target_identifier == PAYLOAD["title"]
+
+    def test_remove_output_port_announcement__removes_its_notifications(
+        self, client, session
+    ):
+        output_port = OutputPortFactory()
+        _producer(output_port)
+        _consuming_data_product(output_port, UserFactory())
+        announcement_id = client.post(_url(output_port), json=PAYLOAD).json()["id"]
+        other = NotificationFactory()
+
+        response = client.delete(f"{_url(output_port)}/{announcement_id}")
+
+        assert response.status_code == 200, response.text
+        assert _notified_user_ids(session, announcement_id) == set()
+        assert session.get(Notification, other.id) is not None
 
     def test_remove_output_port_announcement__of_other_output_port_not_found(
         self, client, session

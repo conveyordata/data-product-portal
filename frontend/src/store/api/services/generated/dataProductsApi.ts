@@ -566,6 +566,16 @@ export type Exploration = {
   status: AbstractDataProductStatus;
   finalizers: string[];
 };
+export type Announcement = {
+  id: string;
+  output_port_id: string;
+  type: AnnouncementType;
+  title: string;
+  message: string;
+  link: string | null;
+  author: User | null;
+  created_at: string;
+};
 export type GetEventHistoryResponseItem = {
   id: string;
   name: string;
@@ -584,6 +594,7 @@ export type GetEventHistoryResponseItem = {
   output_port?: OutputPort | null;
   technical_asset?: TechnicalAsset | null;
   exploration?: Exploration | null;
+  announcement?: Announcement | null;
 };
 export type GetEventHistoryResponse = {
   events: GetEventHistoryResponseItem[];
@@ -692,6 +703,13 @@ export enum TechnicalAssetStatus {
 export enum TechnicalMapping {
   Default = "default",
   Custom = "custom",
+}
+export enum AnnouncementType {
+  Issue = "issue",
+  ActionNeeded = "action_needed",
+  PlannedMaintenance = "planned_maintenance",
+  NewVersion = "new_version",
+  Info = "info",
 }
 export enum DataProductSettingType {
   Checkbox = "checkbox",

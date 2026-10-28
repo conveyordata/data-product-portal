@@ -10,8 +10,10 @@ import {
     useRemoveAllUserNotificationsMutation,
     useRemoveUserNotificationMutation,
 } from '@/store/api/services/generated/usersNotificationsApi.ts';
+import { EventType } from '@/types/events/event-types.ts';
 import { formatDateToNowFromUTCString } from '@/utils/date.helper';
 import { dispatchMessage } from '@/utils/feedback.ts';
+import { AnnouncementNotification } from './announcement-notification';
 import { NotificationDescription } from './notification-description';
 import styles from './notifications.module.scss';
 
@@ -96,39 +98,76 @@ export function Notifications() {
         setMaxItems((prev) => prev + MAX_ITEMS_DEFAULT);
     }, []);
 
-    const notificationItems = useMemo(() => {
-        if (!notifications || notifications.length === 0) return [];
+    const [announcementNotifications, requestNotifications] = useMemo(() => {
+        const isAnnouncement = (notification: GetUserNotificationsResponseItem) =>
+            notification.event.name === EventType.ANNOUNCEMENT_CREATED;
+        return [notifications.filter(isAnnouncement), notifications.filter((n) => !isAnnouncement(n))];
+    }, [notifications]);
 
-        const slicedItems = notifications.slice(0, maxItems).map((notification, idx) => {
-            const prev = notifications[idx - 1];
+    const createShowMoreItem = useCallback(
+        (excessLength: number) => (
+            <Flex key="show-more-indicator" className={styles.notificationItem}>
+                <Button
+                    className={styles.closeButton}
+                    type="link"
+                    onClick={(event) => {
+                        event.stopPropagation();
+                        handleLoadMore();
+                    }}
+                >
+                    <Typography.Text type="secondary">
+                        {t('... {{count}} more items', { count: excessLength })}
+                    </Typography.Text>
+                </Button>
+            </Flex>
+        ),
+        [handleLoadMore, t],
+    );
+
+    const requestItems = useMemo(() => {
+        const slicedItems = requestNotifications.slice(0, maxItems).map((notification, idx) => {
+            const prev = requestNotifications[idx - 1];
             const sameActorAsPrevious = idx > 0 && prev.event.actor_id === notification.event.actor_id;
 
             return createNotificationItem(notification, !sameActorAsPrevious, handleRemoveNotification, idx);
         });
 
-        const excessLength = notifications.length - maxItems;
-
-        if (excessLength > 0) {
-            slicedItems.push(
-                <Flex key="show-more-indicator" className={styles.notificationItem}>
-                    <Button
-                        className={styles.closeButton}
-                        type="link"
-                        onClick={(event) => {
-                            event.stopPropagation();
-                            handleLoadMore();
-                        }}
-                    >
-                        <Typography.Text type="secondary">
-                            {t('... {{count}} more items', { count: excessLength })}
-                        </Typography.Text>
-                    </Button>
-                </Flex>,
-            );
-        }
+        const excessLength = requestNotifications.length - maxItems;
+        if (excessLength > 0) slicedItems.push(createShowMoreItem(excessLength));
 
         return slicedItems;
-    }, [notifications, createNotificationItem, handleRemoveNotification, t, maxItems, handleLoadMore]);
+    }, [requestNotifications, createNotificationItem, handleRemoveNotification, maxItems, createShowMoreItem]);
+
+    const announcementItems = useMemo(() => {
+        const slicedItems = announcementNotifications
+            .slice(0, maxItems)
+            .map((notification) => (
+                <AnnouncementNotification
+                    key={notification.id}
+                    notification={notification}
+                    onAcknowledge={handleRemoveNotification}
+                />
+            ));
+
+        const excessLength = announcementNotifications.length - maxItems;
+        if (excessLength > 0) slicedItems.push(createShowMoreItem(excessLength));
+
+        return slicedItems;
+    }, [announcementNotifications, handleRemoveNotification, maxItems, createShowMoreItem]);
+
+    const notificationItems = [
+        { key: 'requests', title: t('Requests'), items: requestItems },
+        { key: 'announcements', title: t('Announcements'), items: announcementItems },
+    ]
+        .filter(({ items }) => items.length > 0)
+        .map(({ key, title, items }) => (
+            <Flex key={key} vertical gap="small">
+                <Typography.Text type="secondary" strong>
+                    {title}
+                </Typography.Text>
+                {items}
+            </Flex>
+        ));
 
     const header = useMemo(() => {
         if (notificationItems?.length > 0) {
@@ -166,7 +205,7 @@ export function Notifications() {
                     content={
                         <div>
                             {header}
-                            <Flex vertical className={styles.notificationItems}>
+                            <Flex vertical gap="middle" className={styles.notificationItems}>
                                 {notificationItems}
                             </Flex>
                         </div>
