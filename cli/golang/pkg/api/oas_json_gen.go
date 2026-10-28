@@ -2070,6 +2070,126 @@ func (s *AnnouncementType) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
+// Encode encodes AppSharedSchemaNonEmptyStr1 as json.
+func (s AppSharedSchemaNonEmptyStr1) Encode(e *jx.Encoder) {
+	unwrapped := string(s)
+
+	e.Str(unwrapped)
+}
+
+// Decode decodes AppSharedSchemaNonEmptyStr1 from json.
+func (s *AppSharedSchemaNonEmptyStr1) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode AppSharedSchemaNonEmptyStr1 to nil")
+	}
+	var unwrapped string
+	if err := func() error {
+		v, err := d.Str()
+		unwrapped = string(v)
+		if err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = AppSharedSchemaNonEmptyStr1(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s AppSharedSchemaNonEmptyStr1) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *AppSharedSchemaNonEmptyStr1) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes AppSharedSchemaNonEmptyStr2 as json.
+func (s AppSharedSchemaNonEmptyStr2) Encode(e *jx.Encoder) {
+	unwrapped := string(s)
+
+	e.Str(unwrapped)
+}
+
+// Decode decodes AppSharedSchemaNonEmptyStr2 from json.
+func (s *AppSharedSchemaNonEmptyStr2) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode AppSharedSchemaNonEmptyStr2 to nil")
+	}
+	var unwrapped string
+	if err := func() error {
+		v, err := d.Str()
+		unwrapped = string(v)
+		if err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = AppSharedSchemaNonEmptyStr2(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s AppSharedSchemaNonEmptyStr2) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *AppSharedSchemaNonEmptyStr2) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes AppSharedSchemaNonEmptyStr3 as json.
+func (s AppSharedSchemaNonEmptyStr3) Encode(e *jx.Encoder) {
+	unwrapped := string(s)
+
+	e.Str(unwrapped)
+}
+
+// Decode decodes AppSharedSchemaNonEmptyStr3 from json.
+func (s *AppSharedSchemaNonEmptyStr3) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode AppSharedSchemaNonEmptyStr3 to nil")
+	}
+	var unwrapped string
+	if err := func() error {
+		v, err := d.Str()
+		unwrapped = string(v)
+		if err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = AppSharedSchemaNonEmptyStr3(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s AppSharedSchemaNonEmptyStr3) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *AppSharedSchemaNonEmptyStr3) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode implements json.Marshaler.
 func (s *ApproveLinkBetweenTechnicalAssetAndOutputPortRequest) Encode(e *jx.Encoder) {
 	e.ObjStart()
@@ -3096,11 +3216,11 @@ func (s *CreateAnnouncement) encodeFields(e *jx.Encoder) {
 	}
 	{
 		e.FieldStart("title")
-		e.Str(s.Title)
+		s.Title.Encode(e)
 	}
 	{
 		e.FieldStart("message")
-		e.Str(s.Message)
+		s.Message.Encode(e)
 	}
 	{
 		if s.Link.Set {
@@ -3139,9 +3259,7 @@ func (s *CreateAnnouncement) Decode(d *jx.Decoder) error {
 		case "title":
 			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
-				v, err := d.Str()
-				s.Title = string(v)
-				if err != nil {
+				if err := s.Title.Decode(d); err != nil {
 					return err
 				}
 				return nil
@@ -3151,9 +3269,7 @@ func (s *CreateAnnouncement) Decode(d *jx.Decoder) error {
 		case "message":
 			requiredBitSet[0] |= 1 << 2
 			if err := func() error {
-				v, err := d.Str()
-				s.Message = string(v)
-				if err != nil {
+				if err := s.Message.Decode(d); err != nil {
 					return err
 				}
 				return nil
@@ -24246,46 +24362,6 @@ func (s NilUser) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *NilUser) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode encodes NonEmptyStr as json.
-func (s NonEmptyStr) Encode(e *jx.Encoder) {
-	unwrapped := string(s)
-
-	e.Str(unwrapped)
-}
-
-// Decode decodes NonEmptyStr from json.
-func (s *NonEmptyStr) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode NonEmptyStr to nil")
-	}
-	var unwrapped string
-	if err := func() error {
-		v, err := d.Str()
-		unwrapped = string(v)
-		if err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		return errors.Wrap(err, "alias")
-	}
-	*s = NonEmptyStr(unwrapped)
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s NonEmptyStr) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *NonEmptyStr) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

@@ -117,6 +117,16 @@ class TestAnnouncementsRouter:
 
         assert response.status_code == 422
 
+    def test_create_output_port_announcement__rejects_blank_title(
+        self, client, session
+    ):
+        output_port = OutputPortFactory()
+        _producer(output_port)
+
+        response = client.post(_url(output_port), json={**PAYLOAD, "title": "   "})
+
+        assert response.status_code == 422
+
     def test_create_output_port_announcement__rejects_unknown_type(
         self, client, session
     ):
@@ -198,6 +208,25 @@ class TestAnnouncementsRouter:
         )
         assert event.target_id == announcement.id
         assert event.deleted_target_identifier == announcement.title
+
+    def test_remove_output_port_announcement__keeps_title_on_created_event(
+        self, client, session
+    ):
+        output_port = OutputPortFactory()
+        _producer(output_port)
+        announcement_id = client.post(_url(output_port), json=PAYLOAD).json()["id"]
+
+        response = client.delete(f"{_url(output_port)}/{announcement_id}")
+
+        assert response.status_code == 200, response.text
+        created = session.scalar(
+            select(Event).where(
+                Event.name == EventType.ANNOUNCEMENT_CREATED,
+                Event.target_id == announcement_id,
+            )
+        )
+        session.refresh(created)
+        assert created.deleted_target_identifier == PAYLOAD["title"]
 
     def test_remove_output_port_announcement__of_other_output_port_not_found(
         self, client, session

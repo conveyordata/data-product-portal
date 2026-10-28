@@ -59,11 +59,7 @@ def upgrade() -> None:
 
 def downgrade() -> None:
 
-    events = sa.table(
-        "events",
-        sa.column("subject_type", sa.String),
-        sa.column("target_type", sa.String),
-    )
+    events = sa.table("events", sa.column("target_type", sa.String))
     op.execute(events.delete().where(events.c.target_type == "ANNOUNCEMENT"))
     entities = sa.table("event_reference_entities", sa.column("key", sa.String))
     op.execute(entities.delete().where(entities.c.key == "ANNOUNCEMENT"))
