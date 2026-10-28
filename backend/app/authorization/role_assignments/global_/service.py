@@ -90,6 +90,21 @@ class RoleAssignmentService:
         self.db.flush()
         return assignment
 
+    def ensure_can_decide(self, id_: UUID, decision: DecisionStatus) -> None:
+        original = self.get_assignment(id_)
+        if original.decision not in (DecisionStatus.PENDING, decision):
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="This assignment was already decided",
+            )
+
+    def ensure_can_become_admin(self, user: UserModel) -> None:
+        if not user.can_become_admin:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="User is not allowed to elevate to admin",
+            )
+
     def ensure_is_global_scope(self, role_id: UUID) -> None:
         role = self.db.get(RoleModel, role_id)
         if role and role.scope != Scope.GLOBAL:

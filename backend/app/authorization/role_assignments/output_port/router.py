@@ -1,7 +1,7 @@
 from typing import Annotated, Sequence
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, Query
 from pydantic.json_schema import SkipJsonSchema
 from sqlalchemy.orm import Session
 
@@ -228,18 +228,7 @@ def decide_output_port_role_assignment(
     user: User = Depends(get_authenticated_user),
 ) -> OutputPortRoleAssignmentResponse:
     service = RoleAssignmentService(db)
-    original = service.get_assignment(id)
-
-    if original.decision not in (DecisionStatus.PENDING, request.decision):
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="This assignment was already decided",
-        )
-    if request.decision is DecisionStatus.APPROVED and original.role_id is None:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="Cannot approve a request that does not have a role assignment",
-        )
+    service.ensure_can_decide(id, request.decision)
 
     assignment = service.update_assignment(
         UpdateOutputPortRoleAssignment(id=id, decision=request.decision), actor=user
