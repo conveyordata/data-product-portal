@@ -77,9 +77,10 @@ export function HomeNotifications() {
         [notifications],
     );
 
-    if (isAwaitingData(pendingActionsQuery) || isAwaitingData(notificationsQuery)) return null;
-
+    const isLoading = isAwaitingData(pendingActionsQuery) || isAwaitingData(notificationsQuery);
     const isEmpty = requestRows.length === 0 && announcements.length === 0;
+    if (isLoading && isEmpty) return null;
+
     const failed = isEmpty && (hasFailed(pendingActionsQuery) || hasFailed(notificationsQuery));
 
     return (

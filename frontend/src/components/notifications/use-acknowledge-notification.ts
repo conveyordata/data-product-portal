@@ -13,7 +13,9 @@ export function isAnnouncementNotification(notification: GetUserNotificationsRes
 
 export function useAcknowledgeNotification() {
     const { t } = useTranslation();
-    const [removeNotification, { isLoading, originalArgs }] = useRemoveUserNotificationMutation();
+    const [removeNotification, { isLoading, originalArgs }] = useRemoveUserNotificationMutation({
+        fixedCacheKey: 'acknowledge-notification',
+    });
 
     const acknowledge = useCallback(
         async (notificationId: string) => {
