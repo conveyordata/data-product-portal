@@ -20,6 +20,8 @@ class MachineUserIdentity(MachineUser):
     type: Literal[IdentityType.MACHINE_USER]
 
 
+# Because the frontend cannot identify the type of the Identity,
+# this is introduced to avoid setting a "type" param on every type response schema.
 type Identity = Annotated[
     UserIdentity | GroupIdentity | MachineUserIdentity,
     Field(discriminator="type"),
