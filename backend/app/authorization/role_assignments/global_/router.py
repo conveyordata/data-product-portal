@@ -76,7 +76,7 @@ def create_global_role_assignment(
 ) -> GlobalRoleAssignmentResponse:
     role_id = _resolve_role_id(request.role_id)
     return RoleAssignmentService(db).create_assignment(
-        RoleAssignmentRequest(identity_id=request.user_id, role_id=role_id),
+        RoleAssignmentRequest(identity_id=request.identity_id, role_id=role_id),
         actor=user,
     )
 
