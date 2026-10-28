@@ -22,17 +22,14 @@ export function DatasetQuality({ dataProductId, datasetId }: Props) {
     return (
         <Flex vertical gap="small">
             <Title level={5}>{t('Quality Status')}</Title>
-            {summary ? (
-                <Flex vertical gap="small" align="flex-start">
-                    <QualityBadge
-                        quality_status={summary.overall_status}
-                        createdAt={summary.created_at}
-                        detailsUrl={summary.details_url ?? undefined}
-                    />
-                </Flex>
-            ) : (
-                <Text type="secondary">{t('Ask the owners to publish data quality information')}</Text>
-            )}
+            <Flex vertical gap="small" align="flex-start">
+                <QualityBadge
+                    status={summary?.overall_status}
+                    createdAt={summary?.created_at}
+                    detailsUrl={summary?.details_url ?? undefined}
+                />
+                {!summary && <Text type="secondary">{t('Ask the owners to publish data quality information')}</Text>}
+            </Flex>
         </Flex>
     );
 }

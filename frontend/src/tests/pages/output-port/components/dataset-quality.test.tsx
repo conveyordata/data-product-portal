@@ -28,6 +28,7 @@ describe('DatasetQuality', () => {
         rerender(<DatasetQuality dataProductId="dp1" datasetId="without-quality" />);
 
         expect(await screen.findByText('Ask the owners to publish data quality information')).toBeInTheDocument();
+        expect(screen.getByText('No data')).toBeInTheDocument();
         expect(screen.queryByText('Passed')).not.toBeInTheDocument();
     });
 });
