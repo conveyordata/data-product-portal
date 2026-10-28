@@ -81,7 +81,8 @@ export function DataProductActions({ dataProductId }: Props) {
 
         return !roleAssignments.role_assignments.some(
             ({ identity, decision }) =>
-                identity.id === user.id && (decision === DecisionStatus.Pending || decision === DecisionStatus.Approved),
+                identity.id === user.id &&
+                (decision === DecisionStatus.Pending || decision === DecisionStatus.Approved),
         );
     }, [user?.id, isFetchingRoleAssignments, roleAssignments]);
 

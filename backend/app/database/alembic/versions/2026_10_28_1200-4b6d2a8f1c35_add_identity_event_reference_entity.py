@@ -46,6 +46,8 @@ def downgrade() -> None:
         $$;
         """
     )
-    op.execute("UPDATE events SET subject_type = 'USER' WHERE subject_type = 'IDENTITY'")
+    op.execute(
+        "UPDATE events SET subject_type = 'USER' WHERE subject_type = 'IDENTITY'"
+    )
     op.execute("UPDATE events SET target_type = 'USER' WHERE target_type = 'IDENTITY'")
     op.execute("DELETE FROM event_reference_entities WHERE key = 'IDENTITY'")
