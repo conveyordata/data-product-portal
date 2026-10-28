@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { TextEditor } from '@/components/rich-text/text-editor/text-editor.tsx';
-import { editRichText, renderWithProviders, screen, userEvent, waitFor } from '@/tests/test-utils.tsx';
+import { editRichText } from '@/tests/components/rich-text/text-editor.helpers.ts';
+import { renderWithProviders, screen, userEvent, waitFor } from '@/tests/test-utils.tsx';
 
 const saved = '<p>Saved about</p>';
 const edited = '<p>Edited about</p>';

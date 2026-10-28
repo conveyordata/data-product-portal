@@ -1,12 +1,11 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { setupListeners } from '@reduxjs/toolkit/query';
-import { type RenderOptions, render, screen, waitFor } from '@testing-library/react';
+import { type RenderOptions, render } from '@testing-library/react';
 import { NuqsTestingAdapter } from 'nuqs/adapters/testing';
 import type { ReactElement, ReactNode } from 'react';
 import { I18nextProvider } from 'react-i18next';
 import { Provider } from 'react-redux';
 import { MemoryRouter, type MemoryRouterProps } from 'react-router';
-import { expect } from 'vitest';
 import { FeedbackBridge } from '@/components/feedback/feedback-bridge.component.tsx';
 import { BreadcrumbProvider } from '@/components/layout/navbar/breadcrumbs/breadcrumb.context.tsx';
 import '@/store/api/services/apiTags.ts';
@@ -71,13 +70,6 @@ export function renderWithProviders(ui: ReactElement, options?: RenderWithProvid
     };
 
     return render(ui, { wrapper: Wrapper, ...renderOptions });
-}
-
-export async function editRichText(container: HTMLElement, text: string) {
-    const paragraph = container.querySelector('[contenteditable="true"] p');
-    if (!paragraph?.firstChild) throw new Error('editor is not editable');
-    paragraph.firstChild.textContent = text;
-    await waitFor(() => expect(screen.getByRole('button', { name: 'Save changes' })).toBeEnabled());
 }
 
 export { fireEvent, screen, waitFor, within } from '@testing-library/react';

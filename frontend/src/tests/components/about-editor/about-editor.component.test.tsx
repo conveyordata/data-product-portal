@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { AboutEditor, type AboutSource } from '@/components/about-editor/about-editor.component.tsx';
-import { editRichText, renderWithProviders, screen, userEvent, waitFor } from '@/tests/test-utils.tsx';
+import { editRichText } from '@/tests/components/rich-text/text-editor.helpers.ts';
+import { renderWithProviders, screen, userEvent, waitFor } from '@/tests/test-utils.tsx';
 import * as feedback from '@/utils/feedback.ts';
 
 type Query = AboutSource['query'];

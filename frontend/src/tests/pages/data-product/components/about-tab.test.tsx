@@ -1,8 +1,9 @@
 import { HttpResponse, http } from 'msw';
 import { describe, expect, it } from 'vitest';
 import { AboutTab } from '@/pages/data-product/components/data-product-tabs/about-tab/about-tab.tsx';
+import { editRichText } from '@/tests/components/rich-text/text-editor.helpers.ts';
 import { server } from '@/tests/mocks/server.ts';
-import { editRichText, renderWithProviders, screen, userEvent, waitFor } from '@/tests/test-utils.tsx';
+import { renderWithProviders, screen, userEvent, waitFor } from '@/tests/test-utils.tsx';
 import { AuthorizationAction } from '@/types/authorization/rbac-actions';
 
 describe('Data Product AboutTab', () => {
