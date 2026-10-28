@@ -82,3 +82,4 @@ updates:
     ignore:
       - dependency-name: "abatilo/actions-poetry"
         versions: [ "4.0.0" ]
+      - dependency-name: "github/gh-aw-actions/*"
