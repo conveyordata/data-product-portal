@@ -3903,7 +3903,7 @@ func (s *IdentityBatchDeleteRequest) Validate() error {
 	return nil
 }
 
-func (s IdentityType) Validate() error {
+func (s IdentityKind) Validate() error {
 	switch s {
 	case "user":
 		return nil

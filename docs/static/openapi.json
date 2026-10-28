@@ -15315,7 +15315,8 @@
           "group",
           "machine_user"
         ],
-        "title": "IdentityType"
+        "title": "IdentityType",
+        "x-ogen-name": "IdentityKind"
       },
       "InputPortEvent": {
         "properties": {

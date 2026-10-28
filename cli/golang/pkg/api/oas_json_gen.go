@@ -21415,44 +21415,44 @@ func (s *IdentityBatchDeleteRequest) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
-// Encode encodes IdentityType as json.
-func (s IdentityType) Encode(e *jx.Encoder) {
+// Encode encodes IdentityKind as json.
+func (s IdentityKind) Encode(e *jx.Encoder) {
 	e.Str(string(s))
 }
 
-// Decode decodes IdentityType from json.
-func (s *IdentityType) Decode(d *jx.Decoder) error {
+// Decode decodes IdentityKind from json.
+func (s *IdentityKind) Decode(d *jx.Decoder) error {
 	if s == nil {
-		return errors.New("invalid: unable to decode IdentityType to nil")
+		return errors.New("invalid: unable to decode IdentityKind to nil")
 	}
 	v, err := d.StrBytes()
 	if err != nil {
 		return err
 	}
 	// Try to use constant string.
-	switch IdentityType(v) {
-	case IdentityTypeUser:
-		*s = IdentityTypeUser
-	case IdentityTypeGroup:
-		*s = IdentityTypeGroup
-	case IdentityTypeMachineUser:
-		*s = IdentityTypeMachineUser
+	switch IdentityKind(v) {
+	case IdentityKindUser:
+		*s = IdentityKindUser
+	case IdentityKindGroup:
+		*s = IdentityKindGroup
+	case IdentityKindMachineUser:
+		*s = IdentityKindMachineUser
 	default:
-		*s = IdentityType(v)
+		*s = IdentityKind(v)
 	}
 
 	return nil
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s IdentityType) MarshalJSON() ([]byte, error) {
+func (s IdentityKind) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *IdentityType) UnmarshalJSON(data []byte) error {
+func (s *IdentityKind) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

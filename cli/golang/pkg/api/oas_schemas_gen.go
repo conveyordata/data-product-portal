@@ -6358,7 +6358,7 @@ func (s *GroupIdentity) SetType(val string) {
 // Ref: #/components/schemas/GroupMemberIdentityGet
 type GroupMemberIdentityGet struct {
 	ID         uuid.UUID    `json:"id"`
-	Type       IdentityType `json:"type"`
+	Type       IdentityKind `json:"type"`
 	ExternalID string       `json:"external_id"`
 }
 
@@ -6368,7 +6368,7 @@ func (s *GroupMemberIdentityGet) GetID() uuid.UUID {
 }
 
 // GetType returns the value of Type.
-func (s *GroupMemberIdentityGet) GetType() IdentityType {
+func (s *GroupMemberIdentityGet) GetType() IdentityKind {
 	return s.Type
 }
 
@@ -6383,7 +6383,7 @@ func (s *GroupMemberIdentityGet) SetID(val uuid.UUID) {
 }
 
 // SetType sets the value of Type.
-func (s *GroupMemberIdentityGet) SetType(val IdentityType) {
+func (s *GroupMemberIdentityGet) SetType(val IdentityKind) {
 	s.Type = val
 }
 
@@ -7083,31 +7083,31 @@ func (s *IdentityBatchDeleteRequest) SetIds(val []uuid.UUID) {
 }
 
 // Ref: #/components/schemas/IdentityType
-type IdentityType string
+type IdentityKind string
 
 const (
-	IdentityTypeUser        IdentityType = "user"
-	IdentityTypeGroup       IdentityType = "group"
-	IdentityTypeMachineUser IdentityType = "machine_user"
+	IdentityKindUser        IdentityKind = "user"
+	IdentityKindGroup       IdentityKind = "group"
+	IdentityKindMachineUser IdentityKind = "machine_user"
 )
 
-// AllValues returns all IdentityType values.
-func (IdentityType) AllValues() []IdentityType {
-	return []IdentityType{
-		IdentityTypeUser,
-		IdentityTypeGroup,
-		IdentityTypeMachineUser,
+// AllValues returns all IdentityKind values.
+func (IdentityKind) AllValues() []IdentityKind {
+	return []IdentityKind{
+		IdentityKindUser,
+		IdentityKindGroup,
+		IdentityKindMachineUser,
 	}
 }
 
 // MarshalText implements encoding.TextMarshaler.
-func (s IdentityType) MarshalText() ([]byte, error) {
+func (s IdentityKind) MarshalText() ([]byte, error) {
 	switch s {
-	case IdentityTypeUser:
+	case IdentityKindUser:
 		return []byte(s), nil
-	case IdentityTypeGroup:
+	case IdentityKindGroup:
 		return []byte(s), nil
-	case IdentityTypeMachineUser:
+	case IdentityKindMachineUser:
 		return []byte(s), nil
 	default:
 		return nil, errors.Errorf("invalid value: %q", s)
@@ -7115,16 +7115,16 @@ func (s IdentityType) MarshalText() ([]byte, error) {
 }
 
 // UnmarshalText implements encoding.TextUnmarshaler.
-func (s *IdentityType) UnmarshalText(data []byte) error {
-	switch IdentityType(data) {
-	case IdentityTypeUser:
-		*s = IdentityTypeUser
+func (s *IdentityKind) UnmarshalText(data []byte) error {
+	switch IdentityKind(data) {
+	case IdentityKindUser:
+		*s = IdentityKindUser
 		return nil
-	case IdentityTypeGroup:
-		*s = IdentityTypeGroup
+	case IdentityKindGroup:
+		*s = IdentityKindGroup
 		return nil
-	case IdentityTypeMachineUser:
-		*s = IdentityTypeMachineUser
+	case IdentityKindMachineUser:
+		*s = IdentityKindMachineUser
 		return nil
 	default:
 		return errors.Errorf("invalid value: %q", data)
