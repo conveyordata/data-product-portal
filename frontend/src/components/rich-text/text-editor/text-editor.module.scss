@@ -3,20 +3,10 @@
 .editorContainer {
     height: 100%;
     min-height: globals.$text-editor-min-height;
-    display: flex;
-    flex-direction: column;
-    position: relative;
 }
 
 .editorContent {
-    flex: 1;
-    display: flex;
     overflow-y: auto;
-}
-
-.actions {
-    margin-top: auto;
-    padding-top: globals.$spacing-m;
 }
 
 .editor {
@@ -31,7 +21,7 @@
 
     &:focus {
         outline: none;
-        border: 1px solid globals.$primary-color;
+        border-color: globals.$primary-color;
     }
 
     pre {
@@ -55,12 +45,12 @@
     }
     th,
     td {
-        border: 1px solid #ddd;
-        padding: 8px;
+        border: 1px solid globals.$border-color;
+        padding: globals.$spacing-s;
         text-align: left;
     }
     th {
-        background-color: #f2f2f2;
+        background-color: globals.$secondary-color-fill;
     }
 }
 

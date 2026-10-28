@@ -51,7 +51,7 @@ export const TextEditor = ({
                 class: styles.editor,
             },
         },
-        content,
+        content: initialContent,
         editable: false,
     });
 
@@ -90,12 +90,12 @@ export const TextEditor = ({
     }
 
     return (
-        <div className={styles.editorContainer}>
+        <Flex vertical gap="small" className={styles.editorContainer}>
             {isEditMode && <TextEditorMenu editor={editor} isDisabled={isDisabled} />}
-            <div className={styles.editorContent}>
-                <EditorContent editor={editor} content={content ?? undefined} className={styles.content} />
-            </div>
-            <Flex gap="small" justify="flex-end" className={styles.actions}>
+            <Flex flex={1} className={styles.editorContent}>
+                <EditorContent editor={editor} className={styles.content} />
+            </Flex>
+            <Flex gap="small" justify="flex-end">
                 {isEditMode ? (
                     <>
                         <Popconfirm
@@ -143,6 +143,6 @@ export const TextEditor = ({
                     )
                 )}
             </Flex>
-        </div>
+        </Flex>
     );
 };

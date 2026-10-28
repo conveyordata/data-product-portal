@@ -2,8 +2,11 @@
 
 $text-type-dropdown-width: 120px;
 
-.menuBar {
-    margin-bottom: globals.$spacing-m;
+.menuButton {
+    &.active {
+        background-color: globals.$primary-color;
+        color: globals.$blue-1;
+    }
 }
 
 .text-type-dropdown {
