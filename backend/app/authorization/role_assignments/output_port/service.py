@@ -148,6 +148,19 @@ class RoleAssignmentService:
         )
         return self.db.scalar(query)
 
+    def ensure_can_decide(self, id_: UUID, decision: DecisionStatus) -> None:
+        original = self.get_assignment(id_)
+        if original.decision not in (DecisionStatus.PENDING, decision):
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="This assignment was already decided",
+            )
+        if decision is DecisionStatus.APPROVED and original.role_id is None:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Cannot approve a request that does not have a role assignment",
+            )
+
     def ensure_is_dataset_scope(self, role_id: UUID):
         role = self.db.get(Role, role_id)
         if not role:
