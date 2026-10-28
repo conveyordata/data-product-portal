@@ -2,6 +2,7 @@ import uuid
 
 from fastapi.testclient import TestClient
 
+from app.authorization.roles.schema import Scope
 from app.authorization.schema_response import AccessResponse
 from app.core.authz import Action, Authorization
 from app.settings import settings
@@ -58,6 +59,23 @@ class TestAuthorizationRouter:
         DataProductRoleAssignmentFactory(
             role_id=role.id, identity_id=user.id, data_product_id=data_product.id
         )
+
+        response = client.get(f"{ENDPOINT}/access/{action}?resource={output_port.id}")
+
+        assert response.status_code == 200
+        assert AccessResponse(**response.json()).allowed is True
+
+    def test_check_access__hidden_output_port_action_by_data_product_role(
+        self, client: TestClient
+    ):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        data_product = DataProductFactory()
+        output_port = OutputPortFactory(data_product=data_product)
+        role = RoleFactory(scope=Scope.DATA_PRODUCT, permissions=[])
+        DataProductRoleAssignmentFactory(
+            role_id=role.id, identity_id=user.id, data_product_id=data_product.id
+        )
+        action = Action.HIDDEN__OUTPUT_PORT__READ_ANNOUNCEMENTS
 
         response = client.get(f"{ENDPOINT}/access/{action}?resource={output_port.id}")
 

@@ -86,6 +86,27 @@ class TestHasAccessThroughConsumerRole:
             action=str(AuthorizationAction.HIDDEN__OUTPUT_PORT__READ),
         )
 
+    def test_returns_true_for_announcements_of_a_linked_output_port(
+        self, authorizer: Authorization
+    ):
+        authorizer.add_input_port_link(
+            consumer_id="consumer",
+            producer_data_product_id="producer",
+            producer_output_port_id="consumed_output_port",
+        )
+        authorizer.assign_resource_role(
+            user_id="user", role_id="owner", resource_id="consumer"
+        )
+
+        assert _has_access_through_consumer_role(
+            authorizer._enforcer,
+            sub="user",
+            role="owner",
+            resource="consumed_output_port",
+            parent="producer",
+            action=str(AuthorizationAction.HIDDEN__OUTPUT_PORT__READ_ANNOUNCEMENTS),
+        )
+
     def test_returns_false_when_role_exists_only_on_an_unlinked_consumer(
         self, authorizer: Authorization
     ):

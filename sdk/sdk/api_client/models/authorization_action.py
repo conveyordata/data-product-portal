@@ -50,6 +50,7 @@ class AuthorizationAction(IntEnum):
     VALUE_416 = 416
     VALUE_901 = 901
     VALUE_902 = 902
+    VALUE_903 = 903
 
     def __str__(self) -> str:
         return str(self.value)

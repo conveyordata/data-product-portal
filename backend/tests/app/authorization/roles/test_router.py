@@ -41,8 +41,12 @@ class TestRolesRouter:
         assert data["name"] == self.test_role["name"]
         assert data["scope"] == self.test_role["scope"]
         assert data["description"] == self.test_role["description"]
-        assert len(data["permissions"]) == 2
+        assert len(data["permissions"]) == 3
         assert AuthorizationAction.HIDDEN__OUTPUT_PORT__READ in data["permissions"]
+        assert (
+            AuthorizationAction.HIDDEN__OUTPUT_PORT__READ_ANNOUNCEMENTS
+            in data["permissions"]
+        )
         for permission in self.test_role["permissions"]:
             assert permission in data["permissions"]
 
@@ -67,6 +71,7 @@ class TestRolesRouter:
             [
                 int(AuthorizationAction.HIDDEN__DATA_PRODUCT__READ),
                 int(AuthorizationAction.HIDDEN__OUTPUT_PORT__READ),
+                int(AuthorizationAction.HIDDEN__OUTPUT_PORT__READ_ANNOUNCEMENTS),
                 int(AuthorizationAction.DATA_PRODUCT__UPDATE_PROPERTIES),
             ]
         )
@@ -109,6 +114,7 @@ class TestRolesRouter:
             [
                 int(AuthorizationAction.HIDDEN__DATA_PRODUCT__READ),
                 int(AuthorizationAction.HIDDEN__OUTPUT_PORT__READ),
+                int(AuthorizationAction.HIDDEN__OUTPUT_PORT__READ_ANNOUNCEMENTS),
                 int(AuthorizationAction.DATA_PRODUCT__UPDATE_PROPERTIES),
                 int(AuthorizationAction.DATA_PRODUCT__UPDATE_SETTINGS),
             ]

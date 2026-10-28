@@ -4,6 +4,7 @@ import {
     FileTextOutlined,
     HistoryOutlined,
     InfoCircleOutlined,
+    NotificationOutlined,
     SettingOutlined,
     TeamOutlined,
 } from '@ant-design/icons';
@@ -22,9 +23,12 @@ import { DataModelTab } from '@/pages/output-port/components/dataset-tabs/data-m
 import { DataOutputTab } from '@/pages/output-port/components/dataset-tabs/data-output-tab/data-output-tab';
 import { TabKeys } from '@/pages/output-port/components/dataset-tabs/dataset-tabkeys';
 import { UsageTab } from '@/pages/output-port/components/dataset-tabs/usage-tab/usage-tab.tsx';
+import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
 import { useGetOutputPortsEventHistoryQuery } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
+import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import { EventReferenceEntity } from '@/types/events/event-reference-entity.ts';
 import { AboutTab } from './about-tab/about-tab.tsx';
+import { AnnouncementsTab } from './announcements-tab/announcements-tab.tsx';
 import styles from './dataset-tabs.module.scss';
 import { SettingsTab } from './settings-tab/settings-tab';
 import { TeamTab } from './team-tab/team-tab.tsx';
@@ -47,6 +51,10 @@ export function DatasetTabs({ datasetId, dataProductId, isLoading }: Props) {
     const posthog = usePostHog();
     const historyQuery = useGetOutputPortsEventHistoryQuery({ id: datasetId, dataProductId }, { skip: !datasetId });
     const { data: { events: datasetHistoryData = [] } = {} } = historyQuery;
+    const { data: { allowed: canReadAnnouncements = false } = {} } = useCheckAccessQuery(
+        { resource: datasetId, action: AuthorizationAction.HIDDEN__OUTPUT_PORT__READ_ANNOUNCEMENTS },
+        { skip: !datasetId },
+    );
     const { activeTab, onTabChange } = useTabParam(TabKeys.About, Object.values(TabKeys), (tab) =>
         posthog.capture(PosthogEvents.OUTPUT_PORT_TAB, { tab }),
     );
@@ -65,6 +73,16 @@ export function DatasetTabs({ datasetId, dataProductId, isLoading }: Props) {
                 icon: <InfoCircleOutlined />,
                 children: <AboutTab datasetId={datasetId} dataProductId={dataProductId} />,
             },
+            ...(canReadAnnouncements
+                ? [
+                      {
+                          label: t('Announcements'),
+                          key: TabKeys.Announcements,
+                          icon: <NotificationOutlined />,
+                          children: <AnnouncementsTab outputPortId={datasetId} dataProductId={dataProductId} />,
+                      },
+                  ]
+                : []),
             {
                 label: t('Data Model'),
                 key: TabKeys.DataModel,
@@ -122,7 +140,7 @@ export function DatasetTabs({ datasetId, dataProductId, isLoading }: Props) {
                 ),
             },
         ];
-    }, [datasetId, t, datasetHistoryData, historyQuery, dataProductId]);
+    }, [datasetId, t, datasetHistoryData, historyQuery, dataProductId, canReadAnnouncements]);
 
     if (isLoading) {
         return <LoadingSpinner />;

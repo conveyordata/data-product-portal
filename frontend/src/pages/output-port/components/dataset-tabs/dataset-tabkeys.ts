@@ -1,5 +1,6 @@
 export enum TabKeys {
     About = 'about',
+    Announcements = 'announcements',
     Usage = 'usage',
     Consumers = 'consumers',
     Producers = 'producers',
