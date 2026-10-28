@@ -17,7 +17,7 @@ export function DatasetQuality({ dataProductId, datasetId }: Props) {
         { skip: !dataProductId },
     );
 
-    if (!dataProductId || isFetching) return null;
+    if (!dataProductId || (isFetching && !summary)) return null;
 
     return (
         <Flex vertical gap="small">

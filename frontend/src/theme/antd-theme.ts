@@ -1,4 +1,3 @@
-import { generate } from '@ant-design/colors';
 import { FastColor } from '@ant-design/fast-color';
 import { type ThemeConfig, theme } from 'antd';
 
@@ -7,7 +6,6 @@ const { getDesignToken } = theme;
 const token = getDesignToken();
 
 const colorPrimary = '#543EDC';
-const primaryPalette = generate(colorPrimary);
 const primaryTint = (alpha: number) =>
     new FastColor(colorPrimary).setA(alpha).onBackground(token.colorBgContainer).toHexString();
 
@@ -53,8 +51,6 @@ const datamindedThemeConfig: ThemeConfig = {
             rowHoverBg: primaryTint(0.14),
             bodySortBg: primaryTint(0.04),
             headerSortActiveBg: primaryTint(0.1),
-            rowSelectedBg: primaryPalette[2],
-            rowSelectedHoverBg: primaryPalette[3],
         },
         Input: {
             activeShadow: 'none',

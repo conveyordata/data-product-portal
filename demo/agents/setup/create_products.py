@@ -11,6 +11,7 @@ import sys
 import time
 import traceback
 from datetime import datetime, timezone
+from functools import cache
 from pathlib import Path
 from typing import Any
 
@@ -93,6 +94,7 @@ def get_access_type_id(name: str) -> str:
     return match["id"]
 
 
+@cache
 def get_default_access_durations() -> dict[str, str]:
     response = requests.get(f"{PORTAL_URL}/api/v2/configuration/access_durations")
     response.raise_for_status()
@@ -101,6 +103,11 @@ def get_default_access_durations() -> dict[str, str]:
         for d in response.json()["access_durations"]
         if d["is_default"]
     }
+    missing = {"data_products", "explorations"} - defaults.keys()
+    if missing:
+        raise ValueError(
+            f"No default access duration configured for {', '.join(sorted(missing))}"
+        )
     return {
         "data_product_access_duration_type": defaults["data_products"],
         "exploration_access_duration_type": defaults["explorations"],

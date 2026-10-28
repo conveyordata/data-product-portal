@@ -32,7 +32,6 @@
     },
     "dependencies": {
         "@ant-design/charts": "^2.6.7",
-        "@ant-design/colors": "^8.0.1",
         "@ant-design/fast-color": "^3.0.1",
         "@ant-design/icons": "^6.3.4",
         "@dagrejs/dagre": "^2.0.4",
