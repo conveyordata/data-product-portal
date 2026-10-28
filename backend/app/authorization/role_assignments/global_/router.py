@@ -1,7 +1,7 @@
 from typing import Annotated, Literal, Union, cast
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, Query
 from pydantic.json_schema import SkipJsonSchema
 from sqlalchemy.orm import Session
 
@@ -39,11 +39,7 @@ def become_admin(
     user: User = Depends(get_authenticated_user),
 ):
     user = ensure_user_exists(user.id, db)
-    if not user.can_become_admin:
-        raise HTTPException(
-            status.HTTP_403_FORBIDDEN,
-            detail="User is not allowed to elevate to admin",
-        )
+    RoleAssignmentService(db).ensure_can_become_admin(user)
     user.admin_expiry = request.expiry
     authorizer = Authorization()
     authorizer.assign_admin_role(user_id=str(user.id))
@@ -135,13 +131,7 @@ def decide_global_role_assignment(
     user: User = Depends(get_authenticated_user),
 ) -> GlobalRoleAssignmentResponse:
     service = RoleAssignmentService(db)
-    original = service.get_assignment(id)
-
-    if original.decision not in (DecisionStatus.PENDING, request.decision):
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="This assignment was already decided",
-        )
+    service.ensure_can_decide(id, request.decision)
 
     assignment = service.update_assignment(
         UpdateGlobalRoleAssignment(id=id, decision=request.decision), actor=user
