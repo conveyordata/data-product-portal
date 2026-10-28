@@ -18,6 +18,7 @@ from app.authorization.role_assignments.global_.schema import (
 from app.authorization.roles.model import Role as RoleModel
 from app.authorization.roles.schema import Prototype, Scope
 from app.database.database import ensure_exists
+from app.users.model import User as UserModel
 from app.users.schema import User
 
 
