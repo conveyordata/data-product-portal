@@ -1,5 +1,5 @@
 import { BellOutlined, CheckOutlined } from '@ant-design/icons';
-import { Badge, Button, Flex, Popover, Tag, Typography, theme } from 'antd';
+import { Badge, Button, Flex, Popover, Tag, Typography } from 'antd';
 import { type ReactNode, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { EmptyState, emptyStateQueryProps, isAwaitingData } from '@/components/empty-state/empty-state.component.tsx';
@@ -19,9 +19,6 @@ import { isAnnouncementNotification, useAcknowledgeNotification } from './use-ac
 const MAX_ITEMS_DEFAULT = 10;
 
 export function Notifications() {
-    const {
-        token: { colorError },
-    } = theme.useToken();
     const { t } = useTranslation();
 
     const notificationsQuery = useGetUserNotificationsQuery();
@@ -186,13 +183,7 @@ export function Notifications() {
 
     return (
         <Flex>
-            <Badge
-                count={(notifications ?? []).length}
-                showZero={false}
-                color={colorError}
-                style={{ fontSize: 10 }}
-                size="small"
-            >
+            <Badge count={(notifications ?? []).length}>
                 <Popover
                     content={
                         <div>
