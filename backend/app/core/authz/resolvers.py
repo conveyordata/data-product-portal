@@ -49,7 +49,10 @@ class SubjectResolver(ABC):
     ):
         if (result := request.path_params.get(key)) is not None:
             return cast("str", result)
-        if await request.body():
+        if (
+            "json" in request.headers.get("content-type", "application/json")
+            and await request.body()
+        ):
             json_body = await request.json()
             if (
                 isinstance(json_body, dict)

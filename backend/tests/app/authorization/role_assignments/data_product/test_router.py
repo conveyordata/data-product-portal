@@ -154,6 +154,14 @@ class TestDataProductRoleAssignmentsRouter:
         )
         assert response.status_code == 403
 
+    def test_create_assignment__non_json_body_is_rejected(self, client: TestClient):
+        response = client.post(
+            f"{ENDPOINT}",
+            content="not json",
+            headers={"Content-Type": "text/plain"},
+        )
+        assert response.status_code == 403
+
     def test_request_assignment(self, client: TestClient):
         data_product: DataProduct = DataProductFactory()
         me = UserFactory(external_id=settings.DEFAULT_USERNAME)
