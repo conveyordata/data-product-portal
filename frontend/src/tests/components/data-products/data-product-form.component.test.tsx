@@ -213,4 +213,36 @@ describe('DataProductForm environments', () => {
         expect(await screen.findByText('No matching environments')).toBeInTheDocument();
         expect(screen.queryByText('No environments are configured')).not.toBeInTheDocument();
     });
+
+    it('allows editing a Data Product owned only by a non-user identity', async () => {
+        const save = vi.fn();
+
+        server.use(
+            http.get('*/api/v2/authz/role_assignments/data_product', () =>
+                HttpResponse.json({
+                    role_assignments: [
+                        {
+                            role: { prototype: Prototype.OWNER },
+                            identity: {
+                                id: 'group-1',
+                                type: 'group',
+                                external_id: 'group-1',
+                                display_name: 'Group owner',
+                            },
+                        },
+                    ],
+                }),
+            ),
+            http.put('*/api/v2/data_products/dp-1', async ({ request }) => {
+                save(await request.json());
+                return HttpResponse.json({ id: 'dp-1' });
+            }),
+        );
+
+        renderForm('edit');
+        await getEnvironmentPicker();
+        await userEvent.click(screen.getByRole('button', { name: 'Save' }));
+
+        await waitFor(() => expect(save).toHaveBeenCalled());
+    });
 });
