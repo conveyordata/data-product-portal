@@ -1,9 +1,10 @@
-import { ArrowRightOutlined, CheckCircleOutlined } from '@ant-design/icons';
+import { ArrowRightOutlined, WarningOutlined } from '@ant-design/icons';
 import { Button, Card, Col, Flex, Row, Typography, theme } from 'antd';
 import { type ReactNode, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
-import { EmptyState, hasFailed, isAwaitingData } from '@/components/empty-state/empty-state.component.tsx';
+import { ANNOUNCEMENT_URGENCY } from '@/components/announcements/announcement-type.tsx';
+import { EmptyState, hasFailed } from '@/components/empty-state/empty-state.component.tsx';
 import { AnnouncementNotification } from '@/components/notifications/announcement-notification.tsx';
 import {
     isAnnouncementNotification,
@@ -28,18 +29,18 @@ import { dispatchMessage } from '@/utils/feedback.ts';
 import { usePendingActionHandlers } from '@/utils/pending-request.helper.ts';
 
 const MAX_ITEMS = 5;
-const URGENCY = [
-    AnnouncementType.Issue,
-    AnnouncementType.ActionNeeded,
-    AnnouncementType.PlannedMaintenance,
-    AnnouncementType.NewVersion,
-    AnnouncementType.Info,
-];
 
-function Section({ title, extra, items }: { title: string; extra?: ReactNode; items: ReactNode[] }) {
+type SectionProps = { title: ReactNode; extra?: ReactNode; items: ReactNode[]; headerColor?: string };
+
+function Section({ title, extra, items, headerColor }: SectionProps) {
     return (
         <Col xs={24} lg={12}>
-            <Card size="small" title={title} extra={extra}>
+            <Card
+                size="small"
+                title={title}
+                extra={extra}
+                styles={headerColor ? { header: { backgroundColor: headerColor } } : undefined}
+            >
                 <Flex vertical gap="middle">
                     {items}
                 </Flex>
@@ -75,8 +76,8 @@ export function HomeNotifications() {
                 .filter((n) => isAnnouncementNotification(n) && n.event.announcement && n.event.output_port)
                 .sort((a, b) => {
                     const urgency =
-                        URGENCY.indexOf(a.event.announcement?.type ?? AnnouncementType.Info) -
-                        URGENCY.indexOf(b.event.announcement?.type ?? AnnouncementType.Info);
+                        ANNOUNCEMENT_URGENCY.indexOf(a.event.announcement?.type ?? AnnouncementType.Info) -
+                        ANNOUNCEMENT_URGENCY.indexOf(b.event.announcement?.type ?? AnnouncementType.Info);
                     return urgency || new Date(b.event.created_on).getTime() - new Date(a.event.created_on).getTime();
                 }),
         [notifications],
@@ -91,24 +92,18 @@ export function HomeNotifications() {
         }
     };
 
-    const isLoading = isAwaitingData(pendingActionsQuery) || isAwaitingData(notificationsQuery);
     const isEmpty = requestRows.length === 0 && announcements.length === 0;
-    if (isLoading && isEmpty) return null;
-
     const failed = isEmpty && (hasFailed(pendingActionsQuery) || hasFailed(notificationsQuery));
+    if (isEmpty && !failed && reviewingAction === null) return null;
 
     return (
         <Flex vertical gap="middle">
-            <Typography.Title level={4}>{t('Notifications')}</Typography.Title>
-            {isEmpty ? (
+            {failed ? (
                 <EmptyState
                     size="small"
-                    icon={<CheckCircleOutlined />}
-                    title={t("You're all caught up")}
-                    description={t(
-                        'No requests are waiting for your decision and there are no new Announcements on the Output Ports you consume.',
-                    )}
-                    error={failed}
+                    icon={<WarningOutlined />}
+                    title={t("Couldn't load this section")}
+                    error
                     onRetry={() => {
                         pendingActionsQuery.refetch();
                         notificationsQuery.refetch();
@@ -118,7 +113,8 @@ export function HomeNotifications() {
                 <Row gutter={[24, 24]}>
                     {requestRows.length > 0 && (
                         <Section
-                            title={t('Waiting for your decision')}
+                            title={t('Waiting for your decision ({{count}})', { count: requestRows.length })}
+                            headerColor={token.colorWarningBg}
                             extra={
                                 <Link
                                     to={{
@@ -168,6 +164,7 @@ export function HomeNotifications() {
                                         notification={notification}
                                         onAcknowledge={acknowledge}
                                         isAcknowledging={acknowledgingId === notification.id}
+                                        showReadMore
                                     />
                                 ))}
                         />

@@ -32,7 +32,6 @@ PAYLOAD = {
     "type": "action_needed",
     "title": "Daily Feature Engagement will be retired",
     "message": "Move your queries to version 2 before 1 December.",
-    "link": "https://docs.example.com/migration",
 }
 
 
@@ -101,7 +100,6 @@ class TestAnnouncementsRouter:
         assert response.status_code == 200, response.text
         announcement = session.get(Announcement, response.json()["id"])
         assert announcement.title == PAYLOAD["title"]
-        assert announcement.link == PAYLOAD["link"]
         assert announcement.author_id == user.id
         event = session.scalar(select(Event).where(Event.target_id == announcement.id))
         assert event.name == EventType.ANNOUNCEMENT_CREATED
@@ -195,15 +193,6 @@ class TestAnnouncementsRouter:
         assert response.status_code == 200, response.text
         assert _notified_user_ids(session, response.json()["id"]) == set()
 
-    def test_create_output_port_announcement__without_link(self, client, session):
-        output_port = OutputPortFactory()
-        _producer(output_port)
-
-        response = client.post(_url(output_port), json={**PAYLOAD, "link": None})
-
-        assert response.status_code == 200, response.text
-        assert session.get(Announcement, response.json()["id"]).link is None
-
     def test_create_output_port_announcement__as_consumer_forbidden(
         self, client, session
     ):
@@ -213,18 +202,6 @@ class TestAnnouncementsRouter:
         response = client.post(_url(output_port), json=PAYLOAD)
 
         assert response.status_code == 403
-
-    def test_create_output_port_announcement__rejects_non_http_link(
-        self, client, session
-    ):
-        output_port = OutputPortFactory()
-        _producer(output_port)
-
-        response = client.post(
-            _url(output_port), json={**PAYLOAD, "link": "javascript:alert(1)"}
-        )
-
-        assert response.status_code == 422
 
     def test_create_output_port_announcement__rejects_long_title(self, client, session):
         output_port = OutputPortFactory()
@@ -250,7 +227,7 @@ class TestAnnouncementsRouter:
         output_port = OutputPortFactory()
         _producer(output_port)
 
-        response = client.post(_url(output_port), json={**PAYLOAD, "type": "warning"})
+        response = client.post(_url(output_port), json={**PAYLOAD, "type": "issue"})
 
         assert response.status_code == 422
 

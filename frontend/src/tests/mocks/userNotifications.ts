@@ -36,7 +36,7 @@ export function announcementNotification(
     id: string,
     outputPortId: string,
     title: string,
-    type: AnnouncementType = AnnouncementType.Issue,
+    type: AnnouncementType = AnnouncementType.Warning,
     createdOn = '2026-10-26T10:00:00',
 ) {
     return notification({
@@ -68,8 +68,7 @@ export function announcementNotification(
             output_port_id: outputPortId,
             type,
             title,
-            message: '',
-            link: null,
+            message: 'Details on https://status.example.com/incident',
             author: null,
             created_at: '2026-10-26T10:00:00Z',
         },

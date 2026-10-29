@@ -1,6 +1,6 @@
 import { Alert, ConfigProvider, Flex, Form, Input, Modal, Select, Tooltip, Typography, theme } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { AnnouncementTypeTag, getAnnouncementTypeConfig } from '@/components/announcements/announcement-type-tag.tsx';
+import { AnnouncementTypeLabel, getAnnouncementTypeConfig } from '@/components/announcements/announcement-type.tsx';
 import {
     AnnouncementType,
     type CreateAnnouncement,
@@ -31,17 +31,13 @@ export function NewAnnouncementModal({ dataProductId, outputPortId, consumerCoun
     const { token } = theme.useToken();
     const [form] = Form.useForm<CreateAnnouncement>();
     const [createAnnouncement, { isLoading }] = useCreateOutputPortAnnouncementMutation();
-    const typeConfig = getAnnouncementTypeConfig(t);
+    const typeConfig = getAnnouncementTypeConfig(t, token);
     const title = Form.useWatch('title', form) ?? '';
     const message = Form.useWatch('message', form) ?? '';
 
-    const onFinish = async ({ link, ...values }: CreateAnnouncement) => {
+    const onFinish = async (values: CreateAnnouncement) => {
         try {
-            await createAnnouncement({
-                dataProductId,
-                id: outputPortId,
-                createAnnouncement: { ...values, link: link || null },
-            }).unwrap();
+            await createAnnouncement({ dataProductId, id: outputPortId, createAnnouncement: values }).unwrap();
             dispatchMessage({ content: t('Announcement published'), type: 'success' });
             onClose();
         } catch (_error) {
@@ -73,7 +69,7 @@ export function NewAnnouncementModal({ dataProductId, outputPortId, consumerCoun
                         <Select
                             options={Object.values(AnnouncementType).map((type) => ({
                                 value: type,
-                                label: <AnnouncementTypeTag type={type} />,
+                                label: <AnnouncementTypeLabel type={type} />,
                             }))}
                             optionRender={({ data }) => (
                                 <Tooltip title={typeConfig[data.value].meaning} placement="right">
@@ -101,7 +97,7 @@ export function NewAnnouncementModal({ dataProductId, outputPortId, consumerCoun
                         htmlFor="message"
                         required
                         tooltip={t(
-                            'Plain text. Say what happens, who is affected and what consumers need to do. Write any deadline or maintenance window here.',
+                            'Plain text. Say what happens, who is affected and what consumers need to do. Write any deadline or maintenance window here. Links starting with http:// or https:// become clickable.',
                         )}
                         extra={<CharacterCount length={message.length} max={MESSAGE_MAX_LENGTH} />}
                     >
@@ -112,21 +108,6 @@ export function NewAnnouncementModal({ dataProductId, outputPortId, consumerCoun
                         >
                             <Input.TextArea rows={5} maxLength={MESSAGE_MAX_LENGTH} />
                         </Form.Item>
-                    </Form.Item>
-                    <Form.Item<CreateAnnouncement>
-                        name="link"
-                        label={t('More information')}
-                        tooltip={t(
-                            'Shown to consumers as a Read more button. Links must start with http:// or https://.',
-                        )}
-                        rules={[
-                            {
-                                pattern: /^https?:\/\/\S+$/,
-                                message: t('Links must start with http:// or https://'),
-                            },
-                        ]}
-                    >
-                        <Input placeholder={t('https://… a migration guide, changelog or status page')} />
                     </Form.Item>
                 </Form>
             </ConfigProvider>

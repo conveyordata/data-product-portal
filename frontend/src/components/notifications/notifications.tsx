@@ -162,9 +162,11 @@ export function Notifications() {
     const header = useMemo(() => {
         if (notificationItems?.length > 0) {
             return (
-                <Flex justify="space-between" align="center" className={styles.notificationLabel}>
-                    <Typography.Title level={4}>{t('Notifications')}</Typography.Title>{' '}
-                    <Button onClick={handleRemoveAllNotifications}>{t('Acknowledge all')}</Button>
+                <Flex justify="space-between" align="center" gap="large" className={styles.notificationLabel}>
+                    <Typography.Text strong>{t('Notifications')}</Typography.Text>
+                    <Button type="link" size="small" onClick={handleRemoveAllNotifications}>
+                        {t('Acknowledge all')}
+                    </Button>
                 </Flex>
             );
         }

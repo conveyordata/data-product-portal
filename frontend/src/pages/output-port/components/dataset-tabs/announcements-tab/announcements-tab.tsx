@@ -1,10 +1,15 @@
-import { DeleteOutlined, ExportOutlined, NotificationOutlined, PlusOutlined } from '@ant-design/icons';
-import { Button, Card, Flex, Popconfirm, Typography } from 'antd';
-import { useState } from 'react';
+import { DeleteOutlined, NotificationOutlined, PlusOutlined } from '@ant-design/icons';
+import { Button, Card, Flex, Input, Popconfirm, Typography } from 'antd';
+import { useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
-import { AnnouncementTypeTag } from '@/components/announcements/announcement-type-tag.tsx';
-import { EmptyState, emptyStateQueryProps, isAwaitingData } from '@/components/empty-state/empty-state.component.tsx';
+import { AnnouncementTypeIcon } from '@/components/announcements/announcement-type.tsx';
+import {
+    EmptyState,
+    emptyStateQueryProps,
+    isAwaitingData,
+    searchFilter,
+} from '@/components/empty-state/empty-state.component.tsx';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
 import { TabKeys } from '@/pages/output-port/components/dataset-tabs/dataset-tabkeys';
 import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
@@ -20,6 +25,8 @@ import {
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import { formatDateFromISOString } from '@/utils/date.helper.ts';
 import { dispatchMessage } from '@/utils/feedback.ts';
+import { linkify } from '@/utils/linkify.tsx';
+import { cleanupForSearching } from '@/utils/search.ts';
 import { NewAnnouncementModal } from './new-announcement-modal.tsx';
 
 type Props = {
@@ -30,6 +37,7 @@ type Props = {
 export function AnnouncementsTab({ outputPortId, dataProductId }: Props) {
     const { t } = useTranslation();
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
     const announcementsQuery = useGetOutputPortAnnouncementsQuery({ id: outputPortId, dataProductId });
     const { data: { announcements = [] } = {} } = announcementsQuery;
     const { data: { allowed: canPost = false } = {} } = useCheckAccessQuery({
@@ -41,6 +49,12 @@ export function AnnouncementsTab({ outputPortId, dataProductId }: Props) {
         { skip: !canPost },
     );
     const consumerCount = inputPorts.filter(({ status }) => status === InputPortStatus.Approved).length;
+    const filteredAnnouncements = useMemo(() => {
+        const search = cleanupForSearching(searchTerm);
+        return announcements.filter(({ title, message }) =>
+            cleanupForSearching(`${title} ${message}`).includes(search),
+        );
+    }, [announcements, searchTerm]);
 
     if (isAwaitingData(announcementsQuery)) {
         return <LoadingSpinner />;
@@ -54,10 +68,18 @@ export function AnnouncementsTab({ outputPortId, dataProductId }: Props) {
 
     return (
         <Flex vertical gap="middle">
-            {announcements.length > 0 && newAnnouncementButton && (
-                <Flex justify="flex-end">{newAnnouncementButton}</Flex>
+            {announcements.length > 0 && (
+                <Flex gap="middle">
+                    <Input.Search
+                        placeholder={t('Search announcements by title or message')}
+                        allowClear
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                    {newAnnouncementButton}
+                </Flex>
             )}
-            {announcements.length === 0 ? (
+            {filteredAnnouncements.length === 0 ? (
                 <EmptyState
                     icon={<NotificationOutlined />}
                     title={t('No announcements yet')}
@@ -77,10 +99,12 @@ export function AnnouncementsTab({ outputPortId, dataProductId }: Props) {
                         )
                     }
                     action={newAnnouncementButton}
+                    subject={t('announcements')}
+                    filter={searchFilter(searchTerm, setSearchTerm)}
                     {...emptyStateQueryProps(announcementsQuery)}
                 />
             ) : (
-                announcements.map((announcement) => (
+                filteredAnnouncements.map((announcement) => (
                     <AnnouncementCard
                         key={announcement.id}
                         announcement={announcement}
@@ -129,14 +153,21 @@ function AnnouncementCard({ announcement, canDelete, dataProductId }: CardProps)
 
     return (
         <Card size="small">
-            <Flex justify="space-between" align="center" gap="middle">
-                <Flex vertical gap="small">
-                    <Flex align="center" gap="small" wrap>
-                        <AnnouncementTypeTag type={announcement.type} />
+            <Flex justify="space-between" align="flex-start" gap="middle">
+                <Flex vertical gap="small" flex={1} style={{ minWidth: 0 }}>
+                    <Flex align="center" gap="small">
+                        <AnnouncementTypeIcon type={announcement.type} />
                         <Typography.Text strong>{announcement.title}</Typography.Text>
                     </Flex>
-                    <Typography.Paragraph style={{ whiteSpace: 'pre-line', marginBottom: 0 }}>
-                        {announcement.message}
+                    <Typography.Paragraph
+                        style={{ whiteSpace: 'pre-line', marginBottom: 0 }}
+                        ellipsis={{
+                            rows: 3,
+                            expandable: 'collapsible',
+                            symbol: (expanded) => (expanded ? t('less') : t('more')),
+                        }}
+                    >
+                        {linkify(announcement.message)}
                     </Typography.Paragraph>
                     <Typography.Text type="secondary">
                         {t('Posted {{date}} by {{author}}', {
@@ -145,36 +176,22 @@ function AnnouncementCard({ announcement, canDelete, dataProductId }: CardProps)
                         })}
                     </Typography.Text>
                 </Flex>
-                <Flex gap="small" align="center">
-                    {announcement.link && (
-                        <Button
-                            size="small"
-                            href={announcement.link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            icon={<ExportOutlined />}
-                            iconPlacement="end"
-                        >
-                            {t('Read more')}
+                {canDelete && (
+                    <Popconfirm
+                        title={t('Delete Announcement')}
+                        description={t(
+                            'Consumers will no longer see it and its notifications are removed. The deletion is recorded in History. This cannot be undone.',
+                        )}
+                        okText={t('Delete')}
+                        okButtonProps={{ danger: true, loading: isLoading }}
+                        cancelText={t('Cancel')}
+                        onConfirm={onDelete}
+                    >
+                        <Button size="small" type="link" danger icon={<DeleteOutlined />}>
+                            {t('Delete')}
                         </Button>
-                    )}
-                    {canDelete && (
-                        <Popconfirm
-                            title={t('Delete Announcement')}
-                            description={t(
-                                'Consumers will no longer see it and its notifications are removed. The deletion is recorded in History. This cannot be undone.',
-                            )}
-                            okText={t('Delete')}
-                            okButtonProps={{ danger: true, loading: isLoading }}
-                            cancelText={t('Cancel')}
-                            onConfirm={onDelete}
-                        >
-                            <Button size="small" type="link" danger icon={<DeleteOutlined />}>
-                                {t('Delete')}
-                            </Button>
-                        </Popconfirm>
-                    )}
-                </Flex>
+                    </Popconfirm>
+                )}
             </Flex>
         </Card>
     );

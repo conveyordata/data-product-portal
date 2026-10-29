@@ -36,8 +36,8 @@ describe('Notifications', () => {
         const popover = await openBell();
 
         const title = await within(popover).findByText('Spend figures are being restated');
-        expect(within(popover).getByText('Issue')).toBeInTheDocument();
-        expect(within(popover).getByText('Output Port op-1')).toBeInTheDocument();
+        expect(within(popover).getByRole('img', { name: 'Warning' })).toBeInTheDocument();
+        expect(within(popover).getByText(/Output Port op-1/)).toBeInTheDocument();
         expect(title.closest('a')).toHaveAttribute('href', expect.stringMatching(/op-1.*\?tab=announcements$/));
         expect(within(popover).getByRole('button', { name: 'Acknowledge' })).toBeInTheDocument();
         expect(within(popover).queryByText('Requests')).not.toBeInTheDocument();
