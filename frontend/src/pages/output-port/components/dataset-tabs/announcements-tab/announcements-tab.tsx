@@ -194,8 +194,7 @@ export function AnnouncementsTab({ outputPortId, dataProductId }: Props) {
                         pagination={{
                             ...pagination,
                             size: 'small',
-                            placement: ['topEnd'],
-                            style: { marginTop: 0 },
+                            placement: ['bottomEnd'],
                             showTotal: (total, range) =>
                                 t('Showing {{range0}}-{{range1}} of {{count}} announcements', {
                                     range0: range[0],
