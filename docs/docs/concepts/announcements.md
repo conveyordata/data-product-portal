@@ -39,6 +39,6 @@ Consumers see the Announcement in three places:
 
 - the notification bell, which lists requests first and Announcements after them;
 - a "new announcements" badge next to the Output Port on the Input Ports tab of the Consuming Data Product;
-- the Notifications block on the Home page, under the quick actions. It shows up to five requests waiting for your decision, with a link to all of them in the Product Studio, and up to five Announcements, the most urgent type first (Issue, Action needed, Planned maintenance, New version, Info).
+- the Notifications block at the top of the Home page. It shows up to five requests waiting for your decision, with a link to all of them in the Product Studio, and up to five Announcements, the most urgent type first (Issue, Action needed, Planned maintenance, New version, Info).
 
 Acknowledging an Announcement in the bell or on the Home page removes its notification everywhere. The Announcement itself stays on the Output Port.

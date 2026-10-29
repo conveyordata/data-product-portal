@@ -23,10 +23,10 @@ export function Home() {
 
             <Row gutter={[48, 48]}>
                 <Col span={24}>
-                    <QuickActions />
+                    <HomeNotifications />
                 </Col>
                 <Col span={24}>
-                    <HomeNotifications />
+                    <QuickActions />
                 </Col>
             </Row>
         </div>
