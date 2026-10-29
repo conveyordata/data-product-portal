@@ -1,4 +1,4 @@
-import { Col, Row } from 'antd';
+import { Flex } from 'antd';
 import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useBreadcrumbs } from '@/components/layout/navbar/breadcrumbs/breadcrumb.context.tsx';
@@ -18,14 +18,10 @@ export function Home() {
 
     return (
         <div className={styles.container}>
-            <Row gutter={[48, 48]}>
-                <Col span={24}>
-                    <HomeNotifications />
-                </Col>
-                <Col span={24}>
-                    <QuickActions />
-                </Col>
-            </Row>
+            <Flex vertical gap={48}>
+                <HomeNotifications />
+                <QuickActions />
+            </Flex>
         </div>
     );
 }
