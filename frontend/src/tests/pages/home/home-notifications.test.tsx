@@ -24,13 +24,13 @@ describe('HomeNotifications', () => {
         renderBlock();
 
         const requests = await screen.findByText('Waiting for your decision (1)');
-        const announcements = screen.getByText('Announcements');
+        const announcements = screen.getByText('Announcements (1)');
         expect(requests.compareDocumentPosition(announcements) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
         expect(screen.getByText(/requests the role role for Marketing Attribution/)).toBeInTheDocument();
         expect(screen.getByRole('link', { name: /View all/ })).toHaveAttribute('href', '/studio?tab=pending-requests');
     });
 
-    it('shows at most five items per section', async () => {
+    it('shows every item per section with its count', async () => {
         mockUserPendingActions(
             Array.from({ length: 7 }, (_, i) => roleAssignmentRequest(`r${i}`, `Data Product ${i}`)),
         );
@@ -40,9 +40,10 @@ describe('HomeNotifications', () => {
 
         renderBlock();
 
-        expect(await screen.findAllByRole('button', { name: /Review/ })).toHaveLength(5);
+        expect(await screen.findAllByRole('button', { name: /Review/ })).toHaveLength(7);
         expect(screen.getByText('Waiting for your decision (7)')).toBeInTheDocument();
-        expect(screen.getAllByRole('button', { name: 'Acknowledge' })).toHaveLength(5);
+        expect(screen.getAllByRole('button', { name: 'Acknowledge' })).toHaveLength(7);
+        expect(screen.getByText('Announcements (7)')).toBeInTheDocument();
     });
 
     it('still shows announcements when requests fail to load', async () => {

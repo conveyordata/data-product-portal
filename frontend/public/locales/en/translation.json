@@ -146,6 +146,8 @@
     "Announcement published": "Announcement published",
     "announcements": "announcements",
     "Announcements": "Announcements",
+    "Announcements ({{count}})_one": "Announcements ({{count}})",
+    "Announcements ({{count}})_other": "Announcements ({{count}})",
     "Announcements have been acknowledged": "Announcements have been acknowledged",
     "AnnouncementsEmptyProducer_one": "Post one to tell every Consuming Data Product about an issue, a change they need to make, planned maintenance or a new version. <link>{{count}} consumer</link> uses this Output Port today.",
     "AnnouncementsEmptyProducer_other": "Post one to tell every Consuming Data Product about an issue, a change they need to make, planned maintenance or a new version. <link>{{count}} consumers</link> use this Output Port today.",

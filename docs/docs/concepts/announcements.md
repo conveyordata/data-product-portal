@@ -39,7 +39,7 @@ Consumers see the Announcement in three places:
 
 - the notification bell, which lists requests first and Announcements after them;
 - a "new announcements" badge next to the Output Port on the Input Ports tab of the Consuming Data Product;
-- the top of the Home page. It shows up to five requests waiting for your decision, with their total count and a link to all of them in the Product Studio, and up to five Announcements, the most urgent type first (Action needed, Warning, Info). "Read more" on an Announcement shows its full message and its Output Port. Sections without items are hidden.
+- the top of the Home page. It shows the requests waiting for your decision, with a link to them in the Product Studio, and your new Announcements, the most urgent type first (Action needed, Warning, Info). Each card shows its count and scrolls when the list is long. "Read more" on an Announcement shows its full message and its Output Port. Sections without items are hidden.
 
 Acknowledging an Announcement in the bell or on the Home page removes its notification everywhere. The Announcement itself stays on the Output Port.
 

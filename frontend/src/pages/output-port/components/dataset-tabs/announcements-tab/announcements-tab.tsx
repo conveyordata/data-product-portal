@@ -197,6 +197,7 @@ export function AnnouncementsTab({ outputPortId, dataProductId }: Props) {
                             size: 'small',
                             hideOnSinglePage: true,
                         }}
+                        size="small"
                     />
                 </>
             )}

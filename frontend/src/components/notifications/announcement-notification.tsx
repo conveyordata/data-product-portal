@@ -13,14 +13,14 @@ type Props = {
     notification: GetUserNotificationsResponseItem;
     onAcknowledge: (id: string) => void;
     isAcknowledging?: boolean;
-    showReadMore?: boolean;
+    detailed?: boolean;
 };
 
 export function AnnouncementNotification({
     notification,
     onAcknowledge,
     isAcknowledging = false,
-    showReadMore = false,
+    detailed = false,
 }: Props) {
     const { t } = useTranslation();
     const { announcement, output_port, created_on } = notification.event;
@@ -46,7 +46,7 @@ export function AnnouncementNotification({
     );
 
     return (
-        <Flex justify="space-between" align="flex-start" gap="small">
+        <Flex justify="space-between" align="center" gap="small">
             <Flex vertical flex={1} style={{ minWidth: 0 }}>
                 <Link to={outputPortPath}>
                     <Flex align="center" gap="small">
@@ -59,7 +59,7 @@ export function AnnouncementNotification({
                 <Typography.Text type="secondary" ellipsis>
                     {output_port.name} · {formatDateToNowFromUTCString(created_on)}
                 </Typography.Text>
-                {showReadMore && (
+                {detailed && (
                     <Popover content={details} title={announcement.title} trigger="click" placement="bottomLeft">
                         <Button type="link" size="small" style={{ padding: 0, alignSelf: 'flex-start' }}>
                             {t('Read more')}
@@ -68,7 +68,8 @@ export function AnnouncementNotification({
                 )}
             </Flex>
             <Button
-                type="text"
+                type={detailed ? 'default' : 'text'}
+                size={detailed ? 'small' : 'middle'}
                 aria-label={t('Acknowledge')}
                 icon={<CheckOutlined />}
                 loading={isAcknowledging}
@@ -77,7 +78,9 @@ export function AnnouncementNotification({
                     e.stopPropagation();
                     onAcknowledge(notification.id);
                 }}
-            />
+            >
+                {detailed && t('Acknowledge')}
+            </Button>
         </Flex>
     );
 }

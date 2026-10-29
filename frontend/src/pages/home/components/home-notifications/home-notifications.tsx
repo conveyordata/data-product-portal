@@ -1,5 +1,5 @@
 import { ArrowRightOutlined, WarningOutlined } from '@ant-design/icons';
-import { Button, Card, Col, Flex, Row, Typography, theme } from 'antd';
+import { Button, Card, Col, Divider, Flex, Row, Space, Typography, theme } from 'antd';
 import { type ReactNode, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
@@ -28,7 +28,7 @@ import { formatDate } from '@/utils/date.helper.ts';
 import { dispatchMessage } from '@/utils/feedback.ts';
 import { usePendingActionHandlers } from '@/utils/pending-request.helper.ts';
 
-const MAX_ITEMS = 5;
+const MAX_BODY_HEIGHT = 400;
 
 function Section({ title, extra, items }: { title: string; extra?: ReactNode; items: ReactNode[] }) {
     const { token } = theme.useToken();
@@ -38,18 +38,24 @@ function Section({ title, extra, items }: { title: string; extra?: ReactNode; it
                 size="small"
                 title={title}
                 extra={extra}
-                style={{ borderColor: token.colorPrimaryBorder }}
+                style={{ borderColor: token.colorPrimaryBorder, height: '100%' }}
                 styles={{
                     header: {
                         backgroundColor: token.colorPrimaryBg,
                         borderColor: token.colorPrimaryBorder,
                         color: token.colorPrimaryText,
                     },
+                    body: { maxHeight: MAX_BODY_HEIGHT, overflowY: 'auto' },
                 }}
             >
-                <Flex vertical gap="middle">
+                <Space
+                    orientation="vertical"
+                    separator={<Divider size="small" />}
+                    style={{ width: '100%' }}
+                    styles={{ item: { width: '100%' } }}
+                >
                     {items}
-                </Flex>
+                </Space>
             </Card>
         </Col>
     );
@@ -130,7 +136,7 @@ export function HomeNotifications() {
                                     {t('View all')} <ArrowRightOutlined />
                                 </Link>
                             }
-                            items={requestRows.slice(0, MAX_ITEMS).map((row) => (
+                            items={requestRows.map((row) => (
                                 <Flex key={row.key} align="center" gap="small">
                                     <UserAvatar
                                         user={row.requestedBy ?? undefined}
@@ -150,7 +156,7 @@ export function HomeNotifications() {
                     )}
                     {announcements.length > 0 && (
                         <Section
-                            title={t('Announcements')}
+                            title={t('Announcements ({{count}})', { count: announcements.length })}
                             extra={
                                 <Button
                                     type="link"
@@ -161,17 +167,15 @@ export function HomeNotifications() {
                                     {t('Acknowledge all')}
                                 </Button>
                             }
-                            items={announcements
-                                .slice(0, MAX_ITEMS)
-                                .map((notification) => (
-                                    <AnnouncementNotification
-                                        key={notification.id}
-                                        notification={notification}
-                                        onAcknowledge={acknowledge}
-                                        isAcknowledging={acknowledgingId === notification.id}
-                                        showReadMore
-                                    />
-                                ))}
+                            items={announcements.map((notification) => (
+                                <AnnouncementNotification
+                                    key={notification.id}
+                                    notification={notification}
+                                    onAcknowledge={acknowledge}
+                                    isAcknowledging={acknowledgingId === notification.id}
+                                    detailed
+                                />
+                            ))}
                         />
                     )}
                 </Row>
