@@ -122,7 +122,7 @@ export function HomeNotifications() {
                                         color={token.colorPrimary}
                                         size="small"
                                     />
-                                    <Flex vertical flex={1}>
+                                    <Flex vertical flex={1} style={{ minWidth: 0 }}>
                                         <Typography.Text ellipsis={{ tooltip: row.description }}>
                                             {row.description}
                                         </Typography.Text>
