@@ -125,6 +125,35 @@ class TestDataProductRoleAssignmentsRouter:
         assert response.status_code == 200
         assert_event_in_queue("data_product_role_assignment.event", capture_events)
 
+    def test_create_assignment__query_id_of_other_product_is_ignored(
+        self, client: TestClient
+    ):
+        own_data_product: DataProduct = DataProductFactory()
+        target_data_product: DataProduct = DataProductFactory()
+        me = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        authz_role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__CREATE_USER],
+        )
+        DataProductRoleAssignmentFactory(
+            identity_id=me.id,
+            role_id=authz_role.id,
+            data_product_id=own_data_product.id,
+        )
+        user: User = UserFactory()
+        role: Role = RoleFactory(scope=Scope.DATA_PRODUCT)
+
+        response = client.post(
+            f"{ENDPOINT}",
+            params={"data_product_id": str(own_data_product.id)},
+            json={
+                "data_product_id": str(target_data_product.id),
+                "user_id": str(user.id),
+                "role_id": str(role.id),
+            },
+        )
+        assert response.status_code == 403
+
     def test_request_assignment(self, client: TestClient):
         data_product: DataProduct = DataProductFactory()
         me = UserFactory(external_id=settings.DEFAULT_USERNAME)

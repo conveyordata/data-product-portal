@@ -164,6 +164,33 @@ class TestDatasetRoleAssignmentsRouter:
         assert response.status_code == 200
         assert_event_in_queue("output_port_role_assignment.event", capture_events)
 
+    def test_create_assignment__query_id_of_other_output_port_is_ignored(
+        self, client: TestClient
+    ):
+        own_output_port: OutputPort = OutputPortFactory()
+        target_output_port: OutputPort = OutputPortFactory()
+        me = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        authz_role = RoleFactory(
+            scope=Scope.DATASET,
+            permissions=[Action.OUTPUT_PORT__CREATE_USER],
+        )
+        DatasetRoleAssignmentFactory(
+            user_id=me.id, role_id=authz_role.id, output_port_id=own_output_port.id
+        )
+        user: User = UserFactory()
+        role: Role = RoleFactory(scope=Scope.DATASET)
+
+        response = client.post(
+            f"{ENDPOINT}",
+            params={"output_port_id": str(own_output_port.id)},
+            json={
+                "output_port_id": str(target_output_port.id),
+                "user_id": str(user.id),
+                "role_id": str(role.id),
+            },
+        )
+        assert response.status_code == 403
+
     def test_request_assignment(self, client: TestClient):
         dataset: OutputPort = OutputPortFactory()
         me = UserFactory(external_id=settings.DEFAULT_USERNAME)
