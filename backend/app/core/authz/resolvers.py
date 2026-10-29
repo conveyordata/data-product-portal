@@ -47,13 +47,17 @@ class SubjectResolver(ABC):
         key: str,
         db: Session = Depends(get_db_session, scope="function"),
     ):
-        if (result := request.query_params.get(key)) is not None:
-            return result
         if (result := request.path_params.get(key)) is not None:
             return cast("str", result)
-        json_body = await request.json()
-        if isinstance(json_body, dict) and (result := json_body.get(key)) is not None:
-            return cast("str", result)
+        if await request.body():
+            json_body = await request.json()
+            if (
+                isinstance(json_body, dict)
+                and (result := json_body.get(key)) is not None
+            ):
+                return cast("str", result)
+        if (result := request.query_params.get(key)) is not None:
+            return result
 
         return cls.DEFAULT
 
