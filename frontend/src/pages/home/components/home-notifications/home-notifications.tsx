@@ -1,5 +1,5 @@
 import { ArrowRightOutlined, CheckCircleOutlined } from '@ant-design/icons';
-import { Card, Col, Flex, Row, Typography, theme } from 'antd';
+import { Button, Card, Col, Flex, Row, Typography, theme } from 'antd';
 import { type ReactNode, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
@@ -17,10 +17,14 @@ import { transformToTableRow } from '@/pages/product-studio/components/requests/
 import { TabKeys } from '@/pages/product-studio/product-studio-tabkeys.ts';
 import { AnnouncementType } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
 import { useGetUserPendingActionsQuery } from '@/store/api/services/generated/usersApi.ts';
-import { useGetUserNotificationsQuery } from '@/store/api/services/generated/usersNotificationsApi.ts';
+import {
+    useGetUserNotificationsQuery,
+    useRemoveUserNotificationMutation,
+} from '@/store/api/services/generated/usersNotificationsApi.ts';
 import { ApplicationPaths } from '@/types/navigation.ts';
 import type { Request } from '@/types/request-types/request-types.tsx';
 import { formatDate } from '@/utils/date.helper.ts';
+import { dispatchMessage } from '@/utils/feedback.ts';
 import { usePendingActionHandlers } from '@/utils/pending-request.helper.ts';
 
 const MAX_ITEMS = 5;
@@ -50,6 +54,7 @@ export function HomeNotifications() {
     const pendingActionsQuery = useGetUserPendingActionsQuery();
     const notificationsQuery = useGetUserNotificationsQuery();
     const { acknowledge, acknowledgingId } = useAcknowledgeNotification();
+    const [removeNotification, { isLoading: isAcknowledgingAll }] = useRemoveUserNotificationMutation();
     const handlers = usePendingActionHandlers();
     const [reviewingAction, setReviewingAction] = useState<Request | null>(null);
 
@@ -76,6 +81,15 @@ export function HomeNotifications() {
                 }),
         [notifications],
     );
+
+    const acknowledgeAllAnnouncements = async () => {
+        try {
+            await Promise.all(announcements.map(({ id }) => removeNotification(id).unwrap()));
+            dispatchMessage({ content: t('Announcements have been acknowledged'), type: 'success' });
+        } catch (_error) {
+            dispatchMessage({ content: t('Failed to acknowledge announcements'), type: 'error' });
+        }
+    };
 
     const isLoading = isAwaitingData(pendingActionsQuery) || isAwaitingData(notificationsQuery);
     const isEmpty = requestRows.length === 0 && announcements.length === 0;
@@ -136,6 +150,16 @@ export function HomeNotifications() {
                     {announcements.length > 0 && (
                         <Section
                             title={t('Announcements')}
+                            extra={
+                                <Button
+                                    type="link"
+                                    size="small"
+                                    loading={isAcknowledgingAll}
+                                    onClick={acknowledgeAllAnnouncements}
+                                >
+                                    {t('Acknowledge all')}
+                                </Button>
+                            }
                             items={announcements
                                 .slice(0, MAX_ITEMS)
                                 .map((notification) => (

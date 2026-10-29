@@ -3,7 +3,12 @@ import { describe, expect, it } from 'vitest';
 import { HomeNotifications } from '@/pages/home/components/home-notifications/home-notifications.tsx';
 import { AnnouncementType } from '@/store/api/services/generated/usersNotificationsApi.ts';
 import { server } from '@/tests/mocks/server.ts';
-import { announcementNotification, mockUserNotifications, notifiedUser } from '@/tests/mocks/userNotifications.ts';
+import {
+    announcementNotification,
+    mockUserNotifications,
+    notifiedUser,
+    requestNotification,
+} from '@/tests/mocks/userNotifications.ts';
 import { mockUserPendingActions, roleAssignmentRequest } from '@/tests/mocks/userPendingActions.ts';
 import { renderWithProviders, screen, userEvent, waitFor } from '@/tests/test-utils.tsx';
 
@@ -98,6 +103,28 @@ describe('HomeNotifications', () => {
         await user.click(await screen.findByRole('button', { name: 'Acknowledge' }));
 
         await waitFor(() => expect(acknowledged).toBe('notification-a1'));
+    });
+
+    it('acknowledges all announcements but no other notifications', async () => {
+        const user = userEvent.setup();
+        const acknowledged: string[] = [];
+        mockUserPendingActions([]);
+        mockUserNotifications([
+            ...Array.from({ length: 7 }, (_, i) => announcementNotification(`a${i}`, `op-${i}`, `Title ${i}`)),
+            requestNotification('r1'),
+        ]);
+        server.use(
+            http.delete('*/api/v2/users/current/notifications/:id', ({ params }) => {
+                acknowledged.push(String(params.id));
+                return new HttpResponse(null, { status: 204 });
+            }),
+        );
+
+        renderBlock();
+        await user.click(await screen.findByRole('button', { name: 'Acknowledge all' }));
+
+        await waitFor(() => expect(acknowledged).toHaveLength(7));
+        expect(acknowledged.sort()).toEqual(Array.from({ length: 7 }, (_, i) => `notification-a${i}`).sort());
     });
 
     it("shows You're all caught up when there are no requests or announcements", async () => {
