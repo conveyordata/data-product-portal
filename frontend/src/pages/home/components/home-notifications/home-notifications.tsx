@@ -30,16 +30,22 @@ import { usePendingActionHandlers } from '@/utils/pending-request.helper.ts';
 
 const MAX_ITEMS = 5;
 
-type SectionProps = { title: ReactNode; extra?: ReactNode; items: ReactNode[]; headerColor?: string };
-
-function Section({ title, extra, items, headerColor }: SectionProps) {
+function Section({ title, extra, items }: { title: string; extra?: ReactNode; items: ReactNode[] }) {
+    const { token } = theme.useToken();
     return (
         <Col xs={24} lg={12}>
             <Card
                 size="small"
                 title={title}
                 extra={extra}
-                styles={headerColor ? { header: { backgroundColor: headerColor } } : undefined}
+                style={{ borderColor: token.colorPrimaryBorder }}
+                styles={{
+                    header: {
+                        backgroundColor: token.colorPrimaryBg,
+                        borderColor: token.colorPrimaryBorder,
+                        color: token.colorPrimaryText,
+                    },
+                }}
             >
                 <Flex vertical gap="middle">
                     {items}
@@ -114,7 +120,6 @@ export function HomeNotifications() {
                     {requestRows.length > 0 && (
                         <Section
                             title={t('Waiting for your decision ({{count}})', { count: requestRows.length })}
-                            headerColor={token.colorWarningBg}
                             extra={
                                 <Link
                                     to={{

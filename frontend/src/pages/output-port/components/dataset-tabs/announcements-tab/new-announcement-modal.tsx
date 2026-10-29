@@ -1,6 +1,10 @@
-import { Alert, ConfigProvider, Flex, Form, Input, Modal, Select, Tooltip, Typography, theme } from 'antd';
+import { Alert, ConfigProvider, Flex, Form, Input, Modal, Select, Space, Typography, theme } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { AnnouncementTypeLabel, getAnnouncementTypeConfig } from '@/components/announcements/announcement-type.tsx';
+import {
+    AnnouncementTypeIcon,
+    AnnouncementTypeLabel,
+    getAnnouncementTypeConfig,
+} from '@/components/announcements/announcement-type.tsx';
 import {
     AnnouncementType,
     type CreateAnnouncement,
@@ -65,32 +69,45 @@ export function NewAnnouncementModal({ dataProductId, outputPortId, consumerCoun
                     onFinish={onFinish}
                     disabled={isLoading}
                 >
-                    <Form.Item<CreateAnnouncement> name="type" label={t('Type')} rules={[{ required: true }]}>
-                        <Select
-                            options={Object.values(AnnouncementType).map((type) => ({
-                                value: type,
-                                label: <AnnouncementTypeLabel type={type} />,
-                            }))}
-                            optionRender={({ data }) => (
-                                <Tooltip title={typeConfig[data.value].meaning} placement="right">
-                                    <span>{data.label}</span>
-                                </Tooltip>
-                            )}
-                        />
-                    </Form.Item>
                     <Form.Item<CreateAnnouncement>
                         label={t('Title')}
                         htmlFor="title"
                         required
+                        tooltip={t('Pick the type with the icon in front of the title.')}
                         extra={<CharacterCount length={title.length} max={TITLE_MAX_LENGTH} />}
                     >
-                        <Form.Item<CreateAnnouncement>
-                            name="title"
-                            noStyle
-                            rules={[{ required: true, whitespace: true, message: t('Please provide a title') }]}
-                        >
-                            <Input placeholder={t('e.g. Version 2 is now available')} maxLength={TITLE_MAX_LENGTH} />
-                        </Form.Item>
+                        <Space.Compact block>
+                            <Form.Item<CreateAnnouncement> name="type" noStyle rules={[{ required: true }]}>
+                                <Select
+                                    aria-label={t('Type')}
+                                    style={{ width: 'auto' }}
+                                    popupMatchSelectWidth={false}
+                                    options={Object.values(AnnouncementType).map((type) => ({
+                                        value: type,
+                                        label: <AnnouncementTypeIcon type={type} />,
+                                    }))}
+                                    optionRender={({ data }) => (
+                                        <Flex vertical>
+                                            <AnnouncementTypeLabel type={data.value} />
+                                            <Typography.Text type="secondary">
+                                                {typeConfig[data.value].meaning}
+                                            </Typography.Text>
+                                        </Flex>
+                                    )}
+                                />
+                            </Form.Item>
+                            <Form.Item<CreateAnnouncement>
+                                name="title"
+                                noStyle
+                                rules={[{ required: true, whitespace: true, message: t('Please provide a title') }]}
+                            >
+                                <Input
+                                    id="title"
+                                    placeholder={t('e.g. Version 2 is now available')}
+                                    maxLength={TITLE_MAX_LENGTH}
+                                />
+                            </Form.Item>
+                        </Space.Compact>
                     </Form.Item>
                     <Form.Item<CreateAnnouncement>
                         label={t('Message')}

@@ -1,4 +1,4 @@
-import { ExclamationCircleFilled, InfoCircleFilled, WarningFilled } from '@ant-design/icons';
+import { ExclamationCircleOutlined, InfoCircleOutlined, WarningOutlined } from '@ant-design/icons';
 import { Flex, type GlobalToken, Tooltip, theme } from 'antd';
 import type { TFunction } from 'i18next';
 import type { ReactNode } from 'react';
@@ -23,19 +23,19 @@ export function getAnnouncementTypeConfig(
             label: t('Action needed'),
             meaning: t('Consumers must change something: a deprecation, retirement or breaking change.'),
             color: token.colorError,
-            icon: <ExclamationCircleFilled />,
+            icon: <ExclamationCircleOutlined />,
         },
         [AnnouncementType.Warning]: {
             label: t('Warning'),
             meaning: t('Something is wrong or will be: late or incomplete data, an incident or planned maintenance.'),
             color: token.colorWarning,
-            icon: <WarningFilled />,
+            icon: <WarningOutlined />,
         },
         [AnnouncementType.Info]: {
             label: t('Info'),
             meaning: t('News that needs no action, such as a new version.'),
             color: token.colorTextTertiary,
-            icon: <InfoCircleFilled />,
+            icon: <InfoCircleOutlined />,
         },
     };
 }

@@ -2,7 +2,6 @@ import { Col, Row } from 'antd';
 import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useBreadcrumbs } from '@/components/layout/navbar/breadcrumbs/breadcrumb.context.tsx';
-import { AlertBanner } from '@/pages/home/components/alert-banner/alert-banner.tsx';
 import { HomeNotifications } from '@/pages/home/components/home-notifications/home-notifications.tsx';
 import { QuickActions } from '@/pages/home/components/quick-actions/quick-actions.tsx';
 import { selectCurrentUser } from '@/store/api/services/auth-slice.ts';
@@ -19,8 +18,6 @@ export function Home() {
 
     return (
         <div className={styles.container}>
-            <AlertBanner />
-
             <Row gutter={[48, 48]}>
                 <Col span={24}>
                     <HomeNotifications />
