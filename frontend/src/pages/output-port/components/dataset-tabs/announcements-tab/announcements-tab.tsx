@@ -90,7 +90,7 @@ export function AnnouncementsTab({ outputPortId, dataProductId }: Props) {
                 title: t('Announcement'),
                 dataIndex: 'title',
                 render: (_, { title, message }) => (
-                    <Flex vertical gap="small">
+                    <Flex vertical>
                         <Typography.Text strong>{title}</Typography.Text>
                         <Typography.Paragraph
                             type="secondary"
@@ -193,9 +193,15 @@ export function AnnouncementsTab({ outputPortId, dataProductId }: Props) {
                         onChange={onChange}
                         pagination={{
                             ...pagination,
-                            placement: ['bottomEnd'],
                             size: 'small',
-                            hideOnSinglePage: true,
+                            placement: ['topEnd'],
+                            style: { marginTop: 0 },
+                            showTotal: (total, range) =>
+                                t('Showing {{range0}}-{{range1}} of {{count}} announcements', {
+                                    range0: range[0],
+                                    range1: range[1],
+                                    count: total,
+                                }),
                         }}
                         size="small"
                     />

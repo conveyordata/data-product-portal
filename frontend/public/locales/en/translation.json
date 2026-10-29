@@ -803,6 +803,8 @@
     "Show more": "Show more",
     "Show Output Ports": "Show $t(Output Ports)",
     "Show sidebar": "Show sidebar",
+    "Showing {{range0}}-{{range1}} of {{count}} announcements_one": "Showing {{range0}}-{{range1}} of {{count}} announcements",
+    "Showing {{range0}}-{{range1}} of {{count}} announcements_other": "Showing {{range0}}-{{range1}} of {{count}} announcements",
     "Showing {{range0}}-{{range1}} of {{count}} Data Products_one": "Showing {{range0}}-{{range1}} of {{count}} $t(Data Product)",
     "Showing {{range0}}-{{range1}} of {{count}} Data Products_other": "Showing {{range0}}-{{range1}} of {{count}} $t(Data Products)",
     "Showing {{range0}}-{{range1}} of {{count}} Explorations_one": "Showing {{range0}}-{{range1}} of {{count}} Explorations",

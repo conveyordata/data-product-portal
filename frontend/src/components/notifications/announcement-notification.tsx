@@ -56,16 +56,18 @@ export function AnnouncementNotification({
                         </Typography.Text>
                     </Flex>
                 </Link>
-                <Typography.Text type="secondary" ellipsis>
-                    {output_port.name} · {formatDateToNowFromUTCString(created_on)}
-                </Typography.Text>
-                {detailed && (
-                    <Popover content={details} title={announcement.title} trigger="click" placement="bottomLeft">
-                        <Button type="link" size="small" style={{ padding: 0, alignSelf: 'flex-start' }}>
-                            {t('Read more')}
-                        </Button>
-                    </Popover>
-                )}
+                <Flex align="center" gap="small">
+                    <Typography.Text type="secondary" ellipsis>
+                        {output_port.name} · {formatDateToNowFromUTCString(created_on)}
+                    </Typography.Text>
+                    {detailed && (
+                        <Popover content={details} title={announcement.title} trigger="click" placement="bottomLeft">
+                            <Button type="link" size="small" style={{ padding: 0, height: 'auto' }}>
+                                {t('Read more')}
+                            </Button>
+                        </Popover>
+                    )}
+                </Flex>
             </Flex>
             <Button
                 type={detailed ? 'default' : 'text'}
