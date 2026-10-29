@@ -11,7 +11,6 @@ import {
     useAcknowledgeNotification,
 } from '@/components/notifications/use-acknowledge-notification.ts';
 import { acceptRequest, rejectRequest } from '@/components/pending-access-requests-modal/request-handlers.ts';
-import { ReviewButton } from '@/components/pending-access-requests-modal/review-button.tsx';
 import { ReviewRequestModal } from '@/components/pending-access-requests-modal/review-request-modal.tsx';
 import { UserAvatar } from '@/components/user-avatar/user-avatar.component.tsx';
 import { transformToTableRow } from '@/pages/product-studio/components/requests/request-utils.ts';
@@ -149,7 +148,13 @@ export function HomeNotifications() {
                                         </Typography.Text>
                                         <Typography.Text type="secondary">{formatDate(row.date)}</Typography.Text>
                                     </Flex>
-                                    <ReviewButton action={row.pendingAction} onReview={setReviewingAction} />
+                                    <Button
+                                        type="link"
+                                        size="small"
+                                        onClick={() => setReviewingAction(row.pendingAction)}
+                                    >
+                                        {t('Review')}
+                                    </Button>
                                 </Flex>
                             ))}
                         />
