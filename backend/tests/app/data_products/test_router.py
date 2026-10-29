@@ -557,6 +557,23 @@ class TestDataProductsRouter:
         response = self.delete_data_product(client, data_product.id)
         assert response.status_code == 200
 
+    def test_remove_data_product__conflicting_query_id(self, client):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        allowed = DataProductFactory()
+        target = DataProductFactory()
+        role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__DELETE],
+        )
+        DataProductRoleAssignmentFactory(
+            identity_id=user.id,
+            role_id=role.id,
+            data_product_id=allowed.id,
+        )
+        response = client.delete(f"{ENDPOINT}/{target.id}", params={"id": allowed.id})
+        assert response.status_code == 403
+        assert client.get(f"{ENDPOINT}/{target.id}").status_code == 200
+
     def test_remove_data_product_with_finalizers_returns_202(self, client):
         user = UserFactory(external_id=settings.DEFAULT_USERNAME)
         data_product = DataProductFactory(finalizers=["some-system"])

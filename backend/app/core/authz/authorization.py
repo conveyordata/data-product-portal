@@ -3,8 +3,6 @@ from functools import partial
 from pathlib import Path
 from typing import (
     TYPE_CHECKING,
-    Awaitable,
-    Callable,
     Sequence,
     TypeAlias,
     Union,
@@ -112,27 +110,8 @@ class Authorization(metaclass=Singleton):
         resolver: type[SubjectResolver],
         *,
         object_id: str = "id",
-    ) -> Callable[[Request, User, Session], Awaitable[None]]:
-        async def inner(
-            request: Request,
-            user: User = Depends(get_authenticated_user),
-            db: Session = Depends(get_db_session, scope="function"),
-        ) -> None:
-            context = await resolver.resolve_context(request, object_id, db)
-
-            if not cls().has_access(
-                sub=str(user.id),
-                dom=context.domain_id,
-                obj=context.object_id,
-                parent=context.parent_id,
-                act=action,
-            ):
-                raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail="You don't have permission to perform this action",
-                )
-
-        return inner
+    ) -> "Enforcement":
+        return Enforcement(action, resolver, object_id)
 
     @cachedmethod(lambda self: self._cache)
     def has_access(
@@ -579,3 +558,30 @@ class Authorization(metaclass=Singleton):
 
         self._after_update()
         return True
+
+
+@dataclass(frozen=True)
+class Enforcement:
+    action: AuthorizationAction
+    resolver: type[SubjectResolver]
+    object_id: str
+
+    async def __call__(
+        self,
+        request: Request,
+        user: User = Depends(get_authenticated_user),
+        db: Session = Depends(get_db_session, scope="function"),
+    ) -> None:
+        context = await self.resolver.resolve_context(request, self.object_id, db)
+
+        if not Authorization().has_access(
+            sub=str(user.id),
+            dom=context.domain_id,
+            obj=context.object_id,
+            parent=context.parent_id,
+            act=self.action,
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You don't have permission to perform this action",
+            )

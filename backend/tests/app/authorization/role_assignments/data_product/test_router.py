@@ -96,6 +96,50 @@ class TestDataProductRoleAssignmentsRouter:
         else:
             mock_data_product_auth_assignment.assert_not_called()
 
+    def test_create_assignment__conflicting_query_id(self, client: TestClient):
+        allowed: DataProduct = DataProductFactory()
+        target: DataProduct = DataProductFactory()
+        me = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        authz_role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__CREATE_USER],
+        )
+        DataProductRoleAssignmentFactory(
+            identity_id=me.id, role_id=authz_role.id, data_product_id=allowed.id
+        )
+
+        response = client.post(
+            f"{ENDPOINT}",
+            params={"data_product_id": str(allowed.id)},
+            json={
+                "data_product_id": str(target.id),
+                "user_id": str(UserFactory().id),
+                "role_id": str(RoleFactory(scope=Scope.DATA_PRODUCT).id),
+            },
+        )
+        assert response.status_code == 403
+
+    def test_create_assignment__unresolvable_id_denied(self, client: TestClient):
+        allowed: DataProduct = DataProductFactory()
+        me = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        authz_role = RoleFactory(
+            scope=Scope.DATA_PRODUCT,
+            permissions=[Action.DATA_PRODUCT__CREATE_USER],
+        )
+        DataProductRoleAssignmentFactory(
+            identity_id=me.id, role_id=authz_role.id, data_product_id=allowed.id
+        )
+
+        response = client.post(
+            f"{ENDPOINT}",
+            json={
+                "data_product_id": 123,
+                "user_id": str(UserFactory().id),
+                "role_id": str(RoleFactory(scope=Scope.DATA_PRODUCT).id),
+            },
+        )
+        assert response.status_code == 403
+
     @patch(
         "app.authorization.role_assignments.data_product.router.DataProductAuthAssignment"
     )
