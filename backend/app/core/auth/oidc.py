@@ -55,7 +55,7 @@ class OIDCIdentity(BaseModel):
     sub: str
     name: str
     given_name: str
-    family_name: str
+    family_name: str = ""
     email: str
     username: Optional[str] = None
     preferred_username: Optional[str] = None
@@ -65,3 +65,33 @@ class OIDCIdentity(BaseModel):
         values["username"] = values.get("username") or values.get("preferred_username")
         values["given_name"] = values.get("given_name") or values.get("name")
         return values
+
+    @classmethod
+    def from_claims(cls, claims: dict) -> "OIDCIdentity":
+        """Builds the identity from the claims of a validated access token.
+
+        Cognito puts the given name in ``name``. Entra ID puts the display name there and
+        offers ``given_name`` and ``family_name`` only as optional claims, so fall back to
+        splitting the display name on its last space. The email comes from ``email``,
+        ``preferred_username`` or ``upn``, whichever the provider filled in.
+        """
+        email = (
+            claims.get("email") or claims.get("preferred_username") or claims.get("upn")
+        )
+        if not email or "@" not in email:
+            raise ValueError("token carries no email, preferred_username or upn claim")
+        given_name = claims.get("given_name")
+        family_name = claims.get("family_name") or ""
+        if not given_name:
+            display_name = claims.get("name") or email.split("@")[0]
+            head, _, tail = display_name.rpartition(" ")
+            given_name = head or tail
+            family_name = family_name or (tail if head else "")
+        return cls(
+            sub=claims["sub"],
+            name=claims.get("name") or given_name,
+            given_name=given_name,
+            family_name=family_name,
+            email=email,
+            preferred_username=claims.get("preferred_username"),
+        )
