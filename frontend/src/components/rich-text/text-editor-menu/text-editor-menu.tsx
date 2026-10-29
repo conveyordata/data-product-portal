@@ -90,128 +90,6 @@ export const TextEditorMenu = ({ editor, isDisabled }: Props) => {
         ],
     ];
 
-    function getActiveTextType() {
-        if (editor?.isActive('heading', { level: 1 })) {
-            return 'heading1';
-        }
-        if (editor?.isActive('heading', { level: 2 })) {
-            return 'heading2';
-        }
-        if (editor?.isActive('heading', { level: 3 })) {
-            return 'heading3';
-        }
-        return 'paragraph';
-    }
-
-    function onTextTypeChange(value: string) {
-        switch (value) {
-            case 'heading1':
-                toggleHeading(1);
-                break;
-            case 'heading2':
-                toggleHeading(2);
-                break;
-            case 'heading3':
-                toggleHeading(3);
-                break;
-            case 'heading4':
-                toggleHeading(4);
-                break;
-            case 'paragraph':
-                toggleParagraph();
-                break;
-        }
-    }
-
-    if (!editor) {
-        return null;
-    }
-
-    return (
-        <Flex align="center">
-            <Popover content={t('Undo')} trigger="hover">
-                <Button className={getClassName('undo')} onClick={undo} disabled={!canUndo || isDisabled} type="text">
-                    <UndoOutlined />
-                </Button>
-            </Popover>
-            <Popover content={t('Redo')} trigger="hover">
-                <Button className={getClassName('redo')} onClick={redo} disabled={!canRedo || isDisabled} type="text">
-                    <RedoOutlined />
-                </Button>
-            </Popover>
-            <Divider type="vertical" />
-            <Popover content={t('Turn into')} trigger="hover">
-                <div>
-                    <Select
-                        options={[
-                            {
-                                label: t('Turn into'),
-                                options: TextTypeMenuOptions.map((option) => ({ ...option, key: option.value })),
-                            },
-                        ]}
-                        defaultValue="paragraph"
-                        className={styles.textTypeDropdown}
-                        title={t('Turn into')}
-                        value={getActiveTextType()}
-                        onChange={onTextTypeChange}
-                        disabled={isDisabled}
-                    />
-                </div>
-            </Popover>
-            <Divider type="vertical" />
-            <Popover content={t('Bold')} trigger="hover">
-                <Button className={getClassName('bold')} onClick={toggleBold} disabled={isDisabled} type="text">
-                    <BoldOutlined />
-                </Button>
-            </Popover>
-            <Popover content={t('Underline')} trigger="hover">
-                <Button
-                    className={getClassName('underline')}
-                    onClick={toggleUnderline}
-                    disabled={isDisabled}
-                    type="text"
-                >
-                    <UnderlineOutlined />
-                </Button>
-            </Popover>
-            <Popover content={t('Italic')} trigger="hover">
-                <Button className={getClassName('italic')} onClick={toggleItalic} disabled={isDisabled} type="text">
-                    <ItalicOutlined />
-                </Button>
-            </Popover>
-            <Popover content={t('Strike')} trigger="hover">
-                <Button className={getClassName('strike')} onClick={toggleStrike} disabled={isDisabled} type="text">
-                    <StrikethroughOutlined />
-                </Button>
-            </Popover>
-            <Divider type="vertical" />
-            <Popover content={t('Bulleted list')} trigger="hover">
-                <Button
-                    onClick={() => toggleBulletList()}
-                    className={getClassName('bulletList')}
-                    disabled={isDisabled}
-                    type="text"
-                >
-                    <UnorderedListOutlined />
-                </Button>
-            </Popover>
-            <Popover content={t('Numbered list')} trigger="hover">
-                <Button
-                    onClick={() => toggleOrderedList()}
-                    className={getClassName('orderedList')}
-                    disabled={isDisabled}
-                    type="text"
-                >
-                    <OrderedListOutlined />
-                </Button>
-            </Popover>
-            <Divider type="vertical" />
-            <Popover content={t('Code block')} trigger="hover">
-                <Button className={getClassName('codeBlock')} onClick={toggleCode} disabled={isDisabled} type="text">
-                    <CodeOutlined />
-                </Button>
-            </Popover>
-        </Flex>
     const renderButtons = (buttons: MenuButton[]) =>
         buttons.map(({ label, icon, run, active, disabled }) => (
             <Tooltip key={label} title={label}>
@@ -226,7 +104,7 @@ export const TextEditorMenu = ({ editor, isDisabled }: Props) => {
         ));
 
     return (
-        <Flex align="center" className={styles.menuBar}>
+        <Flex align="center">
             {renderButtons(history)}
             <Divider orientation="vertical" />
             <Tooltip title={t('Turn into')}>

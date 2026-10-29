@@ -1,13 +1,4 @@
-@use "@/styles/globals";
-
 $text-type-dropdown-width: 120px;
-
-.menuButton {
-    &.active {
-        background-color: globals.$primary-color;
-        color: globals.$blue-1;
-    }
-}
 
 .text-type-dropdown {
     width: $text-type-dropdown-width;
