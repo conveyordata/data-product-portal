@@ -1,6 +1,6 @@
 from enum import Enum
 from functools import lru_cache
-from typing import Optional
+from typing import Literal, Optional
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -35,6 +35,10 @@ class Settings(BaseSettings):
     OIDC_AUTHORITY: Optional[str] = None
     OIDC_REDIRECT_URI: Optional[str] = None
     OIDC_AUDIENCE: Optional[str] = None
+    # Where the user's identity (name, email) comes from after the access token is validated:
+    #   "userinfo": call the provider's userinfo endpoint with the access token (default, Cognito)
+    #   "token":    read the claims of the validated access token (Entra ID, Keycloak, ...)
+    OIDC_IDENTITY_SOURCE: Literal["userinfo", "token"] = "userinfo"
 
     MCP_BASE_URL: Optional[str] = None
     MCP_AUTH_REDIRECT_URIS: list[str] = []

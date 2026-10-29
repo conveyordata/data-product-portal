@@ -6,7 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.auth.api_key import secured_api_key
-from app.core.auth.jwt import JWTToken, JWTTokenValid, PyJWTError
+from app.core.auth.jwt import JWTToken, JWTTokenValid
 from app.core.auth.oidc import OIDCIdentity
 from app.database.database import get_system_db_session
 from app.settings import settings
@@ -54,17 +54,31 @@ if settings.OIDC_ENABLED:
     def secured_call(token: str = Depends(oidc.oidc_dependency)) -> JWTToken:
         jwt = JWTTokenValid(token)
         if not jwt.is_valid():
-            raise PyJWTError
-        return JWTToken(sub=jwt.valid_jwt_token.get("sub"), token=token)
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid or expired access token",
+            )
+        return JWTToken(
+            sub=jwt.valid_jwt_token.get("sub"), token=token, claims=jwt.valid_jwt_token
+        )
 
     def authorize_user(
         token: JWTToken = Depends(secured_call),
         db: Session = Depends(get_system_db_session),
     ) -> User:
-        response = httpx.post(
-            url=oidc.userinfo_endpoint, headers={"Authorization": token.token}
-        )
-        oidc_user = OIDCIdentity.model_validate(response.json())
+        if settings.OIDC_IDENTITY_SOURCE == "token" and token.claims:
+            try:
+                oidc_user = OIDCIdentity.from_claims(token.claims)
+            except (KeyError, ValueError) as e:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail=f"Access token lacks identity claims: {e}",
+                )
+        else:
+            response = httpx.post(
+                url=oidc.userinfo_endpoint, headers={"Authorization": token.token}
+            )
+            oidc_user = OIDCIdentity.model_validate(response.json())
         return update_db_user(oidc_user, token, db)
 
     def api_key_authenticated(
