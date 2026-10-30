@@ -1,6 +1,6 @@
 from abc import ABC
 from dataclasses import dataclass
-from typing import Type, TypeAlias, Union, cast
+from typing import Type, TypeAlias, Union
 
 from fastapi import Depends, Request
 from sqlalchemy import select
@@ -47,15 +47,20 @@ class SubjectResolver(ABC):
         key: str,
         db: Session = Depends(get_db_session, scope="function"),
     ):
-        if (result := request.query_params.get(key)) is not None:
-            return result
-        if (result := request.path_params.get(key)) is not None:
-            return cast("str", result)
-        json_body = await request.json()
-        if isinstance(json_body, dict) and (result := json_body.get(key)) is not None:
-            return cast("str", result)
-
-        return cls.DEFAULT
+        dependant = request.scope["route"].dependant
+        value = None
+        if any(p.name == key for p in dependant.path_params):
+            value = request.path_params.get(key)
+        elif any(p.name == key for p in dependant.query_params):
+            value = request.query_params.get(key)
+        elif dependant.body_params:
+            try:
+                json_body = await request.json()
+            except ValueError:
+                json_body = None
+            if isinstance(json_body, dict):
+                value = json_body.get(key)
+        return value if isinstance(value, str) else cls.DEFAULT
 
     @classmethod
     async def _resolve_domain(
