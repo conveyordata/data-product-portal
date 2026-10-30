@@ -1,15 +1,24 @@
-import { DeleteOutlined, ExportOutlined, NotificationOutlined, PlusOutlined } from '@ant-design/icons';
-import { Button, Card, Flex, Popconfirm, Typography } from 'antd';
-import { useState } from 'react';
+import { DeleteOutlined, NotificationOutlined, PlusOutlined } from '@ant-design/icons';
+import { Button, Flex, Input, Popconfirm, type TableColumnsType, Typography } from 'antd';
+import { useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
-import { AnnouncementTypeTag } from '@/components/announcements/announcement-type-tag.tsx';
-import { EmptyState, emptyStateQueryProps, isAwaitingData } from '@/components/empty-state/empty-state.component.tsx';
+import { ANNOUNCEMENT_URGENCY, AnnouncementTypeIcon } from '@/components/announcements/announcement-type.tsx';
+import {
+    EmptyState,
+    emptyStateQueryProps,
+    isAwaitingData,
+    searchFilter,
+} from '@/components/empty-state/empty-state.component.tsx';
+import { ListTable } from '@/components/list-table/list-table.component.tsx';
 import { LoadingSpinner } from '@/components/loading/loading-spinner/loading-spinner';
+import { DEFAULT_TABLE_PAGINATION } from '@/constants/table.constants.ts';
+import { useTablePagination } from '@/hooks/use-table-pagination.tsx';
 import { TabKeys } from '@/pages/output-port/components/dataset-tabs/dataset-tabkeys';
 import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
 import {
     type Announcement,
+    type AnnouncementType,
     useGetOutputPortAnnouncementsQuery,
     useRemoveOutputPortAnnouncementMutation,
 } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
@@ -20,6 +29,9 @@ import {
 import { AuthorizationAction } from '@/types/authorization/rbac-actions.ts';
 import { formatDateFromISOString } from '@/utils/date.helper.ts';
 import { dispatchMessage } from '@/utils/feedback.ts';
+import { linkify } from '@/utils/linkify.tsx';
+import { cleanupForSearching } from '@/utils/search.ts';
+import { Sorter } from '@/utils/table-sorter.helper';
 import { NewAnnouncementModal } from './new-announcement-modal.tsx';
 
 type Props = {
@@ -30,6 +42,7 @@ type Props = {
 export function AnnouncementsTab({ outputPortId, dataProductId }: Props) {
     const { t } = useTranslation();
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
     const announcementsQuery = useGetOutputPortAnnouncementsQuery({ id: outputPortId, dataProductId });
     const { data: { announcements = [] } = {} } = announcementsQuery;
     const { data: { allowed: canPost = false } = {} } = useCheckAccessQuery({
@@ -41,6 +54,73 @@ export function AnnouncementsTab({ outputPortId, dataProductId }: Props) {
         { skip: !canPost },
     );
     const consumerCount = inputPorts.filter(({ status }) => status === InputPortStatus.Approved).length;
+    const filteredAnnouncements = useMemo(() => {
+        const search = cleanupForSearching(searchTerm);
+        return announcements.filter(({ title, message }) =>
+            cleanupForSearching(`${title} ${message}`).includes(search),
+        );
+    }, [announcements, searchTerm]);
+    const { pagination, handlePaginationChange } = useTablePagination(filteredAnnouncements, {
+        initialPagination: DEFAULT_TABLE_PAGINATION,
+    });
+
+    const columns = useMemo((): TableColumnsType<Announcement> => {
+        const sorter = new Sorter<Announcement>();
+        return [
+            {
+                title: t('Type'),
+                dataIndex: 'type',
+                width: 72,
+                align: 'center',
+                render: (type: AnnouncementType) => <AnnouncementTypeIcon type={type} />,
+                sorter: sorter.numberSorter(({ type }) => ANNOUNCEMENT_URGENCY.indexOf(type)),
+            },
+            {
+                title: t('Announcement'),
+                dataIndex: 'title',
+                render: (_, { title, message }) => (
+                    <Flex vertical>
+                        <Typography.Text strong>{title}</Typography.Text>
+                        <Typography.Paragraph
+                            type="secondary"
+                            style={{ whiteSpace: 'pre-line', marginBottom: 0 }}
+                            ellipsis={{
+                                rows: 2,
+                                expandable: 'collapsible',
+                                symbol: (expanded) => (expanded ? t('less') : t('more')),
+                            }}
+                        >
+                            {linkify(message)}
+                        </Typography.Paragraph>
+                    </Flex>
+                ),
+            },
+            {
+                title: t('Posted'),
+                dataIndex: 'created_at',
+                width: 180,
+                defaultSortOrder: 'descend',
+                sorter: sorter.stringSorter(({ created_at }) => created_at),
+                render: (_, { created_at, author }) => (
+                    <Flex vertical>
+                        <Typography.Text>{formatDateFromISOString(created_at)}</Typography.Text>
+                        <Typography.Text type="secondary">
+                            {author ? `${author.first_name} ${author.last_name}` : t('a former user')}
+                        </Typography.Text>
+                    </Flex>
+                ),
+            },
+            {
+                title: t('Actions'),
+                key: 'actions',
+                width: 110,
+                hidden: !canPost,
+                render: (_, announcement) => (
+                    <DeleteAnnouncementButton announcement={announcement} dataProductId={dataProductId} />
+                ),
+            },
+        ];
+    }, [t, canPost, dataProductId]);
 
     if (isAwaitingData(announcementsQuery)) {
         return <LoadingSpinner />;
@@ -54,9 +134,6 @@ export function AnnouncementsTab({ outputPortId, dataProductId }: Props) {
 
     return (
         <Flex vertical gap="middle">
-            {announcements.length > 0 && newAnnouncementButton && (
-                <Flex justify="flex-end">{newAnnouncementButton}</Flex>
-            )}
             {announcements.length === 0 ? (
                 <EmptyState
                     icon={<NotificationOutlined />}
@@ -80,14 +157,39 @@ export function AnnouncementsTab({ outputPortId, dataProductId }: Props) {
                     {...emptyStateQueryProps(announcementsQuery)}
                 />
             ) : (
-                announcements.map((announcement) => (
-                    <AnnouncementCard
-                        key={announcement.id}
-                        announcement={announcement}
-                        canDelete={canPost}
-                        dataProductId={dataProductId}
+                <>
+                    <Flex gap="middle">
+                        <Input.Search
+                            placeholder={t('Search announcements by title or message')}
+                            allowClear
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                        {newAnnouncementButton}
+                    </Flex>
+                    <ListTable<Announcement>
+                        query={announcementsQuery}
+                        dataSource={filteredAnnouncements}
+                        columns={columns}
+                        subject={t('announcements')}
+                        emptyState={{ icon: <NotificationOutlined />, title: t('No announcements yet') }}
+                        filter={searchFilter(searchTerm, setSearchTerm)}
+                        rowKey={({ id }) => id}
+                        onChange={handlePaginationChange}
+                        pagination={{
+                            ...pagination,
+                            size: 'small',
+                            placement: ['bottomEnd'],
+                            showTotal: (total, range) =>
+                                t('Showing {{range0}}-{{range1}} of {{count}} announcements', {
+                                    range0: range[0],
+                                    range1: range[1],
+                                    count: total,
+                                }),
+                        }}
+                        size="small"
                     />
-                ))
+                </>
             )}
             {isModalOpen && (
                 <NewAnnouncementModal
@@ -101,18 +203,15 @@ export function AnnouncementsTab({ outputPortId, dataProductId }: Props) {
     );
 }
 
-type CardProps = {
+function DeleteAnnouncementButton({
+    announcement,
+    dataProductId,
+}: {
     announcement: Announcement;
-    canDelete: boolean;
     dataProductId: string;
-};
-
-function AnnouncementCard({ announcement, canDelete, dataProductId }: CardProps) {
+}) {
     const { t } = useTranslation();
     const [removeAnnouncement, { isLoading }] = useRemoveOutputPortAnnouncementMutation();
-    const author = announcement.author
-        ? `${announcement.author.first_name} ${announcement.author.last_name}`
-        : t('a former user');
 
     const onDelete = async () => {
         try {
@@ -128,54 +227,19 @@ function AnnouncementCard({ announcement, canDelete, dataProductId }: CardProps)
     };
 
     return (
-        <Card size="small">
-            <Flex justify="space-between" align="center" gap="middle">
-                <Flex vertical gap="small">
-                    <Flex align="center" gap="small" wrap>
-                        <AnnouncementTypeTag type={announcement.type} />
-                        <Typography.Text strong>{announcement.title}</Typography.Text>
-                    </Flex>
-                    <Typography.Paragraph style={{ whiteSpace: 'pre-line', marginBottom: 0 }}>
-                        {announcement.message}
-                    </Typography.Paragraph>
-                    <Typography.Text type="secondary">
-                        {t('Posted {{date}} by {{author}}', {
-                            date: formatDateFromISOString(announcement.created_at),
-                            author,
-                        })}
-                    </Typography.Text>
-                </Flex>
-                <Flex gap="small" align="center">
-                    {announcement.link && (
-                        <Button
-                            size="small"
-                            href={announcement.link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            icon={<ExportOutlined />}
-                            iconPlacement="end"
-                        >
-                            {t('Read more')}
-                        </Button>
-                    )}
-                    {canDelete && (
-                        <Popconfirm
-                            title={t('Delete Announcement')}
-                            description={t(
-                                'Consumers will no longer see it and its notifications are removed. The deletion is recorded in History. This cannot be undone.',
-                            )}
-                            okText={t('Delete')}
-                            okButtonProps={{ danger: true, loading: isLoading }}
-                            cancelText={t('Cancel')}
-                            onConfirm={onDelete}
-                        >
-                            <Button size="small" type="link" danger icon={<DeleteOutlined />}>
-                                {t('Delete')}
-                            </Button>
-                        </Popconfirm>
-                    )}
-                </Flex>
-            </Flex>
-        </Card>
+        <Popconfirm
+            title={t('Delete Announcement')}
+            description={t(
+                'Consumers will no longer see it and its notifications are removed. The deletion is recorded in History. This cannot be undone.',
+            )}
+            okText={t('Delete')}
+            okButtonProps={{ danger: true, loading: isLoading }}
+            cancelText={t('Cancel')}
+            onConfirm={onDelete}
+        >
+            <Button size="small" type="link" danger icon={<DeleteOutlined />}>
+                {t('Delete')}
+            </Button>
+        </Popconfirm>
     );
 }

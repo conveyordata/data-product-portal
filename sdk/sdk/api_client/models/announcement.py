@@ -26,7 +26,6 @@ class Announcement:
         type_ (AnnouncementType):
         title (str):
         message (str):
-        link (None | str):
         author (None | User):
         created_at (datetime.datetime):
     """
@@ -36,7 +35,6 @@ class Announcement:
     type_: AnnouncementType
     title: str
     message: str
-    link: None | str
     author: None | User
     created_at: datetime.datetime
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
@@ -53,9 +51,6 @@ class Announcement:
         title = self.title
 
         message = self.message
-
-        link: None | str
-        link = self.link
 
         author: dict[str, Any] | None
         if isinstance(self.author, User):
@@ -74,7 +69,6 @@ class Announcement:
                 "type": type_,
                 "title": title,
                 "message": message,
-                "link": link,
                 "author": author,
                 "created_at": created_at,
             }
@@ -96,13 +90,6 @@ class Announcement:
         title = d.pop("title")
 
         message = d.pop("message")
-
-        def _parse_link(data: object) -> None | str:
-            if data is None:
-                return data
-            return cast(None | str, data)
-
-        link = _parse_link(d.pop("link"))
 
         def _parse_author(data: object) -> None | User:
             if data is None:
@@ -127,7 +114,6 @@ class Announcement:
             type_=type_,
             title=title,
             message=message,
-            link=link,
             author=author,
             created_at=created_at,
         )

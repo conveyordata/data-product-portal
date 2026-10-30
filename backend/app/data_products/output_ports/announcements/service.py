@@ -34,7 +34,6 @@ class AnnouncementService:
             type=request.type,
             title=request.title,
             message=request.message,
-            link=request.link,
             author_id=actor.id,
         )
         self.db.add(announcement)

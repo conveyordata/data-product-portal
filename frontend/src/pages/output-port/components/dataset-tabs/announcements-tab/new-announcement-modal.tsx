@@ -1,6 +1,10 @@
-import { Alert, ConfigProvider, Flex, Form, Input, Modal, Select, Tooltip, Typography, theme } from 'antd';
+import { Alert, ConfigProvider, Flex, Form, Input, Modal, Select, Space, Typography, theme } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { AnnouncementTypeTag, getAnnouncementTypeConfig } from '@/components/announcements/announcement-type-tag.tsx';
+import {
+    AnnouncementTypeIcon,
+    AnnouncementTypeLabel,
+    getAnnouncementTypeConfig,
+} from '@/components/announcements/announcement-type.tsx';
 import {
     AnnouncementType,
     type CreateAnnouncement,
@@ -31,17 +35,13 @@ export function NewAnnouncementModal({ dataProductId, outputPortId, consumerCoun
     const { token } = theme.useToken();
     const [form] = Form.useForm<CreateAnnouncement>();
     const [createAnnouncement, { isLoading }] = useCreateOutputPortAnnouncementMutation();
-    const typeConfig = getAnnouncementTypeConfig(t);
+    const typeConfig = getAnnouncementTypeConfig(t, token);
     const title = Form.useWatch('title', form) ?? '';
     const message = Form.useWatch('message', form) ?? '';
 
-    const onFinish = async ({ link, ...values }: CreateAnnouncement) => {
+    const onFinish = async (values: CreateAnnouncement) => {
         try {
-            await createAnnouncement({
-                dataProductId,
-                id: outputPortId,
-                createAnnouncement: { ...values, link: link || null },
-            }).unwrap();
+            await createAnnouncement({ dataProductId, id: outputPortId, createAnnouncement: values }).unwrap();
             dispatchMessage({ content: t('Announcement published'), type: 'success' });
             onClose();
         } catch (_error) {
@@ -69,39 +69,52 @@ export function NewAnnouncementModal({ dataProductId, outputPortId, consumerCoun
                     onFinish={onFinish}
                     disabled={isLoading}
                 >
-                    <Form.Item<CreateAnnouncement> name="type" label={t('Type')} rules={[{ required: true }]}>
-                        <Select
-                            options={Object.values(AnnouncementType).map((type) => ({
-                                value: type,
-                                label: <AnnouncementTypeTag type={type} />,
-                            }))}
-                            optionRender={({ data }) => (
-                                <Tooltip title={typeConfig[data.value].meaning} placement="right">
-                                    <span>{data.label}</span>
-                                </Tooltip>
-                            )}
-                        />
-                    </Form.Item>
                     <Form.Item<CreateAnnouncement>
                         label={t('Title')}
                         htmlFor="title"
                         required
+                        tooltip={t('Pick the type with the icon in front of the title.')}
                         extra={<CharacterCount length={title.length} max={TITLE_MAX_LENGTH} />}
                     >
-                        <Form.Item<CreateAnnouncement>
-                            name="title"
-                            noStyle
-                            rules={[{ required: true, whitespace: true, message: t('Please provide a title') }]}
-                        >
-                            <Input placeholder={t('e.g. Version 2 is now available')} maxLength={TITLE_MAX_LENGTH} />
-                        </Form.Item>
+                        <Space.Compact block>
+                            <Form.Item<CreateAnnouncement> name="type" noStyle rules={[{ required: true }]}>
+                                <Select
+                                    aria-label={t('Type')}
+                                    style={{ width: 'auto' }}
+                                    popupMatchSelectWidth={false}
+                                    options={Object.values(AnnouncementType).map((type) => ({
+                                        value: type,
+                                        label: <AnnouncementTypeIcon type={type} />,
+                                    }))}
+                                    optionRender={({ data }) => (
+                                        <Flex vertical>
+                                            <AnnouncementTypeLabel type={data.value} />
+                                            <Typography.Text type="secondary">
+                                                {typeConfig[data.value].meaning}
+                                            </Typography.Text>
+                                        </Flex>
+                                    )}
+                                />
+                            </Form.Item>
+                            <Form.Item<CreateAnnouncement>
+                                name="title"
+                                noStyle
+                                rules={[{ required: true, whitespace: true, message: t('Please provide a title') }]}
+                            >
+                                <Input
+                                    id="title"
+                                    placeholder={t('e.g. Version 2 is now available')}
+                                    maxLength={TITLE_MAX_LENGTH}
+                                />
+                            </Form.Item>
+                        </Space.Compact>
                     </Form.Item>
                     <Form.Item<CreateAnnouncement>
                         label={t('Message')}
                         htmlFor="message"
                         required
                         tooltip={t(
-                            'Plain text. Say what happens, who is affected and what consumers need to do. Write any deadline or maintenance window here.',
+                            'Plain text. Say what happens, who is affected and what consumers need to do. Write any deadline or maintenance window here. Links starting with http:// or https:// become clickable.',
                         )}
                         extra={<CharacterCount length={message.length} max={MESSAGE_MAX_LENGTH} />}
                     >
@@ -112,21 +125,6 @@ export function NewAnnouncementModal({ dataProductId, outputPortId, consumerCoun
                         >
                             <Input.TextArea rows={5} maxLength={MESSAGE_MAX_LENGTH} />
                         </Form.Item>
-                    </Form.Item>
-                    <Form.Item<CreateAnnouncement>
-                        name="link"
-                        label={t('More information')}
-                        tooltip={t(
-                            'Shown to consumers as a Read more button. Links must start with http:// or https://.',
-                        )}
-                        rules={[
-                            {
-                                pattern: /^https?:\/\/\S+$/,
-                                message: t('Links must start with http:// or https://'),
-                            },
-                        ]}
-                    >
-                        <Input placeholder={t('https://… a migration guide, changelog or status page')} />
                     </Form.Item>
                 </Form>
             </ConfigProvider>

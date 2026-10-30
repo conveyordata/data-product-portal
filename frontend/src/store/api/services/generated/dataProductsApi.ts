@@ -572,7 +572,6 @@ export type Announcement = {
   type: AnnouncementType;
   title: string;
   message: string;
-  link: string | null;
   author: User | null;
   created_at: string;
 };
@@ -705,10 +704,8 @@ export enum TechnicalMapping {
   Custom = "custom",
 }
 export enum AnnouncementType {
-  Issue = "issue",
   ActionNeeded = "action_needed",
-  PlannedMaintenance = "planned_maintenance",
-  NewVersion = "new_version",
+  Warning = "warning",
   Info = "info",
 }
 export enum DataProductSettingType {

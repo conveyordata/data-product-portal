@@ -60,10 +60,9 @@ export function announcementNotification(id: string, outputPortId: string, title
         announcement: {
             id: `announcement-${id}`,
             output_port_id: outputPortId,
-            type: AnnouncementType.Issue,
+            type: AnnouncementType.Warning,
             title,
-            message: '',
-            link: null,
+            message: 'Details on https://status.example.com/incident',
             author: null,
             created_at: '2026-10-26T10:00:00Z',
         },

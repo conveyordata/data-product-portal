@@ -10669,17 +10669,6 @@
             "type": "string",
             "title": "Message"
           },
-          "link": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Link"
-          },
           "author": {
             "anyOf": [
               {
@@ -10703,7 +10692,6 @@
           "type",
           "title",
           "message",
-          "link",
           "author",
           "created_at"
         ],
@@ -10712,10 +10700,8 @@
       "AnnouncementType": {
         "type": "string",
         "enum": [
-          "issue",
           "action_needed",
-          "planned_maintenance",
-          "new_version",
+          "warning",
           "info"
         ],
         "title": "AnnouncementType"
@@ -11434,20 +11420,6 @@
           },
           "message": {
             "$ref": "#/components/schemas/app__shared__schema__NonEmptyStr__2"
-          },
-          "link": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 2083,
-                "minLength": 1,
-                "format": "uri"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Link"
           }
         },
         "type": "object",

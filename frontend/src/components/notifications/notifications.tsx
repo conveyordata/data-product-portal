@@ -1,5 +1,5 @@
 import { BellOutlined, CheckOutlined } from '@ant-design/icons';
-import { Badge, Button, Flex, Popover, Tag, Typography, theme } from 'antd';
+import { Badge, Button, Flex, Popover, Tag, Typography } from 'antd';
 import { type ReactNode, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { EmptyState, emptyStateQueryProps, isAwaitingData } from '@/components/empty-state/empty-state.component.tsx';
@@ -8,42 +8,25 @@ import {
     type GetUserNotificationsResponseItem,
     useGetUserNotificationsQuery,
     useRemoveAllUserNotificationsMutation,
-    useRemoveUserNotificationMutation,
 } from '@/store/api/services/generated/usersNotificationsApi.ts';
-import { EventType } from '@/types/events/event-types.ts';
 import { formatDateToNowFromUTCString } from '@/utils/date.helper';
 import { dispatchMessage } from '@/utils/feedback.ts';
 import { AnnouncementNotification } from './announcement-notification';
 import { NotificationDescription } from './notification-description';
 import styles from './notifications.module.scss';
+import { isAnnouncementNotification, useAcknowledgeNotification } from './use-acknowledge-notification';
 
 const MAX_ITEMS_DEFAULT = 10;
 
 export function Notifications() {
-    const {
-        token: { colorError },
-    } = theme.useToken();
     const { t } = useTranslation();
 
     const notificationsQuery = useGetUserNotificationsQuery();
     const { data: { notifications = [] } = {} } = notificationsQuery;
 
-    const [removeNotification, { isLoading: isAcknowledging, originalArgs: acknowledgingId }] =
-        useRemoveUserNotificationMutation();
+    const { acknowledge: handleRemoveNotification, acknowledgingId, isAcknowledging } = useAcknowledgeNotification();
     const [removeAllNotifications] = useRemoveAllUserNotificationsMutation();
     const [maxItems, setMaxItems] = useState(MAX_ITEMS_DEFAULT);
-
-    const handleRemoveNotification = useCallback(
-        async (notificationId: string) => {
-            try {
-                await removeNotification(notificationId).unwrap();
-                dispatchMessage({ content: t('Notification has been acknowledged'), type: 'success' });
-            } catch (_error) {
-                dispatchMessage({ content: t('Failed to acknowledge notification'), type: 'error' });
-            }
-        },
-        [removeNotification, t],
-    );
 
     const handleRemoveAllNotifications = useCallback(async () => {
         try {
@@ -99,11 +82,13 @@ export function Notifications() {
         setMaxItems((prev) => prev + MAX_ITEMS_DEFAULT);
     }, []);
 
-    const [announcementNotifications, requestNotifications] = useMemo(() => {
-        const isAnnouncement = (notification: GetUserNotificationsResponseItem) =>
-            notification.event.name === EventType.ANNOUNCEMENT_CREATED;
-        return [notifications.filter(isAnnouncement), notifications.filter((n) => !isAnnouncement(n))];
-    }, [notifications]);
+    const [announcementNotifications, requestNotifications] = useMemo(
+        () => [
+            notifications.filter(isAnnouncementNotification),
+            notifications.filter((n) => !isAnnouncementNotification(n)),
+        ],
+        [notifications],
+    );
 
     const createShowMoreItem = useCallback(
         (excessLength: number) => (
@@ -147,7 +132,8 @@ export function Notifications() {
                     key={notification.id}
                     notification={notification}
                     onAcknowledge={handleRemoveNotification}
-                    isAcknowledging={isAcknowledging && acknowledgingId === notification.id}
+                    isAcknowledging={acknowledgingId === notification.id}
+                    disabled={isAcknowledging}
                 />
             ));
 
@@ -160,8 +146,8 @@ export function Notifications() {
         handleRemoveNotification,
         maxItems,
         createShowMoreItem,
-        isAcknowledging,
         acknowledgingId,
+        isAcknowledging,
     ]);
 
     const notificationItems = [
@@ -181,9 +167,11 @@ export function Notifications() {
     const header = useMemo(() => {
         if (notificationItems?.length > 0) {
             return (
-                <Flex justify="space-between" align="center" className={styles.notificationLabel}>
-                    <Typography.Title level={4}>{t('Notifications')}</Typography.Title>{' '}
-                    <Button onClick={handleRemoveAllNotifications}>{t('Acknowledge all')}</Button>
+                <Flex justify="space-between" align="center" gap="large" className={styles.notificationLabel}>
+                    <Typography.Text strong>{t('Notifications')}</Typography.Text>
+                    <Button type="link" size="small" onClick={handleRemoveAllNotifications}>
+                        {t('Acknowledge all')}
+                    </Button>
                 </Flex>
             );
         }
@@ -203,13 +191,7 @@ export function Notifications() {
 
     return (
         <Flex>
-            <Badge
-                count={(notifications ?? []).length}
-                showZero={false}
-                color={colorError}
-                style={{ fontSize: 10 }}
-                size="small"
-            >
+            <Badge count={(notifications ?? []).length}>
                 <Popover
                     content={
                         <div>

@@ -33,7 +33,6 @@ def upgrade() -> None:
         sa.Column("type", sa.String(), nullable=False),
         sa.Column("title", sa.String(length=100), nullable=False),
         sa.Column("message", sa.Text(), nullable=False),
-        sa.Column("link", sa.Text(), nullable=True),
         sa.Column(
             "author_id",
             sa.UUID,
