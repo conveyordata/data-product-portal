@@ -24,6 +24,7 @@ from tests.factories import (
     DataProductSettingFactory,
     DatasetRoleAssignmentFactory,
     ExplorationFactory,
+    GlobalRoleAssignmentFactory,
     InputPortFactory,
     OutputPortAccessTypeFactory,
     OutputPortFactory,
@@ -164,6 +165,20 @@ class TestOutputPortRouter:
             client, other_data_product.id, output_port_payload
         )
         assert other_data_product.id != accessible_data_product.id
+        assert response.status_code == 403, response.text
+
+    def test_create_output_port__global_permission_only(
+        self, output_port_payload, client
+    ):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        role = RoleFactory(
+            scope=Scope.GLOBAL,
+            permissions=[AuthorizationAction.GLOBAL__CREATE_OUTPUT_PORT],
+        )
+        GlobalRoleAssignmentFactory(identity_id=user.id, role_id=role.id)
+        response = self.create_output_port(
+            client, DataProductFactory().id, output_port_payload
+        )
         assert response.status_code == 403, response.text
 
     def test_create_output_port__hidden_data_product_only_allows_private_output_port(
