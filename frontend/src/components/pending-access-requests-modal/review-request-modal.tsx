@@ -46,6 +46,7 @@ import {
     RequestType_TechnicalAssetOutputPort,
 } from '@/types/request-types/request-types.tsx';
 import { formatDate } from '@/utils/date.helper.ts';
+import { getIdentityDisplayName, getIdentitySecondaryLabel, getIdentityTypeLabel } from '@/utils/identity.ts';
 import { getInputPortStatusBadgeStatus, getInputPortStatusLabel } from '@/utils/status.helper.ts';
 
 type Props = {
@@ -257,14 +258,18 @@ function getRequestDetails(
     }
 
     if (action.request_type === RequestType_DataProductRoleAssignment) {
-        const roleName = action.role ? action.role.name : t('a role');
+        const roleName = action.role?.name ?? t('a role');
+        const identity = action.identity;
+
         return {
-            requesterName: `${action.requested_by?.first_name} ${action.requested_by?.last_name}`,
-            requesterEmail: action.requested_by?.email || '',
+            requesterName: action.requested_by
+                ? `${action.requested_by.first_name} ${action.requested_by.last_name}`
+                : '',
+            requesterEmail: action.requested_by?.email ?? '',
             source: {
-                name: `${action.user.first_name} ${action.user.last_name}`,
-                email: action.user.email,
-                type: t('User'),
+                name: getIdentityDisplayName(identity),
+                email: getIdentitySecondaryLabel(identity),
+                type: getIdentityTypeLabel(identity, t),
                 icon: <UserOutlined />,
             },
             target: {
@@ -276,7 +281,7 @@ function getRequestDetails(
             accessType: roleName,
             justification: '',
             hasJustification: false,
-            requestedOn: action.requested_on || '',
+            requestedOn: action.requested_on ?? '',
             title: t('Review Role Assignment Request'),
         };
     }

@@ -39,6 +39,12 @@ def test_export_openapi_describes_plugin_configuration_generically() -> None:
     assert "FakeTechnicalAssetConfiguration" not in str(schemas)
 
 
+def test_export_openapi_uses_unique_ogen_identity_type_name() -> None:
+    schema = custom_openapi(f_app)["components"]["schemas"]["IdentityType"]
+
+    assert schema["x-ogen-name"] == "IdentityKind"
+
+
 def find_model_name_collisions(app: FastAPI) -> dict[str, list[Type]]:
     # Collect all models used in the application
     unique_models: set[Type] = set()

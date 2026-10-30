@@ -124,7 +124,19 @@ export type GetUserGroupsApiResponse =
 export type GetUserGroupsApiArg = string;
 export type RemoveUserApiResponse = /** status 200 Successful Response */ any;
 export type RemoveUserApiArg = string;
-export type User = {
+export type GroupIdentity = {
+  id: string;
+  external_id: string;
+  display_name: string;
+  type: "group";
+};
+export type MachineUserIdentity = {
+  id: string;
+  external_id: string;
+  display_name: string;
+  type: "machine_user";
+};
+export type UserIdentity = {
   id: string;
   email: string;
   external_id: string;
@@ -133,7 +145,18 @@ export type User = {
   has_seen_tour: boolean;
   can_become_admin: boolean;
   admin_expiry?: string | null;
+  type: "user";
 };
+export type Identity =
+  | ({
+      type: "group";
+    } & GroupIdentity)
+  | ({
+      type: "machine_user";
+    } & MachineUserIdentity)
+  | ({
+      type: "user";
+    } & UserIdentity);
 export type Scope = "dataset" | "data_product" | "domain" | "global";
 export type AuthorizationAction =
   | 101
@@ -194,9 +217,19 @@ export type Role = {
   prototype: Prototype;
 };
 export type DecisionStatus = "approved" | "pending" | "denied";
+export type User = {
+  id: string;
+  email: string;
+  external_id: string;
+  first_name: string;
+  last_name: string;
+  has_seen_tour: boolean;
+  can_become_admin: boolean;
+  admin_expiry?: string | null;
+};
 export type GlobalRoleAssignmentResponse = {
   id: string;
-  user: User;
+  identity: Identity;
   role: Role;
   decision: DecisionStatus;
   requested_on: string | null;
@@ -424,7 +457,7 @@ export type TechnicalAssetOutputPortRequest = {
 export type DataProductRoleAssignmentRequest = {
   id: string;
   data_product: DataProduct;
-  user: User;
+  identity: Identity;
   role: Role | null;
   decision: DecisionStatus;
   requested_on: string | null;

@@ -6,6 +6,7 @@ import {
     RequestType_TechnicalAssetOutputPort,
 } from '@/types/request-types/request-types.tsx';
 import type { DecisionStatus, InputPortRequestDecision } from '@/types/roles';
+import { getIdentityDisplayName } from '@/utils/identity.ts';
 
 export interface TableRow {
     key: string;
@@ -26,10 +27,10 @@ export function getRequestDescription(action: Request): string {
         case RequestType_TechnicalAssetOutputPort:
             return `${action.technical_asset.name} requests to be included in ${action.output_port.name}`;
         case RequestType_DataProductRoleAssignment: {
-            const userName = `${action.user.first_name} ${action.user.last_name}`;
+            const identityName = getIdentityDisplayName(action.identity);
             const roleName = action.role?.name || 'role';
             const productName = action.data_product.name;
-            return `${userName} requests the ${roleName} role for ${productName}`;
+            return `${identityName} requests the ${roleName} role for ${productName}`;
         }
         default:
             throw new Error('Unknown request type');

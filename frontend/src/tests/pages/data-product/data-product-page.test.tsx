@@ -133,7 +133,7 @@ describe('DataProduct Page', () => {
         server.use(
             http.get('*/api/v2/authz/role_assignments/data_product', () => {
                 return HttpResponse.json({
-                    role_assignments: [{ user: { id: '1' }, decision: 'approved' }],
+                    role_assignments: [{ identity: { id: '1' }, decision: 'approved' }],
                 });
             }),
         );
