@@ -1,5 +1,6 @@
 import { Flex, Typography } from 'antd';
 import clsx from 'clsx';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useGetThemeSettingsQuery } from '@/store/api/services/generated/configurationThemeSettingsApi.ts';
 import styles from './sidebar-logo.module.scss';
@@ -11,11 +12,15 @@ type Props = {
 export function SidebarLogo({ variant = 'light' }: Props) {
     const { t } = useTranslation();
     const { data: settings } = useGetThemeSettingsQuery();
+    const portalName = settings ? settings.portal_name : t('Data Product Portal');
+
+    useEffect(() => {
+        document.title = portalName;
+    }, [portalName]);
+
     return (
         <Flex vertical className={styles.logoWrapper}>
-            <Typography.Text className={clsx(styles.logoText, styles[variant])}>
-                {settings ? settings.portal_name : t('Data Product Portal')}
-            </Typography.Text>
+            <Typography.Text className={clsx(styles.logoText, styles[variant])}>{portalName}</Typography.Text>
         </Flex>
     );
 }

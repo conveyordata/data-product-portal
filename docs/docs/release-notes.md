@@ -31,6 +31,7 @@ sidebar_position: 200
 - **[API]**: A query statistics `PATCH` that contains the same day and consumer more than once no longer fails with a 500; the last entry is used.
 - **[API]**: Authorization checks the id the endpoint acts on. Before, a user with rights on one Data Product could act on another by passing the first id in the query string, for example to delete it or to add Role Assignments to it. An id with the same name elsewhere in the request is now ignored, and an id that cannot be read is denied with a 403.
 - **[UI]**: Output Port tables now show the same quality status as the Output Port detail page.
+- **[UI]**: The browser tab shows the portal name set in Settings → Theme, like the sidebar, instead of always "Data Product Portal".
 
 ## 0.8.0
 
