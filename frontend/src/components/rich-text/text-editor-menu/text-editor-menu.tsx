@@ -104,7 +104,7 @@ export const TextEditorMenu = ({ editor, isDisabled }: Props) => {
         ));
 
     return (
-        <Flex align="center" className={styles.menuBar}>
+        <Flex align="center">
             {renderButtons(history)}
             <Divider orientation="vertical" />
             <Tooltip title={t('Turn into')}>

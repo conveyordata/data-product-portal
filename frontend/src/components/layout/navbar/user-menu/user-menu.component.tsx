@@ -1,4 +1,4 @@
-import { LogoutOutlined, UserOutlined } from '@ant-design/icons';
+import { LogoutOutlined, UserOutlined, UserSwitchOutlined } from '@ant-design/icons';
 import { Badge, Dropdown, Flex, type MenuProps, Typography, theme } from 'antd';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -95,7 +95,7 @@ export function UserMenu() {
     const switchUserItem: MenuItem | undefined = isAuthDisabled
         ? {
               key: 'SwitchUser',
-              icon: <UserOutlined />,
+              icon: <UserSwitchOutlined />,
               label: t('Switch user'),
               onClick: () => setIsSwitchUserOpen(true),
           }

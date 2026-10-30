@@ -1,10 +1,10 @@
 import type { api } from '@/store/api/services/generated/completeServiceApi.ts';
 import { STATIC_TAG_ID, TagTypes } from '@/store/api/services/tag-types.ts';
+import { requestListTags } from '@/store/api/services/tags/requestTags.ts';
 
 type EndpointDefinitions = Parameters<typeof api.enhanceEndpoints>[0]['endpoints'];
 
 export const dataProductTags = {
-    //Data products api
     getDataProducts: {
         providesTags: [{ type: TagTypes.DataProduct, id: STATIC_TAG_ID.LIST }],
     },
@@ -19,15 +19,11 @@ export const dataProductTags = {
                 id: op.output_port_id,
             })) ?? []),
             ...(arg.input_ports?.output_ports?.map((op) => ({ type: TagTypes.History, id: op.output_port_id })) ?? []),
-            { type: TagTypes.MyRequests },
+            ...requestListTags,
         ],
     },
     removeDataProduct: {
-        invalidatesTags: (_, __, id) => [
-            { type: TagTypes.DataProduct, id: STATIC_TAG_ID.LIST },
-            { type: TagTypes.DataProduct, id },
-            { type: TagTypes.DataProductOutputPorts, id },
-        ],
+        invalidatesTags: [{ type: TagTypes.DataProduct, id: STATIC_TAG_ID.LIST }],
     },
     updateDataProduct: {
         invalidatesTags: (resp) =>
@@ -82,12 +78,11 @@ export const dataProductTags = {
             })),
             ...arg.requestInputPortsForDataProductRequest.output_ports.map((op) => ({
                 type: TagTypes.OutputPortInputPorts,
-                outputPortId: op.output_port_id,
+                id: op.output_port_id,
             })),
             { type: TagTypes.History, id: arg.id },
             { type: TagTypes.DataProductInputPorts, id: arg.id },
-            { type: TagTypes.MyRequests },
-            { type: TagTypes.PendingAction, id: STATIC_TAG_ID.LIST },
+            ...requestListTags,
         ],
     },
     revokeInputPortForDataProduct: {
@@ -97,7 +92,8 @@ export const dataProductTags = {
             { type: TagTypes.History, id: arg.outputPortId },
             { type: TagTypes.History, id: arg.id },
             { type: TagTypes.DataProductInputPorts, id: arg.id },
-            { type: TagTypes.OutputPortInputPorts, outputPortId: arg.outputPortId },
+            { type: TagTypes.OutputPortInputPorts, id: arg.outputPortId },
+            ...requestListTags,
         ],
     },
     cancelInputPortForDataProduct: {
@@ -107,8 +103,8 @@ export const dataProductTags = {
             { type: TagTypes.History, id: arg.outputPortId },
             { type: TagTypes.History, id: arg.id },
             { type: TagTypes.DataProductInputPorts, id: arg.id },
-            { type: TagTypes.PendingAction, id: STATIC_TAG_ID.LIST },
-            { type: TagTypes.OutputPortInputPorts, outputPortId: arg.outputPortId },
+            { type: TagTypes.OutputPortInputPorts, id: arg.outputPortId },
+            ...requestListTags,
         ],
     },
     renewInputPortForDataProduct: {
@@ -118,9 +114,8 @@ export const dataProductTags = {
             { type: TagTypes.History, id: arg.outputPortId },
             { type: TagTypes.History, id: arg.id },
             { type: TagTypes.DataProductInputPorts, id: arg.id },
-            { type: TagTypes.MyRequests },
-            { type: TagTypes.PendingAction, id: STATIC_TAG_ID.LIST },
-            { type: TagTypes.OutputPortInputPorts, outputPortId: arg.outputPortId },
+            { type: TagTypes.OutputPortInputPorts, id: arg.outputPortId },
+            ...requestListTags,
         ],
     },
     getDataProductInputPorts: {

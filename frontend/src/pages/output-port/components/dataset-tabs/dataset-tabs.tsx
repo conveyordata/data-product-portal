@@ -63,7 +63,7 @@ export function DatasetTabs({ datasetId, dataProductId, isLoading }: Props) {
                 label: t('About'),
                 key: TabKeys.About,
                 icon: <InfoCircleOutlined />,
-                children: <AboutTab datasetId={datasetId} dataProductId={dataProductId} />,
+                children: <AboutTab outputPortId={datasetId} dataProductId={dataProductId} />,
             },
             {
                 label: t('Data Model'),

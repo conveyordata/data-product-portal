@@ -4,14 +4,15 @@ import { describe, expect, it } from 'vitest';
 import { TextEditor } from '@/components/rich-text/text-editor/text-editor.tsx';
 import { renderWithProviders, screen, userEvent } from '../../test-utils';
 
-function renderEditor(initialContent: string) {
-    const { container } = renderWithProviders(<TextEditor initialContent={initialContent} isInitialEditMode />);
+async function renderEditor(initialContent: string) {
+    const { container } = renderWithProviders(<TextEditor initialContent={initialContent} />);
+    await userEvent.click(await screen.findByRole('button', { name: 'Edit content' }));
     return (container.querySelector('.ProseMirror') as HTMLElement & { editor: Editor }).editor;
 }
 
 describe('TextEditorMenu', () => {
     it('bolds the selected text', async () => {
-        const editor = renderEditor('<p>plain</p>');
+        const editor = await renderEditor('<p>plain</p>');
         act(() => {
             editor.commands.selectAll();
         });
@@ -22,7 +23,7 @@ describe('TextEditorMenu', () => {
     });
 
     it('highlights Bold when the cursor moves into bold text', async () => {
-        const editor = renderEditor('<p>plain <strong>bold</strong></p>');
+        const editor = await renderEditor('<p>plain <strong>bold</strong></p>');
         act(() => {
             editor.commands.setTextSelection(2);
         });
@@ -36,7 +37,7 @@ describe('TextEditorMenu', () => {
     });
 
     it('turns a paragraph into a heading', async () => {
-        const editor = renderEditor('<p>title</p>');
+        const editor = await renderEditor('<p>title</p>');
 
         await userEvent.click(screen.getByRole('combobox'));
         await userEvent.click(await screen.findByText('Heading 2'));
@@ -44,8 +45,8 @@ describe('TextEditorMenu', () => {
         expect(editor.getHTML()).toContain('<h2>title</h2>');
     });
 
-    it('shows Text for a heading level it does not offer', () => {
-        const editor = renderEditor('<h4>deep</h4>');
+    it('shows Text for a heading level it does not offer', async () => {
+        const editor = await renderEditor('<h4>deep</h4>');
         act(() => {
             editor.commands.setTextSelection(2);
         });

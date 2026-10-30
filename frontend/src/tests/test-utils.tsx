@@ -20,7 +20,7 @@ type TestStorePreloadedState = {
     cart?: { DatasetIds: string[] };
 };
 
-function createTestStore() {
+export function createTestStore() {
     const store = configureStore({
         reducer: {
             auth: authSlice,

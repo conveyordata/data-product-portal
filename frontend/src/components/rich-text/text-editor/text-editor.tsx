@@ -1,4 +1,4 @@
-import { CheckOutlined, EditOutlined } from '@ant-design/icons';
+import { CloseOutlined, EditOutlined, SaveOutlined } from '@ant-design/icons';
 import { Table } from '@tiptap/extension-table';
 import { TableCell } from '@tiptap/extension-table-cell';
 import { TableHeader } from '@tiptap/extension-table-header';
@@ -6,7 +6,7 @@ import { TableRow } from '@tiptap/extension-table-row';
 import { Typography } from '@tiptap/extension-typography';
 import { EditorContent, useEditor } from '@tiptap/react';
 import { StarterKit } from '@tiptap/starter-kit';
-import { Button, Tooltip } from 'antd';
+import { Button, Flex, Popconfirm, Tooltip } from 'antd';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -18,10 +18,9 @@ import styles from './text-editor.module.scss';
 type Props = {
     initialContent?: string | null;
     isDisabled?: boolean;
-    onSubmit?: (content: string) => void;
+    onSubmit?: (content: string) => Promise<void>;
     isSubmitting?: boolean;
     isLoading?: boolean;
-    isInitialEditMode?: boolean;
 };
 
 const extensions = [StarterKit, Typography, TextStyleCustomExtension, Table, TableCell, TableHeader, TableRow];
@@ -30,15 +29,20 @@ export const TextEditor = ({
     initialContent,
     onSubmit,
     isDisabled,
-    isLoading = false,
     isSubmitting = false,
-    isInitialEditMode = false,
+    isLoading = false,
 }: Props) => {
     const { t } = useTranslation();
     const [content, setContent] = useState(initialContent);
-    const [isEditMode, setIsEditMode] = useState(isInitialEditMode && !isDisabled);
+    const [savedContent, setSavedContent] = useState(initialContent);
+    const [isEditMode, setIsEditMode] = useState(false);
+    const isDirty = content !== savedContent;
     const editor = useEditor({
         extensions,
+        onCreate: ({ editor }) => {
+            setContent(editor.getHTML());
+            setSavedContent(editor.getHTML());
+        },
         onUpdate: ({ editor }) => {
             setContent(editor.getHTML());
         },
@@ -47,27 +51,38 @@ export const TextEditor = ({
                 class: styles.editor,
             },
         },
-        content,
-        editable: isEditMode,
+        content: initialContent,
+        editable: false,
     });
 
-    function handleSubmit() {
+    async function handleSubmit() {
         const html = editor?.getHTML();
-        if (onSubmit && html) {
-            onSubmit(html);
+        if (!onSubmit || !html) {
+            return;
         }
+        try {
+            await onSubmit(html);
+        } catch {
+            return;
+        }
+        setSavedContent(html);
+        setIsEditMode(false);
     }
 
-    function toggleEditMode() {
-        setIsEditMode((prev) => !prev);
+    function handleDiscard() {
+        editor?.commands.setContent(savedContent ?? '');
+        setContent(savedContent);
+        setIsEditMode(false);
+    }
+
+    function discardIfUnchanged() {
+        if (!isDirty) {
+            handleDiscard();
+        }
     }
 
     useEffect(() => {
-        if (isDisabled) {
-            editor?.setEditable(false);
-        } else if (isEditMode) {
-            editor?.setEditable(isEditMode);
-        }
+        editor?.setEditable(isEditMode && !isDisabled);
     }, [isEditMode, isDisabled, editor]);
 
     if (!editor) {
@@ -75,35 +90,59 @@ export const TextEditor = ({
     }
 
     return (
-        <div className={styles.editorContainer}>
+        <Flex vertical gap="small" className={styles.editorContainer}>
             {isEditMode && <TextEditorMenu editor={editor} isDisabled={isDisabled} />}
-            <div className={styles.editorContent}>
-                <EditorContent editor={editor} content={content ?? undefined} className={styles.content} />
-            </div>
-            {isEditMode ? (
-                <Tooltip title={t('Save changes')}>
-                    <Button
-                        type="primary"
-                        className={styles.submitButton}
-                        onClick={handleSubmit}
-                        icon={<CheckOutlined />}
-                        disabled={isDisabled || isLoading || isSubmitting}
-                        loading={isSubmitting}
-                    />
-                </Tooltip>
-            ) : (
-                !isDisabled && (
-                    <Tooltip title={t('Edit content')}>
-                        <Button
-                            type="primary"
-                            className={styles.submitButton}
-                            onClick={toggleEditMode}
-                            disabled={isDisabled || isLoading || isSubmitting}
-                            icon={<EditOutlined />}
-                        />
-                    </Tooltip>
-                )
-            )}
-        </div>
+            <Flex flex={1} className={styles.editorContent}>
+                <EditorContent editor={editor} className={styles.content} />
+            </Flex>
+            <Flex gap="small" justify="flex-end">
+                {isEditMode ? (
+                    <>
+                        <Popconfirm
+                            title={t('Discard changes?')}
+                            description={t('Your unsaved changes will be lost.')}
+                            okText={t('Discard')}
+                            cancelText={t('Keep editing')}
+                            onConfirm={handleDiscard}
+                            disabled={!isDirty}
+                        >
+                            <Tooltip title={t('Discard changes')}>
+                                <Button
+                                    shape="circle"
+                                    aria-label={t('Discard changes')}
+                                    onClick={discardIfUnchanged}
+                                    icon={<CloseOutlined />}
+                                    disabled={isLoading || isSubmitting}
+                                />
+                            </Tooltip>
+                        </Popconfirm>
+                        <Tooltip title={t('Save changes')}>
+                            <Button
+                                type="primary"
+                                shape="circle"
+                                aria-label={t('Save changes')}
+                                onClick={handleSubmit}
+                                icon={<SaveOutlined />}
+                                disabled={isDisabled || !isDirty || isLoading || isSubmitting}
+                                loading={isSubmitting}
+                            />
+                        </Tooltip>
+                    </>
+                ) : (
+                    !isDisabled && (
+                        <Tooltip title={t('Edit content')}>
+                            <Button
+                                type="primary"
+                                shape="circle"
+                                aria-label={t('Edit content')}
+                                onClick={() => setIsEditMode(true)}
+                                icon={<EditOutlined />}
+                                disabled={isLoading || isSubmitting}
+                            />
+                        </Tooltip>
+                    )
+                )}
+            </Flex>
+        </Flex>
     );
 };
