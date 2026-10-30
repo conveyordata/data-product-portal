@@ -33,6 +33,7 @@ sidebar_position: 200
 ### bugfixes
 
 - **[UI]**: Output Port tables now show the same quality status as the Output Port detail page.
+- **[UI]**: The browser tab shows the portal name set in Settings → Theme, like the sidebar, instead of always "Data Product Portal".
 
 ## 0.8.0
 
