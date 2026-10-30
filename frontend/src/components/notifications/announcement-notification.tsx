@@ -33,7 +33,7 @@ export function AnnouncementNotification({
     );
 
     const details = (
-        <Flex vertical gap="small" style={{ maxWidth: '25em' }}>
+        <Flex vertical gap="small" style={{ maxWidth: '40em' }}>
             <AnnouncementTypeLabel type={announcement.type} />
             <Typography.Paragraph style={{ whiteSpace: 'pre-line', marginBottom: 0 }}>
                 {linkify(announcement.message)}
