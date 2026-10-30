@@ -53,7 +53,7 @@ Other tools let persons request access directly (Purview, Collibra, Unity Catalo
 
 1. Both owner identity and viewer identity are supported.
 2. The three principles of the requester rule hold.
-3. End users discover a dashboard and request access without joining a team.
+3. End users discover a dashboard in Portal and request access without joining a team.
 4. The Output Port owner sees who reads and why, with lineage to the dashboard, and can revoke access.
 5. It scales to large audiences that change often.
 6. It is clear for people and the Provisioner what each concept may do, at the lowest extra weight.
@@ -90,6 +90,8 @@ A Consumption that later needs to publish means creating a Data Product; that is
 A Consumption has a kind (dashboard, application, agent, notebook, integration); the technology lives on its Technical Assets, of types that cannot be shared.
 Its owner is a user or Group, the same ownership model as a Data Product. Machine users are technically allowed as owner but discouraged.
 It is built as a new kind of the base model that Data Product and Exploration share, which gives it Input Ports, time-bound access and events.
+Portal is the source of truth for a Consumption's Input Ports and audiences, and provisions its Technical Assets where a Provisioner supports them.
+A dashboard that already exists can be registered as a Consumption; Portal then governs only its data connections and audiences.
 
 ### How each scenario works
 
@@ -142,15 +144,15 @@ flowchart LR
         A1[Audience: Sales]
         A2[Audience: Compliance]
     end
-    IP1 -->|approved once| OP1
-    IP2 -->|approved once| OP2
-    TA --> IP1
-    TA --> IP2
-    A1 -.-> IP1
-    A2 -.-> IP1
-    A2 -.-> IP2
-    EU[End user] -->|asks to join, Consumption owner approves| A1
-    G[Group] -->|added by Consumption owner| A2
+    OP1 -->|approved once| IP1
+    OP2 -->|approved once| IP2
+    IP1 --> TA
+    IP2 --> TA
+    IP1 -.-> A1
+    IP1 -.-> A2
+    IP2 -.-> A2
+    A1 ---|asks to join, Consumption owner approves| EU[End user]
+    A2 ---|added by Consumption owner| G[Group]
 ```
 
 ### What gets provisioned
