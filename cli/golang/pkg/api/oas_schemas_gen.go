@@ -5313,6 +5313,7 @@ type GetEventHistoryResponseItem struct {
 	OutputPort               OptNilOutputPort      `json:"output_port"`
 	TechnicalAsset           OptNilTechnicalAsset  `json:"technical_asset"`
 	Exploration              OptNilExploration     `json:"exploration"`
+	Announcement             OptNilAnnouncement    `json:"announcement"`
 }
 
 // GetID returns the value of ID.
@@ -5400,6 +5401,11 @@ func (s *GetEventHistoryResponseItem) GetExploration() OptNilExploration {
 	return s.Exploration
 }
 
+// GetAnnouncement returns the value of Announcement.
+func (s *GetEventHistoryResponseItem) GetAnnouncement() OptNilAnnouncement {
+	return s.Announcement
+}
+
 // SetID sets the value of ID.
 func (s *GetEventHistoryResponseItem) SetID(val uuid.UUID) {
 	s.ID = val
@@ -5483,6 +5489,11 @@ func (s *GetEventHistoryResponseItem) SetTechnicalAsset(val OptNilTechnicalAsset
 // SetExploration sets the value of Exploration.
 func (s *GetEventHistoryResponseItem) SetExploration(val OptNilExploration) {
 	s.Exploration = val
+}
+
+// SetAnnouncement sets the value of Announcement.
+func (s *GetEventHistoryResponseItem) SetAnnouncement(val OptNilAnnouncement) {
+	s.Announcement = val
 }
 
 // Ref: #/components/schemas/GetExplorationInputPortsResponse
@@ -8513,6 +8524,74 @@ func (o OptNilAccessMode) Get() (v AccessMode, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptNilAccessMode) Or(d AccessMode) AccessMode {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptNilAnnouncement returns new OptNilAnnouncement with value set to v.
+func NewOptNilAnnouncement(v Announcement) OptNilAnnouncement {
+	return OptNilAnnouncement{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptNilAnnouncement is optional nullable Announcement.
+type OptNilAnnouncement struct {
+	Value Announcement
+	Set   bool
+	Null  bool
+}
+
+// IsSet returns true if OptNilAnnouncement was set.
+func (o OptNilAnnouncement) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptNilAnnouncement) Reset() {
+	var v Announcement
+	o.Value = v
+	o.Set = false
+	o.Null = false
+}
+
+// SetTo sets value to v.
+func (o *OptNilAnnouncement) SetTo(v Announcement) {
+	o.Set = true
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o OptNilAnnouncement) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *OptNilAnnouncement) SetToNull() {
+	o.Set = true
+	o.Null = true
+	var v Announcement
+	o.Value = v
+}
+
+// IsEmpty returns true if the field was omitted from the payload (not Set and not Null).
+func (o OptNilAnnouncement) IsEmpty() bool {
+	return !o.Set && !o.Null
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptNilAnnouncement) Get() (v Announcement, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptNilAnnouncement) Or(d Announcement) Announcement {
 	if v, ok := o.Get(); ok {
 		return v
 	}

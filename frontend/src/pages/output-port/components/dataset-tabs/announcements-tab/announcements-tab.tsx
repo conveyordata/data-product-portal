@@ -230,7 +230,7 @@ function DeleteAnnouncementButton({
         <Popconfirm
             title={t('Delete Announcement')}
             description={t(
-                'Consumers will no longer see it. The deletion is recorded in History. This cannot be undone.',
+                'Consumers will no longer see it and its notifications are removed. The deletion is recorded in History. This cannot be undone.',
             )}
             okText={t('Delete')}
             okButtonProps={{ danger: true, loading: isLoading }}

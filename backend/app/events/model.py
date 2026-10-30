@@ -5,6 +5,7 @@ from sqlalchemy import Column, Enum, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from app.data_products.output_ports.announcements.model import Announcement
 from app.database.database import Base
 from app.shared.model import BaseORM
 from app.users.notifications.model import Notification
@@ -75,4 +76,9 @@ class Event(Base, BaseORM):
         "foreign(Exploration.id), Event.subject_type == 'EXPLORATION'), "
         "and_(Event.target_id == foreign(Exploration.id), "
         "Event.target_type == 'EXPLORATION'))",
+    )
+    announcement: Mapped[Announcement | None] = relationship(
+        primaryjoin="and_(Event.target_id == foreign(Announcement.id), "
+        "Event.target_type == 'ANNOUNCEMENT')",
+        lazy="joined",
     )

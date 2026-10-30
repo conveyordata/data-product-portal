@@ -750,6 +750,7 @@ export type GetEventHistoryResponseItem = {
   output_port?: OutputPort | null;
   technical_asset?: TechnicalAsset | null;
   exploration?: Exploration | null;
+  announcement?: Announcement | null;
 };
 export type GetEventHistoryResponse = {
   events: GetEventHistoryResponseItem[];
