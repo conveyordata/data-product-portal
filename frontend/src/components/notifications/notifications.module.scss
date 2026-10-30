@@ -25,6 +25,7 @@
 
 .notification-items {
     padding-right: globals.$spacing-m;
+    max-width: 32rem;
     max-height: 80vh;
     overflow: hidden;
     overflow-y: auto;

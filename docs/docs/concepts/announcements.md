@@ -20,7 +20,7 @@ Every Announcement has a title, a plain-text message and one of three types, sho
 | Warning | Something is wrong or will be: late or incomplete data, an incident or planned maintenance. |
 | Info | News that needs no action, such as a new version. |
 
-Links in the message that start with `http://` or `https://` become clickable. Long messages are cut off after three lines with a "more" link.
+Links in the message that start with `http://` or `https://` become clickable. Long messages are cut off after two lines with a "more" link.
 
 ## Reading
 

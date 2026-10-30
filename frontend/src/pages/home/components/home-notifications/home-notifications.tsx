@@ -16,7 +16,6 @@ import { ReviewRequestModal } from '@/components/pending-access-requests-modal/r
 import { UserAvatar } from '@/components/user-avatar/user-avatar.component.tsx';
 import { transformToTableRow } from '@/pages/product-studio/components/requests/request-utils.ts';
 import { TabKeys } from '@/pages/product-studio/product-studio-tabkeys.ts';
-import { AnnouncementType } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
 import { useGetUserPendingActionsQuery } from '@/store/api/services/generated/usersApi.ts';
 import {
     useGetUserNotificationsQuery,
@@ -66,8 +65,9 @@ export function HomeNotifications() {
     const { token } = theme.useToken();
     const pendingActionsQuery = useGetUserPendingActionsQuery();
     const notificationsQuery = useGetUserNotificationsQuery();
-    const { acknowledge, acknowledgingId } = useAcknowledgeNotification();
-    const [removeNotification, { isLoading: isAcknowledgingAll }] = useRemoveUserNotificationMutation();
+    const { acknowledge, acknowledgingId, isAcknowledging } = useAcknowledgeNotification();
+    const [removeNotification] = useRemoveUserNotificationMutation();
+    const [isAcknowledgingAll, setIsAcknowledgingAll] = useState(false);
     const handlers = usePendingActionHandlers();
     const [reviewingAction, setReviewingAction] = useState<Request | null>(null);
 
@@ -88,19 +88,22 @@ export function HomeNotifications() {
                 .filter((n) => isAnnouncementNotification(n) && n.event.announcement && n.event.output_port)
                 .sort((a, b) => {
                     const urgency =
-                        ANNOUNCEMENT_URGENCY.indexOf(a.event.announcement?.type ?? AnnouncementType.Info) -
-                        ANNOUNCEMENT_URGENCY.indexOf(b.event.announcement?.type ?? AnnouncementType.Info);
+                        ANNOUNCEMENT_URGENCY.findIndex((type) => type === a.event.announcement?.type) -
+                        ANNOUNCEMENT_URGENCY.findIndex((type) => type === b.event.announcement?.type);
                     return urgency || new Date(b.event.created_on).getTime() - new Date(a.event.created_on).getTime();
                 }),
         [notifications],
     );
 
     const acknowledgeAllAnnouncements = async () => {
+        setIsAcknowledgingAll(true);
         try {
             await Promise.all(announcements.map(({ id }) => removeNotification(id).unwrap()));
             dispatchMessage({ content: t('Announcements have been acknowledged'), type: 'success' });
         } catch (_error) {
             dispatchMessage({ content: t('Failed to acknowledge announcements'), type: 'error' });
+        } finally {
+            setIsAcknowledgingAll(false);
         }
     };
 
@@ -109,7 +112,7 @@ export function HomeNotifications() {
     if (isEmpty && !failed && reviewingAction === null) return null;
 
     return (
-        <Flex vertical gap="middle" style={{ marginBottom: 48 }}>
+        <Flex vertical gap="middle" style={{ marginBottom: token.marginXXL }}>
             {failed ? (
                 <EmptyState
                     size="small"
@@ -162,6 +165,7 @@ export function HomeNotifications() {
                                     type="link"
                                     size="small"
                                     loading={isAcknowledgingAll}
+                                    disabled={isAcknowledging}
                                     onClick={acknowledgeAllAnnouncements}
                                 >
                                     {t('Acknowledge all')}
@@ -173,6 +177,7 @@ export function HomeNotifications() {
                                     notification={notification}
                                     onAcknowledge={acknowledge}
                                     isAcknowledging={acknowledgingId === notification.id}
+                                    disabled={isAcknowledging || isAcknowledgingAll}
                                     detailed
                                 />
                             ))}

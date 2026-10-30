@@ -29,5 +29,5 @@ export function useAcknowledgeNotification() {
         [removeNotification, t],
     );
 
-    return { acknowledge, acknowledgingId: isLoading ? originalArgs : undefined };
+    return { acknowledge, isAcknowledging: isLoading, acknowledgingId: isLoading ? originalArgs : undefined };
 }

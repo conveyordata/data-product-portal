@@ -13,6 +13,7 @@ type Props = {
     notification: GetUserNotificationsResponseItem;
     onAcknowledge: (id: string) => void;
     isAcknowledging?: boolean;
+    disabled?: boolean;
     detailed?: boolean;
 };
 
@@ -20,6 +21,7 @@ export function AnnouncementNotification({
     notification,
     onAcknowledge,
     isAcknowledging = false,
+    disabled = false,
     detailed = false,
 }: Props) {
     const { t } = useTranslation();
@@ -75,7 +77,7 @@ export function AnnouncementNotification({
                 aria-label={t('Acknowledge')}
                 icon={detailed ? undefined : <CheckOutlined />}
                 loading={isAcknowledging}
-                disabled={isAcknowledging}
+                disabled={isAcknowledging || disabled}
                 onClick={(e) => {
                     e.stopPropagation();
                     onAcknowledge(notification.id);

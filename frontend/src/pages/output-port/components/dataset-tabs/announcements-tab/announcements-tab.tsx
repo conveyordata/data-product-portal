@@ -1,13 +1,9 @@
 import { DeleteOutlined, NotificationOutlined, PlusOutlined } from '@ant-design/icons';
-import { Button, Flex, Input, Popconfirm, type TableColumnsType, type TableProps, Typography, theme } from 'antd';
+import { Button, Flex, Input, Popconfirm, type TableColumnsType, Typography } from 'antd';
 import { useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
-import {
-    ANNOUNCEMENT_URGENCY,
-    AnnouncementTypeIcon,
-    getAnnouncementTypeConfig,
-} from '@/components/announcements/announcement-type.tsx';
+import { ANNOUNCEMENT_URGENCY, AnnouncementTypeIcon } from '@/components/announcements/announcement-type.tsx';
 import {
     EmptyState,
     emptyStateQueryProps,
@@ -22,7 +18,7 @@ import { TabKeys } from '@/pages/output-port/components/dataset-tabs/dataset-tab
 import { useCheckAccessQuery } from '@/store/api/services/generated/authorizationApi.ts';
 import {
     type Announcement,
-    AnnouncementType,
+    type AnnouncementType,
     useGetOutputPortAnnouncementsQuery,
     useRemoveOutputPortAnnouncementMutation,
 } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
@@ -45,7 +41,6 @@ type Props = {
 
 export function AnnouncementsTab({ outputPortId, dataProductId }: Props) {
     const { t } = useTranslation();
-    const { token } = theme.useToken();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const announcementsQuery = useGetOutputPortAnnouncementsQuery({ id: outputPortId, dataProductId });
@@ -71,7 +66,6 @@ export function AnnouncementsTab({ outputPortId, dataProductId }: Props) {
 
     const columns = useMemo((): TableColumnsType<Announcement> => {
         const sorter = new Sorter<Announcement>();
-        const typeConfig = getAnnouncementTypeConfig(t, token);
         return [
             {
                 title: t('Type'),
@@ -79,11 +73,6 @@ export function AnnouncementsTab({ outputPortId, dataProductId }: Props) {
                 width: 72,
                 align: 'center',
                 render: (type: AnnouncementType) => <AnnouncementTypeIcon type={type} />,
-                filters: Object.values(AnnouncementType).map((type) => ({
-                    text: typeConfig[type].label,
-                    value: type,
-                })),
-                onFilter: (value, { type }) => type === value,
                 sorter: sorter.numberSorter(({ type }) => ANNOUNCEMENT_URGENCY.indexOf(type)),
             },
             {
@@ -131,7 +120,7 @@ export function AnnouncementsTab({ outputPortId, dataProductId }: Props) {
                 ),
             },
         ];
-    }, [t, token, canPost, dataProductId]);
+    }, [t, canPost, dataProductId]);
 
     if (isAwaitingData(announcementsQuery)) {
         return <LoadingSpinner />;
@@ -142,10 +131,6 @@ export function AnnouncementsTab({ outputPortId, dataProductId }: Props) {
             {t('New Announcement')}
         </Button>
     );
-
-    const onChange: TableProps<Announcement>['onChange'] = (pagination) => {
-        handlePaginationChange(pagination);
-    };
 
     return (
         <Flex vertical gap="middle">
@@ -190,7 +175,7 @@ export function AnnouncementsTab({ outputPortId, dataProductId }: Props) {
                         emptyState={{ icon: <NotificationOutlined />, title: t('No announcements yet') }}
                         filter={searchFilter(searchTerm, setSearchTerm)}
                         rowKey={({ id }) => id}
-                        onChange={onChange}
+                        onChange={handlePaginationChange}
                         pagination={{
                             ...pagination,
                             size: 'small',
