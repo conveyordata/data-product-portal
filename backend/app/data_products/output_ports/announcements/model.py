@@ -28,7 +28,6 @@ class Announcement(Base):
     type: Mapped[str] = mapped_column(String, nullable=False)
     title: Mapped[str] = mapped_column(String(length=100), nullable=False)
     message: Mapped[str] = mapped_column(Text, nullable=False)
-    link: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     author_id: Mapped[Optional[uuid.UUID]] = mapped_column(
         UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL")
     )

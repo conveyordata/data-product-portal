@@ -303,13 +303,9 @@ func (s *Announcement) Validate() error {
 
 func (s AnnouncementType) Validate() error {
 	switch s {
-	case "issue":
-		return nil
 	case "action_needed":
 		return nil
-	case "planned_maintenance":
-		return nil
-	case "new_version":
+	case "warning":
 		return nil
 	case "info":
 		return nil

@@ -3,7 +3,6 @@
 package api
 
 import (
-	"net/url"
 	"time"
 
 	"github.com/go-faster/errors"
@@ -640,7 +639,6 @@ type Announcement struct {
 	Type         AnnouncementType `json:"type"`
 	Title        string           `json:"title"`
 	Message      string           `json:"message"`
-	Link         NilString        `json:"link"`
 	Author       NilUser          `json:"author"`
 	CreatedAt    time.Time        `json:"created_at"`
 }
@@ -668,11 +666,6 @@ func (s *Announcement) GetTitle() string {
 // GetMessage returns the value of Message.
 func (s *Announcement) GetMessage() string {
 	return s.Message
-}
-
-// GetLink returns the value of Link.
-func (s *Announcement) GetLink() NilString {
-	return s.Link
 }
 
 // GetAuthor returns the value of Author.
@@ -710,11 +703,6 @@ func (s *Announcement) SetMessage(val string) {
 	s.Message = val
 }
 
-// SetLink sets the value of Link.
-func (s *Announcement) SetLink(val NilString) {
-	s.Link = val
-}
-
 // SetAuthor sets the value of Author.
 func (s *Announcement) SetAuthor(val NilUser) {
 	s.Author = val
@@ -729,20 +717,16 @@ func (s *Announcement) SetCreatedAt(val time.Time) {
 type AnnouncementType string
 
 const (
-	AnnouncementTypeIssue              AnnouncementType = "issue"
-	AnnouncementTypeActionNeeded       AnnouncementType = "action_needed"
-	AnnouncementTypePlannedMaintenance AnnouncementType = "planned_maintenance"
-	AnnouncementTypeNewVersion         AnnouncementType = "new_version"
-	AnnouncementTypeInfo               AnnouncementType = "info"
+	AnnouncementTypeActionNeeded AnnouncementType = "action_needed"
+	AnnouncementTypeWarning      AnnouncementType = "warning"
+	AnnouncementTypeInfo         AnnouncementType = "info"
 )
 
 // AllValues returns all AnnouncementType values.
 func (AnnouncementType) AllValues() []AnnouncementType {
 	return []AnnouncementType{
-		AnnouncementTypeIssue,
 		AnnouncementTypeActionNeeded,
-		AnnouncementTypePlannedMaintenance,
-		AnnouncementTypeNewVersion,
+		AnnouncementTypeWarning,
 		AnnouncementTypeInfo,
 	}
 }
@@ -750,13 +734,9 @@ func (AnnouncementType) AllValues() []AnnouncementType {
 // MarshalText implements encoding.TextMarshaler.
 func (s AnnouncementType) MarshalText() ([]byte, error) {
 	switch s {
-	case AnnouncementTypeIssue:
-		return []byte(s), nil
 	case AnnouncementTypeActionNeeded:
 		return []byte(s), nil
-	case AnnouncementTypePlannedMaintenance:
-		return []byte(s), nil
-	case AnnouncementTypeNewVersion:
+	case AnnouncementTypeWarning:
 		return []byte(s), nil
 	case AnnouncementTypeInfo:
 		return []byte(s), nil
@@ -768,17 +748,11 @@ func (s AnnouncementType) MarshalText() ([]byte, error) {
 // UnmarshalText implements encoding.TextUnmarshaler.
 func (s *AnnouncementType) UnmarshalText(data []byte) error {
 	switch AnnouncementType(data) {
-	case AnnouncementTypeIssue:
-		*s = AnnouncementTypeIssue
-		return nil
 	case AnnouncementTypeActionNeeded:
 		*s = AnnouncementTypeActionNeeded
 		return nil
-	case AnnouncementTypePlannedMaintenance:
-		*s = AnnouncementTypePlannedMaintenance
-		return nil
-	case AnnouncementTypeNewVersion:
-		*s = AnnouncementTypeNewVersion
+	case AnnouncementTypeWarning:
+		*s = AnnouncementTypeWarning
 		return nil
 	case AnnouncementTypeInfo:
 		*s = AnnouncementTypeInfo
@@ -1117,7 +1091,6 @@ type CreateAnnouncement struct {
 	Type    AnnouncementType            `json:"type"`
 	Title   AppSharedSchemaNonEmptyStr1 `json:"title"`
 	Message AppSharedSchemaNonEmptyStr2 `json:"message"`
-	Link    OptNilURI                   `json:"link"`
 }
 
 // GetType returns the value of Type.
@@ -1135,11 +1108,6 @@ func (s *CreateAnnouncement) GetMessage() AppSharedSchemaNonEmptyStr2 {
 	return s.Message
 }
 
-// GetLink returns the value of Link.
-func (s *CreateAnnouncement) GetLink() OptNilURI {
-	return s.Link
-}
-
 // SetType sets the value of Type.
 func (s *CreateAnnouncement) SetType(val AnnouncementType) {
 	s.Type = val
@@ -1153,11 +1121,6 @@ func (s *CreateAnnouncement) SetTitle(val AppSharedSchemaNonEmptyStr1) {
 // SetMessage sets the value of Message.
 func (s *CreateAnnouncement) SetMessage(val AppSharedSchemaNonEmptyStr2) {
 	s.Message = val
-}
-
-// SetLink sets the value of Link.
-func (s *CreateAnnouncement) SetLink(val OptNilURI) {
-	s.Link = val
 }
 
 // Ref: #/components/schemas/CreateAnnouncementResponse
@@ -10386,74 +10349,6 @@ func (o OptNilUIElementString) Get() (v UIElementString, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptNilUIElementString) Or(d UIElementString) UIElementString {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
-// NewOptNilURI returns new OptNilURI with value set to v.
-func NewOptNilURI(v url.URL) OptNilURI {
-	return OptNilURI{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptNilURI is optional nullable url.URL.
-type OptNilURI struct {
-	Value url.URL
-	Set   bool
-	Null  bool
-}
-
-// IsSet returns true if OptNilURI was set.
-func (o OptNilURI) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptNilURI) Reset() {
-	var v url.URL
-	o.Value = v
-	o.Set = false
-	o.Null = false
-}
-
-// SetTo sets value to v.
-func (o *OptNilURI) SetTo(v url.URL) {
-	o.Set = true
-	o.Null = false
-	o.Value = v
-}
-
-// IsNull returns true if value is Null.
-func (o OptNilURI) IsNull() bool { return o.Null }
-
-// SetToNull sets value to null.
-func (o *OptNilURI) SetToNull() {
-	o.Set = true
-	o.Null = true
-	var v url.URL
-	o.Value = v
-}
-
-// IsEmpty returns true if the field was omitted from the payload (not Set and not Null).
-func (o OptNilURI) IsEmpty() bool {
-	return !o.Set && !o.Null
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptNilURI) Get() (v url.URL, ok bool) {
-	if o.Null {
-		return v, false
-	}
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptNilURI) Or(d url.URL) url.URL {
 	if v, ok := o.Get(); ok {
 		return v
 	}

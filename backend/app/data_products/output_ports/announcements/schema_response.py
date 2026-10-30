@@ -13,7 +13,6 @@ class Announcement(ORMModel):
     type: AnnouncementType
     title: str
     message: str
-    link: Optional[str]
     author: Optional[User]
     created_at: datetime
 

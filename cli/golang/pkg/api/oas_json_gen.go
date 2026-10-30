@@ -4,7 +4,6 @@ package api
 
 import (
 	"math/bits"
-	"net/url"
 	"strconv"
 	"time"
 
@@ -1845,10 +1844,6 @@ func (s *Announcement) encodeFields(e *jx.Encoder) {
 		e.Str(s.Message)
 	}
 	{
-		e.FieldStart("link")
-		s.Link.Encode(e)
-	}
-	{
 		e.FieldStart("author")
 		s.Author.Encode(e)
 	}
@@ -1858,15 +1853,14 @@ func (s *Announcement) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfAnnouncement = [8]string{
+var jsonFieldsNameOfAnnouncement = [7]string{
 	0: "id",
 	1: "output_port_id",
 	2: "type",
 	3: "title",
 	4: "message",
-	5: "link",
-	6: "author",
-	7: "created_at",
+	5: "author",
+	6: "created_at",
 }
 
 // Decode decodes Announcement from json.
@@ -1936,18 +1930,8 @@ func (s *Announcement) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"message\"")
 			}
-		case "link":
-			requiredBitSet[0] |= 1 << 5
-			if err := func() error {
-				if err := s.Link.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"link\"")
-			}
 		case "author":
-			requiredBitSet[0] |= 1 << 6
+			requiredBitSet[0] |= 1 << 5
 			if err := func() error {
 				if err := s.Author.Decode(d); err != nil {
 					return err
@@ -1957,7 +1941,7 @@ func (s *Announcement) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"author\"")
 			}
 		case "created_at":
-			requiredBitSet[0] |= 1 << 7
+			requiredBitSet[0] |= 1 << 6
 			if err := func() error {
 				v, err := json.DecodeDateTime(d)
 				s.CreatedAt = v
@@ -1978,7 +1962,7 @@ func (s *Announcement) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b11111111,
+		0b01111111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -2040,14 +2024,10 @@ func (s *AnnouncementType) Decode(d *jx.Decoder) error {
 	}
 	// Try to use constant string.
 	switch AnnouncementType(v) {
-	case AnnouncementTypeIssue:
-		*s = AnnouncementTypeIssue
 	case AnnouncementTypeActionNeeded:
 		*s = AnnouncementTypeActionNeeded
-	case AnnouncementTypePlannedMaintenance:
-		*s = AnnouncementTypePlannedMaintenance
-	case AnnouncementTypeNewVersion:
-		*s = AnnouncementTypeNewVersion
+	case AnnouncementTypeWarning:
+		*s = AnnouncementTypeWarning
 	case AnnouncementTypeInfo:
 		*s = AnnouncementTypeInfo
 	default:
@@ -3222,19 +3202,12 @@ func (s *CreateAnnouncement) encodeFields(e *jx.Encoder) {
 		e.FieldStart("message")
 		s.Message.Encode(e)
 	}
-	{
-		if s.Link.Set {
-			e.FieldStart("link")
-			s.Link.Encode(e)
-		}
-	}
 }
 
-var jsonFieldsNameOfCreateAnnouncement = [4]string{
+var jsonFieldsNameOfCreateAnnouncement = [3]string{
 	0: "type",
 	1: "title",
 	2: "message",
-	3: "link",
 }
 
 // Decode decodes CreateAnnouncement from json.
@@ -3275,16 +3248,6 @@ func (s *CreateAnnouncement) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"message\"")
-			}
-		case "link":
-			if err := func() error {
-				s.Link.Reset()
-				if err := s.Link.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"link\"")
 			}
 		default:
 			return d.Skip()
@@ -26110,57 +26073,6 @@ func (s OptNilUIElementString) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *OptNilUIElementString) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode encodes url.URL as json.
-func (o OptNilURI) Encode(e *jx.Encoder) {
-	if !o.Set {
-		return
-	}
-	if o.Null {
-		e.Null()
-		return
-	}
-	json.EncodeURI(e, o.Value)
-}
-
-// Decode decodes url.URL from json.
-func (o *OptNilURI) Decode(d *jx.Decoder) error {
-	if o == nil {
-		return errors.New("invalid: unable to decode OptNilURI to nil")
-	}
-	if d.Next() == jx.Null {
-		if err := d.Null(); err != nil {
-			return err
-		}
-
-		var v url.URL
-		o.Value = v
-		o.Set = true
-		o.Null = true
-		return nil
-	}
-	o.Set = true
-	o.Null = false
-	v, err := json.DecodeURI(d)
-	if err != nil {
-		return err
-	}
-	o.Value = v
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s OptNilURI) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *OptNilURI) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
