@@ -18,13 +18,13 @@ How a dashboard reads its data decides who needs access:
 * **Owner identity**: the dashboard reads with one identity, its owner's or a service principal's. Only that identity needs a grant on the Output Port.
 * **Viewer identity**: the dashboard reads with the identity of each person viewing it (e.g. Power BI single sign-on to Databricks). Every end user needs a grant on the Output Port.
 
-The question is how Portal models a consumer that only consumes, the identities that read through it and their access, without forcing it into a Data Product or an Exploration.
+The question is how Portal models a consumer that only consumes, the identities that read through it and their access.
 
 ### Terms used in this ADR
 
 * **Consumption**: working name for a consumer that only consumes, such as a dashboard, an application, an agent, a notebook or an integration. See the open question on its name.
 * **End user**: one person who reads a Consumption without being on a team that owns data.
-* **Audience**: a set of identities (users, Groups and machine users, see [ADR-0023](./0023-external-identities-group-based-auth.md)) that read through a Consumption, linked to one or more of its Input Ports. A Consumption can have several audiences, for example one that sees personal data and one that doesn't.
+* **Audience**: a set of identities (users, Groups and machine users, see [ADR-0023](./0023-external-identities-group-based-auth.md)) that read through a Consumption, linked to some of its Input Ports. A Consumption can have several audiences, for example one that sees personal data and one that doesn't.
 
 ### The requester rule
 
@@ -46,7 +46,6 @@ Other tools let persons request access directly (Purview, Collibra, Unity Catalo
 | Team dashboard | About 5 readers who know each other. |
 | Organisation-wide dashboard | About 500 readers who don't know each other and come and go. |
 | Application, agent or integration | An application, an agent, or an integration that moves data to another system inside or outside the organisation, reading with a service principal. |
-| Personal connection | A single person with a permanent connection. |
 | Exploration | A time-boxed exploration that may grow into a dashboard later on. |
 | Dashboard on own data | The team that owns a Data Product builds a dashboard on its own Output Port. |
 
@@ -97,7 +96,7 @@ It is built as a new kind of the base model that Data Product and Exploration sh
 * **Team or organisation-wide dashboard.** Finance creates a Consumption "Sales attribution", states its purpose and requests the Sales Output Port. The Sales owner approves once. End users ask to join an audience, and the Consumption owner approves.
 * **Dashboard on own data.** A dashboard that only the team owning the data reads, such as a quality dashboard, is a Technical Asset of a type that cannot be shared, inside its Data Product. It reads with the Data Product's identity, needs no request and no audience, and is listed as an asset of the Data Product. This works today. It becomes a Consumption once end users outside the team need to see it. This assumes the Provisioner lets a Data Product's team members read the Data Product's own data.
 * **Application, agent or integration.** A Consumption whose audience holds the service principals it reads with, plus viewers when an app or agent reads on their behalf. An integration that moves data to an operational system or an external party is a Consumption; if other teams build on the target through Portal, it publishes data and is a Data Product.
-* **Personal connection and exploration.** An Exploration (see "Exploration, Consumption and Data Product").
+* **Exploration.** An Exploration (see "Exploration, Consumption and Data Product").
 * **Only listed.** A Consumption whose audience holds only the identity it reads with. Portal has the lineage, and the organisation decides whether it governs more.
 
 ### Combining data
@@ -123,7 +122,7 @@ When several Consumptions repeat the same join or logic, it should move upstream
 * Membership of a Group follows the identity provider. A change to a Group triggers a reconcile of the Consumptions it sits in.
 * Through lineage the Output Port owner sees the Consumption, its purpose, and each audience linked to their Output Port with its Groups, machine users and individual end users. Members of a Group are not expanded.
 * Membership is permanent until removed.
-* Every audience is linked to at least one Input Port. Removing an Input Port removes its links, and an audience left without links is removed.
+* Removing an Input Port removes its links. An audience left without links stays, and its members lose the access until it is linked to an Input Port again.
 
 Sensitive data is split with Output Ports, not inside the Consumption.
 For example, the Sales Data Product publishes "Customers" and "Customers PII", and the Revenue dashboard holds an Input Port on each.
@@ -169,7 +168,8 @@ The Provisioner SDK gets a new resource type for a Consumption, next to Data Pro
 
 ### Exploration, Consumption and Data Product
 
-An Exploration is a lifecycle stage, not a type of Consumption: a personal, short-lived starting point that can grow into a Consumption or a Data Product.
+An Exploration is a lifecycle stage: a personal, short-lived starting point that can grow into a Consumption or a Data Product.
+How that promotion works is out of scope of this ADR; only the principles below are decided.
 
 | | Exploration | Consumption | Data Product |
 |---|---|---|---|
@@ -213,7 +213,7 @@ It applies to Data Products too: today a Data Product requesting its own team's 
 | Upgrade to publishing | 🔴 create a Data Product | 🟢 change the kind in place | n/a | 🟢 nothing to change |
 | Roles and Groups | 🟡 a new role scope | 🟢 reuses Data Product roles | 🟢 | 🟢 |
 | Catalog growth | 🟢 a separate list | 🟡 many Data Products, needs a filter by kind | 🟢 | 🔴 producing and consuming mixed |
-| "A dashboard on its own is not a Data Product" | 🟢 | 🟡 softened by "consumer-aligned" | 🟡 an Output Port nobody builds on | 🔴 |
+| "A dashboard on its own is not a Data Product" | 🟢 | 🟡 a dashboard is called a Data Product | 🟡 an Output Port nobody builds on | 🔴 |
 | New concept | 🔴 yes | 🟡 types gain behaviour | 🟢 none | 🟢 none |
 
 ### Option 1: Consumption as a separate concept
@@ -234,7 +234,7 @@ It applies to Data Products too: today a Data Product requesting its own team's 
 * **Neutral, because** "consumer-aligned Data Product" is an established data mesh term.
 * **Bad, because** Data Product types are labels without behaviour today; giving them behaviour is new.
 * **Bad, because** every dashboard becomes a Data Product, so the catalog grows and needs a filter by kind.
-* **Bad, because** it softens "a dashboard on its own is not a Data Product".
+* **Bad, because** a dashboard is then called a Data Product, while a dashboard on its own publishes no data for others to build on.
 
 ### Option 3: Output Port with audiences
 
