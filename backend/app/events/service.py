@@ -7,6 +7,7 @@ from sqlalchemy import event as sql_event
 from sqlalchemy.orm import Session
 
 from app.data_products.model import DataProduct
+from app.data_products.output_ports.announcements.model import Announcement
 from app.data_products.output_ports.model import OutputPort
 from app.data_products.technical_assets.model import TechnicalAsset
 from app.events.enums import EventEntityType
@@ -138,6 +139,20 @@ def _backup_exploration_name_on_delete(mapper, connection, target):
             )
         )
         .values(deleted_target_identifier=target.name)
+    )
+
+
+@sql_event.listens_for(Announcement, "before_delete")
+def _backup_announcement_title_on_delete(mapper, connection, target):
+    connection.execute(
+        update(EventModel.__table__)
+        .where(
+            and_(
+                EventModel.target_id == target.id,
+                EventModel.target_type == EventEntityType.ANNOUNCEMENT,
+            )
+        )
+        .values(deleted_target_identifier=target.title)
     )
 
 

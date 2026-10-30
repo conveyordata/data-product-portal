@@ -4,6 +4,7 @@ import {
     FileTextOutlined,
     HistoryOutlined,
     InfoCircleOutlined,
+    NotificationOutlined,
     SettingOutlined,
     TeamOutlined,
 } from '@ant-design/icons';
@@ -25,6 +26,7 @@ import { UsageTab } from '@/pages/output-port/components/dataset-tabs/usage-tab/
 import { useGetOutputPortsEventHistoryQuery } from '@/store/api/services/generated/dataProductsOutputPortsApi.ts';
 import { EventReferenceEntity } from '@/types/events/event-reference-entity.ts';
 import { AboutTab } from './about-tab/about-tab.tsx';
+import { AnnouncementsTab } from './announcements-tab/announcements-tab.tsx';
 import styles from './dataset-tabs.module.scss';
 import { SettingsTab } from './settings-tab/settings-tab';
 import { TeamTab } from './team-tab/team-tab.tsx';
@@ -64,6 +66,12 @@ export function DatasetTabs({ datasetId, dataProductId, isLoading }: Props) {
                 key: TabKeys.About,
                 icon: <InfoCircleOutlined />,
                 children: <AboutTab datasetId={datasetId} dataProductId={dataProductId} />,
+            },
+            {
+                label: t('Announcements'),
+                key: TabKeys.Announcements,
+                icon: <NotificationOutlined />,
+                children: <AnnouncementsTab outputPortId={datasetId} dataProductId={dataProductId} />,
             },
             {
                 label: t('Data Model'),

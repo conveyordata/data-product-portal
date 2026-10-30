@@ -97,6 +97,10 @@ type CreateOutputPortAccessTypeRes interface {
 	createOutputPortAccessTypeRes()
 }
 
+type CreateOutputPortAnnouncementRes interface {
+	createOutputPortAnnouncementRes()
+}
+
 type CreateOutputPortRes interface {
 	createOutputPortRes()
 }
@@ -333,6 +337,10 @@ type GetOutputPortAccessTypesRes interface {
 	getOutputPortAccessTypesRes()
 }
 
+type GetOutputPortAnnouncementsRes interface {
+	getOutputPortAnnouncementsRes()
+}
+
 type GetOutputPortCuratedQueriesRes interface {
 	getOutputPortCuratedQueriesRes()
 }
@@ -523,6 +531,10 @@ type RemoveInputPortForExplorationRes interface {
 
 type RemoveOutputPortAccessTypeRes interface {
 	removeOutputPortAccessTypeRes()
+}
+
+type RemoveOutputPortAnnouncementRes interface {
+	removeOutputPortAnnouncementRes()
 }
 
 type RemoveOutputPortAsInputPortRes interface {
