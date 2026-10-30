@@ -12,7 +12,6 @@ class AuthorizationAction(IntEnum):
 
     GLOBAL__UPDATE_CONFIGURATION = 101
     GLOBAL__CREATE_DATAPRODUCT = 102
-    GLOBAL__CREATE_OUTPUT_PORT = 103
     GLOBAL__REQUEST_DATAPRODUCT_ACCESS = 104
     GLOBAL__REQUEST_OUTPUT_PORT_ACCESS = 105
     GLOBAL__CREATE_USER = 106
@@ -41,6 +40,7 @@ class AuthorizationAction(IntEnum):
     DATA_PRODUCT__REQUEST_OUTPUT_PORT_ACCESS = 313
     DATA_PRODUCT__REVOKE_OUTPUT_PORT_ACCESS = 314
     DATA_PRODUCT__READ_INTEGRATIONS = 315
+    DATA_PRODUCT__CREATE_OUTPUT_PORT = 316
 
     OUTPUT_PORT__UPDATE_PROPERTIES = 401
     OUTPUT_PORT__UPDATE_SETTINGS = 402
@@ -64,3 +64,6 @@ class AuthorizationAction(IntEnum):
     # Discoverable Data Products or public, restricted Output Ports ensure that everyone has this permission on their Data Product without any role.
     HIDDEN__DATA_PRODUCT__READ = 901
     HIDDEN__OUTPUT_PORT__READ = 902
+
+    # DEPRECATED
+    GLOBAL__CREATE_OUTPUT_PORT = 103  # Replaced by DATA_PRODUCT__CREATE_OUTPUT_PORT

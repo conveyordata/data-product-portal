@@ -71,7 +71,7 @@ For more information about output ports, take a look at the concept page describ
 ### How to Create an output port
 
 1. **Navigate to the Output Ports Section**.
-2. **Click 'Add Output Port'**.
+2. **Click 'Add Output Port'**. This requires a role on the Data Product that allows adding Output Ports, such as Owner.
 3. **Specify Metadata**: Include necessary metadata such as:
    - **Name**
    - **Owners**

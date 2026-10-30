@@ -255,12 +255,6 @@ function determinePermissionsForScope(scope: Scope, roles: Role[], t: TFunction)
                     description: t('Allows the creation of an Exploration'),
                 },
                 {
-                    type: 'Instance',
-                    id: AuthorizationAction.GLOBAL__CREATE_OUTPUT_PORT,
-                    name: 'Create Output Port',
-                    description: t('Allows the creation of an Output Port'),
-                },
-                {
                     type: 'Group',
                     id: 'Manage Access',
                     name: 'Manage Access',
@@ -372,6 +366,12 @@ function determinePermissionsForScope(scope: Scope, roles: Role[], t: TFunction)
                     id: AuthorizationAction.DATA_PRODUCT__DELETE,
                     name: 'Delete Data Product',
                     description: t('Allows the role to delete the Data Product'),
+                },
+                {
+                    type: 'Instance',
+                    id: AuthorizationAction.DATA_PRODUCT__CREATE_OUTPUT_PORT,
+                    name: 'Add Output Port',
+                    description: t('Allows adding an Output Port to this Data Product'),
                 },
                 {
                     type: 'Group',
