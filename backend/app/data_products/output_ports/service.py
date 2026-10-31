@@ -3,7 +3,7 @@ from typing import Iterable, Mapping, Optional, Sequence, assert_never
 from uuid import UUID
 
 from fastapi import HTTPException, status
-from sqlalchemy import func, select
+from sqlalchemy import String, case, func, select
 from sqlalchemy.orm import Session, joinedload, raiseload, selectinload, undefer
 from sqlalchemy.sql.base import ExecutableOption
 
@@ -78,6 +78,9 @@ from app.graph.node import Node, NodeData, NodeType
 from app.resource_names.service import ResourceNameValidityType
 from app.users.model import User as UserModel
 from app.users.schema import User
+
+TSQUERY_POSITIVE_LEXEME_PATTERN = r"(^|[ (])'((?:[^']|'')*)'(?![^()]*\))"
+TSQUERY_POSITIVE_LEXEME_PREFIX_REPLACEMENT = r"\1'\2':*"
 
 
 def get_dataset_load_options() -> Sequence[ExecutableOption]:
@@ -226,14 +229,22 @@ class OutputPortService:
         no filtering is applied other than the limit.
         """
         ordered_by = OutputPortModel.name.asc()
-        if query:
-            query_embedding = self.embedding_model.embed(query)
+        normalized_query = query.strip() if query else None
+        if normalized_query:
+            query_embedding = self.embedding_model.embed(normalized_query)
             semantic_score = (
                 1 - OutputPortModel.embeddings.cosine_distance(*query_embedding)
             ).label("semantic_score")
-            ts_query = func.websearch_to_tsquery("english", query)
+            ts_query = self._build_search_ts_query(normalized_query)
             keyword_score = func.coalesce(
-                func.ts_rank_cd(OutputPortModel.search_vector, ts_query, 32), 0
+                case(
+                    (
+                        OutputPortModel.search_vector.bool_op("@@")(ts_query),
+                        func.ts_rank_cd(OutputPortModel.search_vector, ts_query, 32),
+                    ),
+                    else_=0,
+                ),
+                0,
             ).label("keyword_score")
 
             semantic_weight = 2.0 / 3.0
@@ -244,7 +255,11 @@ class OutputPortService:
                 .desc()
             )
 
-        stmt = select(OutputPortModel).order_by(ordered_by).limit(limit)
+        stmt = (
+            select(OutputPortModel)
+            .order_by(ordered_by, OutputPortModel.name.asc())
+            .limit(limit)
+        )
         if (user_id := self.db.info.get("current_user_id")) is not None:
             stmt = stmt.where(access_function_filter_excluding_consumers(user_id))
         match assignment_filter:
@@ -261,6 +276,19 @@ class OutputPortService:
         results = self.db.scalars(stmt).unique().all()
 
         return results
+
+    @staticmethod
+    def _build_search_ts_query(query: str):
+        websearch_ts_query = func.websearch_to_tsquery("english", query)
+        prefix_ts_query_text = func.regexp_replace(
+            websearch_ts_query.cast(String),
+            TSQUERY_POSITIVE_LEXEME_PATTERN,
+            TSQUERY_POSITIVE_LEXEME_PREFIX_REPLACEMENT,
+            "g",
+        )
+        prefix_ts_query = func.to_tsquery("english", prefix_ts_query_text)
+
+        return websearch_ts_query.op("||")(prefix_ts_query)
 
     @staticmethod
     def recalculate_embeddings_load_options():

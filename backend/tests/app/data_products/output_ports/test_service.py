@@ -16,6 +16,13 @@ from tests.factories import (
 )
 from tests.session_util import as_user
 
+SEARCH_EMBEDDING = [1.0, *([0.0] * 383)]
+
+
+class StaticEmbeddingModel:
+    def embed(self, query):
+        return [SEARCH_EMBEDDING]
+
 
 class TestDatasetsService:
     def test_recalculate_search(self, session):
@@ -158,6 +165,181 @@ class TestDatasetsService:
             "Owner should also see public datasets"
         )
 
+    def test_search_output_ports__matches_partial_prefix(self, session):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        wind_output_port = OutputPortFactory(
+            name="Wind Turbine Output", description="Renewable generation metrics"
+        )
+        unrelated_output_port = OutputPortFactory(
+            name="Finance Budget", description="Quarterly accounting metrics"
+        )
+        self.set_search_state(session, wind_output_port, unrelated_output_port)
+
+        partial_results = self.search_with_static_embeddings(
+            session, "win", user, limit=1
+        )
+        full_word_results = self.search_with_static_embeddings(
+            session, "wind", user, limit=1
+        )
+
+        assert [result.id for result in partial_results] == [wind_output_port.id]
+        assert [result.id for result in full_word_results] == [wind_output_port.id]
+
+    def test_search_output_ports__matches_multi_word_partial_prefix_case_insensitive(
+        self, session
+    ):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        clinical_output_port = OutputPortFactory(
+            name="Clinical Dataset", description="Patient outcome measures"
+        )
+        unrelated_output_port = OutputPortFactory(
+            name="Marketing Metrics", description="Campaign performance"
+        )
+        self.set_search_state(session, clinical_output_port, unrelated_output_port)
+
+        results = self.search_with_static_embeddings(
+            session, "CLIN DATA", user, limit=1
+        )
+
+        assert [result.id for result in results] == [clinical_output_port.id]
+
+    def test_search_output_ports__preserves_or_operator(self, session):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        finance_output_port = OutputPortFactory(
+            name="Finance Ledger", description="Accounting metrics"
+        )
+        budget_output_port = OutputPortFactory(
+            name="Budget Forecast", description="Planning metrics"
+        )
+        unrelated_output_port = OutputPortFactory(
+            name="Telemetry Events", description="Device metrics"
+        )
+        self.set_search_state(
+            session, finance_output_port, budget_output_port, unrelated_output_port
+        )
+
+        results = self.search_with_static_embeddings(
+            session, "finance OR budget", user, limit=2
+        )
+
+        assert {result.id for result in results} == {
+            finance_output_port.id,
+            budget_output_port.id,
+        }
+
+    def test_search_output_ports__preserves_exclusion_operator(self, session):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        excluded_output_port = OutputPortFactory(
+            name="Finance Budget", description="Restricted budget planning"
+        )
+        matching_output_port = OutputPortFactory(
+            name="Finance Forecast", description="Revenue planning"
+        )
+        unrelated_output_port = OutputPortFactory(
+            name="Marketing Leads", description="Pipeline metrics"
+        )
+        self.set_search_state(
+            session, excluded_output_port, matching_output_port, unrelated_output_port
+        )
+
+        results = self.search_with_static_embeddings(
+            session, "finance -budget", user, limit=1
+        )
+
+        assert [result.id for result in results] == [matching_output_port.id]
+
+    def test_search_output_ports__prefixes_terms_after_leading_exclusion(self, session):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        excluded_output_port = OutputPortFactory(
+            name="Finance Budget", description="Restricted budget planning"
+        )
+        matching_output_port = OutputPortFactory(
+            name="Finance Forecast", description="Revenue planning"
+        )
+        self.set_search_state(session, excluded_output_port, matching_output_port)
+
+        results = self.search_with_static_embeddings(
+            session, "-budget fin", user, limit=1
+        )
+
+        assert [result.id for result in results] == [matching_output_port.id]
+
+    def test_search_output_ports__does_not_prefix_excluded_quoted_phrase(self, session):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        excluded_output_port = OutputPortFactory(
+            name="Finance Budget Plan", description="Yearly figures"
+        )
+        matching_output_port = OutputPortFactory(
+            name="Finance Budget Planner", description="Yearly figures"
+        )
+        unrelated_output_port = OutputPortFactory(
+            name="Marketing Leads", description="Pipeline metrics"
+        )
+        self.set_search_state(
+            session, excluded_output_port, matching_output_port, unrelated_output_port
+        )
+
+        results = self.search_with_static_embeddings(
+            session, 'fin -"budget plan"', user, limit=1
+        )
+
+        assert [result.id for result in results] == [matching_output_port.id]
+
+    def test_search_output_ports__preserves_quoted_phrase_operator(self, session):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        reversed_output_port = OutputPortFactory(
+            name="Alpha Data Customer", description="Reversed word order"
+        )
+        phrase_output_port = OutputPortFactory(
+            name="Zulu Customer Data", description="Customer data mart"
+        )
+        self.set_search_state(session, reversed_output_port, phrase_output_port)
+
+        results = self.search_with_static_embeddings(
+            session, '"customer data"', user, limit=1
+        )
+
+        assert [result.id for result in results] == [phrase_output_port.id]
+
+    def test_search_output_ports__preserves_accented_unicode_terms(self, session):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        unrelated_output_port = OutputPortFactory(
+            name="Aachen Mobility", description="Regional transport metrics"
+        )
+        unicode_output_port = OutputPortFactory(
+            name="München Mobility", description="Regional transport metrics"
+        )
+        self.set_search_state(session, unrelated_output_port, unicode_output_port)
+
+        results = self.search_with_static_embeddings(session, "München", user, limit=1)
+
+        assert [result.id for result in results] == [unicode_output_port.id]
+
+    def test_search_output_ports__handles_empty_punctuation_and_stop_word_queries(
+        self, session
+    ):
+        user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+        alpha_output_port = OutputPortFactory(name="Alpha Dataset")
+        zulu_output_port = OutputPortFactory(name="Zulu Dataset")
+        self.set_search_state(session, alpha_output_port, zulu_output_port)
+
+        whitespace_results = self.search_with_static_embeddings(
+            session, "   ", user, limit=2
+        )
+        punctuation_results = self.search_with_static_embeddings(
+            session, "?!...", user, limit=2
+        )
+        stop_word_results = self.search_with_static_embeddings(
+            session, "the and", user, limit=2
+        )
+
+        expected_default_order = [alpha_output_port.id, zulu_output_port.id]
+        assert [result.id for result in whitespace_results] == expected_default_order
+        assert [result.id for result in punctuation_results] == expected_default_order
+        assert {result.id for result in stop_word_results} == set(
+            expected_default_order
+        )
+
     @staticmethod
     def get_output_port(output_port: OutputPort, session) -> OutputPort:
         return session.get(
@@ -165,4 +347,23 @@ class TestDatasetsService:
             output_port.id,
             options=[selectinload(OutputPort.data_product_links)],
             populate_existing=True,
+        )
+
+    @staticmethod
+    def set_search_state(session, *output_ports: OutputPort) -> None:
+        for output_port in output_ports:
+            output_port.embeddings = SEARCH_EMBEDDING
+            OutputPortService._recalculate_search_vector(output_port)
+            session.add(output_port)
+        session.flush()
+
+    @staticmethod
+    def search_with_static_embeddings(session, query: str, user, limit: int):
+        service = OutputPortService(session)
+        service.embedding_model = StaticEmbeddingModel()
+        return service.search_output_ports(
+            query=query,
+            limit=limit,
+            user=user,
+            assignment_filter=AssignmentFilter.ALL,
         )
