@@ -10,6 +10,7 @@ from app.authorization.roles.schema import Scope
 from app.core.auth.auth import SYSTEM_ACCOUNT_BOT_EXTERNAL_ID
 from app.core.authz.actions import AuthorizationAction
 from app.data_products.model import DataProduct, DataProductVisibility
+from app.database.database import SKIP_DATA_PRODUCT_VISIBILITY_FILTER
 from app.settings import settings
 from tests.factories import (
     DataProductFactory,
@@ -170,7 +171,7 @@ def test_hidden_data_product_query_can_skip_visibility_filter(session):
     visible = session.get(
         DataProduct,
         data_product.id,
-        execution_options={"skip_data_product_visibility_filter": True},
+        execution_options={SKIP_DATA_PRODUCT_VISIBILITY_FILTER: True},
     )
 
     assert visible.id == data_product.id

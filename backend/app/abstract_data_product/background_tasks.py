@@ -6,7 +6,7 @@ from sqlalchemy import select
 from app.configuration.domains.status import DomainStatus
 from app.core.logging import logger
 from app.data_products.status import AbstractDataProductStatus
-from app.database.database import SessionLocal
+from app.database.database import SKIP_DATA_PRODUCT_VISIBILITY_FILTER, SessionLocal
 
 CHECK_INTERVAL_SECONDS = 600  # run every 10 minutes
 STUCK_THRESHOLD_SECONDS = 3600  # warn after 1 hour in DELETING
@@ -25,7 +25,7 @@ async def check_stuck_deletions() -> None:
                             AbstractDataProduct.status
                             == AbstractDataProductStatus.DELETING
                         ),
-                        execution_options={"skip_data_product_visibility_filter": True},
+                        execution_options={SKIP_DATA_PRODUCT_VISIBILITY_FILTER: True},
                     )
                     .scalars()
                     .all()

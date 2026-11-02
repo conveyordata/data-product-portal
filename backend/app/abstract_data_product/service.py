@@ -47,7 +47,11 @@ from app.data_products.output_ports.model import (
     ensure_output_port_exists,
 )
 from app.data_products.status import AbstractDataProductStatus
-from app.database.database import SKIP_OUTPUT_PORT_ACCESS_FUNCTION_FILTER, UNFILTERED
+from app.database.database import (
+    SKIP_DATA_PRODUCT_VISIBILITY_FILTER,
+    SKIP_OUTPUT_PORT_ACCESS_FUNCTION_FILTER,
+    UNFILTERED,
+)
 from app.users.model import User
 
 
@@ -420,7 +424,7 @@ class AbstractDataProductService:
             data_product_id,
             output_port_id,
             consuming_data_product_id,
-            execution_options={"skip_data_product_visibility_filter": True},
+            execution_options={SKIP_DATA_PRODUCT_VISIBILITY_FILTER: True},
         )
         self._ensure_not_deleting(current_link.consuming_abstract_data_product)
         self._ensure_not_deleting(current_link.output_port.data_product)

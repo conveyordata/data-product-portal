@@ -217,28 +217,6 @@ class DataProductNameResolver(SubjectResolver):
         return cls.DEFAULT
 
 
-class TechnicalAssetResolver(SubjectResolver):
-    model: Model = DataProduct
-
-    @classmethod
-    async def _resolve(
-        cls,
-        request: Request,
-        key: str,
-        db: Session = Depends(get_db_session, scope="function"),
-    ):
-        obj = await DataProductResolver._resolve(request, key, db)
-        if obj != cls.DEFAULT:
-            technical_asset = (
-                db.scalars(select(TechnicalAsset).where(TechnicalAsset.id == obj))
-                .unique()
-                .one_or_none()
-            )
-            if technical_asset:
-                return technical_asset.owner_id
-        return cls.DEFAULT
-
-
 class TechnicalAssetOutputPortAssociationResolver(OutputPortResolver):
     @classmethod
     async def _resolve(

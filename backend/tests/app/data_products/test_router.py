@@ -1382,6 +1382,24 @@ class TestDataProductsRouter:
             node["data"]["id"] for node in response.json()["nodes"]
         }
 
+    def test_get_output_port_graph_data__consumer_sees_technical_asset_of_hidden_producer(
+        self, client, session
+    ):
+        producer, output_port, _, _ = self.setup_consumer_of_private_output_port(
+            session
+        )
+        link = TechnicalAssetOutputPortAssociationFactory(output_port=output_port)
+
+        response = client.get(
+            f"{ENDPOINT}/{producer.id}/output_ports/{output_port.id}/graph",
+            params={"level": 3},
+        )
+
+        assert response.status_code == 200, response.text
+        node_ids = {node["data"]["id"] for node in response.json()["nodes"]}
+        assert str(link.technical_asset.id) in node_ids
+        assert str(producer.id) not in node_ids
+
     def test_search_output_ports__consumed_private_output_port_not_listed_for_consumer(
         self, client, session
     ):

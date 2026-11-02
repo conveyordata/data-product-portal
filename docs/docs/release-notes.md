@@ -32,6 +32,8 @@ sidebar_position: 200
 - **[API]**: Authorization checks the id the endpoint acts on. Before, a user with rights on one Data Product could act on another by passing the first id in the query string, for example to delete it or to add Role Assignments to it. An id with the same name elsewhere in the request is now ignored, and an id that cannot be read is denied with a 403.
 - **[UI]**: Output Port tables now show the same quality status as the Output Port detail page.
 - **[UI]**: The browser tab shows the portal name set in Settings → Theme, like the sidebar, instead of always "Data Product Portal".
+- **[MCP]**: Search, Data Product analytics and the marketplace overview no longer fail when a Hidden Data Product owns Technical Assets. Technical Assets of Hidden Data Products are now left out for users who can't see the Data Product, also in the Technical Asset details and Glue tools.
+- **[API/UI]**: The Output Port graph no longer fails for consumers of an Output Port of a Hidden Data Product. They see its linked Technical Assets, as on the Output Port details, but not the Hidden Data Product itself.
 
 ## 0.8.0
 

@@ -1,12 +1,30 @@
 import pytest
 
+from app.authorization.roles.schema import Scope
+from app.core.authz import Action
+from app.data_products.model import DataProductVisibility
+from app.settings import settings
 from tests.factories import (
     AccessModeFactory,
+    DataProductFactory,
+    GlobalRoleAssignmentFactory,
     InputPortRequestFactory,
+    RoleFactory,
     TechnicalAssetFactory,
+    UserFactory,
 )
 
 ENDPOINT = "/api/v2/configuration/access_modes"
+
+
+@pytest.fixture
+def configuration_manager():
+    user = UserFactory(external_id=settings.DEFAULT_USERNAME)
+    role = RoleFactory(
+        scope=Scope.GLOBAL, permissions=[Action.GLOBAL__UPDATE_CONFIGURATION]
+    )
+    GlobalRoleAssignmentFactory(identity_id=user.id, role_id=role.id)
+    return user
 
 
 @pytest.fixture
@@ -155,6 +173,35 @@ class TestAccessModesRouter:
         response = self.delete_access_mode(client, access_mode.id)
         assert response.status_code == 400, response.json()
 
+    @pytest.mark.usefixtures("configuration_manager")
+    def test_update_access_mode__remove_technical_asset_type_in_use_by_hidden_technical_asset(
+        self, client
+    ):
+        access_mode = AccessModeFactory(
+            technical_asset_types=[
+                "FakeLinkPlugin",
+                "FakeTechnicalAssetConfiguration",
+            ]
+        )
+        _hidden_technical_asset(access_mode)
+        response = self.update_access_mode(
+            client,
+            {
+                "description": access_mode.description,
+                "technical_asset_types": ["FakeLinkPlugin"],
+            },
+            access_mode.id,
+        )
+        assert response.status_code == 400, response.json()
+
+    @pytest.mark.usefixtures("configuration_manager")
+    def test_delete_access_mode__linked_to_hidden_technical_asset(self, client):
+        access_mode = AccessModeFactory()
+        _hidden_technical_asset(access_mode)
+        response = self.delete_access_mode(client, access_mode.id)
+        assert response.status_code == 400, response.json()
+        assert "in use" in response.json()["detail"]
+
     @staticmethod
     def create_access_mode(client, payload):
         return client.post(ENDPOINT, json=payload)
@@ -170,3 +217,10 @@ class TestAccessModesRouter:
     @staticmethod
     def delete_access_mode(client, access_mode_id):
         return client.delete(f"{ENDPOINT}/{access_mode_id}")
+
+
+def _hidden_technical_asset(access_mode):
+    return TechnicalAssetFactory(
+        access_modes=[access_mode],
+        owner=DataProductFactory(visibility=DataProductVisibility.HIDDEN),
+    )
